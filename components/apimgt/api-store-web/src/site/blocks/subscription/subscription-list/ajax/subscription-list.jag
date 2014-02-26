@@ -1,0 +1,66 @@
+<%
+include("/jagg/jagg.jag");
+(function () {
+    var mod, obj, result, username,
+            msg = require("/site/conf/ui-messages.jag"),
+            action = request.getParameter("action"),
+            user = jagg.getUser();
+    if (action == "getAllSubscriptions") {
+        if (!user) {
+            print({
+                error:true,
+                message:msg.error.loginRequired(action)
+            });
+            return;
+        }
+        username = user.username;
+
+        mod = jagg.module("subscription");
+        result = mod.getAllSubscriptions(username);
+
+        if (result.error) {
+            obj = {
+                error:result.error,
+                message:msg.error.authError(action, username)
+            };
+        } else {
+            obj = {
+                error:false,
+                subscriptions:result.applications
+            }
+        }
+        print(obj);
+     }else if (action == "getSubscriptionByApplication") {
+	var appname = request.getParameter("app");
+        if (!user) {
+            print({
+                error:true,
+                message:msg.error.loginRequired(action)
+            });
+            return;
+        }
+        username = user.username;
+
+        mod = jagg.module("subscription");
+        result = mod.getAPISubscriptionsForApplication(username,appname);
+
+        if (result.error) {
+            obj = {
+                error:result.error,
+                message:msg.error.authError(action, username)
+            };
+        } else {
+            obj = {
+                error:false,
+                apis:result.subscriptions
+            }
+        }
+        print(obj);
+     }else {
+        print({
+            error:true,
+            message:msg.error.invalidAction(action)
+        });
+    }
+}());
+%>

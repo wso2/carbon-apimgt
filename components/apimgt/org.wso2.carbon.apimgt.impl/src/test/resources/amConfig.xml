@@ -1,0 +1,21 @@
+<APIManager>
+    <Database>
+        <URL>jdbc:h2:target/repository/database/WSO2AM_DB</URL>
+        <Username>wso2carbon</Username>
+        <Password>wso2carbon</Password>
+        <Driver>org.h2.Driver</Driver>
+        <maxActive>50</maxActive>
+        <maxWait>60000</maxWait>
+        <minIdle>5</minIdle>
+    </Database>
+    <APIConsumerAuthentication>
+        <EnableTokenGeneration>false</EnableTokenGeneration>
+    </APIConsumerAuthentication>
+    <APIUsageTracking>
+        <Enabled>false</Enabled>
+        <ThriftPort>7612</ThriftPort>
+        <BAMServerURL>https://localhost:9444/</BAMServerURL>
+        <BAMUsername>admin</BAMUsername>
+        <BAMPassword>admin</BAMPassword>
+    </APIUsageTracking>
+</APIManager>

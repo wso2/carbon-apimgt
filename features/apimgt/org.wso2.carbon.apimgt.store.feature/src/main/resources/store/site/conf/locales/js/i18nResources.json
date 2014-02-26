@@ -1,0 +1,55 @@
+{
+    "info": {
+        "appSelect": "Please select an application before subscribing",
+        "wait": "Please wait..." ,
+        "subscription": "Subscription Successful" ,
+        "subscriptionSuccess": "Congratulations! You have successfully subscribed to the API. Please go to 'My Subscriptions' page to review your subscription and generate keys.",
+        "subscriptionPending": "Congratulations! Your subscription request has been submitted and is now awaiting approval.",
+        "applicationSuccess": "Congratulations! You have successfully added the API.",
+        "applicationPending": "Congratulations! Your application  request has been submitted and is now awaiting approval.",
+        "gotoSubsPage": "Go to My Subscriptions",
+        "stayPage": "Stay on this page",
+        "returntoAPIPage": "Return back to API detail page?",
+        "yes": "Yes",
+        "no": "No",
+        "charsLeft": "Characters left: "
+
+
+    },
+    "confirm": {
+        "delete": "Confirm Delete",
+        "deleteMsg": "Are you sure you want to remove the application " ,
+        "deleteMsgPostfix": "? This will cancel all the existing subscriptions and keys associated with the application. " ,
+        "unsubscribeMsg": "Are you sure you want to unsubscribe from "
+
+
+    },
+    "titles":{
+        "save":"Save",
+        "cancel":"Cancel",
+        "production":"Production",
+        "sandbox":"Sandbox",
+        "hideKeys":" Hide Keys ",
+        "showKeys":" Show Keys ",
+        "regenerate":" Re-generate "
+    },
+    "resultMsgs":{
+        "showKey":"The keys are available. Click the 'Show Key' button to view."
+
+    },
+    "validationMsgs":{
+        "invalidEmail": "Invalid email address ",
+        "fieldRequired": "This field is required.",
+        "exceedChars": "Name exceeds character limit (70)",
+        "illegalChars": "Name contains one or more illegal characters ",
+        "illegalName": "The Name contains one or more illegal characters ",
+        "invalid": " Invalid",
+        "valid": "Valid",
+        "testUri": "Test URI",
+        "validating": "Validating.."
+    },
+    "errorMsgs":{
+    	"login":"Unable to log you in!"
+    }
+
+}

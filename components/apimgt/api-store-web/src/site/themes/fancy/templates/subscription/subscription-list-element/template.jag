@@ -1,0 +1,261 @@
+<% jagg.template("subscription/subscription-list-element", function(inputs, outputs, jagg) { %>
+<% var i=outputs.i, app = outputs.app;
+        var str_i = String(i).replace('.','_');
+                %>
+
+        <input type="hidden"  class="prodAccessTokenHidden" value="<%=app.prodKey%>" >
+        <input type="hidden"  class="sandAccessTokenHidden" value="<%=app.sandboxKey%>" >
+        <h3 data-section="key-prod" class="js_toggle"><%=i18n.localize("keysPro")%> <i class="icon-chevron-down icon-keys"></i></h3>
+        <div class="keyBoxOut">
+            <div class="container-fluid">
+                <div class="row-fluid">
+                    <div class="span6">
+                        <%
+                         var log = new Log();
+                         var prodVadidataionTime = app.prodValidityTime;
+                         var sandVadidataionTime = app.sandValidityTime;
+
+                         <!-- If token is not set to never expire, then take the expiration in seconds -->
+                         if (prodVadidataionTime > 0) {
+                            prodVadidataionTime = prodVadidataionTime / 1000;
+                         }
+                         if (sandVadidataionTime > 0) {
+                            sandVadidataionTime = sandVadidataionTime / 1000;
+                         }
+
+                         <!-- This is required to remove the decimal points getting added by jaggery to validation time-->
+                         if (prodVadidataionTime != null) {
+                            var prod_tmp = String(prodVadidataionTime).split();
+                            var prodValidityTime = prod_tmp[0];
+                         }
+
+                         if (sandVadidataionTime != null) {
+                            var sand_tmp = String(sandVadidataionTime).split();
+                            var sandValidityTime = sand_tmp[0];
+                         }
+
+                        %>
+                        <% if(app.prodKey != null ) { %>
+                        <!-- START Show key info -->
+                        <h5 class="special-colored"><%=i18n.localize("accessToken")%></h5>
+
+                        <div class="accessToken">
+                            <% if(app.prodKey != null && app.prodKey.length > 60){ %>
+                               <textarea class="tokenTextarea accessTokenDisplayPro keyValues" data-value="<%=app.prodKey%>"><%=app.prodKey%></textarea>
+                            <% } else { %>
+                               <span class="accessTokenDisplayPro keyValues" data-value="<%=app.prodKey%>"><%=app.prodKey%></span>
+                            <% } %>
+
+
+                        </div>
+                        <div class="show-hide-key processing-msg" style="display:none;"><%=i18n.localize("generating")%></div>
+                        <div class="form-inline proRegenerateForm">
+                            <button class="show-hide-key btn btn-primary"
+                                                            onclick="regenerate('<%=app.name%>','PRODUCTION',200,this,'pull-right','<%=app.prodConsumerKey%>','<%=app.prodConsumerSecret%>')" ><i class="icon-refresh"></i>
+                                                            <%=i18n.localize("regenerate")%></button>
+                            Token Validity: <input type="text" class="input-mini token-validity-input" id="refreshProdValidityTime" value='<%=prodValidityTime%>' maxlength="70"  autofocus="autofocus" style="margin-top:5px;"  />  Seconds
+                            <span class="label label-warning" id = "timeWarn" style="display:none;"><%=i18n.localize("timeWarn")%></span>
+                        </div>
+
+                        <h5><%=i18n.localize("consumerKey")%></h5>
+
+
+                        <div class="consumerKey">
+                        <% if(app.prodConsumerKey != null && app.prodConsumerKey.length > 60){ %>
+                          <textarea class="tokenTextarea keyValues" data-value="<%=app.prodConsumerKey%>"><%=app.prodConsumerKey%></textarea>
+                        <% } else { %>
+                          <span class="keyValues" data-value="<%=app.prodConsumerKey%>"><%=app.prodConsumerKey%></span>
+                        <% } %>
+                        </div>
+
+                        <h5><%=i18n.localize("consumerSecret")%></h5>
+
+                        <div class="consumerSecret">
+                        <% if(app.prodConsumerSecret != null && app.prodConsumerSecret.length > 60){ %>
+                           <textarea class="tokenTextarea keyValues" data-value="<%=app.prodConsumerSecret%>"><%=app.prodConsumerSecret%></textarea>
+                        <% } else { %>
+                            <span class="keyValues" data-value="<%=app.prodConsumerSecret%>"><%=app.prodConsumerSecret%></span>
+                        <% } %>
+                        </div>
+                        <!-- END Show key info -->
+                        <% }else{ %>
+                        <%=i18n.localize("prodKeyMsg")%>
+                        <div class="gen-btn-wrapper">
+                                    <button  class="app-key-generate-button btn btn-primary"
+                                   data-application="<%=app.name%>"
+                                   data-callbackUrl="<%=app.callbackUrl%>"
+                                   data-keytype="PRODUCTION"
+                                   iteration="200"
+                                    >
+                                    <%=i18n.localize("generate")%></button>
+                        </div>
+                        <% } %>
+                    </div>
+                    <div class="span6 keyBoxOut-config">
+                        <!-- START Config section -->
+                            <h5>Allowed Domains</h5>
+                            <div>
+                               <textarea id="allowedDomainsPro" style="width:95%;height:40px;margin-bottom: 0"><% if(app.prodKey != null ) { %><%=app.prodAuthorizedDomains%><% } else { %>ALL<% } %></textarea>
+                               <div>Leave empty or filling with "ALL" will allow all domains.</div>
+                               <% if(app.prodKey != null ) { %>
+                               <button class="btn"
+                                       onclick="updateAccessAllowDomains('<%=app.name%>','PRODUCTION',200,this)" style="font-size:11px;width:104px;" >Update Domains</button>
+                               <div style="display:none" class="success-update-msg">Successfully updated.</div>
+                               <% } else { %>
+                                    Token Validity: <input type="text" class="input-mini token-validity-input" id="refreshProdValidityTime" value="<%=prodValidityTime%>" maxlength="70"  autofocus="autofocus" style="margin-top:5px;"  />  Seconds
+                                    <span class="label label-warning" id = "timeWarn" style="display:none;"><%=i18n.localize("timeWarn")%></span>
+                               <% } %>
+                            </div>
+
+
+                        <!-- END config section -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <h3 data-section="key-sand" class="js_toggle"><%=i18n.localize("keysSand")%> <i class="icon-chevron-down icon-keys"></i></h3>
+
+        <div class="keyBoxOut">
+           <div class="container-fluid">
+               <div class="row-fluid">
+                   <div class="span6">
+                       <!-- START Show key info -->
+                       <% if(app.sandboxKey!=null){%>
+
+
+                       <h5 class="special-colored"><%=i18n.localize("accessToken")%></h5>
+
+                        <div class="accessToken">
+                          <% if(app.sandboxKey != null && app.sandboxKey.length > 60){ %>
+                              <textarea class="tokenTextarea accessTokenDisplaySand keyValues" data-value="<%=app.sandboxKey%>"><%=app.sandboxKey%></textarea>
+                          <% } else { %>
+                              <span class="accessTokenDisplaySand keyValues" data-value="<%=app.sandboxKey%>"><%=app.sandboxKey%></span>
+                          <% } %>
+                        </div>
+
+
+                       <div class="show-hide-key processing-msg" style="display:none;"><%=i18n.localize("generating")%></div>
+
+                       <div class="form-inline proRegenerateForm">
+                           <button class="show-hide-key btn btn-primary"
+                                                         onclick="regenerate('<%=app.name%>','SANDBOX',200,this,'pull-right','<%=app.sandboxConsumerKey%>','<%=app.sandboxConsumerSecret%>')" ><i class="icon-refresh"></i>
+                                                         <%=i18n.localize("regenerate")%></button>
+                           Token Validity: <input type="text" class="input-mini token-validity-input" id="refreshSandValidityTime" value="<%=sandValidityTime%>" maxlength="70"  autofocus="autofocus" style="margin-top:5px;"  />  Seconds
+                           <span class="label label-warning" id = "timeWarn" style="display:none;"><%=i18n.localize("timeWarn")%></span>
+                       </div>
+
+                       <h5><%=i18n.localize("consumerKey")%></h5>
+                       <div>
+                       <% if(app.sandboxConsumerKey != null && app.sandboxConsumerKey.length > 28){ %>
+                          <textarea class="tokenTextarea keyValues" data-value="<%=app.sandboxConsumerKey%>"><%=app.sandboxConsumerKey%></textarea>
+                      <% } else { %>
+                          <span class="keyValues" data-value="<%=app.sandboxConsumerKey%>"><%=app.sandboxConsumerKey%></span>
+                      <% } %>
+                      </div>
+
+
+                       <h5><%=i18n.localize("consumerSecret")%></h5>
+                       <div>
+                       <% if(app.sandboxConsumerSecret != null && app.sandboxConsumerSecret.length > 28){ %>
+                          <textarea class="tokenTextarea keyValues" data-value="<%=app.sandboxConsumerSecret%>"><%=app.sandboxConsumerSecret%></textarea>
+                       <% } else { %>
+                          <span class="keyValues" data-value="<%=app.sandboxConsumerSecret%>"><%=app.sandboxConsumerSecret%></span>
+                       <% } %>
+                       </div>
+
+
+                       <% }else {%>
+                       <%=i18n.localize("sandboxKeyMsg")%>
+                        <div class="gen-btn-wrapper" <% if(app.sandboxKey!=null){%>style="display:none"<% } %> >
+                           <button class="app-key-generate-button btn btn-primary"
+                          data-application="<%=app.name%>"
+                          data-callbackUrl="<%=app.callbackUrl%>"
+                          data-keytype="SANDBOX"
+                          iteration="200"
+                           >
+                           <%=i18n.localize("generate")%></button>
+                        </div>
+                       <% } %>
+                       <!-- END Show key info -->
+                   </div>
+                   <div class="span6 keyBoxOut-config">
+                       <!-- START Config section -->
+                        <h5>Allowed Domains</h5>
+                        <div>
+                         <textarea id="allowedDomainsSand" style="width:98%;height:40px;margin-bottom: 0"><% if(app.sandboxKey!=null){ %><%=app.sandboxAuthorizedDomains%><% }else{ %>ALL<% } %></textarea>
+                         <div>Leave empty or filling with "ALL" will allow all domains.</div>
+                         <% if(app.sandboxKey!=null){ %>
+                         <button  class="btn"
+                              onclick="updateAccessAllowDomains('<%=app.name%>','SANDBOX',200,this,'allowDomainsSandRegenBtn')" style="font-size:11px;width:104px;" >Update Domains</button>
+                         <div style="display:none" class="success-update-msg">Successfully updated.</div>
+                         <% } else { %>
+                            <h5>Token Validity</h5> <input type="text" class="input-mini token-validity-input" id="refreshSandValidityTime" value="<%=sandValidityTime%>" maxlength="70"  autofocus="autofocus" style="margin-top:5px;"  />  Seconds
+                            <span class="label label-warning" id = "timeWarn" style="display:none;"><%=i18n.localize("timeWarn")%></span>
+                         <% } %>
+                        </div>
+                       <!-- END Config section -->
+                   </div>
+               </div>
+           </div>
+        </div>
+
+
+        <h3 data-section="api-listing" class="js_toggle">Subscribed APIs <i class="icon-chevron-down icon-keys"></i></h3>
+
+
+
+        <div class="container-fluid subsApiListing api-section">
+            <div class="row-fluid">
+
+            <%
+            var tenant=request.getParameter("tenant");
+            var urlPrefix;
+            if(tenant!=null) {urlPrefix="tenant="+tenant;}else{urlPrefix='';}
+            var apis = app.subscriptions;
+            lenJ = apis.length;
+            for(j = 0; j < lenJ; j++) {
+                api = apis[j];
+                prodKey = api.prodKey;
+                clazz = (j%2) == 0 ? "even" : "odd";
+                path = jagg.getMappedUrl("/site/pages/item-info.jag") + "?name=" + api.name + "&version=" + api.version + "&provider=" + api.provider+ "&"+urlPrefix;
+                var apiName = api.name;
+                if(api.name.length > 12){
+                    apiName = api.name.substring(0,10)+ "..";
+                }
+            %>
+                <div class="span4 keyListPadding">
+                    <div class="thumbnail <% if(api.status == "DEPRECATED" || api.status == "RETIRED" || api.status == "BLOCKED") { %>deprecated<% } %>">
+                        <div class="deprecatedLabel">
+                            <% if(api.status == "DEPRECATED") { %>
+                            <span class="label label-warning"><%=i18n.localize("deprecated")%></span>
+                            <% } else if(api.status == "RETIRED") { %>
+                            <span class="label label-important"><%=i18n.localize("retired")%></span>
+                            <% }else if(api.status == "BLOCKED" || api.subStatus == "BLOCKED") { %>
+                            <span class="label label-important"><%=i18n.localize("blocked")%></span>
+                            <% } else if(api.subStatus == "PROD_ONLY_BLOCKED") {%>
+                            <span class="label label-important"><%=i18n.localize("prodBlocked")%></span>
+                            <%}%>
+                        </div>
+                        <div class="container-fluid">
+                            <div class="row-fluid">
+                                <div class="span4">
+                                    <a href="<%=path%>" class="thumbnailInsideLink"><img width="70" alt="" src="<% if(api.thumburl) { %><%=api.thumburl%><% } else { %><%=jagg.getAbsoluteUrl(jagg.getThemeFile("images/api-default.png"))%><% }%>"  <%if(api.subStatus != "UNBLOCKED") {%>class="desaturate"  title="Subscription not active."<%}%>/></a>
+                                </div>
+                                <div class="span8">
+                                    <% if(api.subStatus != "BLOCKED" || api.subStatus != "PROD_ONLY_BLOCKED"){ %>
+                                    <img src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("images/close.png"))%>" onClick="removeSubscription('<%=api.name%>','<%=api.version%>','<%=api.provider%>','<%=app.id%>',this)" align="right"  class="closeBtn" />
+                                    <%}%>
+                                    <a href="<%=path%>" class="service-name" title="<%=api.name%>-<%=api.version%>"><%=apiName%> - <%=api.version%></a>
+                                    <div class="provider-info"><%=api.provider%></div>
+                                    <div class="tier-info"><%=api.tier%> Subscription</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            <% } %>
+            </div><!-- End row -->
+        </div><!-- End container-fluid -->
+
+<% }); %>

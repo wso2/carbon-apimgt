@@ -1,0 +1,35 @@
+<%
+var updateDocumentation = function (api, doc) {
+    var log = new Log(),
+            provider = jagg.module("manager").getAPIProviderObj();
+    try {
+        var success = provider.updateDocumentation(api.provider, api.name, api.version,
+                                                doc.name, doc.type, doc.summary, doc.sourceType, doc.sourceUrl, doc.fileContent, doc.otherTypeName);
+        if (log.isDebugEnabled()) {
+            log.debug("updateNewDocumentation : " + doc.sourceType);
+        }
+        if (success=="true") {
+            if (doc.sourceType == "inline") {
+                //return addInlineContent(api, doc);
+            }
+            else {
+                return {
+                    error:false
+                };
+            }
+
+        } else {
+            return {
+                error:success
+            };
+        }
+    } catch (e) {
+        log.error(e.message);
+        return {
+            error:e,
+            docs:null,
+            message:e.message.split(":")[1]
+        };
+    }
+};
+%>

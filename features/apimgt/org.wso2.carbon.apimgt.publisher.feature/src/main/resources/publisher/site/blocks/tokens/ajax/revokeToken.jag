@@ -1,0 +1,65 @@
+<%
+include("/jagg/jagg.jag");
+
+(function () {
+    var mod, obj, result, username,
+            action = request.getParameter("action"),
+            site = require("/site/conf/site.json"),
+            msg = require("/site/conf/ui-messages.jag");
+
+    if(jagg.getUser() == null){
+        print({
+            error:true,
+            message:'timeout'
+        });
+    }else{
+        if (action === "revokeAccessToken") {
+            mod = jagg.module("subscription");
+            var accessToken,consumerKey,authUser;
+            accessToken = request.getParameter("accessToken");
+            consumerKey = request.getParameter("consumerKey");
+            authUser = request.getParameter("authUser");
+
+            result = mod.revokeAccessToken(accessToken,consumerKey,authUser);
+            if (result.error==true) {
+                obj = {
+                    error:true,
+                    message:result.message
+                };
+            } else {
+                obj = {
+                    error:false,
+                    message:result.message
+                }
+            }
+            print(obj);
+
+        }
+        else if (action === "revokeAccessTokenBySubscriber") {
+            mod = jagg.module("subscription");
+            var userName;
+            subscriberName = request.getParameter("subscriberName");
+            result = mod.revokeAccessTokenBySubscriber(subscriberName);
+            if (result.error==true) {
+                obj = {
+                    error:true,
+                    message:result.message
+                };
+            } else {
+                obj = {
+                    error:false,
+                    message:result.message
+                }
+            }
+            print(obj);
+
+        }
+        else {
+            print({
+                      error:true,
+                      message:msg.error.invalidAction(action)
+                  });
+        }
+    }
+}());
+%>

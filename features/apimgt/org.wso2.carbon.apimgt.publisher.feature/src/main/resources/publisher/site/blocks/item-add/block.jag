@@ -1,0 +1,22 @@
+<%
+jagg.block("item-add", {
+    initializer:function (data) {
+
+    },
+
+  getOutputs:function (inputs) {
+    var externalAPIStores, result, mod;
+    mod = jagg.module("api");
+    result = mod.getExternalAPIStores();
+    externalAPIStores = result.externalAPIStores;
+    
+    result = mod.isSynapseGateway();
+    isSynapseGateway = result.isSynapseGateway;
+    return {
+    		"externalAPIStores":externalAPIStores,
+            "isSynapseGateway":isSynapseGateway
+        }
+    }
+
+});
+%>

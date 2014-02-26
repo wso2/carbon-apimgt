@@ -1,0 +1,9 @@
+<%
+include("/jagg/jagg.jag");
+
+(function () {
+    var showLogin = request.getParameter("showLogin");
+    session.put("showLogin", showLogin);
+    print({error:false});
+}());
+%>

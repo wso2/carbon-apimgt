@@ -1,0 +1,52 @@
+<Server>
+    <OAuth>
+        <RequestTokenUrl>https://localhost:9443/oauth/request-token</RequestTokenUrl>
+        <AccessTokenUrl>https://localhost:9443/oauth/access-token</AccessTokenUrl>
+        <AuthorizeUrl>https://localhost:9443/oauth/authorize-url</AuthorizeUrl>
+        <!-- Default validity period for Authorization Code in seconds -->
+        <AuthorizationCodeDefaultValidityPeriod>300</AuthorizationCodeDefaultValidityPeriod>
+        <!-- Default validity period for Access Token in seconds -->
+        <AccessTokenDefaultValidityPeriod>3600</AccessTokenDefaultValidityPeriod>
+        <!-- Timestamp skew in seconds -->
+        <TimestampSkew>300</TimestampSkew>
+        <!-- Enable OAuth caching. This cache has the replication support. -->
+        <EnableOAuthCache>true</EnableOAuthCache>
+        <!-- Configure the security measures needs to be done prior to store the token in the database,
+          such as hashing, encrypting, etc.-->
+        <TokenPersistencePreprocessor>
+            org.wso2.carbon.identity.oauth.preprocessor.PlainTextTokenPersistencePreprocessor
+        </TokenPersistencePreprocessor>
+        <!-- Supported Response Types -->
+        <SupportedResponseTypes>code,token</SupportedResponseTypes>
+        <!-- Supported Grant Types -->
+        <SupportedGrantTypes>password,refresh_token,client_credentials,authorization_code</SupportedGrantTypes>
+        <OAuthCallbackHandlers>
+            <OAuthCallbackHandler Class="org.wso2.carbon.apimgt.keymgt.util.APIManagerOAuthCallbackHandler"/>
+        </OAuthCallbackHandlers>
+
+        <!-- Add custom user headers to the response-->
+        <!--<RequiredRespHeaderClaimUris>
+            <ClaimUri>http://wso2.org/claims/emailaddress</ClaimUri>
+            <ClaimUri>http://wso2.org/claims/gender</ClaimUri>
+        </RequiredRespHeaderClaimUris>-->
+
+        <!-- Enable/Disable OAuth Caching-->
+        <!--<EnableCache>true</EnableCache>-->
+
+        <!-- Assertions can be used to embedd parameters into access token.-->
+        <EnableAssertions>
+            <UserName>false</UserName>
+        </EnableAssertions>
+
+        <!-- This should be set to true when using multiple user stores and keys should saved
+                into different tables according to the user store. By default all the application keys are saved in to the same table.
+                UserName Assertion should be 'true' to use this.-->
+        <EnableAccessTokenPartitioning>false</EnableAccessTokenPartitioning>
+
+        <!-- user store domain names and mappings to new table names.
+                    eg: if you provide 'A:foo.com', foo.com should be the user store domain name and 'A' represent the relavant mapping of
+                    token storing table, i.e. tokens relevant to the users comming from foo.com user store will be added to a table called
+                    IDN_OAUTH2_ACCESS_TOKEN_A. -->
+        <AccessTokenPartitioningDomains><!-- A:foo.com, B:bar.com --></AccessTokenPartitioningDomains>
+    </OAuth>
+</Server>

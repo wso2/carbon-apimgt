@@ -1,0 +1,28 @@
+<component xmlns="http://products.wso2.org/carbon">
+    <ManagementPermissions>
+        <ManagementPermission>
+            <DisplayName>API</DisplayName>
+            <ResourceId>/permission/admin/manage/api</ResourceId>
+        </ManagementPermission>
+        <ManagementPermission>
+            <DisplayName>Create</DisplayName>
+            <ResourceId>/permission/admin/manage/api/create</ResourceId>
+        </ManagementPermission>
+        <ManagementPermission>
+            <DisplayName>Publish</DisplayName>
+            <ResourceId>/permission/admin/manage/api/publish</ResourceId>
+        </ManagementPermission>
+        <ManagementPermission>
+            <DisplayName>Subscribe</DisplayName>
+            <ResourceId>/permission/admin/manage/api/subscribe</ResourceId>
+        </ManagementPermission>
+        <ManagementPermission>
+            <DisplayName>Manage Tiers</DisplayName>
+            <ResourceId>/permission/admin/manage/manage_tiers</ResourceId>
+        </ManagementPermission>
+	<ManagementPermission>
+            <DisplayName>Workflows</DisplayName>
+            <ResourceId>/permission/admin/manage/workflowadmin</ResourceId>
+        </ManagementPermission>
+    </ManagementPermissions>
+</component>

@@ -1,0 +1,15 @@
+<%
+jagg.block("api/throttling", {
+    initializer:function (data) {
+
+    },
+
+    getInputs:function () {
+        return {
+            "api":null,
+            "discoveryURL":null,
+            "user":null
+        }
+    }
+});
+%>

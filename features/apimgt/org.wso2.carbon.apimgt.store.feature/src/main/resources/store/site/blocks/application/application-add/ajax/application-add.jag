@@ -1,0 +1,45 @@
+<%
+include("/jagg/jagg.jag");
+
+(function () {
+    var mod, obj, application, result, username, tier, callbackUrl, description,
+            msg = require("/site/conf/ui-messages.jag"),
+            action = request.getParameter("action"),
+            user = jagg.getUser();
+    if (action == "addApplication") {
+        if (!user) {
+            print({
+                error:true,
+                message:msg.error.loginRequired(action)
+            });
+            return;
+        }
+
+        application = request.getParameter("application");
+        username = user.username;
+        tier = request.getParameter("tier");
+        callbackUrl = request.getParameter("callbackUrl");
+        description = request.getParameter("description");       
+        mod = jagg.module("application");
+        result = mod.addApplication(username, application, tier, callbackUrl, description);
+
+        if (result.error) {
+            obj = {
+                error:true,
+                message:result.error
+            };
+        } else {
+            obj = {
+                error:false,
+                status:result.status
+            }
+        }
+        print(obj);
+    } else {
+        print({
+            error:true,
+            message:msg.error.invalidAction(action)
+        });
+    }
+}());
+%>

@@ -1,0 +1,21 @@
+<% jagg.template("footer", function(inputs, outputs, jagg) { %>
+            <div class="container-fluid footer-main">
+                   <div class="row-fluid">
+                       <div class="span12">
+                           <div class="container">
+                               <div class="row">
+                                   <%=i18n.localize("copyright", "&copy; Copyright 2011 &ndash; 2013 All Rights Reserved.")%>
+                               </div>
+                           </div>
+                       </div>
+                   </div>
+               </div>
+
+
+         <!--<div class="container-fluid">
+            <div class="row">
+                <div class="span6"><%=i18n.localize("copyright")%></div>
+                <div class="pull-right"><a class="powered-by-logo" href="http://wso2.com/products/api-manager" target="_blank"></a></div>
+            </div>
+         </div>-->
+<% }); %>

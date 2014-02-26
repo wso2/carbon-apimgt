@@ -1,0 +1,41 @@
+<%
+// This is a generic header file that can be included in all the pages.
+
+var getRedirectPathForNonAuthenticatedUser = function () {
+   var requestedPage = request.getRequestURI();
+    var tenantParam="";
+    if (request.getQueryString() != null) {
+        requestedPage = requestedPage + '?' + encodeURIComponent(request.getQueryString());
+       var tenantDomain=getTenantDomain();
+       if(tenantDomain!=null){
+       tenantParam="&tenant="+tenantDomain;
+       }
+    }
+    var redirectPath = jagg.getAbsoluteUrl("/?requestedPage=" + requestedPage+tenantParam);
+    return redirectPath;
+};
+
+var getTenantDomain=function(){
+return request.getParameter("tenant");
+};
+
+var isTenantAllowed=function(){
+ var user = jagg.getUser(),username;
+
+	var userInSession = session.get("LOGGED_IN_USER");
+	if(userInSession != null && userInSession.indexOf("@")!=-1 && userInSession.split("@")[1] == request.getParameter("tenant")){
+		jagg.setUser({username:userInSession, cookie:null});
+	}
+
+   /*if(user!=null){
+   	username=user.username;
+   	if(request.getParameter("tenant")!=null){
+   		if(user.username.split("@")[1]!=request.getParameter("tenant")){
+   			jagg.setUser(null);
+   			response.sendRedirect(getRedirectPathForNonAuthenticatedUser());
+   			return;
+   		}
+   	}
+   }*/
+   };
+%>

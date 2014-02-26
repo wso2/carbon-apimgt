@@ -1,0 +1,4 @@
+<%
+    session.put("showLogin", "true");
+    response.sendRedirect(request.getParameter("redirectToHome"));
+%>

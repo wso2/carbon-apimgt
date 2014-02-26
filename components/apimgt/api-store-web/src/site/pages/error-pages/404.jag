@@ -1,0 +1,33 @@
+<%
+include("/jagg/jagg.jag");
+var site = require("/site/conf/site.json");
+
+(function () {
+
+    jagg.render({
+        "name":"page/base",
+        "inputs":{
+            "title":"Error",
+            "body":[
+                {
+                    "name":"layout/base",
+                    "inputs":{
+                        "top":null,
+                        "left":null,
+                        "right":null,
+                         "middle":{
+                            "name":"errors",
+                            "inputs":{
+                                "error":"404"
+                            }
+                        },
+                        "bottom":null
+                    }
+                }
+            ]
+        }
+    });
+}());
+
+
+%>

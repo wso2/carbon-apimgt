@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+# Copyright (c) 2008, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+  -->
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <parent>
+        <groupId>org.wso2.carbon</groupId>
+        <artifactId>carbon-components</artifactId>
+        <version>4.2.0</version>
+    </parent>
+
+    <groupId>org.wso2.carbon</groupId>
+    <artifactId>apimgt</artifactId>
+    <version>1.3.0-SNAPSHOT</version>
+    <modelVersion>4.0.0</modelVersion>
+    <packaging>pom</packaging>
+    <name>API Management</name>
+    <modules>
+        <module>org.wso2.carbon.apimgt.api</module>
+        <module>org.wso2.carbon.apimgt.impl</module>
+        <module>org.wso2.carbon.apimgt.hostobjects</module>
+        <module>org.wso2.carbon.apimgt.keymgt</module>
+	<module>org.wso2.carbon.apimgt.keymgt.client</module>
+        <module>org.wso2.carbon.apimgt.gateway</module>
+        <module>org.wso2.carbon.apimgt.usage</module>
+	<module>org.wso2.carbon.apimgt.core</module>
+	<module>org.wso2.carbon.apimgt.interceptor</module>
+	<module>org.wso2.carbon.apimgt.startup.publisher</module>
+    </modules>
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>2.3.1</version>
+                <configuration>
+                    <encoding>UTF-8</encoding>
+                    <source>1.6</source>
+                    <target>1.6</target>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
+    <repositories>
+        <repository>
+            <id>wso2-nexus</id>
+            <name>WSO2 internal Repository</name>
+            <url>http://maven.wso2.org/nexus/content/groups/wso2-public/</url>
+            <releases>
+                <enabled>true</enabled>
+                <updatePolicy>daily</updatePolicy>
+                <checksumPolicy>fail</checksumPolicy>
+            </releases>
+        </repository>
+    </repositories>
+    
+    <properties>
+        <hostobjects.version>1.0.0</hostobjects.version>
+        <apim.version>1.3.0-SNAPSHOT</apim.version>
+        <identity.version>${wso2carbon.version}</identity.version>
+        <wso2carbon.version.identity>${wso2carbon.version}</wso2carbon.version.identity>
+        <axis2.wso2.version.identity>${axis2.wso2.version}</axis2.wso2.version.identity>
+        <axiom.wso2.version.identity>${axiom.wso2.version}</axiom.wso2.version.identity>
+        <synapse.version.identity>${synapse.version}</synapse.version.identity>
+        <synapse.version.handlers>${synapse.version}</synapse.version.handlers>
+        <throttle.version.handlers>3.3.0</throttle.version.handlers>
+        <gdata-core.wso2.version.identity>${gdata-core.wso2.version}
+        </gdata-core.wso2.version.identity>
+        <junit.version.identity>${junit.version}</junit.version.identity>
+        <smack.version.identity>${smack.wso2.version}</smack.version.identity>
+        <smackx.version.identity>${smackx.wso2.version}</smackx.version.identity>
+        <sun-xacml.wso2.version.identity>${sun-xacml.wso2.version}</sun-xacml.wso2.version.identity>
+        <wss4j.version.wso2.identity>${wss4j.version}</wss4j.version.wso2.identity>
+        <rampart.wso2.version.identity>${rampart.wso2.version}</rampart.wso2.version.identity>
+        <opensaml.wso2.version.identity>${opensaml.wso2.version}</opensaml.wso2.version.identity>
+        <opensaml2.wso2.version.identity>${opensaml2.wso2.version}</opensaml2.wso2.version.identity>
+        <openid4java.wso2.version.identity>${openid4java.wso2.version}
+        </openid4java.wso2.version.identity>
+        <httpcomponents-httpclient.wso2.version.identity>${httpcomponents-httpclient.wso2.version}
+        </httpcomponents-httpclient.wso2.version.identity>
+        <httpcomponents-httpcore.wso2.version.identity>${httpcomponents-httpcore.wso2.version}
+        </httpcomponents-httpcore.wso2.version.identity>
+        <neethi.osgi.version.identity>${neethi.osgi.version}</neethi.osgi.version.identity>
+	    <libthrift.wso2.version>0.7.wso2v1</libthrift.wso2.version>
+    </properties>
+</project>

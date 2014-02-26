@@ -1,0 +1,35 @@
+<%
+include("/jagg/jagg.jag");
+(function () {
+    var mod, obj, tenant, result, limit,
+
+            msg = require("/site/conf/ui-messages.jag"),
+            action = request.getParameter("action");
+    if (action == "getRecentlyAddedAPIs") {
+
+        tenant = request.getParameter("tenant");
+        limit = request.getParameter("limit");
+
+        mod = jagg.module("api");
+        result = mod.getRecentlyAddedAPIs(limit,tenant);
+
+        if (result.error) {
+            obj = {
+                error:result.error,
+                message:msg.error.authError(action)
+            };
+        } else {
+            obj = {
+                error:false
+
+            }
+        }
+        print(obj);
+    } else {
+        print({
+            error:true,
+            message:msg.error.invalidAction(action)
+        });
+    }
+}());
+%>

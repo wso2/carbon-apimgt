@@ -1,0 +1,54 @@
+<% jagg.template("menu/left", function(inputs, outputs, jagg) { %>
+<%  var tenant=request.getParameter("tenant");
+    var urlPrefix;
+    var urlPostfix;
+    if(tenant!=null) {urlPrefix="?tenant="+tenant;}else{urlPrefix='';}
+    if(tenant!=null) {urlPostfix="&tenant="+tenant;}else{urlPostfix='';}
+
+    var site = require("/site/conf/site.json");
+    var ssoEnabled = site.ssoConfiguration.enabled;
+
+    var reqUrl = request.getRequestURI();
+    var listUrl=jagg.getAbsoluteUrl("/site/pages/index.jag");
+    var listMappedUrl=jagg.getMappedUrl("/site/pages/index.jag");
+    var infoUrl=jagg.getAbsoluteUrl("/site/pages/item-info.jag");
+    var infoMappedUrl=jagg.getMappedUrl("/site/pages/item-info.jag");
+    var addUrl=jagg.getAbsoluteUrl("/site/pages/add.jag");
+    var addMappedUrl=jagg.getMappedUrl("/site/pages/add.jag");
+    var subsUrl=jagg.getAbsoluteUrl("/site/pages/subscriptions.jag");
+    var subsMappedUrl=jagg.getMappedUrl("/site/pages/subscriptions.jag");
+    var userUrl=jagg.getAbsoluteUrl("/site/pages/user.jag");
+    var userMappedUrl=jagg.getMappedUrl("/site/pages/user.jag");
+    var statsUrl=jagg.getAbsoluteUrl("/site/pages/statistics.jag");
+    var statsMappedUrl=jagg.getMappedUrl("/site/pages/statistics.jag");
+    var allStatsUrl=jagg.getAbsoluteUrl("/site/pages/all-statistics.jag");
+    var allStatsMappedUrl=jagg.getMappedUrl("/site/pages/all-statistics.jag");
+    var tierPermissionsUrl=jagg.getAbsoluteUrl("/site/pages/tiers.jag");
+    var tierPermissionsMappedUrl=jagg.getMappedUrl("/site/pages/tiers.jag");
+	
+	
+    var  mod,isPermitted, isManageTierPermitted;
+    isPermitted=jagg.getCreatePermitted().permitted;
+    isManageTierPermitted = jagg.getManageTierPermitted().permitted;
+%>
+
+<div class="sidebar-nav left-menu-back01">
+    <ul class="nav nav-list">
+       <li class="nav-header"><%=i18n.localize("apis")%></li>
+        <li <%if(reqUrl.equals(site.context)||reqUrl.equals(site.context+"/")||reqUrl.indexOf(listUrl)>=0 || reqUrl.indexOf(listMappedUrl)>=0||reqUrl.indexOf(infoUrl)>=0 || reqUrl.indexOf(infoMappedUrl)>=0|| reqUrl.indexOf(userUrl)>=0||reqUrl.indexOf(userMappedUrl)>=0){%>class="active"<% } %>><a href="<%=listMappedUrl%>?page=1<%=urlPostfix%>"  onclick="jagg.sessionAwareJS({redirect:'<%=listMappedUrl%>?page=1<%=urlPostfix%>',e:event,ssoEnabled:<%=ssoEnabled%>})"><%=i18n.localize("browse")%></a></li>
+        <%if(isPermitted){%><li <% if(reqUrl.indexOf(addUrl)>=0 || reqUrl.indexOf(addMappedUrl)>=0){%>class="active"<% } %>><a href="<%=addMappedUrl%><%=urlPrefix%>" onclick="jagg.sessionAwareJS({redirect:'<%=addMappedUrl%><%=urlPrefix%>',e:event,ssoEnabled:<%=ssoEnabled%>})"><%=i18n.localize("add")%></a></li><%}%>
+        <li <% if(reqUrl.indexOf(allStatsUrl)>=0 || reqUrl.indexOf(allStatsMappedUrl)>=0){%>class="active"<% } %>><a href="<%=allStatsMappedUrl%><%=urlPrefix%>" onclick="jagg.sessionAwareJS({redirect:'<%=allStatsMappedUrl%><%=urlPrefix%>',e:event,ssoEnabled:<%=ssoEnabled%>})"><%=i18n.localize("allStats")%></a></li>
+        <%if(isPermitted){%>
+        	<li class="nav-header"><%=i18n.localize("myAPIs")%></li>
+        	<li <% if(reqUrl.indexOf(subsUrl)>=0||reqUrl.indexOf(subsMappedUrl)>=0){%>class="active"<% } %>><a href="<%=subsMappedUrl%><%=urlPrefix%>" onclick="jagg.sessionAwareJS({redirect:'<%=subsMappedUrl%><%=urlPrefix%>',e:event,ssoEnabled:<%=ssoEnabled%>})"><%=i18n.localize("subscriptions")%></a></li>
+			<li <% if(reqUrl.indexOf(statsUrl)>=0||reqUrl.indexOf(statsMappedUrl)>=0){%>class="active"<% } %>><a href="<%=statsMappedUrl%><%=urlPrefix%>" onclick="jagg.sessionAwareJS({redirect:'<%=statsMappedUrl%><%=urlPrefix%>',e:event,ssoEnabled:<%=ssoEnabled%>})"><%=i18n.localize("statistics")%></a></li>
+		<%}%>
+		<%if(isManageTierPermitted){%>
+			<li class="nav-header"><%=i18n.localize("tierPermissions")%></li>
+			<li <% if(reqUrl.indexOf(tierPermissionsUrl)>=0||reqUrl.indexOf(tierPermissionsMappedUrl)>=0){%>class="active"<% } %>><a href="<%=tierPermissionsMappedUrl%><%=urlPrefix%>" onclick="jagg.sessionAwareJS({redirect:'<%=tierPermissionsMappedUrl%><%=urlPrefix%>',e:event})"><%=i18n.localize("tierPermissions")%></a></li>
+		<%}%>
+        
+     </ul>
+</div>
+
+<%});%>

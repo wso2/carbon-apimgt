@@ -1,0 +1,26 @@
+<%
+jagg.block("subscription/subscription-list-element", {
+    initializer:function (data) {
+
+    },
+
+    getInputs:function () {
+        return {
+            "app":null
+        }
+    },
+
+    getOutputs:function (inputs) {
+
+        var comments, result;
+        //result = jagg.module("comment").getAPIComments(inputs.api);
+        //comments = result.comments;
+        var app = inputs.app;
+
+        return {
+            "app":app,
+            "i":inputs.i
+        };
+    }
+});
+%>

@@ -1,0 +1,755 @@
+<% jagg.template("item-edit", function(inputs, outputs, jagg) {
+ var mod = jagg.module("api");
+ var result = mod.getTiers().tiers;
+ var isSynapseGateway = mod.isSynapseGateway().isSynapseGateway;
+ var isSuperTenant = jagg.getUser().isSuperTenant;
+ var i,resCount,rowNums = [],api = outputs.api; log = new Log();%>
+
+<script type="text/javascript">
+var addSelectedTiers;
+$(document).ready(function() {
+    addSelectedTiers = function(target) {
+        var tierDescs,tiersList,tiersDescList,tiers = [];
+        tiersList = "<%=api.availableTiers%>";
+        tiersDescList = "<%=api.tierDescs%>";
+        tiers = tiersList.split(",");
+        tierDescs = tiersDescList.split(",");
+        for (var i = 0; i < tiers.length; i++) {
+            var tier = tiers[i];
+            var tierDesc = tierDescs[i];
+            for (var j = 0; j < target.options.length; j++) {
+                if (tier == target.options[j].value) {
+                    target.options[j].selected = "selected";
+                    if (tierDesc != "null") {
+                        $("#editTiersHelp").html(tierDesc);
+                    }
+                }
+            }
+        }
+    }
+});
+var insequence = "<%=api.inSequence%>";
+var outsequence = "<%=api.outSequence%>";
+var inSequencesLoaded = false;
+var outSequencesLoaded = false;
+
+</script>
+<div class="alert alert-error" id="editAPIError" style="display:none">
+<span id="editErrorSpan"></span>
+</div>
+<div class="alert alert-block" id="editAPIWarn" style="display:none">
+<span id="editWarnSpan"><b>Warning!</b><br/>
+You are editing an API with active subscribers. Tier Availability changes will not be reflected on
+active subscriptions.<br/>
+API Definition for Swagger will not be overriden with the changes you will do to the API. 
+</span>
+</div>
+<script type="text/javascript">
+    var subs = "<%=api.subs%>";
+    if(subs > 0){
+        document.getElementById('editAPIWarn').style.display="block";
+    }
+</script>
+<div class="row-fluid">
+    <div class="span12">
+        <form method="POST" class="form-horizontal well" id="editAPIForm" action="<%=site.context%>/site/blocks/item-add/ajax/add.jag"  enctype="multipart/form-data">
+            <fieldset>
+            <legend><%=i18n.localize("generalDetailsTitle")%></legend>
+            <input type="hidden" name="action" id="action" value="updateAPI"/>
+            <input type="hidden" name="name" id="name" value="<%=api.name%>"/>
+            <input type="hidden" name="version" id="version" value="<%=api.version%>"/>
+            <input type="hidden" name="provider" id="provider" value="<%=api.provider%>"/>
+            <input type="hidden" name="tiersCollection" id="tiersCollection" value="<%=api.availableTiers%>"/>
+            <span id="spanContext" style="display:none;"><%=api.context%></span>
+
+
+            <div class="control-group">
+                <label class="control-label" for="context"><%=i18n.localize("context")%>:<span class="requiredAstrix">*</span></label>
+                <div class="controls">
+                    <input type="text" class="input-xlarge required validInput contextExists noSpace" id="context" name="context" value="<%=api.context%>" onChange="setContextValue('<%=api.version%>')"/>
+                </div>
+            </div>
+
+            <div class="control-group">
+                    <label class="control-label" for="editTier"><%=i18n.localize("tier")%>:<span class="requiredAstrix">*</span></label>
+                    <div class="controls">
+                        <select id="editTier" class="selected" name="editTier"  multiple="multiple">
+                       </select>
+                       <a class="icon-question-sign help_popup" help_data="tier_help"></a>
+                       <p id="tier_help" class="hide"><%=i18n.localize("tierHelpMsg")%></p>
+                    </div>
+            </div>
+
+            <div class="control-group transport-styles">
+               <label class="control-label" for="transports"><%=i18n.localize("transports")%>:<span class="requiredAstrix">*</span></label>
+               <div class="controls">
+                   <div class="checkbox">
+                       <label  class="checkbox inline" >
+                           <input type="checkbox" class="required transports_check_http" id="transport_http" name="transports" value="http" <%=api.transport_http%>/>
+                           <input type="hidden" id="http_checked" name="http_checked" <%if(api.transport_http == "checked"){%>value="http"<%}else{%>value=""<%}%>/>
+                           <%=i18n.localize("httpTransport")%>
+                       </label>
+                       <label  class="checkbox inline" >
+                           <input type="checkbox" class="required transports_check_https" id="transport_https" name="transports" value="https" <%=api.transport_https%>/>
+                           <input type="hidden" id="https_checked" name="https_checked" <%if(api.transport_https == "checked"){%>value="https"<%}else{%>value=""<%}%>/>
+                           <%=i18n.localize("httpsTransport")%>
+                       </label>
+                   </div>
+               </div>
+            </div>
+
+            <div class="control-group">
+                <div class="controls">
+                   <a href="#" class="more-options" ref="more-options-general"><%=i18n.localize("moreOptions")%></a>
+                </div>
+            </div>
+            <div id="more-options-general" style="display:none">
+
+         		<!--Response Caching -->
+                <div class="control-group">
+                    <label class="control-label" for="responseCache"><%=i18n.localize("responseCache")%>:</label>
+                      <div class="controls"> 
+                       <select class="select required" id="responseCache" name="responseCache" onchange="showCacheTimeout()">
+			                <option value="disabled" <%if(api.responseCache != "Enabled"){%> selected="selected" <%}%>><%=i18n.localize("responseCacheDisabled")%></option>
+			                <option value="enabled" <%if(api.responseCache=="Enabled"){%> selected="selected" <%}%>><%=i18n.localize("responseCacheEnabled")%></option>
+		                </select>                                
+                        <a class="icon-question-sign help_popup" help_data="cache_help"></a>
+                        <p id="cache_help" class="hide"><%=i18n.localize("cacheHelpMsg")%></p>           
+                     </div>
+                </div>
+                <div class="control-group" id="cacheTimeout"  <%if(api.responseCache != "Enabled"){%> style="display:none;" <%}%>>
+                    <label class="control-label" for="cacheTimeout"><%=i18n.localize("cacheTimeout")%>:<span class="requiredAstrix">*</span></label>
+                    <div class="controls">
+                        <input type="text" style="text-align:right;" class="input-small required validInput number" id="cacheTimeout" name="cacheTimeout" value=<%=api.cacheTimeout%>>
+                    </div>
+                </div>
+            <!--Response Caching End -->
+
+            <div class="control-group">
+               <label class="control-label" for="visibility"><%=i18n.localize("visibility")%>:<span class="requiredAstrix">*</span></label>
+               <div class="controls">
+                   <select class="select required" id="visibility" name="visibility" onchange="showHideRoles()">
+                       <option value="public" <%if(api.visibility=="public"){%> selected="selected" <%}%>><%=i18n.localize("public")%></option>
+                       <option value="restricted" <%if(api.visibility=="restricted"){%> selected="selected" <%}%>><%=i18n.localize("restricted")%></option>
+                   </select>
+               </div>
+           </div>
+           
+           <div class="control-group" id="rolesDiv" <%if(api.visibility!="restricted"){%>style="display: none;"<%}%>>
+                <label class="control-label" for="roles" id="rolesLabel" name="rolesLabel">
+                    <%=i18n.localize("roles")%>:<% if (isSuperTenant) { %><span class="requiredAstrix">*</span><%}%>
+                </label>
+                <div class="controls">
+                    <input type="text" <% if (isSuperTenant) { %>class="input required validInput validateRoles"<%}else{%>class="input validateRoles"<%}%>
+                    id="roles" name="roles"  value="<%=api.roles%>"/>
+                </div>
+            </div>
+
+            <div class="control-group">
+                <label class="control-label" for="imageUrl"><%=i18n.localize("thumbnail")%></label>
+                <div class="controls">
+                    <div class="pull-left">
+                         <% if(api.thumb==null){%> <div><img id="apiEditThumb" alt="" src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("images/api-default.png"))%>"/></div><%}else{%>
+                        <div><img id="apiEditThumb" alt="" src="<%=api.thumb%>"/></div> <%}%>
+                        <a onclick="javascript:$('#imageUrl').toggle('slow')" style="cursor: pointer">
+                            <i class="icon-picture"></i> <%=i18n.localize("changeIcon")%>
+                        </a>
+                    </div>
+                    <div class="pull-left" id="imageUrl" style="display:none;">
+                        <div id="apiThumb-container" class="pull-left"> <input type="file" class="input-xlarge" name="apiThumb" /></div>
+                        <input class="pull-left btn" type="button" id="clearThumb" value="<%=i18n.localize("clear")%>"/>
+                        <div class="help-block pull-left inline-help">
+                            <ul>
+                                <li><%=i18n.localize("imgHelpMsg")%></li>
+                                <li><%=i18n.localize("imgHelpMsg2")%></li>
+                            </ul>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <div class="control-group">
+                <label class="control-label" for="editDescription"><%=i18n.localize("description")%>:</label>
+                <div class="controls">
+                    <textarea class="input-xlarge" id="editDescription" rows="3"
+                              style="margin-left: 0px; margin-right: 0px; width: 501px; " name="description"><%=api.description%></textarea>
+                </div>
+            </div>
+
+            <div class="control-group">
+                   <label class="control-label" for="editTags"><%=i18n.localize("tags")%>:</label>
+                   <div class="controls">
+                       <input type="text" class="input-xlarge validInput" id="editTags" name="tags" value="<%=api.tags%>"/>
+                       <p class="help-block"><%=i18n.localize("tagsHelpMsg")%></p>
+                   </div>
+               </div>
+
+            <% if (isSynapseGateway) { %>
+            <div class="control-group">
+                <label class="control-label" for="sequence"><%=i18n.localize("sequence")%>:</label>
+
+
+                <div class="controls">
+                <label class="checkbox">
+                    <input type="checkbox" onclick="toggleSequence(this)" name="sequence_check" id="sequence_check"
+                        <% if(api.inSequence != null || api.outSequence != null){ %>checked="checked"><%}%><%=i18n.localize("sequenceMsg")%>
+                </label>
+                <table class="table table-bordered table-striped" id="seqTable"
+                        <% if(api.inSequence == null && api.outSequence == null){ %>style="display:none"<%}%>>
+                    <thead>
+                        <tr>
+                            <th><%=i18n.localize("inFlow")%></th>
+                            <th><%=i18n.localize("outFlow")%></th>
+                        </tr>
+                    </thead>
+                        <tr>
+                            <td>
+                                <select id="inSequence"  name="inSequence" >
+                                    <option value="none" selected="selected"><%=i18n.localize("none")%></option>
+                                </select>
+                            </td>
+                            <td>
+                                <select id="outSequence"  name="outSequence">
+                                    <option value="none" selected="selected"><%=i18n.localize("none")%></option>
+                                </select>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+            <%}%>
+            
+            </div><!-- end of more options div -->                            
+            </fieldset>
+            <fieldset>
+               <legend><%=i18n.localize("endpointTitle")%></legend>
+
+               <div class="control-group">
+                   <label class="control-label" for="endpoint_type">Endpoint Type:<span class="requiredAstrix">*</span></label>
+                       <div class="controls">
+                           <select class="select required" id="endpoint_type" name="endpoint_type">
+                               <option value="http">HTTP Endpoint</option>
+                               <option value="address">URL Endpoint</option>
+                               <option value="wsdl">WSDL Endpoint</option>
+                               <option value="failover">Failover Endpoint</option>
+                               <option value="load_balance">Load balanced Endpoint</option>
+                           </select>
+                           <a class="icon-question-sign help_popup" help_data="endpoint_help"></a>
+                       </div>
+               </div>
+
+               <input type="hidden" id="endpoint_config" name="endpoint_config" value='<% print(api.endpointConfig); %>'/>
+
+               <div id="endpoint_help" class="hide">
+                <strong>HTTP Endpoint </strong><p>Defines a URI Template based REST Service endpoint</p>
+                <strong>URL Endpoint</strong><p>Defines the direct URL of the service</p>
+                <strong>WSDL Endpoint</strong><p>Defines the WSDL, Service and Port</p>
+                <strong>Failover Group </strong><p>Defines the endpoints that the service will try to connect to in case
+                        of a failure. This will take place in a round robin manner</p>
+                <strong>Load Balance</strong><p> Endpoint 	Defines groups of endpoints for replicated services.The
+                        incoming requests will be directed to these endpoints in a round robin manner. These endpoints
+                        automatically handle the fail-over cases as well</p>
+               </div>
+
+               <div id="endpoint_form" class="endpoint_dives" >
+               </div>
+
+               <div class="control-group">
+                 <div class="controls">
+                        <a href="#" class="more-options" ref="more-options-endpoints"><%=i18n.localize("moreOptions")%></a>
+                     </div>
+                 </div>
+               <div id="more-options-endpoints" style="display:none">
+
+
+                <div class="control-group">
+                    <label class="control-label" for="endpointType"><%=i18n.localize("endpointType")%>:<span class="requiredAstrix">*</span></label>
+                    <div class="controls">
+                    <select class="select required" id="endpointType" name="endpointType" onchange="showUTProductionURL()">
+                        <option value="nonsecured" <%if(api.endpointTypeSecured=="false"){%> selected="selected" <%}%>><%=i18n.localize("nonsecured")%></option>
+                        <option value="secured" <%if(api.endpointTypeSecured=="true"){%> selected="selected" <%}%>><%=i18n.localize("secured")%></option>
+                    </select>
+
+                    </div>
+                </div>
+
+                <div class="control-group" id="credentials" <%if(api.endpointTypeSecured=="false"){%>style="display: none;"<%}%>">
+                    <label class="control-label" for="credentials"><%=i18n.localize("credentials")%>:<span class="requiredAstrix">*</span></label>
+                    <div class="controls">
+                        <input type="text" class="input-small required validInput" id="epUsername" name="epUsername"  value="<%=api.epUsername%>">
+                        <input type="password" class="input-small required" id="epPassword" name="epPassword" value="<%=api.epPassword%>">
+                    </div>
+                </div>
+
+                <div class="control-group api_wsdl">
+                    <label class="control-label" for="wsdl"><%=i18n.localize("wsdl")%>:</label>
+                    <div class="controls">
+                        <div class="input-append">
+                        <input type="text" class="input-xlarge validInput" id="wsdl" name="wsdl"  value="<%=api.wsdl%>" />
+                        <button class="btn check_url_valid" url-type="wsdl" type="button" ><%=i18n.localize("testURI")%></button>
+                        </div>
+                        <p class="help-block"><%=i18n.localize("wsdlHelpMsg")%></p>
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label class="control-label" for="wadl"><%=i18n.localize("wadl")%>:</label>
+                    <div class="controls">
+                        <div class="input-append">
+                        <input type="text" class="input-xlarge validInput" id="wadl" name="wadl" value="<%=api.wadl%>" />
+                        <button class="btn check_url_valid"  type="button"  ><%=i18n.localize("testURI")%></button>
+                        </div>
+                        <p class="help-block"><%=i18n.localize("wadlHelpMsg")%></p>
+                    </div>
+                </div>
+                </div> <!-- end of more options -->
+            </fieldset>
+
+            <fieldset>
+                <legend class="legend-with-hidden-info js_hidden_section_title"><%=i18n.localize("businessInformationTitle")%> <i class="icon-chevron-right icon-keys"></i></legend>
+                <div style="display: none">
+                    <div class="control-group">
+                        <label class="control-label" for="bizOwner"><%=i18n.localize("busiOwner")%>:</label>
+                        <div class="controls">
+                             <input type="text" class="input-xlarge validInput" id="bizOwner" name="bizOwner" value="<%=api.bizOwner%>"/>
+                        </div>
+                    </div>
+                     <div class="control-group">
+                        <label class="control-label" for="bizOwnerMail"><%=i18n.localize("busiOwnerMail")%>:</label>
+                        <div class="controls">
+                             <input type="text" class="input-xlarge email" id="bizOwnerMail" name="bizOwnerMail" value="<%=api.bizOwnerMail%>"/>
+                        </div>
+                    </div>
+                     <div class="control-group">
+                        <label class="control-label" for="techOwner"><%=i18n.localize("techOwner")%>:</label>
+                        <div class="controls">
+                             <input type="text" class="input-xlarge validInput" id="techOwner" name="techOwner" value="<%=api.techOwner%>"/>
+                        </div>
+                    </div>
+                     <div class="control-group">
+                        <label class="control-label" for="techOwnerMail"><%=i18n.localize("techOwnerMail")%>:</label>
+                        <div class="controls">
+                             <input type="text" class="input-xlarge email" id="techOwnerMail" name="techOwnerMail" value="<%=api.techOwnerMail%>"/>
+                        </div>
+                    </div>
+                </div>
+            </fieldset>
+
+			<fieldset>
+                    <legend class="legend-with-hidden-info js_hidden_section_title"><%=i18n.localize("subscriptionsTitle")%><i class="icon-chevron-right icon-keys"></i></legend>
+                    <div class="control-group" style="display: none">
+	                	<label class="control-label" for="subscriptions"><%=i18n.localize("subscriptionsTitle")%>:</label>
+	                			
+						<div class="controls">
+		                	<select class="select required" id="subscriptions" name="subscriptions" onchange="showHideTennats()">
+			                	<option value="current_tenant" <%if(api.subscriptionAvailability=="current_tenant"){%> selected="selected" <%}%> ><%=i18n.localize("availableToCurrentTenant")%></option>
+			                	<option value="all_tenants" <%if(api.subscriptionAvailability=="all_tenants"){%> selected="selected" <%}%> ><%=i18n.localize("availableToAllTenants")%></option>
+			                	<option value="specific_tennats" <%if(api.subscriptionAvailability=="specific_tennats"){%> selected="selected" <%}%> ><%=i18n.localize("availableToSpecificTenants")%></option>
+		                	</select>
+                            <a class="icon-question-sign help_popup" help_data="subscriptions_help"></a>
+                            <div id="subscriptions_help" class="hide"><%=i18n.localize("subscriptionHelpMsg")%></div>
+	                	</div>
+					                
+                <br/>
+                	<div class="control-group" id="tennatsDiv" <%if(api.subscriptionAvailability!="specific_tennats"){%>style="display: none;"<%}%>>
+		                <label class="control-label" for="tenants" id="tennatLabel" name="tennatLabel">
+		                	<%=i18n.localize("tenants")%>:<span class="requiredAstrix">*</span>
+		                </label>
+		                <div class="controls">
+		                    <input type="text" class="input required"
+		                    id="tenants" name="tenants" value="<%=api.subscriptionTenants%>"/>
+	                        <p class="help-block" id="tennatsHelp"><%=i18n.localize("tenantsHelpMsg")%></p>
+		                </div>
+	                
+	            	</div>
+	            </div>
+				</fieldset>
+            <fieldset>
+            <legend class="legend-with-hidden-info"><%=i18n.localize("resources")%></legend>
+
+            <div>
+
+                    <div class="resourceTableDiv" id="resourceTableDiv"  style="margin-left: 10px;">
+                        <div style="padding-bottom:10px;"><a onclick="addResourcesToApi()"><i
+                                class="icon-plus-sign"></i> <%=i18n.localize("addNewResource")%></a></div>
+                        <table class="table table-bordered table-striped" id="resourceTable">
+                            <thead>
+                            <tr>
+                                <th><%=i18n.localize("urlPrefix")%></th>
+                                <th><%=i18n.localize("urlPattern")%></th>
+                                <th style="width:66px;"><%=i18n.localize("httpVerb")%></th>
+                                <th style="width:120px;"><%=i18n.localize("authType")%></th>
+                                <th style="width:120px;"><%=i18n.localize("throttlingTier")%></th>
+                                <th style="width:20px;"><%=i18n.localize("action")%></th>
+                            </tr>
+
+                            </thead>
+                            <tbody>
+
+                            <tr id="resourceRow"  style="display:none;">
+                                <td><span class="contextForUrl"><%=api.context%>/<%=api.version%></span></td>
+                                <td>
+                                    <input type="text" class="input resourceTemplate validInput" style="width:95%"
+                                           name="resourceTemplate"/>
+                                </td>
+                                <td>
+                                    <label class="checkbox ">
+                                        <input type="checkbox" id="resource-get" name="resource-get"
+                                               class="resource-get" value="GET"/> <%=i18n.localize("get")%>
+                                    </label>
+
+                                    <label class="checkbox ">
+                                        <input type="checkbox" id="resource-post" name="resource-post"
+                                               class="resource-post" value="POST"/> <%=i18n.localize("post")%>
+                                    </label>
+
+
+                                    <label class="checkbox ">
+                                        <input type="checkbox" id="resource-put" name="resource-put"
+                                               class="resource-put" value="PUT"/> <%=i18n.localize("put")%>
+                                    </label>
+
+
+                                    <label class="checkbox ">
+                                        <input type="checkbox" id="resource-delete" name="resource-delete"
+                                               class="resource-delete" value="DELETE"> <%=i18n.localize("delete")%>
+                                    </label>
+
+
+                                    <label class="checkbox ">
+                                        <input type="checkbox" id="resource-options" name="resource-options"
+                                               class="resource-options" value="OPTIONS"> <%=i18n.localize("options")%>
+                                    </label>
+
+
+                                </td>
+                                <td>
+                                    <select style="width:100%" class="getAuthType">
+                                        <option><%=i18n.localize("none")%></option>
+                                        <option selected="selected"><%=i18n.localize("application")%></option>
+                                        <option><%=i18n.localize("applicationUser")%></option>
+                                        <option><%=i18n.localize("application&applicationUser")%></option>
+                                    </select>
+                                    <select style="width:100%" class="postAuthType">
+                                        <option><%=i18n.localize("none")%></option>
+                                        <option selected="selected"><%=i18n.localize("application")%></option>
+                                        <option><%=i18n.localize("applicationUser")%></option>
+                                        <option><%=i18n.localize("application&applicationUser")%></option>
+                                    </select>
+                                    <select style="width:100%" class="putAuthType">
+                                        <option><%=i18n.localize("none")%></option>
+                                        <option selected="selected"><%=i18n.localize("application")%></option>
+                                        <option><%=i18n.localize("applicationUser")%></option>
+                                        <option><%=i18n.localize("application&applicationUser")%></option>
+                                    </select>
+                                    <select style="width:100%" class="deleteAuthType">
+                                        <option><%=i18n.localize("none")%></option>
+                                        <option selected="selected"><%=i18n.localize("application")%></option>
+                                        <option><%=i18n.localize("applicationUser")%></option>
+                                        <option><%=i18n.localize("application&applicationUser")%></option>
+                                    </select>
+                                    <select style="width:100%" class="optionsAuthType">
+                                        <option><%=i18n.localize("none")%></option>
+                                        <option selected="selected"><%=i18n.localize("application")%></option>
+                                        <option><%=i18n.localize("applicationUser")%></option>
+                                        <option><%=i18n.localize("application&applicationUser")%></option>
+                                    </select>
+
+                                </td>
+                                <!--Throttling-fix-->
+                                <td id = "throttlingTierListNew">
+                                     <select style="width:100%" id="getThrottlingTier" class="getThrottlingTier" name="getThrottlingTier"></select>
+                                     <select style="width:100%" id="postThrottlingTier" class="postThrottlingTier" name="postThrottlingTier"></select>
+                                     <select style="width:100%" id="putThrottlingTier" class="putThrottlingTier" name="putThrottlingTier"></select>
+                                     <select style="width:100%" id="deleteThrottlingTier" class="deleteThrottlingTier" name="deleteThrottlingTier"></select>
+                                     <select style="width:100%" id="optionsThrottlingTier" class="optionsThrottlingTier" name="optionsThrottlingTier"></select>
+                                </td>
+                                <!--Throttling-fix-->
+                                <td>
+                                    <button type="button" disabled="disabled" class='even-width-button btn downButton'
+                                            onclick="moveMe(this)"><i class="icon-chevron-down"></i> <%=i18n.localize("moveDown")%>
+                                    </button>
+                                    <button onclick="moveMe(this)" type="button" disabled="disabled"
+                                            class='even-width-button btn upButton'><i class="icon-chevron-up"></i> <%=i18n.localize("moveUp")%>
+                                    </button>
+                                    <button type="button" class="btn btn-danger even-width-button deleteButton"
+                                            id="resourceDelBtn" onclick="deleteResource(this)">
+                                        <i class="icon-trash icon-white"></i>  <%=i18n.localize("deleteMethod")%>
+                                    </button>
+                                </td>
+                            </tr>
+
+                            <%if (api.templates!=null && api.templates.length > 0) {
+                            for (i = 0; i < api.templates.length; i++) {
+                            %>
+                            <tr id="item-<%=String(i)%>" class="resourceRow">
+                                <td><span id="contextForUrlDefault"><%=api.context%>/<%=api.version%></span></td>
+                                <td>
+                                    <input style="width: 95%;" type="text" class="input resourceTemplate" id="uriTemplate"
+                                           name="resourceTemplate" value="<%=api.templates[i][0]%>"/>
+                                </td>
+                                <td>
+                                    <%
+
+                                    var methods = api.templates[i][1].split(",");
+                                    var authTypes = api.templates[i][2].split(",");
+                                    var throttlingTiers = api.templates[i][3].split(",");
+                                    var getVal,putVal,postVal,deleteVal,optionVal,method;
+
+                                    var tiersList = mod.getTiers().tiers;
+
+                                    var getThrottlingTier,postThrottlingTier,deleteThrottlingTier,optionsThrottlingTier,putThrottlingTier;
+
+                                    var getAuthVal,putAuthVal,postAuthVal,deleteAuthVal,optionAuthVal,method;
+                                    for(var n=0;n
+                                    <methods.length
+                                    ;n++) {
+                                    method=methods[n];
+                                    if(authTypes[n]=='Application_User'){authTypes[n]='Application User';}
+
+                                    if(method=="GET"){getVal=true;getAuthVal=authTypes[n];
+                                    getThrottlingTier=throttlingTiers[n];}
+
+                                    if(method=="PUT"){putVal=true;putAuthVal=authTypes[n];
+                                    putThrottlingTier=throttlingTiers[n];}
+
+                                    if(method=="POST"){postVal=true;postAuthVal=authTypes[n];
+                                    postThrottlingTier=throttlingTiers[n];}
+
+                                    if(method=="DELETE"){deleteVal=true;deleteAuthVal=authTypes[n];
+                                    deleteThrottlingTier=throttlingTiers[n];}
+
+                                    if(method=="OPTIONS"){optionVal=true;optionAuthVal=authTypes[n];
+                                    optionsThrottlingTier=throttlingTiers[n];}
+                                    }%>
+                                    <label class="checkbox inline">
+                                        <input type="checkbox" id="resource-get" name="resource-get" class="resource-get"
+                                               value="GET" <%if(getVal){%>checked="true"<%}%> /><%=i18n.localize("get")%>
+                                    </label>
+                                    <label class="checkbox inline">
+                                        <input type="checkbox" id="resource-post" name="resource-post" class="resource-post"
+                                               value="POST" <%if(postVal){%>checked="true"<%}%>
+                                        /><%=i18n.localize("post")%>
+                                    </label>
+                                    <label class="checkbox inline">
+                                        <input type="checkbox" id="resource-put" name="resource-put" class="resource-put"
+                                               value="PUT" <%if(putVal){%>checked="true"<%}%> /> <%=i18n.localize("put")%>
+                                    </label>
+                                    <label class="checkbox inline">
+                                        <input type="checkbox" id="resource-delete" name="resource-delete" class="resource-delete"
+                                               value="DELETE" <%if(deleteVal){%>checked="true"<%}%>
+                                        /> <%=i18n.localize("delete")%>
+                                    </label>
+                                    <label class="checkbox inline">
+                                        <input type="checkbox" id="resource-options" name="resource-options" class="resource-options"
+                                               value="OPTIONS" <%if(optionVal){%>checked="true"<%}%>
+                                        /> <%=i18n.localize("options")%>
+                                    </label>
+
+                                    <% getVal=putVal=postVal=deleteVal=optionVal=""; %>
+
+                                </td>
+
+                                <td>
+                                    <select style="width:100%" class="getAuthType">
+                                        <option <%if(getAuthVal && getAuthVal=="None"){%> selected="selected" <%}%>><%=i18n.localize("none")%></option>
+                                        <option <%if(getAuthVal && getAuthVal=="Application"){%> selected="selected" <%}%>><%=i18n.localize("application")%></option>
+                                        <option <%if(getAuthVal && getAuthVal=="Application User"){%> selected="selected" <%}%>><%=i18n.localize("applicationUser")%></option>
+                                        <option <%if(getAuthVal && getAuthVal=="Any"){%> selected="selected" <%}%>><%=i18n.localize("application&applicationUser")%></option>
+
+                                    </select>
+                                    <select style="width:100%" class="postAuthType">
+                                        <option <%if(postAuthVal && postAuthVal=="None"){%> selected="selected" <%}%>><%=i18n.localize("none")%></option>
+                                        <option <%if(postAuthVal && postAuthVal=="Application"){%> selected="selected" <%}%>><%=i18n.localize("application")%></option>
+                                        <option <%if(postAuthVal && postAuthVal=="Application User"){%> selected="selected" <%}%>><%=i18n.localize("applicationUser")%></option>
+                                        <option <%if(postAuthVal && postAuthVal=="Any"){%> selected="selected" <%}%>><%=i18n.localize("application&applicationUser")%></option>
+
+                                    </select>
+                                    <select style="width:100%" class="putAuthType">
+                                        <option <%if(putAuthVal && putAuthVal=="None"){%> selected="selected" <%}%>><%=i18n.localize("none")%></option>
+                                        <option <%if(putAuthVal && putAuthVal=="Application"){%> selected="selected" <%}%>><%=i18n.localize("application")%></option>
+                                        <option <%if(putAuthVal && putAuthVal=="Application User"){ %> selected="selected" <%}%>><%=i18n.localize("applicationUser")%></option>
+                                        <option <% if(putAuthVal && putAuthVal=="Any"){ %> selected="selected" <%}%>><%=i18n.localize("application&applicationUser")%></option>
+
+                                    </select>
+                                    <select style="width:100%" class="deleteAuthType">
+                                        <option <%if(deleteAuthVal && deleteAuthVal=="None"){%> selected="selected" <%}%>><%=i18n.localize("none")%></option>
+                                        <option <%if(deleteAuthVal && deleteAuthVal=="Application"){%> selected="selected" <%}%>><%=i18n.localize("application")%></option>
+                                        <option <%if(deleteAuthVal && deleteAuthVal=="Application User"){%> selected="selected" <%}%>><%=i18n.localize("applicationUser")%></option>
+                                        <option <%if(deleteAuthVal && deleteAuthVal=="Any"){%> selected="selected" <%}%>><%=i18n.localize("application&applicationUser")%></option>
+
+                                    </select>
+                                    <select style="width:100%" class="optionsAuthType">
+                                        <option <%if(optionAuthVal && optionAuthVal=="None"){%> selected="selected" <%}%>><%=i18n.localize("none")%></option>
+                                        <option <%if(optionAuthVal && optionAuthVal=="Application"){%> selected="selected" <%}%>><%=i18n.localize("application")%></option>
+                                        <option <%if(optionAuthVal && optionAuthVal=="Application User"){%> selected="selected" <%}%>><%=i18n.localize("applicationUser")%></option>
+                                        <option <%if(optionAuthVal && optionAuthVal=="Any"){%> selected="selected" <%}%>><%=i18n.localize("application&applicationUser")%></option>
+
+                                    </select>
+
+                                </td>
+                                     <td id = "throttlingTierList">
+
+                                         <select style="width:100%" id="getThrottlingTier" class="getThrottlingTier" name="getThrottlingTier"><%
+                                         for(var k = 0 ; k < tiersList.length ; k++){
+                                         var l =  tiersList.length - k -1;
+                                         %>
+                                         <option <%if(tiersList[l].tierName==getThrottlingTier){%> selected="selected" <%}%> value="<%=tiersList[l].tierName%>"><%=tiersList[l].tierDisplayName%></option>
+                                         <% }
+                                         %></select>
+                                         <select style="width:100%" id="postThrottlingTier" class="postThrottlingTier" name="postThrottlingTier"><%
+                                         for(var k = 0 ; k < tiersList.length ; k++){
+                                         var l =  tiersList.length - k -1;
+                                         %>
+                                         <option <%if(tiersList[l].tierName==postThrottlingTier){%> selected="selected" <%}%>value="<%=tiersList[l].tierName%>"><%=tiersList[l].tierDisplayName%></option>
+                                         <% }
+                                         %></select>
+                                         <select style="width:100%" id="putThrottlingTier" class="putThrottlingTier" name="putThrottlingTier"><%
+                                         for(var k = 0 ; k < tiersList.length ; k++){
+                                         var l =  tiersList.length - k -1;
+                                         %>
+                                         <option <%if(tiersList[l].tierName==putThrottlingTier){%> selected="selected" <%}%>value="<%=tiersList[l].tierName%>"><%=tiersList[l].tierDisplayName%></option>
+                                         <% }
+                                         %></select>
+                                         <select style="width:100%" id="deleteThrottlingTier" class="deleteThrottlingTier" name="deleteThrottlingTier"><%
+                                         for(var k = 0 ; k < tiersList.length ; k++){
+                                         var l =  tiersList.length - k -1;
+                                         %>
+                                         <option <%if(tiersList[l].tierName==deleteThrottlingTier){%> selected="selected" <%}%>value="<%=tiersList[l].tierName%>"><%=tiersList[l].tierDisplayName%></option>
+                                         <% }
+                                         %></select>
+                                         <select style="width:100%" id="optionsThrottlingTier" class="optionsThrottlingTier" name="optionsThrottlingTier"><%
+                                         for(var k = 0 ; k < tiersList.length ; k++){
+                                         var l =  tiersList.length - k -1;
+                                         %>
+                                         <option <%if(tiersList[l].tierName==optionsThrottlingTier){%> selected="selected" <%}%>value="<%=tiersList[l].tierName%>"><%=tiersList[l].tierDisplayName%></option>
+                                         <% }
+                                         %></select>
+                                        </td>
+
+                                <% getAuthVal=putAuthVal=postAuthVal=deleteAuthVal=optionAuthVal=""; %>
+                                <td>
+                                    <button type="button" disabled="disabled" class='even-width-button btn downButton'
+                                            onclick="moveMe(this)"><i class="icon-chevron-down"></i> <%=i18n.localize("moveDown")%>
+                                    </button>
+                                    <button onclick="moveMe(this)" type="button" disabled="disabled"
+                                            class='even-width-button btn upButton'><i class="icon-chevron-up"></i> <%=i18n.localize("moveUp")%>
+                                    </button>
+                                    <button type="button" class="btn btn-danger even-width-button deleteButton"
+                                            id="resourceDelBtn" onclick="deleteResource(this)">
+                                        <i class="icon-trash icon-white"></i> <%=i18n.localize("deleteMethod")%>
+                                    </button>
+                                </td>
+                            </tr>
+
+                            <% rowNums.push(i);
+
+
+                            }}%>
+                            </tbody>
+                        </table>
+
+                    </div>
+                    <div class="alert alert-error" id="resourceTableError" style="display:none">
+                        <div id="stateActions" class="controls"></div>
+                    </div>
+
+
+            </div>
+        </fieldset>
+
+
+<input type="hidden" name="apiVersion" id="apiVersion" value="<%=<%=api.version%>%>">
+<input type="hidden" name="resourceCount" id="resourceCount" value="<%=String(api.templates.length)%>">
+<div id="hiddenFormElements">
+    <%if (api.templates!=null && api.templates.length > 0) {
+              for (j = 0; j < api.templates.length; j++) {
+              %>
+    <input type="hidden" name="resourceMethod-<%=String(j)%>" id="resourceMethod-<%=String(j)%>"
+           value="<%=api.templates[j][1]%>">
+    <input type="hidden" name="uriTemplate-<%=String(j)%>" id="uriTemplate-<%=String(j)%>"
+           value="<%=api.templates[j][0]%>">
+    <input type="hidden" name="resourceMethodAuthType-<%=String(j)%>" id="resourceMethodAuthType-<%=String(j)%>"
+           value="<%=api.templates[j][2]%>">
+    <input type="hidden" name="resourceMethodThrottlingTier-<%=String(j)%>" id="resourceMethodThrottlingTier-<%=String(j)%>"
+           value="<%=api.templates[j][3]%>">
+    <%}}%>
+</div>
+
+
+
+             <div class="form-actions" style="display:none" id="saveMessage">
+                    <div class="btn loadingButton">Saving API. Please wait..</div>
+             </div>
+            <div class="form-actions" id="saveButtons">
+                <input type="submit" id="updateButton" class="btn btn-primary" value="<%=i18n.localize("save")%>"/>
+                <input type="reset" id="cancelEdit" class="btn" value="<%=i18n.localize("cancel")%>">
+            </div>
+
+        </form>
+
+                    <div  id="advance_endpoint_config" class="modal hide fade">
+                         <div class="modal-header">
+                         <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                         <h3>Advanced Endpoint Configuration</h3>
+                         </div>
+                         <div class="modal-body form-horizontal">
+                         <form id="advance_form"></form>
+                         </div>
+                         <div class="modal-footer">
+                         <div id="res" class="hide" style="color:red;float:left"></div>
+                         <a href="#" class="btn" data-dismiss="modal">Close</a>
+                         <a href="#" class="btn btn-primary" id="advance_ep_submit">Save changes</a>
+                         </div>
+                    </div>
+    </div>
+</div>
+
+
+ <script type="text/javascript">
+
+$(document).ready(function() {
+ var v = $("#editAPIForm").validate({
+
+        submitHandler: function(form) {
+            $('#saveMessage').show(); $('#saveButtons').hide();
+            $(form).ajaxSubmit({
+                success:function(responseText, statusText, xhr, $form)  {
+                  if(!responseText.error){
+                      if (($.cookie("selectedTab") != null)) {
+                            $.cookie("selectedTab", "overview");
+                      }
+                      var current = window.location.pathname;
+                      if (current.indexOf(".jag") >= 0) {
+                      location.href = "item-info.jag?name=<%=api.name%>&version=<%=api.version%>&provider=<%=api.provider%>";
+                      }else{
+                      location.href = "site/pages/item-info.jag?name=<%=api.name%>&version=<%=api.version%>&provider=<%=api.provider%>";
+                      }
+                      $("#editAPIForm")[0].reset();
+                  } else {
+                          jagg.message({content:responseText.message,type:"error",cbk:function(){
+                              $('#saveMessage').hide(); $('#saveButtons').show();
+                          }
+                          });
+
+                                                                         }
+                }, dataType: 'json'
+            });
+        }
+    });
+    $('#cancelEdit').click(
+            function(){
+                var current = window.location.pathname;
+                if (current.indexOf(".jag") >= 0) {
+                location.href = 'index.jag';
+                }else{
+                location.href = 'site/pages/index.jag';
+                }
+            }
+            );
+ });
+
+ </script>
+
+
+<% }); %>
