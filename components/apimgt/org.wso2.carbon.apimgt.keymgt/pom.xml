@@ -36,12 +36,10 @@
 		<dependency>
 			<groupId>org.wso2.carbon</groupId>
 			<artifactId>org.wso2.carbon.identity.core</artifactId>   
-			<version>${project.version}</version>			
 		</dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.identity.oauth</artifactId>  
-	    <version>${project.version}</version>		
         </dependency>
 		<dependency>
 			<groupId>org.wso2.carbon</groupId>

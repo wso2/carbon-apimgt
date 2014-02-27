@@ -88,7 +88,6 @@
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.identity.core</artifactId>
-            <version>${project.parent.version}</version>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
@@ -98,11 +97,10 @@
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.bam.presentation.stub</artifactId>
-            <version>${project.parent.version}</version>
         </dependency>		
-		<dependency>
+	<dependency>
             <groupId>org.wso2.carbon</groupId>
-			<artifactId>org.wso2.carbon.mediation.security.stub</artifactId>
+	    <artifactId>org.wso2.carbon.mediation.security.stub</artifactId>
             <version>${project.parent.version}</version>
         </dependency>
     </dependencies>
@@ -218,20 +216,20 @@
                                 <bundleDef>org.wso2.carbon:org.wso2.carbon.apimgt.usage.publisher</bundleDef>
                                 <bundleDef>org.wso2.carbon:org.wso2.carbon.apimgt.usage.client</bundleDef>
                                 <bundleDef>org.wso2.carbon:org.wso2.carbon.apimgt.core</bundleDef>
-                                <bundleDef>org.wso2.carbon:org.wso2.carbon.sequences.stub:${project.parent.version}</bundleDef>
-                                <bundleDef>org.wso2.carbon:org.wso2.carbon.identity.user.registration.stub:${carbon.platform.version}</bundleDef>
-                                <bundleDef>org.wso2.carbon:org.wso2.carbon.bam.presentation.stub:${carbon.platform.version}</bundleDef>
-								<bundleDef>org.wso2.carbon:org.wso2.carbon.mediation.security.stub:${carbon.platform.version}</bundleDef>
+                                <bundleDef>org.wso2.carbon:org.wso2.carbon.sequences.stub</bundleDef>
+                                <bundleDef>org.wso2.carbon:org.wso2.carbon.identity.user.registration.stub</bundleDef>
+                                <bundleDef>org.wso2.carbon:org.wso2.carbon.bam.presentation.stub</bundleDef>
+				<bundleDef>org.wso2.carbon:org.wso2.carbon.mediation.security.stub</bundleDef>
                             </bundles>
                             <importBundles>
-                                <importBundleDef>org.wso2.carbon:org.wso2.carbon.identity.authentication:${carbon.platform.version}</importBundleDef>
-                                <importBundleDef>org.wso2.carbon:org.wso2.carbon.identity.thrift.authentication:${project.parent.version}</importBundleDef>
+                                <importBundleDef>org.wso2.carbon:org.wso2.carbon.identity.authentication</importBundleDef>
+                                <importBundleDef>org.wso2.carbon:org.wso2.carbon.identity.thrift.authentication</importBundleDef>
                                 <importBundleDef>libthrift.wso2:libthrift:0.8.0.wso2v1</importBundleDef>
                             </importBundles>
                             <importFeatures>
-                                <importFeatureDef>org.wso2.carbon.core.server:${carbon.platform.version}</importFeatureDef>
-                                <importFeatureDef>org.wso2.carbon.identity.oauth.server:${project.parent.version}</importFeatureDef>
-                                <importFeatureDef>org.wso2.carbon.um.ws.service.server:${carbon.platform.version}</importFeatureDef>
+                                <importFeatureDef>org.wso2.carbon.core.server</importFeatureDef>
+                                <importFeatureDef>org.wso2.carbon.identity.oauth.server</importFeatureDef>
+                                <importFeatureDef>org.wso2.carbon.um.ws.service.server</importFeatureDef>
                             </importFeatures>
                         </configuration>
                     </execution>
