@@ -10,7 +10,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.wso2.carbon</groupId>
   <artifactId>org.wso2.carbon.apimgt.startup.publisher</artifactId>
-  <version>${apim.version}</version>
+  <version>4.3.0-SNAPSHOT</version>
   <packaging>bundle</packaging>
   <name>WSO2 Carbon - API Management Startup Publisher </name>
     <repositories>
@@ -40,12 +40,12 @@
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.apimgt.impl</artifactId>
-             <version>${apim.version}</version>
+             <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.apimgt.core</artifactId>
-             <version>${apim.version}</version>
+             <version>${project.version}</version>
         </dependency>
    </dependencies>
 

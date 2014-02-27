@@ -67,12 +67,12 @@
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.apimgt.keymgt.stub</artifactId>
-	    <version>${apim.version}</version>			
+	    <version>${project.version}</version>			
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.apimgt.impl</artifactId>   
-	    <version>${apim.version}</version>
+	    <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
@@ -100,6 +100,7 @@
 	        <plugin>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>maven-scr-plugin</artifactId>
+		<version>1.6.0</version>
             </plugin>
             <plugin>
                 <groupId>org.apache.felix</groupId>
