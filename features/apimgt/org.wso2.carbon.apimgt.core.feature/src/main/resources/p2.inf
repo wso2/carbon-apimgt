@@ -1,0 +1,9 @@
+instructions.configure = \
+org.eclipse.equinox.p2.touchpoint.natives.copy(source:${installFolder}/../features/org.wso2.carbon.apimgt.core_${feature.version}/sql/,target:${installFolder}/../../../dbscripts/apimgt,overwrite:true);\
+org.eclipse.equinox.p2.touchpoint.natives.copy(source:${installFolder}/../features/org.wso2.carbon.apimgt.core_${feature.version}/config/rxts/,target:${installFolder}/../../resources/rxts,overwrite:true);\
+org.eclipse.equinox.p2.touchpoint.natives.copy(source:${installFolder}/../features/org.wso2.carbon.apimgt.core_${feature.version}/config/api-manager.xml/,target:${installFolder}/../../conf/api-manager.xml,overwrite:true);\
+org.eclipse.equinox.p2.touchpoint.natives.copy(source:${installFolder}/../features/org.wso2.carbon.apimgt.core_${feature.version}/conf/master-datasources.xml/,target:${installFolder}/../../conf/datasources/master-datasources.xml,overwrite:true);\
+org.eclipse.equinox.p2.touchpoint.natives.copy(source:${installFolder}/../features/org.wso2.carbon.apimgt.core_${feature.version}/repository/database/WSO2AM_DB.h2.db/,target:${installFolder}/../../database/WSO2AM_DB.h2.db,overwrite:true);\
+
+
+

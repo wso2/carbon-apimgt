@@ -1,0 +1,7 @@
+instructions.configure = \
+org.eclipse.equinox.p2.touchpoint.natives.copy(source:${installFolder}/../features/org.wso2.carbon.apimgt.store_${feature.version}/store/,target:${installFolder}/../../deployment/server/jaggeryapps/store,overwrite:true);\
+org.eclipse.equinox.p2.touchpoint.natives.copy(source:${installFolder}/../features/org.wso2.carbon.apimgt.store_${feature.version}/apistore/,target:${installFolder}/../../modules/apistore,overwrite:true);\
+org.eclipse.equinox.p2.touchpoint.natives.copy(source:${installFolder}/../features/org.wso2.carbon.apimgt.store_${feature.version}/customTheme/,target:${installFolder}/../../deployment/server/jaggeryapps/store,overwrite:true);\
+org.eclipse.equinox.p2.touchpoint.natives.copy(source:${installFolder}/../features/org.wso2.carbon.apimgt.store_${feature.version}/workflow-admin/,target:${installFolder}/../../deployment/server/jaggeryapps/workflow-admin,overwrite:true);\
+
+
