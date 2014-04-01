@@ -98,7 +98,7 @@
             <plugin>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>maven-scr-plugin</artifactId>
-                <version>1.7.4</version>
+                <!--<version>1.7.4</version>-->
             </plugin>
         </plugins>
     </build>
