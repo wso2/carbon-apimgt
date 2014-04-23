@@ -449,14 +449,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     }
                 }
                
-                Boolean gatewayKeyCacheEnabled=false;
-                String gatewayKeyCacheEnabledString = config.getFirstProperty(APIConstants.API_GATEWAY_KEY_CACHE_ENABLED);
-                //If gateway key cache enabled
-                if (gatewayKeyCacheEnabledString != null) {
-                    gatewayKeyCacheEnabled = Boolean.parseBoolean(gatewayKeyCacheEnabledString);
-                }
-                //If resource paths being saved are on permission cache, remove them.
-                if (gatewayExists && gatewayKeyCacheEnabled) {
+                //If gateway(s) exist, remove resource paths saved on the cache.
+                if (gatewayExists) {
                     if (isAPIPublished && !oldApi.getUriTemplates().equals(api.getUriTemplates())) {
                         Set<URITemplate> resourceVerbs = api.getUriTemplates();
 
@@ -468,10 +462,10 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                                 for(URITemplate resourceVerb : resourceVerbs){
                                     String resourceURLContext = resourceVerb.getUriTemplate();
                                     //If url context ends with the '*' character.
-                                    if(resourceURLContext.endsWith("*")){
+                                    //if(resourceURLContext.endsWith("*")){
                                         //Remove the ending '*'
-                                        resourceURLContext = resourceURLContext.substring(0, resourceURLContext.length() - 1);
-                                    }
+                                    //    resourceURLContext = resourceURLContext.substring(0, resourceURLContext.length() - 1);
+                                    //}
                                     client.invalidateResourceCache(api.getContext(),api.getId().getVersion(),resourceURLContext,resourceVerb.getHTTPVerb());
                                     if (log.isDebugEnabled()) {
                                         log.debug("Calling invalidation cache");
@@ -594,7 +588,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     	try{
     		String jsonText = APIUtil.createSwaggerJSONContent(api);
     		
-    		String resourcePath = APIUtil.getAPIDefinitionFilePath(identifier.getApiName(), identifier.getVersion()); 
+    		String resourcePath = APIUtil.getAPIDefinitionFilePath(identifier.getApiName(), identifier.getVersion(),identifier.getProviderName());
     		
     		Resource resource = registry.newResource();
     		    		
@@ -977,7 +971,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      */
     public void addAPIDefinitionContent(APIIdentifier identifier, String documentationName, String text) 
     					throws APIManagementException {
-    	String contentPath = APIUtil.getAPIDefinitionFilePath(identifier.getApiName(), identifier.getVersion());
+    	String contentPath = APIUtil.getAPIDefinitionFilePath(identifier.getApiName(), identifier.getVersion(),identifier.getProviderName());
     	
     	try {
             Resource docContent = registry.newResource();
@@ -1299,7 +1293,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             }
             
             /*Remove API Definition Resource - swagger*/
-            String apiDefinitionFilePath = APIUtil.getAPIDefinitionFilePath(identifier.getApiName(), identifier.getVersion());
+            String apiDefinitionFilePath = APIUtil.getAPIDefinitionFilePath(identifier.getApiName(), identifier.getVersion(),identifier.getProviderName());
             if (registry.resourceExists(apiDefinitionFilePath)) {
             	registry.delete(apiDefinitionFilePath);
             }
@@ -1324,8 +1318,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             Set<APIStore> apiStoreSet = getPublishedExternalAPIStores(api.getId());
             if (apiStoreSet != null && apiStoreSet.size() != 0) {
                 for (APIStore store : apiStoreSet) {
-                    APIStore aStore=config.getExternalAPIStore(store.getName());
-                    new WSO2APIPublisher().deleteFromStore(api.getId(), aStore);
+                	new WSO2APIPublisher().deleteFromStore(api.getId(), APIUtil.getExternalAPIStore(store.getName(), tenantId));
                 }
             }
             apiMgtDAO.deleteAPI(identifier);
@@ -1452,29 +1445,31 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         Set<APIStore> notPublishedAPIStores = new HashSet<APIStore>();
         Set<APIStore> modifiedPublishedApiStores = new HashSet<APIStore>();
         Set<APIStore> updateApiStores = new HashSet<APIStore>();
-        APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
-                getAPIManagerConfigurationService().getAPIManagerConfiguration();
         for (APIStore apiStore: apiStoreSet) {
             boolean publishedToStore=false;
             for (APIStore store : publishedStores) {  //If selected external store in edit page is already saved in db
-                if (store.equals(apiStore)) { //Check if there's a modification happened in config file external store definition
+            	if (store.equals(apiStore)) { //Check if there's a modification happened in config file external store definition
+                    if (!isAPIAvailableInExternalAPIStore(api, apiStore)) {
+                    // API is not available
+            	    continue;
+                    }
                     if (!store.getEndpoint().equals(apiStore.getEndpoint()) || !store.getType().equals((apiStore.getType()))||!store.getDisplayName().equals(apiStore.getDisplayName())) {
                         //Include the store definition to update the db stored APIStore set
-                        modifiedPublishedApiStores.add(config.getExternalAPIStore(store.getName()));
+                    	modifiedPublishedApiStores.add(APIUtil.getExternalAPIStore(store.getName(), tenantId));
                     }
                     publishedToStore=true; //Already the API has published to external APIStore
 
                     //In this case,the API is already added to external APIStore,thus we don't need to publish it again.
                     //We need to update the API in external Store.
                     //Include to update API in external APIStore
-                    updateApiStores.add(config.getExternalAPIStore(store.getName()));
+                    updateApiStores.add(APIUtil.getExternalAPIStore(store.getName(), tenantId));
 
 
                 }
 
             }
             if (!publishedToStore) {  //If the API has not yet published to selected external APIStore
-                notPublishedAPIStores.add(config.getExternalAPIStore(apiStore.getName()));
+                notPublishedAPIStores.add(APIUtil.getExternalAPIStore(apiStore.getName(), tenantId));
             }
 
         }
@@ -1487,6 +1482,18 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         updated=true;
         return updated;
     }
+    
+	private boolean isAPIAvailableInExternalAPIStore(API api, APIStore store) throws APIManagementException {
+		// Check external APIStore type is wso2 or not
+		if (APIConstants.WSO2_API_STORE_TYPE.equals(store.getType())) {
+			return new WSO2APIPublisher().isAPIAvailable(api, store);
+		} else {
+			// When the external APIStore is not a WSO2 APIStore
+			log.warn("The configured external APIStore type is currently not supported. Hence ignoring checking the API availabiltiy in - "
+					+ store.getDisplayName());
+		}
+		return false;
+	}
 
 
     /**
@@ -1540,11 +1547,11 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     @Override
     public Set<APIStore> getExternalAPIStores(APIIdentifier apiId)
             throws APIManagementException {
-        if (APIUtil.isAPIsPublishToExternalAPIStores()) {
+        if (APIUtil.isAPIsPublishToExternalAPIStores(tenantId)) {
             SortedSet<APIStore> sortedApiStores = new TreeSet<APIStore>(new APIStoreNameComparator());
             Set<APIStore> publishedStores = apiMgtDAO.getExternalAPIStoresDetails(apiId);
             sortedApiStores.addAll(publishedStores);
-            return APIUtil.getExternalAPIStores(sortedApiStores);
+            return APIUtil.getExternalAPIStores(sortedApiStores, tenantId);
         } else {
             return null;
         }
@@ -1559,7 +1566,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     @Override
     public Set<APIStore> getPublishedExternalAPIStores(APIIdentifier apiId)
             throws APIManagementException {
-        if (APIUtil.isAPIsPublishToExternalAPIStores()) {
+        if (APIUtil.isAPIsPublishToExternalAPIStores(tenantId)) {
             return apiMgtDAO.getExternalAPIStoresDetails(apiId);
 
         } else {
@@ -1630,6 +1637,38 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 		}
 		return sequenceList;
 	}
+
+    /**
+     * Get stored custom fault sequences from governanceSystem registry
+     *
+     * @throws APIManagementException
+     */
+
+    public List<String> getCustomFaultSequences() throws APIManagementException {
+
+        List<String> sequenceList = new ArrayList<String>();
+        try {
+            UserRegistry registry = ServiceReferenceHolder.getInstance().getRegistryService()
+                    .getGovernanceSystemRegistry(tenantId);
+            if (registry.resourceExists(APIConstants.API_CUSTOM_FAULTSEQUENCE_LOCATION)) {
+                org.wso2.carbon.registry.api.Collection faultSeqCollection =
+                        (org.wso2.carbon.registry.api.Collection) registry.get(APIConstants.API_CUSTOM_FAULTSEQUENCE_LOCATION);
+                if (faultSeqCollection !=null) {
+                    String[] faultSeqChildPaths = faultSeqCollection.getChildren();
+                    for (int i = 0; i < faultSeqChildPaths.length; i++) {
+                        Resource outSequence = registry.get(faultSeqChildPaths[i]);
+                        OMElement seqElment = APIUtil.buildOMElement(outSequence.getContentStream());
+
+                        sequenceList.add(seqElment.getAttributeValue(new QName("name")));
+                    }
+                }
+            }
+
+        } catch (Exception e) {
+            handleException("Issue is in getting custom Fault Sequences from the Registry", e);
+        }
+        return sequenceList;
+    }
 
 	@Override
 	public boolean isSynapseGateway() throws APIManagementException {

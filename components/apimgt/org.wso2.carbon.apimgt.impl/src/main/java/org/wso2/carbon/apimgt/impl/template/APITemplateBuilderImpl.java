@@ -67,6 +67,7 @@ public class APITemplateBuilderImpl implements APITemplateBuilder {
             configcontext = new SecurityConfigContext(configcontext,api);
             configcontext = new JwtConfigContext(configcontext);
             configcontext = new ResponseCacheConfigContext(configcontext, api);
+            configcontext = new BAMMediatorConfigContext(configcontext, api);
             configcontext = new HandlerConfigContex(configcontext, handlers);
             configcontext = new EnvironmentConfigContext(configcontext, environment);
             configcontext = new TemplateUtilContext(configcontext);

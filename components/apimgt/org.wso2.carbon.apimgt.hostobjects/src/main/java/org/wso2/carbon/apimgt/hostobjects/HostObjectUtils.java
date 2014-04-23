@@ -161,7 +161,7 @@ public class HostObjectUtils {
     protected static boolean checkDataPublishingEnabled() {
         APIManagerConfiguration configuration =
                 ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration();
-        String enabledStr = configuration.getFirstProperty(APIMgtUsagePublisherConstants.API_USAGE_ENABLED);
+        String enabledStr = configuration.getFirstProperty(APIConstants.API_USAGE_ENABLED);
         return enabledStr != null && Boolean.parseBoolean(enabledStr);
     }
 }

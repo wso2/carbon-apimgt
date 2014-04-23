@@ -2,6 +2,7 @@
 include("/jagg/jagg.jag");
 
 (function () {
+    response.contentType = "application/json; charset=UTF-8";
     var mod, obj, result, username,
             action = request.getParameter("action"),
             site = require("/site/conf/site.json"),
@@ -12,7 +13,7 @@ include("/jagg/jagg.jag");
                   message:'AuthenticateError'
               });
     } else {
-        if (action === "addDocumentation") {
+        if (action === "addDocumentation" && request.getMethod() == 'POST') {
             mod = jagg.module("documentation");
             var apiData = {};
             var docData = {};
@@ -46,7 +47,7 @@ include("/jagg/jagg.jag");
                 }
             }
             print(obj);
-        } else if (action === "addInlineContent") {
+        } else if (action === "addInlineContent" && request.getMethod() == 'POST') {
             mod = jagg.module("documentation");
             var apiDetails = {};
             var docDetails = {};
@@ -88,7 +89,7 @@ include("/jagg/jagg.jag");
             }
             print(obj);
 
-        } else if (action === "removeDocumentation") {
+        } else if (action === "removeDocumentation" && request.getMethod() == 'POST') {
             mod = jagg.module("documentation");
             var apiInfo = {};
             var docInfo = {};

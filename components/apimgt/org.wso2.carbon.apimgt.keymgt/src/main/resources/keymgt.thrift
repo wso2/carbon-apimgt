@@ -23,6 +23,7 @@ struct APIKeyValidationInfoDTO {
     12: optional string consumerKey;
     13: optional string apiPublisher;
     14: optional list<string> authorizedDomains;
+    15: optional set<string> scopes;
 }
 
 struct URITemplate {
@@ -36,6 +37,6 @@ struct URITemplate {
 
 
 service APIKeyValidationService {
-APIKeyValidationInfoDTO validateKey(1:required string context, 2:required string version, 3:required string accessToken, 4:required string sessionId, 5:required string requiredAuthenticationLevel, 6:optional string clientDomain) throws (1:APIKeyMgtException apiKeyMgtException, 2:APIManagementException apiMgtException)
-list<URITemplate> getAllURITemplates(1:required string context, 2:required string apiVersion) throws (1:APIKeyMgtException apiKeyMgtException, 2:APIManagementException apiMgtException)
+APIKeyValidationInfoDTO validateKey(1:required string context, 2:required string version, 3:required string accessToken, 4:required string sessionId, 5:required string requiredAuthenticationLevel, 6:optional string clientDomain, 7:required string matchingResource, 8:required string httpVerb) throws (1:APIKeyMgtException apiKeyMgtException, 2:APIManagementException apiMgtException)
+list<URITemplate> getAllURITemplates(1:required string context, 2:required string apiVersion, 3:required string sessionId) throws (1:APIKeyMgtException apiKeyMgtException, 2:APIManagementException apiMgtException)
 }

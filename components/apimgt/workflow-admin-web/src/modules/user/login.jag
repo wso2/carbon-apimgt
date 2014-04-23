@@ -48,7 +48,7 @@ try{
     }else{
     isSuperTenant =tenantMode;
     var sessionCookie = cookie.split(';')[0];
-    jagg.setUser({username:username, isSuperTenant:isSuperTenant, cookie:sessionCookie});
+    jagg.setUser({username:username, isSuperTenant:isSuperTenant, cookie:sessionCookie, userDomain : username.split("@")[1]});
 
 
     return {
@@ -163,13 +163,16 @@ var site = require("/site/conf/site.json");
 var roles= result. *::["return"];
 for(var i=0; i<roles.length(); i++){
  var entry=roles[i];
-
- var roleName= entry.text();
-
- if(roleName==site.allowedRole){
- return true;
- }
-
+var roleName= entry.text();
+var approvedRole;
+var roleNames = site.allowedRoles.split(",");
+var count = roleNames.length;
+for(var j=0; j < count ; j++ ){
+  approvedRole = roleNames[j];
+  if(approvedRole==roleName) {
+     return true;
+  }
+}
 return false;}
 };
 

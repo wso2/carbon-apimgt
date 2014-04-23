@@ -25,13 +25,13 @@
                         print('<ul class="endpoint_list">');
                         for(var index = 0; index < endpoint_config.production_endpoints.length; index++){
                         %>
-                            <li><%= endpoint_config.production_endpoints[index].url %></li>
+                            <li><%= encode.forHtml(endpoint_config.production_endpoints[index].url) %></li>
                         <%
                         }
                         print('</ul>');
                     }
                     else{
-                        print(endpoint_config.production_endpoints.url);
+                        print(encode.forHtml(endpoint_config.production_endpoints.url));
                     }
                 %>
                 </td>
@@ -45,7 +45,7 @@
                         print('<ul class="endpoint_list">');
                         for(var index = 0; index < endpoint_config.production_failovers.length; index++){
                         %>
-                            <li><%= endpoint_config.production_failovers[index].url %></li>
+                            <li><%= encode.forHtml(endpoint_config.production_failovers[index].url) %></li>
                         <%
                         }
                         print('</ul>');
@@ -63,13 +63,13 @@
                         print('<ul class="endpoint_list">');
                         for(var index = 0; index < endpoint_config.sandbox_endpoints.length; index++){
                         %>
-                            <li><%= endpoint_config.sandbox_endpoints[index].url %></li>
+                            <li><%= encode.forHtml(endpoint_config.sandbox_endpoints[index].url) %></li>
                         <%
                         }
                         print('</ul>');
                     }
                     else{
-                        print(endpoint_config.sandbox_endpoints.url);
+                        print(encode.forHtml(endpoint_config.sandbox_endpoints.url));
                     }
                 %>
                 </td>
@@ -82,7 +82,7 @@
                         print('<ul class="endpoint_list">');
                         for(var index = 0; index < endpoint_config.sandbox_failovers.length; index++){
                         %>
-                            <li><%= endpoint_config.sandbox_failovers[index].url %></li>
+                            <li><%= encode.forHtml(endpoint_config.sandbox_failovers[index].url) %></li>
                         <%
                         }
                         print('</ul>');
@@ -95,13 +95,13 @@
             <%if(api.wsdl!=''){%>
             <tr>
                 <td><%=i18n.localize("wsdl")%></td>
-                <td id="wsdl"><a href="<%=api.wsdl%>" target="_blank"><%=api.wsdl%></a></td>
+                <td id="wsdl"><a href="<%= encode.forHtmlAttribute(api.wsdl) %>" target="_blank"><%= encode.forHtml(api.wsdl)%></a></td>
             </tr>
             <%}
             if(api.wadl!=''){%>
             <tr>
                 <td><%=i18n.localize("wadl")%></td>
-                <td id="wadl"><a href="<%=api.wadl%>" target="_blank"><%=api.wadl%></a></td>
+                <td id="wadl"><a href="<%= encode.forHtmlAttribute(api.wadl)%>" target="_blank"><%= encode.forHtml(api.wadl)%></a></td>
             </tr>
             <%}%>
             <tr>

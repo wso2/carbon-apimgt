@@ -5,16 +5,19 @@ jagg.block("item-add", {
     },
 
   getOutputs:function (inputs) {
-    var externalAPIStores, result, mod;
+    var externalAPIStores, isSynapseGateway, isDataPublishingEnabled, result, mod;
     mod = jagg.module("api");
-    result = mod.getExternalAPIStores();
-    externalAPIStores = result.externalAPIStores;
     
     result = mod.isSynapseGateway();
     isSynapseGateway = result.isSynapseGateway;
+    
+    result = mod.isDataPublishingEnabled();
+    isDataPublishingEnabled = result.isDataPublishingEnabled;
+    
     return {
     		"externalAPIStores":externalAPIStores,
-            "isSynapseGateway":isSynapseGateway
+            "isSynapseGateway":isSynapseGateway,
+            "isDataPublishingEnabled":isDataPublishingEnabled
         }
     }
 

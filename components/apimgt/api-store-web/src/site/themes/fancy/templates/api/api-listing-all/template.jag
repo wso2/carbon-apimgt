@@ -2,7 +2,7 @@
 
 <%
           var urlPrefix;
-          var tenant=request.getParameter("tenant");
+          var tenant=request_tenant;
           if(tenant!=null) {urlPrefix="&tenant="+tenant;}else{urlPrefix='';}
           if (outputs.error) { %>
 <label><b><%=outputs.message%></b></label>
@@ -42,24 +42,19 @@ to=0;
              var tag = null;
              if (request.getParameter('tag') != null) {
              tag = request.getParameter('tag');
-             if(tag!=null&&tag.indexOf("<")>0){tag=tag.replace(/</g,"&lt;");}
-             if(tag!=null&&tag.indexOf(">")>0){tag=tag.replace(/>/g,"&gt;");}
-             if(tag!=null&&tag.indexOf("&")>0){tag=tag.replace(/&/g,"&amp;");}
-             if(tag!=null&&tag.indexOf("'")>0){tag=tag.replace(/'/g,"&#x27;");}
-             if(tag!=null&&tag.indexOf("\"")>0){tag=tag.replace(/"/g,"&quot");}
                              tagDisplayName = tag;
                              if( tag.split(site.tagGroupKey).length == 2 ){
                                  tagDisplayName = tag.split(site.tagGroupKey)[0];
                        %>
-                           <h2>APIs - <%=tagDisplayName%></h2>
+                           <h2>APIs - <%= encode.forHtml(tagDisplayName)%></h2>
                            <ul class="breadcrumb">
                               <li><a href="<%=jagg.getAbsoluteUrl("/site/pages/list-apis.jag")%><%=urlPrefix%>">APIs groups</a> <span class="divider">/</span></li>
-                              <li class="active"><%=tagDisplayName%></li>
+                              <li class="active"><%= encode.forHtml(tagDisplayName)%></li>
                           </ul>
                        <%
                    }else{
                    %>
-                         <h2>APIs - ( <%=tag%> )</h2>
+                         <h2>APIs - ( <%= encode.forHtml(tag) %> )</h2>
                    <%
                    }
                }else{
@@ -71,7 +66,10 @@ to=0;
 <div class="clear"></div>
 <div class="content-section shadow-up">
     <div class="content-data">
-        <% if(numberOfPages > 1) { %>
+        <%
+        var query=    encode.forUriComponent(request.getParameter('query'));
+        if(query == 'null')query = null;
+        if(numberOfPages > 1) { %>
         <div class="api-count-display"><span><%=String(from).split('.')[0]%> - <%=String(to).split('.')[0]%></span> of <span><%=String(outputs.totalLength).split('.')[0]%></span> <%=i18n.localize("apis")%></div>
         <% } %>
         <div class="thumbnail-custom">
@@ -82,13 +80,22 @@ to=0;
 
                         for(i = 0; i < apis.length; i++) {
                             api = apis[i];
+                             var uname=    encode.forUriComponent(request.getParameter('uname'));
+                                       var name=     encode.forUriComponent(api.name);
+                                       var version=  encode.forUriComponent(api.version);
+                                       var provider= encode.forUriComponent(api.provider);
+
+                                       if(uname == 'null')uname = null;
+                                       if(name == 'null')name = null;
+                                       if(version == 'null')version = null;
+                                       if(provider == 'null')provider = null;
                             thumbURL = api.thumbnailurl;
                             if(thumbURL && thumbURL.indexOf("images/") == 0) {
                                 thumbURL = jagg.getAbsoluteUrl(jagg.getThemeFile(thumbURL));
                             }
-                            path = jagg.getMappedUrl("/site/pages/item-info.jag") + "?name=" + api.name + "&version=" + api.version + "&provider=" + api.provider+ urlPrefix;
+                            path = jagg.getMappedUrl("/site/pages/item-info.jag") + "?name=" + name+ "&version=" + version + "&provider=" +provider+ urlPrefix;
                             if(tag != null){
-                                path+="&tag="+tag;
+                                path+="&tag="+encode.forUriComponent(tag);
                             }
                         %>
                 <li>
@@ -107,7 +114,7 @@ to=0;
                 <% } %>
 
             </ul>
-            <% var query=request.getParameter("query");
+            <%
                      if(numberOfPages > 1) { %>
             <div class="pagination">
                 <ul>
@@ -116,7 +123,7 @@ to=0;
                                 <% if(page != 1) { %>
 
                                 <%if(query!=null ) { %>
-                                href="?page=<%=String((page-1))%><%=urlPrefix%>&query=<%=query%>"
+                                href="?page=<%=String((page-1))%><%=urlPrefix%>&query=<%= query %>"
                                 <% }else{ %>
                                 href="?page=<%=String((page-1))%><%=urlPrefix%>"
                                 <% } }%>
@@ -144,7 +151,7 @@ to=0;
 
                            if(numberOfPages <= (pConst+6)){
                                    for(var i=1;i<=numberOfPages;i++) { %>
-                    <li <% if(parseInt(i)==parseInt(page)){ %> class="active" <% } %>><a href="?page=<%=String(i)%><%=urlPrefix%><% if(query!=null){ %>&query=<%=query%><%}%>"><%=String(i).split('.')[0]%></a></li>
+                    <li <% if(parseInt(i)==parseInt(page)){ %> class="active" <% } %>><a href="?page=<%=String(i)%><%=urlPrefix%><% if(query!=null){ %>&query=<%= query%><%}%>"><%=String(i).split('.')[0]%></a></li>
                     <% }
                            }
                            else{

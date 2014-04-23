@@ -61,13 +61,13 @@ jagg.module("api", {
     hasPublishPermission:function () {
         return jagg.require(jagg.getModulesDir() + "api/check-permissions.jag").hasPublishPermission.apply(this, arguments);
     },
+    showStoreURL:function () {
+        return jagg.require(jagg.getModulesDir() + "api/check-permissions.jag").showStoreURL.apply(this, arguments);
+    },
     validateRoles:function () {
         return jagg.require(jagg.getModulesDir() + "api/add.jag").validateRoles.apply(this, arguments);
     },
-    getExternalAPIStores:function () {
-        return jagg.require(jagg.getModulesDir() + "api/add.jag").getExternalAPIStores.apply(this, arguments);
-    },
-	getCustomInSequences:function () {
+    getCustomInSequences:function () {
         return jagg.require(jagg.getModulesDir() + "api/add.jag").getCustomInSequences.apply(this, arguments);
     },
     getCustomOutSequences:function () {
@@ -75,7 +75,17 @@ jagg.module("api", {
     },
     isSynapseGateway:function () {
     	return jagg.require(jagg.getModulesDir() + "api/add.jag").isSynapseGateway.apply(this, arguments);
-    }
+    },
+    getCustomFaultSequences:function () {
+        return jagg.require(jagg.getModulesDir() + "api/add.jag").getCustomFaultSequences.apply(this, arguments);
+    },
+     isSynapseGateway:function () {
+     	return jagg.require(jagg.getModulesDir() + "api/add.jag").isSynapseGateway.apply(this, arguments);
+    },
+    isDataPublishingEnabled:function () {
+ 	return jagg.require(jagg.getModulesDir() + "api/add.jag").isDataPublishingEnabled.apply(this, arguments);
+     }
+
 
 });
 %>

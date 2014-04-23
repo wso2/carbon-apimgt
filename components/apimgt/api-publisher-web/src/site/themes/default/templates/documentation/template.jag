@@ -10,11 +10,11 @@
         var result = mod.getAllDocumentation(apiData);
         var docs = result.docs;
         var createPermitted = outputs.isCreatePermitted;
-        var tenant=request.getParameter("tenant");
+        var tenant= encode.forUriComponent(request.getParameter("tenant"));
         var urlPrefix;
         var urlPostfix;
-        if(tenant!=null) {urlPrefix="?tenant="+tenant;}else{urlPrefix='';}
-        if(tenant!=null) {urlPostfix="&tenant="+tenant;}else{urlPostfix='';}
+        if(tenant!='null') {urlPrefix="?tenant="+tenant;}else{urlPrefix='';}
+        if(tenant!='null') {urlPostfix="&tenant="+tenant;}else{urlPostfix='';}
 
 
      %>
@@ -75,10 +75,7 @@
                                 <input type="radio" name="optionsRadios" id="optionsRadios4" value="support forum" onChange="disableInline('forum')"/>
 <%=i18n.localize("supportForum")%>
                             </label>
-                            <label class="radio">
-                                <input type="radio" name="optionsRadios" id="optionsRadios5" value="API message format" onChange="disableInline()"/>
-<%=i18n.localize("apiMsgFormats")%>
-                            </label>
+
                             <label class="radio">
                                 <input type="radio" name="optionsRadios" id="optionsRadios6" value="other" onChange="disableInline()" onclick="javascript:$('#otherTypeDiv').toggle('slow')"/><%=i18n.localize("other")%>
                             </label>
@@ -145,28 +142,28 @@
                     doc= docs[i];
                 %>
                 <tr id="<%=api.name%>-<%=doc.docName.replace(/ /g,'__')%>">
-                    <td><%=doc.docName%></td>
-                    <td><%=doc.docType%></td>
+                    <td><%= encode.forHtml(doc.docName)%></td>
+                    <td><%= encode.forHtml(doc.docType)%></td>
                     <td class="dateFull"><%=doc.docLastUpdated%></td>
                     <%if(createPermitted){%>
                     <td id="buttonTd"><% if(doc.sourceType == "INLINE") { 
                     	
                     	if (doc.docType == "Swagger API Definition") {
                     	%>
-                    		<a href="javascript:editJSONContent('<%=api.provider%>','<%=api.name%>','<%=api.version%>','<%=doc.docName%>','edit','<%=urlPostfix%>')"><i class="icon-edit"></i> <%=i18n.localize("editContent")%></a>
+                    		<a href="javascript:editJSONContent('<%=api.provider%>','<%=api.name%>','<%=api.version%>','<%= encode.forJavaScriptAttribute(doc.docName)%>','edit','<%=urlPostfix%>')"><i class="icon-edit"></i> <%=i18n.localize("editContent")%></a>
                         <% } else { %>
-                        	<a href="javascript:editInlineContent('<%=api.provider%>','<%=api.name%>','<%=api.version%>','<%=doc.docName%>','edit','<%=urlPostfix%>')"><i class="icon-edit"></i> <%=i18n.localize("editContent")%></a>
+                        	<a href="javascript:editInlineContent('<%=api.provider%>','<%=api.name%>','<%=api.version%>','<%= encode.forJavaScriptAttribute(doc.docName)%>','edit','<%=urlPostfix%>')"><i class="icon-edit"></i> <%=i18n.localize("editContent")%></a>
                         <%}%> 
                         
                         <% }else if (doc.sourceType == "URL"){%>
-                         <a href="<%=doc.sourceUrl%><%=urlPrefix%>" target="_blank" ><i class="icon-check"></i> <%=i18n.localize("view")%></a> 
+                         <a href="<%= encode.forHtmlAttribute(encode.forUri(doc.sourceUrl))%><%=urlPrefix%>" target="_blank" ><i class="icon-check"></i> <%=i18n.localize("view")%></a>
                         <%}else if (doc.sourceType == "FILE"){ %>
-			 <a href="<%=doc.filePath%><%=urlPrefix%>" target="_blank" ><i class="icon-check"></i> <%=i18n.localize("open")%></a> 
+			 <a href="<%=doc.filePath%><%=urlPrefix%>" target="_blank" download><i class="icon-check"></i> <%=i18n.localize("open")%></a> 
 			<%}%>	
                         <% if (doc.docType != "Swagger API Definition") {%>
-                        | <a href="javascript:updateDocumentation('<%=api.name%>-<%=doc.docName%>','<%=doc.docName%>','<%=doc.docType%>','<%=doc.summary%>','<%=doc.sourceType%>','<%=doc.sourceUrl%>','<%=doc.filePath%>','<%=doc.otherTypeName%>')"><i class="icon-retweet"></i> <%=i18n.localize("update")%></a> |
+                        | <a href="javascript:updateDocumentation('<%=api.name%>-<%= encode.forJavaScriptAttribute(doc.docName)%>','<%= encode.forJavaScriptAttribute(doc.docName)%>','<%=doc.docType%>','<%= encode.forJavaScriptAttribute(doc.summary)%>','<%=doc.sourceType%>','<%=doc.sourceUrl%>','<%=doc.filePath%>','<%=doc.otherTypeName%>')"><i class="icon-retweet"></i> <%=i18n.localize("update")%></a> |
 			
-                        <a href="javascript:removeDocumentation('<%=api.provider%>','<%=api.name%>','<%=api.version%>','<%=doc.docName%>','<%=doc.docType%>')"><i class="icon-trash"></i> <%=i18n.localize("deleteMethod")%></a>
+                        <a href="javascript:removeDocumentation('<%=api.provider%>','<%=api.name%>','<%=api.version%>','<%= encode.forJavaScriptAttribute(doc.docName) %>','<%= encode.forJavaScriptAttribute(doc.docType)%>')"><i class="icon-trash"></i> <%=i18n.localize("deleteMethod")%></a>
 
 						<% } %>
 			</td>

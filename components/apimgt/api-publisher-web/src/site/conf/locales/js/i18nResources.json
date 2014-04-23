@@ -25,7 +25,7 @@
             "emptyVerb":"At least one HTTP Verb has to be checked for a resource. ",
             "duplicateUrlPattern":"has duplicated entries. ",
             "noData":"No Data Found ... ",
-            "checkBAMConnectivity":" <a href='http://docs.wso2.org/wiki/display/AM150/Monitoring+Using+WSO2+BAM' target='_blank' class='warningLink'>Refer our wiki to configure BAM correctly</a>",
+            "checkBAMConnectivity":" <a href='http://docs.wso2.org/wiki/display/AM170/Monitoring+Using+WSO2+BAM' target='_blank' class='warningLink'>Refer our wiki to configure BAM correctly</a>",
             "unavailableData":"Data unavailable",
             "login":"Unable to log you in!"
         },
@@ -39,18 +39,21 @@
             "testUri": "Test URI",
             "validating": "Validating.."
         },
+		"failOver":{
+			"title":"Failover State"
+		},
         "endpointUi":{
             "Format":"Format",
             "Optimize":"Optimize",
             "Error_Codes":"Error Codes",
-            "Intial Duration (Millis)":"Intial Duration (Millis)",
-            "Max Duration (Millis)":"Max Duration (Millis)",
+            "Intial Duration (Millis)":"Intial Duration (ms)",
+            "Max Duration (Millis)":"Max Duration (ms)",
             "Factor":"Factor",
             "Error Codes":"Error Codes",
             "Retries Before Suspension":"Retries Before Suspension",
-            "Retry Delay(Millis)":"Retry Delay(Millis)",
+            "Retry Delay(Millis)":"Retry Delay(ms)",
             "Action":"Action",
-            "Duration (Millis)":"Duration (Millis)",
+            "Duration (Millis)":"Duration (ms)",
             "WS-Addressing":"WS-Addressing",
             "WS-Security":"WS-Security",
             "Message Content":"Message Content",
@@ -91,6 +94,7 @@
             "None":"None",
             "Transport":"Transport",
             "SOAP":"SOAP",
+	    	"none":"None" ,	
             "Client ID":"Client ID",
             "AlgorithmOther":"Class Name for Algorithm",
             "Never timeout":"Never timeout",

@@ -48,6 +48,9 @@ public class APISecurityConstants {
     public static final int SUBSCRIPTION_INACTIVE = 900909;
     public static final String SUBSCRIPTION_INACTIVE_MESSAGE = "The subscription to the API is inactive";
 
+    public static final int INVALID_SCOPE = 900910;
+    public static final String INVALID_SCOPE_MESSAGE = "Invalid Scope. The access token does not allow you to access the requested scope";
+
     /**
      * returns an String that corresponds to errorCode passed in
      * @param errorCode
@@ -85,6 +88,9 @@ public class APISecurityConstants {
                 break;
             case SUBSCRIPTION_INACTIVE:
                 errorMessage = SUBSCRIPTION_INACTIVE_MESSAGE;
+                break;
+            case INVALID_SCOPE:
+                errorMessage = INVALID_SCOPE_MESSAGE;
                 break;
             default:
                 errorMessage = API_AUTH_GENERAL_ERROR_MESSAGE;

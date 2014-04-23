@@ -2,6 +2,7 @@
 include("/jagg/jagg.jag");
 
 (function () {
+    response.contentType = "application/json; charset=UTF-8";
     var mod, obj, result, username,
         action = request.getParameter("action"),
         site = require("/site/conf/site.json"),
@@ -14,7 +15,7 @@ include("/jagg/jagg.jag");
             message:'timeout'
         });
     }else{
-        if (action === "updateExternal") {
+        if (action === "updateExternal" && request.getMethod() == 'POST') {
 
             mod = jagg.module("api");
             var apiData = {};

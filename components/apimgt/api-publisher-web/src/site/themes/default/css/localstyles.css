@@ -1,5 +1,5 @@
 body{
-    background: #efefef url(../images/back.jpg) repeat center top;
+    background: #fff;
     color: #333333;
     font-family: "Helvetica Neue",Helvetica,Arial,sans-serif;
     font-size: 13px;
@@ -21,6 +21,9 @@ label, input, button, select, textarea{
 .copy-msg li a{
     color:#CDA869;
 }
+
+
+
 .tenant-position-setter{
     color: #888;
     margin-top: 48px;
@@ -201,9 +204,19 @@ div.navbar-inner {
     -webkit-box-shadow: 0 0 0 #fff;
 }
 #layout-base{
+    padding-left:0;
+    margin-left:0;
 }
 .menu-content{
     margin: 0 0 0;
+}
+.menu-content .navbar .nav > li > a {
+    padding:5px 14px 0px;
+    text-align:center;
+    cursor:pointer;
+    text-shadow: 0 0 0 #FFFFFF;
+    color:#fff;
+    height:50px;
 }
 a.powered-by-logo {
     background: transparent url(../images/poweredByLogo.png) no-repeat 0 0;
@@ -259,7 +272,7 @@ a.powered-by-logo {
 }
 .breadcrumb{
     position:absolute;
-    left:10px;
+    left:177px;
     margin-top:-42px;
     background-color: transparent;
 }
@@ -288,6 +301,7 @@ a.powered-by-logo {
 }
 .login-header{
     margin-bottom:37px;
+    background: #292E38;
 }
 #login-link{
     margin-left:0;
@@ -308,6 +322,9 @@ a.powered-by-logo {
 }
 #userMenu{
     cursor:pointer;
+}
+#userMenu b{
+
 }
 #userMenu:hover{
     background:transparent;
@@ -579,6 +596,7 @@ h1, h2, h3, h4, h5, h6{
     margin:0;
 }
 .footer-main{
+    display: none;
     background:transparent url(../images/appFac_59.jpg) repeat;
     padding:10px 0;
     width:100%;
@@ -587,62 +605,17 @@ h1, h2, h3, h4, h5, h6{
     color:#9f9f9f;
 }
 
-.btn-primary,.btn {
-    font-size:12px;
-    text-align: left;
-}
-.btn-success:hover, .btn-success:focus{
-    background-color: #3cbca4;
-}
 
-.btn-primary.active,
-.btn-warning.active,
-.btn-danger.active,
-.btn-success.active,
-.btn-info.active,
-.btn-inverse.active {
-    background-color: #395751 !important;
-}
-.btn-primary {
-  color: #fff;
-  text-shadow: 0 0 0 rgba(0, 0, 0, 0.25);
-  background-color: #395751;
-  *background-color: #395751;
-  background-image: -webkit-gradient(linear, 0 0, 0 100%, from(#3cbca4), to(#395751));
-  background-image: -webkit-linear-gradient(top, #3cbca4, #395751);
-  background-image: -o-linear-gradient(top, #3cbca4, #395751);
-  background-image: linear-gradient(to bottom, #3cbca4, #395751);
-  background-image: -moz-linear-gradient(top, #3cbca4, #395751);
-  background-repeat: repeat-x;
-  border-color: #3cbca4 #3cbca4 #3b363d;
-  border-color: rgba(57, 87, 81, 0.1) rgba(57, 87, 81, 0.1) rgba(60,188,164, 0.25);
-  filter: progid:dximagetransform.microsoft.gradient(startColorstr='#3cbca4', endColorstr='#395751', GradientType=0);
-  filter: progid:dximagetransform.microsoft.gradient(enabled=false);
-}
-.btn-primary:hover,
-.btn-primary:active,
-.btn-primary.active,
-.btn-primary.disabled,
-.btn-primary[disabled] {
-  color: #efefef;
-  background-color: #395751;
-  *background-color: #395751;
-}
-.btn-primary:active,
-.btn-primary.active {
-    *background-color: #395751   \9;
-}
 
 .header{
-    background:transparent url(../images/appFac_02.jpg) repeat-x;
-    height:143px;
+    height:54px;
     padding:0;
     position:absolute;
     width:100%;
     z-index:-1;
 }
 .top-menu{
-    background:transparent url(../images/appFac_04.jpg) repeat-x;
+    background:transparent;
     height:143px;
 }
 .brand{
@@ -653,13 +626,11 @@ h1, h2, h3, h4, h5, h6{
     margin-left:0;
 }
 .menu-back{
-    background:transparent url(../images/appFac_04.jpg) repeat-x;
+    background:transparent;
     height:55px;
     margin-left: 0;
 }
 .menu-content{
-    border-left:solid 5px #4b4b4b;
-    margin-top:7px;
     margin-left:0;
     height:46px;
 }
@@ -689,9 +660,13 @@ body {
     height: 100%;
     /* Negative indent footer by it's height */
     margin: 0 auto -140px;
+    background: transparent url(../images/back.png) repeat-y left top;
 }
 
 /* Set the fixed height of the footer here */
+#push{
+    display: none;
+}
 #push,
 #footer {
     height: 150px;
@@ -740,14 +715,45 @@ body {
     margin-bottom:15px;
 }
 .left-menu-back01{
-    background: transparent url(../images/left-menu-back01.png) repeat left top;
+    background: #636871;
     padding:10px 0;
+    min-height: 500px;
+    border-right:solid 1px #000;
 }
-.nav-list > .active > a, .nav-list > .active > a:hover, .nav-list > .active > a:focus{
-    background-color: #444;
+#left{
+    margin-top:-38px;
+    width:143px;
 }
+#left li a{
+    padding:10px 5px 10px 20px;
+    text-shadow: none;
+    border-bottom: solid 1px #000;
+    color:#fff;
+    font-size: 13px;
+}
+#left .nav-list > .active > a,#left .nav-list > .active > a:hover,#left .nav-list > .active > a:focus{
+    background-color: #18CDE8;
+    color:#292E38;
+}
+#left li a:hover{
+    background-color: #818791;
+}
+
+#left li a.substats{
+    padding: 0px !important;
+    border-bottom: none;
+    margin-left: -20px;
+}
+
+
 .left-menu-back01 li.nav-header{
-    color:#444;
+    border-bottom: 1px solid #000000;
+    color: #FFFFFF;
+    font-size: 14px;
+    padding-left: 20px;
+    text-shadow: none;
+    padding-top:10px;
+    padding-bottom:10px;
 }
 .thumbnail h5 div{
     white-space: nowrap;
@@ -863,3 +869,23 @@ legend + .control-group {
     list-style:none;
     margin:0px;
 }
+
+.resource_container {
+  background-color:#F5F5F5;
+  padding: 10px;
+  margin: 5px 0px 0px 10px ;
+}
+
+.scope_container {
+  background-color: #F5F5BB !important;
+}
+label.errorTier {
+    color: #BE0000;
+    padding-bottom: 10px;
+}
+
+.pointer{ cursor: pointer;}
+
+.scope_container h4{  color:#884; margin-bottom: 5px;}
+
+#define_scopes { margin-left: 10px}

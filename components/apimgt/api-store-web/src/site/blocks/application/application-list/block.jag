@@ -25,5 +25,6 @@ jagg.block("application/application-list", {
             "tiers":tiers
         };
     }
+
 });
 %>

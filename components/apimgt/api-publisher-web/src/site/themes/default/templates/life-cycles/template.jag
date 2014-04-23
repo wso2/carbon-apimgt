@@ -145,6 +145,7 @@ $('#editStatus option').each(  //when refreshed page the default is not selected
                         $('#statusUpdateMsg').show();
                         initOf_state  = lastLcChange.newStatus;
                         $('#status').html(lastLcChange.newStatus);
+                        $('.storeCheck').attr("disabled",false);
                         $('#inUpdated').html(jagg.getDate(lastLcChange.date));
                         toggleUpdateBtn();
                         var t = setTimeout("hideMsg()", 3000);

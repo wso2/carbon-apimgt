@@ -20,6 +20,12 @@ package org.wso2.carbon.apimgt.usage.client;
 public final class APIUsageStatisticsClientConstants {
 
 
+    public static final String API_REQUEST_SUMMARY = "API_REQUEST_SUMMARY";
+
+    public static final String CONSUMERKEY = "consumerkey";
+
+    public static final String RESOURCE = "resource";
+
     public static final String API_VERSION_SERVICE_TIME_SUMMARY = "API_RESPONSE_SUMMARY";
 
     public static final String API_VERSION_SERVICE_TIME_SUMMARY_INDEX = "APIVersionServiceTimeSummaryIndex";
@@ -85,6 +91,8 @@ public final class APIUsageStatisticsClientConstants {
     public static final String DAY= "day";
 
     public static final String TIME= "time";
+    
+    public static final String DESTINATION= "destination";
 
     public static final int DEFAULT_RESULTS_LIMIT = 10;
     
@@ -99,5 +107,7 @@ public final class APIUsageStatisticsClientConstants {
     public static final String API_USAGE_JDBC_UserName =  API_USAGE_TRACKING + "JDBCUserName";
 
     public static final String API_USAGE_JDBC_Password =  API_USAGE_TRACKING + "JDBCPassword";
+    
+    public static final String API_USAGEBY_DESTINATION_SUMMARY = "API_DESTINATION_SUMMARY";
 
 }

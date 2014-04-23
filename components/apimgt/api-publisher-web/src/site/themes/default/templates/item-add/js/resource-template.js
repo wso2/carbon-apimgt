@@ -1,204 +1,203 @@
-$(document).ready(function() {
-    $('#uriTemplate').click(function() {
-        $('#resourceTableError').hide('fast');
-    });
-    //Adding the default row
-    $('#resourceRow').clone().addClass('resourceRow').insertAfter($('#resourceRow')).show();
-    $('.resourceTemplate',$('#resourceRow').next()).val('/*');
-    $('input:checkbox',$('#resourceRow').next()).attr('checked','checked');
-    loadTiers($('#resourceRow').get(0));
-    loadTiers($('#resourceRow').next().get(0));
 
-    $('#context').change(function() {
-        getContextValue();
-    });
+var HTTP_VERBS = [ "GET", "POST", "PUT", "DELETE", "OPTIONS"];
 
-    $('#version').change(function() {
-        getContextValue();
-    });
+var SCOPES = [];
 
-    enableDisableButtons();
-    $('#resourceTable tr.resourceRow').each(function() {
-    $('input', this).unbind('change');
-    $('input:checkbox', this).change(function() {
-        createHiddenForm();
-        validateResourceTable();
+$( document ).ready(function() {
+
+    SCOPES = jQuery.parseJSON($("#scopes_config").val());
+    if(SCOPES == undefined)SCOPES=[];
+    //RESOURCES.resources = jQuery.parseJSON($("#resource_config").val());
+    
+
+    Handlebars.registerHelper('property_exist', function(object,property,options) {
+        if(object.hasOwnProperty(property)){
+            return options.fn({"verb":property ,"object":object[property]});
+        }
+        return false;
     });
 
-    $('input:text', this).change(function() {
-        createHiddenForm();
-        validateResourceTable();
+    Handlebars.registerHelper('selected', function(option, value){
+        if (option === value) {
+            return ' selected';
+        } else {
+            return ''
+        }
+    });    
+
+    Handlebars.registerHelper('debug', function (object) {
+        console.log(object);
     });
 
-    $('select', this).change(function() {
-        createHiddenForm();
-        validateResourceTable();
-    });
-});
-
-});
-
-var addResourcesToApi = function () {
-    $('#resourceRow').clone().addClass('resourceRow').insertAfter($('#resourceRow')).show();
-    enableDisableButtons();
-    $('#resourceTable tr.resourceRow').each(function(){
-        $('input',this).unbind('change');
-        $('input:checkbox',this).change(function(){
-            createHiddenForm();
-            validateResourceTable();
-        });
-
-        $('input:text',this).change(function(){
-            createHiddenForm();
-            validateResourceTable();
-        });
-
-        $('select',this).change(function(){
-            createHiddenForm();
-            validateResourceTable();
-        });
-    });
-};
-var enableDisableButtons = function(){
-
-   $('#resourceTable tr').each(function(index){
-        var allRows = $('#resourceTable tr');
-        if(index > 1){
-            if(index == 2){
-                    $('.upButton',this).attr('disabled','disabled');
-                    $('.downButton',this).removeAttr('disabled');
+    $("#add_resource").click(function(){
+        if($("#resource_url_pattern").val() == ""){
+            alert("URL pattern cannot be null");
+            return;
+        }
+        var resource = { "url_pattern": $("#resource_url_pattern").val() };
+        resource.http_verbs = {};
+        var vc=0;
+        $(".http_verb_select").each(function(){
+            if($(this).is(':checked')){
+                resource.http_verbs[$(this).val()] = { "auth_type": AUTH_TYPES[AUTH_TYPES.length -1].key , "throttling_tier":TIERS[TIERS.length -1].tierName };
+                vc++;
             }
-            if(index > 2 && allRows.length-1 > index){
-                    $('.downButton',this).removeAttr('disabled');
-                    $('.upButton',this).removeAttr('disabled');
-            }
-            if(allRows.length-1 == index){
-                $('.deleteButton',this).removeAttr('disabled','disabled');
-                if(index != 2){
-                    $('.upButton',this).removeAttr('disabled');
-                }else {
-                    $('.upButton',this).attr('disabled','disabled');
-                    $('.deleteButton',this).attr('disabled','disabled');
+        });
+        if(vc==0){
+            alert("You should select at least one HTTP verb.")
+            return;
+        }
+        RESOURCES.unshift(resource);
+        $("#resource_url_pattern").val("");
+        $(".http_verb_select").attr("checked",false);
+        $("#resource_view").trigger("draw");       
+    });
+
+    $("#resource_view").delegate(".http_verb_deselect","change", function(){
+        var i = $(this).attr("data-index");
+        var verb = $(this).attr("data-verb");
+        delete(RESOURCES[i].http_verbs[verb]);
+        $("#resource_view").trigger("draw");
+    }); 
+
+
+    $("#resource_view").delegate(".http_verb_add","change", function(){
+        var i = $(this).attr("data-index");
+        if(!RESOURCES[i].hasOwnProperty("http_verbs")){
+            RESOURCES[i].http_verbs = {};
+        }
+        RESOURCES[i].http_verbs[$(this).val()] = { "auth_type": "" , "throttling_tier":"" };
+        $("#resource_view").trigger("draw");
+    }); 
+
+    $("#resource_view").delegate(".resource_url_pattern","change", function(){
+        var i = $(this).attr("data-index");
+        RESOURCES[i].url_pattern = $(this).val();
+        $("#resource_view").trigger("draw");        
+    }); 
+
+    $("#resource_view").delegate(".movedown_resource","click", function(){
+        var i = parseInt($(this).attr("data-index"),10);
+        if(i != (RESOURCES.length - 1)){
+            var tmp = RESOURCES[i];
+            RESOURCES[i] = RESOURCES[i+1];
+            RESOURCES[i+1] = tmp;
+        }
+        $("#resource_view").trigger("draw");
+    });     
+
+    $("#resource_view").delegate(".moveup_resource","click", function(){
+        var i = parseInt($(this).attr("data-index"),10);
+        if(i != 0){
+            var tmp = RESOURCES[i];
+            RESOURCES[i] = RESOURCES[i-1];
+            RESOURCES[i-1] = tmp;
+        }
+        $("#resource_view").trigger("draw");        
+    }); 
+
+    $("#resource_view").delegate(".delete_resource","click", function(){
+        var i = $(this).attr("data-index");
+        RESOURCES.splice(i, 1);
+        $("#resource_view").trigger("draw");                
+    });
+
+    $("#resource_view").delegate(".resource_scope_select","change", function(){
+        var i = $(this).attr("data-index");
+        var verb = $(this).attr("data-verb");
+        RESOURCES[i].http_verbs[verb].scope = $(this).val();
+        $("#resource_config").val(JSON.stringify({ "resources" : RESOURCES , "scopes":SCOPES }));                
+    });
+
+    $("#resource_view").delegate(".resource_auth_select","change", function(){
+        var i = $(this).attr("data-index");
+        var verb = $(this).attr("data-verb");
+        RESOURCES[i].http_verbs[verb].auth_type = $(this).val();
+        $("#resource_config").val(JSON.stringify({ "resources" : RESOURCES , "scopes":SCOPES }));
+    });
+
+    $("#resource_view").delegate(".resource_tier_select","change", function(){
+        var i = $(this).attr("data-index");
+        var verb = $(this).attr("data-verb");
+        RESOURCES[i].http_verbs[verb].throttling_tier = $(this).val();
+        $("#resource_config").val(JSON.stringify({ "resources" : RESOURCES , "scopes":SCOPES }));        
+    });
+    
+
+    $("#scopes_view").delegate(".delete_scope","click", function(){
+        var i = $(this).attr("data-index");
+        SCOPES.splice(i, 1);
+        $("#resource_view").trigger("draw");        
+    });
+
+    $("#scopes_view").delegate("#define_scopes" ,'click', function(){
+        $("#scopeName").val('');
+        $("#scopeDescription").val('');
+        $("#scopeKey").val('');
+        $("#define_scope_modal").modal('show');
+    });
+
+    $("#scope_submit").click(function(){
+        var scope = { 
+            name :$("#scopeName").val(),
+            description : $("#scopeDescription").val(),
+            key:$("#scopeKey").val()
+        };
+        if(SCOPES == undefined){
+            SCOPES=[];
+        }
+        SCOPES.push(scope);
+        $("#define_scope_modal").modal('hide');
+        $("#resource_view").trigger("draw");    
+    });
+
+    $("#resource_view").on("draw", function(){
+        for(var i=0;i < RESOURCES.length ; i++){
+            RESOURCES[i].url_pattern = RESOURCES[i].url_pattern.indexOf('/') == 0 ? RESOURCES[i].url_pattern.substring(1) : RESOURCES[i].url_pattern;
+            RESOURCES[i].idx = i;
+            RESOURCES[i].missing = [];
+            if(RESOURCES[i].hasOwnProperty('http_verbs')){
+                for(var y =0; y < HTTP_VERBS.length; y++){
+                    if(RESOURCES[i].http_verbs[HTTP_VERBS[y]] == undefined){
+                        RESOURCES[i].missing.push(HTTP_VERBS[y]);
+                    }
                 }
-                $('.downButton',this).attr('disabled','disabled');
+            }
+            else{
+                RESOURCES[i].missing = HTTP_VERBS;
             }
         }
+        if(SCOPES){
+            for(var i=0; i < SCOPES.length ; i++){
+                SCOPES[i].idx = i;
+            }
+        }
+
+        //get the version and the context
+        var version = ($('#version[name=version]').val()=='')?"{version}":$('#version[name=version]').val();
+        var context = ($('#context').val()=='')?"{context}":$('#context').val();
+        console.log(version)
+        console.log(context);
+        context = context.indexOf('/') == 0 ? context.substring(1) : context;
+
+        var template = Handlebars.partials['resources']({ "resources": RESOURCES, "verbs": HTTP_VERBS, "scopes": SCOPES, "tiers": TIERS, "auth_types":AUTH_TYPES, 'version':version , 'context':context });
+        var template2 = Handlebars.partials['scopes']({ "resources": RESOURCES, "verbs": HTTP_VERBS, "scopes": SCOPES, "tiers": TIERS , "auth_types":AUTH_TYPES, 'version':version , 'context':context });        
+        $("#resource_view").html(template);
+        $("#scopes_view").html(template2);
+        //set values
+        $("#resource_config").val(JSON.stringify({ "resources" : RESOURCES , "scopes":SCOPES }));        
     });
-};
-var moveMe = function(moveButton){
-    var action = "move-up";
-    if($(moveButton).hasClass('downButton')){
-        action = "move-down";
-    }
 
-    if(action == "move-up"){
-        $(moveButton).parent().parent().insertBefore($(moveButton).parent().parent().prev());
-    }
-    if(action == "move-down"){
-        $(moveButton).parent().parent().insertAfter($(moveButton).parent().parent().next());
-    }
+    
 
-    enableDisableButtons();
-    createHiddenForm();
-    validateResourceTable();
-};
-var createHiddenForm = function(){
-    $('#hiddenFormElements input').remove();
+    //load the resource partial
+    var source   = $("#resource-template").html();
+    Handlebars.partials['resources'] = Handlebars.compile(source);
+    var source2   = $("#scopes-template").html();
+    Handlebars.partials['scopes'] = Handlebars.compile(source2);    
+    $("#resource_view").trigger("draw");
 
-    $('#resourceTable tr').each(function(index){
-        var resourcesCount = index - 2;
-        var resourceMethodValues = "";
-        var resourceMethodAuthValues = "";
-        var resourceThrottlingTierValues = "";
-        var tr = this;
-        //read the checkbox values
-        if($('.resource-get',tr).is(':checked')){
-            if(resourceMethodValues == ""){resourceMethodValues += "GET"}else{resourceMethodValues += ",GET"}
-            var selectedValue = $('.getAuthType',tr).val();
-            if(resourceMethodAuthValues == ""){resourceMethodAuthValues += selectedValue }else{resourceMethodAuthValues += ","+selectedValue}
-            <!--Throttling-fix-->
-            var selectedValueThrottling = $('.getThrottlingTier',tr).val();
-            if(resourceThrottlingTierValues == ""){resourceThrottlingTierValues += selectedValueThrottling }else{resourceThrottlingTierValues += ","+selectedValueThrottling}
-            <!--Throttling-fix-->
-        }
-        if($('.resource-put',tr).is(':checked')){
-            if(resourceMethodValues == ""){resourceMethodValues += "PUT"}else{resourceMethodValues += ",PUT"}
-            var selectedValue = $('.putAuthType',tr).val();
-            if(resourceMethodAuthValues == ""){resourceMethodAuthValues += selectedValue }else{resourceMethodAuthValues += ","+selectedValue}
-            <!--Throttling-fix-->
-            var selectedValueThrottling = $('.putThrottlingTier',tr).val();
-            console.log(selectedValueThrottling);
-            if(resourceThrottlingTierValues == ""){resourceThrottlingTierValues += selectedValueThrottling }else{resourceThrottlingTierValues += ","+selectedValueThrottling}
-            <!--Throttling-fix-->
-        }
-        if($('.resource-post',tr).is(':checked')){
-            if(resourceMethodValues == ""){resourceMethodValues += "POST"}else{resourceMethodValues += ",POST"}
-            var selectedValue = $('.postAuthType',tr).val();
-            if(resourceMethodAuthValues == ""){resourceMethodAuthValues += selectedValue }else{resourceMethodAuthValues += ","+selectedValue}
-            <!--Throttling-fix-->
-            var selectedValueThrottling = $('.postThrottlingTier',tr).val();
-            console.log(selectedValueThrottling);
-            if(resourceThrottlingTierValues == ""){resourceThrottlingTierValues += selectedValueThrottling }else{resourceThrottlingTierValues += ","+selectedValueThrottling}
-            <!--Throttling-fix-->
-        }
-        if($('.resource-delete',tr).is(':checked')){
-            if(resourceMethodValues == ""){resourceMethodValues += "DELETE"}else{resourceMethodValues += ",DELETE"}
-            var selectedValue = $('.deleteAuthType',tr).val();
-            if(resourceMethodAuthValues == ""){resourceMethodAuthValues += selectedValue }else{resourceMethodAuthValues += ","+selectedValue}
-            <!--Throttling-fix-->
-            var selectedValueThrottling = $('.deleteThrottlingTier',tr).val();
-            console.log(selectedValueThrottling);
-            if(resourceThrottlingTierValues == ""){resourceThrottlingTierValues += selectedValueThrottling }else{resourceThrottlingTierValues += ","+selectedValueThrottling}
-            <!--Throttling-fix-->
-        }
-        if($('.resource-options',tr).is(':checked')){
-            if(resourceMethodValues == ""){resourceMethodValues += "OPTIONS"}else{resourceMethodValues += ",OPTIONS"}
-            var selectedValue = $('.optionsAuthType',tr).val();
-            if(resourceMethodAuthValues == ""){resourceMethodAuthValues += selectedValue }else{resourceMethodAuthValues += ","+selectedValue}
-            <!--Throttling-fix-->
-            var selectedValueThrottling = $('.optionsThrottlingTier',tr).val();
-            console.log(selectedValueThrottling);
-            if(resourceThrottlingTierValues == ""){resourceThrottlingTierValues += selectedValueThrottling }else{resourceThrottlingTierValues += ","+selectedValueThrottling}
-            <!--Throttling-fix-->
-        }
-
-
-       if(index > 1){
-           $('<input>').attr('type', 'hidden')
-                   .attr('name', 'uriTemplate-' + resourcesCount).attr('id', 'uriTemplate-' + resourcesCount).attr('value', $('.resourceTemplate',tr).val())
-                   .appendTo('#hiddenFormElements');
-
-           $('<input>').attr('type', 'hidden')
-                   .attr('name', 'resourceMethod-' + resourcesCount).attr('id', 'resourceMethod-' + resourcesCount).attr('value', resourceMethodValues)
-                   .appendTo('#hiddenFormElements');
-
-           $('<input>').attr('type', 'hidden')
-                   .attr('name', 'resourceMethodAuthType-' + resourcesCount).attr('id', 'resourceMethodAuthType-' + resourcesCount).attr('value', resourceMethodAuthValues)
-                   .appendTo('#hiddenFormElements');
-           <!--Throttling-fix-->
-           $('<input>').attr('type', 'hidden')
-               .attr('name', 'resourceMethodThrottlingTier-' + resourcesCount).attr('id', 'resourceMethodThrottlingTier-' + resourcesCount).attr('value', resourceThrottlingTierValues)
-               .appendTo('#hiddenFormElements');
-           <!--Throttling-fix-->
-       }
-   });
-
-   $('#resourceCount').val($('#resourceTable tr').length-2);
-};
-var deleteResource = function (deleteButton) {
-    var count=$('#resourceTable tr').length;
-    //Check whether only one defined resource remains before delete operation
-    if(count==3){
-        $('#resourceTableError').show('fast');
-        $('#resourceTableError').html('Sorry. This row can not be deleted. Atleast one resource entry has to be available.<br />');
-        return;
-    }
-    $('#resourceTableError').hide('fast');
-    $(deleteButton).parent().parent().remove();
-
-    enableDisableButtons();
-    createHiddenForm();
-};
+});
 
 var validateResourceTable = function(){
     var errors = "";
@@ -235,7 +234,6 @@ var validateResourceTable = function(){
     });
 
 
-
     if(!allRowsHas_at_least_one_check){
         errors += "At least one HTTP Verb has to be checked for a resource.<br />";
     }
@@ -250,3 +248,4 @@ var validateResourceTable = function(){
     }
     return errors;
 };
+

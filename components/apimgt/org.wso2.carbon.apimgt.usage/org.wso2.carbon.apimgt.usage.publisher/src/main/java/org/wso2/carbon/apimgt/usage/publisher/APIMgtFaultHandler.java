@@ -73,4 +73,8 @@ public class APIMgtFaultHandler extends AbstractMediator{
         }
         return true; // Should never stop the message flow
     }
+
+    public boolean isContentAware(){
+        return false;
+    }
 }

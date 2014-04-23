@@ -1,5 +1,8 @@
 var inSequencesLoaded = false;
 var outSequencesLoaded = false;
+var faultSequencesLoaded = false;
+
+var TIERS = [];
 
 function loadTiers(row) {
 
@@ -12,6 +15,9 @@ function loadTiers(row) {
                       $('.putThrottlingTier',row).html('');
                       $('.deleteThrottlingTier',row).html('');
                       $('.optionsThrottlingTier',row).html('');
+
+                      TIERS = result.tiers;
+                      $("#resource_view").trigger("draw");
 
                       for (var i = 0; i < result.tiers.length; i++) {
                           var k = result.tiers.length - i -1;
@@ -150,13 +156,14 @@ $(document).ready(function() {
                                           submitHandler: function(form) {
                                               // Adding custom validation for
 												// the resource url UI
-                                              if(validateResourceTable() != ""){
+                                              /*if(validateResourceTable() != ""){
                                                   return;
-                                              }
+                                              }*/
 
 
                                               $('#saveMessage').show();
                                               $('#saveButtons').hide();
+
                                               $(form).ajaxSubmit({
                                                                      success:function(responseText, statusText, xhr, $form) {
                                                                          if (!responseText.error) {
@@ -218,7 +225,7 @@ function getContextValue() {
 function showHideRoles(){
     var visibility = $('#visibility').find(":selected").val();
 
-    if (visibility == "public" || visibility == "controlled"){
+    if (visibility == "public" || visibility == "private" || visibility == "controlled"){
         $('#rolesDiv').hide();
     } else{
         $('#rolesDiv').show();
@@ -337,11 +344,52 @@ function loadOutSequences() {
 			}, "json");
 }
 
+function loadFaultSequences() {
+
+	if(faultSequencesLoaded){
+        return;
+	}
+
+	jagg.post("/site/blocks/item-add/ajax/add.jag", {
+		action : "getCustomFaultSequences"
+	},
+			function(result) {
+				if (!result.error) {
+					var arr = [];
+					if (result.sequences.length == 0) {
+						var msg = "No defined sequences";
+						$('<input>').
+						attr('type', 'hidden').
+						attr('name', 'faultSeq').
+						attr('id', 'faultSeq').
+						attr('value', msg).
+						appendTo('#addAPIForm');
+					}else {
+						for ( var j = 0; j < result.sequences.length; j++) {
+							arr.push(result.sequences[j]);
+						}
+						for(var i=0; i<arr.length; i++){
+							$('#faultSequence').append('<option value="'+result.sequences[i]+'">'+result.sequences[i]+'</option>');
+							$('<input>').
+							attr('type', 'hidden').
+							attr('name', 'faultSeq').
+							attr('id', 'faultSeq').
+							attr('value', result.sequences[i]).
+							appendTo('#addAPIForm');
+
+						}
+					}
+					faultSequencesLoaded = true;
+				}
+			}, "json");
+}
+
 function toggleSequence(checkbox){
 	if($(checkbox).is(":checked")){
 		$(checkbox).parent().next().show();
 		loadInSequences();
 		loadOutSequences();
+		loadFaultSequences();
 	}else{
 		$(checkbox).parent().next().hide();
 	}

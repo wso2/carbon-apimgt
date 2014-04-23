@@ -40,7 +40,7 @@ public class ThriftAPIDataStore implements APIKeyDataStore{
      * @throws org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityException
      *          on error
      */
-    public APIKeyValidationInfoDTO getAPIKeyData(String context, String apiVersion, String apiKey, String clientDomain)
+    /*public APIKeyValidationInfoDTO getAPIKeyData(String context, String apiVersion, String apiKey, String clientDomain)
             throws APISecurityException {
         ThriftKeyValidatorClient client = null;
         try {
@@ -57,7 +57,7 @@ public class ThriftAPIDataStore implements APIKeyDataStore{
             } catch (Exception ignored) {
             }
         }
-    }
+    }*/
 
     /**
      * Validate the given API key for the specified API context and version.
@@ -70,11 +70,13 @@ public class ThriftAPIDataStore implements APIKeyDataStore{
      *          on error
      */
     public APIKeyValidationInfoDTO getAPIKeyData(String context, String apiVersion, String apiKey,
-                                                 String requiredAuthenticationLevel, String clientDomain) throws APISecurityException {
+                                                 String requiredAuthenticationLevel, String clientDomain,
+                                                 String matchingResource, String httpVerb) throws APISecurityException {
         ThriftKeyValidatorClient client = null;
         try {
             client = clientPool.get();
-            return client.getAPIKeyData(context, apiVersion, apiKey,requiredAuthenticationLevel, clientDomain);
+            return client.getAPIKeyData(context, apiVersion, apiKey,requiredAuthenticationLevel, clientDomain,
+                                        matchingResource, httpVerb);
         } catch (Exception e) {
             throw new APISecurityException(APISecurityConstants.API_AUTH_GENERAL_ERROR,
                     "Error while accessing backend services for API key validation", e);

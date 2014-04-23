@@ -170,7 +170,7 @@ public class APIMgtDAOTest extends TestCase {
 		assertTrue(!key1.equals(key2));
 	}
 
-	public String[] testRegisterApplicationAccessToken() throws Exception {
+	/*public String[] testRegisterApplicationAccessToken() throws Exception {
 		String validityTime = "5000";
 		String key2 = "", key4 = "";
 
@@ -242,7 +242,7 @@ public class APIMgtDAOTest extends TestCase {
 		applications = apiMgtDAO.getApplications(subscriber);
 		assertNotNull(applications);
 	}
-
+    */
 	public void checkSubscribersEqual(Subscriber lhs, Subscriber rhs) throws Exception {
 		assertEquals(lhs.getId(), rhs.getId());
 		assertEquals(lhs.getEmail(), rhs.getEmail());
@@ -335,6 +335,7 @@ public class APIMgtDAOTest extends TestCase {
 		}
 	}
 
+/*
 	public void testUnsubscribe() throws Exception {
 		Subscriber subscriber = new Subscriber("THILINA");
 		Set<SubscribedAPI> subscriptions = apiMgtDAO.getSubscribedAPIs(subscriber);
@@ -345,6 +346,7 @@ public class APIMgtDAOTest extends TestCase {
 		subscriptions = apiMgtDAO.getSubscribedAPIs(subscriber);
 		assertTrue(subscriptions.isEmpty());
 	}
+*/
 
 //	public void testIsAccessTokenExists() throws Exception {
 //		boolean exist = apiMgtDAO.isAccessTokenExists(testRegisterApplicationAccessToken()[0]);

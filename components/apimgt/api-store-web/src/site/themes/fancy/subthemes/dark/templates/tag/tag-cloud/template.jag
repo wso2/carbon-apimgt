@@ -1,6 +1,6 @@
 <% jagg.template("tag/tag-cloud", function(inputs, outputs, jagg) { %>
 <%
-    var tenant=request.getParameter("tenant");
+    var tenant=request_tenant;
     var urlPrefix;
     if(tenant!=null) {urlPrefix="tenant="+tenant;}else{urlPrefix='';}
 %>

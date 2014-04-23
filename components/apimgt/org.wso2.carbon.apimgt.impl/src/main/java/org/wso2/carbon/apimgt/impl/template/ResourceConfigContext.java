@@ -42,6 +42,7 @@ public class ResourceConfigContext extends ConfigContextDecorator {
         VelocityContext context = super.getContext();
 
         context.put("resources", api.getUriTemplates());
+        context.put("faultSequence", api.getFaultSequence());
 
         return context;  //To change body of implemented methods use File | Settings | File Templates.
     }

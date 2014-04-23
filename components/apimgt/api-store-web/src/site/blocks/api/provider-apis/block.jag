@@ -12,7 +12,7 @@ jagg.block("api/provider-apis", {
         var currentApi = inputs.currentApi;
         var currentApiVersion = inputs.currentApiVersion;
         var mod = jagg.module("api");
-        var result = mod.getPublishedAPIsByProvider(providerId,username,currentApi,currentApiVersion);
+        var result = mod.getPublishedAPIsByProvider(providerId,username,currentApi,currentApiVersion,inputs.count);
         var apis=result.apis;
         return {
             "apis":apis,
@@ -23,7 +23,8 @@ jagg.block("api/provider-apis", {
     getInputs:function () {
         return {
             "providerId":null,
-            "currentApi":null
+            "currentApi":null,
+            "count":5
         };
     }
 });

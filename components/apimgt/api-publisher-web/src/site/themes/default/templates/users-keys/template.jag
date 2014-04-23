@@ -30,11 +30,11 @@
         <tbody id="users">
 
         <%
-        var tenant=request.getParameter("tenant");
+        var tenant= encode.forUriComponent(request.getParameter("tenant"));
         var urlPrefix;
         var urlPostfix;
-        if(tenant!=null) {urlPrefix="?tenant="+tenant;}else{urlPrefix='';}
-        if(tenant!=null) {urlPostfix="&tenant="+tenant;}else{urlPostfix='';}
+        if(tenant!='null') {urlPrefix="?tenant="+tenant;}else{urlPrefix='';}
+        if(tenant!='null') {urlPostfix="&tenant="+tenant;}else{urlPostfix='';}
 
         var i, apiPath,subscriber, numberOfPages, subscribers = outputs.subscribers;
 		

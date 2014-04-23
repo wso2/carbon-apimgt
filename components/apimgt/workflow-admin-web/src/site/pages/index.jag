@@ -16,6 +16,10 @@ middlePage="subscription-task";
 middlePage="signup-task";
 }else if(pageName=="application"){
 middlePage="application-task";
+}else if(pageName=="appRegistration"){
+middlePage="app-registration-task";
+}else if(pageName=="themeUpload"){
+middlePage="theme-upload-task";
 }
 
 (function () {

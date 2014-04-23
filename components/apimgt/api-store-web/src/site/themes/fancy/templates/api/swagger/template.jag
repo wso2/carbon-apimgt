@@ -1,11 +1,13 @@
 <% jagg.template("api/swagger", function(inputs, outputs, jagg) {
 var discoveryUrl = outputs.discoveryURL;
+
+var api = outputs.api;
 %>
 
 <script type="text/javascript">
         $(function () {
             window.swaggerUi = new SwaggerUi({
-                discoveryUrl:"<%=discoveryUrl%>",
+                discoveryUrl: requestURL + "/site/blocks/api/swagger/ajax/swagger-json.jag?name=<%= api.name %>&version=<%= api.version %>&provider=<%= api.provider %>&tenant=<%= request_tenant %>",
                 dom_id:"swagger-ui-container",
 		apiKeyName: "authorization",
 		supportHeaderParams: true,

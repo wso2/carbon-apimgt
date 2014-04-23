@@ -21,6 +21,11 @@
            <artifactId>js</artifactId>
            <version>1.7.0.R4.wso2v1</version>
        </dependency>
+        <dependency>
+            <groupId>org.owasp.encoder</groupId>
+            <artifactId>encoder</artifactId>
+            <version>1.1</version>
+        </dependency>
        <dependency>
            <groupId>com.google.code.gson</groupId>
            <artifactId>gson</artifactId>

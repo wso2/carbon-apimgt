@@ -1,5 +1,5 @@
 <% jagg.template("user/login", function(inputs, outputs, jagg) {
-var i18n = require("i18n");
+var i18n = require("i18n");var publisherUrl;
 var localeResourcesBasePath="/site/conf/locales/jaggery/";
 i18n.init(request,localeResourcesBasePath);
 %>
@@ -13,7 +13,7 @@ i18n.init(request,localeResourcesBasePath);
         if(request.getQueryString()){
             currentURL += "?" + request.getQueryString();
         }
-        var tenant=request.getParameter("tenant");
+        var tenant=request_tenant;
         var urlPrefix;
         if(tenant!=null) {urlPrefix="tenant="+tenant;}else{urlPrefix='';}
         
@@ -24,6 +24,10 @@ i18n.init(request,localeResourcesBasePath);
 
 %>
 <% if(user) { %>
+
+<%if(jagg.getUser().hasPublisherAccess){%>
+<%publisherUrl = jagg.module("manager").getAPIPublisherURL().url;
+<%}%>
 <ul class="nav actions login-sign-up pull-right">
             <li class="dropdown settingsSection">
                 <i class="icon-theme"></i>
@@ -77,7 +81,7 @@ i18n.init(request,localeResourcesBasePath);
 <% } else { %>
 <ul class="nav actions login-sign-up pull-right">
 <%
-var tenant=request.getParameter("tenant");
+var tenant=request_tenant;
 if(isSelfSignupEnabled && (tenant==null || tenant=="carbon.super")){%>
     <li>
         <i class="icon-signup-top"></i>
@@ -97,18 +101,20 @@ if(isSelfSignupEnabled && (tenant==null || tenant=="carbon.super")){%>
 <%if(jagg.getUser()!=null){%>
 	<!--Links to Access Tenant Store and Public Store-->
 		<%if (jagg.getUser().hasPublisherAccess) {%>
-			Go to <a href="#" onclick="getAPIPublisherURL()" ><%=i18n.localize("apipublisher")%></a>
+			Go to <a href="<%=publisherUrl%>" target="_blank" ><%=i18n.localize("apipublisher")%></a>
+           <%if(site.showPublicStoreURL){%>
+           |
 
-
-		|
-		<%}%>
+		<%}}%>
 	<%}%>
 
-		<%if (tenant == null && isSuperTenant != null && !isSuperTenant) {%>
-			Go to <a href="<%=jagg.getAbsoluteUrl("/")%><%="?tenant=" + tenantDomain%>"><%=tenantDomain%><%=i18n.localize("apistoreDesc")%></a>
+		<%if (tenant == null && isSuperTenant != null && !isSuperTenant && site.showPublicStoreURL) {%>
+
+				Go to <a href="<%=jagg.getAbsoluteUrl("/")%><%="?tenant=" + tenantDomain%>"><%=tenantDomain%><%=i18n.localize("apistoreDesc")%></a>
 
 
-		<%} else if (tenant != null) {%>
+		<%} else if ((tenant != null)&& site.showPublicStoreURL){%>
+
 			Go to <a href="<%=jagg.getAbsoluteUrl("/")%>"><%=i18n.localize("publicAPIStore")%></a>
 
 

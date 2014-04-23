@@ -71,7 +71,9 @@
 		        					 <br />
 		        					 <div class="form-inline">
 		        					 	<label class="control-label" for="roles" id="rolesLabel" name="rolesLabel">roles</label>
-		        					 	<input type="text" class="input required"  id="<%=roleInputName%>" name="<%=roleInputName%>" value="<%=roleList%>"/>
+		        					 	<input type="text" class="input rolesInput"  id="<%=roleInputName%>" name="<%=roleInputName%>" value="<%=roleList%>"/>
+		        					 	<label class="errorTier" id="errorTier<%=String(i)%>"style="display:none;">This field is required.</label>
+                                        <label class="errorTier" id="errorTierRoles<%=String(i)%>"style="display:none;">Invalid role name[s]</label>
 		        					 	<p class="help-block" id="rolesHelp"><%=i18n.localize("rolesHelpMsg")%></p>
 		        					 </div>
 	        					</div> 

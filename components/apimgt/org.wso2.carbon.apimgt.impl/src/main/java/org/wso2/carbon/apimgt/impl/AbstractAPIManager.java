@@ -427,7 +427,7 @@ public abstract class AbstractAPIManager implements APIManager {
             documentation.setSourceType(docSourceType);
             
             String swaggerDocPath = APIConstants.API_DOC_LOCATION + RegistryConstants.PATH_SEPARATOR + 
-            		apiId.getApiName() +"-"  + apiId.getVersion() + RegistryConstants.PATH_SEPARATOR + APIConstants.API_DOC_RESOURCE_NAME;
+            		apiId.getApiName() +"-"  + apiId.getVersion() +'-'+apiId.getProviderName() + RegistryConstants.PATH_SEPARATOR + APIConstants.API_DOC_RESOURCE_NAME;
             if (registry.resourceExists(swaggerDocPath)) {
             	Resource docResource = registry.get(swaggerDocPath);
             	documentation.setLastUpdated(docResource.getLastModified());

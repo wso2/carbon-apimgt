@@ -82,6 +82,24 @@ var jagg = jagg || {};
         });
     };
 
+
+    jagg.fillProgress = function (chartId){
+        if(t_on[chartId]){
+            var progressBar = $('#'+chartId+' div.progress-striped div.bar')[0];
+            if(progressBar == undefined){
+                t_on[chartId] = 0 ;
+                return;
+            }
+            var time = Math.floor((Math.random() * 400) + 800);
+            var divider = Math.floor((Math.random() * 2) + 2);
+            var currentWidth = parseInt(progressBar.style.width.split('%')[0]);
+            var newWidth = currentWidth + parseInt((100 - currentWidth) / divider);
+            newWidth += "%";
+            $(progressBar).css('width', newWidth);
+            var t = setTimeout('jagg.fillProgress("'+chartId+'")', time);
+        }
+    };
+
     jagg.initStars = function (elem, saveCallback, removeCallback, data) {
         $('.dynamic-rating-stars a', elem).each(function () {
             $(this).mouseover(function () {

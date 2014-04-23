@@ -320,6 +320,14 @@ public interface APIProvider extends APIManager {
     
     public List<String> getCustomOutSequences()  throws APIManagementException;
 
+    /**
+     * Get the list of Custom Fault Sequences.
+     * @return List of available fault sequences
+     * @throws APIManagementException
+     */
+
+    public List<String> getCustomFaultSequences()  throws APIManagementException;
+
 
     /**
      * When enabled publishing to external APIStores support,publish the API to external APIStores

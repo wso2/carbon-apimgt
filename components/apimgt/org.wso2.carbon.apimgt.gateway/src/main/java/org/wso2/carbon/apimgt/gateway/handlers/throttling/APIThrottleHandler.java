@@ -39,10 +39,7 @@ import org.apache.synapse.rest.AbstractHandler;
 import org.apache.synapse.rest.RESTConstants;
 import org.apache.synapse.transport.nhttp.NhttpConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.Utils;
-import org.wso2.carbon.apimgt.gateway.handlers.security.APIKeyValidator;
-import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityException;
-import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityUtils;
-import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationContext;
+import org.wso2.carbon.apimgt.gateway.handlers.security.*;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dto.VerbInfoDTO;
@@ -509,29 +506,19 @@ public class APIThrottleHandler extends AbstractHandler {
 
                 //---------------End of application level throttling------------
                 //==============================Start of Resource level throttling=========================================
-                String apiContext = (String) synCtx.getProperty(RESTConstants.REST_API_CONTEXT);
-                String apiVersion = (String) synCtx.getProperty(RESTConstants.SYNAPSE_REST_API_VERSION);
-                String fullRequestPath = (String) synCtx.getProperty(RESTConstants.REST_FULL_REQUEST_PATH);
-                String requestPath = fullRequestPath.substring((apiContext + apiVersion).length() + 1, fullRequestPath.length());
-                //Add / to the request path if request path is empty.
-                if(requestPath.length() < 1){
-                    requestPath = "/";
-                }
-                //throttling per resource level
-                //get API context from incoming request
-                apiContext = (String) synCtx.getProperty(RESTConstants.REST_API_CONTEXT);
-                //get API version from incoming request
-                apiVersion = (String) synCtx.getProperty(RESTConstants.SYNAPSE_REST_API_VERSION);
-                //get http method
-                String httpMethod = (String) ((Axis2MessageContext) synCtx).getAxis2MessageContext().
-                        getProperty(Constants.Configuration.HTTP_METHOD);
+
                 //get throttling information for given request with resource path and http verb
                 APIKeyValidator validator = new APIKeyValidator(ServiceReferenceHolder.getInstance().getConfigurationContextService().getServerConfigContext().getAxisConfiguration());
                 VerbInfoDTO verbInfoDTO = null;
                 try {
-                    verbInfoDTO = validator.getVerbInfoDTOFromAPIData(apiContext, apiVersion, requestPath, httpMethod);
+                    //verbInfoDTO = validator.getVerbInfoDTOFromAPIData(apiContext, apiVersion, requestPath, httpMethod);
+                    verbInfoDTO = validator.findMatchingVerb(synCtx);
                 } catch (APISecurityException e) {
-                    e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+                    log.error("API Security Exception " + e.getMessage());
+                    e.printStackTrace();
+                } catch (ResourceNotFoundException e) {
+                    log.error("Could not find matching resource " + e.getMessage());
+                    e.printStackTrace();
                 }
                 String resourceLevelRoleId = null;
                 //no data related to verb information data

@@ -20,6 +20,7 @@
 </div>
 <div class="content-section shadow-up">
 <div class="content-data">
+Use applications to subscribe to APIs and manage access keys. There is DefaultApplication pre-created to use and it can add more applications on this page.
     <form id="appAddForm">
         <h3><%=i18n.localize("addApp")%></h3>
 
@@ -32,7 +33,7 @@
                             <input type="text" class="required validateSpecialChars validName" maxlength="70"
                                    id="application-name" autofocus="autofocus"/></div>
                         <input type="hidden" id="apiPath" value="<%=apiPath%>"/>
-                        <input type="hidden" id="goBack" value="<%=goBack%>"/>
+                        <input type="hidden" id="goBack" value="<%= encode.forHtmlAttribute(goBack)%>"/>
                     </div>
                 </div>
                 <div class="control-group">
@@ -73,7 +74,7 @@
                 <div class="control-group">
                     <label class="control-label" for="callback-url" style="padding-top: 5px;"><%=i18n.localize("callbackUrl")%></label>
                     <div class="controls">
-                        <input type="text" class="url validInput" style="width:400px;" maxlength="70" name="callback-url"  id="callback-url"/>
+                        <input type="text" class="validInput" style="width:400px;" maxlength="70" name="callback-url"  id="callback-url"/>
                     </div>
                 </div>
                 <div class="control-group">

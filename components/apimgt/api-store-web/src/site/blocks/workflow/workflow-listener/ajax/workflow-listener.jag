@@ -3,6 +3,7 @@ include("/jagg/jagg.jag");
 var log = new Log();
 
 (function () {
+    response.contentType = "application/json; charset=UTF-8";
     var workflowReference, status, description, username, password, encryptedHeader, msg = require("/site/conf/ui-messages.jag");
 
         encryptedHeader = request.getHeader('Authorization');

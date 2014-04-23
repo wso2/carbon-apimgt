@@ -3,7 +3,7 @@
                  <h4>  <%=i18n.localize("recentlyAdded")%></h4>
                      <%
         var urlPrefix;
-        var tenant=request.getParameter("tenant");
+        var tenant=request_tenant;
         if(tenant!=null) {urlPrefix="&tenant="+tenant;}else{urlPrefix='';}
         var i, api, path, thumbURL, apis = outputs.apis, length = apis.length;
         if(length>8){length=8;}

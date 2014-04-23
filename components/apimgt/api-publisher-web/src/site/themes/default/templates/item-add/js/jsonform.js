@@ -214,7 +214,7 @@ jsonform.fieldTemplate = function(inner) {
         '</div>' +
       '<% } %>' +
       '<% if (node.description) { %>' +
-        '<span class="help-inline"><%= node.description %></span>' +
+      '<p class="help-block"><%= node.description %></p>' +
       '<% } %>' +
       '<span class="help-block jsonform-errortext" style="display:none;"></span>' +
     '</div></div>';

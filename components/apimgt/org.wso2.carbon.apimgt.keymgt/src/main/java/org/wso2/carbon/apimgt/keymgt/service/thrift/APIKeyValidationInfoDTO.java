@@ -44,6 +44,7 @@ public class APIKeyValidationInfoDTO implements org.apache.thrift.TBase<APIKeyVa
   private static final org.apache.thrift.protocol.TField CONSUMER_KEY_FIELD_DESC = new org.apache.thrift.protocol.TField("consumerKey", org.apache.thrift.protocol.TType.STRING, (short)12);
   private static final org.apache.thrift.protocol.TField API_PUBLISHER_FIELD_DESC = new org.apache.thrift.protocol.TField("apiPublisher", org.apache.thrift.protocol.TType.STRING, (short)13);
   private static final org.apache.thrift.protocol.TField AUTHORIZED_DOMAINS_FIELD_DESC = new org.apache.thrift.protocol.TField("authorizedDomains", org.apache.thrift.protocol.TType.LIST, (short)14);
+  private static final org.apache.thrift.protocol.TField SCOPES_FIELD_DESC = new org.apache.thrift.protocol.TField("scopes", org.apache.thrift.protocol.TType.SET, (short)15);
 
   private static final Map<Class<? extends IScheme>, SchemeFactory> schemes = new HashMap<Class<? extends IScheme>, SchemeFactory>();
   static {
@@ -65,6 +66,7 @@ public class APIKeyValidationInfoDTO implements org.apache.thrift.TBase<APIKeyVa
   public String consumerKey; // optional
   public String apiPublisher; // optional
   public List<String> authorizedDomains; // optional
+  public Set<String> scopes; // optional
 
   /** The set of fields this struct contains, along with convenience methods for finding and manipulating them. */
   public enum _Fields implements org.apache.thrift.TFieldIdEnum {
@@ -81,7 +83,8 @@ public class APIKeyValidationInfoDTO implements org.apache.thrift.TBase<APIKeyVa
     API_NAME((short)11, "apiName"),
     CONSUMER_KEY((short)12, "consumerKey"),
     API_PUBLISHER((short)13, "apiPublisher"),
-    AUTHORIZED_DOMAINS((short)14, "authorizedDomains");
+    AUTHORIZED_DOMAINS((short)14, "authorizedDomains"),
+    SCOPES((short)15, "scopes");
 
     private static final Map<String, _Fields> byName = new HashMap<String, _Fields>();
 
@@ -124,6 +127,8 @@ public class APIKeyValidationInfoDTO implements org.apache.thrift.TBase<APIKeyVa
           return API_PUBLISHER;
         case 14: // AUTHORIZED_DOMAINS
           return AUTHORIZED_DOMAINS;
+        case 15: // SCOPES
+          return SCOPES;
         default:
           return null;
       }
@@ -167,7 +172,7 @@ public class APIKeyValidationInfoDTO implements org.apache.thrift.TBase<APIKeyVa
   private static final int __AUTHORIZED_ISSET_ID = 0;
   private static final int __VALIDATIONSTATUS_ISSET_ID = 1;
   private BitSet __isset_bit_vector = new BitSet(2);
-  private _Fields optionals[] = {_Fields.AUTHORIZED,_Fields.SUBSCRIBER,_Fields.TIER,_Fields.TYPE,_Fields.END_USER_TOKEN,_Fields.END_USER_NAME,_Fields.APPLICATION_NAME,_Fields.VALIDATION_STATUS,_Fields.APPLICATION_ID,_Fields.APPLICATION_TIER,_Fields.API_NAME,_Fields.CONSUMER_KEY,_Fields.API_PUBLISHER,_Fields.AUTHORIZED_DOMAINS};
+  private _Fields optionals[] = {_Fields.AUTHORIZED,_Fields.SUBSCRIBER,_Fields.TIER,_Fields.TYPE,_Fields.END_USER_TOKEN,_Fields.END_USER_NAME,_Fields.APPLICATION_NAME,_Fields.VALIDATION_STATUS,_Fields.APPLICATION_ID,_Fields.APPLICATION_TIER,_Fields.API_NAME,_Fields.CONSUMER_KEY,_Fields.API_PUBLISHER,_Fields.AUTHORIZED_DOMAINS,_Fields.SCOPES};
   public static final Map<_Fields, org.apache.thrift.meta_data.FieldMetaData> metaDataMap;
   static {
     Map<_Fields, org.apache.thrift.meta_data.FieldMetaData> tmpMap = new EnumMap<_Fields, org.apache.thrift.meta_data.FieldMetaData>(_Fields.class);
@@ -199,6 +204,9 @@ public class APIKeyValidationInfoDTO implements org.apache.thrift.TBase<APIKeyVa
         new org.apache.thrift.meta_data.FieldValueMetaData(org.apache.thrift.protocol.TType.STRING)));
     tmpMap.put(_Fields.AUTHORIZED_DOMAINS, new org.apache.thrift.meta_data.FieldMetaData("authorizedDomains", org.apache.thrift.TFieldRequirementType.OPTIONAL, 
         new org.apache.thrift.meta_data.ListMetaData(org.apache.thrift.protocol.TType.LIST, 
+            new org.apache.thrift.meta_data.FieldValueMetaData(org.apache.thrift.protocol.TType.STRING))));
+    tmpMap.put(_Fields.SCOPES, new org.apache.thrift.meta_data.FieldMetaData("scopes", org.apache.thrift.TFieldRequirementType.OPTIONAL, 
+        new org.apache.thrift.meta_data.SetMetaData(org.apache.thrift.protocol.TType.SET, 
             new org.apache.thrift.meta_data.FieldValueMetaData(org.apache.thrift.protocol.TType.STRING))));
     metaDataMap = Collections.unmodifiableMap(tmpMap);
     org.apache.thrift.meta_data.FieldMetaData.addStructMetaDataMap(APIKeyValidationInfoDTO.class, metaDataMap);
@@ -255,6 +263,13 @@ public class APIKeyValidationInfoDTO implements org.apache.thrift.TBase<APIKeyVa
       }
       this.authorizedDomains = __this__authorizedDomains;
     }
+    if (other.isSetScopes()) {
+      Set<String> __this__scopes = new HashSet<String>();
+      for (String other_element : other.scopes) {
+        __this__scopes.add(other_element);
+      }
+      this.scopes = __this__scopes;
+    }
   }
 
   public APIKeyValidationInfoDTO deepCopy() {
@@ -279,6 +294,7 @@ public class APIKeyValidationInfoDTO implements org.apache.thrift.TBase<APIKeyVa
     this.consumerKey = null;
     this.apiPublisher = null;
     this.authorizedDomains = null;
+    this.scopes = null;
   }
 
   public boolean isAuthorized() {
@@ -630,6 +646,45 @@ public class APIKeyValidationInfoDTO implements org.apache.thrift.TBase<APIKeyVa
     }
   }
 
+  public int getScopesSize() {
+    return (this.scopes == null) ? 0 : this.scopes.size();
+  }
+
+  public java.util.Iterator<String> getScopesIterator() {
+    return (this.scopes == null) ? null : this.scopes.iterator();
+  }
+
+  public void addToScopes(String elem) {
+    if (this.scopes == null) {
+      this.scopes = new HashSet<String>();
+    }
+    this.scopes.add(elem);
+  }
+
+  public Set<String> getScopes() {
+    return this.scopes;
+  }
+
+  public APIKeyValidationInfoDTO setScopes(Set<String> scopes) {
+    this.scopes = scopes;
+    return this;
+  }
+
+  public void unsetScopes() {
+    this.scopes = null;
+  }
+
+  /** Returns true if field scopes is set (has been assigned a value) and false otherwise */
+  public boolean isSetScopes() {
+    return this.scopes != null;
+  }
+
+  public void setScopesIsSet(boolean value) {
+    if (!value) {
+      this.scopes = null;
+    }
+  }
+
   public void setFieldValue(_Fields field, Object value) {
     switch (field) {
     case AUTHORIZED:
@@ -744,6 +799,14 @@ public class APIKeyValidationInfoDTO implements org.apache.thrift.TBase<APIKeyVa
       }
       break;
 
+    case SCOPES:
+      if (value == null) {
+        unsetScopes();
+      } else {
+        setScopes((Set<String>)value);
+      }
+      break;
+
     }
   }
 
@@ -791,6 +854,9 @@ public class APIKeyValidationInfoDTO implements org.apache.thrift.TBase<APIKeyVa
     case AUTHORIZED_DOMAINS:
       return getAuthorizedDomains();
 
+    case SCOPES:
+      return getScopes();
+
     }
     throw new IllegalStateException();
   }
@@ -830,6 +896,8 @@ public class APIKeyValidationInfoDTO implements org.apache.thrift.TBase<APIKeyVa
       return isSetApiPublisher();
     case AUTHORIZED_DOMAINS:
       return isSetAuthorizedDomains();
+    case SCOPES:
+      return isSetScopes();
     }
     throw new IllegalStateException();
   }
@@ -970,6 +1038,15 @@ public class APIKeyValidationInfoDTO implements org.apache.thrift.TBase<APIKeyVa
       if (!(this_present_authorizedDomains && that_present_authorizedDomains))
         return false;
       if (!this.authorizedDomains.equals(that.authorizedDomains))
+        return false;
+    }
+
+    boolean this_present_scopes = true && this.isSetScopes();
+    boolean that_present_scopes = true && that.isSetScopes();
+    if (this_present_scopes || that_present_scopes) {
+      if (!(this_present_scopes && that_present_scopes))
+        return false;
+      if (!this.scopes.equals(that.scopes))
         return false;
     }
 
@@ -1129,6 +1206,16 @@ public class APIKeyValidationInfoDTO implements org.apache.thrift.TBase<APIKeyVa
         return lastComparison;
       }
     }
+    lastComparison = Boolean.valueOf(isSetScopes()).compareTo(typedOther.isSetScopes());
+    if (lastComparison != 0) {
+      return lastComparison;
+    }
+    if (isSetScopes()) {
+      lastComparison = org.apache.thrift.TBaseHelper.compareTo(this.scopes, typedOther.scopes);
+      if (lastComparison != 0) {
+        return lastComparison;
+      }
+    }
     return 0;
   }
 
@@ -1277,6 +1364,16 @@ public class APIKeyValidationInfoDTO implements org.apache.thrift.TBase<APIKeyVa
         sb.append("null");
       } else {
         sb.append(this.authorizedDomains);
+      }
+      first = false;
+    }
+    if (isSetScopes()) {
+      if (!first) sb.append(", ");
+      sb.append("scopes:");
+      if (this.scopes == null) {
+        sb.append("null");
+      } else {
+        sb.append(this.scopes);
       }
       first = false;
     }
@@ -1446,6 +1543,24 @@ public class APIKeyValidationInfoDTO implements org.apache.thrift.TBase<APIKeyVa
               org.apache.thrift.protocol.TProtocolUtil.skip(iprot, schemeField.type);
             }
             break;
+          case 15: // SCOPES
+            if (schemeField.type == org.apache.thrift.protocol.TType.SET) {
+              {
+                org.apache.thrift.protocol.TSet _set3 = iprot.readSetBegin();
+                struct.scopes = new HashSet<String>(2*_set3.size);
+                for (int _i4 = 0; _i4 < _set3.size; ++_i4)
+                {
+                  String _elem5; // required
+                  _elem5 = iprot.readString();
+                  struct.scopes.add(_elem5);
+                }
+                iprot.readSetEnd();
+              }
+              struct.setScopesIsSet(true);
+            } else { 
+              org.apache.thrift.protocol.TProtocolUtil.skip(iprot, schemeField.type);
+            }
+            break;
           default:
             org.apache.thrift.protocol.TProtocolUtil.skip(iprot, schemeField.type);
         }
@@ -1553,11 +1668,25 @@ public class APIKeyValidationInfoDTO implements org.apache.thrift.TBase<APIKeyVa
           oprot.writeFieldBegin(AUTHORIZED_DOMAINS_FIELD_DESC);
           {
             oprot.writeListBegin(new org.apache.thrift.protocol.TList(org.apache.thrift.protocol.TType.STRING, struct.authorizedDomains.size()));
-            for (String _iter3 : struct.authorizedDomains)
+            for (String _iter6 : struct.authorizedDomains)
             {
-              oprot.writeString(_iter3);
+              oprot.writeString(_iter6);
             }
             oprot.writeListEnd();
+          }
+          oprot.writeFieldEnd();
+        }
+      }
+      if (struct.scopes != null) {
+        if (struct.isSetScopes()) {
+          oprot.writeFieldBegin(SCOPES_FIELD_DESC);
+          {
+            oprot.writeSetBegin(new org.apache.thrift.protocol.TSet(org.apache.thrift.protocol.TType.STRING, struct.scopes.size()));
+            for (String _iter7 : struct.scopes)
+            {
+              oprot.writeString(_iter7);
+            }
+            oprot.writeSetEnd();
           }
           oprot.writeFieldEnd();
         }
@@ -1622,7 +1751,10 @@ public class APIKeyValidationInfoDTO implements org.apache.thrift.TBase<APIKeyVa
       if (struct.isSetAuthorizedDomains()) {
         optionals.set(13);
       }
-      oprot.writeBitSet(optionals, 14);
+      if (struct.isSetScopes()) {
+        optionals.set(14);
+      }
+      oprot.writeBitSet(optionals, 15);
       if (struct.isSetAuthorized()) {
         oprot.writeBool(struct.authorized);
       }
@@ -1665,9 +1797,18 @@ public class APIKeyValidationInfoDTO implements org.apache.thrift.TBase<APIKeyVa
       if (struct.isSetAuthorizedDomains()) {
         {
           oprot.writeI32(struct.authorizedDomains.size());
-          for (String _iter4 : struct.authorizedDomains)
+          for (String _iter8 : struct.authorizedDomains)
           {
-            oprot.writeString(_iter4);
+            oprot.writeString(_iter8);
+          }
+        }
+      }
+      if (struct.isSetScopes()) {
+        {
+          oprot.writeI32(struct.scopes.size());
+          for (String _iter9 : struct.scopes)
+          {
+            oprot.writeString(_iter9);
           }
         }
       }
@@ -1676,7 +1817,7 @@ public class APIKeyValidationInfoDTO implements org.apache.thrift.TBase<APIKeyVa
     @Override
     public void read(org.apache.thrift.protocol.TProtocol prot, APIKeyValidationInfoDTO struct) throws org.apache.thrift.TException {
       TTupleProtocol iprot = (TTupleProtocol) prot;
-      BitSet incoming = iprot.readBitSet(14);
+      BitSet incoming = iprot.readBitSet(15);
       if (incoming.get(0)) {
         struct.authorized = iprot.readBool();
         struct.setAuthorizedIsSet(true);
@@ -1731,18 +1872,32 @@ public class APIKeyValidationInfoDTO implements org.apache.thrift.TBase<APIKeyVa
       }
       if (incoming.get(13)) {
         {
-          org.apache.thrift.protocol.TList _list5 = new org.apache.thrift.protocol.TList(org.apache.thrift.protocol.TType.STRING, iprot.readI32());
-          struct.authorizedDomains = new ArrayList<String>(_list5.size);
-          for (int _i6 = 0; _i6 < _list5.size; ++_i6)
+          org.apache.thrift.protocol.TList _list10 = new org.apache.thrift.protocol.TList(org.apache.thrift.protocol.TType.STRING, iprot.readI32());
+          struct.authorizedDomains = new ArrayList<String>(_list10.size);
+          for (int _i11 = 0; _i11 < _list10.size; ++_i11)
           {
-            String _elem7; // required
-            _elem7 = iprot.readString();
-            struct.authorizedDomains.add(_elem7);
+            String _elem12; // required
+            _elem12 = iprot.readString();
+            struct.authorizedDomains.add(_elem12);
           }
         }
         struct.setAuthorizedDomainsIsSet(true);
+      }
+      if (incoming.get(14)) {
+        {
+          org.apache.thrift.protocol.TSet _set13 = new org.apache.thrift.protocol.TSet(org.apache.thrift.protocol.TType.STRING, iprot.readI32());
+          struct.scopes = new HashSet<String>(2*_set13.size);
+          for (int _i14 = 0; _i14 < _set13.size; ++_i14)
+          {
+            String _elem15; // required
+            _elem15 = iprot.readString();
+            struct.scopes.add(_elem15);
+          }
+        }
+        struct.setScopesIsSet(true);
       }
     }
   }
 
 }
+

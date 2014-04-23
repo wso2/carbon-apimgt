@@ -52,7 +52,7 @@ public class RESTAPIAdminClient extends AbstractAPIGatewayAdminClient {
                     && !tenantDomain.equals(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)) {
             	restApiAdminStub.addApiForTenant(apiConfig, tenantDomain);
             }else {
-            	 restApiAdminStub.addApiFromString(apiConfig);	
+            	 restApiAdminStub.addApiFromString(apiConfig);
             }
         } catch (Exception e) {
             throw new AxisFault("Error while adding new API", e);

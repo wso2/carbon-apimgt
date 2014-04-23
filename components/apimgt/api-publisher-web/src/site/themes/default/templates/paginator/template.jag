@@ -1,10 +1,16 @@
 <% jagg.template("paginator", function(inputs, outputs, jagg) { %>
 <% var numberOfPages = outputs.numberOfPages,currentPage=outputs.currentPage;
-   var uname=request.getParameter('uname');
-   var query=request.getParameter('query');
-   var name=request.getParameter('name');
-   var version=request.getParameter('version');
-   var provider=request.getParameter('provider');
+   var uname=    encode.forUriComponent(request.getParameter('uname'));
+   var query=    encode.forUriComponent(request.getParameter('query'));
+   var name=     encode.forUriComponent(request.getParameter('name'));
+   var version=  encode.forUriComponent(request.getParameter('version'));
+   var provider= encode.forUriComponent(request.getParameter('provider'));
+
+   if(uname == 'null')uname = null;
+   if(query == 'null')query = null;
+   if(name == 'null')name = null;
+   if(version == 'null')version = null;
+   if(provider == 'null')provider = null;
 %>
  <!--START Pagination links-->
     <% if(numberOfPages > 1) { %>

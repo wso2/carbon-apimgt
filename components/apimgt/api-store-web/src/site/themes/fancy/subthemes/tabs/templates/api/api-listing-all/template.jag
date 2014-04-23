@@ -2,7 +2,7 @@
 
         <%
           var urlPrefix;
-          var tenant=request.getParameter("tenant");
+          var tenant=request_tenant;
           if(tenant!=null) {urlPrefix="&tenant="+tenant;}else{urlPrefix='';}
           if (outputs.error) { %>
         		<label><b><%=outputs.message%></b></label>
@@ -77,7 +77,7 @@
                             }
                             path = jagg.getMappedUrl("/site/pages/item-info.jag") + "?name=" + api.name + "&version=" + api.version + "&provider=" + api.provider+ urlPrefix;
                             if(tag != null){
-                                path+="&tag="+tag;
+                                path+="&tag="+encode.forUriComponent(tag);
                             }
                         %>
                                 <li>
@@ -102,7 +102,7 @@
                         <% } %>
 
                     </ul>
-                    <% var query=request.getParameter("query");
+                    <% var query= encode.forUriComponent(request.getParameter("query"));
                      if(numberOfPages > 1) { %>
                     <div class="pagination">
                         <ul>

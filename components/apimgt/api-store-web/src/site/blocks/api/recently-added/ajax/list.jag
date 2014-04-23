@@ -1,6 +1,7 @@
 <%
 include("/jagg/jagg.jag");
 (function () {
+    response.contentType = "application/json; charset=UTF-8";
     var mod, obj, tenant, result, limit,
 
             msg = require("/site/conf/ui-messages.jag"),

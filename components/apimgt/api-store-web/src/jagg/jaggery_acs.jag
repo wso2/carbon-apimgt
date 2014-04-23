@@ -21,7 +21,7 @@
                     if(!Boolean(isLogoutResponse)) {
                     // relay state value should be a valid value, this value is mapped with request uri.
                         var relayState = request.getParameter("RelayState");
-			
+
                         var requestedURI =  ssoRelyingParty.getRelayStateProperty(relayState);
                         if(  requestedURI==null){
                             log.error("Relaystate value is invalid.");
@@ -31,10 +31,10 @@
 
                         // validating the signature
                         if(site.ssoConfiguration.responseSigningEnabled === 'true'){
-						var fullUserName = ssoRelyingParty.getSAMLResponseNameId(samlResponse);			
+						var fullUserName = ssoRelyingParty.getSAMLResponseNameId(samlResponse);
 						if(fullUserName != null && fullUserName.indexOf("@")!=-1){
 							var domainName = fullUserName.split("@")[1];
-							jagg.module("manager").loadTenantRegistry(domainName);	
+							jagg.module("manager").loadTenantRegistry(domainName);
 						}
 
                         var isSignatureValid =ssoRelyingParty.validateSignature(samlResponse);
@@ -48,7 +48,8 @@
                         session.put("showLogin", "false");
                         var api = jagg.module("api");
                         var isUserPermitted=api.hasUserPermissions(ssoRelyingParty.getLoggedInUser(sessionId));
-                        jagg.setUser({username:ssoRelyingParty.getLoggedInUser(sessionId), cookie:null});
+                        var hasPublisherAccess=api.hasPublisherAccess(ssoRelyingParty.getLoggedInUser(sessionId));
+                        jagg.setUser({username:ssoRelyingParty.getLoggedInUser(sessionId), cookie:null, hasPublisherAccess:hasPublisherAccess});
                         session.put("LOGGED_IN_USER",ssoRelyingParty.getLoggedInUser(sessionId));
                         //First check whether user is having sufficent permissions [create/publish]
                          if(!isUserPermitted.permitted ){
@@ -62,8 +63,8 @@
         			        store.addSubscriber(username);
         			        subscriber = store.getSubscriber(username);
     			        }
-                        session.put("LOGGED_IN_USER",ssoRelyingParty.getLoggedInUser(sessionId));		
-						
+                        session.put("LOGGED_IN_USER",ssoRelyingParty.getLoggedInUser(sessionId));
+						session.put("hasPublisherAccess",hasPublisherAccess);
                         response.sendRedirect(requestedURI);
                    } }else{
                         // if the saml response is log out request from IDP, we log out from web app.

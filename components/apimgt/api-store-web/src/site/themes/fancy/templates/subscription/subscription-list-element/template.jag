@@ -1,6 +1,7 @@
 <% jagg.template("subscription/subscription-list-element", function(inputs, outputs, jagg) { %>
 <% var i=outputs.i, app = outputs.app;
         var str_i = String(i).replace('.','_');
+
                 %>
 
         <input type="hidden"  class="prodAccessTokenHidden" value="<%=app.prodKey%>" >
@@ -78,7 +79,24 @@
                         <% } %>
                         </div>
                         <!-- END Show key info -->
-                        <% }else{ %>
+                        <% } else if(app.prodKeyState != null){ %>
+			<% if(app.prodKeyState == "CREATED") {%>
+                        <%=i18n.localize("prodKeyCreatedMsg")%>
+			<%} else if(app.prodKeyState == "REJECTED") {%>
+                        <%=i18n.localize("prodKeyRejectedMsg")%>
+			<%} if(app.prodKeyState == "APPROVED") {
+                        <%=i18n.localize("prodKeyApprovedMsg")%>
+                        <div class="gen-btn-wrapper">
+                                    <button  class="app-create-key-button btn btn-primary"
+                                   data-application="<%=app.name%>"
+                                   data-callbackUrl="<%=app.callbackUrl%>"
+                                   data-keytype="PRODUCTION"
+                                   iteration="200"
+                                    >
+                                    <%=i18n.localize("generateKey")%></button>
+                        </div>
+			<%}%>
+                        <% } else{ %>
                         <%=i18n.localize("prodKeyMsg")%>
                         <div class="gen-btn-wrapper">
                                     <button  class="app-key-generate-button btn btn-primary"
@@ -91,7 +109,12 @@
                         </div>
                         <% } %>
                     </div>
-                    <div class="span6 keyBoxOut-config">
+                    
+		    
+
+		    <div class="span6 keyBoxOut-config" 
+<% if(app.prodKeyState == "CREATED" || app.prodKeyState == "APPROVED" || app.prodKeyState == "REJECTED") { %> style="display:none" <% } %> >
+
                         <!-- START Config section -->
                             <h5>Allowed Domains</h5>
                             <div>
@@ -106,10 +129,9 @@
                                     <span class="label label-warning" id = "timeWarn" style="display:none;"><%=i18n.localize("timeWarn")%></span>
                                <% } %>
                             </div>
-
-
                         <!-- END config section -->
                     </div>
+	
                 </div>
             </div>
         </div>
@@ -165,7 +187,24 @@
                        </div>
 
 
-                       <% }else {%>
+                       <% }else if(app.sandboxKeyState != null){%>
+                       <% if(app.sandboxKeyState == "CREATED") {%>
+                        <%=i18n.localize("sandboxKeyCreatedMsg")%>
+			<%} else if(app.sandboxKeyState == "REJECTED") {%>
+                        <%=i18n.localize("sandboxKeyRejectedMsg")%>
+			<%} if(app.sandboxKeyState == "APPROVED") {
+                        <%=i18n.localize("sandboxKeyApprovedMsg")%>
+                        <div class="gen-btn-wrapper">
+                                    <button  class="app-create-key-button btn btn-primary"
+                                   data-application="<%=app.name%>"
+                                   data-callbackUrl="<%=app.callbackUrl%>"
+                                   data-keytype="SANDBOX"
+                                   iteration="200"
+                                    >
+                                    <%=i18n.localize("generateKey")%></button>
+                        </div>
+			<%}%>
+                       <% } else {%>
                        <%=i18n.localize("sandboxKeyMsg")%>
                         <div class="gen-btn-wrapper" <% if(app.sandboxKey!=null){%>style="display:none"<% } %> >
                            <button class="app-key-generate-button btn btn-primary"
@@ -179,7 +218,8 @@
                        <% } %>
                        <!-- END Show key info -->
                    </div>
-                   <div class="span6 keyBoxOut-config">
+
+		<div class="span6 keyBoxOut-config" <% if(app.sandboxKeyState == "CREATED" || app.sandboxKeyState == "APPROVED" || app.sandboxKeyState == "REJECTED") { %> style="display:none"<%}%>>
                        <!-- START Config section -->
                         <h5>Allowed Domains</h5>
                         <div>
@@ -209,7 +249,7 @@
             <div class="row-fluid">
 
             <%
-            var tenant=request.getParameter("tenant");
+            var tenant=request_tenant;
             var urlPrefix;
             if(tenant!=null) {urlPrefix="tenant="+tenant;}else{urlPrefix='';}
             var apis = app.subscriptions;

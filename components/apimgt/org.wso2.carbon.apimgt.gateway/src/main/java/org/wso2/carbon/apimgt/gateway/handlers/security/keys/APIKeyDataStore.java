@@ -38,8 +38,8 @@ public interface APIKeyDataStore {
      * @return an APIKeyValidationInfoDTO instance containing key validation data
      * @throws org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityException on error
      */
-    public APIKeyValidationInfoDTO getAPIKeyData(String context, String apiVersion,
-                                                 String apiKey, String clientDomain) throws APISecurityException;
+    //public APIKeyValidationInfoDTO getAPIKeyData(String context, String apiVersion,
+    //                                             String apiKey, String clientDomain) throws APISecurityException;
 
     /**
      * Validate the given API key for the specified API context and version.
@@ -51,8 +51,9 @@ public interface APIKeyDataStore {
      * @return an APIKeyValidationInfoDTO instance containing key validation data
      * @throws org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityException on error
      */
-    public APIKeyValidationInfoDTO getAPIKeyData(String context, String apiVersion,
-                                                 String apiKey, String requiredAuthenticationLevel, String clientDomain) throws APISecurityException;
+    public APIKeyValidationInfoDTO getAPIKeyData(String context, String apiVersion, String apiKey,
+                                                 String requiredAuthenticationLevel, String clientDomain,
+                                                 String matchingResource, String httpVerb) throws APISecurityException;
 
     /**
      * Get API Resource URI Templates

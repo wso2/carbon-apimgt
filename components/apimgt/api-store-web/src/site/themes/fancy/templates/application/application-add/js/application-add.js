@@ -5,6 +5,10 @@ function tierChanged(element){
 }
 
 $(document).ready(function () {
+    $.ajaxSetup({
+      contentType: "application/x-www-form-urlencoded; charset=utf-8"
+    });
+
     var application = $("#application-name").val("");
 
      $.validator.addMethod('validateSpecialChars', function(value, element) {

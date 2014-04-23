@@ -19,5 +19,5 @@
 package org.wso2.carbon.apimgt.impl.workflow;
 
 public enum WorkflowStatus {
-    CREATED, APPROVED, REJECTED
+    CREATED, APPROVED, REJECTED, REGISTERED
 }

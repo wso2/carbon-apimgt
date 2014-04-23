@@ -46,7 +46,11 @@ var getAPI = function (api) {
             endpointConfig:result[34],
             responseCache:result[35],
             cacheTimeout:result[36],
-            availableTiersDisplayNames:result[37]
+            availableTiersDisplayNames:result[37],
+            faultSequence:result[38],
+            destinationStats:result[39],
+            resources:result[40],
+            scopes:result[41]
         };
         return {
             error:false,

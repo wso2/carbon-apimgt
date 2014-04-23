@@ -61,4 +61,25 @@ public abstract class UserSignUpWorkflowExecutor extends WorkflowExecutor {
         roles.add(role);
         userAdminStub.updateRolesOfUser(userName, roles.toArray(new String[roles.size()]));
     }
+
+    /**
+     * Method to delete a user
+     * @param serverURL
+     * @param adminUsername
+     * @param adminPassword
+     * @param userName
+     * @throws Exception
+     */
+    protected static void deleteUser(String serverURL, String adminUsername,
+                                            String adminPassword, String userName) throws Exception {
+
+        log.info("Remove the rejected user :"+userName);
+        String url = serverURL + "UserAdmin";
+
+        UserAdminStub userAdminStub = new UserAdminStub(url);
+        CarbonUtils.setBasicAccessSecurityHeaders(adminUsername, adminPassword,
+                true, userAdminStub._getServiceClient());
+        userAdminStub.deleteUser(userName);
+
+    }
 }

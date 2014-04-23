@@ -27,16 +27,15 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.*;
 import org.wso2.carbon.apimgt.api.model.Tag;
 import org.wso2.carbon.apimgt.handlers.security.stub.types.APIKeyMapping;
-import org.wso2.carbon.apimgt.impl.dto.ApplicationWorkflowDTO;
-import org.wso2.carbon.apimgt.impl.dto.Environment;
-import org.wso2.carbon.apimgt.impl.dto.SubscriptionWorkflowDTO;
-import org.wso2.carbon.apimgt.impl.dto.TierPermissionDTO;
+import org.wso2.carbon.apimgt.impl.dto.*;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIAuthenticationAdminClient;
 import org.wso2.carbon.apimgt.impl.utils.APINameComparator;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.utils.APIVersionComparator;
 import org.wso2.carbon.apimgt.impl.workflow.*;
+import org.wso2.carbon.apimgt.keymgt.client.SubscriberKeyMgtClient;
+import org.wso2.carbon.apimgt.keymgt.stub.types.carbon.ApplicationKeysDTO;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.governance.api.exception.GovernanceException;
 import org.wso2.carbon.governance.api.generic.GenericArtifactManager;
@@ -342,13 +341,14 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                         .getTenantId(tenantDomain);
                 userRegistry = ServiceReferenceHolder.getInstance().
                         getRegistryService().getGovernanceUserRegistry(CarbonConstants.REGISTRY_ANONNYMOUS_USERNAME, tenantId);
+                PrivilegedCarbonContext.getThreadLocalCarbonContext().setUsername(CarbonConstants.REGISTRY_ANONNYMOUS_USERNAME);
             } else {
                 userRegistry = registry;
+                PrivilegedCarbonContext.getThreadLocalCarbonContext().setUsername(this.username);
             }
             this.isTenantModeStoreView = isTenantMode;
             this.requestedTenant = tenantDomain;
-            PrivilegedCarbonContext.getThreadLocalCarbonContext().setUsername(this.username);
-
+            
             Map<String, API> latestPublishedAPIs = new HashMap<String, API>();
             List<API> multiVersionedAPIs = new ArrayList<API>();
             Comparator<API> versionComparator = new APIVersionComparator();
@@ -1063,6 +1063,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         Matcher matcher;
         try {
             GenericArtifactManager artifactManager = APIUtil.getArtifactManager(registry, APIConstants.API_KEY);
+            PaginationContext.init(1, 100000, "ASC", APIConstants.API_OVERVIEW_NAME, Integer.MAX_VALUE);
             if (artifactManager != null) {
                 GenericArtifact[] genericArtifacts = artifactManager
                         .getAllGenericArtifacts();
@@ -1131,56 +1132,61 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     public Map<String,Object> searchPaginatedAPIs(Registry registry, String searchTerm, String searchType,int start,int end) throws APIManagementException {
         SortedSet<API> apiSet = new TreeSet<API>(new APINameComparator());
         List<API> apiList = new ArrayList<API>();
-        String regex = "(?i)[\\w.|-]*" + searchTerm.trim() + "[\\w.|-]*";
-        Pattern pattern;
-        Matcher matcher;
+        // String regex = "(?i)[\\w.|-]*" + searchTerm.trim() + "[\\w.|-]*";
+        final String searchValue=searchTerm.trim();
         Map<String,Object> result=new HashMap<String, Object>();
+        int totalLength=0;
+        String criteria=APIConstants.API_OVERVIEW_NAME;
         try {
 
             GenericArtifactManager artifactManager = APIUtil.getArtifactManager(registry, APIConstants.API_KEY);
+            PaginationContext.init(0, 10000, "ASC", APIConstants.API_OVERVIEW_NAME, Integer.MAX_VALUE);
             if (artifactManager != null) {
-                GenericArtifact[] genericArtifacts = artifactManager
-                        .getAllGenericArtifacts();
+
+                if (searchType.equalsIgnoreCase("Provider")) {
+                    criteria=APIConstants.API_OVERVIEW_PROVIDER;
+                } else if (searchType.equalsIgnoreCase("Version")) {
+                    criteria=APIConstants.API_OVERVIEW_VERSION;
+                } else if (searchType.equalsIgnoreCase("Context")) {
+                    criteria=APIConstants.API_OVERVIEW_CONTEXT;
+                }else if (searchType.equalsIgnoreCase("Description")) {
+                    criteria=APIConstants.API_OVERVIEW_DESCRIPTION;
+                }
+
+                //Create the search attribute map for PUBLISHED APIs
+                Map<String, List<String>> listMap = new HashMap<String, List<String>>();
+                listMap.put(criteria, new ArrayList<String>() {{
+                    add(searchValue);
+                }});
+
+                GenericArtifact[] genericArtifacts = artifactManager.findGenericArtifacts(listMap);
+                totalLength = PaginationContext.getInstance().getLength();
                 if (genericArtifacts == null || genericArtifacts.length == 0) {
 
                     result.put("apis",apiSet);
                     result.put("length",0);
                     return result;
                 }
-                pattern = Pattern.compile(regex);
 
                 for (GenericArtifact artifact : genericArtifacts) {
                     String status = artifact.getAttribute(APIConstants.API_OVERVIEW_STATUS);
 
-                    if (searchType.equalsIgnoreCase("Provider")) {
-                        String api = APIUtil.replaceEmailDomainBack(artifact.getAttribute(APIConstants.API_OVERVIEW_PROVIDER));
-                        matcher = pattern.matcher(api);
-                    } else if (searchType.equalsIgnoreCase("Version")) {
-                        String api = artifact.getAttribute(APIConstants.API_OVERVIEW_VERSION);
-                        matcher = pattern.matcher(api);
-                    } else if (searchType.equalsIgnoreCase("Context")) {
-                        String api = artifact.getAttribute(APIConstants.API_OVERVIEW_CONTEXT);
-                        matcher = pattern.matcher(api);
-                    } else {
-                        String apiName = artifact.getAttribute(APIConstants.API_OVERVIEW_NAME);
-                        matcher = pattern.matcher(apiName);
-                    }
                     if (isAllowDisplayAPIsWithMultipleStatus()) {
-                        if (matcher.find() && (status.equals(APIConstants.PUBLISHED) || status.equals(APIConstants.DEPRECATED))) {
+                        if (status.equals(APIConstants.PUBLISHED) || status.equals(APIConstants.DEPRECATED)) {
                             apiList.add(APIUtil.getAPI(artifact, registry));
                         }
                     } else {
-                        if (matcher.find() && status.equals(APIConstants.PUBLISHED)) {
+                        if (status.equals(APIConstants.PUBLISHED)) {
                             apiList.add(APIUtil.getAPI(artifact, registry));
                         }
                     }
 
                 }
-                if(apiList.size()<end){
-                    end=apiList.size();
+                if(totalLength<((start+end)-1)){
+                    end=totalLength;
                 }
                 for(int i=start;i<end;i++){
-                   apiSet.add(apiList.get(i));
+                    apiSet.add(apiList.get(i));
 
 
                 }
@@ -1189,7 +1195,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             handleException("Failed to search APIs with type", e);
         }
         result.put("apis",apiSet);
-        result.put("length",apiList.size());
+        result.put("length",totalLength);
         return result;
     }
 
@@ -1248,33 +1254,44 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             int subscriptionId = apiMgtDAO.addSubscription(identifier, api.getContext(), applicationId,
                     APIConstants.SubscriptionStatus.ON_HOLD);
 
-            WorkflowExecutor addSubscriptionWFExecutor = WorkflowExecutorFactory.getInstance().
-                    getWorkflowExecutor(WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_CREATION);
-
-            SubscriptionWorkflowDTO workflowDTO = new SubscriptionWorkflowDTO();
-            workflowDTO.setStatus(WorkflowStatus.CREATED);
-            workflowDTO.setCreatedTime(System.currentTimeMillis());
-            workflowDTO.setTenantDomain(tenantDomain);
-            workflowDTO.setTenantId(tenantId);
-            workflowDTO.setExternalWorkflowReference(addSubscriptionWFExecutor.generateUUID());
-            workflowDTO.setWorkflowReference(String.valueOf(subscriptionId));
-            workflowDTO.setWorkflowType(WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_CREATION);
-            workflowDTO.setCallbackUrl(addSubscriptionWFExecutor.getCallbackURL());
-            workflowDTO.setApiName(identifier.getApiName());
-            workflowDTO.setApiContext(api.getContext());
-            workflowDTO.setApiVersion(identifier.getVersion());
-            workflowDTO.setApiProvider(identifier.getProviderName());
-            workflowDTO.setTierName(identifier.getTier());
-            workflowDTO.setApplicationName(apiMgtDAO.getApplicationNameFromId(applicationId));
-            workflowDTO.setSubscriber(userId);
+            boolean isTenantFlowStarted = false;
+            if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
+                isTenantFlowStarted = true;
+                PrivilegedCarbonContext.startTenantFlow();
+                PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
+            }
 
             try {
+
+                WorkflowExecutor addSubscriptionWFExecutor = WorkflowExecutorFactory.getInstance().
+                        getWorkflowExecutor(WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_CREATION);
+
+                SubscriptionWorkflowDTO workflowDTO = new SubscriptionWorkflowDTO();
+                workflowDTO.setStatus(WorkflowStatus.CREATED);
+                workflowDTO.setCreatedTime(System.currentTimeMillis());
+                workflowDTO.setTenantDomain(tenantDomain);
+                workflowDTO.setTenantId(tenantId);
+                workflowDTO.setExternalWorkflowReference(addSubscriptionWFExecutor.generateUUID());
+                workflowDTO.setWorkflowReference(String.valueOf(subscriptionId));
+                workflowDTO.setWorkflowType(WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_CREATION);
+                workflowDTO.setCallbackUrl(addSubscriptionWFExecutor.getCallbackURL());
+                workflowDTO.setApiName(identifier.getApiName());
+                workflowDTO.setApiContext(api.getContext());
+                workflowDTO.setApiVersion(identifier.getVersion());
+                workflowDTO.setApiProvider(identifier.getProviderName());
+                workflowDTO.setTierName(identifier.getTier());
+                workflowDTO.setApplicationName(apiMgtDAO.getApplicationNameFromId(applicationId));
+                workflowDTO.setSubscriber(userId);
                 addSubscriptionWFExecutor.execute(workflowDTO);
             } catch (WorkflowException e) {
                 //If the workflow execution fails, roll back transaction by removing the subscription entry.
                 apiMgtDAO.removeSubscriptionById(subscriptionId);
                 log.error("Could not execute Workflow", e);
                 throw new APIManagementException("Could not execute Workflow", e);
+            } finally {
+                if (isTenantFlowStarted) {
+                    PrivilegedCarbonContext.endTenantFlow();
+                }
             }
 
             if (APIUtil.isAPIGatewayKeyCacheEnabled()) {
@@ -1355,36 +1372,46 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
      */
     
     public String addApplication(Application application, String userId)
-            throws APIManagementException {        
-    	
-    	int applicationId = apiMgtDAO.addApplication(application, userId);
-    	
-        WorkflowExecutor appCreationWFExecutor = WorkflowExecutorFactory.getInstance().
-                                                 getWorkflowExecutor(WorkflowConstants.WF_TYPE_AM_APPLICATION_CREATION);
-        
-        ApplicationWorkflowDTO appWFDto = new ApplicationWorkflowDTO();
-        
-        appWFDto.setApplication(application);
-        
-        appWFDto.setExternalWorkflowReference(appCreationWFExecutor.generateUUID());
-        appWFDto.setWorkflowReference(String.valueOf(applicationId));
-        appWFDto.setWorkflowType(WorkflowConstants.WF_TYPE_AM_APPLICATION_CREATION);
-        appWFDto.setCallbackUrl(appCreationWFExecutor.getCallbackURL());
-        appWFDto.setStatus(WorkflowStatus.CREATED);
-        appWFDto.setTenantDomain(tenantDomain);
-        appWFDto.setTenantId(tenantId);
-        appWFDto.setUserName(userId);
-        appWFDto.setCreatedTime(System.currentTimeMillis());
-        
+            throws APIManagementException {
+
+        int applicationId = apiMgtDAO.addApplication(application, userId);
+
+        boolean isTenantFlowStarted = false;
+        if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
+            isTenantFlowStarted = true;
+            PrivilegedCarbonContext.startTenantFlow();
+            PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
+        }
+
         try {
+
+            WorkflowExecutor appCreationWFExecutor = WorkflowExecutorFactory.getInstance().
+                    getWorkflowExecutor(WorkflowConstants.WF_TYPE_AM_APPLICATION_CREATION);
+            ApplicationWorkflowDTO appWFDto = new ApplicationWorkflowDTO();
+            appWFDto.setApplication(application);
+
+            appWFDto.setExternalWorkflowReference(appCreationWFExecutor.generateUUID());
+            appWFDto.setWorkflowReference(String.valueOf(applicationId));
+            appWFDto.setWorkflowType(WorkflowConstants.WF_TYPE_AM_APPLICATION_CREATION);
+            appWFDto.setCallbackUrl(appCreationWFExecutor.getCallbackURL());
+            appWFDto.setStatus(WorkflowStatus.CREATED);
+            appWFDto.setTenantDomain(tenantDomain);
+            appWFDto.setTenantId(tenantId);
+            appWFDto.setUserName(userId);
+            appWFDto.setCreatedTime(System.currentTimeMillis());
+
             appCreationWFExecutor.execute(appWFDto);
         } catch (WorkflowException e) {
-        	 //If the workflow execution fails, roll back transaction by removing the application entry.
+            //If the workflow execution fails, roll back transaction by removing the application entry.
             apiMgtDAO.deleteApplication(application);
             log.error("Unable to execute Application Creation Workflow", e);
             handleException("Unable to execute Application Creation Workflow", e);
-        }        
-        String status = apiMgtDAO.getApplicationStatus(application.getName(),userId);
+        } finally {
+            if (isTenantFlowStarted) {
+                PrivilegedCarbonContext.endTenantFlow();
+            }
+        }
+        String status = apiMgtDAO.getApplicationStatus(application.getName(), userId);
         return status;
     }
 
@@ -1443,6 +1470,105 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 }
             }
         }
+    }
+
+    @Override
+    public Map<String,String> requestApprovalForApplicationRegistration(String userId, String applicationName, String tokenType, String callbackUrl, String[] allowedDomains, String validityTime) throws APIManagementException {
+
+        Application application  = apiMgtDAO.getApplicationByName(applicationName,userId);
+
+        if(!WorkflowStatus.APPROVED.toString().equals(application.getStatus())){
+            throw new APIManagementException("Application should be approved before registering.");
+        }
+
+        boolean isTenantFlowStarted = false;
+        if(tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)){
+            isTenantFlowStarted = true;
+            PrivilegedCarbonContext.startTenantFlow();
+            PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
+        }
+
+
+        WorkflowExecutor appRegistrationWorkflow = null;
+        ApplicationRegistrationWorkflowDTO appRegWFDto = null;
+        try {
+        if(APIConstants.API_KEY_TYPE_PRODUCTION.equals(tokenType)){
+            appRegistrationWorkflow = WorkflowExecutorFactory.getInstance().
+                    getWorkflowExecutor(WorkflowConstants.WF_TYPE_AM_APPLICATION_REGISTRATION_PRODUCTION);
+            appRegWFDto = (ApplicationRegistrationWorkflowDTO)WorkflowExecutorFactory.getInstance().
+                    createWorkflowDTO(WorkflowConstants.WF_TYPE_AM_APPLICATION_REGISTRATION_PRODUCTION);
+        } else if(APIConstants.API_KEY_TYPE_SANDBOX.equals(tokenType)){
+            appRegistrationWorkflow = WorkflowExecutorFactory.getInstance().
+                    getWorkflowExecutor(WorkflowConstants.WF_TYPE_AM_APPLICATION_REGISTRATION_SANDBOX);
+            appRegWFDto = (ApplicationRegistrationWorkflowDTO)WorkflowExecutorFactory.getInstance().
+                    createWorkflowDTO(WorkflowConstants.WF_TYPE_AM_APPLICATION_REGISTRATION_SANDBOX);
+        }
+
+        appRegWFDto.setStatus(WorkflowStatus.CREATED);
+        appRegWFDto.setCreatedTime(System.currentTimeMillis());
+        appRegWFDto.setTenantDomain(tenantDomain);
+        appRegWFDto.setTenantId(tenantId);
+        appRegWFDto.setExternalWorkflowReference(appRegistrationWorkflow.generateUUID());
+        appRegWFDto.setWorkflowReference(appRegWFDto.getExternalWorkflowReference());
+        appRegWFDto.setApplication(application);
+        appRegWFDto.setUserName(userId);
+        appRegWFDto.setCallbackUrl(appRegistrationWorkflow.getCallbackURL());
+        appRegWFDto.setDomainList(allowedDomains);
+        appRegWFDto.setValidityTime(Long.parseLong(validityTime));
+
+
+            appRegistrationWorkflow.execute(appRegWFDto);
+
+        } catch (WorkflowException e) {
+            log.error("Could not execute Workflow", e);
+            throw new APIManagementException("Could not execute Workflow", e);
+        } finally {
+            if(isTenantFlowStarted){
+                PrivilegedCarbonContext.endTenantFlow();
+            }
+        }
+
+        //TODO: Return  ApplicationKeysDTO or WorkflowDTO without creating a Map.To do this has to move either into
+        // api module.
+        Map<String,String> keyDetails = new HashMap<String, String>();
+        keyDetails.put("keyState",appRegWFDto.getStatus().toString());
+        ApplicationKeysDTO applicationKeysDTO = appRegWFDto.getKeyDetails();
+
+        if(applicationKeysDTO != null){
+
+            keyDetails.put("accessToken",applicationKeysDTO.getApplicationAccessToken());
+            keyDetails.put("consumerKey",applicationKeysDTO.getConsumerKey());
+            keyDetails.put("consumerSecret",applicationKeysDTO.getConsumerSecret());
+            keyDetails.put("validityTime",applicationKeysDTO.getValidityTime());
+
+        }
+
+
+        return keyDetails;
+    }
+
+    public Map<String,String> completeApplicationRegistration(String userId, String applicationName, String tokenType) throws APIManagementException{
+
+        Application application =  apiMgtDAO.getApplicationByName(applicationName,userId);
+        String status =  apiMgtDAO.getRegistrationApprovalState(application.getId(),tokenType);
+        Map<String,String> keyDetails = null;
+        try {
+            SubscriberKeyMgtClient keyMgtClient = APIUtil.getKeyManagementClient();
+            if(APIConstants.AppRegistrationStatus.REGISTRATION_APPROVED.equals(status))                                            {
+                ApplicationRegistrationWorkflowDTO workflowDTO = apiMgtDAO.populateAppRegistrationWorkflowDTO(application.getId());
+            ApplicationKeysDTO dto = keyMgtClient.getApplicationAccessKey(userId, application.getName(),tokenType,
+                    application.getCallbackUrl(),workflowDTO.getAllowedDomains(), Long.toString(workflowDTO.getValidityTime()));
+                keyDetails = new HashMap<String,String>();
+                keyDetails.put("accessToken",dto.getApplicationAccessToken());
+                keyDetails.put("consumerKey",dto.getConsumerKey());
+                keyDetails.put("consumerSecret", dto.getConsumerSecret());
+                keyDetails.put("validityTime",dto.getValidityTime());
+                keyDetails.put("accessallowdomains",workflowDTO.getDomainList());
+            }
+        } catch (Exception e) {
+            APIUtil.handleException("Error occurred while executing SubscriberKeyMgtClient.", e);
+        }
+        return keyDetails;
     }
 
     public Application[] getApplications(Subscriber subscriber) throws APIManagementException {

@@ -49,7 +49,18 @@
         "validating": "Validating.."
     },
     "errorMsgs":{
-    	"login":"Unable to log you in!"
+    	"login":"Unable to log you in!",
+        "invalidDocUrl":"Invalid Document Url Format.",
+        "inlineContent":"Sorry. The content of this document cannot be loaded.",
+        "apiResource":"Sorry. This row can not be deleted. AtLeast one resource entry has to be available." ,
+        "uniqueUrlPattern":"URL Pattern has to be unique. ",
+        "emptyUrlPattern":"URL Pattern can't be empty. ",
+        "emptyVerb":"At least one HTTP Verb has to be checked for a resource. ",
+        "duplicateUrlPattern":"has duplicated entries. ",
+        "noData":"No Data Found ... ",
+        "checkBAMConnectivity":" <a href='http://docs.wso2.org/wiki/display/AM170/Monitoring+Using+WSO2+BAM' target='_blank' class='warningLink'>Refer our wiki to configure BAM correctly</a>",
+        "unavailableData":"Data unavailable",
+        "login":"Unable to log you in!"
     }
 
 }

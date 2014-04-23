@@ -228,6 +228,20 @@ public interface APIConsumer extends APIManager {
     public void removeApplication(Application application) throws APIManagementException;
 
     /**
+     * Creates a request for getting Approval for Application Registration.
+     *
+     * @param userId Subsriber name.
+     * @param  applicationName of the Application.
+     * @param tokenType Token type (PRODUCTION | SANDBOX)
+     * @param callbackUrl Callback URL for the Application.
+     * @param
+     * @throws APIManagementException if failed to applications for given subscriber
+     */
+    public Map<String,String> requestApprovalForApplicationRegistration(String userId, String applicationName, String tokenType,
+                                                            String callbackUrl, String[] allowedDomains, String validityTime)
+        throws APIManagementException;
+
+    /**
      * Returns a list of applications for a given subscriber
      *
      * @param subscriber Subscriber
@@ -296,4 +310,16 @@ public interface APIConsumer extends APIManager {
      * @throws APIManagementException if failed to get the tiers
      */
     public boolean isTierDeneid(String tierName)throws APIManagementException;
+
+
+    /**
+     * Complete Application Registration process.If the Application registration fails before
+     * generating the Access Tokens, this method should be used to resume registration.
+     * @param userId Tenant Aware userID
+     * @param applicationName Name of the Application
+     * @param tokenType Type of the Token (PRODUCTION | SANDBOX)
+     * @return a Map containing the details of the OAuth application.
+     * @throws APIManagementException if failed to get the tiers
+     */
+    public Map<String,String> completeApplicationRegistration(String userId, String applicationName, String tokenType) throws APIManagementException;
 }

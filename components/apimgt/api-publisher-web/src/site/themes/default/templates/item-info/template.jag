@@ -6,7 +6,7 @@
 <link type="text/css" rel="stylesheet" href="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("templates/utils/dojo-release-1.8.3/dijit/themes/claro/claro.css"))%>"  media="screen"/>
 <div id="item-info">
     <div class="title-section">
-    <h2><%=api.name%> - <%=api.version%></h2>
+    <h2><%= encode.forHtml(api.name)%> - <%= encode.forHtml(api.version)%></h2>
     </div>
     <div class="content-section shadow-up">
         <div class="content-data">

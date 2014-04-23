@@ -9,8 +9,10 @@
 
 var insequence = "<%=api.inSequence%>";
 var outsequence = "<%=api.outSequence%>";
+var faultsequence = "<%=api.faultSequence%>";
 var inSequencesLoaded = false;
 var outSequencesLoaded = false;
+var faultSequencesLoaded = false;
 
 </script>
 
@@ -31,7 +33,7 @@ var outSequencesLoaded = false;
                     <div class="checkbox">
                         <%for(var i=0;i<api.apiStores.length;i++){%>
                         <label>
-                            <input type="checkbox"  id="store<%=i%>" name="store<%=i%>" class="storeCheck" value="<%=api.apiStores[i].name%>" <%if(api.apiStores[i].published){%>checked<%}%> />
+                            <input type="checkbox"  id="store<%=i%>" name="store<%=i%>" class="storeCheck" value="<%=api.apiStores[i].name%>" <%if(api.apiStores[i].published){%>checked<%}%><%if(api.status!='PUBLISHED'){%>disabled<%}%> />
                             <%=api.apiStores[i].displayName%>
                         </label>
                         <%}%>

@@ -24,7 +24,7 @@ var tenantDomains=outputs.tenantDomains;
                                     var currentURL = request.getRequestURL();
                                 %>
                                     <li class="thumbnail span3 tenent-thumb">
-                                    <a href="<%=currentURL%>?tenant=<%=tenantDomains[i]%>">
+                                    <a href="<%= encode.forHtmlAttribute(encode.forUri(currentURL + "?tenant="+tenantDomains[i])) %>">
                                     <center>
                                     <img src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("images/tenant-store.png"))%>" alt="">
                                     <h3><%=tenantDomains[i]%></h3>

@@ -21,6 +21,7 @@ package org.wso2.carbon.apimgt.impl.dto;
 
 import java.io.Serializable;
 import java.util.List;
+import java.util.Set;
 
 /**
  * This class represent the API key validation Info DTO.
@@ -45,6 +46,8 @@ public class APIKeyValidationInfoDTO implements Serializable {
     private long validityPeriod;
     private long issuedTime;
     private List<String> authorizedDomains;
+
+    private Set<String> scopes;
 
     private String apiName;
 
@@ -186,6 +189,14 @@ public class APIKeyValidationInfoDTO implements Serializable {
 
     public void setApiPublisher(String apiPublisher) {
         this.apiPublisher = apiPublisher;
+    }
+
+    public Set<String> getScopes() {
+        return scopes;
+    }
+
+    public void setScopes(Set<String> scopes) {
+        this.scopes = scopes;
     }
 }
 

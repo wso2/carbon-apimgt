@@ -31,21 +31,7 @@ $(document).ready(function(){
     });
 });
 
-var getAPIStoreURL = function (username,isSuperTenant) {
-    jagg.post("/site/blocks/user/login/ajax/login.jag", {action:"getAPIStoreURL"}, function (result) {
-        if (!result.error) {
-            if(isSuperTenant){location.href = result.url;}
-            else{
-                var tenantDomain=username.split("@")[1];
-                location.href = result.url+"?tenant="+tenantDomain;
-            }
 
-
-        } else {
-            jagg.message({content:result.message,type:"error"});
-        }
-    }, "json");
-};
 
 
 

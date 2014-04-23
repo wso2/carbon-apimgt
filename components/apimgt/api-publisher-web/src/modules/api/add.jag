@@ -63,25 +63,6 @@ var isURLValid = function (type,url) {
         };
     }
 };
-var getExternalAPIStores = function () {
-    var result, externalAPIStores,log = new Log(),
-            provider = jagg.module("manager").getAPIProviderObj();
-    try {
-        result = provider.getExternalAPIStores();
-        if (log.isDebugEnabled()) {
-            log.debug("Invoke getExternalAPIStores()" );
-        }
-        return {
-            error:false,
-            externalAPIStores:result
-        };
-    } catch (e) {
-        log.error(e.message);
-        return {
-            error:e
-        };
-    }
-};
 
 var getTiers = function () {
     var tier,tiers,list=[],log = new Log(),
@@ -170,6 +151,28 @@ var getCustomOutSequences = function () {
     }
 };
 
+var getCustomFaultSequences = function () {
+    var sequence,sequences,list=[],log = new Log(),
+            provider = jagg.module("manager").getAPIProviderObj();
+    try {
+    	sequences = provider.getCustomFaultSequences();
+        if (log.isDebugEnabled()) {
+            log.debug("getCustomFaultSequences " +  " : " + sequences);
+        }
+
+        return {
+            error:false,
+            sequences:sequences
+        };
+    } catch (e) {
+        log.error(e.message);
+        return {
+            error:e,
+            sequences:null
+        };
+    }
+};
+
 var isSynapseGateway = function () {
     var result, isSynapseGateway,log = new Log(),
             provider = jagg.module("manager").getAPIProviderObj();
@@ -181,6 +184,26 @@ var isSynapseGateway = function () {
         return {
             error:false,
             isSynapseGateway:result
+        };
+    } catch (e) {
+        log.error(e.message);
+        return {
+            error:e
+        };
+    }
+};
+
+var isDataPublishingEnabled = function () {
+    var result, isDataPublishingEnabled,log = new Log(),
+            provider = jagg.module("manager").getAPIProviderObj();
+    try {
+        result = provider.isDataPublishingEnabled();
+        if (log.isDebugEnabled()) {
+            log.debug("Invoke isDataPublishingEnabled()" );
+        }
+        return {
+            error:false,
+            isDataPublishingEnabled:result
         };
     } catch (e) {
         log.error(e.message);

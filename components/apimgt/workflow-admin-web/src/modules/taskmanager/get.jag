@@ -29,6 +29,8 @@ prefixEndpoint= site.workflows.subscriptionWorkFlowServerURL;
 prefixEndpoint=site.workflows.signupWorkFlowServerURL;
 } else if(taskType=="ApproveApplication"){
 prefixEndpoint=site.workflows.applicationWorkFlowServerURL;
+} else if(taskType=="ApplicationRegistration"){
+prefixEndpoint=site.workflows.appRegistrationWorkFlowServerURL;
 }
 
 var payload = '<ns:simpleQuery xmlns:ns="http://docs.oasis-open.org/ns/bpel4people/ws-humantask/api/200803" xmlns:ns1="http://docs.oasis-open.org/ns/bpel4people/ws-humantask/types/200803">'+

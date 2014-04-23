@@ -6,11 +6,11 @@
     <div class="content-section shadow-up">
     <div class="content-data">
     <%
-    var tenant=request.getParameter("tenant");
+    var tenant= encode.forUriComponent(request.getParameter("tenant"));
     var urlPrefix;
     var urlPostfix;
-    if(tenant!=null) {urlPrefix="?tenant="+tenant;}else{urlPrefix='';}
-    if(tenant!=null) {urlPostfix="&tenant="+tenant;}else{urlPostfix='';}
+    if(tenant!='null') {urlPrefix="?tenant="+tenant;}else{urlPrefix='';}
+    if(tenant!='null') {urlPostfix="&tenant="+tenant;}else{urlPostfix='';}
     if ((outputs.apis != null && outputs.apis.length > 0) || request.getParameter('query') != null) {
         jagg.includeBlock("search/api-search", null);
     }
@@ -20,6 +20,26 @@
         <label><b> <%=outputs.message%></b></label>
     <% }else{
     %>
+   <script type="text/javascript">
+   function hideMsg() {
+       $('#apiInfo').hide("fast");
+   }
+       $(document).ready(function () {
+        if($.cookie('showAPIInfo')=="yes"){
+        $('#apiInfo').show();
+        var date = new Date();
+        date.setTime(date.getTime() + (40* 1000));
+        $.cookie('showAPIInfo', 'false',{ path: '/',expires: date });
+         var t = setTimeout("hideMsg()", 3000);
+
+       }
+
+       });
+
+   </script>
+        <div class="alert alert-info" id="apiInfo" style="display:none;">
+           <div style="padding-bottom:10px"><b><%=i18n.localize("aboutAPIs")%></b></div>
+       </div>
 
     <ul class="thumbnails">
         <span class="loading"></span>

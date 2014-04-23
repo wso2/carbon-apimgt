@@ -17,6 +17,8 @@
 */
 package org.wso2.carbon.apimgt.api.model;
 
+import org.json.simple.JSONValue;
+
 import java.util.*;
 
 public class URITemplate {
@@ -30,6 +32,9 @@ public class URITemplate {
     private List<String> authTypes = new ArrayList<String>();
     private String throttlingTier;
     private List<String> throttlingTiers = new ArrayList<String>();
+    private Scope scope;
+    private List<Scope> scopes = new ArrayList<Scope>();
+
 
     public String getThrottlingTier() {
         return throttlingTier;
@@ -46,7 +51,6 @@ public class URITemplate {
     public void setThrottlingTiers(List<String> throttlingTiers) {
         this.throttlingTiers = throttlingTiers;
     }
-
 
     public String getHTTPVerb() {
         return httpVerb;
@@ -147,4 +151,40 @@ public class URITemplate {
         return str.trim();
     }
 
+    public Scope getScope() {
+        return scope;
+    }
+    public Scope getScopes() {
+        return scope;
+    }
+
+    public void setScope(Scope scope) {
+        this.scope = scope;
+    }
+
+    public void setScopes(Scope scope){
+        this.scopes.add(scope);
+    }
+
+    public String getResourceMap(){
+        Map verbs = new LinkedHashMap();
+        int i = 0;
+        for (String method : httpVerbs) {
+            Map verb = new LinkedHashMap();
+            verb.put("auth_type",authTypes.get(i));
+            verb.put("throttling_tier",throttlingTiers.get(i));
+            try{
+                Scope tmpScope = scopes.get(i);
+                if(tmpScope != null){
+                    verb.put("scope",tmpScope.getKey());
+                }
+            }catch(IndexOutOfBoundsException e){
+                //todo need to rewrite to prevent this type of exceptions
+            }
+            verbs.put(method,verb);
+            i++;
+        }
+        //todo this is a hack to make key validation service stub from braking need to rewrite.
+        return JSONValue.toJSONString(verbs);
+    }
 }

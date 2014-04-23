@@ -36,6 +36,7 @@ import org.apache.axiom.om.OMElement;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.impl.dto.Environment;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 
@@ -78,12 +79,12 @@ public class APIMWSDLReader {
 	 * 
 	 */
 	
-	public OMElement readAndCleanWsdl() throws APIManagementException {
+	public OMElement readAndCleanWsdl(API api) throws APIManagementException {
 
 		try {
 			Definition wsdlDefinition = readWSDLFile();
 
-			setServiceDefinition(wsdlDefinition);
+			setServiceDefinition(wsdlDefinition, api);
 
 			WSDLWriter writer = getWsdlFactoryInstance().newWSDLWriter();
 
@@ -139,7 +140,7 @@ public class APIMWSDLReader {
 	 * @throws APIManagementException
 	 */
 	
-	private void setServiceDefinition(Definition definition) throws APIManagementException {
+	private void setServiceDefinition(Definition definition, API api) throws APIManagementException {
 
 		Map serviceMap = definition.getAllServices();
 		Iterator serviceItr = serviceMap.entrySet().iterator();
@@ -164,7 +165,7 @@ public class APIMWSDLReader {
 						if (addressURI == null) {
 							break;
 						} else {
-							setAddressUrl(extensibilityElement);
+							setAddressUrl(extensibilityElement, api);
 						}
 					}
 				}
@@ -206,15 +207,15 @@ public class APIMWSDLReader {
 	 * @throws APIManagementException
 	 */
 
-	private void setAddressUrl(ExtensibilityElement exElement) throws APIManagementException {
+    private void setAddressUrl(ExtensibilityElement exElement, API api) throws APIManagementException {
 
-		if (exElement instanceof SOAP12AddressImpl) {
-			((SOAP12AddressImpl) exElement).setLocationURI(APIUtil.getGatewayendpoint());
-		} else if (exElement instanceof SOAPAddressImpl) {
-			 ((SOAPAddressImpl) exElement).setLocationURI(APIUtil.getGatewayendpoint());
-		} else if (exElement instanceof HTTPAddressImpl) {
-			 ((HTTPAddressImpl) exElement).setLocationURI(APIUtil.getGatewayendpoint());
-		} else {
+        if (exElement instanceof SOAP12AddressImpl) {
+            ((SOAP12AddressImpl) exElement).setLocationURI(APIUtil.getGatewayendpoint(api.getTransports()) + api.getContext() + "/" + api.getId().getVersion());
+        } else if (exElement instanceof SOAPAddressImpl) {
+            ((SOAPAddressImpl) exElement).setLocationURI(APIUtil.getGatewayendpoint(api.getTransports()) + api.getContext() + "/" + api.getId().getVersion());
+        } else if (exElement instanceof HTTPAddressImpl) {
+            ((HTTPAddressImpl) exElement).setLocationURI(APIUtil.getGatewayendpoint(api.getTransports()) + api.getContext() + "/" + api.getId().getVersion());
+        } else {
 			String msg = "Unsupported WSDL errors!";
 			log.error(msg);
 			throw new APIManagementException(msg);

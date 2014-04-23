@@ -7,9 +7,9 @@ var localeResourcesBasePath="/site/conf/locales/jaggery/";
 var tenantDomain=request.getParameter("tenant");
 var urlPrefix;
 var urlPostfix;
-if(tenantDomain!=null){
-   urlPrefix="?tenant="+tenantDomain;
-   urlPostfix="&tenant="+tenantDomain;
+if(tenantDomain!='null'){
+   urlPrefix="?tenant="+ encode.forUriComponent(tenantDomain);
+   urlPostfix="&tenant="+ encode.forUriComponent(tenantDomain);
 }else{
    urlPrefix='';
    urlPostfix='';
@@ -18,15 +18,13 @@ i18n.init(request,localeResourcesBasePath);
 %>
 <head>
     <%
-    var partWithContext = request.getRequestURL().split(
-                                request.getRequestURI()
-                              )[0]+request.getContextPath();
+    var partWithContext = request_url
 
     %>
     <script>
         var requestURL = '<%=partWithContext%>';
         var ssoEnabled = '<%=site.ssoConfiguration.enabled%>';
-        var tenantDomain = '<%=tenantDomain%>';
+        var tenantDomain = '<%= encode.forJavaScript(tenantDomain) %>';
     </script>
     <title><%=outputs.title%></title>
     <meta charset="UTF-8">
@@ -53,7 +51,7 @@ i18n.init(request,localeResourcesBasePath);
 
     <script type="text/javascript" src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("lib/jquery-1.7.1.min.js"))%>"></script>
 
-    <%
+<%
     var data = jagg.data();
     if(data.header) {
         jagg.printData(data.header.js);
@@ -72,7 +70,7 @@ var jsonUrl="json";
 var addUrl="add";
 var editUrl="info";
 %>
-<body <% if(reqUrl.indexOf(inlineUrl)>=0 || reqUrl.indexOf(jsonUrl)>=0){%> onload="loadDefaultTinyMCEContent('<%=provider%>','<%=name%>','<%=version%>','<%=docName%>')"<%}%>
+<body <% if(reqUrl.indexOf(inlineUrl)>=0 || reqUrl.indexOf(jsonUrl)>=0){%> onload="loadDefaultTinyMCEContent('<%= encode.forJavaScript(provider) %>','<%= encode.forJavaScript(name) %>','<%= encode.forJavaScript(version)%>','<%= encode.forJavaScript(docName)%>')"<%}%>
 <% if(reqUrl.indexOf(addUrl)>=0 || reqUrl.indexOf(editUrl)>=0){%> onload="loadTiers()"<%}%>
 >
     <div id="wrap">
@@ -120,6 +118,15 @@ var editUrl="info";
     <script type="text/javascript" src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("lib/bootstrap/js/bootstrap-carousel.js"))%>"></script>
     <script type="text/javascript" src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("lib/bootstrap/js/bootstrap-typeahead.js"))%>"></script>
     <script type="text/javascript" src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("lib/bootstrap/js/bootstrap-affix.js"))%>"></script>
+    <script type="text/javascript">
+        $(document).ready(function(){
+            $('.left-menu-back01').css('min-height',$(document).height()+'px');
+            $(window).resize(function(){
+                 $('.left-menu-back01').css('min-height',$(document).height()+'px');
+            });
+        });
+    </script>
+
 </body>
 </html>
 <% }); %>

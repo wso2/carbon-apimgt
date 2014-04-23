@@ -40,7 +40,7 @@ h5{
     color: #747c8c;
 }
 body{
-    background:transparent url(../images/back.jpg);
+    background:#fff;
 }
 p{
     margin-top:10px;
@@ -56,15 +56,15 @@ a{
     padding-left:0;
 }
 .header{
-    background:transparent url(../images/appFac_02.jpg) repeat-x;
-    height:143px;
+    height:54px;
+    background:#292E38;
     padding:0;
     position:absolute;
     width:100%;
     z-index:-1;
+    border-bottom: solid 1px #000;
 }
 .top-menu{
-    background:transparent url(../images/appFac_04.jpg) repeat-x;
     height:143px;
 }
 .brand{
@@ -72,7 +72,6 @@ a{
     height:26px;
     display:block;
     margin-top:15px;
-    margin-left:20px;
 }
 .row-fluid div.special-link-box1{
     background: #f0f0f0;
@@ -89,13 +88,11 @@ a{
 .logo-section{
     /*width:150px;*/
 }
-.menu-back{
-    background:transparent url(../images/appFac_04.jpg) repeat-x;
+div.row-fluid div.menu-back{
     height:55px;
+    margin-left: -12px;
 }
 .menu-content{
-    border-left:solid 5px #4b4b4b;
-    margin-top:7px;
     height:46px;
 }
 .menu-content div.navbar {
@@ -113,17 +110,21 @@ a{
     box-shadow: inset 2px 2px 2px 2px rgba(0, 0, 0, 0.1);
 }
 .menu-content .navbar .nav > li > a {
-    padding:0 14px;
+    padding:5px 14px 0px;
     text-align:center;
     cursor:pointer;
     text-shadow: 0 0 0 #FFFFFF;
     color:#fff;
-    height:45px;
+    height:50px;
+}
+.menu-content .navbar .orderFix  > li > a{
+    border-left: 1px solid #444444;
+    border-right: 1px solid #444444;
 }
 .menu-content .navbar .nav > .active > a, .navbar .nav > .active > a:hover, .navbar .nav > .active > a:focus {
-    background:transparent;
+    background:#18CDE8;
     text-align:center;
-    color:#cfcfcf;
+    color:#292E38;
     text-shadow:0 0 0 #FFFFFF;
 }
 .menu-content .navbar .divider-vertical{
@@ -158,6 +159,7 @@ a{
 
 .breadcrumb-section{
     padding:0px 0 0 42px;
+    display: none;
 }
 .breadcrumb-section h1{
     display: inline;
@@ -251,6 +253,7 @@ a{
     z-index:-1;
     min-height: 68px; /* .push must be the same height as .footer */
     color:#9f9f9f;
+    display: none;
 }
 .footer-main hr{
     border: dotted 1px #777;
@@ -310,50 +313,6 @@ a{
     font-size:22px;
     color: #7d7d7d;
     padding:10px 0;
-}
-.btn-primary,.btn {
-    font-size:12px;
-    text-align: left;
-}
-.btn-primary:hover, .btn-primary:focus{
-    background-color: #395751;
-}
-.btn-primary.active,
-.btn-warning.active,
-.btn-danger.active,
-.btn-success.active,
-.btn-info.active,
-.btn-inverse.active {
-    background-color: #395751 !important;
-}
-.btn-primary {
-  color: #fff;
-  text-shadow: 0 0 0 rgba(0, 0, 0, 0.25);
-  background-color: #395751;
-  *background-color: #395751;
-  background-image: -webkit-gradient(linear, 0 0, 0 100%, from(#3cbca4), to(#395751));
-  background-image: -webkit-linear-gradient(top, #3cbca4, #395751);
-  background-image: -o-linear-gradient(top, #3cbca4, #395751);
-  background-image: linear-gradient(to bottom, #3cbca4, #395751);
-  background-image: -moz-linear-gradient(top, #3cbca4, #395751);
-  background-repeat: repeat-x;
-  border-color: #3cbca4 #3cbca4 #3b363d;
-  border-color: rgba(57, 87, 81, 0.1) rgba(57, 87, 81, 0.1) rgba(60,188,164, 0.25);
-  filter: progid:dximagetransform.microsoft.gradient(startColorstr='#3cbca4', endColorstr='#395751', GradientType=0);
-  filter: progid:dximagetransform.microsoft.gradient(enabled=false);
-}
-.btn-primary:hover,
-.btn-primary:active,
-.btn-primary.active,
-.btn-primary.disabled,
-.btn-primary[disabled] {
-  color: #efefef;
-  background-color: #395751;
-  *background-color: #395751;
-}
-.btn-primary:active,
-.btn-primary.active {
-    *background-color: #395751   \9;
 }
 .tab-table{
     width:100%;
@@ -1311,4 +1270,121 @@ display: inline;
 -webkit-filter: grayscale(100%);
 -moz-filter: grayscale(100%);
 filter: grayscale(100%);
+}
+.social_links img {
+    width: 35px;
+    padding: 5px;
+    border: 0;
+    box-shadow: 0;
+    display: inline;
+}
+
+.api_urls { font-size:15px;}
+
+.desaturate {
+    -webkit-filter: grayscale(100%);
+    -moz-filter: grayscale(100%);
+    filter: grayscale(100%);
+}
+.search-section-custom div.span3{
+    min-height: 50px;
+}
+.search-section-custom div.span9{
+    padding-left: 10px;
+}
+.content-strip-mid{
+    padding:0;
+    margin: -50px 0 0 0;
+}
+.search-section-custom{
+    padding:0;
+    margin: 0;
+}
+.content-strip-mid h4{
+    background: transparent;
+    box-shadow: none;
+    color:#fff;
+}
+.content-strip-mid div.span3{
+    min-height: 1000px;
+}
+.content-strip-mid div.span3,.search-section-custom div.span3{
+    background: #636871;
+    border-right: solid 1px #000;
+}
+.content-strip-section{
+    padding-left: 10px;
+}
+.content-strip-mid a{
+    color:#fff;
+}
+#push{
+    display: none;
+}
+#searchAPIHelp{
+    position: absolute;
+    background: #fff;
+    padding: 20px;
+    border: solid 1px #ccc;
+    margin-left: 256px
+}
+
+/* graphtable styles */
+.graphTable a {
+    color: #C75F3E;
+}
+.graphTable {
+    border-left: 1px solid #C1DAD7;
+    border-top: 1px solid #C1DAD7;
+    margin: 10px 0 0;
+    padding: 0;
+}
+.graphTable caption {
+    font: italic 11px "Trebuchet MS",Verdana,Arial,Helvetica,sans-serif;
+    padding: 0 0 5px;
+    text-align: right;
+    width: 700px;
+}
+.graphTable th {
+    background: url("images/bg_header.jpg") no-repeat scroll 0 0 #CAE8EA;
+    border-bottom: 1px solid #C1DAD7;
+    border-right: 1px solid #C1DAD7;
+    border-top: 1px solid #C1DAD7;
+    color: #4F6B72;
+    font: bold 11px "Trebuchet MS",Verdana,Arial,Helvetica,sans-serif;
+    letter-spacing: 2px;
+    padding: 6px 6px 6px 12px;
+    text-align: left;
+    text-transform: uppercase;
+}
+.graphTable th.nobg {
+    background: none repeat scroll 0 0 rgba(0, 0, 0, 0);
+    border-left: 0 none;
+    border-right: 1px solid #C1DAD7;
+    border-top: 0 none;
+}
+.graphTable td {
+    background: none repeat scroll 0 0 #FFFFFF;
+    border-bottom: 1px solid #C1DAD7;
+    border-right: 1px solid #C1DAD7;
+    color: #4F6B72;
+    padding: 6px 6px 6px 12px;
+}
+.graphTable td.alt {
+    background: none repeat scroll 0 0 #F5FAFA;
+    color: #797268;
+    width: 100%;
+}
+.graphTable th.spec {
+    background: none repeat scroll 0 0 #FFFFFF;
+    border-left: 1px solid #C1DAD7;
+    border-top: 0 none;
+    font: bold 10px "Trebuchet MS",Verdana,Arial,Helvetica,sans-serif;
+}
+.graphTable th.specalt {
+    background: none repeat scroll 0 0 #F5FAFA;
+    border-left: 1px solid #C1DAD7;
+    border-top: 0 none;
+    color: #797268;
+    font: bold 10px "Trebuchet MS",Verdana,Arial,Helvetica,sans-serif;
 }

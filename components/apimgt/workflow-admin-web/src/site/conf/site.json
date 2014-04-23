@@ -6,10 +6,12 @@
     "context" : "/workflow-admin",
     "tasksPerPage": 10,
     "allowedRole":"admin",
+    "allowedRoles":"admin,subscriber",
     "workflows":{
      "applicationWorkFlowServerURL": "https://localhost:9445/services/",
      "subscriptionWorkFlowServerURL": "https://localhost:9445/services/",
-     "signupWorkFlowServerURL": "https://localhost:9445/services/"
+     "signupWorkFlowServerURL": "https://localhost:9445/services/",
+     "appRegistrationWorkFlowServerURL": "https://localhost:9445/services/"
 
     },
     "ssoConfiguration" : {

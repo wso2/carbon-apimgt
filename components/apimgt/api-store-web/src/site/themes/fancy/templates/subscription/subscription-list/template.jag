@@ -1,10 +1,13 @@
-<% jagg.template("subscription/subscription-list", function(inputs, outputs, jagg) { %>
+<% jagg.template("subscription/subscription-list", function(inputs, outputs, jagg) {
+  var lenI=0,apps = outputs.applications; if(apps!=null){lenI = apps.length;}
+ %>
 <div class="title-section">
            <h2>Subscriptions</h2>
 </div>
 <div class="content-section shadow-up">
     <div class="content-data subs-section">
-        Keys are generated per Application which allows to use a single key for multiple APIs and subscribe multiple times to a single API, with different SLA levels.
+       <%if(lenI!=0){%>
+        Keys are generated per Application which allows to use a single key for multiple APIs and subscribe multiple times to a single API, with different SLA levels.<%}%>
         <h3>Applications With Subscriptions</h3>
         <link rel="stylesheet" type="text/css" href="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("js/lib/select2-3.4.2/select2.css"))%>" />
         <script src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("js/lib/select2-3.4.2/select2.js"))%>"></script>
@@ -19,7 +22,7 @@
         </script>
         <select id="appListSelected" class="input-large">
             <%
-                var i, j, app, selectedApp, api, apis, key, lenI = 0, clazz, lenJ, path, apps = outputs.applications; if(apps!=null){lenI = apps.length;}
+                var i, j, app, selectedApp, api, apis, key,  clazz, path;
                 selectedApp = '';
             %>
             <%
@@ -27,7 +30,7 @@
             for(i = 0; i < lenI; i++) {
                 app = apps[i];
                 %>
-                <option value="<%=app.name%>" <%
+                <option value="<%= encode.forHtmlAttribute(app.name)%>" <%
                     if(request.getParameter('selectedApp') == null ){
                         if(session.get('selectedApp') == null){
                             if(i==0){ selectedApp = app; %> selected="selected" <% }
@@ -44,7 +47,7 @@
                             %> selected="selected" <%
                         }
                     }
-                %>><%=app.name%></option>
+                %>><%= encode.forHtml(app.name)%></option>
             <% } %>
         </select>
         <%
@@ -59,19 +62,19 @@
                     </div>
                 </div>
             </div>
-       <%
-                        } else{
-             var listAPIsURL="/site/pages/list-apis.jag";
-             if(request.getQueryString()){
-             listAPIsURL+= "?" + request.getQueryString();
-             }
+        <%
+            }else{
+                          var listAPIsURL="/site/pages/list-apis.jag";
+                          if(request.getQueryString()){
+                          listAPIsURL+= "?" + request.getQueryString();
+                          }
 
-                    %><br/><br/>
-            <div class="alert alert-info">
-                   <b>  No subscriptions are created yet. To add a new subscription , select an API and subscribe to it from  <a href="<%=jagg.getAbsoluteUrl(listAPIsURL)%>">API listing page</a> .</b>
-            </div>
-            <%}%>
-           </div>
-       </div>
+                                 %><br/><br/>
+                         <div class="alert alert-info">
+                                <b>  No subscriptions are created yet. To add a new subscription , select an API and subscribe to it from  <a href="<%=jagg.getAbsoluteUrl(listAPIsURL)%>">API listing page</a> .</b>
+                         </div>
+                         <%}%>
+                        </div>
+                    </div>
 
-       <% }); %>
+<% }); %>

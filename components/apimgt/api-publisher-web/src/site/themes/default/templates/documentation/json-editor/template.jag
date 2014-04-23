@@ -2,10 +2,10 @@
 var mode = request.getParameter("mode");
 %>
 <script type="text/javascript">
-var apiName = '<%=request.getParameter("apiName")%>';
-var apiVersion = '<%=request.getParameter("version")%>';
-var provider = '<%=request.getParameter("provider")%>';
-var docName = '<%=request.getParameter("docName")%>';
+var apiName = "<%= encode.forJavaScript(request.getParameter("apiName"))%>";
+var apiVersion = "<%= encode.forJavaScript(request.getParameter("version"))%>";
+var provider = "<%= encode.forJavaScript(request.getParameter("provider"))%>";
+var docName = "<%= encode.forJavaScript(request.getParameter("docName"))%>";
 </script>
         <div class="alert alert-error" id="inlineError" style="display:none">
             <span id="inlineErrorSpan"></span>
@@ -17,7 +17,7 @@ var docName = '<%=request.getParameter("docName")%>';
                 <div class="span12"></div>
                 <div class="span12">
                     <div id="apiDeatils">
-                        <h3><%=request.getParameter("docName")%></h3>
+                        <h3><%= encode.forHtml(request.getParameter("docName"))%></h3>
                     </div>
                 <div class="alert alert-success" id="docAddMessage" style="display:none;width:62%">
                 <button type="button" class="close" data-dismiss="alert">&times;</button>
