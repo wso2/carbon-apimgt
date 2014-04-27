@@ -410,8 +410,7 @@ public class APIManagerStartupPublisher implements ServerStartupHandler {
 		try {
 			String jsonText = APIUtil.createSwaggerJSONContent(api);
 
-			String resourcePath = APIUtil.getAPIDefinitionFilePath(
-					identifier.getApiName(), identifier.getVersion());
+			String resourcePath = APIUtil.getAPIDefinitionFilePath(identifier.getApiName(), identifier.getVersion(),identifier.getProviderName());
 
 			Resource resource = registry.newResource();
 
