@@ -226,22 +226,22 @@
                     <instructions>
                         <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
                         <Bundle-Name>${project.artifactId}</Bundle-Name>
-                        <Private-Package>
+                        <!--Private-Package>
                             org.wso2.carbon.apimgt.impl.internal
-                        </Private-Package>
+                        </Private-Package-->
                         <Export-Package>
-                            org.wso2.carbon.apimgt.impl,
-                            org.wso2.carbon.apimgt.impl.clients.*,
-                            org.wso2.carbon.apimgt.impl.dao.*,
-                            org.wso2.carbon.apimgt.impl.dto.*,
-                            org.wso2.carbon.apimgt.impl.handlers.*,
-                            org.wso2.carbon.apimgt.impl.listners.*,
-                            org.wso2.carbon.apimgt.impl.observers.*,
-                            org.wso2.carbon.apimgt.impl.publishers.*,
-                            org.wso2.carbon.apimgt.impl.template.*,
-                            org.wso2.carbon.apimgt.impl.token.*,
-                            org.wso2.carbon.apimgt.impl.utils.*,
-                            org.wso2.carbon.apimgt.impl.workflow.*,
+                            org.wso2.carbon.apimgt.impl.*,
+                            <!--org.wso2.carbon.apimgt.impl.clients.*,-->
+                            <!--org.wso2.carbon.apimgt.impl.dao.*,-->
+                            <!--org.wso2.carbon.apimgt.impl.dto.*,-->
+                            <!--org.wso2.carbon.apimgt.impl.handlers.*,-->
+                            <!--org.wso2.carbon.apimgt.impl.listners.*,-->
+                            <!--org.wso2.carbon.apimgt.impl.observers.*,-->
+                            <!--org.wso2.carbon.apimgt.impl.publishers.*,-->
+                            <!--org.wso2.carbon.apimgt.impl.template.*,-->
+                            <!--org.wso2.carbon.apimgt.impl.token.*,-->
+                            <!--org.wso2.carbon.apimgt.impl.utils.*,-->
+                            <!--org.wso2.carbon.apimgt.impl.workflow.*,-->
                         </Export-Package>
                         <Import-Package>
                             org.wso2.carbon.governance.api.*,
