@@ -19,21 +19,20 @@
 
 package org.wso2.carbon.apimgt.hostobjects;
 
-import java.util.Comparator;
-
 import org.apache.axis2.context.ConfigurationContext;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.hostobjects.internal.HostObjectComponent;
+import org.wso2.carbon.apimgt.hostobjects.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
-import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.keymgt.client.SubscriberKeyMgtClient;
-import org.wso2.carbon.apimgt.usage.publisher.APIMgtUsagePublisherConstants;
 import org.wso2.carbon.identity.user.registration.stub.dto.UserFieldDTO;
 import org.wso2.carbon.utils.CarbonUtils;
 import org.wso2.carbon.utils.ConfigurationContextService;
+
+import java.util.Comparator;
 
 public class HostObjectUtils {
     private static final Log log = LogFactory.getLog(APIProviderHostObject.class);

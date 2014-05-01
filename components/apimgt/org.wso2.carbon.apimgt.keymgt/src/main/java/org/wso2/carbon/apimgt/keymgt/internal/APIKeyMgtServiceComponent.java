@@ -27,6 +27,8 @@ import org.apache.thrift.transport.TServerSocket;
 import org.apache.thrift.transport.TTransportException;
 import org.osgi.service.component.ComponentContext;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
+import org.wso2.carbon.apimgt.impl.APIManagerConfigurationServiceImpl;
 import org.wso2.carbon.apimgt.keymgt.service.thrift.APIKeyMgtException;
 import org.wso2.carbon.apimgt.keymgt.service.thrift.APIKeyValidationServiceImpl;
 import org.wso2.carbon.apimgt.keymgt.util.APIKeyMgtDataHolder;
@@ -35,9 +37,11 @@ import org.wso2.carbon.identity.thrift.authentication.ThriftAuthenticatorService
 import org.wso2.carbon.registry.core.service.RegistryService;
 import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
+import org.wso2.carbon.utils.CarbonUtils;
 import org.wso2.carbon.utils.NetworkUtils;
 import org.wso2.carbon.apimgt.keymgt.service.thrift.APIKeyValidationService;
 
+import java.io.File;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.concurrent.ExecutorService;
@@ -68,6 +72,15 @@ public class APIKeyMgtServiceComponent {
 
     protected void activate(ComponentContext ctxt) {
         try {
+            APIManagerConfiguration configuration = new APIManagerConfiguration();
+            String filePath = CarbonUtils.getCarbonHome() + File.separator + "repository" +
+                    File.separator + "conf" + File.separator + "api-manager.xml";
+            configuration.load(filePath);
+
+            APIManagerConfigurationServiceImpl configurationService =
+                    new APIManagerConfigurationServiceImpl(configuration);
+            ServiceReferenceHolder.getInstance().setAPIManagerConfigurationService(configurationService);
+
             APIKeyMgtDataHolder.initData();
             //Based on configuration we have to decide thrift server run or not
             if (APIKeyMgtDataHolder.getThriftServerEnabled()) {

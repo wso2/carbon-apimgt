@@ -22,6 +22,8 @@ import org.wso2.carbon.apimgt.hostobjects.APIStoreHostObject;
 import org.wso2.carbon.apimgt.hostobjects.HostObjectUtils;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
+import org.wso2.carbon.registry.core.service.RegistryService;
+import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.utils.ConfigurationContextService;
 
 /**
@@ -35,6 +37,12 @@ import org.wso2.carbon.utils.ConfigurationContextService;
  * policy="dynamic"
  * bind="setConfigurationContextService"
  * unbind="unsetConfigurationContextService"
+ * @scr.reference name="user.realm.service"
+ * interface="org.wso2.carbon.user.core.service.RealmService"
+ * cardinality="1..1" policy="dynamic" bind="setRealmService" unbind="unsetRealmService"
+ * @scr.reference name="registry.service"
+ * interface="org.wso2.carbon.registry.core.service.RegistryService"
+ * cardinality="1..1" policy="dynamic" bind="setRegistryService" unbind="unsetRegistryService"
  */
 public class HostObjectComponent {
 
@@ -59,6 +67,7 @@ public class HostObjectComponent {
             log.debug("API manager configuration service bound to the API host objects");
         }
         configuration = amcService.getAPIManagerConfiguration();
+        ServiceReferenceHolder.getInstance().setAPIManagerConfigurationService(amcService);
     }
 
     protected void unsetAPIManagerConfigurationService(APIManagerConfigurationService amcService) {
@@ -78,5 +87,27 @@ public class HostObjectComponent {
 
     protected void unsetConfigurationContextService(ConfigurationContextService configCtx) {
         HostObjectUtils.setConfigContextService(null);
+    }
+
+    protected void setRealmService(RealmService realmService) {
+        if (realmService != null && log.isDebugEnabled()) {
+            log.debug("Realm service initialized");
+        }
+        ServiceReferenceHolder.getInstance().setRealmService(realmService);
+    }
+
+    protected void unsetRealmService(RealmService realmService) {
+        ServiceReferenceHolder.getInstance().setRealmService(null);
+    }
+
+    protected void setRegistryService(RegistryService registryService) {
+        if (registryService != null && log.isDebugEnabled()) {
+            log.debug("Registry service initialized");
+        }
+        ServiceReferenceHolder.getInstance().setRegistryService(registryService);
+    }
+
+    protected void unsetRegistryService(RegistryService registryService) {
+        ServiceReferenceHolder.getInstance().setRegistryService(null);
     }
 }
