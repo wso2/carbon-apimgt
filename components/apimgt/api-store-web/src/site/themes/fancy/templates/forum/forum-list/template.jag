@@ -1,0 +1,94 @@
+<% jagg.template("forum/forum-list", function(inputs, outputs, jagg) { 
+
+var siteConf = require("/site/conf/site.json");
+
+var urlSuffix;
+var tenant=request_tenant;
+if(tenant!=null) {
+	urlSuffix="&tenant="+tenant;
+}else{
+	urlSuffix='';
+}
+
+%>
+
+<% 
+var needLoginStyleClass = "";		
+if(!jagg.getUser()){ 
+	needLoginStyleClass = "need-login";
+}
+				
+var parentId = siteConf.forum.resourceIdentifier;
+if(inputs.api){
+	parentId = inputs.api.provider + ":" + inputs.api.name + ":" + inputs.api.version;
+}
+%>
+
+<div class="title-section">
+	<h2>Forum</h2>
+</div>
+
+<div class="content-section shadow-up">
+    <div class="content-data">
+        <div class="row">
+        <div class="span6">
+
+        <div class="form-search from-inline" style="margin:10px 30px">
+			<a href="/store/forum/new<%='?parentId=' + parentId + urlSuffix%>" class="btn btn-primary <%= needLoginStyleClass %> " style="margin-right:30px"><%=i18n.localize('forum.createNewTopic')%></a>
+			<input type="text" class="input-x-large clearable search-input" placeholder="<%=i18n.localize('forum.searchForum')%>" id="forum_topic_search_value">
+            <button class="btn btn-primary search-button" id="forum_topic_search" style="margin-left:-10px;border-radius:0;"><i class="icon-search icon-white"></i></button>
+        </div>
+
+        </div>
+        <div id="paginator_container" class="span6">
+        </div>
+        </div>        
+
+        <div id="forum_topic_list">
+        </div>        
+        <script id="template_topic_list" type="text/x-handlebars-template">
+        <table class="table table-striped table-bordered">
+            <thead>
+                <tr>
+                    <th><%=i18n.localize('forum.topic')%></th>
+                    <th class="span1"><%=i18n.localize('forum.replies')%></th>
+                    <!--<th class="span3">Latest Post</th>-->
+                </tr>
+            </thead>
+            <tbody>
+                {{#each topics}}
+                <tr>
+                    <td>
+                    <a href="<%=siteConf.context%>/forum/topic/{{ topicId }}?<%=urlSuffix%>"><strong>{{ subject }}</strong></a>						
+					<% if(jagg.getUser()){ %>
+                    <i class="icon-trash pull-right delete_topic" data-id="{{ topicId }}" data-subject="{{ subject }}"/>
+					<% } %>
+                    <br /> <%=i18n.localize('forum.by')%> : {{ topicOwner }}
+                    </td>
+                    <td>{{ replyCount }}</td>
+                    <!--<td> -->
+                    <!--Today 6:11 AM-->
+                    <!--<br /> By : Seven Tsoi-->
+                    <!--</td>-->
+                </tr>
+                {{/each}}
+            </tbody>
+        </table>
+        </script>
+		<script id="template_paginator" type="text/x-handlebars-template">
+			{{#if showPaginator}}
+			<div id="pages" class="span6 pull-right" style="margin:10px 0 10px 10px"></div>
+			{{/if}}
+		</script> 
+		<script type="text/javascript">
+			<%
+				var parentId = siteConf.forum.resourceIdentifier;
+				if(inputs.api){
+					parentId = inputs.api.provider + ":" + inputs.api.name + ":" + inputs.api.version;
+				}
+			%>
+			var parentId = "<%=parentId%>";
+		</script>       
+    </div>
+</div>
+<% });%>
