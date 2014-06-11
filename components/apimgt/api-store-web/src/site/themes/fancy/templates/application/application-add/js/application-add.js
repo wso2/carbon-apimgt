@@ -44,12 +44,12 @@ $(document).ready(function () {
                 $.cookie('lastAppStatus',status,{ expires: date});
                 if(goBack == "yes"){
                     jagg.message({content:i18n.t('info.returntoAPIPage'),type:'confirm',okCallback:function(){
-			 window.location.href = apiViewUrl + "?" +  apiPath;
+                    window.location.href = apiViewUrl + "?" +  apiPath;
                     },cancelCallback:function(){
-                        window.location.href='';
+                        window.location.reload();
                     }});
                 } else{
-                    window.location.href='';
+                    window.location.reload();
                 }
 
             } else {

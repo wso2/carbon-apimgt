@@ -58,6 +58,7 @@ var query=request.getParameter("query");
                     <li><%=i18n.localize("searchAPIHelpMsg4")%></li>
                     <li><%=i18n.localize("searchAPIHelpMsg5")%></li>
                     <li><%=i18n.localize("searchAPIHelpMsg6")%></li>
+                    <li><%=i18n.localize("searchAPIHelpMsg7")%></li>
                     </ol>
                 </div>
             </div>

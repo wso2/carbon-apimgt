@@ -89,6 +89,25 @@ API Definition for Swagger will not be overriden with the changes you will do to
             </div>
 
             <div class="control-group">
+                    <label  class="control-label" >Default Version</label>
+                     <div class="controls">
+                        <input type="checkbox" class="default_version_check" id="default_version" name="default_version" value="default_version" <%if(api.isDefaultVersion=="true"){%>checked<%}%>/>
+
+                        <a class="icon-question-sign help_popup" help_data="default_api_help"></a>
+                        <p id="default_api_help" class="hide">Making an API version default will allow the subscribers to invoke it without the version attribute in the URI.</p>
+
+                        <%if(api.isDefaultVersion=="false"){if(api.hasDefaultVersion){%>
+                            <p class="help-block">Currently set to version : <%=api.currentDefaultVersion%></p>
+                        <%}else{%>
+                            <p class="help-block">No default version defined for the current API</p>
+                        <%}}%>
+
+                        <input type="hidden" id="default_version_checked" name="default_version_checked" value=<%if(api.isDefaultVersion=="true"){%>"default_version"<%}else{%>""<%}%>/>
+                    </div>
+                    
+            </div>
+
+            <div class="control-group">
                     <label class="control-label" for="editTier"><%=i18n.localize("tier")%>:<span class="requiredAstrix">*</span></label>
                     <div class="controls">
                         <select id="editTier" class="selected" name="editTier"  multiple="multiple">
@@ -161,7 +180,7 @@ API Definition for Swagger will not be overriden with the changes you will do to
                     <%=i18n.localize("roles")%>:<% if (isSuperTenant) { %><span class="requiredAstrix">*</span><%}%>
                 </label>
                 <div class="controls">
-                    <input type="text" <% if (isSuperTenant) { %>class="input required validInput validateRoles"<%}else{%>class="input validateRoles"<%}%>
+                    <input type="text" class="input required validInput validateRoles"
                     id="roles" name="roles"  value="<%=api.roles%>"/>
                     <p class="help-block" id="rolesHelp"><%=i18n.localize("rolesHelpMsg")%></p>
                 </div>
@@ -513,19 +532,25 @@ API Definition for Swagger will not be overriden with the changes you will do to
                     <div class="control-group">
                         <label class="control-label" for="scopeKey">Scope Key</label>
                         <div class="controls">
-                        <input type="text" id="scopeKey" placeholder="Eg: ADMINISTRATOR">
+                        <input type="text" id="scopeKey" placeholder="Eg: api_name_read">
                         </div>
                     </div>
                     <div class="control-group">
                         <label class="control-label" for="scopeName">Scope Name</label>
                         <div class="controls">
-                        <input type="text" id="scopeName" placeholder="Eg: Administration APIs">
+                        <input type="text" id="scopeName" placeholder="Eg: Read My Data">
+                        </div>
+                    </div>
+                    <div class="control-group">
+                        <label class="control-label" for="scopeRoles">Roles</label>
+                        <div class="controls">
+                        <input type="text" id="scopeRoles" placeholder="Eg: role1,role2,role3">
                         </div>
                     </div>
                     <div class="control-group">
                         <label class="control-label" for="inputEmail">Description</label>
                         <div class="controls">
-                        <textarea id="scopeDescription" placeholder="Eg: This scope will group all the administration APIs"></textarea>
+                        <textarea id="scopeDescription" placeholder="Eg: Allows the Application to read your data"></textarea>
                         </div>
                     </div>
                 </form>

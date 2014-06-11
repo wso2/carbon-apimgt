@@ -37,6 +37,9 @@ jagg.module("api", {
     },
     hasPublisherAccess:function () {
         return jagg.require(jagg.getModulesDir() + "api/permissions.jag").hasPublisherAccess.apply(this, arguments);
+    },
+    getAllPaginatedPrototypedAPIs:function () {
+        return jagg.require(jagg.getModulesDir() + "api/prototyped.jag").getAllPaginatedPrototypedAPIs.apply(this, arguments);
     }
 });
 %>

@@ -14,6 +14,9 @@ jagg.module("manager", {
     getHTTPURL:function () {
         return jagg.require(jagg.getModulesDir() + "manager/manager.jag").getHTTPURL.apply(this, arguments);
     },
+    getAPIPublisherURL:function () {
+        return jagg.require(jagg.getModulesDir() + "manager/manager.jag").getAPIPublisherURL.apply(this, arguments);
+    },
     isSelfSignupEnabled:function () {
         return jagg.require(jagg.getModulesDir() + "manager/manager.jag").isSelfSignupEnabled.apply(this, arguments);
     },

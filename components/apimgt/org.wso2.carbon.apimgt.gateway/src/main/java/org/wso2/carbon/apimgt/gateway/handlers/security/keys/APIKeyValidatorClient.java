@@ -127,6 +127,7 @@ public class APIKeyValidatorClient {
         dto.setApplicationId(generatedDto.getApplicationId());
         dto.setApplicationTier(generatedDto.getApplicationTier());
         dto.setApiPublisher(generatedDto.getApiPublisher());
+        dto.setApiName(generatedDto.getApiName());
         dto.setScopes(generatedDto.getScopes() == null ? null : new HashSet<String>(Arrays.asList(generatedDto.getScopes())));
         return dto;
     }

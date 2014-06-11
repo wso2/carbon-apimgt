@@ -322,4 +322,25 @@ public interface APIConsumer extends APIManager {
      * @throws APIManagementException if failed to get the tiers
      */
     public Map<String,String> completeApplicationRegistration(String userId, String applicationName, String tokenType) throws APIManagementException;
+
+    /**
+     * Returns details of an API information in low profile
+     *
+     * @param identifier APIIdentifier
+     * @return An API object related to the given identifier or null
+     * @throws APIManagementException if failed get API from APIIdentifier
+     */
+    public API getAPIInfo(APIIdentifier identifier) throws APIManagementException;
+    
+    /**
+     * Returns a paginated list of all APIs in given Status. If a given API has multiple APIs,
+     * only the latest version will be included
+     * in this list.
+     * @param tenantDomain tenant domain
+     * @param start starting number
+     * @param end ending number
+     * @return set of API
+     * @throws APIManagementException if failed to API set
+     */
+    public Map<String,Object> getAllPaginatedAPIsByStatus(String tenantDomain,int start,int end, String Status) throws APIManagementException;
 }

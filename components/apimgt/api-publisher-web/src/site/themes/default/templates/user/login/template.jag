@@ -6,13 +6,13 @@
                 response.sendRedirect('index.jag');
             }
 %>
-<div class="container-fluid">
+<div class="container-fluid login-container">
     <div class="row-fluid">
-        <div class="span2">
+        <div class="span2 login-left">
             <div class="left-side-col">
             </div>
         </div>
-        <div class="span6 ">
+        <div class="span6 login-content">
             <div class="title-section">
                 <h2>Login</h2>
             </div>

@@ -86,6 +86,11 @@ public class UserAwareAPIProvider extends APIProviderImpl {
     }
 
     @Override
+    public boolean checkIfAPIExists(APIIdentifier apiId) throws APIManagementException {
+        return super.checkIfAPIExists(apiId);
+    }
+
+    @Override
     public void updateDocumentation(APIIdentifier apiId,
                                     Documentation documentation) throws APIManagementException {
         checkCreatePermission();

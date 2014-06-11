@@ -4,7 +4,8 @@ var copyAPI = function (api, newVersion) {
             provider = jagg.module("manager").getAPIProviderObj();
 
     try {
-        success = provider.createNewAPIVersion(api.provider, api.name, api.version, newVersion);
+        
+        success = provider.createNewAPIVersion(api.provider, api.name, api.version, newVersion,api.isDefaultVersion);
         if (log.isDebugEnabled()) {
             log.debug("copyAPI for : " + api.name + "-" + api.version + " as " + api.name + "-" + newVersion);
         }

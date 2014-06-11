@@ -29,4 +29,14 @@ var isTenantAllowed=function(){
    }
    }
    };
+
+var encode = require('encode');
+encode = new encode.Encode();
+
+if(site.request_url == "READ_FROM_REQUEST"){
+    request_url = request.getRequestURL().split(request.getRequestURI())[0]+request.getContextPath();
+}
+else{
+    request_url = site.request_url;
+}
 %>

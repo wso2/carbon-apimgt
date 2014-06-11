@@ -28,7 +28,7 @@ public class DataBridgeFaultPublisherDTO extends FaultPublisherDTO{
         setContext(faultPublisherDTO.getContext());
         setApi_version(faultPublisherDTO.getApi_version());
         setApi(faultPublisherDTO.getApi());
-        setResource(faultPublisherDTO.getResource());
+        setResourcePath(faultPublisherDTO.getResourcePath());
         setMethod(faultPublisherDTO.getMethod());
         setVersion(faultPublisherDTO.getVersion());
         setErrorCode(faultPublisherDTO.getErrorCode());
@@ -57,7 +57,7 @@ public class DataBridgeFaultPublisherDTO extends FaultPublisherDTO{
                 "          {'name':'context','type':'STRING'}," +
                 "          {'name':'api_version','type':'STRING'}," +
                 "          {'name':'api','type':'STRING'}," +
-                "          {'name':'resource','type':'STRING'}," +
+                "          {'name':'resourcePath','type':'STRING'}," +
                 "          {'name':'method','type':'STRING'}," +
                 "          {'name':'version','type':'STRING'}," +
                 "          {'name':'errorCode','type':'STRING'}," +
@@ -77,7 +77,7 @@ public class DataBridgeFaultPublisherDTO extends FaultPublisherDTO{
     }
 
     public Object createPayload(){
-        return new Object[]{getConsumerKey(),getContext(),getApi_version(),getApi(),getResource(),getMethod(),
+        return new Object[]{getConsumerKey(),getContext(),getApi_version(),getApi(), getResourcePath(),getMethod(),
                 getVersion(),getErrorCode(),getErrorMessage(), String.valueOf(getRequestTime()),getUsername(),
                 getTenantDomain(),getHostName(),getApiPublisher(), getApplicationName(), getApplicationId()};
     }

@@ -15,6 +15,27 @@ var getHostname = function() {
     return getAPIStoreObj().getHostName();
 };
 
+var getAPIPublisherURL = function() {
+    var result,log=new Log();
+    var store = getAPIStoreObj();
+    try {
+    result = store.getAPIPublisherURL();
+    if (log.isDebugEnabled()) {
+    log.debug("getAPIPublisherURL : ");
+    }
+    return {
+    error:false,
+    url:result
+    };
+    } catch (e) {
+    return {
+    error:true,
+    message:e.message.split(":")[1]
+    };
+    }
+
+};
+
 var getServer = function() {
     return {
         server : "localhost",

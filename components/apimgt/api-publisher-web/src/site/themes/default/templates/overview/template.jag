@@ -1,6 +1,8 @@
 <% jagg.template("overview", function(inputs, outputs, jagg) { %>
 <% var api=outputs.api; var createPermitted=outputs.isCreatePermitted;%>
-<% var endpoint_config = parse(api.endpointConfig); %>
+<%  if(api.endpointConfig){ 
+    var endpoint_config = parse(api.endpointConfig); 
+  } %>
 <div class="row-fluid">
     <div class="span2">
          <% jagg.includeBlock("item-nav-list",{api:api}); %>
@@ -16,7 +18,7 @@
                 <td class="span3"><%=i18n.localize("context")%></td>
                 <td id="inUrl"><%=api.context%></td>
             </tr>
-            <% if(endpoint_config.production_endpoints != undefined){ %>
+            <% if(endpoint_config && (endpoint_config.production_endpoints != undefined)){ %>
             <tr>
                 <td class="span3"><%=i18n.localize("endpoint")%></td>
                 <td id="inUrl">
@@ -37,7 +39,7 @@
                 </td>
             </tr>
             <% } %>
-            <% if(endpoint_config.production_failovers != undefined){ %>
+            <% if(endpoint_config && (endpoint_config.production_failovers != undefined)){ %>
             <tr>
                 <td><%=i18n.localize("productionFailoverEp")%></td>
                 <td>
@@ -54,7 +56,7 @@
                 </td>
             </tr>
             <% } %>
-            <%if(endpoint_config.sandbox_endpoints != undefined){%>
+            <%if(endpoint_config && (endpoint_config.sandbox_endpoints != undefined)){%>
             <tr>
                 <td><%=i18n.localize("sandbox")%></td>
                 <td id="sandbox">
@@ -74,7 +76,7 @@
                 %>
                 </td>
             </tr>
-            <% if(endpoint_config.sandbox_failovers != undefined){ %>
+            <% if(endpoint_config && (endpoint_config.sandbox_failovers != undefined)){ %>
             <tr>
                 <td><%=i18n.localize("sandboxFailoverEp")%></td>
                 <td>
@@ -95,7 +97,7 @@
             <%if(api.wsdl!=''){%>
             <tr>
                 <td><%=i18n.localize("wsdl")%></td>
-                <td id="wsdl"><a href="<%= encode.forHtmlAttribute(api.wsdl) %>" target="_blank"><%= encode.forHtml(api.wsdl)%></a></td>
+                <td id="wsdl"><a href="<%= encode.forHtmlAttribute(api.wsdl) %>" target="_blank"><%= encode.forHtml(api.wsdl.substring(api.wsdl.lastIndexOf("/")))%></a></td>
             </tr>
             <%}
             if(api.wadl!=''){%>
@@ -111,6 +113,17 @@
             <tr>
                 <td><%=i18n.localize("tier")%></td>
                 <td id="tierAvb"><%=api.availableTiersDisplayNames%></td>
+            </tr>
+            <tr>
+                <td><%=i18n.localize("defaultAPIVersion")%></td>
+                <td id="defaultAPIVersion">
+                    <%if(api.hasDefaultVersion){
+                        print(api.currentDefaultVersion);
+                    }else{
+                        print("None");
+                    }%>
+                </td>
+
             </tr>
             <% if(api.tags!=''){%>
             <tr>
@@ -150,16 +163,33 @@
             var provider = '<%=api.provider%>';
         </script>
 <div class="row-fluid">
-    <form id="copyApiForm">
+    <form id="copyApiForm">   
     <div class="well" id="copy-api">
         <input type="hidden" id="overviewAPIVersion" value="<%=api.version%>"/>
         <input type="hidden" id="overviewAPIName" value="<%=api.name%>"/>
         <label><%=i18n.localize("toVersion")%></label>
-        <input type="text" class="span3 required" id="new-version"><span class="help-inline"><%=i18n.localize("versionHelpMsg")%></span>
+        <input type="text" class="span3 required" id="new-version"/><span class="help-inline"><%=i18n.localize("versionHelpMsg")%></span>
+        
+        <div class="default-version">
+            <label class="control-label">Default Version</label>
+            <div class="controls">
+                <input type="checkbox" class="default_version_check_cp" id="default_version_cp" name="default_version_cp" value="default_version"/>
+                <input type="hidden" id="default_version_checked_cp" name="default_version_checked_cp" value=""/>
+                 <%if(api.hasDefaultVersion){%>
+                    <p class="help-block">Currently set to version : <%=api.currentDefaultVersion%></p>
+                <%}else{%>
+                    <p class="help-block">No default version defined for the current API</p>
+                <%}%> 
+            </div>
+        </div>
+       
+        
         <div class="copy-buttons">
             <button type="submit" class="btn btn-primary copy-button"><%=i18n.localize("done")%></button>
             <button type="button" class="btn cancel-button" onclick="javascript:$('#copy-api').toggle('slow');$('#show-copy-api').toggle()"><%=i18n.localize("cancel")%></button>
         </div>
+
+
     </div>
     <div id="show-copy-api" class="form-actions">
         <button type="button" class="btn" onclick="javascript:$('#copy-api').toggle('slow');$('#show-copy-api').toggle()"><%=i18n.localize("copy")%></button>
@@ -168,3 +198,4 @@
 </div>
 <%}%>
 <% }); %>
+

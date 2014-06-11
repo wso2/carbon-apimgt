@@ -82,7 +82,7 @@ i18n.init(request,localeResourcesBasePath);
                                  <ul class="help-links">
                                  <li><a href="http://dist.wso2.org/products/api-manager/1.7.0/APIManager-GettingStarted-v1.7.0.pdf"><%=i18n.localize("gettingStartedGuide")%></a></li>
                                   <li><a href="http://docs.wso2.org/display/AM170/Installing+the+Product" target="_blank"><%=i18n.localize("installationGuide")%></a></li>
-                                  <li><a href="http://docs.wso2.org/display/AM170/Quick+Start" target="_blank"><%=i18n.localize("quickStartGuide")%></a></li>
+                                  <li><a href="http://docs.wso2.org/display/AM170/Quick+Start+Guide" target="_blank"><%=i18n.localize("quickStartGuide")%></a></li>
                                   <li> <a href="http://docs.wso2.org/display/AM170/Samples" target="_blank"><%=i18n.localize("samples")%></a></li>
                                  </ul>
                           </div>

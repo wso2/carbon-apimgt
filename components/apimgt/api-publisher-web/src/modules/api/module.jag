@@ -64,6 +64,9 @@ jagg.module("api", {
     showStoreURL:function () {
         return jagg.require(jagg.getModulesDir() + "api/check-permissions.jag").showStoreURL.apply(this, arguments);
     },
+    showAPIDocVisibility:function () {
+        return jagg.require(jagg.getModulesDir() + "api/check-permissions.jag").showAPIDocVisibility.apply(this, arguments);
+    },
     validateRoles:function () {
         return jagg.require(jagg.getModulesDir() + "api/add.jag").validateRoles.apply(this, arguments);
     },
@@ -84,8 +87,24 @@ jagg.module("api", {
     },
     isDataPublishingEnabled:function () {
  	return jagg.require(jagg.getModulesDir() + "api/add.jag").isDataPublishingEnabled.apply(this, arguments);
-     }
-
-
+     },
+    createAPI:function () {
+        return jagg.require(jagg.getModulesDir() + "api/add.jag").createAPI.apply(this, arguments);
+    },
+    updateAPIDesign:function () {
+        return jagg.require(jagg.getModulesDir() + "api/add.jag").updateAPIDesign.apply(this, arguments);
+    },     
+    getSwagger12Resource:function () {
+        return jagg.require(jagg.getModulesDir() + "api/add.jag").getSwagger12Resource.apply(this, arguments);
+    },     
+    updateAPIImplementation:function () {
+        return jagg.require(jagg.getModulesDir() + "api/add.jag").updateAPIImplementation.apply(this, arguments);
+    },
+    manageAPI:function () {
+        return jagg.require(jagg.getModulesDir() + "api/add.jag").manageAPI.apply(this, arguments);
+    } ,
+    checkIfResourceExists:function () {
+        return jagg.require(jagg.getModulesDir() + "api/add.jag").checkIfResourceExists.apply(this, arguments);
+    }
 });
 %>

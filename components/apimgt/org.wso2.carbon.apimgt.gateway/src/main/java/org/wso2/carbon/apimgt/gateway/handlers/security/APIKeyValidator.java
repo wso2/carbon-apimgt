@@ -59,6 +59,7 @@ public class APIKeyValidator {
     private APIKeyDataStore dataStore;
     private AxisConfiguration axisConfig;
     private boolean isGatewayAPIKeyValidationEnabled = true;
+    private boolean isGatewayAPIResourceValidationEnabled = true;
     protected Log log = LogFactory.getLog(getClass());
 
     public APIKeyValidator(AxisConfiguration axisConfig) {
@@ -71,6 +72,7 @@ public class APIKeyValidator {
             this.dataStore = new ThriftAPIDataStore();
         }
         this.isGatewayAPIKeyValidationEnabled = isAPIKeyValidationEnabled();
+        this.isGatewayAPIResourceValidationEnabled = isAPIResourceValidationEnabled();
         this.getKeyCache();
         this.getResourceCache();
     }
@@ -149,6 +151,16 @@ public class APIKeyValidator {
             return Boolean.parseBoolean(serviceURL);
         } catch (Exception e) {
             log.error("Did not found valid API Validation Information cache configuration. Use default configuration" + e);
+        }
+        return true;
+    }
+    public boolean isAPIResourceValidationEnabled() {
+        try {
+            APIManagerConfiguration config = ServiceReferenceHolder.getInstance().getAPIManagerConfiguration();
+            String serviceURL = config.getFirstProperty(APIConstants.API_GATEWAY_RESOURCE_CACHE_ENABLED);
+            return Boolean.parseBoolean(serviceURL);
+        } catch (Exception e) {
+            log.error("Did not found valid API Resource Validation Information cache configuration. Use default configuration" + e);
         }
         return true;
     }
@@ -331,9 +343,9 @@ public class APIKeyValidator {
             apiInfoDTO = doGetAPIInfo(apiContext, apiVersion);
             getResourceCache().put(apiCacheKey, apiInfoDTO);
         }
-
+        if(apiInfoDTO.getResources()!=null){
         for (ResourceInfoDTO resourceInfoDTO : apiInfoDTO.getResources()) {
-            if (resourceString.equals(resourceInfoDTO.getUrlPattern())) {
+            if ((resourceString.trim()).equalsIgnoreCase(resourceInfoDTO.getUrlPattern().trim())) {
                 for (VerbInfoDTO verbDTO : resourceInfoDTO.getHttpVerbs()) {
                     if (verbDTO.getHttpVerb().equals(httpMethod)) {
                         //Store verb in cache
@@ -345,6 +357,7 @@ public class APIKeyValidator {
                     }
                 }
             }
+        }
         }
         return null;
     }
@@ -401,8 +414,9 @@ public class APIKeyValidator {
 
         String cacheKey = context + ":" + apiVersion;
         APIInfoDTO apiInfoDTO = null;
+        if (isGatewayAPIResourceValidationEnabled) {
         apiInfoDTO = (APIInfoDTO) getResourceCache().get(cacheKey);
-        
+        }
         if (apiInfoDTO == null) {
             apiInfoDTO = doGetAPIInfo(context, apiVersion);
             getResourceCache().put(cacheKey, apiInfoDTO);
@@ -414,7 +428,7 @@ public class APIKeyValidator {
 
             //Get decision from cache.
             VerbInfoDTO matchingVerb = null;
-            if (isGatewayAPIKeyValidationEnabled) {
+            if (isGatewayAPIResourceValidationEnabled) {
                 matchingVerb = (VerbInfoDTO) getResourceCache().get(requestCacheKey);
             }
             //On a cache hit
@@ -422,6 +436,7 @@ public class APIKeyValidator {
                 matchingVerb.setRequestKey(requestCacheKey);
                 return matchingVerb;
             } else {
+                if(apiInfoDTO.getResources()!=null){
                 for (ResourceInfoDTO resourceInfoDTO : apiInfoDTO.getResources()) {
                     String urlPattern = resourceInfoDTO.getUrlPattern();
 
@@ -437,6 +452,7 @@ public class APIKeyValidator {
                         }
                     }
                 }
+                }
             }
         }
 
@@ -449,7 +465,7 @@ public class APIKeyValidator {
 
             //Get decision from cache.
             VerbInfoDTO matchingVerb = null;
-            if (isGatewayAPIKeyValidationEnabled) {
+            if (isGatewayAPIResourceValidationEnabled) {
                 matchingVerb = (VerbInfoDTO) getResourceCache().get(requestCacheKey);
             }
 

@@ -1,4 +1,3 @@
-
 <wsdl:definitions xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:ax232="http://api.apimgt.carbon.wso2.org/xsd" xmlns:ns1="http://org.apache.axis2/xsd" xmlns:ax230="http://keymgt.apimgt.carbon.wso2.org/xsd" xmlns:wsaw="http://www.w3.org/2006/05/addressing/wsdl" xmlns:ax236="http://model.api.apimgt.carbon.wso2.org/xsd" xmlns:tns="http://service.keymgt.apimgt.carbon.wso2.org" xmlns:http="http://schemas.xmlsoap.org/wsdl/http/" xmlns:ax234="http://dto.impl.apimgt.carbon.wso2.org/xsd" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:mime="http://schemas.xmlsoap.org/wsdl/mime/" xmlns:soap12="http://schemas.xmlsoap.org/wsdl/soap12/" targetNamespace="http://service.keymgt.apimgt.carbon.wso2.org">
     <wsdl:documentation>APIKeyValidationService</wsdl:documentation>
     <wsdl:types>
@@ -10,6 +9,7 @@
                     <xs:element minOccurs="0" name="authTypeAsString" nillable="true" type="xs:string"></xs:element>
                     <xs:element maxOccurs="unbounded" minOccurs="0" name="authTypes" nillable="true" type="xs:string"></xs:element>
                     <xs:element maxOccurs="unbounded" minOccurs="0" name="httpVerbs" nillable="true" type="xs:string"></xs:element>
+                    <xs:element minOccurs="0" name="mediationScript" nillable="true" type="xs:string"></xs:element>
                     <xs:element minOccurs="0" name="methodsAsString" nillable="true" type="xs:string"></xs:element>
                     <xs:element minOccurs="0" name="resourceMap" nillable="true" type="xs:string"></xs:element>
                     <xs:element minOccurs="0" name="resourceSandboxURI" nillable="true" type="xs:string"></xs:element>
@@ -30,6 +30,7 @@
                     <xs:element minOccurs="0" name="id" type="xs:int"></xs:element>
                     <xs:element minOccurs="0" name="key" nillable="true" type="xs:string"></xs:element>
                     <xs:element minOccurs="0" name="name" nillable="true" type="xs:string"></xs:element>
+                    <xs:element minOccurs="0" name="roles" nillable="true" type="xs:string"></xs:element>
                 </xs:sequence>
             </xs:complexType>
         </xs:schema>
@@ -244,13 +245,13 @@
     </wsdl:binding>
     <wsdl:service name="APIKeyValidationService">
         <wsdl:port name="APIKeyValidationServiceHttpsSoap11Endpoint" binding="tns:APIKeyValidationServiceSoap11Binding">
-            <soap:address location="https://lalaji-ThinkPad-T530:8243/services/APIKeyValidationService.APIKeyValidationServiceHttpsSoap11Endpoint"></soap:address>
+            <soap:address location="https://dinusha-Latitude-E6540:8243/services/APIKeyValidationService.APIKeyValidationServiceHttpsSoap11Endpoint"></soap:address>
         </wsdl:port>
         <wsdl:port name="APIKeyValidationServiceHttpsSoap12Endpoint" binding="tns:APIKeyValidationServiceSoap12Binding">
-            <soap12:address location="https://lalaji-ThinkPad-T530:8243/services/APIKeyValidationService.APIKeyValidationServiceHttpsSoap12Endpoint"></soap12:address>
+            <soap12:address location="https://dinusha-Latitude-E6540:8243/services/APIKeyValidationService.APIKeyValidationServiceHttpsSoap12Endpoint"></soap12:address>
         </wsdl:port>
         <wsdl:port name="APIKeyValidationServiceHttpsEndpoint" binding="tns:APIKeyValidationServiceHttpBinding">
-            <http:address location="https://lalaji-ThinkPad-T530:8243/services/APIKeyValidationService.APIKeyValidationServiceHttpsEndpoint"></http:address>
+            <http:address location="https://dinusha-Latitude-E6540:8243/services/APIKeyValidationService.APIKeyValidationServiceHttpsEndpoint"></http:address>
         </wsdl:port>
     </wsdl:service>
 </wsdl:definitions>

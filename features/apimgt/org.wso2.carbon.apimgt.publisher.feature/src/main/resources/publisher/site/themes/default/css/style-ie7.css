@@ -1,22 +1,36 @@
-ul.breadcrumb {
-	margin-top:-60px;
-}
-ul.breadcrumb li{
-    float:left;
-    display:block;
-}
-button.btn-api-del{
-    padding:0 5px;
-}
-div.menu-back{
-    margin-top: -18px;
+body{
+    background: #fff url(../images/back-normal.png) repeat-y left top;
 }
 #left{
-    margin-top: 50px;
+    width:251px;
+    background: transparent;
 }
-#middle{
-    margin-top: 50px;
+.footer-main{
+    margin-left:277px;
 }
-.logo-section{
-    margin-top:-18px;
+div.row-fluid div.login-content{
+    margin-left:250px;
+}
+.login-header{
+    margin-top:-25px;
+}
+div.content-data{
+    padding:10px 0;
+    border:solid 1px #ccc;
+}
+div.login-content div.content-data{
+    padding:10px 30px;
+}
+div.title-section{
+    background: #efefef;
+}
+div.form-search{
+    border:none;
+}
+.new-sub-menu-wizard div.wizard-number{
+    display: inline !important;
+    margin-right: 10px;
+}
+.new-sub-menu-wizard{
+    margin-top: 20px !important;
 }

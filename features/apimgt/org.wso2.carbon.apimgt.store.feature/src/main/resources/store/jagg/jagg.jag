@@ -50,7 +50,14 @@ var jagg = jagg || (function () {
     };
 
     var getThemeFile = function (path) {
-        var p, index, theme = getUserTheme();
+        var p, index, theme = getUserTheme();        
+        if(theme.tenant_theme) {
+            p = getTenantThemePath() + path;
+            index = p.indexOf("?");
+            if(new File(p.substring(0, index == -1 ? p.length : index)).isExists()) {
+                return p;
+            }
+        }        
         if(theme.subtheme) {
             p = getThemePath() + "subthemes/" + theme.subtheme + "/" + path;
             index = p.indexOf("?");
@@ -65,9 +72,17 @@ var jagg = jagg || (function () {
         return "/site/themes/";
     };
 
+    var getTenantThemesPath = function(){
+        return "/site/tenant_themes/";
+    };
+
     var getThemePath = function () {
         return getThemesPath() + getUserTheme().base + "/";
     };
+
+    var getTenantThemePath = function (){
+        return getTenantThemesPath() + getTheme().tenant_theme + "/";
+    }
 
     var getBlockFile = function (name) {
         return getBlocksDir() + name + "/block.jag";
@@ -106,10 +121,17 @@ var jagg = jagg || (function () {
         var site = require("/site/conf/site.json"),
                 theme = request.getParameter("theme"),
                 subtheme = request.getParameter("subtheme");
-        return {
+        var r = {
             base : theme ? theme : site.theme.base,
-            subtheme : subtheme ? subtheme : site.theme.subtheme
+            subtheme : subtheme ? subtheme : site.theme.subtheme,
         };
+        //load the tenant theme if exists
+        var tenant = request.getParameter('tenant');
+        if(tenant){
+            tenant = tenant.replace("/",".");
+            r.tenant_theme = request.getParameter('tenant');
+        }        
+        return r;
     };
 
     var getUserTheme = function () {

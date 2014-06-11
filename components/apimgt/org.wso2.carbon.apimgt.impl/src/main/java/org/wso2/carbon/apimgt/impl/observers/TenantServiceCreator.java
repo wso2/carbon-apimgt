@@ -160,6 +160,12 @@ public class TenantServiceCreator extends AbstractAxis2ConfigurationContextObser
         }
         
         try {
+            APIUtil.loadTenantGAConfig(tenantId);
+        } catch(Exception e) {
+            log.error("Failed to load ga-config.xml to tenant " + tenantDomain + "'s registry");
+        }
+        
+        try {
         	APIManagerConfiguration configuration = ServiceReferenceHolder.getInstance().
         			getAPIManagerConfigurationService().getAPIManagerConfiguration();
         	 String enabledStr = configuration.getFirstProperty(APIConstants.API_USAGE_ENABLED);

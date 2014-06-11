@@ -25,88 +25,7 @@ $(document).ready(function() {
 
     });
 
-$('#saveDoc').click(function() {
-        var sourceType = getRadioValue($('input[name=optionsRadios1]:radio:checked'));
-        var docUrlDiv = $("#docUrl");
-	var fileDiv = $("#docLocation");
-        var apiName = $("#docAPIName").val();
-        var errCondition = docUrlDiv.val() == "";
-	var isFilePathEmpty = fileDiv.val() == "";
-	var isOtherTypeNameEmpty = $('#specifyBox').val() == null || $('#specifyBox').val() == '';
-	var docType = getRadioValue($('input[name=optionsRadios]:radio:checked'));
 
-        var errorCondition = false;
-        if($(this).val() != "Update"){
-            errorCondition = isAvailableDoc(apiName + "-" + docId.val());
-        }
-        if (apiName && !validInput(docId, 'Duplicate Document Name.', errorCondition)) {
-            return;
-        } else if (sourceType == 'url' && !validInput(docUrlDiv, 'This field is required.', errCondition)) {
-            return;
-        } else if (sourceType == 'url' && !validInputUrl(docUrlDiv)) {
-            return;
-        }else if($(this).val() != "Update" && sourceType == 'file' && !validInput(fileDiv, 'This field is required.', isFilePathEmpty)) {
-         		    return;
-        }else if(docType.toLowerCase() == 'other' && !validInput($('#specifyBox'),'This field is required.', isOtherTypeNameEmpty)){
-			return;	
-		}
-
-        if($(this).val() == "Update" && $("#docLocation").val() == ""){
-            $("#docLocation").removeClass('required');
-        }
-
-        $("#addNewDoc").validate();
-        if ($("#addNewDoc").valid()) {
-            var version = $("#docAPIVersion").val();
-            var provider = $("#spanProvider").text();
-            var docName = $("#docName").val();
-            var summary = $("#summary").val();            
-
-            var docUrl = docUrlDiv.val();
-            if (docUrl.indexOf("http") == -1) {
-                docUrl = "http://" + docUrl;
-            }
-
-            var mode = $('#newDoc .btn-primary').val();
-	$('<input>').attr('type', 'hidden')
-		    .attr('name', 'provider').attr('value', provider).prependTo('#addNewDoc');
-	$('<input>').attr('type', 'hidden')
-		    .attr('name', 'action').attr('value', "addDocumentation").prependTo('#addNewDoc');
-	$('<input>').attr('type', 'hidden')
-		    .attr('name', 'apiName').attr('value', apiName).prependTo('#addNewDoc');
-	$('<input>').attr('type', 'hidden')
-		    .attr('name', 'version').attr('value', version).prependTo('#addNewDoc');
-	$('<input>').attr('type', 'hidden')
-		    .attr('name', 'docName').attr('value', docName).prependTo('#addNewDoc');
-	$('<input>').attr('type', 'hidden')
-		    .attr('name', 'docType').attr('value', docType).prependTo('#addNewDoc');
-	$('<input>').attr('type', 'hidden')
-		    .attr('name', 'summary').attr('value', summary).prependTo('#addNewDoc');
-	$('<input>').attr('type', 'hidden')
-		    .attr('name', 'sourceType').attr('value', sourceType).prependTo('#addNewDoc');
-	$('<input>').attr('type', 'hidden')
-		    .attr('name', 'docUrl').attr('value', docUrl).prependTo('#addNewDoc');
-	$('<input>').attr('type', 'hidden')
-		    .attr('name', 'mode').attr('value', mode).prependTo('#addNewDoc');
-	if(docType.toLowerCase()=='other'){
-	$('<input>').attr('type', 'hidden')
-		    .attr('name', 'newType').attr('value', $('#specifyBox').val()).prependTo('#addNewDoc');
-	}
-
-	$('#addNewDoc').ajaxSubmit(function (result) {
-                          if (!result.error) {
-                              $.cookie("tab", "docsLink");
-                              clearDocs();
-                          } else {
-                              if (result.message == "AuthenticateError") {
-                                  jagg.showLogin();
-                              } else {
-                                  jagg.message({content:result.message,type:"error"});
-                              }
-                          }
-                      });
-        }
-    });
 });
 
 var newDocFormToggle = function(){
@@ -151,7 +70,7 @@ var removeDocumentation = function (provider, apiName, version, docName, docType
     $('#messageModal').modal();
 };
 
-var updateDocumentation = function (rowId, docName, docType, summary, sourceType, docUrl, filePath, otherTypeName) {
+var updateDocumentation = function (rowId, docName, docType, summary, sourceType, docUrl, filePath, otherTypeName,visibility) {
     $("#docTable").hide('fast');
     $('#newDoc .btn-primary').text('Update');
     $('#newDoc .btn-primary').val('Update');
@@ -161,9 +80,27 @@ var updateDocumentation = function (rowId, docName, docType, summary, sourceType
     $('#newDoc').show('fast');
     $('#newDoc #docName').val(docName);
     $('#newDoc #docName').attr('disabled', 'disabled');
+    $("#docVisibility").val(visibility);
     if (summary != "{}" && summary != 'null') {
         $('#newDoc #summary').val(summary);
     }
+   if(docType == "Swagger API Definition"){
+       $('#newDoc #summary').attr("disabled",true);
+       $('#optionsRadios6').attr('checked', true);
+       $('#optionsRadios1').attr('disabled', true);
+       $('#optionsRadios2').attr('disabled', true);
+       $('#optionsRadios3').attr('disabled', true);
+       $('#optionsRadios4').attr('disabled', true);
+       $('#optionsRadios5').attr('disabled', true);
+       $('#optionsRadios6').attr('disabled', true);
+       $('#optionsRadios7').attr('disabled', true);
+       $('#optionsRadios8').attr('disabled', true);
+       $('#optionsRadios9').attr('disabled', true);
+
+       $('#optionsRadios7').attr('checked', true);
+   }
+
+   else{
     if (sourceType == "INLINE") {
         $('#optionsRadios7').attr('checked', true);
         $('#sourceUrlDoc').hide('slow');
@@ -176,7 +113,7 @@ var updateDocumentation = function (rowId, docName, docType, summary, sourceType
         }
     }else {
             $('#optionsRadios9').attr('checked', true);
-	    $('#sourceFile').show('slow');	
+	    $('#sourceFile').show('slow');
 	}
 
     for (var i = 1; i <= 6; i++) {
@@ -184,10 +121,11 @@ var updateDocumentation = function (rowId, docName, docType, summary, sourceType
             $('#optionsRadios' + i).attr('checked', true);
 	if(docType.toLowerCase() == 'other'){
 		$('#specifyBox').val(otherTypeName);
-		$('#otherTypeDiv').show();		
+		$('#otherTypeDiv').show();
 		}
         }
     }
+   }
 };
 
 var editJSONContent = function (provider, apiName, version, docName, mode,tenantDomain) {
@@ -213,6 +151,106 @@ var editInlineContent = function (provider, apiName, version, docName, mode,tena
 var clearDocs = function () {
     window.location.reload();
 
+};
+
+var saveDoc=function(){
+    var sourceType = getRadioValue($('input[name=optionsRadios1]:radio:checked'));
+    var docId = $("#docName");
+    var docUrlDiv = $("#docUrl");
+    var fileDiv = $("#docLocation");
+    var apiName = $("#docAPIName").val();
+    var errCondition = docUrlDiv.val() == "";
+    var isFilePathEmpty = fileDiv.val() == "";
+    var isOtherTypeNameEmpty = $('#specifyBox').val() == null || $('#specifyBox').val() == '';
+    var docType = getRadioValue($('input[name=optionsRadios]:radio:checked'));
+    var docVisibility=$("#docVisibility option:selected").val();
+    var docName = $("#docName").val();
+    var errorCondition = false;
+    if($('#saveDocBtn').val() != "Update"){
+        errorCondition = isAvailableDoc(apiName + "-" + docId.val());
+    }
+    if (apiName && !validInput(docId, 'Duplicate Document Name.', errorCondition)) {
+        return;
+    } else if (sourceType == 'url' && !validInput(docUrlDiv, 'This field is required.', errCondition)) {
+        return;
+    } else if (sourceType == 'url' && !validInputUrl(docUrlDiv)) {
+        return;
+    }else if($('#saveDocBtn').val() != "Update" && sourceType == 'file' && !validInput(fileDiv, 'This field is required.', isFilePathEmpty)) {
+        return;
+    }else if(docType.toLowerCase() == 'other' && !validInput($('#specifyBox'),'This field is required.', isOtherTypeNameEmpty) && docName!="Swagger API Definition"){
+        return;
+    }
+
+    if($('#saveDocBtn').val() == "Update" && $("#docLocation").val() == ""){
+        $("#docLocation").removeClass('required');
+    }
+
+    $("#addNewDoc").validate();
+    if ($("#addNewDoc").valid()) {
+        var version = $("#docAPIVersion").val();
+        var provider = $("#spanProvider").text();
+
+        var summary = $("#summary").val();
+
+        var docUrl = docUrlDiv.val();
+        if (docUrl.indexOf("http") == -1) {
+            docUrl = "http://" + docUrl;
+        }
+
+        if (sourceType == 'file') {
+
+            var fileExtension = getExtension($("#docLocation").val());
+
+            var mimeType = getMimeType(fileExtension);
+
+            $('<input>').attr('type', 'hidden')
+                .attr('name', 'mimeType').attr('value', mimeType).prependTo('#addNewDoc');
+        }
+
+
+        var mode = $('#newDoc .btn-primary').val();
+        $('<input>').attr('type', 'hidden')
+            .attr('name', 'provider').attr('value', provider).prependTo('#addNewDoc');
+        $('<input>').attr('type', 'hidden')
+            .attr('name', 'action').attr('value', "addDocumentation").prependTo('#addNewDoc');
+        $('<input>').attr('type', 'hidden')
+            .attr('name', 'apiName').attr('value', apiName).prependTo('#addNewDoc');
+        $('<input>').attr('type', 'hidden')
+            .attr('name', 'version').attr('value', version).prependTo('#addNewDoc');
+        $('<input>').attr('type', 'hidden')
+            .attr('name', 'docName').attr('value', docName).prependTo('#addNewDoc');
+        $('<input>').attr('type', 'hidden')
+            .attr('name', 'docType').attr('value', docType).prependTo('#addNewDoc');
+        $('<input>').attr('type', 'hidden')
+            .attr('name', 'summary').attr('value', summary).prependTo('#addNewDoc');
+        $('<input>').attr('type', 'hidden')
+            .attr('name', 'sourceType').attr('value', sourceType).prependTo('#addNewDoc');
+        $('<input>').attr('type', 'hidden')
+            .attr('name', 'docUrl').attr('value', docUrl).prependTo('#addNewDoc');
+        $('<input>').attr('type', 'hidden')
+            .attr('name', 'mode').attr('value', mode).prependTo('#addNewDoc');
+        if(docVisibility){
+            $('<input>').attr('type', 'hidden')
+                .attr('name', 'docVisibility').attr('value', docVisibility).prependTo('#addNewDoc');
+        }
+        if(docType.toLowerCase()=='other'){
+            $('<input>').attr('type', 'hidden')
+                .attr('name', 'newType').attr('value', $('#specifyBox').val()).prependTo('#addNewDoc');
+        }
+
+        $('#addNewDoc').ajaxSubmit(function (result) {
+            if (!result.error) {
+                $.cookie("tab", "docsLink");
+                clearDocs();
+            } else {
+                if (result.message == "AuthenticateError") {
+                    jagg.showLogin();
+                } else {
+                    jagg.message({content:result.message,type:"error"});
+                }
+            }
+        });
+    }
 };
 
 var getRadioValue = function (radioButton) {
@@ -281,6 +319,49 @@ var validInputUrl = function(docUrlDiv) {
     }
 };
 
+var CONTENT_MAP = {
+        'js': 'application/javascript',
+        'css': 'text/css',
+        'csv': 'text/csv',
+        'html': 'text/html',
+        'json': 'application/json',
+        'png': 'image/png',
+        'jpeg': 'image/jpeg',
+        'gif': 'image/gif',
+        'svg': 'image/svg+xml',
+        'ttf': 'application/x-font-ttf',
+        'eot': 'application/vnd.ms-fontobject',
+        'woff': 'application/font-woff',
+        'otf': 'application/x-font-otf',
+        'zip': 'application/zip',
+        'xml': 'application/xml',
+        'xhtml': 'application/xhtml+xml',
+        'pdf': 'application/pdf',
+        'txt': 'text/plain',
+        'doc': 'application/msword',
+        'ppt': 'application/vnd.ms-powerpoint',
+        'docx': 'application/msword',
+        'pptx': 'application/vnd.ms-powerpoint',
+        'xls' : 'application/vnd.ms-excel',
+        'xlsx' : 'application/vnd.ms-excel'
+    };
+
+var getExtension = function(baseFileName) {
+    var baseNameComponents = baseFileName.split('.');
+    if (baseNameComponents.length > 1) {
+    	var extension = baseNameComponents[baseNameComponents.length - 1];
+        return extension;
+    } else {
+    	return 'txt';
+    }
+
+};
+
+var getMimeType = function(extension) {
+    var type=CONTENT_MAP[extension];
+    if(!type){type="application/octet-stream";}
+    return type;
+};
 
 
 

@@ -85,7 +85,28 @@ public class API {
     
     private String destinationStatsEnabled;
 
+    private String implementation = "ENDPOINT";
+
     private Set<Scope> scopes;
+
+    private boolean isDefaultVersion = false;
+    private boolean isPublishedDefaultVersion=false;
+
+    /**
+     * Contains flag indicating whether dummy backend or not
+     * @return
+     */
+    public String getImplementation() {
+        return implementation;
+    }
+
+    /**
+     * Returns flag indicating whether dummy backend or not
+     * @param implementation
+     */
+    public void setImplementation(String implementation) {
+        this.implementation = implementation;
+    }
 
     /**
      * The average rating provided by the API subscribers
@@ -513,5 +534,21 @@ public class API {
 
     public void setScopes(Set<Scope> scopes) {
         this.scopes = scopes;
+    }
+
+    public void setAsDefaultVersion(boolean value){
+        isDefaultVersion =value;
+    }
+
+    public void setAsPublishedDefaultVersion(boolean value){
+        isPublishedDefaultVersion =value;
+    }
+
+    public boolean isDefaultVersion(){
+        return isDefaultVersion;
+    }
+
+    public boolean isPublishedDefaultVersion(){
+        return isPublishedDefaultVersion;
     }
 }

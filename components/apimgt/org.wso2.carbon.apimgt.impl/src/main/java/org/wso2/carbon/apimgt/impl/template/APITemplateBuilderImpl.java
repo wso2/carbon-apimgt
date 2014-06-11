@@ -43,6 +43,8 @@ public class APITemplateBuilderImpl implements APITemplateBuilder {
     private static final Log log = LogFactory.getLog(APITemplateBuilderImpl.class);
 
     public static final String TEMPLATE_TYPE_VELOCITY = "velocity_template";
+    public static final String TEMPLATE_TYPE_PROTOTYPE = "prototype_template";
+    public static final String TEMPLATE_DEFAULT_API= "default_api_template";
 
     private API api;
     private List<HandlerConfig> handlers = new ArrayList<HandlerConfig>();
@@ -57,8 +59,8 @@ public class APITemplateBuilderImpl implements APITemplateBuilder {
 
         try {
             // build the context for template and apply the necessary decorators
-            ConfigContext configcontext = new APIConfigContext(this.api);
 
+            ConfigContext configcontext = new APIConfigContext(this.api);
             configcontext = new TransportConfigContext(configcontext, api);
             configcontext = new ResourceConfigContext(configcontext, api);
             // this should be initialised before endpoint config context.
@@ -77,6 +79,8 @@ public class APITemplateBuilderImpl implements APITemplateBuilder {
 
             VelocityContext context = configcontext.getContext();
 
+            Object keys = context.internalGetKeys();
+
             /*  first, initialize velocity engine  */
             VelocityEngine velocityengine = new VelocityEngine();
             velocityengine.init();
@@ -91,6 +95,76 @@ public class APITemplateBuilderImpl implements APITemplateBuilder {
         }
         return writer.toString();
     }
+
+    @Override
+    public String getConfigStringForPrototypeScriptAPI(Environment environment) throws APITemplateException {
+        StringWriter writer = new StringWriter();
+
+        try {
+            // build the context for template and apply the necessary decorators
+
+            ConfigContext configcontext = new APIConfigContext(this.api);
+            configcontext = new TransportConfigContext(configcontext, api);
+            configcontext = new ResourceConfigContext(configcontext, api);
+            configcontext = new EndpointBckConfigContext(configcontext,api);
+            configcontext = new EndpointConfigContext(configcontext, api);
+            configcontext = new SecurityConfigContext(configcontext,api);
+            configcontext = new JwtConfigContext(configcontext);
+            configcontext = new ResponseCacheConfigContext(configcontext, api);
+            configcontext = new BAMMediatorConfigContext(configcontext, api);
+            configcontext = new HandlerConfigContex(configcontext, handlers);
+            configcontext = new EnvironmentConfigContext(configcontext, environment);
+            configcontext = new TemplateUtilContext(configcontext);
+
+            //@todo: this validation might be better to do when the builder is initialized.
+            configcontext.validate();
+
+            VelocityContext context = configcontext.getContext();
+
+            Object keys = context.internalGetKeys();
+
+            /*  first, initialize velocity engine  */
+            VelocityEngine velocityengine = new VelocityEngine();
+            velocityengine.init();
+
+            Template t = velocityengine.getTemplate(this.getPrototypeTemplatePath());
+
+            t.merge(context, writer);
+
+        } catch (Exception e) {
+            log.error("Velocity Error", e);
+            throw new APITemplateException("Velocity Error", e);
+        }
+        return writer.toString();
+    }
+
+    @Override
+    public String getConfigStringForDefaultAPITemplate(String defaultVersion) throws APITemplateException {
+        StringWriter writer = new StringWriter();
+
+        try {
+            VelocityEngine velocityengine = new VelocityEngine();
+            velocityengine.init();
+
+            ConfigContext configcontext= new APIConfigContext(this.api);
+
+            VelocityContext context = configcontext.getContext();
+            context.put("defaultVersion",defaultVersion);
+            String fwdApiContext=this.api.getContext();
+            if(fwdApiContext!=null && fwdApiContext.charAt(0) == '/')
+                fwdApiContext=fwdApiContext.substring(1);
+            context.put("fwdApiContext",fwdApiContext);
+
+            Template t = velocityengine.getTemplate(this.getDefaultAPITemplatePath());
+
+            t.merge(context, writer);
+        } catch (Exception e) {
+            log.error("Velocity Error", e);
+            throw new APITemplateException("Velocity Error", e);
+        }
+        return writer.toString();
+    }
+
 
     @Override
     public OMElement getConfigXMLForTemplate(Environment environment) throws APITemplateException {
@@ -116,4 +190,11 @@ public class APITemplateBuilderImpl implements APITemplateBuilder {
         return "repository" + File.separator + "resources" + File.separator + "api_templates" + File.separator + APITemplateBuilderImpl.TEMPLATE_TYPE_VELOCITY + ".xml";
     }
 
+    public String getPrototypeTemplatePath() {
+        return "repository" + File.separator + "resources" + File.separator + "api_templates" + File.separator + APITemplateBuilderImpl.TEMPLATE_TYPE_PROTOTYPE + ".xml";
+    }
+
+    public String getDefaultAPITemplatePath(){
+        return "repository" + File.separator + "resources" + File.separator + "api_templates" + File.separator + APITemplateBuilderImpl.TEMPLATE_DEFAULT_API + ".xml";
+    }
 }

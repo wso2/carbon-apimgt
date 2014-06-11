@@ -7,9 +7,9 @@ var localeResourcesBasePath="/site/conf/locales/jaggery/";
 var tenantDomain=request.getParameter("tenant");
 var urlPrefix;
 var urlPostfix;
-if(tenantDomain!=null){
-   urlPrefix="?tenant="+tenantDomain;
-   urlPostfix="&tenant="+tenantDomain;
+if(tenantDomain!='null'){
+   urlPrefix="?tenant="+ encode.forUriComponent(tenantDomain);
+   urlPostfix="&tenant="+ encode.forUriComponent(tenantDomain);
 }else{
    urlPrefix='';
    urlPostfix='';
@@ -18,15 +18,13 @@ i18n.init(request,localeResourcesBasePath);
 %>
 <head>
     <%
-    var partWithContext = request.getRequestURL().split(
-                                request.getRequestURI()
-                              )[0]+request.getContextPath();
+    var partWithContext = request_url
 
     %>
     <script>
         var requestURL = '<%=partWithContext%>';
         var ssoEnabled = '<%=site.ssoConfiguration.enabled%>';
-        var tenantDomain = '<%=tenantDomain%>';
+        var tenantDomain = '<%= encode.forJavaScript(tenantDomain) %>';
     </script>
     <title><%=outputs.title%></title>
     <meta charset="UTF-8">
@@ -44,7 +42,7 @@ i18n.init(request,localeResourcesBasePath);
 
     <!--Loca styles-->
     <link href="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("css/localstyles.css"))%>" rel="stylesheet">
-    <!--[if lt IE 9]><link rel="stylesheet" type="text/css" href="<%=jagg.getAbsoluteUrl("/site/themes/default/css/style-ie7-8.css")%>" media="all"/><![endif]-->
+    <!--[if IE 8]><link rel="stylesheet" type="text/css" href="<%=jagg.getAbsoluteUrl("/site/themes/default/css/style-ie8.css")%>" media="all"/><![endif]-->
     <!--[if IE 7]><link rel="stylesheet" type="text/css" href="<%=jagg.getAbsoluteUrl("/site/themes/default/css/style-ie7.css")%>" media="all"/><![endif]-->
 
     <!-- Le HTML5 shim, for IE6-8 support of HTML5 elements -->
@@ -52,8 +50,26 @@ i18n.init(request,localeResourcesBasePath);
     <script src="<%=jagg.getAbsoluteUrl("/site/themes/default/lib/i18n/i18next-1.5.9.js")%>"></script>
 
     <script type="text/javascript" src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("lib/jquery-1.7.1.min.js"))%>"></script>
+    <script type="text/javascript" src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("lib/modernizr.custom.js"))%>"></script>
+    <script type="text/javascript">
+    if(!Modernizr.mq('only all')){
+        var resize_middle = function(){
+            var doc_w  = $( document ).width();
+            var left_w = $('#left').width();
+            var middle_w = doc_w - left_w - 100;
+            $('#middle').width(middle_w);
+        };
+        $(document).ready(function(){
+            resize_middle();
+            $(window).resize(function(){
+                resize_middle();
+            });
+        });
 
-    <%
+    }
+    </script>
+
+<%
     var data = jagg.data();
     if(data.header) {
         jagg.printData(data.header.js);
@@ -72,7 +88,7 @@ var jsonUrl="json";
 var addUrl="add";
 var editUrl="info";
 %>
-<body <% if(reqUrl.indexOf(inlineUrl)>=0 || reqUrl.indexOf(jsonUrl)>=0){%> onload="loadDefaultTinyMCEContent('<%=provider%>','<%=name%>','<%=version%>','<%=docName%>')"<%}%>
+<body <% if(reqUrl.indexOf(inlineUrl)>=0 || reqUrl.indexOf(jsonUrl)>=0){%> onload="loadDefaultTinyMCEContent('<%= encode.forJavaScript(provider) %>','<%= encode.forJavaScript(name) %>','<%= encode.forJavaScript(version)%>','<%= encode.forJavaScript(docName)%>')"<%}%>
 <% if(reqUrl.indexOf(addUrl)>=0 || reqUrl.indexOf(editUrl)>=0){%> onload="loadTiers()"<%}%>
 >
     <div id="wrap">
@@ -88,7 +104,7 @@ var editUrl="info";
         <div id="body"><% jagg.includeBlocks(outputs.body); %></div>
         <div id="push"></div>
     </div>
-    <div id="footer" class="footer-main"><% jagg.includeBlocks(outputs.footer); %></div>
+    <div id="footer" ><% jagg.includeBlocks(outputs.footer); %></div>
     <% jagg.includeBlock("dialogs", null); %>
     <%
     if(data.footer) {
@@ -120,6 +136,9 @@ var editUrl="info";
     <script type="text/javascript" src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("lib/bootstrap/js/bootstrap-carousel.js"))%>"></script>
     <script type="text/javascript" src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("lib/bootstrap/js/bootstrap-typeahead.js"))%>"></script>
     <script type="text/javascript" src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("lib/bootstrap/js/bootstrap-affix.js"))%>"></script>
+    <script type="text/javascript" src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("templates/item-design/js/bootstrap-editable.js"))%>"></script>
+
+
 </body>
 </html>
 <% }); %>

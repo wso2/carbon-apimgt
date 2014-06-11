@@ -131,6 +131,33 @@ public class APIMWSDLReader {
 
 	}
 
+
+
+    /**
+     * Create the WSDL definition <javax.wsdl.Definition> from the baseURI of
+     * the WSDL
+     *
+     * @return {@link Definition} - WSDL4j definition constructed form the wsdl
+     *         original baseuri
+     * @throws APIManagementException
+     * @throws WSDLException
+     */
+
+    private Definition readWSDLFile(API api) throws APIManagementException, WSDLException {
+        WSDLReader reader = getWsdlFactoryInstance().newWSDLReader();
+        // switch off the verbose mode
+        reader.setFeature(JAVAX_WSDL_VERBOSE_MODE, false);
+        reader.setFeature("javax.wsdl.importDocuments", false);
+
+        Definition wsdlDefinition;
+        if (log.isDebugEnabled()) {
+            log.debug("Reading  the WSDL. Base uri is " + baseURI);
+        }
+        wsdlDefinition = reader.readWSDL(api.getWsdlUrl());
+        return wsdlDefinition;
+
+    }
+
 	/**
 	 * Clear the actual service Endpoint and use Gateway Endpoint instead of the
 	 * actual Endpoint.

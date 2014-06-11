@@ -265,12 +265,10 @@ public interface APIManager {
     public Set<Tier> getTiers(String tenantDomain) throws APIManagementException;
 
     /**
-      * Returns details of an API information in low profile
-      *
-      * @param identifier APIIdentifier
-      * @return An API object related to the given identifier or null
-      * @throws APIManagementException if failed get API from APIIdentifier
-   */
-   public API getAPIInfo(APIIdentifier identifier, boolean callArtifact) throws APIManagementException;
-
+     * Returns the Swagger definition as a string
+     * @param apiId
+     * @return
+     * @throws APIManagementException
+     */
+    public String getSwaggerDefinition(APIIdentifier apiId) throws APIManagementException;
 }

@@ -2,11 +2,15 @@
 include("/jagg/jagg.jag");
 
 (function () {
+    var encode = require('encode');
+    encode = new encode.Encode();
+    response.contentType = "application/json; charset=UTF-8";
+
     var mod, name, version, provider, comment, obj, result,
             msg = require("/site/conf/ui-messages.jag"),
             action = request.getParameter("action"),
             user = jagg.getUser();
-    if (action == "addComment") {
+    if (action == "addComment" && request.getMethod() == 'POST') {
         if (!user) {
             print({
                 error:true,
@@ -18,6 +22,8 @@ include("/jagg/jagg.jag");
         version = request.getParameter("version");
         provider = request.getParameter("provider");
         comment = request.getParameter("comment");
+
+
 
         if (!name || !version || !provider || !comment) {
             print({

@@ -36,6 +36,7 @@ import org.wso2.carbon.apimgt.usage.client.exception.APIMgtUsageQueryServiceClie
 import org.wso2.carbon.apimgt.usage.client.internal.APIUsageClientServiceComponent;
 import org.wso2.carbon.bam.presentation.stub.QueryServiceStub;
 import org.wso2.carbon.utils.CarbonUtils;
+import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import javax.naming.Context;
 import javax.naming.InitialContext;
@@ -690,25 +691,19 @@ public class APIUsageStatisticsClient {
     public List<APIUsageByUserDTO> getAPIUsageByUser(String providerName, String fromDate, String toDate)
             throws APIMgtUsageQueryServiceClientException {
 
-        OMElement omElement = this.queryBetweenTwoDaysForAPIUsageByUser(fromDate, toDate, null);
+        OMElement omElement = this.queryBetweenTwoDaysForAPIUsageByUser(providerName, fromDate, toDate, null);
         Collection<APIUsageByUserName> usageData = getUsageDataByAPIName(omElement);
-        List<API> providerAPIs = getAPIsByProvider(providerName);
         List<APIUsageByUserDTO> usageByName = new ArrayList<APIUsageByUserDTO>();
 
         for (APIUsageByUserName usage : usageData) {
-            for (API providerAPI : providerAPIs) {
-                if (providerAPI.getId().getApiName().equals(usage.apiName) &&
-                        providerAPI.getId().getVersion().equals(usage.apiVersion)) {
-
-                    APIUsageByUserDTO usageDTO = new APIUsageByUserDTO();
-                    usageDTO.setApiName(usage.apiName);
-                    usageDTO.setVersion(usage.apiVersion);
-                    usageDTO.setUserID(usage.userID);
-                    usageDTO.setCount(usage.requestCount);
-                    usageByName.add(usageDTO);
-                }
-            }
+            APIUsageByUserDTO usageDTO = new APIUsageByUserDTO();
+            usageDTO.setApiName(usage.apiName);
+            usageDTO.setVersion(usage.apiVersion);
+            usageDTO.setUserID(usage.userID);
+            usageDTO.setCount(usage.requestCount);
+            usageByName.add(usageDTO);
         }
+
         return usageByName;
     }
 
@@ -1602,7 +1597,7 @@ public class APIUsageStatisticsClient {
         }
     }
 
-    private OMElement queryBetweenTwoDaysForAPIUsageByUser(String fromDate, String toDate, Integer limit)
+    private OMElement queryBetweenTwoDaysForAPIUsageByUser(String providerName, String fromDate, String toDate, Integer limit)
             throws APIMgtUsageQueryServiceClientException {
         if (dataSource == null) {
             throw new APIMgtUsageQueryServiceClientException("BAM data source hasn't been initialized. Ensure " +
@@ -1614,6 +1609,8 @@ public class APIUsageStatisticsClient {
             resultsLimit = limit.intValue();
         }
 
+        String tenantDomain = MultitenantUtils.getTenantDomain(providerName);
+
         Connection connection = null;
         Statement statement = null;
         ResultSet rs = null;
@@ -1624,24 +1621,35 @@ public class APIUsageStatisticsClient {
             String oracleQuery;
             String mssqlQuery;
             if (fromDate != null && toDate != null) {
-                query = "SELECT API, API_VERSION, VERSION, USERID, SUM(TOTAL_REQUEST_COUNT) AS TOTAL_REQUEST_COUNT, CONTEXT " +
+                query = "SELECT API, API_VERSION,VERSION, APIPUBLISHER, USERID, SUM(TOTAL_REQUEST_COUNT) AS TOTAL_REQUEST_COUNT, CONTEXT " +
                         "FROM API_REQUEST_SUMMARY" + " WHERE " + APIUsageStatisticsClientConstants.TIME + " BETWEEN " +
-                        "\'" + fromDate + "\' AND \'" + toDate + "\'" + " GROUP BY API, API_VERSION, USERID, VERSION, CONTEXT ORDER BY TOTAL_REQUEST_COUNT DESC LIMIT " + resultsLimit;
+                        "\'" + fromDate + "\' AND \'" + toDate + "\'" + " AND " +
+                        APIUsageStatisticsClientConstants.API_PUBLISHER + " = \'" + tenantDomain + "\'" +
+                        " GROUP BY API, API_VERSION, USERID, VERSION, APIPUBLISHER, CONTEXT ORDER BY TOTAL_REQUEST_COUNT DESC LIMIT " + resultsLimit;
 
-                oracleQuery = "SELECT API, API_VERSION, VERSION, USERID, SUM(TOTAL_REQUEST_COUNT) AS TOTAL_REQUEST_COUNT, CONTEXT " +
+                oracleQuery = "SELECT API, API_VERSION, VERSION, APIPUBLISHER, USERID, SUM(TOTAL_REQUEST_COUNT) AS TOTAL_REQUEST_COUNT, CONTEXT " +
                         "FROM API_REQUEST_SUMMARY" + " WHERE " + APIUsageStatisticsClientConstants.TIME + " BETWEEN " +
-                        "\'" + fromDate + "\' AND \'" + toDate + "\'" + " AND ROWNUM <= " + resultsLimit + " GROUP BY API, API_VERSION, VERSION, USERID, CONTEXT ORDER BY TOTAL_REQUEST_COUNT DESC";
-                mssqlQuery = "SELECT TOP " + resultsLimit + " API, API_VERSION, VERSION, USERID, SUM(TOTAL_REQUEST_COUNT) AS TOTAL_REQUEST_COUNT, CONTEXT " +
+                        "\'" + fromDate + "\' AND \'" + toDate + "\'" + " AND " +
+                        APIUsageStatisticsClientConstants.API_PUBLISHER + " = \'" + tenantDomain + "\'" +
+                        " AND ROWNUM <= " + resultsLimit + " GROUP BY API, API_VERSION, VERSION, USERID, APIPUBLISHER, CONTEXT ORDER BY TOTAL_REQUEST_COUNT DESC";
+
+                mssqlQuery = "SELECT TOP " + resultsLimit + " API, API_VERSION, VERSION, APIPUBLISHER, USERID, SUM(TOTAL_REQUEST_COUNT) AS TOTAL_REQUEST_COUNT, CONTEXT " +
                         "FROM API_REQUEST_SUMMARY" + " WHERE " + APIUsageStatisticsClientConstants.TIME + " BETWEEN " +
-                        "\'" + fromDate + "\' AND \'" + toDate + "\'" + " GROUP BY API, API_VERSION, USERID, VERSION, CONTEXT ORDER BY TOTAL_REQUEST_COUNT DESC";
+                        "\'" + fromDate + "\' AND \'" + toDate + "\'" + " AND " +
+                        APIUsageStatisticsClientConstants.API_PUBLISHER + " = \'" + tenantDomain + "\'" +
+                        " GROUP BY API, API_VERSION, USERID, VERSION, APIPUBLISHER, CONTEXT ORDER BY TOTAL_REQUEST_COUNT DESC";
             } else {
-                query = "SELECT API, API_VERSION, VERSION, USERID, SUM(TOTAL_REQUEST_COUNT) AS TOTAL_REQUEST_COUNT, CONTEXT " +
-                        "FROM API_REQUEST_SUMMARY GROUP BY API, API_VERSION, USERID ORDER BY TOTAL_REQUEST_COUNT DESC LIMIT " + resultsLimit;
+                query = "SELECT API, API_VERSION, VERSION, APIPUBLISHER, USERID, SUM(TOTAL_REQUEST_COUNT) AS TOTAL_REQUEST_COUNT, CONTEXT " +
+                        "FROM API_REQUEST_SUMMARY" + " WHERE " + APIUsageStatisticsClientConstants.API_PUBLISHER + " = \'" + tenantDomain + "\'" +
+                        " GROUP BY API, API_VERSION, APIPUBLISHER, USERID ORDER BY TOTAL_REQUEST_COUNT DESC LIMIT " + resultsLimit;
 
-                oracleQuery = "SELECT API, API_VERSION, VERSION, USERID, SUM(TOTAL_REQUEST_COUNT) AS TOTAL_REQUEST_COUNT, CONTEXT " +
-                        "FROM API_REQUEST_SUMMARY WHERE ROWNUM <= " + resultsLimit + " GROUP BY API, API_VERSION, VERSION, USERID, CONTEXT ORDER BY TOTAL_REQUEST_COUNT DESC ";
-                mssqlQuery = "SELECT TOP " + resultsLimit + " API, API_VERSION, VERSION, USERID, SUM(TOTAL_REQUEST_COUNT) AS TOTAL_REQUEST_COUNT, CONTEXT " +
-                        "FROM API_REQUEST_SUMMARY GROUP BY API, API_VERSION, USERID ORDER BY TOTAL_REQUEST_COUNT DESC ";
+                oracleQuery = "SELECT API, API_VERSION, VERSION, APIPUBLISHER, USERID, SUM(TOTAL_REQUEST_COUNT) AS TOTAL_REQUEST_COUNT, CONTEXT " +
+                        "FROM API_REQUEST_SUMMARY WHERE " + APIUsageStatisticsClientConstants.API_PUBLISHER + " = \'" + tenantDomain + "\'" +
+                        " AND ROWNUM <= " + resultsLimit + " GROUP BY API, API_VERSION, VERSION, APIPUBLISHER, USERID, CONTEXT ORDER BY TOTAL_REQUEST_COUNT DESC ";
+
+                mssqlQuery = "SELECT TOP " + resultsLimit + " API, API_VERSION, VERSION, APIPUBLISHER, USERID, SUM(TOTAL_REQUEST_COUNT) AS TOTAL_REQUEST_COUNT, CONTEXT " +
+                        "FROM API_REQUEST_SUMMARY" + " WHERE " + APIUsageStatisticsClientConstants.API_PUBLISHER + " = \'" + tenantDomain + "\'" +
+                        " GROUP BY API, API_VERSION, APIPUBLISHER, USERID ORDER BY TOTAL_REQUEST_COUNT DESC ";
 
             }
             if ((connection.getMetaData().getDriverName()).contains("Oracle")) {
@@ -1650,6 +1658,7 @@ public class APIUsageStatisticsClient {
             if(connection.getMetaData().getDatabaseProductName().contains("Microsoft")){
                 query = mssqlQuery;
             }
+
             rs = statement.executeQuery(query);
             StringBuilder returnStringBuilder = new StringBuilder("<omElement><rows>");
             int columnCount = rs.getMetaData().getColumnCount();
@@ -2193,7 +2202,7 @@ public class APIUsageStatisticsClient {
 
         private String apiName;
         private String apiVersion;
-        ;
+        private String context;
         private String userID;
         private long requestCount;
 
@@ -2206,6 +2215,8 @@ public class APIUsageStatisticsClient {
                     APIUsageStatisticsClientConstants.USER_ID)).getText();
             requestCount = (long) Double.parseDouble(row.getFirstChildWithName(new QName(
                     APIUsageStatisticsClientConstants.REQUEST)).getText());
+            context = row.getFirstChildWithName(new QName(
+                    APIUsageStatisticsClientConstants.CONTEXT)).getText();
         }
     }
 

@@ -16,7 +16,7 @@ var login = login || {};
                      } else {
                          $('#loginErrorMsg').show();
                          $('#password').val('');
-                         $('#loginErrorMsg div.theMsg').html('<strong>'+i18n.t("errorMsgs.login")+'</strong><br />' + result.message);
+                         $('#loginErrorMsg div.theMsg').text(result.message).prepend('<strong>'+i18n.t("errorMsgs.login")+'</strong><br />');
                      }
                  }, "json");
     };
@@ -107,6 +107,18 @@ function applyTheme(elm){
     $('#themeToApply').val($(elm).attr("data-theme"));
     $('#subthemeToApply').val($(elm).attr("data-subtheme"));
     $('#themeSelectForm').submit();
+}
+
+function getAPIPublisherURL(){
+    jagg.post("/site/blocks/user/login/ajax/login.jag", { action:"getAPIPublisherURL"},
+        function (result) {
+            if (!result.error) {
+                    location.href = result.url;
+
+            } else {
+                jagg.message({content:result.message,type:"error"});
+            }
+        }, "json");
 }
 
 

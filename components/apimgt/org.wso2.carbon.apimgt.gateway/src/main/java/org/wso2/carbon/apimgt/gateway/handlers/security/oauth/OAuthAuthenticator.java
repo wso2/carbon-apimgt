@@ -42,11 +42,13 @@ public class OAuthAuthenticator implements Authenticator {
     protected APIKeyValidator keyValidator;
 
     private String securityHeader = HttpHeaders.AUTHORIZATION;
+    private String defaultAPIHeader="WSO2_AM_API_DEFAULT_VERSION";
     private String consumerKeyHeaderSegment = "Bearer";
     private String oauthHeaderSplitter = ",";
     private String consumerKeySegmentDelimiter = " ";
     private String securityContextHeader;
     private boolean removeOAuthHeadersFromOutMessage=true;
+    private boolean removeDefaultAPIHeaderFromOutMessage=true;
     private String clientDomainHeader = "referer";
     private String requestOrigin;
 
@@ -70,6 +72,10 @@ public class OAuthAuthenticator implements Authenticator {
         if(removeOAuthHeadersFromOutMessage){
             headers.remove(securityHeader);
         }
+        if(removeDefaultAPIHeaderFromOutMessage){
+            headers.remove(defaultAPIHeader);
+        }
+
         String apiContext = (String) synCtx.getProperty(RESTConstants.REST_API_CONTEXT);
         String apiVersion = (String) synCtx.getProperty(RESTConstants.SYNAPSE_REST_API_VERSION);
         String fullRequestPath = (String)synCtx.getProperty(RESTConstants.REST_FULL_REQUEST_PATH);

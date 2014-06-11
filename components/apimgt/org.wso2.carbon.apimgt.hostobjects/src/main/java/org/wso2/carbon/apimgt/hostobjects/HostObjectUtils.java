@@ -19,6 +19,8 @@
 
 package org.wso2.carbon.apimgt.hostobjects;
 
+import java.util.Comparator;
+
 import org.apache.axis2.context.ConfigurationContext;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -28,11 +30,14 @@ import org.wso2.carbon.apimgt.hostobjects.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.keymgt.client.SubscriberKeyMgtClient;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.identity.user.registration.stub.dto.UserFieldDTO;
 import org.wso2.carbon.utils.CarbonUtils;
 import org.wso2.carbon.utils.ConfigurationContextService;
+import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
+import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
-import java.util.Comparator;
+import javax.cache.Caching;
 
 public class HostObjectUtils {
     private static final Log log = LogFactory.getLog(APIProviderHostObject.class);
@@ -162,5 +167,34 @@ public class HostObjectUtils {
                 ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration();
         String enabledStr = configuration.getFirstProperty(APIConstants.API_USAGE_ENABLED);
         return enabledStr != null && Boolean.parseBoolean(enabledStr);
+    }
+
+    /**
+     * This method will clear recently added API cache.
+     * @param username
+     */
+    public static void invalidateRecentlyAddedAPICache(String username){
+        try{
+            PrivilegedCarbonContext.startTenantFlow();
+            if(username!=null && APIConstants.isRecentlyAddedAPICacheEnabled){
+                String tenantDomainFromUserName =  MultitenantUtils.getTenantDomain(username);
+                if(tenantDomainFromUserName != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomainFromUserName)){
+                    PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomainFromUserName, true);
+                }
+                else {
+                    PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME, true);
+                }
+                Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER).getCache("RECENTLY_ADDED_API").remove(username+":"+tenantDomainFromUserName);
+            }
+        } finally {
+            PrivilegedCarbonContext.endTenantFlow();
+        }
+    }
+
+    protected static  boolean isUsageDataSourceSpecified() {
+        APIManagerConfiguration configuration =
+                ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration();
+
+        return (null != configuration.getFirstProperty(APIConstants.API_USAGE_DATA_SOURCE_NAME));
     }
 }

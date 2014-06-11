@@ -28,7 +28,7 @@ public class BAMResponsePublisherDTO extends ResponsePublisherDTO {
         setContext(responsePublisherDTO.getContext());
         setApi_version(responsePublisherDTO.getApi_version());
         setApi(responsePublisherDTO.getApi());
-        setResource(responsePublisherDTO.getResource());
+        setResourcePath(responsePublisherDTO.getResourcePath());
         setMethod(responsePublisherDTO.getMethod());
         setVersion(responsePublisherDTO.getVersion());
         setResponseTime(responsePublisherDTO.getResponseTime());
@@ -45,7 +45,7 @@ public class BAMResponsePublisherDTO extends ResponsePublisherDTO {
         eventMap.put("context", ByteBuffer.wrap(getContext().getBytes()));
         eventMap.put("api_version", ByteBuffer.wrap(getApi_version().getBytes()));
         eventMap.put("api", ByteBuffer.wrap(getApi().getBytes()));
-        eventMap.put("resource", ByteBuffer.wrap(getResource().getBytes()));
+        eventMap.put("resourcePath", ByteBuffer.wrap(getResourcePath().getBytes()));
         eventMap.put("method", ByteBuffer.wrap(getMethod().getBytes()));
         eventMap.put("version", ByteBuffer.wrap(getVersion().getBytes()));
         eventMap.put("response", ByteBuffer.wrap(String.valueOf(getResponse()).getBytes()));

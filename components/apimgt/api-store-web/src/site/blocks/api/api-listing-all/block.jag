@@ -13,7 +13,10 @@ jagg.block("api/api-listing-all", {
      getOutputs:function (inputs) {
         var apis, result, mod,error, response,message, list=[],tenantDomain,
                 tag = request.getParameter("tag"), page = request.getParameter("page"),
-                query = request.getParameter("query");
+                query = request.getParameter("query")
+                apiStatus = request.getParameter("apiStatus");
+                
+                
         if(tag == null) { tag = inputs.tag;}
         tenantDomain=request.getParameter("tenant");
 
@@ -33,6 +36,10 @@ jagg.block("api/api-listing-all", {
             apis = response.result.apis;
             error = response.result.error;
             message = response.result.message;
+        } else if (apiStatus == "PROTOTYPED" || apiStatus == "prototyped") {
+        	mod = jagg.module("api");
+            response = mod.getAllPaginatedPrototypedAPIs(tenantDomain,start,end);
+            apis = response.result.apis;
         } else {
             mod = jagg.module("api");
             response = mod.getAllPaginatedPublishedAPIs(tenantDomain,start,end);

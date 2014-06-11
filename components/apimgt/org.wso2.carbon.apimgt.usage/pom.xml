@@ -18,10 +18,6 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    <modules>
-        <module>org.wso2.carbon.apimgt.usage.publisher</module>
-        <module>org.wso2.carbon.apimgt.usage.client</module>
-    </modules>
     <parent>
         <groupId>org.wso2.carbon</groupId>
         <artifactId>apimgt</artifactId>
@@ -47,5 +43,11 @@
             <url>http://dist.wso2.org/maven2</url>
         </repository>
     </repositories>
+
+    <modules>
+        <module>org.wso2.carbon.apimgt.usage.publisher</module>
+        <module>org.wso2.carbon.apimgt.usage.client</module>
+	<module>org.wso2.carbon.apimgt.usage.analyzer</module>
+    </modules>
 
 </project>

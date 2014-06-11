@@ -38,19 +38,6 @@ function loadTiers(row) {
 $(document).ready(function() {
     //js code to hide form options 
     //@todo: can change to a jquery plugin and move to base js
-    $('.more-options').click(function(){
-        var id = $(this).attr('ref');
-        var div = $('#'+id);
-        if(div.is(":visible")){
-            $(this).text("Show More Options");
-        }
-        else{
-            $(this).text("Show Less Options");
-        }
-        div.toggle('fast');
-        return false; 
-    });
-    
 
     $('.js_hidden_section_title').click(function(){
         var $next = $(this).next();
@@ -98,6 +85,15 @@ $(document).ready(function() {
                   }
               }, "json");
 
+    $('.default_version_check').change(function(){
+        if($(this).is(":checked")){
+            $(default_version_checked).val($(this).val());
+        }else{
+            $(default_version_checked).val("");
+        }
+    });
+
+
     $('.transports_check_http').change(function(){
         if($(this).is(":checked")){
             $(http_checked).val($(this).val());
@@ -116,19 +112,26 @@ $(document).ready(function() {
 
     $('.storeCheck').change(function () {
         var checkedStores = $('#externalAPIStores').val();
+        if (checkedStores == "REMOVEALL") {
+            checkedStores = "";
+        }
         if ($(this).is(":checked")) {
             $('#externalAPIStores').val(checkedStores + "::" + $(this).val());
         } else {
             var storeValsWithoutUnchecked = "";
             var checkStoresArray = checkedStores.split("::");
             for (var k = 0; k < checkStoresArray.length; k++) {
-                if (!checkStoresArray[k] == $(this).val()) {
+                if (!(checkStoresArray[k] == $(this).val())) {
                     storeValsWithoutUnchecked += checkStoresArray[k] + "::";
                 }
+            }
+            if (storeValsWithoutUnchecked == "") {
+                storeValsWithoutUnchecked = "REMOVEALL";
             }
             $('#externalAPIStores').val(storeValsWithoutUnchecked);
         }
     });
+
 
     $("select[name='tier']").change(function() {
         // multipleValues will be an array

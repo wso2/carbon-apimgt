@@ -28,6 +28,7 @@ public class Scope {
 
     String key;
     String name;
+    String roles;
     String description;
     int id;
 
@@ -45,6 +46,14 @@ public class Scope {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getRoles() {
+        return roles;
+    }
+
+    public void setRoles(String roles) {
+        this.roles = roles;
     }
 
     public String getDescription() {

@@ -15,7 +15,7 @@
 <div class="title-section"><h2><%=i18n.localize("signupTitle")%></h2></div>
 <div class="content-section shadow-up">
 <div class="content-data">
-<form class="form-horizontal" id="sign-up">
+<form class="form-horizontal" id="sign-up" autocomplete="off">
 <fieldset>
     <div class="control-group">
         <label class="control-label"  for="newUsername"><%=i18n.localize("username")%>:<span class="requiredAstrix">*</span></label>

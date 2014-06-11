@@ -44,6 +44,7 @@ i18n.init(request,localeResourcesBasePath);
     <link rel="apple-touch-icon-precomposed" sizes="114x114" href="bootstrap/ico/apple-touch-icon-114-precomposed.png">
     <link rel="apple-touch-icon-precomposed" sizes="72x72" href="bootstrap/ico/apple-touch-icon-72-precomposed.png">
     <link rel="apple-touch-icon-precomposed" href="bootstrap/ico/apple-touch-icon-57-precomposed.png">
+    <link rel="stylesheet" href="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("css/font-awesome.min.css"))%>" />
 
     <!-- Le HTML5 shim, for IE6-8 support of HTML5 elements -->
     <!--[if lt IE 9]><script src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("js/lib/html5/html5.js"))%>"></script><![endif]-->
@@ -96,20 +97,20 @@ i18n.init(request,localeResourcesBasePath);
 
 
     <% jagg.includeBlocks(outputs.body); %>
-
+    <div id="push"></div>
 </div> <!-- End wrapper -->
    <div class="container-fluid footer-main">
        <div class="row-fluid">
            <div class="span12">
-               <div class="container">
-                   <div class="row">
+               <div class="container-fluid">
+                   <div class="row-fluid">
                        <div class="span3">
                            <h5><%=i18n.localize("gettingStarted")%></h5>
 
                               <ul class="help-links">
                               <li><a href="http://dist.wso2.org/products/api-manager/1.7.0/APIManager-GettingStarted-v1.7.0.pdf"><%=i18n.localize("gettingStartedGuide")%></a></li>
                               <li><a href="http://docs.wso2.org/display/AM170/Installing+the+Product" target="_blank"><%=i18n.localize("installationGuide")%></a></li>
-                              <li><a href="http://docs.wso2.org/display/AM170/Quick+Start" target="_blank"><%=i18n.localize("quickStartGuide")%></a></li>
+                              <li><a href="http://docs.wso2.org/display/AM170/Quick+Start+Guide" target="_blank"><%=i18n.localize("quickStartGuide")%></a></li>
                               <li> <a href="http://docs.wso2.org/display/AM170/Samples" target="_blank"><%=i18n.localize("samples")%></a></li>
                               </ul>
                        </div>
@@ -148,7 +149,7 @@ i18n.init(request,localeResourcesBasePath);
 
 
                             <hr />
-                            <%=i18n.localize("copyright", "&copy; Copyright 2011 &ndash; 2013 All Rights Reserved.")%>
+                            <%=i18n.localize("copyright", "&copy; Copyright 2011 &ndash; 2014 All Rights Reserved.")%>
                             <a class="powered-by-logo pull-right" href="http://wso2.com/products/api-manager" target="_blank"></a>
 
 

@@ -26,27 +26,27 @@
                       <div class="navbar">
                           <div class="navbar-inner">
                               <%
-                              var tenantStore=request.getQueryString();
-                              if(outputs.tenantDomains==null ||  (tenantStore!=null && tenantStore.indexOf("tenant")>=0 )){%>
-                              <ul class="nav orderFix">
-                                  <%
-                                  var i, link, links = outputs.links, length = links.length;
-                                  for(i = 0; i < length; i++) {
-                                      link = links[i];
-                                  %>
-                                  <li <%=(link.active ? 'class="active"' : '')%>>
-
-                                      <a title="<%=link.tooltip%>" href="<%=link.url%>"<%=(link.classes ? ' class="' + link.classes + '"' : "")%>>
-                                          <i class="<%=link.classIcon%>"></i>
-                                          <br>
-                                          <%=link.title%>
-                                      </a>
-                                  </li>
-                                  <% } %>
+                             var tenantStore=request.getQueryString();
+                             if(outputs.tenantDomains==null ||(tenantStore!=null && tenantStore.indexOf("tenant")>=0) ){%>
+                             <ul class="nav orderFix">
+                             <%
+                             var i, link, links = outputs.links, length = links.length;
+                             for(i = 0; i < length; i++) {
+                             link = links[i];
+                             if(link.title=='Forum' && ((tenantStore!=null) && (tenantStore.indexOf("tenant")>=0&& tenantStore.indexOf("carbon.super")<0) ) ){ }else{
+                             %>
+                             <li <%=(link.active ? 'class="active"' : '')%>>
+                             <a title="<%=link.tooltip%>" href="<%=link.url%>"<%=(link.classes ? ' class="' + link.classes + '"' : "")%>>
+                             <i class="<%=link.classIcon%>"></i>
+                             <br>
+                             <%=link.title%>
+                             </a>
+                             </li>
+                                  <% } }%>
 
                                     <li class="dropdown tryit-menu-item">
                                       <a class="dropdown-toggle" data-toggle="dropdown" href="#">
-                                          <i class="icon-tools-top"></i>
+                                          <i class="fa fa-bar-chart-o"></i>
                                                                                 <br>
                                           Statistics <b class="caret"></b></a>
 
@@ -64,7 +64,7 @@
                                   </li>
                                   <li class="dropdown tryit-menu-item">
                                       <a class="dropdown-toggle" data-toggle="dropdown" href="#">
-                                          <i class="icon-tools-top"></i>
+                                          <i class="fa fa-wrench"></i>
                                                                                 <br>
                                           Tools <b class="caret"></b></a>
                                       <ul class="dropdown-menu">

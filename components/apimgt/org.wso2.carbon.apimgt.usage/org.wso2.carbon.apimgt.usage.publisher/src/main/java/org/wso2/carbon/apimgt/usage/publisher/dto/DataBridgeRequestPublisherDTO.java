@@ -19,13 +19,6 @@ package org.wso2.carbon.apimgt.usage.publisher.dto;
 
 import org.wso2.carbon.apimgt.usage.publisher.APIMgtUsagePublisherConstants;
 import org.wso2.carbon.apimgt.usage.publisher.DataPublisherUtil;
-import org.wso2.carbon.databridge.agent.thrift.DataPublisher;
-import org.wso2.carbon.databridge.agent.thrift.exception.AgentException;
-import org.wso2.carbon.databridge.agent.thrift.lb.LoadBalancingDataPublisher;
-import org.wso2.carbon.databridge.commons.exception.DifferentStreamDefinitionAlreadyDefinedException;
-import org.wso2.carbon.databridge.commons.exception.MalformedStreamDefinitionException;
-import org.wso2.carbon.databridge.commons.exception.NoStreamDefinitionExistException;
-import org.wso2.carbon.databridge.commons.exception.StreamDefinitionException;
 
 public class DataBridgeRequestPublisherDTO extends RequestPublisherDTO {
 
@@ -34,7 +27,7 @@ public class DataBridgeRequestPublisherDTO extends RequestPublisherDTO {
         setContext(requestPublisherDTO.getContext());
         setApi_version(requestPublisherDTO.getApi_version());
         setApi(requestPublisherDTO.getApi());
-        setResource(requestPublisherDTO.getResource());
+        setResourcePath(requestPublisherDTO.getResourcePath());
         setMethod(requestPublisherDTO.getMethod());
         setVersion(requestPublisherDTO.getVersion());
         setRequestTime(requestPublisherDTO.getRequestTime());
@@ -44,6 +37,7 @@ public class DataBridgeRequestPublisherDTO extends RequestPublisherDTO {
         setApiPublisher(requestPublisherDTO.getApiPublisher());
         setApplicationName(requestPublisherDTO.getApplicationName());
         setApplicationId(requestPublisherDTO.getApplicationId());
+        setAccessLevel(requestPublisherDTO.getAccessLevel());
     }
 
     public static String getStreamDefinition() {
@@ -60,7 +54,7 @@ public class DataBridgeRequestPublisherDTO extends RequestPublisherDTO {
                 "          {'name':'context','type':'STRING'}," +
                 "          {'name':'api_version','type':'STRING'}," +
                 "          {'name':'api','type':'STRING'}," +
-                "          {'name':'resource','type':'STRING'}," +
+                "          {'name':'resourcePath','type':'STRING'}," +
                 "          {'name':'method','type':'STRING'}," +
                 "          {'name':'version','type':'STRING'}," +
                 "          {'name':'request','type':'INT'}," +
@@ -70,7 +64,8 @@ public class DataBridgeRequestPublisherDTO extends RequestPublisherDTO {
                 "          {'name':'hostName','type':'STRING'}," +
                 "          {'name':'apiPublisher','type':'STRING'}," +
                 "          {'name':'applicationName','type':'STRING'}," +
-                "          {'name':'applicationId','type':'STRING'}" +
+                "          {'name':'applicationId','type':'STRING'}," +
+                "          {'name':'accessLevel','type':'STRING'}" +
                 "  ]" +
                 "}";
 
@@ -78,9 +73,9 @@ public class DataBridgeRequestPublisherDTO extends RequestPublisherDTO {
     }
 
     public Object createPayload(){
-        return new Object[]{getConsumerKey(),getContext(),getApi_version(),getApi(),getResource(),getMethod(),
+        return new Object[]{getConsumerKey(),getContext(),getApi_version(),getApi(), getResourcePath(),getMethod(),
                             getVersion(), getRequestCount(),getRequestTime(),getUsername(),getTenantDomain(),getHostName(),
-                            getApiPublisher(), getApplicationName(), getApplicationId()};
+                            getApiPublisher(), getApplicationName(), getApplicationId(),getAccessLevel()};
         
     }
 

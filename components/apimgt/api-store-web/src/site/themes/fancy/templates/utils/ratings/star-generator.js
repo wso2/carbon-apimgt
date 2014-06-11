@@ -52,7 +52,7 @@ var getDynamicStars = function (rating) {
     } else {
         selectedRating = '<a class="selected-rating">' + rating + '</a>/5';
         returnScript = returnScript + selectedRating +
-        '<a title="Remove Rating" class="remove-rating"  onclick="removeRating(jagg.api)"></a>' +
+        '<a title="Remove Rating" class="remove-rating"></a>' +
         '</div>';
     }
     return returnScript;

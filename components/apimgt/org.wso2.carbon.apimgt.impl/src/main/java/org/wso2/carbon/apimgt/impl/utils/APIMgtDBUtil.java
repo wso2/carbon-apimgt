@@ -30,6 +30,10 @@ import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.sql.DataSource;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -208,5 +212,37 @@ public final class APIMgtDBUtil {
         dbConfiguration.setUserName(config.getFirstProperty(DB_USER));
         dbConfiguration.setPassword(config.getFirstProperty(DB_PASSWORD));
         return dbConfiguration;
+    }
+
+    /**
+     * Function converts IS to String
+     * Used for handling blobs
+     * @param is
+     * @return
+     */
+    public static String getStringFromInputStream(InputStream is) {
+        BufferedReader br = null;
+        StringBuilder sb = new StringBuilder();
+
+        String line;
+        try {
+
+            br = new BufferedReader(new InputStreamReader(is));
+            while ((line = br.readLine()) != null) {
+                sb.append(line);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            if (br != null) {
+                try {
+                    br.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        return sb.toString();
+
     }
 }

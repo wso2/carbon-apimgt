@@ -133,13 +133,13 @@
     "revoke": "Revoke",
     "revokeTitle": "Revoke Access Token",
 
-    "apiSubscriptons" : "Subscriptions",
-    "apiUsage" : "Usage",
-    "apiResponseTimes" : "Response Times",
-    "apiLastAccessTimes" : "Last Access Times",
-    "apiUsageResourcePath" : "Usage by Resource Path",
-    "apiUsageFromDestination" : "Usage by destination",
-    "apiUsageByUser" : "Usage by User",
+    "apiSubscriptons" : "API Subscriptions",
+    "apiUsage" : "API Usage",
+    "apiResponseTimes" : "API Response Times",
+    "apiLastAccessTimes" : "API Last Access Times",
+    "apiUsageResourcePath" : "API Usage by Resource Path",
+    "apiUsageFromDestination" : "API Usage by destination",
+    "apiUsageByUser" : "API Usage by User",
     "faultyInvocations" : "Faulty Invocations",
 
     "overallAPIUsageTitle": "Overall API Usage (Across All Versions)",
@@ -234,7 +234,11 @@
     "searchAPIHelpMsg2":"By API Name [Default]  or",
     "searchAPIHelpMsg3":"By API Provider [Syntax - provider:xxxx ]  or",
     "searchAPIHelpMsg4":"By API Version  [Syntax - version:xxxx ]  or",
-    "searchAPIHelpMsg5":"By Context [Syntax - context:xxxx ] ",
+    "searchAPIHelpMsg5":"By Context [Syntax - context:xxxx ] or ",
+    "searchAPIHelpMsg6":"By Status [Syntax - status:xxxx ] or ",
+    "searchAPIHelpMsg7":"By Description [Syntax - description:xxxx ] or",
+    "searchAPIHelpMsg8":"By Subcontext [Syntax - subcontext:xxxx ] ",
+    "searchAPIHelpMsg9":"By Documentation Content [Syntax - doc:xxxx ] ",
     "revokeHelpMsg1":"Search Options",
     "revokeHelpMsg2":"By Access Token [Default] or",
     "revokeHelpMsg3":"By Authorized User - Syntax - user:xxxxx or",
@@ -247,7 +251,7 @@
     "nonsecured": "Non Secured",
     "endpointType": "Endpoint Security Scheme",
     "credentials": "Credentials",
-    "copyright": "&copy; Copyright 2011 &ndash; 2013 All Rights Reserved.",
+    "copyright": "&copy; Copyright 2011 &ndash; 2014 All Rights Reserved.",
     "gettingStarted":"Getting Started",
     "gettingStartedGuide":"Getting Started Guide (PDF)",
     "installationGuide":"Installation Guide",
@@ -284,5 +288,11 @@
     "sandboxFailoverEp"   : "Sandbox Fail-over Endpoint(s)",
     "apistore":"APIStore",
 
-    "destinationStats":"Destination based Usage Tracking"
+    "destinationStats":"Destination based Usage Tracking",
+
+    "defaultAPIVersion":"Default API Version",
+
+    "docSum" : "Summary",
+    "viewDoc" : "View Content",
+    "download" : "Download"
 }

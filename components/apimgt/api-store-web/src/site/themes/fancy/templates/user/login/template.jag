@@ -30,10 +30,10 @@ i18n.init(request,localeResourcesBasePath);
 <%}%>
 <ul class="nav actions login-sign-up pull-right">
             <li class="dropdown settingsSection">
-                <i class="icon-theme"></i>
+                <i class="fa fa-tachometer"></i>
                                 <br>
               <a href="#" class="dropdown-toggle" data-toggle="dropdown">Themes <b class="caret"></b></a>
-              <ul class="dropdown-menu">
+              <ul class="dropdown-menu theme-container">
                 <li  class="themeSelection"><h3><%=i18n.localize("selectTheme")%></h3>
                     <form id="themeSelectForm" action="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("templates/user/theme/template.jag?theme=modern"))%>">
                         <input type="hidden" id="themeToApply" name="themeToApply" />
@@ -67,7 +67,7 @@ i18n.init(request,localeResourcesBasePath);
             </li>
            <li class="divider-vertical"></li>
            <li class="dropdown">
-               <i class="icon-user-top"></i>
+               <i class="fa fa-user"></i>
                <br>
                <a class="link-to-user dropdown-toggle" data-toggle="dropdown"><%=user.username%> <b class="caret"></b></a>
              <ul class="dropdown-menu" id="userInfoMenu">
@@ -84,13 +84,13 @@ i18n.init(request,localeResourcesBasePath);
 var tenant=request_tenant;
 if(isSelfSignupEnabled && (tenant==null || tenant=="carbon.super")){%>
     <li>
-        <i class="icon-signup-top"></i>
+        <i class="fa fa-pencil-square-o"></i>
         <br>
         <a id="register-link" href="<%=httpsUrl%><%=site.context%>/site/pages/sign-up.jag?<%=urlPrefix%>"><%=i18n.localize("signup")%></a>
     </li>
 	<%}%>
     <li>
-        <i class="icon-user-top"></i>
+        <i class="fa fa-user"></i>
         <br>
         <a id="login-link"><%=i18n.localize("login")%></a>
     </li>

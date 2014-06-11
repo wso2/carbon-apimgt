@@ -203,14 +203,14 @@ public class WSO2APIPublisher implements APIPublisher {
 
             if (isError) {
                 String errorMsg=responseString.split(",")[1].split(":")[1].split("}")[0].trim();
-                throw new APIManagementException(" Authentication with external APIStore - "+store.getDisplayName()+ "   failed due to "+errorMsg+".API publishing to APIStore- "+store.getDisplayName()+" failed.");
+                throw new APIManagementException(" Authentication with external APIStore - "+store.getDisplayName()+ "  failed due to "+errorMsg+".API publishing to APIStore- "+store.getDisplayName()+" failed.");
 
             } else{
                 return true;
             }
 
-        } catch (Exception e) {
-            throw new APIManagementException("Authentication with external APIStore : "+store.getDisplayName() +" failed.", e);
+        } catch (IOException e) {
+            throw new APIManagementException("Error while accessing the external store : "+ store.getDisplayName() +" : "+e.getMessage(), e);
 
         }
     }

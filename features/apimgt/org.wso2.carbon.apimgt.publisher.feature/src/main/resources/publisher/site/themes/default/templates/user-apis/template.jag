@@ -2,7 +2,7 @@
 var uname=request.getParameter("uname");
 %>
 <div id="user">
-    <div class="title-section"><h2><%=i18n.localize("apisByProviderTitle")%> <%=uname%></h2></div>
+    <div class="title-section"><h2><%=i18n.localize("apisByProviderTitle")%> <%= encode.forHtml(uname)%></h2></div>
     <%
        if ((outputs.apis != null && outputs.apis.length > 0) || request.getParameter('query') != null) {
            jagg.includeBlock("search/apis-by-provider-search", null);
@@ -35,13 +35,13 @@ var uname=request.getParameter("uname");
             if((currentPage-1)*itemsPerPage == length){
                 if(String(currentPage)=='1'){%>
                  <script>
-                    window.location.href = "<%=jagg.getAbsoluteUrl("/site/pages/index.jag")%>+ "?uname=" + "<%=uname%>";
+                    window.location.href = "<%=jagg.getAbsoluteUrl("/site/pages/index.jag")%>+ "?uname=" + "<%= encode.forUriComponent(uname)%>";
                 </script>
                 <%}else{
                 currentPage = currentPage - 1;
                 %>
                 <script>
-                    window.location.href = "<%=jagg.getMappedUrl("/site/pages/user.jag")%> + "?uname=" + "<%=uname%>" +"&page="+"<%=String(currentPage)%>";
+                    window.location.href = "<%=jagg.getMappedUrl("/site/pages/user.jag")%> + "?uname=" + "<%=encode.forUriComponent(uname)%>" +"&page="+"<%=String(currentPage)%>";
                 </script><%
             } }}
            var from = (currentPage - 1)*itemsPerPage;
@@ -72,7 +72,7 @@ var uname=request.getParameter("uname");
             <%
             if (length == 0) {
             %>
-            <tr><td colspan="6"><%=i18n.localize("noApisByProviderMsg")%> -<%=uname%></td></tr>
+            <tr><td colspan="6"><%=i18n.localize("noApisByProviderMsg")%> -<%= encode.forHtml(uname)%></td></tr>
             <%
             }
             %>

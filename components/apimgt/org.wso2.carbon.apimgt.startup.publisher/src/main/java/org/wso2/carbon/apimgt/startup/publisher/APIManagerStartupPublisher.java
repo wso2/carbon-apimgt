@@ -35,7 +35,7 @@ import org.wso2.carbon.apimgt.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.startup.publisher.internal.DataHolder;
-import org.wso2.carbon.apimgt.usage.publisher.internal.ServiceReferenceHolder;
+import org.wso2.carbon.apimgt.startup.publisher.internal.ServiceReferenceHolder;
 import org.wso2.carbon.core.ServerStartupHandler;
 import org.wso2.carbon.governance.api.generic.GenericArtifactManager;
 import org.wso2.carbon.governance.api.generic.dataobjects.GenericArtifact;
@@ -44,6 +44,7 @@ import org.wso2.carbon.registry.common.CommonConstants;
 import org.wso2.carbon.registry.core.Registry;
 import org.wso2.carbon.registry.core.Resource;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
+import org.wso2.carbon.registry.core.session.CurrentSession;
 
 import javax.activation.FileTypeMap;
 import javax.cache.Cache;
@@ -257,7 +258,7 @@ public class APIManagerStartupPublisher implements ServerStartupHandler {
 			this.registry = DataHolder.getRegistryService()
 					.getGovernanceSystemRegistry();
 			createAPIArtifact(api);
-			apiMgtDAO.addAPI(api);
+			apiMgtDAO.addAPI(api, CurrentSession.getTenantId());
 			
 			
 			/* Adding Document URL*/

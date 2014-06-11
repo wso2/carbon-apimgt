@@ -49,7 +49,7 @@ public class APISecurityConstants {
     public static final String SUBSCRIPTION_INACTIVE_MESSAGE = "The subscription to the API is inactive";
 
     public static final int INVALID_SCOPE = 900910;
-    public static final String INVALID_SCOPE_MESSAGE = "Invalid Scope. The access token does not allow you to access the requested scope";
+    public static final String INVALID_SCOPE_MESSAGE = "The access token does not allow you to access the requested resource";
 
     /**
      * returns an String that corresponds to errorCode passed in

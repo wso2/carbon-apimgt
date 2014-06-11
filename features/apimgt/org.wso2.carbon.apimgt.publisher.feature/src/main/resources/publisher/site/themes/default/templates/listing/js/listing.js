@@ -25,7 +25,7 @@ var removeAPI = function(name, version, provider) {
                   }else{
                        jagg.message({content:result.message,type:"error"});
                   }
-              }, "json");
+            }, "json");
 
     }});
 

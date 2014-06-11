@@ -29,7 +29,9 @@ include("/jagg/jagg.jag");
             docData.fileContent = request.getFile("docLocation");
             docData.content = "";
 	    	docData.otherTypeName = request.getParameter("newType");
-	
+	    	docData.mimeType = request.getParameter("mimeType");
+	    	docData.visibility = request.getParameter("docVisibility");
+
             if (mode == "Update") {
                 result = mod.updateDocumentation(apiData, docData);
             } else {

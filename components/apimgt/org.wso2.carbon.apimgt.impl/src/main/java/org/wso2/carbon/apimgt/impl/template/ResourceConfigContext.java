@@ -16,6 +16,8 @@
 
 package org.wso2.carbon.apimgt.impl.template;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.velocity.VelocityContext;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.API;
@@ -24,6 +26,7 @@ import org.wso2.carbon.apimgt.api.model.API;
  * Set the uri templates as the resources
  */
 public class ResourceConfigContext extends ConfigContextDecorator {
+    private static final Log log = LogFactory.getLog(ResourceConfigContext.class);
 
     private API api;
 
@@ -43,6 +46,7 @@ public class ResourceConfigContext extends ConfigContextDecorator {
 
         context.put("resources", api.getUriTemplates());
         context.put("faultSequence", api.getFaultSequence());
+        context.put("apiStatus", api.getStatus());
 
         return context;  //To change body of implemented methods use File | Settings | File Templates.
     }

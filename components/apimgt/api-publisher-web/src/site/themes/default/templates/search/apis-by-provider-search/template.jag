@@ -17,6 +17,9 @@ var uname=request.getParameter("uname");
             <li><%=i18n.localize("searchAPIHelpMsg3")%></li>
             <li><%=i18n.localize("searchAPIHelpMsg4")%></li>
             <li><%=i18n.localize("searchAPIHelpMsg5")%></li>
+            <li><%=i18n.localize("searchAPIHelpMsg6")%></li>
+            <li><%=i18n.localize("searchAPIHelpMsg7")%></li>
+            <li><%=i18n.localize("searchAPIHelpMsg8")%></li>
         </ol>
     </div>
     <input type="hidden" name="uname" value="<%= encode.forHtml(uname)%>" />

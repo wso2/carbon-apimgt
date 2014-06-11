@@ -41,9 +41,6 @@ public class APIMGTConfigReaderService {
         bamServerUser = config.getFirstProperty(APIConstants.API_USAGE_BAM_SERVER_USER);
         bamServerPassword = config.getFirstProperty(APIConstants.API_USAGE_BAM_SERVER_PASSWORD);
         publisherClass = config.getFirstProperty(APIConstants.API_USAGE_PUBLISHER_CLASS);
-        String googleAnalyticsEnabledStr = config.getFirstProperty(APIConstants.API_GOOGLE_ANALYTICS_TRACKING_ENABLED);
-        googleAnalyticsTrackingEnabled = googleAnalyticsEnabledStr != null && JavaUtils.isTrueExplicitly(googleAnalyticsEnabledStr);
-        googleAnalyticsTrackingID = config.getFirstProperty(APIConstants.API_GOOGLE_ANALYTICS_TRACKING_ID);
     }
 
     public String getBamServerThriftPort() {

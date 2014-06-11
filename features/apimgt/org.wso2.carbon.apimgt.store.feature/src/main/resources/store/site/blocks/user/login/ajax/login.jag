@@ -2,11 +2,15 @@
 include("/jagg/jagg.jag");
 
 (function () {
+    response.contentType = "application/json; charset=UTF-8";
+    response.addHeader('Pragma', 'No-cache');
+    response.addHeader('Cache-control', 'no-cache');
+
     var mod, obj, result, username,
             action = request.getParameter("action"),
             site = require("/site/conf/site.json"),
             msg = require("/site/conf/ui-messages.jag");
-    if (action === "login") {
+    if (action === "login" && request.getMethod() == 'POST') {
         mod = jagg.module("user");
         username = request.getParameter("username");
 
@@ -26,7 +30,7 @@ include("/jagg/jagg.jag");
             obj = {
                 error:false
             }
-        jagg.setUser({username:result.username, isSuperTenant:result.isSuperTenant, cookie:result.cookie});
+        jagg.setUser({username:result.username, isSuperTenant:result.isSuperTenant, cookie:result.cookie, hasPublisherAccess:result.hasPublisherAccess});
         session.put("showLogin", "false");
         }
         print(obj);
@@ -36,7 +40,22 @@ include("/jagg/jagg.jag");
         print({
             error:false
         });
-    } else if (action === "loginWithSAMLToken") {
+    } else if (action === "getAPIPublisherURL") {
+             mod = jagg.module("manager");
+             var resultVal=mod.getAPIPublisherURL();
+             if (resultVal.error) {
+                obj = {
+                      error:true,
+                      message:resultVal.message
+                      };
+             } else {
+                      obj = {
+                      error:false,
+                      url:resultVal.url
+                      }
+                      }
+    print(obj);
+    }else if (action === "loginWithSAMLToken") {
              var log = new Log();
 
              mod = jagg.module("user");

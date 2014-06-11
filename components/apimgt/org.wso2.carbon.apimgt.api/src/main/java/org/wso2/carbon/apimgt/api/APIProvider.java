@@ -21,6 +21,7 @@ import org.wso2.carbon.apimgt.api.dto.UserApplicationAPIUsage;
 import org.wso2.carbon.apimgt.api.model.*;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -128,6 +129,8 @@ public interface APIProvider extends APIManager {
     
     public void removeTier(Tier tier) throws APIManagementException;
 
+    public String getDefaultVersion(APIIdentifier apiid) throws APIManagementException;
+
     /**
      * Adds a new API to the Store
      *
@@ -200,6 +203,14 @@ public interface APIProvider extends APIManager {
      */
     public void addDocumentation(APIIdentifier apiId,
                                  Documentation documentation) throws APIManagementException;
+
+    /**
+     * Checks if a given API exists in the registry
+     * @param apiId
+     * @return boolean result
+     * @throws APIManagementException
+     */
+    public boolean checkIfAPIExists(APIIdentifier apiId) throws APIManagementException;
 
     /**
      * This method used to save the documentation content
@@ -375,5 +386,32 @@ public interface APIProvider extends APIManager {
      *         
      */
     public boolean isSynapseGateway() throws APIManagementException;
+    
+    /**
+     * Search API by Document Content
+     *
+     * @param searchTerm  Search Term
+     * @param searchType  Search Type
+     * @return   Set of Documents and APIs
+     * @throws APIManagementException
+     */
+    public Map<Documentation, API> searchAPIsByDoc(String searchTerm, String searchType) throws APIManagementException;
+    
+    /**
+     * This method updates Swagger 1.2 resources in the registry
+     * @param fileName
+     * @param jsonText
+     * @throws APIManagementException
+     */
+    public void updateSwagger12Definition(APIIdentifier apiId, String fileName, String jsonText) throws APIManagementException;
+    
+    
+    /**
+     * Returns the Swagger12 definition as a string
+     * @param apiId
+     * @return
+     * @throws APIManagementException
+     */
+    public String getSwagger12Definition(APIIdentifier apiId) throws APIManagementException;
 
 }

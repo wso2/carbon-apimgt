@@ -76,7 +76,19 @@ var RESOURCES = [
                     </div>
                 </div>
 
+                <div class="control-group">
+                        <label  class="control-label" >Default Version</label>
+                         <div class="controls">
+                            <input type="checkbox" class="default_version_check" id="default_version" name="default_version" value="default_version"/>
+                            <input type="hidden" id="default_version_checked" name="default_version_checked" value=""/>
 
+                            <a class="icon-question-sign help_popup" help_data="default_api_help"></a>
+                            <p id="default_api_help" class="hide">If an API is invoked without the version, then the default API is invoked</p>
+
+                        </div>
+                        
+                </div>
+                
                 <div class="control-group">
                     <label class="control-label" for="tier"><%=i18n.localize("tier")%>:<span class="requiredAstrix">*</span></label>
                     <div class="controls">
@@ -483,19 +495,25 @@ var RESOURCES = [
                     <div class="control-group">
                         <label class="control-label" for="scopeKey">Scope Key</label>
                         <div class="controls">
-                        <input type="text" id="scopeKey" placeholder="Eg: ADMINISTRATOR">
+                        <input type="text" id="scopeKey" placeholder="Eg: api_name_read">
                         </div>
                     </div>
                     <div class="control-group">
                         <label class="control-label" for="scopeName">Scope Name</label>
                         <div class="controls">
-                        <input type="text" id="scopeName" placeholder="Eg: Administration APIs">
+                        <input type="text" id="scopeName" placeholder="Eg: Read My Data">
+                        </div>
+                    </div>
+                    <div class="control-group">
+                        <label class="control-label" for="scopeRoles">Roles</label>
+                        <div class="controls">
+                        <input type="text" id="scopeRoles" placeholder="Eg: role1,role2,role3">
                         </div>
                     </div>
                     <div class="control-group">
                         <label class="control-label" for="inputEmail">Description</label>
                         <div class="controls">
-                        <textarea id="scopeDescription" placeholder="Eg: This scope will group all the administration APIs"></textarea>
+                        <textarea id="scopeDescription" placeholder="Eg: Allows the Application to read your data"></textarea>
                         </div>
                     </div>
                 </form>

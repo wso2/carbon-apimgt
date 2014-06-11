@@ -124,9 +124,10 @@
     "searchAPIHelpMsg2":"Por Nombre de API [Default]",
     "searchAPIHelpMsg3":"Por Proveedor de API [ Syntax - provider:xxxx ]  o",
     "searchAPIHelpMsg4":"Por Version de API [ Syntax - version:xxxx ]  o",
-    "searchAPIHelpMsg5":"Por Contexto [ Syntax - context:xxxx ]",
+    "searchAPIHelpMsg5":"Por Contexto [ Syntax - context:xxxx ]  0",
+    "searchAPIHelpMsg6":"Por Descripci&oacute;n [ Syntax - description:xxxx ]",
 
-    "copyright": "&copy; Copyright 2011 &ndash; 2012 All Rights Reserved.",
+    "copyright": "&copy; Copyright 2011 &ndash; 2014 All Rights Reserved.",
 
     "First Name":"Nombre",
     "Last Name":"Apellidos",

@@ -135,4 +135,31 @@ var showStoreURL = function () {
         };
     }
 };
+
+var showAPIDocVisibility = function () {
+    var result, log = new Log(),
+            provider = jagg.module("manager").getAPIProviderObj();
+    try {
+        result = provider.showAPIDocVisibility();
+        if (log.isDebugEnabled()) {
+            log.debug("showAPIDocVisibility method " );
+        }
+        if(result){
+        return {
+            error:false,
+            permitted:result
+        };
+        }else{
+        return {
+            error:true,
+            permitted:result
+        }; }
+    } catch (e) {
+        log.error(e.message);
+        return {
+            error:true,
+            permitted:false
+        };
+    }
+};
 %>

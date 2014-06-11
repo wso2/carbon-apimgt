@@ -4,6 +4,14 @@ var jagg = jagg || {};
     var option = { resGetPath:requestURL+'/site/conf/locales/js/i18nResources.json'};
     i18n.init(option);
 
+    if (!window.console) {
+        window.console = {
+            log: function(obj){},
+            info: function(obj){}
+        };
+    }
+
+
     jagg.post = function () {
         var args = Array.prototype.slice.call(arguments);
         args[0] = this.site.context + args[0];
@@ -82,6 +90,24 @@ var jagg = jagg || {};
         });
     };
 
+
+    jagg.fillProgress = function (chartId){
+        if(t_on[chartId]){
+            var progressBar = $('#'+chartId+' div.progress-striped div.bar')[0];
+            if(progressBar == undefined){
+                t_on[chartId] = 0 ;
+                return;
+            }
+            var time = Math.floor((Math.random() * 400) + 800);
+            var divider = Math.floor((Math.random() * 2) + 2);
+            var currentWidth = parseInt(progressBar.style.width.split('%')[0]);
+            var newWidth = currentWidth + parseInt((100 - currentWidth) / divider);
+            newWidth += "%";
+            $(progressBar).css('width', newWidth);
+            var t = setTimeout('jagg.fillProgress("'+chartId+'")', time);
+        }
+    };
+
     jagg.initStars = function (elem, saveCallback, removeCallback, data) {
         $('.dynamic-rating-stars a', elem).each(function () {
             $(this).mouseover(function () {
@@ -115,7 +141,7 @@ var jagg = jagg || {};
         $(".dynamic-rating", elem).data("rating-meta", data).data("rating", $(".selected-rating", elem).text());
 
         $(".remove-rating", elem).click(function () {
-            removeCallback($(".dynamic-rating", elem).data("rating-meta", data));
+            removeCallback($(".dynamic-rating", elem).data("rating-meta"));
         });
     };
 

@@ -28,13 +28,16 @@ include("/jagg/jagg.jag");
             var externalAPIStoresArray = new Array();
             var externalAPIStores = request.getParameter("externalAPIStores");
             if(externalAPIStores!=null && externalAPIStores != ''){
+		        if(externalAPIStores=="REMOVEALL"){
+			        externalAPIStores = " ::";
+		            }
             	var externalAPIStoresVals=externalAPIStores.split("::");
              		for(var k=0;k<externalAPIStoresVals.length;k++){
              			if(externalAPIStoresVals[k]!=''){
              				externalAPIStoresArray.push(externalAPIStoresVals[k]);
              			}
              		}
-             
+
              		apiData.externalAPIStores = externalAPIStoresArray;
 
             		result = mod.updateExternalAPIStores(apiData);

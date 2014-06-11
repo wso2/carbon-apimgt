@@ -40,7 +40,7 @@ public class APIDescriptionGenUtil {
         // specification. So it just extract the required element.
         OMElement maxCount = null;
         OMElement timeUnit = null;
-        int requestPerMinute;
+        long requestPerMinute;
         try {
             maxCount = policy.getFirstChildWithName(APIConstants.POLICY_ELEMENT).getFirstChildWithName
                     (APIConstants
@@ -58,9 +58,9 @@ public class APIDescriptionGenUtil {
                 log.warn(msg);
                 throw new APIManagementException(msg);
             }
-            requestPerMinute = (Integer.parseInt(maxCount.getText().trim()) * 60000) / (Integer.parseInt(timeUnit.getText().trim()));
+            requestPerMinute = (Long.parseLong(maxCount.getText().trim()) * 60000) / (Long.parseLong(timeUnit.getText().trim()));
             if (requestPerMinute >= 1) {
-                String description = DESCRIPTION.replaceAll("\\[1\\]", Integer.toString(requestPerMinute));
+                String description = DESCRIPTION.replaceAll("\\[1\\]", Long.toString(requestPerMinute));
                 return description;
             }
             return DESCRIPTION;

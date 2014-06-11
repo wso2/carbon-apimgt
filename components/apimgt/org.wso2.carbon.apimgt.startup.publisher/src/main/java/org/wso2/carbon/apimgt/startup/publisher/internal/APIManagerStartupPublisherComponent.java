@@ -22,6 +22,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
+import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
 import org.wso2.carbon.apimgt.startup.publisher.APIManagerStartupPublisher;
 import org.wso2.carbon.core.ServerStartupHandler;
 import org.wso2.carbon.registry.core.service.RegistryService;
@@ -32,6 +33,9 @@ import org.wso2.carbon.registry.core.service.RegistryService;
  * 
  * @scr.reference name="registry.service" interface="org.wso2.carbon.registry.core.service.RegistryService"
  * cardinality="1..1" policy="dynamic" bind="setRegistryService" unbind="unsetRegistryService"
+ * @scr.reference name="api.manager.config.service"
+ * interface="org.wso2.carbon.apimgt.impl.APIManagerConfigurationService" cardinality="1..1"
+ * policy="dynamic" bind="setAPIManagerConfigurationService" unbind="unsetAPIManagerConfigurationService"
  */
 public class APIManagerStartupPublisherComponent {
 	private static final Log log = LogFactory.getLog(APIManagerStartupPublisherComponent.class);
@@ -61,6 +65,16 @@ public class APIManagerStartupPublisherComponent {
 
     protected void unsetRegistryService(RegistryService registryService) {
     	DataHolder.setRegistryService(null);
+    }
+
+    protected void setAPIManagerConfigurationService(APIManagerConfigurationService service) {
+        log.debug("API manager configuration service bound to the API usage handler");
+        ServiceReferenceHolder.getInstance().setAPIManagerConfigurationService(service);
+    }
+
+    protected void unsetAPIManagerConfigurationService(APIManagerConfigurationService service) {
+        log.debug("API manager configuration service unbound from the API usage handler");
+        ServiceReferenceHolder.getInstance().setAPIManagerConfigurationService(null);
     }
     
 }

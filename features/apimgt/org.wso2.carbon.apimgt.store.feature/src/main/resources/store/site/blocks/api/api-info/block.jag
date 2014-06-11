@@ -15,46 +15,192 @@ jagg.block("api/api-info", {
 
     getOutputs:function (inputs) {
 
-        var applications, application, i, j, lenI, lenJ, subscriptions,isRatingActivated, subscription, username, result,deniedTiers,
-                list = [],
-                api = inputs.api,
-                uriTemplates = inputs.uriTemplates,
-                discoveryURL = inputs.discoveryURL,
-                selectedAPI=null,
-                user = jagg.getUser();
+    var applications, application, i, j, lenI, lenJ, subscriptions,isRatingActivated, subscription, username, result,deniedTiers,
+        list = [],
+        api = inputs.api,
+        uriTemplates = inputs.uriTemplates,
+        discoveryURL = inputs.discoveryURL,
+        swaggerString = inputs.swaggerString,
+        selectedAPI=null,
+        user = jagg.getUser();
+        var showConsole=true;
+        var isAdvertiseOnly = (api.isAdvertiseOnly == null)? false :api.isAdvertiseOnly ;
 
+        if(swaggerString=="noPermissions"){showConsole=false;}
+    if (user) {
+        username = user.username;
+        result = jagg.module("application").getApplications(username);
+        applications = result.applications;
 
-        if (user) {
-            username = user.username;
-            result = jagg.module("application").getApplications(username);
-            applications = result.applications;
+        result = jagg.module("rating").isRatingActivated();
+        isRatingActivated = result.allow;
 
-            result = jagg.module("rating").isRatingActivated();
-            isRatingActivated = result.allow;
-
-            result = jagg.module("subscription").getAPISubscriptions(api, username);
-            subscriptions = result.subscriptions;
-            if(applications!=null){
+        result = jagg.module("subscription").getAPISubscriptions(api, username);
+        subscriptions = result.subscriptions;
+        if(applications!=null){
             lenI = applications.length;
-            }if(subscriptions!=null){
+        }if(subscriptions!=null){
             lenJ = subscriptions.length;
-            }
-            Label1:
-                    for (i = 0; i < lenI; i++) {
-                        application = applications[i];
-                        for (j = 0; j < lenJ; j++) {
-                            subscription = subscriptions[j];
-                            if (subscription.applicationId == application.id) {
-                                continue Label1;
-                            }
-                        }
-                        list.push(application);
+        }
+        Label1:
+            for (i = 0; i < lenI; i++) {
+                application = applications[i];
+                for (j = 0; j < lenJ; j++) {
+                    subscription = subscriptions[j];
+                    if (subscription.applicationId == application.id) {
+                        continue Label1;
                     }
-			result = jagg.module("tiers").getDeniedTiers();
-			deniedTiers = result.tiers;
-
+                }
+                list.push(application);
             }
+        result = jagg.module("tiers").getDeniedTiers();
+        deniedTiers = result.tiers;
 
+    }
+    if(!isAdvertiseOnly){
+        if(showConsole){
+            return {
+                "api":api,
+                "deniedTiers":deniedTiers,
+                "discoveryURL":discoveryURL,
+                "applications":list,
+                "user":user,
+                "uriTemplates":uriTemplates,
+                "isRatingActivated":isRatingActivated,
+                "tabs":{
+                    "tabs":[
+                        {
+                            "title":i18n.localize("overview.title"),
+                            "body":[
+                                {
+                                    "name":"api/overview",
+                                    "inputs":{
+                                        "api":api,
+                                        "discoveryURL":discoveryURL,
+                                        "user":user
+                                    }
+                                }
+                            ]
+                        },
+                        {
+                            "title":i18n.localize("documentation.title"),
+                            "body":[
+                                {
+                                    "name":"api/documentation",
+                                    "inputs": {
+                                        "api":api
+                                    }
+                                }
+                            ]
+                        },
+                        {
+                            "title":i18n.localize("apiconsole.title"),
+                            "body":[
+                                {
+                                    "name":"api/swagger",
+                                    "inputs": {
+                                        "api":api,
+                                        "discoveryURL":discoveryURL
+                                    }
+                                }
+                            ]
+                        },
+                        {
+                            "title":i18n.localize("throttling.title"),
+                            "body":[
+                                {
+                                    "name":"api/throttling",
+                                    "inputs": {
+                                        "api":api,
+                                        "uriTemplates":uriTemplates,
+                                        "discoveryURL":discoveryURL
+                                    }
+                                }
+                            ]
+                        },
+                        {
+                            "title":i18n.localize("forum"),
+                            "body":[
+                                {
+                                    "name":"forum/forum-list",
+                                    "inputs": {
+                                        "api":api,
+                                        "uriTemplates":uriTemplates,
+                                        "discoveryURL":discoveryURL
+                                    }
+                                }
+                            ]
+                        }
+                    ]
+                }
+            };}
+        else{
+            return {
+                "api":api,
+                "deniedTiers":deniedTiers,
+                "discoveryURL":discoveryURL,
+                "applications":list,
+                "user":user,
+                "uriTemplates":uriTemplates,
+                "isRatingActivated":isRatingActivated,
+                "tabs":{
+                    "tabs":[
+                        {
+                            "title":i18n.localize("overview.title"),
+                            "body":[
+                                {
+                                    "name":"api/overview",
+                                    "inputs":{
+                                        "api":api,
+                                        "discoveryURL":discoveryURL,
+                                        "user":user
+                                    }
+                                }
+                            ]
+                        },
+                        {
+                            "title":i18n.localize("documentation.title"),
+                            "body":[
+                                {
+                                    "name":"api/documentation",
+                                    "inputs": {
+                                        "api":api
+                                    }
+                                }
+                            ]
+                        },
+                        {
+                            "title":i18n.localize("throttling.title"),
+                            "body":[
+                                {
+                                    "name":"api/throttling",
+                                    "inputs": {
+                                        "api":api,
+                                        "uriTemplates":uriTemplates,
+                                        "discoveryURL":discoveryURL
+                                    }
+                                }
+                            ]
+                        },
+                        {
+                            "title":i18n.localize("forum"),
+                            "body":[
+                                {
+                                    "name":"forum/forum-list",
+                                    "inputs": {
+                                        "api":api,
+                                        "uriTemplates":uriTemplates,
+                                        "discoveryURL":discoveryURL
+                                    }
+                                }
+                            ]
+                        }
+                    ]
+                }
+            };
+
+        }
+    }else{
         return {
             "api":api,
             "deniedTiers":deniedTiers,
@@ -77,47 +223,12 @@ jagg.block("api/api-info", {
                                 }
                             }
                         ]
-                    },
-                    {
-                        "title":i18n.localize("documentation.title"),
-                        "body":[
-                            {
-                                "name":"api/documentation",
-                                "inputs": {
-                                    "api":api
-                                }
-                            }
-                        ]
-                    },
-                    {
-                        "title":i18n.localize("apiconsole.title"),
-                        "body":[
-                            {
-                                "name":"api/swagger",
-                                "inputs": {
-                                    "api":api,
-                                    "discoveryURL":discoveryURL
-                                }
-                            }
-                        ]
-                    },
-                    {
-                        "title":i18n.localize("throttling.title"),
-                        "body":[
-                            {
-                                "name":"api/throttling",
-                                "inputs": {
-                                    "api":api,
-                                    "uriTemplates":uriTemplates,
-                                    "discoveryURL":discoveryURL
-                                }
-                            }
-                        ]
                     }
                 ]
             }
         };
-    },
+    }
+},
 
     getStaticBlocks:function () {
         return [

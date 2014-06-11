@@ -20,7 +20,9 @@ include("/jagg/jagg.jag");
         api.provider = request.getParameter("provider");
         api.name = request.getParameter("apiName");
         api.version = request.getParameter("version");
+        api.isDefaultVersion=request.getParameter("isDefaultVersion");
         var newVersion = request.getParameter("newVersion");
+
 
         result = mod.copyAPI(api, newVersion);
         if (result.error) {

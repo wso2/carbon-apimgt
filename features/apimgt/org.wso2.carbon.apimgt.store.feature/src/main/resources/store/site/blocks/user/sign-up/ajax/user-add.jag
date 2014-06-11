@@ -6,11 +6,14 @@ i18n.init(request,localeResourcesBasePath);
 var log = new Log();
 
 (function () {
+    response.contentType = "application/json; charset=UTF-8";
+    response.addHeader('Pragma', 'No-cache');
+    response.addHeader('Cache-control', 'no-cache');
     var mod, obj, password, allFieldsValues, result, username,
             msg = require("/site/conf/ui-messages.jag"),
             action = request.getParameter("action"),showWorkflowTip,
             user = jagg.getUser();
-    if (action == "addUser") {
+    if (action == "addUser" && request.getMethod() == 'POST') {
 
         username = request.getParameter("username");
         password = request.getParameter("password");

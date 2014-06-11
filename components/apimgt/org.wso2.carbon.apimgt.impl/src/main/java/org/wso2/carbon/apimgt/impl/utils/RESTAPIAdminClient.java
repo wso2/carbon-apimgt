@@ -28,10 +28,12 @@ public class RESTAPIAdminClient extends AbstractAPIGatewayAdminClient {
 
     private RestApiAdminStub restApiAdminStub;
     private String qualifiedName;
+    private String qualifiedDefaultApiName;
     private Environment environment;
     
     public RESTAPIAdminClient(APIIdentifier apiId, Environment environment) throws AxisFault {
         this.qualifiedName = apiId.getProviderName() + "--" + apiId.getApiName() + ":v" + apiId.getVersion();
+        this.qualifiedDefaultApiName=apiId.getProviderName() + "--" + apiId.getApiName();
         String providerDomain = apiId.getProviderName();
         providerDomain=providerDomain.replace("-AT-", "@");
         restApiAdminStub = new RestApiAdminStub(null, environment.getServerURL() + "RestApiAdmin");
@@ -47,6 +49,7 @@ public class RESTAPIAdminClient extends AbstractAPIGatewayAdminClient {
 	 */
 	public void addApi(APITemplateBuilder builder, String tenantDomain ) throws AxisFault {
         try {
+
             String apiConfig = builder.getConfigStringForTemplate(environment);
             if (tenantDomain != null && !("").equals(tenantDomain)
                     && !tenantDomain.equals(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)) {
@@ -58,6 +61,42 @@ public class RESTAPIAdminClient extends AbstractAPIGatewayAdminClient {
             throw new AxisFault("Error while adding new API", e);
         }
 	}
+
+    /**
+     * Add the API to the gateway
+     * @param builder
+     * @param tenantDomain
+     * @throws AxisFault
+     */
+    public void addPrototypeApiScriptImpl(APITemplateBuilder builder, String tenantDomain) throws AxisFault {
+        try {
+
+            String apiConfig = builder.getConfigStringForPrototypeScriptAPI(environment);
+            if (tenantDomain != null && !("").equals(tenantDomain)
+                    && !tenantDomain.equals(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)) {
+                restApiAdminStub.addApiForTenant(apiConfig, tenantDomain);
+            }else {
+                restApiAdminStub.addApiFromString(apiConfig);
+            }
+        } catch (Exception e) {
+            throw new AxisFault("Error while adding new API", e);
+        }
+    }
+
+    public void addDefaultAPI(APITemplateBuilder builder, String tenantDomain, String defaultVersion) throws AxisFault{
+
+        try {
+            String apiConfig = builder.getConfigStringForDefaultAPITemplate(defaultVersion);
+            if (tenantDomain != null && !("").equals(tenantDomain)
+                    && !tenantDomain.equals(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)) {
+                restApiAdminStub.addApiForTenant(apiConfig, tenantDomain);
+            }else {
+                restApiAdminStub.addApiFromString(apiConfig);
+            }
+        } catch (Exception e) {
+            throw new AxisFault("Error while adding API", e);
+        }
+    }
 
 	/**
 	 * Get API from the gateway
@@ -80,6 +119,20 @@ public class RESTAPIAdminClient extends AbstractAPIGatewayAdminClient {
         }
     }
 
+    public APIData getDefaultApi(String tenantDomain) throws AxisFault {
+        try {
+            APIData apiData;
+            if (tenantDomain != null && !("").equals(tenantDomain)
+                    && !tenantDomain.equals(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)) {
+                apiData = restApiAdminStub.getApiForTenant(qualifiedDefaultApiName,tenantDomain);
+            }else {
+                apiData = restApiAdminStub.getApiByName(qualifiedDefaultApiName);
+            }
+            return (APIData) apiData;
+        } catch (Exception e) {
+            throw new AxisFault("Error while obtaining API information from gateway", e);
+        }
+    }
     /**
      * Update the API in the Gateway
      * @param builder
@@ -101,6 +154,43 @@ public class RESTAPIAdminClient extends AbstractAPIGatewayAdminClient {
 		}
 	}
 
+    /**
+     * Update the API in the Gateway
+     * @param builder
+     * @param tenantDomain
+     * @throws AxisFault
+     */
+    public void updateApiForInlineScript(APITemplateBuilder builder, String tenantDomain) throws AxisFault {
+        try {
+            String apiConfig = builder.getConfigStringForPrototypeScriptAPI(environment);
+            if (tenantDomain != null && !("").equals(tenantDomain) &&
+                    !tenantDomain.equals(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)) {
+
+                restApiAdminStub.updateApiForTenant(qualifiedName, apiConfig, tenantDomain);
+            } else {
+                restApiAdminStub.updateApiFromString(qualifiedName, apiConfig);
+            }
+        } catch (Exception e) {
+            throw new AxisFault("Error while updating API", e);
+        }
+    }
+
+    public void updateDefaultApi(APITemplateBuilder builder, String tenantDomain,String defaultVersion) throws AxisFault {
+        try {
+            String apiConfig = builder.getConfigStringForDefaultAPITemplate(defaultVersion);
+            if (tenantDomain != null && !("").equals(tenantDomain) &&
+                    !tenantDomain.equals(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)) {
+
+                restApiAdminStub.updateApiForTenant(qualifiedDefaultApiName, apiConfig, tenantDomain);
+            } else {
+                restApiAdminStub.updateApiFromString(qualifiedDefaultApiName, apiConfig);
+            }
+        } catch (Exception e) {
+            throw new AxisFault("Error while updating API", e);
+        }
+    }
+    
+
 	/**
 	 * Delete the API from Gateway
 	 * @param tenantDomain
@@ -119,4 +209,19 @@ public class RESTAPIAdminClient extends AbstractAPIGatewayAdminClient {
 			throw new AxisFault("Error while deleting API", e);
 		}
 	}
+
+    public void deleteDefaultApi(String tenantDomain) throws AxisFault {
+        try {
+            if (tenantDomain != null && !("").equals(tenantDomain) &&
+                    !tenantDomain.equals(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)) {
+                restApiAdminStub.deleteApiForTenant(qualifiedDefaultApiName, tenantDomain);
+            } else {
+                restApiAdminStub.deleteApi(qualifiedDefaultApiName);
+            }
+
+        } catch (Exception e) {
+            throw new AxisFault("Error while deleting API", e);
+        }
+    }
+
 }

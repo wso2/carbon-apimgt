@@ -60,7 +60,7 @@ require(["dojo/dom", "dojo/domReady!"], function (dom) {
                 else {
                     $('#middle').html("");
                     $('#middle').append($('<div class="errorWrapper"><span class="label top-level-warning"><i class="icon-warning-sign icon-white"></i>'
-                        + i18n.t('errorMsgs.checkBAMConnectivity') + '</span><br/><img src="../themes/default/templates/stats/images/statsThumb.png" alt="Smiley face"></div>'));
+                        + i18n.t('errorMsgs.checkBAMConnectivity') + '</span><br/><img src="../themes/default/templates/stats/api-usage-user/images/statsThumb.png" alt="Smiley face"></div>'));
                 }
 
 
@@ -92,7 +92,7 @@ var drawAPIUsageByUser = function (from, to) {
                 if (length == 0) {
                     $('#apiUsageByUserTable').hide();
                     $('#tempLoadingSpaceUsageByUser').html('');
-                    $('#tempLoadingSpaceUsageByUser').append($('<span class="label label-info">' + i18n.t('errorMsgs.checkBAMConnectivity') + '</span>'));
+                    $('#tempLoadingSpaceUsageByUser').append($('<span class="label label-info">' + i18n.t('errorMsgs.noData') + '</span>'));
 
                 } else {
                     $('#tempLoadingSpaceUsageByUser').hide();

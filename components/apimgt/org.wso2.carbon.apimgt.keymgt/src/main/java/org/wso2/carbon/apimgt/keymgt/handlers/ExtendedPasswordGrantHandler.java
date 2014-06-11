@@ -3,6 +3,9 @@ package org.wso2.carbon.apimgt.keymgt.handlers;
 import org.apache.axiom.om.OMElement;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.base.ServerConfigurationException;
 import org.wso2.carbon.identity.base.IdentityException;
 import org.wso2.carbon.identity.core.util.IdentityConfigParser;
@@ -22,13 +25,15 @@ import org.wso2.carbon.user.core.UserRealm;
 import org.wso2.carbon.user.core.config.RealmConfiguration;
 import org.wso2.carbon.user.core.service.RealmService;
 
+import javax.cache.Cache;
+import javax.cache.Caching;
 import javax.xml.namespace.QName;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class ExtendedPasswordGrantHandler extends PasswordGrantHandler {
 
-    private static Log log = LogFactory.getLog(PasswordGrantHandler.class);
+    private static Log log = LogFactory.getLog(ExtendedPasswordGrantHandler.class);
 
     private static final String CONFIG_ELEM_OAUTH = "OAuth";
 
@@ -143,6 +148,12 @@ public class ExtendedPasswordGrantHandler extends PasswordGrantHandler {
         }
 
         return isValidated;
+    }
+
+    @Override
+    public boolean validateScope(OAuthTokenReqMessageContext tokReqMsgCtx){
+        ScopesIssuer scopesIssuer = new ScopesIssuer();
+        return scopesIssuer.setScopes(tokReqMsgCtx);
     }
 
     /**

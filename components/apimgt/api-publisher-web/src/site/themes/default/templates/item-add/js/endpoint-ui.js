@@ -526,13 +526,7 @@ $(document).ready(function () {
 
     });
 
-    //this can go to main js
-    $('a.help_popup').popover({
-        html : true,
-        content: function() {
-            return $('#'+$(this).attr('help_data')).html();
-        }
-    });
+
 
     APP.form.advance_endpoint_config.onSubmit = function (errors, values) {
         if (errors) {
@@ -554,7 +548,7 @@ $(document).ready(function () {
     });
 
     // when the add api or
-    $('#addNewAPIButton , #updateButton').bind('click',
+    $('#addNewAPIButton , #updateButton , .manageSaveButton').bind('click',
         function() {
             var ec = APP.ep_form.getValues();
             ec.endpoint_type = $('#endpoint_type').val();
@@ -596,15 +590,60 @@ $(document).ready(function () {
             return true;
         }
     );
+
+    APP.update_ep_config = function() {
+        var ec = APP.ep_form.getValues();
+        ec.endpoint_type = $('#endpoint_type').val();
+        $('.advance_endpoint_config').each(function(index, el){
+            var ep_config = jQuery.parseJSON($(el).attr('ep-config-data'));
+            var name = $(el).attr('field-name');
+            var field = name.replace(/\[([0-9]*)\]$/, '');
+            var value_index = name.replace(/([a-zA-Z0-9_]*)/, '').replace('[','').replace(']','');
+            if(value_index == ''){
+                if(ec[field] != undefined && ec[field] !="")
+                    ec[field] = { url: ec[field] , config: ep_config };
+                else
+                    ec[field] = undefined;
+            }
+            else{
+                if(ec[field][value_index] != undefined && ec[field][value_index] !="")
+                    ec[field][value_index] = { url: ec[field][value_index] , config: ep_config };
+                else{
+                    ec[field].splice(value_index,1);
+                }
+            }
+            return true;
+        });
+
+        //clear undefined urls
+        if(ec.production_endpoints instanceof Array && ec.production_endpoints.length == 0){
+            ec.production_endpoints = undefined;
+        }
+        if(ec.sandbox_endpoints instanceof Array && ec.sandbox_endpoints.length == 0){
+            ec.sandbox_endpoints = undefined;
+        }
+
+        $('#endpoint_config').val(JSON.stringify(ec));
+
+        if(ec.endpoint_type == 'wsdl'){
+            $('#wsdl').val(ec.production_endpoints.url);
+        }
+
+        return true;
+    };
 });
 
 
 APP.is_production_endpoint_specified = function(){
+    APP.update_ep_config();
     var endpoint_config = jQuery.parseJSON($('#endpoint_config').val());
+    console.log(endpoint_config);
     return endpoint_config.production_endpoints != undefined
 };
 
 APP.is_sandbox_endpoint_specified = function(){
+    APP.update_ep_config();
     var endpoint_config = jQuery.parseJSON($('#endpoint_config').val());
+    console.log(endpoint_config);
     return endpoint_config.sandbox_endpoints != undefined
 };

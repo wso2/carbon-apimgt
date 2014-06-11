@@ -2,11 +2,12 @@
 include("/jagg/jagg.jag");
 
 (function () {
+    response.contentType = "application/json; charset=UTF-8";
     var mod, obj, application, result, username,
             msg = require("/site/conf/ui-messages.jag"),
             action = request.getParameter("action"),
             user = jagg.getUser();
-    if (action == "updateApplication") {
+    if (action == "updateApplication" && request.getMethod() == 'POST') {
         if (!user) {
             print({
                 error:true,

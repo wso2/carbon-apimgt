@@ -13,7 +13,7 @@ i18n.init(request,localeResourcesBasePath);
         if(request.getQueryString()){
             currentURL += "?" + request.getQueryString();
         }
-        var tenant=request.getParameter("tenant");
+        var tenant=request_tenant;
         var urlPrefix;
         if(tenant!=null) {urlPrefix="tenant="+tenant;}else{urlPrefix='';}
         
@@ -75,7 +75,7 @@ i18n.init(request,localeResourcesBasePath);
 <% } else { %>
 <ul class="nav actions login-sign-up pull-right">
 <%
-var tenant=request.getParameter("tenant");
+var tenant=request_tenant;
 if(isSelfSignupEnabled && tenant==null){%>
     <li>
         <a id="register-link" href="<%=httpsUrl%><%=site.context%>/site/pages/sign-up.jag?<%=urlPrefix%>"><%=i18n.localize("signup")%></a>

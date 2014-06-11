@@ -1,13 +1,17 @@
 <%
 var getAPI = function (api) {
-    var api, result,
+    var api, result, defaultVersion,
             log = new Log(),
             provider = jagg.module("manager").getAPIProviderObj();
+
     try {
         result = provider.getAPI(api.provider, api.name, api.version);
+        defaultVersion=provider.getDefaultAPIVersion(api.provider, api.name);
+        hasDefaultVersion=(defaultVersion!=null);
         if (log.isDebugEnabled()) {
             log.debug("getAPI : " + stringify(result));
         }
+
         api = {
             name:result[0],
             version:result[4],
@@ -50,7 +54,11 @@ var getAPI = function (api) {
             faultSequence:result[38],
             destinationStats:result[39],
             resources:result[40],
-            scopes:result[41]
+            scopes:result[41],
+            isDefaultVersion:result[42],
+            implementation:result[43],
+            hasDefaultVersion:hasDefaultVersion,
+            currentDefaultVersion: defaultVersion       
         };
         return {
             error:false,

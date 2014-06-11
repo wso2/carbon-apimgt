@@ -61,6 +61,7 @@ import org.wso2.carbon.identity.oauth.cache.CacheKey;
 import org.wso2.carbon.identity.oauth.cache.OAuthCache;
 import org.wso2.carbon.identity.oauth.cache.OAuthCacheKey;
 import org.wso2.carbon.identity.oauth.config.OAuthServerConfiguration;
+import org.wso2.carbon.utils.CarbonUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -196,12 +197,19 @@ public class APIKeyMgtSubscriberService extends AbstractAdmin {
         int keyMgtPort = keymgtURL.getPort();
         String tokenEndpoint = null;
 
-        if (keyMgtServerURL != null) {
-            String[] tmp = keyMgtServerURL.split("services");
-            tokenEndpoint = tmp[0] + tokenEndpointName;
+        String webContextRoot = CarbonUtils.getServerConfiguration().getFirstProperty("WebContextRoot");
+
+        if(webContextRoot == null || "/".equals(webContextRoot)){
+            webContextRoot = "";
         }
 
-        String revokeEndpoint = tokenEndpoint.replace("token", "revoke");
+        if (keyMgtServerURL != null) {
+            String[] tmp = keyMgtServerURL.split(webContextRoot + "/services");
+            tokenEndpoint = tmp[0] + tokenEndpointName;
+        }
+        //To revoke tokens we should call revoke API deployed in API gateway.
+        String revokeEndpoint = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration().
+                getFirstProperty(APIConstants.API_KEY_MANAGER_REVOKE_API_URL);
 
         // Below code is to overcome host name verification failure we get in certificate
         // validation due to self-signed certificate.

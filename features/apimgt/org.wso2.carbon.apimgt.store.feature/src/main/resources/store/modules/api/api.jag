@@ -1,12 +1,15 @@
 <%
 var getAPIDescription = function (api, username) {
-    var discoveryURL, 
+    var discoveryURL,swaggerString,
     		log = new Log(),
             store = jagg.module("manager").getAPIStoreObj();
 	
 	try {
-		discoveryURL = store.getSwaggerDiscoveryUrl(api.name, api.version, api.provider);
-        var api2 = store.getAPI(api.provider, api.name, api.version, username);
+		var encode = require('encode');
+    		encode = new encode.Encode();
+		discoveryURL = store.getSwaggerDiscoveryUrl(encode.forUriComponent(api.name), api.version, api.provider);
+		swaggerString=store.getSwaggerResource(encode.forUriComponent(api.name), api.version, api.provider);
+        	var api2 = store.getAPI(api.provider, api.name, api.version, username);
 		        
         if (log.isDebugEnabled()) {
             log.debug("getAPI : " + stringify(api));
@@ -18,6 +21,7 @@ var getAPIDescription = function (api, username) {
             api:api,
             uriTemplates:uriTemplates,
             discoveryURL:discoveryURL,
+            swaggerString:swaggerString.swagger,
             message:null
         };
     } catch (e) {

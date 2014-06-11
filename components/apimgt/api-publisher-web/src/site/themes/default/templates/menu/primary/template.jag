@@ -54,13 +54,12 @@
                                 <%if(jagg.getShowStoreURL()){%>
                                 <!--Links to Access APIStore-->
                                   <div class="tenant-position-setter">
-                                
+
                                    Go to <a href="<%=storeUrl%>"  target="_blank"><%=i18n.localize("apistore")%></a>
-                                
-                                  </div>                               
-                                
-                                </div>
+
+                                  </div>
                                 <%}%>
+                                </div>
                           </div>
                       </div>
                   </div>

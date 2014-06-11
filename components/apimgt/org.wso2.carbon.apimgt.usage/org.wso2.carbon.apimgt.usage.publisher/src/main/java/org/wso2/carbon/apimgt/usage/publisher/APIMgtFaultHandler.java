@@ -53,7 +53,7 @@ public class APIMgtFaultHandler extends AbstractMediator{
             faultPublisherDTO.setContext((String) messageContext.getProperty(APIMgtUsagePublisherConstants.CONTEXT));
             faultPublisherDTO.setApi_version((String) messageContext.getProperty(APIMgtUsagePublisherConstants.API_VERSION));
             faultPublisherDTO.setApi((String) messageContext.getProperty(APIMgtUsagePublisherConstants.API));
-            faultPublisherDTO.setResource((String) messageContext.getProperty(APIMgtUsagePublisherConstants.RESOURCE));
+            faultPublisherDTO.setResourcePath((String) messageContext.getProperty(APIMgtUsagePublisherConstants.RESOURCE));
             faultPublisherDTO.setMethod((String) messageContext.getProperty(APIMgtUsagePublisherConstants.HTTP_METHOD));
             faultPublisherDTO.setVersion((String) messageContext.getProperty(APIMgtUsagePublisherConstants.VERSION));
             faultPublisherDTO.setErrorCode(String.valueOf(messageContext.getProperty(SynapseConstants.ERROR_CODE)));

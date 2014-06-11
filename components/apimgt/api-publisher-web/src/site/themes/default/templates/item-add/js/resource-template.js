@@ -66,7 +66,7 @@ $( document ).ready(function() {
         if(!RESOURCES[i].hasOwnProperty("http_verbs")){
             RESOURCES[i].http_verbs = {};
         }
-        RESOURCES[i].http_verbs[$(this).val()] = { "auth_type": "" , "throttling_tier":"" };
+        RESOURCES[i].http_verbs[$(this).val()] = {  "auth_type": AUTH_TYPES[AUTH_TYPES.length -1].key , "throttling_tier":TIERS[TIERS.length -1].tierName };
         $("#resource_view").trigger("draw");
     }); 
 
@@ -134,6 +134,7 @@ $( document ).ready(function() {
         $("#scopeName").val('');
         $("#scopeDescription").val('');
         $("#scopeKey").val('');
+        $("#scopeRoles").val('');
         $("#define_scope_modal").modal('show');
     });
 
@@ -141,7 +142,8 @@ $( document ).ready(function() {
         var scope = { 
             name :$("#scopeName").val(),
             description : $("#scopeDescription").val(),
-            key:$("#scopeKey").val()
+            key:$("#scopeKey").val(),
+            roles:$("#scopeRoles").val()
         };
         if(SCOPES == undefined){
             SCOPES=[];

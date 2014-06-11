@@ -16,8 +16,6 @@
 
 package org.wso2.carbon.apimgt.impl;
 
-import net.sf.saxon.functions.IsWholeNumber;
-
 import org.apache.axiom.om.OMElement;
 import org.apache.axis2.AxisFault;
 import org.apache.commons.logging.Log;
@@ -99,6 +97,11 @@ public class APIGatewayManager {
 					// relevant url has been removed.
 					operation ="delete";
 					client.deleteApi(tenantDomain);
+                    if(api.isPublishedDefaultVersion()){
+                        if(client.getDefaultApi(tenantDomain)!=null){
+                            client.deleteDefaultApi(tenantDomain);
+                        }
+                    }
 					setSecurevaultProperty(api,tenantDomain,environment,operation);
 					undeployCustomSequences(api,tenantDomain, environment);
 				} else {
@@ -112,7 +115,19 @@ public class APIGatewayManager {
                     operation ="update";
 
                     //Update the API
-                    client.updateApi(builder, tenantDomain);
+                    if(api.getImplementation().equalsIgnoreCase(APIConstants.IMPLEMENTATION_TYPE_INLINE)){
+                        client.updateApiForInlineScript(builder, tenantDomain);
+                    }else if (api.getImplementation().equalsIgnoreCase(APIConstants.IMPLEMENTATION_TYPE_ENDPOINT)){
+                        client.updateApi(builder, tenantDomain);
+                    }
+
+                    if(api.isDefaultVersion() || api.isPublishedDefaultVersion()){//api.isPublishedDefaultVersion() check is used to detect and update when context etc. is changed in the api which is not the default version but has a published default api
+                        if(client.getDefaultApi(tenantDomain)!=null){
+                            client.updateDefaultApi(builder,tenantDomain,api.getId().getVersion());
+                        }else{
+                            client.addDefaultAPI(builder,tenantDomain,api.getId().getVersion());
+                        }
+                    }
 					setSecurevaultProperty(api,tenantDomain,environment,operation);
 
                     //Update the custom sequences of the API
@@ -143,7 +158,19 @@ public class APIGatewayManager {
                     operation ="add";
 
                     //Add the API
-                    client.addApi(builder, tenantDomain);
+                    if(api.getImplementation().equalsIgnoreCase(APIConstants.IMPLEMENTATION_TYPE_INLINE)){
+                        client.addPrototypeApiScriptImpl(builder, tenantDomain);
+                    }else if (api.getImplementation().equalsIgnoreCase(APIConstants.IMPLEMENTATION_TYPE_ENDPOINT)){
+                        client.addApi(builder, tenantDomain);
+                    }
+
+                    if(api.isDefaultVersion()){
+                        if(client.getDefaultApi(tenantDomain)!=null){
+                            client.updateDefaultApi(builder,tenantDomain,api.getId().getVersion());
+                        }else{
+                            client.addDefaultAPI(builder,tenantDomain,api.getId().getVersion());
+                        }
+                    }
 					setSecurevaultProperty(api,tenantDomain,environment,operation);
 
                     //Deploy the custom sequences of the API.
@@ -179,8 +206,29 @@ public class APIGatewayManager {
 				undeployCustomSequences(api, tenantDomain,environment);
 				setSecurevaultProperty(api,tenantDomain,environment,operation);
 			}
+
+            if(api.isPublishedDefaultVersion()){
+                if(client.getDefaultApi(tenantDomain)!=null){
+                    client.deleteDefaultApi(tenantDomain);
+                }
+            }
+
 		}
 	}
+
+    public void removeDefaultAPIFromGateway(API api, String tenantDomain) throws Exception {
+        for (Environment environment : environments) {
+            RESTAPIAdminClient client = new RESTAPIAdminClient(api.getId(), environment);
+            if(client.getDefaultApi(tenantDomain)!=null){
+                if (debugEnabled) {
+                    log.debug("Removing Default API " + api.getId().getApiName() + " From environment " +
+                            environment.getName());
+                }
+
+                client.deleteDefaultApi(tenantDomain);
+            }
+        }
+    }
 
 	/**
 	 * Checks whether the API has been published.

@@ -1,11 +1,12 @@
 <%
 include("/jagg/jagg.jag");
 (function () {
+    response.contentType = "application/json; charset=UTF-8";
     var mod, obj, name, version, provider, tier, application, applicationId, applicationName, context, result, username, accessAllowDomains,
             user = jagg.getUser(),
             msg = require("/site/conf/ui-messages.jag"),
             action = request.getParameter("action");
-    if (action == "addSubscription") {
+    if (action == "addSubscription" && request.getMethod() == 'POST') {
         if (!user) {
             print({
                 error:true,
@@ -46,7 +47,7 @@ include("/jagg/jagg.jag");
             }
         }
         print(obj);
-    }else if (action == "addAPISubscription") {
+    }else if (action == "addAPISubscription" && request.getMethod() == 'POST') {
         if (!user) {
             print({
                 error:true,
@@ -72,7 +73,7 @@ include("/jagg/jagg.jag");
         if (result.error) {
             obj = {
                 error:result.error,
-                message:msg.error.authError(action, username)
+                message:result.message
             };
         } else {
             obj = {
@@ -80,7 +81,7 @@ include("/jagg/jagg.jag");
             }
         }
         print(obj);
-    }else if (action == "generateAPIKey") {
+    }else if (action == "generateAPIKey" && request.getMethod() == 'POST') {
         if (!user) {
             print({
                 error:true,
@@ -119,7 +120,7 @@ include("/jagg/jagg.jag");
             }
         }
         print(obj);
-    } else if (action == "generateApplicationKey") {
+    } else if (action == "generateApplicationKey" && request.getMethod() == 'POST') {
         if (!user) {
             print({
                 error:true,
@@ -134,9 +135,14 @@ include("/jagg/jagg.jag");
         accessAllowDomains = request.getParameter("authorizedDomains");       
         var accessAllowDomainsArr = accessAllowDomains.split(",");
         validityTime = request.getParameter("validityTime");
-        
+		var retryAfterFailure = request.getParameter("retryAfterFailure");
+	
+		if(retryAfterFailure == null){
+			retryAfterFailure = false;
+		}
+
         mod = jagg.module("subscription");
-        result = mod.generateApplicationKey(application, username, keyType, callbackUrl, accessAllowDomainsArr, validityTime);
+        result = mod.generateApplicationKey(application, username, keyType, callbackUrl, accessAllowDomainsArr, validityTime,retryAfterFailure);
 
         if (result.error) {
             obj = {
@@ -152,7 +158,7 @@ include("/jagg/jagg.jag");
             }
         }
         print(obj);
-     } else if (action == "updateAccessAllowDomains") {
+     } else if (action == "updateAccessAllowDomains" && request.getMethod() == 'POST') {
         if (!user) {
             print({
                 error:true,
@@ -179,7 +185,7 @@ include("/jagg/jagg.jag");
             }
         }
         print(obj);
-     } else if (action == "refreshToken") {
+     } else if (action == "refreshToken" && request.getMethod() == 'POST') {
         if (!user) {
             print({
                 error:true,

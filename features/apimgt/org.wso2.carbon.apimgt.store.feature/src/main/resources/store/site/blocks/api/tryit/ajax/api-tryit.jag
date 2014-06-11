@@ -103,6 +103,7 @@ var log = new Log();
         }
         print(stringify(result)+"**#*#**#*#"+xhr.responseText);
     } else {
+        response.contentType = "application/json; charset=UTF-8";
         print({
             error:true,
             message:msg.error.invalidAction(action)

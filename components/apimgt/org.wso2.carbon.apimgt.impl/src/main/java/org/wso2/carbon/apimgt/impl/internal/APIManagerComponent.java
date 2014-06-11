@@ -120,6 +120,7 @@ public class APIManagerComponent {
             addTierPolicies();
             addDefinedSequencesToRegistry();
             APIUtil.loadTenantExternalStoreConfig(MultitenantConstants.SUPER_TENANT_ID);
+            APIUtil.loadTenantGAConfig(MultitenantConstants.SUPER_TENANT_ID);
             int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
             APIUtil.loadTenantWorkFlowExtensions(tenantId);
             
@@ -172,6 +173,7 @@ public class APIManagerComponent {
             APIMgtDBUtil.initialize();
             //Check User add listener enabled or not
             boolean selfSignInProcessEnabled = Boolean.parseBoolean(configuration.getFirstProperty("WorkFlowExtensions.SelfSignIn.ProcessEnabled"));
+            readRecentlyAddedAPICacheConfigs(configuration);
             if (selfSignInProcessEnabled) {
                 if (bundleContext != null) {
                     bundleContext.registerService(UserStoreManagerListener.class.getName(),
@@ -428,30 +430,27 @@ public class APIManagerComponent {
                     "in the self sign up configuration");
         }
 
-        boolean create = Boolean.parseBoolean(config.getFirstProperty(APIConstants.SELF_SIGN_UP_CREATE_ROLE));
-        if (create) {
-            String[] permissions = new String[]{
-                    "/permission/admin/login",
-                    APIConstants.Permissions.API_SUBSCRIBE
-            };
-            try {
-                RealmService realmService = ServiceReferenceHolder.getInstance().getRealmService();
-                UserRealm realm = realmService.getBootstrapRealm();
-                UserStoreManager manager = realm.getUserStoreManager();
-                if (!manager.isExistingRole(role)) {
-                    if (log.isDebugEnabled()) {
-                        log.debug("Creating subscriber role: " + role);
-                    }
-                    Permission[] subscriberPermissions = new Permission[]{new Permission("/permission/admin/login",UserMgtConstants.EXECUTE_ACTION),
-                            new Permission(APIConstants.Permissions.API_SUBSCRIBE, UserMgtConstants.EXECUTE_ACTION)};
-                    String superTenantName = ServiceReferenceHolder.getInstance().getRealmService().getBootstrapRealmConfiguration().getAdminUserName();
-                    String[] userList = new String[]{superTenantName};
-                    manager.addRole(role, userList, subscriberPermissions);
+        String[] permissions = new String[]{
+                "/permission/admin/login",
+                APIConstants.Permissions.API_SUBSCRIBE
+        };
+        try {
+            RealmService realmService = ServiceReferenceHolder.getInstance().getRealmService();
+            UserRealm realm = realmService.getBootstrapRealm();
+            UserStoreManager manager = realm.getUserStoreManager();
+            if (!manager.isExistingRole(role)) {
+                if (log.isDebugEnabled()) {
+                    log.debug("Creating subscriber role: " + role);
                 }
-            } catch (UserStoreException e) {
-                throw new APIManagementException("Error while creating subscriber role: " + role + " - " +
-                        "Self registration might not function properly.", e);
+                Permission[] subscriberPermissions = new Permission[]{new Permission("/permission/admin/login", UserMgtConstants.EXECUTE_ACTION),
+                        new Permission(APIConstants.Permissions.API_SUBSCRIBE, UserMgtConstants.EXECUTE_ACTION)};
+                String superTenantName = ServiceReferenceHolder.getInstance().getRealmService().getBootstrapRealmConfiguration().getAdminUserName();
+                String[] userList = new String[]{superTenantName};
+                manager.addRole(role, userList, subscriberPermissions);
             }
+        } catch (UserStoreException e) {
+            throw new APIManagementException("Error while creating subscriber role: " + role + " - " +
+                    "Self registration might not function properly.", e);
         }
     }
     
@@ -501,5 +500,13 @@ public class APIManagerComponent {
 
     public static TenantRegistryLoader getTenantRegistryLoader(){
         return tenantRegistryLoader;
+    }
+    private void readRecentlyAddedAPICacheConfigs(APIManagerConfiguration config) {
+        String isRecentlyAddedAPICachedEnabled = config.getFirstProperty(APIConstants.API_STORE_RECENTLY_ADDED_API_CACHE_ENABLE);
+        if (isRecentlyAddedAPICachedEnabled == null) {
+            APIConstants.isRecentlyAddedAPICacheEnabled = false;
+        } else {
+            APIConstants.isRecentlyAddedAPICacheEnabled  =  isRecentlyAddedAPICachedEnabled.equalsIgnoreCase("true") ? true : false;
+        }
     }
 }

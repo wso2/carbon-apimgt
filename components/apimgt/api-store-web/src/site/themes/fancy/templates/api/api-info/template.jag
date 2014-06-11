@@ -198,8 +198,15 @@ if(tenant!=null) {
                             denied = false;
                              } %>
                         </select>
-                        <%var firstTierDesc=api.tiers[0].tierDescription;
-                        if(firstTierDesc=="null"){firstTierDesc='';}
+                        <%
+                            var tierArr = api.tiers;
+                            var firstTierDesc = '';
+                            if(tierArr != null){
+                                firstTierDesc = tierArr[0].tierDescription;
+                                if(firstTierDesc == "null"){
+                                    firstTierDesc='';
+                                }
+                            }
                         %>
                         <span class="help-block" id="tierDesc"><%=firstTierDesc%>
                         <%if(api.tiers[0].tierAttributes!=null){

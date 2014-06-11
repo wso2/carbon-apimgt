@@ -22,7 +22,7 @@
 
 
   <!--li><span><i class="icon-heart"></i> Up time: 90%</span></li-->
-  <li><span id="status"><i class="icon-pencil"></i>&nbsp;<%=api.status%></span></li>
+  <li><a href="#" onclick="showTab('lifecyclesLink')"><span id="status"><i class="icon-pencil"></i>&nbsp;<%=api.status%></span></a></li>
   <li><span id="version"><i class="icon-th"></i>&nbsp;<%=api.version%></span></li>
   <li><a href="#"  onclick="showTab('docsLink')"><i class="icon-file"></i> <%=i18n.localize("docs")%></a></li>
 </ul>

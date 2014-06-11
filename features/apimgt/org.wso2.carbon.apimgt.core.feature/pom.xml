@@ -227,6 +227,8 @@
                                 <importBundleDef>org.wso2.carbon:org.wso2.carbon.identity.thrift.authentication
                                 </importBundleDef>
                                 <importBundleDef>libthrift.wso2:libthrift:0.8.0.wso2v1</importBundleDef>
+                                <importBundleDef>com.github.dblock.waffle.wso2:waffle-jna</importBundleDef>
+				<importBundleDef>org.wso2.carbon:org.wso2.carbon.ganalytics.publisher</importBundleDef>
                             </importBundles>
                             <importFeatures>
                                 <importFeatureDef>org.wso2.carbon.core.server</importFeatureDef>

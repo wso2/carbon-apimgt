@@ -33,8 +33,16 @@ public class URITemplate {
     private String throttlingTier;
     private List<String> throttlingTiers = new ArrayList<String>();
     private Scope scope;
+    private String mediationScript;
     private List<Scope> scopes = new ArrayList<Scope>();
 
+    public String getMediationScript() {
+        return mediationScript;
+    }
+
+    public void setMediationScript(String mediationScript) {
+        this.mediationScript = mediationScript;
+    }
 
     public String getThrottlingTier() {
         return throttlingTier;
