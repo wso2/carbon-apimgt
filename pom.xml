@@ -330,7 +330,7 @@
             <dependency>
                 <groupId>org.wso2.carbon</groupId>
                 <artifactId>org.wso2.carbon.mediation.dependency.mgt</artifactId>
-                <version>${project.version}</version>
+		<version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.wso2.carbon</groupId>
@@ -465,6 +465,26 @@
             <version>4.3.0-SNAPSHOT</version>
 	    <type>zip</type>
         </dependency>
+	    <dependency>
+                <groupId>org.json.wso2</groupId>
+                <artifactId>json</artifactId>
+                <version>${orbit.version.json}</version>
+            </dependency>
+	    <dependency>
+                <groupId>com.google.code.gson</groupId>
+                <artifactId>gson</artifactId>
+                <version>2.2.4</version>
+            </dependency>
+	<dependency>
+            <groupId>com.googlecode.json-simple.wso2</groupId>
+            <artifactId>json-simple</artifactId>
+            <version>1.1.wso2v1</version>
+        </dependency>
+         <dependency>
+             <groupId>org.apache.httpcomponents</groupId>
+             <artifactId>httpmime</artifactId>
+            <version>4.2.5</version>
+         </dependency>
         </dependencies>
     </dependencyManagement>
 
@@ -534,6 +554,7 @@
         <neethi.osgi.version.identity>${neethi.osgi.version}</neethi.osgi.version.identity>
         <libthrift.wso2.version>0.7.wso2v1</libthrift.wso2.version>
 	<ganalytics.version>4.3.0-SNAPSHOT</ganalytics.version>
+	<orbit.version.json>2.0.0.wso2v1</orbit.version.json>
     </properties>
 </project>
 

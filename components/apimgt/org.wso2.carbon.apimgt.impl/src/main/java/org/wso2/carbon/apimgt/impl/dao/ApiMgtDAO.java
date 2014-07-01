@@ -5186,7 +5186,11 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
                 }else {
                     is = null;
                 }
-                prepStmt.setBinaryStream(6, is);
+                if (connection.getMetaData().getDriverName().contains("PostgreSQL")) {
+                    prepStmt.setBinaryStream(2, is, uriTemplate.getMediationScript().getBytes().length);
+                }else{
+                    prepStmt.setBinaryStream(6, is);
+                }
                 prepStmt.addBatch();
                 if(uriTemplate.getScope()!=null){
                     scopePrepStmt.setString(1, APIUtil.getResourceKey(api,uriTemplate));
