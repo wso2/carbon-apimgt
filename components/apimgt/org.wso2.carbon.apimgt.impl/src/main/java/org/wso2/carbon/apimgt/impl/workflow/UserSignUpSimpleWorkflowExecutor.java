@@ -20,10 +20,12 @@ package org.wso2.carbon.apimgt.impl.workflow;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.dto.WorkflowDTO;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
+import org.wso2.carbon.user.core.UserCoreConstants;
 
 import java.util.List;
 
@@ -53,8 +55,8 @@ public class UserSignUpSimpleWorkflowExecutor extends UserSignUpWorkflowExecutor
                     " authentication manager");
         }
 
-        String role = config.getFirstProperty(APIConstants.SELF_SIGN_UP_ROLE);
-        if (role == null) {
+        String role = UserCoreConstants.INTERNAL_DOMAIN + CarbonConstants.DOMAIN_SEPARATOR+config.getFirstProperty(APIConstants.SELF_SIGN_UP_ROLE);
+        if (role.equals(UserCoreConstants.INTERNAL_DOMAIN + CarbonConstants.DOMAIN_SEPARATOR)) {
             throw new WorkflowException("Subscriber role undefined for self registration");
         }
 

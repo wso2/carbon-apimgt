@@ -70,12 +70,13 @@ function triggerSubscribe() {
 $(document).ready(function () {
     $("select[name='tiers-list']").change(function() {
         var selectedIndex = document.getElementById('tiers-list').selectedIndex;
+        var selectedTier = $(this).val();
         var api = jagg.api;
         var tiers = api.tiers;
         for (var i = 0; i < tiers.length; i++) {
             var tierDesc = tiers[i].tierDescription;
             var tierAttrs=tiers[i].tierAttributes;
-            if (selectedIndex == i) {
+            if (selectedTier == tiers[i].tierName) {
                 if (tierDesc != null) {
                     $("#tierDesc").text(tierDesc);
                 }if(tierAttrs!=null){
@@ -119,7 +120,7 @@ $(document).ready(function () {
             }
         }, "json");
     }, function (api) {
-
+		removeRating(api);
     }, jagg.api);
 
 
@@ -156,7 +157,7 @@ var addRating = function (newRating, userRating) {
                         }
                     }, "json");
                 }, function (api) {
-		
+					removeRating(api);
                 }, jagg.api);
 
             });
@@ -214,7 +215,7 @@ var removeStars = function (newRating) {
                         }
                     }, "json");
                 }, function (api) {
-	   
+	   				removeRating(api);
                 }, jagg.api);
 
             });

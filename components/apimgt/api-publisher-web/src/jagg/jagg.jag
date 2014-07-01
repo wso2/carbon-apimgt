@@ -67,6 +67,12 @@ var jagg = jagg || (function () {
     var setManageTierPermitted = function (permission) {
         return session.put("manageTierPermitted",permission);
     };
+    var setShowStoreURL = function (showStoreURL) {
+        return session.put("showStoreURL",showStoreURL);
+    };
+    var getShowStoreURL = function () {
+            return session.get("showStoreURL");
+    };
 
 var getThemeFile = function (path) {
         var p, index, theme = getUserTheme();
@@ -493,7 +499,7 @@ return getThemePath() + path;
     };
 
     var addHeaderJS = function (template, key, js) {
-        js = '<script type="text/javascript" src="' + site.context + getThemeFile(js) + '"></script>';
+        js = '<script type="text/javascript" src="' + site.context + getThemeFile(js) + '"></script>\n';
         insertData(this, template, "header", "js", key, js);
     };
 
@@ -517,7 +523,7 @@ return getThemePath() + path;
     };
 
     var addFooterJS = function (template, key, js) {
-        js = '<script type="text/javascript" src="' + site.context + getThemeFile(js) + '"></script>';
+        js = '\t<script type="text/javascript" src="' + site.context + getThemeFile(js) + '"></script>\n';
         insertData(this, template, "footer", "js", key, js);
     };
 
@@ -538,6 +544,8 @@ return getThemePath() + path;
         setUser:setUser,
         getUser:getUser,
         setCreatePermitted:setCreatePermitted,
+        setShowStoreURL:setShowStoreURL,
+        getShowStoreURL:getShowStoreURL,
         getCreatePermitted:getCreatePermitted,
         setPublishPermitted:setPublishPermitted,
         getPublishPermitted:getPublishPermitted,

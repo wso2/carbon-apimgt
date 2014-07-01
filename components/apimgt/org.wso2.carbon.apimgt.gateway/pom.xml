@@ -31,27 +31,22 @@
     <version>4.3.0-SNAPSHOT</version>
 	<name>WSO2 Carbon - API Gateway</name>
     <url>http://wso2.org</url>
-
     <dependencies>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.core</artifactId>
-			<version>${project.version}</version>			
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.mediation.initializer</artifactId>
-			<version>${project.version}</version>			
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.throttle.core</artifactId>
-            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.synapse</groupId>
             <artifactId>synapse-core</artifactId>
-            <version>2.1.0-wso2v9</version>
             <exclusions>
                 <exclusion>
                     <groupId>org.apache.axis2</groupId>
@@ -67,22 +62,18 @@
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.apimgt.keymgt.stub</artifactId>
-	    <version>${project.version}</version>			
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
-            <artifactId>org.wso2.carbon.apimgt.impl</artifactId>   
-	    <version>${project.version}</version>
+            <artifactId>org.wso2.carbon.apimgt.impl</artifactId>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
-            <artifactId>org.wso2.carbon.ui</artifactId>     
-			<version>${project.version}</version>			
+            <artifactId>org.wso2.carbon.ui</artifactId>
         </dependency>
         <dependency>
              <groupId>org.wso2.carbon</groupId>
-             <artifactId>org.wso2.carbon.utils</artifactId>       
-			<version>${project.version}</version>			 
+             <artifactId>org.wso2.carbon.utils</artifactId>
          </dependency>
     </dependencies>
 
@@ -100,7 +91,7 @@
 	        <plugin>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>maven-scr-plugin</artifactId>
-		<version>1.6.0</version>
+		<!--<version>1.6.0</version>-->
             </plugin>
             <plugin>
                 <groupId>org.apache.felix</groupId>
@@ -123,7 +114,7 @@
                         </Export-Package>
                         <Import-Package>
                             !javax.xml.soap,
-                            javax.xml.stream.*; version="1.0.1",
+                            javax.xml.stream.*;version=1.0.0,
                             org.apache.axis2.rpc.receivers; version="${axis2.osgi.version.range}",
                             org.apache.axiom.*; version="${axiom.osgi.version.range}",
                             org.apache.axis2; version="${axis2.osgi.version.range}",
@@ -141,9 +132,9 @@
                             org.apache.synapse.mediators.base,
                             org.apache.axis2.transport.base,
                             org.wso2.carbon.core,
-                            org.wso2.carbon.registry.core.service; version=1.0.1,
+                            org.wso2.carbon.registry.core.service;version=1.0.1,
                             org.wso2.carbon.apimgt.impl.*,
-                            javax.xml.soap; version=1.0.0,
+			    javax.xml.soap;version=1.0.0,
                             *;resolution:=optional
                         </Import-Package>
                         <DynamicImport-Package>org.wso2.throttle.*</DynamicImport-Package>

@@ -23,7 +23,7 @@ package org.wso2.carbon.apimgt.api.model;
 public enum APIStatus {
 
     CREATED("CREATED"), PUBLISHED("PUBLISHED"),
-    DEPRECATED("DEPRECATED"), RETIRED("RETIRED"), BLOCKED("BLOCKED");
+    DEPRECATED("DEPRECATED"), RETIRED("RETIRED"), BLOCKED("BLOCKED"), PROTOTYPED("PROTOTYPED");
 
     private String status;
 

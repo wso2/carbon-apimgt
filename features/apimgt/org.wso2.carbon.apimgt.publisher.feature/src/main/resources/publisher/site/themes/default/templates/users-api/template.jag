@@ -86,7 +86,7 @@
         </div>
 
         <!-- Row -->
-<h3><%=i18n.localize("usageByCurrentSubscribers")%> (v-<%=request.getParameter("version")%>)</h3>
+<h3><%=i18n.localize("usageByCurrentSubscribers")%> (v-<%= encode.forHtml(request.getParameter("version"))%>)</h3>
 <div class="well">
     <div class="row-fluid">
         <div class="span6">

@@ -20,6 +20,10 @@ package org.wso2.carbon.apimgt.impl.workflow;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
+import org.wso2.carbon.user.api.UserStoreManager;
+import org.wso2.carbon.user.core.UserRealm;
+import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.user.mgt.stub.UserAdminStub;
 import org.wso2.carbon.user.mgt.stub.types.carbon.FlaggedName;
 import org.wso2.carbon.utils.CarbonUtils;
@@ -46,6 +50,14 @@ public abstract class UserSignUpWorkflowExecutor extends WorkflowExecutor {
         log.info("Adding Subscriber role to user");
         String url = serverURL + "UserAdmin";
 
+        RealmService realmService = ServiceReferenceHolder.getInstance().getRealmService();
+        UserRealm realm = realmService.getBootstrapRealm();
+        UserStoreManager manager = realm.getUserStoreManager();
+        if (!manager.isExistingRole(role)){
+            log.error("Could not find role " + role + " in the user store");
+            throw new Exception("Could not find role " + role + " in the user store");
+        }
+
         UserAdminStub userAdminStub = new UserAdminStub(url);
         CarbonUtils.setBasicAccessSecurityHeaders(adminUsername, adminPassword,
                 true, userAdminStub._getServiceClient());
@@ -60,5 +72,26 @@ public abstract class UserSignUpWorkflowExecutor extends WorkflowExecutor {
         }
         roles.add(role);
         userAdminStub.updateRolesOfUser(userName, roles.toArray(new String[roles.size()]));
+    }
+
+    /**
+     * Method to delete a user
+     * @param serverURL
+     * @param adminUsername
+     * @param adminPassword
+     * @param userName
+     * @throws Exception
+     */
+    protected static void deleteUser(String serverURL, String adminUsername,
+                                            String adminPassword, String userName) throws Exception {
+
+        log.info("Remove the rejected user :"+userName);
+        String url = serverURL + "UserAdmin";
+
+        UserAdminStub userAdminStub = new UserAdminStub(url);
+        CarbonUtils.setBasicAccessSecurityHeaders(adminUsername, adminPassword,
+                true, userAdminStub._getServiceClient());
+        userAdminStub.deleteUser(userName);
+
     }
 }

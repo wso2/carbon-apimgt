@@ -28,10 +28,12 @@ import org.apache.axis2.transport.http.HTTPConstants;
 import org.apache.axis2.transport.http.HttpTransportProperties;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.dto.WorkflowDTO;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
+import org.wso2.carbon.user.core.UserCoreConstants;
 
 import javax.xml.stream.XMLStreamException;
 import java.util.ArrayList;
@@ -121,18 +123,17 @@ public class UserSignUpWSWorkflowExecutor extends UserSignUpWorkflowExecutor{
         log.info("User Sign Up [Complete] Workflow Invoked. Workflow ID : " + workflowDTO.getExternalWorkflowReference() + "Workflow State : "+ workflowDTO.getStatus());
 
         super.complete(workflowDTO);
+        APIManagerConfiguration config = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration();
+        String serverURL = config.getFirstProperty(APIConstants.AUTH_MANAGER_URL);
+        String adminUsername = config.getFirstProperty(APIConstants.AUTH_MANAGER_USERNAME);
+        String adminPassword = config.getFirstProperty(APIConstants.AUTH_MANAGER_PASSWORD);
+        if (serverURL == null || adminUsername == null || adminPassword == null) {
+            throw new WorkflowException("Required parameter missing to connect to the" +
+                    " authentication manager");
+        }
         if(WorkflowStatus.APPROVED.equals(workflowDTO.getStatus())){
-            APIManagerConfiguration config = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration();
-            String serverURL = config.getFirstProperty(APIConstants.AUTH_MANAGER_URL);
-            String adminUsername = config.getFirstProperty(APIConstants.AUTH_MANAGER_USERNAME);
-            String adminPassword = config.getFirstProperty(APIConstants.AUTH_MANAGER_PASSWORD);
-            if (serverURL == null || adminUsername == null || adminPassword == null) {
-                throw new WorkflowException("Required parameter missing to connect to the" +
-                        " authentication manager");
-            }
-
-            String role = config.getFirstProperty(APIConstants.SELF_SIGN_UP_ROLE);
-            if (role == null) {
+            String role = UserCoreConstants.INTERNAL_DOMAIN + CarbonConstants.DOMAIN_SEPARATOR + config.getFirstProperty(APIConstants.SELF_SIGN_UP_ROLE);
+            if (role.equals(UserCoreConstants.INTERNAL_DOMAIN + CarbonConstants.DOMAIN_SEPARATOR)) {
                 throw new WorkflowException("Subscriber role undefined for self registration");
             }
 
@@ -143,6 +144,15 @@ public class UserSignUpWSWorkflowExecutor extends UserSignUpWorkflowExecutor{
                 throw new WorkflowException("Error while assigning role to user", e);
 
             }
+        } else{
+                try{
+                /* Remove created user */
+                deleteUser(serverURL, adminUsername, adminPassword, workflowDTO.getWorkflowReference());
+                }catch(Exception e){
+                    throw new WorkflowException("Error while deleting the user", e);
+
+                }
+
         }
 
     }

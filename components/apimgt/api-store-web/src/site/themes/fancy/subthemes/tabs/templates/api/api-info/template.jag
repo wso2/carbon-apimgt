@@ -5,7 +5,7 @@
         var tags = result.tags;
         var i, tag,  length = tags.length;
         var urlPrefix;
-        var tenant=request.getParameter("tenant");
+        var tenant=request_tenant;
         if(tenant!=null) {urlPrefix="&tenant="+tenant;}else{urlPrefix='';}
    %>
 <% jagg.includeBlock("search/api-search", {tag:'Databases-group'}); %>
@@ -41,7 +41,7 @@
                                     <%
                                     var i, length, app, thumbURL, api = outputs.api, apps = outputs.applications, deniedTiers = outputs.deniedTiers, user = outputs.user,isRatingActivated = outputs.isRatingActivated;
                                     var urlPrefix;
-                                    var tenant=request.getParameter("tenant");
+                                    var tenant=request_tenant;
                                     if(tenant!=null) {urlPrefix="&tenant="+tenant;}else{urlPrefix='';}
                                     %>
                                     <%if(api!=null){
@@ -82,7 +82,7 @@
 
                                         <!--ul class="breadcrumb">
                                             <li><a href="<%=jagg.getAbsoluteUrl("/site/pages/list-apis.jag?")%><%=urlPrefix%>">APIs groups</a> <span class="divider">/</span></li>
-                                            <li><a href="<%=jagg.getAbsoluteUrl(groupPath+"&")%><%=urlPrefix%>"><%=tagDisplayName%></a> <span class="divider">/</span></li>
+                                            <li><a href="<%=jagg.getAbsoluteUrl(groupPath+"&")%><%=urlPrefix%>"><%= encode.forHtml(tagDisplayName)%></a> <span class="divider">/</span></li>
                                             <li class="active"><%=api.name%> - <%=api.version%></li>
                                         </ul -->
                                         <%
@@ -208,7 +208,7 @@
                                                     </div>
                                                 </div>
                                                 <%}else{%><div style="padding-bottom:10px"> <div class="alert alert-info">
-                                                <strong><%=i18n.localize("noAPIMsg1")%><%=request.getParameter("name")%> <%=i18n.localize("noAPIMsg2")%></strong>
+                                                <strong><%=i18n.localize("noAPIMsg1")%><%= encode.forHtml(request.getParameter("name"))%> <%=i18n.localize("noAPIMsg2")%></strong>
                                             </div></div>  <% } %>
                                             </div>
                                         </div>
@@ -233,8 +233,8 @@
 
       $(document).ready(function(){
             <% if(request.getParameter("tag") != null) { %>
-                var activeTab = '#'+'<%=request.getParameter("tag")%>';
-                var realName =  '<%=request.getParameter("tag").split(site.tagGroupKey)[0]%>';
+                var activeTab = '#'+'<%= encode.forJavaScript(request.getParameter("tag"))%>';
+                var realName =  '<%= encode.forJavaScript( request.getParameter("tag").split(site.tagGroupKey)[0])%>';
               console.info(realName);
                 $('li',$(activeTab+'_tab').parent()).removeClass('active');
                 $(activeTab+'_tab').parent().addClass('active');

@@ -13,7 +13,7 @@ i18n.init(request,localeResourcesBasePath);
         if(request.getQueryString()){
             currentURL += "?" + request.getQueryString();
         }
-        var tenant=request.getParameter("tenant");
+        var tenant=request_tenant;
         var urlPrefix;
         if(tenant!=null) {urlPrefix="tenant="+tenant;}else{urlPrefix='';}
         

@@ -3,8 +3,8 @@
         "base" : "default",
         "subtheme" : "modern"
     },
-    "context" : "/publisher"
-    ,
+    "context" : "/publisher",
+    "request_url":"READ_FROM_REQUEST",
     "ssoConfiguration" : {
         "enabled" : "false",
         "issuer" : "API_PUBLISHER",

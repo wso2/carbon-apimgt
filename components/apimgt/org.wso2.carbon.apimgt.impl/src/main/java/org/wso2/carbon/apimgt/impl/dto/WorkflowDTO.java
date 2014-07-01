@@ -20,10 +20,12 @@ package org.wso2.carbon.apimgt.impl.dto;
 
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowStatus;
 
+import java.io.Serializable;
+
 /**
  * This is the DTO that will be used for storing workflow related contextual information.
  */
-public class WorkflowDTO {
+public class WorkflowDTO implements Serializable {
 
     private String workflowReference;
 

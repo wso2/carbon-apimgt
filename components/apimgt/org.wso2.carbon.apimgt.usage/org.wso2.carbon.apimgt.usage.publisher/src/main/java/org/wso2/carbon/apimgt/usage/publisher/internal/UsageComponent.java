@@ -27,6 +27,7 @@ import org.wso2.carbon.apimgt.usage.publisher.service.APIMGTConfigReaderService;
 import org.wso2.carbon.base.ServerConfiguration;
 import org.wso2.carbon.databridge.agent.thrift.DataPublisher;
 import org.wso2.carbon.databridge.agent.thrift.lb.LoadBalancingDataPublisher;
+import org.wso2.carbon.user.core.service.RealmService;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -36,6 +37,9 @@ import java.util.concurrent.ConcurrentHashMap;
  * @scr.reference name="api.manager.config.service"
  * interface="org.wso2.carbon.apimgt.impl.APIManagerConfigurationService" cardinality="1..1"
  * policy="dynamic" bind="setAPIManagerConfigurationService" unbind="unsetAPIManagerConfigurationService"
+ * @scr.reference name="user.realm.service"
+ * interface="org.wso2.carbon.user.core.service.RealmService"
+ * cardinality="1..1" policy="dynamic" bind="setRealmService" unbind="unsetRealmService"
  */
 public class UsageComponent {
 
@@ -70,11 +74,13 @@ public class UsageComponent {
     protected void setAPIManagerConfigurationService(APIManagerConfigurationService service) {
         log.debug("API manager configuration service bound to the API usage handler");
         amConfigService = service;
+        ServiceReferenceHolder.getInstance().setAPIManagerConfigurationService(service);
     }
 
     protected void unsetAPIManagerConfigurationService(APIManagerConfigurationService service) {
         log.debug("API manager configuration service unbound from the API usage handler");
         amConfigService = null;
+        ServiceReferenceHolder.getInstance().setAPIManagerConfigurationService(null);
     }
 
     public static APIMGTConfigReaderService getApiMgtConfigReaderService() {
@@ -108,6 +114,17 @@ public class UsageComponent {
         }
 
         dataPublisherMap.put(tenantDomain, dataPublisher);
+    }
+
+    protected void setRealmService(RealmService realmService) {
+        if (realmService != null && log.isDebugEnabled()) {
+            log.debug("Realm service initialized");
+        }
+        ServiceReferenceHolder.getInstance().setRealmService(realmService);
+    }
+
+    protected void unsetRealmService(RealmService realmService) {
+        ServiceReferenceHolder.getInstance().setRealmService(null);
     }
 
 }

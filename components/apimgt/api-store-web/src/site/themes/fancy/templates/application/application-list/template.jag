@@ -37,8 +37,10 @@
     }
     var j=0, tiers = outputs.tiers;
     %>
-    <script type="text/javascript">
-        var foo='<%=apps%>';
+    <script type="text/javascript" charset="utf-8">
+
+        var foo='<%= encode.forJavaScript(apps) %>';
+
     </script>
     <table cellspacing="0" cellpadding="0" class="table table-bordered table-striped" id="applicationTable">
         <thead>
@@ -68,7 +70,7 @@
                 else if(i + 1 == length) classes = "last";
             %>
             <tr class="<%=classes%>" data-value="<%=app.name%>" tier-value="<%=app.tier%>" callback-value="<%=callbackUrl%>" description-value="<%=description%>" >
-                <td class="app_name_cell"><%=app.name%></td>
+                <td class="app_name_cell"><%= encode.forHtml(app.name)%></td>
                 <td class="app_name_cell">
                     <select id="<%="tiers" + i%>" name="<%="tiers" + i%>" disabled="disabled">
                         <%for(j=0; j<tiers.length; j++){%>
@@ -82,24 +84,29 @@
 				<%
                 var status=app.status;
                 var statusVal;
+                var disableUpdate;
                 if(status=='APPROVED'){
-                statusVal='ACTIVE';
+                    statusVal='ACTIVE';
+                    disableUpdate = false;
                 }else{
-                statusVal='INACTIVE';
+                    statusVal='INACTIVE';
+                    disableUpdate = true;
                 }
                 %>
-                <td class="app_name_cell"><%=statusVal%></td>
-				<td class="app_name_cell"><%=callbackUrl%></td>
-				<td class="app_name_cell"><%=description%></td>
+                <td class="app_name_cell"><%= encode.forHtml(statusVal)%></td>
+				<td class="app_name_cell"><%= encode.forHtml(callbackUrl)%></td>
+				<td class="app_name_cell"><%= encode.forHtml(description)%></td>
                 <td>
-                    <a onclick="changeAppNameMode(this)"><i class="icon-edit"></i> <%=i18n.localize("edit")%></a>
+                    <%if(!disableUpdate){%>
+                        <a onclick="changeAppNameMode(this)"><i class="icon-edit"></i> <%=i18n.localize("edit")%></a>
+                    <%}%>
                     <div style="display: none;">
                         <button class="btn btn-primary" onclick="updateApplication(this)">Save</button>
                         <button class="btn" onclick="updateApplication_reset(this)">Cancel</button>
                     </div>
                 </td>
                 <td>
-                    <a onclick="deleteApp(this)"><i class="icon-trash"></i> <%=i18n.localize("delete")%></a>
+                    <a onclick="deleteApp(this)"><i class="icon-trash"></i> Delete</a>
                 </td>
             </tr>
             <% } %>

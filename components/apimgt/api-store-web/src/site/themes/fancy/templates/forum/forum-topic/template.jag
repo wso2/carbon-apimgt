@@ -1,0 +1,146 @@
+<% jagg.template("forum/forum-topic", function(inputs, outputs, jagg) {
+var stars = require(jagg.getThemeFile("utils/ratings/star-generator.js"));
+
+%>
+<!--<script id="template_reply_list" type="text/x-handlebars-template">-->
+
+<div class="forum-topic-edit content-section shadow-up">
+    
+		<div id="topic_details">
+		</div>
+
+		<div class="topic-rating">
+			<table cellspacing="0" cellpadding="0" class="table">
+        	<tbody>
+            	<tr>
+               		<td class="rating-star">
+                    	<div class="average-rating"><%=inputs.averageRating%></div>
+                   	</td>
+                  	<td colspan="1">
+                    	<div class="star-ratings">
+							<%if(jagg.getUser()){
+                        		print(stars.getDynamicStars(parseInt(inputs.userRating)));
+								}else{
+								print(stars.getStaticStars(parseInt(site.context, inputs.userRating, jagg.getUserTheme().base)));
+								}%>
+                        </div>
+                    </td>
+				</tr>
+         	</tbody>
+        	</table>
+		</div>
+
+        <div id="forum_reply_list">
+        </div>
+
+		<script id="template_topic_details" type="text/x-handlebars-template">
+        
+		<div class="title-section" id="topic">
+		  <%if(jagg.getUser()){%>
+          <i class="icon-edit pull-right edit_topic_icon " style="margin:10px;" data-id="{{ topicId }}" ></i>
+		  <%}%>
+          <h2>{{ replies.topic.0.subject}}</h2>
+        </div>
+		   
+		<div class="forum-description" id="forum_description">
+			{{{ replies.topic.0.description}}}
+		</div> 
+
+		<div class="title-section" id="edit-mode-title" style="display: none">
+          <h2>Edit - {{ replies.topic.0.subject}}</h2>
+        </div>
+
+		<div id="topic_edit" style="display: none">
+		 	<div class="topic-subject-edit">
+                <label class="control-label"><strong><h4><%=i18n.localize('forum.topicEdit.subject')%></h4></strong></label>
+                <div class="controls" id="input_inside"></div>
+            </div>
+        </div>
+
+        <div class="topic_description_edit" id="descritpion_edit" style="display: none">
+			<label><h4><%=i18n.localize('forum.topicEdit.description')%></h4></label>
+       	 	<div id="summernote3" data-id="{{ replies.topic.0.topicId}}"></div>
+			<div style="clear:both;"></div>
+			<div class="edit-topic-form-actions">
+            	<a class="btn btn-primary edit_forum_topic pull-right"><%=i18n.localize('save')%></a>
+                <a class="btn edit_cancel  pull-right"><%=i18n.localize('cancel')%></a>
+				<div style="clear:both;"></div>
+			</div>
+        </div>
+		</script>
+
+       	<script id="template_reply_list" type="text/x-handlebars-template">
+		
+		
+        
+		<div class="replies-list" style="display: none;">
+
+		<div class="pull-left replies-list-title" style="vertical-align:middle;"><label><h4>Replies</h4></label></div>
+
+		<div id="pages1" class="span6 pull-right"></div>
+			
+		<table class="table table-striped table-bordered forum-replies">
+
+        <tbody id="reply_list_tbody">
+
+          <tr id="reply_list_tr" style="display: none;">
+             <td class="span3" id="rely_list_td1">
+
+             </td>
+             <td id="rely_list_td2">
+
+             </td>
+
+             </tr>
+             {{#each replies.replies}}
+
+            <tr >
+
+                <td class="span3">{{ date }} <br/>
+                {{ timeStamp }} <br/>
+                <%=i18n.localize('forum.by')%> {{ createdBy }}
+                <br/>
+
+				<%if(jagg.getUser()){%>
+                <i class="icon-trash  delete_reply" data-id="{{ replyId }}"/>
+                <i class="icon-edit  edit_reply"  data-id="{{ replyId }}"/></td>
+				<%}%>                
+				<td  data-id="{{ replyId }}">
+
+
+                {{{ reply }}}
+
+                </td>
+                
+				<td style="display: none;" data-id="{{ replyId }}">
+					<div id="summernote2" data-id="{{ replyId }}"></div>
+					<div id="forum-reply-actions"> 
+          				<a class="btn btn-primary edit_forum_reply"  data-id="{{ replyId }}"><%=i18n.localize('save')%></a>
+         				<a class="btn edit_cancel"  data-id="{{ replyId }}"><%=i18n.localize('cancel')%></a>
+					</div>
+				</td>
+
+                </tr>
+                {{/each}}
+            </tbody>    
+        </table>
+		</div>
+
+        </script>
+         <form class="form-horizontal forum_form add-reply" >
+            <div>
+                <label><strong><h4><%=i18n.localize('forum.addReply.title')%></h4></strong></label>
+            </div>
+            <div id="summernote1"></div>
+            <a class="btn btn-primary" id="add-forum-reply" ><%=i18n.localize('forum.addReply.replyToThread')%></a>
+
+        </form>
+
+        <!--</div>-->
+    </div>
+</div>
+<script>
+	var context = '<%=site.context%>',theme = '<%=jagg.getUserTheme().base%>', topicId = '<%=inputs.topicId%>';
+    var existingRating = 3;
+    </script>
+<% }); %>

@@ -3,6 +3,8 @@
         "base" : "fancy"
     },
     "context" : "/store",
+    "request_url":"READ_FROM_REQUEST",
+    "showPublicStoreURL":true,
     "tagWiseMode" :"false",
     "tagGroupKey" :"-group",
     "ssoConfiguration" : {
@@ -13,6 +15,11 @@
         "identityAlias" : "",
         "responseSigningEnabled":"true",
         "keyStoreName" :""
+    },
+    "forum" : {
+        "topicsPerPage" : "5",
+        "repliesPerPage" : "5",
+        "resourceIdentifier" : "common"
     }
 
 

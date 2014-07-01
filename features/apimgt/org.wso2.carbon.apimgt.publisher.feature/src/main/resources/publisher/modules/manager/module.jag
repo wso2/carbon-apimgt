@@ -17,6 +17,9 @@ jagg.module("manager", {
      getAPIStoreObj:function () {
         return jagg.require(jagg.getModulesDir() + "manager/manager.jag").getAPIStoreObj.apply(this, arguments);
      },
+     getAPIStoreURL:function () {
+        return jagg.require(jagg.getModulesDir() + "manager/manager.jag").getAPIStoreURL.apply(this, arguments);
+     },
      loadTenantRegistry:function (tenantDomain) {
         return jagg.require(jagg.getModulesDir() + "manager/manager.jag").loadTenantRegistry.apply(this, arguments);
      },

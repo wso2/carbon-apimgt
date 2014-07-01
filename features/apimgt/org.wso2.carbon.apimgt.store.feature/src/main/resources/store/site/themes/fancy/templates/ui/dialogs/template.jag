@@ -26,7 +26,7 @@ i18n.init(request,localeResourcesBasePath);
 <div class="modal fade" id="messageModal"></div>
 <div id="login-data" style="display:none;">
     <% if(outputs.isSecure == true){%>
-    <form id="mainLoginForm">
+    <form id="mainLoginForm" autocomplete="off">
         <div class="modal-header">
             <button class="close" data-dismiss="modal">x</button>
             <h3><%=i18n.localize("login")%></h3>
@@ -42,7 +42,7 @@ i18n.init(request,localeResourcesBasePath);
             <input type="text" id="username" name="name" class="span3" placeholder="<%=i18n.localize("usernamePlcHolder")%>"/>
             <label><%=i18n.localize("password")%>:</label>
             <input type="password" id="password" name="pass" class="span3"/>
-            <input type="hidden" id="tenant" name="tenant" value="<%=request.getParameter("tenant")%>">
+            <input type="hidden" id="tenant" name="tenant" value="<%=request_tenant%>">
 
 
         </div>
@@ -52,7 +52,7 @@ i18n.init(request,localeResourcesBasePath);
         </div>
     </form>
     <% } else { %>
-    <form id="loginRedirectForm" method="post" action="<%=httpsUrl%><%=jagg.getAbsoluteUrl(jagg.getThemeFile("templates/user/login/redirector.jag"))%>">
+    <form id="loginRedirectForm" method="post" action="<%=httpsUrl%><%=jagg.getAbsoluteUrl(jagg.getThemeFile("templates/user/login/redirector.jag"))%>" autocomplete="off">
         <input type="hidden" name="redirectToHTTPS" id="redirectToHTTPS" value="<%=httpsURL%>" />
     </form>
     <% } %>

@@ -27,6 +27,16 @@ public class APIKey {
     private String createdDate;
     private String authUser;
     private String authorizedDomains;
+    private String state;
+
+
+    public String getState() {
+        return state;
+    }
+
+    public void setState(String state) {
+        this.state = state;
+    }
 
     public String getConsumerKey() {
         return consumerKey;

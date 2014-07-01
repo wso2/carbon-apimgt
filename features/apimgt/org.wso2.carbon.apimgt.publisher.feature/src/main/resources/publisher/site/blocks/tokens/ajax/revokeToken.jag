@@ -2,6 +2,7 @@
 include("/jagg/jagg.jag");
 
 (function () {
+    response.contentType = "application/json; charset=UTF-8";
     var mod, obj, result, username,
             action = request.getParameter("action"),
             site = require("/site/conf/site.json"),
@@ -13,7 +14,7 @@ include("/jagg/jagg.jag");
             message:'timeout'
         });
     }else{
-        if (action === "revokeAccessToken") {
+        if (action === "revokeAccessToken" && request.getMethod() == 'POST') {
             mod = jagg.module("subscription");
             var accessToken,consumerKey,authUser;
             accessToken = request.getParameter("accessToken");
@@ -35,7 +36,7 @@ include("/jagg/jagg.jag");
             print(obj);
 
         }
-        else if (action === "revokeAccessTokenBySubscriber") {
+        else if (action === "revokeAccessTokenBySubscriber" && request.getMethod() == 'POST') {
             mod = jagg.module("subscription");
             var userName;
             subscriberName = request.getParameter("subscriberName");

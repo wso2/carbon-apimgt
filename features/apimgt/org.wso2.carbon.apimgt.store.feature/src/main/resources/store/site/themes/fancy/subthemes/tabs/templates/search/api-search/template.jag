@@ -11,7 +11,7 @@ var query=request.getParameter("query");
             <div class="span6">
                 <%
                 var urlPrefix;
-                var tenant=request.getParameter("tenant");
+                var tenant=request_tenant;
                 if(tenant!=null) {urlPrefix="&tenant="+tenant;}else{urlPrefix='';}
 
 
@@ -29,7 +29,7 @@ var query=request.getParameter("query");
                         %>
                             <ul class="breadcrumb">
                                <li><a href="<%=jagg.getAbsoluteUrl("/site/pages/list-apis.jag")%><%=urlPrefix%>">APIs groups</a> <span class="divider">/</span></li>
-                               <li class="active" id="tagBreadcrumbUrl"><%=tagDisplayName%></li>
+                               <li class="active" id="tagBreadcrumbUrl"><%= encode.forHtml(tagDisplayName)%></li>
                            </ul>
                         <%
                     }
@@ -38,10 +38,10 @@ var query=request.getParameter("query");
             </div>
             <div class="span6">
                 <form class="form-inline pull-right" style="margin-top:10px;" action="<%=jagg.getMappedUrl("/site/pages/list-apis.jag")%>">
-                <input type="text" class="input-large" name="query"<%if(query!=null){%> value="<%=query%>" <%}else{%>
+                <input type="text" class="input-large" name="query"<%if(query!=null){%> value="<%= encode.forHtml(query)%>" <%}else{%>
                                      placeholder="<%=i18n.localize("searchAPI")%>"<%}%>/>
-                                     <%var tenant=request.getParameter("tenant");if(tenant!=null){ %>
-                                     <input type="hidden" name="tenant" value="<%=request.getParameter("tenant")%>" />
+                                     <%var tenant=request_tenant;if(tenant!=null){ %>
+                                     <input type="hidden" name="tenant" value="<%=request_tenant%>" />
                                      <%}%>
 
                   <button onclick="submitSearchForm(this)" class="btn">Search</button>
@@ -57,6 +57,8 @@ var query=request.getParameter("query");
                     <li><%=i18n.localize("searchAPIHelpMsg3")%></li>
                     <li><%=i18n.localize("searchAPIHelpMsg4")%></li>
                     <li><%=i18n.localize("searchAPIHelpMsg5")%></li>
+                    <li><%=i18n.localize("searchAPIHelpMsg6")%></li>
+                    <li><%=i18n.localize("searchAPIHelpMsg7")%></li>
                     </ol>
                 </div>
             </div>

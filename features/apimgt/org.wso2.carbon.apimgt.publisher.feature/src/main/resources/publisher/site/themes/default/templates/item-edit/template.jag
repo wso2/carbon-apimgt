@@ -2,10 +2,24 @@
  var mod = jagg.module("api");
  var result = mod.getTiers().tiers;
  var isSynapseGateway = mod.isSynapseGateway().isSynapseGateway;
+ var isDataPublishingEnabled = mod.isDataPublishingEnabled().isDataPublishingEnabled;
  var isSuperTenant = jagg.getUser().isSuperTenant;
- var i,resCount,rowNums = [],api = outputs.api; log = new Log();%>
-
+ var i,resCount,rowNums = [],api = outputs.api; log = new Log();
+ var last_tier = result[result.length -1];
+%>
 <script type="text/javascript">
+var TIERS = <%= result %>;
+
+var AUTH_TYPES = [
+  { "value": "<%=i18n.localize("none")%>", "key":"<%=i18n.localize("none")%>"} ,
+  { "value": "<%=i18n.localize("application")%>", "key":"<%=i18n.localize("application")%>"},
+  { "value": "<%=i18n.localize("applicationUser")%>", "key":"Application_User"},
+  { "value": "<%=i18n.localize("application&applicationUser")%>", "key":"Any"},
+];
+
+var RESOURCES = <%= api.resources %>;
+
+
 var addSelectedTiers;
 $(document).ready(function() {
     addSelectedTiers = function(target) {
@@ -30,8 +44,10 @@ $(document).ready(function() {
 });
 var insequence = "<%=api.inSequence%>";
 var outsequence = "<%=api.outSequence%>";
+var faultsequence = "<%=api.faultSequence%>";
 var inSequencesLoaded = false;
 var outSequencesLoaded = false;
+var faultSequencesLoaded = false;
 
 </script>
 <div class="alert alert-error" id="editAPIError" style="display:none">
@@ -67,7 +83,28 @@ API Definition for Swagger will not be overriden with the changes you will do to
                 <label class="control-label" for="context"><%=i18n.localize("context")%>:<span class="requiredAstrix">*</span></label>
                 <div class="controls">
                     <input type="text" class="input-xlarge required validInput contextExists noSpace" id="context" name="context" value="<%=api.context%>" onChange="setContextValue('<%=api.version%>')"/>
+                    <a class="icon-question-sign help_popup" help_data="context_help"></a>
+                    <p id="context_help" class="hide"><%=i18n.localize("contextHelpMsg")%></p>
                 </div>
+            </div>
+
+            <div class="control-group">
+                    <label  class="control-label" >Default Version</label>
+                     <div class="controls">
+                        <input type="checkbox" class="default_version_check" id="default_version" name="default_version" value="default_version" <%if(api.isDefaultVersion=="true"){%>checked<%}%>/>
+
+                        <a class="icon-question-sign help_popup" help_data="default_api_help"></a>
+                        <p id="default_api_help" class="hide">Making an API version default will allow the subscribers to invoke it without the version attribute in the URI.</p>
+
+                        <%if(api.isDefaultVersion=="false"){if(api.hasDefaultVersion){%>
+                            <p class="help-block">Currently set to version : <%=api.currentDefaultVersion%></p>
+                        <%}else{%>
+                            <p class="help-block">No default version defined for the current API</p>
+                        <%}}%>
+
+                        <input type="hidden" id="default_version_checked" name="default_version_checked" value=<%if(api.isDefaultVersion=="true"){%>"default_version"<%}else{%>""<%}%>/>
+                    </div>
+                    
             </div>
 
             <div class="control-group">
@@ -110,8 +147,8 @@ API Definition for Swagger will not be overriden with the changes you will do to
                     <label class="control-label" for="responseCache"><%=i18n.localize("responseCache")%>:</label>
                       <div class="controls"> 
                        <select class="select required" id="responseCache" name="responseCache" onchange="showCacheTimeout()">
-			                <option value="disabled" <%if(api.responseCache != "Enabled"){%> selected="selected" <%}%>><%=i18n.localize("responseCacheDisabled")%></option>
-			                <option value="enabled" <%if(api.responseCache=="Enabled"){%> selected="selected" <%}%>><%=i18n.localize("responseCacheEnabled")%></option>
+			                <option value="disabled" <%if(api.responseCache != "Enabled"){%> selected="selected" <%}%>><%=i18n.localize("disabled")%></option>
+			                <option value="enabled" <%if(api.responseCache=="Enabled"){%> selected="selected" <%}%>><%=i18n.localize("enabled")%></option>
 		                </select>                                
                         <a class="icon-question-sign help_popup" help_data="cache_help"></a>
                         <p id="cache_help" class="hide"><%=i18n.localize("cacheHelpMsg")%></p>           
@@ -130,8 +167,11 @@ API Definition for Swagger will not be overriden with the changes you will do to
                <div class="controls">
                    <select class="select required" id="visibility" name="visibility" onchange="showHideRoles()">
                        <option value="public" <%if(api.visibility=="public"){%> selected="selected" <%}%>><%=i18n.localize("public")%></option>
+                       <option value="private" <%if(api.visibility=="private"){%> selected="selected" <%}%>><%=i18n.localize("private")%></option>
                        <option value="restricted" <%if(api.visibility=="restricted"){%> selected="selected" <%}%>><%=i18n.localize("restricted")%></option>
                    </select>
+                   <a class="icon-question-sign help_popup" help_data="role_help"></a>
+                   <p id="role_help" class="hide"><%=i18n.localize("roleHelpMsg")%></p>
                </div>
            </div>
            
@@ -140,8 +180,9 @@ API Definition for Swagger will not be overriden with the changes you will do to
                     <%=i18n.localize("roles")%>:<% if (isSuperTenant) { %><span class="requiredAstrix">*</span><%}%>
                 </label>
                 <div class="controls">
-                    <input type="text" <% if (isSuperTenant) { %>class="input required validInput validateRoles"<%}else{%>class="input validateRoles"<%}%>
+                    <input type="text" class="input required validInput validateRoles"
                     id="roles" name="roles"  value="<%=api.roles%>"/>
+                    <p class="help-block" id="rolesHelp"><%=i18n.localize("rolesHelpMsg")%></p>
                 </div>
             </div>
 
@@ -193,14 +234,16 @@ API Definition for Swagger will not be overriden with the changes you will do to
                 <div class="controls">
                 <label class="checkbox">
                     <input type="checkbox" onclick="toggleSequence(this)" name="sequence_check" id="sequence_check"
-                        <% if(api.inSequence != null || api.outSequence != null){ %>checked="checked"><%}%><%=i18n.localize("sequenceMsg")%>
+                        <% if(api.inSequence != null || api.outSequence != null || api.faultSequence != null){ %>
+                            checked="checked"><%}%><%=i18n.localize("sequenceMsg")%>
                 </label>
                 <table class="table table-bordered table-striped" id="seqTable"
-                        <% if(api.inSequence == null && api.outSequence == null){ %>style="display:none"<%}%>>
+                        <% if(api.inSequence == null && api.outSequence == null && api.faultSequence == null){ %>style="display:none"<%}%>>
                     <thead>
                         <tr>
                             <th><%=i18n.localize("inFlow")%></th>
                             <th><%=i18n.localize("outFlow")%></th>
+                            <th><%=i18n.localize("faultFlow")%></th>
                         </tr>
                     </thead>
                         <tr>
@@ -211,6 +254,11 @@ API Definition for Swagger will not be overriden with the changes you will do to
                             </td>
                             <td>
                                 <select id="outSequence"  name="outSequence">
+                                    <option value="none" selected="selected"><%=i18n.localize("none")%></option>
+                                </select>
+                            </td>
+                            <td>
+                                <select id="faultSequence"  name="faultSequence">
                                     <option value="none" selected="selected"><%=i18n.localize("none")%></option>
                                 </select>
                             </td>
@@ -230,7 +278,7 @@ API Definition for Swagger will not be overriden with the changes you will do to
                        <div class="controls">
                            <select class="select required" id="endpoint_type" name="endpoint_type">
                                <option value="http">HTTP Endpoint</option>
-                               <option value="address">URL Endpoint</option>
+                               <option value="address">Address Endpoint</option>
                                <option value="wsdl">WSDL Endpoint</option>
                                <option value="failover">Failover Endpoint</option>
                                <option value="load_balance">Load balanced Endpoint</option>
@@ -239,11 +287,11 @@ API Definition for Swagger will not be overriden with the changes you will do to
                        </div>
                </div>
 
-               <input type="hidden" id="endpoint_config" name="endpoint_config" value='<% print(api.endpointConfig); %>'/>
+               <input type="hidden" id="endpoint_config" name="endpoint_config" value="<%= encode.forHtmlAttribute(api.endpointConfig) %>"/>
 
                <div id="endpoint_help" class="hide">
                 <strong>HTTP Endpoint </strong><p>Defines a URI Template based REST Service endpoint</p>
-                <strong>URL Endpoint</strong><p>Defines the direct URL of the service</p>
+                <strong>Address Endpoint</strong><p>Defines the direct URL of the service</p>
                 <strong>WSDL Endpoint</strong><p>Defines the WSDL, Service and Port</p>
                 <strong>Failover Group </strong><p>Defines the endpoints that the service will try to connect to in case
                         of a failure. This will take place in a round robin manner</p>
@@ -274,7 +322,7 @@ API Definition for Swagger will not be overriden with the changes you will do to
                     </div>
                 </div>
 
-                <div class="control-group" id="credentials" <%if(api.endpointTypeSecured=="false"){%>style="display: none;"<%}%>">
+                <div class="control-group" id="credentials" <%if(api.endpointTypeSecured=="false"){%>style="display: none;"<%}%>>
                     <label class="control-label" for="credentials"><%=i18n.localize("credentials")%>:<span class="requiredAstrix">*</span></label>
                     <div class="controls">
                         <input type="text" class="input-small required validInput" id="epUsername" name="epUsername"  value="<%=api.epUsername%>">
@@ -302,6 +350,23 @@ API Definition for Swagger will not be overriden with the changes you will do to
                         <p class="help-block"><%=i18n.localize("wadlHelpMsg")%></p>
                     </div>
                 </div>
+
+                <% if(isDataPublishingEnabled) { %>
+                <!--Southboud statistics -->
+                <div class="control-group">
+                    <label class="control-label" for="destinationStats"><%=i18n.localize("destinationStats")%>:</label>
+                      <div class="controls">
+                       <select class="select required" id="destinationStats" name="destinationStats">
+			                <option value="disabled" <%if(api.destinationStats != "Enabled"){%> selected="selected" <%}%>><%=i18n.localize("disabled")%></option>
+			                <option value="enabled" <%if(api.destinationStats == "Enabled"){%> selected="selected" <%}%>><%=i18n.localize("enabled")%></option>
+		                </select>
+                        <a class="icon-question-sign help_popup" help_data="stats_help"></a>
+                        <p id="stats_help" class="hide"><%=i18n.localize("statsHelpMsg")%></p>
+                     </div>
+                </div>
+                <!--Southboud statistics End -->
+                <% }%>
+
                 </div> <!-- end of more options -->
             </fieldset>
 
@@ -367,289 +432,58 @@ API Definition for Swagger will not be overriden with the changes you will do to
             <fieldset>
             <legend class="legend-with-hidden-info"><%=i18n.localize("resources")%></legend>
 
+                <div id="scopes_view"></div>
+                <div class="resource_container" data-index="idx">
+                        <span style="color:#999">URL Pattern&nbsp;</span>
+                        <div class="input-prepend">
+                            <span class="add-on">/{context}/{version}/</span>
+                            <input style="width:500px" id="resource_url_pattern" type="text" placeholder="Url Pattern Ex: path/to/resource" class="resource_url_pattern"/>
+                        </div>
+                        <div  style="margin-top:5px;">
+                            <ul class="inline" style="margin-left:80px">
+                                <li>
+                                    <label class="checkbox">
+                                    <input type="checkbox" value="GET" class="http_verb_select" > &nbsp; GET
+                                    </label>
+                                </li>
+
+                                <li>
+                                    <label class="checkbox">
+                                    <input type="checkbox" value="POST" class="http_verb_select" > &nbsp; POST
+                                    </label>
+                                </li>
+
+                                <li>
+                                    <label class="checkbox">
+                                    <input type="checkbox" value="PUT" class="http_verb_select" > &nbsp; PUT
+                                    </label>
+                                </li>
+
+                                <li>
+                                    <label class="checkbox">
+                                    <input type="checkbox" value="DELETE" class="http_verb_select" > &nbsp; DELETE
+                                    </label>
+                                </li>
+
+                                <li>
+                                    <label class="checkbox">
+                                    <input type="checkbox" value="OPTIONS" class="http_verb_select" > &nbsp; OPTIONS
+                                    </label>
+                                </li>
+
+                            </ul>
+                        </div>
+                            <button class="btn" type="button" id="add_resource" style="margin:0 0 10px 10px;"><i class="icon-plus-sign"></i>&nbsp;<%=i18n.localize("addNewResource")%></button>
+                        </div>
+
+                <div id="resource_view"></div>
+
+                <input type="hidden" name="resource_config" id="resource_config" value="<%= encode.forHtmlAttribute(api.resources) %>" >
+                <input type="hidden" name="scopes_config" id="scopes_config" value="<%= encode.forHtmlAttribute(api.scopes) %>" >
+
             <div>
 
-                    <div class="resourceTableDiv" id="resourceTableDiv"  style="margin-left: 10px;">
-                        <div style="padding-bottom:10px;"><a onclick="addResourcesToApi()"><i
-                                class="icon-plus-sign"></i> <%=i18n.localize("addNewResource")%></a></div>
-                        <table class="table table-bordered table-striped" id="resourceTable">
-                            <thead>
-                            <tr>
-                                <th><%=i18n.localize("urlPrefix")%></th>
-                                <th><%=i18n.localize("urlPattern")%></th>
-                                <th style="width:66px;"><%=i18n.localize("httpVerb")%></th>
-                                <th style="width:120px;"><%=i18n.localize("authType")%></th>
-                                <th style="width:120px;"><%=i18n.localize("throttlingTier")%></th>
-                                <th style="width:20px;"><%=i18n.localize("action")%></th>
-                            </tr>
 
-                            </thead>
-                            <tbody>
-
-                            <tr id="resourceRow"  style="display:none;">
-                                <td><span class="contextForUrl"><%=api.context%>/<%=api.version%></span></td>
-                                <td>
-                                    <input type="text" class="input resourceTemplate validInput" style="width:95%"
-                                           name="resourceTemplate"/>
-                                </td>
-                                <td>
-                                    <label class="checkbox ">
-                                        <input type="checkbox" id="resource-get" name="resource-get"
-                                               class="resource-get" value="GET"/> <%=i18n.localize("get")%>
-                                    </label>
-
-                                    <label class="checkbox ">
-                                        <input type="checkbox" id="resource-post" name="resource-post"
-                                               class="resource-post" value="POST"/> <%=i18n.localize("post")%>
-                                    </label>
-
-
-                                    <label class="checkbox ">
-                                        <input type="checkbox" id="resource-put" name="resource-put"
-                                               class="resource-put" value="PUT"/> <%=i18n.localize("put")%>
-                                    </label>
-
-
-                                    <label class="checkbox ">
-                                        <input type="checkbox" id="resource-delete" name="resource-delete"
-                                               class="resource-delete" value="DELETE"> <%=i18n.localize("delete")%>
-                                    </label>
-
-
-                                    <label class="checkbox ">
-                                        <input type="checkbox" id="resource-options" name="resource-options"
-                                               class="resource-options" value="OPTIONS"> <%=i18n.localize("options")%>
-                                    </label>
-
-
-                                </td>
-                                <td>
-                                    <select style="width:100%" class="getAuthType">
-                                        <option><%=i18n.localize("none")%></option>
-                                        <option selected="selected"><%=i18n.localize("application")%></option>
-                                        <option><%=i18n.localize("applicationUser")%></option>
-                                        <option><%=i18n.localize("application&applicationUser")%></option>
-                                    </select>
-                                    <select style="width:100%" class="postAuthType">
-                                        <option><%=i18n.localize("none")%></option>
-                                        <option selected="selected"><%=i18n.localize("application")%></option>
-                                        <option><%=i18n.localize("applicationUser")%></option>
-                                        <option><%=i18n.localize("application&applicationUser")%></option>
-                                    </select>
-                                    <select style="width:100%" class="putAuthType">
-                                        <option><%=i18n.localize("none")%></option>
-                                        <option selected="selected"><%=i18n.localize("application")%></option>
-                                        <option><%=i18n.localize("applicationUser")%></option>
-                                        <option><%=i18n.localize("application&applicationUser")%></option>
-                                    </select>
-                                    <select style="width:100%" class="deleteAuthType">
-                                        <option><%=i18n.localize("none")%></option>
-                                        <option selected="selected"><%=i18n.localize("application")%></option>
-                                        <option><%=i18n.localize("applicationUser")%></option>
-                                        <option><%=i18n.localize("application&applicationUser")%></option>
-                                    </select>
-                                    <select style="width:100%" class="optionsAuthType">
-                                        <option><%=i18n.localize("none")%></option>
-                                        <option selected="selected"><%=i18n.localize("application")%></option>
-                                        <option><%=i18n.localize("applicationUser")%></option>
-                                        <option><%=i18n.localize("application&applicationUser")%></option>
-                                    </select>
-
-                                </td>
-                                <!--Throttling-fix-->
-                                <td id = "throttlingTierListNew">
-                                     <select style="width:100%" id="getThrottlingTier" class="getThrottlingTier" name="getThrottlingTier"></select>
-                                     <select style="width:100%" id="postThrottlingTier" class="postThrottlingTier" name="postThrottlingTier"></select>
-                                     <select style="width:100%" id="putThrottlingTier" class="putThrottlingTier" name="putThrottlingTier"></select>
-                                     <select style="width:100%" id="deleteThrottlingTier" class="deleteThrottlingTier" name="deleteThrottlingTier"></select>
-                                     <select style="width:100%" id="optionsThrottlingTier" class="optionsThrottlingTier" name="optionsThrottlingTier"></select>
-                                </td>
-                                <!--Throttling-fix-->
-                                <td>
-                                    <button type="button" disabled="disabled" class='even-width-button btn downButton'
-                                            onclick="moveMe(this)"><i class="icon-chevron-down"></i> <%=i18n.localize("moveDown")%>
-                                    </button>
-                                    <button onclick="moveMe(this)" type="button" disabled="disabled"
-                                            class='even-width-button btn upButton'><i class="icon-chevron-up"></i> <%=i18n.localize("moveUp")%>
-                                    </button>
-                                    <button type="button" class="btn btn-danger even-width-button deleteButton"
-                                            id="resourceDelBtn" onclick="deleteResource(this)">
-                                        <i class="icon-trash icon-white"></i>  <%=i18n.localize("deleteMethod")%>
-                                    </button>
-                                </td>
-                            </tr>
-
-                            <%if (api.templates!=null && api.templates.length > 0) {
-                            for (i = 0; i < api.templates.length; i++) {
-                            %>
-                            <tr id="item-<%=String(i)%>" class="resourceRow">
-                                <td><span id="contextForUrlDefault"><%=api.context%>/<%=api.version%></span></td>
-                                <td>
-                                    <input style="width: 95%;" type="text" class="input resourceTemplate" id="uriTemplate"
-                                           name="resourceTemplate" value="<%=api.templates[i][0]%>"/>
-                                </td>
-                                <td>
-                                    <%
-
-                                    var methods = api.templates[i][1].split(",");
-                                    var authTypes = api.templates[i][2].split(",");
-                                    var throttlingTiers = api.templates[i][3].split(",");
-                                    var getVal,putVal,postVal,deleteVal,optionVal,method;
-
-                                    var tiersList = mod.getTiers().tiers;
-
-                                    var getThrottlingTier,postThrottlingTier,deleteThrottlingTier,optionsThrottlingTier,putThrottlingTier;
-
-                                    var getAuthVal,putAuthVal,postAuthVal,deleteAuthVal,optionAuthVal,method;
-                                    for(var n=0;n
-                                    <methods.length
-                                    ;n++) {
-                                    method=methods[n];
-                                    if(authTypes[n]=='Application_User'){authTypes[n]='Application User';}
-
-                                    if(method=="GET"){getVal=true;getAuthVal=authTypes[n];
-                                    getThrottlingTier=throttlingTiers[n];}
-
-                                    if(method=="PUT"){putVal=true;putAuthVal=authTypes[n];
-                                    putThrottlingTier=throttlingTiers[n];}
-
-                                    if(method=="POST"){postVal=true;postAuthVal=authTypes[n];
-                                    postThrottlingTier=throttlingTiers[n];}
-
-                                    if(method=="DELETE"){deleteVal=true;deleteAuthVal=authTypes[n];
-                                    deleteThrottlingTier=throttlingTiers[n];}
-
-                                    if(method=="OPTIONS"){optionVal=true;optionAuthVal=authTypes[n];
-                                    optionsThrottlingTier=throttlingTiers[n];}
-                                    }%>
-                                    <label class="checkbox inline">
-                                        <input type="checkbox" id="resource-get" name="resource-get" class="resource-get"
-                                               value="GET" <%if(getVal){%>checked="true"<%}%> /><%=i18n.localize("get")%>
-                                    </label>
-                                    <label class="checkbox inline">
-                                        <input type="checkbox" id="resource-post" name="resource-post" class="resource-post"
-                                               value="POST" <%if(postVal){%>checked="true"<%}%>
-                                        /><%=i18n.localize("post")%>
-                                    </label>
-                                    <label class="checkbox inline">
-                                        <input type="checkbox" id="resource-put" name="resource-put" class="resource-put"
-                                               value="PUT" <%if(putVal){%>checked="true"<%}%> /> <%=i18n.localize("put")%>
-                                    </label>
-                                    <label class="checkbox inline">
-                                        <input type="checkbox" id="resource-delete" name="resource-delete" class="resource-delete"
-                                               value="DELETE" <%if(deleteVal){%>checked="true"<%}%>
-                                        /> <%=i18n.localize("delete")%>
-                                    </label>
-                                    <label class="checkbox inline">
-                                        <input type="checkbox" id="resource-options" name="resource-options" class="resource-options"
-                                               value="OPTIONS" <%if(optionVal){%>checked="true"<%}%>
-                                        /> <%=i18n.localize("options")%>
-                                    </label>
-
-                                    <% getVal=putVal=postVal=deleteVal=optionVal=""; %>
-
-                                </td>
-
-                                <td>
-                                    <select style="width:100%" class="getAuthType">
-                                        <option <%if(getAuthVal && getAuthVal=="None"){%> selected="selected" <%}%>><%=i18n.localize("none")%></option>
-                                        <option <%if(getAuthVal && getAuthVal=="Application"){%> selected="selected" <%}%>><%=i18n.localize("application")%></option>
-                                        <option <%if(getAuthVal && getAuthVal=="Application User"){%> selected="selected" <%}%>><%=i18n.localize("applicationUser")%></option>
-                                        <option <%if(getAuthVal && getAuthVal=="Any"){%> selected="selected" <%}%>><%=i18n.localize("application&applicationUser")%></option>
-
-                                    </select>
-                                    <select style="width:100%" class="postAuthType">
-                                        <option <%if(postAuthVal && postAuthVal=="None"){%> selected="selected" <%}%>><%=i18n.localize("none")%></option>
-                                        <option <%if(postAuthVal && postAuthVal=="Application"){%> selected="selected" <%}%>><%=i18n.localize("application")%></option>
-                                        <option <%if(postAuthVal && postAuthVal=="Application User"){%> selected="selected" <%}%>><%=i18n.localize("applicationUser")%></option>
-                                        <option <%if(postAuthVal && postAuthVal=="Any"){%> selected="selected" <%}%>><%=i18n.localize("application&applicationUser")%></option>
-
-                                    </select>
-                                    <select style="width:100%" class="putAuthType">
-                                        <option <%if(putAuthVal && putAuthVal=="None"){%> selected="selected" <%}%>><%=i18n.localize("none")%></option>
-                                        <option <%if(putAuthVal && putAuthVal=="Application"){%> selected="selected" <%}%>><%=i18n.localize("application")%></option>
-                                        <option <%if(putAuthVal && putAuthVal=="Application User"){ %> selected="selected" <%}%>><%=i18n.localize("applicationUser")%></option>
-                                        <option <% if(putAuthVal && putAuthVal=="Any"){ %> selected="selected" <%}%>><%=i18n.localize("application&applicationUser")%></option>
-
-                                    </select>
-                                    <select style="width:100%" class="deleteAuthType">
-                                        <option <%if(deleteAuthVal && deleteAuthVal=="None"){%> selected="selected" <%}%>><%=i18n.localize("none")%></option>
-                                        <option <%if(deleteAuthVal && deleteAuthVal=="Application"){%> selected="selected" <%}%>><%=i18n.localize("application")%></option>
-                                        <option <%if(deleteAuthVal && deleteAuthVal=="Application User"){%> selected="selected" <%}%>><%=i18n.localize("applicationUser")%></option>
-                                        <option <%if(deleteAuthVal && deleteAuthVal=="Any"){%> selected="selected" <%}%>><%=i18n.localize("application&applicationUser")%></option>
-
-                                    </select>
-                                    <select style="width:100%" class="optionsAuthType">
-                                        <option <%if(optionAuthVal && optionAuthVal=="None"){%> selected="selected" <%}%>><%=i18n.localize("none")%></option>
-                                        <option <%if(optionAuthVal && optionAuthVal=="Application"){%> selected="selected" <%}%>><%=i18n.localize("application")%></option>
-                                        <option <%if(optionAuthVal && optionAuthVal=="Application User"){%> selected="selected" <%}%>><%=i18n.localize("applicationUser")%></option>
-                                        <option <%if(optionAuthVal && optionAuthVal=="Any"){%> selected="selected" <%}%>><%=i18n.localize("application&applicationUser")%></option>
-
-                                    </select>
-
-                                </td>
-                                     <td id = "throttlingTierList">
-
-                                         <select style="width:100%" id="getThrottlingTier" class="getThrottlingTier" name="getThrottlingTier"><%
-                                         for(var k = 0 ; k < tiersList.length ; k++){
-                                         var l =  tiersList.length - k -1;
-                                         %>
-                                         <option <%if(tiersList[l].tierName==getThrottlingTier){%> selected="selected" <%}%> value="<%=tiersList[l].tierName%>"><%=tiersList[l].tierDisplayName%></option>
-                                         <% }
-                                         %></select>
-                                         <select style="width:100%" id="postThrottlingTier" class="postThrottlingTier" name="postThrottlingTier"><%
-                                         for(var k = 0 ; k < tiersList.length ; k++){
-                                         var l =  tiersList.length - k -1;
-                                         %>
-                                         <option <%if(tiersList[l].tierName==postThrottlingTier){%> selected="selected" <%}%>value="<%=tiersList[l].tierName%>"><%=tiersList[l].tierDisplayName%></option>
-                                         <% }
-                                         %></select>
-                                         <select style="width:100%" id="putThrottlingTier" class="putThrottlingTier" name="putThrottlingTier"><%
-                                         for(var k = 0 ; k < tiersList.length ; k++){
-                                         var l =  tiersList.length - k -1;
-                                         %>
-                                         <option <%if(tiersList[l].tierName==putThrottlingTier){%> selected="selected" <%}%>value="<%=tiersList[l].tierName%>"><%=tiersList[l].tierDisplayName%></option>
-                                         <% }
-                                         %></select>
-                                         <select style="width:100%" id="deleteThrottlingTier" class="deleteThrottlingTier" name="deleteThrottlingTier"><%
-                                         for(var k = 0 ; k < tiersList.length ; k++){
-                                         var l =  tiersList.length - k -1;
-                                         %>
-                                         <option <%if(tiersList[l].tierName==deleteThrottlingTier){%> selected="selected" <%}%>value="<%=tiersList[l].tierName%>"><%=tiersList[l].tierDisplayName%></option>
-                                         <% }
-                                         %></select>
-                                         <select style="width:100%" id="optionsThrottlingTier" class="optionsThrottlingTier" name="optionsThrottlingTier"><%
-                                         for(var k = 0 ; k < tiersList.length ; k++){
-                                         var l =  tiersList.length - k -1;
-                                         %>
-                                         <option <%if(tiersList[l].tierName==optionsThrottlingTier){%> selected="selected" <%}%>value="<%=tiersList[l].tierName%>"><%=tiersList[l].tierDisplayName%></option>
-                                         <% }
-                                         %></select>
-                                        </td>
-
-                                <% getAuthVal=putAuthVal=postAuthVal=deleteAuthVal=optionAuthVal=""; %>
-                                <td>
-                                    <button type="button" disabled="disabled" class='even-width-button btn downButton'
-                                            onclick="moveMe(this)"><i class="icon-chevron-down"></i> <%=i18n.localize("moveDown")%>
-                                    </button>
-                                    <button onclick="moveMe(this)" type="button" disabled="disabled"
-                                            class='even-width-button btn upButton'><i class="icon-chevron-up"></i> <%=i18n.localize("moveUp")%>
-                                    </button>
-                                    <button type="button" class="btn btn-danger even-width-button deleteButton"
-                                            id="resourceDelBtn" onclick="deleteResource(this)">
-                                        <i class="icon-trash icon-white"></i> <%=i18n.localize("deleteMethod")%>
-                                    </button>
-                                </td>
-                            </tr>
-
-                            <% rowNums.push(i);
-
-
-                            }}%>
-                            </tbody>
-                        </table>
-
-                    </div>
                     <div class="alert alert-error" id="resourceTableError" style="display:none">
                         <div id="stateActions" class="controls"></div>
                     </div>
@@ -660,21 +494,6 @@ API Definition for Swagger will not be overriden with the changes you will do to
 
 
 <input type="hidden" name="apiVersion" id="apiVersion" value="<%=<%=api.version%>%>">
-<input type="hidden" name="resourceCount" id="resourceCount" value="<%=String(api.templates.length)%>">
-<div id="hiddenFormElements">
-    <%if (api.templates!=null && api.templates.length > 0) {
-              for (j = 0; j < api.templates.length; j++) {
-              %>
-    <input type="hidden" name="resourceMethod-<%=String(j)%>" id="resourceMethod-<%=String(j)%>"
-           value="<%=api.templates[j][1]%>">
-    <input type="hidden" name="uriTemplate-<%=String(j)%>" id="uriTemplate-<%=String(j)%>"
-           value="<%=api.templates[j][0]%>">
-    <input type="hidden" name="resourceMethodAuthType-<%=String(j)%>" id="resourceMethodAuthType-<%=String(j)%>"
-           value="<%=api.templates[j][2]%>">
-    <input type="hidden" name="resourceMethodThrottlingTier-<%=String(j)%>" id="resourceMethodThrottlingTier-<%=String(j)%>"
-           value="<%=api.templates[j][3]%>">
-    <%}}%>
-</div>
 
 
 
@@ -702,8 +521,49 @@ API Definition for Swagger will not be overriden with the changes you will do to
                          <a href="#" class="btn btn-primary" id="advance_ep_submit">Save changes</a>
                          </div>
                     </div>
+
+            <div  id="define_scope_modal" class="modal hide fade form-horizontal">
+                <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h3>Define Scope</h3>
+                </div>
+                <div class="modal-body">
+                <form id="scope_form">
+                    <div class="control-group">
+                        <label class="control-label" for="scopeKey">Scope Key</label>
+                        <div class="controls">
+                        <input type="text" id="scopeKey" placeholder="Eg: api_name_read">
+                        </div>
+                    </div>
+                    <div class="control-group">
+                        <label class="control-label" for="scopeName">Scope Name</label>
+                        <div class="controls">
+                        <input type="text" id="scopeName" placeholder="Eg: Read My Data">
+                        </div>
+                    </div>
+                    <div class="control-group">
+                        <label class="control-label" for="scopeRoles">Roles</label>
+                        <div class="controls">
+                        <input type="text" id="scopeRoles" placeholder="Eg: role1,role2,role3">
+                        </div>
+                    </div>
+                    <div class="control-group">
+                        <label class="control-label" for="inputEmail">Description</label>
+                        <div class="controls">
+                        <textarea id="scopeDescription" placeholder="Eg: Allows the Application to read your data"></textarea>
+                        </div>
+                    </div>
+                </form>
+                </div>
+                <div class="modal-footer">
+                <div id="res" class="hide" style="color:red;float:left"></div>
+                <a class="btn" data-dismiss="modal">Close</a>
+                <a class="btn btn-primary" id="scope_submit">Add Scope</a>
+                </div>
+           </div>
     </div>
 </div>
+
 
 
  <script type="text/javascript">
@@ -751,5 +611,85 @@ $(document).ready(function() {
 
  </script>
 
+<script id="scopes-template" type="text/x-handlebars-template">
+    <div class="resource_container scope_container">
+    {{#if scopes}}
+        <h4>Scopes</h4>
+        <ul>
+            {{#each scopes}}
+            <li>
+                <h6><a data-index='{{idx}}' class='delete_scope'><i class='icon-trash'></i></a> &nbsp;&nbsp; {{ key }} : {{ name }}  </h6>
+                <p>{{ description }}</p>
+            </li>
+            {{/each}}
+        </ul>
+    {{/if}}
+        <a id="define_scopes" class="pointer btn"><i class="icon-plus-sign"></i>&nbsp;Add Scopes</a>
+    </div>
+</script>
+
+<script id="resource-template" type="text/x-handlebars-template">
+    {{#each resources}}
+        <div class="resource_container" data-index="idx">
+                        <span style="color:#999">URL Pattern&nbsp;</span>
+                        <span style="font-size:18px;font-weight:bold">/{{../context}}/{{../version}}/{{ url_pattern }}</span>
+                            <blockquote class="pull-right">
+                            <a data-index='{{idx}}' class='delete_resource'><i class='icon-trash'></i></a>&nbsp;
+                            <a data-index='{{idx}}' class='moveup_resource'><i class='icon-arrow-up '></i></a>&nbsp;
+                            <a data-index='{{idx}}' class='movedown_resource'><i class='icon-arrow-down '></i></a>&nbsp;
+                            </blockquote>
+                        <table style="margin-left:80px;" class="table-hover">
+                            <tr>
+                                <td style="color:#999; text-align:center">HTTP Verb</td>
+                                <td style="color:#999; text-align:center">Auth Type</td>
+                                <td style="color:#999; text-align:center">Throttling Tier</td>
+                                {{#if ../scopes}}
+                                <td style="color:#999; text-align:center">Scope</td>
+                                {{/if}}
+                            </tr>
+                        {{#each ../verbs }}
+                        {{#property_exist ../http_verbs .}}
+                            <tr>
+                                <td><input class="http_verb_deselect" data-index="{{ ../../idx }}" data-verb="{{ verb }}" type="checkbox" class="http_verb_select"  checked="checked" > {{ verb }}</td>
+                                <td>
+                                <select data-index="{{ ../../idx }}"  data-verb="{{ verb }}" class="resource_auth_select" style="height:25px;">
+                                    {{#each ../../../auth_types}}
+                                        <option title="{{ key }}" value="{{ key }}" {{selected ../object.auth_type key}}>{{  value }}</option>
+                                    {{/each}}
+                                </select>
+                            </td>
+                            <td>
+                                <select data-index="{{ ../../idx }}"  data-verb="{{ verb }}" class="resource_tier_select" style="height:25px;">
+                                    {{#each ../../../tiers}}
+                                        <option title="{{ tierDescription }}" value="{{ tierName }}" {{selected ../object.throttling_tier tierName}}>{{  tierDisplayName }}</option>
+                                    {{/each}}
+                                </select>
+                            </td>
+                            {{#if ../../../scopes}}
+                            <td>
+                                <select data-index="{{ ../../../idx }}"  data-verb="{{ ../verb }}" class="resource_scope_select" style="height:25px;">
+                                    <option title="" value="undefined"> </option>
+                                    {{#each ../../../../scopes}}
+                                        <option title="{{ description }}" value="{{ key }}" {{selected key ../object.scope}}>{{ name }}</option>
+                                    {{/each}}
+                                </select>
+                            </td>
+                            {{/if}}
+                            </tr>
+                        {{/property_exist}}
+                        {{/each}}
+                        </table>
+            <ul  style="margin-left:80px;margin-top:5px;" class="inline">
+            {{#each missing}}
+                <li>
+                    <label class="checkbox">
+                    <input  data-index='{{../idx}}' type="checkbox" class="http_verb_add" value="{{ . }}"> &nbsp; {{ . }}
+                    </label>
+                </li>
+            {{/each}}
+            </ul>
+        </div>
+    {{/each}}
+</script>
 
 <% }); %>

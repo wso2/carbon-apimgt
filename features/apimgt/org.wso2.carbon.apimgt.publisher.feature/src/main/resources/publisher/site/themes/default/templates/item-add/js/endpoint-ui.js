@@ -7,70 +7,80 @@ if (typeof APP === 'undefined') {
 
 $(document).ready(function () {
 
-APP.form.advance_endpoint_config =
-{
-    schema: {
-        format: {
-            type: 'string',
-            title: i18n.t('endpointUi.Format'),
-            enum: ['soap11', 'soap12', 'POX', 'REST', 'GET', 'leave-as-is'],
-            default: 'leave-as-is'
-        },
-        optimize: {
-            type: 'string',
-            title: i18n.t('endpointUi.Optimize'),
-            enum: ['SWA', 'MTOM', 'leave-as-is'],
-            default: 'leave-as-is'
-        },
-        suspendErrorCode: {
-            title: i18n.t('endpointUi.Error_Codes'),
-            type: 'array',
-            items:{
-                enum: [ "101507", "101508", "101505", "101506", "101509", "101500", "101510", "101001", "101000", "101503", "101504" ,"101501",],
-                type: 'string'
-            }
+    APP.form.advance_endpoint_config =
+    {
+        schema: {
+            format: {
+                type: 'string',
+                title: i18n.t('endpointUi.Format'),
+                'enum': ['soap11', 'soap12', 'POX', 'REST', 'GET', 'leave-as-is'],
+                description:'Message format for the endpoint.',
+                'default': 'leave-as-is'
+            },
+            optimize: {
+                type: 'string',
+                title: i18n.t('endpointUi.Optimize'),
+                'enum': ['SWA', 'MTOM', 'leave-as-is'],
+                description:'Method to optimize the attachments.',
+                'default': 'leave-as-is'
+            },
+            suspendErrorCode: {
+                title: i18n.t('endpointUi.Error_Codes'),
+                type: 'array',
+                description: 'A list of error codes.If these error codes are received from the endpoint, the endpoint will be suspended.',
+                items:{
+                    'enum': [ "101507", "101508", "101505", "101506", "101509", "101500", "101510", "101001", "101000", "101503", "101504" ,"101501"],
+                    type: 'string'
+                }
 
-        },
-        suspendDuration: {
-            title: i18n.t('endpointUi.Intial Duration (Millis)'),
-            type: 'number'
-        },
-        suspendMaxDuration: {
-            title: i18n.t('endpointUi.Max Duration (Millis)'),
-            type: 'number'
-        },
-        factor: {
-            title: i18n.t('endpointUi.Factor'),
-            type: 'number'
-        },
-        retryErroCode: {
-            title: i18n.t('endpointUi.Error Codes'),
-            type: 'array',
-            items:{
-                enum: [ "101507", "101508", "101505", "101506", "101509", "101500", "101510", "101001", "101000", "101503", "101504" ,"101501",],
-                type: 'string'
+            },
+            suspendDuration: {
+                title: i18n.t('endpointUi.Intial Duration (Millis)'),
+                description:'The duration that the endpoint is suspended for the first time after the receiving the suspend error codes.',
+                type: 'number'
+            },
+            suspendMaxDuration: {
+                title: i18n.t('endpointUi.Max Duration (Millis)'),
+                description:'The maximum duration that the endpoint is suspended after the receiving the suspend error codes.',
+                type: 'number'
+            },
+            factor: {
+                title: i18n.t('endpointUi.Factor'),
+                description:'The duration to suspend can vary from the first time suspension to the subsequent time. The factor value decides the suspense duration variance between subsequent suspensions.',
+                type: 'number'
+            },
+            retryErroCode: {
+                title: i18n.t('endpointUi.Error Codes'),
+                type: 'array',
+                description:'A list of error codes. If these error codes are received from the endpoint, the request will be subjected to a timeout.',
+                items:{
+                    'enum': [ "101507", "101508", "101505", "101506", "101509", "101500", "101510", "101001", "101000", "101503", "101504" ,"101501"],
+                    type: 'string'
+                }
+            },
+            retryTimeOut: {
+                title: i18n.t('endpointUi.Retries Before Suspension'),
+                description:'The number of re-tries in case of a timeout, caused by the above listed error codes.',
+                type: 'number'
+            },
+            retryDelay: {
+                title: i18n.t('endpointUi.Retry Delay(Millis)'),
+                description:'The delay between retries, in milliseconds.',
+                type: 'number'
+            },
+            actionSelect: {
+                title: i18n.t('endpointUi.Action'),
+                type: 'string',
+                description:'The action to be done at a timeout situation. You can select from: 1) Never Timeout 2) Discard Message 3) Execute Fault Sequence',
+                'enum': [ "neverTimeout", "discard", "fault" ]
+            },
+            actionDuration: {
+                title: i18n.t('endpointUi.Duration (Millis)'),
+                description:'The duration in milliseconds before considering a request as timeout.',
+                type: 'number'
             }
         },
-        retryTimeOut: {
-            title: i18n.t('endpointUi.Retries Before Suspension'),
-            type: 'number'
-        },
-        retryDelay: {
-            title: i18n.t('endpointUi.Retry Delay(Millis)'),
-            type: 'number'
-        },
-        actionSelect: {
-            title: i18n.t('endpointUi.Action'),
-            type: 'string',
-            enum: [ "neverTimeout", "discard", "fault" ],
-
-        },
-        actionDuration: {
-            title: i18n.t('endpointUi.Duration (Millis)'),
-            type: 'number'
-        }
-    },
-    form: [{
+        form: [{
             "type": "fieldset",
             "htmlClass": "ae_message_content",
             "title": i18n.t('endpointUi.Message Content'),
@@ -111,9 +121,9 @@ APP.form.advance_endpoint_config =
                     "101000": 	i18n.t("endpointUi.101000"),
                     "101503": 	i18n.t("endpointUi.101503"),
                     "101504": 	i18n.t("endpointUi.101504"),
-                    "101501": 	i18n.t("endpointUi.101501"),
-                    }
-                },
+                    "101501": 	i18n.t("endpointUi.101501")
+                }
+            },
                 { key:'suspendDuration'},
                 { key:'suspendMaxDuration'},
                 { key:'factor'}]
@@ -137,304 +147,314 @@ APP.form.advance_endpoint_config =
                     "101000": 	i18n.t("endpointUi.101000"),
                     "101503": 	i18n.t("endpointUi.101503"),
                     "101504": 	i18n.t("endpointUi.101504"),
-                    "101501": 	i18n.t("endpointUi.101501"),
-                    }
-                },
+                    "101501": 	i18n.t("endpointUi.101501")
+                }
+            },
                 'retryTimeOut', 'retryDelay']
         }, {
             "type": "fieldset",
             "title": i18n.t("endpointUi.Connection Timeout"),
             "items": [
-            {
-                key: 'actionSelect',
-                'titleMap': {
-                    "neverTimeout": i18n.t("endpointUi.Never timeout"),
-                    "discard": i18n.t("endpointUi.Discard message"),
-                    "fault": i18n.t("endpointUi.Execute fault sequence")
-                },
-                value:'fault'
-            },{
-                key:'actionDuration',
-                value: '30000'
-            }
+                {
+                    key: 'actionSelect',
+                    'titleMap': {
+                        "neverTimeout": i18n.t("endpointUi.Never timeout"),
+                        "discard": i18n.t("endpointUi.Discard message"),
+                        "fault": i18n.t("endpointUi.Execute fault sequence")
+                    },
+                    value:'fault'
+                },{
+                    key:'actionDuration',
+                    value: '30000'
+                }
             ]
         }
-    ]
-};
+        ]
+    };
 
-APP.form.http_endpoint = {
-    "schema": {
+    APP.form.http_endpoint = {
+        "schema": {
 
-        "production_endpoints": {
-            "title": i18n.t("endpointUi.Production Endpoint"),
-            "type": "endpoint",
-            "fieldHtmlClass": "input-xlarge validateEndpoints"
-        },
-        sandbox_endpoints: {
-            title: i18n.t("endpointUi.Sandbox Endpoint"),
-            type: 'endpoint',
-            "fieldHtmlClass": "input-xlarge validateEndpoints"
-        },
-    },
-    form: [
-        'production_endpoints', 'sandbox_endpoints'
-    ]
-};
-
-APP.form.address_endpoint = {
-    "schema": {
-
-        "production_endpoints": {
-            "title": i18n.t("endpointUi.Production Endpoint"),
-            "type": "endpoint",
-        },
-        sandbox_endpoints: {
-            title: i18n.t("endpointUi.Sandbox Endpoint"),
-            type: 'endpoint',
-
-        },
-    },
-    form: [{
-        key: 'production_endpoints',
-        "fieldHtmlClass": "input-xlarge validateEndpoints"
-    }, {
-        key: 'sandbox_endpoints',
-        "fieldHtmlClass": "input-xlarge validateEndpoints"
-    }]
-};
-
-APP.form.wsdl_endpoint = {
-    "schema": {
-
-        "production_endpoints": {
-            "title": i18n.t("endpointUi.Production WSDL"),
-            "type": "endpoint",
-            "urlType":"wsdl",
-            "fieldHtmlClass": "input-xlarge validateEndpoints"
-        },
-        'wsdlendpointService': {
-            title: i18n.t("endpointUi.Service"),
-            type: 'text'
-        },
-        'wsdlendpointPort': {
-            title: i18n.t("endpointUi.Port"),
-            type: 'text',
-            "fieldHtmlClass":"required"
-        },
-        "sandbox_endpoints": {
-            title: i18n.t("endpointUi.Sandbox WSDL"),
-            type: 'endpoint',
-            "urlType":"wsdl",
-            "fieldHtmlClass": "input-xlarge validateEndpoints"
-        },
-    },
-    form: [
-        'production_endpoints',
-        {
-            key : 'wsdlendpointService',
-            "fieldHtmlClass":"required"
-        },{
-            key:'wsdlendpointPort',
-            "fieldHtmlClass":"required"
-        }
-        , 'sandbox_endpoints'
-    ]
-};
-
-APP.form.failover_endpoint = {
-    "schema": {
-        "production_endpoints": {
-            "title": i18n.t("endpointUi.Production Endpoint"),
-            "type": "endpoint",
-            "fieldHtmlClass": "input-xlarge"
-        },
-        "production_failovers": {
-            "title": i18n.t("endpointUi.Production Fail-over Endpoints"),
-            "type": "array",
-            "items": {
+            "production_endpoints": {
+                "title": i18n.t("endpointUi.Production Endpoint"),
                 "type": "endpoint",
-                "title": i18n.t("endpointUi.Endpoint")+" {{idx}} )"
-            }
-        },
-        sandbox_endpoints: {
-            title: i18n.t("endpointUi.Sandbox Endpoint"),
-            type: 'endpoint'
-        },
-        "sandbox_failovers": {
-            "title": i18n.t("endpointUi.Sandbox Fail-over Endpoints"),
-            "type": "array",
-            "items": {
-                "type": "endpoint",
-                "title": i18n.t("endpointUi.Endpoint")+" {{idx}} )"
-            }
-        }
-    },
-    form: [
-        'production_endpoints', 'production_failovers', 'sandbox_endpoints', 'sandbox_failovers'
-    ]
-};
-
-APP.form.load_balance_endpoint = {
-    "schema": {
-        algoCombo: {
-            type: 'string',
-            title: i18n.t("endpointUi.Algorithm"),
-            enum: ['org.apache.synapse.endpoints.algorithms.RoundRobin', 'other'],
-            default: 'org.apache.synapse.endpoints.algorithms.RoundRobin'
-        },
-        algoClassName: {
-            type: 'string',
-            title: i18n.t("endpointUi.AlgorithmOther"),
-        },
-        sessionManagement: {
-            type: 'string',
-            title: i18n.t("endpointUi.Session Management"),
-            enum: [ 'http', 'soap', 'simpleClientSession']
-        },
-        sessionTimeOut: {
-            title: i18n.t("endpointUi.Session Timeout (Mills) "),
-            type: 'number'
-        },
-        "production_endpoints": {
-            "title": i18n.t("endpointUi.Production Endpoints"),
-            "type": "array",
-            "items": {
-                "type": "endpoint",
-                "title": i18n.t("endpointUi.Endpoint")+" {{idx}} )"
-            }
-        },
-        "sandbox_endpoints": {
-            "title": i18n.t("endpointUi.Sandbox Endpoints"),
-            "type": "array",
-            "items": {
-                "type": "endpoint",
-                "title": i18n.t("endpointUi.Endpoint")+" {{idx}} )"
-            }
-        }
-    },
-    form: [
-        'production_endpoints',
-        {
-            key:'algoCombo',
-            titleMap:{
-                'org.apache.synapse.endpoints.algorithms.RoundRobin' : i18n.t("endpointUi.Round-robin"),
-                "other":"Other"
+                "fieldHtmlClass": "input-xlarge validateEndpoints"
             },
-            "onChange": function (evt) {
-                if($(evt.target).val() == 'other'){
-                    $('.algo_class_field').val('');
-                    $('.algo_class_name').show('fast');
+            sandbox_endpoints: {
+                title: i18n.t("endpointUi.Sandbox Endpoint"),
+                type: 'endpoint',
+                "fieldHtmlClass": "input-xlarge validateEndpoints"
+            }
+        },
+        form: [
+            'production_endpoints', 'sandbox_endpoints'
+        ]
+    };
+
+    APP.form.address_endpoint = {
+        "schema": {
+
+            "production_endpoints": {
+                "title": i18n.t("endpointUi.Production Endpoint"),
+                "type": "endpoint"
+            },
+            sandbox_endpoints: {
+                title: i18n.t("endpointUi.Sandbox Endpoint"),
+                type: 'endpoint'
+
+            }
+        },
+        form: [{
+            key: 'production_endpoints',
+            "fieldHtmlClass": "input-xlarge validateEndpoints"
+        }, {
+            key: 'sandbox_endpoints',
+            "fieldHtmlClass": "input-xlarge validateEndpoints"
+        }]
+    };
+
+    APP.form.wsdl_endpoint = {
+        "schema": {
+
+            "production_endpoints": {
+                "title": i18n.t("endpointUi.Production WSDL"),
+                "type": "endpoint",
+                "urlType":"wsdl",
+                "fieldHtmlClass": "input-xlarge validateEndpoints"
+            },
+            'wsdlendpointService': {
+                title: i18n.t("endpointUi.Service"),
+                type: 'text'
+            },
+            'wsdlendpointPort': {
+                title: i18n.t("endpointUi.Port"),
+                type: 'text',
+                "fieldHtmlClass":"required"
+            },
+            "sandbox_endpoints": {
+                title: i18n.t("endpointUi.Sandbox WSDL"),
+                type: 'endpoint',
+                "urlType":"wsdl",
+                "fieldHtmlClass": "input-xlarge validateEndpoints"
+            }
+        },
+        form: [
+            'production_endpoints',
+            {
+                key : 'wsdlendpointService',
+                "fieldHtmlClass":"required"
+            },{
+                key:'wsdlendpointPort',
+                "fieldHtmlClass":"required"
+            }
+            , 'sandbox_endpoints'
+        ]
+    };
+
+    APP.form.failover_endpoint = {
+        "schema": {
+            "production_endpoints": {
+                "title": i18n.t("endpointUi.Production Endpoint"),
+                "type": "endpoint",
+                "fieldHtmlClass": "input-xlarge"
+            },
+            "production_failovers": {
+                "title": i18n.t("endpointUi.Production Fail-over Endpoints"),
+                "type": "array",
+                "items": {
+                    "type": "endpoint",
+                    "title": i18n.t("endpointUi.Endpoint")+" {{idx}} )"
                 }
-                else{
-                    $('.algo_class_name').hide('fast');
-                    $('.algo_class_field').val($(evt.target).val());
+            },
+            sandbox_endpoints: {
+                title: i18n.t("endpointUi.Sandbox Endpoint"),
+                type: 'endpoint'
+            },
+            "sandbox_failovers": {
+                "title": i18n.t("endpointUi.Sandbox Fail-over Endpoints"),
+                "type": "array",
+                "items": {
+                    "type": "endpoint",
+                    "title": i18n.t("endpointUi.Endpoint")+" {{idx}} )"
                 }
             }
-        },{
-            key:"algoClassName",
-            htmlClass: "hide algo_class_name",
-            "fieldHtmlClass": "required algo_class_field",
-            value:'org.apache.synapse.endpoints.algorithms.RoundRobin'
         },
-        {
-            key:'sessionManagement',
-            titleMap:{
-                'http':i18n.t("endpointUi.Transport"),
-                'soap':i18n.t("endpointUi.SOAP"),
-                'simpleClientSession':i18n.t("endpointUi.Client ID")
+        form: [
+            'production_endpoints', 'production_failovers', 'sandbox_endpoints', 'sandbox_failovers'
+        ]
+    };
+
+    APP.form.load_balance_endpoint = {
+        "schema": {
+            algoCombo: {
+                type: 'string',
+                title: i18n.t("endpointUi.Algorithm"),
+                'enum': ['org.apache.synapse.endpoints.algorithms.RoundRobin', 'other'],
+                'default': 'org.apache.synapse.endpoints.algorithms.RoundRobin'
             },
-            value:'http'
+            algoClassName: {
+                type: 'string',
+                title: i18n.t("endpointUi.AlgorithmOther")
+            },
+            sessionManagement: {
+                type: 'string',
+                title: i18n.t("endpointUi.Session Management"),
+                'enum': [ 'http', 'soap', 'simpleClientSession','none']
+            },
+            sessionTimeOut: {
+                title: i18n.t("endpointUi.Session Timeout (Mills) "),
+                type: 'number'
+            },
+            failOver: {
+                title: i18n.t("failOver.title"),
+                'enum': [ 'True', 'False']
+            },
+            "production_endpoints": {
+                "title": i18n.t("endpointUi.Production Endpoints"),
+                "type": "array",
+                "items": {
+                    "type": "endpoint",
+                    "title": i18n.t("endpointUi.Endpoint")+" {{idx}} )"
+                }
+            },
+            "sandbox_endpoints": {
+                "title": i18n.t("endpointUi.Sandbox Endpoints"),
+                "type": "array",
+                "items": {
+                    "type": "endpoint",
+                    "title": i18n.t("endpointUi.Endpoint")+" {{idx}} )"
+                }
+            }
         },
-        {
-            key:'sessionTimeOut'
-        },
-        'sandbox_endpoints'
-    ]
-};
+        form: [
+            'production_endpoints',
+            {
+                key:'algoCombo',
+                titleMap:{
+                    'org.apache.synapse.endpoints.algorithms.RoundRobin' : i18n.t("endpointUi.Round-robin"),
+                    "other":"Other"
+                },
+                "onChange": function (evt) {
+                    if($(evt.target).val() == 'other'){
+                        $('.algo_class_field').val('');
+                        $('.algo_class_name').show('fast');
+                    }
+                    else{
+                        $('.algo_class_name').hide('fast');
+                        $('.algo_class_field').val($(evt.target).val());
+                    }
+                }
+            }
+			,{
+		            key:"failOver",
+		            value:'False'
+		        }
+			,{
+                key:"algoClassName",
+                htmlClass: "hide algo_class_name",
+                "fieldHtmlClass": "required algo_class_field",
+                value:'org.apache.synapse.endpoints.algorithms.RoundRobin'
+            },
+            {
+                key:'sessionManagement',
+                titleMap:{
+                    'http':i18n.t("endpointUi.Transport"),
+                    'soap':i18n.t("endpointUi.SOAP"),
+                    'simpleClientSession':i18n.t("endpointUi.Client ID"),
+		    		'none':i18n.t("endpointUi.none"),
+                },
+                value:'http'
+            },
+            {
+                key:'sessionTimeOut'
+            },
+            'sandbox_endpoints'
+        ]
+    };
 
 // this will convert the config in to json form value
-APP.endpointConfig2JsonForm = function(config){
+    APP.endpointConfig2JsonForm = function(config){
 
-    var value = jQuery.extend({}, config);
-    delete value.production_endpoints;
-    delete value.sandbox_endpoints;
+        var value = jQuery.extend({}, config);
+        delete value.production_endpoints;
+        delete value.sandbox_endpoints;
 
-    if(config.production_endpoints)
-    if( config.production_endpoints instanceof Array){
-        value.production_endpoints = [];
-        for (var i = 0; i < config.production_endpoints.length; i++) {
-            value.production_endpoints[i] = config.production_endpoints[i].url
-        }
-    }
-    else{
-        value.production_endpoints = config.production_endpoints.url;
-    }
+        if(config.production_endpoints)
+            if( config.production_endpoints instanceof Array){
+                value.production_endpoints = [];
+                for (var i = 0; i < config.production_endpoints.length; i++) {
+                    value.production_endpoints[i] = config.production_endpoints[i].url
+                }
+            }
+            else{
+                value.production_endpoints = config.production_endpoints.url;
+            }
 
-    if(config.sandbox_endpoints)
-    if(config.sandbox_endpoints instanceof Array){
-        value.sandbox_endpoints = [];
-        for (var i = 0; i < config.sandbox_endpoints.length; i++) {
-            value.sandbox_endpoints[i] = config.sandbox_endpoints[i].url
-        }
-    }
-    else{
-        value.sandbox_endpoints = APP.endpoint_config.sandbox_endpoints.url;
-    }
+        if(config.sandbox_endpoints)
+            if(config.sandbox_endpoints instanceof Array){
+                value.sandbox_endpoints = [];
+                for (var i = 0; i < config.sandbox_endpoints.length; i++) {
+                    value.sandbox_endpoints[i] = config.sandbox_endpoints[i].url
+                }
+            }
+            else{
+                value.sandbox_endpoints = APP.endpoint_config.sandbox_endpoints.url;
+            }
 
-    if(config.production_failovers)
-    if( config.production_failovers != undefined){
-        value.production_failovers = [];
-        for (var i = 0; i < config.production_failovers.length; i++) {
-            value.production_failovers[i] = config.production_failovers[i].url
-        }
-    }
+        if(config.production_failovers)
+            if( config.production_failovers != undefined){
+                value.production_failovers = [];
+                for (var i = 0; i < config.production_failovers.length; i++) {
+                    value.production_failovers[i] = config.production_failovers[i].url
+                }
+            }
 
-    if(config.sandbox_failovers)
-    if(config.sandbox_failovers != undefined){
-        value.sandbox_failovers = [];
-        for (var i = 0; i < config.sandbox_failovers.length; i++) {
-            value.sandbox_failovers[i] = config.sandbox_failovers[i].url
-        }
-    }
+        if(config.sandbox_failovers)
+            if(config.sandbox_failovers != undefined){
+                value.sandbox_failovers = [];
+                for (var i = 0; i < config.sandbox_failovers.length; i++) {
+                    value.sandbox_failovers[i] = config.sandbox_failovers[i].url
+                }
+            }
 
-    return value;
-}
-
-APP.populateAdvanceData = function(config){
-    if(config.production_endpoints)
-    if( config.production_endpoints instanceof Array){
-        for (var i = 0; i < config.production_endpoints.length; i++) {
-            $(".advance_endpoint_config[field-name='production_endpoints["+i+"]']").attr('ep-config-data',JSON.stringify( config.production_endpoints[i].config ));
-        }
-    }
-    else{
-            $(".advance_endpoint_config[field-name='production_endpoints']").attr('ep-config-data',JSON.stringify( config.production_endpoints.config ));
+        return value;
     }
 
-    if(config.sandbox_endpoints)
-    if(config.sandbox_endpoints instanceof Array){
-        for (var i = 0; i < config.sandbox_endpoints.length; i++) {
-            $(".advance_endpoint_config[field-name='sandbox_endpoints["+i+"]']").attr('ep-config-data',JSON.stringify(config.sandbox_endpoints[i].config));
-        }
-    }
-    else{
-            $(".advance_endpoint_config[field-name='sandbox_endpoints']").attr('ep-config-data',JSON.stringify(config.sandbox_endpoints.config));
-    }
+    APP.populateAdvanceData = function(config){
+        if(config.production_endpoints)
+            if( config.production_endpoints instanceof Array){
+                for (var i = 0; i < config.production_endpoints.length; i++) {
+                    $(".advance_endpoint_config[field-name='production_endpoints["+i+"]']").attr('ep-config-data',JSON.stringify( config.production_endpoints[i].config ));
+                }
+            }
+            else{
+                $(".advance_endpoint_config[field-name='production_endpoints']").attr('ep-config-data',JSON.stringify( config.production_endpoints.config ));
+            }
 
-    if(config.production_failovers)
-    if( config.production_failovers instanceof Array){
-        for (var i = 0; i < config.production_failovers.length; i++) {
-            $(".advance_endpoint_config[field-name='production_failovers["+i+"]']").attr('ep-config-data',JSON.stringify( config.production_failovers[i].config ));
-        }
-    }
+        if(config.sandbox_endpoints)
+            if(config.sandbox_endpoints instanceof Array){
+                for (var i = 0; i < config.sandbox_endpoints.length; i++) {
+                    $(".advance_endpoint_config[field-name='sandbox_endpoints["+i+"]']").attr('ep-config-data',JSON.stringify(config.sandbox_endpoints[i].config));
+                }
+            }
+            else{
+                $(".advance_endpoint_config[field-name='sandbox_endpoints']").attr('ep-config-data',JSON.stringify(config.sandbox_endpoints.config));
+            }
 
-    if(config.sandbox_failovers)
-    if(config.sandbox_failovers instanceof Array){
-        for (var i = 0; i < config.sandbox_failovers.length; i++) {
-            $(".advance_endpoint_config[field-name='sandbox_failovers["+i+"]']").attr('ep-config-data',JSON.stringify(config.sandbox_failovers[i].config));
-        }
+        if(config.production_failovers)
+            if( config.production_failovers instanceof Array){
+                for (var i = 0; i < config.production_failovers.length; i++) {
+                    $(".advance_endpoint_config[field-name='production_failovers["+i+"]']").attr('ep-config-data',JSON.stringify( config.production_failovers[i].config ));
+                }
+            }
+
+        if(config.sandbox_failovers)
+            if(config.sandbox_failovers instanceof Array){
+                for (var i = 0; i < config.sandbox_failovers.length; i++) {
+                    $(".advance_endpoint_config[field-name='sandbox_failovers["+i+"]']").attr('ep-config-data',JSON.stringify(config.sandbox_failovers[i].config));
+                }
+            }
     }
-}
 
     if($('#endpoint_config').val() != undefined && $('#endpoint_config').val()!=''){
         APP.endpoint_config = JSON.parse($('#endpoint_config').val());
@@ -506,13 +526,7 @@ APP.populateAdvanceData = function(config){
 
     });
 
-    //this can go to main js
-    $('a.help_popup').popover({
-        html : true,
-        content: function() {
-          return $('#'+$(this).attr('help_data')).html();
-        }
-    });
+
 
     APP.form.advance_endpoint_config.onSubmit = function (errors, values) {
         if (errors) {
@@ -534,37 +548,37 @@ APP.populateAdvanceData = function(config){
     });
 
     // when the add api or
-    $('#addNewAPIButton , #updateButton').bind('click',
+    $('#addNewAPIButton , #updateButton , .manageSaveButton').bind('click',
         function() {
             var ec = APP.ep_form.getValues();
             ec.endpoint_type = $('#endpoint_type').val();
             $('.advance_endpoint_config').each(function(index, el){
-                 var ep_config = jQuery.parseJSON($(el).attr('ep-config-data'));
-                 var name = $(el).attr('field-name');
-                 var field = name.replace(/\[([0-9]*)\]$/, '');
-                 var value_index = name.replace(/([a-zA-Z0-9_]*)/, '').replace('[','').replace(']','');
-                 if(value_index == ''){
-                     if(ec[field] != undefined && ec[field] !="")
-                         ec[field] = { url: ec[field] , config: ep_config };
-                     else
-                         ec[field] = undefined;
-                 }
-                 else{
-                     if(ec[field][value_index] != undefined && ec[field][value_index] !="")
-                         ec[field][value_index] = { url: ec[field][value_index] , config: ep_config };
-                     else{
-                         ec[field].splice(value_index,1);
-                     }
-                 }
-                 return true;
+                var ep_config = jQuery.parseJSON($(el).attr('ep-config-data'));
+                var name = $(el).attr('field-name');
+                var field = name.replace(/\[([0-9]*)\]$/, '');
+                var value_index = name.replace(/([a-zA-Z0-9_]*)/, '').replace('[','').replace(']','');
+                if(value_index == ''){
+                    if(ec[field] != undefined && ec[field] !="")
+                        ec[field] = { url: ec[field] , config: ep_config };
+                    else
+                        ec[field] = undefined;
+                }
+                else{
+                    if(ec[field][value_index] != undefined && ec[field][value_index] !="")
+                        ec[field][value_index] = { url: ec[field][value_index] , config: ep_config };
+                    else{
+                        ec[field].splice(value_index,1);
+                    }
+                }
+                return true;
             });
 
             //clear undefined urls
             if(ec.production_endpoints instanceof Array && ec.production_endpoints.length == 0){
-               ec.production_endpoints = undefined;
+                ec.production_endpoints = undefined;
             }
             if(ec.sandbox_endpoints instanceof Array && ec.sandbox_endpoints.length == 0){
-               ec.sandbox_endpoints = undefined;
+                ec.sandbox_endpoints = undefined;
             }
 
             $('#endpoint_config').val(JSON.stringify(ec));
@@ -576,15 +590,60 @@ APP.populateAdvanceData = function(config){
             return true;
         }
     );
+
+    APP.update_ep_config = function() {
+        var ec = APP.ep_form.getValues();
+        ec.endpoint_type = $('#endpoint_type').val();
+        $('.advance_endpoint_config').each(function(index, el){
+            var ep_config = jQuery.parseJSON($(el).attr('ep-config-data'));
+            var name = $(el).attr('field-name');
+            var field = name.replace(/\[([0-9]*)\]$/, '');
+            var value_index = name.replace(/([a-zA-Z0-9_]*)/, '').replace('[','').replace(']','');
+            if(value_index == ''){
+                if(ec[field] != undefined && ec[field] !="")
+                    ec[field] = { url: ec[field] , config: ep_config };
+                else
+                    ec[field] = undefined;
+            }
+            else{
+                if(ec[field][value_index] != undefined && ec[field][value_index] !="")
+                    ec[field][value_index] = { url: ec[field][value_index] , config: ep_config };
+                else{
+                    ec[field].splice(value_index,1);
+                }
+            }
+            return true;
+        });
+
+        //clear undefined urls
+        if(ec.production_endpoints instanceof Array && ec.production_endpoints.length == 0){
+            ec.production_endpoints = undefined;
+        }
+        if(ec.sandbox_endpoints instanceof Array && ec.sandbox_endpoints.length == 0){
+            ec.sandbox_endpoints = undefined;
+        }
+
+        $('#endpoint_config').val(JSON.stringify(ec));
+
+        if(ec.endpoint_type == 'wsdl'){
+            $('#wsdl').val(ec.production_endpoints.url);
+        }
+
+        return true;
+    };
 });
 
 
 APP.is_production_endpoint_specified = function(){
+    APP.update_ep_config();
     var endpoint_config = jQuery.parseJSON($('#endpoint_config').val());
+    console.log(endpoint_config);
     return endpoint_config.production_endpoints != undefined
 };
 
 APP.is_sandbox_endpoint_specified = function(){
+    APP.update_ep_config();
     var endpoint_config = jQuery.parseJSON($('#endpoint_config').val());
+    console.log(endpoint_config);
     return endpoint_config.sandbox_endpoints != undefined
 };

@@ -1,11 +1,12 @@
 <%
 include("/jagg/jagg.jag");
 (function () {
+    response.contentType = "application/json; charset=UTF-8";
     var mod, obj, name, version, provider, tier, applicationId, application, context, result, username,
             user = jagg.getUser(),
             msg = require("/site/conf/ui-messages.jag"),
             action = request.getParameter("action");
-    if (action == "removeSubscription") {
+    if (action == "removeSubscription" && request.getMethod() == 'POST') {
         if (!user) {
             print({
                 error:true,

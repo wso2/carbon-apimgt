@@ -43,6 +43,7 @@ public class SignupObserver extends AbstractAxis2ConfigurationContextObserver {
                 getAPIManagerConfigurationService().getAPIManagerConfiguration();
         try {
             new APIUtil().setupSelfRegistration(configuration,tenantId);
+            APIUtil.loadTenantWorkFlowExtensions(tenantId);
         } catch (APIManagementException e) {
            log.error("Error while adding role for tenant : "+tenantDomain,e);
         }

@@ -2,6 +2,7 @@
 <%
     var tagWiseMode = site.tagWiseMode;
     var tag = request.getParameter("tag");
+    var apiStatus = request.getParameter("apiStatus");
     var query = request.getParameter("query");
     if(tagWiseMode == "true"){
         if(tag ==null && query == null ){

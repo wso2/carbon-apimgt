@@ -16,7 +16,7 @@ var login = login || {};
                      } else {
                          $('#loginErrorMsg').show();
                          $('#password').val('');
-                         $('#loginErrorMsg div.theMsg').html('<strong>'+i18n.t("errorMsgs.login")+'</strong><br />' + result.message);
+                         $('#loginErrorMsg div.theMsg').text(result.message).prepend('<strong>'+i18n.t("errorMsgs.login")+'</strong><br />');
                      }
                  }, "json");
     };

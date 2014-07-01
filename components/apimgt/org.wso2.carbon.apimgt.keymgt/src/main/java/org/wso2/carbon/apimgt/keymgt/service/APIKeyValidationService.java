@@ -31,17 +31,19 @@ import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
+import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.keymgt.APIKeyMgtException;
 import org.wso2.carbon.apimgt.keymgt.util.APIKeyMgtDataHolder;
 import org.wso2.carbon.apimgt.keymgt.util.APIKeyMgtUtil;
 import org.wso2.carbon.core.AbstractAdmin;
+import org.wso2.carbon.identity.oauth.config.OAuthServerConfiguration;
+import org.wso2.carbon.identity.oauth2.IdentityOAuth2Exception;
+import org.wso2.carbon.identity.oauth2.model.AccessTokenDO;
+import org.wso2.carbon.identity.oauth2.validators.OAuth2ScopeValidator;
 
 import javax.cache.Cache;
 import javax.cache.Caching;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  *
@@ -58,8 +60,11 @@ public class APIKeyValidationService extends AbstractAdmin {
      *         authorized, tier information will be <pre>null</pre>
      * @throws APIKeyMgtException Error occurred when accessing the underlying database or registry.
      */
-    public APIKeyValidationInfoDTO validateKey(String context, String version, String accessToken,String requiredAuthenticationLevel, String clientDomain)
+    public APIKeyValidationInfoDTO validateKey(String context, String version, String accessToken,
+                                               String requiredAuthenticationLevel, String clientDomain,
+                                               String matchingResource, String httpVerb)
             throws APIKeyMgtException, APIManagementException {
+
         MessageContext axis2MessageContext = MessageContext.getCurrentMessageContext();
         Map headersMap = null;
         String activityID = null;
@@ -91,7 +96,9 @@ public class APIKeyValidationService extends AbstractAdmin {
         }
 
         Cache cache = Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER).getCache(APIConstants.KEY_CACHE_NAME);
-        String cacheKey = accessToken + ":" + context + ":" + version+":"+requiredAuthenticationLevel;
+        String cacheKey = APIUtil.getAccessTokenCacheKey(accessToken, context, version, matchingResource,
+                                                         httpVerb, requiredAuthenticationLevel);
+
         APIKeyValidationInfoDTO info;
         ApiMgtDAO apiMgtDAO = new ApiMgtDAO();
         Boolean keyCacheEnabledGateway = APIKeyMgtDataHolder.getKeyCacheEnabledKeyMgt();
@@ -138,9 +145,37 @@ public class APIKeyValidationService extends AbstractAdmin {
                 }
             }
         }
+
+        String resource = context + "/" + version + matchingResource + ":" + httpVerb;
+
         //If validation info is not cached creates fresh api key validation information object and returns it
         APIKeyValidationInfoDTO apiKeyValidationInfoDTO = apiMgtDAO.validateKey(context, version, accessToken,requiredAuthenticationLevel);
-        
+
+        OAuth2ScopeValidator scopeValidator = OAuthServerConfiguration.getInstance().getoAuth2ScopeValidator();
+
+        String[] scopes = null;
+        Set<String> scopesSet = apiKeyValidationInfoDTO.getScopes();
+        if(scopesSet != null && !scopesSet.isEmpty()){
+            scopes = scopesSet.toArray(new String[scopesSet.size()]);
+        }
+
+        AccessTokenDO accessTokenDO = new AccessTokenDO(apiKeyValidationInfoDTO.getConsumerKey(),
+                                                        apiKeyValidationInfoDTO.getEndUserName(), scopes,
+                                                        null, apiKeyValidationInfoDTO.getValidityPeriod(),
+                                                        apiKeyValidationInfoDTO.getType());
+        accessTokenDO.setAccessToken(accessToken);
+
+        try {
+            if(scopeValidator != null && !scopeValidator.validateScope(accessTokenDO, resource)){
+                apiKeyValidationInfoDTO.setAuthorized(false);
+                apiKeyValidationInfoDTO.setValidationStatus(APIConstants.KeyValidationStatus.INVALID_SCOPE);
+            }
+        } catch (IdentityOAuth2Exception e) {
+            log.error("ERROR while validating token scope " + e.getMessage());
+            apiKeyValidationInfoDTO.setAuthorized(false);
+            apiKeyValidationInfoDTO.setValidationStatus(APIConstants.KeyValidationStatus.INVALID_SCOPE);
+        }
+
         if (apiKeyValidationInfoDTO.isAuthorized()) {
         	//return if client domain is not-authorized
         	checkClientDomainAuthorized(apiKeyValidationInfoDTO, clientDomain);

@@ -4,7 +4,7 @@ var addDocumentation = function (api, doc) {
             provider = jagg.module("manager").getAPIProviderObj();
     try {
         var success = provider.addDocumentation(api.provider, api.name, api.version,
-                                                doc.name, doc.type, doc.summary, doc.sourceType, doc.sourceUrl, doc.fileContent, doc.otherTypeName);
+                                                doc.name, doc.type, doc.summary, doc.sourceType, doc.sourceUrl, doc.fileContent, doc.otherTypeName, doc.mimeType,doc.visibility);
         if (log.isDebugEnabled()) {
             log.debug("addNewDocumentation : " + doc.sourceType);
         }

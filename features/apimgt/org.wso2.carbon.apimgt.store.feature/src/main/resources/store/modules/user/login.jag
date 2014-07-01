@@ -48,7 +48,8 @@ var login = function (username, password,tenantMode) {
 	username:result.user,
         error:false,
         cookie:cookie,
-        isSuperTenant:isSuperTenant
+        isSuperTenant:isSuperTenant,
+        hasPublisherAccess:result.hasPublisherAccess
     };
 };
 

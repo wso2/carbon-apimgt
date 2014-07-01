@@ -1,0 +1,47 @@
+<?xml version="1.0"?>
+<artifactType type="application/vnd.wso2-forum-topic+xml" shortName="topic" singularLabel="Topic" pluralLabel="Topics" hasNamespace="false" iconSet="7">
+	<storagePath>/forumtopics/@{overview_location}/@{overview_id}/topic</storagePath>
+	<nameAttribute>overview_title</nameAttribute>
+	<ui>
+        <list>
+            <column name="Title">
+                <data type="path" value="overview_title" href="@{storagePath}"/>
+            </column>
+        </list>
+	</ui>
+	<content>
+    <table name="Overview">
+	<field type="text" required="true">
+            <name>ID</name>
+        </field>
+        <field type="text" required="true">
+            <name>Title</name>
+        </field>
+	<field type="text" required="true">
+            <name>Location</name>
+        </field>
+	<field type="text" required="true">
+            <name>Owner</name>
+        </field>
+	<field type="text" required="true">
+            <name>Tenant Domain</name>
+        </field>
+	<field type="date" required="true">
+            <name>Created Date</name>
+        </field>
+	<field type="text" required="false">
+            <name>Reply Count</name>
+        </field>
+        <field type="text" required="true">
+            <name>Timestamp</name>
+        </field>
+	<field type="text" required="false">
+            <name>Last Reply By</name>
+        </field>
+	<field type="text" required="false">
+            <name>Last Reply Timestamp</name>
+        </field>
+    </table>
+</content>
+
+</artifactType>

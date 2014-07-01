@@ -41,6 +41,9 @@ $('#beautify').click(function(evt) {
 }); 
 
 $(document).ready(function() {
+    $.ajaxSetup({
+      contentType: "application/x-www-form-urlencoded; charset=utf-8"
+    });
 
     $('#rest > button').click(function() {
         var url = $('#rest-url').val();

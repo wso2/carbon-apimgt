@@ -21,13 +21,19 @@ var generateAPIKey = function (api, context, application, username, keyType, cal
         };
     }
 };
-var generateApplicationKey = function (application, username, keyType, callbackUrl, accessAllowDomains, validityTime) {
+var generateApplicationKey = function (application, username, keyType, callbackUrl, accessAllowDomains, validityTime,afterFailure) {
+    afterFailure = typeof afterFailure !== 'undefined' ? afterFailure : false;
     var key,
             log = new Log(),
             store = jagg.module("manager").getAPIStoreObj();
 
     try {
-        key = store.getApplicationKey( username,application, keyType, callbackUrl, accessAllowDomains, validityTime);
+	if(afterFailure){
+        key = store.createApplicationKeys( username,application, keyType, callbackUrl, accessAllowDomains, validityTime);
+	}else{
+	key = store.getApplicationKey( username,application, keyType, callbackUrl, accessAllowDomains, validityTime);
+        
+	}
         if (log.isDebugEnabled()) {
             log.debug("generateAPIKey");
         }
@@ -43,6 +49,7 @@ var generateApplicationKey = function (application, username, keyType, callbackU
         };
     }
 };
+
 
 var refreshToken = function (username,application, keyType ,oldAccessToken, accessAllowDomains ,
 		clientId, clientSecret, validityTime) {

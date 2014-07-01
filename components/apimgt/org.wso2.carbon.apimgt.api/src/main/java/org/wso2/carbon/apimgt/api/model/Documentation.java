@@ -31,6 +31,7 @@ public class Documentation {
     private String summary;
     private DocumentSourceType sourceType;
     private String sourceUrl;
+    private DocumentVisibility visibility;
     private Date lastUpdated;
     private String filePath;
 
@@ -93,6 +94,15 @@ public class Documentation {
         this.summary = summary;
     }
 
+    public DocumentVisibility getVisibility() {
+        return visibility;
+    }
+
+    public void setVisibility(DocumentVisibility visibility) {
+        this.visibility = visibility;
+    }
+
+
     public DocumentSourceType getSourceType() {
         return sourceType;
     }
@@ -123,6 +133,15 @@ public class Documentation {
 
         private DocumentSourceType(String type) {
             this.type = type;
+        }
+    }
+    public enum DocumentVisibility {
+        OWNER_ONLY("owner_only"), PRIVATE("private"),API_LEVEL("api_level");
+
+        private String visibility;
+
+        private DocumentVisibility(String visibility) {
+            this.visibility = visibility;
         }
     }
 }

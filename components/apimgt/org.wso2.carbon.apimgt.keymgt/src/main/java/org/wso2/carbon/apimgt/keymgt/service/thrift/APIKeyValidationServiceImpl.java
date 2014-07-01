@@ -90,7 +90,7 @@ public class APIKeyValidationServiceImpl extends AbstractAdmin
 
     public APIKeyValidationInfoDTO validateKey(String context, String version, String accessToken,
                                                String sessionId,String requiredAuthenticationLevel,
-                                               String allowedDomains)
+                                               String allowedDomains, String matchingResource, String httpVerb)
             throws APIKeyMgtException, APIManagementException, TException {
         APIKeyValidationInfoDTO thriftKeyValidationInfoDTO = null;
         try {
@@ -125,7 +125,9 @@ public class APIKeyValidationServiceImpl extends AbstractAdmin
                                                                     currentSession);
 
                         org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO keyValidationInfoDTO =
-                                apiKeyValidationService.validateKey(context, version, accessToken,requiredAuthenticationLevel,allowedDomains);
+                                apiKeyValidationService.validateKey(context, version, accessToken,
+                                                                    requiredAuthenticationLevel,allowedDomains,
+                                                                    matchingResource, httpVerb);
 
                         thriftKeyValidationInfoDTO = new APIKeyValidationInfoDTO();
                         thriftKeyValidationInfoDTO.setAuthorized(keyValidationInfoDTO.isAuthorized());

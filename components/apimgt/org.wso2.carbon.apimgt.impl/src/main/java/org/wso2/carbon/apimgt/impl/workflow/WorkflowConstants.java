@@ -26,6 +26,10 @@ public class WorkflowConstants {
 
     public static final String WF_TYPE_AM_APPLICATION_CREATION = "AM_APPLICATION_CREATION";
 
+    public static final String WF_TYPE_AM_APPLICATION_REGISTRATION_PRODUCTION = "AM_APPLICATION_REGISTRATION_PRODUCTION";
+
+    public static final String WF_TYPE_AM_APPLICATION_REGISTRATION_SANDBOX = "AM_APPLICATION_REGISTRATION_SANDBOX";
+
     public static final String WF_TYPE_AM_COMMENTS_ADD = "AM_COMMENTS_ADD";
 
     public static final String API_MANAGER = "APIManager";
@@ -37,6 +41,10 @@ public class WorkflowConstants {
     public static final String PASSWORD_ = "password";
 
     public static final String APPLICATION_CREATION = "ApplicationCreation";
+
+    public static final String PRODUCTION_APPLICATION_REGISTRATION = "ProductionApplicationRegistration";
+
+    public static final String SANDBOX_APPLICATION_REGISTRATION = "SandboxApplicationRegistration";
 
     public static final String USER_SIGN_UP = "UserSignUp";
 

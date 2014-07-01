@@ -3,7 +3,7 @@
     <%
         var i, tag, tags = outputs.tags, length = tags.length;
         var urlPrefix;
-        var tenant=request.getParameter("tenant");
+        var tenant=request_tenant;
         if(tenant!=null) {urlPrefix="&tenant="+tenant;}else{urlPrefix='';}
     %>
 <%
@@ -70,7 +70,7 @@ jagg.includeBlock("search/api-search", {tag:tabToSelect});
 
       $(document).ready(function(){
         <% if(request.getParameter("selected-tab") != null){%>
-            var activeTab = '#'+'<%=request.getParameter("selected-tab")%>';
+            var activeTab = '#'+'<%= encode.forJavaScript(request.getParameter("selected-tab"))%>';
             $('#topTabContent div.tabs').hide();
             $(activeTab).show();
             $('li',$(activeTab+'_tab').parent()).removeClass('active');

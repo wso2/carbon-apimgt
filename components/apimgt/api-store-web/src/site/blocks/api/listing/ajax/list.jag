@@ -1,7 +1,8 @@
 <%
 include("/jagg/jagg.jag");
 (function () {
-    var mod, obj, tenant, result, response,username,
+    response.contentType = "application/json; charset=UTF-8";
+    var mod, obj, tenant, result, username,
             user = jagg.getUser(),
             msg = require("/site/conf/ui-messages.jag"),
             action = request.getParameter("action");
@@ -67,7 +68,7 @@ include("/jagg/jagg.jag");
               var start=request.getParameter("start");
               var end=request.getParameter("end");
               mod = jagg.module("api");
-              response = mod.getAllPaginatedPublishedAPIs(tenant,start,end);
+              result = mod.getAllPaginatedPublishedAPIs(tenant,start,end);
 
               if (result.error) {
                   obj = {
@@ -76,10 +77,9 @@ include("/jagg/jagg.jag");
                   };
               } else {
                   obj = {
-                      error:false,
-                      apis:response.result.apis
-
-                  }
+			error : false,
+			apis : result.result.apis
+		  }
               }
               print(obj);
           }

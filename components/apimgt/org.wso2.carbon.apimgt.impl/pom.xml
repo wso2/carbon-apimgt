@@ -15,14 +15,14 @@
         <groupId>org.wso2.carbon</groupId>
         <artifactId>apimgt</artifactId>
         <version>4.3.0-SNAPSHOT</version>
-	<relativePath>../pom.xml</relativePath>
+        <relativePath>../pom.xml</relativePath>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
     <artifactId>org.wso2.carbon.apimgt.impl</artifactId>
     <version>4.3.0-SNAPSHOT</version>
     <packaging>bundle</packaging>
-    <name>WSO2 Carbon - API Management Implementation </name>
+    <name>WSO2 Carbon - API Management Implementation</name>
     <repositories>
         <repository>
             <id>wso2-nexus</id>
@@ -35,31 +35,42 @@
             </releases>
         </repository>
     </repositories>
-  <dependencies>
-    	<dependency>
+    <dependencies>
+        <dependency>
+            <groupId>org.json.wso2</groupId>
+            <artifactId>json</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.user.core</artifactId>
-            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.governance.api</artifactId>
-            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.carbon</groupId>
+            <artifactId>org.wso2.carbon.apimgt.keymgt.stub</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.carbon</groupId>
+            <artifactId>org.wso2.carbon.apimgt.keymgt.client</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>httpmime</artifactId>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.registry.ws.client</artifactId>
-            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.core</artifactId>
-			<version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.apimgt.api</artifactId>
-            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
@@ -72,7 +83,6 @@
         <dependency>
             <groupId>com.h2database.wso2</groupId>
             <artifactId>h2-database-engine</artifactId>
-            <version>${orbit.version.h2.engine}</version>
             <exclusions>
                 <exclusion>
                     <groupId>org.eclipse.osgi</groupId>
@@ -87,42 +97,34 @@
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.rest.api.stub</artifactId>
-           <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.apimgt.handlers.security.stub</artifactId>
-            <version>${project.version}</version>
         </dependency>
         <dependency>
-             <groupId>org.wso2.carbon</groupId>
-             <artifactId>org.wso2.carbon.user.mgt.stub</artifactId>
-             <version>${project.version}</version>
+            <groupId>org.wso2.carbon</groupId>
+            <artifactId>org.wso2.carbon.user.mgt.stub</artifactId>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.um.ws.api</artifactId>
-            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.utils</artifactId>
-           <version>${project.version}</version>
         </dependency>
-	<dependency>
+        <dependency>
             <groupId>com.google.code.gson</groupId>
             <artifactId>gson</artifactId>
-            <version>2.1</version>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.mediation.dependency.mgt</artifactId>
-           <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.mediation.registry</artifactId>
-            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
@@ -131,27 +133,22 @@
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.mediation.initializer</artifactId>
-			<version>${project.version}</version>
         </dependency>
-		<dependency>
+        <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.sequences.stub</artifactId>
-            <version>${project.version}</version>
         </dependency>
-		<dependency>
-			<groupId>org.wso2.carbon</groupId>
-			<artifactId>org.wso2.carbon.mediation.security.stub</artifactId>
-			<version>${project.version}</version>
-		</dependency>
         <dependency>
-          <groupId>org.wso2.carbon</groupId>
-          <artifactId>org.wso2.carbon.registry.indexing</artifactId>
-          <version>${project.version}</version>
+            <groupId>org.wso2.carbon</groupId>
+            <artifactId>org.wso2.carbon.mediation.security.stub</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.carbon</groupId>
+            <artifactId>org.wso2.carbon.registry.indexing</artifactId>
         </dependency>
         <dependency>
             <groupId>com.googlecode.json-simple.wso2</groupId>
             <artifactId>json-simple</artifactId>
-            <version>1.1.wso2v1</version>
         </dependency>
     </dependencies>
     <build>
@@ -226,8 +223,18 @@
                             org.wso2.carbon.apimgt.impl.internal
                         </Private-Package>
                         <Export-Package>
-                            !org.wso2.carbon.apimgt.impl.internal.APIManagerComponent,
-                            org.wso2.carbon.apimgt.impl.*,
+                            org.wso2.carbon.apimgt.impl.*;version="${carbon.platform.package.export.version}",
+                            <!--org.wso2.carbon.apimgt.impl.clients.*,-->
+                            <!--org.wso2.carbon.apimgt.impl.dao.*,-->
+                            <!--org.wso2.carbon.apimgt.impl.dto.*,-->
+                            <!--org.wso2.carbon.apimgt.impl.handlers.*,-->
+                            <!--org.wso2.carbon.apimgt.impl.listners.*,-->
+                            <!--org.wso2.carbon.apimgt.impl.observers.*,-->
+                            <!--org.wso2.carbon.apimgt.impl.publishers.*,-->
+                            <!--org.wso2.carbon.apimgt.impl.template.*,-->
+                            <!--org.wso2.carbon.apimgt.impl.token.*,-->
+                            <!--org.wso2.carbon.apimgt.impl.utils.*,-->
+                            <!--org.wso2.carbon.apimgt.impl.workflow.*,-->
                         </Export-Package>
                         <Import-Package>
                             org.wso2.carbon.governance.api.*,
@@ -247,15 +254,15 @@
             <plugin>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>maven-scr-plugin</artifactId>
-                <version>1.0.10</version>
-                <executions>
-                    <execution>
-                        <id>generate-scr-scrdescriptor</id>
-                        <goals>
-                            <goal>scr</goal>
-                        </goals>
-                    </execution>
-                </executions>
+                <!--<version>1.0.10</version>-->
+                <!--<executions>-->
+                <!--<execution>-->
+                <!--<id>generate-scr-scrdescriptor</id>-->
+                <!--<goals>-->
+                <!--<goal>scr</goal>-->
+                <!--</goals>-->
+                <!--</execution>-->
+                <!--</executions>-->
             </plugin>
 
 

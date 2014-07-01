@@ -8,7 +8,10 @@
 
     <!-- This parameter is used when adding api management capability to other products like GReg, AS, DSS etc.-->
     <GatewayType>Synapse</GatewayType>
-
+	
+  <!-- This parameter is used to enable the securevault support when try to publish endpoint secured APIs. Values should be "true" or "false".
+  By default secure vault is disabled.-->
+	<EnableSecureVault>false</EnableSecureVault>
     <!--
         Database configuration used by API publisher, API store and API key manager.
         When these components are deployed separately, each of them should have
@@ -45,7 +48,7 @@
         <!--
             Server URL of the Authentication service
         -->
-        <ServerURL>https://${carbon.local.ip}:${mgt.transport.https.port}/services/</ServerURL>
+        <ServerURL>https://${carbon.local.ip}:${mgt.transport.https.port}${carbon.context}/services/</ServerURL>
         <!--
             Admin username for the Authentication manager.
         -->
@@ -97,6 +100,18 @@
 	<!--RemoveOAuthHeadersFromOutMessage>true</RemoveOAuthHeadersFromOutMessage-->
     </APIConsumerAuthentication>
 
+    <!-- Primary/secondary login configuration for APIstore. If user likes to keep two login attributes in a distributed setup, to login the APIstore,
+		he should configure this section. Primary login doesn't have a claimUri associated with it. But secondary login, which is a claim attribute,
+		is associated with a claimuri.-->
+    <!-- <LoginConfig>
+            <UserIdLogin  primary="true">
+        <ClaimUri></ClaimUri>
+        </UserIdLogin>
+        <EmailLogin  primary="false">
+            <ClaimUri>http://wso2.org/claims/emailaddress</ClaimUri>
+        </EmailLogin>
+    </LoginConfig>-->
+
     <!--
         Credentials for the API gateway admin server. This configuration
         is mainly used by the API publisher and store to connect to the API gateway and
@@ -114,7 +129,7 @@
 			<!--
             			Server URL of the API gateway.
         		-->
-                        <ServerURL>https://${carbon.local.ip}:${mgt.transport.https.port}/services/</ServerURL>
+                        <ServerURL>https://${carbon.local.ip}:${mgt.transport.https.port}${carbon.context}/services/</ServerURL>
 			<!--
             			Admin username for the API gateway.
         		-->
@@ -131,9 +146,14 @@
         </Environments>
         
         <!--
-            Enable/Disable caching at gateway node.
+            Enable/Disable token caching at gateway node.
         -->
         <EnableGatewayKeyCache>true</EnableGatewayKeyCache>
+
+        <!--
+            Enable/Disable API resource caching at gateway node.
+        -->
+        <EnableGatewayResourceCache>true</EnableGatewayResourceCache>
 
 	<!-- Header name can be configurable, as you preferred. When API invocation is restricted to access only for authorized domains, 
 		client request should send his domain, as the value of this header. 
@@ -197,24 +217,6 @@
         -->
         <!--DataSourceName>jdbc/WSO2AM_STATS_DB</DataSourceName-->
 
-	<!--
-            Google Analytics publisher configuration. Create Google Analytics account and obtain a
-            Tracking ID. 
-	    Reffer http://support.google.com/analytics/bin/answer.py?hl=en&answer=1009694
-        -->
-        <GoogleAnalyticsTracking>
-             <!--
-                 Enable/Disable Google Analytics Tracking
-             -->
-             <Enabled>false</Enabled>
-
-             <!--
-                Google Analytics Tracking ID    
-             -->
-             <TrackingID>UA-XXXXXXXX-X</TrackingID>
-
-       </GoogleAnalyticsTracking>
-
     </APIUsageTracking>
 
     <!--
@@ -226,7 +228,7 @@
         <!--
             Server URL of the API key manager
         -->
-        <ServerURL>https://${carbon.local.ip}:${mgt.transport.https.port}/services/</ServerURL>
+        <ServerURL>https://${carbon.local.ip}:${mgt.transport.https.port}${carbon.context}/services/</ServerURL>
 
         <!--
             Admin username for API key manager.
@@ -275,7 +277,14 @@
        <!-- <RemoveUserNameToJWTForApplicationToken>true</RemoveUserNameToJWTForApplicationToken>-->
 
 	<!-- Name of the token API -->
-	<TokenEndPointName>oauth2/token</TokenEndPointName>
+	<TokenEndPointName>/oauth2/token</TokenEndPointName>
+
+	<!-- This the API URL for revoke API. When we revoke tokens revoke requests should go through this 
+             API deployed in API gateway. Then it will do cache invalidations related to revoked tokens.
+	     In distributed deployment we should configure this property in key manager node by pointing 
+	     gateway https url. Also please note that we should point gateway revoke service to key manager
+	-->
+	<RevokeAPIURL>https://${carbon.local.ip}:${https.nio.port}/revoke</RevokeAPIURL>
 	
 	<!-- Whether to encrypt tokens when storing in the Database
 	Note: If changing this value to true, change the value of <TokenPersistenceProcessor> to
@@ -312,22 +321,16 @@
             permission.
         -->
         <SubscriberRoleName>subscriber</SubscriberRoleName>
-
-        <!--
-            This parameter specifies whether the subscriber role specified above
-            should be created in the local user store or not. This only makes sense
-            when the API subscribers are authenticated against the local user store.
-            That is the local Carbon server is acting as the AuthManager. If a remote
-            Carbon server is acting as the AuthManager, this parameter should be turned
-            off for the local server.
-        -->
-        <CreateSubscriberRole>true</CreateSubscriberRole>
     </SelfSignUp>
 
     <!--
         Use this configuration to control the number of APIs shown in API store.
     -->
     <APIStore>
+	<!--This property is used to indicate how we do user name comparision for token generation https://wso2.org/jira/browse/APIMANAGER-2225-->
+	<CompareCaseInsensitively>true</CompareCaseInsensitively>
+        <DisplayURL>false</DisplayURL>
+        <URL>https://${carbon.local.ip}:${mgt.transport.https.port}/store</URL>
         <!--
             This parameter specifies whether to display multiple versions of same
             API or only showing the latest version of an API.
@@ -355,8 +358,28 @@
 
         -->
 		<DisplayRatings>true</DisplayRatings>
+	      
+              <!--
+                This parameter specifies the expiration time of the TagCache. TagCache will 
+                only be created when this element is uncommented. When the specified
+                time duration gets elapsed ,tag cache will get re-generated.
+               -->
+         <!--TagCacheDuration>120000</TagCacheDuration-->
+
 
     </APIStore>
+
+    <APIPublisher>
+        <DisplayURL>false</DisplayURL>
+        <URL>https://${carbon.local.ip}:${mgt.transport.https.port}/publisher</URL>
+        <!--
+               This parameter specifies enabling the capability of setting API documentation level granular visibility levels.
+               By default any document associate with an API will have the same permissions set as the API.With enabling below
+               property,it will show two additional permission levels as visible only to all registered users in a particular
+               domain or only visible to API doc creator
+      -->
+        <!--EnableAPIDocVisibilityLevels>true</EnableAPIDocVisibilityLevels-->
+    </APIPublisher>
 
     <!--
         Status observers can be registered against the API Publisher to listen for
@@ -367,22 +390,7 @@
     <!--StatusObservers>
         <Observer>org.wso2.carbon.apimgt.impl.observers.SimpleLoggingObserver</Observer>
     </StatusObservers-->
-
-    <!--
-        There are set of plugguble extensions for some operations related to API MAnager
-	operations such as self sign in, subscriptions and etc. For those operatios we can
-	trigger external work flow of business process server. Here are the configurations
-	related to those operations
-    -->
-    <WorkFlowExtensions>
-      <SelfSignIn>
-         <ProcessEnabled>false</ProcessEnabled>
-         <ServerURL>http://test.com/service</ServerURL>
-         <UserName>admin</UserName>
-         <Password>admin</Password>
-      </SelfSignIn>
-    </WorkFlowExtensions>
-
+    
     <!-- 
 	Use this configuration Create APIs at the Server startup
     -->
@@ -433,37 +441,7 @@
 		
     </StartupAPIPublisher>
 
-    <!--
-   Below are set of external APIStores which can be configured to publish an API from current running
-   APIM server.-->
-
-    <!--<ExternalAPIStores>-->
-
-	<!--Configuration to set the store URL of the current running APIM deployment. 
-	APIs published to external stores will be redirected to this URL-->
-	
-	<!--<StoreURL>http://localhost:9763/store</StoreURL>
-
-        <ExternalAPIStore id="Store1" type="wso2">
-            <DisplayName>Store1</DisplayName>
-            <Endpoint>http://localhost:9764/store</Endpoint>
-            <Username>xxxx</Username>
-            <Password>xxxx</Password>
-        </ExternalAPIStore>
-
-        <ExternalAPIStore id="ProWeb" type="proWeb">
-            <Name>ProgrammableWeb</Name>
-            <Endpoint>xxxxx</Endpoint>
-        </ExternalAPIStore>
-
-        <ExternalAPIStore id="Store2" type="wso2">
-            <DisplayName>Store2</DisplayName>
-            <Endpoint>http://localhost:9764/store</Endpoint>
-            <Username>xxxx</Username>
-            <Password>xxxx</Password>
-        </ExternalAPIStore>
-
-    </ExternalAPIStores> -->
+    
 
     <!--
 	When an API is invoked, a list of handlers get engaged to its execution flow. This
@@ -472,5 +450,22 @@
 	Defaults to: bottom
     -->	
     <!--ExtensionHandlerPosition>top|bottom</ExtensionHandlerPosition-->
+
+
+    <!--Configuration to enable/disable sending CORS headers in the Gateway response
+        and define the Access-Control-Allow-Origin header value.-->
+    <CORSConfiguration>
+        
+	<!--Configuration to enable/disable sending CORS headers from the Gateway-->
+	<Enabled>true</Enabled>
+
+	<!--The value of the Access-Control-Allow-Origin header. Default values are 
+	    API Store addresses, which is needed for swagger to function.-->
+	<Access-Control-Allow-Origin>https://localhost:9443,http://localhost:9763</Access-Control-Allow-Origin>
+
+	<!--Configure Access-Control-Allow-Headers-->
+	<Access-Control-Allow-Headers>authorization,Access-Control-Allow-Origin,Content-Type</Access-Control-Allow-Headers>
+	
+    </CORSConfiguration>
 </APIManager>
 

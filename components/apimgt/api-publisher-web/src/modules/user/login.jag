@@ -1,6 +1,6 @@
 <%
 var login = function (username, password,tenantMode) {
-    var result, isSuperTenant, message,  
+    var result, isSuperTenant, message,showStoreURL,
             log = new Log(),
             manager = jagg.module("manager"),
             provider = manager.getAPIProviderObj();
@@ -33,6 +33,7 @@ var login = function (username, password,tenantMode) {
     }else{
     cookie = result.sessionId;
     isSuperTenant = result.isSuperTenant;
+    showStoreURL=result.showStoreURL;
     cookie = cookie.split(';')[0];
     jagg.setUser({username:result.user, isSuperTenant:isSuperTenant, cookie:cookie});
 
@@ -43,6 +44,7 @@ var login = function (username, password,tenantMode) {
     jagg.setCreatePermitted(isCreatePermitted);
     jagg.setPublishPermitted(isPublishPermitted);
     jagg.setManageTierPermitted(isManageTierPermitted);
+    jagg.setShowStoreURL(showStoreURL);
 
     return {
         error:false,
@@ -58,7 +60,7 @@ var loginWithSAMLToken = function (token) {
     var result,
             log = new Log(),
             manager = jagg.module("manager");
-            
+
 
 
     var encodedToken = ssoRelyingParty.xmlEncode(token);

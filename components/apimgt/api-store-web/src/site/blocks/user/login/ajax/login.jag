@@ -2,11 +2,15 @@
 include("/jagg/jagg.jag");
 
 (function () {
+    response.contentType = "application/json; charset=UTF-8";
+    response.addHeader('Pragma', 'No-cache');
+    response.addHeader('Cache-control', 'no-cache');
+
     var mod, obj, result, username,
             action = request.getParameter("action"),
             site = require("/site/conf/site.json"),
             msg = require("/site/conf/ui-messages.jag");
-    if (action === "login") {
+    if (action === "login" && request.getMethod() == 'POST') {
         mod = jagg.module("user");
         username = request.getParameter("username");
 
@@ -38,16 +42,16 @@ include("/jagg/jagg.jag");
         });
     } else if (action === "getAPIPublisherURL") {
              mod = jagg.module("manager");
-             var response=mod.getAPIPublisherURL();
-             if (response.error) {
+             var resultVal=mod.getAPIPublisherURL();
+             if (resultVal.error) {
                 obj = {
                       error:true,
-                      message:response.message
+                      message:resultVal.message
                       };
              } else {
                       obj = {
                       error:false,
-                      url:response.url
+                      url:resultVal.url
                       }
                       }
     print(obj);

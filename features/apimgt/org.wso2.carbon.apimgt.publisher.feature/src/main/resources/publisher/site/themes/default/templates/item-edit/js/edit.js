@@ -1,3 +1,6 @@
+
+var TIERS = [];
+
 $(document).ready(function() {
     //js code to hide form options 
     //@todo: can change to a jquery plugin and move to base js
@@ -33,6 +36,14 @@ $(document).ready(function() {
 
     });
 
+    $('.default_version_check').change(function(){
+        if($(this).is(":checked")){
+            $(default_version_checked).val($(this).val());
+        }else{
+            $(default_version_checked).val("");
+        }
+    });
+
     $('.transports_check_http').change(function(){
         if($(this).is(":checked")){
             $(http_checked).val($(this).val());
@@ -51,15 +62,21 @@ $(document).ready(function() {
 
     $('.storeCheck').change(function () {
         var checkedStores = $('#externalAPIStores').val();
+        if (checkedStores == "REMOVEALL") {
+            checkedStores = "";
+        }
         if ($(this).is(":checked")) {
             $('#externalAPIStores').val(checkedStores + "::" + $(this).val());
         } else {
             var storeValsWithoutUnchecked = "";
             var checkStoresArray = checkedStores.split("::");
             for (var k = 0; k < checkStoresArray.length; k++) {
-                if (!checkStoresArray[k] == $(this).val()) {
+                if (!(checkStoresArray[k] == $(this).val())) {
                     storeValsWithoutUnchecked += checkStoresArray[k] + "::";
                 }
+            }
+            if (storeValsWithoutUnchecked == "") {
+                storeValsWithoutUnchecked = "REMOVEALL";
             }
             $('#externalAPIStores').val(storeValsWithoutUnchecked);
         }
@@ -99,6 +116,7 @@ $(document).ready(function() {
 
     loadInSequences();
     loadOutSequences();
+    loadFaultSequences();
 
     $('.js_hidden_section_title').click(function(){
            var $next = $(this).next();
@@ -131,6 +149,10 @@ function loadTiers() {
                     $('.deleteThrottlingTier',row).append($('<option value="'+result.tiers[k].tierName+'" title="'+result.tiers[k].tierDescription+'">'+result.tiers[k].tierDisplayName+'</option>'));
                     $('.optionsThrottlingTier',row).append($('<option value="'+result.tiers[k].tierName+'" title="'+result.tiers[k].tierDescription+'">'+result.tiers[k].tierDisplayName+'</option>'));
                 }
+
+                TIERS = result.tiers;
+                $("#resource_view").trigger("draw");
+
                 for (var i = 0; i < result.tiers.length; i++) {
                     arr.push(result.tiers[i].tierName);
                 }
@@ -384,7 +406,7 @@ function getContextValue() {
 }
 function showHideRoles(){
     var visibility = $('#visibility').find(":selected").val();
-    if (visibility == "public" ){
+    if (visibility == "public" || visibility == "private"){
 		$('#rolesDiv').hide();
 	} else{
 		$('#rolesDiv').show();
@@ -429,6 +451,7 @@ function toggleSequence(checkbox){
 		$(checkbox).parent().next().show();
 		loadInSequences();
 		loadOutSequences();
+		loadFaultSequences();
 	}else{
 		$(checkbox).parent().next().hide();
 	}
@@ -520,6 +543,51 @@ function loadOutSequences() {
 						}
 					}
 					outSequencesLoaded = true;
+				}
+			}, "json");
+}
+
+function loadFaultSequences() {
+
+	if(faultSequencesLoaded){
+	    return;
+	}
+
+	jagg.post("/site/blocks/item-add/ajax/add.jag", {
+		action : "getCustomFaultSequences"
+	},
+			function(result) {
+				if (!result.error) {
+					var arr = [];
+					if (result.sequences.length == 0) {
+						var msg = "No defined sequences";
+						$('<input>').
+						attr('type', 'hidden').
+						attr('name', 'faultSeq').
+						attr('id', 'faultSeq').
+						attr('value', msg).
+						appendTo('#addAPIForm');
+					}else {
+						for ( var j = 0; j < result.sequences.length; j++) {
+							arr.push(result.sequences[j]);
+						}
+						for(var i=0; i<arr.length; i++){
+                            if(result.sequences[i] == faultsequence){
+                                $('#faultSequence').append('<option value="'+result.sequences[i]+'" selected="selected">'+result.sequences[i]+'</option>');
+                            }
+                            else{
+                                $('#faultSequence').append('<option value="'+result.sequences[i]+'">'+result.sequences[i]+'</option>');
+                            }
+							$('<input>').
+							attr('type', 'hidden').
+							attr('name', 'faultSeq').
+							attr('id', 'faultSeq').
+							attr('value', result.sequences[i]).
+							appendTo('#addAPIForm');
+
+						}
+					}
+					faultSequencesLoaded = true;
 				}
 			}, "json");
 }

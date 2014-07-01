@@ -64,9 +64,11 @@ public class API {
     private String transports;
     private String inSequence;
     private String outSequence;
+    private String faultSequence;
 
     private String oldInSequence;
     private String oldOutSequence;
+    private String oldFaultSequence;
 
     private boolean advertiseOnly;
     private String apiOwner;
@@ -80,6 +82,31 @@ public class API {
     
     private String responseCache;
     private int cacheTimeout;
+    
+    private String destinationStatsEnabled;
+
+    private String implementation = "ENDPOINT";
+
+    private Set<Scope> scopes;
+
+    private boolean isDefaultVersion = false;
+    private boolean isPublishedDefaultVersion=false;
+
+    /**
+     * Contains flag indicating whether dummy backend or not
+     * @return
+     */
+    public String getImplementation() {
+        return implementation;
+    }
+
+    /**
+     * Returns flag indicating whether dummy backend or not
+     * @param implementation
+     */
+    public void setImplementation(String implementation) {
+        this.implementation = implementation;
+    }
 
     /**
      * The average rating provided by the API subscribers
@@ -476,7 +503,52 @@ public class API {
 	public void setCacheTimeout(int cacheTimeout) {
 		this.cacheTimeout = cacheTimeout;
 	}
+
+    public String getFaultSequence() {
+        return faultSequence;
+    }
+
+    public void setFaultSequence(String faultSequence) {
+        this.faultSequence = faultSequence;
+    }
+
+    public String getOldFaultSequence() {
+        return oldFaultSequence;
+    }
+
+    public void setOldFaultSequence(String oldFaultSequence) {
+        this.oldFaultSequence = oldFaultSequence;
+    }
     
-    
-    
+	public String getDestinationStatsEnabled() {
+		return destinationStatsEnabled;
+	}
+
+	public void setDestinationStatsEnabled(String destinationStatsEnabled) {
+		this.destinationStatsEnabled = destinationStatsEnabled;
+	}
+
+    public Set<Scope> getScopes() {
+        return scopes;
+    }
+
+    public void setScopes(Set<Scope> scopes) {
+        this.scopes = scopes;
+    }
+
+    public void setAsDefaultVersion(boolean value){
+        isDefaultVersion =value;
+    }
+
+    public void setAsPublishedDefaultVersion(boolean value){
+        isPublishedDefaultVersion =value;
+    }
+
+    public boolean isDefaultVersion(){
+        return isDefaultVersion;
+    }
+
+    public boolean isPublishedDefaultVersion(){
+        return isPublishedDefaultVersion;
+    }
 }

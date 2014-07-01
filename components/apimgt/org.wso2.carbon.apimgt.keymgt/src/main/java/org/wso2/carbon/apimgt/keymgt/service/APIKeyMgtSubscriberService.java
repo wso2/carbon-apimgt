@@ -49,10 +49,10 @@ import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dto.APIInfoDTO;
 import org.wso2.carbon.apimgt.impl.dto.Environment;
-import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIAuthenticationAdminClient;
 import org.wso2.carbon.apimgt.keymgt.APIKeyMgtException;
 import org.wso2.carbon.apimgt.keymgt.ApplicationKeysDTO;
+import org.wso2.carbon.apimgt.keymgt.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.keymgt.util.APIKeyMgtUtil;
 import org.wso2.carbon.core.AbstractAdmin;
 import org.wso2.carbon.identity.base.IdentityException;
@@ -61,6 +61,7 @@ import org.wso2.carbon.identity.oauth.cache.CacheKey;
 import org.wso2.carbon.identity.oauth.cache.OAuthCache;
 import org.wso2.carbon.identity.oauth.cache.OAuthCacheKey;
 import org.wso2.carbon.identity.oauth.config.OAuthServerConfiguration;
+import org.wso2.carbon.utils.CarbonUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -71,21 +72,22 @@ import java.util.Set;
  * consuming the APIs published in the API Store.
  */
 public class APIKeyMgtSubscriberService extends AbstractAdmin {
-	
-	 private static final Log log = LogFactory.getLog(APIKeyMgtSubscriberService.class);
-	 private static final String GRANT_TYPE_CLIENT_CREDENTIALS = "client_credentials";
-	 private static final String OAUTH_RESPONSE_ACCESSTOKEN = "access_token";
-	 private static final String OAUTH_RESPONSE_EXPIRY_TIME = "expires_in";
+
+    private static final Log log = LogFactory.getLog(APIKeyMgtSubscriberService.class);
+    private static final String GRANT_TYPE_CLIENT_CREDENTIALS = "client_credentials";
+    private static final String OAUTH_RESPONSE_ACCESSTOKEN = "access_token";
+    private static final String OAUTH_RESPONSE_EXPIRY_TIME = "expires_in";
 
     /**
      * Get the access token for a user per given API. Users/developers can use this access token
      * to consume the API by directly passing it as a bearer token as per the OAuth 2.0 specification.
-     * @param userId User/Developer name
+     *
+     * @param userId     User/Developer name
      * @param apiInfoDTO Information about the API to which the Access token will be issued.
      *                   Provider name, API name and the version should be provided to uniquely identify
      *                   an API.
-     * @param tokenType Type (scope) of the required access token
-     * @return  Access Token
+     * @param tokenType  Type (scope) of the required access token
+     * @return Access Token
      * @throws APIKeyMgtException Error when getting the AccessToken from the underlying token store.
      */
     public String getAccessToken(String userId, APIInfoDTO apiInfoDTO,
@@ -93,14 +95,14 @@ public class APIKeyMgtSubscriberService extends AbstractAdmin {
             APIManagementException, IdentityException {
         ApiMgtDAO apiMgtDAO = new ApiMgtDAO();
         String accessToken = apiMgtDAO.getAccessKeyForAPI(userId, applicationName, apiInfoDTO, tokenType);
-        if (accessToken == null){
+        if (accessToken == null) {
             //get the tenant id for the corresponding domain
             String tenantAwareUserId = userId;
             int tenantId = IdentityUtil.getTenantIdOFUser(userId);
 
             String[] credentials = apiMgtDAO.addOAuthConsumer(tenantAwareUserId, tenantId, applicationName, callbackUrl);
 
-            accessToken = apiMgtDAO.registerAccessToken(credentials[0],applicationName,
+            accessToken = apiMgtDAO.registerAccessToken(credentials[0], applicationName,
                     tenantAwareUserId, tenantId, apiInfoDTO, tokenType);
         }
         return accessToken;
@@ -110,14 +112,14 @@ public class APIKeyMgtSubscriberService extends AbstractAdmin {
      * Get the access token for the specified application. This token can be used as an OAuth
      * 2.0 bearer token to access any API in the given application.
      *
-     * @param userId User/Developer name
+     * @param userId          User/Developer name
      * @param applicationName Name of the application
-     * @param tokenType Type (scope) of the required access token
+     * @param tokenType       Type (scope) of the required access token
      * @return Access token
      * @throws APIKeyMgtException on error
      */
     public ApplicationKeysDTO getApplicationAccessToken(String userId, String applicationName, String tokenType,
-    		String callbackUrl, String[] allowedDomains, String validityTime)
+                                                        String callbackUrl, String[] allowedDomains, String validityTime)
             throws APIKeyMgtException, APIManagementException, IdentityException {
 
         ApiMgtDAO apiMgtDAO = new ApiMgtDAO();
@@ -127,9 +129,13 @@ public class APIKeyMgtSubscriberService extends AbstractAdmin {
             //get the tenant id for the corresponding domain
             String tenantAwareUserId = userId;
             int tenantId = IdentityUtil.getTenantIdOFUser(userId);
-            credentials = apiMgtDAO.addOAuthConsumer(tenantAwareUserId, tenantId, applicationName, callbackUrl);
-            accessToken = apiMgtDAO.registerApplicationAccessToken(credentials[0], applicationName,
-                    tenantAwareUserId, tenantId, tokenType, allowedDomains,validityTime);
+            Application application = apiMgtDAO.getApplicationByName(applicationName, userId);
+            String state = apiMgtDAO.getRegistrationApprovalState(application.getId(), tokenType);
+            if (APIConstants.AppRegistrationStatus.REGISTRATION_APPROVED.equals(state)) {
+                credentials = apiMgtDAO.addOAuthConsumer(tenantAwareUserId, tenantId, applicationName, callbackUrl);
+                accessToken = apiMgtDAO.registerApplicationAccessToken(credentials[0], application.getId(), applicationName,
+                        tenantAwareUserId, tokenType, allowedDomains, validityTime);
+            }
 
         } else if (credentials == null) {
             credentials = apiMgtDAO.getOAuthCredentials(accessToken, tokenType);
@@ -148,9 +154,10 @@ public class APIKeyMgtSubscriberService extends AbstractAdmin {
 
     /**
      * Get the list of subscribed APIs of a user
+     *
      * @param userId User/Developer name
      * @return An array of APIInfoDTO instances, each instance containing information of provider name,
-     * api name and version.
+     *         api name and version.
      * @throws APIKeyMgtException Error when getting the list of APIs from the persistence store.
      */
     public APIInfoDTO[] getSubscribedAPIsOfUser(String userId) throws APIKeyMgtException,
@@ -158,31 +165,31 @@ public class APIKeyMgtSubscriberService extends AbstractAdmin {
         ApiMgtDAO ApiMgtDAO = new ApiMgtDAO();
         return ApiMgtDAO.getSubscribedAPIsOfUser(userId);
     }
-    
-	/**
-	 * Renew the ApplicationAccesstoken, Call Token endpoint and get parameters.
-	 * Revoke old token.
-	 * 
-	 * @param tokenType
-	 * @param oldAccessToken
-	 * @param allowedDomains
-	 * @param clientId
-	 * @param clientSecret
-	 * @param validityTime
-	 * @return
-	 * @throws Exception
-	 */
 
-	public String renewAccessToken(String tokenType, String oldAccessToken,
-	                               String[] allowedDomains, String clientId, String clientSecret,
-	                               String validityTime) throws Exception {
-		String newAccessToken = null;
-		long validityPeriod = 0;
-		// create a post request to getNewAccessToken for client_credentials
-		// grant type.
-		
-		//String tokenEndpoint = OAuthServerConfiguration.getInstance().getTokenEndPoint();
-        String tokenEndpointName =  ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration().
+    /**
+     * Renew the ApplicationAccesstoken, Call Token endpoint and get parameters.
+     * Revoke old token.
+     *
+     * @param tokenType
+     * @param oldAccessToken
+     * @param allowedDomains
+     * @param clientId
+     * @param clientSecret
+     * @param validityTime
+     * @return
+     * @throws Exception
+     */
+
+    public String renewAccessToken(String tokenType, String oldAccessToken,
+                                   String[] allowedDomains, String clientId, String clientSecret,
+                                   String validityTime) throws Exception {
+        String newAccessToken = null;
+        long validityPeriod = 0;
+        // create a post request to getNewAccessToken for client_credentials
+        // grant type.
+
+        //String tokenEndpoint = OAuthServerConfiguration.getInstance().getTokenEndPoint();
+        String tokenEndpointName = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration().
                 getFirstProperty(APIConstants.API_KEY_MANAGER_TOKEN_ENDPOINT_NAME);
         String keyMgtServerURL = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration().
                 getFirstProperty(APIConstants.API_KEY_MANAGER_URL);
@@ -190,12 +197,19 @@ public class APIKeyMgtSubscriberService extends AbstractAdmin {
         int keyMgtPort = keymgtURL.getPort();
         String tokenEndpoint = null;
 
-        if (keyMgtServerURL != null) {
-            String[] tmp = keyMgtServerURL.split("services");
-            tokenEndpoint = tmp [0] + tokenEndpointName;
+        String webContextRoot = CarbonUtils.getServerConfiguration().getFirstProperty("WebContextRoot");
+
+        if(webContextRoot == null || "/".equals(webContextRoot)){
+            webContextRoot = "";
         }
-        
-		String revokeEndpoint = tokenEndpoint.replace("token", "revoke");
+
+        if (keyMgtServerURL != null) {
+            String[] tmp = keyMgtServerURL.split(webContextRoot + "/services");
+            tokenEndpoint = tmp[0] + tokenEndpointName;
+        }
+        //To revoke tokens we should call revoke API deployed in API gateway.
+        String revokeEndpoint = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration().
+                getFirstProperty(APIConstants.API_KEY_MANAGER_REVOKE_API_URL);
 
         // Below code is to overcome host name verification failure we get in certificate
         // validation due to self-signed certificate.
@@ -211,25 +225,25 @@ public class APIKeyMgtSubscriberService extends AbstractAdmin {
         }
         SingleClientConnManager mgr1 = new SingleClientConnManager(registry);
         SingleClientConnManager mgr2 = new SingleClientConnManager(registry);
-        
+
         HttpClient tokenEPClient = new DefaultHttpClient(mgr1, client.getParams());
         HttpClient revokeEPClient = new DefaultHttpClient(mgr2, client.getParams());
-		HttpPost httpTokpost = new HttpPost(tokenEndpoint);
-		HttpPost httpRevokepost = new HttpPost(revokeEndpoint);
-		
-		// Request parameters.
-		List<NameValuePair> tokParams = new ArrayList<NameValuePair>(3);
-		List<NameValuePair> revokeParams = new ArrayList<NameValuePair>(3);
-		
-		tokParams.add(new BasicNameValuePair(OAuth.OAUTH_GRANT_TYPE, GRANT_TYPE_CLIENT_CREDENTIALS));
-		tokParams.add(new BasicNameValuePair(OAuth.OAUTH_CLIENT_ID, clientId));
-		tokParams.add(new BasicNameValuePair(OAuth.OAUTH_CLIENT_SECRET, clientSecret));
-		
-		revokeParams.add(new BasicNameValuePair(OAuth.OAUTH_CLIENT_ID, clientId));
-		revokeParams.add(new BasicNameValuePair(OAuth.OAUTH_CLIENT_SECRET, clientSecret));
-		revokeParams.add(new BasicNameValuePair("token", oldAccessToken));
-		
-		try {
+        HttpPost httpTokpost = new HttpPost(tokenEndpoint);
+        HttpPost httpRevokepost = new HttpPost(revokeEndpoint);
+
+        // Request parameters.
+        List<NameValuePair> tokParams = new ArrayList<NameValuePair>(3);
+        List<NameValuePair> revokeParams = new ArrayList<NameValuePair>(3);
+
+        tokParams.add(new BasicNameValuePair(OAuth.OAUTH_GRANT_TYPE, GRANT_TYPE_CLIENT_CREDENTIALS));
+        tokParams.add(new BasicNameValuePair(OAuth.OAUTH_CLIENT_ID, clientId));
+        tokParams.add(new BasicNameValuePair(OAuth.OAUTH_CLIENT_SECRET, clientSecret));
+
+        revokeParams.add(new BasicNameValuePair(OAuth.OAUTH_CLIENT_ID, clientId));
+        revokeParams.add(new BasicNameValuePair(OAuth.OAUTH_CLIENT_SECRET, clientSecret));
+        revokeParams.add(new BasicNameValuePair("token", oldAccessToken));
+
+        try {
             //Revoke the Old Access Token
             httpRevokepost.setEntity(new UrlEncodedFormEntity(revokeParams, "UTF-8"));
             HttpResponse revokeResponse = tokenEPClient.execute(httpRevokepost);
@@ -237,8 +251,8 @@ public class APIKeyMgtSubscriberService extends AbstractAdmin {
             if (revokeResponse.getStatusLine().getStatusCode() != 200) {
                 throw new RuntimeException("Failed : HTTP error code : " +
                         revokeResponse.getStatusLine().getStatusCode());
-            } else{
-                if(log.isDebugEnabled()){
+            } else {
+                if (log.isDebugEnabled()) {
                     log.debug("Successfully revoked old application access token");
                 }
             }
@@ -248,31 +262,31 @@ public class APIKeyMgtSubscriberService extends AbstractAdmin {
             HttpResponse tokResponse = revokeEPClient.execute(httpTokpost);
             HttpEntity tokEntity = tokResponse.getEntity();
 
-			if (tokResponse.getStatusLine().getStatusCode() != 200) {
-				throw new RuntimeException("Failed : HTTP error code : " +
-						tokResponse.getStatusLine().getStatusCode());
-			} else {
-				String responseStr = EntityUtils.toString(tokEntity);
-				JSONObject obj = new JSONObject(responseStr);
-				newAccessToken = obj.get(OAUTH_RESPONSE_ACCESSTOKEN).toString();
-				validityPeriod = Long.parseLong(obj.get(OAUTH_RESPONSE_EXPIRY_TIME).toString());
+            if (tokResponse.getStatusLine().getStatusCode() != 200) {
+                throw new RuntimeException("Failed : HTTP error code : " +
+                        tokResponse.getStatusLine().getStatusCode());
+            } else {
+                String responseStr = EntityUtils.toString(tokEntity);
+                JSONObject obj = new JSONObject(responseStr);
+                newAccessToken = obj.get(OAUTH_RESPONSE_ACCESSTOKEN).toString();
+                validityPeriod = Long.parseLong(obj.get(OAUTH_RESPONSE_EXPIRY_TIME).toString());
 
-				if (validityTime != null && !"".equals(validityTime)) {
-					validityPeriod = Long.parseLong(validityTime);
-				}
-			}
-		} catch (Exception e2) {
-			String errMsg = "Error in getting new accessToken";
-			log.error(errMsg);
-			throw new APIKeyMgtException(errMsg, e2);
+                if (validityTime != null && !"".equals(validityTime)) {
+                    validityPeriod = Long.parseLong(validityTime);
+                }
+            }
+        } catch (Exception e2) {
+            String errMsg = "Error in getting new accessToken";
+            log.error(errMsg);
+            throw new APIKeyMgtException(errMsg, e2);
 
-		}
-		ApiMgtDAO apiMgtDAO = new ApiMgtDAO();
-		apiMgtDAO.updateRefreshedApplicationAccessToken(tokenType, newAccessToken,
-		    		                                    validityPeriod);
-		return newAccessToken;
+        }
+        ApiMgtDAO apiMgtDAO = new ApiMgtDAO();
+        apiMgtDAO.updateRefreshedApplicationAccessToken(tokenType, newAccessToken,
+                validityPeriod);
+        return newAccessToken;
 
-	}
+    }
 
     public void unsubscribeFromAPI(String userId, APIInfoDTO apiInfoDTO) {
 
@@ -286,10 +300,10 @@ public class APIKeyMgtSubscriberService extends AbstractAdmin {
      * @throws APIManagementException on error in revoking
      * @throws AxisFault              on error in clearing cached key
      */
-    public void revokeAccessToken(String key,String consumerKey,String authorizedUser) throws APIManagementException, AxisFault {
-        ApiMgtDAO dao=new ApiMgtDAO();
+    public void revokeAccessToken(String key, String consumerKey, String authorizedUser) throws APIManagementException, AxisFault {
+        ApiMgtDAO dao = new ApiMgtDAO();
         dao.revokeAccessToken(key);
-        clearOAuthCache(consumerKey,authorizedUser);
+        clearOAuthCache(consumerKey, authorizedUser);
     }
 
     /**
@@ -326,7 +340,7 @@ public class APIKeyMgtSubscriberService extends AbstractAdmin {
         }
         if (mappings.size() > 0) {
             List<Environment> gatewayEnvs = config.getApiGatewayEnvironments();
-            for(Environment environment : gatewayEnvs){
+            for (Environment environment : gatewayEnvs) {
                 APIAuthenticationAdminClient client = new APIAuthenticationAdminClient(environment);
                 client.invalidateKeys(mappings);
             }

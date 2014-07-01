@@ -8,6 +8,7 @@ function getProviderAPIVersionUsage(providerName, apiName, server) {
     var usage = [];
 
     try {
+
         usage = apiProvider.getProviderAPIVersionUsage(providerName, apiName, server);
         if (log.isDebugEnabled()) {
             log.debug("getProviderAPIVersionUsage for : " + server);
@@ -117,6 +118,36 @@ function getAPIUsageByResourcePath(providerName,from,to) {
         usage = apiProvider.getAPIUsageByResourcePath(providerName,from,to);
         if (log.isDebugEnabled()) {
             log.debug("getAPIUsageByResourcePath for : " + providerName);
+        }
+        if (usage == null) {
+            return {
+                error:true
+            };
+
+        } else {
+
+            return {
+                error:false,
+                usage:usage
+            };
+        }
+    } catch (e) {
+        log.error(e.message);
+        return {
+            error:e,
+            usage:null
+
+        };
+    }
+}
+
+function getAPIUsageByDestination(providerName,from,to) {
+    var usage = [];
+    var usageout = [];
+    try {
+        usage = apiProvider.getAPIUsageByDestination(providerName,from,to);
+        if (log.isDebugEnabled()) {
+            log.debug("getAPIUsageByDestination for : " + providerName);
         }
         if (usage == null) {
             return {

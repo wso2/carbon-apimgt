@@ -3,6 +3,7 @@
  <%
 var discoveryUrl = outputs.discoveryURL;
 %>
+
 <div id="overview">
 	<%if (!api.isAdvertiseOnly) {%>
 
@@ -17,7 +18,12 @@ var discoveryUrl = outputs.discoveryURL;
 	        <%
 	        for (i = 1; i < epParams.length; i++) {
 	            %>
-	            <div  class="well well-small api_urls" ><%=epParams[i]%><%=api.context%>/<%=api.version%></div>
+	            <div  class="well well-small api_urls"><%=epParams[i]%><%=api.context%>/<%=api.version%>
+                    <%if (api.isDefaultVersion){%>
+                        <br><%=epParams[i]%><%=api.context%>
+                    <%}%>
+                </div>
+
 	            <%
 	        }
 	        %>

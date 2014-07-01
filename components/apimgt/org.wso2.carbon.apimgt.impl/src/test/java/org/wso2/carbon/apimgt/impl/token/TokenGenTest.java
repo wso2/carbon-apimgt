@@ -77,5 +77,11 @@ public class TokenGenTest extends TestCase {
         //String decodedToken = new String(Base64Utils.decode(token));
         //log.info(decodedToken);
         //assertNotNull(decodedToken);
+
+	 // enduser claim should be as "http://wso2.org/claims/enduser":"<enduser>"
+        String endUserClaim = "http://wso2.org/claims/enduser";
+        String userName = decodedBody.split(endUserClaim)[1].split("\"")[2];
+        System.out.println("user name "+userName);
+        Assert.assertEquals("denis@carbon.super", userName);
     }
 }

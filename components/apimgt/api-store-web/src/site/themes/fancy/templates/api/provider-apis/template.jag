@@ -3,7 +3,7 @@
     <h4><%=i18n.localize("moreAPI")%>  '<%=outputs.providerId%>'</h4>
      <%
     var urlPrefix;
-    var tenant=request.getParameter("tenant");
+    var tenant=request_tenant;
     if(tenant!=null) {urlPrefix="&tenant="+tenant;}else{urlPrefix='';}
 
     var i, api, path,apis = outputs.apis, thumbURL; if(apis!=null){length = apis.length;

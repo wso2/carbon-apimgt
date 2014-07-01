@@ -16,8 +16,6 @@
 
 package org.wso2.carbon.apimgt.impl;
 
-import net.sf.saxon.functions.IsWholeNumber;
-
 import org.apache.axiom.om.OMElement;
 import org.apache.axis2.AxisFault;
 import org.apache.commons.logging.Log;
@@ -99,6 +97,11 @@ public class APIGatewayManager {
 					// relevant url has been removed.
 					operation ="delete";
 					client.deleteApi(tenantDomain);
+                    if(api.isPublishedDefaultVersion()){
+                        if(client.getDefaultApi(tenantDomain)!=null){
+                            client.deleteDefaultApi(tenantDomain);
+                        }
+                    }
 					setSecurevaultProperty(api,tenantDomain,environment,operation);
 					undeployCustomSequences(api,tenantDomain, environment);
 				} else {
@@ -106,9 +109,28 @@ public class APIGatewayManager {
 						log.debug("API exists, updating existing API " + api.getId().getApiName() +
 						          " in environment " + environment.getName());
 					}
-					operation ="update";
-					client.updateApi(builder, tenantDomain);
+                    //Deploy the fault sequence first since it has to be available by the time the API is deployed.
+                    deployAPIFaultSequence(api, tenantDomain, environment);
+
+                    operation ="update";
+
+                    //Update the API
+                    if(api.getImplementation().equalsIgnoreCase(APIConstants.IMPLEMENTATION_TYPE_INLINE)){
+                        client.updateApiForInlineScript(builder, tenantDomain);
+                    }else if (api.getImplementation().equalsIgnoreCase(APIConstants.IMPLEMENTATION_TYPE_ENDPOINT)){
+                        client.updateApi(builder, tenantDomain);
+                    }
+
+                    if(api.isDefaultVersion() || api.isPublishedDefaultVersion()){//api.isPublishedDefaultVersion() check is used to detect and update when context etc. is changed in the api which is not the default version but has a published default api
+                        if(client.getDefaultApi(tenantDomain)!=null){
+                            client.updateDefaultApi(builder,tenantDomain,api.getId().getVersion());
+                        }else{
+                            client.addDefaultAPI(builder,tenantDomain,api.getId().getVersion());
+                        }
+                    }
 					setSecurevaultProperty(api,tenantDomain,environment,operation);
+
+                    //Update the custom sequences of the API
 					updateCustomSequences(api, tenantDomain, environment);
 				}
 			} else {
@@ -130,9 +152,28 @@ public class APIGatewayManager {
 						log.debug("API does not exist, adding new API " + api.getId().getApiName() +
 						          " in environment " + environment.getName());
 					}
-					operation ="add";
-					client.addApi(builder, tenantDomain);
+                    //Deploy the fault sequence first since it has to be available by the time the API is deployed.
+                    deployAPIFaultSequence(api, tenantDomain, environment);
+
+                    operation ="add";
+
+                    //Add the API
+                    if(api.getImplementation().equalsIgnoreCase(APIConstants.IMPLEMENTATION_TYPE_INLINE)){
+                        client.addPrototypeApiScriptImpl(builder, tenantDomain);
+                    }else if (api.getImplementation().equalsIgnoreCase(APIConstants.IMPLEMENTATION_TYPE_ENDPOINT)){
+                        client.addApi(builder, tenantDomain);
+                    }
+
+                    if(api.isDefaultVersion()){
+                        if(client.getDefaultApi(tenantDomain)!=null){
+                            client.updateDefaultApi(builder,tenantDomain,api.getId().getVersion());
+                        }else{
+                            client.addDefaultAPI(builder,tenantDomain,api.getId().getVersion());
+                        }
+                    }
 					setSecurevaultProperty(api,tenantDomain,environment,operation);
+
+                    //Deploy the custom sequences of the API.
 					deployCustomSequences(api, tenantDomain, environment);
 				}
 			}
@@ -165,8 +206,29 @@ public class APIGatewayManager {
 				undeployCustomSequences(api, tenantDomain,environment);
 				setSecurevaultProperty(api,tenantDomain,environment,operation);
 			}
+
+            if(api.isPublishedDefaultVersion()){
+                if(client.getDefaultApi(tenantDomain)!=null){
+                    client.deleteDefaultApi(tenantDomain);
+                }
+            }
+
 		}
 	}
+
+    public void removeDefaultAPIFromGateway(API api, String tenantDomain) throws Exception {
+        for (Environment environment : environments) {
+            RESTAPIAdminClient client = new RESTAPIAdminClient(api.getId(), environment);
+            if(client.getDefaultApi(tenantDomain)!=null){
+                if (debugEnabled) {
+                    log.debug("Removing Default API " + api.getId().getApiName() + " From environment " +
+                            environment.getName());
+                }
+
+                client.deleteDefaultApi(tenantDomain);
+            }
+        }
+    }
 
 	/**
 	 * Checks whether the API has been published.
@@ -374,6 +436,50 @@ public class APIGatewayManager {
             }
         }
 
+    }
+
+    private void deployAPIFaultSequence(API api, String tenantDomain, Environment environment)
+            throws APIManagementException {
+
+        String faultSequenceName = api.getFaultSequence();
+
+        //If a fault sequence has be defined.
+        if (isSequenceDefined(faultSequenceName)) {
+            try {
+                PrivilegedCarbonContext.startTenantFlow();
+                if (tenantDomain != null && !tenantDomain.equals("")) {
+                    PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
+                } else {
+                    PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain
+                            (MultitenantConstants.SUPER_TENANT_DOMAIN_NAME, true);
+                }
+                int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
+
+                SequenceAdminServiceClient seqClient = new SequenceAdminServiceClient(environment);
+
+                //If the sequence already exists
+                if (seqClient.isExistingSequence(faultSequenceName, tenantDomain)) {
+                    //Delete the sequence. We need to redeploy afterwards since the sequence may have been updated.
+                    seqClient.deleteSequence(faultSequenceName, tenantDomain);
+                }
+                //Get the fault sequence xml
+                OMElement faultSequence = APIUtil.getCustomSequence(faultSequenceName, tenantId, "fault");
+
+                SequenceAdminServiceClient sequenceAdminServiceClient = new SequenceAdminServiceClient(environment);
+
+                if (faultSequence != null) {
+                    //Deploy the fault sequence
+                    sequenceAdminServiceClient.addSequence(faultSequence, tenantDomain);
+                }
+
+            } catch (Exception e) {
+                String msg = "Error in updating the fault sequence at the Gateway";
+                log.error(msg, e);
+                throw new APIManagementException(msg, e);
+            } finally {
+                PrivilegedCarbonContext.endTenantFlow();
+            }
+        }
     }
 
     private boolean isSequenceDefined(String sequence){

@@ -58,7 +58,12 @@ var initOf_requireResubscription = 'true';
                 <div class="controls">
                     <select id="editStatus" name="status" onChange="getSelectedValue('<%=api.status%>')">
                         <option value="CREATED"<%=(api.status == "CREATED" ? ' selected="selected"' : '')%>><%=i18n.localize("created")%></option>
-                        <option value="PUBLISHED"<%=(api.status == "PUBLISHED" ? ' selected="selected"' : '')%>><%=i18n.localize("published")%></option>
+                        <%if(api.implementation == "INLINE" || api.endpointConfig != ""){%>
+                            <option value="PROTOTYPED"<%=(api.status == "PROTOTYPED" ? ' selected="selected"' : '')%>><%= "PROTOTYPED" %></option>
+                        <%}%>
+                        <%if(api.availableTiers != null && api.availableTiers != ""){%>
+                            <option value="PUBLISHED"<%=(api.status == "PUBLISHED" ? ' selected="selected"' : '')%>><%=i18n.localize("published")%></option>
+                        <%}%>
                         <option value="DEPRECATED"<%=(api.status == "DEPRECATED" ? ' selected="selected"' : '')%>><%=i18n.localize("deprecated")%></option>
                         <option value="RETIRED"<%=(api.status == "RETIRED" ? ' selected="selected"' : '')%>><%=i18n.localize("retired")%></option>
                         <option value="BLOCKED"<%=(api.status == "BLOCKED" ? ' selected="selected"' : '')%>><%=i18n.localize("blocked")%></option>
@@ -145,6 +150,7 @@ $('#editStatus option').each(  //when refreshed page the default is not selected
                         $('#statusUpdateMsg').show();
                         initOf_state  = lastLcChange.newStatus;
                         $('#status').html(lastLcChange.newStatus);
+                        $('.storeCheck').attr("disabled",false);
                         $('#inUpdated').html(jagg.getDate(lastLcChange.date));
                         toggleUpdateBtn();
                         var t = setTimeout("hideMsg()", 3000);

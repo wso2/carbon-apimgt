@@ -30,7 +30,7 @@
                 <div>
                     <input type="text" class="required validateSpecialChars validName" maxlength="70" id="application-name" autofocus="autofocus"/></div>
                 <input type="hidden" id="apiPath" value="<%=apiPath%>"/>
-                <input type="hidden" id="goBack" value="<%=goBack%>"/>
+                <input type="hidden" id="goBack" value="<%= goBack%>"/>
 
 
             </div>

@@ -31,19 +31,19 @@ public class APIKeyValidationService {
 
   public interface Iface {
 
-    public APIKeyValidationInfoDTO validateKey(String context, String version, String accessToken, String sessionId, String requiredAuthenticationLevel, String clientDomain) throws APIKeyMgtException, APIManagementException, org.apache.thrift.TException;
-     public List<URITemplate> getAllURITemplates(String context, String apiVersion, String sessionId) throws
-                                                                                                         org.wso2.carbon.apimgt.gateway.handlers.security.thrift.APIKeyMgtException, APIManagementException, org.apache.thrift.TException,
-                                                                                       APIKeyMgtException;
- 
- }
+    public APIKeyValidationInfoDTO validateKey(String context, String version, String accessToken, String sessionId, String requiredAuthenticationLevel, String clientDomain, String matchingResource, String httpVerb) throws APIKeyMgtException, APIManagementException, org.apache.thrift.TException;
+
+    public List<URITemplate> getAllURITemplates(String context, String apiVersion, String sessionId) throws APIKeyMgtException, APIManagementException, org.apache.thrift.TException;
+
+  }
 
   public interface AsyncIface {
 
-    public void validateKey(String context, String version, String accessToken, String sessionId, String requiredAuthenticationLevel, String clientDomain, org.apache.thrift.async.AsyncMethodCallback<AsyncClient.validateKey_call> resultHandler) throws org.apache.thrift.TException;
-    public void getAllURITemplates(String context, String apiVersion, String sessionId,org.apache.thrift.async.AsyncMethodCallback<AsyncClient.getAllURITemplates_call> resultHandler) throws org.apache.thrift.TException;
- 
- }
+    public void validateKey(String context, String version, String accessToken, String sessionId, String requiredAuthenticationLevel, String clientDomain, String matchingResource, String httpVerb, org.apache.thrift.async.AsyncMethodCallback<AsyncClient.validateKey_call> resultHandler) throws org.apache.thrift.TException;
+
+    public void getAllURITemplates(String context, String apiVersion, String sessionId, org.apache.thrift.async.AsyncMethodCallback<AsyncClient.getAllURITemplates_call> resultHandler) throws org.apache.thrift.TException;
+
+  }
 
   public static class Client extends org.apache.thrift.TServiceClient implements Iface {
     public static class Factory implements org.apache.thrift.TServiceClientFactory<Client> {
@@ -65,13 +65,13 @@ public class APIKeyValidationService {
       super(iprot, oprot);
     }
 
-    public APIKeyValidationInfoDTO validateKey(String context, String version, String accessToken, String sessionId, String requiredAuthenticationLevel, String clientDomain) throws APIKeyMgtException, APIManagementException, org.apache.thrift.TException
+    public APIKeyValidationInfoDTO validateKey(String context, String version, String accessToken, String sessionId, String requiredAuthenticationLevel, String clientDomain, String matchingResource, String httpVerb) throws APIKeyMgtException, APIManagementException, org.apache.thrift.TException
     {
-      send_validateKey(context, version, accessToken, sessionId, requiredAuthenticationLevel, clientDomain);
+      send_validateKey(context, version, accessToken, sessionId, requiredAuthenticationLevel, clientDomain, matchingResource, httpVerb);
       return recv_validateKey();
     }
 
-    public void send_validateKey(String context, String version, String accessToken, String sessionId, String requiredAuthenticationLevel, String clientDomain) throws org.apache.thrift.TException
+    public void send_validateKey(String context, String version, String accessToken, String sessionId, String requiredAuthenticationLevel, String clientDomain, String matchingResource, String httpVerb) throws org.apache.thrift.TException
     {
       validateKey_args args = new validateKey_args();
       args.setContext(context);
@@ -80,6 +80,8 @@ public class APIKeyValidationService {
       args.setSessionId(sessionId);
       args.setRequiredAuthenticationLevel(requiredAuthenticationLevel);
       args.setClientDomain(clientDomain);
+      args.setMatchingResource(matchingResource);
+      args.setHttpVerb(httpVerb);
       sendBase("validateKey", args);
     }
 
@@ -99,38 +101,36 @@ public class APIKeyValidationService {
       throw new org.apache.thrift.TApplicationException(org.apache.thrift.TApplicationException.MISSING_RESULT, "validateKey failed: unknown result");
     }
 
-      public List<URITemplate> getAllURITemplates(String context, String apiVersion,String sessionId) throws
-                                                                                                      org.wso2.carbon.apimgt.gateway.handlers.security.thrift.APIKeyMgtException, APIManagementException, org.apache.thrift.TException
-      {
-          send_getAllURITemplates(context, apiVersion,sessionId);
-          return recv_getAllURITemplates();
-      }
+    public List<URITemplate> getAllURITemplates(String context, String apiVersion, String sessionId) throws APIKeyMgtException, APIManagementException, org.apache.thrift.TException
+    {
+      send_getAllURITemplates(context, apiVersion, sessionId);
+      return recv_getAllURITemplates();
+    }
 
-      public void send_getAllURITemplates(String context, String apiVersion,String sessionId) throws org.apache.thrift.TException
-      {
-          getAllURITemplates_args args = new getAllURITemplates_args();
-          args.setContext(context);
-          args.setApiVersion(apiVersion);
-          args.setSessionId(sessionId);
-          sendBase("getAllURITemplates", args);
-      }
+    public void send_getAllURITemplates(String context, String apiVersion, String sessionId) throws org.apache.thrift.TException
+    {
+      getAllURITemplates_args args = new getAllURITemplates_args();
+      args.setContext(context);
+      args.setApiVersion(apiVersion);
+      args.setSessionId(sessionId);
+      sendBase("getAllURITemplates", args);
+    }
 
-      public List<URITemplate> recv_getAllURITemplates() throws
-                                                         org.wso2.carbon.apimgt.gateway.handlers.security.thrift.APIKeyMgtException, APIManagementException, org.apache.thrift.TException
-      {
-          getAllURITemplates_result result = new getAllURITemplates_result();
-          receiveBase(result, "getAllURITemplates");
-          if (result.isSetSuccess()) {
-              return result.success;
-          }
-          if (result.apiKeyMgtException != null) {
-              throw result.apiKeyMgtException;
-          }
-          if (result.apiMgtException != null) {
-              throw result.apiMgtException;
-          }
-          throw new org.apache.thrift.TApplicationException(org.apache.thrift.TApplicationException.MISSING_RESULT, "getAllURITemplates failed: unknown result");
+    public List<URITemplate> recv_getAllURITemplates() throws APIKeyMgtException, APIManagementException, org.apache.thrift.TException
+    {
+      getAllURITemplates_result result = new getAllURITemplates_result();
+      receiveBase(result, "getAllURITemplates");
+      if (result.isSetSuccess()) {
+        return result.success;
       }
+      if (result.apiKeyMgtException != null) {
+        throw result.apiKeyMgtException;
+      }
+      if (result.apiMgtException != null) {
+        throw result.apiMgtException;
+      }
+      throw new org.apache.thrift.TApplicationException(org.apache.thrift.TApplicationException.MISSING_RESULT, "getAllURITemplates failed: unknown result");
+    }
 
   }
   public static class AsyncClient extends org.apache.thrift.async.TAsyncClient implements AsyncIface {
@@ -150,9 +150,9 @@ public class APIKeyValidationService {
       super(protocolFactory, clientManager, transport);
     }
 
-    public void validateKey(String context, String version, String accessToken, String sessionId, String requiredAuthenticationLevel, String clientDomain, org.apache.thrift.async.AsyncMethodCallback<validateKey_call> resultHandler) throws org.apache.thrift.TException {
+    public void validateKey(String context, String version, String accessToken, String sessionId, String requiredAuthenticationLevel, String clientDomain, String matchingResource, String httpVerb, org.apache.thrift.async.AsyncMethodCallback<validateKey_call> resultHandler) throws org.apache.thrift.TException {
       checkReady();
-      validateKey_call method_call = new validateKey_call(context, version, accessToken, sessionId, requiredAuthenticationLevel, clientDomain, resultHandler, this, ___protocolFactory, ___transport);
+      validateKey_call method_call = new validateKey_call(context, version, accessToken, sessionId, requiredAuthenticationLevel, clientDomain, matchingResource, httpVerb, resultHandler, this, ___protocolFactory, ___transport);
       this.___currentMethod = method_call;
       ___manager.call(method_call);
     }
@@ -164,7 +164,9 @@ public class APIKeyValidationService {
       private String sessionId;
       private String requiredAuthenticationLevel;
       private String clientDomain;
-      public validateKey_call(String context, String version, String accessToken, String sessionId, String requiredAuthenticationLevel, String clientDomain, org.apache.thrift.async.AsyncMethodCallback<validateKey_call> resultHandler, org.apache.thrift.async.TAsyncClient client, org.apache.thrift.protocol.TProtocolFactory protocolFactory, org.apache.thrift.transport.TNonblockingTransport transport) throws org.apache.thrift.TException {
+      private String matchingResource;
+      private String httpVerb;
+      public validateKey_call(String context, String version, String accessToken, String sessionId, String requiredAuthenticationLevel, String clientDomain, String matchingResource, String httpVerb, org.apache.thrift.async.AsyncMethodCallback<validateKey_call> resultHandler, org.apache.thrift.async.TAsyncClient client, org.apache.thrift.protocol.TProtocolFactory protocolFactory, org.apache.thrift.transport.TNonblockingTransport transport) throws org.apache.thrift.TException {
         super(client, protocolFactory, transport, resultHandler, false);
         this.context = context;
         this.version = version;
@@ -172,6 +174,8 @@ public class APIKeyValidationService {
         this.sessionId = sessionId;
         this.requiredAuthenticationLevel = requiredAuthenticationLevel;
         this.clientDomain = clientDomain;
+        this.matchingResource = matchingResource;
+        this.httpVerb = httpVerb;
       }
 
       public void write_args(org.apache.thrift.protocol.TProtocol prot) throws org.apache.thrift.TException {
@@ -183,6 +187,8 @@ public class APIKeyValidationService {
         args.setSessionId(sessionId);
         args.setRequiredAuthenticationLevel(requiredAuthenticationLevel);
         args.setClientDomain(clientDomain);
+        args.setMatchingResource(matchingResource);
+        args.setHttpVerb(httpVerb);
         args.write(prot);
         prot.writeMessageEnd();
       }
@@ -196,44 +202,44 @@ public class APIKeyValidationService {
         return (new Client(prot)).recv_validateKey();
       }
     }
-      public void getAllURITemplates(String context, String apiVersion, String sessionId,org.apache.thrift.async.AsyncMethodCallback<getAllURITemplates_call> resultHandler) throws org.apache.thrift.TException {
-          checkReady();
-          getAllURITemplates_call method_call = new getAllURITemplates_call(context, apiVersion,sessionId, resultHandler, this, ___protocolFactory, ___transport);
-          this.___currentMethod = method_call;
-          ___manager.call(method_call);
+
+    public void getAllURITemplates(String context, String apiVersion, String sessionId, org.apache.thrift.async.AsyncMethodCallback<getAllURITemplates_call> resultHandler) throws org.apache.thrift.TException {
+      checkReady();
+      getAllURITemplates_call method_call = new getAllURITemplates_call(context, apiVersion, sessionId, resultHandler, this, ___protocolFactory, ___transport);
+      this.___currentMethod = method_call;
+      ___manager.call(method_call);
+    }
+
+    public static class getAllURITemplates_call extends org.apache.thrift.async.TAsyncMethodCall {
+      private String context;
+      private String apiVersion;
+      private String sessionId;
+      public getAllURITemplates_call(String context, String apiVersion, String sessionId, org.apache.thrift.async.AsyncMethodCallback<getAllURITemplates_call> resultHandler, org.apache.thrift.async.TAsyncClient client, org.apache.thrift.protocol.TProtocolFactory protocolFactory, org.apache.thrift.transport.TNonblockingTransport transport) throws org.apache.thrift.TException {
+        super(client, protocolFactory, transport, resultHandler, false);
+        this.context = context;
+        this.apiVersion = apiVersion;
+        this.sessionId = sessionId;
       }
 
-      public static class getAllURITemplates_call extends org.apache.thrift.async.TAsyncMethodCall {
-          private String context;
-          private String apiVersion;
-          private String sessionId;
-          public getAllURITemplates_call(String context, String apiVersion, String sessionId,org.apache.thrift.async.AsyncMethodCallback<getAllURITemplates_call> resultHandler, org.apache.thrift.async.TAsyncClient client, org.apache.thrift.protocol.TProtocolFactory protocolFactory, org.apache.thrift.transport.TNonblockingTransport transport) throws org.apache.thrift.TException {
-              super(client, protocolFactory, transport, resultHandler, false);
-              this.context = context;
-              this.apiVersion = apiVersion;
-              this.sessionId=sessionId;
-          }
-
-          public void write_args(org.apache.thrift.protocol.TProtocol prot) throws org.apache.thrift.TException {
-              prot.writeMessageBegin(new org.apache.thrift.protocol.TMessage("getAllURITemplates", org.apache.thrift.protocol.TMessageType.CALL, 0));
-              getAllURITemplates_args args = new getAllURITemplates_args();
-              args.setContext(context);
-              args.setApiVersion(apiVersion);
-              args.setSessionId(sessionId);
-              args.write(prot);
-              prot.writeMessageEnd();
-          }
-
-          public List<URITemplate> getResult() throws
-                                               org.wso2.carbon.apimgt.gateway.handlers.security.thrift.APIKeyMgtException, APIManagementException, org.apache.thrift.TException {
-              if (getState() != org.apache.thrift.async.TAsyncMethodCall.State.RESPONSE_READ) {
-                  throw new IllegalStateException("Method call not finished!");
-              }
-              org.apache.thrift.transport.TMemoryInputTransport memoryTransport = new org.apache.thrift.transport.TMemoryInputTransport(getFrameBuffer().array());
-              org.apache.thrift.protocol.TProtocol prot = client.getProtocolFactory().getProtocol(memoryTransport);
-              return (new Client(prot)).recv_getAllURITemplates();
-          }
+      public void write_args(org.apache.thrift.protocol.TProtocol prot) throws org.apache.thrift.TException {
+        prot.writeMessageBegin(new org.apache.thrift.protocol.TMessage("getAllURITemplates", org.apache.thrift.protocol.TMessageType.CALL, 0));
+        getAllURITemplates_args args = new getAllURITemplates_args();
+        args.setContext(context);
+        args.setApiVersion(apiVersion);
+        args.setSessionId(sessionId);
+        args.write(prot);
+        prot.writeMessageEnd();
       }
+
+      public List<URITemplate> getResult() throws APIKeyMgtException, APIManagementException, org.apache.thrift.TException {
+        if (getState() != org.apache.thrift.async.TAsyncMethodCall.State.RESPONSE_READ) {
+          throw new IllegalStateException("Method call not finished!");
+        }
+        org.apache.thrift.transport.TMemoryInputTransport memoryTransport = new org.apache.thrift.transport.TMemoryInputTransport(getFrameBuffer().array());
+        org.apache.thrift.protocol.TProtocol prot = client.getProtocolFactory().getProtocol(memoryTransport);
+        return (new Client(prot)).recv_getAllURITemplates();
+      }
+    }
 
   }
 
@@ -265,7 +271,7 @@ public class APIKeyValidationService {
       protected validateKey_result getResult(I iface, validateKey_args args) throws org.apache.thrift.TException {
         validateKey_result result = new validateKey_result();
         try {
-          result.success = iface.validateKey(args.context, args.version, args.accessToken, args.sessionId, args.requiredAuthenticationLevel, args.clientDomain);
+          result.success = iface.validateKey(args.context, args.version, args.accessToken, args.sessionId, args.requiredAuthenticationLevel, args.clientDomain, args.matchingResource, args.httpVerb);
         } catch (APIKeyMgtException apiKeyMgtException) {
           result.apiKeyMgtException = apiKeyMgtException;
         } catch (APIManagementException apiMgtException) {
@@ -275,29 +281,27 @@ public class APIKeyValidationService {
       }
     }
 
-      private static class getAllURITemplates<I extends Iface>
-              extends org.apache.thrift.ProcessFunction<I, getAllURITemplates_args> {
-          public getAllURITemplates() {
-              super("getAllURITemplates");
-          }
-
-          protected getAllURITemplates_args getEmptyArgsInstance() {
-              return new getAllURITemplates_args();
-          }
-
-          protected getAllURITemplates_result getResult(I iface, getAllURITemplates_args args)
-                  throws org.apache.thrift.TException {
-              getAllURITemplates_result result = new getAllURITemplates_result();
-              try {
-                  result.success = iface.getAllURITemplates(args.context, args.apiVersion, args.sessionId);
-              } catch (org.wso2.carbon.apimgt.gateway.handlers.security.thrift.APIKeyMgtException apiKeyMgtException) {
-                  result.apiKeyMgtException = apiKeyMgtException;
-              } catch (APIManagementException apiMgtException) {
-                  result.apiMgtException = apiMgtException;
-              }
-              return result;
-          }
+    private static class getAllURITemplates<I extends Iface> extends org.apache.thrift.ProcessFunction<I, getAllURITemplates_args> {
+      public getAllURITemplates() {
+        super("getAllURITemplates");
       }
+
+      protected getAllURITemplates_args getEmptyArgsInstance() {
+        return new getAllURITemplates_args();
+      }
+
+      protected getAllURITemplates_result getResult(I iface, getAllURITemplates_args args) throws org.apache.thrift.TException {
+        getAllURITemplates_result result = new getAllURITemplates_result();
+        try {
+          result.success = iface.getAllURITemplates(args.context, args.apiVersion, args.sessionId);
+        } catch (APIKeyMgtException apiKeyMgtException) {
+          result.apiKeyMgtException = apiKeyMgtException;
+        } catch (APIManagementException apiMgtException) {
+          result.apiMgtException = apiMgtException;
+        }
+        return result;
+      }
+    }
 
   }
 
@@ -310,6 +314,8 @@ public class APIKeyValidationService {
     private static final org.apache.thrift.protocol.TField SESSION_ID_FIELD_DESC = new org.apache.thrift.protocol.TField("sessionId", org.apache.thrift.protocol.TType.STRING, (short)4);
     private static final org.apache.thrift.protocol.TField REQUIRED_AUTHENTICATION_LEVEL_FIELD_DESC = new org.apache.thrift.protocol.TField("requiredAuthenticationLevel", org.apache.thrift.protocol.TType.STRING, (short)5);
     private static final org.apache.thrift.protocol.TField CLIENT_DOMAIN_FIELD_DESC = new org.apache.thrift.protocol.TField("clientDomain", org.apache.thrift.protocol.TType.STRING, (short)6);
+    private static final org.apache.thrift.protocol.TField MATCHING_RESOURCE_FIELD_DESC = new org.apache.thrift.protocol.TField("matchingResource", org.apache.thrift.protocol.TType.STRING, (short)7);
+    private static final org.apache.thrift.protocol.TField HTTP_VERB_FIELD_DESC = new org.apache.thrift.protocol.TField("httpVerb", org.apache.thrift.protocol.TType.STRING, (short)8);
 
     private static final Map<Class<? extends IScheme>, SchemeFactory> schemes = new HashMap<Class<? extends IScheme>, SchemeFactory>();
     static {
@@ -323,6 +329,8 @@ public class APIKeyValidationService {
     public String sessionId; // required
     public String requiredAuthenticationLevel; // required
     public String clientDomain; // required
+    public String matchingResource; // required
+    public String httpVerb; // required
 
     /** The set of fields this struct contains, along with convenience methods for finding and manipulating them. */
     public enum _Fields implements org.apache.thrift.TFieldIdEnum {
@@ -331,7 +339,9 @@ public class APIKeyValidationService {
       ACCESS_TOKEN((short)3, "accessToken"),
       SESSION_ID((short)4, "sessionId"),
       REQUIRED_AUTHENTICATION_LEVEL((short)5, "requiredAuthenticationLevel"),
-      CLIENT_DOMAIN((short)6, "clientDomain");
+      CLIENT_DOMAIN((short)6, "clientDomain"),
+      MATCHING_RESOURCE((short)7, "matchingResource"),
+      HTTP_VERB((short)8, "httpVerb");
 
       private static final Map<String, _Fields> byName = new HashMap<String, _Fields>();
 
@@ -358,6 +368,10 @@ public class APIKeyValidationService {
             return REQUIRED_AUTHENTICATION_LEVEL;
           case 6: // CLIENT_DOMAIN
             return CLIENT_DOMAIN;
+          case 7: // MATCHING_RESOURCE
+            return MATCHING_RESOURCE;
+          case 8: // HTTP_VERB
+            return HTTP_VERB;
           default:
             return null;
         }
@@ -413,6 +427,10 @@ public class APIKeyValidationService {
           new org.apache.thrift.meta_data.FieldValueMetaData(org.apache.thrift.protocol.TType.STRING)));
       tmpMap.put(_Fields.CLIENT_DOMAIN, new org.apache.thrift.meta_data.FieldMetaData("clientDomain", org.apache.thrift.TFieldRequirementType.DEFAULT, 
           new org.apache.thrift.meta_data.FieldValueMetaData(org.apache.thrift.protocol.TType.STRING)));
+      tmpMap.put(_Fields.MATCHING_RESOURCE, new org.apache.thrift.meta_data.FieldMetaData("matchingResource", org.apache.thrift.TFieldRequirementType.REQUIRED, 
+          new org.apache.thrift.meta_data.FieldValueMetaData(org.apache.thrift.protocol.TType.STRING)));
+      tmpMap.put(_Fields.HTTP_VERB, new org.apache.thrift.meta_data.FieldMetaData("httpVerb", org.apache.thrift.TFieldRequirementType.REQUIRED, 
+          new org.apache.thrift.meta_data.FieldValueMetaData(org.apache.thrift.protocol.TType.STRING)));
       metaDataMap = Collections.unmodifiableMap(tmpMap);
       org.apache.thrift.meta_data.FieldMetaData.addStructMetaDataMap(validateKey_args.class, metaDataMap);
     }
@@ -426,7 +444,9 @@ public class APIKeyValidationService {
       String accessToken,
       String sessionId,
       String requiredAuthenticationLevel,
-      String clientDomain)
+      String clientDomain,
+      String matchingResource,
+      String httpVerb)
     {
       this();
       this.context = context;
@@ -435,6 +455,8 @@ public class APIKeyValidationService {
       this.sessionId = sessionId;
       this.requiredAuthenticationLevel = requiredAuthenticationLevel;
       this.clientDomain = clientDomain;
+      this.matchingResource = matchingResource;
+      this.httpVerb = httpVerb;
     }
 
     /**
@@ -459,6 +481,12 @@ public class APIKeyValidationService {
       if (other.isSetClientDomain()) {
         this.clientDomain = other.clientDomain;
       }
+      if (other.isSetMatchingResource()) {
+        this.matchingResource = other.matchingResource;
+      }
+      if (other.isSetHttpVerb()) {
+        this.httpVerb = other.httpVerb;
+      }
     }
 
     public validateKey_args deepCopy() {
@@ -473,6 +501,8 @@ public class APIKeyValidationService {
       this.sessionId = null;
       this.requiredAuthenticationLevel = null;
       this.clientDomain = null;
+      this.matchingResource = null;
+      this.httpVerb = null;
     }
 
     public String getContext() {
@@ -619,6 +649,54 @@ public class APIKeyValidationService {
       }
     }
 
+    public String getMatchingResource() {
+      return this.matchingResource;
+    }
+
+    public validateKey_args setMatchingResource(String matchingResource) {
+      this.matchingResource = matchingResource;
+      return this;
+    }
+
+    public void unsetMatchingResource() {
+      this.matchingResource = null;
+    }
+
+    /** Returns true if field matchingResource is set (has been assigned a value) and false otherwise */
+    public boolean isSetMatchingResource() {
+      return this.matchingResource != null;
+    }
+
+    public void setMatchingResourceIsSet(boolean value) {
+      if (!value) {
+        this.matchingResource = null;
+      }
+    }
+
+    public String getHttpVerb() {
+      return this.httpVerb;
+    }
+
+    public validateKey_args setHttpVerb(String httpVerb) {
+      this.httpVerb = httpVerb;
+      return this;
+    }
+
+    public void unsetHttpVerb() {
+      this.httpVerb = null;
+    }
+
+    /** Returns true if field httpVerb is set (has been assigned a value) and false otherwise */
+    public boolean isSetHttpVerb() {
+      return this.httpVerb != null;
+    }
+
+    public void setHttpVerbIsSet(boolean value) {
+      if (!value) {
+        this.httpVerb = null;
+      }
+    }
+
     public void setFieldValue(_Fields field, Object value) {
       switch (field) {
       case CONTEXT:
@@ -669,6 +747,22 @@ public class APIKeyValidationService {
         }
         break;
 
+      case MATCHING_RESOURCE:
+        if (value == null) {
+          unsetMatchingResource();
+        } else {
+          setMatchingResource((String)value);
+        }
+        break;
+
+      case HTTP_VERB:
+        if (value == null) {
+          unsetHttpVerb();
+        } else {
+          setHttpVerb((String)value);
+        }
+        break;
+
       }
     }
 
@@ -691,6 +785,12 @@ public class APIKeyValidationService {
 
       case CLIENT_DOMAIN:
         return getClientDomain();
+
+      case MATCHING_RESOURCE:
+        return getMatchingResource();
+
+      case HTTP_VERB:
+        return getHttpVerb();
 
       }
       throw new IllegalStateException();
@@ -715,6 +815,10 @@ public class APIKeyValidationService {
         return isSetRequiredAuthenticationLevel();
       case CLIENT_DOMAIN:
         return isSetClientDomain();
+      case MATCHING_RESOURCE:
+        return isSetMatchingResource();
+      case HTTP_VERB:
+        return isSetHttpVerb();
       }
       throw new IllegalStateException();
     }
@@ -783,6 +887,24 @@ public class APIKeyValidationService {
         if (!(this_present_clientDomain && that_present_clientDomain))
           return false;
         if (!this.clientDomain.equals(that.clientDomain))
+          return false;
+      }
+
+      boolean this_present_matchingResource = true && this.isSetMatchingResource();
+      boolean that_present_matchingResource = true && that.isSetMatchingResource();
+      if (this_present_matchingResource || that_present_matchingResource) {
+        if (!(this_present_matchingResource && that_present_matchingResource))
+          return false;
+        if (!this.matchingResource.equals(that.matchingResource))
+          return false;
+      }
+
+      boolean this_present_httpVerb = true && this.isSetHttpVerb();
+      boolean that_present_httpVerb = true && that.isSetHttpVerb();
+      if (this_present_httpVerb || that_present_httpVerb) {
+        if (!(this_present_httpVerb && that_present_httpVerb))
+          return false;
+        if (!this.httpVerb.equals(that.httpVerb))
           return false;
       }
 
@@ -862,6 +984,26 @@ public class APIKeyValidationService {
           return lastComparison;
         }
       }
+      lastComparison = Boolean.valueOf(isSetMatchingResource()).compareTo(typedOther.isSetMatchingResource());
+      if (lastComparison != 0) {
+        return lastComparison;
+      }
+      if (isSetMatchingResource()) {
+        lastComparison = org.apache.thrift.TBaseHelper.compareTo(this.matchingResource, typedOther.matchingResource);
+        if (lastComparison != 0) {
+          return lastComparison;
+        }
+      }
+      lastComparison = Boolean.valueOf(isSetHttpVerb()).compareTo(typedOther.isSetHttpVerb());
+      if (lastComparison != 0) {
+        return lastComparison;
+      }
+      if (isSetHttpVerb()) {
+        lastComparison = org.apache.thrift.TBaseHelper.compareTo(this.httpVerb, typedOther.httpVerb);
+        if (lastComparison != 0) {
+          return lastComparison;
+        }
+      }
       return 0;
     }
 
@@ -929,6 +1071,22 @@ public class APIKeyValidationService {
         sb.append(this.clientDomain);
       }
       first = false;
+      if (!first) sb.append(", ");
+      sb.append("matchingResource:");
+      if (this.matchingResource == null) {
+        sb.append("null");
+      } else {
+        sb.append(this.matchingResource);
+      }
+      first = false;
+      if (!first) sb.append(", ");
+      sb.append("httpVerb:");
+      if (this.httpVerb == null) {
+        sb.append("null");
+      } else {
+        sb.append(this.httpVerb);
+      }
+      first = false;
       sb.append(")");
       return sb.toString();
     }
@@ -949,6 +1107,12 @@ public class APIKeyValidationService {
       }
       if (requiredAuthenticationLevel == null) {
         throw new org.apache.thrift.protocol.TProtocolException("Required field 'requiredAuthenticationLevel' was not present! Struct: " + toString());
+      }
+      if (matchingResource == null) {
+        throw new org.apache.thrift.protocol.TProtocolException("Required field 'matchingResource' was not present! Struct: " + toString());
+      }
+      if (httpVerb == null) {
+        throw new org.apache.thrift.protocol.TProtocolException("Required field 'httpVerb' was not present! Struct: " + toString());
       }
     }
 
@@ -1034,6 +1198,22 @@ public class APIKeyValidationService {
                 org.apache.thrift.protocol.TProtocolUtil.skip(iprot, schemeField.type);
               }
               break;
+            case 7: // MATCHING_RESOURCE
+              if (schemeField.type == org.apache.thrift.protocol.TType.STRING) {
+                struct.matchingResource = iprot.readString();
+                struct.setMatchingResourceIsSet(true);
+              } else { 
+                org.apache.thrift.protocol.TProtocolUtil.skip(iprot, schemeField.type);
+              }
+              break;
+            case 8: // HTTP_VERB
+              if (schemeField.type == org.apache.thrift.protocol.TType.STRING) {
+                struct.httpVerb = iprot.readString();
+                struct.setHttpVerbIsSet(true);
+              } else { 
+                org.apache.thrift.protocol.TProtocolUtil.skip(iprot, schemeField.type);
+              }
+              break;
             default:
               org.apache.thrift.protocol.TProtocolUtil.skip(iprot, schemeField.type);
           }
@@ -1079,6 +1259,16 @@ public class APIKeyValidationService {
           oprot.writeString(struct.clientDomain);
           oprot.writeFieldEnd();
         }
+        if (struct.matchingResource != null) {
+          oprot.writeFieldBegin(MATCHING_RESOURCE_FIELD_DESC);
+          oprot.writeString(struct.matchingResource);
+          oprot.writeFieldEnd();
+        }
+        if (struct.httpVerb != null) {
+          oprot.writeFieldBegin(HTTP_VERB_FIELD_DESC);
+          oprot.writeString(struct.httpVerb);
+          oprot.writeFieldEnd();
+        }
         oprot.writeFieldStop();
         oprot.writeStructEnd();
       }
@@ -1101,6 +1291,8 @@ public class APIKeyValidationService {
         oprot.writeString(struct.accessToken);
         oprot.writeString(struct.sessionId);
         oprot.writeString(struct.requiredAuthenticationLevel);
+        oprot.writeString(struct.matchingResource);
+        oprot.writeString(struct.httpVerb);
         BitSet optionals = new BitSet();
         if (struct.isSetClientDomain()) {
           optionals.set(0);
@@ -1124,6 +1316,10 @@ public class APIKeyValidationService {
         struct.setSessionIdIsSet(true);
         struct.requiredAuthenticationLevel = iprot.readString();
         struct.setRequiredAuthenticationLevelIsSet(true);
+        struct.matchingResource = iprot.readString();
+        struct.setMatchingResourceIsSet(true);
+        struct.httpVerb = iprot.readString();
+        struct.setHttpVerbIsSet(true);
         BitSet incoming = iprot.readBitSet(1);
         if (incoming.get(0)) {
           struct.clientDomain = iprot.readString();
@@ -1693,1144 +1889,1153 @@ public class APIKeyValidationService {
 
   }
 
-    public static class getAllURITemplates_args implements org.apache.thrift.TBase<getAllURITemplates_args, getAllURITemplates_args._Fields>, java.io.Serializable, Cloneable   {
-        private static final org.apache.thrift.protocol.TStruct STRUCT_DESC = new org.apache.thrift.protocol.TStruct("getAllURITemplates_args");
+  public static class getAllURITemplates_args implements org.apache.thrift.TBase<getAllURITemplates_args, getAllURITemplates_args._Fields>, java.io.Serializable, Cloneable   {
+    private static final org.apache.thrift.protocol.TStruct STRUCT_DESC = new org.apache.thrift.protocol.TStruct("getAllURITemplates_args");
 
-        private static final org.apache.thrift.protocol.TField CONTEXT_FIELD_DESC = new org.apache.thrift.protocol.TField("context", org.apache.thrift.protocol.TType.STRING, (short)1);
-        private static final org.apache.thrift.protocol.TField API_VERSION_FIELD_DESC = new org.apache.thrift.protocol.TField("apiVersion", org.apache.thrift.protocol.TType.STRING, (short)2);
-        private static final org.apache.thrift.protocol.TField SESSION_ID_FIELD_DESC = new org.apache.thrift.protocol.TField("sessionId", org.apache.thrift.protocol.TType.STRING, (short)3);
-        private static final Map<Class<? extends IScheme>, SchemeFactory> schemes = new HashMap<Class<? extends IScheme>, SchemeFactory>();
-        static {
-            schemes.put(StandardScheme.class, new getAllURITemplates_argsStandardSchemeFactory());
-            schemes.put(TupleScheme.class, new getAllURITemplates_argsTupleSchemeFactory());
+    private static final org.apache.thrift.protocol.TField CONTEXT_FIELD_DESC = new org.apache.thrift.protocol.TField("context", org.apache.thrift.protocol.TType.STRING, (short)1);
+    private static final org.apache.thrift.protocol.TField API_VERSION_FIELD_DESC = new org.apache.thrift.protocol.TField("apiVersion", org.apache.thrift.protocol.TType.STRING, (short)2);
+    private static final org.apache.thrift.protocol.TField SESSION_ID_FIELD_DESC = new org.apache.thrift.protocol.TField("sessionId", org.apache.thrift.protocol.TType.STRING, (short)3);
+
+    private static final Map<Class<? extends IScheme>, SchemeFactory> schemes = new HashMap<Class<? extends IScheme>, SchemeFactory>();
+    static {
+      schemes.put(StandardScheme.class, new getAllURITemplates_argsStandardSchemeFactory());
+      schemes.put(TupleScheme.class, new getAllURITemplates_argsTupleSchemeFactory());
+    }
+
+    public String context; // required
+    public String apiVersion; // required
+    public String sessionId; // required
+
+    /** The set of fields this struct contains, along with convenience methods for finding and manipulating them. */
+    public enum _Fields implements org.apache.thrift.TFieldIdEnum {
+      CONTEXT((short)1, "context"),
+      API_VERSION((short)2, "apiVersion"),
+      SESSION_ID((short)3, "sessionId");
+
+      private static final Map<String, _Fields> byName = new HashMap<String, _Fields>();
+
+      static {
+        for (_Fields field : EnumSet.allOf(_Fields.class)) {
+          byName.put(field.getFieldName(), field);
         }
+      }
 
-        public String context; // required
-        public String apiVersion; // required
-        public String sessionId; // required
-
-        /** The set of fields this struct contains, along with convenience methods for finding and manipulating them. */
-        public enum _Fields implements org.apache.thrift.TFieldIdEnum {
-            CONTEXT((short)1, "context"),
-            API_VERSION((short)2, "apiVersion"),
-            SESSION_ID((short)3, "sessionId");
-
-            private static final Map<String, _Fields> byName = new HashMap<String, _Fields>();
-
-            static {
-                for (_Fields field : EnumSet.allOf(_Fields.class)) {
-                    byName.put(field.getFieldName(), field);
-                }
-            }
-
-            /**
-             * Find the _Fields constant that matches fieldId, or null if its not found.
-             */
-            public static _Fields findByThriftId(int fieldId) {
-                switch(fieldId) {
-                    case 1: // CONTEXT
-                        return CONTEXT;
-                    case 2: // API_VERSION
-                        return API_VERSION;
-                    case 3: // API_VERSION
-                        return SESSION_ID;
-                    default:
-                        return null;
-                }
-            }
-
-            /**
-             * Find the _Fields constant that matches fieldId, throwing an exception
-             * if it is not found.
-             */
-            public static _Fields findByThriftIdOrThrow(int fieldId) {
-                _Fields fields = findByThriftId(fieldId);
-                if (fields == null) throw new IllegalArgumentException("Field " + fieldId + " doesn't exist!");
-                return fields;
-            }
-
-            /**
-             * Find the _Fields constant that matches name, or null if its not found.
-             */
-            public static _Fields findByName(String name) {
-                return byName.get(name);
-            }
-
-            private final short _thriftId;
-            private final String _fieldName;
-
-            _Fields(short thriftId, String fieldName) {
-                _thriftId = thriftId;
-                _fieldName = fieldName;
-            }
-
-            public short getThriftFieldId() {
-                return _thriftId;
-            }
-
-            public String getFieldName() {
-                return _fieldName;
-            }
+      /**
+       * Find the _Fields constant that matches fieldId, or null if its not found.
+       */
+      public static _Fields findByThriftId(int fieldId) {
+        switch(fieldId) {
+          case 1: // CONTEXT
+            return CONTEXT;
+          case 2: // API_VERSION
+            return API_VERSION;
+          case 3: // SESSION_ID
+            return SESSION_ID;
+          default:
+            return null;
         }
+      }
 
-        // isset id assignments
-        public static final Map<_Fields, org.apache.thrift.meta_data.FieldMetaData> metaDataMap;
-        static {
-            Map<_Fields, org.apache.thrift.meta_data.FieldMetaData> tmpMap = new EnumMap<_Fields, org.apache.thrift.meta_data.FieldMetaData>(_Fields.class);
-            tmpMap.put(_Fields.CONTEXT, new org.apache.thrift.meta_data.FieldMetaData("context", org.apache.thrift.TFieldRequirementType.REQUIRED,
-                                                                                      new org.apache.thrift.meta_data.FieldValueMetaData(org.apache.thrift.protocol.TType.STRING)));
-            tmpMap.put(_Fields.API_VERSION, new org.apache.thrift.meta_data.FieldMetaData("apiVersion", org.apache.thrift.TFieldRequirementType.REQUIRED,
-                                                                                          new org.apache.thrift.meta_data.FieldValueMetaData(org.apache.thrift.protocol.TType.STRING)));
-            tmpMap.put(_Fields.SESSION_ID, new org.apache.thrift.meta_data.FieldMetaData("sessionId", org.apache.thrift.TFieldRequirementType.REQUIRED,
-                                                                                         new org.apache.thrift.meta_data.FieldValueMetaData(org.apache.thrift.protocol.TType.STRING)));
-            metaDataMap = Collections.unmodifiableMap(tmpMap);
-            org.apache.thrift.meta_data.FieldMetaData.addStructMetaDataMap(getAllURITemplates_args.class, metaDataMap);
+      /**
+       * Find the _Fields constant that matches fieldId, throwing an exception
+       * if it is not found.
+       */
+      public static _Fields findByThriftIdOrThrow(int fieldId) {
+        _Fields fields = findByThriftId(fieldId);
+        if (fields == null) throw new IllegalArgumentException("Field " + fieldId + " doesn't exist!");
+        return fields;
+      }
+
+      /**
+       * Find the _Fields constant that matches name, or null if its not found.
+       */
+      public static _Fields findByName(String name) {
+        return byName.get(name);
+      }
+
+      private final short _thriftId;
+      private final String _fieldName;
+
+      _Fields(short thriftId, String fieldName) {
+        _thriftId = thriftId;
+        _fieldName = fieldName;
+      }
+
+      public short getThriftFieldId() {
+        return _thriftId;
+      }
+
+      public String getFieldName() {
+        return _fieldName;
+      }
+    }
+
+    // isset id assignments
+    public static final Map<_Fields, org.apache.thrift.meta_data.FieldMetaData> metaDataMap;
+    static {
+      Map<_Fields, org.apache.thrift.meta_data.FieldMetaData> tmpMap = new EnumMap<_Fields, org.apache.thrift.meta_data.FieldMetaData>(_Fields.class);
+      tmpMap.put(_Fields.CONTEXT, new org.apache.thrift.meta_data.FieldMetaData("context", org.apache.thrift.TFieldRequirementType.REQUIRED, 
+          new org.apache.thrift.meta_data.FieldValueMetaData(org.apache.thrift.protocol.TType.STRING)));
+      tmpMap.put(_Fields.API_VERSION, new org.apache.thrift.meta_data.FieldMetaData("apiVersion", org.apache.thrift.TFieldRequirementType.REQUIRED, 
+          new org.apache.thrift.meta_data.FieldValueMetaData(org.apache.thrift.protocol.TType.STRING)));
+      tmpMap.put(_Fields.SESSION_ID, new org.apache.thrift.meta_data.FieldMetaData("sessionId", org.apache.thrift.TFieldRequirementType.REQUIRED, 
+          new org.apache.thrift.meta_data.FieldValueMetaData(org.apache.thrift.protocol.TType.STRING)));
+      metaDataMap = Collections.unmodifiableMap(tmpMap);
+      org.apache.thrift.meta_data.FieldMetaData.addStructMetaDataMap(getAllURITemplates_args.class, metaDataMap);
+    }
+
+    public getAllURITemplates_args() {
+    }
+
+    public getAllURITemplates_args(
+      String context,
+      String apiVersion,
+      String sessionId)
+    {
+      this();
+      this.context = context;
+      this.apiVersion = apiVersion;
+      this.sessionId = sessionId;
+    }
+
+    /**
+     * Performs a deep copy on <i>other</i>.
+     */
+    public getAllURITemplates_args(getAllURITemplates_args other) {
+      if (other.isSetContext()) {
+        this.context = other.context;
+      }
+      if (other.isSetApiVersion()) {
+        this.apiVersion = other.apiVersion;
+      }
+      if (other.isSetSessionId()) {
+        this.sessionId = other.sessionId;
+      }
+    }
+
+    public getAllURITemplates_args deepCopy() {
+      return new getAllURITemplates_args(this);
+    }
+
+    @Override
+    public void clear() {
+      this.context = null;
+      this.apiVersion = null;
+      this.sessionId = null;
+    }
+
+    public String getContext() {
+      return this.context;
+    }
+
+    public getAllURITemplates_args setContext(String context) {
+      this.context = context;
+      return this;
+    }
+
+    public void unsetContext() {
+      this.context = null;
+    }
+
+    /** Returns true if field context is set (has been assigned a value) and false otherwise */
+    public boolean isSetContext() {
+      return this.context != null;
+    }
+
+    public void setContextIsSet(boolean value) {
+      if (!value) {
+        this.context = null;
+      }
+    }
+
+    public String getApiVersion() {
+      return this.apiVersion;
+    }
+
+    public getAllURITemplates_args setApiVersion(String apiVersion) {
+      this.apiVersion = apiVersion;
+      return this;
+    }
+
+    public void unsetApiVersion() {
+      this.apiVersion = null;
+    }
+
+    /** Returns true if field apiVersion is set (has been assigned a value) and false otherwise */
+    public boolean isSetApiVersion() {
+      return this.apiVersion != null;
+    }
+
+    public void setApiVersionIsSet(boolean value) {
+      if (!value) {
+        this.apiVersion = null;
+      }
+    }
+
+    public String getSessionId() {
+      return this.sessionId;
+    }
+
+    public getAllURITemplates_args setSessionId(String sessionId) {
+      this.sessionId = sessionId;
+      return this;
+    }
+
+    public void unsetSessionId() {
+      this.sessionId = null;
+    }
+
+    /** Returns true if field sessionId is set (has been assigned a value) and false otherwise */
+    public boolean isSetSessionId() {
+      return this.sessionId != null;
+    }
+
+    public void setSessionIdIsSet(boolean value) {
+      if (!value) {
+        this.sessionId = null;
+      }
+    }
+
+    public void setFieldValue(_Fields field, Object value) {
+      switch (field) {
+      case CONTEXT:
+        if (value == null) {
+          unsetContext();
+        } else {
+          setContext((String)value);
         }
+        break;
 
-        public getAllURITemplates_args() {
+      case API_VERSION:
+        if (value == null) {
+          unsetApiVersion();
+        } else {
+          setApiVersion((String)value);
         }
+        break;
 
-        public getAllURITemplates_args(
-                String context,
-                String apiVersion,String sessionId)
+      case SESSION_ID:
+        if (value == null) {
+          unsetSessionId();
+        } else {
+          setSessionId((String)value);
+        }
+        break;
+
+      }
+    }
+
+    public Object getFieldValue(_Fields field) {
+      switch (field) {
+      case CONTEXT:
+        return getContext();
+
+      case API_VERSION:
+        return getApiVersion();
+
+      case SESSION_ID:
+        return getSessionId();
+
+      }
+      throw new IllegalStateException();
+    }
+
+    /** Returns true if field corresponding to fieldID is set (has been assigned a value) and false otherwise */
+    public boolean isSet(_Fields field) {
+      if (field == null) {
+        throw new IllegalArgumentException();
+      }
+
+      switch (field) {
+      case CONTEXT:
+        return isSetContext();
+      case API_VERSION:
+        return isSetApiVersion();
+      case SESSION_ID:
+        return isSetSessionId();
+      }
+      throw new IllegalStateException();
+    }
+
+    @Override
+    public boolean equals(Object that) {
+      if (that == null)
+        return false;
+      if (that instanceof getAllURITemplates_args)
+        return this.equals((getAllURITemplates_args)that);
+      return false;
+    }
+
+    public boolean equals(getAllURITemplates_args that) {
+      if (that == null)
+        return false;
+
+      boolean this_present_context = true && this.isSetContext();
+      boolean that_present_context = true && that.isSetContext();
+      if (this_present_context || that_present_context) {
+        if (!(this_present_context && that_present_context))
+          return false;
+        if (!this.context.equals(that.context))
+          return false;
+      }
+
+      boolean this_present_apiVersion = true && this.isSetApiVersion();
+      boolean that_present_apiVersion = true && that.isSetApiVersion();
+      if (this_present_apiVersion || that_present_apiVersion) {
+        if (!(this_present_apiVersion && that_present_apiVersion))
+          return false;
+        if (!this.apiVersion.equals(that.apiVersion))
+          return false;
+      }
+
+      boolean this_present_sessionId = true && this.isSetSessionId();
+      boolean that_present_sessionId = true && that.isSetSessionId();
+      if (this_present_sessionId || that_present_sessionId) {
+        if (!(this_present_sessionId && that_present_sessionId))
+          return false;
+        if (!this.sessionId.equals(that.sessionId))
+          return false;
+      }
+
+      return true;
+    }
+
+    @Override
+    public int hashCode() {
+      return 0;
+    }
+
+    public int compareTo(getAllURITemplates_args other) {
+      if (!getClass().equals(other.getClass())) {
+        return getClass().getName().compareTo(other.getClass().getName());
+      }
+
+      int lastComparison = 0;
+      getAllURITemplates_args typedOther = (getAllURITemplates_args)other;
+
+      lastComparison = Boolean.valueOf(isSetContext()).compareTo(typedOther.isSetContext());
+      if (lastComparison != 0) {
+        return lastComparison;
+      }
+      if (isSetContext()) {
+        lastComparison = org.apache.thrift.TBaseHelper.compareTo(this.context, typedOther.context);
+        if (lastComparison != 0) {
+          return lastComparison;
+        }
+      }
+      lastComparison = Boolean.valueOf(isSetApiVersion()).compareTo(typedOther.isSetApiVersion());
+      if (lastComparison != 0) {
+        return lastComparison;
+      }
+      if (isSetApiVersion()) {
+        lastComparison = org.apache.thrift.TBaseHelper.compareTo(this.apiVersion, typedOther.apiVersion);
+        if (lastComparison != 0) {
+          return lastComparison;
+        }
+      }
+      lastComparison = Boolean.valueOf(isSetSessionId()).compareTo(typedOther.isSetSessionId());
+      if (lastComparison != 0) {
+        return lastComparison;
+      }
+      if (isSetSessionId()) {
+        lastComparison = org.apache.thrift.TBaseHelper.compareTo(this.sessionId, typedOther.sessionId);
+        if (lastComparison != 0) {
+          return lastComparison;
+        }
+      }
+      return 0;
+    }
+
+    public _Fields fieldForId(int fieldId) {
+      return _Fields.findByThriftId(fieldId);
+    }
+
+    public void read(org.apache.thrift.protocol.TProtocol iprot) throws org.apache.thrift.TException {
+      schemes.get(iprot.getScheme()).getScheme().read(iprot, this);
+    }
+
+    public void write(org.apache.thrift.protocol.TProtocol oprot) throws org.apache.thrift.TException {
+      schemes.get(oprot.getScheme()).getScheme().write(oprot, this);
+    }
+
+    @Override
+    public String toString() {
+      StringBuilder sb = new StringBuilder("getAllURITemplates_args(");
+      boolean first = true;
+
+      sb.append("context:");
+      if (this.context == null) {
+        sb.append("null");
+      } else {
+        sb.append(this.context);
+      }
+      first = false;
+      if (!first) sb.append(", ");
+      sb.append("apiVersion:");
+      if (this.apiVersion == null) {
+        sb.append("null");
+      } else {
+        sb.append(this.apiVersion);
+      }
+      first = false;
+      if (!first) sb.append(", ");
+      sb.append("sessionId:");
+      if (this.sessionId == null) {
+        sb.append("null");
+      } else {
+        sb.append(this.sessionId);
+      }
+      first = false;
+      sb.append(")");
+      return sb.toString();
+    }
+
+    public void validate() throws org.apache.thrift.TException {
+      // check for required fields
+      if (context == null) {
+        throw new org.apache.thrift.protocol.TProtocolException("Required field 'context' was not present! Struct: " + toString());
+      }
+      if (apiVersion == null) {
+        throw new org.apache.thrift.protocol.TProtocolException("Required field 'apiVersion' was not present! Struct: " + toString());
+      }
+      if (sessionId == null) {
+        throw new org.apache.thrift.protocol.TProtocolException("Required field 'sessionId' was not present! Struct: " + toString());
+      }
+    }
+
+    private void writeObject(java.io.ObjectOutputStream out) throws java.io.IOException {
+      try {
+        write(new org.apache.thrift.protocol.TCompactProtocol(new org.apache.thrift.transport.TIOStreamTransport(out)));
+      } catch (org.apache.thrift.TException te) {
+        throw new java.io.IOException(te);
+      }
+    }
+
+    private void readObject(java.io.ObjectInputStream in) throws java.io.IOException, ClassNotFoundException {
+      try {
+        read(new org.apache.thrift.protocol.TCompactProtocol(new org.apache.thrift.transport.TIOStreamTransport(in)));
+      } catch (org.apache.thrift.TException te) {
+        throw new java.io.IOException(te);
+      }
+    }
+
+    private static class getAllURITemplates_argsStandardSchemeFactory implements SchemeFactory {
+      public getAllURITemplates_argsStandardScheme getScheme() {
+        return new getAllURITemplates_argsStandardScheme();
+      }
+    }
+
+    private static class getAllURITemplates_argsStandardScheme extends StandardScheme<getAllURITemplates_args> {
+
+      public void read(org.apache.thrift.protocol.TProtocol iprot, getAllURITemplates_args struct) throws org.apache.thrift.TException {
+        org.apache.thrift.protocol.TField schemeField;
+        iprot.readStructBegin();
+        while (true)
         {
-            this();
-            this.context = context;
-            this.apiVersion = apiVersion;
-            this.sessionId=sessionId;
-        }
-
-        /**
-         * Performs a deep copy on <i>other</i>.
-         */
-        public getAllURITemplates_args(getAllURITemplates_args other) {
-            if (other.isSetContext()) {
-                this.context = other.context;
-            }
-            if (other.isSetApiVersion()) {
-                this.apiVersion = other.apiVersion;
-            }
-            if (other.isSetSessionId()) {
-                this.sessionId = other.sessionId;
-            }
-        }
-
-        public getAllURITemplates_args deepCopy() {
-            return new getAllURITemplates_args(this);
-        }
-
-        @Override
-        public void clear() {
-            this.context = null;
-            this.apiVersion = null;
-            this.sessionId=null;
-        }
-
-        public String getContext() {
-            return this.context;
-        }
-        public String getSessionId() {
-            return this.sessionId;
-        }
-
-        public getAllURITemplates_args setContext(String context) {
-            this.context = context;
-            return this;
-        }
-        public getAllURITemplates_args setSessionId(String sessionId) {
-            this.sessionId = sessionId;
-            return this;
-        }
-
-        public void unsetContext() {
-            this.context = null;
-        }
-        public void unsetSessionId() {
-            this.sessionId = null;
-        }
-
-        /** Returns true if field context is set (has been assigned a value) and false otherwise */
-        public boolean isSetContext() {
-            return this.context != null;
-        }
-        public boolean isSetSessionId() {
-            return this.sessionId != null;
-        }
-
-        public void setContextIsSet(boolean value) {
-            if (!value) {
-                this.context = null;
-            }
-        }
-        public void setSessionIdIsSet(boolean value) {
-            if (!value) {
-                this.sessionId = null;
-            }
-        }
-
-        public String getApiVersion() {
-            return this.apiVersion;
-        }
-
-        public getAllURITemplates_args setApiVersion(String apiVersion) {
-            this.apiVersion = apiVersion;
-            return this;
-        }
-
-        public void unsetApiVersion() {
-            this.apiVersion = null;
-        }
-
-        /** Returns true if field apiVersion is set (has been assigned a value) and false otherwise */
-        public boolean isSetApiVersion() {
-            return this.apiVersion != null;
-        }
-
-        public void setApiVersionIsSet(boolean value) {
-            if (!value) {
-                this.apiVersion = null;
-            }
-        }
-
-        public void setFieldValue(_Fields field, Object value) {
-            switch (field) {
-                case CONTEXT:
-                    if (value == null) {
-                        unsetContext();
-                    } else {
-                        setContext((String)value);
-                    }
-                    break;
-
-                case API_VERSION:
-                    if (value == null) {
-                        unsetApiVersion();
-                    } else {
-                        setApiVersion((String)value);
-                    }
-                    break;
-
-                case SESSION_ID:
-                    if (value == null) {
-                        unsetSessionId();
-                    } else {
-                        setSessionId((String)value);
-                    }
-                    break;
-
-            }
-        }
-
-        public Object getFieldValue(_Fields field) {
-            switch (field) {
-                case CONTEXT:
-                    return getContext();
-
-                case API_VERSION:
-                    return getApiVersion();
-
-                case SESSION_ID:
-                    return getSessionId();
-
-            }
-            throw new IllegalStateException();
-        }
-
-        /** Returns true if field corresponding to fieldID is set (has been assigned a value) and false otherwise */
-        public boolean isSet(_Fields field) {
-            if (field == null) {
-                throw new IllegalArgumentException();
-            }
-
-            switch (field) {
-                case CONTEXT:
-                    return isSetContext();
-                case API_VERSION:
-                    return isSetApiVersion();
-                case SESSION_ID:
-                    return isSetSessionId();
-            }
-            throw new IllegalStateException();
-        }
-
-        @Override
-        public boolean equals(Object that) {
-            if (that == null)
-                return false;
-            if (that instanceof getAllURITemplates_args)
-                return this.equals((getAllURITemplates_args)that);
-            return false;
-        }
-
-        public boolean equals(getAllURITemplates_args that) {
-            if (that == null)
-                return false;
-
-            boolean this_present_context = true && this.isSetContext();
-            boolean that_present_context = true && that.isSetContext();
-            if (this_present_context || that_present_context) {
-                if (!(this_present_context && that_present_context))
-                    return false;
-                if (!this.context.equals(that.context))
-                    return false;
-            }
-
-            boolean this_present_apiVersion = true && this.isSetApiVersion();
-            boolean that_present_apiVersion = true && that.isSetApiVersion();
-            if (this_present_apiVersion || that_present_apiVersion) {
-                if (!(this_present_apiVersion && that_present_apiVersion))
-                    return false;
-                if (!this.apiVersion.equals(that.apiVersion))
-                    return false;
-            }
-
-            boolean this_present_sessionId = true && this.isSetSessionId();
-            boolean that_present_sessionId = true && that.isSetSessionId();
-            if (this_present_sessionId || that_present_sessionId) {
-                if (!(this_present_sessionId && that_present_sessionId))
-                    return false;
-                if (!this.sessionId.equals(that.sessionId))
-                    return false;
-            }
-
-            return true;
-        }
-
-        @Override
-        public int hashCode() {
-            return 0;
-        }
-
-        public int compareTo(getAllURITemplates_args other) {
-            if (!getClass().equals(other.getClass())) {
-                return getClass().getName().compareTo(other.getClass().getName());
-            }
-
-            int lastComparison = 0;
-            getAllURITemplates_args typedOther = (getAllURITemplates_args)other;
-
-            lastComparison = Boolean.valueOf(isSetContext()).compareTo(typedOther.isSetContext());
-            if (lastComparison != 0) {
-                return lastComparison;
-            }
-            if (isSetContext()) {
-                lastComparison = org.apache.thrift.TBaseHelper.compareTo(this.context, typedOther.context);
-                if (lastComparison != 0) {
-                    return lastComparison;
-                }
-            }
-            lastComparison = Boolean.valueOf(isSetApiVersion()).compareTo(typedOther.isSetApiVersion());
-            if (lastComparison != 0) {
-                return lastComparison;
-            }
-            if (isSetApiVersion()) {
-                lastComparison = org.apache.thrift.TBaseHelper.compareTo(this.apiVersion, typedOther.apiVersion);
-                if (lastComparison != 0) {
-                    return lastComparison;
-                }
-            }
-            lastComparison = Boolean.valueOf(isSetSessionId()).compareTo(typedOther.isSetSessionId());
-            if (lastComparison != 0) {
-                return lastComparison;
-            }
-            if (isSetSessionId()) {
-                lastComparison = org.apache.thrift.TBaseHelper.compareTo(this.sessionId, typedOther.sessionId);
-                if (lastComparison != 0) {
-                    return lastComparison;
-                }
-            }
-            return 0;
-        }
-
-        public _Fields fieldForId(int fieldId) {
-            return _Fields.findByThriftId(fieldId);
-        }
-
-        public void read(org.apache.thrift.protocol.TProtocol iprot) throws org.apache.thrift.TException {
-            schemes.get(iprot.getScheme()).getScheme().read(iprot, this);
-        }
-
-        public void write(org.apache.thrift.protocol.TProtocol oprot) throws org.apache.thrift.TException {
-            schemes.get(oprot.getScheme()).getScheme().write(oprot, this);
-        }
-
-        @Override
-        public String toString() {
-            StringBuilder sb = new StringBuilder("getAllURITemplates_args(");
-            boolean first = true;
-
-            sb.append("context:");
-            if (this.context == null) {
-                sb.append("null");
-            } else {
-                sb.append(this.context);
-            }
-            first = false;
-            if (!first) sb.append(", ");
-            sb.append("apiVersion:");
-            if (this.apiVersion == null) {
-                sb.append("null");
-            } else {
-                sb.append(this.apiVersion);
-            }
-            first = false;
-            if (!first) sb.append(", ");
-            sb.append("sessionId:");
-            if (this.sessionId == null) {
-                sb.append("null");
-            } else {
-                sb.append(this.sessionId);
-            }
-            sb.append(")");
-            return sb.toString();
-        }
-
-        public void validate() throws org.apache.thrift.TException {
-            // check for required fields
-            if (context == null) {
-                throw new org.apache.thrift.protocol.TProtocolException("Required field 'context' was not present! Struct: " + toString());
-            }
-            if (apiVersion == null) {
-                throw new org.apache.thrift.protocol.TProtocolException("Required field 'apiVersion' was not present! Struct: " + toString());
-            }
-            if (sessionId == null) {
-                throw new org.apache.thrift.protocol.TProtocolException("Required field 'sessionId' was not present! Struct: " + toString());
-            }
-        }
-
-        private void writeObject(java.io.ObjectOutputStream out) throws java.io.IOException {
-            try {
-                write(new org.apache.thrift.protocol.TCompactProtocol(new org.apache.thrift.transport.TIOStreamTransport(out)));
-            } catch (org.apache.thrift.TException te) {
-                throw new java.io.IOException(te);
-            }
-        }
-
-        private void readObject(java.io.ObjectInputStream in) throws java.io.IOException, ClassNotFoundException {
-            try {
-                read(new org.apache.thrift.protocol.TCompactProtocol(new org.apache.thrift.transport.TIOStreamTransport(in)));
-            } catch (org.apache.thrift.TException te) {
-                throw new java.io.IOException(te);
-            }
-        }
-
-        private static class getAllURITemplates_argsStandardSchemeFactory implements SchemeFactory {
-            public getAllURITemplates_argsStandardScheme getScheme() {
-                return new getAllURITemplates_argsStandardScheme();
-            }
-        }
-
-        private static class getAllURITemplates_argsStandardScheme extends StandardScheme<getAllURITemplates_args> {
-
-            public void read(org.apache.thrift.protocol.TProtocol iprot, getAllURITemplates_args struct) throws org.apache.thrift.TException {
-                org.apache.thrift.protocol.TField schemeField;
-                iprot.readStructBegin();
-                while (true)
-                {
-                    schemeField = iprot.readFieldBegin();
-                    if (schemeField.type == org.apache.thrift.protocol.TType.STOP) {
-                        break;
-                    }
-                    switch (schemeField.id) {
-                        case 1: // CONTEXT
-                            if (schemeField.type == org.apache.thrift.protocol.TType.STRING) {
-                                struct.context = iprot.readString();
-                                struct.setContextIsSet(true);
-                            } else {
-                                org.apache.thrift.protocol.TProtocolUtil.skip(iprot, schemeField.type);
-                            }
-                            break;
-                        case 2: // API_VERSION
-                            if (schemeField.type == org.apache.thrift.protocol.TType.STRING) {
-                                struct.apiVersion = iprot.readString();
-                                struct.setApiVersionIsSet(true);
-                            } else {
-                                org.apache.thrift.protocol.TProtocolUtil.skip(iprot, schemeField.type);
-                            }
-                            break;
-                        case 3: // SESSION_ID
-                            if (schemeField.type == org.apache.thrift.protocol.TType.STRING) {
-                                struct.sessionId = iprot.readString();
-                                struct.setSessionIdIsSet(true);
-                            } else {
-                                org.apache.thrift.protocol.TProtocolUtil.skip(iprot, schemeField.type);
-                            }
-                            break;
-                        default:
-                            org.apache.thrift.protocol.TProtocolUtil.skip(iprot, schemeField.type);
-                    }
-                    iprot.readFieldEnd();
-                }
-                iprot.readStructEnd();
-
-                // check for required fields of primitive type, which can't be checked in the validate method
-                struct.validate();
-            }
-
-            public void write(org.apache.thrift.protocol.TProtocol oprot, getAllURITemplates_args struct) throws org.apache.thrift.TException {
-                struct.validate();
-
-                oprot.writeStructBegin(STRUCT_DESC);
-                if (struct.context != null) {
-                    oprot.writeFieldBegin(CONTEXT_FIELD_DESC);
-                    oprot.writeString(struct.context);
-                    oprot.writeFieldEnd();
-                }
-                if (struct.apiVersion != null) {
-                    oprot.writeFieldBegin(API_VERSION_FIELD_DESC);
-                    oprot.writeString(struct.apiVersion);
-                    oprot.writeFieldEnd();
-                }
-                if (struct.sessionId != null) {
-                    oprot.writeFieldBegin(SESSION_ID_FIELD_DESC);
-                    oprot.writeString(struct.sessionId);
-                    oprot.writeFieldEnd();
-                }
-                oprot.writeFieldStop();
-                oprot.writeStructEnd();
-            }
-
-        }
-
-        private static class getAllURITemplates_argsTupleSchemeFactory implements SchemeFactory {
-            public getAllURITemplates_argsTupleScheme getScheme() {
-                return new getAllURITemplates_argsTupleScheme();
-            }
-        }
-
-        private static class getAllURITemplates_argsTupleScheme extends TupleScheme<getAllURITemplates_args> {
-
-            @Override
-            public void write(org.apache.thrift.protocol.TProtocol prot, getAllURITemplates_args struct) throws org.apache.thrift.TException {
-                TTupleProtocol oprot = (TTupleProtocol) prot;
-                oprot.writeString(struct.context);
-                oprot.writeString(struct.apiVersion);
-            }
-
-            @Override
-            public void read(org.apache.thrift.protocol.TProtocol prot, getAllURITemplates_args struct) throws org.apache.thrift.TException {
-                TTupleProtocol iprot = (TTupleProtocol) prot;
+          schemeField = iprot.readFieldBegin();
+          if (schemeField.type == org.apache.thrift.protocol.TType.STOP) { 
+            break;
+          }
+          switch (schemeField.id) {
+            case 1: // CONTEXT
+              if (schemeField.type == org.apache.thrift.protocol.TType.STRING) {
                 struct.context = iprot.readString();
                 struct.setContextIsSet(true);
+              } else { 
+                org.apache.thrift.protocol.TProtocolUtil.skip(iprot, schemeField.type);
+              }
+              break;
+            case 2: // API_VERSION
+              if (schemeField.type == org.apache.thrift.protocol.TType.STRING) {
                 struct.apiVersion = iprot.readString();
                 struct.setApiVersionIsSet(true);
+              } else { 
+                org.apache.thrift.protocol.TProtocolUtil.skip(iprot, schemeField.type);
+              }
+              break;
+            case 3: // SESSION_ID
+              if (schemeField.type == org.apache.thrift.protocol.TType.STRING) {
                 struct.sessionId = iprot.readString();
                 struct.setSessionIdIsSet(true);
-            }
+              } else { 
+                org.apache.thrift.protocol.TProtocolUtil.skip(iprot, schemeField.type);
+              }
+              break;
+            default:
+              org.apache.thrift.protocol.TProtocolUtil.skip(iprot, schemeField.type);
+          }
+          iprot.readFieldEnd();
         }
+        iprot.readStructEnd();
+
+        // check for required fields of primitive type, which can't be checked in the validate method
+        struct.validate();
+      }
+
+      public void write(org.apache.thrift.protocol.TProtocol oprot, getAllURITemplates_args struct) throws org.apache.thrift.TException {
+        struct.validate();
+
+        oprot.writeStructBegin(STRUCT_DESC);
+        if (struct.context != null) {
+          oprot.writeFieldBegin(CONTEXT_FIELD_DESC);
+          oprot.writeString(struct.context);
+          oprot.writeFieldEnd();
+        }
+        if (struct.apiVersion != null) {
+          oprot.writeFieldBegin(API_VERSION_FIELD_DESC);
+          oprot.writeString(struct.apiVersion);
+          oprot.writeFieldEnd();
+        }
+        if (struct.sessionId != null) {
+          oprot.writeFieldBegin(SESSION_ID_FIELD_DESC);
+          oprot.writeString(struct.sessionId);
+          oprot.writeFieldEnd();
+        }
+        oprot.writeFieldStop();
+        oprot.writeStructEnd();
+      }
 
     }
-    public static class getAllURITemplates_result implements org.apache.thrift.TBase<getAllURITemplates_result, getAllURITemplates_result._Fields>, java.io.Serializable, Cloneable   {
-        private static final org.apache.thrift.protocol.TStruct STRUCT_DESC = new org.apache.thrift.protocol.TStruct("getAllURITemplates_result");
 
-        private static final org.apache.thrift.protocol.TField SUCCESS_FIELD_DESC = new org.apache.thrift.protocol.TField("success", org.apache.thrift.protocol.TType.LIST, (short)0);
-        private static final org.apache.thrift.protocol.TField API_KEY_MGT_EXCEPTION_FIELD_DESC = new org.apache.thrift.protocol.TField("apiKeyMgtException", org.apache.thrift.protocol.TType.STRUCT, (short)1);
-        private static final org.apache.thrift.protocol.TField API_MGT_EXCEPTION_FIELD_DESC = new org.apache.thrift.protocol.TField("apiMgtException", org.apache.thrift.protocol.TType.STRUCT, (short)2);
+    private static class getAllURITemplates_argsTupleSchemeFactory implements SchemeFactory {
+      public getAllURITemplates_argsTupleScheme getScheme() {
+        return new getAllURITemplates_argsTupleScheme();
+      }
+    }
 
-        private static final Map<Class<? extends IScheme>, SchemeFactory> schemes = new HashMap<Class<? extends IScheme>, SchemeFactory>();
-        static {
-            schemes.put(StandardScheme.class, new getAllURITemplates_resultStandardSchemeFactory());
-            schemes.put(TupleScheme.class, new getAllURITemplates_resultTupleSchemeFactory());
+    private static class getAllURITemplates_argsTupleScheme extends TupleScheme<getAllURITemplates_args> {
+
+      @Override
+      public void write(org.apache.thrift.protocol.TProtocol prot, getAllURITemplates_args struct) throws org.apache.thrift.TException {
+        TTupleProtocol oprot = (TTupleProtocol) prot;
+        oprot.writeString(struct.context);
+        oprot.writeString(struct.apiVersion);
+        oprot.writeString(struct.sessionId);
+      }
+
+      @Override
+      public void read(org.apache.thrift.protocol.TProtocol prot, getAllURITemplates_args struct) throws org.apache.thrift.TException {
+        TTupleProtocol iprot = (TTupleProtocol) prot;
+        struct.context = iprot.readString();
+        struct.setContextIsSet(true);
+        struct.apiVersion = iprot.readString();
+        struct.setApiVersionIsSet(true);
+        struct.sessionId = iprot.readString();
+        struct.setSessionIdIsSet(true);
+      }
+    }
+
+  }
+
+  public static class getAllURITemplates_result implements org.apache.thrift.TBase<getAllURITemplates_result, getAllURITemplates_result._Fields>, java.io.Serializable, Cloneable   {
+    private static final org.apache.thrift.protocol.TStruct STRUCT_DESC = new org.apache.thrift.protocol.TStruct("getAllURITemplates_result");
+
+    private static final org.apache.thrift.protocol.TField SUCCESS_FIELD_DESC = new org.apache.thrift.protocol.TField("success", org.apache.thrift.protocol.TType.LIST, (short)0);
+    private static final org.apache.thrift.protocol.TField API_KEY_MGT_EXCEPTION_FIELD_DESC = new org.apache.thrift.protocol.TField("apiKeyMgtException", org.apache.thrift.protocol.TType.STRUCT, (short)1);
+    private static final org.apache.thrift.protocol.TField API_MGT_EXCEPTION_FIELD_DESC = new org.apache.thrift.protocol.TField("apiMgtException", org.apache.thrift.protocol.TType.STRUCT, (short)2);
+
+    private static final Map<Class<? extends IScheme>, SchemeFactory> schemes = new HashMap<Class<? extends IScheme>, SchemeFactory>();
+    static {
+      schemes.put(StandardScheme.class, new getAllURITemplates_resultStandardSchemeFactory());
+      schemes.put(TupleScheme.class, new getAllURITemplates_resultTupleSchemeFactory());
+    }
+
+    public List<URITemplate> success; // required
+    public APIKeyMgtException apiKeyMgtException; // required
+    public APIManagementException apiMgtException; // required
+
+    /** The set of fields this struct contains, along with convenience methods for finding and manipulating them. */
+    public enum _Fields implements org.apache.thrift.TFieldIdEnum {
+      SUCCESS((short)0, "success"),
+      API_KEY_MGT_EXCEPTION((short)1, "apiKeyMgtException"),
+      API_MGT_EXCEPTION((short)2, "apiMgtException");
+
+      private static final Map<String, _Fields> byName = new HashMap<String, _Fields>();
+
+      static {
+        for (_Fields field : EnumSet.allOf(_Fields.class)) {
+          byName.put(field.getFieldName(), field);
         }
+      }
 
-        public List<URITemplate> success; // required
-        public org.wso2.carbon.apimgt.gateway.handlers.security.thrift.APIKeyMgtException apiKeyMgtException; // required
-        public APIManagementException apiMgtException; // required
-
-        /** The set of fields this struct contains, along with convenience methods for finding and manipulating them. */
-        public enum _Fields implements org.apache.thrift.TFieldIdEnum {
-            SUCCESS((short)0, "success"),
-            API_KEY_MGT_EXCEPTION((short)1, "apiKeyMgtException"),
-            API_MGT_EXCEPTION((short)2, "apiMgtException");
-
-            private static final Map<String, _Fields> byName = new HashMap<String, _Fields>();
-
-            static {
-                for (_Fields field : EnumSet.allOf(_Fields.class)) {
-                    byName.put(field.getFieldName(), field);
-                }
-            }
-
-            /**
-             * Find the _Fields constant that matches fieldId, or null if its not found.
-             */
-            public static _Fields findByThriftId(int fieldId) {
-                switch(fieldId) {
-                    case 0: // SUCCESS
-                        return SUCCESS;
-                    case 1: // API_KEY_MGT_EXCEPTION
-                        return API_KEY_MGT_EXCEPTION;
-                    case 2: // API_MGT_EXCEPTION
-                        return API_MGT_EXCEPTION;
-                    default:
-                        return null;
-                }
-            }
-
-            /**
-             * Find the _Fields constant that matches fieldId, throwing an exception
-             * if it is not found.
-             */
-            public static _Fields findByThriftIdOrThrow(int fieldId) {
-                _Fields fields = findByThriftId(fieldId);
-                if (fields == null) throw new IllegalArgumentException("Field " + fieldId + " doesn't exist!");
-                return fields;
-            }
-
-            /**
-             * Find the _Fields constant that matches name, or null if its not found.
-             */
-            public static _Fields findByName(String name) {
-                return byName.get(name);
-            }
-
-            private final short _thriftId;
-            private final String _fieldName;
-
-            _Fields(short thriftId, String fieldName) {
-                _thriftId = thriftId;
-                _fieldName = fieldName;
-            }
-
-            public short getThriftFieldId() {
-                return _thriftId;
-            }
-
-            public String getFieldName() {
-                return _fieldName;
-            }
+      /**
+       * Find the _Fields constant that matches fieldId, or null if its not found.
+       */
+      public static _Fields findByThriftId(int fieldId) {
+        switch(fieldId) {
+          case 0: // SUCCESS
+            return SUCCESS;
+          case 1: // API_KEY_MGT_EXCEPTION
+            return API_KEY_MGT_EXCEPTION;
+          case 2: // API_MGT_EXCEPTION
+            return API_MGT_EXCEPTION;
+          default:
+            return null;
         }
+      }
 
-        // isset id assignments
-        public static final Map<_Fields, org.apache.thrift.meta_data.FieldMetaData> metaDataMap;
-        static {
-            Map<_Fields, org.apache.thrift.meta_data.FieldMetaData> tmpMap = new EnumMap<_Fields, org.apache.thrift.meta_data.FieldMetaData>(_Fields.class);
-            tmpMap.put(_Fields.SUCCESS, new org.apache.thrift.meta_data.FieldMetaData("success", org.apache.thrift.TFieldRequirementType.DEFAULT,
-                                                                                      new org.apache.thrift.meta_data.ListMetaData(org.apache.thrift.protocol.TType.LIST,
-                                                                                                                                   new org.apache.thrift.meta_data.StructMetaData(org.apache.thrift.protocol.TType.STRUCT, URITemplate.class))));
-            tmpMap.put(_Fields.API_KEY_MGT_EXCEPTION, new org.apache.thrift.meta_data.FieldMetaData("apiKeyMgtException", org.apache.thrift.TFieldRequirementType.DEFAULT,
-                                                                                                    new org.apache.thrift.meta_data.FieldValueMetaData(org.apache.thrift.protocol.TType.STRUCT)));
-            tmpMap.put(_Fields.API_MGT_EXCEPTION, new org.apache.thrift.meta_data.FieldMetaData("apiMgtException", org.apache.thrift.TFieldRequirementType.DEFAULT,
-                                                                                                new org.apache.thrift.meta_data.FieldValueMetaData(org.apache.thrift.protocol.TType.STRUCT)));
-            metaDataMap = Collections.unmodifiableMap(tmpMap);
-            org.apache.thrift.meta_data.FieldMetaData.addStructMetaDataMap(getAllURITemplates_result.class, metaDataMap);
+      /**
+       * Find the _Fields constant that matches fieldId, throwing an exception
+       * if it is not found.
+       */
+      public static _Fields findByThriftIdOrThrow(int fieldId) {
+        _Fields fields = findByThriftId(fieldId);
+        if (fields == null) throw new IllegalArgumentException("Field " + fieldId + " doesn't exist!");
+        return fields;
+      }
+
+      /**
+       * Find the _Fields constant that matches name, or null if its not found.
+       */
+      public static _Fields findByName(String name) {
+        return byName.get(name);
+      }
+
+      private final short _thriftId;
+      private final String _fieldName;
+
+      _Fields(short thriftId, String fieldName) {
+        _thriftId = thriftId;
+        _fieldName = fieldName;
+      }
+
+      public short getThriftFieldId() {
+        return _thriftId;
+      }
+
+      public String getFieldName() {
+        return _fieldName;
+      }
+    }
+
+    // isset id assignments
+    public static final Map<_Fields, org.apache.thrift.meta_data.FieldMetaData> metaDataMap;
+    static {
+      Map<_Fields, org.apache.thrift.meta_data.FieldMetaData> tmpMap = new EnumMap<_Fields, org.apache.thrift.meta_data.FieldMetaData>(_Fields.class);
+      tmpMap.put(_Fields.SUCCESS, new org.apache.thrift.meta_data.FieldMetaData("success", org.apache.thrift.TFieldRequirementType.DEFAULT, 
+          new org.apache.thrift.meta_data.ListMetaData(org.apache.thrift.protocol.TType.LIST, 
+              new org.apache.thrift.meta_data.StructMetaData(org.apache.thrift.protocol.TType.STRUCT, URITemplate.class))));
+      tmpMap.put(_Fields.API_KEY_MGT_EXCEPTION, new org.apache.thrift.meta_data.FieldMetaData("apiKeyMgtException", org.apache.thrift.TFieldRequirementType.DEFAULT, 
+          new org.apache.thrift.meta_data.FieldValueMetaData(org.apache.thrift.protocol.TType.STRUCT)));
+      tmpMap.put(_Fields.API_MGT_EXCEPTION, new org.apache.thrift.meta_data.FieldMetaData("apiMgtException", org.apache.thrift.TFieldRequirementType.DEFAULT, 
+          new org.apache.thrift.meta_data.FieldValueMetaData(org.apache.thrift.protocol.TType.STRUCT)));
+      metaDataMap = Collections.unmodifiableMap(tmpMap);
+      org.apache.thrift.meta_data.FieldMetaData.addStructMetaDataMap(getAllURITemplates_result.class, metaDataMap);
+    }
+
+    public getAllURITemplates_result() {
+    }
+
+    public getAllURITemplates_result(
+      List<URITemplate> success,
+      APIKeyMgtException apiKeyMgtException,
+      APIManagementException apiMgtException)
+    {
+      this();
+      this.success = success;
+      this.apiKeyMgtException = apiKeyMgtException;
+      this.apiMgtException = apiMgtException;
+    }
+
+    /**
+     * Performs a deep copy on <i>other</i>.
+     */
+    public getAllURITemplates_result(getAllURITemplates_result other) {
+      if (other.isSetSuccess()) {
+        List<URITemplate> __this__success = new ArrayList<URITemplate>();
+        for (URITemplate other_element : other.success) {
+          __this__success.add(new URITemplate(other_element));
         }
+        this.success = __this__success;
+      }
+      if (other.isSetApiKeyMgtException()) {
+        this.apiKeyMgtException = new APIKeyMgtException(other.apiKeyMgtException);
+      }
+      if (other.isSetApiMgtException()) {
+        this.apiMgtException = new APIManagementException(other.apiMgtException);
+      }
+    }
 
-        public getAllURITemplates_result() {
+    public getAllURITemplates_result deepCopy() {
+      return new getAllURITemplates_result(this);
+    }
+
+    @Override
+    public void clear() {
+      this.success = null;
+      this.apiKeyMgtException = null;
+      this.apiMgtException = null;
+    }
+
+    public int getSuccessSize() {
+      return (this.success == null) ? 0 : this.success.size();
+    }
+
+    public java.util.Iterator<URITemplate> getSuccessIterator() {
+      return (this.success == null) ? null : this.success.iterator();
+    }
+
+    public void addToSuccess(URITemplate elem) {
+      if (this.success == null) {
+        this.success = new ArrayList<URITemplate>();
+      }
+      this.success.add(elem);
+    }
+
+    public List<URITemplate> getSuccess() {
+      return this.success;
+    }
+
+    public getAllURITemplates_result setSuccess(List<URITemplate> success) {
+      this.success = success;
+      return this;
+    }
+
+    public void unsetSuccess() {
+      this.success = null;
+    }
+
+    /** Returns true if field success is set (has been assigned a value) and false otherwise */
+    public boolean isSetSuccess() {
+      return this.success != null;
+    }
+
+    public void setSuccessIsSet(boolean value) {
+      if (!value) {
+        this.success = null;
+      }
+    }
+
+    public APIKeyMgtException getApiKeyMgtException() {
+      return this.apiKeyMgtException;
+    }
+
+    public getAllURITemplates_result setApiKeyMgtException(APIKeyMgtException apiKeyMgtException) {
+      this.apiKeyMgtException = apiKeyMgtException;
+      return this;
+    }
+
+    public void unsetApiKeyMgtException() {
+      this.apiKeyMgtException = null;
+    }
+
+    /** Returns true if field apiKeyMgtException is set (has been assigned a value) and false otherwise */
+    public boolean isSetApiKeyMgtException() {
+      return this.apiKeyMgtException != null;
+    }
+
+    public void setApiKeyMgtExceptionIsSet(boolean value) {
+      if (!value) {
+        this.apiKeyMgtException = null;
+      }
+    }
+
+    public APIManagementException getApiMgtException() {
+      return this.apiMgtException;
+    }
+
+    public getAllURITemplates_result setApiMgtException(APIManagementException apiMgtException) {
+      this.apiMgtException = apiMgtException;
+      return this;
+    }
+
+    public void unsetApiMgtException() {
+      this.apiMgtException = null;
+    }
+
+    /** Returns true if field apiMgtException is set (has been assigned a value) and false otherwise */
+    public boolean isSetApiMgtException() {
+      return this.apiMgtException != null;
+    }
+
+    public void setApiMgtExceptionIsSet(boolean value) {
+      if (!value) {
+        this.apiMgtException = null;
+      }
+    }
+
+    public void setFieldValue(_Fields field, Object value) {
+      switch (field) {
+      case SUCCESS:
+        if (value == null) {
+          unsetSuccess();
+        } else {
+          setSuccess((List<URITemplate>)value);
         }
+        break;
 
-        public getAllURITemplates_result(
-                List<URITemplate> success,
-                org.wso2.carbon.apimgt.gateway.handlers.security.thrift.APIKeyMgtException apiKeyMgtException,
-                APIManagementException apiMgtException)
+      case API_KEY_MGT_EXCEPTION:
+        if (value == null) {
+          unsetApiKeyMgtException();
+        } else {
+          setApiKeyMgtException((APIKeyMgtException)value);
+        }
+        break;
+
+      case API_MGT_EXCEPTION:
+        if (value == null) {
+          unsetApiMgtException();
+        } else {
+          setApiMgtException((APIManagementException)value);
+        }
+        break;
+
+      }
+    }
+
+    public Object getFieldValue(_Fields field) {
+      switch (field) {
+      case SUCCESS:
+        return getSuccess();
+
+      case API_KEY_MGT_EXCEPTION:
+        return getApiKeyMgtException();
+
+      case API_MGT_EXCEPTION:
+        return getApiMgtException();
+
+      }
+      throw new IllegalStateException();
+    }
+
+    /** Returns true if field corresponding to fieldID is set (has been assigned a value) and false otherwise */
+    public boolean isSet(_Fields field) {
+      if (field == null) {
+        throw new IllegalArgumentException();
+      }
+
+      switch (field) {
+      case SUCCESS:
+        return isSetSuccess();
+      case API_KEY_MGT_EXCEPTION:
+        return isSetApiKeyMgtException();
+      case API_MGT_EXCEPTION:
+        return isSetApiMgtException();
+      }
+      throw new IllegalStateException();
+    }
+
+    @Override
+    public boolean equals(Object that) {
+      if (that == null)
+        return false;
+      if (that instanceof getAllURITemplates_result)
+        return this.equals((getAllURITemplates_result)that);
+      return false;
+    }
+
+    public boolean equals(getAllURITemplates_result that) {
+      if (that == null)
+        return false;
+
+      boolean this_present_success = true && this.isSetSuccess();
+      boolean that_present_success = true && that.isSetSuccess();
+      if (this_present_success || that_present_success) {
+        if (!(this_present_success && that_present_success))
+          return false;
+        if (!this.success.equals(that.success))
+          return false;
+      }
+
+      boolean this_present_apiKeyMgtException = true && this.isSetApiKeyMgtException();
+      boolean that_present_apiKeyMgtException = true && that.isSetApiKeyMgtException();
+      if (this_present_apiKeyMgtException || that_present_apiKeyMgtException) {
+        if (!(this_present_apiKeyMgtException && that_present_apiKeyMgtException))
+          return false;
+        if (!this.apiKeyMgtException.equals(that.apiKeyMgtException))
+          return false;
+      }
+
+      boolean this_present_apiMgtException = true && this.isSetApiMgtException();
+      boolean that_present_apiMgtException = true && that.isSetApiMgtException();
+      if (this_present_apiMgtException || that_present_apiMgtException) {
+        if (!(this_present_apiMgtException && that_present_apiMgtException))
+          return false;
+        if (!this.apiMgtException.equals(that.apiMgtException))
+          return false;
+      }
+
+      return true;
+    }
+
+    @Override
+    public int hashCode() {
+      return 0;
+    }
+
+    public int compareTo(getAllURITemplates_result other) {
+      if (!getClass().equals(other.getClass())) {
+        return getClass().getName().compareTo(other.getClass().getName());
+      }
+
+      int lastComparison = 0;
+      getAllURITemplates_result typedOther = (getAllURITemplates_result)other;
+
+      lastComparison = Boolean.valueOf(isSetSuccess()).compareTo(typedOther.isSetSuccess());
+      if (lastComparison != 0) {
+        return lastComparison;
+      }
+      if (isSetSuccess()) {
+        lastComparison = org.apache.thrift.TBaseHelper.compareTo(this.success, typedOther.success);
+        if (lastComparison != 0) {
+          return lastComparison;
+        }
+      }
+      lastComparison = Boolean.valueOf(isSetApiKeyMgtException()).compareTo(typedOther.isSetApiKeyMgtException());
+      if (lastComparison != 0) {
+        return lastComparison;
+      }
+      if (isSetApiKeyMgtException()) {
+        lastComparison = org.apache.thrift.TBaseHelper.compareTo(this.apiKeyMgtException, typedOther.apiKeyMgtException);
+        if (lastComparison != 0) {
+          return lastComparison;
+        }
+      }
+      lastComparison = Boolean.valueOf(isSetApiMgtException()).compareTo(typedOther.isSetApiMgtException());
+      if (lastComparison != 0) {
+        return lastComparison;
+      }
+      if (isSetApiMgtException()) {
+        lastComparison = org.apache.thrift.TBaseHelper.compareTo(this.apiMgtException, typedOther.apiMgtException);
+        if (lastComparison != 0) {
+          return lastComparison;
+        }
+      }
+      return 0;
+    }
+
+    public _Fields fieldForId(int fieldId) {
+      return _Fields.findByThriftId(fieldId);
+    }
+
+    public void read(org.apache.thrift.protocol.TProtocol iprot) throws org.apache.thrift.TException {
+      schemes.get(iprot.getScheme()).getScheme().read(iprot, this);
+    }
+
+    public void write(org.apache.thrift.protocol.TProtocol oprot) throws org.apache.thrift.TException {
+      schemes.get(oprot.getScheme()).getScheme().write(oprot, this);
+      }
+
+    @Override
+    public String toString() {
+      StringBuilder sb = new StringBuilder("getAllURITemplates_result(");
+      boolean first = true;
+
+      sb.append("success:");
+      if (this.success == null) {
+        sb.append("null");
+      } else {
+        sb.append(this.success);
+      }
+      first = false;
+      if (!first) sb.append(", ");
+      sb.append("apiKeyMgtException:");
+      if (this.apiKeyMgtException == null) {
+        sb.append("null");
+      } else {
+        sb.append(this.apiKeyMgtException);
+      }
+      first = false;
+      if (!first) sb.append(", ");
+      sb.append("apiMgtException:");
+      if (this.apiMgtException == null) {
+        sb.append("null");
+      } else {
+        sb.append(this.apiMgtException);
+      }
+      first = false;
+      sb.append(")");
+      return sb.toString();
+    }
+
+    public void validate() throws org.apache.thrift.TException {
+      // check for required fields
+    }
+
+    private void writeObject(java.io.ObjectOutputStream out) throws java.io.IOException {
+      try {
+        write(new org.apache.thrift.protocol.TCompactProtocol(new org.apache.thrift.transport.TIOStreamTransport(out)));
+      } catch (org.apache.thrift.TException te) {
+        throw new java.io.IOException(te);
+      }
+    }
+
+    private void readObject(java.io.ObjectInputStream in) throws java.io.IOException, ClassNotFoundException {
+      try {
+        read(new org.apache.thrift.protocol.TCompactProtocol(new org.apache.thrift.transport.TIOStreamTransport(in)));
+      } catch (org.apache.thrift.TException te) {
+        throw new java.io.IOException(te);
+      }
+    }
+
+    private static class getAllURITemplates_resultStandardSchemeFactory implements SchemeFactory {
+      public getAllURITemplates_resultStandardScheme getScheme() {
+        return new getAllURITemplates_resultStandardScheme();
+      }
+    }
+
+    private static class getAllURITemplates_resultStandardScheme extends StandardScheme<getAllURITemplates_result> {
+
+      public void read(org.apache.thrift.protocol.TProtocol iprot, getAllURITemplates_result struct) throws org.apache.thrift.TException {
+        org.apache.thrift.protocol.TField schemeField;
+        iprot.readStructBegin();
+        while (true)
         {
-            this();
-            this.success = success;
-            this.apiKeyMgtException = apiKeyMgtException;
-            this.apiMgtException = apiMgtException;
-        }
-
-        /**
-         * Performs a deep copy on <i>other</i>.
-         */
-        public getAllURITemplates_result(getAllURITemplates_result other) {
-            if (other.isSetSuccess()) {
-                List<URITemplate> __this__success = new ArrayList<URITemplate>();
-                for (URITemplate other_element : other.success) {
-                    __this__success.add(new URITemplate(other_element));
-                }
-                this.success = __this__success;
-            }
-            if (other.isSetApiKeyMgtException()) {
-                this.apiKeyMgtException = new org.wso2.carbon.apimgt.gateway.handlers.security.thrift.APIKeyMgtException(other.apiKeyMgtException);
-            }
-            if (other.isSetApiMgtException()) {
-                this.apiMgtException = new APIManagementException(other.apiMgtException);
-            }
-        }
-
-        public getAllURITemplates_result deepCopy() {
-            return new getAllURITemplates_result(this);
-        }
-
-        @Override
-        public void clear() {
-            this.success = null;
-            this.apiKeyMgtException = null;
-            this.apiMgtException = null;
-        }
-
-        public int getSuccessSize() {
-            return (this.success == null) ? 0 : this.success.size();
-        }
-
-        public java.util.Iterator<URITemplate> getSuccessIterator() {
-            return (this.success == null) ? null : this.success.iterator();
-        }
-
-        public void addToSuccess(URITemplate elem) {
-            if (this.success == null) {
-                this.success = new ArrayList<URITemplate>();
-            }
-            this.success.add(elem);
-        }
-
-        public List<URITemplate> getSuccess() {
-            return this.success;
-        }
-
-        public getAllURITemplates_result setSuccess(List<URITemplate> success) {
-            this.success = success;
-            return this;
-        }
-
-        public void unsetSuccess() {
-            this.success = null;
-        }
-
-        /** Returns true if field success is set (has been assigned a value) and false otherwise */
-        public boolean isSetSuccess() {
-            return this.success != null;
-        }
-
-        public void setSuccessIsSet(boolean value) {
-            if (!value) {
-                this.success = null;
-            }
-        }
-
-        public org.wso2.carbon.apimgt.gateway.handlers.security.thrift.APIKeyMgtException getApiKeyMgtException() {
-            return this.apiKeyMgtException;
-        }
-
-        public getAllURITemplates_result setApiKeyMgtException(
-                org.wso2.carbon.apimgt.gateway.handlers.security.thrift.APIKeyMgtException apiKeyMgtException) {
-            this.apiKeyMgtException = apiKeyMgtException;
-            return this;
-        }
-
-        public void unsetApiKeyMgtException() {
-            this.apiKeyMgtException = null;
-        }
-
-        /** Returns true if field apiKeyMgtException is set (has been assigned a value) and false otherwise */
-        public boolean isSetApiKeyMgtException() {
-            return this.apiKeyMgtException != null;
-        }
-
-        public void setApiKeyMgtExceptionIsSet(boolean value) {
-            if (!value) {
-                this.apiKeyMgtException = null;
-            }
-        }
-
-        public APIManagementException getApiMgtException() {
-            return this.apiMgtException;
-        }
-
-        public getAllURITemplates_result setApiMgtException(APIManagementException apiMgtException) {
-            this.apiMgtException = apiMgtException;
-            return this;
-        }
-
-        public void unsetApiMgtException() {
-            this.apiMgtException = null;
-        }
-
-        /** Returns true if field apiMgtException is set (has been assigned a value) and false otherwise */
-        public boolean isSetApiMgtException() {
-            return this.apiMgtException != null;
-        }
-
-        public void setApiMgtExceptionIsSet(boolean value) {
-            if (!value) {
-                this.apiMgtException = null;
-            }
-        }
-
-        public void setFieldValue(_Fields field, Object value) {
-            switch (field) {
-                case SUCCESS:
-                    if (value == null) {
-                        unsetSuccess();
-                    } else {
-                        setSuccess((List<URITemplate>)value);
-                    }
-                    break;
-
-                case API_KEY_MGT_EXCEPTION:
-                    if (value == null) {
-                        unsetApiKeyMgtException();
-                    } else {
-                        setApiKeyMgtException((org.wso2.carbon.apimgt.gateway.handlers.security.thrift.APIKeyMgtException)value);
-                    }
-                    break;
-
-                case API_MGT_EXCEPTION:
-                    if (value == null) {
-                        unsetApiMgtException();
-                    } else {
-                        setApiMgtException((APIManagementException)value);
-                    }
-                    break;
-
-            }
-        }
-
-        public Object getFieldValue(_Fields field) {
-            switch (field) {
-                case SUCCESS:
-                    return getSuccess();
-
-                case API_KEY_MGT_EXCEPTION:
-                    return getApiKeyMgtException();
-
-                case API_MGT_EXCEPTION:
-                    return getApiMgtException();
-
-            }
-            throw new IllegalStateException();
-        }
-
-        /** Returns true if field corresponding to fieldID is set (has been assigned a value) and false otherwise */
-        public boolean isSet(_Fields field) {
-            if (field == null) {
-                throw new IllegalArgumentException();
-            }
-
-            switch (field) {
-                case SUCCESS:
-                    return isSetSuccess();
-                case API_KEY_MGT_EXCEPTION:
-                    return isSetApiKeyMgtException();
-                case API_MGT_EXCEPTION:
-                    return isSetApiMgtException();
-            }
-            throw new IllegalStateException();
-        }
-
-        @Override
-        public boolean equals(Object that) {
-            if (that == null)
-                return false;
-            if (that instanceof getAllURITemplates_result)
-                return this.equals((getAllURITemplates_result)that);
-            return false;
-        }
-
-        public boolean equals(getAllURITemplates_result that) {
-            if (that == null)
-                return false;
-
-            boolean this_present_success = true && this.isSetSuccess();
-            boolean that_present_success = true && that.isSetSuccess();
-            if (this_present_success || that_present_success) {
-                if (!(this_present_success && that_present_success))
-                    return false;
-                if (!this.success.equals(that.success))
-                    return false;
-            }
-
-            boolean this_present_apiKeyMgtException = true && this.isSetApiKeyMgtException();
-            boolean that_present_apiKeyMgtException = true && that.isSetApiKeyMgtException();
-            if (this_present_apiKeyMgtException || that_present_apiKeyMgtException) {
-                if (!(this_present_apiKeyMgtException && that_present_apiKeyMgtException))
-                    return false;
-                if (!this.apiKeyMgtException.equals(that.apiKeyMgtException))
-                    return false;
-            }
-
-            boolean this_present_apiMgtException = true && this.isSetApiMgtException();
-            boolean that_present_apiMgtException = true && that.isSetApiMgtException();
-            if (this_present_apiMgtException || that_present_apiMgtException) {
-                if (!(this_present_apiMgtException && that_present_apiMgtException))
-                    return false;
-                if (!this.apiMgtException.equals(that.apiMgtException))
-                    return false;
-            }
-
-            return true;
-        }
-
-        @Override
-        public int hashCode() {
-            return 0;
-        }
-
-        public int compareTo(getAllURITemplates_result other) {
-            if (!getClass().equals(other.getClass())) {
-                return getClass().getName().compareTo(other.getClass().getName());
-            }
-
-            int lastComparison = 0;
-            getAllURITemplates_result typedOther = (getAllURITemplates_result)other;
-
-            lastComparison = Boolean.valueOf(isSetSuccess()).compareTo(typedOther.isSetSuccess());
-            if (lastComparison != 0) {
-                return lastComparison;
-            }
-            if (isSetSuccess()) {
-                lastComparison = org.apache.thrift.TBaseHelper.compareTo(this.success, typedOther.success);
-                if (lastComparison != 0) {
-                    return lastComparison;
-                }
-            }
-            lastComparison = Boolean.valueOf(isSetApiKeyMgtException()).compareTo(typedOther.isSetApiKeyMgtException());
-            if (lastComparison != 0) {
-                return lastComparison;
-            }
-            if (isSetApiKeyMgtException()) {
-                lastComparison = org.apache.thrift.TBaseHelper.compareTo(this.apiKeyMgtException, typedOther.apiKeyMgtException);
-                if (lastComparison != 0) {
-                    return lastComparison;
-                }
-            }
-            lastComparison = Boolean.valueOf(isSetApiMgtException()).compareTo(typedOther.isSetApiMgtException());
-            if (lastComparison != 0) {
-                return lastComparison;
-            }
-            if (isSetApiMgtException()) {
-                lastComparison = org.apache.thrift.TBaseHelper.compareTo(this.apiMgtException, typedOther.apiMgtException);
-                if (lastComparison != 0) {
-                    return lastComparison;
-                }
-            }
-            return 0;
-        }
-
-        public _Fields fieldForId(int fieldId) {
-            return _Fields.findByThriftId(fieldId);
-        }
-
-        public void read(org.apache.thrift.protocol.TProtocol iprot) throws org.apache.thrift.TException {
-            schemes.get(iprot.getScheme()).getScheme().read(iprot, this);
-        }
-
-        public void write(org.apache.thrift.protocol.TProtocol oprot) throws org.apache.thrift.TException {
-            schemes.get(oprot.getScheme()).getScheme().write(oprot, this);
-        }
-
-        @Override
-        public String toString() {
-            StringBuilder sb = new StringBuilder("getAllURITemplates_result(");
-            boolean first = true;
-
-            sb.append("success:");
-            if (this.success == null) {
-                sb.append("null");
-            } else {
-                sb.append(this.success);
-            }
-            first = false;
-            if (!first) sb.append(", ");
-            sb.append("apiKeyMgtException:");
-            if (this.apiKeyMgtException == null) {
-                sb.append("null");
-            } else {
-                sb.append(this.apiKeyMgtException);
-            }
-            first = false;
-            if (!first) sb.append(", ");
-            sb.append("apiMgtException:");
-            if (this.apiMgtException == null) {
-                sb.append("null");
-            } else {
-                sb.append(this.apiMgtException);
-            }
-            first = false;
-            sb.append(")");
-            return sb.toString();
-        }
-
-        public void validate() throws org.apache.thrift.TException {
-            // check for required fields
-        }
-
-        private void writeObject(java.io.ObjectOutputStream out) throws java.io.IOException {
-            try {
-                write(new org.apache.thrift.protocol.TCompactProtocol(new org.apache.thrift.transport.TIOStreamTransport(out)));
-            } catch (org.apache.thrift.TException te) {
-                throw new java.io.IOException(te);
-            }
-        }
-
-        private void readObject(java.io.ObjectInputStream in) throws java.io.IOException, ClassNotFoundException {
-            try {
-                read(new org.apache.thrift.protocol.TCompactProtocol(new org.apache.thrift.transport.TIOStreamTransport(in)));
-            } catch (org.apache.thrift.TException te) {
-                throw new java.io.IOException(te);
-            }
-        }
-
-        private static class getAllURITemplates_resultStandardSchemeFactory implements SchemeFactory {
-            public getAllURITemplates_resultStandardScheme getScheme() {
-                return new getAllURITemplates_resultStandardScheme();
-            }
-        }
-
-        private static class getAllURITemplates_resultStandardScheme extends StandardScheme<getAllURITemplates_result> {
-
-            public void read(org.apache.thrift.protocol.TProtocol iprot, getAllURITemplates_result struct) throws org.apache.thrift.TException {
-                org.apache.thrift.protocol.TField schemeField;
-                iprot.readStructBegin();
-                while (true)
+          schemeField = iprot.readFieldBegin();
+          if (schemeField.type == org.apache.thrift.protocol.TType.STOP) { 
+            break;
+          }
+          switch (schemeField.id) {
+            case 0: // SUCCESS
+              if (schemeField.type == org.apache.thrift.protocol.TType.LIST) {
                 {
-                    schemeField = iprot.readFieldBegin();
-                    if (schemeField.type == org.apache.thrift.protocol.TType.STOP) {
-                        break;
-                    }
-                    switch (schemeField.id) {
-                        case 0: // SUCCESS
-                            if (schemeField.type == org.apache.thrift.protocol.TType.LIST) {
-                                {
-                                    org.apache.thrift.protocol.TList _list0 = iprot.readListBegin();
-                                    struct.success = new ArrayList<URITemplate>(_list0.size);
-                                    for (int _i1 = 0; _i1 < _list0.size; ++_i1)
-                                    {
-                                        URITemplate _elem2; // required
-                                        _elem2 = new URITemplate();
-                                        _elem2.read(iprot);
-                                        struct.success.add(_elem2);
-                                    }
-                                    iprot.readListEnd();
-                                }
-                                struct.setSuccessIsSet(true);
-                            } else {
-                                org.apache.thrift.protocol.TProtocolUtil.skip(iprot, schemeField.type);
-                            }
-                            break;
-                        case 1: // API_KEY_MGT_EXCEPTION
-                            if (schemeField.type == org.apache.thrift.protocol.TType.STRUCT) {
-                                struct.apiKeyMgtException = new org.wso2.carbon.apimgt.gateway.handlers.security.thrift.APIKeyMgtException();
-                                struct.apiKeyMgtException.read(iprot);
-                                struct.setApiKeyMgtExceptionIsSet(true);
-                            } else {
-                                org.apache.thrift.protocol.TProtocolUtil.skip(iprot, schemeField.type);
-                            }
-                            break;
-                        case 2: // API_MGT_EXCEPTION
-                            if (schemeField.type == org.apache.thrift.protocol.TType.STRUCT) {
-                                struct.apiMgtException = new APIManagementException();
-                                struct.apiMgtException.read(iprot);
-                                struct.setApiMgtExceptionIsSet(true);
-                            } else {
-                                org.apache.thrift.protocol.TProtocolUtil.skip(iprot, schemeField.type);
-                            }
-                            break;
-                        default:
-                            org.apache.thrift.protocol.TProtocolUtil.skip(iprot, schemeField.type);
-                    }
-                    iprot.readFieldEnd();
+                  org.apache.thrift.protocol.TList _list16 = iprot.readListBegin();
+                  struct.success = new ArrayList<URITemplate>(_list16.size);
+                  for (int _i17 = 0; _i17 < _list16.size; ++_i17)
+                  {
+                    URITemplate _elem18; // required
+                    _elem18 = new URITemplate();
+                    _elem18.read(iprot);
+                    struct.success.add(_elem18);
+                  }
+                  iprot.readListEnd();
                 }
-                iprot.readStructEnd();
-
-                // check for required fields of primitive type, which can't be checked in the validate method
-                struct.validate();
-            }
-
-            public void write(org.apache.thrift.protocol.TProtocol oprot, getAllURITemplates_result struct) throws org.apache.thrift.TException {
-                struct.validate();
-
-                oprot.writeStructBegin(STRUCT_DESC);
-                if (struct.success != null) {
-                    oprot.writeFieldBegin(SUCCESS_FIELD_DESC);
-                    {
-                        oprot.writeListBegin(new org.apache.thrift.protocol.TList(org.apache.thrift.protocol.TType.STRUCT, struct.success.size()));
-                        for (URITemplate _iter3 : struct.success)
-                        {
-                            _iter3.write(oprot);
-                        }
-                        oprot.writeListEnd();
-                    }
-                    oprot.writeFieldEnd();
-                }
-                if (struct.apiKeyMgtException != null) {
-                    oprot.writeFieldBegin(API_KEY_MGT_EXCEPTION_FIELD_DESC);
-                    struct.apiKeyMgtException.write(oprot);
-                    oprot.writeFieldEnd();
-                }
-                if (struct.apiMgtException != null) {
-                    oprot.writeFieldBegin(API_MGT_EXCEPTION_FIELD_DESC);
-                    struct.apiMgtException.write(oprot);
-                    oprot.writeFieldEnd();
-                }
-                oprot.writeFieldStop();
-                oprot.writeStructEnd();
-            }
-
+                struct.setSuccessIsSet(true);
+              } else { 
+                org.apache.thrift.protocol.TProtocolUtil.skip(iprot, schemeField.type);
+              }
+              break;
+            case 1: // API_KEY_MGT_EXCEPTION
+              if (schemeField.type == org.apache.thrift.protocol.TType.STRUCT) {
+                struct.apiKeyMgtException = new APIKeyMgtException();
+                struct.apiKeyMgtException.read(iprot);
+                struct.setApiKeyMgtExceptionIsSet(true);
+              } else { 
+                org.apache.thrift.protocol.TProtocolUtil.skip(iprot, schemeField.type);
+              }
+              break;
+            case 2: // API_MGT_EXCEPTION
+              if (schemeField.type == org.apache.thrift.protocol.TType.STRUCT) {
+                struct.apiMgtException = new APIManagementException();
+                struct.apiMgtException.read(iprot);
+                struct.setApiMgtExceptionIsSet(true);
+              } else { 
+                org.apache.thrift.protocol.TProtocolUtil.skip(iprot, schemeField.type);
+              }
+              break;
+            default:
+              org.apache.thrift.protocol.TProtocolUtil.skip(iprot, schemeField.type);
+          }
+          iprot.readFieldEnd();
         }
+        iprot.readStructEnd();
 
-        private static class getAllURITemplates_resultTupleSchemeFactory implements SchemeFactory {
-            public getAllURITemplates_resultTupleScheme getScheme() {
-                return new getAllURITemplates_resultTupleScheme();
+        // check for required fields of primitive type, which can't be checked in the validate method
+        struct.validate();
+      }
+
+      public void write(org.apache.thrift.protocol.TProtocol oprot, getAllURITemplates_result struct) throws org.apache.thrift.TException {
+        struct.validate();
+
+        oprot.writeStructBegin(STRUCT_DESC);
+        if (struct.success != null) {
+          oprot.writeFieldBegin(SUCCESS_FIELD_DESC);
+          {
+            oprot.writeListBegin(new org.apache.thrift.protocol.TList(org.apache.thrift.protocol.TType.STRUCT, struct.success.size()));
+            for (URITemplate _iter19 : struct.success)
+            {
+              _iter19.write(oprot);
             }
+            oprot.writeListEnd();
+          }
+          oprot.writeFieldEnd();
         }
-
-        private static class getAllURITemplates_resultTupleScheme extends TupleScheme<getAllURITemplates_result> {
-
-            @Override
-            public void write(org.apache.thrift.protocol.TProtocol prot, getAllURITemplates_result struct) throws org.apache.thrift.TException {
-                TTupleProtocol oprot = (TTupleProtocol) prot;
-                BitSet optionals = new BitSet();
-                if (struct.isSetSuccess()) {
-                    optionals.set(0);
-                }
-                if (struct.isSetApiKeyMgtException()) {
-                    optionals.set(1);
-                }
-                if (struct.isSetApiMgtException()) {
-                    optionals.set(2);
-                }
-                oprot.writeBitSet(optionals, 3);
-                if (struct.isSetSuccess()) {
-                    {
-                        oprot.writeI32(struct.success.size());
-                        for (URITemplate _iter4 : struct.success)
-                        {
-                            _iter4.write(oprot);
-                        }
-                    }
-                }
-                if (struct.isSetApiKeyMgtException()) {
-                    struct.apiKeyMgtException.write(oprot);
-                }
-                if (struct.isSetApiMgtException()) {
-                    struct.apiMgtException.write(oprot);
-                }
-            }
-
-            @Override
-            public void read(org.apache.thrift.protocol.TProtocol prot, getAllURITemplates_result struct) throws org.apache.thrift.TException {
-                TTupleProtocol iprot = (TTupleProtocol) prot;
-                BitSet incoming = iprot.readBitSet(3);
-                if (incoming.get(0)) {
-                    {
-                        org.apache.thrift.protocol.TList _list5 = new org.apache.thrift.protocol.TList(org.apache.thrift.protocol.TType.STRUCT, iprot.readI32());
-                        struct.success = new ArrayList<URITemplate>(_list5.size);
-                        for (int _i6 = 0; _i6 < _list5.size; ++_i6)
-                        {
-                            URITemplate _elem7; // required
-                            _elem7 = new URITemplate();
-                            _elem7.read(iprot);
-                            struct.success.add(_elem7);
-                        }
-                    }
-                    struct.setSuccessIsSet(true);
-                }
-                if (incoming.get(1)) {
-                    struct.apiKeyMgtException = new org.wso2.carbon.apimgt.gateway.handlers.security.thrift.APIKeyMgtException();
-                    struct.apiKeyMgtException.read(iprot);
-                    struct.setApiKeyMgtExceptionIsSet(true);
-                }
-                if (incoming.get(2)) {
-                    struct.apiMgtException = new APIManagementException();
-                    struct.apiMgtException.read(iprot);
-                    struct.setApiMgtExceptionIsSet(true);
-                }
-            }
+        if (struct.apiKeyMgtException != null) {
+          oprot.writeFieldBegin(API_KEY_MGT_EXCEPTION_FIELD_DESC);
+          struct.apiKeyMgtException.write(oprot);
+          oprot.writeFieldEnd();
         }
+        if (struct.apiMgtException != null) {
+          oprot.writeFieldBegin(API_MGT_EXCEPTION_FIELD_DESC);
+          struct.apiMgtException.write(oprot);
+          oprot.writeFieldEnd();
+        }
+        oprot.writeFieldStop();
+        oprot.writeStructEnd();
+      }
 
     }
 
+    private static class getAllURITemplates_resultTupleSchemeFactory implements SchemeFactory {
+      public getAllURITemplates_resultTupleScheme getScheme() {
+        return new getAllURITemplates_resultTupleScheme();
+      }
+    }
+
+    private static class getAllURITemplates_resultTupleScheme extends TupleScheme<getAllURITemplates_result> {
+
+      @Override
+      public void write(org.apache.thrift.protocol.TProtocol prot, getAllURITemplates_result struct) throws org.apache.thrift.TException {
+        TTupleProtocol oprot = (TTupleProtocol) prot;
+        BitSet optionals = new BitSet();
+        if (struct.isSetSuccess()) {
+          optionals.set(0);
+        }
+        if (struct.isSetApiKeyMgtException()) {
+          optionals.set(1);
+        }
+        if (struct.isSetApiMgtException()) {
+          optionals.set(2);
+        }
+        oprot.writeBitSet(optionals, 3);
+        if (struct.isSetSuccess()) {
+          {
+            oprot.writeI32(struct.success.size());
+            for (URITemplate _iter20 : struct.success)
+            {
+              _iter20.write(oprot);
+            }
+          }
+        }
+        if (struct.isSetApiKeyMgtException()) {
+          struct.apiKeyMgtException.write(oprot);
+        }
+        if (struct.isSetApiMgtException()) {
+          struct.apiMgtException.write(oprot);
+        }
+      }
+
+      @Override
+      public void read(org.apache.thrift.protocol.TProtocol prot, getAllURITemplates_result struct) throws org.apache.thrift.TException {
+        TTupleProtocol iprot = (TTupleProtocol) prot;
+        BitSet incoming = iprot.readBitSet(3);
+        if (incoming.get(0)) {
+          {
+            org.apache.thrift.protocol.TList _list21 = new org.apache.thrift.protocol.TList(org.apache.thrift.protocol.TType.STRUCT, iprot.readI32());
+            struct.success = new ArrayList<URITemplate>(_list21.size);
+            for (int _i22 = 0; _i22 < _list21.size; ++_i22)
+            {
+              URITemplate _elem23; // required
+              _elem23 = new URITemplate();
+              _elem23.read(iprot);
+              struct.success.add(_elem23);
+            }
+          }
+          struct.setSuccessIsSet(true);
+        }
+        if (incoming.get(1)) {
+          struct.apiKeyMgtException = new APIKeyMgtException();
+          struct.apiKeyMgtException.read(iprot);
+          struct.setApiKeyMgtExceptionIsSet(true);
+        }
+        if (incoming.get(2)) {
+          struct.apiMgtException = new APIManagementException();
+          struct.apiMgtException.read(iprot);
+          struct.setApiMgtExceptionIsSet(true);
+        }
+      }
+    }
+
+  }
 
 }

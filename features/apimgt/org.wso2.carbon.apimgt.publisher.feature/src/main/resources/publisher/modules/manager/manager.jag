@@ -13,6 +13,27 @@ var getServer = function() {
     };
 };
 
+var getAPIStoreURL = function() {
+    var result,log=new Log();
+    var provider = getAPIProviderObj();
+    try {
+    result = provider.getAPIStoreURL();
+    if (log.isDebugEnabled()) {
+    log.debug("getAPIStoreURL : ");
+    }
+    return {
+    error:false,
+    url:result
+    };
+    } catch (e) {
+    return {
+    error:true,
+    message:e.message.split(":")[1]
+    };
+    }
+
+};
+
 var getAdminCookie = function() {
     //TODO : this should be set in the Context during the deployment
 

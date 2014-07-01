@@ -35,7 +35,7 @@ public class WSAPIKeyDataStore implements APIKeyDataStore {
 
     private static final APIKeyValidatorClientPool clientPool = APIKeyValidatorClientPool.getInstance();
 
-    public APIKeyValidationInfoDTO getAPIKeyData(String context, String apiVersion,
+    /*public APIKeyValidationInfoDTO getAPIKeyData(String context, String apiVersion,
                                                  String apiKey, String clientDomain) throws APISecurityException {
         APIKeyValidatorClient client = null;
         try {
@@ -52,15 +52,17 @@ public class WSAPIKeyDataStore implements APIKeyDataStore {
             } catch (Exception ignored) {
             }
         }
-    }
+    }*/
 
     public APIKeyValidationInfoDTO getAPIKeyData(String context, String apiVersion,
-                                                 String apiKey,String requiredAuthenticationLevel, String clientDomain)
+                                                 String apiKey,String requiredAuthenticationLevel, String clientDomain,
+                                                 String matchingResource, String httpVerb)
             throws APISecurityException {
         APIKeyValidatorClient client = null;
         try {
             client = clientPool.get();
-            return client.getAPIKeyData(context, apiVersion, apiKey,requiredAuthenticationLevel, clientDomain);
+            return client.getAPIKeyData(context, apiVersion, apiKey,requiredAuthenticationLevel, clientDomain,
+                                        matchingResource, httpVerb);
         }catch (APISecurityException ex) {
             throw new APISecurityException(ex.getErrorCode(),
                     "Resource forbidden", ex);

@@ -32,7 +32,6 @@
                 <% jagg.includeBlocks(outputs.right); %>
             </div>
         </div>
-        <div id="push"></div>
     </div>
 
 <% }); %>

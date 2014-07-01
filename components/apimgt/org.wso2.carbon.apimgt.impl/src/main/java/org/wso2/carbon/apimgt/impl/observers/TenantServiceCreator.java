@@ -23,6 +23,7 @@ import org.apache.axiom.om.impl.builder.StAXOMBuilder;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.context.ConfigurationContext;
 import org.apache.axis2.engine.AxisConfiguration;
+import org.apache.axis2.util.JavaUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
@@ -36,8 +37,12 @@ import org.apache.synapse.config.xml.MultiXMLConfigurationSerializer;
 import org.apache.synapse.config.xml.SequenceMediatorFactory;
 import org.apache.synapse.mediators.base.SequenceMediator;
 import org.apache.synapse.registry.Registry;
+import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
+import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.base.CarbonBaseUtils;
+import org.wso2.carbon.base.MultitenantConstants;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.context.RegistryType;
 import org.wso2.carbon.mediation.initializer.configurations.ConfigurationManager;
@@ -146,6 +151,35 @@ public class TenantServiceCreator extends AbstractAxis2ConfigurationContextObser
             APIUtil.writeDefinedSequencesToTenantRegistry(tenantId);
         }catch(Exception e){
             log.error("Failed to write defined sequences to tenant " + tenantDomain + "'s registry");
+        }
+        
+        try {
+            APIUtil.loadTenantExternalStoreConfig(tenantId);
+        } catch(Exception e) {
+            log.error("Failed to load external-stores.xml to tenant " + tenantDomain + "'s registry");
+        }
+        
+        try {
+            APIUtil.loadTenantGAConfig(tenantId);
+        } catch(Exception e) {
+            log.error("Failed to load ga-config.xml to tenant " + tenantDomain + "'s registry");
+        }
+        
+        try {
+        	APIManagerConfiguration configuration = ServiceReferenceHolder.getInstance().
+        			getAPIManagerConfigurationService().getAPIManagerConfiguration();
+        	 String enabledStr = configuration.getFirstProperty(APIConstants.API_USAGE_ENABLED);
+             boolean enabled = enabledStr != null && JavaUtils.isTrueExplicitly(enabledStr);
+             if (enabled) {
+            	 String bamServerURL = configuration.getFirstProperty(APIConstants.API_USAGE_BAM_SERVER_URL);
+                 String bamServerUser = configuration.getFirstProperty(APIConstants.API_USAGE_BAM_SERVER_USER);
+                 String bamServerPassword = configuration.getFirstProperty(APIConstants.API_USAGE_BAM_SERVER_PASSWORD);
+                 String bamServerThriftPort = configuration.getFirstProperty(APIConstants.API_USAGE_THRIFT_PORT);
+             	 APIUtil.addBamServerProfile(bamServerURL, bamServerUser, bamServerPassword, 
+             			bamServerThriftPort, tenantId);
+             }
+        } catch(Exception e) {
+            log.error("Failed to load bam profile configuration to tenant " + tenantDomain + "'s registry");
         }
     }
 

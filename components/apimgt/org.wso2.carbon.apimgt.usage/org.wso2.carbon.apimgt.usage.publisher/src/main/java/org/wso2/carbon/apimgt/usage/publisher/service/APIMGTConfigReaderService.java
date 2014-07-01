@@ -19,6 +19,7 @@ package org.wso2.carbon.apimgt.usage.publisher.service;
 
 import org.apache.axis2.util.JavaUtils;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
+import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.usage.publisher.APIMgtUsagePublisherConstants;
 
 public class APIMGTConfigReaderService {
@@ -33,16 +34,13 @@ public class APIMGTConfigReaderService {
     private String googleAnalyticsTrackingID;
 
     public APIMGTConfigReaderService(APIManagerConfiguration config) {
-        String enabledStr = config.getFirstProperty(APIMgtUsagePublisherConstants.API_USAGE_ENABLED);
+        String enabledStr = config.getFirstProperty(APIConstants.API_USAGE_ENABLED);
         enabled = enabledStr != null && JavaUtils.isTrueExplicitly(enabledStr);
-        bamServerThriftPort = config.getFirstProperty(APIMgtUsagePublisherConstants.API_USAGE_THRIFT_PORT);
-        bamServerURL = config.getFirstProperty(APIMgtUsagePublisherConstants.API_USAGE_BAM_SERVER_URL);
-        bamServerUser = config.getFirstProperty(APIMgtUsagePublisherConstants.API_USAGE_BAM_SERVER_USER);
-        bamServerPassword = config.getFirstProperty(APIMgtUsagePublisherConstants.API_USAGE_BAM_SERVER_PASSWORD);
-        publisherClass = config.getFirstProperty(APIMgtUsagePublisherConstants.API_USAGE_PUBLISHER_CLASS);
-        String googleAnalyticsEnabledStr = config.getFirstProperty(APIMgtUsagePublisherConstants.API_GOOGLE_ANALYTICS_TRACKING_ENABLED);
-        googleAnalyticsTrackingEnabled = googleAnalyticsEnabledStr != null && JavaUtils.isTrueExplicitly(googleAnalyticsEnabledStr);
-        googleAnalyticsTrackingID = config.getFirstProperty(APIMgtUsagePublisherConstants.API_GOOGLE_ANALYTICS_TRACKING_ID);
+        bamServerThriftPort = config.getFirstProperty(APIConstants.API_USAGE_THRIFT_PORT);
+        bamServerURL = config.getFirstProperty(APIConstants.API_USAGE_BAM_SERVER_URL);
+        bamServerUser = config.getFirstProperty(APIConstants.API_USAGE_BAM_SERVER_USER);
+        bamServerPassword = config.getFirstProperty(APIConstants.API_USAGE_BAM_SERVER_PASSWORD);
+        publisherClass = config.getFirstProperty(APIConstants.API_USAGE_PUBLISHER_CLASS);
     }
 
     public String getBamServerThriftPort() {

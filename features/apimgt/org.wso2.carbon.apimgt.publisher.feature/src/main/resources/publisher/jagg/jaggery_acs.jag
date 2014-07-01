@@ -30,10 +30,10 @@
 
             // validating the signature
             if(site.ssoConfiguration.responseSigningEnabled === 'true'){
-		var fullUserName = ssoRelyingParty.getSAMLResponseNameId(samlResponse);			
+		var fullUserName = ssoRelyingParty.getSAMLResponseNameId(samlResponse);
 			if(fullUserName != null && fullUserName.indexOf("@")!=-1){
 				var domainName = fullUserName.split("@")[1];
-				jagg.module("manager").loadTenantRegistry(domainName);	
+				jagg.module("manager").loadTenantRegistry(domainName);
 		}
                 var isSignatureValid = ssoRelyingParty.validateSignature(samlResponse);
                 if (!Boolean(isSignatureValid)) {
@@ -53,10 +53,12 @@
             }
             var isCreatePermitted = api.hasCreatePermission();
             var isPublishPermitted = api.hasPublishPermission();
-	    var hasTierPermission = api.hasManageTierPermission();
+            var showStoreURL=api.showStoreURL();
+	        var hasTierPermission = api.hasManageTierPermission();
             jagg.setCreatePermitted(isCreatePermitted);
             jagg.setPublishPermitted(isPublishPermitted);
             jagg.setManageTierPermitted(hasTierPermission);
+            jagg.setShowStoreURL(showStoreURL);
             response.sendRedirect(requestedURI);
         } else {
             // if the saml response is log out request from IDP, we log out from web app.

@@ -8,6 +8,7 @@ jagg.block("api/swagger", {
         return {
             "api":null,
             "discoveryURL":null,
+            "swaggerString":null,
             "user":null
         }
     }

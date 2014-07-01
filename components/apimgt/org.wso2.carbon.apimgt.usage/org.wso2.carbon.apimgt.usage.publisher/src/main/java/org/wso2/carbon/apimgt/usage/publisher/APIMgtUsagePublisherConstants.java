@@ -25,13 +25,6 @@ public final class APIMgtUsagePublisherConstants {
     public static final String HEADER_SEGMENT_DELIMITER = " ";
     public static final String  AXIS2_MC_HTTP_METHOD = "HTTP_METHOD";
 
-    public static final String API_USAGE_TRACKING = "APIUsageTracking.";
-    public static final String API_USAGE_ENABLED = API_USAGE_TRACKING + "Enabled";
-    public static final String API_USAGE_THRIFT_PORT = API_USAGE_TRACKING + "ThriftPort";
-    public static final String API_USAGE_BAM_SERVER_URL = API_USAGE_TRACKING + "BAMServerURL";
-    public static final String API_USAGE_BAM_SERVER_USER = API_USAGE_TRACKING + "BAMUsername";
-    public static final String API_USAGE_BAM_SERVER_PASSWORD = API_USAGE_TRACKING + "BAMPassword";
-    public static final String API_USAGE_PUBLISHER_CLASS = API_USAGE_TRACKING + "PublisherClass";
 
     public static final String CONSUMER_KEY = "api.ut.consumerKey";
     public static final String USER_ID = "api.ut.userId";
@@ -52,10 +45,14 @@ public final class APIMgtUsagePublisherConstants {
     public static final String  API_MANAGER_RESPONSE_STREAM_NAME = "org.wso2.apimgt.statistics.response";
     public static final String  API_MANAGER_RESPONSE_STREAM_VERSION = "1.0.0";
     public static final String  API_MANAGER_FAULT_STREAM_NAME = "org.wso2.apimgt.statistics.fault";
+    public static final String  API_MANAGER_THROTTLE_STREAM_NAME = "org.wso2.apimgt.statistics.throttle";
     public static final String  API_MANAGER_FAULT_STREAM_VERSION = "1.0.0";
+    public static final String  API_MANAGER_THROTTLE_STREAM_VERSION = "1.0.0";
 
-    public static final String API_GOOGLE_ANALYTICS_TRACKING = API_USAGE_TRACKING + "GoogleAnalyticsTracking.";
-    public static final String API_GOOGLE_ANALYTICS_TRACKING_ENABLED = API_GOOGLE_ANALYTICS_TRACKING + "Enabled";
-    public static final String API_GOOGLE_ANALYTICS_TRACKING_ID = API_GOOGLE_ANALYTICS_TRACKING + "TrackingID";
+    public static final String API_GOOGLE_ANALYTICS_TRACKING_ENABLED = "Enabled";
+    public static final String API_GOOGLE_ANALYTICS_TRACKING_ID = "TrackingID";
+    
+
+
         
 }

@@ -64,14 +64,16 @@ public class ThriftKeyValidatorClient {
         }
     }
 
-    public APIKeyValidationInfoDTO getAPIKeyData(String context, String apiVersion,
-                                                 String apiKey,String requiredAuthenticationLevel,
-                                                 String clientDomain) throws APISecurityException {
+    public APIKeyValidationInfoDTO getAPIKeyData(String context, String apiVersion, String apiKey,
+                                                 String requiredAuthenticationLevel, String clientDomain,
+                                                 String matchingResource, String httpVerb) throws APISecurityException {
+
         APIKeyValidationInfoDTO apiKeyValidationInfoDTO = null;
         org.wso2.carbon.apimgt.gateway.handlers.security.thrift.APIKeyValidationInfoDTO thriftDTO;
 
         try {
-            thriftDTO = keyValClient.validateKey(context, apiVersion, apiKey, sessionId,requiredAuthenticationLevel,clientDomain);
+            thriftDTO = keyValClient.validateKey(context, apiVersion, apiKey, sessionId, requiredAuthenticationLevel,
+                                                 clientDomain, matchingResource, httpVerb);
 
         } catch (Exception e) {
             try {
@@ -81,7 +83,8 @@ public class ThriftKeyValidatorClient {
                 //we re-initialize the thrift client in case open sockets have been closed due to
                 //key manager restart.
                 reInitializeClient();
-                thriftDTO = keyValClient.validateKey(context, apiVersion, apiKey, sessionId,requiredAuthenticationLevel, clientDomain);
+                thriftDTO = keyValClient.validateKey(context, apiVersion, apiKey, sessionId, requiredAuthenticationLevel,
+                                                     clientDomain, matchingResource, httpVerb);
 
             } catch (Exception e1) {
                 throw new APISecurityException(APISecurityConstants.API_AUTH_GENERAL_ERROR, e1.getMessage());
@@ -102,6 +105,8 @@ public class ThriftKeyValidatorClient {
         apiKeyValidationInfoDTO.setApiName(thriftDTO.getApiName());
         apiKeyValidationInfoDTO.setApiPublisher(thriftDTO.getApiPublisher());
         apiKeyValidationInfoDTO.setConsumerKey(thriftDTO.getConsumerKey());
+        apiKeyValidationInfoDTO.setAuthorizedDomains(thriftDTO.getAuthorizedDomains());
+        apiKeyValidationInfoDTO.setScopes(thriftDTO.getScopes());
 
         return apiKeyValidationInfoDTO;
     }
@@ -153,7 +158,7 @@ public class ThriftKeyValidatorClient {
             param.setTrustStore(thriftUtils.getTrustStorePath(), thriftUtils.getTrustStorePassword());
 
             TTransport transport = TSSLTransportFactory.getClientSocket(
-                    thriftUtils.getRemoteServerIP(), thriftUtils.getThriftPort(),
+                    thriftUtils.getThriftServerHost(), thriftUtils.getThriftPort(),
                     thriftUtils.getThriftClientConnectionTimeOut(), param);
 
             //TProtocol protocol = new TCompactProtocol(transport);

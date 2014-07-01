@@ -15,7 +15,6 @@ jagg.block("comment/comment-list", {
         var comments, result;
         result = jagg.module("comment").getAPIComments(inputs.api);
         comments = result.comments;
-
         return {
             "comments":comments
         };

@@ -82,13 +82,15 @@ public class Utils {
     }
     
     public static void setFaultPayload(MessageContext messageContext, OMElement payload) {
-        OMElement firstChild = messageContext.getEnvelope().getBody().getFirstElement();
-        if (firstChild != null) {
-            firstChild.insertSiblingAfter(payload);
-            firstChild.detach();
-        } else {
-            messageContext.getEnvelope().getBody().addChild(payload);
-        }        
+        Iterator<OMElement> childElements = messageContext.getEnvelope().getBody().getChildElements();
+
+        if(childElements != null){
+            while(childElements.hasNext()){
+                OMElement child = childElements.next();
+                child.detach();
+            }
+        }
+        messageContext.getEnvelope().getBody().addChild(payload);
     }
     
     public static void setSOAPFault(MessageContext messageContext, String code, 

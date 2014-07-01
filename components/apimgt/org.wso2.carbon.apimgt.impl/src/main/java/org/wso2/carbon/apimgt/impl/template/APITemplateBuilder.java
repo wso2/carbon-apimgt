@@ -23,6 +23,10 @@ public interface APITemplateBuilder {
 
     public String getConfigStringForTemplate(Environment environment) throws APITemplateException;
 
+    public String getConfigStringForPrototypeScriptAPI(Environment environment) throws APITemplateException;
+
     public OMElement getConfigXMLForTemplate(Environment environment) throws APITemplateException;
+
+    public String getConfigStringForDefaultAPITemplate(String defaultVersion) throws APITemplateException;
 
 }

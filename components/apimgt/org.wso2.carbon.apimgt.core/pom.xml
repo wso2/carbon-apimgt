@@ -1,18 +1,19 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
-  <parent>
-	<groupId>org.wso2.carbon</groupId>
-	<artifactId>apimgt</artifactId>
-	<version>4.3.0-SNAPSHOT</version>
-	<relativePath>../pom.xml</relativePath>
-  </parent>
+    <parent>
+        <groupId>org.wso2.carbon</groupId>
+        <artifactId>apimgt</artifactId>
+        <version>4.3.0-SNAPSHOT</version>
+        <relativePath>../pom.xml</relativePath>
+    </parent>
 
-  <modelVersion>4.0.0</modelVersion>
-  <groupId>org.wso2.carbon</groupId>
-  <artifactId>org.wso2.carbon.apimgt.core</artifactId>
-  <version>4.3.0-SNAPSHOT</version>
-  <packaging>bundle</packaging>
-  <name>WSO2 Carbon - API Management Core </name>
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>org.wso2.carbon</groupId>
+    <artifactId>org.wso2.carbon.apimgt.core</artifactId>
+    <version>4.3.0-SNAPSHOT</version>
+    <packaging>bundle</packaging>
+    <name>WSO2 Carbon - API Management Core</name>
     <repositories>
         <repository>
             <id>wso2-nexus</id>
@@ -26,42 +27,36 @@
         </repository>
     </repositories>
 
-   <dependencies>
+    <dependencies>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.core</artifactId>
-            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.throttle.core</artifactId>
-            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.logging</artifactId>
-             <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.apimgt.impl</artifactId>
-            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.apimgt.keymgt.stub</artifactId>
-	    <version>${project.version}</version>
         </dependency>
-	<dependency>
+        <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.apimgt.usage.publisher</artifactId>
-            <version>${project.version}</version>
         </dependency>
-   </dependencies>
+    </dependencies>
 
-   <build>
-	<plugins>
-   	   <plugin>
+    <build>
+        <plugins>
+            <plugin>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>maven-bundle-plugin</artifactId>
                 <version>1.4.0</version>
@@ -77,8 +72,8 @@
                         </Export-Package>
                         <Import-Package>
                             org.wso2.carbon.core,
-                            org.wso2.carbon.registry.core.service; version=1.0.1,
-                            javax.xml.soap; version=1.0.0,
+                            org.wso2.carbon.registry.core.service;version=1.0.1,
+                            javax.xml.soap;version=1.0.0,
                             org.wso2.carbon.apimgt.impl.*,
                             *;resolution:=optional
                         </Import-Package>
@@ -89,16 +84,16 @@
             <plugin>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>maven-scr-plugin</artifactId>
-                <version>1.0.10</version>
-                <executions>
-                    <execution>
-                        <id>generate-scr-scrdescriptor</id>
-                        <goals>
-                            <goal>scr</goal>
-                        </goals>
-                    </execution>
-                </executions>
+                <!--<version>1.0.10</version>-->
+                <!--<executions>-->
+                <!--<execution>-->
+                <!--<id>generate-scr-scrdescriptor</id>-->
+                <!--<goals>-->
+                <!--<goal>scr</goal>-->
+                <!--</goals>-->
+                <!--</execution>-->
+                <!--</executions>-->
             </plugin>
-      </plugins>
+        </plugins>
     </build>
 </project>

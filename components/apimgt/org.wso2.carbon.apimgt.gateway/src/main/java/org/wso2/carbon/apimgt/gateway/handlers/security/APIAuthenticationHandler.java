@@ -112,7 +112,7 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
 	    	Map<String, String> headers = (Map) axis2MC.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
 	    		    	    	
 	    	headers.put(APIConstants.CORSHeaders.ACCESS_CONTROL_ALLOW_ORIGIN, Utils.getAllowedOrigin(authenticator.getRequestOrigin()));
-	        headers.put(APIConstants.CORSHeaders.ACCESS_CONTROL_ALLOW_METHODS, Utils.getAllowedMethods());
+	        //headers.put(APIConstants.CORSHeaders.ACCESS_CONTROL_ALLOW_METHODS, Utils.getAllowedMethods());
 	        headers.put(APIConstants.CORSHeaders.ACCESS_CONTROL_ALLOW_HEADERS, Utils.getAllowedHeaders());
 	        axis2MC.setProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS, headers);
     	}
@@ -142,7 +142,9 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
         int status;
         if (e.getErrorCode() == APISecurityConstants.API_AUTH_GENERAL_ERROR) {
             status = HttpStatus.SC_INTERNAL_SERVER_ERROR;
-        } else if (e.getErrorCode() == APISecurityConstants.API_AUTH_INCORRECT_API_RESOURCE || e.getErrorCode() == APISecurityConstants.API_AUTH_FORBIDDEN) {
+        } else if (e.getErrorCode() == APISecurityConstants.API_AUTH_INCORRECT_API_RESOURCE ||
+                   e.getErrorCode() == APISecurityConstants.API_AUTH_FORBIDDEN ||
+                e.getErrorCode() == APISecurityConstants.INVALID_SCOPE) {
             status = HttpStatus.SC_FORBIDDEN;
         } else {
             status = HttpStatus.SC_UNAUTHORIZED;

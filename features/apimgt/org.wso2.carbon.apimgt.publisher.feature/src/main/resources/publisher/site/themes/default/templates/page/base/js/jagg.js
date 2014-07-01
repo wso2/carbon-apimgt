@@ -4,6 +4,14 @@ var jagg = jagg || {};
     var option = { resGetPath:requestURL+'/site/conf/locales/js/i18nResources.json'};
     i18n.init(option);
 
+    if (!window.console) {
+        window.console = {
+            log: function(obj){},
+            info: function(obj){}
+        };
+    }
+
+
     jagg.post = function () {
         var args = Array.prototype.slice.call(arguments);
         args[0] = this.site.context + args[0];
@@ -225,3 +233,28 @@ var jagg = jagg || {};
     };
 
 }());
+
+
+$(document).ready(function(){
+    //this can go to main js
+    $('a.help_popup').popover({
+        html : true,
+        content: function() {
+            return $('#'+$(this).attr('help_data')).html();
+        }
+    });
+
+    $('.more-options').click(function(){
+        var id = $(this).attr('ref');
+        var div = $('#'+id);
+        if(div.is(":visible")){
+            $(this).text("Show More Options");
+        }
+        else{
+            $(this).text("Show Less Options");
+        }
+        div.toggle('fast');
+        return false; 
+    });
+    
+});

@@ -19,6 +19,7 @@ package org.wso2.carbon.apimgt.keymgt.util;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.identity.oauth.callback.AbstractOAuthCallbackHandler;
 import org.wso2.carbon.identity.oauth.callback.OAuthCallback;
@@ -54,21 +55,22 @@ public class APIManagerOAuthCallbackHandler extends AbstractOAuthCallbackHandler
             if (OAuthCallback.OAuthCallbackType.SCOPE_VALIDATION_TOKEN.equals(
                     oauthCallback.getCallbackType())){
                 String[] scopes = oauthCallback.getRequestedScope();
-                String scope = null;
-                if(scopes != null && scopes.length > 0){
-                    scope = scopes[0];
-                }else{
-                    ApiMgtDAO dao = new ApiMgtDAO();
+                //If no scopes have been requested.
+                if(scopes == null || scopes.length == 0){
+                    /*ApiMgtDAO dao = new ApiMgtDAO();
                     try {
-                        scope = dao.getTokenScope(oauthCallback.getClient());
+                        scopes = new String[]{dao.getTokenScope(oauthCallback.getClient())};
                     } catch (APIManagementException e) {
                         String msg = "Error while looking up token scope";
                         log.error(msg, e);
                         throw new UnsupportedCallbackException(oauthCallback, msg);
-                    }
+                    }*/
 
+                   //Issue a default scope. The default scope can only be used to access resources which are
+                   // not associated to a scope
+                   scopes = new String[]{APIConstants.OAUTH2_DEFAULT_SCOPE};
                 }
-                oauthCallback.setApprovedScope(new String[]{ scope.toUpperCase() });
+                oauthCallback.setApprovedScope(scopes);
                 oauthCallback.setValidScope(true);
             }
         }

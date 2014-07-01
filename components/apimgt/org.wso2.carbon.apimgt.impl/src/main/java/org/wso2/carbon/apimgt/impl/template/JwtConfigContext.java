@@ -32,9 +32,9 @@ public class JwtConfigContext extends ConfigContextDecorator {
         VelocityContext context = super.getContext();
 
         if (ApiMgtDAO.jwtGenerator != null) {
-            context.put("jwtIsEnable", true);
+            context.put("jwtIsEnabled", true);
         } else {
-            context.put("jwtIsEnable", false);
+            context.put("jwtIsEnabled", false);
         }
 
         return context;

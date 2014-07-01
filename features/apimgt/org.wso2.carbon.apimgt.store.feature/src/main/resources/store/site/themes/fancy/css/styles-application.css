@@ -257,7 +257,7 @@ input.error{
 }
 #comment-add .counter,.application-add .counter{
     color: #666666;
-    font-size:11px;
+    font-size:12px;
 }
 #comment-add .warning, .application-add .warning{color:#600;}
 #comment-add .exceeded, .application-add .exceeded{color:#e00;}
@@ -1220,10 +1220,10 @@ body ul#resources li.resource ul.endpoints li.endpoint ul.operations li.operatio
 }
 .tenant-position-setter{
 	color: #888;
-    margin-top: 48px;
+    margin-top: 68px;
     text-align: right;
     position: absolute;
-    right:20px;
+    right:23px;
 }
 .tenant-position-setter a{
     color: #005580;
@@ -1338,6 +1338,21 @@ a.share_links.active{
     height:70px;
 }
 
+.doc-search-result {
+	margin-bottom: 15px;
+	float:left;
+	width:70%;
+	padding-left:20px;
+	padding-right:20px;	
+}
+
+.doc-search-api-result {
+	float:left;
+	padding-left:20px;
+}
+.doc-search-result-text {
+	color:#547f00;
+}
 
 .social-buttons { display: block; list-style: none; padding: 0; margin: 20px; }
 .social-buttons > li { display: block; margin: 0; padding: 10px; float: left; }
@@ -1349,3 +1364,140 @@ a.share_links.active{
 .social-buttons .facebook-like { width: 50px; height: 65px; background-position: -145px 0; }
 .social-buttons .linkedin-share { width: 60px; height: 65px; background-position: -215px 0; }
 .vhidden { border: 0; clip: rect(0 0 0 0); height: 1px; margin: -1px; overflow: hidden; padding: 0; position: absolute; width: 1px; }
+
+/* Styles for text boxes with clear ('x') button. */
+.clearable{
+  background:url(../images/search_close.png) no-repeat right -10px center;
+  border:1px solid #999;
+  padding:3px 18px 3px 4px; /* USE the same right padding in jQ! */
+  border-radius:3px;
+}
+.clearable.x{
+  background-position: right 5px center;
+}
+.clearable.onX{
+  cursor:pointer;
+}
+
+/* START - Forum releated stuff */
+.tab-content div.title-section{
+	display:none
+}
+
+.tab-content div.content-section{
+	box-shadow:none;
+	padding:0;
+}
+
+.tab-content div.content-section div.content-data{
+	padding:0;
+}
+
+#topic_details p{
+	padding-left:10px;
+}
+
+table#description{
+	border:none;
+	background:transparent;
+	box-shadow:none;
+}
+
+.rating-star{
+	width:50px;
+	padding-left:10px;
+}
+
+.edit-topic-form-actions{
+	padding:10px 0;
+	text-align:left;
+	height:50px;
+}
+.edit-topic-form-actions a{
+	float:left;
+	margin : 0px 5px 0px 0px;
+}
+
+.edit-topic-form-actions{
+	margin : 0px 0px 0px 20px;
+}
+
+.topic-subject-edit label{
+	padding : 20px 0px 0px 20px;
+	margin : 0;
+}
+
+.topic-subject-edit h4{
+	margin : 0;
+}
+
+.topic-subject-edit div{
+	padding : 10px 20px 20px 20px;
+}
+
+.topic_description_edit label{
+	padding : 0px 0px 0px 20px;
+	margin : 0;
+}
+
+.topic_description_edit h4{
+	margin : 0;
+}
+
+.note-editor{
+	margin : 10px 20px 0px 20px;
+}
+
+.icon-edit{
+	cursor:pointer;
+}
+
+.forum-description{
+	padding: 20px;
+}
+
+.topic-rating .rating-star{
+	padding : 10px 0px 10px 20px;
+}
+
+.add-reply label{
+	padding : 20px 0px 0px 20px;
+	margin : 0;
+}
+
+#add-forum-reply{
+	margin : 10px 0px 0px 20px;
+}
+
+table.forum_replies{
+	padding : 0 0 0 20px;
+}
+
+.replies-list{
+	padding: 0 20px 0 20px;
+}
+
+.topic-rating .table td{
+	border-bottom: 1px solid #dddddd
+}
+
+.replies-list-title{
+	padding-top: 20px;
+}
+
+#forum-reply-actions{
+	margin: 10px 0 0 20px;
+}
+
+#topic-add-actions{
+	margin: 10px 0 0 20px;
+}
+
+#forum-add-subject{
+	margin-left:20px;
+}
+
+.new-topic-container{
+	padding-top:20px;
+}
+/* END - Forum releated stuff */

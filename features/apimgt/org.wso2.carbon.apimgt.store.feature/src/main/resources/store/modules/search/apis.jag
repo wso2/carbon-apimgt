@@ -29,7 +29,7 @@ var searchPaginatedAPIs = function (query,tenantDomain,start,end) {
             store = jagg.module("manager").getAPIStoreObj();
 
     try {
-        result = store.searchPaginatedAPIsByType(query,tenantDomain,String(start),String(end+1));
+        result = store.searchPaginatedAPIsByType(query,tenantDomain,String(start),String(end));
         if (log.isDebugEnabled()) {
             log.debug("searchAPIs : " + stringify(result.apis));
         }

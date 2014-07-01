@@ -50,7 +50,8 @@ public class JDBCAPIKeyDataStore implements APIKeyDataStore {
     }
 
     public APIKeyValidationInfoDTO getAPIKeyData(String context, String apiVersion,
-                                                 String apiKey,String requiredAuthenticationLevel, String clientDomain) throws APISecurityException {
+                                                 String apiKey,String requiredAuthenticationLevel, String clientDomain,
+                                                 String matchingResource, String httpVerb) throws APISecurityException {
         try {
             return dao.validateKey(context, apiVersion, apiKey,requiredAuthenticationLevel);
         } catch (APIManagementException e) {

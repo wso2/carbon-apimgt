@@ -121,9 +121,14 @@ public class JWTGenerator {
             }
             signatureAlgorithm =  ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().
                             getAPIManagerConfiguration().getFirstProperty(SIGNATURE_ALGORITHM);
-            if(signatureAlgorithm == null || !(signatureAlgorithm.equals(NONE) || signatureAlgorithm.equals(SHA256_WITH_RSA))){
+
+            if(signatureAlgorithm == null){
+                signatureAlgorithm = NONE;
+            }
+            else if(!NONE.equals(signatureAlgorithm) || SHA256_WITH_RSA.equals(signatureAlgorithm)){
                 signatureAlgorithm = SHA256_WITH_RSA;
             }
+
             if(claimsRetrieverImplClass != null){
                 try{
                     claimsRetriever = (ClaimsRetriever)Class.forName(claimsRetrieverImplClass).newInstance();
@@ -271,7 +276,11 @@ public class JWTGenerator {
         jwtBuilder.append("\"");
 
         if(claimsRetriever != null){
-            SortedMap<String,String> claimValues = claimsRetriever.getClaims(endUserName);
+        	String  tenantAwareUserName = endUserName;
+            if (endUserName != null) {
+                tenantAwareUserName = MultitenantUtils.getTenantAwareUsername(endUserName);
+            }
+            SortedMap<String,String> claimValues = claimsRetriever.getClaims(tenantAwareUserName);
             Iterator<String> it = new TreeSet(claimValues.keySet()).iterator();
             while(it.hasNext()){
                 String claimURI = it.next();
@@ -289,9 +298,17 @@ public class JWTGenerator {
       String jwtHeader = null;
 
       //if signature algo==NONE, header without cert
-      if(signatureAlgorithm.equals(NONE)){
-          jwtHeader = "{\"typ\":\"JWT\"}";
-      } else if (signatureAlgorithm.equals(SHA256_WITH_RSA)){
+      if(NONE.equals(signatureAlgorithm)){
+          StringBuilder jwtHeaderBuilder = new StringBuilder();
+          jwtHeaderBuilder.append("{\"typ\":\"JWT\",");
+          jwtHeaderBuilder.append("\"alg\":\"");
+          jwtHeaderBuilder.append(JWTSignatureAlg.NONE.getJwsCompliantCode());
+          jwtHeaderBuilder.append("\"");
+          jwtHeaderBuilder.append("}");
+          
+          jwtHeader = jwtHeaderBuilder.toString();
+
+      } else if (SHA256_WITH_RSA.equals(signatureAlgorithm)){
           jwtHeader = addCertToHeader(endUserName);
       }
 
@@ -449,7 +466,8 @@ public class JWTGenerator {
             //{"typ":"JWT", "alg":"[2]", "x5t":"[1]"}
             jwtHeader.append("{\"typ\":\"JWT\",");
             jwtHeader.append("\"alg\":\"");
-            jwtHeader.append(signatureAlgorithm);
+            jwtHeader.append(SHA256_WITH_RSA.equals(signatureAlgorithm) ?
+                             JWTSignatureAlg.SHA256_WITH_RSA.getJwsCompliantCode() : signatureAlgorithm);
             jwtHeader.append("\",");
 
             jwtHeader.append("\"x5t\":\"");

@@ -2,7 +2,7 @@
 var query=request.getParameter("query");
 %>
 <form class="well form-search" action="<%=jagg.getMappedUrl("/site/pages/tokens.jag")%>">
-    <input type="text" name="query" class="input-xlarge search-query required" <%if(query!=null){%> value="<%=query%>" <%}else{%>
+    <input type="text" name="query" class="input-xlarge search-query required" <%if(query!=null){%> value="<%= encode.forHtml(query)%>" <%}else{%>
            placeholder="<%=i18n.localize("filterTokens")%>"<%}%> />
     <button class="btn btn-primary" id="tokenSearch"><%=i18n.localize("search")%></button>
     <a class="icon-plus tierHelp" onclick="javascript:$('#searchAPIHelp').toggle()"></a>

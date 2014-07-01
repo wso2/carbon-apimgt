@@ -16,9 +16,12 @@
 
 package org.wso2.carbon.apimgt.gateway.handlers.security.keys;
 
+import edu.emory.mathcs.backport.java.util.Arrays;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.client.Options;
 import org.apache.axis2.client.ServiceClient;
+import org.apache.axis2.context.ConfigurationContext;
+import org.apache.axis2.context.ConfigurationContextFactory;
 import org.apache.axis2.context.MessageContext;
 import org.apache.axis2.context.ServiceContext;
 import org.apache.axis2.transport.http.HTTPConstants;
@@ -35,6 +38,7 @@ import org.wso2.carbon.apimgt.keymgt.stub.validator.APIKeyValidationServiceStub;
 import org.wso2.carbon.utils.CarbonUtils;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
@@ -58,7 +62,8 @@ public class APIKeyValidatorClient {
         }
 
         try {
-            clientStub = new APIKeyValidationServiceStub(null, serviceURL + "APIKeyValidationService");
+            ConfigurationContext ctx = ConfigurationContextFactory.createConfigurationContextFromFileSystem(null, null);
+            clientStub = new APIKeyValidationServiceStub(ctx, serviceURL + "APIKeyValidationService");
             ServiceClient client = clientStub._getServiceClient();
             Options options = client.getOptions();
             options.setTimeOutInMilliSeconds(TIMEOUT_IN_MILLIS);
@@ -72,9 +77,9 @@ public class APIKeyValidatorClient {
         }
     }
 
-    public APIKeyValidationInfoDTO getAPIKeyData(String context, String apiVersion,
-                                                 String apiKey,String requiredAuthenticationLevel,
-                                                 String clientDomain) throws APISecurityException {
+    public APIKeyValidationInfoDTO getAPIKeyData(String context, String apiVersion, String apiKey,
+                                                 String requiredAuthenticationLevel, String clientDomain,
+                                                 String matchingResource, String httpVerb) throws APISecurityException {
 
         CarbonUtils.setBasicAccessSecurityHeaders(username, password,
                 true, clientStub._getServiceClient());
@@ -82,7 +87,7 @@ public class APIKeyValidatorClient {
             clientStub._getServiceClient().getOptions().setProperty(HTTPConstants.COOKIE_STRING, cookie);
         }
         try {
-            List headerList = new ArrayList();
+            List headerList = (List)clientStub._getServiceClient().getOptions().getProperty(org.apache.axis2.transport.http.HTTPConstants.HTTP_HEADERS);
             Map headers = (Map) MessageContext.getCurrentMessageContext().getProperty(
                     org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
             if (headers != null) {
@@ -90,7 +95,8 @@ public class APIKeyValidatorClient {
             }
             clientStub._getServiceClient().getOptions().setProperty(org.apache.axis2.transport.http.HTTPConstants.HTTP_HEADERS, headerList);
             org.wso2.carbon.apimgt.impl.dto.xsd.APIKeyValidationInfoDTO dto =
-                    clientStub.validateKey(context, apiVersion, apiKey,requiredAuthenticationLevel,clientDomain);
+                    clientStub.validateKey(context, apiVersion, apiKey,requiredAuthenticationLevel, clientDomain,
+                                           matchingResource, httpVerb);
             ServiceContext serviceContext = clientStub.
                     _getServiceClient().getLastOperationContext().getServiceContext();
             cookie = (String) serviceContext.getProperty(HTTPConstants.COOKIE_STRING);
@@ -120,6 +126,9 @@ public class APIKeyValidatorClient {
         dto.setValidationStatus(generatedDto.getValidationStatus());
         dto.setApplicationId(generatedDto.getApplicationId());
         dto.setApplicationTier(generatedDto.getApplicationTier());
+        dto.setApiPublisher(generatedDto.getApiPublisher());
+        dto.setApiName(generatedDto.getApiName());
+        dto.setScopes(generatedDto.getScopes() == null ? null : new HashSet<String>(Arrays.asList(generatedDto.getScopes())));
         return dto;
     }
     public ArrayList<URITemplate> getAllURITemplates(String context, String apiVersion

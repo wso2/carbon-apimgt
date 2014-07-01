@@ -12,7 +12,8 @@
         "returntoAPIPage": "Return back to API detail page?",
         "yes": "Yes",
         "no": "No",
-        "charsLeft": "Characters left: "
+        "charsLeft": "Characters left: ",
+		"replyAdded": "Reply Succesfully Added"
 
 
     },
@@ -20,7 +21,8 @@
         "delete": "Confirm Delete",
         "deleteMsg": "Are you sure you want to remove the application " ,
         "deleteMsgPostfix": "? This will cancel all the existing subscriptions and keys associated with the application. " ,
-        "unsubscribeMsg": "Are you sure you want to unsubscribe from "
+        "unsubscribeMsg": "Are you sure you want to unsubscribe from ",
+		"deleteMsgForForumTopic": "Do you want to remove the topic "
 
 
     },
@@ -49,7 +51,18 @@
         "validating": "Validating.."
     },
     "errorMsgs":{
-    	"login":"Unable to log you in!"
+    	"login":"Unable to log you in!",
+        "invalidDocUrl":"Invalid Document Url Format.",
+        "inlineContent":"Sorry. The content of this document cannot be loaded.",
+        "apiResource":"Sorry. This row can not be deleted. AtLeast one resource entry has to be available." ,
+        "uniqueUrlPattern":"URL Pattern has to be unique. ",
+        "emptyUrlPattern":"URL Pattern can't be empty. ",
+        "emptyVerb":"At least one HTTP Verb has to be checked for a resource. ",
+        "duplicateUrlPattern":"has duplicated entries. ",
+        "noData":"No Data Found ... ",
+        "checkBAMConnectivity":" <a href='http://docs.wso2.org/wiki/display/AM170/Publishing+API+Runtime+Statistics' target='_blank' class='warningLink'>Refer our wiki to configure BAM correctly</a>",
+        "unavailableData":"Data unavailable",
+        "login":"Unable to log you in!"
     }
 
 }

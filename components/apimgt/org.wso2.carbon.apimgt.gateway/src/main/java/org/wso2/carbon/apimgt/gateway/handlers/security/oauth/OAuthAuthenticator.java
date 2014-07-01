@@ -27,6 +27,7 @@ import org.wso2.carbon.apimgt.gateway.handlers.security.*;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
+import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.util.Map;
 
@@ -41,11 +42,13 @@ public class OAuthAuthenticator implements Authenticator {
     protected APIKeyValidator keyValidator;
 
     private String securityHeader = HttpHeaders.AUTHORIZATION;
+    private String defaultAPIHeader="WSO2_AM_API_DEFAULT_VERSION";
     private String consumerKeyHeaderSegment = "Bearer";
     private String oauthHeaderSplitter = ",";
     private String consumerKeySegmentDelimiter = " ";
     private String securityContextHeader;
     private boolean removeOAuthHeadersFromOutMessage=true;
+    private boolean removeDefaultAPIHeaderFromOutMessage=true;
     private String clientDomainHeader = "referer";
     private String requestOrigin;
 
@@ -69,6 +72,10 @@ public class OAuthAuthenticator implements Authenticator {
         if(removeOAuthHeadersFromOutMessage){
             headers.remove(securityHeader);
         }
+        if(removeDefaultAPIHeaderFromOutMessage){
+            headers.remove(defaultAPIHeader);
+        }
+
         String apiContext = (String) synCtx.getProperty(RESTConstants.REST_API_CONTEXT);
         String apiVersion = (String) synCtx.getProperty(RESTConstants.SYNAPSE_REST_API_VERSION);
         String fullRequestPath = (String)synCtx.getProperty(RESTConstants.REST_FULL_REQUEST_PATH);
@@ -82,7 +89,8 @@ public class OAuthAuthenticator implements Authenticator {
 
         String clientDomain = getClientDomain(synCtx);
         //If the matching resource does not require authentication
-        String authenticationScheme = keyValidator.getResourceAuthenticationScheme(apiContext, apiVersion, requestPath, httpMethod);
+        //String authenticationScheme = keyValidator.getResourceAuthenticationScheme(apiContext, apiVersion, requestPath, httpMethod);
+        String authenticationScheme = keyValidator.getResourceAuthenticationScheme(synCtx);
         APIKeyValidationInfoDTO info;
         if(APIConstants.AUTH_NO_AUTHENTICATION.equals(authenticationScheme)){
 
@@ -114,12 +122,16 @@ public class OAuthAuthenticator implements Authenticator {
                 throw new APISecurityException(APISecurityConstants.API_AUTH_MISSING_CREDENTIALS,
                                                "Required OAuth credentials not provided");
             }
+            String matchingResource = (String)synCtx.getProperty(APIConstants.API_ELECTED_RESOURCE);
+
             org.apache.axis2.context.MessageContext axis2MessageCtx = ((Axis2MessageContext) synCtx).getAxis2MessageContext();
             org.apache.axis2.context.MessageContext.setCurrentMessageContext(axis2MessageCtx);
-            info = keyValidator.getKeyValidationInfo(apiContext, apiKey, apiVersion, authenticationScheme, clientDomain);
+            info = keyValidator.getKeyValidationInfo(apiContext, apiKey, apiVersion, authenticationScheme, clientDomain,
+                                                     matchingResource, httpMethod);
+
             synCtx.setProperty("APPLICATION_NAME", info.getApplicationName());
             synCtx.setProperty("END_USER_NAME", info.getEndUserName());
-        }
+          }
 
         if (info.isAuthorized()) {
             AuthenticationContext authContext = new AuthenticationContext();
@@ -134,6 +146,12 @@ public class OAuthAuthenticator implements Authenticator {
             authContext.setApplicationTier(info.getApplicationTier());
             authContext.setConsumerKey(info.getConsumerKey());
             APISecurityUtils.setAuthenticationContext(synCtx, authContext, securityContextHeader);
+            
+            /* Synapse properties required for BAM Mediator*/
+            String tenantDomain = MultitenantUtils.getTenantDomain(info.getApiPublisher());
+            synCtx.setProperty("API_PUBLISHER", tenantDomain);
+            synCtx.setProperty("API_NAME", info.getApiName());
+            
             return true;
         } else {
             throw new APISecurityException(info.getValidationStatus(),

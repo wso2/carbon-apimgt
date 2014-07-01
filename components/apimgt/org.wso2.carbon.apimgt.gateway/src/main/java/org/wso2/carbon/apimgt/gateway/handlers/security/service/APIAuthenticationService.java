@@ -19,6 +19,7 @@ package org.wso2.carbon.apimgt.gateway.handlers.security.service;
 
 
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.mediation.initializer.AbstractServiceBusAdmin;
 
@@ -58,16 +59,18 @@ public class APIAuthenticationService extends AbstractServiceBusAdmin {
 
     public void invalidateResourceCache(String apiContext, String apiVersion,
                                         String resourceURLContext, String httpVerb) {
-        String resourceVerbCacheKey = apiContext + "/" + apiVersion +
-                                      resourceURLContext + ":" + httpVerb;
-        String resourceCacheKey = apiContext + ":" + apiVersion;
-        Cache cache = Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER).getCache(APIConstants.RESOURCE_CACHE_NAME);
-        Cache keyCache = Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER).getCache(APIConstants.KEY_CACHE_NAME);
 
-        if(keyCache.containsKey(apiContext + ":" + apiVersion))  {
-            keyCache.remove(apiContext + ":" + apiVersion);
+        String resourceVerbCacheKey = APIUtil.getResourceInfoDTOCacheKey(apiContext, apiVersion,
+                                                                         resourceURLContext, httpVerb);
+
+        String apiCacheKey = APIUtil.getAPIInfoDTOCacheKey(apiContext, apiVersion);
+
+        Cache cache = Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER).getCache(APIConstants.RESOURCE_CACHE_NAME);
+
+        if(cache.containsKey(apiCacheKey))  {
+            cache.remove(apiCacheKey);
         }
-        //TODO Review and fix
+        //TODO this code is not needed now, can remove
        /* if (keyCache.size() != 0) {
             Set keys = keyCache.keySet();
             for (Object cacheKey : keys) {
@@ -79,10 +82,10 @@ public class APIAuthenticationService extends AbstractServiceBusAdmin {
         }*/
 
 
-        if(keyCache.containsKey(apiContext + "/" + apiVersion + resourceURLContext))  {
-            keyCache.remove(apiContext + "/" + apiVersion + resourceURLContext);
+        if(cache.containsKey(resourceVerbCacheKey))  {
+            cache.remove(resourceVerbCacheKey);
         }
-        //TODO Review and fix
+        //TODO this code is not needed now, can remove
         /*if (cache.size() != 0) {
             if (resourceURLContext.equals("/")) {
                 Set keys = cache.keySet();

@@ -6,13 +6,13 @@
                 response.sendRedirect('index.jag');
             }
 %>
-<div class="container-fluid">
+<div class="container-fluid login-container">
     <div class="row-fluid">
-        <div class="span2">
+        <div class="span2 login-left">
             <div class="left-side-col">
             </div>
         </div>
-        <div class="span6 ">
+        <div class="span6 login-content">
             <div class="title-section">
                 <h2>Login</h2>
             </div>
@@ -23,13 +23,13 @@
                        <div class="alert alert-error" id="loginError" style="display:none">
                            <span id="loginErrorSpan"></span>
                        </div>
-                       <form class="" action="index.jag" id="loginForm">
+                       <form class="" action="index.jag" id="loginForm" autocomplete="off">
                            <label><%=i18n.localize("username")%>:<span class="requiredAstrix">*</span></label>
                            <input type="text" id="username" autofocus="autofocus" validation="required"  />
 
                            <label><%=i18n.localize("password")%>:<span class="requiredAstrix">*</span></label>
                            <input type="password" id="pass" />
-                           <input type="hidden"  id="tenant" value="<%=request.getParameter("tenant")%>"/>
+                           <input type="hidden"  id="tenant" value="<%= encode.forHtml(request.getParameter("tenant"))%>"/>
                            <div>
                                <input type="button" class="btn btn-primary" onclick="login()"  value="<%=i18n.localize("login")%>" id="loginButton" />
                                <input type="reset" class="btn" value="<%=i18n.localize("reset")%>" />

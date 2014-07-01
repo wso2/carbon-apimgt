@@ -44,7 +44,7 @@
                          <tr>
 	        					<td><%=tierPermissions[i].tierDisplayName%></td>
 	        					<td>
-	        					<div class="form-actions" style="border-top:none;padding-top:0;padding-bottom:0">
+	        					<div>
 		        					<div id="radiodev" class="form-inline">
 		        					<% if (denied) {%>
 		        						<label class="checkbox-inline radio">
@@ -68,11 +68,12 @@
 			        					</label>
 		        					 <%}%>
 		        					 </div>
-		        					 <br />
 		        					 <div class="form-inline">
 		        					 	<label class="control-label" for="roles" id="rolesLabel" name="rolesLabel">roles</label>
-		        					 	<input type="text" class="input required"  id="<%=roleInputName%>" name="<%=roleInputName%>" value="<%=roleList%>"/>
-		        					 	<p class="help-block" id="rolesHelp"><%=i18n.localize("rolesHelpMsg")%></p>
+		        					 	<input type="text" class="input rolesInput"  id="<%=roleInputName%>" name="<%=roleInputName%>" value="<%=roleList%>"/>
+		        					 	<label class="errorTier" id="errorTier<%=String(i)%>"style="display:none;">This field is required.</label>
+                                        <label class="errorTier" id="errorTierRoles<%=String(i)%>"style="display:none;">Invalid role name[s]</label>
+		        					 	<label class="help-block" id="rolesHelp"><%=i18n.localize("rolesHelpMsg")%></label>
 		        					 </div>
 	        					</div> 
 		                	

@@ -11,17 +11,14 @@ i18n.init(request,localeResourcesBasePath);
 
     <!-- Le styles -->
     <%
-    var partWithContext = request.getRequestURL().split(
-                                request.getRequestURI()
-                              )[0]+request.getContextPath();
 
-    var tenant=request.getParameter("tenant");
+    var tenant=request_tenant;
     var urlPrefix;
     if(tenant!=null) {urlPrefix="tenant="+tenant;}else{urlPrefix='';}
 
     %>
     <script>
-        var requestURL = '<%=partWithContext%>';
+        var requestURL = '<%= request_url %>';
         var ssoEnabled = '<%=site.ssoConfiguration.enabled%>';
         var tenant = '<%=tenant%>';
         var urlPrefix = '<%=urlPrefix%>';

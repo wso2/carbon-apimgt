@@ -100,6 +100,41 @@ $(document).ready(function () {
         $(this).html(i18n.t('info.wait'));
     });
 
+    $('.app-create-key-button').click(function () {
+        var elem = $(this);
+        var i = elem.attr("iteration");
+        var keyType = elem.attr("data-keytype");
+        var authoDomains;
+        var domainsDiv;
+        var regen;
+        var link;
+        var validityTime;
+        if (keyType == 'PRODUCTION') {
+            authoDomains = $('#allowedDomainsPro').val();
+            validityTime=$('#refreshProdValidityTime').val();
+        } else {
+            authoDomains = $('#allowedDomainsSand').val();
+            validityTime=$('#refreshSandValidityTime').val();
+        }
+        jagg.post("/site/blocks/subscription/subscription-add/ajax/subscription-add.jag", {
+            action:"generateApplicationKey",
+            application:elem.attr("data-application"),
+            keytype:elem.attr("data-keytype"),
+            callbackUrl:elem.attr("data-callbackUrl"),
+            authorizedDomains:authoDomains,
+            validityTime:validityTime,
+	    retryAfterFailure:true
+        }, function (result) {
+            if (!result.error) {
+                location.reload();
+            } else {
+                jagg.message({content:result.message,type:"error"});
+            }
+        }, "json");
+
+        $(this).html(i18n.t('info.wait'));
+    });
+
        $('.key-table-content textarea').focus(function() {
         var $this = $(this);
         $this.select();

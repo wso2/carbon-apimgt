@@ -1,12 +1,12 @@
 <% jagg.template("menu/primary", function(inputs, outputs, jagg) { %>
-<%var reqUrl = request.getRequestURI();
+<%var reqUrl = request.getRequestURI();var storeUrl;
  var inlineUrl=jagg.getAbsoluteUrl("/site/pages/inline-editor.jag");
 
  var urlPrefix;
  var urlPostfix;
- var tenant=request.getParameter("tenant");
- if(tenant!=null) {urlPrefix="?tenant="+tenant;}else{urlPrefix='';}
- if(tenant!=null) {urlPostfix="&tenant="+tenant;}else{urlPostfix='';}
+ var tenant= encode.forUriComponent(request.getParameter("tenant"));
+ if(tenant!='null') {urlPrefix="?tenant="+tenant;}else{urlPrefix='';}
+ if(tenant!='null') {urlPostfix="&tenant="+tenant;}else{urlPostfix='';}
 
 %>
 
@@ -20,6 +20,12 @@
 <link href="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("css/localstyles.css"))%>" rel="stylesheet">
 <script src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile('lib/jquery-1.7.1.min.js'))%>"></script>
 
+<%if(jagg.getShowStoreURL()){%>
+<%storeUrl = jagg.module("manager").getAPIStoreURL().url;
+  var tenantDomain=outputs.user.username.split("@")[1];
+                if(tenantDomain==undefined){tenantDomain='carbon.super';}
+                storeUrl = storeUrl+"?tenant="+tenantDomain;%>
+<%}%>
 
 
 
@@ -45,12 +51,14 @@
                                     </ul>
                                   </li>
                                 </ul>
+                                <%if(jagg.getShowStoreURL()){%>
                                 <!--Links to Access APIStore-->
-                                <div class="tenant-position-setter">
+                                  <div class="tenant-position-setter">
 
-                                			Go to <a href="#" onclick="jagg.sessionAwareJS({callback:getAPIStoreURL('<%=outputs.user.username%>',<%=jagg.getUser().isSuperTenant%>),ssoEnabled:<%=ssoEnabled%>})"><%=i18n.localize("apistore")%></a>
+                                   Go to <a href="<%=storeUrl%>"  target="_blank"><%=i18n.localize("apistore")%></a>
 
-                                			</div>
+                                  </div>
+                                <%}%>
                                 </div>
                           </div>
                       </div>

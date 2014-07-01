@@ -82,6 +82,8 @@ public class ThriftUtils {
             sessionId = thriftAuthClient.getSessionId(userName, password);
 
         } catch (AuthenticationException e) {
+            thriftAuthClient=null;
+            sessionId=null;
             throw new APISecurityException(APISecurityConstants.API_AUTH_GENERAL_ERROR, e.getMessage());
         }
     }

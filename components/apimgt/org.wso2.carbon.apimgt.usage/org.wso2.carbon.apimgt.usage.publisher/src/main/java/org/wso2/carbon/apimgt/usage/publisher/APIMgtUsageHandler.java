@@ -27,7 +27,7 @@ import org.apache.synapse.rest.AbstractHandler;
 import org.apache.synapse.rest.RESTConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityUtils;
 import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationContext;
-import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
+import org.wso2.carbon.apimgt.usage.publisher.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.usage.publisher.dto.RequestPublisherDTO;
 import org.wso2.carbon.apimgt.usage.publisher.dto.ResponsePublisherDTO;
 import org.wso2.carbon.apimgt.usage.publisher.internal.UsageComponent;
@@ -81,11 +81,13 @@ public class APIMgtUsageHandler extends AbstractHandler {
             String username = "";
             String applicationName = "";
             String applicationId = "";
+            String throttlingTier = "";
             if (authContext != null) {
                 consumerKey = authContext.getConsumerKey();
                 username = authContext.getUsername();
                 applicationName = authContext.getApplicationName();
                 applicationId = authContext.getApplicationId();
+                throttlingTier = authContext.getTier();
             }
             String hostName = DataPublisherUtil.getHostAddress();
             String context = (String)mc.getProperty(RESTConstants.REST_API_CONTEXT);
@@ -122,7 +124,7 @@ public class APIMgtUsageHandler extends AbstractHandler {
             requestPublisherDTO.setApi_version(api_version);
             requestPublisherDTO.setApi(api);
             requestPublisherDTO.setVersion(version);
-            requestPublisherDTO.setResource(resource);
+            requestPublisherDTO.setResourcePath(resource);
             requestPublisherDTO.setMethod(method);
             requestPublisherDTO.setRequestTime(currentTime);
             requestPublisherDTO.setUsername(username);
@@ -132,6 +134,7 @@ public class APIMgtUsageHandler extends AbstractHandler {
             requestPublisherDTO.setApiPublisher(apiPublisher);
             requestPublisherDTO.setApplicationName(applicationName);
             requestPublisherDTO.setApplicationId(applicationId);
+            requestPublisherDTO.setAccessLevel(throttlingTier);
 
             publisher.publishEvent(requestPublisherDTO);
             //We check if usage metering is enabled for billing purpose
@@ -190,7 +193,7 @@ public class APIMgtUsageHandler extends AbstractHandler {
             responsePublisherDTO.setApi_version((String) mc.getProperty(APIMgtUsagePublisherConstants.API_VERSION));
             responsePublisherDTO.setApi((String) mc.getProperty(APIMgtUsagePublisherConstants.API));
             responsePublisherDTO.setVersion((String) mc.getProperty(APIMgtUsagePublisherConstants.VERSION));
-            responsePublisherDTO.setResource((String) mc.getProperty(APIMgtUsagePublisherConstants.RESOURCE));
+            responsePublisherDTO.setResourcePath((String) mc.getProperty(APIMgtUsagePublisherConstants.RESOURCE));
             responsePublisherDTO.setMethod((String)mc.getProperty(APIMgtUsagePublisherConstants.HTTP_METHOD));
             responsePublisherDTO.setResponseTime(currentTime);
             responsePublisherDTO.setServiceTime(serviceTime);

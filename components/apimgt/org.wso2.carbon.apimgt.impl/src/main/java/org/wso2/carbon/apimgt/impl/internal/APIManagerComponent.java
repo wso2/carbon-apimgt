@@ -19,6 +19,7 @@
 package org.wso2.carbon.apimgt.impl.internal;
 
 import org.apache.axis2.engine.ListenerManager;
+import org.apache.axis2.util.JavaUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -38,6 +39,7 @@ import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.utils.RemoteAuthorizationManager;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowExecutorFactory;
 import org.wso2.carbon.base.MultitenantConstants;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.governance.api.util.GovernanceConstants;
 import org.wso2.carbon.registry.core.ActionConstants;
 import org.wso2.carbon.registry.core.RegistryConstants;
@@ -64,6 +66,8 @@ import org.wso2.carbon.utils.ConfigurationContextService;
 import org.wso2.carbon.utils.FileUtil;
 
 import javax.cache.Cache;
+import javax.swing.plaf.multi.MultiTabbedPaneUI;
+
 import java.io.File;
 import java.io.FilenameFilter;
 import java.io.IOException;
@@ -115,13 +119,18 @@ public class APIManagerComponent {
             addRxtConfigs();
             addTierPolicies();
             addDefinedSequencesToRegistry();
-
+            APIUtil.loadTenantExternalStoreConfig(MultitenantConstants.SUPER_TENANT_ID);
+            APIUtil.loadTenantGAConfig(MultitenantConstants.SUPER_TENANT_ID);
+            int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
+            APIUtil.loadTenantWorkFlowExtensions(tenantId);
+            
+            
             APIManagerConfiguration configuration = new APIManagerConfiguration();
             String filePath = CarbonUtils.getCarbonHome() + File.separator + "repository" +
                     File.separator + "conf" + File.separator + "api-manager.xml";
             configuration.load(filePath);
 
-            WorkflowExecutorFactory.getInstance().load(filePath);
+            //WorkflowExecutorFactory.getInstance().load(filePath);
 
             String gatewayType = configuration.getFirstProperty(APIConstants.API_GATEWAY_TYPE);
             if ("Synapse".equalsIgnoreCase(gatewayType)) {
@@ -157,13 +166,14 @@ public class APIManagerComponent {
                             RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH + APIConstants.API_APPLICATION_DATA_LOCATION),
                     APIConstants.Permissions.API_PUBLISH,
                     UserMgtConstants.EXECUTE_ACTION, null);
-
+            
             setupImagePermissions();
             RemoteAuthorizationManager authorizationManager = RemoteAuthorizationManager.getInstance();
             authorizationManager.init();
             APIMgtDBUtil.initialize();
             //Check User add listener enabled or not
             boolean selfSignInProcessEnabled = Boolean.parseBoolean(configuration.getFirstProperty("WorkFlowExtensions.SelfSignIn.ProcessEnabled"));
+            readRecentlyAddedAPICacheConfigs(configuration);
             if (selfSignInProcessEnabled) {
                 if (bundleContext != null) {
                     bundleContext.registerService(UserStoreManagerListener.class.getName(),
@@ -182,6 +192,19 @@ public class APIManagerComponent {
                 }
             }
             new APIUtil().setupSelfRegistration(configuration,MultitenantConstants.SUPER_TENANT_ID);
+            
+            /* Add Bam Server Profile for collecting southbound statistics*/
+            String enabledStr = configuration.getFirstProperty(APIConstants.API_USAGE_ENABLED);
+            boolean enabled = enabledStr != null && JavaUtils.isTrueExplicitly(enabledStr);
+            if (enabled) {
+            	String bamServerURL = configuration.getFirstProperty(APIConstants.API_USAGE_BAM_SERVER_URL);
+                String bamServerUser = configuration.getFirstProperty(APIConstants.API_USAGE_BAM_SERVER_USER);
+                String bamServerPassword = configuration.getFirstProperty(APIConstants.API_USAGE_BAM_SERVER_PASSWORD);
+                String bamServerThriftPort = configuration.getFirstProperty(APIConstants.API_USAGE_THRIFT_PORT);
+            	APIUtil.addBamServerProfile(bamServerURL, bamServerUser, bamServerPassword, 
+            			bamServerThriftPort, MultitenantConstants.SUPER_TENANT_ID);
+            }
+            
         } catch (APIManagementException e) {
             log.error("Error while initializing the API manager component", e);
         }
@@ -345,28 +368,47 @@ public class APIManagerComponent {
                 if(log.isDebugEnabled()){
                     log.debug("Defined sequences have already been added to the registry");
                 }
+                //No need to add to add in sequences or out sequences. Do not return yet until we check for fault
+                // sequences as well. (Designed to support migrations).
+                //return;
+            }
+            else{
+                if(log.isDebugEnabled()){
+                    log.debug("Adding defined sequences to the registry.");
+                }
+
+                InputStream inSeqStream =
+                        APIManagerComponent.class.getResourceAsStream("/definedsequences/in/log_in_message.xml");
+                byte[] inSeqData = IOUtils.toByteArray(inSeqStream);
+                Resource inSeqResource = registry.newResource();
+                inSeqResource.setContent(inSeqData);
+
+                registry.put(APIConstants.API_CUSTOM_INSEQUENCE_LOCATION + "log_in_message.xml", inSeqResource);
+
+                InputStream outSeqStream =
+                        APIManagerComponent.class.getResourceAsStream("/definedsequences/out/log_out_message.xml");
+                byte[] outSeqData = IOUtils.toByteArray(outSeqStream);
+                Resource outSeqResource = registry.newResource();
+                outSeqResource.setContent(outSeqData);
+
+                registry.put(APIConstants.API_CUSTOM_OUTSEQUENCE_LOCATION + "log_out_message.xml", outSeqResource);
+            }
+
+            if (registry.resourceExists(APIConstants.API_CUSTOM_FAULTSEQUENCE_LOCATION)) {
+                if(log.isDebugEnabled()){
+                    log.debug("Defined fault sequences have already been added to the tenant's registry");
+                }
+                //Fault sequences have already been added. Nothing to do beyond this. Return.
                 return;
             }
 
-            if(log.isDebugEnabled()){
-                log.debug("Adding defined sequences to the registry.");
-            }
+            InputStream faultSeqStream =
+                    APIManagerComponent.class.getResourceAsStream("/definedsequences/fault/json_fault.xml");
+            byte[] faultSeqData = IOUtils.toByteArray(faultSeqStream);
+            Resource faultSeqResource = registry.newResource();
+            faultSeqResource.setContent(faultSeqData);
 
-            InputStream inSeqStream =
-                    APIManagerComponent.class.getResourceAsStream("/definedsequences/in/log_in_message.xml");
-            byte[] inSeqData = IOUtils.toByteArray(inSeqStream);
-            Resource inSeqResource = registry.newResource();
-            inSeqResource.setContent(inSeqData);
-
-            registry.put(APIConstants.API_CUSTOM_INSEQUENCE_LOCATION + "log_in_message.xml", inSeqResource);
-
-            InputStream outSeqStream =
-                    APIManagerComponent.class.getResourceAsStream("/definedsequences/out/log_out_message.xml");
-            byte[] outSeqData = IOUtils.toByteArray(outSeqStream);
-            Resource outSeqResource = registry.newResource();
-            outSeqResource.setContent(outSeqData);
-
-            registry.put(APIConstants.API_CUSTOM_OUTSEQUENCE_LOCATION + "log_out_message.xml", outSeqResource);
+            registry.put(APIConstants.API_CUSTOM_FAULTSEQUENCE_LOCATION + "json_fault.xml", faultSeqResource);
 
         } catch (RegistryException e) {
             throw new APIManagementException("Error while saving defined sequences to the registry ", e);
@@ -388,36 +430,58 @@ public class APIManagerComponent {
                     "in the self sign up configuration");
         }
 
-        boolean create = Boolean.parseBoolean(config.getFirstProperty(APIConstants.SELF_SIGN_UP_CREATE_ROLE));
-        if (create) {
-            String[] permissions = new String[]{
-                    "/permission/admin/login",
-                    APIConstants.Permissions.API_SUBSCRIBE
-            };
-            try {
-                RealmService realmService = ServiceReferenceHolder.getInstance().getRealmService();
-                UserRealm realm = realmService.getBootstrapRealm();
-                UserStoreManager manager = realm.getUserStoreManager();
-                if (!manager.isExistingRole(role)) {
-                    if (log.isDebugEnabled()) {
-                        log.debug("Creating subscriber role: " + role);
-                    }
-                    Permission[] subscriberPermissions = new Permission[]{new Permission("/permission/admin/login",UserMgtConstants.EXECUTE_ACTION),
-                            new Permission(APIConstants.Permissions.API_SUBSCRIBE, UserMgtConstants.EXECUTE_ACTION)};
-                    String superTenantName = ServiceReferenceHolder.getInstance().getRealmService().getBootstrapRealmConfiguration().getAdminUserName();
-                    String[] userList = new String[]{superTenantName};
-                    manager.addRole(role, userList, subscriberPermissions);
+        String[] permissions = new String[]{
+                "/permission/admin/login",
+                APIConstants.Permissions.API_SUBSCRIBE
+        };
+        try {
+            RealmService realmService = ServiceReferenceHolder.getInstance().getRealmService();
+            UserRealm realm = realmService.getBootstrapRealm();
+            UserStoreManager manager = realm.getUserStoreManager();
+            if (!manager.isExistingRole(role)) {
+                if (log.isDebugEnabled()) {
+                    log.debug("Creating subscriber role: " + role);
                 }
-            } catch (UserStoreException e) {
-                throw new APIManagementException("Error while creating subscriber role: " + role + " - " +
-                        "Self registration might not function properly.", e);
+                Permission[] subscriberPermissions = new Permission[]{new Permission("/permission/admin/login", UserMgtConstants.EXECUTE_ACTION),
+                        new Permission(APIConstants.Permissions.API_SUBSCRIBE, UserMgtConstants.EXECUTE_ACTION)};
+                String superTenantName = ServiceReferenceHolder.getInstance().getRealmService().getBootstrapRealmConfiguration().getAdminUserName();
+                String[] userList = new String[]{superTenantName};
+                manager.addRole(role, userList, subscriberPermissions);
             }
+        } catch (UserStoreException e) {
+            throw new APIManagementException("Error while creating subscriber role: " + role + " - " +
+                    "Self registration might not function properly.", e);
         }
     }
+    
+    /**
+     * Add the External API Stores Configuration to registry
+     * @throws APIManagementException
+     */
+    private void addExternalStoresConfigs() throws APIManagementException {
+        RegistryService registryService = ServiceReferenceHolder.getInstance().getRegistryService();
+        try {
+            UserRegistry registry = registryService.getGovernanceSystemRegistry();
+            if (registry.resourceExists(APIConstants.EXTERNAL_API_STORES_LOCATION)) {
+                log.debug("External Stores configuration already uploaded to the registry");
+                return;
+            }
 
+            log.debug("Adding External Stores configuration to the registry");
+            InputStream inputStream = APIManagerComponent.class.getResourceAsStream("/externalstores/default-external-api-stores.xml");
+            byte[] data = IOUtils.toByteArray(inputStream);
+            Resource resource = registry.newResource();
+            resource.setContent(data);
 
-
-    protected void setConfigurationContextService(ConfigurationContextService contextService) {
+            registry.put(APIConstants.EXTERNAL_API_STORES_LOCATION, resource);
+        } catch (RegistryException e) {
+            throw new APIManagementException("Error while saving External Stores configuration information to the registry", e);
+        } catch (IOException e) {
+            throw new APIManagementException("Error while reading External Stores configuration file content", e);
+        }
+    }
+    
+   protected void setConfigurationContextService(ConfigurationContextService contextService) {
         ServiceReferenceHolder.setContextService(contextService);
     }
 
@@ -436,5 +500,13 @@ public class APIManagerComponent {
 
     public static TenantRegistryLoader getTenantRegistryLoader(){
         return tenantRegistryLoader;
+    }
+    private void readRecentlyAddedAPICacheConfigs(APIManagerConfiguration config) {
+        String isRecentlyAddedAPICachedEnabled = config.getFirstProperty(APIConstants.API_STORE_RECENTLY_ADDED_API_CACHE_ENABLE);
+        if (isRecentlyAddedAPICachedEnabled == null) {
+            APIConstants.isRecentlyAddedAPICacheEnabled = false;
+        } else {
+            APIConstants.isRecentlyAddedAPICacheEnabled  =  isRecentlyAddedAPICachedEnabled.equalsIgnoreCase("true") ? true : false;
+        }
     }
 }

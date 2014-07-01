@@ -9,6 +9,7 @@ import org.apache.synapse.rest.AbstractHandler;
 import org.apache.synapse.rest.RESTConstants;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
+import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import javax.cache.Caching;
 import java.util.Iterator;
@@ -49,29 +50,43 @@ public class APIManagerCacheExtensionHandler extends AbstractHandler {
     }
 
     private void clearCacheForAccessToken(MessageContext messageContext) {
-        
+
         org.apache.axis2.context.MessageContext axisMC = ((Axis2MessageContext) messageContext).getAxis2MessageContext();
         try {
             String revokedToken = (String) ((TreeMap) axisMC.getProperty("TRANSPORT_HEADERS")).get("RevokedAccessToken");
             String renewedToken = (String) ((TreeMap) axisMC.getProperty("TRANSPORT_HEADERS")).get("DeactivatedAccessToken");
+            String authorizedUser = (String) ((TreeMap) axisMC.getProperty("TRANSPORT_HEADERS")).get("AuthorizedUser");
             PrivilegedCarbonContext.startTenantFlow();
-            PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME, true);
+            if (authorizedUser != null) {
+                String tenantDomain = MultitenantUtils.getTenantDomain(authorizedUser);
+                PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
+            } else {
+                PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME, true);
+            }
             Iterator iterator = Caching.getCacheManager("API_MANAGER_CACHE").getCache("keyCache").keys();
-            while (iterator.hasNext()) {
-                String cacheKey = iterator.next().toString();
-                if (revokedToken != null && cacheKey.contains(revokedToken)) {
-                    Caching.getCacheManager("API_MANAGER_CACHE").getCache("keyCache").remove(cacheKey);
-                    break;
-                } else if (renewedToken != null && cacheKey.contains(renewedToken)) {
-                    Caching.getCacheManager("API_MANAGER_CACHE").getCache("keyCache").remove(cacheKey);
-                    break;
+            if (revokedToken != null) {
+                while (iterator.hasNext()) {
+                    String cacheKey = iterator.next().toString();
+                    if (cacheKey.contains(revokedToken)) {
+                        Caching.getCacheManager("API_MANAGER_CACHE").getCache("keyCache").remove(cacheKey);
+                        if (log.isDebugEnabled()) {
+                            log.debug("clearing cache entries associated with token " + revokedToken);
+                        }
+                        break;
+                    }
                 }
             }
 
-            // APIKeyValidationInfoDTO info = (APIKeyValidationInfoDTO) getKeyCache().get(cacheKey);
-            if (revokedToken != null) {
-                if (log.isDebugEnabled()) {
-                    log.debug("clearing cache entries associated with token " + revokedToken);
+            if (renewedToken != null) {
+                while (iterator.hasNext()) {
+                    String cacheKey = iterator.next().toString();
+                    if (cacheKey.contains(renewedToken)) {
+                        Caching.getCacheManager("API_MANAGER_CACHE").getCache("keyCache").remove(cacheKey);
+                        if (log.isDebugEnabled()) {
+                            log.debug("clearing cache entries associated with token " + renewedToken);
+                        }
+                        break;
+                    }
                 }
             }
         } catch (Exception e) {
@@ -80,7 +95,7 @@ public class APIManagerCacheExtensionHandler extends AbstractHandler {
             PrivilegedCarbonContext.endTenantFlow();
         }
     }
-    
+
     public boolean handleRequest(MessageContext messageContext) {
         return true;
     }

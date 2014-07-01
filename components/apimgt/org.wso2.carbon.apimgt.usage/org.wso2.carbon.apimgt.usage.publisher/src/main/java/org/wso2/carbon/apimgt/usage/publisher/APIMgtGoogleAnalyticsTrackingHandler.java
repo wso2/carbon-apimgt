@@ -2,47 +2,88 @@ package org.wso2.carbon.apimgt.usage.publisher;
 
 import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
-import java.net.URL;
-import java.net.URLConnection;
-import java.net.URLDecoder;
-import java.net.URLEncoder;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Map;
-import java.util.UUID;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
+import javax.xml.namespace.QName;
+
+import org.apache.axiom.om.OMElement;
+import org.apache.axis2.Constants;
+import org.apache.axis2.util.JavaUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpHeaders;
 import org.apache.synapse.MessageContext;
+import org.apache.synapse.SynapseException;
+import org.apache.synapse.config.Entry;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.rest.AbstractHandler;
 import org.apache.synapse.rest.RESTConstants;
-import org.wso2.carbon.apimgt.usage.publisher.internal.UsageComponent;
+import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityUtils;
+import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationContext;
+import org.wso2.carbon.ganalytics.publisher.GoogleAnalyticsConstants;
+import org.wso2.carbon.ganalytics.publisher.GoogleAnalyticsData;
+import org.wso2.carbon.ganalytics.publisher.GoogleAnalyticsDataPublisher;
 
 public class APIMgtGoogleAnalyticsTrackingHandler extends AbstractHandler {
 
 	private static final Log log = LogFactory
 			.getLog(APIMgtGoogleAnalyticsTrackingHandler.class);
 
-	private static final String GOOGLE_ANALYTICS_TRACKER_VERSION = "4.4sj";
+	private static final String GOOGLE_ANALYTICS_TRACKER_VERSION = "1";
 
 	private static final String COOKIE_NAME = "__utmmobile";
 
-	private static final String UTM_GIF_LOCATION = "http://www.google-analytics.com/__utm.gif";
+	private static final String ANONYMOUS_USER_ID = "anonymous";
+	
+	/** The key for getting the google analytics configuration - key refers to a/an [registry] entry    */
+    private String configKey = null;
+    /** Version number of the throttle policy */
+    private long version;
 
-	private boolean enabled = UsageComponent.getApiMgtConfigReaderService().isGoogleAnalyticsTrackingEnabled();
-
-	private String googleAnalytictPropertyID = UsageComponent.getApiMgtConfigReaderService().
-			getGoogleAnalyticsTrackingID();
-
-	private ExecutorService executor = Executors.newFixedThreadPool(1);
+	private GoogleAnalyticsConfig config = null;
 
 	@Override
 	public boolean handleRequest(MessageContext msgCtx) {
-		if (!enabled) {
+		if (configKey == null) {
+            throw new SynapseException("Google Analytics configuration unspecified for the API");
+        }
+
+        Entry entry = msgCtx.getConfiguration().getEntryDefinition(configKey);
+        if (entry == null) {
+            handleException("Cannot find Google Analytics configuration using key: " + configKey);
+            return false;
+        }
+        Object entryValue = null;
+        boolean reCreate = false;
+
+        if (entry.isDynamic()) {
+            if ((!entry.isCached()) || (entry.isExpired()) || config == null) {
+                entryValue = msgCtx.getEntry(this.configKey);
+                if (this.version != entry.getVersion()) {
+                	reCreate = true;
+                }
+            }
+        } else if (config == null){
+            entryValue = msgCtx.getEntry(this.configKey);
+        }
+        
+        if ( reCreate || config == null) {
+        	if (entryValue == null || !(entryValue instanceof OMElement)) {
+                handleException("Unable to load Google Analytics configuration using key: " + configKey);
+                return false;
+            }
+        	version = entry.getVersion();
+            config = new GoogleAnalyticsConfig((OMElement)entryValue);
+        }
+        
+        if (config == null) {
+			handleException("Unable to load Google Analytics configuration using key: " + configKey);
+            return false;
+		}
+		
+		if (!config.enabled) {
 			return true;
 		}
 		try {
@@ -74,18 +115,14 @@ public class APIMgtGoogleAnalyticsTrackingHandler extends AbstractHandler {
 			domainName = "";
 		}
 
-		String documentReferer = "-";
-
 		String path = (String) msgCtx
 				.getProperty(RESTConstants.REST_FULL_REQUEST_PATH);
 		String documentPath = path;
 		if (isEmpty(documentPath)) {
 			documentPath = "";
-		} else {
-			documentPath = URLDecoder.decode(documentPath, "UTF-8");
-		}
+		} 
 
-		String account = googleAnalytictPropertyID;
+		String account = config.googleAnalyticsTrackingID;
 
 		String userAgent = (String) headers.get(HttpHeaders.USER_AGENT);
 		if (isEmpty(userAgent)) {
@@ -97,17 +134,18 @@ public class APIMgtGoogleAnalyticsTrackingHandler extends AbstractHandler {
 		/* Set the visitorId in MessageContext */
 		msgCtx.setProperty(COOKIE_NAME, visitorId);
 
-		/* Construct the gif hit url */
-		String utmUrl = UTM_GIF_LOCATION + "?" + "utmwv="
-				+ GOOGLE_ANALYTICS_TRACKER_VERSION + "&utmn="
-				+ getRandomNumber() + "&utmhn=" + "none" + "&utmr="
-				+ URLEncoder.encode(documentReferer, "UTF-8") + "&utmp="
-				+ URLEncoder.encode(documentPath, "UTF-8") + "&utmac="
-				+ account + "&utmcc=__utma%3D999.999.999.999.999.1%3B"
-				+ "&utmvid=" + visitorId + "&utmip=" + "";
+		String httpMethod = (String)((Axis2MessageContext) msgCtx).getAxis2MessageContext().
+                getProperty(Constants.Configuration.HTTP_METHOD);
+		
+		GoogleAnalyticsData data = new GoogleAnalyticsData
+                .DataBuilder(account, GOOGLE_ANALYTICS_TRACKER_VERSION , visitorId , GoogleAnalyticsConstants.HIT_TYPE_PAGEVIEW)
+                .setDocumentPath(documentPath)
+                .setDocumentHostName(domainName)
+                .setDocumentTitle(httpMethod)
+                .build();
 
-		Runnable googleAnalyticsPublisher = new GoogleAnalyticsPublisher(utmUrl, userAgent);
-		executor.execute(googleAnalyticsPublisher);
+        String payload = GoogleAnalyticsDataPublisher.buildPayloadString(data);
+        GoogleAnalyticsDataPublisher.publishGET(payload, userAgent, false);
 	}
 
 	/**
@@ -123,16 +161,21 @@ public class APIMgtGoogleAnalyticsTrackingHandler extends AbstractHandler {
 	 * messageContext, use that. Otherwise use a random number.
 	 * 
 	 */
-	private static String getVisitorId(String account, String userAgent,MessageContext msgCtx) 
+	private static String getVisitorId(String account, String userAgent, MessageContext msgCtx) 
 			throws NoSuchAlgorithmException, UnsupportedEncodingException {
 
 		if (msgCtx.getProperty(COOKIE_NAME) != null) {
 			return (String) msgCtx.getProperty(COOKIE_NAME);
 		}
-
 		String message;
-		message = userAgent + getRandomNumber() + UUID.randomUUID().toString();
-
+		
+		AuthenticationContext authContext  = APISecurityUtils.getAuthenticationContext(msgCtx);
+		if (authContext != null) {
+			message = authContext.getApiKey();
+		} else {
+			message = ANONYMOUS_USER_ID;
+		}
+		
 		MessageDigest m = MessageDigest.getInstance("MD5");
 		m.update(message.getBytes("UTF-8"), 0, message.length());
 		byte[] sum = m.digest();
@@ -147,46 +190,35 @@ public class APIMgtGoogleAnalyticsTrackingHandler extends AbstractHandler {
 		return "0x" + md5String.substring(0, 16);
 	}
 
-	/**
-	 * Get a random number string.
-	 * 
-	 * @return
-	 */
-	private static String getRandomNumber() {
-		return Integer.toString((int) (Math.random() * 0x7fffffff));
-	}
-
-	/**
-	 * Make a tracking request to Google Analytics from this server.
-	 * 
-	 */
-	private class GoogleAnalyticsPublisher implements Runnable {
-		String utmUrl;
-		String userAgent;
-
-		public GoogleAnalyticsPublisher(String utmUrl, String userAgent) {
-			this.utmUrl = utmUrl;
-			this.userAgent = userAgent;
-		}
-
-		@Override
-		public void run() {
-			try {
-				URL url = new URL(utmUrl);
-				URLConnection connection = url.openConnection();
-				connection.setUseCaches(false);
-				connection.addRequestProperty("User-Agent", userAgent);
-				connection.getContent();
-			} catch (Exception e) {
-				log.error(e.getMessage(), e);
-			}
-		}
-
-	}
-
 	@Override
 	public boolean handleResponse(MessageContext arg0) {
 		return true;
+	}
+	
+	private void handleException(String msg) {
+        log.error(msg);
+        throw new SynapseException(msg);
+    }
+	
+	private class GoogleAnalyticsConfig {
+		private boolean enabled;
+		private String googleAnalyticsTrackingID;
+		
+		public GoogleAnalyticsConfig(OMElement config) {
+			googleAnalyticsTrackingID = config.getFirstChildWithName(new QName(
+					APIMgtUsagePublisherConstants.API_GOOGLE_ANALYTICS_TRACKING_ID)).getText();
+            String googleAnalyticsEnabledStr = config.getFirstChildWithName(new QName(
+            		APIMgtUsagePublisherConstants.API_GOOGLE_ANALYTICS_TRACKING_ENABLED)).getText();
+            enabled =  googleAnalyticsEnabledStr != null && JavaUtils.isTrueExplicitly(googleAnalyticsEnabledStr);
+		}
+	}
+	
+	public String getConfigKey() {
+		return configKey;
+	}
+
+	public void setConfigKey(String configKey) {
+		this.configKey = configKey;
 	}
 
 }

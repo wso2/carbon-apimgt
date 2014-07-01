@@ -2,11 +2,12 @@
 include("/jagg/jagg.jag");
 
 (function () {
+    response.contentType = "application/json; charset=UTF-8";
     var mod, obj, result, username,
             action = request.getParameter("action"),
             site = require("/site/conf/site.json"),
             msg = require("/site/conf/ui-messages.jag");
-    if (action === "login") {
+    if (action === "login" && request.getMethod() == 'POST') {
         mod = jagg.module("user");
         username = request.getParameter("username");
 
@@ -14,7 +15,7 @@ include("/jagg/jagg.jag");
             var s=username.split("@");
             username=s[0] + "@" + s[1].toLowerCase();
         }
-	
+
         var tenant = request.getParameter("tenant");
         result = mod.login(username, request.getParameter("password"),tenant);
         if (result.error) {

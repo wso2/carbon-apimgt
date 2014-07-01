@@ -1,4 +1,142 @@
 <%
+
+var manageAPI = function (api) {
+    var success, log = new Log(),
+            provider = jagg.module("manager").getAPIProviderObj();
+    try {
+        success = provider.manageAPI(api);
+        if (log.isDebugEnabled()) {
+            log.debug("manageAPI : " + api.name + "-" + api.version);
+        }
+        if(success){
+        return {
+            error:false
+        };
+        }else{
+        return {
+            error:true
+        }; }
+    } catch (e) {
+        log.error(e);
+        return {
+            error:true,
+            message:e.message.split(":")[1]
+        };
+    }
+};
+
+var checkIfResourceExists = function (api) {
+    var success, log = new Log(),
+            provider = jagg.module("manager").getAPIProviderObj();
+    try {
+        success = provider.checkIfResourceExists(api);
+        if (log.isDebugEnabled()) {
+            log.debug("checkIfResourceExists : " + api.name + "-" + api.version);
+        }
+        return success;
+    } catch (e) {
+        log.error(e.message);
+        return {
+            error:true,
+            message:e.message.split(":")[1]
+        };
+    }
+};
+
+var updateAPIImplementation = function (api) {
+    var success, log = new Log(),
+            provider = jagg.module("manager").getAPIProviderObj();
+    try {
+        success = provider.updateAPIImplementation(api);
+        if (log.isDebugEnabled()) {
+            log.debug("updateAPIImplementation : " + api.name + "-" + api.version);
+        }
+        if(success){
+        return {
+            error:false
+        };
+        }else{
+        return {
+            error:true
+        }; }
+    } catch (e) {
+        log.error(e);
+        return {
+            error:true,
+            message:e.message.split(":")[1]
+        };
+    }
+};
+
+var getSwagger12Resource = function (api) {
+    var success, log = new Log(),
+            provider = jagg.module("manager").getAPIProviderObj();
+    try {
+        success = provider.getSwagger12Resource(api);
+        if (log.isDebugEnabled()) {
+            log.debug("getSwagger12Resource : " + api.name + "-" + api.version);
+        }
+        return success;        
+    } catch (e) {
+        log.error(e.message);
+        return {
+            error:true,
+            message:e.message.split(":")[1]
+        };
+    }
+};
+
+var createAPI = function (api) {
+    var success, log = new Log(),
+            provider = jagg.module("manager").getAPIProviderObj();
+    try {
+        success = provider.createAPI(api);
+
+        if (log.isDebugEnabled()) {
+            log.debug("createAPI : " + api.name + "-" + api.version);
+        }
+        if(success){
+        return {
+            error:false
+        };
+        }else{
+        return {
+            error:true
+        }; }
+    } catch (e) {
+        log.error(e);
+        return {
+            error:true,
+            message:e.message.split(":")[1]
+        };
+    }
+};
+
+var updateAPIDesign = function (api) {
+    var success, log = new Log(),
+            provider = jagg.module("manager").getAPIProviderObj();
+    try {
+        success = provider.updateAPIDesign(api);
+        if (log.isDebugEnabled()) {
+            log.debug("updateAPIDesign : " + api.name + "-" + api.version);
+        }
+        if(success){
+        return {
+            error:false
+        };
+        }else{
+        return {
+            error:true
+        }; }
+    } catch (e) {
+        log.error(e);
+        return {
+            error:true,
+            message:e.message.split(":")[1]
+        };
+    }
+};
+
 var addAPI = function (api) {
     var success, log = new Log(),
             provider = jagg.module("manager").getAPIProviderObj();
@@ -55,25 +193,6 @@ var isURLValid = function (type,url) {
         return {
             error:false,
             response:result
-        };
-    } catch (e) {
-        log.error(e.message);
-        return {
-            error:e
-        };
-    }
-};
-var getExternalAPIStores = function () {
-    var result, externalAPIStores,log = new Log(),
-            provider = jagg.module("manager").getAPIProviderObj();
-    try {
-        result = provider.getExternalAPIStores();
-        if (log.isDebugEnabled()) {
-            log.debug("Invoke getExternalAPIStores()" );
-        }
-        return {
-            error:false,
-            externalAPIStores:result
         };
     } catch (e) {
         log.error(e.message);
@@ -170,6 +289,28 @@ var getCustomOutSequences = function () {
     }
 };
 
+var getCustomFaultSequences = function () {
+    var sequence,sequences,list=[],log = new Log(),
+            provider = jagg.module("manager").getAPIProviderObj();
+    try {
+    	sequences = provider.getCustomFaultSequences();
+        if (log.isDebugEnabled()) {
+            log.debug("getCustomFaultSequences " +  " : " + sequences);
+        }
+
+        return {
+            error:false,
+            sequences:sequences
+        };
+    } catch (e) {
+        log.error(e.message);
+        return {
+            error:e,
+            sequences:null
+        };
+    }
+};
+
 var isSynapseGateway = function () {
     var result, isSynapseGateway,log = new Log(),
             provider = jagg.module("manager").getAPIProviderObj();
@@ -181,6 +322,26 @@ var isSynapseGateway = function () {
         return {
             error:false,
             isSynapseGateway:result
+        };
+    } catch (e) {
+        log.error(e.message);
+        return {
+            error:e
+        };
+    }
+};
+
+var isDataPublishingEnabled = function () {
+    var result, isDataPublishingEnabled,log = new Log(),
+            provider = jagg.module("manager").getAPIProviderObj();
+    try {
+        result = provider.isDataPublishingEnabled();
+        if (log.isDebugEnabled()) {
+            log.debug("Invoke isDataPublishingEnabled()" );
+        }
+        return {
+            error:false,
+            isDataPublishingEnabled:result
         };
     } catch (e) {
         log.error(e.message);
