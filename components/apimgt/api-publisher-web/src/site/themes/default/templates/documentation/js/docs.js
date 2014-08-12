@@ -1,12 +1,12 @@
 $(document).ready(function() {
     var docUrlDiv=$('#docUrl');
     docUrlDiv.click(function() {
-       docUrlDiv.removeClass('error');
-       docUrlDiv.next().hide();
+        docUrlDiv.removeClass('error');
+        docUrlDiv.next().hide();
     });
 
     docUrlDiv.change(function() {
-    validInputUrl(docUrlDiv);
+        validInputUrl(docUrlDiv);
     });
 
     $('input[name=optionsRadios1]:radio:checked').change(function() {
@@ -34,7 +34,7 @@ var newDocFormToggle = function(){
     $('#summary').val('');
     $('#docUrl').val('');
     $('#specifyBox').val('');
-    $('#optionsRadios7').attr("checked","checked");
+    $('#optionsRadios6').attr("checked","checked");
     $('#optionsRadios1').attr("checked","checked");
     $('#sourceUrlDoc').hide();
 };
@@ -47,22 +47,22 @@ var removeDocumentation = function (provider, apiName, version, docName, docType
     $('#messageModal a.btn-other').html('No');
     $('#messageModal a.btn-primary').click(function() {
         jagg.post("/site/blocks/documentation/ajax/docs.jag", { action:"removeDocumentation",provider:provider,
-            apiName:apiName, version:version,docName:docName,docType:docType},
-                  function (result) {
-                      if (!result.error) {
-                          $('#messageModal').modal('hide');
-                          $('#' + apiName + '-' + docName.replace(/ /g,'__')).remove();
-                          if ($('#docTable tr').length == 1) {
-                              $('#docTable').append($('<tr><td colspan="6">'+i18n.t('resultMsgs.noDocs')+'</td></tr>'));
-                          }
-                      } else {
-                          if (result.message == "AuthenticateError") {
-                              jagg.showLogin();
-                          } else {
-                              jagg.message({content:result.message,type:"error"});
-                          }
-                      }
-                  }, "json");
+                apiName:apiName, version:version,docName:docName,docType:docType},
+            function (result) {
+                if (!result.error) {
+                    $('#messageModal').modal('hide');
+                    $('#' + apiName + '-' + docName.replace(/ /g,'__')).remove();
+                    if ($('#docTable tr').length == 1) {
+                        $('#docTable').append($('<tr><td colspan="6">'+i18n.t('resultMsgs.noDocs')+'</td></tr>'));
+                    }
+                } else {
+                    if (result.message == "AuthenticateError") {
+                        jagg.showLogin();
+                    } else {
+                        jagg.message({content:result.message,type:"error"});
+                    }
+                }
+            }, "json");
     });
     $('#messageModal a.btn-other').click(function() {
         return;
@@ -84,48 +84,53 @@ var updateDocumentation = function (rowId, docName, docType, summary, sourceType
     if (summary != "{}" && summary != 'null') {
         $('#newDoc #summary').val(summary);
     }
-   if(docType == "Swagger API Definition"){
-       $('#newDoc #summary').attr("disabled",true);
-       $('#optionsRadios6').attr('checked', true);
-       $('#optionsRadios1').attr('disabled', true);
-       $('#optionsRadios2').attr('disabled', true);
-       $('#optionsRadios3').attr('disabled', true);
-       $('#optionsRadios4').attr('disabled', true);
-       $('#optionsRadios5').attr('disabled', true);
-       $('#optionsRadios6').attr('disabled', true);
-       $('#optionsRadios7').attr('disabled', true);
-       $('#optionsRadios8').attr('disabled', true);
-       $('#optionsRadios9').attr('disabled', true);
+    if(docType == "Swagger API Definition"){
+        $('#newDoc #summary').attr("disabled",true);
+        $('#optionsRadios5').attr('checked', true);
+        $('#optionsRadios1').attr('disabled', true);
+        $('#optionsRadios2').attr('disabled', true);
+        $('#optionsRadios3').attr('disabled', true);
+        $('#optionsRadios4').attr('disabled', true);
+        $('#optionsRadios5').attr('disabled', true);
+        $('#optionsRadios6').attr('disabled', true);
+        $('#optionsRadios7').attr('disabled', true);
+        $('#optionsRadios8').attr('disabled', true);
 
-       $('#optionsRadios7').attr('checked', true);
-   }
 
-   else{
-    if (sourceType == "INLINE") {
-        $('#optionsRadios7').attr('checked', true);
-        $('#sourceUrlDoc').hide('slow');
-        $('#docUrl').val('');
-    } else if(sourceType == "URL"){
-        if (docUrl != "{}") {
-            $('#newDoc #docUrl').val(docUrl);
+        $('#optionsRadios6').attr('checked', true);
+    }
+
+    else{
+        if (sourceType == "INLINE") {
+            $('#optionsRadios6').attr('checked', true);
+            $('#sourceUrlDoc').hide('slow');
+            $('#docUrl').val('');
+        } else if(sourceType == "URL"){
+            if (docUrl != "{}") {
+                $('#newDoc #docUrl').val(docUrl);
+                $('#optionsRadios7').attr('checked', true);
+                $('#sourceUrlDoc').show('slow');
+            }
+        }else {
             $('#optionsRadios8').attr('checked', true);
-            $('#sourceUrlDoc').show('slow');
-        }
-    }else {
-            $('#optionsRadios9').attr('checked', true);
-	    $('#sourceFile').show('slow');
-	}
+            $('#toggleFileDoc').show('slow');
+            if(filePath){
+                $('#fileNameDiv').text(filePath.split("documentation/files/")[1]);
+                $('#fileNameDiv').show('slow');
+            }
 
-    for (var i = 1; i <= 6; i++) {
-        if ($('#optionsRadios' + i).val().toUpperCase().indexOf(docType.toUpperCase()) >= 0) {
-            $('#optionsRadios' + i).attr('checked', true);
-	if(docType.toLowerCase() == 'other'){
-		$('#specifyBox').val(otherTypeName);
-		$('#otherTypeDiv').show();
-		}
+        }
+
+        for (var i = 1; i <= 5; i++) {
+            if ($('#optionsRadios' + i).val().toUpperCase().indexOf(docType.toUpperCase()) >= 0) {
+                $('#optionsRadios' + i).attr('checked', true);
+                if(docType.toLowerCase() == 'other'){
+                    $('#specifyBox').val(otherTypeName);
+                    $('#otherTypeDiv').show();
+                }
+            }
         }
     }
-   }
 };
 
 var editJSONContent = function (provider, apiName, version, docName, mode,tenantDomain) {
@@ -264,13 +269,15 @@ var getRadioValue = function (radioButton) {
 
 var disableInline = function(type) {
     if (type == 'forum') {
-        document.getElementById("optionsRadios7").disabled = true;
-        document.getElementById("optionsRadios8").checked = true;
-        $('#sourceUrlDoc').show('slow');
-    } else {
-        document.getElementById("optionsRadios7").disabled = false;
+        document.getElementById("optionsRadios6").disabled = true;
         document.getElementById("optionsRadios7").checked = true;
+        $('#sourceUrlDoc').show('slow');
+        $('#sourceFile').hide('slow');
+    } else {
+        document.getElementById("optionsRadios6").disabled = false;
+        document.getElementById("optionsRadios6").checked = true;
         $('#sourceUrlDoc').hide('slow');
+        $('#sourceFile').hide('slow');
     }
 };
 
@@ -288,6 +295,7 @@ var validInput = function(divId, message, condition) {
             divId.parent().append('<label class="error">' + message + '</label>');
         } else {
             divId.next().show();
+            divId.next().text(message);
         }
         return false;
     } else {
@@ -320,39 +328,39 @@ var validInputUrl = function(docUrlDiv) {
 };
 
 var CONTENT_MAP = {
-        'js': 'application/javascript',
-        'css': 'text/css',
-        'csv': 'text/csv',
-        'html': 'text/html',
-        'json': 'application/json',
-        'png': 'image/png',
-        'jpeg': 'image/jpeg',
-        'gif': 'image/gif',
-        'svg': 'image/svg+xml',
-        'ttf': 'application/x-font-ttf',
-        'eot': 'application/vnd.ms-fontobject',
-        'woff': 'application/font-woff',
-        'otf': 'application/x-font-otf',
-        'zip': 'application/zip',
-        'xml': 'application/xml',
-        'xhtml': 'application/xhtml+xml',
-        'pdf': 'application/pdf',
-        'txt': 'text/plain',
-        'doc': 'application/msword',
-        'ppt': 'application/vnd.ms-powerpoint',
-        'docx': 'application/msword',
-        'pptx': 'application/vnd.ms-powerpoint',
-        'xls' : 'application/vnd.ms-excel',
-        'xlsx' : 'application/vnd.ms-excel'
-    };
+    'js': 'application/javascript',
+    'css': 'text/css',
+    'csv': 'text/csv',
+    'html': 'text/html',
+    'json': 'application/json',
+    'png': 'image/png',
+    'jpeg': 'image/jpeg',
+    'gif': 'image/gif',
+    'svg': 'image/svg+xml',
+    'ttf': 'application/x-font-ttf',
+    'eot': 'application/vnd.ms-fontobject',
+    'woff': 'application/font-woff',
+    'otf': 'application/x-font-otf',
+    'zip': 'application/zip',
+    'xml': 'application/xml',
+    'xhtml': 'application/xhtml+xml',
+    'pdf': 'application/pdf',
+    'txt': 'text/plain',
+    'doc': 'application/msword',
+    'ppt': 'application/vnd.ms-powerpoint',
+    'docx': 'application/msword',
+    'pptx': 'application/vnd.ms-powerpoint',
+    'xls' : 'application/vnd.ms-excel',
+    'xlsx' : 'application/vnd.ms-excel'
+};
 
 var getExtension = function(baseFileName) {
     var baseNameComponents = baseFileName.split('.');
     if (baseNameComponents.length > 1) {
-    	var extension = baseNameComponents[baseNameComponents.length - 1];
+        var extension = baseNameComponents[baseNameComponents.length - 1];
         return extension;
     } else {
-    	return 'txt';
+        return 'txt';
     }
 
 };
@@ -362,7 +370,6 @@ var getMimeType = function(extension) {
     if(!type){type="application/octet-stream";}
     return type;
 };
-
 
 
 

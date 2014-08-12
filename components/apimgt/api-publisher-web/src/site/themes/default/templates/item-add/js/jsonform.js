@@ -349,7 +349,7 @@ jsonform.elementTypes = {
       '<button class="btn advance_endpoint_config" type="button" field-name="<%= node.name %>">Advanced Options</button>'+
       '<button class="btn check_url_valid" type="button" >Test</button>'+
       '</div>' +
-      '<p class="help-block">Ex : http://appserver/resource</p>',
+      '<p class="help-block">E.g.,: http://appserver/resource</p>',
     'fieldtemplate': true,
     'inputfield': true
     },

@@ -169,17 +169,20 @@
         <input type="hidden" id="overviewAPIName" value="<%=api.name%>"/>
         <label><%=i18n.localize("toVersion")%></label>
         <input type="text" class="span3 required" id="new-version"/><span class="help-inline"><%=i18n.localize("versionHelpMsg")%></span>
-        
+         <a class="icon-question-sign help_popup" help_data="versionCopy_help"></a>
+         <p id="versionCopy_help" class="hide"><%=i18n.localize("versionCopyHelpMsg")%></p>
         <div class="default-version">
             <label class="control-label">Default Version</label>
             <div class="controls">
                 <input type="checkbox" class="default_version_check_cp" id="default_version_cp" name="default_version_cp" value="default_version"/>
                 <input type="hidden" id="default_version_checked_cp" name="default_version_checked_cp" value=""/>
+                 
                  <%if(api.hasDefaultVersion){%>
                     <p class="help-block">Currently set to version : <%=api.currentDefaultVersion%></p>
                 <%}else{%>
                     <p class="help-block">No default version defined for the current API</p>
                 <%}%> 
+               
             </div>
         </div>
        

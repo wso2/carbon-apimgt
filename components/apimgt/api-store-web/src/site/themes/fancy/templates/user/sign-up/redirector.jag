@@ -1,4 +1,16 @@
 <%
+    site = require("/site/conf/site.json");
+
+	function openRedirectValidation(url){
+		var storecontext = new RegExp(site.context, 'g');
+		if(url.match(storecontext)){
+			return url;
+		}else{
+			return site.context;
+		}
+	}
+
+	
     session.put("showLogin", "true");
-    response.sendRedirect(request.getParameter("redirectToHome"));
+    response.sendRedirect(openRedirectValidation(request.getParameter("redirectToHome")));
 %>

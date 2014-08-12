@@ -10,7 +10,10 @@ import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.poi.hssf.extractor.ExcelExtractor;
+import org.apache.poi.poifs.filesystem.OfficeXmlFileException;
 import org.apache.poi.poifs.filesystem.POIFSFileSystem;
+import org.apache.poi.xssf.extractor.XSSFExcelExtractor;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.apache.solr.common.SolrException;
 import org.apache.solr.common.SolrException.ErrorCode;
 import org.wso2.carbon.registry.indexing.IndexingConstants;
@@ -24,9 +27,25 @@ public class MSExcelIndexer implements Indexer {
 	public IndexDocument getIndexedDocument(File2Index fileData)
 			throws SolrException {
 		try {
-			POIFSFileSystem fs = new POIFSFileSystem(new ByteArrayInputStream(fileData.data));
-			ExcelExtractor extractor = new ExcelExtractor(fs);
-			String excelText = extractor.getText();
+
+            String excelText = null;
+            try{
+
+                //Extract Excel 2003 (.xsl) document files
+                POIFSFileSystem fs = new POIFSFileSystem(new ByteArrayInputStream(fileData.data));
+                ExcelExtractor extractor = new ExcelExtractor(fs);
+                excelText = extractor.getText();
+            }catch (OfficeXmlFileException e){
+
+                //if 2003 Excel (.xsl) extraction failed, try with Excel 2007 (.xslx) document files extractor
+                XSSFWorkbook xssfSheets = new XSSFWorkbook(new ByteArrayInputStream(fileData.data));
+                XSSFExcelExtractor xssfExcelExtractor = new XSSFExcelExtractor(xssfSheets);
+                excelText = xssfExcelExtractor.getText();
+
+            }catch (Exception e){
+                String msg = "Failed to extract the document";
+                log.error(msg, e);
+            }
 
 			IndexDocument indexDoc = new IndexDocument(fileData.path, excelText, null);
 			

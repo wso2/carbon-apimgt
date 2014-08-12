@@ -57,6 +57,7 @@ import org.wso2.carbon.apimgt.usage.client.APIUsageStatisticsClient;
 import org.wso2.carbon.apimgt.usage.client.dto.*;
 import org.wso2.carbon.apimgt.usage.client.exception.APIMgtUsageQueryServiceClientException;
 import org.wso2.carbon.authenticator.stub.AuthenticationAdminStub;
+import org.wso2.carbon.base.ServerConfiguration;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.user.mgt.stub.UserAdminStub;
@@ -64,7 +65,10 @@ import org.wso2.carbon.utils.CarbonUtils;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
+import javax.net.ssl.HostnameVerifier;
+import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLHandshakeException;
+import javax.net.ssl.SSLSession;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -565,6 +569,9 @@ public class APIProviderHostObject extends ScriptableObject {
         }
                 
         api.setDescription(StringEscapeUtils.escapeHtml(description));
+        HashSet<String> deletedTags = new HashSet<String>(api.getTags());
+        deletedTags.removeAll(tag);
+        api.removeTags(deletedTags);
         api.addTags(tag);
         api.setBusinessOwner(bizOwner);
         api.setBusinessOwnerEmail(bizOwnerEmail);
@@ -3642,41 +3649,95 @@ public class APIProviderHostObject extends ScriptableObject {
         return apiOlderVersionExist;
     }
 
-    public static String jsFunction_isURLValid(Context cx, Scriptable thisObj,
-                                               Object[] args, Function funObj)
-            throws APIManagementException {
-        String response = "";
-        if (args == null || !isStringValues(args)) {
-            handleException("Invalid input parameters.");
-        }
-        String urlVal = (String) args[1];
-        String type = (String) args[0];
-        if (urlVal != null && !urlVal.equals("")) {
-            try {
-                if (type != null && type.equals("wsdl")) {
-                    validateWsdl(urlVal);
-                } else {
-                    URL url = new URL(urlVal);
-                    URLConnection conn = url.openConnection();
-                    conn.connect();
-                }
-                response = "success";
-            } catch (MalformedURLException e) {
-                response = "malformed";
-            } catch (UnknownHostException e) {
-                response = "unknown";
-            } catch (ConnectException e) {
-                response = "Cannot establish connection to the provided address";
-            } catch (SSLHandshakeException e) {
-                response = "ssl_error";
-            } catch (Exception e) {
-                response = e.getMessage();
-            }
-        }
-        return response;
+	public static String jsFunction_isURLValid(Context cx, Scriptable thisObj, Object[] args,
+	                                           Function funObj) throws APIManagementException {
+		String response = "";
+		if (args == null || !isStringValues(args)) {
+			handleException("Invalid input parameters.");
+		}
+		String urlVal = (String) args[1];
+		String type = (String) args[0];
+		if (urlVal != null && !urlVal.equals("")) {
+			HttpURLConnection con = null;
+			HttpsURLConnection conHttps = null;
+			URLConnection conn = null;
+			try {
+				URL url = new URL(urlVal);
+				if (type != null && type.equals("wsdl")) {
+					validateWsdl(urlVal);
+				}
+				// checking http,https endpoints up to resource level by doing
+				// http HEAD. And other end point
+				// validation do through basic url connect
+				else if (url.getProtocol().matches("https")) {
+					ServerConfiguration serverConfig = CarbonUtils.getServerConfiguration();
+					String trustStorePath =
+					                        serverConfig.getFirstProperty("Security.TrustStore.Location");
+					String trustStorePassword =
+					                            serverConfig.getFirstProperty("Security.TrustStore.Password");
+					System.setProperty("javax.net.ssl.trustStore", trustStorePath);
+					System.setProperty("javax.net.ssl.trustStorePassword", trustStorePassword);
+					conHttps = (HttpsURLConnection) new URL(urlVal).openConnection();
+					conHttps.setRequestMethod("HEAD");
+					conHttps.setConnectTimeout(4000);
+					conHttps.setReadTimeout(4000);
+					// We will skip host name verification as this is just
+					// testing endpoint. This verification skip
+					// will be limited only for this connection
+					conHttps.setHostnameVerifier(DO_NOT_VERIFY);
+					// check if we get 4XX,5XX range response or not. If its not
+					// in 4XX,5XX range will allow to proceed
+					if ((conHttps.getResponseCode()) / 100 < 4) {
+						return "success";
+					} else {
+						return "error while connecting";
+					}
+				} else if (url.getProtocol().matches("http")) {
+					con = (HttpURLConnection) new URL(urlVal).openConnection();
+					con.setRequestMethod("HEAD");
+					if ((con.getResponseCode()) / 100 < 4) {
+						return "success";
+					} else {
+						return "error while connecting";
+					}
+				} else {
+					conn = url.openConnection();
+					conn.connect();
+				}
+				response = "success";
+			} catch (MalformedURLException e) {
+				response = "malformed";
+			} catch (UnknownHostException e) {
+				response = "unknown";
+			} catch (ConnectException e) {
+				response = "Cannot establish connection to the provided address";
+			} catch (SSLHandshakeException e) {
+				response = "ssl_error";
+			} catch (Exception e) {
+				response = e.getMessage();
+			} finally {
+				if (conHttps != null) {
+					conHttps.disconnect();
+				}
+				if (con != null) {
+					con.disconnect();
+				}
+				if (conn != null) {
+					conn = null;
+				}
+			}
+		}
+		return response;
 
-    }
+	} 
 
+	private static HostnameVerifier DO_NOT_VERIFY = new HostnameVerifier() {
+		public boolean verify(String hostname, SSLSession session) {
+			return true;
+		}
+	};
+		 
+		 
     private boolean resourceMethodMatches(String[] resourceMethod1,
                                           String[] resourceMethod2) {
         for (String m1 : resourceMethod1) {

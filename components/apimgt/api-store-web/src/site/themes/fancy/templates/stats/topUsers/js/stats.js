@@ -108,7 +108,7 @@ var drawTopUsersGraph = function(from,to){
                 $('#topUsersView').empty();
                 for(var k=0 ; k<lentth1 ;k++){
 
-                     $('#topUsersView').append($('<div class="well"><div class="row-fluid"> <h3>Aplication Name:  '+json.usage[k].appName+'</h3><div class="span6" style="height:350px; width :350px"><div id="userChart'+(k+1)+'" style="height:350px;"><div class="progress progress-striped active"><div class="bar" style="width: 10%;"></div></div></div> </div> <div class="span6"> <table class="table graphTable" id="userTable'+(k+1)+'" style="display:none;"><tr> <th>User</th><th>Number of API Calls</th></tr> </table> </div></div></div>'));
+                     $('#topUsersView').append($('<div class="well"><div class="row-fluid"> <h3>Application Name:  '+json.usage[k].appName+'</h3><div class="span6" style="height:350px; width :350px"><div id="userChart'+(k+1)+'" style="height:350px;"><div class="progress progress-striped active"><div class="bar" style="width: 10%;"></div></div></div> </div> <div class="span6"> <table class="table graphTable" id="userTable'+(k+1)+'" style="display:none;"><tr> <th>User</th><th>Number of API Calls</th></tr> </table> </div></div></div>'));
              } for(var k=0 ; k<lentth1 ;k++){
                 var length = json.usage[k].userCountArray.length,data = [];
 

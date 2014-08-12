@@ -16,7 +16,8 @@ i18n.init(request,localeResourcesBasePath);
 
     var tenant=request_tenant;
     var urlPrefix;
-    var fullUrl = null; 
+    var fullUrl = null;
+   
     if(tenant!=null) {urlPrefix="tenant="+tenant;}else{urlPrefix='';}
 	fullUrl = request.getRequestURI();
 	if(request.getQueryString() != null){

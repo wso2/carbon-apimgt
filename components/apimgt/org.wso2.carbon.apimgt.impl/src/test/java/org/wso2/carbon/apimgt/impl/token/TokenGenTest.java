@@ -21,6 +21,7 @@ import junit.framework.TestCase;
 import org.apache.axiom.util.base64.Base64Utils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationServiceImpl;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
@@ -52,6 +53,7 @@ public class TokenGenTest extends TestCase {
         dto.setApplicationId("1");
         dto.setApplicationTier("UNLIMITED");
         dto.setEndUserName("denis");
+        dto.setUserType(APIConstants.ACCESS_TOKEN_USER_TYPE_APPLICATION);
         String token = jwtGen.generateToken(dto, "cricScore", "1.9.0", true);
         System.out.println("Generated Token: " + token);
         String header = token.split("\\.")[0];
@@ -60,6 +62,44 @@ public class TokenGenTest extends TestCase {
         String body = token.split("\\.")[1];
         String decodedBody = new String(Base64Utils.decode(body));
         System.out.println("Body: " + decodedBody);
+
+
+        // With end user name not included
+        token = jwtGen.generateToken(dto, "cricScore", "1.9.0", false);
+        System.out.println("Generated Token: " + token);
+        header = token.split("\\.")[0];
+        decodedHeader = new String(Base64Utils.decode(header));
+        System.out.println("Header: "+decodedHeader);
+        body = token.split("\\.")[1];
+        decodedBody = new String(Base64Utils.decode(body));
+        System.out.println("Body: " + decodedBody);
+
+
+        dto.setUserType(APIConstants.SUBSCRIPTION_USER_TYPE);
+        token = jwtGen.generateToken(dto, "cricScore", "1.9.0", true);
+        System.out.println("Generated Token: " + token);
+        header = token.split("\\.")[0];
+        decodedHeader = new String(Base64Utils.decode(header));
+        System.out.println("Header: "+decodedHeader);
+        body = token.split("\\.")[1];
+        decodedBody = new String(Base64Utils.decode(body));
+        System.out.println("Body: " + decodedBody);
+
+        // enduser claim should be as "http://wso2.org/claims/enduser":"<enduser>"
+        String endUserClaim = "http://wso2.org/claims/enduser";
+        String userName = decodedBody.split(endUserClaim)[1].split("\"")[2];
+        System.out.println("user name "+userName);
+        Assert.assertEquals("denis@carbon.super", userName);
+
+        token = jwtGen.generateToken(dto, "cricScore", "1.9.0", false);
+        System.out.println("Generated Token: " + token);
+        header = token.split("\\.")[0];
+        decodedHeader = new String(Base64Utils.decode(header));
+        System.out.println("Header: "+decodedHeader);
+        body = token.split("\\.")[1];
+        decodedBody = new String(Base64Utils.decode(body));
+        System.out.println("Body: " + decodedBody);
+
 
         //we can not do assert eaquals because body includes expiration time.
         
@@ -78,10 +118,6 @@ public class TokenGenTest extends TestCase {
         //log.info(decodedToken);
         //assertNotNull(decodedToken);
 
-	 // enduser claim should be as "http://wso2.org/claims/enduser":"<enduser>"
-        String endUserClaim = "http://wso2.org/claims/enduser";
-        String userName = decodedBody.split(endUserClaim)[1].split("\"")[2];
-        System.out.println("user name "+userName);
-        Assert.assertEquals("denis@carbon.super", userName);
+
     }
 }
