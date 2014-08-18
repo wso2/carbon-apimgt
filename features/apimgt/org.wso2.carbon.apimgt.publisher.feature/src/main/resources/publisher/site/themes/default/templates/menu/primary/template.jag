@@ -22,7 +22,9 @@
 
 <%if(jagg.getShowStoreURL()){%>
 <%storeUrl = jagg.module("manager").getAPIStoreURL().url;
-  var tenantDomain=outputs.user.username.split("@")[1];
+var MultitenantUtils = Packages.org.wso2.carbon.utils.multitenancy.MultitenantUtils;
+var tenantDomain =MultitenantUtils.getTenantDomain(outputs.user.username);
+
                 if(tenantDomain==undefined){tenantDomain='carbon.super';}
                 storeUrl = storeUrl+"?tenant="+tenantDomain;%>
 <%}%>

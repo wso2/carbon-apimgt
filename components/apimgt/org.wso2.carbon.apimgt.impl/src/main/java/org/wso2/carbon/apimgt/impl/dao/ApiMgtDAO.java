@@ -23,8 +23,6 @@ import org.apache.axiom.util.base64.Base64Utils;
 import org.apache.axis2.util.JavaUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.commons.ssl.util.Hex;
-import org.apache.derby.iapi.types.RawToBinaryFormatStream;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.dto.UserApplicationAPIUsage;
 import org.wso2.carbon.apimgt.api.model.*;
@@ -78,11 +76,6 @@ public class ApiMgtDAO {
     private static final String ENABLE_JWT_CACHE = "APIKeyManager.EnableJWTCache";
     private boolean forceCaseInsensitiveComparisons = false;
 
-    // Primary/Secondary Login conifguration
-    private static final String USERID_LOGIN = "UserIdLogin";
-    private static final String EMAIL_LOGIN = "EmailLogin";
-    private static final String PRIMARY_LOGIN = "primary";
-    private static final String CLAIM_URI = "ClaimUri";
 
     public ApiMgtDAO() {
         String enableJWTGeneration = ServiceReferenceHolder.getInstance()
@@ -829,12 +822,12 @@ public class ApiMgtDAO {
                                 //On a Cache miss
                                 if(calleeToken == null){
                                     //Generate Token and update Cache.
-                                    calleeToken = generateJWTToken(userType, keyValidationInfoDTO, context, version);
+                                    calleeToken = generateJWTToken(keyValidationInfoDTO, context, version);
                                     jwtCache.put(cacheKey, calleeToken);
                                 }
                             }
                             else{
-                                calleeToken = generateJWTToken(userType, keyValidationInfoDTO, context, version);
+                                calleeToken = generateJWTToken(keyValidationInfoDTO, context, version);
                             }
 
                             keyValidationInfoDTO.setEndUserToken(calleeToken);
@@ -865,12 +858,11 @@ public class ApiMgtDAO {
         return keyValidationInfoDTO;
     }
 
-    private String generateJWTToken(String userType, APIKeyValidationInfoDTO keyValidationInfoDTO,
+    private String generateJWTToken(APIKeyValidationInfoDTO keyValidationInfoDTO,
                                     String context, String version) throws APIManagementException {
 
         String jwtToken;
-        if (removeUserNameInJWTForAppToken &&
-                APIConstants.ACCESS_TOKEN_USER_TYPE_APPLICATION.equalsIgnoreCase(userType)) {
+        if (removeUserNameInJWTForAppToken) {
             jwtToken = jwtGenerator.generateToken(keyValidationInfoDTO, context, version, false);
         } else {
             jwtToken = jwtGenerator.generateToken(keyValidationInfoDTO, context, version, true);
@@ -1645,8 +1637,6 @@ public class ApiMgtDAO {
                             " AM_SUBSCRIPTION_KEY_MAPPING SKM " +
                             "WHERE" +
                             " SKM.SUBSCRIPTION_ID = ?";
-
-        String authorizedDomains;
 
         Set<APIKey> apiKeys = new HashSet<APIKey>();
         try {
@@ -5187,7 +5177,11 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
                     is = null;
                 }
                 if (connection.getMetaData().getDriverName().contains("PostgreSQL")) {
-                    prepStmt.setBinaryStream(2, is, uriTemplate.getMediationScript().getBytes().length);
+                    if(uriTemplate.getMediationScript() != null) {
+                        prepStmt.setBinaryStream(6, is, uriTemplate.getMediationScript().getBytes().length);
+                    }else{
+                        prepStmt.setBinaryStream(6, is, 0);
+                    }
                 }else{
                     prepStmt.setBinaryStream(6, is);
                 }
@@ -5508,10 +5502,13 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
         String deleteExternalAPIStoresQuery = "DELETE FROM AM_EXTERNAL_STORES WHERE API_ID=?";
         String deleteAPIQuery = "DELETE FROM AM_API WHERE API_PROVIDER=? AND API_NAME=? AND API_VERSION=? ";
         String deleteURLTemplateQuery = "DELETE FROM AM_API_URL_MAPPING WHERE API_ID = ?";
-
+     
         try {
             connection = APIMgtDBUtil.getConnection();
             id = getAPIID(apiId,connection);
+            
+            removeAPIScope(apiId);
+            
             prepStmt = connection.prepareStatement(deleteSubscriptionQuery);
             prepStmt.setInt(1, id);
             prepStmt.execute();
@@ -5531,7 +5528,7 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
             prepStmt = connection.prepareStatement(deleteExternalAPIStoresQuery);
             prepStmt.setInt(1, id);
             prepStmt.execute();
-
+			
             prepStmt = connection.prepareStatement(deleteAPIQuery);
             prepStmt.setString(1, APIUtil.replaceEmailDomainBack(apiId.getProviderName()));
             prepStmt.setString(2, apiId.getApiName());
@@ -5541,7 +5538,7 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
             prepStmt = connection.prepareStatement(deleteURLTemplateQuery);
             prepStmt.setInt(1, id);
             prepStmt.execute();
-
+            
             String curDefaultVersion = getDefaultVersion(apiId);
             String pubDefaultVersion = getPublishedDefaultVersion(apiId);
             if(apiId.getVersion().equals(curDefaultVersion)){
@@ -5695,24 +5692,16 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
      *
      * @param context         String context for API
      * @param version         version of API
-     * @param subscriberName  subscribed user name
-     * @param applicationName application name api belongs
-     * @param tier            tier name
-     * @param endUserName     name of end user
+     * @param keyValidationInfoDTO   APIKeyValidationInfoDTO
      * @return signed JWT token string
      * @throws APIManagementException error in generating token
      */
-    public String createJWTTokenString(String context, String version, String subscriberName,
-                                       String applicationName, String tier, String endUserName)
+    public String createJWTTokenString(String context, String version, APIKeyValidationInfoDTO keyValidationInfoDTO)
             throws APIManagementException {
         String calleeToken = null;
-        APIKeyValidationInfoDTO keyValidationInfoDTO = new APIKeyValidationInfoDTO();
-        keyValidationInfoDTO.setSubscriber(subscriberName);
-        keyValidationInfoDTO.setApplicationName(applicationName);
-        keyValidationInfoDTO.setTier(tier);
-        keyValidationInfoDTO.setEndUserName(endUserName);
+
         if (jwtGenerator != null) {
-            calleeToken = jwtGenerator.generateToken(keyValidationInfoDTO, context, version, true);
+            calleeToken = generateJWTToken(keyValidationInfoDTO, context, version);
         } else {
             if (log.isDebugEnabled()) {
                 log.debug("JWT generator not properly initialized. JWT token will not present in validation info");
@@ -6199,16 +6188,16 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
 
         Map<String, Map<String, String>> loginConfiguration = ServiceReferenceHolder.getInstance()
                 .getAPIManagerConfigurationService().getAPIManagerConfiguration().getLoginConfiguration();
-        if (loginConfiguration.get(EMAIL_LOGIN) != null) {
-            Map<String, String> emailConf = loginConfiguration.get(EMAIL_LOGIN);
-            if ("true".equalsIgnoreCase(emailConf.get(PRIMARY_LOGIN))) {
+        if (loginConfiguration.get(APIConstants.EMAIL_LOGIN) != null) {
+            Map<String, String> emailConf = loginConfiguration.get(APIConstants.EMAIL_LOGIN);
+            if ("true".equalsIgnoreCase(emailConf.get(APIConstants.PRIMARY_LOGIN))) {
                 if (isUserLoggedInEmail(userId)) {
                     return false;
                 } else {
                     return true;
                 }
             }
-            if ("false".equalsIgnoreCase(emailConf.get(PRIMARY_LOGIN))) {
+            if ("false".equalsIgnoreCase(emailConf.get(APIConstants.PRIMARY_LOGIN))) {
                 if (isUserLoggedInEmail(userId)) {
                     return true;
                 } else {
@@ -6217,17 +6206,17 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
             }
 
         }
-        if (loginConfiguration.get(USERID_LOGIN) != null) {
+        if (loginConfiguration.get(APIConstants.USERID_LOGIN) != null) {
             Map<String, String> userIdConf = loginConfiguration
-                    .get(USERID_LOGIN);
-            if ("true".equalsIgnoreCase(userIdConf.get(PRIMARY_LOGIN))) {
+                    .get(APIConstants.USERID_LOGIN);
+            if ("true".equalsIgnoreCase(userIdConf.get(APIConstants.PRIMARY_LOGIN))) {
                 if (isUserLoggedInEmail(userId)) {
                     return true;
                 } else {
                     return false;
                 }
             }
-            if ("false".equalsIgnoreCase(userIdConf.get(PRIMARY_LOGIN))) {
+            if ("false".equalsIgnoreCase(userIdConf.get(APIConstants.PRIMARY_LOGIN))) {
                 if (isUserLoggedInEmail(userId)) {
                     return false;
                 } else {
@@ -6248,29 +6237,31 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
      *
      * @param login
      * @return
+     * @throws APIManagementException 
      */
-    private String getPrimaryloginFromSecondary(String login) {
+    private String getPrimaryloginFromSecondary(String login) throws APIManagementException {
         Map<String, Map<String, String>> loginConfiguration = ServiceReferenceHolder.getInstance()
                 .getAPIManagerConfigurationService().getAPIManagerConfiguration().getLoginConfiguration();
         String claimURI = null, username = null;
         if (isUserLoggedInEmail(login)) {
-            Map<String, String> emailConf = loginConfiguration.get(EMAIL_LOGIN);
-            claimURI = emailConf.get(CLAIM_URI);
+            Map<String, String> emailConf = loginConfiguration.get(APIConstants.EMAIL_LOGIN);
+            claimURI = emailConf.get(APIConstants.CLAIM_URI);
         } else {
             Map<String, String> userIdConf = loginConfiguration
-                    .get(USERID_LOGIN);
-            claimURI = userIdConf.get(CLAIM_URI);
+                    .get(APIConstants.USERID_LOGIN);
+            claimURI = userIdConf.get(APIConstants.CLAIM_URI);
         }
 
         try {
             RemoteUserManagerClient rmUserlient = new RemoteUserManagerClient(login);
-            String user[] = rmUserlient.getUserList(claimURI, login);
+            String[] user = rmUserlient.getUserList(claimURI, login);
             if (user.length > 0) {
                 username = user[0].toString();
             }
         } catch (Exception e) {
-            log.error("Error while retriivng the primaryLogin name using seconadry loginanme : "
-                      + login, e);
+        
+            handleException("Error while retriivng the primaryLogin name using seconadry loginanme : "
+                      +login, e);
         }
         return username;
     }
@@ -6280,8 +6271,9 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
      *
      * @param userID
      * @return
+     * @throws APIManagementException 
      */
-    private String getLoginUserName(String userID) {
+    private String getLoginUserName(String userID) throws APIManagementException {
         String primaryLogin = userID;
         if (isSecondaryLogin(userID)) {
             primaryLogin = getPrimaryloginFromSecondary(userID);
@@ -6624,7 +6616,6 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
                         ps.setString(5, uriTemplate.getScope().getRoles());
                         ps.execute();
                         rs = ps.getGeneratedKeys();
-                        int scopeId = -1;
                         if (rs.next()) {
                             uriTemplate.getScope().setId(rs.getInt(1));
                         }
@@ -6645,7 +6636,6 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
                         ps.setString(5, scope.getRoles());
                         ps.execute();
                         rs = ps.getGeneratedKeys();
-                        int scopeId = -1;
                         if (rs.next()) {
                             scope.setId(rs.getInt(1));
                         }
@@ -6783,7 +6773,6 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
         ResultSet resultSet = null;
         PreparedStatement ps = null;
         Set<Scope> scopes= new LinkedHashSet<Scope>();
-        int apiId = -1;
         try {
             conn = APIMgtDBUtil.getConnection();
 
@@ -6922,4 +6911,54 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
         return null;
     }
 
+	/**
+	 * Remove scope entries from DB, when delete APIs
+	 * 
+	 * @param apiIdentifier
+	 */
+	private void removeAPIScope(APIIdentifier apiIdentifier) throws APIManagementException {
+		Set<Scope> scopes = getAPIScopes(apiIdentifier);
+
+		Connection connection = null;
+		PreparedStatement prepStmt = null;
+		ResultSet rs = null;
+		int scopeId = -1;
+		int apiId = -1;
+
+		String deleteAPIScopeQuery = "DELETE FROM AM_API_SCOPES WHERE API_ID = ?";
+		String deleteOauth2ScopeQuery = "DELETE FROM IDN_OAUTH2_SCOPE  WHERE SCOPE_ID = ?";
+		String deleteOauth2ResourceScopeQuery =
+		                                        "DELETE FROM IDN_OAUTH2_RESOURCE_SCOPE  WHERE SCOPE_ID = ?";
+
+		try {
+			connection = APIMgtDBUtil.getConnection();
+
+			prepStmt = connection.prepareStatement(deleteAPIScopeQuery);
+			prepStmt.setInt(1, apiId);
+			prepStmt.execute();
+
+			if (!scopes.isEmpty()) {
+				Iterator<Scope> scopeItr = scopes.iterator();
+				while (scopeItr.hasNext()) {
+					scopeId = scopeItr.next().getId();				
+
+					prepStmt = connection.prepareStatement(deleteOauth2ResourceScopeQuery);
+					prepStmt.setInt(1, scopeId);
+					prepStmt.execute();
+					
+					prepStmt = connection.prepareStatement(deleteOauth2ScopeQuery);
+					prepStmt.setInt(1, scopeId);
+					prepStmt.execute();
+				}
+			}
+
+			connection.commit();
+
+		} catch (SQLException e) {
+			handleException("Error while removing the scopes for the API: " +
+			                        apiIdentifier.getApiName() + " from the database", e);
+		} finally {
+			APIMgtDBUtil.closeAllConnections(prepStmt, connection, rs);
+		}
+	}
 }

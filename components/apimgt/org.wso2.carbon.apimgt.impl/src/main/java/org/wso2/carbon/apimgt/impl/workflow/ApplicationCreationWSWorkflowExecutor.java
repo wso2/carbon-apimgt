@@ -150,32 +150,44 @@ public class ApplicationCreationWSWorkflowExecutor extends WorkflowExecutor {
 	@Override
 	public void complete(WorkflowDTO workFlowDTO) throws WorkflowException {
         workFlowDTO.setUpdatedTime(System.currentTimeMillis());
-		super.complete(workFlowDTO);
-        log.info("Application Creation [Complete] Workflow Invoked. Workflow ID : " + workFlowDTO.getExternalWorkflowReference() + "Workflow State : "+ workFlowDTO.getStatus());
+        ApiMgtDAO dao = new ApiMgtDAO();
+        try {
+            if(dao.getApplicationById(Integer.parseInt(workFlowDTO.getWorkflowReference())) != null) {
 
-        if(WorkflowStatus.APPROVED.equals(workFlowDTO.getStatus())){
-            String status = null;
-            if ("CREATED".equals(workFlowDTO.getStatus().toString())) {
-                status = APIConstants.ApplicationStatus.APPLICATION_CREATED;
-            } else if ("REJECTED".equals(workFlowDTO.getStatus().toString())) {
-                status = APIConstants.ApplicationStatus.APPLICATION_REJECTED;
-            } else if ("APPROVED".equals(workFlowDTO.getStatus().toString())) {
-                status = APIConstants.ApplicationStatus.APPLICATION_APPROVED;
+                super.complete(workFlowDTO);
+                log.info("Application Creation [Complete] Workflow Invoked. Workflow ID : " + workFlowDTO.getExternalWorkflowReference() + "Workflow State : " + workFlowDTO.getStatus());
+
+                if (WorkflowStatus.APPROVED.equals(workFlowDTO.getStatus())) {
+                    String status = null;
+                    if ("CREATED".equals(workFlowDTO.getStatus().toString())) {
+                        status = APIConstants.ApplicationStatus.APPLICATION_CREATED;
+                    } else if ("REJECTED".equals(workFlowDTO.getStatus().toString())) {
+                        status = APIConstants.ApplicationStatus.APPLICATION_REJECTED;
+                    } else if ("APPROVED".equals(workFlowDTO.getStatus().toString())) {
+                        status = APIConstants.ApplicationStatus.APPLICATION_APPROVED;
+                    }
+
+
+                    try {
+                        dao.updateApplicationStatus(Integer.parseInt(workFlowDTO.getWorkflowReference()),
+                                status);
+                    } catch (APIManagementException e) {
+                        String msg = "Error occured when updating the status of the Application creation " +
+                                "process";
+                        log.error(msg, e);
+                        throw new WorkflowException(msg, e);
+                    }
+                }
+            }else {
+                String msg = "Application does not exist";
+                throw new WorkflowException(msg);
             }
-
-            ApiMgtDAO dao = new ApiMgtDAO();
-
-            try {
-                dao.updateApplicationStatus(Integer.parseInt(workFlowDTO.getWorkflowReference()),
-                                            status);
-            } catch (APIManagementException e) {
-                String msg = "Error occured when updating the status of the Application creation " +
-                        "process";
-                log.error(msg, e);
-                throw new WorkflowException(msg, e);
-            }
+        } catch (APIManagementException e) {
+            String msg = "Error occured when retrieving the Application creation with workflow ID :"+workFlowDTO.getWorkflowReference();
+            log.error(msg, e);
+            throw new WorkflowException(msg, e);
         }
-	}
+    }
 
 	@Override
 	public List<WorkflowDTO> getWorkflowDetails(String workflowStatus) throws WorkflowException {

@@ -5,16 +5,13 @@ var login = function (username, password,tenantMode) {
             manager = jagg.module("manager"),
             store = manager.getAPIStoreObj();
     if(tenantMode!='null' && tenantMode!='' && tenantMode!=null){
-	var userDomain=null;
-	if (username.indexOf("@") != -1) {
-            userDomain=username.split("@")[1];
-        }
-    	
-    	if(!(tenantMode=='carbon.super' && userDomain == null) && tenantMode!=userDomain){
+		var MultitenantUtils = Packages.org.wso2.carbon.utils.multitenancy.MultitenantUtils;
+    var userDomain = MultitenantUtils.getTenantDomain(username);
+     if(!(tenantMode=='carbon.super' && userDomain == null) && tenantMode!=userDomain){
 	    	return {
 	            error:true,
 	            cookie:null,
-	            message:"Authentication failed."+username.split("@")[0]+" is not from the tenant domain " + tenantMode
+	            message:"Authentication failed. "+MultitenantUtils.getTenantAwareUsername(username)+" is not from the tenant domain " + tenantMode
 	        };
     	}
     }

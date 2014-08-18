@@ -147,6 +147,15 @@ public class SubscriptionCreationWSWorkflowExecutor extends WorkflowExecutor{
                 log.error("Could not complete subscription creation workflow", e);
                 throw new WorkflowException("Could not complete subscription creation workflow", e);
             }
+        }else if(WorkflowStatus.REJECTED.equals(workflowDTO.getStatus())){
+            ApiMgtDAO apiMgtDAO = new ApiMgtDAO();
+            try {
+                apiMgtDAO.updateSubscriptionStatus(Integer.parseInt(workflowDTO.getWorkflowReference()),
+                        APIConstants.SubscriptionStatus.REJECTED);
+            } catch (APIManagementException e) {
+                log.error("Could not complete subscription creation workflow", e);
+                throw new WorkflowException("Could not complete subscription creation workflow", e);
+            }
         }
     }
 

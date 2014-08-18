@@ -32,9 +32,14 @@
                         // validating the signature
                         if(site.ssoConfiguration.responseSigningEnabled === 'true'){
 						var fullUserName = ssoRelyingParty.getSAMLResponseNameId(samlResponse);
-						if(fullUserName != null && fullUserName.indexOf("@")!=-1){
-							var domainName = fullUserName.split("@")[1];
-							jagg.module("manager").loadTenantRegistry(domainName);
+						var MultitenantConstants = Packages.org.wso2.carbon.utils.multitenancy.MultitenantConstants;
+						var MultitenantUtils = Packages.org.wso2.carbon.utils.multitenancy.MultitenantUtils;
+						if(fullUserName != null){
+							var domainName = MultitenantUtils.getTenantDomain(fullUserName);
+
+							if (MultitenantConstants.SUPER_TENANT_DOMAIN_NAME !== domainName) {
+								jagg.module("manager").loadTenantRegistry(domainName);
+							}
 						}
 
                         var isSignatureValid =ssoRelyingParty.validateSignature(samlResponse);

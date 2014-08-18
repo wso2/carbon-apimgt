@@ -10,7 +10,10 @@ import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.poi.hwpf.extractor.WordExtractor;
+import org.apache.poi.poifs.filesystem.OfficeXmlFileException;
 import org.apache.poi.poifs.filesystem.POIFSFileSystem;
+import org.apache.poi.xwpf.extractor.XWPFWordExtractor;
+import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.apache.solr.common.SolrException;
 import org.apache.solr.common.SolrException.ErrorCode;
 import org.wso2.carbon.registry.indexing.IndexingConstants;
@@ -24,11 +27,25 @@ public class MSWordIndexer implements Indexer {
 	public IndexDocument getIndexedDocument(File2Index fileData)
 			throws SolrException {
 		try {
-			POIFSFileSystem fs = new POIFSFileSystem(new ByteArrayInputStream(fileData.data));
-						
-			WordExtractor extractor = new WordExtractor(fs);
-			String wordText = extractor.getText();
+            String wordText = null;
+            try {
+                //Extract MSWord 2003 document files
+                POIFSFileSystem fs = new POIFSFileSystem(new ByteArrayInputStream(fileData.data));
 
+                WordExtractor msWord2003Extractor = new WordExtractor(fs);
+                wordText = msWord2003Extractor.getText();
+
+            }catch (OfficeXmlFileException e){
+                //if 2003 extraction failed, try with MSWord 2007 document files extractor
+                XWPFDocument doc = new XWPFDocument(new ByteArrayInputStream(fileData.data));
+
+                XWPFWordExtractor msWord2007Extractor = new XWPFWordExtractor(doc);
+                wordText = msWord2007Extractor.getText();
+
+            }catch (Exception e){
+                String msg = "Failed to extract the document";
+                log.error(msg, e);
+            }
 			IndexDocument indexDoc = new IndexDocument(fileData.path, wordText, null);
 			
 			Map<String, List<String>> fields = new HashMap<String, List<String>>();

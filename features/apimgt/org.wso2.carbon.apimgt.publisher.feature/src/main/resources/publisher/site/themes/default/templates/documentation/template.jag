@@ -38,7 +38,7 @@
             </div>
         </div>
         <!-- Row -->
-        <form id="addNewDoc" enctype="multipart/form-data" action="/publisher/site/blocks/documentation/ajax/docs.jag" method="POST">
+        <form id="addNewDoc" enctype="multipart/form-data" action="<%=site.context%>/site/blocks/documentation/ajax/docs.jag" method="POST">
         <div class="container-fluid" style="padding-left:0">
 	<div id="newDoc" style="display:none;">
 		<div class="row-fluid">
@@ -77,24 +77,24 @@
 		                <label class="control-label"><%=i18n.localize("type")%></label>
 		                <div class="controls">
 		                    <label class="radio">
-		                        <input type="radio" name="optionsRadios" id="optionsRadios1" value="how to" checked="" onChange="disableInline()"/>
+		                          <input type="radio" name="optionsRadios" id="optionsRadios1" value="how to" checked="" onChange="disableInline()" onclick="javascript:$('#otherTypeDiv').hide('slow')"/>
 	<%=i18n.localize("howTo")%>
 		                    </label>
 		                    <label class="radio">
-		                        <input type="radio" name="optionsRadios" id="optionsRadios2" value="samples" onChange="disableInline()"/>
+		                       <input type="radio" name="optionsRadios" id="optionsRadios2" value="samples" onChange="disableInline()" onclick="javascript:$('#otherTypeDiv').hide('slow')"/>
 	<%=i18n.localize("samples")%>
 		                    </label>
 		                    <label class="radio">
-		                        <input type="radio" name="optionsRadios" id="optionsRadios3" value="public forum" onChange="disableInline('forum')"/>
+		                     <input type="radio" name="optionsRadios" id="optionsRadios3" value="public forum" onChange="disableInline('forum')" onclick="javascript:$('#otherTypeDiv').hide('slow')"/>
 	<%=i18n.localize("publicForum")%>
 		                    </label>
 		                    <label class="radio">
-		                        <input type="radio" name="optionsRadios" id="optionsRadios4" value="support forum" onChange="disableInline('forum')"/>
+		                        <input type="radio" name="optionsRadios" id="optionsRadios4" value="support forum" onChange="disableInline('forum')" onclick="javascript:$('#otherTypeDiv').hide('slow')"/>
 	<%=i18n.localize("supportForum")%>
 		                    </label>
 
 		                    <label class="radio">
-		                        <input type="radio" name="optionsRadios" id="optionsRadios6" value="other" onChange="disableInline()" onclick="javascript:$('#otherTypeDiv').toggle('slow')"/><%=i18n.localize("other")%>
+		                        <input type="radio" name="optionsRadios" id="optionsRadios5" value="other" onChange="disableInline()" onclick="javascript:$('#otherTypeDiv').toggle('slow')"/><%=i18n.localize("other")%>
 		                    </label>
 									<div id="otherTypeDiv" class="controls" style="display:none;">
 				                 <span class="requiredAstrix">*</span> <input type="text" class="required" id="specifyBox" style="width:98%;"/>
@@ -110,17 +110,28 @@
 		                <label class="control-label"><%=i18n.localize("source")%></label>
 		                <div class="controls">
 		                    <label class="radio">
-		                        <input type="radio" name="optionsRadios1" id="optionsRadios7" value="inline" onclick="javascript:$('#sourceUrlDoc').hide('slow');$('#sourceFile').hide('slow')" checked=""><%=i18n.localize("inline")%>
+		                        <input type="radio" name="optionsRadios1" id="optionsRadios6" value="inline" onclick="javascript:$('#sourceUrlDoc').hide('slow');$('#sourceFile').hide('slow')" checked=""><%=i18n.localize("inline")%>
 		                    </label>
+		                     <a class="icon-question-sign help_popup" help_data="inlineDoc_help"></a>
+            				 <p id="inlineDoc_help" class="hide"><%=i18n.localize("inlineDocHelpMsg")%></p>
 		                    <label class="radio">
-		                        <input type="radio" name="optionsRadios1" id="optionsRadios8" value="url" onclick="javascript:$('#sourceUrlDoc').toggle('slow');$('#sourceFile').hide('slow')"><%=i18n.localize("url")%>
+		                        <input type="radio" name="optionsRadios1" id="optionsRadios7" value="url" onclick="javascript:$('#sourceUrlDoc').toggle('slow');$('#sourceFile').hide('slow')"><%=i18n.localize("url")%>
 		                    </label>
+		                    <a class="icon-question-sign help_popup" help_data="urlDoc_help"></a>
+            				 <p id="urlDoc_help" class="hide"><%=i18n.localize("urlDocHelpMsg")%></p>
 		                    <div id="sourceUrlDoc" class="controls" style="display:none;">
 		                     <span class="requiredAstrix">*</span> <input type="text" class="required" style="width:98%" id="docUrl">
 		                    </div>
-				    <label class="radio">
-		                        <input type="radio" name="optionsRadios1" id="optionsRadios9" value="file" onclick="javascript:$('#sourceFile').toggle('slow');$('#sourceUrlDoc').hide('slow')"><%=i18n.localize("file")%>
+				  			  <label class="radio">
+		                        <input type="radio" name="optionsRadios1" id="optionsRadios8" value="file" onclick="javascript:$('#sourceFile').toggle('slow');$('#sourceUrlDoc').hide('slow')"><%=i18n.localize("file")%>
 		                    </label>
+		                    <a class="icon-question-sign help_popup" help_data="fileDoc_help"></a>
+            				 <p id="fileDoc_help" class="hide"><%=i18n.localize("fileDocHelpMsg")%></p>
+						
+						<div id="fileNameDiv" style="display:none;"></div>
+						<a onclick="javascript:$('#sourceFile').toggle('slow')" id="toggleFileDoc" style="display:none;">
+                            Change File
+                        </a>
 		                    <div id="sourceFile" class="controls" style="display:none;">
 		                     <span class="requiredAstrix">*</span> <input type="file" class="required" style="width:98%" name="docLocation" id="docLocation">
 		                    </div>

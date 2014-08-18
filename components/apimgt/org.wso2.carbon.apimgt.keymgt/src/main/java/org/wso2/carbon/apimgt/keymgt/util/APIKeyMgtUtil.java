@@ -97,41 +97,4 @@ public class APIKeyMgtUtil {
             return null;
         }
     }
-
-    /**
-     * validates if an accessToken has expired or not
-     * @param accessTokenDO
-     * @return
-     */
-    public static boolean hasAccessTokenExpired(APIKeyValidationInfoDTO accessTokenDO) {
-        long timestampSkew;
-        long currentTime;
-        long validityPeriod;
-        if(accessTokenDO.getValidityPeriod() != Long.MAX_VALUE)  {
-            validityPeriod = accessTokenDO.getValidityPeriod() * 1000;
-        }else{
-            validityPeriod = accessTokenDO.getValidityPeriod();
-        }
-        long issuedTime = accessTokenDO.getIssuedTime();
-        //long issuedTime = accessTokenDO.getIssuedTime().getTime();
-
-        timestampSkew = OAuthServerConfiguration.getInstance().getTimeStampSkewInSeconds() * 1000;
-        currentTime = System.currentTimeMillis();
-
-        //If the validity period is not an never expiring value
-        if (validityPeriod != Long.MAX_VALUE) {
-            //check the validity of cached OAuth2AccessToken Response
-            if ((currentTime - timestampSkew) > (issuedTime + validityPeriod)) {
-                accessTokenDO.setValidationStatus(
-                        APIConstants.KeyValidationStatus.API_AUTH_ACCESS_TOKEN_EXPIRED);
-                if (accessTokenDO.getEndUserToken() != null) {
-                	log.info("Token " + accessTokenDO.getEndUserToken() + " expired.");
-                }
-                return true;
-            }
-        }
-
-
-        return false;
-    }
 }

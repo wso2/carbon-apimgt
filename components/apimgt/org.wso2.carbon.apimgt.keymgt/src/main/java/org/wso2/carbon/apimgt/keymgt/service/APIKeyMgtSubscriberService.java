@@ -246,20 +246,20 @@ public class APIKeyMgtSubscriberService extends AbstractAdmin {
         try {
             //Revoke the Old Access Token
             httpRevokepost.setEntity(new UrlEncodedFormEntity(revokeParams, "UTF-8"));
-            HttpResponse revokeResponse = tokenEPClient.execute(httpRevokepost);
+            HttpResponse revokeResponse = revokeEPClient.execute(httpRevokepost);
 
-            if (revokeResponse.getStatusLine().getStatusCode() != 200) {
-                throw new RuntimeException("Failed : HTTP error code : " +
+            if (revokeResponse.getStatusLine().getStatusCode() != 202) {
+                throw new RuntimeException("Token revoke failed : HTTP error code : " +
                         revokeResponse.getStatusLine().getStatusCode());
             } else {
                 if (log.isDebugEnabled()) {
-                    log.debug("Successfully revoked old application access token");
+                    log.debug("Successfully submitted revoke request for old application token. HTTP status : 202");
                 }
             }
 
             //Generate New Access Token
             httpTokpost.setEntity(new UrlEncodedFormEntity(tokParams, "UTF-8"));
-            HttpResponse tokResponse = revokeEPClient.execute(httpTokpost);
+            HttpResponse tokResponse = tokenEPClient.execute(httpTokpost);
             HttpEntity tokEntity = tokResponse.getEntity();
 
             if (tokResponse.getStatusLine().getStatusCode() != 200) {

@@ -1,5 +1,29 @@
 <%
-    session.put("showLogin", "true");
+session.put("showLogin", "true");
+
+var site = require("/site/conf/site.json");
+
+if(site.request_url=="READ_FROM_REQUEST"){
+
     session.put("redirectToHTTPS", request.getParameter("redirectToHTTPS"));
     response.sendRedirect(request.getParameter("redirectToHTTPS"));
+
+}
+else{
+
+    var request_url = site.request_url;
+    var tenant = request.getParameter("tenant");
+
+    if(tenant == "null"){
+	queryString = "?tenant=carbon.super";
+    }else{
+	queryString = "?tenant="+tenant;
+    }
+
+    session.put("redirectToHTTPS", site.request_url+queryString);
+    response.sendRedirect(site.request_url+queryString);
+
+}
+
+
 %>
