@@ -24,11 +24,16 @@ import org.apache.velocity.Template;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.VelocityEngine;
 import org.wso2.carbon.apimgt.api.model.API;
+import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
+import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
 import org.wso2.carbon.apimgt.impl.dto.Environment;
+import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 
 import javax.xml.stream.XMLStreamException;
 import java.io.File;
 import java.io.StringWriter;
+import java.lang.String;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -44,9 +49,9 @@ public class APITemplateBuilderImpl implements APITemplateBuilder {
 
     public static final String TEMPLATE_TYPE_VELOCITY = "velocity_template";
     public static final String TEMPLATE_TYPE_PROTOTYPE = "prototype_template";
-    public static final String TEMPLATE_DEFAULT_API= "default_api_template";
-
+    public static final String TEMPLATE_DEFAULT_API = "default_api_template";
     private API api;
+    private String velocityLogPath = null;
     private List<HandlerConfig> handlers = new ArrayList<HandlerConfig>();
 
     public APITemplateBuilderImpl(API api) {
@@ -64,9 +69,9 @@ public class APITemplateBuilderImpl implements APITemplateBuilder {
             configcontext = new TransportConfigContext(configcontext, api);
             configcontext = new ResourceConfigContext(configcontext, api);
             // this should be initialised before endpoint config context.
-            configcontext = new EndpointBckConfigContext(configcontext,api);
+            configcontext = new EndpointBckConfigContext(configcontext, api);
             configcontext = new EndpointConfigContext(configcontext, api);
-            configcontext = new SecurityConfigContext(configcontext,api);
+            configcontext = new SecurityConfigContext(configcontext, api);
             configcontext = new JwtConfigContext(configcontext);
             configcontext = new ResponseCacheConfigContext(configcontext, api);
             configcontext = new BAMMediatorConfigContext(configcontext, api);
@@ -83,6 +88,9 @@ public class APITemplateBuilderImpl implements APITemplateBuilder {
 
             /*  first, initialize velocity engine  */
             VelocityEngine velocityengine = new VelocityEngine();
+            if (!getVelocityLogPath().equalsIgnoreCase("not-defined")) {
+                velocityengine.setProperty("runtime.log", getVelocityLogPath());
+            }
             velocityengine.init();
 
             Template t = velocityengine.getTemplate(this.getTemplatePath());
@@ -106,9 +114,9 @@ public class APITemplateBuilderImpl implements APITemplateBuilder {
             ConfigContext configcontext = new APIConfigContext(this.api);
             configcontext = new TransportConfigContext(configcontext, api);
             configcontext = new ResourceConfigContext(configcontext, api);
-            configcontext = new EndpointBckConfigContext(configcontext,api);
+            configcontext = new EndpointBckConfigContext(configcontext, api);
             configcontext = new EndpointConfigContext(configcontext, api);
-            configcontext = new SecurityConfigContext(configcontext,api);
+            configcontext = new SecurityConfigContext(configcontext, api);
             configcontext = new JwtConfigContext(configcontext);
             configcontext = new ResponseCacheConfigContext(configcontext, api);
             configcontext = new BAMMediatorConfigContext(configcontext, api);
@@ -125,6 +133,9 @@ public class APITemplateBuilderImpl implements APITemplateBuilder {
 
             /*  first, initialize velocity engine  */
             VelocityEngine velocityengine = new VelocityEngine();
+            if (!getVelocityLogPath().equalsIgnoreCase("not-defined")) {
+                velocityengine.setProperty("runtime.log", getVelocityLogPath());
+            }
             velocityengine.init();
 
             Template t = velocityengine.getTemplate(this.getPrototypeTemplatePath());
@@ -144,16 +155,19 @@ public class APITemplateBuilderImpl implements APITemplateBuilder {
 
         try {
             VelocityEngine velocityengine = new VelocityEngine();
+            if (!getVelocityLogPath().equalsIgnoreCase("not-defined")) {
+                velocityengine.setProperty("runtime.log", getVelocityLogPath());
+            }
             velocityengine.init();
 
-            ConfigContext configcontext= new APIConfigContext(this.api);
+            ConfigContext configcontext = new APIConfigContext(this.api);
 
             VelocityContext context = configcontext.getContext();
-            context.put("defaultVersion",defaultVersion);
-            String fwdApiContext=this.api.getContext();
-            if(fwdApiContext!=null && fwdApiContext.charAt(0) == '/')
-                fwdApiContext=fwdApiContext.substring(1);
-            context.put("fwdApiContext",fwdApiContext);
+            context.put("defaultVersion", defaultVersion);
+            String fwdApiContext = this.api.getContext();
+            if (fwdApiContext != null && fwdApiContext.charAt(0) == '/')
+                fwdApiContext = fwdApiContext.substring(1);
+            context.put("fwdApiContext", fwdApiContext);
 
             Template t = velocityengine.getTemplate(this.getDefaultAPITemplatePath());
 
@@ -194,7 +208,22 @@ public class APITemplateBuilderImpl implements APITemplateBuilder {
         return "repository" + File.separator + "resources" + File.separator + "api_templates" + File.separator + APITemplateBuilderImpl.TEMPLATE_TYPE_PROTOTYPE + ".xml";
     }
 
-    public String getDefaultAPITemplatePath(){
+    public String getDefaultAPITemplatePath() {
         return "repository" + File.separator + "resources" + File.separator + "api_templates" + File.separator + APITemplateBuilderImpl.TEMPLATE_DEFAULT_API + ".xml";
+    }
+
+    public String getVelocityLogPath() {
+        if (this.velocityLogPath != null) {
+            return this.velocityLogPath;
+        } else {
+            APIManagerConfigurationService config = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService();
+            String velocityLogPath = config.getAPIManagerConfiguration().getFirstProperty(APIConstants.velocityLogPath);
+            if (velocityLogPath != null && velocityLogPath.length() > 1) {
+                this.velocityLogPath = velocityLogPath;
+            } else {
+                this.velocityLogPath = "not-defined";
+            }
+            return this.velocityLogPath;
+        }
     }
 }

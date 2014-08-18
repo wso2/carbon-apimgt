@@ -21,7 +21,8 @@ var tenantDomains=outputs.tenantDomains;
                                 <center><div class="pagination" id="tenant_pages"><ul id="holder"></ul></div></center>
                                 <ul id="tenant_container">
                                 <%for(var i=0;i< tenantDomains.length;i++){
-                                    var currentURL = request.getRequestURL();
+                                    var site = require("/site/conf/site.json");
+                                    var currentURL = site.context;
                                 %>
                                     <li class="thumbnail span3 tenent-thumb">
                                     <a href="<%= encode.forHtmlAttribute(encode.forUri(currentURL + "?tenant="+tenantDomains[i])) %>">

@@ -1365,7 +1365,42 @@ a.share_links.active{
 .social-buttons .linkedin-share { width: 60px; height: 65px; background-position: -215px 0; }
 .vhidden { border: 0; clip: rect(0 0 0 0); height: 1px; margin: -1px; overflow: hidden; padding: 0; position: absolute; width: 1px; }
 
-/* Styles for text boxes with clear ('x') button. */
+/* START - Forum styles */
+
+.row-fluid .forum-page [class*="span"]{
+    margin-left:30px;
+}
+
+.forum-page .content-data> *{
+    margin-top: 20px;
+}
+.forum-page .content-data>:first-child{
+    margin-top: 0;
+}
+
+.forum-page .content-data .forum_form > *{
+    margin-top: 10px;
+}
+.forum-page .content-data .forum_form >:first-child{
+    margin-top:0;
+}
+
+.forum-page #forum_topic_rating_block table td {
+   border-bottom: 1px solid #dddddd;
+}
+
+.forum-page .pagination {
+    margin: 0;
+}
+
+.forum-reply-edit-block > *{
+    margin-bottom: 10px;
+}
+
+.forum-reply-edit-block >:last-child {
+    margin-bottom: 0px;
+}
+
 .clearable{
   background:url(../images/search_close.png) no-repeat right -10px center;
   border:1px solid #999;
@@ -1373,131 +1408,103 @@ a.share_links.active{
   border-radius:3px;
 }
 .clearable.x{
-  background-position: right 5px center;
+  background-position: right 10px center;
 }
 .clearable.onX{
   cursor:pointer;
 }
 
-/* START - Forum releated stuff */
-.tab-content div.title-section{
-	display:none
+td.forum-reply-edit-block{
+    padding: 10px;
 }
 
-.tab-content div.content-section{
-	box-shadow:none;
-	padding:0;
+input.x-large{
+    font-size: 22px;
+    font-weight: bold;
+    border-radius: 6px;
+    color:#7d7d7d;
+    height: 42px;
 }
 
-.tab-content div.content-section div.content-data{
-	padding:0;
+input.large{
+    font-size: 18px;
+    font-weight: bold;
+    border-radius: 6px;
+    color:#7d7d7d;
+    height: 42px;
 }
 
-#topic_details p{
-	padding-left:10px;
+#forum_replies_block > * {
+    margin: 20px 0;
 }
 
-table#description{
-	border:none;
-	background:transparent;
-	box-shadow:none;
+#forum_topic_edit_block{
+    margin-top: 0;
 }
 
-.rating-star{
-	width:50px;
-	padding-left:10px;
+#forum_topic_title_bar i{
+    margin-left: 2px;
 }
 
-.edit-topic-form-actions{
-	padding:10px 0;
-	text-align:left;
-	height:50px;
-}
-.edit-topic-form-actions a{
-	float:left;
-	margin : 0px 5px 0px 0px;
+#forum_topic_edit_block > *{
+    margin-bottom: 20px;
 }
 
-.edit-topic-form-actions{
-	margin : 0px 0px 0px 20px;
+#forum_topic_edit_block >:last-child{
+    margin-bottom: 0;
 }
 
-.topic-subject-edit label{
-	padding : 20px 0px 0px 20px;
-	margin : 0;
+#forum_topic_description_edit_block >:last-child{
+    margin-top: 10px;
 }
 
-.topic-subject-edit h4{
-	margin : 0;
+#forum_topic_rating_block tr >:first-child{
+    width: 50px;
 }
 
-.topic-subject-edit div{
-	padding : 10px 20px 20px 20px;
+#forum_topic_title_bar{
+
+    padding: 10px 20px;
 }
 
-.topic_description_edit label{
-	padding : 0px 0px 0px 20px;
-	margin : 0;
+#forum_topic_title_bar h2{
+    padding: 0;
+    margin: 0;
 }
 
-.topic_description_edit h4{
-	margin : 0;
+#forum_topic_title_bar input[type="text"]{
+    margin: 0;
+    padding-top: 0;
+    padding-bottom: 0;
 }
 
-.note-editor{
-	margin : 10px 20px 0px 20px;
+#forum_topics_list_paginator{
+    height: 30px;
 }
 
-.icon-edit{
-	cursor:pointer;
+#forum_no_topics{
+    text-align: center;
+    font-size: 48px;
+    padding: 150px 0;
+    color: #7d7d7d;
 }
 
-.forum-description{
-	padding: 20px;
+/* API level forum styles*/
+.tab-pane .forum-page .title-section{
+    display: none;
 }
 
-.topic-rating .rating-star{
-	padding : 10px 0px 10px 20px;
+.tab-pane .forum-page .content-section{
+    -webkit-box-shadow: none;
+    box-shadow: none;
 }
 
-.add-reply label{
-	padding : 20px 0px 0px 20px;
-	margin : 0;
+.tab-pane .forum-page .content-data{
+    padding:0;
 }
 
-#add-forum-reply{
-	margin : 10px 0px 0px 20px;
+.tab-pane .forum-page #forum_topics_list a{
+    color : #444;
 }
 
-table.forum_replies{
-	padding : 0 0 0 20px;
-}
-
-.replies-list{
-	padding: 0 20px 0 20px;
-}
-
-.topic-rating .table td{
-	border-bottom: 1px solid #dddddd
-}
-
-.replies-list-title{
-	padding-top: 20px;
-}
-
-#forum-reply-actions{
-	margin: 10px 0 0 20px;
-}
-
-#topic-add-actions{
-	margin: 10px 0 0 20px;
-}
-
-#forum-add-subject{
-	margin-left:20px;
-}
-
-.new-topic-container{
-	padding-top:20px;
-}
-/* END - Forum releated stuff */
+/* END - Forum styles */

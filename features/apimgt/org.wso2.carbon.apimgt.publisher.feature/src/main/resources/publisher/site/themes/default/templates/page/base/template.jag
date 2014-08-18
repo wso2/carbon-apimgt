@@ -18,8 +18,7 @@ i18n.init(request,localeResourcesBasePath);
 %>
 <head>
     <%
-    var partWithContext = request_url
-
+    var partWithContext = request_url;
     %>
     <script>
         var requestURL = '<%=partWithContext%>';

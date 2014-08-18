@@ -11,26 +11,37 @@ if(tenant!=null) {
 }
 
 %>
-<div class="title-section">
-    <h2><%=i18n.localize('forum.topicCreation.title')%></h2>
+
+<div id="forum_add_new_topic_page" class="forum-page">
+    
+    <div class="title-section">
+        <h2><%=i18n.localize('forum.topicCreation.title')%></h2>
+    </div>
+
+    <div class="content-section shadow-up">
+        <div class="content-data">
+            <form class="form-horizontal forum_form">
+                <table width="100%">
+                    <tr>
+                        <td width="100%">
+                            <input type="text" id="subject" placeholder="<%=i18n.localize('forum.topicCreation.subject')%>" class="input-block-level large">
+                        </td>
+                    </tr>
+                </table>
+                <div id="topicDescriptioEditor"></div>
+                <input type="hidden" id="parentId" name="parentId" value="<%=inputs.parentId%>">
+                <div id="topic-add-actions">
+                    <a class="btn btn-primary" id="add-forum-topic">
+                        <%=i18n.localize( 'forum.topicCreation.create')%>
+                    </a>
+                    <a class="btn" href="<%=siteConf.context%>/forum?<%=urlSuffix%>">
+                        <%=i18n.localize( 'cancel')%>
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+
 </div>
 
-<div class="content-section shadow-up">
-    <div class="new-topic-container">
-        <h1></h1>
-        <form class="form-horizontal forum_form" >
-			<table width="100%">
-				<tr>
-					<td width="100%" style="padding-right:20px;padding-left:20px"><input type="text" id="subject" placeholder="<%=i18n.localize('forum.topicCreation.subject')%>" class="input-block-level"></td>
-				</tr>
-			</table>
-            <div id="summernote"></div>
-			<input type="hidden" id="parentId" name="parentId" value="<%=inputs.parentId%>">	
-    		<div id="topic-add-actions">        
-				<a class="btn btn-primary" id="add-forum-topic"><%=i18n.localize('forum.topicCreation.create')%></a>
-            	<a class="btn" href="<%=siteConf.context%>/forum?<%=urlSuffix%>"><%=i18n.localize('cancel')%></a>
-			</div>
-        </form>
-    </div>
-</div>
 <% }); %>

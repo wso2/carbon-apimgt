@@ -129,7 +129,7 @@
       </form>
 </div>
 </div>
-<form id="signUpRedirectForm" method="post" action="<%=httpsUrl%><%=jagg.getAbsoluteUrl(jagg.getThemeFile("templates/user/sign-up/redirector.jag"))%>">
+<form id="signUpRedirectForm" method="post" action="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("templates/user/sign-up/redirector.jag"))%>">
         <input type="hidden" name="redirectToHome" id="redirectToHome" value="<%=site.context%>" />
 </form>
 

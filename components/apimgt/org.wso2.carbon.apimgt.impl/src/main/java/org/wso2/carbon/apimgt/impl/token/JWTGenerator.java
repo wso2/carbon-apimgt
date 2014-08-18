@@ -177,11 +177,11 @@ public class JWTGenerator {
         String applicationName = keyValidationInfoDTO.getApplicationName();
         String applicationId = keyValidationInfoDTO.getApplicationId();
         String tier = keyValidationInfoDTO.getTier();
-        String endUserName = includeEndUserName ? keyValidationInfoDTO.getEndUserName() : null;
+        String endUserName = keyValidationInfoDTO.getEndUserName();
         String keyType = keyValidationInfoDTO.getType();
         String userType = keyValidationInfoDTO.getUserType();
         String applicationTier = keyValidationInfoDTO.getApplicationTier();
-        String enduserTenantId = includeEndUserName ? String.valueOf(getTenantId(endUserName)) : null;
+        String enduserTenantId = String.valueOf(getTenantId(endUserName));
         
 //        jwtBody = jwtBody.replaceAll("\\[1\\]", API_GATEWAY_ID);
 //        jwtBody = jwtBody.replaceAll("\\[2\\]", String.valueOf(expireIn));
@@ -266,29 +266,48 @@ public class JWTGenerator {
         jwtBuilder.append("\"");
         jwtBuilder.append(dialect);
         jwtBuilder.append("/enduser\":\"");
-        jwtBuilder.append(getUserNameWithTenantPrefix(endUserName));
+
+        boolean isApplicationToken = keyValidationInfoDTO.getUserType().equalsIgnoreCase(APIConstants.ACCESS_TOKEN_USER_TYPE_APPLICATION) ? true : false;
+
+        if (isApplicationToken && !includeEndUserName) {
+                jwtBuilder.append("null");
+        }
+        else {
+            jwtBuilder.append(getUserNameWithTenantPrefix(endUserName));
+        }
+
         jwtBuilder.append("\",");
 
         jwtBuilder.append("\"");
         jwtBuilder.append(dialect);
         jwtBuilder.append("/enduserTenantId\":\"");
-        jwtBuilder.append(enduserTenantId);
+
+        if (isApplicationToken && !includeEndUserName) {
+            jwtBuilder.append("null");
+        }
+        else {
+            jwtBuilder.append(enduserTenantId);
+        }
+
         jwtBuilder.append("\"");
 
-        if(claimsRetriever != null){
-        	String  tenantAwareUserName = endUserName;
-            if (endUserName != null) {
-                tenantAwareUserName = MultitenantUtils.getTenantAwareUsername(endUserName);
-            }
-            SortedMap<String,String> claimValues = claimsRetriever.getClaims(tenantAwareUserName);
-            Iterator<String> it = new TreeSet(claimValues.keySet()).iterator();
-            while(it.hasNext()){
-                String claimURI = it.next();
-                jwtBuilder.append(", \"");
-                jwtBuilder.append(claimURI);
-                jwtBuilder.append("\":\"");
-                jwtBuilder.append(claimValues.get(claimURI));
-                jwtBuilder.append("\"");
+        if(claimsRetriever != null) {
+            if (false == (isApplicationToken && !includeEndUserName)) {
+                String tenantAwareUserName = endUserName;
+
+                if (MultitenantConstants.SUPER_TENANT_ID == getTenantId(endUserName)) {
+                    tenantAwareUserName = MultitenantUtils.getTenantAwareUsername(endUserName);
+                }
+                SortedMap<String, String> claimValues = claimsRetriever.getClaims(tenantAwareUserName);
+                Iterator<String> it = new TreeSet(claimValues.keySet()).iterator();
+                while (it.hasNext()) {
+                    String claimURI = it.next();
+                    jwtBuilder.append(", \"");
+                    jwtBuilder.append(claimURI);
+                    jwtBuilder.append("\":\"");
+                    jwtBuilder.append(claimValues.get(claimURI));
+                    jwtBuilder.append("\"");
+                }
             }
         }
 

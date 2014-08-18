@@ -24,7 +24,7 @@ var login = login || {};
     loginbox.logout = function () {
         jagg.post("/site/blocks/user/login/ajax/login.jag", {action:"logout"}, function (result) {
             if (result.error == false) {
-                window.location.href=requestURL+"?"+urlPrefix;
+            	  window.location.href="?"+urlPrefix;
             } else {
                 jagg.message({content:result.message,type:"error"});
             }
@@ -60,8 +60,8 @@ $(document).ready(function () {
 	if(ssoEnabled && ssoEnabled == 'true'){
 		var targetLocation = $(this).attr('href');
 		if(targetLocation == undefined){
-		//targetLocation = window.location.href;		
-		targetLocation = currentLocation;
+		targetLocation = window.location.href;		
+		//targetLocation = currentLocation;
 		}
 		var redirectURL = '/store/site/pages/sso-filter.jag?requestedPage='+encodeURIComponent(targetLocation);
 		window.location.href = redirectURL;	

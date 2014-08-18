@@ -45,6 +45,7 @@ import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import javax.cache.Cache;
 import javax.cache.Caching;
 import java.util.*;
+import org.wso2.carbon.apimgt.gateway.handlers.Utils;
 
 /**
  * This class is used to validate a given API key against a given API context and a version.
@@ -104,7 +105,12 @@ public class APIKeyValidator {
                                                          httpVerb, authenticationScheme);
         if (isGatewayAPIKeyValidationEnabled) {
             APIKeyValidationInfoDTO info = (APIKeyValidationInfoDTO) getKeyCache().get(cacheKey);
-            if (info != null) {
+
+            if (null != info) {
+                if (APIUtil.hasAccessTokenExpired(info)) {
+                    info.setAuthorized(false);
+                }
+
                 return info;
             }
         }
@@ -297,7 +303,7 @@ public class APIKeyValidator {
         Resource selectedResource = null;
 
         for(API api : synCtx.getConfiguration().getAPIs()){
-            if(apiContext.equals(api.getContext())){
+            if(apiContext.equals(api.getContext()) && apiVersion.equals(api.getVersion())){
                 selectedApi = api;
                 break;
             }

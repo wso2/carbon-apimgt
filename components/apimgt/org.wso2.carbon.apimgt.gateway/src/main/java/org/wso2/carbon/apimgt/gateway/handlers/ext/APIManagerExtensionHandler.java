@@ -22,6 +22,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.synapse.Mediator;
 import org.apache.synapse.MessageContext;
+import org.apache.synapse.SynapseConstants;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.rest.AbstractHandler;
 import org.apache.synapse.rest.RESTConstants;
@@ -159,7 +160,7 @@ public class APIManagerExtensionHandler extends AbstractHandler {
             if (DIRECTION_IN.equals(direction)) {
                 log.debug("Inbound API call from client to gateway: " + logMessage);
             } else if (DIRECTION_OUT.equals(direction)) {
-                logMessage = logMessage + " , EndPointURL=" + axisMC.getProperty("ENDPOINT_PREFIX");
+                //logMessage = logMessage + " , EndPointURL=" + messageContext.getProperty(SynapseConstants.ENDPOINT_PREFIX);
                 log.debug("Outbound API call from gateway to client: " + logMessage);
             }
         }

@@ -14,11 +14,20 @@
 		
 		response.sendRedirect(site.ssoConfiguration.externalLogoutPage);
 		return;
-	} else {
+	} else {		
+		
+		//check whether session is expired
+		var user = jagg.getUser();
+	    if (!user) {
+	    	session.invalidate();
+	        response.sendRedirect(request_url);	
+	        return;
+	    }	 
 		var samlLogoutRequest = ssoRelyingParty.getSAMLLogoutRequest(session.get("LOGGED_IN_USER"),session.getId());
 		var encodedRequest = ssoRelyingParty.encode(samlLogoutRequest);
 		var relayState = ssoRelyingParty.getUUID();
 		var idpURL = ssoRelyingParty.getProperty("identityProviderURL");
+
 %>
 
 		<div>

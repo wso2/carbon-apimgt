@@ -68,6 +68,8 @@ var initOf_requireResubscription = 'true';
                         <option value="RETIRED"<%=(api.status == "RETIRED" ? ' selected="selected"' : '')%>><%=i18n.localize("retired")%></option>
                         <option value="BLOCKED"<%=(api.status == "BLOCKED" ? ' selected="selected"' : '')%>><%=i18n.localize("blocked")%></option>
                     </select>
+                    <a class="icon-question-sign help_popup" help_data="lifecycle_help"></a>
+           			 <p id="lifecycle_help" class="hide"><%=i18n.localize("lifecycleHelpMsg")%></p>
                  </div> <br/>
                  <div class="controls publishCheckBoxes">
                     <label class="checkbox" id="publishToGatewayDiv"  style="display:none;">

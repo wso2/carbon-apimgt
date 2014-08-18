@@ -69,7 +69,7 @@
     "noAPIMsg1" : "No API available with the name -",
     "noAPIMsg2" : "or the user is not authorized to view the API.",
     "noSearchResultMsg" : "No matching results",
-    "appHelpMsg" : "Applications are required to make API subscriptions and consume them. You will be able to subscribe these applications to APIs from the API details page. Requests made from this application will be throttled by the Application level throttling tier and the subscription level throttling tier",
+    "appHelpMsg" : "An application is available at different levels of service. The maximum number of requests you can make to an API is determined by the tiers.",
     "noAppMsg" : "No applications yet",
     "commentMsg" : "Comment exceeds character limit",
     "noCommentMsg" : "No comments yet",
@@ -213,5 +213,25 @@
     "ShareonFacebook":"Share on Facebook",
     "apipublisher":"API Publisher",
     "publicAPIStore":"Public API Store",
-    "apistoreDesc":"'s API Store"
+    "apistoreDesc":"'s API Store",
+
+    "forum" : "Forum",
+    "forum.searchForum" : "Search Forum",
+    "forum.noTopicsFound" : "No topics found.",
+    "forum.createNewTopic" : "Create New Topic",
+    "forum.topic" : "Topic",
+    "forum.replies" : "Replies",
+    "forum.by" : "By",
+    
+    "forum.topicCreation.title" : "Create New Topic",
+    "forum.topicCreation.subject" : "Subject",
+    "forum.topicCreation.create" : "Create",
+
+    "forum.topicEdit.subject" : "Edit Subject",
+    "forum.topicEdit.description" : "Edit Topic Description",
+
+    "forum.addReply.title" : "Add reply",
+    "forum.addReply.replyToThread" : "Reply to Thread",
+    "tokenHelpMsg" : "The period after which the token will expire after generation. A negative value ensures that the token never expires.",
+    "callBackHelpMsg":"This parameter can be used in the authorization code grant type when invoking an API. For example, assume that both the client and the API Gateway are run on the same server and the Authorization API URL is https://localhost:8243/authorize. <strong> query component:</strong> “response_type=code&client_id=<consumer_key>&scope=PRODUCTION&redirect_uri=<application_callback_url>” and <strong>headers:</strong> Content-Type:application/x-www-form-urlencoded" 
 }

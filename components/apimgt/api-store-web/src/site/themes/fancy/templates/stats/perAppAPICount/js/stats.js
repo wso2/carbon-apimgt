@@ -117,7 +117,7 @@ var drawGraphAPIUsage = function(from,to){
                 $('#apiUsage').empty();
                 for(var k=0 ; k<lentth1 ;k++){
 
-                     $('#apiUsage').append($('<div class="well"><div class="row-fluid"> <h3>Aplication Name:  '+json.usage[k].appName+'</h3><div class="span6" style="height:350px; width :350px"><div id="apiChart'+(k+1)+'" style="height:350px;"><div class="progress progress-striped active"><div class="bar" style="width: 10%;"></div></div></div> </div> <div class="span6"> <table class="table graphTable" id="apiTable'+(k+1)+'" style="display:none;"><tr> <th>'+ i18n.t("apiName")+'</th><th>'+ i18n.t("noOfAPICalls")+'</th></tr> </table> </div></div></div>'));
+                     $('#apiUsage').append($('<div class="well"><div class="row-fluid"> <h3>Application Name:  '+json.usage[k].appName+'</h3><div class="span6" style="height:350px; width :350px"><div id="apiChart'+(k+1)+'" style="height:350px;"><div class="progress progress-striped active"><div class="bar" style="width: 10%;"></div></div></div> </div> <div class="span6"> <table class="table graphTable" id="apiTable'+(k+1)+'" style="display:none;"><tr> <th>'+ i18n.t("apiName")+'</th><th>'+ i18n.t("noOfAPICalls")+'</th></tr> </table> </div></div></div>'));
              } for(var k=0 ; k<lentth1 ;k++){
                 var length = json.usage[k].apiCountArray.length,data = [];
 

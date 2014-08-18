@@ -10,7 +10,10 @@ import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.poi.hslf.extractor.PowerPointExtractor;
+import org.apache.poi.poifs.filesystem.OfficeXmlFileException;
 import org.apache.poi.poifs.filesystem.POIFSFileSystem;
+import org.apache.poi.xslf.extractor.XSLFPowerPointExtractor;
+import org.apache.poi.xslf.usermodel.XMLSlideShow;
 import org.apache.solr.common.SolrException;
 import org.apache.solr.common.SolrException.ErrorCode;
 import org.wso2.carbon.registry.indexing.IndexingConstants;
@@ -24,10 +27,25 @@ public class MSPowerpointIndexer implements Indexer {
 	public IndexDocument getIndexedDocument(File2Index fileData)
 			throws SolrException {
 		try {
-			POIFSFileSystem fs = new POIFSFileSystem(new ByteArrayInputStream(fileData.data));
-			
-			PowerPointExtractor extractor = new PowerPointExtractor(fs);
-			String ppText = extractor.getText();
+            String ppText = null;
+            try{
+                //Extract Powerpoint 2003 (.ppt) document files
+                POIFSFileSystem fs = new POIFSFileSystem(new ByteArrayInputStream(fileData.data));
+
+                PowerPointExtractor extractor = new PowerPointExtractor(fs);
+                ppText = extractor.getText();
+
+            }catch (OfficeXmlFileException e){
+
+                //if 2003 Powerpoint (.ppt) extraction failed, try with Powerpoint 2007 (.pptx) document file extractor
+                XMLSlideShow xmlSlideShow = new XMLSlideShow(new ByteArrayInputStream(fileData.data));
+                XSLFPowerPointExtractor xslfPowerPointExtractor = new XSLFPowerPointExtractor(xmlSlideShow);
+                ppText = xslfPowerPointExtractor.getText();
+
+            }catch (Exception e){
+                String msg = "Failed to extract the document";
+                log.error(msg, e);
+            }
 
 			IndexDocument indexDoc = new IndexDocument(fileData.path, ppText, null);
 			

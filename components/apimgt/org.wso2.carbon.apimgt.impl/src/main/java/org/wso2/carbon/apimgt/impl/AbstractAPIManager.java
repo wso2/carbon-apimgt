@@ -81,6 +81,7 @@ public abstract class AbstractAPIManager implements APIManager {
                 configRegistry = ServiceReferenceHolder.getInstance().getRegistryService().
                         getConfigSystemRegistry();
                 this.username= CarbonConstants.REGISTRY_ANONNYMOUS_USERNAME;
+                ServiceReferenceHolder.setUserRealm((UserRealm)(ServiceReferenceHolder.getInstance().getRealmService().getBootstrapRealm()));
             } else {
                 String tenantDomainName = MultitenantUtils.getTenantDomain(username);
                 String tenantUserName = MultitenantUtils.getTenantAwareUsername(username);
@@ -99,6 +100,8 @@ public abstract class AbstractAPIManager implements APIManager {
                 APIUtil.loadloadTenantAPIRXT( tenantUserName, tenantId);
                 APIUtil.loadTenantAPIPolicy( tenantUserName, tenantId);
                 APIUtil.writeDefinedSequencesToTenantRegistry(tenantId);
+                ServiceReferenceHolder.setUserRealm((UserRealm)(ServiceReferenceHolder.getInstance().
+                        getRealmService().getTenantUserRealm(tenantId)));
             }
             ServiceReferenceHolder.setUserRealm(ServiceReferenceHolder.getInstance().
                     getRegistryService().getConfigSystemRegistry().getUserRealm());

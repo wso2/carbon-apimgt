@@ -34,7 +34,6 @@ import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.keymgt.APIKeyMgtException;
 import org.wso2.carbon.apimgt.keymgt.util.APIKeyMgtDataHolder;
-import org.wso2.carbon.apimgt.keymgt.util.APIKeyMgtUtil;
 import org.wso2.carbon.core.AbstractAdmin;
 import org.wso2.carbon.identity.oauth.config.OAuthServerConfiguration;
 import org.wso2.carbon.identity.oauth2.IdentityOAuth2Exception;
@@ -87,8 +86,8 @@ public class APIKeyValidationService extends AbstractAdmin {
             throw new APIKeyMgtException("Error while building response messageContext: " + axisFault.getLocalizedMessage());
         }
 
-        String logMsg = "KeyValidation request from gateway: requestTime=" + new Date(System.currentTimeMillis());
         if (log.isDebugEnabled()) {
+            String logMsg = "KeyValidation request from gateway: requestTime=" + new Date(System.currentTimeMillis());
             if (activityID != null) {
                 logMsg = logMsg + " , transactionId=" + activityID;
             }
@@ -118,31 +117,27 @@ public class APIKeyValidationService extends AbstractAdmin {
                 }
 
                  //check if token has expired
-                boolean tokenExpired = APIKeyMgtUtil.hasAccessTokenExpired(info);
+                boolean tokenExpired = APIUtil.hasAccessTokenExpired(info);
                 if (!tokenExpired) {
                     //If key validation information is authorized then only we have to check for JWT token
                     //If key validation information is authorized and JWT cache disabled then only we use
                     //cached api key validation information and generate new JWT token
                     if (!APIKeyMgtDataHolder.getJWTCacheEnabledKeyMgt() && info.isAuthorized()) {
                         String JWTString;
-                        if (info.getUserType().equalsIgnoreCase(APIConstants.ACCESS_TOKEN_USER_TYPE_APPLICATION)) {
-                            JWTString = apiMgtDAO.createJWTTokenString(context, version, info.getSubscriber(),
-                                    apiMgtDAO.getApplicationNameFromId(Integer.parseInt(info.getApplicationId())),
-                                    info.getTier(), "null");
-                        } else {
-                            JWTString = apiMgtDAO.createJWTTokenString(context, version, info.getSubscriber(),
-                                    apiMgtDAO.getApplicationNameFromId(Integer.parseInt(info.getApplicationId())),
-                                    info.getTier(), info.getEndUserName());
-                        }
+
+                        JWTString = apiMgtDAO.createJWTTokenString(context, version, info);
+
                         info.setEndUserToken(JWTString);
                     }
                     if (log.isDebugEnabled() && axis2MessageContext != null) {
                         logMessageDetails(axis2MessageContext, info);
                     }
-                    return info;
                 } else {
                     log.info("Token " + cacheKey + " expired.");
+                    info.setAuthorized(false);
                 }
+
+                return info;
             }
         }
 

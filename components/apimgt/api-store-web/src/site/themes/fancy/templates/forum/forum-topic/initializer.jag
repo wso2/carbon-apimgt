@@ -9,6 +9,7 @@ jagg.initializer("forum/forum-topic", {
     	jagg.addHeaderJS("forum/forum-list", "summernote", "templates/forum/js/summernote.min.js");
     	jagg.addFooterJS("forum/forum-list", "form-list", "templates/forum/js/forum-list.js");
         jagg.addFooterJS("forum/forum-list", "paginator", "templates/forum/js/bootstrap-paginator.min.js");
+        jagg.addFooterJS("forum/forum-list", "sanitizer", "templates/forum/js/html-css-sanitizer-minified.js");
 
 
     }
