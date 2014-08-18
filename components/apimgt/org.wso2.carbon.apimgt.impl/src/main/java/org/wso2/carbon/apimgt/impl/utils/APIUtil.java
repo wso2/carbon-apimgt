@@ -2693,20 +2693,23 @@ public final class APIUtil {
 	    			if (!resourcePaths.contains(path)) {
 	    				resourcePaths.add(path);
 	    			}
-	    			String httpVerb = template.getHTTPVerb();
-	    			final JSONObject operationJson = (JSONObject) parser.parse(operationJsonTemplate);
-	    			operationJson.put("method", httpVerb);
-	    			operationJson.put("auth_type", template.getAuthType());
-	    			operationJson.put("throttling_tier", template.getThrottlingTier());
-	    			
-	    			if(resourcePathJSONs.get(path) != null) {
-	    				resourcePathJSONs.get(path).add(operationJson);
-	    				
-	    			} else {
-	    				resourcePathJSONs.put(path, new ArrayList<JSONObject>() {{
-	    					add(operationJson);
-	    				}});    				
-	    			}
+	    			String httpVerbsStrng = template.getMethodsAsString();	    			
+	    			String[] httpVerbs = httpVerbsStrng.split(" ");
+	    			for (String httpVerb : httpVerbs) {
+	    				final JSONObject operationJson = (JSONObject) parser.parse(operationJsonTemplate);
+		    			operationJson.put("method", httpVerb);
+		    			operationJson.put("auth_type", template.getAuthType());
+		    			operationJson.put("throttling_tier", template.getThrottlingTier());
+		    			
+		    			if(resourcePathJSONs.get(path) != null) {
+		    				resourcePathJSONs.get(path).add(operationJson);
+		    				
+		    			} else {
+		    				resourcePathJSONs.put(path, new ArrayList<JSONObject>() {{
+		    					add(operationJson);
+		    				}});    				
+		    			}
+					}
 	    			resourceNamepaths.put(resourceName, resourcePaths);    			
 	    		} else {
 	    			JSONObject resourcePathJson = (JSONObject) parser.parse(apiResourceJsontemplate);
@@ -2718,21 +2721,23 @@ public final class APIUtil {
 	    			resourcePaths = new ArrayList<String>();
 	    			resourcePaths.add(path);
 	    			
-	    			String httpVerb = template.getHTTPVerb();
-	    			final JSONObject operationJson = (JSONObject) parser.parse(operationJsonTemplate);
-	    			operationJson.put("method", httpVerb);
-	    			operationJson.put("auth_type", template.getAuthType());
-	    			operationJson.put("throttling_tier", template.getThrottlingTier());
-	    			
-	    			if(resourcePathJSONs.get(path) != null) {
-	    				resourcePathJSONs.get(path).add(operationJson);
-	    				
-	    			} else {
-	    				resourcePathJSONs.put(path, new ArrayList<JSONObject>() {{
-	    					add(operationJson);
-	    				}});    				
-	    			}
-	    			
+	    			String httpVerbsStrng = template.getMethodsAsString();	    			
+	    			String[] httpVerbs = httpVerbsStrng.split(" ");
+	    			for (String httpVerb : httpVerbs) {
+	    				final JSONObject operationJson = (JSONObject) parser.parse(operationJsonTemplate);
+		    			operationJson.put("method", httpVerb);
+		    			operationJson.put("auth_type", template.getAuthType());
+		    			operationJson.put("throttling_tier", template.getThrottlingTier());
+		    			
+		    			if(resourcePathJSONs.get(path) != null) {
+		    				resourcePathJSONs.get(path).add(operationJson);
+		    				
+		    			} else {
+		    				resourcePathJSONs.put(path, new ArrayList<JSONObject>() {{
+		    					add(operationJson);
+		    				}});    				
+		    			}
+					}
 	    			resourceNamepaths.put(resourceName, resourcePaths);
 	    		}
 	    	}
