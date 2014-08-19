@@ -12,7 +12,7 @@
  var i=0, tiers = outputs.tiers;
  %>
  <script>
- var apiViewUrl = '<%=httpsUrl%><%=site.context%>/apis/info';
+ var apiViewUrl = '<%=site.context%>/apis/info';
  var appAddUrl = '<%=httpsUrl%><%=request.getRequestURI()%>';
  </script>
 <div class="title-section">
@@ -20,7 +20,7 @@
 </div>
 <div class="content-section shadow-up">
 <div class="content-data">
-Use applications to subscribe to APIs and manage access keys. There is DefaultApplication pre-created to use and it can add more applications on this page.
+An application is a logical collection of APIs. Applications allow you to use a single access token to invoke a collection of APIs and to subscribe to one API multiple times with different SLA levels. The DefaultApplication is pre-created and allows unlimited access by default.
     <form id="appAddForm">
         <h3><%=i18n.localize("addApp")%></h3>
 
@@ -75,6 +75,8 @@ Use applications to subscribe to APIs and manage access keys. There is DefaultAp
                     <label class="control-label" for="callback-url" style="padding-top: 5px;"><%=i18n.localize("callbackUrl")%></label>
                     <div class="controls">
                         <input type="text" class="validInput" style="width:400px;" maxlength="400" name="callback-url"  id="callback-url"/>
+                        <a class="icon-question-sign help_popup" onclick="javascript:$('#callback_help').toggle('fast')"></a>
+                        <p id="callback_help" class="hide"><%=i18n.localize("callBackHelpMsg")%></p>
                     </div>
                 </div>
                 <div class="control-group">

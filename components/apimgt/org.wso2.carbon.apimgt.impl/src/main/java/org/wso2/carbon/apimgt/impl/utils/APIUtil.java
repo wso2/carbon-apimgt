@@ -49,6 +49,7 @@ import org.wso2.carbon.apimgt.api.model.*;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
+import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
 import org.wso2.carbon.apimgt.impl.dto.Environment;
 import org.wso2.carbon.apimgt.impl.internal.APIManagerComponent;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
@@ -491,6 +492,7 @@ public final class APIUtil {
             String apiName = artifact.getAttribute(APIConstants.API_OVERVIEW_NAME);
             String apiVersion = artifact.getAttribute(APIConstants.API_OVERVIEW_VERSION);
             api = new API(new APIIdentifier(providerName, apiName, apiVersion));
+            api.setRating(getAverageRating(api.getId()));
             api.setThumbnailUrl(artifact.getAttribute(APIConstants.API_OVERVIEW_THUMBNAIL_URL));
             api.setStatus(getApiStatus(artifact.getAttribute(APIConstants.API_OVERVIEW_STATUS)));
             api.setContext(artifact.getAttribute(APIConstants.API_OVERVIEW_CONTEXT));
@@ -1066,7 +1068,7 @@ public final class APIUtil {
     
     public static String createWSDL(Registry registry, API api) throws RegistryException, APIManagementException {  	
         
-    	try {			
+    	try {
     		String wsdlResourcePath = APIConstants.API_WSDL_RESOURCE_LOCATION + api.getId().getProviderName() +
                     "--" + api.getId().getApiName() + api.getId().getVersion()+".wsdl";
 			String absoluteWSDLResourcePath = RegistryUtils.getAbsolutePath(
@@ -1658,7 +1660,7 @@ public final class APIUtil {
                
                api.setResponseCache(artifact.getAttribute(APIConstants.API_OVERVIEW_RESPONSE_CACHING));
                api.setImplementation(artifact.getAttribute(APIConstants.PROTOTYPE_OVERVIEW_IMPLEMENTATION));
-               
+               api.setVisibility(artifact.getAttribute(APIConstants.API_OVERVIEW_VISIBILITY));
                int cacheTimeout = APIConstants.API_RESPONSE_CACHE_TIMEOUT;
                try {		
                	cacheTimeout = Integer.parseInt(artifact.getAttribute(APIConstants.API_OVERVIEW_CACHE_TIMEOUT));
@@ -1799,6 +1801,34 @@ public final class APIUtil {
     }
 
     /**
+     * validates if an accessToken has expired or not
+     * @param accessTokenDO
+     * @return true if token has expired else false
+     */
+    public static boolean hasAccessTokenExpired(APIKeyValidationInfoDTO accessTokenDO) {
+        long validityPeriod = accessTokenDO.getValidityPeriod();
+        long issuedTime = accessTokenDO.getIssuedTime();
+        long timestampSkew = OAuthServerConfiguration.getInstance().getTimeStampSkewInSeconds() * 1000;
+        long currentTime = System.currentTimeMillis();
+
+        //If the validity period is not an never expiring value
+        if (validityPeriod != Long.MAX_VALUE) {
+            //check the validity of cached OAuth2AccessToken Response
+
+            if ((currentTime - timestampSkew) > (issuedTime + validityPeriod)) {
+                accessTokenDO.setValidationStatus(
+                        APIConstants.KeyValidationStatus.API_AUTH_ACCESS_TOKEN_EXPIRED);
+                if (accessTokenDO.getEndUserToken() != null) {
+                    log.info("Token " + accessTokenDO.getEndUserToken() + " expired.");
+                }
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
      *  When an input is having '@',replace it with '-AT-' [This is required to persist API data in registry,as registry paths don't allow '@' sign.]
      * @param input inputString
      * @return String modifiedString
@@ -1874,6 +1904,10 @@ public final class APIUtil {
         			MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)) {
         		int tenantId = ServiceReferenceHolder.getInstance().getRealmService().
         				getTenantManager().getTenantId(tenantDomain);
+                // calculate resource path
+                RegistryAuthorizationManager authorizationManager = new RegistryAuthorizationManager
+                        (ServiceReferenceHolder.getUserRealm());
+                resourcePath = authorizationManager.computePathOnMount(resourcePath);
         		AuthorizationManager authManager = ServiceReferenceHolder.getInstance().getRealmService().
         				getTenantUserRealm(tenantId).getAuthorizationManager();
         		if (visibility != null && visibility.equalsIgnoreCase(APIConstants.API_RESTRICTED_VISIBILITY)) {
@@ -2271,19 +2305,36 @@ public final class APIUtil {
             //This is  "registry" is a governance registry instance, therefore calculate the relative path to governance.
             String govRelativePath =   RegistryUtils.getRelativePathToOriginal(resourcePath,
                     RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH);
-			try {
-				if (registry.resourceExists(govRelativePath)) {
-					continue;
-				}
-				String rxt = FileUtil.readFileToString(rxtDir + File.separator + rxtPath);
-				Resource resource = registry.newResource();
-				resource.setContent(rxt.getBytes());
-				resource.setMediaType(APIConstants.RXT_MEDIA_TYPE);
-				registry.put(govRelativePath, resource);
-			} catch (IOException e) {
-				String msg = "Failed to read rxt files";
-				throw new APIManagementException(msg, e);
-			} catch (RegistryException e) {
+			             try {
+                // calculate resource path
+                RegistryAuthorizationManager authorizationManager = new RegistryAuthorizationManager
+                        (ServiceReferenceHolder.getUserRealm());
+                resourcePath = authorizationManager.computePathOnMount(resourcePath);
+                
+                AuthorizationManager authManager = ServiceReferenceHolder.getInstance().getRealmService().
+                        getTenantUserRealm(tenantID).getAuthorizationManager();
+                
+                 if (registry.resourceExists(govRelativePath)) {
+                    // set anonymous user permission to RXTs
+                    authManager.authorizeRole(APIConstants.ANONYMOUS_ROLE, resourcePath, ActionConstants.GET);
+                     continue;
+                 }
+                
+                 String rxt = FileUtil.readFileToString(rxtDir + File.separator + rxtPath);
+                 Resource resource = registry.newResource();
+                 resource.setContent(rxt.getBytes());
+                 resource.setMediaType(APIConstants.RXT_MEDIA_TYPE);
+                 registry.put(govRelativePath, resource);
+
+                
+                authManager.authorizeRole(APIConstants.ANONYMOUS_ROLE, resourcePath, ActionConstants.GET);
+                
+            } catch (UserStoreException e) {
+                throw new APIManagementException("Error while adding role permissions to API", e);
+            } catch (IOException e) {
+                 String msg = "Failed to read rxt files";
+                 throw new APIManagementException(msg, e);
+             } catch (RegistryException e) {
 				String msg = "Failed to add rxt to registry ";
 				throw new APIManagementException(msg, e);
 			}
@@ -2642,20 +2693,23 @@ public final class APIUtil {
 	    			if (!resourcePaths.contains(path)) {
 	    				resourcePaths.add(path);
 	    			}
-	    			String httpVerb = template.getHTTPVerb();
-	    			final JSONObject operationJson = (JSONObject) parser.parse(operationJsonTemplate);
-	    			operationJson.put("method", httpVerb);
-	    			operationJson.put("auth_type", template.getAuthType());
-	    			operationJson.put("throttling_tier", template.getThrottlingTier());
-	    			
-	    			if(resourcePathJSONs.get(path) != null) {
-	    				resourcePathJSONs.get(path).add(operationJson);
-	    				
-	    			} else {
-	    				resourcePathJSONs.put(path, new ArrayList<JSONObject>() {{
-	    					add(operationJson);
-	    				}});    				
-	    			}
+	    			String httpVerbsStrng = template.getMethodsAsString();	    			
+	    			String[] httpVerbs = httpVerbsStrng.split(" ");
+	    			for (String httpVerb : httpVerbs) {
+	    				final JSONObject operationJson = (JSONObject) parser.parse(operationJsonTemplate);
+		    			operationJson.put("method", httpVerb);
+		    			operationJson.put("auth_type", template.getAuthType());
+		    			operationJson.put("throttling_tier", template.getThrottlingTier());
+		    			
+		    			if(resourcePathJSONs.get(path) != null) {
+		    				resourcePathJSONs.get(path).add(operationJson);
+		    				
+		    			} else {
+		    				resourcePathJSONs.put(path, new ArrayList<JSONObject>() {{
+		    					add(operationJson);
+		    				}});    				
+		    			}
+					}
 	    			resourceNamepaths.put(resourceName, resourcePaths);    			
 	    		} else {
 	    			JSONObject resourcePathJson = (JSONObject) parser.parse(apiResourceJsontemplate);
@@ -2667,21 +2721,23 @@ public final class APIUtil {
 	    			resourcePaths = new ArrayList<String>();
 	    			resourcePaths.add(path);
 	    			
-	    			String httpVerb = template.getHTTPVerb();
-	    			final JSONObject operationJson = (JSONObject) parser.parse(operationJsonTemplate);
-	    			operationJson.put("method", httpVerb);
-	    			operationJson.put("auth_type", template.getAuthType());
-	    			operationJson.put("throttling_tier", template.getThrottlingTier());
-	    			
-	    			if(resourcePathJSONs.get(path) != null) {
-	    				resourcePathJSONs.get(path).add(operationJson);
-	    				
-	    			} else {
-	    				resourcePathJSONs.put(path, new ArrayList<JSONObject>() {{
-	    					add(operationJson);
-	    				}});    				
-	    			}
-	    			
+	    			String httpVerbsStrng = template.getMethodsAsString();	    			
+	    			String[] httpVerbs = httpVerbsStrng.split(" ");
+	    			for (String httpVerb : httpVerbs) {
+	    				final JSONObject operationJson = (JSONObject) parser.parse(operationJsonTemplate);
+		    			operationJson.put("method", httpVerb);
+		    			operationJson.put("auth_type", template.getAuthType());
+		    			operationJson.put("throttling_tier", template.getThrottlingTier());
+		    			
+		    			if(resourcePathJSONs.get(path) != null) {
+		    				resourcePathJSONs.get(path).add(operationJson);
+		    				
+		    			} else {
+		    				resourcePathJSONs.put(path, new ArrayList<JSONObject>() {{
+		    					add(operationJson);
+		    				}});    				
+		    			}
+					}
 	    			resourceNamepaths.put(resourceName, resourcePaths);
 	    		}
 	    	}
@@ -2704,6 +2760,7 @@ public final class APIUtil {
 			}
 	    	
 	    	mainAPIJson.put("apiVersion", version);
+	    	((JSONObject)mainAPIJson.get("info")).put("description", description);
 	    	for (Entry<String, List<String>> entry : resourceNamepaths.entrySet()) {
 	    		String resourcePath = entry.getKey();
 				JSONObject jsonOb = resourceNameJSONs.get(resourcePath);
@@ -2962,14 +3019,21 @@ public final class APIUtil {
      * @return {@link String} -HTTP permlink
      */
     public static String getRegistryResourceHTTPPermlink(String path){
-    	String scheme= "http";
+        String schemeHttp = "http";
+        String schemeHttps = "https";
 
-		ConfigurationContextService contetxservice = ServiceReferenceHolder.getContextService();
-        
-        int port = CarbonUtils.getTransportProxyPort(contetxservice.getServerConfigContext(), scheme);
-        
+        ConfigurationContextService contetxservice = ServiceReferenceHolder.getContextService();
+        //First we will try to generate http permalink and if its disabled then only we will consider https
+        int port = CarbonUtils.getTransportProxyPort(contetxservice.getServerConfigContext(), schemeHttp);
         if (port == -1) {
-            port = CarbonUtils.getTransportPort(contetxservice.getServerConfigContext(), scheme);
+            port = CarbonUtils.getTransportPort(contetxservice.getServerConfigContext(), schemeHttp);
+        }
+        //getting https parameters if http is disabled. If proxy port is not present we will go for default port
+        if (port == -1) {
+            port = CarbonUtils.getTransportProxyPort(contetxservice.getServerConfigContext(), schemeHttps);
+        }
+        if (port == -1) {
+            port = CarbonUtils.getTransportPort(contetxservice.getServerConfigContext(), schemeHttps);
         }
 
         String webContext = ServerConfiguration.getInstance().getFirstProperty("WebContextRoot");

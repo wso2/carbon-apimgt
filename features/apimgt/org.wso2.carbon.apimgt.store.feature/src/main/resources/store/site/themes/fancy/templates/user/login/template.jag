@@ -86,7 +86,14 @@ if(isSelfSignupEnabled && (tenant==null || tenant=="carbon.super")){%>
     <li>
         <i class="fa fa-pencil-square-o"></i>
         <br>
-        <a id="register-link" href="<%=httpsUrl%><%=site.context%>/site/pages/sign-up.jag?<%=urlPrefix%>"><%=i18n.localize("signup")%></a>
+	<% if(site.request_url=="READ_FROM_REQUEST") { %>
+	<a id="register-link" href="<%=httpsUrl%><%=site.context%>/site/pages/sign-up.jag?<%=urlPrefix%>"><%=i18n.localize("signup")%></a>
+	
+	<% } else {
+	    %>
+	<a id="register-link" href="<%=site.request_url%>/site/pages/sign-up.jag?<%=urlPrefix%>"><%=i18n.localize("signup")%></a>
+	
+	<% } %>
     </li>
 	<%}%>
     <li>

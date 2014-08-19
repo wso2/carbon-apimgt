@@ -220,6 +220,7 @@
     
 	"forum" : "Forum",
 	"forum.searchForum" : "Search Forum",
+    "forum.noTopicsFound" : "No topics found.",
 	"forum.createNewTopic" : "Create New Topic",
 	"forum.topic" : "Topic",
 	"forum.replies" : "Replies",
@@ -234,10 +235,5 @@
 
 	"forum.addReply.title" : "Add reply",
 	"forum.addReply.replyToThread" : "Reply to Thread"
-	
-
-
-
-
  
 }

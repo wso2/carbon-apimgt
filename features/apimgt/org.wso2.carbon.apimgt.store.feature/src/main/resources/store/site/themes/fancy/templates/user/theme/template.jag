@@ -1,9 +1,20 @@
 <%
-        var subtheme = request.getParameter("subthemeToApply");
-        session.put("theme", {
-            "base" : request.getParameter("themeToApply"),
-            "subtheme" : (subtheme && subtheme != "") ? subtheme : null
-        });
-        response.sendRedirect(request.getParameter("pathToSend"));
+    site = require("/site/conf/site.json");
+
+	function openRedirectValidation(url){
+		var storecontext = new RegExp(site.context, 'g');
+		if(url.match(storecontext)){
+			return url;
+		}else{
+			return site.context;
+		}
+	}
+
+    var subtheme = request.getParameter("subthemeToApply");
+    session.put("theme", {
+    	"base" : request.getParameter("themeToApply") || 'fancy',
+        "subtheme" : (subtheme && subtheme != "") ? subtheme : null
+    });
+    response.sendRedirect(openRedirectValidation(request.getParameter("pathToSend")));
 
 %>

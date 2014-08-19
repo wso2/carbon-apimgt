@@ -38,6 +38,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
 
 public class Utils {
     
@@ -178,8 +179,9 @@ public class Utils {
     		for (String origin: origins) {
     			originsList.add(origin.trim());
     		}
-    		
-    		if (currentRequestOrigin != null && originsList.contains(currentRequestOrigin)) {
+    		if(originsList.contains("*")){
+                allowedOrigins="*";
+            }else if (currentRequestOrigin != null && originsList.contains(currentRequestOrigin)) {
     			allowedOrigins = currentRequestOrigin;
     		} else {
     			allowedOrigins = null; 
@@ -205,4 +207,41 @@ public class Utils {
     	    	    	
     	return Boolean.parseBoolean(corsEnabled);
     }
+
+    /**
+     * validates if an accessToken has expired or not
+     *
+     * @param accessTokenDO
+     * @return
+     */
+    public static boolean hasAccessTokenExpired(APIKeyValidationInfoDTO accessTokenDO) {
+        long timestampSkew;
+        long currentTime;
+        long validityPeriod;
+        if (accessTokenDO.getValidityPeriod() != Long.MAX_VALUE) {
+            validityPeriod = accessTokenDO.getValidityPeriod() * 1000;
+        } else {
+            validityPeriod = accessTokenDO.getValidityPeriod();
+        }
+        long issuedTime = accessTokenDO.getIssuedTime();
+        //long issuedTime = accessTokenDO.getIssuedTime().getTime();
+        currentTime = System.currentTimeMillis();
+
+        //If the validity period is not an never expiring value
+        if (validityPeriod != Long.MAX_VALUE) {
+            //check the validity of cached OAuth2AccessToken Response
+            if ((currentTime) > (issuedTime + validityPeriod)) {
+                accessTokenDO.setValidationStatus(
+                        APIConstants.KeyValidationStatus.API_AUTH_ACCESS_TOKEN_EXPIRED);
+                if (accessTokenDO.getEndUserToken() != null) {
+                    log.info("Token " + accessTokenDO.getEndUserToken() + " expired.");
+                }
+                return true;
+            }
+        }
+
+
+        return false;
+    }
+
 }

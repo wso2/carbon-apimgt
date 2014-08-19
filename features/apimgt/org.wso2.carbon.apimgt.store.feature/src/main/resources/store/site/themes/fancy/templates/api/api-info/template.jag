@@ -21,11 +21,10 @@ if(tenant!=null) {
    session.put("apiPath",request.getQueryString());
 
    if(tenant!=null && user) {
-    var userDomain=null;
-	if(user.username.indexOf("@")!=-1){
-		userDomain = user.username.split("@")[1];
-	}
-    if(!(tenant=='carbon.super' && userDomain == null) && tenant != userDomain){
+    var MultitenantUtils = Packages.org.wso2.carbon.utils.multitenancy.MultitenantUtils;
+    var userDomain = MultitenantUtils.getTenantDomain(user.username);
+    
+    if(tenant !='carbon.super' && tenant != userDomain){
     	var subscriptionAvailability = api.subscriptionAvailability;
     	if (subscriptionAvailability == 'all_tenants') {
     		subsPermitted = true;

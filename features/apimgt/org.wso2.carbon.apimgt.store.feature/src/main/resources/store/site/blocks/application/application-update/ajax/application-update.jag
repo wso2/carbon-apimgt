@@ -26,6 +26,12 @@ include("/jagg/jagg.jag");
         mod = jagg.module("application");
         result = mod.updateApplication(applicationNew,applicationOld,username,tier,callbackUrlNew,descriptionNew);
 
+	//If name of the selected application is edited,add the new name  to   session
+        var selectedApp=session.get("selectedApp");
+        if(applicationOld!=applicationNew && applicationOld==selectedApp){
+        session.put("selectedApp",applicationNew);
+        }
+
         if (result.error) {
             obj = {
                 error:result.error,
