@@ -341,6 +341,8 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             if ((isTenantMode && this.tenantDomain==null) || (isTenantMode && isTenantDomainNotMatching(tenantDomain))) {//Tenant store anonymous mode
                 int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
                         .getTenantId(tenantDomain);
+                // explicitly load the tenant's registry
+      	      	APIUtil.loadTenantRegistry(tenantId);
                 userRegistry = ServiceReferenceHolder.getInstance().
                         getRegistryService().getGovernanceUserRegistry(CarbonConstants.REGISTRY_ANONNYMOUS_USERNAME, tenantId);
                 PrivilegedCarbonContext.getThreadLocalCarbonContext().setUsername(CarbonConstants.REGISTRY_ANONNYMOUS_USERNAME);
@@ -573,8 +575,10 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                         .getTenantId(tenantDomain);
                 userRegistry = ServiceReferenceHolder.getInstance().
                         getRegistryService().getGovernanceUserRegistry(CarbonConstants.REGISTRY_ANONNYMOUS_USERNAME, tenantId);
+                PrivilegedCarbonContext.getThreadLocalCarbonContext().setUsername(CarbonConstants.REGISTRY_ANONNYMOUS_USERNAME);
             } else {
                 userRegistry = registry;
+                PrivilegedCarbonContext.getThreadLocalCarbonContext().setUsername(this.username);
             }
             this.isTenantModeStoreView = isTenantMode;
             this.requestedTenant = tenantDomain;
@@ -787,6 +791,8 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             if ((isTenantMode && this.tenantDomain == null) || (isTenantMode && isTenantDomainNotMatching(tenantDomain))) {//Tenant based store anonymous mode
                 int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
                         .getTenantId(tenantDomain);
+                // explicitly load the tenant's registry
+      	      	APIUtil.loadTenantRegistry(tenantId);
                 PrivilegedCarbonContext.getThreadLocalCarbonContext().setUsername(CarbonConstants.REGISTRY_ANONNYMOUS_USERNAME);
                 isTenantFlowStarted = true;
                 userRegistry = ServiceReferenceHolder.getInstance().
@@ -817,61 +823,49 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                     }
                 }
             }
-            latestAPIQueryPath = RegistryConstants.QUERIES_COLLECTION_PATH + "/latest-apis";
-            Map<String, String> params = new HashMap<String, String>();
-            params.put(RegistryConstants.RESULT_TYPE_PROPERTY_NAME, RegistryConstants.RESOURCES_RESULT_TYPE);
-            if (userRegistry != null) {
-                Collection collection = userRegistry.executeQuery(latestAPIQueryPath, params);
-                int resultSetSize = Math.min(limit, collection.getChildCount());
-                String[] recentlyAddedAPIPaths = new String[resultSetSize];
-                for (int i = 0; i < resultSetSize; i++) {
-                    recentlyAddedAPIPaths[i] = collection.getChildren()[i];
-                }
-                Set<API> apisSet = getAPIs(userRegistry, limit, recentlyAddedAPIPaths);
-                if (!APIUtil.isAllowDisplayMultipleVersions()) {
-                    recentlyAddedAPIs.addAll(apisSet);
-                    if (APIConstants.isRecentlyAddedAPICacheEnabled) {
-                        Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER).getCache(APIConstants.RECENTLY_ADDED_API_CACHE_NAME).put(username + ":" + tenantDomain, apisSet);
-                    }
-                    return recentlyAddedAPIs;
-                } else {
-                    recentlyAddedAPIsWithMultipleVersions.addAll(apisSet);
-                    if (APIConstants.isRecentlyAddedAPICacheEnabled) {
-                        Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER).getCache(APIConstants.RECENTLY_ADDED_API_CACHE_NAME).put(username + ":" + tenantDomain, apisSet);
-                    }
-                    return recentlyAddedAPIsWithMultipleVersions;
-                }
-            }
-            Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER).getCache("RECENTLY_ADDED_API").put(username + ":" + tenantDomain, recentlyAddedAPIs);
-            return recentlyAddedAPIs;
-
-
+            
+            PaginationContext.init(0, limit, "DESC", "timestamp", Integer.MAX_VALUE);
+        	
+        	Map<String, List<String>> listMap = new HashMap<String, List<String>>();
+        	listMap.put(APIConstants.API_OVERVIEW_STATUS, new ArrayList<String>() {{
+        		add(APIConstants.PUBLISHED);
+        	}});
+        	
+        	//Find UUID
+        	GenericArtifactManager artifactManager = APIUtil.getArtifactManager(userRegistry, APIConstants.API_KEY);
+        	if (artifactManager != null) {
+        		GenericArtifact[] genericArtifacts = artifactManager.findGenericArtifacts(listMap);
+        		SortedSet<API> allAPIs = new TreeSet<API>(new APINameComparator());
+        		for (GenericArtifact artifact : genericArtifacts) {
+        			API api = APIUtil.getAPI(artifact);
+        			allAPIs.add(api);
+        		}
+        		
+        		if (!APIUtil.isAllowDisplayMultipleVersions()) {
+        			recentlyAddedAPIs.addAll(allAPIs);
+        			if (APIConstants.isRecentlyAddedAPICacheEnabled) {
+        				Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER).getCache(APIConstants.RECENTLY_ADDED_API_CACHE_NAME).put(username + ":" + tenantDomain, allAPIs);
+        			}
+        			return recentlyAddedAPIs;
+        		} else {
+        			recentlyAddedAPIsWithMultipleVersions.addAll(allAPIs);
+        			if (APIConstants.isRecentlyAddedAPICacheEnabled) {
+        				Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER).getCache(APIConstants.RECENTLY_ADDED_API_CACHE_NAME).put(username + ":" + tenantDomain, allAPIs);
+        			}
+        			return recentlyAddedAPIsWithMultipleVersions;
+        		}
+        	 } 
         } catch (RegistryException e) {
-            try {
-                //Before a tenant login to the store or publisher at least one time,
-                //a registry exception is thrown when the tenant store is accessed the store in anonymous mode.
-                //This fix checks whether query resource available in the registry. If not
-                // give a warn.
-                if (!userRegistry.resourceExists(latestAPIQueryPath)) {
-                    log.warn("Failed to retrieve recently added API query resource at " + latestAPIQueryPath);
-                    return recentlyAddedAPIs;
-                }
-            } catch (RegistryException e1) {
-                //ignore
-            }
-            handleException("Failed to get recently added APIs", e);
-            return null;
-        } catch (org.wso2.carbon.user.api.UserStoreException e) {
-            handleException("Failed to get recently added APIs", e);
-            return null;
+        	handleException("Failed to get all published APIs", e);
+        } catch (UserStoreException e) {
+        	handleException("Failed to get all published APIs", e);
         } finally {
-            PaginationContext.destroy();
-            if (isTenantFlowStarted) {
-                PrivilegedCarbonContext.endTenantFlow();
-            }
+        	PaginationContext.destroy();
+        	if (isTenantFlowStarted) {
+        		PrivilegedCarbonContext.endTenantFlow();
+        	}
         }
-
-
+        return recentlyAddedAPIs;
     }
 
     public Set<Tag> getAllTags(String requestedTenantDomain) throws APIManagementException {

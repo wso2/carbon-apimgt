@@ -213,5 +213,23 @@
     "ShareonFacebook":"Share on Facebook",
     "apipublisher":"API Publisher",
     "publicAPIStore":"Public API Store",
-    "apistoreDesc":"'s API Store"
+    "apistoreDesc":"'s API Store",
+
+    "forum" : "Forum",
+    "forum.searchForum" : "Search Forum",
+    "forum.noTopicsFound" : "No topics found.",
+    "forum.createNewTopic" : "Create New Topic",
+    "forum.topic" : "Topic",
+    "forum.replies" : "Replies",
+    "forum.by" : "By",
+    
+    "forum.topicCreation.title" : "Create New Topic",
+    "forum.topicCreation.subject" : "Subject",
+    "forum.topicCreation.create" : "Create",
+
+    "forum.topicEdit.subject" : "Edit Subject",
+    "forum.topicEdit.description" : "Edit Topic Description",
+
+    "forum.addReply.title" : "Add reply",
+    "forum.addReply.replyToThread" : "Reply to Thread"
 }

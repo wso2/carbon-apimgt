@@ -28,6 +28,7 @@ import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityException;
 import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
+import org.wso2.carbon.apimgt.impl.generated.thrift.APIKeyValidationService;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -69,7 +70,7 @@ public class ThriftKeyValidatorClient {
                                                  String matchingResource, String httpVerb) throws APISecurityException {
 
         APIKeyValidationInfoDTO apiKeyValidationInfoDTO = null;
-        org.wso2.carbon.apimgt.gateway.handlers.security.thrift.APIKeyValidationInfoDTO thriftDTO;
+        org.wso2.carbon.apimgt.impl.generated.thrift.APIKeyValidationInfoDTO thriftDTO;
 
         try {
             thriftDTO = keyValClient.validateKey(context, apiVersion, apiKey, sessionId, requiredAuthenticationLevel,
@@ -107,13 +108,15 @@ public class ThriftKeyValidatorClient {
         apiKeyValidationInfoDTO.setConsumerKey(thriftDTO.getConsumerKey());
         apiKeyValidationInfoDTO.setAuthorizedDomains(thriftDTO.getAuthorizedDomains());
         apiKeyValidationInfoDTO.setScopes(thriftDTO.getScopes());
+        apiKeyValidationInfoDTO.setIssuedTime(thriftDTO.getIssuedTime());
+        apiKeyValidationInfoDTO.setValidityPeriod(thriftDTO.getValidityPeriod());
 
         return apiKeyValidationInfoDTO;
     }
     public ArrayList<URITemplate> getAllURITemplates(String context, String apiVersion
     ) throws APISecurityException {
         ArrayList<URITemplate> templates=new ArrayList<URITemplate>();
-        List<org.wso2.carbon.apimgt.gateway.handlers.security.thrift.URITemplate> uriTemplates;
+        List<org.wso2.carbon.apimgt.impl.generated.thrift.URITemplate> uriTemplates;
 
         try {
             uriTemplates = keyValClient.getAllURITemplates(context, apiVersion,sessionId);
@@ -132,7 +135,7 @@ public class ThriftKeyValidatorClient {
                 throw new APISecurityException(APISecurityConstants.API_AUTH_GENERAL_ERROR, e1.getMessage());
             }
         }
-        for (org.wso2.carbon.apimgt.gateway.handlers.security.thrift.URITemplate aDto : uriTemplates) {
+        for (org.wso2.carbon.apimgt.impl.generated.thrift.URITemplate aDto : uriTemplates) {
             URITemplate temp = toTemplates(aDto);
             templates.add(temp);
         }
@@ -140,7 +143,7 @@ public class ThriftKeyValidatorClient {
     }
 
     private URITemplate toTemplates(
-            org.wso2.carbon.apimgt.gateway.handlers.security.thrift.URITemplate dto) {
+            org.wso2.carbon.apimgt.impl.generated.thrift.URITemplate dto) {
         URITemplate template = new URITemplate();
         template.setAuthType(dto.getAuthType());
         template.setHTTPVerb(dto.getHttpVerb());

@@ -296,7 +296,7 @@ public final class APIConstants {
     public static final String API_KEY_SECURITY_CONTEXT_TTL = API_KEY_MANAGER + "SecurityContextTTL";
     public static final String API_KEY_MANAGER_ENABLE_JWT_CACHE = API_KEY_MANAGER + "EnableJWTCache";
     public static final String API_KEY_MANAGER_ENABLE_VALIDATION_INFO_CACHE = API_KEY_MANAGER + "EnableKeyMgtValidationInfoCache";
-    public static final String API_KEY_MANAGER_REMOVE_USERNAME_TO_JWT_FOR_APP_TOKEN = API_KEY_MANAGER + "RemoveUserNameToJWTForApplicationToken";
+    public static final String API_KEY_MANAGER_REMOVE_USERNAME_TO_JWT_FOR_APP_TOKEN = API_KEY_MANAGER + "RemoveUserNameFromJWTForApplicationToken";
     public static final String API_KEY_MANAGER_ENABLE_ASSERTIONS = API_KEY_MANAGER + "EnableAssertions.";
     public static final String API_KEY_MANAGER_ENABLE_ASSERTIONS_USERNAME = API_KEY_MANAGER_ENABLE_ASSERTIONS + "UserName";
     public static final String API_KEY_MANAGER_ENABLE_ACCESS_TOKEN_PARTITIONING = API_KEY_MANAGER + "AccessTokenPartitioning." + "EnableAccessTokenPartitioning";
@@ -544,4 +544,13 @@ public final class APIConstants {
     public static final String RECENTLY_ADDED_API_CACHE_NAME = "RECENTLY_ADDED_API";
     public static final String API_STORE_RECENTLY_ADDED_API_CACHE_ENABLE = API_STORE + "EnableRecentlyAddedAPICache";
     public static boolean isRecentlyAddedAPICacheEnabled = false;
+    public static String velocityLogPath = "VelocityLogPath";
+    
+    // Primary/Secondary Login configuration
+    public static final String USERID_LOGIN = "UserIdLogin";
+    public static final String EMAIL_LOGIN = "EmailLogin";
+    public static final String PRIMARY_LOGIN = "primary";
+    public static final String CLAIM_URI = "ClaimUri";
+
+
 }

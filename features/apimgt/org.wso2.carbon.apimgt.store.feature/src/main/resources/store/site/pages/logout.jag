@@ -2,6 +2,17 @@
 include("/jagg/jagg.jag");
 var site = require("/site/conf/site.json");
 
+// Since the header.jag is not installed
+var encode = require('encode');
+encode = new encode.Encode();
+
+if(site.request_url == "READ_FROM_REQUEST"){
+    request_url = request.getRequestURL().split(request.getRequestURI())[0]+request.getContextPath();
+}
+else{
+    request_url = site.request_url;
+}
+
 jagg.includeBlock("sso/logout", {});
 
 %>

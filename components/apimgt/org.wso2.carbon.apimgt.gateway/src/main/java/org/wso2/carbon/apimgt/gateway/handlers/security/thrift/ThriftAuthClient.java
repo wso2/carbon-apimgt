@@ -18,15 +18,19 @@
  */
 package org.wso2.carbon.apimgt.gateway.handlers.security.thrift;
 
+
+import org.apache.http.client.HttpClient;
 import org.apache.http.conn.scheme.Scheme;
+import org.apache.http.conn.scheme.SchemeRegistry;
 import org.apache.http.conn.ssl.SSLSocketFactory;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.impl.conn.PoolingClientConnectionManager;
 import org.apache.thrift.TException;
 import org.apache.thrift.protocol.TCompactProtocol;
 import org.apache.thrift.protocol.TProtocol;
 import org.apache.thrift.transport.THttpClient;
 import org.apache.thrift.transport.TTransportException;
-import org.wso2.carbon.base.ServerConfiguration;
+
 
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
@@ -63,6 +67,7 @@ public class ThriftAuthClient {
 
     public ThriftAuthClient(String serverIP, String remoteServerPort, String webContextRoot)
             throws AuthenticationException {
+
         try {
             TrustManager easyTrustManager = new X509TrustManager() {
                 public void checkClientTrusted(
@@ -87,10 +92,14 @@ public class ThriftAuthClient {
             sslContext.init(null, new TrustManager[]{easyTrustManager}, null);
             SSLSocketFactory sf = new SSLSocketFactory(sslContext);
             sf.setHostnameVerifier(SSLSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER);
-            Scheme httpsScheme = new Scheme("https", sf, Integer.parseInt(remoteServerPort));
 
-            DefaultHttpClient httpClient = new DefaultHttpClient();
-            httpClient.getConnectionManager().getSchemeRegistry().register(httpsScheme);
+            //REGISTERS SCHEMES FOR BOTH HTTP AND HTTPS
+            SchemeRegistry registry = new SchemeRegistry();
+            registry.register(new Scheme("https", sf,Integer.parseInt(remoteServerPort)));
+
+
+            PoolingClientConnectionManager manager = new PoolingClientConnectionManager (registry);
+            HttpClient httpClient = new DefaultHttpClient(manager);
 
             //If the webContextRoot is null or /
             if(webContextRoot == null || "/".equals(webContextRoot)){
@@ -100,6 +109,7 @@ public class ThriftAuthClient {
             String thriftServiceURL = "https://" + serverIP + ":" + remoteServerPort +
                                       webContextRoot + "/" + "thriftAuthenticator";
             client = new THttpClient(thriftServiceURL, httpClient);
+
 
         } catch (TTransportException e) {
             throw new AuthenticationException("Error in creating thrift authentication client..");

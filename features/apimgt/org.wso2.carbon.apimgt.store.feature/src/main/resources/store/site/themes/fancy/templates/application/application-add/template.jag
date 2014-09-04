@@ -12,7 +12,7 @@
  var i=0, tiers = outputs.tiers;
  %>
  <script>
- var apiViewUrl = '<%=httpsUrl%><%=site.context%>/apis/info';
+ var apiViewUrl = '<%=site.context%>/apis/info';
  var appAddUrl = '<%=httpsUrl%><%=request.getRequestURI()%>';
  </script>
 <div class="title-section">

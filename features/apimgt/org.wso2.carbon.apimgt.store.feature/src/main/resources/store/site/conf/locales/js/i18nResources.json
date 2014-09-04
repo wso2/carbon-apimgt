@@ -22,8 +22,8 @@
         "deleteMsg": "Are you sure you want to remove the application " ,
         "deleteMsgPostfix": "? This will cancel all the existing subscriptions and keys associated with the application. " ,
         "unsubscribeMsg": "Are you sure you want to unsubscribe from ",
-		"deleteMsgForForumTopic": "Do you want to remove the topic "
-
+		"deleteMsgForForumTopic": "Do you want to remove the topic ",
+		"deleteMsgForForumReply": "Do you want to remove this reply ?"
 
     },
     "titles":{
@@ -62,7 +62,14 @@
         "noData":"No Data Found ... ",
         "checkBAMConnectivity":" <a href='http://docs.wso2.org/wiki/display/AM170/Publishing+API+Runtime+Statistics' target='_blank' class='warningLink'>Refer our wiki to configure BAM correctly</a>",
         "unavailableData":"Data unavailable",
-        "login":"Unable to log you in!"
+        "login":"Unable to log you in!",
+        "cannotDeleteForumTopic" : "Cannot delete the topic. ",
+        "cannotEditForumTopic" : "Cannot edit the topic. " ,
+        "cannotDeleteForumReply" : "Cannot delete the reply. ",
+        "cannotEditForumReply" : "Cannot edit the reply. ",
+        "topicSubjectCannotBeEmpty" : "Topic subject cannot be empty.",
+        "topicDescriptionCannotBeEmpty" : "Topic description cannot be empty.",
+        "replyCannotBeEmpty" : "Reply cannot be empty."
     }
 
 }

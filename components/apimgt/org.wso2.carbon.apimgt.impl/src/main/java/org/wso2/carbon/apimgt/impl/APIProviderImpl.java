@@ -557,6 +557,10 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 String apiDefinitionFilePath = APIUtil.getAPIDefinitionFilePath(api.getId().getApiName(), api.getId().getVersion(), api.getId().getProviderName());
                 if (!registry.resourceExists(apiDefinitionFilePath)) {
                 	createUpdateAPIDefinition(api);
+                }else{
+                    /* if registry is exists delete and recreate */
+                    registry.delete(apiDefinitionFilePath);
+                    createUpdateAPIDefinition(api);
                 }
 
                 //update apiContext cache
@@ -1100,8 +1104,31 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             		/* Create the JSON Content again for API with new definition */
             		String content = APIUtil.createSwaggerJSONContent(newAPI);
             		addAPIDefinitionContent(newId, doc.getName(), content);
+            		setPermissionToAPIDefinition(newAPI, doc);
             	} else {
-	                addDocumentation(newId, doc);
+            		/*copying the file in registry for new api*/
+            		Documentation.DocumentSourceType sourceType = doc.getSourceType();
+            		if(sourceType==Documentation.DocumentSourceType.FILE){
+            		String absoluteSourceFilePath=doc.getFilePath();
+            		//extract the prepend ->/registry/resource/_system/governance/ and for tenant /t/my.com/registry/resource/_system/governance/
+            		int prependInex=absoluteSourceFilePath.indexOf(APIConstants.API_LOCATION);
+            		String prependPath=absoluteSourceFilePath.substring(0,prependInex);
+            		//get the file name from absolute file path
+            		int fileNameIndex=absoluteSourceFilePath.lastIndexOf(RegistryConstants.PATH_SEPARATOR);
+            		String fileName=absoluteSourceFilePath.substring(fileNameIndex+1);
+            		// create relative file path of old location
+            		String sourceFilePath=absoluteSourceFilePath.substring(prependInex);;
+            		// create the relative file path where file should be copied
+            		String targetFilePath=APIConstants.API_LOCATION +RegistryConstants.PATH_SEPARATOR+newId.getProviderName()
+                    		+RegistryConstants.PATH_SEPARATOR+newId.getApiName()+RegistryConstants.PATH_SEPARATOR+newId.getVersion()
+                    		+RegistryConstants.PATH_SEPARATOR+APIConstants.DOC_DIR+RegistryConstants.PATH_SEPARATOR
+                    		+APIConstants.DOCUMENT_FILE_DIR+RegistryConstants.PATH_SEPARATOR+fileName;
+            		// copy the file from old location to new location(for new api)
+            		registry.copy(sourceFilePath,targetFilePath);
+            		// update the filepath attribute in doc artifact to create new doc artifact for new version of api
+            		doc.setFilePath(prependPath+targetFilePath);
+            		}
+            		copyDocumentation(newAPI, doc);
 	                String content = getDocumentationContent(api.getId(), doc.getName());
 	                if (content != null) {
 	                    addDocumentationContent(newId, doc.getName(), content);
@@ -1135,6 +1162,40 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
     }
     
+    
+  
+	
+	private void setPermissionToAPIDefinition(API newAPI, Documentation documentation)
+	                                                                                                throws APIManagementException {
+		
+		APIIdentifier identifier=newAPI.getId();
+		API api = newAPI;
+		String apiDefinitionFilePath =
+		                               APIUtil.getAPIDefinitionFilePath(identifier.getApiName(),
+		                                                                identifier.getVersion(),
+		                                                                identifier.getProviderName());
+		try {
+			String docVisibility = documentation.getVisibility().name();
+			String apiPath = APIUtil.getAPIPath(identifier);
+			String[] authorizedRoles = getAuthorizedRoles(apiPath);
+			String visibility = api.getVisibility();
+			if (docVisibility != null) {
+				if (APIConstants.DOC_SHARED_VISIBILITY.equalsIgnoreCase(docVisibility)) {
+					authorizedRoles = null;
+					visibility = APIConstants.DOC_SHARED_VISIBILITY;
+				} else if (APIConstants.DOC_OWNER_VISIBILITY.equalsIgnoreCase(docVisibility)) {
+					authorizedRoles = null;
+					visibility = APIConstants.DOC_OWNER_VISIBILITY;
+				}
+			}
+			APIUtil.setResourcePermissions(api.getId().getProviderName(), visibility,
+			                               authorizedRoles, apiDefinitionFilePath);
+		} catch (UserStoreException e) {
+			handleException("Failed to set Permission to copied swagger api definistion", e);
+		}
+
+	}
+	
     private void copySwagger12Resources(APIIdentifier apiId, APIIdentifier newAPIId) throws APIManagementException{
     	String resourcePath = APIUtil.getSwagger12DefinitionFilePath(apiId.getApiName(),
                 apiId.getVersion(), apiId.getProviderName());
@@ -1568,6 +1629,54 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             String docVisibility=documentation.getVisibility().name();
             String[] authorizedRoles=getAuthorizedRoles(apiPath);
             API api=getAPI(apiPath);
+            String visibility=api.getVisibility();
+            if(docVisibility!=null){
+            if(APIConstants.DOC_SHARED_VISIBILITY.equalsIgnoreCase(docVisibility)){
+            authorizedRoles=null;
+            visibility=APIConstants.DOC_SHARED_VISIBILITY;
+            } else if(APIConstants.DOC_OWNER_VISIBILITY.equalsIgnoreCase(docVisibility)){
+            authorizedRoles=null;
+            visibility=APIConstants.DOC_OWNER_VISIBILITY;
+            }
+            }
+            APIUtil.setResourcePermissions(api.getId().getProviderName(),
+                   visibility, authorizedRoles, artifact.getPath());
+            String docFilePath = artifact.getAttribute(APIConstants.DOC_FILE_PATH);
+            if(docFilePath != null && !docFilePath.equals("")){
+                //The docFilePatch comes as /t/tenanatdoman/registry/resource/_system/governance/apimgt/applicationdata..
+                //We need to remove the /t/tenanatdoman/registry/resource/_system/governance section to set permissions.
+                int startIndex = docFilePath.indexOf("governance") + "governance".length();
+                String filePath = docFilePath.substring(startIndex, docFilePath.length());
+                APIUtil.setResourcePermissions(api.getId().getProviderName(),
+                        visibility,authorizedRoles, filePath);
+                registry.addAssociation(artifact.getPath(), filePath,
+                        APIConstants.DOCUMENTATION_FILE_ASSOCIATION);
+            }
+        } catch (RegistryException e) {
+            handleException("Failed to add documentation", e);
+        } catch (UserStoreException e) {
+            handleException("Failed to add documentation", e);
+        }
+    }
+    
+    
+    private void copyDocumentation(API newAPI, Documentation documentation)
+            throws APIManagementException {
+        try {
+        	APIIdentifier apiId=newAPI.getId();
+        	API api=newAPI;
+            GenericArtifactManager artifactManager = new GenericArtifactManager(registry,
+                                                                                APIConstants.DOCUMENTATION_KEY);
+            GenericArtifact artifact =
+                    artifactManager.newGovernanceArtifact(new QName(documentation.getName()));
+            artifactManager.addGenericArtifact(
+                    APIUtil.createDocArtifactContent(artifact, apiId, documentation));
+            String apiPath = APIUtil.getAPIPath(apiId);
+            //Adding association from api to documentation . (API -----> doc)
+            registry.addAssociation(apiPath, artifact.getPath(),
+                                    APIConstants.DOCUMENTATION_ASSOCIATION);
+            String docVisibility=documentation.getVisibility().name();
+            String[] authorizedRoles=getAuthorizedRoles(apiPath);
             String visibility=api.getVisibility();
             if(docVisibility!=null){
             if(APIConstants.DOC_SHARED_VISIBILITY.equalsIgnoreCase(docVisibility)){
