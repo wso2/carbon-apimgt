@@ -3005,7 +3005,7 @@ public final class APIUtil {
         return token;
     }
 
-    public static void loadTenantRegistry(int tenantId){
+    public static void loadTenantRegistry(int tenantId) throws RegistryException{
         TenantRegistryLoader tenantRegistryLoader = APIManagerComponent.getTenantRegistryLoader();
         ServiceReferenceHolder.getInstance().getIndexLoaderService().loadTenantIndex(tenantId);
         tenantRegistryLoader.loadTenantRegistry(tenantId);
