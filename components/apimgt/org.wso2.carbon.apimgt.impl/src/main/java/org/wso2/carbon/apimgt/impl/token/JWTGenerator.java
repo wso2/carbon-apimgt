@@ -18,10 +18,8 @@
 package org.wso2.carbon.apimgt.impl.token;
 
 import org.apache.axiom.util.base64.Base64Utils;
-import org.apache.axis2.util.JavaUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
@@ -29,8 +27,9 @@ import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.base.MultitenantConstants;
-import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.core.util.KeyStoreManager;
+import org.wso2.carbon.registry.core.exceptions.RegistryException;
+import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
@@ -424,6 +423,8 @@ public class JWTGenerator {
             throw new APIManagementException(error);
         } catch (APIManagementException e) {
             //do not log
+            throw new APIManagementException(e.getMessage());
+        } catch (RegistryException e){
             throw new APIManagementException(e.getMessage());
         }
     }

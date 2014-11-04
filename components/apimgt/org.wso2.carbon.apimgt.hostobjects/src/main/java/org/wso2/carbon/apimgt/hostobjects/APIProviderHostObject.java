@@ -59,6 +59,7 @@ import org.wso2.carbon.apimgt.usage.client.exception.APIMgtUsageQueryServiceClie
 import org.wso2.carbon.authenticator.stub.AuthenticationAdminStub;
 import org.wso2.carbon.base.ServerConfiguration;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
+import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.user.mgt.stub.UserAdminStub;
 import org.wso2.carbon.utils.CarbonUtils;
@@ -3448,6 +3449,9 @@ public class APIProviderHostObject extends ScriptableObject {
             } catch (org.wso2.carbon.user.api.UserStoreException e) {
                 log.error("Could not load tenant registry. Error while getting tenant id from tenant domain " +
                         tenantDomain);
+            } catch (RegistryException e){
+                log.error("Could not load tenant registry. Error while getting tenant id from tenant domain " +
+                          tenantDomain);
             }
         }
 
