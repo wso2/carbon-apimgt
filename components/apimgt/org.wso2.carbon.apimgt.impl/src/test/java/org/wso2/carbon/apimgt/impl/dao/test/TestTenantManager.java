@@ -76,7 +76,7 @@ public class TestTenantManager implements TenantManager {
 
     }
 
-    //#TODO we need to add method body of this method.adding this method adding this method in order to avoid compilation error.
+    //#TODO we need to add method body of this method.adding this method in order to avoid compilation error.
     @Override
     public void deleteTenant(int i, boolean b) throws UserStoreException {
 
