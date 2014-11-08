@@ -75,6 +75,12 @@ public class TestTenantManager implements TenantManager {
     public void deleteTenant(int i) throws UserStoreException {
 
     }
+
+    @Override
+    public void deleteTenant(int i, boolean b) throws UserStoreException {
+
+    }
+
     public Tenant[] getAllTenantsForTenantDomainStr(String domain) throws UserStoreException {
         return null;
     }
