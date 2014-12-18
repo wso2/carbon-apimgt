@@ -36,6 +36,7 @@ import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.startup.publisher.internal.DataHolder;
 import org.wso2.carbon.apimgt.startup.publisher.internal.ServiceReferenceHolder;
+import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.core.ServerStartupHandler;
 import org.wso2.carbon.governance.api.generic.GenericArtifactManager;
 import org.wso2.carbon.governance.api.generic.dataobjects.GenericArtifact;
@@ -44,7 +45,6 @@ import org.wso2.carbon.registry.common.CommonConstants;
 import org.wso2.carbon.registry.core.Registry;
 import org.wso2.carbon.registry.core.Resource;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
-import org.wso2.carbon.registry.core.session.CurrentSession;
 
 import javax.activation.FileTypeMap;
 import javax.cache.Cache;
@@ -258,7 +258,8 @@ public class APIManagerStartupPublisher implements ServerStartupHandler {
 			this.registry = DataHolder.getRegistryService()
 					.getGovernanceSystemRegistry();
 			createAPIArtifact(api);
-			apiMgtDAO.addAPI(api, CurrentSession.getTenantId());
+            final int tenantId = CarbonContext.getThreadLocalCarbonContext().getTenantId();
+			apiMgtDAO.addAPI(api, tenantId);
 			
 			
 			/* Adding Document URL*/
@@ -411,7 +412,8 @@ public class APIManagerStartupPublisher implements ServerStartupHandler {
 		try {
 			String jsonText = APIUtil.createSwaggerJSONContent(api);
 
-			String resourcePath = APIUtil.getAPIDefinitionFilePath(identifier.getApiName(), identifier.getVersion(),identifier.getProviderName());
+			String resourcePath = APIUtil.getAPIDefinitionFilePath(
+					identifier.getApiName(), identifier.getVersion(), identifier.getProviderName());
 
 			Resource resource = registry.newResource();
 

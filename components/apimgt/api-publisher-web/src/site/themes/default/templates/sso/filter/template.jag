@@ -26,10 +26,23 @@
 	}
 	if (checkSSO && !Boolean(isAuthenticated)) {
 
-	    ssoRelyingParty.setProperty("identityProviderURL", site.ssoConfiguration.identityProviderURL);
-	    ssoRelyingParty.setProperty("keyStorePassword", site.ssoConfiguration.keyStorePassword);
-	    ssoRelyingParty.setProperty("identityAlias",site.ssoConfiguration.identityAlias);
-	    ssoRelyingParty.setProperty("keyStoreName",site.ssoConfiguration.keyStoreName);
+	    var keyStorePassword = site.ssoConfiguration.keyStorePassword;
+            var keyStoreAlias = site.ssoConfiguration.identityAlias;
+            var keyStoreLocation = site.ssoConfiguration.keyStoreName;
+            var CarbonUtils = Packages.org.wso2.carbon.utils.CarbonUtils;
+            if(site.ssoConfiguration.keyStorePassword == null || site.ssoConfiguration.keyStorePassword == ""){
+                site.ssoConfiguration.keyStorePassword = CarbonUtils.getServerConfiguration().getFirstProperty("Security.KeyStore.Password");
+                }
+            if(site.ssoConfiguration.identityAlias == null || site.ssoConfiguration.identityAlias == ""){
+                site.ssoConfiguration.identityAlias = CarbonUtils.getServerConfiguration().getFirstProperty("Security.KeyStore.KeyAlias");
+                }
+            if(site.ssoConfiguration.keyStoreName == null || site.ssoConfiguration.keyStoreName == ""){
+                site.ssoConfiguration.keyStoreName = CarbonUtils.getServerConfiguration().getFirstProperty("Security.KeyStore.Location");
+                }
+            ssoRelyingParty.setProperty("identityProviderURL", site.ssoConfiguration.identityProviderURL);
+            ssoRelyingParty.setProperty("keyStorePassword", String(site.ssoConfiguration.keyStorePassword));
+            ssoRelyingParty.setProperty("identityAlias", String(site.ssoConfiguration.identityAlias));
+            ssoRelyingParty.setProperty("keyStoreName", String(site.ssoConfiguration.keyStoreName));
 
 	    var samlAuthRequest = ssoRelyingParty.getSAMLAuthRequest();
 	    var encodedRequest = ssoRelyingParty.encode(samlAuthRequest);

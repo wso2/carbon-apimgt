@@ -21,11 +21,11 @@
         <artifactId>org.wso2.carbon.apimgt.usage</artifactId>
         <groupId>org.wso2.carbon</groupId>
         <version>4.3.0-SNAPSHOT</version>
-        <relativePath>../pom.xml</relativePath>
+	<relativePath>../pom.xml</relativePath>
     </parent>
     <modelVersion>4.0.0</modelVersion>
     <packaging>bundle</packaging>
-
+ 
     <artifactId>org.wso2.carbon.apimgt.usage.publisher</artifactId>
     <version>4.3.0-SNAPSHOT</version>
     <name>WSO2 Carbon - API Management Usage Publisher</name>
@@ -34,26 +34,32 @@
         <dependency>
             <groupId>org.apache.synapse</groupId>
             <artifactId>synapse-core</artifactId>
+            <version>2.1.2-wso2v5</version>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
-            <artifactId>org.wso2.carbon.apimgt.impl</artifactId>
+            <artifactId>org.wso2.carbon.apimgt.impl</artifactId>   
+	    <version>${apim.version}</version>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
-            <artifactId>org.wso2.carbon.apimgt.gateway</artifactId>
+            <artifactId>org.wso2.carbon.apimgt.gateway</artifactId>     
+	    <version>${apim.version}</version>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.databridge.agent.thrift</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.wso2.carbon</groupId>
-            <artifactId>org.wso2.carbon.usage.agent</artifactId>
+	    <version>${wso2carbon.version}</version>
         </dependency>
 	<dependency>
             <groupId>org.wso2.carbon</groupId>
+            <artifactId>org.wso2.carbon.usage.agent</artifactId>
+            <version>${wso2carbon.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.ganalytics.publisher</artifactId>
+            <version>${wso2carbon.version}</version>
         </dependency>
     </dependencies>
 
@@ -62,7 +68,6 @@
             <plugin>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>maven-bundle-plugin</artifactId>
-                <version>1.4.0</version>
                 <extensions>true</extensions>
                 <configuration>
                     <instructions>
@@ -72,9 +77,7 @@
                             org.wso2.carbon.apimgt.usage.publisher.internal
                         </Private-Package>
                         <Export-Package>
-                            org.wso2.carbon.apimgt.usage.publisher,
-                            org.wso2.carbon.apimgt.usage.publisher.dto.*,
-                            org.wso2.carbon.apimgt.usage.publisher.service.*,
+                            org.wso2.carbon.apimgt.usage.publisher.*
                         </Export-Package>
                         <Import-Package>
                             javax.servlet;version="${imp.pkg.version.javax.servlet}",
@@ -99,6 +102,7 @@
             <plugin>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>maven-scr-plugin</artifactId>
+                <version>1.7.4</version>
             </plugin>
         </plugins>
     </build>

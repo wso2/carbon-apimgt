@@ -64,7 +64,7 @@ else{
 <td><%=tasks[i].createdTime%></td>
  <td>                       <%if((tasks[i].status=="RESERVED")){%>
                               <button class="btn js_startBtn" id="js_startBtn<%=String(i)%>" data="<%=tasks[i].id%>" iteration="<%=String(i)%>">Start</button>
-                              <select style="display: none" class="js_stateDropDown pull-left" style="margin-right: 6px;">
+                              <select id="js_stateDropDown<%=String(i)%>" style="display: none" class="js_stateDropDown pull-left" style="margin-right: 6px;">
                                   <option value="APPROVED">Approve</option>
                                   <option value="REJECTED">Reject</option>
                               </select>
@@ -73,7 +73,7 @@ else{
                               <%}else if (tasks[i].status=='COMPLETED'){%>
                               <label>Completed</label>
                               <%}else if(tasks[i].status=='IN_PROGRESS'){%>
-                               <select class="js_stateDropDown pull-left" style="margin-right: 6px;">
+                               <select id="js_stateDropDown<%=String(i)%>" class="js_stateDropDown pull-left" style="margin-right: 6px;">
                                 <option value="APPROVED">Approve</option>
                                 <option value="REJECTED">Reject</option>
                                </select>
@@ -81,7 +81,7 @@ else{
                               <%}else if (tasks[i].status=='READY'){%>
                               <button class="btn js_assignBtn pull-left" id="js_assignBtn<%=String(i)%>" data="<%=tasks[i].id%>" iteration="<%=String(i)%>">Assign To Me</button>
                               <button class="btn js_startBtn pull-left" id="js_startBtn<%=String(i)%>" style="display: none" data="<%=tasks[i].id%>" iteration="<%=String(i)%>">Start</button>
-                              <select style="display: none" class="js_stateDropDown pull-left" style="margin-right: 6px;">
+                              <select id="js_stateDropDown<%=String(i)%>" style="display: none" class="js_stateDropDown pull-left" style="margin-right: 6px;">
                               <option value="APPROVED">Approve</option>
                               <option value="REJECTED">Reject</option>
                               </select>

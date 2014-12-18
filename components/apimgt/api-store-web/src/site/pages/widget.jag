@@ -8,7 +8,7 @@ i18n.init(request,localeResourcesBasePath);
 
 (function () {
 
-    var result, api, title, mod, links,error,message,discoveryURL,uriTemplates
+    var result, api, title, mod, links,error,message,uriTemplates
             name = request.getParameter("name"),
             version = request.getParameter("version"),
             provider = request.getParameter("provider"),
@@ -23,7 +23,6 @@ i18n.init(request,localeResourcesBasePath);
     api = result.api;
     error = result.error;
     message = result.message;
-    discoveryURL = result.discoveryURL;
     swaggerString=result.swaggerString;
     uriTemplates = result.uriTemplates;
     var apiName="";
@@ -41,7 +40,6 @@ i18n.init(request,localeResourcesBasePath);
                             "name":"api/widget",
                             "inputs":{
                                      "api":api,
-                                     "discoveryURL":discoveryURL,
                                      "swaggerString":swaggerString,
                                      "uriTemplates":uriTemplates,
                                      "error":error,

@@ -28,7 +28,6 @@ import org.apache.synapse.rest.RESTConstants;
 import org.apache.synapse.rest.RESTUtils;
 import org.apache.synapse.rest.Resource;
 import org.apache.synapse.rest.dispatch.RESTDispatcher;
-import org.apache.synapse.rest.dispatch.URITemplateBasedDispatcher;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.gateway.handlers.security.keys.APIKeyDataStore;
 import org.wso2.carbon.apimgt.gateway.handlers.security.keys.WSAPIKeyDataStore;
@@ -45,7 +44,6 @@ import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import javax.cache.Cache;
 import javax.cache.Caching;
 import java.util.*;
-import org.wso2.carbon.apimgt.gateway.handlers.Utils;
 
 /**
  * This class is used to validate a given API key against a given API context and a version.
@@ -58,13 +56,18 @@ import org.wso2.carbon.apimgt.gateway.handlers.Utils;
 public class APIKeyValidator {
 
     private APIKeyDataStore dataStore;
+
     private AxisConfiguration axisConfig;
-    private boolean isGatewayAPIKeyValidationEnabled = true;
+
+    private boolean gatewayKeyCacheEnabled = true;
+
     private boolean isGatewayAPIResourceValidationEnabled = true;
+
     protected Log log = LogFactory.getLog(getClass());
 
     public APIKeyValidator(AxisConfiguration axisConfig) {
         this.axisConfig = axisConfig;
+
         //check the client type from config
         String keyValidatorClientType = APISecurityUtils.getKeyValidatorClientType();
         if (APIConstants.API_KEY_VALIDATOR_WS_CLIENT.equals(keyValidatorClientType)) {
@@ -72,14 +75,19 @@ public class APIKeyValidator {
         } else if (APIConstants.API_KEY_VALIDATOR_THRIFT_CLIENT.equals(keyValidatorClientType)) {
             this.dataStore = new ThriftAPIDataStore();
         }
-        this.isGatewayAPIKeyValidationEnabled = isAPIKeyValidationEnabled();
+
+        this.gatewayKeyCacheEnabled = isAPIKeyValidationEnabled();
+
         this.isGatewayAPIResourceValidationEnabled = isAPIResourceValidationEnabled();
-        this.getKeyCache();
+
+        this.getGatewayKeyCache();
+
         this.getResourceCache();
     }
 
-    protected Cache getKeyCache() {
-        return Caching.getCacheManager("API_MANAGER_CACHE").getCache("keyCache");
+    protected Cache getGatewayKeyCache() {
+        return Caching.getCacheManager(
+                APIConstants.API_MANAGER_CACHE_MANAGER).getCache(APIConstants.GATEWAY_KEY_CACHE_NAME);
         //return PrivilegedCarbonContext.getCurrentContext(axisConfig).getCache("keyCache");
     }
 
@@ -99,18 +107,27 @@ public class APIKeyValidator {
      */
     public APIKeyValidationInfoDTO getKeyValidationInfo(String context, String apiKey,
                                                         String apiVersion, String authenticationScheme, String clientDomain,
-                                                        String matchingResource, String httpVerb) throws APISecurityException {
+                                                        String matchingResource, String httpVerb, boolean defaultVersionInvoked) throws APISecurityException {
 
-        String cacheKey = APIUtil.getAccessTokenCacheKey(apiKey, context, apiVersion, matchingResource,
+        String prefixedVersion = apiVersion;
+        //Check if client has invoked the default version API.
+        if(defaultVersionInvoked){
+            //Prefix the version so that it looks like _default_1.0 (_default_<version>)).
+            //This is so that the Key Validator knows that this request is coming through a default api version
+            prefixedVersion = APIConstants.DEFAULT_VERSION_PREFIX.concat(prefixedVersion);
+        }
+
+        String cacheKey = APIUtil.getAccessTokenCacheKey(apiKey, context, prefixedVersion, matchingResource,
                                                          httpVerb, authenticationScheme);
-        if (isGatewayAPIKeyValidationEnabled) {
-            APIKeyValidationInfoDTO info = (APIKeyValidationInfoDTO) getKeyCache().get(cacheKey);
+        if (gatewayKeyCacheEnabled) {
+            APIKeyValidationInfoDTO info = (APIKeyValidationInfoDTO) getGatewayKeyCache().get(cacheKey);
 
-            if (null != info) {
-                if (APIUtil.hasAccessTokenExpired(info)) {
+            if (info != null) {
+                if (APIUtil.isAccessTokenExpired(info)) {
                     info.setAuthorized(false);
+                 // in cache, if token is expired  remove cache entry.
+                    getGatewayKeyCache().remove(cacheKey);
                 }
-
                 return info;
             }
         }
@@ -124,16 +141,18 @@ public class APIKeyValidator {
         // if (info != null) {
         //   return info;
         //}
-        APIKeyValidationInfoDTO info = doGetKeyValidationInfo(context, apiVersion, apiKey, authenticationScheme, clientDomain,
+        APIKeyValidationInfoDTO info = doGetKeyValidationInfo(context, prefixedVersion, apiKey, authenticationScheme, clientDomain,
                                                               matchingResource, httpVerb);
         if (info != null) {
-            if (isGatewayAPIKeyValidationEnabled && clientDomain == null) { //save into cache only if, validation is correct and api is allowed for all domains
-                getKeyCache().put(cacheKey, info);
+            if (gatewayKeyCacheEnabled && clientDomain == null) { //save into cache only if, validation is correct and api is allowed for all domains
+                getGatewayKeyCache().put(cacheKey, info);
             }
             return info;
         } else {
+        	String warnMsg = "API key validation service returns null object";
+        	log.warn(warnMsg);
             throw new APISecurityException(APISecurityConstants.API_AUTH_GENERAL_ERROR,
-                    "API key validator returned null");
+                    warnMsg);
         }
         //}
     }
@@ -141,6 +160,7 @@ public class APIKeyValidator {
     protected APIKeyValidationInfoDTO doGetKeyValidationInfo(String context, String apiVersion, String apiKey,
                                                              String authenticationScheme, String clientDomain,
                                                              String matchingResource, String httpVerb) throws APISecurityException {
+
 
         return dataStore.getAPIKeyData(context, apiVersion, apiKey, authenticationScheme, clientDomain,
                                        matchingResource, httpVerb);
@@ -195,7 +215,7 @@ public class APIKeyValidator {
 
             //Get decision from cache.
             VerbInfoDTO matchingVerb = null;
-            if (isGatewayAPIKeyValidationEnabled) {
+            if (gatewayKeyCacheEnabled) {
                 matchingVerb = (VerbInfoDTO) getResourceCache().get(requestCacheKey);
             }
             //On a cache hit
@@ -228,7 +248,7 @@ public class APIKeyValidator {
 
             //Get decision from cache.
             VerbInfoDTO matchingVerb = null;
-            if (isGatewayAPIKeyValidationEnabled) {
+            if (gatewayKeyCacheEnabled) {
                 matchingVerb = (VerbInfoDTO) getResourceCache().get(requestCacheKey);
             }
 
@@ -282,7 +302,13 @@ public class APIKeyValidator {
             verb = (VerbInfoDTO) getResourceCache().get(resourceCacheKey);
             //Cache hit
             if(verb != null){
+                if(log.isDebugEnabled()){
+                    log.debug("Found resource in Cache for key: ".concat(resourceCacheKey));
+                }
                 return verb;
+            }
+            if(log.isDebugEnabled()){
+                log.debug("Resource not found in cache for key: ".concat(resourceCacheKey));
             }
         }
 
@@ -294,6 +320,10 @@ public class APIKeyValidator {
         if ("".equals(requestPath)) {
             requestPath = "/";
         }
+
+        if(log.isDebugEnabled()){
+            log.debug("Setting REST_SUB_REQUEST_PATH in msg context: ".concat(requestPath));
+        }
         synCtx.setProperty(RESTConstants.REST_SUB_REQUEST_PATH, requestPath);
 
         String httpMethod = (String)((Axis2MessageContext) synCtx).getAxis2MessageContext().
@@ -304,6 +334,9 @@ public class APIKeyValidator {
 
         for(API api : synCtx.getConfiguration().getAPIs()){
             if(apiContext.equals(api.getContext()) && apiVersion.equals(api.getVersion())){
+                if(log.isDebugEnabled()){
+                    log.debug("Selected API: ".concat(apiContext).concat(", Version: ").concat(apiVersion));
+                }
                 selectedApi = api;
                 break;
             }
@@ -328,6 +361,9 @@ public class APIKeyValidator {
         String resourceString = selectedResource.getDispatcherHelper().getString();
         resourceCacheKey = APIUtil.getResourceInfoDTOCacheKey(apiContext, apiVersion, resourceString, httpMethod);
 
+        if(log.isDebugEnabled()){
+            log.debug("Selected Resource: ".concat(resourceString));
+        }
         //Set the elected resource
         synCtx.setProperty(APIConstants.API_ELECTED_RESOURCE, resourceString);
 
@@ -335,9 +371,16 @@ public class APIKeyValidator {
 
         //Cache hit
         if(verb != null){
+            if(log.isDebugEnabled()){
+                log.debug("Got Resource from cache for key: ".concat(resourceCacheKey));
+            }
             //Set cache key in the message context so that it can be used by the subsequent handlers.
             synCtx.setProperty(APIConstants.API_RESOURCE_CACHE_KEY, resourceCacheKey);
             return verb;
+        }
+
+        if(log.isDebugEnabled()){
+            log.debug("Cache miss for Resource for key: ".concat(resourceCacheKey));
         }
 
         String apiCacheKey = APIUtil.getAPIInfoDTOCacheKey(apiContext, apiVersion);
@@ -346,23 +389,29 @@ public class APIKeyValidator {
 
         //Cache miss
         if (apiInfoDTO == null) {
+            if(log.isDebugEnabled()){
+                log.debug("Could not find API object in cache for key: ".concat(apiCacheKey));
+            }
             apiInfoDTO = doGetAPIInfo(apiContext, apiVersion);
             getResourceCache().put(apiCacheKey, apiInfoDTO);
         }
         if(apiInfoDTO.getResources()!=null){
-        for (ResourceInfoDTO resourceInfoDTO : apiInfoDTO.getResources()) {
-            if ((resourceString.trim()).equalsIgnoreCase(resourceInfoDTO.getUrlPattern().trim())) {
-                for (VerbInfoDTO verbDTO : resourceInfoDTO.getHttpVerbs()) {
-                    if (verbDTO.getHttpVerb().equals(httpMethod)) {
-                        //Store verb in cache
-                        getResourceCache().put(resourceCacheKey, verbDTO);
-                        //Set cache key in the message context so that it can be used by the subsequent handlers.
-                        synCtx.setProperty(APIConstants.API_RESOURCE_CACHE_KEY, resourceCacheKey);
-                        verbDTO.setRequestKey(resourceCacheKey);
-                        return verbDTO;
+            for (ResourceInfoDTO resourceInfoDTO : apiInfoDTO.getResources()) {
+                if ((resourceString.trim()).equalsIgnoreCase(resourceInfoDTO.getUrlPattern().trim())) {
+                    for (VerbInfoDTO verbDTO : resourceInfoDTO.getHttpVerbs()) {
+                        if (verbDTO.getHttpVerb().equals(httpMethod)) {
+                            if(log.isDebugEnabled()){
+                                log.debug("Putting resource object in cache with key: ".concat(resourceCacheKey));
+                            }
+                            //Store verb in cache
+                            getResourceCache().put(resourceCacheKey, verbDTO);
+                            //Set cache key in the message context so that it can be used by the subsequent handlers.
+                            synCtx.setProperty(APIConstants.API_RESOURCE_CACHE_KEY, resourceCacheKey);
+                            verbDTO.setRequestKey(resourceCacheKey);
+                            return verbDTO;
+                        }
                     }
                 }
-            }
         }
         }
         return null;

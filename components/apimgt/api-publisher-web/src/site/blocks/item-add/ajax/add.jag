@@ -2,7 +2,7 @@
 include("/jagg/jagg.jag");
 
 (function () {
-    response.contentType = "application/json; charset=UTF-8";
+    response.contentType = "text/plain; charset=UTF-8";
     var mod, obj, result, username,
     		action = request.getParameter("action"),
             site = require("/site/conf/site.json"),
@@ -131,7 +131,25 @@ include("/jagg/jagg.jag");
             }
             print(obj);
 
-        } else if (action === "isContextExist") {
+        } else if (action === "isAPINameExist") {
+            mod = jagg.module("api");
+            var apiName = request.getParameter("apiName");
+            result = mod.isApiNameExist(apiName);
+            if (result.error) {
+                obj = {
+                    error:true,
+                    message:msg.error.backendError(action)
+                };
+            } else {
+                obj = {
+                    error:false,
+                    exist:result.exist
+                }
+            }
+
+            print(obj);
+
+        }else if (action === "isContextExist") {
             mod = jagg.module("api");
             var context = request.getParameter("context");
             var oldContext = request.getParameter("oldContext");

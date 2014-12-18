@@ -42,18 +42,18 @@ public class ApplicationThrottleController {
 
     private static final Object lock = new Object();
     
-    public static ThrottleContext getApplicationThrottleContext(MessageContext synCtx, ConfigurationContext cc, 
+    public static ThrottleContext getApplicationThrottleContext(MessageContext synCtx, ThrottleDataHolder dataHolder,
                                                                 String applicationId){
         synchronized (lock) {
-            Object throttleContext = cc.getProperty(APP_THROTTLE_CONTEXT_PREFIX + applicationId);
+            Object throttleContext = dataHolder.getThrottleContext(applicationId);
             if(throttleContext == null){
-                return createThrottleContext(synCtx, cc, applicationId);
+                return createThrottleContext(synCtx, dataHolder, applicationId);
             }
             return (ThrottleContext)throttleContext;
         }
     }
 
-    private static ThrottleContext createThrottleContext(MessageContext synCtx, ConfigurationContext cc, String applicationId){
+    private static ThrottleContext createThrottleContext(MessageContext synCtx, ThrottleDataHolder dataHolder, String applicationId){
 
         //Entry entry = synCtx.getConfiguration().getEntryDefinition(APPLICATION_THROTTLE_POLICY_KEY);
         //if (entry == null) {
@@ -71,7 +71,7 @@ public class ApplicationThrottleController {
         try {
             Throttle throttle = ThrottleFactory.createMediatorThrottle(PolicyEngine.getPolicy((OMElement) entryValue));
             ThrottleContext context = throttle.getThrottleContext(ThrottleConstants.ROLE_BASED_THROTTLE_KEY);
-            cc.setProperty(APP_THROTTLE_CONTEXT_PREFIX + applicationId, context);
+            dataHolder.addThrottleContext(applicationId, context);
             return context;
         } catch (ThrottleException e) {
             handleException("Error processing the throttling policy", e);

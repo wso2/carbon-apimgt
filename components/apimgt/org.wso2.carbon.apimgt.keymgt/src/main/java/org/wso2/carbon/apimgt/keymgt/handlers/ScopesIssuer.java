@@ -38,9 +38,13 @@ public class ScopesIssuer {
 
     private static Log log = LogFactory.getLog(ScopesIssuer.class);
 
+    private static final String DEVICE_SCOPE_PREFIX = "device_";
+
+    private static final String DEFAULT_SCOPE_NAME = "default";
+
     public boolean setScopes(OAuthTokenReqMessageContext tokReqMsgCtx){
         String[] requestedScopes = tokReqMsgCtx.getScope();
-        String[] defaultScope = new String[]{"default"};
+        String[] defaultScope = new String[]{DEFAULT_SCOPE_NAME};
 
         //If no scopes were requested.
         if(requestedScopes == null || requestedScopes.length == 0){
@@ -90,8 +94,10 @@ public class ScopesIssuer {
                     log.debug("No scopes defined for the Application " +
                             tokReqMsgCtx.getOauth2AccessTokenReqDTO().getClientId());
                 }
-                tokReqMsgCtx.setScope(defaultScope);
-                cache.put(cacheKey, defaultScope);
+
+                String[] allowedScopes = getAllowedScopes(reqScopeList);
+                tokReqMsgCtx.setScope(allowedScopes);
+                cache.put(cacheKey, allowedScopes);
                 return true;
             }
 
@@ -105,9 +111,11 @@ public class ScopesIssuer {
                 userStoreManager = realmService.getTenantUserRealm(tenantId).getUserStoreManager();
                 userRoles = userStoreManager.getRoleListOfUser(MultitenantUtils.getTenantAwareUsername(username));
             } catch (IdentityException e) {
+                //Log and return since we do not want to stop issuing the token in case of scope validation failures.
                 log.error("Error when obtaining tenant Id of user " + username, e);
                 return false;
             } catch (UserStoreException e) {
+                //Log and return since we do not want to stop issuing the token in case of scope validation failures.
                 log.error("Error when getting the tenant's UserStoreManager or when getting roles of user ", e);
                 return false;
             }
@@ -140,7 +148,7 @@ public class ScopesIssuer {
                 //The requested scope is defined for the context of the App but no roles have been associated with the scope
                 //OR
                 //The scope string starts with 'device_'.
-                else if(appScopes.containsKey(scope) || scope.startsWith("device_")){
+                else if(appScopes.containsKey(scope) || scope.startsWith(DEVICE_SCOPE_PREFIX)){
                     authorizedScopes.add(scope);
                 }
             }
@@ -176,6 +184,28 @@ public class ScopesIssuer {
         cacheKey.append(reqScopesHash);
 
         return cacheKey.toString();
+    }
+
+    /**
+     * Get the set of default scopes. This will return a String array which has the scopes that are prefixed with
+     * "device_" from the set of requested scopes. If no such scopes exists, it will only return the 'default' scope.
+     * @param requestedScopes - The set of requested scopes
+     * @return
+     */
+    private String[] getAllowedScopes(List<String> requestedScopes){
+        List<String> authorizedScopes = new ArrayList<String>();
+
+        //Iterate the requested scopes list.
+        for (String scope : requestedScopes) {
+            if(scope.startsWith(DEVICE_SCOPE_PREFIX)){
+                authorizedScopes.add(scope);
+            }
+        }
+
+        if(authorizedScopes.isEmpty()){
+            authorizedScopes.add(DEFAULT_SCOPE_NAME);
+        }
+        return authorizedScopes.toArray(new String[authorizedScopes.size()]);
     }
 }
 

@@ -18,9 +18,9 @@
 </script>   
 <div id="item-add">
 <%
-    var design_w_link = site.context+'/design?'+apiUrlId;
-    var implement_w_link = site.context+'/implement?'+apiUrlId;
-    var manage_w_link = site.context+'/manage?'+apiUrlId;
+    var design_w_link = jagg.url('/design?'+apiUrlId);
+    var implement_w_link = jagg.url('/implement?'+apiUrlId);
+    var manage_w_link = jagg.url('/manage?'+apiUrlId);    
 
     var manage_wlabel = "";
     if( api.availableTiers !=""){
@@ -62,7 +62,8 @@
 
     <div class="row-fluid">
         <div class="span12">                             
-            <form class="form-horizontal" method="POST" id="implement_form" enctype="multipart/form-data" action="<%=site.context%>/site/blocks/item-design/ajax/add.jag?<%= apiUrlId %>&action=implement">
+            <form class="form-horizontal" method="POST" id="implement_form" enctype="multipart/form-data" 
+                action="<%= jagg.url("/site/blocks/item-design/ajax/add.jag?action=implement&"+apiUrlId ) %>">
     <div class="well well-small" style="padding:0px">        
     <fieldset>    
     <div class="control-group">
@@ -200,7 +201,7 @@
                 </div>
                 <div class="form-actions" id="saveButtons">
                     <input type="submit" class="btn btn-primary manageSaveButton" value="Save"/>
-                    <a class="btn btn-warning manageSaveButton" id="prototyped_api">Deploy Prototype</a>
+                     <%if(outputs.isPermitted){%> <a class="btn btn-warning manageSaveButton" id="prototyped_api">Deploy Prototype</a><%}%>
                     <a id="go_to_manage" class="btn btn-primary manageSaveButton" >Manage</a> 
                     <input type="reset" class="btn" value="<%=i18n.localize("cancel")%>" onclick="javascript:window.location.href='./'" />                                                            
                 </div>
@@ -303,7 +304,8 @@ mc.setPayloadJSON('{ "data" : "sample JSON"}');*/
 
 <script>
     $(document).ready(function(){        
-        $.get( "<%=site.context%>/site/blocks/item-design/ajax/add.jag?name=<%= encode.forHtml(api.name) %>&version=<%= encode.forHtml(api.version) %>&provider=<%= encode.forHtml(api.provider) %>&action=swagger" , function( data ) {
+        $.get( "<%= jagg.url("/site/blocks/item-design/ajax/add.jag") %>?name=<%= encode.forHtml(api.name) %>&version=<%= encode.forHtml(api.version) %>&provider=<%= encode.forHtml(api.provider) %>&action=swagger" , function( data ) {
+            var data = jQuery.parseJSON(data);
             var designer = APIDesigner();
             designer.load_api_document(data);
             $("#swaggerUpload").modal('hide');
@@ -311,7 +313,7 @@ mc.setPayloadJSON('{ "data" : "sample JSON"}');*/
 
         $('#go_to_manage').click(function(e){            
             $("body").on("api_saved", function(e){
-                location.href = "<%=site.context%>/manage?<%= apiUrlId %>";                
+                location.href = "<%= jagg.url("/manage?"+apiUrlId)%>";
             });
             $("#implement_form").submit();
         });        

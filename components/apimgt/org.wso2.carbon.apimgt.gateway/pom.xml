@@ -31,22 +31,32 @@
     <version>4.3.0-SNAPSHOT</version>
 	<name>WSO2 Carbon - API Gateway</name>
     <url>http://wso2.org</url>
+
     <dependencies>
+        <dependency>
+            <groupId>org.apache.synapse</groupId>
+            <artifactId>synapse-extensions</artifactId>
+            <version>2.1.2-wso2v6</version>
+        </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.core</artifactId>
+			<version>${wso2carbon.version}</version>			
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.mediation.initializer</artifactId>
+			<version>${wso2carbon.version}</version>			
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.throttle.core</artifactId>
+            <version>${wso2carbon.version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.synapse</groupId>
             <artifactId>synapse-core</artifactId>
+            <version>2.1.2-wso2v6</version>
             <exclusions>
                 <exclusion>
                     <groupId>org.apache.axis2</groupId>
@@ -57,23 +67,27 @@
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.logging</artifactId>
-			<version>${project.version}</version>			
+	    <version>${wso2carbon.version}</version>			
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.apimgt.keymgt.stub</artifactId>
+	    <version>${apim.version}</version>			
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
-            <artifactId>org.wso2.carbon.apimgt.impl</artifactId>
+            <artifactId>org.wso2.carbon.apimgt.impl</artifactId>   
+	    <version>${apim.version}</version>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
-            <artifactId>org.wso2.carbon.ui</artifactId>
+            <artifactId>org.wso2.carbon.ui</artifactId>     
+	    <version>${wso2carbon.version}</version>			
         </dependency>
         <dependency>
              <groupId>org.wso2.carbon</groupId>
-             <artifactId>org.wso2.carbon.utils</artifactId>
+             <artifactId>org.wso2.carbon.utils</artifactId>       
+	     <version>${wso2carbon.version}</version>			 
          </dependency>
     </dependencies>
 
@@ -91,7 +105,6 @@
 	        <plugin>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>maven-scr-plugin</artifactId>
-		<!--<version>1.6.0</version>-->
             </plugin>
             <plugin>
                 <groupId>org.apache.felix</groupId>
@@ -114,7 +127,7 @@
                         </Export-Package>
                         <Import-Package>
                             !javax.xml.soap,
-                            javax.xml.stream.*;version=1.0.0,
+                            javax.xml.stream.*,
                             org.apache.axis2.rpc.receivers; version="${axis2.osgi.version.range}",
                             org.apache.axiom.*; version="${axiom.osgi.version.range}",
                             org.apache.axis2; version="${axis2.osgi.version.range}",
@@ -132,8 +145,9 @@
                             org.apache.synapse.mediators.base,
                             org.apache.axis2.transport.base,
                             org.wso2.carbon.core,
-                            org.wso2.carbon.registry.core.service;version=1.0.1,
-			    javax.xml.soap;version=1.0.0,
+                            org.wso2.carbon.registry.core.service,
+                            org.wso2.carbon.apimgt.impl.*,
+                            javax.xml.soap,
                             *;resolution:=optional
                         </Import-Package>
                         <DynamicImport-Package>org.wso2.throttle.*</DynamicImport-Package>
@@ -142,4 +156,9 @@
             </plugin>
         </plugins>
     </build>
+
+    <properties>
+	<apim.version>4.3.0-SNAPSHOT</apim.version>
+        <wso2carbon.version>4.3.0-SNAPSHOT</wso2carbon.version>
+    </properties>
 </project>

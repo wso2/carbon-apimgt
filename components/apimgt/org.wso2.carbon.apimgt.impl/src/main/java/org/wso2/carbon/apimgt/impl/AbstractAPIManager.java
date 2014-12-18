@@ -124,8 +124,11 @@ public abstract class AbstractAPIManager implements APIManager {
         String tagsQueryPath = RegistryConstants.QUERIES_COLLECTION_PATH + "/tag-summary";
         String latestAPIsQueryPath = RegistryConstants.QUERIES_COLLECTION_PATH + "/latest-apis";
         String resourcesByTag = RegistryConstants.QUERIES_COLLECTION_PATH + "/resource-by-tag";
-        String path = RegistryUtils.getAbsolutePath(RegistryContext.getBaseInstance(),
-                                                    RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH + "/repository/components/org.wso2.carbon.governance");
+        String path =
+                      RegistryUtils.getAbsolutePath(RegistryContext.getBaseInstance(),
+                                                    APIUtil.getMountedPath(RegistryContext.getBaseInstance(),
+                                                                           RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH) +
+                                                            "/repository/components/org.wso2.carbon.governance");
         if (username == null) {
             try {
                 UserRealm realm = ServiceReferenceHolder.getUserRealm();
@@ -157,7 +160,10 @@ public abstract class AbstractAPIManager implements APIManager {
             // a must for executeQuery results to be passed to client side
             String sql1 =
                     "SELECT  " +
-                    "   '/_system/governance/repository/components/org.wso2.carbon.governance' AS MOCK_PATH, " +
+                                  "   '" +
+                                  APIUtil.getMountedPath(RegistryContext.getBaseInstance(),
+                                                         RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH) +
+                                  "/repository/components/org.wso2.carbon.governance' AS MOCK_PATH, " +
                     "   RT.REG_TAG_NAME AS TAG_NAME, " +
                     "   COUNT(RT.REG_TAG_NAME) AS USED_COUNT " +
                     "FROM " +
@@ -222,7 +228,10 @@ public abstract class AbstractAPIManager implements APIManager {
             Resource resource = registry.newResource();
             String sql =
                     "SELECT " +
-                    "   '/_system/governance/repository/components/org.wso2.carbon.governance' AS MOCK_PATH, " +
+                                 "   '" +
+                                 APIUtil.getMountedPath(RegistryContext.getBaseInstance(),
+                                                        RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH) +
+                                 "/repository/components/org.wso2.carbon.governance' AS MOCK_PATH, " +
                     "   R.REG_UUID AS REG_UUID " +
                     "FROM " +
                     "   REG_RESOURCE_TAG RRT, " +
@@ -616,6 +625,34 @@ public abstract class AbstractAPIManager implements APIManager {
         	if (isTenantFlowStarted) {
         		PrivilegedCarbonContext.endTenantFlow();
         	}
+        }
+        return false;
+    }
+
+
+    public boolean isApiNameExist(String apiName) throws APIManagementException {
+        boolean isTenantFlowStarted = false;
+        try {
+            if(tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)){
+                isTenantFlowStarted = true;
+                PrivilegedCarbonContext.startTenantFlow();
+                PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
+            }
+            GenericArtifactManager artifactManager = new GenericArtifactManager(registry,
+                                                                                APIConstants.API_KEY);
+            GenericArtifact[] artifacts = artifactManager.getAllGenericArtifacts();
+            for (GenericArtifact artifact : artifacts) {
+                String artifactName = artifact.getAttribute(APIConstants.API_OVERVIEW_NAME);
+                if (artifactName.equalsIgnoreCase(apiName)) {
+                    return true;
+                }
+            }
+        } catch (RegistryException e) {
+            handleException("Failed to check api name availability : " + apiName, e);
+        } finally {
+            if (isTenantFlowStarted) {
+                PrivilegedCarbonContext.endTenantFlow();
+            }
         }
         return false;
     }

@@ -30,17 +30,16 @@ import org.apache.synapse.core.SynapseEnvironment;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.rest.AbstractHandler;
 import org.apache.synapse.rest.RESTConstants;
+import org.apache.synapse.transport.passthru.util.RelayUtils;
 import org.wso2.carbon.apimgt.gateway.handlers.Utils;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.gateway.handlers.security.oauth.OAuthAuthenticator;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 
-import edu.emory.mathcs.backport.java.util.Arrays;
-
+import javax.xml.stream.XMLStreamException;
+import java.io.IOException;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -64,7 +63,9 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
     private volatile Authenticator authenticator;
 
     public void init(SynapseEnvironment synapseEnvironment) {
-        log.debug("Initializing API authentication handler instance");
+		if (log.isDebugEnabled()) {
+			log.debug("Initializing API authentication handler instance");
+		}
         String authenticatorType = ServiceReferenceHolder.getInstance().getAPIManagerConfiguration().
                 getFirstProperty(APISecurityConstants.API_SECURITY_AUTHENTICATOR);
         if (authenticatorType == null) {
@@ -80,15 +81,16 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
         authenticator.init(synapseEnvironment);
     }
 
-    public void destroy() {
-        log.debug("Destroying API authentication handler instance");
-        authenticator.destroy();
+    public void destroy() {        
+        if(authenticator != null) {
+        	authenticator.destroy();
+        } else {
+        	log.warn("Unable to destroy uninitialized authentication hander instance");
+        }        
     }
 
     public boolean handleRequest(MessageContext messageContext) {
         try {
-
-
             if (authenticator.authenticate(messageContext)) {
                 return true;
             }
@@ -112,7 +114,7 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
 	    	Map<String, String> headers = (Map) axis2MC.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
 	    		    	    	
 	    	headers.put(APIConstants.CORSHeaders.ACCESS_CONTROL_ALLOW_ORIGIN, Utils.getAllowedOrigin(authenticator.getRequestOrigin()));
-	        //headers.put(APIConstants.CORSHeaders.ACCESS_CONTROL_ALLOW_METHODS, Utils.getAllowedMethods());
+	        headers.put(APIConstants.CORSHeaders.ACCESS_CONTROL_ALLOW_METHODS, Utils.getAllowedMethods());
 	        headers.put(APIConstants.CORSHeaders.ACCESS_CONTROL_ALLOW_HEADERS, Utils.getAllowedHeaders());
 	        axis2MC.setProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS, headers);
     	}
@@ -133,12 +135,19 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
             // logic from getting executed
             return;
         }
-
         // By default we send a 401 response back
         org.apache.axis2.context.MessageContext axis2MC = ((Axis2MessageContext) messageContext).
                 getAxis2MessageContext();
+        try{
+            RelayUtils.buildMessage(axis2MC);
+        }
+        catch (IOException ex){        //In case of an exception, it won't be propagated up, instead, will be logged; because we're setting a fault message in the payload.
+            log.error("Error occurred while building the message", ex);
+        }
+        catch (XMLStreamException ex) {
+            log.error("Error occurred while building the message", ex);
+        }
         axis2MC.setProperty(Constants.Configuration.MESSAGE_TYPE, "application/soap+xml");
-
         int status;
         if (e.getErrorCode() == APISecurityConstants.API_AUTH_GENERAL_ERROR) {
             status = HttpStatus.SC_INTERNAL_SERVER_ERROR;

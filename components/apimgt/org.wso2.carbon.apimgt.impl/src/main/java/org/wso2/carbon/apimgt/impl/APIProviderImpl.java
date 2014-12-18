@@ -24,6 +24,8 @@ import org.apache.axiom.om.OMFactory;
 import org.apache.axiom.om.util.AXIOMUtil;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.Constants;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -81,6 +83,8 @@ import java.util.regex.Pattern;
  * security to this class.
  */
 class APIProviderImpl extends AbstractAPIManager implements APIProvider {
+	
+	private static final Log log = LogFactory.getLog(APIProviderImpl.class);
 
     public APIProviderImpl(String username) throws APIManagementException {
         super(username);
@@ -189,8 +193,11 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      */
     public Provider getProvider(String providerName) throws APIManagementException {
         Provider provider = null;
-        String providerPath = RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH +
-                              APIConstants.PROVIDERS_PATH + RegistryConstants.PATH_SEPARATOR + providerName;
+        String providerPath =
+                              APIUtil.getMountedPath(RegistryContext.getBaseInstance(),
+                                                     RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH) +
+                                      APIConstants.PROVIDERS_PATH +
+                                      RegistryConstants.PATH_SEPARATOR + providerName;
         try {
             GenericArtifactManager artifactManager = APIUtil.getArtifactManager(registry,
                                                                                 APIConstants.PROVIDER_KEY);
@@ -557,10 +564,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 String apiDefinitionFilePath = APIUtil.getAPIDefinitionFilePath(api.getId().getApiName(), api.getId().getVersion(), api.getId().getProviderName());
                 if (!registry.resourceExists(apiDefinitionFilePath)) {
                 	createUpdateAPIDefinition(api);
-                }else{
-                    /* if registry is exists delete and recreate */
-                    registry.delete(apiDefinitionFilePath);
-                    createUpdateAPIDefinition(api);
                 }
 
                 //update apiContext cache
@@ -626,7 +629,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 //check for wsdl endpoint
                 org.json.JSONObject response1 = new org.json.JSONObject(api.getEndpointConfig());
                 String wsdlURL = api.getWsdlUrl();
-                if(response1.get("endpoint_type").toString().equalsIgnoreCase("wsdl")){
+                if(response1.get("endpoint_type").toString().equalsIgnoreCase("wsdl")
+                        && response1.has("production_endpoints")){
                     wsdlURL = response1.getJSONObject("production_endpoints").get("url").toString();
                 }
                 if (APIUtil.isValidWSDLURL(wsdlURL)) {
@@ -839,7 +843,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         APIVersionComparator comparator = new APIVersionComparator();
         for (String version : versions) {
             API otherApi = getAPI(new APIIdentifier(provider, apiName, version));
-            if (comparator.compare(otherApi, api) < 0 && otherApi.getStatus().equals(APIStatus.PUBLISHED)) {
+            if (comparator.compare(otherApi, api) < 0 && !otherApi.getStatus().equals(APIStatus.RETIRED)) {
                 apiMgtDAO.makeKeysForwardCompatible(provider, apiName, version,
                                                     api.getId().getVersion(), api.getContext());
             }
@@ -866,6 +870,10 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             gatewayManager.publishToGateway(api, builder, tenantDomain);
         } catch (Exception e) {
             handleException("Error while publishing to Gateway ", e);
+        }
+        if (log.isDebugEnabled()) {
+        	String logMessage = "API Name: " + api.getId().getApiName() + ", API Version "+api.getId().getVersion()+" published to gateway";
+        	log.debug(logMessage);
         }
     }
 
@@ -904,6 +912,10 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             gatewayManager.removeFromGateway(api, tenantDomain);
         } catch (Exception e) {
             handleException("Error while removing API from Gateway ", e);
+        }
+        if(log.isDebugEnabled()){
+        	String logMessage = "API Name: " + api.getId().getApiName() + ", API Version "+api.getId().getVersion()+" deleted from gateway";
+        	log.debug(logMessage);
         }
     }
 
@@ -1105,39 +1117,63 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             		String content = APIUtil.createSwaggerJSONContent(newAPI);
             		addAPIDefinitionContent(newId, doc.getName(), content);
             		setPermissionToAPIDefinition(newAPI, doc);
-            	} else {
-            		/*copying the file in registry for new api*/
-            		Documentation.DocumentSourceType sourceType = doc.getSourceType();
-            		if(sourceType==Documentation.DocumentSourceType.FILE){
-            		String absoluteSourceFilePath=doc.getFilePath();
-            		//extract the prepend ->/registry/resource/_system/governance/ and for tenant /t/my.com/registry/resource/_system/governance/
-            		int prependInex=absoluteSourceFilePath.indexOf(APIConstants.API_LOCATION);
-            		String prependPath=absoluteSourceFilePath.substring(0,prependInex);
-            		//get the file name from absolute file path
-            		int fileNameIndex=absoluteSourceFilePath.lastIndexOf(RegistryConstants.PATH_SEPARATOR);
-            		String fileName=absoluteSourceFilePath.substring(fileNameIndex+1);
-            		// create relative file path of old location
-            		String sourceFilePath=absoluteSourceFilePath.substring(prependInex);;
-            		// create the relative file path where file should be copied
-            		String targetFilePath=APIConstants.API_LOCATION +RegistryConstants.PATH_SEPARATOR+newId.getProviderName()
-                    		+RegistryConstants.PATH_SEPARATOR+newId.getApiName()+RegistryConstants.PATH_SEPARATOR+newId.getVersion()
-                    		+RegistryConstants.PATH_SEPARATOR+APIConstants.DOC_DIR+RegistryConstants.PATH_SEPARATOR
-                    		+APIConstants.DOCUMENT_FILE_DIR+RegistryConstants.PATH_SEPARATOR+fileName;
-            		// copy the file from old location to new location(for new api)
-            		registry.copy(sourceFilePath,targetFilePath);
-            		// update the filepath attribute in doc artifact to create new doc artifact for new version of api
-            		doc.setFilePath(prependPath+targetFilePath);
-            		}
-            		copyDocumentation(newAPI, doc);
-	                String content = getDocumentationContent(api.getId(), doc.getName());
-	                if (content != null) {
-	                    addDocumentationContent(newId, doc.getName(), content);
-	                }
+				} else {
+					/* copying the file in registry for new api */
+					Documentation.DocumentSourceType sourceType = doc.getSourceType();
+					if (sourceType == Documentation.DocumentSourceType.FILE) {
+						String absoluteSourceFilePath = doc.getFilePath();
+						// extract the prepend
+						// ->/registry/resource/_system/governance/ and for
+						// tenant
+						// /t/my.com/registry/resource/_system/governance/
+						int prependIndex =
+						                   absoluteSourceFilePath.indexOf(APIConstants.API_LOCATION);
+						String prependPath = absoluteSourceFilePath.substring(0, prependIndex);
+						// get the file name from absolute file path
+						int fileNameIndex =
+						                    absoluteSourceFilePath.lastIndexOf(RegistryConstants.PATH_SEPARATOR);
+						String fileName = absoluteSourceFilePath.substring(fileNameIndex + 1);
+						// create relative file path of old location
+						String sourceFilePath = absoluteSourceFilePath.substring(prependIndex);
+						// create the relative file path where file should be
+						// copied
+						String targetFilePath =
+						                        APIConstants.API_LOCATION +
+						                                RegistryConstants.PATH_SEPARATOR +
+						                                newId.getProviderName() +
+						                                RegistryConstants.PATH_SEPARATOR +
+						                                newId.getApiName() +
+						                                RegistryConstants.PATH_SEPARATOR +
+						                                newId.getVersion() +
+						                                RegistryConstants.PATH_SEPARATOR +
+						                                APIConstants.DOC_DIR +
+						                                RegistryConstants.PATH_SEPARATOR +
+						                                APIConstants.DOCUMENT_FILE_DIR +
+						                                RegistryConstants.PATH_SEPARATOR + fileName;
+						// copy the file from old location to new location(for
+						// new api)
+						registry.copy(sourceFilePath, targetFilePath);
+						// update the filepath attribute in doc artifact to
+						// create new doc artifact for new version of api
+						doc.setFilePath(prependPath + targetFilePath);
+					}
+					createDocumentation(newAPI, doc);
+					String content = getDocumentationContent(api.getId(), doc.getName());
+					if (content != null) {
+						addDocumentationContent(newAPI, doc.getName(), content);
+					}
             	}
             }
             
-            copySwagger12Resources(api.getId(), newId);
-
+            //copy only if there are swagger 1.2 data. APIs created before APIM 1.7 do not have swagger 1.2
+            //data entry in the registry. When copying a migrated API just ignore the swagger 1.2. 
+            //getSwagger12Definition() method will handle displaying the swagger 1.1 apis           
+            String resourcePath = APIUtil.getSwagger12DefinitionFilePath(api.getId().getApiName(),
+            		api.getId().getVersion(), api.getId().getProviderName());            
+            if (registry.resourceExists(resourcePath + APIConstants.API_DOC_1_2_RESOURCE_NAME)) {            	
+            	 copySwagger12Resources(api.getId(), newId);            	 
+			}
+            
             // Make sure to unset the isLatest flag on the old version
             GenericArtifact oldArtifact = artifactManager.getGenericArtifact(
                     apiSourceArtifact.getUUID());
@@ -1161,12 +1197,15 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             handleException(msg, e);
         }
     }
-    
-    
-  
-	
+
+    /**
+     * Set the permission to api definition document
+     * @param newAPI
+     * @param documentation
+     * @throws APIManagementException
+     */	
 	private void setPermissionToAPIDefinition(API newAPI, Documentation documentation)
-	                                                                                                throws APIManagementException {
+	                                                                                  throws APIManagementException {
 		
 		APIIdentifier identifier=newAPI.getId();
 		API api = newAPI;
@@ -1279,25 +1318,27 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      *          if failed to add documentation
      */
     public void addDocumentation(APIIdentifier apiId, Documentation documentation)
-            throws APIManagementException {
-        createDocumentation(apiId, documentation);
+    		throws APIManagementException {
+    	API api = getAPI(apiId);
+    	createDocumentation(api, documentation);
     }
 
     /**
      * This method used to save the documentation content
      *
-     * @param identifier,        API identifier
+     * @param api,        API
      * @param documentationName, name of the inline documentation
      * @param text,              content of the inline documentation
      * @throws org.wso2.carbon.apimgt.api.APIManagementException
      *          if failed to add the document as a resource to registry
-     */
-    public void addDocumentationContent(APIIdentifier identifier, String documentationName, String text)
+     */    
+    public void addDocumentationContent(API api, String documentationName, String text)
             throws APIManagementException {
-
-        String documentationPath = APIUtil.getAPIDocPath(identifier) + documentationName;
-        String contentPath = APIUtil.getAPIDocPath(identifier) + APIConstants.INLINE_DOCUMENT_CONTENT_DIR +
-                             RegistryConstants.PATH_SEPARATOR + documentationName;
+    	
+    	APIIdentifier identifier = api.getId();
+    	String documentationPath = APIUtil.getAPIDocPath(identifier) + documentationName;
+    	String contentPath = APIUtil.getAPIDocPath(identifier) + APIConstants.INLINE_DOCUMENT_CONTENT_DIR +
+    			RegistryConstants.PATH_SEPARATOR + documentationName;
         try {
             Resource docResource = registry.get(documentationPath);
             GenericArtifactManager artifactManager = new GenericArtifactManager(registry,
@@ -1326,7 +1367,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             String apiPath = APIUtil.getAPIPath(identifier);
             String[] authorizedRoles = getAuthorizedRoles(apiPath);
             String docVisibility=doc.getVisibility().name();
-            API api=getAPI(apiPath);
             String visibility=api.getVisibility();
             if(docVisibility!=null){
                 if(APIConstants.DOC_SHARED_VISIBILITY.equalsIgnoreCase(docVisibility)){
@@ -1564,8 +1604,11 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             /* Generate API Definition for Swagger Console if any URI templates are available */
             if (api.getUriTemplates().size() > 0) {
             	createUpdateAPIDefinition(api);
+            }            
+            if(log.isDebugEnabled()){
+            	String logMessage = "API Name: " + api.getId().getApiName() + ", API Version "+api.getId().getVersion()+" created";
+            	log.debug(logMessage);
             }
-
         } catch (Exception e) {
         	 try {
                  registry.rollbackTransaction();
@@ -1587,9 +1630,11 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     private void clearResourcePermissions(String artifactPath, APIIdentifier apiId)
             throws APIManagementException {
         try {
-            String resourcePath = RegistryUtils.getAbsolutePath(RegistryContext.getBaseInstance(),
-                    RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH
-                            + artifactPath);
+            String resourcePath =
+                                  RegistryUtils.getAbsolutePath(RegistryContext.getBaseInstance(),
+                                                                APIUtil.getMountedPath(RegistryContext.getBaseInstance(),
+                                                                                       RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH) +
+                                                                        artifactPath);
             String tenantDomain = MultitenantUtils.getTenantDomain(
                     APIUtil.replaceEmailDomainBack(apiId.getProviderName()));
             if (!tenantDomain.equals(org.wso2.carbon.utils.multitenancy.
@@ -1609,64 +1654,16 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     /**
      * Create a documentation
      *
-     * @param apiId         APIIdentifier
+     * @param api         API
      * @param documentation Documentation
      * @throws APIManagementException if failed to add documentation
      */
-    private void createDocumentation(APIIdentifier apiId, Documentation documentation)
+    private void createDocumentation(API api, Documentation documentation)
             throws APIManagementException {
         try {
-            GenericArtifactManager artifactManager = new GenericArtifactManager(registry,
-                                                                                APIConstants.DOCUMENTATION_KEY);
-            GenericArtifact artifact =
-                    artifactManager.newGovernanceArtifact(new QName(documentation.getName()));
-            artifactManager.addGenericArtifact(
-                    APIUtil.createDocArtifactContent(artifact, apiId, documentation));
-            String apiPath = APIUtil.getAPIPath(apiId);
-            //Adding association from api to documentation . (API -----> doc)
-            registry.addAssociation(apiPath, artifact.getPath(),
-                                    APIConstants.DOCUMENTATION_ASSOCIATION);
-            String docVisibility=documentation.getVisibility().name();
-            String[] authorizedRoles=getAuthorizedRoles(apiPath);
-            API api=getAPI(apiPath);
-            String visibility=api.getVisibility();
-            if(docVisibility!=null){
-            if(APIConstants.DOC_SHARED_VISIBILITY.equalsIgnoreCase(docVisibility)){
-            authorizedRoles=null;
-            visibility=APIConstants.DOC_SHARED_VISIBILITY;
-            } else if(APIConstants.DOC_OWNER_VISIBILITY.equalsIgnoreCase(docVisibility)){
-            authorizedRoles=null;
-            visibility=APIConstants.DOC_OWNER_VISIBILITY;
-            }
-            }
-            APIUtil.setResourcePermissions(api.getId().getProviderName(),
-                   visibility, authorizedRoles, artifact.getPath());
-            String docFilePath = artifact.getAttribute(APIConstants.DOC_FILE_PATH);
-            if(docFilePath != null && !docFilePath.equals("")){
-                //The docFilePatch comes as /t/tenanatdoman/registry/resource/_system/governance/apimgt/applicationdata..
-                //We need to remove the /t/tenanatdoman/registry/resource/_system/governance section to set permissions.
-                int startIndex = docFilePath.indexOf("governance") + "governance".length();
-                String filePath = docFilePath.substring(startIndex, docFilePath.length());
-                APIUtil.setResourcePermissions(api.getId().getProviderName(),
-                        visibility,authorizedRoles, filePath);
-                registry.addAssociation(artifact.getPath(), filePath,
-                        APIConstants.DOCUMENTATION_FILE_ASSOCIATION);
-            }
-        } catch (RegistryException e) {
-            handleException("Failed to add documentation", e);
-        } catch (UserStoreException e) {
-            handleException("Failed to add documentation", e);
-        }
-    }
-    
-    
-    private void copyDocumentation(API newAPI, Documentation documentation)
-            throws APIManagementException {
-        try {
-        	APIIdentifier apiId=newAPI.getId();
-        	API api=newAPI;
-            GenericArtifactManager artifactManager = new GenericArtifactManager(registry,
-                                                                                APIConstants.DOCUMENTATION_KEY);
+        	APIIdentifier apiId = api.getId();
+        	GenericArtifactManager artifactManager = new GenericArtifactManager(registry,
+        			APIConstants.DOCUMENTATION_KEY);
             GenericArtifact artifact =
                     artifactManager.newGovernanceArtifact(new QName(documentation.getName()));
             artifactManager.addGenericArtifact(
@@ -1706,11 +1703,15 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             handleException("Failed to add documentation", e);
         }
     }
-
+    
+    
+   
     private String[] getAuthorizedRoles(String artifactPath) throws UserStoreException {
-        String  resourcePath = RegistryUtils.getAbsolutePath(RegistryContext.getBaseInstance(),
-                                                             RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH
-                                                             + artifactPath);
+        String resourcePath =
+                              RegistryUtils.getAbsolutePath(RegistryContext.getBaseInstance(),
+                                                            APIUtil.getMountedPath(RegistryContext.getBaseInstance(),
+                                                                                   RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH) +
+                                                                    artifactPath);
         if (!tenantDomain.equals(org.wso2.carbon.utils.multitenancy.
                 MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)) {
         int tenantId = ServiceReferenceHolder.getInstance().getRealmService().
@@ -1840,7 +1841,36 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 contextCache.remove(api.getContext());
                 contextCache.put(api.getContext(), false);
             }
+            /*remove empty directories*/
+            String apiCollectionPath = APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR +
+            		identifier.getProviderName() + RegistryConstants.PATH_SEPARATOR +
+            		identifier.getApiName();            
+            if(registry.resourceExists(apiCollectionPath)){
+            	Resource apiCollection=registry.get(apiCollectionPath);
+            	CollectionImpl collection=(CollectionImpl)apiCollection;
+            	//if there is no other versions of apis delete the directory of the api
+            	if(collection.getChildCount() == 0){
+                    if(log.isDebugEnabled()){
+                        log.debug("No more versions of the API found, removing API collection from registry");
+                    }
+            		registry.delete(apiCollectionPath);		
+            	}
+            }
 
+            String apiProviderPath=APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR +
+            		identifier.getProviderName();            
+            if(registry.resourceExists(apiProviderPath)){
+            	Resource providerCollection=registry.get(apiProviderPath);
+            	CollectionImpl collection=(CollectionImpl)providerCollection;
+            	//if there is no api for given provider delete the provider directory
+            	if(collection.getChildCount() == 0){
+                    if(log.isDebugEnabled()){
+                        log.debug("No more APIs from the provider " + identifier.getProviderName() + " found. " +
+                                "Removing provider collection from registry");
+                    }
+            		registry.delete(apiProviderPath);		
+            	}
+            }
         } catch (RegistryException e) {
             handleException("Failed to remove the API from : " + path, e);
         }
@@ -1850,94 +1880,177 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     	return APIUtil.searchAPIsByDoc(registry, tenantId, username, searchTerm, searchType);
     }
     
-    public List<API> searchAPIs(String searchTerm, String searchType, String providerId) throws APIManagementException {
-    	
-    	List<API> apiSortedList = new ArrayList<API>();
-    	    	
-        String regex = "(?i)[\\w.|-]*" + searchTerm.trim() + "[\\w.|-]*";
-		      
-        Pattern pattern;
-        Matcher matcher = null;
-        try {
-        	
-        	List<API> apiList;
-            if(providerId!=null){
-                apiList= getAPIsByProvider(providerId);
-            }else{
-                apiList= getAllAPIs();
-            }
-            if (apiList == null || apiList.size() == 0) {
-                return apiSortedList;
-            }
-            pattern = Pattern.compile(regex);
-            for (API api : apiList) {
+    /**
+     * Search APIs based on given search term
+     * @param searchTerm
+     * @param searchType
+     * @param providerId
+     * 
+     * @throws APIManagementException
+     */
+    
+	public List<API> searchAPIs(String searchTerm, String searchType, String providerId)
+	                                                                                    throws APIManagementException {
+		List<API> apiList = new ArrayList<API>();
+		String regex = "(?i)[\\w.|-]*" + searchTerm.trim() + "[\\w.|-]*";
+		Pattern pattern;
+		Matcher matcher = null;
+		String apiConstant = null;
+		try {
+			if (providerId != null) {
+				apiList = getAPIsByProvider(providerId);
+				if (apiList == null || apiList.size() == 0) {
+					return apiList;
+				}
+				pattern = Pattern.compile(regex);
+				for (API api : apiList) {
+					if (searchType.equalsIgnoreCase("Name")) {
+						apiConstant = api.getId().getApiName();
+					} else if (searchType.equalsIgnoreCase("Provider")) {
+						apiConstant = api.getId().getProviderName();
+					} else if (searchType.equalsIgnoreCase("Version")) {
+						apiConstant = api.getId().getVersion();
+					} else if (searchType.equalsIgnoreCase("Context")) {
+						apiConstant = api.getContext();
+					} else if (searchType.equalsIgnoreCase("Status")) {
+						apiConstant = api.getStatus().getStatus();
+					} else if (searchType.equalsIgnoreCase("Description")) {
+						apiConstant = api.getDescription();
+					}
+					if (apiConstant != null) {
+						matcher = pattern.matcher(apiConstant);
+						if (matcher != null && matcher.find()) {
+							apiList.add(api);
+						}
+					}
+					if (searchType.equalsIgnoreCase("Subcontext")) {
+						Set<URITemplate> urls = api.getUriTemplates();
+						if (urls.size() > 0) {
+							for (URITemplate url : urls) {
+								matcher = pattern.matcher(url.getUriTemplate());
+								if (matcher != null && matcher.find()) {
+									apiList.add(api);
+									break;
+								}
+							}
+						}
+					}
+				}
+			} else {
+				apiList = searchAPIs(searchTerm, searchType);
+			}
+		} catch (APIManagementException e) {
+			handleException("Failed to search APIs with type", e);
+		}
+		Collections.sort(apiList, new APINameComparator());
+		return apiList;
+	}
 
-                if (searchType.equalsIgnoreCase("Name")) {
-                    String api1 = api.getId().getApiName();
-                    matcher = pattern.matcher(api1);
-                    if (matcher != null && matcher.find()) {
-                        apiSortedList.add(api);
-                    }
-                }else if (searchType.equalsIgnoreCase("Provider")) {
-                    String api1 = api.getId().getProviderName();
-                    matcher = pattern.matcher(api1);
-                    if (matcher != null && matcher.find()) {
-                        apiSortedList.add(api);
-                    }
-                } else if (searchType.equalsIgnoreCase("Version")) {
-                    String api1 = api.getId().getVersion();
-                    matcher = pattern.matcher(api1);
-                    if (matcher != null && matcher.find()) {
-                        apiSortedList.add(api);
-                    }
-                } else if (searchType.equalsIgnoreCase("Context")) {
-                    String api1 = api.getContext();
-                    matcher = pattern.matcher(api1);
-                    if (matcher != null && matcher.find()) {
-                        apiSortedList.add(api);
-                    }
-                } else if (searchType.equalsIgnoreCase("Status")) {
-                    String status = api.getStatus().getStatus();
-                    matcher = pattern.matcher(status);
-                    if (matcher != null && matcher.find()) {
-                        apiSortedList.add(api);
-                    }
-                } else if (searchType.equalsIgnoreCase("Description")) {
-                    String desc = api.getDescription();
-                    if(desc!=null){
-                    matcher = pattern.matcher(desc);
-                    }
-                    if (matcher != null && matcher.find()) {
-                        apiSortedList.add(api);
-                    }
-                } else if (searchType.equalsIgnoreCase("Subcontext")) {
-                    Set<URITemplate> urls = api.getUriTemplates();
-                    if(urls.size()>0){
-                    for(URITemplate url:urls){
-                    matcher=pattern.matcher(url.getUriTemplate());
-                    if (matcher != null && matcher.find()) {
-                    apiSortedList.add(api);
-                    break;
-                    }
-                    }
-                    }
-                } else {
-                    String apiName = api.getId().getApiName();
-                    matcher = pattern.matcher(apiName);
-                    if (matcher != null && matcher.find()) {
-                        apiSortedList.add(api);
-                    }
-                }
-                
+	/**
+	 * Search APIs 
+	 * @param searchTerm
+	 * @param searchType
+	 * @return
+	 * @throws APIManagementException
+	 */
+	 
+	private List<API> searchAPIs(String searchTerm, String searchType) throws APIManagementException {
+		List<API> apiList = new ArrayList<API>();
+//		final String searchValue = searchTerm.trim();
+		
+		Pattern pattern;
+		Matcher matcher = null;
+		String searchCriteria = APIConstants.API_OVERVIEW_NAME;
+		boolean isTenantFlowStarted = false;
+		String userName = this.username;
+		try {
+			if (tenantDomain != null &&
+			    !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
+				isTenantFlowStarted = true;
+				PrivilegedCarbonContext.startTenantFlow();
+				PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain,
+				                                                                      true);
+			}
+			PrivilegedCarbonContext.getThreadLocalCarbonContext().setUsername(userName);
+			GenericArtifactManager artifactManager =
+			                                         APIUtil.getArtifactManager(registry,
+			                                                                    APIConstants.API_KEY);
+			if (artifactManager != null) {
+				if (searchType.equalsIgnoreCase("Name")) {
+					searchCriteria = APIConstants.API_OVERVIEW_NAME;
+				} else if (searchType.equalsIgnoreCase("Version")) {
+					searchCriteria = APIConstants.API_OVERVIEW_VERSION;
+				} else if (searchType.equalsIgnoreCase("Context")) {
+					searchCriteria = APIConstants.API_OVERVIEW_CONTEXT;
+				} else if (searchType.equalsIgnoreCase("Description")) {
+					searchCriteria = APIConstants.API_OVERVIEW_DESCRIPTION;
+				} else if (searchType.equalsIgnoreCase("Provider")) {
+					searchCriteria = APIConstants.API_OVERVIEW_PROVIDER;
+					searchTerm = searchTerm.replaceAll("@", "-AT-");
+				} else if (searchType.equalsIgnoreCase("Status")) {
+					searchCriteria = APIConstants.API_OVERVIEW_STATUS;
+				} 
+				
+//				Map<String, List<String>> listMap = new HashMap<String, List<String>>();
+//				listMap.put(searchCriteria, new ArrayList<String>() {
+//					{
+//						add(searchValue);
+//					}
+//				});
+//				GenericArtifact[] genericArtifacts = artifactManager.findGenericArtifacts(listMap);
+//				if (genericArtifacts == null || genericArtifacts.length == 0) {
+//					return apiList;
+//				}
+//				for (GenericArtifact artifact : genericArtifacts) {
+//					apiList.add(APIUtil.getAPI(artifact, registry));
+//				}
+				String regex = "(?i)[\\w.|-]*" + searchTerm.trim() + "[\\w.|-]*";
+				pattern = Pattern.compile(regex);
+				
+				if (searchType.equalsIgnoreCase("Subcontext")) {
+					
+					List<API> allAPIs = getAllAPIs();
+					for (API api : allAPIs) {
+						Set<URITemplate> urls = api.getUriTemplates();
+						if (urls.size() > 0) {
+							for (URITemplate url : urls) {
+								matcher = pattern.matcher(url.getUriTemplate());
+								if (matcher != null && matcher.find()) {
+									apiList.add(api);
+									break;
+								}
+							}
+						}
+					}					
+					
+				} else {					
+					GenericArtifact[] genericArtifacts = artifactManager.getAllGenericArtifacts();
+					if (genericArtifacts == null || genericArtifacts.length == 0) {
+						return apiList;
+					}
+					
+					for (GenericArtifact artifact : genericArtifacts) {
+						String value = artifact.getAttribute(searchCriteria);
+						
+						if (value != null) {
+							matcher = pattern.matcher(value);
+							if (matcher != null && matcher.find()) {
+								apiList.add(APIUtil.getAPI(artifact, registry));
+							}
+						}				
+				    }	
+				} 
 
-
-            }
-        } catch (APIManagementException e) {
-            handleException("Failed to search APIs with type", e);
-        } 
-        Collections.sort(apiSortedList, new APINameComparator());
-        return apiSortedList;
-    }
+			}
+		} catch (RegistryException e) {
+			handleException("Failed to search APIs with type", e);
+		} finally {
+			if (isTenantFlowStarted) {
+				PrivilegedCarbonContext.endTenantFlow();
+			}
+		}
+		return apiList;
+	}
 
     /**
      * Update the Tier Permissions
@@ -2329,6 +2442,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 		}
 		return apiJSON.toJSONString();
 	}
+
+	
 }
 
 

@@ -1,0 +1,20 @@
+<SelfSignUp>
+	
+   <EnableSignup>true</EnableSignup>
+   
+   <!-- user storage to store users -->
+   <SignUpDomain>PRIMARY</SignUpDomain>   
+   
+   <!-- Tenant admin information. (for clustered setup credentials for AuthManager) -->
+   <AdminUserName>admin</AdminUserName>
+   <AdminPassword>admin</AdminPassword>
+   
+   <!-- List of roles for the tenant user -->
+   <SignUpRoles>
+   	<SignUpRole>
+    		<RoleName>subscriber</RoleName>
+      		<IsExternalRole>false</IsExternalRole>
+  	</SignUpRole>    
+   </SignUpRoles>
+    
+</SelfSignUp>

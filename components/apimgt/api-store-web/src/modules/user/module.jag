@@ -30,6 +30,9 @@ jagg.module("user", {
     },
     checkIfSubscriberRolePresent:function () {
         return jagg.require(jagg.getModulesDir() + "user/user.jag").checkIfSubscriberRolePresent.apply(this, arguments);
+    },
+    checkIfUserExsits:function (username) {
+        return jagg.require(jagg.getModulesDir() + "user/user.jag").checkIfUserExsits.apply(this, arguments);
     }
 });
 %>

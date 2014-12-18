@@ -214,6 +214,15 @@
     "credentials": "Credenciales",
 
     "productionFailoverEp": "Production Fail-over URL",
-    "sandboxFailoverEp"   : "Sandbox Fail-over URL"
+    "sandboxFailoverEp"   : "Sandbox Fail-over URL",
+ 
+	"busiOwner" : "Dueño de Negocio",
+	"busiOwnerMail" : "Empresario Email",
+	"businessInformationTitle" : "Información de contacto",
+	
+	"techOwner" : "Propietario técnica" ,
+	"techOwnerMail" : "Técnico Propietario Enviar",
+
+    "apiUnavailable" : "API no existe"
 
 }

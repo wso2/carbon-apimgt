@@ -2,7 +2,7 @@
 include("/jagg/jagg.jag");
 
 (function () {
-    response.contentType = "application/json; charset=UTF-8";
+    response.contentType = "text/plain; charset=UTF-8";
     var mod, obj, result, username,
             action = request.getParameter("action"),
             site = require("/site/conf/site.json"),
@@ -34,15 +34,24 @@ include("/jagg/jagg.jag");
 
             if (mode == "Update") {
                 result = mod.updateDocumentation(apiData, docData);
-            } else {
+            } else if (mode == null || mode== ""|| mode== "add") {
                 result = mod.addDocumentation(apiData, docData);
+            } else{
+               obj = {
+                                  error:true,
+                                  message:"Invalid request parameters"
+                      };
+               response.status = 500;
+               print(obj);
+               return;
             }
 
-            if (result.error == "true") {
+            if (result.error === true) {
                 obj = {
                     error:result.error,
                     message:result.message
                 };
+                response.status = 500;
             } else {
                 obj = {
                     error:false
