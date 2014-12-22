@@ -2,7 +2,7 @@ $(document).ready(function(){
     $( "body" ).delegate( "button.check_url_valid", "click", function() {
         var btn = this;
         var url = $(this).parent().find('input:first').val();
-        var type = $(this).attr('url-type');
+        var type = $.parseJSON($("#endpoint_config").val())['endpoint_type']
         $(btn).parent().parent().find('.url_validate_label').remove();
         $(btn).addClass("loadingButton-small");
         $(btn).val(i18n.t('validationMsgs.validating'));

@@ -19,7 +19,12 @@ package org.wso2.carbon.apimgt.usage.publisher;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.apimgt.usage.publisher.dto.*;
+import org.wso2.carbon.apimgt.usage.publisher.dto.DataBridgeFaultPublisherDTO;
+import org.wso2.carbon.apimgt.usage.publisher.dto.DataBridgeRequestPublisherDTO;
+import org.wso2.carbon.apimgt.usage.publisher.dto.DataBridgeResponsePublisherDTO;
+import org.wso2.carbon.apimgt.usage.publisher.dto.FaultPublisherDTO;
+import org.wso2.carbon.apimgt.usage.publisher.dto.RequestPublisherDTO;
+import org.wso2.carbon.apimgt.usage.publisher.dto.ResponsePublisherDTO;
 import org.wso2.carbon.apimgt.usage.publisher.internal.DataPublisherAlreadyExistsException;
 import org.wso2.carbon.apimgt.usage.publisher.internal.UsageComponent;
 import org.wso2.carbon.apimgt.usage.publisher.service.APIMGTConfigReaderService;
@@ -87,19 +92,6 @@ public class APIMgtUsageDataBridgeDataPublisher implements APIMgtUsageDataPublis
                                                   APIMgtUsagePublisherConstants.API_MANAGER_FAULT_STREAM_NAME,
                                                   APIMgtUsagePublisherConstants.API_MANAGER_FAULT_STREAM_VERSION);
             }
-
-            //If Throttle Stream Definition does not exist.
-            if(!dataPublisher.isStreamDefinitionAdded(APIMgtUsagePublisherConstants.API_MANAGER_THROTTLE_STREAM_NAME,
-                                                      APIMgtUsagePublisherConstants.API_MANAGER_THROTTLE_STREAM_VERSION)){
-
-                //Get Throttle Stream Definition
-                String throttStreamDefinition = DataBridgeThrottlePublisherDTO.getStreamDefinition();
-
-                //Add Fault Stream Definition;
-                dataPublisher.addStreamDefinition(throttStreamDefinition,
-                                                  APIMgtUsagePublisherConstants.API_MANAGER_THROTTLE_STREAM_NAME,
-                                                  APIMgtUsagePublisherConstants.API_MANAGER_THROTTLE_STREAM_VERSION);
-            }
         }catch (Exception e){
             log.error("Error initializing APIMgtUsageDataBridgeDataPublisher", e);
         }
@@ -143,20 +135,6 @@ public class APIMgtUsageDataBridgeDataPublisher implements APIMgtUsageDataPublis
 
         } catch (AgentException e) {
             log.error("Error while publishing Fault event", e);
-        }
-    }
-
-    public void publishEvent(ThrottlePublisherDTO throttPublisherDTO) {
-        DataBridgeThrottlePublisherDTO dataBridgeThrottlePublisherDTO = new DataBridgeThrottlePublisherDTO(throttPublisherDTO);
-        try {
-            //Publish Throttle data
-            dataPublisher.publish(APIMgtUsagePublisherConstants.API_MANAGER_THROTTLE_STREAM_NAME,
-                    APIMgtUsagePublisherConstants.API_MANAGER_THROTTLE_STREAM_VERSION,
-                    System.currentTimeMillis(), new Object[]{"external"}, null,
-                    (Object[]) dataBridgeThrottlePublisherDTO.createPayload());
-
-        } catch (AgentException e) {
-            log.error("Error while publishing Throttle exceed event", e);
         }
     }
 

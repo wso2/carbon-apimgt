@@ -68,7 +68,7 @@ API Definition for Swagger will not be overriden with the changes you will do to
 </script>
 <div class="row-fluid">
     <div class="span12">
-        <form method="POST" class="form-horizontal well" id="editAPIForm" action="<%=site.context%>/site/blocks/item-add/ajax/add.jag"  enctype="multipart/form-data">
+        <form method="POST" class="form-horizontal well" id="editAPIForm" action="<%= jagg.url("/site/blocks/item-add/ajax/add.jag")%>"  enctype="multipart/form-data">
             <fieldset>
             <legend><%=i18n.localize("generalDetailsTitle")%></legend>
             <input type="hidden" name="action" id="action" value="updateAPI"/>
@@ -191,13 +191,13 @@ API Definition for Swagger will not be overriden with the changes you will do to
                 <div class="controls">
                     <div class="pull-left">
                          <% if(api.thumb==null){%> <div><img id="apiEditThumb" alt="" src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("images/api-default.png"))%>"/></div><%}else{%>
-                        <div><img id="apiEditThumb" alt="" src="<%=api.thumb%>"/></div> <%}%>
+                        <div><img id="apiEditThumb" alt="" src="<%=jagg.getRegistryPath(api.thumb)%>"/></div> <%}%>
                         <a onclick="javascript:$('#imageUrl').toggle('slow')" style="cursor: pointer">
                             <i class="icon-picture"></i> <%=i18n.localize("changeIcon")%>
                         </a>
                     </div>
                     <div class="pull-left" id="imageUrl" style="display:none;">
-                        <div id="apiThumb-container" class="pull-left"> <input type="file" class="input-xlarge" name="apiThumb" /></div>
+                        <div id="apiThumb-container" class="pull-left"> <input type="file" class="input-xlarge validateImageFile" name="apiThumb" /></div>
                         <input class="pull-left btn" type="button" id="clearThumb" value="<%=i18n.localize("clear")%>"/>
                         <div class="help-block pull-left inline-help">
                             <ul>

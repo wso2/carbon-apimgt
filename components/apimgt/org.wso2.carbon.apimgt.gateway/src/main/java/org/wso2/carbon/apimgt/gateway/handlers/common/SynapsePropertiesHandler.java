@@ -22,7 +22,12 @@ public class SynapsePropertiesHandler extends AbstractHandler{
 
     public boolean handleRequest(MessageContext messageContext) {
         String httpport = System.getProperty("http.nio.port");
+        String httpsport = System.getProperty("https.nio.port");
         messageContext.setProperty("http.nio.port", httpport);
+        messageContext.setProperty("https.nio.port", httpsport);
+        String mgtHttpsPort = System.getProperty("mgt.transport.https.port");
+        messageContext.setProperty("mgtHttpsPort",mgtHttpsPort);
+
         return true;
     }
 

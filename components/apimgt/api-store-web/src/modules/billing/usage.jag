@@ -5,7 +5,10 @@ function getProviderAPIUsage(subscriberName,period) {
         var log = new Log();
         var store = jagg.module("manager").getAPIStoreObj();
         try {
-        usage = store.getAPIUsageforSubscriber(subscriberName,period);
+            if(period != null && subscriberName != null) {
+                 usage = store.getAPIUsageforSubscriber(subscriberName,period);
+            }
+       
         if (log.isDebugEnabled()) {
         log.debug("getProviderAPIUsage for : " + server);
         }

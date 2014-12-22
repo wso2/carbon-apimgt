@@ -81,13 +81,11 @@ public class APIMgtUsageHandler extends AbstractHandler {
             String username = "";
             String applicationName = "";
             String applicationId = "";
-            String throttlingTier = "";
             if (authContext != null) {
                 consumerKey = authContext.getConsumerKey();
                 username = authContext.getUsername();
                 applicationName = authContext.getApplicationName();
                 applicationId = authContext.getApplicationId();
-                throttlingTier = authContext.getTier();
             }
             String hostName = DataPublisherUtil.getHostAddress();
             String context = (String)mc.getProperty(RESTConstants.REST_API_CONTEXT);
@@ -134,7 +132,6 @@ public class APIMgtUsageHandler extends AbstractHandler {
             requestPublisherDTO.setApiPublisher(apiPublisher);
             requestPublisherDTO.setApplicationName(applicationName);
             requestPublisherDTO.setApplicationId(applicationId);
-            requestPublisherDTO.setAccessLevel(throttlingTier);
 
             publisher.publishEvent(requestPublisherDTO);
             //We check if usage metering is enabled for billing purpose

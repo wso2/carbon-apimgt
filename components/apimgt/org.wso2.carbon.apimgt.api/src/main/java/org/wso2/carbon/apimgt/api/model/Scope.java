@@ -17,14 +17,9 @@
 */
 package org.wso2.carbon.apimgt.api.model;
 
-/**
- * Created with IntelliJ IDEA.
- * User: jo
- * Date: 3/21/14
- * Time: 9:32 AM
- * To change this template use File | Settings | File Templates.
- */
-public class Scope {
+import java.io.Serializable;
+
+public class Scope implements Serializable{
 
     String key;
     String name;

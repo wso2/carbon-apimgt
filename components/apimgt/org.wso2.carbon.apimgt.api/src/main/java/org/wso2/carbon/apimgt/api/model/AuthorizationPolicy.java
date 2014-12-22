@@ -17,11 +17,13 @@
 */
 package org.wso2.carbon.apimgt.api.model;
 
+import java.io.Serializable;
+
 /**
  * Authorization Policy associated with a given API.
  */
 @SuppressWarnings("unused")
-public class AuthorizationPolicy {
+public class AuthorizationPolicy implements Serializable{
     private String policyURL;
 
     public AuthorizationPolicy(String policyURL) {

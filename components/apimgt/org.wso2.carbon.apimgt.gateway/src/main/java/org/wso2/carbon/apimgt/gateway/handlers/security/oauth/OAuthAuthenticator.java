@@ -17,16 +17,20 @@
 package org.wso2.carbon.apimgt.gateway.handlers.security.oauth;
 
 import org.apache.axis2.Constants;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpHeaders;
 import org.apache.synapse.MessageContext;
 import org.apache.synapse.core.SynapseEnvironment;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.rest.RESTConstants;
+import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.gateway.handlers.security.*;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
+import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.util.Map;
@@ -38,6 +42,8 @@ import java.util.Map;
  * through the APIManagerConfiguration.
  */
 public class OAuthAuthenticator implements Authenticator {
+
+    private static final Log log = LogFactory.getLog(OAuthAuthenticator.class);
 
     protected APIKeyValidator keyValidator;
 
@@ -68,9 +74,22 @@ public class OAuthAuthenticator implements Authenticator {
         String apiKey = null;
         if (headers != null) {
             apiKey = extractCustomerKeyFromAuthHeader(headers);
+            if(log.isDebugEnabled()){
+                log.debug("Received Token ".concat(apiKey));
+            }
         }
+
+        //Check if client invoked the default version API (accessing API without version).
+        boolean defaultVersionInvoked = headers.containsKey(defaultAPIHeader);
+        if(log.isDebugEnabled()){
+            log.debug("Default Version API invoked");
+        }
+
         if(removeOAuthHeadersFromOutMessage){
             headers.remove(securityHeader);
+            if(log.isDebugEnabled()){
+                log.debug("Removing Authorization header from headers");
+            }
         }
         if(removeDefaultAPIHeaderFromOutMessage){
             headers.remove(defaultAPIHeader);
@@ -81,6 +100,10 @@ public class OAuthAuthenticator implements Authenticator {
         String fullRequestPath = (String)synCtx.getProperty(RESTConstants.REST_FULL_REQUEST_PATH);
 
         String requestPath = fullRequestPath.substring((apiContext + apiVersion).length() + 1, fullRequestPath.length());
+
+        if(log.isDebugEnabled()){
+            log.debug("Full Request Path = ".concat(requestPath));
+        }
         if (requestPath.equals("")) {
             requestPath = requestPath + "/";
         }
@@ -88,11 +111,18 @@ public class OAuthAuthenticator implements Authenticator {
                 getProperty(Constants.Configuration.HTTP_METHOD);
 
         String clientDomain = getClientDomain(synCtx);
+        if(log.isDebugEnabled() && null != clientDomain) {
+            log.debug("Received Client Domain ".concat(clientDomain));
+        }
         //If the matching resource does not require authentication
         //String authenticationScheme = keyValidator.getResourceAuthenticationScheme(apiContext, apiVersion, requestPath, httpMethod);
         String authenticationScheme = keyValidator.getResourceAuthenticationScheme(synCtx);
         APIKeyValidationInfoDTO info;
         if(APIConstants.AUTH_NO_AUTHENTICATION.equals(authenticationScheme)){
+
+            if(log.isDebugEnabled()){
+                log.debug("Found Authentication Scheme: ".concat(authenticationScheme));
+            }
 
             String clientIP = (String)((Axis2MessageContext) synCtx).getAxis2MessageContext().getProperty(APIConstants.REMOTE_ADDR);
 
@@ -117,21 +147,34 @@ public class OAuthAuthenticator implements Authenticator {
             info = new APIKeyValidationInfoDTO();
             info.setAuthorized(false);
             info.setValidationStatus(900906);
-        } else {
-            if (apiKey == null || apiContext == null || apiVersion == null) {
-                throw new APISecurityException(APISecurityConstants.API_AUTH_MISSING_CREDENTIALS,
-                                               "Required OAuth credentials not provided");
+        } else if (apiKey == null || apiContext == null || apiVersion == null) {
+            if(log.isDebugEnabled()){
+                if(apiKey == null){
+                    log.debug("OAuth headers not found");
+                }
+                else if(apiContext == null){
+                    log.debug("Couldn't find API Context");
+                }
+                else if(apiVersion == null){
+                    log.debug("Could not find api version");
+                }
             }
-            String matchingResource = (String)synCtx.getProperty(APIConstants.API_ELECTED_RESOURCE);
-
+            throw new APISecurityException(APISecurityConstants.API_AUTH_MISSING_CREDENTIALS,
+                    "Required OAuth credentials not provided");
+        } else {
+            String matchingResource = (String) synCtx.getProperty(APIConstants.API_ELECTED_RESOURCE);
+            if(log.isDebugEnabled()){
+                log.debug("Matching resource is: ".concat(matchingResource));
+            }
             org.apache.axis2.context.MessageContext axis2MessageCtx = ((Axis2MessageContext) synCtx).getAxis2MessageContext();
             org.apache.axis2.context.MessageContext.setCurrentMessageContext(axis2MessageCtx);
+
             info = keyValidator.getKeyValidationInfo(apiContext, apiKey, apiVersion, authenticationScheme, clientDomain,
-                                                     matchingResource, httpMethod);
+                    matchingResource, httpMethod, defaultVersionInvoked);
 
             synCtx.setProperty("APPLICATION_NAME", info.getApplicationName());
             synCtx.setProperty("END_USER_NAME", info.getEndUserName());
-          }
+        }
 
         if (info.isAuthorized()) {
             AuthenticationContext authContext = new AuthenticationContext();
@@ -144,6 +187,7 @@ public class OAuthAuthenticator implements Authenticator {
             authContext.setApplicationId(info.getApplicationId());
             authContext.setApplicationName(info.getApplicationName());
             authContext.setApplicationTier(info.getApplicationTier());
+            authContext.setSubscriber(info.getSubscriber());
             authContext.setConsumerKey(info.getConsumerKey());
             APISecurityUtils.setAuthenticationContext(synCtx, authContext, securityContextHeader);
             
@@ -151,9 +195,20 @@ public class OAuthAuthenticator implements Authenticator {
             String tenantDomain = MultitenantUtils.getTenantDomain(info.getApiPublisher());
             synCtx.setProperty("API_PUBLISHER", tenantDomain);
             synCtx.setProperty("API_NAME", info.getApiName());
-            
+
+            try {
+                APIUtil.checkClientDomainAuthorized(info, clientDomain);
+            } catch (APIManagementException e) {
+               throw new APISecurityException(info.getValidationStatus(), e.getMessage());
+            }
+            if(log.isDebugEnabled()){
+                log.debug("User is authorized to access the Resource");
+            }
             return true;
         } else {
+            if(log.isDebugEnabled()){
+                log.debug("User is NOT authorized to access the Resource");
+            }
             throw new APISecurityException(info.getValidationStatus(),
                     "Access failure for API: " + apiContext + ", version: " + apiVersion +
                             " with key: " + apiKey);

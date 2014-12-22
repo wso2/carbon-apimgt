@@ -17,13 +17,14 @@
 */
 package org.wso2.carbon.apimgt.api.model;
 
+import java.io.Serializable;
 import java.util.*;
 
 /**
  * Provider's & system's view of API
  */
 @SuppressWarnings("unused")
-public class API {
+public class API implements Serializable{
 
     private APIIdentifier id;
 
@@ -287,6 +288,13 @@ public class API {
         this.availableTiers.addAll(availableTiers);
     }
 
+    /**
+     * Removes all Tiers from the API object.
+     */
+    public void removeAllTiers(){
+        availableTiers.clear();
+    }
+
     public void removeAvailableTiers(Set<Tier> availableTiers) {
         this.availableTiers.removeAll(availableTiers);
     }
@@ -446,6 +454,15 @@ public class API {
       */
   	public void setOutSequence(String outSeq) {
   		this.outSequence = outSeq;
+  	}
+  	
+  	/**
+  	 * remove custom sequences from api object
+  	 */
+  	public void removeCustomSequences(){
+  		this.inSequence=null;
+  		this.outSequence=null;
+  		this.faultSequence=null;
   	}
 
     public String getOldInSequence() {

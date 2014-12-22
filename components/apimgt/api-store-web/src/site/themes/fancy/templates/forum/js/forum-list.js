@@ -21,7 +21,7 @@ function forum_load_topics(page, search) {
         params.search = search;
     }
 
-    $.getJSON(requestURL + '/forum/api/topic', params, function (result) {
+    $.getJSON(requestURL + 'forum/api/topic', params, function (result) {
         console.log(result);
         if (result.error == false) {
 
@@ -78,7 +78,7 @@ function forum_load_replies(page) {
     var id = currentLocation.split('/').pop();
 
 
-    $.getJSON(requestURL + '/forum/api/topic/' + id, params, function (result) {
+    $.getJSON(requestURL + 'forum/api/topic/' + id, params, function (result) {
         console.log(result);
         if (result.error == false) {
             
@@ -138,6 +138,7 @@ $(document).ready(function () {
 
     // Add new forum topic.
     $(document).on("click", '#add-forum-topic', function () {
+	jagg.sessionAwareJS({redirect:'/site/pages/index.jag'});
         var currentLocation = window.location.pathname;
         var id = currentLocation.split('/').pop();
 
@@ -181,12 +182,12 @@ $(document).ready(function () {
         };
         $.ajax({
             type: 'POST',
-            url: requestURL + '/forum/api/topic/',
+            url: requestURL + 'forum/api/topic/',
             data: JSON.stringify(topic),
             contentType: "application/json",
             dataType: 'json',
             success: function (result) {
-                window.location = requestURL + '/forum/topic/' + result.id + tenantDomain;
+                window.location = requestURL + 'forum/topic/' + result.id + tenantDomain;
             }
         });
 
@@ -194,20 +195,20 @@ $(document).ready(function () {
 
     // Delete a topic
     $(document).on("click", ".forum_delete_topic_icon", function (event) {
-
+	jagg.sessionAwareJS({redirect:'/site/pages/index.jag'});
         var deleteButton = this;
 
         // Show confirmation dialog box.
 
         $('#messageModal').html($('#confirmation-data').html());
-        $('#messageModal div.modal-body').html('\n\n' + i18n.t('confirm.deleteMsgForForumTopic') + '"' + $(deleteButton).attr('data-subject') + '" ?');
+        $('#messageModal div.modal-body').text('\n\n' + i18n.t('confirm.deleteMsgForForumTopic') + '"' + $(deleteButton).attr('data-subject') + '" ?');
         $('#messageModal h3.modal-title').html(i18n.t('confirm.delete'));
         $('#messageModal a.btn-primary').html(i18n.t('info.yes'));
         $('#messageModal a.btn-other').html(i18n.t('info.no'));
         $('#messageModal a.btn-primary').click(function () {
             $.ajax({
                 type: 'DELETE',
-                url: requestURL + '/forum/api/topic/' + $(deleteButton).attr('data-id'),
+                url: requestURL + 'forum/api/topic/' + $(deleteButton).attr('data-id'),
                 data: "",
                 dataType: 'html',
                 success: function (data) {
@@ -312,7 +313,7 @@ $(document).ready(function () {
 
         $.ajax({
             type: 'PUT',
-            url: requestURL + '/forum/api/topic/',
+            url: requestURL + 'forum/api/topic/',
             data: JSON.stringify(topic),
             contentType: "application/json",
             dataType: 'html',
@@ -354,6 +355,7 @@ $(document).ready(function () {
     //Add new reply.
 
     $(document).on("click", '#forum_add_reply_button', function () {
+	jagg.sessionAwareJS({redirect:'/site/pages/index.jag'});
         var currentLocation = window.location.pathname;
         var id = currentLocation.split('/').pop();
 
@@ -410,7 +412,7 @@ $(document).ready(function () {
 
     // Shows reply edit block
     $(document).on("click", ".forum_edit_reply_icon", function (event) {
-
+	jagg.sessionAwareJS({redirect:'/site/pages/index.jag'});
         var currentLocation = window.location.pathname;
         var topicId = currentLocation.split('/').pop();
         var reply = $(this).parent().next().html();
@@ -434,7 +436,7 @@ $(document).ready(function () {
 
     // Saves updated reply.
     $(document).on("click", '.forum_save_updated_reply_button', function (event) {
-
+	jagg.sessionAwareJS({redirect:'/site/pages/index.jag'});
         var currentLocation = window.location.pathname;
         var topicId = currentLocation.split('/').pop();
         var replyId = $(this).data('id');
@@ -458,7 +460,7 @@ $(document).ready(function () {
 
         $.ajax({
             type: 'PUT',
-            url: requestURL + '/forum/api/reply',
+            url: requestURL + 'forum/api/reply',
             data: JSON.stringify(topic),
             contentType: "application/json",
             dataType: 'html',
@@ -494,7 +496,7 @@ $(document).ready(function () {
 
     //Deletes a reply.
     $(document).on("click", '.forum_delete_reply_icon', function (event) {
-
+	jagg.sessionAwareJS({redirect:'/site/pages/index.jag'});
         var deleteButton = this;
 
         $('#messageModal').html($('#confirmation-data').html());
@@ -505,7 +507,7 @@ $(document).ready(function () {
         $('#messageModal a.btn-primary').click(function () {
             $.ajax({
                 type: 'DELETE',
-                url: requestURL + '/forum/api/reply/' + $(deleteButton).attr('data-id'),
+                url: requestURL + 'forum/api/reply/' + $(deleteButton).attr('data-id'),
                 data: "",
                 dataType: 'html',
                 success: function (data) {

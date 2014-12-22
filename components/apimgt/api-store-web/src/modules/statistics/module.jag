@@ -13,6 +13,8 @@ jagg.module("statistics", {
         return jagg.require(jagg.getModulesDir() + "statistics/usage.jag").getAppApiCallType.apply(this, arguments);
     },getTopAppUsers:function () {
         return jagg.require(jagg.getModulesDir() + "statistics/usage.jag").getTopAppUsers.apply(this, arguments);
+    },isDataPublishingEnabled:function () {
+        return jagg.require(jagg.getModulesDir() + "statistics/usage.jag").isDataPublishingEnabled.apply(this, arguments);        
     }
 });
 %>

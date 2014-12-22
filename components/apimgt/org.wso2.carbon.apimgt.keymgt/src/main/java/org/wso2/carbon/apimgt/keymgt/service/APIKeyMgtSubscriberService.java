@@ -29,12 +29,6 @@ import org.apache.http.NameValuePair;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpPost;
-import org.apache.http.conn.scheme.Scheme;
-import org.apache.http.conn.scheme.SchemeRegistry;
-import org.apache.http.conn.ssl.SSLSocketFactory;
-import org.apache.http.conn.ssl.X509HostnameVerifier;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.impl.conn.SingleClientConnManager;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
 import org.codehaus.jettison.json.JSONObject;
@@ -168,7 +162,8 @@ public class APIKeyMgtSubscriberService extends AbstractAdmin {
 
     /**
      * Renew the ApplicationAccesstoken, Call Token endpoint and get parameters.
-     * Revoke old token.
+     * Revoke old token.(create a post request to getNewAccessToken with client_credentials
+        grant type.)
      *
      * @param tokenType
      * @param oldAccessToken
@@ -185,16 +180,15 @@ public class APIKeyMgtSubscriberService extends AbstractAdmin {
                                    String validityTime) throws Exception {
         String newAccessToken = null;
         long validityPeriod = 0;
-        // create a post request to getNewAccessToken for client_credentials
-        // grant type.
+        
 
-        //String tokenEndpoint = OAuthServerConfiguration.getInstance().getTokenEndPoint();
         String tokenEndpointName = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration().
                 getFirstProperty(APIConstants.API_KEY_MANAGER_TOKEN_ENDPOINT_NAME);
         String keyMgtServerURL = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration().
                 getFirstProperty(APIConstants.API_KEY_MANAGER_URL);
         URL keymgtURL = new URL(keyMgtServerURL);
         int keyMgtPort = keymgtURL.getPort();
+        String keyMgtProtocol= keymgtURL.getProtocol();
         String tokenEndpoint = null;
 
         String webContextRoot = CarbonUtils.getServerConfiguration().getFirstProperty("WebContextRoot");
@@ -207,27 +201,18 @@ public class APIKeyMgtSubscriberService extends AbstractAdmin {
             String[] tmp = keyMgtServerURL.split(webContextRoot + "/services");
             tokenEndpoint = tmp[0] + tokenEndpointName;
         }
+      
         //To revoke tokens we should call revoke API deployed in API gateway.
         String revokeEndpoint = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration().
                 getFirstProperty(APIConstants.API_KEY_MANAGER_REVOKE_API_URL);
 
-        // Below code is to overcome host name verification failure we get in certificate
-        // validation due to self-signed certificate.
-        X509HostnameVerifier hostnameVerifier = SSLSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER;
-        DefaultHttpClient client = new DefaultHttpClient();
-        SchemeRegistry registry = new SchemeRegistry();
-        SSLSocketFactory socketFactory = SSLSocketFactory.getSocketFactory();
-        socketFactory.setHostnameVerifier(hostnameVerifier);
-        if (keyMgtPort >= 0) {
-            registry.register(new Scheme("https", keyMgtPort, socketFactory));
-        } else {
-            registry.register(new Scheme("https", 443, socketFactory));
-        }
-        SingleClientConnManager mgr1 = new SingleClientConnManager(registry);
-        SingleClientConnManager mgr2 = new SingleClientConnManager(registry);
+		URL revokeEndpointURL = new URL(revokeEndpoint);
+		String revokeEndpointProtocol = revokeEndpointURL.getProtocol();
+		int revokeEndpointPort = revokeEndpointURL.getPort();
+	
 
-        HttpClient tokenEPClient = new DefaultHttpClient(mgr1, client.getParams());
-        HttpClient revokeEPClient = new DefaultHttpClient(mgr2, client.getParams());
+        HttpClient tokenEPClient =  APIKeyMgtUtil.getHttpClient(keyMgtPort, keyMgtProtocol);
+        HttpClient revokeEPClient = APIKeyMgtUtil.getHttpClient(revokeEndpointPort, revokeEndpointProtocol);
         HttpPost httpTokpost = new HttpPost(tokenEndpoint);
         HttpPost httpRevokepost = new HttpPost(revokeEndpoint);
 
@@ -248,12 +233,12 @@ public class APIKeyMgtSubscriberService extends AbstractAdmin {
             httpRevokepost.setEntity(new UrlEncodedFormEntity(revokeParams, "UTF-8"));
             HttpResponse revokeResponse = revokeEPClient.execute(httpRevokepost);
 
-            if (revokeResponse.getStatusLine().getStatusCode() != 202) {
+            if (revokeResponse.getStatusLine().getStatusCode() != 200) {
                 throw new RuntimeException("Token revoke failed : HTTP error code : " +
                         revokeResponse.getStatusLine().getStatusCode());
             } else {
                 if (log.isDebugEnabled()) {
-                    log.debug("Successfully submitted revoke request for old application token. HTTP status : 202");
+                    log.debug("Successfully submitted revoke request for old application token. HTTP status : 200");
                 }
             }
 
@@ -275,12 +260,12 @@ public class APIKeyMgtSubscriberService extends AbstractAdmin {
                     validityPeriod = Long.parseLong(validityTime);
                 }
             }
-        } catch (Exception e2) {
+        } catch (Exception e) {
             String errMsg = "Error in getting new accessToken";
-            log.error(errMsg);
-            throw new APIKeyMgtException(errMsg, e2);
-
+            log.error(errMsg, e);
+            throw new APIKeyMgtException(errMsg, e);
         }
+        
         ApiMgtDAO apiMgtDAO = new ApiMgtDAO();
         apiMgtDAO.updateRefreshedApplicationAccessToken(tokenType, newAccessToken,
                 validityPeriod);

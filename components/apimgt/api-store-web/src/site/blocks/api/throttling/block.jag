@@ -7,7 +7,6 @@ jagg.block("api/throttling", {
     getInputs:function () {
         return {
             "api":null,
-            "discoveryURL":null,
             "user":null
         }
     }

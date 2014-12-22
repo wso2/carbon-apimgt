@@ -8,7 +8,7 @@
   <% var api = outputs.api; %>
   <% if(api.thumb==null){%>
   <li><img id="apiThumb" src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("images/api-default.png"))%>" alt="" /></li>
-  <%}else{%> <li><img id="apiThumb" src="<%=api.thumb%>" alt="" /></li>
+  <%}else{%> <li><img id="apiThumb" src="<%=jagg.getRegistryPath(api.thumb)%>" alt="" /></li>
   <%}%>
   <li><a href="#" onclick="showTab('usersLink')"><i class="icon-user"></i>
       <span class="userCount">

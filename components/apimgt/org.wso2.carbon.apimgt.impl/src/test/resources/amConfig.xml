@@ -10,6 +10,7 @@
     </Database>
     <APIConsumerAuthentication>
         <EnableTokenGeneration>false</EnableTokenGeneration>
+	<SignatureAlgorithm>NONE</SignatureAlgorithm>
     </APIConsumerAuthentication>
     <APIUsageTracking>
         <Enabled>false</Enabled>

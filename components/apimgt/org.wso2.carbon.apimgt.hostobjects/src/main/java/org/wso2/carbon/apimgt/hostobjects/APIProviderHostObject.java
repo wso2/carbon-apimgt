@@ -26,6 +26,12 @@ import org.apache.axis2.transport.http.HTTPConstants;
 import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.http.HttpHost;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpHead;
+import org.apache.http.conn.params.ConnRoutePNames;
+import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.woden.WSDLFactory;
 import org.apache.woden.WSDLReader;
 import org.jaggeryjs.hostobjects.file.FileHostObject;
@@ -59,6 +65,8 @@ import org.wso2.carbon.apimgt.usage.client.exception.APIMgtUsageQueryServiceClie
 import org.wso2.carbon.authenticator.stub.AuthenticationAdminStub;
 import org.wso2.carbon.base.ServerConfiguration;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
+import org.wso2.carbon.core.util.PermissionUpdateUtil;
+import org.wso2.carbon.registry.core.RegistryConstants;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.user.mgt.stub.UserAdminStub;
@@ -75,11 +83,16 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.*;
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @SuppressWarnings("unused")
 public class APIProviderHostObject extends ScriptableObject {
 
     private static final Log log = LogFactory.getLog(APIProviderHostObject.class);
+    //private static Pattern endpointURIPattern=Pattern.compile("^((http(?:s)?:\\/\\/)?([a-zA-Z0-9\\-\\.]{1,})+((\\:([0-9]{1,5}))?)(?:(\\/?|(?:\\/((\\{uri\\.var\\.[\\w]+\\})|[\\w\\-]+)))*)(?:\\/?|\\/\\w+\\.[a-zA-Z0-9]{1,})(?:\\?|(\\?(?:[\\w]+)(?:\\=([\\w\\-]+|\\{uri\\.var\\.[\\w]+\\}))?))?(?:\\&|(\\&(?:[\\w]+)(?:\\=([\\w\\-]+|\\{uri\\.var\\.[\\w]+\\}))?))*)$");
+    private static Pattern pathParamExtractorPattern=Pattern.compile("\\{.*?\\}");
+    private static Pattern pathParamValidatorPattern=Pattern.compile("\\{uri\\.var\\.[\\w]+\\}");
 
     private String username;
 
@@ -173,6 +186,12 @@ public class APIProviderHostObject extends ScriptableObject {
             Options options = client.getOptions();
             options.setManageSession(true);
 
+            String tenantDomain = MultitenantUtils.getTenantDomain(username);
+            //update permission cache before validate user
+            int tenantId =  ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
+                    .getTenantId(tenantDomain);
+            PermissionUpdateUtil.updatePermissionTree(tenantId);
+
             String host = new URL(url).getHost();
             if (!authAdminStub.login(username, password, host)) {
                 handleException("Login failed.Please recheck the username and password and try again..");
@@ -183,7 +202,6 @@ public class APIProviderHostObject extends ScriptableObject {
 
             String usernameWithDomain = APIUtil.getLoggedInUserInfo(sessionCookie,url).getUserName();
             usernameWithDomain = APIUtil.setDomainNameToUppercase(usernameWithDomain);
-            String tenantDomain = MultitenantUtils.getTenantDomain(username);
             boolean isSuperTenant = false;
 
             if (tenantDomain.equals(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)) {
@@ -216,6 +234,36 @@ public class APIProviderHostObject extends ScriptableObject {
         }
 
         return row;
+    }
+
+    /**
+     * This method is used to update the permission cache from jaggery side. user name should be passed as a parameter
+     *
+     * @param cx      Rhino context
+     * @param thisObj Scriptable object
+     * @param args    Passing arguments
+     * @param funObj  Function object
+     * @return
+     * @throws APIManagementException
+     */
+    public static boolean jsFunction_updatePermissionCache(Context cx, Scriptable thisObj,
+                                                           Object[] args, Function funObj)throws APIManagementException {
+        if (args==null || args.length == 0) {
+            handleException("Invalid input parameters to the login method");
+        }
+
+        boolean updated=false;
+        try{
+            String username = (String) args[0];
+
+            String tenantDomain = MultitenantUtils.getTenantDomain(username);
+            int tenantId =  ServiceReferenceHolder.getInstance().getRealmService().getTenantManager().getTenantId(tenantDomain);
+            PermissionUpdateUtil.updatePermissionTree(tenantId);
+            updated = true;
+        } catch (Exception e) {
+            log.error("Error while updating permissions", e);
+        }
+        return updated;
     }
 
     public static String jsFunction_getAuthServerURL(Context cx, Scriptable thisObj,
@@ -315,6 +363,10 @@ public class APIProviderHostObject extends ScriptableObject {
         String inSequence =  (String) apiData.get("inSequence", apiData);
         String outSequence = (String) apiData.get("outSequence", apiData);
         String faultSequence = (String) apiData.get("faultSequence", apiData);
+        String businessOwner = (String) apiData.get("bizOwner", apiData);
+	String businessOwnerEmail = (String) apiData.get("bizOwnerMail", apiData);
+	String technicalOwner = (String) apiData.get("techOwner", apiData);
+	String technicalOwnerEmail = (String) apiData.get("techOwnerMail", apiData);
 
         String responseCache = (String) apiData.get("responseCache", apiData);
         int cacheTimeOut = APIConstants.API_RESPONSE_CACHE_TIMEOUT;
@@ -363,14 +415,28 @@ public class APIProviderHostObject extends ScriptableObject {
         api.setAsDefaultVersion("default_version".equals(defaultVersion) ? true : false);
         api.setScopes(scopeList);
 
-        if(!"none".equals(inSequence)){
-        	api.setInSequence(inSequence);
+		api.removeCustomSequences();
+		if (!"none".equals(inSequence)) {
+			api.setInSequence(inSequence);
+		}
+		if (!"none".equals(outSequence)) {
+			api.setOutSequence(outSequence);
+		}
+		if (!"none".equals(faultSequence)) {
+			api.setFaultSequence(faultSequence);
+		}
+	
+        if(!"none".equals(businessOwner)){
+            api.setBusinessOwner(businessOwner);
         }
-        if(!"none".equals(outSequence)){
-        	api.setOutSequence(outSequence);
+        if(!"none".equals(businessOwnerEmail)){
+            api.setBusinessOwnerEmail(businessOwnerEmail);
         }
-        if(!"none".equals(faultSequence)){
-        	api.setFaultSequence(faultSequence);
+        if(!"none".equals(technicalOwner)){
+            api.setTechnicalOwner(technicalOwner);
+        }
+        if(!"none".equals(technicalOwnerEmail)){
+            api.setTechnicalOwnerEmail(technicalOwnerEmail);
         }
         
         Set<Tier> availableTier = new HashSet<Tier>();
@@ -380,6 +446,7 @@ public class APIProviderHostObject extends ScriptableObject {
         	for (String tierName : tierNames) {
         		availableTier.add(new Tier(tierName));
         	}
+            api.removeAllTiers();
         	api.addAvailableTiers(availableTier);
         }
         api.setLastUpdated(new Date());
@@ -454,6 +521,9 @@ public class APIProviderHostObject extends ScriptableObject {
         api.setWadlUrl(wadl);
         api.setWsdlUrl(wsdl);
         api.setEndpointConfig((String) apiData.get("endpoint_config", apiData));
+        
+        // Validate endpoint URI format
+        validateEndpointURI(api.getEndpointConfig());
 
         String destinationStats = (String) apiData.get("destinationStats", apiData);
         if (APIConstants.ENABLED.equalsIgnoreCase(destinationStats)) {
@@ -807,6 +877,26 @@ public class APIProviderHostObject extends ScriptableObject {
 	        //Iterating each resourcePath config
 	        for (int i = 0; i < resources.size(); i++) {
 	            JSONObject resourceConfig = (JSONObject) resources.get(i);
+                APIManagerConfiguration config = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration();
+                List<Environment> environments = config.getApiGatewayEnvironments();
+                Environment env = null;
+                String ep = "";
+                if(environments!=null) {
+                    env = environments.get(0);
+                    String gatewayEndpoint = env.getApiGatewayEndpoint();
+                    if (gatewayEndpoint.contains(",")) {
+                        ep = gatewayEndpoint.split(",")[0];
+                    } else {
+                        ep = gatewayEndpoint;
+                    }
+                }
+                String apiPath = APIUtil.getAPIPath(apiId);
+                API api = apiProvider.getAPI(apiPath);
+                if(ep.endsWith(RegistryConstants.PATH_SEPARATOR)){
+                    ep.substring(0,ep.length()-1);
+                }
+                String basePath = ep+api.getContext()+RegistryConstants.PATH_SEPARATOR+apiId.getVersion();
+                resourceConfig.put("basePath",basePath);
 	            String resourceJSON = resourceConfig.toJSONString();
 	            
 	            String resourcePath = (String) resourceConfig.get("resourcePath");
@@ -960,6 +1050,11 @@ public class APIProviderHostObject extends ScriptableObject {
         String tier = (String) apiData.get("tier", apiData);
         FileHostObject fileHostObject = (FileHostObject) apiData.get("imageUrl", apiData);
         String contextVal = (String) apiData.get("context", apiData);
+        APIProvider apiProvider = getAPIProvider(thisObj);
+        //check for context exists
+        if (apiProvider.isContextExist(contextVal)) {
+            handleException("Error occurred while adding the API. A duplicate API context already exists for " + contextVal);
+        }
         String context = contextVal.startsWith("/") ? contextVal : ("/" + contextVal);
         String providerDomain=MultitenantUtils.getTenantDomain(String.valueOf(apiData.get("provider", apiData)));
         if(!MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equalsIgnoreCase(providerDomain))
@@ -1007,7 +1102,6 @@ public class APIProviderHostObject extends ScriptableObject {
         name = (name != null ? name.trim() : null);
         version = (version != null ? version.trim() : null);
         APIIdentifier apiId = new APIIdentifier(provider, name, version);
-        APIProvider apiProvider = getAPIProvider(thisObj);
 
         if (apiProvider.isAPIAvailable(apiId)) {
             handleException("Error occurred while adding the API. A duplicate API already exists for " +
@@ -1180,6 +1274,8 @@ public class APIProviderHostObject extends ScriptableObject {
 
         // @todo needs to be validated
         api.setEndpointConfig((String) apiData.get("endpoint_config", apiData));
+        //Validate endpoint URI format
+        validateEndpointURI(api.getEndpointConfig());
 
         //set secured endpoint parameters
         if ("secured".equals(endpointSecured)) {
@@ -1542,6 +1638,8 @@ public class APIProviderHostObject extends ScriptableObject {
 
         // @todo needs to be validated
         api.setEndpointConfig((String) apiData.get("endpoint_config", apiData));
+        //Validate endpoint URI format
+        validateEndpointURI(api.getEndpointConfig());
 
         api.setSubscriptionAvailability(subscriptionAvailability);
         api.setSubscriptionAvailableTenants(subscriptionAvailableTenants);
@@ -1801,7 +1899,7 @@ public class APIProviderHostObject extends ScriptableObject {
         boolean result = false;
         NativeArray myn = new NativeArray(0);
 
-        if (args == null || args.length==0) {
+        if (args == null || args.length == 0) {
             handleException("Invalid number of parameters or their types.");
         }
 
@@ -1809,7 +1907,7 @@ public class APIProviderHostObject extends ScriptableObject {
 
         String providerName = String.valueOf(apiData.get("provider", apiData));
         String providerNameTenantFlow = args[0].toString();
-        providerName=APIUtil.replaceEmailDomain(providerName);
+        providerName = APIUtil.replaceEmailDomain(providerName);
         String apiName = (String) apiData.get("apiName", apiData);
         String version = (String) apiData.get("version", apiData);
 
@@ -1817,16 +1915,23 @@ public class APIProviderHostObject extends ScriptableObject {
         APIProvider apiProvider = getAPIProvider(thisObj);
         boolean isTenantFlowStarted = false;
         try {
-            String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(providerNameTenantFlow));
-            if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
+            String tenantDomain = MultitenantUtils.
+                    getTenantDomain(APIUtil.replaceEmailDomainBack(providerName));
+            if (tenantDomain != null &&
+                !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
                 isTenantFlowStarted = true;
                 PrivilegedCarbonContext.startTenantFlow();
-                PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
+                PrivilegedCarbonContext.getThreadLocalCarbonContext().
+                        setTenantDomain(tenantDomain, true);
             }
             result = apiProvider.checkIfAPIExists(apiId);
-        }catch (Exception e){
+        } catch (Exception e) {
             handleException("Error occurred while checking if API exists " + apiName +
-                    "-" + version, e);
+                            "-" + version, e);
+        } finally {
+            if (isTenantFlowStarted) {
+                PrivilegedCarbonContext.endTenantFlow();
+            }
         }
         return result;
     }
@@ -2618,7 +2723,8 @@ public class APIProviderHostObject extends ScriptableObject {
             if (docName.equals(APIConstants.API_DEFINITION_DOC_NAME)) {
                 apiProvider.addAPIDefinitionContent(apiId, docName, docContent);
             } else {
-                apiProvider.addDocumentationContent(apiId, docName, docContent);
+            	API api = apiProvider.getAPI(apiId);
+            	apiProvider.addDocumentationContent(api, docName, docContent);
             }
         } catch (APIManagementException e) {
             handleException("Error occurred while adding the content of the documentation- " + docName, e);
@@ -2862,6 +2968,24 @@ public class APIProviderHostObject extends ScriptableObject {
             handleException("Input context value is null");
         }
         return contextExist.toString();
+    }
+
+    public static String jsFunction_isApiNameExist(Context cx, Scriptable thisObj,
+                                                   Object[] args, Function funObj)
+            throws APIManagementException {
+        Boolean apiExist = false;
+        if (args != null && isStringValues(args)) {
+            String apiName = (String) args[0];
+            APIProvider apiProvider = getAPIProvider(thisObj);
+            try {
+                apiExist = apiProvider.isApiNameExist(apiName);
+            } catch (APIManagementException e) {
+                handleException("Error from registry while checking the api name is already exist", e);
+            }
+        } else {
+            handleException("Input api name value is null");
+        }
+        return apiExist.toString();
     }
 
     private static DocumentationType getDocType(String docType) {
@@ -3449,13 +3573,30 @@ public class APIProviderHostObject extends ScriptableObject {
             } catch (org.wso2.carbon.user.api.UserStoreException e) {
                 log.error("Could not load tenant registry. Error while getting tenant id from tenant domain " +
                         tenantDomain);
-            } catch (RegistryException e){
-                log.error("Could not load tenant registry. Error while getting tenant id from tenant domain " +
-                          tenantDomain);
+            } catch (RegistryException e) {
+                log.error("Error occurred while loading the registry of tenant '" + tenantDomain + "'", e);
             }
         }
 
     }
+    
+        
+	/**
+	 * load axis configuration for the tenant
+	 * 
+	 * @param cx
+	 * @param thisObj
+	 * @param args
+	 * @param funObj
+	 */
+	public static void jsFunction_loadAxisConfigOfTenant(Context cx, Scriptable thisObj,
+	                                                     Object[] args, Function funObj) {
+		String tenantDomain = args[0].toString();
+		if (tenantDomain != null &&
+		    !org.wso2.carbon.base.MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
+			APIUtil.loadTenantConfig(tenantDomain);
+		}
+	}
 
     public static NativeArray jsFunction_getLifeCycleEvents(Context cx, Scriptable thisObj,
                                                             Object[] args,
@@ -3661,71 +3802,86 @@ public class APIProviderHostObject extends ScriptableObject {
 		}
 		String urlVal = (String) args[1];
 		String type = (String) args[0];
-		if (urlVal != null && !urlVal.equals("")) {
-			HttpURLConnection con = null;
-			HttpsURLConnection conHttps = null;
+		if (urlVal != null && !urlVal.isEmpty()) {
 			URLConnection conn = null;
 			try {
 				URL url = new URL(urlVal);
 				if (type != null && type.equals("wsdl")) {
 					validateWsdl(urlVal);
+					response = "success";
 				}
 				// checking http,https endpoints up to resource level by doing
 				// http HEAD. And other end point
 				// validation do through basic url connect
 				else if (url.getProtocol().matches("https")) {
 					ServerConfiguration serverConfig = CarbonUtils.getServerConfiguration();
-					String trustStorePath =
-					                        serverConfig.getFirstProperty("Security.TrustStore.Location");
-					String trustStorePassword =
-					                            serverConfig.getFirstProperty("Security.TrustStore.Password");
+					String trustStorePath = serverConfig.getFirstProperty("Security.TrustStore.Location");
+					String trustStorePassword = serverConfig.getFirstProperty("Security.TrustStore.Password");
 					System.setProperty("javax.net.ssl.trustStore", trustStorePath);
 					System.setProperty("javax.net.ssl.trustStorePassword", trustStorePassword);
-					conHttps = (HttpsURLConnection) new URL(urlVal).openConnection();
-					conHttps.setRequestMethod("HEAD");
-					conHttps.setConnectTimeout(4000);
-					conHttps.setReadTimeout(4000);
-					// We will skip host name verification as this is just
-					// testing endpoint. This verification skip
-					// will be limited only for this connection
-					conHttps.setHostnameVerifier(DO_NOT_VERIFY);
-					// check if we get 4XX,5XX range response or not. If its not
-					// in 4XX,5XX range will allow to proceed
-					if ((conHttps.getResponseCode()) / 100 < 4) {
-						return "success";
-					} else {
-						return "error while connecting";
-					}
+
+                    HttpClient client = new DefaultHttpClient();
+                    HttpHead head = new HttpHead(urlVal);
+                    client.getParams().setParameter("http.socket.timeout", 4000);
+                    client.getParams().setParameter("http.connection.timeout", 4000);
+
+
+                    if (System.getProperty("http.proxyHost") != null && System.getProperty("http.proxyPort") != null)   {
+                        if (log.isDebugEnabled())   {
+                            log.debug("Proxy configured, hence routing through configured proxy");
+                        }
+                        String proxyHost = System.getProperty("http.proxyHost");
+                        String proxyPort = System.getProperty("http.proxyPort");
+                        client.getParams().setParameter(ConnRoutePNames.DEFAULT_PROXY, new HttpHost(proxyHost, new Integer(proxyPort)));
+                    }
+
+                    HttpResponse httpResponse = client.execute(head);
+                    int statusCode = httpResponse.getStatusLine().getStatusCode();
+
+                    //If the endpoint doesn't support HTTP HEAD or if status code is < 400
+                    if(statusCode == 405 || statusCode / 100 < 4) {
+                        if(log.isDebugEnabled() && statusCode == 405){
+                            log.debug("Endpoint doesn't support HTTP HEAD");
+                        }
+                        return "success";
+                    } else {
+                        return "error while connecting";
+                    }
 				} else if (url.getProtocol().matches("http")) {
-					con = (HttpURLConnection) new URL(urlVal).openConnection();
-					con.setRequestMethod("HEAD");
-					if ((con.getResponseCode()) / 100 < 4) {
-						return "success";
-					} else {
-						return "error while connecting";
-					}
+
+                    HttpClient client = new DefaultHttpClient();
+                    HttpHead head = new HttpHead(urlVal);
+                    client.getParams().setParameter("http.socket.timeout", 4000);
+                    client.getParams().setParameter("http.connection.timeout", 4000);
+
+
+                    if (System.getProperty("http.proxyHost") != null && System.getProperty("http.proxyPort") != null)   {
+                        if (log.isDebugEnabled())   {
+                            log.debug("Proxy configured, hence routing through configured proxy");
+                        }
+                        String proxyHost = System.getProperty("http.proxyHost");
+                        String proxyPort = System.getProperty("http.proxyPort");
+                        client.getParams().setParameter(ConnRoutePNames.DEFAULT_PROXY, new HttpHost(proxyHost, new Integer(proxyPort)));
+                    }
+
+                    HttpResponse httpResponse = client.execute(head);
+                    int statusCode = httpResponse.getStatusLine().getStatusCode();
+
+                    //If the endpoint doesn't support HTTP HEAD or if status code is < 400
+                    if(statusCode == 405 || statusCode / 100 < 4) {
+                        if(log.isDebugEnabled() && statusCode == 405){
+                            log.debug("Endpoint doesn't support HTTP HEAD");
+                        }
+                        return "success";
+                    } else {
+                        return "error while connecting";
+                    }
 				} else {
-					conn = url.openConnection();
-					conn.connect();
+                    return "error while connecting";
 				}
-				response = "success";
-			} catch (MalformedURLException e) {
-				response = "malformed";
-			} catch (UnknownHostException e) {
-				response = "unknown";
-			} catch (ConnectException e) {
-				response = "Cannot establish connection to the provided address";
-			} catch (SSLHandshakeException e) {
-				response = "ssl_error";
 			} catch (Exception e) {
 				response = e.getMessage();
 			} finally {
-				if (conHttps != null) {
-					conHttps.disconnect();
-				}
-				if (con != null) {
-					con.disconnect();
-				}
 				if (conn != null) {
 					conn = null;
 				}
@@ -4006,10 +4162,14 @@ public class APIProviderHostObject extends ScriptableObject {
         }
         NativeArray myn = new NativeArray(0);
         NativeObject row = new NativeObject();
-        row.put("year",row,list.get(0).toString());
-        row.put("month",row,list.get(1).toString());
-        row.put("day",row,list.get(2).toString());
-        myn.put(0,myn,row);
+
+        if (!list.isEmpty()) {
+            row.put("year",row,list.get(0).toString());
+            row.put("month",row,list.get(1).toString());
+            row.put("day",row,list.get(2).toString());
+            myn.put(0,myn,row);
+        }
+
         return myn;
     }
 
@@ -4262,10 +4422,88 @@ public class APIProviderHostObject extends ScriptableObject {
     return false;
     }
     }
-
+    
+	/**
+	 * Evaluate HTTP end-point URI to validate path parameter and query
+	 * parameter formats<br>
+	 * Sample URI format<br>
+	 * http[s]//[www.]anyhost[.com][:port]/{uri.var.param}?param1=value&param2={
+	 * uri.var.value}
+	 * 
+	 * @param endpointConfig
+	 *            JSON representation of end-point configuration.
+	 * @return true if valid URI
+	 * @throws APIManagementException
+	 *             If the endpointConfig is invalid or URI is invalid
+	 */
+	private static boolean validateEndpointURI(String endpointConfig)
+			throws APIManagementException {
+		boolean isInvalid = false;
+		if (endpointConfig != null) {
+            try {
+                List<String> uriList= new ArrayList<String>();
+                JSONParser parser = new JSONParser();
+                JSONObject jsonObject = (JSONObject) parser.parse(endpointConfig);
+                Object epType = jsonObject.get("endpoint_type");
+                if (epType instanceof String && "http".equals(epType)) {
+                    // extract production uri from config
+                    Object prodEPs = (JSONObject) jsonObject.get("production_endpoints");
+                    if (prodEPs instanceof JSONObject) {
+                        Object url = ((JSONObject) prodEPs).get("url");
+                        if (url instanceof String) {
+                            uriList.add(url.toString());
+                        }
+                    }
+                    // extract sandbox uri from config
+                    Object sandEPs = (JSONObject) jsonObject.get("sandbox_endpoints");
+                    if (sandEPs instanceof JSONObject) {
+                        Object url = ((JSONObject) sandEPs).get("url");
+                        if (url instanceof String) {
+                            uriList.add(url.toString());
+                        }
+                    }
+                }
+                for(String uri:uriList){
+                    // validate only if uri contains { or }
+                    if(uri.contains("{") || uri.contains("}")){
+                        // check { and } are matched or not. otherwise invalid
+                        int startCount = 0, endCount = 0;
+                        for(char c:uri.toCharArray()){
+                            if(c=='{'){
+                                startCount++;
+                            }else if(c=='}'){
+                                endCount++;
+                            }
+                            // this check guarantee the order of '{' and '}'. Ex: {uri.var.name} not }uri.var.name{
+                            if(endCount>startCount){
+                                isInvalid=true;
+                                break;
+                            }
+                        }
+                        // continue only if the matching brackets are found. otherwise invalid
+                        if(startCount==endCount){
+                            // extract content including { } brackets
+                            Matcher pathParamMatcher=pathParamExtractorPattern.matcher(uri);
+                            while(pathParamMatcher.find()){
+                                // validate the format of { } content
+                                Matcher formatMatcher=pathParamValidatorPattern.matcher(pathParamMatcher.group());
+                                if(!formatMatcher.matches()){
+                                    isInvalid=true;
+                                    break;
+                                }
+                            }
+                        }else{
+                            isInvalid=true;
+                        }
+                    }
+                }
+            } catch (ParseException e) {
+                handleException("Invalid Endpoint config", e);
+            }
+            if (isInvalid) {
+                handleException("Invalid Endpoint URI. Please refer HTTP Endpoint documentation of the WSO2 ESB for details.");
+            }
+        }
+		return isInvalid;
+	}
 }
-
-
-
-
-

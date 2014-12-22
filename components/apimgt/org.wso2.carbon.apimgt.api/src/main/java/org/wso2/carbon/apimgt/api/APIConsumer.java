@@ -103,6 +103,22 @@ public interface APIConsumer extends APIManager {
     public Set<Tag> getAllTags(String tenantDomain) throws APIManagementException;
 
     /**
+     * Returns all tags with their descriptions.
+     *
+     * NOTE : The reason for having a separate method to get the tags with their attributes is,
+     * because of the implementation of addition tag attributes.
+     * Tag attributes are saved in a registry location with convention.
+     * e.g.  governance/apimgt/applicationdata/tags/{tag_name}/description.txt.
+     * In most of the use cases these attributes are not needed.
+     * So not fetching the description if it is not needed is healthy for performance.
+     *
+     * @param tenantDomain Tenant domain.
+     * @return The description of the tag.
+     * @throws APIManagementException if there is a failure in getting the description.
+     */
+    public Set<Tag> getTagsWithAttributes(String tenantDomain)throws APIManagementException;
+
+    /**
      * Rate a particular API. This will be called when subscribers rate an API
      *
      * @param apiId  The API identifier
@@ -268,7 +284,7 @@ public interface APIConsumer extends APIManager {
      * @return set of API
      * @throws APIManagementException if failed to get set of API
      */
-    public Set<API> getPublishedAPIsByProvider(String providerId,String loggedUser, int limit) throws APIManagementException;/**
+    public Set<API> getPublishedAPIsByProvider(String providerId,String loggedUser, int limit, String apiOwner) throws APIManagementException;/**
 
      /** Get a list of published APIs by the given provider.
      *

@@ -19,9 +19,10 @@ package org.wso2.carbon.apimgt.api.model;
 
 import org.json.simple.JSONValue;
 
+import java.io.Serializable;
 import java.util.*;
 
-public class URITemplate {
+public class URITemplate implements Serializable{
 
     private String uriTemplate;
     private String resourceURI;
@@ -35,13 +36,62 @@ public class URITemplate {
     private Scope scope;
     private String mediationScript;
     private List<Scope> scopes = new ArrayList<Scope>();
+    private Map<String, String> mediationScripts = new HashMap<String, String>();
 
     public String getMediationScript() {
         return mediationScript;
     }
 
+
     public void setMediationScript(String mediationScript) {
         this.mediationScript = mediationScript;
+    }
+
+    /**
+     * Set mediation script for a given http method
+     * @param method http method name
+     * @param mediationScript mediation script content
+     */
+    public void setMediationScripts(String method, String mediationScript){
+        if (mediationScript != null  && !mediationScript.trim().equals("") && !mediationScript.trim().equals("null")){
+            mediationScripts.put(method, mediationScript);
+        }
+    }
+
+    /**
+     * Generating the script by aggregating scripts of each http method to form a single script in to be
+     * used when generating synapse configuration file.
+     *
+     * @return aggregated script in the following format,
+     * if (http-method = 'GET'){
+     *     //script for GET
+     * }
+     * ....
+     * ....
+     * if (http-method = 'POST'){
+     *     //script for POST
+     * }
+     */
+    public String getAggregatedMediationScript(){
+        if (mediationScripts.isEmpty()){
+            return "null";
+        }else if (mediationScripts.size() == 1 && httpVerbs.size() == 1){
+            return mediationScript;
+        }else{
+            StringBuilder aggregatedScript = new StringBuilder();
+
+            for (Map.Entry<String, String> entry : mediationScripts.entrySet()){
+                String httpMethod = entry.getKey();
+                String mediationScript = entry.getValue();
+
+                aggregatedScript.append("if (mc.getProperty('REST_METHOD') == '" + httpMethod + "'){");
+                aggregatedScript.append(mediationScript);
+                aggregatedScript.append("}");
+
+            }
+
+            return aggregatedScript.toString();
+        }
     }
 
     public String getThrottlingTier() {

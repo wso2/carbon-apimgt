@@ -12,8 +12,7 @@
  var i=0, tiers = outputs.tiers;
  %>
  <script>
- var apiViewUrl = '<%=httpsUrl%><%=site.context%>/apis/info';
- var appAddUrl = '<%=httpsUrl%><%=request.getRequestURI()%>';
+ var apiViewUrl = '<%= jagg.url('/apis/info')%>';
  </script>
 <div class="content-section shadow-up">
 <div class="content-data">

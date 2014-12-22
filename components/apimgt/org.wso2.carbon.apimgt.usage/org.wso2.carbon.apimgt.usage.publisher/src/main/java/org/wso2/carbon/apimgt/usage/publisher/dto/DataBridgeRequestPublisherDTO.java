@@ -37,7 +37,6 @@ public class DataBridgeRequestPublisherDTO extends RequestPublisherDTO {
         setApiPublisher(requestPublisherDTO.getApiPublisher());
         setApplicationName(requestPublisherDTO.getApplicationName());
         setApplicationId(requestPublisherDTO.getApplicationId());
-        setAccessLevel(requestPublisherDTO.getAccessLevel());
     }
 
     public static String getStreamDefinition() {
@@ -64,8 +63,7 @@ public class DataBridgeRequestPublisherDTO extends RequestPublisherDTO {
                 "          {'name':'hostName','type':'STRING'}," +
                 "          {'name':'apiPublisher','type':'STRING'}," +
                 "          {'name':'applicationName','type':'STRING'}," +
-                "          {'name':'applicationId','type':'STRING'}," +
-                "          {'name':'accessLevel','type':'STRING'}" +
+                "          {'name':'applicationId','type':'STRING'}" +
                 "  ]" +
                 "}";
 
@@ -75,7 +73,7 @@ public class DataBridgeRequestPublisherDTO extends RequestPublisherDTO {
     public Object createPayload(){
         return new Object[]{getConsumerKey(),getContext(),getApi_version(),getApi(), getResourcePath(),getMethod(),
                             getVersion(), getRequestCount(),getRequestTime(),getUsername(),getTenantDomain(),getHostName(),
-                            getApiPublisher(), getApplicationName(), getApplicationId(),getAccessLevel()};
+                            getApiPublisher(), getApplicationName(), getApplicationId()};
         
     }
 

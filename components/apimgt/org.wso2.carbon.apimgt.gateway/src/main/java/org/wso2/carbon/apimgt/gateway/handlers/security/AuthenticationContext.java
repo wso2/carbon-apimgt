@@ -32,6 +32,16 @@ public class AuthenticationContext {
     private String applicationId;
     private String applicationName;
     private String consumerKey;
+    private String subscriber;
+
+
+    public String getSubscriber() {
+        return subscriber;
+    }
+
+    public void setSubscriber(String subscriber) {
+        this.subscriber = subscriber;
+    }
 
     public boolean isAuthenticated() {
         return authenticated;

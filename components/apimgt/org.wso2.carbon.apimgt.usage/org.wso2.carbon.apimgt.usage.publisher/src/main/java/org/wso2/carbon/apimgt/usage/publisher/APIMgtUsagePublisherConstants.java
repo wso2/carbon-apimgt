@@ -45,10 +45,8 @@ public final class APIMgtUsagePublisherConstants {
     public static final String  API_MANAGER_RESPONSE_STREAM_NAME = "org.wso2.apimgt.statistics.response";
     public static final String  API_MANAGER_RESPONSE_STREAM_VERSION = "1.0.0";
     public static final String  API_MANAGER_FAULT_STREAM_NAME = "org.wso2.apimgt.statistics.fault";
-    public static final String  API_MANAGER_THROTTLE_STREAM_NAME = "org.wso2.apimgt.statistics.throttle";
     public static final String  API_MANAGER_FAULT_STREAM_VERSION = "1.0.0";
-    public static final String  API_MANAGER_THROTTLE_STREAM_VERSION = "1.0.0";
-
+    
     public static final String API_GOOGLE_ANALYTICS_TRACKING_ENABLED = "Enabled";
     public static final String API_GOOGLE_ANALYTICS_TRACKING_ID = "TrackingID";
     

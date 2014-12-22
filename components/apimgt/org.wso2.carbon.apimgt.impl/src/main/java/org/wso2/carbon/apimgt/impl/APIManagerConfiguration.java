@@ -17,12 +17,12 @@
 package org.wso2.carbon.apimgt.impl;
 
 import org.apache.axiom.om.OMElement;
+import org.apache.axiom.om.OMException;
 import org.apache.axiom.om.impl.builder.StAXOMBuilder;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.APIStore;
 import org.wso2.carbon.apimgt.impl.dto.Environment;
@@ -89,12 +89,21 @@ public class APIManagerConfiguration {
             readChildElements(builder.getDocumentElement(), new Stack<String>());
             initialized = true;
         } catch (IOException e) {
+            log.error(e.getMessage());
             throw new APIManagementException("I/O error while reading the API manager " +
                     "configuration: " + filePath, e);
         } catch (XMLStreamException e) {
+            log.error(e.getMessage());
             throw new APIManagementException("Error while parsing the API manager " +
                     "configuration: " + filePath, e);
-        } finally {
+        } catch (OMException e){
+            log.error(e.getMessage());
+            throw new APIManagementException("Error while parsing API Manager configuration: " + filePath, e);
+        } catch (Exception e){
+            log.error(e.getMessage());
+            throw new APIManagementException("Unexpected error occurred while parsing configuration: " + filePath, e);
+        }
+        finally {
             IOUtils.closeQuietly(in);
         }
     }

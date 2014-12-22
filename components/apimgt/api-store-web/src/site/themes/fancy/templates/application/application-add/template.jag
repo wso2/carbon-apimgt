@@ -12,8 +12,7 @@
  var i=0, tiers = outputs.tiers;
  %>
  <script>
- var apiViewUrl = '<%=site.context%>/apis/info';
- var appAddUrl = '<%=httpsUrl%><%=request.getRequestURI()%>';
+ var apiViewUrl = '<%= jagg.url('/apis/info') %>';
  </script>
 <div class="title-section">
            <h2><%=i18n.localize("applications")%></h2>
@@ -75,8 +74,8 @@ An application is a logical collection of APIs. Applications allow you to use a 
                     <label class="control-label" for="callback-url" style="padding-top: 5px;"><%=i18n.localize("callbackUrl")%></label>
                     <div class="controls">
                         <input type="text" class="validInput" style="width:400px;" maxlength="400" name="callback-url"  id="callback-url"/>
-                        <a class="icon-question-sign help_popup" onclick="javascript:$('#callback_help').toggle('fast')"></a>
-                        <p id="callback_help" class="hide"><%=i18n.localize("callBackHelpMsg")%></p>
+                        <a class="icon-question-sign help_popup"></a>
+                        <div id="callback_help"></div>
                     </div>
                 </div>
                 <div class="control-group">
@@ -85,7 +84,7 @@ An application is a logical collection of APIs. Applications allow you to use a 
                          <textarea id="description" maxlength="400" style="width:400px;" type="text"></textarea>
                 </div>
                 <div class="form-actions">
-                    <input type="submit" id="application-add-button" class="btn btn-primary" value="<%=i18n.localize("add")%>"/>
+                    <input type="submit" id="application-add-button" class="btn btn-primary" onclick="jagg.sessionAwareJS({redirect:'/site/pages/applications.jag'})" value="<%=i18n.localize("add")%>"/>
                 </div>
 
             </div>
