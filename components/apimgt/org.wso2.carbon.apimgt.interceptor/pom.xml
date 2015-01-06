@@ -1,34 +1,35 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
-  <parent>
-	<groupId>org.wso2.carbon</groupId>
-	<artifactId>apimgt</artifactId>
-	<version>4.3.0-SNAPSHOT</version>
-	<relativePath>../pom.xml</relativePath>
-  </parent>
+    <parent>
+        <groupId>org.wso2.carbon</groupId>
+        <artifactId>apimgt</artifactId>
+        <version>4.3.0-SNAPSHOT</version>
+        <relativePath>../pom.xml</relativePath>
+    </parent>
 
-  <modelVersion>4.0.0</modelVersion>
-  <groupId>org.wso2.carbon</groupId>
-  <artifactId>org.wso2.carbon.apimgt.interceptor</artifactId>
-  <version>4.3.0-SNAPSHOT</version>
-  <packaging>bundle</packaging>
-  <name>WSO2 Carbon - API Management Interceptor </name>
-   
-  <dependencies>
-	<dependency>
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>org.wso2.carbon</groupId>
+    <artifactId>org.wso2.carbon.apimgt.interceptor</artifactId>
+    <version>4.3.0-SNAPSHOT</version>
+    <packaging>bundle</packaging>
+    <name>WSO2 Carbon - API Management Interceptor</name>
+
+    <dependencies>
+        <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.tomcat</artifactId>
-            <version>${wso2carbon.version}</version>
+            <!--<version>${wso2carbon.version}</version>-->
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.tomcat.ext</artifactId>
-            <version>${wso2carbon.version}</version>
+            <!--<version>${wso2carbon.version}</version>-->
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.core</artifactId>
-            <version>${wso2carbon.version}</version>
+            <!--<version>${wso2carbon.version}</version>-->
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
@@ -38,12 +39,12 @@
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.logging</artifactId>
-             <version>${wso2carbon.version}</version>
+            <!--<version>${wso2carbon.version}</version>-->
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.apimgt.core</artifactId>
-             <version>${apim.version}</version>
+            <version>${apim.version}</version>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
@@ -55,11 +56,11 @@
             <artifactId>org.wso2.carbon.apimgt.keymgt.stub</artifactId>
             <version>${apim.version}</version>
         </dependency>
-   </dependencies>
+    </dependencies>
 
-   <build>
-	<plugins>
-   	   <plugin>
+    <build>
+        <plugins>
+            <plugin>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>maven-bundle-plugin</artifactId>
                 <version>1.4.0</version>
@@ -99,11 +100,11 @@
                     </execution>
                 </executions>
             </plugin>
-      </plugins>
+        </plugins>
     </build>
     <properties>
-	<apim.version>4.3.0-SNAPSHOT</apim.version>
-	<wso2carbon.version>4.3.0-SNAPSHOT</wso2carbon.version>
+        <apim.version>4.3.0-SNAPSHOT</apim.version>
+        <wso2carbon.version>4.3.0-SNAPSHOT</wso2carbon.version>
     </properties>
 
 </project>
