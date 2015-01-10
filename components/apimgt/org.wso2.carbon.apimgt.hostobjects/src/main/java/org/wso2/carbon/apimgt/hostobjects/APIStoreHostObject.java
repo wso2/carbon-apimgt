@@ -57,7 +57,6 @@ import org.wso2.carbon.authenticator.stub.AuthenticationAdminStub;
 import org.wso2.carbon.base.MultitenantConstants;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.core.util.PermissionUpdateUtil;
-import org.wso2.carbon.identity.base.IdentityConstants;
 import org.wso2.carbon.identity.oauth.config.OAuthServerConfiguration;
 import org.wso2.carbon.identity.oauth.internal.OAuthComponentServiceHolder;
 import org.wso2.carbon.registry.core.RegistryConstants;
@@ -641,24 +640,25 @@ public class APIStoreHostObject extends ScriptableObject {
                                            Object[] args, Function funObj)
             throws ScriptException, APIManagementException {
 
-        if (args != null && isStringArray(args)) {
-            APIInfoDTO apiInfo = new APIInfoDTO();
-            apiInfo.setProviderId((String) args[0]);
-            apiInfo.setApiName((String) args[1]);
-            apiInfo.setVersion((String) args[2]);
-            apiInfo.setContext((String) args[3]);
-            try {
-                SubscriberKeyMgtClient keyMgtClient = HostObjectUtils.getKeyManagementClient();
-                return keyMgtClient.getAccessKey((String) args[5], apiInfo, (String) args[4], (String) args[6], (String) args[7]);
-            } catch (Exception e) {
-                String msg = "Error while obtaining access tokens";
-                handleException(msg, e);
-                return null;
-            }
-        } else {
-            handleException("Invalid input parameters.");
-            return null;
-        }
+//        if (args != null && isStringArray(args)) {
+////            APIInfoDTO apiInfo = new APIInfoDTO();
+////            apiInfo.setProviderId((String) args[0]);
+////            apiInfo.setApiName((String) args[1]);
+////            apiInfo.setVersion((String) args[2]);
+////            apiInfo.setContext((String) args[3]);
+////            try {
+////                SubscriberKeyMgtClient keyMgtClient = HostObjectUtils.getKeyManagementClient();
+////                return keyMgtClient.getAccessKey((String) args[5], apiInfo, (String) args[4], (String) args[6], (String) args[7]);
+////            } catch (Exception e) {
+////                String msg = "Error while obtaining access tokens";
+////                handleException(msg, e);
+//                return null;
+//            }
+//        } else {
+//            handleException("Invalid input parameters.");
+//            return null;
+//        }
+        return null;
     }
 
     /*

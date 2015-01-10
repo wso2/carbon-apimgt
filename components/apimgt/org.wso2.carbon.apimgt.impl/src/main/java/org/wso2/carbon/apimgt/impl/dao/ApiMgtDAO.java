@@ -4950,8 +4950,10 @@ public class ApiMgtDAO {
             		prepStmt.close();
 
             		subscribedApplications.add(info.applicationId);
+                    // catching the exception because when copy the api without the option "require re-subscription"
+                    // need to go forward rather throwing the exception
                 } catch (SubscriptionAlreadyExistingException e) {
-                    log.error(e.getMessage(),e);
+                    log.error("Error while adding subscription " + e.getMessage(), e);
                 }
             }
 
@@ -4965,9 +4967,12 @@ public class ApiMgtDAO {
                 if (!subscribedApplications.contains(applicationId)) {
                     apiId.setTier(rs.getString("TIER_ID"));
                     try {
-                        addSubscription(apiId, rs.getString("CONTEXT"), applicationId, APIConstants.SubscriptionStatus.UNBLOCKED);
+                        addSubscription(apiId, rs.getString("CONTEXT"), applicationId, APIConstants.SubscriptionStatus
+                                .UNBLOCKED);
+                        // catching the exception because when copy the api without the option "require re-subscription"
+                        // need to go forward rather throwing the exception
                     } catch (SubscriptionAlreadyExistingException e) {
-                        log.error(e.getMessage(),e);
+                        log.error("Error while adding subscription" + e.getMessage(), e);
                     }
                 }
             }

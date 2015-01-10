@@ -19,22 +19,19 @@
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.tomcat</artifactId>
-            <!--<version>${wso2carbon.version}</version>-->
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.tomcat.ext</artifactId>
-            <!--<version>${wso2carbon.version}</version>-->
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.core</artifactId>
-            <!--<version>${wso2carbon.version}</version>-->
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.throttle.core</artifactId>
-            <version>${wso2carbon.version}</version>
+            <!--version>${wso2carbon.version}</version-->
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>

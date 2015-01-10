@@ -16,17 +16,17 @@
     <url>http://wso2.org</url>
 
     <dependencies>
-        <dependency>
-            <groupId>rhino.wso2</groupId>
-            <artifactId>js</artifactId>
-            <version>1.7.0.R4.wso2v1</version>
-        </dependency>
-        <dependency>
-            <groupId>com.google.code.gson</groupId>
-            <artifactId>gson</artifactId>
-            <version>2.1</version>
-            <scope>compile</scope>
-        </dependency>
+    	<dependency>
+           <groupId>rhino.wso2</groupId>
+           <artifactId>js</artifactId>
+           <version>1.7.0.R4.wso2v1</version>
+       </dependency>
+       <dependency>
+           <groupId>com.google.code.gson</groupId>
+           <artifactId>gson</artifactId>
+           <version>2.1</version>
+           <scope>compile</scope>
+       </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.governance.api</artifactId>
@@ -79,12 +79,22 @@
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.user.mgt.stub</artifactId>
-            <version>${wso2carbon.version}</version>
+            <!--version>${wso2carbon.version}</version-->
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.identity.user.registration.stub</artifactId>
-            <version>${wso2carbon.version}</version>
+            <!--version>${wso2carbon.version}</version-->
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.carbon</groupId>
+            <artifactId>org.wso2.carbon.identity.oauth</artifactId>
+            <!--version>${wso2carbon.version}</version-->
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-log4j12</artifactId>
+            <version>1.7.5</version>
         </dependency>
         <dependency>
             <groupId>org.owasp.encoder</groupId>
