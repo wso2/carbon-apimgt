@@ -14,22 +14,22 @@
  ~ See the License for the specific language governing permissions and
  ~ limitations under the License.
 -->
- <project xmlns="http://maven.apache.org/POM/4.0.0"
+<project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
-     <parent>
+    <parent>
         <groupId>org.wso2.carbon</groupId>
         <artifactId>apimgt</artifactId>
         <version>4.3.0-SNAPSHOT</version>
-	<relativePath>../pom.xml</relativePath>
+        <relativePath>../pom.xml</relativePath>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
     <artifactId>org.wso2.carbon.apimgt.gateway</artifactId>
     <packaging>bundle</packaging>
     <version>4.3.0-SNAPSHOT</version>
-	<name>WSO2 Carbon - API Gateway</name>
+    <name>WSO2 Carbon - API Gateway</name>
     <url>http://wso2.org</url>
 
     <dependencies>
@@ -41,17 +41,18 @@
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.core</artifactId>
-			<version>${wso2carbon.version}</version>			
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.carbon</groupId>
+            <artifactId>org.wso2.carbon.registry.core</artifactId>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.mediation.initializer</artifactId>
-			<version>${wso2carbon.version}</version>			
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.throttle.core</artifactId>
-            <version>${wso2carbon.version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.synapse</groupId>
@@ -67,28 +68,25 @@
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.logging</artifactId>
-	    <version>${wso2carbon.version}</version>			
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.apimgt.keymgt.stub</artifactId>
-	    <version>${apim.version}</version>			
+            <version>${apim.version}</version>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
-            <artifactId>org.wso2.carbon.apimgt.impl</artifactId>   
-	    <version>${apim.version}</version>
+            <artifactId>org.wso2.carbon.apimgt.impl</artifactId>
+            <version>${apim.version}</version>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
-            <artifactId>org.wso2.carbon.ui</artifactId>     
-	    <version>${wso2carbon.version}</version>			
+            <artifactId>org.wso2.carbon.ui</artifactId>
         </dependency>
         <dependency>
-             <groupId>org.wso2.carbon</groupId>
-             <artifactId>org.wso2.carbon.utils</artifactId>       
-	     <version>${wso2carbon.version}</version>			 
-         </dependency>
+            <groupId>org.wso2.carbon</groupId>
+            <artifactId>org.wso2.carbon.utils</artifactId>
+        </dependency>
     </dependencies>
 
     <build>
@@ -102,7 +100,7 @@
                     <target>1.5</target>
                 </configuration>
             </plugin>
-	        <plugin>
+            <plugin>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>maven-scr-plugin</artifactId>
             </plugin>
@@ -158,7 +156,7 @@
     </build>
 
     <properties>
-	<apim.version>4.3.0-SNAPSHOT</apim.version>
+        <apim.version>4.3.0-SNAPSHOT</apim.version>
         <wso2carbon.version>4.3.0-SNAPSHOT</wso2carbon.version>
     </properties>
 </project>
