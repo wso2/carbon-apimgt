@@ -85,7 +85,7 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
         if(authenticator != null) {
         	authenticator.destroy();
         } else {
-        	log.warn("Unable to destroy uninitialized authentication hander instance");
+        	log.warn("Unable to destroy uninitialized authentication handler instance");
         }        
     }
 
@@ -99,7 +99,12 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
             if (log.isDebugEnabled()) {
                 logMessageDetails(messageContext);
             }
-            log.error("API authentication failure", e);
+            // We do not need to log authentication failures as errors since these are not product errors.
+            log.warn("API authentication failure due to " +
+                     APISecurityConstants.getAuthenticationFailureMessage(e.getErrorCode()));
+            if(log.isDebugEnabled()){
+                log.debug("API authentication failed with error " + e.getErrorCode(), e);
+            }
             handleAuthFailure(messageContext, e);
         }
         return false;
@@ -190,7 +195,7 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
         OMElement errorMessage = fac.createOMElement("message", ns);
         errorMessage.setText(APISecurityConstants.getAuthenticationFailureMessage(e.getErrorCode()));
         OMElement errorDetail = fac.createOMElement("description", ns);
-        errorDetail.setText(e.getMessage());
+        errorDetail.setText(APISecurityConstants.getFailureMessageDetailDescription(e.getErrorCode(), e.getMessage()));
 
         payload.addChild(errorCode);
         payload.addChild(errorMessage);

@@ -1230,8 +1230,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 			APIUtil.setResourcePermissions(api.getId().getProviderName(), visibility,
 			                               authorizedRoles, apiDefinitionFilePath);
 		} catch (UserStoreException e) {
-			handleException("Failed to set Permission to copied swagger api definistion", e);
-		}
+            handleException("Failed to set permission to copied swagger api definition of:"
+                    + api.getId().getApiName() + " version :" + api.getId().getVersion(), e);
+        }
 
 	}
 	

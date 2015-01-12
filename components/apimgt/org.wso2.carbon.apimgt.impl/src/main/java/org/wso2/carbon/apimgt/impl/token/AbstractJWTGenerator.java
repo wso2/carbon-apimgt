@@ -1,5 +1,5 @@
 /*
-*Copyright (c) 2005-2010, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+*Copyright (c) 2014-2015, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
 *
 *WSO2 Inc. licenses this file to you under the Apache License,
 *Version 2.0 (the "License"); you may not use this file except
@@ -165,9 +165,17 @@ public abstract class AbstractJWTGenerator implements TokenGenerator {
         String jwtHeader = null;
 
         //if signature algo==NONE, header without cert
-        if (signatureAlgorithm.equals(NONE)) {
-            jwtHeader = "{\"typ\":\"JWT\"}";
-        } else if (signatureAlgorithm.equals(SHA256_WITH_RSA)) {
+        if (NONE.equals(signatureAlgorithm)) {
+            StringBuilder jwtHeaderBuilder = new StringBuilder();
+            jwtHeaderBuilder.append("{\"typ\":\"JWT\",");
+            jwtHeaderBuilder.append("\"alg\":\"");
+            jwtHeaderBuilder.append(JWTSignatureAlg.NONE.getJwsCompliantCode());
+            jwtHeaderBuilder.append("\"");
+            jwtHeaderBuilder.append("}");
+
+            jwtHeader = jwtHeaderBuilder.toString();
+
+        } else if (SHA256_WITH_RSA.equals(signatureAlgorithm)) {
             jwtHeader = addCertToHeader(keyValidationInfoDTO.getEndUserName());
         }
         return jwtHeader;
@@ -356,7 +364,8 @@ public abstract class AbstractJWTGenerator implements TokenGenerator {
             //{"typ":"JWT", "alg":"[2]", "x5t":"[1]"}
             jwtHeader.append("{\"typ\":\"JWT\",");
             jwtHeader.append("\"alg\":\"");
-            jwtHeader.append(signatureAlgorithm);
+            jwtHeader.append(SHA256_WITH_RSA.equals(signatureAlgorithm) ?
+                    JWTSignatureAlg.SHA256_WITH_RSA.getJwsCompliantCode() : signatureAlgorithm);
             jwtHeader.append("\",");
 
             jwtHeader.append("\"x5t\":\"");

@@ -35,13 +35,20 @@
 	<dependencies>
 		<dependency>
 			<groupId>org.wso2.carbon</groupId>
-			<artifactId>org.wso2.carbon.identity.core</artifactId>   
-			<version>${wso2carbon.version}</version>			
+			<artifactId>org.wso2.carbon.identity.core</artifactId>
 		</dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
-            <artifactId>org.wso2.carbon.identity.oauth</artifactId>  
-	    <version>${wso2carbon.version}</version>
+            <artifactId>org.wso2.carbon.apimgt.api</artifactId>
+            <version>${apim.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.carbon</groupId>
+            <artifactId>org.wso2.carbon.identity.oauth</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.carbon</groupId>
+            <artifactId>org.wso2.carbon.governance.api</artifactId>
         </dependency>
 		<dependency>
 			<groupId>org.wso2.carbon</groupId>
