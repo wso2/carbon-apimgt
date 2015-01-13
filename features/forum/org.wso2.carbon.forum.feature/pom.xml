@@ -59,10 +59,10 @@
                             <id>org.wso2.carbon.forum</id>
                             <propertiesFile>../../../etc/feature.properties</propertiesFile>
                             <importFeatures>
-                                <importFeatureDef>org.wso2.carbon.core:4.3.0-SNAPSHOT</importFeatureDef>
+                                <importFeatureDef>org.wso2.carbon.core:${carbon.kernel.version}</importFeatureDef>
                             </importFeatures>
                             <includedFeatures>
-                                <includedFeatureDef>org.wso2.carbon:org.wso2.carbon.forum.server.feature:4.3.0-SNAPSHOT</includedFeatureDef>
+                                <includedFeatureDef>org.wso2.carbon:org.wso2.carbon.forum.server.feature:${carbon.platform.version}</includedFeatureDef>
                             </includedFeatures>
                         </configuration>
                     </execution>
