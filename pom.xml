@@ -10,8 +10,8 @@
     <url>http://wso2.org</url>
 
     <modules>
-        <module>service-stubs/org.wso2.carbon.apimgt.handlers.security.stub</module>
-        <module>service-stubs/org.wso2.carbon.apimgt.keymgt.stub</module>
+        <!--module>service-stubs/org.wso2.carbon.apimgt.handlers.security.stub</module>
+        <module>service-stubs/org.wso2.carbon.apimgt.keymgt.stub</module-->
         <module>components/apimgt</module>
         <module>components/forum</module>
         <module>features/apimgt</module>
