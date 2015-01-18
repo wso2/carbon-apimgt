@@ -70,7 +70,8 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
-                <configuration>
+                <version>2.18</version>
+		<configuration>
                     <excludes>
                         <exclude>**/Abstract*</exclude>
                     </excludes>
@@ -83,7 +84,7 @@
             <plugin>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>maven-bundle-plugin</artifactId>
-
+		<version>1.4.0</version>
                 <extensions>true</extensions>
                 <configuration>
                     <instructions>
