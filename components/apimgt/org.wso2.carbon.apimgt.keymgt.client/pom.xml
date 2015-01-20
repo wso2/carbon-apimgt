@@ -61,7 +61,7 @@
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.apimgt.handlers.security.stub</artifactId>
-            <version>${wso2carbon.version}</version>
+            <version>${carbon.platform.version}</version>
         </dependency>
     </dependencies>
 
@@ -104,10 +104,6 @@
             </plugin>
         </plugins>
     </build>
-    <properties>
-        <apim.version>4.3.0-SNAPSHOT</apim.version>
-        <wso2carbon.version>4.3.0-SNAPSHOT</wso2carbon.version>
-    </properties>
 
 </project>
 

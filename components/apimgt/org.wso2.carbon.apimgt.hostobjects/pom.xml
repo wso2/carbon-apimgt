@@ -30,7 +30,7 @@
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.governance.api</artifactId>
-            <version>${wso2carbon.version}</version>
+            <version>${carbon.platform.version}</version>
         </dependency>
         <dependency>
             <groupId>org.jaggeryjs</groupId>
@@ -138,8 +138,4 @@
         </plugins>
     </build>
 
-    <properties>
-        <apim.version>4.3.0-SNAPSHOT</apim.version>
-        <wso2carbon.version>4.3.0-SNAPSHOT</wso2carbon.version>
-    </properties>
 </project>

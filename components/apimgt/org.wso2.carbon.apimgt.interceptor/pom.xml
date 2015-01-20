@@ -99,9 +99,5 @@
             </plugin>
         </plugins>
     </build>
-    <properties>
-        <apim.version>4.3.0-SNAPSHOT</apim.version>
-        <wso2carbon.version>4.3.0-SNAPSHOT</wso2carbon.version>
-    </properties>
 
 </project>
