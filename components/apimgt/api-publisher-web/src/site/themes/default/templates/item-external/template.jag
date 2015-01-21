@@ -18,7 +18,8 @@ var faultSequencesLoaded = false;
 
 <div class="row-fluid">
     <div class="span12">
-        <form method="POST" class="form-horizontal well" id="externalAPIStoresForm" action="<%=site.context%>/site/blocks/item-external/ajax/external.jag"  enctype="multipart/form-data">
+        <form method="POST" class="form-horizontal well" id="externalAPIStoresForm" 
+        action="<%= jagg.url("/site/blocks/item-external/ajax/external.jag")%>"  enctype="multipart/form-data">
             <input type="hidden" name="action" id="action" value="updateExternal"/>
             <input type="hidden" name="name" id="name" value="<%=api.name%>"/>
             <input type="hidden" name="version" id="version" value="<%=api.version%>"/>

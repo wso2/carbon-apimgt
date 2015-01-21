@@ -619,7 +619,14 @@ public class WSO2APIPublisher implements APIPublisher {
                 Resource resource = registry.get(APIConstants.EXTERNAL_API_STORES_LOCATION);
                 String content = new String((byte[]) resource.getContent());
                 OMElement element = AXIOMUtil.stringToOM(content);
-                redirectURL = element.getFirstChildWithName(new QName(APIConstants.EXTERNAL_API_STORES_STORE_URL)).getText();
+                OMElement storeURL=element.getFirstChildWithName(new QName(APIConstants.EXTERNAL_API_STORES_STORE_URL));
+                if(storeURL != null){
+                	redirectURL = storeURL.getText();
+                }else{
+                	String msg = "Store URL not found in External Stores Configuration";
+                    log.error(msg);
+                    throw new APIManagementException(msg);
+                }
 			}
 			return redirectURL;
 		} catch (RegistryException e) {
@@ -634,115 +641,130 @@ public class WSO2APIPublisher implements APIPublisher {
          
     }
 
-    private MultipartEntity getMultipartEntity(API api,String externalPublisher, String action) throws org.wso2.carbon.registry.api.RegistryException, IOException {
+    private MultipartEntity getMultipartEntity(API api,String externalPublisher, String action) 
+    		throws org.wso2.carbon.registry.api.RegistryException, IOException, UserStoreException, APIManagementException {
 
-
-        MultipartEntity entity = new MultipartEntity(HttpMultipartMode.BROWSER_COMPATIBLE);
+		MultipartEntity entity = new MultipartEntity(HttpMultipartMode.BROWSER_COMPATIBLE);
 
         try {
 
 
-        entity.addPart(APIConstants.API_ACTION, new StringBody(action));
+			entity.addPart(APIConstants.API_ACTION, new StringBody(action));
 
-        entity.addPart("name", new StringBody(api.getId().getApiName()));
-        entity.addPart("version", new StringBody(api.getId().getVersion()));
-        entity.addPart("provider", new StringBody(externalPublisher));
-        entity.addPart("description", new StringBody(checkValue(api.getDescription())));
-        entity.addPart("endpoint", new StringBody(checkValue(api.getUrl())));
-        entity.addPart("sandbox", new StringBody(checkValue(api.getSandboxUrl())));
-        entity.addPart("wsdl", new StringBody(checkValue(api.getWsdlUrl())));
-        entity.addPart("wadl", new StringBody(checkValue(api.getWadlUrl())));
-        entity.addPart("endpoint_config",  new StringBody(checkValue(api.getEndpointConfig())));
+			entity.addPart("name", new StringBody(api.getId().getApiName()));
+			entity.addPart("version", new StringBody(api.getId().getVersion()));
+			entity.addPart("provider", new StringBody(externalPublisher));
+			entity.addPart("description", new StringBody(checkValue(api.getDescription())));
+			entity.addPart("endpoint", new StringBody(checkValue(api.getUrl())));
+			entity.addPart("sandbox", new StringBody(checkValue(api.getSandboxUrl())));
+			entity.addPart("wsdl", new StringBody(checkValue(api.getWsdlUrl())));
+			entity.addPart("wadl", new StringBody(checkValue(api.getWadlUrl())));
+			entity.addPart("endpoint_config", new StringBody(checkValue(api.getEndpointConfig())));
 
-        URL url = new URL(getFullRegistryIconUrl(api.getThumbnailUrl()));
-        File fileToUpload = new File("tmp/icon");
-        if(!fileToUpload.exists()){
-        fileToUpload.createNewFile();
-        }
-        FileUtils.copyURLToFile(url, fileToUpload);
-        FileBody fileBody = new FileBody(fileToUpload, "application/octet-stream");
-        entity.addPart("apiThumb", fileBody);
-       // fileToUpload.delete();
+			URL url = new URL(getFullRegistryIconUrl(api.getThumbnailUrl()));
+			File fileToUpload = new File("tmp/icon");
+			if (!fileToUpload.exists()) {
+				fileToUpload.createNewFile();
+			}
+			FileUtils.copyURLToFile(url, fileToUpload);
+			FileBody fileBody = new FileBody(fileToUpload, "application/octet-stream");
+			entity.addPart("apiThumb", fileBody);
+			// fileToUpload.delete();
 
-        StringBuilder tagsSet = new StringBuilder("");
+			StringBuilder tagsSet = new StringBuilder("");
 
-        Iterator it = api.getTags().iterator();
-        int j = 0;
-        while (it.hasNext()) {
-            Object tagObject = it.next();
-            tagsSet.append((String) tagObject);
-            if (j != api.getTags().size() - 1) {
-                tagsSet.append(",");
-            }
-            j++;
-        }
+			Iterator it = api.getTags().iterator();
+			int j = 0;
+			while (it.hasNext()) {
+				Object tagObject = it.next();
+				tagsSet.append((String) tagObject);
+				if (j != api.getTags().size() - 1) {
+					tagsSet.append(",");
+				}
+				j++;
+			}
 
-        entity.addPart("tags", new StringBody(checkValue(tagsSet.toString())));
-        StringBuilder tiersSet = new StringBuilder("");
-        Iterator tier = api.getAvailableTiers().iterator();
-        int k = 0;
-        while (tier.hasNext()) {
-            Object tierObject = tier.next();
-            Tier availTier=(Tier) tierObject;
-            tiersSet.append(availTier.getName());
-            if (k != api.getAvailableTiers().size() - 1) {
-                tiersSet.append(",");
-            }
-            k++;
-        }
-        entity.addPart("tiersCollection", new StringBody(checkValue(tiersSet.toString())));
-        entity.addPart("context", new StringBody(api.getContext()));
-        entity.addPart("bizOwner", new StringBody(checkValue(api.getBusinessOwner())));
-        entity.addPart("bizOwnerMail", new StringBody(checkValue(api.getBusinessOwnerEmail())));
-        entity.addPart("techOwnerMail", new StringBody(checkValue(api.getTechnicalOwnerEmail())));
-        entity.addPart("techOwner", new StringBody(checkValue(api.getTechnicalOwner())));
-        entity.addPart("visibility", new StringBody(api.getVisibility()));
-        entity.addPart("roles", new StringBody(checkValue(api.getVisibleRoles())));
-        entity.addPart("endpointType", new StringBody(checkValue(String.valueOf(api.isEndpointSecured()))));
-        entity.addPart("epUsername", new StringBody(checkValue(api.getEndpointUTUsername())));
-        entity.addPart("epPassword", new StringBody(checkValue(api.getEndpointUTPassword())));
-        entity.addPart("advertiseOnly",  new StringBody("true"));
+			entity.addPart("tags", new StringBody(checkValue(tagsSet.toString())));
+			StringBuilder tiersSet = new StringBuilder("");
+			Iterator tier = api.getAvailableTiers().iterator();
+			int k = 0;
+			while (tier.hasNext()) {
+				Object tierObject = tier.next();
+				Tier availTier = (Tier) tierObject;
+				tiersSet.append(availTier.getName());
+				if (k != api.getAvailableTiers().size() - 1) {
+					tiersSet.append(",");
+				}
+				k++;
+			}
+			entity.addPart("tiersCollection", new StringBody(checkValue(tiersSet.toString())));
+			entity.addPart("context", new StringBody(api.getContext()));
+			entity.addPart("bizOwner", new StringBody(checkValue(api.getBusinessOwner())));
+			entity.addPart("bizOwnerMail", new StringBody(checkValue(api.getBusinessOwnerEmail())));
+			entity.addPart("techOwnerMail",
+			               new StringBody(checkValue(api.getTechnicalOwnerEmail())));
+			entity.addPart("techOwner", new StringBody(checkValue(api.getTechnicalOwner())));
+			entity.addPart("visibility", new StringBody(api.getVisibility()));
+			entity.addPart("roles", new StringBody(checkValue(api.getVisibleRoles())));
+			entity.addPart("endpointType",
+			               new StringBody(checkValue(String.valueOf(api.isEndpointSecured()))));
+			entity.addPart("epUsername", new StringBody(checkValue(api.getEndpointUTUsername())));
+			entity.addPart("epPassword", new StringBody(checkValue(api.getEndpointUTPassword())));
 
-        APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
-                    getAPIManagerConfigurationService().getAPIManagerConfiguration();
-        entity.addPart("redirectURL",  new StringBody(checkValue(config.getFirstProperty(APIConstants.EXTERNAL_API_STORES_STORE_URL))));
-        if(api.getTransports()==null){
-            entity.addPart("http_checked",new StringBody(""));
-            entity.addPart("https_checked", new StringBody(""));
-        }else{
-            String[] transports=api.getTransports().split(",");
-            if(transports.length==1){
-                if("https".equals(transports[0])){
-                    entity.addPart("http_checked",new StringBody(""));
-                    entity.addPart("https_checked", new StringBody(transports[0]));
+			entity.addPart("apiOwner", new StringBody(api.getId().getProviderName()));
+			entity.addPart("advertiseOnly", new StringBody("true"));
 
-                }else{
-                    entity.addPart("https_checked",new StringBody(""));
-                    entity.addPart("http_checked", new StringBody(transports[0]));
-                }
-            }else{
-                entity.addPart("http_checked",new StringBody("http"));
-                entity.addPart("https_checked", new StringBody("https"));
+        
+			String tenantDomain =
+			                      MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(api.getId()
+			                                                                                         .getProviderName()));
+			int tenantId =
+			               ServiceReferenceHolder.getInstance().getRealmService()
+			                                     .getTenantManager().getTenantId(tenantDomain);
+			entity.addPart("redirectURL", new StringBody(getExternalStoreRedirectURL(tenantId)));
+			if (api.getTransports() == null) {
+				entity.addPart("http_checked", new StringBody(""));
+				entity.addPart("https_checked", new StringBody(""));
+			} else {
+				String[] transports = api.getTransports().split(",");
+				if (transports.length == 1) {
+					if ("https".equals(transports[0])) {
+						entity.addPart("http_checked", new StringBody(""));
+						entity.addPart("https_checked", new StringBody(transports[0]));
 
-            }
-        }
-        entity.addPart("resourceCount", new StringBody(String.valueOf(api.getUriTemplates().size())));
+					} else {
+						entity.addPart("https_checked", new StringBody(""));
+						entity.addPart("http_checked", new StringBody(transports[0]));
+					}
+				} else {
+					entity.addPart("http_checked", new StringBody("http"));
+					entity.addPart("https_checked", new StringBody("https"));
 
-        Iterator urlTemplate = api.getUriTemplates().iterator();
-        int i=0;
-        while (urlTemplate.hasNext()) {
-            Object templateObject = urlTemplate.next();
-            URITemplate template=(URITemplate)templateObject;
-            entity.addPart("uriTemplate-" + i, new StringBody(template.getUriTemplate()));
-            entity.addPart("resourceMethod-" + i, new StringBody(template.getMethodsAsString().replaceAll("\\s",",")));
-            entity.addPart("resourceMethodAuthType-" + i, new StringBody(String.valueOf(template.getAuthTypeAsString().replaceAll("\\s",","))));
-            entity.addPart("resourceMethodThrottlingTier-" + i, new StringBody(template.getThrottlingTiersAsString().replaceAll("\\s",",")));
-            i++;
-        }
-        return entity;
-        } catch (UnsupportedEncodingException e) {
-           throw new IOException("Error while adding the API to external APIStore :",e);
-        }
+				}
+			}
+			entity.addPart("resourceCount",
+			               new StringBody(String.valueOf(api.getUriTemplates().size())));
+
+			Iterator urlTemplate = api.getUriTemplates().iterator();
+			int i = 0;
+			while (urlTemplate.hasNext()) {
+				Object templateObject = urlTemplate.next();
+				URITemplate template = (URITemplate) templateObject;
+				entity.addPart("uriTemplate-" + i, new StringBody(template.getUriTemplate()));
+				entity.addPart("resourceMethod-" + i,
+				               new StringBody(template.getMethodsAsString().replaceAll("\\s", ",")));
+				entity.addPart("resourceMethodAuthType-" + i,
+				               new StringBody(String.valueOf(template.getAuthTypeAsString()
+				                                                     .replaceAll("\\s", ","))));
+				entity.addPart("resourceMethodThrottlingTier-" + i,
+				               new StringBody(template.getThrottlingTiersAsString()
+				                                      .replaceAll("\\s", ",")));
+				i++;
+			}
+			return entity;
+		} catch (UnsupportedEncodingException e) {
+			throw new IOException("Error while adding the API to external APIStore :", e);
+		}
     }
 
     private static String getFullRegistryIconUrl(String postfixUrl) {

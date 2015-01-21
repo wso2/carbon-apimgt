@@ -58,48 +58,34 @@ $(document).ready(function(){
         });
 
 
-    var v = $("#manage_form").validate({
-        submitHandler: function(form) {
-        if(!validate_tiers()){
-            return false;
-        }
-        var designer = APIDesigner();
-        $('#swagger').val(JSON.stringify(designer.api_doc));
-        $('#saveMessage').show();
-        $('#saveButtons').hide();        
-        $(form).ajaxSubmit({
-            success:function(responseText, statusText, xhr, $form) {
-                $('#saveMessage').hide();
-                $('#saveButtons').show();                
-                if (!responseText.error) {                
-                    $( "body" ).trigger( "api_saved" );       
-                } else {
-                     if (responseText.message == "timeout") {
-                         if (ssoEnabled) {
-                             var currentLoc = window.location.pathname;
-                             if (currentLoc.indexOf(".jag") >= 0) {
-                                 location.href = "add.jag";
-                             } else {
-                                 location.href = 'site/pages/add.jag';
-                             }
-                         } else {
-                             jagg.showLogin();
-                         }
-                     } else {
-                         jagg.message({content:responseText.message,type:"error"});
-                     }
-                }
-            }, dataType: 'json'
-        });
-        }
-    });
+    
 
     loadInSequences();
     loadOutSequences();
     loadFaultSequences();
+
+    if ( $("#toggleSequence").attr('checked') ) {
+	$('#toggleSequence').parent().next().show();
+    } 
+    else {
+	$('#toggleSequence').parent().next().hide();
+    }
+    
 });
 
-
+$('.js_hidden_section_title').click(function(){
+        var $next = $(this).next();
+        var $i = $('i',this);
+        if($next.is(":visible")){
+            $next.hide();
+            $i.removeClass('icon-chevron-down');
+            $i.addClass('icon-chevron-right');
+        }else{
+            $next.show();
+            $i.removeClass('icon-chevron-right');
+            $i.addClass('icon-chevron-down');
+        }
+    });
 
 function loadInSequences() {
 
@@ -245,6 +231,9 @@ $("#toggleSequence").change(function(e){
         loadFaultSequences();
     }else{
         $(this).parent().next().hide();
+        $('#faultSequence').val('');
+        $('#inSequence').val('') ;
+        $('#outSequence').val('');
     }
 });
 

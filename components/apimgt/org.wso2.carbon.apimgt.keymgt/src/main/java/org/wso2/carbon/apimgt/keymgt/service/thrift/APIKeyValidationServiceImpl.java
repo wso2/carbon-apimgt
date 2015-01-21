@@ -20,14 +20,16 @@ package org.wso2.carbon.apimgt.keymgt.service.thrift;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.thrift.TException;
-import org.wso2.carbon.apimgt.impl.generated.thrift.*;
+import org.wso2.carbon.apimgt.impl.generated.thrift.APIKeyValidationInfoDTO;
+import org.wso2.carbon.apimgt.impl.generated.thrift.APIKeyValidationService;
+import org.wso2.carbon.apimgt.impl.generated.thrift.APIManagementException;
+import org.wso2.carbon.apimgt.impl.generated.thrift.URITemplate;
 import org.wso2.carbon.apimgt.keymgt.APIKeyMgtException;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.core.AbstractAdmin;
 import org.wso2.carbon.identity.thrift.authentication.ThriftAuthenticatorService;
 import org.wso2.carbon.utils.ServerConstants;
 import org.wso2.carbon.utils.ThriftSession;
-import org.wso2.carbon.context.PrivilegedCarbonContext;
-import org.wso2.carbon.context.RegistryType;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
 import java.util.ArrayList;
@@ -147,6 +149,7 @@ public class APIKeyValidationServiceImpl extends AbstractAdmin
                         thriftKeyValidationInfoDTO.setApiName(keyValidationInfoDTO.getApiName());
                         thriftKeyValidationInfoDTO.setIssuedTime(keyValidationInfoDTO.getIssuedTime());
                         thriftKeyValidationInfoDTO.setValidityPeriod(keyValidationInfoDTO.getValidityPeriod());
+                        thriftKeyValidationInfoDTO.setAuthorizedDomains(keyValidationInfoDTO.getAuthorizedDomains());
                     } finally {
                          PrivilegedCarbonContext.endTenantFlow();
                     }

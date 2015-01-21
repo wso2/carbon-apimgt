@@ -24,6 +24,7 @@ import org.wso2.carbon.user.api.UserStoreManager;
 import org.wso2.carbon.user.core.UserRealm;
 import org.wso2.carbon.user.core.config.RealmConfiguration;
 import org.wso2.carbon.user.core.service.RealmService;
+import org.wso2.carbon.user.core.util.UserCoreUtil;
 
 import javax.cache.Cache;
 import javax.cache.Caching;
@@ -120,23 +121,36 @@ public class ExtendedPasswordGrantHandler extends PasswordGrantHandler {
 
                     if (requiredHeaderClaimUris != null && requiredHeaderClaimUris.size() > 0) {
                         // Get user's claim values from the default profile.
-                        Claim[] mapClaimValues = getUserClaimValues(oAuth2AccessTokenReqDTO, userStoreManager);
-                        ResponseHeader header;
-                        for (Iterator<String> iterator = requiredHeaderClaimUris.iterator(); iterator.hasNext(); ) {
+                        String userStoreDomain = UserCoreUtil.extractDomainFromName(tokReqMsgCtx
+                                .getAuthorizedUser());
 
-                            String claimUri = iterator.next();
+                        String endUsernameWithDomain = UserCoreUtil.addDomainToName
+                                (oAuth2AccessTokenReqDTO.getResourceOwnerUsername(),
+                                        userStoreDomain);
 
-                            for (int j = 0; j < mapClaimValues.length; j++) {
-                                Claim claim = mapClaimValues[j];
-                                if (claimUri.equals(claim.getClaimUri())) {
-                                    header = new ResponseHeader();
-                                    header.setKey(claim.getDisplayTag());
-                                    header.setValue(claim.getValue());
-                                    respHeaders.add(header);
-                                    break;
+                        Claim[] mapClaimValues = getUserClaimValues(endUsernameWithDomain,userStoreManager);
+
+                        if(mapClaimValues != null && mapClaimValues.length > 0){
+                            ResponseHeader header;
+                            for (Iterator<String> iterator = requiredHeaderClaimUris.iterator(); iterator.hasNext(); ) {
+                                String claimUri = iterator.next();
+
+                                for (int j = 0; j < mapClaimValues.length; j++) {
+                                    Claim claim = mapClaimValues[j];
+                                    if (claimUri.equals(claim.getClaimUri())) {
+                                        header = new ResponseHeader();
+                                        header.setKey(claim.getDisplayTag());
+                                        header.setValue(claim.getValue());
+                                        respHeaders.add(header);
+                                        break;
+                                    }
                                 }
                             }
                         }
+                        else if(log.isDebugEnabled()){
+                           log.debug("No claim values for user : "+endUsernameWithDomain);
+                        }
+
                     }
                 } catch (Exception e) {
                     throw new IdentityOAuth2Exception(e.getMessage(), e);
@@ -268,17 +282,19 @@ public class ExtendedPasswordGrantHandler extends PasswordGrantHandler {
         return username;
     }
 
-    private Claim[] getUserClaimValues(OAuth2AccessTokenReqDTO tokenReqDTO, UserStoreManager userStoreManager) throws UserStoreException {
-        Claim[] userClaims = userClaimsCache.getValueFromCache(tokenReqDTO.getResourceOwnerUsername());
+    private Claim[] getUserClaimValues(String authorizedUser, UserStoreManager userStoreManager)
+            throws
+            UserStoreException {
+        Claim[] userClaims = userClaimsCache.getValueFromCache(authorizedUser);
         if(userClaims != null){
             return userClaims;
         }else{
             if(log.isDebugEnabled()){
-                log.debug("Cache miss for user claims. Username :" + tokenReqDTO.getResourceOwnerUsername());
+                log.debug("Cache miss for user claims. Username :" + authorizedUser);
             }
             userClaims = userStoreManager.getUserClaimValues(
-                    tokenReqDTO.getResourceOwnerUsername(), null);
-            userClaimsCache.addToCache(tokenReqDTO.getResourceOwnerUsername(),userClaims);
+                    authorizedUser, null);
+            userClaimsCache.addToCache(authorizedUser,userClaims);
             return userClaims;
         }
     }

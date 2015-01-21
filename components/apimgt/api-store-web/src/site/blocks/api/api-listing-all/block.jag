@@ -15,7 +15,8 @@ jagg.block("api/api-listing-all", {
                 tag = request.getParameter("tag"), page = request.getParameter("page"),
                 query = request.getParameter("query")
                 apiStatus = request.getParameter("apiStatus");
-                
+
+        var log = new Log();
                 
         if(tag == null) { tag = inputs.tag;}
         tenantDomain=request.getParameter("tenant");
@@ -33,9 +34,20 @@ jagg.block("api/api-listing-all", {
         } else if (query) {
             mod = jagg.module("search");
             response = mod.searchPaginatedAPIs(query,tenantDomain,start,end);
-            apis = response.result.apis;
-            error = response.result.error;
-            message = response.result.message;
+            if(response.error){
+                error = true;
+                message = response.message;
+                return {
+                    "error":error,
+                    "message":message
+                };
+            }
+            else{
+                apis = response.result.apis;
+                error = response.result.error;
+                message = response.result.message;
+            }
+
         } else if (apiStatus == "PROTOTYPED" || apiStatus == "prototyped") {
         	mod = jagg.module("api");
             response = mod.getAllPaginatedPrototypedAPIs(tenantDomain,start,end);

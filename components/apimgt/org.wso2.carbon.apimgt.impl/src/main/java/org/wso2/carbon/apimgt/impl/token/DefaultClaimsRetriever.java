@@ -20,6 +20,7 @@ package org.wso2.carbon.apimgt.impl.token;
 
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
+import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.utils.ClaimCache;
 import org.wso2.carbon.apimgt.impl.utils.ClaimCacheKey;
 import org.wso2.carbon.apimgt.impl.utils.UserClaims;
@@ -71,7 +72,7 @@ public class DefaultClaimsRetriever implements ClaimsRetriever {
     public SortedMap<String, String> getClaims(String endUserName) throws APIManagementException {
         SortedMap<String, String> claimValues;
         try {
-            int tenantId = JWTGenerator.getTenantId(endUserName);
+            int tenantId = APIUtil.getTenantId(endUserName);
             //check in local cache
             String key = endUserName + ":" + tenantId;
             ClaimCacheKey cacheKey = new ClaimCacheKey(key);

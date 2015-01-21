@@ -26,6 +26,8 @@ package org.wso2.carbon.apimgt.api.model;
 public class Tag {
 
     private String name;
+    private String description;
+    private boolean thumbnailExists;
     private int noOfOccurrences;
 
     public Tag(String name) {
@@ -47,5 +49,25 @@ public class Tag {
 
     public void setNoOfOccurrences(int noOfOccurrences) {
         this.noOfOccurrences = noOfOccurrences;
+    }
+
+    public String getDescription() {
+
+        if(description != null){
+            return description;
+        }
+        return ""; // Return empty string if there is no description.
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public boolean isThumbnailExists() {
+        return thumbnailExists;
+    }
+
+    public void setThumbnailExists(boolean thumbnailExists) {
+        this.thumbnailExists = thumbnailExists;
     }
 }

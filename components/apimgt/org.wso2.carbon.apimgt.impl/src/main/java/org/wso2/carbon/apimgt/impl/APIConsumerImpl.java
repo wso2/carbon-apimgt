@@ -52,8 +52,6 @@ import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 import javax.cache.Caching;
 
 import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * This class provides the core API store functionality. It is implemented in a very
@@ -841,17 +839,42 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         			allAPIs.add(api);
         		}
         		
-        		if (!APIUtil.isAllowDisplayMultipleVersions()) {
-        			recentlyAddedAPIs.addAll(allAPIs);
-        			if (APIConstants.isRecentlyAddedAPICacheEnabled) {
-        				Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER).getCache(APIConstants.RECENTLY_ADDED_API_CACHE_NAME).put(username + ":" + tenantDomain, allAPIs);
-        			}
-        			return recentlyAddedAPIs;
-        		} else {
+				if (!APIUtil.isAllowDisplayMultipleVersions()) {
+					Map<String, API> latestPublishedAPIs = new HashMap<String, API>();
+					Comparator<API> versionComparator = new APIVersionComparator();
+					String key;
+					for (API api : allAPIs) {
+						key = api.getId().getProviderName() + ":" + api.getId().getApiName();
+						API existingAPI = latestPublishedAPIs.get(key);
+						if (existingAPI != null) {
+							// If we have already seen an API with the same
+							// name, make sure this one has a higher version
+							// number
+							if (versionComparator.compare(api, existingAPI) > 0) {
+								latestPublishedAPIs.put(key, api);
+							}
+						} else {
+							// We haven't seen this API before
+							latestPublishedAPIs.put(key, api);
+						}
+					}
+
+					for (API api : latestPublishedAPIs.values()) {
+						recentlyAddedAPIs.add(api);
+					}
+					if (APIConstants.isRecentlyAddedAPICacheEnabled) {
+						Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER)
+						       .getCache(APIConstants.RECENTLY_ADDED_API_CACHE_NAME)
+						       .put(username + ":" + tenantDomain, allAPIs);
+					}
+					return recentlyAddedAPIs;
+				} else {        			    			
         			recentlyAddedAPIsWithMultipleVersions.addAll(allAPIs);
-        			if (APIConstants.isRecentlyAddedAPICacheEnabled) {
-        				Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER).getCache(APIConstants.RECENTLY_ADDED_API_CACHE_NAME).put(username + ":" + tenantDomain, allAPIs);
-        			}
+					if (APIConstants.isRecentlyAddedAPICacheEnabled) {
+						Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER)
+						       .getCache(APIConstants.RECENTLY_ADDED_API_CACHE_NAME)
+						       .put(username + ":" + tenantDomain, allAPIs);
+					}
         			return recentlyAddedAPIsWithMultipleVersions;
         		}
         	 } 
@@ -958,6 +981,46 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         return tagSet;
     }
 
+	@Override
+	public Set<Tag> getTagsWithAttributes(String tenantDomain) throws APIManagementException {
+		// Fetch the all the tags first.
+		Set<Tag> tags = getAllTags(tenantDomain);
+		// For each and every tag get additional attributes from the registry.
+		String descriptionPathPattern =
+		                                APIConstants.TAGS_INFO_ROOT_LOCATION +
+		                                        "/%s/description.txt";
+		String thumbnailPathPattern = APIConstants.TAGS_INFO_ROOT_LOCATION + "/%s/thumbnail.png";
+		for (Tag tag : tags) {
+			// Get the description.
+			Resource descriptionResource = null;
+			String descriptionPath = String.format(descriptionPathPattern, tag.getName());
+			try {
+				descriptionResource = registry.get(descriptionPath);
+			} catch (RegistryException e) {
+				log.warn(String.format("Cannot get the description for the tag '%s'", tag.getName()));
+			}
+			// The resource is assumed to be a byte array since its the content
+			// of a text file.
+			if (descriptionResource != null) {
+				try {
+					String description = new String((byte[]) descriptionResource.getContent());
+					tag.setDescription(description);
+				} catch (Exception e) {
+					handleException(String.format("Cannot read content of %s", descriptionPath), e);
+				}
+			}
+			// Checks whether the thumbnail exists.
+			String thumbnailPath = String.format(thumbnailPathPattern, tag.getName());
+			try {
+				tag.setThumbnailExists(registry.resourceExists(thumbnailPath));
+			} catch (RegistryException e) {
+				log.warn(String.format("Error while querying the existence of %s", thumbnailPath),
+				         e);
+			}
+		}
+		return tags;
+	}
+    
     public void rateAPI(APIIdentifier apiId, APIRating rating,
                         String user) throws APIManagementException {
         apiMgtDAO.addRating(apiId, rating.getRating(), user);
@@ -1062,7 +1125,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 
     }
 
-    public Set<API> getPublishedAPIsByProvider(String providerId, String loggedUsername, int limit)
+    public Set<API> getPublishedAPIsByProvider(String providerId, String loggedUsername, int limit, String apiOwner)
             throws APIManagementException {
         SortedSet<API> apiSortedSet = new TreeSet<API>(new APINameComparator());
         SortedSet<API> apiVersionsSortedSet = new TreeSet<API>(new APIVersionComparator());
@@ -1101,7 +1164,9 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 
                 Resource resource;
                 String path = RegistryUtils.getAbsolutePath(RegistryContext.getBaseInstance(),
-                                                            RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH + apiPath);
+                                                            APIUtil.getMountedPath(RegistryContext.getBaseInstance(),
+                                                                                   RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH) +
+                                                                    apiPath);
                 boolean checkAuthorized = false;
                 String userNameWithoutDomain = loggedUsername;
 
@@ -1150,6 +1215,13 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 
                     }
                     if (api != null) {
+                        if(apiOwner!=null && !apiOwner.isEmpty()){
+                            if(APIUtil.replaceEmailDomainBack(providerId).equals(APIUtil.replaceEmailDomainBack(apiOwner)) && api.getApiOwner()!=null && !api.getApiOwner().isEmpty() && !APIUtil.replaceEmailDomainBack(apiOwner).equals(APIUtil.replaceEmailDomainBack(api.getApiOwner()))){
+                                continue; // reject remote APIs when local admin user's API selected
+                            }else if(!APIUtil.replaceEmailDomainBack(providerId).equals(APIUtil.replaceEmailDomainBack(apiOwner)) && !APIUtil.replaceEmailDomainBack(apiOwner).equals(APIUtil.replaceEmailDomainBack(api.getApiOwner()))){
+                                continue; // reject local admin's APIs when remote API selected
+                            }
+                        }
                         String key;
                         //Check the configuration to allow showing multiple versions of an API true/false
                         if (!allowMultipleVersions) { //If allow only showing the latest version of an API
@@ -1198,78 +1270,8 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 
     }
 
-    public Set<API> searchAPI(String searchTerm, String searchType, String requestedTenantDomain)
-            throws APIManagementException {
-        Set<API> apiSet = new HashSet<API>();
-        try {
-            Registry userRegistry;
-            boolean isTenantMode=(requestedTenantDomain != null);
-            if ((isTenantMode && this.tenantDomain==null) || (isTenantMode && isTenantDomainNotMatching(requestedTenantDomain))) {//Tenant store anonymous mode
-                int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
-                        .getTenantId(requestedTenantDomain);
-                userRegistry = ServiceReferenceHolder.getInstance().
-                        getRegistryService().getGovernanceUserRegistry(CarbonConstants.REGISTRY_ANONNYMOUS_USERNAME, tenantId);
-            } else {
-                userRegistry = this.registry;
-            }
-            apiSet.addAll(searchAPI(userRegistry, searchTerm, searchType));
-
-        } catch (Exception e) {
-            handleException("Failed to Search APIs", e);
-        }
-        return apiSet;
-    }
-
-    public Set<API> searchAPI(Registry registry, String searchTerm, String searchType) throws APIManagementException {
-        SortedSet<API> apiSet = new TreeSet<API>(new APINameComparator());
-        String regex = "(?i)[\\w.|-]*" + searchTerm.trim() + "[\\w.|-]*";
-        Pattern pattern;
-        Matcher matcher;
-        try {
-            GenericArtifactManager artifactManager = APIUtil.getArtifactManager(registry, APIConstants.API_KEY);
-            PaginationContext.init(1, 100000, "ASC", APIConstants.API_OVERVIEW_NAME, Integer.MAX_VALUE);
-            if (artifactManager != null) {
-                GenericArtifact[] genericArtifacts = artifactManager
-                        .getAllGenericArtifacts();
-                if (genericArtifacts == null || genericArtifacts.length == 0) {
-                    return apiSet;
-                }
-                pattern = Pattern.compile(regex);
-
-                for (GenericArtifact artifact : genericArtifacts) {
-                    String status = artifact.getAttribute(APIConstants.API_OVERVIEW_STATUS);
-
-                    if (searchType.equalsIgnoreCase("Provider")) {
-                        String api = APIUtil.replaceEmailDomainBack(artifact.getAttribute(APIConstants.API_OVERVIEW_PROVIDER));
-                        matcher = pattern.matcher(api);
-                    } else if (searchType.equalsIgnoreCase("Version")) {
-                        String api = artifact.getAttribute(APIConstants.API_OVERVIEW_VERSION);
-                        matcher = pattern.matcher(api);
-                    } else if (searchType.equalsIgnoreCase("Context")) {
-                        String api = artifact.getAttribute(APIConstants.API_OVERVIEW_CONTEXT);
-                        matcher = pattern.matcher(api);
-                    } else {
-                        String apiName = artifact.getAttribute(APIConstants.API_OVERVIEW_NAME);
-                        matcher = pattern.matcher(apiName);
-                    }
-                    if (APIUtil.isAllowDisplayAPIsWithMultipleStatus()) {
-                        if (matcher.find() && (status.equals(APIConstants.PUBLISHED) || status.equals(APIConstants.DEPRECATED))) {
-                            apiSet.add(APIUtil.getAPI(artifact, registry));
-                        }
-                    } else {
-                        if (matcher.find() && status.equals(APIConstants.PUBLISHED)) {
-                            apiSet.add(APIUtil.getAPI(artifact, registry));
-                        }
-                    }
-
-                }
-            }
-        } catch (RegistryException e) {
-            handleException("Failed to search APIs with type", e);
-        }
-        return apiSet;
-    }
-
+   
+	
     public Map<String,Object> searchPaginatedAPIs(String searchTerm, String searchType, String requestedTenantDomain,int start,int end)
             throws APIManagementException {
         Map<String,Object> result = new HashMap<String,Object>();
@@ -1313,13 +1315,21 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         return result;
     }
     
-    
+    /**
+	 * Pagination API search based on solr indexing
+	 * 
+	 * @param registry
+	 * @param searchTerm
+	 * @param searchType
+	 * @return
+	 * @throws APIManagementException
+	 */
 
     public Map<String,Object> searchPaginatedAPIs(Registry registry, String searchTerm, String searchType,int start,int end) throws APIManagementException {
         SortedSet<API> apiSet = new TreeSet<API>(new APINameComparator());
         List<API> apiList = new ArrayList<API>();
-        // String regex = "(?i)[\\w.|-]*" + searchTerm.trim() + "[\\w.|-]*";
-        final String searchValue=searchTerm.trim();
+        
+        searchTerm = searchTerm.trim();
         Map<String,Object> result=new HashMap<String, Object>();
         int totalLength=0;
         String criteria=APIConstants.API_OVERVIEW_NAME;
@@ -1331,6 +1341,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 
                 if (searchType.equalsIgnoreCase("Provider")) {
                     criteria=APIConstants.API_OVERVIEW_PROVIDER;
+                    searchTerm = searchTerm.replaceAll("@", "-AT-");
                 } else if (searchType.equalsIgnoreCase("Version")) {
                     criteria=APIConstants.API_OVERVIEW_VERSION;
                 } else if (searchType.equalsIgnoreCase("Context")) {
@@ -1340,6 +1351,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 }
 
                 //Create the search attribute map for PUBLISHED APIs
+                final String searchValue = searchTerm;
                 Map<String, List<String>> listMap = new HashMap<String, List<String>>();
                 listMap.put(criteria, new ArrayList<String>() {{
                     add(searchValue);
@@ -1371,11 +1383,10 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 if(totalLength<=((start+end)-1)){
                     end=totalLength;
                 }
-                for(int i=start;i<end;i++){
-                    apiSet.add(apiList.get(i));
+				for (int i = start; i < end; i++) {
+					apiSet.add(apiList.get(i));
 
-
-                }
+				}
             }
         } catch (RegistryException e) {
             handleException("Failed to search APIs with type", e);
@@ -1390,11 +1401,14 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         Set<SubscribedAPI> subscribedAPIs = new HashSet<SubscribedAPI>();
         try {
             originalSubscribedAPIs=apiMgtDAO.getSubscribedAPIs(subscriber);
-            for(SubscribedAPI subscribedApi:originalSubscribedAPIs) {
-                subscribedApi.getTier().setDisplayName(APIUtil.getTierDisplayName(tenantId,subscribedApi.getTier().getName()));
-                subscribedAPIs.add(subscribedApi);
+            if(originalSubscribedAPIs!=null && !originalSubscribedAPIs.isEmpty()){
+            	Map<String, Tier> tiers=APIUtil.getTiers(tenantId);
+            	for(SubscribedAPI subscribedApi:originalSubscribedAPIs) {
+            		Tier tier=tiers.get(subscribedApi.getTier().getName());
+	                subscribedApi.getTier().setDisplayName(tier!=null?tier.getDisplayName():subscribedApi.getTier().getName());
+	                subscribedAPIs.add(subscribedApi);
+	            }
             }
-
         } catch (APIManagementException e) {
             handleException("Failed to get APIs of " + subscriber.getName(), e);
         }
@@ -1404,7 +1418,15 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     public Set<SubscribedAPI> getSubscribedAPIs(Subscriber subscriber, String applicationName) throws APIManagementException {
         Set<SubscribedAPI> subscribedAPIs = null;
         try {
-            subscribedAPIs = apiMgtDAO.getSubscribedAPIs(subscriber, applicationName);
+        	subscribedAPIs = apiMgtDAO.getSubscribedAPIs(subscriber, applicationName);
+            if(subscribedAPIs!=null && !subscribedAPIs.isEmpty()){
+            	Map<String, Tier> tiers=APIUtil.getTiers(tenantId);
+            	for(SubscribedAPI subscribedApi:subscribedAPIs) {
+            		Tier tier=tiers.get(subscribedApi.getTier().getName());
+	                subscribedApi.getTier().setDisplayName(tier!=null?tier.getDisplayName():subscribedApi.getTier().getName());
+	                subscribedAPIs.add(subscribedApi);
+	            }
+            }
         } catch (APIManagementException e) {
             handleException("Failed to get APIs of " + subscriber.getName() + " under application " + applicationName, e);
         }
@@ -1483,6 +1505,10 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             if (APIUtil.isAPIGatewayKeyCacheEnabled()) {
                 invalidateCachedKeys(applicationId, identifier);
             }
+            if (log.isDebugEnabled()) {
+                String logMessage = "API Name: " + identifier.getApiName() + ", API Version "+identifier.getVersion()+" subscribe by " + userId + " for app "+ apiMgtDAO.getApplicationNameFromId(applicationId);
+                log.debug(logMessage);
+            }
 
             return apiMgtDAO.getSubscriptionStatusById(subscriptionId);
         } else {
@@ -1496,6 +1522,11 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         apiMgtDAO.removeSubscription(identifier, applicationId);
         if (APIUtil.isAPIGatewayKeyCacheEnabled()) {
             invalidateCachedKeys(applicationId, identifier);
+        }
+        if(log.isDebugEnabled()){
+            String appName = apiMgtDAO.getApplicationNameFromId(applicationId);
+            String logMessage = "API Name: " + identifier.getApiName() + ", API Version "+identifier.getVersion()+" subscription removed by " + userId +" from app "+ appName;
+            log.debug(logMessage);
         }
     }
 
@@ -1738,26 +1769,33 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         return keyDetails;
     }
 
-    public Map<String,String> completeApplicationRegistration(String userId, String applicationName, String tokenType) throws APIManagementException{
+    public Map<String, String> completeApplicationRegistration(String userId,
+                                                               String applicationName,
+                                                               String tokenType)
+            throws APIManagementException {
 
-        Application application =  apiMgtDAO.getApplicationByName(applicationName,userId);
-        String status =  apiMgtDAO.getRegistrationApprovalState(application.getId(),tokenType);
-        Map<String,String> keyDetails = null;
-        try {
-            SubscriberKeyMgtClient keyMgtClient = APIUtil.getKeyManagementClient();
-            if(APIConstants.AppRegistrationStatus.REGISTRATION_APPROVED.equals(status))                                            {
-                ApplicationRegistrationWorkflowDTO workflowDTO = apiMgtDAO.populateAppRegistrationWorkflowDTO(application.getId());
-            ApplicationKeysDTO dto = keyMgtClient.getApplicationAccessKey(userId, application.getName(),tokenType,
-                    application.getCallbackUrl(),workflowDTO.getAllowedDomains(), Long.toString(workflowDTO.getValidityTime()));
-                keyDetails = new HashMap<String,String>();
-                keyDetails.put("accessToken",dto.getApplicationAccessToken());
-                keyDetails.put("consumerKey",dto.getConsumerKey());
-                keyDetails.put("consumerSecret", dto.getConsumerSecret());
-                keyDetails.put("validityTime",dto.getValidityTime());
-                keyDetails.put("accessallowdomains",workflowDTO.getDomainList());
+        Application application = apiMgtDAO.getApplicationByName(applicationName, userId);
+        String status = apiMgtDAO.getRegistrationApprovalState(application.getId(), tokenType);
+        Map<String, String> keyDetails = null;
+
+        SubscriberKeyMgtClient keyMgtClient = APIUtil.getKeyManagementClient();
+        if (APIConstants.AppRegistrationStatus.REGISTRATION_APPROVED.equals(status)) {
+            ApplicationRegistrationWorkflowDTO workflowDTO = apiMgtDAO.populateAppRegistrationWorkflowDTO(application.getId());
+            if (workflowDTO == null) {
+                throw new APIManagementException("Couldn't populate WorkFlow details.");
             }
-        } catch (Exception e) {
-            APIUtil.handleException("Error occurred while executing SubscriberKeyMgtClient.", e);
+            try {
+                ApplicationKeysDTO dto = keyMgtClient.getApplicationAccessKey(userId, application.getName(), tokenType,
+                                                                              application.getCallbackUrl(), workflowDTO.getAllowedDomains(), Long.toString(workflowDTO.getValidityTime()));
+                keyDetails = new HashMap<String, String>();
+                keyDetails.put("accessToken", dto.getApplicationAccessToken());
+                keyDetails.put("consumerKey", dto.getConsumerKey());
+                keyDetails.put("consumerSecret", dto.getConsumerSecret());
+                keyDetails.put("validityTime", dto.getValidityTime());
+                keyDetails.put("accessallowdomains", workflowDTO.getDomainList());
+            } catch (Exception e) {
+                APIUtil.handleException("Error occurred while executing SubscriberKeyMgtClient.", e);
+            }
         }
         return keyDetails;
     }
@@ -2033,6 +2071,13 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         }
         return passRegistry;
     }
+
+	@Override
+	public Set<API> searchAPI(String searchTerm, String searchType, String tenantDomain)
+	                                                                                    throws APIManagementException {
+		// TODO Auto-generated method stub
+		return null;
+	}
 
 	
 

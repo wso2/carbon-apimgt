@@ -17,12 +17,17 @@
 */
 package org.wso2.carbon.apimgt.impl.utils;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.net.URL;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import com.ibm.wsdl.extensions.http.HTTPAddressImpl;
+import com.ibm.wsdl.extensions.soap.SOAPAddressImpl;
+import com.ibm.wsdl.extensions.soap12.SOAP12AddressImpl;
+import org.apache.axiom.om.OMElement;
+import org.apache.axiom.om.util.AXIOMUtil;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.apache.woden.wsdl20.Endpoint;
+import org.apache.woden.wsdl20.xml.EndpointElement;
+import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.model.API;
 
 import javax.wsdl.Definition;
 import javax.wsdl.Port;
@@ -32,17 +37,16 @@ import javax.wsdl.extensions.ExtensibilityElement;
 import javax.wsdl.factory.WSDLFactory;
 import javax.wsdl.xml.WSDLReader;
 import javax.wsdl.xml.WSDLWriter;
-import org.apache.axiom.om.OMElement;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.api.model.API;
-import org.wso2.carbon.apimgt.impl.dto.Environment;
-import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.net.URI;
+import java.net.URL;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 
-import com.ibm.wsdl.extensions.http.HTTPAddressImpl;
-import com.ibm.wsdl.extensions.soap.SOAPAddressImpl;
-import com.ibm.wsdl.extensions.soap12.SOAP12AddressImpl;
+
+
 
 /**
  * This class is used to read the WSDL file using WSDL4J library.
@@ -106,6 +110,73 @@ public class APIMWSDLReader {
 
 	}
 
+    public OMElement readAndCleanWsdl2(API api) throws APIManagementException {
+
+        try {
+            org.apache.woden.wsdl20.Description wsdlDefinition = readWSDL2File();
+            setServiceDefinitionForWSDL2(wsdlDefinition, api);
+            org.apache.woden.WSDLWriter writer = org.apache.woden.WSDLFactory.newInstance().newWSDLWriter();
+            ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+            writer.writeWSDL(wsdlDefinition.toElement(), byteArrayOutputStream);
+            ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream( byteArrayOutputStream.toByteArray());
+            OMElement wsdlElement = APIUtil.buildOMElement(byteArrayInputStream);
+//            String wsdlDoc = toString(byteArrayInputStream);
+            return wsdlElement;
+        } catch (Exception e) {
+            String msg = " Error occurs when change the addres URL of the WSDL";
+            log.error(msg);
+            throw new APIManagementException(msg, e);
+        }
+
+    }
+
+    private org.apache.woden.wsdl20.Description readWSDL2File() throws APIManagementException, WSDLException {
+        WSDLReader reader = getWsdlFactoryInstance().newWSDLReader();
+        reader.setFeature(JAVAX_WSDL_VERBOSE_MODE, false);
+        reader.setFeature("javax.wsdl.importDocuments", false);
+        try {
+            org.apache.woden.WSDLFactory wFactory = org.apache.woden.WSDLFactory.newInstance();
+            org.apache.woden.WSDLReader wReader = wFactory.newWSDLReader();
+            wReader.setFeature(org.apache.woden.WSDLReader.FEATURE_VALIDATION, true);
+//            wReader.setFeature(JAVAX_WSDL_VERBOSE_MODE, false);
+//            wReader.setFeature("javax.wsdl.importDocuments", false);
+            org.apache.woden.wsdl20.Description wsdlDefinition1 = wReader.readWSDL(baseURI);
+            return wsdlDefinition1;
+        } catch (org.apache.woden.WSDLException e) {
+            e.printStackTrace();
+        }
+        if (log.isDebugEnabled()) {
+            log.debug("Reading  the WSDL. Base uri is " + baseURI);
+        }
+        return null;
+    }
+
+    private void setServiceDefinitionForWSDL2(org.apache.woden.wsdl20.Description definition, API api) throws APIManagementException {
+        org.apache.woden.wsdl20.Service[] serviceMap = definition.getServices();
+        URL addressURI = null;
+        try {
+            for(org.apache.woden.wsdl20.Service svc : serviceMap){
+                Endpoint[] portMap = svc.getEndpoints();
+                for (Endpoint endpoint:portMap){
+                    EndpointElement element = endpoint.toElement();
+
+
+                    addressURI = endpoint.getAddress().toURL();
+                    if (addressURI == null) {
+                        break;
+                    } else {
+                        String endpointTransport = determineURLTransport(endpoint.getAddress().getScheme(), api.getTransports());
+                        setAddressUrl(element, new URI(APIUtil.getGatewayendpoint(endpointTransport) + api.getContext() + "/" + api.getId().getVersion()));
+                    }
+                }
+            }
+
+        } catch (Exception e) {
+            log.error("Error occured while getting the wsdl address location", e);
+            throw new APIManagementException(e);
+        }
+
+    }
 	/**
 	 * Create the WSDL definition <javax.wsdl.Definition> from the baseURI of
 	 * the WSDL
@@ -192,7 +263,8 @@ public class APIMWSDLReader {
 						if (addressURI == null) {
 							break;
 						} else {
-							setAddressUrl(extensibilityElement, api);
+							String endpointTransport = determineURLTransport(addressURI.getProtocol(), api.getTransports());
+                            setAddressUrl(extensibilityElement, endpointTransport, api);
 						}
 					}
 				}
@@ -234,19 +306,50 @@ public class APIMWSDLReader {
 	 * @throws APIManagementException
 	 */
 
-    private void setAddressUrl(ExtensibilityElement exElement, API api) throws APIManagementException {
+	private void setAddressUrl(ExtensibilityElement exElement, String transports, API api) throws APIManagementException {
 
         if (exElement instanceof SOAP12AddressImpl) {
-            ((SOAP12AddressImpl) exElement).setLocationURI(APIUtil.getGatewayendpoint(api.getTransports()) + api.getContext() + "/" + api.getId().getVersion());
+        	((SOAP12AddressImpl) exElement).setLocationURI(APIUtil.getGatewayendpoint(transports) + api.getContext() + "/" + api.getId().getVersion());
         } else if (exElement instanceof SOAPAddressImpl) {
-            ((SOAPAddressImpl) exElement).setLocationURI(APIUtil.getGatewayendpoint(api.getTransports()) + api.getContext() + "/" + api.getId().getVersion());
+        	((SOAPAddressImpl) exElement).setLocationURI(APIUtil.getGatewayendpoint(transports) + api.getContext() + "/" + api.getId().getVersion());
         } else if (exElement instanceof HTTPAddressImpl) {
-            ((HTTPAddressImpl) exElement).setLocationURI(APIUtil.getGatewayendpoint(api.getTransports()) + api.getContext() + "/" + api.getId().getVersion());
+        	 ((HTTPAddressImpl) exElement).setLocationURI(APIUtil.getGatewayendpoint(transports) + api.getContext() + "/" + api.getId().getVersion());
         } else {
 			String msg = "Unsupported WSDL errors!";
 			log.error(msg);
 			throw new APIManagementException(msg);
 		}
 	}
+	
+	private void setAddressUrl(EndpointElement endpoint,URI uri) throws APIManagementException {
+        endpoint.setAddress(uri);
+    }
+
+    public static String toString(ByteArrayInputStream is) {
+        int size = is.available();
+        char[] theChars = new char[size];
+        byte[] bytes    = new byte[size];
+
+        is.read(bytes, 0, size);
+        for (int i = 0; i < size;)
+            theChars[i] = (char)(bytes[i++]&0xff);
+
+        return new String(theChars);
+    }
+
+    private String determineURLTransport(String scheme, String transports) {
+        // If transports is defined as "http,https" consider the actual transport
+        // protocol of the url, else give priority to the transport defined at API level
+        if (transports.equals("http,https") || transports.equals("https,http")) {
+            if (scheme.equals("http")) {
+                return "http";
+            }
+            else if (scheme.startsWith("https")) {
+                return "https";
+            }
+        }
+
+        return transports;
+    }
 	
 }

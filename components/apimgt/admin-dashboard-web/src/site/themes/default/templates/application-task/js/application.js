@@ -23,7 +23,7 @@ $(document).ready(function(){
         var taskId=btn.attr("data");
         var iteration=btn.attr("iteration");
         var description=$('#desc'+iteration).text();
-        var status=$('.js_stateDropDown').val();
+        var status=$('#js_stateDropDown'+iteration).val();
         btn.attr("disabled","disabled");
         jagg.post("/site/blocks/task-manager/ajax/task.jag", { action:"completeTask",status:status,taskId:taskId,taskType:"application",description:description },
             function (json) {

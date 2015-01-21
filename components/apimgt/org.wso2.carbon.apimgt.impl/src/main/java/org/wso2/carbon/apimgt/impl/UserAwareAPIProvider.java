@@ -96,12 +96,12 @@ public class UserAwareAPIProvider extends APIProviderImpl {
         checkCreatePermission();
         super.updateDocumentation(apiId, documentation);
     }
-
+   
     @Override
-    public void addDocumentationContent(APIIdentifier identifier, String documentationName,
+    public void addDocumentationContent(API api, String documentationName,
                                         String text) throws APIManagementException {
         checkCreatePermission();
-        super.addDocumentationContent(identifier, documentationName, text);
+        super.addDocumentationContent(api, documentationName, text);
     }
 
     @Override

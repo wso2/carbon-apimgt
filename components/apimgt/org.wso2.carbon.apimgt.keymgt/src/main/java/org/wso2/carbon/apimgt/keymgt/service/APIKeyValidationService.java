@@ -94,17 +94,18 @@ public class APIKeyValidationService extends AbstractAdmin {
             log.debug(logMsg);
         }
 
-        Cache cache = Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER).getCache(APIConstants.KEY_CACHE_NAME);
+        Cache keyManagerCache =
+                Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER).getCache(APIConstants.KEY_CACHE_NAME);
         String cacheKey = APIUtil.getAccessTokenCacheKey(accessToken, context, version, matchingResource,
                                                          httpVerb, requiredAuthenticationLevel);
 
         APIKeyValidationInfoDTO info;
         ApiMgtDAO apiMgtDAO = new ApiMgtDAO();
-        Boolean keyCacheEnabledGateway = APIKeyMgtDataHolder.getKeyCacheEnabledKeyMgt();
+        Boolean keyCacheEnabledKeyMgt = APIKeyMgtDataHolder.getKeyCacheEnabledKeyMgt();
 
         //If gateway key cache enabled only we retrieve key validation info or JWT token form cache
-        if (keyCacheEnabledGateway) {
-            info = (APIKeyValidationInfoDTO) cache.get(cacheKey);
+        if (keyCacheEnabledKeyMgt) {
+            info = (APIKeyValidationInfoDTO) keyManagerCache.get(cacheKey);
             //If key validation information is not null then only we proceed with cached object
             if (info != null) {
                 if (log.isDebugEnabled()) {
@@ -113,11 +114,11 @@ public class APIKeyValidationService extends AbstractAdmin {
                 
                 if (info.isAuthorized()) {
                     //return if client domain is not-authorized
-                    checkClientDomainAuthorized(info, clientDomain);
+                    APIUtil.checkClientDomainAuthorized(info, clientDomain);
                 }
 
                  //check if token has expired
-                boolean tokenExpired = APIUtil.hasAccessTokenExpired(info);
+                boolean tokenExpired = APIUtil.isAccessTokenExpired(info);
                 if (!tokenExpired) {
                     //If key validation information is authorized then only we have to check for JWT token
                     //If key validation information is authorized and JWT cache disabled then only we use
@@ -173,13 +174,13 @@ public class APIKeyValidationService extends AbstractAdmin {
 
         if (apiKeyValidationInfoDTO.isAuthorized()) {
         	//return if client domain is not-authorized
-        	checkClientDomainAuthorized(apiKeyValidationInfoDTO, clientDomain);
+            APIUtil.checkClientDomainAuthorized(apiKeyValidationInfoDTO, clientDomain);
         }
         
         //If key validation information is not null and key validation enabled at keyMgt we put validation
         //information into cache
         if (apiKeyValidationInfoDTO != null) {
-            cache.put(cacheKey, apiKeyValidationInfoDTO);
+            keyManagerCache.put(cacheKey, apiKeyValidationInfoDTO);
         }
 
         if (log.isDebugEnabled() && axis2MessageContext != null) {
@@ -202,21 +203,6 @@ public class APIKeyValidationService extends AbstractAdmin {
 
         return ApiMgtDAO.getAllURITemplates(context, version);
 
-    }
-    
-    private void checkClientDomainAuthorized (APIKeyValidationInfoDTO apiKeyValidationInfoDTO, String clientDomain) 
-    		throws APIManagementException {
-    	if (clientDomain != null) {
-    		clientDomain = clientDomain.trim();
-    	}
-    	List<String> authorizedDomains = apiKeyValidationInfoDTO.getAuthorizedDomains();
-    	if (!(authorizedDomains.contains("ALL") || authorizedDomains.contains(clientDomain))) {
-    		log.error("Unauthorized client domain :" + clientDomain +
-    				". Only \"" + authorizedDomains + "\" domains are authorized to access the API.");
-    		throw new APIManagementException("Unauthorized client domain :" + clientDomain +
-    				". Only \"" + authorizedDomains + "\" domains are authorized to access the API.");
-    	}
-    	
     }
 
     private void logMessageDetails(MessageContext messageContext, APIKeyValidationInfoDTO apiKeyValidationInfoDTO) {

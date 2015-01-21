@@ -45,7 +45,7 @@ var RESOURCES = [
         <div class="span12">
             <form class="form-horizontal" method="POST"
               id="addAPIForm"
-              enctype="multipart/form-data" action="<%=site.context%>/site/blocks/item-add/ajax/add.jag">
+              enctype="multipart/form-data" action="<%= jagg.url("/site/blocks/item-add/ajax/add.jag")%>">
                 <fieldset>
                 <legend><%=i18n.localize("generalDetailsTitle")%></legend>
                 <input type="hidden" name="action" id="addAPI" value="addAPI"/>
@@ -174,7 +174,7 @@ var RESOURCES = [
                     <div class="controls">
                         <div id="inpFile" class="pull-left">
                             <div id="apiThumb-container"  style="display: inline;">
-                                <input type="file" class="input-xlarge" id="apiThumb" name="apiThumb"/></div>
+                                <input type="file" class="input-xlarge validateImageFile" id="apiThumb" name="apiThumb"/></div>
                             </div>
                         <input type="button" class="btn pull-left" id="clearThumb" value="<%=i18n.localize("clear")%>"/>
                         <div class="help-block pull-left inline-help">

@@ -45,18 +45,6 @@ public abstract class PublisherDTO {
 
     private String applicationId;
 
-    private String accessLevel;
-
-    private String resource;
-
-    public String getResource() {
-        return resource;
-    }
-
-    public void setResource(String resource) {
-        this.resource = resource;
-    }
-
     public String getHostName() {
         return hostName;
     }
@@ -119,14 +107,6 @@ public abstract class PublisherDTO {
 
     public void setResourcePath(String resource) {
         this.resourcePath = resource;
-    }
-
-    public String getAccessLevel() {
-        return accessLevel;
-    }
-
-    public void setAccessLevel(String accessLevel) {
-        this.accessLevel = accessLevel;
     }
 
     public void setMethod(String method) {

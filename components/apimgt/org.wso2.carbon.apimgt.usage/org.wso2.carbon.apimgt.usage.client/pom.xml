@@ -21,11 +21,11 @@
         <artifactId>org.wso2.carbon.apimgt.usage</artifactId>
         <groupId>org.wso2.carbon</groupId>
         <version>4.3.0-SNAPSHOT</version>
-        <relativePath>../pom.xml</relativePath>
+	<relativePath>../pom.xml</relativePath>
     </parent>
     <modelVersion>4.0.0</modelVersion>
     <packaging>bundle</packaging>
-
+ 
     <artifactId>org.wso2.carbon.apimgt.usage.client</artifactId>
     <version>4.3.0-SNAPSHOT</version>
     <name>WSO2 Carbon - API Management Usage Client</name>
@@ -37,11 +37,18 @@
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
-            <artifactId>org.wso2.carbon.apimgt.impl</artifactId>
+            <artifactId>org.wso2.carbon.apimgt.impl</artifactId>  
+	    <version>${apim.version}</version>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
-            <artifactId>org.wso2.carbon.apimgt.usage.publisher</artifactId>
+            <artifactId>org.wso2.carbon.apimgt.usage.publisher</artifactId>  
+	    <version>${apim.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>commons-lang.wso2</groupId>
+            <artifactId>commons-lang</artifactId>
+            <version>2.6.0.wso2v1</version>
         </dependency>
     </dependencies>
 
@@ -50,7 +57,6 @@
             <plugin>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>maven-bundle-plugin</artifactId>
-                <version>1.4.0</version>
                 <extensions>true</extensions>
                 <configuration>
                     <instructions>
@@ -77,6 +83,14 @@
             <plugin>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>maven-scr-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>generate-scr-scrdescriptor</id>
+                        <goals>
+                            <goal>scr</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>

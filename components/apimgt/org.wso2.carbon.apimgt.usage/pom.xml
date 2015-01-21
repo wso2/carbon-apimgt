@@ -18,16 +18,21 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
+    <modules>
+        <module>org.wso2.carbon.apimgt.usage.publisher/1.2.0</module>
+        <module>org.wso2.carbon.apimgt.usage.client/1.2.0</module>
+    </modules>
     <parent>
         <groupId>org.wso2.carbon</groupId>
         <artifactId>apimgt</artifactId>
-        <version>4.3.0-SNAPSHOT</version>
+        <version>1.2.0</version>
     </parent>
 
+    <groupId>org.wso2.carbon</groupId>
     <artifactId>org.wso2.carbon.apimgt.usage</artifactId>
     <name>WSO@ Carbon - API Management Usage Aggregator Module</name>
     <packaging>pom</packaging>
-    <version>4.3.0-SNAPSHOT</version>
+    <version>1.2.0</version>
     <dependencies>
 
         <dependency>
@@ -39,15 +44,9 @@
 
     <repositories>
         <repository>
-            <id>wso2-maven2-repository</id>
-            <url>http://dist.wso2.org/maven2</url>
-        </repository>
+             <id>wso2-maven2-repository</id>
+	    <url>http://dist.wso2.org/maven2</url>
+	</repository>
     </repositories>
-
-    <modules>
-        <module>org.wso2.carbon.apimgt.usage.publisher</module>
-        <module>org.wso2.carbon.apimgt.usage.client</module>
-	<module>org.wso2.carbon.apimgt.usage.analyzer</module>
-    </modules>
 
 </project>
