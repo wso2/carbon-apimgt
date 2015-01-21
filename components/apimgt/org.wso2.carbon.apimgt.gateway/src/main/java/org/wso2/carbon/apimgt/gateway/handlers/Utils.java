@@ -72,9 +72,13 @@ public class Utils {
             <property name="error_message_type" value="application/json"/>
             <sequence key="_build_"/>
             </sequence>     */
-            if (messageContext.getProperty("error_message_type") != null &&
+            /*  if (messageContext.getProperty("error_message_type") != null &&
                     messageContext.getProperty("error_message_type").toString().equalsIgnoreCase("application/json")) {
                 axis2MC.setProperty(Constants.Configuration.MESSAGE_TYPE, "application/json");
+            }*/
+            //adding this fix to support any message type as error message type
+            if (messageContext.getProperty("error_message_type") != null) {
+                axis2MC.setProperty(Constants.Configuration.MESSAGE_TYPE, messageContext.getProperty("error_message_type"));
             }
 
             headers.remove(HttpHeaders.HOST);

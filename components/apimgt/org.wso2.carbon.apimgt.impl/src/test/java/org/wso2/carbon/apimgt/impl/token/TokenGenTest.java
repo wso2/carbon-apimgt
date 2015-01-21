@@ -44,9 +44,55 @@ public class TokenGenTest extends TestCase {
                 new APIManagerConfigurationServiceImpl(config));
     }
 
+    public void testAbstractJWTGenerator() throws Exception {
+        JWTGenerator jwtGen = new JWTGenerator();
+        APIKeyValidationInfoDTO dto=new APIKeyValidationInfoDTO();
+        dto.setSubscriber("sanjeewa");
+        dto.setApplicationName("sanjeewa-app");
+        dto.setApplicationId("1");
+        dto.setApplicationTier("UNLIMITED");
+        dto.setEndUserName("malalgoda");
+        dto.setUserType(APIConstants.ACCESS_TOKEN_USER_TYPE_APPLICATION);
+        //Here we will call generate token method with 4 argument.
+        String token = jwtGen.generateToken(dto, "testAPI", "1.5.0","DUMMY_TOKEN_STRING");
+        System.out.println("Generated Token: " + token);
+        String header = token.split("\\.")[0];
+        String decodedHeader = new String(Base64Utils.decode(header));
+        System.out.println("Header: "+decodedHeader);
+        String body = token.split("\\.")[1];
+        String decodedBody = new String(Base64Utils.decode(body));
+        System.out.println("Body: " + decodedBody);
+        // With end user name not included
+        token = jwtGen.generateToken(dto, "testAPI", "1.5.0");
+        System.out.println("Generated Token: " + token);
+        header = token.split("\\.")[0];
+        decodedHeader = new String(Base64Utils.decode(header));
+        System.out.println("Header: "+decodedHeader);
+        body = token.split("\\.")[1];
+        decodedBody = new String(Base64Utils.decode(body));
+        System.out.println("Body: " + decodedBody);
+        dto.setUserType(APIConstants.SUBSCRIPTION_USER_TYPE);
+        token = jwtGen.generateToken(dto, "testAPI", "1.5.0");
+        System.out.println("Generated Token: " + token);
+        header = token.split("\\.")[0];
+        decodedHeader = new String(Base64Utils.decode(header));
+        System.out.println("Header: "+decodedHeader);
+        body = token.split("\\.")[1];
+        decodedBody = new String(Base64Utils.decode(body));
+        System.out.println("Body: " + decodedBody);
+
+        token = jwtGen.generateToken(dto, "testAPI", "1.5.0");
+        System.out.println("Generated Token: " + token);
+        header = token.split("\\.")[0];
+        decodedHeader = new String(Base64Utils.decode(header));
+        System.out.println("Header: "+decodedHeader);
+        body = token.split("\\.")[1];
+        decodedBody = new String(Base64Utils.decode(body));
+        System.out.println("Body: " + decodedBody);
+    }
     //    TODO: Have to convert to work with new JWT generation and signing
     public void testJWTGeneration() throws Exception {
-        JWTGenerator jwtGen = new JWTGenerator(false, false);
+        JWTGenerator jwtGen = new JWTGenerator();
         APIKeyValidationInfoDTO dto=new APIKeyValidationInfoDTO();
         dto.setSubscriber("sastry");
         dto.setApplicationName("hubapp");
@@ -54,7 +100,7 @@ public class TokenGenTest extends TestCase {
         dto.setApplicationTier("UNLIMITED");
         dto.setEndUserName("denis");
         dto.setUserType(APIConstants.ACCESS_TOKEN_USER_TYPE_APPLICATION);
-        String token = jwtGen.generateToken(dto, "cricScore", "1.9.0", true);
+        String token = jwtGen.generateToken(dto, "cricScore", "1.9.0");
         System.out.println("Generated Token: " + token);
         String header = token.split("\\.")[0];
         String decodedHeader = new String(Base64Utils.decode(header));
@@ -65,7 +111,7 @@ public class TokenGenTest extends TestCase {
 
 
         // With end user name not included
-        token = jwtGen.generateToken(dto, "cricScore", "1.9.0", false);
+        token = jwtGen.generateToken(dto, "cricScore", "1.9.0");
         System.out.println("Generated Token: " + token);
         header = token.split("\\.")[0];
         decodedHeader = new String(Base64Utils.decode(header));
@@ -76,7 +122,7 @@ public class TokenGenTest extends TestCase {
 
 
         dto.setUserType(APIConstants.SUBSCRIPTION_USER_TYPE);
-        token = jwtGen.generateToken(dto, "cricScore", "1.9.0", true);
+        token = jwtGen.generateToken(dto, "cricScore", "1.9.0");
         System.out.println("Generated Token: " + token);
         header = token.split("\\.")[0];
         decodedHeader = new String(Base64Utils.decode(header));
@@ -85,13 +131,7 @@ public class TokenGenTest extends TestCase {
         decodedBody = new String(Base64Utils.decode(body));
         System.out.println("Body: " + decodedBody);
 
-        // enduser claim should be as "http://wso2.org/claims/enduser":"<enduser>"
-        String endUserClaim = "http://wso2.org/claims/enduser";
-        String userName = decodedBody.split(endUserClaim)[1].split("\"")[2];
-        System.out.println("user name "+userName);
-        Assert.assertEquals("denis@carbon.super", userName);
-
-        token = jwtGen.generateToken(dto, "cricScore", "1.9.0", false);
+        token = jwtGen.generateToken(dto, "cricScore", "1.9.0");
         System.out.println("Generated Token: " + token);
         header = token.split("\\.")[0];
         decodedHeader = new String(Base64Utils.decode(header));

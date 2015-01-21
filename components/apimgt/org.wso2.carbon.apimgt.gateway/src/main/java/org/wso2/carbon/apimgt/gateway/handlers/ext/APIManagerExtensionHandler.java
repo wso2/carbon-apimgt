@@ -147,6 +147,13 @@ public class APIManagerExtensionHandler extends AbstractHandler {
         } catch (Exception e) {
             //We do nothing here simply this parameter will skip in debug logs
         }
+
+        if(DIRECTION_OUT.equals(direction)){
+            String statusCode = String.valueOf(axisMC.getProperty("HTTP_SC"));
+            if(statusCode != null && !"".equals(statusCode)){
+                logMessage = logMessage + " , statusCode=" + statusCode;
+            }
+        }
         if (isLoginRequest) {
 
             if (DIRECTION_IN.equals(direction)) {
@@ -160,7 +167,8 @@ public class APIManagerExtensionHandler extends AbstractHandler {
             if (DIRECTION_IN.equals(direction)) {
                 log.debug("Inbound API call from client to gateway: " + logMessage);
             } else if (DIRECTION_OUT.equals(direction)) {
-                logMessage = logMessage + " , EndPointURL=" + axisMC.getProperty("ENDPOINT_PREFIX");
+                //logMessage = logMessage + " , EndPointURL=" + messageContext.getProperty(SynapseConstants
+                 //       .ENDPOINT_PREFIX);
                 log.debug("Outbound API call from gateway to client: " + logMessage);
             }
         }

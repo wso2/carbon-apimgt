@@ -7,7 +7,6 @@ jagg.block("api/swagger", {
     getInputs:function () {
         return {
             "api":null,
-            "discoveryURL":null,
             "swaggerString":null,
             "user":null
         }

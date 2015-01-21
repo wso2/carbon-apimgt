@@ -40,7 +40,7 @@ try{
             log.debug("Error while authenticating user : " + username);
         }
 
-        message = username+" Login Failed.";
+        message = "Login Failed.";
 
         return {
             error:true,
@@ -49,7 +49,7 @@ try{
         };
     }else{
     isSuperTenant =tenantMode;
-    var sessionCookie = cookie.split(';')[0];
+    var sessionCookie = xhr.getResponseHeader("Set-Cookie");//cookie.split(';')[0];
     jagg.setUser({username:username, isSuperTenant:isSuperTenant, cookie:sessionCookie, userDomain : username.split("@")[1]});
 
 
@@ -62,7 +62,7 @@ try{
      return {
             error:true,
             cookie:null,
-            message:username+" Login Failed."
+            message:"Login Failed."
         };
 
 }}
@@ -95,7 +95,8 @@ var loginWithSAMLToken = function (token) {
     xhr.send(payload);
     var cookie = (xhr.getAllResponseHeaders());
 
-    var cookieString = cookie.split(";")[0].split(":")[1];
+   // var cookieString = cookie.split(";")[0].split(":")[1];
+   var cookieString = xhr.getResponseHeader("Set-Cookie");
     var userName = ssoRelyingParty.getSAMLResponseNameId(token);
     getWorkflowCookie(username,password);
 
@@ -125,7 +126,9 @@ xhr.open("POST", endpoint);
 var payload = '<soap:Envelope xmlns:soap="http://www.w3.org/2003/05/soap-envelope" xmlns:aut="http://authentication.services.core.carbon.wso2.org"><soap:Header/><soap:Body><aut:login><aut:username>' +  username + '</aut:username><aut:password>' + password + '</aut:password><aut:remoteAddress>localhost</aut:remoteAddress></aut:login></soap:Body></soap:Envelope>';
 xhr.send(payload);
 var cookie = (xhr.getAllResponseHeaders());
-session.put("workflowCookie",cookie.split(";")[0].split(":")[1]);
+//session.put("workflowCookie",cookie.split(";")[0].split(":")[1]);
+var sessionCookie =  xhr.getResponseHeader("Set-Cookie");
+session.put("workflowCookie",sessionCookie);
 }catch (e) {
         log.error(e.message);
 
@@ -144,6 +147,12 @@ var isEmailLoginEnabled=store.isEnableEmailUsername();
 var checkedUserName=username;
 if(!isEmailLoginEnabled && (username.indexOf("@") != -1)){
 checkedUserName=username.split("@")[0];
+}
+if(isEmailLoginEnabled) {
+  var email = username.split("@")[1];
+  if(email != null) {
+    checkedUserName=username.split("@")[0] + "@" + email ;
+  }
 }
 var endpoint =  store.getAuthServerURL()+"RemoteUserStoreManagerService/";
 var payload = '<ser:getRoleListOfUser xmlns:ser="http://service.ws.um.carbon.wso2.org">'+

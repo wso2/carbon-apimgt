@@ -56,6 +56,10 @@ public final class APIConstants {
     
     public static final String API_APPLICATION_DATA_LOCATION = APIMGT_REGISTRY_LOCATION +"/applicationdata";
 
+	// Registry location where descriptions and thumbnails of the tags are
+	// stored.
+	public static final String TAGS_INFO_ROOT_LOCATION = API_APPLICATION_DATA_LOCATION + "/tags";
+    
     //registry location of API
     public static final String API_LOCATION = API_APPLICATION_DATA_LOCATION + "/provider";
     
@@ -115,6 +119,10 @@ public final class APIConstants {
     public static final String WORKFLOW_EXECUTOR_LOCATION = API_APPLICATION_DATA_LOCATION + "/workflow-extensions.xml";
 
     public static final String WORKFLOW_MEDIA_TYPE = "workflow-config";
+    
+    //registry resource containing the self signup user config
+    public static final String SELF_SIGN_UP_CONFIG_LOCATION = API_APPLICATION_DATA_LOCATION + "/sign-up-config.xml";
+    public static final String SELF_SIGN_UP_CONFIG_MEDIA_TYPE =  "signup-config";
 
     public static final String BAM_SERVER_PROFILE_LOCATION = "bamServerProfiles/bam-profile";
     
@@ -220,6 +228,10 @@ public final class APIConstants {
     public static final String IDENTITY_OAUTH2_FIELD_TIME_CREATED = "TIME_CREATED";
     public static final String IDENTITY_OAUTH2_FIELD_VALIDITY_PERIOD = "VALIDITY_PERIOD";
 
+    public static final String API_CONSUMER_AUTHENTICATION = "APIConsumerAuthentication.";
+    public static final String TOKEN_GENERATOR_IMPL = API_CONSUMER_AUTHENTICATION+"TokenGeneratorImpl";
+    public static final String ENABLE_JWT_GENERATION = API_CONSUMER_AUTHENTICATION+"EnableTokenGeneration";
+
     //documentation rxt
 
     public static final String DOC_NAME= "overview_name";
@@ -253,6 +265,11 @@ public final class APIConstants {
         public static final String UNBLOCKED = "UNBLOCKED";
         public static final String ON_HOLD = "ON_HOLD";
         public static final String REJECTED = "REJECTED";
+    }
+
+    public static class SubscriptionCreatedStatus   {
+        public static final String SUBSCRIBE = "SUBSCRIBE";
+        public static final String UN_SUBSCRIBE = "UN_SUBSCRIBE";
     }
 
     public static final String RXT_MEDIA_TYPE = "application/vnd.wso2.registry-ext-type+xml";
@@ -312,6 +329,7 @@ public final class APIConstants {
     public static final String API_STORE_DISPLAY_RATINGS = API_STORE + "DisplayRatings";
     public static final String API_STORE_FORCE_CI_COMPARISIONS = API_STORE + "CompareCaseInsensitively";
     public static final String API_STORE_TAG_CACHE_DURATION = API_STORE + "TagCacheDuration";
+    public static final String API_STORE_REUSE_APP_NAME = API_STORE + "ReuseAppName";
 
     public static final String API_PUBLISHER = "APIPublisher.";
     public static final String SHOW_API_PUBLISHER_URL_FROM_STORE = "APIPublisher."+"DisplayURL";
@@ -341,6 +359,17 @@ public final class APIConstants {
     public static final String SELF_SIGN_UP = "SelfSignUp.";
     public static final String SELF_SIGN_UP_ENABLED = SELF_SIGN_UP + "Enabled";
     public static final String SELF_SIGN_UP_ROLE = SELF_SIGN_UP + "SubscriberRoleName";
+    
+    //elements in the configuration file in the registry related to self signup
+    public static final String SELF_SIGN_UP_REG_ROOT = "SelfSignUp";
+    public static final String SELF_SIGN_UP_REG_DOMAIN_ELEM = "SignUpDomain";
+    public static final String SELF_SIGN_UP_REG_ROLES_ELEM = "SignUpRoles";
+    public static final String SELF_SIGN_UP_REG_ROLE_ELEM = "SignUpRole";
+    public static final String SELF_SIGN_UP_REG_USERNAME = "AdminUserName";
+    public static final String SELF_SIGN_UP_REG_PASSWORD = "AdminPassword";
+    public static final String SELF_SIGN_UP_REG_ENABLED = "EnableSignup";
+    public static final String SELF_SIGN_UP_REG_ROLE_NAME_ELEMENT = "RoleName";
+    public static final String SELF_SIGN_UP_REG_ROLE_IS_EXTERNAL = "IsExternalRole";
 
     public static final String STATUS_OBSERVERS = "StatusObservers.";
     public static final String OBSERVER = STATUS_OBSERVERS + "Observer";
@@ -440,12 +469,14 @@ public final class APIConstants {
     public static final String API_MANAGER_CACHE_MANAGER = "API_MANAGER_CACHE";
     public static final String API_CONTEXT_CACHE_MANAGER = "API_CONTEXT_CACHE_MANAGER";
     public static final String RESOURCE_CACHE_NAME = "resourceCache";
+    public static final String GATEWAY_KEY_CACHE_NAME = "gatewayKeyCache";
     public static final String KEY_CACHE_NAME = "keyCache";
     public static final String JWT_CACHE_NAME = "jwtCache";
     public static final String API_CONTEXT_CACHE = "apiContextCache";
     public static final String WORKFLOW_CACHE_NAME = "workflowCache";
     public static final String APP_USER_SCOPE_CACHE = "appUserScopeCache";
     public static final String APP_SCOPE_CACHE = "appScopeCache";
+    public static final String SELF_SIGN_UP_CONFIG_CACHE = "selfSignupCache";
     public static final int API_CONTEXT_CACHE_EXPIRY_TIME_IN_DAYS = 3650 ;
 
     //URI Authentication Schemes
@@ -544,13 +575,15 @@ public final class APIConstants {
     public static final String RECENTLY_ADDED_API_CACHE_NAME = "RECENTLY_ADDED_API";
     public static final String API_STORE_RECENTLY_ADDED_API_CACHE_ENABLE = API_STORE + "EnableRecentlyAddedAPICache";
     public static boolean isRecentlyAddedAPICacheEnabled = false;
-    public static String velocityLogPath = "VelocityLogPath";
+    public static String VELOCITY_LOGGER = "VelocityLogger";
     
     // Primary/Secondary Login configuration
     public static final String USERID_LOGIN = "UserIdLogin";
     public static final String EMAIL_LOGIN = "EmailLogin";
     public static final String PRIMARY_LOGIN = "primary";
     public static final String CLAIM_URI = "ClaimUri";
+
+    public static final String DEFAULT_VERSION_PREFIX = "_default_";
 
 
 }

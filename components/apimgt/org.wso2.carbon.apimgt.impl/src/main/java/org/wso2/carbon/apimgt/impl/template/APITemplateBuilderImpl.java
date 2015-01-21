@@ -23,9 +23,9 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.velocity.Template;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.VelocityEngine;
+import org.apache.velocity.runtime.RuntimeConstants;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.impl.APIConstants;
-import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
 import org.wso2.carbon.apimgt.impl.dto.Environment;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
@@ -84,12 +84,14 @@ public class APITemplateBuilderImpl implements APITemplateBuilder {
 
             VelocityContext context = configcontext.getContext();
 
-            Object keys = context.internalGetKeys();
+            context.internalGetKeys();
 
             /*  first, initialize velocity engine  */
             VelocityEngine velocityengine = new VelocityEngine();
-            if (!getVelocityLogPath().equalsIgnoreCase("not-defined")) {
-                velocityengine.setProperty("runtime.log", getVelocityLogPath());
+            if (!"not-defined".equalsIgnoreCase(getVelocityLogger())) {
+                velocityengine.setProperty( RuntimeConstants.RUNTIME_LOG_LOGSYSTEM_CLASS,
+                                            "org.apache.velocity.runtime.log.Log4JLogChute" );
+                velocityengine.setProperty( "runtime.log.logsystem.log4j.logger", getVelocityLogger());
             }
             velocityengine.init();
 
@@ -129,12 +131,14 @@ public class APITemplateBuilderImpl implements APITemplateBuilder {
 
             VelocityContext context = configcontext.getContext();
 
-            Object keys = context.internalGetKeys();
+            context.internalGetKeys();
 
             /*  first, initialize velocity engine  */
             VelocityEngine velocityengine = new VelocityEngine();
-            if (!getVelocityLogPath().equalsIgnoreCase("not-defined")) {
-                velocityengine.setProperty("runtime.log", getVelocityLogPath());
+            if (!"not-defined".equalsIgnoreCase(getVelocityLogger())) {
+                velocityengine.setProperty( RuntimeConstants.RUNTIME_LOG_LOGSYSTEM_CLASS,
+                                            "org.apache.velocity.runtime.log.Log4JLogChute" );
+                velocityengine.setProperty( "runtime.log.logsystem.log4j.logger", getVelocityLogger());
             }
             velocityengine.init();
 
@@ -155,12 +159,16 @@ public class APITemplateBuilderImpl implements APITemplateBuilder {
 
         try {
             VelocityEngine velocityengine = new VelocityEngine();
-            if (!getVelocityLogPath().equalsIgnoreCase("not-defined")) {
-                velocityengine.setProperty("runtime.log", getVelocityLogPath());
+            if (!"not-defined".equalsIgnoreCase(getVelocityLogger())) {
+                velocityengine.setProperty( RuntimeConstants.RUNTIME_LOG_LOGSYSTEM_CLASS,
+                                            "org.apache.velocity.runtime.log.Log4JLogChute" );
+                velocityengine.setProperty( "runtime.log.logsystem.log4j.logger", getVelocityLogger());
             }
             velocityengine.init();
 
             ConfigContext configcontext = new APIConfigContext(this.api);
+            configcontext = new TransportConfigContext(configcontext, api);
+            configcontext = new ResourceConfigContext(configcontext, api);
 
             VelocityContext context = configcontext.getContext();
             context.put("defaultVersion", defaultVersion);
@@ -212,12 +220,12 @@ public class APITemplateBuilderImpl implements APITemplateBuilder {
         return "repository" + File.separator + "resources" + File.separator + "api_templates" + File.separator + APITemplateBuilderImpl.TEMPLATE_DEFAULT_API + ".xml";
     }
 
-    public String getVelocityLogPath() {
+    public String getVelocityLogger() {
         if (this.velocityLogPath != null) {
             return this.velocityLogPath;
         } else {
             APIManagerConfigurationService config = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService();
-            String velocityLogPath = config.getAPIManagerConfiguration().getFirstProperty(APIConstants.velocityLogPath);
+            String velocityLogPath = config.getAPIManagerConfiguration().getFirstProperty(APIConstants.VELOCITY_LOGGER);
             if (velocityLogPath != null && velocityLogPath.length() > 1) {
                 this.velocityLogPath = velocityLogPath;
             } else {

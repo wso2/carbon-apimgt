@@ -1,5 +1,5 @@
 <% jagg.template("api/throttling", function(inputs, outputs, jagg) {
-var discoveryUrl = outputs.discoveryURL;
+
 var i, length, app, thumbURL, api = outputs.api, templatesList = outputs.uriTemplates;
                              var mod = jagg.module("api");
                              var result = mod.getTiers().tiers;

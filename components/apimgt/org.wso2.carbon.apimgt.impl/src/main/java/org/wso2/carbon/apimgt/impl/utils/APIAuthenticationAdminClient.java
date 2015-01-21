@@ -86,16 +86,36 @@ public class APIAuthenticationAdminClient { // extends AbstractAPIGatewayAdminCl
     protected void setup(Stub stub, Environment environment) throws AxisFault {
         APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
                 getAPIManagerConfigurationService().getAPIManagerConfiguration();
-        //By default login to keyMgt server
-        String cookie = loginKeyMgt();
-        String gatewayKeyCacheEnabledString = config.getFirstProperty(APIConstants.API_GATEWAY_KEY_CACHE_ENABLED);
+
+        String cookie = null;
+        boolean loggedIn = false;
+
+        String keyMgtKeyCacheEnabledString =
+                config.getFirstProperty(APIConstants.API_KEY_MANAGER_ENABLE_VALIDATION_INFO_CACHE);
+
+        //If keyMgt server key cache enabled we login to KM
+        if (keyMgtKeyCacheEnabledString != null) {
+            Boolean keyMgtKeyCacheEnabled = Boolean.parseBoolean(keyMgtKeyCacheEnabledString);
+            if (keyMgtKeyCacheEnabled) {
+                loggedIn = true;
+                cookie = loginKeyMgt();
+            }
+        }
+
+        if (!loggedIn) {
+            //login to Gateway
+            loggedIn = true;
+            cookie = loginGateway(environment);
+        }
+        /*String gatewayKeyCacheEnabledString = config.getFirstProperty(APIConstants.API_GATEWAY_KEY_CACHE_ENABLED);
         //If gateway key cache enabled we need to login to gateway
         if (gatewayKeyCacheEnabledString != null) {
             Boolean gatewayKeyCacheEnabled = Boolean.parseBoolean(gatewayKeyCacheEnabledString);
             if (gatewayKeyCacheEnabled) {
                 cookie = loginGateway(environment);
             }
-        }
+        }*/
+
         ServiceClient client = stub._getServiceClient();
         Options options = client.getOptions();
         options.setTimeOutInMilliSeconds(15 * 60 * 1000);
@@ -214,8 +234,9 @@ public class APIAuthenticationAdminClient { // extends AbstractAPIGatewayAdminCl
                 return url + serviceName;
             }
         }
-        //By default caching at keyMgt server
-        String url = config.getFirstProperty(APIConstants.API_KEY_MANAGER_URL);
+        //By default return url of Gateway
+        //String url = config.getFirstProperty(APIConstants.API_KEY_MANAGER_URL);
+        String url = environment.getServerURL();
         return url + serviceName;
     }
 }

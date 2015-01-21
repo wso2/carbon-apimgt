@@ -21,6 +21,7 @@ package org.wso2.carbon.apimgt.usage.client;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.impl.builder.StAXOMBuilder;
 import org.apache.axiom.om.util.AXIOMUtil;
+import org.apache.commons.lang.StringEscapeUtils;
 import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
@@ -35,6 +36,7 @@ import org.wso2.carbon.apimgt.usage.client.dto.*;
 import org.wso2.carbon.apimgt.usage.client.exception.APIMgtUsageQueryServiceClientException;
 import org.wso2.carbon.apimgt.usage.client.internal.APIUsageClientServiceComponent;
 import org.wso2.carbon.bam.presentation.stub.QueryServiceStub;
+import org.wso2.carbon.core.util.CryptoUtil;
 import org.wso2.carbon.utils.CarbonUtils;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
@@ -163,7 +165,7 @@ public class APIUsageStatisticsClient {
         APIResponseFaultCountDTO apiUsageDTO;
         for (AppAPIResponseFaultCount usage : usageData) {
             for (String subscriberApp : subscriberApps) {
-                if (subscriberApp.equals(usage.consumerKey)) {
+                if (subscriberApp != null && subscriberApp.equals(usage.consumerKey)) {
                     String consumerKey = usage.consumerKey;
                     String api = usage.apiName;
                     Boolean count = false;
@@ -201,7 +203,7 @@ public class APIUsageStatisticsClient {
         AppUsageDTO appUsageDTO;
         for (AppUsage usage : usageData) {
             for (String subscriberApp : subscriberApps) {
-                if (subscriberApp.equals(usage.consumerKey)) {
+                if (subscriberApp != null && subscriberApp.equals(usage.consumerKey)) {
                     String consumerKey = usage.consumerKey;
                     String user = usage.userid;
                     Boolean count = false;
@@ -257,7 +259,7 @@ public class APIUsageStatisticsClient {
         AppCallTypeDTO appCallTypeDTO;
         for (AppCallType usage : usageData) {
             for (String subscriberApp : subscriberApps) {
-                if (subscriberApp.equals(usage.consumerKey)) {
+                if (subscriberApp != null && subscriberApp.equals(usage.consumerKey)) {
                     String consumerKey = usage.consumerKey;
                     String api = usage.apiName;
                     Boolean count = false;
@@ -318,7 +320,7 @@ public class APIUsageStatisticsClient {
         AppRegisteredUsersDTO appUsers;
         for (AppRegisteredUsersDTO usage : usageData) {
             for (String subscriberApp : subscriberApps) {
-                if (subscriberApp.equals(usage.getconsumerKey())) {
+                if (subscriberApp != null && subscriberApp.equals(usage.getconsumerKey())) {
                     appUsers = new AppRegisteredUsersDTO();
                     appUsers.setappName(subscriberAppsMap.get(usage.getconsumerKey()));
                     appUsers.setUser(usage.getUser());
@@ -408,7 +410,7 @@ public class APIUsageStatisticsClient {
         APIUsageDTO apiUsageDTO;
         for (AppAPIUsage usage : usageData) {
             for (String subscriberApp : subscriberApps) {
-                if (subscriberApp.equals(usage.consumerKey)) {
+                if (subscriberApp != null && subscriberApp.equals(usage.consumerKey)) {
                     String consumerKey = usage.consumerKey;
                     String api = usage.apiName;
                     Boolean count = false;
@@ -448,19 +450,23 @@ public class APIUsageStatisticsClient {
 
             rs = statement.executeQuery(query);
 
-            int columnCount = rs.getMetaData().getColumnCount();
             List<String> consumerKeys = new ArrayList<String>();
             while (rs.next()) {
-                String[] appDetail = new String[2];
-                for (int i = 1; i <= columnCount; i++) {
-                    String columnName = rs.getMetaData().getColumnName(i);
-                    String columnValue = rs.getString(columnName);
-                    appDetail[i - 1] = columnValue;
-                    if (i == 1) {
-                        consumerKeys.add(columnValue);
-                    }
+                String consumerKey = rs.getString("CONSUMER_KEY");
+                String appName = rs.getString("NAME");
+                APIManagerConfiguration config = APIUsageClientServiceComponent.getAPIManagerConfiguration();
+                String tokenEncryptionConfig = config.getFirstProperty("APIKeyManager.EncryptPersistedTokens");
+
+                boolean isTokenEncryptionEnabled = Boolean.parseBoolean(tokenEncryptionConfig);
+
+                if (isTokenEncryptionEnabled)   {
+                    String decryptedConsumerKey = new String(CryptoUtil.getDefaultCryptoUtil().base64DecodeAndDecrypt(consumerKey));
+                    consumerKeys.add(decryptedConsumerKey);
+                    subscriberAppsMap.put(decryptedConsumerKey, appName);
+                } else {
+                    consumerKeys.add(consumerKey);
+                    subscriberAppsMap.put(consumerKey, appName);
                 }
-                subscriberAppsMap.put(appDetail[0], appDetail[1]);
             }
             return consumerKeys;
 
@@ -1238,7 +1244,8 @@ public class APIUsageStatisticsClient {
                 for (int i = 1; i <= columnCount; i++) {
                     String columnName = rs.getMetaData().getColumnName(i);
                     String columnValue = rs.getString(columnName);
-                    returnStringBuilder.append("<" + columnName.toLowerCase() + ">" + columnValue +
+                    String xmlEscapedValue = StringEscapeUtils.escapeXml(columnValue);
+                    returnStringBuilder.append("<" + columnName.toLowerCase() + ">" + xmlEscapedValue +
                             "</" + columnName.toLowerCase() + ">");
                 }
                 returnStringBuilder.append("</row>");
@@ -1942,7 +1949,11 @@ public class APIUsageStatisticsClient {
         OMElement rowsElement = data.getFirstChildWithName(new QName(
                 APIUsageStatisticsClientConstants.ROWS));
         OMElement rowElement = rowsElement.getFirstChildWithName(new QName(APIUsageStatisticsClientConstants.ROW));
-        usageData.add(new APIFirstAccess(rowElement));
+
+        if (rowElement!=null) {
+            usageData.add(new APIFirstAccess(rowElement));
+        }
+
         return usageData;
     }
 

@@ -7,10 +7,9 @@ import org.apache.synapse.MessageContext;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.rest.AbstractHandler;
 import org.apache.synapse.rest.RESTConstants;
+import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
-import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
-
 import javax.cache.Caching;
 import java.util.Iterator;
 import java.util.Map;
@@ -25,7 +24,6 @@ import java.util.TreeMap;
 public class APIManagerCacheExtensionHandler extends AbstractHandler {
 
     private static final String EXT_SEQUENCE_PREFIX = "WSO2AM--Ext--";
-    private static final String DIRECTION_IN = "In";
     private static final String DIRECTION_OUT = "Out";
     private static final Log log = LogFactory.getLog(APIManagerCacheExtensionHandler.class);
 
@@ -57,18 +55,23 @@ public class APIManagerCacheExtensionHandler extends AbstractHandler {
             String renewedToken = (String) ((TreeMap) axisMC.getProperty("TRANSPORT_HEADERS")).get("DeactivatedAccessToken");
             String authorizedUser = (String) ((TreeMap) axisMC.getProperty("TRANSPORT_HEADERS")).get("AuthorizedUser");
             PrivilegedCarbonContext.startTenantFlow();
-            if (authorizedUser != null) {
-                String tenantDomain = MultitenantUtils.getTenantDomain(authorizedUser);
-                PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
-            } else {
-                PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME, true);
-            }
-            Iterator iterator = Caching.getCacheManager("API_MANAGER_CACHE").getCache("keyCache").keys();
+           // if (authorizedUser != null) {
+           //     String tenantDomain = MultitenantUtils.getTenantDomain(authorizedUser);
+           //     PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
+           // } else {
+            //This if condition commented out as a temp fix for APIMANAGER-1830.Reason is when we set gateway cache,we always set cache
+            //values for tenant/super tenants in super tenant space only.In gateway oauth handler code,to get tenant domain there's no direct
+            //method,rather processing incoming request attributes,which will add additional cost for each API request.
+            PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME, true);
+            // }
+            Iterator iterator = Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER).
+                                                                   getCache(APIConstants.GATEWAY_KEY_CACHE_NAME).keys();
             if (revokedToken != null) {
                 while (iterator.hasNext()) {
                     String cacheKey = iterator.next().toString();
                     if (cacheKey.contains(revokedToken)) {
-                        Caching.getCacheManager("API_MANAGER_CACHE").getCache("keyCache").remove(cacheKey);
+                        Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER).
+                                                         getCache(APIConstants.GATEWAY_KEY_CACHE_NAME).remove(cacheKey);
                         if (log.isDebugEnabled()) {
                             log.debug("clearing cache entries associated with token " + revokedToken);
                         }
@@ -81,7 +84,8 @@ public class APIManagerCacheExtensionHandler extends AbstractHandler {
                 while (iterator.hasNext()) {
                     String cacheKey = iterator.next().toString();
                     if (cacheKey.contains(renewedToken)) {
-                        Caching.getCacheManager("API_MANAGER_CACHE").getCache("keyCache").remove(cacheKey);
+                        Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER).
+                                                         getCache(APIConstants.GATEWAY_KEY_CACHE_NAME).remove(cacheKey);
                         if (log.isDebugEnabled()) {
                             log.debug("clearing cache entries associated with token " + renewedToken);
                         }

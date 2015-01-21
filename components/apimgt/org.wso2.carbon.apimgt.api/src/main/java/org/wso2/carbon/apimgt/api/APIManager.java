@@ -43,7 +43,14 @@ public interface APIManager {
      * @throws APIManagementException on error
      */
     public List<API> getAllAPIs() throws APIManagementException;
-
+    /**
+     * Returns details of an API
+     *
+     * @param apiPath APIIdentifier
+     * @return An API object related to the given identifier or null
+     * @throws APIManagementException if failed get API from APIIdentifier
+     */
+    public API getAPI(String apiPath) throws APIManagementException;
     /**
      * Returns details of an API
      *
@@ -70,6 +77,15 @@ public interface APIManager {
      * @throws APIManagementException if failed to check the context availability
      */
     public boolean isContextExist(String context) throws APIManagementException;
+
+    /**
+     * Checks whether the given API name is already registered in the system
+     *
+     * @param apiName A String representing an API name
+     * @return true if the api name already exists and false otherwise
+     * @throws APIManagementException if failed to check the context availability
+     */
+    public boolean isApiNameExist(String apiName) throws APIManagementException;
 
     /**
      * Returns a set of API versions for the given provider and API name

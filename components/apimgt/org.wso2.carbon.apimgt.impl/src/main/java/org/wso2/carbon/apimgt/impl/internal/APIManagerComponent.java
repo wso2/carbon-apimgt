@@ -37,7 +37,6 @@ import org.wso2.carbon.apimgt.impl.observers.TenantServiceCreator;
 import org.wso2.carbon.apimgt.impl.utils.APIMgtDBUtil;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.utils.RemoteAuthorizationManager;
-import org.wso2.carbon.apimgt.impl.workflow.WorkflowExecutorFactory;
 import org.wso2.carbon.base.MultitenantConstants;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.governance.api.util.GovernanceConstants;
@@ -66,8 +65,6 @@ import org.wso2.carbon.utils.ConfigurationContextService;
 import org.wso2.carbon.utils.FileUtil;
 
 import javax.cache.Cache;
-import javax.swing.plaf.multi.MultiTabbedPaneUI;
-
 import java.io.File;
 import java.io.FilenameFilter;
 import java.io.IOException;
@@ -123,6 +120,8 @@ public class APIManagerComponent {
             APIUtil.loadTenantGAConfig(MultitenantConstants.SUPER_TENANT_ID);
             int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
             APIUtil.loadTenantWorkFlowExtensions(tenantId);
+            //load self sigup configuration to the registry
+            APIUtil.loadTenantSelfSignUpConfigurations(tenantId);
             
             
             APIManagerConfiguration configuration = new APIManagerConfiguration();
@@ -153,17 +152,23 @@ public class APIManagerComponent {
 
             AuthorizationUtils.addAuthorizeRoleListener(APIConstants.AM_CREATOR_APIMGT_EXECUTION_ID,
                     RegistryUtils.getAbsolutePath(RegistryContext.getBaseInstance(),
-                            RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH + APIConstants.API_APPLICATION_DATA_LOCATION),
+                                                                                      APIUtil.getMountedPath(RegistryContext.getBaseInstance(),
+                                                                                                             RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH) +
+                                                                                              APIConstants.API_APPLICATION_DATA_LOCATION),
                     APIConstants.Permissions.API_CREATE,
                     UserMgtConstants.EXECUTE_ACTION, null);
             AuthorizationUtils.addAuthorizeRoleListener(APIConstants.AM_CREATOR_GOVERNANCE_EXECUTION_ID,
                     RegistryUtils.getAbsolutePath(RegistryContext.getBaseInstance(),
-                            RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH + "/trunk"),
+                                                                                      APIUtil.getMountedPath(RegistryContext.getBaseInstance(),
+                                                                                                             RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH) +
+                                                                                              "/trunk"),
                     APIConstants.Permissions.API_CREATE,
                     UserMgtConstants.EXECUTE_ACTION, null);
             AuthorizationUtils.addAuthorizeRoleListener(APIConstants.AM_PUBLISHER_APIMGT_EXECUTION_ID,
                     RegistryUtils.getAbsolutePath(RegistryContext.getBaseInstance(),
-                            RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH + APIConstants.API_APPLICATION_DATA_LOCATION),
+                                                                                      APIUtil.getMountedPath(RegistryContext.getBaseInstance(),
+                                                                                                             RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH) +
+                                                                                              APIConstants.API_APPLICATION_DATA_LOCATION),
                     APIConstants.Permissions.API_PUBLISH,
                     UserMgtConstants.EXECUTE_ACTION, null);
             
@@ -191,7 +196,7 @@ public class APIManagerComponent {
                     contextCache.put(context, true);
                 }
             }
-            new APIUtil().setupSelfRegistration(configuration,MultitenantConstants.SUPER_TENANT_ID);
+            APIUtil.createSelfSignUpRoles(MultitenantConstants.SUPER_TENANT_ID);
             
             /* Add Bam Server Profile for collecting southbound statistics*/
             String enabledStr = configuration.getFirstProperty(APIConstants.API_USAGE_ENABLED);
@@ -315,7 +320,10 @@ public class APIManagerComponent {
             AuthorizationManager accessControlAdmin = ServiceReferenceHolder.getInstance().
                     getRealmService().getTenantUserRealm(MultitenantConstants.SUPER_TENANT_ID).
                     getAuthorizationManager();
-            String imageLocation = RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH + APIConstants.API_IMAGE_LOCATION;
+            String imageLocation =
+                                   APIUtil.getMountedPath(RegistryContext.getBaseInstance(),
+                                                          RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH) +
+                                           APIConstants.API_IMAGE_LOCATION;
             if (!accessControlAdmin.isRoleAuthorized(CarbonConstants.REGISTRY_ANONNYMOUS_ROLE_NAME,
                     imageLocation, ActionConstants.GET)) {
                 // Can we get rid of this?

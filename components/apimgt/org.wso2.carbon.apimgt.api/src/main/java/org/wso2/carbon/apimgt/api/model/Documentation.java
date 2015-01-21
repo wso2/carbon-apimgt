@@ -17,6 +17,7 @@
 */
 package org.wso2.carbon.apimgt.api.model;
 
+import java.io.Serializable;
 import java.util.Date;
 
 /**
@@ -25,7 +26,7 @@ import java.util.Date;
  * @see DocumentationType
  */
 @SuppressWarnings("unused")
-public class Documentation {
+public class Documentation implements Serializable{
     private DocumentationType type;
     private String name;
     private String summary;

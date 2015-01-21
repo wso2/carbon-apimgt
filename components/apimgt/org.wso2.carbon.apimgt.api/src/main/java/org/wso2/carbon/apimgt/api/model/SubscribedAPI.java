@@ -33,6 +33,7 @@ public class SubscribedAPI {
     private Date lastAccessed;
     private Application application;
     private String subStatus;
+    private String subCreatedStatus;
     private List<APIKey> keys = new ArrayList<APIKey>();
 
     private boolean isBlocked;   //TODO: what is the difference & usage of revoking & blocking users
@@ -98,6 +99,14 @@ public class SubscribedAPI {
 
     public void setBlocked(boolean blocked) {
         isBlocked = blocked;
+    }
+
+    public String getSubCreatedStatus() {
+        return subCreatedStatus;
+    }
+
+    public void setSubCreatedStatus(String subCreatedStatus) {
+        this.subCreatedStatus = subCreatedStatus;
     }
 
     @Override

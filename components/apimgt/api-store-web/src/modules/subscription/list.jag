@@ -1,11 +1,11 @@
 <%
-var getAllSubscriptions = function (username) {
+var getAllSubscriptions = function (username, selectedAppName) {
     var applications,
             log = new Log(),
             store = jagg.module("manager").getAPIStoreObj();
 
     try {
-        applications = store.getAllSubscriptions(username);
+        applications = store.getAllSubscriptions(username , selectedAppName);
         if (log.isDebugEnabled()) {
             log.debug("getAllSubscriptions : " + stringify(applications));
         }

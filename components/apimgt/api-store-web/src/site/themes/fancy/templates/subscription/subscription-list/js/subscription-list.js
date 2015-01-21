@@ -14,6 +14,10 @@ function showHideKeys(){
 
 $(document).ready(function () {
 
+    $.ajaxSetup({
+        contentType: "application/x-www-form-urlencoded; charset=utf-8"
+    });
+
     $("#refreshProdValidityTime").keyup(function() {
         var prodvalidityTime = $(this).val();
         if (isNaN(prodvalidityTime)|| prodvalidityTime>9223372036854775807) {
@@ -161,9 +165,32 @@ $(document).ready(function () {
         showHideKeys();
     });
     showHideKeys();
+    
+    
+    $('.help_popup_prod').click(function(){
+	        $('#prodtoken_help').toggle('fast', function()
+	        {
+	            $('#prodtoken_help').html(i18n.t('info.tokenHelpMsg'));
+	        });
+	        return false;
+	    })
+	    
+   $('.help_popup_sand').click(function(){
+	 $('#sandtoken_help').toggle('fast', function()
+	 {
+	  $('#sandtoken_help').html(i18n.t('info.tokenHelpMsg'));
+	   });
+	    return false;
+	 });
+	  
+	    
 });
 
 var regenerate=function(appName,keyType,i,btn,div,clientId,clientSecret) {
+    if(jagg.sessionExpired()){
+        window.location.reload();
+    }
+    //jagg.sessionAwareJS({redirect:'/site/pages/subscriptions.jag'});
     //$('.show-hide-key pull-right').attr('disabled');
     $(btn).parent().hide();
     $(btn).parent().prev().show();
@@ -248,6 +275,7 @@ var regenerate=function(appName,keyType,i,btn,div,clientId,clientSecret) {
 
 
 var updateAccessAllowDomains = function(appName, keyType, i, btn) {
+    jagg.sessionAwareJS({redirect:'/site/pages/subscriptions.jag'});
     var elem = $(btn);
     var oldAccessToken;
     var authorizedDomainsEdit;
@@ -345,6 +373,7 @@ function toggleTokenTimeSection(link){
 }
 
 function removeSubscription(apiName, version, provider, applicationId, delLink) {
+    jagg.sessionAwareJS({redirect:'/site/pages/subscriptions.jag'});
     $('#messageModal').html($('#confirmation-data').html());
     $('#messageModal h3.modal-title').html(i18n.t('confirm.delete'));
     $('#messageModal div.modal-body').html('\n\n'+i18n.t('confirm.unsubscribeMsg') +'<b>"' + apiName+'-'+version + '</b>"?');

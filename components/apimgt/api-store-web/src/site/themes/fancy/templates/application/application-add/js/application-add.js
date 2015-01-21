@@ -46,10 +46,10 @@ $(document).ready(function () {
                     jagg.message({content:i18n.t('info.returntoAPIPage'),type:'confirm',okCallback:function(){
                     window.location.href = apiViewUrl + "?" +  apiPath;
                     },cancelCallback:function(){
-                        window.location.reload();
+                        window.location.reload(true);
                     }});
                 } else{
-                    window.location.reload();
+                    window.location.reload(true);
                 }
 
             } else {
@@ -71,5 +71,14 @@ $(document).ready(function () {
                applicationAdd();
             }
         });*/
+   
+    $('.help_popup').click(function()
+	    {
+	        $('#callback_help').toggle('fast', function()
+	        {
+	            $('#callback_help').html(i18n.t('info.callBackHelpMsg'));
+	        });
+	        return false;
+	    });
 });
 

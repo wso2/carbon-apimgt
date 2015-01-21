@@ -17,13 +17,14 @@
 */
 package org.wso2.carbon.apimgt.api.model;
 
+import java.io.Serializable;
 import java.util.Map;
 
 /**
  * This class represent the Tier
  */
 @SuppressWarnings("unused")
-public class Tier {
+public class Tier implements Serializable{
 
     private String name;
     private String displayName;

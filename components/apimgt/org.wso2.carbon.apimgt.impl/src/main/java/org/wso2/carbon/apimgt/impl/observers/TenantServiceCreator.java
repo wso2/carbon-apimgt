@@ -74,14 +74,12 @@ public class TenantServiceCreator extends AbstractAxis2ConfigurationContextObser
     private String sandboxKeyErrorSequenceName = "_sandbox_key_error_";
     private String productionKeyErrorSequenceName = "_production_key_error_";
     private String throttleOutSequenceName = "_throttle_out_handler_";
-    private String buildSequenceName = "_build_";
     private String faultSequenceName = "fault";
     private String mainSequenceName = "main";
     private String synapseConfigRootPath = CarbonBaseUtils.getCarbonHome() + "/repository/resources/apim-synapse-config/";
     private SequenceMediator authFailureHandlerSequence = null;
     private SequenceMediator resourceMisMatchSequence = null;
-    private SequenceMediator throttleOutSequence = null;
-    private SequenceMediator buildSequence = null;
+    private SequenceMediator throttleOutSequence = null;    
     private SequenceMediator sandboxKeyErrorSequence = null;
     private SequenceMediator productionKeyErrorSequence = null;
 
@@ -93,6 +91,7 @@ public class TenantServiceCreator extends AbstractAxis2ConfigurationContextObser
     	String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
     	int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
         try {
+        	        	
             // first check which configuration should be active
             org.wso2.carbon.registry.core.Registry registry =
                     (org.wso2.carbon.registry.core.Registry) PrivilegedCarbonContext
@@ -130,11 +129,11 @@ public class TenantServiceCreator extends AbstractAxis2ConfigurationContextObser
 
             File synapseConfigDir = new File(synapseConfigsDir,
                     manger.getTracker().getCurrentConfigurationName());
-            File buildSequenceFile = new File(synapseConfigsDir + "/" + manger.getTracker().getCurrentConfigurationName() +
-                    "/" + MultiXMLConfigurationBuilder.SEQUENCES_DIR + "/" + buildSequenceName + ".xml");
-            //Here we will check build sequence exist in synapse artifact. If it is not available we will create
+            File authFailureHandlerSequenceNameFile = new File(synapseConfigsDir + "/" + manger.getTracker().getCurrentConfigurationName() +
+                    "/" + MultiXMLConfigurationBuilder.SEQUENCES_DIR + "/" + authFailureHandlerSequenceName + ".xml");
+            //Here we will check authfailurehandler sequence exist in synapse artifact. If it is not available we will create
             //sequence synapse configurations by using resource artifacts
-            if (!buildSequenceFile.exists()) {
+            if (!authFailureHandlerSequenceNameFile.exists()) {
                 createTenantSynapseConfigHierarchy(synapseConfigDir, tenantDomain);
             }
         } catch (Exception e) {
@@ -165,6 +164,20 @@ public class TenantServiceCreator extends AbstractAxis2ConfigurationContextObser
             log.error("Failed to load ga-config.xml to tenant " + tenantDomain + "'s registry");
         }
         
+        try {
+        	 //load workflow-extension configuration to the registry
+        	APIUtil.loadTenantWorkFlowExtensions(tenantId);
+        } catch(Exception e) {
+            log.error("Failed to load workflow-extension.xml to tenant " + tenantDomain + "'s registry");
+        }
+        
+        try {
+        	 //load self signup configurations to the registry            
+            APIUtil.loadTenantSelfSignUpConfigurations(tenantId);
+        } catch(Exception e) {
+           log.error("Failed to load sign-up-config.xml to tenant " + tenantDomain + "'s registry");
+        }                
+         
         try {
         	APIManagerConfiguration configuration = ServiceReferenceHolder.getInstance().
         			getAPIManagerConfigurationService().getAPIManagerConfiguration();
@@ -242,12 +255,6 @@ public class TenantServiceCreator extends AbstractAxis2ConfigurationContextObser
                 throttleOutSequence = (SequenceMediator) factory.createMediator(builder.getDocumentElement(), new Properties());
                 throttleOutSequence.setFileName(throttleOutSequenceName + ".xml");
             }
-            if (buildSequence == null) {
-                in = FileUtils.openInputStream(new File(synapseConfigRootPath + buildSequenceName + ".xml"));
-                builder = new StAXOMBuilder(in);
-                buildSequence = (SequenceMediator) factory.createMediator(builder.getDocumentElement(), new Properties());
-                buildSequence.setFileName(buildSequenceName + ".xml");
-            }
             if (sandboxKeyErrorSequence == null) {
                 in = FileUtils.openInputStream(new File(synapseConfigRootPath + sandboxKeyErrorSequenceName + ".xml"));
                 builder = new StAXOMBuilder(in);
@@ -283,7 +290,6 @@ public class TenantServiceCreator extends AbstractAxis2ConfigurationContextObser
             serializer.serializeSequence(authFailureHandlerSequence, initialSynCfg, null);
             serializer.serializeSequence(sandboxKeyErrorSequence, initialSynCfg, null);
             serializer.serializeSequence(productionKeyErrorSequence, initialSynCfg, null);
-            serializer.serializeSequence(buildSequence, initialSynCfg, null);
             serializer.serializeSequence(throttleOutSequence, initialSynCfg, null);
             serializer.serializeSequence(resourceMisMatchSequence, initialSynCfg, null);
             serializer.serializeSynapseRegistry(registry, initialSynCfg, null);

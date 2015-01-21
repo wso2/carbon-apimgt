@@ -101,6 +101,17 @@
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.mediation.security.stub</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.googlecode.json-simple.wso2</groupId>
+            <artifactId>json-simple</artifactId>
+            <version>1.1.wso2v1</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.wso2.carbon</groupId>
+            <artifactId>org.wso2.carbon.application.deployer</artifactId>
+
+        </dependency>
     </dependencies>
 
     <build>
@@ -209,7 +220,10 @@
                                 <bundleDef>org.wso2.carbon:org.wso2.carbon.apimgt.impl</bundleDef>
                                 <bundleDef>org.wso2.carbon:org.wso2.carbon.apimgt.hostobjects</bundleDef>
                                 <bundleDef>
-                                    org.wso2.carbon:org.wso2.carbon.apimgt.keymgt.stub:${project.parent.version}
+                                    org.wso2.carbon:org.wso2.carbon.apimgt.keymgt.stub:${carbon.platform.version}
+                                </bundleDef>
+                                <bundleDef>
+                                    org.wso2.carbon:org.wso2.carbon.apimgt.handlers.security.stub:${carbon.platform.version}
                                 </bundleDef>
                                 <bundleDef>org.wso2.carbon:org.wso2.carbon.apimgt.keymgt.client</bundleDef>
                                 <bundleDef>org.wso2.carbon:org.wso2.carbon.apimgt.keymgt</bundleDef>
@@ -220,6 +234,7 @@
                                 <bundleDef>org.wso2.carbon:org.wso2.carbon.identity.user.registration.stub</bundleDef>
                                 <bundleDef>org.wso2.carbon:org.wso2.carbon.bam.presentation.stub</bundleDef>
                                 <bundleDef>org.wso2.carbon:org.wso2.carbon.mediation.security.stub</bundleDef>
+                                <bundleDef>com.googlecode.json-simple.wso2:json-simple:1.1.wso2v1</bundleDef>
                             </bundles>
                             <importBundles>
                                 <importBundleDef>org.wso2.carbon:org.wso2.carbon.identity.authentication
@@ -228,10 +243,10 @@
                                 </importBundleDef>
                                 <importBundleDef>libthrift.wso2:libthrift:0.8.0.wso2v1</importBundleDef>
                                 <importBundleDef>com.github.dblock.waffle.wso2:waffle-jna</importBundleDef>
-				<importBundleDef>org.wso2.carbon:org.wso2.carbon.ganalytics.publisher</importBundleDef>
+                                <importBundleDef>org.wso2.carbon:org.wso2.carbon.ganalytics.publisher</importBundleDef>
                             </importBundles>
                             <importFeatures>
-                                <importFeatureDef>org.wso2.carbon.core.server</importFeatureDef>
+                                <importFeatureDef>org.wso2.carbon.core.server:${carbon.kernel.version}</importFeatureDef>
                                 <importFeatureDef>org.wso2.carbon.identity.oauth.server</importFeatureDef>
                                 <importFeatureDef>org.wso2.carbon.um.ws.service.server</importFeatureDef>
                             </importFeatures>

@@ -4,20 +4,30 @@ jagg.block("api/provider-apis", {
         var user= jagg.getUser();
         var username;
         if(user!=null){
-        username=user.username;
+        	username=user.username;
         }else{
-        username="";
+        	username="";
         }
-        var  providerId = inputs.providerId;
+        var providerId = inputs.providerId;
+        var apiOwner = inputs.apiOwner;
         var currentApi = inputs.currentApi;
         var currentApiVersion = inputs.currentApiVersion;
-        var mod = jagg.module("api");
-        var result = mod.getPublishedAPIsByProvider(providerId,username,currentApi,currentApiVersion,inputs.count);
-        var apis=result.apis;
-        return {
-            "apis":apis,
-            "providerId":providerId
-        };
+        if(providerId!='Provider'){
+        	var mod = jagg.module("api");
+        	var result = mod.getPublishedAPIsByProvider(providerId,username,currentApi,currentApiVersion,inputs.count,apiOwner);
+        	var apis=result.apis;
+        	return {
+            	"apis":apis,
+            	"providerId":providerId,
+            	"apiOwner":apiOwner
+        	};
+        }else{
+        	return {
+               "apis":null,
+               "providerId":null,
+               "apiOwner":null
+            };
+        }
     },
 
     getInputs:function () {

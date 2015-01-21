@@ -40,7 +40,7 @@ include("/jagg/jagg.jag");
         print(obj);
     } else if (action === "logout") {
         jagg.setUser(null);
-	session.remove("selectedApp");
+	    session.remove("selectedApp");
         print({
             error:false
         });

@@ -24,9 +24,12 @@ var login = login || {};
     loginbox.logout = function () {
         jagg.post("/site/blocks/user/login/ajax/login.jag", {action:"logout"}, function (result) {
             if (result.error == false) {
-            	  window.location.href="?"+urlPrefix;
+            	  //window.location.href="?"+urlPrefix;
+		    window.location.href=document.URL;
+            window.location.reload();
             } else {
                 jagg.message({content:result.message,type:"error"});
+                window.location.reload();
             }
         }, "json");
     };

@@ -1,8 +1,13 @@
 function triggerSubscribe() {
+	$.ajaxSetup({
+        contentType: "application/x-www-form-urlencoded; charset=utf-8"
+    });
+    jagg.sessionAwareJS({redirect:'/site/pages/index.jag'});
     if (!jagg.loggedIn) {
         return;
     }
     var applicationId = $("#application-list").val();
+    var applicationName = $("#application-list option:selected").text();
     if (applicationId == "-" || applicationId == "createNewApp") {
         jagg.message({content:i18n.t('info.appSelect'),type:"info"});
         return;
@@ -22,21 +27,32 @@ function triggerSubscribe() {
         $("#subscribe-button").html('Subscribe');
         $("#subscribe-button").removeAttr('disabled');
         if (result.error == false) {
-            $('#messageModal').html($('#confirmation-data').html());
-            $('#messageModal h3.modal-title').html(i18n.t('info.subscription'));
-            if(result.status == 'ON_HOLD'){
-                $('#messageModal div.modal-body').html('\n\n' + i18n.t('info.subscriptionPending'));
-            }else{
-                $('#messageModal div.modal-body').html('\n\n' + i18n.t('info.subscriptionSuccess'));
+            if(result.status == 'REJECTED')    {
+                $('#messageModal').html($('#confirmation-data').html());
+                $('#messageModal h3.modal-title').html(i18n.t('info.subscriptionRejectTitle'));
+                $('#messageModal div.modal-body').html('\n\n' + i18n.t('info.subscriptionRejected'));
+                $('#messageModal a.btn-primary').html(i18n.t('info.OK'));
+                $('#messageModal a.btn-primary').click(function() {
+                    window.location.reload();
+                });
+            } else  {
+                $('#messageModal').html($('#confirmation-data').html());
+                $('#messageModal h3.modal-title').html(i18n.t('info.subscription'));
+                if(result.status == 'ON_HOLD'){
+                    $('#messageModal div.modal-body').html('\n\n' + i18n.t('info.subscriptionPending'));
+                }else{
+                    $('#messageModal div.modal-body').html('\n\n' + i18n.t('info.subscriptionSuccess'));
+                }
+                $('#messageModal a.btn-primary').html(i18n.t('info.gotoSubsPage'));
+                $('#messageModal a.btn-other').html(i18n.t('info.stayPage'));
+                $('#messageModal a.btn-other').click(function() {
+                    window.location.reload();
+                });
+                $('#messageModal a.btn-primary').click(function() {
+                    urlPrefix = "selectedApp=" + applicationName + "&" + urlPrefix;
+                    location.href = "../site/pages/subscriptions.jag?" + urlPrefix;
+                });
             }
-            $('#messageModal a.btn-primary').html(i18n.t('info.gotoSubsPage'));
-            $('#messageModal a.btn-other').html(i18n.t('info.stayPage'));
-            $('#messageModal a.btn-other').click(function() {
-                window.location.reload();
-            });
-            $('#messageModal a.btn-primary').click(function() {
-                location.href = "../site/pages/subscriptions.jag?" + urlPrefix;
-            });
             $('#messageModal').modal();
 
 

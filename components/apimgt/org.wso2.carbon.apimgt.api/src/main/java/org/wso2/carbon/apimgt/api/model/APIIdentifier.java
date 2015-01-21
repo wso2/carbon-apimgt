@@ -20,12 +20,14 @@ package org.wso2.carbon.apimgt.api.model;
 
 import org.wso2.carbon.apimgt.api.APIManagementException;
 
+import java.io.Serializable;
+
 /**
  * An API can be uniquely identified by a combination of providerName,apiName & version.
  * This class represents this unique identifier.
  */
 @SuppressWarnings("unused")
-public class APIIdentifier {
+public class APIIdentifier implements Serializable{
 
     private final String providerName;
     private final String apiName;
@@ -96,5 +98,10 @@ public class APIIdentifier {
         result = 31 * result + apiName.hashCode();
         result = 31 * result + version.hashCode();
         return result;
+    }
+    
+    @Override
+    public String toString() {
+    	return this.getProviderName() + "-" + this.getApiName() + "-" + this.getVersion();
     }
 }
