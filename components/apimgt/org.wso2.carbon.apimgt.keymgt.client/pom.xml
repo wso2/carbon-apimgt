@@ -36,17 +36,17 @@
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.core</artifactId>
-            <!--<version>${wso2carbon.version}</version>-->
+            <version>${carbon.kernel.version}</version>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.utils</artifactId>
-            <!--<version>${wso2carbon.version}</version>		-->
+            <version>${carbon.kernel.version}</version>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.logging</artifactId>
-            <!--<version>${wso2carbon.version}</version>-->
+            <version>${carbon.kernel.version}</version>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>

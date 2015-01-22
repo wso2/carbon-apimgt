@@ -249,6 +249,7 @@
                                 <importFeatureDef>org.wso2.carbon.core.server:${carbon.kernel.version}</importFeatureDef>
                                 <importFeatureDef>org.wso2.carbon.identity.oauth.server</importFeatureDef>
                                 <importFeatureDef>org.wso2.carbon.um.ws.service.server</importFeatureDef>
+				<importFeatureDef>org.wso2.carbon.um.ws.service.client</importFeatureDef>
                             </importFeatures>
                         </configuration>
                     </execution>
