@@ -51,10 +51,10 @@ public class AuthorizationManager {
         if (instance == null) {
             synchronized (AuthorizationManager.class) {
                 if (instance == null) {
-                    String strIsExisternal = ServiceReferenceHolder.getInstance()
+                    String strIsExternal = ServiceReferenceHolder.getInstance()
                             .getAPIManagerConfigurationService().getAPIManagerConfiguration().
                                     getFirstProperty(APIConstants.ConfigParameters.IS_EXTERNAL);
-                    if (strIsExisternal == null || "".equals(strIsExisternal)) {
+                    if (strIsExternal == null || "".equals(strIsExternal)) {
                         if (log.isDebugEnabled()) {
                             log.debug("IsExternal attribute is not configured in Authorization Manager " +
                                     "configuration, Therefore assuming that the internal Authorization Manager " +
