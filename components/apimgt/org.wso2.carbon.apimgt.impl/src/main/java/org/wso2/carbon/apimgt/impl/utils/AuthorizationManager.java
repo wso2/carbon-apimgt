@@ -16,6 +16,8 @@
 
 package org.wso2.carbon.apimgt.impl.utils;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.commons.pool.BasePoolableObjectFactory;
 import org.apache.commons.pool.ObjectPool;
 import org.apache.commons.pool.impl.StackObjectPool;
@@ -35,6 +37,8 @@ public class AuthorizationManager {
     private ScheduledExecutorService exec;
     private ScheduledFuture future;
 
+    private static final Log log = LogFactory.getLog(AuthorizationManager.class);
+
     public enum ClientType {
         REMOTE, STANDALONE
     }
@@ -47,9 +51,27 @@ public class AuthorizationManager {
         if (instance == null) {
             synchronized (AuthorizationManager.class) {
                 if (instance == null) {
+                    String strIsExisternal = ServiceReferenceHolder.getInstance()
+                            .getAPIManagerConfigurationService().getAPIManagerConfiguration().
+                                    getFirstProperty(APIConstants.ConfigParameters.IS_EXTERNAL);
+                    if (strIsExisternal == null || "".equals(strIsExisternal)) {
+                        if (log.isDebugEnabled()) {
+                            log.debug("IsExternal attribute is not configured in Authorization Manager " +
+                                    "configuration, Therefore assuming that the internal Authorization Manager " +
+                                    "Client implementation is being used");
+                        }
+                    }
                     boolean isExternal = Boolean.parseBoolean(ServiceReferenceHolder.getInstance()
                             .getAPIManagerConfigurationService().getAPIManagerConfiguration().
                                     getFirstProperty(APIConstants.ConfigParameters.IS_EXTERNAL));
+                    if (log.isDebugEnabled()) {
+                        log.debug("IsExternal attribute is set to '" + isExternal + "'");
+                        if (isExternal) {
+                            log.debug("Remote Authorization Manager Client implementation will be used");
+                        } else {
+                            log.debug("Standalone Authorization Manager Client implementation will be used");
+                        }
+                    }
                     ClientType authClientType = (!isExternal) ? ClientType.STANDALONE : ClientType.REMOTE;
                     instance = new AuthorizationManager(authClientType);
                 }
