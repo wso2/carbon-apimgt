@@ -67,7 +67,6 @@ import org.wso2.carbon.base.ServerConfiguration;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.core.util.PermissionUpdateUtil;
 import org.wso2.carbon.registry.core.RegistryConstants;
-import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.user.mgt.stub.UserAdminStub;
 import org.wso2.carbon.utils.CarbonUtils;
@@ -80,6 +79,7 @@ import javax.net.ssl.SSLHandshakeException;
 import javax.net.ssl.SSLSession;
 
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.*;
 import java.util.*;
@@ -3573,8 +3573,6 @@ public class APIProviderHostObject extends ScriptableObject {
             } catch (org.wso2.carbon.user.api.UserStoreException e) {
                 log.error("Could not load tenant registry. Error while getting tenant id from tenant domain " +
                         tenantDomain);
-            } catch (RegistryException e) {
-                log.error("Error occurred while loading the registry of tenant '" + tenantDomain + "'", e);
             }
         }
 
@@ -3813,73 +3811,20 @@ public class APIProviderHostObject extends ScriptableObject {
 				// checking http,https endpoints up to resource level by doing
 				// http HEAD. And other end point
 				// validation do through basic url connect
-				else if (url.getProtocol().matches("https")) {
-					ServerConfiguration serverConfig = CarbonUtils.getServerConfiguration();
-					String trustStorePath = serverConfig.getFirstProperty("Security.TrustStore.Location");
-					String trustStorePassword = serverConfig.getFirstProperty("Security.TrustStore.Password");
-					System.setProperty("javax.net.ssl.trustStore", trustStorePath);
-					System.setProperty("javax.net.ssl.trustStorePassword", trustStorePassword);
+                else if (url.getProtocol().matches("https")) {
+                    ServerConfiguration serverConfig = CarbonUtils.getServerConfiguration();
+                    String trustStorePath = serverConfig.getFirstProperty("Security.TrustStore.Location");
+                    String trustStorePassword = serverConfig.getFirstProperty("Security.TrustStore.Password");
+                    System.setProperty("javax.net.ssl.trustStore", trustStorePath);
+                    System.setProperty("javax.net.ssl.trustStorePassword", trustStorePassword);
 
-                    HttpClient client = new DefaultHttpClient();
-                    HttpHead head = new HttpHead(urlVal);
-                    client.getParams().setParameter("http.socket.timeout", 4000);
-                    client.getParams().setParameter("http.connection.timeout", 4000);
-
-
-                    if (System.getProperty("http.proxyHost") != null && System.getProperty("http.proxyPort") != null)   {
-                        if (log.isDebugEnabled())   {
-                            log.debug("Proxy configured, hence routing through configured proxy");
-                        }
-                        String proxyHost = System.getProperty("http.proxyHost");
-                        String proxyPort = System.getProperty("http.proxyPort");
-                        client.getParams().setParameter(ConnRoutePNames.DEFAULT_PROXY, new HttpHost(proxyHost, new Integer(proxyPort)));
-                    }
-
-                    HttpResponse httpResponse = client.execute(head);
-                    int statusCode = httpResponse.getStatusLine().getStatusCode();
-
-                    //If the endpoint doesn't support HTTP HEAD or if status code is < 400
-                    if(statusCode == 405 || statusCode / 100 < 4) {
-                        if(log.isDebugEnabled() && statusCode == 405){
-                            log.debug("Endpoint doesn't support HTTP HEAD");
-                        }
-                        return "success";
-                    } else {
-                        return "error while connecting";
-                    }
-				} else if (url.getProtocol().matches("http")) {
-
-                    HttpClient client = new DefaultHttpClient();
-                    HttpHead head = new HttpHead(urlVal);
-                    client.getParams().setParameter("http.socket.timeout", 4000);
-                    client.getParams().setParameter("http.connection.timeout", 4000);
-
-
-                    if (System.getProperty("http.proxyHost") != null && System.getProperty("http.proxyPort") != null)   {
-                        if (log.isDebugEnabled())   {
-                            log.debug("Proxy configured, hence routing through configured proxy");
-                        }
-                        String proxyHost = System.getProperty("http.proxyHost");
-                        String proxyPort = System.getProperty("http.proxyPort");
-                        client.getParams().setParameter(ConnRoutePNames.DEFAULT_PROXY, new HttpHost(proxyHost, new Integer(proxyPort)));
-                    }
-
-                    HttpResponse httpResponse = client.execute(head);
-                    int statusCode = httpResponse.getStatusLine().getStatusCode();
-
-                    //If the endpoint doesn't support HTTP HEAD or if status code is < 400
-                    if(statusCode == 405 || statusCode / 100 < 4) {
-                        if(log.isDebugEnabled() && statusCode == 405){
-                            log.debug("Endpoint doesn't support HTTP HEAD");
-                        }
-                        return "success";
-                    } else {
-                        return "error while connecting";
-                    }
-				} else {
+                    return sendHttpHEADRequest(urlVal);
+                } else if (url.getProtocol().matches("http")) {
+                    return sendHttpHEADRequest(urlVal);
+                } else {
                     return "error while connecting";
-				}
-			} catch (Exception e) {
+                }
+            } catch (Exception e) {
 				response = e.getMessage();
 			} finally {
 				if (conn != null) {
@@ -4506,4 +4451,51 @@ public class APIProviderHostObject extends ScriptableObject {
         }
 		return isInvalid;
 	}
+
+    /**
+     * Validate the backend by sending HTTP HEAD
+     *
+     * @param urlVal - backend URL
+     * @return - status of HTTP HEAD Request to backend
+     */
+    private static String sendHttpHEADRequest(String urlVal) {
+
+        String response = "error while connecting";
+
+        HttpClient client = new DefaultHttpClient();
+        HttpHead head = new HttpHead(urlVal);
+        client.getParams().setParameter("http.socket.timeout", 4000);
+        client.getParams().setParameter("http.connection.timeout", 4000);
+
+
+        if (System.getProperty(APIConstants.HTTP_PROXY_HOST) != null &&
+            System.getProperty(APIConstants.HTTP_PROXY_PORT) != null) {
+            if (log.isDebugEnabled()) {
+                log.debug("Proxy configured, hence routing through configured proxy");
+            }
+            String proxyHost = System.getProperty(APIConstants.HTTP_PROXY_HOST);
+            String proxyPort = System.getProperty(APIConstants.HTTP_PROXY_PORT);
+            client.getParams().setParameter(ConnRoutePNames.DEFAULT_PROXY,
+                        new HttpHost(proxyHost, new Integer(proxyPort)));
+        }
+
+        try {
+            HttpResponse httpResponse = client.execute(head);
+            int statusCode = httpResponse.getStatusLine().getStatusCode();
+
+            //If the endpoint doesn't support HTTP HEAD or if status code is < 400
+            if (statusCode == 405 || statusCode / 100 < 4) {
+                if (log.isDebugEnabled() && statusCode == 405) {
+                    log.debug("Endpoint doesn't support HTTP HEAD");
+                }
+                response = "success";
+            }
+        } catch (IOException e) {
+            // sending a default error message.
+            log.error("Error occurred while connecting backend : " + urlVal + ", reason : " + e.getMessage());
+        } finally {
+            client.getConnectionManager().shutdown();
+        }
+        return response;
+    }
 }
