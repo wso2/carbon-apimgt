@@ -51,7 +51,7 @@ public interface Authenticator {
      *
      * @param synCtx The message to be authenticated
      * @return true if the authentication is successful (never returns false)
-     * @throws APISecurityException If an authentication failure or some other error occurs
+     * @throws org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityException If an authentication failure or some other error occurs
      */
     public boolean authenticate(MessageContext synCtx) throws APISecurityException;
 

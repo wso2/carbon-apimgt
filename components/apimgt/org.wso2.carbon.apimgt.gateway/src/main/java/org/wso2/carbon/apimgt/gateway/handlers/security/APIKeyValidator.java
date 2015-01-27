@@ -103,7 +103,7 @@ public class APIKeyValidator {
      * @param apiKey     API key to be validated
      * @param apiVersion API version number
      * @return An APIKeyValidationInfoDTO object
-     * @throws APISecurityException If an error occurs while accessing backend services
+     * @throws org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityException If an error occurs while accessing backend services
      */
     public APIKeyValidationInfoDTO getKeyValidationInfo(String context, String apiKey,
                                                         String apiVersion, String authenticationScheme, String clientDomain,
