@@ -58,7 +58,7 @@ public class SubscriberKeyMgtClient {
             ServiceClient client = subscriberServiceStub._getServiceClient();
             Options options = client.getOptions();
             options.setManageSession(true);
-            options.setProperty(org.apache.axis2.transport.http.HTTPConstants.COOKIE_STRING,
+            options.setProperty(HTTPConstants.COOKIE_STRING,
                                 authenticatedCookie);
         } catch (Exception e) {
             String errorMsg = "Error when instantiating SubscriberKeyMgtClient.";
