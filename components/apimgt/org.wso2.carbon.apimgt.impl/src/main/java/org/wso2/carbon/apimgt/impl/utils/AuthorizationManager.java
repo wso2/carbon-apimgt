@@ -98,9 +98,9 @@ public class AuthorizationManager {
     }
 
     public boolean isUserAuthorized(String user, String permission) throws APIManagementException {
-        RemoteAuthorizationManagerClient client = null;
+        AuthorizationManagerClient client = null;
         try {
-            client = (RemoteAuthorizationManagerClient) clientPool.borrowObject();
+            client = (AuthorizationManagerClient) clientPool.borrowObject();
             return client.isUserAuthorized(user, permission);
 
         } catch (Exception e) {
@@ -116,9 +116,9 @@ public class AuthorizationManager {
     }
 
     public String[] getRolesOfUser(String user) throws APIManagementException {
-        RemoteAuthorizationManagerClient client = null;
+        AuthorizationManagerClient client = null;
         try {
-            client = (RemoteAuthorizationManagerClient) clientPool.borrowObject();
+            client = (AuthorizationManagerClient) clientPool.borrowObject();
             return client.getRolesOfUser(user);
 
         } catch (Exception e) {
@@ -134,9 +134,9 @@ public class AuthorizationManager {
     }
 
     public String[] getRoleNames() throws APIManagementException {
-        RemoteAuthorizationManagerClient client = null;
+        AuthorizationManagerClient client = null;
         try {
-            client = (RemoteAuthorizationManagerClient) clientPool.borrowObject();
+            client = (AuthorizationManagerClient) clientPool.borrowObject();
             return client.getRoleNames();
 
         } catch (Exception e) {
