@@ -21,9 +21,9 @@ import java.io.Serializable;
 import java.util.Date;
 
 /**
- * Documentation for API. There can be several types of documentation. Refer {@link DocumentationType}.
+ * Documentation for API. There can be several types of documentation. Refer {@link org.wso2.carbon.apimgt.api.model.DocumentationType}.
  *
- * @see DocumentationType
+ * @see org.wso2.carbon.apimgt.api.model.DocumentationType
  */
 @SuppressWarnings("unused")
 public class Documentation implements Serializable{
