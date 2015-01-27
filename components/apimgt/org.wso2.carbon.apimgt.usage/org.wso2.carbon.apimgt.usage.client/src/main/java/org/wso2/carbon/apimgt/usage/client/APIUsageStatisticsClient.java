@@ -28,9 +28,11 @@ import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
 import org.wso2.carbon.apimgt.api.model.Subscriber;
+import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.impl.utils.APIMgtDBUtil;
+import org.wso2.carbon.apimgt.usage.client.billing.APIUsageRangeCost;
 import org.wso2.carbon.apimgt.usage.client.billing.PaymentPlan;
 import org.wso2.carbon.apimgt.usage.client.dto.*;
 import org.wso2.carbon.apimgt.usage.client.exception.APIMgtUsageQueryServiceClientException;
@@ -455,7 +457,7 @@ public class APIUsageStatisticsClient {
                 String consumerKey = rs.getString("CONSUMER_KEY");
                 String appName = rs.getString("NAME");
                 APIManagerConfiguration config = APIUsageClientServiceComponent.getAPIManagerConfiguration();
-                String tokenEncryptionConfig = config.getFirstProperty("APIKeyManager.EncryptPersistedTokens");
+                String tokenEncryptionConfig = config.getFirstProperty(APIConstants.API_KEY_MANAGER_ENCRYPT_TOKENS);
 
                 boolean isTokenEncryptionEnabled = Boolean.parseBoolean(tokenEncryptionConfig);
 
@@ -507,7 +509,7 @@ public class APIUsageStatisticsClient {
      *
      * @param providerName Name of the API provider
      * @return a List of APIUsageDTO objects - possibly empty
-     * @throws APIMgtUsageQueryServiceClientException if an error occurs while contacting backend services
+     * @throws org.wso2.carbon.apimgt.usage.client.exception.APIMgtUsageQueryServiceClientException if an error occurs while contacting backend services
      */
     public List<APIUsageDTO> getUsageByAPIs(String providerName, String fromDate, String toDate, int limit)
             throws APIMgtUsageQueryServiceClientException {
@@ -546,7 +548,7 @@ public class APIUsageStatisticsClient {
      * @param providerName Name of the API provider
      * @param apiName      Name of th API
      * @return a List of APIVersionUsageDTO objects, possibly empty
-     * @throws APIMgtUsageQueryServiceClientException on error
+     * @throws org.wso2.carbon.apimgt.usage.client.exception.APIMgtUsageQueryServiceClientException on error
      */
     public List<APIVersionUsageDTO> getUsageByAPIVersions(String providerName,
                                                           String apiName) throws APIMgtUsageQueryServiceClientException {
@@ -589,7 +591,7 @@ public class APIUsageStatisticsClient {
      * @param fromDate
      * @param toDate
      * @return
-     * @throws APIMgtUsageQueryServiceClientException
+     * @throws org.wso2.carbon.apimgt.usage.client.exception.APIMgtUsageQueryServiceClientException
      */
     public List<APIVersionUsageDTO> getUsageByAPIVersions(String providerName, String apiName,
                                                           String fromDate, String toDate) throws APIMgtUsageQueryServiceClientException {
@@ -628,7 +630,7 @@ public class APIUsageStatisticsClient {
      *
      * @param providerName Name of the API provider
      * @return a List of APIResourcePathUsageDTO objects, possibly empty
-     * @throws APIMgtUsageQueryServiceClientException on error
+     * @throws org.wso2.carbon.apimgt.usage.client.exception.APIMgtUsageQueryServiceClientException on error
      */
     public List<APIResourcePathUsageDTO> getAPIUsageByResourcePath(String providerName, String fromDate, String toDate)
             throws APIMgtUsageQueryServiceClientException {
@@ -692,7 +694,7 @@ public class APIUsageStatisticsClient {
      *
      * @param providerName Name of the API provider
      * @return a List of APIUsageByUserDTO objects, possibly empty
-     * @throws APIMgtUsageQueryServiceClientException on error
+     * @throws org.wso2.carbon.apimgt.usage.client.exception.APIMgtUsageQueryServiceClientException on error
      */
     public List<APIUsageByUserDTO> getAPIUsageByUser(String providerName, String fromDate, String toDate)
             throws APIMgtUsageQueryServiceClientException {
@@ -719,7 +721,7 @@ public class APIUsageStatisticsClient {
      *
      * @param providerName Name of the API provider
      * @return a List of APIResponseTimeDTO objects, possibly empty
-     * @throws APIMgtUsageQueryServiceClientException on error
+     * @throws org.wso2.carbon.apimgt.usage.client.exception.APIMgtUsageQueryServiceClientException on error
      */
     public List<APIResponseTimeDTO> getResponseTimesByAPIs(String providerName, String fromDate, String toDate, int limit)
             throws APIMgtUsageQueryServiceClientException {
@@ -770,7 +772,7 @@ public class APIUsageStatisticsClient {
      *
      * @param providerName Name of the API provider
      * @return a list of APIVersionLastAccessTimeDTO objects, possibly empty
-     * @throws APIMgtUsageQueryServiceClientException on error
+     * @throws org.wso2.carbon.apimgt.usage.client.exception.APIMgtUsageQueryServiceClientException on error
      */
     public List<APIVersionLastAccessTimeDTO> getLastAccessTimesByAPI(String providerName, String fromDate, String toDate, int limit)
             throws APIMgtUsageQueryServiceClientException {
@@ -820,7 +822,7 @@ public class APIUsageStatisticsClient {
      * @param apiName      Name of the API
      * @param limit        Number of sorted entries to return
      * @return a List of PerUserAPIUsageDTO objects - Possibly empty
-     * @throws APIMgtUsageQueryServiceClientException on error
+     * @throws org.wso2.carbon.apimgt.usage.client.exception.APIMgtUsageQueryServiceClientException on error
      */
     public List<PerUserAPIUsageDTO> getUsageBySubscribers(String providerName, String apiName, int limit)
             throws APIMgtUsageQueryServiceClientException {
@@ -954,68 +956,58 @@ public class APIUsageStatisticsClient {
     }
 
     public List<APIVersionUserUsageDTO> getUsageBySubscriber(String subscriberName, String period) throws Exception, APIManagementException {
-        Map<String, Object> result = new HashMap<String, Object>();
         OMElement omElement;
-        // Collection<APIVersionUsageByUser> usageData = null;
+
         List<APIVersionUserUsageDTO> apiUserUsages = new ArrayList<APIVersionUserUsageDTO>();
 
         Calendar cal = Calendar.getInstance();
-        int year = cal.get(cal.YEAR);
-        int month = cal.get(cal.MONTH) + 1;
-        if (!period.equals("" + year + "-" + month)) {
-            omElement = this.queryDatabase(
-                    APIUsageStatisticsClientConstants.KEY_USAGE_MONTH_SUMMARY, null);
-            Collection<APIVersionUsageByUserMonth> usageData = getUsageAPIBySubscriberMonthly(omElement);
-            int i = 0;
-            for (APIVersionUsageByUserMonth usageEntry : usageData) {
+        int year = cal.get(Calendar.YEAR);
+        int month = cal.get(Calendar.MONTH) + 1;
 
+        if (!period.equals("" + year + "-" + month)) {
+            omElement = this.queryDatabase(APIUsageStatisticsClientConstants.KEY_USAGE_MONTH_SUMMARY, null);
+            Collection<APIVersionUsageByUserMonth> usageData = getUsageAPIBySubscriberMonthly(omElement);
+            for (APIVersionUsageByUserMonth usageEntry : usageData) {
 
                 if (usageEntry.username.equals(subscriberName) && usageEntry.month.equals(period)) {
 
-                    APIVersionUserUsageDTO userUsageDTO = new APIVersionUserUsageDTO();
-                    userUsageDTO.setApiname(usageEntry.apiName);
-                    userUsageDTO.setContext(usageEntry.context);
-                    userUsageDTO.setVersion(usageEntry.apiVersion);
-                    userUsageDTO.setCount(usageEntry.requestCount);
-                    String cost = evaluate(usageEntry.apiName, (int) usageEntry.requestCount).get("total").toString();
-                    String costPerAPI = evaluate(usageEntry.apiName, (int) usageEntry.requestCount).get("cost").toString();
-                    userUsageDTO.setCost(cost);
-                    userUsageDTO.setCostPerAPI(costPerAPI);
-                    apiUserUsages.add(userUsageDTO);
-                    i++;
+                    List<APIUsageRangeCost> rangeCosts = evaluate(usageEntry.apiName, (int) usageEntry.requestCount);
 
+                    for (APIUsageRangeCost rangeCost : rangeCosts)  {
+                        APIVersionUserUsageDTO userUsageDTO = new APIVersionUserUsageDTO();
+                        userUsageDTO.setApiname(usageEntry.apiName);
+                        userUsageDTO.setContext(usageEntry.context);
+                        userUsageDTO.setVersion(usageEntry.apiVersion);
+                        userUsageDTO.setCount(rangeCost.getRangeInvocationCount());
+                        userUsageDTO.setCost(rangeCost.getCost().toString());
+                        userUsageDTO.setCostPerAPI(rangeCost.getCostPerUnit().toString());
+                        apiUserUsages.add(userUsageDTO);
+
+                    }
                 }
-
-
             }
 
         } else {
-            omElement = this.queryDatabase(
-                    APIUsageStatisticsClientConstants.KEY_USAGE_MONTH_SUMMARY, null);
+            omElement = this.queryDatabase(APIUsageStatisticsClientConstants.KEY_USAGE_MONTH_SUMMARY, null);
             Collection<APIVersionUsageByUser> usageData = getUsageAPIBySubscriber(omElement);
-            int i = 0;
             for (APIVersionUsageByUser usageEntry : usageData) {
-
 
                 if (usageEntry.username.equals(subscriberName)) {
 
+                    List<APIUsageRangeCost> rangeCosts = evaluate(usageEntry.apiName, (int) usageEntry.requestCount);
 
-                    APIVersionUserUsageDTO userUsageDTO = new APIVersionUserUsageDTO();
-                    userUsageDTO.setApiname(usageEntry.apiName);
-                    userUsageDTO.setContext(usageEntry.context);
-                    userUsageDTO.setVersion(usageEntry.apiVersion);
-                    userUsageDTO.setCount(usageEntry.requestCount);
-                    String cost = evaluate(usageEntry.apiName, (int) usageEntry.requestCount).get("total").toString();
-                    String costPerAPI = evaluate(usageEntry.apiName + i, (int) usageEntry.requestCount).get("cost").toString();
-                    userUsageDTO.setCost(cost);
-                    userUsageDTO.setCostPerAPI(costPerAPI);
-                    apiUserUsages.add(userUsageDTO);
-                    i++;
+                    for (APIUsageRangeCost rangeCost : rangeCosts) {
+                        APIVersionUserUsageDTO userUsageDTO = new APIVersionUserUsageDTO();
+                        userUsageDTO.setApiname(usageEntry.apiName);
+                        userUsageDTO.setContext(usageEntry.context);
+                        userUsageDTO.setVersion(usageEntry.apiVersion);
+                        userUsageDTO.setCount(rangeCost.getRangeInvocationCount());
+                        userUsageDTO.setCost(rangeCost.getCost().toString());
+                        userUsageDTO.setCostPerAPI(rangeCost.getCostPerUnit().toString());
+                        apiUserUsages.add(userUsageDTO);
+                    }
                 }
-
-
             }
-
         }
 
 
@@ -1940,7 +1932,7 @@ public class APIUsageStatisticsClient {
         return usageData;
     }
 
-    public Map<String, Object> evaluate(String param, int calls) throws Exception {
+    public List<APIUsageRangeCost> evaluate(String param, int calls) throws Exception {
         return paymentPlan.evaluate(param, calls);
     }
 

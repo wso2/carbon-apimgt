@@ -120,70 +120,44 @@ public class DataParameter extends BillingBase {
         return returnElement;
     }
 
-
-
     /**
-     * @param usedAmount is the Used amount of data units
-     * @return BigDecimal value of cost for used data units
-     * @throws Exception at Illegal range of usage value or error in configuration
+     * totalInvocation - total amount of data units used
+     *
+     * This method calculate the total amount of money used for each data unit range
      */
-    public Map<String,Object> evaluate(int usedAmount) throws Exception{
-        BigDecimal total = BigDecimal.ZERO;
-        int beginValue = 0;
-        int lastIndex=elementVector.size();
-        int currentIndex=1;
-        double cost = 0;
-        double costInRange;
-        int dataUnitsInRange;
-        int start;
-        int end;
 
-        for (ParameterElement iterator : elementVector) {
-            start = (iterator.getStartingValue());
-            end = (iterator.getEndValue());
-            cost = iterator.getCostPerUnit();
-            costInRange=0;
-            if(beginValue==start){
-                if ( end < usedAmount) {
-                    dataUnitsInRange = (end - start);
-                    if(dataUnitsInRange>0){
-                        costInRange=dataUnitsInRange * cost;
-                        total = total.add(BigDecimal.valueOf(costInRange));
-                        beginValue =
-                                end;
+    public List<APIUsageRangeCost> evaluateInvocationCost(int totalInvocation)  {
 
-                    }
-                    if(currentIndex == lastIndex ){
-                        String errorMessage="data value is out of maximum configuration limit";
-                        log.error(errorMessage);
-                        throw new Exception(errorMessage);
-                    }
+        int start, end, rangeInvocation = totalInvocation;
+        double unitCost, rangeCost;
+        List<APIUsageRangeCost> rangeCosts = new ArrayList<APIUsageRangeCost>();
+        Vector<ParameterElement> reverseElements = new Vector<ParameterElement>(elementVector);
+        Collections.reverse(reverseElements);
+        for (ParameterElement element : reverseElements)  {
+            start = element.getStartingValue();
+            end = element.getEndValue();
+            unitCost = element.getCostPerUnit();
 
-                }
-                else{
-                    dataUnitsInRange = (usedAmount - start);
-                    if(dataUnitsInRange>=0){
-                        costInRange=dataUnitsInRange * cost;
-                        total = total.add(BigDecimal.valueOf(costInRange));
-
-                        break;
-                    }
-                }
+            if (start < rangeInvocation && rangeInvocation <= end) {
+                int rangeUnits = rangeInvocation - start;
+                rangeCost = unitCost * rangeUnits;
+                APIUsageRangeCost usageRangeCost = new APIUsageRangeCost();
+                usageRangeCost.setRangeInvocationCount(rangeUnits);
+                usageRangeCost.setCostPerUnit(unitCost);
+                usageRangeCost.setCost(rangeCost);
+                rangeCosts.add(usageRangeCost);
+                rangeInvocation = start;
+            } else if (start < rangeInvocation && end <= rangeInvocation) {
+                int rangeUnits = end - start;
+                rangeCost = rangeUnits * unitCost;
+                APIUsageRangeCost usageRangeCost = new APIUsageRangeCost();
+                usageRangeCost.setCost(rangeCost);
+                usageRangeCost.setCostPerUnit(unitCost);
+                usageRangeCost.setRangeInvocationCount(rangeInvocation);
+                rangeInvocation = start;
+                rangeCosts.add(usageRangeCost);
             }
-            else{
-                //This error throws when configuration file does not
-                // define charges for some region in bill calculation
-                log.error("cannot find configuration for this region");
-                throw new Exception("cannot find configuration for this region");
-            }
-            currentIndex=currentIndex+1;
         }
-
-        Map<String,Object> evaluateValues=new HashMap<String,Object>();
-        evaluateValues.put("cost",cost);
-        evaluateValues.put("total",total.setScale(2,BigDecimal.ROUND_HALF_UP));
-        return evaluateValues;
-
+        return rangeCosts;
     }
-
 }
