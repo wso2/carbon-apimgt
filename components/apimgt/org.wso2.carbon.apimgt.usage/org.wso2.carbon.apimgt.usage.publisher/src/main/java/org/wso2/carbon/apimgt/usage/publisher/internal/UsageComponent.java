@@ -103,7 +103,7 @@ public class UsageComponent {
      * Adds a LoadBalancingDataPublisher to the data publisher map.
      * @param tenantDomain - The tenant domain under which the data publisher will be registered.
      * @param dataPublisher - Instance of the LoadBalancingDataPublisher
-     * @throws DataPublisherAlreadyExistsException - If a data publisher has already been registered under the
+     * @throws org.wso2.carbon.apimgt.usage.publisher.internal.DataPublisherAlreadyExistsException - If a data publisher has already been registered under the
      * tenant domain
      */
     public static void addDataPublisher(String tenantDomain, LoadBalancingDataPublisher dataPublisher)
