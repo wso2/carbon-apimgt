@@ -95,7 +95,7 @@ public class ApplicationCreationWSWorkflowExecutor extends WorkflowExecutor {
 				List<String> authSchemes = new ArrayList<String>();
 				authSchemes.add(HttpTransportProperties.Authenticator.BASIC);
 				auth.setAuthSchemes(authSchemes);
-				options.setProperty(org.apache.axis2.transport.http.HTTPConstants.AUTHENTICATE,
+				options.setProperty(HTTPConstants.AUTHENTICATE,
 				                    auth);
 				options.setManageSession(true);
 			}

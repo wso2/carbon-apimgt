@@ -125,7 +125,7 @@ public class ApiMgtDAO {
      * @param identifier      APIIdentifier
      * @param keyType         Type of the key required
      * @return Access token
-     * @throws APIManagementException if failed to get Access token
+     * @throws org.wso2.carbon.apimgt.api.APIManagementException if failed to get Access token
      * @throws org.wso2.carbon.identity.base.IdentityException
      *                                if failed to get tenant id
      */
@@ -230,7 +230,7 @@ public class ApiMgtDAO {
      *
      * @param dto  DTO related to Application Registration.
      * @param onlyKeyMappingEntry When this flag is enabled, only AM_APPLICATION_KEY_MAPPING will get affected.
-     * @throws APIManagementException if failed to create entries in  AM_APPLICATION_REGISTRATION and
+     * @throws org.wso2.carbon.apimgt.api.APIManagementException if failed to create entries in  AM_APPLICATION_REGISTRATION and
      * AM_APPLICATION_KEY_MAPPING tables.
      */
 
@@ -382,7 +382,7 @@ public class ApiMgtDAO {
      *
      * @param userId id of the user
      * @return APIInfoDTO[]
-     * @throws APIManagementException if failed to get Subscribed APIs
+     * @throws org.wso2.carbon.apimgt.api.APIManagementException if failed to get Subscribed APIs
      * @throws org.wso2.carbon.identity.base.IdentityException
      *                                if failed to get tenant id
      */
@@ -460,7 +460,7 @@ public class ApiMgtDAO {
      *
      * @param apiInfoDTO API info
      * @return APIKeyInfoDTO[]
-     * @throws APIManagementException if failed to get key info for given API
+     * @throws org.wso2.carbon.apimgt.api.APIManagementException if failed to get key info for given API
      */
     public APIKeyInfoDTO[] getSubscribedUsersForAPI(APIInfoDTO apiInfoDTO)
             throws APIManagementException {
@@ -522,7 +522,7 @@ public class ApiMgtDAO {
      * @param userId     id of the user
      * @param apiInfoDTO Api info
      * @param statusEnum Status of the access key
-     * @throws APIManagementException if failed to update the access token
+     * @throws org.wso2.carbon.apimgt.api.APIManagementException if failed to update the access token
      * @throws org.wso2.carbon.identity.base.IdentityException
      *                                if failed to get tenant id
      */
@@ -610,7 +610,7 @@ public class ApiMgtDAO {
      * @param accessToken Provided Access Token
      * @return APIKeyValidationInfoDTO instance with authorization status and tier information if
      *         authorized.
-     * @throws APIManagementException Error when accessing the database or registry.
+     * @throws org.wso2.carbon.apimgt.api.APIManagementException Error when accessing the database or registry.
      */
     public APIKeyValidationInfoDTO validateKey(String context, String version, String accessToken, String requiredAuthenticationLevel)
             throws APIManagementException {
@@ -1077,33 +1077,22 @@ public class ApiMgtDAO {
         Connection conn = null;
         ResultSet resultSet = null;
         PreparedStatement ps = null;
+        PreparedStatement preparedStforInsert = null;
+        ResultSet rs = null;
         int subscriptionId = -1;
-        int apiId = -1;
+        int apiId;
 
         try {
             conn = APIMgtDBUtil.getConnection();
-            String getApiQuery = "SELECT API_ID FROM AM_API API WHERE API_PROVIDER = ? AND " +
-                                 "API_NAME = ? AND API_VERSION = ?";
-            ps = conn.prepareStatement(getApiQuery);
-            ps.setString(1, APIUtil.replaceEmailDomainBack(identifier.getProviderName()));
-            ps.setString(2, identifier.getApiName());
-            ps.setString(3, identifier.getVersion());
-            resultSet = ps.executeQuery();
-            if (resultSet.next()) {
-                apiId = resultSet.getInt("API_ID");
-            }
-            resultSet.close();
-            ps.close();
-
-            if (apiId == -1) {
-                String msg = "Unable to get the API ID for: " + identifier;
-                log.error(msg);
-                throw new APIManagementException(msg);
-            }
+            apiId = getAPIID(identifier, conn);
 
             //Query to check if this subscription already exists
-            String checkDuplicateQuery = "SELECT SUB_STATUS, SUBS_CREATE_STATE FROM AM_SUBSCRIPTION WHERE API_ID = ? AND" +
-                    " APPLICATION_ID = ? AND TIER_ID = ?";
+            String checkDuplicateQuery = "SELECT " +
+                                         "SUB_STATUS, SUBS_CREATE_STATE FROM AM_SUBSCRIPTION" +
+                                         " WHERE " +
+                                         "API_ID = ? " +
+                                         "AND APPLICATION_ID = ? " +
+                                         "AND TIER_ID = ?";
             ps = conn.prepareStatement(checkDuplicateQuery);
             ps.setInt(1, apiId);
             ps.setInt(2, applicationId);
@@ -1117,9 +1106,6 @@ public class ApiMgtDAO {
                 String subStatus = resultSet.getString("SUB_STATUS");
                 String subCreationStatus = resultSet.getString("SUBS_CREATE_STATE");
 
-                resultSet.close();
-                ps.close();
-
                 if(APIConstants.SubscriptionStatus.UNBLOCKED.equals(subStatus)
                         && APIConstants.SubscriptionCreatedStatus.SUBSCRIBE.equals(subCreationStatus))  {
 
@@ -1130,22 +1116,16 @@ public class ApiMgtDAO {
                             + identifier.getApiName() + " in Application " + applicationId);
                 } else if (APIConstants.SubscriptionStatus.UNBLOCKED.equals(subStatus)
                         && APIConstants.SubscriptionCreatedStatus.UN_SUBSCRIBE.equals(subCreationStatus))    {
-                    String deleteQuery = "DELETE FROM AM_SUBSCRIPTION WHERE API_ID = ? AND APPLICATION_ID = ? AND TIER_ID = ?";
-
-                    ps = conn.prepareStatement(deleteQuery);
-                    ps.setInt(1, apiId);
-                    ps.setInt(2, applicationId);
-                    ps.setString(3, identifier.getTier());
-                    ps.executeUpdate();
+                    deleteSubscriptionByApiIDAndAppID(apiId, applicationId, identifier.getTier(), conn);
                 } else if (APIConstants.SubscriptionStatus.BLOCKED.equals(subStatus))  {
-                    log.error("Subscription to API " + identifier.getApiName() + " through application " + applicationId + " was blocked");
-                    throw new APIManagementException("Subscription to API " + identifier.getApiName() + " through application " + applicationId + " was blocked");
+                    log.error("Subscription to API " + identifier.getApiName() + " through application "
+                              + applicationId + " was blocked");
+                    throw new APIManagementException("Subscription to API " + identifier.getApiName()
+                                                     + " through application " + applicationId + " was blocked");
                 }
 
 
             }
-            resultSet.close();
-            ps.close();
 
             //This query to update the AM_SUBSCRIPTION table
             String sqlQuery = "INSERT " +
@@ -1154,24 +1134,23 @@ public class ApiMgtDAO {
 
             //Adding data to the AM_SUBSCRIPTION table
             //ps = conn.prepareStatement(sqlQuery, Statement.RETURN_GENERATED_KEYS);
-            ps = conn.prepareStatement(sqlQuery, new String[]{"SUBSCRIPTION_ID"});
+            preparedStforInsert = conn.prepareStatement(sqlQuery, new String[]{"SUBSCRIPTION_ID"});
             if (conn.getMetaData().getDriverName().contains("PostgreSQL")) {
-                ps = conn.prepareStatement(sqlQuery, new String[]{"subscription_id"});
+                preparedStforInsert = conn.prepareStatement(sqlQuery, new String[]{"subscription_id"});
             }
 
-            ps.setString(1, identifier.getTier());
-            ps.setInt(2, apiId);
-            ps.setInt(3, applicationId);
-            ps.setString(4, status != null ? status : APIConstants.SubscriptionStatus.UNBLOCKED);
-            ps.setString(5, APIConstants.SubscriptionCreatedStatus.SUBSCRIBE);
+            preparedStforInsert.setString(1, identifier.getTier());
+            preparedStforInsert.setInt(2, apiId);
+            preparedStforInsert.setInt(3, applicationId);
+            preparedStforInsert.setString(4, status != null ? status : APIConstants.SubscriptionStatus.UNBLOCKED);
+            preparedStforInsert.setString(5, APIConstants.SubscriptionCreatedStatus.SUBSCRIBE);
 
-            ps.executeUpdate();
-            ResultSet rs = ps.getGeneratedKeys();
+            preparedStforInsert.executeUpdate();
+            rs = preparedStforInsert.getGeneratedKeys();
             while (rs.next()) {
                 //subscriptionId = rs.getInt(1);
                 subscriptionId = Integer.valueOf(rs.getString(1)).intValue();
             }
-            ps.close();
 
             // finally commit transaction
             conn.commit();
@@ -1187,6 +1166,7 @@ public class ApiMgtDAO {
             handleException("Failed to add subscriber data ", e);
         } finally {
             APIMgtDBUtil.closeAllConnections(ps, conn, resultSet);
+            APIMgtDBUtil.closeAllConnections(preparedStforInsert, null, rs);
         }
         return subscriptionId;
     }
@@ -1196,30 +1176,20 @@ public class ApiMgtDAO {
         Connection conn = null;
         ResultSet resultSet = null;
         PreparedStatement ps = null;
+        PreparedStatement preparedStForUpdateOrDelete = null;
         int subscriptionId = -1;
         int apiId = -1;
         String subStatus = null;
 
         try {
             conn = APIMgtDBUtil.getConnection();
-            String getApiQuery = "SELECT API_ID FROM AM_API API WHERE API_PROVIDER = ? AND " +
-                                 "API_NAME = ? AND API_VERSION = ?";
-            ps = conn.prepareStatement(getApiQuery);
-            ps.setString(1, APIUtil.replaceEmailDomainBack(identifier.getProviderName()));
-            ps.setString(2, identifier.getApiName());
-            ps.setString(3, identifier.getVersion());
-            resultSet = ps.executeQuery();
-            if (resultSet.next()) {
-                apiId = resultSet.getInt("API_ID");
-            }
-            resultSet.close();
-            ps.close();
+            apiId = getAPIID(identifier, conn);
 
-            if (apiId == -1) {
-                throw new APIManagementException("Unable to get the API ID for: " + identifier);
-            }
-
-            String subscriptionStatusQuery = "SELECT SUB_STATUS FROM AM_SUBSCRIPTION WHERE API_ID = ? AND APPLICATION_ID = ?";
+            String subscriptionStatusQuery = "SELECT " +
+                                             "SUB_STATUS FROM AM_SUBSCRIPTION" +
+                                             " WHERE " +
+                                             "API_ID = ? " +
+                                             "AND APPLICATION_ID = ?";
 
             ps = conn.prepareStatement(subscriptionStatusQuery);
             ps.setInt(1, apiId);
@@ -1230,27 +1200,30 @@ public class ApiMgtDAO {
             if (resultSet.next())   {
                 subStatus = resultSet.getString("SUB_STATUS");
             }
-            resultSet.close();
-            ps.close();
 
             // If the user was unblocked, remove the entry from DB, else change the status and keep the entry.
 
-            String updateQuery = "UPDATE AM_SUBSCRIPTION SET SUBS_CREATE_STATE = '" + APIConstants.SubscriptionCreatedStatus.UN_SUBSCRIBE
-                    + "' WHERE API_ID = ? AND APPLICATION_ID = ?";
+            String updateQuery = "UPDATE AM_SUBSCRIPTION " +
+                                 " SET " +
+                                 "SUBS_CREATE_STATE = '" + APIConstants.SubscriptionCreatedStatus.UN_SUBSCRIBE +
+                                 "' WHERE " +
+                                 "API_ID = ? " +
+                                 "AND APPLICATION_ID = ?";
 
             String deleteQuery = "DELETE FROM AM_SUBSCRIPTION WHERE API_ID = ? AND APPLICATION_ID = ?";
 
-            if(APIConstants.SubscriptionStatus.BLOCKED.equals(subStatus) || APIConstants.SubscriptionStatus.PROD_ONLY_BLOCKED.equals(subStatus)) {
-                ps = conn.prepareStatement(updateQuery);
-                ps.setInt(1, apiId);
-                ps.setInt(2, applicationId);
+            if(APIConstants.SubscriptionStatus.BLOCKED.equals(subStatus)
+               || APIConstants.SubscriptionStatus.PROD_ONLY_BLOCKED.equals(subStatus)) {
+                preparedStForUpdateOrDelete = conn.prepareStatement(updateQuery);
+                preparedStForUpdateOrDelete.setInt(1, apiId);
+                preparedStForUpdateOrDelete.setInt(2, applicationId);
             } else {
-                ps = conn.prepareStatement(deleteQuery);
-                ps.setInt(1, apiId);
-                ps.setInt(2, applicationId);
+                preparedStForUpdateOrDelete = conn.prepareStatement(deleteQuery);
+                preparedStForUpdateOrDelete.setInt(1, apiId);
+                preparedStForUpdateOrDelete.setInt(2, applicationId);
             }
 
-            ps.executeUpdate();
+            preparedStForUpdateOrDelete.executeUpdate();
 
             // finally commit transaction
             conn.commit();
@@ -1266,6 +1239,7 @@ public class ApiMgtDAO {
             handleException("Failed to add subscriber data ", e);
         } finally {
             APIMgtDBUtil.closeAllConnections(ps, conn, resultSet);
+            APIMgtDBUtil.closeAllConnections(preparedStForUpdateOrDelete, null, null);
         }
     }
 
@@ -1331,7 +1305,7 @@ public class ApiMgtDAO {
      *
      * @param subscriberName id
      * @return Subscriber
-     * @throws APIManagementException if failed to get Subscriber from subscriber id
+     * @throws org.wso2.carbon.apimgt.api.APIManagementException if failed to get Subscriber from subscriber id
      */
     public Subscriber getSubscriber(String subscriberName) throws APIManagementException {
 
@@ -2616,7 +2590,7 @@ public class ApiMgtDAO {
      *
      * @param subscriptionId Subscription Id
      * @return access token data
-     * @throws APIManagementException
+     * @throws org.wso2.carbon.apimgt.api.APIManagementException
      */
     public Map<String, String> getAccessTokenData(int subscriptionId)
             throws APIManagementException {
@@ -2691,7 +2665,7 @@ public class ApiMgtDAO {
      *
      * @param providerName name of the provider
      * @return Set<Subscriber>
-     * @throws APIManagementException if failed to get subscribers for given provider
+     * @throws org.wso2.carbon.apimgt.api.APIManagementException if failed to get subscribers for given provider
      */
     public Set<Subscriber> getSubscribersOfProvider(String providerName)
             throws APIManagementException {
@@ -2946,8 +2920,8 @@ public class ApiMgtDAO {
      * @param newAccessToken
      * @param validityPeriod
      * @return
-     * @throws IdentityException
-     * @throws APIManagementException
+     * @throws org.wso2.carbon.identity.base.IdentityException
+     * @throws org.wso2.carbon.apimgt.api.APIManagementException
      */
     public void updateRefreshedApplicationAccessToken(String keyType, String newAccessToken,
                                                       long validityPeriod) throws IdentityException,
@@ -3065,7 +3039,7 @@ public class ApiMgtDAO {
      * @param apiInfoDTO      Application Info DTO
      * @param keyType         Type (scope) of the key
      * @return accessToken
-     * @throws IdentityException if failed to register accessToken
+     * @throws org.wso2.carbon.identity.base.IdentityException if failed to register accessToken
      */
     public String registerAccessToken(String consumerKey, String applicationName, String userId,
                                       int tenantId, APIInfoDTO apiInfoDTO, String keyType)
@@ -3348,7 +3322,7 @@ public class ApiMgtDAO {
      * @param state State of the registration.
      * @param keyType PRODUCTION | SANDBOX
      * @param appId ID of the Application.
-     * @throws APIManagementException if updating fails.
+     * @throws org.wso2.carbon.apimgt.api.APIManagementException if updating fails.
      */
     public void updateApplicationRegistration(String state, String keyType, int appId) throws APIManagementException {
         Connection conn = null;
@@ -3381,7 +3355,7 @@ public class ApiMgtDAO {
      * @param apiIdentifier APIIdentifier
      * @param userId        User Id
      * @return true if user subscribed for given APIIdentifier
-     * @throws APIManagementException if failed to check subscribed or not
+     * @throws org.wso2.carbon.apimgt.api.APIManagementException if failed to check subscribed or not
      */
     public boolean isSubscribed(APIIdentifier apiIdentifier, String userId)
             throws APIManagementException {
@@ -3562,7 +3536,7 @@ public class ApiMgtDAO {
      *
      * @param accessToken AccessToken
      * @return Subscriber
-     * @throws APIManagementException if failed to get subscriber for given access token
+     * @throws org.wso2.carbon.apimgt.api.APIManagementException if failed to get subscriber for given access token
      */
     public Subscriber getSubscriberById(String accessToken) throws APIManagementException {
         Connection connection = null;
@@ -3834,7 +3808,7 @@ public class ApiMgtDAO {
     /**
      * @param apiIdentifier API Identifier
      * @param userId      User Id
-     * @throws APIManagementException if failed to add Application
+     * @throws org.wso2.carbon.apimgt.api.APIManagementException if failed to add Application
      */
     public void addRating(APIIdentifier apiIdentifier,int rating,String userId,Connection conn)
             throws APIManagementException, SQLException {
@@ -3934,7 +3908,7 @@ public class ApiMgtDAO {
     /**
      * @param apiIdentifier API Identifier
      * @param userId        User Id
-     * @throws APIManagementException if failed to add Application
+     * @throws org.wso2.carbon.apimgt.api.APIManagementException if failed to add Application
      */
     public void removeAPIRating(APIIdentifier apiIdentifier, String userId, Connection conn)
             throws APIManagementException, SQLException {
@@ -4026,7 +4000,7 @@ public class ApiMgtDAO {
     /**
      * @param apiIdentifier API Identifier
      * @param userId        User Id
-     * @throws APIManagementException if failed to add Application
+     * @throws org.wso2.carbon.apimgt.api.APIManagementException if failed to add Application
      */
     public int getUserRating(APIIdentifier apiIdentifier, String userId, Connection conn)
             throws APIManagementException, SQLException {
@@ -4105,7 +4079,7 @@ public class ApiMgtDAO {
 
     /**
      * @param apiIdentifier API Identifier
-     * @throws APIManagementException if failed to add Application
+     * @throws org.wso2.carbon.apimgt.api.APIManagementException if failed to add Application
      */
     public static float getAverageRating(APIIdentifier apiIdentifier, Connection conn)
             throws APIManagementException, SQLException {
@@ -4148,7 +4122,7 @@ public class ApiMgtDAO {
     /**
      * @param application Application
      * @param userId      User Id
-     * @throws APIManagementException if failed to add Application
+     * @throws org.wso2.carbon.apimgt.api.APIManagementException if failed to add Application
      */
     public int addApplication(Application application, String userId, Connection conn)
             throws APIManagementException, SQLException {
@@ -4261,7 +4235,7 @@ public class ApiMgtDAO {
      * Update the status of the Application creation process
      * @param applicationId
      * @param status
-     * @throws APIManagementException
+     * @throws org.wso2.carbon.apimgt.api.APIManagementException
      */
     public void updateApplicationStatus(int applicationId, String status) throws APIManagementException {
         Connection conn = null;
@@ -4305,7 +4279,7 @@ public class ApiMgtDAO {
 	 *
 	 * @param appName
 	 * @return
-	 * @throws APIManagementException
+	 * @throws org.wso2.carbon.apimgt.api.APIManagementException
 	 */
 	public String getApplicationStatus(String appName,String userId) throws APIManagementException {
 		Connection conn = null;
@@ -4344,7 +4318,7 @@ public class ApiMgtDAO {
     /**
      * @param username Subscriber
      * @return ApplicationId for given appname.
-     * @throws APIManagementException if failed to get Applications for given subscriber.
+     * @throws org.wso2.carbon.apimgt.api.APIManagementException if failed to get Applications for given subscriber.
      */
     public int getApplicationId(String appName, String username) throws APIManagementException {
         if (username == null) {
@@ -4390,7 +4364,7 @@ public class ApiMgtDAO {
      * Find the name of the application by Id
      * @param applicationId - applicatoin id
      * @return - application name
-     * @throws APIManagementException
+     * @throws org.wso2.carbon.apimgt.api.APIManagementException
      */
     public String getApplicationNameFromId(int applicationId) throws APIManagementException{
 
@@ -4425,7 +4399,7 @@ public class ApiMgtDAO {
     /**
      * @param subscriber Subscriber
      * @return Applications for given subscriber.
-     * @throws APIManagementException if failed to get Applications for given subscriber.
+     * @throws org.wso2.carbon.apimgt.api.APIManagementException if failed to get Applications for given subscriber.
      */
     public Application[] getApplications(Subscriber subscriber) throws APIManagementException {
         if (subscriber == null) {
@@ -4614,7 +4588,7 @@ public class ApiMgtDAO {
      * @param tenantId   Tenant Id
      * @param connection
      * @return Subscriber
-     * @throws APIManagementException if failed to get subscriber
+     * @throws org.wso2.carbon.apimgt.api.APIManagementException if failed to get subscriber
      */
     private Subscriber getSubscriber(String username, int tenantId, Connection connection)
             throws APIManagementException {
@@ -5067,7 +5041,7 @@ public class ApiMgtDAO {
     /**
      * Persists WorkflowDTO to Database
      * @param workflow
-     * @throws APIManagementException
+     * @throws org.wso2.carbon.apimgt.api.APIManagementException
      */
     public void addWorkflowEntry(WorkflowDTO workflow) throws APIManagementException {
         Connection connection = null;
@@ -5132,7 +5106,7 @@ public class ApiMgtDAO {
      * Returns a workflow object for a given external workflow reference.
      * @param workflowReference
      * @return
-     * @throws APIManagementException
+     * @throws org.wso2.carbon.apimgt.api.APIManagementException
      */
     public WorkflowDTO retrieveWorkflow(String workflowReference) throws APIManagementException {
         Connection connection = null;
@@ -5198,7 +5172,7 @@ public class ApiMgtDAO {
          * @param apiId
          * @param connection
          * @return
-         * @throws APIManagementException
+         * @throws org.wso2.carbon.apimgt.api.APIManagementException
          */
 
 
@@ -5290,7 +5264,7 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
      * @param apiId
      * @param api
      * @param connection
-     * @throws APIManagementException
+     * @throws org.wso2.carbon.apimgt.api.APIManagementException
      */
     public void addURLTemplates(int apiId, API api, Connection connection) throws APIManagementException {
         if (apiId == -1) {
@@ -5361,7 +5335,7 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
      *
      * @param applicationName Name of the Application
      * @param userId Name of the User.
-     * @throws APIManagementException
+     * @throws org.wso2.carbon.apimgt.api.APIManagementException
      */
     public Application getApplicationByName(String applicationName, String userId) throws APIManagementException {
         //mysql> select APP.APPLICATION_ID, APP.NAME, APP.SUBSCRIBER_ID,APP.APPLICATION_TIER,APP.CALLBACK_URL,APP.DESCRIPTION,
@@ -5483,7 +5457,7 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
      * update URI templates define for an API
      *
      * @param api
-     * @throws APIManagementException
+     * @throws org.wso2.carbon.apimgt.api.APIManagementException
      */
     public void updateURLTemplates(API api) throws APIManagementException {
 
@@ -5711,7 +5685,7 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
      * Change access token status in to revoked in database level.
      *
      * @param key API Key to be revoked
-     * @throws APIManagementException on error in revoking access token
+     * @throws org.wso2.carbon.apimgt.api.APIManagementException on error in revoking access token
      */
     public void revokeAccessToken(String key) throws APIManagementException {
 
@@ -5746,7 +5720,7 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
      *
      * @param accessToken String access token
      * @return APIIdentifier set for all API's associated with given access token
-     * @throws APIManagementException error in getting APIIdentifiers
+     * @throws org.wso2.carbon.apimgt.api.APIManagementException error in getting APIIdentifiers
      */
     public Set<APIIdentifier> getAPIByAccessToken(String accessToken)
             throws APIManagementException {
@@ -5790,7 +5764,7 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
      *
      * @param tier String tier name
      * @return Application object array associated with tier
-     * @throws APIManagementException on error in getting applications array
+     * @throws org.wso2.carbon.apimgt.api.APIManagementException on error in getting applications array
      */
     public Application[] getApplicationsByTier(String tier) throws APIManagementException {
         if (tier == null) {
@@ -5844,7 +5818,7 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
      * @param version         version of API
      * @param keyValidationInfoDTO   APIKeyValidationInfoDTO
      * @return signed JWT token string
-     * @throws APIManagementException error in generating token
+     * @throws org.wso2.carbon.apimgt.api.APIManagementException error in generating token
      */
     public String createJWTTokenString(String context, String version, APIKeyValidationInfoDTO keyValidationInfoDTO)
             throws APIManagementException {
@@ -5867,7 +5841,7 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
      * @param version         version of API
      * @param keyValidationInfoDTO   APIKeyValidationInfoDTO
      * @return signed JWT token string
-     * @throws APIManagementException error in generating token
+     * @throws org.wso2.carbon.apimgt.api.APIManagementException error in generating token
      */
     public String createJWTTokenString(String context, String version, APIKeyValidationInfoDTO keyValidationInfoDTO, String accessToken)
             throws APIManagementException {
@@ -6117,7 +6091,7 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
      * Returns all the Comments on an API
      * @param identifier	API Identifier
      * @return				Comment Array
-     * @throws APIManagementException
+     * @throws org.wso2.carbon.apimgt.api.APIManagementException
      */
     public Comment[] getComments(APIIdentifier identifier) throws APIManagementException {
         List<Comment> commentList = new ArrayList<Comment>();
@@ -6405,7 +6379,7 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
      *
      * @param login
      * @return
-     * @throws APIManagementException 
+     * @throws org.wso2.carbon.apimgt.api.APIManagementException
      */
     private String getPrimaryloginFromSecondary(String login) throws APIManagementException {
         Map<String, Map<String, String>> loginConfiguration = ServiceReferenceHolder.getInstance()
@@ -6439,7 +6413,7 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
      *
      * @param userID
      * @return
-     * @throws APIManagementException 
+     * @throws org.wso2.carbon.apimgt.api.APIManagementException
      */
     private String getLoginUserName(String userID) throws APIManagementException {
         String primaryLogin = userID;
@@ -6459,7 +6433,7 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
      * @param apiId APIIdentifier
      * @param apiStoreSet APIStores set
      * @return   added/failed
-     * @throws APIManagementException
+     * @throws org.wso2.carbon.apimgt.api.APIManagementException
      */
     public boolean addExternalAPIStoresDetails(APIIdentifier apiId, Set<APIStore> apiStoreSet)
             throws APIManagementException {
@@ -6522,7 +6496,7 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
      * @param apiId APIIdentifier
      * @param apiStoreSet APIStores set
      * @return   added/failed
-     * @throws APIManagementException
+     * @throws org.wso2.carbon.apimgt.api.APIManagementException
      */
     public boolean deleteExternalAPIStoresDetails(APIIdentifier apiId, Set<APIStore> apiStoreSet)
             throws APIManagementException {
@@ -6606,7 +6580,7 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
     /**
      * Updateexternal APIStores details to which APIs published
      * @param apiIdentifier API Identifier
-     * @throws APIManagementException if failed to add Application
+     * @throws org.wso2.carbon.apimgt.api.APIManagementException if failed to add Application
      */
     public void updateExternalAPIStoresDetails(APIIdentifier apiIdentifier,
                                                Set<APIStore> apiStoreSet, Connection conn)
@@ -6661,7 +6635,7 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
      * Return external APIStore details on successfully APIs published
      * @param apiId  APIIdentifier
      * @return  Set of APIStore
-     * @throws APIManagementException
+     * @throws org.wso2.carbon.apimgt.api.APIManagementException
      */
     public Set<APIStore> getExternalAPIStoresDetails(APIIdentifier apiId)
             throws APIManagementException {
@@ -6693,7 +6667,7 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
      * Get external APIStores details which are stored in database
      *
      * @param apiIdentifier API Identifier
-     * @throws APIManagementException if failed to get external APIStores
+     * @throws org.wso2.carbon.apimgt.api.APIManagementException if failed to get external APIStores
      */
     public Set<APIStore> getExternalAPIStoresDetails(APIIdentifier apiIdentifier
             , Connection conn)
@@ -6978,7 +6952,7 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
      * update URI templates define for an API
      *
      * @param api
-     * @throws APIManagementException
+     * @throws org.wso2.carbon.apimgt.api.APIManagementException
      */
     public void updateScopes(API api, int tenantId)
             throws APIManagementException {
@@ -7134,4 +7108,33 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
 			APIMgtDBUtil.closeAllConnections(prepStmt, connection, rs);
 		}
 	}
+
+    /**
+     * Delete a user subscription based on API_ID, APP_ID, TIER_ID
+     *
+     * @param apiId - subscriber API ID
+     * @param appId - application ID used to subscribe
+     * @param tier - subscribed TIER ID
+     * @throws java.sql.SQLException - Letting the caller to handle the roll back
+     */
+    private void deleteSubscriptionByApiIDAndAppID(int apiId, int appId, String tier, Connection conn)
+            throws SQLException {
+        String deleteQuery = "DELETE FROM AM_SUBSCRIPTION " +
+                             " WHERE " +
+                             "API_ID = ? " +
+                             "AND APPLICATION_ID = ? " +
+                             "AND TIER_ID = ?";
+        PreparedStatement ps = null;
+        try {
+            ps = conn.prepareStatement(deleteQuery);
+            ps.setInt(1, apiId);
+            ps.setInt(2, appId);
+            ps.setString(3, tier);
+
+            ps.executeUpdate();
+        } finally {
+            APIMgtDBUtil.closeAllConnections(ps, null, null);
+        }
+    }
+
 }

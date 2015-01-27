@@ -32,7 +32,6 @@ import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.base.MultitenantConstants;
 import org.wso2.carbon.core.util.KeyStoreManager;
-import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.security.*;
@@ -281,8 +280,6 @@ public abstract class AbstractJWTGenerator implements TokenGenerator {
             String error = "Error in signature";
             //do not log
             throw new APIManagementException(error);
-        } catch (RegistryException e) {
-            throw new APIManagementException("Error occurred while loading tenant registry", e);
         }
     }
 
@@ -311,7 +308,7 @@ public abstract class AbstractJWTGenerator implements TokenGenerator {
      * Helper method to add public certificate to JWT_HEADER to signature verification.
      *
      * @param endUserName
-     * @throws APIManagementException
+     * @throws org.wso2.carbon.apimgt.api.APIManagementException
      */
     private String addCertToHeader(String endUserName) throws APIManagementException {
 

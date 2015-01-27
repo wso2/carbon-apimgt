@@ -117,7 +117,7 @@ public abstract class AbstractAPIManager implements APIManager {
     /**
      * method to register custom registry queries
      * @param registry  Registry instance to use
-     * @throws RegistryException n error
+     * @throws org.wso2.carbon.registry.core.exceptions.RegistryException n error
      */
     private void registerCustomQueries(UserRegistry registry, String username)
             throws RegistryException, APIManagementException {

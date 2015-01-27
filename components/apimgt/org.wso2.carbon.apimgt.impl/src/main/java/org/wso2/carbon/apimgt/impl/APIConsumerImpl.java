@@ -119,7 +119,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
      *
      * @param tag
      * @return
-     * @throws APIManagementException
+     * @throws org.wso2.carbon.apimgt.api.APIManagementException
      */
     public Set<API> getAPIsWithTag(String tag) throws APIManagementException {
         if (taggedAPIs != null) {
@@ -137,7 +137,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
      *
      * @param tag
      * @return
-     * @throws APIManagementException
+     * @throws org.wso2.carbon.apimgt.api.APIManagementException
      */
     public Map<String,Object> getPaginatedAPIsWithTag(String tag,int start,int end) throws APIManagementException {
         List<API> apiSet = new ArrayList<API>();
@@ -171,7 +171,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
      * @param registry - Current registry; tenant/SuperTenant
      * @param tag
      * @return
-     * @throws APIManagementException
+     * @throws org.wso2.carbon.apimgt.api.APIManagementException
      */
     private Set<API> getAPIsWithTag(Registry registry, String tag)
             throws APIManagementException {
@@ -214,7 +214,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
      * The method to get APIs to Store view      *
      *
      * @return Set<API>  Set of APIs
-     * @throws APIManagementException
+     * @throws org.wso2.carbon.apimgt.api.APIManagementException
      */
     public Set<API> getAllPublishedAPIs(String tenantDomain) throws APIManagementException {
         SortedSet<API> apiSortedSet = new TreeSet<API>(new APINameComparator());
@@ -312,7 +312,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
      * The method to get APIs to Store view      *
      *
      * @return Set<API>  Set of APIs
-     * @throws APIManagementException
+     * @throws org.wso2.carbon.apimgt.api.APIManagementException
      */
     public Map<String,Object> getAllPaginatedPublishedAPIs(String tenantDomain,int start,int end) throws APIManagementException {
     	
@@ -433,7 +433,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
      * The method to get APIs by given status to Store view  
      *
      * @return Set<API>  Set of APIs
-     * @throws APIManagementException
+     * @throws org.wso2.carbon.apimgt.api.APIManagementException
      */
     @Override
 	public Map<String, Object> getAllPaginatedAPIsByStatus(String tenantDomain,
@@ -558,7 +558,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
      * The method to get All PUBLISHED and DEPRECATED APIs, to Store view      
      *
      * @return Set<API>  Set of APIs
-     * @throws APIManagementException
+     * @throws org.wso2.carbon.apimgt.api.APIManagementException
      */
     public Map<String,Object> getAllPaginatedAPIs(String tenantDomain,int start,int end) throws APIManagementException {
         Map<String,Object> result=new HashMap<String, Object>();
@@ -766,7 +766,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
      *
      * @param limit no limit. Return everything else, limit the return list to specified value.
      * @return Set<API>
-     * @throws APIManagementException
+     * @throws org.wso2.carbon.apimgt.api.APIManagementException
      */
     public Set<API> getRecentlyAddedAPIs(int limit, String tenantDomain)
             throws APIManagementException {
@@ -1263,7 +1263,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         } catch (org.wso2.carbon.user.core.UserStoreException e) {
             handleException("Failed to get Published APIs for provider : " + providerId, e);
             return null;
-        } catch (org.wso2.carbon.user.api.UserStoreException e) {
+        } catch (UserStoreException e) {
             handleException("Failed to get Published APIs for provider : " + providerId, e);
             return null;
         }
@@ -1322,7 +1322,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 	 * @param searchTerm
 	 * @param searchType
 	 * @return
-	 * @throws APIManagementException
+	 * @throws org.wso2.carbon.apimgt.api.APIManagementException
 	 */
 
     public Map<String,Object> searchPaginatedAPIs(Registry registry, String searchTerm, String searchType,int start,int end) throws APIManagementException {
@@ -1583,7 +1583,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 
     /**
      * Add a new Application from the store.
-     * @param application - {@link Application}
+     * @param application - {@link org.wso2.carbon.apimgt.api.model.Application}
      * @param userId - {@link String} 
      * @return {@link String}
      */
@@ -1861,7 +1861,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                     }
                 }
             }
-        } catch (org.wso2.carbon.user.api.UserStoreException e) {
+        } catch (UserStoreException e) {
             log.error("cannot retrieve user role list for tenant" + tenantDomain);
         }
         return deniedTiers;
@@ -1872,7 +1872,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
      *
      * @param tierName
      * @return
-     * @throws APIManagementException if failed to get the tiers
+     * @throws org.wso2.carbon.apimgt.api.APIManagementException if failed to get the tiers
      */
     public boolean isTierDeneid(String tierName) throws APIManagementException {
         String[] currentUserRoles = new String[0];
@@ -1899,7 +1899,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                     }
                 }
             }
-        } catch (org.wso2.carbon.user.api.UserStoreException e) {
+        } catch (UserStoreException e) {
             log.error("cannot retrieve user role list for tenant" + tenantDomain);
         }
         return false;
@@ -1912,12 +1912,12 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
      * @param limit    Specifies the number of APIs to add.
      * @param apiPaths Array of API paths.
      * @return Set<API> set of APIs
-     * @throws RegistryException
-     * @throws APIManagementException
+     * @throws org.wso2.carbon.registry.core.exceptions.RegistryException
+     * @throws org.wso2.carbon.apimgt.api.APIManagementException
      */
     private Set<API> getAPIs(Registry registry, int limit, String[] apiPaths)
             throws RegistryException, APIManagementException,
-            org.wso2.carbon.user.api.UserStoreException {
+            UserStoreException {
 
         SortedSet<API> apiSortedSet = new TreeSet<API>(new APINameComparator());
         SortedSet<API> apiVersionsSortedSet = new TreeSet<API>(new APIVersionComparator());
@@ -2050,22 +2050,23 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(identifier.getProviderName()));
             if (!tenantDomain.equals(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)) {
                 int id = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager().getTenantId(tenantDomain);
+                // explicitly load the tenant's registry
+                APIUtil.loadTenantRegistry(id);
                 passRegistry = ServiceReferenceHolder.getInstance().getRegistryService().getGovernanceSystemRegistry(id);
             } else {
                 if (this.tenantDomain != null && !this.tenantDomain.equals(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)) {
-                    passRegistry = ServiceReferenceHolder.getInstance().getRegistryService().getGovernanceUserRegistry(identifier.getProviderName(),MultitenantConstants.SUPER_TENANT_ID);
+                    // explicitly load the tenant's registry
+                    APIUtil.loadTenantRegistry(MultitenantConstants.SUPER_TENANT_ID);
+                    passRegistry = ServiceReferenceHolder.getInstance().getRegistryService().getGovernanceUserRegistry(
+                            identifier.getProviderName(), MultitenantConstants.SUPER_TENANT_ID);
                 } else {
-                    if (this.tenantDomain != null && !this.tenantDomain.equals(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)) {
-                        passRegistry = ServiceReferenceHolder.getInstance().getRegistryService().getGovernanceUserRegistry(identifier.getProviderName(),MultitenantConstants.SUPER_TENANT_ID);
-                    } else {
-                        passRegistry = this.registry;
-                    }
+                    passRegistry = this.registry;
                 }
             }
         } catch (RegistryException e) {
             handleException("Failed to get API from registry on path of : " +apiPath, e);
             return null;
-        } catch (org.wso2.carbon.user.api.UserStoreException e) {
+        } catch (UserStoreException e) {
             handleException("Failed to get API from registry on path of : "+ apiPath, e);
             return null;
         }

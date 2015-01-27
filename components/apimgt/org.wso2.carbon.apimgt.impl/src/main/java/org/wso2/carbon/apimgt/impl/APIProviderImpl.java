@@ -408,7 +408,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      *
      * @param artifactId API artifact ID
      * @param apiStatus Current status of the API
-     * @throws APIManagementException on error
+     * @throws org.wso2.carbon.apimgt.api.APIManagementException on error
      */
     private void saveAPIStatus(String artifactId, String apiStatus) throws APIManagementException{
         try{
@@ -799,7 +799,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      * Function returns true if the specified API already exists in the registry
      * @param identifier
      * @return
-     * @throws APIManagementException
+     * @throws org.wso2.carbon.apimgt.api.APIManagementException
      */
     public boolean checkIfAPIExists(APIIdentifier identifier) throws APIManagementException {
         String apiPath = APIUtil.getAPIPath(identifier);
@@ -830,7 +830,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         } catch (RegistryException e) {
             handleException("Failed to get API from : " + apiPath, e);
             return false;
-        } catch (org.wso2.carbon.user.api.UserStoreException e) {
+        } catch (UserStoreException e) {
             handleException("Failed to get API from : " + apiPath, e);
             return false;
         }
@@ -1202,7 +1202,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      * Set the permission to api definition document
      * @param newAPI
      * @param documentation
-     * @throws APIManagementException
+     * @throws org.wso2.carbon.apimgt.api.APIManagementException
      */	
 	private void setPermissionToAPIDefinition(API newAPI, Documentation documentation)
 	                                                                                  throws APIManagementException {
@@ -1551,7 +1551,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      * Create an Api
      *
      * @param api API
-     * @throws APIManagementException if failed to create API
+     * @throws org.wso2.carbon.apimgt.api.APIManagementException if failed to create API
      */
     private void createAPI(API api) throws APIManagementException {
         GenericArtifactManager artifactManager = APIUtil.getArtifactManager(registry,
@@ -1626,7 +1626,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      * This function is to set resource permissions based on its visibility
      *
      * @param artifactPath API resource path
-     * @throws APIManagementException Throwing exception
+     * @throws org.wso2.carbon.apimgt.api.APIManagementException Throwing exception
      */
     private void clearResourcePermissions(String artifactPath, APIIdentifier apiId)
             throws APIManagementException {
@@ -1638,7 +1638,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                                                                         artifactPath);
             String tenantDomain = MultitenantUtils.getTenantDomain(
                     APIUtil.replaceEmailDomainBack(apiId.getProviderName()));
-            if (!tenantDomain.equals(org.wso2.carbon.utils.multitenancy.
+            if (!tenantDomain.equals(
                     MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)) {
                 AuthorizationManager authManager = ServiceReferenceHolder.getInstance().
                         getRealmService().getTenantUserRealm(((UserRegistry) registry).getTenantId()).
@@ -1657,7 +1657,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      *
      * @param api         API
      * @param documentation Documentation
-     * @throws APIManagementException if failed to add documentation
+     * @throws org.wso2.carbon.apimgt.api.APIManagementException if failed to add documentation
      */
     private void createDocumentation(API api, Documentation documentation)
             throws APIManagementException {
@@ -1713,7 +1713,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                                                             APIUtil.getMountedPath(RegistryContext.getBaseInstance(),
                                                                                    RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH) +
                                                                     artifactPath);
-        if (!tenantDomain.equals(org.wso2.carbon.utils.multitenancy.
+        if (!tenantDomain.equals(
                 MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)) {
         int tenantId = ServiceReferenceHolder.getInstance().getRealmService().
                     getTenantManager().getTenantId(tenantDomain);
@@ -1887,19 +1887,19 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      * @param searchType
      * @param providerId
      * 
-     * @throws APIManagementException
+     * @throws org.wso2.carbon.apimgt.api.APIManagementException
      */
     
 	public List<API> searchAPIs(String searchTerm, String searchType, String providerId)
 	                                                                                    throws APIManagementException {
-		List<API> apiList = new ArrayList<API>();
+		List<API> foundApiList = new ArrayList<API>();
 		String regex = "(?i)[\\w.|-]*" + searchTerm.trim() + "[\\w.|-]*";
 		Pattern pattern;
 		Matcher matcher = null;
 		String apiConstant = null;
 		try {
 			if (providerId != null) {
-				apiList = getAPIsByProvider(providerId);
+                List<API> apiList = getAPIsByProvider(providerId);
 				if (apiList == null || apiList.size() == 0) {
 					return apiList;
 				}
@@ -1921,7 +1921,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 					if (apiConstant != null) {
 						matcher = pattern.matcher(apiConstant);
 						if (matcher != null && matcher.find()) {
-							apiList.add(api);
+                            foundApiList.add(api);
 						}
 					}
 					if (searchType.equalsIgnoreCase("Subcontext")) {
@@ -1930,7 +1930,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 							for (URITemplate url : urls) {
 								matcher = pattern.matcher(url.getUriTemplate());
 								if (matcher != null && matcher.find()) {
-									apiList.add(api);
+                                    foundApiList.add(api);
 									break;
 								}
 							}
@@ -1938,13 +1938,13 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 					}
 				}
 			} else {
-				apiList = searchAPIs(searchTerm, searchType);
+                foundApiList = searchAPIs(searchTerm, searchType);
 			}
 		} catch (APIManagementException e) {
 			handleException("Failed to search APIs with type", e);
 		}
-		Collections.sort(apiList, new APINameComparator());
-		return apiList;
+		Collections.sort(foundApiList, new APINameComparator());
+		return foundApiList;
 	}
 
 	/**
@@ -1952,7 +1952,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 	 * @param searchTerm
 	 * @param searchType
 	 * @return
-	 * @throws APIManagementException
+	 * @throws org.wso2.carbon.apimgt.api.APIManagementException
 	 */
 	 
 	private List<API> searchAPIs(String searchTerm, String searchType) throws APIManagementException {
@@ -2278,7 +2278,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 	/**
 	 * Get stored custom inSequences from governanceSystem registry
 	 * 
-	 * @throws APIManagementException
+	 * @throws org.wso2.carbon.apimgt.api.APIManagementException
 	 */
 
 	public List<String> getCustomInSequences() throws APIManagementException {
@@ -2310,7 +2310,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 	/**
 	 * Get stored custom outSequences from governanceSystem registry
 	 * 
-	 * @throws APIManagementException
+	 * @throws org.wso2.carbon.apimgt.api.APIManagementException
 	 */
 
 	public List<String> getCustomOutSequences() throws APIManagementException {
@@ -2342,7 +2342,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     /**
      * Get stored custom fault sequences from governanceSystem registry
      *
-     * @throws APIManagementException
+     * @throws org.wso2.carbon.apimgt.api.APIManagementException
      */
 
     public List<String> getCustomFaultSequences() throws APIManagementException {

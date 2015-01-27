@@ -30,7 +30,7 @@ public interface APIPublisher {
      * @param store    Store
      * @return   published/not
      */
-    public boolean publishToStore(API api,APIStore store) throws APIManagementException;
+    public boolean publishToStore(API api, APIStore store) throws APIManagementException;
 
     /**
      * The method to publish API to external Store
@@ -38,7 +38,7 @@ public interface APIPublisher {
      * @param store    Store
      * @return   updated/not
      */
-    public boolean updateToStore(API api,APIStore store) throws APIManagementException;
+    public boolean updateToStore(API api, APIStore store) throws APIManagementException;
 
     /**
      * The method to publish API to external Store
@@ -46,5 +46,5 @@ public interface APIPublisher {
      * @param store    Store
      * @return   deleted/not
      */
-    public boolean deleteFromStore(APIIdentifier apiId,APIStore store) throws APIManagementException;
+    public boolean deleteFromStore(APIIdentifier apiId, APIStore store) throws APIManagementException;
 }

@@ -88,7 +88,7 @@ class RemoteAuthorizationManagerClient {
      * @param user Username
      * @param permission A valid Carbon permission
      * @return true if the user has the specified permission and false otherwise
-     * @throws APIManagementException If and error occurs while accessing the admin service
+     * @throws org.wso2.carbon.apimgt.api.APIManagementException If and error occurs while accessing the admin service
      */
     public boolean isUserAuthorized(String user, String permission) throws APIManagementException {
         CarbonUtils.setBasicAccessSecurityHeaders(username, password,
@@ -117,7 +117,7 @@ class RemoteAuthorizationManagerClient {
      *
      * @param user Username
      * @return the list of roles to which the user belongs to.
-     * @throws APIManagementException If and error occurs while accessing the admin service
+     * @throws org.wso2.carbon.apimgt.api.APIManagementException If and error occurs while accessing the admin service
      */
     public String[] getRolesOfUser(String user) throws APIManagementException {
         CarbonUtils.setBasicAccessSecurityHeaders(username, password,
@@ -145,7 +145,7 @@ class RemoteAuthorizationManagerClient {
      *
 
      * @return the list of roles
-     * @throws APIManagementException If and error occurs while accessing the admin service
+     * @throws org.wso2.carbon.apimgt.api.APIManagementException If and error occurs while accessing the admin service
      */
     public String[] getRoleNames() throws APIManagementException {
         CarbonUtils.setBasicAccessSecurityHeaders(username, password,

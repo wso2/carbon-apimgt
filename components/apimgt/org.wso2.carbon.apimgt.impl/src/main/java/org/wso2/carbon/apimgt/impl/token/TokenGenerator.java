@@ -27,6 +27,7 @@ import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
 public interface TokenGenerator {
 
 
-    public String generateToken(APIKeyValidationInfoDTO keyValidationInfoDTO, String apiContext,String version) throws APIManagementException;
-    public String generateToken(APIKeyValidationInfoDTO keyValidationInfoDTO, String apiContext,String version, String accessToken) throws APIManagementException;
+    public String generateToken(APIKeyValidationInfoDTO keyValidationInfoDTO, String apiContext, String version) throws APIManagementException;
+    public String generateToken(APIKeyValidationInfoDTO keyValidationInfoDTO, String apiContext, String version,
+                                String accessToken) throws APIManagementException;
 }

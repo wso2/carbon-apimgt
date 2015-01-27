@@ -464,7 +464,7 @@ public class APIManagerComponent {
     
     /**
      * Add the External API Stores Configuration to registry
-     * @throws APIManagementException
+     * @throws org.wso2.carbon.apimgt.api.APIManagementException
      */
     private void addExternalStoresConfigs() throws APIManagementException {
         RegistryService registryService = ServiceReferenceHolder.getInstance().getRegistryService();

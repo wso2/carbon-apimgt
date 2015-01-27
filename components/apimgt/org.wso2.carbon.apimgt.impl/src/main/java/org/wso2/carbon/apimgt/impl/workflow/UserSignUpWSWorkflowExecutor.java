@@ -90,7 +90,7 @@ public class UserSignUpWSWorkflowExecutor extends UserSignUpWorkflowExecutor{
                 if(contentType == null){
                     options.setProperty(Constants.Configuration.MESSAGE_TYPE, HTTPConstants.MEDIA_TYPE_APPLICATION_XML);
                 }
-                options.setProperty(org.apache.axis2.transport.http.HTTPConstants.AUTHENTICATE, auth);
+                options.setProperty(HTTPConstants.AUTHENTICATE, auth);
                 options.setManageSession(true);
             }
 

@@ -44,7 +44,7 @@ public class SequenceAdminServiceClient extends AbstractAPIGatewayAdminClient {
 	 * 
 	 * @param sequence  - The sequence element , which to be deployed in synapse
 	 * @param tenantDomain
-	 * @throws AxisFault
+	 * @throws org.apache.axis2.AxisFault
 	 */
 	public void addSequence(OMElement sequence, String tenantDomain) throws AxisFault {
 		try {
@@ -64,7 +64,7 @@ public class SequenceAdminServiceClient extends AbstractAPIGatewayAdminClient {
 	 * Undeploy the sequence from gateway
 	 * @param sequenceName -The sequence name, which need to be undeployed from synapse configuration
 	 * @param tenantDomain
-	 * @throws AxisFault
+	 * @throws org.apache.axis2.AxisFault
 	 */
 	public void deleteSequence(String sequenceName, String tenantDomain) throws AxisFault {
 		try {
@@ -86,7 +86,7 @@ public class SequenceAdminServiceClient extends AbstractAPIGatewayAdminClient {
 	 * @param sequenceName
 	 *            -The sequence name,
 	 * @param tenantDomain
-	 * @throws AxisFault
+	 * @throws org.apache.axis2.AxisFault
 	 */
 	public OMElement getSequence(String sequenceName, String tenantDomain) throws AxisFault {
 		try {

@@ -45,7 +45,7 @@ public class RESTAPIAdminClient extends AbstractAPIGatewayAdminClient {
 	 * Add the API to the gateway
 	 * @param builder
 	 * @param tenantDomain
-	 * @throws AxisFault
+	 * @throws org.apache.axis2.AxisFault
 	 */
 	public void addApi(APITemplateBuilder builder, String tenantDomain ) throws AxisFault {
         try {
@@ -66,7 +66,7 @@ public class RESTAPIAdminClient extends AbstractAPIGatewayAdminClient {
      * Add the API to the gateway
      * @param builder
      * @param tenantDomain
-     * @throws AxisFault
+     * @throws org.apache.axis2.AxisFault
      */
     public void addPrototypeApiScriptImpl(APITemplateBuilder builder, String tenantDomain) throws AxisFault {
         try {
@@ -102,7 +102,7 @@ public class RESTAPIAdminClient extends AbstractAPIGatewayAdminClient {
 	 * Get API from the gateway
 	 * @param tenantDomain
 	 * @return
-	 * @throws AxisFault
+	 * @throws org.apache.axis2.AxisFault
 	 */
     public APIData getApi(String tenantDomain) throws AxisFault {
         try {
@@ -137,7 +137,7 @@ public class RESTAPIAdminClient extends AbstractAPIGatewayAdminClient {
      * Update the API in the Gateway
      * @param builder
      * @param tenantDomain
-     * @throws AxisFault
+     * @throws org.apache.axis2.AxisFault
      */
 	public void updateApi(APITemplateBuilder builder, String tenantDomain) throws AxisFault {
 		try {
@@ -158,7 +158,7 @@ public class RESTAPIAdminClient extends AbstractAPIGatewayAdminClient {
      * Update the API in the Gateway
      * @param builder
      * @param tenantDomain
-     * @throws AxisFault
+     * @throws org.apache.axis2.AxisFault
      */
     public void updateApiForInlineScript(APITemplateBuilder builder, String tenantDomain) throws AxisFault {
         try {
@@ -194,7 +194,7 @@ public class RESTAPIAdminClient extends AbstractAPIGatewayAdminClient {
 	/**
 	 * Delete the API from Gateway
 	 * @param tenantDomain
-	 * @throws AxisFault
+	 * @throws org.apache.axis2.AxisFault
 	 */
 	public void deleteApi(String tenantDomain) throws AxisFault {
 		try {

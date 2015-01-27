@@ -40,7 +40,7 @@ public class ApplicationRegistrationSimpleWorkflowExecutor extends AbstractAppli
 	 *
 	 * @param workFlowDTO
 	 *            - {@link org.wso2.carbon.apimgt.impl.dto.ApplicationRegistrationWorkflowDTO}
-	 * @throws org.wso2.carbon.apimgt.impl.workflow.WorkflowException
+	 * @throws WorkflowException
 	 */
 
 	public void execute(WorkflowDTO workFlowDTO) throws WorkflowException {

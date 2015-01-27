@@ -47,7 +47,7 @@ public abstract class AbstractAPIGatewayAdminClient {
      * for any subsequent admin service invocations.
      * 
      * @param stub A client stub to be setup
-     * @throws AxisFault if an error occurs when logging into the API gateway
+     * @throws org.apache.axis2.AxisFault if an error occurs when logging into the API gateway
      */
     protected void setup(Stub stub, Environment environment) throws AxisFault {
         String cookie = login(environment);
@@ -57,14 +57,14 @@ public abstract class AbstractAPIGatewayAdminClient {
         options.setProperty(HTTPConstants.SO_TIMEOUT, 15 * 60 * 1000);
         options.setProperty(HTTPConstants.CONNECTION_TIMEOUT, 15 * 60 * 1000);
         options.setManageSession(true);
-        options.setProperty(org.apache.axis2.transport.http.HTTPConstants.COOKIE_STRING, cookie);
+        options.setProperty(HTTPConstants.COOKIE_STRING, cookie);
     }
 
     /**
      * Login to the API gateway as an admin
      * 
      * @return A session cookie string
-     * @throws AxisFault if an error occurs while logging in
+     * @throws org.apache.axis2.AxisFault if an error occurs while logging in
      */
     private String login(Environment environment) throws AxisFault {
         String user = environment.getUserName();
