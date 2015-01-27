@@ -82,7 +82,7 @@ API Definition for Swagger will not be overriden with the changes you will do to
             <div class="control-group">
                 <label class="control-label" for="context"><%=i18n.localize("context")%>:<span class="requiredAstrix">*</span></label>
                 <div class="controls">
-                    <input type="text" class="input-xlarge required validInput contextExists noSpace" id="context" name="context" value="<%=api.context%>" onChange="setContextValue('<%=api.version%>')"/>
+                    <input type="text" class="input-xlarge required validRegistryName validInput contextExists noSpace" id="context" name="context" value="<%=api.context%>" onChange="setContextValue('<%=api.version%>')"/>
                     <a class="icon-question-sign help_popup" help_data="context_help"></a>
                     <p id="context_help" class="hide"><%=i18n.localize("contextHelpMsg")%></p>
                 </div>

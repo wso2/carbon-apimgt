@@ -22,7 +22,9 @@
 		//check whether session is expired
                 var user = jagg.getUser();
                 if (!user) {
-                        log.debug("User information not avaialble, so invalidating session");
+                        if (log.isDebugEnabled()) {
+                            log.debug("User information not avaialble, so invalidating session");
+                        }
                         session.invalidate();
                         response.sendRedirect(jagg.getHttpsUrl("/"));
                         return;
@@ -35,12 +37,16 @@
 
                 if(samlLogoutRequest==null){
                         //logout request failed because there is no session details in anymore. Here trying to do a login request.
-                        log.debug("logout request failed because there is no session details in SAMLSSORelyingPartyObject. Here it is trying to do a login request");
+                        if (log.isDebugEnabled()) {
+                            log.debug("logout request failed because there is no session details in
+                                                    SAMLSSORelyingPartyObject. Here it is trying to do a login request");
+                        }
                         samlLogoutRequest = ssoRelyingParty.getSAMLAuthRequest();
                         idpURL = site.ssoConfiguration.identityProviderURL ;
                 }else{
-
-                        log.debug("doing logout request");
+                        if (log.isDebugEnabled()) {
+                            log.debug("doing logout request");
+                        }
                         idpURL = ssoRelyingParty.getProperty("identityProviderURL");
                 }
 
