@@ -66,7 +66,7 @@ public class APIKeyMgtUtil {
     /**
      * Get a database connection instance from the Identity Persistence Manager
      * @return Database Connection
-     * @throws APIKeyMgtException Error when getting an instance of the identity Persistence Manager
+     * @throws org.wso2.carbon.apimgt.keymgt.APIKeyMgtException Error when getting an instance of the identity Persistence Manager
      */
     public static Connection getDBConnection() throws APIKeyMgtException {
         try {

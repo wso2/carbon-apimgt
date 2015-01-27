@@ -37,6 +37,7 @@ import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
 import org.wso2.carbon.apimgt.api.model.Subscriber;
+import org.wso2.carbon.apimgt.handlers.security.stub.types.APIKeyMapping;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
@@ -81,7 +82,7 @@ public class APIKeyMgtSubscriberService extends AbstractAdmin {
      *                   an API.
      * @param tokenType  Type (scope) of the required access token
      * @return Access Token
-     * @throws APIKeyMgtException Error when getting the AccessToken from the underlying token store.
+     * @throws org.wso2.carbon.apimgt.keymgt.APIKeyMgtException Error when getting the AccessToken from the underlying token store.
      */
     public String getAccessToken(String userId, APIInfoDTO apiInfoDTO,
                                  String applicationName, String tokenType, String callbackUrl) throws APIKeyMgtException,
@@ -109,7 +110,7 @@ public class APIKeyMgtSubscriberService extends AbstractAdmin {
      * @param applicationName Name of the application
      * @param tokenType       Type (scope) of the required access token
      * @return Access token
-     * @throws APIKeyMgtException on error
+     * @throws org.wso2.carbon.apimgt.keymgt.APIKeyMgtException on error
      */
     public ApplicationKeysDTO getApplicationAccessToken(String userId, String applicationName, String tokenType,
                                                         String callbackUrl, String[] allowedDomains, String validityTime)
@@ -151,7 +152,7 @@ public class APIKeyMgtSubscriberService extends AbstractAdmin {
      * @param userId User/Developer name
      * @return An array of APIInfoDTO instances, each instance containing information of provider name,
      *         api name and version.
-     * @throws APIKeyMgtException Error when getting the list of APIs from the persistence store.
+     * @throws org.wso2.carbon.apimgt.keymgt.APIKeyMgtException Error when getting the list of APIs from the persistence store.
      */
     public APIInfoDTO[] getSubscribedAPIsOfUser(String userId) throws APIKeyMgtException,
             APIManagementException, IdentityException {
@@ -310,25 +311,25 @@ public class APIKeyMgtSubscriberService extends AbstractAdmin {
             keys = dao.getApplicationKeys(application.getId());
             apiSet = dao.getSubscribedAPIs(application.getSubscriber());
         }
-//        List<APIKeyMapping> mappings = new ArrayList<APIKeyMapping>();
+        List<APIKeyMapping> mappings = new ArrayList<APIKeyMapping>();
         for (String key : keys) {
             dao.revokeAccessToken(key);
             for (SubscribedAPI api : apiSet) {
-//                APIKeyMapping mapping = new APIKeyMapping();
-//                API apiDefinition = APIKeyMgtUtil.getAPI(api.getApiId());
-//                mapping.setApiVersion(api.getApiId().getVersion());
-//                mapping.setContext(apiDefinition.getContext());
-//                mapping.setKey(key);
-//                mappings.add(mapping);
+                APIKeyMapping mapping = new APIKeyMapping();
+                API apiDefinition = APIKeyMgtUtil.getAPI(api.getApiId());
+                mapping.setApiVersion(api.getApiId().getVersion());
+                mapping.setContext(apiDefinition.getContext());
+                mapping.setKey(key);
+                mappings.add(mapping);
             }
         }
-//        if (mappings.size() > 0) {
-//            List<Environment> gatewayEnvs = config.getApiGatewayEnvironments();
-//            for (Environment environment : gatewayEnvs) {
-//                APIAuthenticationAdminClient client = new APIAuthenticationAdminClient(environment);
-//                client.invalidateKeys(mappings);
-//            }
-//        }
+        if (mappings.size() > 0) {
+            List<Environment> gatewayEnvs = config.getApiGatewayEnvironments();
+            for (Environment environment : gatewayEnvs) {
+                APIAuthenticationAdminClient client = new APIAuthenticationAdminClient(environment);
+                client.invalidateKeys(mappings);
+            }
+        }
     }
 
 

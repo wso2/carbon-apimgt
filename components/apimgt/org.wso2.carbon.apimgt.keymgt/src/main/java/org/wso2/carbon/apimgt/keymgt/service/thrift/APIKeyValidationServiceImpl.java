@@ -60,7 +60,7 @@ public class APIKeyValidationServiceImpl extends AbstractAdmin
      * throws APIKeyMgtException
      */
     private void populateCurrentCarbonContextFromAuthSession(
-            PrivilegedCarbonContext carbonContextHolder, ThriftSession authSession) throws org.wso2.carbon.apimgt.keymgt.APIKeyMgtException {
+            PrivilegedCarbonContext carbonContextHolder, ThriftSession authSession) throws APIKeyMgtException {
 
         //read parameters from it and set it in current carbon context for this thread
         PrivilegedCarbonContext storedCarbonCtxHolder = (PrivilegedCarbonContext)
@@ -73,7 +73,7 @@ public class APIKeyValidationServiceImpl extends AbstractAdmin
 		} catch (Exception e) {
 			String authErrorMsg = "Error populating current carbon context from thrift auth session: " + e.getMessage();
             log.warn(authErrorMsg);
-            throw new org.wso2.carbon.apimgt.keymgt.APIKeyMgtException(authErrorMsg);
+            throw new APIKeyMgtException(authErrorMsg);
 		}
         
         /*carbonContextHolder.setUsername(storedCarbonCtxHolder.getUsername());
@@ -166,7 +166,7 @@ public class APIKeyValidationServiceImpl extends AbstractAdmin
                 throw new org.wso2.carbon.apimgt.impl.generated.thrift.APIKeyMgtException(initErrorMsg);
             }
 
-        } catch (org.wso2.carbon.apimgt.keymgt.APIKeyMgtException e) {
+        } catch (APIKeyMgtException e) {
             log.error("Error in invoking validate key via thrift..");
             throw new org.wso2.carbon.apimgt.impl.generated.thrift.APIKeyMgtException(e.getMessage());
         } catch (org.wso2.carbon.apimgt.api.APIManagementException e) {
@@ -227,7 +227,7 @@ public class APIKeyValidationServiceImpl extends AbstractAdmin
                 throw new APIKeyMgtException(initErrorMsg);
             }
 
-        } catch (org.wso2.carbon.apimgt.keymgt.APIKeyMgtException e) {
+        } catch (APIKeyMgtException e) {
             log.error("Error in invoking validate key via thrift..");
             throw new org.wso2.carbon.apimgt.impl.generated.thrift.APIKeyMgtException(e.getMessage());
         } catch (org.wso2.carbon.apimgt.api.APIManagementException e) {

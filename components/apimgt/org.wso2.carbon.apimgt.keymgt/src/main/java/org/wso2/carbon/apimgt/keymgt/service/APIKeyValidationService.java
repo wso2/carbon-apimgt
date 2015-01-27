@@ -57,7 +57,7 @@ public class APIKeyValidationService extends AbstractAdmin {
      * @param accessToken Provided access token
      * @return APIKeyValidationInfoDTO with authorization info and tier info if authorized. If it is not
      *         authorized, tier information will be <pre>null</pre>
-     * @throws APIKeyMgtException Error occurred when accessing the underlying database or registry.
+     * @throws org.wso2.carbon.apimgt.keymgt.APIKeyMgtException Error occurred when accessing the underlying database or registry.
      */
     public APIKeyValidationInfoDTO validateKey(String context, String version, String accessToken,
                                                String requiredAuthenticationLevel, String clientDomain,
@@ -196,7 +196,7 @@ public class APIKeyValidationService extends AbstractAdmin {
      * @param version API Version
      * @return APIKeyValidationInfoDTO with authorization info and tier info if authorized. If it is not
      *         authorized, tier information will be <pre>null</pre>
-     * @throws APIKeyMgtException Error occurred when accessing the underlying database or registry.
+     * @throws org.wso2.carbon.apimgt.keymgt.APIKeyMgtException Error occurred when accessing the underlying database or registry.
      */
     public ArrayList<URITemplate> getAllURITemplates(String context, String version)
             throws APIKeyMgtException, APIManagementException {
