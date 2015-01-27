@@ -37,7 +37,6 @@ import org.wso2.carbon.apimgt.impl.observers.CommonConfigDeployer;
 import org.wso2.carbon.apimgt.impl.observers.SignupObserver;
 import org.wso2.carbon.apimgt.impl.utils.APIMgtDBUtil;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
-import org.wso2.carbon.apimgt.impl.utils.RemoteAuthorizationManager;
 import org.wso2.carbon.bam.service.data.publisher.services.ServiceDataPublisherAdmin;
 import org.wso2.carbon.base.MultitenantConstants;
 import org.wso2.carbon.context.CarbonContext;
@@ -200,8 +199,8 @@ public class APIManagerComponent {
                                                         UserMgtConstants.EXECUTE_ACTION, null);
 
             setupImagePermissions();
-            RemoteAuthorizationManager authorizationManager = RemoteAuthorizationManager.getInstance();
-            authorizationManager.init();
+//            RemoteAuthorizationManager authorizationManager = RemoteAuthorizationManager.getInstance();
+//            authorizationManager.init();
             APIMgtDBUtil.initialize();
             //Check User add listener enabled or not
             boolean selfSignInProcessEnabled = Boolean.parseBoolean(configuration.getFirstProperty("WorkFlowExtensions.SelfSignIn.ProcessEnabled"));
@@ -254,8 +253,7 @@ public class APIManagerComponent {
         }
         registration.unregister();
         APIManagerFactory.getInstance().clearAll();
-        RemoteAuthorizationManager authorizationManager = RemoteAuthorizationManager.getInstance();
-        authorizationManager.destroy();
+        org.wso2.carbon.apimgt.impl.utils.AuthorizationManager.getInstance().destroy();
     }
 
     protected void setRegistryService(RegistryService registryService) {
