@@ -518,6 +518,7 @@
     <properties>
 
         <!-- Carbon kernel version -->
+        <wso2carbon.version>4.2.0</wso2carbon.version>
         <carbon.kernel.version>4.3.0</carbon.kernel.version>
         <carbon.kernel.imp.pkg.version>[4.3.0, 4.4.0)</carbon.kernel.imp.pkg.version>
 
