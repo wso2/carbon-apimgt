@@ -64,7 +64,7 @@ public class APIStatsPublisher {
         requestPublisherDTO.setApi(keyValidationDTO.getApiName());
         //TODO Remove Hard Coded Version and use proper
         requestPublisherDTO.setVersion("1.0.0");
-        //requestPublisherDTO.setResource(pathInfo);
+        requestPublisherDTO.setResource(pathInfo);
         requestPublisherDTO.setMethod(httpMethod);
         requestPublisherDTO.setRequestTime(requestTime);
         requestPublisherDTO.setUsername(keyValidationDTO.getEndUserName());
@@ -110,7 +110,7 @@ public class APIStatsPublisher {
         responsePublisherDTO.setApi(keyValidationDTO.getApiName());
         //TODO Remove Hard Coded Version and use proper
         responsePublisherDTO.setVersion("1.0.0");
-        //responsePublisherDTO.setResource(pathInfo);
+        responsePublisherDTO.setResource(pathInfo);
         responsePublisherDTO.setMethod(httpMethod);
         responsePublisherDTO.setResponseTime(currentTime);
         responsePublisherDTO.setServiceTime(currentTime - requestTime);
