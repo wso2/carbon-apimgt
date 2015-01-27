@@ -585,5 +585,11 @@ public final class APIConstants {
 
     public static final String DEFAULT_VERSION_PREFIX = "_default_";
 
+    public static class ConfigParameters {
+        private ConfigParameters() {
+            throw new AssertionError();
+        }
+        public static final String IS_EXTERNAL = "IsExternal";
+    }
 
 }
