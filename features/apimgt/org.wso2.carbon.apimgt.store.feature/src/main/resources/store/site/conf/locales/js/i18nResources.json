@@ -3,8 +3,10 @@
         "appSelect": "Please select an application before subscribing",
         "wait": "Please wait..." ,
         "subscription": "Subscription Successful" ,
+        "subscriptionRejectTitle": "Subscription Rejected" ,
         "subscriptionSuccess": "Congratulations! You have successfully subscribed to the API. Please go to 'My Subscriptions' page to review your subscription and generate keys.",
         "subscriptionPending": "Congratulations! Your subscription request has been submitted and is now awaiting approval.",
+        "subscriptionRejected": "Your subscription is rejected, since it does not matched with authetication requirments. Please contact the api publisher for more information",
         "applicationSuccess": "Congratulations! You have successfully added the API.",
         "applicationPending": "Congratulations! Your application  request has been submitted and is now awaiting approval.",
         "gotoSubsPage": "Go to My Subscriptions",
@@ -12,9 +14,11 @@
         "returntoAPIPage": "Return back to API detail page?",
         "yes": "Yes",
         "no": "No",
+        "OK": "OK",
         "charsLeft": "Characters left: ",
-		"replyAdded": "Reply Succesfully Added"
-
+		"replyAdded": "Reply Successfully Added",
+		"callBackHelpMsg": "This parameter can be used in the authorization code grant type when invoking an API. For example, assume that both the client and the API Gateway are run on the same server and the Authorization API URL is https://localhost:8243/authorize. <strong> query component:</strong> “response_type=code&client_id=<consumer_key>&scope=PRODUCTION&redirect_uri=<application_callback_url>” and <strong>headers:</strong> Content-Type:application/x-www-form-urlencoded",
+		"tokenHelpMsg" : "The period after which the token will expire after generation. A negative value ensures that the token never expires."
 
     },
     "confirm": {
@@ -60,7 +64,7 @@
         "emptyVerb":"At least one HTTP Verb has to be checked for a resource. ",
         "duplicateUrlPattern":"has duplicated entries. ",
         "noData":"No Data Found ... ",
-        "checkBAMConnectivity":" <a href='http://docs.wso2.org/wiki/display/AM170/Publishing+API+Runtime+Statistics' target='_blank' class='warningLink'>Refer our wiki to configure BAM correctly</a>",
+        "checkBAMConnectivity":" <a href='http://docs.wso2.org/wiki/display/AM180/Publishing+API+Runtime+Statistics' target='_blank' class='warningLink'>Refer our wiki to configure BAM correctly</a>",
         "unavailableData":"Data unavailable",
         "login":"Unable to log you in!",
         "cannotDeleteForumTopic" : "Cannot delete the topic. ",
