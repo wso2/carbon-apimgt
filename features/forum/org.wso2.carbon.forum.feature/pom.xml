@@ -22,12 +22,12 @@
     <parent>
         <groupId>org.wso2.carbon</groupId>
         <artifactId>forum-feature</artifactId>
-        <version>4.3.0-SNAPSHOT</version>
+        <version>1.2.0</version>
 	<relativePath>../pom.xml</relativePath>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
-    <version>4.3.0-SNAPSHOT</version>
+    <version>1.2.0</version>
     <artifactId>org.wso2.carbon.forum.feature</artifactId>
     <packaging>pom</packaging>
     <name>WSO2 Carbon - Forum Feature</name>
@@ -38,6 +38,7 @@
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.forum.server.feature</artifactId>
+            <version>1.0.1</version>
             <type>zip</type>
         </dependency>
     </dependencies>
@@ -59,10 +60,10 @@
                             <id>org.wso2.carbon.forum</id>
                             <propertiesFile>../../../etc/feature.properties</propertiesFile>
                             <importFeatures>
-                                <importFeatureDef>org.wso2.carbon.core:${carbon.kernel.version}</importFeatureDef>
+                                <importFeatureDef>org.wso2.carbon.core:4.2.0</importFeatureDef>
                             </importFeatures>
                             <includedFeatures>
-                                <includedFeatureDef>org.wso2.carbon:org.wso2.carbon.forum.server.feature:${carbon.platform.version}</includedFeatureDef>
+                                <includedFeatureDef>org.wso2.carbon:org.wso2.carbon.forum.server.feature:1.0.1</includedFeatureDef>
                             </includedFeatures>
                         </configuration>
                     </execution>

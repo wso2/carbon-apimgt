@@ -22,13 +22,13 @@
     <parent>
         <groupId>org.wso2.carbon</groupId>
         <artifactId>apimgt-feature</artifactId>
-        <version>4.3.0-SNAPSHOT</version>
+        <version>1.2.0</version>
 	<relativePath>../pom.xml</relativePath>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
     <artifactId>org.wso2.carbon.apimgt.feature</artifactId>
-    <version>4.3.0-SNAPSHOT</version>
+    <version>1.2.4</version>
     <packaging>pom</packaging>
     <name>WSO2 Carbon - Api management Feature</name>
     <url>http://wso2.org</url>
@@ -38,26 +38,31 @@
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.apimgt.core.feature</artifactId>
+            <version>1.2.4</version>
             <type>zip</type>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.apimgt.gateway.feature</artifactId>
+            <version>1.2.4</version>
             <type>zip</type>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.apimgt.store.feature</artifactId>
+            <version>1.2.4</version>
             <type>zip</type>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.apimgt.publisher.feature</artifactId>
+            <version>1.2.4</version>
             <type>zip</type>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.apimgt.startup.publisher.feature</artifactId>
+            <version>1.2.4</version>
             <type>zip</type>
         </dependency>
     </dependencies>
@@ -79,14 +84,14 @@
                             <id>org.wso2.carbon.apimgt</id>
                             <propertiesFile>../../../etc/feature.properties</propertiesFile>
                             <importFeatures>
-                                <importFeatureDef>org.wso2.carbon.core:${carbon.kernel.version}</importFeatureDef>
+                                <importFeatureDef>org.wso2.carbon.core:4.2.0</importFeatureDef>
                             </importFeatures>
                             <includedFeatures>
-                                <includedFeatureDef>org.wso2.carbon:org.wso2.carbon.apimgt.core.feature</includedFeatureDef>
-                                <includedFeatureDef>org.wso2.carbon:org.wso2.carbon.apimgt.gateway.feature</includedFeatureDef>
-                                <includedFeatureDef>org.wso2.carbon:org.wso2.carbon.apimgt.publisher.feature</includedFeatureDef>
-                                <includedFeatureDef>org.wso2.carbon:org.wso2.carbon.apimgt.store.feature</includedFeatureDef>
-                                <includedFeatureDef>org.wso2.carbon:org.wso2.carbon.apimgt.startup.publisher.feature</includedFeatureDef>
+                                <includedFeatureDef>org.wso2.carbon:org.wso2.carbon.apimgt.core.feature:1.2.4</includedFeatureDef>
+                                <includedFeatureDef>org.wso2.carbon:org.wso2.carbon.apimgt.gateway.feature:1.2.4</includedFeatureDef>
+                                <includedFeatureDef>org.wso2.carbon:org.wso2.carbon.apimgt.publisher.feature:1.2.4</includedFeatureDef>
+                                <includedFeatureDef>org.wso2.carbon:org.wso2.carbon.apimgt.store.feature:1.2.4</includedFeatureDef>
+                                <includedFeatureDef>org.wso2.carbon:org.wso2.carbon.apimgt.startup.publisher.feature:1.2.4</includedFeatureDef>
                             </includedFeatures>
                         </configuration>
                     </execution>
