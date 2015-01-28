@@ -1,9 +1,9 @@
 <%
 
 //TODO : remove this when log configs are implemented
-Log.prototype.isDebugEnabled = function () {
-    return false;
-};
+//Log.prototype.isDebugEnabled = function () {
+//    return false;
+//};
 
 //TODO : remove this when Context HO is implemented.
 var context = context || {
@@ -33,6 +33,8 @@ var jagg = jagg || (function () {
 
     var data;
 
+    var reverse_proxy;    
+
     var setData = function (d) {
         data = d;
     };
@@ -46,6 +48,13 @@ var jagg = jagg || (function () {
     };
 
     var setUser = function (user) {
+        //if jaggery allow session reset
+        if (typeof request.getSession == "function") {
+            if (session && !session.isNew()) {
+                session.invalidate();
+            }
+            session = request.getSession(true);
+        }
         session.put("logged.user", user);
     };
 
@@ -344,8 +353,115 @@ return getThemePath() + path;
     };
 
     var getAbsoluteUrl = function (path) {
-        return site.context + path;
+        var host = "" 
+        if(isReverseProxyEnabled()){
+            host = "https://" + site.reverseProxy.host ;
+        }
+        return host + url(path);
     };
+
+    var getSiteDomainFromRequest = function(){
+        var match = href.match(/^(https?\:)\/\/(([^:\/?#]*)(?:\:([0-9]+))?)(\/[^?#]*)(\?[^#]*|)(#.*|)$/);
+    }
+
+    var getRequestSegments = function(){
+        var href = request.getRequestURL()
+        var match = href.match(/^(https?\:)\/\/(([^:\/?#]*)(?:\:([0-9]+))?)(\/[^?#]*)(\?[^#]*|)(#.*|)$/);
+        return match && {
+            protocol: match[1],
+            host: match[2],
+            hostname: match[3],
+            port: match[4],
+            pathname: match[5],
+            search: match[6],
+            hash: match[7]
+        }
+
+    }
+
+    var getHttpsUrl = function(path){
+        var hostname = "";
+        var requestSegments = getRequestSegments();     
+        mod = jagg.module("manager");
+        hostname = mod.getHTTPsURL();
+        hostname = hostname.replace("https://","");
+
+        // if the site is fronted by a proxy server
+        if(isReverseProxyEnabled()){
+             hostname = site.reverseProxy.host ;
+             //if a custom https port is used
+             if(site.reverseProxy.hosts_port){
+                hostname = hostname + ":" + site.reverseProxy.hosts_port;
+             }
+        }        
+
+        return "https://" + hostname + url(path);
+    }    
+
+    var url = function(path,parameters){
+        var params = ""
+        if(parameters){
+            params = "?";
+            for (var key in parameters) {
+                params = key+"="+parameters[key];
+            }
+        }
+        return getSiteContext()+ path + params;
+    };
+
+    var getCarbonProxyContextPath = function(){
+        var CarbonUtils = Packages.org.wso2.carbon.utils.CarbonUtils;
+        var carbonUtils = new CarbonUtils();
+        var context = carbonUtils.getServerConfiguration().getFirstProperty("ProxyContextPath");
+        if(context != null)
+            return context;
+        else
+            return '';    
+    };
+
+    var isReverseProxyEnabled = function(){
+        if(reverse_proxy != undefined){
+            return reverse_proxy;
+        }
+        if(site.reverseProxy.enabled){
+            if(site.reverseProxy.enabled == "auto"){
+                var xfwd = request.getHeader("X-Forwarded-Host");
+                if(xfwd != null){
+                    var xfwd = xfwd.split(",")[0];   
+                    if(xfwd.trim() == site.reverseProxy.host){
+                        reverse_proxy = true;                
+                    }                                 
+                }else{
+                    reverse_proxy = false;                
+                }                    
+            }
+            else{
+                reverse_proxy = true;
+            }            
+        }
+        else{
+            reverse_proxy = false;
+        }        
+        return reverse_proxy;
+    };
+
+    var getSiteContext = function(){
+        if(isReverseProxyEnabled()){
+            return site.reverseProxy.context
+        }
+
+        var proxyContext = getCarbonProxyContextPath();
+        return proxyContext + site.context;        
+    };
+
+    var getRegistryPath = function(path){
+        if(isReverseProxyEnabled()){
+            return site.reverseProxy.context + path;
+        }
+
+        var ProxyContextPath = getCarbonProxyContextPath();
+        return ProxyContextPath + path;
+    }    
 
     var module = function (name, module) {
         if (module) {
@@ -489,7 +605,7 @@ return getThemePath() + path;
     };
 
     var addHeaderCSS = function (template, key, css) {
-        css = '<link type="text/css" rel="stylesheet" href="' + site.context + getThemeFile(css) + '"/>';
+        css = '<link type="text/css" rel="stylesheet" href="' + url(getThemeFile(css)) + '"/>';
         insertData(this, template, "header", "css", key, css);
     };
 
@@ -499,7 +615,7 @@ return getThemePath() + path;
     };
 
     var addHeaderJS = function (template, key, js) {
-        js = '<script type="text/javascript" src="' + site.context + getThemeFile(js) + '"></script>\n';
+        js = '<script type="text/javascript" src="' + url(getThemeFile(js)) + '"></script>\n';
         insertData(this, template, "header", "js", key, js);
     };
 
@@ -513,7 +629,7 @@ return getThemePath() + path;
     };
 
     var addFooterCSS = function (template, key, css) {
-        css = '<link type="text/css" rel="stylesheet" href="' + site.context + getThemeFile(css) + '"/>';
+        css = '<link type="text/css" rel="stylesheet" href="' + url(getThemeFile(css)) + '"/>';
         insertData(this, template, "footer", "css", key, css);
     };
 
@@ -523,7 +639,7 @@ return getThemePath() + path;
     };
 
     var addFooterJS = function (template, key, js) {
-        js = '\t<script type="text/javascript" src="' + site.context + getThemeFile(js) + '"></script>\n';
+        js = '\t<script type="text/javascript" src="' + url(getThemeFile(js)) + '"></script>\n';
         insertData(this, template, "footer", "js", key, js);
     };
 
@@ -538,6 +654,40 @@ return getThemePath() + path;
 
     var includeJag = function (path) {
         include(getThemeFile(path));
+    };
+
+    var isValiedImage = function(image){
+        var allowedImageUploads = ["png","gif","jpg","jpeg"]; //default allowed image extentions.
+        var skipImageMimeCheck = false;
+
+        // put a config option to site.json
+        var site = require("/site/conf/site.json");
+        if(site.allowedImageUploads){
+            allowedImageUploads = site.allowedImageUploads;
+        }
+        if(site.skipImageMimeCheck){
+            skipImageMimeCheck = site.skipImageMimeCheck;
+        }
+
+        var name = image.getName();
+        var extention = name.match( /\.[0-9a-z]{1,5}$/im )[0];
+        extention = extention.replace(".","");
+
+        
+        if(allowedImageUploads.indexOf(extention) == -1){
+            return false;
+        }
+
+        var contentType = image.getContentType();
+        // following check was put in bcos if the mimetype was refered by the backend.
+        if(!skipImageMimeCheck && !contentType.match(/^image/i)){
+            return false;
+        }
+
+        // @todo magic number validation.
+        // @todo validate with image manipulation. this would be the ultimate solution.
+
+        return true;
     };
 
     return {
@@ -576,7 +726,11 @@ return getThemePath() + path;
         addFooterCode:addFooterCode,
         includeJag:includeJag,
         getUserTheme:getUserTheme,
-        getThemeFile:getThemeFile
+        getThemeFile:getThemeFile,
+        isValiedImage:isValiedImage,
+        url:url,
+        getRegistryPath:getRegistryPath,
+        getHttpsUrl:getHttpsUrl
     };
 
 }());
