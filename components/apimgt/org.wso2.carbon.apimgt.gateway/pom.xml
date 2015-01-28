@@ -125,8 +125,7 @@
                         <Export-Package>
                             !javax.servlet,
                             !javax.servlet.http,
-                            !org.wso2.carbon.apimgt.gateway.internal,
-                            org.wso2.carbon.apimgt.gateway.*,
+                            org.wso2.carbon.apimgt.gateway.*;version="4.3.0-SNAPSHOT",
                             org.wso2.throttle.*
                         </Export-Package>
                         <Import-Package>
@@ -150,7 +149,7 @@
                             org.apache.axis2.transport.base,
                             org.wso2.carbon.core,
                             org.wso2.carbon.registry.core.service,
-                            org.wso2.carbon.apimgt.impl.*,
+                            org.wso2.carbon.apimgt.impl.*;version="4.3.0-SNAPSHOT",
                             javax.xml.soap,
                             *;resolution:=optional
                         </Import-Package>

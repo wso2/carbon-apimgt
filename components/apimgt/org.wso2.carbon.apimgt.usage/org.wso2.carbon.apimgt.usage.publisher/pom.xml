@@ -74,7 +74,7 @@
                             org.wso2.carbon.apimgt.usage.publisher.internal
                         </Private-Package>
                         <Export-Package>
-                            org.wso2.carbon.apimgt.usage.publisher.*
+                            org.wso2.carbon.apimgt.usage.publisher.*;version="4.3.0-SNAPSHOT",
                         </Export-Package>
                         <Import-Package>
                             javax.servlet;version="${imp.pkg.version.javax.servlet}",
