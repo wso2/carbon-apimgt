@@ -22,13 +22,13 @@
     <parent>
         <groupId>org.wso2.carbon</groupId>
         <artifactId>apimgt-feature</artifactId>
-        <version>4.3.0-SNAPSHOT</version>
-	<relativePath>../pom.xml</relativePath>
+        <version>1.2.0</version>
+	    <relativePath>../pom.xml</relativePath>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
     <artifactId>org.wso2.carbon.apimgt.gateway.feature</artifactId>
-    <version>4.3.0-SNAPSHOT</version>
+    <version>1.2.4</version>
     <packaging>pom</packaging>
     <name>WSO2 Carbon - Api management Gateway Feature</name>
     <url>http://wso2.org</url>
@@ -39,18 +39,22 @@
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.apimgt.gateway</artifactId>
+            <version>1.2.4</version>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.apimgt.impl</artifactId>
+            <version>1.2.4</version>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.apimgt.handlers.security.stub</artifactId>
+            <version>${wso2carbon.version}</version>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.apimgt.keymgt.stub</artifactId>
+            <version>4.2.3</version>
         </dependency>
         <dependency>
             <groupId>com.googlecode.json-simple.wso2</groupId>
@@ -87,14 +91,14 @@
                             <bundles>
                                 <bundleDef>org.wso2.carbon:org.wso2.carbon.apimgt.gateway</bundleDef>
                                 <bundleDef>org.wso2.carbon:org.wso2.carbon.apimgt.impl</bundleDef>
-                                <bundleDef>org.wso2.carbon:org.wso2.carbon.apimgt.keymgt.stub:${project.parent.version}</bundleDef>
+                                <bundleDef>org.wso2.carbon:org.wso2.carbon.apimgt.keymgt.stub:4.2.3</bundleDef>
                                 <bundleDef>org.wso2.carbon:org.wso2.carbon.apimgt.handlers.security.stub</bundleDef>
                                 <bundleDef>com.googlecode.json-simple.wso2:json-simple</bundleDef>
                             </bundles>
 
                             <importFeatures>
                                 <importFeatureDef>org.apache.synapse.wso2:${synapse.version}</importFeatureDef>
-                                <importFeatureDef>org.wso2.carbon.mediation.initializer:${project.parent.version}</importFeatureDef>
+                                <importFeatureDef>org.wso2.carbon.mediation.initializer:4.2.2</importFeatureDef>
                             </importFeatures>
                         </configuration>
                     </execution>
