@@ -22,24 +22,26 @@
     <parent>
         <groupId>org.wso2.carbon</groupId>
         <artifactId>apimgt-feature</artifactId>
-        <version>4.3.0-SNAPSHOT</version>
+        <version>1.2.0</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
     <artifactId>org.wso2.carbon.apimgt.core.feature</artifactId>
-    <version>4.3.0-SNAPSHOT</version>
+    <version>1.2.4</version>
     <packaging>pom</packaging>
     <name>WSO2 Carbon - Api management Core Feature</name>
     <url>http://wso2.org</url>
-    <description>This feature contains the core bundles required for getting light weight API Management
-        functionalities.
+
+    <description>
+        This feature contains the core bundles required for getting light weight API Management functionalities.
     </description>
 
     <dependencies>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.registry.core</artifactId>
+            <version>4.2.0</version>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
@@ -52,65 +54,78 @@
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.apimgt.api</artifactId>
+            <version>1.2.3</version>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.apimgt.impl</artifactId>
+            <version>1.2.4</version>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.apimgt.hostobjects</artifactId>
+            <version>1.2.4</version>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.apimgt.keymgt</artifactId>
+            <version>1.2.3</version>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.apimgt.keymgt.client</artifactId>
+            <version>1.2.1</version>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.apimgt.keymgt.stub</artifactId>
+            <version>4.2.3</version>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.apimgt.usage.publisher</artifactId>
+            <version>1.2.2</version>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.apimgt.usage.client</artifactId>
+            <version>1.2.4</version>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.apimgt.core</artifactId>
+            <version>1.2.2</version>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.identity.core</artifactId>
+            <version>4.2.3</version>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.sequences.stub</artifactId>
+            <version>4.2.1</version>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.bam.presentation.stub</artifactId>
+            <version>4.2.0</version>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.mediation.security.stub</artifactId>
+            <version>4.2.0</version>
         </dependency>
-        <dependency>
-            <groupId>com.googlecode.json-simple.wso2</groupId>
-            <artifactId>json-simple</artifactId>
-            <version>1.1.wso2v1</version>
-        </dependency>
-
         <dependency>
             <groupId>org.wso2.carbon</groupId>
-            <artifactId>org.wso2.carbon.application.deployer</artifactId>
+            <artifactId>org.wso2.carbon.ganalytics.publisher</artifactId>
+            <version>4.2.0</version>
+        </dependency>
 
+        <dependency>
+            <groupId>org.apache.woden.wso2</groupId>
+            <artifactId>woden</artifactId>
+            <version>1.0.0.M9-wso2v1</version>
         </dependency>
     </dependencies>
 
@@ -165,7 +180,6 @@
             </plugin>
             <plugin>
                 <artifactId>maven-resources-plugin</artifactId>
-                <version>2.4</version>
                 <executions>
                     <execution>
                         <id>copy-resources</id>
@@ -216,40 +230,32 @@
                                 </properties>
                             </adviceFile>
                             <bundles>
-                                <bundleDef>org.wso2.carbon:org.wso2.carbon.apimgt.api</bundleDef>
-                                <bundleDef>org.wso2.carbon:org.wso2.carbon.apimgt.impl</bundleDef>
+                                <bundleDef>org.wso2.carbon:org.wso2.carbon.apimgt.api:1.2.3</bundleDef>
+                                <bundleDef>org.wso2.carbon:org.wso2.carbon.apimgt.impl:1.2.4</bundleDef>
                                 <bundleDef>org.wso2.carbon:org.wso2.carbon.apimgt.hostobjects</bundleDef>
-                                <bundleDef>
-                                    org.wso2.carbon:org.wso2.carbon.apimgt.keymgt.stub:${carbon.platform.version}
-                                </bundleDef>
-                                <bundleDef>
-                                    org.wso2.carbon:org.wso2.carbon.apimgt.handlers.security.stub:${carbon.platform.version}
-                                </bundleDef>
-                                <bundleDef>org.wso2.carbon:org.wso2.carbon.apimgt.keymgt.client</bundleDef>
-                                <bundleDef>org.wso2.carbon:org.wso2.carbon.apimgt.keymgt</bundleDef>
-                                <bundleDef>org.wso2.carbon:org.wso2.carbon.apimgt.usage.publisher</bundleDef>
-                                <bundleDef>org.wso2.carbon:org.wso2.carbon.apimgt.usage.client</bundleDef>
-                                <bundleDef>org.wso2.carbon:org.wso2.carbon.apimgt.core</bundleDef>
-                                <bundleDef>org.wso2.carbon:org.wso2.carbon.sequences.stub</bundleDef>
-                                <bundleDef>org.wso2.carbon:org.wso2.carbon.identity.user.registration.stub</bundleDef>
-                                <bundleDef>org.wso2.carbon:org.wso2.carbon.bam.presentation.stub</bundleDef>
-                                <bundleDef>org.wso2.carbon:org.wso2.carbon.mediation.security.stub</bundleDef>
-                                <bundleDef>com.googlecode.json-simple.wso2:json-simple:1.1.wso2v1</bundleDef>
+                                <bundleDef>org.wso2.carbon:org.wso2.carbon.apimgt.keymgt.stub:4.2.3</bundleDef>
+                                <bundleDef>org.wso2.carbon:org.wso2.carbon.apimgt.keymgt.client:1.2.1</bundleDef>
+                                <bundleDef>org.wso2.carbon:org.wso2.carbon.apimgt.keymgt:1.2.3</bundleDef>
+                                <bundleDef>org.wso2.carbon:org.wso2.carbon.apimgt.usage.publisher:1.2.2</bundleDef>
+                                <bundleDef>org.wso2.carbon:org.wso2.carbon.apimgt.usage.client:1.2.4</bundleDef>
+                                <bundleDef>org.wso2.carbon:org.wso2.carbon.apimgt.core:1.2.2</bundleDef>
+                                <bundleDef>org.wso2.carbon:org.wso2.carbon.sequences.stub:4.2.1</bundleDef>
+                                <bundleDef>org.wso2.carbon:org.wso2.carbon.identity.user.registration.stub:${carbon.platform.version}</bundleDef>
+                                <bundleDef>org.wso2.carbon:org.wso2.carbon.bam.presentation.stub:${carbon.platform.version}</bundleDef>
+                                <bundleDef>org.wso2.carbon:org.wso2.carbon.mediation.security.stub:${carbon.platform.version}</bundleDef>
+                                <bundleDef>org.apache.woden.wso2:woden</bundleDef>
                             </bundles>
                             <importBundles>
-                                <importBundleDef>org.wso2.carbon:org.wso2.carbon.identity.authentication
-                                </importBundleDef>
-                                <importBundleDef>org.wso2.carbon:org.wso2.carbon.identity.thrift.authentication
-                                </importBundleDef>
+                                <importBundleDef>org.wso2.carbon:org.wso2.carbon.identity.authentication:${carbon.platform.version}</importBundleDef>
+                                <importBundleDef>org.wso2.carbon:org.wso2.carbon.identity.thrift.authentication:4.2.1</importBundleDef>
                                 <importBundleDef>libthrift.wso2:libthrift:0.8.0.wso2v1</importBundleDef>
-                                <importBundleDef>com.github.dblock.waffle.wso2:waffle-jna</importBundleDef>
-                                <importBundleDef>org.wso2.carbon:org.wso2.carbon.ganalytics.publisher</importBundleDef>
+                                <importBundleDef>com.github.dblock.waffle.wso2:waffle-jna:1.6.wso2v1</importBundleDef>
+                                <importBundleDef>org.wso2.carbon:org.wso2.carbon.ganalytics.publisher:4.2.1</importBundleDef>
                             </importBundles>
                             <importFeatures>
-                                <importFeatureDef>org.wso2.carbon.core.server:${carbon.kernel.version}</importFeatureDef>
-                                <importFeatureDef>org.wso2.carbon.identity.oauth.server</importFeatureDef>
-                                <importFeatureDef>org.wso2.carbon.um.ws.service.server</importFeatureDef>
-				<importFeatureDef>org.wso2.carbon.um.ws.service.client</importFeatureDef>
+                                <importFeatureDef>org.wso2.carbon.core.server:${carbon.platform.version}</importFeatureDef>
+                                <importFeatureDef>org.wso2.carbon.identity.oauth.server:4.2.4</importFeatureDef>
+                                <importFeatureDef>org.wso2.carbon.um.ws.service.server:${carbon.platform.version}</importFeatureDef>
                             </importFeatures>
                         </configuration>
                     </execution>
