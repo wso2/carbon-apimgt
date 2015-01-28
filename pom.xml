@@ -188,12 +188,6 @@
 
             <dependency>
                 <groupId>org.wso2.carbon</groupId>
-                <artifactId>org.wso2.carbon.apimgt.startup.publisher</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.wso2.carbon</groupId>
                 <artifactId>org.wso2.carbon.hostobjects.sso</artifactId>
                 <version>${project.version}</version>
             </dependency>
@@ -571,8 +565,7 @@
         <synapse.version.identity>${synapse.version}</synapse.version.identity>
         <synapse.version.handlers>${synapse.version}</synapse.version.handlers>
         <throttle.version.handlers>3.3.0</throttle.version.handlers>
-        <gdata-core.wso2.version.identity>${gdata-core.wso2.version}
-        </gdata-core.wso2.version.identity>
+        <gdata-core.wso2.version.identity>${gdata-core.wso2.version}</gdata-core.wso2.version.identity>
         <junit.version.identity>${junit.version}</junit.version.identity>
         <smack.version.identity>${smack.wso2.version}</smack.version.identity>
         <smackx.version.identity>${smackx.wso2.version}</smackx.version.identity>
@@ -581,8 +574,7 @@
         <rampart.wso2.version.identity>${rampart.wso2.version}</rampart.wso2.version.identity>
         <opensaml.wso2.version.identity>${opensaml.wso2.version}</opensaml.wso2.version.identity>
         <opensaml2.wso2.version.identity>${opensaml2.wso2.version}</opensaml2.wso2.version.identity>
-        <openid4java.wso2.version.identity>${openid4java.wso2.version}
-        </openid4java.wso2.version.identity>
+        <openid4java.wso2.version.identity>${openid4java.wso2.version}</openid4java.wso2.version.identity>
         <httpcomponents-httpclient.wso2.version.identity>${httpcomponents-httpclient.wso2.version}
         </httpcomponents-httpclient.wso2.version.identity>
         <httpcomponents-httpcore.wso2.version.identity>${httpcomponents-httpcore.wso2.version}
