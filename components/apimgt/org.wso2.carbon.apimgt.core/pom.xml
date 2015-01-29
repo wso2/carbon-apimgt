@@ -59,13 +59,13 @@
                         <Private-Package>
                         </Private-Package>
                         <Export-Package>
-                            org.wso2.carbon.apimgt.core.*,
+                            org.wso2.carbon.apimgt.core.*;version="4.3.0-SNAPSHOT",
                         </Export-Package>
                         <Import-Package>
                             org.wso2.carbon.core,
                             org.wso2.carbon.registry.core.service,
                             javax.xml.soap;version="1.0.0",
-                            org.wso2.carbon.apimgt.impl.*,
+                            <!--org.wso2.carbon.apimgt.impl.*;version="4.3.0-SNAPSHOT",-->
                             *;resolution:=optional
                         </Import-Package>
                         <DynamicImport-Package>*</DynamicImport-Package>

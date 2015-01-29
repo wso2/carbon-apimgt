@@ -245,21 +245,22 @@
             <plugin>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>maven-bundle-plugin</artifactId>
-                <version>1.4.0</version>
+                <version>2.3.5</version>
                 <extensions>true</extensions>
                 <configuration>
                     <instructions>
                         <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
                         <Bundle-Name>${project.artifactId}</Bundle-Name>
                         <Private-Package>
-                            org.wso2.carbon.apimgt.impl.internal
+                            org.wso2.carbon.apimgt.impl.internal.*
                         </Private-Package>
                         <Export-Package>
                             !org.wso2.carbon.apimgt.impl.internal.*,
                             !org.wso2.carbon.apimgt.impl.dto.xsd,
-                            org.wso2.carbon.apimgt.impl.*,
+                            org.wso2.carbon.apimgt.impl.*;version="4.3.0-SNAPSHOT",
                         </Export-Package>
                         <Import-Package>
+                            !org.wso2.carbon.apimgt.api.model.xsd.*,
                             org.wso2.carbon.governance.api.*,
                             org.wso2.carbon.registry.ws.client.*,
                             org.apache.woden.*,

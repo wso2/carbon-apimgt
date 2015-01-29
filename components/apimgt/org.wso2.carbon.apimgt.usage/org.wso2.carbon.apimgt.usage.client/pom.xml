@@ -64,10 +64,11 @@
                         <Bundle-Name>${project.artifactId}</Bundle-Name>
                         <Export-Package>
                             !org.wso2.carbon.apimgt.usage.client.internal,
-                            org.wso2.carbon.apimgt.usage.client.*
+                            org.wso2.carbon.apimgt.usage.client.*;version="4.3.0-SNAPSHOT",
                         </Export-Package>
                         <Private-Package>
                             org.wso2.carbon.apimgt.usage.client.internal,
+                            org.wso2.carbon.apimgt.usage.client.internal.APIUsageClientServiceComponent,
                         </Private-Package>
                         <Import-Package>
                             javax.servlet;version="${imp.pkg.version.javax.servlet}",
