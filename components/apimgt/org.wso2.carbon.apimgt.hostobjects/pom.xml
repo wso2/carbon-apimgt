@@ -66,7 +66,7 @@
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.apimgt.keymgt.client</artifactId>
-            <version>${apim.version}</version>
+            <version>1.2.1</version>
         </dependency>
         <dependency>
             <groupId>commons-io.wso2</groupId>
