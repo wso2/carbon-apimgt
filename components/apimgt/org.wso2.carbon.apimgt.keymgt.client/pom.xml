@@ -12,12 +12,13 @@
     limitations under the License.
 -->
 
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
 	<parent>
 		<groupId>org.wso2.carbon.apimgt</groupId>
 		<artifactId>apimgt</artifactId>
-		<version>1.2.1-SNAPSHOT</version>
+		<version>1.2.0</version>
 		<relativePath>../pom.xml</relativePath>
 	</parent>
 
@@ -25,7 +26,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<artifactId>org.wso2.carbon.apimgt.keymgt.client</artifactId>
 	<packaging>bundle</packaging>
-	<version>1.2.2-SNAPSHOT</version>
+	<version>${apimgt.keymgt.client.version}</version>
 	<name>WSO2 Carbon - API Key Mgt Client</name>
 	<description>Key Management Client functionality for API Mgt/Store solution</description>
 	<url>http://wso2.org</url>
