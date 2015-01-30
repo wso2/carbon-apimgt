@@ -28,7 +28,7 @@
 
     <modelVersion>4.0.0</modelVersion>
     <artifactId>org.wso2.carbon.apimgt.store.feature</artifactId>
-    <version>1.2.4</version>
+    <version>${apimgt.store.feature.version}</version>
     <packaging>pom</packaging>
     <name>WSO2 Carbon - API Store Feature</name>
     <url>http://wso2.org</url>
@@ -39,37 +39,30 @@
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.registry.core</artifactId>
-            <version>4.2.0</version>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.governance.api</artifactId>
-            <version>4.2.0</version>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.apimgt.api</artifactId>
-            <version>1.2.3</version>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.apimgt.impl</artifactId>
-            <version>1.2.4</version>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.apimgt.hostobjects</artifactId>
-            <version>1.2.4</version>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.apimgt.keymgt.client</artifactId>
-            <version>1.2.1</version>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.apimgt.handlers.security.stub</artifactId>
-            <version>4.2.0</version>
         </dependency>
     </dependencies>
 

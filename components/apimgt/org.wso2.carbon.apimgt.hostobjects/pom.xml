@@ -10,7 +10,7 @@
 
     <modelVersion>4.0.0</modelVersion>
     <artifactId>org.wso2.carbon.apimgt.hostobjects</artifactId>
-    <version>1.2.4</version>
+    <version>${apimgt.hostobjects.version}</version>
     <packaging>bundle</packaging>
     <name>WSO2 Carbon - HostObject for API management</name>
     <url>http://wso2.org</url>
@@ -19,74 +19,59 @@
         <dependency>
             <groupId>rhino.wso2</groupId>
             <artifactId>js</artifactId>
-            <version>1.7.0.R4.wso2v1</version>
         </dependency>
         <dependency>
             <groupId>com.google.code.gson</groupId>
             <artifactId>gson</artifactId>
-            <version>2.1</version>
             <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.governance.api</artifactId>
-            <version>${wso2carbon.version}</version>
         </dependency>
         <dependency>
             <groupId>org.jaggeryjs</groupId>
             <artifactId>org.jaggeryjs.scriptengine</artifactId>
-            <version>${jaggery.version}</version>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.apimgt.api</artifactId>
-            <version>1.2.3</version>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.apimgt.impl</artifactId>
-            <version>1.2.4</version>
         </dependency>
         <dependency>
             <groupId>org.jaggeryjs</groupId>
             <artifactId>org.jaggeryjs.hostobjects.web</artifactId>
-            <version>${jaggery.version}</version>
         </dependency>
         <dependency>
             <groupId>org.jaggeryjs</groupId>
             <artifactId>org.jaggeryjs.hostobjects.file</artifactId>
-            <version>${jaggery.version}</version>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.apimgt.usage.client</artifactId>
-            <version>1.2.3</version>
         </dependency>
-
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.apimgt.keymgt.client</artifactId>
-            <version>1.2.1</version>
         </dependency>
         <dependency>
             <groupId>commons-io.wso2</groupId>
             <artifactId>commons-io</artifactId>
-            <version>2.0.0.wso2v1</version>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.user.mgt.stub</artifactId>
-            <version>${wso2carbon.version}</version>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.identity.user.registration.stub</artifactId>
-            <version>${wso2carbon.version}</version>
         </dependency>
         <dependency>
             <groupId>org.owasp.encoder</groupId>
             <artifactId>encoder</artifactId>
-            <version>1.1</version>
         </dependency>
     </dependencies>
 

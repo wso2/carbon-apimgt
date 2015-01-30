@@ -29,7 +29,7 @@
 
     <modelVersion>4.0.0</modelVersion>
     <artifactId>org.wso2.carbon.apimgt.startup.publisher.feature</artifactId>
-    <version>1.2.4</version>
+    <version>${apimgt.startup.publisher.feature.version}</version>
     <packaging>pom</packaging>
     <name>WSO2 Carbon - Api management Server Startup Publisher Feature</name>
     <url>http://wso2.org</url>
@@ -39,27 +39,22 @@
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.core</artifactId>
-            <version>4.2.0</version>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.logging</artifactId>
-            <version>4.2.0</version>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.apimgt.core</artifactId>
-            <version>1.2.2</version>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.apimgt.startup.publisher</artifactId>
-            <version>1.2.2</version>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.apimgt.impl</artifactId>
-            <version>1.2.4</version>
         </dependency>
 
     </dependencies>

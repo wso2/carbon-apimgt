@@ -26,7 +26,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<artifactId>org.wso2.carbon.apimgt.keymgt.client</artifactId>
 	<packaging>bundle</packaging>
-	<version>1.2.1</version>
+	<version>${apimgt.keymgt.client.version}</version>
 	<name>WSO2 Carbon - API Key Mgt Client</name>
 	<description>Key Management Client functionality for API Mgt/Store solution</description>
 	<url>http://wso2.org</url>
@@ -35,32 +35,26 @@
 		<dependency>
 			<groupId>org.wso2.carbon</groupId>
 			<artifactId>org.wso2.carbon.core</artifactId>
-			<version>${wso2carbon.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.wso2.carbon</groupId>
 			<artifactId>org.wso2.carbon.utils</artifactId>
-			<version>${wso2carbon.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.wso2.carbon</groupId>
 			<artifactId>org.wso2.carbon.logging</artifactId>
-			<version>${wso2carbon.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.wso2.carbon</groupId>
 			<artifactId>org.wso2.carbon.apimgt.keymgt.stub</artifactId>
-			<version>4.2.2</version>
 		</dependency>
 		<dependency>
 			<groupId>org.wso2.carbon</groupId>
 			<artifactId>org.wso2.carbon.authenticator.stub</artifactId>
-			<version>${wso2carbon.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.wso2.carbon</groupId>
 			<artifactId>org.wso2.carbon.apimgt.handlers.security.stub</artifactId>
-			<version>${wso2carbon.version}</version>
 		</dependency>
 	</dependencies>
 

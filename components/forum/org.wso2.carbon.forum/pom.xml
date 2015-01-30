@@ -19,7 +19,7 @@
 
     <modelVersion>4.0.0</modelVersion>
     <artifactId>org.wso2.carbon.forum</artifactId>
-    <version>1.2.0</version>
+    <version>${carbon.forum.version}</version>
     <packaging>bundle</packaging>
     <name>WSO2 Carbon - Forum Component</name>
 

@@ -27,29 +27,25 @@
     <modelVersion>4.0.0</modelVersion>
     <packaging>bundle</packaging>
     <artifactId>org.wso2.carbon.apimgt.usage.client</artifactId>
-    <version>1.2.4</version>
+    <version>${apimgt.usage.client}</version>
     <name>WSO2 Carbon - API Management Usage Client</name>
 
     <dependencies>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.bam.presentation.stub</artifactId>
-            <version>${wso2carbon.version}</version>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.apimgt.impl</artifactId>
-            <version>1.2.4</version>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.apimgt.usage.publisher</artifactId>
-            <version>1.2.2</version>
         </dependency>
         <dependency>
             <groupId>commons-lang.wso2</groupId>
             <artifactId>commons-lang</artifactId>
-            <version>2.6.0.wso2v1</version>
         </dependency>
     </dependencies>
 

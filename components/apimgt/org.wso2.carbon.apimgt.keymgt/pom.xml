@@ -25,7 +25,7 @@
 
 	<modelVersion>4.0.0</modelVersion>
 	<artifactId>org.wso2.carbon.apimgt.keymgt</artifactId>
-	<version>1.2.3</version>
+	<version>${apimgt.keymgt.version}</version>
 	<packaging>bundle</packaging>
 	<name>WSO2 Carbon - API Key Mgt</name>
 	<description>Key Management functionality for API Mgt/Store solution</description>
@@ -34,38 +34,31 @@
 	<dependencies>
 		<dependency>
 			<groupId>org.wso2.carbon</groupId>
-			<artifactId>org.wso2.carbon.identity.core</artifactId>   
-			<version>${wso2carbon.version}</version>			
+			<artifactId>org.wso2.carbon.identity.core</artifactId>
 		</dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
-            <artifactId>org.wso2.carbon.identity.oauth</artifactId>  
-	    <version>4.2.4</version>
+            <artifactId>org.wso2.carbon.identity.oauth</artifactId>
         </dependency>
 		<dependency>
 			<groupId>org.wso2.carbon</groupId>
-			<artifactId>org.wso2.carbon.registry.core</artifactId>  
-			<version>${wso2carbon.version}</version>			
+			<artifactId>org.wso2.carbon.registry.core</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.wso2.carbon</groupId>
-			<artifactId>org.wso2.carbon.core</artifactId>    
-			<version>${wso2carbon.version}</version>			
+			<artifactId>org.wso2.carbon.core</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.wso2.carbon</groupId>
 			<artifactId>org.wso2.carbon.utils</artifactId>
-			<version>${wso2carbon.version}</version>			
 		</dependency>
 		<dependency>
             <groupId>org.wso2.carbon</groupId>
-            <artifactId>org.wso2.carbon.logging</artifactId>       
-			<version>${wso2carbon.version}</version>
+            <artifactId>org.wso2.carbon.logging</artifactId>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
-            <artifactId>org.wso2.carbon.apimgt.impl</artifactId>    
-			<version>1.2.3</version>
+            <artifactId>org.wso2.carbon.apimgt.impl</artifactId>
         </dependency>
 	</dependencies>
 

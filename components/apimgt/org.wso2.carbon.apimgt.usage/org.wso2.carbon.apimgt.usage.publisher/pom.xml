@@ -27,39 +27,33 @@
     <modelVersion>4.0.0</modelVersion>
     <packaging>bundle</packaging>
     <artifactId>org.wso2.carbon.apimgt.usage.publisher</artifactId>
-    <version>1.2.2</version>
+    <version>${apimgt.usage.publisher}</version>
     <name>WSO2 Carbon - API Management Usage Publisher</name>
 
     <dependencies>
         <dependency>
             <groupId>org.apache.synapse</groupId>
             <artifactId>synapse-core</artifactId>
-            <version>2.1.2-wso2v5</version>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.apimgt.impl</artifactId>
-            <version>1.2.2</version>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.apimgt.gateway</artifactId>
-            <version>1.2.2</version>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.databridge.agent.thrift</artifactId>
-            <version>${wso2carbon.version}</version>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.usage.agent</artifactId>
-            <version>2.1.2</version>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.ganalytics.publisher</artifactId>
-            <version>4.2.0</version>
         </dependency>
     </dependencies>
 

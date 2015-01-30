@@ -29,7 +29,7 @@
     <modelVersion>4.0.0</modelVersion>
     <artifactId>org.wso2.carbon.apimgt.handlers.security.stub</artifactId>
     <packaging>bundle</packaging>
-    <version>4.2.0</version>
+    <version>${apimgt.handlers.security.stub}</version>
     <name>WSO2 Carbon - API Security Handler Service Stub</name>
     <url>http://wso2.org</url>
 
@@ -118,12 +118,10 @@
         <dependency>
             <groupId>org.apache.axis2.wso2</groupId>
             <artifactId>axis2</artifactId>
-            <version>${orbit.version.axis2}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.axis2.wso2</groupId>
             <artifactId>axis2-client</artifactId>
-            <version>${orbit.version.axis2}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.ws.commons.axiom.wso2</groupId>
