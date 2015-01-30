@@ -9,7 +9,7 @@
 
     <modelVersion>4.0.0</modelVersion>
     <artifactId>org.wso2.carbon.apimgt.interceptor</artifactId>
-    <version>${apimgt.interceptor.version}</version>
+    <version>1.2.1</version>
     <packaging>bundle</packaging>
     <name>WSO2 Carbon - API Management Interceptor </name>
 
