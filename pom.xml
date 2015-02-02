@@ -273,9 +273,9 @@
             </dependency>
 
             <dependency>
-                <groupId>org.wso2.carbon</groupId>
+                <groupId>org.wso2.carbon.commons</groupId>
                 <artifactId>org.wso2.carbon.databridge.agent.thrift</artifactId>
-                <version>${org.wso2.carbon.databridge.agent.thrift.version}</version>
+                <version>${carbon.commons.version}</version>
             </dependency>
 
             <dependency>
@@ -321,9 +321,9 @@
             </dependency>
 
             <dependency>
-                <groupId>org.wso2.carbon</groupId>
+                <groupId>org.wso2.carbon.commons</groupId>
                 <artifactId>org.wso2.carbon.event.core</artifactId>
-                <version>${org.wso2.carbon.event.core.version}</version>
+                <version>${carbon.commons.version}</version>
             </dependency>
 
             <dependency>
@@ -423,9 +423,9 @@
             </dependency>
 
             <dependency>
-                <groupId>org.wso2.carbon</groupId>
+                <groupId>org.wso2.carbon.mediation</groupId>
                 <artifactId>org.wso2.carbon.rest.api.stub</artifactId>
-                <version>${org.wso2.carbon.rest.api.stub.version}</version>
+                <version>${carbon.mediation.version}</version>
             </dependency>
 
             <dependency>
@@ -435,9 +435,9 @@
             </dependency>
 
             <dependency>
-                <groupId>org.wso2.carbon</groupId>
+                <groupId>org.wso2.carbon.mediation</groupId>
                 <artifactId>org.wso2.carbon.mediation.dependency.mgt</artifactId>
-                <version>${org.wso2.carbon.mediation.dependency.mgt.version}</version>
+                <version>${carbon.mediation.version}</version>
             </dependency>
 
             <dependency>
@@ -447,15 +447,15 @@
             </dependency>
 
             <dependency>
-                <groupId>org.wso2.carbon</groupId>
+                <groupId>org.wso2.carbon.mediation</groupId>
                 <artifactId>org.wso2.carbon.mediation.registry</artifactId>
-                <version>${org.wso2.carbon.mediation.registry.version}</version>
+                <version>${carbon.mediation.version}</version>
             </dependency>
 
             <dependency>
-                <groupId>org.wso2.carbon</groupId>
+                <groupId>org.wso2.carbon.mediation</groupId>
                 <artifactId>org.wso2.carbon.mediation.initializer</artifactId>
-                <version>${org.wso2.carbon.mediation.initializer.version}</version>
+                <version>${carbon.mediation.version}</version>
             </dependency>
 
             <dependency>
@@ -501,15 +501,15 @@
             </dependency>
 
             <dependency>
-                <groupId>org.wso2.carbon</groupId>
+                <groupId>org.wso2.carbon.commons</groupId>
                 <artifactId>org.wso2.carbon.user.mgt.stub</artifactId>
-                <version>${org.wso2.carbon.user.mgt.stub.version}</version>
+                <version>${carbon.commons.version}</version>
             </dependency>
 
             <dependency>
-                <groupId>org.wso2.carbon</groupId>
+                <groupId>org.wso2.carbon.commons</groupId>
                 <artifactId>org.wso2.carbon.um.ws.api</artifactId>
-                <version>${org.wso2.carbon.um.ws.api.version}</version>
+                <version>${carbon.commons.version}</version>
             </dependency>
 
             <dependency>
@@ -650,15 +650,9 @@
         <wso2carbon.version>4.3.0</wso2carbon.version>
         <carbon.registry.version>4.3.0</carbon.registry.version>
         <carbon.kernel.imp.pkg.version>[4.3.0, 4.4.0)</carbon.kernel.imp.pkg.version>
-        <org.wso2.carbon.rest.api.stub.version>4.2.0</org.wso2.carbon.rest.api.stub.version> <!--check -->
-        <org.wso2.carbon.user.mgt.stub.version>4.2.0</org.wso2.carbon.user.mgt.stub.version>
-        <org.wso2.carbon.um.ws.api.version>4.2.0</org.wso2.carbon.um.ws.api.version>
-        <org.wso2.carbon.mediation.dependency.mgt.version>4.2.0</org.wso2.carbon.mediation.dependency.mgt.version>
+        <carbon.commons.version>4.3.0</carbon.commons.version>
         <org.wso2.carbon.bam.presentation.stub.version>4.2.0</org.wso2.carbon.bam.presentation.stub.version>
-        <org.wso2.carbon.mediation.registry.version>4.2.0</org.wso2.carbon.mediation.registry.version>
-        <org.wso2.carbon.event.core.version>4.2.0</org.wso2.carbon.event.core.version>
-        <org.wso2.carbon.mediation.initializer.version>4.2.0</org.wso2.carbon.mediation.initializer.version>
-        <org.wso2.carbon.databridge.agent.thrift.version>4.2.0</org.wso2.carbon.databridge.agent.thrift.version>
+        <carbon.mediation.version>4.3.0</carbon.mediation.version>
 
         <!-- Carbon platform version comes here-->
         <carbon.platform.package.export.version>4.3.0</carbon.platform.package.export.version>
@@ -704,8 +698,7 @@
         <synapse.version.identity>${synapse.version}</synapse.version.identity>
         <synapse.version.handlers>${synapse.version}</synapse.version.handlers>
         <throttle.version.handlers>3.3.0</throttle.version.handlers>
-        <gdata-core.wso2.version.identity>${gdata-core.wso2.version}
-        </gdata-core.wso2.version.identity>
+        <gdata-core.wso2.version.identity>${gdata-core.wso2.version}</gdata-core.wso2.version.identity>
         <junit.version.identity>${junit.version}</junit.version.identity>
         <smack.version.identity>${smack.wso2.version}</smack.version.identity>
         <smackx.version.identity>${smackx.wso2.version}</smackx.version.identity>
@@ -714,12 +707,9 @@
         <rampart.wso2.version.identity>${rampart.wso2.version}</rampart.wso2.version.identity>
         <opensaml.wso2.version.identity>${opensaml.wso2.version}</opensaml.wso2.version.identity>
         <opensaml2.wso2.version.identity>${opensaml2.wso2.version}</opensaml2.wso2.version.identity>
-        <openid4java.wso2.version.identity>${openid4java.wso2.version}
-        </openid4java.wso2.version.identity>
-        <httpcomponents-httpclient.wso2.version.identity>${httpcomponents-httpclient.wso2.version}
-        </httpcomponents-httpclient.wso2.version.identity>
-        <httpcomponents-httpcore.wso2.version.identity>${httpcomponents-httpcore.wso2.version}
-        </httpcomponents-httpcore.wso2.version.identity>
+        <openid4java.wso2.version.identity>${openid4java.wso2.version}</openid4java.wso2.version.identity>
+        <httpcomponents-httpclient.wso2.version.identity>${httpcomponents-httpclient.wso2.version}</httpcomponents-httpclient.wso2.version.identity>
+        <httpcomponents-httpcore.wso2.version.identity>${httpcomponents-httpcore.wso2.version}</httpcomponents-httpcore.wso2.version.identity>
         <neethi.osgi.version.identity>${neethi.osgi.version}</neethi.osgi.version.identity>
         <libthrift.wso2.version>0.7.wso2v1</libthrift.wso2.version>
         <ganalytics.version>4.2.0</ganalytics.version>
