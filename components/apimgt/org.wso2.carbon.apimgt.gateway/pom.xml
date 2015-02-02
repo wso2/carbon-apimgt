@@ -19,16 +19,16 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
     <parent>
-        <groupId>org.wso2.carbon</groupId>
+        <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>apimgt</artifactId>
-        <version>4.3.0-SNAPSHOT</version>
+        <version>${apimgt.project.version}</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
     <artifactId>org.wso2.carbon.apimgt.gateway</artifactId>
     <packaging>bundle</packaging>
-    <version>4.3.0-SNAPSHOT</version>
+    <version>${apimgt.project.version}</version>
     <name>WSO2 Carbon - API Gateway</name>
     <url>http://wso2.org</url>
 
@@ -36,12 +36,10 @@
         <dependency>
             <groupId>org.apache.synapse</groupId>
             <artifactId>synapse-extensions</artifactId>
-            <version>2.1.2-wso2v6</version>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.core</artifactId>
-            <version>${carbon.kernel.version}</version>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
@@ -58,7 +56,6 @@
         <dependency>
             <groupId>org.apache.synapse</groupId>
             <artifactId>synapse-core</artifactId>
-            <version>2.1.2-wso2v6</version>
             <exclusions>
                 <exclusion>
                     <groupId>org.apache.axis2</groupId>
@@ -71,19 +68,12 @@
             <artifactId>org.wso2.carbon.logging</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.wso2.carbon</groupId>
+            <groupId>org.wso2.carbon.apimgt</groupId>
             <artifactId>org.wso2.carbon.apimgt.keymgt.stub</artifactId>
-            <version>${apim.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.wso2.carbon</groupId>
+            <groupId>org.wso2.carbon.apimgt</groupId>
             <artifactId>org.wso2.carbon.apimgt.impl</artifactId>
-            <version>${apim.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.wso2.carbon</groupId>
-            <artifactId>org.wso2.carbon.apimgt.api</artifactId>
-            <version>${apim.version}</version>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
@@ -125,12 +115,13 @@
                         <Export-Package>
                             !javax.servlet,
                             !javax.servlet.http,
-                            org.wso2.carbon.apimgt.gateway.*;version="4.3.0-SNAPSHOT",
+                            !org.wso2.carbon.apimgt.gateway.internal,
+                            org.wso2.carbon.apimgt.gateway.*,
                             org.wso2.throttle.*
                         </Export-Package>
                         <Import-Package>
                             !javax.xml.soap,
-                            javax.xml.stream.*,
+                            javax.xml.stream.*; version="1.0.1",
                             org.apache.axis2.rpc.receivers; version="${axis2.osgi.version.range}",
                             org.apache.axiom.*; version="${axiom.osgi.version.range}",
                             org.apache.axis2; version="${axis2.osgi.version.range}",
@@ -148,9 +139,9 @@
                             org.apache.synapse.mediators.base,
                             org.apache.axis2.transport.base,
                             org.wso2.carbon.core,
-                            org.wso2.carbon.registry.core.service,
-                            org.wso2.carbon.apimgt.impl.*;version="4.3.0-SNAPSHOT",
-                            javax.xml.soap,
+                            org.wso2.carbon.registry.core.service; version=1.0.1,
+                            org.wso2.carbon.apimgt.impl.*,
+                            javax.xml.soap; version=1.0.0,
                             *;resolution:=optional
                         </Import-Package>
                         <DynamicImport-Package>org.wso2.throttle.*</DynamicImport-Package>
@@ -159,5 +150,4 @@
             </plugin>
         </plugins>
     </build>
-
 </project>

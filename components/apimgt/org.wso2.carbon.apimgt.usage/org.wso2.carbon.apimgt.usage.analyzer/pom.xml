@@ -18,9 +18,9 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
+        <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>org.wso2.carbon.apimgt.usage</artifactId>
-        <groupId>org.wso2.carbon</groupId>
-        <version>4.3.0-SNAPSHOT</version>
+        <version>${apimgt.project.version}</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -28,14 +28,13 @@
 
     <artifactId>org.wso2.carbon.apimgt.usage.analyzer</artifactId>
     <name>WSO2 Carbon - API Management Usage Analyzer</name>
-    <version>${apim.version}</version>
+    <version>${apimgt.project.version}</version>
     <packaging>bundle</packaging>
 
     <dependencies>
         <dependency>
-            <groupId>org.wso2.carbon</groupId>
+            <groupId>org.wso2.carbon.apimgt</groupId>
             <artifactId>org.wso2.carbon.apimgt.impl</artifactId>
-			<version>4.3.0-SNAPSHOT</version>
         </dependency>
     </dependencies>
     <build>
@@ -49,7 +48,7 @@
                         <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
                         <Bundle-Name>${project.artifactId}</Bundle-Name>
                         <Export-Package>
-                            org.wso2.carbon.apimgt.usage.analyzer.*;version="4.3.0-SNAPSHOT",
+                            org.wso2.carbon.apimgt.usage.analyzer.*;version="${apimgt.project.version}",
                         </Export-Package>
                         <Import-Package>
                             javax.servlet;version="${imp.pkg.version.javax.servlet}",

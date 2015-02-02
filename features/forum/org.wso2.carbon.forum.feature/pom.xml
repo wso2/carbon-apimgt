@@ -20,15 +20,15 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
     <parent>
-        <groupId>org.wso2.carbon</groupId>
+        <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>forum-feature</artifactId>
-        <version>4.3.0-SNAPSHOT</version>
-	<relativePath>../pom.xml</relativePath>
+        <version>${apimgt.project.version}</version>
+	    <relativePath>../pom.xml</relativePath>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
-    <version>4.3.0-SNAPSHOT</version>
     <artifactId>org.wso2.carbon.forum.feature</artifactId>
+    <version>${apimgt.project.version}</version>
     <packaging>pom</packaging>
     <name>WSO2 Carbon - Forum Feature</name>
     <url>http://wso2.org</url>
@@ -36,7 +36,7 @@
 
     <dependencies>
         <dependency>
-            <groupId>org.wso2.carbon</groupId>
+            <groupId>org.wso2.carbon.apimgt</groupId>
             <artifactId>org.wso2.carbon.forum.server.feature</artifactId>
             <type>zip</type>
         </dependency>
@@ -59,10 +59,10 @@
                             <id>org.wso2.carbon.forum</id>
                             <propertiesFile>../../../etc/feature.properties</propertiesFile>
                             <importFeatures>
-                                <importFeatureDef>org.wso2.carbon.core:${carbon.kernel.version}</importFeatureDef>
+                                <importFeatureDef>org.wso2.carbon.core:4.3.0</importFeatureDef>
                             </importFeatures>
                             <includedFeatures>
-                                <includedFeatureDef>org.wso2.carbon:org.wso2.carbon.forum.server.feature:${carbon.platform.version}</includedFeatureDef>
+                                <includedFeatureDef>org.wso2.carbon.apimgt:org.wso2.carbon.forum.server.feature:${apimgt.project.version}</includedFeatureDef>
                             </includedFeatures>
                         </configuration>
                     </execution>

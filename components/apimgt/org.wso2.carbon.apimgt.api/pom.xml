@@ -11,26 +11,25 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <parent>
-        <groupId>org.wso2.carbon</groupId>
+        <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>apimgt</artifactId>
-        <version>4.3.0-SNAPSHOT</version>
-	<relativePath>../pom.xml</relativePath>
+        <version>${apimgt.project.version}</version>
+        <relativePath>../pom.xml</relativePath>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
     <artifactId>org.wso2.carbon.apimgt.api</artifactId>
-    <version>4.3.0-SNAPSHOT</version>
+    <version>${apimgt.project.version}</version>
     <packaging>bundle</packaging>
     <name>WSO2 Carbon - Api for API Management</name>
 
-	<dependencies>
+    <dependencies>
         <dependency>
             <groupId>com.googlecode.json-simple.wso2</groupId>
             <artifactId>json-simple</artifactId>
             <version>1.1.wso2v1</version>
         </dependency>
     </dependencies>
-
     <build>
         <plugins>
             <plugin>
@@ -43,7 +42,8 @@
                         <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
                         <Bundle-Name>${project.artifactId}</Bundle-Name>
                         <Export-Package>
-                            org.wso2.carbon.apimgt.api.*;version="4.3.0-SNAPSHOT",
+                            org.wso2.carbon.apimgt.api.*;version="${apimgt.project.version}"
+                            org.wso2.carbon.apimgt.api.model.xsd;version="${apimgt.project.version}",
                         </Export-Package>
                         <DynamicImport-Package>*</DynamicImport-Package>
                     </instructions>

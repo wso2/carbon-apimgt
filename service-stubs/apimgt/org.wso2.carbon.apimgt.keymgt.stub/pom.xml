@@ -21,16 +21,16 @@
 
 
     <parent>
-        <groupId>org.wso2.carbon</groupId>
+        <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>apimgt-stubs</artifactId>
-        <version>4.3.0-SNAPSHOT</version>
+        <version>${apimgt.project.version}</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
     <artifactId>org.wso2.carbon.apimgt.keymgt.stub</artifactId>
     <packaging>bundle</packaging>
-    <version>4.3.0-SNAPSHOT</version>
+    <version>${apimgt.project.version}</version>
     <name>WSO2 Carbon - API Key Management Stub</name>
     <url>http://wso2.org</url>
 
@@ -111,8 +111,12 @@
                         <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
                         <Bundle-Name>${project.artifactId}</Bundle-Name>
                         <Export-Package>
-                            org.wso2.carbon.apimgt.stub.*;version="${carbon.platform.package.export.version}",
-                            org.wso2.carbon.identity.*;version="${carbon.platform.package.export.version}",
+                            org.wso2.carbon.apimgt.impl.dto.xsd.*;version="${carbon.platform.package.export.version}",
+                            org.wso2.carbon.apimgt.api.xsd*;version="${carbon.platform.package.export.version}",
+                            org.wso2.carbon.apimgt.api.model.xsd*;version="${carbon.platform.package.export.version}",
+                            org.wso2.carbon.apimgt.api.impl.dto.xsd*;version="${carbon.platform.package.export.version}",
+                            org.wso2.carbon.apimgt.keymgt.stub.*;version="${carbon.platform.package.export.version}",
+                            org.wso2.carbon.identity.base.xsd.*;version="${carbon.platform.package.export.version}",
                         </Export-Package>
                         <Import-Package>
                             !javax.xml.namespace,
@@ -141,10 +145,6 @@
             <groupId>org.apache.ws.commons.axiom.wso2</groupId>
             <artifactId>axiom</artifactId>
         </dependency>
-        <!--<dependency>
-            <groupId>org.apache.ws.commons.axiom.wso2</groupId>
-            <artifactId>axiom-impl</artifactId>
-        </dependency>-->
     </dependencies>
 
 </project>

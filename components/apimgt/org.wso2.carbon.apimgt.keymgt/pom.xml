@@ -16,17 +16,16 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
     <parent>
-        <groupId>org.wso2.carbon</groupId>
+        <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>apimgt</artifactId>
-		<version>4.3.0-SNAPSHOT</version>
-	<relativePath>../pom.xml</relativePath>
+        <version>${apimgt.project.version}</version>
+        <relativePath>../pom.xml</relativePath>
     </parent>
 
 
 	<modelVersion>4.0.0</modelVersion>
-	<groupId>org.wso2.carbon</groupId>
 	<artifactId>org.wso2.carbon.apimgt.keymgt</artifactId>
-	<version>4.3.0-SNAPSHOT</version>
+	<version>${apimgt.project.version}</version>
 	<packaging>bundle</packaging>
 	<name>WSO2 Carbon - API Key Mgt</name>
 	<description>Key Management functionality for API Mgt/Store solution</description>
@@ -39,42 +38,32 @@
 		</dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
-            <artifactId>org.wso2.carbon.apimgt.api</artifactId>
-            <version>${apim.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.identity.oauth</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.wso2.carbon</groupId>
-            <artifactId>org.wso2.carbon.governance.api</artifactId>
         </dependency>
 		<dependency>
 			<groupId>org.wso2.carbon</groupId>
-			<artifactId>org.wso2.carbon.registry.core</artifactId>  
-			<!--<version>${wso2carbon.version}</version>			-->
+			<artifactId>org.wso2.carbon.registry.core</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.wso2.carbon</groupId>
 			<artifactId>org.wso2.carbon.core</artifactId>
-            <version>${carbon.kernel.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.wso2.carbon</groupId>
 			<artifactId>org.wso2.carbon.utils</artifactId>
-			<!--<version>${wso2carbon.version}</version>			-->
 		</dependency>
 		<dependency>
             <groupId>org.wso2.carbon</groupId>
-            <artifactId>org.wso2.carbon.logging</artifactId>       
-			<!--<version>${wso2carbon.version}</version>-->
+            <artifactId>org.wso2.carbon.logging</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.wso2.carbon</groupId>
-            <artifactId>org.wso2.carbon.apimgt.impl</artifactId>    
-			<version>${apim.version}</version>
+            <groupId>org.wso2.carbon.apimgt</groupId>
+            <artifactId>org.wso2.carbon.apimgt.impl</artifactId>
         </dependency>
+<!--        <dependency>
+            <groupId>org.wso2.carbon.apimgt</groupId>
+            <artifactId>org.wso2.carbon.apimgt.handlers.security.stub</artifactId>
+        </dependency>-->
 	</dependencies>
 
 	<build>
@@ -82,7 +71,6 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
-		<version>2.18</version>
                 <configuration>
                     <excludes>
                         <exclude>**/Abstract*</exclude>
@@ -96,7 +84,7 @@
 			<plugin>
 				<groupId>org.apache.felix</groupId>
 				<artifactId>maven-bundle-plugin</artifactId>
-				<version>1.4.0</version>
+
 				<extensions>true</extensions>
 				<configuration>
 					<instructions>
@@ -126,6 +114,7 @@
 			</plugin>
 		</plugins>
 	</build>
+
 
 </project>
 

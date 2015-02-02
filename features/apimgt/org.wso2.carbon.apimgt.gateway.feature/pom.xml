@@ -20,15 +20,15 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
     <parent>
-        <groupId>org.wso2.carbon</groupId>
+        <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>apimgt-feature</artifactId>
-        <version>4.3.0-SNAPSHOT</version>
-	<relativePath>../pom.xml</relativePath>
+        <version>${apimgt.project.version}</version>
+	    <relativePath>../pom.xml</relativePath>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
     <artifactId>org.wso2.carbon.apimgt.gateway.feature</artifactId>
-    <version>4.3.0-SNAPSHOT</version>
+    <version>${apimgt.project.version}</version>
     <packaging>pom</packaging>
     <name>WSO2 Carbon - Api management Gateway Feature</name>
     <url>http://wso2.org</url>
@@ -37,25 +37,24 @@
 
     <dependencies>
         <dependency>
-            <groupId>org.wso2.carbon</groupId>
+            <groupId>org.wso2.carbon.apimgt</groupId>
             <artifactId>org.wso2.carbon.apimgt.gateway</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.wso2.carbon</groupId>
+            <groupId>org.wso2.carbon.apimgt</groupId>
             <artifactId>org.wso2.carbon.apimgt.impl</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.wso2.carbon</groupId>
+            <groupId>org.wso2.carbon.apimgt</groupId>
             <artifactId>org.wso2.carbon.apimgt.handlers.security.stub</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.wso2.carbon</groupId>
+            <groupId>org.wso2.carbon.apimgt</groupId>
             <artifactId>org.wso2.carbon.apimgt.keymgt.stub</artifactId>
         </dependency>
         <dependency>
             <groupId>com.googlecode.json-simple.wso2</groupId>
             <artifactId>json-simple</artifactId>
-            <version>1.1.wso2v1</version>
         </dependency>
 
     </dependencies>
@@ -85,16 +84,16 @@
                                 </properties>
                             </adviceFile>
                             <bundles>
-                                <bundleDef>org.wso2.carbon:org.wso2.carbon.apimgt.gateway</bundleDef>
-                                <bundleDef>org.wso2.carbon:org.wso2.carbon.apimgt.impl</bundleDef>
-                                <bundleDef>org.wso2.carbon:org.wso2.carbon.apimgt.keymgt.stub:${project.parent.version}</bundleDef>
-                                <bundleDef>org.wso2.carbon:org.wso2.carbon.apimgt.handlers.security.stub</bundleDef>
+                                <bundleDef>org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.gateway</bundleDef>
+                                <bundleDef>org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.impl</bundleDef>
+                                <bundleDef>org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.keymgt.stub:${apimgt.project.version}</bundleDef>
+                                <bundleDef>org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.handlers.security.stub:${apimgt.project.version}</bundleDef>
                                 <bundleDef>com.googlecode.json-simple.wso2:json-simple</bundleDef>
                             </bundles>
 
                             <importFeatures>
                                 <importFeatureDef>org.apache.synapse.wso2:${synapse.version}</importFeatureDef>
-                                <importFeatureDef>org.wso2.carbon.mediation.initializer:${project.parent.version}</importFeatureDef>
+                                <importFeatureDef>org.wso2.carbon.mediation.initializer:4.2.2</importFeatureDef>
                             </importFeatures>
                         </configuration>
                     </execution>
