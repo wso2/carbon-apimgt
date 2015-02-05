@@ -137,7 +137,7 @@
                             org.apache.synapse.mediators.base,
                             org.apache.axis2.transport.base,
                             org.wso2.carbon.core,
-                            org.wso2.carbon.registry.core.service; version="${carbon.registry.imp.pkg.version}",
+                            org.wso2.carbon.registry.core.service; version=1.0.1,
                             org.wso2.carbon.apimgt.impl.*,
                             javax.xml.soap; version=1.0.0,
                             *;resolution:=optional

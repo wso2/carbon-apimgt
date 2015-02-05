@@ -235,7 +235,6 @@
                             org.wso2.carbon.apimgt.impl.internal.*
                         </Private-Package>
                         <Export-Package>
-                            !org.wso2.carbon.apimgt.impl.internal.*,
                             org.wso2.carbon.apimgt.impl.*;version="${carbon.apimgt.version}",
                         </Export-Package>
                         <Import-Package>
