@@ -638,7 +638,7 @@
         <project.scm.id>my-scm-server</project.scm.id>
 
         <!-- APIM Component Version -->
-        <apimgt.project.version>1.3.1-SNAPSHOT</apimgt.project.version>
+        <apimgt.project.version>1.3.2-SNAPSHOT</apimgt.project.version>
 
         <!-- Carbon kernel version -->
         <wso2carbon.version>4.3.0</wso2carbon.version>
