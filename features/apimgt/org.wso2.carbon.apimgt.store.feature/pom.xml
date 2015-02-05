@@ -97,9 +97,9 @@
                                 <bundleDef>org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.handlers.security.stub</bundleDef>
                             </bundles>
                             <importFeatures>
-                                <importFeatureDef>org.wso2.carbon.core.server:${carbon.version}</importFeatureDef>
-                                <importFeatureDef>org.wso2.carbon.registry.core:${carbon.version}</importFeatureDef>
-                                <importFeatureDef>org.wso2.carbon.identity.self.registration.server:${carbon.version}</importFeatureDef>
+                                <importFeatureDef>org.wso2.carbon.core.server:${carbon.kernel.version}</importFeatureDef>
+                                <importFeatureDef>org.wso2.carbon.registry.core:${carbon.kernel.version}</importFeatureDef>
+                                <importFeatureDef>org.wso2.carbon.identity.self.registration.server:${carbon.kernel.version}</importFeatureDef>
                             </importFeatures>
                             <importBundles>
                                 <importBundleDef>org.wso2.carbon:org.wso2.carbon.hostobjects.sso:4.2.2</importBundleDef>
