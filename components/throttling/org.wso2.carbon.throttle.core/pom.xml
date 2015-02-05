@@ -38,7 +38,7 @@
                             org.wso2.carbon.throttle.module.*
                         </Export-Package>
                         <Import-Package>
-                            org.wso2.carbon.registry.core.*; version="${carbon.apimgt.exp.pkg.version}",
+                            org.wso2.carbon.registry.core.*; version="${carbon.apimgt.imp.pkg.version}",
                             org.apache.axis2.*; version="${axis2.osgi.version.range}",
                             org.apache.axiom.*; version="${axiom.osgi.version.range}",
                             org.apache.neethi.*; version="${neethi.osgi.version.range}",
