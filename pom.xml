@@ -481,7 +481,7 @@
             <dependency>
                 <groupId>org.wso2.carbon.identity</groupId>
                 <artifactId>org.wso2.carbon.identity.user.registration.stub</artifactId>
-                <version>${carbon.kernel.version}</version>
+                <version>${identity.version}</version>
             </dependency>
 
             <dependency>
@@ -654,7 +654,7 @@
         <carbon.mediation.version>4.3.0</carbon.mediation.version>
 
         <!-- Identity Version -->
-        <identity.version>4.3.0</identity.version>
+        <identity.version>4.3.3</identity.version>
 
         <!-- Governance Version -->
         <carbon.governance.version>4.3.0</carbon.governance.version>
