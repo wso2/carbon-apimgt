@@ -25,7 +25,7 @@
 
     <modules>
         <module>service-stubs/apimgt</module>
-        <!--module>service-stubs/bam</module-->
+        <module>service-stubs/bam</module>
         <module>components/ganalytics</module>
         <module>components/throttling</module>
         <module>components/apimgt</module>
@@ -215,6 +215,12 @@
             </dependency>
 
             <dependency>
+                <groupId>org.wso2.carbon.apimgt</groupId>
+                <artifactId>org.wso2.carbon.throttle.core</artifactId>
+                <version>${carbon.apimgt.version}</version>
+            </dependency>
+
+            <dependency>
                 <groupId>commons-lang.wso2</groupId>
                 <artifactId>commons-lang</artifactId>
                 <version>${commons-lang.version}</version>
@@ -380,12 +386,6 @@
                 <groupId>commons-logging</groupId>
                 <artifactId>commons-logging</artifactId>
                 <version>${commons-logging.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.wso2.carbon</groupId>
-                <artifactId>org.wso2.carbon.throttle.core</artifactId>
-                <version>${carbon.throttle.core.version}</version>
             </dependency>
 
             <dependency>
@@ -707,7 +707,6 @@
         <httpclient.version>4.1.1-wso2v1</httpclient.version>
         <commons-logging.version>1.1.1</commons-logging.version>
         <h2-database-engine.version>1.2.140.wso2v3</h2-database-engine.version>
-        <carbon.throttle.core.version>4.2.1</carbon.throttle.core.version>
         <carbon.multitenancy.version>4.3.3</carbon.multitenancy.version>
         <json-simple.wso2.version>1.1.wso2v1</json-simple.wso2.version>
         <junit.version>4.8.1</junit.version>
