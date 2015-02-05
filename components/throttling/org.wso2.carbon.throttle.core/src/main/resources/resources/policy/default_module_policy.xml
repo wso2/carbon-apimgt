@@ -1,0 +1,18 @@
+<wsp:Policy xmlns:wsp="http://schemas.xmlsoap.org/ws/2004/09/policy"
+            xmlns:throttle="http://www.wso2.org/products/wso2commons/throttle">
+    <throttle:ModuleThrottleAssertion>
+        <throttle:MaximumConcurrentAccess>5</throttle:MaximumConcurrentAccess>
+        <wsp:Policy>
+            <throttle:ID throttle:type="IP">other</throttle:ID>
+            <wsp:Policy>
+                <throttle:Allow/>
+            </wsp:Policy>
+        </wsp:Policy>
+        <wsp:Policy>
+            <throttle:ID throttle:type="DOMAIN">other</throttle:ID>
+            <wsp:Policy>
+                <throttle:Allow/>
+            </wsp:Policy>
+        </wsp:Policy>
+    </throttle:ModuleThrottleAssertion>
+</wsp:Policy>
