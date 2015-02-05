@@ -32,7 +32,7 @@
 
     <dependencies>
         <dependency>
-            <groupId>org.wso2.carbon</groupId>
+            <groupId>org.wso2.carbon.apimgt</groupId>
             <artifactId>org.wso2.carbon.bam.presentation.stub</artifactId>
         </dependency>
         <dependency>
@@ -67,6 +67,7 @@
                             org.wso2.carbon.apimgt.usage.client.internal,
                         </Private-Package>
                         <Import-Package>
+                            org.wso2.carbon.bam.presentation.*;version="${carbon.apimgt.version}",
                             javax.servlet;version="${imp.pkg.version.javax.servlet}",
                             javax.servlet.http;version="${imp.pkg.version.javax.servlet}",
                             javax.servlet.resources;version="${imp.pkg.version.javax.servlet}",

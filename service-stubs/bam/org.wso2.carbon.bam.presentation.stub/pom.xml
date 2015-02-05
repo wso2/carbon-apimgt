@@ -94,10 +94,9 @@
                         <Private-Package>
                         </Private-Package>
                         <Export-Package>
-                            org.wso2.carbon.bam.presentation.stub.*;version="${carbon.apimgt.version}"
+                            org.wso2.carbon.bam.presentation.*;version="${carbon.apimgt.version}"
                         </Export-Package>
                         <Import-Package>
-                            !org.wso2.carbon.bam.presentation.stub.*
                         </Import-Package>
                         <DynamicImport-Package>*</DynamicImport-Package>
                     </instructions>

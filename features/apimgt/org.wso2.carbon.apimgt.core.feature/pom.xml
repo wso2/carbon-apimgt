@@ -95,7 +95,7 @@
             <artifactId>org.wso2.carbon.sequences.stub</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.wso2.carbon</groupId>
+            <groupId>org.wso2.carbon.apimgt</groupId>
             <artifactId>org.wso2.carbon.bam.presentation.stub</artifactId>
         </dependency>
         <dependency>
