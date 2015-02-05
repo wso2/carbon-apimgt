@@ -22,13 +22,13 @@
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>apimgt-feature</artifactId>
-        <version>${apimgt.project.version}</version>
+        <version>1.3.2-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
     <artifactId>org.wso2.carbon.apimgt.store.feature</artifactId>
-    <version>${apimgt.project.version}</version>
+    <version>1.3.2-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>WSO2 Carbon - API Store Feature</name>
     <url>http://wso2.org</url>
@@ -40,7 +40,7 @@
             <artifactId>org.wso2.carbon.registry.core</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.wso2.carbon</groupId>
+            <groupId>org.wso2.carbon.governance</groupId>
             <artifactId>org.wso2.carbon.governance.api</artifactId>
         </dependency>
         <dependency>
@@ -97,9 +97,9 @@
                                 <bundleDef>org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.handlers.security.stub</bundleDef>
                             </bundles>
                             <importFeatures>
-                                <importFeatureDef>org.wso2.carbon.core.server:${wso2carbon.version}</importFeatureDef>
-                                <importFeatureDef>org.wso2.carbon.registry.core:${wso2carbon.version}</importFeatureDef>
-                                <importFeatureDef>org.wso2.carbon.identity.self.registration.server:${wso2carbon.version}</importFeatureDef>
+                                <importFeatureDef>org.wso2.carbon.core.server:${carbon.version}</importFeatureDef>
+                                <importFeatureDef>org.wso2.carbon.registry.core:${carbon.version}</importFeatureDef>
+                                <importFeatureDef>org.wso2.carbon.identity.self.registration.server:${carbon.version}</importFeatureDef>
                             </importFeatures>
                             <importBundles>
                                 <importBundleDef>org.wso2.carbon:org.wso2.carbon.hostobjects.sso:4.2.2</importBundleDef>
