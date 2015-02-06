@@ -20,7 +20,7 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
     <parent>
-        <groupId>org.wso2.carbon.apimgt</groupId>
+        <groupId>org.wso2.carbon</groupId>
         <artifactId>apimgt-feature</artifactId>
         <version>1.2.0</version>
         <relativePath>../pom.xml</relativePath>
@@ -51,39 +51,39 @@
             <artifactId>org.wso2.carbon.governance.api</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.wso2.carbon.apimgt</groupId>
+            <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.apimgt.api</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.wso2.carbon.apimgt</groupId>
+            <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.apimgt.impl</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.wso2.carbon.apimgt</groupId>
+            <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.apimgt.hostobjects</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.wso2.carbon.apimgt</groupId>
+            <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.apimgt.keymgt</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.wso2.carbon.apimgt</groupId>
+            <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.apimgt.keymgt.client</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.wso2.carbon.apimgt</groupId>
+            <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.apimgt.keymgt.stub</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.wso2.carbon.apimgt</groupId>
+            <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.apimgt.usage.publisher</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.wso2.carbon.apimgt</groupId>
+            <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.apimgt.usage.client</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.wso2.carbon.apimgt</groupId>
+            <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.apimgt.core</artifactId>
         </dependency>
         <dependency>
@@ -214,15 +214,15 @@
                                 </properties>
                             </adviceFile>
                             <bundles>
-                                <bundleDef>org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.api:${apimgt.api.version}</bundleDef>
-                                <bundleDef>org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.impl:${apimgt.impl.version}</bundleDef>
-                                <bundleDef>org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.hostobjects</bundleDef>
-                                <bundleDef>org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.keymgt.stub:${apimgt.keymgt.stub.version}</bundleDef>
-                                <bundleDef>org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.keymgt.client:${apimgt.keymgt.client.version}</bundleDef>
-                                <bundleDef>org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.keymgt:${apimgt.keymgt.version}</bundleDef>
-                                <bundleDef>org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.usage.publisher:${apimgt.usage.publisher}</bundleDef>
-                                <bundleDef>org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.usage.client:${apimgt.usage.client}</bundleDef>
-                                <bundleDef>org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.core:${apimgt.core.version}</bundleDef>
+                                <bundleDef>org.wso2.carbon:org.wso2.carbon.apimgt.api:${apimgt.api.version}</bundleDef>
+                                <bundleDef>org.wso2.carbon:org.wso2.carbon.apimgt.impl:${apimgt.impl.version}</bundleDef>
+                                <bundleDef>org.wso2.carbon:org.wso2.carbon.apimgt.hostobjects</bundleDef>
+                                <bundleDef>org.wso2.carbon:org.wso2.carbon.apimgt.keymgt.stub:${apimgt.keymgt.stub.version}</bundleDef>
+                                <bundleDef>org.wso2.carbon:org.wso2.carbon.apimgt.keymgt.client:${apimgt.keymgt.client.version}</bundleDef>
+                                <bundleDef>org.wso2.carbon:org.wso2.carbon.apimgt.keymgt:${apimgt.keymgt.version}</bundleDef>
+                                <bundleDef>org.wso2.carbon:org.wso2.carbon.apimgt.usage.publisher:${apimgt.usage.publisher}</bundleDef>
+                                <bundleDef>org.wso2.carbon:org.wso2.carbon.apimgt.usage.client:${apimgt.usage.client}</bundleDef>
+                                <bundleDef>org.wso2.carbon:org.wso2.carbon.apimgt.core:${apimgt.core.version}</bundleDef>
                                 <bundleDef>org.wso2.carbon:org.wso2.carbon.sequences.stub:4.2.1</bundleDef>
                                 <bundleDef>org.wso2.carbon:org.wso2.carbon.identity.user.registration.stub:${carbon.platform.version}</bundleDef>
                                 <bundleDef>org.wso2.carbon:org.wso2.carbon.bam.presentation.stub:${carbon.platform.version}</bundleDef>

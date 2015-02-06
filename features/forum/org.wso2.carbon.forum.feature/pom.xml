@@ -20,7 +20,7 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
     <parent>
-        <groupId>org.wso2.carbon.apimgt</groupId>
+        <groupId>org.wso2.carbon</groupId>
         <artifactId>forum-feature</artifactId>
         <version>1.2.0</version>
 	<relativePath>../pom.xml</relativePath>
@@ -36,7 +36,7 @@
 
     <dependencies>
         <dependency>
-            <groupId>org.wso2.carbon.apimgt</groupId>
+            <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.forum.server.feature</artifactId>
             <type>zip</type>
         </dependency>
@@ -62,7 +62,7 @@
                                 <importFeatureDef>org.wso2.carbon.core:4.2.0</importFeatureDef>
                             </importFeatures>
                             <includedFeatures>
-                                <includedFeatureDef>org.wso2.carbon.apimgt:org.wso2.carbon.forum.server.feature:${carbon.forum.server.feature.version}</includedFeatureDef>
+                                <includedFeatureDef>org.wso2.carbon:org.wso2.carbon.forum.server.feature:${carbon.forum.server.feature.version}</includedFeatureDef>
                             </includedFeatures>
                         </configuration>
                     </execution>

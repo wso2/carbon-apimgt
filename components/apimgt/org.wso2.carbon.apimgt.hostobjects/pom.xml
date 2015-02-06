@@ -2,7 +2,7 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <parent>
-        <groupId>org.wso2.carbon.apimgt</groupId>
+        <groupId>org.wso2.carbon</groupId>
         <artifactId>apimgt</artifactId>
         <version>1.2.0</version>
         <relativePath>../pom.xml</relativePath>
@@ -34,11 +34,11 @@
             <artifactId>org.jaggeryjs.scriptengine</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.wso2.carbon.apimgt</groupId>
+            <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.apimgt.api</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.wso2.carbon.apimgt</groupId>
+            <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.apimgt.impl</artifactId>
         </dependency>
         <dependency>
@@ -50,11 +50,11 @@
             <artifactId>org.jaggeryjs.hostobjects.file</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.wso2.carbon.apimgt</groupId>
+            <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.apimgt.usage.client</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.wso2.carbon.apimgt</groupId>
+            <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.apimgt.keymgt.client</artifactId>
         </dependency>
         <dependency>
