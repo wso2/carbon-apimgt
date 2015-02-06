@@ -119,7 +119,7 @@
                         <Import-Package>
                             !javax.xml.namespace,
                             javax.xml.namespace; version=0.0.0,
-                            javax.servlet; version="{javax.servlet.imp.pkg.version}",
+                            javax.servlet; version="${javax.servlet.imp.pkg.version}",
                             javax.servlet.http; version="${javax.servlet.imp.pkg.version}",
                             org.apache.axiom.*; version="${axiom.osgi.version.range}",
                             *;resolution:=optional
