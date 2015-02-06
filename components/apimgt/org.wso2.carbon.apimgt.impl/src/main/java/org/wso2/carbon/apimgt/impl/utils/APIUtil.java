@@ -1567,7 +1567,7 @@ public final class APIUtil {
                 authorized = manager.isUserAuthorized(MultitenantUtils.getTenantAwareUsername(username), permission,
                                                       CarbonConstants.UI_PERMISSION_ACTION);
             } else {
-                authorized = AuthorizationManager.getInstance().isUserAuthorized(username, permission);
+                authorized = AuthorizationManager.getInstance().isUserAuthorized(MultitenantUtils.getTenantAwareUsername(username), permission);
             }
             if (!authorized) {
                 throw new APIManagementException("User '" + username + "' does not have the " +
