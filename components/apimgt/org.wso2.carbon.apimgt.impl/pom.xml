@@ -12,7 +12,7 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
     <parent>
-        <groupId>org.wso2.carbon</groupId>
+        <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>apimgt</artifactId>
         <version>1.2.0</version>
 	<relativePath>../pom.xml</relativePath>
@@ -61,11 +61,11 @@
             <artifactId>org.wso2.carbon.core</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.wso2.carbon</groupId>
+            <groupId>org.wso2.carbon.apimgt</groupId>
             <artifactId>org.wso2.carbon.apimgt.api</artifactId>
         </dependency>
       <dependency>
-          <groupId>org.wso2.carbon</groupId>
+          <groupId>org.wso2.carbon.apimgt</groupId>
           <artifactId>org.wso2.carbon.apimgt.keymgt.client</artifactId>
       </dependency>
         <dependency>
@@ -155,7 +155,7 @@
             <artifactId>json-simple</artifactId>
         </dependency>
 		<dependency>
-			<groupId>org.wso2.carbon</groupId>
+			<groupId>org.wso2.carbon.apimgt</groupId>
 			<artifactId>org.wso2.carbon.apimgt.keymgt.stub</artifactId>
 		</dependency>
     </dependencies>
