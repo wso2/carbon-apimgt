@@ -445,10 +445,14 @@ public class APIUsageStatisticsClient {
         try {
             connection = APIMgtDBUtil.getConnection();
             statement = connection.createStatement();
-            String query;
+            String query, mssqlQuery;
 
             query = "SELECT  CONSUMER_KEY,NAME FROM AM_APPLICATION_KEY_MAPPING  NATURAL JOIN AM_APPLICATION  NATURAL JOIN AM_SUBSCRIBER WHERE USER_ID = '" + subscriberName + "' ";
+            mssqlQuery = "SELECT CONSUMER_KEY, NAME FROM AM_APPLICATION_KEY_MAPPING INNER JOIN AM_APPLICATION ON AM_APPLICATION_KEY_MAPPING.APPLICATION_ID=AM_APPLICATION.APPLICATION_ID INNER JOIN AM_SUBSCRIBER ON AM_APPLICATION.SUBSCRIBER_ID = AM_SUBSCRIBER.SUBSCRIBER_ID WHERE AM_SUBSCRIBER.USER_ID = '" + subscriberName + "' ";
 
+            if(connection.getMetaData().getDatabaseProductName().contains("Microsoft")){
+                query = mssqlQuery;
+            }
             rs = statement.executeQuery(query);
 
             List<String> consumerKeys = new ArrayList<String>();
