@@ -644,30 +644,30 @@
         <project.scm.id>my-scm-server</project.scm.id>
 
         <!-- APIM Component Version -->
-        <apimgt.api.version>1.2.3-SNAPSHOT</apimgt.api.version>
-        <apimgt.impl.version>1.2.4-SNAPSHOT</apimgt.impl.version>
-        <apimgt.core.version>1.2.2-SNAPSHOT</apimgt.core.version>
-        <apimgt.gateway.version>1.2.4-SNAPSHOT</apimgt.gateway.version>
-        <apimgt.hostobjects.version>1.2.4-SNAPSHOT</apimgt.hostobjects.version>
-        <apimgt.interceptor.version>1.2.1-SNAPSHOT</apimgt.interceptor.version> <!--check-->
-        <apimgt.keymgt.version>1.2.3-SNAPSHOT</apimgt.keymgt.version>
-        <apimgt.keymgt.client.version>1.2.1-SNAPSHOT</apimgt.keymgt.client.version>
-        <apimgt.startup.publisher.version>1.2.2-SNAPSHOT</apimgt.startup.publisher.version>
-        <apimgt.usage.client>1.2.4-SNAPSHOT</apimgt.usage.client>
-        <apimgt.usage.publisher>1.2.2-SNAPSHOT</apimgt.usage.publisher>
-        <apimgt.keymgt.stub.version>4.2.4-SNAPSHOT</apimgt.keymgt.stub.version>
-        <apimgt.handlers.security.stub>4.2.0-SNAPSHOT</apimgt.handlers.security.stub>
-        <carbon.forum.version>1.2.0-SNAPSHOT</carbon.forum.version>
-        <carbon.forum.feature.version>1.2.0-SNAPSHOT</carbon.forum.feature.version>
-        <carbon.forum.server.feature.version>1.0.1-SNAPSHOT</carbon.forum.server.feature.version>
+        <apimgt.api.version>1.2.3</apimgt.api.version>
+        <apimgt.impl.version>1.2.4</apimgt.impl.version>
+        <apimgt.core.version>1.2.2</apimgt.core.version>
+        <apimgt.gateway.version>1.2.4</apimgt.gateway.version>
+        <apimgt.hostobjects.version>1.2.4</apimgt.hostobjects.version>
+        <apimgt.interceptor.version>1.2.1</apimgt.interceptor.version> <!--check-->
+        <apimgt.keymgt.version>1.2.3</apimgt.keymgt.version>
+        <apimgt.keymgt.client.version>1.2.1</apimgt.keymgt.client.version>
+        <apimgt.startup.publisher.version>1.2.2</apimgt.startup.publisher.version>
+        <apimgt.usage.client>1.2.4</apimgt.usage.client>
+        <apimgt.usage.publisher>1.2.2</apimgt.usage.publisher>
+        <apimgt.keymgt.stub.version>4.2.4</apimgt.keymgt.stub.version>
+        <apimgt.handlers.security.stub>4.2.0</apimgt.handlers.security.stub>
+        <carbon.forum.version>1.2.0</carbon.forum.version>
+        <carbon.forum.feature.version>1.2.0</carbon.forum.feature.version>
+        <carbon.forum.server.feature.version>1.0.1</carbon.forum.server.feature.version>
 
-        <apimgt.core.feature.version>1.2.4-SNAPSHOT</apimgt.core.feature.version>
-        <apimgt.feature.version>1.2.4-SNAPSHOT</apimgt.feature.version>
-        <apimgt.gateway.feature>1.2.4-SNAPSHOT</apimgt.gateway.feature>
-        <apimgt.interceptor.feature>1.2.1-SNAPSHOT</apimgt.interceptor.feature>
-        <apimgt.publisher.feature.version>1.2.4-SNAPSHOT</apimgt.publisher.feature.version>
-        <apimgt.startup.publisher.feature.version>1.2.4-SNAPSHOT</apimgt.startup.publisher.feature.version>
-        <apimgt.store.feature.version>1.2.4-SNAPSHOT</apimgt.store.feature.version>
+        <apimgt.core.feature.version>1.2.4</apimgt.core.feature.version>
+        <apimgt.feature.version>1.2.4</apimgt.feature.version>
+        <apimgt.gateway.feature>1.2.4</apimgt.gateway.feature>
+        <apimgt.interceptor.feature>1.2.1</apimgt.interceptor.feature>
+        <apimgt.publisher.feature.version>1.2.4</apimgt.publisher.feature.version>
+        <apimgt.startup.publisher.feature.version>1.2.4</apimgt.startup.publisher.feature.version>
+        <apimgt.store.feature.version>1.2.4</apimgt.store.feature.version>
 
         <!-- Carbon kernel version -->
         <wso2carbon.version>4.2.0</wso2carbon.version>
@@ -714,26 +714,10 @@
         <wso2carbon.version.identity>${project.version}</wso2carbon.version.identity>
         <axis2.wso2.version.identity>${axis2.wso2.version}</axis2.wso2.version.identity>
         <axiom.wso2.version.identity>${axiom.wso2.version}</axiom.wso2.version.identity>
-        <synapse.version>2.1.3-wso2v1</synapse.version>
+        <synapse.version>2.1.2-wso2v6</synapse.version>
         <synapse.version.identity>${synapse.version}</synapse.version.identity>
         <synapse.version.handlers>${synapse.version}</synapse.version.handlers>
         <throttle.version.handlers>3.3.0</throttle.version.handlers>
-
-        <gdata-core.wso2.version.identity>${gdata-core.wso2.version}</gdata-core.wso2.version.identity>
-        <junit.version.identity>${junit.version}</junit.version.identity>
-        <smack.version.identity>${smack.wso2.version}</smack.version.identity>
-        <smackx.version.identity>${smackx.wso2.version}</smackx.version.identity>
-        <sun-xacml.wso2.version.identity>${sun-xacml.wso2.version}</sun-xacml.wso2.version.identity>
-        <wss4j.version.wso2.identity>${wss4j.version}</wss4j.version.wso2.identity>
-        <rampart.wso2.version.identity>${rampart.wso2.version}</rampart.wso2.version.identity>
-        <opensaml.wso2.version.identity>${opensaml.wso2.version}</opensaml.wso2.version.identity>
-        <opensaml2.wso2.version.identity>${opensaml2.wso2.version}</opensaml2.wso2.version.identity>
-        <openid4java.wso2.version.identity>${openid4java.wso2.version}</openid4java.wso2.version.identity>
-        <httpcomponents-httpclient.wso2.version.identity>${httpcomponents-httpclient.wso2.version}
-        </httpcomponents-httpclient.wso2.version.identity>
-        <httpcomponents-httpcore.wso2.version.identity>${httpcomponents-httpcore.wso2.version}
-        </httpcomponents-httpcore.wso2.version.identity>
-        <neethi.osgi.version.identity>${neethi.osgi.version}</neethi.osgi.version.identity>
 
         <libthrift.wso2.version>0.7.wso2v1</libthrift.wso2.version>
         <ganalytics.version>4.2.0</ganalytics.version>
