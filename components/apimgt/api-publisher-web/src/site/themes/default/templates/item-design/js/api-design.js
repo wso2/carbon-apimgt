@@ -354,7 +354,7 @@ APIDesigner.prototype.init_controllers = function(){
 						if (API_DESIGNER.api_doc.authorizations.oauth2.scopes == undefined) {
 							SCOPES = [];
 						}
-						for (var i = 0; i < API_DESIGNER.api_doc.authorizations.oauth2.scopes.length; i) {
+						for (var i = 0; i < API_DESIGNER.api_doc.authorizations.oauth2.scopes.length; i++) {
 							if (API_DESIGNER.api_doc.authorizations.oauth2.scopes[i].key === $(
 									"#scopeKey").val() || API_DESIGNER.api_doc.authorizations.oauth2.scopes[i].key === $(
 									"#scopeName").val()) {
