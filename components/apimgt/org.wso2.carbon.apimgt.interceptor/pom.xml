@@ -66,6 +66,7 @@
                         </Private-Package>
                         <Export-Package>
                             !org.wso2.carbon.apimgt.interceptor.valve.internal,
+                            !org.wso2.carbon.apimgt.interceptor.valve.internal.APIManagerInterceptorComponent,
                             org.wso2.carbon.apimgt.interceptor.*,
                         </Export-Package>
                         <Import-Package>

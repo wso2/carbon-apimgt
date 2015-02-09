@@ -53,7 +53,7 @@
                         <Private-Package>
                         </Private-Package>
                         <Export-Package>
-                            org.wso2.carbon.apimgt.core.*,
+                            org.wso2.carbon.apimgt.core.*;version="${carbon.apimgt.version}",
                         </Export-Package>
                         <Import-Package>
                             org.wso2.carbon.core,

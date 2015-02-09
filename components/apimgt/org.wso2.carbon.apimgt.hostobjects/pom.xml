@@ -91,7 +91,7 @@
                             org.wso2.carbon.apimgt.hostobjects.internal.HostObjectComponent
                         </Private-Package>
                         <Export-Package>
-                            org.wso2.carbon.apimgt.hostobjects.*;
+                            org.wso2.carbon.apimgt.hostobjects.*;version="${carbon.apimgt.version}"
                         </Export-Package>
                         <Import-Package>
                             org.wso2.carbon.apimgt.api.*,
