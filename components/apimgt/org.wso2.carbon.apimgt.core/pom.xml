@@ -74,7 +74,7 @@
                             org.wso2.carbon.core,
                             org.wso2.carbon.registry.core.service; version=1.0.1,
                             javax.xml.soap; version=1.0.0,
-                            org.wso2.carbon.apimgt.impl.*,
+                            <!--org.wso2.carbon.apimgt.impl.*,-->
                             *;resolution:=optional
                         </Import-Package>
                         <DynamicImport-Package>*</DynamicImport-Package>
