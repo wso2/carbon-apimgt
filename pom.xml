@@ -39,7 +39,7 @@
                 <plugin>
                     <groupId>org.apache.felix</groupId>
                     <artifactId>maven-scr-plugin</artifactId>
-                    <version>1.7.2</version>
+                    <version>${maven-scr-plugin.version}</version>
                     <executions>
                         <execution>
                             <id>generate-scr-scrdescriptor</id>
@@ -53,7 +53,7 @@
                 <plugin>
                     <groupId>org.apache.felix</groupId>
                     <artifactId>maven-bundle-plugin</artifactId>
-                    <version>2.5.3</version>
+                    <version>${maven-bundle-plugin.version}</version>
                 </plugin>
 
                 <plugin>
@@ -674,6 +674,9 @@
 
         <!-- P2 Plugin Version -->
         <carbon.p2.plugin.version>1.5.3</carbon.p2.plugin.version>
+
+        <maven-scr-plugin.version>1.7.2</maven-scr-plugin.version>
+        <maven-bundle-plugin.version>2.5.3</maven-bundle-plugin.version>
 
         <!-- Axis2 Version -->
         <orbit.version.axis2>1.6.1.wso2v11</orbit.version.axis2>
