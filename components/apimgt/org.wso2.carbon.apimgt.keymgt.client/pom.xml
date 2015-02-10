@@ -86,7 +86,7 @@
 							*;resolution:=optional
 						</Import-Package>
 						<Export-Package>
-							org.wso2.carbon.apimgt.keymgt.*;version="4.3.0-SNAPSHOT"
+							org.wso2.carbon.apimgt.keymgt.*;version="${carbon.apimgt.version}"
 						</Export-Package>
 						<DynamicImport-Package>*</DynamicImport-Package>
 					</instructions>
