@@ -19,7 +19,7 @@
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>apimgt</artifactId>
-        <version>1.3.2</version>
+        <version>1.3.3-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -27,7 +27,7 @@
     <artifactId>org.wso2.carbon.apimgt.usage</artifactId>
     <name>WSO2 Carbon - API Management Usage Aggregator Module</name>
     <packaging>pom</packaging>
-    <version>1.3.2</version>
+    <version>1.3.3-SNAPSHOT</version>
 
     <modules>
         <module>org.wso2.carbon.apimgt.usage.publisher</module>
