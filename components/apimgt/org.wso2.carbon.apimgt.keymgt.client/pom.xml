@@ -84,11 +84,11 @@
 							${project.artifactId}
 						</Bundle-SymbolicName>
 						<Import-Package>
-							org.apache.commons.logging.*; version="1.0.4",
+							org.apache.commons.logging.*; version="${commons.logging.imp.pkg.version}",
 							*;resolution:=optional
 						</Import-Package>
 						<Export-Package>
-							org.wso2.carbon.apimgt.keymgt.client.*,
+							org.wso2.carbon.apimgt.keymgt.*;version="4.3.0-SNAPSHOT"
 						</Export-Package>
 						<DynamicImport-Package>*</DynamicImport-Package>
 					</instructions>
