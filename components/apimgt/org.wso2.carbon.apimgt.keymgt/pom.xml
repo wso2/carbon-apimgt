@@ -92,7 +92,7 @@
 							org.wso2.carbon.apimgt.keymgt.internal
                         </Private-Package>
 						<Import-Package>
-							org.apache.commons.logging.*; version="1.0.4",
+							org.apache.commons.logging.*; version="${commons.logging.imp.pkg.version}",
 							org.wso2.carbon.identity.base.*,
 							org.wso2.carbon.identity.core.*
                         </Import-Package>
