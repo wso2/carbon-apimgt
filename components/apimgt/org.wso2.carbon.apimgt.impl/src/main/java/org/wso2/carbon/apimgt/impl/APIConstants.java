@@ -592,5 +592,4 @@ public final class APIConstants {
     public static final String KEYMANAGER_SERVERURL = "APIKeyManager.ServerURL";
     public static final String CARBON_LOCALIP = "carbon.local.ip";
 
-
 }
