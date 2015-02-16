@@ -1,6 +1,8 @@
 <%
 include("/jagg/jagg.jag");
 (function () {
+    var site = require("/site/conf/site.json");
+    var ssoEnabled = site.ssoConfiguration.enabled;
     response.contentType = "application/json; charset=UTF-8";
     var mod, obj, result, username,
             msg = require("/site/conf/ui-messages.jag"),
@@ -8,16 +10,31 @@ include("/jagg/jagg.jag");
             user = jagg.getUser();
     if (action == "getAllSubscriptions") {
         if (!user) {
-            print({
-                error:true,
-                message:msg.error.loginRequired(action)
-            });
-            return;
+            if(!ssoEnabled){
+		print({
+		    error:true,
+                    message:msg.error.loginRequired(action)
+            	});
+	    }
+	    return;
         }
         username = user.username;
 
+        // if we have a query parameter from GET request we will use it.
+        if(request.getParameter('selectedApp')!=null){
+            selectedApp = request.getParameter('selectedApp');
+        }
+        //else if we have selected app in session we will use it.
+        else if(session.get('selectedApp')!=null){
+            selectedApp = session.get('selectedApp');
+        }
+        //if not pass blank string because host object is waiting for string args..
+        else{
+            selectedApp= "";
+        }
+
         mod = jagg.module("subscription");
-        result = mod.getAllSubscriptions(username);
+        result = mod.getAllSubscriptions(username,selectedApp);
 
         if (result.error) {
             obj = {
@@ -34,11 +51,13 @@ include("/jagg/jagg.jag");
      }else if (action == "getSubscriptionByApplication") {
 	var appname = request.getParameter("app");
         if (!user) {
-            print({
-                error:true,
-                message:msg.error.loginRequired(action)
-            });
-            return;
+            if(!ssoEnabled){
+		print({
+		    error:true,
+                    message:msg.error.loginRequired(action)
+            	});
+	    }
+	    return;
         }
         username = user.username;
 

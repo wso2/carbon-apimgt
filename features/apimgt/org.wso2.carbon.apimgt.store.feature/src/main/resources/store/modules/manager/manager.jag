@@ -47,6 +47,23 @@ var isSelfSignupEnabled = function(){
 	return 	getAPIStoreObj().isSelfSignupEnabled();
 };
 
+var isSelfSignupEnabledForTenantUser = function(tenantDomain){
+    var log = new Log();
+    try {
+
+        if (tenantDomain == null) {
+             return  getAPIStoreObj().isSelfSignupEnabledForTenant("carbon.super");
+        } else {
+             return  getAPIStoreObj().isSelfSignupEnabledForTenant(tenantDomain);
+        }
+    } catch (e) {
+        log.error(e.message);
+        return false;
+    }
+    
+    
+};
+
 var getAdminCookie = function() {
     //TODO : this should be set in the Context during the deployment
 
@@ -88,6 +105,25 @@ var loadTenantRegistry = function (tenantDomain) {
     }    
 };
 
+var loadTenantAxisConfiguration = function (tenantDomain) {
+ 
+    try {
+        if (tenantDomain != null && tenantDomain != "") {  
+             
+           getAPIStoreObj().loadAxisConfigOfTenant(String(tenantDomain));
+            return
+            {
+                error:false
+            }
+            ;
+        }
+    } catch (e) {
+        return {
+            error:true,
+            message:e.message
+        };
+    }    
+};
 
 var getActiveTenantDomains=function(){
     var tenantDomains,

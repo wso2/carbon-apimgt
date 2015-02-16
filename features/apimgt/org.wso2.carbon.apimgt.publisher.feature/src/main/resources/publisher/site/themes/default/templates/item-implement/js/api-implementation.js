@@ -44,9 +44,9 @@ $(document).ready(function(){
                      if (ssoEnabled) {
                          var currentLoc = window.location.pathname;
                          if (currentLoc.indexOf(".jag") >= 0) {
-                             location.href = "add.jag";
+                             location.href = "index.jag";
                          } else {
-                             location.href = 'site/pages/add.jag';
+                             location.href = 'site/pages/index.jag';
                          }
                      } else {
                          jagg.showLogin();
@@ -68,7 +68,7 @@ $(document).ready(function(){
                 var designer = APIDesigner();            
                 $.ajax({
                     type: "POST",
-                    url: "/publisher/site/blocks/life-cycles/ajax/life-cycles.jag",
+                    url: jagg.site.context + "/site/blocks/life-cycles/ajax/life-cycles.jag",
                     data: {
                         action :"updateStatus",
                         name:designer.saved_api.name,
@@ -86,9 +86,9 @@ $(document).ready(function(){
                                  if (ssoEnabled) {
                                      var currentLoc = window.location.pathname;
                                      if (currentLoc.indexOf(".jag") >= 0) {
-                                         location.href = "add.jag";
+                                         location.href = "index.jag";
                                      } else {
-                                         location.href = 'site/pages/add.jag';
+                                    	 location.href = 'site/pages/index.jag';
                                      }
                                  } else {
                                      jagg.showLogin();

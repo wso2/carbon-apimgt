@@ -146,13 +146,14 @@ var addAPI = function (api) {
             log.debug("addAPI : " + api.name + "-" + api.version);
         }
         if(success){
-        return {
-            error:false
-        };
-        }else{
-        return {
-            error:true
-        }; }
+            return {
+                error:false
+            };
+        } else  {
+            return {
+                error:true
+            };
+        }
     } catch (e) {
         log.error(e.message);
         return {
@@ -180,6 +181,26 @@ var isContextExist = function (context,oldContext) {
             error:e
         };
     }
+};
+
+var isApiNameExist = function (apiName) {
+        var exists, log = new Log(),
+        provider = jagg.module("manager").getAPIProviderObj();
+        try {
+        exists = provider.isApiNameExist(apiName);
+        if (log.isDebugEnabled()) {
+        log.debug("isApiName exist for : " + apiName + " : " + exists);
+        }
+return {
+        error:false,
+        exist:exists
+        };
+} catch (e) {
+        log.error(e.message);
+        return {
+        error:e
+        };
+}
 };
 
 var isURLValid = function (type,url) {

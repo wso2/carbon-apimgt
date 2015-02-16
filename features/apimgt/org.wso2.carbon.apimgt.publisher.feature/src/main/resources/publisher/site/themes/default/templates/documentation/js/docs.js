@@ -243,16 +243,21 @@ var saveDoc=function(){
                 .attr('name', 'newType').attr('value', $('#specifyBox').val()).prependTo('#addNewDoc');
         }
 
-        $('#addNewDoc').ajaxSubmit(function (result) {
-            if (!result.error) {
-                $.cookie("tab", "docsLink");
-                clearDocs();
-            } else {
-                if (result.message == "AuthenticateError") {
-                    jagg.showLogin();
+        $('#addNewDoc').ajaxSubmit({
+            success:function (result) {
+                if (!result.error) {
+                    $.cookie("tab", "docsLink");
+                    clearDocs();
                 } else {
-                    jagg.message({content:result.message,type:"error"});
+                    if (result.message == "AuthenticateError") {
+                        jagg.showLogin();
+                    } else {
+                        jagg.message({content:result.message,type:"error"});
+                    }
                 }
+            },
+            error:function(jqXHR, textStatus, errorThrown){
+                jagg.message({content:(JSON.parse(jqXHR.responseText)).message,type:"error"});
             }
         });
     }
@@ -351,6 +356,7 @@ var CONTENT_MAP = {
     'docx': 'application/msword',
     'pptx': 'application/vnd.ms-powerpoint',
     'xls' : 'application/vnd.ms-excel',
+    'wsdl' : 'application/api-wsdl',
     'xlsx' : 'application/vnd.ms-excel'
 };
 

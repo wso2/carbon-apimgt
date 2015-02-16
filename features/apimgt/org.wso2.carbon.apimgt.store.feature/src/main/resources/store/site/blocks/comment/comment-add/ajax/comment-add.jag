@@ -12,11 +12,13 @@ include("/jagg/jagg.jag");
             user = jagg.getUser();
     if (action == "addComment" && request.getMethod() == 'POST') {
         if (!user) {
-            print({
-                error:true,
-                message:msg.error.loginRequired(action)
-            });
-            return;
+            if(!ssoEnabled){
+		print({
+		    error:true,
+                    message:msg.error.loginRequired(action)
+            	});
+	    }
+	    return;
         }
         name = request.getParameter("name");
         version = request.getParameter("version");

@@ -44,6 +44,7 @@ var content_types = [
 //Create a designer class
 function APIDesigner(){
     //implement singleton pattern
+    this.baseURLValue = "";
 
     if ( arguments.callee._singletonInstance )
         return arguments.callee._singletonInstance;
@@ -85,13 +86,47 @@ function APIDesigner(){
         }
         var path = $("#resource_url_pattern").val();
         if(path.charAt(0) != "/")
-            path = "/"+path
+            path = "/"+path;
+        
+    	var resource_exist = false;
+        $(".http_verb_select").each(function(){    //added this validation to fix https://wso2.org/jira/browse/APIMANAGER-2671
+            if($(this).is(':checked')){
+                if(designer.check_if_resource_exist( path , $(this).val() ) ){
+                	resource_exist = true;
+                    var err_message = "Resource already exist for URL Pattern "+path+" and Verb "+$(this).val();
+                    jagg.message({content:err_message,type:"error"});
+                    return;
+                }
+            }
+        });
+        if(resource_exist){
+        	return;
+        }
+        
         var resource = {
             path: path
         };
         //create parameters
         var re = /\{[a-zA-Z0-9_-]*\}/g;
-        var parameters = []
+        var parameters = [];
+
+        /*parameters.push({
+            "name": "Authorization",
+            "description": "Access Token",
+            "paramType": "header",
+            "required": true,
+            "allowMultiple": false,
+            "dataType": "String"
+        });*/ // Authorization will be set globaly in swagger console.
+        parameters.push({
+            name : "body",
+            "description": "Request Body",
+            "allowMultiple": false,
+            "required": true,
+            "paramType": "body",
+            "type":"string"
+        });
+
         while ((m = re.exec($("#resource_url_pattern").val())) != null) {
             if (m.index === re.lastIndex) {
                 re.lastIndex++;
@@ -101,6 +136,7 @@ function APIDesigner(){
                 "paramType": "path",
                 "allowMultiple": false,
                 "required": true,
+				"type":"string"
             })            
         }        
 
@@ -112,7 +148,8 @@ function APIDesigner(){
                 if(!designer.check_if_resource_exist( path , $(this).val() ) ){
                 resource.operations.push({ 
                     method : $(this).val(),
-                    parameters : parameters
+                    parameters : parameters,
+                    nickname : $(this).val().toLowerCase() + '_' +$("#resource_url_pattern").val()
                 });
                 ic++
                 }
@@ -170,12 +207,14 @@ APIDesigner.prototype.add_default_resource = function(){
 }
 
 APIDesigner.prototype.get_scopes = function(){
-    var scopes = this.api_doc.authorizations.oauth2.scopes;
-    var options = [{ "value": "" , "text": "" }]
-    for(var i =0; i < scopes.length ; i++ ){
-        options.push({ "value": scopes[i].key , "text": scopes[i].name });
+     if(typeof(this.api_doc.authorizations)!='undefined'){
+	var scopes = this.api_doc.authorizations.oauth2.scopes;
+	var options = [{ "value": "" , "text": "" }]
+	for(var i =0; i < scopes.length ; i++ ){
+	    options.push({ "value": scopes[i].key , "text": scopes[i].name });
+	}
+	return options;
     }
-    return options;
 }
 
 APIDesigner.prototype.has_resources = function(){
@@ -206,7 +245,10 @@ APIDesigner.prototype.clean_resources = function(){
 APIDesigner.prototype.init_controllers = function(){
     var API_DESIGNER = this;
 
-    $("#version").change(function(e){ APIDesigner().api_doc.apiVersion = $(this).val() });
+    $("#version").change(function(e){
+        APIDesigner().api_doc.apiVersion = $(this).val();
+        APIDesigner().baseURLValue = "http://localhost:8280/"+$("#context").val().replace("/","")+"/"+$(this).val()});
+    $("#context").change(function(e){ APIDesigner().baseURLValue = "http://localhost:8280/"+$(this).val().replace("/","")+"/"+$("#version").val()});
     $("#name").change(function(e){ APIDesigner().api_doc.info.title = $(this).val() });
     $("#description").change(function(e){ APIDesigner().api_doc.info.description = $(this).val() });
 
@@ -309,6 +351,10 @@ APIDesigner.prototype.init_controllers = function(){
 						API_DESIGNER.render_scopes();
 						API_DESIGNER.render_resources();
 					}); 
+
+    $("#swaggerEditor").click(API_DESIGNER.edit_swagger);
+
+    $("#update_swagger").click(API_DESIGNER.update_swagger);
 }
  
 APIDesigner.prototype.load_api_document = function(api_document){
@@ -317,7 +363,9 @@ APIDesigner.prototype.load_api_document = function(api_document){
     this.render_scopes();
     $("#version").val(api_document.apiVersion);
     $("#name").val(api_document.info.title);
-    $("#description").val(api_document.info.description);
+    if(api_document.info.description){
+    	$("#description").val(api_document.info.description);
+    }
 };
 
 
@@ -334,7 +382,7 @@ APIDesigner.prototype.render_scopes = function(){
 
 APIDesigner.prototype.render_resources = function(){
     context = {
-        "api_doc" : this.api_doc,
+        "api_doc" : jQuery.extend(true, {}, this.api_doc),
         "verbs" :VERBS,
         "has_resources" : this.has_resources()
     }
@@ -370,8 +418,8 @@ APIDesigner.prototype.render_resources = function(){
 };
 
 APIDesigner.prototype.render_resource = function(container){
-    var operation = this.query(container.attr('data-path'));
-    var context = operation[0];
+    var operation = this.query(container.attr('data-path'));    
+    var context = jQuery.extend(true, {}, operation[0]);
     context.resource_path = container.attr('data-path');
     var output = Handlebars.partials['designer-resource-template'](context);
     container.html(output);
@@ -382,7 +430,7 @@ APIDesigner.prototype.render_resource = function(container){
         var decorator = container.find('.editor').data('ace');
         var aceInstance = decorator.editor.ace;
         aceInstance.getSession().on('change', function(e) {
-            context.mediation_script = aceInstance.getValue();
+            operation[0].mediation_script = aceInstance.getValue();
         });
     }
 
@@ -442,12 +490,31 @@ APIDesigner.prototype.add_resource = function(resource, path){
         this.api_doc.apis[i].file = { 
             "apiVersion": this.api_doc.apiVersion,
             "swaggerVersion": "1.2",
+            "basePath":this.baseURLValue,
             "resourcePath": path ,
             apis : [] 
         };
     }    
     this.api_doc.apis[i].file.apis.push(resource);    
     this.render_resources();
+};
+
+APIDesigner.prototype.edit_swagger = function(){
+    var designer =  APIDesigner();
+    designer.swagger_editor = ace.edit("swagger_editor");
+    //var textarea = $('textarea[name="description"]').hide();    
+    designer.swagger_editor.setFontSize(16);
+    designer.swagger_editor.setTheme("ace/theme/textmate");
+    designer.swagger_editor.getSession().setMode("ace/mode/yaml");
+    designer.swagger_editor.getSession().setValue(jsyaml.safeDump(designer.api_doc));
+    
+};
+
+APIDesigner.prototype.update_swagger = function(){
+    var designer =  APIDesigner();
+    var json = jsyaml.safeLoad(designer.swagger_editor.getSession().getValue());
+    designer.load_api_document(json);
+    $('#swaggerEditer').modal('toggle');    
 };
 
 
@@ -465,7 +532,7 @@ $(document).ready(function(){
         var data = {
             "swagger_url" : $("#swagger_import_url").val() // "http://petstore.swagger.wordnik.com/api/api-docs"
         }
-        $.get( "/publisher/site/blocks/item-design/ajax/import.jag", data , function( data ) {
+        $.get( jagg.site.context + "/site/blocks/item-design/ajax/import.jag", data , function( data ) {
             var designer = APIDesigner();
             designer.load_api_document(data);
             $("#swaggerUpload").modal('hide');
@@ -483,6 +550,7 @@ $(document).ready(function(){
     var v = $("#design_form").validate({
         contentType : "application/x-www-form-urlencoded;charset=utf-8",
         dataType: "json",
+	    onkeyup: false,
         submitHandler: function(form) {            
         var designer = APIDesigner();
         
@@ -491,11 +559,11 @@ $(document).ready(function(){
                 content:"At least one resource should be specified. Do you want to add a wildcard resource (/*)." ,
                 type:"confirm",
                 title:"Resource not specified",
-                anotherDialog:false,
+                anotherDialog:true,
                 okCallback:function(){
                     var designer = APIDesigner();
                     designer.add_default_resource();
-
+                    $("#design_form").submit();
                 }
             });            
             return false;
@@ -520,9 +588,9 @@ $(document).ready(function(){
                         if (ssoEnabled) {
                              var currentLoc = window.location.pathname;
                              if (currentLoc.indexOf(".jag") >= 0) {
-                                 location.href = "add.jag";
+                                 location.href = "index.jag";
                              } else {
-                                 location.href = 'site/pages/add.jag';
+                                 location.href = 'site/pages/index.jag';
                              }
                         } else {
                              jagg.showLogin();

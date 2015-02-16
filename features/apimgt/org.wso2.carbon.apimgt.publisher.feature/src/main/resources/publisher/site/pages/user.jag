@@ -8,12 +8,12 @@ var localeResourcesBasePath="/site/conf/locales/jaggery/";
 i18n.init(request,localeResourcesBasePath);
 
 (function () {
-    user = jagg.getUser();
+    var user = jagg.getUser();
     if (!user) {
         response.sendRedirect(getRedirectPathForNonAuthenticatedUser());
     return;
     }
-    isTenantAllowed();
+
 
     jagg.render({
         "name":"page/base",

@@ -983,8 +983,9 @@ label.errorTier {
     .footer-main{
         margin-left:277px;
     }
-    div.row-fluid div.login-content{
+    div.row-fluid div.span6{
         margin-left:250px;
+        margin-top:20px;
     }
 }
 @media all and (min-width: 1000px){
