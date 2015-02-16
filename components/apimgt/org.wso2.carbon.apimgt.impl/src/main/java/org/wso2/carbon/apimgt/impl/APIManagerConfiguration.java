@@ -91,7 +91,7 @@ public class APIManagerConfiguration {
             secretResolver = SecretResolverFactory.create(builder.getDocumentElement(), true);
             readChildElements(builder.getDocumentElement(), new Stack<String>());
             initialized = true;
-            addHostnameToSystemProperty();
+            addKeyManagerConfigsAsSystemProperties();
         } catch (IOException e) {
             log.error(e.getMessage());
             throw new APIManagementException("I/O error while reading the API manager " +
@@ -306,19 +306,26 @@ public class APIManagerConfiguration {
         return null;
     }
 
-    public void addHostnameToSystemProperty() {
+    /**
+     * set the hostname and the port as System properties.
+     * return void
+     */
+    private void addKeyManagerConfigsAsSystemProperties() {
         URL keyManagerURL = null;
         try {
             keyManagerURL = new URL(configuration.get(APIConstants.KEYMANAGER_SERVERURL).get(0));
             String hostname = keyManagerURL.getHost();
+            int port = keyManagerURL.getPort();
+            System.setProperty(APIConstants.KEYMANAGER_PORT,String.valueOf(port));
             if(hostname.equals(System.getProperty(APIConstants.CARBON_LOCALIP))){
                 System.setProperty(APIConstants.KEYMANAGER_HOSTNAME,"localhost");
             }
             else{
                 System.setProperty(APIConstants.KEYMANAGER_HOSTNAME,hostname);
             }
+        //Since this is the server startup.Ingore the exceptions,invoked at the server startup
         } catch (MalformedURLException e) {
-            log.error("MalformedURL Exception", e);
+            log.error("Exception While resolving KeyManager Server URL or Port "+e.getMessage(), e);
         }
     }
 
