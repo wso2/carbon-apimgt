@@ -26,6 +26,7 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.APIStore;
 import org.wso2.carbon.apimgt.impl.dto.Environment;
+import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.securevault.SecretResolver;
 import org.wso2.securevault.SecretResolverFactory;
@@ -35,6 +36,8 @@ import javax.xml.stream.XMLStreamException;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -88,6 +91,7 @@ public class APIManagerConfiguration {
             secretResolver = SecretResolverFactory.create(builder.getDocumentElement(), true);
             readChildElements(builder.getDocumentElement(), new Stack<String>());
             initialized = true;
+            addKeyManagerConfigsAsSystemProperties();
         } catch (IOException e) {
             log.error(e.getMessage());
             throw new APIManagementException("I/O error while reading the API manager " +
@@ -300,6 +304,29 @@ public class APIManagerConfiguration {
             }
         }
         return null;
+    }
+
+    /**
+     * set the hostname and the port as System properties.
+     * return void
+     */
+    private void addKeyManagerConfigsAsSystemProperties() {
+        URL keyManagerURL = null;
+        try {
+            keyManagerURL = new URL(configuration.get(APIConstants.KEYMANAGER_SERVERURL).get(0));
+            String hostname = keyManagerURL.getHost();
+            int port = keyManagerURL.getPort();
+            System.setProperty(APIConstants.KEYMANAGER_PORT,String.valueOf(port));
+            if(hostname.equals(System.getProperty(APIConstants.CARBON_LOCALIP))){
+                System.setProperty(APIConstants.KEYMANAGER_HOSTNAME,"localhost");
+            }
+            else{
+                System.setProperty(APIConstants.KEYMANAGER_HOSTNAME,hostname);
+            }
+        //Since this is the server startup.Ingore the exceptions,invoked at the server startup
+        } catch (MalformedURLException e) {
+            log.error("Exception While resolving KeyManager Server URL or Port "+e.getMessage(), e);
+        }
     }
 
 }
