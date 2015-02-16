@@ -154,6 +154,48 @@
                 </executions>
             </plugin>
             <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>copy</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>copy</goal>
+                        </goals>
+                        <configuration>
+                            <artifactItems>
+                                <artifactItem>
+                                    <groupId>org.apache.httpcomponents</groupId>
+                                    <artifactId>httpmime</artifactId>
+                                    <type>jar</type>
+                                    <overWrite>true</overWrite>
+                                    <outputDirectory>${project.build.directory}/external/libs</outputDirectory>
+                                    <destFileName>httpmime-${httpcomponents.version}.jar</destFileName>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.owasp.encoder</groupId>
+                                    <artifactId>encoder</artifactId>
+                                    <type>jar</type>
+                                    <overWrite>true</overWrite>
+                                    <outputDirectory>${project.build.directory}/external/libs</outputDirectory>
+                                    <destFileName>encoder-${owasp.encoder.version}.jar</destFileName>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>net.sf.saxon</groupId>
+                                    <artifactId>Saxon-HE</artifactId>
+                                    <type>jar</type>
+                                    <overWrite>true</overWrite>
+                                    <outputDirectory>${project.build.directory}/external/libs</outputDirectory>
+                                    <destFileName>Saxon-HE-${Saxon-HE.version}.jar</destFileName>
+                                </artifactItem>
+                            </artifactItems>
+                            <outputDirectory>${project.build.directory}/external/libs</outputDirectory>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
                 <artifactId>maven-resources-plugin</artifactId>
                 <executions>
                     <execution>
@@ -176,6 +218,9 @@
                                         <include>p2.inf</include>
                                         <include>build.properties</include>
                                     </includes>
+                                </resource>
+                                <resource>
+                                    <directory>${project.build.directory}/external/</directory>
                                 </resource>
                             </resources>
                         </configuration>

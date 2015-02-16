@@ -644,6 +644,12 @@
                 <artifactId>neethi</artifactId>
                 <version>${neethi.wso2.version}</version>
             </dependency>
+
+            <dependency>
+                <groupId>net.sf.saxon</groupId>
+                <artifactId>Saxon-HE</artifactId>
+                <version>${Saxon-HE.version}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
@@ -711,6 +717,7 @@
         <httpclient.version>4.1.1-wso2v1</httpclient.version>
         <commons-logging.version>1.1.1</commons-logging.version>
         <h2-database-engine.version>1.2.140.wso2v3</h2-database-engine.version>
+        <Saxon-HE.version>9.4</Saxon-HE.version>
 
         <json-simple.wso2.version>1.1.wso2v1</json-simple.wso2.version>
         <junit.version>4.8.1</junit.version>
