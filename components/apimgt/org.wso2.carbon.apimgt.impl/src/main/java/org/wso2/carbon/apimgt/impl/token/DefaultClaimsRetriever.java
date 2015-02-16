@@ -72,37 +72,40 @@ public class DefaultClaimsRetriever implements ClaimsRetriever {
     public SortedMap<String, String> getClaims(String endUserName) throws APIManagementException {
         SortedMap<String, String> claimValues;
         try {
-            int tenantId = APIUtil.getTenantId(endUserName);
-            //check in local cache
+            if (endUserName != null) {
+                int tenantId = APIUtil.getTenantId(endUserName);
+                String tenantAwareUserName = MultitenantUtils.getTenantAwareUsername(endUserName);
+                //check in local cache
             String key = endUserName + ":" + tenantId;
             ClaimCacheKey cacheKey = new ClaimCacheKey(key);
             //Object result = claimsLocalCache.getValueFromCache(cacheKey);
             Object result = claimsLocalCache.get(cacheKey);
             if (result != null) {
                 claimValues = ((UserClaims) result).getClaimValues();
+                return claimValues;
             } else {
                 ClaimManager claimManager = ServiceReferenceHolder.getInstance().getRealmService().
                         getTenantUserRealm(tenantId).getClaimManager();
                 //Claim[] claims = claimManager.getAllClaims(dialectURI);
                 ClaimMapping[] claims = claimManager.getAllClaimMappings(dialectURI);
                 String[] claimURIs = claimMappingtoClaimURIString(claims);
-                UserStoreManager userStoreManager = ServiceReferenceHolder.getInstance().getRealmService().
-                        getTenantUserRealm(tenantId).getUserStoreManager();
+                UserStoreManager userStoreManager =
+                        ServiceReferenceHolder.getInstance().getRealmService().
+                                getTenantUserRealm(tenantId).getUserStoreManager();
 
-                String tenantAwareUserName = endUserName;
-                if(MultitenantConstants.SUPER_TENANT_ID != tenantId){
-                    tenantAwareUserName = MultitenantUtils.getTenantAwareUsername(endUserName);
-                }
-                claimValues = new TreeMap(userStoreManager.getUserClaimValues(tenantAwareUserName, claimURIs, null));
+                claimValues = new TreeMap(
+                        userStoreManager.getUserClaimValues(tenantAwareUserName, claimURIs, null));
                 UserClaims userClaims = new UserClaims(claimValues);
                 //add to cache
                 claimsLocalCache.put(cacheKey, userClaims);
+                return claimValues;
+            }
             }
         } catch (UserStoreException e) {
             throw new APIManagementException("Error while retrieving user claim values from "
                     + "user store");
         }
-        return claimValues;
+        return null;
     }
 
     /**
