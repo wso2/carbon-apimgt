@@ -19,4 +19,19 @@
         <BAMUsername>admin</BAMUsername>
         <BAMPassword>admin</BAMPassword>
     </APIUsageTracking>
+    <APIKeyManager>
+        <ServerURL>https://${carbon.local.ip}:${mgt.transport.https.port}${carbon.context}/services/</ServerURL>
+        <Username>${admin.username}</Username>
+        <Password>${admin.password}</Password>
+        <EnableJWTCache>false</EnableJWTCache>
+        <EnableKeyMgtValidationInfoCache>false</EnableKeyMgtValidationInfoCache>
+        <KeyValidatorClientType>ThriftClient</KeyValidatorClientType>
+        <ThriftClientPort>10397</ThriftClientPort>
+        <ThriftClientConnectionTimeOut>10000</ThriftClientConnectionTimeOut>
+        <ThriftServerPort>10397</ThriftServerPort>
+        <EnableThriftServer>true</EnableThriftServer>
+        <TokenEndPointName>/oauth2/token</TokenEndPointName>
+        <RevokeAPIURL>https://${carbon.local.ip}:${https.nio.port}/revoke</RevokeAPIURL>
+        <EncryptPersistedTokens>false</EncryptPersistedTokens>
+    </APIKeyManager>
 </APIManager>
