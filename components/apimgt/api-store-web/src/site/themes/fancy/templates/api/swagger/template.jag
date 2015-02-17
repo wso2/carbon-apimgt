@@ -131,7 +131,7 @@ $(document).ready(function(){
             <option value="production">Production</option>
             <option value="sandbox">Sandbox</option>        
           </select> 
-          <label> Environment. </label>
+          <label> Envioromant. </label>
         </div>
       </div>
 <% }else if(jagg.getUser() != null){ %>

@@ -396,5 +396,5 @@ function toggleSequence(checkbox){
 	}else{
 		$(checkbox).parent().next().hide();
 	}
-
+	
 }

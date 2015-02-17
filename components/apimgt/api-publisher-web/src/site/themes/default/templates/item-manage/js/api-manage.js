@@ -1,5 +1,3 @@
-var inSequencesLoaded = false;
-
 //hack to validate tiers
 function validate_tiers(){
     var selectedValues = $('#tier').val();

@@ -71,73 +71,115 @@ $(document).ready(function () {
     });
 
     $('.app-key-generate-button').click(function () {
+
         var elem = $(this);
-        var i = elem.attr("iteration");
         var keyType = elem.attr("data-keytype");
         var authoDomains;
         var domainsDiv;
+        var applicationName = elem.attr("data-application");
         var regen;
         var link;
         var validityTime;
+        var clientName;
         if (keyType == 'PRODUCTION') {
             authoDomains = $('#allowedDomainsPro').val();
-            validityTime=$('#refreshProdValidityTime').val();
+            clientName = applicationName+"PRODUCTION";
+            validityTime = $('#refreshProdValidityTime').val();
         } else {
             authoDomains = $('#allowedDomainsSand').val();
-            validityTime=$('#refreshSandValidityTime').val();
+            clientName = applicationName+"SANDBOX";
+            validityTime = $('#refreshSandValidityTime').val();
         }
+        var oJsonParams =
+            {
+                authorizedDomains: authoDomains,
+                validityTime: validityTime,
+                client_name: clientName,
+                callbackUrl: elem.attr("data-callbackUrl")
+            };
+        console.log(oJsonParams);
         jagg.post("/site/blocks/subscription/subscription-add/ajax/subscription-add.jag", {
-            action:"generateApplicationKey",
-            application:elem.attr("data-application"),
-            keytype:elem.attr("data-keytype"),
-            callbackUrl:elem.attr("data-callbackUrl"),
-            authorizedDomains:authoDomains,
-            validityTime:validityTime
+            action: "generateApplicationKeyOpenKM",
+            application: applicationName,
+            key_type: keyType,
+            jsonParams: JSON.stringify(oJsonParams)
+
         }, function (result) {
             if (!result.error) {
                 location.reload();
             } else {
-                jagg.message({content:result.message,type:"error"});
+                jagg.message({content: result.message, type: "error"});
             }
+
         }, "json");
 
-        $(this).html(i18n.t('info.wait'));
+//        var elem = $(this);
+//        var i = elem.attr("iteration");
+//        var keyType = elem.attr("data-keytype");
+//        var authoDomains;
+//        var domainsDiv;
+//        var regen;
+//        var link;
+//        var validityTime;
+//        if (keyType == 'PRODUCTION') {
+//            authoDomains = $('#allowedDomainsPro').val();
+//            validityTime=$('#refreshProdValidityTime').val();
+//        } else {
+//            authoDomains = $('#allowedDomainsSand').val();
+//            validityTime=$('#refreshSandValidityTime').val();
+//        }
+//        jagg.post("/site/blocks/subscription/subscription-add/ajax/subscription-add.jag", {
+//            action:"generateApplicationKey",
+//            application:elem.attr("data-application"),
+//            keytype:elem.attr("data-keytype"),
+//            callbackUrl:elem.attr("data-callbackUrl"),
+//            authorizedDomains:authoDomains,
+//            validityTime:validityTime
+//        }, function (result) {
+//            if (!result.error) {
+//                location.reload();
+//            } else {
+//                jagg.message({content:result.message,type:"error"});
+//            }
+//        }, "json");
+//
+//        $(this).html(i18n.t('info.wait'));
     });
 
-    $('.app-create-key-button').click(function () {
-        var elem = $(this);
-        var i = elem.attr("iteration");
-        var keyType = elem.attr("data-keytype");
-        var authoDomains;
-        var domainsDiv;
-        var regen;
-        var link;
-        var validityTime;
-        if (keyType == 'PRODUCTION') {
-            authoDomains = $('#allowedDomainsPro').val();
-            validityTime=$('#refreshProdValidityTime').val();
-        } else {
-            authoDomains = $('#allowedDomainsSand').val();
-            validityTime=$('#refreshSandValidityTime').val();
-        }
-        jagg.post("/site/blocks/subscription/subscription-add/ajax/subscription-add.jag", {
-            action:"generateApplicationKey",
-            application:elem.attr("data-application"),
-            keytype:elem.attr("data-keytype"),
-            callbackUrl:elem.attr("data-callbackUrl"),
-            authorizedDomains:authoDomains,
-            validityTime:validityTime,
-	    retryAfterFailure:true
-        }, function (result) {
-            if (!result.error) {
-                location.reload();
-            } else {
-                jagg.message({content:result.message,type:"error"});
-            }
-        }, "json");
-
-        $(this).html(i18n.t('info.wait'));
-    });
+//    $('.app-create-key-button').click(function () {
+//        var elem = $(this);
+//        var i = elem.attr("iteration");
+//        var keyType = elem.attr("data-keytype");
+//        var authoDomains;
+//        var domainsDiv;
+//        var regen;
+//        var link;
+//        var validityTime;
+//        if (keyType == 'PRODUCTION') {
+//            authoDomains = $('#allowedDomainsPro').val();
+//            validityTime=$('#refreshProdValidityTime').val();
+//        } else {
+//            authoDomains = $('#allowedDomainsSand').val();
+//            validityTime=$('#refreshSandValidityTime').val();
+//        }
+//        jagg.post("/site/blocks/subscription/subscription-add/ajax/subscription-add.jag", {
+//            action:"generateApplicationKey",
+//            application:elem.attr("data-application"),
+//            keytype:elem.attr("data-keytype"),
+//            callbackUrl:elem.attr("data-callbackUrl"),
+//            authorizedDomains:authoDomains,
+//            validityTime:validityTime,
+//	    retryAfterFailure:true
+//        }, function (result) {
+//            if (!result.error) {
+//                location.reload();
+//            } else {
+//                jagg.message({content:result.message,type:"error"});
+//            }
+//        }, "json");
+//
+//        $(this).html(i18n.t('info.wait'));
+//    });
 
        $('.key-table-content textarea').focus(function() {
         var $this = $(this);
@@ -185,6 +227,58 @@ $(document).ready(function () {
 	  
 	    
 });
+
+var saveAuthApp=function(oBtnElement,keyType){
+//alert("Inside Function");
+
+    var clientId;
+    var clientSecret;
+    //this is application ID
+    var appId = $(".cApplicationId").val();
+    //application name
+    var applicationName = $(oBtnElement).attr("data-application");
+
+    if (keyType == 'PRODUCTION') {
+        clientId = $('#optionTwoClientIdProduction').val();
+        clientSecret = $('#optionTwoClientSecretProduction').val();
+    }
+    else if(keyType == 'SANDBOX'){
+        clientId = $('#optionTwoClientIdSandbox').val();
+        clientSecret = $('#optionTwoClientSecretSandbox').val();
+    }
+    var elem = $(oBtnElement);
+
+    var oJsonParams =
+        {
+            "client_name":elem.attr("data-application"),
+            "key_type" : keyType,
+            "client_secret":clientSecret
+
+        };
+
+    if(!clientId || !clientSecret){
+        alert("Client id and Client secret can not be empty");
+        return false;
+    }
+
+    jagg.post("/site/blocks/subscription/subscription-add/ajax/subscription-add.jag", {
+
+        action:"saveAuthapp",
+        jsonParams:JSON.stringify(oJsonParams),
+        "client_id":clientId,
+        "applicationName" : applicationName
+
+    }, function (result) {
+           if (!result.error) {
+                location.reload();
+            } else {
+                jagg.message({content:result.message,type:"error"});
+            }
+
+    }, "json");
+    $(this).html(i18n.t('info.wait'));
+}
+
 
 var regenerate=function(appName,keyType,i,btn,div,clientId,clientSecret) {
     if(jagg.sessionExpired()){

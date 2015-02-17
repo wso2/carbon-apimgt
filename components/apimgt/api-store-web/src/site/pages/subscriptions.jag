@@ -8,7 +8,7 @@ var i18n = require("i18n");
 var localeResourcesBasePath="/site/conf/locales/jaggery/";
 i18n.init(request,localeResourcesBasePath);
 var tenantDomain=getTenantDomain();
-
+var log = new Log();
 (function () {
     var apis, site, tag, query, result, mod, user = jagg.getUser();
 
@@ -18,7 +18,6 @@ var tenantDomain=getTenantDomain();
         response.sendRedirect(getRedirectPathForNonAuthenticatedUser());
         return;
     }
-
     jagg.render({
         "name":"page/base",
         "inputs":{

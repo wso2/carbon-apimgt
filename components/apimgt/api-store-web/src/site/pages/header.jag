@@ -4,7 +4,7 @@ var encode = require('encode');
 encode = new encode.Encode();
 var site = require("/site/conf/site.json");
 
-//commented below if condition because anonymous user
+//commented below if condition becuase anonymous user
 //should be able to view the available apis without
 //seeing IS login page.SSO will work when click the login link.
 /*var ssoEnabled = site.ssoConfiguration.enabled;
