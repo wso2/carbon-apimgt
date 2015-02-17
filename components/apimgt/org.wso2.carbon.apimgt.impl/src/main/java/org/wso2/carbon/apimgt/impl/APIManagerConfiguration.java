@@ -75,7 +75,7 @@ public class APIManagerConfiguration {
      * successfully populated, it will ignore all subsequent invocations.
      *
      * @param filePath Path of the XML descriptor file
-     * @throws org.wso2.carbon.apimgt.api.APIManagementException If an error occurs while reading the XML descriptor
+     * @throws APIManagementException If an error occurs while reading the XML descriptor
      */
     public void load(String filePath) throws APIManagementException {
         if (initialized) {

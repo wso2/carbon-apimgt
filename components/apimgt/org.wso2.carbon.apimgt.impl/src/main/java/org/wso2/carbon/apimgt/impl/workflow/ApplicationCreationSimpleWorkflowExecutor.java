@@ -46,8 +46,8 @@ public class ApplicationCreationSimpleWorkflowExecutor extends WorkflowExecutor 
 	 * Execute the workflow executor
 	 * 
 	 * @param workFlowDTO
-	 *            - {@link org.wso2.carbon.apimgt.impl.dto.ApplicationWorkflowDTO}
-	 * @throws org.wso2.carbon.apimgt.impl.workflow.WorkflowException
+	 *            - {@link ApplicationWorkflowDTO}
+	 * @throws WorkflowException
 	 */
 
 	public void execute(WorkflowDTO workFlowDTO) throws WorkflowException {

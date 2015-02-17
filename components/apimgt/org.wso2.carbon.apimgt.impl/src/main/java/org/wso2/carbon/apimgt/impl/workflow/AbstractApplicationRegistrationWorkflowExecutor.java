@@ -22,9 +22,13 @@ package org.wso2.carbon.apimgt.impl.workflow;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.model.OauthAppRequest;
 import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.api.model.Subscriber;
+import org.wso2.carbon.apimgt.api.model.KeyManager;
+import org.wso2.carbon.apimgt.api.model.OAuthApplicationInfo;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.applications.ApplicationCreator;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dto.ApplicationRegistrationWorkflowDTO;
 import org.wso2.carbon.apimgt.impl.dto.WorkflowDTO;
@@ -35,6 +39,7 @@ import org.wso2.carbon.apimgt.keymgt.stub.types.carbon.ApplicationKeysDTO;
 public abstract class AbstractApplicationRegistrationWorkflowExecutor extends WorkflowExecutor{
 
     private static final Log log = LogFactory.getLog(AbstractApplicationRegistrationWorkflowExecutor.class);
+    private ApiMgtDAO dao=new ApiMgtDAO();
 
     public String getWorkflowType(){
        return WorkflowConstants.WF_TYPE_AM_APPLICATION_REGISTRATION_PRODUCTION;
@@ -42,9 +47,12 @@ public abstract class AbstractApplicationRegistrationWorkflowExecutor extends Wo
 
     public void execute(WorkflowDTO workFlowDTO) throws WorkflowException {
         log.debug("Executing AbstractApplicationRegistrationWorkflowExecutor...");
-        ApiMgtDAO dao = new ApiMgtDAO();
+
         try {
-            dao.createApplicationRegistrationEntry((ApplicationRegistrationWorkflowDTO) workFlowDTO, false);
+            //dao.createApplicationRegistrationEntry((ApplicationRegistrationWorkflowDTO) workFlowDTO, false);
+            ApplicationRegistrationWorkflowDTO appRegDTO = (ApplicationRegistrationWorkflowDTO)workFlowDTO;
+            dao.createApplicationRegistrationEntry(appRegDTO,false);
+           // appRegDTO.getAppInfoDTO().saveDTO();
             super.execute(workFlowDTO);
         } catch (APIManagementException e) {
             log.error("Error while creating Application Registration entry.", e);
@@ -64,7 +72,17 @@ public abstract class AbstractApplicationRegistrationWorkflowExecutor extends Wo
                 status = APIConstants.AppRegistrationStatus.REGISTRATION_APPROVED;
             }
 
-            ApiMgtDAO dao = new ApiMgtDAO();
+            ApplicationRegistrationWorkflowDTO regWorkFlowDTO = (ApplicationRegistrationWorkflowDTO)workFlowDTO;
+            Application application = ApplicationCreator.populateApplication(workFlowDTO.getWorkflowReference());
+//            OauthAppRequest appInfoDTO = ApplicationCreator.createAppInfoDTO(null);
+//            appInfoDTO.setMappingId(regWorkFlowDTO.getWorkflowReference());
+//           // appInfoDTO.retrieveDTO();
+//            if(application != null){
+//                regWorkFlowDTO.setApplication(application);
+//                regWorkFlowDTO.setAppInfoDTO(appInfoDTO);
+//            }
+
+            /*ApiMgtDAO dao = new ApiMgtDAO();
 
             ApplicationRegistrationWorkflowDTO regWorkFlowDTO = (ApplicationRegistrationWorkflowDTO)workFlowDTO;
             dao.populateAppRegistrationWorkflowDTO(regWorkFlowDTO);
@@ -75,13 +93,55 @@ public abstract class AbstractApplicationRegistrationWorkflowExecutor extends Wo
             if(((ApplicationRegistrationWorkflowDTO) workFlowDTO).getApplication() == null){
                 throw new WorkflowException("Couldn't find application to complete the Registration process.");
             }
+            */
         } catch (APIManagementException e) {
             log.error("Error while completing Application Registration entry.", e);
             throw new WorkflowException("Error while completing Application Registration entry.", e);
         }
     }
 
-    protected void generateKeysForApplication(ApplicationRegistrationWorkflowDTO workflowDTO) throws APIManagementException {
+    /**
+     * This method will create a oAuth client at oAuthServer.
+     * and will create a mapping with APIM using consumerKey
+     * @param workflowDTO
+     * @throws APIManagementException
+     */
+    protected void generateKeysForApplication(ApplicationRegistrationWorkflowDTO workflowDTO) throws
+            APIManagementException {
+        log.debug("Registering Application and creating an Access Token... ");
+        Application application = workflowDTO.getApplication();
+        Subscriber subscriber = application.getSubscriber();
+
+        if (application == null || subscriber == null || workflowDTO.getAllowedDomains() == null) {
+            ApiMgtDAO dao = new ApiMgtDAO();
+            dao.populateAppRegistrationWorkflowDTO(workflowDTO);
+        }
+
+        SubscriberKeyMgtClient keyMgtClient = APIUtil.getKeyManagementClient();
+
+        try {
+            //get new key manager
+            KeyManager keyManager = ApplicationCreator.getKeyManager();
+            //createApplication on oAuthorization server.
+            OAuthApplicationInfo oAuthApplication = keyManager.createApplication(workflowDTO.getAppInfoDTO());
+            //Do application mapping with consumerKey.
+            //dao.createApplicationRegistrationEntry(workflowDTO, true);
+
+            //update associateApplication
+            application.updateAssociateOAuthApp(workflowDTO.getKeyType(), oAuthApplication);
+
+
+            ApplicationKeysDTO keysDTO =  keyMgtClient.getApplicationAccessKey(subscriber.getName(), application.getName(),
+                    workflowDTO.getKeyType(), application.getCallbackUrl(),
+                    workflowDTO.getAllowedDomains(), Long.toString(workflowDTO.getValidityTime()));
+            workflowDTO.setKeyDetails(keysDTO);
+        } catch (Exception e) {
+            APIUtil.handleException("Error occurred while executing SubscriberKeyMgtClient.", e);
+        }
+    }
+
+    protected void generateKeysForApplication_original(ApplicationRegistrationWorkflowDTO workflowDTO) throws
+            APIManagementException {
         log.debug("Registering Application and creating an Access Token... ");
         Application application = workflowDTO.getApplication();
         Subscriber subscriber = application.getSubscriber();

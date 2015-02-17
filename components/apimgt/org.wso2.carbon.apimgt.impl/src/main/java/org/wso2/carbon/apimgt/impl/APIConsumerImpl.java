@@ -21,12 +21,16 @@ package org.wso2.carbon.apimgt.impl;
 import org.apache.axis2.AxisFault;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.json.simple.JSONArray;
 import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.model.OauthAppRequest;
 import org.wso2.carbon.apimgt.api.model.*;
 import org.wso2.carbon.apimgt.api.model.Tag;
 import org.wso2.carbon.apimgt.handlers.security.stub.types.APIKeyMapping;
+import org.wso2.carbon.apimgt.impl.applications.ApplicationCreator;
+import org.wso2.carbon.apimgt.impl.applications.ApplicationImpl;
 import org.wso2.carbon.apimgt.impl.dto.*;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.*;
@@ -52,6 +56,8 @@ import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 import javax.cache.Caching;
 
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * This class provides the core API store functionality. It is implemented in a very
@@ -119,7 +125,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
      *
      * @param tag
      * @return
-     * @throws org.wso2.carbon.apimgt.api.APIManagementException
+     * @throws APIManagementException
      */
     public Set<API> getAPIsWithTag(String tag) throws APIManagementException {
         if (taggedAPIs != null) {
@@ -137,7 +143,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
      *
      * @param tag
      * @return
-     * @throws org.wso2.carbon.apimgt.api.APIManagementException
+     * @throws APIManagementException
      */
     public Map<String,Object> getPaginatedAPIsWithTag(String tag,int start,int end) throws APIManagementException {
         List<API> apiSet = new ArrayList<API>();
@@ -171,7 +177,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
      * @param registry - Current registry; tenant/SuperTenant
      * @param tag
      * @return
-     * @throws org.wso2.carbon.apimgt.api.APIManagementException
+     * @throws APIManagementException
      */
     private Set<API> getAPIsWithTag(Registry registry, String tag)
             throws APIManagementException {
@@ -214,7 +220,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
      * The method to get APIs to Store view      *
      *
      * @return Set<API>  Set of APIs
-     * @throws org.wso2.carbon.apimgt.api.APIManagementException
+     * @throws APIManagementException
      */
     public Set<API> getAllPublishedAPIs(String tenantDomain) throws APIManagementException {
         SortedSet<API> apiSortedSet = new TreeSet<API>(new APINameComparator());
@@ -312,7 +318,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
      * The method to get APIs to Store view      *
      *
      * @return Set<API>  Set of APIs
-     * @throws org.wso2.carbon.apimgt.api.APIManagementException
+     * @throws APIManagementException
      */
     public Map<String,Object> getAllPaginatedPublishedAPIs(String tenantDomain,int start,int end) throws APIManagementException {
     	
@@ -433,7 +439,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
      * The method to get APIs by given status to Store view  
      *
      * @return Set<API>  Set of APIs
-     * @throws org.wso2.carbon.apimgt.api.APIManagementException
+     * @throws APIManagementException
      */
     @Override
 	public Map<String, Object> getAllPaginatedAPIsByStatus(String tenantDomain,
@@ -558,7 +564,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
      * The method to get All PUBLISHED and DEPRECATED APIs, to Store view      
      *
      * @return Set<API>  Set of APIs
-     * @throws org.wso2.carbon.apimgt.api.APIManagementException
+     * @throws APIManagementException
      */
     public Map<String,Object> getAllPaginatedAPIs(String tenantDomain,int start,int end) throws APIManagementException {
         Map<String,Object> result=new HashMap<String, Object>();
@@ -766,7 +772,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
      *
      * @param limit no limit. Return everything else, limit the return list to specified value.
      * @return Set<API>
-     * @throws org.wso2.carbon.apimgt.api.APIManagementException
+     * @throws APIManagementException
      */
     public Set<API> getRecentlyAddedAPIs(int limit, String tenantDomain)
             throws APIManagementException {
@@ -1322,7 +1328,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 	 * @param searchTerm
 	 * @param searchType
 	 * @return
-	 * @throws org.wso2.carbon.apimgt.api.APIManagementException
+	 * @throws APIManagementException
 	 */
 
     public Map<String,Object> searchPaginatedAPIs(Registry registry, String searchTerm, String searchType,int start,int end) throws APIManagementException {
@@ -1394,6 +1400,34 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         result.put("apis",apiSet);
         result.put("length",totalLength);
         return result;
+    }
+
+    /**
+     *
+     * @param jsonString this string will contain oAuth app details
+     * @param userName user name of logged in user.
+     * @param clientId this is the consumer key of oAuthApplication
+     * @param applicationName this is the APIM appication name.
+     * @return
+     * @throws APIManagementException
+     */
+    public Map<String, Object> saveSemiManualClient(String jsonString, String userName, String clientId,
+                                                    String applicationName) throws APIManagementException {
+
+        OauthAppRequest oauthAppRequest = ApplicationCreator.createOauthAppRequest(jsonString);
+
+        apiMgtDAO.createApplicationKeyTypeMapping(oauthAppRequest, applicationName, userName, clientId);
+
+        //#TODO get actuall values from response and pass.
+        Map<String, Object> keyDetails = new HashMap<String, Object>();
+        keyDetails.put("validityTime", "3600");
+        keyDetails.put("accessToken", "NULL");
+        keyDetails.put("consumerKey", "NULL");
+        keyDetails.put("consumerSecret", "NULL");
+        keyDetails.put("validityTime", "3600");
+
+        return null;
+
     }
 
     public Set<SubscribedAPI> getSubscribedAPIs(Subscriber subscriber) throws APIManagementException {
@@ -1583,7 +1617,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 
     /**
      * Add a new Application from the store.
-     * @param application - {@link org.wso2.carbon.apimgt.api.model.Application}
+     * @param application - {@link Application}
      * @param userId - {@link String} 
      * @return {@link String}
      */
@@ -1639,6 +1673,78 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             throw new APIManagementException("Cannot update the application while it is INACTIVE");
         }
         apiMgtDAO.updateApplication(application);
+    }
+
+    public Map<String,String> requestApprovalForApplicationRegistration_new(String userId, String applicationName, String tokenType, String callbackUrl, String[] allowedDomains, String validityTime) throws APIManagementException {
+
+        Application application = apiMgtDAO.getApplicationByName(applicationName, userId);
+
+        if (!WorkflowStatus.APPROVED.toString().equals(application.getStatus())) {
+            throw new APIManagementException("Application should be approved before registering.");
+        }
+
+        boolean isTenantFlowStarted = false;
+        if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
+            isTenantFlowStarted = true;
+            PrivilegedCarbonContext.startTenantFlow();
+            PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
+        }
+
+
+        WorkflowExecutor appRegistrationWorkflow = null;
+        ApplicationRegistrationWorkflowDTO appRegWFDto = null;
+        try {
+            if (APIConstants.API_KEY_TYPE_PRODUCTION.equals(tokenType)) {
+                appRegistrationWorkflow = WorkflowExecutorFactory.getInstance().
+                        getWorkflowExecutor(WorkflowConstants.WF_TYPE_AM_APPLICATION_REGISTRATION_PRODUCTION);
+                appRegWFDto = (ApplicationRegistrationWorkflowDTO) WorkflowExecutorFactory.getInstance().
+                        createWorkflowDTO(WorkflowConstants.WF_TYPE_AM_APPLICATION_REGISTRATION_PRODUCTION);
+            } else if (APIConstants.API_KEY_TYPE_SANDBOX.equals(tokenType)) {
+                appRegistrationWorkflow = WorkflowExecutorFactory.getInstance().
+                        getWorkflowExecutor(WorkflowConstants.WF_TYPE_AM_APPLICATION_REGISTRATION_SANDBOX);
+                appRegWFDto = (ApplicationRegistrationWorkflowDTO) WorkflowExecutorFactory.getInstance().
+                        createWorkflowDTO(WorkflowConstants.WF_TYPE_AM_APPLICATION_REGISTRATION_SANDBOX);
+            }
+
+            appRegWFDto.setStatus(WorkflowStatus.CREATED);
+            appRegWFDto.setCreatedTime(System.currentTimeMillis());
+            appRegWFDto.setTenantDomain(tenantDomain);
+            appRegWFDto.setTenantId(tenantId);
+            appRegWFDto.setExternalWorkflowReference(appRegistrationWorkflow.generateUUID());
+            appRegWFDto.setWorkflowReference(appRegWFDto.getExternalWorkflowReference());
+            appRegWFDto.setApplication(application);
+            appRegWFDto.setUserName(userId);
+            appRegWFDto.setCallbackUrl(appRegistrationWorkflow.getCallbackURL());
+            appRegWFDto.setDomainList(allowedDomains);
+            appRegWFDto.setValidityTime(Long.parseLong(validityTime));
+
+
+            appRegistrationWorkflow.execute(appRegWFDto);
+
+        } catch (WorkflowException e) {
+            log.error("Could not execute Workflow", e);
+            throw new APIManagementException("Could not execute Workflow", e);
+        } finally {
+            if (isTenantFlowStarted) {
+                PrivilegedCarbonContext.endTenantFlow();
+            }
+        }
+
+        //TODO: Return  ApplicationKeysDTO or WorkflowDTO without creating a Map.To do this has to move either into
+        // api module.
+        Map<String, String> keyDetails = new HashMap<String, String>();
+        keyDetails.put("keyState", appRegWFDto.getStatus().toString());
+        ApplicationKeysDTO applicationKeysDTO = appRegWFDto.getKeyDetails();
+
+        if (applicationKeysDTO != null) {
+
+            keyDetails.put("accessToken", applicationKeysDTO.getApplicationAccessToken());
+            keyDetails.put("consumerKey", applicationKeysDTO.getConsumerKey());
+            keyDetails.put("consumerSecret", applicationKeysDTO.getConsumerSecret());
+            keyDetails.put("validityTime", applicationKeysDTO.getValidityTime());
+
+        }
+        return keyDetails;
     }
 
     public void removeApplication(Application application) throws APIManagementException {
@@ -1697,14 +1803,14 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     @Override
     public Map<String,String> requestApprovalForApplicationRegistration(String userId, String applicationName, String tokenType, String callbackUrl, String[] allowedDomains, String validityTime) throws APIManagementException {
 
-        Application application  = apiMgtDAO.getApplicationByName(applicationName,userId);
+        Application application = apiMgtDAO.getApplicationByName(applicationName, userId);
 
-        if(!WorkflowStatus.APPROVED.toString().equals(application.getStatus())){
+        if (!WorkflowStatus.APPROVED.toString().equals(application.getStatus())) {
             throw new APIManagementException("Application should be approved before registering.");
         }
 
         boolean isTenantFlowStarted = false;
-        if(tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)){
+        if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
             isTenantFlowStarted = true;
             PrivilegedCarbonContext.startTenantFlow();
             PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
@@ -1714,29 +1820,29 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         WorkflowExecutor appRegistrationWorkflow = null;
         ApplicationRegistrationWorkflowDTO appRegWFDto = null;
         try {
-        if(APIConstants.API_KEY_TYPE_PRODUCTION.equals(tokenType)){
-            appRegistrationWorkflow = WorkflowExecutorFactory.getInstance().
-                    getWorkflowExecutor(WorkflowConstants.WF_TYPE_AM_APPLICATION_REGISTRATION_PRODUCTION);
-            appRegWFDto = (ApplicationRegistrationWorkflowDTO)WorkflowExecutorFactory.getInstance().
-                    createWorkflowDTO(WorkflowConstants.WF_TYPE_AM_APPLICATION_REGISTRATION_PRODUCTION);
-        } else if(APIConstants.API_KEY_TYPE_SANDBOX.equals(tokenType)){
-            appRegistrationWorkflow = WorkflowExecutorFactory.getInstance().
-                    getWorkflowExecutor(WorkflowConstants.WF_TYPE_AM_APPLICATION_REGISTRATION_SANDBOX);
-            appRegWFDto = (ApplicationRegistrationWorkflowDTO)WorkflowExecutorFactory.getInstance().
-                    createWorkflowDTO(WorkflowConstants.WF_TYPE_AM_APPLICATION_REGISTRATION_SANDBOX);
-        }
+            if (APIConstants.API_KEY_TYPE_PRODUCTION.equals(tokenType)) {
+                appRegistrationWorkflow = WorkflowExecutorFactory.getInstance().
+                        getWorkflowExecutor(WorkflowConstants.WF_TYPE_AM_APPLICATION_REGISTRATION_PRODUCTION);
+                appRegWFDto = (ApplicationRegistrationWorkflowDTO) WorkflowExecutorFactory.getInstance().
+                        createWorkflowDTO(WorkflowConstants.WF_TYPE_AM_APPLICATION_REGISTRATION_PRODUCTION);
+            } else if (APIConstants.API_KEY_TYPE_SANDBOX.equals(tokenType)) {
+                appRegistrationWorkflow = WorkflowExecutorFactory.getInstance().
+                        getWorkflowExecutor(WorkflowConstants.WF_TYPE_AM_APPLICATION_REGISTRATION_SANDBOX);
+                appRegWFDto = (ApplicationRegistrationWorkflowDTO) WorkflowExecutorFactory.getInstance().
+                        createWorkflowDTO(WorkflowConstants.WF_TYPE_AM_APPLICATION_REGISTRATION_SANDBOX);
+            }
 
-        appRegWFDto.setStatus(WorkflowStatus.CREATED);
-        appRegWFDto.setCreatedTime(System.currentTimeMillis());
-        appRegWFDto.setTenantDomain(tenantDomain);
-        appRegWFDto.setTenantId(tenantId);
-        appRegWFDto.setExternalWorkflowReference(appRegistrationWorkflow.generateUUID());
-        appRegWFDto.setWorkflowReference(appRegWFDto.getExternalWorkflowReference());
-        appRegWFDto.setApplication(application);
-        appRegWFDto.setUserName(userId);
-        appRegWFDto.setCallbackUrl(appRegistrationWorkflow.getCallbackURL());
-        appRegWFDto.setDomainList(allowedDomains);
-        appRegWFDto.setValidityTime(Long.parseLong(validityTime));
+            appRegWFDto.setStatus(WorkflowStatus.CREATED);
+            appRegWFDto.setCreatedTime(System.currentTimeMillis());
+            appRegWFDto.setTenantDomain(tenantDomain);
+            appRegWFDto.setTenantId(tenantId);
+            appRegWFDto.setExternalWorkflowReference(appRegistrationWorkflow.generateUUID());
+            appRegWFDto.setWorkflowReference(appRegWFDto.getExternalWorkflowReference());
+            appRegWFDto.setApplication(application);
+            appRegWFDto.setUserName(userId);
+            appRegWFDto.setCallbackUrl(appRegistrationWorkflow.getCallbackURL());
+            appRegWFDto.setDomainList(allowedDomains);
+            appRegWFDto.setValidityTime(Long.parseLong(validityTime));
 
 
             appRegistrationWorkflow.execute(appRegWFDto);
@@ -1745,28 +1851,174 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             log.error("Could not execute Workflow", e);
             throw new APIManagementException("Could not execute Workflow", e);
         } finally {
-            if(isTenantFlowStarted){
+            if (isTenantFlowStarted) {
                 PrivilegedCarbonContext.endTenantFlow();
             }
         }
 
         //TODO: Return  ApplicationKeysDTO or WorkflowDTO without creating a Map.To do this has to move either into
         // api module.
-        Map<String,String> keyDetails = new HashMap<String, String>();
-        keyDetails.put("keyState",appRegWFDto.getStatus().toString());
+        Map<String, String> keyDetails = new HashMap<String, String>();
+        keyDetails.put("keyState", appRegWFDto.getStatus().toString());
         ApplicationKeysDTO applicationKeysDTO = appRegWFDto.getKeyDetails();
 
-        if(applicationKeysDTO != null){
+        if (applicationKeysDTO != null) {
 
-            keyDetails.put("accessToken",applicationKeysDTO.getApplicationAccessToken());
-            keyDetails.put("consumerKey",applicationKeysDTO.getConsumerKey());
-            keyDetails.put("consumerSecret",applicationKeysDTO.getConsumerSecret());
-            keyDetails.put("validityTime",applicationKeysDTO.getValidityTime());
+            keyDetails.put("accessToken", applicationKeysDTO.getApplicationAccessToken());
+            keyDetails.put("consumerKey", applicationKeysDTO.getConsumerKey());
+            keyDetails.put("consumerSecret", applicationKeysDTO.getConsumerSecret());
+            keyDetails.put("validityTime", applicationKeysDTO.getValidityTime());
 
         }
+        return keyDetails;
+    }
 
+    /**
+     * @param userId          Subsriber name.
+     * @param applicationName of the Application.
+     * @param tokenType       Token type (PRODUCTION | SANDBOX)
+     * @param jsonString      json String with oAuthApplication parameters.
+     * @return
+     * @throws APIManagementException
+     */
+    @Override
+    public Map<String, Object> updateAuthClient(String userId, String applicationName, String tokenType,
+                                                String jsonString) throws APIManagementException {
+
+        if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
+            PrivilegedCarbonContext.startTenantFlow();
+            PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
+        }
+        //Create OauthAppRequest object by passing json String.
+        OauthAppRequest request = ApplicationCreator.createOauthAppRequest(jsonString);
+        //get key manager instant.
+        KeyManager keyManager = ApplicationCreator.getKeyManager();
+        //call update method.
+        keyManager.updateApplication(request);
+
+        //TODO: Return  ApplicationKeysDTO or WorkflowDTO without creating a Map.To do this has to move either
+        // into api module.
+        Map<String, Object> keyDetails = new HashMap<String, Object>();
+        keyDetails.put("validityTime", "3600");
 
         return keyDetails;
+    }
+
+    /**
+     * This method perform delete oAuth application.
+     *
+     * @param consumerKey
+     * @throws APIManagementException
+     */
+    @Override
+    public void deleteAuthApplication(String consumerKey) throws APIManagementException {
+        //get key manager instance.
+        KeyManager keyManager = ApplicationCreator.getKeyManager();
+        //delete oAuthApplication by calling key manager implementation
+        keyManager.deleteApplication(consumerKey);
+    }
+
+    /**
+     * @param userId          Subsriber name.
+     * @param applicationName of the Application.
+     * @param tokenType       Token type (PRODUCTION | SANDBOX)
+     * @param clientDetails   oAuthApplication parameters as a json string.
+     * @return
+     * @throws APIManagementException
+     */
+    @Override
+    public Map<String, Object> requestApprovalForApplicationRegistration(String userId, String applicationName, String tokenType, String clientDetails) throws APIManagementException {
+        boolean isTenantFlowStarted = false;
+
+        if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
+            isTenantFlowStarted = true;
+            PrivilegedCarbonContext.startTenantFlow();
+            PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
+        }
+        //initiate WorkflowExecutor
+        WorkflowExecutor appRegistrationWorkflow = null;
+        //initiate ApplicationRegistrationWorkflowDTO
+        ApplicationRegistrationWorkflowDTO appRegWFDto = null;
+        //get APIM application by Application Name and userId.
+        Application application = ApplicationCreator.retrieveApplication(applicationName, userId);
+        //Build key manager instance and create oAuthAppRequest by jsonString.
+        OauthAppRequest request = ApplicationCreator.createOauthAppRequest(clientDetails);
+
+        String allowDomains = (String) request.getoAuthApplicationInfo().getParameter("callbackUrl");
+        //split by comma and make an array.
+        String[] allowDomainsArray = allowDomains.split(",", -1);
+
+        try {
+            //if its a PRODUCTION application.
+            if (APIConstants.API_KEY_TYPE_PRODUCTION.equals(tokenType)) {
+                //initiate workflow type. By default simple work flow will be executed.
+                appRegistrationWorkflow = WorkflowExecutorFactory.getInstance().
+                        getWorkflowExecutor(WorkflowConstants.WF_TYPE_AM_APPLICATION_REGISTRATION_PRODUCTION);
+                appRegWFDto = (ApplicationRegistrationWorkflowDTO) WorkflowExecutorFactory.getInstance().
+                        createWorkflowDTO(WorkflowConstants.WF_TYPE_AM_APPLICATION_REGISTRATION_PRODUCTION);
+
+            }//if it is a sandBox application.
+            else if (APIConstants.API_KEY_TYPE_SANDBOX.equals(tokenType)) { //if its a SANDBOX application.
+                appRegistrationWorkflow = WorkflowExecutorFactory.getInstance().
+                        getWorkflowExecutor(WorkflowConstants.WF_TYPE_AM_APPLICATION_REGISTRATION_SANDBOX);
+                appRegWFDto = (ApplicationRegistrationWorkflowDTO) WorkflowExecutorFactory.getInstance().
+                        createWorkflowDTO(WorkflowConstants.WF_TYPE_AM_APPLICATION_REGISTRATION_SANDBOX);
+            }
+
+            //set status.
+            appRegWFDto.setStatus(WorkflowStatus.CREATED);
+            //set created time
+            appRegWFDto.setCreatedTime(System.currentTimeMillis());
+            //set tenant domain
+            appRegWFDto.setTenantDomain(tenantDomain);
+            //set tenantId
+            appRegWFDto.setTenantId(tenantId);
+            //set workflow reference ID
+            appRegWFDto.setExternalWorkflowReference(appRegistrationWorkflow.generateUUID());
+            //set workflow reference
+            appRegWFDto.setWorkflowReference(appRegWFDto.getExternalWorkflowReference());
+            //set APIM application.
+            appRegWFDto.setApplication(application);
+            //set workflow mappingID
+            request.setMappingId(appRegWFDto.getWorkflowReference());
+            //set user name
+            appRegWFDto.setUserName(userId);
+            //set callback URL
+            appRegWFDto.setCallbackUrl(appRegistrationWorkflow.getCallbackURL());
+            //set oAuthApplication properties.
+            appRegWFDto.setAppInfoDTO(request);
+            //set allowdomains
+            appRegWFDto.setDomainList(allowDomainsArray);
+            //execute workflow.
+            appRegistrationWorkflow.execute(appRegWFDto);
+
+        } catch (WorkflowException e) {
+            log.error("Could not execute Workflow", e);
+            throw new APIManagementException("Could not execute Workflow", e);
+        } finally {
+            if (isTenantFlowStarted) {
+                PrivilegedCarbonContext.endTenantFlow();
+            }
+        }
+
+        Map<String, Object> keyDetails = new HashMap<String, Object>();
+        keyDetails.put("keyState", appRegWFDto.getStatus().toString());
+        ApplicationKeysDTO applicationKeysDTO = appRegWFDto.getKeyDetails();
+
+        if (applicationKeysDTO != null) {
+
+            keyDetails.put("accessToken", applicationKeysDTO.getApplicationAccessToken());
+            keyDetails.put("consumerKey", applicationKeysDTO.getConsumerKey());
+            keyDetails.put("consumerSecret", applicationKeysDTO.getConsumerSecret());
+            keyDetails.put("validityTime", applicationKeysDTO.getValidityTime());
+
+        }
+        return keyDetails;
+
+//        //TODO: Return  ApplicationKeysDTO or WorkflowDTO without creating a Map.To do this has to move either into api module.
+//        Map<String, Object> keyDetails = new HashMap<String, Object>();
+//        keyDetails.put("keyState", appRegWFDto.getStatus().toString());
+//        return keyDetails;
     }
 
     public Map<String, String> completeApplicationRegistration(String userId,
@@ -1802,6 +2054,20 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 
     public Application[] getApplications(Subscriber subscriber) throws APIManagementException {
         return apiMgtDAO.getApplications(subscriber);
+    }
+
+    /**
+     *
+     * @param userId APIM subscriber user ID.
+     * @param ApplicationName APIM application name.
+     * @return
+     * @throws APIManagementException
+     */
+    public Application getApplicationsByName(String userId, String ApplicationName) throws
+            APIManagementException {
+
+        return apiMgtDAO.getApplicationByName(ApplicationName, userId);
+
     }
 
     public boolean isApplicationTokenExists(String accessToken) throws APIManagementException {
@@ -1861,7 +2127,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                     }
                 }
             }
-        } catch (UserStoreException e) {
+        } catch (org.wso2.carbon.user.api.UserStoreException e) {
             log.error("cannot retrieve user role list for tenant" + tenantDomain);
         }
         return deniedTiers;
@@ -1872,7 +2138,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
      *
      * @param tierName
      * @return
-     * @throws org.wso2.carbon.apimgt.api.APIManagementException if failed to get the tiers
+     * @throws APIManagementException if failed to get the tiers
      */
     public boolean isTierDeneid(String tierName) throws APIManagementException {
         String[] currentUserRoles = new String[0];
@@ -1899,7 +2165,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                     }
                 }
             }
-        } catch (UserStoreException e) {
+        } catch (org.wso2.carbon.user.api.UserStoreException e) {
             log.error("cannot retrieve user role list for tenant" + tenantDomain);
         }
         return false;
@@ -1912,12 +2178,12 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
      * @param limit    Specifies the number of APIs to add.
      * @param apiPaths Array of API paths.
      * @return Set<API> set of APIs
-     * @throws org.wso2.carbon.registry.core.exceptions.RegistryException
-     * @throws org.wso2.carbon.apimgt.api.APIManagementException
+     * @throws RegistryException
+     * @throws APIManagementException
      */
     private Set<API> getAPIs(Registry registry, int limit, String[] apiPaths)
             throws RegistryException, APIManagementException,
-            UserStoreException {
+            org.wso2.carbon.user.api.UserStoreException {
 
         SortedSet<API> apiSortedSet = new TreeSet<API>(new APINameComparator());
         SortedSet<API> apiVersionsSortedSet = new TreeSet<API>(new APIVersionComparator());
@@ -2066,7 +2332,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         } catch (RegistryException e) {
             handleException("Failed to get API from registry on path of : " +apiPath, e);
             return null;
-        } catch (UserStoreException e) {
+        } catch (org.wso2.carbon.user.api.UserStoreException e) {
             handleException("Failed to get API from registry on path of : "+ apiPath, e);
             return null;
         }

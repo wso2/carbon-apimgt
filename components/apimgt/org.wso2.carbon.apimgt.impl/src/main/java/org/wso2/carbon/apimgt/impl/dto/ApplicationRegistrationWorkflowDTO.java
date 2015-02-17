@@ -18,6 +18,7 @@
 
 package org.wso2.carbon.apimgt.impl.dto;
 
+import org.wso2.carbon.apimgt.api.model.OauthAppRequest;
 import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowConstants;
 import org.wso2.carbon.apimgt.keymgt.stub.types.carbon.ApplicationKeysDTO;
@@ -34,7 +35,17 @@ public class ApplicationRegistrationWorkflowDTO extends WorkflowDTO {
     private long validityTime;
     private String[] allowedDomains;
     private ApplicationKeysDTO keyDetails;
+    private OauthAppRequest appInfoDTO;
 
+
+
+    public OauthAppRequest getAppInfoDTO() {
+        return appInfoDTO;
+    }
+
+    public void setAppInfoDTO(OauthAppRequest appInfoDTO) {
+        this.appInfoDTO = appInfoDTO;
+    }
 
     public void setDomainList(String[] accessAllowDomains) {
         StringBuilder builder = new StringBuilder();

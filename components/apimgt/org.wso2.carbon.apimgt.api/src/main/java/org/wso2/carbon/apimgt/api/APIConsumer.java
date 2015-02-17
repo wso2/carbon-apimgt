@@ -31,7 +31,7 @@ public interface APIConsumer extends APIManager {
     /**
      * @param subscriberId id of the Subscriber
      * @return Subscriber
-     * @throws org.wso2.carbon.apimgt.api.APIManagementException if failed to get Subscriber
+     * @throws APIManagementException if failed to get Subscriber
      */
     public Subscriber getSubscriber(String subscriberId) throws APIManagementException;
 
@@ -40,7 +40,7 @@ public interface APIConsumer extends APIManager {
      *
      * @param tag name of the tag
      * @return set of API having the given tag name
-     * @throws org.wso2.carbon.apimgt.api.APIManagementException if failed to get set of API
+     * @throws APIManagementException if failed to get set of API
      */
     public Set<API> getAPIsWithTag(String tag) throws APIManagementException;
 
@@ -51,7 +51,7 @@ public interface APIConsumer extends APIManager {
      * @param start starting number
      * @param end ending number
      * @return set of API having the given tag name
-     * @throws org.wso2.carbon.apimgt.api.APIManagementException if failed to get set of API
+     * @throws APIManagementException if failed to get set of API
      */
     public Map<String,Object> getPaginatedAPIsWithTag(String tag, int start, int end) throws APIManagementException;
 
@@ -61,7 +61,7 @@ public interface APIConsumer extends APIManager {
      * in this list.
      *
      * @return set of API
-     * @throws org.wso2.carbon.apimgt.api.APIManagementException if failed to API set
+     * @throws APIManagementException if failed to API set
      */
     public Set<API> getAllPublishedAPIs(String tenantDomain) throws APIManagementException;
  /**
@@ -72,7 +72,7 @@ public interface APIConsumer extends APIManager {
      * @param start starting number
      * @param end ending number
      * @return set of API
-     * @throws org.wso2.carbon.apimgt.api.APIManagementException if failed to API set
+     * @throws APIManagementException if failed to API set
      */
     public Map<String,Object> getAllPaginatedPublishedAPIs(String tenantDomain, int start, int end)
             throws APIManagementException;
@@ -82,7 +82,7 @@ public interface APIConsumer extends APIManager {
      *
      * @param limit if -1, no limit. Return everything else, limit the return list to specified value.
      * @return Set of API
-     * @throws org.wso2.carbon.apimgt.api.APIManagementException if failed to get top rated APIs
+     * @throws APIManagementException if failed to get top rated APIs
      */
     public Set<API> getTopRatedAPIs(int limit) throws APIManagementException;
 
@@ -91,15 +91,15 @@ public interface APIConsumer extends APIManager {
      *
      * @param limit if -1, no limit. Return everything else, limit the return list to specified value.
      * @return set of API
-     * @throws org.wso2.carbon.apimgt.api.APIManagementException if failed to get recently added APIs
+     * @throws APIManagementException if failed to get recently added APIs
      */
-    public Set<API> getRecentlyAddedAPIs(int limit, String tenantDomain) throws APIManagementException;
+    public Set<API> getRecentlyAddedAPIs(int limit,String tenantDomain) throws APIManagementException;
 
     /**
      * Get all tags of published APIs
      *
      * @return a list of all Tags applied to all APIs published.
-     * @throws org.wso2.carbon.apimgt.api.APIManagementException if failed to get All the tags
+     * @throws APIManagementException if failed to get All the tags
      */
     public Set<Tag> getAllTags(String tenantDomain) throws APIManagementException;
 
@@ -115,7 +115,7 @@ public interface APIConsumer extends APIManager {
      *
      * @param tenantDomain Tenant domain.
      * @return The description of the tag.
-     * @throws org.wso2.carbon.apimgt.api.APIManagementException if there is a failure in getting the description.
+     * @throws APIManagementException if there is a failure in getting the description.
      */
     public Set<Tag> getTagsWithAttributes(String tenantDomain)throws APIManagementException;
 
@@ -125,7 +125,7 @@ public interface APIConsumer extends APIManager {
      * @param apiId  The API identifier
      * @param rating The rating provided by the subscriber
      * @param user Username of the subscriber providing the rating
-     * @throws org.wso2.carbon.apimgt.api.APIManagementException If an error occurs while rating the API
+     * @throws APIManagementException If an error occurs while rating the API
      */
     public void rateAPI(APIIdentifier apiId, APIRating rating, String user) throws APIManagementException;
     /**
@@ -133,7 +133,7 @@ public interface APIConsumer extends APIManager {
      *
      * @param apiId  The API identifier
      * @param user Username of the subscriber providing the rating
-     * @throws org.wso2.carbon.apimgt.api.APIManagementException If an error occurs while rating the API
+     * @throws APIManagementException If an error occurs while rating the API
      */
     public void removeAPIRating(APIIdentifier apiId, String user) throws APIManagementException;
 
@@ -142,7 +142,7 @@ public interface APIConsumer extends APIManager {
      *
      * @param subscriber Subscriber
      * @return Set<API>
-     * @throws org.wso2.carbon.apimgt.api.APIManagementException if failed to get API for subscriber
+     * @throws APIManagementException if failed to get API for subscriber
      */
     public Set<SubscribedAPI> getSubscribedAPIs(Subscriber subscriber) throws APIManagementException;
 
@@ -151,10 +151,21 @@ public interface APIConsumer extends APIManager {
      *
      * @param subscriber Subscriber
      * @return Set<API>
-     * @throws org.wso2.carbon.apimgt.api.APIManagementException if failed to get API for subscriber
+     * @throws APIManagementException if failed to get API for subscriber
      */
-    public Set<SubscribedAPI> getSubscribedAPIs(Subscriber subscriber, String applicationName)
-            throws APIManagementException;
+    public Set<SubscribedAPI> getSubscribedAPIs(Subscriber subscriber, String applicationName) throws APIManagementException;
+
+    /**
+     *
+     * @param jsonString this string will contain oAuth app details
+     * @param userName user name of logged in user.
+     * @param clientId this is the consumer key of oAuthApplication
+     * @param applicationName this is the APIM appication name.
+     * @return
+     * @throws APIManagementException
+     */
+    public Map<String,Object> saveSemiManualClient(String jsonString, String userName, String clientId,
+                                                   String  applicationName) throws APIManagementException;
 
     /**
      * Returns true if a given user has subscribed to the API
@@ -162,7 +173,7 @@ public interface APIConsumer extends APIManager {
      * @param apiIdentifier APIIdentifier
      * @param userId        user id
      * @return true, if giving api identifier is already subscribed
-     * @throws org.wso2.carbon.apimgt.api.APIManagementException if failed to check the subscribed state
+     * @throws APIManagementException if failed to check the subscribed state
      */
     public boolean isSubscribed(APIIdentifier apiIdentifier, String userId) throws APIManagementException;
 
@@ -173,7 +184,7 @@ public interface APIConsumer extends APIManager {
      * @param userId        id of the user
      * @param applicationId Application Id
      * @return String subscription status
-     * @throws org.wso2.carbon.apimgt.api.APIManagementException if failed to add subscription details to database
+     * @throws APIManagementException if failed to add subscription details to database
      */
     public String addSubscription(APIIdentifier identifier, String userId, int applicationId)
             throws APIManagementException;
@@ -184,7 +195,7 @@ public interface APIConsumer extends APIManager {
      * @param identifier    APIIdentifier
      * @param userId        id of the user
      * @param applicationId Application Id
-     * @throws org.wso2.carbon.apimgt.api.APIManagementException if failed to add subscription details to database
+     * @throws APIManagementException if failed to add subscription details to database
      */
     public void removeSubscription(APIIdentifier identifier, String userId, int applicationId)
             throws APIManagementException;
@@ -194,7 +205,7 @@ public interface APIConsumer extends APIManager {
      *
      * @param identifier APIIdentifier
      * @param userId     id of the user
-     * @throws org.wso2.carbon.apimgt.api.APIManagementException if failed to add subscription details to database
+     * @throws APIManagementException if failed to add subscription details to database
      */
     public void removeSubscriber(APIIdentifier identifier, String userId)
             throws APIManagementException;
@@ -205,7 +216,7 @@ public interface APIConsumer extends APIManager {
      * @param identifier    APIIdentifier
      * @param userId        user id
      * @param applicationId Application Id
-     * @throws org.wso2.carbon.apimgt.api.APIManagementException if failed to update subscription
+     * @throws APIManagementException if failed to update subscription
      */
     public void updateSubscriptions(APIIdentifier identifier, String userId, int applicationId)
             throws APIManagementException;
@@ -214,7 +225,7 @@ public interface APIConsumer extends APIManager {
      * @param identifier Api identifier
      * @param comment comment text
      * @param user Username of the comment author                        
-     * @throws org.wso2.carbon.apimgt.api.APIManagementException if failed to add comment for API
+     * @throws APIManagementException if failed to add comment for API
      */
     public void addComment(APIIdentifier identifier, String comment,
                            String user) throws APIManagementException;
@@ -222,7 +233,7 @@ public interface APIConsumer extends APIManager {
     /**
      * @param identifier Api identifier
      * @return Comments
-     * @throws org.wso2.carbon.apimgt.api.APIManagementException if failed to get comments for identifier
+     * @throws APIManagementException if failed to get comments for identifier
      */
     public Comment[] getComments(APIIdentifier identifier) throws APIManagementException;
 
@@ -231,7 +242,7 @@ public interface APIConsumer extends APIManager {
      *
      * @param application Application
      * @param userId      User Id
-     * @throws org.wso2.carbon.apimgt.api.APIManagementException if failed to add Application
+     * @throws APIManagementException if failed to add Application
      */
     public String addApplication(Application application, String userId) throws APIManagementException;
 
@@ -239,7 +250,7 @@ public interface APIConsumer extends APIManager {
      * Updates the details of the specified user application.
      *
      * @param application Application object containing updated data
-     * @throws org.wso2.carbon.apimgt.api.APIManagementException If an error occurs while updating the application
+     * @throws APIManagementException If an error occurs while updating the application
      */
     public void updateApplication(Application application) throws APIManagementException;
 
@@ -253,31 +264,75 @@ public interface APIConsumer extends APIManager {
      * @param tokenType Token type (PRODUCTION | SANDBOX)
      * @param callbackUrl Callback URL for the Application.
      * @param
-     * @throws org.wso2.carbon.apimgt.api.APIManagementException if failed to applications for given subscriber
+     * @throws APIManagementException if failed to applications for given subscriber
      */
-    public Map<String,String> requestApprovalForApplicationRegistration(String userId, String applicationName,
-                                                                        String tokenType,
-                                                                        String callbackUrl, String[] allowedDomains,
-                                                                        String validityTime)
+    public Map<String,String> requestApprovalForApplicationRegistration(String userId, String applicationName, String tokenType,
+                                                            String callbackUrl, String[] allowedDomains, String validityTime)
         throws APIManagementException;
+
+    /**
+     * Creates a request for getting Approval for Application Registration.
+     *
+     * @param userId Subsriber name.
+     * @param  applicationName of the Application.
+     * @param tokenType Token type (PRODUCTION | SANDBOX)
+     * @param jsonString Callback URL for the Application.
+     * @param
+     * @throws APIManagementException if failed to applications for given subscriber
+     */
+    public Map<String,Object> requestApprovalForApplicationRegistration(String userId, String applicationName, String tokenType,
+                                                                        String jsonString)
+            throws APIManagementException;
+
+    /**
+     * Creates a request for application update.
+     *
+     * @param userId Subsriber name.
+     * @param  applicationName of the Application.
+     * @param tokenType Token type (PRODUCTION | SANDBOX)
+     * @param jsonString json String with oAuthApplication parameters.
+     * @param
+     * @throws APIManagementException if failed to applications for given subscriber
+     */
+    public Map<String,Object> updateAuthClient(String userId, String applicationName, String tokenType,
+                                               String jsonString)
+            throws APIManagementException;
+
+    /**
+     * Delete oAuth application from Key manager and remove key manager mapping from APIM.
+     * @param consumerKey Client id of oAuthApplication.
+     * @throws APIManagementException
+     */
+    public void deleteAuthApplication(String consumerKey)
+            throws APIManagementException;
+
 
     /**
      * Returns a list of applications for a given subscriber
      *
      * @param subscriber Subscriber
      * @return Applications
-     * @throws org.wso2.carbon.apimgt.api.APIManagementException if failed to applications for given subscriber
+     * @throws APIManagementException if failed to applications for given subscriber
      */
     public Application[] getApplications(Subscriber subscriber) throws APIManagementException;
+
+    /**
+     * This will return APIM application by giving name and subscriber
+     * @param userId APIM subscriber ID.
+     * @param ApplicationName APIM application name.
+     * @return it will return Application.
+     * @throws APIManagementException
+     */
+    public Application getApplicationsByName(String userId , String ApplicationName) throws
+            APIManagementException;
 
     public Set<SubscribedAPI> getSubscribedIdentifiers(Subscriber subscriber,
                                                        APIIdentifier identifier) throws APIManagementException;
     
     public Set<APIIdentifier> getAPIByConsumerKey(String accessToken) throws APIManagementException;
 
-    public Set<API> searchAPI(String searchTerm, String searchType, String tenantDomain) throws APIManagementException;
-    public Map<String,Object> searchPaginatedAPIs(String searchTerm, String searchType, String tenantDomain, int start,
-                                                  int end) throws APIManagementException;
+    public Set<API> searchAPI(String searchTerm, String searchType,String tenantDomain) throws APIManagementException;
+    public Map<String,Object> searchPaginatedAPIs(String searchTerm, String searchType,String tenantDomain,int start,int end) throws APIManagementException;
     public int getUserRating(APIIdentifier apiId, String user) throws APIManagementException;
 
     /**
@@ -287,17 +342,16 @@ public interface APIConsumer extends APIManager {
      * @param loggedUser logged user
      * @param limit Maximum number of results to return. Pass -1 to get all.
      * @return set of API
-     * @throws org.wso2.carbon.apimgt.api.APIManagementException if failed to get set of API
+     * @throws APIManagementException if failed to get set of API
      */
-    public Set<API> getPublishedAPIsByProvider(String providerId, String loggedUser, int limit, String apiOwner)
-            throws APIManagementException;/**
+    public Set<API> getPublishedAPIsByProvider(String providerId,String loggedUser, int limit, String apiOwner) throws APIManagementException;/**
 
      /** Get a list of published APIs by the given provider.
      *
      * @param providerId , provider id
      * @param limit Maximum number of results to return. Pass -1 to get all.
      * @return set of API
-     * @throws org.wso2.carbon.apimgt.api.APIManagementException if failed to get set of API
+     * @throws APIManagementException if failed to get set of API
      */
     public Set<API> getPublishedAPIsByProvider(String providerId, int limit) throws APIManagementException;
 
@@ -305,7 +359,7 @@ public interface APIConsumer extends APIManager {
      * Check whether an application access token is already persist in database.
      * @param accessToken
      * @return
-     * @throws org.wso2.carbon.apimgt.api.APIManagementException
+     * @throws APIManagementException
      */
     public boolean isApplicationTokenExists(String accessToken) throws APIManagementException;
 
@@ -313,7 +367,7 @@ public interface APIConsumer extends APIManager {
      * Update exiting access allowing domain list
      * @param accessToken
      * @param accessAllowDomains
-     * @throws org.wso2.carbon.apimgt.api.APIManagementException
+     * @throws APIManagementException
      */
     public void updateAccessAllowDomains(String accessToken, String[] accessAllowDomains) throws APIManagementException;
     
@@ -321,7 +375,7 @@ public interface APIConsumer extends APIManager {
      * Returns a list of Tiers denied for the current user
      *
      * @return Set<String>
-     * @throws org.wso2.carbon.apimgt.api.APIManagementException if failed to get the tiers
+     * @throws APIManagementException if failed to get the tiers
      */
     public Set<String> getDeniedTiers()throws APIManagementException;
     
@@ -329,7 +383,7 @@ public interface APIConsumer extends APIManager {
      * Check whether given Tier is denied for the user
      * @param tierName
      * @return 
-     * @throws org.wso2.carbon.apimgt.api.APIManagementException if failed to get the tiers
+     * @throws APIManagementException if failed to get the tiers
      */
     public boolean isTierDeneid(String tierName)throws APIManagementException;
 
@@ -341,17 +395,16 @@ public interface APIConsumer extends APIManager {
      * @param applicationName Name of the Application
      * @param tokenType Type of the Token (PRODUCTION | SANDBOX)
      * @return a Map containing the details of the OAuth application.
-     * @throws org.wso2.carbon.apimgt.api.APIManagementException if failed to get the tiers
+     * @throws APIManagementException if failed to get the tiers
      */
-    public Map<String,String> completeApplicationRegistration(String userId, String applicationName, String tokenType)
-            throws APIManagementException;
+    public Map<String,String> completeApplicationRegistration(String userId, String applicationName, String tokenType) throws APIManagementException;
 
     /**
      * Returns details of an API information in low profile
      *
      * @param identifier APIIdentifier
      * @return An API object related to the given identifier or null
-     * @throws org.wso2.carbon.apimgt.api.APIManagementException if failed get API from APIIdentifier
+     * @throws APIManagementException if failed get API from APIIdentifier
      */
     public API getAPIInfo(APIIdentifier identifier) throws APIManagementException;
     
@@ -363,8 +416,7 @@ public interface APIConsumer extends APIManager {
      * @param start starting number
      * @param end ending number
      * @return set of API
-     * @throws org.wso2.carbon.apimgt.api.APIManagementException if failed to API set
+     * @throws APIManagementException if failed to API set
      */
-    public Map<String,Object> getAllPaginatedAPIsByStatus(String tenantDomain, int start, int end, String Status)
-            throws APIManagementException;
+    public Map<String,Object> getAllPaginatedAPIsByStatus(String tenantDomain,int start,int end, String Status) throws APIManagementException;
 }

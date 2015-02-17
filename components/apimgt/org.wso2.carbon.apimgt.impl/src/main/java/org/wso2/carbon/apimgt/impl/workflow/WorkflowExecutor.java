@@ -43,7 +43,7 @@ public abstract class WorkflowExecutor implements Serializable {
     /**
      * Implements the workflow execution logic.
      * @param workflowDTO - The WorkflowDTO which contains workflow contextual information related to the workflow.
-     * @throws org.wso2.carbon.apimgt.impl.workflow.WorkflowException - Thrown when the workflow execution was not fully performed.
+     * @throws WorkflowException - Thrown when the workflow execution was not fully performed.
      */
     public void execute(WorkflowDTO workflowDTO) throws WorkflowException{
         ApiMgtDAO apiMgtDAO = new ApiMgtDAO();
@@ -57,7 +57,7 @@ public abstract class WorkflowExecutor implements Serializable {
     /**
      * Implements the workflow completion logic.
      * @param workflowDTO - The WorkflowDTO which contains workflow contextual information related to the workflow.
-     * @throws org.wso2.carbon.apimgt.impl.workflow.WorkflowException - Thrown when the workflow completion was not fully performed.
+     * @throws WorkflowException - Thrown when the workflow completion was not fully performed.
      */
     public void complete(WorkflowDTO workflowDTO) throws WorkflowException{
         ApiMgtDAO apiMgtDAO = new ApiMgtDAO();
@@ -72,7 +72,7 @@ public abstract class WorkflowExecutor implements Serializable {
      * Returns the information of the workflows whose status' match the workflowStatus
      * @param workflowStatus - The status of the workflows to match
      * @return - List of workflows whose status' matches the workflowStatus param. 'null' if no matches found.
-     * @throws org.wso2.carbon.apimgt.impl.workflow.WorkflowException - Thrown when the workflow information could not be retrieved.
+     * @throws WorkflowException - Thrown when the workflow information could not be retrieved.
      */
     public abstract List<WorkflowDTO> getWorkflowDetails(String workflowStatus) throws WorkflowException;
 
@@ -88,7 +88,7 @@ public abstract class WorkflowExecutor implements Serializable {
     /**
      * Method for persisting Workflow DTO
      * @param workflowDTO
-     * @throws org.wso2.carbon.apimgt.impl.workflow.WorkflowException
+     * @throws WorkflowException
      */
     public void persistWorkflow(WorkflowDTO workflowDTO) throws WorkflowException {
         ApiMgtDAO apiMgtDAO = new ApiMgtDAO();
