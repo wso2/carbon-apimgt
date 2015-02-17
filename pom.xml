@@ -662,7 +662,7 @@
 
         <!-- Carbon kernel version -->
         <carbon.kernel.version>4.3.0</carbon.kernel.version>
-        <carbon.registry.version>4.3.0</carbon.registry.version>
+        <carbon.registry.version>4.3.1</carbon.registry.version>
         <carbon.registry.imp.pkg.version>[1.0.1, 1.1.0)</carbon.registry.imp.pkg.version>
         <carbon.commons.version>4.3.4</carbon.commons.version>
         <carbon.mediation.version>4.3.0</carbon.mediation.version>
