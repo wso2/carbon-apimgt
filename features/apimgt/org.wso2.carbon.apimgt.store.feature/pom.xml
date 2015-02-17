@@ -28,7 +28,7 @@
 
     <modelVersion>4.0.0</modelVersion>
     <artifactId>org.wso2.carbon.apimgt.store.feature</artifactId>
-    <version>${apimgt.store.feature.version}</version>
+    <version>1.2.4-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>WSO2 Carbon - API Store Feature</name>
     <url>http://wso2.org</url>
