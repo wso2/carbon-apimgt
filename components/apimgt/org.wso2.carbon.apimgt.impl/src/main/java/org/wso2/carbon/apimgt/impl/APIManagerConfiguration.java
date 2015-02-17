@@ -27,6 +27,9 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.APIStore;
 import org.wso2.carbon.apimgt.impl.dto.Environment;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
+import org.wso2.carbon.user.api.RealmConfiguration;
+import org.wso2.carbon.user.api.UserStoreException;
+import org.wso2.carbon.user.core.config.RealmConfigXMLProcessor;
 import org.wso2.securevault.SecretResolver;
 import org.wso2.securevault.SecretResolverFactory;
 
@@ -268,8 +271,23 @@ public class APIManagerConfiguration {
             String sysProp = text.substring(indexOfStartingChars + 2,
                     indexOfClosingBrace);
             String propValue = System.getProperty(sysProp);
-            if(propValue == null && sysProp.equals("carbon.context")){
-                propValue = ServiceReferenceHolder.getContextService().getServerConfigContext().getContextRoot();
+            if (propValue == null) {
+                if (sysProp.equals("carbon.context")) {
+                    propValue = ServiceReferenceHolder.getContextService().getServerConfigContext().getContextRoot();
+                } else if (sysProp.equals("admin.username") || sysProp.equals("admin.password")) {
+                    try {
+                        RealmConfiguration realmConfig = new RealmConfigXMLProcessor().buildRealmConfigurationFromFile();
+                        if (sysProp.equals("admin.username")) {
+                            propValue = realmConfig.getAdminUserName();
+                        } else {
+                            propValue = realmConfig.getAdminPassword();
+                        }
+                    } catch (UserStoreException e) {
+                        //Can't throw an exception because the server is starting and can't be halted.
+                        log.error(e.getMessage());
+                        return null;
+                    }
+                }
             }
             if (propValue != null) {
                 text = text.substring(0, indexOfStartingChars) + propValue
