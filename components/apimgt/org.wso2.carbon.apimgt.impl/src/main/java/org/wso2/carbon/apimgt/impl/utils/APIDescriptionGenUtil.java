@@ -76,7 +76,7 @@ public class APIDescriptionGenUtil {
      * The method to extract the tier attributes from each tier level policy definitions
      * @param policy  Tier level policy
      * @return Attributes map
-     * @throws org.wso2.carbon.apimgt.api.APIManagementException
+     * @throws APIManagementException
      */
     public static Map<String, Object> getTierAttributes(OMElement policy)
             throws APIManagementException {

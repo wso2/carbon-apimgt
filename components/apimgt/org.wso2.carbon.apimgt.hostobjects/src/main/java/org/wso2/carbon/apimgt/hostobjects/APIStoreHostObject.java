@@ -28,21 +28,21 @@ import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.jaggeryjs.scriptengine.exceptions.ScriptException;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 import org.mozilla.javascript.*;
 import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.*;
 import org.wso2.carbon.apimgt.hostobjects.internal.HostObjectComponent;
-import org.wso2.carbon.apimgt.impl.APIConstants;
-import org.wso2.carbon.apimgt.impl.APIConstants.ApplicationStatus;
-import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
-import org.wso2.carbon.apimgt.impl.APIManagerFactory;
-import org.wso2.carbon.apimgt.impl.UserAwareAPIConsumer;
+import org.wso2.carbon.apimgt.impl.*;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dto.Environment;
 import org.wso2.carbon.apimgt.impl.dto.UserRegistrationConfigDTO;
 import org.wso2.carbon.apimgt.impl.dto.WorkflowDTO;
 import org.wso2.carbon.apimgt.impl.dto.xsd.APIInfoDTO;
+import org.wso2.carbon.apimgt.impl.workflow.WorkflowStatus;
 import org.wso2.carbon.apimgt.hostobjects.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.utils.SelfSignUpUtil;
@@ -58,6 +58,8 @@ import org.wso2.carbon.base.MultitenantConstants;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.core.util.PermissionUpdateUtil;
 import org.wso2.carbon.identity.base.IdentityConstants;
+import org.wso2.carbon.identity.oauth.config.OAuthServerConfiguration;
+import org.wso2.carbon.apimgt.impl.APIConstants.ApplicationStatus;
 import org.wso2.carbon.identity.oauth.config.OAuthServerConfiguration;
 import org.wso2.carbon.identity.oauth.internal.OAuthComponentServiceHolder;
 import org.wso2.carbon.registry.core.RegistryConstants;
@@ -726,6 +728,182 @@ public class APIStoreHostObject extends ScriptableObject {
             handleException("Invalid input parameters.");
             return null;
         }
+    }
+    /**
+     * This method is responsible to create oAuth Application and Application keys for a given APIM application
+     * @param cx      will be used to store information about the executing of the script.
+     *                This is a object of org.mozilla.javascript.Context package.
+     * @param thisObj Object of Scriptable interface provides for the management of properties and for
+     *                performing conversions.
+     * @param args    this will contain parameter list from jag files.
+     * @param funObj  this object  provides for calling functions and constructors.
+     * @return this will return response of oAuthApplication registration.
+     * @throws ScriptException
+     * @throws APIManagementException
+     * @throws ParseException
+     */
+    public static NativeObject jsFunction_getApplicationKeyOpenKM(Context cx, Scriptable thisObj,
+                                                            Object[] args, Function funObj)
+            throws ScriptException, APIManagementException, ParseException {
+        if (args != null && args.length != 0) {
+
+
+            NativeObject apiData = (NativeObject) args[0];
+            //this parameter will hold oAuthApplication properties that required to create new oAuthApplication.
+            String jsonString = (String) apiData.get(ApplicationConstants.OAUTH_CLIENT_JSONPARAMSTRING, apiData);
+            //logged in user name.
+            String userName = (String) apiData.get(ApplicationConstants.OAUTH_CLIENT_USERNAME, apiData);
+            //APIM application name.
+            String applicationName = (String) apiData.get(ApplicationConstants.OAUTH_CLIENT_APPLICATION);
+            //Key type whether its a sandBox or production oAuth application.
+            String keyType = (String) apiData.get(ApplicationConstants.APP_KEY_TYPE);
+
+            //String allowDomains = (String) apiData.get(ApplicationConstants.ALLOW_DOMAINS);
+
+//            NativeArray accessAllowDomainsArr = (NativeArray) args[4]; // args[4] is not mandatory
+//            String[] accessAllowDomainsArray = new String[(int) accessAllowDomainsArr.getLength()];
+//            for (Object domain : accessAllowDomainsArr.getIds()) {
+//                int index = (Integer) domain;
+//                accessAllowDomainsArray[index] = (String) accessAllowDomainsArr.get(index, null);
+//            }
+
+            Map<String, Object> keyDetails;
+            //call new application registration process.
+            keyDetails = getAPIConsumer(thisObj).requestApprovalForApplicationRegistration(userName,
+                    applicationName, keyType, jsonString);
+            //set Response.
+            Set<Map.Entry<String, Object>> entries = keyDetails.entrySet();
+            //initiate native object in order to hold response.
+            NativeObject row = new NativeObject();
+            //Read the response and set key/value pair in to Native object.
+            for (Map.Entry<String, Object> entry : entries) {
+                row.put(entry.getKey(), row, entry.getValue());
+            }
+            //return the response native object.
+            return row;
+
+        } else {
+            handleException("Invalid input parameters given while trying to get application key. ");
+            return null;
+        }
+    }
+
+    /**
+     * This method is responsible for update given oAuthApplication.
+     * @param cx      will be used to store information about the executing of the script.
+     *                This is a object of org.mozilla.javascript.Context package.
+     * @param thisObj Object of Scriptable interface provides for the management of
+     *                properties and for performing conversions.
+     * @param args    this will contain parameter list from jag files.
+     * @param funObj  this object  provides for calling functions and constructors.
+     * @return this will return response of oAuthApplication registration.
+     * @throws ScriptException
+     * @throws APIManagementException
+     * @throws ParseException
+     */
+    public static NativeObject jsFunction_updateAuthClient_new(Context cx, Scriptable thisObj,
+                                                           Object[] args, Function funObj)
+            throws ScriptException, APIManagementException, ParseException {
+        if (args != null && args.length != 0) {
+
+
+            NativeObject apiData = (NativeObject) args[0];
+            //this parameter will hold oAuthApplication properties that required to create new oAuthApplication.
+            String jsonString = (String) apiData.get(ApplicationConstants.OAUTH_CLIENT_JSONPARAMSTRING, apiData);
+            //logged in user name.
+            String userName = (String) apiData.get(ApplicationConstants.OAUTH_CLIENT_USERNAME, apiData);
+            //APIM application name.
+            String applicationName = (String) apiData.get(ApplicationConstants.OAUTH_CLIENT_USERNAME);
+            //Key type whether its a sandBox or production oAuth application.
+            String keytype = (String) apiData.get("key_type");
+            //this map will hold response that we are getting from Application registration process.
+            Map<String, Object> keyDetails;
+            //call update application registration process.
+            keyDetails = getAPIConsumer(thisObj).updateAuthClient(userName, applicationName, keytype, jsonString);
+            //set Response.
+            Set<Map.Entry<String, Object>> entries = keyDetails.entrySet();
+            //initiate native object in order to hold response.
+            NativeObject row = new NativeObject();
+            //Read the response and set key/value pair in to Native object.
+            for (Map.Entry<String, Object> entry : entries) {
+                row.put(entry.getKey(), row, entry.getValue());
+            }
+            //return the response native object.
+            return row;
+        } else {
+            handleException("Invalid input parameters given while trying to update auth client");
+            return null;
+        }
+    }
+
+    /**
+     * This method is responsible for deleting oAuthApplication by consumerKey.
+     * @param cx      will be used to store information about the executing of the script.
+     *                This is a object of org.mozilla.javascript.Context package.
+     * @param thisObj Object of Scriptable interface provides for the management of
+     *                properties and for performing conversions.
+     * @param args    this will contain parameter list from jag files.
+     * @param funObj  this object  provides for calling functions and constructors.
+     * @throws ScriptException
+     * @throws APIManagementException
+     * @throws ParseException
+     */
+    public static void jsFunction_deleteAuthApplication(Context cx, Scriptable thisObj,
+                                                        Object[] args, Function funObj)
+            throws ScriptException, APIManagementException, ParseException {
+
+        if (args != null && args.length != 0) {
+            NativeObject argsData = (NativeObject) args[0];
+            //consumer key of oAuthApplication
+            String consumerKey = (String) argsData.get("consumerKey", argsData);
+            //delete oAuthApplication
+            getAPIConsumer(thisObj).deleteAuthApplication(consumerKey);
+        } else {
+            handleException("Invalid input parameters given while trying to delete auth application.");
+        }
+    }
+
+    /**
+     * This method is responsible semi-manual client registration.
+     *
+     * @param cx      will be used to store information about the executing of the script.
+     *                This is a object of org.mozilla.javascript.Context package.
+     * @param thisObj Object of Scriptable interface provides for the management of
+     *                properties and for performing conversions.
+     * @param args    this will contain parameter list from jag files.
+     * @param funObj  this object  provides for calling functions and constructors.
+     * @throws ScriptException
+     * @throws APIManagementException
+     * @throws ParseException
+     */
+    public static void jsFunction_saveAuthapp_new(Context cx, Scriptable thisObj,
+                                                      Object[] args, Function funObj)
+            throws ScriptException, APIManagementException, ParseException {
+        if (args != null && args.length != 0) {
+
+            try {
+                NativeObject apiData = (NativeObject) args[0];
+
+                //this parameter will hold oAuthApplication properties that required to create new oAuthApplication.
+                String jsonString = (String) apiData.get("jsonParams", apiData);
+                //logged in user name.
+                String userName = (String) apiData.get("username", apiData);
+                //this is consumer key of the oAuthApplication.
+                String clientId = (String) apiData.get("client_id", apiData);
+                //APIM application name.
+                String applicationName = (String) apiData.get("applicationName", apiData);
+                //this map will hold response that we are getting from Application registration process.
+                Map<String, Object> keyDetails;
+                getAPIConsumer(thisObj).saveSemiManualClient(jsonString, userName, clientId, applicationName);
+
+            } catch (Exception e) {
+                handleException("Error while obtaining the application access token for the application" + e
+                        .getMessage(), e);
+            }
+        } else {
+            handleException("Invalid input parameters.");
+        }
+
     }
 
     public static NativeObject jsFunction_login(Context cx, Scriptable thisObj,
@@ -2345,6 +2523,155 @@ public class APIStoreHostObject extends ScriptableObject {
             return null;
         }
     }
+    public static NativeArray jsFunction_getAllSubscriptions_new(Context cx,
+                                                             Scriptable thisObj, Object[] args, Function funObj)
+            throws ScriptException, APIManagementException {
+
+        if (args == null || args.length == 0 || !isStringArray(args)) {
+            return null;
+        }
+
+        NativeArray applicationList = new NativeArray(0);
+        boolean isTenantFlowStarted = false;
+        
+        long startTime = 0;
+        if(log.isDebugEnabled()){
+            startTime = System.currentTimeMillis();
+        }
+        
+        try {
+            String username = args[0].toString();
+            String appName = args[1].toString();
+
+            String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(username));
+            if (tenantDomain != null &&
+                !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
+                isTenantFlowStarted = true;
+                PrivilegedCarbonContext.startTenantFlow();
+                PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
+            }
+
+            Subscriber subscriber = new Subscriber(username);
+            APIConsumer apiConsumer = getAPIConsumer(thisObj);
+            Application[] applications = apiConsumer.getApplications(new Subscriber(username));
+            if (applications != null) {
+                int i = 0;
+                for (Application application : applications) {
+                    if (ApplicationStatus.APPLICATION_APPROVED.equals(application.getStatus())) {
+                        NativeObject appObj = new NativeObject();
+                        appObj.put("id", appObj, application.getId());
+                        appObj.put("name", appObj, application.getName());
+                        appObj.put("callbackUrl", appObj, application.getCallbackUrl());
+                        //APIKey prodKey =
+                        //                 getAppKey(application,
+                        //                           APIConstants.API_KEY_TYPE_PRODUCTION);
+                        //boolean prodEnableRegenarateOption = true;
+                        JSONParser parser = new JSONParser();
+                        JSONObject jsonObject = null;
+                        OAuthApplicationInfo prodApp = application.getOAuthApp("PRODUCTION");
+
+                        if (prodApp != null) {
+
+                            if (prodApp.getJsonString() != null) {
+
+                                String jsonString = prodApp.getJsonString();
+                                jsonObject = (JSONObject) parser.parse(jsonString);
+
+                                String prodConsumerKey = (String) prodApp.getClientId();
+                                String prodConsumerSecret = (String) jsonObject.get(ApplicationConstants.
+                                        OAUTH_CLIENT_SECRET);
+
+                                appObj.put("prodKey", appObj, ApplicationConstants.OAUTH_CLIENT_NOACCESSTOKEN);
+                                appObj.put("prodConsumerKey", appObj, prodConsumerKey);
+                                appObj.put("prodConsumerSecret", appObj, prodConsumerSecret);
+
+                                String configURI = (String) jsonObject.get(ApplicationConstants.
+                                        OAUTH_CLIENT_REGISTRATION_CLIENT_URI);
+                                if (configURI != null) {
+                                    appObj.put("prodcustAppMode", appObj, ApplicationConstants.OAUTH_CLIENT_MANUAL);
+                                } else {
+                                    appObj.put("prodcustAppMode", appObj, null);
+                                }
+                                appObj.put("jsonParameters", appObj, jsonString);
+                            } else {
+                                appObj.put("jsonParameters", appObj, "none");
+                            }
+                        }
+                        OAuthApplicationInfo sandApp = application.getOAuthApp("SANDBOX");
+
+                        if (sandApp != null) {
+
+                            if (sandApp.getJsonString() != null) {
+
+                                String jsonString = sandApp.getJsonString();
+                                jsonObject = (JSONObject) parser.parse(jsonString);
+
+                                String sandboxConsumerKey = (String) sandApp.getClientId();
+                                String sandboxConsumerSecret = (String) jsonObject.
+                                        get(ApplicationConstants.OAUTH_CLIENT_SECRET);
+                                String configURI = (String) jsonObject.get(ApplicationConstants.
+                                        OAUTH_CLIENT_REGISTRATION_CLIENT_URI);
+
+                                appObj.put("sandboxKey", appObj, ApplicationConstants.OAUTH_CLIENT_NOACCESSTOKEN);
+                                appObj.put("sandboxConsumerKey", appObj, sandboxConsumerKey);
+                                appObj.put("sandboxConsumerSecret", appObj, sandboxConsumerSecret);
+
+                                if (configURI != null) {
+                                    //application mode is set to the manual
+                                    appObj.put("prodcustAppModeSandBox", appObj, ApplicationConstants.
+                                            OAUTH_CLIENT_MANUAL);
+                                } else {
+                                    //application mode is set to the semi-manual
+                                    appObj.put("prodcustAppModeSandBox", appObj, null);
+                                }
+                                appObj.put("jsonParametersSandBox", appObj, jsonString);
+                            } else {
+                                appObj.put("jsonParametersSandBox", appObj, "none");
+                            }
+                        }
+
+                        NativeArray apisArray = new NativeArray(0);
+                        if (((appName == null || "".equals(appName)) && i == 0) ||
+                                appName.equals(application.getName())) {
+
+                            long startLoop = 0;
+                            if (log.isDebugEnabled()) {
+                                startLoop = System.currentTimeMillis();
+                            }
+
+                            Set<SubscribedAPI> subscribedAPIs =
+                                    apiConsumer.getSubscribedAPIs(subscriber,
+                                            application.getName());
+                            for (SubscribedAPI subscribedAPI : subscribedAPIs) {
+                                addAPIObj(subscribedAPI, apisArray, thisObj);
+                            }
+
+                            if (log.isDebugEnabled()) {
+                                log.debug("getSubscribedAPIs loop took : " +
+                                        (System.currentTimeMillis() - startLoop) + "ms");
+                            }
+                        }
+                        appObj.put("subscriptions", appObj, apisArray);
+                        applicationList.put(i++, applicationList, appObj);
+                    }
+                }
+            }
+        } catch (APIManagementException e) {
+            handleException("Error while obtaining application data", e);
+        } catch (ParseException e) {
+            handleException("Error while parsing json data." + e.getMessage(), e);
+        } finally {
+            if (isTenantFlowStarted) {
+                PrivilegedCarbonContext.endTenantFlow();
+            }
+        }
+
+        if (log.isDebugEnabled()) {
+            log.debug("jsFunction_getMySubscriptionDetail took : " +
+                    (System.currentTimeMillis() - startTime) + "ms");
+        }
+        return applicationList;
+    }
 
     /**
      * Returns the Swagger definition
@@ -2540,6 +2867,7 @@ public class APIStoreHostObject extends ScriptableObject {
                                            getApplicationAccessTokenValidityPeriodInSeconds() * 1000);
                             }
                         }
+
 
                         APIKey sandboxKey = getAppKey(application, APIConstants.API_KEY_TYPE_SANDBOX);
                         boolean sandEnableRegenarateOption = true;
@@ -2779,6 +3107,42 @@ public class APIStoreHostObject extends ScriptableObject {
             }
         }
         return myn;
+    }
+
+    /**
+     * This method helps to get an APIM application by given name.
+     * @param cx      will be used to store information about the executing of the script.
+     *                This is a object of org.mozilla.javascript.Context package.
+     * @param thisObj Object of Scriptable interface provides for the management of
+     *                properties and for performing conversions.
+     * @param args    this will contain parameter list from jag files.
+     * @param funObj  this object  provides for calling functions and constructors.
+     * @return this will return response of oAuthApplication registration.
+     * @throws ScriptException
+     * @throws APIManagementException
+     *
+     */
+    public static NativeObject jsFunction_getApplicationByName(Context cx,
+                                                               Scriptable thisObj, Object[] args, Function funObj)
+            throws ScriptException, APIManagementException {
+
+        NativeObject row = new NativeObject();
+        if (args != null) {
+            String userId = (String) args[0];
+            String applicationName = (String) args[1];
+            APIConsumer apiConsumer = getAPIConsumer(thisObj);
+            Application application = apiConsumer.getApplicationsByName(userId, applicationName);
+            if (application != null) {
+
+                row.put("name", row, application.getName());
+                row.put("tier", row, application.getTier());
+                row.put("id", row, application.getId());
+                row.put("callbackUrl", row, application.getCallbackUrl());
+                row.put("status", row, application.getStatus());
+                row.put("description", row, application.getDescription());
+            }
+        }
+        return row;
     }
 
     public static String jsFunction_addApplication(Context cx,
@@ -3263,7 +3627,7 @@ public class APIStoreHostObject extends ScriptableObject {
 	 * @param signupConfig
 	 *            tenant based configuration
 	 * @param serverURL
-	 * @throws java.rmi.RemoteException
+	 * @throws RemoteException
 	 * @throws UserAdminUserAdminException
 	 */
 	private static void removeTenantUser(String username, UserRegistrationConfigDTO signupConfig,

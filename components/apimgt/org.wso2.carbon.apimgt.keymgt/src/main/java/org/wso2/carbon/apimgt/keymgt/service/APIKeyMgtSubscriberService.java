@@ -33,10 +33,7 @@ import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
 import org.codehaus.jettison.json.JSONObject;
 import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.api.model.API;
-import org.wso2.carbon.apimgt.api.model.Application;
-import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
-import org.wso2.carbon.apimgt.api.model.Subscriber;
+import org.wso2.carbon.apimgt.api.model.*;
 import org.wso2.carbon.apimgt.handlers.security.stub.types.APIKeyMapping;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
@@ -82,7 +79,7 @@ public class APIKeyMgtSubscriberService extends AbstractAdmin {
      *                   an API.
      * @param tokenType  Type (scope) of the required access token
      * @return Access Token
-     * @throws org.wso2.carbon.apimgt.keymgt.APIKeyMgtException Error when getting the AccessToken from the underlying token store.
+     * @throws APIKeyMgtException Error when getting the AccessToken from the underlying token store.
      */
     public String getAccessToken(String userId, APIInfoDTO apiInfoDTO,
                                  String applicationName, String tokenType, String callbackUrl) throws APIKeyMgtException,
@@ -110,40 +107,52 @@ public class APIKeyMgtSubscriberService extends AbstractAdmin {
      * @param applicationName Name of the application
      * @param tokenType       Type (scope) of the required access token
      * @return Access token
-     * @throws org.wso2.carbon.apimgt.keymgt.APIKeyMgtException on error
+     * @throws APIKeyMgtException on error
      */
     public ApplicationKeysDTO getApplicationAccessToken(String userId, String applicationName, String tokenType,
                                                         String callbackUrl, String[] allowedDomains, String validityTime)
             throws APIKeyMgtException, APIManagementException, IdentityException {
 
         ApiMgtDAO apiMgtDAO = new ApiMgtDAO();
-        String[] credentials = null;
+
+        OAuthApplicationInfo oAuthApplicationInfo = null;
         String accessToken = apiMgtDAO.getAccessKeyForApplication(userId, applicationName, tokenType);
-        if (accessToken == null) {
-            //get the tenant id for the corresponding domain
-            String tenantAwareUserId = userId;
-            int tenantId = IdentityUtil.getTenantIdOFUser(userId);
-            Application application = apiMgtDAO.getApplicationByName(applicationName, userId);
-            String state = apiMgtDAO.getRegistrationApprovalState(application.getId(), tokenType);
-            if (APIConstants.AppRegistrationStatus.REGISTRATION_APPROVED.equals(state)) {
-                credentials = apiMgtDAO.addOAuthConsumer(tenantAwareUserId, tenantId, applicationName, callbackUrl);
-                accessToken = apiMgtDAO.registerApplicationAccessToken(credentials[0], application.getId(), applicationName,
-                        tenantAwareUserId, tokenType, allowedDomains, validityTime);
+        Application application = apiMgtDAO.getApplicationByName(applicationName, userId);
+        oAuthApplicationInfo = apiMgtDAO.getProductionClientOfApplication(application.getId(), tokenType);
+        if (oAuthApplicationInfo == null) {
+            throw new APIKeyMgtException("Unable to locate oAuth Application");
+        } else {
+            if (oAuthApplicationInfo.getClientId() == null) {
+                throw new APIKeyMgtException("Consumer key value is null can not get application access token");
+            } else if (oAuthApplicationInfo.getParameter("client_secret") == null) {
+                throw new APIKeyMgtException("Consumer secret value is null can not get application access token");
             }
 
-        } else if (credentials == null) {
-            credentials = apiMgtDAO.getOAuthCredentials(accessToken, tokenType);
-            if (credentials == null || credentials[0] == null || credentials[1] == null) {
-                throw new APIKeyMgtException("Unable to locate OAuth credentials");
+            String consumerKey = oAuthApplicationInfo.getClientId();
+            String consumerSecret = (String) oAuthApplicationInfo.getParameter("client_secret");
+            if (accessToken == null) {
+                //get the tenant id for the corresponding domain
+                String tenantAwareUserId = userId;
+
+                String state = apiMgtDAO.getRegistrationApprovalState(application.getId(), tokenType);
+                if (APIConstants.AppRegistrationStatus.REGISTRATION_APPROVED.equals(state)) {
+                    //credentials = apiMgtDAO.addOAuthConsumer(tenantAwareUserId, tenantId, applicationName, callbackUrl);
+
+                    accessToken = apiMgtDAO.registerApplicationAccessToken(oAuthApplicationInfo.getClientId(), application.getId(),
+                            applicationName,
+                            tenantAwareUserId, tokenType, allowedDomains, validityTime);
+                }
+
             }
+
+            ApplicationKeysDTO keys = new ApplicationKeysDTO();
+            keys.setApplicationAccessToken(accessToken);
+            keys.setConsumerKey(consumerKey);
+            keys.setConsumerSecret(consumerSecret);
+            keys.setValidityTime(validityTime);
+            return keys;
         }
 
-        ApplicationKeysDTO keys = new ApplicationKeysDTO();
-        keys.setApplicationAccessToken(accessToken);
-        keys.setConsumerKey(credentials[0]);
-        keys.setConsumerSecret(credentials[1]);
-        keys.setValidityTime(validityTime);
-        return keys;
     }
 
     /**
@@ -152,7 +161,7 @@ public class APIKeyMgtSubscriberService extends AbstractAdmin {
      * @param userId User/Developer name
      * @return An array of APIInfoDTO instances, each instance containing information of provider name,
      *         api name and version.
-     * @throws org.wso2.carbon.apimgt.keymgt.APIKeyMgtException Error when getting the list of APIs from the persistence store.
+     * @throws APIKeyMgtException Error when getting the list of APIs from the persistence store.
      */
     public APIInfoDTO[] getSubscribedAPIsOfUser(String userId) throws APIKeyMgtException,
             APIManagementException, IdentityException {

@@ -34,13 +34,10 @@ import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 
 import javax.xml.namespace.QName;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
+import java.util.*;
 import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
+import org.wso2.carbon.identity.oauth2.stub.dto.OAuth2TokenValidationResponseDTO_TokenValidationContextParam;
 
 public class Utils {
     
@@ -196,6 +193,18 @@ public class Utils {
     	}
     	
     	return allowedOrigins;
+    }
+
+    public static Map<String,String> constructParameterMap(OAuth2TokenValidationResponseDTO_TokenValidationContextParam[] params){
+        Map<String,String> paramMap = null;
+        if(params != null){
+            paramMap = new HashMap<String, String>(params.length);
+            for(OAuth2TokenValidationResponseDTO_TokenValidationContextParam param : params){
+                paramMap.put(param.getKey(),param.getValue());
+            }
+        }
+
+        return paramMap;
     }
     
     public static String getAllowedHeaders() {

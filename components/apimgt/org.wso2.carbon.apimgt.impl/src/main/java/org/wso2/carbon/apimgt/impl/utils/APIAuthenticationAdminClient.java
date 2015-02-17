@@ -81,7 +81,7 @@ public class APIAuthenticationAdminClient { // extends AbstractAPIGatewayAdminCl
      * for any subsequent admin service invocations.
      *
      * @param stub A client stub to be setup
-     * @throws org.apache.axis2.AxisFault if an error occurs when logging into the API gateway
+     * @throws AxisFault if an error occurs when logging into the API gateway
      */
     protected void setup(Stub stub, Environment environment) throws AxisFault {
         APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
@@ -129,7 +129,7 @@ public class APIAuthenticationAdminClient { // extends AbstractAPIGatewayAdminCl
      * Login to the API gateway as an admin
      *
      * @return A session cookie string
-     * @throws org.apache.axis2.AxisFault if an error occurs while logging in
+     * @throws AxisFault if an error occurs while logging in
      */
     private String loginGateway(Environment environment) throws AxisFault {
         APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
@@ -170,7 +170,7 @@ public class APIAuthenticationAdminClient { // extends AbstractAPIGatewayAdminCl
      * Login to the API keyMgt as an admin
      *
      * @return A session cookie string
-     * @throws org.apache.axis2.AxisFault if an error occurs while logging in
+     * @throws AxisFault if an error occurs while logging in
      */
     private String loginKeyMgt() throws AxisFault {
         APIManagerConfiguration config = ServiceReferenceHolder.getInstance().

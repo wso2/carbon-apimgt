@@ -52,6 +52,7 @@ import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.impl.UserAwareAPIProvider;
+import org.wso2.carbon.apimgt.impl.applications.ApplicationCreator;
 import org.wso2.carbon.apimgt.impl.dto.Environment;
 import org.wso2.carbon.apimgt.impl.dto.TierPermissionDTO;
 import org.wso2.carbon.apimgt.impl.utils.APIAuthenticationAdminClient;
@@ -235,6 +236,196 @@ public class APIProviderHostObject extends ScriptableObject {
         }
 
         return row;
+    }
+    /**
+     * This method is to functionality of managing an API in API-Provider     *
+     * @param cx      Rhino context
+     * @param thisObj Scriptable object
+     * @param args    Passing arguments
+     * @param funObj  Function object
+     * @return true if the API was added successfully
+     * @throws APIManagementException Wrapped exception by org.wso2.carbon.apimgt.api.APIManagementException
+     */
+    public static boolean jsFunction_manageAPI_new(Context cx, Scriptable thisObj,
+			Object[] args,	Function funObj) throws APIManagementException, ScriptException {
+    	boolean success = false;
+    	
+    	if (args==null||args.length == 0) {
+            handleException("Invalid number of input parameters.");
+        }
+    	        
+        NativeObject apiData = (NativeObject) args[0];
+        String provider = String.valueOf(apiData.get("provider", apiData));
+        String name = (String) apiData.get("apiName", apiData);
+        String version = (String) apiData.get("version", apiData);
+
+        String swaggerContent = (String) apiData.get("swagger", apiData);
+        JSONParser parser = new JSONParser();
+        JSONObject resourceConfigs = null;
+        Set<Scope> scopeList = new LinkedHashSet<Scope>();
+        try {
+            JSONObject apiDocument = (JSONObject) parser.parse(swaggerContent);
+            if(apiDocument.get("api_doc") != null){
+                resourceConfigs = (JSONObject) apiDocument.get("api_doc");
+                if (resourceConfigs.get("authorizations") != null) {
+                    JSONObject authorizations = (JSONObject) resourceConfigs.get("authorizations");
+                    if (authorizations.get("oauth2") != null) {
+                        JSONObject oauth2 = (JSONObject) authorizations.get("oauth2");
+                        if (oauth2.get("scopes") != null) {
+                            JSONArray scopes = (JSONArray) oauth2.get("scopes");
+
+                            if (scopes != null) {
+                                for (int i=0; i < scopes.size(); i++)
+                                {
+                                    Map scope = (Map) scopes.get(i);
+                                    if (scope.get("key") != null) {
+                                        Scope scopeObj = new Scope();
+                                        scopeObj.setKey((String) scope.get("key"));
+                                        scopeObj.setName((String) scope.get("name"));
+                                        scopeObj.setRoles((String) scope.get("roles"));
+                                        scopeObj.setDescription((String) scope.get("description"));
+                                        scopeList.add(scopeObj);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        } catch (ParseException e) {
+            handleException("Error while processing Api Definition.");
+        }
+
+        String subscriptionAvailability = (String) apiData.get("subscriptionAvailability", apiData);
+        String subscriptionAvailableTenants = "";
+        if (subscriptionAvailability != null && subscriptionAvailability.equals(APIConstants.SUBSCRIPTION_TO_SPECIFIC_TENANTS)) {
+        	subscriptionAvailableTenants = (String) apiData.get("subscriptionTenants", apiData);
+        }
+        
+        String defaultVersion=(String)apiData.get("defaultVersion",apiData);
+        String transport = getTransports(apiData);
+
+        String tier = (String) apiData.get("tier", apiData);
+
+        String inSequence =  (String) apiData.get("inSequence", apiData);
+        String outSequence = (String) apiData.get("outSequence", apiData);
+        String faultSequence = (String) apiData.get("faultSequence", apiData);
+        String businessOwner = (String) apiData.get("bizOwner", apiData);
+	String businessOwnerEmail = (String) apiData.get("bizOwnerMail", apiData);
+	String technicalOwner = (String) apiData.get("techOwner", apiData);
+	String technicalOwnerEmail = (String) apiData.get("techOwnerMail", apiData);
+
+        String responseCache = (String) apiData.get("responseCache", apiData);
+        int cacheTimeOut = APIConstants.API_RESPONSE_CACHE_TIMEOUT;
+        if (APIConstants.ENABLED.equalsIgnoreCase(responseCache)) {
+        	responseCache = APIConstants.ENABLED;
+            try {
+             	cacheTimeOut = Integer.parseInt ((String) apiData.get("cacheTimeout", apiData));
+            } catch (NumberFormatException e) {
+                		//ignore
+            }
+        } else {
+           	responseCache = APIConstants.DISABLED;
+        }
+        
+        
+        if (provider != null) {
+            provider = APIUtil.replaceEmailDomain(provider);
+        }        
+        provider = (provider != null ? provider.trim() : null);
+        name = (name != null ? name.trim() : null);
+        version = (version != null ? version.trim() : null);
+        
+        APIIdentifier apiId = new APIIdentifier(provider, name, version);
+        APIProvider apiProvider = getAPIProvider(thisObj);
+        API api = null;
+        boolean isTenantFlowStarted = false;
+        try {
+            String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(provider));
+            if(tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
+            	isTenantFlowStarted = true;
+                PrivilegedCarbonContext.startTenantFlow();
+                PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
+            }
+            api = apiProvider.getAPI(apiId);
+        } finally {
+        	if (isTenantFlowStarted) {
+        		PrivilegedCarbonContext.endTenantFlow();
+        	}
+        }
+        
+        api.setTransports(transport);
+        api.setSubscriptionAvailability(subscriptionAvailability);
+        api.setSubscriptionAvailableTenants(subscriptionAvailableTenants);
+        api.setResponseCache(responseCache);
+        api.setCacheTimeout(cacheTimeOut);
+        api.setAsDefaultVersion("default_version".equals(defaultVersion) ? true : false);
+        api.setScopes(scopeList);
+
+		api.removeCustomSequences();
+		if (!"none".equals(inSequence)) {
+			api.setInSequence(inSequence);
+		}
+		if (!"none".equals(outSequence)) {
+			api.setOutSequence(outSequence);
+		}
+		if (!"none".equals(faultSequence)) {
+			api.setFaultSequence(faultSequence);
+		}
+	
+        if(!"none".equals(businessOwner)){
+            api.setBusinessOwner(businessOwner);
+        }
+        if(!"none".equals(businessOwnerEmail)){
+            api.setBusinessOwnerEmail(businessOwnerEmail);
+        }
+        if(!"none".equals(technicalOwner)){
+            api.setTechnicalOwner(technicalOwner);
+        }
+        if(!"none".equals(technicalOwnerEmail)){
+            api.setTechnicalOwnerEmail(technicalOwnerEmail);
+        }
+        
+        Set<Tier> availableTier = new HashSet<Tier>();
+        String[] tierNames;
+        if (tier != null) {
+        	tierNames = tier.split(",");
+        	for (String tierName : tierNames) {
+        		availableTier.add(new Tier(tierName));
+        	}
+            api.removeAllTiers();
+        	api.addAvailableTiers(availableTier);
+        }
+        api.setLastUpdated(new Date());
+
+        if (apiData.get("swagger", apiData) != null) {
+            Set<URITemplate> uriTemplates = parseResourceConfig(apiProvider, apiId, (String) apiData.get("swagger", apiData));
+            api.setUriTemplates(uriTemplates);
+        }
+        //get new resource manager.
+        ResourceManager resourceManager = ApplicationCreator.getResourceManager();
+
+        Map registeredResource = resourceManager.getResourceByApiId(api.getId().toString());
+        if (registeredResource == null) {
+            handleException("Could not find any registered resources found for the given API id: " + api.getId()
+                    .toString());
+        }
+        if (registeredResource.get("apiId") == null) {
+            boolean isNewResourceRegistered = resourceManager.registerNewResource(api , null);
+            if (!isNewResourceRegistered) {
+                handleException("APIResource registration is failed while adding the API- " + api.getId().getApiName
+                        () + "-" + api
+                        .getId().getVersion());
+            }
+        } else {
+            //update APIResource.
+            String resourceId = (String) registeredResource.get("resourceId");
+            if (resourceId == null) {
+                handleException("APIResource update is failed because of empty resourceID.");
+            }
+            resourceManager.updateRegisteredResource(api , registeredResource);
+        }
+        return saveAPI(apiProvider, provider, api, null, false);
     }
 
     /**
@@ -2159,6 +2350,10 @@ public class APIProviderHostObject extends ScriptableObject {
                 myn.put(42, myn, checkValue(Boolean.toString(api.isDefaultVersion())));
                 myn.put(43, myn, api.getImplementation());
 
+//                //get new key manager
+//                ResourceManager resourceManager = ApplicationCreator.getResourceManager();
+//                Map registeredResource = resourceManager.getResourceByApiId(api.getId().toString());
+//                myn.put(44, myn, JSONObject.toJSONString(registeredResource));
 
             } else {
                 handleException("Cannot find the requested API- " + apiName +
@@ -3656,6 +3851,14 @@ public class APIProviderHostObject extends ScriptableObject {
             }
             APIProvider apiProvider = getAPIProvider(thisObj);
             apiProvider.deleteAPI(apiId);
+            ResourceManager resourceManager = ApplicationCreator.getResourceManager();
+
+            if (apiId.toString() != null) {
+                resourceManager.deleteRegisteredResourceByAPIId(apiId.toString());
+            } else {
+                handleException("Can not delete registered resource api id is null");
+            }
+
         } finally {
         	if (isTenantFlowStarted) {
         		PrivilegedCarbonContext.endTenantFlow();
