@@ -65,6 +65,15 @@ public interface KeyManager {
     OAuthApplicationInfo retrieveApplication(String consumerKey) throws APIManagementException;
 
     /**
+     * Store calls this method to get a new Application Access Token. This will be called when getting the token for
+     * the first time and when Store needs to refresh the existing token.
+     * @param tokenRequest AccessTokenRequest which encapsulates parameters sent from UI.
+     * @return Details of the Generated Token. AccessToken and Validity period are a must.
+     * @throws APIManagementException
+     */
+    AccessTokenInfo getNewApplicationAccessToken(AccessTokenRequest tokenRequest) throws APIManagementException;
+
+    /**
      * Call Introspection API + User API. This should retrieve two things including user claims.
      *
      * @return json String
@@ -86,6 +95,18 @@ public interface KeyManager {
     OAuthApplicationInfo buildFromJSON(String jsonInput) throws APIManagementException;
 
     /**
+     * This method will parse the JSON input and add those additional values to AccessTokenRequest. If its needed to
+     * pass parameters in addition to those specified in AccessTokenRequest, those can be provided in the JSON input.
+     * @param jsonInput Input as a JSON. This is the same JSON passed from Store UI.
+     * @param tokenRequest Object encapsulating parameters sent from UI.
+     * @return If input AccessTokenRequest is null, a new object will be returned,
+     * else the additional parameters will be added to the input object passed.
+     * @throws APIManagementException
+     */
+    AccessTokenRequest buildAccessTokenRequestFromJSON(String jsonInput, AccessTokenRequest tokenRequest)
+            throws APIManagementException;
+
+    /**
      * This method will be used if you want to create a oAuth application in semi-manual mode
      * where you must input minimum consumer key and consumer secret.
      *
@@ -94,44 +115,4 @@ public interface KeyManager {
      * @throws APIManagementException
      */
     OAuthApplicationInfo createSemiManualAuthApplication(OauthAppRequest appInfoRequest) throws APIManagementException;
-
-//    /**
-//     * This Method will talk to APIResource registration end point  of  authorization server then will return the
-//     * response as Map.
-//     *
-//     * @param externalResource ExternalResource object, This APIResource would be an API and it comes with APIResource attributes
-//     *                  such as scopes/url_sets/auth_methods etc.
-//     * @return this will return a Map with returned values of APIResource registration.
-//     * @throws APIManagementException
-//     */
-//
-//    boolean registerNewResource(ExternalResource externalResource) throws APIManagementException;
-//
-//    /**
-//     * This method will be used to retrieve registered resource by given API ID.
-//     *
-//     * @param apiId APIM api id.
-//     * @return It will return a Map with registered resource details.
-//     * @throws APIManagementException
-//     */
-//    Map getResourceByApiId(String apiId) throws APIManagementException;
-//
-//    /**
-//     * This method is responsible for update given APIResource  by its resourceId.
-//     *
-//     * @param externalResource this  will hold ExternalResource data that needs to be updated.
-//     * @return TRUE|FALSE. if it is successfully updated it will return TRUE or else FALSE.
-//     * @throws APIManagementException
-//     */
-//    boolean updateRegisteredResource(ExternalResource externalResource) throws APIManagementException;
-//
-//    /**
-//     * This method will accept API id  as a parameter  and will delete the registered resource.
-//     *
-//     * @param apiID API id.
-//     * @throws APIManagementException
-//     */
-//    void deleteRegisteredResourceByAPIId(String apiID) throws APIManagementException;
-
-
 }
