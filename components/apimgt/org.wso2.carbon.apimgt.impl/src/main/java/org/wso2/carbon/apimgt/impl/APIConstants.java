@@ -65,6 +65,9 @@ public final class APIConstants {
     
     public static final String API_TIER_LOCATION = API_APPLICATION_DATA_LOCATION + "/tiers.xml";
 
+    public static final String API_DOMAIN_MAPPINGS = API_APPLICATION_DATA_LOCATION + "/domain-mappings.json";
+
+
     public static final String API_IMAGE_LOCATION = API_APPLICATION_DATA_LOCATION + "/icons";
 
     //registry location for consumer
