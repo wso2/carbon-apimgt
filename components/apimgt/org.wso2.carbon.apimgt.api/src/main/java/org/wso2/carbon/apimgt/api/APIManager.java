@@ -287,4 +287,12 @@ public interface APIManager {
      * @throws APIManagementException
      */
     public String getSwaggerDefinition(APIIdentifier apiId) throws APIManagementException;
+
+    /**
+     * Returns a list of domain name mappings.
+     *
+     * @return Set<Tier>
+     * @throws org.wso2.carbon.apimgt.api.APIManagementException if failed to get the predefined tiers
+     */
+    public Map<String,String> getTenantDomainMappings(String tenantDomain) throws APIManagementException;
 }

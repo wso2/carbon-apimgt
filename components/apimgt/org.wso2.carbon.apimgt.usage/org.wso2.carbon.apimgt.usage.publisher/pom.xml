@@ -27,7 +27,7 @@
     <modelVersion>4.0.0</modelVersion>
     <packaging>bundle</packaging>
     <artifactId>org.wso2.carbon.apimgt.usage.publisher</artifactId>
-    <version>${apimgt.usage.publisher}</version>
+    <version>1.2.3-SNAPSHOT</version>
     <name>WSO2 Carbon - API Management Usage Publisher</name>
 
     <dependencies>

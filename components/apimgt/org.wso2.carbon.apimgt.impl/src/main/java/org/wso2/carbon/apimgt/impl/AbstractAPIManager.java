@@ -882,4 +882,24 @@ public abstract class AbstractAPIManager implements APIManager {
         }
         return apiJSON.toJSONString();
     }
+
+    /**
+     * Returns a list of pre-defined # {@link org.wso2.carbon.apimgt.api.model.Tier} in the system.
+     *
+     * @return Set<Tier>
+     */
+    public Map<String,String> getTenantDomainMappings(String tenantDomain) throws APIManagementException {
+        PrivilegedCarbonContext.startTenantFlow();
+        PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
+        Map<String,String> domains = new HashMap<String, String>();
+
+        int requestedTenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
+        if (requestedTenantId == 0) {
+            domains = APIUtil.getDomainMapings(-1);
+        } else {
+            domains = APIUtil.getDomainMapings(requestedTenantId);
+        }
+        PrivilegedCarbonContext.endTenantFlow();
+        return domains;
+    }
 }

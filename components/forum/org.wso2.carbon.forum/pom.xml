@@ -19,7 +19,7 @@
 
     <modelVersion>4.0.0</modelVersion>
     <artifactId>org.wso2.carbon.forum</artifactId>
-    <version>${carbon.forum.version}</version>
+    <version>1.2.0-SNAPSHOT</version>
     <packaging>bundle</packaging>
     <name>WSO2 Carbon - Forum Component</name>
 
@@ -53,12 +53,10 @@
             </plugin>
             <plugin>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>2.3.2</version>
             </plugin>
             <plugin>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>maven-scr-plugin</artifactId>
-                <version>1.0.10</version>
                 <executions>
                     <execution>
                         <id>generate-scr-scrdescriptor</id>

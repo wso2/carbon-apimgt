@@ -74,6 +74,7 @@ import org.wso2.carbon.utils.CarbonUtils;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
+import javax.cache.Caching;
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLHandshakeException;
@@ -4701,4 +4702,45 @@ public class APIProviderHostObject extends ScriptableObject {
         }
         return response;
     }
+    /**
+     * retrieves active tenant domains and return true or false to display private
+     * visibility
+     *
+     * @return boolean true If display private visibility
+     */
+    public static boolean jsFunction_isMultipleTenantsAvailable() {
+        int tenantsDomainSize;
+        Object cacheObj = Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER).
+                getCache(APIConstants.APIPROVIDER_HOSTCACHE).get(APIConstants.TENANTCOUNT_CACHEKEY);
+        //if tenantDomainSize is not in the cache, Then the cache object is null
+        if (cacheObj == null) {
+            tenantsDomainSize = 0;
+        } else {
+            tenantsDomainSize = Integer.parseInt(cacheObj.toString());
+        }
+        //if there only super tenant in the system, tenantDomainSize is 1
+        if (tenantsDomainSize < 2) {
+            try {
+                Set<String> tenantDomains = APIUtil.getActiveTenantDomains();
+                //if there is more than than one tenant
+                if (tenantDomains.size() > 1) {
+                    Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER).
+                            getCache(APIConstants.APIPROVIDER_HOSTCACHE).
+                            put(APIConstants.TENANTCOUNT_CACHEKEY, String.valueOf(tenantDomains.size()));
+                    return true;
+                } else {
+                    return false;
+                }
+            } catch (UserStoreException e) {
+                /*If there are errors in getting active tenant domains from user store,
+                 Minimum privileges are allocated to the user
+                */
+                log.error("Errors in getting active tenants form UserStore " + e.getMessage(), e);
+                return false;
+            }
+        } else {
+            return true;
+        }
+    }
+
 }

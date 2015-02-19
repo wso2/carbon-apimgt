@@ -4262,5 +4262,30 @@ public class APIStoreHostObject extends ScriptableObject {
         return apiConsumer;
     }
 
-
+    public static NativeObject jsFunction_getDomainMappings(Context cx, Scriptable thisObj,
+                                                  Object[] args,
+                                                  Function funObj) {
+        NativeObject myn = new NativeObject();
+        APIConsumer apiConsumer = getAPIConsumer(thisObj);
+        Map<String, String> domains = new HashMap<String, String>();
+        try {
+            //If tenant domain is present in url we will use it to get available tiers
+            if (args.length > 0 && args[0] != null) {
+                domains = apiConsumer.getTenantDomainMappings((String) args[0]);
+            }
+            if(domains == null || domains.size() == 0 ){
+                return null;
+            }
+            Iterator entries = domains.entrySet().iterator();
+            while (entries.hasNext()) {
+                Map.Entry thisEntry = (Map.Entry) entries.next();
+                String key = (String) thisEntry.getKey();
+                String value = (String) thisEntry.getValue();
+                myn.put(key,myn,value);
+            }
+        } catch (Exception e) {
+            log.error("Error while getting available domain mappings", e);
+        }
+        return myn;
+    }
 }

@@ -431,30 +431,26 @@ public class APIKeyValidator {
 
         ResourceInfoDTO resourceInfoDTO = null;
         VerbInfoDTO verbInfoDTO = null;
-        int i = 0;
-        for (URITemplate uriTemplate : uriTemplates) {
-        	if (resourceInfoDTO != null && resourceInfoDTO.getUrlPattern().equalsIgnoreCase(uriTemplate.getUriTemplate())) {
-                LinkedHashSet<VerbInfoDTO> verbs = (LinkedHashSet<VerbInfoDTO>) resourceInfoDTO.getHttpVerbs();
-                verbInfoDTO = new VerbInfoDTO();
-                verbInfoDTO.setHttpVerb(uriTemplate.getHTTPVerb());
-                verbInfoDTO.setAuthType(uriTemplate.getAuthType());
-                verbInfoDTO.setThrottling(uriTemplate.getThrottlingTier());
-                verbs.add(verbInfoDTO);
-                resourceInfoDTO.setHttpVerbs(verbs);
-                apiInfoDTO.getResources().add(resourceInfoDTO);
-             } else {
-            	 resourceInfoDTO = new ResourceInfoDTO();
-                 resourceInfoDTO.setUrlPattern(uriTemplate.getUriTemplate());
-                 verbInfoDTO = new VerbInfoDTO();
-                 verbInfoDTO.setHttpVerb(uriTemplate.getHTTPVerb());
-                 verbInfoDTO.setAuthType(uriTemplate.getAuthType());
-                 verbInfoDTO.setThrottling(uriTemplate.getThrottlingTier());
-                 LinkedHashSet<VerbInfoDTO> httpVerbs2 = new LinkedHashSet();
-                 httpVerbs2.add(verbInfoDTO);
-                 resourceInfoDTO.setHttpVerbs(httpVerbs2);
-                 apiInfoDTO.getResources().add(resourceInfoDTO);
-              }
-            }
+
+        // The following map is used to retrieve already created ResourceInfoDTO rather than iterating -
+        // the resource Set in apiInfoDTO.
+        LinkedHashMap<String,ResourceInfoDTO> resourcesMap = new LinkedHashMap<String, ResourceInfoDTO>();
+        for (URITemplate uriTemplate : uriTemplates) { 
+            resourceInfoDTO = resourcesMap.get(uriTemplate.getUriTemplate());
+            if(null == resourceInfoDTO){ 
+                resourceInfoDTO = new ResourceInfoDTO();
+                resourceInfoDTO.setUrlPattern(uriTemplate.getUriTemplate());
+                resourceInfoDTO.setHttpVerbs(new LinkedHashSet());
+                apiInfoDTO.getResources().add(resourceInfoDTO); 
+                resourcesMap.put(uriTemplate.getUriTemplate(),resourceInfoDTO);
+            } 
+            verbInfoDTO = new VerbInfoDTO();
+            verbInfoDTO.setHttpVerb(uriTemplate.getHTTPVerb());
+            verbInfoDTO.setAuthType(uriTemplate.getAuthType());
+            verbInfoDTO.setThrottling(uriTemplate.getThrottlingTier());
+            resourceInfoDTO.getHttpVerbs().add(verbInfoDTO);
+        }
+
         return apiInfoDTO;
     }
 
