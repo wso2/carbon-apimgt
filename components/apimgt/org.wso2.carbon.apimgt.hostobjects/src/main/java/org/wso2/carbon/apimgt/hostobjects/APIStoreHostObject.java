@@ -3808,12 +3808,10 @@ public class APIStoreHostObject extends ScriptableObject {
     public static NativeObject jsFunction_refreshToken(Context cx, Scriptable thisObj,
                                                        Object[] args,
                                                        Function funObj)
-            throws APIManagementException, AxisFault {
+            throws AxisFault, APIManagementException {
 
         NativeObject row = new NativeObject();
         if (args != null && args.length != 0) {
-            String userId = (String) args[0];
-            String applicationName = (String) args[1];
             //String tokenType = (String) args[2];
             //Token type would be default with new scopes implementation introduced in 1.7.0
             String tokenType = "default";
@@ -3824,6 +3822,9 @@ public class APIStoreHostObject extends ScriptableObject {
             String clientSecret = (String) args[6];
             String validityTime = (String) args[7];
 
+            //TODO:should take JSON input as an argument.
+            String jsonInput = null;
+
             for (Object domain : accessAllowDomainsArr.getIds()) {
                 int index = (Integer) domain;
                 accessAllowDomainsArray[index] = (String) accessAllowDomainsArr.get(index, null);
@@ -3831,40 +3832,30 @@ public class APIStoreHostObject extends ScriptableObject {
 
             APIConsumer apiConsumer = getAPIConsumer(thisObj);
             //Check whether old access token is already available
-            if (apiConsumer.isApplicationTokenExists(oldAccessToken)) {
-                SubscriberKeyMgtClient keyMgtClient = HostObjectUtils.getKeyManagementClient();
-                ApplicationKeysDTO dto = new ApplicationKeysDTO();
-                String accessToken;
-                try {
-                    //Regenerate the application access key
-                    accessToken = keyMgtClient.regenerateApplicationAccessKey(tokenType, oldAccessToken,
-                            accessAllowDomainsArray, clientId, clientSecret, validityTime);
-                    if (accessToken != null) {
-                        //Set newly generated application access token
-                        dto.setApplicationAccessToken(accessToken);
-                    }
-                    row.put("accessToken", row, dto.getApplicationAccessToken());
-                    row.put("consumerKey", row, dto.getConsumerKey());
-                    row.put("consumerSecret", row, dto.getConsumerSecret());
-                    row.put("validityTime", row, validityTime);
-                    boolean isRegenarateOptionEnabled = true;
-                    if (getApplicationAccessTokenValidityPeriodInSeconds() < 0) {
-                        isRegenarateOptionEnabled = false;
-                    }
-                    row.put("enableRegenarate", row, isRegenarateOptionEnabled);
-                } catch (APIManagementException e) {
-                    handleException("Error while refreshing the access token.", e);
-                } catch (Exception e) {
-                    handleException(e.getMessage(), e);
-                }
-            } else {
-                handleException("Cannot regenerate a new access token. There's no access token available as : " + oldAccessToken);
+
+            AccessTokenInfo response = null;
+            try {
+                response = apiConsumer.renewAccessToken(oldAccessToken, clientId, clientSecret,
+                                                        validityTime,
+                                                        accessAllowDomainsArray, jsonInput);
+            } catch (APIManagementException e) {
+                handleException("Error while renewing AccessToken");
             }
+
+            row.put("accessToken", row, response.getAccessToken());
+            row.put("consumerKey", row, response.getConsumerKey());
+            row.put("consumerSecret", row, response.getConsumerKey());
+            row.put("validityTime", row, response.getValidityPeriod());
+            row.put("responseParams", row, response.getJSONString());
+
+            boolean isRegenarateOptionEnabled = true;
+            if (getApplicationAccessTokenValidityPeriodInSeconds() < 0) {
+                isRegenarateOptionEnabled = false;
+            }
+            row.put("enableRegenarate", row, isRegenarateOptionEnabled);
             return row;
-        } else {
-            handleException("Invalid types of input parameters.");
-            return null;
         }
+        return null;
     }
 
     public static void jsFunction_updateAccessAllowDomains(Context cx, Scriptable thisObj,

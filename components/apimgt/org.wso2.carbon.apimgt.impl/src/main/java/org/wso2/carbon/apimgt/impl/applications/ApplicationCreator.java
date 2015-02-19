@@ -65,7 +65,7 @@ public class ApplicationCreator {
     }
 
     /**
-     * This method will take hardcoded class name from APImanager.xml file and will return that class's instance.
+     * This method will take hardcoded class name from api-manager.xml file and will return that class's instance.
      * This class should be implementation class of keyManager.
      * @return keyManager instance.
      */
@@ -165,4 +165,25 @@ public class ApplicationCreator {
         //return appRequest.
         return appRequest;
     }
+
+    /**
+     * This method adds additional parameters specified in JSON input to TokenRequest.
+     * @param jsonParams Additional Parameters required by the Authorization Server.
+     * @param tokenRequest Values captured in TokenRequest.
+     * @return Token Request after adding parameters in JSON input.
+     * @throws APIManagementException
+     */
+    public static AccessTokenRequest populateTokenRequest(String jsonParams, AccessTokenRequest tokenRequest)
+            throws APIManagementException {
+        if (tokenRequest == null) {
+            tokenRequest = new AccessTokenRequest();
+        }
+
+        KeyManager keyManager = getKeyManager();
+        if (keyManager != null) {
+            return keyManager.buildAccessTokenRequestFromJSON(jsonParams, tokenRequest);
+        }
+        return null;
+    }
+
 }

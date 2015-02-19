@@ -26,8 +26,11 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.model.AccessTokenRequest;
+import org.wso2.carbon.apimgt.api.model.ApplicationConstants;
 import org.wso2.carbon.apimgt.api.model.KeyManager;
 import org.wso2.carbon.apimgt.api.model.OAuthApplicationInfo;
+import org.wso2.carbon.identity.oauth2.dto.OAuth2AccessTokenReqDTO;
 
 import java.util.Map;
 
@@ -37,6 +40,49 @@ import java.util.Map;
  */
 public abstract class AbstractKeyManager implements KeyManager {
     private static Log log = LogFactory.getLog(AbstractKeyManager.class);
+
+    public AccessTokenRequest buildAccessTokenRequestFromJSON(String jsonInput, AccessTokenRequest tokenRequest)
+            throws APIManagementException {
+
+        if (jsonInput == null || jsonInput.isEmpty()) {
+            if (log.isDebugEnabled()) {
+                log.debug("JsonInput is null or Empty.");
+            }
+            return tokenRequest;
+        }
+
+        JSONParser parser = new JSONParser();
+        JSONObject jsonObject;
+
+        if (tokenRequest == null) {
+            if (log.isDebugEnabled()) {
+                log.debug("Input request is null. Creating a new Request Object.");
+            }
+            tokenRequest = new AccessTokenRequest();
+        }
+
+        try {
+            jsonObject = (JSONObject) parser.parse(jsonInput);
+            // Getting parameters from input string and setting in TokenRequest.
+            if (jsonObject instanceof Map && !jsonObject.isEmpty()) {
+                Map<String, Object> params = (Map) jsonObject;
+
+                if (null != params.get(ApplicationConstants.OAUTH_CLIENT_ID)) {
+                    tokenRequest.setClientId((String) params.get(ApplicationConstants.OAUTH_CLIENT_ID));
+                }
+
+                if (null != params.get(ApplicationConstants.OAUTH_CLIENT_SECRET)) {
+                    tokenRequest.setClientSecret((String) params.get(ApplicationConstants.OAUTH_CLIENT_SECRET));
+                }
+
+                return tokenRequest;
+            }
+        } catch (ParseException e) {
+            handleException("Error occurred while parsing JSON String", e);
+        }
+        return null;
+    }
+
 
     /**
      * This method will accept json String and will do the json parse will set oAuth application properties to OAuthApplicationInfo object.
