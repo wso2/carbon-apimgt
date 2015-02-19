@@ -18,6 +18,8 @@
 package org.wso2.carbon.apimgt.usage.publisher.service;
 
 import org.apache.axis2.util.JavaUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.usage.publisher.APIMgtUsagePublisherConstants;
@@ -32,6 +34,13 @@ public class APIMGTConfigReaderService {
     private String publisherClass;
     private boolean googleAnalyticsTrackingEnabled;
     private String googleAnalyticsTrackingID;
+	private String requestStreamName;
+	private String requestStreamVersion;
+	private String responseStreamName;
+	private String responseStreamVersion;
+	private String faultStreamName;
+	private String faultStreamVersion;
+	private static Log log = LogFactory.getLog(APIMGTConfigReaderService.class);
 
     public APIMGTConfigReaderService(APIManagerConfiguration config) {
         String enabledStr = config.getFirstProperty(APIConstants.API_USAGE_ENABLED);
@@ -41,6 +50,27 @@ public class APIMGTConfigReaderService {
         bamServerUser = config.getFirstProperty(APIConstants.API_USAGE_BAM_SERVER_USER);
         bamServerPassword = config.getFirstProperty(APIConstants.API_USAGE_BAM_SERVER_PASSWORD);
         publisherClass = config.getFirstProperty(APIConstants.API_USAGE_PUBLISHER_CLASS);
+	    requestStreamName =
+			    config.getFirstProperty(APIMgtUsagePublisherConstants.API_REQUEST_STREAM_NAME);
+	    requestStreamVersion =
+			    config.getFirstProperty(APIMgtUsagePublisherConstants.API_REQUEST_STREAM_VERSION);
+	    if (requestStreamName == null || requestStreamVersion == null) {
+		    log.error("Request stream name or version is null. Check api-manager.xml");
+	    }
+	    responseStreamName =
+			    config.getFirstProperty(APIMgtUsagePublisherConstants.API_RESPONSE_STREAM_NAME);
+	    responseStreamVersion =
+			    config.getFirstProperty(APIMgtUsagePublisherConstants.API_RESPONSE_STREAM_VERSION);
+	    if (responseStreamName == null || responseStreamVersion == null) {
+		    log.error("Response stream name or version is null. Check api-manager.xml");
+	    }
+	    faultStreamName =
+			    config.getFirstProperty(APIMgtUsagePublisherConstants.API_FAULT_STREAM_NAME);
+	    faultStreamVersion =
+			    config.getFirstProperty(APIMgtUsagePublisherConstants.API_FAULT_STREAM_VERSION);
+	    if (faultStreamName == null || faultStreamVersion == null) {
+		    log.error("Fault stream name or version is null. Check api-manager.xml");
+	    }
     }
 
     public String getBamServerThriftPort() {
@@ -70,9 +100,33 @@ public class APIMGTConfigReaderService {
     public String getGoogleAnalyticsTrackingID() {
  		return googleAnalyticsTrackingID;
  	}
-    
+
     public boolean isGoogleAnalyticsTrackingEnabled() {
     	return googleAnalyticsTrackingEnabled;
     }
+
+	public String getRequestStreamName() {
+		return requestStreamName;
+	}
+
+	public String getRequestStreamVersion() {
+		return requestStreamVersion;
+	}
+
+	public String getResponseStreamName() {
+		return responseStreamName;
+	}
+
+	public String getResponseStreamVersion() {
+		return responseStreamVersion;
+	}
+
+	public String getFaultStreamName() {
+		return faultStreamName;
+	}
+
+	public String getFaultStreamVersion() {
+		return faultStreamVersion;
+	}
 
 }

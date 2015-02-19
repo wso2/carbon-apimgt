@@ -44,6 +44,7 @@ public class APIMgtUsageDataBridgeDataPublisher implements APIMgtUsageDataPublis
     private static final Log log   = LogFactory.getLog(APIMgtUsageDataBridgeDataPublisher.class);
 
     private LoadBalancingDataPublisher dataPublisher;
+    private APIMGTConfigReaderService apimgtConfigReaderService;
 
     public void init(){
         try {
@@ -52,45 +53,46 @@ public class APIMgtUsageDataBridgeDataPublisher implements APIMgtUsageDataPublis
             }
 
             this.dataPublisher = getDataPublisher();
+            this.apimgtConfigReaderService = getApiMgtConfigReaderService();
 
             //If Request Stream Definition does not exist.
-            if(!dataPublisher.isStreamDefinitionAdded(APIMgtUsagePublisherConstants.API_MANAGER_REQUEST_STREAM_NAME,
-                    APIMgtUsagePublisherConstants.API_MANAGER_REQUEST_STREAM_VERSION)){
+            if(!dataPublisher.isStreamDefinitionAdded(apimgtConfigReaderService.getRequestStreamName(),
+                    apimgtConfigReaderService.getRequestStreamVersion())){
 
                 //Get Request Stream Definition
                 String requestStreamDefinition =  DataBridgeRequestPublisherDTO.getStreamDefinition();
 
                 //Add Request Stream Definition.
                 dataPublisher.addStreamDefinition(requestStreamDefinition,
-                        APIMgtUsagePublisherConstants.API_MANAGER_REQUEST_STREAM_NAME,
-                        APIMgtUsagePublisherConstants.API_MANAGER_REQUEST_STREAM_VERSION);
+                        apimgtConfigReaderService.getRequestStreamName(),
+                        apimgtConfigReaderService.getRequestStreamVersion());
             }
 
             //If Response Stream Definition does not exist.
-            if(!dataPublisher.isStreamDefinitionAdded(APIMgtUsagePublisherConstants.API_MANAGER_RESPONSE_STREAM_NAME,
-                     APIMgtUsagePublisherConstants.API_MANAGER_RESPONSE_STREAM_VERSION)){
+            if(!dataPublisher.isStreamDefinitionAdded(apimgtConfigReaderService.getResponseStreamName(),
+                    apimgtConfigReaderService.getResponseStreamVersion())){
 
                 //Get Response Stream Definition.
                 String responseStreamDefinition = DataBridgeResponsePublisherDTO.getStreamDefinition();
 
                 //Add Response Stream Definition.
                 dataPublisher.addStreamDefinition(responseStreamDefinition,
-                        APIMgtUsagePublisherConstants.API_MANAGER_RESPONSE_STREAM_NAME,
-                        APIMgtUsagePublisherConstants.API_MANAGER_RESPONSE_STREAM_VERSION);
+                        apimgtConfigReaderService.getResponseStreamName(),
+                        apimgtConfigReaderService.getResponseStreamVersion());
 
             }
 
             //If Fault Stream Definition does not exist.
-            if(!dataPublisher.isStreamDefinitionAdded(APIMgtUsagePublisherConstants.API_MANAGER_FAULT_STREAM_NAME,
-                                                      APIMgtUsagePublisherConstants.API_MANAGER_FAULT_STREAM_VERSION)){
+            if(!dataPublisher.isStreamDefinitionAdded(apimgtConfigReaderService.getFaultStreamName(),
+                    apimgtConfigReaderService.getFaultStreamVersion())){
 
                 //Get Fault Stream Definition
                 String faultStreamDefinition = DataBridgeFaultPublisherDTO.getStreamDefinition();
 
                 //Add Fault Stream Definition;
                 dataPublisher.addStreamDefinition(faultStreamDefinition,
-                                                  APIMgtUsagePublisherConstants.API_MANAGER_FAULT_STREAM_NAME,
-                                                  APIMgtUsagePublisherConstants.API_MANAGER_FAULT_STREAM_VERSION);
+                        apimgtConfigReaderService.getFaultStreamName(),
+                        apimgtConfigReaderService.getFaultStreamVersion());
             }
         }catch (Exception e){
             log.error("Error initializing APIMgtUsageDataBridgeDataPublisher", e);
@@ -101,8 +103,8 @@ public class APIMgtUsageDataBridgeDataPublisher implements APIMgtUsageDataPublis
         DataBridgeRequestPublisherDTO dataBridgeRequestPublisherDTO = new DataBridgeRequestPublisherDTO(requestPublisherDTO);
         try {
             //Publish Request Data
-            dataPublisher.publish(APIMgtUsagePublisherConstants.API_MANAGER_REQUEST_STREAM_NAME,
-                                  APIMgtUsagePublisherConstants.API_MANAGER_REQUEST_STREAM_VERSION ,
+            dataPublisher.publish(apimgtConfigReaderService.getRequestStreamName(),
+                    apimgtConfigReaderService.getRequestStreamVersion() ,
                                   System.currentTimeMillis(), new Object[]{"external"}, null,
                                   (Object[]) dataBridgeRequestPublisherDTO.createPayload());
         } catch(AgentException e){
@@ -114,8 +116,8 @@ public class APIMgtUsageDataBridgeDataPublisher implements APIMgtUsageDataPublis
         DataBridgeResponsePublisherDTO dataBridgeResponsePublisherDTO = new DataBridgeResponsePublisherDTO(responsePublisherDTO);
         try {
             //Publish Response Data
-            dataPublisher.publish(APIMgtUsagePublisherConstants.API_MANAGER_RESPONSE_STREAM_NAME,
-                    APIMgtUsagePublisherConstants.API_MANAGER_RESPONSE_STREAM_VERSION ,
+            dataPublisher.publish(apimgtConfigReaderService.getResponseStreamName(),
+                    apimgtConfigReaderService.getResponseStreamVersion() ,
                     System.currentTimeMillis(), new Object[]{"external"}, null,
                     (Object[]) dataBridgeResponsePublisherDTO.createPayload());
 
@@ -128,8 +130,8 @@ public class APIMgtUsageDataBridgeDataPublisher implements APIMgtUsageDataPublis
         DataBridgeFaultPublisherDTO dataBridgeFaultPublisherDTO = new DataBridgeFaultPublisherDTO(faultPublisherDTO);
         try {
             //Publish Fault Data
-            dataPublisher.publish(APIMgtUsagePublisherConstants.API_MANAGER_FAULT_STREAM_NAME,
-                    APIMgtUsagePublisherConstants.API_MANAGER_FAULT_STREAM_VERSION ,
+            dataPublisher.publish(apimgtConfigReaderService.getFaultStreamName(),
+                    apimgtConfigReaderService.getFaultStreamVersion() ,
                     System.currentTimeMillis(), new Object[]{"external"}, null,
                     (Object[]) dataBridgeFaultPublisherDTO.createPayload());
 
@@ -187,4 +189,8 @@ public class APIMgtUsageDataBridgeDataPublisher implements APIMgtUsageDataPublis
 
         return loadBalancingDataPublisher;
     }
+
+	private static APIMGTConfigReaderService getApiMgtConfigReaderService() {
+		return UsageComponent.getApiMgtConfigReaderService();
+	}
 }

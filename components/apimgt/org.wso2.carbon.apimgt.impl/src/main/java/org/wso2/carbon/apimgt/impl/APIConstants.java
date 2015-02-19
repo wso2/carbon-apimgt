@@ -570,10 +570,15 @@ public final class APIConstants {
     public static final String API_ELECTED_RESOURCE = "API_ELECTED_RESOURCE";
 
     public static final String OAUTH2_DEFAULT_SCOPE = "default";
-    
-    public static final String  API_MANAGER_DESTINATION_STATS_BAM_PROFILE_NAME = "bam-profile";
-    public static final String  API_MANAGER_DESTINATION_REQUESTS_STREAM_NAME = "org_wso2_apimgt_statistics_destination";
-    public static final String  API_MANAGER_DESTINATION_REQUESTS_STREAM_VERSION = "1.0.0";
+
+    public static final String API_USAGE_PUBLISHING = "APIUsageTracking.";
+	public static final String API_USAGE_STREAMS = API_USAGE_PUBLISHING + "Streams.";
+	public static final String API_USAGE_DESTINATION_STREAM = API_USAGE_STREAMS + "Destination.";
+    public static final String API_DESTINATION_STREAM_NAME = API_USAGE_DESTINATION_STREAM + "Name";
+	public static final String API_DESTINATION_STREAM_VERSION =
+			API_USAGE_DESTINATION_STREAM + "Version";
+	public static final String API_DESTINATION_BAM_PROFILE_NAME =
+			API_USAGE_DESTINATION_STREAM + "BAMProfileName";
 
     public static final String RECENTLY_ADDED_API_CACHE_NAME = "RECENTLY_ADDED_API";
     public static final String API_STORE_RECENTLY_ADDED_API_CACHE_ENABLE = API_STORE + "EnableRecentlyAddedAPICache";
