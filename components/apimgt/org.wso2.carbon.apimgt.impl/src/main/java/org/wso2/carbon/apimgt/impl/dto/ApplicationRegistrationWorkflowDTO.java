@@ -18,6 +18,8 @@
 
 package org.wso2.carbon.apimgt.impl.dto;
 
+import org.wso2.carbon.apimgt.api.model.AccessTokenInfo;
+import org.wso2.carbon.apimgt.api.model.OAuthApplicationInfo;
 import org.wso2.carbon.apimgt.api.model.OauthAppRequest;
 import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowConstants;
@@ -36,8 +38,17 @@ public class ApplicationRegistrationWorkflowDTO extends WorkflowDTO {
     private String[] allowedDomains;
     private ApplicationKeysDTO keyDetails;
     private OauthAppRequest appInfoDTO;
+    private OAuthApplicationInfo applicationInfo;
+    private AccessTokenInfo accessTokenInfo;
+    private AccessTokenInfo accessToken;
 
+    public OAuthApplicationInfo getApplicationInfo() {
+        return applicationInfo;
+    }
 
+    public void setApplicationInfo(OAuthApplicationInfo applicationInfo) {
+        this.applicationInfo = applicationInfo;
+    }
 
     public OauthAppRequest getAppInfoDTO() {
         return appInfoDTO;
@@ -120,6 +131,14 @@ public class ApplicationRegistrationWorkflowDTO extends WorkflowDTO {
 
     public void setUserName(String userName) {
         this.userName = userName;
+    }
+
+    public AccessTokenInfo getAccessTokenInfo() {
+        return accessTokenInfo;
+    }
+
+    public void setAccessToken(AccessTokenInfo accessToken) {
+        this.accessToken = accessToken;
     }
 
 }

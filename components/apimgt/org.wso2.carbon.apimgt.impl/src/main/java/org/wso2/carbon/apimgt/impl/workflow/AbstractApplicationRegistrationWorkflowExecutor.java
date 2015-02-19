@@ -22,6 +22,9 @@ package org.wso2.carbon.apimgt.impl.workflow;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.model.AccessTokenInfo;
+import org.wso2.carbon.apimgt.api.model.AccessTokenRequest;
+import org.wso2.carbon.apimgt.api.model.ApplicationConstants;
 import org.wso2.carbon.apimgt.api.model.OauthAppRequest;
 import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.api.model.Subscriber;
@@ -130,11 +133,9 @@ public abstract class AbstractApplicationRegistrationWorkflowExecutor extends Wo
             //update associateApplication
             application.updateAssociateOAuthApp(workflowDTO.getKeyType(), oAuthApplication);
 
-
-            ApplicationKeysDTO keysDTO =  keyMgtClient.getApplicationAccessKey(subscriber.getName(), application.getName(),
-                    workflowDTO.getKeyType(), application.getCallbackUrl(),
-                    workflowDTO.getAllowedDomains(), Long.toString(workflowDTO.getValidityTime()));
-            workflowDTO.setKeyDetails(keysDTO);
+            AccessTokenRequest tokenRequest = ApplicationCreator.createAccessTokenRequest(oAuthApplication,null);
+            AccessTokenInfo tokenInfo = ApplicationCreator.getKeyManager().getNewApplicationAccessToken(tokenRequest);
+            workflowDTO.setAccessToken(tokenInfo);
         } catch (Exception e) {
             APIUtil.handleException("Error occurred while executing SubscriberKeyMgtClient.", e);
         }

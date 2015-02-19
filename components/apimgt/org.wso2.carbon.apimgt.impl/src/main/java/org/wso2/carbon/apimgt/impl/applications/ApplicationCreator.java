@@ -186,4 +186,17 @@ public class ApplicationCreator {
         return null;
     }
 
+    public static AccessTokenRequest createAccessTokenRequest(OAuthApplicationInfo oAuthApplication,
+                                                              AccessTokenRequest tokenRequest)
+            throws APIManagementException {
+        if (tokenRequest == null) {
+            tokenRequest = new AccessTokenRequest();
+        }
+
+        KeyManager keyManager = getKeyManager();
+        if (keyManager != null) {
+            return keyManager.buildAccessTokenRequestFromOAuthApp(oAuthApplication, tokenRequest);
+        }
+        return null;
+    }
 }
