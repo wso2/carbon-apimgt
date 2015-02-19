@@ -419,4 +419,19 @@ public interface APIConsumer extends APIManager {
      * @throws APIManagementException if failed to API set
      */
     public Map<String,Object> getAllPaginatedAPIsByStatus(String tenantDomain,int start,int end, String Status) throws APIManagementException;
+
+    /**
+     * Revokes the oldAccessToken generating a new one.
+     *
+     * @param oldAccessToken          Token to be revoked
+     * @param clientId                Consumer Key for the Application
+     * @param clientSecret            Consumer Secret for the Application
+     * @param validityTime            Desired Validity time for the token
+     * @param accessAllowDomainsArray List of domains that this access token should be allowed to.
+     * @param jsonInput               Additional parameters if Authorization server needs any.
+     * @return Details of the newly generated Access Token.
+     * @throws APIManagementException
+     */
+    AccessTokenInfo renewAccessToken(String oldAccessToken, String clientId, String clientSecret, String validityTime,
+                                     String[] accessAllowDomainsArray, String jsonInput) throws APIManagementException;
 }

@@ -31,6 +31,7 @@ import org.wso2.carbon.apimgt.api.model.Tag;
 import org.wso2.carbon.apimgt.handlers.security.stub.types.APIKeyMapping;
 import org.wso2.carbon.apimgt.impl.applications.ApplicationCreator;
 import org.wso2.carbon.apimgt.impl.applications.ApplicationImpl;
+import org.wso2.carbon.apimgt.impl.dao.TokenMgtDao;
 import org.wso2.carbon.apimgt.impl.dto.*;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.*;
@@ -559,7 +560,49 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         result.put("totalLength",totalLength);
         return result;
 	}
-    
+
+    /**
+     * Re-generates the access token.
+     * @param oldAccessToken          Token to be revoked
+     * @param clientId                Consumer Key for the Application
+     * @param clientSecret            Consumer Secret for the Application
+     * @param validityTime            Desired Validity time for the token
+     * @param accessAllowDomainsArray List of domains that this access token should be allowed to.
+     * @param jsonInput               Additional parameters if Authorization server needs any.
+     * @return Renewed Access Token.
+     * @throws APIManagementException
+     */
+    @Override
+    public AccessTokenInfo renewAccessToken(String oldAccessToken, String clientId, String clientSecret,
+                                            String validityTime, String[] accessAllowDomainsArray,
+                                            String jsonInput) throws APIManagementException {
+        // Create Token Request with parameters provided from UI.
+        AccessTokenRequest tokenRequest = new AccessTokenRequest();
+        tokenRequest.setClientId(clientId);
+        tokenRequest.setClientSecret(clientSecret);
+        tokenRequest.setValidityPeriod(Long.parseLong(validityTime));
+        tokenRequest.setTokenToRevoke(oldAccessToken);
+
+        try {
+            // Populating additional parameters.
+            tokenRequest = ApplicationCreator.populateTokenRequest(jsonInput, tokenRequest);
+            KeyManager keyManager = ApplicationCreator.getKeyManager();
+            AccessTokenInfo tokenResponse = keyManager.getNewApplicationAccessToken(tokenRequest);
+            AccessTokenInfo info = TokenMgtDao.getAccessTokenForConsumerId(tokenRequest.getClientId());
+            if (info == null) {
+                TokenMgtDao.insertAccessTokenForConsumerKey(tokenRequest.getClientId(), tokenResponse);
+            } else {
+                TokenMgtDao.updateTokenForConsumerKey(tokenRequest.getClientId(), tokenResponse);
+            }
+
+            return tokenResponse;
+
+        } catch (APIManagementException e) {
+            log.error("Error while re-generating AccessToken", e);
+            throw e;
+        }
+    }
+
     /**
      * The method to get All PUBLISHED and DEPRECATED APIs, to Store view      
      *
