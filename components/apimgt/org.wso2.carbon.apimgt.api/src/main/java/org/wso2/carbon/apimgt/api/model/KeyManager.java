@@ -115,4 +115,14 @@ public interface KeyManager {
      * @throws APIManagementException
      */
     OAuthApplicationInfo createSemiManualAuthApplication(OauthAppRequest appInfoRequest) throws APIManagementException;
+
+    /**
+     * This method will create an AccessTokenRequest using OAuthApplicationInfo object. If tokenRequest is null,
+     * this will create a new object, else will modify the provided AccessTokenRequest Object.
+     * @param oAuthApplication
+     * @param tokenRequest
+     * @return AccessTokenRequest
+     */
+    AccessTokenRequest buildAccessTokenRequestFromOAuthApp(OAuthApplicationInfo oAuthApplication,
+                                                           AccessTokenRequest tokenRequest) throws APIManagementException;
 }
