@@ -2046,15 +2046,20 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 
         Map<String, Object> keyDetails = new HashMap<String, Object>();
         keyDetails.put("keyState", appRegWFDto.getStatus().toString());
-        ApplicationKeysDTO applicationKeysDTO = appRegWFDto.getKeyDetails();
+        OAuthApplicationInfo applicationInfo = appRegWFDto.getApplicationInfo();
 
-        if (applicationKeysDTO != null) {
+        if (applicationInfo != null) {
+            keyDetails.put("consumerKey", applicationInfo.getClientId());
+            keyDetails.put("consumerSecret", (String) applicationInfo.getParameter(ApplicationConstants
+                                                                                      .OAUTH_CLIENT_SECRET));
+            keyDetails.put("appDetails",applicationInfo.getJsonString());
+        }
 
-            keyDetails.put("accessToken", applicationKeysDTO.getApplicationAccessToken());
-            keyDetails.put("consumerKey", applicationKeysDTO.getConsumerKey());
-            keyDetails.put("consumerSecret", applicationKeysDTO.getConsumerSecret());
-            keyDetails.put("validityTime", applicationKeysDTO.getValidityTime());
-
+        AccessTokenInfo tokenInfo = appRegWFDto.getAccessTokenInfo();
+        if(tokenInfo != null){
+            keyDetails.put("accessToken", tokenInfo.getAccessToken());
+            keyDetails.put("validityTime", tokenInfo.getValidityPeriod());
+            keyDetails.put("tokenDetails",tokenInfo.getJSONString());
         }
         return keyDetails;
 

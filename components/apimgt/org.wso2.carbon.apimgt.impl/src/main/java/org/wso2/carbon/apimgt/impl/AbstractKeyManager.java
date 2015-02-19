@@ -118,6 +118,21 @@ public abstract class AbstractKeyManager implements KeyManager {
         return null;
     }
 
+    public AccessTokenRequest buildAccessTokenRequestFromOAuthApp(OAuthApplicationInfo oAuthApplication,
+                                                           AccessTokenRequest tokenRequest) throws
+                                                                                            APIManagementException{
+        if(oAuthApplication == null){
+            return tokenRequest;
+        }
+        if(tokenRequest == null){
+            tokenRequest = new AccessTokenRequest();
+        }
+        tokenRequest.setClientId(oAuthApplication.getClientId());
+        tokenRequest.setClientSecret((String) oAuthApplication.getParameter(ApplicationConstants.OAUTH_CLIENT_SECRET));
+
+        return tokenRequest;
+    }
+
     /**
      * common method to throw exceptions.
      *
