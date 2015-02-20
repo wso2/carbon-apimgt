@@ -398,7 +398,10 @@ public final class APIUtil {
                 }
             }
             api.addAvailableTiers(availableTier);
+            // This contains the resolved context
             api.setContext(artifact.getAttribute(APIConstants.API_OVERVIEW_CONTEXT));
+            // We set the context template here
+            api.setContextTemplate(artifact.getAttribute(APIConstants.API_OVERVIEW_CONTEXT_TEMPLATE));
             api.setLatest(Boolean.valueOf(artifact.getAttribute(APIConstants.API_OVERVIEW_IS_LATEST)));
 
 
@@ -648,6 +651,11 @@ public final class APIUtil {
             artifact.setAttribute(APIConstants.API_OVERVIEW_DESTINATION_BASED_STATS_ENABLED, api.getDestinationStatsEnabled());
             
 			artifact.setAttribute(APIConstants.PROTOTYPE_OVERVIEW_IMPLEMENTATION, api.getImplementation());
+
+            // This is to support the pluggable version strategy.
+            artifact.setAttribute(APIConstants.API_OVERVIEW_CONTEXT_TEMPLATE, api.getContextTemplate());
+            artifact.setAttribute(APIConstants.API_OVERVIEW_VERSION_TYPE, "context"); // TODO: check whether this is
+            // correct
 
             String tiers = "";
             for (Tier tier : api.getAvailableTiers()) {

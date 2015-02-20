@@ -96,6 +96,7 @@ public class APIProviderHostObject extends ScriptableObject {
     private static Pattern pathParamValidatorPattern=Pattern.compile("\\{uri\\.var\\.[\\w]+\\}");
 
     private String username;
+    private static String VERSION_PARAM="{version}";
 
     private APIProvider apiProvider;
 
@@ -697,6 +698,7 @@ public class APIProviderHostObject extends ScriptableObject {
         provider = (provider != null ? provider.trim() : null);
         name = (name != null ? name.trim() : null);
         version = (version != null ? version.trim() : null);
+
         APIIdentifier apiId = new APIIdentifier(provider, name, version);
         APIProvider apiProvider = getAPIProvider(thisObj);
 
@@ -707,6 +709,27 @@ public class APIProviderHostObject extends ScriptableObject {
 
         API api = new API(apiId);
         api.setStatus(APIStatus.CREATED);
+
+        // This is to support the new Pluggable version strategy
+        // if the context does not contain any {version} segment, we use the default version strategy.
+        if(!context.contains(VERSION_PARAM)){
+            if(!context.endsWith("/")){
+                context = context + "/";
+            }
+            context = context + VERSION_PARAM;
+        }
+        api.setContextTemplate(context);
+
+        // This condition should not be true for any occasion but we keep it so that there are no loopholes in
+        // the flow.
+        if (version == null) {
+            // context template patterns - /{version}/foo or /foo/{version}
+            // if the version is null, then we remove the /{version} part from the context
+            context = contextVal.replace("/" + VERSION_PARAM, "");
+        }else{
+            context = context.replace(VERSION_PARAM, version);
+        }
+
         api.setContext(context);
         api.setVisibility(APIConstants.API_GLOBAL_VISIBILITY);
         api.setLastUpdated(new Date());

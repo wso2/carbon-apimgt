@@ -27,8 +27,13 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpHeaders;
 import org.apache.synapse.MessageContext;
+import org.apache.synapse.config.xml.rest.VersionStrategyFactory;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.core.axis2.Axis2Sender;
+import org.apache.synapse.rest.API;
+import org.apache.synapse.rest.RESTConstants;
+import org.apache.synapse.rest.version.ContextVersionStrategy;
+import org.apache.synapse.rest.version.VersionStrategy;
 import org.apache.synapse.transport.nhttp.NhttpConstants;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.APIConstants;
@@ -246,6 +251,24 @@ public class Utils {
 
 
         return false;
+    }
+
+    public static String getRequestPath(MessageContext synCtx, String fullRequestPath, String apiContext, String
+            apiVersion) {
+        String requestPath;
+        String versionStrategy = (String) synCtx.getProperty(RESTConstants.SYNAPSE_REST_API_VERSION_STRATEGY);
+
+        if(VersionStrategyFactory.TYPE_URL.equals(versionStrategy)){
+            // most used strategy. server:port/context/version/resource
+            requestPath = fullRequestPath.substring((apiContext + apiVersion).length() + 1, fullRequestPath.length());
+        }else if(VersionStrategyFactory.TYPE_CONTEXT.equals(versionStrategy)){
+            // version in context. server:port/contextWithVersion/resource
+            requestPath = fullRequestPath.substring(apiContext.length(), fullRequestPath.length());
+        }else{
+            // default version. assume there is no version is used
+            requestPath = fullRequestPath.substring(apiContext.length(), fullRequestPath.length());
+        }
+        return requestPath;
     }
 
 }
