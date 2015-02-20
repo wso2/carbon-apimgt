@@ -161,6 +161,11 @@ public class DefaultKeyManagerImpl extends AbstractKeyManager {
         long validityPeriod = 0;
         AccessTokenInfo tokenInfo = null;
 
+        if(tokenRequest == null){
+            log.warn("No information available to generate Token.");
+            return null;
+        }
+
 
         String tokenEndpointName = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration().
                 getFirstProperty(APIConstants.API_KEY_MANAGER_TOKEN_ENDPOINT_NAME);
@@ -168,12 +173,12 @@ public class DefaultKeyManagerImpl extends AbstractKeyManager {
                 getFirstProperty(APIConstants.API_KEY_MANAGER_URL);
         URL keymgtURL = new URL(keyMgtServerURL);
         int keyMgtPort = keymgtURL.getPort();
-        String keyMgtProtocol= keymgtURL.getProtocol();
+        String keyMgtProtocol = keymgtURL.getProtocol();
         String tokenEndpoint = null;
 
         String webContextRoot = CarbonUtils.getServerConfiguration().getFirstProperty("WebContextRoot");
 
-        if(webContextRoot == null || "/".equals(webContextRoot)){
+        if (webContextRoot == null || "/".equals(webContextRoot)) {
             webContextRoot = "";
         }
 
@@ -186,43 +191,48 @@ public class DefaultKeyManagerImpl extends AbstractKeyManager {
         String revokeEndpoint = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration().
                 getFirstProperty(APIConstants.API_KEY_MANAGER_REVOKE_API_URL);
 
-        URL revokeEndpointURL = new URL(revokeEndpoint);
-        String revokeEndpointProtocol = revokeEndpointURL.getProtocol();
-        int revokeEndpointPort = revokeEndpointURL.getPort();
 
-
-        HttpClient tokenEPClient =  APIKeyMgtUtil.getHttpClient(keyMgtPort, keyMgtProtocol);
-        HttpClient revokeEPClient = APIKeyMgtUtil.getHttpClient(revokeEndpointPort, revokeEndpointProtocol);
-        HttpPost httpTokpost = new HttpPost(tokenEndpoint);
-        HttpPost httpRevokepost = new HttpPost(revokeEndpoint);
-
-        // Request parameters.
-        List<NameValuePair> tokParams = new ArrayList<NameValuePair>(3);
-        List<NameValuePair> revokeParams = new ArrayList<NameValuePair>(3);
-
-        tokParams.add(new BasicNameValuePair(OAuth.OAUTH_GRANT_TYPE, GRANT_TYPE_CLIENT_CREDENTIALS));
-        tokParams.add(new BasicNameValuePair(OAuth.OAUTH_CLIENT_ID, tokenRequest.getClientId()));
-        tokParams.add(new BasicNameValuePair(OAuth.OAUTH_CLIENT_SECRET, tokenRequest.getClientSecret()));
-
-        revokeParams.add(new BasicNameValuePair(OAuth.OAUTH_CLIENT_ID, tokenRequest.getClientId()));
-        revokeParams.add(new BasicNameValuePair(OAuth.OAUTH_CLIENT_SECRET, tokenRequest.getClientSecret()));
-        revokeParams.add(new BasicNameValuePair("token", tokenRequest.getTokenToRevoke()));
-
+        // Call the /revoke only if there's a token to be revoked.
         try {
-            //Revoke the Old Access Token
-            httpRevokepost.setEntity(new UrlEncodedFormEntity(revokeParams, "UTF-8"));
-            HttpResponse revokeResponse = revokeEPClient.execute(httpRevokepost);
+            if (tokenRequest.getTokenToRevoke() != null) {
+                URL revokeEndpointURL = new URL(revokeEndpoint);
+                String revokeEndpointProtocol = revokeEndpointURL.getProtocol();
+                int revokeEndpointPort = revokeEndpointURL.getPort();
 
-            if (revokeResponse.getStatusLine().getStatusCode() != 200) {
-                throw new RuntimeException("Token revoke failed : HTTP error code : " +
-                                           revokeResponse.getStatusLine().getStatusCode());
-            } else {
-                if (log.isDebugEnabled()) {
-                    log.debug("Successfully submitted revoke request for old application token. HTTP status : 200");
+                HttpClient revokeEPClient = APIKeyMgtUtil.getHttpClient(revokeEndpointPort, revokeEndpointProtocol);
+
+                HttpPost httpRevokepost = new HttpPost(revokeEndpoint);
+
+                // Request parameters.
+                List<NameValuePair> revokeParams = new ArrayList<NameValuePair>(3);
+                revokeParams.add(new BasicNameValuePair(OAuth.OAUTH_CLIENT_ID, tokenRequest.getClientId()));
+                revokeParams.add(new BasicNameValuePair(OAuth.OAUTH_CLIENT_SECRET, tokenRequest.getClientSecret()));
+                revokeParams.add(new BasicNameValuePair("token", tokenRequest.getTokenToRevoke()));
+
+
+                //Revoke the Old Access Token
+                httpRevokepost.setEntity(new UrlEncodedFormEntity(revokeParams, "UTF-8"));
+                HttpResponse revokeResponse = revokeEPClient.execute(httpRevokepost);
+
+                if (revokeResponse.getStatusLine().getStatusCode() != 200) {
+                    throw new RuntimeException("Token revoke failed : HTTP error code : " +
+                                               revokeResponse.getStatusLine().getStatusCode());
+                } else {
+                    if (log.isDebugEnabled()) {
+                        log.debug("Successfully submitted revoke request for old application token. HTTP status : 200");
+                    }
                 }
             }
 
             //Generate New Access Token
+            HttpClient tokenEPClient = APIKeyMgtUtil.getHttpClient(keyMgtPort, keyMgtProtocol);
+            HttpPost httpTokpost = new HttpPost(tokenEndpoint);
+            List<NameValuePair> tokParams = new ArrayList<NameValuePair>(3);
+            tokParams.add(new BasicNameValuePair(OAuth.OAUTH_GRANT_TYPE, GRANT_TYPE_CLIENT_CREDENTIALS));
+            tokParams.add(new BasicNameValuePair(OAuth.OAUTH_CLIENT_ID, tokenRequest.getClientId()));
+            tokParams.add(new BasicNameValuePair(OAuth.OAUTH_CLIENT_SECRET, tokenRequest.getClientSecret()));
+
+
             httpTokpost.setEntity(new UrlEncodedFormEntity(tokParams, "UTF-8"));
             HttpResponse tokResponse = tokenEPClient.execute(httpTokpost);
             HttpEntity tokEntity = tokResponse.getEntity();
