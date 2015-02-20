@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:tns="http://services.samples/xsd/PlaceOrder" xmlns:xs="http://www.w3.org/2001/XMLSchema" targetNamespace="http://services.samples/xsd/PlaceOrder" elementFormDefault="qualified" attributeFormDefault="qualified">
+	<xs:complexType name="PlaceOrder">
+		<xs:sequence>
+			<xs:element name="price" type="xs:double"/>
+			<xs:element name="quantity" type="xs:int"/>
+			<xs:element name="symbol" type="xs:string"/>
+		</xs:sequence>
+	</xs:complexType>
+</xs:schema>

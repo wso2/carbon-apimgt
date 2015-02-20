@@ -1,0 +1,114 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl"?>
+<rdf:RDF xml:lang="en"
+         xmlns="http://usefulinc.com/ns/doap#" 
+         xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" 
+         xmlns:asfext="http://projects.apache.org/ns/asfext#"
+         xmlns:foaf="http://xmlns.com/foaf/0.1/">
+<!--
+  =======================================================================
+
+   Copyright (c) 2006 The Apache Software Foundation.  
+   All rights reserved.
+
+  =======================================================================
+-->
+  <Project rdf:about="http://synapse.apache.org/">
+    <created>2007-06-08</created>
+    <license rdf:resource="http://usefulinc.com/doap/licenses/asl20" />
+    <name>Apache Synapse</name>
+    <homepage rdf:resource="http://synapse.apache.org/" />
+    <asfext:pmc rdf:resource="http://synapse.apache.org" />
+    <shortdesc>Apache Synapse is a lightweight ESB engine and XML router.</shortdesc>
+    <description>Apache Synapse is a simple and highly effective ESB, Web Services intermediary and SOA framework. It can be
+added to your existing network very simply either as a services gateway or as an HTTP proxy. Once Apache
+Synapse is mediating your service requests it can perform many functions including routing, load-balancing,
+transformation and protocol switching. Apache Synapse can be used to build an Enterprise Service Bus (ESB) or
+Service Oriented Architecture (SOA).
+
+Apache Synapse has been designed to support very fast XML routing with a streaming XML design based upon
+Apache Axiom. in addition, the use of a completely asynchronous architecture and non-blocking IO based on Java NIO
+ensures that Synapse has very low overhead and can scale to support thousands of concurrent clients without dropping
+messages.</description>
+    <bug-database rdf:resource="https://issues.apache.org/jira/browse/SYNAPSE" />
+    <mailing-list rdf:resource="http://synapse.apache.org/mail-lists.html" />
+    <download-page rdf:resource="http://synapse.apache.org/download.cgi" />
+    <programming-language>Java</programming-language>
+    <category rdf:resource="http://projects.apache.org/category/xml" />
+    <category rdf:resource="http://www.apache.org/category/http"/>
+    <category rdf:resource="http://www.apache.org/category/network-server"/>
+    <category rdf:resource="http://www.apache.org/category/network-client"/>
+    
+    <release>
+      <Version>
+        <name>Apache Synapse 1.2</name>
+        <created>2008-06-09</created>
+        <revision>1.2</revision>
+      </Version>
+    </release>
+    <release>
+      <Version>
+        <name>Apache Synapse 1.1.1</name>
+        <created>2008-01-24</created>
+        <revision>1.1.1</revision>
+      </Version>
+    </release>
+    <repository>
+      <SVNRepository>
+        <location rdf:resource="http://svn.apache.org/repos/asf/synapse/trunk/java"/>
+        <browse rdf:resource="http://svn.apache.org/viewvc/synapse/trunk/java/"/>
+      </SVNRepository>
+    </repository>
+    <maintainer>
+      <foaf:Person>
+        <foaf:name>Paul Fremantle</foaf:name>
+          <foaf:mbox rdf:resource="mailto:pzf@apache.org"/>
+      </foaf:Person>
+    </maintainer>
+    <asfext:implements><asfext:Standard>
+      <asfext:title>SOAP1.1</asfext:title>
+      <asfext:body>W3C</asfext:body>
+      <asfext:id>SOAP1.1</asfext:id>
+      <asfext:url rdf:resource="http://www.w3.org/TR/soap/"/>
+    </asfext:Standard></asfext:implements>
+    <asfext:implements><asfext:Standard>
+      <asfext:title>SOAP1.2</asfext:title>
+      <asfext:body>W3C</asfext:body>
+      <asfext:id>SOAP1.2</asfext:id>
+      <asfext:url rdf:resource="http://www.w3.org/TR/soap12-part1/"/>
+    </asfext:Standard></asfext:implements>
+    <asfext:implements><asfext:Standard>
+      <asfext:title>MTOM</asfext:title>
+      <asfext:body>W3C</asfext:body>
+      <asfext:id>SOAP-MTOM</asfext:id>
+      <asfext:url rdf:resource="http://www.w3.org/TR/soap12-mtom/"/>
+    </asfext:Standard></asfext:implements>
+    <asfext:implements><asfext:Standard>
+      <asfext:title>HTTP</asfext:title>
+      <asfext:body>IETF</asfext:body>
+      <asfext:id>HTTP 1.1</asfext:id>
+      <asfext:url rdf:resource="http://www.w3.org/Protocols/rfc2616/rfc2616.html"/>
+    </asfext:Standard></asfext:implements>
+    <asfext:implements><asfext:Standard>
+      <asfext:title>WS-Addressing</asfext:title>
+      <asfext:body>W3C</asfext:body>
+      <asfext:id>WSA</asfext:id>
+      <asfext:url rdf:resource="http://www.w3.org/2002/ws/addr/"/>
+    </asfext:Standard></asfext:implements>
+    <asfext:implements><asfext:Standard>
+      <asfext:title>WS-ReliableMessaging</asfext:title>
+      <asfext:body>OASIS</asfext:body>
+      <asfext:id>WSRM</asfext:id>
+      <asfext:url rdf:resource="http://www.oasis-open.org/committees/tc_home.php?wg_abbrev=ws-rx"/>
+    </asfext:Standard></asfext:implements>
+    <asfext:implements><asfext:Standard>
+      <asfext:title>WS-Security</asfext:title>
+      <asfext:body>OASIS</asfext:body>
+      <asfext:id>WSSEC</asfext:id>
+      <asfext:url rdf:resource="http://www.oasis-open.org/committees/download.php/16790/wss-v1.1-spec-os-SOAPMessageSecurity.pdf"/>
+    </asfext:Standard></asfext:implements>
+    
+    
+    
+  </Project>
+</rdf:RDF>

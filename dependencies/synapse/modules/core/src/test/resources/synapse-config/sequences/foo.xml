@@ -1,0 +1,11 @@
+<sequence name="foo" xmlns="http://ws.apache.org/ns/synapse">
+    <filter source="get-property('To')" regex=".*/StockQuote.*">
+        <then>
+            <log level="full"/>                        
+        </then>
+        <else>
+            <drop/>
+        </else>
+    </filter>
+    <send/>
+</sequence>

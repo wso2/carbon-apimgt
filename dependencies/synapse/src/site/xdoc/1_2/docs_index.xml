@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<!--
+  ~  Licensed to the Apache Software Foundation (ASF) under one
+  ~  or more contributor license agreements.  See the NOTICE file
+  ~  distributed with this work for additional information
+  ~  regarding copyright ownership.  The ASF licenses this file
+  ~  to you under the Apache License, Version 2.0 (the
+  ~  "License"); you may not use this file except in compliance
+  ~  with the License.  You may obtain a copy of the License at
+  ~
+  ~   http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~  Unless required by applicable law or agreed to in writing,
+  ~  software distributed under the License is distributed on an
+  ~   * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+  ~  KIND, either express or implied.  See the License for the
+  ~  specific language governing permissions and limitations
+  ~  under the License.
+  -->
+
+<document>
+
+  <properties>
+    <title>Documentation</title>
+  </properties>
+
+<body>
+
+<section name="Apache Synapse - Documentation">
+  <p>
+      Apache Synapse is an extremely lightweight and easy-to-use Open Source Enterprise Service Bus
+      (ESB) available under the Apache Software License v2.0. Apache Synapse graduated from the
+      Apache Incubator on the 2nd of January 2007, and was accepted as a sub-project of the Apache
+      Web Services project. In December 2007, Apache Synapse became a top level project (TLP) of the
+      Apache Software Foundation
+  </p>
+  <p>Documentation for the 1.1.1 release:</p>
+
+  <ul>
+  <li><a href="./Synapse_QuickStart.html">Quick Start Guide</a></li>
+  <li><a href="./Synapse_Configuration_Language.html">The Synapse Configuration Language</a></li>
+  <li><a href="./Synapse_Samples.html">A Quick start with Synapse Samples</a></li>
+  <li><a href="./Synapse_Extending.html">Extending Synapse</a></li>
+  <li>The Synapse Wiki <a href="http://wiki.apache.org/ws/Synapse">http://wiki.apache.org/ws/Synapse</a></li>
+  </ul>
+</section>
+
+</body>
+</document>

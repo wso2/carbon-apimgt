@@ -1,0 +1,10 @@
+<sequence name="main" xmlns="http://ws.apache.org/ns/synapse">
+    <in>
+        <log/>
+        <send>
+            <endpoint>
+                <address uri="http://localhost:9000/services/SimpleStockQuoteService"/>
+            </endpoint>
+        </send>
+    </in>
+</sequence>

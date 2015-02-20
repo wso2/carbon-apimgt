@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/">
+  <s:Body>
+    <test>à peine arrivés nous entrâmes dans sa chambre</test>
+  </s:Body>
+</s:Envelope>
