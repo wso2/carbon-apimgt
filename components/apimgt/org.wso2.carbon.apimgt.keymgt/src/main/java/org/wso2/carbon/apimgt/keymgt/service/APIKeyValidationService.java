@@ -38,14 +38,7 @@ import org.wso2.carbon.apimgt.keymgt.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.keymgt.util.APIKeyMgtDataHolder;
 import org.wso2.carbon.apimgt.keymgt.util.APIKeyMgtUtil;
 import org.wso2.carbon.core.AbstractAdmin;
-import org.wso2.carbon.identity.oauth.config.OAuthServerConfiguration;
-import org.wso2.carbon.identity.oauth2.IdentityOAuth2Exception;
-import org.wso2.carbon.identity.oauth2.dto.OAuth2TokenValidationRequestDTO;
-import org.wso2.carbon.identity.oauth2.model.AccessTokenDO;
-import org.wso2.carbon.identity.oauth2.validators.OAuth2ScopeValidator;
 
-import javax.cache.Cache;
-import javax.cache.Caching;
 import java.util.*;
 
 /**
@@ -55,12 +48,12 @@ public class APIKeyValidationService extends AbstractAdmin {
     private static final Log log = LogFactory.getLog(APIKeyValidationService.class);
     private KeyValidationHandler keyValidationHandler;
 
-    public APIKeyValidationService(){
+    public APIKeyValidationService() {
         try {
             keyValidationHandler = (KeyValidationHandler) Class.forName(ServiceReferenceHolder.getInstance().
                     getAPIManagerConfigurationService().getAPIManagerConfiguration().
                     getFirstProperty(APIConstants.API_KEY_MANGER_VALIDATIONHANDLER_CLASS_NAME)).newInstance();
-            log.info("Created instance successfully");
+            log.info("Initialised KeyValidationHandler instance successfully");
         } catch (InstantiationException e) {
             log.error("Error while instantiating class" + e.toString());
         } catch (IllegalAccessException e) {
@@ -133,7 +126,18 @@ public class APIKeyValidationService extends AbstractAdmin {
 
         if(infoDTO != null){
             validationContext.setCacheHit(true);
+            log.debug("APIKeyValidationInfoDTO fetched from cache. Setting cache hit to true...");
             validationContext.setValidationInfoDTO(infoDTO);
+
+            // If JWTCache is disabled, we have to re-generate JWT.
+            if(!APIKeyMgtDataHolder.isJWTCacheEnabledKeyMgt()){
+                infoDTO.setEndUserToken(null);
+            }
+
+            if(infoDTO.getEndUserToken() != null){
+                log.debug("JWT fetched from cache. Setting JWTCacheHit to true...");
+                validationContext.setJWTCacheHit(true);
+            }
         }
 
         log.debug("Before calling Validate Token method...");
@@ -152,12 +156,12 @@ public class APIKeyValidationService extends AbstractAdmin {
 
         log.debug("State after calling validateScopes... "+state);
 
-        if(state){
+        if(state && APIKeyMgtDataHolder.isJwtGenerationEnabled()){
             keyValidationHandler.generateConsumerToken(validationContext);
         }
         log.debug("State after calling generateConsumerToken... "+state);
 
-        if(validationContext.isStoreInCache()){
+        if(!validationContext.isCacheHit()){
             APIKeyMgtUtil.writeToKeyManagerCache(cacheKey,validationContext.getValidationInfoDTO());
         }
 
@@ -201,7 +205,7 @@ public class APIKeyValidationService extends AbstractAdmin {
                     //If key validation information is authorized then only we have to check for JWT token
                     //If key validation information is authorized and JWT cache disabled then only we use
                     //cached api key validation information and generate new JWT token
-                    if (!APIKeyMgtDataHolder.getJWTCacheEnabledKeyMgt() && info.isAuthorized()) {
+                    if (!APIKeyMgtDataHolder.isJWTCacheEnabledKeyMgt() && info.isAuthorized()) {
                         String JWTString;
 
                         JWTString = apiMgtDAO.createJWTTokenString(context, version, info);
