@@ -21,7 +21,10 @@ package org.wso2.carbon.apimgt.keymgt.util;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
+import org.wso2.carbon.apimgt.impl.token.JWTGenerator;
+import org.wso2.carbon.apimgt.impl.token.TokenGenerator;
 import org.wso2.carbon.registry.core.service.RegistryService;
 import org.wso2.carbon.user.core.service.RealmService;
 
@@ -33,9 +36,11 @@ public class APIKeyMgtDataHolder {
     private static Boolean isJWTCacheEnabledKeyMgt = true;
     private static Boolean isKeyCacheEnabledKeyMgt = true;
     private static Boolean isThriftServerEnabled = true;
+    private static TokenGenerator tokenGenerator;
+    private static boolean jwtGenerationEnabled = false;
     private static final Log log = LogFactory.getLog(APIKeyMgtDataHolder.class);
 
-    public static Boolean getJWTCacheEnabledKeyMgt() {
+    public static Boolean isJWTCacheEnabledKeyMgt() {
         return isJWTCacheEnabledKeyMgt;
     }
 
@@ -89,6 +94,40 @@ public class APIKeyMgtDataHolder {
             APIKeyMgtDataHolder.isJWTCacheEnabledKeyMgt = getInitValues(APIConstants.API_KEY_MANAGER_ENABLE_JWT_CACHE);
             APIKeyMgtDataHolder.isKeyCacheEnabledKeyMgt = getInitValues(APIConstants.API_KEY_MANAGER_ENABLE_VALIDATION_INFO_CACHE);
             APIKeyMgtDataHolder.isThriftServerEnabled = getInitValues(APIConstants.API_KEY_MANAGER_ENABLE_THRIFT_SERVER);
+
+            APIManagerConfiguration configuration = org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder.getInstance()
+                    .getAPIManagerConfigurationService().getAPIManagerConfiguration();
+
+            if (configuration == null) {
+                log.error("API Manager configuration is not initialized");
+            } else {
+                jwtGenerationEnabled = Boolean.parseBoolean(configuration.getFirstProperty(APIConstants
+                                                                                                   .ENABLE_JWT_GENERATION));
+                if (log.isDebugEnabled()) {
+                    log.debug("JWTGeneration enabled : " + jwtGenerationEnabled);
+                }
+            }
+
+            if (configuration == null) {
+                log.error("API Manager configuration is not initialized");
+            } else {
+                if (jwtGenerationEnabled) {
+                    String clazz = configuration.getFirstProperty(APIConstants.TOKEN_GENERATOR_IMPL);
+                    if (clazz == null) {
+                        tokenGenerator = new JWTGenerator();
+                    } else {
+                        try {
+                            tokenGenerator = (TokenGenerator) Class.forName(clazz).newInstance();
+                        } catch (InstantiationException e) {
+                            log.error("Error while instantiating class " + clazz, e);
+                        } catch (IllegalAccessException e) {
+                            log.error(e);
+                        } catch (ClassNotFoundException e) {
+                            log.error("Cannot find the class " + clazz + e);
+                        }
+                    }
+                }
+            }
         } catch (Exception e) {
             log.error("Error occur while initializing API KeyMgt Data Holder.Default configuration will be used." + e.toString());
         }
@@ -100,5 +139,14 @@ public class APIKeyMgtDataHolder {
             return Boolean.parseBoolean(val);
         }
         return false;
+    }
+
+    public static boolean isJwtGenerationEnabled(){
+        return jwtGenerationEnabled;
+    }
+
+    // Returns the implementation for JWTTokenGenerator.
+    public static TokenGenerator getTokenGenerator() {
+        return tokenGenerator;
     }
 }
