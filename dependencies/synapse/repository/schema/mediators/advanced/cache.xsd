@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<!--
+  ~  Licensed to the Apache Software Foundation (ASF) under one
+  ~  or more contributor license agreements.  See the NOTICE file
+  ~  distributed with this work for additional information
+  ~  regarding copyright ownership.  The ASF licenses this file
+  ~  to you under the Apache License, Version 2.0 (the
+  ~  "License"); you may not use this file except in compliance
+  ~  with the License.  You may obtain a copy of the License at
+  ~
+  ~   http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~  Unless required by applicable law or agreed to in writing,
+  ~  software distributed under the License is distributed on an
+  ~   * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+  ~  KIND, either express or implied.  See the License for the
+  ~  specific language governing permissions and limitations
+  ~  under the License.
+  -->
+
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified"
+           targetNamespace="http://ws.apache.org/ns/synapse"
+           xmlns="http://ws.apache.org/ns/synapse">
+
+    <xs:include schemaLocation="../mediators.xsd"/>
+
+    <xs:element name="cache">
+        <xs:annotation>
+            <xs:documentation source="description">
+                Cache mediator to cache the response messages
+            </xs:documentation>
+        </xs:annotation>
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="implementation" minOccurs="0" maxOccurs="1">
+                    <xs:annotation>
+                        <xs:documentation>
+                            The cache implementation type and configurations
+                        </xs:documentation>
+                    </xs:annotation>
+                    <xs:complexType>
+                        <xs:attribute name="type" use="optional">
+                            <xs:simpleType>
+                                <xs:restriction base="xs:string">
+                                    <xs:enumeration value="memory"/>
+                                    <xs:enumeration value="disk"/>
+                                </xs:restriction>
+                            </xs:simpleType>
+                        </xs:attribute>
+                        <xs:attribute name="maxSize" type="xs:int" use="optional"/>
+                    </xs:complexType>
+                </xs:element>
+                <xs:element name="onCacheHit" minOccurs="0" maxOccurs="1">
+                    <xs:annotation>
+                        <xs:documentation>
+                            If a cache hit occurs, the sequence or the mediator list to be invoked
+                        </xs:documentation>
+                    </xs:annotation>
+                    <xs:complexType>
+                        <xs:group ref="mediatorList" minOccurs="1" maxOccurs="unbounded"/>
+                        <xs:attribute name="sequence" type="xs:string" use="optional"/>
+                    </xs:complexType>
+                </xs:element>
+            </xs:sequence>
+            <xs:attribute name="id" type="xs:string" use="optional"/>
+            <xs:attribute name="hashGenerator" type="xs:string" use="optional" default="org.wso2.caching.digest.DOMHASHGenerator"/>
+            <xs:attribute name="timeout" type="xs:int" use="optional"/>
+            <xs:attribute name="collector" type="xs:boolean" use="required"/>
+            <xs:attribute name="maxMessageSize" type="xs:int" use="optional"/>
+            <xs:attribute name="scope" use="optional" default="per-host">
+                <xs:simpleType>
+                    <xs:restriction base="xs:string">
+                        <xs:enumeration value="per-host"/>
+                        <xs:enumeration value="per-mediator"/>
+                    </xs:restriction>
+                </xs:simpleType>
+            </xs:attribute>
+        </xs:complexType>
+    </xs:element>
+
+</xs:schema>

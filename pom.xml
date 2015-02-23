@@ -24,11 +24,13 @@
     </scm>
 
     <modules>
+        <module>dependencies/synapse</module>
         <module>service-stubs/apimgt</module>
         <module>components/apimgt</module>
         <module>components/forum</module>
         <module>features/apimgt</module>
         <module>features/forum</module>
+        <module>features/synapse</module>
     </modules>
 
     <build>
@@ -222,11 +224,45 @@
                 <artifactId>poi-ooxml</artifactId>
                 <version>3.9</version>
             </dependency>
-
+            <dependency>
+                <groupId>org.apache.synapse</groupId>
+                <artifactId>synapse-core</artifactId>
+                <version>${synapse.version}</version>
+            </dependency>
             <dependency>
                 <groupId>org.apache.synapse</groupId>
                 <artifactId>synapse-extensions</artifactId>
-                <version>2.1.2-wso2v6</version>
+                <version>${synapse.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.synapse</groupId>
+                <artifactId>synapse-vfs-transport</artifactId>
+                <version>${synapse.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.synapse</groupId>
+                <artifactId>synapse-tasks</artifactId>
+                <version>${synapse.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.synapse</groupId>
+                <artifactId>synapse-samples</artifactId>
+                <version>${synapse.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.synapse</groupId>
+                <artifactId>synapse-nhttp-transport</artifactId>
+                <version>${synapse.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.synapse</groupId>
+                <artifactId>synapse-commons</artifactId>
+                <version>${synapse.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.synapse</groupId>
+                <artifactId>synapse-fix-transport</artifactId>
+                <version>${synapse.version}</version>
             </dependency>
 
             <dependency>
@@ -408,13 +444,6 @@
                 <artifactId>org.wso2.carbon.rest.api.stub</artifactId>
                 <version>${wso2carbon.version}</version>
             </dependency>
-
-            <dependency>
-                <groupId>org.apache.synapse</groupId>
-                <artifactId>synapse-core</artifactId>
-                <version>2.1.3-wso2v1</version>
-            </dependency>
-
             <dependency>
                 <groupId>org.wso2.carbon</groupId>
                 <artifactId>org.wso2.carbon.mediation.dependency.mgt</artifactId>
@@ -646,6 +675,7 @@
         <apimgt.publisher.feature.version>1.2.4-SNAPSHOT</apimgt.publisher.feature.version>
         <apimgt.startup.publisher.feature.version>1.2.4-SNAPSHOT</apimgt.startup.publisher.feature.version>
         <apimgt.store.feature.version>1.2.4-SNAPSHOT</apimgt.store.feature.version>
+        <apimgt.synapse.feature.version>1.2.4-SNAPSHOT</apimgt.synapse.feature.version>
 
         <!-- Carbon kernel version -->
         <wso2carbon.version>4.2.0</wso2carbon.version>
@@ -700,7 +730,7 @@
         <wso2carbon.version.identity>${project.version}</wso2carbon.version.identity>
         <axis2.wso2.version.identity>${axis2.wso2.version}</axis2.wso2.version.identity>
         <axiom.wso2.version.identity>${axiom.wso2.version}</axiom.wso2.version.identity>
-        <synapse.version>2.1.2-wso2v6</synapse.version>
+        <synapse.version>2.1.2-wso2v7-SNAPSHOT</synapse.version>
         <synapse.version.identity>${synapse.version}</synapse.version.identity>
         <synapse.version.handlers>${synapse.version}</synapse.version.handlers>
         <throttle.version.handlers>3.3.0</throttle.version.handlers>

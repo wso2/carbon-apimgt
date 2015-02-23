@@ -1,0 +1,3 @@
+<endpoint name="epr1" xmlns="http://ws.apache.org/ns/synapse">
+    <address uri="http://localhost:9000/services/LBService1"/>
+</endpoint>

@@ -1,0 +1,559 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<document>
+    <properties>
+        <title>Apache Synapse - Quick Start Guide</title>
+    </properties>
+    <head>
+        <style type="text/css" xml:space="preserve">
+    .command {
+        border: 1px dashed #3c78b5;
+        text-align: left;
+        background-color: #f0f0f0;
+        padding: 3px;
+        font-size: 11px;
+        font-family: Courier;
+        margin: 10px;
+        line-height: 13px;
+    }
+    .consoleOutput {
+        border: 1px dashed #3c78b5;
+        font-size: 11px;
+        font-family: Courier;
+        margin: 10px;
+        line-height: 13px;
+        background-color: #f0f0f0;
+        border-bottom: 1px dashed #3c78b5;
+        padding: 3px;
+        border-style: solid;
+    }
+    .info {
+        border-style: solid;
+        border-width: 1px;
+        border-color: #090;
+        background-color: #dfd;
+        text-align:left;
+        margin-top: 5px;
+        margin-bottom: 5px;
+    }
+    li {
+        font-family: Verdana, arial, sans-serif;
+        font-size: 11px;
+        line-height: 16px;
+        color: #000000;
+        font-weight: normal;
+    }
+    p {
+        font-family: Verdana, arial, sans-serif;
+        font-size: 11px;
+        line-height: 16px;
+        color: #000000;
+        font-weight: normal;
+    }
+    pre {
+        padding: 0px;
+        margin-top: 5px;
+        margin-left: 15px;
+        margin-bottom: 5px;
+        margin-right: 5px;
+        text-align: left;
+        background-color: #f0f0f0;
+        padding: 3px;
+        border: 1px dashed #3c78b5;
+        font-size: 11px;
+        font-family: Courier;
+        margin: 10px;
+        line-height: 13px;
+    }
+    h1 {
+        font-size: 24px;
+        line-height: normal;
+        font-weight: bold;
+        background-color: #f0f0f0;
+        color: #003366;
+        border-bottom: 1px solid #3c78b5;
+        padding: 2px;
+        margin: 36px 0px 4px 0px;
+    }
+    h2 {
+        font-size: 18px;
+        line-height: normal;
+        font-weight: bold;
+        background-color: #f0f0f0;
+        border-bottom: 1px solid #3c78b5;
+        padding: 2px;
+        margin: 27px 0px 4px 0px;
+    }
+    h3 {
+        font-size: 14px;
+        line-height: normal;
+        font-weight: bold;
+        background-color: #f0f0f0;
+        padding: 2px;
+        margin: 21px 0px 4px 0px;
+    }
+    h4 {
+        font-size: 12px;
+        line-height: normal;
+        font-weight: bold;
+        background-color: #f0f0f0;
+        padding: 2px;
+        margin: 18px 0px 4px 0px;
+    }</style>
+    </head>
+  <body>
+    <div style="margin-top:-40px; float:right; _margin-top:0px;">
+      <img alt="Synapse logo"
+           src="images/synapse-logo-web2.png" width="197"
+           height="82"/>
+    </div>
+    <div>
+      <h1>
+        Apache Synapse ESB - Quick Start Guide
+      </h1>
+    </div>
+    <p>
+      This guide will demonstrate two sample applications covering the basic and
+      the most common usage scenarios of Synapse; which is Message mediation and
+      Service mediation (i.e. using Proxy services). You will be guided through
+      a step by step approach to get a feeling about Synapse from the absolute
+      beginning.
+    </p>
+    <h3>
+      Pre-requisites
+    </h3>
+    <p>
+      You should have following pre-requisites installed on your system to
+      follow through this guide
+    </p>
+    <ul>
+      <li>
+        A Java 2 SE - JDK or JRE of version 1.5.x or higher
+      </li>
+      <li>
+        Apache Ant <a href="http://ant.apache.org">http://ant.apache.org</a>
+      </li>
+    </ul>
+    <h2>
+      Message Mediation
+    </h2>
+    <p>
+      In this example Synapse will be used to simply log all the messages
+      passing through it. Although this simple scenario only performs logging,
+      it demonstrates the basics of message mediation, where the logging
+      functionality could be replaced with any combination of advanced
+      mediations such as transformations, content based routing as well as
+      bridging between different communication protocols etc. So, let's start
+      with the basics.
+    </p>
+    <h3>
+      Download
+    </h3>
+    <p>
+      Our first task is to download Synapse. Open a web browser and access the
+      following URL:
+      <a href="http://synapse.apache.org/download.html">http://synapse.apache.org/download.html</a>.
+      You will then see the list of available releases. Click on the latest version, and you
+      will be directed to the Synapse release download page. Now download the
+      'Standard binary distribution' ZIP or tar.gz archive compatible with your
+      operating system.
+    </p>
+    <h3>
+      Installation
+    </h3>
+    <p>
+      Synapse can be installed just by extracting the downloaded binary
+      archive.. A directory named synapse with the release number will be
+      created in the selected parent directory, containing all the files
+      required for Synapse. We will refer to this directory as &lt;synapse-home&gt;
+      from now on.
+    </p>
+    <h3>
+      Running the sample
+    </h3>
+    <p>
+      Synapse ships with a set of sample clients and services to demonstrate
+      some of its core capabilities. Hence, you will need to run three programs
+      to get an idea of message mediation. The destination server that hosts the
+      ultimate service to be invoked to service the client, the client itself,
+      and Synapse, which acts as the intermediary to bridge between the client
+      and the server.
+    </p>
+    <p/>
+    <h4>
+      Starting the sample Axis2 server
+    </h4>
+    <p>
+      In this case we are using a standalone Axis2 web services engine as the
+      server. You don't have to get it now, it is already bundled with your
+      Synapse distribution. But we have to deploy a sample service for which
+      client can send requests. Go to &lt;synapse-home&gt;/samples/axis2Server/src/SimpleStockQuoteService
+      directory. Run "ant" to build and deploy this service to the sample Axis2
+      server.
+    </p>
+    <p/>
+<pre xml:space="preserve">user@host:/opt/synapse-1.1.1/samples/axis2Server$ cd src/SimpleStockQuoteService/
+user@host:/opt/synapse-1.1.1/samples/axis2Server/src/SimpleStockQuoteService$ ant
+Buildfile: build.xml
+
+clean:
+
+init:
+    [mkdir] Created dir: /opt/synapse-1.1.1/samples/axis2Server/src/SimpleStockQuoteService/temp
+    [mkdir] Created dir: /opt/synapse-1.1.1/samples/axis2Server/src/SimpleStockQuoteService/temp/classes
+    [mkdir] Created dir: /opt/synapse-1.1.1/samples/axis2Server/repository/services
+
+compile-all:
+    [javac] Compiling 9 source files to /opt/synapse-1.1.1/samples/axis2Server/src/SimpleStockQuoteService/temp/classes
+
+build-service:
+    [mkdir] Created dir: /opt/synapse-1.1.1/samples/axis2Server/src/SimpleStockQuoteService/temp/SimpleStockQuote
+    [mkdir] Created dir: /opt/synapse-1.1.1/samples/axis2Server/src/SimpleStockQuoteService/temp/SimpleStockQuote/META-INF
+     [copy] Copying 1 file to /opt/synapse-1.1.1/samples/axis2Server/src/SimpleStockQuoteService/temp/SimpleStockQuote/META-INF
+     [copy] Copying 1 file to /opt/synapse-1.1.1/samples/axis2Server/src/SimpleStockQuoteService/temp/SimpleStockQuote/META-INF
+     [copy] Copying 9 files to /opt/synapse-1.1.1/samples/axis2Server/src/SimpleStockQuoteService/temp/SimpleStockQuote
+      [jar] Building jar: /opt/synapse-1.1.1/samples/axis2Server/repository/services/SimpleStockQuoteService.aar
+
+BUILD SUCCESSFUL
+Total time: 2 seconds
+user@host:/opt/synapse-1.1.1/samples/axis2Server/src/SimpleStockQuoteService$</pre>
+    <p>
+      Now go to &lt;synapse-home&gt;/samples/axis2Server directory and start the
+      server using the following command. This will start Axis2 server on port
+      9000 (http).
+    </p>
+    <div class="command">
+      <p>
+        Linux / Unix: . axis2server.sh
+      </p>
+      <p>
+        Windows: axis2server.bat
+      </p>
+    </div>
+    <p>
+      You will see the following messages on the console.
+    </p>
+<pre xml:space="preserve">user@host:/opt/synapse-1.1.1/samples/axis2Server$ ./axis2server.sh
+ Using Bouncy castle JAR for Java 1.5
+ Using JAVA_HOME:   /opt/jdk1.5_06
+ Using AXIS2 Repository :   /opt/synapse-1.1.1/samples/axis2Server/repository
+ Using AXIS2 Configuration :   /opt/synapse-1.1.1/samples/axis2Server/repository/conf/axis2.xml
+2007-11-05 14:36:41,462 [-] [main]  INFO SimpleHTTPServer [SimpleAxisServer] Starting
+[SimpleAxisServer] Using the Axis2 Repository : /opt/synapse-1.1.1/samples/axis2Server/repository
+[SimpleAxisServer] Using the Axis2 Configuration File : /opt/synapse-1.1.1/samples/axis2Server/repository/conf/axis2.xml
+2007-11-05 14:36:43,864 [-] [main]  INFO HttpCoreNIOSender HTTPS Sender starting
+2007-11-05 14:36:43,891 [-] [main]  INFO HttpCoreNIOSender HTTP Sender starting
+2007-11-05 14:36:44,288 [-] [main]  INFO HttpCoreNIOListener HTTPS Listener starting on port : 9002
+2007-11-05 14:36:44,298 [-] [main]  INFO HttpCoreNIOListener HTTP Listener starting on port : 9000
+2007-11-05 14:36:44,350 [-] [main]  INFO SimpleHTTPServer [SimpleAxisServer] Started</pre>
+    <p/>
+    <h4>
+      Starting Synapse
+    </h4>
+    <p>
+      Now it's time to start Synapse. In this scenario we are starting Synapse
+      using the sample configuration found in synapse_sample_0.xml (i.e. in
+      repository/conf/sample) and listed below. It is configured to log and pass
+      through, all the messages.
+    </p>
+<pre xml:space="preserve">&lt;definitions xmlns="http://ws.apache.org/ns/synapse"&gt;<br/>    &lt;log level="full"/&gt; <br/>    &lt;send/&gt;
+&lt;/definitions&gt; </pre>
+    <p/>
+    <p>
+      Go to &lt;synapse-home&gt;/bin directory and type the command given below.
+      Synapse will be started on port 8280 (http) and 8243 (https - under JDK
+      1.5)
+    </p>
+    <div class="command">
+      <p>
+        Linux / Unix: . synapse.sh -sample 0
+      </p>
+      <p>
+        Windows: synapse.bat -sample 0
+      </p>
+    </div>
+    <p/>
+    <p>
+      Following messages will be displayed on the console to indicate the
+      successfull startup of Synapse.
+    </p>
+<pre xml:space="preserve">user@host:/opt/synapse-1.1.1/bin$ ./synapse.sh -sample 0
+ Using Bouncy castle JAR for Java 1.5
+Starting Synapse/Java ...
+Using SYNAPSE_HOME:    /opt/synapse-1.1.1
+Using JAVA_HOME:       /opt/jdk1.5_06
+Using SYNAPSE_XML:     -Dsynapse.xml=/opt/synapse-1.1.1/repository/conf/sample/synapse_sample_0.xml
+2007-11-05 14:58:55,029 [-] [main]  INFO ServerManager Using the Axis2 Repository /opt/synapse-1.1.1/repository
+2007-11-05 14:58:56,617 [-] [main]  INFO SynapseInitializationModule Initializing Synapse at : Mon Nov 05 14:58:56 LKT 2007
+2007-11-05 14:58:56,618 [127.0.1.1-asankha] [main]  INFO SynapseInitializationModule Loading mediator extensions...
+2007-11-05 14:58:56,619 [127.0.1.1-asankha] [main]  INFO SynapseInitializationModule Initializing the Synapse configuration ...
+2007-11-05 14:58:56,624 [127.0.1.1-asankha] [main]  INFO XMLConfigurationBuilder Generating the Synapse configuration model by parsing the XML configuration
+2007-11-05 14:58:56,717 [127.0.1.1-asankha] [main]  INFO SynapseConfigurationBuilder Loaded Synapse configuration from : /opt/synapse-1.1/repository/conf/sample/synapse_sample_0.xml
+2007-11-05 14:58:56,724 [127.0.1.1-asankha] [main]  INFO SynapseInitializationModule Deploying the Synapse service..
+2007-11-05 14:58:56,740 [127.0.1.1-asankha] [main]  INFO SynapseInitializationModule Initializing Sandesha 2...
+2007-11-05 14:58:56,801 [127.0.1.1-asankha] [main]  INFO SynapseInitializationModule Deploying Proxy services...
+2007-11-05 14:58:56,801 [127.0.1.1-asankha] [main]  INFO SynapseInitializationModule Synapse initialized successfully...!
+2007-11-05 14:58:56,886 [127.0.1.1-asankha] [main]  INFO HttpCoreNIOSender HTTPS Sender starting
+2007-11-05 14:58:56,887 [127.0.1.1-asankha] [main]  INFO HttpCoreNIOSender HTTP Sender starting
+2007-11-05 14:58:57,039 [127.0.1.1-asankha] [main]  INFO HttpCoreNIOListener HTTPS Listener starting on port : 8243
+2007-11-05 14:58:57,040 [127.0.1.1-asankha] [main]  INFO ServerManager Starting transport https on port 8243
+2007-11-05 14:58:57,041 [127.0.1.1-asankha] [main]  INFO HttpCoreNIOListener HTTP Listener starting on port : 8280
+2007-11-05 14:58:57,041 [127.0.1.1-asankha] [main]  INFO ServerManager Starting transport http on port 8280
+2007-11-05 14:58:57,085 [127.0.1.1-asankha] [main]  INFO ServerManager Starting transport vfs
+2007-11-05 14:58:57,086 [127.0.1.1-asankha] [main]  INFO ServerManager Ready for processing</pre>
+    <p/>
+    <h4>
+      Run the client
+    </h4>
+    <p>
+      Now the final step, running the client. Go to &lt;synapse-home&gt;/samples/axis2Client
+      directory and type the following command
+    </p>
+<pre xml:space="preserve">user@host:/opt/synapse-1.1.1/samples/axis2Client$ ant stockquote -Daddurl=http://localhost:9000/services/SimpleStockQuoteService -Dtrpurl=http://localhost:8280 -Dmode=quote -Dsymbol=IBM
+Buildfile: build.xml
+
+init:
+    [mkdir] Created dir: /opt/synapse-1.1.1/samples/axis2Client/target/classes
+
+compile:
+    [javac] Compiling 10 source files to /opt/synapse-1.1.1/samples/axis2Client/target/classes
+
+stockquote:
+     [java] Standard :: Stock price = $91.09641757880443
+
+BUILD SUCCESSFUL</pre>
+    <p/>
+    <p>
+      This sends a request for a stock quote for the symbol IBM and sets the
+      transport URL to Synapse (http://localhost:8280) and the WS-Addressing EPR
+      set that of the actual server
+      (http://localhost:9000/services/SimpleStockQuoteService). The actual wire
+      level http message sent by the client is as follows, and is sent over port
+      8280 to the Synapse instance on localhost.
+    </p>
+<pre xml:space="preserve">POST / HTTP/1.1
+Content-Type: text/xml; charset=UTF-8
+SOAPAction: "urn:getQuote"
+User-Agent: Axis2
+Host: 127.0.0.1
+Transfer-Encoding: chunked
+
+218
+&lt;?xml version='1.0' encoding='UTF-8'?&gt;
+   &lt;soapenv:Envelope xmlns:wsa="http://www.w3.org/2005/08/addressing" xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/"&gt;
+      &lt;soapenv:Header&gt;
+         &lt;wsa:To&gt;http://localhost:9000/services/SimpleStockQuoteService&lt;/wsa:To&gt;
+         &lt;wsa:MessageID&gt;urn:uuid:D538B21E30B32BB8291177589283717&lt;/wsa:MessageID&gt;
+         &lt;wsa:Action&gt;urn:getQuote&lt;/wsa:Action&gt;
+      &lt;/soapenv:Header&gt;
+      &lt;soapenv:Body&gt;
+         &lt;m0:getQuote xmlns:m0="http://services.samples/xsd"&gt;
+            &lt;m0:request&gt;
+               &lt;m0:symbol&gt;IBM&lt;/m0:symbol&gt;
+            &lt;/m0:request&gt;
+         &lt;/m0:getQuote&gt;
+      &lt;/soapenv:Body&gt;
+   &lt;/soapenv:Envelope&gt;0</pre>
+    <p/>
+    <p>
+      Now take a look at the console running Synapse. You will see that all the
+      details of the mediation are logged along with all the SOAP messages
+      passed through Synapse. If you execute Synapse in debug mode by editing
+      the lib/log4j.properties "log4j.category.org.apache.synapse" as "DEBUG"
+      instead of INFO, you will see more information as follows after a restart
+      and replay of the above scenario again.
+    </p>
+<pre xml:space="preserve">2007-11-05 15:03:51,082 [127.0.1.1-asankha] [I/O dispatcher 3]  INFO PipeImpl Using native OS Pipes for event-driven to stream IO bridging
+2007-11-05 15:03:51,206 [127.0.1.1-asankha] [HttpServerWorker-1] DEBUG SynapseMessageReceiver Synapse received a new message for message mediation...
+2007-11-05 15:03:51,206 [127.0.1.1-asankha] [HttpServerWorker-1] DEBUG SynapseMessageReceiver Received To: http://localhost:9000/services/SimpleStockQuoteService
+2007-11-05 15:03:51,206 [127.0.1.1-asankha] [HttpServerWorker-1] DEBUG SynapseMessageReceiver SOAPAction: urn:getQuote
+2007-11-05 15:03:51,206 [127.0.1.1-asankha] [HttpServerWorker-1] DEBUG SynapseMessageReceiver WSA-Action: urn:getQuote
+2007-11-05 15:03:51,206 [127.0.1.1-asankha] [HttpServerWorker-1] DEBUG Axis2SynapseEnvironment Injecting MessageContext
+2007-11-05 15:03:51,207 [127.0.1.1-asankha] [HttpServerWorker-1] DEBUG Axis2SynapseEnvironment Using Main Sequence for injected message
+2007-11-05 15:03:51,207 [127.0.1.1-asankha] [HttpServerWorker-1] DEBUG SequenceMediator Start : Sequence &lt;main&gt;
+2007-11-05 15:03:51,207 [127.0.1.1-asankha] [HttpServerWorker-1] DEBUG SequenceMediator Sequence &lt;SequenceMediator&gt; :: mediate()
+2007-11-05 15:03:51,207 [127.0.1.1-asankha] [HttpServerWorker-1] DEBUG LogMediator Start : Log mediator
+2007-11-05 15:03:51,231 [127.0.1.1-asankha] [HttpServerWorker-1]  INFO LogMediator To: http://localhost:9000/services/SimpleStockQuoteService, WSAction: urn:getQuote, SOAPAction: urn:getQuote, ReplyTo: http://www.w3.org/2005/08/addressing/anonymous, MessageID: urn:uuid:DB76240DF26CE9AF1D1194253430879, Direction: request, Envelope: &lt;?xml version='1.0' encoding='utf-8'?&gt;&lt;soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:wsa="http://www.w3.org/2005/08/addressing"&gt;&lt;soapenv:Header&gt;&lt;wsa:To&gt;http://localhost:9000/soap/SimpleStockQuoteService&lt;/wsa:To&gt;&lt;wsa:MessageID&gt;urn:uuid:DB76240DF26CE9AF1D1194253430879&lt;/wsa:MessageID&gt;&lt;wsa:Action&gt;urn:getQuote&lt;/wsa:Action&gt;&lt;/soapenv:Header&gt;&lt;soapenv:Body&gt;&lt;m0:getQuote xmlns:m0="http://services.samples/xsd"&gt;&lt;m0:request&gt;&lt;m0:symbol&gt;IBM&lt;/m0:symbol&gt;&lt;/m0:request&gt;&lt;/m0:getQuote&gt;&lt;/soapenv:Body&gt;&lt;/soapenv:Envelope&gt;
+2007-11-05 15:03:51,250 [127.0.1.1-asankha] [HttpServerWorker-1] DEBUG LogMediator End : Log mediator
+2007-11-05 15:03:51,250 [127.0.1.1-asankha] [HttpServerWorker-1] DEBUG SendMediator Start : Send mediator
+2007-11-05 15:03:51,250 [127.0.1.1-asankha] [HttpServerWorker-1] DEBUG SendMediator Sending request message using implicit message properties..
+Sending To: http://localhost:9000/services/SimpleStockQuoteService
+SOAPAction: urn:getQuote
+2007-11-05 15:03:51,254 [127.0.1.1-asankha] [HttpServerWorker-1] DEBUG Axis2FlexibleMEPClient Sending [add = false] [sec = false] [rm = false] [ to Address: http://localhost:9000/services/SimpleStockQuoteService]
+2007-11-05 15:03:51,302 [127.0.1.1-asankha] [HttpServerWorker-1]  INFO TimeoutHandler This engine will expire all callbacks after : 86400 seconds, irrespective of the timeout action, after the specified or optional timeout
+2007-11-05 15:03:51,356 [127.0.1.1-asankha] [HttpServerWorker-1] DEBUG SendMediator End : Send mediator
+2007-11-05 15:03:51,356 [127.0.1.1-asankha] [HttpServerWorker-1] DEBUG SequenceMediator End : Sequence &lt;main&gt;
+2007-11-05 15:03:51,398 [127.0.1.1-asankha] [HttpClientWorker-1] DEBUG SynapseCallbackReceiver Synapse received an asynchronous response message
+2007-11-05 15:03:51,400 [127.0.1.1-asankha] [HttpClientWorker-1] DEBUG SynapseCallbackReceiver Received To: null
+2007-11-05 15:03:51,400 [127.0.1.1-asankha] [HttpClientWorker-1] DEBUG SynapseCallbackReceiver SOAPAction: null
+2007-11-05 15:03:51,400 [127.0.1.1-asankha] [HttpClientWorker-1] DEBUG SynapseCallbackReceiver WSA-Action: null
+2007-11-05 15:03:51,402 [127.0.1.1-asankha] [HttpClientWorker-1] DEBUG SynapseCallbackReceiver Body :
+&lt;?xml version='1.0' encoding='utf-8'?&gt;&lt;soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/"&gt;&lt;soapenv:Body&gt;&lt;ns:getQuoteResponse xmlns:ns="http://services.samples/xsd"&gt;&lt;ns:return type="samples.services.GetQuoteResponse"&gt;&lt;ns:change&gt;4.03627430702446&lt;/ns:change&gt;&lt;ns:earnings&gt;-9.467701672785129&lt;/ns:earnings&gt;&lt;ns:high&gt;191.83014686803938&lt;/ns:high&gt;&lt;ns:last&gt;185.42637586281398&lt;/ns:last&gt;&lt;ns:lastTradeTimestamp&gt;Mon Nov 05 15:03:51 LKT 2007&lt;/ns:lastTradeTimestamp&gt;&lt;ns:low&gt;193.2690208751758&lt;/ns:low&gt;&lt;ns:marketCap&gt;-1737393.107878862&lt;/ns:marketCap&gt;&lt;ns:name&gt;IBM Company&lt;/ns:name&gt;&lt;ns:open&gt;-183.2632780777984&lt;/ns:open&gt;&lt;ns:peRatio&gt;-17.430497030284027&lt;/ns:peRatio&gt;&lt;ns:percentageChange&gt;1.9749680728382655&lt;/ns:percentageChange&gt;&lt;ns:prevClose&gt;204.37162314344914&lt;/ns:prevClose&gt;&lt;ns:symbol&gt;IBM&lt;/ns:symbol&gt;&lt;ns:volume&gt;6695&lt;/ns:volume&gt;&lt;/ns:return&gt;&lt;/ns:getQuoteResponse&gt;&lt;/soapenv:Body&gt;&lt;/soapenv:Envelope&gt;
+2007-11-05 15:03:51,404 [127.0.1.1-asankha] [HttpClientWorker-1] DEBUG Axis2SynapseEnvironment Injecting MessageContext
+2007-11-05 15:03:51,404 [127.0.1.1-asankha] [HttpClientWorker-1] DEBUG Axis2SynapseEnvironment Using Main Sequence for injected message
+2007-11-05 15:03:51,404 [127.0.1.1-asankha] [HttpClientWorker-1] DEBUG SequenceMediator Start : Sequence &lt;main&gt;
+2007-11-05 15:03:51,404 [127.0.1.1-asankha] [HttpClientWorker-1] DEBUG SequenceMediator Sequence &lt;SequenceMediator&gt; :: mediate()
+2007-11-05 15:03:51,404 [127.0.1.1-asankha] [HttpClientWorker-1] DEBUG LogMediator Start : Log mediator
+2007-11-05 15:03:51,405 [127.0.1.1-asankha] [HttpClientWorker-1]  INFO LogMediator To: http://www.w3.org/2005/08/addressing/anonymous, MessageID: urn:uuid:A6510AF6BD288D8DFB1194253431259544001-942151716, Direction: response, Envelope: &lt;?xml version='1.0' encoding='utf-8'?&gt;&lt;soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/"&gt;&lt;soapenv:Body&gt;&lt;ns:getQuoteResponse xmlns:ns="http://services.samples/xsd"&gt;&lt;ns:return type="samples.services.GetQuoteResponse"&gt;&lt;ns:change&gt;4.03627430702446&lt;/ns:change&gt;&lt;ns:earnings&gt;-9.467701672785129&lt;/ns:earnings&gt;&lt;ns:high&gt;191.83014686803938&lt;/ns:high&gt;&lt;ns:last&gt;185.42637586281398&lt;/ns:last&gt;&lt;ns:lastTradeTimestamp&gt;Mon Nov 05 15:03:51 LKT 2007&lt;/ns:lastTradeTimestamp&gt;&lt;ns:low&gt;193.2690208751758&lt;/ns:low&gt;&lt;ns:marketCap&gt;-1737393.107878862&lt;/ns:marketCap&gt;&lt;ns:name&gt;IBM Company&lt;/ns:name&gt;&lt;ns:open&gt;-183.2632780777984&lt;/ns:open&gt;&lt;ns:peRatio&gt;-17.430497030284027&lt;/ns:peRatio&gt;&lt;ns:percentageChange&gt;1.9749680728382655&lt;/ns:percentageChange&gt;&lt;ns:prevClose&gt;204.37162314344914&lt;/ns:prevClose&gt;&lt;ns:symbol&gt;IBM&lt;/ns:symbol&gt;&lt;ns:volume&gt;6695&lt;/ns:volume&gt;&lt;/ns:return&gt;&lt;/ns:getQuoteResponse&gt;&lt;/soapenv:Body&gt;&lt;/soapenv:Envelope&gt;
+2007-11-05 15:03:51,405 [127.0.1.1-asankha] [HttpClientWorker-1] DEBUG LogMediator End : Log mediator
+2007-11-05 15:03:51,405 [127.0.1.1-asankha] [HttpClientWorker-1] DEBUG SendMediator Start : Send mediator
+2007-11-05 15:03:51,405 [127.0.1.1-asankha] [HttpClientWorker-1] DEBUG SendMediator Sending response message using implicit message properties..
+Sending To: http://www.w3.org/2005/08/addressing/anonymous
+SOAPAction: null
+2007-11-05 15:03:51,408 [127.0.1.1-asankha] [HttpClientWorker-1] DEBUG SendMediator End : Send mediator
+2007-11-05 15:03:51,408 [127.0.1.1-asankha] [HttpClientWorker-1] DEBUG SequenceMediator End : Sequence &lt;main&gt;</pre>
+    <p>
+      You have successfully completed the first part of this guide. Now let's
+      look at the next scenario, proxy services.
+    </p>
+    <p/>
+    <h2>
+      Proxy Services
+    </h2>
+    <p>
+      As the name implies, a proxy service acts as a service hosted in Synapse,
+      and typically fronts an existing service endpoint. A proxy service can be
+      created and exposed on a different transport, schema, WSDL, or QoS (such
+      as WS-Security, WS-Reliable Messaging) aspect than the real service and
+      could mediate the messages before being delivered to the actual endpoint,
+      and the responses before they reach the client.
+    </p>
+    <p>
+      Clients can send requests for proxy services directly to Synapse, as the
+      client sees as if they are hosted on it, and for example can perform ?wsdl
+      and view the WSDL of the virtual proxy service. But in the Synapse
+      configuration, such requests can be handled in anyway you like. Most
+      obvious thing would be to do some processing to the message and send it to
+      the actual service, probably running on a different computer. But it is
+      not necessary to always send the message to the actual service. You may
+      list any combination of tasks to be performed on the messages received for
+      the proxy service and terminate the flow or send some java back to the
+      client even without sending it to an actual service. Let's explore a
+      simple proxy services scenario step by step to get a better feeling. As
+      you have downloaded and installed Synapse in the previous section, now you
+      can start directly on the sample.
+    </p>
+    <p/>
+    <h3>
+      Running the sample
+    </h3>
+    <p>
+      As in the previous section, there should be three entities running to
+      demonstrate proxy services, the server, client and Synapse. Let's start
+      with the server.
+    </p>
+    <p/>
+    <h4>
+      Starting the sample Axis2 server
+    </h4>
+    <p>
+      As you have built and deployed the SimpleStockQuote service in the
+      previous section, you can simply start the server by switching to the &lt;synapse-home&gt;/samples/axis2Server
+      directory and running the following command.
+    </p>
+    <div class="command">
+      <p>
+        Linux / Unix: . axis2server.sh
+      </p>
+      <p>
+        Windows: axis2server.bat
+      </p>
+    </div>
+    <p>
+      You can see the console messages as in the previous section.
+    </p>
+    <h4>
+      Starting Synapse
+    </h4>
+    <p>
+      We have to start Synapse with a configuration containing a proxy service
+      definition. In this case we are using the synapse_sample_150.xml, so that
+      you don't have to write the configuration your self.
+    </p>
+<pre xml:space="preserve">&lt;definitions xmlns="http://ws.apache.org/ns/synapse"&gt;
+    &lt;proxy name="StockQuoteProxy"&gt;
+        &lt;target&gt;
+            &lt;endpoint&gt;
+                &lt;address uri="http://localhost:9000/services/SimpleStockQuoteService"/&gt;
+            &lt;/endpoint&gt;
+            &lt;outSequence&gt;
+                &lt;send/&gt;
+            &lt;/outSequence&gt;
+        &lt;/target&gt;
+        &lt;publishWSDL uri="file:repository/conf/sample/resources/proxy/sample_proxy_1.wsdl"/&gt;
+    &lt;/proxy&gt;
+&lt;/definitions&gt;</pre>
+    <p/>
+    <p>
+      The above configuration will expose a proxy service named StockQuoteProxy
+      and specifies an endpoint
+      (http://localhost:9000/services/SimpleStockQuoteService) as the target for the
+      proxy service. Therefore, messages coming to the proxy service will be
+      directed to the address http://localhost:9000/services/SimpleStockQuoteService
+      specified in the endpoint. There is also an out sequence for the proxy
+      service, which is applicable for response messages. In the out sequence,
+      we just send the messages back to the client. The publishWSDL tag
+      specifies an WSDL to be published for this proxy service. Let's start
+      Synapse with this sample configuration by running the below command from
+      the &lt;synapse-home&gt;/bin directory. It is possible to specify a
+      sequence of mediation for incoming messages instead of a target endpoint,
+      and many other possibilities and options are available to configure proxy
+      services. These are explained in the samples and configuration guides.
+    </p>
+    <p/>
+    <div class="command">
+      <p>
+        Linux / Unix: . synapse.sh -sample 150
+      </p>
+      <p>
+        Windows: synapse.bat -sample 150
+      </p>
+    </div>
+    <p/>
+    <p>
+      Synapse will display a set of messages as in the previous section
+      describing the steps of starting procedure. Before running the client, it
+      is time to observe another feature of proxy services. That is displaying
+      the published WSDL. Just open a web browser and point it to the address
+      http://localhost:8280/services/StockQuoteProxy?wsdl. You will see the
+      sample_proxy_1.wsdl specified in the configuration but containing the
+      correct EPR for the service over http/s.
+    </p>
+    <p/>
+    <h4>
+      Run the client
+    </h4>
+    <p>
+      Now it is time to see it in action. Go to the &lt;synapse-home&gt;/samples/axis2Clients
+      directory and type the following command:
+    </p>
+    <div class="command">
+      ant stockquote -Dtrpurl=http://localhost:8280/services/StockQuoteProxy
+      -Dmode=quote -Dsymbol=IBM
+    </div>
+    <p>
+      The above command sends a stockquote request directly to the provided
+      transport endpoint at: http://localhost:8280/services/StockQuoteProxy. You
+      will see the response from the server displayed on the console as follows:
+    </p>
+    <div class="consoleOutput">
+      Standard :: Stock price = $165.32687331383468
+    </div>
+    <p/>
+    <p>
+      This quick guide illustrates the simple use case of proxy services. Please
+      refer to samples #150 and above in the Samples guide, for in depth
+      coverage of more advanced use cases.
+    </p>
+    <p/>
+    <p>
+      Yes, you are done with a quick look at Synapse. Now it is time to go
+      deeper and reveal the advanced features of Synapse. You can browse through
+      the samples for your interested areas. If you have any issue regarding
+      Synapse as a user, feel free ask it in the Synapse user mailing list
+      (<a href="http://synapse.apache.org/mail-lists.html">http://synapse.apache.org/mail-lists.html</a>).
+    </p>
+    <p/>
+    <p/>
+    <p/>
+  </body>
+</document>

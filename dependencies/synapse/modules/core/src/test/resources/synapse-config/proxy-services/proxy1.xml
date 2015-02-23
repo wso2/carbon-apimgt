@@ -1,0 +1,7 @@
+<proxy name="proxy1" xmlns="http://ws.apache.org/ns/synapse">
+    <target endpoint="epr1" inSequence="foo">
+        <outSequence>
+            <send/>
+        </outSequence>
+    </target>
+</proxy>

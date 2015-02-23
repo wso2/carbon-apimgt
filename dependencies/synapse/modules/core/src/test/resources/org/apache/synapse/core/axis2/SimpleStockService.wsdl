@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wsdl:definitions xmlns:axis2="http://services.samples"  xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" targetNamespace="http://services.samples" xmlns:ns1="http://services.samples/xsd/GetQuote" xmlns:ns2="http://services.samples/xsd/PlaceOrder">
+
+<wsdl:types>
+	<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" targetNamespace="http://services.samples">
+			<xs:import namespace="http://services.samples/xsd/GetQuote" schemaLocation="schema/SimpleStockService-GetQuote.xsd"/>
+	</xs:schema>
+</wsdl:types>	
+	
+	<wsdl:message name="placeOrderMessage">
+		<wsdl:part name="part1" element="ns1:placeOrder"/>
+	</wsdl:message>
+	<wsdl:message name="getQuoteMessage">
+		<wsdl:part name="part1" element="ns1:getQuote"/>
+	</wsdl:message>
+	<wsdl:message name="getQuoteResponseMessage">
+		<wsdl:part name="part1" element="ns1:getQuoteResponse"/>
+	</wsdl:message>
+	<wsdl:portType name="SimpleStockQuoteServicePortType">
+		<wsdl:operation name="placeOrder">
+			<wsdl:input message="axis2:placeOrderMessage" xmlns:wsaw="http://www.w3.org/2006/05/addressing/wsdl" wsaw:Action="urn:placeOrder"/>
+		</wsdl:operation>
+		<wsdl:operation name="getQuote">
+			<wsdl:input message="axis2:getQuoteMessage" xmlns:wsaw="http://www.w3.org/2006/05/addressing/wsdl" wsaw:Action="urn:getQuote"/>
+			<wsdl:output message="axis2:getQuoteResponseMessage" xmlns:wsaw="http://www.w3.org/2006/05/addressing/wsdl" wsaw:Action="http://services.samples/SimpleStockQuoteServicePortType/getQuoteResponse"/>
+		</wsdl:operation>
+	</wsdl:portType>
+	<wsdl:binding name="SimpleStockQuoteServiceSOAP11Binding" type="axis2:SimpleStockQuoteServicePortType">
+		<soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+		<wsdl:operation name="placeOrder">
+			<soap:operation soapAction="urn:placeOrder" style="document"/>
+			<wsdl:input>
+				<soap:body use="literal"/>
+			</wsdl:input>
+		</wsdl:operation>
+		<wsdl:operation name="getQuote">
+			<soap:operation soapAction="urn:getQuote" style="document"/>
+			<wsdl:input>
+				<soap:body use="literal"/>
+			</wsdl:input>
+			<wsdl:output>
+				<soap:body use="literal"/>
+			</wsdl:output>
+		</wsdl:operation>
+	</wsdl:binding>
+	<wsdl:service name="SimpleStockQuoteService">
+		<wsdl:port name="SimpleStockQuoteServiceSOAP11port_http" binding="axis2:SimpleStockQuoteServiceSOAP11Binding">
+			<soap:address location="http://localhost:5555/web/WmPolicyGateway/services/user_name_req_PGService"/>
+		</wsdl:port>
+	</wsdl:service>
+	<!-- wsdl:documentation>SimpleStockQuoteService</wsdl:documentation-->
+</wsdl:definitions>

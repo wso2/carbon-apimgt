@@ -1,0 +1,12 @@
+<sequence name="bar" xmlns="http://synapse.apache.org/ns/2010/04/configuration">
+    <log/>
+    <filter source="get-property('To')" regex=".*/StockQuote.*">
+        <send>
+            <endpoint>
+                <address uri="http://localhost:9000/services/SimpleStockQuoteService"/>
+            </endpoint>
+        </send>
+        <drop/>
+    </filter>
+    <send/>
+</sequence>
