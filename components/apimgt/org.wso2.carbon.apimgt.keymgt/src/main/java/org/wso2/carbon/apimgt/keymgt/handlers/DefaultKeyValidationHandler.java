@@ -6,6 +6,7 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
+import org.wso2.carbon.apimgt.impl.token.TokenGenerator;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.keymgt.APIKeyMgtException;
 import org.wso2.carbon.apimgt.keymgt.service.TokenValidationContext;
@@ -150,8 +151,4 @@ public class DefaultKeyValidationHandler extends AbstractKeyValidationHandler {
 
     }
 
-    @Override
-    public boolean generateConsumerToken(TokenValidationContext oAuth2TokenValidationMessageContext) throws APIKeyMgtException {
-        return true;
-    }
 }
