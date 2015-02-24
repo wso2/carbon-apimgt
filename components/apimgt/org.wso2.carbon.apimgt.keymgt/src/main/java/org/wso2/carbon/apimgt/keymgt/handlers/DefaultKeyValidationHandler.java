@@ -7,26 +7,19 @@ import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.clients.OAuth2TokenValidationServiceClient;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
-import org.wso2.carbon.apimgt.impl.token.TokenGenerator;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.keymgt.APIKeyMgtException;
 import org.wso2.carbon.apimgt.keymgt.service.TokenValidationContext;
-import org.wso2.carbon.apimgt.keymgt.util.APIKeyMgtDataHolder;
-import org.wso2.carbon.apimgt.keymgt.util.APIKeyMgtUtil;
 import org.wso2.carbon.identity.oauth.config.OAuthServerConfiguration;
 import org.wso2.carbon.identity.oauth2.IdentityOAuth2Exception;
-import org.wso2.carbon.identity.oauth2.dto.OAuth2AuthorizeReqDTO;
-import org.wso2.carbon.identity.oauth2.dto.OAuth2TokenValidationRequestDTO;
-import org.wso2.carbon.identity.oauth2.dto.OAuth2TokenValidationResponseDTO;
 import org.wso2.carbon.identity.oauth2.model.AccessTokenDO;
 import org.wso2.carbon.identity.oauth2.stub.dto.OAuth2ClientApplicationDTO;
 import org.wso2.carbon.identity.oauth2.validators.OAuth2ScopeValidator;
-import org.wso2.carbon.identity.oauth2.validators.OAuth2TokenValidationMessageContext;
 
-import javax.cache.Cache;
-import javax.cache.Caching;
-import java.util.*;
-
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 public class DefaultKeyValidationHandler extends AbstractKeyValidationHandler {
 
