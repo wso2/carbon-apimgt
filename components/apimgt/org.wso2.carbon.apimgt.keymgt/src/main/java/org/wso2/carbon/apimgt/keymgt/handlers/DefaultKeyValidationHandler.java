@@ -4,6 +4,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.clients.OAuth2TokenValidationServiceClient;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
 import org.wso2.carbon.apimgt.impl.token.TokenGenerator;
@@ -18,14 +19,13 @@ import org.wso2.carbon.identity.oauth2.dto.OAuth2AuthorizeReqDTO;
 import org.wso2.carbon.identity.oauth2.dto.OAuth2TokenValidationRequestDTO;
 import org.wso2.carbon.identity.oauth2.dto.OAuth2TokenValidationResponseDTO;
 import org.wso2.carbon.identity.oauth2.model.AccessTokenDO;
+import org.wso2.carbon.identity.oauth2.stub.dto.OAuth2ClientApplicationDTO;
 import org.wso2.carbon.identity.oauth2.validators.OAuth2ScopeValidator;
 import org.wso2.carbon.identity.oauth2.validators.OAuth2TokenValidationMessageContext;
 
 import javax.cache.Cache;
 import javax.cache.Caching;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 
 public class DefaultKeyValidationHandler extends AbstractKeyValidationHandler {
@@ -56,29 +56,38 @@ public class DefaultKeyValidationHandler extends AbstractKeyValidationHandler {
             }
         }
 
-        String context = validationContext.getContext();
-        String version =  validationContext.getVersion();
-        String requiredAuthenticationLevel= validationContext.getRequiredAuthenticationLevel();
-        String accessToken = validationContext.getAccessToken();
-        String matchingResource = validationContext.getMatchingResource();
-        String httpVerb = validationContext.getHttpVerb();
+        OAuth2ClientApplicationDTO oAuth2ClientApplicationDTO;
 
-        if(context == null || version == null || requiredAuthenticationLevel == null || accessToken == null ||
-                matchingResource == null || httpVerb == null){
-            throw new APIKeyMgtException("Required parameters are not set.");
-        }
-
-        //If validation info is not cached creates fresh api key validation information object and returns it
-        APIKeyValidationInfoDTO apiKeyValidationInfoDTO = null;
         try {
-            apiKeyValidationInfoDTO = apiMgtDAO.validateKey(context, version, accessToken,requiredAuthenticationLevel);
-            validationContext.setValidationInfoDTO(apiKeyValidationInfoDTO);
+            OAuth2TokenValidationServiceClient oAuth2TokenValidationServiceClient = new
+                    OAuth2TokenValidationServiceClient();
+            oAuth2ClientApplicationDTO = oAuth2TokenValidationServiceClient.
+                    validateAuthenticationRequest(validationContext.getAccessToken());
+
         } catch (APIManagementException e) {
-            log.error("Error occurred while calling validateKey method ",e);
-            throw new APIKeyMgtException(e.getMessage(),e);
+            log.error("Oauth2 token validation failed", e);
+            throw new APIKeyMgtException("Oauth2 token validation failed");
         }
 
-        return apiKeyValidationInfoDTO.isAuthorized();
+        org.wso2.carbon.identity.oauth2.stub.dto.OAuth2TokenValidationResponseDTO oAuth2TokenValidationResponseDTO = oAuth2ClientApplicationDTO.
+                getAccessTokenValidationResponse();
+
+        if(!oAuth2TokenValidationResponseDTO.getValid()) {
+            log.error("Oauth2 Token is invalid");
+            throw new APIKeyMgtException("Oauth2 Token is invalid");
+        }
+
+        APIKeyValidationInfoDTO apiKeyValidationInfoDTO = new APIKeyValidationInfoDTO();
+        apiKeyValidationInfoDTO.setAuthorized(oAuth2TokenValidationResponseDTO.getValid());
+        apiKeyValidationInfoDTO.setEndUserName(oAuth2TokenValidationResponseDTO.getAuthorizedUser());
+        apiKeyValidationInfoDTO.setConsumerKey(oAuth2ClientApplicationDTO.getConsumerKey());
+
+        Set<String> scopeSet = new HashSet<String>(Arrays.asList(oAuth2TokenValidationResponseDTO.getScope()));
+        apiKeyValidationInfoDTO.setScopes(scopeSet);
+
+        validationContext.setValidationInfoDTO(apiKeyValidationInfoDTO);
+
+        return oAuth2TokenValidationResponseDTO.getValid();
     }
 
     private void checkClientDomainAuthorized (APIKeyValidationInfoDTO apiKeyValidationInfoDTO, String clientDomain)
