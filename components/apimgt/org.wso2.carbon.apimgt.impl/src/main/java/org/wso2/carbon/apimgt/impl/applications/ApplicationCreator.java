@@ -111,9 +111,19 @@ public class ApplicationCreator {
      * @param e   Exception object.
      * @throws APIManagementException
      */
-    private void handleException(String msg, Exception e) throws APIManagementException {
+    private static void handleException(String msg, Exception e) throws APIManagementException {
         log.error(msg, e);
         throw new APIManagementException(msg, e);
+    }
+    /**
+     * common method to throw exceptions only with message.
+     *
+     * @param msg this parameter contain error message that we need to throw.
+     * @throws APIManagementException
+     */
+    private static void handleException(String msg) throws APIManagementException {
+        log.error(msg);
+        throw new APIManagementException(msg);
     }
     /**
      * This method will take application name and user id as parameters and will return application object.
@@ -121,8 +131,11 @@ public class ApplicationCreator {
      * @param userId logged in userID
      * @return APIM application object will return.
      */
-    public static Application retrieveApplication(String appName, String userId) {
+    public static Application retrieveApplication(String appName, String userId) throws APIManagementException {
         Application application = getNewApplication(appName, userId);
+        if(application == null){
+            handleException("Application " + appName + " is not found.. ");
+        }
         ((ApplicationImpl) application).populateApplication();
         return application;
     }
@@ -151,18 +164,37 @@ public class ApplicationCreator {
     /**
      * This method will parse json String and set properties in  OAuthApplicationInfo object.
      * Further it will initiate new OauthAppRequest  object and set applicationInfo object as its own property.
+     * @param clientName This consumer key of the application
+     * @param callbackURL This is the call back URL of the application
      * @param clientDetails
      * @return appRequest object of OauthAppRequest.
      * @throws APIManagementException
      */
-    public static OauthAppRequest createOauthAppRequest(String clientDetails) throws APIManagementException {
-        //parse json string and set applicationInfo parameters.
-        OAuthApplicationInfo applicationInfo = getKeyManager().buildFromJSON(clientDetails);
+    public static OauthAppRequest createOauthAppRequest(String clientName, String callbackURL, String clientDetails)
+            throws
+            APIManagementException {
+
         //initiate OauthAppRequest object.
         OauthAppRequest appRequest = new OauthAppRequest();
+        OAuthApplicationInfo authApplicationInfo = new OAuthApplicationInfo();
+        authApplicationInfo.setClientName(clientName);
+        authApplicationInfo.setCallBackURL(callbackURL);
+
+        if (clientDetails != null) {
+            //parse json string and set applicationInfo parameters.
+            authApplicationInfo = getKeyManager().buildFromJSON(authApplicationInfo, clientDetails);
+
+            if (log.isDebugEnabled()) {
+                log.debug("Additional json parameters when building OauthAppRequest =  " + clientDetails);
+            }
+
+        } else {
+            if (log.isDebugEnabled()) {
+                log.debug("No additional json parameters when building OauthAppRequest");
+            }
+        }
         //set applicationInfo object
-        appRequest.setoAuthApplicationInfo(applicationInfo);
-        //return appRequest.
+        appRequest.setoAuthApplicationInfo(authApplicationInfo);
         return appRequest;
     }
 

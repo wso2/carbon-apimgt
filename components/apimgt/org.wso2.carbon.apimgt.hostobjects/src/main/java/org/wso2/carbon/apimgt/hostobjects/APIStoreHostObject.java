@@ -663,10 +663,19 @@ public class APIStoreHostObject extends ScriptableObject {
         }
     }
 
-    /*
-     * getting key for a subscribed Application - args[] list String subscriberID, String
-	 * application name, String keyType
-	 */
+    /**
+     * This method is responsible to create oAuth Application and Application keys for a given APIM application
+     * @param cx      will be used to store information about the executing of the script.
+     *                This is a object of org.mozilla.javascript.Context package.
+     * @param thisObj Object of Scriptable interface provides for the management of properties and for
+     *                performing conversions.
+     * @param args    this will contain parameter list from jag files.
+     * @param funObj  this object  provides for calling functions and constructors.
+     * @return this will return response of oAuthApplication registration.
+     * @throws ScriptException
+     * @throws APIManagementException
+     * @throws ParseException
+     */
     public static NativeObject jsFunction_getApplicationKey(Context cx, Scriptable thisObj,
                                                             Object[] args, Function funObj)
             throws ScriptException, APIManagementException {
@@ -690,9 +699,17 @@ public class APIStoreHostObject extends ScriptableObject {
                         validityPeriod = String.valueOf(defaultValidityPeriod);
                     }
                 }
+                //if length = 7 we can ensure we have additional parameters to pass.
+                String jsonParams = null;
+                if(args.length == 7){
+                    jsonParams = (String) args[7];
+                }else{
+                    jsonParams = null;
+                }
 
-                Map<String, String> keyDetails = getAPIConsumer(thisObj).requestApprovalForApplicationRegistration((String) args[0],
-                        (String) args[1], (String) args[2], (String) args[3], accessAllowDomainsArray, validityPeriod);
+                Map<String, Object> keyDetails = getAPIConsumer(thisObj).requestApprovalForApplicationRegistration((String) args[0],
+                        (String) args[1], (String) args[2], (String) args[3], accessAllowDomainsArray,
+                        validityPeriod, jsonParams);
 
                 NativeObject row = new NativeObject();
                 String authorizedDomains = "";
@@ -706,9 +723,9 @@ public class APIStoreHostObject extends ScriptableObject {
                     }
                 }
 
-                Set<Map.Entry<String, String>> entries = keyDetails.entrySet();
+                Set<Map.Entry<String, Object>> entries = keyDetails.entrySet();
 
-                for (Map.Entry<String, String> entry : entries) {
+                for (Map.Entry<String, Object> entry : entries) {
                     row.put(entry.getKey(), row, entry.getValue());
                 }
 
@@ -729,64 +746,64 @@ public class APIStoreHostObject extends ScriptableObject {
             return null;
         }
     }
-    /**
-     * This method is responsible to create oAuth Application and Application keys for a given APIM application
-     * @param cx      will be used to store information about the executing of the script.
-     *                This is a object of org.mozilla.javascript.Context package.
-     * @param thisObj Object of Scriptable interface provides for the management of properties and for
-     *                performing conversions.
-     * @param args    this will contain parameter list from jag files.
-     * @param funObj  this object  provides for calling functions and constructors.
-     * @return this will return response of oAuthApplication registration.
-     * @throws ScriptException
-     * @throws APIManagementException
-     * @throws ParseException
-     */
-    public static NativeObject jsFunction_getApplicationKeyOpenKM(Context cx, Scriptable thisObj,
-                                                            Object[] args, Function funObj)
-            throws ScriptException, APIManagementException, ParseException {
-        if (args != null && args.length != 0) {
-
-
-            NativeObject apiData = (NativeObject) args[0];
-            //this parameter will hold oAuthApplication properties that required to create new oAuthApplication.
-            String jsonString = (String) apiData.get(ApplicationConstants.OAUTH_CLIENT_JSONPARAMSTRING, apiData);
-            //logged in user name.
-            String userName = (String) apiData.get(ApplicationConstants.OAUTH_CLIENT_USERNAME, apiData);
-            //APIM application name.
-            String applicationName = (String) apiData.get(ApplicationConstants.OAUTH_CLIENT_APPLICATION);
-            //Key type whether its a sandBox or production oAuth application.
-            String keyType = (String) apiData.get(ApplicationConstants.APP_KEY_TYPE);
-
-            //String allowDomains = (String) apiData.get(ApplicationConstants.ALLOW_DOMAINS);
-
-//            NativeArray accessAllowDomainsArr = (NativeArray) args[4]; // args[4] is not mandatory
-//            String[] accessAllowDomainsArray = new String[(int) accessAllowDomainsArr.getLength()];
-//            for (Object domain : accessAllowDomainsArr.getIds()) {
-//                int index = (Integer) domain;
-//                accessAllowDomainsArray[index] = (String) accessAllowDomainsArr.get(index, null);
+//    /**
+//     * This method is responsible to create oAuth Application and Application keys for a given APIM application
+//     * @param cx      will be used to store information about the executing of the script.
+//     *                This is a object of org.mozilla.javascript.Context package.
+//     * @param thisObj Object of Scriptable interface provides for the management of properties and for
+//     *                performing conversions.
+//     * @param args    this will contain parameter list from jag files.
+//     * @param funObj  this object  provides for calling functions and constructors.
+//     * @return this will return response of oAuthApplication registration.
+//     * @throws ScriptException
+//     * @throws APIManagementException
+//     * @throws ParseException
+//     */
+//    public static NativeObject jsFunction_getApplicationKeyOpenKM(Context cx, Scriptable thisObj,
+//                                                            Object[] args, Function funObj)
+//            throws ScriptException, APIManagementException, ParseException {
+//        if (args != null && args.length != 0) {
+//
+//
+//            NativeObject apiData = (NativeObject) args[0];
+//            //this parameter will hold oAuthApplication properties that required to create new oAuthApplication.
+//            String jsonString = (String) apiData.get(ApplicationConstants.OAUTH_CLIENT_JSONPARAMSTRING, apiData);
+//            //logged in user name.
+//            String userName = (String) apiData.get(ApplicationConstants.OAUTH_CLIENT_USERNAME, apiData);
+//            //APIM application name.
+//            String applicationName = (String) apiData.get(ApplicationConstants.OAUTH_CLIENT_APPLICATION);
+//            //Key type whether its a sandBox or production oAuth application.
+//            String keyType = (String) apiData.get(ApplicationConstants.APP_KEY_TYPE);
+//
+//            //String allowDomains = (String) apiData.get(ApplicationConstants.ALLOW_DOMAINS);
+//
+////            NativeArray accessAllowDomainsArr = (NativeArray) args[4]; // args[4] is not mandatory
+////            String[] accessAllowDomainsArray = new String[(int) accessAllowDomainsArr.getLength()];
+////            for (Object domain : accessAllowDomainsArr.getIds()) {
+////                int index = (Integer) domain;
+////                accessAllowDomainsArray[index] = (String) accessAllowDomainsArr.get(index, null);
+////            }
+//
+//            Map<String, Object> keyDetails;
+//            //call new application registration process.
+//            keyDetails = getAPIConsumer(thisObj).requestApprovalForApplicationRegistration(userName,
+//                    applicationName, keyType, jsonString);
+//            //set Response.
+//            Set<Map.Entry<String, Object>> entries = keyDetails.entrySet();
+//            //initiate native object in order to hold response.
+//            NativeObject row = new NativeObject();
+//            //Read the response and set key/value pair in to Native object.
+//            for (Map.Entry<String, Object> entry : entries) {
+//                row.put(entry.getKey(), row, entry.getValue());
 //            }
-
-            Map<String, Object> keyDetails;
-            //call new application registration process.
-            keyDetails = getAPIConsumer(thisObj).requestApprovalForApplicationRegistration(userName,
-                    applicationName, keyType, jsonString);
-            //set Response.
-            Set<Map.Entry<String, Object>> entries = keyDetails.entrySet();
-            //initiate native object in order to hold response.
-            NativeObject row = new NativeObject();
-            //Read the response and set key/value pair in to Native object.
-            for (Map.Entry<String, Object> entry : entries) {
-                row.put(entry.getKey(), row, entry.getValue());
-            }
-            //return the response native object.
-            return row;
-
-        } else {
-            handleException("Invalid input parameters given while trying to get application key. ");
-            return null;
-        }
-    }
+//            //return the response native object.
+//            return row;
+//
+//        } else {
+//            handleException("Invalid input parameters given while trying to get application key. ");
+//            return null;
+//        }
+//    }
 
     /**
      * This method is responsible for update given oAuthApplication.

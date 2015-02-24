@@ -280,7 +280,10 @@ public interface APIConsumer extends APIManager {
      * @param
      * @throws APIManagementException if failed to applications for given subscriber
      */
-    public Map<String,Object> requestApprovalForApplicationRegistration(String userId, String applicationName, String tokenType,
+    public Map<String,Object> requestApprovalForApplicationRegistration(String userId, String applicationName,
+                                                                        String tokenType,
+                                                                        String callbackUrl, String[] allowedDomains,
+                                                                        String validityTime,
                                                                         String jsonString)
             throws APIManagementException;
 
