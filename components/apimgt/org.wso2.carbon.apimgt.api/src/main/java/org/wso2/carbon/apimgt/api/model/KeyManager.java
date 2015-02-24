@@ -95,6 +95,17 @@ public interface KeyManager {
     OAuthApplicationInfo buildFromJSON(String jsonInput) throws APIManagementException;
 
     /**
+     * @param authApplicationInfo
+     * @param jsonInput this jsonInput will contain set of oAuth application properties.
+     * @return OAuthApplicationInfo object will return after parsed jsonInput
+     * @throws APIManagementException
+     *
+     */
+    OAuthApplicationInfo buildFromJSON(OAuthApplicationInfo authApplicationInfo,  String jsonInput) throws
+            APIManagementException;
+
+
+    /**
      * This method will parse the JSON input and add those additional values to AccessTokenRequest. If its needed to
      * pass parameters in addition to those specified in AccessTokenRequest, those can be provided in the JSON input.
      * @param jsonInput Input as a JSON. This is the same JSON passed from Store UI.

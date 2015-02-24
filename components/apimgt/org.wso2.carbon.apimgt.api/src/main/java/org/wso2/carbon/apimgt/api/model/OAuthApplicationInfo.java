@@ -29,6 +29,8 @@ import org.json.simple.parser.ParseException;
 public class OAuthApplicationInfo {
 
     private String clientId;
+    private String clientName;
+    private String callBackURL;
     private Map<String,Object> parameters = new HashMap<String, Object>();
 
     /**
@@ -46,6 +48,21 @@ public class OAuthApplicationInfo {
         this.clientId = clientId;
     }
 
+    /**
+     * Set client Name of OAuthApplication.
+     * @param clientName
+     */
+    public void setClientName(String clientName){
+        this.clientName = clientName;
+    }
+
+    /**
+     * Set callback URL of OAuthapplication.
+     * @param callBackURL
+     */
+    public void setCallBackURL(String callBackURL){
+        this.callBackURL = callBackURL;
+    }
     public void addParameter(String name,Object value){
         parameters.put(name,value);
     }
@@ -58,6 +75,14 @@ public class OAuthApplicationInfo {
 
         return JSONObject.toJSONString(parameters);
 
+    }
+
+    public String getClientName(){
+        return clientName;
+    }
+
+    public String getCallBackURL(){
+        return callBackURL;
     }
 
     public void putAll(Map<String,Object> parameters){

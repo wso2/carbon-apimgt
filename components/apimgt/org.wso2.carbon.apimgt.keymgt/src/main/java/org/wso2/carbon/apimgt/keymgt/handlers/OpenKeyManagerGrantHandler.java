@@ -30,44 +30,18 @@ public class OpenKeyManagerGrantHandler extends ClientCredentialsGrantHandler {
 
     @Override
     public boolean authorizeAccessDelegation(OAuthTokenReqMessageContext tokReqMsgCtx){
+
+        tokReqMsgCtx.setValidityPeriod(5000000);
+
         return true;
     }
 
     @Override
     public boolean validateGrant(OAuthTokenReqMessageContext tokReqMsgCtx)
             throws IdentityOAuth2Exception {
-        //return super.validateGrant(tokReqMsgCtx);
 
-        log.info("Mobile Grant handler is hit");
+        return super.validateGrant(tokReqMsgCtx);
 
-        boolean authStatus = true;
-
-        // extract request parameters
-        //OAuth2Parameters[] parameters = tokReqMsgCtx.getOauth2AccessTokenReqDTO().
-
-//        String mobileNumber = null;
-//
-//        // find out mobile number
-//        for(RequestParameter parameter : parameters){
-//            if(MOBILE_GRANT_PARAM.equals(parameter.getKey())){
-//                if(parameter.getValue() != null && parameter.getValue().length > 0){
-//                    mobileNumber = parameter.getValue()[0];
-//                }
-//            }
-//        }
-//
-//        if(mobileNumber != null) {
-//            //validate mobile number
-//            authStatus =  isValidMobileNumber(mobileNumber);
-//
-//            if(authStatus) {
-//                // if valid set authorized mobile number as grant user
-//                oAuthTokenReqMessageContext.setAuthorizedUser(mobileNumber);
-//                oAuthTokenReqMessageContext.setScope(oAuthTokenReqMessageContext.getOauth2AccessTokenReqDTO().getScope());
-//            }
-//        }
-
-        return authStatus;
     }
 
     @Override

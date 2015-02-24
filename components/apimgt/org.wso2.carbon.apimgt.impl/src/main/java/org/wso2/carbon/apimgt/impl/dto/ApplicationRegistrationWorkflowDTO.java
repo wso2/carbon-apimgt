@@ -137,8 +137,8 @@ public class ApplicationRegistrationWorkflowDTO extends WorkflowDTO {
         return accessTokenInfo;
     }
 
-    public void setAccessToken(AccessTokenInfo accessToken) {
-        this.accessToken = accessToken;
+    public void setAccessTokenInfo(AccessTokenInfo accessTokenInfo) {
+        this.accessTokenInfo = accessTokenInfo;
     }
 
 }

@@ -133,35 +133,14 @@ public abstract class AbstractApplicationRegistrationWorkflowExecutor extends Wo
             //update associateApplication
             application.updateAssociateOAuthApp(workflowDTO.getKeyType(), oAuthApplication);
 
+            workflowDTO.setApplicationInfo(oAuthApplication);
+
             AccessTokenRequest tokenRequest = ApplicationCreator.createAccessTokenRequest(oAuthApplication,null);
             AccessTokenInfo tokenInfo = ApplicationCreator.getKeyManager().getNewApplicationAccessToken(tokenRequest);
-            workflowDTO.setAccessToken(tokenInfo);
+            workflowDTO.setAccessTokenInfo(tokenInfo);
         } catch (Exception e) {
             APIUtil.handleException("Error occurred while executing SubscriberKeyMgtClient.", e);
         }
     }
 
-    protected void generateKeysForApplication_original(ApplicationRegistrationWorkflowDTO workflowDTO) throws
-            APIManagementException {
-        log.debug("Registering Application and creating an Access Token... ");
-        Application application = workflowDTO.getApplication();
-        Subscriber subscriber = application.getSubscriber();
-
-        if (application == null || subscriber == null || workflowDTO.getAllowedDomains() == null) {
-            ApiMgtDAO dao = new ApiMgtDAO();
-            dao.populateAppRegistrationWorkflowDTO(workflowDTO);
-        }
-
-        SubscriberKeyMgtClient keyMgtClient = APIUtil.getKeyManagementClient();
-
-        try {
-
-            ApplicationKeysDTO keysDTO =  keyMgtClient.getApplicationAccessKey(subscriber.getName(), application.getName(),
-                    workflowDTO.getKeyType(), application.getCallbackUrl(),
-                    workflowDTO.getAllowedDomains(), Long.toString(workflowDTO.getValidityTime()));
-            workflowDTO.setKeyDetails(keysDTO);
-        } catch (Exception e) {
-            APIUtil.handleException("Error occurred while executing SubscriberKeyMgtClient.", e);
-        }
-    }
 }
