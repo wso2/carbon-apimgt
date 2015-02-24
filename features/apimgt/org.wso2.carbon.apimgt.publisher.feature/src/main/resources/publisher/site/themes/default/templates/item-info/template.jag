@@ -2,12 +2,13 @@
 <% var api = outputs.api;
    var permitted=outputs.isPermitted;
    var isCreatePermitted=outputs.isCreatePermitted;
+if(api != null) { 
     var apiUrlId = "name="+encode.forHtml(api.name)+"&version="+encode.forHtml(api.version)+"&provider="+encode.forHtml(api.provider);   
 %>
 <link type="text/css" rel="stylesheet" href="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("templates/utils/dojo-release-1.8.3/dijit/themes/claro/claro.css"))%>"  media="screen"/>
 <div id="item-info">
     <div class="title-section">
-    <h2><%= encode.forHtml(api.name)%> - <%= encode.forHtml(api.version)%>&nbsp;<a class="api_design_edit" href="<%=site.context%>/design?<%= apiUrlId %>"><i class="icon-edit"></i> Edit</a></h2>
+     <h2><%= encode.forHtml(api.name)%> - <%= encode.forHtml(api.version)%>&nbsp;<a class="api_design_edit" <%if(!isCreatePermitted){%> style="display:none;"<%}%> href="<%= jagg.url("/design")%>?<%= apiUrlId %>"><i class="icon-edit"></i> Edit</a></h2>
     </div>
     <div class="content-section shadow-up">
         <div class="content-data">
@@ -41,4 +42,10 @@
         </div>
     </div>
 </div>
+
+<% } else { %>
+    <div class="alert alert-info">
+        <div style="padding-bottom:10px"><%=i18n.localize("apiUnavailable")%></div>
+    </div>    
+<% } %> 
 <% }); %>

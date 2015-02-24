@@ -1,12 +1,16 @@
 function changeAppNameMode(linkObj){
+    jagg.sessionAwareJS({redirect:'site/pages/applications.jag'});
     var theTr = $(linkObj).parent().parent();
     var appName = $(theTr).attr('data-value');
     $('td:first',theTr).html('<div class="row-fluid"><div class="span6"> <input class="app_name_new" maxlength="70" value="'
-        +theTr.attr('data-value')+'" type="text" /> </div></div> ');
+        +'" type="text" /> </div></div> ');
+    $('td:first',theTr).find(".app_name_new").val(theTr.attr('data-value'));
     $('td:eq(3)',theTr).html('<div class="row-fluid"><div class="span6"> <input class="callback_new validInput" maxlength="70" value="'
-        +theTr.attr('callback-value')+'" type="text" /> </div></div> ');
+        +'" type="text" /> </div></div> ');
+    $('td:eq(3)',theTr).find(".callback_new").val(theTr.attr('callback-value'));
     $('td:eq(4)',theTr).html('<div class="row-fluid"><div class="span6"> <input class="description-new" maxlength="70" value="'
-        +theTr.attr('description-value')+'" type="text" /> </div></div> ');
+        +'" type="text" /> </div></div> ');
+    $('td:eq(4)',theTr).find(".description-new").val(theTr.attr('description-value'));
     //Hide the Edit link
     $("td:eq(4)", theTr).children("a").hide();
     $("td:eq(5)", theTr).children("a").hide();
@@ -64,22 +68,24 @@ function changeAppNameMode(linkObj){
     $("td:eq(1)", theTr).children("select").removeAttr("disabled");
 }
 function updateApplication_reset(linkObj){
+    jagg.sessionAwareJS({redirect:'site/pages/applications.jag'});
     var theTr = $(linkObj).parent().parent().parent();
     var appName = $(theTr).attr('data-value');
     var tier = $(theTr).attr('tier-value');
     var callbackUrl = $(theTr).attr('callback-value');
     var description = $(theTr).attr('description-value');
-    $('td:first',theTr).html(appName);
+    $('td:first',theTr).text(appName);
     $("td:eq(1)", theTr).children("select").val(tier);
     $("td:eq(1)", theTr).children("select").attr("disabled", "disabled");
-    $('td:eq(3)',theTr).html(callbackUrl);
-    $('td:eq(4)',theTr).html(description);
+    $('td:eq(3)',theTr).text(callbackUrl);
+    $('td:eq(4)',theTr).text(description);
     //Hide the Save and Cancel buttons
     $("td:eq(5)", theTr).children("div").hide();
     //Show the Edit link
     $("td:eq(5)", theTr).children("a").show();
 }
 function updateApplication(linkObj){
+    jagg.sessionAwareJS({redirect:'site/pages/applications.jag'});
     var theTr = $(linkObj).parent().parent().parent();
     var applicationOld = $(theTr).attr('data-value');
     var applicationNew = $('input.app_name_new',theTr).val();
@@ -117,11 +123,12 @@ function updateApplication(linkObj){
 }
 
 function deleteApp(linkObj) {
+    jagg.sessionAwareJS({redirect:'site/pages/applications.jag'});
     var theTr = $(linkObj).parent().parent();
     var appName = $(theTr).attr('data-value');
     $('#messageModal').html($('#confirmation-data').html());
     $('#messageModal h3.modal-title').html(i18n.t('confirm.delete'));
-    $('#messageModal div.modal-body').html('\n\n'+i18n.t('confirm.deleteMsg')+'"' + appName + '"'+i18n.t('confirm.deleteMsgPostfix'));
+    $('#messageModal div.modal-body').text('\n\n'+i18n.t('confirm.deleteMsg')+'"' + appName + '"'+i18n.t('confirm.deleteMsgPostfix'));
     $('#messageModal a.btn-primary').html(i18n.t('info.yes'));
     $('#messageModal a.btn-other').html(i18n.t('info.no'));
     $('#messageModal a.btn-primary').click(function() {
@@ -130,14 +137,14 @@ function deleteApp(linkObj) {
             application:appName
         }, function (result) {
             if (!result.error) {
-                window.location.reload();
+                window.location.reload(true);
             } else {
                 jagg.message({content:result.message,type:"error"});
             }
         }, "json");
     });
     $('#messageModal a.btn-other').click(function() {
-        window.location.reload();
+        window.location.reload(true);
     });
     $('#messageModal').modal();
 

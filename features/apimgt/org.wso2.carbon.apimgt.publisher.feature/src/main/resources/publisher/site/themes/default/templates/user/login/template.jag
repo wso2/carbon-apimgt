@@ -59,14 +59,7 @@
         var mod,httpsUrl;
         mod = jagg.module("manager");
         httpsUrl= mod.getHTTPsURL();
-        var site = require("/site/conf/site.json");
 
-        if(site.request_url=="READ_FROM_REQUEST"){
-            response.sendRedirect(httpsUrl+site.context);
-           
-        }else{
-            var request_url = site.request_url;
-            response.sendRedirect(site.request_url);
-        }
+        response.sendRedirect(jagg.getHttpsUrl("/"));
 } %>
 <%});%>

@@ -2,7 +2,7 @@
 <% var i, length, doc = outputs.doc;
 
 %>
-<h2><%=doc.docName%></h2>
+<h2><%=encode.forHtml(doc.docName)%></h2>
 <br/>
 <div class="documentation">
     <div class="span11">

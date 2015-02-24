@@ -88,8 +88,8 @@
                     path = jagg.getMappedUrl("/site/pages/item-info.jag") + "?name=" + api.name + "&version=" + api.version + "&provider=" + api.provider+urlPostfix;
 
                     var nameSubstring = api.name;
-                    if (api.name.length > 10) {
-                        nameSubstring = api.name.substring(0, 8)+"..";
+                    if (api.name.length > 15) {
+                        nameSubstring = api.name.substring(0, 15)+"..";
                     }
 
         %>
@@ -122,7 +122,7 @@
 			                    <% if(api.thumb == null) { %>
 			                    <img class="thumb" src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("images/api-default.png"))%>" alt=""/>
 			                    <% } else{ %>
-			                    <img class="thumb" src="<%=api.thumb%>" alt=""/>
+			                    <img class="thumb" src="<%=jagg.getRegistryPath(api.thumb)%>" alt=""/>
 			                    <% } %>
 			                </a>
 			                <h5>
@@ -137,32 +137,33 @@
                 </div>
                 <%} else {%>
         <li>
-            <%if(outputs.isCreatePermitted){%>
-            <button title="Delete API" type="button" class="close btn-api-del" onClick="removeAPI('<%=api.name%>','<%=api.version%>','<%=api.provider%>')"><%=i18n.localize("times")%></button>
-            <%}%>
             <div class="thumbnail">
-                <a href="<%=path%>">
-                    <% if(api.thumb == null) { %>
-                    <img class="thumb" src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("images/api-default.png"))%>" alt=""/>
-                    <% } else{ %>
-                    <img class="thumb" src="<%=api.thumb%>" alt=""/>
-                    <% } %>
-                </a>
-                <h5>
-                    <a href="<%=path%>" onclick="jagg.sessionAwareJS({redirect:'<%=path%>'})" class="label label-info" title="<%=api.name%>-<%=api.version%>">
-                        <%=nameSubstring%> - <span class="versionTxt"><%=api.version%></span>
+                    <a href="<%=path%>">
+                        <% if(api.thumb == null) { %>
+                        <img class="thumb responsive" src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("images/api-default.png"))%>" alt=""/>
+                        <% } else{ %>
+                        <img class="thumb responsive" src="<%=jagg.getRegistryPath(api.thumb)%>" alt=""/>
+                        <% } %>
                     </a>
-                    <div>(<%=api.provider%>)</div>
-                </h5>
-                <div>
-                    <a href="<%=path%>" onclick="jagg.sessionAwareJS({callback:selectUserTab('<%=path%>')})" >
-                        <span id="noOfUsers">
-                            <% if (api.subs == "1") { %><%=api.subs%> <%=i18n.localize("user")%> <% } else { %><%=api.subs%> <%=i18n.localize("users")%><% } %>
-                        </span>
-                    </a>
+                    <div class="caption">
+                        <a href="<%=path%>" onclick="jagg.sessionAwareJS({redirect:'<%=path%>'})" class="link-h1" title="<%=api.name%>">
+                            <%=api.name%>
+                        </a>
+                        <div class="version-provider-wrapper"><%=api.version%> <a class="link-h2"><%=api.provider%></a></div>
+
+                       <div>
+                            <a href="<%=path%>" onclick="jagg.sessionAwareJS({callback:selectUserTab('<%=path%>')})" >
+                                <span id="noOfUsers">
+                                    <% if (api.subs == "1") { %><%=api.subs%> <%=i18n.localize("user")%> <% } else { %><%=api.subs%> <%=i18n.localize("users")%><% } %>
+                                </span>
+                            </a>
+                        </div>
+                        <p><%=api.status%></p>
+                        <%if(outputs.isCreatePermitted){%>
+                            <button title="Delete API" type="button" class="close btn-api-del" onClick="removeAPI('<%=api.name%>','<%=api.version%>','<%=api.provider%>',this);return false;"><%=i18n.localize("times")%></button>
+                        <%}%>
+                    </div>
                 </div>
-                <p class="status"><%=api.status%></p>
-            </div>
         </li>
         <% }} }%>
     </ul>

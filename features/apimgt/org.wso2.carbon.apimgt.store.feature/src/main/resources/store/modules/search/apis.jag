@@ -41,7 +41,7 @@ var searchPaginatedAPIs = function (query,tenantDomain,start,end) {
     } catch (e) {
         log.error(e.message);
         return {
-            error:e,
+            error:true,
             result:null,
             message:e.message.split(":")[1]
         };

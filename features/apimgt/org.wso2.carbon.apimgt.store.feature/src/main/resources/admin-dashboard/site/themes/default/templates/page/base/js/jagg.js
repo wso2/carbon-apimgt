@@ -194,20 +194,21 @@ var jagg = jagg || {};
 
 
         if(jagg.sessionExpired()){
-		if(params.ssoEnabled != null && params.ssoEnabled === true){
-			return;		
-		}
-           if(params.e != undefined){  //Canceling the href call
-                if ( params.e.preventDefault ) {
-                    params.e.preventDefault();
+            if(ssoEnabled){
+                window.location.reload();
+            } else {
+                if (params.e != undefined) {  //Canceling the href call
+                    if (params.e.preventDefault) {
+                        params.e.preventDefault();
 
-                // otherwise set the returnValue property of the original event to false (IE)
-                } else {
-                    params.e.returnValue = false;
+                        // otherwise set the returnValue property of the original event to false (IE)
+                    } else {
+                        params.e.returnValue = false;
+                    }
                 }
-            }
 
-            jagg.showLogin(params);
+                jagg.showLogin(params);
+            }
         }else if(params.callback != undefined && typeof params.callback == "function"){
              params.callback();
          }

@@ -7,15 +7,15 @@
     var mod = jagg.module("api");
     var tiers = mod.getTiers().tiers;
     var default_tier = tiers[tiers.length -1].tierName;
-
+    var enableSelectedTenantSubscription = site.enableSelectedTenantSubscription;
     %> 
 <script language="javascript">
     var VERBS = [ 'GET' , 'POST' , 'PUT' , 'DELETE', 'OPTIONS'];
     var AUTH_TYPES = [
-      { "value": "<%=i18n.localize("none")%>", "text":"<%=i18n.localize("none")%>"} ,
-      { "value": "<%=i18n.localize("application")%>", "text":"<%=i18n.localize("application")%>"},
-      { "value": "<%=i18n.localize("applicationUser")%>", "text":"<%=i18n.localize("applicationUser")%>"},
-      { "value": "<%=i18n.localize("application&applicationUser")%>", "text":"<%=i18n.localize("application&applicationUser")%>"}
+      { "value": "None", "text":"<%=i18n.localize("none")%>"} ,
+      { "value": "Application", "text":"<%=i18n.localize("application")%>"},
+      { "value": "Application User", "text":"<%=i18n.localize("applicationUser")%>"},
+      { "value": "Application & Application User", "text":"<%=i18n.localize("application&applicationUser")%>"}
     ];
     var TIERS =[
         <% for (var i = 0; i < tiers.length; i++) { 
@@ -24,8 +24,8 @@
     ];
 
     var DEFAULT_TIER = "<%= tiers[tiers.length -1].tierName%>";
-    var DEFAULT_AUTH = "<%=i18n.localize("application&applicationUser")%>";
-    var OPTION_DEFAULT_AUTH = "<%=i18n.localize("none")%>";
+    var DEFAULT_AUTH = "Application & Application User";
+    var OPTION_DEFAULT_AUTH = "None";
 
     var insequence = "<%=api.inSequence%>";
     var outsequence = "<%=api.outSequence%>";
@@ -36,9 +36,9 @@
 </script>
 <div id="item-add">
 <%
-    var design_w_link = site.context+'/design?'+apiUrlId;
-    var implement_w_link = site.context+'/implement?'+apiUrlId;
-    var manage_w_link = site.context+'/manage?'+apiUrlId;    
+    var design_w_link = jagg.url('/design?'+apiUrlId);
+    var implement_w_link = jagg.url('/implement?'+apiUrlId);
+    var manage_w_link = jagg.url('/manage?'+apiUrlId);    
 %>
 <center>
 <ul class="new-sub-menu-wizard" style="margin:0 auto">
@@ -75,7 +75,7 @@
         <div class="span12">                           
             <form class="form-horizontal" method="POST"
               id="manage_form"
-              enctype="multipart/form-data" action="<%=site.context%>/site/blocks/item-design/ajax/add.jag?<%= apiUrlId %>&action=manage">
+              enctype="multipart/form-data" action="<%= jagg.url("/site/blocks/item-design/ajax/add.jag?" + apiUrlId ) %>&action=manage">
     <fieldset>
     <legend>Configurations</legend>
 
@@ -118,25 +118,23 @@
                     </div>
                 </div>
 
-            <div class="control-group transport-styles">
-               <label class="control-label" for="transports"><%=i18n.localize("transports")%>:<span class="requiredAstrix">*</span></label>
-               <div class="controls">
-                   <div class="checkbox">
-                       <label  class="checkbox inline" >
-                           <input type="checkbox" class="required transports_check_http" id="transport_http" name="transports" value="http" <%=api.transport_http%>/>
-                           <input type="hidden" id="http_checked" name="http_checked" <%if(api.transport_http == "checked"){%>value="http"<%}else{%>value=""<%}%>/>
-                           <%=i18n.localize("httpTransport")%>
-                       </label>
-                       <label  class="checkbox inline" >
-                           <input type="checkbox" class="required transports_check_https" id="transport_https" name="transports" value="https" <%=api.transport_https%>/>
-                           <input type="hidden" id="https_checked" name="https_checked" <%if(api.transport_https == "checked"){%>value="https"<%}else{%>value=""<%}%>/>
-                           <%=i18n.localize("httpsTransport")%>
-                       </label>
-                       <a class="icon-question-sign help_popup" help_data="transport_help"></a>
-                        <p id="transport_help" class="hide"><%=i18n.localize("transportHelpMsg")%></p>
-                   </div>
-               </div>
-            </div>  
+                <div class="control-group transport-styles">
+                <label class="control-label" for="transports"><%=i18n.localize("transports")%>:<span class="requiredAstrix">*</span></label>
+                <div class="controls">
+                    <div class="checkbox">
+                        <label  class="checkbox inline " >
+                            <input type="checkbox"  id="transport_http" name="transport_http"  value="http" <%if(api.transport_http=="checked"){%>checked<%}%> />
+                         
+                            <%=i18n.localize("httpTransport")%>
+                        </label>
+                        <label  class="checkbox inline" >
+                            <input type="checkbox" id="transport_https" name="transport_https"  value="https" <%if(api.transport_https=="checked"){%>checked<%}%>/>
+                            
+                            <%=i18n.localize("httpsTransport")%>
+                        </label>
+                    </div>
+                </div>
+             </div> 
 
             <% if (isSynapseGateway) { %>
             <div class="control-group">
@@ -147,7 +145,8 @@
                 <label class="checkbox">
                     <input type="checkbox" id="toggleSequence" name="sequence_check" id="sequence_check"
                 <%
-                if(api.inSequence || api.outSequence|| api.faultSequence){ %>
+                if((api.inSequence && (!"none".equals(api.inSequence)))|| (api.outSequence && (!"none".equals(api.outSequence)))
+                	|| ( api.faultSequence && (!"none".equals(api.faultSequence)))){ %>
                 checked="checked"<%}%>><%=i18n.localize("sequenceMsg")%>
                 </label>
                 <table class="table table-bordered table-striped" id="seqTable"
@@ -203,18 +202,29 @@
             <!--Response Caching End -->
 
                 <div class="control-group">
+		        <% mod = jagg.module("api");
+		 	result = mod.isMultipleTenantsAvailable();
+	         	var isMultipleTenantsAvailable = result.status;
+			if(api.visibility == "public" && isMultipleTenantsAvailable == true){%>
                         <label class="control-label" for="subscriptions"><%=i18n.localize("subscriptionsTitle")%>:</label>
-                                
                         <div class="controls">
-                            <select class="select required" id="subscriptions" name="subscriptions">
-                                <option value="current_tenant" <%if(api.subscriptionAvailability=="current_tenant"){%> selected="selected" <%}%> ><%=i18n.localize("availableToCurrentTenant")%></option>
+                        	<% if(api.visibility!="public") {%>
+                           	<select class="select required" id="subscriptions" name="subscriptions" >
+                               	<option value="current_tenant"  selected="selected"><%=i18n.localize("availableToCurrentTenant")%></option>
+                           	</select> 
+                        	<%} else {%>
+                            	<select class="select required" id="subscriptions" name="subscriptions" >
+                               	<option value="current_tenant" <%if(api.subscriptionAvailability=="current_tenant"){%> selected="selected" <%}%> ><%=i18n.localize("availableToCurrentTenant")%></option>
                                 <option value="all_tenants" <%if(api.subscriptionAvailability=="all_tenants"){%> selected="selected" <%}%> ><%=i18n.localize("availableToAllTenants")%></option>
-                                <option value="specific_tennats" <%if(api.subscriptionAvailability=="specific_tennats"){%> selected="selected" <%}%> ><%=i18n.localize("availableToSpecificTenants")%></option>
-                            </select>
-                            <a class="icon-question-sign help_popup" help_data="subscriptions_help"></a>
-                            <div id="subscriptions_help" class="hide"><%=i18n.localize("subscriptionHelpMsg")%></div>
-                        </div>
-                                    
+                                	<% if(!(enableSelectedTenantSubscription == 'false')) {%>
+                                	<option value="specific_tennats" <%if(api.subscriptionAvailability=="specific_tennats"){%> selected="selected" <%}%> ><%=i18n.localize("availableToSpecificTenants")%></option>
+                                	<% } %>
+                            	</select> 
+                        	<%}%>     
+                            	<a class="icon-question-sign help_popup" help_data="subscriptions_help"></a>
+                           	<div id="subscriptions_help" class="hide"><%=i18n.localize("subscriptionHelpMsg")%></div>
+                       </div>
+                       <% } %>            
                 <br/>
                     <div class="control-group" id="tennatsDiv" <%if(api.subscriptionAvailability!="specific_tennats"){%>style="display: none;"<%}%>>
                         <label class="control-label" for="tenants" id="tennatLabel" name="tennatLabel">
@@ -229,6 +239,37 @@
                     </div>
                 </div>
     </fieldset>
+    <fieldset>
+	<legend class="legend-with-hidden-info js_hidden_section_title"><%=i18n.localize("businessInformationTitle")%> <i class="icon-chevron-right icon-keys"></i></legend>
+	 <div style="display: none">
+	<!--legend>Business Information</legend-->
+                               
+                    <div class="control-group">
+                        <label class="control-label" for="bizOwner"><%=i18n.localize("busiOwner")%>:</label>
+                        <div class="controls">
+                             <input type="text" class="input-xlarge validInput" id="bizOwner" name="bizOwner" value="<%=api.bizOwner%>"/>
+                        </div>
+                    </div>
+                     <div class="control-group">
+                        <label class="control-label" for="bizOwnerMail"><%=i18n.localize("busiOwnerMail")%>:</label>
+                        <div class="controls">
+                             <input type="text" class="input-xlarge email" id="bizOwnerMail" name="bizOwnerMail" value="<%=api.bizOwnerMail%>"/>
+                        </div>
+                    </div>
+                     <div class="control-group">
+                        <label class="control-label" for="techOwner"><%=i18n.localize("techOwner")%>:</label>
+                        <div class="controls">
+                             <input type="text" class="input-xlarge validInput" id="techOwner" name="techOwner" value="<%=api.techOwner%>"/>
+                        </div>
+                    </div>
+                     <div class="control-group">
+                        <label class="control-label" for="techOwnerMail"><%=i18n.localize("techOwnerMail")%>:</label>
+                        <div class="controls">
+                             <input type="text" class="input-xlarge email" id="techOwnerMail" name="techOwnerMail" value="<%=api.techOwnerMail%>"/>
+                        </div>
+                    </div>
+                 </div>
+            </fieldset>
 
                 <div id="api_designer">
                     <div id ="apidoc_details"></div>
@@ -246,8 +287,8 @@
                     <div class="btn loadingButton">Saving API. Please wait..</div>
                 </div>
                 <div class="form-actions" id="saveButtons"> 
-                    <button class="btn btn-primary" /><%=i18n.localize("save")%></button>
-                    <a class="btn btn-info" id="publish_api" >Save & Publish</a>                    
+                    <button class="btn btn-primary" id="save_api"/><%=i18n.localize("save")%></button>
+                    <%if(outputs.isPermitted){%> <a class="btn btn-info" id="publish_api" >Save & Publish</a>  <%}%>
                     <input type="reset" class="btn" value="<%=i18n.localize("cancel")%>" onclick="javascript:window.location.href='./'" />                                         
                 </div>
             </form>
@@ -310,7 +351,7 @@
             </td>
             <td class="resource_expand"><a class="resource-path">{{ ../path }}</a></td>   
             <td width="99%"><span class="operation-summary change_summary" data-path="$.apis[{{ ../../index}}].file.apis[{{ ../index }}].operations[{{ @index }}]" data-attr="summary" >{{ summary }}</span></td>
-            <td><a class="operation-summary auth_type_select"  data-type="select" data-path="$.apis[{{ ../../index}}].file.apis[{{ ../index }}].operations[{{ @index }}]" data-attr="auth_type">{{ auth_type }}</a></td>        
+            <td><a class="operation-summary auth_type_select"  data-type="select" data-path="$.apis[{{ ../../index}}].file.apis[{{ ../index }}].operations[{{ @index }}]" data-attr="auth_type" data-value="{{ auth_type }}"></a></td>        
             <td><a class='operation-summary throttling_select'  data-type="select" data-path="$.apis[{{ ../../index}}].file.apis[{{ ../index }}].operations[{{ @index }}]" data-attr="throttling_tier">{{ throttling_tier }}</a></td>
             <td><a class="operation-summary scope_select"  data-type="select" data-path="$.apis[{{ ../../index}}].file.apis[{{ ../index }}].operations[{{ @index }}]" data-attr="scope">{{ scope }}</a></td>
         </tr>
@@ -342,7 +383,12 @@
 
 <script>
     $(document).ready(function(){
-        $.get( "<%=site.context%>/site/blocks/item-design/ajax/add.jag?<%= apiUrlId %>&action=swagger" , function( data ) {
+        $.ajaxSetup({
+            contentType: "application/x-www-form-urlencoded; charset=utf-8"
+        });
+
+        $.get( "<%= jagg.url("/site/blocks/item-design/ajax/add.jag?" + apiUrlId ) %>&action=swagger" , function( data ) {
+            var data = jQuery.parseJSON(data);
             var designer = APIDesigner();
             designer.load_api_document(data);
             designer.set_default_management_values();
@@ -350,57 +396,96 @@
             $("#swaggerUpload").modal('hide');
         });
 
-        $('#publish_api').click(function(e){
-            $("body").on("api_saved", function(e){
-                $.ajax({
-                    type: "POST",
-                    url: "<%=site.context%>/site/blocks/life-cycles/ajax/life-cycles.jag",
-                    data: {
-                        action :"updateStatus",
-                        name:"<%=api.name%>",
-                        version:"<%=api.version%>",
-                        provider: "<%=api.provider%>",
-                        status: "PUBLISHED",
-                        publishToGateway:true,
-                        requireResubscription:true
-                    },
-                    success: function(responseText){
-                        $("body").unbind('api_saved');
-                        if (!responseText.error) {
-                            //jagg.message({content:"API Published",type:"info"});
-                            location.href = "<%=site.context%>/info?<%= apiUrlId %>";                                                
-                        } else {
-                             if (responseText.message == "timeout") {
-                                 if (ssoEnabled) {
-                                     var currentLoc = window.location.pathname;
-                                     if (currentLoc.indexOf(".jag") >= 0) {
-                                         location.href = "add.jag";
-                                     } else {
-                                         location.href = 'site/pages/add.jag';
-                                     }
+        var publish_api = function(e){
+            $.ajax({
+                type: "POST",
+                url: "<%= jagg.url("/site/blocks/life-cycles/ajax/life-cycles.jag") %>",
+                data: {
+                    action :"updateStatus",
+                    name:"<%=api.name%>",
+                    version:"<%=api.version%>",
+                    provider: "<%=api.provider%>",
+                    status: "PUBLISHED",
+                    publishToGateway:true,
+                    requireResubscription:true
+                },
+                success: function(responseText){
+                    $("body").unbind('api_saved');
+                    if (!responseText.error) {
+                        //jagg.message({content:"API Published",type:"info"});
+                        location.href = "<%= jagg.url("/info?"+ apiUrlId ) %>";                                                
+                    } else {
+                         if (responseText.message == "timeout") {
+                             if (ssoEnabled) {
+                                 var currentLoc = window.location.pathname;
+                                 if (currentLoc.indexOf(".jag") >= 0) {
+                                     location.href = "index.jag";
                                  } else {
-                                     jagg.showLogin();
+                                     location.href = 'site/pages/index.jag';
                                  }
                              } else {
-                                 jagg.message({content:responseText.message,type:"error"});
+                                 jagg.showLogin();
                              }
+                         } else {
+                             jagg.message({content:responseText.message,type:"error"});
                          }
-                    },
-                    dataType: "json"
-                });
+                     }
+                },
+                dataType: "json"
             });
+        };
+
+        var v = $("#manage_form").validate({
+            submitHandler: function(form) {
+            if(!validate_tiers()){
+                return false;
+            }
+            var designer = APIDesigner();
+            $('#swagger').val(JSON.stringify(designer.api_doc));
+            $('#saveMessage').show();
+            $('#saveButtons').hide();        
+            $(form).ajaxSubmit({
+                success:function(responseText, statusText, xhr, $form) {
+                    $('#saveMessage').hide();
+                    $('#saveButtons').show();                
+                    if (!responseText.error) {                
+                        $( "body" ).trigger( "api_saved" );       
+                    } else {
+                         if (responseText.message == "timeout") {
+                             if (ssoEnabled) {
+                                 var currentLoc = window.location.pathname;
+                                 if (currentLoc.indexOf(".jag") >= 0) {
+                                     location.href = "index.jag";
+                                 } else {
+                                     location.href = 'site/pages/index.jag';
+                                 }
+                             } else {
+                                 jagg.showLogin();
+                             }
+                         } else {
+                             jagg.message({content:responseText.message,type:"error"});
+                         }
+                    }
+                }, dataType: 'json'
+            });
+            }
+        });
+
+        $('#publish_api').click(function(e){
+            $("body").on("api_saved", publish_api);
             $("#manage_form").submit();
         });
 
-    $('#responseCache').change(function(){
-        var cache = $('#responseCache').find(":selected").val();
-        if(cache == "enabled"){
-            $('#cacheTimeout').show();
-        }
-        else{
-            $('#cacheTimeout').hide();
-        }
-    });
+        
+        $('#responseCache').change(function(){
+            var cache = $('#responseCache').find(":selected").val();
+            if(cache == "enabled"){
+                $('#cacheTimeout').show();
+            }
+            else{
+                $('#cacheTimeout').hide();
+            }
+        });
 
     });
 </script>
