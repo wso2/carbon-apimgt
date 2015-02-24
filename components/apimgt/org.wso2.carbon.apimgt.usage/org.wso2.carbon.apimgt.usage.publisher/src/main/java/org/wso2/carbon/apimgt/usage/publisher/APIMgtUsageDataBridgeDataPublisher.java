@@ -22,9 +22,11 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.usage.publisher.dto.DataBridgeFaultPublisherDTO;
 import org.wso2.carbon.apimgt.usage.publisher.dto.DataBridgeRequestPublisherDTO;
 import org.wso2.carbon.apimgt.usage.publisher.dto.DataBridgeResponsePublisherDTO;
+import org.wso2.carbon.apimgt.usage.publisher.dto.DataBridgeThrottlePublisherDTO;
 import org.wso2.carbon.apimgt.usage.publisher.dto.FaultPublisherDTO;
 import org.wso2.carbon.apimgt.usage.publisher.dto.RequestPublisherDTO;
 import org.wso2.carbon.apimgt.usage.publisher.dto.ResponsePublisherDTO;
+import org.wso2.carbon.apimgt.usage.publisher.dto.ThrottlePublisherDTO;
 import org.wso2.carbon.apimgt.usage.publisher.internal.DataPublisherAlreadyExistsException;
 import org.wso2.carbon.apimgt.usage.publisher.internal.UsageComponent;
 import org.wso2.carbon.apimgt.usage.publisher.service.APIMGTConfigReaderService;
@@ -94,6 +96,19 @@ public class APIMgtUsageDataBridgeDataPublisher implements APIMgtUsageDataPublis
                         apimgtConfigReaderService.getFaultStreamName(),
                         apimgtConfigReaderService.getFaultStreamVersion());
             }
+
+            //If Throttle Stream Definition does not exist.
+            if(!dataPublisher.isStreamDefinitionAdded(apimgtConfigReaderService.getThrottleStreamName(),
+                    apimgtConfigReaderService.getThrottleStreamVersion())){
+
+                //Get Throttle Stream Definition
+                String throttleStreamDefinition = DataBridgeThrottlePublisherDTO.getStreamDefinition();
+
+                //Add Throttle Stream Definition;
+                dataPublisher.addStreamDefinition(throttleStreamDefinition,
+                        apimgtConfigReaderService.getThrottleStreamName(),
+                        apimgtConfigReaderService.getThrottleStreamVersion());
+            }
         }catch (Exception e){
             log.error("Error initializing APIMgtUsageDataBridgeDataPublisher", e);
         }
@@ -137,6 +152,21 @@ public class APIMgtUsageDataBridgeDataPublisher implements APIMgtUsageDataPublis
 
         } catch (AgentException e) {
             log.error("Error while publishing Fault event", e);
+        }
+    }
+
+    public void publishEvent(ThrottlePublisherDTO throttPublisherDTO) {
+        DataBridgeThrottlePublisherDTO dataBridgeThrottlePublisherDTO = new
+                DataBridgeThrottlePublisherDTO(throttPublisherDTO);
+        try {
+            //Publish Throttle data
+            dataPublisher.publish(apimgtConfigReaderService.getThrottleStreamName(),
+                                  apimgtConfigReaderService.getThrottleStreamVersion(),
+                                  System.currentTimeMillis(), new Object[]{"external"}, null,
+                                  (Object[]) dataBridgeThrottlePublisherDTO.createPayload());
+
+        } catch (AgentException e) {
+            log.error("Error while publishing Throttle exceed event", e);
         }
     }
 
