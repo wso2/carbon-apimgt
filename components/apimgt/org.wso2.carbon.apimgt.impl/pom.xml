@@ -158,18 +158,24 @@
 			<groupId>org.wso2.carbon.apimgt</groupId>
 			<artifactId>org.wso2.carbon.apimgt.keymgt.stub</artifactId>
 		</dependency>
+<<<<<<< HEAD
 <<<<<<< upstream/release-1.9.0
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.databridge.agent.thrift</artifactId>
         </dependency>
 =======
+=======
+>>>>>>> a1d4a556b7e4f0dac0f5ef5af233686767731e78
       <dependency>
           <groupId>org.wso2.carbon</groupId>
           <artifactId>org.wso2.carbon.identity.oauth.stub</artifactId>
           <version>4.2.3</version>
       </dependency>
+<<<<<<< HEAD
 >>>>>>> HEAD~13
+=======
+>>>>>>> a1d4a556b7e4f0dac0f5ef5af233686767731e78
     </dependencies>
     <build>
         <plugins>
