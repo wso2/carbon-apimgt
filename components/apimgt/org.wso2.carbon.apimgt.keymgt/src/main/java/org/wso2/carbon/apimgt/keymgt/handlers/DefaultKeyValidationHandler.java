@@ -45,6 +45,7 @@ public class DefaultKeyValidationHandler extends AbstractKeyValidationHandler {
             boolean tokenExpired = APIUtil.isAccessTokenExpired(infoDTO);
             if (tokenExpired) {
                 infoDTO.setAuthorized(false);
+                infoDTO.setValidationStatus(APIConstants.KeyValidationStatus.API_AUTH_ACCESS_TOKEN_EXPIRED);
                 log.debug("Token " + validationContext.getAccessToken() + " expired.");
                 return false;
             } else {
@@ -69,6 +70,7 @@ public class DefaultKeyValidationHandler extends AbstractKeyValidationHandler {
 
             if (!hasTokenRequiredAuthLevel(validationContext.getRequiredAuthenticationLevel(), tokenInfo)) {
                 apiKeyValidationInfoDTO.setAuthorized(false);
+                apiKeyValidationInfoDTO.setValidationStatus(APIConstants.KeyValidationStatus.API_AUTH_INCORRECT_ACCESS_TOKEN_TYPE);
                 return false;
             }
 
