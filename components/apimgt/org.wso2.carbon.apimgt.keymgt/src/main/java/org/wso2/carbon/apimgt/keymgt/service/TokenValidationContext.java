@@ -20,6 +20,7 @@
 
 package org.wso2.carbon.apimgt.keymgt.service;
 
+import org.wso2.carbon.apimgt.api.model.AccessTokenInfo;
 import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
 
 import java.util.HashMap;
@@ -42,6 +43,15 @@ public class TokenValidationContext {
     private APIKeyValidationInfoDTO validationInfoDTO;
     private boolean isCacheHit;
     private boolean isJWTCacheHit;
+    private AccessTokenInfo tokenInfo;
+
+    public AccessTokenInfo getTokenInfo() {
+        return tokenInfo;
+    }
+
+    public void setTokenInfo(AccessTokenInfo tokenInfo) {
+        this.tokenInfo = tokenInfo;
+    }
 
     public boolean isCacheHit() {
         return isCacheHit;

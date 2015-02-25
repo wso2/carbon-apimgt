@@ -78,7 +78,8 @@ public interface KeyManager {
      *
      * @return json String
      */
-    Map getTokenMetaData(String accessToken) throws APIManagementException;
+    //TODO:Change the Exception to APIKeyMgtException
+    AccessTokenInfo getTokenMetaData(String accessToken) throws APIManagementException;
 
     /**
      * Key manager implementation should be read from hardcoded json file
