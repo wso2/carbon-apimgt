@@ -27,7 +27,9 @@ import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.utils.URLEncodedUtils;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
 import org.codehaus.jettison.json.JSONObject;
@@ -58,7 +60,7 @@ import java.util.Map;
  */
 public class DefaultKeyManagerImpl extends AbstractKeyManager {
 
-    private static final String GRANT_TYPE_CLIENT_CREDENTIALS = "client_credentials";
+    private static final String GRANT_TYPE_CLIENT_CREDENTIALS = "open_keymanager";
     private static final String OAUTH_RESPONSE_ACCESSTOKEN = "access_token";
     private static final String OAUTH_RESPONSE_EXPIRY_TIME = "expires_in";
 
@@ -70,7 +72,7 @@ public class DefaultKeyManagerImpl extends AbstractKeyManager {
         OAuthConsumerAppDTO oAuthConsumerAppDTO = new OAuthConsumerAppDTO();
 
         OAuthApplicationInfo oAuthApplicationInfo = oauthAppRequest.getoAuthApplicationInfo();
-        oAuthConsumerAppDTO.setApplicationName((String) oAuthApplicationInfo.getParameter("client_name"));
+        oAuthConsumerAppDTO.setApplicationName(oAuthApplicationInfo.getClientName());
 
         if(oAuthApplicationInfo.getParameter("callback_url") != null){
             JSONArray jsonArray = (JSONArray) oAuthApplicationInfo.getParameter("callback_url");
@@ -92,7 +94,7 @@ public class DefaultKeyManagerImpl extends AbstractKeyManager {
 
         try {
             oAuthConsumerAppDTO = oAuthAdminClient.
-                    getOAuthApplicationDataByAppName((String) oAuthApplicationInfo.getParameter("client_name"));
+                    getOAuthApplicationDataByAppName(oAuthApplicationInfo.getClientName());
         } catch (Exception e) {
             handleException("Can not retrieve registered OAuth application information ", e);
         }
@@ -228,7 +230,8 @@ public class DefaultKeyManagerImpl extends AbstractKeyManager {
             HttpClient tokenEPClient = APIKeyMgtUtil.getHttpClient(keyMgtPort, keyMgtProtocol);
             HttpPost httpTokpost = new HttpPost(tokenEndpoint);
             List<NameValuePair> tokParams = new ArrayList<NameValuePair>(3);
-            tokParams.add(new BasicNameValuePair(OAuth.OAUTH_GRANT_TYPE, GRANT_TYPE_CLIENT_CREDENTIALS));
+            tokParams.add(new BasicNameValuePair(OAuth.OAUTH_GRANT_TYPE, "open_keymanager"));
+            tokParams.add(new BasicNameValuePair("test","test"));
             tokParams.add(new BasicNameValuePair(OAuth.OAUTH_CLIENT_ID, tokenRequest.getClientId()));
             tokParams.add(new BasicNameValuePair(OAuth.OAUTH_CLIENT_SECRET, tokenRequest.getClientSecret()));
 
@@ -266,6 +269,11 @@ public class DefaultKeyManagerImpl extends AbstractKeyManager {
 
     @Override
     public String getKeyManagerMetaData() throws APIManagementException {
+        return null;
+    }
+
+    @Override
+    public OAuthApplicationInfo buildFromJSON(String jsonInput) throws APIManagementException {
         return null;
     }
 

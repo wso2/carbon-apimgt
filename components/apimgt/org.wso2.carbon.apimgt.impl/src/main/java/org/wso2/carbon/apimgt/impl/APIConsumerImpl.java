@@ -1457,7 +1457,10 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     public Map<String, Object> saveSemiManualClient(String jsonString, String userName, String clientId,
                                                     String applicationName) throws APIManagementException {
 
-        OauthAppRequest oauthAppRequest = ApplicationCreator.createOauthAppRequest(jsonString);
+        String callBackURL = null;
+
+        OauthAppRequest oauthAppRequest = ApplicationCreator.createOauthAppRequest(applicationName , callBackURL ,
+                jsonString);
 
         apiMgtDAO.createApplicationKeyTypeMapping(oauthAppRequest, applicationName, userName, clientId);
 
@@ -1932,8 +1935,9 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             PrivilegedCarbonContext.startTenantFlow();
             PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
         }
+        String callbackURL= null;
         //Create OauthAppRequest object by passing json String.
-        OauthAppRequest request = ApplicationCreator.createOauthAppRequest(jsonString);
+        OauthAppRequest request = ApplicationCreator.createOauthAppRequest(applicationName, callbackURL, jsonString);
         //get key manager instant.
         KeyManager keyManager = ApplicationCreator.getKeyManager();
         //call update method.
@@ -1970,28 +1974,31 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
      * @throws APIManagementException
      */
     @Override
-    public Map<String, Object> requestApprovalForApplicationRegistration(String userId, String applicationName, String tokenType, String clientDetails) throws APIManagementException {
+    public Map<String, Object> requestApprovalForApplicationRegistration(String userId, String applicationName,
+                                                                         String tokenType, String callbackUrl,
+                                                                         String[] allowedDomains,
+                                                                         String validityTime,
+                                                                         String jsonString)
+            throws APIManagementException {
+
         boolean isTenantFlowStarted = false;
 
-        if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
-            isTenantFlowStarted = true;
-            PrivilegedCarbonContext.startTenantFlow();
-            PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
-        }
-        //initiate WorkflowExecutor
-        WorkflowExecutor appRegistrationWorkflow = null;
-        //initiate ApplicationRegistrationWorkflowDTO
-        ApplicationRegistrationWorkflowDTO appRegWFDto = null;
-        //get APIM application by Application Name and userId.
-        Application application = ApplicationCreator.retrieveApplication(applicationName, userId);
-        //Build key manager instance and create oAuthAppRequest by jsonString.
-        OauthAppRequest request = ApplicationCreator.createOauthAppRequest(clientDetails);
-
-        String allowDomains = (String) request.getoAuthApplicationInfo().getParameter("callbackUrl");
-        //split by comma and make an array.
-        String[] allowDomainsArray = allowDomains.split(",", -1);
-
         try {
+            if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
+                isTenantFlowStarted = true;
+                PrivilegedCarbonContext.startTenantFlow();
+                PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
+            }
+            //initiate WorkflowExecutor
+            WorkflowExecutor appRegistrationWorkflow = null;
+            //initiate ApplicationRegistrationWorkflowDTO
+            ApplicationRegistrationWorkflowDTO appRegWFDto = null;
+            //get APIM application by Application Name and userId.
+            Application application = ApplicationCreator.retrieveApplication(applicationName, userId);
+            //Build key manager instance and create oAuthAppRequest by jsonString.
+            OauthAppRequest request = ApplicationCreator.createOauthAppRequest(applicationName,callbackUrl,jsonString);
+
+
             //if its a PRODUCTION application.
             if (APIConstants.API_KEY_TYPE_PRODUCTION.equals(tokenType)) {
                 //initiate workflow type. By default simple work flow will be executed.
@@ -2008,33 +2015,41 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                         createWorkflowDTO(WorkflowConstants.WF_TYPE_AM_APPLICATION_REGISTRATION_SANDBOX);
             }
 
-            //set status.
+
             appRegWFDto.setStatus(WorkflowStatus.CREATED);
-            //set created time
             appRegWFDto.setCreatedTime(System.currentTimeMillis());
-            //set tenant domain
             appRegWFDto.setTenantDomain(tenantDomain);
-            //set tenantId
             appRegWFDto.setTenantId(tenantId);
-            //set workflow reference ID
             appRegWFDto.setExternalWorkflowReference(appRegistrationWorkflow.generateUUID());
-            //set workflow reference
             appRegWFDto.setWorkflowReference(appRegWFDto.getExternalWorkflowReference());
-            //set APIM application.
             appRegWFDto.setApplication(application);
-            //set workflow mappingID
             request.setMappingId(appRegWFDto.getWorkflowReference());
-            //set user name
             appRegWFDto.setUserName(userId);
-            //set callback URL
             appRegWFDto.setCallbackUrl(appRegistrationWorkflow.getCallbackURL());
-            //set oAuthApplication properties.
             appRegWFDto.setAppInfoDTO(request);
-            //set allowdomains
-            appRegWFDto.setDomainList(allowDomainsArray);
-            //execute workflow.
+            appRegWFDto.setDomainList(allowedDomains);
+            appRegWFDto.setValidityTime(Long.parseLong(validityTime));
             appRegistrationWorkflow.execute(appRegWFDto);
 
+
+            Map<String, Object> keyDetails = new HashMap<String, Object>();
+            keyDetails.put("keyState", appRegWFDto.getStatus().toString());
+            OAuthApplicationInfo applicationInfo = appRegWFDto.getApplicationInfo();
+
+            if (applicationInfo != null) {
+                keyDetails.put("consumerKey", applicationInfo.getClientId());
+                keyDetails.put("consumerSecret", (String) applicationInfo.getParameter(ApplicationConstants
+                        .OAUTH_CLIENT_SECRET));
+                keyDetails.put("appDetails", applicationInfo.getJsonString());
+            }
+
+            AccessTokenInfo tokenInfo = appRegWFDto.getAccessTokenInfo();
+            if (tokenInfo != null) {
+                keyDetails.put("accessToken", tokenInfo.getAccessToken());
+                keyDetails.put("validityTime", tokenInfo.getValidityPeriod());
+                keyDetails.put("tokenDetails", tokenInfo.getJSONString());
+            }
+            return keyDetails;
         } catch (WorkflowException e) {
             log.error("Could not execute Workflow", e);
             throw new APIManagementException("Could not execute Workflow", e);
@@ -2044,29 +2059,6 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             }
         }
 
-        Map<String, Object> keyDetails = new HashMap<String, Object>();
-        keyDetails.put("keyState", appRegWFDto.getStatus().toString());
-        OAuthApplicationInfo applicationInfo = appRegWFDto.getApplicationInfo();
-
-        if (applicationInfo != null) {
-            keyDetails.put("consumerKey", applicationInfo.getClientId());
-            keyDetails.put("consumerSecret", (String) applicationInfo.getParameter(ApplicationConstants
-                                                                                      .OAUTH_CLIENT_SECRET));
-            keyDetails.put("appDetails",applicationInfo.getJsonString());
-        }
-
-        AccessTokenInfo tokenInfo = appRegWFDto.getAccessTokenInfo();
-        if(tokenInfo != null){
-            keyDetails.put("accessToken", tokenInfo.getAccessToken());
-            keyDetails.put("validityTime", tokenInfo.getValidityPeriod());
-            keyDetails.put("tokenDetails",tokenInfo.getJSONString());
-        }
-        return keyDetails;
-
-//        //TODO: Return  ApplicationKeysDTO or WorkflowDTO without creating a Map.To do this has to move either into api module.
-//        Map<String, Object> keyDetails = new HashMap<String, Object>();
-//        keyDetails.put("keyState", appRegWFDto.getStatus().toString());
-//        return keyDetails;
     }
 
     public Map<String, String> completeApplicationRegistration(String userId,
