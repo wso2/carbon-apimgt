@@ -86,7 +86,7 @@ public class APIMgtWorkflowDataPublisher {
                 //Add Workflow Stream Definition;
                 dataPublisher.addStreamDefinition(wfStreamDefinition,
                                                   wfStreamName,
-                                                  wfStreamDefinition);
+                                                  wfStreamVersion);
             }
         } catch (MalformedURLException e) {
             log.error("Error initializing APIMgtWorkflowDataPublisher." + e.getMessage(), e);
