@@ -25,6 +25,6 @@ public class OpenKeyManagerGrantValidator extends AbstractValidator<HttpServletR
     public OpenKeyManagerGrantValidator() {
 
         // mobile number must be in the request parameter
-        requiredParams.add("test");
+        requiredParams.add("validity_period");
     }
 }
