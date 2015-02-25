@@ -91,6 +91,10 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
 
     public boolean handleRequest(MessageContext messageContext) {
         try {
+            if (Utils.isStatsEnabled()) {
+                long currentTime = System.currentTimeMillis();
+                messageContext.setProperty("api.ut.requestTime", Long.toString(currentTime));
+            }
             if (authenticator.authenticate(messageContext)) {
                 return true;
             }
@@ -111,7 +115,10 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
     }
 
     public boolean handleResponse(MessageContext messageContext) {
-    	
+        if (Utils.isStatsEnabled()) {
+            long currentTime = System.currentTimeMillis();
+            messageContext.setProperty("api.ut.backendRequestEndTime", Long.toString(currentTime));
+        }
     	if (Utils.isCORSEnabled()) {
 	    	/* For CORS support adding required headers to the response */
 	    	org.apache.axis2.context.MessageContext axis2MC = ((Axis2MessageContext) messageContext).
