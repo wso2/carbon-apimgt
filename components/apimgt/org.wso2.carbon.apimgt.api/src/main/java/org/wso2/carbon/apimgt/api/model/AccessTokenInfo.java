@@ -29,6 +29,10 @@ import java.util.HashMap;
  */
 public class AccessTokenInfo {
 
+    private boolean isTokenValid;
+
+    private boolean isApplicationToken;
+
     private String consumerKey;
 
     private String[] scope;
@@ -40,8 +44,9 @@ public class AccessTokenInfo {
     private long issuedTime;
 
     private long validityPeriod;
+    private String endUserName;
 
-    public String[] getScope() {
+    public String[] getScopes() {
         return scope;
     }
 
@@ -99,12 +104,29 @@ public class AccessTokenInfo {
         return parameters.get(paramName);
     }
 
+    public boolean isTokenValid() {
+        return isTokenValid;
+    }
+
+    public void setTokenValid(boolean isTokenValid) {
+        this.isTokenValid = isTokenValid;
+    }
+
+    public boolean isApplicationToken() {
+        return isApplicationToken;
+    }
+
+    public void setApplicationToken(boolean isApplicationToken) {
+        this.isApplicationToken = isApplicationToken;
+    }
+
     /**
      * Sending additional properties as a JSON String.
 
      */
     public String getJSONString(){
 
+        // TODO:Need to add other parameters into the param Map.
         if(!parameters.containsKey("scopes")){
             parameters.put("scopes",scope);
         }
@@ -116,4 +138,11 @@ public class AccessTokenInfo {
         return JSONObject.toJSONString(parameters);
     }
 
+    public String getEndUserName() {
+        return endUserName;
+    }
+
+    public void setEndUserName(String endUserName) {
+        this.endUserName = endUserName;
+    }
 }

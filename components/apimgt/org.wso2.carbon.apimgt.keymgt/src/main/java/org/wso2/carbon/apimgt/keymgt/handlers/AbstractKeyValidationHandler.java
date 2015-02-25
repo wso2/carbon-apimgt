@@ -3,12 +3,18 @@ package org.wso2.carbon.apimgt.keymgt.handlers;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.model.AccessTokenInfo;
+import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
 import org.wso2.carbon.apimgt.impl.token.TokenGenerator;
 import org.wso2.carbon.apimgt.keymgt.APIKeyMgtException;
 import org.wso2.carbon.apimgt.keymgt.service.TokenValidationContext;
 import org.wso2.carbon.apimgt.keymgt.util.APIKeyMgtDataHolder;
+
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 public abstract class AbstractKeyValidationHandler implements KeyValidationHandler {
 
@@ -40,6 +46,10 @@ public abstract class AbstractKeyValidationHandler implements KeyValidationHandl
             state = dao.validateSubscriptionDetails(validationContext.getContext(),
                                                     validationContext.getVersion(),
                                                     dto.getConsumerKey(), dto);
+            if (state) {
+                dto.setAuthorizedDomains(ApiMgtDAO.getAuthorizedDomainList(validationContext.getAccessToken()));
+                checkClientDomainAuthorized(dto, validationContext.getClientDomain());
+            }
 
 
             if (log.isDebugEnabled() && dto != null) {
@@ -52,6 +62,62 @@ public abstract class AbstractKeyValidationHandler implements KeyValidationHandl
         }
 
         return state;
+    }
+
+    protected void checkClientDomainAuthorized (APIKeyValidationInfoDTO apiKeyValidationInfoDTO, String clientDomain)
+            throws APIKeyMgtException {
+        if (clientDomain != null) {
+            clientDomain = clientDomain.trim();
+        }
+        List<String> authorizedDomains = apiKeyValidationInfoDTO.getAuthorizedDomains();
+        if (!(authorizedDomains.contains("ALL") || authorizedDomains.contains(clientDomain))) {
+            log.error("Unauthorized client domain :" + clientDomain +
+                      ". Only \"" + authorizedDomains + "\" domains are authorized to access the API.");
+            throw new APIKeyMgtException("Unauthorized client domain :" + clientDomain +
+                                         ". Only \"" + authorizedDomains + "\" domains are authorized to access the API.");
+        }
+
+    }
+
+    /**
+     * Determines whether the provided token is an ApplicationToken.
+     * @param tokenInfo
+     */
+    protected void setTokenType(AccessTokenInfo tokenInfo) {
+        String[] scopes = tokenInfo.getScopes();
+        String applicationTokenScope = APIKeyMgtDataHolder.getApplicationTokenScope();
+
+        if (scopes != null && applicationTokenScope != null && !applicationTokenScope.isEmpty()) {
+            if (Arrays.asList(scopes).contains(applicationTokenScope)) {
+                tokenInfo.setApplicationToken(true);
+            }
+        }
+
+    }
+
+    /**
+     * Resources protected with Application token type can only be accessed using Application Access Tokens. This method
+     * verifies if a particular resource can be accessed using the obtained token.
+     * @param authScheme Type of token required by the resource (Application | User Token)
+     * @param tokenInfo Details about the Token
+     * @return {@code true} if token is of the type required, {@code false} otherwise.
+     */
+    protected boolean hasTokenRequiredAuthLevel(String authScheme,
+                                                        AccessTokenInfo tokenInfo) {
+
+        if (authScheme == null || authScheme.isEmpty() || tokenInfo == null) {
+            return false;
+        }
+        setTokenType(tokenInfo);
+
+        if (APIConstants.AUTH_APPLICATION_LEVEL_TOKEN.equals(authScheme)) {
+            return tokenInfo.isApplicationToken();
+        } else if (APIConstants.AUTH_APPLICATION_USER_LEVEL_TOKEN.equals(authScheme)) {
+            return !tokenInfo.isApplicationToken();
+        }
+
+        return true;
+
     }
 
     @Override
