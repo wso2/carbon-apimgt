@@ -42,12 +42,14 @@ import org.wso2.carbon.apimgt.api.model.OAuthApplicationInfo;
 import org.wso2.carbon.apimgt.api.model.OauthAppRequest;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.AbstractKeyManager;
+import org.wso2.carbon.apimgt.impl.clients.OAuth2TokenValidationServiceClient;
 import org.wso2.carbon.apimgt.impl.clients.OAuthAdminClient;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.keymgt.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.keymgt.util.APIKeyMgtUtil;
 import org.wso2.carbon.identity.oauth.stub.dto.OAuthConsumerAppDTO;
+import org.wso2.carbon.identity.oauth2.stub.dto.OAuth2ClientApplicationDTO;
 import org.wso2.carbon.utils.CarbonUtils;
 
 import java.util.ArrayList;
@@ -263,8 +265,31 @@ public class DefaultKeyManagerImpl extends AbstractKeyManager {
     }
 
     @Override
-    public Map getTokenMetaData(String accessToken) throws APIManagementException {
-        return null;
+    public AccessTokenInfo getTokenMetaData(String accessToken) throws APIManagementException {
+
+        AccessTokenInfo tokenInfo = new AccessTokenInfo();
+
+        OAuth2ClientApplicationDTO oAuth2ClientApplicationDTO;
+        OAuth2TokenValidationServiceClient oAuth2TokenValidationServiceClient = new
+                OAuth2TokenValidationServiceClient();
+        oAuth2ClientApplicationDTO = oAuth2TokenValidationServiceClient.
+                validateAuthenticationRequest(accessToken);
+        org.wso2.carbon.identity.oauth2.stub.dto.OAuth2TokenValidationResponseDTO oAuth2TokenValidationResponseDTO = oAuth2ClientApplicationDTO.
+                getAccessTokenValidationResponse();
+
+        if (!oAuth2TokenValidationResponseDTO.getValid()) {
+            log.error("Invalid OAuth Token : "+oAuth2TokenValidationResponseDTO.getErrorMsg());
+            throw new APIManagementException("Invalid OAuth Token : "+oAuth2TokenValidationResponseDTO.getErrorMsg());
+        }
+
+        tokenInfo.setTokenValid(oAuth2TokenValidationResponseDTO.getValid());
+        tokenInfo.setEndUserName(oAuth2TokenValidationResponseDTO.getAuthorizedUser());
+        tokenInfo.setConsumerKey(oAuth2ClientApplicationDTO.getConsumerKey());
+        tokenInfo.setValidityPeriod(oAuth2TokenValidationResponseDTO.getExpiryTime());
+        tokenInfo.setIssuedTime(System.currentTimeMillis());
+        tokenInfo.setScope(oAuth2TokenValidationResponseDTO.getScope());
+
+        return tokenInfo;
     }
 
     @Override

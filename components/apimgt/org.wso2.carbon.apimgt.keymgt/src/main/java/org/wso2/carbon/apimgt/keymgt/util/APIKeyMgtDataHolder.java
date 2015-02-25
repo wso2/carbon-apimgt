@@ -40,6 +40,9 @@ public class APIKeyMgtDataHolder {
     private static boolean jwtGenerationEnabled = false;
     private static final Log log = LogFactory.getLog(APIKeyMgtDataHolder.class);
 
+    // Scope used for marking Application Tokens
+    private static String applicationTokenScope;
+
     public static Boolean isJWTCacheEnabledKeyMgt() {
         return isJWTCacheEnabledKeyMgt;
     }
@@ -101,16 +104,14 @@ public class APIKeyMgtDataHolder {
             if (configuration == null) {
                 log.error("API Manager configuration is not initialized");
             } else {
+                applicationTokenScope = configuration.getFirstProperty(APIConstants
+                                                                               .API_KEY_MANAGER_APPLICATION_TOKEN_SCOPE);
                 jwtGenerationEnabled = Boolean.parseBoolean(configuration.getFirstProperty(APIConstants
                                                                                                    .ENABLE_JWT_GENERATION));
                 if (log.isDebugEnabled()) {
                     log.debug("JWTGeneration enabled : " + jwtGenerationEnabled);
                 }
-            }
 
-            if (configuration == null) {
-                log.error("API Manager configuration is not initialized");
-            } else {
                 if (jwtGenerationEnabled) {
                     String clazz = configuration.getFirstProperty(APIConstants.TOKEN_GENERATOR_IMPL);
                     if (clazz == null) {
@@ -148,5 +149,9 @@ public class APIKeyMgtDataHolder {
     // Returns the implementation for JWTTokenGenerator.
     public static TokenGenerator getTokenGenerator() {
         return tokenGenerator;
+    }
+
+    public static String getApplicationTokenScope() {
+        return applicationTokenScope;
     }
 }
