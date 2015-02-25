@@ -231,7 +231,7 @@ public class DefaultKeyManagerImpl extends AbstractKeyManager {
             HttpPost httpTokpost = new HttpPost(tokenEndpoint);
             List<NameValuePair> tokParams = new ArrayList<NameValuePair>(3);
             tokParams.add(new BasicNameValuePair(OAuth.OAUTH_GRANT_TYPE, "open_keymanager"));
-            tokParams.add(new BasicNameValuePair("test","test"));
+            tokParams.add(new BasicNameValuePair("validity_period","360000"));
             tokParams.add(new BasicNameValuePair(OAuth.OAUTH_CLIENT_ID, tokenRequest.getClientId()));
             tokParams.add(new BasicNameValuePair(OAuth.OAUTH_CLIENT_SECRET, tokenRequest.getClientSecret()));
 
