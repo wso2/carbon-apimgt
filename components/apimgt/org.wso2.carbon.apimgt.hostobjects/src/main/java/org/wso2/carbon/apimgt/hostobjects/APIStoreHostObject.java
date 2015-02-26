@@ -3373,7 +3373,7 @@ public class APIStoreHostObject extends ScriptableObject {
                                                                     Function funObj)
             throws APIManagementException {
         NativeArray apiArray = new NativeArray(0);
-        if (args != null && isStringArray(args)) {
+        if (args != null && isStringArray(args) && args.length == 4) {
             String providerName = APIUtil.replaceEmailDomain(args[0].toString());
             String username = args[1].toString();
             String limitArg = args[2].toString();
