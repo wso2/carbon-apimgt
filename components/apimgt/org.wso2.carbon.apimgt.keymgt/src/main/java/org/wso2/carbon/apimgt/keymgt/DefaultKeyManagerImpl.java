@@ -27,9 +27,7 @@ import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
-import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
-import org.apache.http.client.utils.URLEncodedUtils;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
 import org.codehaus.jettison.json.JSONObject;
@@ -44,7 +42,6 @@ import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.AbstractKeyManager;
 import org.wso2.carbon.apimgt.impl.clients.OAuth2TokenValidationServiceClient;
 import org.wso2.carbon.apimgt.impl.clients.OAuthAdminClient;
-import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.keymgt.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.keymgt.util.APIKeyMgtUtil;
@@ -54,7 +51,6 @@ import org.wso2.carbon.utils.CarbonUtils;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 /**
  * This class holds the key manager implementation considering WSO2 as the identity provider
@@ -62,9 +58,10 @@ import java.util.Map;
  */
 public class DefaultKeyManagerImpl extends AbstractKeyManager {
 
-    private static final String GRANT_TYPE_CLIENT_CREDENTIALS = "open_keymanager";
+    private static final String GRANT_TYPE_VALUE = "open_keymanager";
     private static final String OAUTH_RESPONSE_ACCESSTOKEN = "access_token";
     private static final String OAUTH_RESPONSE_EXPIRY_TIME = "expires_in";
+    private static final String GRANT_TYPE_PARAM_VALIDITY = "validity_period";
 
     private static final Log log = LogFactory.getLog(DefaultKeyManagerImpl.class);
 
@@ -232,8 +229,9 @@ public class DefaultKeyManagerImpl extends AbstractKeyManager {
             HttpClient tokenEPClient = APIKeyMgtUtil.getHttpClient(keyMgtPort, keyMgtProtocol);
             HttpPost httpTokpost = new HttpPost(tokenEndpoint);
             List<NameValuePair> tokParams = new ArrayList<NameValuePair>(3);
-            tokParams.add(new BasicNameValuePair(OAuth.OAUTH_GRANT_TYPE, "open_keymanager"));
-            tokParams.add(new BasicNameValuePair("validity_period","360000"));
+            tokParams.add(new BasicNameValuePair(OAuth.OAUTH_GRANT_TYPE, GRANT_TYPE_VALUE));
+            tokParams.add(new BasicNameValuePair(GRANT_TYPE_PARAM_VALIDITY,
+                                                 Long.toString(tokenRequest.getValidityPeriod())));
             tokParams.add(new BasicNameValuePair(OAuth.OAUTH_CLIENT_ID, tokenRequest.getClientId()));
             tokParams.add(new BasicNameValuePair(OAuth.OAUTH_CLIENT_SECRET, tokenRequest.getClientSecret()));
 
