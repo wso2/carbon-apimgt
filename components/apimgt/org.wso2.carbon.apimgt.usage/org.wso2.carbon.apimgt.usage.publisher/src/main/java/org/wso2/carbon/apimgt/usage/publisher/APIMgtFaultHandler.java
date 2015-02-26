@@ -46,8 +46,8 @@ public class APIMgtFaultHandler extends AbstractMediator {
             if (!enabled) {
                 return true;
             }
-            long requestTime = (Long) messageContext.getProperty(APIMgtUsagePublisherConstants.
-                                                                         REQUEST_START_TIME);
+            long requestTime = Long.parseLong((String) messageContext.getProperty(APIMgtUsagePublisherConstants.
+                                                                         REQUEST_START_TIME));
 
             FaultPublisherDTO faultPublisherDTO = new FaultPublisherDTO();
             faultPublisherDTO.setConsumerKey((String) messageContext.getProperty(
