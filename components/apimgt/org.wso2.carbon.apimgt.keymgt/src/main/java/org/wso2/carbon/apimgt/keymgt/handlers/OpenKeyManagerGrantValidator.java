@@ -24,7 +24,7 @@ import javax.servlet.http.HttpServletRequest;
 public class OpenKeyManagerGrantValidator extends AbstractValidator<HttpServletRequest> {
     public OpenKeyManagerGrantValidator() {
 
-        // mobile number must be in the request parameter
+        // validity period must be in the request parameter
         requiredParams.add("validity_period");
     }
 }
