@@ -152,180 +152,7 @@ public final class APIUtil {
             String providerName = artifact.getAttribute(APIConstants.API_OVERVIEW_PROVIDER);
             String apiName = artifact.getAttribute(APIConstants.API_OVERVIEW_NAME);
             String apiVersion = artifact.getAttribute(APIConstants.API_OVERVIEW_VERSION);
-            APIIdentifier apiId=new APIIdentifier(providerName, apiName, apiVersion);
-            api = new API(apiId);
-            // set rating
-            String artifactPath = GovernanceUtils.getArtifactPath(registry, artifact.getId());
-           // BigDecimal bigDecimal = new BigDecimal(getAverageRating(apiId));
-            //BigDecimal res = bigDecimal.setScale(1, RoundingMode.HALF_UP);
-            api.setRating(getAverageRating(apiId));
-            //set description
-            api.setDescription(artifact.getAttribute(APIConstants.API_OVERVIEW_DESCRIPTION));
-            //set last access time
-            api.setLastUpdated(registry.get(artifactPath).getLastModified());
-            // set url
-            api.setUrl(artifact.getAttribute(APIConstants.API_OVERVIEW_ENDPOINT_URL));
-            api.setSandboxUrl(artifact.getAttribute(APIConstants.API_OVERVIEW_SANDBOX_URL));
-            api.setStatus(getApiStatus(artifact.getAttribute(APIConstants.API_OVERVIEW_STATUS)));
-            api.setThumbnailUrl(artifact.getAttribute(APIConstants.API_OVERVIEW_THUMBNAIL_URL));
-            api.setWsdlUrl(artifact.getAttribute(APIConstants.API_OVERVIEW_WSDL));
-            api.setWadlUrl(artifact.getAttribute(APIConstants.API_OVERVIEW_WADL));
-            api.setTechnicalOwner(artifact.getAttribute(APIConstants.API_OVERVIEW_TEC_OWNER));
-            api.setTechnicalOwnerEmail(artifact.getAttribute(APIConstants.API_OVERVIEW_TEC_OWNER_EMAIL));
-            api.setBusinessOwner(artifact.getAttribute(APIConstants.API_OVERVIEW_BUSS_OWNER));
-            api.setBusinessOwnerEmail(artifact.getAttribute(APIConstants.API_OVERVIEW_BUSS_OWNER_EMAIL));
-            api.setVisibility(artifact.getAttribute(APIConstants.API_OVERVIEW_VISIBILITY));
-            api.setVisibleRoles(artifact.getAttribute(APIConstants.API_OVERVIEW_VISIBLE_ROLES));
-            api.setVisibleTenants(artifact.getAttribute(APIConstants.API_OVERVIEW_VISIBLE_TENANTS));
-            api.setEndpointSecured(Boolean.parseBoolean(artifact.getAttribute(APIConstants.API_OVERVIEW_ENDPOINT_SECURED)));
-            api.setEndpointUTUsername(artifact.getAttribute(APIConstants.API_OVERVIEW_ENDPOINT_USERNAME));
-            api.setEndpointUTPassword(artifact.getAttribute(APIConstants.API_OVERVIEW_ENDPOINT_PASSWORD));
-            api.setTransports(artifact.getAttribute(APIConstants.API_OVERVIEW_TRANSPORTS));
-            api.setInSequence(artifact.getAttribute(APIConstants.API_OVERVIEW_INSEQUENCE));
-            api.setOutSequence(artifact.getAttribute(APIConstants.API_OVERVIEW_OUTSEQUENCE));
-            api.setFaultSequence(artifact.getAttribute(APIConstants.API_OVERVIEW_FAULTSEQUENCE));
-            api.setResponseCache(artifact.getAttribute(APIConstants.API_OVERVIEW_RESPONSE_CACHING));
-            api.setImplementation(artifact.getAttribute(APIConstants.PROTOTYPE_OVERVIEW_IMPLEMENTATION));
-            
-            int cacheTimeout = APIConstants.API_RESPONSE_CACHE_TIMEOUT;
-            try {		
-            	cacheTimeout = Integer.parseInt(artifact.getAttribute(APIConstants.API_OVERVIEW_CACHE_TIMEOUT));
-            } catch(NumberFormatException e) {
-            	//ignore
-            }
-            
-            api.setCacheTimeout(cacheTimeout);
-
-            api.setEndpointConfig(artifact.getAttribute(APIConstants.API_OVERVIEW_ENDPOINT_CONFIG));
-
-            api.setRedirectURL(artifact.getAttribute(APIConstants.API_OVERVIEW_REDIRECT_URL));
-            api.setApiOwner(artifact.getAttribute(APIConstants.API_OVERVIEW_OWNER));
-            api.setAdvertiseOnly(Boolean.parseBoolean(artifact.getAttribute(APIConstants.API_OVERVIEW_ADVERTISE_ONLY)));
-            
-            api.setSubscriptionAvailability(artifact.getAttribute(APIConstants.API_OVERVIEW_SUBSCRIPTION_AVAILABILITY));
-            api.setSubscriptionAvailableTenants(artifact.getAttribute(APIConstants.API_OVERVIEW_SUBSCRIPTION_AVAILABLE_TENANTS));
-            
-            api.setDestinationStatsEnabled(artifact.getAttribute(APIConstants.API_OVERVIEW_DESTINATION_BASED_STATS_ENABLED));
-            
-            String tenantDomainName = MultitenantUtils.getTenantDomain(replaceEmailDomainBack(providerName));
-            int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
-                    .getTenantId(tenantDomainName);
-            
-            Set<Tier> availableTier = new HashSet<Tier>();
-            String tiers = artifact.getAttribute(APIConstants.API_OVERVIEW_TIER);
-            Map<String, Tier> definedTiers = getTiers(tenantId);
-            if (tiers != null && !"".equals(tiers)) {
-                String[] tierNames = tiers.split("\\|\\|");
-                for (String tierName : tierNames) {
-                    Tier definedTier = definedTiers.get(tierName);
-                    if (definedTier != null) {
-                        availableTier.add(definedTier);
-                    } else {
-                        log.warn("Unknown tier: " + tierName + " found on API: " + apiName);
-                    }
-                }
-            }
-            api.addAvailableTiers(availableTier);
-            api.setContext(artifact.getAttribute(APIConstants.API_OVERVIEW_CONTEXT));
-            api.setLatest(Boolean.valueOf(artifact.getAttribute(APIConstants.API_OVERVIEW_IS_LATEST)));
-
-
-            Set<URITemplate> uriTemplates = new LinkedHashSet<URITemplate>();
-            List<String> uriTemplateNames = new ArrayList<String>();
-
-            Set<Scope> scopes = ApiMgtDAO.getAPIScopes(api.getId());
-            api.setScopes(scopes);
-
-            HashMap<String,String> urlPatternsSet;
-            urlPatternsSet = ApiMgtDAO.getURITemplatesPerAPIAsString(api.getId());
-
-            HashMap<String,String> resourceScopes;
-            resourceScopes = ApiMgtDAO.getResourceToScopeMapping(api.getId());
-
-            Set<String> urlPatternsKeySet = urlPatternsSet.keySet();
-            String resourceScopeKey;
-            for (String urlPattern : urlPatternsKeySet) {
-                    URITemplate uriTemplate = new URITemplate();
-                    String [] urlPatternComponents=urlPattern.split("::");
-                    String uTemplate = (urlPatternComponents.length>=1)?urlPatternComponents[0]:null;
-                    String method = (urlPatternComponents.length>=2)?urlPatternComponents[1]:null;
-                    String authType = (urlPatternComponents.length>=3)?urlPatternComponents[2]:null;
-                    String throttlingTier = (urlPatternComponents.length>=4)?urlPatternComponents[3]:null;
-                    String mediationScript = (urlPatternComponents.length>=5)?urlPatternComponents[4]:null;
-                    uriTemplate.setHTTPVerb(method);
-                    uriTemplate.setAuthType(authType);
-                    uriTemplate.setThrottlingTier(throttlingTier);
-                    uriTemplate.setHttpVerbs(method);
-                    uriTemplate.setAuthTypes(authType);
-                    uriTemplate.setUriTemplate(uTemplate);
-                    uriTemplate.setResourceURI(api.getUrl());
-                    uriTemplate.setResourceSandboxURI(api.getSandboxUrl());
-                    uriTemplate.setThrottlingTiers(throttlingTier);
-                    uriTemplate.setMediationScript(mediationScript);
-                    resourceScopeKey = APIUtil.getResourceKey(api.getContext(),apiVersion,uTemplate,method);
-                    uriTemplate.setScopes(findScopeByKey(scopes,resourceScopes.get(resourceScopeKey)));
-                    //Checking for duplicate uri template names
-                    if (uriTemplateNames.contains(uTemplate)) {
-                        for (URITemplate tmp : uriTemplates) {
-                            if (uTemplate.equals(tmp.getUriTemplate())) {
-                                tmp.setHttpVerbs(method);
-                                tmp.setAuthTypes(authType);
-                                tmp.setThrottlingTiers(throttlingTier);
-                                resourceScopeKey = APIUtil.getResourceKey(api.getContext(),apiVersion,uTemplate,method);
-                                tmp.setScopes(findScopeByKey(scopes,resourceScopes.get(resourceScopeKey)));
-                                break;
-                            }
-                        }
-                    } else {
-                        uriTemplates.add(uriTemplate);
-                    }
-
-                    uriTemplateNames.add(uTemplate);
-
-
-                }
-
-            api.setUriTemplates(uriTemplates);
-            api.setAsDefaultVersion(Boolean.valueOf(artifact.getAttribute(APIConstants.API_OVERVIEW_IS_DEFAULT_VERSION)));
-            Set<String> tags = new HashSet<String>();
-            Tag[] tag = registry.getTags(artifactPath);
-            for (Tag tag1 : tag) {
-                tags.add(tag1.getTagName());
-            }
-            api.addTags(tags);
-            api.setLastUpdated(registry.get(artifactPath).getLastModified());
-            api.setImplementation(artifact.getAttribute(APIConstants.PROTOTYPE_OVERVIEW_IMPLEMENTATION));
-
-        } catch (GovernanceException e) {
-            String msg = "Failed to get API for artifact ";
-            throw new APIManagementException(msg, e);
-        } catch (RegistryException e) {
-            String msg = "Failed to get LastAccess time or Rating";
-            throw new APIManagementException(msg, e);
-        } catch (UserStoreException e){
-            String msg = "Failed to get User Realm of API Provider";
-            throw new APIManagementException(msg, e);
-        }
-        return api;
-    }
-
-    /**
-     * This Method is different from getAPI method, as this one returns
-     * URLTemplates without aggregating duplicates. This is to be used for building synapse config.
-     * @param artifact
-     * @param registry
-     * @return
-     * @throws org.wso2.carbon.apimgt.api.APIManagementException
-     */
-    public static API getAPIForPublishing(GovernanceArtifact artifact, Registry registry)
-            throws APIManagementException {
-
-        API api;
-        try {
-            String providerName = artifact.getAttribute(APIConstants.API_OVERVIEW_PROVIDER);
-            String apiName = artifact.getAttribute(APIConstants.API_OVERVIEW_NAME);
-            String apiVersion = artifact.getAttribute(APIConstants.API_OVERVIEW_VERSION);
-            APIIdentifier apiId=new APIIdentifier(providerName, apiName, apiVersion);
+            APIIdentifier apiId = new APIIdentifier(providerName, apiName, apiVersion);
             api = new API(apiId);
             // set rating
             String artifactPath = GovernanceUtils.getArtifactPath(registry, artifact.getId());
@@ -363,7 +190,7 @@ public final class APIUtil {
             int cacheTimeout = APIConstants.API_RESPONSE_CACHE_TIMEOUT;
             try {
                 cacheTimeout = Integer.parseInt(artifact.getAttribute(APIConstants.API_OVERVIEW_CACHE_TIMEOUT));
-            } catch(NumberFormatException e) {
+            } catch (NumberFormatException e) {
                 //ignore
             }
 
@@ -409,21 +236,191 @@ public final class APIUtil {
             Set<Scope> scopes = ApiMgtDAO.getAPIScopes(api.getId());
             api.setScopes(scopes);
 
-            HashMap<String,String> urlPatternsSet;
+            HashMap<String, String> urlPatternsSet;
             urlPatternsSet = ApiMgtDAO.getURITemplatesPerAPIAsString(api.getId());
-            HashMap<String,String> resourceScopes;
+
+            HashMap<String, String> resourceScopes;
             resourceScopes = ApiMgtDAO.getResourceToScopeMapping(api.getId());
 
             Set<String> urlPatternsKeySet = urlPatternsSet.keySet();
             String resourceScopeKey;
             for (String urlPattern : urlPatternsKeySet) {
                 URITemplate uriTemplate = new URITemplate();
-                String [] urlPatternComponents=urlPattern.split("::");
-                String uTemplate = (urlPatternComponents.length>=1)?urlPatternComponents[0]:null;
-                String method = (urlPatternComponents.length>=2)?urlPatternComponents[1]:null;
-                String authType = (urlPatternComponents.length>=3)?urlPatternComponents[2]:null;
-                String throttlingTier = (urlPatternComponents.length>=4)?urlPatternComponents[3]:null;
-                String mediationScript = (urlPatternComponents.length>=5)?urlPatternComponents[4]:null;
+                String[] urlPatternComponents = urlPattern.split("::");
+                String uTemplate = (urlPatternComponents.length >= 1) ? urlPatternComponents[0] : null;
+                String method = (urlPatternComponents.length >= 2) ? urlPatternComponents[1] : null;
+                String authType = (urlPatternComponents.length >= 3) ? urlPatternComponents[2] : null;
+                String throttlingTier = (urlPatternComponents.length >= 4) ? urlPatternComponents[3] : null;
+                String mediationScript = (urlPatternComponents.length >= 5) ? urlPatternComponents[4] : null;
+                uriTemplate.setHTTPVerb(method);
+                uriTemplate.setAuthType(authType);
+                uriTemplate.setThrottlingTier(throttlingTier);
+                uriTemplate.setHttpVerbs(method);
+                uriTemplate.setAuthTypes(authType);
+                uriTemplate.setUriTemplate(uTemplate);
+                uriTemplate.setResourceURI(api.getUrl());
+                uriTemplate.setResourceSandboxURI(api.getSandboxUrl());
+                uriTemplate.setThrottlingTiers(throttlingTier);
+                uriTemplate.setMediationScript(mediationScript);
+                resourceScopeKey = APIUtil.getResourceKey(api.getContext(), apiVersion, uTemplate, method);
+                uriTemplate.setScopes(findScopeByKey(scopes, resourceScopes.get(resourceScopeKey)));
+                //Checking for duplicate uri template names
+                if (uriTemplateNames.contains(uTemplate)) {
+                    for (URITemplate tmp : uriTemplates) {
+                        if (uTemplate.equals(tmp.getUriTemplate())) {
+                            tmp.setHttpVerbs(method);
+                            tmp.setAuthTypes(authType);
+                            tmp.setThrottlingTiers(throttlingTier);
+                            resourceScopeKey = APIUtil.getResourceKey(api.getContext(), apiVersion, uTemplate, method);
+                            tmp.setScopes(findScopeByKey(scopes, resourceScopes.get(resourceScopeKey)));
+                            break;
+                        }
+                    }
+                } else {
+                    uriTemplates.add(uriTemplate);
+                }
+                uriTemplateNames.add(uTemplate);
+            }
+            api.setUriTemplates(uriTemplates);
+            api.setAsDefaultVersion(Boolean.valueOf(artifact.getAttribute(APIConstants.API_OVERVIEW_IS_DEFAULT_VERSION)));
+            Set<String> tags = new HashSet<String>();
+            Tag[] tag = registry.getTags(artifactPath);
+            for (Tag tag1 : tag) {
+                tags.add(tag1.getTagName());
+            }
+            api.addTags(tags);
+            api.setLastUpdated(registry.get(artifactPath).getLastModified());
+            api.setImplementation(artifact.getAttribute(APIConstants.PROTOTYPE_OVERVIEW_IMPLEMENTATION));
+
+        } catch (GovernanceException e) {
+            String msg = "Failed to get API for artifact ";
+            throw new APIManagementException(msg, e);
+        } catch (RegistryException e) {
+            String msg = "Failed to get LastAccess time or Rating";
+            throw new APIManagementException(msg, e);
+        } catch (UserStoreException e) {
+            String msg = "Failed to get User Realm of API Provider";
+            throw new APIManagementException(msg, e);
+        }
+        return api;
+    }
+
+    /**
+     * This Method is different from getAPI method, as this one returns
+     * URLTemplates without aggregating duplicates. This is to be used for building synapse config.
+     *
+     * @param artifact
+     * @param registry
+     * @return API
+     * @throws org.wso2.carbon.apimgt.api.APIManagementException
+     */
+    public static API getAPIForPublishing(GovernanceArtifact artifact, Registry registry)
+            throws APIManagementException {
+
+        API api;
+        try {
+            String providerName = artifact.getAttribute(APIConstants.API_OVERVIEW_PROVIDER);
+            String apiName = artifact.getAttribute(APIConstants.API_OVERVIEW_NAME);
+            String apiVersion = artifact.getAttribute(APIConstants.API_OVERVIEW_VERSION);
+            APIIdentifier apiId = new APIIdentifier(providerName, apiName, apiVersion);
+            api = new API(apiId);
+            // set rating
+            String artifactPath = GovernanceUtils.getArtifactPath(registry, artifact.getId());
+            // BigDecimal bigDecimal = new BigDecimal(getAverageRating(apiId));
+            //BigDecimal res = bigDecimal.setScale(1, RoundingMode.HALF_UP);
+            api.setRating(getAverageRating(apiId));
+            //set description
+            api.setDescription(artifact.getAttribute(APIConstants.API_OVERVIEW_DESCRIPTION));
+            //set last access time
+            api.setLastUpdated(registry.get(artifactPath).getLastModified());
+            // set url
+            api.setUrl(artifact.getAttribute(APIConstants.API_OVERVIEW_ENDPOINT_URL));
+            api.setSandboxUrl(artifact.getAttribute(APIConstants.API_OVERVIEW_SANDBOX_URL));
+            api.setStatus(getApiStatus(artifact.getAttribute(APIConstants.API_OVERVIEW_STATUS)));
+            api.setThumbnailUrl(artifact.getAttribute(APIConstants.API_OVERVIEW_THUMBNAIL_URL));
+            api.setWsdlUrl(artifact.getAttribute(APIConstants.API_OVERVIEW_WSDL));
+            api.setWadlUrl(artifact.getAttribute(APIConstants.API_OVERVIEW_WADL));
+            api.setTechnicalOwner(artifact.getAttribute(APIConstants.API_OVERVIEW_TEC_OWNER));
+            api.setTechnicalOwnerEmail(artifact.getAttribute(APIConstants.API_OVERVIEW_TEC_OWNER_EMAIL));
+            api.setBusinessOwner(artifact.getAttribute(APIConstants.API_OVERVIEW_BUSS_OWNER));
+            api.setBusinessOwnerEmail(artifact.getAttribute(APIConstants.API_OVERVIEW_BUSS_OWNER_EMAIL));
+            api.setVisibility(artifact.getAttribute(APIConstants.API_OVERVIEW_VISIBILITY));
+            api.setVisibleRoles(artifact.getAttribute(APIConstants.API_OVERVIEW_VISIBLE_ROLES));
+            api.setVisibleTenants(artifact.getAttribute(APIConstants.API_OVERVIEW_VISIBLE_TENANTS));
+            api.setEndpointSecured(Boolean.parseBoolean(artifact.getAttribute(APIConstants.API_OVERVIEW_ENDPOINT_SECURED)));
+            api.setEndpointUTUsername(artifact.getAttribute(APIConstants.API_OVERVIEW_ENDPOINT_USERNAME));
+            api.setEndpointUTPassword(artifact.getAttribute(APIConstants.API_OVERVIEW_ENDPOINT_PASSWORD));
+            api.setTransports(artifact.getAttribute(APIConstants.API_OVERVIEW_TRANSPORTS));
+            api.setInSequence(artifact.getAttribute(APIConstants.API_OVERVIEW_INSEQUENCE));
+            api.setOutSequence(artifact.getAttribute(APIConstants.API_OVERVIEW_OUTSEQUENCE));
+            api.setFaultSequence(artifact.getAttribute(APIConstants.API_OVERVIEW_FAULTSEQUENCE));
+            api.setResponseCache(artifact.getAttribute(APIConstants.API_OVERVIEW_RESPONSE_CACHING));
+            api.setImplementation(artifact.getAttribute(APIConstants.PROTOTYPE_OVERVIEW_IMPLEMENTATION));
+
+            int cacheTimeout = APIConstants.API_RESPONSE_CACHE_TIMEOUT;
+            try {
+                cacheTimeout = Integer.parseInt(artifact.getAttribute(APIConstants.API_OVERVIEW_CACHE_TIMEOUT));
+            } catch (NumberFormatException e) {
+                //ignore
+            }
+
+            api.setCacheTimeout(cacheTimeout);
+
+            api.setEndpointConfig(artifact.getAttribute(APIConstants.API_OVERVIEW_ENDPOINT_CONFIG));
+
+            api.setRedirectURL(artifact.getAttribute(APIConstants.API_OVERVIEW_REDIRECT_URL));
+            api.setApiOwner(artifact.getAttribute(APIConstants.API_OVERVIEW_OWNER));
+            api.setAdvertiseOnly(Boolean.parseBoolean(artifact.getAttribute(APIConstants.API_OVERVIEW_ADVERTISE_ONLY)));
+
+            api.setSubscriptionAvailability(artifact.getAttribute(APIConstants.API_OVERVIEW_SUBSCRIPTION_AVAILABILITY));
+            api.setSubscriptionAvailableTenants(artifact.getAttribute(APIConstants.API_OVERVIEW_SUBSCRIPTION_AVAILABLE_TENANTS));
+
+            api.setDestinationStatsEnabled(artifact.getAttribute(APIConstants.API_OVERVIEW_DESTINATION_BASED_STATS_ENABLED));
+
+            String tenantDomainName = MultitenantUtils.getTenantDomain(replaceEmailDomainBack(providerName));
+            int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
+                    .getTenantId(tenantDomainName);
+
+            Set<Tier> availableTier = new HashSet<Tier>();
+            String tiers = artifact.getAttribute(APIConstants.API_OVERVIEW_TIER);
+            Map<String, Tier> definedTiers = getTiers(tenantId);
+            if (tiers != null && !"".equals(tiers)) {
+                String[] tierNames = tiers.split("\\|\\|");
+                for (String tierName : tierNames) {
+                    Tier definedTier = definedTiers.get(tierName);
+                    if (definedTier != null) {
+                        availableTier.add(definedTier);
+                    } else {
+                        log.warn("Unknown tier: " + tierName + " found on API: " + apiName);
+                    }
+                }
+            }
+            api.addAvailableTiers(availableTier);
+            api.setContext(artifact.getAttribute(APIConstants.API_OVERVIEW_CONTEXT));
+            api.setLatest(Boolean.valueOf(artifact.getAttribute(APIConstants.API_OVERVIEW_IS_LATEST)));
+
+
+            Set<URITemplate> uriTemplates = new LinkedHashSet<URITemplate>();
+            List<String> uriTemplateNames = new ArrayList<String>();
+
+            Set<Scope> scopes = ApiMgtDAO.getAPIScopes(api.getId());
+            api.setScopes(scopes);
+
+            HashMap<String, String> urlPatternsSet;
+            urlPatternsSet = ApiMgtDAO.getURITemplatesPerAPIAsString(api.getId());
+            HashMap<String, String> resourceScopes;
+            resourceScopes = ApiMgtDAO.getResourceToScopeMapping(api.getId());
+
+            Set<String> urlPatternsKeySet = urlPatternsSet.keySet();
+            String resourceScopeKey;
+            for (String urlPattern : urlPatternsKeySet) {
+                URITemplate uriTemplate = new URITemplate();
+                String[] urlPatternComponents = urlPattern.split("::");
+                String uTemplate = (urlPatternComponents.length >= 1) ? urlPatternComponents[0] : null;
+                String method = (urlPatternComponents.length >= 2) ? urlPatternComponents[1] : null;
+                String authType = (urlPatternComponents.length >= 3) ? urlPatternComponents[2] : null;
+                String throttlingTier = (urlPatternComponents.length >= 4) ? urlPatternComponents[3] : null;
+                String mediationScript = (urlPatternComponents.length >= 5) ? urlPatternComponents[4] : null;
                 uriTemplate.setHTTPVerb(method);
                 uriTemplate.setAuthType(authType);
                 uriTemplate.setThrottlingTier(throttlingTier);
@@ -457,7 +454,7 @@ public final class APIUtil {
                 uriTemplateNames.add(uTemplate);
             }
 
-            if (api.getImplementation().equalsIgnoreCase(APIConstants.IMPLEMENTATION_TYPE_INLINE)){
+            if (api.getImplementation().equalsIgnoreCase(APIConstants.IMPLEMENTATION_TYPE_INLINE)) {
                 for (URITemplate template : uriTemplates) {
                     template.setMediationScript(template.getAggregatedMediationScript());
                 }
@@ -480,7 +477,7 @@ public final class APIUtil {
         } catch (RegistryException e) {
             String msg = "Failed to get LastAccess time or Rating";
             throw new APIManagementException(msg, e);
-        } catch (UserStoreException e){
+        } catch (UserStoreException e) {
             String msg = "Failed to get User Realm of API Provider";
             throw new APIManagementException(msg, e);
         }
