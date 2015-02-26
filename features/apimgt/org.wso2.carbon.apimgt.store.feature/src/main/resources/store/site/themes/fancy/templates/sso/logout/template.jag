@@ -3,8 +3,9 @@
 <%
     //jagg.setUser(null);
     //response.sendRedirect("site/pages/list-apis.jag");
-
+	var log = new Log();
 	var security =require("sso");
+	var site = require("/site/conf/site.json");
 	var ssoRelyingParty = new security.SSORelyingParty(site.ssoConfiguration.issuer);
 	
 	if(site.ssoConfiguration.externalLogoutPage != null
@@ -17,16 +18,40 @@
 	} else {
 
 		//check whether session is expired
-		var user = jagg.getUser();
-	    if (!user) {
-	    	session.invalidate();	   
-	        response.sendRedirect(request_url);
-	        return;
-	    }		
-		var samlLogoutRequest = ssoRelyingParty.getSAMLLogoutRequest(session.get("LOGGED_IN_USER"),session.getId());		
-		var encodedRequest = ssoRelyingParty.encode(samlLogoutRequest);
-		var relayState = ssoRelyingParty.getUUID();
-		var idpURL = ssoRelyingParty.getProperty("identityProviderURL");
+                var user = jagg.getUser();
+                if (!user) {
+                        if (log.isDebugEnabled()) {
+                            log.debug("User information not avaialble, so invalidating session");
+                        }
+                        session.invalidate();
+                        response.sendRedirect(jagg.getAbsoluteUrl('/'));
+                        return;
+                }
+
+                //Trying to get logut request
+                log.debug("User found, and starting logout request process");
+                var samlLogoutRequest = ssoRelyingParty.getSAMLLogoutRequest(session.get("LOGGED_IN_USER"),session.getId());
+                var idpURL = "" ;
+
+                if(samlLogoutRequest==null){
+                        //logout request failed because there is no session details in anymore. Here trying to do a login request.
+                        if (log.isDebugEnabled()) {
+                            log.debug("logout request failed because there is no session details in
+                                            SAMLSSORelyingPartyObject. Here it is trying to do a login request");
+                        }
+                        samlLogoutRequest = ssoRelyingParty.getSAMLAuthRequest();
+                        idpURL = site.ssoConfiguration.identityProviderURL ;
+                } else {
+                        if (log.isDebugEnabled()) {
+                            log.debug("doing logout request");
+                        }
+                        idpURL = ssoRelyingParty.getProperty("identityProviderURL");
+                }
+
+                var encodedRequest = ssoRelyingParty.encode(samlLogoutRequest);
+                var relayState = ssoRelyingParty.getUUID();
+
+
 		
 %>
 

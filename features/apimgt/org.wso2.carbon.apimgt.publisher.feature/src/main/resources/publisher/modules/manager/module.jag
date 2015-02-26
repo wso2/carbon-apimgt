@@ -23,6 +23,9 @@ jagg.module("manager", {
      loadTenantRegistry:function (tenantDomain) {
         return jagg.require(jagg.getModulesDir() + "manager/manager.jag").loadTenantRegistry.apply(this, arguments);
      },
+     loadTenantAxisConfiguration:function (tenantDomain) {
+        return jagg.require(jagg.getModulesDir() + "manager/manager.jag").loadTenantAxisConfiguration.apply(this, arguments);
+     },
      invokeService:function () {
        return jagg.require(jagg.getModulesDir() + "manager/client.jag").invokeService.apply(this, arguments);
      }

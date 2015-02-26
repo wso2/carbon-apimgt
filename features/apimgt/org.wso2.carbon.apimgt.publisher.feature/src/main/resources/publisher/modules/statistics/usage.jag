@@ -405,6 +405,34 @@ function getFirstAccessTime(providerName, server) {
     }
 }
 
+function isDataPublishingEnabled(providerName, server) {
+    var usage = [];
+    var usageout = [];
+    try {
+        usage = apiProvider.isDataPublishingEnabled();
+        if (log.isDebugEnabled()) {
+            log.debug("isDataPublishingEnabled check");
+        }
+        if (usage == null) {
+            return {
+                error:true
+            };
 
+        } else {
+
+            return {
+                error:false,
+                usage:usage
+            };
+        }
+    } catch (e) {
+        log.error(e.message);
+        return {
+            error:e,
+            usage:null
+
+        };
+    }
+}
 
 %>

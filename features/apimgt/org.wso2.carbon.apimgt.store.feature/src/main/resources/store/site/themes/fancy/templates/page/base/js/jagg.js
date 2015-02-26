@@ -1,7 +1,7 @@
 var jagg = jagg || {};
 
 (function () {
-    var option = { resGetPath:requestURL+'/site/conf/locales/js/i18nResources.json'};
+    var option = { resGetPath:requestURL+'site/conf/locales/js/i18nResources.json'};
     i18n.init(option);
 
     if (!window.console) {
@@ -17,6 +17,18 @@ var jagg = jagg || {};
         args[0] = this.site.context + args[0];
         $.post.apply(this, args);
     };
+
+    jagg.syncPost = function(url, data, callback, type) {
+        url = this.site.context + url;
+        return jQuery.ajax({
+                               type: "POST",
+                               url: url,
+                               data: data,
+                               async:false,
+                               success: callback,
+                               dataType:"json"
+        });
+},
 
    jagg.messageDisplay = function (params) {
         $('#messageModal').html($('#confirmation-data').html());
@@ -155,5 +167,89 @@ var jagg = jagg || {};
     jagg.getDate = function(timestamp){
          timestamp = parseInt(timestamp);
          return new Date(timestamp).toLocaleString();
+    };
+
+    jagg.showLogin = function(params){
+        $('#messageModal').html($('#login-data').html());
+        if(!$('#messageModal').is(":visible")){
+            $('#messageModal').modal('show');
+        }
+         $('#mainLoginForm input').die();
+         $('#mainLoginForm input').keydown(function(event) {
+         if (event.which == 13) {
+                event.preventDefault();
+                jagg.login($("#username").val(), $("#password").val(),params);
+
+            }
+        });
+
+        $('#loginBtn').die();
+         $('#loginBtn').click(
+            function() {
+                jagg.login($("#username").val(), $("#password").val(),params);
+            }
+         );
+        $('#username').focus();
+        $('#loginErrorBox').show();
+        $('#loginErrorMsg').html('<strong>Session Timed Out </strong>- your session has expired due to an extended period of inactivity. You will need to re-authenticate to access the requested information. ');
+    };
+
+    jagg.login = function (username, password, params) {
+        if(username == "" || password == ""){
+            $('#loginErrorBox').show();
+            $('#loginErrorMsg').html('Username, Password fields are empty.');
+            $('#username').focus();
+            return;
+        }
+        jagg.post("/site/blocks/user/login/ajax/login.jag", { action:"login", username:username, password:password },
+                 function (result) {
+                     if (result.error == false) {
+                         $('#messageModal').modal('hide');
+                         if(params.redirect != undefined ){
+                             window.location.href = params.redirect;
+                         }else if(params.callback != undefined && typeof params.callback == "function"){
+                             params.callback();
+                         }
+                     } else {
+                         $('#loginErrorBox').show();
+                         $('#loginErrorMsg').html(result.message);
+
+                     }
+                 }, "json");
+    };
+
+    jagg.sessionExpired = function (){
+        var sessionExpired = false;
+        jagg.syncPost("/site/blocks/user/login/ajax/sessionCheck.jag", { action:"sessionCheck" },
+                 function (result) {
+                     if(result!=null){
+                         if (result.message == "timeout") {
+                             sessionExpired = true;
+                         }
+                     }
+                 }, "json");
+        return sessionExpired;
+    };
+
+    jagg.sessionAwareJS = function(params){
+       if(jagg.sessionExpired()){
+		if(ssoEnabled === 'true'){  // Reload the page if sso is enabled to redirect to the IS login page
+			window.location.reload();
+		} else {
+			if (params.e != undefined) {  //Canceling the href call
+                   		if (params.e.preventDefault) {
+                        		params.e.preventDefault();
+               			 // otherwise set the returnValue property of the original event to false (IE)
+				} else {
+				    params.e.returnValue = false;
+				}
+			}
+			jagg.showLogin(params);
+            	}
+
+            	jagg.showLogin(params);
+        }else if(params.callback != undefined && typeof params.callback == "function"){
+             params.callback();
+	}
     };
 }());

@@ -12,6 +12,7 @@ var chartColorScheme2 = ["#ED2939", "#E0115F", "#E62020", "#F2003C", "#ED1C24", 
 //fault colors || shades of blue
 var chartColorScheme3 = ["#0099CC", "#436EEE", "#82CFFD", "#33A1C9", "#8DB6CD", "#60AFFE", "#7AA9DD", "#104E8B", "#7EB6FF", "#4981CE", "#2E37FE"];
 currentLocation = window.location.pathname;
+var statsEnabled = isDataPublishingEnabled();
 
 require(["dojo/dom", "dojo/domReady!"], function (dom) {
     currentLocation = window.location.pathname;
@@ -57,6 +58,12 @@ require(["dojo/dom", "dojo/domReady!"], function (dom) {
                     $("#rangeSliderWrapper").width(width);
 
                 }
+
+                else if (json.usage && json.usage.length == 0 && statsEnabled) {
+                    $('#middle').html("");
+                    $('#middle').append($('<div class="errorWrapper"><img src="../themes/default/templates/stats/images/statsEnabledThumb.png" alt="Stats Enabled"></div>'));
+                }
+
                 else {
                     $('#middle').html("");
                     $('#middle').append($('<div class="errorWrapper"><span class="label top-level-warning"><i class="icon-warning-sign icon-white"></i>'
@@ -145,7 +152,7 @@ var drawProviderAPIServiceTime = function (from, to) {
                         });
 
                         // Add axes
-                        serviceTimeChart.addAxis("x", {  fixLower: "major", fixUpper: "major" });
+                        serviceTimeChart.addAxis("x", {  fixLower: "major", fixUpper: "major" , includeZero: true});
                         serviceTimeChart.addAxis("y", {vertical: true,
                             labels: dojo.map(data, function (value, index) {
                                 return {value: index + 1, text: value[0]};
@@ -158,7 +165,7 @@ var drawProviderAPIServiceTime = function (from, to) {
                         require(["dojo/_base/array"], function (array) {
                             chartData = array.map(data, function (d) {
                                 color++;
-                                return {y: d[1], text: d[0], tooltip: "<b>" + d[0] + "</b><br /><i>" + d[1] + "s</i>", fill: "#0099CC"};
+                                return {y: d[1], text: d[0], tooltip: "<b>" + d[0] + "</b><br /><i>" + d[1] + "ms</i>", fill: "#0099CC"};
                             });
                         });
 
@@ -189,6 +196,22 @@ var drawProviderAPIServiceTime = function (from, to) {
             }
             t_on['serviceTimeChart'] = 0;
         }, "json");
+}
+
+function isDataPublishingEnabled(){
+    jagg.post("/site/blocks/stats/api-response-times/ajax/stats.jag", { action: "isDataPublishingEnabled"},
+        function (json) {
+            if (!json.error) {
+                statsEnabled = json.usage;
+                return statsEnabled;
+            } else {
+                if (json.message == "AuthenticateError") {
+                    jagg.showLogin();
+                } else {
+                    jagg.message({content: json.message, type: "error"});
+                }
+            }
+        }, "json");        
 }
 
 

@@ -12,6 +12,7 @@ var chartColorScheme2 = ["#ED2939", "#E0115F", "#E62020", "#F2003C", "#ED1C24", 
 //fault colors || shades of blue
 var chartColorScheme3 = ["#0099CC", "#436EEE", "#82CFFD", "#33A1C9", "#8DB6CD", "#60AFFE", "#7AA9DD", "#104E8B", "#7EB6FF", "#4981CE", "#2E37FE"];
 currentLocation = window.location.pathname;
+var statsEnabled = isDataPublishingEnabled();
 
 require(["dojo/dom", "dojo/domReady!"], function (dom) {
     currentLocation = window.location.pathname;
@@ -57,6 +58,12 @@ require(["dojo/dom", "dojo/domReady!"], function (dom) {
                     $("#rangeSliderWrapper").width(width);
 
                 }
+
+                else if (json.usage && json.usage.length == 0 && statsEnabled) {
+                    $('#middle').html("");
+                    $('#middle').append($('<div class="errorWrapper"><img src="../themes/default/templates/stats/images/statsEnabledThumb.png" alt="Stats Enabled"></div>'));
+                }
+
                 else {
                     $('#middle').html("");
                     $('#middle').append($('<div class="errorWrapper"><span class="label top-level-warning"><i class="icon-warning-sign icon-white"></i>'
@@ -111,6 +118,21 @@ var drawAPIUsageByResourcePath = function (from, to) {
 
 }
 
+function isDataPublishingEnabled(){
+    jagg.post("/site/blocks/stats/api-usage-resource-path/ajax/stats.jag", { action: "isDataPublishingEnabled"},
+        function (json) {
+            if (!json.error) {
+                statsEnabled = json.usage;
+                return statsEnabled;
+            } else {
+                if (json.message == "AuthenticateError") {
+                    jagg.showLogin();
+                } else {
+                    jagg.message({content: json.message, type: "error"});
+                }
+            }
+        }, "json");        
+}
 
 var convertTimeString = function (date) {
     var d = new Date(date);

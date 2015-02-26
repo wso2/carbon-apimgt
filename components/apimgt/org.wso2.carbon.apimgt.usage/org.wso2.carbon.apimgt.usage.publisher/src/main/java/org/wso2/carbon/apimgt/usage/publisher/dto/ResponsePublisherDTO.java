@@ -22,8 +22,11 @@ public class ResponsePublisherDTO extends PublisherDTO {
     private int response = 1;
 
     private long responseTime;
-
+    private boolean cacheHit;
     private long serviceTime;
+    private long backendTime;
+    private long eventTime;
+    private long responseSize;
 
     public int getResponse(){
         return response;
@@ -31,6 +34,14 @@ public class ResponsePublisherDTO extends PublisherDTO {
 
     public void setResponseTime(long responseTime) {
         this.responseTime = responseTime;
+    }
+
+    public long getEventTime() {
+        return eventTime;
+    }
+
+    public void setEventTime(long eventTime) {
+        this.eventTime = eventTime;
     }
 
     public long getResponseTime() {
@@ -43,6 +54,29 @@ public class ResponsePublisherDTO extends PublisherDTO {
 
     public long getServiceTime() {
         return serviceTime;
+    }
+
+    public void setBackendTime(long backendTime) {
+        this.backendTime= backendTime;
+    }
+
+    public long getBackendTime() {
+        return backendTime;
+    }
+    public void setResponseSize(long size) {
+        this.responseSize= size;
+    }
+
+    public long getResponseSize() {
+        return responseSize;
+    }
+
+    public void setCacheHit(boolean cacheHit) {
+        this.cacheHit= cacheHit;
+    }
+
+    public boolean getCacheHit() {
+        return cacheHit;
     }
 
 }

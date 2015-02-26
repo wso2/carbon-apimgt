@@ -20,6 +20,7 @@ package org.wso2.carbon.apimgt.usage.publisher;
 import org.wso2.carbon.apimgt.usage.publisher.dto.FaultPublisherDTO;
 import org.wso2.carbon.apimgt.usage.publisher.dto.RequestPublisherDTO;
 import org.wso2.carbon.apimgt.usage.publisher.dto.ResponsePublisherDTO;
+import org.wso2.carbon.apimgt.usage.publisher.dto.ThrottlePublisherDTO;
 
 public interface APIMgtUsageDataPublisher {
 
@@ -30,5 +31,7 @@ public interface APIMgtUsageDataPublisher {
     public void publishEvent(ResponsePublisherDTO responsePublisherDTO);
 
     public void publishEvent(FaultPublisherDTO faultPublisherDTO);
+
+    public void publishEvent(ThrottlePublisherDTO throttlePublisherDTO);
 
 }

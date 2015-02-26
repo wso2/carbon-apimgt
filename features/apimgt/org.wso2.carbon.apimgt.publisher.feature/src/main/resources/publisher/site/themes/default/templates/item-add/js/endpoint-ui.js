@@ -228,26 +228,40 @@ $(document).ready(function () {
             },
             'wsdlendpointPort': {
                 title: i18n.t("endpointUi.Port"),
-                type: 'text',
-                "fieldHtmlClass":"required"
+                type: 'text'
             },
             "sandbox_endpoints": {
                 title: i18n.t("endpointUi.Sandbox WSDL"),
                 type: 'endpoint',
                 "urlType":"wsdl",
                 "fieldHtmlClass": "input-xlarge validateEndpoints"
+            },
+            'wsdlendpointServiceSandbox': {
+                title: i18n.t("endpointUi.Service"),
+                type: 'text'
+            },
+            'wsdlendpointPortSandbox': {
+                title: i18n.t("endpointUi.Port"),
+                type: 'text'
             }
         },
         form: [
             'production_endpoints',
             {
                 key : 'wsdlendpointService',
-                "fieldHtmlClass":"required"
+                "fieldHtmlClass":"validateProdWSDLService"
             },{
                 key:'wsdlendpointPort',
-                "fieldHtmlClass":"required"
+                "fieldHtmlClass":"validateProdWSDLPort"
             }
-            , 'sandbox_endpoints'
+            , 'sandbox_endpoints',
+            {
+                key : 'wsdlendpointServiceSandbox',
+                "fieldHtmlClass":"validateSandboxWSDLService"
+            },{
+                key:'wsdlendpointPortSandbox',
+                "fieldHtmlClass":"validateSandboxWSDLPort"
+            }
         ]
     };
 
@@ -347,7 +361,7 @@ $(document).ready(function () {
             }
 			,{
 		            key:"failOver",
-		            value:'False'
+		            value:'True'
 		        }
 			,{
                 key:"algoClassName",
@@ -363,7 +377,7 @@ $(document).ready(function () {
                     'simpleClientSession':i18n.t("endpointUi.Client ID"),
 		    		'none':i18n.t("endpointUi.none"),
                 },
-                value:'http'
+                value:'none'
             },
             {
                 key:'sessionTimeOut'
@@ -583,7 +597,7 @@ $(document).ready(function () {
 
             $('#endpoint_config').val(JSON.stringify(ec));
 
-            if(ec.endpoint_type == 'wsdl'){
+            if(ec.endpoint_type == 'wsdl' && ec.production_endpoints != null){
                 $('#wsdl').val(ec.production_endpoints.url);
             }
 
@@ -625,7 +639,7 @@ $(document).ready(function () {
 
         $('#endpoint_config').val(JSON.stringify(ec));
 
-        if(ec.endpoint_type == 'wsdl'){
+        if(ec.endpoint_type == 'wsdl' && ec.production_endpoints != null){
             $('#wsdl').val(ec.production_endpoints.url);
         }
 
@@ -646,4 +660,29 @@ APP.is_sandbox_endpoint_specified = function(){
     var endpoint_config = jQuery.parseJSON($('#endpoint_config').val());
     console.log(endpoint_config);
     return endpoint_config.sandbox_endpoints != undefined
+};
+
+APP.is_production_wsdl_endpoint_service_specified = function(){
+    APP.update_ep_config();
+    var endpoint_config = jQuery.parseJSON($('#endpoint_config').val());
+    return endpoint_config.wsdlendpointService != "" && endpoint_config.wsdlendpointService != undefined
+   
+};
+
+APP.is_production_wsdl_endpoint_port_specified = function(){
+    APP.update_ep_config();
+    var endpoint_config = jQuery.parseJSON($('#endpoint_config').val());
+    return endpoint_config.wsdlendpointPort != "" && endpoint_config.wsdlendpointPort != undefined
+};
+
+APP.is_sandbox_wsdl_endpoint_service_specified = function(){
+    APP.update_ep_config();
+    var endpoint_config = jQuery.parseJSON($('#endpoint_config').val());
+    return endpoint_config.wsdlendpointServiceSandbox != "" && endpoint_config.wsdlendpointServiceSandbox != undefined
+};
+
+APP.is_sandbox_wsdl_endpoint_port_specified = function(){
+    APP.update_ep_config();
+    var endpoint_config = jQuery.parseJSON($('#endpoint_config').val());
+    return endpoint_config.wsdlendpointPortSandbox != "" && endpoint_config.wsdlendpointPortSandbox != undefined
 };

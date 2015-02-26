@@ -1,6 +1,8 @@
 <%
 include("/jagg/jagg.jag");
 (function () {
+    var site = require("/site/conf/site.json");
+    var ssoEnabled = site.ssoConfiguration.enabled;
     response.contentType = "application/json; charset=UTF-8";
     var mod, obj, name, version, provider,rating, result, username,
             user = jagg.getUser(),
@@ -8,11 +10,13 @@ include("/jagg/jagg.jag");
             action = request.getParameter("action");
     if (action == "addRating" && request.getMethod() == 'POST') {
         if (!user) {
-            print({
-                error:true,
-                message:msg.error.loginRequired(action)
-            });
-            return;
+            if(!ssoEnabled){
+		print({
+		    error:true,
+                    message:msg.error.loginRequired(action)
+            	});
+	    }
+	    return;
         }
 
         name = request.getParameter("name");
@@ -42,11 +46,13 @@ include("/jagg/jagg.jag");
         print(obj);
     } else if (action == "removeRating" && request.getMethod() == 'POST') {
         if (!user) {
-            print({
-                error:true,
-                message:msg.error.loginRequired(action)
-            });
-            return;
+           if(!ssoEnabled){
+		print({
+		    error:true,
+                    message:msg.error.loginRequired(action)
+            	});
+	    }
+	    return;
         }
 
         name = request.getParameter("name");

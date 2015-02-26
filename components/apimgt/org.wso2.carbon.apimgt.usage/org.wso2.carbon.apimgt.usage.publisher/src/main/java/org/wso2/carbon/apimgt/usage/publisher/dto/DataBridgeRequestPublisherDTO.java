@@ -38,6 +38,8 @@ public class DataBridgeRequestPublisherDTO extends RequestPublisherDTO {
         setApiPublisher(requestPublisherDTO.getApiPublisher());
         setApplicationName(requestPublisherDTO.getApplicationName());
         setApplicationId(requestPublisherDTO.getApplicationId());
+        setUserAgent(requestPublisherDTO.getUserAgent());
+        setTier(requestPublisherDTO.getTier());
     }
 
     public static String getStreamDefinition() {
@@ -45,7 +47,7 @@ public class DataBridgeRequestPublisherDTO extends RequestPublisherDTO {
 	    APIMGTConfigReaderService apimgtConfigReaderService =
 			    UsageComponent.getApiMgtConfigReaderService();
 
-        String streamDefinition = "{" +
+        return "{" +
                 "  'name':'" + apimgtConfigReaderService.getRequestStreamName() + "'," +
                 "  'version':'" + apimgtConfigReaderService.getRequestStreamVersion() + "'," +
                 "  'nickName': 'API Manager Request Data'," +
@@ -68,17 +70,17 @@ public class DataBridgeRequestPublisherDTO extends RequestPublisherDTO {
                 "          {'name':'hostName','type':'STRING'}," +
                 "          {'name':'apiPublisher','type':'STRING'}," +
                 "          {'name':'applicationName','type':'STRING'}," +
-                "          {'name':'applicationId','type':'STRING'}" +
+                "          {'name':'applicationId','type':'STRING'}," +
+                "          {'name':'userAgent','type':'STRING'}," +
+                "          {'name':'tier','type':'STRING'}" +
                 "  ]" +
                 "}";
-
-        return streamDefinition;
     }
 
     public Object createPayload(){
         return new Object[]{getConsumerKey(),getContext(),getApi_version(),getApi(), getResourcePath(),getMethod(),
                             getVersion(), getRequestCount(),getRequestTime(),getUsername(),getTenantDomain(),getHostName(),
-                            getApiPublisher(), getApplicationName(), getApplicationId()};
+                            getApiPublisher(), getApplicationName(), getApplicationId(),getUserAgent(),getTier()};
         
     }
 

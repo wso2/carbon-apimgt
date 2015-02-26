@@ -18,8 +18,10 @@
         </script>
         <select id="appListSelected" class="input-large">
             <%
-                var i, j, app, selectedApp, api, apis, key, lenI = 0, clazz, lenJ, path, apps = outputs.applications; if(apps!=null){lenI = apps.length;}
-                selectedApp = '';
+                var i, j, app, selectedApp, api, apis, key, lenI = 0, clazz, lenJ, path, apps = outputs.applications; selectedApp = '';
+                if(apps!=null){lenI = apps.length;}
+                if(lenI.length > 0)
+                { selectedApp = apps[0]; }
             %>
             <%
             if(request.getParameter('removeSession')!=null){session.remove('selectedApp')}

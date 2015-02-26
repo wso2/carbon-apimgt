@@ -52,10 +52,6 @@ public class API extends AbstractRESTProcessor implements ManagedLifecycle {
 
     public API(String name, String context) {
         super(name);
-        setContext(context);
-    }
-
-    public void setContext(String context) {
         if (!context.startsWith("/")) {
             handleException("API context must begin with '/' character");
         }
@@ -253,7 +249,6 @@ public class API extends AbstractRESTProcessor implements ManagedLifecycle {
         synCtx.setProperty(RESTConstants.SYNAPSE_REST_API, getName());
         synCtx.setProperty(RESTConstants.SYNAPSE_REST_API_VERSION, versionStrategy.getVersion());
         synCtx.setProperty(RESTConstants.REST_API_CONTEXT, context);
-        synCtx.setProperty(RESTConstants.SYNAPSE_REST_API_VERSION_STRATEGY, versionStrategy.getVersionType());
 
         // Calculate REST_URL_POSTFIX from full request path
         String restURLPostfix = (String) synCtx.getProperty(RESTConstants.REST_FULL_REQUEST_PATH);

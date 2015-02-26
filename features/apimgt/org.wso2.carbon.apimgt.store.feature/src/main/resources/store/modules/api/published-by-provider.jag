@@ -1,11 +1,11 @@
 <%
-var getPublishedAPIsByProvider = function (provider,loggedUser,currentApi,currentApiVersion,limit) {
+var getPublishedAPIsByProvider = function (provider,loggedUser,currentApi,currentApiVersion,limit,apiOwner) {
     var list, i, length, api, apis,
             log = new Log(),
             store = jagg.module("manager").getAPIStoreObj();
 
     try {
-        apis = store.getPublishedAPIsByProvider(provider,loggedUser,String(limit));
+        apis = store.getPublishedAPIsByProvider(provider,loggedUser,String(limit),apiOwner);
         if (log.isDebugEnabled()) {
             log.debug("getPublishedAPIsByProvider : " + stringify(apis));
         }

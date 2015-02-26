@@ -41,4 +41,28 @@ var getAllTags = function (tenantDomain) {
         };
     }
 };
+
+var getTagsWithAttributes = function (tenantDomain) {
+    var tags,
+		log = new Log(),
+        store = jagg.module("manager").getAPIStoreObj();
+
+    try {
+        tags = store.getTagsWithAttributes(tenantDomain);
+        if (log.isDebugEnabled()) {
+            log.debug("getTagsWithAttributes : " + stringify(tags));
+        }
+        
+        return {
+            error:false,
+            tags:tags
+        };
+    } catch (e) {
+        log.error(e.message);
+        return {
+            error:e,
+            tags:null
+        };
+    }
+};
 %>

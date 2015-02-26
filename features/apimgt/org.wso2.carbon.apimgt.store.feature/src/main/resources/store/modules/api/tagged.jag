@@ -28,7 +28,7 @@ var getPaginatedAPIsByTag = function (tag,start,end) {
             store = jagg.module("manager").getAPIStoreObj();
 
     try {
-        result = store.getPaginatedAPIsWithTag(tag,String(start),String(end+1));
+        result = store.getPaginatedAPIsWithTag(tag,String(start),String(end));
         if (log.isDebugEnabled()) {
             log.debug("getAPIsByTag : " + stringify(result.apis));
         }

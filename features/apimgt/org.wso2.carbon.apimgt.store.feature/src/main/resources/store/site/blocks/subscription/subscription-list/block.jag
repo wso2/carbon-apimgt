@@ -12,8 +12,16 @@ jagg.block("subscription/subscription-list", {
 
     getOutputs:function (inputs) {
 
-        var applications, result, user = inputs.user;
-        result = jagg.module("subscription").getAllSubscriptions(user.username);
+        var applications, result, selectedApp, user = inputs.user;
+        if(request.getParameter('selectedApp')!=null){
+            selectedApp = request.getParameter('selectedApp');
+        }else if(session.get('selectedApp')!=null){
+            selectedApp = session.get('selectedApp');
+        }else{
+            selectedApp= "";
+        }
+        
+        result = jagg.module("subscription").getAllSubscriptions(user.username, selectedApp);
         applications = result.applications;
 
         return {

@@ -43,11 +43,14 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+
+import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
 
 public class Utils {
     
     private static final Log log = LogFactory.getLog(Utils.class);
+    private static APIManagerConfiguration config= ServiceReferenceHolder.getInstance().getAPIManagerConfiguration();
     
     public static void sendFault(MessageContext messageContext, int status) {
         org.apache.axis2.context.MessageContext axis2MC = ((Axis2MessageContext) messageContext).
@@ -211,10 +214,17 @@ public class Utils {
     }
     
     public static boolean isCORSEnabled() {
-    	String corsEnabled = ServiceReferenceHolder.getInstance().getAPIManagerConfiguration().
+    	String corsEnabled = config.
     	        getFirstProperty(APIConstants.CORS_CONFIGURATION_ENABLED);
     	    	    	
     	return Boolean.parseBoolean(corsEnabled);
+    }
+
+    public static boolean isStatsEnabled() {
+        String statsEnabled = config.
+                getFirstProperty(APIConstants.CORS_CONFIGURATION_ENABLED);
+
+        return Boolean.parseBoolean(statsEnabled);
     }
 
     /**

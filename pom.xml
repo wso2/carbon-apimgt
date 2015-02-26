@@ -494,12 +494,6 @@
 
             <dependency>
                 <groupId>org.wso2.carbon</groupId>
-                <artifactId>org.wso2.carbon.bam.presentation.stub</artifactId>
-                <version>${wso2carbon.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.wso2.carbon</groupId>
                 <artifactId>org.wso2.carbon.identity.user.registration.stub</artifactId>
                 <version>${wso2carbon.version}</version>
             </dependency>

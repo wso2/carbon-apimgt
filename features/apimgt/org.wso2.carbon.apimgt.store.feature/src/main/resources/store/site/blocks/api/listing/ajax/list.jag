@@ -1,6 +1,8 @@
 <%
 include("/jagg/jagg.jag");
 (function () {
+    var site = require("/site/conf/site.json");
+    var ssoEnabled = site.ssoConfiguration.enabled;
     response.contentType = "application/json; charset=UTF-8";
     var mod, obj, tenant, result, username,
             user = jagg.getUser(),
@@ -8,14 +10,16 @@ include("/jagg/jagg.jag");
             action = request.getParameter("action");
     if (action == "getAllPublishedAPIs") {
         if (!user) {
-            print({
-                error:true,
-                message:msg.error.loginRequired(action)
-            });
-            return;
+           if(!ssoEnabled){
+		print({
+		    error:true,
+                    message:msg.error.loginRequired(action)
+            	});
+	    }
+	    return;
         }
 	username = user.username;
-        tenant = request.getParameter("tenant");
+        tenant = jagg.getTenantDomain();
 
         mod = jagg.module("api");
         result = mod.getAllPublishedAPIs(tenant);
@@ -35,11 +39,13 @@ include("/jagg/jagg.jag");
         print(obj);
     } else if (action == "getAllDocumentationOfApi") { 
 	if (!user) {
-            print({
-                error:true,
-                message:msg.error.loginRequired(action)
-            });
-            return;
+            if(!ssoEnabled){
+		print({
+		    error:true,
+                    message:msg.error.loginRequired(action)
+            	});
+	    }
+	    return;
         }
 	username = user.username;
         mod = jagg.module("documentation");
@@ -57,14 +63,16 @@ include("/jagg/jagg.jag");
 	print(result);
     } else if (action == "getAllPaginatedPublishedAPIs") {
               if (!user) {
-                  print({
-                      error:true,
-                      message:msg.error.loginRequired(action)
-                  });
-                  return;
+                  if(!ssoEnabled){
+			print({
+			    error:true,
+		            message:msg.error.loginRequired(action)
+		    	});
+		  }
+		  return;
               }
       	      username = user.username;
-              tenant = request.getParameter("tenant");
+              tenant = jagg.getTenantDomain();
               var start=request.getParameter("start");
               var end=request.getParameter("end");
               mod = jagg.module("api");

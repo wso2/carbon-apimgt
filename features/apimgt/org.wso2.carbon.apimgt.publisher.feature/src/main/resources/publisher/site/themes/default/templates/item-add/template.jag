@@ -45,7 +45,7 @@ var RESOURCES = [
         <div class="span12">
             <form class="form-horizontal" method="POST"
               id="addAPIForm"
-              enctype="multipart/form-data" action="<%=site.context%>/site/blocks/item-add/ajax/add.jag">
+              enctype="multipart/form-data" action="<%= jagg.url("/site/blocks/item-add/ajax/add.jag")%>">
                 <fieldset>
                 <legend><%=i18n.localize("generalDetailsTitle")%></legend>
                 <input type="hidden" name="action" id="addAPI" value="addAPI"/>
@@ -53,7 +53,7 @@ var RESOURCES = [
                 <div class="control-group">
                     <label class="control-label" for="name"><%=i18n.localize("name")%>:<span class="requiredAstrix">*</span></label>
                     <div class="controls">
-                        <input type="text" class="input-xlarge required validInput noSpace" id="name" name="name" autofocus="autofocus"/>
+                        <input type="text" class="input-xlarge required validRegistryName validInput noSpace" id="name" name="name" autofocus="autofocus"/>
                         <a class="icon-question-sign help_popup" help_data="name_help"></a>
                         <p id="name_help" class="hide"><%=i18n.localize("nameHelpMsg")%></p>
                     </div>
@@ -62,7 +62,7 @@ var RESOURCES = [
                 <div class="control-group">
                     <label class="control-label" for="context"><%=i18n.localize("context")%>:<span class="requiredAstrix">*</span></label>
                     <div class="controls">
-                        <input type="text" class="input-xlarge required validInput contextExists noSpace" id="context" name="context" onchange="getContextValue()" />
+                        <input type="text" class="input-xlarge required validRegistryName validInput contextExists noSpace" id="context" name="context" onchange="getContextValue()" />
                         <a class="icon-question-sign help_popup" help_data="context_help"></a>
                         <p id="context_help" class="hide"><%=i18n.localize("contextHelpMsg")%></p>
                     </div>
@@ -174,7 +174,7 @@ var RESOURCES = [
                     <div class="controls">
                         <div id="inpFile" class="pull-left">
                             <div id="apiThumb-container"  style="display: inline;">
-                                <input type="file" class="input-xlarge" id="apiThumb" name="apiThumb"/></div>
+                                <input type="file" class="input-xlarge validateImageFile" id="apiThumb" name="apiThumb"/></div>
                             </div>
                         <input type="button" class="btn pull-left" id="clearThumb" value="<%=i18n.localize("clear")%>"/>
                         <div class="help-block pull-left inline-help">
