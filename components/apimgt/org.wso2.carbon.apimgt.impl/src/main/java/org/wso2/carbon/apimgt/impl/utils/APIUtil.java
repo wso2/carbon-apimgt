@@ -1063,42 +1063,43 @@ public final class APIUtil {
             return null;
         }
     }
+
     /**
      * Crate an WSDL from given wsdl url. Reset the endpoint details to gateway node
-     **
+     *
      * @param registry - Governance Registry space to save the WSDL
-     * @param api -API instance
+     * @param api      -API instance
      * @return Path of the created resource
      * @throws org.wso2.carbon.apimgt.api.APIManagementException If an error occurs while adding the WSDL
      */
 
     public static String createWSDL(Registry registry, API api) throws RegistryException, APIManagementException {
 
-    	try {
-    		String wsdlResourcePath = APIConstants.API_WSDL_RESOURCE_LOCATION + api.getId().getProviderName() +
-                    "--" + api.getId().getApiName() + api.getId().getVersion()+".wsdl";
-			String absoluteWSDLResourcePath = RegistryUtils.getAbsolutePath(
-                    RegistryContext.getBaseInstance(), APIUtil.getMountedPath(RegistryContext.getBaseInstance(), RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH)) +
-                    wsdlResourcePath;
+        try {
+            String wsdlResourcePath = APIConstants.API_WSDL_RESOURCE_LOCATION + api.getId().getProviderName() +
+                                      "--" + api.getId().getApiName() + api.getId().getVersion() + ".wsdl";
+            String absoluteWSDLResourcePath = RegistryUtils.getAbsolutePath(
+                    RegistryContext.getBaseInstance(), APIUtil.getMountedPath(RegistryContext.getBaseInstance(),
+                                                                              RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH)) +
+                                              wsdlResourcePath;
 
-			APIMWSDLReader wsdlreader = new APIMWSDLReader(api.getWsdlUrl());
+            APIMWSDLReader wsdlreader = new APIMWSDLReader(api.getWsdlUrl());
             OMElement wsdlContentEle = null;
             String wsdRegistryPath = null;
 
             String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
-            if(tenantDomain.equalsIgnoreCase(org.wso2.carbon.utils.multitenancy.MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)){
+            if (tenantDomain.equalsIgnoreCase(org.wso2.carbon.utils.multitenancy.MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)) {
                 wsdRegistryPath = RegistryConstants.PATH_SEPARATOR + "registry"
-                        + RegistryConstants.PATH_SEPARATOR + "resource"
-                        + absoluteWSDLResourcePath;
-            }
-            else{
-                wsdRegistryPath = "/t/"+tenantDomain+ RegistryConstants.PATH_SEPARATOR + "registry"
-                        + RegistryConstants.PATH_SEPARATOR + "resource"
-                        + absoluteWSDLResourcePath;
+                                  + RegistryConstants.PATH_SEPARATOR + "resource"
+                                  + absoluteWSDLResourcePath;
+            } else {
+                wsdRegistryPath = "/t/" + tenantDomain + RegistryConstants.PATH_SEPARATOR + "registry"
+                                  + RegistryConstants.PATH_SEPARATOR + "resource"
+                                  + absoluteWSDLResourcePath;
             }
 
             Resource wsdlResource = registry.newResource();
-            if(!api.getWsdlUrl().matches(wsdRegistryPath)) {
+            if (!api.getWsdlUrl().matches(wsdRegistryPath)) {
                 if (isWSDL2Document(api.getWsdlUrl())) {
                     wsdlContentEle = wsdlreader.readAndCleanWsdl2(api);
                     wsdlResource.setContent(wsdlContentEle.toString());
@@ -1112,8 +1113,8 @@ public final class APIUtil {
                 setResourcePermissions(api.getId().getProviderName(), null, null, wsdlResourcePath);
             }
 
-			//set the wsdl resource permlink as the wsdlURL.
-			api.setWsdlUrl(getRegistryResourceHTTPPermlink(absoluteWSDLResourcePath));
+            //set the wsdl resource permlink as the wsdlURL.
+            api.setWsdlUrl(getRegistryResourceHTTPPermlink(absoluteWSDLResourcePath));
 
             return wsdlResourcePath;
 
@@ -1122,7 +1123,7 @@ public final class APIUtil {
             log.error(msg, e);
             throw new RegistryException(msg, e);
         } catch (APIManagementException e) {
-	        String msg = "Failed to reset the WSDL : " + api.getWsdlUrl() ;
+            String msg = "Failed to reset the WSDL : " + api.getWsdlUrl();
             log.error(msg, e);
             throw new APIManagementException(msg, e);
         }
@@ -1918,12 +1919,14 @@ public final class APIUtil {
     public static void copyResourcePermissions(String username, String sourceArtifactPath, String targetArtifactPath)
             throws APIManagementException {
         String sourceResourcePath = RegistryUtils.getAbsolutePath(RegistryContext.getBaseInstance(),
-                APIUtil.getMountedPath(RegistryContext.getBaseInstance(), RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH)
-                        + sourceArtifactPath);
+                                                                  APIUtil.getMountedPath(RegistryContext.getBaseInstance(),
+                                                                                         RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH)
+                                                                  + sourceArtifactPath);
 
         String targetResourcePath = RegistryUtils.getAbsolutePath(RegistryContext.getBaseInstance(),
-                APIUtil.getMountedPath(RegistryContext.getBaseInstance(), RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH)
-                        + targetArtifactPath);
+                                                                  APIUtil.getMountedPath(RegistryContext.getBaseInstance(),
+                                                                                         RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH)
+                                                                  + targetArtifactPath);
 
         String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(username));
 
@@ -1957,30 +1960,31 @@ public final class APIUtil {
     public static void setResourcePermissions(String username, String visibility, String[] roles, String artifactPath)
             throws APIManagementException {
         try {
-        	String resourcePath = RegistryUtils.getAbsolutePath(RegistryContext.getBaseInstance(),
-        	        APIUtil.getMountedPath(RegistryContext.getBaseInstance(), RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH)
-                    + artifactPath);
+            String resourcePath = RegistryUtils.getAbsolutePath(RegistryContext.getBaseInstance(),
+                                                                APIUtil.getMountedPath(RegistryContext.getBaseInstance(),
+                                                                                       RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH)
+                                                                + artifactPath);
 
-        	String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(username));
-        	if (!tenantDomain.equals(org.wso2.carbon.utils.multitenancy.
-        			MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)) {
-        		int tenantId = ServiceReferenceHolder.getInstance().getRealmService().
-        				getTenantManager().getTenantId(tenantDomain);
+            String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(username));
+            if (!tenantDomain.equals(org.wso2.carbon.utils.multitenancy.
+                                             MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)) {
+                int tenantId = ServiceReferenceHolder.getInstance().getRealmService().
+                        getTenantManager().getTenantId(tenantDomain);
                 // calculate resource path
                 RegistryAuthorizationManager authorizationManager = new RegistryAuthorizationManager
                         (ServiceReferenceHolder.getUserRealm());
                 resourcePath = authorizationManager.computePathOnMount(resourcePath);
-        		AuthorizationManager authManager = ServiceReferenceHolder.getInstance().getRealmService().
-        				getTenantUserRealm(tenantId).getAuthorizationManager();
-        		if (visibility != null && visibility.equalsIgnoreCase(APIConstants.API_RESTRICTED_VISIBILITY)) {
-        			boolean isRoleEveryOne = false;
+                AuthorizationManager authManager = ServiceReferenceHolder.getInstance().getRealmService().
+                        getTenantUserRealm(tenantId).getAuthorizationManager();
+                if (visibility != null && visibility.equalsIgnoreCase(APIConstants.API_RESTRICTED_VISIBILITY)) {
+                    boolean isRoleEveryOne = false;
                     /*If no roles have defined, authorize for everyone role */
-        			if (roles != null && roles.length == 1 && roles[0].equals("")) {
-                    	authManager.authorizeRole(APIConstants.EVERYONE_ROLE, resourcePath,
-                                ActionConstants.GET);
-                    	isRoleEveryOne = true;
+                    if (roles != null && roles.length == 1 && roles[0].equals("")) {
+                        authManager.authorizeRole(APIConstants.EVERYONE_ROLE, resourcePath,
+                                                  ActionConstants.GET);
+                        isRoleEveryOne = true;
                     } else {
-                    	for (String role : roles) {
+                        for (String role : roles) {
                             if (role.equalsIgnoreCase(APIConstants.EVERYONE_ROLE)) {
                                 isRoleEveryOne = true;
                             }
@@ -1989,10 +1993,10 @@ public final class APIUtil {
                         }
                     }
                     if (!isRoleEveryOne) {
-                    	authManager.denyRole(APIConstants.EVERYONE_ROLE, resourcePath, ActionConstants.GET);
+                        authManager.denyRole(APIConstants.EVERYONE_ROLE, resourcePath, ActionConstants.GET);
                     }
                     authManager.denyRole(APIConstants.ANONYMOUS_ROLE, resourcePath, ActionConstants.GET);
-        		} else if (visibility != null && visibility.equalsIgnoreCase(APIConstants.API_PRIVATE_VISIBILITY)) {
+                } else if (visibility != null && visibility.equalsIgnoreCase(APIConstants.API_PRIVATE_VISIBILITY)) {
                     authManager.authorizeRole(APIConstants.EVERYONE_ROLE, resourcePath, ActionConstants.GET);
                     authManager.denyRole(APIConstants.ANONYMOUS_ROLE, resourcePath, ActionConstants.GET);
                 } else if (visibility != null && visibility.equalsIgnoreCase(APIConstants.DOC_OWNER_VISIBILITY)) {
@@ -2003,18 +2007,18 @@ public final class APIUtil {
                         authManager.denyRole(APIConstants.ANONYMOUS_ROLE, resourcePath, ActionConstants.GET);
                     } else {
                         for (String role : roles) {
-                         authManager.denyRole(role, resourcePath, ActionConstants.GET);
+                            authManager.denyRole(role, resourcePath, ActionConstants.GET);
 
                         }
                     }
                 } else {
-                	authManager.authorizeRole(APIConstants.EVERYONE_ROLE, resourcePath,
-                                                       ActionConstants.GET);
-                	authManager.authorizeRole(APIConstants.ANONYMOUS_ROLE, resourcePath,
-                                                       ActionConstants.GET);
+                    authManager.authorizeRole(APIConstants.EVERYONE_ROLE, resourcePath,
+                                              ActionConstants.GET);
+                    authManager.authorizeRole(APIConstants.ANONYMOUS_ROLE, resourcePath,
+                                              ActionConstants.GET);
                 }
-        	} else {
-        		RegistryAuthorizationManager authorizationManager = new RegistryAuthorizationManager
+            } else {
+                RegistryAuthorizationManager authorizationManager = new RegistryAuthorizationManager
                         (ServiceReferenceHolder.getUserRealm());
 
                 if (visibility != null && visibility.equalsIgnoreCase(APIConstants.API_RESTRICTED_VISIBILITY)) {
@@ -2036,12 +2040,12 @@ public final class APIUtil {
                     authorizationManager.denyRole(APIConstants.ANONYMOUS_ROLE, resourcePath, ActionConstants.GET);
                 } else if (visibility != null && visibility.equalsIgnoreCase(APIConstants.DOC_OWNER_VISIBILITY)) {
                      /*If no roles have defined, deny access for everyone & anonymous role */
-                    if (roles == null ) {
+                    if (roles == null) {
                         authorizationManager.denyRole(APIConstants.EVERYONE_ROLE, resourcePath, ActionConstants.GET);
                         authorizationManager.denyRole(APIConstants.ANONYMOUS_ROLE, resourcePath, ActionConstants.GET);
                     } else {
                         for (String role : roles) {
-                        authorizationManager.denyRole(role, resourcePath, ActionConstants.GET);
+                            authorizationManager.denyRole(role, resourcePath, ActionConstants.GET);
 
                         }
                     }
@@ -2051,11 +2055,11 @@ public final class APIUtil {
                     authorizationManager.authorizeRole(APIConstants.ANONYMOUS_ROLE, resourcePath,
                                                        ActionConstants.GET);
                 }
-        	}
+            }
 
 
         } catch (UserStoreException e) {
-        	throw new APIManagementException("Error while adding role permissions to API", e);
+            throw new APIManagementException("Error while adding role permissions to API", e);
         }
     }
 
@@ -2134,10 +2138,11 @@ public final class APIUtil {
 			
 			/*set resource permission*/
             AuthorizationManager authManager = ServiceReferenceHolder.getInstance().getRealmService().
-    				getTenantUserRealm(tenantID).getAuthorizationManager();
+                    getTenantUserRealm(tenantID).getAuthorizationManager();
             String resourcePath = RegistryUtils.getAbsolutePath(RegistryContext.getBaseInstance(),
-                    APIUtil.getMountedPath(RegistryContext.getBaseInstance(), RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH)
-                    + APIConstants.EXTERNAL_API_STORES_LOCATION);
+                                                                APIUtil.getMountedPath(RegistryContext.getBaseInstance(),
+                                                                                       RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH)
+                                                                + APIConstants.EXTERNAL_API_STORES_LOCATION);
             authManager.denyRole(APIConstants.EVERYONE_ROLE, resourcePath, ActionConstants.GET);
 
 		} catch (RegistryException e) {
@@ -2157,42 +2162,43 @@ public final class APIUtil {
 	 */
 
 	public static void loadTenantGAConfig(int tenantID) throws APIManagementException {
-		try {
-			RegistryService registryService =
-			                                  ServiceReferenceHolder.getInstance()
-			                                                        .getRegistryService();
-			//UserRegistry govRegistry = registryService.getGovernanceUserRegistry(tenant, tenantID);
+        try {
+            RegistryService registryService =
+                    ServiceReferenceHolder.getInstance()
+                            .getRegistryService();
+            //UserRegistry govRegistry = registryService.getGovernanceUserRegistry(tenant, tenantID);
             UserRegistry govRegistry = registryService.getGovernanceSystemRegistry(tenantID);
 
             if (govRegistry.resourceExists(APIConstants.GA_CONFIGURATION_LOCATION)) {
                 log.debug("Google Analytics configuration already uploaded to the registry");
                 return;
             }
-			if (log.isDebugEnabled()) {
-				log.debug("Adding Google Analytics configuration to the tenant's registry");
-			}
-			InputStream inputStream =
-			                          APIManagerComponent.class.getResourceAsStream("/statistics/default-ga-config.xml");
-			byte[] data = IOUtils.toByteArray(inputStream);
-			Resource resource = govRegistry.newResource();
-			resource.setContent(data);
-			govRegistry.put(APIConstants.GA_CONFIGURATION_LOCATION, resource);
+            if (log.isDebugEnabled()) {
+                log.debug("Adding Google Analytics configuration to the tenant's registry");
+            }
+            InputStream inputStream =
+                    APIManagerComponent.class.getResourceAsStream("/statistics/default-ga-config.xml");
+            byte[] data = IOUtils.toByteArray(inputStream);
+            Resource resource = govRegistry.newResource();
+            resource.setContent(data);
+            govRegistry.put(APIConstants.GA_CONFIGURATION_LOCATION, resource);
 
 			/*set resource permission*/
             AuthorizationManager authManager = ServiceReferenceHolder.getInstance().getRealmService().
-    				getTenantUserRealm(tenantID).getAuthorizationManager();
+                    getTenantUserRealm(tenantID).getAuthorizationManager();
             String resourcePath = RegistryUtils.getAbsolutePath(RegistryContext.getBaseInstance(),
-                    APIUtil.getMountedPath(RegistryContext.getBaseInstance(), RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH)
-                    + APIConstants.GA_CONFIGURATION_LOCATION);
+                                                                APIUtil.getMountedPath(RegistryContext.getBaseInstance(),
+                                                                                       RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH)
+                                                                + APIConstants.GA_CONFIGURATION_LOCATION);
             authManager.denyRole(APIConstants.EVERYONE_ROLE, resourcePath, ActionConstants.GET);
 
-		} catch (RegistryException e) {
+        } catch (RegistryException e) {
             throw new APIManagementException("Error while saving Google Analytics configuration information to the registry", e);
         } catch (IOException e) {
             throw new APIManagementException("Error while reading Google Analytics configuration file content", e);
         } catch (UserStoreException e) {
-        	throw new APIManagementException("Error while setting permission to Google Analytics configuration file", e);
-		}
+            throw new APIManagementException("Error while setting permission to Google Analytics configuration file", e);
+        }
     }
 
     public static void loadTenantWorkFlowExtensions(int tenantID)
@@ -2433,37 +2439,36 @@ public final class APIUtil {
 	 * @throws org.wso2.carbon.apimgt.api.APIManagementException
 	 */
 
-	public static void loadloadTenantAPIRXT(String tenant, int tenantID)
-	                                                                    throws APIManagementException {
-		RegistryService registryService = ServiceReferenceHolder.getInstance().getRegistryService();
-		UserRegistry registry = null;
-		try {
-			//registry = registryService.getRegistry(tenant, tenantID);
+    public static void loadloadTenantAPIRXT(String tenant, int tenantID) throws APIManagementException {
+        RegistryService registryService = ServiceReferenceHolder.getInstance().getRegistryService();
+        UserRegistry registry = null;
+        try {
+            //registry = registryService.getRegistry(tenant, tenantID);
             registry = registryService.getGovernanceSystemRegistry(tenantID);
-		} catch (RegistryException e) {
-			throw new APIManagementException("Error when create registry instance ", e);
-		}
+        } catch (RegistryException e) {
+            throw new APIManagementException("Error when create registry instance ", e);
+        }
 
-		String rxtDir =
-		                CarbonUtils.getCarbonHome() + File.separator + "repository" +
-		                        File.separator + "resources" + File.separator + "rxts";
-		File file = new File(rxtDir);
-		FilenameFilter filenameFilter = new FilenameFilter() {
-			public boolean accept(File dir, String name) {
-				// if the file extension is .rxt return true, else false
-				return name.endsWith(".rxt");
-			}
-		};
-		String[] rxtFilePaths = file.list(filenameFilter);
-		for (String rxtPath : rxtFilePaths) {
-			String resourcePath =
-			                      GovernanceConstants.RXT_CONFIGS_PATH +
-			                              RegistryConstants.PATH_SEPARATOR + rxtPath;
+        String rxtDir = CarbonUtils.getCarbonHome() + File.separator + "repository" + File.separator + "resources" +
+                        File.separator + "rxts";
+        File file = new File(rxtDir);
+        FilenameFilter filenameFilter = new FilenameFilter() {
+            public boolean accept(File dir, String name) {
+                // if the file extension is .rxt return true, else false
+                return name.endsWith(".rxt");
+            }
+        };
+        String[] rxtFilePaths = file.list(filenameFilter);
+        for (String rxtPath : rxtFilePaths) {
+            String resourcePath =
+                    GovernanceConstants.RXT_CONFIGS_PATH +
+                    RegistryConstants.PATH_SEPARATOR + rxtPath;
 
             //This is  "registry" is a governance registry instance, therefore calculate the relative path to governance.
-            String govRelativePath =   RegistryUtils.getRelativePathToOriginal(resourcePath,
-                        APIUtil.getMountedPath(RegistryContext.getBaseInstance(), RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH));
-			             try {
+            String govRelativePath = RegistryUtils.getRelativePathToOriginal(resourcePath,
+                                                                             APIUtil.getMountedPath(RegistryContext.getBaseInstance(),
+                                                                                                    RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH));
+            try {
                 // calculate resource path
                 RegistryAuthorizationManager authorizationManager = new RegistryAuthorizationManager
                         (ServiceReferenceHolder.getUserRealm());
@@ -2472,17 +2477,17 @@ public final class APIUtil {
                 AuthorizationManager authManager = ServiceReferenceHolder.getInstance().getRealmService().
                         getTenantUserRealm(tenantID).getAuthorizationManager();
 
-                 if (registry.resourceExists(govRelativePath)) {
+                if (registry.resourceExists(govRelativePath)) {
                     // set anonymous user permission to RXTs
                     authManager.authorizeRole(APIConstants.ANONYMOUS_ROLE, resourcePath, ActionConstants.GET);
-                     continue;
-                 }
+                    continue;
+                }
 
-                 String rxt = FileUtil.readFileToString(rxtDir + File.separator + rxtPath);
-                 Resource resource = registry.newResource();
-                 resource.setContent(rxt.getBytes());
-                 resource.setMediaType(APIConstants.RXT_MEDIA_TYPE);
-                 registry.put(govRelativePath, resource);
+                String rxt = FileUtil.readFileToString(rxtDir + File.separator + rxtPath);
+                Resource resource = registry.newResource();
+                resource.setContent(rxt.getBytes());
+                resource.setMediaType(APIConstants.RXT_MEDIA_TYPE);
+                registry.put(govRelativePath, resource);
 
 
                 authManager.authorizeRole(APIConstants.ANONYMOUS_ROLE, resourcePath, ActionConstants.GET);
@@ -2490,15 +2495,15 @@ public final class APIUtil {
             } catch (UserStoreException e) {
                 throw new APIManagementException("Error while adding role permissions to API", e);
             } catch (IOException e) {
-                 String msg = "Failed to read rxt files";
-                 throw new APIManagementException(msg, e);
-             } catch (RegistryException e) {
-				String msg = "Failed to add rxt to registry ";
-				throw new APIManagementException(msg, e);
-			}
-		}
+                String msg = "Failed to read rxt files";
+                throw new APIManagementException(msg, e);
+            } catch (RegistryException e) {
+                String msg = "Failed to add rxt to registry ";
+                throw new APIManagementException(msg, e);
+            }
+        }
 
-	}
+    }
 
     /**
      * Converting the user store domain name to uppercase.
@@ -3533,9 +3538,10 @@ public final class APIUtil {
 	    		for (Association association : associations) {
 	    			boolean isAuthorized = false;
 	    			String documentationPath = association.getSourcePath();
-		    		String path = RegistryUtils.getAbsolutePath(RegistryContext.getBaseInstance(),
-		    		APIUtil.getMountedPath(RegistryContext.getBaseInstance(), RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH) + documentationPath);
-		    		if (CarbonConstants.REGISTRY_ANONNYMOUS_USERNAME.equalsIgnoreCase(username)) {
+                    String path = RegistryUtils.getAbsolutePath(RegistryContext.getBaseInstance(),
+                                                                APIUtil.getMountedPath(RegistryContext.getBaseInstance(),
+                                                                                       RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH) + documentationPath);
+                    if (CarbonConstants.REGISTRY_ANONNYMOUS_USERNAME.equalsIgnoreCase(username)) {
 		    			isAuthorized = manager.isRoleAuthorized(APIConstants.ANONYMOUS_ROLE, path, ActionConstants.GET);
 		    		} else {
 		    			isAuthorized = manager.isUserAuthorized(username, path, ActionConstants.GET);
@@ -3554,9 +3560,10 @@ public final class APIUtil {
 			    		if (docAssociations.length > 0) {
 			    			isAuthorized = false;
 			    			String apiPath = docAssociations[0].getSourcePath();
-			    			path = RegistryUtils.getAbsolutePath(RegistryContext.getBaseInstance(),
-			    			       APIUtil.getMountedPath(RegistryContext.getBaseInstance(), RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH) + apiPath);
-				    		if (CarbonConstants.REGISTRY_ANONNYMOUS_USERNAME.equalsIgnoreCase(username)) {
+                            path = RegistryUtils.getAbsolutePath(RegistryContext.getBaseInstance(),
+                                                                 APIUtil.getMountedPath(RegistryContext.getBaseInstance(),
+                                                                                        RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH) + apiPath);
+                            if (CarbonConstants.REGISTRY_ANONNYMOUS_USERNAME.equalsIgnoreCase(username)) {
 				    			isAuthorized = manager.isRoleAuthorized(APIConstants.ANONYMOUS_ROLE, path, ActionConstants.GET);
 				    		} else {
 				    			isAuthorized = manager.isUserAuthorized(username, path, ActionConstants.GET);
@@ -3719,10 +3726,8 @@ public final class APIUtil {
      * This method will return mounted path of the path if the path
      * is mounted. Else path will be returned.
      *
-     * @param registryContext
-     *            Registry Context instance which holds path mappings
-     * @param path
-     *            default path of the registry
+     * @param registryContext Registry Context instance which holds path mappings
+     * @param path            default path of the registry
      * @return mounted path or path
      */
     public static String getMountedPath(RegistryContext registryContext, String path) {
@@ -3730,8 +3735,9 @@ public final class APIUtil {
             List<Mount> mounts = registryContext.getMounts();
             if (mounts != null) {
                 for (Mount mount : mounts) {
-                    if (path.equals(mount.getPath()))
+                    if (path.equals(mount.getPath())) {
                         return mount.getTargetPath();
+                    }
                 }
             }
         }
