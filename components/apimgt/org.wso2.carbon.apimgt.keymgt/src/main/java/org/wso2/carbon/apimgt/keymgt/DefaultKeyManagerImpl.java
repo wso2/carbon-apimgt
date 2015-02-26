@@ -47,6 +47,7 @@ import org.wso2.carbon.apimgt.impl.clients.OAuthAdminClient;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.keymgt.internal.ServiceReferenceHolder;
+import org.wso2.carbon.apimgt.keymgt.util.APIKeyMgtDataHolder;
 import org.wso2.carbon.apimgt.keymgt.util.APIKeyMgtUtil;
 import org.wso2.carbon.identity.oauth.stub.dto.OAuthConsumerAppDTO;
 import org.wso2.carbon.identity.oauth2.stub.dto.OAuth2ClientApplicationDTO;
@@ -62,9 +63,10 @@ import java.util.Map;
  */
 public class DefaultKeyManagerImpl extends AbstractKeyManager {
 
-    private static final String GRANT_TYPE_CLIENT_CREDENTIALS = "open_keymanager";
     private static final String OAUTH_RESPONSE_ACCESSTOKEN = "access_token";
     private static final String OAUTH_RESPONSE_EXPIRY_TIME = "expires_in";
+    private static final String GRANT_TYPE_VALUE = "open_keymanager";
+    private static final String GRANT_TYPE_PARAM_VALIDITY = "validity_period";
 
     private static final Log log = LogFactory.getLog(DefaultKeyManagerImpl.class);
 
@@ -229,20 +231,19 @@ public class DefaultKeyManagerImpl extends AbstractKeyManager {
             }
             //get default application access token name from config.
 
-            String applicationAccessToken = org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder.getInstance()
-                    .getAPIManagerConfigurationService().getAPIManagerConfiguration()
-                    .getFirstProperty(APIConstants.API_KEY_MANGER_APPLLICATION_TOKEN_SCOPE);
+            String applicationScope = APIKeyMgtDataHolder.getApplicationTokenScope();
 
 
             //Generate New Access Token
             HttpClient tokenEPClient = APIKeyMgtUtil.getHttpClient(keyMgtPort, keyMgtProtocol);
             HttpPost httpTokpost = new HttpPost(tokenEndpoint);
             List<NameValuePair> tokParams = new ArrayList<NameValuePair>(3);
-            tokParams.add(new BasicNameValuePair(OAuth.OAUTH_GRANT_TYPE, "open_keymanager"));
-            tokParams.add(new BasicNameValuePair("validity_period","360000"));
-            tokParams.add(new BasicNameValuePair("scope", applicationAccessToken));
+            tokParams.add(new BasicNameValuePair(OAuth.OAUTH_GRANT_TYPE, GRANT_TYPE_VALUE));
+            tokParams.add(new BasicNameValuePair(GRANT_TYPE_PARAM_VALIDITY,
+                                                 Long.toString(tokenRequest.getValidityPeriod())));
             tokParams.add(new BasicNameValuePair(OAuth.OAUTH_CLIENT_ID, tokenRequest.getClientId()));
             tokParams.add(new BasicNameValuePair(OAuth.OAUTH_CLIENT_SECRET, tokenRequest.getClientSecret()));
+            tokParams.add(new BasicNameValuePair("scope", applicationScope));
 
 
             httpTokpost.setEntity(new UrlEncodedFormEntity(tokParams, "UTF-8"));
