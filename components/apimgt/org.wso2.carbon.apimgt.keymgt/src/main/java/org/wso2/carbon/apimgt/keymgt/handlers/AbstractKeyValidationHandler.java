@@ -8,6 +8,7 @@ import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
 import org.wso2.carbon.apimgt.impl.token.TokenGenerator;
+import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.keymgt.APIKeyMgtException;
 import org.wso2.carbon.apimgt.keymgt.service.TokenValidationContext;
 import org.wso2.carbon.apimgt.keymgt.util.APIKeyMgtDataHolder;
@@ -66,15 +67,10 @@ public abstract class AbstractKeyValidationHandler implements KeyValidationHandl
 
     protected void checkClientDomainAuthorized (APIKeyValidationInfoDTO apiKeyValidationInfoDTO, String clientDomain)
             throws APIKeyMgtException {
-        if (clientDomain != null) {
-            clientDomain = clientDomain.trim();
-        }
-        List<String> authorizedDomains = apiKeyValidationInfoDTO.getAuthorizedDomains();
-        if (!(authorizedDomains.contains("ALL") || authorizedDomains.contains(clientDomain))) {
-            log.error("Unauthorized client domain :" + clientDomain +
-                      ". Only \"" + authorizedDomains + "\" domains are authorized to access the API.");
-            throw new APIKeyMgtException("Unauthorized client domain :" + clientDomain +
-                                         ". Only \"" + authorizedDomains + "\" domains are authorized to access the API.");
+        try {
+            APIUtil.checkClientDomainAuthorized(apiKeyValidationInfoDTO,clientDomain);
+        } catch (APIManagementException e) {
+            log.error("Error while validating client domain",e);
         }
 
     }
