@@ -317,7 +317,6 @@ public final class APIConstants {
     public static final String API_KEY_MANGER_KEY_VALIDATION_HANDLER_CLASS_NAME = API_KEY_MANAGER + "KeyValidationHandlerClassName";
     public static final String API_KEY_MANGER_EXT_DAO_CLASS_NAME = API_KEY_MANAGER + "ExtDAOClassName";
     public static final String API_KEY_MANGER_DCR_END_POINT_URL = API_KEY_MANAGER + "DCREndpointURL";
-    public static final String API_KEY_MANGER_APPLLICATION_TOKEN_SCOPE = API_KEY_MANAGER + "ApplicationTokenScope";
 
 
     public static final String API_KEY_MANAGER_THRIFT_SERVER_HOST = API_KEY_MANAGER + "ThriftServerHost";
