@@ -3,10 +3,12 @@ package org.wso2.carbon.apimgt.keymgt.handlers;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.identity.oauth2.IdentityOAuth2Exception;
 import org.wso2.carbon.identity.oauth2.model.*;
 import org.wso2.carbon.identity.oauth2.token.OAuthTokenReqMessageContext;
 import org.wso2.carbon.identity.oauth2.token.handlers.grant.ClientCredentialsGrantHandler;
+import org.wso2.carbon.apimgt.impl.APIConstants;
 
 public class OpenKeyManagerGrantHandler extends ClientCredentialsGrantHandler {
 
