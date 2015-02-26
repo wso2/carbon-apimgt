@@ -347,6 +347,7 @@ public final class APIConstants {
     public static final String EXTERNAL_API_STORE = "ExternalAPIStore";
     public static final String EXTERNAL_API_STORE_ID = "id";
     public static final String EXTERNAL_API_STORE_TYPE = "type";
+    public static final String EXTERNAL_API_STORE_CLASS_NAME = "className";
     public static final String EXTERNAL_API_STORE_DISPLAY_NAME = "DisplayName";
     public static final String EXTERNAL_API_STORE_ENDPOINT = "Endpoint";
     public static final String EXTERNAL_API_STORE_USERNAME = "Username";
