@@ -35,8 +35,6 @@ public class DefaultKeyValidationHandler extends AbstractKeyValidationHandler {
 
     @Override
     public boolean validateToken(TokenValidationContext validationContext) throws APIKeyMgtException {
-
-
         if (validationContext.isCacheHit()) {
             APIKeyValidationInfoDTO infoDTO = validationContext.getValidationInfoDTO();
 
