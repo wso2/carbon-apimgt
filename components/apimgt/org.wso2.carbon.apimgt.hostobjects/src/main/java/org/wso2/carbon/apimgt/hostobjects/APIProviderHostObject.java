@@ -244,24 +244,25 @@ public class APIProviderHostObject extends ScriptableObject {
      * @param thisObj Scriptable object
      * @param args    Passing arguments
      * @param funObj  Function object
-     * @return true if update successful, false otherwise
+     * @return
      * @throws APIManagementException
      */
     public static boolean jsFunction_updatePermissionCache(Context cx, Scriptable thisObj,
-                                                           Object[] args, Function funObj)
-            throws APIManagementException {
-        if (args == null || args.length == 0) {
+                                                           Object[] args, Function funObj)throws APIManagementException {
+        if (args==null || args.length == 0) {
             handleException("Invalid input parameters to the login method");
         }
-        String username = (String) args[0];
-        boolean updated = false;
-        try {
 
-            APIUtil.updatePermissionCache(username);
+        boolean updated=false;
+        try{
+            String username = (String) args[0];
+
+            String tenantDomain = MultitenantUtils.getTenantDomain(username);
+            int tenantId =  ServiceReferenceHolder.getInstance().getRealmService().getTenantManager().getTenantId(tenantDomain);
+            PermissionUpdateUtil.updatePermissionTree(tenantId);
             updated = true;
         } catch (Exception e) {
-            // This is not a critical issue. If this fails user may not able to login just after user creation
-            log.error("Error while updating permissions for user " + username, e);
+            log.error("Error while updating permissions", e);
         }
         return updated;
     }
@@ -4367,21 +4368,26 @@ public class APIProviderHostObject extends ScriptableObject {
     return false;
     }
     }
-
-    /**
-     * Evaluate HTTP end-point URI to validate path parameter and query
-     * parameter formats<br>
-     * Sample URI format<br>
-     * http[s]//[www.]anyhost[.com][:port]/{uri.var.param}?param1=value&param2={uri.var.value}
-     *
-     * @param endpointConfig JSON representation of end-point configuration.
-     * @return true if valid URI
-     * @throws APIManagementException If the endpointConfig is invalid or URI is invalid
-     */
-    private static boolean validateEndpointURI(String endpointConfig)
-            throws APIManagementException {
-        if (endpointConfig != null) {
+    
+	/**
+	 * Evaluate HTTP end-point URI to validate path parameter and query
+	 * parameter formats<br>
+	 * Sample URI format<br>
+	 * http[s]//[www.]anyhost[.com][:port]/{uri.var.param}?param1=value&param2={
+	 * uri.var.value}
+	 * 
+	 * @param endpointConfig
+	 *            JSON representation of end-point configuration.
+	 * @return true if valid URI
+	 * @throws APIManagementException
+	 *             If the endpointConfig is invalid or URI is invalid
+	 */
+	private static boolean validateEndpointURI(String endpointConfig)
+			throws APIManagementException {
+		boolean isInvalid = false;
+		if (endpointConfig != null) {
             try {
+                List<String> uriList= new ArrayList<String>();
                 JSONParser parser = new JSONParser();
                 JSONObject jsonObject = (JSONObject) parser.parse(endpointConfig);
                 Object epType = jsonObject.get("endpoint_type");
@@ -4390,70 +4396,62 @@ public class APIProviderHostObject extends ScriptableObject {
                     Object prodEPs = (JSONObject) jsonObject.get("production_endpoints");
                     if (prodEPs instanceof JSONObject) {
                         Object url = ((JSONObject) prodEPs).get("url");
-                        if (url instanceof String && !isValidURI(url.toString())) {
-                            handleException("Invalid Production Endpoint URI. Please refer HTTP Endpoint " +
-                                            "documentation of the WSO2 ESB for details.");
+                        if (url instanceof String) {
+                            uriList.add(url.toString());
                         }
                     }
                     // extract sandbox uri from config
                     Object sandEPs = (JSONObject) jsonObject.get("sandbox_endpoints");
                     if (sandEPs instanceof JSONObject) {
                         Object url = ((JSONObject) sandEPs).get("url");
-                        if (url instanceof String && !isValidURI(url.toString())) {
-                            handleException("Invalid Sandbox Endpoint URI. Please refer HTTP Endpoint " +
-                                            "documentation of the WSO2 ESB for details.");
+                        if (url instanceof String) {
+                            uriList.add(url.toString());
+                        }
+                    }
+                }
+                for(String uri:uriList){
+                    // validate only if uri contains { or }
+                    if(uri.contains("{") || uri.contains("}")){
+                        // check { and } are matched or not. otherwise invalid
+                        int startCount = 0, endCount = 0;
+                        for(char c:uri.toCharArray()){
+                            if(c=='{'){
+                                startCount++;
+                            }else if(c=='}'){
+                                endCount++;
+                            }
+                            // this check guarantee the order of '{' and '}'. Ex: {uri.var.name} not }uri.var.name{
+                            if(endCount>startCount){
+                                isInvalid=true;
+                                break;
+                            }
+                        }
+                        // continue only if the matching brackets are found. otherwise invalid
+                        if(startCount==endCount){
+                            // extract content including { } brackets
+                            Matcher pathParamMatcher=pathParamExtractorPattern.matcher(uri);
+                            while(pathParamMatcher.find()){
+                                // validate the format of { } content
+                                Matcher formatMatcher=pathParamValidatorPattern.matcher(pathParamMatcher.group());
+                                if(!formatMatcher.matches()){
+                                    isInvalid=true;
+                                    break;
+                                }
+                            }
+                        }else{
+                            isInvalid=true;
                         }
                     }
                 }
             } catch (ParseException e) {
                 handleException("Invalid Endpoint config", e);
             }
-        }
-        return true;
-    }
-
-    /**
-     * This method returns whether the given url is contain valid uri params or not
-     *
-     * @param url URI to be validated
-     * @return true if URI doesn't contain params or valid params
-     */
-    private static boolean isValidURI(String url) {
-        boolean isInvalid = false;
-        // validate only if uri contains { or }
-        if (url != null && (url.contains("{") || url.contains("}"))) {
-            // check { and } are matched or not. otherwise invalid
-            int startCount = 0, endCount = 0;
-            for (char c : url.toCharArray()) {
-                if (c == '{') {
-                    startCount++;
-                } else if (c == '}') {
-                    endCount++;
-                }
-                // this check guarantee the order of '{' and '}'. Ex: {uri.var.name} not }uri.var.name{
-                if (endCount > startCount) {
-                    isInvalid = true;
-                    break;
-                }
-            }
-            // continue only if the matching no of brackets are found. otherwise invalid
-            if (startCount == endCount) {
-                // extract content including { } brackets
-                Matcher pathParamMatcher = pathParamExtractorPattern.matcher(url);
-                while (pathParamMatcher.find()) {
-                    // validate the format of { } content
-                    Matcher formatMatcher = pathParamValidatorPattern.matcher(pathParamMatcher.group());
-                    if (!formatMatcher.matches()) {
-                        isInvalid = true;
-                        break;
-                    }
-                }
-            } else {
-                isInvalid = true;
+            if (isInvalid) {
+                handleException("Invalid Endpoint URI. Please refer HTTP Endpoint documentation of the WSO2 ESB for details.");
             }
         }
-        return !isInvalid;
-    }
+		return isInvalid;
+	}
 
     /**
      * Validate the backend by sending HTTP HEAD

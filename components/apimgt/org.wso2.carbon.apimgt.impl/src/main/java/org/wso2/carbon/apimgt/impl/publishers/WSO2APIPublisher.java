@@ -610,35 +610,35 @@ public class WSO2APIPublisher implements APIPublisher {
     }
     
     private String getExternalStoreRedirectURL(int tenantId) throws APIManagementException {
-        UserRegistry registry;
-        String redirectURL = null;
-        try {
-            registry = ServiceReferenceHolder.getInstance().getRegistryService()
+    	UserRegistry registry;
+    	 String redirectURL = null;
+		try {
+			registry = ServiceReferenceHolder.getInstance().getRegistryService()
                     .getGovernanceSystemRegistry(tenantId);
-            if (registry.resourceExists(APIConstants.EXTERNAL_API_STORES_LOCATION)) {
+			if (registry.resourceExists(APIConstants.EXTERNAL_API_STORES_LOCATION)) {
                 Resource resource = registry.get(APIConstants.EXTERNAL_API_STORES_LOCATION);
                 String content = new String((byte[]) resource.getContent());
                 OMElement element = AXIOMUtil.stringToOM(content);
-                OMElement storeURL = element.getFirstChildWithName(new QName(APIConstants.EXTERNAL_API_STORES_STORE_URL));
-                if (storeURL != null) {
-                    redirectURL = storeURL.getText();
-                } else {
-                    String msg = "Store URL element is missing in External APIStores configuration";
+                OMElement storeURL=element.getFirstChildWithName(new QName(APIConstants.EXTERNAL_API_STORES_STORE_URL));
+                if(storeURL != null){
+                	redirectURL = storeURL.getText();
+                }else{
+                	String msg = "Store URL not found in External Stores Configuration";
                     log.error(msg);
                     throw new APIManagementException(msg);
                 }
-            }
-            return redirectURL;
-        } catch (RegistryException e) {
-            String msg = "Error while retrieving External Stores Configuration from registry";
+			}
+			return redirectURL;
+		} catch (RegistryException e) {
+			String msg = "Error while retrieving External Stores Configuration from registry";
             log.error(msg, e);
             throw new APIManagementException(msg, e);
-        } catch (XMLStreamException e) {
-            String msg = "Malformed XML found in the External Stores Configuration resource";
+		} catch (XMLStreamException e) {
+			String msg = "Malformed XML found in the External Stores Configuration resource";
             log.error(msg, e);
             throw new APIManagementException(msg, e);
-        }
-
+		}
+         
     }
 
     private MultipartEntity getMultipartEntity(API api,String externalPublisher, String action) 
