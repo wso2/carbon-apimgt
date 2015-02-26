@@ -68,6 +68,7 @@ import org.wso2.carbon.core.commons.stub.loggeduserinfo.LoggedUserInfoAdminStub;
 import org.wso2.carbon.core.multitenancy.utils.TenantAxisUtils;
 import org.wso2.carbon.core.util.CryptoException;
 import org.wso2.carbon.core.util.CryptoUtil;
+import org.wso2.carbon.core.util.PermissionUpdateUtil;
 import org.wso2.carbon.governance.api.common.dataobjects.GovernanceArtifact;
 import org.wso2.carbon.governance.api.endpoints.EndpointManager;
 import org.wso2.carbon.governance.api.endpoints.dataobjects.Endpoint;
@@ -1064,22 +1065,22 @@ public final class APIUtil {
     }
     /**
      * Crate an WSDL from given wsdl url. Reset the endpoint details to gateway node
-     ** 
+     **
      * @param registry - Governance Registry space to save the WSDL
      * @param api -API instance
      * @return Path of the created resource
      * @throws org.wso2.carbon.apimgt.api.APIManagementException If an error occurs while adding the WSDL
      */
-    
-    public static String createWSDL(Registry registry, API api) throws RegistryException, APIManagementException {  	
-        
+
+    public static String createWSDL(Registry registry, API api) throws RegistryException, APIManagementException {
+
     	try {
     		String wsdlResourcePath = APIConstants.API_WSDL_RESOURCE_LOCATION + api.getId().getProviderName() +
                     "--" + api.getId().getApiName() + api.getId().getVersion()+".wsdl";
 			String absoluteWSDLResourcePath = RegistryUtils.getAbsolutePath(
                     RegistryContext.getBaseInstance(), APIUtil.getMountedPath(RegistryContext.getBaseInstance(), RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH)) +
                     wsdlResourcePath;
-            
+
 			APIMWSDLReader wsdlreader = new APIMWSDLReader(api.getWsdlUrl());
             OMElement wsdlContentEle = null;
             String wsdRegistryPath = null;
@@ -1110,12 +1111,12 @@ public final class APIUtil {
                 //set the anonymous role for wsld resource to avoid basicauth security.
                 setResourcePermissions(api.getId().getProviderName(), null, null, wsdlResourcePath);
             }
-			
+
 			//set the wsdl resource permlink as the wsdlURL.
 			api.setWsdlUrl(getRegistryResourceHTTPPermlink(absoluteWSDLResourcePath));
 
-            return wsdlResourcePath; 
-            
+            return wsdlResourcePath;
+
         } catch (RegistryException e) {
             String msg = "Failed to add WSDL " + api.getWsdlUrl() + " to the registry";
             log.error(msg, e);
@@ -1124,7 +1125,7 @@ public final class APIUtil {
 	        String msg = "Failed to reset the WSDL : " + api.getWsdlUrl() ;
             log.error(msg, e);
             throw new APIManagementException(msg, e);
-        } 
+        }
     }
     
     /**
@@ -1959,7 +1960,7 @@ public final class APIUtil {
         	String resourcePath = RegistryUtils.getAbsolutePath(RegistryContext.getBaseInstance(),
         	        APIUtil.getMountedPath(RegistryContext.getBaseInstance(), RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH)
                     + artifactPath);
-        	
+
         	String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(username));
         	if (!tenantDomain.equals(org.wso2.carbon.utils.multitenancy.
         			MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)) {
@@ -2051,11 +2052,11 @@ public final class APIUtil {
                                                        ActionConstants.GET);
                 }
         	}
-            
+
 
         } catch (UserStoreException e) {
         	throw new APIManagementException("Error while adding role permissions to API", e);
-        } 
+        }
     }
 
 	/**
@@ -2135,7 +2136,7 @@ public final class APIUtil {
             AuthorizationManager authManager = ServiceReferenceHolder.getInstance().getRealmService().
     				getTenantUserRealm(tenantID).getAuthorizationManager();
             String resourcePath = RegistryUtils.getAbsolutePath(RegistryContext.getBaseInstance(),
-                    APIUtil.getMountedPath(RegistryContext.getBaseInstance(), RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH) 
+                    APIUtil.getMountedPath(RegistryContext.getBaseInstance(), RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH)
                     + APIConstants.EXTERNAL_API_STORES_LOCATION);
             authManager.denyRole(APIConstants.EVERYONE_ROLE, resourcePath, ActionConstants.GET);
 
@@ -2176,7 +2177,7 @@ public final class APIUtil {
 			Resource resource = govRegistry.newResource();
 			resource.setContent(data);
 			govRegistry.put(APIConstants.GA_CONFIGURATION_LOCATION, resource);
-			
+
 			/*set resource permission*/
             AuthorizationManager authManager = ServiceReferenceHolder.getInstance().getRealmService().
     				getTenantUserRealm(tenantID).getAuthorizationManager();
@@ -2431,7 +2432,7 @@ public final class APIUtil {
 	 * @param tenantID
 	 * @throws org.wso2.carbon.apimgt.api.APIManagementException
 	 */
-	
+
 	public static void loadloadTenantAPIRXT(String tenant, int tenantID)
 	                                                                    throws APIManagementException {
 		RegistryService registryService = ServiceReferenceHolder.getInstance().getRegistryService();
@@ -2442,7 +2443,7 @@ public final class APIUtil {
 		} catch (RegistryException e) {
 			throw new APIManagementException("Error when create registry instance ", e);
 		}
-			
+
 		String rxtDir =
 		                CarbonUtils.getCarbonHome() + File.separator + "repository" +
 		                        File.separator + "resources" + File.separator + "rxts";
@@ -2467,25 +2468,25 @@ public final class APIUtil {
                 RegistryAuthorizationManager authorizationManager = new RegistryAuthorizationManager
                         (ServiceReferenceHolder.getUserRealm());
                 resourcePath = authorizationManager.computePathOnMount(resourcePath);
-                
+
                 AuthorizationManager authManager = ServiceReferenceHolder.getInstance().getRealmService().
                         getTenantUserRealm(tenantID).getAuthorizationManager();
-                
+
                  if (registry.resourceExists(govRelativePath)) {
                     // set anonymous user permission to RXTs
                     authManager.authorizeRole(APIConstants.ANONYMOUS_ROLE, resourcePath, ActionConstants.GET);
                      continue;
                  }
-                
+
                  String rxt = FileUtil.readFileToString(rxtDir + File.separator + rxtPath);
                  Resource resource = registry.newResource();
                  resource.setContent(rxt.getBytes());
                  resource.setMediaType(APIConstants.RXT_MEDIA_TYPE);
                  registry.put(govRelativePath, resource);
 
-                
+
                 authManager.authorizeRole(APIConstants.ANONYMOUS_ROLE, resourcePath, ActionConstants.GET);
-                
+
             } catch (UserStoreException e) {
                 throw new APIManagementException("Error while adding role permissions to API", e);
             } catch (IOException e) {
@@ -3713,11 +3714,11 @@ public final class APIUtil {
         }
 
     }
-    
+
     /**
      * This method will return mounted path of the path if the path
      * is mounted. Else path will be returned.
-     * 
+     *
      * @param registryContext
      *            Registry Context instance which holds path mappings
      * @param path
@@ -3776,5 +3777,17 @@ public final class APIUtil {
             throw new APIManagementException(msg, e);
         }
         return domains;
+    }
+
+    /**
+     * This method will update the permission cache of the tenant which is related to the given usename
+     *
+     * @param username User name to find the relevant tenant
+     * @throws UserStoreException if the permission update failed
+     */
+    public static void updatePermissionCache(String username) throws UserStoreException {
+        String tenantDomain = MultitenantUtils.getTenantDomain(username);
+        int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager().getTenantId(tenantDomain);
+        PermissionUpdateUtil.updatePermissionTree(tenantId);
     }
 }

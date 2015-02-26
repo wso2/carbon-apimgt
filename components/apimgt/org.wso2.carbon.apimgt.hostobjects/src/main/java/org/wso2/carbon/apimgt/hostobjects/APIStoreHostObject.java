@@ -816,25 +816,23 @@ public class APIStoreHostObject extends ScriptableObject {
      * @param thisObj Scriptable object
      * @param args    Passing arguments
      * @param funObj  Function object
-     * @return
+     * @return true if update successful, false otherwise
      * @throws APIManagementException
      */
     public static boolean jsFunction_updatePermissionCache(Context cx, Scriptable thisObj,
-                                                           Object[] args, Function funObj)throws APIManagementException {
-        if (args==null || args.length == 0) {
+                                                           Object[] args, Function funObj)
+            throws APIManagementException {
+        if (args == null || args.length == 0) {
             handleException("Invalid input parameters to the login method");
         }
-
-        boolean updated=false;
-        try{
-            String username = (String) args[0];
-
-            String tenantDomain = MultitenantUtils.getTenantDomain(username);
-            int tenantId =  ServiceReferenceHolder.getInstance().getRealmService().getTenantManager().getTenantId(tenantDomain);
-            PermissionUpdateUtil.updatePermissionTree(tenantId);
+        String username = (String) args[0];
+        boolean updated = false;
+        try {
+            APIUtil.updatePermissionCache(username);
             updated = true;
         } catch (Exception e) {
-            log.error("Error while updating permissions", e);
+            // This is not a critical issue. If this fails user may not able to login just after user creation
+            log.error("Error while updating permissions cache for " + username, e);
         }
         return updated;
     }
