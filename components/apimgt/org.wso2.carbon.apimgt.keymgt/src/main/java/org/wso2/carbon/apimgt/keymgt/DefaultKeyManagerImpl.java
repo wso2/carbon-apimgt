@@ -40,11 +40,16 @@ import org.wso2.carbon.apimgt.api.model.OAuthApplicationInfo;
 import org.wso2.carbon.apimgt.api.model.OauthAppRequest;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.AbstractKeyManager;
+import org.wso2.carbon.apimgt.impl.clients.ApplicationManagementServiceClient;
 import org.wso2.carbon.apimgt.impl.clients.OAuthAdminClient;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.keymgt.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.keymgt.util.APIKeyMgtUtil;
+import org.wso2.carbon.identity.application.common.model.xsd.InboundAuthenticationConfig;
+import org.wso2.carbon.identity.application.common.model.xsd.InboundAuthenticationRequestConfig;
+import org.wso2.carbon.identity.application.common.model.xsd.Property;
+import org.wso2.carbon.identity.application.common.model.xsd.ServiceProvider;
 import org.wso2.carbon.identity.oauth.stub.dto.OAuthConsumerAppDTO;
 import org.wso2.carbon.utils.CarbonUtils;
 
@@ -67,6 +72,9 @@ public class DefaultKeyManagerImpl extends AbstractKeyManager {
     @Override
     public OAuthApplicationInfo createApplication(OauthAppRequest oauthAppRequest) throws APIManagementException {
         OAuthAdminClient oAuthAdminClient = APIUtil.getOauthAdminClient();
+        ApplicationManagementServiceClient applicationManagementServiceClient = APIUtil.
+                getApplicationManagementServiceClient();
+
         OAuthConsumerAppDTO oAuthConsumerAppDTO = new OAuthConsumerAppDTO();
 
         OAuthApplicationInfo oAuthApplicationInfo = oauthAppRequest.getoAuthApplicationInfo();
@@ -98,6 +106,53 @@ public class DefaultKeyManagerImpl extends AbstractKeyManager {
         }
 
         oAuthApplicationInfo = createOAuthAppFromResponse(oAuthConsumerAppDTO);
+
+        ServiceProvider serviceProvider = new ServiceProvider();
+        serviceProvider.setApplicationName((String) oAuthApplicationInfo.getParameter("client_name"));
+        serviceProvider.setDescription("Service Provider for application " + oAuthApplicationInfo.getParameter("client_name"));
+
+
+        InboundAuthenticationConfig inboundAuthenticationConfig = new InboundAuthenticationConfig();
+        InboundAuthenticationRequestConfig[] inboundAuthenticationRequestConfigs = new
+                InboundAuthenticationRequestConfig[1];
+        InboundAuthenticationRequestConfig inboundAuthenticationRequestConfig = new
+                InboundAuthenticationRequestConfig();
+
+        inboundAuthenticationRequestConfig.setInboundAuthKey(oAuthConsumerAppDTO.getOauthConsumerKey());
+        inboundAuthenticationRequestConfig.setInboundAuthType("oauth2");
+        if (oAuthConsumerAppDTO.getOauthConsumerSecret()!= null && !oAuthConsumerAppDTO.
+                getOauthConsumerSecret().isEmpty()) {
+            Property property = new Property();
+            property.setName("oauthConsumerSecret");
+            property.setValue(oAuthConsumerAppDTO.getOauthConsumerSecret());
+            Property[] properties = {property};
+            inboundAuthenticationRequestConfig.setProperties(properties);
+        }
+
+        inboundAuthenticationRequestConfigs[0] = inboundAuthenticationRequestConfig;
+        inboundAuthenticationConfig.setInboundAuthenticationRequestConfigs(inboundAuthenticationRequestConfigs);
+        serviceProvider.setInboundAuthenticationConfig(inboundAuthenticationConfig);
+
+        try {
+            applicationManagementServiceClient.createApplication(serviceProvider);
+        } catch (Exception e) {
+            handleException("Service Provider creation failed", e);
+        }
+
+//        try {
+//            serviceProvider = applicationManagementServiceClient.getApplication((String) oAuthApplicationInfo.getParameter("client_name"));
+//        } catch (Exception e) {
+//            handleException("Service Provider creation failed", e);
+//        }
+
+
+//
+//        try {
+//            applicationManagementServiceClient.updateApplicationData(serviceProvider);
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
+
 
         return oAuthApplicationInfo;
 
