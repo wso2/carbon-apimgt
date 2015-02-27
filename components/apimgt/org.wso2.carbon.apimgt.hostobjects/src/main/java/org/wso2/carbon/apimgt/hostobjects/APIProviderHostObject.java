@@ -4545,8 +4545,8 @@ public class APIProviderHostObject extends ScriptableObject {
 	*/
     public static boolean isStringArray(Object[] args) {
         int argsCount = args.length;
-        for (int i = 0; i < argsCount; i++) {
-            if (!(args[i] instanceof String)) {
+        for (Object arg : args) {
+            if (!(arg instanceof String)) {
                 return false;
             }
         }
