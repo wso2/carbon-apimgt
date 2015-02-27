@@ -7,6 +7,7 @@
 
         <input type="hidden"  class="prodAccessTokenHidden" value="<%=app.prodKey%>" >
         <input type="hidden"  class="sandAccessTokenHidden" value="<%=app.sandboxKey%>" >
+        <input type="hidden" type="text"  id="scopeInput" value='<%=app.prodKeyScope %>'/>
         <h3 data-section="key-prod" class="js_toggle"><%=i18n.localize("keysPro")%> <i class="icon-chevron-down icon-keys"></i></h3>
         <div class="keyBoxOut">
             <div class="container-fluid">
@@ -15,6 +16,8 @@
                          var log = new Log();
                          var prodVadidataionTime = app.prodValidityTime;
                          var sandVadidataionTime = app.sandValidityTime;
+                         var scopes = app.scopes;
+                         lenS = scopes.length;
 
                          <!-- If token is not set to never expire, then take the expiration in seconds -->
                          if (prodVadidataionTime > 0) {
@@ -95,6 +98,21 @@
                 								<button id="prodAccessCopy" data-clipboard-target="prodAccess" title="Copy to clipboard" class="curl-copybtn"><i class="fa fa-clipboard"></i></button>
                 							</div>
 										</div>
+
+                                        <% if(lenS > 0){ %>
+										<div class="token">
+											<% if(app.prodKeyScope != null && lenS<0 && app.prodKeyScope.length > 60){ %>
+											   <textarea class="tokenTextarea accessTokenScopeDisplayPro keyValues" data-value="<%=app.prodKeyScope%>"><%=app.prodKeyScope%></textarea>
+											<% } else  { %>
+											   <span class="accessTokenScopeDisplayPro keyValues" id="prodAccessScope" data-value="<%=app.prodKeyScope%>"><%=app.prodKeyScope%></span>
+											<% } %>
+			  								<div class="copybtn-wrapper">
+                    							<span class="curl-copyinfo">Copied!</span>
+                								<button id="prodAccessCopy" data-clipboard-target="prodAccessScope" title="Copy to clipboard" class="curl-copybtn"><i class="fa fa-clipboard"></i></button>
+                							</div>
+										</div>
+										<% } %>
+
 										<div class="regenerate-wrapper">
 											<div class="span2">
 												<div class="dropdown">
@@ -110,6 +128,9 @@
 											</div>
 											<div class="span10">
 												<div class="form-inline proRegenerateForm">
+												    <% if(lenS > 0){ %>
+												        <a href="#scopePopup" role="button" class="btn" data-toggle="modal" id="selectScopeText" ><%=i18n.localize("selectScopes")%></a>
+                                                    <% } %>
 													Validity Time: <input type="text" class="input-mini token-validity-input" id="refreshProdValidityTime" value='<%=prodValidityTime%>' maxlength="70"  autofocus="autofocus" /> Seconds
 													<span class="label label-warning" id = "timeWarn" style="display:none;"><%=i18n.localize("timeWarn")%></span>
 													<button class="show-hide-key btn btn-primary" onclick="regenerate('<%=app.name%>','PRODUCTION',200,this,'pull-right','<%=app.prodConsumerKey%>','<%=app.prodConsumerSecret%>')" ><i class="fa fa-repeat"></i> <%=i18n.localize("regenerate")%></button>
@@ -139,6 +160,10 @@
 							<%}%>
                         <% } else{ %>
                         <%=i18n.localize("prodKeyMsg")%>
+                        <% if(lenS > 0){ %>
+                            <br><br>
+                            <a href="#scopePopup" role="button" class="btn" data-toggle="modal" ><%=i18n.localize("selectScopes")%></a>
+                        <% } %>
                         <div class="gen-btn-wrapper">
                         	<button  class="app-key-generate-button btn btn-primary" onclick="jagg.sessionAwareJS({redirect:'/site/pages/subscriptions.jag'})"
                                    data-application="<%=app.name%>"
@@ -251,6 +276,21 @@
                 								<button id="sandAccessCopy" data-clipboard-target="sandAccess" title="Copy to clipboard" class="curl-copybtn"><i class="fa fa-clipboard"></i></button>
                 							</div>
 										</div>
+
+										<% if(lenS > 0){ %>
+                                            <div class="token">
+                                                <% if(app.sandKeyScope != null && app.sandKeyScope.length > 60){ %>
+                                                   <textarea class="tokenTextarea sandScopeDisplayPro keyValues" data-value="<%=app.sandKeyScope%>"><%=app.sandKeyScope%></textarea>
+                                                <% } else { %>
+                                                   <span class="sandScopeDisplayPro keyValues" id="sandAccessScope" data-value="<%=app.sandKeyScope%>"><%=app.sandKeyScope%></span>
+                                                <% } %>
+                                                <div class="copybtn-wrapper">
+                                                    <span class="curl-copyinfo">Copied!</span>
+                                                    <button id="sandScopeCopy" data-clipboard-target="sandAccessScope" title="Copy to clipboard" class="curl-copybtn"><i class="fa fa-clipboard"></i></button>
+                                                </div>
+                                            </div>
+                                        <% } %>
+
 										<div class="regenerate-wrapper">
 											<div class="span2">
 												<div class="dropdown">
@@ -266,6 +306,9 @@
 											</div>
 											<div class="span10">
 												<div class="form-inline proRegenerateForm">
+												    <% if(lenS > 0){ %>
+													    <a href="#scopePopup" role="button" class="btn" data-toggle="modal" ><%=i18n.localize("selectScopes")%></a>
+													<% } %>
 													Validity: <input type="text" class="input-mini token-validity-input" id="refreshSandValidityTime" value="<%=sandValidityTime%>" maxlength="70"  autofocus="autofocus" /> Seconds
 		                            				<span class="label label-warning" id = "timeWarn" style="display:none;"><%=i18n.localize("timeWarn")%></span>
 		                            				<button class="show-hide-key btn btn-primary" onclick="regenerate('<%=app.name%>','SANDBOX',200,this,'pull-right','<%=app.sandboxConsumerKey%>','<%=app.sandboxConsumerSecret%>')" ><i class="fa fa-repeat"></i> <%=i18n.localize("regenerate")%></button>
@@ -294,6 +337,10 @@
 					   		<%}%>
                        <% } else {%>
                        <%=i18n.localize("sandboxKeyMsg")%>
+                       <% if(lenS > 0){ %>
+                           <br><br>
+                           <a href="#scopePopup" role="button" class="btn" data-toggle="modal" ><%=i18n.localize("selectScopes")%></a>
+                       <% } %>
                        <div class="gen-btn-wrapper" <% if(app.sandboxKey!=null){%>style="display:none"<% } %> >
                            <button class="app-key-generate-button btn btn-primary" onclick="jagg.sessionAwareJS({redirect:'/site/pages/subscriptions.jag'})"
                           		data-application="<%=app.name%>"
@@ -406,6 +453,31 @@
             <% } %>
             </div><!-- End row -->
         </div><!-- End container-fluid -->
+
+        <% if(lenS > 0){ %>
+            <div id="scopePopup" class="modal hide fade" tabindex="-1" role="dialog" aria-hidden="true">
+                    <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                    <h3><%=i18n.localize("selectScopes")%></h3>
+                    </div>
+                    <div class="modal-body">
+                        <ul>
+                        <li><input type="checkbox" name="Default Scope" value="default" id="default" class="Checkbox"> Default Scope : default</li>
+
+                                <% for (var i = 0; i < lenS; i++) {
+
+                                         %><li><input type="checkbox" name="<%=scopes[i].scopeName%>" value="<%=scopes[i].scopeKey%>" id="<%= scopes[i].scopeKey%>" class="Checkbox"> <%= scopes[i].scopeName%> : <%= scopes[i].scopeKey %></li><%
+                                        }
+                                        %></ul><%
+                                 %>
+                    </div>
+
+                    <div class="modal-footer">
+                    <input class="btn btn-primary" data-dismiss="modal" type="button" id="scopeSelectButtonPop" value="Select">
+                    <button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
+                    </div>
+            </div>
+        <% } %>
 		
 		<script>
 
