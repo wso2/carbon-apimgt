@@ -1,6 +1,6 @@
 <%
 include("/jagg/jagg.jag");
-var publisher = jagg.module("manager").getAPIProviderObj();
+var publisher = jagg.module("manager").getAPIStoreObj();
 var domain=request.getParameter("tenant");
 var resourceUrl = request.getParameter("resourceUrl");
 
