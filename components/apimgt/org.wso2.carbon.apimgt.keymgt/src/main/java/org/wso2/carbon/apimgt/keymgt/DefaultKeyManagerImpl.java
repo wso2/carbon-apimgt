@@ -19,7 +19,12 @@
 package org.wso2.carbon.apimgt.keymgt;
 
 import org.apache.amber.oauth2.common.OAuth;
+import org.apache.axiom.om.OMContainer;
+import org.apache.axiom.om.OMElement;
+import org.apache.axiom.om.OMNode;
+import org.apache.axiom.om.impl.builder.StAXOMBuilder;
 import org.apache.axis2.util.URL;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpEntity;
@@ -38,6 +43,7 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.AccessTokenInfo;
 import org.wso2.carbon.apimgt.api.model.AccessTokenRequest;
 import org.wso2.carbon.apimgt.api.model.ApplicationConstants;
+import org.wso2.carbon.apimgt.api.model.KeyManagerConfiguration;
 import org.wso2.carbon.apimgt.api.model.OAuthApplicationInfo;
 import org.wso2.carbon.apimgt.api.model.OauthAppRequest;
 import org.wso2.carbon.apimgt.impl.APIConstants;
@@ -52,10 +58,18 @@ import org.wso2.carbon.apimgt.keymgt.util.APIKeyMgtUtil;
 import org.wso2.carbon.identity.oauth.stub.dto.OAuthConsumerAppDTO;
 import org.wso2.carbon.identity.oauth2.stub.dto.OAuth2ClientApplicationDTO;
 import org.wso2.carbon.utils.CarbonUtils;
+import org.wso2.securevault.SecretResolverFactory;
 
+import javax.xml.namespace.QName;
+import javax.xml.stream.XMLStreamException;
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Stack;
 
 /**
  * This class holds the key manager implementation considering WSO2 as the identity provider
@@ -67,6 +81,8 @@ public class DefaultKeyManagerImpl extends AbstractKeyManager {
     private static final String OAUTH_RESPONSE_EXPIRY_TIME = "expires_in";
     private static final String GRANT_TYPE_VALUE = "open_keymanager";
     private static final String GRANT_TYPE_PARAM_VALIDITY = "validity_period";
+
+    private KeyManagerConfiguration configuration;
 
     private static final Log log = LogFactory.getLog(DefaultKeyManagerImpl.class);
 
@@ -301,7 +317,7 @@ public class DefaultKeyManagerImpl extends AbstractKeyManager {
     }
 
     @Override
-    public String getKeyManagerMetaData() throws APIManagementException {
+    public KeyManagerConfiguration getKeyManagerConfiguration() throws APIManagementException {
         return null;
     }
 
@@ -313,6 +329,34 @@ public class DefaultKeyManagerImpl extends AbstractKeyManager {
     @Override
     public OAuthApplicationInfo createSemiManualAuthApplication(OauthAppRequest appInfoRequest) throws APIManagementException {
         return null;
+    }
+
+    @Override
+    public void loadConfiguration(String configuration) throws APIManagementException{
+        if(configuration != null && !configuration.isEmpty()){
+            StAXOMBuilder builder = null;
+            try {
+                builder = new StAXOMBuilder(new ByteArrayInputStream(configuration.getBytes()));
+                OMElement document = builder.getDocumentElement();
+                if(this.configuration == null) {
+                    synchronized (this) {
+                        this.configuration = new KeyManagerConfiguration();
+                        this.configuration.setManualModeSupported(true);
+                        this.configuration.setResourceRegistrationEnabled(true);
+                        this.configuration.setTokenValidityConfigurable(true);
+                        Iterator<OMElement> elementIterator = document.getChildElements();
+                        while (elementIterator.hasNext()){
+                            OMElement element = elementIterator.next();
+                            this.configuration.addParameter(element.getLocalName(),element.getText());
+                        }
+                    }
+                }
+
+            } catch (XMLStreamException e) {
+                e.printStackTrace();
+            }
+
+        }
     }
 
     /**

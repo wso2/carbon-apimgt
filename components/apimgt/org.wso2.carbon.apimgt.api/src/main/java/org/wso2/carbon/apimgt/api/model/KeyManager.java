@@ -84,9 +84,9 @@ public interface KeyManager {
     /**
      * Key manager implementation should be read from hardcoded json file
      *
-     * @return json String
+     * @return {@code KeyManagerConfiguration}
      */
-    String getKeyManagerMetaData() throws APIManagementException;
+    KeyManagerConfiguration getKeyManagerConfiguration() throws APIManagementException;
 
     /**
      * @param jsonInput this jsonInput will contain set of oAuth application properties.
@@ -137,4 +137,6 @@ public interface KeyManager {
      */
     AccessTokenRequest buildAccessTokenRequestFromOAuthApp(OAuthApplicationInfo oAuthApplication,
                                                            AccessTokenRequest tokenRequest) throws APIManagementException;
+
+    void loadConfiguration(String configuration) throws APIManagementException;
 }

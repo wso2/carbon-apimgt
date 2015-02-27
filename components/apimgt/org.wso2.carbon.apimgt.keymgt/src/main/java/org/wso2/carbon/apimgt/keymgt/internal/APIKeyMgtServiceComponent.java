@@ -82,6 +82,10 @@ public class APIKeyMgtServiceComponent {
             ServiceReferenceHolder.getInstance().setAPIManagerConfigurationService(configurationService);
 
             APIKeyMgtDataHolder.initData();
+
+            String keyManagerFile = CarbonUtils.getCarbonHome() + File.separator + "repository" +
+                                    File.separator + "conf" + File.separator + "key-manager.xml";
+            APIKeyMgtDataHolder.initializeKeyManager(keyManagerFile);
             //Based on configuration we have to decide thrift server run or not
             if (APIKeyMgtDataHolder.getThriftServerEnabled()) {
                 APIKeyValidationServiceImpl.init(thriftAuthenticationService);
