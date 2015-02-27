@@ -5,6 +5,7 @@ var t_on = {
     'tempLoadingSpace':1
 };
 var currentLocation;
+var statsEnabled = isDataPublishingEnabled();
 
 var chartColorScheme1 = ["#3da0ea","#bacf0b","#e7912a","#4ec9ce","#f377ab","#ec7337","#bacf0b","#f377ab","#3da0ea","#e7912a","#bacf0b"];
 //fault colors || shades of red
@@ -54,6 +55,12 @@ require(["dojo/dom", "dojo/domReady!"], function(dom){
                     $("#rangeSliderWrapper").width(width);
 
                 }
+
+                else if (json.usage && json.usage.length == 0 && statsEnabled) {
+                    $('#middle').html("");
+                    $('#middle').append($('<div class="errorWrapper"><img src="../themes/default/templates/stats/images/statsEnabledThumb.png" alt="Stats Enabled"></div>'));
+                }
+
                 else{
                     $('#middle').html("");
                     $('#middle').append($('<div class="errorWrapper"><span class="label top-level-warning"><i class="icon-warning-sign icon-white"></i>'
@@ -177,7 +184,7 @@ var drawAPIResponseFaultCountChart = function(from,to){
                             return {value: index + 1, text: value[0]};
                         })
                         });
-                        faultyCountChart.addAxis("y",{vertical:true,fixLower: "major", fixUpper: "major"});
+                        faultyCountChart.addAxis("y",{vertical:true,fixLower: "major", fixUpper: "major", includeZero: true});
 
                         // Define the data
                         var chartData; var color = -1;
@@ -217,6 +224,21 @@ var drawAPIResponseFaultCountChart = function(from,to){
         }, "json");
 }
 
+function isDataPublishingEnabled(){
+    jagg.post("/site/blocks/stats/api-usage/ajax/stats.jag", { action: "isDataPublishingEnabled"},
+        function (json) {
+            if (!json.error) {
+                statsEnabled = json.usage;
+                return statsEnabled;
+            } else {
+                if (json.message == "AuthenticateError") {
+                    jagg.showLogin();
+                } else {
+                    jagg.message({content: json.message, type: "error"});
+                }
+            }
+        }, "json");        
+}
 
 var convertTimeString = function(date){
     var d = new Date(date);

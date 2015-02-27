@@ -25,27 +25,28 @@ public class ApplicationImpl extends Application {
     /**
      * populate Application
      */
-    public void populateApplication() {
-        try {
+    public void populateApplication() throws APIManagementException {
 
-            Application application = dao.getApplicationById(getId());
-            if (application == null) {
-                application = dao.getApplicationByName(this.getName(), this.getSubscriber().getName());
-            }
-            this.setId(application.getId());
-            this.setTier(application.getTier());
-            if(application.getCallbackUrl() == ""){
-                this.setCallbackUrl(null);
-            }else{
-                this.setCallbackUrl(application.getCallbackUrl());
-            }
 
-            this.setDescription(application.getDescription());
-            this.setStatus(application.getStatus());
-            this.getSubscriber().setId(application.getSubscriber().getId());
-        } catch (APIManagementException e) {
-            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+        Application application = dao.getApplicationById(getId());
+        if (application == null) {
+            application = dao.getApplicationByName(this.getName(), this.getSubscriber().getName());
         }
+        if (application == null) {
+            handleException("Application " + this.getName() + " can not found");
+        }
+        this.setId(application.getId());
+        this.setTier(application.getTier());
+        if (application.getCallbackUrl() == "") {
+            this.setCallbackUrl(null);
+        } else {
+            this.setCallbackUrl(application.getCallbackUrl());
+        }
+
+        this.setDescription(application.getDescription());
+        this.setStatus(application.getStatus());
+        this.getSubscriber().setId(application.getSubscriber().getId());
+
     }
 
     /**
@@ -73,6 +74,16 @@ public class ApplicationImpl extends Application {
     protected void handleException(String msg, Exception e) throws APIManagementException {
         log.error(msg, e);
         throw new APIManagementException(msg, e);
+    }
+
+    /**
+     * Common function for exception handling.
+     * @param msg
+     * @throws APIManagementException
+     */
+    protected void handleException(String msg) throws APIManagementException {
+        log.error(msg);
+        throw new APIManagementException(msg);
     }
 
 }

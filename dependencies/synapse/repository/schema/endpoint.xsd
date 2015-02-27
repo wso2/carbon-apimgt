@@ -1,0 +1,315 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<!--
+  ~  Licensed to the Apache Software Foundation (ASF) under one
+  ~  or more contributor license agreements.  See the NOTICE file
+  ~  distributed with this work for additional information
+  ~  regarding copyright ownership.  The ASF licenses this file
+  ~  to you under the Apache License, Version 2.0 (the
+  ~  "License"); you may not use this file except in compliance
+  ~  with the License.  You may obtain a copy of the License at
+  ~
+  ~   http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~  Unless required by applicable law or agreed to in writing,
+  ~  software distributed under the License is distributed on an
+  ~   * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+  ~  KIND, either express or implied.  See the License for the
+  ~  specific language governing permissions and limitations
+  ~  under the License.
+  -->
+
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified"
+           targetNamespace="http://ws.apache.org/ns/synapse"
+           xmlns="http://ws.apache.org/ns/synapse">
+
+    <xs:include schemaLocation="misc/common.xsd"/>
+
+    <xs:element name="endpoint" type="NamedEndpoint">
+        <xs:annotation>
+            <xs:documentation source="description">
+                &lt;endpoint&gt; declarations for the synapse configuration
+            </xs:documentation>
+        </xs:annotation>
+    </xs:element>
+
+    <xs:complexType name="NamedEndpoint">
+        <xs:annotation>
+            <xs:documentation source="description">
+                This is a named endpoint which will come on the top level synapse configuration
+            </xs:documentation>
+        </xs:annotation>
+        <xs:complexContent>
+            <xs:extension base="Endpoint">
+                <xs:attribute name="name" type="xs:string" use="required"/>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+
+    <xs:complexType name="Endpoint">
+        <xs:annotation>
+            <xs:documentation source="description">
+                This is a representation of an endpoint
+            </xs:documentation>
+        </xs:annotation>
+        <xs:choice minOccurs="1">
+            <xs:group ref="leafEndpoints" minOccurs="0" maxOccurs="1"/>
+            <xs:group ref="aggregatedEndpoints" minOccurs="0" maxOccurs="1"/>
+            <xs:group ref="dynamicLB" minOccurs="0" maxOccurs="1"/>
+        </xs:choice>
+        <xs:attribute name="name" type="xs:string" use="optional"/>
+        <xs:attribute name="key" type="xs:string" use="optional"/>
+    </xs:complexType>
+
+    <xs:group name="leafEndpoints">
+        <xs:annotation>
+            <xs:documentation source="description">
+                This group represents the set of leaf level endpoints
+            </xs:documentation>
+        </xs:annotation>
+        <xs:choice>
+            <xs:element name="default" type="DefaultEndpoint"/>
+            <xs:element name="address">
+                <xs:complexType>
+                    <xs:complexContent>
+                        <xs:extension base="DefaultEndpoint">
+                            <xs:attribute name="uri" type="xs:anyURI" use="required"/>
+                        </xs:extension>
+                    </xs:complexContent>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="wsdl">
+                <xs:complexType>
+                    <xs:complexContent>
+                        <xs:extension base="DefaultEndpoint">
+                            <xs:group ref="inlineWsdl" minOccurs="0" maxOccurs="1"/>
+                            <!-- TODO : fix the schema complication by changing the config -->
+                            <xs:attribute name="uri" type="xs:anyURI" use="optional"/>
+                            <xs:attribute name="service" type="xs:string" use="required"/>
+                            <xs:attribute name="port" type="xs:string" use="required"/>
+                        </xs:extension>
+                    </xs:complexContent>
+                </xs:complexType>
+            </xs:element>
+        </xs:choice>
+    </xs:group>
+
+    <xs:group name="aggregatedEndpoints">
+        <xs:annotation>
+            <xs:documentation source="description">
+                This group represents the secondary endpoints like load balance and fail over
+            </xs:documentation>
+        </xs:annotation>
+        <xs:choice>
+            <xs:group ref="lbEndpoints"/>
+            <xs:group ref="failoverEndpoints"/>
+        </xs:choice>
+    </xs:group>
+
+    <xs:group name="lbEndpoints">
+        <xs:annotation>
+            <xs:documentation source="description">
+                This group represents the secondary load balance endpoints
+            </xs:documentation>
+        </xs:annotation>
+        <xs:all>
+            <xs:element name="session" minOccurs="0" maxOccurs="1">
+                <xs:complexType>
+                    <xs:attribute name="type" use="optional">
+                        <xs:simpleType>
+                            <xs:restriction base="xs:string">
+                                <xs:enumeration value="simpleClientSession"/>
+                                <!-- TODO : add other possible values -->
+                            </xs:restriction>
+                        </xs:simpleType>
+                    </xs:attribute>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="loadbalance" minOccurs="1" maxOccurs="1">
+                <xs:complexType>
+                    <xs:choice maxOccurs="unbounded">
+                        <xs:element name="endpoint" minOccurs="2" maxOccurs="unbounded">
+                            <xs:complexType>
+                                <xs:choice>
+                                    <xs:group ref="leafEndpoints" minOccurs="0" maxOccurs="1"/>
+                                    <xs:group ref="failoverEndpoints" minOccurs="0" maxOccurs="1"/>
+                                </xs:choice>
+                                <xs:attribute name="name" type="xs:string" use="optional"/>
+                                <xs:attribute name="key" type="xs:string" use="optional"/>
+                            </xs:complexType>
+                        </xs:element>
+                        <xs:element name="member" minOccurs="2" maxOccurs="unbounded">
+                            <xs:complexType>
+                                <xs:attribute name="hostName" type="xs:string" use="optional"/>
+                                <xs:attribute name="httpPort" type="xs:string" use="optional"/>
+                                <xs:attribute name="httpsPort" type="xs:string" use="optional"/>
+                            </xs:complexType>
+                        </xs:element>
+                    </xs:choice>
+                    <xs:attribute name="algorithm" type="xs:string" default="org.apache.synapse.endpoints.algorithms.RoundRobin" use="optional"/>
+                    <xs:attribute name="failover" type="xs:boolean" default="true" use="optional"/>
+                </xs:complexType>
+            </xs:element>
+        </xs:all>
+    </xs:group>
+
+    <xs:group name="failoverEndpoints">
+        <xs:annotation>
+            <xs:documentation source="description">
+                This group represents the secondary fail over endpoints
+            </xs:documentation>
+        </xs:annotation>
+        <xs:all>
+            <xs:element name="failover" minOccurs="1" maxOccurs="1">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element name="endpoint" minOccurs="2" maxOccurs="unbounded">
+                            <xs:complexType>
+                                <xs:choice>
+                                    <xs:group ref="leafEndpoints" minOccurs="0" maxOccurs="1"/>
+                                    <xs:group ref="lbEndpoints" minOccurs="0" maxOccurs="1"/>
+                                </xs:choice>
+                                <xs:attribute name="name" type="xs:string" use="optional"/>
+                                <xs:attribute name="key" type="xs:string" use="optional"/>
+                            </xs:complexType>
+                        </xs:element>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+        </xs:all>
+    </xs:group>
+
+    <xs:group name="dynamicLB">
+        <xs:annotation>
+            <xs:documentation source="description">
+                This group represents the dynamic loadbalance endpoint
+            </xs:documentation>
+        </xs:annotation>
+        <xs:all>
+            <xs:element name="dynamicLoadbalance" minOccurs="1" maxOccurs="1">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element name="membershipHandler" minOccurs="1" maxOccurs="1">
+                            <xs:complexType>
+                                <xs:sequence>
+                                    <xs:element name="property" minOccurs="0" maxOccurs="unbounded">
+                                        <xs:complexType>
+                                            <xs:attribute name="name" type="xs:string" use="required"/>
+                                            <xs:attribute name="value" type="xs:string" use="required"/>
+                                        </xs:complexType>
+                                    </xs:element>
+                                </xs:sequence>
+                                <xs:attribute name="class" type="xs:string" use="optional" default="org.apache.synapse.core.axis2.Axis2LoadBalanceMembershipHandler"/>
+                            </xs:complexType>
+                        </xs:element>
+                    </xs:sequence>
+                    <xs:attribute name="algorithm" type="xs:string" use="optional" default="org.apache.synapse.endpoints.algorithms.RoundRobin"/>
+                    <xs:attribute name="failover" type="xs:boolean" use="optional" default="true"/>
+                </xs:complexType>
+            </xs:element>
+        </xs:all>
+    </xs:group>
+
+    <xs:complexType name="DefaultEndpoint">
+        <xs:annotation>
+            <xs:documentation source="description">
+                This is the type declaration of the default endpoint
+            </xs:documentation>
+        </xs:annotation>
+        <xs:all>
+            <xs:element name="enableRM" minOccurs="0" maxOccurs="1">
+                <xs:complexType>
+                    <xs:attribute name="policy" type="xs:string" use="optional"/>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="enableSec" minOccurs="0" maxOccurs="1">
+                <xs:complexType>
+                    <xs:attribute name="policy" type="xs:string" use="required"/>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="enableAddressing" minOccurs="0" maxOccurs="1">
+                <xs:complexType>
+                    <xs:attribute name="version" use="optional" default="final">
+                        <xs:simpleType>
+                            <xs:restriction base="xs:string">
+                                <xs:enumeration value="final"/>
+                                <xs:enumeration value="submission"/>
+                            </xs:restriction>
+                        </xs:simpleType>
+                    </xs:attribute>
+                    <xs:attribute name="separateListener" use="optional" type="xs:boolean" default="false"/>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="timeout" minOccurs="0" maxOccurs="1">
+                <xs:complexType>
+                    <xs:all>
+                        <xs:element name="duration" minOccurs="0" maxOccurs="1" type="xs:long"/>
+                        <xs:element name="responseAction" minOccurs="0" maxOccurs="1">
+                            <xs:simpleType>
+                                <xs:restriction base="xs:string">
+                                    <xs:enumeration value="discard"/>
+                                    <xs:enumeration value="fault"/>
+                                </xs:restriction>
+                            </xs:simpleType>
+                        </xs:element>
+                    </xs:all>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="markForSuspension" minOccurs="0" maxOccurs="1">
+                <xs:complexType>
+                    <xs:all>
+                        <xs:element name="errorCodes" minOccurs="0" maxOccurs="1" type="xs:string"/>
+                        <xs:element name="retriesBeforeSuspension" minOccurs="0" maxOccurs="1" type="xs:integer"/>
+                        <xs:element name="retryDelay" minOccurs="0" maxOccurs="1" type="xs:long"/>
+                    </xs:all>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="suspendOnFailure" minOccurs="0" maxOccurs="1">
+                <xs:complexType>
+                    <xs:all>
+                        <xs:element name="errorCodes" minOccurs="0" maxOccurs="1" type="xs:string"/>
+                        <xs:element name="initialDuration" minOccurs="0" maxOccurs="1" type="xs:long"/>
+                        <xs:element name="progressionFactor" minOccurs="0" maxOccurs="1" type="xs:integer"/>
+                        <xs:element name="maximumDuration" minOccurs="0" maxOccurs="1" type="xs:long"/>
+                    </xs:all>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="suspendDurationOnFailure" minOccurs="0" maxOccurs="1">
+                <xs:annotation>
+                    <xs:documentation source="description">
+                        This is deprecated, please use the suspendOnFailure
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:element>
+        </xs:all>
+        <xs:attributeGroup ref="commonEndpoint"/>
+    </xs:complexType>
+
+    <xs:attributeGroup name="commonEndpoint">
+        <xs:annotation>
+            <xs:documentation source="description">
+                This group of attributes represents the common endpoint attribute set
+            </xs:documentation>
+        </xs:annotation>
+        <xs:attribute name="format" use="optional">
+            <xs:simpleType>
+                <xs:restriction base="xs:string">
+                    <xs:enumeration value="soap11"/>
+                    <xs:enumeration value="soap12"/>
+                    <xs:enumeration value="pox"/>
+                    <xs:enumeration value="get"/>
+                </xs:restriction>
+            </xs:simpleType>
+        </xs:attribute>
+        <xs:attribute name="optimize" use="optional">
+            <xs:simpleType>
+                <xs:restriction base="xs:string">
+                    <xs:enumeration value="mtom"/>
+                    <xs:enumeration value="swa"/>
+                </xs:restriction>
+            </xs:simpleType>
+        </xs:attribute>
+        <xs:attribute name="encoding" type="xs:string" use="optional"/>
+        <xs:attributeGroup ref="monitoringAspect"/>
+    </xs:attributeGroup>
+
+</xs:schema>

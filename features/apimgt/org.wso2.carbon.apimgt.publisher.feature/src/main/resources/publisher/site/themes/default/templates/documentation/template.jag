@@ -38,7 +38,7 @@
             </div>
         </div>
         <!-- Row -->
-        <form id="addNewDoc" enctype="multipart/form-data" action="<%=site.context%>/site/blocks/documentation/ajax/docs.jag" method="POST">
+        <form id="addNewDoc" enctype="multipart/form-data" action="<%= jagg.url("/site/blocks/documentation/ajax/docs.jag")%>" method="POST">
         <div class="container-fluid" style="padding-left:0">
 	<div id="newDoc" style="display:none;">
 		<div class="row-fluid">
@@ -60,6 +60,8 @@
 		        <div class="control-group">
 		             <label class="control-label" for="textarea"><%=i18n.localize("visibility")%></label>
 		             <div class="controls">
+		             <a class="icon-question-sign help_popup" help_data="doc_help"></a>
+                     <p id="doc_help" class="hide"><%=i18n.localize("docRoleHelpMsg")%></p>
 		            <select id="docVisibility" style="width:100%">
 		              <option value="API_LEVEL" selected="true">Same as API visibility</option>
 		              <option value="OWNER_ONLY">Private</option>
@@ -111,29 +113,33 @@
 		                <div class="controls">
 		                    <label class="radio">
 		                        <input type="radio" name="optionsRadios1" id="optionsRadios6" value="inline" onclick="javascript:$('#sourceUrlDoc').hide('slow');$('#sourceFile').hide('slow')" checked=""><%=i18n.localize("inline")%>
-		                    </label>
-		                     <a class="icon-question-sign help_popup" help_data="inlineDoc_help"></a>
-            				 <p id="inlineDoc_help" class="hide"><%=i18n.localize("inlineDocHelpMsg")%></p>
+		                        <a class="icon-question-sign help_popup" help_data="inlineDoc_help"></a>
+           				 <p id="inlineDoc_help" class="hide"><%=i18n.localize("inlineDocHelpMsg")%></p>
+		                      </label>
+		                     
 		                    <label class="radio">
 		                        <input type="radio" name="optionsRadios1" id="optionsRadios7" value="url" onclick="javascript:$('#sourceUrlDoc').toggle('slow');$('#sourceFile').hide('slow')"><%=i18n.localize("url")%>
-		                    </label>
-		                    <a class="icon-question-sign help_popup" help_data="urlDoc_help"></a>
-            				 <p id="urlDoc_help" class="hide"><%=i18n.localize("urlDocHelpMsg")%></p>
+		                        <a class="icon-question-sign help_popup" help_data="urlDoc_help"></a>
+           				 <p id="urlDoc_help" class="hide"><%=i18n.localize("urlDocHelpMsg")%></p>
+		                      </label>
+		                    
 		                    <div id="sourceUrlDoc" class="controls" style="display:none;">
 		                     <span class="requiredAstrix">*</span> <input type="text" class="required" style="width:98%" id="docUrl">
 		                    </div>
-				  			  <label class="radio">
+				   <label class="radio">
 		                        <input type="radio" name="optionsRadios1" id="optionsRadios8" value="file" onclick="javascript:$('#sourceFile').toggle('slow');$('#sourceUrlDoc').hide('slow')"><%=i18n.localize("file")%>
+		                        <a class="icon-question-sign help_popup" help_data="fileDoc_help"></a>
+           				 <p id="fileDoc_help" class="hide"><%=i18n.localize("fileDocHelpMsg")%></p>
 		                    </label>
-		                    <a class="icon-question-sign help_popup" help_data="fileDoc_help"></a>
-            				 <p id="fileDoc_help" class="hide"><%=i18n.localize("fileDocHelpMsg")%></p>
+		                    
 						
-						<div id="fileNameDiv" style="display:none;"></div>
-						<a onclick="javascript:$('#sourceFile').toggle('slow')" id="toggleFileDoc" style="display:none;">
+					<div id="fileNameDiv" style="display:none;"></div>
+					<a onclick="javascript:$('#sourceFile').toggle('slow')" id="toggleFileDoc" style="display:none;">
                             Change File
                         </a>
 		                    <div id="sourceFile" class="controls" style="display:none;">
 		                     <span class="requiredAstrix">*</span> <input type="file" class="required" style="width:98%" name="docLocation" id="docLocation">
+		                     <p id="fileType_help"><%=i18n.localize("fileDocTypeHelpMsg")%></p>
 		                    </div>
 		                </div>
 		            </div>
@@ -172,9 +178,14 @@
                 <tbody id="listDocs">
                 <%
                 var i, doc, length = docs.length;
+		
                 for(i = 0; i < length; i++) {
-                    doc= docs[i];var log=new Log();
-
+                    doc= docs[i];var log=new Log(); 
+		    if (doc.docType == "Swagger API Definition") {
+			//Swagger API definition is not shown in docs and only can be modified from 'Edit Swagger Definition' buttion in the 'Edit' view
+			length--;
+			continue;
+		    }
                 %>
                 <tr id="<%=api.name%>-<%=doc.docName.replace(/ /g,'__')%>">
                     <td><%= encode.forHtml(doc.docName)%></td>
@@ -187,26 +198,18 @@
                    </td><%}%>
                     <td class="dateFull"><%=doc.docLastUpdated%></td>
                     <%if(createPermitted){%>
-                    <td id="buttonTd"><% if(doc.sourceType == "INLINE") {
-
-                    	if (doc.docType == "Swagger API Definition") {
-                    	%>
-                    		<a href="javascript:editJSONContent('<%=api.provider%>','<%=api.name%>','<%=api.version%>','<%= encode.forJavaScriptAttribute(doc.docName)%>','edit','<%=urlPostfix%>')"><i class="icon-edit"></i> <%=i18n.localize("editContent")%></a>
-                        <% } else { %>
-                        	<a href="javascript:editInlineContent('<%=api.provider%>','<%=api.name%>','<%=api.version%>','<%= encode.forJavaScriptAttribute(doc.docName)%>','edit','<%=urlPostfix%>')"><i class="icon-edit"></i> <%=i18n.localize("editContent")%></a>
-                        <%}%>
-
+                    <td id="buttonTd">
+			<% if(doc.sourceType == "INLINE") {%>
+ 			 	<a href="javascript:editInlineContent('<%=api.provider%>','<%=api.name%>','<%=api.version%>','<%= encode.forJavaScriptAttribute(doc.docName)%>','edit','<%=urlPostfix%>')"><i class="icon-edit"></i> <%=i18n.localize("editContent")%></a>
                         <% }else if (doc.sourceType == "URL"){%>
-                         <a href="<%= encode.forHtmlAttribute(encode.forUri(doc.sourceUrl))%><%=urlPrefix%>" target="_blank" ><i class="icon-check"></i> <%=i18n.localize("view")%></a>
+                         	<a href="<%= encode.forHtmlAttribute(encode.forUri(doc.sourceUrl))%><%=urlPrefix%>" target="_blank" ><i class="icon-check"></i> <%=i18n.localize("view")%></a>
                         <%}else if (doc.sourceType == "FILE"){ %>
-			 <a href="<%=doc.filePath%><%=urlPrefix%>" target="_blank" download><i class="icon-check"></i> <%=i18n.localize("open")%></a>
+			 	<a href="<%=jagg.getRegistryPath(doc.filePath)%><%=urlPrefix%>" target="_blank" download><i class="icon-check"></i> <%=i18n.localize("open")%></a>
 			<%}%>
 
                         | <a href="javascript:updateDocumentation('<%=api.name%>-<%= encode.forJavaScriptAttribute(doc.docName)%>','<%= encode.forJavaScriptAttribute(doc.docName)%>','<%=doc.docType%>','<%= encode.forJavaScriptAttribute(doc.summary)%>','<%=doc.sourceType%>','<%=doc.sourceUrl%>','<%=doc.filePath%>','<%=doc.otherTypeName%>','<%=doc.visibility%>')"><i class="icon-retweet"></i> <%=i18n.localize("update")%></a>
-                         <% if (doc.docType != "Swagger API Definition") {%>
+                         
                         |<a href="javascript:removeDocumentation('<%=api.provider%>','<%=api.name%>','<%=api.version%>','<%= encode.forJavaScriptAttribute(doc.docName) %>','<%= encode.forJavaScriptAttribute(doc.docType)%>')"><i class="icon-trash"></i> <%=i18n.localize("deleteMethod")%></a>
-
-						<% } %>
 			</td>
                     <%}%>
                 </tr>

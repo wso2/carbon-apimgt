@@ -91,7 +91,8 @@ public abstract class AbstractKeyManager implements KeyManager {
      * @return OAuthApplicationInfo object will be return.
      * @throws APIManagementException
      */
-    public OAuthApplicationInfo buildFromJSON(String jsonInput) throws APIManagementException {
+    public OAuthApplicationInfo buildFromJSON(OAuthApplicationInfo oAuthApplicationInfo, String jsonInput) throws
+            APIManagementException {
         //initiate json parser.
         JSONParser parser = new JSONParser();
         JSONObject jsonObject;
@@ -102,15 +103,14 @@ public abstract class AbstractKeyManager implements KeyManager {
             if (jsonObject instanceof Map) {
                 //create a map to hold json parsed objects.
                 Map<String, Object> params = (Map) jsonObject;
-                //initiate OAuthApplicationInfo object.
-                OAuthApplicationInfo info = new OAuthApplicationInfo();
+
                 //set client Id
                 if ((String) params.get("client_id") != null) {
-                    info.setClientId((String) params.get("client_id"));
+                    oAuthApplicationInfo.setClientId((String) params.get("client_id"));
                 }
                 //copy all params map in to OAuthApplicationInfo's Map object.
-                info.putAll(params);
-                return info;
+                oAuthApplicationInfo.putAll(params);
+                return oAuthApplicationInfo;
             }
         } catch (ParseException e) {
             handleException("Error occurred while parsing JSON String", e);

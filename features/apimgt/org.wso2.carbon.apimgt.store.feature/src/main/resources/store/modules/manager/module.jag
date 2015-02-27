@@ -20,7 +20,9 @@ jagg.module("manager", {
     isSelfSignupEnabled:function () {
         return jagg.require(jagg.getModulesDir() + "manager/manager.jag").isSelfSignupEnabled.apply(this, arguments);
     },
-
+    isSelfSignupEnabledForTenantUser:function (tenantDomain) {
+        return jagg.require(jagg.getModulesDir() + "manager/manager.jag").isSelfSignupEnabledForTenantUser.apply(this, arguments);
+    },
     getAPIStoreObj:function () {
         return jagg.require(jagg.getModulesDir() + "manager/manager.jag").getAPIStoreObj.apply(this, arguments);
      },
@@ -28,7 +30,9 @@ jagg.module("manager", {
     loadTenantRegistry:function (tenantDomain) {
         return jagg.require(jagg.getModulesDir() + "manager/manager.jag").loadTenantRegistry.apply(this, arguments);
      },
-
+     loadTenantAxisConfiguration:function (tenantDomain) {
+        return jagg.require(jagg.getModulesDir() + "manager/manager.jag").loadTenantAxisConfiguration.apply(this, arguments);
+     },
      invokeService:function () {
        return jagg.require(jagg.getModulesDir() + "manager/client.jag").invokeService.apply(this, arguments);
      },

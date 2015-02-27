@@ -223,8 +223,13 @@ public class APIKeyValidationService extends AbstractAdmin {
                 return info;
             }
         }
-
-        String resource = context + "/" + version + matchingResource + ":" + httpVerb;
+        String actualVersion = version;
+        //Check if the api version has been prefixed with _default_
+        if (version != null && version.startsWith(APIConstants.DEFAULT_VERSION_PREFIX)) {
+            //Remove the prefix from the version.
+            actualVersion = version.split(APIConstants.DEFAULT_VERSION_PREFIX)[1];
+        }
+        String resource = context + "/" + actualVersion + matchingResource + ":" + httpVerb;
 
         //If validation info is not cached creates fresh api key validation information object and returns it
         APIKeyValidationInfoDTO apiKeyValidationInfoDTO = apiMgtDAO.validateKey(context, version, accessToken,requiredAuthenticationLevel);
@@ -258,12 +263,9 @@ public class APIKeyValidationService extends AbstractAdmin {
         	//return if client domain is not-authorized
             APIUtil.checkClientDomainAuthorized(apiKeyValidationInfoDTO, clientDomain);
         }
-        
-        //If key validation information is not null and key validation enabled at keyMgt we put validation
-        //information into cache
-        if (apiKeyValidationInfoDTO != null) {
-            keyManagerCache.put(cacheKey, apiKeyValidationInfoDTO);
-        }
+
+        //Put validation information into cache
+        keyManagerCache.put(cacheKey, apiKeyValidationInfoDTO);
 
         if (log.isDebugEnabled() && axis2MessageContext != null) {
             logMessageDetails(axis2MessageContext, apiKeyValidationInfoDTO);

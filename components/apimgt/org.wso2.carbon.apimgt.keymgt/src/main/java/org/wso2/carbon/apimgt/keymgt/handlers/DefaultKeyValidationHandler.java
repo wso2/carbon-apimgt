@@ -3,7 +3,10 @@ package org.wso2.carbon.apimgt.keymgt.handlers;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.model.AccessTokenInfo;
+import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.applications.ApplicationCreator;
 import org.wso2.carbon.apimgt.impl.clients.OAuth2TokenValidationServiceClient;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
@@ -32,8 +35,6 @@ public class DefaultKeyValidationHandler extends AbstractKeyValidationHandler {
 
     @Override
     public boolean validateToken(TokenValidationContext validationContext) throws APIKeyMgtException {
-
-
         if (validationContext.isCacheHit()) {
             APIKeyValidationInfoDTO infoDTO = validationContext.getValidationInfoDTO();
 
@@ -42,6 +43,7 @@ public class DefaultKeyValidationHandler extends AbstractKeyValidationHandler {
             boolean tokenExpired = APIUtil.isAccessTokenExpired(infoDTO);
             if (tokenExpired) {
                 infoDTO.setAuthorized(false);
+                infoDTO.setValidationStatus(APIConstants.KeyValidationStatus.API_AUTH_ACCESS_TOKEN_EXPIRED);
                 log.debug("Token " + validationContext.getAccessToken() + " expired.");
                 return false;
             } else {
@@ -49,56 +51,45 @@ public class DefaultKeyValidationHandler extends AbstractKeyValidationHandler {
             }
         }
 
-        OAuth2ClientApplicationDTO oAuth2ClientApplicationDTO;
+        AccessTokenInfo tokenInfo = null;
 
         try {
-            OAuth2TokenValidationServiceClient oAuth2TokenValidationServiceClient = new
-                    OAuth2TokenValidationServiceClient();
-            oAuth2ClientApplicationDTO = oAuth2TokenValidationServiceClient.
-                    validateAuthenticationRequest(validationContext.getAccessToken());
+            tokenInfo = ApplicationCreator.getKeyManager().getTokenMetaData(validationContext.getAccessToken());
+
+            if (tokenInfo == null || !tokenInfo.isTokenValid()) {
+                return false;
+            }
+
+            validationContext.setTokenInfo(tokenInfo);
+            //TODO: Eliminate use of APIKeyValidationInfoDTO if possible
+
+            APIKeyValidationInfoDTO apiKeyValidationInfoDTO = new APIKeyValidationInfoDTO();
+            validationContext.setValidationInfoDTO(apiKeyValidationInfoDTO);
+
+            if (!hasTokenRequiredAuthLevel(validationContext.getRequiredAuthenticationLevel(), tokenInfo)) {
+                apiKeyValidationInfoDTO.setAuthorized(false);
+                apiKeyValidationInfoDTO.setValidationStatus(APIConstants.KeyValidationStatus.API_AUTH_INCORRECT_ACCESS_TOKEN_TYPE);
+                return false;
+            }
+
+            apiKeyValidationInfoDTO.setAuthorized(tokenInfo.isTokenValid());
+            apiKeyValidationInfoDTO.setEndUserName(tokenInfo.getEndUserName());
+            apiKeyValidationInfoDTO.setConsumerKey(tokenInfo.getConsumerKey());
+            apiKeyValidationInfoDTO.setIssuedTime(tokenInfo.getIssuedTime());
+            apiKeyValidationInfoDTO.setValidityPeriod(tokenInfo.getValidityPeriod());
+
+            if (tokenInfo.getScopes() != null) {
+                Set<String> scopeSet = new HashSet<String>(Arrays.asList(tokenInfo.getScopes()));
+                apiKeyValidationInfoDTO.setScopes(scopeSet);
+            }
 
         } catch (APIManagementException e) {
-            log.error("Oauth2 token validation failed", e);
-            throw new APIKeyMgtException("Oauth2 token validation failed");
+            log.error("Error while obtaining Token Metadata from Authorization Server", e);
+            throw new APIKeyMgtException("Error while obtaining Token Metadata from Authorization Server");
         }
 
-        org.wso2.carbon.identity.oauth2.stub.dto.OAuth2TokenValidationResponseDTO oAuth2TokenValidationResponseDTO = oAuth2ClientApplicationDTO.
-                getAccessTokenValidationResponse();
-
-        if(!oAuth2TokenValidationResponseDTO.getValid()) {
-            log.error("Oauth2 Token is invalid");
-            throw new APIKeyMgtException("Oauth2 Token is invalid");
-        }
-
-        APIKeyValidationInfoDTO apiKeyValidationInfoDTO = new APIKeyValidationInfoDTO();
-        apiKeyValidationInfoDTO.setAuthorized(oAuth2TokenValidationResponseDTO.getValid());
-        apiKeyValidationInfoDTO.setEndUserName(oAuth2TokenValidationResponseDTO.getAuthorizedUser());
-        apiKeyValidationInfoDTO.setConsumerKey(oAuth2ClientApplicationDTO.getConsumerKey());
-
-        Set<String> scopeSet = new HashSet<String>(Arrays.asList(oAuth2TokenValidationResponseDTO.getScope()));
-        apiKeyValidationInfoDTO.setScopes(scopeSet);
-
-        validationContext.setValidationInfoDTO(apiKeyValidationInfoDTO);
-
-        return oAuth2TokenValidationResponseDTO.getValid();
+        return tokenInfo.isTokenValid();
     }
-
-    private void checkClientDomainAuthorized (APIKeyValidationInfoDTO apiKeyValidationInfoDTO, String clientDomain)
-            throws APIKeyMgtException {
-        if (clientDomain != null) {
-            clientDomain = clientDomain.trim();
-        }
-        List<String> authorizedDomains = apiKeyValidationInfoDTO.getAuthorizedDomains();
-        if (!(authorizedDomains.contains("ALL") || authorizedDomains.contains(clientDomain))) {
-            log.error("Unauthorized client domain :" + clientDomain +
-                    ". Only \"" + authorizedDomains + "\" domains are authorized to access the API.");
-            throw new APIKeyMgtException("Unauthorized client domain :" + clientDomain +
-                    ". Only \"" + authorizedDomains + "\" domains are authorized to access the API.");
-        }
-
-    }
-
-
 
     @Override
     public boolean validateScopes(TokenValidationContext validationContext) throws APIKeyMgtException {
@@ -118,10 +109,16 @@ public class DefaultKeyValidationHandler extends AbstractKeyValidationHandler {
 
         String[] scopes = null;
         Set<String> scopesSet = apiKeyValidationInfoDTO.getScopes();
-        if(scopesSet != null && !scopesSet.isEmpty()){
+
+        if (scopesSet != null && !scopesSet.isEmpty()) {
             scopes = scopesSet.toArray(new String[scopesSet.size()]);
-            if(log.isDebugEnabled()){
-                log.debug("Scopes allowed for token : "+validationContext.getAccessToken()+" : "+scopes);
+            if (log.isDebugEnabled() && scopes != null) {
+                StringBuffer scopeList = new StringBuffer();
+                for (String scope : scopes) {
+                    scopeList.append(scope + ",");
+                }
+                scopeList.deleteCharAt(scopeList.length() - 1);
+                log.debug("Scopes allowed for token : " + validationContext.getAccessToken() + " : " + scopeList.toString());
             }
         }
 

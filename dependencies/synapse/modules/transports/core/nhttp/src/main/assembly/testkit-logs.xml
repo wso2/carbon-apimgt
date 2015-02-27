@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+<assembly>
+    <id>testkit-logs</id>
+    <formats>
+        <format>zip</format>
+    </formats>
+    <fileSets>
+        <fileSet>
+            <directory>target/testkit-logs</directory>
+            <outputDirectory></outputDirectory>
+        </fileSet>
+    </fileSets>
+</assembly>

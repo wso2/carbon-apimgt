@@ -1,0 +1,4 @@
+org.apache.synapse.mediators.spring.SpringMediatorFactory
+org.apache.synapse.mediators.bsf.ScriptMediatorFactory
+org.apache.synapse.mediators.throttle.ThrottleMediatorFactory
+org.apache.synapse.mediators.xquery.XQueryMediatorFactory

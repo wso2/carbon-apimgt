@@ -8,7 +8,7 @@ i18n.init(request,localeResourcesBasePath);
 
 (function () {
 
-    var result, api, title, mod, links,error,message,discoveryURL,swaggerString,uriTemplates
+    var result, api, title, mod, links,error,message,swaggerString,uriTemplates
             name = request.getParameter("name"),
             version = request.getParameter("version"),
             provider = request.getParameter("provider"),
@@ -23,17 +23,18 @@ i18n.init(request,localeResourcesBasePath);
     api = result.api;
     error = result.error;
     message = result.message;
-    discoveryURL = result.discoveryURL;
     swaggerString=result.swaggerString;
     uriTemplates = result.uriTemplates;
     var apiName="";
     var apiVersion=null;
     var apiProvider="Provider";
+    var apiOwner="";
 
     if(!error){
     apiName=api.name;
     apiVersion=api.version;
     apiProvider=api.provider;
+    apiOwner=api.apiOwner;
     }
     title = "API Store - " + apiName;
 
@@ -55,6 +56,7 @@ i18n.init(request,localeResourcesBasePath);
                             "name":"api/provider-apis",
                             "inputs":{
                                      "providerId":apiProvider,
+                                     "apiOwner":apiOwner,
                                      "currentApi":apiName,
                                      "currentApiVersion":apiVersion,
                                      "uriTemplates":uriTemplates,
@@ -66,7 +68,6 @@ i18n.init(request,localeResourcesBasePath);
                             "name":"api/api-info",
                             "inputs":{
                                      "api":api,
-                                     "discoveryURL":discoveryURL,
                                      "swaggerString":swaggerString,
                                      "uriTemplates":uriTemplates,
                                      "error":error,

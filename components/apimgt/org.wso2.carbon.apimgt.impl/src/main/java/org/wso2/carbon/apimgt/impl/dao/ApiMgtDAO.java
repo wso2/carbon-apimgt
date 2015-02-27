@@ -650,7 +650,7 @@ public class ApiMgtDAO {
         if(version != null && version.startsWith(APIConstants.DEFAULT_VERSION_PREFIX)){
             defaultVersionInvoked = true;
             //Remove the prefix from the version.
-            version = version.split(APIConstants.DEFAULT_VERSION_PREFIX)[0];
+            version = version.split(APIConstants.DEFAULT_VERSION_PREFIX)[1];
         }
 
         String getAPISqlQuery = "SELECT "+

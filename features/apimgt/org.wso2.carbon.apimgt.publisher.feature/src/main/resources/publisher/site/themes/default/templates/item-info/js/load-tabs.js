@@ -61,6 +61,10 @@ var getResponseTime = function(name) {
 
 
 $(document).ready(function() {
+
+    // Converting dates from timestamp to date string
+    jagg.printDate();
+
     if (($.cookie("selectedTab") != null)) {
         var tabLink = $.cookie("selectedTab");
         $('#' + tabLink + "Link").tab('show');
@@ -77,8 +81,7 @@ $(document).ready(function() {
         }});
 
     });
-    // Converting dates from timestamp to date string
-    jagg.printDate();
+    
 });
 var t_on = {
             'versionChart':1,
@@ -188,8 +191,7 @@ function pushDataForTabs(clickedTab){
                               } else {
                                   $('#versionTable').hide();
                                   $('#versionChart').css("fontSize", 14);
-                                  $('#versionChart').append($('<div class="errorWrapper"><span class="label top-level-warning"><i class="icon-warning-sign icon-white"></i>'
-                                                                      +i18n.t('errorMsgs.checkBAMConnectivity')+'</span></div>'));
+                                  $('#versionChart').append($('<span class="label label-info">' + i18n.t('errorMsgs.noData') + '</span>'));
                               }
 
                           } else {
@@ -283,8 +285,7 @@ function pushDataForTabs(clickedTab){
                               } else {
                                   $('#versionUserTable').hide();
                                   $('#versionUserChart').css("fontSize", 14);
-                                  $('#versionUserChart').append($('<div class="errorWrapper"><span class="label top-level-warning"><i class="icon-warning-sign icon-white"></i>'
-                                  +i18n.t('errorMsgs.checkBAMConnectivity')+'</span></div>'));
+                                  $('#versionUserChart').append($('<span class="label label-info">' + i18n.t('errorMsgs.noData') + '</span>'));
                               }
 
                           } else {
@@ -386,8 +387,7 @@ function pushDataForTabs(clickedTab){
                               } else {
                                   $('#userTable').hide();
                                   $('#userChart').css("fontSize", 14);
-                                  $('#userChart').append($('<div class="errorWrapper"><span class="label top-level-warning"><i class="icon-warning-sign icon-white"></i>'
-                                                                   +i18n.t('errorMsgs.checkBAMConnectivity')+'</span></div>'));
+                                  $('#userChart').append($('<span class="label label-info">' + i18n.t('errorMsgs.noData') + '</span>'));
                               }
 
                           } else {
@@ -481,8 +481,7 @@ function pushDataForTabs(clickedTab){
                               } else {
                                   $('#userVersionTable').hide();
                                   $('#userVersionChart').css("fontSize", 14);
-                                  $('#userVersionChart').append($('<div class="errorWrapper"><span class="label top-level-warning"><i class="icon-warning-sign icon-white"></i>'
-                                                                          +i18n.t('errorMsgs.checkBAMConnectivity')+'</span></div>'));
+                                  $('#userVersionChart').append($('<span class="label label-info">' + i18n.t('errorMsgs.noData') + '</span>'));
                               }
 
                           } else {

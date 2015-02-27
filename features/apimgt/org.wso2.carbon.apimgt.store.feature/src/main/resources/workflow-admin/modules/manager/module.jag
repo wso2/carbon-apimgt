@@ -19,7 +19,10 @@ jagg.module("manager", {
      },
      invokeService:function () {
        return jagg.require(jagg.getModulesDir() + "manager/client.jag").invokeService.apply(this, arguments);
-     }
-
+     },
+     
+    getAPIProviderObj:function () {
+        return jagg.require(jagg.getModulesDir() + "manager/manager.jag").getAPIProviderObj.apply(this, arguments);
+     },
  });
  %>

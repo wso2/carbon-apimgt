@@ -18,9 +18,14 @@
 
 package org.wso2.carbon.apimgt.impl.workflow;
 
+import org.apache.axis2.util.JavaUtils;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dto.WorkflowDTO;
+import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
+import org.wso2.carbon.apimgt.impl.workflow.events.APIMgtWorkflowDataPublisher;
 import org.wso2.carbon.registry.core.utils.UUIDGenerator;
 
 import java.io.Serializable;
@@ -32,6 +37,8 @@ import java.util.List;
 public abstract class WorkflowExecutor implements Serializable {
 
     protected String callbackURL;
+
+
 
     /**
      * Returns the workflow executor type. It is better to follow a convention as PRODUCT_ARTIFACT_ACTION for the
@@ -45,10 +52,11 @@ public abstract class WorkflowExecutor implements Serializable {
      * @param workflowDTO - The WorkflowDTO which contains workflow contextual information related to the workflow.
      * @throws WorkflowException - Thrown when the workflow execution was not fully performed.
      */
-    public void execute(WorkflowDTO workflowDTO) throws WorkflowException{
+    public void execute(WorkflowDTO workflowDTO) throws WorkflowException {
         ApiMgtDAO apiMgtDAO = new ApiMgtDAO();
         try {
             apiMgtDAO.addWorkflowEntry(workflowDTO);
+            publishEvents(workflowDTO);
         } catch (APIManagementException e) {
             throw new WorkflowException("Error while persisting workflow", e);
         }
@@ -63,6 +71,7 @@ public abstract class WorkflowExecutor implements Serializable {
         ApiMgtDAO apiMgtDAO = new ApiMgtDAO();
         try {
             apiMgtDAO.updateWorkflowStatus(workflowDTO);
+            publishEvents(workflowDTO);
         } catch (APIManagementException e) {
             throw new WorkflowException("Error while updating workflow", e);
         }
@@ -75,6 +84,9 @@ public abstract class WorkflowExecutor implements Serializable {
      * @throws WorkflowException - Thrown when the workflow information could not be retrieved.
      */
     public abstract List<WorkflowDTO> getWorkflowDetails(String workflowStatus) throws WorkflowException;
+
+
+
 
     /**
      * Method generates and returns UUID
@@ -105,6 +117,22 @@ public abstract class WorkflowExecutor implements Serializable {
 
     public void setCallbackURL(String callbackURL) {
         this.callbackURL = callbackURL;
+    }
+
+    /*
+    This method is to publish workflow events
+    * @param workflowDTO workflow DTO
+    */
+    public void publishEvents(WorkflowDTO workflowDTO) {
+        APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
+                getAPIManagerConfigurationService().
+                getAPIManagerConfiguration();
+        String enabledStr = config.getFirstProperty(APIConstants.API_USAGE_ENABLED);
+        boolean enabled = enabledStr != null && JavaUtils.isTrueExplicitly(enabledStr);
+        if (enabled) {
+            APIMgtWorkflowDataPublisher publisher = new APIMgtWorkflowDataPublisher();
+            publisher.publishEvent(workflowDTO);
+        }
     }
 
 }

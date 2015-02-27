@@ -36,6 +36,7 @@ public class BAMRequestPublisherDTO extends RequestPublisherDTO{
         setTenantDomain(requestPublisherDTO.getTenantDomain());
         setApplicationName(requestPublisherDTO.getApplicationName());
         setApplicationId(requestPublisherDTO.getApplicationId());
+        setTier(requestPublisherDTO.getTier());
     }
 
     public Map<String, ByteBuffer> createEventDataMap() {
@@ -53,6 +54,7 @@ public class BAMRequestPublisherDTO extends RequestPublisherDTO{
         eventMap.put("tenantDomain", ByteBuffer.wrap(String.valueOf(getTenantDomain()).getBytes()));
         eventMap.put("applicationName", ByteBuffer.wrap(getApplicationName().getBytes()));
         eventMap.put("applicationId", ByteBuffer.wrap(getApplicationId().getBytes()));
+        eventMap.put("tier", ByteBuffer.wrap(getTier().getBytes()));
         return eventMap;
     }
 

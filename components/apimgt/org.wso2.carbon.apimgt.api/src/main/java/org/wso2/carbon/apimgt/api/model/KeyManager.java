@@ -78,7 +78,8 @@ public interface KeyManager {
      *
      * @return json String
      */
-    Map getTokenMetaData(String accessToken) throws APIManagementException;
+    //TODO:Change the Exception to APIKeyMgtException
+    AccessTokenInfo getTokenMetaData(String accessToken) throws APIManagementException;
 
     /**
      * Key manager implementation should be read from hardcoded json file
@@ -93,6 +94,17 @@ public interface KeyManager {
      * @throws APIManagementException
      */
     OAuthApplicationInfo buildFromJSON(String jsonInput) throws APIManagementException;
+
+    /**
+     * @param authApplicationInfo
+     * @param jsonInput this jsonInput will contain set of oAuth application properties.
+     * @return OAuthApplicationInfo object will return after parsed jsonInput
+     * @throws APIManagementException
+     *
+     */
+    OAuthApplicationInfo buildFromJSON(OAuthApplicationInfo authApplicationInfo,  String jsonInput) throws
+            APIManagementException;
+
 
     /**
      * This method will parse the JSON input and add those additional values to AccessTokenRequest. If its needed to

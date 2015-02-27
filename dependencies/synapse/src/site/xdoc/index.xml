@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<!--
+  ~  Licensed to the Apache Software Foundation (ASF) under one
+  ~  or more contributor license agreements.  See the NOTICE file
+  ~  distributed with this work for additional information
+  ~  regarding copyright ownership.  The ASF licenses this file
+  ~  to you under the Apache License, Version 2.0 (the
+  ~  "License"); you may not use this file except in compliance
+  ~  with the License.  You may obtain a copy of the License at
+  ~
+  ~   http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~  Unless required by applicable law or agreed to in writing,
+  ~  software distributed under the License is distributed on an
+  ~   * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+  ~  KIND, either express or implied.  See the License for the
+  ~  specific language governing permissions and limitations
+  ~  under the License.
+  -->
+
+<document>
+
+  <properties>
+    <title>The lightweight ESB</title>
+  </properties>
+
+<body>
+  
+<section name="Apache Synapse Enterprise Service Bus (ESB)">
+  <p>
+      Apache Synapse is a lightweight and high-performance Enterprise Service Bus (ESB). Powered
+      by a small and asynchronous mediation engine, Apache Synapse provides exceptional support
+      for XML, Web Services and REST. In addition to XML and SOAP, Apache Synapse supports
+      several other content interchange formats, such as plain text, binary, Hessian and JSON. The
+      wide range of transport adapters available for Synapse, enables it to communicate over many
+      application and transport layer protocols. As of now, Apache Synapse has support for protocols
+      like HTTP/S, Mail (POP3, IMAP, SMTP), JMS, TCP, UDP, VFS and FIX.
+  </p>
+  <p>
+      Apache Synapse is designed to be lightweight and fast. The non-blocking HTTP transport,
+      the multi-threaded mediation engine and the streaming XML infoset combine to ensure that
+      Synapse can mediate very high volumes of messages through the service bus with minimum
+      delay and resource usage. Synapse also comes with comprehensive logging capabilities,
+      statistics collection and JMX monitoring support which are crucial in production deployments.
+  </p>
+  <p>
+      Synapse uses Apache Axis2 as the underlying Web Services engine. Therefore it has outstanding
+      support for Web Services and related standards such as SOAP and WSDL. Tried and tested
+      Axis2 modules like Apache Rampart and Apache Sandesha2 can be used with Synapse with no
+      configuration overhead. Using such external modules, Apache Synapse supports a range of
+      Web Services standards including WS-Security, WS-Reliable Messaging and WS-Eventing. Synapse
+      also makes use of the Axis2 clustering framework and the deployment framework to provide
+      enteprise grade clustering support and development time hot deployment support.
+  </p>
+  <p>
+      The Synapse mediation engine is configured using a simple, XML-based configuration language.
+      The configuration language and the related functional components are designed with SOA
+      best practices in mind. As a result one could easily store configuration fragments in an
+      external registry and import them to the mediation engine on demand.
+      Synapse ships with a large collection of useful mediators that can be used to develop even the
+      most complex enterprise integration scenarios. If necessary, the mediation engine can be
+      easily extended by developing custom mediators using Java or your favorite scripting
+      language.
+  </p>
+  <p>
+      Apache Synapse is free and open source software distributed under the
+      <a href="http://www.apache.org/licenses/LICENSE-2.0">Apache Software License 2.0</a>.
+  </p>
+  <p>Want to get started? Please refer one of these comprehensive manuals:
+      <ul>
+          <li><a href="./Synapse_QuickStart.html">Quick Start Guide</a></li>
+          <li><a href="./Synapse_Configuration_Language.html">The Synapse Configuration Language</a></li>
+          <li><a href="./Synapse_Samples.html">Synapse Samples Catalog</a></li>
+          <li><a href="./Synapse_Extending.html">Extending Synapse</a></li>
+      </ul>
+  </p>
+  <p>Need some assistance with a problem? Feel free to get in touch with the community over these
+      mailing lists:
+      <ul>
+          <li>The Developer mailing list:  <a href="mailto:dev-subscribe@synapse.apache.org">Subscribe</a></li>
+          <li>The User mailing list:  <a href="mailto:user-subscribe@synapse.apache.org">Subscribe</a></li>
+      </ul>
+  </p>
+</section>
+	
+<section name="Key Features">
+		<p>The latest release of Synapse is <a href="download/2.0/download.cgi">2.0</a>. Its key features are </p>
+
+	<ul>
+        <li><p>Proxy services - facilitating transport, interface (WSDL/Schema/Policy), message format (SOAP 1.1/1.2, POX/REST, Text, Binary), QoS (WS-Addressing/WS-Security/WS-RM) and optimization switching (MTOM/SwA)</p></li>
+        <li><p>Non-blocking HTTP/S transports based on Apache <a target="_blank" href="http://hc.apache.org/httpcomponents-core/index.html">HttpCore</a> for ultrafast execution and support for thousands of connections at high concurreny with constant memory usage</p></li>
+        <li><p>Built in Registry/Repository, facilitating dynamic updating and reloading of the configuration and associated resources (e.g. XSLTs, XSD, JS, ..)</p></li>
+        <li><p>Easily extended via custom Java class (mediator and command)/Spring mediators, or BSF Scripting languages (Javascript, Ruby, Groovy, etc.)</p></li>
+        <li><p>Built in support for scheduling tasks using the <a target="_blank" href="http://www.opensymphony.com/quartz">Quartz</a> scheduler</p></li>
+        <li><p>Load-balancing (with or without sticky sessions) /Fail-over, and clustered Throttling and Caching support</p></li>
+        <li><p>WS-Security, WS-Reliable Messaging &amp; Throttling configurable via (message/operation/service level) WS-Policies</p></li>
+        <li><p>JMS (v1.x upwards) message support for binary, plain text and XML and SOAP payloads</p></li>
+        <li><p>Support for <a href="http://hessian.caucho.com/">Hessian binary web service protocol</a></p></li>
+        <li><p>Industry driven <a href="http://www.fixprotocol.org/">Financial Information eXchange (FIX)</a> protocol</p></li>
+        <li><p>Enhanced support for Apache VFS transports (s/ftp, file, zip/tar/gz, webdav, cifs..)</p></li>
+        <li><p>Support for message splitting &amp; aggregation using the EIP</p></li>
+        <li><p>Database lookup &amp; store support with DBMediators with reusable database connection pools</p></li>
+        <li><p>Enhanced Mail transport with POP3/SMTP/IMAP protocols</p></li>
+        <li><p>GZip encoding over the HTTP/S transport</p></li>
+        <li><p>Dual-Channel message exchange with WS-Addressing</p></li>
+        <li><p>Ability to pin a proxy service or a task to server instances on a cluster</p></li>
+        <li><p>Mandatory sequence if required before mediation</p></li>
+        <li><p>Lightweight, XML and Web services centric messaging model</p></li>
+        <li><p>Configurations serialized into a file system for versioning/backup &amp; restoration with built-in Registry support</p></li>
+        <li><p>Support for Error handling and timeouts, recovery with http/s maintainance mode &amp; gracefull shutdown</p></li>
+        <li><p>JMX monitoring support</p></li>
+    	<li><p>Many samples and a built-in Axis2 server to try out and experiment with samples (Samples includes WS-Security, JMS POX/Text messages, Script mediation and many more samples which can be run out of the box) </p></li>
+	    <li><p>Enhanced documentation for samples and getting started</p></li>
+	</ul>
+</section>
+</body>
+</document>

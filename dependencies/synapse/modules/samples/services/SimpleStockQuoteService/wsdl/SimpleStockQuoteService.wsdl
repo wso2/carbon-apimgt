@@ -1,0 +1,323 @@
+<!--
+  ~  Licensed to the Apache Software Foundation (ASF) under one
+  ~  or more contributor license agreements.  See the NOTICE file
+  ~  distributed with this work for additional information
+  ~  regarding copyright ownership.  The ASF licenses this file
+  ~  to you under the Apache License, Version 2.0 (the
+  ~  "License"); you may not use this file except in compliance
+  ~  with the License.  You may obtain a copy of the License at
+  ~
+  ~   http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~  Unless required by applicable law or agreed to in writing,
+  ~  software distributed under the License is distributed on an
+  ~   * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+  ~  KIND, either express or implied.  See the License for the
+  ~  specific language governing permissions and limitations
+  ~  under the License.
+  -->
+
+<wsdl:definitions xmlns:axis2="http://services.samples"
+                  xmlns:mime="http://schemas.xmlsoap.org/wsdl/mime/"
+                  xmlns:ns0="http://services.samples/xsd"
+                  xmlns:soap12="http://schemas.xmlsoap.org/wsdl/soap12/"
+                  xmlns:http="http://schemas.xmlsoap.org/wsdl/http/"
+                  xmlns:ns1="http://org.apache.axis2/xsd"
+                  xmlns:xs="http://www.w3.org/2001/XMLSchema"
+                  xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+                  xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/"
+                  targetNamespace="http://services.samples">
+    <wsdl:documentation>SimpleStockQuoteService</wsdl:documentation>
+    <wsdl:types>
+        <xs:schema xmlns:ns="http://services.samples/xsd" attributeFormDefault="qualified"
+                   elementFormDefault="qualified" targetNamespace="http://services.samples/xsd">
+            <xs:element name="getFullQuote">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element name="request" nillable="true" type="ns:GetFullQuote"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="GetFullQuote" type="ns:GetFullQuote"/>
+            <xs:complexType name="GetFullQuote">
+                <xs:sequence>
+                    <xs:element name="symbol" nillable="true" type="xs:string"/>
+                </xs:sequence>
+            </xs:complexType>
+            <xs:element name="getFullQuoteResponse">
+                <xs:complexType>
+
+                    <xs:sequence>
+                        <xs:element name="return" nillable="true" type="ns:GetFullQuoteResponse"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="GetFullQuoteResponse" type="ns:GetFullQuoteResponse"/>
+            <xs:complexType name="GetFullQuoteResponse">
+                <xs:sequence>
+                    <xs:element maxOccurs="unbounded" name="tradeHistory" nillable="true"
+                                type="ns:TradingDay"/>
+                </xs:sequence>
+            </xs:complexType>
+            <xs:element name="TradingDay" type="ns:TradingDay"/>
+            <xs:complexType name="TradingDay">
+                <xs:sequence>
+                    <xs:element name="day" type="xs:int"/>
+                    <xs:element name="quote" nillable="true" type="ns:GetQuoteResponse"/>
+                </xs:sequence>
+
+            </xs:complexType>
+            <xs:element name="GetQuoteResponse" type="ns:GetQuoteResponse"/>
+            <xs:complexType name="GetQuoteResponse">
+                <xs:sequence>
+                    <xs:element name="change" type="xs:double"/>
+                    <xs:element name="earnings" type="xs:double"/>
+                    <xs:element name="high" type="xs:double"/>
+                    <xs:element name="last" type="xs:double"/>
+                    <xs:element name="lastTradeTimestamp" nillable="true" type="xs:string"/>
+                    <xs:element name="low" type="xs:double"/>
+                    <xs:element name="marketCap" type="xs:double"/>
+                    <xs:element name="name" nillable="true" type="xs:string"/>
+                    <xs:element name="open" type="xs:double"/>
+                    <xs:element name="peRatio" type="xs:double"/>
+                    <xs:element name="percentageChange" type="xs:double"/>
+                    <xs:element name="prevClose" type="xs:double"/>
+                    <xs:element name="symbol" nillable="true" type="xs:string"/>
+
+                    <xs:element name="volume" type="xs:int"/>
+                </xs:sequence>
+            </xs:complexType>
+            <xs:element name="getMarketActivity">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element name="request" nillable="true" type="ns:GetMarketActivity"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="GetMarketActivity" type="ns:GetMarketActivity"/>
+            <xs:complexType name="GetMarketActivity">
+                <xs:sequence>
+                    <xs:element maxOccurs="unbounded" name="symbols" nillable="true"
+                                type="xs:string"/>
+                </xs:sequence>
+            </xs:complexType>
+            <xs:element name="getMarketActivityResponse">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element name="return" nillable="true"
+                                    type="ns:GetMarketActivityResponse"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="GetMarketActivityResponse" type="ns:GetMarketActivityResponse"/>
+            <xs:complexType name="GetMarketActivityResponse">
+                <xs:sequence/>
+            </xs:complexType>
+            <xs:element name="getQuote">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element name="request" nillable="true" type="ns:GetQuote"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="getSimpleQuote">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element name="symbol" nillable="true" type="xs:string"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+
+            <xs:element name="GetQuote" type="ns:GetQuote"/>
+            <xs:complexType name="GetQuote">
+                <xs:sequence>
+                    <xs:element name="symbol" nillable="true" type="xs:string"/>
+                </xs:sequence>
+            </xs:complexType>
+            <xs:element name="getQuoteResponse">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element name="return" nillable="true" type="ns:GetQuoteResponse"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="placeOrder">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element name="order" nillable="true" type="ns:PlaceOrder"/>
+
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="PlaceOrder" type="ns:PlaceOrder"/>
+            <xs:complexType name="PlaceOrder">
+                <xs:sequence>
+                    <xs:element name="price" type="xs:double"/>
+                    <xs:element name="quantity" type="xs:int"/>
+                    <xs:element name="symbol" nillable="true" type="xs:string"/>
+                </xs:sequence>
+            </xs:complexType>
+        </xs:schema>
+    </wsdl:types>
+    <wsdl:message name="placeOrderMessage">
+        <wsdl:part name="part1" element="ns0:placeOrder"/>
+    </wsdl:message>
+    <wsdl:message name="getQuoteMessage">
+        <wsdl:part name="part1" element="ns0:getQuote"/>
+    </wsdl:message>
+    <wsdl:message name="getSimpleQuoteMessage">
+        <wsdl:part name="part1" element="ns0:getSimpleQuote"/>
+    </wsdl:message>
+    <wsdl:message name="getQuoteResponse">
+        <wsdl:part name="part1" element="ns0:getQuoteResponse"/>
+    </wsdl:message>
+    <wsdl:message name="getMarketActivityMessage">
+        <wsdl:part name="part1" element="ns0:getMarketActivity"/>
+    </wsdl:message>
+    <wsdl:message name="getMarketActivityResponse">
+        <wsdl:part name="part1" element="ns0:getMarketActivityResponse"/>
+    </wsdl:message>
+    <wsdl:message name="getFullQuoteMessage">
+        <wsdl:part name="part1" element="ns0:getFullQuote"/>
+    </wsdl:message>
+    <wsdl:message name="getFullQuoteResponse">
+        <wsdl:part name="part1" element="ns0:getFullQuoteResponse"/>
+    </wsdl:message>
+    <wsdl:portType name="SimpleStockQuoteServicePortType">
+        <wsdl:operation name="placeOrder">
+            <wsdl:input xmlns:wsaw="http://www.w3.org/2006/05/addressing/wsdl"
+                        message="axis2:placeOrderMessage" wsaw:Action="urn:placeOrder"/>
+        </wsdl:operation>
+        <wsdl:operation name="getQuote">
+            <wsdl:input xmlns:wsaw="http://www.w3.org/2006/05/addressing/wsdl"
+                        message="axis2:getQuoteMessage" wsaw:Action="urn:getQuote"/>
+            <wsdl:output message="axis2:getQuoteResponse"/>
+        </wsdl:operation>
+        <wsdl:operation name="getSimpleQuote">
+            <wsdl:input xmlns:wsaw="http://www.w3.org/2006/05/addressing/wsdl"
+                        message="axis2:getSimpleQuoteMessage" wsaw:Action="urn:getSimpleQuote"/>
+            <wsdl:output message="axis2:getQuoteResponse"/>
+        </wsdl:operation>
+        <wsdl:operation name="getMarketActivity">
+            <wsdl:input xmlns:wsaw="http://www.w3.org/2006/05/addressing/wsdl"
+                        message="axis2:getMarketActivityMessage"
+                        wsaw:Action="urn:getMarketActivity"/>
+            <wsdl:output message="axis2:getMarketActivityResponse"/>
+        </wsdl:operation>
+        <wsdl:operation name="getFullQuote">
+            <wsdl:input xmlns:wsaw="http://www.w3.org/2006/05/addressing/wsdl"
+                        message="axis2:getFullQuoteMessage" wsaw:Action="urn:getFullQuote"/>
+            <wsdl:output message="axis2:getFullQuoteResponse"/>
+        </wsdl:operation>
+    </wsdl:portType>
+    <wsdl:binding name="SimpleStockQuoteServiceSOAP11Binding"
+                  type="axis2:SimpleStockQuoteServicePortType">
+        <soap:binding transport="http://schemas.xmlsoap.org/soap/http" style="document"/>
+        <wsdl:operation name="placeOrder">
+            <soap:operation soapAction="urn:placeOrder" style="document"/>
+            <wsdl:input>
+                <soap:body use="literal"/>
+            </wsdl:input>
+        </wsdl:operation>
+        <wsdl:operation name="getQuote">
+            <soap:operation soapAction="urn:getQuote" style="document"/>
+            <wsdl:input>
+                <soap:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="getSimpleQuote">
+            <soap:operation soapAction="urn:getSimpleQuote" style="document"/>
+            <wsdl:input>
+                <soap:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="getMarketActivity">
+            <soap:operation soapAction="urn:getMarketActivity" style="document"/>
+            <wsdl:input>
+                <soap:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="getFullQuote">
+            <soap:operation soapAction="urn:getFullQuote" style="document"/>
+            <wsdl:input>
+                <soap:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+    </wsdl:binding>
+    <wsdl:binding name="SimpleStockQuoteServiceSOAP12Binding"
+                  type="axis2:SimpleStockQuoteServicePortType">
+        <soap12:binding transport="http://schemas.xmlsoap.org/soap/http" style="document"/>
+        <wsdl:operation name="placeOrder">
+            <soap12:operation soapAction="urn:placeOrder" style="document"/>
+            <wsdl:input>
+                <soap12:body use="literal"/>
+            </wsdl:input>
+        </wsdl:operation>
+        <wsdl:operation name="getQuote">
+            <soap12:operation soapAction="urn:getQuote" style="document"/>
+            <wsdl:input>
+                <soap12:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap12:body use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="getSimpleQuote">
+            <soap12:operation soapAction="urn:getSimpleQuote" style="document"/>
+            <wsdl:input>
+                <soap12:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap12:body use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="getMarketActivity">
+            <soap12:operation soapAction="urn:getMarketActivity" style="document"/>
+            <wsdl:input>
+                <soap12:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap12:body use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="getFullQuote">
+            <soap12:operation soapAction="urn:getFullQuote" style="document"/>
+            <wsdl:input>
+                <soap12:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap12:body use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+    </wsdl:binding>
+    <wsdl:service name="SimpleStockQuoteService">
+        <wsdl:port name="SimpleStockQuoteServiceSOAP11port_https"
+                   binding="axis2:SimpleStockQuoteServiceSOAP11Binding">
+            <soap:address location="https://localhost:9002/services/SimpleStockQuoteService"/>
+        </wsdl:port>
+        <wsdl:port name="SimpleStockQuoteServiceSOAP11port_http1"
+                   binding="axis2:SimpleStockQuoteServiceSOAP11Binding">
+            <soap:address location="http://localhost:9000/services/SimpleStockQuoteService"/>
+        </wsdl:port>
+        <wsdl:port name="SimpleStockQuoteServiceSOAP12port_https"
+                   binding="axis2:SimpleStockQuoteServiceSOAP12Binding">
+            <soap12:address location="https://localhost:9002/services/SimpleStockQuoteService"/>
+        </wsdl:port>
+        <wsdl:port name="SimpleStockQuoteServiceSOAP12port_http1"
+                   binding="axis2:SimpleStockQuoteServiceSOAP12Binding">
+            <soap12:address location="http://localhost:9000/services/SimpleStockQuoteService"/>
+        </wsdl:port>
+    </wsdl:service>
+</wsdl:definitions>

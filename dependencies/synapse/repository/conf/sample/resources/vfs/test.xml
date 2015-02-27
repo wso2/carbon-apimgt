@@ -1,0 +1,10 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:wsa="http://www.w3.org/2005/08/addressing">
+	<soapenv:Body>
+		<getQuote xmlns="http://services.samples">
+			<request>
+				<symbol>IBM</symbol>
+			</request>
+		</getQuote>
+	</soapenv:Body>
+</soapenv:Envelope>

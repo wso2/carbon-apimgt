@@ -34,14 +34,15 @@ import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 
 import javax.xml.namespace.QName;
+import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import java.util.*;
-
 import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
 import org.wso2.carbon.identity.oauth2.stub.dto.OAuth2TokenValidationResponseDTO_TokenValidationContextParam;
 
 public class Utils {
     
     private static final Log log = LogFactory.getLog(Utils.class);
+    private static APIManagerConfiguration config= ServiceReferenceHolder.getInstance().getAPIManagerConfiguration();
     
     public static void sendFault(MessageContext messageContext, int status) {
         org.apache.axis2.context.MessageContext axis2MC = ((Axis2MessageContext) messageContext).
@@ -217,10 +218,17 @@ public class Utils {
     }
     
     public static boolean isCORSEnabled() {
-    	String corsEnabled = ServiceReferenceHolder.getInstance().getAPIManagerConfiguration().
+    	String corsEnabled = config.
     	        getFirstProperty(APIConstants.CORS_CONFIGURATION_ENABLED);
     	    	    	
     	return Boolean.parseBoolean(corsEnabled);
+    }
+
+    public static boolean isStatsEnabled() {
+        String statsEnabled = config.
+                getFirstProperty(APIConstants.CORS_CONFIGURATION_ENABLED);
+
+        return Boolean.parseBoolean(statsEnabled);
     }
 
     /**
