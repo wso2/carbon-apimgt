@@ -18,8 +18,15 @@
 
 package org.wso2.carbon.apimgt.keymgt.util;
 
+import org.apache.axiom.om.OMElement;
+import org.apache.axiom.om.OMException;
+import org.apache.axiom.om.impl.builder.StAXOMBuilder;
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.model.KeyManager;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
@@ -27,6 +34,15 @@ import org.wso2.carbon.apimgt.impl.token.JWTGenerator;
 import org.wso2.carbon.apimgt.impl.token.TokenGenerator;
 import org.wso2.carbon.registry.core.service.RegistryService;
 import org.wso2.carbon.user.core.service.RealmService;
+
+import javax.xml.namespace.QName;
+import javax.xml.stream.XMLOutputFactory;
+import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamWriter;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.StringWriter;
 
 public class APIKeyMgtDataHolder {
 
@@ -39,6 +55,7 @@ public class APIKeyMgtDataHolder {
     private static TokenGenerator tokenGenerator;
     private static boolean jwtGenerationEnabled = false;
     private static final Log log = LogFactory.getLog(APIKeyMgtDataHolder.class);
+    private static KeyManager keyManager = null;
 
     // Scope used for marking Application Tokens
     private static String applicationTokenScope;
@@ -57,6 +74,66 @@ public class APIKeyMgtDataHolder {
 
     public static void setKeyCacheEnabledKeyMgt(Boolean keyCacheEnabledKeyMgt) {
         isKeyCacheEnabledKeyMgt = keyCacheEnabledKeyMgt;
+    }
+
+    public static void initializeKeyManager(String configPath) throws APIManagementException {
+
+        InputStream in = null;
+        try {
+            in = FileUtils.openInputStream(new File(configPath));
+            StAXOMBuilder builder = new StAXOMBuilder(in);
+            OMElement document = builder.getDocumentElement();
+            if (document == null || !APIConstants.KEY_MANAGER.equals(document.getQName().getLocalPart())) {
+                throw new APIManagementException("KeyManager section not found. key-manager.xml may be corrupted.");
+            }
+
+            log.debug("Reading key-manager.xml");
+
+            String clazz = document.getAttribute(new QName("class")).getAttributeValue();
+            keyManager = (KeyManager) Class.forName(clazz).newInstance();
+
+            log.debug("Initialised KeyManager implementation");
+
+            OMElement configElement = document.getFirstElement();
+            if (!"Configuration".equals(configElement.getQName().getLocalPart())) {
+                throw new APIManagementException("Configuration section not found. key-manager.xml may be corrupted.");
+            }
+
+            log.debug("Loading KeyManager configuration,");
+
+            XMLOutputFactory xof = XMLOutputFactory.newInstance();
+            XMLStreamWriter streamWriter;
+            StringWriter stringStream = new StringWriter();
+            streamWriter = xof.createXMLStreamWriter(stringStream);
+            configElement.serialize(streamWriter);
+            streamWriter.close();
+            keyManager.loadConfiguration(stringStream.toString());
+
+            log.debug("Successfully loaded KeyManager configuration.");
+
+        } catch (IOException e) {
+            log.error(e.getMessage());
+            throw new APIManagementException("I/O error while reading the API manager " +
+                                             "configuration: " + configPath, e);
+        } catch (XMLStreamException e) {
+            log.error(e.getMessage());
+            throw new APIManagementException("Error while parsing the API manager " +
+                                             "configuration: " + configPath, e);
+        } catch (OMException e) {
+            log.error(e.getMessage());
+            throw new APIManagementException("Error while parsing API Manager configuration: " + configPath, e);
+        } catch (ClassNotFoundException e) {
+            log.error("Error occurred while instantiating KeyManager implementation");
+            throw new APIManagementException("Error occurred while instantiating KeyManager implementation", e);
+        } catch (InstantiationException e) {
+            e.printStackTrace();
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        } catch (APIManagementException e) {
+            e.printStackTrace();
+        } finally {
+            IOUtils.closeQuietly(in);
+        }
     }
 
 
