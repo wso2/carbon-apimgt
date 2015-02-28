@@ -25,7 +25,7 @@ var jagg = jagg || {};
     jagg.messageDisplay = function (params) {
         $('#messageModal').html($('#confirmation-data').html());
         if (params.title == undefined) {
-            $('#messageModal h3.modal-title').html('APIManager Workflow Admin');
+            $('#messageModal h3.modal-title').html('Admin Dashboard');
         } else {
             $('#messageModal h3.modal-title').html(params.title);
         }
@@ -102,7 +102,7 @@ var jagg = jagg || {};
                 type = "Error"
             }
         }
-        jagg.messageDisplay({content:params.content,title:"APIManager Workflow Admin - " + type,buttons:[
+        jagg.messageDisplay({content:params.content,title:"Admin Dashboard - " + type,buttons:[
             {name:"OK",cssClass:"btn btn-primary",cbk:function() {
                 $('#messageModal').modal('hide');
                 if (params.cbk && typeof params.cbk == "function")
@@ -226,3 +226,34 @@ var jagg = jagg || {};
     };
 
 }());
+
+$(document).ready(function(){
+    //this can go to main js
+    $('.more-options').click(function(){
+        var id = $(this).attr('ref');
+        var div = $('#'+id);
+        if(div.is(":visible")){
+            $(this).text("Show More Options");
+        }
+        else{
+            $(this).text("Show Less Options");
+        }
+        div.toggle('fast');
+        return false;
+    });
+
+    $('.stats-enabled').click(function(){
+        var id = $(this).attr('ref');
+        var div = $('#'+id);
+        div.toggle('fast');
+        $(this).checked();
+        return false;
+    });
+
+    $('a.help_popup').popover({
+        html : true,
+        content: function() {
+            return $('#'+$(this).attr('help_data')).html();
+        }
+    });
+});

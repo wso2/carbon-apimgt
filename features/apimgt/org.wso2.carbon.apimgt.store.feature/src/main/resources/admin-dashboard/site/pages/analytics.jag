@@ -7,23 +7,6 @@ var i18n = require("i18n");
 var localeResourcesBasePath="/site/conf/locales/jaggery/";
 i18n.init(request,localeResourcesBasePath);
 
-var middlePage="signup-task";
-
-var pageName=request.getParameter("task");
-if(pageName=="subscription"){
-middlePage="subscription-task";
-}else if(pageName=="signup"){
-middlePage="signup-task";
-}else if(pageName=="application"){
-middlePage="application-task";
-}else if(pageName=="appRegistration"){
-middlePage="app-registration-task";
-}else if(pageName=="themeUpload"){
-middlePage="theme-upload-task";
-}else if(pageName=="analytics"){
-middlePage="analytics-task";
-}
-
 (function () {
     var user = jagg.getUser();
     if (!user) {
@@ -43,7 +26,7 @@ middlePage="analytics-task";
                     "name":"layout/extended",
                     "inputs":{
                         "middle":{
-                            "name":middlePage
+                            "name":"analytics-task"
                         }
                     }
                 }
