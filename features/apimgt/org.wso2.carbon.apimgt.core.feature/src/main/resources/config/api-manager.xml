@@ -500,5 +500,5 @@
    <!-- This property is there to configure velocity log output into existing Log4j carbon Logger.
  	You can enable this and set preferable Logger name. 
    -->
-   <!--VelocityLogPath>VELOCITY</VelocityLogPath-->
+   <!--VelocityLogger>VELOCITY</VelocityLogger-->
 </APIManager>
