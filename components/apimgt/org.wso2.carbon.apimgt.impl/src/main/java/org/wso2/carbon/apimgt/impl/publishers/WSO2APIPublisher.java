@@ -611,8 +611,15 @@ public class WSO2APIPublisher implements APIPublisher {
     
     private String getExternalStoreRedirectURL(int tenantId) throws APIManagementException {
     	UserRegistry registry;
-    	 String redirectURL = null;
-		try {
+    	 String redirectURL;
+        redirectURL = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
+                .getAPIManagerConfiguration()
+                .getFirstProperty(APIConstants.EXTERNAL_API_STORES + "." + APIConstants.EXTERNAL_API_STORES_STORE_URL);
+
+        if (redirectURL != null) {
+            return redirectURL;
+        }
+        try {
 			registry = ServiceReferenceHolder.getInstance().getRegistryService()
                     .getGovernanceSystemRegistry(tenantId);
 			if (registry.resourceExists(APIConstants.EXTERNAL_API_STORES_LOCATION)) {
