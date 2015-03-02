@@ -12,11 +12,12 @@ var datasourceData = outputs.datasourceData;
         <div class="control-group" >
             <label class="control-label" for="enableStats" style="display: inline">Enable Analytics </label>
             <div class="controls" style="display: inline">
-                <input type="checkbox" id="enableStats" class="stats-enabled but" ref="stats-enabled" style="margin: 4px 5px 5px 52px"/>
+                <input type="checkbox" id="enableStats" class="stats-enabled but" ref="configuration_form" style="margin: 4px 5px 5px 52px"/>
             </div>
         </div>
-        <form action="<%= jagg.url("/site/blocks/analytics-task/ajax/add.jag") %>" id="configuration_form" enctype="multipart/form-data" method="post" class="form-horizontal">
-            <fieldset id="stats-enabled" style="display:none">
+        <form action="<%= jagg.url("/site/blocks/analytics-task/ajax/add.jag") %>" id="configuration_form"
+                            enctype="multipart/form-data" method="post" class="form-horizontal"  style="display:none">
+            <fieldset>
                 <legend>Event Receiver</legend>
                 <div class="control-group"  id="event_receiver_url_designer">
                     <label class="control-label" for="eventReceiverURL">URL:<span class="requiredAstrix">*</span></label>

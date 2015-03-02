@@ -242,14 +242,6 @@ $(document).ready(function(){
         return false;
     });
 
-    $('.stats-enabled').click(function(){
-        var id = $(this).attr('ref');
-        var div = $('#'+id);
-        div.toggle('fast');
-        $(this).checked();
-        return false;
-    });
-
     $('a.help_popup').popover({
         html : true,
         content: function() {

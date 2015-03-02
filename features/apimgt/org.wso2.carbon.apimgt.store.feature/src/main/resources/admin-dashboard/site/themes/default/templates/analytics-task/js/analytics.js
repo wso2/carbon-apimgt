@@ -71,7 +71,47 @@ $(document).ready(function(){
             });
         }
     });
+
+    $('.stats-enabled').click(function(){
+        var id = $(this).attr('ref');
+        var form = $('#'+id);
+        form.toggle('fast');
+        if ($(this).is(':checked')) {
+            $(this).checked();
+        } else {
+            disableAnalytics();
+            $(this).unchecked();
+        }
+        return false;
+    });
 });
+
+    function disableAnalytics(){
+        $.post("site/blocks/analytics-task/ajax/enable.jag",
+           {
+               enable: "false"
+           },
+           function(data,status){
+               if (!data.error) {
+                   $( "body" ).trigger( "conf_saved" );
+               } else {
+                   if (data.message == "timeout") {
+                       if (ssoEnabled) {
+                           var currentLoc = window.location.pathname;
+                           if (currentLoc.indexOf(".jag") >= 0) {
+                               location.href = "index.jag";
+                           } else {
+                               location.href = 'site/pages/index.jag';
+                           }
+                       } else {
+                           jagg.showLogin();
+                       }
+                   } else {
+                       jagg.message({content:data.message,type:"error"});
+                   }
+               }
+           });
+    }
 
 function removeUrlSet(index) {
     //$("#urlSetContainer" + index).hide();
