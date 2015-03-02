@@ -2328,28 +2328,17 @@ public final class APIUtil {
      * @throws org.wso2.carbon.apimgt.api.APIManagementException
      */
     public static void addBamServerProfile(String bamServerURL, String bamServerUser, 
-    		String bamServerPassword, String bamServerThriftPort, int tenantId) throws APIManagementException {
+    		String bamServerPassword, int tenantId) throws APIManagementException {
     	RegistryService registryService = ServiceReferenceHolder.getInstance().getRegistryService();
         try {
             UserRegistry registry = registryService.getConfigSystemRegistry(tenantId);
             log.debug("Adding Bam Server Profile to the registry");
             InputStream inputStream = APIManagerComponent.class.getResourceAsStream("/bam/profile/bam-profile.xml");
             String bamProfile = IOUtils.toString(inputStream);
-            
-            int strIndex = bamServerURL.indexOf("://");
-            int endIndex = bamServerURL.lastIndexOf(":");
-            
-            bamServerURL = bamServerURL.substring(strIndex + 3, endIndex);
-            bamServerPassword = encryptPassword(bamServerPassword);
-            int bamServerThriftPortVal = Integer.parseInt(bamServerThriftPort);
-            String bamServerThriftAuthPort = String.valueOf(bamServerThriftPortVal + 100);
                         
             String bamProfileConfig = bamProfile.replaceAll("\\[1\\]", bamServerURL).
-            		replaceAll("\\[2\\]", bamServerThriftAuthPort).
-            		replaceAll("\\[3\\]", bamServerThriftPort).
-            		replaceAll("\\[4\\]", bamServerUser).
-            		replaceAll("\\[5\\]", bamServerPassword);
-            
+            		replaceAll("\\[2\\]", bamServerUser).
+            		replaceAll("\\[3\\]", bamServerPassword);
             
             Resource resource = registry.newResource();
             resource.setContent(bamProfileConfig);

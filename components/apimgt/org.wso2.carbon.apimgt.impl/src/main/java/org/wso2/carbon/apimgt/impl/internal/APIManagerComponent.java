@@ -203,18 +203,7 @@ public class APIManagerComponent {
                 }
             }
             APIUtil.createSelfSignUpRoles(MultitenantConstants.SUPER_TENANT_ID);
-            
-            /* Add Bam Server Profile for collecting southbound statistics*/
-            String enabledStr = configuration.getFirstProperty(APIConstants.API_USAGE_ENABLED);
-            boolean enabled = enabledStr != null && JavaUtils.isTrueExplicitly(enabledStr);
-            if (enabled) {
-            	String bamServerURL = configuration.getFirstProperty(APIConstants.API_USAGE_BAM_SERVER_URL);
-                String bamServerUser = configuration.getFirstProperty(APIConstants.API_USAGE_BAM_SERVER_USER);
-                String bamServerPassword = configuration.getFirstProperty(APIConstants.API_USAGE_BAM_SERVER_PASSWORD);
-                String bamServerThriftPort = configuration.getFirstProperty(APIConstants.API_USAGE_THRIFT_PORT);
-            	APIUtil.addBamServerProfile(bamServerURL, bamServerUser, bamServerPassword, 
-            			bamServerThriftPort, MultitenantConstants.SUPER_TENANT_ID);
-            }
+
             dataPublisherMap = new ConcurrentHashMap<String, LoadBalancingDataPublisher>();
             
         } catch (APIManagementException e) {
