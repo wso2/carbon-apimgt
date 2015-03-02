@@ -76,7 +76,7 @@
 </center> 
     <div class="title-section">
         <% if(api){ %> 
-            <h2><%= encode.forHtml(api.name) %> : <%= encode.forHtml(api.context) %>/<%= encode.forHtml(api.version) %></h2>
+            <h2><%= encode.forHtml(api.name) %>(<%= encode.forHtml(api.version) %>) : <%= encode.forHtml(api.context) %></h2>
         <% }else{ %>
             <h2>Design API</h2>
         <% } %>
@@ -144,7 +144,7 @@
     <div class="control-group">
         <label class="control-label" for="context"><%=i18n.localize("context")%>:<span class="requiredAstrix">*</span></label>
         <div class="controls">
-            <input type="text" class="input-xlarge required validRegistryName validInput contextExists noSpace" id="context" name="context" onchange="getContextValue()" />
+            <input type="text" class="input-xlarge required validContextTemplate validInput contextExists noSpace" id="context" name="context" onchange="getContextValue()" onkeyup="updateContextPattern()" />
             <a class="icon-question-sign help_popup" help_data="context_help"></a>
             <p id="context_help" class="hide"><%=i18n.localize("contextHelpMsg")%></p>
         </div>
@@ -153,7 +153,7 @@
     <div class="control-group">
         <label class="control-label" for="version"><%=i18n.localize("version")%>:<span class="requiredAstrix">*</span></label>
         <div class="controls">
-            <input type="text" class="input required validInput noSpace" id="version" name="version" onchange="getContextValue()" value=""/>
+            <input type="text" class="input required validInput noSpace" id="version" name="version" onchange="getContextValue()" value="" onkeyup="updateContextPattern()"/>
             <p class="help-block"><%=i18n.localize("versionsHelpMsg")%></p>
         </div>
     </div>
@@ -350,7 +350,11 @@
             <label class="control-label" for="inputPassword">URL Pattern</label>
             <div class="controls">
                 <div class="input-prepend">
-                    <span class="add-on">/{context}/{version}/</span>
+                    <% if(api){ %>
+                        <span class="add-on" id="resource_url_pattern_refix"><%= encode.forHtml(api.context)%></span>
+                    <% }else{ %>
+                        <span class="add-on" id="resource_url_pattern_refix">/{context}/{version}/</span>
+                    <% } %>
                     <input style="width:500px" id="resource_url_pattern" type="text" placeholder="Url Pattern Ex: path/to/resource" class="resource_url_pattern"/>
                 </div>
             </div>

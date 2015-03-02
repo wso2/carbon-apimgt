@@ -7,8 +7,10 @@
 	    <%
         if(domains != null){
             for (var key in domains) {
+                // since we are using context versioning, we remove the api.version from the URL.
+                // The reason is that the context will have the version now
                 %>
-                <div  class="well well-small api_urls"><%=domains[key]%><%=api.context%>/<%=api.version%>
+                <div  class="well well-small api_urls"><%=domains[key]%><%=api.context%>
                     <%if (api.isDefaultVersion){%>
                         <br><%=domains[key]%><%=api.context%>
                     <%}%>
@@ -25,9 +27,11 @@
     	            <h5><%=epParams[0]%> <%=i18n.localize("urls")%>:</h5>
 
     	        <%
+                // since we are using context versioning, we remove the api.version from the URL.
+                // The reason is that the context will have the version now
     	        for (i = 1; i < epParams.length; i++) {
     	            %>
-    	            <div  class="well well-small api_urls"><%=epParams[i]%><%=api.context%>/<%=api.version%>
+    	            <div  class="well well-small api_urls"><%=epParams[i]%><%=api.context%>
                         <%if (api.isDefaultVersion){%>
                             <br><%=epParams[i]%><%=api.context%>
                         <%}%>

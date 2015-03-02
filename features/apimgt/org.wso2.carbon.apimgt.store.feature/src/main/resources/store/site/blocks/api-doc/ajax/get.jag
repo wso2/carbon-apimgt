@@ -107,6 +107,7 @@ function generate_swagger_object(swagger){
 	}
         var output = new Packages.java.lang.String(data.content);
         var jsonObj = JSON.parse(output);
+        log.info(jsonObj);
         if(jsonObj.basePath){
             var basePathValue = jsonObj.basePath;
             var username=null;
