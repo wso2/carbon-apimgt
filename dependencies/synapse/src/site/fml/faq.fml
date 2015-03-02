@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<faqs xmlns="http://maven.apache.org/FML/1.0"
+      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:schemaLocation="http://maven.apache.org/FML/1.0 http://maven.apache.org/xsd/fml-1.0.xsd"
+      title="Frequently Asked Questions"
+      toplink="false">
+    <part id="general">
+        <faq id="cdata">
+            <question>
+                Synapse seems to replace CDATA sections in incoming messages by text nodes.
+                Why does this happen?
+            </question>
+            <answer>
+                <p>Woodstox, the XML parser used by Synapse, by default works in coalescing mode,
+                implying that adjacent CDATA sections and text nodes are combined and reported as
+                a single CHARACTER event. Therefore information about CDATA sections is lost. Note
+                that enabling coalescing by default is contrary to the StAX specifications and this
+                is a <a href="http://jira.codehaus.org/browse/WSTX-140">bug</a> in the Woodstox
+                version used by Synapse.</p>
+                <p>Starting with version 1.2.9, Axiom has a feature that allows to control the
+                settings of the underlying StAX implementation (see the Javadoc of the StAXUtils
+                class for more details). This can be used to switch off coalescing, so that CDATA
+                sections will be preserved. To achieve this, create an
+                <tt>XMLInputFactory.properties</tt> file with the following content:</p>
+<pre>
+javax.xml.stream.isCoalescing=false
+</pre>
+                <p>This file needs to be placed in the classpath of Synapse. For a standalone
+                deployment, the right place is the <tt>lib</tt> directory and for a WAR deployment,
+                place the file into <tt>WEB-INF/classes</tt>. Since Synapse 1.3 only ships with
+                Axiom 1.2.8, you will also have to replace the corresponding JARs by newer versions.
+                Note that at the time of writing, Axiom 1.2.9 has not yet been released and the
+                required feature is only available in snapshot versions of Axiom.</p>
+            </answer>
+        </faq>
+    </part>
+</faqs>

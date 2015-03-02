@@ -20,10 +20,18 @@ var log = new Log();
 		allFieldsValues = request.getParameter("allFieldsValues");
         
         mod = jagg.module("user");
-        
-        result = mod.addUser(username, password, allFieldsValues);
-
-        subscriberCheckResult = mod.checkIfSubscriberRolePresent(username);
+        var userExist = mod.checkIfUserExsits(username);
+        if(userExist) {
+            result = {
+                error : true,
+                message : "User name already exists"
+            };          
+       
+        } else {
+             result = mod.addUser(username, password, allFieldsValues);
+             subscriberCheckResult = mod.checkIfSubscriberRolePresent(username);
+        }
+       
 
         if (result.error) {
             obj = {

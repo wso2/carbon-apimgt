@@ -3,10 +3,14 @@
 <% var stars = require(jagg.getThemeFile("utils/ratings/star-generator.js")); %>
 <%
     var thumbURL = "";
-    var link = "/store/apis/info?name=" + api.name + "&version=" + api.version + "&provider=" + api.provider
+    var link = jagg.getAbsoluteUrl("/apis/info?name=" + api.name + "&version=" + api.version + "&provider=" + api.provider)
     if(api!=null){
         thumbURL = api.thumbnailurl;
-        thumbURL = jagg.getAbsoluteUrl(jagg.getThemeFile(thumbURL));
+        if(thumbURL && thumbURL.indexOf("images/") == 0) {
+            thumbURL = jagg.getAbsoluteUrl(jagg.getThemeFile(thumbURL));
+        }else{
+            thumbURL = jagg.getRegistryPath(thumbURL);
+        }    
     }
 %>
 <html>
@@ -66,7 +70,7 @@
 
     %>
     </p>
-    <div class="star-ratings"><%=stars.getStaticStars(site.context, api.rates, jagg.getUserTheme().base)%></div>
+    <div class="star-ratings"><%=stars.getStaticStars(jagg.getSiteContext(), api.rates, jagg.getUserTheme().base)%></div>
     </body>
     </html>
 <% }); %>

@@ -37,4 +37,19 @@ var checkIfSubscriberRolePresent = function (username) {
             };
         }
 };
+
+var checkIfUserExsits = function (username) {
+     store = jagg.module("manager").getAPIStoreObj();
+        try {
+            if (log.isDebugEnabled()) {
+                log.debug("Checking whether user already exists");
+            }
+            return store.isUserExists(username);
+        } catch (e) {
+            log.error(e.message);
+            //for error
+            return true;
+        }
+
+}
 %>

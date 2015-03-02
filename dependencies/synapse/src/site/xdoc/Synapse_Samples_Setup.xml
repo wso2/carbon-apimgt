@@ -1,0 +1,1159 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<document>
+    <properties>
+        <title>Apache Synapse - Samples Setup</title>
+    </properties>
+    <head>
+        <style type="text/css" xml:space="preserve">
+    .command {
+        border: 1px dashed #3c78b5;
+        text-align: left;
+        background-color: #f0f0f0;
+        padding: 3px;
+        font-size: 11px;
+        font-family: Courier;
+        margin: 10px;
+        line-height: 13px;
+    }
+    .consoleOutput {
+        border: 1px dashed #3c78b5;
+        font-size: 11px;
+        font-family: Courier;
+        margin: 10px;
+        line-height: 13px;
+        background-color: #f0f0f0;
+        border-bottom: 1px dashed #3c78b5;
+        padding: 3px;
+        border-style: solid;
+    }
+    .info {
+        border-style: solid;
+        border-width: 1px;
+        border-color: #090;
+        background-color: #dfd;
+        text-align:left;
+        margin-top: 5px;
+        margin-bottom: 5px;
+    }
+    li {
+        font-family: Verdana, arial, sans-serif;
+        font-size: 11px;
+        line-height: 16px;
+        color: #000000;
+        font-weight: normal;
+    }
+    p, td {
+        font-family: Verdana, arial, sans-serif;
+        font-size: 11px;
+        line-height: 16px;
+        color: #000000;
+        font-weight: normal;
+    }
+    pre {
+        padding: 0px;
+        margin-top: 5px;
+        margin-left: 15px;
+        margin-bottom: 5px;
+        margin-right: 5px;
+        text-align: left;
+        background-color: #f0f0f0;
+        padding: 3px;
+        border: 1px dashed #3c78b5;
+        font-size: 11px;
+        font-family: Courier;
+        margin: 10px;
+        line-height: 13px;
+    }
+    h1 {
+        font-size: 24px;
+        line-height: normal;
+        font-weight: bold;
+        background-color: #f0f0f0;
+        color: #003366;
+        border-bottom: 1px solid #3c78b5;
+        padding: 2px;
+        margin: 36px 0px 4px 0px;
+    }
+    h2 {
+        font-size: 18px;
+        line-height: normal;
+        font-weight: bold;
+        background-color: #f0f0f0;
+        border-bottom: 1px solid #3c78b5;
+        padding: 2px;
+        margin: 27px 0px 4px 0px;
+    }
+    h3 {
+        font-size: 14px;
+        line-height: normal;
+        font-weight: bold;
+        background-color: #f0f0f0;
+        padding: 2px;
+        margin: 21px 0px 4px 0px;
+    }
+    h4 {
+        font-size: 12px;
+        line-height: normal;
+        font-weight: bold;
+        background-color: #f0f0f0;
+        padding: 2px;
+        margin: 18px 0px 4px 0px;
+    }</style>
+    </head>
+    <body>
+    <div style="margin-top:-40px; float:right; _margin-top:0px;">
+      <img alt="Synapse logo"
+           src="images/synapse-logo-web2.png" width="197"
+           height="82"/>
+    </div>
+    <div>
+      <h1>
+        Apache Synapse ESB - Samples Setup
+      </h1>
+    </div>
+    
+    <p>
+      Synapse ships with a set of working examples that demonstrate some of the
+      basic features and capabilities of Synapse. A set of sample clients and
+      services are provided in addition to the sample configurations. Scripts
+      are provided to execute the sample scenarios as explained below.
+    </p>
+    <h4>
+      Prerequisites
+    </h4>
+    <p>
+      To try out the samples you will need Java development kit version 1.5.x or
+      later and Apache Ant version 1.6.5 or later. Ant can be downloaded from
+      <a href="http://ant.apache.org">http://ant.apache.org</a>. The JMS examples can be executed against an
+      ActiveMQ installation by default (or another JMS provider with relevant
+      configuration changes.)
+    </p>
+    <p>
+      Note*: The samples and the documentation assume that you are running
+      Synapse in DEBUG mode. You can switch from the default INFO log messages
+      to DEBUG log messages by changing the line
+      "log4j.category.org.apache.synapse=INFO" as
+      "log4j.category.org.apache.synapse=DEBUG" in the lib/log4j.properties
+      file.
+    </p>
+    <h2>
+      Understanding the Samples
+    </h2>
+    <table border="0" style="width: 100%">
+      <caption/>
+      <tbody>
+        <tr>
+          <td>
+            Client
+          </td>
+          <td>
+            Synapse
+          </td>
+          <td>
+            Service
+          </td>
+        </tr>
+        <tr>
+          <td/>
+          <td/>
+          <td/>
+        </tr>
+        <tr>
+          <td>
+            ant stockquote
+          </td>
+          <td>
+            ./synapse.sh -sample &lt;n&gt;
+          </td>
+          <td>
+            SimpleStockQuoteService
+          </td>
+        </tr>
+        <tr>
+          <td/>
+          <td/>
+          <td>
+            SecureStockQuoteService etc.
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <p>
+      The above table depicts the interactions between the clients, Synapse
+      and the services at a higher level. The Clients are able to send SOAP/REST
+      or POX messages over transports such as HTTP/S or JMS with WS-Addressing,
+      WS-Security or WS-Reliable messaging. They can send binary optimized
+      content using MTOM or SwA or binary or plain text JMS messages. After
+      mediation through Synapse, the requests are passed over to the sample
+      services. The sample clients and services are explained below.
+    </p>
+
+    <h2>
+      Using the Sample Clients
+    </h2>
+    <p>
+      The sample clients can be executed from the samples/axis2Client directory
+      through the provided ant script. Simply executing 'ant' displays the
+      available clients and some of the sample options used to configure them.
+      The sample clients available are listed below:
+    </p>
+    <h3>
+      1. Stock Quote Client
+    </h3>
+    <p>
+      This is a simple SOAP client that can send stock quote requests, and
+      receive and display the last sale price for a stock symbol.
+    </p>
+<pre xml:space="preserve">ant stockquote [-Dsymbol=IBM|MSFT|SUN|..]
+  [-Dmode=quote | customquote | fullquote | placeorder | marketactivity]
+  [-Dsoapver=soap11 | soap12]
+  [-Daddurl=http://localhost:9000/services/SimpleStockQuoteService]
+  [-Dtrpurl=http://localhost:8280] [-Dprxurl=http://localhost:8280]
+  [-Dpolicy=../../repository/conf/sample/resources/policy/policy_1.xml]</pre>
+
+    <p>
+      The client is able to operate in the following modes, and send the
+      payloads listed below as SOAP messages:
+    </p>
+    <ul>
+      <li>
+        quote - send a quote request for a single stock as follows. The response
+        contains the last sales price for the stock which will be displayed
+<pre xml:space="preserve">&lt;m:getQuote xmlns:m="http://services.samples/xsd"&gt;
+  &lt;m:request&gt;
+    &lt;m:symbol&gt;IBM&lt;/m:symbol&gt;
+  &lt;/m:request&gt;
+&lt;/m:getQuote&gt;</pre>
+      </li>
+      <li>
+        customquote - send a quote request in a custom format. Synapse will
+        transform this custom request to the standard stock quote request format
+        and send it to the service. Upon receipt of the response, it will be
+        transformed again to a custom response format and returned to the
+        client, which will then display the last sales price.
+<pre xml:space="preserve">&lt;m0:checkPriceRequest xmlns:m0="http://www.apache-synapse.org/test"&gt;
+  &lt;m0:Code&gt;symbol&lt;/m0:Code&gt;
+&lt;/m0:checkPriceRequest&gt;</pre>
+      </li>
+      <li>
+        fullquote - get quote reports for the stock over a number of days (i.e.
+        last 100 days of the year).
+<pre xml:space="preserve">&lt;m:getFullQuote xmlns:m="http://services.samples/xsd"&gt;
+  &lt;m:request&gt;
+    &lt;m:symbol&gt;IBM&lt;/m:symbol&gt;
+  &lt;/m:request&gt;
+&lt;/m:getFullQuote&gt;</pre>
+      </li>
+      <li>
+        placeorder - place an order for stocks using a one way request
+<pre xml:space="preserve">&lt;m:placeOrder xmlns:m="http://services.samples/xsd"&gt;
+  &lt;m:order&gt;
+    &lt;m:price&gt;3.141593E0&lt;/m:price&gt;
+    &lt;m:quantity&gt;4&lt;/m:quantity&gt;
+    &lt;m:symbol&gt;IBM&lt;/m:symbol&gt;
+  &lt;/m:order&gt;
+&lt;/m:placeOrder&gt;</pre>
+      </li>
+      <li>
+        marketactivity - get a market activity report for the day (i.e. quotes
+        for multiple symbols)
+<pre xml:space="preserve">&lt;m:getMarketActivity xmlns:m="http://services.samples/xsd"&gt;
+  &lt;m:request&gt;
+    &lt;m:symbol&gt;IBM&lt;/m:symbol&gt;
+    ...
+    &lt;m:symbol&gt;MSFT&lt;/m:symbol&gt;
+  &lt;/m:request&gt;
+&lt;/m:getMarketActivity&gt;</pre>
+      </li>
+    </ul>
+    <p>
+      Note : See samples/axis2Client/src/samples/common/StockQuoteHandler.java
+      for sample responses expected by the clients.
+    </p>
+    <h4>
+      Smart Client Mode:
+    </h4>
+    <p>
+      The 'addurl' property sets the WS-Addressing EPR, and the 'trpurl' sets a
+      transport URL for a message. Thus by specifying both of these properties,
+      the client can operate in the 'smart client' mode, where the addressing
+      EPR can specify the ultimate receiver, while the transport URL set to
+      Synapse will ensure that any necessary mediation takes place before the
+      message is delivered to the ultimate receiver.
+    </p>
+<pre xml:space="preserve">e.g: ant stockquote -Daddurl=&lt;addressingEPR&gt; -Dtrpurl=&lt;synapse&gt;</pre>
+    <h4>
+      Gateway / Dumb Client Mode:
+    </h4>
+    <p>
+      By specifying only a transport URL, the client operates in the 'dumb
+      client' mode, where it sends the message to Synapse and depends on the
+      Synapse rules for proper mediation and routing of the message to the
+      ultimate destination.
+    </p>
+<pre xml:space="preserve">e.g: ant stockquote -Dtrpurl=&lt;synapse&gt;</pre>
+    <h4>
+      Proxy Client Mode:
+    </h4>
+    <p>
+      In this mode, the client uses the 'prxurl' as a HTTP proxy to send the
+      request. Thus by setting the 'prxurl' to Synapse, the client can ensure
+      that the message will reach Synapse for mediation. The client can
+      optionally set a WS-Addressing EPR if required.
+    </p>
+<pre xml:space="preserve">e.g: ant stockquote -Dprxurl=&lt;synapse&gt; [-Daddurl=&lt;addressingEPR&gt;]</pre>
+
+    <p>
+      Specifying a policy
+    </p>
+    <p>
+      By specifying a WS-Policy using the 'policy' property, QoS aspects such as
+      WS-Security can be enforced on the request. The policy can specify details
+      such as timestamps, signatures and encryption. See Apache Axis2 and Apache
+      Rampart documentation for more information.
+    </p>
+
+    <h3>
+      2. Generic JMS Client
+    </h3>
+
+    <p>
+      The JMS client is able to send plain text, plain binary content or POX
+      content by directly publishing a JMS message to the specified destination.
+      The JMS destination name should be specified with the 'jms_dest' property.
+      The 'jms_type' property can specify 'text', 'binary' or 'pox' to specify
+      the type of message payload.
+    </p>
+
+    <p>
+      The plain text payload for a 'text' message can be specified through the
+      'payload' property. For binary messages, the 'payload' property will
+      contain the path to the binary file. For POX messages, the 'payload'
+      property will hold a stock symbol name to be used within the POX request
+      for stock order placement request.
+    </p>
+    <p>
+      e.g:
+    </p>
+<pre xml:space="preserve">ant jmsclient -Djms_type=text -Djms_dest=dynamicQueues/JMSTextProxy -Djms_payload="24.34 100 IBM"
+ant jmsclient -Djms_type=pox -Djms_dest=dynamicQueues/JMSPoxProxy -Djms_payload=MSFT
+ant jmsclient -Djms_type=binary -Djms_dest=dynamicQueues/JMSFileUploadProxy
+                     -Djms_payload=./../../repository/conf/sample/resources/mtom/asf-logo.gif</pre>
+    <p>
+      Note: The JMS client assumes the existence of a default ActiveMQ (4.1.0 or
+      above) installation on the local machine.
+    </p>
+
+    <h3>
+      3. MTOM / SwA Client
+    </h3>
+
+    <p>
+      The MTOM / SwA client is able to send a binary image file as a MTOM or SwA
+      optimized message, and receive the same file again through the response
+      and save it as a temporary file. The 'opt_mode' can specify 'mtom' or
+      'swa' respectively for the above mentioned optimizations. Optionally the
+      path to a custom file can be specified through the 'opt_file' property,
+      and the destination address can be changed through the 'opt_url' property
+      if required.
+    </p>
+<pre xml:space="preserve">e.g. ant optimizeclient -Dopt_mode=[mtom | swa]</pre>
+
+    <h2>
+      Starting the Sample Services
+    </h2>
+
+    <p>
+      The sample services ship with a pre-configured Axis2 server and
+      demonstrates in-only and in-out SOAP/REST or POX messaging over HTTP/S and
+      JMS transports, using WS-Addressing, WS-Security and WS-Reliable Messaging
+      and handling of binary content using MTOM and SwA.
+    </p>
+    <p>
+      The sample services can be found in the samples/axis2Server/src directory
+      and can be built and deployed using ant from within each service directory
+    </p>
+<pre xml:space="preserve">user@host:/tmp/synapse-1.1/samples/axis2Server/src/SimpleStockQuoteService$ ant
+Buildfile: build.xml
+...
+build-service:
+   ....
+      [jar] Building jar: /tmp/synapse-1.1/samples/axis2Server/repository/services/SimpleStockQuoteService.aar
+
+BUILD SUCCESSFUL
+Total time: 3 seconds</pre>
+
+    <p>
+      To start the Axis2 server, go to the samples/axis2Server directory and
+      execute the axis2server.sh or axis2server.bat script. This starts the
+      Axis2 server with the HTTP transport listener on port 9000 and HTTPS on
+      9002 respectively. To enable JMS transport, you will need to setup and
+      start a JMS provider. An ActiveMQ 4.0.1 or later JMS server on the local
+      machine is supported by default, and can be easily enabled by uncommenting
+      the JMS transport from the repository/conf/axis2.xml
+    </p>
+
+    <h3>
+      Sample services
+    </h3>
+    <h4>
+      1. SimpleStockQuoteService
+    </h4>
+    <p>
+      This service has four operations, getQuote (in-out), getFullQuote(in-out),
+      getMarketActivity(in-out) and placeOrder (in-only). The getQuote operation
+      will generate a sample stock quote for a given symbol. The getFullQuote
+      operation will generate a history of stock quotes for the symbol for a
+      number of days, and the getMarketActivity operation returns stock quotes
+      for a list of given symbols. The placeOrder operation will accept a one
+      way message for an order.
+    </p>
+    <h4>
+      2. SecureStockQuoteService
+    </h4>
+    <p>
+      This service is a clone of the SimpleStockQuoteService, but has
+      WS-Security enabled and an attached security policy for signing and
+      encryption of messages.
+    </p>
+    <h4>
+      3. MTOMSwASampleService
+    </h4>
+    <p>
+      This service has three operations uploadFileUsingMTOM(in-out),
+      uploadFileUsingSwA(in-out) and oneWayUploadUsingMTOM(in-only) and
+      demonstrates the use of MTOM and SwA. The uploadFileUsingMTOM and
+      uploadFileUsingSwA operations accept a binary image from the SOAP request
+      as MTOM and SwA, and returns this image back again as the response, while
+      the oneWayUploadUsingMTOM saves the request message to disk.
+    </p>
+
+    <h3>
+      Starting Sample Synapse Configurations
+    </h3>
+    <p>
+      To start Synapse with the sample default configuration, execute the
+      synapse.bat or synapse.sh script found in the /bin directory. This starts
+      up an instance of Synapse using the Synapse and Axis2 configuration files
+      located in the repository/conf directory. The repository/conf/samples
+      directory contains the sample configurations available as synapse_sample_&lt;n&gt;.xml
+      files. To start a specific sample configuration of Synapse, use the
+      '-sample &lt;n&gt;' switch as follows:
+    </p>
+<pre xml:space="preserve">synapse.bat -sample &lt;n&gt;
+synapse.sh -sample &lt;n&gt;</pre>
+
+    <h2>
+      Setting up the JMS Listener
+    </h2>
+    <p>
+      The samples used in this guide assumes the existence of a local ActiveMQ
+      (4.1.0 or higher) installation properly installed and started up. You also
+      need to copy the following client JAR files into the Synapse 'lib' folder
+      to support ActiveMQ. These files are found in the 'lib' directory of the
+      ActiveMQ installation.
+    </p>
+    <ul>
+      <li>
+        activeio-core-3.x.x.jar
+      </li>
+      <li>
+        activemq-core-4.x.x.jar
+      </li>
+      <li>
+        geronimo-j2ee-management_1.0_spec-1.0.jar
+      </li>
+    </ul>
+    <p>
+      To enable the JMS transport, you need to uncomment the JMS transport
+      listener configuration. If you are using a JMS provider other than
+      ActiveMQ this configuration should be updated to reflect your environment.
+      Once uncommented, the default configuration should be as follows. To
+      enable JMS for Synapse, the repository/conf/axis2.xml must be updated,
+      while to enable JMS support for the sample Axis2 server the
+      samples/axis2Server/repository/conf/axis2.xml file must be updated.
+    </p>
+<pre xml:space="preserve">    &lt;!--Uncomment this and configure as appropriate for JMS transport support, after setting up your JMS environment (e.g. ActiveMQ)--&gt;
+    &lt;transportReceiver name="jms" class="org.apache.synapse.transport.jms.JMSListener"&gt;
+        &lt;parameter name="myTopicConnectionFactory" locked="false"&gt;
+                &lt;parameter name="java.naming.factory.initial" locked="false"&gt;org.apache.activemq.jndi.ActiveMQInitialContextFactory&lt;/parameter&gt;
+                &lt;parameter name="java.naming.provider.url" locked="false"&gt;tcp://localhost:61616&lt;/parameter&gt;
+                &lt;parameter name="transport.jms.ConnectionFactoryJNDIName" locked="false"&gt;TopicConnectionFactory&lt;/parameter&gt;
+        &lt;/parameter&gt;
+
+        &lt;parameter name="myQueueConnectionFactory" locked="false"&gt;
+                &lt;parameter name="java.naming.factory.initial" locked="false"&gt;org.apache.activemq.jndi.ActiveMQInitialContextFactory&lt;/parameter&gt;
+                &lt;parameter name="java.naming.provider.url" locked="false"&gt;tcp://localhost:61616&lt;/parameter&gt;
+                &lt;parameter name="transport.jms.ConnectionFactoryJNDIName" locked="false"&gt;QueueConnectionFactory&lt;/parameter&gt;
+        &lt;/parameter&gt;
+
+        &lt;parameter name="default" locked="false"&gt;
+                &lt;parameter name="java.naming.factory.initial" locked="false"&gt;org.apache.activemq.jndi.ActiveMQInitialContextFactory&lt;/parameter&gt;
+                &lt;parameter name="java.naming.provider.url" locked="false"&gt;tcp://localhost:61616&lt;/parameter&gt;
+                &lt;parameter name="transport.jms.ConnectionFactoryJNDIName" locked="false"&gt;QueueConnectionFactory&lt;/parameter&gt;
+        &lt;/parameter&gt;
+    &lt;/transportReceiver&gt;</pre>
+    <p>
+      If you are using ActiveMQ, you can use the Ant script in <tt>samples/util</tt> to set up Synapse
+      (i.e. copying the required JAR files and modifying <tt>axis2.xml</tt>) in an automated way. In order to do
+      this, change into the <tt>samples/util</tt> directory and execute the following command:
+    </p>
+<pre xml:space="preserve">ant setupActiveMQ -Dactivemq.home=<i>&lt;ActiveMQ home directory></i></pre>
+    <p>
+      Note that if the environment variable <tt>ACTIVEMQ_HOME</tt> is defined, you can omit the <tt>-Dactivemq.home</tt>
+      option. If you also want to set up ActiveMQ for the sample Axis2 server, issue the following command:
+    </p>
+<pre xml:space="preserve">ant setupActiveMQ -Daxis2.xml=..\axis2Server\repository\conf\axis2.xml</pre>
+    <h2 id="setupamqpjms">
+      Configure Synapse for AMQP Transport
+    </h2>
+
+    <p>
+      The samples used in this guide assumes the existence of a local QPid
+      (1.0-M2 or higher) installation properly installed and started up. You also
+      need to copy the following client JAR files into the Synapse 'lib' folder
+      to support AMQP. These files are found in the 'lib' directory of the
+      QPid installation.
+    </p>
+    <ul>
+      <li>qpid-client-1.0-incubating-M2.jar</li>
+      <li>qpid-common-1.0-incubating-M2.jar</li>
+      <li>geronimo-jms_1.1_spec-1.0.jar</li>
+      <li>slf4j-api-1.4.0.jar    **</li>
+      <li>slf4j-log4j12-1.4.0.jar  **</li>
+    </ul>
+        <p>
+          ** To configure FIX (Quickfix/J 1.3) with AMQP (QPid-1.0-M2) copy the sl4j-* libraries comes with QPid and ignore the sl4j-* libraries with Quickfix/J.
+        </p>
+    <p>
+      To enable the AMQP over JMS transport, you need to uncomment the JMS transport
+      listener configuration. To enable AMQP over JMS for synapse, the repository/conf/axis2.xml must be updated,
+      while to enable JMS support for the sample Axis2 server the
+      samples/axis2Server/repository/conf/axis2.xml file must be updated.
+    </p>
+    <pre xml:space="preserve">    &lt;!--Uncomment this and configure as appropriate for JMS transport support, after setting up your JMS environment --&gt;
+        &lt;transportReceiver name="jms" class="org.apache.synapse.transport.jms.JMSListener"&gt;
+        &lt;/transportReceiver&gt;
+
+        &lt;transportSender name="jms" class="org.apache.synapse.transport.jms.JMSSender"&gt;
+        &lt;/transportReceiver&gt;</pre>
+
+    <p>
+        Locate and edit the AMQP connection settings file for the message consumer, this fle is usually named direct.properties.
+        <pre>
+            java.naming.factory.initial = org.apache.qpid.jndi.PropertiesFileInitialContextFactory
+            # register some connection factories
+            # connectionfactory.[jndiname] = [ConnectionURL]
+            connectionfactory.qpidConnectionfactory = amqp://guest:guest@clientid/test?brokerlist='tcp://localhost:5672'
+            # Register an AMQP destination in JNDI
+            # destination.[jniName] = [BindingURL]
+            destination.directQueue = direct://amq.direct//QpidStockQuoteService?routingkey='QpidStockQuoteService'
+            destination.replyQueue = direct://amq.direct//replyQueue?routingkey='replyQueue'</pre>
+    </p>
+    <p>
+        Locate and edit the AMQP connection settings file for Synapse, this fle is usually named con.properties.
+        <pre>
+            #initial context factory
+            #java.naming.factory.initial =org.apache.qpid.jndi.PropertiesFileInitialContextFactory
+            # register some connection factories
+            # connectionfactory.[jndiname] = [ConnectionURL]
+            connectionfactory.qpidConnectionfactory=amqp://guest:guest@clientid/test?brokerlist='tcp://localhost:5672'
+            # Register an AMQP destination in JNDI
+            # destination.[jndiName] = [BindingURL]
+            destination.directQueue=direct://amq.direct//QpidStockQuoteService</pre>
+    </p>
+    <h2 id="mailsender">
+      Setting up Mail Transport Sender
+    </h2>
+    <p>
+      To enable the mail transport for samples, you need to uncomment the mail
+      transport sender configuration in the repository/conf/axis2.xml. Uncomment
+      the MailTransportSender sample configuration and make sure it points to a
+      valid SMTP configuration for any actual scenarios.
+    </p>
+    <pre xml:space="preserve">    &lt;transportSender name="mailto" class="org.apache.synapse.transport.mail.MailTransportSender"&gt;
+        &lt;parameter name="mail.smtp.host"&gt;smtp.gmail.com&lt;/parameter&gt;
+        &lt;parameter name="mail.smtp.port"&gt;587&lt;/parameter&gt;
+        &lt;parameter name="mail.smtp.starttls.enable"&gt;true&lt;/parameter&gt;
+        &lt;parameter name="mail.smtp.auth"&gt;true&lt;/parameter&gt;
+        &lt;parameter name="mail.smtp.user"&gt;synapse.demo.0&lt;/parameter&gt;
+        &lt;parameter name="mail.smtp.password"&gt;mailpassword&lt;/parameter&gt;
+        &lt;parameter name="mail.smtp.from"&gt;synapse.demo.0@gmail.com&lt;/parameter&gt;
+    &lt;/transportSender&gt;</pre>
+
+    <h2 id="fixtransport">
+      Configuring Synapse for the FIX Transport
+    </h2>
+    <h3 id="fixsamples">
+      Configuring Synapse for FIX Samples
+    </h3>
+    <p>
+    In order to configure Synapse to run the FIX samples given in this guide you will need to
+    to enable the FIX transport as described in the <a href="transports.html#Setting_up_the_FIX_Transport">transport
+    documentation</a>.
+	In addition you will need to create some FIX configuration files as
+	specified below.
+    </p>
+    <p>
+	The FileStorePath property in the following two files should point
+        to two directories in your local file system. Once the samples
+        are executed, Synapse will create FIX message stores in these two
+        directories.
+    </p>
+    <p>
+      Put the following entries in a file called fix-synapse.cfg
+
+      <pre>[default]
+FileStorePath=examples/target/data/synapse-acceptor
+ConnectionType=acceptor
+StartTime=00:00:00
+EndTime=00:00:00
+HeartBtInt=30
+ValidOrderTypes=1,2,F
+SenderCompID=SYNAPSE
+TargetCompID=BANZAI
+UseDataDictionary=Y
+DefaultMarketPrice=12.30
+
+[session]
+BeginString=FIX.4.0
+SocketAcceptPort=9876</pre>
+    </p>
+    <p>
+      Put the following entries in a file called synapse-sender.cfg
+      <pre>[default]
+FileStorePath=examples/target/data/synapse-initiator
+SocketConnectHost=localhost
+StartTime=00:00:00
+EndTime=00:00:00
+HeartBtInt=30
+ReconnectInterval=5
+SenderCompID=SYNAPSE
+TargetCompID=EXEC
+ConnectionType=initiator
+
+[session]
+BeginString=FIX.4.0
+SocketConnectPort=19876</pre>
+    </p>
+
+    <h3 id="fixsamplesconfig">
+      Configuring Sample FIX Applications
+    </h3>
+    <p>
+      Locate and edit the FIX configuration file of Executor to be as follows.
+      This file is usually named executor.cfg
+      <pre>[default]
+FileStorePath=examples/target/data/executor
+ConnectionType=acceptor
+StartTime=00:00:00
+EndTime=00:00:00
+HeartBtInt=30
+ValidOrderTypes=1,2,F
+SenderCompID=EXEC
+TargetCompID=SYNAPSE
+UseDataDictionary=Y
+DefaultMarketPrice=12.30
+
+[session]
+BeginString=FIX.4.0
+SocketAcceptPort=19876</pre>
+    </p>
+    <p>
+      Locate and edit the FIX configuration file of Banzai to be as follows.
+      This file is usually named banzai.cfg
+      <pre>[default]
+FileStorePath=examples/target/data/banzai
+ConnectionType=initiator
+SenderCompID=BANZAI
+TargetCompID=SYNAPSE
+SocketConnectHost=localhost
+StartTime=00:00:00
+EndTime=00:00:00
+HeartBtInt=30
+ReconnectInterval=5
+
+[session]
+BeginString=FIX.4.0
+SocketConnectPort=9876</pre>
+   </p>
+    <p>
+	The FileStorePath property in the above two files should point
+        to two directories in your local file system.
+    </p>
+    <p>
+	If you are using a binary distribution of Quickfix/J, the two
+	samples and their default configuration files are all packed to a
+	single jar file called quickfixj-examples.jar. You can extract the jar file,
+    replace the modified configuration files and pack
+	them to a jar file again under the same name.
+    You can pass the new configuration file as a command line parameter too, in that case you don't
+    need to modify the quickfixj-examples.jar.
+    You can copy the config files from $SYNAPSE_HOME/repository/conf/sample/resources/fix folder to
+    $QFJ_HOME/etc folder. Execute the sample apps from $QFJ_HOME/bin, ./banzai.sh/bat ../etc/banzai.cfg
+    executor.sh/bat ../etc/executor.sh. 
+    </p>
+    <p>
+    For more information regarding the FIX sample applications please
+    refer the <a href="http://www.quickfixj.org/quickfixj/usermanual/usage/examples.html">Example Applications</a> section in the Quickfix/J
+    documentation. For more information on configuring Quickfix/J applications
+    refer the <a href="http://www.quickfixj.org/quickfixj/usermanual/usage/configuration.html">Configuring Quickfix/J</a> section of the Quickfix/J 
+    documentation.
+    </p>
+    <h2 id="tcp">
+      Setting up the TCP Transport
+    </h2>
+    <p>
+      To enable the TCP transport for samples first you need to download the Axis2 TCP transport
+      jar and copy it to the lib directory of Synapse. This library can be downloaded from the
+      <a href="http://ws.apache.org/commons/transport">WS-Commons Transports</a> website. Then open
+      up the axis2.xml file and uncomment the TCP transport receiver and sender configurations:
+    </p>
+    <pre xml:space="preserve">
+    &lt;transportReceiver name="tcp" class="org.apache.axis2.transport.tcp.TCPServer"&gt;
+	    &lt;parameter name="port"&gt;6060&lt;/parameter&gt;
+    &lt;/transportReceiver&gt;
+
+    &lt;transportSender name="tcp" class="org.apache.axis2.transport.tcp.TCPTransportSender"/&gt;</pre>
+    <p>
+     If you wish to use the sample Axis2 client to send TCP messages, you have to uncomment the TCP
+     transport sender configuration in the samples/axis2Client/client_repo/conf/axis2.xml file.
+    </p>
+
+    <h2 id="udp">
+      Setting up the UDP Transport
+    </h2>
+    <p>
+      To enable the UDP transport for samples first you need to download the Axis2 UDP transport
+      jar and copy it to the lib directory of Synapse. This library can be downloaded from the
+      <a href="http://ws.apache.org/commons/transport">WS-Commons Transports</a> website. Then
+      open up the axis2.xml file and uncomment the UDP transport receiver and sender configurations:
+    </p>
+    <pre xml:space="preserve">
+    &lt;transportReceiver name="udp" class="org.apache.axis2.transport.udp.UDPListener"/&gt;
+
+    &lt;transportSender name="udp" class="org.apache.axis2.transport.udp.UDPSender"/&gt;</pre>
+    <p>
+     If you wish to use the sample Axis2 client to send UDP messages, you have to uncomment the UDP
+     transport sender configuration in the samples/axis2Client/client_repo/conf/axis2.xml file.
+    </p>
+
+    <h2 id="script">
+      Configuring Synapse for Script Mediator Support
+    </h2>
+
+    <p>
+      The Synapse Script Mediator is a Synapse extension, and thus all
+      prerequisites are not bundled by default with the Synapse distribution.
+      Before you use some script mediators you may need to manually add the
+      required jar files to the Synapse lib directory, and optionally perform
+      other installation tasks as may be required by the individual scripting
+      language. This is explained in the following sections.
+    </p>
+    <h4>
+      JavaScript Support
+    </h4>
+    <p>
+      The JavaScript/E4X support is enabled by default and comes ready-to-use
+      with the Synapse distribution.
+    </p>
+    <h4>
+      Ruby Support
+    </h4>
+    <p>
+      For Ruby support you need to download the 'jruby-complete.jar' from the
+      Maven repository for JRuby, and copy it into the 'lib' folder of Synapse .
+      The JRuby JAR can be downloaded from <a
+      href="http://repo2.maven.org/maven2/org/jruby/jruby-complete/1.3.0/jruby-complete-1.3.0.jar">
+      here</a>.
+    </p>
+
+    <h2 id="json">
+      Configuring Synapse for JSON Support
+    </h2>
+
+    <p>
+      <a href="http://json.org">JSON</a> is a lightweight data-interchange format.
+      It can be used as an alternative to XML or SOAP. To enable the JSON support
+      in Synapse, following two jar files should be deployed into the 'lib' directory
+      of Synapse.
+    </p>
+    <ul>
+        <li><a href="http://repo1.maven.org/maven2/org/apache/axis2/axis2-json">axis2-json.jar</a></li>
+        <li><a href="http://jettison.codehaus.org/Download">jettison.jar</a></li>
+    </ul>
+    <p>
+      Having deployed the necessary libraries you should now register the JSON message
+      builder and formatter with Synapse. Open up 'repository/conf/axis2.xml' file
+      of Synapse and add the following two entries under the 'messageBuilders' and
+      'messageFormatters' sections respectively.
+    </p>
+    <pre>
+      &lt;messageBuilder contentType="application/json"
+                         class="org.apache.axis2.json.JSONOMBuilder"/&gt;
+
+      &lt;messageFormatter contentType="application/json"
+                         class="org.apache.axis2.json.JSONMessageFormatter"/&gt;
+    </pre>
+    <p>
+      If you are planning to run sample 440, you should also add the above two entries
+      to the 'samples/axis2Client/client_repo/conf/axis2.xml' file.
+    </p>    
+
+    <h2 id="derby">
+      Setting up Derby database server
+    </h2>
+    <p>
+      You can download Apache Derby distribution from <a
+      href="http://db.apache.org/derby/">http://db.apache.org/derby/</a>
+    </p>
+    <ol>
+      <li>
+        Set up and start the Derby network server
+      </li>
+      <li>
+        Create and open a connection to the database using the Derby client
+        driver<br/>
+        <pre> CONNECT 'jdbc:derby://localhost:1527/synapsedb;user=synapse;password=synapse;create=true';</pre>
+      </li>
+      <li>
+        Create a table using the following statement
+        <pre> CREATE table company(name varchar(10), id varchar(10), price double);</pre>
+      </li>
+      <li>
+        Inserts some data using following statements
+        <pre> INSERT into company values ('IBM','c1',0.0);
+ INSERT into company values ('SUN','c2',0.0);
+ INSERT into company values ('MSFT','c3',0.0);</pre>
+      </li>
+    </ol>
+    <p>
+      When using Derby, you need to add derby.jar, derbyclient.jar and
+      derbynet.jar to the classpath. This can be done by putting the above three
+      jars into the Synapse lib directory. For testing these samples Derby
+      10.1.1.0 binary distribution was used.
+    </p>
+    <p>
+      You can use any other database product instead of Derby. Then you have to
+      change the database connection details accordingly. Also you have to copy
+      the required database driver jars to the Synapse classpath.
+    </p>
+
+    <h2 id="mysql">
+      Setting Up MySQL database server
+    </h2>
+    <p>
+      You can use a MySQL installation to try out certain database mediator samples.
+      You can download MySQL distribution from <a
+      href="http://dev.mysql.com/downloads/">http://dev.mysql.com/downloads/</a>
+    </p>
+    <ol>
+      <li>
+        Set up and start the MySQL server
+      </li>
+      <li>
+        Create a sample databasae<br/>
+        <pre> DROP DATABASE IF EXISTS synapsedb;
+ CREATE DATABASE synapsedb;</pre>
+      </li>      
+      <li>
+        Create a table in the sample database
+        <pre> USE synapsedb; 
+ DROP TABLE IF EXISTS company;
+ CREATE table company(name varchar(10), id varchar(10), price double);</pre>
+      </li>
+      <li>
+        Inserts some data using following statements
+        <pre> INSERT into company values ('IBM','c1',3.7563);
+ INSERT into company values ('SUN','c2',3.8349);
+ INSERT into company values ('MSFT','c3',3.2938);</pre>
+      </li>
+      <li>Create a Stored Procedures<br/>
+        <pre> DROP PROCEDURE If EXISTS getCompany;
+ CREATE PROCEDURE getCompany(compName VARCHAR(10)) SELECT name, id, price FROM company WHERE name = compName;
+
+ DROP PROCEDURE If EXISTS updateCompany;
+ CREATE PROCEDURE updateCompany(compPrice DOUBLE,compName VARCHAR(10)) UPDATE company SET price = compPrice WHERE name = compName;
+</pre>
+      </li>
+    </ol>
+    <p>
+      When using MySQL, you need to add mysql-connector-java.jar to the Synapse classpath. This can be done
+      by putting the above mentioned jar into the Synapse lib directory. For testing the samples
+      MySQL-5.0.75 distribution and mysql-connector-java-5.1.12-bin.jar was used.
+    </p>
+    <p>
+      You can use any other database product instead of MySQL. Then you have to
+      change the database connection details accordingly. Also you have to copy
+      the required database driver jars to the Synapse classpath.
+    </p>
+    <h2>Key Stores Configurations</h2>
+
+<div>
+<p>This configuration is to be used in any location that needs key stores. This is currently used
+    for creating https URL connections and configuring secret manager. This configuration can be
+    specified on synapse.properties. Following shows a sample.
+</p>
+
+<div>
+    <p>
+        <strong>KeyStores configurations
+            <br/>
+        </strong>
+    </p>
+    <pre># KeyStores configurations
+
+        keystore.identity.location=lib/identity.jks
+        keystore.identity.type=JKS
+        keystore.identity.alias=synapse
+        keystore.identity.store.password=password
+        keystore.identity.key.password=password
+        #keystore.identity.parameters=enableHostnameVerifier=false;keyStoreCertificateFilePath=/home/esb.cer
+
+        keystore.trust.location=lib/trust.jks
+        keystore.trust.type=JKS
+        keystore.trust.alias=synapse
+        keystore.trust.store.password=password
+        #keystore.trust.parameters=enableHostnameVerifier=false;keyStoreCertificateFilePath=/home/esb.cer
+
+    </pre>
+</div>
+<p>Note: In the case where use for configuring key store for secret manager, the passwords in the
+    above configurations act as only just alias. There are some mechanisms that can be used to
+    provide actual password for these aliases. Those are described under <strong>Securing Password</strong>.</p>
+</div>
+        <h2>Securing Password</h2>
+
+<div>
+<p>All secrets are managed using Secret Manager. Secret Manager keeps any number of secret
+    repositories.
+    Those are arranged in a cascade manger. Secrets can be accessed by providing alias for those.
+
+    Key Stores needed for Secret Manager and secret repositories need to be configured according to
+    the<strong>Key Stores Configurations</strong>. In this case, all the passwords in the key store
+    configuration
+    contains only alias to refer actual password. For example
+    keystore.identity.storePassword=password
+    Here
+    <strong>password</strong>
+    is an alias and to be used to get actual password
+
+    In order to resolve above passwords (i.e. to get actual passwords); it is needed to provide a
+    <strong>password provider</strong>
+    for each keystore.
+    This can be done by adding property called
+    <strong>secretProvider= any implementation of
+        org.apache.synapse.securevault.secret.SecretCallbackHandler
+    </strong>
+    Example
+    <pre>
+        keystore.identity.store.secretProvider=org.apache.synapse.securevault.secret.handler.JMXSecretCallbackHandler
+    </pre>
+</p>
+<p>
+    The  <strong>password provider</strong> should be an implementation of
+     <strong>org.apache.synapse.securevault.secret.SecretCallbackHandler</strong>.Synapse ships three
+    implementations that can be used for this purpose.
+
+    <ul>
+        <li>
+            org.apache.synapse.securevault.secret.handler.JMXSecretCallbackHandler
+        </li>
+        <li>
+            org.apache.synapse.securevault.secret.handler.JlineSecretCallbackHandler
+        </li>
+        <li>
+            org.apache.synapse.securevault.secret.handler.HardCodedSecretCallbackHandler
+        </li>
+        <li>
+            org.apache.synapse.securevault.secret.handler.JBossEncryptionSecretCallbackHandler
+        </li>
+    </ul>
+    <p>
+        When use <strong>org.apache.synapse.securevault.secret.handler.JMXSecretCallbackHandler</strong>
+        , It is needed to use a JMX Console. Then , using JMX Console need to access the MBean
+        <strong>SecretsProvider</strong>
+        and add passwords for following keys. Therese is method to add secret in
+        <strong>SecretsProvider</strong>
+        MBean.
+
+        <ul>
+            <li>identity.store.pass</li>
+            <li>trust.store.pass</li>
+            <li>identity.key.pass</li>
+        </ul>
+
+        Note: These keys are only meaningful to SecretManager.
+
+        There is a <strong>ServerManager</strong> MBean that can be used to start synapse.
+    </p>
+</p>
+ <p>Secret repository can be configured using <strong>synape.properties</strong>.</p>
+<div>
+    <p>
+        <strong>Secret repositories
+            <br/>
+        </strong>
+    </p>
+    <pre>secretRepositories=file
+
+        secretRepositories.file.provider=org.apache.synapse.securevault.secret.repository.FileBaseSecretRepositoryProvider
+        secretRepositories.file.location=cipher-text.properties
+
+    </pre>
+</div>
+<p>
+    Currently, there is only one secret repository and it is  <strong>FileBaseSecretRepository</strong>. It use
+    <strong>cipher-text.properties</strong> to keep secrets. A sample file is shown bellow.
+
+</p>
+<div>
+    <p>
+        <strong>Sample cipher-text.properties
+            <br/>
+        </strong>
+    </p>
+    <pre>aliases=synapse
+
+        # configuration per each plaintext
+        synapse.secret=EsY65tztE9R5b9pErVxLp8Br5d3ol6vRdWAkYHdc7XkZteGf37VJ+iNlCenqxYSEto0vcjpcmmzwf7K2wd9u3KQtVGKEoNLSe2LYZtrm3tKmGd6PX9YpdN72ml3JISNXPJ69yybFi6DVUIJfE5MFOd7gswWfCnkmZ3eJ6M1nuiI=
+        synapse.secret.algorithm=RSA
+        synapse.secret.alias=synapse
+        synapse.secret.keystore=identity
+
+
+    </pre>
+</div>
+<p>
+    To run synapse with secret manager, it is needed to set <strong>deployment mode</strong> into
+    <strong>production</strong> and this can be done using wrapper.conf. There is an inline document on that configuration about
+    where to set this value.
+</p>
+</div>
+        <h2>Setting up Synapse DataSources</h2>
+
+<div>
+<p>Definition of the reusable database connection pool or datasources can be
+done using synapse.properties file. It is possible to configure any number of
+datasources. Currently only two types of datasources are supported and those are
+based on <a href="http://commons.apache.org/dbcp/">Apache DBCP</a> datasources: BasicDataSource and
+PerUserPoolDataSource. Following configuration includes
+both two definitions. This configuration is related with sample 363.</p>
+
+
+<p>Configuration is somewhat similar to the log4j appender configuration.</p>
+
+
+<p>It requires two databases, follow the above specified (Setting up
+Derby Database server) steps to create the two databases
+<strong>'jdbc:derby://localhost:1527/lookupdb'</strong>,
+<strong>'jdbc:derby://localhost:1527/reportdb'</strong> using the user name and password as
+'synapse'. Fill in the data for those two databases as per described in the above section</p>
+
+<div>
+<p><strong>synapse.properties configuration <br />
+</strong></p>
+<pre>#datasources
+synapse.datasources=lookupds,reportds
+synapse.datasources.icFactory=com.sun.jndi.rmi.registry.RegistryContextFactory
+synapse.datasources.providerUrl=rmi://localhost:2199
+synapse.datasources.providerPort=2199
+
+synapse.datasources.lookupds.type=BasicDataSource
+synapse.datasources.lookupds.driverClassName=org.apache.derby.jdbc.ClientDriver
+synapse.datasources.lookupds.url=jdbc:derby://localhost:1527/lookupdb;create=false
+synapse.datasources.lookupds.username=synapse
+synapse.datasources.lookupds.password=synapse
+synapse.datasources.lookupds.dsName=lookupdb
+synapse.datasources.lookupds.maxActive=100
+synapse.datasources.lookupds.maxIdle=20
+synapse.datasources.lookupds.maxWait=10000
+
+synapse.datasources.reportds.type=PerUserPoolDataSource
+synapse.datasources.reportds.cpdsadapter.factory=org.apache.commons.dbcp.cpdsadapter.DriverAdapterCPDS
+synapse.datasources.reportds.cpdsadapter.className=org.apache.commons.dbcp.cpdsadapter.DriverAdapterCPDS
+synapse.datasources.reportds.cpdsadapter.name=cpds
+synapse.datasources.reportds.dsName=reportdb
+synapse.datasources.reportds.driverClassName=org.apache.derby.jdbc.ClientDriver
+synapse.datasources.reportds.url=jdbc:derby://localhost:1527/reportdb;create=false
+synapse.datasources.reportds.username=synapse
+synapse.datasources.reportds.password=synapse
+synapse.datasources.reportds.maxActive=100
+synapse.datasources.reportds.maxIdle=20
+synapse.datasources.reportds.maxWait=10000</pre>
+</div>
+ <p>To secure data sources password, it is need to use secret manager. Please first refer that
+    document before reading this. If the secret manager is used, then passwords that have been
+    specified are considered as aliases and those are used for picking actual passwords. To get
+    password securely, it is needed to set the password provider for each data source.
+    The
+    <strong>password provider</strong>
+    should be an implementation of
+    <strong>org.apache.synapse.securevault.secret.SecretCallbackHandler</strong>. There are few
+    options but it is
+    recommended to use
+    <strong>org.apache.synapse.securevault.secret.handler.SecretManagerSecretCallbackHandler</strong>
+    in this case
+    (i.e. securing data source password).
+</p>
+<p>
+<strong>A sample configuration for above
+    <strong>lookupds</strong>
+    data source to use password provider
+    <br/>
+</strong>
+</p>
+<pre>
+    synapse.datasources.lookupds.secretProvider=org.apache.synapse.securevault.secret.handler.SecretManagerSecretCallbackHandler
+</pre>  
+</div>
+<h2>Using CipherTool</h2>
+
+<div>
+<p>
+    This is a simple tool for encrypting and decrypting simple texts such as passwords.
+
+    The arguments that are inputs to this tool with their meanings are shown bellow.
+    <ul>
+        <li><strong>keystore</strong> If keys are in a store , it's location</li>
+        <li><strong>storepass</strong> Password for access keyStore</li>
+        <li><strong>keypass</strong> To get private key</li>
+        <li><strong>alias</strong> Alias to identify key owner</li>
+        <li><strong>storetype</strong> Type of keyStore , Default is JKS </li>
+        <li><strong>keyfile</strong> If key is in a file</li>
+        <li><strong>opmode</strong> encrypt or decrypt , Default is encrypt </li>
+        <li><strong>algorithm</strong> encrypt or decrypt algorithm , Default is RSA</li>
+        <li><strong>source</strong> Either cipher or plain text as an in-lined form</li>
+        <li><strong>outencode</strong> Currently base64 and use for encode result</li>
+        <li><strong>inencode</strong> Currently base64 and use to decode input</li>
+        <li><strong>trusted</strong>  Is KeyStore a trusted store? If presents this, consider as a trusted store</li>
+    </ul>
+</p>
+
+<p>The required scripts (
+    <strong>ciphertool.bat</strong>
+    and <strong>ciphertool.sh</strong>) are available in bin directory.
+</p>
+
+<div>
+    <p>
+        <strong>A simple encrypting sample
+            <br/>
+        </strong>
+    </p>
+    <p>
+        <strong>ciphertool.bat -source synapse -keystore lib\trust.jks -storepass password -alias synapse -outencode base64 -trusted
+            <br/>
+        </strong>
+    </p>
+    <pre>ciphertool.bat -source synapse -keystore lib\trust.jks -storepass password -alias synapse -outencode base64 -trusted
+        Using SYNAPSE_HOME: C:\Project\apache\synapse\trunck2\modules\distribution\target\synapse-2.1.0-wso2v2
+        Using JAVA_HOME: C:\Program Files\Java\jdk1.5.0_14
+        Output : VbwH1pePwf4XmUtCdIvO0MA/EZPl8YK+E0kGkMpFd7CbWKpR2h1evTv902zoVorbJbHsVDNXfuvUUGmQAptUl4GknAm4bgZsgQ/pbsRbXivRkNzg9JVqw3FzWkR2uN2ZCHSacC4IdUwOjSDOTQ+kH7se
+        58kt2xqJSax2a9pdL1w=
+    </pre>
+</div>
+</div>
+</body>
+</document>

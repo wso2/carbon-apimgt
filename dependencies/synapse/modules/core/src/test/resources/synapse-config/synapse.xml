@@ -1,0 +1,12 @@
+<definitions xmlns="http://ws.apache.org/ns/synapse">
+
+    <endpoint name="synapse_xml_epr1">
+        <address uri="http://localhost:8080/services/Test"/>
+    </endpoint>
+
+    <sequence name="synapse_xml_seq1">
+        <log/>
+        <drop/>
+    </sequence>
+    
+</definitions>

@@ -1,0 +1,8 @@
+{
+    "id":"0001",
+    "ok":true,
+    "amount":5250,
+    "url" : [
+            "http://org.wso2.json/32_32"
+    ]
+}

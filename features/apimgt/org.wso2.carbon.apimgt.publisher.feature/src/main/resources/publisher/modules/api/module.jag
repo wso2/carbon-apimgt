@@ -11,6 +11,9 @@ jagg.module("api", {
     isContextExist:function () {
         return jagg.require(jagg.getModulesDir() + "api/add.jag").isContextExist.apply(this, arguments);
     },
+    isApiNameExist:function () {
+        return jagg.require(jagg.getModulesDir() + "api/add.jag").isApiNameExist.apply(this, arguments);
+    },
     isURLValid:function () {
         return jagg.require(jagg.getModulesDir() + "api/add.jag").isURLValid.apply(this, arguments);
     },
@@ -67,6 +70,9 @@ jagg.module("api", {
     showAPIDocVisibility:function () {
         return jagg.require(jagg.getModulesDir() + "api/check-permissions.jag").showAPIDocVisibility.apply(this, arguments);
     },
+    updatePermissionCache:function () {
+        return jagg.require(jagg.getModulesDir() + "api/check-permissions.jag").updatePermissionCache.apply(this, arguments);
+    },
     validateRoles:function () {
         return jagg.require(jagg.getModulesDir() + "api/add.jag").validateRoles.apply(this, arguments);
     },
@@ -105,6 +111,9 @@ jagg.module("api", {
     } ,
     checkIfResourceExists:function () {
         return jagg.require(jagg.getModulesDir() + "api/add.jag").checkIfResourceExists.apply(this, arguments);
+    } ,
+    isMultipleTenantsAvailable:function(){
+	return jagg.require(jagg.getModulesDir() + "api/add.jag").isMultipleTenantsAvailable.apply(this, arguments);
     }
 });
 %>

@@ -16,15 +16,19 @@ if(tenant!=null) {
    thumbURL = api.thumbnailurl;
    if(thumbURL && thumbURL.indexOf("images/") == 0) {
         thumbURL = jagg.getAbsoluteUrl(jagg.getThemeFile(thumbURL));
+   }else{
+        thumbURL = jagg.getRegistryPath(thumbURL);
    }
    var subsPermitted = jagg.module("subscription").hasSubscribePermission().permitted;
    session.put("apiPath",request.getQueryString());
 
+   //logged in mode
    if(tenant!=null && user) {
     var MultitenantUtils = Packages.org.wso2.carbon.utils.multitenancy.MultitenantUtils;
     var userDomain = MultitenantUtils.getTenantDomain(user.username);
     
-    if(tenant !='carbon.super' && tenant != userDomain){
+    //check whether logged in domain and store domain is same
+    if(tenant.toLocaleLowerCase() != userDomain.toLocaleLowerCase()){
     	var subscriptionAvailability = api.subscriptionAvailability;
     	if (subscriptionAvailability == 'all_tenants') {
     		subsPermitted = true;
@@ -34,7 +38,7 @@ if(tenant!=null) {
     		if (subscriptionAvailableTenants != null) {
     			var allowedTenants = subscriptionAvailableTenants.split(",");
     			for (var i = 0;i < allowedTenants.length; i++) {
-    				if (allowedTenants[i] != null && userDomain == allowedTenants[i].trim()) {
+    				if (allowedTenants[i] != null && userDomain.toLocaleLowerCase() == allowedTenants[i].trim().toLocaleLowerCase()) {
     					subsPermitted = true;
     				}
     			}
@@ -60,7 +64,7 @@ if(tenant!=null) {
 %>
 <div class="title-section">
 
-    <script>var isRatingActivated = <%=isRatingActivated%>, context = '<%=site.context%>',theme = '<%=jagg.getUserTheme().base%>', user = <%=(user != null)%>
+    <script>var isRatingActivated = <%=isRatingActivated%>, context = '<%= jagg.getSiteContext()%>',theme = '<%=jagg.getUserTheme().base%>', user = <%=(user != null)%>
     var existingRating = <%=api.rating%>
     </script>
     <h2 style="margin-right:10px"><%=api.name%> - <%=api.version%></h2>
@@ -119,7 +123,7 @@ if(tenant!=null) {
                                 <td colspan="<%=colspan%>">
                                     <div class="star-ratings">
                                         <% if(user) { %><%=stars.getDynamicStars(api.userRate)%>
-                                        <% } else { %><%=stars.getStaticStars(site.context, api.userRate,jagg.getUserTheme().base)%><% } %>
+                                        <% } else { %><%=stars.getStaticStars(jagg.getSiteContext(), api.userRate,jagg.getUserTheme().base)%><% } %>
                                     </div>
                                 </td>
 
@@ -232,9 +236,13 @@ if(tenant!=null) {
                     <%}%>
                     <%if (api.isAdvertiseOnly && api.redirectURL != null) {
                         var tenantDomain = 'carbon.super';
-                        if(api.redirectURL.indexOf("?")!=-1){
-							tenantDomain = api.redirectURL.split("?")[1];
-						}
+                        if(api.redirectURL.indexOf("?") != -1){
+				tenantDomain = api.redirectURL.split("?")[1];
+			} else if (api.apiOwner != null && api.apiOwner.indexOf("@") != -1) {
+				tenantDomain = api.apiOwner.split("@")[1];
+			} else if (api.apiOwner != null && api.apiOwner.indexOf("-AT-") != -1) {
+				tenantDomain = api.apiOwner.split("-AT-")[1];
+			}
                     	var path = api.redirectURL + "/apis/info?name=" + api.name + "&version=" + api.version + "&provider=" + api.apiOwner +"&tenant=" + tenantDomain;
                     %>
                     	<div id="store-redirect-link" class="span4 title-section"><a class="btn btn-primary" href="<%=path%>" target="_"><%=i18n.localize("goToSubscribe")%></a></div>

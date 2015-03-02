@@ -10,6 +10,7 @@ jagg.initializer("item-design", {
         jagg.addFooterJS("ace-theme", "jagg", "templates/item-design/js/src-noconflict/theme-textmate.js");
         jagg.addFooterJS("ace-mode", "jagg", "templates/item-design/js/src-noconflict/mode-json.js");
         jagg.addFooterJS("ace-mode", "jagg", "templates/item-design/js/src-noconflict/mode-javascript.js");
+        jagg.addFooterJS("ace-mode", "jagg", "templates/item-design/js/src-noconflict/mode-yaml.js");        
         jagg.addFooterJS("jquery-ace", "jagg", "templates/item-design/js/jquery-ace.min.js");
         //jagg.addFooterJS("bootstrap-min", "jagg", "lib/bootstrap/js/bootstrap.min.js");
         //jagg.addFooterJS("bootstrap-editable.min", "jagg", "templates/item-design/js/bootstrap-editable.js");        
@@ -20,7 +21,7 @@ jagg.initializer("item-design", {
         jagg.addFooterJS("tagsjs", "jagg", "templates/item-design/js/bootstrap-tagsinput.min.js");
 
 
-
+        jagg.addFooterJS("yaml2json", "jagg", "templates/item-design/js/js-yaml.min.js");
         jagg.addFooterJS("design-api", "jagg", "templates/item-design/js/api-design.js");
     }
 });

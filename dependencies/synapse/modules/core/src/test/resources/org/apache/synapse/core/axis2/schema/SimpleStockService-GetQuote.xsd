@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:tns="http://services.samples/xsd/GetQuote" xmlns:po="http://services.samples/xsd/PlaceOrder" xmlns:xs="http://www.w3.org/2001/XMLSchema" targetNamespace="http://services.samples/xsd/GetQuote" elementFormDefault="qualified" attributeFormDefault="qualified">
+
+	<xs:import namespace="http://services.samples/xsd/PlaceOrder" schemaLocation="SimpleStockService-PlaceOrder.xsd"/>
+
+	<xs:element name="getQuote">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="request" type="tns:GetQuote"/>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="GetQuote" type="tns:GetQuote"/>
+	<xs:complexType name="GetQuote">
+		<xs:sequence>
+			<xs:element name="symbol" type="xs:string"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:element name="getQuoteResponse">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="return" type="tns:GetQuoteResponse"/>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="GetQuoteResponse" type="tns:GetQuoteResponse"/>
+	<xs:complexType name="GetQuoteResponse">
+		<xs:sequence>
+			<xs:element name="change" type="xs:double"/>
+			<xs:element name="earnings" type="xs:double"/>
+			<xs:element name="high" type="xs:double"/>
+			<xs:element name="last" type="xs:double"/>
+			<xs:element name="lastTradeTimestamp" type="xs:string"/>
+			<xs:element name="low" type="xs:double"/>
+			<xs:element name="marketCap" type="xs:double"/>
+			<xs:element name="name" type="xs:string"/>
+			<xs:element name="open" type="xs:double"/>
+			<xs:element name="peRatio" type="xs:double"/>
+			<xs:element name="percentageChange" type="xs:double"/>
+			<xs:element name="prevClose" type="xs:double"/>
+			<xs:element name="symbol" type="xs:string"/>
+			<xs:element name="volume" type="xs:int"/>
+		</xs:sequence>
+	</xs:complexType>
+	
+	
+	<xs:element name="placeOrder">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="order" type="po:PlaceOrder"/>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	
+</xs:schema>

@@ -1,0 +1,102 @@
+##
+##  Licensed to the Apache Software Foundation (ASF) under one
+##  or more contributor license agreements.  See the NOTICE file
+##  distributed with this work for additional information
+##  regarding copyright ownership.  The ASF licenses this file
+##  to you under the Apache License, Version 2.0 (the
+##  "License"); you may not use this file except in compliance
+##  with the License.  You may obtain a copy of the License at
+##
+##   http://www.apache.org/licenses/LICENSE-2.0
+##
+##  Unless required by applicable law or agreed to in writing,
+##  software distributed under the License is distributed on an
+##   * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+##  KIND, either express or implied.  See the License for the
+##  specific language governing permissions and limitations
+##  under the License.
+##
+#set( $symbol_dollar = '$' )
+## Property substitution is a bit tricky here because it can happen at three different moments:
+##  * When building the archetype -> use ${property}
+##  * When generating the project from the archetype -> use \${property}
+##  * When building the project -> use \${symbol_dollar}{property}
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>\${groupId}</groupId>
+    <artifactId>\${artifactId}</artifactId>
+    <version>\${version}</version>
+    <name>Synapse distribution</name>
+    <packaging>pom</packaging>
+    <profiles>
+        <profile>
+            <activation>
+                <property>
+                    <name>synapse.version</name>
+                    <value>2.1.0-wso2v2</value>
+                </property>
+            </activation>
+            <repositories>
+                <repository>
+                    <id>apache-snapshots</id>
+                    <name>Apache Maven 2 Snapshot Repository</name>
+                    <url>http://people.apache.org/repo/m2-snapshot-repository/</url>
+                    <releases>
+                        <updatePolicy>never</updatePolicy>
+                    </releases>
+                    <snapshots>
+                        <updatePolicy>interval:10080</updatePolicy> <!-- i.e. refresh weekly -->
+                    </snapshots>
+                </repository>
+            </repositories>
+        </profile>
+    </profiles>
+    <properties>
+        <synapse.version>${synapse.version}</synapse.version>
+    </properties>
+    <dependencies>
+        <dependency>
+            <groupId>org.apache.synapse</groupId>
+            <artifactId>synapse-package-skeleton</artifactId>
+            <version>\${symbol_dollar}{synapse.version}</version>
+            <type>zip</type>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.synapse</groupId>
+            <artifactId>synapse-extensions</artifactId>
+            <version>\${symbol_dollar}{synapse.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.synapse</groupId>
+            <artifactId>synapse-experimental</artifactId>
+            <version>\${symbol_dollar}{synapse.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>log4j</groupId>
+            <artifactId>log4j</artifactId>
+            <version>${log4j.version}</version>
+        </dependency>
+    </dependencies>
+    <build>
+        <plugins>
+            <plugin>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <version>2.2-beta-3</version>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>single</goal>
+                        </goals>
+                        <configuration>
+                            <descriptors>
+                                <descriptor>src/main/assembly/bin.xml</descriptor>
+                            </descriptors>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+</project>

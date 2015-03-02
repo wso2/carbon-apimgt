@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wsdl:definitions name="Imported"
+                  targetNamespace="http://www.example.com/imported"
+                  xmlns:tns="http://www.example.com/imported"
+                  xmlns:s="http://www.example.com/schema"
+                  xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/"
+                  xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+    <wsdl:types>
+        <xsd:schema targetNamespace="http://www.example.com/imported">
+            <xsd:import namespace="http://www.example.com/schema" schemaLocation="imported.xsd"/>
+            <xsd:element name="getTestData">
+                <xsd:complexType>
+                    <xsd:sequence>
+                        <xsd:element name="test" type="s:SomeType" minOccurs="1" maxOccurs="1"/>
+                    </xsd:sequence>
+                </xsd:complexType>
+            </xsd:element>
+            <xsd:element name="getTestDataResponse">
+                <xsd:complexType>
+                    <xsd:sequence>
+                        <xsd:element name="test" type="s:SomeType" minOccurs="1" maxOccurs="1"/>
+                    </xsd:sequence>
+                </xsd:complexType>
+            </xsd:element>
+        </xsd:schema>
+    </wsdl:types>
+    <wsdl:message name="getTestDataRequest">
+        <wsdl:part name="parameters" element="tns:getTestData"/>
+    </wsdl:message>
+    <wsdl:message name="getTestDataResponse">
+        <wsdl:part name="parameters" element="tns:getTestDataResponse"/>
+    </wsdl:message>
+    <wsdl:portType name="Test">
+        <wsdl:operation name="getTestData">
+            <wsdl:input message="tns:getTestDataRequest" name="getTestData"/>
+            <wsdl:output message="tns:getTestDataResponse" name="getTestDataResponse"/>
+        </wsdl:operation>
+    </wsdl:portType>
+</wsdl:definitions>

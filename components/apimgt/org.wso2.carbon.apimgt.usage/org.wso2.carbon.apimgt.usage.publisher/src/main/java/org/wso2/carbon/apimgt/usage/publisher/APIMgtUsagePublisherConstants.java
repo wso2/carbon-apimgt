@@ -39,6 +39,10 @@ public final class APIMgtUsagePublisherConstants {
     public static final String API_PUBLISHER = "api.ut.apiPublisher";
     public static final String APPLICATION_NAME = "api.ut.application.name";
     public static final String APPLICATION_ID = "api.ut.application.id";
+    public static final String REQUEST_START_TIME = "api.ut.requestTime";
+    public static final String BACKEND_REQUEST_START_TIME = "api.ut.backendRequestTime";
+    public static final String BACKEND_REQUEST_END_TIME = "api.ut.backendRequestEndTime";
+    public static final String REQUEST_END_TIME = "api.ut.requestEndTime";
 
 
     public static final String API_GOOGLE_ANALYTICS_TRACKING_ENABLED = "Enabled";
@@ -50,12 +54,15 @@ public final class APIMgtUsagePublisherConstants {
 	public static final String API_USAGE_REQUEST_STREAM = API_USAGE_STREAMS + "Request.";
 	public static final String API_USAGE_RESPONSE_STREAM = API_USAGE_STREAMS + "Response.";
 	public static final String API_USAGE_FAULT_STREAM = API_USAGE_STREAMS + "Fault.";
+    public static final String API_USAGE_THROTTLE_STREAM = API_USAGE_STREAMS + "Throttle.";
 	public static final String API_REQUEST_STREAM_NAME = API_USAGE_REQUEST_STREAM + "Name";
 	public static final String API_REQUEST_STREAM_VERSION = API_USAGE_REQUEST_STREAM + "Version";
 	public static final String API_RESPONSE_STREAM_NAME = API_USAGE_RESPONSE_STREAM + "Name";
 	public static final String API_RESPONSE_STREAM_VERSION = API_USAGE_RESPONSE_STREAM + "Version";
 	public static final String API_FAULT_STREAM_NAME = API_USAGE_FAULT_STREAM + "Name";
 	public static final String API_FAULT_STREAM_VERSION = API_USAGE_FAULT_STREAM + "Version";
+    public static final String API_THROTTLE_STREAM_NAME = API_USAGE_THROTTLE_STREAM + "Name";
+	public static final String API_THRORRLE_STREAM_VERSION = API_USAGE_THROTTLE_STREAM + "Version";
 
 
 }

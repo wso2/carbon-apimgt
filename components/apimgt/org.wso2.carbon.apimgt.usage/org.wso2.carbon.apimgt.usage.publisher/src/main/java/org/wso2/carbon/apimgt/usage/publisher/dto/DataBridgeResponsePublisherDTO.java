@@ -23,7 +23,7 @@ import org.wso2.carbon.apimgt.usage.publisher.service.APIMGTConfigReaderService;
 
 public class DataBridgeResponsePublisherDTO extends ResponsePublisherDTO {
 
-    public DataBridgeResponsePublisherDTO(ResponsePublisherDTO responsePublisherDTO){
+    public DataBridgeResponsePublisherDTO(ResponsePublisherDTO responsePublisherDTO) {
         setConsumerKey(responsePublisherDTO.getConsumerKey());
         setContext(responsePublisherDTO.getContext());
         setApi_version(responsePublisherDTO.getApi_version());
@@ -33,55 +33,63 @@ public class DataBridgeResponsePublisherDTO extends ResponsePublisherDTO {
         setVersion(responsePublisherDTO.getVersion());
         setResponseTime(responsePublisherDTO.getResponseTime());
         setServiceTime(responsePublisherDTO.getServiceTime());
+        setBackendTime(responsePublisherDTO.getBackendTime());
         setUsername(responsePublisherDTO.getUsername());
+        setEventTime(responsePublisherDTO.getEventTime());
         setTenantDomain(responsePublisherDTO.getTenantDomain());
         setHostName(DataPublisherUtil.getHostAddress());
         setApiPublisher(responsePublisherDTO.getApiPublisher());
         setApplicationName(responsePublisherDTO.getApplicationName());
         setApplicationId(responsePublisherDTO.getApplicationId());
+        setCacheHit(responsePublisherDTO.getCacheHit());
+        setResponseSize(responsePublisherDTO.getResponseSize());
     }
 
     public static String getStreamDefinition() {
 
-	    APIMGTConfigReaderService apimgtConfigReaderService =
-			    UsageComponent.getApiMgtConfigReaderService();
+        APIMGTConfigReaderService apimgtConfigReaderService =
+                UsageComponent.getApiMgtConfigReaderService();
 
-        String streamDefinition = "{" +
-                "  'name':'" + apimgtConfigReaderService.getResponseStreamName() + "'," +
-                "  'version':'" + apimgtConfigReaderService.getResponseStreamVersion() + "'," +
-                "  'nickName': 'API Manager Reponse Data'," +
-                "  'description': 'Response Data'," +
-                "  'metaData':[" +
-                "          {'name':'clientType','type':'STRING'}" +
-                "  ]," +
-                "  'payloadData':[" +
-                "          {'name':'consumerKey','type':'STRING'}," +
-                "          {'name':'context','type':'STRING'}," +
-                "          {'name':'api_version','type':'STRING'}," +
-                "          {'name':'api','type':'STRING'}," +
-                "          {'name':'resourcePath','type':'STRING'}," +
-                "          {'name':'method','type':'STRING'}," +
-                "          {'name':'version','type':'STRING'}," +
-                "          {'name':'response','type':'INT'}," +
-                "          {'name':'responseTime','type':'LONG'}," +
-                "          {'name':'serviceTime','type':'LONG'}," +
-                "          {'name':'userId','type':'STRING'}," +
-                "          {'name':'tenantDomain','type':'STRING'}," +
-                "          {'name':'hostName','type':'STRING'}," +
-                "          {'name':'apiPublisher','type':'STRING'}," +
-                "          {'name':'applicationName','type':'STRING'}," +
-                "          {'name':'applicationId','type':'STRING'}" +
-                "  ]" +
+        return "{" +
+               "  'name':'" + apimgtConfigReaderService.getResponseStreamName() + "'," +
+               "  'version':'" + apimgtConfigReaderService.getResponseStreamVersion() + "'," +
+               "  'nickName': 'API Manager Response Data'," +
+               "  'description': 'Response Data'," +
+               "  'metaData':[" +
+               "          {'name':'clientType','type':'STRING'}" +
+               "  ]," +
+               "  'payloadData':[" +
+               "          {'name':'consumerKey','type':'STRING'}," +
+               "          {'name':'context','type':'STRING'}," +
+               "          {'name':'api_version','type':'STRING'}," +
+               "          {'name':'api','type':'STRING'}," +
+               "          {'name':'resourcePath','type':'STRING'}," +
+               "          {'name':'method','type':'STRING'}," +
+               "          {'name':'version','type':'STRING'}," +
+               "          {'name':'responseTime','type':'LONG'}," +
+               "          {'name':'serviceTime','type':'LONG'}," +
+               "          {'name':'backendTime','type':'LONG'}," +
+               "          {'name':'username','type':'STRING'}," +
+               "          {'name':'eventTime','type':'LONG'}," +
+               "          {'name':'tenantDomain','type':'STRING'}," +
+               "          {'name':'hostName','type':'STRING'}," +
+               "          {'name':'apiPublisher','type':'STRING'}," +
+               "          {'name':'applicationName','type':'STRING'}," +
+               "          {'name':'applicationId','type':'STRING'}," +
+               "          {'name':'cacheHit','type':'BOOL'}," +
+               "          {'name':'responseSize','type':'LONG'}" +
+               "  ]" +
 
-                "}";
-
-        return streamDefinition;
+               "}";
     }
 
-    public Object createPayload(){
-        return new Object[]{getConsumerKey(),getContext(),getApi_version(),getApi(), getResourcePath(),getMethod(),
-                getVersion(),getResponse(),getResponseTime(),getServiceTime(),getUsername(),getTenantDomain(),getHostName(),
-                getApiPublisher(), getApplicationName(), getApplicationId()};
+    public Object createPayload() {
+        return new Object[]{getConsumerKey(), getContext(), getApi_version(), getApi(),
+                            getResourcePath(), getMethod(),
+                            getVersion(), getResponseTime(), getServiceTime(), getBackendTime(), getUsername(),
+                            getEventTime(), getTenantDomain(), getHostName(),
+                            getApiPublisher(), getApplicationName(), getApplicationId(), getCacheHit(),
+                            getResponseSize()};
     }
 
 }

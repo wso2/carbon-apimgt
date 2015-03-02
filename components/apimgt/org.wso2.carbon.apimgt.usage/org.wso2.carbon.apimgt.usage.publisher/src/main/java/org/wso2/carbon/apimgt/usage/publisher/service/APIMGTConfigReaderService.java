@@ -40,6 +40,8 @@ public class APIMGTConfigReaderService {
 	private String responseStreamVersion;
 	private String faultStreamName;
 	private String faultStreamVersion;
+    private String throttleStreamName;
+	private String throttleStreamVersion;
 	private static Log log = LogFactory.getLog(APIMGTConfigReaderService.class);
 
     public APIMGTConfigReaderService(APIManagerConfiguration config) {
@@ -71,6 +73,13 @@ public class APIMGTConfigReaderService {
 	    if (faultStreamName == null || faultStreamVersion == null) {
 		    log.error("Fault stream name or version is null. Check api-manager.xml");
 	    }
+        throttleStreamName =
+                config.getFirstProperty(APIMgtUsagePublisherConstants.API_THROTTLE_STREAM_NAME);
+        throttleStreamVersion =
+                config.getFirstProperty(APIMgtUsagePublisherConstants.API_THRORRLE_STREAM_VERSION);
+        if (throttleStreamName == null || throttleStreamVersion == null) {
+            log.error("Throttle stream name or version is null. Check api-manager.xml");
+        }
     }
 
     public String getBamServerThriftPort() {
@@ -128,5 +137,13 @@ public class APIMGTConfigReaderService {
 	public String getFaultStreamVersion() {
 		return faultStreamVersion;
 	}
+
+    public String getThrottleStreamName() {
+        return throttleStreamName;
+    }
+
+    public String getThrottleStreamVersion() {
+        return throttleStreamVersion;
+    }
 
 }

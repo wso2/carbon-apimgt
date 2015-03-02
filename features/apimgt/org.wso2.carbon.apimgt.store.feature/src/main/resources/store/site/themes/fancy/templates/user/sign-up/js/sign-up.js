@@ -20,9 +20,18 @@ $(document).ready(function() {
 			allFieldsValues = allFieldsValues + "|" + value;
 		}
 	}
+        var tenantDomain = document.getElementById('hiddenTenantDomain').value;
+        var fullUserName;
+        if(tenantDomain == "null" || tenantDomain == "carbon.super") {
+            fullUserName = document.getElementById('newUsername').value;
+        } else {
+            fullUserName = document.getElementById('newUsername').value + "@" 
+                    + tenantDomain;
+        }
+
     	jagg.post("/site/blocks/user/sign-up/ajax/user-add.jag", {
             action:"addUser",
-            username:$('#newUsername').val(),
+            username:fullUserName,
             password:$('#newPassword').val(),
             allFieldsValues:allFieldsValues
         }, function (result) {

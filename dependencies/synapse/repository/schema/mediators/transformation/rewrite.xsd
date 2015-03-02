@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<!--
+  ~  Licensed to the Apache Software Foundation (ASF) under one
+  ~  or more contributor license agreements.  See the NOTICE file
+  ~  distributed with this work for additional information
+  ~  regarding copyright ownership.  The ASF licenses this file
+  ~  to you under the Apache License, Version 2.0 (the
+  ~  "License"); you may not use this file except in compliance
+  ~  with the License.  You may obtain a copy of the License at
+  ~
+  ~   http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~  Unless required by applicable law or agreed to in writing,
+  ~  software distributed under the License is distributed on an
+  ~   * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+  ~  KIND, either express or implied.  See the License for the
+  ~  specific language governing permissions and limitations
+  ~  under the License.
+  -->
+
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified"
+           targetNamespace="http://ws.apache.org/ns/synapse"
+           xmlns="http://ws.apache.org/ns/synapse">
+
+    <xs:include schemaLocation="../../misc/evaluators.xsd"/>
+
+    <xs:element name="rewrite">
+        <xs:annotation>
+            <xs:documentation source="description">
+                XQuery mediator to transform messages
+            </xs:documentation>
+        </xs:annotation>
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="rewriterule" minOccurs="1" maxOccurs="unbounded">
+                    <xs:complexType>
+                        <xs:choice maxOccurs="unbounded">
+                            <xs:element name="condition" minOccurs="0" maxOccurs="1">
+                                <xs:complexType>
+                                    <xs:group ref="evaluatorList"/>
+                                </xs:complexType>
+                            </xs:element>
+                            <xs:element name="action" minOccurs="1" maxOccurs="1">
+                                <xs:complexType>
+                                    <xs:attribute name="value" use="optional" type="xs:string"/>
+                                    <xs:attribute name="xpath" use="optional" type="xs:string"/>
+                                    <xs:attribute name="regex" use="optional" type="xs:string"/>
+                                    <xs:attribute name="type" use="optional">
+                                        <xs:simpleType>
+                                            <xs:restriction base="xs:string">
+                                                <xs:enumeration value="set"/>
+                                                <xs:enumeration value="append"/>
+                                                <xs:enumeration value="prepend"/>
+                                                <xs:enumeration value="replace"/>
+                                                <xs:enumeration value="remove"/>
+                                            </xs:restriction>
+                                        </xs:simpleType>
+                                    </xs:attribute>
+                                    <xs:attribute name="fragment" use="optional">
+                                        <xs:simpleType>
+                                            <xs:restriction base="xs:string">
+                                                <xs:enumeration value="protocol"/>
+                                                <xs:enumeration value="user"/>
+                                                <xs:enumeration value="host"/>
+                                                <xs:enumeration value="port"/>
+                                                <xs:enumeration value="path"/>
+                                                <xs:enumeration value="query"/>
+                                                <xs:enumeration value="ref"/>
+                                                <xs:enumeration value="full"/>
+                                            </xs:restriction>
+                                        </xs:simpleType>
+                                    </xs:attribute>
+                                </xs:complexType>
+                            </xs:element>
+                        </xs:choice>
+                    </xs:complexType>
+                </xs:element>
+            </xs:sequence>
+            <xs:attribute name="inProperty" use="optional" type="xs:string"/>
+            <xs:attribute name="outProperty" use="optional" type="xs:string"/>
+        </xs:complexType>
+    </xs:element>
+
+</xs:schema>

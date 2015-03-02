@@ -29,9 +29,9 @@ if(tenant!=null) {
                     </tr>
                 </table>
                 <div id="topicDescriptioEditor"></div>
-                <input type="hidden" id="parentId" name="parentId" value="<%=inputs.parentId%>">
+                <input type="hidden" id="parentId" name="parentId" value="<%= encode.forHtml(inputs.parentId)%>">
                 <div id="topic-add-actions">
-                    <a class="btn btn-primary" id="add-forum-topic">
+                    <a class="btn btn-primary" id="add-forum-topic" onclick="jagg.sessionAwareJS({redirect:'/site/pages/forum.jag'})">
                         <%=i18n.localize( 'forum.topicCreation.create')%>
                     </a>
                     <a class="btn" href="<%=siteConf.context%>/forum?<%=urlSuffix%>">
