@@ -189,9 +189,15 @@ public final class APIUtil {
 
             int cacheTimeout = APIConstants.API_RESPONSE_CACHE_TIMEOUT;
             try {
-                cacheTimeout = Integer.parseInt(artifact.getAttribute(APIConstants.API_OVERVIEW_CACHE_TIMEOUT));
+                String strCacheTimeout = artifact.getAttribute(APIConstants.API_OVERVIEW_CACHE_TIMEOUT);
+                if (strCacheTimeout != null && !strCacheTimeout.isEmpty()) {
+                    cacheTimeout = Integer.parseInt(strCacheTimeout);
+                }
             } catch (NumberFormatException e) {
-                //ignore
+                if (log.isWarnEnabled()) {
+                    log.warn("Error while retrieving cache timeout from the registry for " + apiId);
+                }
+                // ignore the exception and use default cache timeout value
             }
 
             api.setCacheTimeout(cacheTimeout);
@@ -359,9 +365,15 @@ public final class APIUtil {
 
             int cacheTimeout = APIConstants.API_RESPONSE_CACHE_TIMEOUT;
             try {
-                cacheTimeout = Integer.parseInt(artifact.getAttribute(APIConstants.API_OVERVIEW_CACHE_TIMEOUT));
+                String strCacheTimeout = artifact.getAttribute(APIConstants.API_OVERVIEW_CACHE_TIMEOUT);
+                if (strCacheTimeout != null && !strCacheTimeout.isEmpty()) {
+                    cacheTimeout = Integer.parseInt(strCacheTimeout);
+                }
             } catch (NumberFormatException e) {
-                //ignore
+                if (log.isWarnEnabled()) {
+                    log.warn("Error while retrieving cache timeout from the registry for " + apiId);
+                }
+                // ignore the exception and use default cache timeout value
             }
 
             api.setCacheTimeout(cacheTimeout);

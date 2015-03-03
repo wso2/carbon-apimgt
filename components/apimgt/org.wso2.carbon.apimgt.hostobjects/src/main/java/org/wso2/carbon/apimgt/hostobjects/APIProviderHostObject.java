@@ -260,7 +260,11 @@ public class APIProviderHostObject extends ScriptableObject {
             APIUtil.updatePermissionCache(username);
             updated = true;
         } catch (Exception e) {
-            // This is not a critical issue. If this fails user may not able to login just after user creation
+            // If the user creation or permission change done in another node in distributed setup, users may not be
+            // able to login into the system using SSO until permission cache updated. We call this method internally
+            // to update the permission cache, when user trying to login into the system. If this request fails user
+            // may not able to login into the systems and user will be getting an invalid credentials message. User
+            // can login into the system once permission cache automatically updated in predefined interval.
             log.error("Error while updating permissions for user " + username, e);
         }
         return updated;
