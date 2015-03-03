@@ -73,6 +73,8 @@ var log = new Log();
 
         result = mod.addToolbox(configData);
 
+        result = mod.addBamServerProfile(configData);
+
         if (result.error) {
             obj = {
                 error:true,

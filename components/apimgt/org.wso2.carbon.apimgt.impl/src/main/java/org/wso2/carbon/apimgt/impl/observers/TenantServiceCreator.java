@@ -176,23 +176,6 @@ public class TenantServiceCreator extends AbstractAxis2ConfigurationContextObser
             APIUtil.loadTenantSelfSignUpConfigurations(tenantId);
         } catch(Exception e) {
            log.error("Failed to load sign-up-config.xml to tenant " + tenantDomain + "'s registry");
-        }                
-         
-        try {
-        	APIManagerConfiguration configuration = ServiceReferenceHolder.getInstance().
-        			getAPIManagerConfigurationService().getAPIManagerConfiguration();
-        	 String enabledStr = configuration.getFirstProperty(APIConstants.API_USAGE_ENABLED);
-             boolean enabled = enabledStr != null && JavaUtils.isTrueExplicitly(enabledStr);
-             if (enabled) {
-            	 String bamServerURL = configuration.getFirstProperty(APIConstants.API_USAGE_BAM_SERVER_URL);
-                 String bamServerUser = configuration.getFirstProperty(APIConstants.API_USAGE_BAM_SERVER_USER);
-                 String bamServerPassword = configuration.getFirstProperty(APIConstants.API_USAGE_BAM_SERVER_PASSWORD);
-                 String bamServerThriftPort = configuration.getFirstProperty(APIConstants.API_USAGE_THRIFT_PORT);
-             	 APIUtil.addBamServerProfile(bamServerURL, bamServerUser, bamServerPassword, 
-             			bamServerThriftPort, tenantId);
-             }
-        } catch(Exception e) {
-            log.error("Failed to load bam profile configuration to tenant " + tenantDomain + "'s registry");
         }
     }
 

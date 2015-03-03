@@ -144,6 +144,16 @@ var addToolbox = function (configData) {
     };
 };
 
+var addBamServerProfile = function (configData) {
+
+    var carbon = require('carbon');
+    org.wso2.carbon.apimgt.impl.utils.APIUtil.addBamServerProfile(configData.eventReceiverURL,
+            configData.eventReceiverUsername, configData.eventReceiverPassword, parseInt(carbon.server.tenantId()));
+    return {
+        error:false
+    };
+};
+
 var getDataSourceConfigString = function (configData) {
 
     var configString = '<configuration>' +

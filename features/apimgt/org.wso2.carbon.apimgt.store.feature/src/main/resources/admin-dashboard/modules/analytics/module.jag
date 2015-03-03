@@ -23,6 +23,10 @@ jagg.module("analytics", {
 
     addToolbox:function () {
         return jagg.require(jagg.getModulesDir() + "analytics/add.jag").addToolbox.apply(this, arguments);
+    },
+
+    addBamServerProfile:function () {
+        return jagg.require(jagg.getModulesDir() + "analytics/add.jag").addBamServerProfile.apply(this, arguments);
     }
 });
 %>
