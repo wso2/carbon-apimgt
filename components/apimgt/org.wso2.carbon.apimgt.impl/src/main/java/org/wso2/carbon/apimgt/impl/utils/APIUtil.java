@@ -3785,4 +3785,65 @@ public final class APIUtil {
         }
         return domains;
     }
+
+    /**
+     * This method used to Downloaded Uploaded Documents from publisher
+     *
+     * @param userName     logged in username
+     * @param resourceUrl  resource want to download
+     * @param tenantDomain loggedUserTenantDomain
+     * @return map that contains Data of the resource
+     * @throws APIManagementException
+     */
+
+    public static Map<String, Object> getDocument(String userName, String resourceUrl,
+                                                  String tenantDomain)
+            throws APIManagementException {
+        Map<String, Object> documentMap = new HashMap<String, Object>();
+
+        InputStream inStream = null;
+        String[] resourceSplitPath =
+                resourceUrl.split(RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH);
+        if (resourceSplitPath.length == 2) {
+            resourceUrl = resourceSplitPath[1];
+        } else {
+            handleException("Invalid resource Path " + resourceUrl);
+        }
+        Resource apiDocResource;
+        Registry registryType = null;
+        int tenantId = MultitenantConstants.SUPER_TENANT_ID;
+        try {
+            if (tenantDomain != null && !"null".equals(tenantDomain)) {
+                tenantId = ServiceReferenceHolder
+                        .getInstance().getRealmService().getTenantManager()
+                        .getTenantId(tenantDomain);
+            }
+            if (tenantId != MultitenantConstants.SUPER_TENANT_ID) {
+                userName = userName.split("@" + tenantDomain)[0];
+            }
+            registryType = ServiceReferenceHolder
+                    .getInstance().
+                            getRegistryService().getGovernanceUserRegistry(userName, tenantId);
+            if (registryType.resourceExists(resourceUrl)) {
+                apiDocResource = registryType.get(resourceUrl);
+                inStream = apiDocResource.getContentStream();
+                documentMap.put("Data", inStream);
+                documentMap.put("contentType", apiDocResource.getMediaType());
+                String[] content = apiDocResource.getPath().split("/");
+                documentMap.put("name", content[content.length - 1]);
+            }
+        } catch (org.wso2.carbon.user.api.UserStoreException e) {
+            log.error("Couldn't retrieve Tenant Domain for User " + userName, e);
+            handleException("Couldn't retrieve Tenant Domain for User " + userName, e);
+
+        } catch (RegistryException e) {
+            log.error("Couldn't retrieve registry for User " + userName + " Tenant " + tenantDomain,
+                      e);
+            handleException(
+                    "Couldn't retrieve registry for User " + userName + " Tenant " + tenantDomain,
+                    e);
+        }
+        return documentMap;
+    }
+
 }

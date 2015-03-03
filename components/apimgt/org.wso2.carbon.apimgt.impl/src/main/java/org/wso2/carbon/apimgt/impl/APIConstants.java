@@ -496,6 +496,9 @@ public final class APIConstants {
     public static final String EVERYONE_ROLE = "internal/everyone";
     public static final String ANONYMOUS_ROLE = "system/wso2.anonymous.role";
 
+    // Anonymous end user, to be used with ACCESS_TOKEN_USER_TYPE_APPLICATION
+    public static final String END_USER_ANONYMOUS = "anonymous";
+
     public static final String READ_ACTION = "2";
     public static final String WRITE_ACTION = "3";
     public static final String DELETE_ACTION = "4";
