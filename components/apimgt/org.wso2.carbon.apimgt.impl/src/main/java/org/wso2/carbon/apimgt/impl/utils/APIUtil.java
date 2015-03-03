@@ -57,6 +57,7 @@ import org.wso2.carbon.apimgt.api.doc.model.Parameter;
 import org.wso2.carbon.apimgt.api.model.*;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
+import org.wso2.carbon.apimgt.impl.clients.ApplicationManagementServiceClient;
 import org.wso2.carbon.apimgt.impl.clients.OAuthAdminClient;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
@@ -1080,7 +1081,19 @@ public final class APIUtil {
         }
     }
 
-    
+
+    public static ApplicationManagementServiceClient getApplicationManagementServiceClient() throws APIManagementException {
+        APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
+                getAPIManagerConfigurationService().getAPIManagerConfiguration();
+        try {
+            return new ApplicationManagementServiceClient();
+        } catch (Exception e) {
+            handleException("Error while initializing the Application Management Service client", e);
+            return null;
+        }
+    }
+
+
     /**
      * Crate an WSDL from given wsdl url. Reset the endpoint details to gateway node
      ** 
