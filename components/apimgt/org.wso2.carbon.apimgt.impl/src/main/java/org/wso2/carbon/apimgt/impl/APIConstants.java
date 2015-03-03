@@ -313,6 +313,7 @@ public final class APIConstants {
     public static final String KEY_MANAGER = "KeyManager";
     public static final String AUTHSERVER_URL = "AuthorizationServerURL";
     public static final String TOKEN_URL = "TokenURL";
+    public static final String REVOKE_URL = "RevokeURL";
 
     public static final String API_KEY_MANGER_APPLICATION_CLASS_NAME = API_KEY_MANAGER + "ApplicationClassName";
     public static final String API_KEY_MANGER_IMPLEMENTATION_CLASS_NAME = API_KEY_MANAGER + "KeyManagerImplementationClassName";
