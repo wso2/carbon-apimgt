@@ -234,31 +234,12 @@ public class DefaultKeyManagerImpl extends AbstractKeyManager {
             return null;
         }
 
-
-        String tokenEndpointName = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration().
-                getFirstProperty(APIConstants.API_KEY_MANAGER_TOKEN_ENDPOINT_NAME);
-        String keyMgtServerURL = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration().
-                getFirstProperty(APIConstants.API_KEY_MANAGER_URL);
-        URL keymgtURL = new URL(keyMgtServerURL);
+        String tokenEndpoint = configuration.getParameter(APIConstants.TOKEN_URL);
+        //To revoke tokens we should call revoke API deployed in API gateway.
+        String revokeEndpoint = configuration.getParameter(APIConstants.REVOKE_URL);
+        URL keymgtURL = new URL(tokenEndpoint);
         int keyMgtPort = keymgtURL.getPort();
         String keyMgtProtocol = keymgtURL.getProtocol();
-        String tokenEndpoint = null;
-
-        String webContextRoot = CarbonUtils.getServerConfiguration().getFirstProperty("WebContextRoot");
-
-        if (webContextRoot == null || "/".equals(webContextRoot)) {
-            webContextRoot = "";
-        }
-
-        if (keyMgtServerURL != null) {
-            String[] tmp = keyMgtServerURL.split(webContextRoot + "/services");
-            tokenEndpoint = tmp[0] + tokenEndpointName;
-        }
-
-        //To revoke tokens we should call revoke API deployed in API gateway.
-        String revokeEndpoint = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration().
-                getFirstProperty(APIConstants.API_KEY_MANAGER_REVOKE_API_URL);
-
 
         // Call the /revoke only if there's a token to be revoked.
         try {
