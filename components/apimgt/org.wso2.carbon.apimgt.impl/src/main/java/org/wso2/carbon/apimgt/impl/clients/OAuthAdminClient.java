@@ -26,8 +26,10 @@ import org.apache.axis2.transport.http.HTTPConstants;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.model.KeyManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
+import org.wso2.carbon.apimgt.impl.factory.KeyManagerFactory;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.identity.oauth.stub.OAuthAdminServiceStub;
 import org.wso2.carbon.identity.oauth.stub.dto.OAuthConsumerAppDTO;
@@ -43,13 +45,9 @@ public class OAuthAdminClient {
     private String cookie;
     //String username;
 
-
-        public OAuthAdminClient() throws APIManagementException {
-        APIManagerConfiguration config = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().
-                getAPIManagerConfiguration();
-            String serviceURL = config.getFirstProperty(APIConstants.API_KEY_MANAGER_URL);
-            //username = config.getFirstProperty(APIConstants.API_KEY_MANAGER_USERNAME);
-
+    public OAuthAdminClient() throws APIManagementException {
+        KeyManagerConfiguration configuration = KeyManagerFactory.getKeyManager().getKeyManagerConfiguration();
+        String serviceURL = configuration.getParameter(APIConstants.AUTHSERVER_URL);
         if (serviceURL == null) {
             throw new APIManagementException("Required connection details for the key management server not provided");
         }

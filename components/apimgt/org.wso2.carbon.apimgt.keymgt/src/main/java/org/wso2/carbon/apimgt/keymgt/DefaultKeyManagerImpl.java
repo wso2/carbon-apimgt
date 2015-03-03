@@ -364,7 +364,7 @@ public class DefaultKeyManagerImpl extends AbstractKeyManager {
 
     @Override
     public KeyManagerConfiguration getKeyManagerConfiguration() throws APIManagementException {
-        return null;
+        return configuration;
     }
 
     @Override
