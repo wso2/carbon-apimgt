@@ -55,7 +55,6 @@ public class APIKeyMgtDataHolder {
     private static TokenGenerator tokenGenerator;
     private static boolean jwtGenerationEnabled = false;
     private static final Log log = LogFactory.getLog(APIKeyMgtDataHolder.class);
-    private static KeyManager keyManager = null;
 
     // Scope used for marking Application Tokens
     private static String applicationTokenScope;
@@ -74,66 +73,6 @@ public class APIKeyMgtDataHolder {
 
     public static void setKeyCacheEnabledKeyMgt(Boolean keyCacheEnabledKeyMgt) {
         isKeyCacheEnabledKeyMgt = keyCacheEnabledKeyMgt;
-    }
-
-    public static void initializeKeyManager(String configPath) throws APIManagementException {
-
-        InputStream in = null;
-        try {
-            in = FileUtils.openInputStream(new File(configPath));
-            StAXOMBuilder builder = new StAXOMBuilder(in);
-            OMElement document = builder.getDocumentElement();
-            if (document == null || !APIConstants.KEY_MANAGER.equals(document.getQName().getLocalPart())) {
-                throw new APIManagementException("KeyManager section not found. key-manager.xml may be corrupted.");
-            }
-
-            log.debug("Reading key-manager.xml");
-
-            String clazz = document.getAttribute(new QName("class")).getAttributeValue();
-            keyManager = (KeyManager) Class.forName(clazz).newInstance();
-
-            log.debug("Initialised KeyManager implementation");
-
-            OMElement configElement = document.getFirstElement();
-            if (!"Configuration".equals(configElement.getQName().getLocalPart())) {
-                throw new APIManagementException("Configuration section not found. key-manager.xml may be corrupted.");
-            }
-
-            log.debug("Loading KeyManager configuration,");
-
-            XMLOutputFactory xof = XMLOutputFactory.newInstance();
-            XMLStreamWriter streamWriter;
-            StringWriter stringStream = new StringWriter();
-            streamWriter = xof.createXMLStreamWriter(stringStream);
-            configElement.serialize(streamWriter);
-            streamWriter.close();
-            keyManager.loadConfiguration(stringStream.toString());
-
-            log.debug("Successfully loaded KeyManager configuration.");
-
-        } catch (IOException e) {
-            log.error(e.getMessage());
-            throw new APIManagementException("I/O error while reading the API manager " +
-                                             "configuration: " + configPath, e);
-        } catch (XMLStreamException e) {
-            log.error(e.getMessage());
-            throw new APIManagementException("Error while parsing the API manager " +
-                                             "configuration: " + configPath, e);
-        } catch (OMException e) {
-            log.error(e.getMessage());
-            throw new APIManagementException("Error while parsing API Manager configuration: " + configPath, e);
-        } catch (ClassNotFoundException e) {
-            log.error("Error occurred while instantiating KeyManager implementation");
-            throw new APIManagementException("Error occurred while instantiating KeyManager implementation", e);
-        } catch (InstantiationException e) {
-            e.printStackTrace();
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
-        } catch (APIManagementException e) {
-            e.printStackTrace();
-        } finally {
-            IOUtils.closeQuietly(in);
-        }
     }
 
 

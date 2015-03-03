@@ -29,11 +29,9 @@ import org.wso2.carbon.apimgt.api.dto.UserApplicationAPIUsage;
 import org.wso2.carbon.apimgt.api.model.*;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
-import org.wso2.carbon.apimgt.impl.applications.ApplicationCreator;
-import org.wso2.carbon.apimgt.impl.applications.ApplicationImpl;
+import org.wso2.carbon.apimgt.impl.factory.KeyManagerFactory;
 import org.wso2.carbon.apimgt.impl.dto.*;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
-import org.wso2.carbon.apimgt.impl.token.ClaimsRetriever;
 import org.wso2.carbon.apimgt.impl.token.JWTGenerator;
 import org.wso2.carbon.apimgt.impl.token.TokenGenerator;
 import org.wso2.carbon.apimgt.impl.utils.APIMgtDBUtil;
@@ -49,7 +47,6 @@ import org.wso2.carbon.identity.base.IdentityException;
 import org.wso2.carbon.identity.core.util.IdentityDatabaseUtil;
 import org.wso2.carbon.identity.core.util.IdentityUtil;
 import org.wso2.carbon.identity.oauth.IdentityOAuthAdminException;
-import org.wso2.carbon.identity.oauth.common.OAuthConstants;
 import org.wso2.carbon.identity.oauth.OAuthUtil;
 import org.wso2.carbon.identity.oauth.config.OAuthServerConfiguration;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
@@ -2348,7 +2345,7 @@ public class ApiMgtDAO {
             }
 
             if(consumerKey != null){
-            keyManager = ApplicationCreator.getKeyManager();
+            keyManager = KeyManagerFactory.getKeyManager();
             oAuthApplication = keyManager.retrieveApplication(consumerKey);
            // oAuthApplication.setJsonString(jsonString);
             }
@@ -3587,7 +3584,7 @@ public class ApiMgtDAO {
         Connection connection = null;
         PreparedStatement ps = null;
         //initiate key manager.
-        KeyManager keyManager = ApplicationCreator.getKeyManager();
+        KeyManager keyManager = KeyManagerFactory.getKeyManager();
         //get oAuthApplicationInfo object.
         OAuthApplicationInfo oAuthApplicationInfo = oauthAppRequest.getoAuthApplicationInfo();
         oAuthApplicationInfo.setClientId(clientId);

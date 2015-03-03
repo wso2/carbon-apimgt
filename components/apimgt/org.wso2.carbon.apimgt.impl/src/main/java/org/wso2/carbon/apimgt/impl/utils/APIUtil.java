@@ -1070,8 +1070,7 @@ public final class APIUtil {
     }
 
     public static OAuthAdminClient getOauthAdminClient() throws APIManagementException {
-        APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
-                getAPIManagerConfigurationService().getAPIManagerConfiguration();
+
         try {
             return new OAuthAdminClient();
         } catch (Exception e) {
