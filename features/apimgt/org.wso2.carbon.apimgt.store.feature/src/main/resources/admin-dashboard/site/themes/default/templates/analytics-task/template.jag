@@ -434,12 +434,12 @@ var datasourceData = outputs.datasourceData;
                     </div>
                 </div>
             </fieldset>
-
             <div class="form-actions" id="saveButtons">
                 <input type="submit" class="btn btn-primary" value="Save" action="design"/>
             </div>
 
             <input type="hidden" id="event_receiver_url_groups" name="event_receiver_url_groups" value=""/>
+            <div class="ui_message" style="display: none">Saved</div>
         </form>
         </div>
         </div>
@@ -467,6 +467,8 @@ $(document).ready(function(){
 
     <% if(analyticsData.analytics != null){ %>
             createMultiUrlArrayAndView("<%=analyticsData.analytics.eventReceiverURL.text()%>");
+            var enableAnalytics = "<%=analyticsData.analytics.enableAnalytics.text()%>";
+            expandViewIfAnalyticsEnabled(enableAnalytics);
             document.getElementById("eventReceiverUsername").value = "<%=analyticsData.analytics.eventReceiverUsername.text()%>";
             document.getElementById("eventReceiverPassword").value = "<%=analyticsData.analytics.eventReceiverPassword.text()%>";
             document.getElementById("eventAnalyserURL").value = "<%=analyticsData.analytics.eventAnalyserURL.text()%>";

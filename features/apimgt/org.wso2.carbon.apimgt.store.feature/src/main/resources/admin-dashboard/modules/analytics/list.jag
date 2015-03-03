@@ -19,7 +19,7 @@ var getAnalyticsConfig = function (analyticsData) {
     } else {
         var analytics_config = new XML(ContentStr.content);
         conf = {
-            enableAnalytics: analytics_config.enableAnalytics,
+            enableAnalytics: analytics_config.enable,
             eventReceiverURL: analytics_config.event_receiver.URL,
             eventReceiverUsername: analytics_config.event_receiver.Username,
             eventReceiverPassword: analytics_config.event_receiver.Password,

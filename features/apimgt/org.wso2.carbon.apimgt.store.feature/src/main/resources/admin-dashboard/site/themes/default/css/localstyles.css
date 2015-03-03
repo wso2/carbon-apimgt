@@ -1141,3 +1141,9 @@ ol.progtrckr li.progtrckr-todo:before {
 #design_form div.control-group, #implement_form div.control-group, #manage_form div.control-group{
     margin-bottom: 8px;
 }
+
+.ui_message {
+    margin: 5px 0 0 10px;
+    padding: 10px;
+    background-color: #8DEAE3 !important;
+}

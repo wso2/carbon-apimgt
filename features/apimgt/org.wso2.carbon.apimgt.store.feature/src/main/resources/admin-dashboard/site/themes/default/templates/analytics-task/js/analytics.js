@@ -25,6 +25,7 @@ function showReceiverURLs() {
     template = Handlebars.compile(source);
     $('#event_receiver_url').html(template(multi_urls));
     $('#event_receiver_url').show();
+    return true;
 }
 
 $(document).ready(function(){
@@ -47,8 +48,9 @@ $(document).ready(function(){
 
             $(form).ajaxSubmit({
                 success:function(responseText, statusText, xhr, $form){
-                    $('#saveMessage').hide();
-                    $('#saveButtons').show();
+                    $('.ui_message').innerHTML = "Configurations Saved!!!";
+                    $('.ui_message').fadeIn('slow');
+                    $('.ui_message').delay(4000).fadeOut('slow');
                     if (!responseText.error) {
                         $( "body" ).trigger( "conf_saved" );
                     } else {
@@ -75,16 +77,24 @@ $(document).ready(function(){
     $('.stats-enabled').click(function(){
         var id = $(this).attr('ref');
         var form = $('#'+id);
-        form.toggle('fast');
+        form.toggle("blind");
         if ($(this).is(':checked')) {
-            $(this).checked();
         } else {
             disableAnalytics();
-            $(this).unchecked();
         }
-        return false;
+        return true;
     });
 });
+
+    function expandViewIfAnalyticsEnabled(enableAnalytics){
+        if (enableAnalytics == "true") {
+            $('#configuration_form').show();
+            $('#enableStats').prop('checked', true);
+        } else {
+            $('#enableStats').prop('checked', false);
+        }
+        return true;
+    }
 
     function disableAnalytics(){
         $.post("site/blocks/analytics-task/ajax/enable.jag",
