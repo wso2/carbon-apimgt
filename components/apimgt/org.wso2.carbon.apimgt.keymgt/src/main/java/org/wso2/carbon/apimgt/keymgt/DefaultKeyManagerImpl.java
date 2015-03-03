@@ -39,6 +39,7 @@ import org.wso2.carbon.apimgt.impl.AbstractKeyManager;
 import org.wso2.carbon.apimgt.impl.clients.ApplicationManagementServiceClient;
 import org.wso2.carbon.apimgt.impl.clients.OAuth2TokenValidationServiceClient;
 import org.wso2.carbon.apimgt.impl.clients.OAuthAdminClient;
+import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.keymgt.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.keymgt.util.APIKeyMgtDataHolder;
@@ -78,6 +79,9 @@ public class DefaultKeyManagerImpl extends AbstractKeyManager {
         OAuthApplicationInfo oAuthApplicationInfo = oauthAppRequest.getoAuthApplicationInfo();
         oAuthConsumerAppDTO.setApplicationName(oAuthApplicationInfo.getClientName());
 
+        String username = (String)oAuthApplicationInfo.getParameter(ApplicationConstants.
+                OAUTH_CLIENT_USERNAME);
+
         if(oAuthApplicationInfo.getParameter("callback_url") != null){
             JSONArray jsonArray = (JSONArray) oAuthApplicationInfo.getParameter("callback_url");
             String callbackUrl = null;
@@ -90,7 +94,7 @@ public class DefaultKeyManagerImpl extends AbstractKeyManager {
         }
 
         try {
-            oAuthAdminClient.registerOAuthApplicationData(oAuthConsumerAppDTO);
+            oAuthAdminClient.registerOAuthApplicationData(oAuthConsumerAppDTO, username);
 
         } catch (Exception e) {
             handleException("OAuth application registration failed", e);
@@ -98,7 +102,7 @@ public class DefaultKeyManagerImpl extends AbstractKeyManager {
 
         try {
             oAuthConsumerAppDTO = oAuthAdminClient.
-                    getOAuthApplicationDataByAppName(oAuthApplicationInfo.getClientName());
+                    getOAuthApplicationDataByAppName(oAuthApplicationInfo.getClientName(), username);
         } catch (Exception e) {
             handleException("Can not retrieve registered OAuth application information ", e);
         }
@@ -132,7 +136,7 @@ public class DefaultKeyManagerImpl extends AbstractKeyManager {
         serviceProvider.setInboundAuthenticationConfig(inboundAuthenticationConfig);
 
         try {
-            applicationManagementServiceClient.createApplication(serviceProvider);
+            applicationManagementServiceClient.createApplication(serviceProvider, username);
         } catch (Exception e) {
             handleException("Service Provider creation failed", e);
         }
@@ -147,16 +151,18 @@ public class DefaultKeyManagerImpl extends AbstractKeyManager {
         OAuthConsumerAppDTO oAuthConsumerAppDTO = getOAuthConsumerAppDTOFromAppInfo(appInfoDTO);
         String oAuthAppName = (String) appInfoDTO.getoAuthApplicationInfo().getParameter(ApplicationConstants.
                 OAUTH_CLIENT_NAME);
+        String username = (String) appInfoDTO.getoAuthApplicationInfo().getParameter(ApplicationConstants.
+                OAUTH_CLIENT_USERNAME);
 
         try {
-            oAuthAdminClient.updateOAuthApplicationData(oAuthConsumerAppDTO);
+            oAuthAdminClient.updateOAuthApplicationData(oAuthConsumerAppDTO, username);
         } catch (Exception e) {
             handleException("Can not update OAuth application : " + oAuthAppName, e);
         }
 
         try {
             oAuthConsumerAppDTO = oAuthAdminClient.
-                    getOAuthApplicationDataByAppName(oAuthAppName);
+                    getOAuthApplicationDataByAppName(oAuthAppName, username);
         } catch (Exception e) {
             handleException("Can not retrieve updated OAuth application : " + oAuthAppName, e);
         }
@@ -170,8 +176,9 @@ public class DefaultKeyManagerImpl extends AbstractKeyManager {
     public void deleteApplication(String consumerKey) throws APIManagementException {
 
         OAuthAdminClient oAuthAdminClient = APIUtil.getOauthAdminClient();
+        String username = ApiMgtDAO.getUserFromOauthToken(consumerKey);
         try {
-            oAuthAdminClient.removeOAuthApplicationData(consumerKey);
+            oAuthAdminClient.removeOAuthApplicationData(consumerKey, username);
         } catch (Exception e) {
             handleException("Can not remove OAuth application for the given consumer key : " + consumerKey, e);
         }
@@ -182,8 +189,10 @@ public class DefaultKeyManagerImpl extends AbstractKeyManager {
     public OAuthApplicationInfo retrieveApplication(String consumerKey) throws APIManagementException {
         OAuthAdminClient oAuthAdminClient = APIUtil.getOauthAdminClient();
         OAuthConsumerAppDTO oAuthConsumerAppDTO = new OAuthConsumerAppDTO();
+
+        String username = ApiMgtDAO.getUserFromOauthToken(consumerKey);
         try {
-            oAuthConsumerAppDTO = oAuthAdminClient.getOAuthApplicationData(consumerKey);
+            oAuthConsumerAppDTO = oAuthAdminClient.getOAuthApplicationData(consumerKey, username);
         } catch (Exception e) {
             handleException("Can not retrieve OAuth application information from given key: " + consumerKey, e);
         }

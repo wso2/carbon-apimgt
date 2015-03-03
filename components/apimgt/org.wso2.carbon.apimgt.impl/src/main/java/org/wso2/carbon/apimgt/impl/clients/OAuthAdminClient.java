@@ -31,8 +31,6 @@ import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.identity.oauth.stub.OAuthAdminServiceStub;
 import org.wso2.carbon.identity.oauth.stub.dto.OAuthConsumerAppDTO;
-import org.wso2.carbon.identity.oauth.stub.dto.OAuthRevocationRequestDTO;
-import org.wso2.carbon.identity.oauth.stub.dto.OAuthRevocationResponseDTO;
 
 
 public class OAuthAdminClient {
@@ -43,14 +41,14 @@ public class OAuthAdminClient {
 
     private OAuthAdminServiceStub oAuthAdminServiceStub;
     private String cookie;
-    String username;
+    //String username;
 
 
         public OAuthAdminClient() throws APIManagementException {
         APIManagerConfiguration config = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().
                 getAPIManagerConfiguration();
             String serviceURL = config.getFirstProperty(APIConstants.API_KEY_MANAGER_URL);
-            username = config.getFirstProperty(APIConstants.API_KEY_MANAGER_USERNAME);
+            //username = config.getFirstProperty(APIConstants.API_KEY_MANAGER_USERNAME);
 
         if (serviceURL == null) {
             throw new APIManagementException("Required connection details for the key management server not provided");
@@ -73,86 +71,35 @@ public class OAuthAdminClient {
         }
     }
 
-    public OAuthConsumerAppDTO[] getAllOAuthApplicationData() throws Exception {
+    public OAuthConsumerAppDTO getOAuthApplicationData(String consumerKey, String username) throws Exception {
         Util.setAuthHeaders(oAuthAdminServiceStub._getServiceClient(), username);
-        OAuthConsumerAppDTO[] oAuthConsumerAppDTOs = oAuthAdminServiceStub.getAllOAuthApplicationData();
-
-        return oAuthConsumerAppDTOs;
-    }
-
-    public OAuthConsumerAppDTO getOAuthApplicationData(String consumerkey) throws Exception {
-        Util.setAuthHeaders(oAuthAdminServiceStub._getServiceClient(), username);
-        OAuthConsumerAppDTO oAuthConsumerAppDTO = oAuthAdminServiceStub.getOAuthApplicationData(consumerkey);
+        OAuthConsumerAppDTO oAuthConsumerAppDTO = oAuthAdminServiceStub.getOAuthApplicationData(consumerKey);
 
         return oAuthConsumerAppDTO;
 
     }
 
-    public OAuthConsumerAppDTO getOAuthApplicationDataByAppName(String appName) throws Exception {
+    public OAuthConsumerAppDTO getOAuthApplicationDataByAppName(String appName, String username) throws Exception {
         Util.setAuthHeaders(oAuthAdminServiceStub._getServiceClient(), username);
         OAuthConsumerAppDTO oAuthConsumerAppDTO = oAuthAdminServiceStub.getOAuthApplicationDataByAppName(appName);
 
         return oAuthConsumerAppDTO;
     }
 
-    public void registerOAuthApplicationData(OAuthConsumerAppDTO application) throws Exception {
+    public void registerOAuthApplicationData(OAuthConsumerAppDTO application, String username) throws Exception {
         Util.setAuthHeaders(oAuthAdminServiceStub._getServiceClient(), username);
         oAuthAdminServiceStub.registerOAuthApplicationData(application);
 
     }
 
-    public OAuthConsumerAppDTO getOAuthApplicationDataByName(String applicationName) throws Exception {
+    public void removeOAuthApplicationData(String consumerKey, String username) throws Exception {
         Util.setAuthHeaders(oAuthAdminServiceStub._getServiceClient(), username);
-        OAuthConsumerAppDTO[] dtos = oAuthAdminServiceStub.getAllOAuthApplicationData();
-
-        if (dtos != null && dtos.length > 0) {
-            for (OAuthConsumerAppDTO dto : dtos) {
-                if (applicationName.equals(dto.getApplicationName())) {
-                    return dto;
-                }
-            }
-        }
-        return null;
-
+        oAuthAdminServiceStub.removeOAuthApplicationData(consumerKey);
     }
 
-    public void removeOAuthApplicationData(String consumerkey) throws Exception {
-        Util.setAuthHeaders(oAuthAdminServiceStub._getServiceClient(), username);
-        oAuthAdminServiceStub.removeOAuthApplicationData(consumerkey);
-    }
-
-    public void updateOAuthApplicationData(OAuthConsumerAppDTO consumerAppDTO) throws Exception {
+    public void updateOAuthApplicationData(OAuthConsumerAppDTO consumerAppDTO, String username) throws Exception {
         Util.setAuthHeaders(oAuthAdminServiceStub._getServiceClient(), username);
         oAuthAdminServiceStub.updateConsumerApplication(consumerAppDTO);
     }
 
-    public OAuthConsumerAppDTO[] getAppsAuthorizedByUser() throws Exception {
-        Util.setAuthHeaders(oAuthAdminServiceStub._getServiceClient(), username);
-        OAuthConsumerAppDTO[] oAuthConsumerAppDTOs = oAuthAdminServiceStub.getAppsAuthorizedByUser();
-
-        return oAuthConsumerAppDTOs;
-
-    }
-
-    public OAuthRevocationResponseDTO revokeAuthzForAppsByRessourceOwner(
-            OAuthRevocationRequestDTO reqDTO) throws Exception {
-
-        Util.setAuthHeaders(oAuthAdminServiceStub._getServiceClient(), username);
-        OAuthRevocationResponseDTO oAuthRevocationResponseDTO = oAuthAdminServiceStub.
-                revokeAuthzForAppsByResoureOwner(reqDTO);
-
-        return oAuthRevocationResponseDTO;
-
-    }
-
-    public String[] getAllowedOAuthGrantTypes() throws Exception {
-        Util.setAuthHeaders(oAuthAdminServiceStub._getServiceClient(), username);
-        String[] allowedGrantTypes = null;
-
-        if (allowedGrantTypes == null) {
-            allowedGrantTypes = oAuthAdminServiceStub.getAllowedGrantTypes();
-        }
-
-        return allowedGrantTypes;
-    }
 }
