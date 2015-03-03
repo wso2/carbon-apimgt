@@ -42,13 +42,13 @@ public class ApplicationManagementServiceClient {
     private static final int TIMEOUT_IN_MILLIS = 15 * 60 * 1000;
 
     private IdentityApplicationManagementServiceStub identityApplicationManagementServiceStub;
-    String username;
+    //String username;
 
     public ApplicationManagementServiceClient() throws APIManagementException {
         APIManagerConfiguration config = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().
                 getAPIManagerConfiguration();
         String serviceURL = config.getFirstProperty(APIConstants.API_KEY_MANAGER_URL);
-        username = config.getFirstProperty(APIConstants.API_KEY_MANAGER_USERNAME);
+        //username = config.getFirstProperty(APIConstants.API_KEY_MANAGER_USERNAME);
 
         if (serviceURL == null) {
             throw new APIManagementException("Required connection details for the key management server not provided");
@@ -76,7 +76,7 @@ public class ApplicationManagementServiceClient {
      * @param serviceProvider
      * @throws Exception
      */
-    public void createApplication(ServiceProvider serviceProvider) throws Exception {
+    public void createApplication(ServiceProvider serviceProvider, String username) throws Exception {
         try {
             if (debugEnabled) {
                 log.debug("Registering Service Provider " + serviceProvider.getApplicationName());
@@ -98,7 +98,7 @@ public class ApplicationManagementServiceClient {
      * @return
      * @throws Exception
      */
-    public ServiceProvider getApplication(String applicationName) throws Exception {
+    public ServiceProvider getApplication(String applicationName, String username) throws Exception {
         try {
             if (debugEnabled) {
                 log.debug("Loading Service Provider " + applicationName);
@@ -116,7 +116,7 @@ public class ApplicationManagementServiceClient {
      * @return
      * @throws Exception
      */
-    public ApplicationBasicInfo[] getAllApplicationBasicInfo() throws Exception {
+    public ApplicationBasicInfo[] getAllApplicationBasicInfo(String username) throws Exception {
         try {
             Util.setAuthHeaders(identityApplicationManagementServiceStub._getServiceClient(), username);
             return identityApplicationManagementServiceStub.getAllApplicationBasicInfo();
@@ -133,7 +133,7 @@ public class ApplicationManagementServiceClient {
      * @param serviceProvider
      * @throws Exception
      */
-    public void updateApplicationData(ServiceProvider serviceProvider) throws Exception {
+    public void updateApplicationData(ServiceProvider serviceProvider, String username) throws Exception {
         try {
             Util.setAuthHeaders(identityApplicationManagementServiceStub._getServiceClient(), username);
             identityApplicationManagementServiceStub.updateApplication(serviceProvider);
@@ -150,7 +150,7 @@ public class ApplicationManagementServiceClient {
      * @param applicationID
      * @throws Exception
      */
-    public void deleteApplication(String applicationID) throws Exception {
+    public void deleteApplication(String applicationID, String username) throws Exception {
         try {
             Util.setAuthHeaders(identityApplicationManagementServiceStub._getServiceClient(), username);
             identityApplicationManagementServiceStub.deleteApplication(applicationID);
@@ -168,7 +168,7 @@ public class ApplicationManagementServiceClient {
      * @param identityProviderName
      * @throws Exception
      */
-    public IdentityProvider getFederatedIdentityProvider(String identityProviderName)
+    public IdentityProvider getFederatedIdentityProvider(String identityProviderName, String username)
             throws Exception {
         Util.setAuthHeaders(identityApplicationManagementServiceStub._getServiceClient(), username);
         return identityApplicationManagementServiceStub.getIdentityProvider(identityProviderName);
@@ -178,7 +178,7 @@ public class ApplicationManagementServiceClient {
      * @return
      * @throws Exception
      */
-    public RequestPathAuthenticatorConfig[] getAllRequestPathAuthenticators() throws Exception {
+    public RequestPathAuthenticatorConfig[] getAllRequestPathAuthenticators(String username) throws Exception {
         Util.setAuthHeaders(identityApplicationManagementServiceStub._getServiceClient(), username);
         return identityApplicationManagementServiceStub.getAllRequestPathAuthenticators();
     }
@@ -187,7 +187,7 @@ public class ApplicationManagementServiceClient {
      * @return
      * @throws Exception
      */
-    public LocalAuthenticatorConfig[] getAllLocalAuthenticators() throws Exception {
+    public LocalAuthenticatorConfig[] getAllLocalAuthenticators(String username) throws Exception {
         Util.setAuthHeaders(identityApplicationManagementServiceStub._getServiceClient(), username);
         return identityApplicationManagementServiceStub.getAllLocalAuthenticators();
     }
@@ -196,7 +196,7 @@ public class ApplicationManagementServiceClient {
      * @return
      * @throws Exception
      */
-    public IdentityProvider[] getAllFederatedIdentityProvider() throws Exception {
+    public IdentityProvider[] getAllFederatedIdentityProvider(String username) throws Exception {
         IdentityProvider[] idps = null;
 
         try {
@@ -212,7 +212,7 @@ public class ApplicationManagementServiceClient {
      * @return
      * @throws Exception
      */
-    public String[] getAllClaimUris() throws Exception {
+    public String[] getAllClaimUris(String username) throws Exception {
         Util.setAuthHeaders(identityApplicationManagementServiceStub._getServiceClient(), username);
         return identityApplicationManagementServiceStub.getAllLocalClaimUris();
     }

@@ -7465,7 +7465,38 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
         return null;
     }
 
-	/**
+    public static String getUserFromOauthToken(String oauthToken) throws APIManagementException {
+
+        Connection conn = null;
+        ResultSet resultSet = null;
+        PreparedStatement ps = null;
+        String tokenOwner = null;
+
+        try {
+            conn = APIMgtDBUtil.getConnection();
+            String getUserQuery = "SELECT DISTINCT AMS.USER_ID  ,AKM.CONSUMER_KEY " +
+                    "FROM AM_APPLICATION_KEY_MAPPING AKM, AM_APPLICATION AA, AM_SUBSCRIBER AMS " +
+                    "WHERE AKM.CONSUMER_KEY = ? AND " +
+                    "AKM.APPLICATION_ID = AA.APPLICATION_ID AND AA.SUBSCRIBER_ID = AMS.SUBSCRIBER_ID";
+            ps = conn.prepareStatement(getUserQuery);
+            ps.setString(1, oauthToken);
+            resultSet = ps.executeQuery();
+            if (resultSet.next()) {
+                tokenOwner = resultSet.getString("USER_ID");
+            }
+            resultSet.close();
+            ps.close();
+            return tokenOwner;
+        } catch (SQLException e) {
+            handleException("Failed to retrieve user ID for given OAuth token", e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(ps, conn, resultSet);
+        }
+        return null;
+    }
+
+
+    /**
 	 * Remove scope entries from DB, when delete APIs
 	 * 
 	 * @param apiIdentifier
