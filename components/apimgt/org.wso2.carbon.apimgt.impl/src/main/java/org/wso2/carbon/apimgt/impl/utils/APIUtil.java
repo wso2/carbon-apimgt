@@ -2171,6 +2171,7 @@ public final class APIUtil {
 	 */
 
 	public static void loadTenantGAConfig(int tenantID) throws APIManagementException {
+        InputStream inputStream = null;
         try {
             RegistryService registryService =
                     ServiceReferenceHolder.getInstance()
@@ -2185,8 +2186,7 @@ public final class APIUtil {
             if (log.isDebugEnabled()) {
                 log.debug("Adding Google Analytics configuration to the tenant's registry");
             }
-            InputStream inputStream =
-                    APIManagerComponent.class.getResourceAsStream("/statistics/default-ga-config.xml");
+            inputStream = APIManagerComponent.class.getResourceAsStream("/statistics/default-ga-config.xml");
             byte[] data = IOUtils.toByteArray(inputStream);
             Resource resource = govRegistry.newResource();
             resource.setContent(data);
@@ -2207,6 +2207,16 @@ public final class APIUtil {
             throw new APIManagementException("Error while reading Google Analytics configuration file content", e);
         } catch (UserStoreException e) {
             throw new APIManagementException("Error while setting permission to Google Analytics configuration file", e);
+        } finally {
+            try {
+                if (inputStream != null) {
+                    inputStream.close();
+                }
+            } catch (IOException e) {
+                if (log.isWarnEnabled()) {
+                    log.warn("Error while closing the input stream");
+                }
+            }
         }
     }
 
