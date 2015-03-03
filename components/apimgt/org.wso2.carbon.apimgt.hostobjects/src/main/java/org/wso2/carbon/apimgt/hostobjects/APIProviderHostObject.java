@@ -2213,7 +2213,8 @@ public class APIProviderHostObject extends ScriptableObject {
                         continue;
                     }
 
-                    String key = api.getId().getApiName() + " (" + api.getId().getProviderName() + ")";
+                    String[] apiData = {api.getId().getApiName(), api.getId().getVersion(),  api.getId().getProviderName()};
+                    String key = "[\""+apiData[0]+"\",\""+apiData[1]+"\",\""+apiData[2]+"\"]";
                     Long currentCount = subscriptions.get(key);
                     if (currentCount != null) {
                         subscriptions.put(key, currentCount + count);
@@ -2229,24 +2230,24 @@ public class APIProviderHostObject extends ScriptableObject {
                     sub.count = entry.getValue();
                     subscriptionData.add(sub);
                 }
-                Collections.sort(subscriptionData, new Comparator<APISubscription>() {
-                    public int compare(APISubscription o1, APISubscription o2) {
-                        // Note that o2 appears before o1
-                        // This is because we need to sort in the descending order
-                        return (int) (o2.count - o1.count);
-                    }
-                });
-                if (subscriptionData.size() > 10) {
-                    APISubscription other = new APISubscription();
-                    other.name = "[Other]";
-                    for (int i = 10; i < subscriptionData.size(); i++) {
-                        other.count = other.count + subscriptionData.get(i).count;
-                    }
-                    while (subscriptionData.size() > 10) {
-                        subscriptionData.remove(10);
-                    }
-                    subscriptionData.add(other);
-                }
+//                Collections.sort(subscriptionData, new Comparator<APISubscription>() {
+//                    public int compare(APISubscription o1, APISubscription o2) {
+//                        // Note that o2 appears before o1
+//                        // This is because we need to sort in the descending order
+//                        return (int) (o2.count - o1.count);
+//                    }
+//                });
+//                if (subscriptionData.size() > 10) {
+//                    APISubscription other = new APISubscription();
+//                    other.name = "[Other]";
+//                    for (int i = 10; i < subscriptionData.size(); i++) {
+//                        other.count = other.count + subscriptionData.get(i).count;
+//                    }
+//                    while (subscriptionData.size() > 10) {
+//                        subscriptionData.remove(10);
+//                    }
+//                    subscriptionData.add(other);
+//                }
 
                 int i = 0;
                 for (APISubscription sub : subscriptionData) {
@@ -3186,6 +3187,7 @@ public class APIProviderHostObject extends ScriptableObject {
                 row.put("method", row, usage.getMethod());
                 row.put("context", row, usage.getContext());
                 row.put("count", row, usage.getCount());
+                row.put("time", row, usage.getTime());
                 myn.put(i, myn, row);
                 i++;
             }
@@ -3666,6 +3668,7 @@ public class APIProviderHostObject extends ScriptableObject {
     private static class APISubscription {
         private String name;
         private long count;
+        private String version;
     }
 
     public static boolean jsFunction_updateDocumentation(Context cx, Scriptable thisObj,

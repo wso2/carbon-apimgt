@@ -139,7 +139,7 @@
     "apiLastAccessTimes" : "API Last Access Times",
     "apiUsageResourcePath" : "API Usage by Resource Path",
     "apiUsageFromDestination" : "API Usage by Destination",
-    "apiUsageByUser" : "API Usage by User",
+    "apiUsageComparison" : "API Usage Comparison",
     "faultyInvocations" : "Faulty Invocations",
 
     "overallAPIUsageTitle": "Overall API Usage (Across All Versions)",
@@ -148,7 +148,7 @@
     "overallAPILastAccessTimesTitle": "API Last Access Times (Across All Versions)",
     "apiUsageFromResourcePathTitle": "API Usage by Resource Path",
     "apiUsageFromDestinationTitle": "API Usage by Destination",
-    "apiUsageByUser": "API Usage by User",
+    "apiUsageComparisonTitle": "API Usage Comparison (Across All Versions)",
     "faultyInvocationsTitle": "Faulty Invocations",
     "faultyAnalyzeTitle": "Faulty Invocations",
     "apiUsageByVersionTitle": "API Usage by Versions",
