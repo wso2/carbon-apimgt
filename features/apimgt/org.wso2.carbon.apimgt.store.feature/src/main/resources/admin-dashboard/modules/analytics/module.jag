@@ -9,6 +9,10 @@ jagg.module("analytics", {
         return jagg.require(jagg.getModulesDir() + "analytics/list.jag").getDatasourceConfig.apply(this, arguments);
     },
 
+    enableAnalytics:function () {
+        return jagg.require(jagg.getModulesDir() + "analytics/add.jag").enableAnalytics.apply(this, arguments);
+    },
+
     addAnalyticsConfig:function () {
         return jagg.require(jagg.getModulesDir() + "analytics/add.jag").addAnalyticsConfig.apply(this, arguments);
     },
