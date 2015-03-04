@@ -18,7 +18,7 @@ var log = new Log();
         mod = jagg.module("analytics");
         var configData = {};
 
-        configData.eventReceiverURL = request.getParameter('event_receiver_url_groups');
+        configData.eventReceiverURL = request.getParameter('event_receivers');
         configData.eventReceiverUsername = request.getParameter('eventReceiverUsername');
         configData.eventReceiverPassword = request.getParameter('eventReceiverPassword');
 

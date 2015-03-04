@@ -19,16 +19,13 @@ var getAnalyticsConfig = function (analyticsData) {
     } else {
         var analytics_config = new XML(ContentStr.content);
         conf = {
+            enableAnalytics: analytics_config.enable,
             eventReceiverURL: analytics_config.event_receiver.URL,
             eventReceiverUsername: analytics_config.event_receiver.Username,
             eventReceiverPassword: analytics_config.event_receiver.Password,
             eventAnalyserURL: analytics_config.event_analyser.URL,
             eventAnalyserUsername: analytics_config.event_analyser.Username,
-            eventAnalyserPassword: analytics_config.event_analyser.Password,
-            statDsURL: "https://localhost:3306",
-            statDsDriver: "com.mysql.jdbc.Driver",
-            statDsUsername: "admin",
-            statDsPassword: "admin"
+            eventAnalyserPassword: analytics_config.event_analyser.Password
         };
     }
 

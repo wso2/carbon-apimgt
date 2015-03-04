@@ -10,449 +10,522 @@ var datasourceData = outputs.datasourceData;
     <div class="content-section shadow-up">
         <div class="content-data">
         <div class="control-group" >
-            <label class="control-label" for="enableStats" style="display: inline">Enable Analytics </label>
+            <label class="control-label" for="enableStats" style="display: inline">Enable</label>
             <div class="controls" style="display: inline">
-                <input type="checkbox" id="enableStats" class="stats-enabled but" ref="stats-enabled" style="margin: 4px 5px 5px 52px"/>
+                <input type="checkbox" id="enableStats" class="stats-enabled but" ref="configuration_form" style="margin: 4px 5px 5px 52px"/>
             </div>
         </div>
-        <form action="<%= jagg.url("/site/blocks/analytics-task/ajax/add.jag") %>" id="configuration_form" enctype="multipart/form-data" method="post" class="form-horizontal">
-            <fieldset id="stats-enabled" style="display:none">
-                <legend>Event Receiver</legend>
-                <div class="control-group"  id="event_receiver_url_designer">
-                    <label class="control-label" for="eventReceiverURL">URL:<span class="requiredAstrix">*</span></label>
-                    <div class="controls">
-                        <input type="text" class="input-xlarge validInput" id="eventReceiverURL" name="eventReceiverURL" autofocus="autofocus" value=""/>
-                        <a class="icon-question-sign help_popup" help_data="eventReceiverURLHelp"></a>
-                        <p id="eventReceiverURLHelp" class="hide"><%=i18n.localize("eventReceiverURLHelpMsg")%></p>
-                        <button class="btn" type="button" id="add_url"><i class="icon-plus-sign"></i>&nbsp;Add URL</button>
-                    </div>
-                </div>
-                <div id="event_receiver_urls_space">
-                    <div id ="event_receiver_url"></div>
-                 </div>
-                <div class="control-group">
+        <form action="<%= jagg.url("/site/blocks/analytics-task/ajax/add.jag") %>" id="configuration_form"
+                            enctype="multipart/form-data" method="post" style="display:none">
+            <fieldset>
+            <table class="analytics_table" width="100%">
+            <tr>
+                <td colspan="4">
+                    <legend>Event Receiver</legend>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <label class="control-label" for="eventReceiverURL">URL Group:<span class="requiredAstrix">*</span></label>
+                </td>
+                <td>
                     <label class="control-label" for="eventReceiverUsername">Username:<span class="requiredAstrix">*</span></label>
-                    <div class="controls">
-                        <input type="text" class="input-xlarge validInput noSpace notEmpty" id="eventReceiverUsername" name="eventReceiverUsername" autofocus="autofocus"/>
-                        <a class="icon-question-sign help_popup" help_data="eventReceiverUsernameHelp"></a>
-                        <p id="eventReceiverUsernameHelp" class="hide">Event Receiver Username</p>
-                    </div>
-                </div>
-                <div class="control-group">
+                </td>
+                <td>
                     <label class="control-label" for="eventReceiverPassword">Password:<span class="requiredAstrix">*</span></label>
-                    <div class="controls">
-                        <input type="password" class="input-xlarge validInput noSpace notEmpty" id="eventReceiverPassword" name="eventReceiverPassword" autofocus="autofocus" value=""/>
-                        <a class="icon-question-sign help_popup" help_data="eventReceiverPasswordHelp"></a>
-                        <p id="eventReceiverPasswordHelp" class="hide">Event Receiver Password</p>
+                </td>
+                <td/>
+            </tr>
+            <tr>
+                <td>
+                    <div class="control-group"  id="event_receiver_url_designer">
+                        <div class="controls">
+                            <input type="text" class="input-xlarge validInput" id="eventReceiverURL" name="eventReceiverURL" autofocus="autofocus" value=""/>
+                            <a class="icon-question-sign help_popup" help_data="eventReceiverURLHelp"></a>
+                            <p id="eventReceiverURLHelp" class="hide"><%=i18n.localize("eventReceiverURLHelpMsg")%></p>
+                        </div>
                     </div>
-                </div>
-
-                <legend>Event Analyser</legend>
-                <div class="control-group">
+                </td>
+                <td>
+                    <div class="control-group">
+                        <div class="controls">
+                            <input type="text" class="input-xlarge validInput" id="eventReceiverUsername" name="eventReceiverUsername" autofocus="autofocus"/>
+                            <a class="icon-question-sign help_popup" help_data="eventReceiverUsernameHelp"></a>
+                            <p id="eventReceiverUsernameHelp" class="hide">Event Receiver Username</p>
+                        </div>
+                    </div>
+                </td>
+                <td>
+                    <div class="control-group">
+                        <div class="controls">
+                            <input type="password" class="input-xlarge validInput" id="eventReceiverPassword" name="eventReceiverPassword" autofocus="autofocus" value=""/>
+                            <a class="icon-question-sign help_popup" help_data="eventReceiverPasswordHelp"></a>
+                            <p id="eventReceiverPasswordHelp" class="hide">Event Receiver Password</p>
+                        </div>
+                    </div>
+                </td>
+                <td>
+                    <div class="control-group">
+                        <div class="controls">
+                            <button class="btn" type="button" id="add_url"><i class="icon-plus-sign"></i>&nbsp;Add URL Group</button>
+                        </div>
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td colspan="4">
+                    <div id="event_receiver_urls_space">
+                        <div id ="event_receiver_url"></div>
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td colspan="4">
+                    <legend>Data Analyser</legend>
+                </td>
+            </tr>
+            <tr>
+                <td>
                     <label class="control-label" for="eventAnalyserURL">URL:<span class="requiredAstrix">*</span></label>
-                    <div class="controls">
-                        <input type="text" class="input-xlarge validInput noSpace notEmpty" id="eventAnalyserURL" name="eventAnalyserURL" autofocus="autofocus" value=""/>
-                        <a class="icon-question-sign help_popup" help_data="eventAnalyserURLHelp"></a>
-                        <p id="eventAnalyserURLHelp" class="hide">Event Analyser URL</p>
-                    </div>
-                </div>
-                <div class="control-group">
+                </td>
+                <td>
                     <label class="control-label" for="eventAnalyserUsername">Username:<span class="requiredAstrix">*</span></label>
-                    <div class="controls">
-                        <input type="text" class="input-xlarge validInput noSpace notEmpty" id="eventAnalyserUsername" name="eventAnalyserUsername" autofocus="autofocus" value=""/>
-                        <a class="icon-question-sign help_popup" help_data="eventAnalyserUsernameHelp"></a>
-                        <p id="eventAnalyserUsernameHelp" class="hide">Event Analyser Username</p>
-                    </div>
-                </div>
-                <div class="control-group">
+                </td>
+                <td>
                     <label class="control-label" for="eventAnalyserPassword">Password:<span class="requiredAstrix">*</span></label>
-                    <div class="controls">
-                        <input type="password" class="input-xlarge validInput noSpace notEmpty" id="eventAnalyserPassword" name="eventAnalyserPassword" autofocus="autofocus" value=""/>
-                        <a class="icon-question-sign help_popup" help_data="eventAnalyserPasswordHelp"></a>
-                        <p id="eventAnalyserPasswordHelp" class="hide">Event Analyser Password</p>
+                </td>
+                <td/>
+            </tr>
+            <tr>
+                <td>
+                    <div class="control-group">
+                        <div class="controls">
+                            <input type="text" class="input-xlarge validInput noSpace notEmpty" id="eventAnalyserURL" name="eventAnalyserURL" autofocus="autofocus" value=""/>
+                            <a class="icon-question-sign help_popup" help_data="eventAnalyserURLHelp"></a>
+                            <p id="eventAnalyserURLHelp" class="hide">Event Analyser URL</p>
+                        </div>
                     </div>
-                </div>
-
-                <legend>Event Statistics Datasource</legend>
-                <div class="control-group">
-                    <label class="control-label" for="statDsURL">URL:<span class="requiredAstrix">*</span></label>
-                    <div class="controls">
-                        <input type="text" class="input-xlarge notEmpty" id="statDsURL" name="statDsURL" autofocus="autofocus" value=""/>
-                        <a class="icon-question-sign help_popup" help_data="dsUrlHelp"></a>
-                        <p id="dsUrlHelp" class="hide">Statistics Datasource Connection URL</p>
+                </td>
+                <td>
+                    <div class="control-group">
+                        <div class="controls">
+                            <input type="text" class="input-xlarge validInput noSpace notEmpty" id="eventAnalyserUsername" name="eventAnalyserUsername" autofocus="autofocus" value=""/>
+                            <a class="icon-question-sign help_popup" help_data="eventAnalyserUsernameHelp"></a>
+                            <p id="eventAnalyserUsernameHelp" class="hide">Event Analyser Username</p>
+                        </div>
                     </div>
-                </div>
-                <div class="control-group">
-                    <label class="control-label" for="statDsDriver">Driver:<span class="requiredAstrix">*</span></label>
-                    <div class="controls">
-                        <input type="text" class="input-xlarge validInput noSpace notEmpty" id="statDsDriver" name="statDsDriver" autofocus="autofocus" value=""/>
-                         <a class="icon-question-sign help_popup" help_data="dsDriverHelp"></a>
-                         <p id="dsDriverHelp" class="hide">Statistics Datasource Driver Class Name</p>
+                </td>
+                <td>
+                    <div class="control-group">
+                        <div class="controls">
+                            <input type="password" class="input-xlarge validInput noSpace notEmpty" id="eventAnalyserPassword" name="eventAnalyserPassword" autofocus="autofocus" value=""/>
+                            <a class="icon-question-sign help_popup" help_data="eventAnalyserPasswordHelp"></a>
+                            <p id="eventAnalyserPasswordHelp" class="hide">Event Analyser Password</p>
+                        </div>
                     </div>
-                </div>
-                <div class="control-group">
-                    <label class="control-label" for="statDsUsername">Username:<span class="requiredAstrix">*</span></label>
-                    <div class="controls">
-                        <input type="text" class="input-xlarge validInput noSpace notEmpty" id="statDsUsername" name="statDsUsername" autofocus="autofocus" value=""/>
-                        <a class="icon-question-sign help_popup" help_data="dsUsernameHelp"></a>
-                        <p id="dsUsernameHelp" class="hide">Statistics Datasource Username</p>
+                </td>
+                <td/>
+            </tr>
+            <tr>
+                <td colspan="4">
+                    <legend>Statistics Summary Datasource</legend>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <div class="control-group">
+                        <label class="control-label" for="statDsURL">URL:<span class="requiredAstrix">*</span></label>
+                        <div class="controls">
+                            <input type="text" class="input-xlarge notEmpty" id="statDsURL" name="statDsURL" autofocus="autofocus" value=""/>
+                            <a class="icon-question-sign help_popup" help_data="dsUrlHelp"></a>
+                            <p id="dsUrlHelp" class="hide">Statistics Datasource Connection URL</p>
+                        </div>
                     </div>
-                </div>
-                <div class="control-group">
-                    <label class="control-label" for="statDsPassword">Password:<span class="requiredAstrix">*</span></label>
-                    <div class="controls">
-                        <input type="password" class="input-xlarge validInput noSpace notEmpty" id="statDsPassword" name="statDsPassword" autofocus="autofocus" value=""/>
-                        <a class="icon-question-sign help_popup" help_data="dsPasswordHelp"></a>
-                        <p id="dsPasswordHelp" class="hide">Statistics Datasource Password</p>
+                </td>
+                <td>
+                    <div class="control-group">
+                        <label class="control-label" for="statDsDriver">JDBC Driver Class:<span class="requiredAstrix">*</span></label>
+                        <div class="controls">
+                            <input type="text" class="input-xlarge validInput noSpace notEmpty" id="statDsDriver" name="statDsDriver" autofocus="autofocus" value=""/>
+                             <a class="icon-question-sign help_popup" help_data="dsDriverHelp"></a>
+                             <p id="dsDriverHelp" class="hide">Statistics Datasource Driver Class Name</p>
+                        </div>
                     </div>
-                </div>
-                <div class="control-group">
-                    <div class="controls">
-                        <a href="" class="more-options but" ref="more-options-datasource">Show More Options</a>
+                </td>
+                <td>
+                    <div class="control-group">
+                        <label class="control-label" for="statDsUsername">Username:<span class="requiredAstrix">*</span></label>
+                        <div class="controls">
+                            <input type="text" class="input-xlarge validInput noSpace notEmpty" id="statDsUsername" name="statDsUsername" autofocus="autofocus" value=""/>
+                            <a class="icon-question-sign help_popup" help_data="dsUsernameHelp"></a>
+                            <p id="dsUsernameHelp" class="hide">Statistics Datasource Username</p>
+                        </div>
+                    </div>
+                </td>
+                <td>
+                    <div class="control-group">
+                        <label class="control-label" for="statDsPassword">Password:<span class="requiredAstrix">*</span></label>
+                        <div class="controls">
+                            <input type="password" class="input-xlarge validInput noSpace notEmpty" id="statDsPassword" name="statDsPassword" autofocus="autofocus" value=""/>
+                            <a class="icon-question-sign help_popup" help_data="dsPasswordHelp"></a>
+                            <p id="dsPasswordHelp" class="hide">Statistics Datasource Password</p>
+                        </div>
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td colspan="4">
+                    <div class="control-group">
+                        <div class="controls">
+                            <a href="" class="more-options but" ref="more-options-datasource">Show More Options</a>
+                         </div>
                      </div>
-                 </div>
-                <div id="more-options-datasource" style="display:none">
-                    <div class="control-group">
-                        <label class="control-label" for="statDsDefAutoCommit">Default Auto Commit:</label>
-                        <div class="controls">
-                            <select class="select" id="statDsDefAutoCommit" name="statDsDefAutoCommit" >
-                                <option value="select">Select...</option>
-                                <option value="false">false</option>
-                                <option value="true">true</option>
-                            </select>
-                            <a class="icon-question-sign help_popup" help_data="statDsDefAutoCommitHelp"></a>
-                            <p id="statDsDefAutoCommitHelp" class="hide">Default Auto Commit</p>
+                    <div id="more-options-datasource" style="display:none">
+                        <div class="control-group">
+                            <label class="control-label" for="statDsDefAutoCommit">Default Auto Commit:</label>
+                            <div class="controls">
+                                <select class="select" id="statDsDefAutoCommit" name="statDsDefAutoCommit" >
+                                    <option value="select">Select...</option>
+                                    <option value="false">false</option>
+                                    <option value="true">true</option>
+                                </select>
+                                <a class="icon-question-sign help_popup" help_data="statDsDefAutoCommitHelp"></a>
+                                <p id="statDsDefAutoCommitHelp" class="hide">Default Auto Commit</p>
+                            </div>
+                        </div>
+                        <div class="control-group">
+                            <label class="control-label" for="statDsDefReadOnly">Default Read Only:</label>
+                            <div class="controls">
+                                <select class="select" id="statDsDefReadOnly" name="statDsDefReadOnly" >
+                                    <option value="select">Select...</option>
+                                    <option value="false">false</option>
+                                    <option value="true">true</option>
+                                </select>
+                                <a class="icon-question-sign help_popup" help_data="statDsDefReadOnlyHelp"></a>
+                                <p id="statDsDefReadOnlyHelp" class="hide">Default Read Only</p>
+                            </div>
+                        </div>
+                        <div class="control-group">
+                            <label class="control-label" for="statDsDefTrans">Default Transaction Isolation:</label>
+                            <div class="controls">
+                                <select class="select" id="statDsDefTrans" name="statDsDefTrans" >
+                                    <option value="select">Select...</option>
+                                    <option value="NONE">NONE</option>
+                                    <option value="READ_COMMITTED">READ_COMMITTED</option>
+                                    <option value="READ_UNCOMMITTED">READ_UNCOMMITTED</option>
+                                    <option value="REPEATABLE_READ">REPEATABLE_READ</option>
+                                    <option value="SERIALIZABLE">SERIALIZABLE</option>
+                                </select>
+                                <a class="icon-question-sign help_popup" help_data="statDsDefTransHelp"></a>
+                                <p id="statDsDefTransHelp" class="hide">Default Transaction Isolation</p>
+                            </div>
+                        </div>
+                        <div class="control-group">
+                            <label class="control-label" for="statDsDefCatalog">Default Catalog:</label>
+                            <div class="controls">
+                                 <input type="text" class="input-xlarge" id="statDsDefCatalog" name="statDsDefCatalog"  value="">
+                                <a class="icon-question-sign help_popup" help_data="statDsDefCatalogHelp"></a>
+                                <p id="statDsDefCatalogHelp" class="hide">Default Catalog</p>
+                            </div>
+                        </div>
+                        <div class="control-group">
+                            <label class="control-label" for="statDsMaxActive">Max Active:</label>
+                            <div class="controls">
+                                 <input type="text" class="input-xlarge" id="statDsMaxActive" name="statDsMaxActive"  value="">
+                                <a class="icon-question-sign help_popup" help_data="statDsMaxActiveHelp"></a>
+                                <p id="statDsMaxActiveHelp" class="hide">Max Active</p>
+                            </div>
+                        </div>
+                        <div class="control-group">
+                            <label class="control-label" for="statDsMaxIdle">Max Idle:</label>
+                            <div class="controls">
+                                 <input type="text" class="input-xlarge" id="statDsMaxIdle" name="statDsMaxIdle"  value="">
+                                <a class="icon-question-sign help_popup" help_data="statDsMaxIdleHelp"></a>
+                                <p id="statDsMaxIdleHelp" class="hide">Max Idle</p>
+                            </div>
+                        </div>
+                        <div class="control-group">
+                            <label class="control-label" for="statDsMinIdle">Min Idle:</label>
+                            <div class="controls">
+                                 <input type="text" class="input-xlarge" id="statDsMinIdle" name="statDsMinIdle"  value="">
+                                <a class="icon-question-sign help_popup" help_data="statDsMinIdleHelp"></a>
+                                <p id="statDsMinIdleHelp" class="hide">Min Idle</p>
+                            </div>
+                        </div>
+                        <div class="control-group">
+                            <label class="control-label" for="statDsInitialSize">Initial Size:</label>
+                            <div class="controls">
+                                 <input type="text" class="input-xlarge" id="statDsInitialSize" name="statDsInitialSize"  value="">
+                                <a class="icon-question-sign help_popup" help_data="statDsInitialSizeHelp"></a>
+                                <p id="statDsInitialSizeHelp" class="hide">Initial Size</p>
+                            </div>
+                        </div>
+                        <div class="control-group">
+                            <label class="control-label" for="statDsMaxWait">Max Wait( Milliseconds ):</label>
+                            <div class="controls">
+                                 <input type="text" class="input-xlarge" id="statDsMaxWait" name="statDsMaxWait"  value="">
+                                <a class="icon-question-sign help_popup" help_data="statDsMaxWaitHelp"></a>
+                                <p id="statDsMaxWaitHelp" class="hide">Max Wait</p>
+                            </div>
+                        </div>
+                        <div class="control-group">
+                            <label class="control-label" for="statDsTestOnBorrow">Test On Borrow:</label>
+                            <div class="controls">
+                                 <select class="select" id="statDsTestOnBorrow" name="statDsTestOnBorrow" >
+                                     <option value="select">Select...</option>
+                                     <option value="false">false</option>
+                                     <option value="true">true</option>
+                                 </select>
+                                <a class="icon-question-sign help_popup" help_data="statDsTestOnBorrowHelp"></a>
+                                <p id="statDsTestOnBorrowHelp" class="hide">Test On Borrow</p>
+                            </div>
+                        </div>
+                        <div class="control-group">
+                            <label class="control-label" for="statDsTestOnReturn">Test On Return:</label>
+                            <div class="controls">
+                                 <select class="select" id="statDsTestOnReturn" name="statDsTestOnReturn" >
+                                     <option value="select">Select...</option>
+                                     <option value="false">false</option>
+                                     <option value="true">true</option>
+                                 </select>
+                                <a class="icon-question-sign help_popup" help_data="statDsTestOnReturnHelp"></a>
+                                <p id="statDsTestOnReturnHelp" class="hide">Test On Return</p>
+                            </div>
+                        </div>
+                        <div class="control-group">
+                            <label class="control-label" for="statDsTestWhileIdle">Test While Idle:</label>
+                            <div class="controls">
+                                 <select class="select" id="statDsTestWhileIdle" name="statDsTestWhileIdle" >
+                                     <option value="select">Select...</option>
+                                     <option value="false">false</option>
+                                     <option value="true">true</option>
+                                 </select>
+                                <a class="icon-question-sign help_popup" help_data="statDsTestWhileIdleHelp"></a>
+                                <p id="statDsTestWhileIdleHelp" class="hide">Test While Idle</p>
+                            </div>
+                        </div>
+                        <div class="control-group">
+                            <label class="control-label" for="statDsValidationQuery">Validation Query:</label>
+                            <div class="controls">
+                                <input type="text" class="input-xlarge" id="statDsValidationQuery" name="statDsValidationQuery"  value="">
+                                <a class="icon-question-sign help_popup" help_data="statDsValidationQueryHelp"></a>
+                                <p id="statDsValidationQueryHelp" class="hide">Validation Query</p>
+                            </div>
+                        </div>
+                        <div class="control-group">
+                            <label class="control-label" for="statDsValidationClass">Validation Class Name:</label>
+                            <div class="controls">
+                                <input type="text" class="input-xlarge" id="statDsValidationClass" name="statDsValidationClass"  value="">
+                                <a class="icon-question-sign help_popup" help_data="statDsValidationClassHelp"></a>
+                                <p id="statDsValidationClassHelp" class="hide">Validation Class Name</p>
+                            </div>
+                        </div>
+                        <div class="control-group">
+                            <label class="control-label" for="statDsTimeEviction">Time Between Eviction Runs Millis:</label>
+                            <div class="controls">
+                                <input type="text" class="input-xlarge" id="statDsTimeEviction" name="statDsTimeEviction"  value="">
+                                <a class="icon-question-sign help_popup" help_data="statDsTimeEvictionHelp"></a>
+                                <p id="statDsTimeEvictionHelp" class="hide">Time Between Eviction Runs Millis</p>
+                            </div>
+                        </div>
+                        <div class="control-group">
+                            <label class="control-label" for="statDsNoOfTestsEviction">Number of Tests Per Eviction Run:</label>
+                            <div class="controls">
+                                <input type="text" class="input-xlarge" id="statDsNoOfTestsEviction" name="statDsNoOfTestsEviction"  value="">
+                                <a class="icon-question-sign help_popup" help_data="statDsTimeEvictionHelp"></a>
+                                <p id="statDsTimeEvictionHelp" class="hide">Number of Tests Per Eviction Run</p>
+                            </div>
+                        </div>
+                        <div class="control-group">
+                            <label class="control-label" for="statDsMinEvictableIdleTime">Min Evictable Idle Time Millis:</label>
+                            <div class="controls">
+                                <input type="text" class="input-xlarge" id="statDsMinEvictableIdleTime" name="statDsMinEvictableIdleTime"  value="">
+                                <a class="icon-question-sign help_popup" help_data="statDsMinEvictableIdleTimeHelp"></a>
+                                <p id="statDsMinEvictableIdleTimeHelp" class="hide">Min Evictable Idle Time Millis</p>
+                            </div>
+                        </div>
+                        <div class="control-group">
+                            <label class="control-label" for="statDsAccessToConnAllowed">Access To Underlying Connection Allowed:</label>
+                            <div class="controls">
+                                <select class="select" id="statDsAccessToConnAllowed" name="statDsAccessToConnAllowed" >
+                                     <option value="select">Select...</option>
+                                     <option value="false">false</option>
+                                     <option value="true">true</option>
+                                 </select>
+                                <a class="icon-question-sign help_popup" help_data="statDsAccessToConnAllowedHelp"></a>
+                                <p id="statDsAccessToConnAllowedHelp" class="hide">Access To Underlying Connection Allowed</p>
+                            </div>
+                        </div>
+                        <div class="control-group">
+                            <label class="control-label" for="statDsRemoveAbandoned">Remove Abandoned:</label>
+                            <div class="controls">
+                                <select class="select" id="statDsRemoveAbandoned" name="statDsRemoveAbandoned" >
+                                     <option value="select">Select...</option>
+                                     <option value="false">false</option>
+                                     <option value="true">true</option>
+                                 </select>
+                                <a class="icon-question-sign help_popup" help_data="statDsRemoveAbandonedHelp"></a>
+                                <p id="statDsRemoveAbandonedHelp" class="hide">Remove Abandoned</p>
+                            </div>
+                        </div>
+                        <div class="control-group">
+                            <label class="control-label" for="statDsRemoveAbandonedTimeout">Remove Abandoned Timeout:</label>
+                            <div class="controls">
+                                <input type="text" class="input-xlarge" id="statDsRemoveAbandonedTimeout" name="statDsRemoveAbandonedTimeout"  value="">
+                                <a class="icon-question-sign help_popup" help_data="statDsRemoveAbandonedTimeoutHelp"></a>
+                                <p id="statDsRemoveAbandonedTimeoutHelp" class="hide">Remove Abandoned Timeout</p>
+                            </div>
+                        </div>
+                        <div class="control-group">
+                            <label class="control-label" for="statDsLogAbandoned">Log Abandoned:</label>
+                            <div class="controls">
+                                <select class="select" id="statDsLogAbandoned" name="statDsLogAbandoned" >
+                                     <option value="select">Select...</option>
+                                     <option value="false">false</option>
+                                     <option value="true">true</option>
+                                 </select>
+                                <a class="icon-question-sign help_popup" help_data="statDsLogAbandonedHelp"></a>
+                                <p id="statDsLogAbandonedHelp" class="hide">Remove Abandoned</p>
+                            </div>
+                        </div>
+                        <div class="control-group">
+                            <label class="control-label" for="statDsConnProperties">Connection Properties:</label>
+                            <div class="controls">
+                                <input type="text" class="input-xlarge" id="statDsConnProperties" name="statDsConnProperties"  value="">
+                                <a class="icon-question-sign help_popup" help_data="statDsConnPropertiesHelp"></a>
+                                <p id="statDsConnPropertiesHelp" class="hide">Connection Properties</p>
+                            </div>
+                        </div>
+                        <div class="control-group">
+                            <label class="control-label" for="statDsInitSql">Init Sql:</label>
+                            <div class="controls">
+                                <input type="text" class="input-xlarge" id="statDsInitSql" name="statDsInitSql"  value="">
+                                <a class="icon-question-sign help_popup" help_data="statDsInitSqlHelp"></a>
+                                <p id="statDsInitSqlHelp" class="hide">Init Sql</p>
+                            </div>
+                        </div>
+                        <div class="control-group">
+                            <label class="control-label" for="statDsJDBCInterceptors">JDBC Interceptors:</label>
+                            <div class="controls">
+                                <input type="text" class="input-xlarge" id="statDsJDBCInterceptors" name="statDsJDBCInterceptors"  value="">
+                                <a class="icon-question-sign help_popup" help_data="statDsJDBCInterceptorsHelp"></a>
+                                <p id="statDsJDBCInterceptorsHelp" class="hide">JDBC Interceptors</p>
+                            </div>
+                        </div>
+                        <div class="control-group">
+                            <label class="control-label" for="statDsValidationInterval">Validation Interval:</label>
+                            <div class="controls">
+                                <input type="text" class="input-xlarge" id="statDsValidationInterval" name="statDsValidationInterval"  value="">
+                                <a class="icon-question-sign help_popup" help_data="statDsValidationIntervalHelp"></a>
+                                <p id="statDsValidationIntervalHelp" class="hide">Validation Interval</p>
+                            </div>
+                        </div>
+                        <div class="control-group">
+                            <label class="control-label" for="statDsFairQueue">Fair Queue:</label>
+                            <div class="controls">
+                                <select class="select" id="statDsFairQueue" name="statDsFairQueue" >
+                                     <option value="select">Select...</option>
+                                     <option value="false">false</option>
+                                     <option value="true">true</option>
+                                 </select>
+                                <a class="icon-question-sign help_popup" help_data="statDsFairQueueHelp"></a>
+                                <p id="statDsFairQueueHelp" class="hide">Fair Queue</p>
+                            </div>
+                        </div>
+                        <div class="control-group">
+                            <label class="control-label" for="statDsJMXEnabled">JMX Enabled:</label>
+                            <div class="controls">
+                                <select class="select" id="statDsJMXEnabled" name="statDsJMXEnabled" >
+                                     <option value="select">Select...</option>
+                                     <option value="false">false</option>
+                                     <option value="true">true</option>
+                                 </select>
+                                <a class="icon-question-sign help_popup" help_data="statDsJMXEnabledHelp"></a>
+                                <p id="statDsJMXEnabledHelp" class="hide">JMX Enabled</p>
+                            </div>
+                        </div>
+                        <div class="control-group">
+                            <label class="control-label" for="statDsAbandonWhenPrecFull">Abandon When Percentage Full:</label>
+                            <div class="controls">
+                                <input type="text" class="input-xlarge" id="statDsAbandonWhenPrecFull" name="statDsAbandonWhenPrecFull"  value="">
+                                <a class="icon-question-sign help_popup" help_data="statDsAbandonWhenPrecFullHelp"></a>
+                                <p id="statDsAbandonWhenPrecFullHelp" class="hide">Abandon When Percentage Full</p>
+                            </div>
+                        </div>
+                        <div class="control-group">
+                            <label class="control-label" for="statDsMaxAge">Max Age:</label>
+                            <div class="controls">
+                                <input type="text" class="input-xlarge" id="statDsMaxAge" name="statDsMaxAge"  value="">
+                                <a class="icon-question-sign help_popup" help_data="statDsMaxAgeHelp"></a>
+                                <p id="statDsMaxAgeHelp" class="hide">Max Age</p>
+                            </div>
+                        </div>
+                        <div class="control-group">
+                            <label class="control-label" for="statDsUseEquals">Use Equals:</label>
+                            <div class="controls">
+                                <select class="select" id="statDsUseEquals" name="statDsUseEquals" >
+                                     <option value="select">Select...</option>
+                                     <option value="false">false</option>
+                                     <option value="true">true</option>
+                                 </select>
+                                <a class="icon-question-sign help_popup" help_data="statDsUseEqualsHelp"></a>
+                                <p id="statDsUseEqualsHelp" class="hide">Use Equals</p>
+                            </div>
+                        </div>
+                        <div class="control-group">
+                            <label class="control-label" for="statDsSuspectTimeout">Suspect Timeout:</label>
+                            <div class="controls">
+                                <input type="text" class="input-xlarge" id="statDsSuspectTimeout" name="statDsSuspectTimeout"  value="">
+                                <a class="icon-question-sign help_popup" help_data="statDsSuspectTimeoutHelp"></a>
+                                <p id="statDsSuspectTimeoutHelp" class="hide">Suspect Timeout</p>
+                            </div>
+                        </div>
+                        <div class="control-group">
+                            <label class="control-label" for="statDsAlternateUsernameAllowed">Alternate Username Allowed:</label>
+                            <div class="controls">
+                                <select class="select" id="statDsAlternateUsernameAllowed" name="statDsAlternateUsernameAllowed" >
+                                     <option value="select">Select...</option>
+                                     <option value="false">false</option>
+                                     <option value="true">true</option>
+                                 </select>
+                                <a class="icon-question-sign help_popup" help_data="statDsAlternateUsernameAllowedHelp"></a>
+                                <p id="statDsAlternateUsernameAllowedHelp" class="hide">Alternate Username Allowed</p>
+                            </div>
+                        </div>
+                        <div class="control-group">
+                            <label class="control-label" for="statDsValidationQueryTimeout">Validation Query Timeout:</label>
+                            <div class="controls">
+                                <input type="text" class="input-xlarge" id="statDsValidationQueryTimeout" name="statDsValidationQueryTimeout"  value="">
+                                <a class="icon-question-sign help_popup" help_data="statDsValidationQueryTimeoutHelp"></a>
+                                <p id="statDsValidationQueryTimeoutHelp" class="hide">Validation Query Timeout</p>
+                            </div>
                         </div>
                     </div>
-                    <div class="control-group">
-                        <label class="control-label" for="statDsDefReadOnly">Default Read Only:</label>
-                        <div class="controls">
-                            <select class="select" id="statDsDefReadOnly" name="statDsDefReadOnly" >
-                                <option value="select">Select...</option>
-                                <option value="false">false</option>
-                                <option value="true">true</option>
-                            </select>
-                            <a class="icon-question-sign help_popup" help_data="statDsDefReadOnlyHelp"></a>
-                            <p id="statDsDefReadOnlyHelp" class="hide">Default Read Only</p>
-                        </div>
-                    </div>
-                    <div class="control-group">
-                        <label class="control-label" for="statDsDefTrans">Default Transaction Isolation:</label>
-                        <div class="controls">
-                            <select class="select" id="statDsDefTrans" name="statDsDefTrans" >
-                                <option value="select">Select...</option>
-                                <option value="NONE">NONE</option>
-                                <option value="READ_COMMITTED">READ_COMMITTED</option>
-                                <option value="READ_UNCOMMITTED">READ_UNCOMMITTED</option>
-                                <option value="REPEATABLE_READ">REPEATABLE_READ</option>
-                                <option value="SERIALIZABLE">SERIALIZABLE</option>
-                            </select>
-                            <a class="icon-question-sign help_popup" help_data="statDsDefTransHelp"></a>
-                            <p id="statDsDefTransHelp" class="hide">Default Transaction Isolation</p>
-                        </div>
-                    </div>
-                    <div class="control-group">
-                        <label class="control-label" for="statDsDefCatalog">Default Catalog:</label>
-                        <div class="controls">
-                             <input type="text" class="input-xlarge" id="statDsDefCatalog" name="statDsDefCatalog"  value="">
-                            <a class="icon-question-sign help_popup" help_data="statDsDefCatalogHelp"></a>
-                            <p id="statDsDefCatalogHelp" class="hide">Default Catalog</p>
-                        </div>
-                    </div>
-                    <div class="control-group">
-                        <label class="control-label" for="statDsMaxActive">Max Active:</label>
-                        <div class="controls">
-                             <input type="text" class="input-xlarge" id="statDsMaxActive" name="statDsMaxActive"  value="">
-                            <a class="icon-question-sign help_popup" help_data="statDsMaxActiveHelp"></a>
-                            <p id="statDsMaxActiveHelp" class="hide">Max Active</p>
-                        </div>
-                    </div>
-                    <div class="control-group">
-                        <label class="control-label" for="statDsMaxIdle">Max Idle:</label>
-                        <div class="controls">
-                             <input type="text" class="input-xlarge" id="statDsMaxIdle" name="statDsMaxIdle"  value="">
-                            <a class="icon-question-sign help_popup" help_data="statDsMaxIdleHelp"></a>
-                            <p id="statDsMaxIdleHelp" class="hide">Max Idle</p>
-                        </div>
-                    </div>
-                    <div class="control-group">
-                        <label class="control-label" for="statDsMinIdle">Min Idle:</label>
-                        <div class="controls">
-                             <input type="text" class="input-xlarge" id="statDsMinIdle" name="statDsMinIdle"  value="">
-                            <a class="icon-question-sign help_popup" help_data="statDsMinIdleHelp"></a>
-                            <p id="statDsMinIdleHelp" class="hide">Min Idle</p>
-                        </div>
-                    </div>
-                    <div class="control-group">
-                        <label class="control-label" for="statDsInitialSize">Initial Size:</label>
-                        <div class="controls">
-                             <input type="text" class="input-xlarge" id="statDsInitialSize" name="statDsInitialSize"  value="">
-                            <a class="icon-question-sign help_popup" help_data="statDsInitialSizeHelp"></a>
-                            <p id="statDsInitialSizeHelp" class="hide">Initial Size</p>
-                        </div>
-                    </div>
-                    <div class="control-group">
-                        <label class="control-label" for="statDsMaxWait">Max Wait( Milliseconds ):</label>
-                        <div class="controls">
-                             <input type="text" class="input-xlarge" id="statDsMaxWait" name="statDsMaxWait"  value="">
-                            <a class="icon-question-sign help_popup" help_data="statDsMaxWaitHelp"></a>
-                            <p id="statDsMaxWaitHelp" class="hide">Max Wait</p>
-                        </div>
-                    </div>
-                    <div class="control-group">
-                        <label class="control-label" for="statDsTestOnBorrow">Test On Borrow:</label>
-                        <div class="controls">
-                             <select class="select" id="statDsTestOnBorrow" name="statDsTestOnBorrow" >
-                                 <option value="select">Select...</option>
-                                 <option value="false">false</option>
-                                 <option value="true">true</option>
-                             </select>
-                            <a class="icon-question-sign help_popup" help_data="statDsTestOnBorrowHelp"></a>
-                            <p id="statDsTestOnBorrowHelp" class="hide">Test On Borrow</p>
-                        </div>
-                    </div>
-                    <div class="control-group">
-                        <label class="control-label" for="statDsTestOnReturn">Test On Return:</label>
-                        <div class="controls">
-                             <select class="select" id="statDsTestOnReturn" name="statDsTestOnReturn" >
-                                 <option value="select">Select...</option>
-                                 <option value="false">false</option>
-                                 <option value="true">true</option>
-                             </select>
-                            <a class="icon-question-sign help_popup" help_data="statDsTestOnReturnHelp"></a>
-                            <p id="statDsTestOnReturnHelp" class="hide">Test On Return</p>
-                        </div>
-                    </div>
-                    <div class="control-group">
-                        <label class="control-label" for="statDsTestWhileIdle">Test While Idle:</label>
-                        <div class="controls">
-                             <select class="select" id="statDsTestWhileIdle" name="statDsTestWhileIdle" >
-                                 <option value="select">Select...</option>
-                                 <option value="false">false</option>
-                                 <option value="true">true</option>
-                             </select>
-                            <a class="icon-question-sign help_popup" help_data="statDsTestWhileIdleHelp"></a>
-                            <p id="statDsTestWhileIdleHelp" class="hide">Test While Idle</p>
-                        </div>
-                    </div>
-                    <div class="control-group">
-                        <label class="control-label" for="statDsValidationQuery">Validation Query:</label>
-                        <div class="controls">
-                            <input type="text" class="input-xlarge" id="statDsValidationQuery" name="statDsValidationQuery"  value="">
-                            <a class="icon-question-sign help_popup" help_data="statDsValidationQueryHelp"></a>
-                            <p id="statDsValidationQueryHelp" class="hide">Validation Query</p>
-                        </div>
-                    </div>
-                    <div class="control-group">
-                        <label class="control-label" for="statDsValidationClass">Validation Class Name:</label>
-                        <div class="controls">
-                            <input type="text" class="input-xlarge" id="statDsValidationClass" name="statDsValidationClass"  value="">
-                            <a class="icon-question-sign help_popup" help_data="statDsValidationClassHelp"></a>
-                            <p id="statDsValidationClassHelp" class="hide">Validation Class Name</p>
-                        </div>
-                    </div>
-                    <div class="control-group">
-                        <label class="control-label" for="statDsTimeEviction">Time Between Eviction Runs Millis:</label>
-                        <div class="controls">
-                            <input type="text" class="input-xlarge" id="statDsTimeEviction" name="statDsTimeEviction"  value="">
-                            <a class="icon-question-sign help_popup" help_data="statDsTimeEvictionHelp"></a>
-                            <p id="statDsTimeEvictionHelp" class="hide">Time Between Eviction Runs Millis</p>
-                        </div>
-                    </div>
-                    <div class="control-group">
-                        <label class="control-label" for="statDsNoOfTestsEviction">Number of Tests Per Eviction Run:</label>
-                        <div class="controls">
-                            <input type="text" class="input-xlarge" id="statDsNoOfTestsEviction" name="statDsNoOfTestsEviction"  value="">
-                            <a class="icon-question-sign help_popup" help_data="statDsTimeEvictionHelp"></a>
-                            <p id="statDsTimeEvictionHelp" class="hide">Number of Tests Per Eviction Run</p>
-                        </div>
-                    </div>
-                    <div class="control-group">
-                        <label class="control-label" for="statDsMinEvictableIdleTime">Min Evictable Idle Time Millis:</label>
-                        <div class="controls">
-                            <input type="text" class="input-xlarge" id="statDsMinEvictableIdleTime" name="statDsMinEvictableIdleTime"  value="">
-                            <a class="icon-question-sign help_popup" help_data="statDsMinEvictableIdleTimeHelp"></a>
-                            <p id="statDsMinEvictableIdleTimeHelp" class="hide">Min Evictable Idle Time Millis</p>
-                        </div>
-                    </div>
-                    <div class="control-group">
-                        <label class="control-label" for="statDsAccessToConnAllowed">Access To Underlying Connection Allowed:</label>
-                        <div class="controls">
-                            <select class="select" id="statDsAccessToConnAllowed" name="statDsAccessToConnAllowed" >
-                                 <option value="select">Select...</option>
-                                 <option value="false">false</option>
-                                 <option value="true">true</option>
-                             </select>
-                            <a class="icon-question-sign help_popup" help_data="statDsAccessToConnAllowedHelp"></a>
-                            <p id="statDsAccessToConnAllowedHelp" class="hide">Access To Underlying Connection Allowed</p>
-                        </div>
-                    </div>
-                    <div class="control-group">
-                        <label class="control-label" for="statDsRemoveAbandoned">Remove Abandoned:</label>
-                        <div class="controls">
-                            <select class="select" id="statDsRemoveAbandoned" name="statDsRemoveAbandoned" >
-                                 <option value="select">Select...</option>
-                                 <option value="false">false</option>
-                                 <option value="true">true</option>
-                             </select>
-                            <a class="icon-question-sign help_popup" help_data="statDsRemoveAbandonedHelp"></a>
-                            <p id="statDsRemoveAbandonedHelp" class="hide">Remove Abandoned</p>
-                        </div>
-                    </div>
-                    <div class="control-group">
-                        <label class="control-label" for="statDsRemoveAbandonedTimeout">Remove Abandoned Timeout:</label>
-                        <div class="controls">
-                            <input type="text" class="input-xlarge" id="statDsRemoveAbandonedTimeout" name="statDsRemoveAbandonedTimeout"  value="">
-                            <a class="icon-question-sign help_popup" help_data="statDsRemoveAbandonedTimeoutHelp"></a>
-                            <p id="statDsRemoveAbandonedTimeoutHelp" class="hide">Remove Abandoned Timeout</p>
-                        </div>
-                    </div>
-                    <div class="control-group">
-                        <label class="control-label" for="statDsLogAbandoned">Log Abandoned:</label>
-                        <div class="controls">
-                            <select class="select" id="statDsLogAbandoned" name="statDsLogAbandoned" >
-                                 <option value="select">Select...</option>
-                                 <option value="false">false</option>
-                                 <option value="true">true</option>
-                             </select>
-                            <a class="icon-question-sign help_popup" help_data="statDsLogAbandonedHelp"></a>
-                            <p id="statDsLogAbandonedHelp" class="hide">Remove Abandoned</p>
-                        </div>
-                    </div>
-                    <div class="control-group">
-                        <label class="control-label" for="statDsConnProperties">Connection Properties:</label>
-                        <div class="controls">
-                            <input type="text" class="input-xlarge" id="statDsConnProperties" name="statDsConnProperties"  value="">
-                            <a class="icon-question-sign help_popup" help_data="statDsConnPropertiesHelp"></a>
-                            <p id="statDsConnPropertiesHelp" class="hide">Connection Properties</p>
-                        </div>
-                    </div>
-                    <div class="control-group">
-                        <label class="control-label" for="statDsInitSql">Init Sql:</label>
-                        <div class="controls">
-                            <input type="text" class="input-xlarge" id="statDsInitSql" name="statDsInitSql"  value="">
-                            <a class="icon-question-sign help_popup" help_data="statDsInitSqlHelp"></a>
-                            <p id="statDsInitSqlHelp" class="hide">Init Sql</p>
-                        </div>
-                    </div>
-                    <div class="control-group">
-                        <label class="control-label" for="statDsJDBCInterceptors">JDBC Interceptors:</label>
-                        <div class="controls">
-                            <input type="text" class="input-xlarge" id="statDsJDBCInterceptors" name="statDsJDBCInterceptors"  value="">
-                            <a class="icon-question-sign help_popup" help_data="statDsJDBCInterceptorsHelp"></a>
-                            <p id="statDsJDBCInterceptorsHelp" class="hide">JDBC Interceptors</p>
-                        </div>
-                    </div>
-                    <div class="control-group">
-                        <label class="control-label" for="statDsValidationInterval">Validation Interval:</label>
-                        <div class="controls">
-                            <input type="text" class="input-xlarge" id="statDsValidationInterval" name="statDsValidationInterval"  value="">
-                            <a class="icon-question-sign help_popup" help_data="statDsValidationIntervalHelp"></a>
-                            <p id="statDsValidationIntervalHelp" class="hide">Validation Interval</p>
-                        </div>
-                    </div>
-                    <div class="control-group">
-                        <label class="control-label" for="statDsFairQueue">Fair Queue:</label>
-                        <div class="controls">
-                            <select class="select" id="statDsFairQueue" name="statDsFairQueue" >
-                                 <option value="select">Select...</option>
-                                 <option value="false">false</option>
-                                 <option value="true">true</option>
-                             </select>
-                            <a class="icon-question-sign help_popup" help_data="statDsFairQueueHelp"></a>
-                            <p id="statDsFairQueueHelp" class="hide">Fair Queue</p>
-                        </div>
-                    </div>
-                    <div class="control-group">
-                        <label class="control-label" for="statDsJMXEnabled">JMX Enabled:</label>
-                        <div class="controls">
-                            <select class="select" id="statDsJMXEnabled" name="statDsJMXEnabled" >
-                                 <option value="select">Select...</option>
-                                 <option value="false">false</option>
-                                 <option value="true">true</option>
-                             </select>
-                            <a class="icon-question-sign help_popup" help_data="statDsJMXEnabledHelp"></a>
-                            <p id="statDsJMXEnabledHelp" class="hide">JMX Enabled</p>
-                        </div>
-                    </div>
-                    <div class="control-group">
-                        <label class="control-label" for="statDsAbandonWhenPrecFull">Abandon When Percentage Full:</label>
-                        <div class="controls">
-                            <input type="text" class="input-xlarge" id="statDsAbandonWhenPrecFull" name="statDsAbandonWhenPrecFull"  value="">
-                            <a class="icon-question-sign help_popup" help_data="statDsAbandonWhenPrecFullHelp"></a>
-                            <p id="statDsAbandonWhenPrecFullHelp" class="hide">Abandon When Percentage Full</p>
-                        </div>
-                    </div>
-                    <div class="control-group">
-                        <label class="control-label" for="statDsMaxAge">Max Age:</label>
-                        <div class="controls">
-                            <input type="text" class="input-xlarge" id="statDsMaxAge" name="statDsMaxAge"  value="">
-                            <a class="icon-question-sign help_popup" help_data="statDsMaxAgeHelp"></a>
-                            <p id="statDsMaxAgeHelp" class="hide">Max Age</p>
-                        </div>
-                    </div>
-                    <div class="control-group">
-                        <label class="control-label" for="statDsUseEquals">Use Equals:</label>
-                        <div class="controls">
-                            <select class="select" id="statDsUseEquals" name="statDsUseEquals" >
-                                 <option value="select">Select...</option>
-                                 <option value="false">false</option>
-                                 <option value="true">true</option>
-                             </select>
-                            <a class="icon-question-sign help_popup" help_data="statDsUseEqualsHelp"></a>
-                            <p id="statDsUseEqualsHelp" class="hide">Use Equals</p>
-                        </div>
-                    </div>
-                    <div class="control-group">
-                        <label class="control-label" for="statDsSuspectTimeout">Suspect Timeout:</label>
-                        <div class="controls">
-                            <input type="text" class="input-xlarge" id="statDsSuspectTimeout" name="statDsSuspectTimeout"  value="">
-                            <a class="icon-question-sign help_popup" help_data="statDsSuspectTimeoutHelp"></a>
-                            <p id="statDsSuspectTimeoutHelp" class="hide">Suspect Timeout</p>
-                        </div>
-                    </div>
-                    <div class="control-group">
-                        <label class="control-label" for="statDsAlternateUsernameAllowed">Alternate Username Allowed:</label>
-                        <div class="controls">
-                            <select class="select" id="statDsAlternateUsernameAllowed" name="statDsAlternateUsernameAllowed" >
-                                 <option value="select">Select...</option>
-                                 <option value="false">false</option>
-                                 <option value="true">true</option>
-                             </select>
-                            <a class="icon-question-sign help_popup" help_data="statDsAlternateUsernameAllowedHelp"></a>
-                            <p id="statDsAlternateUsernameAllowedHelp" class="hide">Alternate Username Allowed</p>
-                        </div>
-                    </div>
-                    <div class="control-group">
-                        <label class="control-label" for="statDsValidationQueryTimeout">Validation Query Timeout:</label>
-                        <div class="controls">
-                            <input type="text" class="input-xlarge" id="statDsValidationQueryTimeout" name="statDsValidationQueryTimeout"  value="">
-                            <a class="icon-question-sign help_popup" help_data="statDsValidationQueryTimeoutHelp"></a>
-                            <p id="statDsValidationQueryTimeoutHelp" class="hide">Validation Query Timeout</p>
-                        </div>
-                    </div>
-                </div>
+                </td>
+            </tr>
+            </table>
             </fieldset>
-
-            <div class="form-actions" id="saveButtons">
+            <div class="analytics-form-actions" id="saveButtons" style="display:inline">
                 <input type="submit" class="btn btn-primary" value="Save" action="design"/>
             </div>
-
-            <input type="hidden" id="event_receiver_url_groups" name="event_receiver_url_groups" value=""/>
+            <div class="ui_message" style="display:inline-block"></div>
+            <input type="hidden" id="event_receivers" name="event_receivers" value=""/>
         </form>
         </div>
         </div>
     </div>
 
 <script id="event-receiver-url-template" type="text/x-handlebars-template">
-    <table id="event_receiver_url_table" class="table" style="width:100%">
-        <tr class="resource_container">
-            <td class="resource-method-td" style="width:60%"><h5>Event Receiver Groups</h5></td>
+    <table id="event_receiver_url_table" class="table receiver_url_table" style="width:100%">
+        <tr class="resource_container table_header">
+            <td class="resource-method-td" style="width:30%"><h5>Event Receiver Group</h5></td>
+            <td class="resource-method-td" style="width:30%"><h5>Username</h5></td>
             <td class="resource-method-td"><h5>Actions</h5></td>
         </tr>
         [[#each this]]
             <tr class="resource_container" id="urlSetContainer[[@index]]">
-                <td class="resource-method-td" style="width:50%" id="urlSet[[@index]]">[[this]]</td>
+                <td class="resource-method-td" style="width:30%" id="urlSet[[@index]]">[[this.url_group]]</td>
+                <td class="resource-method-td" style="width:30%" id="username[[@index]]">[[this.username]]</td>
                 <td class="resource-method-td" id="removeButton[[@index]]">
                     <a title="Remove URL set" onclick="removeUrlSet('[[@index]]')"><i class='icon-trash'></i></a>
                 </td>
@@ -465,9 +538,9 @@ var datasourceData = outputs.datasourceData;
 $(document).ready(function(){
 
     <% if(analyticsData.analytics != null){ %>
-            createMultiUrlArrayAndView("<%=analyticsData.analytics.eventReceiverURL.text()%>");
-            document.getElementById("eventReceiverUsername").value = "<%=analyticsData.analytics.eventReceiverUsername.text()%>";
-            document.getElementById("eventReceiverPassword").value = "<%=analyticsData.analytics.eventReceiverPassword.text()%>";
+            createMultiUrlArrayAndView("<%=analyticsData.analytics.eventReceiverURL.text()%>", "<%=analyticsData.analytics.eventReceiverUsername.text()%>");
+            var enableAnalytics = "<%=analyticsData.analytics.enableAnalytics.text()%>";
+            expandViewIfAnalyticsEnabled(enableAnalytics);
             document.getElementById("eventAnalyserURL").value = "<%=analyticsData.analytics.eventAnalyserURL.text()%>";
             document.getElementById("eventAnalyserUsername").value = "<%=analyticsData.analytics.eventAnalyserUsername.text()%>";
             document.getElementById("eventAnalyserPassword").value = "<%=analyticsData.analytics.eventAnalyserPassword.text()%>";

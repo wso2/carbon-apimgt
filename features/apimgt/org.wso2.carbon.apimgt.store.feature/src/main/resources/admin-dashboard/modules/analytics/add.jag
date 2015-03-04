@@ -2,6 +2,33 @@
 
 var log = new Log();
 
+var enableAnalytics = function (enable) {
+    var carbon = require('carbon');
+    var process = require('process');
+    var url = 'https://' + process.getProperty('carbon.local.ip') + ':' + process.getProperty('mgt.transport.https.port') + '/admin/services/';
+    var server = new carbon.server.Server(url);
+    var options = {username: jagg.getUser().username, domain: carbon.server.tenantDomain() , tenantId:  carbon.server.tenantId()};
+    var registry = new carbon.registry.Registry(server, options);
+    var path = '/_system/governance/apimgt/applicationdata/analytics.xml';
+    var ContentStr = registry.get(path);
+    var conf = null;
+    if (ContentStr != null) {
+        var analytics_config = new XML(ContentStr.content);
+        analytics_config.enable = enable;
+        var resource = {
+            content: analytics_config.toXMLString(),
+            mediaType: 'text/xml'
+        };
+        log.info("Changing analytics status to - Enable:" + enable);
+        registry.put(path, resource);
+        log.info("Analytics status changed to - Enable:" + enable);
+    }
+
+    return {
+        error:false
+    };
+};
+
 var addAnalyticsConfig = function (configData) {
 
     var carbon = require('carbon');
@@ -14,6 +41,7 @@ var addAnalyticsConfig = function (configData) {
     var path ='/_system/governance/apimgt/applicationdata/analytics.xml';
 
     var content = new XML("<analytics_config>" +
+                          "<enable>" + true + "</enable>" +
                           "<event_receiver>" +
                           "<URL>" + configData.eventReceiverURL + "</URL>" +
                           "<Username>" + configData.eventReceiverUsername + "</Username>" +
@@ -34,7 +62,7 @@ var addAnalyticsConfig = function (configData) {
     log.info("Analytics config saved in registry");
 
     return {
-     error:false
+        error:false
     };
 };
 
@@ -119,8 +147,8 @@ var addToolbox = function (configData) {
 var addBamServerProfile = function (configData) {
 
     var carbon = require('carbon');
-    org.wso2.carbon.apimgt.impl.utils.APIUtil.addBamServerProfile(configData.eventReceiverURL,
-            configData.eventReceiverUsername, configData.eventReceiverPassword, parseInt(carbon.server.tenantId()));
+    //org.wso2.carbon.apimgt.impl.utils.APIUtil.addBamServerProfile(configData.eventReceiverURL,
+           // configData.eventReceiverUsername, configData.eventReceiverPassword, parseInt(carbon.server.tenantId()));
     return {
         error:false
     };
