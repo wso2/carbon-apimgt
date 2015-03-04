@@ -1121,7 +1121,7 @@ public final class APIUtil {
             log.error(msg, e);
             throw new RegistryException(msg, e);
         } catch (APIManagementException e) {
-	        String msg = "Failed to reset the WSDL : " + api.getWsdlUrl() ;
+	        String msg = "Failed to process the WSDL : " + api.getWsdlUrl() ;
             log.error(msg, e);
             throw new APIManagementException(msg, e);
         } 
@@ -1159,11 +1159,11 @@ public final class APIUtil {
                 wsdlReader20 = WSDLFactory.newInstance().newWSDLReader();
                 wsdlReader20.readWSDL(url);
             } catch (WSDLException e) {
-                throw new APIManagementException("Error while reading WSDL Document", e);
+                throw new APIManagementException("Error while reading WSDL Document from " + url, e);
             }
         }
         } catch (IOException e) {
-            throw new APIManagementException("Error Reading Input from Stream", e);
+            throw new APIManagementException("Error Reading Input from Stream from " + url, e);
         }
         return isWsdl2;
     }
