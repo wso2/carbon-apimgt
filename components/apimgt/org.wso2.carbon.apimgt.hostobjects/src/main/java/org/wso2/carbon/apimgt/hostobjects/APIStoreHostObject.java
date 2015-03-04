@@ -3439,8 +3439,14 @@ public class APIStoreHostObject extends ScriptableObject {
             apiName = (String) args[1];
             version = (String) args[2];
             docName = (String) args[3];
-            
+            boolean isTenantFlowStarted = false;
             try {
+            	String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(providerName));
+            	if (tenantDomain != null && !org.wso2.carbon.utils.multitenancy.MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
+                    isTenantFlowStarted = true;
+                    PrivilegedCarbonContext.startTenantFlow();
+                    PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
+                }
             	providerName = APIUtil.replaceEmailDomain(URLDecoder.decode(providerName, "UTF-8"));
             	APIIdentifier apiId = new APIIdentifier(providerName, apiName,
                         version);
@@ -3449,6 +3455,10 @@ public class APIStoreHostObject extends ScriptableObject {
                 content = apiConsumer.getDocumentationContent(apiId, docName);
             } catch (Exception e) {
                 handleException("Error while getting Inline Document Content ", e);
+            } finally {
+                if (isTenantFlowStarted) {
+                    PrivilegedCarbonContext.endTenantFlow();
+                }
             }
 
             if (content == null) {
@@ -4329,5 +4339,42 @@ public class APIStoreHostObject extends ScriptableObject {
             log.error("Error while getting available domain mappings", e);
         }
         return myn;
+    }
+
+    /**
+     * This method is to Download API-DOCS from APIStore
+     *
+     * @param cx      Rhino context
+     * @param thisObj Scriptable object
+     * @param args    Passing arguments
+     * @param funObj  Function object
+     * @return NativeObject that contains Input stream of Downloaded File
+     * @throws APIManagementException Wrapped exception by org.wso2.carbon.apimgt.api.APIManagementException
+     */
+    public static NativeObject jsFunction_getDocument(Context cx, Scriptable thisObj,
+                                                      Object[] args, Function funObj)
+            throws ScriptException,
+                   APIManagementException {
+        if (args == null || args.length != 2 || !isStringArray(args)) {
+            handleException("Invalid input parameters expected resource Url and tenantDomain");
+        }
+        NativeObject data = new NativeObject();
+
+        String username = getUsernameFromObject(thisObj);
+        // Set anonymous user if no user is login to the system
+        if (username == null) {
+            username = APIConstants.END_USER_ANONYMOUS;
+        }
+        String resource = (String) args[1];
+        String tenantDomain = (String) args[0];
+        Map<String, Object> docResourceMap = APIUtil.getDocument(username, resource, tenantDomain);
+        if (!docResourceMap.isEmpty()) {
+            data.put("Data", data,
+                     cx.newObject(thisObj, "Stream", new Object[] { docResourceMap.get("Data") }));
+            data.put("contentType", data, docResourceMap.get("contentType"));
+            data.put("name", data, docResourceMap.get("name"));
+        }
+
+        return data;
     }
 }

@@ -400,6 +400,7 @@
             $.ajax({
                 type: "POST",
                 url: "<%= jagg.url("/site/blocks/life-cycles/ajax/life-cycles.jag") %>",
+		async : false,
                 data: {
                     action :"updateStatus",
                     name:"<%=api.name%>",

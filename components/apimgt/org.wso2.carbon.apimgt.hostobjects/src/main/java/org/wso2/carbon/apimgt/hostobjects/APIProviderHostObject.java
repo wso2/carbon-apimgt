@@ -4741,4 +4741,57 @@ public class APIProviderHostObject extends ScriptableObject {
         }
     }
 
+    /*
+	* here return boolean with checking all objects in array is string
+	*/
+    public static boolean isStringArray(Object[] args) {
+        int argsCount = args.length;
+        for (Object arg : args) {
+            if (!(arg instanceof String)) {
+                return false;
+            }
+        }
+        return true;
+
+    }
+
+    /**
+     * This method is to Download API-DOCS from APIPublisher
+     *
+     * @param cx      Rhino context
+     * @param thisObj Scriptable object
+     * @param args    Passing arguments
+     * @param funObj  Function object
+     * @return NativeObject that contains Input stream of Downloaded File
+     * @throws APIManagementException Wrapped exception by org.wso2.carbon.apimgt.api.APIManagementException
+     */
+    public static NativeObject jsFunction_getDocument(Context cx, Scriptable thisObj,
+                                                      Object[] args, Function funObj)
+            throws ScriptException,
+                   APIManagementException {
+        if (args == null || args.length != 2 || !isStringArray(args)) {
+            handleException("Invalid input parameters expected resource Url and tenantDomain");
+        }
+        NativeObject data = new NativeObject();
+
+        String username = ((APIProviderHostObject) thisObj).getUsername();
+        // Set anonymous user if no user is login to the system
+        if (username == null) {
+            username = APIConstants.END_USER_ANONYMOUS;
+        }
+        String resource = (String) args[1];
+        String tenantDomain = (String) args[0];
+        Map<String, Object> docResourceMap = APIUtil.getDocument(username, resource, tenantDomain);
+        if (!docResourceMap.isEmpty()) {
+            data.put("Data", data,
+                     cx.newObject(thisObj, "Stream", new Object[] { docResourceMap.get("Data") }));
+            data.put("contentType", data, docResourceMap.get("contentType"));
+            data.put("name", data, docResourceMap.get("name"));
+        } else {
+            handleException("Resource couldn't found for " + resource);
+        }
+
+        return data;
+    }
+
 }

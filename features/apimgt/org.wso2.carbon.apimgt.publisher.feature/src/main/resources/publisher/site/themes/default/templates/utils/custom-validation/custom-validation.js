@@ -30,9 +30,9 @@ $(document).ready(function() {
     },'Select a value for the tier.');
 
     $.validator.addMethod('validRegistryName', function(value, element) {
-        var illegalChars = /([~!@#;%^*+={}\|\\<>\"\'\/,])/;
+        var illegalChars = /([~!@#;%^*+={}\|\\<>\"\',])/;
         return !illegalChars.test(value);
-    }, 'Name contains one or more illegal characters  (~ ! @ #  ; % ^ * + = { } | &lt; &gt;, \' / " \\ ) .');
+    }, 'Name contains one or more illegal characters  (~ ! @ #  ; % ^ * + = { } | &lt; &gt;, \' " \\ ) .');
 
     $.validator.addMethod('noSpace', function(value, element) {
         return !/\s/g.test(value);
@@ -98,5 +98,10 @@ $(document).ready(function() {
         }
         return true;
     }, 'File must be in image file format.');
+
+    $.validator.addMethod('validateForwardSlashAtEnd', function(value, element) {
+        var regexForwardSlashAtEnd = /.+\/$/;
+        return !regexForwardSlashAtEnd.test(value);
+    }, 'Name or Context contains / at the end');
 
 });
