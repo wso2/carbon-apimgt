@@ -1965,7 +1965,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
      * @param userId          Subsriber name.
      * @param applicationName of the Application.
      * @param tokenType       Token type (PRODUCTION | SANDBOX)
-     * @param clientDetails   oAuthApplication parameters as a json string.
+     * @param jsonString   oAuthApplication parameters as a json string.
      * @return
      * @throws APIManagementException
      */

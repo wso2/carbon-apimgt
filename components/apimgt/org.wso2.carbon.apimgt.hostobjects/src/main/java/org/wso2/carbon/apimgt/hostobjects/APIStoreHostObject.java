@@ -701,7 +701,7 @@ public class APIStoreHostObject extends ScriptableObject {
                 }
                 //if length = 7 we can ensure we have additional parameters to pass.
                 String jsonParams = null;
-                if(args.length == 7){
+                if(args.length == 8){
                     jsonParams = (String) args[7];
                 }else{
                     jsonParams = null;
