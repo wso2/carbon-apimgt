@@ -21,7 +21,6 @@ package org.wso2.carbon.apimgt.impl;
 import org.apache.axis2.AxisFault;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.json.simple.JSONArray;
 import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
@@ -29,8 +28,7 @@ import org.wso2.carbon.apimgt.api.model.OauthAppRequest;
 import org.wso2.carbon.apimgt.api.model.*;
 import org.wso2.carbon.apimgt.api.model.Tag;
 import org.wso2.carbon.apimgt.handlers.security.stub.types.APIKeyMapping;
-import org.wso2.carbon.apimgt.impl.applications.ApplicationCreator;
-import org.wso2.carbon.apimgt.impl.applications.ApplicationImpl;
+import org.wso2.carbon.apimgt.impl.factory.KeyManagerFactory;
 import org.wso2.carbon.apimgt.impl.dao.TokenMgtDao;
 import org.wso2.carbon.apimgt.impl.dto.*;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
@@ -57,8 +55,6 @@ import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 import javax.cache.Caching;
 
 import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * This class provides the core API store functionality. It is implemented in a very
@@ -585,8 +581,8 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 
         try {
             // Populating additional parameters.
-            tokenRequest = ApplicationCreator.populateTokenRequest(jsonInput, tokenRequest);
-            KeyManager keyManager = ApplicationCreator.getKeyManager();
+            tokenRequest = ApplicationUtils.populateTokenRequest(jsonInput, tokenRequest);
+            KeyManager keyManager = KeyManagerFactory.getKeyManager();
             AccessTokenInfo tokenResponse = keyManager.getNewApplicationAccessToken(tokenRequest);
             AccessTokenInfo info = TokenMgtDao.getAccessTokenForConsumerId(tokenRequest.getClientId());
             if (info == null) {
@@ -1459,8 +1455,8 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 
         String callBackURL = null;
 
-        OauthAppRequest oauthAppRequest = ApplicationCreator.createOauthAppRequest(applicationName , callBackURL ,
-                jsonString);
+        OauthAppRequest oauthAppRequest = ApplicationUtils.createOauthAppRequest(applicationName, callBackURL,
+                                                                                  jsonString);
 
         apiMgtDAO.createApplicationKeyTypeMapping(oauthAppRequest, applicationName, userName, clientId);
 
@@ -1937,9 +1933,9 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         }
         String callbackURL= null;
         //Create OauthAppRequest object by passing json String.
-        OauthAppRequest request = ApplicationCreator.createOauthAppRequest(applicationName, callbackURL, jsonString);
+        OauthAppRequest request = ApplicationUtils.createOauthAppRequest(applicationName, callbackURL, jsonString);
         //get key manager instant.
-        KeyManager keyManager = ApplicationCreator.getKeyManager();
+        KeyManager keyManager = KeyManagerFactory.getKeyManager();
         //call update method.
         keyManager.updateApplication(request);
 
@@ -1960,7 +1956,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     @Override
     public void deleteAuthApplication(String consumerKey) throws APIManagementException {
         //get key manager instance.
-        KeyManager keyManager = ApplicationCreator.getKeyManager();
+        KeyManager keyManager = KeyManagerFactory.getKeyManager();
         //delete oAuthApplication by calling key manager implementation
         keyManager.deleteApplication(consumerKey);
     }
@@ -1994,9 +1990,9 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             //initiate ApplicationRegistrationWorkflowDTO
             ApplicationRegistrationWorkflowDTO appRegWFDto = null;
             //get APIM application by Application Name and userId.
-            Application application = ApplicationCreator.retrieveApplication(applicationName, userId);
+            Application application = ApplicationUtils.retrieveApplication(applicationName, userId);
             //Build key manager instance and create oAuthAppRequest by jsonString.
-            OauthAppRequest request = ApplicationCreator.createOauthAppRequest(applicationName,callbackUrl,jsonString);
+            OauthAppRequest request = ApplicationUtils.createOauthAppRequest(applicationName, callbackUrl, jsonString);
 
 
             //if its a PRODUCTION application.

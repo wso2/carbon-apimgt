@@ -154,7 +154,8 @@ public class ScopesIssuer {
                 //The requested scope is defined for the context of the App but no roles have been associated with the scope
                 //OR
                 //The scope string starts with 'device_'.
-                else if(appScopes.containsKey(scope) || scope.startsWith(DEVICE_SCOPE_PREFIX)){
+                else if(appScopes.containsKey(scope) || scope.startsWith(DEVICE_SCOPE_PREFIX) || scopeSkipList
+                        .contains(scope)){
                     authorizedScopes.add(scope);
                 }
             }

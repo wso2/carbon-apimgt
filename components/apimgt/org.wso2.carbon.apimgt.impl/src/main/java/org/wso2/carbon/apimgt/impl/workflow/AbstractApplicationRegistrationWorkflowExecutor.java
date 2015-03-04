@@ -31,12 +31,13 @@ import org.wso2.carbon.apimgt.api.model.Subscriber;
 import org.wso2.carbon.apimgt.api.model.KeyManager;
 import org.wso2.carbon.apimgt.api.model.OAuthApplicationInfo;
 import org.wso2.carbon.apimgt.impl.APIConstants;
-import org.wso2.carbon.apimgt.impl.applications.ApplicationCreator;
+import org.wso2.carbon.apimgt.impl.factory.KeyManagerFactory;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dao.TokenMgtDao;
 import org.wso2.carbon.apimgt.impl.dto.ApplicationRegistrationWorkflowDTO;
 import org.wso2.carbon.apimgt.impl.dto.WorkflowDTO;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.apimgt.impl.utils.ApplicationUtils;
 import org.wso2.carbon.apimgt.keymgt.client.SubscriberKeyMgtClient;
 import org.wso2.carbon.apimgt.keymgt.stub.types.carbon.ApplicationKeysDTO;
 
@@ -77,7 +78,7 @@ public abstract class AbstractApplicationRegistrationWorkflowExecutor extends Wo
             }
 
             ApplicationRegistrationWorkflowDTO regWorkFlowDTO = (ApplicationRegistrationWorkflowDTO)workFlowDTO;
-            Application application = ApplicationCreator.populateApplication(workFlowDTO.getWorkflowReference());
+            Application application = ApplicationUtils.populateApplication(workFlowDTO.getWorkflowReference());
 //            OauthAppRequest appInfoDTO = ApplicationCreator.createAppInfoDTO(null);
 //            appInfoDTO.setMappingId(regWorkFlowDTO.getWorkflowReference());
 //           // appInfoDTO.retrieveDTO();
@@ -125,7 +126,7 @@ public abstract class AbstractApplicationRegistrationWorkflowExecutor extends Wo
 
         try {
             //get new key manager
-            KeyManager keyManager = ApplicationCreator.getKeyManager();
+            KeyManager keyManager = KeyManagerFactory.getKeyManager();
             //createApplication on oAuthorization server.
             OAuthApplicationInfo oAuthApplication = keyManager.createApplication(workflowDTO.getAppInfoDTO());
             //Do application mapping with consumerKey.
@@ -136,8 +137,8 @@ public abstract class AbstractApplicationRegistrationWorkflowExecutor extends Wo
 
             workflowDTO.setApplicationInfo(oAuthApplication);
 
-            AccessTokenRequest tokenRequest = ApplicationCreator.createAccessTokenRequest(oAuthApplication,null);
-            AccessTokenInfo tokenInfo = ApplicationCreator.getKeyManager().getNewApplicationAccessToken(tokenRequest);
+            AccessTokenRequest tokenRequest = ApplicationUtils.createAccessTokenRequest(oAuthApplication,null);
+            AccessTokenInfo tokenInfo = keyManager.getNewApplicationAccessToken(tokenRequest);
 
             AccessTokenInfo info = TokenMgtDao.getAccessTokenForConsumerId(tokenRequest.getClientId());
             if (info == null) {

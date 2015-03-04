@@ -52,7 +52,7 @@ import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.impl.UserAwareAPIProvider;
-import org.wso2.carbon.apimgt.impl.applications.ApplicationCreator;
+import org.wso2.carbon.apimgt.impl.factory.KeyManagerFactory;
 import org.wso2.carbon.apimgt.impl.dto.Environment;
 import org.wso2.carbon.apimgt.impl.dto.TierPermissionDTO;
 import org.wso2.carbon.apimgt.impl.utils.APIAuthenticationAdminClient;
@@ -76,8 +76,6 @@ import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import javax.cache.Caching;
 import javax.net.ssl.HostnameVerifier;
-import javax.net.ssl.HttpsURLConnection;
-import javax.net.ssl.SSLHandshakeException;
 import javax.net.ssl.SSLSession;
 
 import java.io.BufferedReader;
@@ -403,7 +401,7 @@ public class APIProviderHostObject extends ScriptableObject {
             api.setUriTemplates(uriTemplates);
         }
         //get new resource manager.
-        ResourceManager resourceManager = ApplicationCreator.getResourceManager();
+        ResourceManager resourceManager = KeyManagerFactory.getResourceManager();
 
         Map registeredResource = resourceManager.getResourceByApiId(api.getId().toString());
         if (registeredResource == null) {
@@ -3851,7 +3849,7 @@ public class APIProviderHostObject extends ScriptableObject {
             }
             APIProvider apiProvider = getAPIProvider(thisObj);
             apiProvider.deleteAPI(apiId);
-            ResourceManager resourceManager = ApplicationCreator.getResourceManager();
+            ResourceManager resourceManager = KeyManagerFactory.getResourceManager();
 
             if (apiId.toString() != null) {
                 resourceManager.deleteRegisteredResourceByAPIId(apiId.toString());

@@ -19,6 +19,8 @@
 package org.wso2.carbon.apimgt.keymgt;
 
 import org.apache.amber.oauth2.common.OAuth;
+import org.apache.axiom.om.OMElement;
+import org.apache.axiom.om.impl.builder.StAXOMBuilder;
 import org.apache.axis2.util.URL;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -27,13 +29,20 @@ import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.utils.URLEncodedUtils;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
 import org.codehaus.jettison.json.JSONObject;
 import org.json.simple.JSONArray;
 import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.api.model.*;
+import org.wso2.carbon.apimgt.api.model.AccessTokenInfo;
+import org.wso2.carbon.apimgt.api.model.AccessTokenRequest;
+import org.wso2.carbon.apimgt.api.model.ApplicationConstants;
+import org.wso2.carbon.apimgt.api.model.KeyManagerConfiguration;
+import org.wso2.carbon.apimgt.api.model.OAuthApplicationInfo;
+import org.wso2.carbon.apimgt.api.model.OauthAppRequest;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.AbstractKeyManager;
 import org.wso2.carbon.apimgt.impl.clients.ApplicationManagementServiceClient;
@@ -51,9 +60,18 @@ import org.wso2.carbon.identity.application.common.model.xsd.ServiceProvider;
 import org.wso2.carbon.identity.oauth.stub.dto.OAuthConsumerAppDTO;
 import org.wso2.carbon.identity.oauth2.stub.dto.OAuth2ClientApplicationDTO;
 import org.wso2.carbon.utils.CarbonUtils;
+import org.wso2.securevault.SecretResolverFactory;
 
+import javax.xml.namespace.QName;
+import javax.xml.stream.XMLStreamException;
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.Stack;
 
 /**
  * This class holds the key manager implementation considering WSO2 as the identity provider
@@ -65,6 +83,8 @@ public class DefaultKeyManagerImpl extends AbstractKeyManager {
     private static final String OAUTH_RESPONSE_EXPIRY_TIME = "expires_in";
     private static final String GRANT_TYPE_VALUE = "open_keymanager";
     private static final String GRANT_TYPE_PARAM_VALIDITY = "validity_period";
+
+    private KeyManagerConfiguration configuration;
 
     private static final Log log = LogFactory.getLog(DefaultKeyManagerImpl.class);
 
@@ -80,7 +100,8 @@ public class DefaultKeyManagerImpl extends AbstractKeyManager {
         oAuthConsumerAppDTO.setApplicationName(oAuthApplicationInfo.getClientName());
 
         String username = (String)oAuthApplicationInfo.getParameter(ApplicationConstants.
-                OAUTH_CLIENT_USERNAME);
+                                                                            OAUTH_CLIENT_USERNAME);
+
 
         if(oAuthApplicationInfo.getParameter("callback_url") != null){
             JSONArray jsonArray = (JSONArray) oAuthApplicationInfo.getParameter("callback_url");
@@ -94,7 +115,7 @@ public class DefaultKeyManagerImpl extends AbstractKeyManager {
         }
 
         try {
-            oAuthAdminClient.registerOAuthApplicationData(oAuthConsumerAppDTO, username);
+            oAuthAdminClient.registerOAuthApplicationData(oAuthConsumerAppDTO,username);
 
         } catch (Exception e) {
             handleException("OAuth application registration failed", e);
@@ -102,7 +123,7 @@ public class DefaultKeyManagerImpl extends AbstractKeyManager {
 
         try {
             oAuthConsumerAppDTO = oAuthAdminClient.
-                    getOAuthApplicationDataByAppName(oAuthApplicationInfo.getClientName(), username);
+                    getOAuthApplicationDataByAppName(oAuthApplicationInfo.getClientName(),username);
         } catch (Exception e) {
             handleException("Can not retrieve registered OAuth application information ", e);
         }
@@ -213,31 +234,12 @@ public class DefaultKeyManagerImpl extends AbstractKeyManager {
             return null;
         }
 
-
-        String tokenEndpointName = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration().
-                getFirstProperty(APIConstants.API_KEY_MANAGER_TOKEN_ENDPOINT_NAME);
-        String keyMgtServerURL = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration().
-                getFirstProperty(APIConstants.API_KEY_MANAGER_URL);
-        URL keymgtURL = new URL(keyMgtServerURL);
+        String tokenEndpoint = configuration.getParameter(APIConstants.TOKEN_URL);
+        //To revoke tokens we should call revoke API deployed in API gateway.
+        String revokeEndpoint = configuration.getParameter(APIConstants.REVOKE_URL);
+        URL keymgtURL = new URL(tokenEndpoint);
         int keyMgtPort = keymgtURL.getPort();
         String keyMgtProtocol = keymgtURL.getProtocol();
-        String tokenEndpoint = null;
-
-        String webContextRoot = CarbonUtils.getServerConfiguration().getFirstProperty("WebContextRoot");
-
-        if (webContextRoot == null || "/".equals(webContextRoot)) {
-            webContextRoot = "";
-        }
-
-        if (keyMgtServerURL != null) {
-            String[] tmp = keyMgtServerURL.split(webContextRoot + "/services");
-            tokenEndpoint = tmp[0] + tokenEndpointName;
-        }
-
-        //To revoke tokens we should call revoke API deployed in API gateway.
-        String revokeEndpoint = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration().
-                getFirstProperty(APIConstants.API_KEY_MANAGER_REVOKE_API_URL);
-
 
         // Call the /revoke only if there's a token to be revoked.
         try {
@@ -342,8 +344,8 @@ public class DefaultKeyManagerImpl extends AbstractKeyManager {
     }
 
     @Override
-    public String getKeyManagerMetaData() throws APIManagementException {
-        return null;
+    public KeyManagerConfiguration getKeyManagerConfiguration() throws APIManagementException {
+        return configuration;
     }
 
     @Override
@@ -354,6 +356,34 @@ public class DefaultKeyManagerImpl extends AbstractKeyManager {
     @Override
     public OAuthApplicationInfo createSemiManualAuthApplication(OauthAppRequest appInfoRequest) throws APIManagementException {
         return null;
+    }
+
+    @Override
+    public void loadConfiguration(String configuration) throws APIManagementException{
+        if(configuration != null && !configuration.isEmpty()){
+            StAXOMBuilder builder = null;
+            try {
+                builder = new StAXOMBuilder(new ByteArrayInputStream(configuration.getBytes()));
+                OMElement document = builder.getDocumentElement();
+                if(this.configuration == null) {
+                    synchronized (this) {
+                        this.configuration = new KeyManagerConfiguration();
+                        this.configuration.setManualModeSupported(true);
+                        this.configuration.setResourceRegistrationEnabled(true);
+                        this.configuration.setTokenValidityConfigurable(true);
+                        Iterator<OMElement> elementIterator = document.getChildElements();
+                        while (elementIterator.hasNext()){
+                            OMElement element = elementIterator.next();
+                            this.configuration.addParameter(element.getLocalName(),element.getText());
+                        }
+                    }
+                }
+
+            } catch (XMLStreamException e) {
+                e.printStackTrace();
+            }
+
+        }
     }
 
     /**

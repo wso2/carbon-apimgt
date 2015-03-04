@@ -1,43 +1,48 @@
 /*
- *  Copyright (c) 2014, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
- *  WSO2 Inc. licenses this file to you under the Apache License,
- *  Version 2.0 (the "License"); you may not use this file except
- *  in compliance with the License.
- *  You may obtain a copy of the License at
+ *   Copyright (c) 2014, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
- *    http://www.apache.org/licenses/LICENSE-2.0
+ *   WSO2 Inc. licenses this file to you under the Apache License,
+ *   Version 2.0 (the "License"); you may not use this file except
+ *   in compliance with the License.
+ *   You may obtain a copy of the License at
  *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing,
+ *  software distributed under the License is distributed on an
+ *  "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ *  KIND, either express or implied.  See the License for the
+ *  specific language governing permissions and limitations
+ *  under the License.
+ * /
  */
 
-package org.wso2.carbon.apimgt.impl.applications;
+package org.wso2.carbon.apimgt.impl.utils;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.api.model.*;
-import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.api.model.AccessTokenRequest;
+import org.wso2.carbon.apimgt.api.model.Application;
+import org.wso2.carbon.apimgt.api.model.KeyManager;
+import org.wso2.carbon.apimgt.api.model.OAuthApplicationInfo;
+import org.wso2.carbon.apimgt.api.model.OauthAppRequest;
+import org.wso2.carbon.apimgt.api.model.Subscriber;
+import org.wso2.carbon.apimgt.impl.applications.ApplicationImpl;
+import org.wso2.carbon.apimgt.impl.factory.KeyManagerFactory;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
-
-
-import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 
 import java.util.Map;
 
 /**
- * This is a factory class.you have to use this when you need to initiate classes by reading config file.
- * for example key manager class will be initiate from here.
+ * Utility class for performing Operations related to Applications, OAuth clients.
  */
-public class ApplicationCreator {
+public class ApplicationUtils {
 
     private static ApiMgtDAO dao = new ApiMgtDAO();
-    private static Log log = LogFactory.getLog(ApplicationCreator.class);
+
+    private static Log log = LogFactory.getLog(ApplicationUtils.class);
 
     /**
      * This method will return object Application object by application name and Subscriber.
@@ -65,67 +70,6 @@ public class ApplicationCreator {
     }
 
     /**
-     * This method will take hardcoded class name from api-manager.xml file and will return that class's instance.
-     * This class should be implementation class of keyManager.
-     * @return keyManager instance.
-     */
-    public static KeyManager getKeyManager() {
-
-        KeyManager keyManager = null;
-        try {
-            keyManager = (KeyManager) Class.forName(ServiceReferenceHolder.getInstance().
-                    getAPIManagerConfigurationService().getAPIManagerConfiguration().
-                    getFirstProperty(APIConstants.API_KEY_MANGER_IMPLEMENTATION_CLASS_NAME)).newInstance();
-            log.info("Created instance successfully");
-        } catch (InstantiationException e) {
-            log.error("Error while instantiating class" + e.toString());
-        } catch (IllegalAccessException e) {
-            log.error("Error while accessing class" + e.toString());
-        } catch (ClassNotFoundException e) {
-            log.error("Error while creating keyManager instance" + e.toString());
-        }
-        return keyManager;
-    }
-
-    public static ResourceManager getResourceManager() {
-        ResourceManager resourceManager = null;
-        try {
-            resourceManager = (ResourceManager) Class.forName(ServiceReferenceHolder.getInstance().
-                    getAPIManagerConfigurationService().getAPIManagerConfiguration().
-                    getFirstProperty(APIConstants.API_RESOURCE_MANGER_IMPLEMENTATION_CLASS_NAME)).newInstance();
-            log.info("Created instance successfully");
-        } catch (InstantiationException e) {
-            log.error("Error while instantiating class" + e.toString());
-        } catch (IllegalAccessException e) {
-            log.error("Error while accessing class" + e.toString());
-        } catch (ClassNotFoundException e) {
-            log.error("Error while creating keyManager instance" + e.toString());
-        }
-        return resourceManager;
-    }
-
-    /**
-     * common method to throw exceptions
-     *
-     * @param msg this parameter contain error message that we need to throw.
-     * @param e   Exception object.
-     * @throws APIManagementException
-     */
-    private static void handleException(String msg, Exception e) throws APIManagementException {
-        log.error(msg, e);
-        throw new APIManagementException(msg, e);
-    }
-    /**
-     * common method to throw exceptions only with message.
-     *
-     * @param msg this parameter contain error message that we need to throw.
-     * @throws APIManagementException
-     */
-    private static void handleException(String msg) throws APIManagementException {
-        log.error(msg);
-        throw new APIManagementException(msg);
-    }
-    /**
      * This method will take application name and user id as parameters and will return application object.
      * @param appName APIM manager application name
      * @param userId logged in userID
@@ -141,7 +85,7 @@ public class ApplicationCreator {
     }
 
     /**
-     * 
+     *
      * @param workflowReference
      * @return
      * @throws APIManagementException
@@ -182,7 +126,7 @@ public class ApplicationCreator {
 
         if (clientDetails != null) {
             //parse json string and set applicationInfo parameters.
-            authApplicationInfo = getKeyManager().buildFromJSON(authApplicationInfo, clientDetails);
+            authApplicationInfo = KeyManagerFactory.getKeyManager().buildFromJSON(authApplicationInfo, clientDetails);
 
             if (log.isDebugEnabled()) {
                 log.debug("Additional json parameters when building OauthAppRequest =  " + clientDetails);
@@ -198,6 +142,7 @@ public class ApplicationCreator {
         return appRequest;
     }
 
+
     /**
      * This method adds additional parameters specified in JSON input to TokenRequest.
      * @param jsonParams Additional Parameters required by the Authorization Server.
@@ -211,7 +156,7 @@ public class ApplicationCreator {
             tokenRequest = new AccessTokenRequest();
         }
 
-        KeyManager keyManager = getKeyManager();
+        KeyManager keyManager = KeyManagerFactory.getKeyManager();
         if (keyManager != null) {
             return keyManager.buildAccessTokenRequestFromJSON(jsonParams, tokenRequest);
         }
@@ -225,10 +170,32 @@ public class ApplicationCreator {
             tokenRequest = new AccessTokenRequest();
         }
 
-        KeyManager keyManager = getKeyManager();
+        KeyManager keyManager = KeyManagerFactory.getKeyManager();
         if (keyManager != null) {
             return keyManager.buildAccessTokenRequestFromOAuthApp(oAuthApplication, tokenRequest);
         }
         return null;
+    }
+
+    /**
+     * common method to throw exceptions
+     *
+     * @param msg this parameter contain error message that we need to throw.
+     * @param e   Exception object.
+     * @throws APIManagementException
+     */
+    private static void handleException(String msg, Exception e) throws APIManagementException {
+        log.error(msg, e);
+        throw new APIManagementException(msg, e);
+    }
+    /**
+     * common method to throw exceptions only with message.
+     *
+     * @param msg this parameter contain error message that we need to throw.
+     * @throws APIManagementException
+     */
+    private static void handleException(String msg) throws APIManagementException {
+        log.error(msg);
+        throw new APIManagementException(msg);
     }
 }

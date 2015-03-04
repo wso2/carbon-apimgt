@@ -311,6 +311,12 @@ public final class APIConstants {
     public static final String API_KEY_MANGER_THRIFT_SERVER_HOST = API_KEY_MANAGER + "ThriftServerHost";
     public static final String API_KEY_MANGER_CONNECTION_TIMEOUT = API_KEY_MANAGER + "ThriftClientConnectionTimeOut";
 
+    // Constants needed for KeyManager section
+    public static final String KEY_MANAGER = "KeyManager";
+    public static final String AUTHSERVER_URL = "AuthorizationServerURL";
+    public static final String TOKEN_URL = "TokenURL";
+    public static final String REVOKE_URL = "RevokeURL";
+
     public static final String API_KEY_MANGER_APPLICATION_CLASS_NAME = API_KEY_MANAGER + "ApplicationClassName";
     public static final String API_KEY_MANGER_IMPLEMENTATION_CLASS_NAME = API_KEY_MANAGER + "KeyManagerImplementationClassName";
     public static final String API_RESOURCE_MANGER_IMPLEMENTATION_CLASS_NAME = API_KEY_MANAGER +
