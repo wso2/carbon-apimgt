@@ -465,9 +465,9 @@ var datasourceData = outputs.datasourceData;
 $(document).ready(function(){
 
     <% if(analyticsData.analytics != null){ %>
-            createMultiUrlArrayAndView("<%=analyticsData.analytics.eventReceiverURL.text()%>");
-            document.getElementById("eventReceiverUsername").value = "<%=analyticsData.analytics.eventReceiverUsername.text()%>";
-            document.getElementById("eventReceiverPassword").value = "<%=analyticsData.analytics.eventReceiverPassword.text()%>";
+            createMultiUrlArrayAndView("<%=analyticsData.analytics.eventReceiverURL%>");
+            document.getElementById("eventReceiverUsername").value = "<%=analyticsData.analytics.eventReceiverUsername%>";
+            document.getElementById("eventReceiverPassword").value = "<%=analyticsData.analytics.eventReceiverPassword%>";
             document.getElementById("eventAnalyserURL").value = "<%=analyticsData.analytics.eventAnalyserURL.text()%>";
             document.getElementById("eventAnalyserUsername").value = "<%=analyticsData.analytics.eventAnalyserUsername.text()%>";
             document.getElementById("eventAnalyserPassword").value = "<%=analyticsData.analytics.eventAnalyserPassword.text()%>";

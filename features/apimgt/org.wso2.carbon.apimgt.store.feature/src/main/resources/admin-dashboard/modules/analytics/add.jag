@@ -6,32 +6,28 @@ var addAnalyticsConfig = function (configData) {
 
     var carbon = require('carbon');
     var process = require('process');
-    var url =  'https://' + process.getProperty('carbon.local.ip') + ':' + process.getProperty('mgt.transport.https.port') + '/admin/services/';
-    var server = new carbon.server.Server(url);
-    var options = {username: jagg.getUser().username, domain: carbon.server.tenantDomain() , tenantId:  carbon.server.tenantId()};
-    var registry = new carbon.registry.Registry(server, options);
+    var conf = carbon.server.loadConfig('user-mgt.xml');
+    var confXml = new XML(conf);
+    var username = confXml.*::['Realm'].*::['Configuration'].*::['AdminUser'].*::['UserName'].text();
+    var password = confXml.*::['Realm'].*::['Configuration'].*::['AdminUser'].*::['Password'].text();
+    var url = 'https://' + process.getProperty('carbon.local.ip') + ':' + process.getProperty('mgt.transport.https.port');
+    var stub = new org.wso2.carbon.bam.service.data.publisher.stub.ServiceDataPublisherAdminStub(url + '/services/ServiceDataPublisherAdmin');
+    var client = stub._getServiceClient();
+    var options = client.getOptions();
+    var authenticator = new org.apache.axis2.transport.http.HttpTransportProperties.Authenticator();
+    authenticator.setUsername(username);
+    authenticator.setPassword(password);
+    authenticator.setPreemptiveAuthentication(true);
+    options.setProperty(org.apache.axis2.transport.http.HTTPConstants.AUTHENTICATE, authenticator);
+    client.setOptions(options);
 
-    var path ='/_system/governance/apimgt/applicationdata/analytics.xml';
+    var eventingConfigData = new org.wso2.carbon.bam.service.data.publisher.stub.conf.EventingConfigData();
+    eventingConfigData.setPublishingEnable(true);
+    eventingConfigData.setUrl(configData.eventReceiverURL);
+    eventingConfigData.setUserName(configData.eventReceiverUsername);
+    eventingConfigData.setPassword(configData.eventReceiverPassword);
 
-    var content = new XML("<analytics_config>" +
-                          "<event_receiver>" +
-                          "<URL>" + configData.eventReceiverURL + "</URL>" +
-                          "<Username>" + configData.eventReceiverUsername + "</Username>" +
-                          "<Password>" + configData.eventReceiverPassword + "</Password>" +
-                          "</event_receiver>" +
-                          "<event_analyser>" +
-                          "<URL>" + configData.eventAnalyserURL + "</URL>" +
-                          "<Username>" + configData.eventAnalyserUsername + "</Username>" +
-                          "<Password>" + configData.eventAnalyserPassword + "</Password>" +
-                          "</event_analyser>" +
-                          "</analytics_config>");
-    var resource ={
-        content: content.toXMLString(),
-        mediaType: 'text/xml'
-    };
-    log.info("Saving Analytics config in registry...");
-    registry.put(path,resource);
-    log.info("Analytics config saved in registry");
+    stub.configureEventing(eventingConfigData);
 
     return {
      error:false

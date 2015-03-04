@@ -13,15 +13,34 @@ var getAnalyticsConfig = function (analyticsData) {
     var log=new Log();
     var path = '/_system/governance/apimgt/applicationdata/analytics.xml';
     var ContentStr = registry.get(path);
+
+    var carbon = require('carbon');
+    var process = require('process');
+    var conf = carbon.server.loadConfig('user-mgt.xml');
+    var confXml = new XML(conf);
+    var username = confXml.*::['Realm'].*::['Configuration'].*::['AdminUser'].*::['UserName'].text();
+    var password = confXml.*::['Realm'].*::['Configuration'].*::['AdminUser'].*::['Password'].text();
+    var url = 'https://' + process.getProperty('carbon.local.ip') + ':' + process.getProperty('mgt.transport.https.port');
+    var stub = new org.wso2.carbon.bam.service.data.publisher.stub.ServiceDataPublisherAdminStub(url + '/services/ServiceDataPublisherAdmin');
+    var client = stub._getServiceClient();
+    var options = client.getOptions();
+    var authenticator = new org.apache.axis2.transport.http.HttpTransportProperties.Authenticator();
+    authenticator.setUsername(username);
+    authenticator.setPassword(password);
+    authenticator.setPreemptiveAuthentication(true);
+    options.setProperty(org.apache.axis2.transport.http.HTTPConstants.AUTHENTICATE, authenticator);
+    client.setOptions(options);
+
+    var eventingConfig = stub.getEventingConfigData();
     var conf = null;
-    if (ContentStr == null) {
+    if (eventingConfig == null) {
         log.warn("Analytics configurations are not available in registry.");
     } else {
         var analytics_config = new XML(ContentStr.content);
         conf = {
-            eventReceiverURL: analytics_config.event_receiver.URL,
-            eventReceiverUsername: analytics_config.event_receiver.Username,
-            eventReceiverPassword: analytics_config.event_receiver.Password,
+            eventReceiverURL: eventingConfig.getUrl(),
+            eventReceiverUsername: eventingConfig.getUserName(),
+            eventReceiverPassword: eventingConfig.getPassword(),
             eventAnalyserURL: analytics_config.event_analyser.URL,
             eventAnalyserUsername: analytics_config.event_analyser.Username,
             eventAnalyserPassword: analytics_config.event_analyser.Password,
