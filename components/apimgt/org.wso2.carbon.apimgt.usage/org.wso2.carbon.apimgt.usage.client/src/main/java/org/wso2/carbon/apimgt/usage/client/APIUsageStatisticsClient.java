@@ -83,7 +83,7 @@ public class APIUsageStatisticsClient {
       */
     /* public APIUsageStatisticsClient(String username) throws APIMgtUsageQueryServiceClientException {
         APIManagerConfiguration config = APIUsageClientServiceComponent.getAPIManagerConfiguration();
-        String targetEndpoint = config.getFirstProperty(APIMgtUsagePublisherConstants.API_USAGE_BAM_SERVER_URL);
+        String targetEndpoint = config.getFirstProperty(APIMgtUsagePublisherConstants.API_USAGE_BAM_SERVER_URL_GROUPS);
         if (targetEndpoint == null || targetEndpoint.equals("")) {
             throw new APIMgtUsageQueryServiceClientException("Required BAM server URL parameter unspecified");
         }

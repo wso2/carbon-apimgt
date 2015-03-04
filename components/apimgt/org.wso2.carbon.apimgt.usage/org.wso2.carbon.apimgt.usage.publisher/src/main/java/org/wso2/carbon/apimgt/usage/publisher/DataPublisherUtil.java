@@ -26,6 +26,7 @@ import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.util.Enumeration;
+import java.util.Map;
 
 public class DataPublisherUtil {
 
@@ -86,5 +87,13 @@ public class DataPublisherUtil {
 
     public static void setEnabledMetering(boolean enabledMetering) {
         isEnabledMetering = enabledMetering;
+    }
+
+    public static boolean isAnalyticsEnabled() {
+        return false;
+    }
+
+    public static Map<String, String> getAnalyticsConfigFromRegistry() {
+        return null;
     }
 }
