@@ -2,7 +2,7 @@
 
 var log = new Log();
 
-var disableAnalytics = function () {
+var enableAnalytics = function (enable) {
     var carbon = require('carbon');
     var process = require('process');
     var url = 'https://' + process.getProperty('carbon.local.ip') + ':' + process.getProperty('mgt.transport.https.port') + '/admin/services/';
@@ -14,14 +14,14 @@ var disableAnalytics = function () {
     var conf = null;
     if (ContentStr != null) {
         var analytics_config = new XML(ContentStr.content);
-        analytics_config.enable = false;
+        analytics_config.enable = enable;
         var resource = {
             content: analytics_config.toXMLString(),
             mediaType: 'text/xml'
         };
-        log.info("Disabling Analytics...");
+        log.info("Changing analytics status to - Enable:" + enable);
         registry.put(path, resource);
-        log.info("Analytics disabled.");
+        log.info("Analytics status changed to - Enable:" + enable);
     }
 
     return {
@@ -147,8 +147,8 @@ var addToolbox = function (configData) {
 var addBamServerProfile = function (configData) {
 
     var carbon = require('carbon');
-    org.wso2.carbon.apimgt.impl.utils.APIUtil.addBamServerProfile(configData.eventReceiverURL,
-            configData.eventReceiverUsername, configData.eventReceiverPassword, parseInt(carbon.server.tenantId()));
+    //org.wso2.carbon.apimgt.impl.utils.APIUtil.addBamServerProfile(configData.eventReceiverURL,
+           // configData.eventReceiverUsername, configData.eventReceiverPassword, parseInt(carbon.server.tenantId()));
     return {
         error:false
     };

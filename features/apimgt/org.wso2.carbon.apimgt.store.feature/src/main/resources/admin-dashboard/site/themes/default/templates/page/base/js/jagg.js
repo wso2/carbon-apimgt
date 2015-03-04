@@ -249,3 +249,9 @@ $(document).ready(function(){
         }
     });
 });
+
+$(document).click(function (e) {
+    if (!$(e.target).is('.help_popup')) {
+        $('.help_popup').popover('hide');
+    }
+});

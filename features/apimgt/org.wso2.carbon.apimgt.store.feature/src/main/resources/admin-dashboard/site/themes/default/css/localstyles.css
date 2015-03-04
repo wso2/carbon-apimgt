@@ -1143,7 +1143,24 @@ ol.progtrckr li.progtrckr-todo:before {
 }
 
 .ui_message {
-    margin: 5px 0 0 10px;
-    padding: 10px;
-    background-color: #8DEAE3 !important;
+    margin: 0 0 0 10px;
+    padding: 5px;
+    width: 90%;
+    background-color: #E6E6E6 !important;
+}
+
+.analytics_table tr td{
+    vertical-align: top;
+}
+
+.receiver_url_table{
+    width: 100%;
+}
+
+.table_header{
+    background-color: #E6E6E6;
+}
+
+.analytics-form-actions{
+    background: transparent;
 }
