@@ -33,7 +33,8 @@ public class Test {
 
         //TODO: Populate the config with required BAM parameters - config.load(testFilePath)
 
-        APIMGTConfigReaderService readerService = new APIMGTConfigReaderService(config);
+        APIMGTConfigReaderService readerService =APIMGTConfigReaderService.getInstance();
+        readerService.setAPIManagerConfiguration(config);
 
         APIMgtUsageDataBridgeDataPublisher testPublisher = new APIMgtUsageDataBridgeDataPublisher();
 

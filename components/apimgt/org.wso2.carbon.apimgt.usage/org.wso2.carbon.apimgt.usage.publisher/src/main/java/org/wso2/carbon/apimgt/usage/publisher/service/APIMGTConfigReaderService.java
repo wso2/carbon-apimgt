@@ -28,7 +28,6 @@ import java.util.Map;
 
 public class APIMGTConfigReaderService {
 
-    private String bamServerThriftPort;
     private String bamServerUrlGroups;
     private String bamServerUser;
     private String bamServerPassword;
@@ -44,9 +43,10 @@ public class APIMGTConfigReaderService {
 	private String faultStreamVersion;
     private String throttleStreamName;
 	private String throttleStreamVersion;
+    public static APIMGTConfigReaderService instance = new APIMGTConfigReaderService();
 	private static Log log = LogFactory.getLog(APIMGTConfigReaderService.class);
 
-    public APIMGTConfigReaderService(APIManagerConfiguration config) {
+    private APIMGTConfigReaderService() {
         enabled = DataPublisherUtil.isAnalyticsEnabled();
         if(enabled == true) {
             Map<String, String> analyticsConfigs = DataPublisherUtil.getAnalyticsConfigFromRegistry();
@@ -54,28 +54,38 @@ public class APIMGTConfigReaderService {
             bamServerUser = analyticsConfigs.get(APIConstants.API_USAGE_BAM_SERVER_USER);
             bamServerPassword = analyticsConfigs.get(APIConstants.API_USAGE_BAM_SERVER_PASSWORD);
         }
+    }
+
+    public static synchronized APIMGTConfigReaderService getInstance(){
+        if(instance == null){
+            instance = new APIMGTConfigReaderService();
+        }
+        return instance;
+    }
+
+    public void setAPIManagerConfiguration(APIManagerConfiguration config){
         publisherClass = config.getFirstProperty(APIConstants.API_USAGE_PUBLISHER_CLASS);
-	    requestStreamName =
-			    config.getFirstProperty(APIMgtUsagePublisherConstants.API_REQUEST_STREAM_NAME);
-	    requestStreamVersion =
-			    config.getFirstProperty(APIMgtUsagePublisherConstants.API_REQUEST_STREAM_VERSION);
-	    if (requestStreamName == null || requestStreamVersion == null) {
-		    log.error("Request stream name or version is null. Check api-manager.xml");
-	    }
-	    responseStreamName =
-			    config.getFirstProperty(APIMgtUsagePublisherConstants.API_RESPONSE_STREAM_NAME);
-	    responseStreamVersion =
-			    config.getFirstProperty(APIMgtUsagePublisherConstants.API_RESPONSE_STREAM_VERSION);
-	    if (responseStreamName == null || responseStreamVersion == null) {
-		    log.error("Response stream name or version is null. Check api-manager.xml");
-	    }
-	    faultStreamName =
-			    config.getFirstProperty(APIMgtUsagePublisherConstants.API_FAULT_STREAM_NAME);
-	    faultStreamVersion =
-			    config.getFirstProperty(APIMgtUsagePublisherConstants.API_FAULT_STREAM_VERSION);
-	    if (faultStreamName == null || faultStreamVersion == null) {
-		    log.error("Fault stream name or version is null. Check api-manager.xml");
-	    }
+        requestStreamName =
+                config.getFirstProperty(APIMgtUsagePublisherConstants.API_REQUEST_STREAM_NAME);
+        requestStreamVersion =
+                config.getFirstProperty(APIMgtUsagePublisherConstants.API_REQUEST_STREAM_VERSION);
+        if (requestStreamName == null || requestStreamVersion == null) {
+            log.error("Request stream name or version is null. Check api-manager.xml");
+        }
+        responseStreamName =
+                config.getFirstProperty(APIMgtUsagePublisherConstants.API_RESPONSE_STREAM_NAME);
+        responseStreamVersion =
+                config.getFirstProperty(APIMgtUsagePublisherConstants.API_RESPONSE_STREAM_VERSION);
+        if (responseStreamName == null || responseStreamVersion == null) {
+            log.error("Response stream name or version is null. Check api-manager.xml");
+        }
+        faultStreamName =
+                config.getFirstProperty(APIMgtUsagePublisherConstants.API_FAULT_STREAM_NAME);
+        faultStreamVersion =
+                config.getFirstProperty(APIMgtUsagePublisherConstants.API_FAULT_STREAM_VERSION);
+        if (faultStreamName == null || faultStreamVersion == null) {
+            log.error("Fault stream name or version is null. Check api-manager.xml");
+        }
         throttleStreamName =
                 config.getFirstProperty(APIMgtUsagePublisherConstants.API_THROTTLE_STREAM_NAME);
         throttleStreamVersion =
@@ -83,10 +93,6 @@ public class APIMGTConfigReaderService {
         if (throttleStreamName == null || throttleStreamVersion == null) {
             log.error("Throttle stream name or version is null. Check api-manager.xml");
         }
-    }
-
-    public String getBamServerThriftPort() {
-        return bamServerThriftPort;
     }
 
     public String getBamServerPassword() {
