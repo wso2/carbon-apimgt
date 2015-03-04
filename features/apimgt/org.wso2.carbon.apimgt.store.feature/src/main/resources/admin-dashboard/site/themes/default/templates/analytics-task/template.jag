@@ -538,7 +538,7 @@ var datasourceData = outputs.datasourceData;
 $(document).ready(function(){
 
     <% if(analyticsData.analytics != null){ %>
-            createMultiUrlArrayAndView("<%=analyticsData.analytics.eventReceiverURL.text()%>", "<%=analyticsData.analytics.eventReceiverUsername.text()%>");
+            createMultiUrlArrayAndView("<%=analyticsData.analytics.eventReceiverURL%>", "<%=analyticsData.analytics.eventReceiverUsername%>");
             var enableAnalytics = "<%=analyticsData.analytics.enableAnalytics.text()%>";
             expandViewIfAnalyticsEnabled(enableAnalytics);
             document.getElementById("eventAnalyserURL").value = "<%=analyticsData.analytics.eventAnalyserURL.text()%>";
