@@ -27,21 +27,16 @@ import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
-import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
-import org.apache.http.client.utils.URLEncodedUtils;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
 import org.codehaus.jettison.json.JSONObject;
 import org.json.simple.JSONArray;
 import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.api.model.AccessTokenInfo;
-import org.wso2.carbon.apimgt.api.model.AccessTokenRequest;
-import org.wso2.carbon.apimgt.api.model.ApplicationConstants;
-import org.wso2.carbon.apimgt.api.model.OAuthApplicationInfo;
-import org.wso2.carbon.apimgt.api.model.OauthAppRequest;
+import org.wso2.carbon.apimgt.api.model.*;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.AbstractKeyManager;
+import org.wso2.carbon.apimgt.impl.clients.ApplicationManagementServiceClient;
 import org.wso2.carbon.apimgt.impl.clients.OAuth2TokenValidationServiceClient;
 import org.wso2.carbon.apimgt.impl.clients.OAuthAdminClient;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
@@ -49,13 +44,16 @@ import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.keymgt.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.keymgt.util.APIKeyMgtDataHolder;
 import org.wso2.carbon.apimgt.keymgt.util.APIKeyMgtUtil;
+import org.wso2.carbon.identity.application.common.model.xsd.InboundAuthenticationConfig;
+import org.wso2.carbon.identity.application.common.model.xsd.InboundAuthenticationRequestConfig;
+import org.wso2.carbon.identity.application.common.model.xsd.Property;
+import org.wso2.carbon.identity.application.common.model.xsd.ServiceProvider;
 import org.wso2.carbon.identity.oauth.stub.dto.OAuthConsumerAppDTO;
 import org.wso2.carbon.identity.oauth2.stub.dto.OAuth2ClientApplicationDTO;
 import org.wso2.carbon.utils.CarbonUtils;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 /**
  * This class holds the key manager implementation considering WSO2 as the identity provider
@@ -73,10 +71,16 @@ public class DefaultKeyManagerImpl extends AbstractKeyManager {
     @Override
     public OAuthApplicationInfo createApplication(OauthAppRequest oauthAppRequest) throws APIManagementException {
         OAuthAdminClient oAuthAdminClient = APIUtil.getOauthAdminClient();
+        ApplicationManagementServiceClient applicationManagementServiceClient = APIUtil.
+                getApplicationManagementServiceClient();
+
         OAuthConsumerAppDTO oAuthConsumerAppDTO = new OAuthConsumerAppDTO();
 
         OAuthApplicationInfo oAuthApplicationInfo = oauthAppRequest.getoAuthApplicationInfo();
         oAuthConsumerAppDTO.setApplicationName(oAuthApplicationInfo.getClientName());
+
+        String username = (String)oAuthApplicationInfo.getParameter(ApplicationConstants.
+                OAUTH_CLIENT_USERNAME);
 
         if(oAuthApplicationInfo.getParameter("callback_url") != null){
             JSONArray jsonArray = (JSONArray) oAuthApplicationInfo.getParameter("callback_url");
@@ -90,7 +94,7 @@ public class DefaultKeyManagerImpl extends AbstractKeyManager {
         }
 
         try {
-            oAuthAdminClient.registerOAuthApplicationData(oAuthConsumerAppDTO);
+            oAuthAdminClient.registerOAuthApplicationData(oAuthConsumerAppDTO, username);
 
         } catch (Exception e) {
             handleException("OAuth application registration failed", e);
@@ -98,12 +102,44 @@ public class DefaultKeyManagerImpl extends AbstractKeyManager {
 
         try {
             oAuthConsumerAppDTO = oAuthAdminClient.
-                    getOAuthApplicationDataByAppName(oAuthApplicationInfo.getClientName());
+                    getOAuthApplicationDataByAppName(oAuthApplicationInfo.getClientName(), username);
         } catch (Exception e) {
             handleException("Can not retrieve registered OAuth application information ", e);
         }
 
         oAuthApplicationInfo = createOAuthAppFromResponse(oAuthConsumerAppDTO);
+
+        ServiceProvider serviceProvider = new ServiceProvider();
+        serviceProvider.setApplicationName((String) oAuthApplicationInfo.getParameter("client_name"));
+        serviceProvider.setDescription("Service Provider for application " + oAuthApplicationInfo.getParameter("client_name"));
+
+
+        InboundAuthenticationConfig inboundAuthenticationConfig = new InboundAuthenticationConfig();
+        InboundAuthenticationRequestConfig[] inboundAuthenticationRequestConfigs = new
+                InboundAuthenticationRequestConfig[1];
+        InboundAuthenticationRequestConfig inboundAuthenticationRequestConfig = new
+                InboundAuthenticationRequestConfig();
+
+        inboundAuthenticationRequestConfig.setInboundAuthKey(oAuthConsumerAppDTO.getOauthConsumerKey());
+        inboundAuthenticationRequestConfig.setInboundAuthType("oauth2");
+        if (oAuthConsumerAppDTO.getOauthConsumerSecret()!= null && !oAuthConsumerAppDTO.
+                getOauthConsumerSecret().isEmpty()) {
+            Property property = new Property();
+            property.setName("oauthConsumerSecret");
+            property.setValue(oAuthConsumerAppDTO.getOauthConsumerSecret());
+            Property[] properties = {property};
+            inboundAuthenticationRequestConfig.setProperties(properties);
+        }
+
+        inboundAuthenticationRequestConfigs[0] = inboundAuthenticationRequestConfig;
+        inboundAuthenticationConfig.setInboundAuthenticationRequestConfigs(inboundAuthenticationRequestConfigs);
+        serviceProvider.setInboundAuthenticationConfig(inboundAuthenticationConfig);
+
+        try {
+            applicationManagementServiceClient.createApplication(serviceProvider, username);
+        } catch (Exception e) {
+            handleException("Service Provider creation failed", e);
+        }
 
         return oAuthApplicationInfo;
 
@@ -115,16 +151,18 @@ public class DefaultKeyManagerImpl extends AbstractKeyManager {
         OAuthConsumerAppDTO oAuthConsumerAppDTO = getOAuthConsumerAppDTOFromAppInfo(appInfoDTO);
         String oAuthAppName = (String) appInfoDTO.getoAuthApplicationInfo().getParameter(ApplicationConstants.
                 OAUTH_CLIENT_NAME);
+        String username = (String) appInfoDTO.getoAuthApplicationInfo().getParameter(ApplicationConstants.
+                OAUTH_CLIENT_USERNAME);
 
         try {
-            oAuthAdminClient.updateOAuthApplicationData(oAuthConsumerAppDTO);
+            oAuthAdminClient.updateOAuthApplicationData(oAuthConsumerAppDTO, username);
         } catch (Exception e) {
             handleException("Can not update OAuth application : " + oAuthAppName, e);
         }
 
         try {
             oAuthConsumerAppDTO = oAuthAdminClient.
-                    getOAuthApplicationDataByAppName(oAuthAppName);
+                    getOAuthApplicationDataByAppName(oAuthAppName, username);
         } catch (Exception e) {
             handleException("Can not retrieve updated OAuth application : " + oAuthAppName, e);
         }
@@ -138,8 +176,9 @@ public class DefaultKeyManagerImpl extends AbstractKeyManager {
     public void deleteApplication(String consumerKey) throws APIManagementException {
 
         OAuthAdminClient oAuthAdminClient = APIUtil.getOauthAdminClient();
+        String username = ApiMgtDAO.getUserFromOauthToken(consumerKey);
         try {
-            oAuthAdminClient.removeOAuthApplicationData(consumerKey);
+            oAuthAdminClient.removeOAuthApplicationData(consumerKey, username);
         } catch (Exception e) {
             handleException("Can not remove OAuth application for the given consumer key : " + consumerKey, e);
         }
@@ -150,8 +189,10 @@ public class DefaultKeyManagerImpl extends AbstractKeyManager {
     public OAuthApplicationInfo retrieveApplication(String consumerKey) throws APIManagementException {
         OAuthAdminClient oAuthAdminClient = APIUtil.getOauthAdminClient();
         OAuthConsumerAppDTO oAuthConsumerAppDTO = new OAuthConsumerAppDTO();
+
+        String username = ApiMgtDAO.getUserFromOauthToken(consumerKey);
         try {
-            oAuthConsumerAppDTO = oAuthAdminClient.getOAuthApplicationData(consumerKey);
+            oAuthConsumerAppDTO = oAuthAdminClient.getOAuthApplicationData(consumerKey, username);
         } catch (Exception e) {
             handleException("Can not retrieve OAuth application information from given key: " + consumerKey, e);
         }
