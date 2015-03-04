@@ -8,7 +8,7 @@ include("/jagg/jagg.jag");
             action = request.getParameter("action");
     if (action == "getRecentlyAddedAPIs") {
 
-        tenant = jagg.getTenantDomain();
+        tenant = request.getParameter("tenant");
         limit = request.getParameter("limit");
         if(limit == null)limit = 5 ;
 

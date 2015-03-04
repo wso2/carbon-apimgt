@@ -6,7 +6,7 @@ jagg.block("layout/extended", {
     },
 
     getOutputs:function (inputs) {
-    var tenantDomain = jagg.getTenantDomain();
+    var tenantDomain=request.getParameter("tenant");
         return {
             "title":inputs.title,
             "top":[

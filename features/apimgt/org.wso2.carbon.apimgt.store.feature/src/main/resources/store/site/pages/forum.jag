@@ -5,7 +5,8 @@ var site = require("/site/conf/site.json");
 var i18n = require("i18n");
 var localeResourcesBasePath="/site/conf/locales/jaggery/";
 i18n.init(request,localeResourcesBasePath);
-var tenantDomain = jagg.getTenantDomain();
+var tenantDomain=getTenantDomain();
+
 
 var log = new Log();
 

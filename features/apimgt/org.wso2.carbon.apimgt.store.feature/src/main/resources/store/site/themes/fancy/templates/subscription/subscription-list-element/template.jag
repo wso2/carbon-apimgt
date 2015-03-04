@@ -2,6 +2,9 @@
 <% var i=outputs.i, app = outputs.app, thumbURL = '';
    var str_i = String(i).replace('.','_');
    var gatewayurlendpoint = outputs.gatewayurl;
+	var log = new Log();
+	var userName=jagg.getUser().username;
+
    if(app!=null){
 %>
 
@@ -11,10 +14,12 @@
         <div class="keyBoxOut">
             <div class="container-fluid">
 	   			<div class="span6">
+
                         <%
                          var log = new Log();
                          var prodVadidataionTime = app.prodValidityTime;
                          var sandVadidataionTime = app.sandValidityTime;
+
 
                          <!-- If token is not set to never expire, then take the expiration in seconds -->
                          if (prodVadidataionTime > 0) {
@@ -26,12 +31,13 @@
 
                          <!-- This is required to remove the decimal points getting added by jaggery to validation time-->
                          if (prodVadidataionTime != null) {
-                            var prod_tmp = String(prodVadidataionTime).split();
+                            var prod_tmp = String(Math.ceil(prodVadidataionTime)).split(".");
                             var prodValidityTime = prod_tmp[0];
+
                          }
 
                          if (sandVadidataionTime != null) {
-                            var sand_tmp = String(sandVadidataionTime).split();
+                            var sand_tmp = String(Math.ceil(sandVadidataionTime)).split(".");
                             var sandValidityTime = sand_tmp[0];
                          }
 
@@ -110,7 +116,8 @@
 											</div>
 											<div class="span10">
 												<div class="form-inline proRegenerateForm">
-													Validity Time: <input type="text" class="input-mini token-validity-input" id="refreshProdValidityTime" value='<%=prodValidityTime%>' maxlength="70"  autofocus="autofocus" /> Seconds
+
+													Validity Time: <input type="text" class="input-mini token-validity-input" id="refreshProdValidityTime" value='<%=prodValidityTime %>' maxlength="70"  autofocus="autofocus" /> Seconds
 													<span class="label label-warning" id = "timeWarn" style="display:none;"><%=i18n.localize("timeWarn")%></span>
 													<button class="show-hide-key btn btn-primary" onclick="regenerate('<%=app.name%>','PRODUCTION',200,this,'pull-right','<%=app.prodConsumerKey%>','<%=app.prodConsumerSecret%>')" ><i class="fa fa-repeat"></i> <%=i18n.localize("regenerate")%></button>
 												</div>
@@ -144,6 +151,7 @@
                                    data-application="<%=app.name%>"
                                    data-callbackUrl="<%=app.callbackUrl%>"
                                    data-keytype="PRODUCTION"
+                                   data-username="<%= userName %>"
                                    iteration="200"><%=i18n.localize("generate")%></button>
                         </div>
                         <% } %>
@@ -299,6 +307,7 @@
                           		data-application="<%=app.name%>"
                           		data-callbackUrl="<%=app.callbackUrl%>"
                           		data-keytype="SANDBOX"
+                          		data-username="<%= userName %>"
                           		iteration="200"><%=i18n.localize("generate")%></button>
                        </div>
                        <% } %>

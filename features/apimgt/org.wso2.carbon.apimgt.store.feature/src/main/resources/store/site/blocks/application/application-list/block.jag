@@ -20,10 +20,18 @@ jagg.block("application/application-list", {
         tierResults = jagg.module("tiers").getTiers();
         tiers = tierResults.tiers;
 
-        return {
-            "applications":applications,
-            "tiers":tiers
-        };
+        if (result.error) {
+            return  {
+                error:true,
+                message:result.error
+            };
+        } else {
+            return {
+                "applications":applications,
+                "tiers":tiers
+            };
+        }
+
     }
 
 });

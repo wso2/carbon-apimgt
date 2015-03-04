@@ -2,7 +2,7 @@
     include("/jagg/jagg.jag");
     var site = require("/site/conf/site.json");
 
-    var tenant = jagg.getTenantDomain();
+    var tenant = request.getParameter("tenant");
     var queryString = "";
 
 	if(tenant == "null"){
