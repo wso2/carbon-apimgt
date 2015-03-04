@@ -18,6 +18,8 @@
 
 package org.wso2.carbon.apimgt.usage.publisher;
 
+import org.apache.axiom.soap.SOAPBody;
+import org.apache.axiom.soap.SOAPEnvelope;
 import org.apache.synapse.MessageContext;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.mediators.AbstractMediator;
@@ -104,8 +106,16 @@ public class APIMgtResponseHandler extends AbstractMediator {
                     log.error("Error occurred while building the message to calculate the response" +
                               " body size", ex);
                 }
-                byte[] size = mc.getEnvelope().getBody().toString().getBytes();
-                responseSize = size.length;
+                if (mc != null) {
+                    SOAPEnvelope env = mc.getEnvelope();
+                    if (env != null) {
+                        SOAPBody soapbody = env.getBody();
+                        if (soapbody != null) {
+                            byte[] size = soapbody.toString().getBytes();
+                            responseSize = size.length;
+                        }
+                    }
+                }
             }
             //When start time not properly set
             if (startTime == 0) {
