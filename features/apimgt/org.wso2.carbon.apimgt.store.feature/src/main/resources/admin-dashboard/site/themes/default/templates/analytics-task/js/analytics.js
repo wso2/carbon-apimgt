@@ -15,6 +15,11 @@ $("#add_url").click(function () {
         jagg.message({content: "'Password' cannot be empty.", type: "error"});
         return;
     }
+    if (multi_urls.length > 0 && (multi_urls[0].username !== $("#eventReceiverUsername").val() ||
+                                  (multi_urls[0].password !== $("#eventReceiverPassword").val()))){
+        jagg.message({content: "'Username' and 'Password' values should be the same for all URL Groups.", type: "error"});
+        return;
+    }
     var url_group = '{' + $("#eventReceiverURL").val() + '}';
     var username = $("#eventReceiverUsername").val();
     var password = $("#eventReceiverPassword").val();

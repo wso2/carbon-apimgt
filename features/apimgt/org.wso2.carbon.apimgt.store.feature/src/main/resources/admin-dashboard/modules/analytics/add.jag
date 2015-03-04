@@ -54,8 +54,9 @@ var addAnalyticsConfig = function (configData) {
     eventingConfigData.setUserName(configData.eventReceiverUsername);
     eventingConfigData.setPassword(configData.eventReceiverPassword);
 
+    log.info("Saving Analytics config in registry...");
     stub.configureEventing(eventingConfigData);
-    log.info("Save Analytics config in registry...");
+    log.info("Analytics config saved in registry.");
 
     return {
         error:false
