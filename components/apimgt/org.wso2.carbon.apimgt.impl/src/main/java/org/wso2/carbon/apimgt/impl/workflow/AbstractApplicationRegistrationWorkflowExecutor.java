@@ -33,6 +33,7 @@ import org.wso2.carbon.apimgt.api.model.OAuthApplicationInfo;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.applications.ApplicationCreator;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
+import org.wso2.carbon.apimgt.impl.dao.TokenMgtDao;
 import org.wso2.carbon.apimgt.impl.dto.ApplicationRegistrationWorkflowDTO;
 import org.wso2.carbon.apimgt.impl.dto.WorkflowDTO;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
@@ -137,6 +138,13 @@ public abstract class AbstractApplicationRegistrationWorkflowExecutor extends Wo
 
             AccessTokenRequest tokenRequest = ApplicationCreator.createAccessTokenRequest(oAuthApplication,null);
             AccessTokenInfo tokenInfo = ApplicationCreator.getKeyManager().getNewApplicationAccessToken(tokenRequest);
+
+            AccessTokenInfo info = TokenMgtDao.getAccessTokenForConsumerId(tokenRequest.getClientId());
+            if (info == null) {
+                TokenMgtDao.insertAccessTokenForConsumerKey(tokenRequest.getClientId(), tokenInfo);
+            } else {
+                TokenMgtDao.updateTokenForConsumerKey(tokenRequest.getClientId(), tokenInfo);
+            }
             workflowDTO.setAccessTokenInfo(tokenInfo);
         } catch (Exception e) {
             APIUtil.handleException("Error occurred while executing SubscriberKeyMgtClient.", e);

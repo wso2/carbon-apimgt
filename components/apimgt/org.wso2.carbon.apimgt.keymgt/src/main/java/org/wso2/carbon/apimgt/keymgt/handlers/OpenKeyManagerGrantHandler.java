@@ -14,6 +14,7 @@ public class OpenKeyManagerGrantHandler extends ClientCredentialsGrantHandler {
 
     private static Log log = LogFactory.getLog(OpenKeyManagerGrantHandler.class);
     private static final String OPENKM_GRANT_PARAM = "validity_period";
+    private static final int DEFAULT_VALIDITY_PERIOD = 3600000;
 
     @Override
     public boolean authorizeAccessDelegation(OAuthTokenReqMessageContext tokReqMsgCtx){
@@ -26,17 +27,22 @@ public class OpenKeyManagerGrantHandler extends ClientCredentialsGrantHandler {
         for(RequestParameter parameter : parameters){
             if(OPENKM_GRANT_PARAM.equals(parameter.getKey())){
                 if(parameter.getValue() != null && parameter.getValue().length > 0){
-                    validityPeriod = Long.valueOf(parameter.getValue()[0]);
+                    if(parameter.getValue()[0] == "0"){
+                        validityPeriod = null;
+                    }else{
+                        validityPeriod = Long.valueOf(parameter.getValue()[0]);
+                    }
+
                 }
             }
         }
 
-        if(validityPeriod != null) {
+        if(validityPeriod != 0) {
             //set validity time
             tokReqMsgCtx.setValidityPeriod(validityPeriod);
         }else{
             //set default validity time
-            tokReqMsgCtx.setValidityPeriod(360000);
+            tokReqMsgCtx.setValidityPeriod(DEFAULT_VALIDITY_PERIOD);
         }
 
         return true;

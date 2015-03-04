@@ -1048,50 +1048,6 @@ public class ApiMgtDAO {
         return tokenGenerator.generateToken(keyValidationInfoDTO, context, version, accessToken);
     }
 
-    public long getApplicationAccessTokenRemainingValidityPeriod (String accessToken) throws APIManagementException {
-        String accessTokenStoreTable = APIConstants.ACCESS_TOKEN_STORE_TABLE;
-        if (APIUtil.checkAccessTokenPartitioningEnabled() &&
-            APIUtil.checkUserNameAssertionEnabled()) {
-            accessTokenStoreTable = APIUtil.getAccessTokenStoreTableFromAccessToken(accessToken);
-        }
-        Connection conn = null;
-        PreparedStatement ps = null;
-        ResultSet rs = null;
-
-        long validityPeriod;
-        long issuedTime;
-        long timestampSkew;
-        long currentTime;
-        long remainingTime = 0;
-
-        String applicationSqlQuery = "SELECT " +
-                                     " IAT.VALIDITY_PERIOD, " +
-                                     " IAT.TIME_CREATED " +
-                                     " FROM " + accessTokenStoreTable + " IAT" +
-                                     " WHERE " +
-                                     " IAT.ACCESS_TOKEN = ? " ;
-
-        try {
-            conn = APIMgtDBUtil.getConnection();
-            ps = conn.prepareStatement(applicationSqlQuery);
-            ps.setString(1, accessToken);
-            rs = ps.executeQuery();
-            if (rs.next()) {
-                issuedTime = rs.getTimestamp(APIConstants.IDENTITY_OAUTH2_FIELD_TIME_CREATED,
-                                             Calendar.getInstance(TimeZone.getTimeZone("UTC"))).getTime();
-                validityPeriod = rs.getLong(APIConstants.IDENTITY_OAUTH2_FIELD_VALIDITY_PERIOD);
-                timestampSkew = OAuthServerConfiguration.getInstance().
-                        getTimeStampSkewInSeconds() * 1000;
-                currentTime = System.currentTimeMillis();
-                remainingTime = ((currentTime) - (issuedTime + validityPeriod));
-            }
-        } catch (SQLException e) {
-            handleException("Error when executing the SQL ", e);
-        } finally {
-            APIMgtDBUtil.closeAllConnections(ps, conn, rs);
-        }
-        return remainingTime;
-    }
 
     //This returns the authorized client domains into a List
     public static List<String> getAuthorizedDomainList(String apiKey) throws APIManagementException {
@@ -2271,7 +2227,7 @@ public class ApiMgtDAO {
     private Set<APIKey> getApplicationKeys(String username, int applicationId)
             throws APIManagementException {
 
-        String accessTokenStoreTable = APIConstants.ACCESS_TOKEN_STORE_TABLE;
+        String accessTokenStoreTable = APIConstants.CONSUMER_KEY_ACCESS_TOKEN_MAPPING_TABLE;
         if (APIUtil.checkAccessTokenPartitioningEnabled() &&
             APIUtil.checkUserNameAssertionEnabled()) {
             accessTokenStoreTable = APIUtil.getAccessTokenStoreTableFromUserId(username);
@@ -2400,35 +2356,24 @@ public class ApiMgtDAO {
         ResultSet resultSet = null;
 
         //The part of the sql query that remain common across databases.
-        String statement =
-                " ICA.CONSUMER_KEY AS CONSUMER_KEY," +
-                        " ICA.CONSUMER_SECRET AS CONSUMER_SECRET," +
+        String statement = " IAT.CONSUMER_KEY AS CONSUMER_KEY," +
                         " IAT.ACCESS_TOKEN AS ACCESS_TOKEN," +
                         " IAT.VALIDITY_PERIOD AS VALIDITY_PERIOD," +
-                        " AKM.KEY_TYPE AS TOKEN_TYPE, " +
+                        " AKM .KEY_TYPE AS TOKEN_TYPE, " +
                         " AKM.STATE AS STATE "+
                         "FROM" +
                         " AM_APPLICATION_KEY_MAPPING AKM," +
-                        accessTokenStoreTable + " IAT," +
-                        " IDN_OAUTH_CONSUMER_APPS ICA " +
+                        accessTokenStoreTable + " IAT " +
                         "WHERE" +
                         " AKM.APPLICATION_ID = ? AND" +
-                        " ICA.USERNAME = ? AND" +
-                        " IAT.USER_TYPE = ? AND" +
-                        " ICA.CONSUMER_KEY = AKM.CONSUMER_KEY AND" +
-                        " IAT.CONSUMER_KEY = ICA.CONSUMER_KEY AND" +
-                        " AKM.KEY_TYPE = 'PRODUCTION' AND" +
-                        " ICA.USERNAME = IAT.AUTHZ_USER AND" +
-                        " (IAT.TOKEN_STATE = 'ACTIVE' OR" +
-                        " IAT.TOKEN_STATE = 'EXPIRED' OR" +
-                        " IAT.TOKEN_STATE = 'REVOKED')" +
-                        " ORDER BY IAT.TIME_CREATED DESC";
+                        " IAT.CONSUMER_KEY = AKM.CONSUMER_KEY AND" +
+                        " AKM.KEY_TYPE = 'PRODUCTION'" ;
 
         String sql = null, oracleSQL = null, mySQLSQL = null, msSQL = null,postgreSQL = null;
 
         //Construct database specific sql statements.
-        oracleSQL = "SELECT ICA.CONSUMER_KEY AS CONSUMER_KEY," +
-                        " ICA.CONSUMER_SECRET AS CONSUMER_SECRET," +
+        oracleSQL = "SELECT IAT.CONSUMER_KEY AS CONSUMER_KEY," +
+
                         " IAT.ACCESS_TOKEN AS ACCESS_TOKEN," +
                         " IAT.VALIDITY_PERIOD AS VALIDITY_PERIOD," +
                         " AKM.KEY_TYPE AS TOKEN_TYPE, " +
@@ -2436,20 +2381,12 @@ public class ApiMgtDAO {
                         " FROM" +
                         " AM_APPLICATION_KEY_MAPPING AKM, " +
                         accessTokenStoreTable + " IAT," +
-                        " IDN_OAUTH_CONSUMER_APPS ICA " +
                         " WHERE" +
                         " AKM.APPLICATION_ID = ? AND" +
-                        " ICA.USERNAME = ? AND" +
-                        " IAT.USER_TYPE = ? AND" +
-                        " ICA.CONSUMER_KEY = AKM.CONSUMER_KEY AND" +
-                        " IAT.CONSUMER_KEY = ICA.CONSUMER_KEY AND" +
-                        " AKM.KEY_TYPE = 'PRODUCTION' AND" +
-                        " ICA.USERNAME = IAT.AUTHZ_USER AND" +
-                        " (IAT.TOKEN_STATE = 'ACTIVE' OR" +
-                        " IAT.TOKEN_STATE = 'EXPIRED' OR" +
-                        " IAT.TOKEN_STATE = 'REVOKED')" +
-                        " AND ROWNUM < 2 " +
-                        " ORDER BY IAT.TIME_CREATED DESC";
+                        " IAT.CONSUMER_KEY = AKM.CONSUMER_KEY AND" +
+                        " AKM.KEY_TYPE = 'PRODUCTION'" +
+                        " AND ROWNUM < 2 " ;
+
 
         mySQLSQL = "SELECT" + statement + " LIMIT 1";
 
@@ -2479,16 +2416,16 @@ public class ApiMgtDAO {
 
             preparedStatement = connection.prepareStatement(sql);
             preparedStatement.setInt(1, applicationId);
-            preparedStatement.setString(2, userName.toLowerCase());
-            preparedStatement.setString(3, APIConstants.ACCESS_TOKEN_USER_TYPE_APPLICATION);
+            //preparedStatement.setString(2, userName.toLowerCase());
+            //preparedStatement.setString(3, APIConstants.ACCESS_TOKEN_USER_TYPE_APPLICATION);
             resultSet = preparedStatement.executeQuery();
             while (resultSet.next()) {
                 APIKey apiKey = new APIKey();
                 accessToken = APIUtil.decryptToken(resultSet.getString("ACCESS_TOKEN"));
                 String consumerKey = resultSet.getString("CONSUMER_KEY");
                 apiKey.setConsumerKey(APIUtil.decryptToken(consumerKey));
-                String consumerSecret = resultSet.getString("CONSUMER_SECRET");
-                apiKey.setConsumerSecret(APIUtil.decryptToken(consumerSecret));
+                //String consumerSecret = resultSet.getString("CONSUMER_SECRET");
+                //apiKey.setConsumerSecret(APIUtil.decryptToken(consumerSecret));
                 apiKey.setAccessToken(accessToken);
                 authorizedDomains = getAuthorizedDomains(accessToken);
                 apiKey.setType(resultSet.getString("TOKEN_TYPE"));
@@ -2511,55 +2448,37 @@ public class ApiMgtDAO {
         ResultSet resultSet = null;
 
         //The part of the sql query that remain common across databases.
-        String statement =
-                " ICA.CONSUMER_KEY AS CONSUMER_KEY," +
-                        " ICA.CONSUMER_SECRET AS CONSUMER_SECRET," +
-                        " IAT.ACCESS_TOKEN AS ACCESS_TOKEN," +
-                        " IAT.VALIDITY_PERIOD AS VALIDITY_PERIOD," +
-                        " AKM.KEY_TYPE AS TOKEN_TYPE " +
-                        "FROM" +
-                        " AM_APPLICATION_KEY_MAPPING AKM," +
-                        accessTokenStoreTable + " IAT," +
-                        " IDN_OAUTH_CONSUMER_APPS ICA " +
-                        "WHERE" +
-                        " AKM.APPLICATION_ID = ? AND" +
-                        " ICA.USERNAME = ? AND" +
-                        " IAT.USER_TYPE = ? AND" +
-                        " ICA.CONSUMER_KEY = AKM.CONSUMER_KEY AND" +
-                        " IAT.CONSUMER_KEY = ICA.CONSUMER_KEY AND" +
-                        " AKM.KEY_TYPE = 'SANDBOX' AND" +
-                        " ICA.USERNAME = IAT.AUTHZ_USER AND" +
-                        " (IAT.TOKEN_STATE = 'ACTIVE' OR" +
-                        " IAT.TOKEN_STATE = 'EXPIRED' OR" +
-                        " IAT.TOKEN_STATE = 'REVOKED')" +
-                        " ORDER BY IAT.TIME_CREATED DESC";
+        //The part of the sql query that remain common across databases.
+        String statement = " IAT.CONSUMER_KEY AS CONSUMER_KEY," +
+                " IAT.ACCESS_TOKEN AS ACCESS_TOKEN," +
+                " IAT.VALIDITY_PERIOD AS VALIDITY_PERIOD," +
+                " AKM.KEY_TYPE AS TOKEN_TYPE, " +
+                " AKM.STATE AS STATE "+
+                "FROM" +
+                " AM_APPLICATION_KEY_MAPPING AKM," +
+                accessTokenStoreTable + " IAT " +
+                "WHERE" +
+                " AKM.APPLICATION_ID = ? AND" +
+                " IAT.CONSUMER_KEY = AKM.CONSUMER_KEY AND" +
+                " AKM.KEY_TYPE = 'SANDBOX'" ;
 
         String sql = null, oracleSQL = null, mySQLSQL = null, msSQL = null,postgreSQL = null;
 
         //Construct database specific sql statements.
-        oracleSQL =  "SELECT ICA.CONSUMER_KEY AS CONSUMER_KEY," +
-                        " ICA.CONSUMER_SECRET AS CONSUMER_SECRET," +
-                        " IAT.ACCESS_TOKEN AS ACCESS_TOKEN," +
-                        " IAT.VALIDITY_PERIOD AS VALIDITY_PERIOD," +
-                        " AKM.KEY_TYPE AS TOKEN_TYPE " +
-                        "FROM" +
-                        " AM_APPLICATION_KEY_MAPPING AKM," +
-                        accessTokenStoreTable + " IAT," +
-                        " IDN_OAUTH_CONSUMER_APPS ICA " +
-                        "WHERE" +
-                        " AKM.APPLICATION_ID = ? AND" +
-                        " ICA.USERNAME = ? AND" +
-                        " IAT.USER_TYPE = ? AND" +
-                        " ICA.CONSUMER_KEY = AKM.CONSUMER_KEY AND" +
-                        " IAT.CONSUMER_KEY = ICA.CONSUMER_KEY AND" +
-                        " AKM.KEY_TYPE = 'SANDBOX' AND" +
-                        " ICA.USERNAME = IAT.AUTHZ_USER AND" +
-                        " (IAT.TOKEN_STATE = 'ACTIVE' OR" +
-                        " IAT.TOKEN_STATE = 'EXPIRED' OR" +
-                        " IAT.TOKEN_STATE = 'REVOKED')" +
-                        " AND ROWNUM < 2 " +
-                        " ORDER BY IAT.TIME_CREATED DESC ";
+        oracleSQL = "SELECT IAT.CONSUMER_KEY AS CONSUMER_KEY," +
 
+                " IAT.ACCESS_TOKEN AS ACCESS_TOKEN," +
+                " IAT.VALIDITY_PERIOD AS VALIDITY_PERIOD," +
+                " AKM.KEY_TYPE AS TOKEN_TYPE, " +
+                " AKM.STATE AS STATE "+
+                " FROM" +
+                " AM_APPLICATION_KEY_MAPPING AKM, " +
+                accessTokenStoreTable + " IAT," +
+                " WHERE" +
+                " AKM.APPLICATION_ID = ? AND" +
+                " IAT.CONSUMER_KEY = AKM.CONSUMER_KEY AND" +
+                " AKM.KEY_TYPE = 'SANDBOX'" +
+                " AND ROWNUM < 2 " ;
         mySQLSQL = "SELECT" + statement + " LIMIT 1";
 
         msSQL = "SELECT TOP 1" + statement;
@@ -2588,8 +2507,8 @@ public class ApiMgtDAO {
 
             preparedStatement = connection.prepareStatement(sql);
             preparedStatement.setInt(1, applicationId);
-            preparedStatement.setString(2, userName.toLowerCase());
-            preparedStatement.setString(3, APIConstants.ACCESS_TOKEN_USER_TYPE_APPLICATION);
+            //preparedStatement.setString(2, userName.toLowerCase());
+            //preparedStatement.setString(3, APIConstants.ACCESS_TOKEN_USER_TYPE_APPLICATION);
             resultSet = preparedStatement.executeQuery();
             while (resultSet.next()) {
                 APIKey apiKey = new APIKey();
