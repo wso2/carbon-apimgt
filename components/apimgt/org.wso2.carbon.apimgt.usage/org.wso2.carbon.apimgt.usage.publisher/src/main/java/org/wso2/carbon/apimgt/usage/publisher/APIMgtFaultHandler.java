@@ -3,9 +3,12 @@ package org.wso2.carbon.apimgt.usage.publisher;
 import org.apache.synapse.MessageContext;
 import org.apache.synapse.SynapseConstants;
 import org.apache.synapse.mediators.AbstractMediator;
+import org.apache.synapse.rest.RESTConstants;
 import org.wso2.carbon.apimgt.usage.publisher.dto.FaultPublisherDTO;
 import org.wso2.carbon.apimgt.usage.publisher.internal.UsageComponent;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
+
+import java.net.URL;
 
 public class APIMgtFaultHandler extends AbstractMediator {
 
@@ -81,6 +84,13 @@ public class APIMgtFaultHandler extends AbstractMediator {
                     APIMgtUsagePublisherConstants.APPLICATION_NAME));
             faultPublisherDTO.setApplicationId((String) messageContext.getProperty(
                     APIMgtUsagePublisherConstants.APPLICATION_ID));
+            String url = (String) messageContext.getProperty(
+                    RESTConstants.REST_URL_PREFIX);
+            URL apiurl = new URL(url);
+            int port = apiurl.getPort();
+            String protocol = messageContext.getProperty(
+                    SynapseConstants.TRANSPORT_IN_NAME) + "-" + port;
+            faultPublisherDTO.setProtocol(protocol);
 
             publisher.publishEvent(faultPublisherDTO);
 
