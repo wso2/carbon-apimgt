@@ -32,7 +32,9 @@ import org.wso2.carbon.apimgt.impl.clients.SequenceAdminServiceClient;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import javax.xml.namespace.QName;
 
@@ -42,7 +44,7 @@ public class APIGatewayManager {
 
 	private static APIGatewayManager instance;
 
-	private List<Environment> environments;
+	private Map<String,Environment> environments;
 
 	private boolean debugEnabled = log.isDebugEnabled();
 
@@ -69,18 +71,21 @@ public class APIGatewayManager {
 	 *            - The template builder
 	 * @param tenantDomain
 	 *            - Tenant Domain of the publisher
-	 * @throws Exception
-	 *             - Thrown when publishing to at least one Gateway fails. A
-	 *             single failure will stop all
-	 *             subsequent attempts to publish to other Gateways.
 	 */
-	public void publishToGateway(API api, APITemplateBuilder builder, String tenantDomain)
-	                                                                                      throws Exception {
-		for (Environment environment : environments) {
-			RESTAPIAdminClient client = new RESTAPIAdminClient(api.getId(), environment);
-			String operation; 
-			// If the API exists in the Gateway
-			if (client.getApi(tenantDomain) != null) {
+    public List<String> publishToGateway(API api, APITemplateBuilder builder, String tenantDomain) {
+        List<String> failedEnvironmentsList = new ArrayList<String>(0);
+        if (api.getEnvironments() == null) {
+            return failedEnvironmentsList;
+        }
+        for (String environmentName : api.getEnvironments()) {
+            Environment environment = environments.get(environmentName);
+            RESTAPIAdminClient client = null;
+            try {
+                client = new RESTAPIAdminClient(api.getId(), environment);
+
+                String operation;
+                // If the API exists in the Gateway
+                if (client.getApi(tenantDomain) != null) {
 
 				// If the Gateway type is 'production' and the production url
 				// has been removed
@@ -177,7 +182,11 @@ public class APIGatewayManager {
 					deployCustomSequences(api, tenantDomain, environment);
 				}
 			}
+            } catch (Exception ex) {
+                failedEnvironmentsList.add(environmentName);
 		}
+	}
+            return failedEnvironmentsList;
 	}
 
 	/**
@@ -187,15 +196,14 @@ public class APIGatewayManager {
 	 *            - The API to be removed
 	 * @param tenantDomain
 	 *            - Tenant Domain of the publisher
-	 * @throws Exception
-	 *             - Thrown if a failure occurs while removing the API from the
-	 *             Gateway. A single failure will
-	 *             stop all subsequent attempts to remove from other Gateways.
 	 */
-	public void removeFromGateway(API api, String tenantDomain) throws Exception {
-		for (Environment environment : environments) {
-			RESTAPIAdminClient client = new RESTAPIAdminClient(api.getId(), environment);
-			
+    public List<String> removeFromGateway(API api, String tenantDomain) {
+        List<String> failedEnvironmentsList = new ArrayList<String>(0);
+        if (api.getEnvironments() != null) {
+            for (String environmentName : api.getEnvironments()) {
+                try {
+                    Environment environment = environments.get(environmentName);
+                    RESTAPIAdminClient client = new RESTAPIAdminClient(api.getId(), environment);
 			if (client.getApi(tenantDomain) != null) {
 				if (debugEnabled) {
 					log.debug("Removing API " + api.getId().getApiName() + " From environment " +
@@ -212,12 +220,21 @@ public class APIGatewayManager {
                     client.deleteDefaultApi(tenantDomain);
                 }
             }
+                } catch (Exception ex) {
+                    failedEnvironmentsList.add(environmentName);
+                }
+            }
 
 		}
+        return failedEnvironmentsList;
 	}
 
-    public void removeDefaultAPIFromGateway(API api, String tenantDomain) throws Exception {
-        for (Environment environment : environments) {
+    public List<String> removeDefaultAPIFromGateway(API api, String tenantDomain) {
+        List<String> failedEnvironmentsList = new ArrayList<String>(0);
+        if (api.getEnvironments() != null) {
+            for (String environmentName : api.getEnvironments()) {
+                try {
+                    Environment environment = environments.get(environmentName);
             RESTAPIAdminClient client = new RESTAPIAdminClient(api.getId(), environment);
             if(client.getDefaultApi(tenantDomain)!=null){
                 if (debugEnabled) {
@@ -225,9 +242,14 @@ public class APIGatewayManager {
                             environment.getName());
                 }
 
-                client.deleteDefaultApi(tenantDomain);
+                        client.deleteDefaultApi(tenantDomain);
+                    }
+                } catch (Exception ex) {
+                    failedEnvironmentsList.add(environmentName);
+                }
             }
         }
+        return failedEnvironmentsList;
     }
 
 	/**
@@ -239,17 +261,20 @@ public class APIGatewayManager {
 	 *            - Tenant Domain of the publisher
 	 * @return True if the API is available in at least one Gateway. False if
 	 *         available in none.
-	 * @throws Exception
-	 *             - Thrown if a check to at least one Gateway fails.
 	 */
-	public boolean isAPIPublished(API api, String tenantDomain) throws Exception {
-		for (Environment environment : environments) {
+	public boolean isAPIPublished(API api, String tenantDomain){
+        List<String> failedEnvironmentsList = new ArrayList<String>(0);
+        for (Environment environment : environments.values()) {
+            try {
 			RESTAPIAdminClient client = new RESTAPIAdminClient(api.getId(), environment);
 			// If the API exists in at least one environment, consider as
 			// published and return true.
 			if (client.getApi(tenantDomain) != null) {
 				return true;
-			}
+                }
+            }catch (Exception ex){
+                failedEnvironmentsList.add(environment.getName());
+            }
 		}
 		return false;
 	}

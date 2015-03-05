@@ -68,7 +68,7 @@ public class APIManagerConfiguration {
 
     private boolean initialized;
 
-    private List<Environment> apiGatewayEnvironments = new ArrayList<Environment>();
+    private Map<String,Environment> apiGatewayEnvironments = new HashMap<String, Environment>();
     private Set<APIStore> externalAPIStores = new HashSet<APIStore>();
 
     public Map<String, Map<String, String>> getLoginConfiguration() {
@@ -154,7 +154,7 @@ public class APIManagerConfiguration {
             }
             else if("Environments".equals(localName)) {
                 Iterator environmentIterator = element.getChildrenWithLocalName("Environment");
-                apiGatewayEnvironments = new ArrayList<Environment>();
+                apiGatewayEnvironments = new HashMap<String, Environment>();
 
                 while (environmentIterator.hasNext()) {
                     Environment environment = new Environment();
@@ -181,8 +181,20 @@ public class APIManagerConfiguration {
                     environment.setPassword(replaceSystemProperty(value));
                     environment.setApiGatewayEndpoint(replaceSystemProperty(
                             environmentElem.getFirstChildWithName(new QName(
-                                    APIConstants.API_GATEWAY_ENDPOINT)).getText()));
-                    apiGatewayEnvironments.add(environment);
+                                                            APIConstants.API_GATEWAY_ENDPOINT)).getText()));
+                    OMElement description =
+                            environmentElem.getFirstChildWithName(new QName("Description"));
+                    if (description != null) {
+                        environment.setDescription(description.getText());
+                    } else {
+                        environment.setDescription("");
+                    }
+                    if (!apiGatewayEnvironments.containsKey(environment.getName())) {
+                        apiGatewayEnvironments.put(environment.getName(), environment);
+                    } else {
+                        log.error("Duplicate environment name found in api-manager.xml " +
+                                  environment.getName());
+                    }
                 }
             } else if (APIConstants.EXTERNAL_API_STORES.equals(localName)) {  //Initialize 'externalAPIStores' config elements
                 Iterator apistoreIterator = element.getChildrenWithLocalName("ExternalAPIStore");
@@ -357,7 +369,7 @@ public class APIManagerConfiguration {
         return text;
     }
 
-    public List<Environment> getApiGatewayEnvironments() {
+    public Map<String,Environment> getApiGatewayEnvironments() {
         return apiGatewayEnvironments;
     }
 
