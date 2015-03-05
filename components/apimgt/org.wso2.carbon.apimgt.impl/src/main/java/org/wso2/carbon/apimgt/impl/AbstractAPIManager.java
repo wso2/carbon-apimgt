@@ -613,8 +613,12 @@ public abstract class AbstractAPIManager implements APIManager {
                                                                                 APIConstants.API_KEY);
             GenericArtifact[] artifacts = artifactManager.getAllGenericArtifacts();
             for (GenericArtifact artifact : artifacts) {
-                String artifactContext = artifact.getAttribute(APIConstants.API_OVERVIEW_CONTEXT);
-                artifactContext=artifactContext.substring(artifactContext.lastIndexOf("/"));
+                String artifactContext = artifact.getAttribute(APIConstants.API_OVERVIEW_CONTEXT_TEMPLATE);
+                // With context version strategy we have to check endswith first
+                // ex: /{version}/foo/ --> /{version}/foo
+                if(artifactContext.endsWith("/")){
+                    artifactContext=artifactContext.substring(artifactContext.lastIndexOf("/"));
+                }
                 if (artifactContext.equalsIgnoreCase(context)) {
                     return true;
                 }

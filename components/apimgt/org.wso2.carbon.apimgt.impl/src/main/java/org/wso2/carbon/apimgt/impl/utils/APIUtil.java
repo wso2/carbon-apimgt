@@ -1129,7 +1129,7 @@ public final class APIUtil {
             log.error(msg, e);
             throw new RegistryException(msg, e);
         } catch (APIManagementException e) {
-	        String msg = "Failed to reset the WSDL : " + api.getWsdlUrl() ;
+	        String msg = "Failed to process the WSDL : " + api.getWsdlUrl() ;
             log.error(msg, e);
             throw new APIManagementException(msg, e);
         } 
@@ -1167,11 +1167,11 @@ public final class APIUtil {
                 wsdlReader20 = WSDLFactory.newInstance().newWSDLReader();
                 wsdlReader20.readWSDL(url);
             } catch (WSDLException e) {
-                throw new APIManagementException("Error while reading WSDL Document", e);
+                throw new APIManagementException("Error while reading WSDL Document from " + url, e);
             }
         }
         } catch (IOException e) {
-            throw new APIManagementException("Error Reading Input from Stream", e);
+            throw new APIManagementException("Error Reading Input from Stream from " + url, e);
         }
         return isWsdl2;
     }
@@ -1351,8 +1351,16 @@ public final class APIUtil {
      * @throws org.wso2.carbon.apimgt.api.APIManagementException if an error occurs when loading tiers from the registry
      */
     public static Set<APIStore> getExternalStores(int tenantId) throws APIManagementException {
-    	Set<APIStore> externalAPIStores = new HashSet<APIStore>();
-    	try {
+        // First checking if ExternalStores are defined in api-manager.xml
+        Set<APIStore> externalAPIStores = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
+                .getAPIManagerConfiguration().getExternalAPIStores();
+        // If defined, return Store Config provided there.
+        if (externalAPIStores != null && !externalAPIStores.isEmpty()) {
+            return externalAPIStores;
+        }
+        // Else Read the config from Tenant's Registry.
+        externalAPIStores = new HashSet<APIStore>();
+        try {
     		UserRegistry registry = ServiceReferenceHolder.getInstance().getRegistryService()
                     .getGovernanceSystemRegistry(tenantId);
             if (registry.resourceExists(APIConstants.EXTERNAL_API_STORES_LOCATION)) {
@@ -1367,7 +1375,7 @@ public final class APIUtil {
                     String type=storeElem.getAttributeValue(new QName(APIConstants.EXTERNAL_API_STORE_TYPE));
                     store.setType(type); //Set Store type [eg:wso2]
                     String name=storeElem.getAttributeValue(new QName(APIConstants.EXTERNAL_API_STORE_ID));
-                    if(name==null){
+                    if (name == null) {
                         try {
                             throw new APIManagementException("The ExternalAPIStore name attribute is not defined in api-manager.xml.");
                         } catch (APIManagementException e) {
@@ -1375,20 +1383,20 @@ public final class APIUtil {
                         }
                     }
                     store.setName(name); //Set store name
-                    OMElement configDisplayName=storeElem.getFirstChildWithName(new QName(APIConstants.EXTERNAL_API_STORE_DISPLAY_NAME));
-                    String displayName=(configDisplayName!=null)?replaceSystemProperty(
-                            configDisplayName.getText()):name;
+                    OMElement configDisplayName = storeElem.getFirstChildWithName(new QName(APIConstants.EXTERNAL_API_STORE_DISPLAY_NAME));
+                    String displayName = (configDisplayName != null) ? replaceSystemProperty(
+                            configDisplayName.getText()) : name;
                     store.setDisplayName(displayName);//Set store display name
                     store.setEndpoint(replaceSystemProperty(
                             storeElem.getFirstChildWithName(new QName(
                                     APIConstants.EXTERNAL_API_STORE_ENDPOINT)).getText())); //Set store endpoint,which is used to publish APIs
                     store.setPublished(false);
-                    if(APIConstants.WSO2_API_STORE_TYPE.equals(type)){
-                    OMElement password=storeElem.getFirstChildWithName(new QName(
+                    if (APIConstants.WSO2_API_STORE_TYPE.equals(type)) {
+                        OMElement password = storeElem.getFirstChildWithName(new QName(
                                 APIConstants.EXTERNAL_API_STORE_PASSWORD));
-                    if(password!=null){
-                    String key = APIConstants.EXTERNAL_API_STORES+"."+APIConstants.EXTERNAL_API_STORE+"."+APIConstants.EXTERNAL_API_STORE_PASSWORD+'_'+name;//Set store login password [optional]
-                    String value = password.getText();
+                        if (password != null) {
+                            String key = APIConstants.EXTERNAL_API_STORES + "." + APIConstants.EXTERNAL_API_STORE + "." + APIConstants.EXTERNAL_API_STORE_PASSWORD + '_' + name;//Set store login password [optional]
+                            String value = password.getText();
                     
                     store.setPassword(replaceSystemProperty(value));
                     store.setUsername(replaceSystemProperty(
@@ -3789,4 +3797,65 @@ public final class APIUtil {
         }
         return domains;
     }
+
+    /**
+     * This method used to Downloaded Uploaded Documents from publisher
+     *
+     * @param userName     logged in username
+     * @param resourceUrl  resource want to download
+     * @param tenantDomain loggedUserTenantDomain
+     * @return map that contains Data of the resource
+     * @throws APIManagementException
+     */
+
+    public static Map<String, Object> getDocument(String userName, String resourceUrl,
+                                                  String tenantDomain)
+            throws APIManagementException {
+        Map<String, Object> documentMap = new HashMap<String, Object>();
+
+        InputStream inStream = null;
+        String[] resourceSplitPath =
+                resourceUrl.split(RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH);
+        if (resourceSplitPath.length == 2) {
+            resourceUrl = resourceSplitPath[1];
+        } else {
+            handleException("Invalid resource Path " + resourceUrl);
+        }
+        Resource apiDocResource;
+        Registry registryType = null;
+        int tenantId = MultitenantConstants.SUPER_TENANT_ID;
+        try {
+            if (tenantDomain != null && !"null".equals(tenantDomain)) {
+                tenantId = ServiceReferenceHolder
+                        .getInstance().getRealmService().getTenantManager()
+                        .getTenantId(tenantDomain);
+            }
+            if (tenantId != MultitenantConstants.SUPER_TENANT_ID) {
+                userName = userName.split("@" + tenantDomain)[0];
+            }
+            registryType = ServiceReferenceHolder
+                    .getInstance().
+                            getRegistryService().getGovernanceUserRegistry(userName, tenantId);
+            if (registryType.resourceExists(resourceUrl)) {
+                apiDocResource = registryType.get(resourceUrl);
+                inStream = apiDocResource.getContentStream();
+                documentMap.put("Data", inStream);
+                documentMap.put("contentType", apiDocResource.getMediaType());
+                String[] content = apiDocResource.getPath().split("/");
+                documentMap.put("name", content[content.length - 1]);
+            }
+        } catch (org.wso2.carbon.user.api.UserStoreException e) {
+            log.error("Couldn't retrieve Tenant Domain for User " + userName, e);
+            handleException("Couldn't retrieve Tenant Domain for User " + userName, e);
+
+        } catch (RegistryException e) {
+            log.error("Couldn't retrieve registry for User " + userName + " Tenant " + tenantDomain,
+                      e);
+            handleException(
+                    "Couldn't retrieve registry for User " + userName + " Tenant " + tenantDomain,
+                    e);
+        }
+        return documentMap;
+    }
+
 }
