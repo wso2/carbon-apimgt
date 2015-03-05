@@ -919,7 +919,10 @@ public class APIProviderHostObject extends ScriptableObject {
                 if(ep.endsWith(RegistryConstants.PATH_SEPARATOR)){
                     ep.substring(0,ep.length()-1);
                 }
-                String basePath = ep+api.getContext()+RegistryConstants.PATH_SEPARATOR+apiId.getVersion();
+                // We do not need the version in the base path since with the context version strategy, the version is
+                // embedded in the context
+                String basePath = ep+api.getContext();
+//                String basePath = ep+api.getContext()+RegistryConstants.PATH_SEPARATOR+apiId.getVersion();
                 resourceConfig.put("basePath",basePath);
 	            String resourceJSON = resourceConfig.toJSONString();
 	            

@@ -3004,8 +3004,12 @@ public final class APIUtil {
         String version = identifier.getVersion();
         Set<URITemplate> uriTemplates = api.getUriTemplates();
         String description = api.getDescription();
-        String urlPrefix = apiContext + "/" +version;
-                        
+
+        // With the new context version strategy, the URL prefix is the apiContext. the verison will be embedded in
+        // the apiContext.
+        String urlPrefix = apiContext;
+//        String urlPrefix = apiContext + "/" +version;
+
         if (endpointsSet.length < 1) {
         	throw new APIManagementException("Error in creating JSON representation of the API" + identifier.getApiName());
         }
