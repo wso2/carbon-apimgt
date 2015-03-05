@@ -1557,8 +1557,8 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             }
 
             try {
-                List<Environment> gatewayEnvs = config.getApiGatewayEnvironments();
-                for (Environment environment : gatewayEnvs) {
+                Map<String, Environment> gatewayEnvs = config.getApiGatewayEnvironments();
+                for (Environment environment : gatewayEnvs.values()) {
                     APIAuthenticationAdminClient client = new APIAuthenticationAdminClient(environment);
                     client.invalidateKeys(mappings);
                 }
@@ -1686,8 +1686,8 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 
             if (mappings.size() > 0) {
                 try {
-                    List<Environment> gatewayEnvs = config.getApiGatewayEnvironments();
-                    for (Environment environment : gatewayEnvs) {
+                    Map<String, Environment> gatewayEnvs = config.getApiGatewayEnvironments();
+                    for (Environment environment : gatewayEnvs.values()) {
                         APIAuthenticationAdminClient client =
                                 new APIAuthenticationAdminClient(environment);
                         client.invalidateKeys(mappings);

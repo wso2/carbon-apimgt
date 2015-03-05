@@ -20,6 +20,9 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.*;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 
+import java.util.List;
+import java.util.Map;
+
 /**
  * User aware APIProvider implementation which ensures that the invoking user has the
  * necessary privileges to execute the operations. Users can use this class as an
@@ -53,9 +56,9 @@ public class UserAwareAPIProvider extends APIProviderImpl {
     }
 
     @Override
-    public void updateAPI(API api) throws APIManagementException {
+    public Map<String, List<String>> updateAPI(API api) throws APIManagementException {
         checkCreatePermission();
-        super.updateAPI(api);
+        return super.updateAPI(api);
     }
 
     @Override
@@ -65,10 +68,11 @@ public class UserAwareAPIProvider extends APIProviderImpl {
     }
 
     @Override
-    public void changeAPIStatus(API api, APIStatus status, String userId,
-                                boolean updateGatewayConfig) throws APIManagementException {
+    public Map<String, List<String>> changeAPIStatus(API api, APIStatus status, String userId,
+                                                     boolean updateGatewayConfig) throws APIManagementException {
         checkPublishPermission();
         super.changeAPIStatus(api, status, userId, updateGatewayConfig);
+        return null;
     }
 
     @Override
