@@ -2428,7 +2428,7 @@ public class ApiMgtDAO {
                 //String consumerSecret = resultSet.getString("CONSUMER_SECRET");
                 //apiKey.setConsumerSecret(APIUtil.decryptToken(consumerSecret));
                 apiKey.setAccessToken(accessToken);
-                authorizedDomains = getAuthorizedDomains(accessToken);
+                authorizedDomains = getAuthorizedDomainsByConsumerKey(consumerKey);
                 apiKey.setType(resultSet.getString("TOKEN_TYPE"));
                 apiKey.setAuthorizedDomains(authorizedDomains);
                 apiKey.setValidityPeriod(resultSet.getLong("VALIDITY_PERIOD"));
@@ -2519,7 +2519,7 @@ public class ApiMgtDAO {
                 //String consumerSecret = resultSet.getString("CONSUMER_SECRET");
                 //apiKey.setConsumerSecret(APIUtil.decryptToken(consumerSecret));
                 apiKey.setAccessToken(accessToken);
-                authorizedDomains = getAuthorizedDomains(accessToken);
+                authorizedDomains = getAuthorizedDomainsByConsumerKey(consumerKey);
                 apiKey.setType(resultSet.getString("TOKEN_TYPE"));
                 apiKey.setAuthorizedDomains(authorizedDomains);
                 apiKey.setValidityPeriod(resultSet.getLong("VALIDITY_PERIOD"));
@@ -6257,6 +6257,86 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
             throw new APIManagementException
                     ("Error in retrieving access allowing domain list from table.", e);
         } catch (CryptoException e) {
+            throw new APIManagementException
+                    ("Error in retrieving access allowing domain list from table.", e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(prepStmt, connection, rs);
+        }
+        return authorizedDomains;
+    }
+
+    // This should be only used only when Token Partitioning is enabled.
+    public static  String getConsumerKeyForTokenWhenTokenPartitioningEnabled(String accessToken) throws APIManagementException {
+
+        if (APIUtil.checkAccessTokenPartitioningEnabled() &&
+            APIUtil.checkUserNameAssertionEnabled()) {
+            String accessTokenStoreTable = APIUtil.getAccessTokenStoreTableFromAccessToken(accessToken);
+            String authorizedDomains = "";
+            String accessAllowDomainsSql = "SELECT CONSUMER_KEY " +
+                                           " FROM " +accessTokenStoreTable+
+                                           " WHERE ACCESS_TOKEN = ? ";
+
+            Connection connection = null;
+            PreparedStatement prepStmt = null;
+            ResultSet rs = null;
+            try {
+                connection = APIMgtDBUtil.getConnection();
+                prepStmt = connection.prepareStatement(accessAllowDomainsSql);
+                prepStmt.setString(1, APIUtil.encryptToken(accessToken));
+                rs = prepStmt.executeQuery();
+                boolean first = true;
+                while (rs.next()) {  //if(rs.next==true) -> domain != null
+                    String domain = rs.getString(1);
+                    if (first) {
+                        authorizedDomains = domain;
+                        first = false;
+                    } else {
+                        authorizedDomains = authorizedDomains + "," + domain;
+                    }
+                }
+                prepStmt.close();
+            } catch (SQLException e) {
+                throw new APIManagementException
+                        ("Error in retrieving access allowing domain list from table.", e);
+            } catch (CryptoException e) {
+                throw new APIManagementException
+                        ("Error in retrieving access allowing domain list from table.", e);
+            } finally {
+                APIMgtDBUtil.closeAllConnections(prepStmt, connection, rs);
+            }
+            return authorizedDomains;
+        }
+
+        return null;
+    }
+
+    public static String getAuthorizedDomainsByConsumerKey(String consumerKey) throws APIManagementException {
+
+        String authorizedDomains = "";
+        String accessAllowDomainsSql = "SELECT AUTHZ_DOMAIN " +
+                                       " FROM AM_APP_KEY_DOMAIN_MAPPING" +
+                                       " WHERE CONSUMER_KEY = ? ";
+
+        Connection connection = null;
+        PreparedStatement prepStmt = null;
+        ResultSet rs = null;
+        try {
+            connection = APIMgtDBUtil.getConnection();
+            prepStmt = connection.prepareStatement(accessAllowDomainsSql);
+            prepStmt.setString(1, consumerKey);
+            rs = prepStmt.executeQuery();
+            boolean first = true;
+            while (rs.next()) {
+                String domain = rs.getString(1);
+                if (first) {
+                    authorizedDomains = domain;
+                    first = false;
+                } else {
+                    authorizedDomains = authorizedDomains + "," + domain;
+                }
+            }
+            prepStmt.close();
+        } catch (SQLException e) {
             throw new APIManagementException
                     ("Error in retrieving access allowing domain list from table.", e);
         } finally {
