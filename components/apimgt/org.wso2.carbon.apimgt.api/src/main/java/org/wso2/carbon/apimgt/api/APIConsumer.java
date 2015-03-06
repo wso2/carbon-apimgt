@@ -157,6 +157,19 @@ public interface APIConsumer extends APIManager {
             throws APIManagementException;
 
     /**
+     * Returns a set of SubscribedAPIs filtered by the given application name and in between starting and ending indexes.
+     *
+     * @param subscriber Subscriber
+     * @param applicationName Application needed to find subscriptions
+     * @param startSubIndex Starting index of subscriptions to be listed
+     * @param endSubIndex Ending index of Subscriptions to be listed
+     * @return
+     * @throws APIManagementException
+     */
+    public Set<SubscribedAPI> getPaginatedSubscribedAPIs(Subscriber subscriber, String applicationName, int startSubIndex, int endSubIndex)
+            throws APIManagementException;
+
+    /**
      * Returns true if a given user has subscribed to the API
      *
      * @param apiIdentifier APIIdentifier

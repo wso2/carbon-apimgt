@@ -1433,6 +1433,24 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         return subscribedAPIs;
     }
 
+    public Set<SubscribedAPI> getPaginatedSubscribedAPIs(Subscriber subscriber, String applicationName, int startSubIndex, int endSubIndex) throws APIManagementException {
+        Set<SubscribedAPI> subscribedAPIs = null;
+        try {
+            subscribedAPIs = apiMgtDAO.getPaginatedSubscribedAPIs(subscriber, applicationName, startSubIndex, endSubIndex);
+            if(subscribedAPIs!=null && !subscribedAPIs.isEmpty()){
+                Map<String, Tier> tiers=APIUtil.getTiers(tenantId);
+                for(SubscribedAPI subscribedApi:subscribedAPIs) {
+                    Tier tier=tiers.get(subscribedApi.getTier().getName());
+                    subscribedApi.getTier().setDisplayName(tier!=null?tier.getDisplayName():subscribedApi.getTier().getName());
+                    subscribedAPIs.add(subscribedApi);
+                }
+            }
+        } catch (APIManagementException e) {
+            handleException("Failed to get APIs of " + subscriber.getName() + " under application " + applicationName, e);
+        }
+        return subscribedAPIs;
+    }
+
     public Set<APIIdentifier> getAPIByConsumerKey(String accessToken) throws APIManagementException {
         try {
             return apiMgtDAO.getAPIByConsumerKey(accessToken);

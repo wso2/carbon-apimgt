@@ -2474,6 +2474,8 @@ public class APIStoreHostObject extends ScriptableObject {
         try {
             String username = args[0].toString();
             String appName = args[1].toString();
+            int startSubIndex = Integer.parseInt(args[2].toString());
+            int endSubIndex = Integer.parseInt(args[3].toString());
 
             String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(username));
             if (tenantDomain != null &&
@@ -2600,8 +2602,8 @@ public class APIStoreHostObject extends ScriptableObject {
                                 startLoop = System.currentTimeMillis();
                             }
                             
-                            Set<SubscribedAPI> subscribedAPIs = apiConsumer.getSubscribedAPIs(subscriber,
-                                                                                              application.getName());
+                            Set<SubscribedAPI> subscribedAPIs = apiConsumer.getPaginatedSubscribedAPIs(subscriber,
+                                    application.getName(), startSubIndex, endSubIndex);
                             for (SubscribedAPI subscribedAPI : subscribedAPIs) {
                                 addAPIObj(subscribedAPI, apisArray, thisObj);
                             }
