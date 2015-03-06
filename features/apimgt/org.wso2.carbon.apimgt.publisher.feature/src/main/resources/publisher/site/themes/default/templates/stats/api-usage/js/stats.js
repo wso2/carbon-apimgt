@@ -92,7 +92,7 @@ require(["dojo/dom", "dojo/domReady!"], function(dom){
                              var to = convertDate(obj.date2);
                              $('#date-range').html(from + " to "+ to);
                              drawProviderAPIUsage(from,to);
-                        });
+                    });
 
                     //setting default date
                     var to = new Date();
@@ -250,7 +250,7 @@ var drawProviderAPIUsage = function(from,to){
                 } else {
                     $('#apiTable').hide();
                     $('#apiChart').css("fontSize", 14);
-                    $('#noDataLabel').append($('<span class="label label-info">'+i18n.t('errorMsgs.noData')+'</span>'));
+                    $('#noDataLabel').html($('<span class="label label-info">'+i18n.t('errorMsgs.noData')+'</span>'));
                 }
 
             } else {
