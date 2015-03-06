@@ -340,6 +340,11 @@ public class DefaultKeyManagerImpl extends AbstractKeyManager {
         tokenInfo.setIssuedTime(System.currentTimeMillis());
         tokenInfo.setScope(oAuth2TokenValidationResponseDTO.getScope());
 
+        if(APIUtil.checkAccessTokenPartitioningEnabled() &&
+           APIUtil.checkUserNameAssertionEnabled()){
+            tokenInfo.setConsumerKey(ApiMgtDAO.getConsumerKeyForTokenWhenTokenPartitioningEnabled(accessToken));
+        }
+
         return tokenInfo;
     }
 

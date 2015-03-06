@@ -48,7 +48,9 @@ public abstract class AbstractKeyValidationHandler implements KeyValidationHandl
                                                     validationContext.getVersion(),
                                                     dto.getConsumerKey(), dto);
             if (state) {
-                dto.setAuthorizedDomains(ApiMgtDAO.getAuthorizedDomainList(validationContext.getAccessToken()));
+
+                dto.setAuthorizedDomains(APIUtil.getListOfAuthorizedDomainsByConsumerKey(validationContext
+                                                                                                 .getTokenInfo().getConsumerKey()));
                 checkClientDomainAuthorized(dto, validationContext.getClientDomain());
             }
 
