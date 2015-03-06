@@ -1811,7 +1811,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             boolean gatewayExists = config.getApiGatewayEnvironments().size() > 0;
             String gatewayType = config.getFirstProperty(APIConstants.API_GATEWAY_TYPE);
 
-            API api = new API(identifier);
+            API api = APIUtil.getAPI(apiArtifact);
             api.setAsDefaultVersion(Boolean.valueOf(isDefaultVersion));
             api.setAsPublishedDefaultVersion(api.getId().getVersion().equals(apiMgtDAO.getPublishedDefaultVersion(api.getId())));
 
