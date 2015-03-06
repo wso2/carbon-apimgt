@@ -238,7 +238,6 @@ public class ApiMgtDAO {
 
     public void createApplicationRegistrationEntry(ApplicationRegistrationWorkflowDTO dto, boolean onlyKeyMappingEntry)
             throws APIManagementException {
-        log.info("createApplicationRegistrationEntry");
 
         Connection conn = null;
         PreparedStatement ps = null;
@@ -1789,7 +1788,6 @@ public class ApiMgtDAO {
     }
 
 	public String getScopesByToken(String accessToken) throws APIManagementException {
-		log.info("getScopesByToken accessed on DAO");
 		String tokenStoreTable = APIConstants.ACCESS_TOKEN_STORE_TABLE;
 		String getScopeSql = "SELECT TOKEN_SCOPE " +
 		                     "FROM " + tokenStoreTable +

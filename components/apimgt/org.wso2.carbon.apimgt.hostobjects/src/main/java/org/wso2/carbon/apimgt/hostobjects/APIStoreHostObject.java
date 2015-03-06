@@ -2516,7 +2516,6 @@ public class APIStoreHostObject extends ScriptableObject {
 	}
 
 	private static String getScopeNamesbyKey(String scopeKey, Set<Scope> availableScopeSet) {
-		log.info("accessed getScopeNamesbyKey");
 		//convert scope keys to names
 		StringBuilder scopeBuilder = new StringBuilder("");
 		String prodKeyScope;
