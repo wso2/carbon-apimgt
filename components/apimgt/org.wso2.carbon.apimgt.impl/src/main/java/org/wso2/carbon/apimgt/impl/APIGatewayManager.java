@@ -44,7 +44,7 @@ public class APIGatewayManager {
 
 	private static APIGatewayManager instance;
 
-	private Map<String,Environment> environments;
+    private Map<String, Environment> environments;
 
 	private boolean debugEnabled = log.isDebugEnabled();
 
@@ -82,10 +82,9 @@ public class APIGatewayManager {
             RESTAPIAdminClient client = null;
             try {
                 client = new RESTAPIAdminClient(api.getId(), environment);
-
-                String operation;
-                // If the API exists in the Gateway
-                if (client.getApi(tenantDomain) != null) {
+			String operation;
+			// If the API exists in the Gateway
+			if (client.getApi(tenantDomain) != null) {
 
 				// If the Gateway type is 'production' and the production url
 				// has been removed
@@ -184,10 +183,10 @@ public class APIGatewayManager {
 			}
             } catch (Exception ex) {
                 failedEnvironmentsList.add(environmentName);
-		}
+            }
 	}
-            return failedEnvironmentsList;
-	}
+        return failedEnvironmentsList;
+    }
 
 	/**
 	 * Removed an API from the configured Gateways
@@ -204,8 +203,9 @@ public class APIGatewayManager {
                 try {
                     Environment environment = environments.get(environmentName);
                     RESTAPIAdminClient client = new RESTAPIAdminClient(api.getId(), environment);
-			if (client.getApi(tenantDomain) != null) {
-				if (debugEnabled) {
+
+                    if (client.getApi(tenantDomain) != null) {
+                        if (debugEnabled) {
 					log.debug("Removing API " + api.getId().getApiName() + " From environment " +
 					          environment.getName());
 				}
@@ -227,7 +227,7 @@ public class APIGatewayManager {
 
 		}
         return failedEnvironmentsList;
-	}
+    }
 
     public List<String> removeDefaultAPIFromGateway(API api, String tenantDomain) {
         List<String> failedEnvironmentsList = new ArrayList<String>(0);
@@ -242,8 +242,8 @@ public class APIGatewayManager {
                             environment.getName());
                 }
 
-                        client.deleteDefaultApi(tenantDomain);
-                    }
+                client.deleteDefaultApi(tenantDomain);
+            }
                 } catch (Exception ex) {
                     failedEnvironmentsList.add(environmentName);
                 }
@@ -262,22 +262,22 @@ public class APIGatewayManager {
 	 * @return True if the API is available in at least one Gateway. False if
 	 *         available in none.
 	 */
-	public boolean isAPIPublished(API api, String tenantDomain){
+    public boolean isAPIPublished(API api, String tenantDomain) {
         List<String> failedEnvironmentsList = new ArrayList<String>(0);
         for (Environment environment : environments.values()) {
             try {
-			RESTAPIAdminClient client = new RESTAPIAdminClient(api.getId(), environment);
-			// If the API exists in at least one environment, consider as
-			// published and return true.
-			if (client.getApi(tenantDomain) != null) {
-				return true;
+                RESTAPIAdminClient client = new RESTAPIAdminClient(api.getId(), environment);
+                // If the API exists in at least one environment, consider as
+                // published and return true.
+                if (client.getApi(tenantDomain) != null) {
+                    return true;
                 }
-            }catch (Exception ex){
+            } catch (Exception ex) {
                 failedEnvironmentsList.add(environment.getName());
             }
-		}
-		return false;
-	}
+        }
+        return false;
+    }
 
 	/**
 	 * Get the specified in/out sequences from api object

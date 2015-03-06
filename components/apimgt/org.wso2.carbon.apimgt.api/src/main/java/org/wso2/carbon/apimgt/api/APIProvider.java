@@ -146,6 +146,7 @@ public interface APIProvider extends APIManager {
      *
      * @param api API
      * @throws org.wso2.carbon.apimgt.api.APIManagementException if failed to update API
+     * @return  failed environments during gateway operation
      */
     public Map<String, List<String>> updateAPI(API api) throws APIManagementException;
 
@@ -157,6 +158,7 @@ public interface APIProvider extends APIManager {
      * @param userId User performing the API state change
      * @param updateGatewayConfig Whether the changes should be pushed to the API gateway or not
      * @throws org.wso2.carbon.apimgt.api.APIManagementException on error
+     * @return  failed environments during gateway operation
      */
     public Map<String, List<String>> changeAPIStatus(API api, APIStatus status, String userId,
                                                      boolean updateGatewayConfig)

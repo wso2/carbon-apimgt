@@ -325,7 +325,7 @@ public class APIKeyMgtSubscriberService extends AbstractAdmin {
             }
         }
         if (mappings.size() > 0) {
-            Map<String,Environment> gatewayEnvs = config.getApiGatewayEnvironments();
+            Map<String, Environment> gatewayEnvs = config.getApiGatewayEnvironments();
             for (Environment environment : gatewayEnvs.values()) {
                 APIAuthenticationAdminClient client = new APIAuthenticationAdminClient(environment);
                 client.invalidateKeys(mappings);

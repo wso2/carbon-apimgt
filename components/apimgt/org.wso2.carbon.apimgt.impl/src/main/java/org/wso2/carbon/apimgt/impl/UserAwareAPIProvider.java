@@ -71,8 +71,7 @@ public class UserAwareAPIProvider extends APIProviderImpl {
     public Map<String, List<String>> changeAPIStatus(API api, APIStatus status, String userId,
                                                      boolean updateGatewayConfig) throws APIManagementException {
         checkPublishPermission();
-        super.changeAPIStatus(api, status, userId, updateGatewayConfig);
-        return null;
+        return super.changeAPIStatus(api, status, userId, updateGatewayConfig);
     }
 
     @Override
