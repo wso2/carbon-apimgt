@@ -1164,3 +1164,7 @@ ol.progtrckr li.progtrckr-todo:before {
 .analytics-form-actions{
     background: transparent;
 }
+
+#more-options-datasource select{
+    width: 284px !important;
+}
