@@ -4319,7 +4319,7 @@ public class APIProviderHostObject extends ScriptableObject {
 		                for (Object store : externalAPIStores) {
 		                	inputStores.add(APIUtil.getExternalAPIStore((String) store, tenantId));
 		                }
-                            updated = apiProvider.updateAPIsInExternalAPIStores(api,inputStores);
+                        updated = apiProvider.updateAPIsInExternalAPIStores(api,inputStores);
 
                     }
 	                return updated;
