@@ -205,6 +205,7 @@
     "docRoleHelpMsg" : "<strong>Same as API visibility: </strong> Visible to the same user roles who can see the API.<br/><strong> Visible to my domain :</strong>  Visible to all registered users in the API's tenant domain.<br/><strong>Private:</strong> Visible only to the API creator's role." ,
     "tenantRoleHelpMsg" : "This option controls the API visibility based on the tenant. " ,
     "versionsHelpMsg":"E.g.,: v1.0.0 ,v1.0 , 1.0.0, 1.0",
+    "tagsHelpLabel":"Type a tag and Enter",
     "tagsHelpMsg":"Use keywords and common search terms as tags to group APIs that have similar characteristics. After publishing the API, consumers can click these tags to jump to a group of similar APIs.",
     "rolesHelpMsg":"Comma separated list (e.g.,: role1,role2,role3)",
     "allowTenantsHelpMsg":"Comma separated list (e.g.,: tenant1.com,tenant2.com). Your API will be accessible to those defined Tenants as well.",
