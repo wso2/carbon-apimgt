@@ -145,26 +145,33 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     public Map<String,Object> getPaginatedAPIsWithTag(String tag,int start,int end) throws APIManagementException {
         List<API> apiSet = new ArrayList<API>();
         Set<API> resultSet = new TreeSet<API>(new APIVersionComparator());
-        Map<String,Object> results = new HashMap<String, Object>();
-        Set<API> taggedAPISet=this.getAPIsWithTag(tag);
-        if(taggedAPISet!=null){
-        if(taggedAPISet.size()<end){
-        end=taggedAPISet.size();
-        }
+        Map<String, Object> results = new HashMap<String, Object>();
+        Set<API> taggedAPISet = this.getAPIsWithTag(tag);
+        if (taggedAPISet != null) {
+            if (taggedAPISet.size() < end) {
+                end = taggedAPISet.size();
+            }
+            int totalLength;
 
-        apiSet.addAll(taggedAPISet);
-        for(int i=start;i<end;i++) {
-          resultSet.add(apiSet.get(i));
-        }
+            apiSet.addAll(taggedAPISet);
+            totalLength = apiSet.size();
+            if (totalLength <= ((start + end) - 1)) {
+                end = totalLength;
+            } else {
+                end = start + end;
+            }
+            for (int i = start; i < end; i++) {
+                resultSet.add(apiSet.get(i));
+            }
 
-            results.put("apis",resultSet);
-            results.put("length",taggedAPISet.size());
-        }else{
-            results.put("apis",null);
-            results.put("length",0);
+            results.put("apis", resultSet);
+            results.put("length", taggedAPISet.size());
+        } else {
+            results.put("apis", null);
+            results.put("length", 0);
 
         }
-        return results ;
+        return results;
     }
 
 
