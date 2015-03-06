@@ -36,6 +36,7 @@ import org.wso2.carbon.apimgt.impl.token.JWTGenerator;
 import org.wso2.carbon.apimgt.impl.token.TokenGenerator;
 import org.wso2.carbon.apimgt.impl.utils.APIMgtDBUtil;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.apimgt.impl.utils.ApplicationUtils;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowConstants;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowExecutorFactory;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowStatus;
@@ -241,10 +242,12 @@ public class ApiMgtDAO {
         ResultSet rs = null;
         Application application = dto.getApplication();
         Subscriber subscriber = application.getSubscriber();
+        String jsonString = dto.getAppInfoDTO().getoAuthApplicationInfo().getJsonString();
+
 
         String registrationEntry = "INSERT INTO " +
-                " AM_APPLICATION_REGISTRATION (SUBSCRIBER_ID,WF_REF,APP_ID,TOKEN_TYPE,ALLOWED_DOMAINS,VALIDITY_PERIOD) " +
-                "  VALUES(?,?,?,?,?,?)";
+                " AM_APPLICATION_REGISTRATION (SUBSCRIBER_ID,WF_REF,APP_ID,TOKEN_TYPE,ALLOWED_DOMAINS,VALIDITY_PERIOD,INPUTS) " +
+                "  VALUES(?,?,?,?,?,?,?)";
 
         String keyMappingEntry = "INSERT INTO " +
                 "AM_APPLICATION_KEY_MAPPING (APPLICATION_ID,KEY_TYPE,STATE) " +
@@ -263,6 +266,7 @@ public class ApiMgtDAO {
                 ps.setString(4, dto.getKeyType());
                 ps.setString(5, dto.getDomainList());
                 ps.setLong(6, dto.getValidityTime());
+                ps.setString(7,jsonString);
                 ps.execute();
                 ps.close();
             }
@@ -2512,8 +2516,8 @@ public class ApiMgtDAO {
                 accessToken = APIUtil.decryptToken(resultSet.getString("ACCESS_TOKEN"));
                 String consumerKey = resultSet.getString("CONSUMER_KEY");
                 apiKey.setConsumerKey(APIUtil.decryptToken(consumerKey));
-                String consumerSecret = resultSet.getString("CONSUMER_SECRET");
-                apiKey.setConsumerSecret(APIUtil.decryptToken(consumerSecret));
+                //String consumerSecret = resultSet.getString("CONSUMER_SECRET");
+                //apiKey.setConsumerSecret(APIUtil.decryptToken(consumerSecret));
                 apiKey.setAccessToken(accessToken);
                 authorizedDomains = getAuthorizedDomains(accessToken);
                 apiKey.setType(resultSet.getString("TOKEN_TYPE"));
@@ -6523,6 +6527,10 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
                 workflowDTO.setUserName(subscriber.getName());
                 workflowDTO.setDomainList(rs.getString("ALLOWED_DOMAINS"));
                 workflowDTO.setValidityTime(rs.getLong("VALIDITY_PERIOD"));
+                OauthAppRequest request = ApplicationUtils.createOauthAppRequest(application.getName(),
+                                                                                 application.getCallbackUrl(),
+                                                                                 rs.getString("INPUTS"));
+                workflowDTO.setAppInfoDTO(request);
 
             }
 
@@ -6549,7 +6557,7 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
         String registrationEntry = "SELECT " +
                 "REG.TOKEN_TYPE," +
                 "REG.ALLOWED_DOMAINS," +
-                "REG.VALIDITY_PERIOD" +
+                "REG.VALIDITY_PERIOD," +
                 " FROM " +
                 "AM_APPLICATION_REGISTRATION REG, " +
                 "AM_APPLICATION APP " +
@@ -6575,6 +6583,60 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
         } catch (SQLException e) {
             handleException("Error occurred while retrieving an " +
                     "Application Registration Entry for Application ID : " + appId, e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(ps, conn, rs);
+        }
+        return workflowDTO;
+    }
+
+    public ApplicationRegistrationWorkflowDTO populateAppRegistrationWorkflowDTO(Application application) throws
+                                                                                          APIManagementException {
+
+        Connection conn = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+
+        ApplicationRegistrationWorkflowDTO workflowDTO = null;
+
+
+        //TODO: Need to create a different Entity for holding Registration Info.
+        String registrationEntry = "SELECT " +
+                                   "REG.TOKEN_TYPE," +
+                                   "REG.ALLOWED_DOMAINS," +
+                                   "REG.VALIDITY_PERIOD," +
+                                   "APP.NAME," +
+                                   "INPUTS" +
+                                   " FROM " +
+                                   "AM_APPLICATION_REGISTRATION REG, " +
+                                   "AM_APPLICATION APP " +
+                                   " WHERE " +
+                                   "REG.APP_ID = APP.APPLICATION_ID AND APP.APPLICATION_ID=?";
+
+
+        try {
+            conn = APIMgtDBUtil.getConnection();
+            ps = conn.prepareStatement(registrationEntry);
+            ps.setInt(1, application.getId());
+            rs = ps.executeQuery();
+
+            while (rs.next()) {
+                workflowDTO = (ApplicationRegistrationWorkflowDTO)
+                        WorkflowExecutorFactory.getInstance().createWorkflowDTO(WorkflowConstants.WF_TYPE_AM_APPLICATION_REGISTRATION_PRODUCTION);
+                workflowDTO.setKeyType(rs.getString("TOKEN_TYPE"));
+                workflowDTO.setDomainList(rs.getString("ALLOWED_DOMAINS"));
+                workflowDTO.setValidityTime(rs.getLong("VALIDITY_PERIOD"));
+                OauthAppRequest request = ApplicationUtils.createOauthAppRequest(application.getName(),
+                                                                                 application.getCallbackUrl(),
+                                                                                 rs.getString("INPUTS"));
+                workflowDTO.setApplicationInfo(request.getoAuthApplicationInfo());
+                workflowDTO.setAppInfoDTO(request);
+
+            }
+
+            ps.close();
+        } catch (SQLException e) {
+            handleException("Error occurred while retrieving an " +
+                            "Application Registration Entry for Application : " + application.getName(), e);
         } finally {
             APIMgtDBUtil.closeAllConnections(ps, conn, rs);
         }
@@ -6616,6 +6678,52 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
             APIMgtDBUtil.closeAllConnections(ps, conn, rs);
         }
         return appId;
+    }
+
+    /**
+     * Fetches WorkflowReference when given Application Name and UserId.
+     *
+     * @param applicationName
+     * @param userId
+     * @return WorkflowReference
+     * @throws APIManagementException
+     */
+    public String getWorkflowReference(String applicationName, String userId) throws APIManagementException {
+        Connection conn = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+        String workflowReference = null;
+
+        String sqlQuery = "SELECT REG.WF_REF FROM " +
+                          "AM_APPLICATION APP, " +
+                          "AM_APPLICATION_REGISTRATION REG, " +
+                          "AM_SUBSCRIBER SUB WHERE " +
+                          "APP.NAME=? AND " +
+                          "SUB.USER_ID=? AND " +
+                          "SUB.SUBSCRIBER_ID = APP.SUBSCRIBER_ID AND " +
+                          "REG.APP_ID=APP.APPLICATION_ID";
+
+        try {
+            conn = APIMgtDBUtil.getConnection();
+            ps = conn.prepareStatement(sqlQuery);
+            ps.setString(1, applicationName);
+            ps.setString(2, userId);
+            rs = ps.executeQuery();
+
+            while (rs.next()) {
+
+                workflowReference = rs.getString("WF_REF");
+            }
+
+            ps.close();
+        } catch (SQLException e) {
+            handleException("Error occurred while getting workflow entry for " +
+                            "Application : " + applicationName + " created by " + userId, e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(ps, conn, rs);
+        }
+        return workflowReference;
+
     }
 
 

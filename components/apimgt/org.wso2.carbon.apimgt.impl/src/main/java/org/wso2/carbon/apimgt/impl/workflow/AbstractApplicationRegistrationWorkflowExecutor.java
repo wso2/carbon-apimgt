@@ -79,6 +79,8 @@ public abstract class AbstractApplicationRegistrationWorkflowExecutor extends Wo
 
             ApplicationRegistrationWorkflowDTO regWorkFlowDTO = (ApplicationRegistrationWorkflowDTO)workFlowDTO;
             Application application = ApplicationUtils.populateApplication(workFlowDTO.getWorkflowReference());
+            dao.populateAppRegistrationWorkflowDTO(regWorkFlowDTO);
+
 //            OauthAppRequest appInfoDTO = ApplicationCreator.createAppInfoDTO(null);
 //            appInfoDTO.setMappingId(regWorkFlowDTO.getWorkflowReference());
 //           // appInfoDTO.retrieveDTO();
@@ -113,6 +115,11 @@ public abstract class AbstractApplicationRegistrationWorkflowExecutor extends Wo
      */
     protected void generateKeysForApplication(ApplicationRegistrationWorkflowDTO workflowDTO) throws
             APIManagementException {
+        dogenerateKeysForApplication(workflowDTO);
+    }
+
+    public static void dogenerateKeysForApplication(ApplicationRegistrationWorkflowDTO workflowDTO) throws
+                                                                                                    APIManagementException{
         log.debug("Registering Application and creating an Access Token... ");
         Application application = workflowDTO.getApplication();
         Subscriber subscriber = application.getSubscriber();
@@ -147,7 +154,7 @@ public abstract class AbstractApplicationRegistrationWorkflowExecutor extends Wo
                 TokenMgtDao.updateTokenForConsumerKey(tokenRequest.getClientId(), tokenInfo);
             }
             workflowDTO.setAccessTokenInfo(tokenInfo);
-        } catch (Exception e) {
+        } catch (APIManagementException e) {
             APIUtil.handleException("Error occurred while executing SubscriberKeyMgtClient.", e);
         }
     }
