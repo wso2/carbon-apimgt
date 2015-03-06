@@ -28,7 +28,7 @@ $("#add_url").click(function () {
     showReceiverURLs();
 });
 
-function createMultiUrlArrayAndView(urlGroup, username){
+function createMultiUrlArrayAndView(urlGroup, username, password){
     multi_urls = [];
     var multi_url_set = urlGroup.split("},");
     for (var i = 0; i < multi_url_set.length; i++) {
@@ -38,7 +38,7 @@ function createMultiUrlArrayAndView(urlGroup, username){
         } else {
             url_group = multi_url_set[i] + "}";
         }
-        var receiver = {"url_group":url_group, "username":username};
+        var receiver = {"url_group":url_group, "username":username, "password":password};
         multi_urls[i]= receiver ;
     }
 
@@ -79,11 +79,11 @@ $(document).ready(function(){
             $('.ui_message').fadeIn('slow');
             $(form).ajaxSubmit({
                 success:function(responseText, statusText, xhr, $form){
-                    $('.ui_message').html("Configurations Saved!");
-                    $('.ui_message').delay(4000).fadeOut('slow');
                     if (!responseText.error) {
-                        $( "body" ).trigger( "conf_saved" );
+                        $('.ui_message').html("Configurations Saved!");
+                        $('.ui_message').delay(4000).fadeOut('slow');
                     } else {
+                        $('.ui_message').html("Error occurred while saving configurations!");
                         if (responseText.message == "timeout") {
                             if (ssoEnabled) {
                                  var currentLoc = window.location.pathname;

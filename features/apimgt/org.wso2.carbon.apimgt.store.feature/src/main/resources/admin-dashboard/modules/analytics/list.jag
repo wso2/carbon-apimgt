@@ -4,124 +4,145 @@ var log = new Log();
 
 var getAnalyticsConfig = function (analyticsData) {
 
-    var carbon = require('carbon');
-    var process = require('process');
-    var url = 'https://' + process.getProperty('carbon.local.ip') + ':' + process.getProperty('mgt.transport.https.port') + '/admin/services/';
-    var server = new carbon.server.Server(url);
-    var options = {username: jagg.getUser().username, domain: carbon.server.tenantDomain() , tenantId:  carbon.server.tenantId()};
-    var registry = new carbon.registry.Registry(server, options);
-    var log=new Log();
-    var path = '/_system/governance/apimgt/applicationdata/analytics.xml';
-    var ContentStr = registry.get(path);
+    try {
+        var carbon = require('carbon');
+        var process = require('process');
+        /*var url = 'https://' + process.getProperty('carbon.local.ip') + ':' + process.getProperty('mgt.transport.https.port') + '/admin/services/';
+        var server = new carbon.server.Server(url);
+        var options = {
+            username: jagg.getUser().username,
+            domain: carbon.server.tenantDomain(),
+            tenantId: carbon.server.tenantId()
+        };
+        var registry = new carbon.registry.Registry(server, options);
+        var log = new Log();
+        var path = '/_system/governance/apimgt/applicationdata/analytics.xml';
+        var ContentStr = registry.get(path);*/
 
-    var conf = carbon.server.loadConfig('user-mgt.xml');
-    var confXml = new XML(conf);
-    var username = confXml.*::['Realm'].*::['Configuration'].*::['AdminUser'].*::['UserName'].text();
-    var password = confXml.*::['Realm'].*::['Configuration'].*::['AdminUser'].*::['Password'].text();
-    var service_url = 'https://' + process.getProperty('carbon.local.ip') + ':' + process.getProperty('mgt.transport.https.port');
-    var stub = new org.wso2.carbon.bam.service.data.publisher.stub.ServiceDataPublisherAdminStub(service_url + '/services/ServiceDataPublisherAdmin');
-    var client = stub._getServiceClient();
-    var client_options = client.getOptions();
-    var authenticator = new org.apache.axis2.transport.http.HttpTransportProperties.Authenticator();
-    authenticator.setUsername(username);
-    authenticator.setPassword(password);
-    authenticator.setPreemptiveAuthentication(true);
-    client_options.setProperty(org.apache.axis2.transport.http.HTTPConstants.AUTHENTICATE, authenticator);
-    client.setOptions(client_options);
+        var conf = carbon.server.loadConfig('user-mgt.xml');
+        var confXml = new XML(conf);
+        var username = confXml.*::['Realm'].*::['Configuration'].*::['AdminUser'].*::['UserName'].text();
+        var password = confXml.*::['Realm'].*::['Configuration'].*::['AdminUser'].*::['Password'].text();
+        var service_url = 'https://' + process.getProperty('carbon.local.ip') + ':' + process.getProperty('mgt.transport.https.port');
+        var stub = new org.wso2.carbon.bam.service.data.publisher.stub.ServiceDataPublisherAdminStub(service_url + '/services/ServiceDataPublisherAdmin');
+        var client = stub._getServiceClient();
+        var client_options = client.getOptions();
+        var authenticator = new org.apache.axis2.transport.http.HttpTransportProperties.Authenticator();
+        authenticator.setUsername(username);
+        authenticator.setPassword(password);
+        authenticator.setPreemptiveAuthentication(true);
+        client_options.setProperty(org.apache.axis2.transport.http.HTTPConstants.AUTHENTICATE, authenticator);
+        client.setOptions(client_options);
 
-    var eventingConfig = stub.getEventingConfigData();
-    var conf = null;
-    if (eventingConfig == null) {
-        log.warn("Analytics configurations are not available in registry.");
-    } else {
-        var analytics_config = new XML(ContentStr.content);
-        conf = {
-            enableAnalytics: analytics_config.enable,
-            eventReceiverURL: eventingConfig.getUrl(),
-            eventReceiverUsername: eventingConfig.getUserName(),
-            eventReceiverPassword: eventingConfig.getPassword(),
-            eventAnalyserURL: analytics_config.event_analyser.URL,
-            eventAnalyserUsername: analytics_config.event_analyser.Username,
-            eventAnalyserPassword: analytics_config.event_analyser.Password
+        var eventingConfig = stub.getEventingConfigData();
+        var conf = null;
+        if (eventingConfig == null) {
+            log.warn("Analytics configurations are not available in registry.");
+        } else {
+            conf = {
+                enableAnalytics: eventingConfig.getPublishingEnable(),
+                eventReceiverURL: eventingConfig.getUrl(),
+                eventReceiverUsername: eventingConfig.getUserName(),
+                eventReceiverPassword: eventingConfig.getPassword(),
+                eventAnalyserURL: eventingConfig.getUrl(),
+                eventAnalyserUsername: eventingConfig.getUserName(),
+                eventAnalyserPassword: eventingConfig.getPassword()
+            };
+        }
+
+        return {
+            error: false,
+            analytics: conf
+        };
+    } catch (ex) {
+        var message = "Error occurred while retrieving Analytics configurations (Cause:" + ex.message + ")";
+        log.error(message);
+        return {
+            error: true,
+            message: message
         };
     }
-
-    return {
-        error:false,
-        analytics:conf
-    };
 };
 
 var getDatasourceConfig = function () {
 
-    var carbon = require('carbon');
-    var process = require('process');
-    var conf = carbon.server.loadConfig('user-mgt.xml');
-    var confXml = new XML(new String(conf));
-    var username = confXml.Realm.Configuration.AdminUser.UserName.text();
-    var password = confXml.Realm.Configuration.AdminUser.Password.text();
-    var url = 'https://' + process.getProperty('carbon.local.ip') + ':' + process.getProperty('mgt.transport.https.port');
-    var stub = new org.wso2.carbon.ndatasource.ui.stub.NDataSourceAdminStub(url + '/services/NDataSourceAdmin');
-    var client = stub._getServiceClient();
-    var options = client.getOptions();
-    var authenticator = new org.apache.axis2.transport.http.HttpTransportProperties.Authenticator();
-    authenticator.setUsername(username);
-    authenticator.setPassword(password);
-    authenticator.setPreemptiveAuthentication(true);
-    options.setProperty(org.apache.axis2.transport.http.HTTPConstants.AUTHENTICATE, authenticator);
-    client.setOptions(options);
+    try {
+        var carbon = require('carbon');
+        var process = require('process');
+        var conf = carbon.server.loadConfig('user-mgt.xml');
+        var confXml = new XML(new String(conf));
+        var username = confXml.Realm.Configuration.AdminUser.UserName.text();
+        var password = confXml.Realm.Configuration.AdminUser.Password.text();
+        var url = 'https://' + process.getProperty('carbon.local.ip') + ':' + process.getProperty('mgt.transport.https.port');
+        var stub = new org.wso2.carbon.ndatasource.ui.stub.NDataSourceAdminStub(url + '/services/NDataSourceAdmin');
+        var client = stub._getServiceClient();
+        var options = client.getOptions();
+        var authenticator = new org.apache.axis2.transport.http.HttpTransportProperties.Authenticator();
+        authenticator.setUsername(username);
+        authenticator.setPassword(password);
+        authenticator.setPreemptiveAuthentication(true);
+        options.setProperty(org.apache.axis2.transport.http.HTTPConstants.AUTHENTICATE, authenticator);
+        client.setOptions(options);
 
-    var dsName = "WSO2_STAT_DB";
-    var dataSource = stub.getDataSource(dsName);
-    var ds = null;
-    if(dataSource == null){
-        log.warn("Datasource '"+dsName +"' not available.");
-    } else {
-        var dataSourceConfig = dataSource.getDsMetaInfo().getDefinition().getDsXMLConfiguration();
-        var dataSourceXml = new XML(new String(dataSourceConfig));
-        ds = {
-            statDsURL: dataSourceXml.url.text(),
-            statDsUsername: dataSourceXml.username.text(),
-            statDsPassword: dataSourceXml.password.text(),
-            statDsDriver: dataSourceXml.driverClassName.text(),
-            statDsDefaultAutoCommit: dataSourceXml.defaultAutoCommit.text(),
-            statDsDefaultReadOnly: dataSourceXml.defaultReadOnly.text(),
-            statDsDefaultTransactionIsolation: dataSourceXml.defaultTransactionIsolation.text(),
-            statDsDefaultCatalog: dataSourceXml.defaultCatalog.text(),
-            statDsMaxActive: dataSourceXml.maxActive.text(),
-            statDsMaxIdle: dataSourceXml.maxIdle.text(),
-            statDsMinIdle: dataSourceXml.minIdle.text(),
-            statDsInitialSize: dataSourceXml.initialSize.text(),
-            statDsMaxWait: dataSourceXml.maxWait.text(),
-            statDsTestOnBorrow: dataSourceXml.testOnBorrow.text(),
-            statDsTestOnReturn: dataSourceXml.testOnReturn.text(),
-            statDsTestWhileIdle: dataSourceXml.testWhileIdle.text(),
-            statDsValidationQuery: dataSourceXml.validationQuery.text(),
-            statDsValidationClass: dataSourceXml.validatorClassName.text(),
-            statDsTimeBetweenEvictionRunsMillis: dataSourceXml.timeBetweenEvictionRunsMillis.text(),
-            statDsNumTestsPerEvictionRun: dataSourceXml.numTestsPerEvictionRun.text(),
-            statDsMinEvictableIdleTimeMillis: dataSourceXml.minEvictableIdleTimeMillis.text(),
-            statDsAccessToUnderlyingConnectionAllowed: dataSourceXml.accessToUnderlyingConnectionAllowed.text(),
-            statDsRemoveAbandoned: dataSourceXml.removeAbandoned.text(),
-            statDsRemoveAbandonedTimeout: dataSourceXml.removeAbandonedTimeout.text(),
-            statDsLogAbandoned: dataSourceXml.logAbandoned.text(),
-            statDsConnectionProperties: dataSourceXml.connectionProperties.text(),
-            statDsInitSQL: dataSourceXml.initSQL.text(),
-            statDsJdbcInterceptors: dataSourceXml.jdbcInterceptors.text(),
-            statDsValidationInterval: dataSourceXml.validationInterval.text(),
-            statDsFairQueue: dataSourceXml.fairQueue.text(),
-            statDsJMXEnabled: dataSourceXml.jmxEnabled.text(),
-            statDsAbandonWhenPercentageFull: dataSourceXml.abandonWhenPercentageFull.text(),
-            statDsMaxAge: dataSourceXml.maxAge.text(),
-            statDsUseEquals: dataSourceXml.useEquals.text(),
-            statDsSuspectTimeout: dataSourceXml.suspectTimeout.text(),
-            statDsAlternateUsernameAllowed: dataSourceXml.alternateUsernameAllowed.text(),
-            statDsValidationQueryTimeout: dataSourceXml.validationQueryTimeout.text()
+        var dsName = "WSO2_STAT_DB";
+        var dataSource = stub.getDataSource(dsName);
+        var ds = null;
+        if (dataSource == null) {
+            log.warn("Datasource '" + dsName + "' not available.");
+        } else {
+            var dataSourceConfig = dataSource.getDsMetaInfo().getDefinition().getDsXMLConfiguration();
+            var dataSourceXml = new XML(new String(dataSourceConfig));
+            ds = {
+                statDsURL: dataSourceXml.url.text(),
+                statDsUsername: dataSourceXml.username.text(),
+                statDsPassword: dataSourceXml.password.text(),
+                statDsDriver: dataSourceXml.driverClassName.text(),
+                statDsDefaultAutoCommit: dataSourceXml.defaultAutoCommit.text(),
+                statDsDefaultReadOnly: dataSourceXml.defaultReadOnly.text(),
+                statDsDefaultTransactionIsolation: dataSourceXml.defaultTransactionIsolation.text(),
+                statDsDefaultCatalog: dataSourceXml.defaultCatalog.text(),
+                statDsMaxActive: dataSourceXml.maxActive.text(),
+                statDsMaxIdle: dataSourceXml.maxIdle.text(),
+                statDsMinIdle: dataSourceXml.minIdle.text(),
+                statDsInitialSize: dataSourceXml.initialSize.text(),
+                statDsMaxWait: dataSourceXml.maxWait.text(),
+                statDsTestOnBorrow: dataSourceXml.testOnBorrow.text(),
+                statDsTestOnReturn: dataSourceXml.testOnReturn.text(),
+                statDsTestWhileIdle: dataSourceXml.testWhileIdle.text(),
+                statDsValidationQuery: dataSourceXml.validationQuery.text(),
+                statDsValidationClass: dataSourceXml.validatorClassName.text(),
+                statDsTimeBetweenEvictionRunsMillis: dataSourceXml.timeBetweenEvictionRunsMillis.text(),
+                statDsNumTestsPerEvictionRun: dataSourceXml.numTestsPerEvictionRun.text(),
+                statDsMinEvictableIdleTimeMillis: dataSourceXml.minEvictableIdleTimeMillis.text(),
+                statDsAccessToUnderlyingConnectionAllowed: dataSourceXml.accessToUnderlyingConnectionAllowed.text(),
+                statDsRemoveAbandoned: dataSourceXml.removeAbandoned.text(),
+                statDsRemoveAbandonedTimeout: dataSourceXml.removeAbandonedTimeout.text(),
+                statDsLogAbandoned: dataSourceXml.logAbandoned.text(),
+                statDsConnectionProperties: dataSourceXml.connectionProperties.text(),
+                statDsInitSQL: dataSourceXml.initSQL.text(),
+                statDsJdbcInterceptors: dataSourceXml.jdbcInterceptors.text(),
+                statDsValidationInterval: dataSourceXml.validationInterval.text(),
+                statDsFairQueue: dataSourceXml.fairQueue.text(),
+                statDsJMXEnabled: dataSourceXml.jmxEnabled.text(),
+                statDsAbandonWhenPercentageFull: dataSourceXml.abandonWhenPercentageFull.text(),
+                statDsMaxAge: dataSourceXml.maxAge.text(),
+                statDsUseEquals: dataSourceXml.useEquals.text(),
+                statDsSuspectTimeout: dataSourceXml.suspectTimeout.text(),
+                statDsAlternateUsernameAllowed: dataSourceXml.alternateUsernameAllowed.text(),
+                statDsValidationQueryTimeout: dataSourceXml.validationQueryTimeout.text()
+            };
+        }
+        return {
+            error: false,
+            dataSource: ds
+        };
+    } catch (ex) {
+        var message = "Error occurred while retrieving Datasource configurations (Cause:" + ex.message + ")";
+        log.error(message);
+        return {
+            error: true,
+            message: message
         };
     }
-    return {
-        error:false,
-        dataSource:ds
-    };
 };
 %>

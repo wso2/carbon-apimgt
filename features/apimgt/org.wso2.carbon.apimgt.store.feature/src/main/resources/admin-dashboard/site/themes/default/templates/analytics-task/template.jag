@@ -538,12 +538,14 @@ var datasourceData = outputs.datasourceData;
 $(document).ready(function(){
 
     <% if(analyticsData.analytics != null){ %>
-            createMultiUrlArrayAndView("<%=analyticsData.analytics.eventReceiverURL%>", "<%=analyticsData.analytics.eventReceiverUsername%>");
-            var enableAnalytics = "<%=analyticsData.analytics.enableAnalytics.text()%>";
+            createMultiUrlArrayAndView("<%=analyticsData.analytics.eventReceiverURL%>",
+                                        "<%=analyticsData.analytics.eventReceiverUsername%>",
+                                        "<%=analyticsData.analytics.eventReceiverPassword%>");
+            var enableAnalytics = "<%=analyticsData.analytics.enableAnalytics%>";
             expandViewIfAnalyticsEnabled(enableAnalytics);
-            document.getElementById("eventAnalyserURL").value = "<%=analyticsData.analytics.eventAnalyserURL.text()%>";
-            document.getElementById("eventAnalyserUsername").value = "<%=analyticsData.analytics.eventAnalyserUsername.text()%>";
-            document.getElementById("eventAnalyserPassword").value = "<%=analyticsData.analytics.eventAnalyserPassword.text()%>";
+            document.getElementById("eventAnalyserURL").value = "<%=analyticsData.analytics.eventAnalyserURL%>";
+            document.getElementById("eventAnalyserUsername").value = "<%=analyticsData.analytics.eventAnalyserUsername%>";
+            document.getElementById("eventAnalyserPassword").value = "<%=analyticsData.analytics.eventAnalyserPassword%>";
     <% } else {%>
             document.getElementById("eventReceiverURL").value = "tcp://localhost:7613";
             document.getElementById("eventReceiverUsername").value = "admin";

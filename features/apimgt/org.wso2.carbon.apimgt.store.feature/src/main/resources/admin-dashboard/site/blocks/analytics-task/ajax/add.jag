@@ -68,23 +68,31 @@ var log = new Log();
 
 
         result = mod.addAnalyticsConfig(configData);
-
-        result = mod.addDatasourceConfig(configData);
+        if (result.error) {
+            print(result);
+            return false;
+        }
 
         result = mod.addToolbox(configData);
+        if (result.error) {
+            print(result);
+            return false;
+        }
+
+        result = mod.addDatasourceConfig(configData);
+        if (result.error) {
+            print(result);
+            return false;
+        }
 
         result = mod.addBamServerProfile(configData);
-
         if (result.error) {
-            obj = {
-                error:true,
-                message:msg.error.backendError(action)
-            };
-        } else {
-            obj = {
-                error:false,
-                response:result.valid
-            }
+            print(result);
+            return false;
+        }
+
+        obj = {
+            error:false
         }
         print(obj);
     }

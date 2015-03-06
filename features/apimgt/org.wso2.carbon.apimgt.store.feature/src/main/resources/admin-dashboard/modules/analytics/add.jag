@@ -3,152 +3,200 @@
 var log = new Log();
 
 var enableAnalytics = function (enable) {
-    var carbon = require('carbon');
-    var process = require('process');
-    var url = 'https://' + process.getProperty('carbon.local.ip') + ':' + process.getProperty('mgt.transport.https.port') + '/admin/services/';
-    var server = new carbon.server.Server(url);
-    var options = {username: jagg.getUser().username, domain: carbon.server.tenantDomain() , tenantId:  carbon.server.tenantId()};
-    var registry = new carbon.registry.Registry(server, options);
-    var path = '/_system/governance/apimgt/applicationdata/analytics.xml';
-    var ContentStr = registry.get(path);
-    var conf = null;
-    if (ContentStr != null) {
-        var analytics_config = new XML(ContentStr.content);
-        analytics_config.enable = enable;
-        var resource = {
-            content: analytics_config.toXMLString(),
-            mediaType: 'text/xml'
+    try {
+        var carbon = require('carbon');
+        var process = require('process');
+        var url = 'https://' + process.getProperty('carbon.local.ip') + ':' + process.getProperty('mgt.transport.https.port') + '/admin/services/';
+        var server = new carbon.server.Server(url);
+        var options = {
+            username: jagg.getUser().username,
+            domain: carbon.server.tenantDomain(),
+            tenantId: carbon.server.tenantId()
         };
-        log.info("Changing analytics status to - Enable:" + enable);
-        registry.put(path, resource);
-        log.info("Analytics status changed to - Enable:" + enable);
-    }
+        var registry = new carbon.registry.Registry(server, options);
+        var path = '/_system/governance/apimgt/applicationdata/analytics.xml';
+        var ContentStr = registry.get(path);
+        var conf = null;
+        if (ContentStr != null) {
+            var analytics_config = new XML(ContentStr.content);
+            analytics_config.enable = enable;
+            var resource = {
+                content: analytics_config.toXMLString(),
+                mediaType: 'text/xml'
+            };
+            log.info("Changing analytics status to - Enable:" + enable);
+            registry.put(path, resource);
+            log.info("Analytics status changed to - Enable:" + enable);
+        }
 
-    return {
-        error:false
-    };
+        return {
+            error: false
+        };
+    } catch (ex) {
+        var message = "Error occurred while Enabling/Disabing Analytics (Cause:" + ex.message + ")";
+        log.error(message);
+        return {
+            error: true,
+            message: message
+        };
+    }
 };
 
 var addAnalyticsConfig = function (configData) {
 
-    var carbon = require('carbon');
-    var process = require('process');
-    var conf = carbon.server.loadConfig('user-mgt.xml');
-    var confXml = new XML(conf);
-    var username = confXml.*::['Realm'].*::['Configuration'].*::['AdminUser'].*::['UserName'].text();
-    var password = confXml.*::['Realm'].*::['Configuration'].*::['AdminUser'].*::['Password'].text();
-    var url = 'https://' + process.getProperty('carbon.local.ip') + ':' + process.getProperty('mgt.transport.https.port');
-    var stub = new org.wso2.carbon.bam.service.data.publisher.stub.ServiceDataPublisherAdminStub(url + '/services/ServiceDataPublisherAdmin');
-    var client = stub._getServiceClient();
-    var options = client.getOptions();
-    var authenticator = new org.apache.axis2.transport.http.HttpTransportProperties.Authenticator();
-    authenticator.setUsername(username);
-    authenticator.setPassword(password);
-    authenticator.setPreemptiveAuthentication(true);
-    options.setProperty(org.apache.axis2.transport.http.HTTPConstants.AUTHENTICATE, authenticator);
-    client.setOptions(options);
+    try {
+        var carbon = require('carbon');
+        var process = require('process');
+        var conf = carbon.server.loadConfig('user-mgt.xml');
+        var confXml = new XML(conf);
+        var username = confXml.*::['Realm'].*::['Configuration'].*::['AdminUser'].*::['UserName'].text();
+        var password = confXml.*::['Realm'].*::['Configuration'].*::['AdminUser'].*::['Password'].text();
+        var url = 'https://' + process.getProperty('carbon.local.ip') + ':' + process.getProperty('mgt.transport.https.port');
+        var stub = new org.wso2.carbon.bam.service.data.publisher.stub.ServiceDataPublisherAdminStub(url + '/services/ServiceDataPublisherAdmin');
+        var client = stub._getServiceClient();
+        var options = client.getOptions();
+        var authenticator = new org.apache.axis2.transport.http.HttpTransportProperties.Authenticator();
+        authenticator.setUsername(username);
+        authenticator.setPassword(password);
+        authenticator.setPreemptiveAuthentication(true);
+        options.setProperty(org.apache.axis2.transport.http.HTTPConstants.AUTHENTICATE, authenticator);
+        client.setOptions(options);
 
-    var eventingConfigData = new org.wso2.carbon.bam.service.data.publisher.stub.conf.EventingConfigData();
-    eventingConfigData.setPublishingEnable(true);
-    eventingConfigData.setUrl(configData.eventReceiverURL);
-    eventingConfigData.setUserName(configData.eventReceiverUsername);
-    eventingConfigData.setPassword(configData.eventReceiverPassword);
+        var eventingConfigData = new org.wso2.carbon.bam.service.data.publisher.stub.conf.EventingConfigData();
+        eventingConfigData.setPublishingEnable(true);
+        eventingConfigData.setUrl(configData.eventReceiverURL);
+        eventingConfigData.setUserName(configData.eventReceiverUsername);
+        eventingConfigData.setPassword(configData.eventReceiverPassword);
 
-    log.info("Saving Analytics config in registry...");
-    stub.configureEventing(eventingConfigData);
-    log.info("Analytics config saved in registry.");
+        log.info("Saving Analytics config in registry...");
+        stub.configureEventing(eventingConfigData);
+        log.info("Analytics config saved in registry.");
 
-    return {
-        error:false
-    };
+        return {
+            error: false
+        };
+    } catch (ex) {
+        var message = "Error occurred while saving Analytics configuration (Cause:" + ex.message + ")";
+        log.error(message);
+        return {
+            error: true,
+            message: message
+        };
+    }
 };
 
 
 var addDatasourceConfig = function (configData) {
 
-    var carbon = require('carbon');
-    var process = require('process');
-    var conf = carbon.server.loadConfig('user-mgt.xml');
-    var confXml = new XML(conf);
-    var username = confXml.*::['Realm'].*::['Configuration'].*::['AdminUser'].*::['UserName'].text();
-    var password = confXml.*::['Realm'].*::['Configuration'].*::['AdminUser'].*::['Password'].text();
-    var url = 'https://' + process.getProperty('carbon.local.ip') + ':' + process.getProperty('mgt.transport.https.port');
-    var stub = new org.wso2.carbon.ndatasource.ui.stub.NDataSourceAdminStub(url + '/services/NDataSourceAdmin');
-    var client = stub._getServiceClient();
-    var options = client.getOptions();
-    var authenticator = new org.apache.axis2.transport.http.HttpTransportProperties.Authenticator();
-    authenticator.setUsername(username);
-    authenticator.setPassword(password);
-    authenticator.setPreemptiveAuthentication(true);
-    options.setProperty(org.apache.axis2.transport.http.HTTPConstants.AUTHENTICATE, authenticator);
-    client.setOptions(options);
+    try {
+        var carbon = require('carbon');
+        var process = require('process');
+        var conf = carbon.server.loadConfig('user-mgt.xml');
+        var confXml = new XML(conf);
+        var username = confXml.*::['Realm'].*::['Configuration'].*::['AdminUser'].*::['UserName'].text();
+        var password = confXml.*::['Realm'].*::['Configuration'].*::['AdminUser'].*::['Password'].text();
+        var url = 'https://' + process.getProperty('carbon.local.ip') + ':' + process.getProperty('mgt.transport.https.port');
+        var stub = new org.wso2.carbon.ndatasource.ui.stub.NDataSourceAdminStub(url + '/services/NDataSourceAdmin');
+        var client = stub._getServiceClient();
+        var options = client.getOptions();
+        var authenticator = new org.apache.axis2.transport.http.HttpTransportProperties.Authenticator();
+        authenticator.setUsername(username);
+        authenticator.setPassword(password);
+        authenticator.setPreemptiveAuthentication(true);
+        options.setProperty(org.apache.axis2.transport.http.HTTPConstants.AUTHENTICATE, authenticator);
+        client.setOptions(options);
 
-    var jndiConfig = new org.wso2.carbon.ndatasource.ui.stub.core.xsd.JNDIConfig();
-    var dsName = 'WSO2_STAT_DB';
-    var dsJndiName = 'jdbc/WSO2_STAT_DB';
-    jndiConfig.setName(dsJndiName);
+        var jndiConfig = new org.wso2.carbon.ndatasource.ui.stub.core.xsd.JNDIConfig();
+        var dsName = 'WSO2_STAT_DB';
+        var dsJndiName = 'jdbc/WSO2_STAT_DB';
+        jndiConfig.setName(dsJndiName);
 
-    var configString = getDataSourceConfigString(configData).result;
-    var dataSourceDefinition = new org.wso2.carbon.ndatasource.ui.stub.core.services.xsd.WSDataSourceMetaInfo_WSDataSourceDefinition();
-    dataSourceDefinition.setType("RDBMS");
-    dataSourceDefinition.setDsXMLConfiguration(configString);
+        var configString = getDataSourceConfigString(configData).result;
+        var dataSourceDefinition = new org.wso2.carbon.ndatasource.ui.stub.core.services.xsd.WSDataSourceMetaInfo_WSDataSourceDefinition();
+        dataSourceDefinition.setType("RDBMS");
+        dataSourceDefinition.setDsXMLConfiguration(configString);
 
-    var dataSourceMetaInfo = new org.wso2.carbon.ndatasource.ui.stub.core.services.xsd.WSDataSourceMetaInfo();
-    dataSourceMetaInfo.setName(dsName);
-    dataSourceMetaInfo.setDescription("The datasource used for getting statistics to API Manager");
-    dataSourceMetaInfo.setJndiConfig(jndiConfig);
-    dataSourceMetaInfo.setDefinition(dataSourceDefinition);
-    log.info("Saving datasource '" + dsName + "'...");
-    stub.addDataSource(dataSourceMetaInfo);
-    log.info("Datasource '" + dsName + "' saved");
-    return {
-        error:false
-    };
+        var dataSourceMetaInfo = new org.wso2.carbon.ndatasource.ui.stub.core.services.xsd.WSDataSourceMetaInfo();
+        dataSourceMetaInfo.setName(dsName);
+        dataSourceMetaInfo.setDescription("The datasource used for getting statistics to API Manager");
+        dataSourceMetaInfo.setJndiConfig(jndiConfig);
+        dataSourceMetaInfo.setDefinition(dataSourceDefinition);
+        log.info("Saving datasource '" + dsName + "'...");
+        stub.addDataSource(dataSourceMetaInfo);
+        log.info("Datasource '" + dsName + "' saved");
+        return {
+            error: false
+        };
+    } catch (ex) {
+        var message = "Error occurred while saving datasource (Cause:" + ex.message + ")";
+        log.error(message);
+        return {
+            error: true,
+            message: message
+        };
+    }
 };
 
 
 var addToolbox = function (configData) {
+    try {
+        var process = require('process');
+        var toolBoxPath = process.getProperty('carbon.home') + '/statistics';
+        var toolBoxName = '';
 
-    var process = require('process');
-    var toolBoxPath = process.getProperty('carbon.home') + '/statistics';
-    var toolBoxName = '';
+        if ('oracle.jdbc.OracleDriver' == configData.statDsDriver) {
+            toolBoxName = 'API_Manager_Analytics_Oracle.tbox';
+        } else {
+            toolBoxName = 'API_Manager_Analytics.tbox';
+        }
+        toolBoxPath = toolBoxPath + '/' + toolBoxName;
+        var file = new java.io.File(toolBoxPath);
 
-    if ('oracle.jdbc.OracleDriver' == configData.statDsDriver) {
-        toolBoxName = 'API_Manager_Analytics_Oracle.tbox';
-    } else {
-        toolBoxName = 'API_Manager_Analytics.tbox';
+        var byteArray = org.apache.commons.io.FileUtils.readFileToByteArray(file);
+        var dataHandler = new javax.activation.DataHandler(byteArray, "application/octet-stream");
+
+        var stub = new org.wso2.carbon.bam.toolbox.deployer.stub.BAMToolboxDepolyerServiceStub(configData.eventAnalyserURL + '/services/BAMToolboxDepolyerService');
+        var client = stub._getServiceClient();
+        var options = client.getOptions();
+        var authenticator = new org.apache.axis2.transport.http.HttpTransportProperties.Authenticator();
+        authenticator.setUsername(configData.eventAnalyserUsername);
+        authenticator.setPassword(configData.eventAnalyserPassword);
+        authenticator.setPreemptiveAuthentication(true);
+        options.setProperty(org.apache.axis2.transport.http.HTTPConstants.AUTHENTICATE, authenticator);
+        client.setOptions(options);
+        log.info("Deploying BAM toolbox '" + toolBoxName + "'...");
+        stub.uploadBAMToolBox(dataHandler, toolBoxName);
+        log.info("BAM toolbox '" + toolBoxName + "' deployed");
+        return {
+            error: false
+        };
+    } catch (ex) {
+        var message = "Error occurred while installing BAM Toolbox (Cause:" + ex.message + ")";
+        log.error(message);
+        return {
+            error: true,
+            message: message
+        };
     }
-    toolBoxPath = toolBoxPath + '/' + toolBoxName;
-    var file = new java.io.File(toolBoxPath);
-
-    var byteArray = org.apache.commons.io.FileUtils.readFileToByteArray(file);
-    var dataHandler = new javax.activation.DataHandler(byteArray,"application/octet-stream");
-
-    var stub = new org.wso2.carbon.bam.toolbox.deployer.stub.BAMToolboxDepolyerServiceStub(configData.eventAnalyserURL + '/services/BAMToolboxDepolyerService');
-    var client = stub._getServiceClient();
-    var options = client.getOptions();
-    var authenticator = new org.apache.axis2.transport.http.HttpTransportProperties.Authenticator();
-    authenticator.setUsername(configData.eventAnalyserUsername);
-    authenticator.setPassword(configData.eventAnalyserPassword);
-    authenticator.setPreemptiveAuthentication(true);
-    options.setProperty(org.apache.axis2.transport.http.HTTPConstants.AUTHENTICATE, authenticator);
-    client.setOptions(options);
-    log.info("Deploying BAM toolbox '" + toolBoxName + "'...");
-    stub.uploadBAMToolBox(dataHandler, toolBoxName);
-    log.info("BAM toolbox '" + toolBoxName + "' deployed");
-    return {
-        error:false
-    };
 };
 
 var addBamServerProfile = function (configData) {
 
-    var carbon = require('carbon');
-    //org.wso2.carbon.apimgt.impl.utils.APIUtil.addBamServerProfile(configData.eventReceiverURL,
-           // configData.eventReceiverUsername, configData.eventReceiverPassword, parseInt(carbon.server.tenantId()));
-    return {
-        error:false
-    };
+    try {
+        var carbon = require('carbon');
+        //org.wso2.carbon.apimgt.impl.utils.APIUtil.addBamServerProfile(configData.eventReceiverURL,
+        // configData.eventReceiverUsername, configData.eventReceiverPassword, parseInt(carbon.server.tenantId()));
+        return {
+            error: false
+        };
+    } catch (ex) {
+        var message = "Error occurred while creating BAM Server Profile (Cause:" + ex.message + ")";
+        log.error(message);
+        return {
+            error: true,
+            message: message
+        };
+    }
 };
 
 var getDataSourceConfigString = function (configData) {
