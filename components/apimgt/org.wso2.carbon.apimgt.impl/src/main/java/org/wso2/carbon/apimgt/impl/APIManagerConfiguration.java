@@ -68,7 +68,7 @@ public class APIManagerConfiguration {
 
     private boolean initialized;
 
-    private Map<String,Environment> apiGatewayEnvironments = new HashMap<String, Environment>();
+    private Map<String, Environment> apiGatewayEnvironments = new HashMap<String, Environment>();
     private Set<APIStore> externalAPIStores = new HashSet<APIStore>();
 
     public Map<String, Map<String, String>> getLoginConfiguration() {
@@ -369,7 +369,7 @@ public class APIManagerConfiguration {
         return text;
     }
 
-    public Map<String,Environment> getApiGatewayEnvironments() {
+    public Map<String, Environment> getApiGatewayEnvironments() {
         return apiGatewayEnvironments;
     }
 

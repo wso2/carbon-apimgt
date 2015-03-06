@@ -68,6 +68,7 @@ import javax.xml.stream.XMLStreamException;
 import java.io.File;
 import java.util.*;
 import java.util.Collection;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -459,6 +460,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      * @param api API
      * @throws org.wso2.carbon.apimgt.api.APIManagementException
      *          if failed to update API
+     * @return map of failed environments
      */
     public Map<String, List<String>> updateAPI(API api) throws APIManagementException {
         Map<String, List<String>> failedGateways = new HashMap<String, List<String>>();
@@ -792,7 +794,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
     public Map<String, List<String>> changeAPIStatus(API api, APIStatus status, String userId,
                                                      boolean updateGatewayConfig) throws APIManagementException {
-        Map<String, List<String>> failedGateways = new HashMap<String, List<String>>();
+        Map<String, List<String>> failedGateways = new ConcurrentHashMap<String, List<String>>();
         APIStatus currentStatus = api.getStatus();
         if (!currentStatus.equals(status)) {
             api.setStatus(status);
@@ -823,7 +825,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                             api.setEnvironments(publishedEnvironments);
                             updateApiArtifact(api, true, false);
                             failedGateways.clear();
-                            failedGateways.put("UNPUBLISHED", new ArrayList<String>());
+                            failedGateways.put("UNPUBLISHED", Collections.EMPTY_LIST);
                             failedGateways.put("PUBLISHED", failedToPublishEnvironments);
                         }
                     } else {
@@ -836,7 +838,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                             updateApiArtifact(api, true, false);
                             failedGateways.clear();
                             failedGateways.put("UNPUBLISHED", failedToRemoveEnvironments);
-                            failedGateways.put("PUBLISHED", new ArrayList<String>());
+                            failedGateways.put("PUBLISHED", Collections.EMPTY_LIST);
                         }
                     }
                 }
@@ -961,7 +963,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
     }
 
-    private List<String> removeFromGateway(API api)  {
+    private List<String> removeFromGateway(API api) {
         String tenantDomain = null;
         List<String> failedEnvironment;
         if (api.getId().getProviderName().contains("AT")) {
@@ -970,7 +972,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
 
         APIGatewayManager gatewayManager = APIGatewayManager.getInstance();
-            failedEnvironment=gatewayManager.removeFromGateway(api, tenantDomain);
+        failedEnvironment = gatewayManager.removeFromGateway(api, tenantDomain);
         if(log.isDebugEnabled()){
         	String logMessage = "API Name: " + api.getId().getApiName() + ", API Version "+api.getId().getVersion()+" deleted from gateway";
         	log.debug(logMessage);
@@ -988,7 +990,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         APIGatewayManager gatewayManager = APIGatewayManager.getInstance();
         return gatewayManager.removeDefaultAPIFromGateway(api, tenantDomain);
 
-        }
+    }
 
     private boolean isAPIPublished(API api) {
             String tenantDomain = null;
@@ -1862,7 +1864,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             boolean gatewayExists = config.getApiGatewayEnvironments().size() > 0;
             String gatewayType = config.getFirstProperty(APIConstants.API_GATEWAY_TYPE);
 
-            API api = APIUtil.getAPI(apiArtifact);
+            API api = new API(identifier);
             api.setAsDefaultVersion(Boolean.valueOf(isDefaultVersion));
             api.setAsPublishedDefaultVersion(api.getId().getVersion().equals(apiMgtDAO.getPublishedDefaultVersion(api.getId())));
 

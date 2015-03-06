@@ -1698,6 +1698,7 @@ public class APIStoreHostObject extends ScriptableObject {
                                                      api.getTransports()) + "|");
                     }
                     if (!"".equals(envDetails.toString())) {
+                        //removig last seperator mark
                         envDetails = envDetails.deleteCharAt(envDetails.length() - 1);
 
                     }
@@ -1821,11 +1822,10 @@ public class APIStoreHostObject extends ScriptableObject {
         Map<String, Environment> environments = config.getApiGatewayEnvironments();
         
         int index = 0;
-        for (Environment environment:environments.values()) {
-                	 	String apiGatewayEndpoints = environment.getApiGatewayEndpoint();
+        for (Environment environment : environments.values()) {
+        	String apiGatewayEndpoints = environment.getApiGatewayEndpoint();
 
-
-            List<String> urlsList = new ArrayList<String>();
+        	List<String> urlsList = new ArrayList<String>();
         	urlsList.addAll(Arrays.asList(apiGatewayEndpoints.split(",")));
         	ListIterator<String> it = urlsList.listIterator();
         	

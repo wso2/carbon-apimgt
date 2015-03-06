@@ -688,7 +688,6 @@ public final class APIUtil {
             }
             writeEnvironmentsToArtifact(artifact, api);
 
-
         } catch (GovernanceException e) {
             String msg = "Failed to create API for : " + api.getId().getApiName();
             log.error(msg, e);
@@ -1195,7 +1194,7 @@ public final class APIUtil {
                 .getApiGatewayEnvironments();
         if (gatewayEnvironments.size() > 1) {
             for (Environment environment : gatewayEnvironments.values()) {
-                if ("production".equals(environment)) {
+                if (APIConstants.GATEWAY_ENV_TYPE_PRODUCTION.equals(environment.getType())) {
                     gatewayURLs = environment.getApiGatewayEndpoint(); // This might have http,https
                     // endpoints
                     gatewayURL = APIUtil.extractHTTPSEndpoint(gatewayURLs, transports);
@@ -1203,7 +1202,7 @@ public final class APIUtil {
                 }
             }
         } else {
-            gatewayURLs = ((Environment)gatewayEnvironments.values().toArray()[0]).getApiGatewayEndpoint();
+            gatewayURLs = ((Environment) gatewayEnvironments.values().toArray()[0]).getApiGatewayEndpoint();
             gatewayURL = extractHTTPSEndpoint(gatewayURLs, transports);
         }
 
@@ -2849,7 +2848,7 @@ public final class APIUtil {
 		APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
                 getAPIManagerConfigurationService().getAPIManagerConfiguration();
 
-        Environment environment = (Environment)config.getApiGatewayEnvironments().values().toArray()[0];
+        Environment environment = (Environment) config.getApiGatewayEnvironments().values().toArray()[0];
         String endpoints = environment.getApiGatewayEndpoint();
         String[] endpointsSet = endpoints.split(",");
         String apiContext = api.getContext();
@@ -3007,7 +3006,7 @@ public final class APIUtil {
 		APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
                 getAPIManagerConfigurationService().getAPIManagerConfiguration();
 
-        Environment environment = (Environment)config.getApiGatewayEnvironments().values().toArray()[0];
+        Environment environment = (Environment) config.getApiGatewayEnvironments().values().toArray()[0];
         String endpoints = environment.getApiGatewayEndpoint();
         String[] endpointsSet = endpoints.split(",");
         String apiContext = api.getContext();
@@ -3864,22 +3863,22 @@ public final class APIUtil {
     public static Set<String> extractEnvironmentsForAPI(String environments) {
         Set<String> environmentStringSet = null;
         if (environments == null) {
-            environmentStringSet= new HashSet<String>(
+            environmentStringSet = new HashSet<String>(
                     ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
                                           .getAPIManagerConfiguration().getApiGatewayEnvironments().keySet());
         } else {
             //handle not to publish to any of the gateways
             if ("none".equals(environments)) {
-                environmentStringSet= new HashSet<String>(Arrays.asList(new String[] { "none" }));
+                environmentStringSet = new HashSet<String>(Arrays.asList(new String[] { "none" }));
             }
             //handle to set published gateways nto api object
             else if (!"".equals(environments)) {
                 String[] publishEnvironmentArray = environments.split(",");
-                environmentStringSet= new HashSet<String>(Arrays.asList(publishEnvironmentArray));
+                environmentStringSet = new HashSet<String>(Arrays.asList(publishEnvironmentArray));
             }
             //handle to publish to any of the gateways when api creating stage
             else if ("".equals(environments)) {
-                environmentStringSet= new HashSet<String>(
+                environmentStringSet = new HashSet<String>(
                         ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
                                               .getAPIManagerConfiguration().getApiGatewayEnvironments().keySet());
             }

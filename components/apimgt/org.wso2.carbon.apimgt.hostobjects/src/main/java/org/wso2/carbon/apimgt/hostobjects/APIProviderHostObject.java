@@ -84,6 +84,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.*;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -297,7 +298,7 @@ public class APIProviderHostObject extends ScriptableObject {
      * @param thisObj Scriptable object
      * @param args    Passing arguments
      * @param funObj  Function object
-     * @return true if the API was added successfully
+     * @return json String of environments failed
      * @throws APIManagementException Wrapped exception by org.wso2.carbon.apimgt.api.APIManagementException
      */
     public static String jsFunction_manageAPI(Context cx, Scriptable thisObj,
@@ -469,12 +470,12 @@ public class APIProviderHostObject extends ScriptableObject {
      * @param thisObj Scriptable object
      * @param args    Passing arguments
      * @param funObj  Function object
-     * @return true if the API was added successfully
+     * @return json string of failed environments
      * @throws APIManagementException Wrapped exception by org.wso2.carbon.apimgt.api.APIManagementException
      */
     public static String jsFunction_updateAPIImplementation(Context cx, Scriptable thisObj,
-                                                            Object[] args, Function funObj) throws APIManagementException, ScriptException {
-    	boolean success = false;
+                                                            Object[] args, Function funObj)
+            throws APIManagementException, ScriptException {
     	
     	if (args==null||args.length == 0) {
             handleException("Invalid number of input parameters.");
@@ -560,13 +561,14 @@ public class APIProviderHostObject extends ScriptableObject {
      * @param thisObj Scriptable object
      * @param args    Passing arguments
      * @param funObj  Function object
-     * @return true if the API was added successfully
+     * @return json string of failed environments
      * @throws APIManagementException Wrapped exception by org.wso2.carbon.apimgt.api.APIManagementException
      */
     public static String jsFunction_updateAPIDesign(Context cx, Scriptable thisObj,
-                                                    Object[] args, Function funObj) throws APIManagementException, ScriptException {
-    	
-    	if (args==null||args.length == 0) {
+                                                    Object[] args, Function funObj)
+            throws APIManagementException, ScriptException {
+
+        if (args==null||args.length == 0) {
             handleException("Invalid number of input parameters.");
         }
 
@@ -668,18 +670,18 @@ public class APIProviderHostObject extends ScriptableObject {
      * @param thisObj Scriptable object
      * @param args    Passing arguments
      * @param funObj  Function object
-     * @return true if the API was added successfully
+     * @return json string of failed Environments
      * @throws APIManagementException Wrapped exception by org.wso2.carbon.apimgt.api.APIManagementException
      */
     public static String jsFunction_createAPI(Context cx, Scriptable thisObj,
-                                              Object[] args, Function funObj) throws APIManagementException, ScriptException {
-    	
-    	if (args==null||args.length == 0) {
+                                              Object[] args, Function funObj)
+            throws APIManagementException, ScriptException {
+
+        if (args==null||args.length == 0) {
             handleException("Invalid number of input parameters.");
         }
 
-        boolean success = false;
-        
+
         NativeObject apiData = (NativeObject) args[0];
         
         String provider = String.valueOf(apiData.get("provider", apiData));
@@ -779,12 +781,12 @@ public class APIProviderHostObject extends ScriptableObject {
      * @param api
      * @param fileHostObject
      * @param create
-     * @return
+     * @return json string of failed Environments
      * @throws APIManagementException
      */
     private static String saveAPI(APIProvider apiProvider, String providerName, API api,
                                   FileHostObject fileHostObject, boolean create) throws APIManagementException {
-    	String success = null;
+        String success = null;
     	boolean isTenantFlowStarted = false;
         try {
             String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(providerName));
@@ -806,9 +808,10 @@ public class APIProviderHostObject extends ScriptableObject {
             }  
             if (create) {
             	apiProvider.addAPI(api);
+                success = createFailedGatewaysAsJsonString(Collections.<String, List<String>>emptyMap());
             } else {
                 Map<String, List<String>> failedGateways = apiProvider.updateAPI(api);
-                success=createFailedGatewaysAsJsonString(failedGateways);
+                success = createFailedGatewaysAsJsonString(failedGateways);
             }
 
         } catch (Exception e) {
@@ -830,11 +833,11 @@ public class APIProviderHostObject extends ScriptableObject {
      * @return set of Uri Templates according to api
      * @throws APIManagementException
      */
-     private static Set<URITemplate> parseResourceConfig(APIProvider apiProvider,
+    private static Set<URITemplate> parseResourceConfig(APIProvider apiProvider,
                                                         APIIdentifier apiId,
                                                         String resourceConfigsJSON, API api)
             throws APIManagementException {
-    	JSONParser parser = new JSONParser();
+        JSONParser parser = new JSONParser();
         JSONObject resourceConfigs = null;
         JSONObject api_doc = null;
         Set<URITemplate> uriTemplates = new LinkedHashSet<URITemplate>();
@@ -1723,6 +1726,15 @@ public class APIProviderHostObject extends ScriptableObject {
         return success;
     }
 
+    /**
+     *
+     * @param cx Rhino context
+     * @param thisObj Scriptable object
+     * @param args Passing arguments
+     * @param funObj Function object
+     * @return json string of failed environments
+     * @throws APIManagementException
+     */
     public static String jsFunction_updateAPIStatus(Context cx, Scriptable thisObj,
                                                     Object[] args,
                                                     Function funObj)
@@ -1730,7 +1742,7 @@ public class APIProviderHostObject extends ScriptableObject {
         if (args == null || args.length == 0) {
             handleException("Invalid number of input parameters.");
         }
-        Map<String, List<String>> failedGateways = new HashMap<String, List<String>>();
+        Map<String, List<String>> failedGateways = new ConcurrentHashMap<String, List<String>>();
         NativeObject apiData = (NativeObject) args[0];
         String success = null;
         String provider = (String) apiData.get("provider", apiData);
@@ -1779,7 +1791,7 @@ public class APIProviderHostObject extends ScriptableObject {
                         }
                     }
                 }
-                success = createFailedGatewaysAsJsonString(failedGateways);
+
             } else {
                 handleException("Couldn't find an API with the name-" + name + "version-" + version);
             }
@@ -1791,7 +1803,7 @@ public class APIProviderHostObject extends ScriptableObject {
         		PrivilegedCarbonContext.endTenantFlow();
         	}
         }
-        return success;
+        return createFailedGatewaysAsJsonString(failedGateways);
     }
 
     public static boolean jsFunction_updateSubscriptionStatus(Context cx, Scriptable thisObj,
@@ -2202,6 +2214,7 @@ public class APIProviderHostObject extends ScriptableObject {
                     }
                     myn.put(44, myn, environmentsPublished.toString());
                 }
+
 
             } else {
                 handleException("Cannot find the requested API- " + apiName +
@@ -4030,8 +4043,8 @@ public class APIProviderHostObject extends ScriptableObject {
             if (mappings.size() > 0) {
                 APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
                         getAPIManagerConfigurationService().getAPIManagerConfiguration();
-                Map<String,Environment> gatewayEnvs = config.getApiGatewayEnvironments();
-                for(Environment environment : gatewayEnvs.values()){
+                Map<String, Environment> gatewayEnvs = config.getApiGatewayEnvironments();
+                for (Environment environment : gatewayEnvs.values()) {
                     APIAuthenticationAdminClient client = new APIAuthenticationAdminClient(environment);
                     client.invalidateKeys(mappings);
                 }
@@ -4670,27 +4683,31 @@ public class APIProviderHostObject extends ScriptableObject {
         return myn;
     }
 
+    /**
+     * @param failedGateways map of failed environments
+     * @return json string of input map
+     */
     private static String createFailedGatewaysAsJsonString(Map<String, List<String>> failedGateways) {
-        String failedJson = null;
-        if (!failedGateways.isEmpty()) {
-            StringBuilder failedToPublish = new StringBuilder();
-            StringBuilder failedToUnPublish = new StringBuilder();
-            for (String environmentName : failedGateways.get("PUBLISHED")) {
-                failedToPublish.append(environmentName + ",");
+        String failedJson = "{\"PUBLISHED\" : \"\" ,\"UNPUBLISHED\":\"\"}";
+        if (failedGateways != null) {
+            if (!failedGateways.isEmpty()) {
+                StringBuilder failedToPublish = new StringBuilder();
+                StringBuilder failedToUnPublish = new StringBuilder();
+                for (String environmentName : failedGateways.get("PUBLISHED")) {
+                    failedToPublish.append(environmentName + ",");
+                }
+                for (String environmentName : failedGateways.get("UNPUBLISHED")) {
+                    failedToUnPublish.append(environmentName + ",");
+                }
+                if (!"".equals(failedToPublish.toString())) {
+                    failedToPublish.deleteCharAt(failedToPublish.length() - 1);
+                }
+                if (!"".equals(failedToUnPublish.toString())) {
+                    failedToUnPublish.deleteCharAt(failedToUnPublish.length() - 1);
+                }
+                failedJson = "{\"PUBLISHED\" : \"" + failedToPublish.toString() + "\" ,\"UNPUBLISHED\":\"" +
+                             failedToUnPublish.toString() + "\"}";
             }
-            for (String environmentName : failedGateways.get("UNPUBLISHED")) {
-                failedToUnPublish.append(environmentName + ",");
-            }
-            if (!"".equals(failedToPublish.toString())) {
-                failedToPublish.deleteCharAt(failedToPublish.length() - 1);
-            }
-            if (!"".equals(failedToUnPublish.toString())) {
-                failedToUnPublish.deleteCharAt(failedToUnPublish.length() - 1);
-            }
-            failedJson = "{\"PUBLISHED\" : \"" + failedToPublish.toString() + "\" ,\"UNPUBLISHED\":\"" +
-                         failedToUnPublish.toString() + "\"}";
-        } else if (failedGateways == null) {
-            failedJson = "{\"PUBLISHED\" : \"\" ,\"UNPUBLISHED\":\"\"}";
         }
         return failedJson;
     }
