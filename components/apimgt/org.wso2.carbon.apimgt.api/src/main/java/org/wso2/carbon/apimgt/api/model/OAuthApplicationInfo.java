@@ -89,4 +89,8 @@ public class OAuthApplicationInfo {
         this.parameters.putAll(parameters);
     }
 
+    public void removeParameter(String key){
+        this.parameters.remove(key);
+    }
+
 }

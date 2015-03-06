@@ -2068,28 +2068,35 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                                                                String applicationName,
                                                                String tokenType)
             throws APIManagementException {
-
-        Application application = apiMgtDAO.getApplicationByName(applicationName, userId);
-        String status = apiMgtDAO.getRegistrationApprovalState(application.getId(), tokenType);
         Map<String, String> keyDetails = null;
+        String workflowReference = apiMgtDAO.getWorkflowReference(applicationName, userId);
+        if(workflowReference != null) {
+            WorkflowDTO workflowDTO = apiMgtDAO.retrieveWorkflow(workflowReference);
+            if(workflowDTO != null){
+            WorkflowStatus status = workflowDTO.getStatus();
+            ApplicationRegistrationWorkflowDTO registrationWorkflowDTO = (ApplicationRegistrationWorkflowDTO)
+                    workflowDTO;
 
-        SubscriberKeyMgtClient keyMgtClient = APIUtil.getKeyManagementClient();
-        if (APIConstants.AppRegistrationStatus.REGISTRATION_APPROVED.equals(status)) {
-            ApplicationRegistrationWorkflowDTO workflowDTO = apiMgtDAO.populateAppRegistrationWorkflowDTO(application.getId());
-            if (workflowDTO == null) {
-                throw new APIManagementException("Couldn't populate WorkFlow details.");
+            if (APIConstants.AppRegistrationStatus.REGISTRATION_APPROVED.equals(status)) {
+                apiMgtDAO.populateAppRegistrationWorkflowDTO(registrationWorkflowDTO);
+                if (workflowDTO == null) {
+                    throw new APIManagementException("Couldn't populate WorkFlow details.");
+                }
+                try {
+                    AbstractApplicationRegistrationWorkflowExecutor.dogenerateKeysForApplication(registrationWorkflowDTO);
+                    AccessTokenInfo tokenInfo = registrationWorkflowDTO.getAccessTokenInfo();
+                    OAuthApplicationInfo oauthApp = registrationWorkflowDTO.getApplicationInfo();
+                    keyDetails = new HashMap<String, String>();
+                    keyDetails.put("accessToken", tokenInfo.getAccessToken());
+                    keyDetails.put("consumerKey", oauthApp.getClientId());
+                    keyDetails.put("consumerSecret", (String) oauthApp.getParameter(ApplicationConstants
+                                                                                      .OAUTH_CLIENT_SECRET));
+                    keyDetails.put("validityTime", Long.toString(tokenInfo.getValidityPeriod()));
+                    keyDetails.put("accessallowdomains", registrationWorkflowDTO.getDomainList());
+                } catch (APIManagementException e) {
+                    APIUtil.handleException("Error occurred while Creating Keys.", e);
+                }
             }
-            try {
-                ApplicationKeysDTO dto = keyMgtClient.getApplicationAccessKey(userId, application.getName(), tokenType,
-                                                                              application.getCallbackUrl(), workflowDTO.getAllowedDomains(), Long.toString(workflowDTO.getValidityTime()));
-                keyDetails = new HashMap<String, String>();
-                keyDetails.put("accessToken", dto.getApplicationAccessToken());
-                keyDetails.put("consumerKey", dto.getConsumerKey());
-                keyDetails.put("consumerSecret", dto.getConsumerSecret());
-                keyDetails.put("validityTime", dto.getValidityTime());
-                keyDetails.put("accessallowdomains", workflowDTO.getDomainList());
-            } catch (Exception e) {
-                APIUtil.handleException("Error occurred while executing SubscriberKeyMgtClient.", e);
             }
         }
         return keyDetails;

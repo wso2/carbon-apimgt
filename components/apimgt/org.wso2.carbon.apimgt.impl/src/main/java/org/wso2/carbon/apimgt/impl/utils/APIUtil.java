@@ -1824,6 +1824,22 @@ public final class APIUtil {
            }
            return api;
        }
+
+    /**
+     * Gets the List of Authorized Domains by consumer key.
+     * @param consumerKey
+     * @return
+     * @throws APIManagementException
+     */
+    public static List<String> getListOfAuthorizedDomainsByConsumerKey(String consumerKey)
+            throws APIManagementException {
+        String list = ApiMgtDAO.getAuthorizedDomainsByConsumerKey(consumerKey);
+        if(list != null || !list.isEmpty()){
+            return Arrays.asList(list.split(","));
+        }
+
+        return null;
+    }
     
     public static boolean checkAccessTokenPartitioningEnabled() {
         return OAuthServerConfiguration.getInstance().isAccessTokenPartitioningEnabled();
