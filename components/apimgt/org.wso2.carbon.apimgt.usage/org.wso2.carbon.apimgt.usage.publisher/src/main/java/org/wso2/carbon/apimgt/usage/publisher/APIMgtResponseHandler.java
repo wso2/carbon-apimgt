@@ -21,8 +21,10 @@ package org.wso2.carbon.apimgt.usage.publisher;
 import org.apache.axiom.soap.SOAPBody;
 import org.apache.axiom.soap.SOAPEnvelope;
 import org.apache.synapse.MessageContext;
+import org.apache.synapse.SynapseConstants;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.mediators.AbstractMediator;
+import org.apache.synapse.rest.RESTConstants;
 import org.apache.synapse.transport.passthru.util.RelayUtils;
 import org.wso2.carbon.apimgt.usage.publisher.dto.ResponsePublisherDTO;
 import org.wso2.carbon.apimgt.usage.publisher.internal.UsageComponent;
@@ -30,6 +32,7 @@ import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import javax.xml.stream.XMLStreamException;
 import java.io.IOException;
+import java.net.URL;
 import java.util.Map;
 
 /*
@@ -167,6 +170,13 @@ public class APIMgtResponseHandler extends AbstractMediator {
             responsePublisherDTO.setCacheHit(cacheHit);
             responsePublisherDTO.setResponseSize(responseSize);
             responsePublisherDTO.setEventTime(endTime);//This is the timestamp response event published
+            String url = (String) mc.getProperty(
+                    RESTConstants.REST_URL_PREFIX);
+            URL apiurl = new URL(url);
+            int port = apiurl.getPort();
+            String protocol = mc.getProperty(
+                    SynapseConstants.TRANSPORT_IN_NAME) + "-" + port;
+            responsePublisherDTO.setProtocol(protocol);
             publisher.publishEvent(responsePublisherDTO);
 
         } catch (Throwable e) {

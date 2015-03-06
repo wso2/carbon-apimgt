@@ -30,6 +30,8 @@ public class APIResourcePathUsageDTO {
 
     private long count;
 
+    private String time;
+
     public String getApiName() {
         return apiName;
     }
@@ -69,4 +71,8 @@ public class APIResourcePathUsageDTO {
     public void setCount(long count) {
         this.count = count;
     }
+
+    public String getTime() {return time;}
+
+    public void setTime(String time) {this.time = time;}
 }

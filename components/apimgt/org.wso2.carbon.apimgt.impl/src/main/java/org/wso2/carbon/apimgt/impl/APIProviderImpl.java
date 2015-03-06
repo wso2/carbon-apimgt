@@ -398,8 +398,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     contextCache.put(api.getContext(), true);
                 }
             }
-        } catch (APIManagementException e) {          
-            throw new APIManagementException("Error in adding API :"+api.getId().getApiName(),e);
+        } catch (APIManagementException e) {
+            throw new APIManagementException("Error in adding API - " + api.getId().getApiName() + "-" +
+                                             api.getId().getVersion() + ". " + e.getMessage(), e);
         }
     }
 
@@ -574,8 +575,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 }
 
             } catch (APIManagementException e) {
-            	handleException("Error while updating the API :" +api.getId().getApiName(),e);
-            }  catch (AxisFault axisFault) {
+                handleException("Error in adding API - " + api.getId().getApiName() + "-" + api.getId().getVersion() +
+                                ". " + e.getMessage(), e);
+            } catch (AxisFault axisFault) {
                 handleException("Error while invalidating API resource cache", axisFault);
             } catch (RegistryException e) {
             	handleException("Error while creating swagger 1.1 API definition:" + api.getId().getApiName(),e);
@@ -705,14 +707,17 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             }
             }
         } catch (Exception e) {
-        	 try {
-                 registry.rollbackTransaction();
-             } catch (RegistryException re) {
-                 handleException("Error while rolling back the transaction for API: " +
-                                 api.getId().getApiName(), re);
-             }
-             handleException("Error while performing registry transaction operation", e);
-           
+            try {
+                registry.rollbackTransaction();
+            } catch (RegistryException re) {
+                handleException("Error while rolling back the transaction for API: " + api.getId().getApiName(), re);
+            }
+            if (e.getMessage() != null) {
+                handleException(e.getMessage(), e);
+            } else {
+                handleException("Error while performing registry transaction operation", e);
+            }
+
         }
     }
     
@@ -787,7 +792,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 }
                 
             } catch (APIManagementException e) {
-            	handleException("Error occured in the status change : " + api.getId().getApiName() , e);
+                handleException("Error occured in the status change - " + api.getId().getApiName() + "-" +
+                                api.getId().getVersion() + ". " + e.getMessage(), e);
             }
             finally {
                 PrivilegedCarbonContext.endTenantFlow();
@@ -869,7 +875,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         try {
             gatewayManager.publishToGateway(api, builder, tenantDomain);
         } catch (Exception e) {
-            handleException("Error while publishing to Gateway ", e);
+            throw new APIManagementException(e.getMessage(), e);
         }
         if (log.isDebugEnabled()) {
         	String logMessage = "API Name: " + api.getId().getApiName() + ", API Version "+api.getId().getVersion()+" published to gateway";

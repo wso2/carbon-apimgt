@@ -806,9 +806,9 @@ public class APIProviderHostObject extends ScriptableObject {
             	apiProvider.updateAPI(api);
             }
             success = true;
-        } catch (Exception e) {
-            handleException("Error while adding the API- " + api.getId().getApiName() + "-" + api.getId().getVersion(), e);
-            return false;
+        } catch (ScriptException e) {
+            throw new APIManagementException("Error while adding api thumbnail for " + api.getId().getApiName() + "-" +
+                                             api.getId().getVersion(), e);
         } finally {
         	if (isTenantFlowStarted) {
         		PrivilegedCarbonContext.endTenantFlow();
@@ -1693,11 +1693,9 @@ public class APIProviderHostObject extends ScriptableObject {
         return success;
     }
 
-    public static boolean jsFunction_updateAPIStatus(Context cx, Scriptable thisObj,
-                                                     Object[] args,
-                                                     Function funObj)
+    public static boolean jsFunction_updateAPIStatus(Context cx, Scriptable thisObj, Object[] args, Function funObj) 
             throws APIManagementException {
-        if (args==null || args.length == 0) {
+        if (args == null || args.length == 0) {
             handleException("Invalid number of input parameters.");
         }
 
@@ -1705,20 +1703,22 @@ public class APIProviderHostObject extends ScriptableObject {
         boolean success = false;
         String provider = (String) apiData.get("provider", apiData);
         String providerTenantMode = (String) apiData.get("provider", apiData);
-        provider=APIUtil.replaceEmailDomain(provider);
+        provider = APIUtil.replaceEmailDomain(provider);
         String name = (String) apiData.get("apiName", apiData);
         String version = (String) apiData.get("version", apiData);
         String status = (String) apiData.get("status", apiData);
         boolean publishToGateway = Boolean.parseBoolean((String) apiData.get("publishToGateway", apiData));
         boolean deprecateOldVersions = Boolean.parseBoolean((String) apiData.get("deprecateOldVersions", apiData));
-        boolean makeKeysForwardCompatible = Boolean.parseBoolean((String) apiData.get("makeKeysForwardCompatible", apiData));
+        boolean makeKeysForwardCompatible =
+                                            Boolean.parseBoolean((String) apiData.get("makeKeysForwardCompatible",
+                                                                                      apiData));
         boolean isTenantFlowStarted = false;
         try {
             String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(providerTenantMode));
-            if(tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)){
-            		isTenantFlowStarted = true;
-                    PrivilegedCarbonContext.startTenantFlow();
-                    PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
+            if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
+                isTenantFlowStarted = true;
+                PrivilegedCarbonContext.startTenantFlow();
+                PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
             }
             APIProvider apiProvider = getAPIProvider(thisObj);
             APIIdentifier apiId = new APIIdentifier(provider, name, version);
@@ -1741,8 +1741,7 @@ public class APIProviderHostObject extends ScriptableObject {
                             if (oldAPI.getId().getApiName().equals(name) &&
                                 versionComparator.compare(oldAPI, api) < 0 &&
                                 (oldAPI.getStatus().equals(APIStatus.PUBLISHED))) {
-                                apiProvider.changeAPIStatus(oldAPI, APIStatus.DEPRECATED,
-                                                            currentUser, publishToGateway);
+                                apiProvider.changeAPIStatus(oldAPI, APIStatus.DEPRECATED, currentUser, publishToGateway);
                             }
                         }
                     }
@@ -1751,13 +1750,10 @@ public class APIProviderHostObject extends ScriptableObject {
             } else {
                 handleException("Couldn't find an API with the name-" + name + "version-" + version);
             }
-        } catch (APIManagementException e) {
-            handleException("Error while updating API status", e);
-            return false;
-        }finally {
-        	if (isTenantFlowStarted) {
-        		PrivilegedCarbonContext.endTenantFlow();
-        	}
+        } finally {
+            if (isTenantFlowStarted) {
+                PrivilegedCarbonContext.endTenantFlow();
+            }
         }
         return success;
     }
@@ -2213,7 +2209,8 @@ public class APIProviderHostObject extends ScriptableObject {
                         continue;
                     }
 
-                    String key = api.getId().getApiName() + " (" + api.getId().getProviderName() + ")";
+                    String[] apiData = {api.getId().getApiName(), api.getId().getVersion(),  api.getId().getProviderName()};
+                    String key = "[\""+apiData[0]+"\",\""+apiData[1]+"\",\""+apiData[2]+"\"]";
                     Long currentCount = subscriptions.get(key);
                     if (currentCount != null) {
                         subscriptions.put(key, currentCount + count);
@@ -2229,24 +2226,24 @@ public class APIProviderHostObject extends ScriptableObject {
                     sub.count = entry.getValue();
                     subscriptionData.add(sub);
                 }
-                Collections.sort(subscriptionData, new Comparator<APISubscription>() {
-                    public int compare(APISubscription o1, APISubscription o2) {
-                        // Note that o2 appears before o1
-                        // This is because we need to sort in the descending order
-                        return (int) (o2.count - o1.count);
-                    }
-                });
-                if (subscriptionData.size() > 10) {
-                    APISubscription other = new APISubscription();
-                    other.name = "[Other]";
-                    for (int i = 10; i < subscriptionData.size(); i++) {
-                        other.count = other.count + subscriptionData.get(i).count;
-                    }
-                    while (subscriptionData.size() > 10) {
-                        subscriptionData.remove(10);
-                    }
-                    subscriptionData.add(other);
-                }
+//                Collections.sort(subscriptionData, new Comparator<APISubscription>() {
+//                    public int compare(APISubscription o1, APISubscription o2) {
+//                        // Note that o2 appears before o1
+//                        // This is because we need to sort in the descending order
+//                        return (int) (o2.count - o1.count);
+//                    }
+//                });
+//                if (subscriptionData.size() > 10) {
+//                    APISubscription other = new APISubscription();
+//                    other.name = "[Other]";
+//                    for (int i = 10; i < subscriptionData.size(); i++) {
+//                        other.count = other.count + subscriptionData.get(i).count;
+//                    }
+//                    while (subscriptionData.size() > 10) {
+//                        subscriptionData.remove(10);
+//                    }
+//                    subscriptionData.add(other);
+//                }
 
                 int i = 0;
                 for (APISubscription sub : subscriptionData) {
@@ -3186,6 +3183,7 @@ public class APIProviderHostObject extends ScriptableObject {
                 row.put("method", row, usage.getMethod());
                 row.put("context", row, usage.getContext());
                 row.put("count", row, usage.getCount());
+                row.put("time", row, usage.getTime());
                 myn.put(i, myn, row);
                 i++;
             }
@@ -3666,6 +3664,7 @@ public class APIProviderHostObject extends ScriptableObject {
     private static class APISubscription {
         private String name;
         private long count;
+        private String version;
     }
 
     public static boolean jsFunction_updateDocumentation(Context cx, Scriptable thisObj,
