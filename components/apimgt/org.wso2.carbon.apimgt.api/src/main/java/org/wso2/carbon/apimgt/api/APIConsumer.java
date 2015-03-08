@@ -367,6 +367,16 @@ public interface APIConsumer extends APIManager {
     public boolean isApplicationTokenExists(String accessToken) throws APIManagementException;
 
     /**
+     * Add allowed domains for given application which is identified by OAuth consumer key
+     * This will directly add allowed domains in to API Manager database
+     * @param oAuthConsumerKey OAuth consumer key
+     * @return
+     * @throws APIManagementException
+     */
+    public void addAccessAllowDomains(String oAuthConsumerKey, String[] accessAllowDomains)
+            throws APIManagementException;
+
+    /**
      * Update exiting access allowing domain list
      * @param accessToken
      * @param accessAllowDomains
