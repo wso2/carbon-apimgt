@@ -3751,7 +3751,7 @@ public final class APIUtil {
      * @return a Map of domain names for tenant
      * @throws org.wso2.carbon.apimgt.api.APIManagementException if an error occurs when loading tiers from the registry
      */
-    public static Map<String, String> getDomainMapings(int tenantId) throws APIManagementException {
+    public static Map<String, String> getDomainMappings(int tenantId) throws APIManagementException {
         Map<String, String> domains = new HashMap<String, String>();
         try {
             Registry registry = ServiceReferenceHolder.getInstance().getRegistryService().
@@ -3760,8 +3760,8 @@ public final class APIUtil {
                 Resource resource = registry.get(APIConstants.API_DOMAIN_MAPPINGS);
                 String content = new String((byte[]) resource.getContent());
                 JSONParser parser = new JSONParser();
-                JSONObject mapings = (JSONObject) parser.parse(content);
-                Iterator entries = mapings.entrySet().iterator();
+                JSONObject mappings = (JSONObject) parser.parse(content);
+                Iterator entries = mappings.entrySet().iterator();
                 while (entries.hasNext()) {
                     Entry thisEntry = (Entry) entries.next();
                     String key = (String) thisEntry.getKey();
@@ -3769,7 +3769,6 @@ public final class APIUtil {
                     domains.put(key,value);
                 }
             }
-
         } catch (RegistryException e) {
             String msg = "Error while retrieving API tiers from registry";
             log.error(msg, e);
