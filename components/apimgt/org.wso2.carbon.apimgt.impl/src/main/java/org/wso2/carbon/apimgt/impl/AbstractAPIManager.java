@@ -894,8 +894,8 @@ public abstract class AbstractAPIManager implements APIManager {
                 PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
             }
 
-        int requestedTenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
-        domains = APIUtil.getDomainMappings(requestedTenantId);
+            int requestedTenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
+            domains = APIUtil.getDomainMappings(requestedTenantId);
 
         } finally {
             if (isTenantFlowStarted) {
@@ -903,6 +903,5 @@ public abstract class AbstractAPIManager implements APIManager {
             }
         }
         return domains;
-        //@todo if tenant flow started call finally block.
     }
 }

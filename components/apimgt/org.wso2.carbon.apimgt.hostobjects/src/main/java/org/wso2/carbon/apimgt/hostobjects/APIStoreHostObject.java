@@ -3923,13 +3923,22 @@ public class APIStoreHostObject extends ScriptableObject {
         return apiConsumer;
     }
 
+    /**
+     * This method will return domain mappings of gateways if exists
+     *
+     * @param cx      Rhino context
+     * @param thisObj Scriptable object
+     * @param args    Passing arguments
+     * @param funObj  Function object
+     * @return NativeObject that contains list of domain mappings of gateways
+     * @throws APIManagementException Wrapped exception by org.wso2.carbon.apimgt.api.APIManagementException
+     */
     public static NativeObject jsFunction_getDomainMappings(Context cx, Scriptable thisObj,
                                                   Object[] args,
                                                   Function funObj) throws APIManagementException {
         NativeObject myn = new NativeObject();
         APIConsumer apiConsumer = getAPIConsumer(thisObj);
         Map<String, String> domains = new HashMap<String, String>();
-        //If tenant domain is present in url we will use it to get available tiers
         if (args.length > 0 && args[0] != null) {
             domains = apiConsumer.getTenantDomainMappings((String) args[0]);
         }
