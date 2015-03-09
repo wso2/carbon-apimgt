@@ -20,7 +20,6 @@ package org.wso2.carbon.apimgt.impl;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
@@ -29,7 +28,6 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIManager;
 import org.wso2.carbon.apimgt.api.model.*;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
-import org.wso2.carbon.apimgt.impl.internal.APIManagerComponent;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APINameComparator;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
@@ -42,13 +40,11 @@ import org.wso2.carbon.registry.core.Collection;
 import org.wso2.carbon.registry.core.config.RegistryContext;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.core.jdbc.realm.RegistryAuthorizationManager;
-import org.wso2.carbon.registry.core.service.TenantRegistryLoader;
 import org.wso2.carbon.registry.core.session.UserRegistry;
 import org.wso2.carbon.registry.core.utils.RegistryUtils;
 import org.wso2.carbon.user.api.AuthorizationManager;
 import org.wso2.carbon.user.core.UserRealm;
 import org.wso2.carbon.user.core.UserStoreException;
-import org.wso2.carbon.utils.CarbonUtils;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
@@ -886,20 +882,26 @@ public abstract class AbstractAPIManager implements APIManager {
     /**
      * Returns a list of pre-defined # {@link org.wso2.carbon.apimgt.api.model.Tier} in the system.
      *
-     * @return Set<Tier>
+     * @return Map<String, String>
      */
     public Map<String,String> getTenantDomainMappings(String tenantDomain) throws APIManagementException {
-        PrivilegedCarbonContext.startTenantFlow();
-        PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
-        Map<String,String> domains = new HashMap<String, String>();
+        boolean isTenantFlowStarted = false;
+        Map<String,String> domains;
+        try {
+            if(tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)){
+                isTenantFlowStarted = true;
+                PrivilegedCarbonContext.startTenantFlow();
+                PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
+            }
 
-        int requestedTenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
-        if (requestedTenantId == 0) {
-            domains = APIUtil.getDomainMapings(-1);
-        } else {
-            domains = APIUtil.getDomainMapings(requestedTenantId);
+            int requestedTenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
+            domains = APIUtil.getDomainMappings(requestedTenantId);
+
+        } finally {
+            if (isTenantFlowStarted) {
+                PrivilegedCarbonContext.endTenantFlow();
+            }
         }
-        PrivilegedCarbonContext.endTenantFlow();
         return domains;
     }
 }
