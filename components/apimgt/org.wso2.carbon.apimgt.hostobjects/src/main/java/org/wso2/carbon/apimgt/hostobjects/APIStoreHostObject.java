@@ -1697,7 +1697,7 @@ public class APIStoreHostObject extends ScriptableObject {
                         envDetails.append(filterUrls(environment.getApiGatewayEndpoint(),
                                                      api.getTransports()) + "|");
                     }
-                    if (!"".equals(envDetails.toString())) {
+                    if (!envDetails.toString().isEmpty()) {
                         //removig last seperator mark
                         envDetails = envDetails.deleteCharAt(envDetails.length() - 1);
 

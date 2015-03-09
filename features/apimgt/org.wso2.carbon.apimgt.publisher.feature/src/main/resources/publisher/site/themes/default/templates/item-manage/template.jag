@@ -710,6 +710,7 @@
                             if(type=="manage"){
                                $("#environmentsRetry-modal").modal('hide');
                                $( "body" ).trigger( "api_saved" );
+                               location.href = "<%= jagg.url("/info?"+ apiUrlId ) %>";
                             }else{
                                location.href = "<%= jagg.url("/info?"+ apiUrlId ) %>";
                             }
