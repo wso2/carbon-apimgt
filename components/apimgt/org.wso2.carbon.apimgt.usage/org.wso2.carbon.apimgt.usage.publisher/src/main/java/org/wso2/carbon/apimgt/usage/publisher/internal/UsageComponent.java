@@ -52,12 +52,13 @@ public class UsageComponent {
 
     protected void activate(ComponentContext ctx) {
         try {
-            apimgtConfigReaderService = new APIMGTConfigReaderService(
-                    amConfigService.getAPIManagerConfiguration());
+            apimgtConfigReaderService = APIMGTConfigReaderService.getInstance();
+            apimgtConfigReaderService.setAPIManagerConfiguration(amConfigService.getAPIManagerConfiguration());
             BundleContext bundleContext = ctx.getBundleContext();
             bundleContext.registerService(APIMGTConfigReaderService.class.getName(),
                                           apimgtConfigReaderService, null);
-            DataPublisherUtil.setEnabledMetering(Boolean.parseBoolean(ServerConfiguration.getInstance().getFirstProperty("EnableMetering")));
+            DataPublisherUtil.setEnabledMetering(
+                    Boolean.parseBoolean(ServerConfiguration.getInstance().getFirstProperty("EnableMetering")));
 
             dataPublisherMap = new ConcurrentHashMap<String, LoadBalancingDataPublisher>();
 

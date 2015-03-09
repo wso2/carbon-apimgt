@@ -17,17 +17,18 @@
 */
 package org.wso2.carbon.apimgt.usage.publisher.service;
 
-import org.apache.axis2.util.JavaUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.usage.publisher.APIMgtUsagePublisherConstants;
+import org.wso2.carbon.apimgt.usage.publisher.DataPublisherUtil;
+
+import java.util.Map;
 
 public class APIMGTConfigReaderService {
 
-    private String bamServerThriftPort;
-    private String bamServerURL;
+    private String bamServerUrlGroups;
     private String bamServerUser;
     private String bamServerPassword;
     private boolean enabled;
@@ -42,37 +43,49 @@ public class APIMGTConfigReaderService {
 	private String faultStreamVersion;
     private String throttleStreamName;
 	private String throttleStreamVersion;
+    public static APIMGTConfigReaderService instance = new APIMGTConfigReaderService();
 	private static Log log = LogFactory.getLog(APIMGTConfigReaderService.class);
 
-    public APIMGTConfigReaderService(APIManagerConfiguration config) {
-        String enabledStr = config.getFirstProperty(APIConstants.API_USAGE_ENABLED);
-        enabled = enabledStr != null && JavaUtils.isTrueExplicitly(enabledStr);
-        bamServerThriftPort = config.getFirstProperty(APIConstants.API_USAGE_THRIFT_PORT);
-        bamServerURL = config.getFirstProperty(APIConstants.API_USAGE_BAM_SERVER_URL);
-        bamServerUser = config.getFirstProperty(APIConstants.API_USAGE_BAM_SERVER_USER);
-        bamServerPassword = config.getFirstProperty(APIConstants.API_USAGE_BAM_SERVER_PASSWORD);
+    private APIMGTConfigReaderService() {
+        enabled = DataPublisherUtil.isAnalyticsEnabled();
+        if(enabled == true) {
+            Map<String, String> analyticsConfigs = DataPublisherUtil.getAnalyticsConfigFromRegistry();
+            bamServerUrlGroups = analyticsConfigs.get(APIConstants.API_USAGE_BAM_SERVER_URL_GROUPS);
+            bamServerUser = analyticsConfigs.get(APIConstants.API_USAGE_BAM_SERVER_USER);
+            bamServerPassword = analyticsConfigs.get(APIConstants.API_USAGE_BAM_SERVER_PASSWORD);
+        }
+    }
+
+    public static synchronized APIMGTConfigReaderService getInstance(){
+        if(instance == null){
+            instance = new APIMGTConfigReaderService();
+        }
+        return instance;
+    }
+
+    public void setAPIManagerConfiguration(APIManagerConfiguration config){
         publisherClass = config.getFirstProperty(APIConstants.API_USAGE_PUBLISHER_CLASS);
-	    requestStreamName =
-			    config.getFirstProperty(APIMgtUsagePublisherConstants.API_REQUEST_STREAM_NAME);
-	    requestStreamVersion =
-			    config.getFirstProperty(APIMgtUsagePublisherConstants.API_REQUEST_STREAM_VERSION);
-	    if (requestStreamName == null || requestStreamVersion == null) {
-		    log.error("Request stream name or version is null. Check api-manager.xml");
-	    }
-	    responseStreamName =
-			    config.getFirstProperty(APIMgtUsagePublisherConstants.API_RESPONSE_STREAM_NAME);
-	    responseStreamVersion =
-			    config.getFirstProperty(APIMgtUsagePublisherConstants.API_RESPONSE_STREAM_VERSION);
-	    if (responseStreamName == null || responseStreamVersion == null) {
-		    log.error("Response stream name or version is null. Check api-manager.xml");
-	    }
-	    faultStreamName =
-			    config.getFirstProperty(APIMgtUsagePublisherConstants.API_FAULT_STREAM_NAME);
-	    faultStreamVersion =
-			    config.getFirstProperty(APIMgtUsagePublisherConstants.API_FAULT_STREAM_VERSION);
-	    if (faultStreamName == null || faultStreamVersion == null) {
-		    log.error("Fault stream name or version is null. Check api-manager.xml");
-	    }
+        requestStreamName =
+                config.getFirstProperty(APIMgtUsagePublisherConstants.API_REQUEST_STREAM_NAME);
+        requestStreamVersion =
+                config.getFirstProperty(APIMgtUsagePublisherConstants.API_REQUEST_STREAM_VERSION);
+        if (requestStreamName == null || requestStreamVersion == null) {
+            log.error("Request stream name or version is null. Check api-manager.xml");
+        }
+        responseStreamName =
+                config.getFirstProperty(APIMgtUsagePublisherConstants.API_RESPONSE_STREAM_NAME);
+        responseStreamVersion =
+                config.getFirstProperty(APIMgtUsagePublisherConstants.API_RESPONSE_STREAM_VERSION);
+        if (responseStreamName == null || responseStreamVersion == null) {
+            log.error("Response stream name or version is null. Check api-manager.xml");
+        }
+        faultStreamName =
+                config.getFirstProperty(APIMgtUsagePublisherConstants.API_FAULT_STREAM_NAME);
+        faultStreamVersion =
+                config.getFirstProperty(APIMgtUsagePublisherConstants.API_FAULT_STREAM_VERSION);
+        if (faultStreamName == null || faultStreamVersion == null) {
+            log.error("Fault stream name or version is null. Check api-manager.xml");
+        }
         throttleStreamName =
                 config.getFirstProperty(APIMgtUsagePublisherConstants.API_THROTTLE_STREAM_NAME);
         throttleStreamVersion =
@@ -80,10 +93,6 @@ public class APIMGTConfigReaderService {
         if (throttleStreamName == null || throttleStreamVersion == null) {
             log.error("Throttle stream name or version is null. Check api-manager.xml");
         }
-    }
-
-    public String getBamServerThriftPort() {
-        return bamServerThriftPort;
     }
 
     public String getBamServerPassword() {
@@ -94,8 +103,8 @@ public class APIMGTConfigReaderService {
         return bamServerUser;
     }
 
-    public String getBamServerURL() {
-        return bamServerURL;
+    public String getBamServerUrlGroups() {
+        return bamServerUrlGroups;
     }
 
     public boolean isEnabled() {

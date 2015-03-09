@@ -184,7 +184,7 @@ public class APIMgtUsageDataBridgeDataPublisher implements APIMgtUsageDataPublis
             APIMGTConfigReaderService apimgtConfigReaderService = UsageComponent.getApiMgtConfigReaderService();
 
             List<String> receiverGroups = org.wso2.carbon.databridge.agent.thrift.util.DataPublisherUtil.
-                    getReceiverGroups(apimgtConfigReaderService.getBamServerURL());
+                    getReceiverGroups(apimgtConfigReaderService.getBamServerUrlGroups());
 
             String serverUser = apimgtConfigReaderService.getBamServerUser();
             String serverPassword = apimgtConfigReaderService.getBamServerPassword();

@@ -108,7 +108,7 @@ public class APIMgtWorkflowDataPublisher {
         //Get LoadBalancingDataPublisher which has been registered for the tenant.
         LoadBalancingDataPublisher loadBalancingDataPublisher = APIManagerComponent.
                 getDataPublisher(tenantDomain);
-        String bamServerURL = config.getFirstProperty(APIConstants.API_USAGE_BAM_SERVER_URL);
+        String bamServerURL = config.getFirstProperty(APIConstants.API_USAGE_BAM_SERVER_URL_GROUPS);
         String bamServerUser = config.getFirstProperty(APIConstants.API_USAGE_BAM_SERVER_USER);
         String bamServerPassword = config.getFirstProperty(APIConstants.API_USAGE_BAM_SERVER_PASSWORD);
 
