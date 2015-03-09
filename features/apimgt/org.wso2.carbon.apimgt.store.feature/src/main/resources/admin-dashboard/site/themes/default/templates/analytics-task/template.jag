@@ -547,9 +547,9 @@ $(document).ready(function(){
             document.getElementById("eventAnalyserUsername").value = "<%=analyticsData.analytics.eventAnalyserUsername%>";
             document.getElementById("eventAnalyserPassword").value = "<%=analyticsData.analytics.eventAnalyserPassword%>";
     <% } else {%>
-            document.getElementById("eventReceiverURL").value = "tcp://localhost:7613";
+            document.getElementById("eventReceiverURL").value = "tcp://localhost:7614";
             document.getElementById("eventReceiverUsername").value = "admin";
-            document.getElementById("eventAnalyserURL").value = "https://localhost:9444";
+            document.getElementById("eventAnalyserURL").value = "https://localhost:9446";
             document.getElementById("eventAnalyserUsername").value = "admin";
     <% } %>
 

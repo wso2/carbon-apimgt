@@ -6,27 +6,26 @@ var enableAnalytics = function (enable) {
     try {
         var carbon = require('carbon');
         var process = require('process');
-        var url = 'https://' + process.getProperty('carbon.local.ip') + ':' + process.getProperty('mgt.transport.https.port') + '/admin/services/';
-        var server = new carbon.server.Server(url);
-        var options = {
-            username: jagg.getUser().username,
-            domain: carbon.server.tenantDomain(),
-            tenantId: carbon.server.tenantId()
-        };
-        var registry = new carbon.registry.Registry(server, options);
-        var path = '/_system/governance/apimgt/applicationdata/analytics.xml';
-        var ContentStr = registry.get(path);
-        if (ContentStr != null) {
-            var analytics_config = new XML(ContentStr.content);
-            analytics_config.enable = enable;
-            var resource = {
-                content: analytics_config.toXMLString(),
-                mediaType: 'text/xml'
-            };
-            log.info("Changing analytics status to - Enable:" + enable);
-            registry.put(path, resource);
-            log.info("Analytics status changed to - Enable:" + enable);
-        }
+        var userMgtConf = carbon.server.loadConfig('user-mgt.xml');
+        var confXml = new XML(userMgtConf);
+        var username = confXml.*::['Realm'].*::['Configuration'].*::['AdminUser'].*::['UserName'].text();
+        var password = confXml.*::['Realm'].*::['Configuration'].*::['AdminUser'].*::['Password'].text();
+        var url = 'https://' + process.getProperty('carbon.local.ip') + ':' + process.getProperty('mgt.transport.https.port');
+        var stub = new org.wso2.carbon.bam.service.data.publisher.stub.ServiceDataPublisherAdminStub(url + '/services/ServiceDataPublisherAdmin');
+        var client = stub._getServiceClient();
+        var options = client.getOptions();
+        var authenticator = new org.apache.axis2.transport.http.HttpTransportProperties.Authenticator();
+        authenticator.setUsername(username);
+        authenticator.setPassword(password);
+        authenticator.setPreemptiveAuthentication(true);
+        options.setProperty(org.apache.axis2.transport.http.HTTPConstants.AUTHENTICATE, authenticator);
+        client.setOptions(options);
+
+        var eventingConfigData = stub.getEventingConfigData();
+        eventingConfigData.setServiceStatsEnable((enable === "true"));
+        log.info("Saving Analytics config in registry...");
+        stub.configureEventing(eventingConfigData);
+        log.info("Analytics config saved in registry.");
 
         return {
             error: false
@@ -61,8 +60,7 @@ var addAnalyticsConfig = function (configData) {
         options.setProperty(org.apache.axis2.transport.http.HTTPConstants.AUTHENTICATE, authenticator);
         client.setOptions(options);
 
-        var eventingConfigData = new org.wso2.carbon.bam.service.data.publisher.stub.conf.EventingConfigData();
-        eventingConfigData.setPublishingEnable(true);
+        var eventingConfigData = stub.getEventingConfigData();
         eventingConfigData.setUrl(configData.eventReceiverURL);
         eventingConfigData.setUserName(configData.eventReceiverUsername);
         eventingConfigData.setPassword(configData.eventReceiverPassword);
