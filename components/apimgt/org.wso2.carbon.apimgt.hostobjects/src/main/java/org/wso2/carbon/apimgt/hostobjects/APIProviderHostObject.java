@@ -75,8 +75,6 @@ import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import javax.cache.Caching;
 import javax.net.ssl.HostnameVerifier;
-import javax.net.ssl.HttpsURLConnection;
-import javax.net.ssl.SSLHandshakeException;
 import javax.net.ssl.SSLSession;
 
 import java.io.BufferedReader;
@@ -460,7 +458,7 @@ public class APIProviderHostObject extends ScriptableObject {
             api.setUriTemplates(uriTemplates);
         }
         
-        return saveAPI(apiProvider, provider, api, null, false);
+        return saveAPI(apiProvider, api, null, false);
     }
     
     
@@ -551,7 +549,7 @@ public class APIProviderHostObject extends ScriptableObject {
             api.setUriTemplates(uriTemplates);
         }
                 
-        return saveAPI(apiProvider, provider, api, null, false);
+        return saveAPI(apiProvider, api, null, false);
     	
     }
     
@@ -661,7 +659,7 @@ public class APIProviderHostObject extends ScriptableObject {
         
         checkFileSize(fileHostObject);
         
-        return saveAPI(apiProvider, provider, api, fileHostObject, false);
+        return saveAPI(apiProvider, api, fileHostObject, false);
     }
     
     /**
@@ -717,7 +715,7 @@ public class APIProviderHostObject extends ScriptableObject {
         api.setVisibility(APIConstants.API_GLOBAL_VISIBILITY);
         api.setLastUpdated(new Date());
         
-        return saveAPI(apiProvider, provider, api, null, true);
+        return saveAPI(apiProvider, api, null, true);
     }
     
     /**
@@ -777,19 +775,19 @@ public class APIProviderHostObject extends ScriptableObject {
     /**
      * This method save or update the API object
      * @param apiProvider
-     * @param providerName
      * @param api
      * @param fileHostObject
      * @param create
      * @return json string of failed Environments
      * @throws APIManagementException
      */
-    private static String saveAPI(APIProvider apiProvider, String providerName, API api,
+    private static String saveAPI(APIProvider apiProvider, API api,
                                   FileHostObject fileHostObject, boolean create) throws APIManagementException {
         String success = null;
     	boolean isTenantFlowStarted = false;
         try {
-            String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(providerName));
+            String tenantDomain =
+                    MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(api.getId().getProviderName()));
             if(tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
             	isTenantFlowStarted = true;
                 PrivilegedCarbonContext.startTenantFlow();
@@ -801,7 +799,7 @@ public class APIProviderHostObject extends ScriptableObject {
                 String thumbPath = APIUtil.getIconPath(api.getId());
 
                 String thumbnailUrl = apiProvider.addIcon(thumbPath, icon);
-                api.setThumbnailUrl(APIUtil.prependTenantPrefix(thumbnailUrl, providerName));
+                api.setThumbnailUrl(APIUtil.prependTenantPrefix(thumbnailUrl, api.getId().getProviderName()));
 
                 /*Set permissions to anonymous role for thumbPath*/
                 APIUtil.setResourcePermissions(api.getId().getProviderName(), null, null, thumbPath);
@@ -814,9 +812,10 @@ public class APIProviderHostObject extends ScriptableObject {
                 success = createFailedGatewaysAsJsonString(failedGateways);
             }
 
-        } catch (Exception e) {
-            handleException("Error while adding the API- " + api.getId().getApiName() + "-" + api.getId().getVersion(), e);
-            return createFailedGatewaysAsJsonString(new HashMap<String, List<String>>(0));
+        } catch (ScriptException e) {
+            handleException("Error while adding the API- " + api.getId().getApiName() + "-" + api.getId().getVersion(),
+                            e);
+            return createFailedGatewaysAsJsonString(Collections.<String, List<String>>emptyMap());
         } finally {
         	if (isTenantFlowStarted) {
         		PrivilegedCarbonContext.endTenantFlow();
