@@ -19,8 +19,8 @@ var getAnalyticsConfig = function (analyticsData) {
         var path = '/_system/governance/apimgt/applicationdata/analytics.xml';
         var ContentStr = registry.get(path);*/
 
-        var conf = carbon.server.loadConfig('user-mgt.xml');
-        var confXml = new XML(conf);
+        var userMgtConf = carbon.server.loadConfig('user-mgt.xml');
+        var confXml = new XML(userMgtConf);
         var username = confXml.*::['Realm'].*::['Configuration'].*::['AdminUser'].*::['UserName'].text();
         var password = confXml.*::['Realm'].*::['Configuration'].*::['AdminUser'].*::['Password'].text();
         var service_url = 'https://' + process.getProperty('carbon.local.ip') + ':' + process.getProperty('mgt.transport.https.port');
@@ -69,8 +69,8 @@ var getDatasourceConfig = function () {
     try {
         var carbon = require('carbon');
         var process = require('process');
-        var conf = carbon.server.loadConfig('user-mgt.xml');
-        var confXml = new XML(new String(conf));
+        var userMgtConf = carbon.server.loadConfig('user-mgt.xml');
+        var confXml = new XML(userMgtConf);
         var username = confXml.Realm.Configuration.AdminUser.UserName.text();
         var password = confXml.Realm.Configuration.AdminUser.Password.text();
         var url = 'https://' + process.getProperty('carbon.local.ip') + ':' + process.getProperty('mgt.transport.https.port');
