@@ -2137,6 +2137,12 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     }
 
 
+    public void addAccessAllowDomains(String oauthConsumerKey, String[] accessAllowDomains)
+            throws APIManagementException {
+        apiMgtDAO.addAccessAllowDomains(oauthConsumerKey, accessAllowDomains);
+    }
+
+
     public void updateAccessAllowDomains(String accessToken, String[] accessAllowDomains)
             throws APIManagementException {
         apiMgtDAO.updateAccessAllowDomains(accessToken, accessAllowDomains);

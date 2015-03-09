@@ -3904,6 +3904,26 @@ public class APIStoreHostObject extends ScriptableObject {
         return null;
     }
 
+
+    public static void jsFunction_addAccessAllowDomains(Context cx, Scriptable thisObj,
+                                                                  Object[] args,
+                                                                  Function funObj) throws APIManagementException {
+        String oAuthConsumerKey = args[0].toString();
+        NativeArray accessAllowDomainsArr = (NativeArray) args[1];
+        String[] accessAllowDomainsArray = new String[(int) accessAllowDomainsArr.getLength()];
+
+        for (Object domain : accessAllowDomainsArr.getIds()) {
+            int index = (Integer) domain;
+            accessAllowDomainsArray[index] = (String) accessAllowDomainsArr.get(index, null);
+        }
+        try {
+            APIConsumer apiConsumer = getAPIConsumer(thisObj);
+            apiConsumer.addAccessAllowDomains(oAuthConsumerKey, accessAllowDomainsArray);
+        } catch (APIManagementException e) {
+            handleException("Error while adding allowed domains for oauth consumer: " + oAuthConsumerKey, e);
+        }
+    }
+
     public static void jsFunction_updateAccessAllowDomains(Context cx, Scriptable thisObj,
                                                            Object[] args,
                                                            Function funObj) throws APIManagementException, AxisFault {
