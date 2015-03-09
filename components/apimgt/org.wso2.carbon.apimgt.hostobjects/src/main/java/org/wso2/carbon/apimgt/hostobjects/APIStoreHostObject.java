@@ -2645,6 +2645,7 @@ public class APIStoreHostObject extends ScriptableObject {
             apiObj.put("subStatus", apiObj, subscribedAPI.getSubStatus());
             apiObj.put("thumburl", apiObj, APIUtil.prependWebContextRoot(api.getThumbnailUrl()));
             apiObj.put("context", apiObj, api.getContext());
+            //Read key from the appObject
             APIKey prodKey = getAppKey(appObject, APIConstants.API_KEY_TYPE_PRODUCTION);
             if (prodKey != null) {
                 apiObj.put("prodKey", apiObj, prodKey.getAccessToken());
