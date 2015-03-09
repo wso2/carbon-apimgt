@@ -345,7 +345,7 @@ public class APIKeyValidator {
         if (selectedApi.getResources().length > 0) {
             for (RESTDispatcher dispatcher : RESTUtils.getDispatchers()) {
                 Resource resource = dispatcher.findResource(synCtx, Arrays.asList(selectedApi.getResources()));
-                if (resource != null) {
+                if (resource != null && Arrays.asList(resource.getMethods()).contains(httpMethod)) {
                     selectedResource = resource;
                     break;
                 }
