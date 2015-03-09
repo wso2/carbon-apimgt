@@ -3903,7 +3903,7 @@ public final class APIUtil {
                     publishedEnvironments.append(environmentName + ",");
                 }
             }
-            if (!"".equals(publishedEnvironments.toString())) {
+            if (!publishedEnvironments.toString().isEmpty()) {
                 publishedEnvironments.deleteCharAt(publishedEnvironments.length() - 1);
             }
         }

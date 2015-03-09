@@ -2206,7 +2206,7 @@ public class APIProviderHostObject extends ScriptableObject {
                     for (String environment : api.getEnvironments()) {
                         environmentsPublished.append(environment + ",");
                     }
-                    if (!"".equals(environmentsPublished.toString())) {
+                    if (!environmentsPublished.toString().isEmpty()) {
                         environmentsPublished.deleteCharAt(environmentsPublished.length() - 1);
                     } else {
                         environmentsPublished.append("none");

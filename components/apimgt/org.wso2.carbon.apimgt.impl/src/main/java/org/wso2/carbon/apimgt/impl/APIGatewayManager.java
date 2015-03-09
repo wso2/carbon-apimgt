@@ -181,10 +181,13 @@ public class APIGatewayManager {
 					deployCustomSequences(api, tenantDomain, environment);
 				}
 			}
-            } catch (Exception ex) {
+            } catch (AxisFault axisFault) {
+                log.error("Error occurred when publish to gateway " + environmentName, axisFault);
                 failedEnvironmentsList.add(environmentName);
+            } catch (APIManagementException ex) {
+                log.error("Error occurred deploying sequences on " + environmentName, ex);
             }
-	}
+        }
         return failedEnvironmentsList;
     }
 
@@ -220,8 +223,11 @@ public class APIGatewayManager {
                     client.deleteDefaultApi(tenantDomain);
                 }
             }
-                } catch (Exception ex) {
+                } catch (AxisFault axisFault) {
+                    log.error("Error occurred when removing from gateway " + environmentName, axisFault);
                     failedEnvironmentsList.add(environmentName);
+                } catch (APIManagementException ex) {
+                    log.error("Error occurred undeploy sequences on " + environmentName, ex);
                 }
             }
 
@@ -244,7 +250,8 @@ public class APIGatewayManager {
 
                 client.deleteDefaultApi(tenantDomain);
             }
-                } catch (Exception ex) {
+                } catch (AxisFault axisFault) {
+                    log.error("Error occurred when removing default api from gateway " + environmentName, axisFault);
                     failedEnvironmentsList.add(environmentName);
                 }
             }
@@ -272,7 +279,8 @@ public class APIGatewayManager {
                 if (client.getApi(tenantDomain) != null) {
                     return true;
                 }
-            } catch (Exception ex) {
+            } catch (AxisFault axisFault) {
+                log.error("Error occurred when check api is published on gatway" + environment.getName(), axisFault);
                 failedEnvironmentsList.add(environment.getName());
             }
         }
