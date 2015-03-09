@@ -2670,7 +2670,7 @@ public class APIStoreHostObject extends ScriptableObject {
                 // apiObj.put("prodValidityRemainingTime", apiObj, getApplicationAccessTokenValidityPeriodInSeconds() * 1000);
             }
 
-            APIKey sandboxKey = getAppKey(subscribedAPI.getApplication(), APIConstants.API_KEY_TYPE_SANDBOX);
+            APIKey sandboxKey = getAppKey(appObject, APIConstants.API_KEY_TYPE_SANDBOX);
             if (sandboxKey != null) {
                 apiObj.put("sandboxKey", apiObj, sandboxKey.getAccessToken());
                 apiObj.put("sandboxConsumerKey", apiObj, sandboxKey.getConsumerKey());
