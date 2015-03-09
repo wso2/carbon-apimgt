@@ -2709,7 +2709,7 @@ public class APIStoreHostObject extends ScriptableObject {
                             if (prodKey.getValidityPeriod() == Long.MAX_VALUE) {
                                 prodEnableRegenarateOption = false;
                             }
-                            appObj.put("prodRegenerateOption", appObj, prodEnableRegenerateOption);
+                            appObj.put("prodRegenerateOption", appObj, prodEnableRegenarateOption);
                             appObj.put("prodAuthorizedDomains", appObj, prodKey.getAuthorizedDomains());
 
                             if (isApplicationAccessTokenNeverExpire(prodKey.getValidityPeriod())) {
@@ -2721,7 +2721,7 @@ public class APIStoreHostObject extends ScriptableObject {
                             appObj.put("prodKey", appObj, null);
                             appObj.put("prodConsumerKey", appObj, null);
                             appObj.put("prodConsumerSecret", appObj, null);
-                            appObj.put("prodRegenerateOption", appObj, prodEnableRegenerateOption);
+                            appObj.put("prodRegenerateOption", appObj, prodEnableRegenarateOption);
                             appObj.put("prodAuthorizedDomains", appObj, null);
                             if (isApplicationAccessTokenNeverExpire(
                                     getApplicationAccessTokenValidityPeriodInSeconds())) {
@@ -2735,7 +2735,7 @@ public class APIStoreHostObject extends ScriptableObject {
                             appObj.put("prodKey", appObj, null);
                             appObj.put("prodConsumerKey", appObj, null);
                             appObj.put("prodConsumerSecret", appObj, null);
-                            appObj.put("prodRegenerateOption", appObj, prodEnableRegenerateOption);
+                            appObj.put("prodRegenerateOption", appObj, prodEnableRegenarateOption);
                             appObj.put("prodAuthorizedDomains", appObj, null);
                             if (isApplicationAccessTokenNeverExpire(
                                     getApplicationAccessTokenValidityPeriodInSeconds())) {
@@ -2816,7 +2816,7 @@ public class APIStoreHostObject extends ScriptableObject {
                             Set<SubscribedAPI> subscribedAPIs = apiConsumer.getSubscribedAPIs(subscriber,
                                     application.getName());
                             for (SubscribedAPI subscribedAPI : subscribedAPIs) {
-                                addAPIObj(subscribedAPI, apisArray, thisObj);
+                                addAPIObj(subscribedAPI, apisArray, thisObj,application);
                             }
 
                             if (log.isDebugEnabled()) {
