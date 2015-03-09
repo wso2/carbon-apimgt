@@ -57,6 +57,7 @@ var getAPI = function (api) {
             scopes:result[41],
             isDefaultVersion:result[42],
             implementation:result[43],
+            environments:result[44],
             hasDefaultVersion:hasDefaultVersion,
             currentDefaultVersion: defaultVersion       
         };

@@ -294,6 +294,8 @@ public final class APIUtil {
             api.addTags(tags);
             api.setLastUpdated(registry.get(artifactPath).getLastModified());
             api.setImplementation(artifact.getAttribute(APIConstants.PROTOTYPE_OVERVIEW_IMPLEMENTATION));
+            String environments = artifact.getAttribute(APIConstants.API_OVERVIEW_ENVIRONMENTS);
+            api.setEnvironments(extractEnvironmentsForAPI(environments));
 
         } catch (GovernanceException e) {
             String msg = "Failed to get API for artifact ";
@@ -472,6 +474,8 @@ public final class APIUtil {
             api.addTags(tags);
             api.setLastUpdated(registry.get(artifactPath).getLastModified());
             api.setImplementation(artifact.getAttribute(APIConstants.PROTOTYPE_OVERVIEW_IMPLEMENTATION));
+            String environments = artifact.getAttribute(APIConstants.API_OVERVIEW_ENVIRONMENTS);
+            api.setEnvironments(extractEnvironmentsForAPI(environments));
 
         } catch (GovernanceException e) {
             String msg = "Failed to get API for artifact ";
@@ -541,7 +545,8 @@ public final class APIUtil {
 
             }
             api.setUriTemplates(uriTemplates);
-
+            String environments = artifact.getAttribute(APIConstants.API_OVERVIEW_ENVIRONMENTS);
+            api.setEnvironments(extractEnvironmentsForAPI(environments));
         } catch (GovernanceException e) {
             String msg = "Failed to get API from artifact ";
             throw new APIManagementException(msg, e);
@@ -681,6 +686,7 @@ public final class APIUtil {
                 i++;
 
             }
+            writeEnvironmentsToArtifact(artifact, api);
 
         } catch (GovernanceException e) {
             String msg = "Failed to create API for : " + api.getId().getApiName();
@@ -1182,21 +1188,21 @@ public final class APIUtil {
         String gatewayURLs = null;
         String gatewayURL = null;
 
-        List<Environment> gatewayEnvironments = ServiceReferenceHolder.getInstance()
+        Map<String, Environment> gatewayEnvironments = ServiceReferenceHolder.getInstance()
                 .getAPIManagerConfigurationService()
                 .getAPIManagerConfiguration()
                 .getApiGatewayEnvironments();
         if (gatewayEnvironments.size() > 1) {
-            for (int i = 0; i < gatewayEnvironments.size(); i++) {
-                if ("production".equals(gatewayEnvironments.get(i).getType())) {
-                    gatewayURLs = gatewayEnvironments.get(i).getApiGatewayEndpoint(); // This might have http,https
+            for (Environment environment : gatewayEnvironments.values()) {
+                if (APIConstants.GATEWAY_ENV_TYPE_PRODUCTION.equals(environment.getType())) {
+                    gatewayURLs = environment.getApiGatewayEndpoint(); // This might have http,https
                     // endpoints
                     gatewayURL = APIUtil.extractHTTPSEndpoint(gatewayURLs, transports);
                     break;
                 }
             }
         } else {
-            gatewayURLs = gatewayEnvironments.get(0).getApiGatewayEndpoint();
+            gatewayURLs = ((Environment) gatewayEnvironments.values().toArray()[0]).getApiGatewayEndpoint();
             gatewayURL = extractHTTPSEndpoint(gatewayURLs, transports);
         }
 
@@ -1780,6 +1786,9 @@ public final class APIUtil {
                api.addTags(tags);
                api.setLastUpdated(registry.get(artifactPath).getLastModified());
                api.setAsDefaultVersion(Boolean.valueOf(artifact.getAttribute(APIConstants.API_OVERVIEW_IS_DEFAULT_VERSION)));
+
+               String environments = artifact.getAttribute(APIConstants.API_OVERVIEW_ENVIRONMENTS);
+               api.setEnvironments(extractEnvironmentsForAPI(environments));
 
            } catch (GovernanceException e) {
                String msg = "Failed to get API fro artifact ";
@@ -2839,7 +2848,7 @@ public final class APIUtil {
 		APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
                 getAPIManagerConfigurationService().getAPIManagerConfiguration();
 
-        Environment environment = config.getApiGatewayEnvironments().get(0);
+        Environment environment = (Environment) config.getApiGatewayEnvironments().values().toArray()[0];
         String endpoints = environment.getApiGatewayEndpoint();
         String[] endpointsSet = endpoints.split(",");
         String apiContext = api.getContext();
@@ -2997,7 +3006,7 @@ public final class APIUtil {
 		APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
                 getAPIManagerConfigurationService().getAPIManagerConfiguration();
 
-        Environment environment = config.getApiGatewayEnvironments().get(0);
+        Environment environment = (Environment) config.getApiGatewayEnvironments().values().toArray()[0];
         String endpoints = environment.getApiGatewayEndpoint();
         String[] endpointsSet = endpoints.split(",");
         String apiContext = api.getContext();
@@ -3751,7 +3760,7 @@ public final class APIUtil {
      * @return a Map of domain names for tenant
      * @throws org.wso2.carbon.apimgt.api.APIManagementException if an error occurs when loading tiers from the registry
      */
-    public static Map<String, String> getDomainMapings(int tenantId) throws APIManagementException {
+    public static Map<String, String> getDomainMappings(int tenantId) throws APIManagementException {
         Map<String, String> domains = new HashMap<String, String>();
         try {
             Registry registry = ServiceReferenceHolder.getInstance().getRegistryService().
@@ -3760,8 +3769,8 @@ public final class APIUtil {
                 Resource resource = registry.get(APIConstants.API_DOMAIN_MAPPINGS);
                 String content = new String((byte[]) resource.getContent());
                 JSONParser parser = new JSONParser();
-                JSONObject mapings = (JSONObject) parser.parse(content);
-                Iterator entries = mapings.entrySet().iterator();
+                JSONObject mappings = (JSONObject) parser.parse(content);
+                Iterator entries = mappings.entrySet().iterator();
                 while (entries.hasNext()) {
                     Entry thisEntry = (Entry) entries.next();
                     String key = (String) thisEntry.getKey();
@@ -3769,7 +3778,6 @@ public final class APIUtil {
                     domains.put(key,value);
                 }
             }
-
         } catch (RegistryException e) {
             String msg = "Error while retrieving API tiers from registry";
             log.error(msg, e);
@@ -3846,4 +3854,59 @@ public final class APIUtil {
         return documentMap;
     }
 
+    /**
+     * this method used to set environments values to api object.
+     *
+     * @param environments environments values in json format
+     * @return set of environments that Published
+     */
+    public static Set<String> extractEnvironmentsForAPI(String environments) {
+        Set<String> environmentStringSet = null;
+        if (environments == null) {
+            environmentStringSet = new HashSet<String>(
+                    ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
+                                          .getAPIManagerConfiguration().getApiGatewayEnvironments().keySet());
+        } else {
+            //handle not to publish to any of the gateways
+            if ("none".equals(environments)) {
+                environmentStringSet = new HashSet<String>(Arrays.asList(new String[] { "none" }));
+            }
+            //handle to set published gateways nto api object
+            else if (!"".equals(environments)) {
+                String[] publishEnvironmentArray = environments.split(",");
+                environmentStringSet = new HashSet<String>(Arrays.asList(publishEnvironmentArray));
+            }
+            //handle to publish to any of the gateways when api creating stage
+            else if ("".equals(environments)) {
+                environmentStringSet = new HashSet<String>(
+                        ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
+                                              .getAPIManagerConfiguration().getApiGatewayEnvironments().keySet());
+            }
+        }
+        return environmentStringSet;
+    }
+
+    /**
+     * This method used to set environment values to governance artifact of API .
+     *
+     * @param artifact Governance object of api to write
+     * @param api      API object with the attributes value
+     * @throws GovernanceException
+     */
+    public static void writeEnvironmentsToArtifact(GenericArtifact artifact, API api) throws GovernanceException {
+        StringBuilder publishedEnvironments = new StringBuilder();
+        Set<String> apiEnvironments = api.getEnvironments();
+        if (apiEnvironments != null && !apiEnvironments.isEmpty()) {
+
+            if (apiEnvironments != null) {
+                for (String environmentName : apiEnvironments) {
+                    publishedEnvironments.append(environmentName + ",");
+                }
+            }
+            if (!"".equals(publishedEnvironments.toString())) {
+                publishedEnvironments.deleteCharAt(publishedEnvironments.length() - 1);
+            }
+        }
+        artifact.setAttribute(APIConstants.API_OVERVIEW_ENVIRONMENTS, publishedEnvironments.toString());
+    }
 }

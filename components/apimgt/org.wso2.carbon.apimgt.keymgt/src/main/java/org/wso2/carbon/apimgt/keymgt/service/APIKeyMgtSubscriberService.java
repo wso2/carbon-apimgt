@@ -59,6 +59,7 @@ import org.wso2.carbon.utils.CarbonUtils;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -324,8 +325,8 @@ public class APIKeyMgtSubscriberService extends AbstractAdmin {
             }
         }
         if (mappings.size() > 0) {
-            List<Environment> gatewayEnvs = config.getApiGatewayEnvironments();
-            for (Environment environment : gatewayEnvs) {
+            Map<String, Environment> gatewayEnvs = config.getApiGatewayEnvironments();
+            for (Environment environment : gatewayEnvs.values()) {
                 APIAuthenticationAdminClient client = new APIAuthenticationAdminClient(environment);
                 client.invalidateKeys(mappings);
             }
