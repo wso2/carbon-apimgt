@@ -3114,6 +3114,52 @@ public class ApiMgtDAO {
 
     }
 
+    public static void addAccessAllowDomains(String oAuthConsumerKey, String[] accessAllowDomains) throws
+            APIManagementException {
+
+        String sqlAddAccessAllowDomains = "INSERT" +
+                " INTO AM_APP_KEY_DOMAIN_MAPPING (CONSUMER_KEY, AUTHZ_DOMAIN) " +
+                " VALUES (?,?)";
+
+        Connection connection = null;
+        PreparedStatement prepStmt = null;
+
+        try {
+            connection = APIMgtDBUtil.getConnection();
+
+            if (accessAllowDomains != null && !accessAllowDomains[0].trim().equals("")) {
+                for (int i = 0; i < accessAllowDomains.length; i++) {
+                    prepStmt = connection.prepareStatement(sqlAddAccessAllowDomains);
+                    prepStmt.setString(1, oAuthConsumerKey);
+                    prepStmt.setString(2, accessAllowDomains[i].trim());
+                    prepStmt.execute();
+                    prepStmt.close();
+                }
+            } else {
+                prepStmt = connection.prepareStatement(sqlAddAccessAllowDomains);
+                prepStmt.setString(1, oAuthConsumerKey);
+                prepStmt.setString(2, "ALL");
+                prepStmt.execute();
+                prepStmt.close();
+            }
+            connection.commit();
+        } catch (SQLException e) {
+            handleException("Error while adding allowed domains for application identified " +
+                    "by consumer key :" + oAuthConsumerKey, e);
+            if (connection != null) {
+                try {
+                    connection.rollback();
+                } catch (SQLException e1) {
+                    log.error("Failed to rollback the add access token ", e);
+                }
+            }
+        } finally {
+            IdentityDatabaseUtil.closeAllConnections(connection, null, prepStmt);
+        }
+
+    }
+
+
     public void updateAccessAllowDomains(String accessToken, String[] accessAllowDomains)
             throws APIManagementException {
         String consumerKey = findConsumerKeyFromAccessToken(accessToken);
