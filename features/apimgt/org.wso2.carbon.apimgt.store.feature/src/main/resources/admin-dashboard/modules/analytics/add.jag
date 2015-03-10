@@ -22,16 +22,16 @@ var enableAnalytics = function (enable) {
         client.setOptions(options);
 
         var eventingConfigData = stub.getEventingConfigData();
-        if(enable === "true" && eventingConfig.getUrl() !== "" && eventingConfig.getUrl() !== null) {
-            log.info("Enabling Analytics...");
-            eventingConfigData.setServiceStatsEnable(true);
-            stub.configureEventing(eventingConfigData);
-            log.info("Analytics enabled");
-        } else if(enable === "false"){
+        if(enable === "false"){
             log.info("Disabling Analytics...");
             eventingConfigData.setServiceStatsEnable(false);
             stub.configureEventing(eventingConfigData);
             log.info("Analytics disabled");
+        } else if(enable === "true" && eventingConfigData.getUrl() !== "" && eventingConfigData.getUrl() !== null) {
+            log.info("Enabling Analytics...");
+            eventingConfigData.setServiceStatsEnable(true);
+            stub.configureEventing(eventingConfigData);
+            log.info("Analytics enabled");
         }
 
         return {
@@ -74,7 +74,9 @@ var addAnalyticsConfig = function (configData) {
 
         log.info("Saving Analytics config in registry...");
         stub.configureEventing(eventingConfigData);
-        var configReaderService = org.wso2.carbon.apimgt.usage.publisher.service.APIMGTConfigReaderService().getInstance();
+        var configReaderService = org.wso2.carbon.apimgt.usage.publisher.service.APIMGTConfigReaderService.getInstance();
+        log.info(configReaderService.getRequestStreamName());
+        log.info(configReaderService.getResponseStreamName());
         configReaderService.setEnabled(true);
         configReaderService.setBamServerUrlGroups(configData.eventReceiverURL);
         configReaderService.setBamServerUser(configData.eventReceiverUsername);
