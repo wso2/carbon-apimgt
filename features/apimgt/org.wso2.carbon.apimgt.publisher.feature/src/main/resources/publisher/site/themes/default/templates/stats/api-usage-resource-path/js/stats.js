@@ -101,12 +101,9 @@ require(["dojo/dom", "dojo/domReady!"], function (dom) {
                             shortcuts:'hide',
                             endDate:currentDay
                         })
-                        .bind('datepicker-change',function(event,obj)
-                        {
-
-                        })
                         .bind('datepicker-apply',function(event,obj)
                         {
+                             btnActiveToggle(this);
                              var from = convertDate(obj.date1);
                              var to = convertDate(obj.date2);
                              $('#date-range').html(from + " to "+ to);
@@ -115,10 +112,7 @@ require(["dojo/dom", "dojo/domReady!"], function (dom) {
                              isDefault=true;
                              isWeek,isMonth,isToday,isHour=false;
                              });
-                        })
-                        .bind('datepicker-close',function()
-                        {
-                    });
+                        });
 
                     //setting default date
                     var to = new Date();
@@ -194,7 +188,7 @@ var drawAPIUsageByResourcePath = function (from, to) {
                                         '<th id="version">version</th>'+
                                         '<th id="context">context</th>'+
                                         '<th id="method">method</th>'+
-                                        '<th>Hits</th>'+
+                                        '<th style="text-align:right">Hits</th>'+
                                     '</tr></thead>'));
                 var obj, result;
                 var apis = [];
@@ -372,7 +366,7 @@ var drawAPIUsageByResourcePath = function (from, to) {
 
 
                                                 nv.addGraph(function () {
-                                                    chart = nv.models.lineWithFocusChart().margin({right: 100,top: 100,left: 100});
+                                                    chart = nv.models.lineWithFocusChart().margin({right: 120,top: 100,left: 100});
                                                     var fitScreen = false;
 
                                                     chart.color(d3.scale.category20b().range());
@@ -471,7 +465,15 @@ var drawAPIUsageByResourcePath = function (from, to) {
                     $('#tableContainer').append($dataTable);
                     $('#chartContainer').append($('<div id="lineWithFocusChart"><svg style="height:450px;"></svg></div>'));
                     $('#tableContainer').show();
-                    $('#resourcePathUsageTable').DataTable();
+                    $('#resourcePathUsageTable').DataTable({
+                        "fnDrawCallback": function(){
+                            if(this.fnSettings().fnRecordsDisplay()<=$("#resourcePathUsageTable_length option:selected" ).val()
+                            || $("#resourcePathUsageTable_length option:selected" ).val()==-1)
+                                $('#resourcePathUsageTable_paginate').hide();
+                            else
+                                $('#resourcePathUsageTable_paginate').show();
+                        },
+                    });
                     $('select').css('width','60px');
                 }
 
@@ -540,4 +542,9 @@ function getCell(column, row) {
 
 function dateToUnix(year, month, day, hour, minute, second) {
     return ((new Date(year, month - 1, day, hour, minute, second)).getTime() );
+}
+
+function btnActiveToggle(button){
+    $(button).siblings().removeClass('active');
+    $(button).addClass('active');
 }

@@ -85,19 +85,13 @@ require(["dojo/dom", "dojo/domReady!"], function(dom){
                             shortcuts:'hide',
                             endDate:currentDay
                         })
-                        .bind('datepicker-change',function(event,obj)
-                        {
-
-                        })
                         .bind('datepicker-apply',function(event,obj)
                         {
+                             btnActiveToggle(this);
                              var from = convertDate(obj.date1);
                              var to = convertDate(obj.date2);
                              $('#date-range').html(from + " to "+ to);
                              drawProviderAPIUsage(from,to);
-                        })
-                        .bind('datepicker-close',function()
-                        {
                     });
 
                     //setting default date
@@ -174,6 +168,7 @@ var drawProviderAPIUsage = function(from,to){
                 }
 
                 if (length > 0) {
+                $('#noDataLabel').html('');
 
 
                     require([
@@ -240,13 +235,22 @@ var drawProviderAPIUsage = function(from,to){
                     });
                     $('#tableContainer').append($dataTable);
                     $('#tableContainer').show();
-                    $('#apiTable').DataTable( {"order": [[ 1, "desc" ]]});
+                    $('#apiTable').DataTable( {
+                        "order": [[ 1, "desc" ]],
+                        "fnDrawCallback": function(){
+                             if(this.fnSettings().fnRecordsDisplay()<=$("#apiTable_length option:selected" ).val()
+                             || $("#apiTable_length option:selected" ).val()==-1)
+                                 $('#apiTable_paginate').hide();
+                             else
+                                 $('#apiTable_paginate').show();
+                        },
+                    });
                     $('select').css('width','60px');
 
                 } else {
                     $('#apiTable').hide();
                     $('#apiChart').css("fontSize", 14);
-                    $('#apiChart').append($('<span class="label label-info">'+i18n.t('errorMsgs.noData')+'</span>'));
+                    $('#noDataLabel').html($('<span class="label label-info">'+i18n.t('errorMsgs.noData')+'</span>'));
                 }
 
             } else {
@@ -305,3 +309,7 @@ function convertDate(date) {
         + hour +":"+(('' + minute).length < 2 ? '0' : '')+ minute;
 }
 
+function btnActiveToggle(button){
+    $(button).siblings().removeClass('active');
+    $(button).addClass('active');
+}
