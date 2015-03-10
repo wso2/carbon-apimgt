@@ -2201,18 +2201,7 @@ public class APIProviderHostObject extends ScriptableObject {
                 myn.put(41, myn, scopesNative.toJSONString());
                 myn.put(42, myn, checkValue(Boolean.toString(api.isDefaultVersion())));
                 myn.put(43, myn, api.getImplementation());
-                StringBuilder environmentsPublished = new StringBuilder();
-                if (!api.getEnvironments().isEmpty()) {
-                    for (String environment : api.getEnvironments()) {
-                        environmentsPublished.append(environment + ",");
-                    }
-                    if (!environmentsPublished.toString().isEmpty()) {
-                        environmentsPublished.deleteCharAt(environmentsPublished.length() - 1);
-                    } else {
-                        environmentsPublished.append("none");
-                    }
-                    myn.put(44, myn, environmentsPublished.toString());
-                }
+                myn.put(44, myn, APIUtil.writeEnvironmentsToArtifact(api));
 
 
             } else {

@@ -686,7 +686,7 @@
 <div  id="environmentsRetry-modal" class="modal hide fade">
         <div class="modal-header">
         <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-        <h3>Failed Gateways in Operation</h3>
+        <h3>Gateway Failures</h3>
         </div>
         <div class="modal-body">
         <div id="modal-published-header">
