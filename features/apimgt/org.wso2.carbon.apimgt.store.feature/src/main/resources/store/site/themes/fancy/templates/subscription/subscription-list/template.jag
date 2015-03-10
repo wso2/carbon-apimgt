@@ -22,7 +22,7 @@
         </script>
         <select id="appListSelected" class="input-large">
             <%
-                var i, j, app, selectedApp, api, apis, key,  clazz, path;
+                var i, j, app, selectedApp, api, apis, key,  clazz, path, totalLength = outputs.totalLength;
                 selectedApp = '';
             %>
             <%
@@ -58,7 +58,7 @@
 
                 <div class="row-fluid">
                     <div class="span12">
-                        <% jagg.includeBlock("subscription/subscription-list-element", {app:selectedApp,i:900}); %>
+                        <% jagg.includeBlock("subscription/subscription-list-element", {app:selectedApp,i:900,length:totalLength,page:outputs.page,itemsPerPage:outputs.itemsPerPage}); %>
                     </div>
                 </div>
             </div>
