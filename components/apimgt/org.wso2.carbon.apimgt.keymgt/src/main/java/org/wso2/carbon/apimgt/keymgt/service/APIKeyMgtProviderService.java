@@ -27,7 +27,10 @@ import org.wso2.carbon.apimgt.keymgt.APIKeyMgtException;
 import org.wso2.carbon.core.AbstractAdmin;
 import org.wso2.carbon.identity.base.IdentityException;
 
+import javax.cache.Cache;
+import javax.cache.Caching;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -116,4 +119,35 @@ public class APIKeyMgtProviderService extends AbstractAdmin {
         }
     }
 
+    /**
+     * Removes passed consumer keys from APP_SCOPE_CACHE & APP_USER_SCOPE_CACHE
+     *
+     * @param consumerKeys
+     */
+    public void removeScopeCache(String[] consumerKeys) {
+
+        if (consumerKeys != null && consumerKeys.length != 0) {
+
+            Cache appCache = Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER).getCache(APIConstants
+                                                                                                              .APP_SCOPE_CACHE);
+            Cache userCache = Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER).getCache(APIConstants
+                                                                                                               .APP_USER_SCOPE_CACHE);
+            for (String consumerKey : consumerKeys) {
+
+                // removing from app scope cache
+                appCache.remove(consumerKey);
+
+                // removing app user scope cache
+                Iterator iterator = userCache.keys();
+                while (iterator.hasNext()) {
+
+                    String cacheKey = iterator.next().toString();
+                    if (cacheKey.contains(consumerKey)) {
+                        userCache.remove(cacheKey);
+                        break;
+                    }
+                }
+            }
+        }
+    }
 }

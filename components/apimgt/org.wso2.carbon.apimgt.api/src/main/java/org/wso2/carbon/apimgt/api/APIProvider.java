@@ -415,4 +415,12 @@ public interface APIProvider extends APIManager {
      */
     public String getSwagger12Definition(APIIdentifier apiId) throws APIManagementException;
 
+    /**
+     * Returns all the Consumer keys of applications which are subscribed to given API
+     *
+     * @param apiIdentifier APIIdentifier
+     * @return a String array of ConsumerKeys
+     * @throws APIManagementException
+     */
+    public String[] getConsumerKeys(APIIdentifier apiIdentifier) throws APIManagementException;
 }

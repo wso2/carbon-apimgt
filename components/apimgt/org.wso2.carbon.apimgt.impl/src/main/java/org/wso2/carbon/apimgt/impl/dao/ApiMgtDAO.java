@@ -4487,6 +4487,60 @@ public class ApiMgtDAO {
         return applications;
     }
 
+
+    /**
+     * Returns all the consumerkeys of application which are subscribed for the given api
+     *
+     * @param identifier APIIdentifier
+     * @return Consumerkeys
+     * @throws org.wso2.carbon.apimgt.api.APIManagementException if failed to get Applications for given subscriber.
+     */
+    public String[] getConsumerKeys(APIIdentifier identifier) throws APIManagementException {
+
+        Set<String> consumerKeys = new HashSet<String>();
+
+        Connection connection = null;
+        PreparedStatement prepStmt = null;
+        ResultSet rs = null;
+
+        int apiId = -1;
+        String sqlQuery = "SELECT " +
+                          "   MAP.CONSUMER_KEY " +
+                          "FROM " +
+                          "   AM_SUBSCRIPTION SUB, " +
+                          "   AM_APPLICATION_KEY_MAPPING MAP " +
+                          "WHERE " +
+                          "   SUB.APPLICATION_ID = MAP.APPLICATION_ID " +
+                          "   AND SUB.API_ID = ?";
+
+        try {
+
+            connection = APIMgtDBUtil.getConnection();
+            apiId = getAPIID(identifier, connection);
+
+            prepStmt = connection.prepareStatement(sqlQuery);
+            prepStmt.setInt(1, apiId);
+            rs = prepStmt.executeQuery();
+
+            while (rs.next()) {
+                consumerKeys.add(rs.getString("CONSUMER_KEY"));
+            }
+
+        } catch (SQLException e) {
+            handleException("Error when reading application subscription information", e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(prepStmt, connection, rs);
+        }
+
+        String[] consumerKeyArray;
+        if (consumerKeys.size() == 0) {
+            consumerKeyArray = null;
+        } else {
+            consumerKeyArray = consumerKeys.toArray(new String[consumerKeys.size()]);
+        }
+        return consumerKeyArray;
+    }
+
     public void deleteApplication(Application application) throws APIManagementException {
         Connection connection = null;
         PreparedStatement prepStmt = null;

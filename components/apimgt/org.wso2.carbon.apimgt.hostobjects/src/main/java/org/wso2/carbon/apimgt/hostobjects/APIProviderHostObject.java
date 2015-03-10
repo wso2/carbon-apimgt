@@ -58,6 +58,7 @@ import org.wso2.carbon.apimgt.impl.utils.APIAuthenticationAdminClient;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.utils.APIVersionComparator;
 import org.wso2.carbon.apimgt.impl.utils.APIVersionStringComparator;
+import org.wso2.carbon.apimgt.keymgt.client.ProviderKeyMgtClient;
 import org.wso2.carbon.apimgt.keymgt.client.SubscriberKeyMgtClient;
 import org.wso2.carbon.apimgt.usage.client.APIUsageStatisticsClient;
 import org.wso2.carbon.apimgt.usage.client.dto.*;
@@ -389,7 +390,7 @@ public class APIProviderHostObject extends ScriptableObject {
         provider = (provider != null ? provider.trim() : null);
         name = (name != null ? name.trim() : null);
         version = (version != null ? version.trim() : null);
-        
+
         APIIdentifier apiId = new APIIdentifier(provider, name, version);
         APIProvider apiProvider = getAPIProvider(thisObj);
         API api = null;
@@ -456,7 +457,21 @@ public class APIProviderHostObject extends ScriptableObject {
             Set<URITemplate> uriTemplates = parseResourceConfig(apiProvider, apiId, (String) apiData.get("swagger", apiData));
             api.setUriTemplates(uriTemplates);
         }
-        
+
+        // removing scopes from cache
+        ProviderKeyMgtClient providerClient = HostObjectUtils.getProviderClient();
+        try {
+            String[] consumerKeys = apiProvider.getConsumerKeys(new APIIdentifier(provider, name, version));
+            if (consumerKeys != null && consumerKeys.length != 0) {
+                providerClient.removeScopeCache(consumerKeys);
+            }
+
+        } catch (APIManagementException e) {
+            log.error("Error while getting the consumerkeys", e);
+        } catch (Exception e) {
+            log.error("Failed to remove the scope cache", e);
+        }
+
         return saveAPI(apiProvider, provider, api, null, false);
     }
     
@@ -806,9 +821,9 @@ public class APIProviderHostObject extends ScriptableObject {
             	apiProvider.updateAPI(api);
             }
             success = true;
-        } catch (Exception e) {
-            handleException("Error while adding the API- " + api.getId().getApiName() + "-" + api.getId().getVersion(), e);
-            return false;
+        } catch (ScriptException e) {
+            throw new APIManagementException("Error while adding api thumbnail for " + api.getId().getApiName() + "-" +
+                                             api.getId().getVersion(), e);
         } finally {
         	if (isTenantFlowStarted) {
         		PrivilegedCarbonContext.endTenantFlow();
@@ -1693,11 +1708,9 @@ public class APIProviderHostObject extends ScriptableObject {
         return success;
     }
 
-    public static boolean jsFunction_updateAPIStatus(Context cx, Scriptable thisObj,
-                                                     Object[] args,
-                                                     Function funObj)
+    public static boolean jsFunction_updateAPIStatus(Context cx, Scriptable thisObj, Object[] args, Function funObj)
             throws APIManagementException {
-        if (args==null || args.length == 0) {
+        if (args == null || args.length == 0) {
             handleException("Invalid number of input parameters.");
         }
 
@@ -1705,20 +1718,22 @@ public class APIProviderHostObject extends ScriptableObject {
         boolean success = false;
         String provider = (String) apiData.get("provider", apiData);
         String providerTenantMode = (String) apiData.get("provider", apiData);
-        provider=APIUtil.replaceEmailDomain(provider);
+        provider = APIUtil.replaceEmailDomain(provider);
         String name = (String) apiData.get("apiName", apiData);
         String version = (String) apiData.get("version", apiData);
         String status = (String) apiData.get("status", apiData);
         boolean publishToGateway = Boolean.parseBoolean((String) apiData.get("publishToGateway", apiData));
         boolean deprecateOldVersions = Boolean.parseBoolean((String) apiData.get("deprecateOldVersions", apiData));
-        boolean makeKeysForwardCompatible = Boolean.parseBoolean((String) apiData.get("makeKeysForwardCompatible", apiData));
+        boolean makeKeysForwardCompatible =
+                                            Boolean.parseBoolean((String) apiData.get("makeKeysForwardCompatible",
+                                                                                      apiData));
         boolean isTenantFlowStarted = false;
         try {
             String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(providerTenantMode));
-            if(tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)){
-            		isTenantFlowStarted = true;
-                    PrivilegedCarbonContext.startTenantFlow();
-                    PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
+            if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
+                isTenantFlowStarted = true;
+                PrivilegedCarbonContext.startTenantFlow();
+                PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
             }
             APIProvider apiProvider = getAPIProvider(thisObj);
             APIIdentifier apiId = new APIIdentifier(provider, name, version);
@@ -1741,8 +1756,7 @@ public class APIProviderHostObject extends ScriptableObject {
                             if (oldAPI.getId().getApiName().equals(name) &&
                                 versionComparator.compare(oldAPI, api) < 0 &&
                                 (oldAPI.getStatus().equals(APIStatus.PUBLISHED))) {
-                                apiProvider.changeAPIStatus(oldAPI, APIStatus.DEPRECATED,
-                                                            currentUser, publishToGateway);
+                                apiProvider.changeAPIStatus(oldAPI, APIStatus.DEPRECATED, currentUser, publishToGateway);
                             }
                         }
                     }
@@ -1751,13 +1765,10 @@ public class APIProviderHostObject extends ScriptableObject {
             } else {
                 handleException("Couldn't find an API with the name-" + name + "version-" + version);
             }
-        } catch (APIManagementException e) {
-            handleException("Error while updating API status", e);
-            return false;
-        }finally {
-        	if (isTenantFlowStarted) {
-        		PrivilegedCarbonContext.endTenantFlow();
-        	}
+        } finally {
+            if (isTenantFlowStarted) {
+                PrivilegedCarbonContext.endTenantFlow();
+            }
         }
         return success;
     }
@@ -2213,7 +2224,8 @@ public class APIProviderHostObject extends ScriptableObject {
                         continue;
                     }
 
-                    String key = api.getId().getApiName() + " (" + api.getId().getProviderName() + ")";
+                    String[] apiData = {api.getId().getApiName(), api.getId().getVersion(),  api.getId().getProviderName()};
+                    String key = "[\""+apiData[0]+"\",\""+apiData[1]+"\",\""+apiData[2]+"\"]";
                     Long currentCount = subscriptions.get(key);
                     if (currentCount != null) {
                         subscriptions.put(key, currentCount + count);
@@ -2229,24 +2241,24 @@ public class APIProviderHostObject extends ScriptableObject {
                     sub.count = entry.getValue();
                     subscriptionData.add(sub);
                 }
-                Collections.sort(subscriptionData, new Comparator<APISubscription>() {
-                    public int compare(APISubscription o1, APISubscription o2) {
-                        // Note that o2 appears before o1
-                        // This is because we need to sort in the descending order
-                        return (int) (o2.count - o1.count);
-                    }
-                });
-                if (subscriptionData.size() > 10) {
-                    APISubscription other = new APISubscription();
-                    other.name = "[Other]";
-                    for (int i = 10; i < subscriptionData.size(); i++) {
-                        other.count = other.count + subscriptionData.get(i).count;
-                    }
-                    while (subscriptionData.size() > 10) {
-                        subscriptionData.remove(10);
-                    }
-                    subscriptionData.add(other);
-                }
+//                Collections.sort(subscriptionData, new Comparator<APISubscription>() {
+//                    public int compare(APISubscription o1, APISubscription o2) {
+//                        // Note that o2 appears before o1
+//                        // This is because we need to sort in the descending order
+//                        return (int) (o2.count - o1.count);
+//                    }
+//                });
+//                if (subscriptionData.size() > 10) {
+//                    APISubscription other = new APISubscription();
+//                    other.name = "[Other]";
+//                    for (int i = 10; i < subscriptionData.size(); i++) {
+//                        other.count = other.count + subscriptionData.get(i).count;
+//                    }
+//                    while (subscriptionData.size() > 10) {
+//                        subscriptionData.remove(10);
+//                    }
+//                    subscriptionData.add(other);
+//                }
 
                 int i = 0;
                 for (APISubscription sub : subscriptionData) {
@@ -3186,6 +3198,7 @@ public class APIProviderHostObject extends ScriptableObject {
                 row.put("method", row, usage.getMethod());
                 row.put("context", row, usage.getContext());
                 row.put("count", row, usage.getCount());
+                row.put("time", row, usage.getTime());
                 myn.put(i, myn, row);
                 i++;
             }
@@ -3666,6 +3679,7 @@ public class APIProviderHostObject extends ScriptableObject {
     private static class APISubscription {
         private String name;
         private long count;
+        private String version;
     }
 
     public static boolean jsFunction_updateDocumentation(Context cx, Scriptable thisObj,
@@ -4538,6 +4552,59 @@ public class APIProviderHostObject extends ScriptableObject {
         } else {
             return true;
         }
+    }
+
+    /*
+	* here return boolean with checking all objects in array is string
+	*/
+    public static boolean isStringArray(Object[] args) {
+        int argsCount = args.length;
+        for (Object arg : args) {
+            if (!(arg instanceof String)) {
+                return false;
+            }
+        }
+        return true;
+
+    }
+
+    /**
+     * This method is to Download API-DOCS from APIPublisher
+     *
+     * @param cx      Rhino context
+     * @param thisObj Scriptable object
+     * @param args    Passing arguments
+     * @param funObj  Function object
+     * @return NativeObject that contains Input stream of Downloaded File
+     * @throws APIManagementException Wrapped exception by org.wso2.carbon.apimgt.api.APIManagementException
+     */
+    public static NativeObject jsFunction_getDocument(Context cx, Scriptable thisObj,
+                                                      Object[] args, Function funObj)
+            throws ScriptException,
+                   APIManagementException {
+        if (args == null || args.length != 2 || !isStringArray(args)) {
+            handleException("Invalid input parameters expected resource Url and tenantDomain");
+        }
+        NativeObject data = new NativeObject();
+
+        String username = ((APIProviderHostObject) thisObj).getUsername();
+        // Set anonymous user if no user is login to the system
+        if (username == null) {
+            username = APIConstants.END_USER_ANONYMOUS;
+        }
+        String resource = (String) args[1];
+        String tenantDomain = (String) args[0];
+        Map<String, Object> docResourceMap = APIUtil.getDocument(username, resource, tenantDomain);
+        if (!docResourceMap.isEmpty()) {
+            data.put("Data", data,
+                     cx.newObject(thisObj, "Stream", new Object[] { docResourceMap.get("Data") }));
+            data.put("contentType", data, docResourceMap.get("contentType"));
+            data.put("name", data, docResourceMap.get("name"));
+        } else {
+            handleException("Resource couldn't found for " + resource);
+        }
+
+        return data;
     }
 
 }
