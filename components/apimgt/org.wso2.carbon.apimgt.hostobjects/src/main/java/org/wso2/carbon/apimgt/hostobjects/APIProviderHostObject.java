@@ -4039,6 +4039,7 @@ public class APIProviderHostObject extends ScriptableObject {
                 row.put("context", row, fault.getContext());
                 row.put("count", row, fault.getCount());
                 row.put("faultPercentage", row, fault.getFaultPercentage());
+                row.put("totalRequestCount",row,fault.getRequestCount());
                 myn.put(i, myn, row);
                 i++;
             }
