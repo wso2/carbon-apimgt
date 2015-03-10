@@ -390,7 +390,7 @@ public class APIProviderHostObject extends ScriptableObject {
         provider = (provider != null ? provider.trim() : null);
         name = (name != null ? name.trim() : null);
         version = (version != null ? version.trim() : null);
-
+        
         APIIdentifier apiId = new APIIdentifier(provider, name, version);
         APIProvider apiProvider = getAPIProvider(thisObj);
         API api = null;
@@ -471,7 +471,7 @@ public class APIProviderHostObject extends ScriptableObject {
         } catch (Exception e) {
             log.error("Failed to remove the scope cache", e);
         }
-
+        
         return saveAPI(apiProvider, provider, api, null, false);
     }
     
@@ -1708,7 +1708,7 @@ public class APIProviderHostObject extends ScriptableObject {
         return success;
     }
 
-    public static boolean jsFunction_updateAPIStatus(Context cx, Scriptable thisObj, Object[] args, Function funObj)
+    public static boolean jsFunction_updateAPIStatus(Context cx, Scriptable thisObj, Object[] args, Function funObj) 
             throws APIManagementException {
         if (args == null || args.length == 0) {
             handleException("Invalid number of input parameters.");
