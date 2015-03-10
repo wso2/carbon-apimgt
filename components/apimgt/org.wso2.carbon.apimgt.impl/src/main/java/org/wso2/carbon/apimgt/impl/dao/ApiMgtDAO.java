@@ -4772,6 +4772,7 @@ public class ApiMgtDAO {
     public void deleteApplication(Application application) throws APIManagementException {
         Connection connection = null;
         PreparedStatement prepStmt = null;
+        PreparedStatement prepStmtGetConsumerKey = null;
         ResultSet rs = null;
 
         String getSubscriptionsQuery = "SELECT" +
@@ -4795,6 +4796,9 @@ public class ApiMgtDAO {
         String deleteConsumerAppQuery = "DELETE FROM IDN_OAUTH_CONSUMER_APPS WHERE CONSUMER_KEY = ?";
         String deleteApplicationQuery = "DELETE FROM AM_APPLICATION WHERE APPLICATION_ID = ?";
         String deleteRegistrationEntry = "DELETE FROM AM_APPLICATION_REGISTRATION WHERE APP_ID = ?";
+        String deleteKeyAccessTokenMappingQuery = "DELETE FROM CONSUMER_KEY_ACCESS_TOKEN_MAPPING WHERE CONSUMER_KEY =" +
+                " ?";
+
 
         try {
             connection = APIMgtDBUtil.getConnection();
@@ -4825,26 +4829,37 @@ public class ApiMgtDAO {
             prepStmt.execute();
             prepStmt.close();
 
-            prepStmt = connection.prepareStatement(getConsumerKeyQuery);
-            prepStmt.setInt(1, application.getId());
-            rs = prepStmt.executeQuery();
+            prepStmtGetConsumerKey = connection.prepareStatement(getConsumerKeyQuery);
+            prepStmtGetConsumerKey.setInt(1, application.getId());
+            rs = prepStmtGetConsumerKey.executeQuery();
             String consumerKey = null;
             while (rs.next()) {
                 consumerKey=rs.getString("CONSUMER_KEY");
-            }
-            prepStmt.close();
-            rs.close();
-            if(consumerKey!=null){
-            prepStmt = connection.prepareStatement(deleteDomainAppQuery);
-            prepStmt.setString(1, consumerKey);
-            prepStmt.execute();
-            prepStmt.close();
+                if (consumerKey != null) {
+                    prepStmt = connection.prepareStatement(deleteDomainAppQuery);
+                    prepStmt.setString(1, consumerKey);
+                    prepStmt.execute();
+                    prepStmt.close();
 
-            prepStmt = connection.prepareStatement(deleteConsumerAppQuery);
-            prepStmt.setString(1, consumerKey);
-            prepStmt.execute();
-            prepStmt.close();
+//                    prepStmt = connection.prepareStatement(deleteConsumerAppQuery);
+//                    prepStmt.setString(1, consumerKey);
+//                    prepStmt.execute();
+//                    prepStmt.close();
+
+                    //get new key manager
+                    KeyManager keyManager = KeyManagerFactory.getKeyManager();
+                    //delete on oAuthorization server.
+                    keyManager.deleteApplication(consumerKey);
+
+                    prepStmt = connection.prepareStatement(deleteKeyAccessTokenMappingQuery);
+                    prepStmt.setString(1, consumerKey);
+                    prepStmt.execute();
+                    prepStmt.close();
+                }
             }
+            prepStmtGetConsumerKey.close();
+            rs.close();
+
             prepStmt = connection.prepareStatement(deleteApplicationKeyQuery);
             prepStmt.setInt(1, application.getId());
             prepStmt.execute();

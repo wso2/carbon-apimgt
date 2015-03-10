@@ -1985,6 +1985,9 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             throws APIManagementException {
 
         boolean isTenantFlowStarted = false;
+        // we should have unique names for applications. There for we will append, the word 'production' or 'sandbox'
+        // according to the token type.
+        StringBuilder applicationNameAfterAppend  = new StringBuilder(applicationName);
 
         try {
             if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
@@ -1998,8 +2001,6 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             ApplicationRegistrationWorkflowDTO appRegWFDto = null;
             //get APIM application by Application Name and userId.
             Application application = ApplicationUtils.retrieveApplication(applicationName, userId);
-            //Build key manager instance and create oAuthAppRequest by jsonString.
-            OauthAppRequest request = ApplicationUtils.createOauthAppRequest(applicationName, callbackUrl, jsonString);
 
 
             //if its a PRODUCTION application.
@@ -2009,6 +2010,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                         getWorkflowExecutor(WorkflowConstants.WF_TYPE_AM_APPLICATION_REGISTRATION_PRODUCTION);
                 appRegWFDto = (ApplicationRegistrationWorkflowDTO) WorkflowExecutorFactory.getInstance().
                         createWorkflowDTO(WorkflowConstants.WF_TYPE_AM_APPLICATION_REGISTRATION_PRODUCTION);
+                applicationNameAfterAppend.append("_PRODUCTION");
 
             }//if it is a sandBox application.
             else if (APIConstants.API_KEY_TYPE_SANDBOX.equals(tokenType)) { //if its a SANDBOX application.
@@ -2016,8 +2018,11 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                         getWorkflowExecutor(WorkflowConstants.WF_TYPE_AM_APPLICATION_REGISTRATION_SANDBOX);
                 appRegWFDto = (ApplicationRegistrationWorkflowDTO) WorkflowExecutorFactory.getInstance().
                         createWorkflowDTO(WorkflowConstants.WF_TYPE_AM_APPLICATION_REGISTRATION_SANDBOX);
+                applicationNameAfterAppend.append("_SANDBOX");
             }
-
+            //Build key manager instance and create oAuthAppRequest by jsonString.
+            OauthAppRequest request = ApplicationUtils.createOauthAppRequest(applicationNameAfterAppend.toString(),
+                    callbackUrl, jsonString);
 
             appRegWFDto.setStatus(WorkflowStatus.CREATED);
             appRegWFDto.setCreatedTime(System.currentTimeMillis());
