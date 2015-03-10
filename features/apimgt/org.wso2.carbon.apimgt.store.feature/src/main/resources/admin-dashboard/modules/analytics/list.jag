@@ -35,6 +35,7 @@ var getAnalyticsConfig = function (analyticsData) {
         client.setOptions(client_options);
 
         var eventingConfig = stub.getEventingConfigData();
+        var analyzingConfigData = stub.getAnalyzingConfigData();
         var conf = null;
         if (eventingConfig == null) {
             log.warn("Analytics configurations are not available in registry.");
@@ -44,9 +45,9 @@ var getAnalyticsConfig = function (analyticsData) {
                 eventReceiverURL: eventingConfig.getUrl(),
                 eventReceiverUsername: eventingConfig.getUserName(),
                 eventReceiverPassword: eventingConfig.getPassword(),
-                eventAnalyserURL: eventingConfig.getUrl(),
-                eventAnalyserUsername: eventingConfig.getUserName(),
-                eventAnalyserPassword: eventingConfig.getPassword()
+                eventAnalyserURL: analyzingConfigData.getUrl(),
+                eventAnalyserUsername: analyzingConfigData.getUserName(),
+                eventAnalyserPassword: analyzingConfigData.getPassword()
             };
         }
 
