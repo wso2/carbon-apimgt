@@ -122,15 +122,7 @@ function APIDesigner(){
             "allowMultiple": false,
             "dataType": "String"
         });*/ // Authorization will be set globaly in swagger console.
-        parameters.push({
-            name : "body",
-            "description": "Request Body",
-            "allowMultiple": false,
-            "required": false,
-            "paramType": "body",
-            "type":"string"
-        });
-
+	
         while ((m = re.exec($("#resource_url_pattern").val())) != null) {
             if (m.index === re.lastIndex) {
                 re.lastIndex++;
@@ -151,9 +143,23 @@ function APIDesigner(){
             if($(this).is(':checked')){
                 if(!designer.check_if_resource_exist( path , $(this).val() ) ){
                 parameters = $.extend(true, [], parameters);
+		
+		var method = $(this).val();               
+                var tempPara = parameters.concat();                
+                     
+                if(method == "POST" || method == "PUT") {   
+                        tempPara.push({
+		            name : "body",
+		      	    "description": "Request Body",
+		            "allowMultiple": false,
+		            "required": false,
+		            "paramType": "body",
+		            "type":"string"
+                        });
+                } 
                 resource.operations.push({ 
                     method : $(this).val(),
-                    parameters : parameters,
+                    parameters : tempPara,
                     nickname : $(this).val().toLowerCase() + '_' +$("#resource_url_pattern").val()
                 });
                 ic++

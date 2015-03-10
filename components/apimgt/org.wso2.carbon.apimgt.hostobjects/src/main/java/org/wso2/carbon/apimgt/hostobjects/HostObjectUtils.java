@@ -176,15 +176,22 @@ public class HostObjectUtils {
     public static void invalidateRecentlyAddedAPICache(String username){
         try{
             PrivilegedCarbonContext.startTenantFlow();
-            if(username!=null && APIConstants.isRecentlyAddedAPICacheEnabled){
-                String tenantDomainFromUserName =  MultitenantUtils.getTenantDomain(username);
-                if(tenantDomainFromUserName != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomainFromUserName)){
-                    PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomainFromUserName, true);
+            APIManagerConfiguration config = HostObjectComponent.getAPIManagerConfiguration();
+            boolean isRecentlyAddedAPICacheEnabled =
+                  Boolean.parseBoolean(config.getFirstProperty(APIConstants.API_STORE_RECENTLY_ADDED_API_CACHE_ENABLE));
+            
+            if (username != null && isRecentlyAddedAPICacheEnabled) {
+                String tenantDomainFromUserName = MultitenantUtils.getTenantDomain(username);
+                if (tenantDomainFromUserName != null &&
+                    !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomainFromUserName)) {
+                    PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomainFromUserName,
+                                                                                          true);
+                } else {
+                    PrivilegedCarbonContext.getThreadLocalCarbonContext()
+                                           .setTenantDomain(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME, true);
                 }
-                else {
-                    PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME, true);
-                }
-                Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER).getCache("RECENTLY_ADDED_API").remove(username+":"+tenantDomainFromUserName);
+                Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER).getCache("RECENTLY_ADDED_API")
+                       .remove(username + ":" + tenantDomainFromUserName);
             }
         } finally {
             PrivilegedCarbonContext.endTenantFlow();

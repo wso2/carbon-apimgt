@@ -18,7 +18,7 @@
         <input type="hidden"  class="prodAccessTokenHidden" value="<%=app.prodKey%>" >
         <input type="hidden"  class="sandAccessTokenHidden" value="<%=app.sandboxKey%>" >
         <h3 data-section="key-prod" class="js_toggle"><%=i18n.localize("keysPro")%> <i class="icon-chevron-down icon-keys"></i></h3>			
-        <div class="keyBoxOut">
+	<div class="keyBoxOut">
             <div class="container-fluid">
 	   			<div class="span6">
                         <%
@@ -102,7 +102,7 @@
 											<% } %>
 			  								<div class="copybtn-wrapper">
                     							<span class="curl-copyinfo">Copied!</span>
-                								<button id="prodAccessCopy" data-clipboard-target="prodAccess" title="Copy to clipboard" class="curl-copybtn"><i class="fa fa-clipboard"></i></button>
+                								<button id="prodAccessCopy" data-clipboard-target="prodAccessTokenHiddenID" title="Copy to clipboard" class="curl-copybtn"><i class="fa fa-clipboard"></i></button>
                 							</div>
 										</div>
 										<div class="regenerate-wrapper">
@@ -258,7 +258,7 @@
 											<% } %>
 			  								<div class="copybtn-wrapper">
                     							<span class="curl-copyinfo">Copied!</span>
-                								<button id="sandAccessCopy" data-clipboard-target="sandAccess" title="Copy to clipboard" class="curl-copybtn"><i class="fa fa-clipboard"></i></button>
+                								<button id="sandAccessCopy" data-clipboard-target="sandAccessTokenHiddenID" title="Copy to clipboard" class="curl-copybtn"><i class="fa fa-clipboard"></i></button>
                 							</div>
 										</div>
 										<div class="regenerate-wrapper">

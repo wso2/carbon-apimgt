@@ -27,31 +27,107 @@ require(["dojo/dom", "dojo/domReady!"], function(dom){
                 if( json.usage && json.usage.length > 0){
                     var d = new Date();
                     var firstAccessDay = new Date(json.usage[0].year, json.usage[0].month-1, json.usage[0].day);
-                    var currentDay = new Date(d.getFullYear(), d.getMonth(), d.getDate());
-                    if(firstAccessDay.valueOf() == currentDay.valueOf()){
-                        currentDay = new Date(d.getFullYear(), d.getMonth(), d.getDate()+1);
-                    }
-                    var rangeSlider =  $("#rangeSlider");
-                    //console.info(currentDay);
-                    rangeSlider.dateRangeSlider({
-                        "bounds":{
-                            min: firstAccessDay,
-                            max: currentDay
-                        },
-                        "defaultValues":{
-                            min: firstAccessDay,
-                            max: currentDay
-                        }
-                    });
-                    rangeSlider.bind("valuesChanged", function(e, data){
-                        var from = convertTimeString(data.values.min);
-                        var to = convertTimeStringPlusDay(data.values.max);
+                    var currentDay = new Date(d.getFullYear(), d.getMonth(), d.getDate(),d.getHours(),d.getMinutes());
 
-                        drawAPIResponseFaultCountTable(from,to);
+                    //day picker
+                    $('#today-btn').on('click',function(){
+                        var to = convertTimeString(currentDay);
+                        var from = convertTimeString(currentDay-86400000);
+                        var dateStr= from+" to "+to;
+                        $("#date-range").html(dateStr);
+                        $('#date-range').data('dateRangePicker').setDateRange(from,to);
                         drawAPIResponseFaultCountChart(from,to);
+
+
                     });
+
+                    //hour picker
+                    $('#hour-btn').on('click',function(){
+                        var to = convertTimeString(currentDay);
+                        var from = convertTimeString(currentDay-3600000);
+                        var dateStr= from+" to "+to;
+                        $("#date-range").html(dateStr);
+                        $('#date-range').data('dateRangePicker').setDateRange(from,to);
+                        drawAPIResponseFaultCountChart(from,to);
+
+                    })
+
+                    //week picker
+                    $('#week-btn').on('click',function(){
+                        var to = convertTimeString(currentDay);
+                        var from = convertTimeString(currentDay-604800000);
+                        var dateStr= from+" to "+to;
+                        $("#date-range").html(dateStr);
+                        $('#date-range').data('dateRangePicker').setDateRange(from,to);
+                        drawAPIResponseFaultCountChart(from,to);
+
+                    })
+
+                    //month picker
+                    $('#month-btn').on('click',function(){
+
+                        var to = convertTimeString(currentDay);
+                        var from = convertTimeString(currentDay-(604800000*4));
+                        var dateStr= from+" to "+to;
+                        $("#date-range").html(dateStr);
+                        $('#date-range').data('dateRangePicker').setDateRange(from,to);
+                        drawAPIResponseFaultCountChart(from,to);
+
+                    });
+
+                    //date picker
+                    $('#date-range').dateRangePicker(
+                        {
+                            startOfWeek: 'monday',
+                            separator : ' to ',
+                            format: 'YYYY-MM-DD HH:mm',
+                            autoClose: false,
+                            time: {
+                                enabled: true
+                            },
+                            shortcuts:'hide',
+                            endDate:currentDay
+                        })
+                        .bind('datepicker-change',function(event,obj)
+                        {
+
+                        })
+                        .bind('datepicker-apply',function(event,obj)
+                        {
+                             var from = convertDate(obj.date1);
+                             var to = convertDate(obj.date2);
+                             $('#date-range').html(from + " to "+ to);
+                             drawAPIResponseFaultCountChart(from,to);
+
+                        })
+                        .bind('datepicker-close',function()
+                        {
+                    });
+
+                    //setting default date
+                    var to = new Date();
+                    var from = new Date(to.getTime() - 1000 * 60 * 60 * 24 * 30);
+
+                    $('#date-range').data('dateRangePicker').setDateRange(from,to);
+                    $('#date-range').html($('#date-range').val());
+                    var fromStr = convertDate(from);
+                    var toStr = convertDate(to);
+                    drawAPIResponseFaultCountChart(fromStr,toStr);
+
+
+
+
+                    $('#date-range').click(function (event) {
+                    event.stopPropagation();
+                    });
+
+                    $('body').on('click', '.btn-group button', function (e) {
+                        $(this).addClass('active');
+                        $(this).siblings().removeClass('active');
+                    });
+
                     var width = $("#rangeSliderWrapper").width();
-                    $("#rangeSliderWrapper").affix();
+                    //$("#rangeSliderWrapper").affix();
                     $("#rangeSliderWrapper").width(width);
 
                 }
@@ -66,8 +142,6 @@ require(["dojo/dom", "dojo/domReady!"], function(dom){
                     $('#middle').append($('<div class="errorWrapper"><span class="label top-level-warning"><i class="icon-warning-sign icon-white"></i>'
                         +i18n.t('errorMsgs.checkBAMConnectivity')+'</span><br/><img src="../themes/default/templates/stats/faulty-invocations/images/statsThumb.png" alt="Smiley face"></div>'));
                 }
-
-
             }
             else {
                 if (json.message == "AuthenticateError") {
@@ -89,9 +163,24 @@ var drawAPIResponseFaultCountTable = function(from,to){
             if (!json.error) {
                 $('#apiFaultyTable').find("tr:gt(0)").remove();
                 var length = json.usage.length;
-                $('#apiFaultyTable').show();
+                $('#tempLoadingAPIFaulty').empty();
+                $('#tableContainer').empty();
+
+                $('#chartContainer').empty();
+
+                $('div#apiFaultyTable_wrapper.dataTables_wrapper.no-footer').remove();
+                var chart;
+                var $dataTable =$('<table class="table defaultTable" id="apiFaultyTable"></table>');
+
+                $dataTable.append($('<thead class="tableHead"><tr>'+
+                                        '<th>api</th>'+
+                                        '<th>version</th>'+
+                                        '<th>count</th>'+
+                                        '<th>percentage</th>'+
+                                    '</tr></thead>'));
+
                 for (var i = 0; i < json.usage.length; i++) {
-                    $('#apiFaultyTable').append($('<tr><td>' + json.usage[i].apiName + '</td><td>' + json.usage[i].version + '</td><td>' + json.usage[i].count + '</td><td><span class="pull-right">' + json.usage[i].faultPercentage +'%</span></td></tr>'));
+                    $dataTable.append($('<tr><td>' + json.usage[i].apiName + '</td><td>' + json.usage[i].version + '</td><td>' + json.usage[i].count + '</td><td><span class="pull-right">' + json.usage[i].faultPercentage +'%</span></td></tr>'));
                 }
                 if (length == 0) {
                     $('#apiFaultyTable').hide();
@@ -100,6 +189,15 @@ var drawAPIResponseFaultCountTable = function(from,to){
 
                 }else{
                     $('#tempLoadingAPIFaulty').hide();
+                    $('#tableContainer').append($dataTable);
+                    $('#tableContainer').show();
+                    $('#apiFaultyTable').DataTable({
+                         "order": [
+                            [ 3, "desc" ]
+                        ]
+                    });
+                    $('select').css('width','60px');
+
                 }
 
             } else {
@@ -162,9 +260,6 @@ var drawAPIResponseFaultCountChart = function(from,to){
                         "dojo/domReady!"
                     ], function(Chart, theme,MouseZoomAndPan,Highlight) {
 
-
-
-
                         // Create the chart within it's "holding" node
                         var faultyCountChart = new Chart("faultyCountChart");
 
@@ -176,15 +271,15 @@ var drawAPIResponseFaultCountChart = function(from,to){
                             type: "Columns",
                             markers: true,
                             gap: 5,
-                            animate:{duration:1000}
+                            animate:{duration:600}
                         });
 
                         // Add axes
-                        faultyCountChart.addAxis("x", { labels:dojo.map(data, function(value, index){
+                        faultyCountChart.addAxis("x", { title: 'API',titleOrientation: "away",minorTicks:false,labels:dojo.map(data, function(value, index){
                             return {value: index + 1, text: value[0]};
                         })
                         });
-                        faultyCountChart.addAxis("y",{vertical:true,fixLower: "major", fixUpper: "major", includeZero: true});
+                        faultyCountChart.addAxis("y",{vertical:true,fixLower: "major", fixUpper: "major",minorTicks:false,title: 'Count'});
 
                         // Define the data
                         var chartData; var color = -1;
@@ -206,12 +301,12 @@ var drawAPIResponseFaultCountChart = function(from,to){
                         faultyCountChart.render();
 
                     });
+                    drawAPIResponseFaultCountTable(fromDate,toDate);
 
                 } else {
                     $('#faultyCountChart').css("fontSize", 14);
                     $('#faultyCountChart').append($('<span class="label label-info">'+i18n.t('errorMsgs.noData')+'</span>'));
                 }
-
 
             } else {
                 if (json.message == "AuthenticateError") {
@@ -242,7 +337,7 @@ function isDataPublishingEnabled(){
 
 var convertTimeString = function(date){
     var d = new Date(date);
-    var formattedDate = d.getFullYear() + "-" + formatTimeChunk((d.getMonth()+1)) + "-" + formatTimeChunk(d.getDate());
+    var formattedDate = d.getFullYear() + "-" + formatTimeChunk((d.getMonth()+1)) + "-" + formatTimeChunk(d.getDate())+" "+formatTimeChunk(d.getHours())+":"+formatTimeChunk(d.getMinutes());
     return formattedDate;
 };
 
@@ -259,3 +354,12 @@ var formatTimeChunk = function (t){
     return t;
 };
 
+function convertDate(date) {
+    var month = date.getMonth() + 1;
+    var day = date.getDate();
+    var hour=date.getHours();
+    var minute=date.getMinutes();
+    return date.getFullYear() + '-' + (('' + month).length < 2 ? '0' : '')
+        + month + '-' + (('' + day).length < 2 ? '0' : '') + day +" "+ (('' + hour).length < 2 ? '0' : '')
+        + hour +":"+(('' + minute).length < 2 ? '0' : '')+ minute;
+}

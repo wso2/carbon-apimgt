@@ -42,6 +42,7 @@ public class DataBridgeFaultPublisherDTO extends FaultPublisherDTO{
         setApiPublisher(faultPublisherDTO.getApiPublisher());
         setApplicationName(faultPublisherDTO.getApplicationName());
         setApplicationId(faultPublisherDTO.getApplicationId());
+        setProtocol(faultPublisherDTO.getProtocol());
     }
 
     public static String getStreamDefinition() {
@@ -73,7 +74,8 @@ public class DataBridgeFaultPublisherDTO extends FaultPublisherDTO{
                 "          {'name':'hostName','type':'STRING'}," +
                 "          {'name':'apiPublisher','type':'STRING'}," +
                 "          {'name':'applicationName','type':'STRING'}," +
-                "          {'name':'applicationId','type':'STRING'}" +
+                "          {'name':'applicationId','type':'STRING'}," +
+                "          {'name':'protocol','type':'STRING'}" +
                 "  ]" +
 
                 "}";
@@ -84,6 +86,6 @@ public class DataBridgeFaultPublisherDTO extends FaultPublisherDTO{
     public Object createPayload(){
         return new Object[]{getConsumerKey(),getContext(),getApi_version(),getApi(), getResourcePath(),getMethod(),
                 getVersion(),getErrorCode(),getErrorMessage(), String.valueOf(getRequestTime()),getUsername(),
-                getTenantDomain(),getHostName(),getApiPublisher(), getApplicationName(), getApplicationId()};
+                getTenantDomain(),getHostName(),getApiPublisher(), getApplicationName(), getApplicationId(),getProtocol()};
     }
 }

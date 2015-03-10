@@ -50,10 +50,8 @@ import org.wso2.carbon.apimgt.api.model.APIStore;
 import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.impl.APIConstants;
-import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
-import org.wso2.carbon.registry.core.Registry;
 import org.wso2.carbon.registry.core.Resource;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.core.session.UserRegistry;
@@ -129,11 +127,10 @@ public class WSO2APIPublisher implements APIPublisher {
     private boolean deleteWSO2Store(APIIdentifier apiId, String externalPublisher, String storeEndpoint, HttpContext httpContext,String displayName) throws APIManagementException {
         boolean deleted;
         HttpClient httpclient = new DefaultHttpClient();
-        if(storeEndpoint.contains("/store")){
-            storeEndpoint=storeEndpoint.split("store")[0]+"publisher"+APIConstants.APISTORE_DELETE_URL;
-        }
-        else if(!generateEndpoint(storeEndpoint)){
-            storeEndpoint=storeEndpoint+APIConstants.APISTORE_DELETE_URL;
+        if (storeEndpoint.contains("/store")) {
+            storeEndpoint = getPublisherURLFromStoreURL(storeEndpoint) + APIConstants.APISTORE_DELETE_URL;
+        } else if (!generateEndpoint(storeEndpoint)) {
+            storeEndpoint = storeEndpoint + APIConstants.APISTORE_DELETE_URL;
         }
         HttpPost httppost = new HttpPost(storeEndpoint);
 
@@ -180,11 +177,10 @@ public class WSO2APIPublisher implements APIPublisher {
             // create a post request to addAPI.
             HttpClient httpclient = new DefaultHttpClient();
             String storeEndpoint=store.getEndpoint();
-            if(store.getEndpoint().contains("/store")){
-            storeEndpoint=store.getEndpoint().split("store")[0]+"publisher"+APIConstants.APISTORE_LOGIN_URL;
-            }
-            else if(!generateEndpoint(store.getEndpoint())){
-                storeEndpoint=storeEndpoint+ APIConstants.APISTORE_LOGIN_URL;
+            if (store.getEndpoint().contains("/store")) {
+                storeEndpoint = getPublisherURLFromStoreURL(storeEndpoint) + APIConstants.APISTORE_LOGIN_URL;
+            } else if (!generateEndpoint(store.getEndpoint())) {
+                storeEndpoint = storeEndpoint + APIConstants.APISTORE_LOGIN_URL;
             }
             HttpPost httppost = new HttpPost(storeEndpoint);
             // Request parameters and other properties.
@@ -224,11 +220,10 @@ public class WSO2APIPublisher implements APIPublisher {
             // create a post request to addAPI.
             HttpClient httpclient = new DefaultHttpClient();
             String storeEndpoint=store.getEndpoint();
-            if(store.getEndpoint().contains("/store")){
-                storeEndpoint=store.getEndpoint().split("store")[0]+"publisher"+APIConstants.APISTORE_LOGIN_URL;
-            }
-            else if(!generateEndpoint(store.getEndpoint())){
-                storeEndpoint=storeEndpoint+ APIConstants.APISTORE_LOGIN_URL;
+            if (store.getEndpoint().contains("/store")) {
+                storeEndpoint = getPublisherURLFromStoreURL(storeEndpoint) + APIConstants.APISTORE_LOGIN_URL;
+            } else if (!generateEndpoint(store.getEndpoint())) {
+                storeEndpoint = storeEndpoint + APIConstants.APISTORE_LOGIN_URL;
             }
             HttpPost httppost = new HttpPost(storeEndpoint);
             // Request parameters and other properties.
@@ -262,11 +257,10 @@ public class WSO2APIPublisher implements APIPublisher {
     private boolean addAPIToStore(API api,String storeEndpoint,String externalPublisher, HttpContext httpContext,String displayName) throws APIManagementException {
         boolean added;
         HttpClient httpclient = new DefaultHttpClient();
-        if(storeEndpoint.contains("/store")){
-            storeEndpoint=storeEndpoint.split("store")[0]+"publisher"+APIConstants.APISTORE_ADD_URL;
-        }
-        else if(!generateEndpoint(storeEndpoint)){
-            storeEndpoint=storeEndpoint+APIConstants.APISTORE_ADD_URL;
+        if (storeEndpoint.contains("/store")) {
+            storeEndpoint = getPublisherURLFromStoreURL(storeEndpoint) + APIConstants.APISTORE_ADD_URL;
+        } else if (!generateEndpoint(storeEndpoint)) {
+            storeEndpoint = storeEndpoint + APIConstants.APISTORE_ADD_URL;
         }
         HttpPost httppost = new HttpPost(storeEndpoint);
 
@@ -334,11 +328,10 @@ public class WSO2APIPublisher implements APIPublisher {
     private boolean updateWSO2Store(API api, String externalPublisher, String storeEndpoint, HttpContext httpContext,String displayName) throws APIManagementException {
         boolean updated;
         HttpClient httpclient = new DefaultHttpClient();
-        if(storeEndpoint.contains("/store")){
-            storeEndpoint=storeEndpoint.split("store")[0]+"publisher"+APIConstants.APISTORE_ADD_URL;
-        }
-        else if(!generateEndpoint(storeEndpoint)){
-            storeEndpoint=storeEndpoint+APIConstants.APISTORE_ADD_URL;
+        if (storeEndpoint.contains("/store")) {
+            storeEndpoint = getPublisherURLFromStoreURL(storeEndpoint) + APIConstants.APISTORE_ADD_URL;
+        } else if (!generateEndpoint(storeEndpoint)) {
+            storeEndpoint = storeEndpoint + APIConstants.APISTORE_ADD_URL;
         }
         HttpPost httppost = new HttpPost(storeEndpoint);
 
@@ -408,47 +401,47 @@ public class WSO2APIPublisher implements APIPublisher {
     }
 
     private boolean isAPIAvailableInWSO2Store(API api, String externalPublisher, String storeEndpoint,
-                                    		  HttpContext httpContext) throws APIManagementException {
-        		boolean available = false;
-        		HttpClient httpclient = new DefaultHttpClient();
-        		if (storeEndpoint.contains("/store")) {
-            	storeEndpoint = storeEndpoint.split("store")[0] + "publisher" + APIConstants.APISTORE_LIST_URL;
-            	} else if (!generateEndpoint(storeEndpoint)) {
-            	storeEndpoint = storeEndpoint + APIConstants.APISTORE_LIST_URL;
-            	}
-        		HttpPost httppost = new HttpPost(storeEndpoint);
+                                              HttpContext httpContext) throws APIManagementException {
+        boolean available = false;
+        HttpClient httpclient = new DefaultHttpClient();
+        if (storeEndpoint.contains("/store")) {
+            storeEndpoint = getPublisherURLFromStoreURL(storeEndpoint) + APIConstants.APISTORE_LIST_URL;
+        } else if (!generateEndpoint(storeEndpoint)) {
+            storeEndpoint = storeEndpoint + APIConstants.APISTORE_LIST_URL;
+        }
+        HttpPost httppost = new HttpPost(storeEndpoint);
 
-                // Request parameters
-                List<NameValuePair> paramVals = new ArrayList<NameValuePair>();
-        		paramVals.add(new BasicNameValuePair(APIConstants.API_ACTION, APIConstants.API_GET_ACTION));
-        		paramVals.add(new BasicNameValuePair("name", api.getId().getApiName()));
-        		paramVals.add(new BasicNameValuePair("provider", externalPublisher));
-        		paramVals.add(new BasicNameValuePair("version", api.getId().getVersion()));
+        // Request parameters
+        List<NameValuePair> paramVals = new ArrayList<NameValuePair>();
+        paramVals.add(new BasicNameValuePair(APIConstants.API_ACTION, APIConstants.API_GET_ACTION));
+        paramVals.add(new BasicNameValuePair("name", api.getId().getApiName()));
+        paramVals.add(new BasicNameValuePair("provider", externalPublisher));
+        paramVals.add(new BasicNameValuePair("version", api.getId().getVersion()));
 
-                try {
-            	httppost.setEntity(new UrlEncodedFormEntity(paramVals, "UTF-8"));
-            	// Execute and get the response.
-                HttpResponse response = httpclient.execute(httppost, httpContext);
-            	HttpEntity entity = response.getEntity();
-            	String responseString = EntityUtils.toString(entity, "UTF-8");
-            	boolean isError = Boolean.parseBoolean(responseString.split(",")[0].split(":")[1].split("}")[0].trim());
-            	if (!isError) { // If get API successful
+        try {
+            httppost.setEntity(new UrlEncodedFormEntity(paramVals, "UTF-8"));
+            // Execute and get the response.
+            HttpResponse response = httpclient.execute(httppost, httpContext);
+            HttpEntity entity = response.getEntity();
+            String responseString = EntityUtils.toString(entity, "UTF-8");
+            boolean isError = Boolean.parseBoolean(responseString.split(",")[0].split(":")[1].split("}")[0].trim());
+            if (!isError) { // If get API successful
                 available = true;
-                }
-            	} catch (UnsupportedEncodingException e) {
-            	throw new APIManagementException("Error while checking the API availabilty: " + api.getId().getApiName()
-                             					+ " in the external WSO2 APIStore: " + storeEndpoint + e);
+            }
+        } catch (UnsupportedEncodingException e) {
+            throw new APIManagementException("Error while checking the API availabilty: " + api.getId().getApiName() +
+                                             " in the external WSO2 APIStore: " + storeEndpoint + e);
 
-                } catch (ClientProtocolException e) {
-            	throw new APIManagementException("Error while checking the API availabilty: " + api.getId().getApiName()
-                    					+ " in the external WSO2 APIStore: " + storeEndpoint + e);
+        } catch (ClientProtocolException e) {
+            throw new APIManagementException("Error while checking the API availabilty: " + api.getId().getApiName() +
+                                             " in the external WSO2 APIStore: " + storeEndpoint + e);
 
-                } catch (IOException e) {
-            	throw new APIManagementException("Error while checking the API availabilty: " + api.getId().getApiName()
-                    					+ " in the external WSO2 APIStore: " + storeEndpoint + e);
+        } catch (IOException e) {
+            throw new APIManagementException("Error while checking the API availabilty: " + api.getId().getApiName() +
+                                             " in the external WSO2 APIStore: " + storeEndpoint + e);
 
-                }
-        		return available;
+        }
+        return available;
     }
 
 
@@ -456,11 +449,10 @@ public class WSO2APIPublisher implements APIPublisher {
     private boolean publishAPIToStore(APIIdentifier apiId,String storeEndpoint,String externalPublisher, HttpContext httpContext,String displayName) throws APIManagementException {
         boolean published;
         HttpClient httpclient = new DefaultHttpClient();
-        if(storeEndpoint.contains("/store")){
-            storeEndpoint=storeEndpoint.split("store")[0]+"publisher"+APIConstants.APISTORE_PUBLISH_URL;
-        }
-        else if(!generateEndpoint(storeEndpoint)){
-            storeEndpoint=storeEndpoint+APIConstants.APISTORE_PUBLISH_URL;
+        if (storeEndpoint.contains("/store")) {
+            storeEndpoint = getPublisherURLFromStoreURL(storeEndpoint) + APIConstants.APISTORE_PUBLISH_URL;
+        } else if (!generateEndpoint(storeEndpoint)) {
+            storeEndpoint = storeEndpoint + APIConstants.APISTORE_PUBLISH_URL;
         }
         HttpPost httppost = new HttpPost(storeEndpoint);
 
@@ -611,8 +603,15 @@ public class WSO2APIPublisher implements APIPublisher {
     
     private String getExternalStoreRedirectURL(int tenantId) throws APIManagementException {
     	UserRegistry registry;
-    	 String redirectURL = null;
-		try {
+    	 String redirectURL;
+        redirectURL = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
+                .getAPIManagerConfiguration()
+                .getFirstProperty(APIConstants.EXTERNAL_API_STORES + "." + APIConstants.EXTERNAL_API_STORES_STORE_URL);
+
+        if (redirectURL != null) {
+            return redirectURL;
+        }
+        try {
 			registry = ServiceReferenceHolder.getInstance().getRegistryService()
                     .getGovernanceSystemRegistry(tenantId);
 			if (registry.resourceExists(APIConstants.EXTERNAL_API_STORES_LOCATION)) {
@@ -800,6 +799,15 @@ public class WSO2APIPublisher implements APIPublisher {
             backendPort = Integer.toString(port);
             return backendPort;
 
+    }
+    
+    /**
+     * This method composes and return the publisher URL from the Store URL. 
+     * @param storeEndpoint
+     * @return Publisher URL
+     */
+    private String getPublisherURLFromStoreURL(String storeEndpoint) {
+        return storeEndpoint.split("/store")[0] + "/publisher";
     }
 
 

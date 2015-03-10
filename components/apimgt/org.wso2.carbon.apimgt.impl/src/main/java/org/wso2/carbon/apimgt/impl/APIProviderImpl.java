@@ -398,8 +398,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     contextCache.put(api.getContext(), true);
                 }
             }
-        } catch (APIManagementException e) {          
-            throw new APIManagementException("Error in adding API :"+api.getId().getApiName(),e);
+        } catch (APIManagementException e) {
+            throw new APIManagementException("Error in adding API - " + api.getId().getApiName() + "-" +
+                                             api.getId().getVersion() + ". " + e.getMessage(), e);
         }
     }
 
@@ -574,8 +575,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 }
 
             } catch (APIManagementException e) {
-            	handleException("Error while updating the API :" +api.getId().getApiName(),e);
-            }  catch (AxisFault axisFault) {
+                handleException("Error in adding API - " + api.getId().getApiName() + "-" + api.getId().getVersion() +
+                                ". " + e.getMessage(), e);
+            } catch (AxisFault axisFault) {
                 handleException("Error while invalidating API resource cache", axisFault);
             } catch (RegistryException e) {
             	handleException("Error while creating swagger 1.1 API definition:" + api.getId().getApiName(),e);
@@ -632,14 +634,16 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 if(response1.get("endpoint_type").toString().equalsIgnoreCase("wsdl")
                         && response1.has("production_endpoints")){
                     wsdlURL = response1.getJSONObject("production_endpoints").get("url").toString();
-                }
-                if (APIUtil.isValidWSDLURL(wsdlURL)) {
-                    String path = APIUtil.createWSDL(registry, api);
-                    if (path != null) {
-                        registry.addAssociation(artifactPath, path, CommonConstants.ASSOCIATION_TYPE01);
-                        updateApiArtifact.setAttribute(APIConstants.API_OVERVIEW_WSDL, api.getWsdlUrl()); //reset the wsdl path to permlink                      
+                    
+                    if (APIUtil.isValidWSDLURL(wsdlURL, true)) {
+                        String path = APIUtil.createWSDL(registry, api);
+                        if (path != null) {
+                            registry.addAssociation(artifactPath, path, CommonConstants.ASSOCIATION_TYPE01);
+                            // reset the wsdl path to permlink
+                            updateApiArtifact.setAttribute(APIConstants.API_OVERVIEW_WSDL, api.getWsdlUrl());
+                        }
                     }
-                }
+                }                
 
                 if (api.getUrl() != null && !"".equals(api.getUrl())){
                     String path = APIUtil.createEndpoint(api.getUrl(), registry);
@@ -705,14 +709,17 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             }
             }
         } catch (Exception e) {
-        	 try {
-                 registry.rollbackTransaction();
-             } catch (RegistryException re) {
-                 handleException("Error while rolling back the transaction for API: " +
-                                 api.getId().getApiName(), re);
-             }
-             handleException("Error while performing registry transaction operation", e);
-           
+            try {
+                registry.rollbackTransaction();
+            } catch (RegistryException re) {
+                handleException("Error while rolling back the transaction for API: " + api.getId().getApiName(), re);
+            }
+            if (e.getMessage() != null) {
+                handleException(e.getMessage(), e);
+            } else {
+                handleException("Error while performing registry transaction operation", e);
+            }
+
         }
     }
     
@@ -787,7 +794,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 }
                 
             } catch (APIManagementException e) {
-            	handleException("Error occured in the status change : " + api.getId().getApiName() , e);
+                handleException("Error occured in the status change - " + api.getId().getApiName() + "-" +
+                                api.getId().getVersion() + ". " + e.getMessage(), e);
             }
             finally {
                 PrivilegedCarbonContext.endTenantFlow();
@@ -869,7 +877,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         try {
             gatewayManager.publishToGateway(api, builder, tenantDomain);
         } catch (Exception e) {
-            handleException("Error while publishing to Gateway ", e);
+            throw new APIManagementException(e.getMessage(), e);
         }
         if (log.isDebugEnabled()) {
         	String logMessage = "API Name: " + api.getId().getApiName() + ", API Version "+api.getId().getVersion()+" published to gateway";
@@ -1575,7 +1583,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     registry.applyTag(artifactPath, tag);
                 }
             }           
-            if (APIUtil.isValidWSDLURL(api.getWsdlUrl())) {
+            if (APIUtil.isValidWSDLURL(api.getWsdlUrl(), false)) {
                 String path = APIUtil.createWSDL(registry, api);
                 if (path != null) {
                     registry.addAssociation(artifactPath, path, CommonConstants.ASSOCIATION_TYPE01);
@@ -1811,7 +1819,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             boolean gatewayExists = config.getApiGatewayEnvironments().size() > 0;
             String gatewayType = config.getFirstProperty(APIConstants.API_GATEWAY_TYPE);
 
-            API api = new API(identifier);
+            //Get API object using the api artifact
+            API api = APIUtil.getAPI(apiArtifact);
             api.setAsDefaultVersion(Boolean.valueOf(isDefaultVersion));
             api.setAsPublishedDefaultVersion(api.getId().getVersion().equals(apiMgtDAO.getPublishedDefaultVersion(api.getId())));
 
