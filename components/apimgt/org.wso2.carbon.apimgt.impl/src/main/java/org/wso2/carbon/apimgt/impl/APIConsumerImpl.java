@@ -826,6 +826,11 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         SortedSet<API> recentlyAddedAPIsWithMultipleVersions = new TreeSet<API>(new APIVersionComparator());
         Registry userRegistry = null;
         String latestAPIQueryPath = null;
+        APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
+                getAPIManagerConfigurationService().getAPIManagerConfiguration();
+        boolean isRecentlyAddedAPICacheEnabled =
+              Boolean.parseBoolean(config.getFirstProperty(APIConstants.API_STORE_RECENTLY_ADDED_API_CACHE_ENABLE));
+        
         PrivilegedCarbonContext.startTenantFlow();
         boolean isTenantFlowStarted = false;
         if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
@@ -852,7 +857,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 PrivilegedCarbonContext.getThreadLocalCarbonContext().setUsername(this.username);
                 isTenantFlowStarted = true;
             }
-            if (APIConstants.isRecentlyAddedAPICacheEnabled) {
+            if (isRecentlyAddedAPICacheEnabled) {
                 boolean isStatusChanged = false;
                 recentlyAddedAPI = (Set<API>) Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER).getCache(APIConstants.RECENTLY_ADDED_API_CACHE_NAME).get(username + ":" + tenantDomain);
                 if (recentlyAddedAPI != null) {
@@ -914,7 +919,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 					for (API api : latestPublishedAPIs.values()) {
 						recentlyAddedAPIs.add(api);
 					}
-					if (APIConstants.isRecentlyAddedAPICacheEnabled) {
+					if (isRecentlyAddedAPICacheEnabled) {
 						Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER)
 						       .getCache(APIConstants.RECENTLY_ADDED_API_CACHE_NAME)
 						       .put(username + ":" + tenantDomain, allAPIs);
@@ -922,7 +927,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 					return recentlyAddedAPIs;
 				} else {        			    			
         			recentlyAddedAPIsWithMultipleVersions.addAll(allAPIs);
-					if (APIConstants.isRecentlyAddedAPICacheEnabled) {
+					if (isRecentlyAddedAPICacheEnabled) {
 						Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER)
 						       .getCache(APIConstants.RECENTLY_ADDED_API_CACHE_NAME)
 						       .put(username + ":" + tenantDomain, allAPIs);
