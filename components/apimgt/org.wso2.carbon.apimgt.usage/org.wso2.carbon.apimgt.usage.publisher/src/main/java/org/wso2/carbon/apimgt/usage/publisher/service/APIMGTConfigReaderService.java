@@ -155,4 +155,19 @@ public class APIMGTConfigReaderService {
         return throttleStreamVersion;
     }
 
+    public void setBamServerUrlGroups(String bamServerUrlGroups) {
+        this.bamServerUrlGroups = bamServerUrlGroups;
+    }
+
+    public void setBamServerUser(String bamServerUser) {
+        this.bamServerUser = bamServerUser;
+    }
+
+    public void setBamServerPassword(String bamServerPassword) {
+        this.bamServerPassword = bamServerPassword;
+    }
+
+    public void setEnabled(boolean enabled) {
+        this.enabled = enabled;
+    }
 }
