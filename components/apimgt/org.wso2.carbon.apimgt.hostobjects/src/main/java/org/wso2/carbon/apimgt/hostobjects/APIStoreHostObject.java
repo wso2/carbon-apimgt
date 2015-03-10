@@ -2593,7 +2593,7 @@ public class APIStoreHostObject extends ScriptableObject {
 
 		                List<APIIdentifier> identifiers = new ArrayList<APIIdentifier>();
 		                for (SubscribedAPI subscribedAPI : subscribedAPIs) {
-			                addAPIObj(subscribedAPI, apisArray, thisObj);
+			                addAPIObj(subscribedAPI, apisArray, thisObj, application);
 			                identifiers.add(subscribedAPI.getApiId());
 
 		                }
@@ -2676,7 +2676,7 @@ public class APIStoreHostObject extends ScriptableObject {
                         }
 
                         APIKey sandboxKey = getAppKey(application, APIConstants.API_KEY_TYPE_SANDBOX);
-                        boolean sandEnableRegenarateOption = true;
+                        boolean sandEnableRegenerateOption = true;
 
                         String sandKeyScope="";
                         if (sandboxKey != null && sandboxKey.getTokenScope() != null){
@@ -2691,9 +2691,9 @@ public class APIStoreHostObject extends ScriptableObject {
                             appObj.put("sandboxConsumerSecret", appObj, sandboxKey.getConsumerSecret());
                             appObj.put("sandboxKeyState", appObj, sandboxKey.getState());
                             if (sandboxKey.getValidityPeriod() == Long.MAX_VALUE) {
-                                sandEnableRegenrateOption = false;
+	                            sandEnableRegenerateOption = false;
                             }
-                            appObj.put("sandRegenerateOption", appObj, sandEnableRegenrateOption);
+                            appObj.put("sandRegenerateOption", appObj, sandEnableRegenerateOption);
                             appObj.put("sandboxAuthorizedDomains", appObj, sandboxKey.getAuthorizedDomains());
                             if (isApplicationAccessTokenNeverExpire(sandboxKey.getValidityPeriod())) {
                                 if (tenantDomain != null &&
@@ -2712,7 +2712,7 @@ public class APIStoreHostObject extends ScriptableObject {
                             appObj.put("sandKeyScope", appObj, null);
                             appObj.put("sandboxConsumerKey", appObj, null);
                             appObj.put("sandboxConsumerSecret", appObj, null);
-                            appObj.put("sandRegenerateOption", appObj, sandEnableRegenrateOption);
+                            appObj.put("sandRegenerateOption", appObj, sandEnableRegenerateOption);
                             appObj.put("sandboxAuthorizedDomains", appObj, null);
                             appObj.put("sandboxKeyState", appObj, sandboxKey.getState());
                             if (isApplicationAccessTokenNeverExpire(
@@ -2727,7 +2727,7 @@ public class APIStoreHostObject extends ScriptableObject {
                             appObj.put("sandKeyScope", appObj, null);
                             appObj.put("sandboxConsumerKey", appObj, null);
                             appObj.put("sandboxConsumerSecret", appObj, null);
-                            appObj.put("sandRegenerateOption", appObj, sandEnableRegenrateOption);
+                            appObj.put("sandRegenerateOption", appObj, sandEnableRegenerateOption);
                             appObj.put("sandboxAuthorizedDomains", appObj, null);
                             if (isApplicationAccessTokenNeverExpire(
                                     getApplicationAccessTokenValidityPeriodInSeconds())) {
