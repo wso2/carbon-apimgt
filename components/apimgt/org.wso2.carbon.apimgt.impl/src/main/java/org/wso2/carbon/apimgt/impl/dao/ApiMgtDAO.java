@@ -1614,8 +1614,7 @@ public class ApiMgtDAO {
                     "   AND APP.APPLICATION_ID=SUBS.APPLICATION_ID " +
                     "   AND API.API_ID=SUBS.API_ID" +
                     "   AND APP.NAME= ? " +
-                    "   AND SUBS.SUBS_CREATE_STATE = '" + APIConstants.SubscriptionCreatedStatus.SUBSCRIBE + "'"+
-                    "   LIMIT startSubIndex,(endSubIndex-startSubIndex)";
+                    "   AND SUBS.SUBS_CREATE_STATE = '" + APIConstants.SubscriptionCreatedStatus.SUBSCRIBE + "'";
 
             if (forceCaseInsensitiveComparisons) {
                 sqlQuery = "SELECT " +
