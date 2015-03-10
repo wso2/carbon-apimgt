@@ -712,23 +712,10 @@ public class APIProviderHostObject extends ScriptableObject {
 
         // This is to support the new Pluggable version strategy
         // if the context does not contain any {version} segment, we use the default version strategy.
-        if(!context.contains(VERSION_PARAM)){
-            if(!context.endsWith("/")){
-                context = context + "/";
-            }
-            context = context + VERSION_PARAM;
-        }
+        context = checkAndSetVersionParam(context);
         api.setContextTemplate(context);
 
-        // This condition should not be true for any occasion but we keep it so that there are no loopholes in
-        // the flow.
-        if (version == null) {
-            // context template patterns - /{version}/foo or /foo/{version}
-            // if the version is null, then we remove the /{version} part from the context
-            context = contextVal.replace("/" + VERSION_PARAM, "");
-        }else{
-            context = context.replace(VERSION_PARAM, version);
-        }
+        context = updateContextWithVersion(version, contextVal, context);
 
         api.setContext(context);
         api.setVisibility(APIConstants.API_GLOBAL_VISIBILITY);
@@ -1089,6 +1076,13 @@ public class APIProviderHostObject extends ScriptableObject {
             context= "/t/"+ providerDomain+context;
         }
 
+        // This is to support the new Pluggable version strategy
+        // if the context does not contain any {version} segment, we use the default version strategy.
+        context = checkAndSetVersionParam(context);
+
+        String contextTemplate = context;
+        context = updateContextWithVersion(version, contextVal, context);
+
         NativeArray uriTemplateArr = (NativeArray) apiData.get("uriTemplateArr", apiData);
 
         String techOwner = (String) apiData.get("techOwner", apiData);
@@ -1290,6 +1284,7 @@ public class APIProviderHostObject extends ScriptableObject {
         }
         api.setStatus(APIStatus.CREATED);
         api.setContext(context);
+        api.setContextTemplate(contextTemplate);
         api.setBusinessOwner(bizOwner);
         api.setBusinessOwnerEmail(bizOwnerEmail);
         api.setTechnicalOwner(techOwner);
@@ -1357,6 +1352,18 @@ public class APIProviderHostObject extends ScriptableObject {
         }
         return success;
 
+    }
+
+    private static String checkAndSetVersionParam(String context) {
+        // This is to support the new Pluggable version strategy
+        // if the context does not contain any {version} segment, we use the default version strategy.
+        if(!context.contains(VERSION_PARAM)){
+            if(!context.endsWith("/")){
+                context = context + "/";
+            }
+            context = context + VERSION_PARAM;
+        }
+        return context;
     }
 
     private static String getTransports(NativeObject apiData) {
@@ -1502,6 +1509,13 @@ public class APIProviderHostObject extends ScriptableObject {
             context= "/t/"+ providerDomain+context;
         }
 
+        // This is to support the new Pluggable version strategy
+        // if the context does not contain any {version} segment, we use the default version strategy.
+        context = checkAndSetVersionParam(context);
+
+        String contextTemplate = context;
+        context = updateContextWithVersion(version, contextVal, context);
+
         APIIdentifier apiId = new APIIdentifier(provider, name, version);
         API api = new API(apiId);
 
@@ -1626,6 +1640,7 @@ public class APIProviderHostObject extends ScriptableObject {
         api.setSandboxUrl(sandboxUrl);
         api.addTags(tag);
         api.setContext(context);
+        api.setContextTemplate(contextTemplate);
         api.setVisibility(visibility);
         api.setVisibleRoles(visibleRoles != null ? visibleRoles.trim() : null);
         api.setVisibleTenants(visibleTenants != null ? visibleTenants.trim() : null);
@@ -1716,6 +1731,19 @@ public class APIProviderHostObject extends ScriptableObject {
         	}
         }
         return success;
+    }
+
+    private static String updateContextWithVersion(String version, String contextVal, String context) {
+        // This condition should not be true for any occasion but we keep it so that there are no loopholes in
+        // the flow.
+        if (version == null) {
+            // context template patterns - /{version}/foo or /foo/{version}
+            // if the version is null, then we remove the /{version} part from the context
+            context = contextVal.replace("/" + VERSION_PARAM, "");
+        }else{
+            context = context.replace(VERSION_PARAM, version);
+        }
+        return context;
     }
 
     public static boolean jsFunction_updateAPIStatus(Context cx, Scriptable thisObj, Object[] args, Function funObj) 
