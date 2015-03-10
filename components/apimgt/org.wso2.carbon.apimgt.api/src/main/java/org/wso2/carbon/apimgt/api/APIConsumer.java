@@ -180,6 +180,16 @@ public interface APIConsumer extends APIManager {
     public boolean isSubscribed(APIIdentifier apiIdentifier, String userId) throws APIManagementException;
 
     /**
+     * Returns the number of subscriptions for the given subscriber and app.
+     *
+     * @param subscriber Subscriber
+     * @param applicationName Application
+     * @return The number of subscriptions
+     * @throws APIManagementException if failed to count the number of subscriptions.
+     */
+    public Integer getSubscriptionCount(Subscriber subscriber,String applicationName) throws APIManagementException;
+
+    /**
      * Add new Subscriber
      *
      * @param identifier    APIIdentifier

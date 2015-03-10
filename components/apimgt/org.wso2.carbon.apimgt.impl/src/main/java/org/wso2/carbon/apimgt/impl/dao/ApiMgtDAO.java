@@ -1529,6 +1529,57 @@ public class ApiMgtDAO {
         return subscribedAPIs;
     }
 
+    public Integer getSubscriptionCount(Subscriber subscriber,String applicationName)
+            throws APIManagementException {
+        Integer subscriptionCount = 0;
+        Connection connection = null;
+        PreparedStatement ps = null;
+        ResultSet result = null;
+
+        try {
+            connection = APIMgtDBUtil.getConnection();
+
+            String sqlQuery = "SELECT COUNT(*) AS SUB_COUNT " +
+                              "FROM AM_SUBSCRIPTION "+
+                              "WHERE SUBS_CREATE_STATE ='" + APIConstants.SubscriptionCreatedStatus.SUBSCRIBE + "'"+
+                              " AND APPLICATION_ID =  SELECT APPLICATION_ID "+
+                                                      "FROM AM_APPLICATION API_ID "+
+                                                      "WHERE  NAME=? AND SUBSCRIBER_ID= SELECT SUBSCRIBER_ID "+
+                                                                                        "FROM AM_SUBSCRIBER "+
+                                                                                        "WHERE USER_ID = ?  AND TENANT_ID=?";
+
+            if (forceCaseInsensitiveComparisons) {
+                sqlQuery = "SELECT COUNT(*) AS SUB_COUNT " +
+                        "FROM AM_SUBSCRIPTION "+
+                        "WHERE SUBS_CREATE_STATE ='" + APIConstants.SubscriptionCreatedStatus.SUBSCRIBE + "'"+
+                        " AND APPLICATION_ID =  SELECT APPLICATION_ID "+
+                                               "FROM AM_APPLICATION API_ID "+
+                                               "WHERE  NAME=? AND SUBSCRIBER_ID= SELECT SUBSCRIBER_ID "+
+                                                                                "FROM AM_SUBSCRIBER "+
+                                                                                "WHERE LOWER(USER_ID) = LOWER(?)  AND TENANT_ID=?";
+            }
+
+            ps = connection.prepareStatement(sqlQuery);
+            ps.setString(1, applicationName);
+            ps.setString(2, subscriber.getName());
+            int tenantId = IdentityUtil.getTenantIdOFUser(subscriber.getName());
+            ps.setInt(3, tenantId);
+            result = ps.executeQuery();
+
+            while (result.next()) {
+                subscriptionCount = result.getInt("SUB_COUNT");
+            }
+
+        } catch (SQLException e) {
+            handleException("Failed to get SubscribedAPI of :" + subscriber.getName(), e);
+        } catch (IdentityException e) {
+            handleException("Failed get tenant id of user " + subscriber.getName(), e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(ps, connection, result);
+        }
+        return subscriptionCount;
+    }
+
     public Set<SubscribedAPI> getPaginatedSubscribedAPIs(Subscriber subscriber,String applicationName, int startSubIndex, int endSubIndex)
             throws APIManagementException {
         Set<SubscribedAPI> subscribedAPIs = new LinkedHashSet<SubscribedAPI>();
@@ -1563,7 +1614,8 @@ public class ApiMgtDAO {
                     "   AND APP.APPLICATION_ID=SUBS.APPLICATION_ID " +
                     "   AND API.API_ID=SUBS.API_ID" +
                     "   AND APP.NAME= ? " +
-                    "   AND SUBS.SUBS_CREATE_STATE = '" + APIConstants.SubscriptionCreatedStatus.SUBSCRIBE + "'";
+                    "   AND SUBS.SUBS_CREATE_STATE = '" + APIConstants.SubscriptionCreatedStatus.SUBSCRIBE + "'"+
+                    "   LIMIT startSubIndex,(endSubIndex-startSubIndex)";
 
             if (forceCaseInsensitiveComparisons) {
                 sqlQuery = "SELECT " +

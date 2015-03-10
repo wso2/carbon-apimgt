@@ -2455,7 +2455,7 @@ public class APIStoreHostObject extends ScriptableObject {
         }
     }
 
-    public static NativeArray jsFunction_getAllSubscriptions(Context cx,
+    public static NativeObject jsFunction_getAllSubscriptions(Context cx,
                                                              Scriptable thisObj, Object[] args, Function funObj)
             throws ScriptException, APIManagementException {
 
@@ -2464,6 +2464,8 @@ public class APIStoreHostObject extends ScriptableObject {
         }
 
         NativeArray applicationList = new NativeArray(0);
+        Integer subscriptionCount = 0;
+        NativeObject result = new NativeObject();
         boolean isTenantFlowStarted = false;
         
         long startTime = 0;
@@ -2601,9 +2603,10 @@ public class APIStoreHostObject extends ScriptableObject {
                             if (log.isDebugEnabled()) {
                                 startLoop = System.currentTimeMillis();
                             }
-                            
+
                             Set<SubscribedAPI> subscribedAPIs = apiConsumer.getPaginatedSubscribedAPIs(subscriber,
                                     application.getName(), startSubIndex, endSubIndex);
+                            subscriptionCount = apiConsumer.getSubscriptionCount(subscriber,application.getName());
                             for (SubscribedAPI subscribedAPI : subscribedAPIs) {
                                 addAPIObj(subscribedAPI, apisArray, thisObj);
                             }
@@ -2629,7 +2632,10 @@ public class APIStoreHostObject extends ScriptableObject {
         if (log.isDebugEnabled()) {
             log.debug("jsFunction_getMySubscriptionDetail took : " + (System.currentTimeMillis() - startTime) + "ms");
         }
-        return applicationList;
+
+        result.put("applications", result, applicationList);
+        result.put("totalLength", result, subscriptionCount);
+        return result;
     }
 
     private static void addAPIObj(SubscribedAPI subscribedAPI, NativeArray apisArray,
