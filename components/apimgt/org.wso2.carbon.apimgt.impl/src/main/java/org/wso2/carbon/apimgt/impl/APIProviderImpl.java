@@ -398,9 +398,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     contextCache.put(api.getContext(), true);
                 }
             }
-        } catch (APIManagementException e) {
-            throw new APIManagementException("Error in adding API - " + api.getId().getApiName() + "-" +
-                                             api.getId().getVersion() + ". " + e.getMessage(), e);
+        } catch (APIManagementException e) {          
+            throw new APIManagementException("Error in adding API :"+api.getId().getApiName(),e);
         }
     }
 
@@ -575,9 +574,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 }
 
             } catch (APIManagementException e) {
-                handleException("Error in adding API - " + api.getId().getApiName() + "-" + api.getId().getVersion() +
-                                ". " + e.getMessage(), e);
-            } catch (AxisFault axisFault) {
+            	handleException("Error while updating the API :" +api.getId().getApiName(),e);
+            }  catch (AxisFault axisFault) {
                 handleException("Error while invalidating API resource cache", axisFault);
             } catch (RegistryException e) {
             	handleException("Error while creating swagger 1.1 API definition:" + api.getId().getApiName(),e);
@@ -707,17 +705,14 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             }
             }
         } catch (Exception e) {
-            try {
-                registry.rollbackTransaction();
-            } catch (RegistryException re) {
-                handleException("Error while rolling back the transaction for API: " + api.getId().getApiName(), re);
-            }
-            if (e.getMessage() != null) {
-                handleException(e.getMessage(), e);
-            } else {
-                handleException("Error while performing registry transaction operation", e);
-            }
-
+        	 try {
+                 registry.rollbackTransaction();
+             } catch (RegistryException re) {
+                 handleException("Error while rolling back the transaction for API: " +
+                                 api.getId().getApiName(), re);
+             }
+             handleException("Error while performing registry transaction operation", e);
+           
         }
     }
     
@@ -792,8 +787,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 }
                 
             } catch (APIManagementException e) {
-                handleException("Error occured in the status change - " + api.getId().getApiName() + "-" +
-                                api.getId().getVersion() + ". " + e.getMessage(), e);
+            	handleException("Error occured in the status change : " + api.getId().getApiName() , e);
             }
             finally {
                 PrivilegedCarbonContext.endTenantFlow();
@@ -875,7 +869,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         try {
             gatewayManager.publishToGateway(api, builder, tenantDomain);
         } catch (Exception e) {
-            throw new APIManagementException(e.getMessage(), e);
+            handleException("Error while publishing to Gateway ", e);
         }
         if (log.isDebugEnabled()) {
         	String logMessage = "API Name: " + api.getId().getApiName() + ", API Version "+api.getId().getVersion()+" published to gateway";
@@ -1817,8 +1811,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             boolean gatewayExists = config.getApiGatewayEnvironments().size() > 0;
             String gatewayType = config.getFirstProperty(APIConstants.API_GATEWAY_TYPE);
 
-            //Get API object using the api artifact
-            API api = APIUtil.getAPI(apiArtifact);
+            API api = new API(identifier);
             api.setAsDefaultVersion(Boolean.valueOf(isDefaultVersion));
             api.setAsPublishedDefaultVersion(api.getId().getVersion().equals(apiMgtDAO.getPublishedDefaultVersion(api.getId())));
 
@@ -2451,17 +2444,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 		return apiJSON.toJSONString();
 	}
 
-    /**
-     * Returns the all the Consumer keys of applications which are subscribed to the given API
-     *
-     * @param apiIdentifier APIIdentifier
-     * @return a String array of ConsumerKeys
-     * @throws APIManagementException
-     */
-    public String[] getConsumerKeys(APIIdentifier apiIdentifier) throws APIManagementException {
-
-        return apiMgtDAO.getConsumerKeys(apiIdentifier);
-    }
+	
 }
 
 

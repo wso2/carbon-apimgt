@@ -30,7 +30,6 @@ import org.wso2.carbon.apimgt.hostobjects.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.keymgt.client.SubscriberKeyMgtClient;
-import org.wso2.carbon.apimgt.keymgt.client.ProviderKeyMgtClient;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.identity.user.registration.stub.dto.UserFieldDTO;
 import org.wso2.carbon.utils.CarbonUtils;
@@ -100,33 +99,6 @@ public class HostObjectUtils {
             return null;
         }
     }
-
-    /**
-     *
-     * @return ProviderKeyMgtClient
-     * @throws APIManagementException
-     */
-    protected static ProviderKeyMgtClient getProviderClient() throws APIManagementException {
-        APIManagerConfiguration config = HostObjectComponent.getAPIManagerConfiguration();
-        String url = config.getFirstProperty(APIConstants.API_KEY_MANAGER_URL);
-        if (url == null) {
-            handleException("API key manager URL unspecified");
-        }
-
-        String username = config.getFirstProperty(APIConstants.API_KEY_MANAGER_USERNAME);
-        String password = config.getFirstProperty(APIConstants.API_KEY_MANAGER_PASSWORD);
-        if (username == null || password == null) {
-            handleException("Authentication credentials for API Provider manager unspecified");
-        }
-
-        try {
-            return new ProviderKeyMgtClient(url, username, password);
-        } catch (Exception e) {
-            handleException("Error while initializing the provider  management client", e);
-            return null;
-        }
-    }
-
 
     private static void handleException(String msg) throws APIManagementException {
         log.error(msg);
