@@ -401,47 +401,47 @@ public class WSO2APIPublisher implements APIPublisher {
     }
 
     private boolean isAPIAvailableInWSO2Store(API api, String externalPublisher, String storeEndpoint,
-                                    		  HttpContext httpContext) throws APIManagementException {
-        		boolean available = false;
-        		HttpClient httpclient = new DefaultHttpClient();
+                                              HttpContext httpContext) throws APIManagementException {
+        boolean available = false;
+        HttpClient httpclient = new DefaultHttpClient();
         if (storeEndpoint.contains("/store")) {
             storeEndpoint = getPublisherURLFromStoreURL(storeEndpoint) + APIConstants.APISTORE_LIST_URL;
         } else if (!generateEndpoint(storeEndpoint)) {
             storeEndpoint = storeEndpoint + APIConstants.APISTORE_LIST_URL;
         }
-        		HttpPost httppost = new HttpPost(storeEndpoint);
+        HttpPost httppost = new HttpPost(storeEndpoint);
 
-                // Request parameters
-                List<NameValuePair> paramVals = new ArrayList<NameValuePair>();
-        		paramVals.add(new BasicNameValuePair(APIConstants.API_ACTION, APIConstants.API_GET_ACTION));
-        		paramVals.add(new BasicNameValuePair("name", api.getId().getApiName()));
-        		paramVals.add(new BasicNameValuePair("provider", externalPublisher));
-        		paramVals.add(new BasicNameValuePair("version", api.getId().getVersion()));
+        // Request parameters
+        List<NameValuePair> paramVals = new ArrayList<NameValuePair>();
+        paramVals.add(new BasicNameValuePair(APIConstants.API_ACTION, APIConstants.API_GET_ACTION));
+        paramVals.add(new BasicNameValuePair("name", api.getId().getApiName()));
+        paramVals.add(new BasicNameValuePair("provider", externalPublisher));
+        paramVals.add(new BasicNameValuePair("version", api.getId().getVersion()));
 
-                try {
-            	httppost.setEntity(new UrlEncodedFormEntity(paramVals, "UTF-8"));
-            	// Execute and get the response.
-                HttpResponse response = httpclient.execute(httppost, httpContext);
-            	HttpEntity entity = response.getEntity();
-            	String responseString = EntityUtils.toString(entity, "UTF-8");
-            	boolean isError = Boolean.parseBoolean(responseString.split(",")[0].split(":")[1].split("}")[0].trim());
-            	if (!isError) { // If get API successful
+        try {
+            httppost.setEntity(new UrlEncodedFormEntity(paramVals, "UTF-8"));
+            // Execute and get the response.
+            HttpResponse response = httpclient.execute(httppost, httpContext);
+            HttpEntity entity = response.getEntity();
+            String responseString = EntityUtils.toString(entity, "UTF-8");
+            boolean isError = Boolean.parseBoolean(responseString.split(",")[0].split(":")[1].split("}")[0].trim());
+            if (!isError) { // If get API successful
                 available = true;
-                }
-            	} catch (UnsupportedEncodingException e) {
-            	throw new APIManagementException("Error while checking the API availabilty: " + api.getId().getApiName()
-                             					+ " in the external WSO2 APIStore: " + storeEndpoint + e);
+            }
+        } catch (UnsupportedEncodingException e) {
+            throw new APIManagementException("Error while checking the API availabilty: " + api.getId().getApiName() +
+                                             " in the external WSO2 APIStore: " + storeEndpoint + e);
 
-                } catch (ClientProtocolException e) {
-            	throw new APIManagementException("Error while checking the API availabilty: " + api.getId().getApiName()
-                    					+ " in the external WSO2 APIStore: " + storeEndpoint + e);
+        } catch (ClientProtocolException e) {
+            throw new APIManagementException("Error while checking the API availabilty: " + api.getId().getApiName() +
+                                             " in the external WSO2 APIStore: " + storeEndpoint + e);
 
-                } catch (IOException e) {
-            	throw new APIManagementException("Error while checking the API availabilty: " + api.getId().getApiName()
-                    					+ " in the external WSO2 APIStore: " + storeEndpoint + e);
+        } catch (IOException e) {
+            throw new APIManagementException("Error while checking the API availabilty: " + api.getId().getApiName() +
+                                             " in the external WSO2 APIStore: " + storeEndpoint + e);
 
-                }
-        		return available;
+        }
+        return available;
     }
 
 
