@@ -5,11 +5,13 @@
             <xs:import namespace="http://util.java/xsd"></xs:import>
             <xs:complexType name="Application">
                 <xs:sequence>
+               <xs:element minOccurs="0" name="applicationWorkFlowStatus" nillable="true" type="xs:string"></xs:element>
                     <xs:element minOccurs="0" name="callbackUrl" nillable="true" type="xs:string"></xs:element>
                     <xs:element minOccurs="0" name="description" nillable="true" type="xs:string"></xs:element>
                     <xs:element minOccurs="0" name="id" type="xs:int"></xs:element>
                     <xs:element minOccurs="0" name="keys" nillable="true" type="xs:anyType"></xs:element>
                     <xs:element minOccurs="0" name="name" nillable="true" type="xs:string"></xs:element>
+               <xs:element minOccurs="0" name="status" nillable="true" type="xs:string"></xs:element>
                     <xs:element minOccurs="0" name="subscribedAPIs" nillable="true" type="ax214:Set"></xs:element>
                     <xs:element minOccurs="0" name="subscriber" nillable="true" type="ax213:Subscriber"></xs:element>
                     <xs:element minOccurs="0" name="tier" nillable="true" type="xs:string"></xs:element>
@@ -152,6 +154,7 @@
                         <xs:element minOccurs="0" name="callbackUrl" nillable="true" type="xs:string"></xs:element>
                         <xs:element maxOccurs="unbounded" minOccurs="0" name="allowedDomains" nillable="true" type="xs:string"></xs:element>
                         <xs:element minOccurs="0" name="validityTime" nillable="true" type="xs:string"></xs:element>
+                  <xs:element minOccurs="0" name="tokenScope" nillable="true" type="xs:string"></xs:element>
                     </xs:sequence>
                 </xs:complexType>
             </xs:element>
@@ -199,6 +202,7 @@
                     <xs:element minOccurs="0" name="applicationAccessToken" nillable="true" type="xs:string"></xs:element>
                     <xs:element minOccurs="0" name="consumerKey" nillable="true" type="xs:string"></xs:element>
                     <xs:element minOccurs="0" name="consumerSecret" nillable="true" type="xs:string"></xs:element>
+               <xs:element minOccurs="0" name="tokenScope" nillable="true" type="xs:string"></xs:element>
                     <xs:element minOccurs="0" name="validityTime" nillable="true" type="xs:string"></xs:element>
                 </xs:sequence>
             </xs:complexType>
