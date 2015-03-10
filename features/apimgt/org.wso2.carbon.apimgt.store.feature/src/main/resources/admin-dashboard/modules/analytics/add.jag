@@ -22,10 +22,17 @@ var enableAnalytics = function (enable) {
         client.setOptions(options);
 
         var eventingConfigData = stub.getEventingConfigData();
-        eventingConfigData.setServiceStatsEnable((enable === "true"));
-        log.info("Saving Analytics config in registry...");
-        stub.configureEventing(eventingConfigData);
-        log.info("Analytics config saved in registry.");
+        if(enable === "false"){
+            log.info("Disabling Analytics...");
+            eventingConfigData.setServiceStatsEnable(false);
+            stub.configureEventing(eventingConfigData);
+            log.info("Analytics disabled");
+        } else if(enable === "true" && eventingConfigData.getUrl() !== "" && eventingConfigData.getUrl() !== null) {
+            log.info("Enabling Analytics...");
+            eventingConfigData.setServiceStatsEnable(true);
+            stub.configureEventing(eventingConfigData);
+            log.info("Analytics enabled");
+        }
 
         return {
             error: false
@@ -67,6 +74,13 @@ var addAnalyticsConfig = function (configData) {
 
         log.info("Saving Analytics config in registry...");
         stub.configureEventing(eventingConfigData);
+        var configReaderService = org.wso2.carbon.apimgt.usage.publisher.service.APIMGTConfigReaderService.getInstance();
+        log.info(configReaderService.getRequestStreamName());
+        log.info(configReaderService.getResponseStreamName());
+        configReaderService.setEnabled(true);
+        configReaderService.setBamServerUrlGroups(configData.eventReceiverURL);
+        configReaderService.setBamServerUser(configData.eventReceiverUsername);
+        configReaderService.setBamServerPassword(configData.eventReceiverPassword);
         log.info("Analytics config saved in registry.");
 
         return {

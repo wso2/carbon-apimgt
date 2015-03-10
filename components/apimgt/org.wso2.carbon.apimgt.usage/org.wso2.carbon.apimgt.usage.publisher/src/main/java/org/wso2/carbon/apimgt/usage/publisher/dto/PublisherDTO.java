@@ -45,6 +45,8 @@ public abstract class PublisherDTO {
 
     private String applicationId;
 
+    private String protocol;
+
 
 
     public String getHostName() {
@@ -155,6 +157,14 @@ public abstract class PublisherDTO {
 
     public void setApplicationId(String applicationId) {
         this.applicationId = applicationId;
+    }
+
+    public String getProtocol() {
+        return protocol;
+    }
+
+    public void setProtocol(String protocol) {
+        this.protocol = protocol;
     }
 
 }
