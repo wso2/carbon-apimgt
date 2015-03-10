@@ -7,10 +7,13 @@
 	    <%
         if(domains != null){
             for (var key in domains) {
+                var re = /\/$/g
+                var domainValue = domains[key].replace(re, ""); // cleaning the tailing slash
+                var contextWithoutTenant = api.context.replace("/t/"+ jagg.getTenantDomain() , "");
                 %>
-                <div  class="well well-small api_urls"><%=domains[key]%><%=api.context%>/<%=api.version%>
+                <div  class="well well-small api_urls"><%=domainValue%><%= contextWithoutTenant %>/<%=api.version%>
                     <%if (api.isDefaultVersion){%>
-                        <br><%=domains[key]%><%=api.context%>
+                        <br><%=%><%= contextWithoutTenant %>
                     <%}%>
                 </div>
                 <%

@@ -135,7 +135,7 @@
     <div class="control-group">
         <label class="control-label" for="name"><%=i18n.localize("name")%>:<span class="requiredAstrix">*</span></label>
         <div class="controls">
-            <input type="text" class="input-xlarge required validRegistryName validInput apiNameExists noSpace" id="name" name="name" autofocus="autofocus" value=""/>
+            <input type="text" class="input-xlarge required validRegistryName validateForwardSlashAtEnd validInput apiNameExists noSpace" id="name" name="name" autofocus="autofocus" value=""/>
             <a class="icon-question-sign help_popup" help_data="name_help"></a>
             <p id="name_help" class="hide"><%=i18n.localize("nameHelpMsg")%></p>
         </div>
@@ -144,7 +144,7 @@
     <div class="control-group">
         <label class="control-label" for="context"><%=i18n.localize("context")%>:<span class="requiredAstrix">*</span></label>
         <div class="controls">
-            <input type="text" class="input-xlarge required validRegistryName validInput contextExists noSpace" id="context" name="context" onchange="getContextValue()" />
+            <input type="text" class="input-xlarge required validRegistryName validateForwardSlashAtEnd validInput contextExists noSpace" id="context" name="context" onchange="getContextValue()" />
             <a class="icon-question-sign help_popup" help_data="context_help"></a>
             <p id="context_help" class="hide"><%=i18n.localize("contextHelpMsg")%></p>
         </div>
@@ -275,9 +275,10 @@
                     <label class="control-label" for="tags"><%=i18n.localize("tags")%>:</label>
                     <div class="controls">
                         <input type="text" placeholder="Add tags" class="input-xlarge validInput validRegistryName" id="tags" name="tags" value="<%= _tags %>" data-role="tagsinput"
-                        onkeyup="$(this).validate()/>
+                        onkeyup="$(this).validate()"/>
                         <a class="icon-question-sign help_popup" help_data="tag_help"></a>
                         <p id="tag_help" class="hide"><%=i18n.localize("tagsHelpMsg")%></p>
+			<p class="help-block"><%=i18n.localize("tagsHelpLabel")%></p>
                     </div>
                 </div>
     </fieldset>
