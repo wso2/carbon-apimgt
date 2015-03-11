@@ -121,7 +121,7 @@ public class HostObjectUtils {
 
         try {
             return new ProviderKeyMgtClient(url, username, password);
-        } catch (Exception e) {
+        } catch (APIManagementException e) {
             handleException("Error while initializing the provider  management client", e);
             return null;
         }

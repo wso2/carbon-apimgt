@@ -26,8 +26,12 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.keymgt.stub.provider.APIKeyMgtProviderServiceStub;
 import org.wso2.carbon.authenticator.stub.AuthenticationAdminStub;
+import org.wso2.carbon.authenticator.stub.LoginAuthenticationExceptionException;
+import org.wso2.carbon.apimgt.api.APIManagementException;
 
+import java.net.MalformedURLException;
 import java.net.URL;
+import java.rmi.RemoteException;
 
 /**
  * This class will be used to access APIKeyMgtProviderService hosted in key manager
@@ -39,7 +43,7 @@ public class ProviderKeyMgtClient {
     private APIKeyMgtProviderServiceStub providerServiceStub;
 
     public ProviderKeyMgtClient(String backendServerURL, String username, String password)
-            throws Exception {
+            throws APIManagementException {
         try {
             AuthenticationAdminStub authenticationAdminStub = new AuthenticationAdminStub(null, backendServerURL +
                                                                                                 "AuthenticationAdmin");
@@ -60,10 +64,12 @@ public class ProviderKeyMgtClient {
             Options options = client.getOptions();
             options.setManageSession(true);
             options.setProperty(HTTPConstants.COOKIE_STRING, authenticatedCookie);
-        } catch (Exception e) {
-            String errorMsg = "Error when instantiating ProviderKeyMgtClient.";
-            log.error(errorMsg, e);
-            throw e;
+        } catch (RemoteException e) {
+            handleException("Cannot connect to the service, instantiating ProviderKeyMgtClient failed", e);
+        } catch (LoginAuthenticationExceptionException e) {
+            handleException("Error during Authentication, instantiating ProviderKeyMgtClient failed", e);
+        } catch (MalformedURLException e) {
+            handleException("Invalid backendServerURL, instantiating ProviderKeyMgtClient failed", e);
         }
     }
 
@@ -73,8 +79,24 @@ public class ProviderKeyMgtClient {
      * @param consumerKeys
      * @throws Exception
      */
-    public void removeScopeCache(String[] consumerKeys) throws Exception {
-        providerServiceStub.removeScopeCache(consumerKeys);
+    public void removeScopeCache(String[] consumerKeys) throws APIManagementException {
+        try {
+            providerServiceStub.removeScopeCache(consumerKeys);
+        } catch (RemoteException e) {
+            handleException("RemoteException occured while removing scope cache ", e);
+        }
+    }
+
+    /**
+     * logs the error message and throws an exception
+     *
+     * @param message   Error message
+     * @param throwable
+     * @throws APIManagementException
+     */
+    private static void handleException(String message, Throwable throwable) throws APIManagementException {
+        log.error(message, throwable);
+        throw new APIManagementException(throwable);
     }
 
 }

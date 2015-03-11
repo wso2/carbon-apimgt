@@ -467,9 +467,8 @@ public class APIProviderHostObject extends ScriptableObject {
             }
 
         } catch (APIManagementException e) {
-            log.error("Error while getting the consumerkeys", e);
-        } catch (Exception e) {
-            log.error("Failed to remove the scope cache", e);
+            //swallowing the excepion since the api update should happen even if cache update fails
+            log.error("Error while removing the scope cache", e);
         }
         
         return saveAPI(apiProvider, provider, api, null, false);
