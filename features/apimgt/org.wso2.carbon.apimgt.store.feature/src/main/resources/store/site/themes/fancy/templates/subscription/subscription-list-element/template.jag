@@ -462,7 +462,6 @@
                     </div>
                     <div class="modal-body">
                         <ul>
-                        <li><input type="checkbox" name="Default Scope" value="default" id="default" class="Checkbox"> Default Scope : default</li>
 
                                 <% for (var i = 0; i < lenS; i++) {
 

@@ -13,9 +13,18 @@ var updateAPIStatus = function (api) {
                 error:true
             };
         } else {
-            return {
-                error:false
-            };
+  var failedToPublishEnvironments = JSON.parse(success).PUBLISHED;
+               var failedToUnPublishEnvironments = JSON.parse(success).UNPUBLISHED;
+               if(failedToPublishEnvironments == "" && failedToUnPublishEnvironments == ""){
+               return {
+                           error:false
+                     };
+               }else{
+                return {
+                           error:true,
+                           message:success + '||warning'
+                       };
+               }
         }
 
     } catch (e) {
