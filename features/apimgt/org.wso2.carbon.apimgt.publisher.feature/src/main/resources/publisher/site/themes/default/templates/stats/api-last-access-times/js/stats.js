@@ -88,20 +88,14 @@ require(["dojo/dom", "dojo/domReady!"], function (dom) {
                                 shortcuts:'hide',
                                 endDate:currentDay
                             })
-                            .bind('datepicker-change',function(event,obj)
-                            {
-
-                            })
                             .bind('datepicker-apply',function(event,obj)
                             {
+                                 btnActiveToggle(this);
                                  var from = convertDate(obj.date1);
                                  var to = convertDate(obj.date2);
                                  $('#date-range').html(from + " to "+ to);
                                  drawProviderAPIVersionUserLastAccess(from,to);
-                            })
-                            .bind('datepicker-close',function()
-                            {
-                        });
+                            });
 
                         //setting default date
                         var to = new Date();
@@ -190,11 +184,11 @@ var drawProviderAPIVersionUserLastAccess = function(from,to){
                                         '<th width="20%">API</th>'+
                                          '<th  width="15%">Version</th>'+
                                         '<th  width="15%">Subscriber</th>'+
-                                        '<th   width="30%">Access Time'+ timezone+'</th>'+
+                                        '<th  style="text-align:right" width="30%">Access Time'+ timezone+'</th>'+
                                     '</tr></thead>'));
 
                 for (var i = 0; i < json.usage.length; i++) {
-                   $($dataTable).append($('<tr><td>' + json.usage[i].api_name + '</td><td>' + json.usage[i].api_version + '</td><td>' + json.usage[i].user + '</td><td >' + jagg.getDate(json.usage[i].lastAccess)+ '</td></tr>'));
+                    $dataTable.append($('<tr><td>' + json.usage[i].api_name + '</td><td>' + json.usage[i].api_version + '</td><td>' + json.usage[i].user + '</td><td style="text-align:right" >' + jagg.getDate(json.usage[i].lastAccess)+ '</td></tr>'));
                 }
                 if (length == 0) {
                     $('#lastAccessTable').hide();
@@ -205,7 +199,13 @@ var drawProviderAPIVersionUserLastAccess = function(from,to){
                     $('#tableContainer').append($dataTable);
                     $('#tableContainer').show();
                     $('#lastAccessTable').dataTable({
-                         "order": [[ 3, "desc" ]]
+                         "order": [[ 3, "desc" ]],
+                          "fnDrawCallback": function(){
+                            if(this.fnSettings().fnRecordsDisplay()<=$("#lastAccessTable_length option:selected" ).val()
+                          || $("#lastAccessTable_length option:selected" ).val()==-1)
+                            $('#lastAccessTable_paginate').hide();
+                            else $('#lastAccessTable_paginate').show();
+                          }
                     });
                     $('select').css('width','60px');
                 }
@@ -265,3 +265,9 @@ function convertDate(date) {
         + month + '-' + (('' + day).length < 2 ? '0' : '') + day +" "+ (('' + hour).length < 2 ? '0' : '')
         + hour +":"+(('' + minute).length < 2 ? '0' : '')+ minute;
 }
+
+function btnActiveToggle(button){
+    $(button).siblings().removeClass('active');
+    $(button).addClass('active');
+}
+

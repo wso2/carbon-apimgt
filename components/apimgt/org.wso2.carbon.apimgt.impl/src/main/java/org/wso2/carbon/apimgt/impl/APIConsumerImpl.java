@@ -781,6 +781,11 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         SortedSet<API> recentlyAddedAPIsWithMultipleVersions = new TreeSet<API>(new APIVersionComparator());
         Registry userRegistry = null;
         String latestAPIQueryPath = null;
+        APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
+                getAPIManagerConfigurationService().getAPIManagerConfiguration();
+        boolean isRecentlyAddedAPICacheEnabled =
+              Boolean.parseBoolean(config.getFirstProperty(APIConstants.API_STORE_RECENTLY_ADDED_API_CACHE_ENABLE));
+        
         PrivilegedCarbonContext.startTenantFlow();
         boolean isTenantFlowStarted = false;
         if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
@@ -807,7 +812,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 PrivilegedCarbonContext.getThreadLocalCarbonContext().setUsername(this.username);
                 isTenantFlowStarted = true;
             }
-            if (APIConstants.isRecentlyAddedAPICacheEnabled) {
+            if (isRecentlyAddedAPICacheEnabled) {
                 boolean isStatusChanged = false;
                 recentlyAddedAPI = (Set<API>) Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER).getCache(APIConstants.RECENTLY_ADDED_API_CACHE_NAME).get(username + ":" + tenantDomain);
                 if (recentlyAddedAPI != null) {
@@ -869,7 +874,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 					for (API api : latestPublishedAPIs.values()) {
 						recentlyAddedAPIs.add(api);
 					}
-					if (APIConstants.isRecentlyAddedAPICacheEnabled) {
+					if (isRecentlyAddedAPICacheEnabled) {
 						Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER)
 						       .getCache(APIConstants.RECENTLY_ADDED_API_CACHE_NAME)
 						       .put(username + ":" + tenantDomain, allAPIs);
@@ -877,7 +882,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 					return recentlyAddedAPIs;
 				} else {        			    			
         			recentlyAddedAPIsWithMultipleVersions.addAll(allAPIs);
-					if (APIConstants.isRecentlyAddedAPICacheEnabled) {
+					if (isRecentlyAddedAPICacheEnabled) {
 						Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER)
 						       .getCache(APIConstants.RECENTLY_ADDED_API_CACHE_NAME)
 						       .put(username + ":" + tenantDomain, allAPIs);
@@ -1702,7 +1707,11 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     }
 
     @Override
-    public Map<String,String> requestApprovalForApplicationRegistration(String userId, String applicationName, String tokenType, String callbackUrl, String[] allowedDomains, String validityTime) throws APIManagementException {
+    public Map<String,String> requestApprovalForApplicationRegistration(String userId, String applicationName,
+                                                                        String tokenType, String callbackUrl,
+                                                                        String[] allowedDomains, String validityTime,
+                                                                        String tokenScope)
+		    throws APIManagementException {
 
         Application application  = apiMgtDAO.getApplicationByName(applicationName,userId);
 
@@ -1720,6 +1729,9 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 
         WorkflowExecutor appRegistrationWorkflow = null;
         ApplicationRegistrationWorkflowDTO appRegWFDto = null;
+	    ApplicationKeysDTO appKeysDto = new ApplicationKeysDTO();
+        appKeysDto.setTokenScope(tokenScope);
+
         try {
         if(APIConstants.API_KEY_TYPE_PRODUCTION.equals(tokenType)){
             appRegistrationWorkflow = WorkflowExecutorFactory.getInstance().
@@ -1744,6 +1756,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         appRegWFDto.setCallbackUrl(appRegistrationWorkflow.getCallbackURL());
         appRegWFDto.setDomainList(allowedDomains);
         appRegWFDto.setValidityTime(Long.parseLong(validityTime));
+            appRegWFDto.setKeyDetails(appKeysDto);
 
 
             appRegistrationWorkflow.execute(appRegWFDto);
@@ -1769,6 +1782,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             keyDetails.put("consumerKey",applicationKeysDTO.getConsumerKey());
             keyDetails.put("consumerSecret",applicationKeysDTO.getConsumerSecret());
             keyDetails.put("validityTime",applicationKeysDTO.getValidityTime());
+            keyDetails.put("tokenScope",applicationKeysDTO.getTokenScope());
 
         }
 
@@ -1778,7 +1792,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 
     public Map<String, String> completeApplicationRegistration(String userId,
                                                                String applicationName,
-                                                               String tokenType)
+                                                               String tokenType, String tokenScope)
             throws APIManagementException {
 
         Application application = apiMgtDAO.getApplicationByName(applicationName, userId);
@@ -1792,14 +1806,19 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 throw new APIManagementException("Couldn't populate WorkFlow details.");
             }
             try {
-                ApplicationKeysDTO dto = keyMgtClient.getApplicationAccessKey(userId, application.getName(), tokenType,
-                                                                              application.getCallbackUrl(), workflowDTO.getAllowedDomains(), Long.toString(workflowDTO.getValidityTime()));
+	            ApplicationKeysDTO dto = keyMgtClient
+			            .getApplicationAccessKey(userId, application.getName(), tokenType,
+			                                     application.getCallbackUrl(),
+			                                     workflowDTO.getAllowedDomains(),
+			                                     Long.toString(workflowDTO.getValidityTime()),
+			                                     tokenScope);
                 keyDetails = new HashMap<String, String>();
                 keyDetails.put("accessToken", dto.getApplicationAccessToken());
                 keyDetails.put("consumerKey", dto.getConsumerKey());
                 keyDetails.put("consumerSecret", dto.getConsumerSecret());
                 keyDetails.put("validityTime", dto.getValidityTime());
                 keyDetails.put("accessallowdomains", workflowDTO.getDomainList());
+                keyDetails.put("tokenScope",dto.getTokenScope());
             } catch (Exception e) {
                 APIUtil.handleException("Error occurred while executing SubscriberKeyMgtClient.", e);
             }
@@ -2085,6 +2104,20 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 	                                                                                    throws APIManagementException {
 		// TODO Auto-generated method stub
 		return null;
+	}
+
+	public Set<Scope> getScopesBySubscribedAPIs(List<APIIdentifier> identifiers)
+			throws APIManagementException {
+		return apiMgtDAO.getScopesBySubscribedAPIs(identifiers);
+	}
+
+	public String getScopesByToken(String accessToken) throws APIManagementException {
+		return apiMgtDAO.getScopesByToken(accessToken);
+	}
+
+	public Set<Scope> getScopesByScopeKeys(String scopeKeys, int tenantId)
+			throws APIManagementException {
+		return apiMgtDAO.getScopesByScopeKeys(scopeKeys, tenantId);
 	}
 
 	

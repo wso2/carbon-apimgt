@@ -2844,10 +2844,13 @@ public class APIProviderHostObject extends ScriptableObject {
                 APIUtil.setResourcePermissions(api.getId().getProviderName(),
                                                api.getVisibility(), visibleRoles,filePath);
                 doc.setFilePath(apiProvider.addIcon(filePath, icon));
+            } else {
+                throw new APIManagementException("Empty File Attachment.");
             }
 
         } catch (Exception e) {
-            handleException("Error while creating an attachment for Document- " + docName + "-" + version, e);
+            handleException("Error while creating an attachment for Document- " + docName + "-" + version + ". " +
+                                    e.getMessage(), e);
             return false;
         }
         boolean isTenantFlowStarted = false;
@@ -4084,6 +4087,7 @@ public class APIProviderHostObject extends ScriptableObject {
                 row.put("context", row, fault.getContext());
                 row.put("count", row, fault.getCount());
                 row.put("faultPercentage", row, fault.getFaultPercentage());
+                row.put("totalRequestCount",row,fault.getRequestCount());
                 myn.put(i, myn, row);
                 i++;
             }
