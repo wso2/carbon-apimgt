@@ -75,8 +75,8 @@ public class OAuthAuthenticator implements Authenticator {
         String apiKey = null;
         if (headers != null) {
             apiKey = extractCustomerKeyFromAuthHeader(headers);
-            if(log.isDebugEnabled()){
-                log.debug("Received Token ".concat(apiKey));
+            if (log.isDebugEnabled()) {
+                log.debug(apiKey != null ? "Received Token ".concat(apiKey) : "No valid Authorization header found");
             }
         }
 

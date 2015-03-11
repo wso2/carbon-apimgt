@@ -26,6 +26,8 @@ public class ApplicationKeysDTO {
     private String consumerSecret;
     private String[] accessAllowDomains;
     private String validityTime;
+    private String tokenScope;
+
     
     public String getApplicationAccessToken() {
         return applicationAccessToken;
@@ -65,5 +67,13 @@ public class ApplicationKeysDTO {
 
 	public void setValidityTime(String validityTime) {
 	    this.validityTime = validityTime;
+    }
+
+    public String getTokenScope() {
+        return tokenScope;
+    }
+
+    public void setTokenScope(String tokenScope) {
+        this.tokenScope = tokenScope;
     }
 }

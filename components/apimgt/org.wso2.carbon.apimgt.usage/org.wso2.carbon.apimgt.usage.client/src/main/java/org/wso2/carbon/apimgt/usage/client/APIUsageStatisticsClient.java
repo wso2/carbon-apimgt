@@ -872,11 +872,12 @@ public class APIUsageStatisticsClient {
                     for (int i = 0; i < apiVersionUsageList.size(); i++) {
                         apiVersionUsageDTO = apiVersionUsageList.get(i);
                         if (apiVersionUsageDTO.getVersion().equals(fault.apiVersion)) {
-                            double requestCount = apiVersionUsageDTO.getCount();
-                            double faultPercentage = (requestCount - fault.faultCount) / requestCount * 100;
+                            long requestCount = apiVersionUsageDTO.getCount();
+                            double faultPercentage = ((double)requestCount - fault.faultCount) / requestCount * 100;
                             DecimalFormat twoDForm = new DecimalFormat("#.##");
                             faultPercentage = 100 - Double.valueOf(twoDForm.format(faultPercentage));
                             faultyDTO.setFaultPercentage(faultPercentage);
+                            faultyDTO.setRequestCount(requestCount);
                             break;
                         }
                     }

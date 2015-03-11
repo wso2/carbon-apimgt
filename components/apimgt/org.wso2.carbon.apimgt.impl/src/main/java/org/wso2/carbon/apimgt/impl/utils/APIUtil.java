@@ -3685,25 +3685,35 @@ public final class APIUtil {
 
 
 
-        /**
-         * This method will check the validity of given url. WSDL url should be contain http, https or file system patch
-         * otherwise we will mark it as invalid wsdl url. How ever here we do not validate wsdl content.
-         * @param wsdlURL wsdl url tobe tested
-         * @return true if its valid url else fale
-         */
-    public static boolean isValidWSDLURL(String wsdlURL){
-        if((wsdlURL != null && !"".equals(wsdlURL)) && (wsdlURL.contains("http:") | wsdlURL.contains("https:") | wsdlURL.contains("file:"))){
-            return true;
-        }
-        else {
-            if(log.isDebugEnabled()){
-                log.debug("WSDL url validation failed. Provided wsdl url is not valid url: "+wsdlURL);
+    /**
+     * This method will check the validity of given url. WSDL url should be
+     * contain http, https or file system patch
+     * otherwise we will mark it as invalid wsdl url. How ever here we do not
+     * validate wsdl content.
+     * 
+     * @param wsdlURL
+     *            wsdl url tobe tested
+     * @return true if its valid url else fale
+     */
+    public static boolean isValidWSDLURL(String wsdlURL, boolean required) {
+        if ((wsdlURL != null && !"".equals(wsdlURL))) {
+            if ((wsdlURL.contains("http:") | wsdlURL.contains("https:") | wsdlURL.contains("file:"))) {
+                return true;
             }
+        } else if (!required) {
+            // If the WSDL in not required and URL is empty, then we don't need
+            // to add debug log.
+            // Hence returning.
             return false;
         }
 
+        if (log.isDebugEnabled()) {
+            log.debug("WSDL url validation failed. Provided wsdl url is not valid url: " + wsdlURL);
+        }
+        return false;
+
     }
-    
+
     /**
      * load tenant axis configurations. 
      * @param tenantDomain

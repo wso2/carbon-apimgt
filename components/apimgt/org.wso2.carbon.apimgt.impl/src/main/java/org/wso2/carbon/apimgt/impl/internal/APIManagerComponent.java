@@ -184,7 +184,6 @@ public class APIManagerComponent {
             APIMgtDBUtil.initialize();
             //Check User add listener enabled or not
             boolean selfSignInProcessEnabled = Boolean.parseBoolean(configuration.getFirstProperty("WorkFlowExtensions.SelfSignIn.ProcessEnabled"));
-            readRecentlyAddedAPICacheConfigs(configuration);
             if (selfSignInProcessEnabled) {
                 if (bundleContext != null) {
                     bundleContext.registerService(UserStoreManagerListener.class.getName(),
@@ -515,14 +514,6 @@ public class APIManagerComponent {
 
     public static TenantRegistryLoader getTenantRegistryLoader(){
         return tenantRegistryLoader;
-    }
-    private void readRecentlyAddedAPICacheConfigs(APIManagerConfiguration config) {
-        String isRecentlyAddedAPICachedEnabled = config.getFirstProperty(APIConstants.API_STORE_RECENTLY_ADDED_API_CACHE_ENABLE);
-        if (isRecentlyAddedAPICachedEnabled == null) {
-            APIConstants.isRecentlyAddedAPICacheEnabled = false;
-        } else {
-            APIConstants.isRecentlyAddedAPICacheEnabled  =  isRecentlyAddedAPICachedEnabled.equalsIgnoreCase("true") ? true : false;
-        }
     }
 
     /**
