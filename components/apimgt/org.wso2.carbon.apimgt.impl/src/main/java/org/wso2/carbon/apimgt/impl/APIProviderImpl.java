@@ -549,7 +549,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                             environmentsRemoved.removeAll(failedToPublishEnvironments);
                             environmentsRemoved.addAll(failedToRemoveEnvironments);
                             if (environmentsRemoved.isEmpty())
-                                environmentsRemoved.add("none");
                             apiPublished.setEnvironments(environmentsRemoved);
                             updateApiArtifact(apiPublished, true, false);
                             failedGateways.clear();
@@ -677,14 +676,16 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 if(response1.get("endpoint_type").toString().equalsIgnoreCase("wsdl")
                         && response1.has("production_endpoints")){
                     wsdlURL = response1.getJSONObject("production_endpoints").get("url").toString();
-                }
-                if (APIUtil.isValidWSDLURL(wsdlURL)) {
-                    String path = APIUtil.createWSDL(registry, api);
-                    if (path != null) {
-                        registry.addAssociation(artifactPath, path, CommonConstants.ASSOCIATION_TYPE01);
-                        updateApiArtifact.setAttribute(APIConstants.API_OVERVIEW_WSDL, api.getWsdlUrl()); //reset the wsdl path to permlink                      
+                    
+                    if (APIUtil.isValidWSDLURL(wsdlURL, true)) {
+                        String path = APIUtil.createWSDL(registry, api);
+                        if (path != null) {
+                            registry.addAssociation(artifactPath, path, CommonConstants.ASSOCIATION_TYPE01);
+                            // reset the wsdl path to permlink
+                            updateApiArtifact.setAttribute(APIConstants.API_OVERVIEW_WSDL, api.getWsdlUrl());
+                        }
                     }
-                }
+                }                
 
                 if (api.getUrl() != null && !"".equals(api.getUrl())){
                     String path = APIUtil.createEndpoint(api.getUrl(), registry);
@@ -1628,7 +1629,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     registry.applyTag(artifactPath, tag);
                 }
             }           
-            if (APIUtil.isValidWSDLURL(api.getWsdlUrl())) {
+            if (APIUtil.isValidWSDLURL(api.getWsdlUrl(), false)) {
                 String path = APIUtil.createWSDL(registry, api);
                 if (path != null) {
                     registry.addAssociation(artifactPath, path, CommonConstants.ASSOCIATION_TYPE01);
