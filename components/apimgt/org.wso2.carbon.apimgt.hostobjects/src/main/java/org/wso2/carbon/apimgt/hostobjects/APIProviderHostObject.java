@@ -75,8 +75,6 @@ import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import javax.cache.Caching;
 import javax.net.ssl.HostnameVerifier;
-import javax.net.ssl.HttpsURLConnection;
-import javax.net.ssl.SSLHandshakeException;
 import javax.net.ssl.SSLSession;
 
 import java.io.BufferedReader;
@@ -85,6 +83,7 @@ import java.io.InputStreamReader;
 import java.lang.reflect.InvocationTargetException;
 import java.net.*;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -298,11 +297,11 @@ public class APIProviderHostObject extends ScriptableObject {
      * @param thisObj Scriptable object
      * @param args    Passing arguments
      * @param funObj  Function object
-     * @return true if the API was added successfully
+     * @return json String of environments failed
      * @throws APIManagementException Wrapped exception by org.wso2.carbon.apimgt.api.APIManagementException
      */
-    public static boolean jsFunction_manageAPI(Context cx, Scriptable thisObj,
-			Object[] args,	Function funObj) throws APIManagementException, ScriptException {
+    public static String jsFunction_manageAPI(Context cx, Scriptable thisObj,
+                                              Object[] args, Function funObj) throws APIManagementException, ScriptException {
     	boolean success = false;
     	
     	if (args==null||args.length == 0) {
@@ -369,7 +368,7 @@ public class APIProviderHostObject extends ScriptableObject {
 	String businessOwnerEmail = (String) apiData.get("bizOwnerMail", apiData);
 	String technicalOwner = (String) apiData.get("techOwner", apiData);
 	String technicalOwnerEmail = (String) apiData.get("techOwnerMail", apiData);
-
+        String environments = (String) apiData.get("environments", apiData);
         String responseCache = (String) apiData.get("responseCache", apiData);
         int cacheTimeOut = APIConstants.API_RESPONSE_CACHE_TIMEOUT;
         if (APIConstants.ENABLED.equalsIgnoreCase(responseCache)) {
@@ -440,7 +439,8 @@ public class APIProviderHostObject extends ScriptableObject {
         if(!"none".equals(technicalOwnerEmail)){
             api.setTechnicalOwnerEmail(technicalOwnerEmail);
         }
-        
+        api.setEnvironments(APIUtil.extractEnvironmentsForAPI(environments));
+
         Set<Tier> availableTier = new HashSet<Tier>();
         String[] tierNames;
         if (tier != null) {
@@ -454,11 +454,12 @@ public class APIProviderHostObject extends ScriptableObject {
         api.setLastUpdated(new Date());
 
         if (apiData.get("swagger", apiData) != null) {
-            Set<URITemplate> uriTemplates = parseResourceConfig(apiProvider, apiId, (String) apiData.get("swagger", apiData));
+            Set<URITemplate> uriTemplates = parseResourceConfig(apiProvider, apiId, (String) apiData
+                    .get("swagger", apiData), api);
             api.setUriTemplates(uriTemplates);
         }
         
-        return saveAPI(apiProvider, provider, api, null, false);
+        return saveAPI(apiProvider, api, null, false);
     }
     
     
@@ -468,12 +469,12 @@ public class APIProviderHostObject extends ScriptableObject {
      * @param thisObj Scriptable object
      * @param args    Passing arguments
      * @param funObj  Function object
-     * @return true if the API was added successfully
+     * @return json string of failed environments
      * @throws APIManagementException Wrapped exception by org.wso2.carbon.apimgt.api.APIManagementException
      */
-    public static boolean jsFunction_updateAPIImplementation(Context cx, Scriptable thisObj,
-											Object[] args,	Function funObj) throws APIManagementException, ScriptException {
-    	boolean success = false;
+    public static String jsFunction_updateAPIImplementation(Context cx, Scriptable thisObj,
+                                                            Object[] args, Function funObj)
+            throws APIManagementException, ScriptException {
     	
     	if (args==null||args.length == 0) {
             handleException("Invalid number of input parameters.");
@@ -544,11 +545,12 @@ public class APIProviderHostObject extends ScriptableObject {
         	        
         
         if (apiData.get("swagger", apiData) != null) {
-        	Set<URITemplate> uriTemplates = parseResourceConfig(apiProvider, apiId, (String) apiData.get("swagger", apiData));
-        	api.setUriTemplates(uriTemplates);
+            Set<URITemplate> uriTemplates = parseResourceConfig(apiProvider, apiId, (String) apiData
+                    .get("swagger", apiData), api);
+            api.setUriTemplates(uriTemplates);
         }
                 
-        return saveAPI(apiProvider, provider, api, null, false);
+        return saveAPI(apiProvider, api, null, false);
     	
     }
     
@@ -558,13 +560,14 @@ public class APIProviderHostObject extends ScriptableObject {
      * @param thisObj Scriptable object
      * @param args    Passing arguments
      * @param funObj  Function object
-     * @return true if the API was added successfully
+     * @return json string of failed environments
      * @throws APIManagementException Wrapped exception by org.wso2.carbon.apimgt.api.APIManagementException
      */
-    public static boolean jsFunction_updateAPIDesign(Context cx, Scriptable thisObj,
-            									Object[] args,	Function funObj) throws APIManagementException, ScriptException {
-    	
-    	if (args==null||args.length == 0) {
+    public static String jsFunction_updateAPIDesign(Context cx, Scriptable thisObj,
+                                                    Object[] args, Function funObj)
+            throws APIManagementException, ScriptException {
+
+        if (args==null||args.length == 0) {
             handleException("Invalid number of input parameters.");
         }
 
@@ -637,8 +640,9 @@ public class APIProviderHostObject extends ScriptableObject {
         }
         
         if (apiData.get("swagger", apiData) != null) {
-        	Set<URITemplate> uriTemplates = parseResourceConfig(apiProvider, apiId, (String) apiData.get("swagger", apiData));
-        	api.setUriTemplates(uriTemplates);
+            Set<URITemplate> uriTemplates = parseResourceConfig(apiProvider, apiId, (String) apiData
+                    .get("swagger", apiData), api);
+            api.setUriTemplates(uriTemplates);
         }
                 
         api.setDescription(StringEscapeUtils.escapeHtml(description));
@@ -656,7 +660,7 @@ public class APIProviderHostObject extends ScriptableObject {
         
         checkFileSize(fileHostObject);
         
-        return saveAPI(apiProvider, provider, api, fileHostObject, false);
+        return saveAPI(apiProvider, api, fileHostObject, false);
     }
     
     /**
@@ -665,18 +669,18 @@ public class APIProviderHostObject extends ScriptableObject {
      * @param thisObj Scriptable object
      * @param args    Passing arguments
      * @param funObj  Function object
-     * @return true if the API was added successfully
+     * @return json string of failed Environments
      * @throws APIManagementException Wrapped exception by org.wso2.carbon.apimgt.api.APIManagementException
      */
-    public static boolean jsFunction_createAPI(Context cx, Scriptable thisObj,
-			Object[] args,	Function funObj) throws APIManagementException, ScriptException {
-    	
-    	if (args==null||args.length == 0) {
+    public static String jsFunction_createAPI(Context cx, Scriptable thisObj,
+                                              Object[] args, Function funObj)
+            throws APIManagementException, ScriptException {
+
+        if (args==null||args.length == 0) {
             handleException("Invalid number of input parameters.");
         }
 
-        boolean success = false;
-        
+
         NativeObject apiData = (NativeObject) args[0];
         
         String provider = String.valueOf(apiData.get("provider", apiData));
@@ -712,7 +716,7 @@ public class APIProviderHostObject extends ScriptableObject {
         api.setVisibility(APIConstants.API_GLOBAL_VISIBILITY);
         api.setLastUpdated(new Date());
         
-        return saveAPI(apiProvider, provider, api, null, true);
+        return saveAPI(apiProvider, api, null, true);
     }
     
     /**
@@ -772,19 +776,19 @@ public class APIProviderHostObject extends ScriptableObject {
     /**
      * This method save or update the API object
      * @param apiProvider
-     * @param providerName
      * @param api
      * @param fileHostObject
      * @param create
-     * @return
+     * @return json string of failed Environments
      * @throws APIManagementException
      */
-    private static boolean saveAPI(APIProvider apiProvider, String providerName, API api, 
-    						FileHostObject fileHostObject, boolean create) throws APIManagementException {
-    	boolean success = false;
+    private static String saveAPI(APIProvider apiProvider, API api,
+                                  FileHostObject fileHostObject, boolean create) throws APIManagementException {
+        String success = null;
     	boolean isTenantFlowStarted = false;
         try {
-            String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(providerName));
+            String tenantDomain =
+                    MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(api.getId().getProviderName()));
             if(tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
             	isTenantFlowStarted = true;
                 PrivilegedCarbonContext.startTenantFlow();
@@ -796,20 +800,23 @@ public class APIProviderHostObject extends ScriptableObject {
                 String thumbPath = APIUtil.getIconPath(api.getId());
 
                 String thumbnailUrl = apiProvider.addIcon(thumbPath, icon);
-                api.setThumbnailUrl(APIUtil.prependTenantPrefix(thumbnailUrl, providerName));
+                api.setThumbnailUrl(APIUtil.prependTenantPrefix(thumbnailUrl, api.getId().getProviderName()));
 
                 /*Set permissions to anonymous role for thumbPath*/
                 APIUtil.setResourcePermissions(api.getId().getProviderName(), null, null, thumbPath);
             }  
             if (create) {
             	apiProvider.addAPI(api);
+                success = createFailedGatewaysAsJsonString(Collections.<String, List<String>>emptyMap());
             } else {
-            	apiProvider.updateAPI(api);
+                Map<String, List<String>> failedGateways = apiProvider.updateAPI(api);
+                success = createFailedGatewaysAsJsonString(failedGateways);
             }
-            success = true;
+
         } catch (ScriptException e) {
-            throw new APIManagementException("Error while adding api thumbnail for " + api.getId().getApiName() + "-" +
-                                             api.getId().getVersion(), e);
+            handleException("Error while adding the API- " + api.getId().getApiName() + "-" + api.getId().getVersion(),
+                            e);
+            return createFailedGatewaysAsJsonString(Collections.<String, List<String>>emptyMap());
         } finally {
         	if (isTenantFlowStarted) {
         		PrivilegedCarbonContext.endTenantFlow();
@@ -818,17 +825,19 @@ public class APIProviderHostObject extends ScriptableObject {
         
     	return success;
     }
-    
+
     /**
      * This method parses the JSON resource config and returns the UriTemplates. Also it saves the swagger
      * 1.2 resources in the registry
      * @param resourceConfigsJSON
-     * @return
+     * @return set of Uri Templates according to api
      * @throws APIManagementException
      */
-    private static Set<URITemplate> parseResourceConfig(APIProvider apiProvider, 
-    			APIIdentifier apiId, String resourceConfigsJSON) throws APIManagementException {
-    	JSONParser parser = new JSONParser();
+    private static Set<URITemplate> parseResourceConfig(APIProvider apiProvider,
+                                                        APIIdentifier apiId,
+                                                        String resourceConfigsJSON, API api)
+            throws APIManagementException {
+        JSONParser parser = new JSONParser();
         JSONObject resourceConfigs = null;
         JSONObject api_doc = null;
         Set<URITemplate> uriTemplates = new LinkedHashSet<URITemplate>();
@@ -880,20 +889,43 @@ public class APIProviderHostObject extends ScriptableObject {
 	        for (int i = 0; i < resources.size(); i++) {
 	            JSONObject resourceConfig = (JSONObject) resources.get(i);
                 APIManagerConfiguration config = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration();
-                List<Environment> environments = config.getApiGatewayEnvironments();
+                Map<String, Environment> environments = config.getApiGatewayEnvironments();
                 Environment env = null;
                 String ep = "";
                 if(environments!=null) {
-                    env = environments.get(0);
+                    Set<String> publishedEnvironments = api.getEnvironments();
+                    if (publishedEnvironments.isEmpty() || publishedEnvironments.contains("none")) {
+
+                        env = environments.values()
+                                          .toArray(new Environment[environments.size()])[0];
                     String gatewayEndpoint = env.getApiGatewayEndpoint();
                     if (gatewayEndpoint.contains(",")) {
                         ep = gatewayEndpoint.split(",")[0];
                     } else {
                         ep = gatewayEndpoint;
                     }
+                    } else {
+                        for (String environmentName : publishedEnvironments) {
+                            // find environment that have hybrid type
+                            if (APIConstants.GATEWAY_ENV_TYPE_HYBRID
+                                    .equals(environments.get(environmentName).getType())) {
+                                env = environments.get(environmentName);
+                                break;
+                            }
+                        }
+                        //if not having any hybrid environment give 1st environment in api published list
+                        if (env == null) {
+                            env = environments.get(publishedEnvironments.toArray()[0]);
+                        }
+                        String gatewayEndpoint = env.getApiGatewayEndpoint();
+                        if (gatewayEndpoint != null && gatewayEndpoint.contains(",")) {
+                            ep = gatewayEndpoint.split(",")[0];
+                        } else {
+                            ep = gatewayEndpoint;
+                        }
+                    }
                 }
                 String apiPath = APIUtil.getAPIPath(apiId);
-                API api = apiProvider.getAPI(apiPath);
                 if(ep.endsWith(RegistryConstants.PATH_SEPARATOR)){
                     ep.substring(0,ep.length()-1);
                 }
@@ -1695,14 +1727,25 @@ public class APIProviderHostObject extends ScriptableObject {
         return success;
     }
 
-    public static boolean jsFunction_updateAPIStatus(Context cx, Scriptable thisObj, Object[] args, Function funObj) 
+    /**
+     *
+     * @param cx Rhino context
+     * @param thisObj Scriptable object
+     * @param args Passing arguments
+     * @param funObj Function object
+     * @return json string of failed environments
+     * @throws APIManagementException
+     */
+    public static String jsFunction_updateAPIStatus(Context cx, Scriptable thisObj,
+                                                    Object[] args,
+                                                    Function funObj)
             throws APIManagementException {
         if (args == null || args.length == 0) {
             handleException("Invalid number of input parameters.");
         }
-
+        Map<String, List<String>> failedGateways = new ConcurrentHashMap<String, List<String>>();
         NativeObject apiData = (NativeObject) args[0];
-        boolean success = false;
+        String success = null;
         String provider = (String) apiData.get("provider", apiData);
         String providerTenantMode = (String) apiData.get("provider", apiData);
         provider = APIUtil.replaceEmailDomain(provider);
@@ -1729,7 +1772,7 @@ public class APIProviderHostObject extends ScriptableObject {
                 APIStatus oldStatus = api.getStatus();
                 APIStatus newStatus = getApiStatus(status);
                 String currentUser = ((APIProviderHostObject) thisObj).getUsername();
-                apiProvider.changeAPIStatus(api, newStatus, currentUser, publishToGateway);
+                failedGateways = apiProvider.changeAPIStatus(api, newStatus, currentUser, publishToGateway);
 
                 if (oldStatus.equals(APIStatus.CREATED) && newStatus.equals(APIStatus.PUBLISHED)) {
                     if (makeKeysForwardCompatible) {
@@ -1743,21 +1786,25 @@ public class APIProviderHostObject extends ScriptableObject {
                             if (oldAPI.getId().getApiName().equals(name) &&
                                 versionComparator.compare(oldAPI, api) < 0 &&
                                 (oldAPI.getStatus().equals(APIStatus.PUBLISHED))) {
-                                apiProvider.changeAPIStatus(oldAPI, APIStatus.DEPRECATED, currentUser, publishToGateway);
+                                failedGateways = apiProvider.changeAPIStatus(oldAPI, APIStatus.DEPRECATED,
+                                                                             currentUser, publishToGateway);
                             }
                         }
                     }
                 }
-                success = true;
+
             } else {
                 handleException("Couldn't find an API with the name-" + name + "version-" + version);
             }
-        } finally {
-            if (isTenantFlowStarted) {
-                PrivilegedCarbonContext.endTenantFlow();
-            }
+        } catch (APIManagementException e) {
+            handleException("Error while updating API status", e);
+            return createFailedGatewaysAsJsonString(failedGateways);
+        }finally {
+        	if (isTenantFlowStarted) {
+        		PrivilegedCarbonContext.endTenantFlow();
+        	}
         }
-        return success;
+        return createFailedGatewaysAsJsonString(failedGateways);
     }
 
     public static boolean jsFunction_updateSubscriptionStatus(Context cx, Scriptable thisObj,
@@ -2156,6 +2203,7 @@ public class APIProviderHostObject extends ScriptableObject {
                 myn.put(41, myn, scopesNative.toJSONString());
                 myn.put(42, myn, checkValue(Boolean.toString(api.isDefaultVersion())));
                 myn.put(43, myn, api.getImplementation());
+                myn.put(44, myn, APIUtil.writeEnvironmentsToArtifact(api));
 
 
             } else {
@@ -3988,8 +4036,8 @@ public class APIProviderHostObject extends ScriptableObject {
             if (mappings.size() > 0) {
                 APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
                         getAPIManagerConfigurationService().getAPIManagerConfiguration();
-                List<Environment> gatewayEnvs = config.getApiGatewayEnvironments();
-                for(Environment environment : gatewayEnvs){
+                Map<String, Environment> gatewayEnvs = config.getApiGatewayEnvironments();
+                for (Environment environment : gatewayEnvs.values()) {
                     APIAuthenticationAdminClient client = new APIAuthenticationAdminClient(environment);
                     client.invalidateKeys(mappings);
                 }
@@ -4597,6 +4645,66 @@ public class APIProviderHostObject extends ScriptableObject {
         }
 
         return data;
+    }
+
+    /**
+     * This method is to functionality of get list of environments that list in api-manager.xml
+     *
+     * @param cx      Rhino context
+     * @param thisObj Scriptable object
+     * @param args    Passing arguments
+     * @param funObj  Function object
+     * @return list of environments with details of environments
+     */
+    public static NativeArray jsFunction_getEnvironments(Context cx, Scriptable thisObj,
+                                                         Object[] args,
+                                                         Function funObj) {
+        NativeArray myn = new NativeArray(1);
+        APIManagerConfiguration config =
+                ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
+                                      .getAPIManagerConfiguration();
+        Map<String, Environment> environments = config.getApiGatewayEnvironments();
+        int i = 0;
+        if (environments != null) {
+            for (Environment environment : environments.values()) {
+                NativeObject row = new NativeObject();
+                row.put("name", row, environment.getName());
+                row.put("description", row, environment.getDescription());
+                row.put("type", row, environment.getType());
+                myn.put(i, myn, row);
+                i++;
+            }
+        }
+        return myn;
+    }
+
+    /**
+     * @param failedGateways map of failed environments
+     * @return json string of input map
+     */
+    private static String createFailedGatewaysAsJsonString(Map<String, List<String>> failedGateways) {
+        String failedJson = "{\"PUBLISHED\" : \"\" ,\"UNPUBLISHED\":\"\"}";
+        if (failedGateways != null) {
+            if (!failedGateways.isEmpty()) {
+                StringBuilder failedToPublish = new StringBuilder();
+                StringBuilder failedToUnPublish = new StringBuilder();
+                for (String environmentName : failedGateways.get("PUBLISHED")) {
+                    failedToPublish.append(environmentName + ",");
+                }
+                for (String environmentName : failedGateways.get("UNPUBLISHED")) {
+                    failedToUnPublish.append(environmentName + ",");
+                }
+                if (!"".equals(failedToPublish.toString())) {
+                    failedToPublish.deleteCharAt(failedToPublish.length() - 1);
+                }
+                if (!"".equals(failedToUnPublish.toString())) {
+                    failedToUnPublish.deleteCharAt(failedToUnPublish.length() - 1);
+                }
+                failedJson = "{\"PUBLISHED\" : \"" + failedToPublish.toString() + "\" ,\"UNPUBLISHED\":\"" +
+                             failedToUnPublish.toString() + "\"}";
+            }
+        }
+        return failedJson;
     }
 
 }
