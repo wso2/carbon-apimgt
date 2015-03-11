@@ -30,31 +30,94 @@ require(["dojo/dom", "dojo/domReady!"], function (dom) {
                 if (json.usage && json.usage.length > 0) {
                     var d = new Date();
                     var firstAccessDay = new Date(json.usage[0].year, json.usage[0].month - 1, json.usage[0].day);
-                    var currentDay = new Date(d.getFullYear(), d.getMonth(), d.getDate());
-                    if (firstAccessDay.valueOf() == currentDay.valueOf()) {
-                        currentDay = new Date(d.getFullYear(), d.getMonth(), d.getDate() + 1);
-                    }
-                    var rangeSlider = $("#rangeSlider");
-                    //console.info(currentDay);
-                    rangeSlider.dateRangeSlider({
-                        "bounds": {
-                            min: firstAccessDay,
-                            max: currentDay
-                        },
-                        "defaultValues": {
-                            min: firstAccessDay,
-                            max: currentDay
-                        }
-                    });
-                    rangeSlider.bind("valuesChanged", function (e, data) {
-                        var from = convertTimeString(data.values.min);
-                        var to = convertTimeStringPlusDay(data.values.max);
+                    var currentDay = new Date(d.getFullYear(), d.getMonth(), d.getDate(),d.getHours(),d.getMinutes());//                    if (firstAccessDay.valueOf() == currentDay.valueOf()) {
 
-                        drawProviderAPIServiceTime(from, to);
+                    //day picker
+                    $('#today-btn').on('click',function(){
+                        var to = convertTimeString(currentDay);
+                        var from = convertTimeString(currentDay-86400000);
+                        var dateStr= from+" to "+to;
+                        $("#date-range").html(dateStr);
+                        $('#date-range').data('dateRangePicker').setDateRange(from,to);
+                        drawProviderAPIServiceTime(from,to);
 
                     });
+
+                    //hour picker
+                    $('#hour-btn').on('click',function(){
+                        var to = convertTimeString(currentDay);
+                        var from = convertTimeString(currentDay-3600000);
+                        var dateStr= from+" to "+to;
+                        $("#date-range").html(dateStr);
+                        $('#date-range').data('dateRangePicker').setDateRange(from,to);
+                        drawProviderAPIServiceTime(from,to);
+                    })
+
+                    //week picker
+                    $('#week-btn').on('click',function(){
+                        var to = convertTimeString(currentDay);
+                        var from = convertTimeString(currentDay-604800000);
+                        var dateStr= from+" to "+to;
+                        $("#date-range").html(dateStr);
+                        $('#date-range').data('dateRangePicker').setDateRange(from,to);
+                        drawProviderAPIServiceTime(from,to);
+                    })
+
+                    //month picker
+                    $('#month-btn').on('click',function(){
+
+                        var to = convertTimeString(currentDay);
+                        var from = convertTimeString(currentDay-(604800000*4));
+                        var dateStr= from+" to "+to;
+                        $("#date-range").html(dateStr);
+                        $('#date-range').data('dateRangePicker').setDateRange(from,to);
+                        drawProviderAPIServiceTime(from,to);
+                    });
+
+                    //date picker
+                    $('#date-range').dateRangePicker(
+                        {
+                            startOfWeek: 'monday',
+                            separator : ' to ',
+                            format: 'YYYY-MM-DD HH:mm',
+                            autoClose: false,
+                            time: {
+                                enabled: true
+                            },
+                            shortcuts:'hide',
+                            endDate:currentDay
+                        })
+                        .bind('datepicker-apply',function(event,obj)
+                        {
+                             btnActiveToggle(this);
+                             var from = convertDate(obj.date1);
+                             var to = convertDate(obj.date2);
+                             $('#date-range').html(from + " to "+ to);
+                             drawProviderAPIServiceTime(from,to);
+                        });
+
+                    //setting default date
+                    var to = new Date();
+                    var from = new Date(to.getTime() - 1000 * 60 * 60 * 24 * 30);
+
+                    $('#date-range').data('dateRangePicker').setDateRange(from,to);
+                    $('#date-range').html($('#date-range').val());
+                    var fromStr = convertDate(from);
+                    var toStr = convertDate(to);
+                    drawProviderAPIServiceTime(fromStr,toStr);
+
+
+                    $('#date-range').click(function (event) {
+                    event.stopPropagation();
+                    });
+
+                    $('body').on('click', '.btn-group button', function (e) {
+                        $(this).addClass('active');
+                        $(this).siblings().removeClass('active');
+                    });
+
                     var width = $("#rangeSliderWrapper").width();
-                    $("#rangeSliderWrapper").affix();
+                    //$("#rangeSliderWrapper").affix();
                     $("#rangeSliderWrapper").width(width);
 
                 }
@@ -90,103 +153,197 @@ var drawProviderAPIServiceTime = function (from, to) {
     jagg.post("/site/blocks/stats/api-response-times/ajax/stats.jag", { action: "getProviderAPIServiceTime", currentLocation: currentLocation, fromDate: fromDate, toDate: toDate },
         function (json) {
             if (!json.error) {
-                var length = json.usage.length, s1 = [];
-                var data = [];
-                $('#serviceTimeChart').empty();
-                for (var i = 0; i < length; i++) {
-                    data[i] = [json.usage[i].apiName, parseFloat(json.usage[i].serviceTime)];
-                    //add fake value to overcome dojo chart single series issue
-                    if (length === 1) {
-                        data.push(["", 0]);
-                    }
-                    //s1.push(tmp);
-                }
 
-                if (length > 0) {
-                    var height = 200;
-                    if (30 * length > 200) height = 30 * length;
-                    $('#serviceTimeChart').height(height);
-                    require([
-                        // Require the basic chart class
-                        "dojox/charting/Chart",
+                    var length = json.usage.length, s1 = [];
+                    var data = [];
 
-                        // Require the theme of our choosing
-                        "dojox/charting/themes/ApimDefault",
-
-                        // Tooltip
-                        "dojox/charting/action2d/Tooltip",
-                        // Require the highlighter
-                        "dojox/charting/action2d/Highlight",
-
-                        //  We want to plot bars
-                        "dojox/charting/plot2d/Bars",
-
-                        //  We want to use Markers
-                        "dojox/charting/plot2d/Markers",
-
-                        //  We'll use default x/y axes
-                        "dojox/charting/axis2d/Default",
-
-                        //mouse zoom and pan
-                        "dojox/charting/action2d/MouseZoomAndPan",
-
-                        // Wait until the DOM is ready
-                        "dojo/domReady!"
-                    ], function (Chart, theme, MouseZoomAndPan, Highlight) {
+                    if (length > 0) {
+                    $('#tempLoadingSpace').empty();
+                    $('#tableContainer').empty();
+                    $('#chartContainer').empty();
 
 
+                    var $dataTable = $('<table class="display defaultTable" width="100%" cellspacing="0" id="apiSelectTable"></table>');
+                        $dataTable.append($('<thead class="tableHead"><tr>' +
+                            '<th width="10%"></th>' +
+                            '<th>API</th>' +
+                            '<th width="30%" style="text-transform:none;text-align:right">RESPONSE TIME(ms)</th>'+
+                            '</tr></thead>'));
 
 
-                        // Create the chart within it's "holding" node
-                        var serviceTimeChart = new Chart("serviceTimeChart");
+                    var chartData=[];
+                    var state_array = [];
+                    var defaultFilterValues=[];
+                    var filterValues=[];
 
-                        // Set the theme
-                        serviceTimeChart.setTheme(theme);
+                        for (var i = 0; i < length; i++) {
+                            chartData.push({"label":json.usage[i].apiName,"value":parseFloat(json.usage[i].serviceTime)})
+                        }
 
-                        // Add the only/default plot
-                        serviceTimeChart.addPlot("default", {
-                            type: "Bars",
-                            markers: true,
-                            gap: 5,
-                            animate: {duration: 1000}
+                        chartData.sort(function(obj1, obj2) {
+                            return obj2.value - obj1.value;
                         });
 
-                        // Add axes
-                        serviceTimeChart.addAxis("x", {  fixLower: "major", fixUpper: "major" , includeZero: true});
-                        serviceTimeChart.addAxis("y", {vertical: true,
-                            labels: dojo.map(data, function (value, index) {
-                                return {value: index + 1, text: value[0]};
-                            })
-                        });
+                        //default display of 15 checked entries on table
+                        for (var i = 0; i < chartData.length; i++) {
+                            if(i<15){
+                                $dataTable.append($('<tr><td >'
+                                    + '<input name="item_checkbox"  checked   id=' + i + '  type="checkbox"  data-item=' + chartData[i].label
+                                    + ' class="inputCheckbox" />'
+                                    + '</td><td style="text-align:left;"><label for=' + i + '>' + chartData[i].label + '</label></td>'
+                                    + '<td style="text-align:right;"><label for=' + i + '>' + chartData[i].value + '</label></td></tr>'));
+                                filterValues.push({"label":chartData[i].label,"value":chartData[i].value});
+                                state_array.push(true);
+                                defaultFilterValues.push({"label":chartData[i].label,"value":chartData[i].value});
+                            } else {
 
-                        // Define the data
-                        var chartData;
-                        var color = -1;
-                        require(["dojo/_base/array"], function (array) {
-                            chartData = array.map(data, function (d) {
-                                color++;
-                                return {y: d[1], text: d[0], tooltip: "<b>" + d[0] + "</b><br /><i>" + d[1] + "ms</i>", fill: "#0099CC"};
+                                $dataTable.append($('<tr><td >'
+                                     + '<input name="item_checkbox" id=' + i + '  type="checkbox"  data-item=' + chartData[i].label
+                                     + ' class="inputCheckbox" />'
+                                     + '</td><td style="text-align:left;"><label for=' + i + '>' + chartData[i].label + '</label></td>'
+                                     + '<td style="text-align:right;"><label for=' + i + '>' + chartData[i].value + '</label></td></tr>'));
+                                filterValues.push({"label":chartData[i].label,"value":chartData[i].value});
+                                state_array.push(false);
+                            }
+                        }
+
+                        var data_chart = [{
+                              'values': defaultFilterValues,
+                              'key': 'Time',
+                        }];
+
+                        var chart;
+                        nv.addGraph(function() {
+                            chart = nv.models.multiBarHorizontalChart()
+                                .x(function(d) { return d.label })
+                                .y(function(d) { return d.value })
+                                .margin({top: 30, right: 70, left: 145,bottom:50})
+                                .showValues(true)
+                                .barColor(d3.scale.category20().range())
+                                .tooltips(false)
+                                .duration(50)
+                                .showControls(false);
+
+                        chart.yAxis.axisLabel('Response Time(ms)');
+                        chart.yAxis.tickFormat(d3.format('d'));
+                        chart.valueFormat(d3.format('d'));
+
+                            d3.select('#serviceTimeChart svg')
+                                .datum(data_chart)
+                                .call(chart);
+
+                            nv.utils.windowResize(chart.update);
+
+                            chart.dispatch.on('stateChange', function(e) { nv.log('New State:', JSON.stringify(e)); });
+                            chart.state.dispatch.on('change', function(state){
+                                nv.log('state', JSON.stringify(state));
                             });
+                            return chart;
                         });
 
-                        // Add the series of data
-                        serviceTimeChart.addSeries("API Service Time", chartData);
+                        $('#chartContainer').append($('<div id="serviceTimeChart" class="with-3d-shadow with-transitions"><svg style="height:450px;"></svg></div>'));
+                        $('#chartContainer').show();
+                        $('#serviceTimeChart svg').show();
+                        $('#tableContainer').append($dataTable);
+                        $('#tableContainer').show();
+                        $('#apiSelectTable').DataTable({
+                             retrieve: true,
+                             "order": [
+                                 [ 2, "desc" ]
+                             ],
+                            "fnDrawCallback": function(){
+                                if(this.fnSettings().fnRecordsDisplay()<=$("#apiSelectTable_length option:selected" ).val()
+                                || $("#apiSelectTable_length option:selected" ).val()==-1)
+                                    $('#apiSelectTable_paginate').hide();
+                                else
+                                    $('#apiSelectTable_paginate').show();
+                            },
+                             "aoColumns": [
+                                 { "bSortable": false },
+                                 null,
+                                 null
+                             ],
+                         });
+                         $('select').css('width','60px');
 
-                        new MouseZoomAndPan(serviceTimeChart, "default", { axis: "x"});
+                        var count=15;
+                        //on checkbox check and uncheck event
+                        $('#apiSelectTable').on('change', 'input.inputCheckbox', function () {
 
-                        new Highlight(serviceTimeChart, "default");
+                            $('#chartContainer').empty();
+                            var id = $(this).attr('id');
+                            var check = $(this).is(':checked');
+                            var tickValue = $(this).attr('data-item');
+                            var draw_chart = [];
 
-                        // Render the chart!
-                        serviceTimeChart.render();
+                            if (check) {
+                            $('#displayMsg').html('');
+                                count++;
+                                //limiting to show 15 entries at a time
+                                if(count>15){
+                                    $('#displayMsg').html('<h5 style="color:#555">Please Note that the graph will be showing only 15 entries</h5>');
+                                    state_array[id] = false;
+                                    $(this).prop("checked", "");
+                                    count--;
+                                }else{
+                                state_array[id] = true;
+                                }
+                            } else {
+                                $('#displayMsg').html('');
+                                state_array[id] = false;
+                                count--;
+                            }
 
-                    });
+                            for(var i=0;i<filterValues.length;i++){
+                                if (state_array[i]) {
+                                    draw_chart.push({"label":filterValues[i].label,"value":filterValues[i].value});
+                                }
+                            }
 
-                } else {
-                    $('#serviceTimeChart').css("fontSize", 14);
-                    $('#serviceTimeChart').append($('<span class="label label-info">' + i18n.t('errorMsgs.noData') + '</span>'));
-                }
+                            //data for checked values
+                            var data_chart = [{
+                                  'values': draw_chart,
+                                  'key': 'Time',
+                            }];
 
+                                var chart;
+                                nv.addGraph(function() {
+                                    chart = nv.models.multiBarHorizontalChart()
+                                        .x(function(d) { return d.label })
+                                        .y(function(d) { return d.value })
+                                        .margin({top: 30, right: 70, bottom: 50, left: 145})
+                                        .showValues(true)
+                                        .barColor(d3.scale.category20().range())
+                                        .tooltips(false)
+                                        .duration(50)
+                                        .showControls(false);
 
+                                chart.yAxis.axisLabel('Response Time(ms)');
+                                chart.yAxis.tickFormat(d3.format('d'));
+                                chart.valueFormat(d3.format('d'));
+
+                                d3.select('#serviceTimeChart svg')
+                                    .datum(data_chart)
+                                    .call(chart);
+
+                                nv.utils.windowResize(chart.update);
+
+                                chart.dispatch.on('stateChange', function(e) { nv.log('New State:', JSON.stringify(e)); });
+                                chart.state.dispatch.on('change', function(state){
+                                    nv.log('state', JSON.stringify(state));
+                                });
+                                return chart;
+                            });
+
+                            $('#chartContainer').append($('<div id="serviceTimeChart" class="with-3d-shadow with-transitions"><svg style="height:450px;"></svg></div>'));
+                            $('#serviceTimeChart svg').show();
+                        });
+                    }else if(length == 0) {
+                        $('#chartContainer').hide();
+                        $('#tableContainer').hide();
+                        $('#tempLoadingSpace').html('');
+                        $('#tempLoadingSpace').append($('<span class="label label-info">' + i18n.t('errorMsgs.noData') + '</span>'));
+                    }
             } else {
                 if (json.message == "AuthenticateError") {
                     jagg.showLogin();
@@ -214,10 +371,9 @@ function isDataPublishingEnabled(){
         }, "json");        
 }
 
-
-var convertTimeString = function (date) {
+var convertTimeString = function(date){
     var d = new Date(date);
-    var formattedDate = d.getFullYear() + "-" + formatTimeChunk((d.getMonth() + 1)) + "-" + formatTimeChunk(d.getDate());
+    var formattedDate = d.getFullYear() + "-" + formatTimeChunk((d.getMonth()+1)) + "-" + formatTimeChunk(d.getDate())+" "+formatTimeChunk(d.getHours())+":"+formatTimeChunk(d.getMinutes());
     return formattedDate;
 };
 
@@ -234,3 +390,17 @@ var formatTimeChunk = function (t) {
     return t;
 };
 
+function convertDate(date) {
+    var month = date.getMonth() + 1;
+    var day = date.getDate();
+    var hour=date.getHours();
+    var minute=date.getMinutes();
+    return date.getFullYear() + '-' + (('' + month).length < 2 ? '0' : '')
+        + month + '-' + (('' + day).length < 2 ? '0' : '') + day +" "+ (('' + hour).length < 2 ? '0' : '')
+        + hour +":"+(('' + minute).length < 2 ? '0' : '')+ minute;
+}
+
+function btnActiveToggle(button){
+    $(button).siblings().removeClass('active');
+    $(button).addClass('active');
+}

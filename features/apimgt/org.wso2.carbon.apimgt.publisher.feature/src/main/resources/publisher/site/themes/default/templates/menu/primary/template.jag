@@ -18,7 +18,7 @@
 <link rel="apple-touch-icon" sizes="114x114" href="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("images/apple-touch-icon-114x114.png"))%>">
 
 <link href="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("css/localstyles.css"))%>" rel="stylesheet">
-<script src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile('lib/jquery-1.7.1.min.js'))%>"></script>
+<!--<script src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile('lib/jquery-1.7.1.min.js'))%>"></script>-->
 
 <%if(jagg.getShowStoreURL()){%>
 <%storeUrl = jagg.module("manager").getAPIStoreURL().url;

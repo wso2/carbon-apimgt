@@ -645,6 +645,7 @@ public class APIUsageStatisticsClient {
                     usageDTO.setMethod(usage.method);
                     usageDTO.setContext(usage.context);
                     usageDTO.setCount(usage.requestCount);
+                    usageDTO.setTime(usage.time);
                     usageByResourcePath.add(usageDTO);
                 }
             }
@@ -871,11 +872,12 @@ public class APIUsageStatisticsClient {
                     for (int i = 0; i < apiVersionUsageList.size(); i++) {
                         apiVersionUsageDTO = apiVersionUsageList.get(i);
                         if (apiVersionUsageDTO.getVersion().equals(fault.apiVersion)) {
-                            double requestCount = apiVersionUsageDTO.getCount();
-                            double faultPercentage = (requestCount - fault.faultCount) / requestCount * 100;
+                            long requestCount = apiVersionUsageDTO.getCount();
+                            double faultPercentage = ((double)requestCount - fault.faultCount) / requestCount * 100;
                             DecimalFormat twoDForm = new DecimalFormat("#.##");
                             faultPercentage = 100 - Double.valueOf(twoDForm.format(faultPercentage));
                             faultyDTO.setFaultPercentage(faultPercentage);
+                            faultyDTO.setRequestCount(requestCount);
                             break;
                         }
                     }
@@ -1314,10 +1316,9 @@ public class APIUsageStatisticsClient {
             statement = connection.createStatement();
             String query;
 
-            query = "SELECT api,version,apiPublisher,context,method,SUM(total_request_count) as total_request_count FROM  "
+            query = "SELECT api,version,apiPublisher,context,method,total_request_count,time FROM "
                     + columnFamily + " WHERE " + APIUsageStatisticsClientConstants.TIME + " BETWEEN " +
-                    "\'" + fromDate + "\' AND \'" + toDate + "\'" + " GROUP BY api,version,apiPublisher,context,method";
-
+                    "\'" + fromDate + "\' AND \'" + toDate + "\'";
             rs = statement.executeQuery(query);
             StringBuilder returnStringBuilder = new StringBuilder("<omElement><rows>");
             int columnCount = rs.getMetaData().getColumnCount();
@@ -2045,6 +2046,7 @@ public class APIUsageStatisticsClient {
         private String method;
         private String context;
         private long requestCount;
+        private String time;
 
         public APIUsageByResourcePath(OMElement row) {
             apiName = row.getFirstChildWithName(new QName(
@@ -2057,6 +2059,8 @@ public class APIUsageStatisticsClient {
                     APIUsageStatisticsClientConstants.CONTEXT)).getText();
             requestCount = (long) Double.parseDouble(row.getFirstChildWithName(new QName(
                     APIUsageStatisticsClientConstants.REQUEST)).getText());
+            time = row.getFirstChildWithName(new QName(
+                    APIUsageStatisticsClientConstants.TIME)).getText();
         }
     }
 

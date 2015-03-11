@@ -374,13 +374,13 @@ form.form-search .tierHelp {
   width: 32%;
 }
 .graphTable a {
-       color: #c75f3e;
+       color: blue;
 }
 
 .graphTable {
        padding: 0;
        margin: 10px 0 0 0;
-   border-left: 1px solid #C1DAD7;
+       border-left: 1px solid #C1DAD7;
        border-top: 1px solid #C1DAD7;
 }
 
@@ -511,7 +511,7 @@ form.form-search .tierHelp {
     font-size: 1.2em;
 }
 #rangeSliderWrapper{
-    height: 60px;
+    height: 20px;
     position: relative;
     border: 2px solid #C8C8C8 !important;
 }
@@ -885,7 +885,14 @@ label.errorTier {
     color:#ccc;
 }
 #left .child-nodesw ul li a:hover{
-    background: transparent;
+    border-bottom: none;
+    margin:0;
+    color:#ccc;
+}
+
+.nav-list > .statsActive > a, .nav-list > .statsActive > a:hover, .nav-list > .statsActive > a:focus{
+   background:#777d88;
+   color:#FFF;
 }
 .doc-search-result {
 	margin-bottom: 15px;
@@ -1231,9 +1238,132 @@ thumbnails
     background: linear-gradient(to right, rgba(255, 255, 255, 0), rgba(255, 255, 255, 0.9) 50%);
 }
 .modal-footer .btn:last-child {
-float: right;
+    float: right;
 }
 .modal-footer .btn{
-float:right;
-margin: 2px;
+    float:right;
+    margin: 2px;
+}
+
+#dateRangePickerContainer .date-range, #dateRangePickerContainer .input-append {
+    background: none !important;
+}
+
+#apiTable th {
+  cursor: pointer;
+  padding-left:20px;
+}
+
+#apiTable th.headerSortUp {
+    background-image: url(../images/sort_asc.png);
+    background-color: #ADD8E6;
+}
+
+#apiTable th.headerSortDown {
+    background-image: url(../images/sort_desc.png);
+    background-color: #ADD8E6;
+}
+
+#apiTable th.header {
+    cursor: pointer;
+    font-weight: bold;
+    background-repeat: no-repeat;
+    background-position: center left;
+    border-right: 1px solid #dad9c7;
+    margin-left: -1px;
+    height: inherit;
+    position: static;
+    width: auto;
+    z-index: inherit;
+}
+
+
+#dateRangePickerContainer{
+    float:right;
+    margin-top:-6px;
+}
+
+.axis path,
+.axis line {
+    fill: none;
+    stroke: red;
+    shape-rendering: crispEdges;
+}
+
+.axis text {
+    font-family: sans-serif;
+    font-size: 11px;
+    color:red;
+}
+
+.nv-x .nv-axis, .nv-legend-text, .nv-y{
+    fill:#555
+}
+
+/*.nv-context{
+    display:none;
+}*/
+
+.add-on-cal {
+    right: 32px;
+    position: absolute;
+    top: 18px;
+}
+
+#date-range{
+    padding-right:30px;
+    width:290px;
+    height:100%;
+    display:inline-block;
+}
+
+.black_overlay{
+	display: none;
+	position: absolute;
+	top: 0%;
+	left: 0%;
+	width: 100%;
+	height: 100%;
+	background-color: black;
+	z-index:1001;
+	-moz-opacity: 0.8;
+	opacity:.80;
+	filter: alpha(opacity=80);
+}
+
+.white_content {
+	display: none;
+	position: absolute;
+	top: 15%;
+	left: 20%;
+	width: 70%;
+	height: 70%;
+	padding: 16px;
+	border: 2px solid #eee;
+	background-color: white;
+	z-index:1002;
+	overflow: auto;
+	padding-top:50px;
+}
+
+.defaultTable th {
+   font: bold 13px "Trebuchet MS", Verdana, Arial, Helvetica, sans-serif;
+   color: #4f6b72;
+   letter-spacing: 2px;
+   text-transform: uppercase;
+   text-align: left;
+   padding: 6px 6px 6px 12px;
+}
+
+#serviceTimeChart .nv-series{
+    display:none;
+}
+
+#today-btn,#hour-btn,#week-btn, #month-btn{
+    width:60px;
+}
+
+.nvd3.nv-line .nvd3.nv-scatter .nv-groups .nv-point {
+    fill-opacity: 100 !important;
+    stroke-opacity: 100 !important;
 }

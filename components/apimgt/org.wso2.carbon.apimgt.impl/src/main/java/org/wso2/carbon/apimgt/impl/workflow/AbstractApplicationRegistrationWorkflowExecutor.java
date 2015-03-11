@@ -95,10 +95,13 @@ public abstract class AbstractApplicationRegistrationWorkflowExecutor extends Wo
 
         try {
 
-            ApplicationKeysDTO keysDTO =  keyMgtClient.getApplicationAccessKey(subscriber.getName(), application.getName(),
-                    workflowDTO.getKeyType(), application.getCallbackUrl(),
-                    workflowDTO.getAllowedDomains(), Long.toString(workflowDTO.getValidityTime()));
-            workflowDTO.setKeyDetails(keysDTO);
+	        ApplicationKeysDTO keysDTO = keyMgtClient
+			        .getApplicationAccessKey(subscriber.getName(), application.getName(),
+			                                 workflowDTO.getKeyType(), application.getCallbackUrl(),
+			                                 workflowDTO.getAllowedDomains(),
+			                                 Long.toString(workflowDTO.getValidityTime()),
+			                                 workflowDTO.getKeyDetails().getTokenScope());
+	        workflowDTO.setKeyDetails(keysDTO);
         } catch (Exception e) {
             APIUtil.handleException("Error occurred while executing SubscriberKeyMgtClient.", e);
         }
