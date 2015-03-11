@@ -29,6 +29,9 @@ import org.wso2.carbon.authenticator.stub.AuthenticationAdminStub;
 
 import java.net.URL;
 
+/**
+ * This class will be used to access APIKeyMgtProviderService hosted in key manager
+ */
 public class ProviderKeyMgtClient {
 
     private static Log log = LogFactory.getLog(ProviderKeyMgtClient.class);
