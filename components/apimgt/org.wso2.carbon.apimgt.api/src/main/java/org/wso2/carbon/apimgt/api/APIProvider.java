@@ -124,9 +124,9 @@ public interface APIProvider extends APIManager {
             throws APIManagementException;
 
     public void addTier(Tier tier) throws APIManagementException;
-
+    
     public void updateTier(Tier tier) throws APIManagementException;
-
+    
     public void removeTier(Tier tier) throws APIManagementException;
 
     public String getDefaultVersion(APIIdentifier apiid) throws APIManagementException;
@@ -222,7 +222,7 @@ public interface APIProvider extends APIManager {
      */
     public void addDocumentationContent(API api, String documentationName, String text)
             throws APIManagementException;
-
+    
     /**
      * This method used to update the API definition content - Swagger
      *
@@ -232,7 +232,7 @@ public interface APIProvider extends APIManager {
      * @throws APIManagementException
      *          if failed to add the document as a resource to registry
      */
-    public void addAPIDefinitionContent(APIIdentifier identifier, String documentationName, String text)
+    public void addAPIDefinitionContent(APIIdentifier identifier, String documentationName, String text) 
     					throws APIManagementException;
 
     /**
@@ -293,43 +293,43 @@ public interface APIProvider extends APIManager {
      *          If failed to update subscription status
      */
     public void updateSubscription(APIIdentifier apiId, String subStatus, int appId) throws APIManagementException;
-
+    
     /**
      * Update the Tier Permissions
      *
      * @param tierName Tier Name
      * @param permissionType Permission Type
-     * @param roles Roles
+     * @param roles Roles          
      * @throws APIManagementException
      *          If failed to update subscription status
      */
     public void updateTierPermissions(String tierName, String permissionType, String roles)
             throws APIManagementException;
-
+    
     /**
      * Get the list of Tier Permissions
-     *
+     * 
      * @return Tier Permission Set
      * @throws APIManagementException
      *          If failed to update subscription status
      */
     public Set getTierPermissions() throws APIManagementException;
-
+    
     /**
      * Get the list of Custom InSequences.
      * @return List of available sequences
      * @throws org.wso2.carbon.apimgt.api.APIManagementException
      */
-
+    
     public List<String> getCustomInSequences()  throws APIManagementException;
-
-
+    
+    
     /**
      * Get the list of Custom OutSequences.
      * @return List of available sequences
      * @throws org.wso2.carbon.apimgt.api.APIManagementException
      */
-
+    
     public List<String> getCustomOutSequences()  throws APIManagementException;
 
     /**
@@ -378,16 +378,16 @@ public interface APIProvider extends APIManager {
      *          If failed to update subscription status
      */
     public Set<APIStore> getPublishedExternalAPIStores(APIIdentifier apiId) throws APIManagementException;
-
+    
     /**
      * Checks the Gateway Type
-     *
+     * 
      * @return True if gateway is Synpase
      * @throws APIManagementException
-     *
+     *         
      */
     public boolean isSynapseGateway() throws APIManagementException;
-
+    
     /**
      * Search API by Document Content
      *
@@ -397,7 +397,7 @@ public interface APIProvider extends APIManager {
      * @throws org.wso2.carbon.apimgt.api.APIManagementException
      */
     public Map<Documentation, API> searchAPIsByDoc(String searchTerm, String searchType) throws APIManagementException;
-
+    
     /**
      * This method updates Swagger 1.2 resources in the registry
      * @param fileName
@@ -406,7 +406,7 @@ public interface APIProvider extends APIManager {
      */
     public void updateSwagger12Definition(APIIdentifier apiId, String fileName, String jsonText) throws APIManagementException;
     
-
+    
     /**
      * Returns the Swagger12 definition as a string
      * @param apiId
