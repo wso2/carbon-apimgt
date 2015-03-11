@@ -1714,18 +1714,24 @@ public class APIStoreHostObject extends ScriptableObject {
                         row.put("userRate", row, userRate);
                     }
                     APIManagerConfiguration config = HostObjectComponent.getAPIManagerConfiguration();
-                    List<Environment> environments = config.getApiGatewayEnvironments();
-                    String envDetails = "";
-                    for (int i = 0; i < environments.size(); i++) {
-                        Environment environment = environments.get(i);
-                        envDetails += environment.getName() + ",";
-                        envDetails += filterUrls(environment.getApiGatewayEndpoint(), api.getTransports());
-                        if (i < environments.size() - 1) {
-                            envDetails += "|";
-                        }
+                    Map<String, Environment> environments = config.getApiGatewayEnvironments();
+                    StringBuilder envDetails = new StringBuilder();
+                    Set<String> environmentsPublishedByAPI =
+                            new HashSet<String>(api.getEnvironments());
+                    environmentsPublishedByAPI.remove("none");
+                    for (String environmentName : environmentsPublishedByAPI) {
+                        Environment environment = environments.get(environmentName);
+                        envDetails.append(environment.getName() + ",");
+                        envDetails.append(filterUrls(environment.getApiGatewayEndpoint(),
+                                                     api.getTransports()) + "|");
+                    }
+                    if (!envDetails.toString().isEmpty()) {
+                        //removig last seperator mark
+                        envDetails = envDetails.deleteCharAt(envDetails.length() - 1);
+
                     }
                     //row.put("serverURL", row, config.getFirstProperty(APIConstants.API_GATEWAY_API_ENDPOINT));
-                    row.put("serverURL", row, envDetails);
+                    row.put("serverURL", row, envDetails.toString());
                     NativeArray tierArr = new NativeArray(0);
                     Set<Tier> tierSet = api.getAvailableTiers();
                     if (tierSet != null) {
@@ -1841,13 +1847,12 @@ public class APIStoreHostObject extends ScriptableObject {
     	NativeArray myn = new NativeArray(0);
     	
     	APIManagerConfiguration config = HostObjectComponent.getAPIManagerConfiguration();
-        List<Environment> environments = config.getApiGatewayEnvironments();
+        Map<String, Environment> environments = config.getApiGatewayEnvironments();
         
         int index = 0;
-        for (int i = 0; i < environments.size(); i++) {
-        	Environment environment = environments.get(i);
+        for (Environment environment : environments.values()) {
         	String apiGatewayEndpoints = environment.getApiGatewayEndpoint();
-        	
+
         	List<String> urlsList = new ArrayList<String>();
         	urlsList.addAll(Arrays.asList(apiGatewayEndpoints.split(",")));
         	ListIterator<String> it = urlsList.listIterator();
