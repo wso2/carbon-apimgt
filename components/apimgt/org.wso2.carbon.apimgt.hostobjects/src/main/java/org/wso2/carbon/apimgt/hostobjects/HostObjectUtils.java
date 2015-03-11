@@ -200,12 +200,12 @@ public class HostObjectUtils {
      * This method will clear recently added API cache.
      * @param username
      */
-    public static void invalidateRecentlyAddedAPICache(String username) {
-        try {
+    public static void invalidateRecentlyAddedAPICache(String username){
+        try{
             PrivilegedCarbonContext.startTenantFlow();
             APIManagerConfiguration config = HostObjectComponent.getAPIManagerConfiguration();
             boolean isRecentlyAddedAPICacheEnabled =
-                    Boolean.parseBoolean(config.getFirstProperty(APIConstants.API_STORE_RECENTLY_ADDED_API_CACHE_ENABLE));
+                  Boolean.parseBoolean(config.getFirstProperty(APIConstants.API_STORE_RECENTLY_ADDED_API_CACHE_ENABLE));
             
             if (username != null && isRecentlyAddedAPICacheEnabled) {
                 String tenantDomainFromUserName = MultitenantUtils.getTenantDomain(username);

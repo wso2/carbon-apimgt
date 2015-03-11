@@ -405,7 +405,7 @@ public interface APIProvider extends APIManager {
      * @throws org.wso2.carbon.apimgt.api.APIManagementException
      */
     public void updateSwagger12Definition(APIIdentifier apiId, String fileName, String jsonText) throws APIManagementException;
-
+    
 
     /**
      * Returns the Swagger12 definition as a string
