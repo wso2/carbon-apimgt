@@ -1243,7 +1243,9 @@ public class APIStoreHostObject extends ScriptableObject {
         try {
 	        UserRegistrationConfigDTO signupConfig =
 	        		SelfSignUpUtil.getSignupConfiguration(tenantDomain);
-	        status = signupConfig.isSignUpEnabled();
+            if (signupConfig != null) {
+                status = signupConfig.isSignUpEnabled();
+            }
         } catch (APIManagementException e) {
 	       log.error("error while loading configuration from registry", e);
         }
