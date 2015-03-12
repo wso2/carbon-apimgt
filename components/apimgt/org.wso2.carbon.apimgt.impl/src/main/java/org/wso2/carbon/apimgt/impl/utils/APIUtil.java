@@ -400,7 +400,10 @@ public final class APIUtil {
                 }
             }
             api.addAvailableTiers(availableTier);
+            // This contains the resolved context
             api.setContext(artifact.getAttribute(APIConstants.API_OVERVIEW_CONTEXT));
+            // We set the context template here
+            api.setContextTemplate(artifact.getAttribute(APIConstants.API_OVERVIEW_CONTEXT_TEMPLATE));
             api.setLatest(Boolean.valueOf(artifact.getAttribute(APIConstants.API_OVERVIEW_IS_LATEST)));
 
 
@@ -653,6 +656,11 @@ public final class APIUtil {
             artifact.setAttribute(APIConstants.API_OVERVIEW_DESTINATION_BASED_STATS_ENABLED, api.getDestinationStatsEnabled());
 
 			artifact.setAttribute(APIConstants.PROTOTYPE_OVERVIEW_IMPLEMENTATION, api.getImplementation());
+
+            // This is to support the pluggable version strategy.
+            artifact.setAttribute(APIConstants.API_OVERVIEW_CONTEXT_TEMPLATE, api.getContextTemplate());
+            artifact.setAttribute(APIConstants.API_OVERVIEW_VERSION_TYPE, "context"); // TODO: check whether this is
+            // correct
 
             String tiers = "";
             for (Tier tier : api.getAvailableTiers()) {
@@ -1690,7 +1698,7 @@ public final class APIUtil {
         * @return API
         * @throws org.wso2.carbon.apimgt.api.APIManagementException if failed to get API from artifact
         */
-       public static API getAPI(GovernanceArtifact artifact, Registry registry,APIIdentifier oldId)
+       public static API getAPI(GovernanceArtifact artifact, Registry registry,APIIdentifier oldId, String oldContext)
                throws APIManagementException {
 
            API api;
@@ -1768,7 +1776,7 @@ public final class APIUtil {
                api.setLatest(Boolean.valueOf(artifact.getAttribute(APIConstants.API_OVERVIEW_IS_LATEST)));
                ArrayList<URITemplate> urlPatternsList;
 
-               urlPatternsList = ApiMgtDAO.getAllURITemplates(api.getContext(), oldId.getVersion());
+               urlPatternsList = ApiMgtDAO.getAllURITemplates(oldContext, oldId.getVersion());
                Set<URITemplate> uriTemplates = new HashSet<URITemplate>(urlPatternsList);
 
                for (URITemplate uriTemplate : uriTemplates) {
@@ -3012,7 +3020,11 @@ public final class APIUtil {
         String version = identifier.getVersion();
         Set<URITemplate> uriTemplates = api.getUriTemplates();
         String description = api.getDescription();
-        String urlPrefix = apiContext + "/" +version;
+
+        // With the new context version strategy, the URL prefix is the apiContext. the verison will be embedded in
+        // the apiContext.
+        String urlPrefix = apiContext;
+//        String urlPrefix = apiContext + "/" +version;
 
         if (endpointsSet.length < 1) {
         	throw new APIManagementException("Error in creating JSON representation of the API" + identifier.getApiName());

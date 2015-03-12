@@ -34,6 +34,11 @@ $(document).ready(function() {
         return !illegalChars.test(value);
     }, 'Name contains one or more illegal characters  (~ ! @ #  ; % ^ * + = { } | &lt; &gt;, \' " \\ ) .');
 
+    $.validator.addMethod('validContextTemplate', function(value, element) {
+        var illegalChars = /([~!@#;%^*+=\|\\<>\"\',])/;
+        return !illegalChars.test(value);
+    }, 'Name contains one or more illegal characters  (~ ! @ #  ; % ^ * + = | &lt; &gt;, \' " \\ ) .');
+
     $.validator.addMethod('noSpace', function(value, element) {
         return !/\s/g.test(value);
     },'Name contains white spaces.');

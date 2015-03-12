@@ -96,6 +96,7 @@ public class APIProviderHostObject extends ScriptableObject {
     private static Pattern pathParamValidatorPattern=Pattern.compile("\\{uri\\.var\\.[\\w]+\\}");
 
     private String username;
+    private static String VERSION_PARAM="{version}";
 
     private APIProvider apiProvider;
 
@@ -715,6 +716,7 @@ public class APIProviderHostObject extends ScriptableObject {
         provider = (provider != null ? provider.trim() : null);
         name = (name != null ? name.trim() : null);
         version = (version != null ? version.trim() : null);
+
         APIIdentifier apiId = new APIIdentifier(provider, name, version);
         APIProvider apiProvider = getAPIProvider(thisObj);
 
@@ -725,6 +727,14 @@ public class APIProviderHostObject extends ScriptableObject {
 
         API api = new API(apiId);
         api.setStatus(APIStatus.CREATED);
+
+        // This is to support the new Pluggable version strategy
+        // if the context does not contain any {version} segment, we use the default version strategy.
+        context = checkAndSetVersionParam(context);
+        api.setContextTemplate(context);
+
+        context = updateContextWithVersion(version, contextVal, context);
+
         api.setContext(context);
         api.setVisibility(APIConstants.API_GLOBAL_VISIBILITY);
         api.setLastUpdated(new Date());
@@ -894,8 +904,7 @@ public class APIProviderHostObject extends ScriptableObject {
             		}
             	}
             }
-            
-        
+
 	        JSONArray resources = (JSONArray) resourceConfigs.get("resources");
 	                
 	        //Iterating each resourcePath config
@@ -942,7 +951,10 @@ public class APIProviderHostObject extends ScriptableObject {
                 if(ep.endsWith(RegistryConstants.PATH_SEPARATOR)){
                     ep.substring(0,ep.length()-1);
                 }
-                String basePath = ep+api.getContext()+RegistryConstants.PATH_SEPARATOR+apiId.getVersion();
+                // We do not need the version in the base path since with the context version strategy, the version is
+                // embedded in the context
+                String basePath = ep+api.getContext();
+//                String basePath = ep+api.getContext()+RegistryConstants.PATH_SEPARATOR+apiId.getVersion();
                 resourceConfig.put("basePath",basePath);
 	            String resourceJSON = resourceConfig.toJSONString();
 	            
@@ -1110,6 +1122,13 @@ public class APIProviderHostObject extends ScriptableObject {
             //Create tenant aware context for API
             context= "/t/"+ providerDomain+context;
         }
+
+        // This is to support the new Pluggable version strategy
+        // if the context does not contain any {version} segment, we use the default version strategy.
+        context = checkAndSetVersionParam(context);
+
+        String contextTemplate = context;
+        context = updateContextWithVersion(version, contextVal, context);
 
         NativeArray uriTemplateArr = (NativeArray) apiData.get("uriTemplateArr", apiData);
 
@@ -1312,6 +1331,7 @@ public class APIProviderHostObject extends ScriptableObject {
         }
         api.setStatus(APIStatus.CREATED);
         api.setContext(context);
+        api.setContextTemplate(contextTemplate);
         api.setBusinessOwner(bizOwner);
         api.setBusinessOwnerEmail(bizOwnerEmail);
         api.setTechnicalOwner(techOwner);
@@ -1379,6 +1399,18 @@ public class APIProviderHostObject extends ScriptableObject {
         }
         return success;
 
+    }
+
+    private static String checkAndSetVersionParam(String context) {
+        // This is to support the new Pluggable version strategy
+        // if the context does not contain any {version} segment, we use the default version strategy.
+        if(!context.contains(VERSION_PARAM)){
+            if(!context.endsWith("/")){
+                context = context + "/";
+            }
+            context = context + VERSION_PARAM;
+        }
+        return context;
     }
 
     private static String getTransports(NativeObject apiData) {
@@ -1524,6 +1556,13 @@ public class APIProviderHostObject extends ScriptableObject {
             context= "/t/"+ providerDomain+context;
         }
 
+        // This is to support the new Pluggable version strategy
+        // if the context does not contain any {version} segment, we use the default version strategy.
+        context = checkAndSetVersionParam(context);
+
+        String contextTemplate = context;
+        context = updateContextWithVersion(version, contextVal, context);
+
         APIIdentifier apiId = new APIIdentifier(provider, name, version);
         API api = new API(apiId);
 
@@ -1648,6 +1687,7 @@ public class APIProviderHostObject extends ScriptableObject {
         api.setSandboxUrl(sandboxUrl);
         api.addTags(tag);
         api.setContext(context);
+        api.setContextTemplate(contextTemplate);
         api.setVisibility(visibility);
         api.setVisibleRoles(visibleRoles != null ? visibleRoles.trim() : null);
         api.setVisibleTenants(visibleTenants != null ? visibleTenants.trim() : null);
@@ -1740,6 +1780,18 @@ public class APIProviderHostObject extends ScriptableObject {
         return success;
     }
 
+    private static String updateContextWithVersion(String version, String contextVal, String context) {
+        // This condition should not be true for any occasion but we keep it so that there are no loopholes in
+        // the flow.
+        if (version == null) {
+            // context template patterns - /{version}/foo or /foo/{version}
+            // if the version is null, then we remove the /{version} part from the context
+            context = contextVal.replace("/" + VERSION_PARAM, "");
+        }else{
+            context = context.replace(VERSION_PARAM, version);
+        }
+        return context;
+    }
     /**
      *
      * @param cx Rhino context

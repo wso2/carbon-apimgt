@@ -39,6 +39,8 @@ public class RESTConstants {
     public static final String SYNAPSE_RESOURCE = "SYNAPSE_RESOURCE";
     public static final String SYNAPSE_REST_API = "SYNAPSE_REST_API";
     public static final String SYNAPSE_REST_API_VERSION = "SYNAPSE_REST_API_VERSION";
+    public static final String SYNAPSE_REST_API_VERSION_STRATEGY = "SYNAPSE_REST_API_VERSION_STRATEGY";
+    public static final String SYNAPSE_REST_CONTEXT_VERSION_VARIABLE = "{version}";
 
     public static final String REST_API_CONTEXT = "REST_API_CONTEXT";
     public static final String REST_URL_PREFIX = "REST_URL_PREFIX";

@@ -167,7 +167,8 @@ public class APIManagerExtensionHandler extends AbstractHandler {
             if (DIRECTION_IN.equals(direction)) {
                 log.debug("Inbound API call from client to gateway: " + logMessage);
             } else if (DIRECTION_OUT.equals(direction)) {
-                logMessage = logMessage + " , EndPointURL=" + messageContext.getProperty(SynapseConstants.ENDPOINT_PREFIX);
+                //logMessage = logMessage + " , EndPointURL=" + messageContext.getProperty(SynapseConstants.ENDPOINT_PREFIX);
+                logMessage = logMessage + " , EndPointURL=" + messageContext.getProperty("ENDPOINT_PREFIX");
                 log.debug("Outbound API call from gateway to client: " + logMessage);
             }
         }
