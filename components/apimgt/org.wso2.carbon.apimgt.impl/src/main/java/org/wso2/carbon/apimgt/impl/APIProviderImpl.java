@@ -1127,6 +1127,14 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 artifact.setAttribute(APIConstants.API_OVERVIEW_THUMBNAIL_URL,
                                       addIcon(APIUtil.getIconPath(newApiId), icon));
             }
+            // Here we keep the old context
+            String oldContext =  artifact.getAttribute(APIConstants.API_OVERVIEW_CONTEXT);
+
+            // We need to change the context by setting the new version
+            // This is a change that is coming with the context version strategy
+            String contextTemplate = artifact.getAttribute(APIConstants.API_OVERVIEW_CONTEXT_TEMPLATE);
+            artifact.setAttribute(APIConstants.API_OVERVIEW_CONTEXT, contextTemplate.replace("{version}", newVersion));
+
             artifactManager.addGenericArtifact(artifact);
             String artifactPath = GovernanceUtils.getArtifactPath(registry, artifact.getId());
             registry.addAssociation(APIUtil.getAPIProviderPath(api.getId()), targetPath,
@@ -1156,7 +1164,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             List<Documentation> docs = getAllDocumentation(api.getId());
             APIIdentifier newId = new APIIdentifier(api.getId().getProviderName(),
                                                     api.getId().getApiName(), newVersion);
-            API newAPI = getAPI(newId,api.getId());
+            API newAPI = getAPI(newId,api.getId(), oldContext);
 
             if(api.isDefaultVersion()){
                 newAPI.setAsDefaultVersion(true);
