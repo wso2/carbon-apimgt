@@ -3879,7 +3879,7 @@ public final class APIUtil {
         } else {
             //handle not to publish to any of the gateways
             if ("none".equals(environments)) {
-                environmentStringSet = new HashSet<String>(Arrays.asList(new String[] { "none" }));
+                environmentStringSet = new HashSet<String>();
             }
             //handle to set published gateways nto api object
             else if (!"".equals(environments)) {

@@ -20,6 +20,7 @@ package org.wso2.carbon.apimgt.usage.publisher;
 
 import org.apache.axiom.soap.SOAPBody;
 import org.apache.axiom.soap.SOAPEnvelope;
+import org.apache.http.HttpHeaders;
 import org.apache.synapse.MessageContext;
 import org.apache.synapse.SynapseConstants;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
@@ -84,38 +85,45 @@ public class APIMgtResponseHandler extends AbstractMediator {
             long serviceTime = 0;
             long backendTime = 0;
             long endTime = System.currentTimeMillis();
+            boolean cacheHit = false;
+
             long startTime = Long.parseLong((String) (mc.getProperty(
                     APIMgtUsagePublisherConstants.REQUEST_START_TIME)));
             long backendStartTime = Long.parseLong((String) (mc.getProperty(
                     APIMgtUsagePublisherConstants.BACKEND_REQUEST_START_TIME)));
             long backendEndTime = Long.parseLong((String) (mc.getProperty(
                     APIMgtUsagePublisherConstants.BACKEND_REQUEST_END_TIME)));
-            boolean cacheHit = false;
-            org.apache.axis2.context.MessageContext axis2MC = ((Axis2MessageContext) mc).
-                    getAxis2MessageContext();
-            Map headers = (Map) axis2MC.getProperty(
-                    org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
-            String contentLength = (String) headers.get("Content-Length");
-            if (contentLength != null) {
-                responseSize = Integer.parseInt(contentLength);
-            } else {  //When chunking is enabled
-                try {
-                    RelayUtils.buildMessage(axis2MC);
-                } catch (IOException ex) {
-                    //In case of an exception, it won't be propagated up, instead, will be logged;
-                    log.error("Error occurred while building the message to" +
-                              " calculate the response body size", ex);
-                } catch (XMLStreamException ex) {
-                    log.error("Error occurred while building the message to calculate the response" +
-                              " body size", ex);
-                }
-                if (mc != null) {
-                    SOAPEnvelope env = mc.getEnvelope();
-                    if (env != null) {
-                        SOAPBody soapbody = env.getBody();
-                        if (soapbody != null) {
-                            byte[] size = soapbody.toString().getBytes();
-                            responseSize = size.length;
+            //Check the config property is set to true to build the response message in-order
+            //to get the response message size
+            boolean isBuildMsg = UsageComponent.getApiMgtConfigReaderService()
+                    .isBuildMsg();
+            if (isBuildMsg) {
+                org.apache.axis2.context.MessageContext axis2MC = ((Axis2MessageContext) mc).
+                        getAxis2MessageContext();
+                Map headers = (Map) axis2MC.getProperty(
+                        org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
+                String contentLength = (String) headers.get(HttpHeaders.CONTENT_LENGTH);
+                if (contentLength != null) {
+                    responseSize = Integer.parseInt(contentLength);
+                } else {  //When chunking is enabled
+                    try {
+                        RelayUtils.buildMessage(axis2MC);
+                    } catch (IOException ex) {
+                        //In case of an exception, it won't be propagated up,and set response size to 0
+                        log.error("Error occurred while building the message to" +
+                                  " calculate the response body size", ex);
+                    } catch (XMLStreamException ex) {
+                        log.error("Error occurred while building the message to calculate the response" +
+                                  " body size", ex);
+                    }
+                    if (mc != null) {
+                        SOAPEnvelope env = mc.getEnvelope();
+                        if (env != null) {
+                            SOAPBody soapbody = env.getBody();
+                            if (soapbody != null) {
+                                byte[] size = soapbody.toString().getBytes();
+                                responseSize = size.length;
+                            }
                         }
                     }
                 }
@@ -137,6 +145,7 @@ public class APIMgtResponseHandler extends AbstractMediator {
                 backendTime = 0;
                 cacheHit = true;
             }
+
             ResponsePublisherDTO responsePublisherDTO = new ResponsePublisherDTO();
             responsePublisherDTO.setConsumerKey((String) mc.getProperty(
                     APIMgtUsagePublisherConstants.CONSUMER_KEY));
