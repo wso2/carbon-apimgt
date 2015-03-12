@@ -1029,6 +1029,7 @@ public class APIProviderHostObject extends ScriptableObject {
         if (provider != null) {
             provider = APIUtil.replaceEmailDomain(provider);
         }
+
         String name = (String) apiData.get("apiName", apiData);
         String version = (String) apiData.get("version", apiData);
         String defaultVersion=(String)apiData.get("defaultVersion",apiData);
@@ -4379,8 +4380,9 @@ public class APIProviderHostObject extends ScriptableObject {
 		                for (Object store : externalAPIStores) {
 		                	inputStores.add(APIUtil.getExternalAPIStore((String) store, tenantId));
 		                }
-		                updated = apiProvider.updateAPIsInExternalAPIStores(api,inputStores);
-	                 }
+                        updated = apiProvider.updateAPIsInExternalAPIStores(api,inputStores);
+
+                    }
 	                return updated;
                 } catch (UserStoreException e) {
                 	handleException("Error while updating external api stores", e);
