@@ -2603,7 +2603,9 @@ public class APIStoreHostObject extends ScriptableObject {
 
 		                }
 		                //get scopes for subscribed apis
-		                scopeSet = apiConsumer.getScopesBySubscribedAPIs(identifiers);
+		                if(!identifiers.isEmpty()){
+			                scopeSet = apiConsumer.getScopesBySubscribedAPIs(identifiers);
+		                }
 
 		                for (Scope scope : scopeSet) {
 			                NativeObject scopeObj = new NativeObject();
@@ -3627,6 +3629,7 @@ public class APIStoreHostObject extends ScriptableObject {
                     }
 
 	                tokenScope = apiConsumer.getScopesByToken(accessToken);
+	                Set<Scope> scopeSet = new LinkedHashSet<Scope>();
 	                Subscriber subscriber = new Subscriber(userId);
 	                //get subscribed APIs set for application
 	                Set<SubscribedAPI> subscribedAPIs =
@@ -3638,7 +3641,9 @@ public class APIStoreHostObject extends ScriptableObject {
 	                }
 
 	                //get scopes for subscribed apis
-	                Set<Scope> scopeSet = apiConsumer.getScopesBySubscribedAPIs(identifiers);
+	                if(!identifiers.isEmpty()){
+		                scopeSet = apiConsumer.getScopesBySubscribedAPIs(identifiers);
+	                }
 	                //convert scope keys to names
 	                String tokenScopeNames = getScopeNamesbyKey(tokenScope, scopeSet);
 
