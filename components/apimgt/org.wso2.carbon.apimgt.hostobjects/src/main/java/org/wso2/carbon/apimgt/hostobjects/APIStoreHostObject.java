@@ -2605,8 +2605,8 @@ public class APIStoreHostObject extends ScriptableObject {
 
 		                }
 
-		                //get scopes for subscribed apis
 		                if (!identifiers.isEmpty()) {
+			                //get scopes for subscribed apis
 			                scopeSet = apiConsumer.getScopesBySubscribedAPIs(identifiers);
 			                for (Scope scope : scopeSet) {
 				                NativeObject scopeObj = new NativeObject();
@@ -3643,8 +3643,8 @@ public class APIStoreHostObject extends ScriptableObject {
 		                identifiers.add(subscribedAPI.getApiId());
 	                }
 
-	                //get scopes for subscribed apis
 	                if(!identifiers.isEmpty()){
+		                //get scopes for subscribed apis
 		                scopeSet = apiConsumer.getScopesBySubscribedAPIs(identifiers);
 		                //convert scope keys to names
 		                tokenScopeNames = getScopeNamesbyKey(tokenScope, scopeSet);
