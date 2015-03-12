@@ -2492,6 +2492,17 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 		return apiJSON.toJSONString();
 	}
 
+    /**
+     * Returns the all the Consumer keys of applications which are subscribed to the given API
+     *
+     * @param apiIdentifier APIIdentifier
+     * @return a String array of ConsumerKeys
+     * @throws APIManagementException
+     */
+    public String[] getConsumerKeys(APIIdentifier apiIdentifier) throws APIManagementException {
+
+        return apiMgtDAO.getConsumerKeys(apiIdentifier);
+    }
 	
 }
 
