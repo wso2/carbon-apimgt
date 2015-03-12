@@ -66,7 +66,6 @@ import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
 
 import java.io.File;
-import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 import java.util.Collection;
 import java.util.concurrent.ConcurrentHashMap;
