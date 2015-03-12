@@ -1243,7 +1243,9 @@ public class APIStoreHostObject extends ScriptableObject {
         try {
 	        UserRegistrationConfigDTO signupConfig =
 	        		SelfSignUpUtil.getSignupConfiguration(tenantDomain);
-	        status = signupConfig.isSignUpEnabled();
+            if (signupConfig != null) {
+                status = signupConfig.isSignUpEnabled();
+            }
         } catch (APIManagementException e) {
 	       log.error("error while loading configuration from registry", e);
         }
@@ -2627,23 +2629,23 @@ public class APIStoreHostObject extends ScriptableObject {
                         appObj.put("callbackUrl", appObj, application.getCallbackUrl());
                         APIKey prodKey = getAppKey(application, APIConstants.API_KEY_TYPE_PRODUCTION);
 
-                        boolean prodEnableRegenerateOption = true;
+                        boolean prodEnableRegenarateOption = true;
 	                    String prodKeyScope = "";
 	                    if (prodKey != null && prodKey.getTokenScope() != null) {
 		                    //convert scope keys to names
 		                    prodKeyScope = getScopeNamesbyKey(prodKey.getTokenScope(), scopeSet);
 	                    }
 
-                        boolean prodEnableRegenarateOption = true;
+                        boolean prodEnableReganarateOption = true;
                         if (prodKey != null && prodKey.getAccessToken() != null) {
                             appObj.put("prodKey", appObj, prodKey.getAccessToken());
                             appObj.put("prodKeyScope", appObj, prodKeyScope);
                             appObj.put("prodConsumerKey", appObj, prodKey.getConsumerKey());
                             appObj.put("prodConsumerSecret", appObj, prodKey.getConsumerSecret());
                             if (prodKey.getValidityPeriod() == Long.MAX_VALUE) {
-                                prodEnableRegenerateOption = false;
+                                prodEnableRegenarateOption = false;
                             }
-                            appObj.put("prodRegenerateOption", appObj, prodEnableRegenerateOption);
+                            appObj.put("prodRegenarateOption", appObj, prodEnableRegenarateOption);
                             appObj.put("prodAuthorizedDomains", appObj, prodKey.getAuthorizedDomains());
 
                             if (isApplicationAccessTokenNeverExpire(prodKey.getValidityPeriod())) {
@@ -2656,7 +2658,7 @@ public class APIStoreHostObject extends ScriptableObject {
                             appObj.put("prodKeyScope", appObj, null);
                             appObj.put("prodConsumerKey", appObj, null);
                             appObj.put("prodConsumerSecret", appObj, null);
-                            appObj.put("prodRegenerateOption", appObj, prodEnableRegenerateOption);
+                            appObj.put("prodRegenarateOption", appObj, prodEnableRegenarateOption);
                             appObj.put("prodAuthorizedDomains", appObj, null);
                             if (isApplicationAccessTokenNeverExpire(
                                     getApplicationAccessTokenValidityPeriodInSeconds())) {
@@ -2671,7 +2673,7 @@ public class APIStoreHostObject extends ScriptableObject {
                             appObj.put("prodKeyScope", appObj, null);
                             appObj.put("prodConsumerKey", appObj, null);
                             appObj.put("prodConsumerSecret", appObj, null);
-                            appObj.put("prodRegenerateOption", appObj, prodEnableRegenerateOption);
+                            appObj.put("prodRegenarateOption", appObj, prodEnableRegenarateOption);
                             appObj.put("prodAuthorizedDomains", appObj, null);
                             if (isApplicationAccessTokenNeverExpire(
                                     getApplicationAccessTokenValidityPeriodInSeconds())) {
@@ -2683,7 +2685,7 @@ public class APIStoreHostObject extends ScriptableObject {
                         }
 
                         APIKey sandboxKey = getAppKey(application, APIConstants.API_KEY_TYPE_SANDBOX);
-                        boolean sandEnableRegenerateOption = true;
+                        boolean sandEnableRegenarateOption = true;
 
                         String sandKeyScope="";
                         if (sandboxKey != null && sandboxKey.getTokenScope() != null){
@@ -2698,9 +2700,9 @@ public class APIStoreHostObject extends ScriptableObject {
                             appObj.put("sandboxConsumerSecret", appObj, sandboxKey.getConsumerSecret());
                             appObj.put("sandboxKeyState", appObj, sandboxKey.getState());
                             if (sandboxKey.getValidityPeriod() == Long.MAX_VALUE) {
-	                            sandEnableRegenerateOption = false;
+	                            sandEnableRegenarateOption = false;
                             }
-                            appObj.put("sandRegenerateOption", appObj, sandEnableRegenerateOption);
+                            appObj.put("sandRegenarateOption", appObj, sandEnableRegenarateOption);
                             appObj.put("sandboxAuthorizedDomains", appObj, sandboxKey.getAuthorizedDomains());
                             if (isApplicationAccessTokenNeverExpire(sandboxKey.getValidityPeriod())) {
                                 if (tenantDomain != null &&
@@ -2719,7 +2721,7 @@ public class APIStoreHostObject extends ScriptableObject {
                             appObj.put("sandKeyScope", appObj, null);
                             appObj.put("sandboxConsumerKey", appObj, null);
                             appObj.put("sandboxConsumerSecret", appObj, null);
-                            appObj.put("sandRegenerateOption", appObj, sandEnableRegenerateOption);
+                            appObj.put("sandRegenarateOption", appObj, sandEnableRegenarateOption);
                             appObj.put("sandboxAuthorizedDomains", appObj, null);
                             appObj.put("sandboxKeyState", appObj, sandboxKey.getState());
                             if (isApplicationAccessTokenNeverExpire(
@@ -2734,7 +2736,7 @@ public class APIStoreHostObject extends ScriptableObject {
                             appObj.put("sandKeyScope", appObj, null);
                             appObj.put("sandboxConsumerKey", appObj, null);
                             appObj.put("sandboxConsumerSecret", appObj, null);
-                            appObj.put("sandRegenerateOption", appObj, sandEnableRegenerateOption);
+                            appObj.put("sandRegenarateOption", appObj, sandEnableRegenarateOption);
                             appObj.put("sandboxAuthorizedDomains", appObj, null);
                             if (isApplicationAccessTokenNeverExpire(
                                     getApplicationAccessTokenValidityPeriodInSeconds())) {

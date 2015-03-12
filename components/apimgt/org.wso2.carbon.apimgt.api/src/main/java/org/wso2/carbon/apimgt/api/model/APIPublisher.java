@@ -13,12 +13,9 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package org.wso2.carbon.apimgt.impl.publishers;
+package org.wso2.carbon.apimgt.api.model;
 
 import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.api.model.API;
-import org.wso2.carbon.apimgt.api.model.APIIdentifier;
-import org.wso2.carbon.apimgt.api.model.APIStore;
 
 /**
  * One or more implementations of this interface can be used to publish APIs to APIStores .
@@ -47,4 +44,12 @@ public interface APIPublisher {
      * @return   deleted/not
      */
     public boolean deleteFromStore(APIIdentifier apiId, APIStore store) throws APIManagementException;
+
+    /**
+     * The method to publish API to external Store
+     * @param api      API
+     * @param store    Store
+     * @return   deleted/not
+     */
+    public boolean isAPIAvailable(API api, APIStore store) throws APIManagementException;
 }
