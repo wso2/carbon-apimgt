@@ -2597,9 +2597,10 @@ public class APIStoreHostObject extends ScriptableObject {
 	                if (((appName == null || "".equals(appName)) && i == 0) ||
 	                    appName.equals(application.getName())) {
 
-		                //get subscribed APIs set for application
+		                //get subscribed APIs set as per the starting and ending indexes for application.
 		                Set<SubscribedAPI> subscribedAPIs =
-				                apiConsumer.getSubscribedAPIs(subscriber, application.getName());
+				                apiConsumer.getPaginatedSubscribedAPIs(subscriber, application.getName(),startSubIndex,endSubIndex);
+                        subscriptionCount = apiConsumer.getSubscriptionCount(subscriber,application.getName());
 
 		                List<APIIdentifier> identifiers = new ArrayList<APIIdentifier>();
 		                for (SubscribedAPI subscribedAPI : subscribedAPIs) {
