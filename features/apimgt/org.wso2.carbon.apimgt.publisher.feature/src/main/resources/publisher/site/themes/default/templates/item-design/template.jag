@@ -285,11 +285,12 @@
                 <div id="api_designer">
                     <div id ="resource_details"></div>
                 </div>            
-
+    <%if(api!=null){%>
                 <input type = "hidden" name = "bizOwner" value = "<%=api.bizOwner%>" />
                 <input type = "hidden" name = "bizOwnerMail" value = "<%=api.bizOwnerMail%>" />
                 <input type = "hidden" name = "techOwner" value = "<%=api.techOwner%>" />
                 <input type = "hidden" name = "techOwnerMail" value = "<%=api.techOwnerMail%>" />
+        			<%}%>
                 <input type="hidden" name="action" value="design" />
                 <input type="hidden" id="swagger" name="swagger" value="" />
                 <div class="form-actions" style="display:none" id="saveMessage">
