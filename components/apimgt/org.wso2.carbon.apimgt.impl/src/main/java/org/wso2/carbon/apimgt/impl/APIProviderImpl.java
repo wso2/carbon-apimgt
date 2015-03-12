@@ -2144,16 +2144,15 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     @Override
     public void publishToExternalAPIStores(API api, Set<APIStore> apiStoreSet)
             throws APIManagementException {
+
         Set<APIStore> publishedStores = new HashSet<APIStore>();
         if (apiStoreSet.size() > 0) {
             for (APIStore store : apiStoreSet) {
-                if (APIConstants.WSO2_API_STORE_TYPE.equals(store.getType())) {
-                    boolean published = new WSO2APIPublisher().publishToStore(api, store); //First trying to publish the API to external APIStore
-                    if (published) { //If published,then save to database.
-                        publishedStores.add(store);
-                    }
-                } else { //When the external APIStore is not a WSO2 APIStore
-                    log.warn("The configured external APIStore type is currently not supported.Hence ignoring publishing the API to - " + store.getDisplayName());
+                org.wso2.carbon.apimgt.api.model.APIPublisher publisher = store.getPublisher();
+                boolean published=publisher.publishToStore(api, store);//First trying to publish the API to external APIStore
+
+                if (published) { //If published,then save to database.
+                    publishedStores.add(store);
                 }
             }
             if (publishedStores.size() != 0) {
@@ -2170,8 +2169,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      *          If failed to update subscription status
      */
     @Override
-    public boolean updateAPIsInExternalAPIStores(API api, Set<APIStore> apiStoreSet)
-            throws APIManagementException {
+    public boolean updateAPIsInExternalAPIStores(API api, Set<APIStore> apiStoreSet) throws APIManagementException {
         boolean updated=false;
         Set<APIStore> publishedStores=getPublishedExternalAPIStores(api.getId());
         Set<APIStore> notPublishedAPIStores = new HashSet<APIStore>();
@@ -2211,7 +2209,11 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
         }
         //Publish API to external APIStore which are not yet published
-        publishToExternalAPIStores(api, notPublishedAPIStores);
+        try {
+            publishToExternalAPIStores(api, notPublishedAPIStores);
+        } catch (APIManagementException e) {
+            e.printStackTrace();
+        }
         //Update the APIs which are already exist in the external APIStore
         updateAPIInExternalAPIStores(api,updateApiStores);
         updateExternalAPIStoresDetails(api.getId(),modifiedPublishedApiStores); //Update database saved published APIStore details,if there are any
@@ -2226,14 +2228,14 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         Set<APIStore> removalCompletedStores = new HashSet<APIStore>();
         if (removedApiStores.size() > 0) {
             for (APIStore store : removedApiStores) {
-                if (APIConstants.WSO2_API_STORE_TYPE.equals(store.getType())) {
-                    //API will be firs deleted from the External Store.
-                    boolean deleted = new WSO2APIPublisher().deleteFromStore(api.getId(), APIUtil.getExternalAPIStore(store.getName(), tenantId));
-                    if (deleted) {
-                        //If the attempt is successful, database will be changed deleting the External store mappings.
-                        removalCompletedStores.add(store);
-                    }
+
+                org.wso2.carbon.apimgt.api.model.APIPublisher publisher = store.getPublisher();
+                boolean deleted=publisher.deleteFromStore(api.getId(), APIUtil.getExternalAPIStore(store.getName(), tenantId));
+                if (deleted) {
+                    //If the attempt is successful, database will be changed deleting the External store mappings.
+                    removalCompletedStores.add(store);
                 }
+
             }
             if (removalCompletedStores.size() != 0) {
                 removeExternalAPIStoreDetails(api.getId(), removalCompletedStores);
@@ -2247,16 +2249,10 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     private boolean isAPIAvailableInExternalAPIStore(API api, APIStore store) throws APIManagementException {
-		// Check external APIStore type is wso2 or not
-		if (APIConstants.WSO2_API_STORE_TYPE.equals(store.getType())) {
-			return new WSO2APIPublisher().isAPIAvailable(api, store);
-		} else {
-			// When the external APIStore is not a WSO2 APIStore
-			log.warn("The configured external APIStore type is currently not supported. Hence ignoring checking the API availabiltiy in - "
-					+ store.getDisplayName());
-		}
-		return false;
-	}
+        org.wso2.carbon.apimgt.api.model.APIPublisher publisher = store.getPublisher();
+        return publisher.isAPIAvailable(api, store);
+
+    }
 
 
     /**
@@ -2271,11 +2267,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             throws APIManagementException {
         if (apiStoreSet != null && apiStoreSet.size() > 0) {
             for (APIStore store : apiStoreSet) {
-                if (APIConstants.WSO2_API_STORE_TYPE.equals(store.getType())) {//Check external APIStore type is wso2 or not
-                    new WSO2APIPublisher().updateToStore(api, store);
-                } else { //When the external APIStore is not a WSO2 APIStore
-                    log.warn("The configured external APIStore type is currently not supported.Hence ignoring updating the API in - " + store.getDisplayName());
-                }
+                org.wso2.carbon.apimgt.api.model.APIPublisher publisher = store.getPublisher();
+                boolean published=publisher.updateToStore(api, store);
             }
         }
 

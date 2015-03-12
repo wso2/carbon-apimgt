@@ -2125,13 +2125,12 @@ public final class APIUtil {
 		}
     }
 
-	/**
-	 * Load the External API Store Configuration  to the registry
-	 *
-	 * @param tenant
-	 * @param tenantID
-	 * @throws org.wso2.carbon.apimgt.api.APIManagementException
-	 */
+    /**
+     * Load the External API Store Configuration  to the registry
+     *
+     * @param tenantID
+     * @throws org.wso2.carbon.apimgt.api.APIManagementException
+     */
 
 	public static void loadTenantExternalStoreConfig(int tenantID)
 	                                                                   throws APIManagementException {
