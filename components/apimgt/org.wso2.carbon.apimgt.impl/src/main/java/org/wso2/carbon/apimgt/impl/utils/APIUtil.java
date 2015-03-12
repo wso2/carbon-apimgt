@@ -1698,7 +1698,7 @@ public final class APIUtil {
         * @return API
         * @throws org.wso2.carbon.apimgt.api.APIManagementException if failed to get API from artifact
         */
-       public static API getAPI(GovernanceArtifact artifact, Registry registry,APIIdentifier oldId)
+       public static API getAPI(GovernanceArtifact artifact, Registry registry,APIIdentifier oldId, String oldContext)
                throws APIManagementException {
 
            API api;
@@ -1776,7 +1776,7 @@ public final class APIUtil {
                api.setLatest(Boolean.valueOf(artifact.getAttribute(APIConstants.API_OVERVIEW_IS_LATEST)));
                ArrayList<URITemplate> urlPatternsList;
 
-               urlPatternsList = ApiMgtDAO.getAllURITemplates(api.getContext(), oldId.getVersion());
+               urlPatternsList = ApiMgtDAO.getAllURITemplates(oldContext, oldId.getVersion());
                Set<URITemplate> uriTemplates = new HashSet<URITemplate>(urlPatternsList);
 
                for (URITemplate uriTemplate : uriTemplates) {
