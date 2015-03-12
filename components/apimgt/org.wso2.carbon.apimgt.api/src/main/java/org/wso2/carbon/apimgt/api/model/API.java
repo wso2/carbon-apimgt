@@ -93,6 +93,16 @@ public class API implements Serializable{
     private boolean isDefaultVersion = false;
     private boolean isPublishedDefaultVersion=false;
 
+    private Set<String> environments;
+
+    public Set<String> getEnvironments() {
+        return environments;
+    }
+
+    public void setEnvironments(Set<String> environments) {
+        this.environments = environments;
+    }
+
     /**
      * Contains flag indicating whether dummy backend or not
      * @return

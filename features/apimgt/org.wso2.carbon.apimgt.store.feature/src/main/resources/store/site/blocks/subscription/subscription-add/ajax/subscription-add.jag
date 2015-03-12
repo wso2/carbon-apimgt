@@ -142,7 +142,8 @@ include("/jagg/jagg.jag");
         keyType = request.getParameter("keytype");
         callbackUrl = request.getParameter("callbackUrl");
         username = user.username;
-        accessAllowDomains = request.getParameter("authorizedDomains");       
+        accessAllowDomains = request.getParameter("authorizedDomains");
+        tokenScope = request.getParameter("tokenScope");       
         var accessAllowDomainsArr = accessAllowDomains.split(",");
         validityTime = request.getParameter("validityTime");
 		var retryAfterFailure = request.getParameter("retryAfterFailure");
@@ -152,7 +153,7 @@ include("/jagg/jagg.jag");
 		}
 
         mod = jagg.module("subscription");
-        result = mod.generateApplicationKey(application, username, keyType, callbackUrl, accessAllowDomainsArr, validityTime,retryAfterFailure);
+        result = mod.generateApplicationKey(application, username, keyType, callbackUrl, accessAllowDomainsArr, validityTime,retryAfterFailure, tokenScope);
 
         if (result.error) {
             obj = {
@@ -216,8 +217,9 @@ include("/jagg/jagg.jag");
         clientId = request.getParameter("clientId");
         clientSecret = request.getParameter("clientSecret");
         validityTime = request.getParameter("validityTime");
+        tokenScope = request.getParameter("tokenScope");
         mod = jagg.module("subscription");
-        result = mod.refreshToken(username,application,keyType,oldAccessToken,accessAllowDomainsArr,clientId, clientSecret,validityTime);
+        result = mod.refreshToken(username,application,keyType,oldAccessToken,accessAllowDomainsArr,clientId, clientSecret,validityTime,tokenScope);
 
         if (result.error) {
             obj = {

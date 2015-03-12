@@ -677,6 +677,12 @@ public class APIStoreHostObject extends ScriptableObject {
             }
             try {
                 String validityPeriod = (String) args[5];
+	            String scopes = (String) args[6];
+	            String username = String.valueOf(args[0]);
+	            String tenantDomain = MultitenantUtils.getTenantDomain(username);
+	            int tenantId =
+			            ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
+			                                  .getTenantId(tenantDomain);
 
                 if (null == validityPeriod || validityPeriod.isEmpty()) { // In case a validity period is unspecified
                     long defaultValidityPeriod = getApplicationAccessTokenValidityPeriodInSeconds();
@@ -689,8 +695,30 @@ public class APIStoreHostObject extends ScriptableObject {
                     }
                 }
 
-                Map<String, String> keyDetails = getAPIConsumer(thisObj).requestApprovalForApplicationRegistration((String) args[0],
-                        (String) args[1], (String) args[2], (String) args[3], accessAllowDomainsArray, validityPeriod);
+	            //checking for authorized scopes
+	            Set<Scope> scopeSet = new LinkedHashSet<Scope>();
+	            List<Scope> authorizedScopes = new ArrayList<Scope>();
+	            String authScopeString;
+	            APIConsumer apiConsumer = getAPIConsumer(thisObj);
+	            if (scopes != null && scopes.length() != 0 &&
+	                !scopes.equals(APIConstants.OAUTH2_DEFAULT_SCOPE)) {
+		            scopeSet.addAll(apiConsumer.getScopesByScopeKeys(scopes, tenantId));
+		            authorizedScopes = getAllowedScopesForUserApplication(username, scopeSet);
+	            }
+
+	            if (!authorizedScopes.isEmpty()) {
+		            StringBuilder scopeBuilder = new StringBuilder();
+		            for (Scope scope : authorizedScopes) {
+			            scopeBuilder.append(scope.getKey()).append(" ");
+		            }
+		            authScopeString = scopeBuilder.toString();
+	            } else {
+		            authScopeString = APIConstants.OAUTH2_DEFAULT_SCOPE;
+	            }
+
+                Map<String, String> keyDetails = getAPIConsumer(thisObj).requestApprovalForApplicationRegistration(
+		                (String) args[0], (String) args[1], (String) args[2], (String) args[3],
+		                accessAllowDomainsArray, validityPeriod, authScopeString);
 
                 NativeObject row = new NativeObject();
                 String authorizedDomains = "";
@@ -1686,18 +1714,24 @@ public class APIStoreHostObject extends ScriptableObject {
                         row.put("userRate", row, userRate);
                     }
                     APIManagerConfiguration config = HostObjectComponent.getAPIManagerConfiguration();
-                    List<Environment> environments = config.getApiGatewayEnvironments();
-                    String envDetails = "";
-                    for (int i = 0; i < environments.size(); i++) {
-                        Environment environment = environments.get(i);
-                        envDetails += environment.getName() + ",";
-                        envDetails += filterUrls(environment.getApiGatewayEndpoint(), api.getTransports());
-                        if (i < environments.size() - 1) {
-                            envDetails += "|";
-                        }
+                    Map<String, Environment> environments = config.getApiGatewayEnvironments();
+                    StringBuilder envDetails = new StringBuilder();
+                    Set<String> environmentsPublishedByAPI =
+                            new HashSet<String>(api.getEnvironments());
+                    environmentsPublishedByAPI.remove("none");
+                    for (String environmentName : environmentsPublishedByAPI) {
+                        Environment environment = environments.get(environmentName);
+                        envDetails.append(environment.getName() + ",");
+                        envDetails.append(filterUrls(environment.getApiGatewayEndpoint(),
+                                                     api.getTransports()) + "|");
+                    }
+                    if (!envDetails.toString().isEmpty()) {
+                        //removig last seperator mark
+                        envDetails = envDetails.deleteCharAt(envDetails.length() - 1);
+
                     }
                     //row.put("serverURL", row, config.getFirstProperty(APIConstants.API_GATEWAY_API_ENDPOINT));
-                    row.put("serverURL", row, envDetails);
+                    row.put("serverURL", row, envDetails.toString());
                     NativeArray tierArr = new NativeArray(0);
                     Set<Tier> tierSet = api.getAvailableTiers();
                     if (tierSet != null) {
@@ -1813,13 +1847,12 @@ public class APIStoreHostObject extends ScriptableObject {
     	NativeArray myn = new NativeArray(0);
     	
     	APIManagerConfiguration config = HostObjectComponent.getAPIManagerConfiguration();
-        List<Environment> environments = config.getApiGatewayEnvironments();
+        Map<String, Environment> environments = config.getApiGatewayEnvironments();
         
         int index = 0;
-        for (int i = 0; i < environments.size(); i++) {
-        	Environment environment = environments.get(i);
+        for (Environment environment : environments.values()) {
         	String apiGatewayEndpoints = environment.getApiGatewayEndpoint();
-        	
+
         	List<String> urlsList = new ArrayList<String>();
         	urlsList.addAll(Arrays.asList(apiGatewayEndpoints.split(",")));
         	ListIterator<String> it = urlsList.listIterator();
@@ -2425,7 +2458,7 @@ public class APIStoreHostObject extends ScriptableObject {
         if (args != null && args.length != 0) {
             try {
 
-                Map<String, String> keyDetails = getAPIConsumer(thisObj).completeApplicationRegistration((String) args[0], (String) args[1], (String) args[2]);
+                Map<String, String> keyDetails = getAPIConsumer(thisObj).completeApplicationRegistration((String) args[0], (String) args[1], (String) args[2],(String) args[6]);
                 NativeObject object = new NativeObject();
 
                 if (keyDetails != null) {
@@ -2455,8 +2488,65 @@ public class APIStoreHostObject extends ScriptableObject {
         }
     }
 
-    public static NativeObject jsFunction_getAllSubscriptions(Context cx,
-                                                             Scriptable thisObj, Object[] args, Function funObj)
+	private static List<Scope> getAllowedScopesForUserApplication(String username,
+	                                                              Set<Scope> reqScopeSet) {
+		String[] userRoles = null;
+		List<Scope> authorizedScopes = new ArrayList<Scope>();
+		try {
+			userRoles = APIUtil.getListOfRoles(username);
+		} catch (APIManagementException e) {
+			log.error("Error while getting  the roles for user", e);
+		}
+
+		List<String> userRoleList = new ArrayList<String>(Arrays.asList(userRoles));
+
+		//Iterate the requested scopes list.
+		for (Scope scope : reqScopeSet) {
+			//Get the set of roles associated with the requested scope.
+			String roles = scope.getRoles();
+
+			//If the scope has been defined in the context of the App and if roles have been defined for the scope
+			if (roles != null && roles.length() != 0) {
+				List<String> roleList =
+						new ArrayList<String>(Arrays.asList(roles.replaceAll(" ", "").split(",")));
+				//Check if user has at least one of the roles associated with the scope
+				roleList.retainAll(userRoleList);
+				if (!roleList.isEmpty()) {
+					authorizedScopes.add(scope);
+				}
+			}
+		}
+
+		return authorizedScopes;
+	}
+
+	private static String getScopeNamesbyKey(String scopeKey, Set<Scope> availableScopeSet) {
+		//convert scope keys to names
+		StringBuilder scopeBuilder = new StringBuilder("");
+		String prodKeyScope;
+
+		if (scopeKey.equals(APIConstants.OAUTH2_DEFAULT_SCOPE)) {
+			scopeBuilder.append("Default  ");
+		} else {
+			List<String> inputScopeList = new ArrayList<String>(Arrays.asList(scopeKey.split(" ")));
+			String scopeName = "";
+			for (String inputScope : inputScopeList) {
+				for (Scope availableScope : availableScopeSet) {
+					if (availableScope.getKey().equals(inputScope)) {
+						scopeName = availableScope.getName();
+						break;
+					}
+				}
+				scopeBuilder.append(scopeName);
+				scopeBuilder.append(", ");
+			}
+		}
+		prodKeyScope = scopeBuilder.toString();
+		prodKeyScope = prodKeyScope.substring(0, prodKeyScope.length() - 2);
+		return prodKeyScope;
+	}
+
+    public static NativeObject jsFunction_getAllSubscriptions(Context cx,Scriptable thisObj, Object[] args, Function funObj)
             throws ScriptException, APIManagementException {
 
         if (args == null || args.length == 0 || !isStringArray(args)) {
@@ -2490,9 +2580,49 @@ public class APIStoreHostObject extends ScriptableObject {
             Subscriber subscriber = new Subscriber(username);
             APIConsumer apiConsumer = getAPIConsumer(thisObj);
             Application[] applications = apiConsumer.getApplications(new Subscriber(username));
+
             if (applications != null) {
                 int i = 0;
                 for (Application application : applications) {
+
+	                long startLoop = 0;
+	                if (log.isDebugEnabled()) {
+		                startLoop = System.currentTimeMillis();
+	                }
+
+	                NativeArray apisArray = new NativeArray(0);
+	                Set<Scope> scopeSet = new LinkedHashSet<Scope>();
+	                NativeArray scopesArray = new NativeArray(0);
+
+	                if (((appName == null || "".equals(appName)) && i == 0) ||
+	                    appName.equals(application.getName())) {
+
+		                //get subscribed APIs set for application
+		                Set<SubscribedAPI> subscribedAPIs =
+				                apiConsumer.getSubscribedAPIs(subscriber, application.getName());
+
+		                List<APIIdentifier> identifiers = new ArrayList<APIIdentifier>();
+		                for (SubscribedAPI subscribedAPI : subscribedAPIs) {
+			                addAPIObj(subscribedAPI, apisArray, thisObj, application);
+			                identifiers.add(subscribedAPI.getApiId());
+
+		                }
+		                //get scopes for subscribed apis
+		                scopeSet = apiConsumer.getScopesBySubscribedAPIs(identifiers);
+
+		                for (Scope scope : scopeSet) {
+			                NativeObject scopeObj = new NativeObject();
+			                scopeObj.put("scopeKey", scopeObj, scope.getKey());
+			                scopeObj.put("scopeName", scopeObj, scope.getName());
+			                scopesArray.put(scopesArray.getIds().length, scopesArray, scopeObj);
+		                }
+
+		                if (log.isDebugEnabled()) {
+			                log.debug("getSubscribedAPIs loop took : " +
+			                          (System.currentTimeMillis() - startLoop) + "ms");
+		                }
+	                }
+
                     if (ApplicationStatus.APPLICATION_APPROVED.equals(application.getStatus())) {
                         NativeObject appObj = new NativeObject();
                         appObj.put("id", appObj, application.getId());
@@ -2501,8 +2631,16 @@ public class APIStoreHostObject extends ScriptableObject {
                         APIKey prodKey = getAppKey(application, APIConstants.API_KEY_TYPE_PRODUCTION);
 
                         boolean prodEnableRegenerateOption = true;
+	                    String prodKeyScope = "";
+	                    if (prodKey != null && prodKey.getTokenScope() != null) {
+		                    //convert scope keys to names
+		                    prodKeyScope = getScopeNamesbyKey(prodKey.getTokenScope(), scopeSet);
+	                    }
+
+                        boolean prodEnableRegenarateOption = true;
                         if (prodKey != null && prodKey.getAccessToken() != null) {
                             appObj.put("prodKey", appObj, prodKey.getAccessToken());
+                            appObj.put("prodKeyScope", appObj, prodKeyScope);
                             appObj.put("prodConsumerKey", appObj, prodKey.getConsumerKey());
                             appObj.put("prodConsumerSecret", appObj, prodKey.getConsumerSecret());
                             if (prodKey.getValidityPeriod() == Long.MAX_VALUE) {
@@ -2518,6 +2656,7 @@ public class APIStoreHostObject extends ScriptableObject {
                             }
                         } else if (prodKey != null) {
                             appObj.put("prodKey", appObj, null);
+                            appObj.put("prodKeyScope", appObj, null);
                             appObj.put("prodConsumerKey", appObj, null);
                             appObj.put("prodConsumerSecret", appObj, null);
                             appObj.put("prodRegenerateOption", appObj, prodEnableRegenerateOption);
@@ -2532,6 +2671,7 @@ public class APIStoreHostObject extends ScriptableObject {
                             appObj.put("prodKeyState", appObj, prodKey.getState());
                         } else {
                             appObj.put("prodKey", appObj, null);
+                            appObj.put("prodKeyScope", appObj, null);
                             appObj.put("prodConsumerKey", appObj, null);
                             appObj.put("prodConsumerSecret", appObj, null);
                             appObj.put("prodRegenerateOption", appObj, prodEnableRegenerateOption);
@@ -2546,16 +2686,24 @@ public class APIStoreHostObject extends ScriptableObject {
                         }
 
                         APIKey sandboxKey = getAppKey(application, APIConstants.API_KEY_TYPE_SANDBOX);
-                        boolean sandEnableRegenrateOption = true;
+                        boolean sandEnableRegenerateOption = true;
+
+                        String sandKeyScope="";
+                        if (sandboxKey != null && sandboxKey.getTokenScope() != null){
+                            //convert scope keys to names
+                            sandKeyScope = getScopeNamesbyKey(sandboxKey.getTokenScope(), scopeSet);
+                        }
+
                         if (sandboxKey != null && sandboxKey.getConsumerKey() != null) {
                             appObj.put("sandboxKey", appObj, sandboxKey.getAccessToken());
+                            appObj.put("sandKeyScope", appObj, sandKeyScope);
                             appObj.put("sandboxConsumerKey", appObj, sandboxKey.getConsumerKey());
                             appObj.put("sandboxConsumerSecret", appObj, sandboxKey.getConsumerSecret());
                             appObj.put("sandboxKeyState", appObj, sandboxKey.getState());
                             if (sandboxKey.getValidityPeriod() == Long.MAX_VALUE) {
-                                sandEnableRegenrateOption = false;
+	                            sandEnableRegenerateOption = false;
                             }
-                            appObj.put("sandRegenerateOption", appObj, sandEnableRegenrateOption);
+                            appObj.put("sandRegenerateOption", appObj, sandEnableRegenerateOption);
                             appObj.put("sandboxAuthorizedDomains", appObj, sandboxKey.getAuthorizedDomains());
                             if (isApplicationAccessTokenNeverExpire(sandboxKey.getValidityPeriod())) {
                                 if (tenantDomain != null &&
@@ -2571,9 +2719,10 @@ public class APIStoreHostObject extends ScriptableObject {
                             }
                         } else if (sandboxKey != null) {
                             appObj.put("sandboxKey", appObj, null);
+                            appObj.put("sandKeyScope", appObj, null);
                             appObj.put("sandboxConsumerKey", appObj, null);
                             appObj.put("sandboxConsumerSecret", appObj, null);
-                            appObj.put("sandRegenerateOption", appObj, sandEnableRegenrateOption);
+                            appObj.put("sandRegenerateOption", appObj, sandEnableRegenerateOption);
                             appObj.put("sandboxAuthorizedDomains", appObj, null);
                             appObj.put("sandboxKeyState", appObj, sandboxKey.getState());
                             if (isApplicationAccessTokenNeverExpire(
@@ -2585,9 +2734,10 @@ public class APIStoreHostObject extends ScriptableObject {
                             }
                         } else {
                             appObj.put("sandboxKey", appObj, null);
+                            appObj.put("sandKeyScope", appObj, null);
                             appObj.put("sandboxConsumerKey", appObj, null);
                             appObj.put("sandboxConsumerSecret", appObj, null);
-                            appObj.put("sandRegenerateOption", appObj, sandEnableRegenrateOption);
+                            appObj.put("sandRegenerateOption", appObj, sandEnableRegenerateOption);
                             appObj.put("sandboxAuthorizedDomains", appObj, null);
                             if (isApplicationAccessTokenNeverExpire(
                                     getApplicationAccessTokenValidityPeriodInSeconds())) {
@@ -2597,28 +2747,12 @@ public class APIStoreHostObject extends ScriptableObject {
                                         getApplicationAccessTokenValidityPeriodInSeconds() * 1000);
                             }
                         }
-                        NativeArray apiArray = new NativeArray(0);
-                        if (appName == null || appName.isEmpty() || appName.equals(application.getName())) {
 
-                            long startLoop = 0;
-                            if (log.isDebugEnabled()) {
-                                startLoop = System.currentTimeMillis();
-                            }
-
-                            Set<SubscribedAPI> subscribedAPIs = apiConsumer.getPaginatedSubscribedAPIs(subscriber,
-                                    application.getName(), startSubIndex, endSubIndex);
-                            subscriptionCount = apiConsumer.getSubscriptionCount(subscriber,application.getName());
-                            for (SubscribedAPI subscribedAPI : subscribedAPIs) {
-                                addAPIObj(subscribedAPI, apiArray, thisObj, application);
-                            }
-
-                            if (log.isDebugEnabled()) {
-                                log.debug("getSubscribedAPIs loop took : " +
-                                        (System.currentTimeMillis() - startLoop) + "ms");
-                            }
-                        }
-                        appObj.put("subscriptions", appObj, apiArray);
+                        appObj.put("subscriptions", appObj, apisArray);
+                        appObj.put("scopes", appObj, scopesArray);
                         applicationList.put(i++, applicationList, appObj);
+                        result.put("applications", result, applicationList);
+                        result.put("totalLength", result, subscriptionCount);
                     }
                 }
             }
@@ -2634,8 +2768,6 @@ public class APIStoreHostObject extends ScriptableObject {
             log.debug("jsFunction_getMySubscriptionDetail took : " + (System.currentTimeMillis() - startTime) + "ms");
         }
 
-        result.put("applications", result, applicationList);
-        result.put("totalLength", result, subscriptionCount);
         return result;
     }
 
@@ -3473,7 +3605,7 @@ public class APIStoreHostObject extends ScriptableObject {
             String applicationName = (String) args[1];
             //String tokenType = (String) args[2];
             //Token type would be default with new scopes implementation introduced in 1.7.0
-            String tokenType = "default";
+            String requestedScopes = (String)args[8];
             String oldAccessToken = (String) args[3];
             NativeArray accessAllowDomainsArr = (NativeArray) args[4];
             String[] accessAllowDomainsArray = new String[(int) accessAllowDomainsArr.getLength()];
@@ -3492,18 +3624,37 @@ public class APIStoreHostObject extends ScriptableObject {
                 SubscriberKeyMgtClient keyMgtClient = HostObjectUtils.getKeyManagementClient();
                 ApplicationKeysDTO dto = new ApplicationKeysDTO();
                 String accessToken;
+                String tokenScope;
                 try {
                     //Regenerate the application access key
-                    accessToken = keyMgtClient.regenerateApplicationAccessKey(tokenType, oldAccessToken,
+                    accessToken = keyMgtClient.regenerateApplicationAccessKey(requestedScopes, oldAccessToken,
                             accessAllowDomainsArray, clientId, clientSecret, validityTime);
                     if (accessToken != null) {
                         //Set newly generated application access token
                         dto.setApplicationAccessToken(accessToken);
                     }
+
+	                tokenScope = apiConsumer.getScopesByToken(accessToken);
+	                Subscriber subscriber = new Subscriber(userId);
+	                //get subscribed APIs set for application
+	                Set<SubscribedAPI> subscribedAPIs =
+			                apiConsumer.getSubscribedAPIs(subscriber, applicationName);
+	                List<APIIdentifier> identifiers = new ArrayList<APIIdentifier>();
+
+	                for (SubscribedAPI subscribedAPI : subscribedAPIs) {
+		                identifiers.add(subscribedAPI.getApiId());
+	                }
+
+	                //get scopes for subscribed apis
+	                Set<Scope> scopeSet = apiConsumer.getScopesBySubscribedAPIs(identifiers);
+	                //convert scope keys to names
+	                String tokenScopeNames = getScopeNamesbyKey(tokenScope, scopeSet);
+
                     row.put("accessToken", row, dto.getApplicationAccessToken());
                     row.put("consumerKey", row, dto.getConsumerKey());
                     row.put("consumerSecret", row, dto.getConsumerSecret());
                     row.put("validityTime", row, validityTime);
+	                row.put("tokenScope", row, tokenScopeNames );
                     boolean isRegenarateOptionEnabled = true;
                     if (getApplicationAccessTokenValidityPeriodInSeconds() < 0) {
                         isRegenarateOptionEnabled = false;

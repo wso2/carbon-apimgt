@@ -161,6 +161,7 @@ public final class APIConstants {
     public static final String API_OVERVIEW_VISIBILITY ="overview_visibility";
     public static final String API_OVERVIEW_VISIBLE_ROLES ="overview_visibleRoles";
     public static final String API_OVERVIEW_VISIBLE_TENANTS ="overview_visibleTenants";
+    public static final String API_OVERVIEW_ENVIRONMENTS = "overview_environments";
     public static final String API_STATUS = "STATUS";
     public static final String API_URI_PATTERN ="URITemplate_urlPattern";
     public static final String API_URI_HTTP_METHOD ="URITemplate_httpVerb";
@@ -408,6 +409,7 @@ public final class APIConstants {
 
     public static final String API_USAGE_TRACKING = "APIUsageTracking.";
     public static final String API_USAGE_ENABLED = API_USAGE_TRACKING + "Enabled";
+    public static final String API_USAGE_BUILD_MSG = API_USAGE_TRACKING + "PublishResponseMessageSize";
     public static final String API_USAGE_THRIFT_PORT = API_USAGE_TRACKING + "ThriftPort";
     public static final String API_USAGE_BAM_SERVER_URL = API_USAGE_TRACKING + "BAMServerURL";
     public static final String API_USAGE_BAM_SERVER_USER = API_USAGE_TRACKING + "BAMUsername";
