@@ -3050,25 +3050,21 @@ public class APIStoreHostObject extends ScriptableObject {
                 return false;
             }
             //check whether there is an app with same name
-            boolean isAppWithSameNameExists = false;
             for (Application app : apps) {
                 if (app.getName().equals(name)) {
-                    isAppWithSameNameExists = true;
-                    break;
+                    return false;
                 }
             }
 
             for (Application app : apps) {
-                if (!isAppWithSameNameExists) {
-                    if (app.getName().equals(oldName)) {
-                        Application application = new Application(name, subscriber);
-                        application.setId(app.getId());
-                        application.setTier(tier);
-                        application.setCallbackUrl(callbackUrl);
-                        application.setDescription(description);
-                        apiConsumer.updateApplication(application);
-                        return true;
-                    }
+                if (app.getName().equals(oldName)) {
+                    Application application = new Application(name, subscriber);
+                    application.setId(app.getId());
+                    application.setTier(tier);
+                    application.setCallbackUrl(callbackUrl);
+                    application.setDescription(description);
+                    apiConsumer.updateApplication(application);
+                    return true;
                 }
             }
         }
