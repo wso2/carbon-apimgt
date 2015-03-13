@@ -1000,7 +1000,7 @@ public class ApiMgtDAO {
             String groupId = subscriber.getGroupId();
 
             // Check for duplicate default applications if group id is available.
-            if (groupId != "" && groupId != null) {
+            if (!groupId.isEmpty() && groupId != null) {
                 Application[] apps = getApplications(subscriber, subscriber.getGroupId());
                
                 if(APIUtil.doesApplicationExist(apps, APIConstants.DEFAULT_APPLICATION_NAME)){

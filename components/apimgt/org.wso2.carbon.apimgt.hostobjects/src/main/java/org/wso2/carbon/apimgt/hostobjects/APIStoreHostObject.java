@@ -2568,7 +2568,7 @@ public class APIStoreHostObject extends ScriptableObject {
             String username = args[0].toString();
             String appName = args[1].toString();
             String groupId = null;
-            if(args.length > 2){
+            if(args.length > 2 && args[2] != null){
             	groupId = args[2].toString();
             }
 
@@ -2583,7 +2583,7 @@ public class APIStoreHostObject extends ScriptableObject {
             Subscriber subscriber = new Subscriber(username);
             APIConsumer apiConsumer = getAPIConsumer(thisObj);
             Application[] applications;
-            if("".equals(groupId) || groupId == null){
+            if(groupId == null || groupId.isEmpty()){
                     applications = apiConsumer.getApplications(new Subscriber(username));
                 }
             else{
@@ -2601,12 +2601,12 @@ public class APIStoreHostObject extends ScriptableObject {
 	                NativeArray apisArray = new NativeArray(0);
 	                Set<Scope> scopeSet = new LinkedHashSet<Scope>();
 	                NativeArray scopesArray = new NativeArray(0);
-	                if (((appName == null || "".equals(appName)) && i == 0) ||
+	                if (((appName == null || appName.isEmpty()) && i == 0) ||
 	                    appName.equals(application.getName())) {
 
 		                //get subscribed APIs set for application
 	                	Set<SubscribedAPI> subscribedAPIs;
-                        if (groupId == null || "".equals(groupId)) {
+                        if (groupId == null || groupId.isEmpty()) {
                             subscribedAPIs = apiConsumer.getSubscribedAPIs(subscriber, application.getName());
                         } else {
                             subscribedAPIs = apiConsumer.getSubscribedAPIs(subscriber, application.getName(), groupId);
@@ -2920,10 +2920,10 @@ public class APIStoreHostObject extends ScriptableObject {
             APIConsumer apiConsumer = getAPIConsumer(thisObj);
             Application[] applications;
             String groupId="";
-            if(args.length >1){
+            if(args.length >1 && args[1] != null){
             	 groupId = args[1].toString();
             }
-            if ("".equals(groupId) || groupId == null) {
+            if (groupId == null || groupId.isEmpty() ) {
                 applications = apiConsumer.getApplications(new Subscriber(username));
             } else {
                 applications = apiConsumer.getApplications(new Subscriber(username), groupId);
@@ -2958,7 +2958,7 @@ public class APIStoreHostObject extends ScriptableObject {
             String callbackUrl = (String) args[3];
             String description = (String) args[4];
             String groupId = null;
-            if(args.length > 5){
+            if(args.length > 5 && args[5] != null){
             	 groupId = (String) args[5];
             }
             
@@ -2966,7 +2966,7 @@ public class APIStoreHostObject extends ScriptableObject {
             Subscriber subscriber = new Subscriber(username);
 
             Application[] apps = null;
-            if (groupId == null || "".equals(groupId)) {
+            if (groupId == null || groupId.isEmpty()) {
                 apps = apiConsumer.getApplications(subscriber);
 
             } else {
@@ -3089,7 +3089,7 @@ public class APIStoreHostObject extends ScriptableObject {
             String callbackUrl = (String) args[4];
             String description = (String) args[5];
             String groupId = null;
-            if(args.length > 6){
+            if(args.length > 6 && args[6] != null){
             	groupId = (String) args[6];
             }
            
@@ -3130,7 +3130,7 @@ public class APIStoreHostObject extends ScriptableObject {
             String workflowReference = (String) args[0];
             String status = (String) args[1];
             String description = null;
-            if (args.length > 2) {
+            if (args.length > 2 && args[2] != null) {
                 description = (String) args[2];
             }
 
@@ -4219,6 +4219,8 @@ public class APIStoreHostObject extends ScriptableObject {
         try {
             groupId = consumer.getGroupIds(response);
         } catch (APIManagementException e) {
+        	//This is actually not an exception, that should abort the user flow. If the groupId is not available then 
+        	//the flow for which the group id is not required will be run.
             log.error("Error occurred while getting group id");
         }
         return groupId;
