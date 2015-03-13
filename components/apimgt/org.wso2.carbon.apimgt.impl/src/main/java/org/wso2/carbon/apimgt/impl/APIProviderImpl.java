@@ -548,7 +548,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                             environmentsRemoved.addAll(environmentsToPublish);
                             environmentsRemoved.removeAll(failedToPublishEnvironments);
                             environmentsRemoved.addAll(failedToRemoveEnvironments);
-                            if (environmentsRemoved.isEmpty())
+                            environmentsToRemove.removeAll(failedToRemoveEnvironments);
+                            environmentsRemoved.removeAll(environmentsToRemove);
                             apiPublished.setEnvironments(environmentsRemoved);
                             updateApiArtifact(apiPublished, true, false);
                             failedGateways.clear();
