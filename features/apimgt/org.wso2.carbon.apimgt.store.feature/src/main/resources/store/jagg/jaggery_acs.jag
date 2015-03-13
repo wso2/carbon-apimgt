@@ -73,9 +73,17 @@
 			            var username = ssoRelyingParty.getLoggedInUser(sessionId);
 			            var manager = jagg.module("manager");
           		        var  store = manager.getAPIStoreObj();
+                        var decodedSamlReponse = ssoRelyingParty.decode(samlResponse);
+                        var groupId = store.getgroupId(decodedSamlReponse);
+                       //Store and empty string instead of null if no group Id is found. This is done so that when checking for a string array 
+                       //the null value returned would not cause any issue.
+                        if(groupId == null){
+                          groupId = "";
+                        }
+			            session.put("groupId", groupId)
 			            var subscriber = store.getSubscriber(username);
     			        if (!subscriber) {
-        			        store.addSubscriber(username);
+        			        store.addSubscriber(username, groupId);
         			        subscriber = store.getSubscriber(username);
     			        }
                         session.put("LOGGED_IN_USER",ssoRelyingParty.getLoggedInUser(sessionId));

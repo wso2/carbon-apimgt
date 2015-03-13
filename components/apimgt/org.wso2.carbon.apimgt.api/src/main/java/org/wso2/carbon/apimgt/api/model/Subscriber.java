@@ -34,6 +34,7 @@ public class Subscriber {
     private int id = 0;
     private int tenantId;
     private String email;
+    private String groupId;
 
     public Subscriber(String name) {
         this.name = name;
@@ -85,5 +86,13 @@ public class Subscriber {
 
     public void setEmail(String email) {
         this.email = email;
+    }
+
+    public String getGroupId() {
+        return groupId;
+    }
+
+    public void setGroupId(String groupId) {
+        this.groupId = groupId;
     }
 }

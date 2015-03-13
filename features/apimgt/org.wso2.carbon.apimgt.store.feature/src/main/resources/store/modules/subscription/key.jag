@@ -21,7 +21,7 @@ var generateAPIKey = function (api, context, application, username, keyType, cal
         };
     }
 };
-var generateApplicationKey = function (application, username, keyType, callbackUrl, accessAllowDomains, validityTime,afterFailure,tokenScope) {
+var generateApplicationKey = function (application, username, keyType, callbackUrl, accessAllowDomains, validityTime,afterFailure,tokenScope, applicationId) {
     afterFailure = typeof afterFailure !== 'undefined' ? afterFailure : false;
     var key,
             log = new Log(),
@@ -29,9 +29,9 @@ var generateApplicationKey = function (application, username, keyType, callbackU
 
     try {
 	if(afterFailure){
-        key = store.createApplicationKeys( username,application, keyType, callbackUrl, accessAllowDomains, validityTime, tokenScope);
+        key = store.createApplicationKeys( username,application, keyType, callbackUrl, accessAllowDomains, validityTime, tokenScope, applicationId);
 	}else{
-	key = store.getApplicationKey( username,application, keyType, callbackUrl, accessAllowDomains, validityTime, tokenScope);
+	key = store.getApplicationKey( username,application, keyType, callbackUrl, accessAllowDomains, validityTime, tokenScope, applicationId);
         
 	}
         if (log.isDebugEnabled()) {

@@ -44,9 +44,12 @@
                         if(request.getParameter('selectedApp') == app.name){
                             selectedApp = app;
                             session.put('selectedApp',app.name);
+                            session.put('selectedAppID',selectedApp.id);
+                     
                             %> selected="selected" <%
                         }
                     }
+                   session.put('selectedAppID',selectedApp.id);
                 %>><%= encode.forHtml(app.name)%></option>
             <% } %>
         </select>
