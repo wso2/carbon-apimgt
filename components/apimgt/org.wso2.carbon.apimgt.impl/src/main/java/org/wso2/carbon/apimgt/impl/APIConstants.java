@@ -141,8 +141,10 @@ public final class APIConstants {
     // Those constance are used in API artifact.
     public static final String API_OVERVIEW_NAME = "overview_name";
     public static final String API_OVERVIEW_VERSION = "overview_version";
+    public static final String API_OVERVIEW_VERSION_TYPE = "overview_versionType";
     public static final String API_OVERVIEW_IS_DEFAULT_VERSION = "overview_isDefaultVersion";
     public static final String API_OVERVIEW_CONTEXT = "overview_context";
+    public static final String API_OVERVIEW_CONTEXT_TEMPLATE = "overview_contextTemplate";
     public static final String API_OVERVIEW_DESCRIPTION = "overview_description";
     public static final String API_OVERVIEW_ENDPOINT_URL = "overview_endpointURL";
     public static final String API_OVERVIEW_SANDBOX_URL = "overview_sandboxURL";
@@ -348,6 +350,7 @@ public final class APIConstants {
     public static final String EXTERNAL_API_STORE = "ExternalAPIStore";
     public static final String EXTERNAL_API_STORE_ID = "id";
     public static final String EXTERNAL_API_STORE_TYPE = "type";
+    public static final String EXTERNAL_API_STORE_CLASS_NAME = "className";
     public static final String EXTERNAL_API_STORE_DISPLAY_NAME = "DisplayName";
     public static final String EXTERNAL_API_STORE_ENDPOINT = "Endpoint";
     public static final String EXTERNAL_API_STORE_USERNAME = "Username";

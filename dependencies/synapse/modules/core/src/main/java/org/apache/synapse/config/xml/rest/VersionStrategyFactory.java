@@ -17,22 +17,24 @@
 */
 package org.apache.synapse.config.xml.rest;
 
+import javax.xml.namespace.QName;
+
 import org.apache.axiom.om.OMAttribute;
 import org.apache.axiom.om.OMElement;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.synapse.SynapseException;
 import org.apache.synapse.rest.API;
+import org.apache.synapse.rest.version.ContextVersionStrategy;
 import org.apache.synapse.rest.version.DefaultStrategy;
 import org.apache.synapse.rest.version.URLBasedVersionStrategy;
 import org.apache.synapse.rest.version.VersionStrategy;
-
-import javax.xml.namespace.QName;
 
 public class VersionStrategyFactory {
     private static final Log log = LogFactory.getLog(VersionStrategyFactory.class);
     public static final String TYPE_URL = "url";
     public static final String TYPE_NULL = "";
+    public static final String TYPE_CONTEXT = "context";
 
     public static VersionStrategy createVersioningStrategy(API api, OMElement apiElt) {
         OMAttribute versionAtt = apiElt.getAttribute(new QName("version"));
@@ -67,6 +69,9 @@ public class VersionStrategyFactory {
                                                          String versionParam) {
         if (versionType != null && TYPE_URL.equals(versionType.trim())) {
             return new URLBasedVersionStrategy(api, version, versionParam);
+        }
+        if (versionType != null && TYPE_CONTEXT.equals(versionType.trim())) {
+            return new ContextVersionStrategy(api,version, versionParam);
         }
         if (versionType == null || TYPE_NULL.equals(versionType.trim())) {
             //no versioning supported here

@@ -29,6 +29,7 @@ import org.apache.synapse.rest.RESTUtils;
 import org.apache.synapse.rest.Resource;
 import org.apache.synapse.rest.dispatch.RESTDispatcher;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
+import org.wso2.carbon.apimgt.gateway.handlers.Utils;
 import org.wso2.carbon.apimgt.gateway.handlers.security.keys.APIKeyDataStore;
 import org.wso2.carbon.apimgt.gateway.handlers.security.keys.WSAPIKeyDataStore;
 import org.wso2.carbon.apimgt.gateway.handlers.security.thrift.ThriftAPIDataStore;
@@ -316,7 +317,7 @@ public class APIKeyValidator {
         String apiVersion = (String) synCtx.getProperty(RESTConstants.SYNAPSE_REST_API_VERSION);
         String fullRequestPath = (String)synCtx.getProperty(RESTConstants.REST_FULL_REQUEST_PATH);
 
-        String requestPath = fullRequestPath.substring((apiContext + apiVersion).length() + 1);
+        String requestPath = Utils.getRequestPath(synCtx, fullRequestPath, apiContext, apiVersion);
         if ("".equals(requestPath)) {
             requestPath = "/";
         }
