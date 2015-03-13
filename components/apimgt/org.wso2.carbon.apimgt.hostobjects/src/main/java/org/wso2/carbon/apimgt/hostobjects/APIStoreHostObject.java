@@ -3050,14 +3050,14 @@ public class APIStoreHostObject extends ScriptableObject {
             //check whether there is an app with same name
             boolean isAppWithSameNameExists = false;
             for (Application app : apps) {
-                if(app.getName().equals(name)){
+                if (app.getName().equals(name)) {
                     isAppWithSameNameExists = true;
                     break;
                 }
             }
 
             for (Application app : apps) {
-                if(!isAppWithSameNameExists) {
+                if (!isAppWithSameNameExists) {
                     if (app.getName().equals(oldName)) {
                         Application application = new Application(name, subscriber);
                         application.setId(app.getId());
