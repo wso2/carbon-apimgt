@@ -180,8 +180,8 @@ public class APITemplateBuilderImpl implements APITemplateBuilder {
 
             // for default version, we remove the {version} param from the apiContext
             String apiContext = this.api.getContextTemplate();
-            if(apiContext.contains("{version}")){
-                apiContext = apiContext.replace("{version}","");
+            if(apiContext.contains(APIConstants.SYNAPSE_REST_CONTEXT_VERSION_VARIABLE)){
+                apiContext = apiContext.replace(APIConstants.SYNAPSE_REST_CONTEXT_VERSION_VARIABLE,"");
             }
 
             context.put("apiContext", apiContext);

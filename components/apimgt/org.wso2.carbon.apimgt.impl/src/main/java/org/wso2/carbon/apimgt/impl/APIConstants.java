@@ -18,6 +18,8 @@
 
 package org.wso2.carbon.apimgt.impl;
 
+import org.apache.synapse.rest.RESTConstants;
+
 import javax.xml.namespace.QName;
 
 /**
@@ -612,6 +614,7 @@ public final class APIConstants {
     public static final String APIPROVIDER_HOSTCACHE = "apiProvideHostObjectCache";
     public static final String TENANTCOUNT_CACHEKEY = "apiProviderCacheKey";
 
-
+    public static final String SYNAPSE_REST_CONTEXT_VERSION_VARIABLE = RESTConstants
+            .SYNAPSE_REST_CONTEXT_VERSION_VARIABLE;
 
 }
