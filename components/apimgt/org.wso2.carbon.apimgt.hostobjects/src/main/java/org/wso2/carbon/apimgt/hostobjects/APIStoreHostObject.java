@@ -2604,14 +2604,16 @@ public class APIStoreHostObject extends ScriptableObject {
 			                identifiers.add(subscribedAPI.getApiId());
 
 		                }
-		                //get scopes for subscribed apis
-		                scopeSet = apiConsumer.getScopesBySubscribedAPIs(identifiers);
 
-		                for (Scope scope : scopeSet) {
-			                NativeObject scopeObj = new NativeObject();
-			                scopeObj.put("scopeKey", scopeObj, scope.getKey());
-			                scopeObj.put("scopeName", scopeObj, scope.getName());
-			                scopesArray.put(scopesArray.getIds().length, scopesArray, scopeObj);
+		                if (!identifiers.isEmpty()) {
+			                //get scopes for subscribed apis
+			                scopeSet = apiConsumer.getScopesBySubscribedAPIs(identifiers);
+			                for (Scope scope : scopeSet) {
+				                NativeObject scopeObj = new NativeObject();
+				                scopeObj.put("scopeKey", scopeObj, scope.getKey());
+				                scopeObj.put("scopeName", scopeObj, scope.getName());
+				                scopesArray.put(scopesArray.getIds().length, scopesArray, scopeObj);
+			                }
 		                }
 
 		                if (log.isDebugEnabled()) {
@@ -3640,6 +3642,8 @@ public class APIStoreHostObject extends ScriptableObject {
                     }
 
 	                tokenScope = apiConsumer.getScopesByToken(accessToken);
+	                Set<Scope> scopeSet = new LinkedHashSet<Scope>();
+	                String tokenScopeNames = "";
 	                Subscriber subscriber = new Subscriber(userId);
 	                //get subscribed APIs set for application
 	                Set<SubscribedAPI> subscribedAPIs =
@@ -3650,10 +3654,12 @@ public class APIStoreHostObject extends ScriptableObject {
 		                identifiers.add(subscribedAPI.getApiId());
 	                }
 
-	                //get scopes for subscribed apis
-	                Set<Scope> scopeSet = apiConsumer.getScopesBySubscribedAPIs(identifiers);
-	                //convert scope keys to names
-	                String tokenScopeNames = getScopeNamesbyKey(tokenScope, scopeSet);
+	                if(!identifiers.isEmpty()){
+		                //get scopes for subscribed apis
+		                scopeSet = apiConsumer.getScopesBySubscribedAPIs(identifiers);
+		                //convert scope keys to names
+		                tokenScopeNames = getScopeNamesbyKey(tokenScope, scopeSet);
+	                }
 
                     row.put("accessToken", row, dto.getApplicationAccessToken());
                     row.put("consumerKey", row, dto.getConsumerKey());
