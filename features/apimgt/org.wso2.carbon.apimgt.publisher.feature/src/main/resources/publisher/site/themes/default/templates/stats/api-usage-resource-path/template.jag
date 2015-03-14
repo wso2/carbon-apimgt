@@ -42,24 +42,25 @@
 
 <div class="well">
     <div class="row-fluid">
-        <div class="span6">
+        <div class="span12">
             <div id="tempLoadingSpaceResourcePath">
                 <div class="progress progress-striped active">
                     <div class="bar" style="width: 10%;"></div>
                 </div>
             </div>
         </div>
-        <div class="span6">&nbsp;</div>
+
         <div class="span11">
 
             <div id="light" class="white_content">
             <div style="float:right;margin-top:-40px">
-                <a href = "javascript:void(0)" onclick = "$('#light').css('display','none');$('#fade').css('display','none');"><i class="icon icon-remove"></i></a>
+                <a href = "javascript:void(0)" onclick = "onClose();"><i class="icon icon-remove"></i></a>
             </div>
             <div id="chartContainer"></div>
             </div>
-            <div id="fade" class="black_overlay"></div>
             <div id="tableContainer"></div>
+            <div id="fade" class="black_overlay"></div>
+
         </div>
     </div>
 </div>

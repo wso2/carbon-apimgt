@@ -193,7 +193,7 @@ var drawAPIResponseFaultCountTable = function(from,to){
 
                 }else if (length == 0) {
                     $('#tableContainer').hide();
-                    $('#tempLoadingSpace').append($('<span class="label label-info">'+i18n.t('errorMsgs.noData')+'</span>'));
+                    $('#tempLoadingSpace').append($('<h3 class="no-data-heading center-wrapper">No Data Available</h3>'));
                 }
 
             } else {
@@ -222,19 +222,12 @@ var drawAPIResponseFaultCountChart = function(from,to){
                     var faultData = [];
                     var data=[];
 
-                    //start value
-                    faultData.push({x:0,y:0,label:""});
-                    data.push({x:0,y:0,label:""});
-
                     //chart data
                     for (var i = 0; i < length; i++) {
-                        faultData.push({x:i+1, y:parseFloat(json.usage[i].count), label: json.usage[i].apiName +" v"+json.usage[i].version});
-                        data.push({x:i+1, y:parseFloat(json.usage[i].totalRequestCount)-parseFloat(json.usage[i].count), label: json.usage[i].apiName});
+                        faultData.push({x:i, y:parseFloat(json.usage[i].count), label: json.usage[i].apiName +" v"+json.usage[i].version});
+                        data.push({x:i, y:parseFloat(json.usage[i].totalRequestCount)-parseFloat(json.usage[i].count), label: json.usage[i].apiName});
                     }
 
-                    //end value
-                    faultData.push({x:length+1,y:0,label:""});
-                    data.push({x:length+1,y:0,label:""});
 
                     var dataStructure = [{
                             "key": "Fault",
@@ -246,7 +239,7 @@ var drawAPIResponseFaultCountChart = function(from,to){
                         }];
 
                     (function (data) {
-                    var colorRangeArray=["#d62728","#1f77b4"];
+                    var colorRangeArray=["#e74c3c","#4aa3df"];
                         var colors = d3.scale.ordinal()
                            .range(colorRangeArray);
                         keyColor = function (d, i) {
@@ -300,7 +293,7 @@ var drawAPIResponseFaultCountChart = function(from,to){
                     $('#tableContainer').hide();
                     $('#chartContainer').hide();
                     $('#tempLoadingSpace').html('');
-                    $('#tempLoadingSpace').append($('<span class="label label-info">'+i18n.t('errorMsgs.noData')+'</span>'));
+                    $('#tempLoadingSpace').append($('<h3 class="no-data-heading center-wrapper">No Data Available</h3>'));
                 }
 
             } else {
