@@ -19,7 +19,6 @@ package org.wso2.carbon.apimgt.api;
 
 import org.wso2.carbon.apimgt.api.dto.UserApplicationAPIUsage;
 import org.wso2.carbon.apimgt.api.model.*;
-
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -146,8 +145,9 @@ public interface APIProvider extends APIManager {
      *
      * @param api API
      * @throws org.wso2.carbon.apimgt.api.APIManagementException if failed to update API
+     * @return  failed environments during gateway operation
      */
-    public void updateAPI(API api) throws APIManagementException;
+    public Map<String, List<String>> updateAPI(API api) throws APIManagementException;
 
     /**
      * Change the lifecycle state of the specified API
@@ -157,8 +157,10 @@ public interface APIProvider extends APIManager {
      * @param userId User performing the API state change
      * @param updateGatewayConfig Whether the changes should be pushed to the API gateway or not
      * @throws org.wso2.carbon.apimgt.api.APIManagementException on error
+     * @return  failed environments during gateway operation
      */
-    public void changeAPIStatus(API api, APIStatus status, String userId, boolean updateGatewayConfig)
+    public Map<String, List<String>> changeAPIStatus(API api, APIStatus status, String userId,
+                                                     boolean updateGatewayConfig)
             throws APIManagementException;
 
     /**
@@ -415,4 +417,12 @@ public interface APIProvider extends APIManager {
      */
     public String getSwagger12Definition(APIIdentifier apiId) throws APIManagementException;
 
+    /**
+     * Returns all the Consumer keys of applications which are subscribed to given API
+     *
+     * @param apiIdentifier APIIdentifier
+     * @return a String array of ConsumerKeys
+     * @throws APIManagementException
+     */
+    public String[] getConsumerKeys(APIIdentifier apiIdentifier) throws APIManagementException;
 }

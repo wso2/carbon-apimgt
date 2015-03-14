@@ -1916,7 +1916,8 @@ public class APIUsageStatisticsClient {
             return AXIOMUtil.stringToOM(returnString);
 
         } catch (Exception e) {
-            throw new APIMgtUsageQueryServiceClientException("Error occurred while querying from JDBC database", e);
+            throw new APIMgtUsageQueryServiceClientException("Error occurred while querying from JDBC database" +
+                                                             e.getMessage(), e);
         } finally {
             if (rs != null) {
                 try {

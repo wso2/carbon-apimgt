@@ -21,10 +21,14 @@ package org.wso2.carbon.apimgt.gateway.handlers.security.service;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
+import org.wso2.carbon.identity.core.util.IdentityUtil;
 import org.wso2.carbon.mediation.initializer.AbstractServiceBusAdmin;
+import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
+import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import javax.cache.Cache;
 import javax.cache.Caching;
+
 import java.util.Iterator;
 import java.util.Set;
 
@@ -34,10 +38,19 @@ public class APIAuthenticationService extends AbstractServiceBusAdmin {
 
         Cache cache = Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER).getCache(APIConstants.KEY_CACHE_NAME);
         for (APIKeyMapping mapping : mappings) {
-            String cacheKey = mapping.getKey() + ":" + mapping.getContext() + ":" + mapping.getApiVersion();
+            //According to new cache design we will use cache key to clear cache if its available in mapping
+            //Later we construct key using attributes. Now cache key will pass as key
+            String cacheKey = mapping.getKey();
+            if(cacheKey!=null){
+                cache.remove(cacheKey);
+            }
+            //If cache key not present we will construct cache key
+            /*else{
+            cacheKey = mapping.getKey() + ":" + mapping.getContext() + ":" + mapping.getApiVersion();
             if(cache.containsKey(cacheKey)){
                 cache.remove(cacheKey);
             }
+            } */
             //TODO Review and fix
            /* Set keys = cache.keySet();
             for (Object cKey : keys) {
@@ -57,50 +70,76 @@ public class APIAuthenticationService extends AbstractServiceBusAdmin {
 
     }
 
-    public void invalidateResourceCache(String apiContext, String apiVersion,
-                                        String resourceURLContext, String httpVerb) {
-
-        String resourceVerbCacheKey = APIUtil.getResourceInfoDTOCacheKey(apiContext, apiVersion,
-                                                                         resourceURLContext, httpVerb);
-
-        String apiCacheKey = APIUtil.getAPIInfoDTOCacheKey(apiContext, apiVersion);
-
-        Cache cache = Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER).getCache(APIConstants.RESOURCE_CACHE_NAME);
-
-        if(cache.containsKey(apiCacheKey))  {
-            cache.remove(apiCacheKey);
+    public void invalidateResourceCache(String apiContext, String apiVersion, String resourceURLContext, String httpVerb) {
+        boolean isTenantFlowStarted = false;
+        int tenantDomainIndex = apiContext.indexOf("/t/");
+        String tenantDomain = MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
+        if (tenantDomainIndex != -1) {
+            String temp = apiContext.substring(tenantDomainIndex + 3, apiContext.length());
+            tenantDomain = temp.substring(0, temp.indexOf("/"));
         }
-        //TODO this code is not needed now, can remove
-       /* if (keyCache.size() != 0) {
-            Set keys = keyCache.keySet();
-            for (Object cacheKey : keys) {
-                String key = cacheKey.toString();
-                if (key.contains(apiContext + ":" + apiVersion)) {
-                    keyCache.remove(key);
-                }
+
+        try {
+            if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
+                isTenantFlowStarted = true;
+                PrivilegedCarbonContext.startTenantFlow();
+                PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
             }
-        }*/
 
+            String resourceVerbCacheKey =
+                                          APIUtil.getResourceInfoDTOCacheKey(apiContext, apiVersion,
+                                                                             resourceURLContext, httpVerb);
 
-        if(cache.containsKey(resourceVerbCacheKey))  {
-            cache.remove(resourceVerbCacheKey);
-        }
-        //TODO this code is not needed now, can remove
-        /*if (cache.size() != 0) {
-            if (resourceURLContext.equals("/")) {
-                Set keys = cache.keySet();
-                for (Object cacheKey : keys) {
-                    String key = cacheKey.toString();
-                    if (key.contains(apiContext + "/" + apiVersion + resourceURLContext)) {
-                        cache.remove(key);
-                    }
-                }
-            } else if (cache.get(resourceCacheKey) != null) {
+            String apiCacheKey = APIUtil.getAPIInfoDTOCacheKey(apiContext, apiVersion);
+
+            Cache cache =
+                          Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER)
+                                 .getCache(APIConstants.RESOURCE_CACHE_NAME);
+
+            if (cache.containsKey(apiCacheKey)) {
+                cache.remove(apiCacheKey);
+            }
+            // TODO this code is not needed now, can remove
+            /*
+             * if (keyCache.size() != 0) {
+             * Set keys = keyCache.keySet();
+             * for (Object cacheKey : keys) {
+             * String key = cacheKey.toString();
+             * if (key.contains(apiContext + ":" + apiVersion)) {
+             * keyCache.remove(key);
+             * }
+             * }
+             * }
+             */
+
+            if (cache.containsKey(resourceVerbCacheKey)) {
                 cache.remove(resourceVerbCacheKey);
             }
+            // TODO this code is not needed now, can remove
+            /*
+             * if (cache.size() != 0) {
+             * if (resourceURLContext.equals("/")) {
+             * Set keys = cache.keySet();
+             * for (Object cacheKey : keys) {
+             * String key = cacheKey.toString();
+             * if (key.contains(apiContext + "/" + apiVersion +
+             * resourceURLContext)) {
+             * cache.remove(key);
+             * }
+             * }
+             * } else if (cache.get(resourceCacheKey) != null) {
+             * cache.remove(resourceVerbCacheKey);
+             * }
+             *
+             * cache.remove(resourceCacheKey);
+             * }
+             */
 
-            cache.remove(resourceCacheKey);
-        } */
+        } finally {
+            if (isTenantFlowStarted) {
+                PrivilegedCarbonContext.endTenantFlow();
+            }
+        }
 
     }
 

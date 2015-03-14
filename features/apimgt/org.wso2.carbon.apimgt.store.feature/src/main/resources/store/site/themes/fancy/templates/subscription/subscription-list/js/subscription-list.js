@@ -13,6 +13,21 @@ function showHideKeys(){
     }
 
 $(document).ready(function () {
+    
+    $('#scopeSelectButtonPop').click(function() {
+    	var selected = ($('.Checkbox:checked').map(function() {
+    	    return this.value;
+    	}).get().join(' '));
+    	$('#scopeInput').attr('value', selected);
+    	$('#scopeInput').attr('value', selected);
+    	});
+    
+    /*$("select[name='scope']").change(function() {
+        var multipleValues = $(this).val() || [];
+        var spaced_string = multipleValues.join(" ");
+        $('#scopeInput').attr('value', spaced_string);
+
+    });*/
 
     $.ajaxSetup({
         contentType: "application/x-www-form-urlencoded; charset=utf-8"
@@ -86,13 +101,16 @@ $(document).ready(function () {
             authoDomains = $('#allowedDomainsSand').val();
             validityTime=$('#refreshSandValidityTime').val();
         }
+        var tokenScope = $('#scopeInput').val();
+        console.log("app-key-generate-button accessed");
         jagg.post("/site/blocks/subscription/subscription-add/ajax/subscription-add.jag", {
             action:"generateApplicationKey",
             application:elem.attr("data-application"),
             keytype:elem.attr("data-keytype"),
             callbackUrl:elem.attr("data-callbackUrl"),
             authorizedDomains:authoDomains,
-            validityTime:validityTime
+            validityTime:validityTime,
+            tokenScope:tokenScope
         }, function (result) {
             if (!result.error) {
                 location.reload();
@@ -113,6 +131,8 @@ $(document).ready(function () {
         var regen;
         var link;
         var validityTime;
+        var tokenScope;
+        
         if (keyType == 'PRODUCTION') {
             authoDomains = $('#allowedDomainsPro').val();
             validityTime=$('#refreshProdValidityTime').val();
@@ -120,6 +140,7 @@ $(document).ready(function () {
             authoDomains = $('#allowedDomainsSand').val();
             validityTime=$('#refreshSandValidityTime').val();
         }
+        tokenScope=$('#scopeInput').val();
         jagg.post("/site/blocks/subscription/subscription-add/ajax/subscription-add.jag", {
             action:"generateApplicationKey",
             application:elem.attr("data-application"),
@@ -202,6 +223,7 @@ var regenerate=function(appName,keyType,i,btn,div,clientId,clientSecret) {
     var clientId;
     var clientSecret;
     var validityTime;
+    var tokenScope;
 
     if (keyType == 'PRODUCTION') {
         oldAccessToken = $('.prodAccessTokenHidden').val();
@@ -215,6 +237,8 @@ var regenerate=function(appName,keyType,i,btn,div,clientId,clientSecret) {
         validityTime=$('#refreshSandValidityTime').val();
     }
     
+    tokenScope=$('#scopeInput').val();
+    
     jagg.post("/site/blocks/subscription/subscription-add/ajax/subscription-add.jag", {
         action:"refreshToken",
         application:appName,
@@ -223,7 +247,8 @@ var regenerate=function(appName,keyType,i,btn,div,clientId,clientSecret) {
         authorizedDomains:authorizedDomainsTemp,
         clientId:clientId,
         clientSecret:clientSecret,
-        validityTime:validityTime
+        validityTime:validityTime,
+        tokenScope:tokenScope
     }, function (result) {
         if (!result.error) {
             $(btn).parent().show();
@@ -233,11 +258,14 @@ var regenerate=function(appName,keyType,i,btn,div,clientId,clientSecret) {
                 $('.prodAccessTokenHidden').val(result.data.key.accessToken);
                 if(!regenerateOption){ $('.proRegenerateForm').hide(); }
                 $('.accessTokenDisplayPro').html(result.data.key.accessToken).attr('data-value',result.data.key.accessToken);
+                $('.accessTokenScopeDisplayPro').html(result.data.key.tokenScope).attr('data-value',result.data.key.tokenScope);
                 showHideKeys();
             } else{
                 $('.sandAccessTokenHidden').val(result.data.key.accessToken);
                 if(!regenerateOption){ $('.sandRegenerateForm').hide(); }
                 $('.accessTokenDisplaySand').html(result.data.key.accessToken).attr('data-value',result.data.key.accessToken);
+                $('.sandScopeDisplayPro').html(result.data.key.tokenScope).attr('data-value',result.data.key.tokenScope);
+                //change sandScopeDisplayPro name
                 showHideKeys();
             }
 

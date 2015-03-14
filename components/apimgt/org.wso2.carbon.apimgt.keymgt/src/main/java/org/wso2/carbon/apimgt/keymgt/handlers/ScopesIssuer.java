@@ -59,12 +59,6 @@ public class ScopesIssuer {
         Cache cache = Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER).
                 getCache(APIConstants.APP_USER_SCOPE_CACHE);
 
-        //Cache hit
-        if(cache.containsKey(cacheKey)){
-            tokReqMsgCtx.setScope((String [])cache.get(cacheKey));
-            return true;
-        }
-
         List<String> reqScopeList = Arrays.asList(requestedScopes);
 
         try {
@@ -75,6 +69,12 @@ public class ScopesIssuer {
             //Cache hit
             if(appCache.containsKey(consumerKey)){
                 appScopes = (Map<String, String>)appCache.get(consumerKey);
+
+                // checking the user cache only if app cache is available (since we only update app cache)
+                if(cache.containsKey(cacheKey)){
+                    tokReqMsgCtx.setScope((String [])cache.get(cacheKey));
+                    return true;
+                }
             }
             //Cache miss
             else{

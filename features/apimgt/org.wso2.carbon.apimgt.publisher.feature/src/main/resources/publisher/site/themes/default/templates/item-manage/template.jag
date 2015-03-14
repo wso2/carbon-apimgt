@@ -2,7 +2,9 @@
     var isSynapseGateway = outputs.isSynapseGateway;
     var api = outputs.api;
     var apiUrlId = "name="+encode.forHtml(api.name)+"&version="+encode.forHtml(api.version)+"&provider="+encode.forHtml(api.provider);
-
+    //get environments detail from api-manager.xml
+    var provider = jagg.module("manager").getAPIProviderObj();
+    var environmentsList=provider.getEnvironments();
     //fetch and display tiers
     var mod = jagg.module("api");
     var tiers = mod.getTiers().tiers;
@@ -239,6 +241,98 @@
                     </div>
                 </div>
     </fieldset>
+
+       <fieldset>
+    	<legend class="legend-with-hidden-info js_hidden_section_title">Gateway Environments<i class="icon-chevron-right icon-keys"></i></legend>
+    	 <div style="display: none">
+    	<!--legend>Environments</legend-->
+    <div class="environments_headings">
+    <div class="environments_checkbox"></div>
+    <div class="environments_data">Environment Name</div>
+    <div class="environments_data">Type</div>
+    <div class="environments_data">Description</div>
+    </div>
+
+             <%
+             var environmentsJson=api.environments;
+             if(environmentsJson=="none"){
+                    for(i=0 ;i<environmentsList.length;i++){
+             %>
+
+              <div class="environments_headings">
+                             <div class="environments_checkbox"><input type="checkbox" value="<%=environmentsList[i].name%>" class="env"></div>
+                             <div class="environments_data"><%=environmentsList[i].name%></div>
+                             <div class="environments_data"><%=environmentsList[i].type%></div>
+                                 <div class="environments_data"><%=environmentsList[i].description%></div>
+                        </div>
+
+             <%}}
+             else{
+                 for(i=0 ;i<environmentsList.length;i++){
+                        if(environmentsJson.split(",").indexOf(environmentsList[i].name)>=0){%>
+                      <div class="data_headings">
+                                                     <div class="environments_checkbox"><input type="checkbox" value="<%=environmentsList[i].name%>" checked class="env"></div>
+                                                     <div class="environments_data"><%=environmentsList[i].name%></div>
+                                                     <div class="environments_data"><%=environmentsList[i].type%></div>
+                                                         <div class="environments_data"><%=environmentsList[i].description%></div>
+                                                   </div>
+                      <%}else{%>
+                      <div class="data_headings">
+                                                     <div class="environments_checkbox"><input type="checkbox" value="<%=environmentsList[i].name%>" class="env"></div>
+                                                     <div class="environments_data"><%=environmentsList[i].name%></div>
+                                                     <div class="environments_data"><%=environmentsList[i].type%></div>
+                                                         <div class="environments_data"><%=environmentsList[i].description%></div>
+                                                  </div>
+
+                       <%}}}%>
+                     </div>
+                    <script>
+                    $('input').on('change', function() {
+                        var values = $('input:checked.env').map(function() {
+                            return this.value;
+                        }).get();
+                    if(values==""){
+                    values="none";
+                    }
+                        $('#environments').val(values.toString());
+                    });
+                                    </script>
+                <style>
+                .environments_headings{
+                    border-bottom: solid 1px;
+                    border-bottom-color: gainsboro;
+                    padding-bottom: 5px;
+                    alignment-baseline: auto;
+                    font-weight:bold;
+                }
+
+                .data_headings{
+                    border-bottom: solid 1px;
+                    border-bottom-color: gainsboro;
+                    padding-bottom: 5px;
+                    alignment-baseline: auto;
+                }
+
+                .environments_checkbox{
+                    text-align: left;
+                   display: inline-block;
+                   vertical-align: top;
+                   *display: inline;
+                	padding :5px;
+                	width:20px;
+                }
+                .environments_data{
+                    text-align: left;
+                   display: inline-block;
+                   vertical-align: top;
+                   *display: inline;
+                   *zoom: 1;
+                padding :5px;
+                text-align:left;
+                width:200px;
+                }
+                </style>
+                </fieldset>
     <fieldset>
 	<legend class="legend-with-hidden-info js_hidden_section_title"><%=i18n.localize("businessInformationTitle")%> <i class="icon-chevron-right icon-keys"></i></legend>
 	 <div style="display: none">
@@ -277,7 +371,7 @@
                     <div id="scopes_view"></div>
                     <div id ="resource_details"></div>
                 </div>           
-
+                <input type="hidden" id="environments" name="environments" value='<%=environmentsJson%>'/>
                 <input type="hidden" name="name" value="<%= encode.forHtml(api.name) %>" />
                 <input type="hidden" name="version" value="<%= encode.forHtml(api.version) %>" />
                 <input type="hidden" name="provider" value="<%= encode.forHtml(api.provider) %>" />
@@ -428,7 +522,36 @@
                                  jagg.showLogin();
                              }
                          } else {
-                             jagg.message({content:responseText.message,type:"error"});
+                              var message=responseText.message;
+                                   if(message.split("||")[1]=="warning"){
+                                     var environmentsFailed=JSON.parse(message.split("||")[0]);
+                                     var failedToPublishEnvironments=environmentsFailed.PUBLISHED;
+                                     var failedToUnpublishedEnvironments=environmentsFailed.UNPUBLISHED;
+                                     var divPublish="",divUnpublished="";
+                                     for(i= 0; i< failedToPublishEnvironments.split(",").length;i++){
+                                        divPublish+=failedToPublishEnvironments.split(",")[i]+"<br>";
+                                         }
+                                     for(i= 0; i< failedToUnpublishedEnvironments.split(",").length;i++){
+                                        divUnpublished+=failedToUnpublishedEnvironments.split(",")[i]+"<br>";
+                                         }
+                                       $( "#modal-published-content" ).empty();
+                                       $( "#modal-unpublished-content" ).empty();
+                                       $( "#modal-published-content" ).append(divPublish);
+                                       $( "#modal-unpublished-content" ).append(divUnpublished);
+                                       if(failedToPublishEnvironments==""){
+                                       $("#modal-published-header").hide();
+                                       $("#modal-published-content").hide();
+                                        }
+                                       if(failedToUnpublishedEnvironments==""){
+                                            $("#modal-unpublished-header").hide();
+                                            $("#modal-unpublished-content").hide();
+                                          }
+                                         $("#retryType").val("manage");
+                                         $("#environmentsRetry-modal").modal('show');
+                                   }
+                                   else{
+                                   jagg.message({content:responseText.message,type:"error"});
+                                       }
                          }
                      }
                 },
@@ -464,8 +587,37 @@
                                  jagg.showLogin();
                              }
                          } else {
-                             jagg.message({content:responseText.message,type:"error"});
+                         var message=responseText.message;
+                         if(message.split("||")[1]=="warning"){
+                          var environmentsFailed=JSON.parse(message.split("||")[0]);
+                          var failedToPublishEnvironments=environmentsFailed.PUBLISHED;
+                           var failedToUnpublishedEnvironments=environmentsFailed.UNPUBLISHED;
+                           var divPublish="",divUnpublished="";
+                                       for(i= 0; i< failedToPublishEnvironments.split(",").length;i++){
+                                      divPublish+=failedToPublishEnvironments.split(",")[i]+"<br>";
+                                     }
+                                   for(i= 0; i< failedToUnpublishedEnvironments.split(",").length;i++){
+                                   divUnpublished+=failedToUnpublishedEnvironments.split(",")[i]+"<br>";
+                                  }
+                                  $( "#modal-published-content" ).empty();
+                                 $( "#modal-unpublished-content" ).empty();
+                            $( "#modal-published-content" ).append(divPublish);
+                           $( "#modal-unpublished-content" ).append(divUnpublished);
+                             if(failedToPublishEnvironments==""){
+                                            $("#modal-published-header").hide();
+                                            $("#modal-published-content").hide();
+                                            }
+                                                 if(failedToUnpublishedEnvironments==""){
+                                                                    $("#modal-unpublished-header").hide();
+                                                                    $("#modal-unpublished-content").hide();
+                                                                    }
+                                $("#retryType").val("lifeCycle");
+                                $("#environmentsRetry-modal").modal('show');
                          }
+                         else{
+                        jagg.message({content:responseText.message,type:"error"});
+                         }
+                                                  }
                     }
                 }, dataType: 'json'
             });
@@ -531,4 +683,38 @@
     </div>
 </div>
 
+<div  id="environmentsRetry-modal" class="modal hide fade">
+        <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <h3>Gateway Failures</h3>
+        </div>
+        <div class="modal-body">
+        <div id="modal-published-header">
+        Failed to Publish Environments
+        </div>
+        <div id="modal-published-content">
+        </div>
+        <div id="modal-unpublished-header">
+                Failed to UnPublish Environments
+                </div>
+                <div id="modal-unpublished-content">
+                </div>
+                <input type="hidden" id="retryType"/>
+        </div>
+        <div class="modal-footer">
+        <div id="res" class="hide" style="color:red;float:left"></div>
+        <a class="btn btn-primary" id="retry" onClick="doGatewayAction()">OK</a>
+                                   <script type="text/javascript">
+                            function doGatewayAction() {
+                            var type=$("#retryType").val();
+                            if(type=="manage"){
+                               $("#environmentsRetry-modal").modal('hide');
+                               $( "body" ).trigger( "api_saved" );
+                               location.href = "<%= jagg.url("/info?"+ apiUrlId ) %>";
+                            }else{
+                               location.href = "<%= jagg.url("/info?"+ apiUrlId ) %>";
+                            }
+                              }
+                                   </script>
+        </div>
 <% }); %>
