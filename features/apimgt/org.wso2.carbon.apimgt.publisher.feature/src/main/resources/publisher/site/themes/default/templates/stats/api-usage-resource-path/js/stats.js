@@ -317,6 +317,15 @@ var drawAPIUsageByResourcePath = function (from, to) {
                     //on context click to show the graph
                     $dataTable.on("click", '.link',function(){
 
+                        //disable scrolling
+                        $('body').css('overflow','hidden');
+                        window.onmousewheel = document.onmousewheel = function(e) {
+                            e = e || window.event;
+                            if (e.preventDefault)
+                                e.preventDefault();
+                            e.returnValue = false;
+                        };
+
                         var row= $(this).closest('tr').attr('id');
                         var context=$(this).text();
                         methodName=getCell('method', ''+row+'').html();
@@ -444,7 +453,8 @@ var drawAPIUsageByResourcePath = function (from, to) {
                                                 data_lineWithFocusChart = [{
                                                     'values': dataStructure,
                                                     'key': 'Hits',
-                                                    'yAxis': '1'
+                                                    'yAxis': '1',
+                                                    'color': '#1f77b4'
                                                 }];
                                            }
                                     }
@@ -456,10 +466,20 @@ var drawAPIUsageByResourcePath = function (from, to) {
                     $('#fade').css('display','block');
                 });
 
+                $('#fade').on("click",function(){
+                    $('#light').css('display','none');$('#fade').css('display','none'); $('body').css('overflow','auto');
+                    window.onmousewheel = document.onmousewheel = function(e) {
+                        e = e || window.event;
+                        if (e.preventDefault)
+                            e.preventDefault();
+                        e.returnValue = true;
+                    };
+                });
+
                 if (length == 0) {
                     $('#resourcePathUsageTable').hide();
                     $('#tempLoadingSpaceResourcePath').html('');
-                    $('#tempLoadingSpaceResourcePath').append($('<span class="label label-info">' + i18n.t('errorMsgs.noData') + '</span>'));
+                    $('#tempLoadingSpaceResourcePath').append($('<h3 class="no-data-heading center-wrapper">No Data Available</h3>'));
 
                 } else {
                     $('#tableContainer').append($dataTable);
@@ -547,4 +567,16 @@ function dateToUnix(year, month, day, hour, minute, second) {
 function btnActiveToggle(button){
     $(button).siblings().removeClass('active');
     $(button).addClass('active');
+}
+
+function onClose(){
+    $('#light').css('display','none');
+    $('#fade').css('display','none');
+    $('body').css('overflow','auto');
+    window.onmousewheel = document.onmousewheel = function(e) {
+        e = e || window.event;
+        if (e.preventDefault)
+            e.preventDefault();
+        e.returnValue = true;
+    };
 }

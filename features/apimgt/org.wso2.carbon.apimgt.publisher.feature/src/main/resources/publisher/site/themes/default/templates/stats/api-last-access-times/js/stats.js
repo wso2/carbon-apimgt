@@ -193,7 +193,7 @@ var drawProviderAPIVersionUserLastAccess = function(from,to){
                 if (length == 0) {
                     $('#lastAccessTable').hide();
                     $('#tempLoadingSpace').html('');
-                    $('#tempLoadingSpace').append($('<span class="label label-info">'+i18n.t('errorMsgs.noData')+'</span>'));
+                    $('#tempLoadingSpace').append($('<h3 class="no-data-heading center-wrapper">No Data Available</h3>'));
 
                 }else{
                     $('#tableContainer').append($dataTable);

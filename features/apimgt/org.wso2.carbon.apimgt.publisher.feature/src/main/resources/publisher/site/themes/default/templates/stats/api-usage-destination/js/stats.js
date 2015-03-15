@@ -172,7 +172,7 @@ var drawAPIUsageByDestination = function(from,to){
                 if (length == 0) {
                     $('#destinationBasedUsageTable').hide();
                     $('#tempLoadingSpaceDestination').html('');
-                    $('#tempLoadingSpaceDestination').append($('<span class="label label-info">'+i18n.t('errorMsgs.noData')+'</span>'));
+                    $('#tempLoadingSpaceDestination').append($('<h3 class="no-data-heading center-wrapper">No Data Available</h3>'));
 
                 }else{
                     $('#tableContainer').append($dataTable);
