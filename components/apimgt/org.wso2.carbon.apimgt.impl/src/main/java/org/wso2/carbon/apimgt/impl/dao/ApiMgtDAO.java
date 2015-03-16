@@ -7660,6 +7660,35 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
         return null;
     }
 
+    public static String getApplicationFromConsumerKey(String consumerKey) throws APIManagementException {
+
+        Connection conn = null;
+        ResultSet resultSet = null;
+        PreparedStatement ps = null;
+        String applicationName = null;
+
+        try {
+            conn = APIMgtDBUtil.getConnection();
+            String getUserQuery = "SELECT A.NAME " +
+                    "FROM AM_APPLICATION A, AM_APPLICATION_KEY_MAPPING AKM " +
+                    "WHERE AKM.CONSUMER_KEY = ? AND AKM.APPLICATION_ID = A.APPLICATION_ID";
+
+            ps = conn.prepareStatement(getUserQuery);
+            ps.setString(1, consumerKey);
+            resultSet = ps.executeQuery();
+            if (resultSet.next()) {
+                applicationName = resultSet.getString("NAME");
+            }
+            resultSet.close();
+            ps.close();
+            return applicationName;
+        } catch (SQLException e) {
+            handleException("Failed to retrieve application name for given consumer key", e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(ps, conn, resultSet);
+        }
+        return null;
+    }
 
     /**
 	 * Remove scope entries from DB, when delete APIs
