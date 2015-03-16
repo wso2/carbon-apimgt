@@ -198,6 +198,16 @@ public class DefaultKeyManagerImpl extends AbstractKeyManager {
 
         OAuthAdminClient oAuthAdminClient = APIUtil.getOauthAdminClient();
         String username = ApiMgtDAO.getUserFromOauthToken(consumerKey);
+
+        ApplicationManagementServiceClient applicationManagementServiceClient = APIUtil.
+                getApplicationManagementServiceClient();
+        String applicationName = ApiMgtDAO.getApplicationFromConsumerKey(consumerKey);
+        try {
+            applicationManagementServiceClient.deleteApplication(applicationName, username);
+        } catch (Exception e) {
+            handleException("Can not remove service provider for the given consumer key : " + consumerKey, e);
+        }
+
         try {
             oAuthAdminClient.removeOAuthApplicationData(consumerKey, username);
         } catch (Exception e) {
