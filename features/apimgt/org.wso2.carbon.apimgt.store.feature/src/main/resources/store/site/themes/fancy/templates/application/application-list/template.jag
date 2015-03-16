@@ -10,8 +10,6 @@
     var numberOfPages = parseInt(length / itemsPerPage);
     var urlPrefix ="";
     var tenant = request.getParameter("tenant");
-    var log = new Log();
-    log.info(tenant);
         if(tenant!=null) {urlPrefix="tenant="+tenant;}else{urlPrefix='carbon.super';}
 
     if (length % itemsPerPage != 0) {
