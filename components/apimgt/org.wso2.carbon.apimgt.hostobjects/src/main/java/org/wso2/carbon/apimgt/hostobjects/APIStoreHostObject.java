@@ -3017,7 +3017,7 @@ public class APIStoreHostObject extends ScriptableObject {
             Subscriber subscriber = new Subscriber(username);
             APIConsumer apiConsumer = getAPIConsumer(thisObj);
             Application[] apps;
-            if(groupId != null || groupId != ""){
+            if(groupId != null || !groupId.isEmpty()){
             	apps = apiConsumer.getApplications(subscriber, groupId);
             }else{
             	apps = apiConsumer.getApplications(subscriber);
@@ -3096,7 +3096,7 @@ public class APIStoreHostObject extends ScriptableObject {
             Subscriber subscriber = new Subscriber(username);
             APIConsumer apiConsumer = getAPIConsumer(thisObj);
             Application[] apps;
-            if(groupId == null || groupId == "" ){
+            if(groupId == null || groupId.isEmpty() ){
             	apps = apiConsumer.getApplications(subscriber);
             }else{
             	apps = apiConsumer.getApplications(subscriber, groupId);
