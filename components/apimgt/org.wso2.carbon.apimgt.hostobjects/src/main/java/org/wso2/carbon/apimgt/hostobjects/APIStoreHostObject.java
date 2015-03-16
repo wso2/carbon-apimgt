@@ -4222,7 +4222,7 @@ public class APIStoreHostObject extends ScriptableObject {
     public static String jsFunction_getGroupIds(Context cx, Scriptable thisObj, Object[] args, Function funObj) {
         String response = (String) args[0];
         APIConsumer consumer = getAPIConsumer(thisObj);
-        String groupId = null;
+        String groupId = "";
         try {
             groupId = consumer.getGroupIds(response);
         } catch (APIManagementException e) {

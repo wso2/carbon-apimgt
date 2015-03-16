@@ -32,7 +32,7 @@ var login = function (username, password,tenantMode) {
             message:message
         };
     }
-    var groupId = store.getGroupIds(Stringify(result));
+    var groupId = store.getGroupIds(stringify(result));
     var subscriber = store.getSubscriber(username);
     if (!subscriber) {
         store.addSubscriber(username, groupId);
