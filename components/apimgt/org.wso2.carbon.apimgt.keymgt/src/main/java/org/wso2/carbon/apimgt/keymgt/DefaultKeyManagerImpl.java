@@ -358,9 +358,25 @@ public class DefaultKeyManagerImpl extends AbstractKeyManager {
         return null;
     }
 
+    /**
+     * This method will create a new record at CLIENT_INFO table by given OauthAppRequest.
+     *
+     * @param appInfoRequest oAuth application properties will contain in this object
+     * @return OAuthApplicationInfo with created oAuth application details.
+     * @throws APIManagementException
+     */
     @Override
-    public OAuthApplicationInfo createSemiManualAuthApplication(OauthAppRequest appInfoRequest) throws APIManagementException {
-        return null;
+    public OAuthApplicationInfo createSemiManualAuthApplication(OauthAppRequest appInfoRequest)
+            throws APIManagementException {
+
+        //initiate OAuthApplicationInfo
+        OAuthApplicationInfo oAuthApplicationInfo = appInfoRequest.getoAuthApplicationInfo();
+        if (log.isDebugEnabled()) {
+            log.debug("Creating semi-manual application for consumer id  :  " + oAuthApplicationInfo.getClientId());
+        }
+        //Insert a record to CLIENT_INFO table.
+        //oidcDao.createSemiManualClient(oAuthApplicationInfo);
+        return oAuthApplicationInfo;
     }
 
     @Override

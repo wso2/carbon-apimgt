@@ -1470,7 +1470,23 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         OauthAppRequest oauthAppRequest = ApplicationUtils.createOauthAppRequest(applicationName, callBackURL,
                                                                                   jsonString);
 
+        KeyManager keyManager = KeyManagerFactory.getKeyManager();
+        //createApplication on oAuthorization server.
+        OAuthApplicationInfo oAuthApplication = keyManager.createSemiManualAuthApplication(oauthAppRequest);
+        //Do application mapping with consumerKey.
         apiMgtDAO.createApplicationKeyTypeMapping(oauthAppRequest, applicationName, userName, clientId);
+
+
+        AccessTokenRequest tokenRequest = ApplicationUtils.createAccessTokenRequest(oAuthApplication,null);
+        AccessTokenInfo tokenInfo = keyManager.getNewApplicationAccessToken(tokenRequest);
+
+        AccessTokenInfo info = TokenMgtDao.getAccessTokenForConsumerId(tokenRequest.getClientId());
+        if (info == null) {
+            TokenMgtDao.insertAccessTokenForConsumerKey(tokenRequest.getClientId(), tokenInfo);
+        } else {
+            TokenMgtDao.updateTokenForConsumerKey(tokenRequest.getClientId(), tokenInfo);
+        }
+
 
         //#TODO get actuall values from response and pass.
         Map<String, Object> keyDetails = new HashMap<String, Object>();
