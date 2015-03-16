@@ -74,7 +74,7 @@
 			            var manager = jagg.module("manager");
           		        var  store = manager.getAPIStoreObj();
                         var decodedSamlReponse = ssoRelyingParty.decode(samlResponse);
-                        var groupId = store.getgroupId(decodedSamlReponse);
+                        var groupId = store.getGroupIds(decodedSamlReponse);
                        //Store and empty string instead of null if no group Id is found. This is done so that when checking for a string array 
                        //the null value returned would not cause any issue.
                         if(groupId == null){
