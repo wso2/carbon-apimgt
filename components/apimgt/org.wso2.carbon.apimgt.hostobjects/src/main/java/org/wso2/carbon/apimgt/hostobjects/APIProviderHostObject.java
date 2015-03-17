@@ -96,7 +96,6 @@ public class APIProviderHostObject extends ScriptableObject {
     private static Pattern pathParamValidatorPattern=Pattern.compile("\\{uri\\.var\\.[\\w]+\\}");
 
     private String username;
-    private static String VERSION_PARAM="{version}";
 
     private APIProvider apiProvider;
 
@@ -1404,11 +1403,11 @@ public class APIProviderHostObject extends ScriptableObject {
     private static String checkAndSetVersionParam(String context) {
         // This is to support the new Pluggable version strategy
         // if the context does not contain any {version} segment, we use the default version strategy.
-        if(!context.contains(VERSION_PARAM)){
+        if(!context.contains(APIConstants.SYNAPSE_REST_CONTEXT_VERSION_VARIABLE)){
             if(!context.endsWith("/")){
                 context = context + "/";
             }
-            context = context + VERSION_PARAM;
+            context = context + APIConstants.SYNAPSE_REST_CONTEXT_VERSION_VARIABLE;
         }
         return context;
     }
@@ -1786,9 +1785,9 @@ public class APIProviderHostObject extends ScriptableObject {
         if (version == null) {
             // context template patterns - /{version}/foo or /foo/{version}
             // if the version is null, then we remove the /{version} part from the context
-            context = contextVal.replace("/" + VERSION_PARAM, "");
+            context = contextVal.replace("/" + APIConstants.SYNAPSE_REST_CONTEXT_VERSION_VARIABLE, "");
         }else{
-            context = context.replace(VERSION_PARAM, version);
+            context = context.replace(APIConstants.SYNAPSE_REST_CONTEXT_VERSION_VARIABLE, version);
         }
         return context;
     }
