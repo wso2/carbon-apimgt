@@ -633,7 +633,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         return failedGateways;
     }
 
-
+    public Map<String, List<String>> updateManageAPI(API api) throws APIManagementException{
+        return updateAPI(api);
+    }
 
     private void updateApiArtifact(API api, boolean updateMetadata,boolean updatePermissions) throws APIManagementException {
 

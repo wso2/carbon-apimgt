@@ -62,6 +62,19 @@ public class UserAwareAPIProvider extends APIProviderImpl {
     }
 
     @Override
+    public Map<String, List<String>> updateManageAPI(API api) throws APIManagementException {
+        boolean permitted = APIUtil.checkPermissionQuietly(username, APIConstants.Permissions.API_CREATE) ||
+                APIUtil.checkPermissionQuietly(username, APIConstants.Permissions.API_PUBLISH);
+        String permission = APIConstants.Permissions.API_CREATE + " or " + APIConstants.Permissions.API_PUBLISH;
+
+        if(!permitted){
+            throw new APIManagementException("User '" + username + "' does not have the " +
+                    "required permission: " + permission);
+        }
+        return super.updateAPI(api);
+    }
+
+    @Override
     public void deleteAPI(APIIdentifier identifier) throws APIManagementException {
         checkCreatePermission();
         super.deleteAPI(identifier);

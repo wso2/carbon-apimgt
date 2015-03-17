@@ -832,7 +832,7 @@ public class APIProviderHostObject extends ScriptableObject {
             	apiProvider.addAPI(api);
                 success = createFailedGatewaysAsJsonString(Collections.<String, List<String>>emptyMap());
             } else {
-                Map<String, List<String>> failedGateways = apiProvider.updateAPI(api);
+                Map<String, List<String>> failedGateways = apiProvider.updateManageAPI(api);
                 success = createFailedGatewaysAsJsonString(failedGateways);
             }
 
