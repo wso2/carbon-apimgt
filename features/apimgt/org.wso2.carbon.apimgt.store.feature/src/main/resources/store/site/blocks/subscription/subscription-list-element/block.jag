@@ -24,7 +24,10 @@ jagg.block("subscription/subscription-list-element", {
         return {
             "app":app,
             "i":inputs.i,
-        	"gatewayurl":gatewayURL[0]
+        	"gatewayurl":gatewayURL[0],
+            "length": inputs.length,
+            "page" : inputs.page,
+            "itemsPerPage": inputs.itemsPerPage
         };
     }
 });
