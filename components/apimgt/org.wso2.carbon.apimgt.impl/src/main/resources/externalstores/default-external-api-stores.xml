@@ -5,23 +5,14 @@
 	
 	<!-- <StoreURL>http://localhost:9763/store</StoreURL>
 
-        <ExternalAPIStore id="Store1" type="wso2">
+        <ExternalAPIStore id="Store2" type="wso2" className="org.wso2.carbon.apimgt.impl.publishers.WSO2APIPublisher">
             <DisplayName>Store1</DisplayName>
             <Endpoint>http://localhost:9763/store</Endpoint>
             <Username>xxxx</Username>
             <Password>xxxx</Password>
         </ExternalAPIStore>
-
-       <ExternalAPIStore id="ProWeb" type="proWeb">
-            <Name>ProgrammableWeb</Name>
-            <Endpoint>xxxxx</Endpoint>
-        </ExternalAPIStore>
-
-        <ExternalAPIStore id="Store2" type="wso2">
-            <DisplayName>Store2</DisplayName>
-            <Endpoint>http://localhost:9764/store</Endpoint>
-            <Username>xxxx</Username>
-            <Password>xxxx</Password>
-        </ExternalAPIStore>-->
+	-->
 
 </ExternalAPIStores>
+
+

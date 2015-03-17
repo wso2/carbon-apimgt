@@ -27,31 +27,99 @@ require(["dojo/dom", "dojo/domReady!"], function(dom){
                 if( json.usage && json.usage.length > 0){
                     var d = new Date();
                     var firstAccessDay = new Date(json.usage[0].year, json.usage[0].month-1, json.usage[0].day);
-                    var currentDay = new Date(d.getFullYear(), d.getMonth(), d.getDate());
-                    if(firstAccessDay.valueOf() == currentDay.valueOf()){
-                        currentDay = new Date(d.getFullYear(), d.getMonth(), d.getDate()+1);
-                    }
-                    var rangeSlider =  $("#rangeSlider");
-                    //console.info(currentDay);
-                    rangeSlider.dateRangeSlider({
-                        "bounds":{
-                            min: firstAccessDay,
-                            max: currentDay
-                        },
-                        "defaultValues":{
-                            min: firstAccessDay,
-                            max: currentDay
-                        }
-                    });
-                    rangeSlider.bind("valuesChanged", function(e, data){
-                        var from = convertTimeString(data.values.min);
-                        var to = convertTimeStringPlusDay(data.values.max);
+                    var currentDay = new Date(d.getFullYear(), d.getMonth(), d.getDate(),d.getHours(),d.getMinutes());
 
-                        drawAPIResponseFaultCountTable(from,to);
+                    //day picker
+                    $('#today-btn').on('click',function(){
+                        var to = convertTimeString(currentDay);
+                        var from = convertTimeString(currentDay-86400000);
+                        var dateStr= from+" to "+to;
+                        $("#date-range").html(dateStr);
+                        $('#date-range').data('dateRangePicker').setDateRange(from,to);
                         drawAPIResponseFaultCountChart(from,to);
+
+
                     });
+
+                    //hour picker
+                    $('#hour-btn').on('click',function(){
+                        var to = convertTimeString(currentDay);
+                        var from = convertTimeString(currentDay-3600000);
+                        var dateStr= from+" to "+to;
+                        $("#date-range").html(dateStr);
+                        $('#date-range').data('dateRangePicker').setDateRange(from,to);
+                        drawAPIResponseFaultCountChart(from,to);
+                        btnActiveToggle(this);
+                    })
+
+                    //week picker
+                    $('#week-btn').on('click',function(){
+                        var to = convertTimeString(currentDay);
+                        var from = convertTimeString(currentDay-604800000);
+                        var dateStr= from+" to "+to;
+                        $("#date-range").html(dateStr);
+                        $('#date-range').data('dateRangePicker').setDateRange(from,to);
+                        drawAPIResponseFaultCountChart(from,to);
+                        btnActiveToggle(this);
+                    })
+
+                    //month picker
+                    $('#month-btn').on('click',function(){
+
+                        var to = convertTimeString(currentDay);
+                        var from = convertTimeString(currentDay-(604800000*4));
+                        var dateStr= from+" to "+to;
+                        $("#date-range").html(dateStr);
+                        $('#date-range').data('dateRangePicker').setDateRange(from,to);
+                        drawAPIResponseFaultCountChart(from,to);
+                        btnActiveToggle(this);
+                    });
+
+                    //date picker
+                    $('#date-range').dateRangePicker(
+                        {
+                            startOfWeek: 'monday',
+                            separator : ' to ',
+                            format: 'YYYY-MM-DD HH:mm',
+                            autoClose: false,
+                            time: {
+                                enabled: true
+                            },
+                            shortcuts:'hide',
+                            endDate:currentDay
+                        })
+                        .bind('datepicker-apply',function(event,obj)
+                        {
+                             btnActiveToggle(this);
+                             var from = convertDate(obj.date1);
+                             var to = convertDate(obj.date2);
+                             $('#date-range').html(from + " to "+ to);
+                             drawAPIResponseFaultCountChart(from,to);
+
+                        });
+
+                    //setting default date
+                    var to = new Date();
+                    var from = new Date(to.getTime() - 1000 * 60 * 60 * 24 * 30);
+
+                    $('#date-range').data('dateRangePicker').setDateRange(from,to);
+                    $('#date-range').html($('#date-range').val());
+                    var fromStr = convertDate(from);
+                    var toStr = convertDate(to);
+                    drawAPIResponseFaultCountChart(fromStr,toStr);
+
+
+                    $('#date-range').click(function (event) {
+                    event.stopPropagation();
+                    });
+
+                    $('body').on('click', '.btn-group button', function (e) {
+                        $(this).siblings().removeClass('active');
+                        $(this).addClass('active');
+                    });
+
                     var width = $("#rangeSliderWrapper").width();
-                    $("#rangeSliderWrapper").affix();
+                    //$("#rangeSliderWrapper").affix();
                     $("#rangeSliderWrapper").width(width);
 
                 }
@@ -66,8 +134,6 @@ require(["dojo/dom", "dojo/domReady!"], function(dom){
                     $('#middle').append($('<div class="errorWrapper"><span class="label top-level-warning"><i class="icon-warning-sign icon-white"></i>'
                         +i18n.t('errorMsgs.checkBAMConnectivity')+'</span><br/><img src="../themes/default/templates/stats/faulty-invocations/images/statsThumb.png" alt="Smiley face"></div>'));
                 }
-
-
             }
             else {
                 if (json.message == "AuthenticateError") {
@@ -89,17 +155,45 @@ var drawAPIResponseFaultCountTable = function(from,to){
             if (!json.error) {
                 $('#apiFaultyTable').find("tr:gt(0)").remove();
                 var length = json.usage.length;
-                $('#apiFaultyTable').show();
-                for (var i = 0; i < json.usage.length; i++) {
-                    $('#apiFaultyTable').append($('<tr><td>' + json.usage[i].apiName + '</td><td>' + json.usage[i].version + '</td><td>' + json.usage[i].count + '</td><td><span class="pull-right">' + json.usage[i].faultPercentage +'%</span></td></tr>'));
-                }
-                if (length == 0) {
-                    $('#apiFaultyTable').hide();
-                    $('#tempLoadingAPIFaulty').html('');
-                    $('#tempLoadingAPIFaulty').append($('<span class="label label-info">'+i18n.t('errorMsgs.noData')+'</span>'));
+                $('#tempLoadingSpace').empty();
+                $('#tableContainer').empty();
 
-                }else{
-                    $('#tempLoadingAPIFaulty').hide();
+                if(length>0){
+
+                $('div#apiFaultyTable_wrapper.dataTables_wrapper.no-footer').remove();
+                var chart;
+                var $dataTable =$('<table class="display defaultTable" width="100%" cellspacing="0" id="apiFaultyTable"></table>');
+
+                $dataTable.append($('<thead class="tableHead"><tr>'+
+                                        '<th>api</th>'+
+                                        '<th>version</th>'+
+                                        '<th>count</th>'+
+                                        '<th width="20%" >percentage</th>'+
+                                    '</tr></thead>'));
+
+                for (var i = 0; i < json.usage.length; i++) {
+                    $dataTable.append($('<tr><td>' + json.usage[i].apiName + '</td><td>' + json.usage[i].version + '</td><td>' + json.usage[i].count + '</td><td style="text-align:right">' + Math.round(json.usage[i].faultPercentage * 100) / 100 +'%</span></td></tr>'));
+                }
+
+                $('#tableContainer').append($dataTable);
+                $('#tableContainer').show();
+                $('#apiFaultyTable').DataTable({
+                     "order": [
+                        [ 3, "desc" ]
+                     ],
+                     "fnDrawCallback": function(){
+                         if(this.fnSettings().fnRecordsDisplay()<=$("#apiFaultyTable_length option:selected" ).val()
+                         || $("#apiFaultyTable_length option:selected" ).val()==-1)
+                             $('#apiFaultyTable_paginate').hide();
+                         else
+                             $('#apiFaultyTable_paginate').show();
+                     },
+                });
+                $('select').css('width','60px');
+
+                }else if (length == 0) {
+                    $('#tableContainer').hide();
+                    $('#tempLoadingSpace').append($('<h3 class="no-data-heading center-wrapper">No Data Available</h3>'));
                 }
 
             } else {
@@ -121,97 +215,86 @@ var drawAPIResponseFaultCountChart = function(from,to){
         function (json) {
             if (!json.error) {
                 var length = json.usage.length,s1 = [];
-                $('#faultyCountChart').empty();
-                var data = [];
-                for (var i = 0; i < length; i++) {
-                    data[i] = [json.usage[i].apiName, parseFloat(json.usage[i].count)];
-                    //add fake value to overcome dojo chart single series issue
-                    if(length === 1){
-                        data.push(["",0]);
-                    }
-                }
+                $('#chartContainer').empty();
+                $('#tempLoadingSpace').empty();
+
                 if (length > 0) {
-                    /*var width = 300;
-                     if (30 * length > 300) width = 35 * length;
-                     $('#faultyCountChart').width(width);*/
-                    require([
-                        // Require the basic chart class
-                        "dojox/charting/Chart",
+                    var faultData = [];
+                    var data=[];
 
-                        // Require the theme of our choosing
-                        "dojox/charting/themes/ApimDefault",
-
-                        // Tooltip
-                        "dojox/charting/action2d/Tooltip",
-                        // Require the highlighter
-                        "dojox/charting/action2d/Highlight",
-
-                        //  We want to plot Columns
-                        "dojox/charting/plot2d/Columns",
-
-                        //  We want to use Markers
-                        "dojox/charting/plot2d/Markers",
-
-                        //  We'll use default x/y axes
-                        "dojox/charting/axis2d/Default",
-
-                        //mouse zoom and pan
-                        "dojox/charting/action2d/MouseZoomAndPan",
-
-                        // Wait until the DOM is ready
-                        "dojo/domReady!"
-                    ], function(Chart, theme,MouseZoomAndPan,Highlight) {
+                    //chart data
+                    for (var i = 0; i < length; i++) {
+                        faultData.push({x:i, y:parseFloat(json.usage[i].count), label: json.usage[i].apiName +" v"+json.usage[i].version});
+                        data.push({x:i, y:parseFloat(json.usage[i].totalRequestCount)-parseFloat(json.usage[i].count), label: json.usage[i].apiName});
+                    }
 
 
+                    var dataStructure = [{
+                            "key": "Fault",
+                            "values": faultData
+                        },
+                        {
+                            "key": "Successful",
+                            "values": data
+                        }];
 
+                    (function (data) {
+                    var colorRangeArray=["#e74c3c","#4aa3df"];
+                        var colors = d3.scale.ordinal()
+                           .range(colorRangeArray);
+                        keyColor = function (d, i) {
+                            return colors(d.key)
+                        };
 
-                        // Create the chart within it's "holding" node
-                        var faultyCountChart = new Chart("faultyCountChart");
+                        var chart;
+                        nv.addGraph(function () {
+                            chart = nv.models.stackedAreaChart()
+                                .x(function (d) {
+                                return d.x
+                            })
+                                .y(function (d) {
+                                return d.y
+                            })
+                                .color(keyColor)
+                                .clipEdge(true)
+                                .useInteractiveGuideline(true)
+                                .margin({left: 80});;
 
-                        // Set the theme
-                        faultyCountChart.setTheme(theme);
+                            if (dataStructure[0].values.length > 5) chart.margin({bottom: 160});
 
-                        // Add the only/default plot
-                        faultyCountChart.addPlot("default", {
-                            type: "Columns",
-                            markers: true,
-                            gap: 5,
-                            animate:{duration:1000}
-                        });
-
-                        // Add axes
-                        faultyCountChart.addAxis("x", { labels:dojo.map(data, function(value, index){
-                            return {value: index + 1, text: value[0]};
-                        })
-                        });
-                        faultyCountChart.addAxis("y",{vertical:true,fixLower: "major", fixUpper: "major", includeZero: true});
-
-                        // Define the data
-                        var chartData; var color = -1;
-                        require(["dojo/_base/array"], function(array){
-                            chartData= array.map(data, function(d){
-                                color++;
-                                return {y: d[1],text:d[0], tooltip: "<b>"+d[0]+"</b><br /><i>"+d[1]+" call(s)</i>",fill:chartColorScheme2[color]};
+                            chart.xAxis
+                                .axisLabel('API')
+                                .tickFormat(function (d) {
+                                var label = dataStructure[0].values[d].label;
+                                return label;
                             });
-                        });
+                            chart.xAxis.tickValues(dataStructure[0].values.map( function(d){return d.x;}));
+                            if (dataStructure[0].values.length > 5) chart.xAxis.rotateLabels(-45);
 
-                        // Add the series of data
-                        faultyCountChart.addSeries("API Service Time",chartData);
+                            chart.yAxis.axisLabel('Total Hits');
+                            chart.yAxis.tickFormat(d3.format(',d'));
 
-                        new MouseZoomAndPan(faultyCountChart, "default", { axis: "x"});
+                            d3.select('#faultyCountChart svg')
+                              .datum(data)
+                              .transition().duration(0)
+                              .call(chart);
 
-                        new Highlight(faultyCountChart,"default");
+                            nv.utils.windowResize(chart.update);
+                            return chart;
+                      });
+                    })(dataStructure);
+                    $('#chartContainer').append($('<div id="faultyCountChart" class="with-3d-shadow with-transitions"><svg style="height:500px;"></svg></div>'));
+                    $('#chartContainer').show();
+                    $('#faultyCountChart svg').show();
 
-                        // Render the chart!
-                        faultyCountChart.render();
-
-                    });
+                    drawAPIResponseFaultCountTable(fromDate,toDate);
 
                 } else {
-                    $('#faultyCountChart').css("fontSize", 14);
-                    $('#faultyCountChart').append($('<span class="label label-info">'+i18n.t('errorMsgs.noData')+'</span>'));
+                    $('#tableContainer').hide();
+                    $('#chartContainer').hide();
+                    $('#tempLoadingSpace').html('');
+                    $('#tempLoadingSpace').append($('<h3 class="no-data-heading center-wrapper">No Data Available</h3>'));
                 }
-
 
             } else {
                 if (json.message == "AuthenticateError") {
@@ -242,7 +325,7 @@ function isDataPublishingEnabled(){
 
 var convertTimeString = function(date){
     var d = new Date(date);
-    var formattedDate = d.getFullYear() + "-" + formatTimeChunk((d.getMonth()+1)) + "-" + formatTimeChunk(d.getDate());
+    var formattedDate = d.getFullYear() + "-" + formatTimeChunk((d.getMonth()+1)) + "-" + formatTimeChunk(d.getDate())+" "+formatTimeChunk(d.getHours())+":"+formatTimeChunk(d.getMinutes());
     return formattedDate;
 };
 
@@ -259,3 +342,17 @@ var formatTimeChunk = function (t){
     return t;
 };
 
+function convertDate(date) {
+    var month = date.getMonth() + 1;
+    var day = date.getDate();
+    var hour=date.getHours();
+    var minute=date.getMinutes();
+    return date.getFullYear() + '-' + (('' + month).length < 2 ? '0' : '')
+        + month + '-' + (('' + day).length < 2 ? '0' : '') + day +" "+ (('' + hour).length < 2 ? '0' : '')
+        + hour +":"+(('' + minute).length < 2 ? '0' : '')+ minute;
+}
+
+function btnActiveToggle(button){
+    $(button).siblings().removeClass('active');
+    $(button).addClass('active');
+}

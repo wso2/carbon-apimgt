@@ -68,7 +68,7 @@ public class APIManagerConfiguration {
 
     private boolean initialized;
 
-    private List<Environment> apiGatewayEnvironments = new ArrayList<Environment>();
+    private Map<String, Environment> apiGatewayEnvironments = new HashMap<String, Environment>();
     private Set<APIStore> externalAPIStores = new HashSet<APIStore>();
 
     public Map<String, Map<String, String>> getLoginConfiguration() {
@@ -152,38 +152,100 @@ public class APIManagerConfiguration {
                 }
                 addToConfiguration(key, replaceSystemProperty(value));
             }
-            else if("Environments".equals(localName)){
+            else if("Environments".equals(localName)) {
                 Iterator environmentIterator = element.getChildrenWithLocalName("Environment");
-                apiGatewayEnvironments = new ArrayList<Environment>();
+                apiGatewayEnvironments = new HashMap<String, Environment>();
 
-                while(environmentIterator.hasNext()){
+                while (environmentIterator.hasNext()) {
                     Environment environment = new Environment();
-                    OMElement environmentElem = (OMElement)environmentIterator.next();
+                    OMElement environmentElem = (OMElement) environmentIterator.next();
                     environment.setType(environmentElem.getAttributeValue(new QName("type")));
                     environment.setName(replaceSystemProperty(
-                                        environmentElem.getFirstChildWithName(new QName("Name")).getText()));
+                            environmentElem.getFirstChildWithName(new QName("Name")).getText()));
                     environment.setServerURL(replaceSystemProperty(
-                                        environmentElem.getFirstChildWithName(new QName(
-                                                APIConstants.API_GATEWAY_SERVER_URL)).getText()));
+                            environmentElem.getFirstChildWithName(new QName(
+                                    APIConstants.API_GATEWAY_SERVER_URL)).getText()));
                     environment.setUserName(replaceSystemProperty(
 
-                                        environmentElem.getFirstChildWithName(new QName(
-                                                APIConstants.API_GATEWAY_USERNAME)).getText()));
+                            environmentElem.getFirstChildWithName(new QName(
+                                    APIConstants.API_GATEWAY_USERNAME)).getText()));
 
                     String key = APIConstants.API_GATEWAY + APIConstants.API_GATEWAY_PASSWORD;
                     String value;
                     if (secretResolver.isInitialized() && secretResolver.isTokenProtected(key)) {
                         value = secretResolver.resolve(key);
-                    }
-                    else{
+                    } else {
                         value = environmentElem.getFirstChildWithName(new QName(
-                                                            APIConstants.API_GATEWAY_PASSWORD)).getText();
+                                APIConstants.API_GATEWAY_PASSWORD)).getText();
                     }
                     environment.setPassword(replaceSystemProperty(value));
                     environment.setApiGatewayEndpoint(replaceSystemProperty(
                             environmentElem.getFirstChildWithName(new QName(
                                                             APIConstants.API_GATEWAY_ENDPOINT)).getText()));
-                    apiGatewayEnvironments.add(environment);
+                    OMElement description =
+                            environmentElem.getFirstChildWithName(new QName("Description"));
+                    if (description != null) {
+                        environment.setDescription(description.getText());
+                    } else {
+                        environment.setDescription("");
+                    }
+                    if (!apiGatewayEnvironments.containsKey(environment.getName())) {
+                        apiGatewayEnvironments.put(environment.getName(), environment);
+                    } else {
+                        log.error("Duplicate environment name found in api-manager.xml " +
+                                  environment.getName());
+                    }
+                }
+            } else if (APIConstants.EXTERNAL_API_STORES.equals(localName)) {  //Initialize 'externalAPIStores' config elements
+                Iterator apistoreIterator = element.getChildrenWithLocalName("ExternalAPIStore");
+                externalAPIStores = new HashSet<APIStore>();
+                while (apistoreIterator.hasNext()) {
+                    APIStore store = new APIStore();
+                    OMElement storeElem = (OMElement) apistoreIterator.next();
+                    String type = storeElem.getAttributeValue(new QName(APIConstants.EXTERNAL_API_STORE_TYPE));
+                    store.setType(type); //Set Store type [eg:wso2]
+                    String name = storeElem.getAttributeValue(new QName(APIConstants.EXTERNAL_API_STORE_ID));
+                    if (name == null) {
+                        try {
+                            throw new APIManagementException("The ExternalAPIStore name attribute is not defined in api-manager.xml.");
+                        } catch (APIManagementException e) {
+                            //ignore
+                        }
+                    }
+                    store.setName(name); //Set store name
+                    OMElement configDisplayName = storeElem.getFirstChildWithName(new QName(APIConstants.EXTERNAL_API_STORE_DISPLAY_NAME));
+                    String displayName = (configDisplayName != null) ? replaceSystemProperty(
+                            configDisplayName.getText()) : name;
+                    store.setDisplayName(displayName);//Set store display name
+                    store.setEndpoint(replaceSystemProperty(
+                            storeElem.getFirstChildWithName(new QName(
+                                    APIConstants.EXTERNAL_API_STORE_ENDPOINT)).getText())); //Set store endpoint,which is used to publish APIs
+                    store.setPublished(false);
+                    if (APIConstants.WSO2_API_STORE_TYPE.equals(type)) {
+                        OMElement password = storeElem.getFirstChildWithName(new QName(
+                                APIConstants.EXTERNAL_API_STORE_PASSWORD));
+                        if (password != null) {
+                            String key = APIConstants.EXTERNAL_API_STORES + "." + APIConstants.EXTERNAL_API_STORE + "." + APIConstants.EXTERNAL_API_STORE_PASSWORD + '_' + name;//Set store login password [optional]
+                            String value;
+                            if (secretResolver.isInitialized() && secretResolver.isTokenProtected(key)) {
+                                value = secretResolver.resolve(key);
+                            } else {
+
+                                value = password.getText();
+                            }
+                            store.setPassword(replaceSystemProperty(value));
+                            store.setUsername(replaceSystemProperty(
+                                    storeElem.getFirstChildWithName(new QName(
+                                            APIConstants.EXTERNAL_API_STORE_USERNAME)).getText())); //Set store login username [optional]
+                        } else {
+                            try {
+                                throw new APIManagementException("The user-credentials of API Publisher is not defined in the <ExternalAPIStore> config of api-manager.xml.");
+                            } catch (APIManagementException e) {
+                                //ignore
+                            }
+                        }
+                    }
+                    externalAPIStores.add(store);
                 }
             }else if(APIConstants.LOGIN_CONFIGS.equals(localName)){
                 Iterator loginConfigIterator = element.getChildrenWithLocalName(APIConstants.LOGIN_CONFIGS);
@@ -307,7 +369,7 @@ public class APIManagerConfiguration {
         return text;
     }
 
-    public List<Environment> getApiGatewayEnvironments() {
+    public Map<String, Environment> getApiGatewayEnvironments() {
         return apiGatewayEnvironments;
     }
 
@@ -341,7 +403,7 @@ public class APIManagerConfiguration {
             else{
                 System.setProperty(APIConstants.KEYMANAGER_HOSTNAME,hostname);
             }
-        //Since this is the server startup.Ingore the exceptions,invoked at the server startup
+        //Since this is the server startup.Ignore the exceptions,invoked at the server startup
         } catch (MalformedURLException e) {
             log.error("Exception While resolving KeyManager Server URL or Port "+e.getMessage(), e);
         }

@@ -34,6 +34,7 @@ public class API implements Serializable{
     private String wsdlUrl;
     private String wadlUrl;
     private String context;
+    private String contextTemplate;
     private String thumbnailUrl;
     private Set<String> tags = new LinkedHashSet<String>();
     private Set<Documentation> documents = new LinkedHashSet<Documentation>();
@@ -92,6 +93,16 @@ public class API implements Serializable{
 
     private boolean isDefaultVersion = false;
     private boolean isPublishedDefaultVersion=false;
+
+    private Set<String> environments;
+
+    public Set<String> getEnvironments() {
+        return environments;
+    }
+
+    public void setEnvironments(Set<String> environments) {
+        this.environments = environments;
+    }
 
     /**
      * Contains flag indicating whether dummy backend or not
@@ -226,6 +237,14 @@ public class API implements Serializable{
 
     public String getContext() {
         return context;
+    }
+
+    public void setContextTemplate(String contextTemplate) {
+        this.contextTemplate = contextTemplate;
+    }
+
+    public String getContextTemplate() {
+        return contextTemplate;
     }
 
     public void setWsdlUrl(String wsdlUrl) {

@@ -31,6 +31,7 @@ public class APIMGTConfigReaderService {
     private String bamServerUser;
     private String bamServerPassword;
     private boolean enabled;
+    private boolean buildMsg;
     private String publisherClass;
     private boolean googleAnalyticsTrackingEnabled;
     private String googleAnalyticsTrackingID;
@@ -52,7 +53,7 @@ public class APIMGTConfigReaderService {
         bamServerUser = config.getFirstProperty(APIConstants.API_USAGE_BAM_SERVER_USER);
         bamServerPassword = config.getFirstProperty(APIConstants.API_USAGE_BAM_SERVER_PASSWORD);
         publisherClass = config.getFirstProperty(APIConstants.API_USAGE_PUBLISHER_CLASS);
-	    requestStreamName =
+        requestStreamName =
 			    config.getFirstProperty(APIMgtUsagePublisherConstants.API_REQUEST_STREAM_NAME);
 	    requestStreamVersion =
 			    config.getFirstProperty(APIMgtUsagePublisherConstants.API_REQUEST_STREAM_VERSION);
@@ -80,6 +81,8 @@ public class APIMGTConfigReaderService {
         if (throttleStreamName == null || throttleStreamVersion == null) {
             log.error("Throttle stream name or version is null. Check api-manager.xml");
         }
+        String build = config.getFirstProperty(APIConstants.API_USAGE_BUILD_MSG);
+        buildMsg = build != null && JavaUtils.isTrueExplicitly(build);
     }
 
     public String getBamServerThriftPort() {
@@ -145,5 +148,11 @@ public class APIMGTConfigReaderService {
     public String getThrottleStreamVersion() {
         return throttleStreamVersion;
     }
+
+    public boolean isBuildMsg() {
+        return buildMsg;
+    }
+
+
 
 }

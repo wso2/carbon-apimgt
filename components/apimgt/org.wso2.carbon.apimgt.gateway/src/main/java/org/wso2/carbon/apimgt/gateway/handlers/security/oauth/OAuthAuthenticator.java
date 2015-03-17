@@ -25,6 +25,7 @@ import org.apache.synapse.core.SynapseEnvironment;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.rest.RESTConstants;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.gateway.handlers.Utils;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.gateway.handlers.security.*;
 import org.wso2.carbon.apimgt.impl.APIConstants;
@@ -74,8 +75,8 @@ public class OAuthAuthenticator implements Authenticator {
         String apiKey = null;
         if (headers != null) {
             apiKey = extractCustomerKeyFromAuthHeader(headers);
-            if(log.isDebugEnabled()){
-                log.debug("Received Token ".concat(apiKey));
+            if (log.isDebugEnabled()) {
+                log.debug(apiKey != null ? "Received Token ".concat(apiKey) : "No valid Authorization header found");
             }
         }
 
@@ -99,7 +100,7 @@ public class OAuthAuthenticator implements Authenticator {
         String apiVersion = (String) synCtx.getProperty(RESTConstants.SYNAPSE_REST_API_VERSION);
         String fullRequestPath = (String)synCtx.getProperty(RESTConstants.REST_FULL_REQUEST_PATH);
 
-        String requestPath = fullRequestPath.substring((apiContext + apiVersion).length() + 1, fullRequestPath.length());
+        String requestPath = Utils.getRequestPath(synCtx, fullRequestPath, apiContext, apiVersion);
 
         if(log.isDebugEnabled()){
             log.debug("Full Request Path = ".concat(requestPath));

@@ -122,15 +122,7 @@ function APIDesigner(){
             "allowMultiple": false,
             "dataType": "String"
         });*/ // Authorization will be set globaly in swagger console.
-        parameters.push({
-            name : "body",
-            "description": "Request Body",
-            "allowMultiple": false,
-            "required": false,
-            "paramType": "body",
-            "type":"string"
-        });
-
+	
         while ((m = re.exec($("#resource_url_pattern").val())) != null) {
             if (m.index === re.lastIndex) {
                 re.lastIndex++;
@@ -151,9 +143,23 @@ function APIDesigner(){
             if($(this).is(':checked')){
                 if(!designer.check_if_resource_exist( path , $(this).val() ) ){
                 parameters = $.extend(true, [], parameters);
+		
+		var method = $(this).val();               
+                var tempPara = parameters.concat();                
+                     
+                if(method == "POST" || method == "PUT") {   
+                        tempPara.push({
+		            name : "body",
+		      	    "description": "Request Body",
+		            "allowMultiple": false,
+		            "required": false,
+		            "paramType": "body",
+		            "type":"string"
+                        });
+                } 
                 resource.operations.push({ 
                     method : $(this).val(),
-                    parameters : parameters,
+                    parameters : tempPara,
                     nickname : $(this).val().toLowerCase() + '_' +$("#resource_url_pattern").val()
                 });
                 ic++
@@ -274,8 +280,9 @@ APIDesigner.prototype.init_controllers = function(){
 
     $("#version").change(function(e){
         APIDesigner().api_doc.apiVersion = $(this).val();
-        APIDesigner().baseURLValue = "http://localhost:8280/"+$("#context").val().replace("/","")+"/"+$(this).val()});
-    $("#context").change(function(e){ APIDesigner().baseURLValue = "http://localhost:8280/"+$(this).val().replace("/","")+"/"+$("#version").val()});
+        // We do not need the version anymore. With the new plugable version strategy the context will have the version
+        APIDesigner().baseURLValue = "http://localhost:8280/"+$("#context").val().replace("/","")});
+    $("#context").change(function(e){ APIDesigner().baseURLValue = "http://localhost:8280/"+$(this).val().replace("/","")});
     $("#name").change(function(e){ APIDesigner().api_doc.info.title = $(this).val() });
     $("#description").change(function(e){ APIDesigner().api_doc.info.description = $(this).val() });
 
@@ -585,7 +592,7 @@ $(document).ready(function(){
     var v = $("#design_form").validate({
         contentType : "application/x-www-form-urlencoded;charset=utf-8",
         dataType: "json",
-	    onkeyup: false,
+        onkeyup: false,
         submitHandler: function(form) {            
         var designer = APIDesigner();
         
@@ -660,5 +667,28 @@ function getContextValue() {
             context = "/" + context;
         }
         $('.contextForUrl').html(context + "/" + version);
+    }
+    updateContextPattern();
+}
+
+function updateContextPattern(){
+    var context = $('#context').val();
+    var version = $('#version').val();
+
+    if(context != ""){
+        if(context.indexOf("{version}") < 0){
+            if(!context.endsWith('/')){
+                context = context + '/';
+            }
+            context = context + "{version}";
+        }
+        $('#resource_url_pattern_refix').text(context);
+    }else{
+        $('#resource_url_pattern_refix').text("/{context}/{version}/");
+    }
+
+    if(version){
+        context = context.replace("{version}",version);
+        $('#resource_url_pattern_refix').text(context);
     }
 }

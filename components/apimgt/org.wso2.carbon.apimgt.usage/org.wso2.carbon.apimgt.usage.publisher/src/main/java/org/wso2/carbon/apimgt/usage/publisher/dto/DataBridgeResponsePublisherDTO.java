@@ -43,6 +43,7 @@ public class DataBridgeResponsePublisherDTO extends ResponsePublisherDTO {
         setApplicationId(responsePublisherDTO.getApplicationId());
         setCacheHit(responsePublisherDTO.getCacheHit());
         setResponseSize(responsePublisherDTO.getResponseSize());
+        setProtocol(responsePublisherDTO.getProtocol());
     }
 
     public static String getStreamDefinition() {
@@ -66,6 +67,7 @@ public class DataBridgeResponsePublisherDTO extends ResponsePublisherDTO {
                "          {'name':'resourcePath','type':'STRING'}," +
                "          {'name':'method','type':'STRING'}," +
                "          {'name':'version','type':'STRING'}," +
+               "          {'name':'response','type':'INT'}," +
                "          {'name':'responseTime','type':'LONG'}," +
                "          {'name':'serviceTime','type':'LONG'}," +
                "          {'name':'backendTime','type':'LONG'}," +
@@ -77,7 +79,8 @@ public class DataBridgeResponsePublisherDTO extends ResponsePublisherDTO {
                "          {'name':'applicationName','type':'STRING'}," +
                "          {'name':'applicationId','type':'STRING'}," +
                "          {'name':'cacheHit','type':'BOOL'}," +
-               "          {'name':'responseSize','type':'LONG'}" +
+               "          {'name':'responseSize','type':'LONG'}," +
+               "          {'name':'protocol','type':'STRING'}" +
                "  ]" +
 
                "}";
@@ -86,10 +89,10 @@ public class DataBridgeResponsePublisherDTO extends ResponsePublisherDTO {
     public Object createPayload() {
         return new Object[]{getConsumerKey(), getContext(), getApi_version(), getApi(),
                             getResourcePath(), getMethod(),
-                            getVersion(), getResponseTime(), getServiceTime(), getBackendTime(), getUsername(),
+                            getVersion(), getResponse(),getResponseTime(), getServiceTime(), getBackendTime(), getUsername(),
                             getEventTime(), getTenantDomain(), getHostName(),
                             getApiPublisher(), getApplicationName(), getApplicationId(), getCacheHit(),
-                            getResponseSize()};
+                            getResponseSize(),getProtocol()};
     }
 
 }
