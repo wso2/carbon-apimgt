@@ -2789,7 +2789,7 @@ public final class APIUtil {
         Set<String> tenantDomains = null;
         Tenant[] tenants = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager().getAllTenants();
         if (tenants == null || tenants.length == 0) {
-            return tenantDomains;
+            tenantDomains = Collections.<String>emptySet();
         } else {
             tenantDomains = new HashSet<String>();
             for (Tenant tenant : tenants) {
@@ -2800,9 +2800,8 @@ public final class APIUtil {
             if (tenantDomains.size() > 0) {
                 tenantDomains.add(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
             }
-            return tenantDomains;
         }
-
+        return tenantDomains;
     }
 
 

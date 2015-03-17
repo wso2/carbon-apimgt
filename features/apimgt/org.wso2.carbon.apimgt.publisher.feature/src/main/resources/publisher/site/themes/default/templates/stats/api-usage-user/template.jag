@@ -41,14 +41,14 @@
 
 <div class="well">
     <div class="row-fluid">
-       <div class="span6">
+       <div class="span12">
                   <div id="tempLoadingSpaceUsageByUser">
                   <div class="progress progress-striped active">
                   <div class="bar" style="width: 10%;"></div>
             </div>
          </div>
        </div>
-        <div class="span6">&nbsp;</div>
+
         <div class="span11">
             <div id="chartContainer" style="height: 100%"></div>
             <div id="displayMsg" style="height:20px;margin-bottom:5px;"></div>

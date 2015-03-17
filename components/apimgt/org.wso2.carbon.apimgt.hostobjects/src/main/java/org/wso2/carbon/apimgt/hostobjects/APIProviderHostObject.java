@@ -2910,7 +2910,7 @@ public class APIProviderHostObject extends ScriptableObject {
                 APIUtil.setResourcePermissions(api.getId().getProviderName(),
                                                api.getVisibility(), visibleRoles,filePath);
                 doc.setFilePath(apiProvider.addIcon(filePath, icon));
-            } else {
+            } else if (sourceType.equalsIgnoreCase(Documentation.DocumentSourceType.FILE.toString())) {
                 throw new APIManagementException("Empty File Attachment.");
             }
 
