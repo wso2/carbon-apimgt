@@ -17,6 +17,7 @@
 */
 package org.wso2.carbon.apimgt.impl;
 
+import org.apache.axis2.util.JavaUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
@@ -29,6 +30,7 @@ public class APIManagerAnalyticsConfiguration {
     private String bamServerUser;
     private String bamServerPassword;
     private boolean enabled;
+    private boolean buildMsg;
     private String publisherClass;
     private boolean googleAnalyticsTrackingEnabled;
     private String googleAnalyticsTrackingID;
@@ -90,6 +92,8 @@ public class APIManagerAnalyticsConfiguration {
         if (throttleStreamName == null || throttleStreamVersion == null) {
             log.error("Throttle stream name or version is null. Check api-manager.xml");
         }
+        String build = config.getFirstProperty(APIConstants.API_USAGE_BUILD_MSG);
+        buildMsg = build != null && JavaUtils.isTrueExplicitly(build);
     }
 
     public String getBamServerPassword() {
@@ -166,5 +170,9 @@ public class APIManagerAnalyticsConfiguration {
 
     public void setEnabled(boolean enabled) {
         this.enabled = enabled;
+    }
+
+    public boolean isBuildMsg() {
+        return buildMsg;
     }
 }

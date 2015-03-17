@@ -149,6 +149,18 @@
                 </td>
             </tr>
             <%}%>
+                         <tr>
+                            <td>Published Environments</td>
+                            <td>
+           <% var publishedEnvironments = api.environments;
+              var publishedElement="";
+           for(i=0 ;i<publishedEnvironments.split(",").length;i++){
+               publishedElement += publishedEnvironments.split(",")[i]+"</br>";
+               }
+               %>
+               <%=publishedElement%>
+                            </td>
+                        </tr>
             </tbody>
         </table>
     </div>

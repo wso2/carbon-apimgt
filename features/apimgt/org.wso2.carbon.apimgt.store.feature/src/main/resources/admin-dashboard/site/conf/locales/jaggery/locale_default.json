@@ -2,6 +2,7 @@
 
     "all":"All",
     "tasks":"Tasks",
+    "settings":"Settings",
 
     "user":"User",
     "subscriptions":"Subscriptions ",
@@ -10,6 +11,8 @@
     "userCreation": "User Creation",
     "appCreation": "Application Creation",
     "themeupload": "Theme Upload",
+    "appRegistration": "Application Registration",
+    "themeupload":"Upload Tenant Theme",
 
     "username": "Username",
     "password": "Password",

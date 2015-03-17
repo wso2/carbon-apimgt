@@ -3,12 +3,14 @@
                 var reqUrl = request.getRequestURI();
                 var listUrl=jagg.getAbsoluteUrl("/site/pages/index.jag");
                 var listMappedUrl=jagg.getMappedUrl("/site/pages/index.jag");
+		var themeMappedUrl = jagg.getMappedUrl("/site/pages/themeupload.jag");
 
                 var encode = require('encode');
                 encode = new encode.Encode();
                 var task = encode.forJavaScript(request.getParameter("task"));
             %>
             <ul class="breadcrumb">
+<<<<<<< HEAD
                 <% if(reqUrl.match("analytics")){%>
                     <li>
                         <%=i18n.localize("settings")%> <span class="divider">/</span>
@@ -24,6 +26,14 @@
                         <a href="<%=listMappedUrl%>" onclick="jagg.sessionAwareJS({redirect:'<%=listMappedUrl%>',e:event})"><%=i18n.localize("themeupload")%></a>
                     </li>
                 <%} else if (task == "signup"){%>
+		<% if (reqUrl.indexOf("themeupload") != -1) {%>
+			 <li>
+		        <%=i18n.localize("settings")%> <span class="divider">/</span>
+		        </li>
+		        <li>
+		        <a href="<%=themeMappedUrl%>" onclick="jagg.sessionAwareJS({redirect:'<%=themeMappedUrl%>',e:event})"><%=i18n.localize("themeupload")%></a>
+		        </li>
+		<% } else if (task == null|| task == 'null'|| task == "signup") {%>
                     <li>
                     <%=i18n.localize("tasks")%> <span class="divider">/</span>
                     </li>
@@ -46,6 +56,30 @@
                 </li>
                 <% } %>
 
+=======
+                <% } else if(task == "subscription") {%>
+		        <li>
+		            <%=i18n.localize("tasks")%> <span class="divider">/</span>
+		        </li>
+		        <li>
+		            <a href="<%=listMappedUrl%>?tasks=subscription" onclick="jagg.sessionAwareJS({redirect:'<%=listMappedUrl%>',e:event})"><%=i18n.localize("subscriptionCreation")%></a>
+		        </li>
+                <% } else if(task == "application") {%>
+		        <li>
+		        <%=i18n.localize("tasks")%> <span class="divider">/</span>
+		        </li>
+		        <li>
+		        <a href="<%=listMappedUrl%>?tasks=application" onclick="jagg.sessionAwareJS({redirect:'<%=listMappedUrl%>',e:event})"><%=i18n.localize("appCreation")%></a>
+		        </li>
+                <% } else if(task == "appRegistration") {%>
+		        <li>
+		        <%=i18n.localize("tasks")%> <span class="divider">/</span>
+		        </li>
+		        <li>
+		        <a href="<%=listMappedUrl%>?tasks=appRegistration" onclick="jagg.sessionAwareJS({redirect:'<%=listMappedUrl%>',e:event})"><%=i18n.localize("appRegistration")%></a>
+		        </li>
+                <% }%>
+>>>>>>> upstream/release-1.9.0
 
             </ul>
 

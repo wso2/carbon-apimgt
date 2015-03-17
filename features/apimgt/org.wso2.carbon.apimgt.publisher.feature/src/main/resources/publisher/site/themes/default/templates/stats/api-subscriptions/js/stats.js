@@ -491,6 +491,8 @@ var drawSubscriberCountByAPIs = function () {
                              .slice(showFrom, showTo).show();
                         }
                     });
+                }else{
+                    $('#pie-chart').html($('<h3 class="no-data-heading center-wrapper">No Data Available</h3>'));
                 }
             } else {
                 if (json.message == "AuthenticateError") {

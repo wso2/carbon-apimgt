@@ -36,14 +36,14 @@
 
 <div class="well">
     <div class="row-fluid">
-        <div class="span6">
+        <div class="span12">
             <div id="tempLoadingSpaceDestination">
                 <div class="progress progress-striped active">
                     <div class="bar" style="width: 10%;"></div>
                 </div>
             </div>
         </div>
-        <div class="span6">&nbsp;</div>
+
         <div class="span11">
             <div id="tableContainer"></div>
         </div>

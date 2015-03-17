@@ -517,7 +517,8 @@ public class APIUsageStatisticsClient {
                 if (providerAPI.getId().getApiName().equals(usage.apiName) &&
                         providerAPI.getId().getVersion().equals(usage.apiVersion) &&
                         providerAPI.getContext().equals(usage.context)) {
-                    String apiName = usage.apiName + " (" + providerAPI.getId().getProviderName() + ")";
+                    String[] apiData = {usage.apiName, usage.apiVersion,  providerAPI.getId().getProviderName()};
+                    String apiName = "[\""+apiData[0]+"\",\""+apiData[1]+"\",\""+apiData[2]+"\"]";
                     APIUsageDTO usageDTO = usageByAPIs.get(apiName);
                     if (usageDTO != null) {
                         usageDTO.setCount(usageDTO.getCount() + usage.requestCount);
@@ -863,11 +864,12 @@ public class APIUsageStatisticsClient {
                     for (int i = 0; i < apiVersionUsageList.size(); i++) {
                         apiVersionUsageDTO = apiVersionUsageList.get(i);
                         if (apiVersionUsageDTO.getVersion().equals(fault.apiVersion)) {
-                            double requestCount = apiVersionUsageDTO.getCount();
-                            double faultPercentage = (requestCount - fault.faultCount) / requestCount * 100;
+                            long requestCount = apiVersionUsageDTO.getCount();
+                            double faultPercentage = ((double)requestCount - fault.faultCount) / requestCount * 100;
                             DecimalFormat twoDForm = new DecimalFormat("#.##");
                             faultPercentage = 100 - Double.valueOf(twoDForm.format(faultPercentage));
                             faultyDTO.setFaultPercentage(faultPercentage);
+                            faultyDTO.setRequestCount(requestCount);
                             break;
                         }
                     }
@@ -1035,7 +1037,7 @@ public class APIUsageStatisticsClient {
         });
         if (usageData.size() > limit) {
             APIUsageDTO other = new APIUsageDTO();
-            other.setApiName("[Other]");
+            other.setApiName("[\"Other\"]");
             for (int i = limit; i < usageData.size(); i++) {
                 other.setCount(other.getCount() + usageData.get(i).getCount());
             }
@@ -1905,7 +1907,8 @@ public class APIUsageStatisticsClient {
             return AXIOMUtil.stringToOM(returnString);
 
         } catch (Exception e) {
-            throw new APIMgtUsageQueryServiceClientException("Error occurred while querying from JDBC database", e);
+            throw new APIMgtUsageQueryServiceClientException("Error occurred while querying from JDBC database" +
+                                                             e.getMessage(), e);
         } finally {
             if (rs != null) {
                 try {

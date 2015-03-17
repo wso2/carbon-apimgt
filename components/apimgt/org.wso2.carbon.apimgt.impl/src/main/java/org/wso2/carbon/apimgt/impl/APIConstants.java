@@ -18,6 +18,8 @@
 
 package org.wso2.carbon.apimgt.impl;
 
+import org.apache.synapse.rest.RESTConstants;
+
 import javax.xml.namespace.QName;
 
 /**
@@ -141,8 +143,10 @@ public final class APIConstants {
     // Those constance are used in API artifact.
     public static final String API_OVERVIEW_NAME = "overview_name";
     public static final String API_OVERVIEW_VERSION = "overview_version";
+    public static final String API_OVERVIEW_VERSION_TYPE = "overview_versionType";
     public static final String API_OVERVIEW_IS_DEFAULT_VERSION = "overview_isDefaultVersion";
     public static final String API_OVERVIEW_CONTEXT = "overview_context";
+    public static final String API_OVERVIEW_CONTEXT_TEMPLATE = "overview_contextTemplate";
     public static final String API_OVERVIEW_DESCRIPTION = "overview_description";
     public static final String API_OVERVIEW_ENDPOINT_URL = "overview_endpointURL";
     public static final String API_OVERVIEW_SANDBOX_URL = "overview_sandboxURL";
@@ -161,6 +165,7 @@ public final class APIConstants {
     public static final String API_OVERVIEW_VISIBILITY ="overview_visibility";
     public static final String API_OVERVIEW_VISIBLE_ROLES ="overview_visibleRoles";
     public static final String API_OVERVIEW_VISIBLE_TENANTS ="overview_visibleTenants";
+    public static final String API_OVERVIEW_ENVIRONMENTS = "overview_environments";
     public static final String API_STATUS = "STATUS";
     public static final String API_URI_PATTERN ="URITemplate_urlPattern";
     public static final String API_URI_HTTP_METHOD ="URITemplate_httpVerb";
@@ -347,6 +352,7 @@ public final class APIConstants {
     public static final String EXTERNAL_API_STORE = "ExternalAPIStore";
     public static final String EXTERNAL_API_STORE_ID = "id";
     public static final String EXTERNAL_API_STORE_TYPE = "type";
+    public static final String EXTERNAL_API_STORE_CLASS_NAME = "className";
     public static final String EXTERNAL_API_STORE_DISPLAY_NAME = "DisplayName";
     public static final String EXTERNAL_API_STORE_ENDPOINT = "Endpoint";
     public static final String EXTERNAL_API_STORE_USERNAME = "Username";
@@ -409,6 +415,9 @@ public final class APIConstants {
     public static final String API_USAGE_TRACKING = "APIUsageTracking.";
     public static final String API_USAGE_ENABLED = API_USAGE_TRACKING + "Enabled";
     public static final String API_USAGE_BAM_SERVER_URL_GROUPS = API_USAGE_TRACKING + "BAMServerURL";
+    public static final String API_USAGE_BUILD_MSG = API_USAGE_TRACKING + "PublishResponseMessageSize";
+    public static final String API_USAGE_THRIFT_PORT = API_USAGE_TRACKING + "ThriftPort";
+    public static final String API_USAGE_BAM_SERVER_URL = API_USAGE_TRACKING + "BAMServerURL";
     public static final String API_USAGE_BAM_SERVER_USER = API_USAGE_TRACKING + "BAMUsername";
     public static final String API_USAGE_BAM_SERVER_PASSWORD = API_USAGE_TRACKING + "BAMPassword";
     public static final String API_USAGE_PUBLISHER_CLASS = API_USAGE_TRACKING + "PublisherClass";
@@ -595,7 +604,6 @@ public final class APIConstants {
 
     public static final String RECENTLY_ADDED_API_CACHE_NAME = "RECENTLY_ADDED_API";
     public static final String API_STORE_RECENTLY_ADDED_API_CACHE_ENABLE = API_STORE + "EnableRecentlyAddedAPICache";
-    public static boolean isRecentlyAddedAPICacheEnabled = false;
     public static String VELOCITY_LOGGER = "VelocityLogger";
 
     
@@ -619,6 +627,7 @@ public final class APIConstants {
     public static final String APIPROVIDER_HOSTCACHE = "apiProvideHostObjectCache";
     public static final String TENANTCOUNT_CACHEKEY = "apiProviderCacheKey";
 
-
+    public static final String SYNAPSE_REST_CONTEXT_VERSION_VARIABLE = RESTConstants
+            .SYNAPSE_REST_CONTEXT_VERSION_VARIABLE;
 
 }

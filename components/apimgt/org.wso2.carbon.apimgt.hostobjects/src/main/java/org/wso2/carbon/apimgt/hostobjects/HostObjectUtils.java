@@ -31,6 +31,7 @@ import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerAnalyticsConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.keymgt.client.SubscriberKeyMgtClient;
+import org.wso2.carbon.apimgt.keymgt.client.ProviderKeyMgtClient;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.identity.user.registration.stub.dto.UserFieldDTO;
 import org.wso2.carbon.ndatasource.common.DataSourceException;
@@ -98,6 +99,32 @@ public class HostObjectUtils {
             return new SubscriberKeyMgtClient(url, username, password);
         } catch (Exception e) {
             handleException("Error while initializing the subscriber key management client", e);
+            return null;
+        }
+    }
+
+    /**
+     * Used to get instance of ProviderKeyMgtClient
+     * @return ProviderKeyMgtClient
+     * @throws APIManagementException
+     */
+    protected static ProviderKeyMgtClient getProviderClient() throws APIManagementException {
+        APIManagerConfiguration config = HostObjectComponent.getAPIManagerConfiguration();
+        String url = config.getFirstProperty(APIConstants.API_KEY_MANAGER_URL);
+        if (url == null) {
+            handleException("API key manager URL unspecified");
+        }
+
+        String username = config.getFirstProperty(APIConstants.API_KEY_MANAGER_USERNAME);
+        String password = config.getFirstProperty(APIConstants.API_KEY_MANAGER_PASSWORD);
+        if (username == null || password == null) {
+            handleException("Authentication credentials for API Provider manager unspecified");
+        }
+
+        try {
+            return new ProviderKeyMgtClient(url, username, password);
+        } catch (APIManagementException e) {
+            handleException("Error while initializing the provider  management client", e);
             return null;
         }
     }
@@ -177,15 +204,22 @@ public class HostObjectUtils {
     public static void invalidateRecentlyAddedAPICache(String username){
         try{
             PrivilegedCarbonContext.startTenantFlow();
-            if(username!=null && APIConstants.isRecentlyAddedAPICacheEnabled){
-                String tenantDomainFromUserName =  MultitenantUtils.getTenantDomain(username);
-                if(tenantDomainFromUserName != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomainFromUserName)){
-                    PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomainFromUserName, true);
+            APIManagerConfiguration config = HostObjectComponent.getAPIManagerConfiguration();
+            boolean isRecentlyAddedAPICacheEnabled =
+                  Boolean.parseBoolean(config.getFirstProperty(APIConstants.API_STORE_RECENTLY_ADDED_API_CACHE_ENABLE));
+            
+            if (username != null && isRecentlyAddedAPICacheEnabled) {
+                String tenantDomainFromUserName = MultitenantUtils.getTenantDomain(username);
+                if (tenantDomainFromUserName != null &&
+                    !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomainFromUserName)) {
+                    PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomainFromUserName,
+                                                                                          true);
+                } else {
+                    PrivilegedCarbonContext.getThreadLocalCarbonContext()
+                                           .setTenantDomain(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME, true);
                 }
-                else {
-                    PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME, true);
-                }
-                Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER).getCache("RECENTLY_ADDED_API").remove(username+":"+tenantDomainFromUserName);
+                Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER).getCache("RECENTLY_ADDED_API")
+                       .remove(username + ":" + tenantDomainFromUserName);
             }
         } finally {
             PrivilegedCarbonContext.endTenantFlow();
