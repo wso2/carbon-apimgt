@@ -1543,23 +1543,27 @@ public class ApiMgtDAO {
             connection = APIMgtDBUtil.getConnection();
 
             String sqlQuery = "SELECT COUNT(*) AS SUB_COUNT " +
-                              "FROM AM_SUBSCRIPTION "+
-                              "WHERE SUBS_CREATE_STATE ='" + APIConstants.SubscriptionCreatedStatus.SUBSCRIBE + "'"+
-                              " AND APPLICATION_ID =  SELECT APPLICATION_ID "+
-                                                      "FROM AM_APPLICATION API_ID "+
-                                                      "WHERE  NAME=? AND SUBSCRIBER_ID= SELECT SUBSCRIBER_ID "+
-                                                                                        "FROM AM_SUBSCRIBER "+
-                                                                                        "WHERE USER_ID = ?  AND TENANT_ID=?";
+                              " FROM AM_SUBSCRIPTION SUBS"+
+                              " ,AM_APPLICATION APP"+
+                              " ,AM_SUBSCRIBER SUB "+
+                              " WHERE SUBS.SUBS_CREATE_STATE ='" + APIConstants.SubscriptionCreatedStatus.SUBSCRIBE + "'"+
+                              " AND SUBS.APPLICATION_ID = APP.APPLICATION_ID"+
+                              " AND APP.NAME=?"+
+                              " AND APP.SUBSCRIBER_ID= SUB.SUBSCRIBER_ID"+
+                              " AND SUB.USER_ID =?"+
+                              " AND SUB.TENANT_ID=?";
 
             if (forceCaseInsensitiveComparisons) {
                 sqlQuery = "SELECT COUNT(*) AS SUB_COUNT " +
-                        "FROM AM_SUBSCRIPTION "+
-                        "WHERE SUBS_CREATE_STATE ='" + APIConstants.SubscriptionCreatedStatus.SUBSCRIBE + "'"+
-                        " AND APPLICATION_ID =  SELECT APPLICATION_ID "+
-                                               "FROM AM_APPLICATION API_ID "+
-                                               "WHERE  NAME=? AND SUBSCRIBER_ID= SELECT SUBSCRIBER_ID "+
-                                                                                "FROM AM_SUBSCRIBER "+
-                                                                                "WHERE LOWER(USER_ID) = LOWER(?)  AND TENANT_ID=?";
+                            " FROM AM_SUBSCRIPTION SUBS"+
+                            " ,AM_APPLICATION APP"+
+                            " ,AM_SUBSCRIBER SUB "+
+                            " WHERE SUBS.SUBS_CREATE_STATE ='" + APIConstants.SubscriptionCreatedStatus.SUBSCRIBE + "'"+
+                            " AND SUBS.APPLICATION_ID = APP.APPLICATION_ID"+
+                            " AND APP.NAME=?"+
+                            " AND APP.SUBSCRIBER_ID= SUB.SUBSCRIBER_ID"+
+                            " AND LOWER(SUB.USER_ID) = LOWER(?)"+
+                            " AND SUB.TENANT_ID=?";
             }
 
             ps = connection.prepareStatement(sqlQuery);
