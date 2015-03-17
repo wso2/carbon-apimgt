@@ -65,7 +65,7 @@
 </ul>
 </center> 
     <div class="title-section">
-        <h2><%= encode.forHtml(api.name) %> : <%= encode.forHtml(api.context) %>/<%= encode.forHtml(api.version) %></h2>
+        <h2><%= encode.forHtml(api.name) %> : <%= encode.forHtml(api.context) %></h2>
     </div>     
     <div class="content-section shadow-up">
     <div class="content-data">   
