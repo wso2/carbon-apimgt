@@ -2835,7 +2835,7 @@ public class APIStoreHostObject extends ScriptableObject {
             apiObj.put("hasMultipleEndpoints", apiObj, String.valueOf(api.getSandboxUrl() != null));
             apisArray.put(apisArray.getIds().length, apisArray, apiObj);
         } catch (APIManagementException e) {
-            handleException("Error while obtaining application metadata", e);
+            log.error("Error while obtaining application metadata", e);
         }
     }
 
