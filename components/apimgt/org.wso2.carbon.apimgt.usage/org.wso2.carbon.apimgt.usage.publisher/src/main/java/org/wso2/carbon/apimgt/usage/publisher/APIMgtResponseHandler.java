@@ -41,7 +41,7 @@ import java.util.Map;
 
 public class APIMgtResponseHandler extends AbstractMediator {
 
-    private boolean enabled = UsageComponent.getApiMgtConfigReaderService().isEnabled();
+    private boolean enabled = DataPublisherUtil.getApiManagerAnalyticsConfiguration().isEnabled();
 
     private volatile APIMgtUsageDataPublisher publisher;
 
@@ -54,7 +54,7 @@ public class APIMgtResponseHandler extends AbstractMediator {
         if (publisher == null) {
             synchronized (this) {
                 if (publisher == null) {
-                    String publisherClass = UsageComponent.getApiMgtConfigReaderService().
+                    String publisherClass = DataPublisherUtil.getApiManagerAnalyticsConfiguration().
                             getPublisherClass();
                     try {
                         log.debug("Instantiating Data Publisher");

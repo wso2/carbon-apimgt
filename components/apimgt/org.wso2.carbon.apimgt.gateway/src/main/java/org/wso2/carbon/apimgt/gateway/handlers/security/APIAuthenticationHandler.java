@@ -62,10 +62,27 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
 
     private volatile Authenticator authenticator;
 
+    private SynapseEnvironment synapseEnvironment;
+
     public void init(SynapseEnvironment synapseEnvironment) {
+        this.synapseEnvironment = synapseEnvironment;
 		if (log.isDebugEnabled()) {
 			log.debug("Initializing API authentication handler instance");
 		}
+        if (ServiceReferenceHolder.getInstance().getApiManagerConfigurationService() != null){
+            initializeAuthenticator();
+        }
+    }
+
+    public void destroy() {        
+        if(authenticator != null) {
+        	authenticator.destroy();
+        } else {
+        	log.warn("Unable to destroy uninitialized authentication handler instance");
+        }        
+    }
+
+    private void initializeAuthenticator() {
         String authenticatorType = ServiceReferenceHolder.getInstance().getAPIManagerConfiguration().
                 getFirstProperty(APISecurityConstants.API_SECURITY_AUTHENTICATOR);
         if (authenticatorType == null) {
@@ -81,19 +98,14 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
         authenticator.init(synapseEnvironment);
     }
 
-    public void destroy() {        
-        if(authenticator != null) {
-        	authenticator.destroy();
-        } else {
-        	log.warn("Unable to destroy uninitialized authentication handler instance");
-        }        
-    }
-
     public boolean handleRequest(MessageContext messageContext) {
         try {
             if (Utils.isStatsEnabled()) {
                 long currentTime = System.currentTimeMillis();
                 messageContext.setProperty("api.ut.requestTime", Long.toString(currentTime));
+            }
+            if (authenticator == null) {
+                initializeAuthenticator();
             }
             if (authenticator.authenticate(messageContext)) {
                 return true;

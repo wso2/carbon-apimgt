@@ -22,6 +22,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.service.component.ComponentContext;
 import org.wso2.carbon.apimgt.core.APIManagerConstants;
+import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
+import org.wso2.carbon.apimgt.impl.internal.APIManagerComponent;
 import org.wso2.carbon.apimgt.interceptor.UsageStatConfiguration;
 import org.wso2.carbon.apimgt.interceptor.valve.APIManagerInterceptorValve;
 import org.wso2.carbon.apimgt.usage.publisher.APIMgtUsageDataPublisher;
@@ -45,9 +47,13 @@ import java.util.ArrayList;
  * 
  * @scr.reference name="registry.service" interface="org.wso2.carbon.registry.core.service.RegistryService"
  * cardinality="1..1" policy="dynamic" bind="setRegistryService" unbind="unsetRegistryService"
+ * @scr.reference name="api.manager.config.service"
+ * interface="org.wso2.carbon.apimgt.impl.APIManagerConfigurationService" cardinality="1..1"
+ * policy="dynamic" bind="setAPIManagerConfigurationService" unbind="unsetAPIManagerConfigurationService"
  */
 public class APIManagerInterceptorComponent {
 	private static final Log log = LogFactory.getLog(APIManagerInterceptorComponent.class);
+    private static APIManagerConfigurationService amConfigService;
     private static String apiManagementEnabled;
     private static String externalAPIManagerGatewayURL;
 
@@ -68,8 +74,8 @@ public class APIManagerInterceptorComponent {
     }
     
 	private void setStatPublishingConf() {
-		boolean statsPublishingEnabled = UsageComponent.getApiMgtConfigReaderService().isEnabled();
-		String statsPublisherClass = UsageComponent.getApiMgtConfigReaderService()
+		boolean statsPublishingEnabled = amConfigService.getAPIAnalyticsConfiguration().isEnabled();
+		String statsPublisherClass = amConfigService.getAPIAnalyticsConfiguration()
 		                                           .getPublisherClass();
 		String hostName = DataPublisherUtil.getHostAddress();
 		APIMgtUsageDataPublisher publisher = null;
@@ -102,6 +108,16 @@ public class APIManagerInterceptorComponent {
 
     protected void unsetConfigurationContextService(ConfigurationContextService contextService) {
         DataHolder.setServerConfigContext(null);
+    }
+
+    protected void setAPIManagerConfigurationService(APIManagerConfigurationService service) {
+        log.debug("API manager configuration service bound to the API usage handler");
+        amConfigService = service;
+    }
+
+    protected void unsetAPIManagerConfigurationService(APIManagerConfigurationService service) {
+        log.debug("API manager configuration service unbound from the API usage handler");
+        amConfigService = null;
     }
     
     protected void setRegistryService(RegistryService registryService) {

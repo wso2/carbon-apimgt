@@ -45,12 +45,12 @@ public class APIMgtUsageHandler extends AbstractHandler {
 
     private volatile APIMgtUsageDataPublisher publisher;
 
-    private boolean enabled = UsageComponent.getApiMgtConfigReaderService().isEnabled();
-
-    private String publisherClass = UsageComponent.getApiMgtConfigReaderService().getPublisherClass();
-
     public boolean handleRequest(MessageContext mc) {
 
+        boolean enabled = DataPublisherUtil.getApiManagerAnalyticsConfiguration().isEnabled();
+
+        String publisherClass = UsageComponent.getAmConfigService().
+                getAPIAnalyticsConfiguration().getPublisherClass();
         try {
             long currentTime = System.currentTimeMillis();
 

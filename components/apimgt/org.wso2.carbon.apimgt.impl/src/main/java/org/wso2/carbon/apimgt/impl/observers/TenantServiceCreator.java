@@ -38,6 +38,7 @@ import org.apache.synapse.config.xml.SequenceMediatorFactory;
 import org.apache.synapse.mediators.base.SequenceMediator;
 import org.apache.synapse.registry.Registry;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.APIManagerAnalyticsConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
@@ -176,6 +177,19 @@ public class TenantServiceCreator extends AbstractAxis2ConfigurationContextObser
             APIUtil.loadTenantSelfSignUpConfigurations(tenantId);
         } catch(Exception e) {
            log.error("Failed to load sign-up-config.xml to tenant " + tenantDomain + "'s registry");
+        }
+        try {
+            APIManagerAnalyticsConfiguration configuration = ServiceReferenceHolder.getInstance().
+                    getAPIManagerConfigurationService().getAPIAnalyticsConfiguration();
+            boolean enabled = configuration.isEnabled();
+            if (enabled) {
+                String bamServerURL = configuration.getBamServerUrlGroups();
+                String bamServerUser = configuration.getBamServerUser();
+                String bamServerPassword = configuration.getBamServerPassword();
+                APIUtil.addBamServerProfile(bamServerURL, bamServerUser, bamServerPassword, tenantId);
+            }
+        } catch(Exception e) {
+            log.error("Failed to load bam profile configuration to tenant " + tenantDomain + "'s registry");
         }
     }
 

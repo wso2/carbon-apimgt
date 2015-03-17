@@ -62,7 +62,7 @@ import java.util.*;
 public class APIUsageStatisticsClient {
 
     private static final String API_USAGE_TRACKING = "APIUsageTracking.";
-    private static final String DATA_SOURCE_NAME = API_USAGE_TRACKING + "DataSourceName";
+    private static final String DATA_SOURCE_NAME = "jdbc/WSO2AM_STATS_DB";
     private static volatile DataSource dataSource = null;
     private static PaymentPlan paymentPlan;
     private static Map<String, String> subscriberAppsMap = new HashMap<String, String>();
@@ -109,7 +109,7 @@ public class APIUsageStatisticsClient {
                 element = buildOMElement(new FileInputStream(filePath));
                 paymentPlan = new PaymentPlan(element);
             }
-            String targetEndpoint = config.getFirstProperty("APIUsageTracking.BAMServerURL");
+            String targetEndpoint = APIUsageClientServiceComponent.getAnalyticsConfiguration().getBamServerUrlGroups();
             if (targetEndpoint == null || targetEndpoint.equals(""))
                 throw new APIMgtUsageQueryServiceClientException("Required BAM server URL parameter unspecified");
             apiProviderImpl = APIManagerFactory.getInstance().getAPIProvider(username);
@@ -122,21 +122,12 @@ public class APIUsageStatisticsClient {
     }
 
     public static void initializeDataSource() throws APIMgtUsageQueryServiceClientException {
-        if (dataSource != null) {
-            return;
-        }
-        APIManagerConfiguration config = APIUsageClientServiceComponent.getAPIManagerConfiguration();
-        String dataSourceName = config.getFirstProperty(DATA_SOURCE_NAME);
-
-        if (dataSourceName != null) {
-            try {
-                Context ctx = new InitialContext();
-                dataSource = (DataSource) ctx.lookup(dataSourceName);
-            } catch (NamingException e) {
-                throw new APIMgtUsageQueryServiceClientException("Error while looking up the data " +
-                        "source: " + dataSourceName);
-            }
-
+        try {
+            Context ctx = new InitialContext();
+            dataSource = (DataSource) ctx.lookup(DATA_SOURCE_NAME);
+        } catch (NamingException e) {
+            throw new APIMgtUsageQueryServiceClientException("Error while looking up the data " +
+                    "source: " + DATA_SOURCE_NAME);
         }
     }
 

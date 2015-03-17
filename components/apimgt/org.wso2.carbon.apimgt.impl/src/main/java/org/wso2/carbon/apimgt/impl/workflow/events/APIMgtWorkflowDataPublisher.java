@@ -22,6 +22,7 @@ import org.apache.axis2.util.JavaUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.APIManagerAnalyticsConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.dto.WorkflowDTO;
 import org.wso2.carbon.apimgt.impl.internal.APIManagerComponent;
@@ -53,8 +54,10 @@ public class APIMgtWorkflowDataPublisher {
     static APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
             getAPIManagerConfigurationService().
             getAPIManagerConfiguration();
-    private String enabledStr = config.getFirstProperty(APIConstants.API_USAGE_ENABLED);
-    boolean enabled = enabledStr != null && JavaUtils.isTrueExplicitly(enabledStr);
+    static APIManagerAnalyticsConfiguration analyticsConfig = ServiceReferenceHolder.getInstance().
+            getAPIManagerConfigurationService().
+            getAPIAnalyticsConfiguration();
+    boolean enabled = analyticsConfig.isEnabled();
     private static String wfStreamName;
     private static String wfStreamVersion;
 
@@ -108,9 +111,9 @@ public class APIMgtWorkflowDataPublisher {
         //Get LoadBalancingDataPublisher which has been registered for the tenant.
         LoadBalancingDataPublisher loadBalancingDataPublisher = APIManagerComponent.
                 getDataPublisher(tenantDomain);
-        String bamServerURL = config.getFirstProperty(APIConstants.API_USAGE_BAM_SERVER_URL_GROUPS);
-        String bamServerUser = config.getFirstProperty(APIConstants.API_USAGE_BAM_SERVER_USER);
-        String bamServerPassword = config.getFirstProperty(APIConstants.API_USAGE_BAM_SERVER_PASSWORD);
+        String bamServerURL = analyticsConfig.getBamServerUrlGroups();
+        String bamServerUser = analyticsConfig.getBamServerUser();
+        String bamServerPassword = analyticsConfig.getBamServerPassword();
 
         //If a LoadBalancingDataPublisher had not been registered for the tenant.
         if (loadBalancingDataPublisher == null) {

@@ -19,14 +19,10 @@ package org.wso2.carbon.apimgt.usage.publisher.internal;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
 import org.wso2.carbon.apimgt.usage.publisher.DataPublisherUtil;
-import org.wso2.carbon.apimgt.usage.publisher.service.APIMGTConfigReaderService;
-import org.wso2.carbon.bam.service.data.publisher.services.ServiceDataPublisherAdmin;
 import org.wso2.carbon.base.ServerConfiguration;
-import org.wso2.carbon.databridge.agent.thrift.DataPublisher;
 import org.wso2.carbon.databridge.agent.thrift.lb.LoadBalancingDataPublisher;
 import org.wso2.carbon.user.core.service.RealmService;
 
@@ -41,28 +37,17 @@ import java.util.concurrent.ConcurrentHashMap;
  * @scr.reference name="user.realm.service"
  * interface="org.wso2.carbon.user.core.service.RealmService"
  * cardinality="1..1" policy="dynamic" bind="setRealmService" unbind="unsetRealmService"
- * @scr.reference name="bam.service.data.publisher"
- * interface="org.wso2.carbon.bam.service.data.publisher.services.ServiceDataPublisherAdmin" cardinality="1..1"
- * policy="dynamic" bind="setDataPublisherService" unbind="unsetDataPublisherService"
  */
 public class UsageComponent {
 
     private static final Log log = LogFactory.getLog(UsageComponent.class);
 
-    private static APIMGTConfigReaderService apimgtConfigReaderService;
     private static APIManagerConfigurationService amConfigService;
-
-    private static ServiceDataPublisherAdmin dataPublisherAdminService;
 
     private static Map<String, LoadBalancingDataPublisher> dataPublisherMap;
 
     protected void activate(ComponentContext ctx) {
         try {
-            apimgtConfigReaderService = APIMGTConfigReaderService.getInstance();
-            apimgtConfigReaderService.setAPIManagerConfiguration(amConfigService.getAPIManagerConfiguration());
-            BundleContext bundleContext = ctx.getBundleContext();
-            bundleContext.registerService(APIMGTConfigReaderService.class.getName(),
-                                          apimgtConfigReaderService, null);
             DataPublisherUtil.setEnabledMetering(
                     Boolean.parseBoolean(ServerConfiguration.getInstance().getFirstProperty("EnableMetering")));
 
@@ -90,23 +75,10 @@ public class UsageComponent {
         ServiceReferenceHolder.getInstance().setAPIManagerConfigurationService(null);
     }
 
-    protected void setDataPublisherService(ServiceDataPublisherAdmin service) {
-        log.debug("Event Data Publisher service bound to the API usage handler");
-        dataPublisherAdminService = service;
+    public static APIManagerConfigurationService getAmConfigService() {
+        return amConfigService;
     }
 
-    protected void unsetDataPublisherService(ServiceDataPublisherAdmin service) {
-        log.debug("Event Data Publisher service unbound from the API usage handler");
-        dataPublisherAdminService = null;
-    }
-
-    public static ServiceDataPublisherAdmin getDataPublisherAdminService() {
-        return dataPublisherAdminService;
-    }
-
-    public static APIMGTConfigReaderService getApiMgtConfigReaderService() {
-        return apimgtConfigReaderService;
-    }
 
     /**
      * Fetch the data publisher which has been registered under the tenant domain.

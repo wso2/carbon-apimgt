@@ -20,8 +20,11 @@ package org.wso2.carbon.apimgt.usage.publisher;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.APIManagerAnalyticsConfiguration;
 import org.wso2.carbon.apimgt.usage.publisher.internal.UsageComponent;
 import org.wso2.carbon.bam.data.publisher.util.BAMDataPublisherConstants;
+import org.wso2.carbon.bam.service.data.publisher.conf.AnalyzingConfigData;
 import org.wso2.carbon.bam.service.data.publisher.conf.EventingConfigData;
 import org.wso2.carbon.base.ServerConfiguration;
 import java.net.Inet4Address;
@@ -93,18 +96,7 @@ public class DataPublisherUtil {
         isEnabledMetering = enabledMetering;
     }
 
-    public static boolean isAnalyticsEnabled() {
-        return UsageComponent.getDataPublisherAdminService().getEventingConfigData().isServiceStatsEnable();
-    }
-
-    public static Map<String, String> getAnalyticsConfigFromRegistry() {
-
-        Map<String,String> propertyMap = new HashMap<String, String>();
-        EventingConfigData eventingConfigData = UsageComponent.
-                getDataPublisherAdminService().getEventingConfigData();
-        propertyMap.put(BAMDataPublisherConstants.BAM_URL, eventingConfigData.getUrl());
-        propertyMap.put(BAMDataPublisherConstants.BAM_USER_NAME, eventingConfigData.getUserName());
-        propertyMap.put(BAMDataPublisherConstants.BAM_PASSWORD, eventingConfigData.getPassword());
-        return propertyMap;
+    public static APIManagerAnalyticsConfiguration getApiManagerAnalyticsConfiguration() {
+        return UsageComponent.getAmConfigService().getAPIAnalyticsConfiguration();
     }
 }

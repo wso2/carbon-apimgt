@@ -58,6 +58,7 @@ import org.wso2.carbon.apimgt.impl.dto.Environment;
 import org.wso2.carbon.apimgt.impl.internal.APIManagerComponent;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.keymgt.client.SubscriberKeyMgtClient;
+import org.wso2.carbon.bam.service.data.publisher.conf.EventingConfigData;
 import org.wso2.carbon.base.MultitenantConstants;
 import org.wso2.carbon.base.ServerConfiguration;
 import org.wso2.carbon.context.CarbonContext;
@@ -2360,6 +2361,21 @@ public final class APIUtil {
         			"configuration file content", e);
 		} 
 	}
+
+    public static boolean isAnalyticsEnabled() {
+        return APIManagerComponent.getDataPublisherAdminService().getEventingConfigData().isServiceStatsEnable();
+    }
+
+    public static Map<String, String> getAnalyticsConfigFromRegistry() {
+
+        Map<String,String> propertyMap = new HashMap<String, String>();
+        EventingConfigData eventingConfigData = APIManagerComponent.
+                getDataPublisherAdminService().getEventingConfigData();
+        propertyMap.put(APIConstants.API_USAGE_BAM_SERVER_URL_GROUPS, eventingConfigData.getUrl());
+        propertyMap.put(APIConstants.API_USAGE_BAM_SERVER_USER, eventingConfigData.getUserName());
+        propertyMap.put(APIConstants.API_USAGE_BAM_SERVER_PASSWORD, eventingConfigData.getPassword());
+        return propertyMap;
+    }
 
     public static void writeDefinedSequencesToTenantRegistry(int tenantID)
             throws APIManagementException {

@@ -18,10 +18,7 @@
 
 package org.wso2.carbon.apimgt.usage.publisher.dto;
 
-import org.wso2.carbon.apimgt.usage.publisher.APIMgtUsagePublisherConstants;
 import org.wso2.carbon.apimgt.usage.publisher.DataPublisherUtil;
-import org.wso2.carbon.apimgt.usage.publisher.internal.UsageComponent;
-import org.wso2.carbon.apimgt.usage.publisher.service.APIMGTConfigReaderService;
 
 public class DataBridgeFaultPublisherDTO extends FaultPublisherDTO{
 
@@ -47,12 +44,11 @@ public class DataBridgeFaultPublisherDTO extends FaultPublisherDTO{
 
     public static String getStreamDefinition() {
 
-	    APIMGTConfigReaderService apimgtConfigReaderService =
-			    UsageComponent.getApiMgtConfigReaderService();
-
         String streamDefinition =  "{" +
-                "  'name':'" + apimgtConfigReaderService.getFaultStreamName() + "'," +
-                "  'version':'" + apimgtConfigReaderService.getFaultStreamVersion() + "'," +
+                "  'name':'" +
+                DataPublisherUtil.getApiManagerAnalyticsConfiguration().getFaultStreamName() + "'," +
+                "  'version':'" +
+                DataPublisherUtil.getApiManagerAnalyticsConfiguration().getFaultStreamVersion() + "'," +
                 "  'nickName': 'API Manager Fault Data'," +
                 "  'description': 'Fault Data'," +
                 "  'metaData':[" +

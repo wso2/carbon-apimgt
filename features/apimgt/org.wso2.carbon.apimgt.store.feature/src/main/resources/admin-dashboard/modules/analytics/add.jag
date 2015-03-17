@@ -80,7 +80,7 @@ var addAnalyticsConfig = function (configData) {
         log.info("Saving Analytics config in registry...");
         stub.configureEventing(eventingConfigData);
         stub.configureAnalyzing(analyzingConfigData);
-        var configReaderService = org.wso2.carbon.apimgt.usage.publisher.service.APIMGTConfigReaderService.getInstance();
+        var configReaderService = org.wso2.carbon.apimgt.impl.APIManagerAnalyticsConfiguration.getInstance();
         log.info(configReaderService.getRequestStreamName());
         log.info(configReaderService.getResponseStreamName());
         configReaderService.setEnabled(true);
@@ -124,8 +124,8 @@ var addDatasourceConfig = function (configData) {
         client.setOptions(options);
 
         var jndiConfig = new org.wso2.carbon.ndatasource.ui.stub.core.xsd.JNDIConfig();
-        var dsName = 'WSO2_STAT_DB';
-        var dsJndiName = 'jdbc/WSO2_STAT_DB';
+        var dsName = 'WSO2AM_STATS_DB';
+        var dsJndiName = 'jdbc/WSO2AM_STATS_DB';
         jndiConfig.setName(dsJndiName);
 
         var configString = getDataSourceConfigString(configData).result;
@@ -141,6 +141,8 @@ var addDatasourceConfig = function (configData) {
         log.info("Saving datasource '" + dsName + "'...");
         stub.addDataSource(dataSourceMetaInfo);
         log.info("Datasource '" + dsName + "' saved");
+        org.wso2.carbon.apimgt.usage.client.APIUsageStatisticsClient.initializeDataSource();
+        log.info("Intialized datasource '" + dsName);
         return {
             error: false
         };
@@ -201,8 +203,8 @@ var addBamServerProfile = function (configData) {
 
     try {
         var carbon = require('carbon');
-        //org.wso2.carbon.apimgt.impl.utils.APIUtil.addBamServerProfile(configData.eventReceiverURL,
-        // configData.eventReceiverUsername, configData.eventReceiverPassword, parseInt(carbon.server.tenantId()));
+        org.wso2.carbon.apimgt.impl.utils.APIUtil.addBamServerProfile(configData.eventReceiverURL,
+        configData.eventReceiverUsername, configData.eventReceiverPassword, parseInt(carbon.server.tenantId()));
         return {
             error: false
         };

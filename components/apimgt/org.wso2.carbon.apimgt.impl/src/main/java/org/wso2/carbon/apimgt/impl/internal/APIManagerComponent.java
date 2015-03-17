@@ -38,6 +38,7 @@ import org.wso2.carbon.apimgt.impl.utils.APIMgtDBUtil;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.utils.RemoteAuthorizationManager;
 import org.wso2.carbon.apimgt.impl.workflow.events.DataPublisherAlreadyExistsException;
+import org.wso2.carbon.bam.service.data.publisher.services.ServiceDataPublisherAdmin;
 import org.wso2.carbon.base.MultitenantConstants;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.databridge.agent.thrift.lb.LoadBalancingDataPublisher;
@@ -99,7 +100,9 @@ import java.util.concurrent.ConcurrentHashMap;
  * @scr.reference name="tenant.indexloader"
  * interface="org.wso2.carbon.registry.indexing.service.TenantIndexingLoader" cardinality="1..1" policy="dynamic"
  * bind="setIndexLoader" unbind="unsetIndexLoader"
-
+ * @scr.reference name="bam.service.data.publisher"
+ * interface="org.wso2.carbon.bam.service.data.publisher.services.ServiceDataPublisherAdmin" cardinality="1..1"
+ * policy="dynamic" bind="setDataPublisherService" unbind="unsetDataPublisherService"
  */
 public class APIManagerComponent {
     //TODO refactor caching implementation
@@ -107,6 +110,8 @@ public class APIManagerComponent {
     private static final Log log = LogFactory.getLog(APIManagerComponent.class);
 
     private ServiceRegistration registration;
+
+    private static ServiceDataPublisherAdmin dataPublisherAdminService;
 
     private static TenantRegistryLoader tenantRegistryLoader;
 
@@ -155,6 +160,9 @@ public class APIManagerComponent {
                     APIManagerConfigurationService.class.getName(),
                     configurationService, null);
             APIStatusObserverList.getInstance().init(configuration);
+
+            APIManagerAnalyticsConfiguration analyticsConfiguration = APIManagerAnalyticsConfiguration.getInstance();
+            analyticsConfiguration.setAPIManagerConfiguration(configuration);
 
             AuthorizationUtils.addAuthorizeRoleListener(APIConstants.AM_CREATOR_APIMGT_EXECUTION_ID,
                     RegistryUtils.getAbsolutePath(RegistryContext.getBaseInstance(),
@@ -230,6 +238,20 @@ public class APIManagerComponent {
 
     protected void unsetRegistryService(RegistryService registryService) {
         ServiceReferenceHolder.getInstance().setRegistryService(null);
+    }
+
+    protected void setDataPublisherService(ServiceDataPublisherAdmin service) {
+        log.debug("Event Data Publisher service bound to the API usage handler");
+        dataPublisherAdminService = service;
+    }
+
+    protected void unsetDataPublisherService(ServiceDataPublisherAdmin service) {
+        log.debug("Event Data Publisher service unbound from the API usage handler");
+        dataPublisherAdminService = null;
+    }
+
+    public static ServiceDataPublisherAdmin getDataPublisherAdminService() {
+        return dataPublisherAdminService;
     }
 
     protected void setIndexLoader(TenantIndexingLoader indexLoader) {

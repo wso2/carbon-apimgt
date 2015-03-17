@@ -15,18 +15,15 @@
 * specific language governing permissions and limitations
 * under the License.
 */
-package org.wso2.carbon.apimgt.usage.publisher.service;
+package org.wso2.carbon.apimgt.impl;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
-import org.wso2.carbon.apimgt.impl.APIConstants;
-import org.wso2.carbon.apimgt.usage.publisher.APIMgtUsagePublisherConstants;
-import org.wso2.carbon.apimgt.usage.publisher.DataPublisherUtil;
+import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 
 import java.util.Map;
 
-public class APIMGTConfigReaderService {
+public class APIManagerAnalyticsConfiguration {
 
     private String bamServerUrlGroups;
     private String bamServerUser;
@@ -43,22 +40,22 @@ public class APIMGTConfigReaderService {
 	private String faultStreamVersion;
     private String throttleStreamName;
 	private String throttleStreamVersion;
-    public static APIMGTConfigReaderService instance = new APIMGTConfigReaderService();
-	private static Log log = LogFactory.getLog(APIMGTConfigReaderService.class);
+    public static APIManagerAnalyticsConfiguration instance = new APIManagerAnalyticsConfiguration();
+	private static Log log = LogFactory.getLog(APIManagerAnalyticsConfiguration.class);
 
-    private APIMGTConfigReaderService() {
-        enabled = DataPublisherUtil.isAnalyticsEnabled();
-        if(enabled == true) {
-            Map<String, String> analyticsConfigs = DataPublisherUtil.getAnalyticsConfigFromRegistry();
+    private APIManagerAnalyticsConfiguration() {
+        enabled = APIUtil.isAnalyticsEnabled();
+        if(enabled) {
+            Map<String, String> analyticsConfigs = APIUtil.getAnalyticsConfigFromRegistry();
             bamServerUrlGroups = analyticsConfigs.get(APIConstants.API_USAGE_BAM_SERVER_URL_GROUPS);
             bamServerUser = analyticsConfigs.get(APIConstants.API_USAGE_BAM_SERVER_USER);
             bamServerPassword = analyticsConfigs.get(APIConstants.API_USAGE_BAM_SERVER_PASSWORD);
         }
     }
 
-    public static synchronized APIMGTConfigReaderService getInstance(){
+    public static synchronized APIManagerAnalyticsConfiguration getInstance(){
         if(instance == null){
-            instance = new APIMGTConfigReaderService();
+            instance = new APIManagerAnalyticsConfiguration();
         }
         return instance;
     }
@@ -66,30 +63,30 @@ public class APIMGTConfigReaderService {
     public void setAPIManagerConfiguration(APIManagerConfiguration config){
         publisherClass = config.getFirstProperty(APIConstants.API_USAGE_PUBLISHER_CLASS);
         requestStreamName =
-                config.getFirstProperty(APIMgtUsagePublisherConstants.API_REQUEST_STREAM_NAME);
+                config.getFirstProperty(APIConstants.API_REQUEST_STREAM_NAME);
         requestStreamVersion =
-                config.getFirstProperty(APIMgtUsagePublisherConstants.API_REQUEST_STREAM_VERSION);
+                config.getFirstProperty(APIConstants.API_REQUEST_STREAM_VERSION);
         if (requestStreamName == null || requestStreamVersion == null) {
             log.error("Request stream name or version is null. Check api-manager.xml");
         }
         responseStreamName =
-                config.getFirstProperty(APIMgtUsagePublisherConstants.API_RESPONSE_STREAM_NAME);
+                config.getFirstProperty(APIConstants.API_RESPONSE_STREAM_NAME);
         responseStreamVersion =
-                config.getFirstProperty(APIMgtUsagePublisherConstants.API_RESPONSE_STREAM_VERSION);
+                config.getFirstProperty(APIConstants.API_RESPONSE_STREAM_VERSION);
         if (responseStreamName == null || responseStreamVersion == null) {
             log.error("Response stream name or version is null. Check api-manager.xml");
         }
         faultStreamName =
-                config.getFirstProperty(APIMgtUsagePublisherConstants.API_FAULT_STREAM_NAME);
+                config.getFirstProperty(APIConstants.API_FAULT_STREAM_NAME);
         faultStreamVersion =
-                config.getFirstProperty(APIMgtUsagePublisherConstants.API_FAULT_STREAM_VERSION);
+                config.getFirstProperty(APIConstants.API_FAULT_STREAM_VERSION);
         if (faultStreamName == null || faultStreamVersion == null) {
             log.error("Fault stream name or version is null. Check api-manager.xml");
         }
         throttleStreamName =
-                config.getFirstProperty(APIMgtUsagePublisherConstants.API_THROTTLE_STREAM_NAME);
+                config.getFirstProperty(APIConstants.API_THROTTLE_STREAM_NAME);
         throttleStreamVersion =
-                config.getFirstProperty(APIMgtUsagePublisherConstants.API_THRORRLE_STREAM_VERSION);
+                config.getFirstProperty(APIConstants.API_THRORRLE_STREAM_VERSION);
         if (throttleStreamName == null || throttleStreamVersion == null) {
             log.error("Throttle stream name or version is null. Check api-manager.xml");
         }
@@ -114,7 +111,7 @@ public class APIMGTConfigReaderService {
     public String getPublisherClass() {
         return publisherClass;
     }
-     
+
     public String getGoogleAnalyticsTrackingID() {
  		return googleAnalyticsTrackingID;
  	}

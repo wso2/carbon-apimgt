@@ -30,7 +30,7 @@ import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 */
 public class APIMgtThrottleUsageHandler extends AbstractMediator {
 
-    private boolean enabled = UsageComponent.getApiMgtConfigReaderService().isEnabled();
+    private boolean enabled = DataPublisherUtil.getApiManagerAnalyticsConfiguration().isEnabled();
 
     private volatile APIMgtUsageDataPublisher publisher;
 
@@ -43,7 +43,8 @@ public class APIMgtThrottleUsageHandler extends AbstractMediator {
         if (publisher == null) {
             synchronized (this) {
                 if (publisher == null) {
-                    String publisherClass = UsageComponent.getApiMgtConfigReaderService().getPublisherClass();
+                    String publisherClass = DataPublisherUtil.getApiManagerAnalyticsConfiguration()
+                            .getPublisherClass();
                     try {
                         log.debug("Instantiating Data Publisher");
                         publisher = (APIMgtUsageDataPublisher) Class.forName(publisherClass).

@@ -85,7 +85,7 @@ var getDatasourceConfig = function () {
         options.setProperty(org.apache.axis2.transport.http.HTTPConstants.AUTHENTICATE, authenticator);
         client.setOptions(options);
 
-        var dsName = "WSO2_STAT_DB";
+        var dsName = "WSO2AM_STATS_DB";
         var dataSource = stub.getDataSource(dsName);
         var ds = null;
         if (dataSource == null) {
