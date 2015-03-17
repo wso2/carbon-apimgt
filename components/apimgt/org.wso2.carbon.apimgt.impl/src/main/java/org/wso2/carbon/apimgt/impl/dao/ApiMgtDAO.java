@@ -1532,6 +1532,171 @@ public class ApiMgtDAO {
         return subscribedAPIs;
     }
 
+    public Integer getSubscriptionCount(Subscriber subscriber,String applicationName)
+            throws APIManagementException {
+        Integer subscriptionCount = 0;
+        Connection connection = null;
+        PreparedStatement ps = null;
+        ResultSet result = null;
+
+        try {
+            connection = APIMgtDBUtil.getConnection();
+
+            String sqlQuery = "SELECT COUNT(*) AS SUB_COUNT " +
+                              " FROM AM_SUBSCRIPTION SUBS"+
+                              " ,AM_APPLICATION APP"+
+                              " ,AM_SUBSCRIBER SUB "+
+                              " WHERE SUBS.SUBS_CREATE_STATE ='" + APIConstants.SubscriptionCreatedStatus.SUBSCRIBE + "'"+
+                              " AND SUBS.APPLICATION_ID = APP.APPLICATION_ID"+
+                              " AND APP.NAME=?"+
+                              " AND APP.SUBSCRIBER_ID= SUB.SUBSCRIBER_ID"+
+                              " AND SUB.USER_ID =?"+
+                              " AND SUB.TENANT_ID=?";
+
+            if (forceCaseInsensitiveComparisons) {
+                sqlQuery = "SELECT COUNT(*) AS SUB_COUNT " +
+                            " FROM AM_SUBSCRIPTION SUBS"+
+                            " ,AM_APPLICATION APP"+
+                            " ,AM_SUBSCRIBER SUB "+
+                            " WHERE SUBS.SUBS_CREATE_STATE ='" + APIConstants.SubscriptionCreatedStatus.SUBSCRIBE + "'"+
+                            " AND SUBS.APPLICATION_ID = APP.APPLICATION_ID"+
+                            " AND APP.NAME=?"+
+                            " AND APP.SUBSCRIBER_ID= SUB.SUBSCRIBER_ID"+
+                            " AND LOWER(SUB.USER_ID) = LOWER(?)"+
+                            " AND SUB.TENANT_ID=?";
+            }
+            
+            ps = connection.prepareStatement(sqlQuery);
+            ps.setString(1, applicationName);
+            ps.setString(2, subscriber.getName());
+            int tenantId = IdentityUtil.getTenantIdOFUser(subscriber.getName());
+            ps.setInt(3, tenantId);
+            result = ps.executeQuery();
+
+            while (result.next()) {
+                subscriptionCount = result.getInt("SUB_COUNT");
+            }
+
+        } catch (SQLException e) {
+            handleException("Failed to get SubscribedAPI of :" + subscriber.getName(), e);
+        } catch (IdentityException e) {
+            handleException("Failed get tenant id of user " + subscriber.getName(), e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(ps, connection, result);
+        }
+        return subscriptionCount;
+    }
+
+    public Set<SubscribedAPI> getPaginatedSubscribedAPIs(Subscriber subscriber,String applicationName, int startSubIndex, int endSubIndex)
+            throws APIManagementException {
+        Set<SubscribedAPI> subscribedAPIs = new LinkedHashSet<SubscribedAPI>();
+        Connection connection = null;
+        PreparedStatement ps = null;
+        ResultSet result = null;
+
+        try {
+            connection = APIMgtDBUtil.getConnection();
+
+            String sqlQuery = "SELECT " +
+                    "   SUBS.SUBSCRIPTION_ID" +
+                    "   ,API.API_PROVIDER AS API_PROVIDER" +
+                    "   ,API.API_NAME AS API_NAME" +
+                    "   ,API.API_VERSION AS API_VERSION" +
+                    "   ,SUBS.TIER_ID AS TIER_ID" +
+                    "   ,APP.APPLICATION_ID AS APP_ID" +
+                    "   ,SUBS.LAST_ACCESSED AS LAST_ACCESSED" +
+                    "   ,SUBS.SUB_STATUS AS SUB_STATUS" +
+                    "   ,SUBS.SUBS_CREATE_STATE AS SUBS_CREATE_STATE" +
+                    "   ,APP.NAME AS APP_NAME " +
+                    "   ,APP.CALLBACK_URL AS CALLBACK_URL " +
+                    "FROM " +
+                    "   AM_SUBSCRIBER SUB," +
+                    "   AM_APPLICATION APP, " +
+                    "   AM_SUBSCRIPTION SUBS, " +
+                    "   AM_API API " +
+                    "WHERE " +
+                    "   SUB.USER_ID = ? " +
+                    "   AND SUB.TENANT_ID = ? " +
+                    "   AND SUB.SUBSCRIBER_ID=APP.SUBSCRIBER_ID " +
+                    "   AND APP.APPLICATION_ID=SUBS.APPLICATION_ID " +
+                    "   AND API.API_ID=SUBS.API_ID" +
+                    "   AND APP.NAME= ? " +
+                    "   AND SUBS.SUBS_CREATE_STATE = '" + APIConstants.SubscriptionCreatedStatus.SUBSCRIBE + "'";
+
+            if (forceCaseInsensitiveComparisons) {
+                sqlQuery = "SELECT " +
+                        "   SUBS.SUBSCRIPTION_ID" +
+                        "   ,API.API_PROVIDER AS API_PROVIDER" +
+                        "   ,API.API_NAME AS API_NAME" +
+                        "   ,API.API_VERSION AS API_VERSION" +
+                        "   ,SUBS.TIER_ID AS TIER_ID" +
+                        "   ,APP.APPLICATION_ID AS APP_ID" +
+                        "   ,SUBS.LAST_ACCESSED AS LAST_ACCESSED" +
+                        "   ,SUBS.SUB_STATUS AS SUB_STATUS" +
+                        "   ,SUBS.SUBS_CREATE_STATE AS SUBS_CREATE_STATE" +
+                        "   ,APP.NAME AS APP_NAME " +
+                        "   ,APP.CALLBACK_URL AS CALLBACK_URL " +
+                        "FROM " +
+                        "   AM_SUBSCRIBER SUB," +
+                        "   AM_APPLICATION APP, " +
+                        "   AM_SUBSCRIPTION SUBS, " +
+                        "   AM_API API " +
+                        "WHERE " +
+                        "   LOWER(SUB.USER_ID) = LOWER(?) " +
+                        "   AND SUB.TENANT_ID = ? " +
+                        "   AND SUB.SUBSCRIBER_ID=APP.SUBSCRIBER_ID " +
+                        "   AND APP.APPLICATION_ID=SUBS.APPLICATION_ID " +
+                        "   AND API.API_ID=SUBS.API_ID" +
+                        "   AND APP.NAME= ? " +
+                        "   AND SUBS.SUBS_CREATE_STATE = '" + APIConstants.SubscriptionCreatedStatus.SUBSCRIBE + "'";
+            }
+
+            ps = connection.prepareStatement(sqlQuery);
+            ps.setString(1, subscriber.getName());
+            int tenantId = IdentityUtil.getTenantIdOFUser(subscriber.getName());
+            ps.setInt(2, tenantId);
+            ps.setString(3, applicationName);
+            result = ps.executeQuery();
+
+            if (result == null) {
+                return subscribedAPIs;
+            }
+
+            int index = 0;
+
+            while (result.next()) {
+                if(index >= startSubIndex && index < endSubIndex) {
+                    APIIdentifier apiIdentifier = new APIIdentifier(APIUtil.replaceEmailDomain(result.getString("API_PROVIDER")),
+                            result.getString("API_NAME"), result.getString("API_VERSION"));
+
+                    SubscribedAPI subscribedAPI = new SubscribedAPI(subscriber, apiIdentifier);
+                    subscribedAPI.setSubStatus(result.getString("SUB_STATUS"));
+                    subscribedAPI.setSubCreatedStatus(result.getString("SUBS_CREATE_STATE"));
+                    subscribedAPI.setTier(new Tier(
+                            result.getString(APIConstants.SUBSCRIPTION_FIELD_TIER_ID)));
+                    subscribedAPI.setLastAccessed(result.getDate(
+                            APIConstants.SUBSCRIPTION_FIELD_LAST_ACCESS));
+
+                    Application application = new Application(result.getString("APP_NAME"), subscriber);
+                    subscribedAPI.setApplication(application);
+                    subscribedAPIs.add(subscribedAPI);
+                    if(index == endSubIndex-1){
+                        break;
+                    }
+                }
+                index++;
+            }
+
+        } catch (SQLException e) {
+            handleException("Failed to get SubscribedAPI of :" + subscriber.getName(), e);
+        } catch (IdentityException e) {
+            handleException("Failed get tenant id of user " + subscriber.getName(), e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(ps, connection, result);
+        }
+        return subscribedAPIs;
+    }
+
     /**
      * This method returns the set of APIs for given subscriber
      *

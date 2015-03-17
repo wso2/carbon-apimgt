@@ -2548,8 +2548,7 @@ public class APIStoreHostObject extends ScriptableObject {
 		return prodKeyScope;
 	}
 
-    public static NativeArray jsFunction_getAllSubscriptions(Context cx,
-                                                             Scriptable thisObj, Object[] args, Function funObj)
+    public static NativeObject jsFunction_getAllSubscriptions(Context cx,Scriptable thisObj, Object[] args, Function funObj)
             throws ScriptException, APIManagementException {
 
         if (args == null || args.length == 0 || !isStringArray(args)) {
@@ -2557,6 +2556,8 @@ public class APIStoreHostObject extends ScriptableObject {
         }
 
         NativeArray applicationList = new NativeArray(0);
+        Integer subscriptionCount = 0;
+        NativeObject result = new NativeObject();
         boolean isTenantFlowStarted = false;
         
         long startTime = 0;
@@ -2567,6 +2568,8 @@ public class APIStoreHostObject extends ScriptableObject {
         try {
             String username = args[0].toString();
             String appName = args[1].toString();
+            int startSubIndex = Integer.parseInt(args[2].toString());
+            int endSubIndex = Integer.parseInt(args[3].toString());
 
             String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(username));
             if (tenantDomain != null &&
@@ -2579,6 +2582,7 @@ public class APIStoreHostObject extends ScriptableObject {
             Subscriber subscriber = new Subscriber(username);
             APIConsumer apiConsumer = getAPIConsumer(thisObj);
             Application[] applications = apiConsumer.getApplications(new Subscriber(username));
+
             if (applications != null) {
                 int i = 0;
                 for (Application application : applications) {
@@ -2591,12 +2595,14 @@ public class APIStoreHostObject extends ScriptableObject {
 	                NativeArray apisArray = new NativeArray(0);
 	                Set<Scope> scopeSet = new LinkedHashSet<Scope>();
 	                NativeArray scopesArray = new NativeArray(0);
+
 	                if (((appName == null || "".equals(appName)) && i == 0) ||
 	                    appName.equals(application.getName())) {
 
-		                //get subscribed APIs set for application
+		                //get subscribed APIs set as per the starting and ending indexes for application.
 		                Set<SubscribedAPI> subscribedAPIs =
-				                apiConsumer.getSubscribedAPIs(subscriber, application.getName());
+				                apiConsumer.getPaginatedSubscribedAPIs(subscriber, application.getName(),startSubIndex,endSubIndex);
+                        subscriptionCount = apiConsumer.getSubscriptionCount(subscriber,application.getName());
 
 		                List<APIIdentifier> identifiers = new ArrayList<APIIdentifier>();
 		                for (SubscribedAPI subscribedAPI : subscribedAPIs) {
@@ -2750,6 +2756,8 @@ public class APIStoreHostObject extends ScriptableObject {
                         appObj.put("subscriptions", appObj, apisArray);
                         appObj.put("scopes", appObj, scopesArray);
                         applicationList.put(i++, applicationList, appObj);
+                        result.put("applications", result, applicationList);
+                        result.put("totalLength", result, subscriptionCount);
                     }
                 }
             }
@@ -2764,7 +2772,8 @@ public class APIStoreHostObject extends ScriptableObject {
         if (log.isDebugEnabled()) {
             log.debug("jsFunction_getMySubscriptionDetail took : " + (System.currentTimeMillis() - startTime) + "ms");
         }
-        return applicationList;
+
+        return result;
     }
 
     private static void addAPIObj(SubscribedAPI subscribedAPI, NativeArray apisArray,
