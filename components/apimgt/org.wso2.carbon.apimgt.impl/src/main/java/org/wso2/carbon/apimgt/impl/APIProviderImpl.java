@@ -1134,7 +1134,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             // We need to change the context by setting the new version
             // This is a change that is coming with the context version strategy
             String contextTemplate = artifact.getAttribute(APIConstants.API_OVERVIEW_CONTEXT_TEMPLATE);
-            artifact.setAttribute(APIConstants.API_OVERVIEW_CONTEXT, contextTemplate.replace("{version}", newVersion));
+            artifact.setAttribute(APIConstants.API_OVERVIEW_CONTEXT,
+                                  contextTemplate.replace(APIConstants.SYNAPSE_REST_CONTEXT_VERSION_VARIABLE,
+                                                          newVersion));
 
             artifactManager.addGenericArtifact(artifact);
             String artifactPath = GovernanceUtils.getArtifactPath(registry, artifact.getId());
