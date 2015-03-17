@@ -2897,9 +2897,10 @@ public class APIProviderHostObject extends ScriptableObject {
             if (fileHostObject != null && fileHostObject.getJavaScriptFile().getLength() != 0) {
             	String contentType = (String) args[10];
                 Icon icon = new Icon(fileHostObject.getInputStream(), contentType);
-                
-                String filePath = APIUtil.getDocumentationFilePath(apiId, fileHostObject.getName());
                 String fname = fileHostObject.getName();
+                int index = fname.lastIndexOf("//");
+                fname = fname.substring(index+1);
+                String filePath = APIUtil.getDocumentationFilePath(apiId, fname);
                 API api = apiProvider.getAPI(apiId);
                 String apiPath=APIUtil.getAPIPath(apiId);
                 String visibleRolesList = api.getVisibleRoles();
@@ -3838,7 +3839,10 @@ public class APIProviderHostObject extends ScriptableObject {
             if (fileHostObject != null && fileHostObject.getJavaScriptFile().getLength() != 0) {
                 Icon icon = new Icon(fileHostObject.getInputStream(),
                                      fileHostObject.getJavaScriptFile().getContentType());
-                String filePath = APIUtil.getDocumentationFilePath(apiId, fileHostObject.getName());
+                String fName = fileHostObject.getName();
+                int index = fName.lastIndexOf("\\");
+                fName = fName.substring(index + 1);
+                String filePath = APIUtil.getDocumentationFilePath(apiId, fName);
                 doc.setFilePath(apiProvider.addIcon(filePath, icon));
             } else if (oldDoc.getFilePath() != null) {
                 doc.setFilePath(oldDoc.getFilePath());
