@@ -29,9 +29,7 @@ import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
-import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
-import org.apache.http.client.utils.URLEncodedUtils;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
 import org.codehaus.jettison.json.JSONObject;
@@ -50,7 +48,6 @@ import org.wso2.carbon.apimgt.impl.clients.OAuth2TokenValidationServiceClient;
 import org.wso2.carbon.apimgt.impl.clients.OAuthAdminClient;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
-import org.wso2.carbon.apimgt.keymgt.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.keymgt.util.APIKeyMgtDataHolder;
 import org.wso2.carbon.apimgt.keymgt.util.APIKeyMgtUtil;
 import org.wso2.carbon.identity.application.common.model.xsd.InboundAuthenticationConfig;
@@ -59,19 +56,12 @@ import org.wso2.carbon.identity.application.common.model.xsd.Property;
 import org.wso2.carbon.identity.application.common.model.xsd.ServiceProvider;
 import org.wso2.carbon.identity.oauth.stub.dto.OAuthConsumerAppDTO;
 import org.wso2.carbon.identity.oauth2.stub.dto.OAuth2ClientApplicationDTO;
-import org.wso2.carbon.utils.CarbonUtils;
-import org.wso2.securevault.SecretResolverFactory;
 
-import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
 import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
-import java.util.Stack;
 
 /**
  * This class holds the key manager implementation considering WSO2 as the identity provider
@@ -201,12 +191,31 @@ public class DefaultKeyManagerImpl extends AbstractKeyManager {
 
         ApplicationManagementServiceClient applicationManagementServiceClient = APIUtil.
                 getApplicationManagementServiceClient();
-        String applicationName = ApiMgtDAO.getApplicationFromConsumerKey(consumerKey);
+        OAuthConsumerAppDTO oAuthConsumerAppDTO = new OAuthConsumerAppDTO();
+        String serviceProviderApplicationName = null;
         try {
-            applicationManagementServiceClient.deleteApplication(applicationName, username);
+            oAuthConsumerAppDTO = oAuthAdminClient.getOAuthApplicationData(consumerKey, username);
+            serviceProviderApplicationName = oAuthConsumerAppDTO.getApplicationName();
         } catch (Exception e) {
-            handleException("Can not remove service provider for the given consumer key : " + consumerKey, e);
+            handleException("Something wrong while get OAuth Application data for the given consumer key : " +
+                    consumerKey, e);
         }
+        if (serviceProviderApplicationName != null) {
+            if (serviceProviderApplicationName.endsWith("_PRODUCTION") ||
+                    serviceProviderApplicationName.endsWith("_SANDBOX")) {
+
+                if (log.isDebugEnabled()) {
+                    log.debug("Trying to delete apim created service provider.");
+                }
+
+                try {
+                    applicationManagementServiceClient.deleteApplication(serviceProviderApplicationName, username);
+                } catch (Exception e) {
+                    handleException("Can not remove service provider for the given consumer key : " + consumerKey, e);
+                }
+            }
+        }
+
 
         try {
             oAuthAdminClient.removeOAuthApplicationData(consumerKey, username);

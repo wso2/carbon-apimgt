@@ -34,7 +34,6 @@ import org.wso2.carbon.apimgt.impl.dto.*;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.*;
 import org.wso2.carbon.apimgt.impl.workflow.*;
-import org.wso2.carbon.apimgt.keymgt.client.SubscriberKeyMgtClient;
 import org.wso2.carbon.apimgt.keymgt.stub.types.carbon.ApplicationKeysDTO;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.governance.api.common.dataobjects.GovernanceArtifact;
@@ -1474,7 +1473,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         //createApplication on oAuthorization server.
         OAuthApplicationInfo oAuthApplication = keyManager.createSemiManualAuthApplication(oauthAppRequest);
         //Do application mapping with consumerKey.
-        apiMgtDAO.createApplicationKeyTypeMapping(oauthAppRequest, applicationName, userName, clientId);
+        apiMgtDAO.createApplicationKeyTypeMappingForManualClients(oauthAppRequest, applicationName, userName, clientId);
 
 
         AccessTokenRequest tokenRequest = ApplicationUtils.createAccessTokenRequest(oAuthApplication,null);
