@@ -146,9 +146,9 @@ include("/jagg/jagg.jag");
         tokenScope = request.getParameter("tokenScope");       
         var accessAllowDomainsArr = accessAllowDomains.split(",");
         validityTime = request.getParameter("validityTime");
-		var retryAfterFailure = request.getParameter("retryAfterFailure");
-  		applicationId =session.get("selectedAppID");
-	
+	var retryAfterFailure = request.getParameter("retryAfterFailure");
+	var applicationId=request.getParameter("selectedAppID");
+		
 		if(retryAfterFailure == null){
 			retryAfterFailure = false;
 		}

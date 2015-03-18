@@ -31,7 +31,7 @@ var generateApplicationKey = function (application, username, keyType, callbackU
 	if(afterFailure){
         key = store.createApplicationKeys( username,application, keyType, callbackUrl, accessAllowDomains, validityTime, tokenScope, applicationId);
 	}else{
-	key = store.getApplicationKey( username,application, keyType, callbackUrl, accessAllowDomains, validityTime, tokenScope, applicationId);
+	    key = store.getApplicationKey( username,application, keyType, callbackUrl, accessAllowDomains, validityTime, tokenScope, applicationId);
         
 	}
         if (log.isDebugEnabled()) {

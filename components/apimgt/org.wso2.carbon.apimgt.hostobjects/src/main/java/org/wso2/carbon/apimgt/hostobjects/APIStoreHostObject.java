@@ -718,7 +718,7 @@ public class APIStoreHostObject extends ScriptableObject {
 
                 Map<String, String> keyDetails = getAPIConsumer(thisObj).requestApprovalForApplicationRegistration(
 		                username, (String) args[1], (String) args[2], (String) args[3],
-		                accessAllowDomainsArray, validityPeriod, authScopeString,  (Integer) args[7]);
+		                accessAllowDomainsArray, validityPeriod, authScopeString,  Integer.parseInt((String)args[7]));
 
                 NativeObject row = new NativeObject();
                 String authorizedDomains = "";
@@ -4222,7 +4222,7 @@ public class APIStoreHostObject extends ScriptableObject {
     public static String jsFunction_getGroupIds(Context cx, Scriptable thisObj, Object[] args, Function funObj) {
         String response = (String) args[0];
         APIConsumer consumer = getAPIConsumer(thisObj);
-        String groupId = "";
+        String groupId = null;
         try {
             groupId = consumer.getGroupIds(response);
         } catch (APIManagementException e) {
