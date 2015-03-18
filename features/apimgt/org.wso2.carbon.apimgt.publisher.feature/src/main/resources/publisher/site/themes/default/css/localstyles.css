@@ -1394,5 +1394,9 @@ svg.pie{
 .no-data-heading{
     color:#818791;
 }
+div.error{
+    color:#d10000 !important;
+    padding:5px;
+}
 
 
