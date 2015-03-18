@@ -27,9 +27,9 @@
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
+    <version>4.4.0</version>
     <artifactId>org.wso2.carbon.apimgt.handlers.security.stub</artifactId>
     <packaging>bundle</packaging>
-    <version>4.2.5-SNAPSHOT</version>
     <name>WSO2 Carbon - API Security Handler Service Stub</name>
     <url>http://wso2.org</url>
 
@@ -98,7 +98,7 @@
                         <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
                         <Bundle-Name>${project.artifactId}</Bundle-Name>
                         <Export-Package>
-                            org.wso2.carbon.apimgt.handlers.security.stub.*;version="${carbon.apimgt.version}",
+                            org.wso2.carbon.apimgt.handlers.security.stub.*;version="${apimgt.handlers.security.stub}",
                         </Export-Package>
                         <Import-Package>
                             !javax.xml.namespace,
