@@ -2548,7 +2548,7 @@ public class APIStoreHostObject extends ScriptableObject {
 		return prodKeyScope;
 	}
 
-    public static NativeArray jsFunction_getAllSubscriptions(Context cx,
+    public static NativeObject jsFunction_getAllSubscriptions(Context cx,
                                                              Scriptable thisObj, Object[] args, Function funObj)
             throws ScriptException, APIManagementException {
 
