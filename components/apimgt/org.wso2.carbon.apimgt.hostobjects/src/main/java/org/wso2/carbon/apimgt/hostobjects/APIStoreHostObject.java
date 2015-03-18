@@ -3529,12 +3529,24 @@ public class APIStoreHostObject extends ScriptableObject {
         APIIdentifier apiId = new APIIdentifier(provider, name, version);
 
         APIConsumer apiConsumer = getAPIConsumer(thisObj);
+        boolean isTenantFlowStarted = false;
+
         try {
+            String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(username));
+            if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
+                isTenantFlowStarted = true;
+                PrivilegedCarbonContext.startTenantFlow();
+                PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
+            }
             apiConsumer.removeSubscription(apiId, username, applicationId);
             return true;
         } catch (APIManagementException e) {
             handleException("Error while removing the subscription of" + name + "-" + version, e);
             return false;
+        } finally {
+            if (isTenantFlowStarted) {
+                PrivilegedCarbonContext.endTenantFlow();
+            }
         }
     }
 
