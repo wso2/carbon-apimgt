@@ -311,11 +311,12 @@ public interface APIConsumer extends APIManager {
      * @param providerId , provider id
      * @param loggedUser logged user
      * @param limit Maximum number of results to return. Pass -1 to get all.
+     * @param apiOwner Owner name which is used to filter APIs
      * @return set of API
      * @throws org.wso2.carbon.apimgt.api.APIManagementException if failed to get set of API
      */
     public Set<API> getPublishedAPIsByProvider(String providerId, String loggedUser, int limit, String apiOwner)
-            throws APIManagementException;/**
+            throws APIManagementException;
 
      /** Get a list of published APIs by the given provider.
      *
