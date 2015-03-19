@@ -17,15 +17,17 @@
 package org.apache.synapse.transport.passthru.util;
 
 import org.apache.axiom.om.OMOutputFormat;
-import org.apache.axis2.addressing.EndpointReference;
-import org.apache.axis2.context.MessageContext;
-import org.apache.axis2.context.ConfigurationContext;
 import org.apache.axis2.Constants;
+import org.apache.axis2.addressing.EndpointReference;
+import org.apache.axis2.context.ConfigurationContext;
+import org.apache.axis2.context.MessageContext;
 import org.apache.axis2.transport.TransportUtils;
 import org.apache.axis2.util.JavaUtils;
 import org.apache.axis2.description.AxisService;
 import org.apache.axis2.description.Parameter;
 import org.apache.axis2.description.AxisOperation;
+import org.apache.axis2.description.Parameter;
+import org.apache.axis2.description.AxisService;;
 import org.apache.http.protocol.HTTP;
 import org.apache.http.HttpStatus;
 import org.apache.commons.logging.Log;
@@ -319,7 +321,7 @@ public class PassThroughTransportUtils {
                * text/xml content type into application/xml if the request was not a SOAP
                * request.
                */
-        if(msgContext.getSoapAction() == null) {
+        if(msgContext.isDoingREST()) {
             msgContext.setProperty(PassThroughConstants.INVOKED_REST, true);
         }
         format.setSOAP11(msgContext.isSOAP11());
