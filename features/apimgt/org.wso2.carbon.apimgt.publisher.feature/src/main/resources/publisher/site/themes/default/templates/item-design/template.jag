@@ -128,7 +128,10 @@
                 </div>
                 <div class="modal-body">
                     <div id="swagger_editor" class="clearfix" style="height:400px;"></div>
-                </div>                    
+                </div>
+                <div class="modal-header">
+                    <label id="output_string" class="error" style="display: block;" disabled></label>
+                </div>
                 <div class="modal-footer">
                 <button class="btn btn-primary" id="update_swagger">Save</button>                    
                 <button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
