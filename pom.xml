@@ -352,13 +352,13 @@
             <dependency>
                 <groupId>org.wso2.carbon</groupId>
                 <artifactId>org.wso2.carbon.registry.core</artifactId>
-                <version>${wso2carbon.version}</version>
+                <version>${carbon.kernel.version}</version>
             </dependency>
 
             <dependency>
-                <groupId>org.wso2.carbon</groupId>
+                <groupId>org.wso2.carbon.registry</groupId>
                 <artifactId>org.wso2.carbon.registry.ws.client</artifactId>
-                <version>${wso2carbon.version}</version>
+                <version>${carbon.registry.version}</version>
             </dependency>
 
             <dependency>
@@ -368,9 +368,9 @@
             </dependency>
 
             <dependency>
-                <groupId>org.wso2.carbon</groupId>
+                <groupId>org.wso2.carbon.governance</groupId>
                 <artifactId>org.wso2.carbon.governance.api</artifactId>
-                <version>4.2.1</version>
+                <version>${carbon.governance.version}</version>
             </dependency>
 
             <dependency>
@@ -418,7 +418,7 @@
             <dependency>
                 <groupId>org.wso2.carbon</groupId>
                 <artifactId>org.wso2.carbon.registry.api</artifactId>
-                <version>${wso2carbon.version}</version>
+                <version>${carbon.kernel.version}</version>
             </dependency>
 
             <dependency>
@@ -475,9 +475,9 @@
             </dependency>
 
             <dependency>
-                <groupId>org.wso2.carbon</groupId>
+                <groupId>org.wso2.carbon.registry</groupId>
                 <artifactId>org.wso2.carbon.registry.indexing</artifactId>
-                <version>4.2.1</version>
+                <version>${carbon.registry.version}</version>
             </dependency>
 
             <dependency>
@@ -680,12 +680,7 @@
         <!-- Carbon kernel version -->
         <wso2carbon.version>4.2.0</wso2carbon.version>
         <carbon.kernel.version>4.2.0</carbon.kernel.version>
-
-
-        <carbon.kernel.version>4.2.0</carbon.kernel.version>
-        <carbon.registry.version>4.2.0</carbon.registry.version>
-        <carbon.registry.imp.pkg.version>[1.0.1, 1.1.0)</carbon.registry.imp.pkg.version>
-        <commons.logging.imp.pkg.version>[1.1.0, 1.2.0)</commons.logging.imp.pkg.version>
+	<commons.logging.imp.pkg.version>[1.1.0, 1.2.0)</commons.logging.imp.pkg.version>
 
         <!-- Carbon platform version comes here-->
         <carbon.platform.version>4.2.0</carbon.platform.version>
@@ -693,7 +688,14 @@
         <carbon.platform.package.import.version.range>[4.2.0, 4.4.0)</carbon.platform.package.import.version.range>
         <carbon.apimgt.handlers.stub.package.import.version.range>4.4.0</carbon.apimgt.handlers.stub.package.import.version.range>
 
-        <!-- P2 Plugin Version -->
+	<!-- Carbon Governance -->
+        <carbon.governance.version>4.3.1-SNAPSHOT</carbon.governance.version>
+
+        <!-- Carbon Registry -->
+        <carbon.registry.version>4.3.2-SNAPSHOT</carbon.registry.version>
+        <carbon.registry.imp.pkg.version>[1.0.1, 1.1.0)</carbon.registry.imp.pkg.version>
+
+	<!-- P2 Plugin Version -->
         <carbon.p2.plugin.version>1.5.3</carbon.p2.plugin.version>
 
         <!-- Axis2 Version -->
