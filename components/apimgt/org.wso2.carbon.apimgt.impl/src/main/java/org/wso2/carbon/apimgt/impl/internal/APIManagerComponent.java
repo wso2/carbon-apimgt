@@ -157,26 +157,26 @@ public class APIManagerComponent {
             APIStatusObserverList.getInstance().init(configuration);
 
             AuthorizationUtils.addAuthorizeRoleListener(APIConstants.AM_CREATOR_APIMGT_EXECUTION_ID,
-                    RegistryUtils.getAbsolutePath(RegistryContext.getBaseInstance(),
+                                                        RegistryUtils.getAbsolutePath(RegistryContext.getBaseInstance(),
                                                                                       APIUtil.getMountedPath(RegistryContext.getBaseInstance(),
                                                                                                              RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH) +
-                                                                                              APIConstants.API_APPLICATION_DATA_LOCATION),
-                    APIConstants.Permissions.API_CREATE,
-                    UserMgtConstants.EXECUTE_ACTION, null);
+                                                                                      APIConstants.API_APPLICATION_DATA_LOCATION),
+                                                        APIConstants.Permissions.API_CREATE,
+                                                        UserMgtConstants.EXECUTE_ACTION, null);
             AuthorizationUtils.addAuthorizeRoleListener(APIConstants.AM_CREATOR_GOVERNANCE_EXECUTION_ID,
-                    RegistryUtils.getAbsolutePath(RegistryContext.getBaseInstance(),
+                                                        RegistryUtils.getAbsolutePath(RegistryContext.getBaseInstance(),
                                                                                       APIUtil.getMountedPath(RegistryContext.getBaseInstance(),
                                                                                                              RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH) +
-                                                                                              "/trunk"),
-                    APIConstants.Permissions.API_CREATE,
-                    UserMgtConstants.EXECUTE_ACTION, null);
+                                                                                      "/trunk"),
+                                                        APIConstants.Permissions.API_CREATE,
+                                                        UserMgtConstants.EXECUTE_ACTION, null);
             AuthorizationUtils.addAuthorizeRoleListener(APIConstants.AM_PUBLISHER_APIMGT_EXECUTION_ID,
-                    RegistryUtils.getAbsolutePath(RegistryContext.getBaseInstance(),
+                                                        RegistryUtils.getAbsolutePath(RegistryContext.getBaseInstance(),
                                                                                       APIUtil.getMountedPath(RegistryContext.getBaseInstance(),
                                                                                                              RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH) +
-                                                                                              APIConstants.API_APPLICATION_DATA_LOCATION),
-                    APIConstants.Permissions.API_PUBLISH,
-                    UserMgtConstants.EXECUTE_ACTION, null);
+                                                                                      APIConstants.API_APPLICATION_DATA_LOCATION),
+                                                        APIConstants.Permissions.API_PUBLISH,
+                                                        UserMgtConstants.EXECUTE_ACTION, null);
             
             setupImagePermissions();
             RemoteAuthorizationManager authorizationManager = RemoteAuthorizationManager.getInstance();
@@ -327,14 +327,14 @@ public class APIManagerComponent {
                     getRealmService().getTenantUserRealm(MultitenantConstants.SUPER_TENANT_ID).
                     getAuthorizationManager();
             String imageLocation =
-                                   APIUtil.getMountedPath(RegistryContext.getBaseInstance(),
-                                                          RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH) +
-                                           APIConstants.API_IMAGE_LOCATION;
+                    APIUtil.getMountedPath(RegistryContext.getBaseInstance(),
+                                           RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH) +
+                    APIConstants.API_IMAGE_LOCATION;
             if (!accessControlAdmin.isRoleAuthorized(CarbonConstants.REGISTRY_ANONNYMOUS_ROLE_NAME,
-                    imageLocation, ActionConstants.GET)) {
+                                                     imageLocation, ActionConstants.GET)) {
                 // Can we get rid of this?
                 accessControlAdmin.authorizeRole(CarbonConstants.REGISTRY_ANONNYMOUS_ROLE_NAME,
-                        imageLocation, ActionConstants.GET);
+                                                 imageLocation, ActionConstants.GET);
             }
         } catch (UserStoreException e) {
             throw new APIManagementException("Error while setting up permissions for image collection", e);

@@ -18,6 +18,8 @@
 
 package org.wso2.carbon.apimgt.impl;
 
+import org.apache.synapse.rest.RESTConstants;
+
 import javax.xml.namespace.QName;
 
 /**
@@ -87,10 +89,14 @@ public final class APIConstants {
 
     public static final String API_CUSTOM_FAULTSEQUENCE_LOCATION = API_CUSTOM_SEQUENCE_LOCATION +"/fault/";
     
-    //registry location for secure vault passwords
+    // registry location for secure vault passwords
     public static final String API_SYSTEM_CONFIG_SECURE_VAULT_LOCATION = "/repository/components/secure-vault";
+
+    // registry location of the governance component
+    public static final String GOVERNANCE_COMPONENT_REGISTRY_LOCATION = "/repository/components/org.wso2.carbon" +
+                                                                     ".governance";
   
-   //registry location for wsdl files
+    // registry location for wsdl files
     public static final String API_WSDL_RESOURCE_LOCATION = API_APPLICATION_DATA_LOCATION + "/wsdls/";
     
     public static final String API_DOC_RESOURCE_NAME = "api-doc.json";
@@ -612,6 +618,7 @@ public final class APIConstants {
     public static final String APIPROVIDER_HOSTCACHE = "apiProvideHostObjectCache";
     public static final String TENANTCOUNT_CACHEKEY = "apiProviderCacheKey";
 
-
+    public static final String SYNAPSE_REST_CONTEXT_VERSION_VARIABLE = RESTConstants
+            .SYNAPSE_REST_CONTEXT_VERSION_VARIABLE;
 
 }

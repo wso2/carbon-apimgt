@@ -194,11 +194,10 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      */
     public Provider getProvider(String providerName) throws APIManagementException {
         Provider provider = null;
-        String providerPath =
-                              APIUtil.getMountedPath(RegistryContext.getBaseInstance(),
+        String providerPath = APIUtil.getMountedPath(RegistryContext.getBaseInstance(),
                                                      RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH) +
-                                      APIConstants.PROVIDERS_PATH +
-                                      RegistryConstants.PATH_SEPARATOR + providerName;
+                              APIConstants.PROVIDERS_PATH +
+                              RegistryConstants.PATH_SEPARATOR + providerName;
         try {
             GenericArtifactManager artifactManager = APIUtil.getArtifactManager(registry,
                                                                                 APIConstants.PROVIDER_KEY);
@@ -536,21 +535,16 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                                     new HashSet<String>(oldApi.getEnvironments());
                             if (!environmentsToPublish.isEmpty() && !environmentsToRemove.isEmpty()) {
                                 environmentsRemoved.retainAll(environmentsToPublish);
-                                environmentsToPublish.removeAll(environmentsToRemove);
                                 environmentsToRemove.removeAll(environmentsRemoved);
                             }
+                            List<String> failedToPublishEnvironments =
+                                    publishToGateway(apiPublished);
                             apiPublished.setEnvironments(environmentsToRemove);
                             List<String> failedToRemoveEnvironments =
                                     removeFromGateway(apiPublished);
+                            environmentsToPublish.removeAll(failedToPublishEnvironments);
+                            environmentsToPublish.addAll(failedToRemoveEnvironments);
                             apiPublished.setEnvironments(environmentsToPublish);
-                            List<String> failedToPublishEnvironments =
-                                    publishToGateway(apiPublished);
-                            environmentsRemoved.addAll(environmentsToPublish);
-                            environmentsRemoved.removeAll(failedToPublishEnvironments);
-                            environmentsRemoved.addAll(failedToRemoveEnvironments);
-                            environmentsToRemove.removeAll(failedToRemoveEnvironments);
-                            environmentsRemoved.removeAll(environmentsToRemove);
-                            apiPublished.setEnvironments(environmentsRemoved);
                             updateApiArtifact(apiPublished, true, false);
                             failedGateways.clear();
                             failedGateways.put("UNPUBLISHED", failedToRemoveEnvironments);
@@ -565,7 +559,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                                 updateApiArtifact(api, true, false);
                                 failedGateways.clear();
                                 failedGateways.put("PUBLISHED", failedToPublishEnvironments);
-                                failedGateways.put("UNPUBLISHED", new ArrayList<String>(0));
+                                failedGateways.put("UNPUBLISHED", Collections.EMPTY_LIST);
                             }
                         }
                     } else {
@@ -1134,7 +1128,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             // We need to change the context by setting the new version
             // This is a change that is coming with the context version strategy
             String contextTemplate = artifact.getAttribute(APIConstants.API_OVERVIEW_CONTEXT_TEMPLATE);
-            artifact.setAttribute(APIConstants.API_OVERVIEW_CONTEXT, contextTemplate.replace("{version}", newVersion));
+            artifact.setAttribute(APIConstants.API_OVERVIEW_CONTEXT,
+                                  contextTemplate.replace(APIConstants.SYNAPSE_REST_CONTEXT_VERSION_VARIABLE,
+                                                          newVersion));
 
             artifactManager.addGenericArtifact(artifact);
             String artifactPath = GovernanceUtils.getArtifactPath(registry, artifact.getId());
@@ -1694,11 +1690,10 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     private void clearResourcePermissions(String artifactPath, APIIdentifier apiId)
             throws APIManagementException {
         try {
-            String resourcePath =
-                                  RegistryUtils.getAbsolutePath(RegistryContext.getBaseInstance(),
+            String resourcePath = RegistryUtils.getAbsolutePath(RegistryContext.getBaseInstance(),
                                                                 APIUtil.getMountedPath(RegistryContext.getBaseInstance(),
                                                                                        RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH) +
-                                                                        artifactPath);
+                                                                artifactPath);
             String tenantDomain = MultitenantUtils.getTenantDomain(
                     APIUtil.replaceEmailDomainBack(apiId.getProviderName()));
             if (!tenantDomain.equals(
@@ -1771,11 +1766,10 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     
    
     private String[] getAuthorizedRoles(String artifactPath) throws UserStoreException {
-        String resourcePath =
-                              RegistryUtils.getAbsolutePath(RegistryContext.getBaseInstance(),
+        String resourcePath = RegistryUtils.getAbsolutePath(RegistryContext.getBaseInstance(),
                                                             APIUtil.getMountedPath(RegistryContext.getBaseInstance(),
                                                                                    RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH) +
-                                                                    artifactPath);
+                                                            artifactPath);
         if (!tenantDomain.equals(
                 MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)) {
         int tenantId = ServiceReferenceHolder.getInstance().getRealmService().

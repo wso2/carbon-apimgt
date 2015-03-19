@@ -211,9 +211,23 @@ public class Axis2FlexibleMEPClient {
                 Object o = axisOutMsgCtx.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
     			Map _headers = (Map) o;
     			if (_headers != null) {
-    				_headers.remove(HTTP.CONTENT_TYPE);
-    				_headers.put(HTTP.CONTENT_TYPE, org.apache.axis2.transport.http.HTTPConstants.MEDIA_TYPE_APPLICATION_SOAP_XML);
-    			}
+                    _headers.remove(HTTP.CONTENT_TYPE);
+                    
+                if ( axisOutMsgCtx.getSoapAction() != null){
+                         String actionHeaderPrefix = ";action=\""; 
+                         String contentTypeWithAction = 
+                                            new StringBuilder(org.apache.axis2.transport.http.HTTPConstants.MEDIA_TYPE_APPLICATION_SOAP_XML.length() 
+                                            + axisOutMsgCtx.getSoapAction().length() + actionHeaderPrefix.length() + 1)
+                                              .append(org.apache.axis2.transport.http.HTTPConstants.MEDIA_TYPE_APPLICATION_SOAP_XML)
+                                              .append(actionHeaderPrefix)
+                                              .append(axisOutMsgCtx.getSoapAction())
+                                              .append('\"')
+                                              .toString();
+                         _headers.put(HTTP.CONTENT_TYPE, contentTypeWithAction);
+                     }else{
+                         _headers.put(HTTP.CONTENT_TYPE, org.apache.axis2.transport.http.HTTPConstants.MEDIA_TYPE_APPLICATION_SOAP_XML);
+                     }
+               }
 
             } else if (SynapseConstants.FORMAT_REST.equals(endpoint.getFormat())) {
                 /*format=rest is kept only backword compatibility. We no longer needed that.*/
@@ -251,6 +265,11 @@ public class Axis2FlexibleMEPClient {
             if (endpoint.getCharSetEncoding() != null) {
                 axisOutMsgCtx.setProperty(Constants.Configuration.CHARACTER_SET_ENCODING,
                         endpoint.getCharSetEncoding());
+                //This is very dirty hack. We need to clean this up. TargetRequest line 176 contains a code block which over writes the
+                //Content-Type returned by the message formatter with the Content-Type in TRANSPORT_HEADERS. Because of that, even when
+                //the Character set encoding is set by the message formatter, it will be replaced by the Content-Type header in TRANSPORT_HEADERS.
+                //So Im setting a property to check in TargetRequest before over writing the header.
+                axisOutMsgCtx.setProperty("EndpointCharEncodingSet","true");
             }
 
             // HTTP Endpoint : use the specified HTTP method and remove REST_URL_POSTFIX, it's not supported in HTTP Endpoint

@@ -36,12 +36,12 @@ var initOf_requireResubscription = 'true';
 // jaggary code which check for published in external stores
 var publishedInExternalStores=false;
 if(api.apiStores!=null && api.apiStores != undefined){
-for(var i=0;i<api.apiStores.length;i++){
-     if(api.apiStores[i].published){
-          publishedInExternalStores=true;
-          break;
-     }
-}
+    for(var i=0;i<api.apiStores.length;i++){
+         if(api.apiStores[i].published){
+              publishedInExternalStores = true;
+              break;
+         }
+    }
 }
 %>
 // java script variable to store the status
@@ -175,8 +175,9 @@ $('#editStatus option').each(  //when refreshed page the default is not selected
                         toggleUpdateBtn();
                         var t = setTimeout("hideMsg()", 3000);
 
-						// call after lifecycle change to display message if the API is published to external stores and status is not published
-						checkExternalStores(lastLcChange.newStatus);
+                        // call after lifecycle change to display message if the API is published to external stores
+                        // and status is not published
+                        checkExternalStores(lastLcChange.newStatus);
 
                   }else{
                         if(responseText.message == "AuthenticateError"){
