@@ -2548,7 +2548,8 @@ public class APIStoreHostObject extends ScriptableObject {
 		return prodKeyScope;
 	}
 
-    public static NativeObject jsFunction_getAllSubscriptions(Context cx,Scriptable thisObj, Object[] args, Function funObj)
+    public static NativeObject jsFunction_getAllSubscriptions(Context cx,
+                                                             Scriptable thisObj, Object[] args, Function funObj)
             throws ScriptException, APIManagementException {
 
         if (args == null || args.length == 0 || !isStringArray(args)) {
@@ -4047,14 +4048,14 @@ public class APIStoreHostObject extends ScriptableObject {
         return userFields;
     }
 
-	
+
     private static void updateRolesOfUser(String serverURL, String adminUsername,
                                           String adminPassword, String userName, String role) throws Exception {
         String url = serverURL + "UserAdmin";
 
         UserAdminStub userAdminStub = new UserAdminStub(url);
         CarbonUtils.setBasicAccessSecurityHeaders(adminUsername, adminPassword,
-                true, userAdminStub._getServiceClient());
+                                                  true, userAdminStub._getServiceClient());
         FlaggedName[] flaggedNames = userAdminStub.getRolesOfUser(userName, "*", -1);
         List<String> roles = new ArrayList<String>();
         if (flaggedNames != null) {
@@ -4135,7 +4136,7 @@ public class APIStoreHostObject extends ScriptableObject {
         boolean loginUserHasPublisherAccess = false;
         if (displayPublishUrlFromStore) {
             loginUserHasPublisherAccess = APIUtil.checkPermissionQuietly(usernameWithDomain, APIConstants.Permissions.API_CREATE) ||
-                    APIUtil.checkPermissionQuietly(usernameWithDomain, APIConstants.Permissions.API_PUBLISH);
+                                          APIUtil.checkPermissionQuietly(usernameWithDomain, APIConstants.Permissions.API_PUBLISH);
         }
         return loginUserHasPublisherAccess;
     }
@@ -4148,7 +4149,7 @@ public class APIStoreHostObject extends ScriptableObject {
         }
         return false;
     }
-    	
+
     public String getUsername() {
         return username;
     }
@@ -4173,8 +4174,8 @@ public class APIStoreHostObject extends ScriptableObject {
      * @throws APIManagementException Wrapped exception by org.wso2.carbon.apimgt.api.APIManagementException
      */
     public static NativeObject jsFunction_getDomainMappings(Context cx, Scriptable thisObj,
-                                                  Object[] args,
-                                                  Function funObj) throws APIManagementException {
+                                                            Object[] args,
+                                                            Function funObj) throws APIManagementException {
         NativeObject myn = new NativeObject();
         APIConsumer apiConsumer = getAPIConsumer(thisObj);
         Map<String, String> domains = new HashMap<String, String>();

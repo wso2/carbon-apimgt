@@ -194,11 +194,10 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      */
     public Provider getProvider(String providerName) throws APIManagementException {
         Provider provider = null;
-        String providerPath =
-                              APIUtil.getMountedPath(RegistryContext.getBaseInstance(),
+        String providerPath = APIUtil.getMountedPath(RegistryContext.getBaseInstance(),
                                                      RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH) +
-                                      APIConstants.PROVIDERS_PATH +
-                                      RegistryConstants.PATH_SEPARATOR + providerName;
+                              APIConstants.PROVIDERS_PATH +
+                              RegistryConstants.PATH_SEPARATOR + providerName;
         try {
             GenericArtifactManager artifactManager = APIUtil.getArtifactManager(registry,
                                                                                 APIConstants.PROVIDER_KEY);
@@ -1694,11 +1693,10 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     private void clearResourcePermissions(String artifactPath, APIIdentifier apiId)
             throws APIManagementException {
         try {
-            String resourcePath =
-                                  RegistryUtils.getAbsolutePath(RegistryContext.getBaseInstance(),
+            String resourcePath = RegistryUtils.getAbsolutePath(RegistryContext.getBaseInstance(),
                                                                 APIUtil.getMountedPath(RegistryContext.getBaseInstance(),
                                                                                        RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH) +
-                                                                        artifactPath);
+                                                                artifactPath);
             String tenantDomain = MultitenantUtils.getTenantDomain(
                     APIUtil.replaceEmailDomainBack(apiId.getProviderName()));
             if (!tenantDomain.equals(
@@ -1771,11 +1769,10 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     
    
     private String[] getAuthorizedRoles(String artifactPath) throws UserStoreException {
-        String resourcePath =
-                              RegistryUtils.getAbsolutePath(RegistryContext.getBaseInstance(),
+        String resourcePath = RegistryUtils.getAbsolutePath(RegistryContext.getBaseInstance(),
                                                             APIUtil.getMountedPath(RegistryContext.getBaseInstance(),
                                                                                    RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH) +
-                                                                    artifactPath);
+                                                            artifactPath);
         if (!tenantDomain.equals(
                 MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)) {
         int tenantId = ServiceReferenceHolder.getInstance().getRealmService().

@@ -7474,13 +7474,13 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
 			String commaSeperatedIds = StringUtils.join(apiIds, ',');
 
 			String sqlQuery =
-					"SELECT " + "A.SCOPE_ID, A.SCOPE_KEY, A.NAME, A.DESCRIPTION, A.ROLES " +
-					"FROM IDN_OAUTH2_SCOPE AS A " + "INNER JOIN AM_API_SCOPES AS B " +
+					"SELECT DISTINCT A.SCOPE_KEY, A.NAME, A.DESCRIPTION, A.ROLES " +
+					"FROM IDN_OAUTH2_SCOPE AS A INNER JOIN AM_API_SCOPES AS B " +
 					"ON A.SCOPE_ID = B.SCOPE_ID WHERE B.API_ID IN (" + commaSeperatedIds + ")";
 
 			if (conn.getMetaData().getDriverName().contains("Oracle")) {
-				sqlQuery = "SELECT " + "A.SCOPE_ID, A.SCOPE_KEY, A.NAME, A.DESCRIPTION, A.ROLES " +
-				           "FROM IDN_OAUTH2_SCOPE A " + "INNER JOIN AM_API_SCOPES B " +
+				sqlQuery = "SELECT DISTINCT A.SCOPE_KEY, A.NAME, A.DESCRIPTION, A.ROLES " +
+				           "FROM IDN_OAUTH2_SCOPE A INNER JOIN AM_API_SCOPES B " +
 				           "ON A.SCOPE_ID = B.SCOPE_ID WHERE B.API_ID IN (" + commaSeperatedIds +
 				           ")";
 			}
@@ -7489,11 +7489,10 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
 			resultSet = ps.executeQuery();
 			while (resultSet.next()) {
 				Scope scope = new Scope();
-				scope.setId(resultSet.getInt(1));
-				scope.setKey(resultSet.getString(2));
-				scope.setName(resultSet.getString(3));
-				scope.setDescription(resultSet.getString(4));
-				scope.setRoles(resultSet.getString(5));
+				scope.setKey(resultSet.getString(1));
+				scope.setName(resultSet.getString(2));
+				scope.setDescription(resultSet.getString(3));
+				scope.setRoles(resultSet.getString(4));
 				scopes.add(scope);
 			}
 		} catch (SQLException e) {
