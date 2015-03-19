@@ -569,7 +569,6 @@ $(document).ready(function(){
     $("#swaggerEditer").on("keyup", function () {
         try {
             jsyaml.load(designer.swagger_editor.getSession().getValue());
-            //console.log(designer.swagger_editor.getSession().getValue());
             document.getElementById('output_string').innerHTML = "";
         } catch (err) {
             document.getElementById('output_string').innerHTML = err;

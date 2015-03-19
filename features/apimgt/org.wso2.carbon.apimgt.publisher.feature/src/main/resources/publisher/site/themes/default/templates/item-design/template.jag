@@ -128,7 +128,6 @@
                 </div>
                 <div class="modal-body">
                     <div id="swagger_editor" class="clearfix" style="height:400px;"></div>
-
                 </div>
                 <div class="modal-header">
                     <label id="output_string" class="error" style="display: block;" disabled></label>
