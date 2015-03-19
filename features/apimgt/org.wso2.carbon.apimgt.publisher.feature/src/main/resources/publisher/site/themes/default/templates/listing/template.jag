@@ -23,57 +23,28 @@
     %>
    <script type="text/javascript">
    
-   var swaggerDefinition = "	{'apiVersion':'1.0.0','swaggerVersion':'1.2','authorizations':{'oauth2':{'scopes':[],'type':'oauth2'}},'apis':[{'file':{'apiVersion':'1.0.0','basePath':'http://10.100.4.11:8280/weatherapi/1.0.0','swaggerVersion':'1.2','resourcePath':'/default','apis':[{'path':'/*','operations':[{'nickname':'get_*','method':'GET','parameters':[{'description':'Name of the City','name':'q','allowMultiple':false,'required':false,'type':'string','paramType':'query'}],'auth_type':'Application & Application User','throttling_tier':'Unlimited'},{'nickname':'options_*','method':'OPTIONS','parameters':[{'description':'Request Body','name':'body','allowMultiple':false,'required':false,'type':'string','paramType':'body'}],'auth_type':'None','throttling_tier':'Unlimited'}]}]},'description':'','path':'/default'}],'info':{'title':'WeatherAPI','termsOfServiceUrl':'','description':'Description','license':'','contact':'','licenseUrl':''}}";
+	var s3 = "	{'apiVersion':'1.0.0','swaggerVersion':'1.2','authorizations':{'oauth2':{'scopes':[],'type':'oauth2'}},'apis':[{'file':{'apiVersion':'1.0.0','basePath':'http://10.100.4.11:8280/weatherapi/1.0.0','swaggerVersion':'1.2','resourcePath':'/default','apis':[{'path':'/*','operations':[{'nickname':'get_*','method':'GET','parameters':[{'description':'Name of the City','name':'q','allowMultiple':false,'required':false,'type':'string','paramType':'query'}],'auth_type':'Application & Application User','throttling_tier':'Unlimited'},{'nickname':'options_*','method':'OPTIONS','parameters':[{'description':'Request Body','name':'body','allowMultiple':false,'required':false,'type':'string','paramType':'body'}],'auth_type':'None','throttling_tier':'Unlimited'}]}]},'description':'','path':'/default'}],'info':{'title':'WeatherAPI','termsOfServiceUrl':'','description':'Description','license':'','contact':'','licenseUrl':''}}";
 	
-	function getBase64FromImageUrl(image) {
-    	var canvas = document.createElement("canvas");
-    	canvas.width =image.width;
-    	canvas.height =image.height;
-	
-    	var ctx = canvas.getContext("2d");
-    	ctx.drawImage(image, 0, 0);
-    
-    	var dataURL = canvas.toDataURL("image/png");
-    	return dataURL;
-    }
-    
-   function dataURItoBlob(dataURI) {
-   		var binary = atob(dataURI.split(',')[1]);
-   	 	var array = [];
-    	for(var i = 0; i < binary.length; i++) {
-        	array.push(binary.charCodeAt(i));
-    	}
-    	return new Uint8Array(array);
-	}
-
-
-
 	var deploySampleAPI = function(){
-		var myImage = new Image();
-		myImage.src = "/publisher/site/themes/default/images/weatherAPI.png";
-		myImage.name = "icon";
 
-
-    
-		var imgfile = new File([dataURItoBlob(getBase64FromImageUrl(myImage))], "weatherAPI.png", {type: "image/png"})
 		var formData = new FormData();
-		formData.append("action", "design");
+		formData.append("action", "sampleDesign");
 		formData.append("name", "WeatherAPI");
 		formData.append("provider", "admin");
 		formData.append("version", "1.0.0");
-		formData.append("description", "Groucho");
-		formData.append("tags", "Groucho");
+		formData.append("description", "The WeatherAPI gives the weather details according to the city name");
+		formData.append("tags", "weather");
 		formData.append("visibility", "Public");
 		formData.append("context", "weatherapi");
-		formData.append("swagger",swaggerDefinition);
-		formData.append("apiThumb",imgfile);
+		formData.append("swagger", s3);
+		formData.append("apiThumb","/site/themes/default/images/weatherAPI.png");
 		
 		var request = new XMLHttpRequest();
 		request.open("POST", "/publisher/site/blocks/item-design/ajax/add.jag");
 		request.send(formData);
 	         
  		jagg.message({
- 			content:"Sample WeatherAPI is Deployed Successfully" ,
+ 			content:"" ,
     		type:"info",
     	 	title:"",
 		});
@@ -91,10 +62,11 @@
   			if (request.readyState==4 && request.status==200)
     		{
     			var urlDesign = '/site/blocks/item-design/ajax/add.jag';
-    			var resultImplement = jagg.post(urlDesign,{action:"implement",name:"WeatherAPI",provider:"admin",version:"1.0.0",provider:"admin",implementation_methods:"endpoint",endpoint_type:"http",endpoint_config:'{"production_endpoints":{"url":"http://api.openweathermap.org/data/2.5/weather","config":null},"endpoint_type":"http"}',production_endpoints:"http://api.openweathermap.org/data/2.5/weather",sandbox_endpoints:" ",endpointType:"nonsecured",swagger:swaggerDefinition},
+    			var resultImplement = jagg.post(urlDesign,{action:"implement",name:"WeatherAPI",provider:"admin",version:"1.0.0",provider:"admin",implementation_methods:"endpoint",endpoint_type:"http",endpoint_config:'{"production_endpoints":{"url":"http://api.openweathermap.org/data/2.5/weather","config":null},"endpoint_type":"http"}',production_endpoints:"http://api.openweathermap.org/data/2.5/weather",sandbox_endpoints:" ",endpointType:"nonsecured",swagger:s3},
 			
 				function(result){
-				var resultManage = jagg.post(urlDesign,{action:"manage",name:"WeatherAPI",provider:"admin",version:"1.0.0",provider:"admin",default_version_checked:" ",tier:"Unlimited",tiersCollection:"Unlimited",transport_http:"http",transport_https:"https",subscriptions:"all_tenants",swagger:swaggerDefinition},
+				
+				var resultManage = jagg.post(urlDesign,{action:"manage",name:"WeatherAPI",provider:"admin",version:"1.0.0",provider:"admin",default_version_checked:" ",tier:"Unlimited",tiersCollection:"Unlimited",transport_http:"http",transport_https:"https",subscriptions:"all_tenants",swagger:s3},
 				
 				function(result){
 					var urlPublished="/site/blocks/life-cycles/ajax/life-cycles.jag";
@@ -118,8 +90,8 @@
 			
 			},'json');
 			
-
-    }
+		}
+	
   } 
 	
 } 
