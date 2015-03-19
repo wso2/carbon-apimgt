@@ -160,6 +160,32 @@ public interface APIConsumer extends APIManager {
     public Set<SubscribedAPI> getSubscribedAPIs(Subscriber subscriber, String applicationName, String groupId) throws APIManagementException;
 
     /**
+     * Returns a set of SubscribedAPIs filtered by the given application name and in between starting and ending indexes.
+     *
+     * @param subscriber Subscriber
+     * @param applicationName Application needed to find subscriptions
+     * @param startSubIndex Starting index of subscriptions to be listed
+     * @param endSubIndex Ending index of Subscriptions to be listed
+     * @return
+     * @throws APIManagementException
+     */
+    public Set<SubscribedAPI> getPaginatedSubscribedAPIs(Subscriber subscriber, String applicationName, int startSubIndex, int endSubIndex)
+            throws APIManagementException;
+
+    
+    /**
+     * Gets the subscribed API's, by the group for the application.
+     * @param subscriber the subscriber subscribing for the api
+     * @param applicationName the application to which the api's are subscribed
+     * @param startSubIndex the start index for pagination
+     * @param endSubIndex end index for pagination
+     * @param groupId the group id of the application
+     * @return the set of subscribed API's.
+     * @throws APIManagementException
+     */
+    public Set<SubscribedAPI> getPaginatedSubscribedAPIsbyGroupId(Subscriber subscriber, String applicationName, int startSubIndex, int endSubIndex, String groupId) 
+            throws APIManagementException;
+    /**
      * Returns true if a given user has subscribed to the API
      *
      * @param apiIdentifier APIIdentifier
@@ -168,6 +194,16 @@ public interface APIConsumer extends APIManager {
      * @throws org.wso2.carbon.apimgt.api.APIManagementException if failed to check the subscribed state
      */
     public boolean isSubscribed(APIIdentifier apiIdentifier, String userId) throws APIManagementException;
+
+    /**
+     * Returns the number of subscriptions for the given subscriber and app.
+     *
+     * @param subscriber Subscriber
+     * @param applicationName Application
+     * @return The number of subscriptions
+     * @throws APIManagementException if failed to count the number of subscriptions.
+     */
+    public Integer getSubscriptionCount(Subscriber subscriber,String applicationName) throws APIManagementException;
 
     /**
      * Add new Subscriber

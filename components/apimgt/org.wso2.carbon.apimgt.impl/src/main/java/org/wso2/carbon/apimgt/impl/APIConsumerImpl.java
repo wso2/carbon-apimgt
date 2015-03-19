@@ -1431,7 +1431,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
      public Set<SubscribedAPI> getSubscribedAPIs(Subscriber subscriber, String applicationName) throws APIManagementException {
         Set<SubscribedAPI> subscribedAPIs = null;
         try {
-        	subscribedAPIs = apiMgtDAO.getSubscribedAPIs(subscriber, applicationName);
+        	subscribedAPIs = apiMgtDAO.getSubscribedAPIs(subscriber, applicationName, null);
             if(subscribedAPIs!=null && !subscribedAPIs.isEmpty()){
             	Map<String, Tier> tiers=APIUtil.getTiers(tenantId);
             	for(SubscribedAPI subscribedApi:subscribedAPIs) {
@@ -1444,6 +1444,47 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             handleException("Failed to get APIs of " + subscriber.getName() + " under application " + applicationName, e);
         }
         return subscribedAPIs;
+    }
+
+    public Set<SubscribedAPI> getPaginatedSubscribedAPIs(Subscriber subscriber, String applicationName, int startSubIndex, int endSubIndex) throws APIManagementException {
+        Set<SubscribedAPI> subscribedAPIs = null;
+        try {
+            subscribedAPIs = apiMgtDAO.getPaginatedSubscribedAPIs(subscriber, applicationName, startSubIndex,endSubIndex);
+            if(subscribedAPIs!=null && !subscribedAPIs.isEmpty()){
+                Map<String, Tier> tiers=APIUtil.getTiers(tenantId);
+                for(SubscribedAPI subscribedApi:subscribedAPIs) {
+                    Tier tier=tiers.get(subscribedApi.getTier().getName());
+                    subscribedApi.getTier().setDisplayName(tier!=null?tier.getDisplayName():subscribedApi.getTier().getName());
+                    subscribedAPIs.add(subscribedApi);
+                }
+            }
+        } catch (APIManagementException e) {
+            handleException("Failed to get APIs of " + subscriber.getName() + " under application " + applicationName, e);
+        }
+        return subscribedAPIs;
+    }
+    
+    public Set<SubscribedAPI> getPaginatedSubscribedAPIsbyGroupId(Subscriber subscriber, String applicationName, int startSubIndex, int endSubIndex, String groupId) throws APIManagementException {
+        Set<SubscribedAPI> subscribedAPIs = null;
+        try {
+            subscribedAPIs = apiMgtDAO.getPaginatedSubscribedAPIsbyGroupId(subscriber, applicationName, startSubIndex,endSubIndex, groupId);
+            if(subscribedAPIs!=null && !subscribedAPIs.isEmpty()){
+                Map<String, Tier> tiers=APIUtil.getTiers(tenantId);
+                for(SubscribedAPI subscribedApi:subscribedAPIs) {
+                    Tier tier=tiers.get(subscribedApi.getTier().getName());
+                    subscribedApi.getTier().setDisplayName(tier!=null?tier.getDisplayName():subscribedApi.getTier().getName());
+                    subscribedAPIs.add(subscribedApi);
+                }
+            }
+        } catch (APIManagementException e) {
+            handleException("Failed to get APIs of " + subscriber.getName() + " under application " + applicationName, e);
+        }
+        return subscribedAPIs;
+    }
+
+    public Integer getSubscriptionCount(Subscriber subscriber,String applicationName)
+            throws APIManagementException {
+        return apiMgtDAO.getSubscriptionCount(subscriber,applicationName);
     }
 
     public Set<APIIdentifier> getAPIByConsumerKey(String accessToken) throws APIManagementException {

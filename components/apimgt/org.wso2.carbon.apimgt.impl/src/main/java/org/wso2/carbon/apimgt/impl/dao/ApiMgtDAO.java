@@ -1451,7 +1451,7 @@ public class ApiMgtDAO {
 
         try {
             connection = APIMgtDBUtil.getConnection();
- if (groupId == null || "".equals(groupId)) {
+             if (groupId == null || groupId.isEmpty()) {
              sqlQuery = "SELECT " +
                               "   SUBS.SUBSCRIPTION_ID" +
                               "   ,API.API_PROVIDER AS API_PROVIDER" +
@@ -1477,7 +1477,7 @@ public class ApiMgtDAO {
                               "   AND API.API_ID=SUBS.API_ID" +
                               "   AND APP.NAME= ? " +
                               "   AND SUBS.SUBS_CREATE_STATE = '" + APIConstants.SubscriptionCreatedStatus.SUBSCRIBE + "'";
-   if (forceCaseInsensitiveComparisons) {
+               if (forceCaseInsensitiveComparisons) {
                 sqlQuery = "SELECT " +
                         "   SUBS.SUBSCRIPTION_ID" +
                         "   ,API.API_PROVIDER AS API_PROVIDER" +
@@ -1507,32 +1507,59 @@ public class ApiMgtDAO {
 
 				} else {
 
-                sqlQuery = "SELECT " + "   SUBS.SUBSCRIPTION_ID" + "   ,API.API_PROVIDER AS API_PROVIDER"
-                        + "   ,API.API_NAME AS API_NAME" + "   ,API.API_VERSION AS API_VERSION"
-                        + "   ,SUBS.TIER_ID AS TIER_ID" + "   ,APP.APPLICATION_ID AS APP_ID"
-                        + "   ,SUBS.LAST_ACCESSED AS LAST_ACCESSED" + "   ,SUBS.SUB_STATUS AS SUB_STATUS"
-                        + "   ,SUBS.SUBS_CREATE_STATE AS SUBS_CREATE_STATE" + "   ,APP.NAME AS APP_NAME "
-                        + "   ,APP.CALLBACK_URL AS CALLBACK_URL " + "FROM " + "   AM_SUBSCRIBER SUB,"
-                        + "   AM_APPLICATION APP, " + "   AM_SUBSCRIPTION SUBS, " + "   AM_API API " + "WHERE "
-                        + "   SUB.USER_ID = ? "
-                        + "   AND SUB.TENANT_ID = ? "
-                        + "   AND APP.APPLICATION_ID=SUBS.APPLICATION_ID " + "   AND API.API_ID=SUBS.API_ID"
-                        + "   AND APP.NAME= ? " + " AND APP.GROUP_ID =?" + "   AND SUBS.SUBS_CREATE_STATE = '"
-                        + APIConstants.SubscriptionCreatedStatus.SUBSCRIBE + "'";
+                sqlQuery = "SELECT " + 
+                        "   SUBS.SUBSCRIPTION_ID" +
+                        "   ,API.API_PROVIDER AS API_PROVIDER"+
+                        "   ,API.API_NAME AS API_NAME" + 
+                        "   ,API.API_VERSION AS API_VERSION"+ 
+                        "   ,SUBS.TIER_ID AS TIER_ID" + 
+                        "   ,APP.APPLICATION_ID AS APP_ID"+ 
+                        "   ,SUBS.LAST_ACCESSED AS LAST_ACCESSED" + 
+                        "   ,SUBS.SUB_STATUS AS SUB_STATUS" + 
+                        "   ,SUBS.SUBS_CREATE_STATE AS SUBS_CREATE_STATE" + 
+                        "   ,APP.NAME AS APP_NAME " + 
+                        "   ,APP.CALLBACK_URL AS CALLBACK_URL " + 
+                        "FROM " + 
+                        "   AM_SUBSCRIBER SUB," + 
+                        "   AM_APPLICATION APP, " + 
+                        "   AM_SUBSCRIPTION SUBS, " + 
+                        "   AM_API API " +
+                        "WHERE "+ "   SUB.USER_ID = ? "+
+                        "   AND SUB.TENANT_ID = ? "+ 
+                        "   AND APP.APPLICATION_ID=SUBS.APPLICATION_ID " + 
+                        "   AND API.API_ID=SUBS.API_ID"+ 
+                        "   AND APP.NAME= ? " + 
+                        "   AND APP.GROUP_ID =?" + 
+                        "   AND SUBS.SUBS_CREATE_STATE = '"+
+                        APIConstants.SubscriptionCreatedStatus.SUBSCRIBE + "'";
 
                 if (forceCaseInsensitiveComparisons) {
-                    sqlQuery = "SELECT " + "   SUBS.SUBSCRIPTION_ID" + "   ,API.API_PROVIDER AS API_PROVIDER"
-                            + "   ,API.API_NAME AS API_NAME" + "   ,API.API_VERSION AS API_VERSION"
-                            + "   ,SUBS.TIER_ID AS TIER_ID" + "   ,APP.APPLICATION_ID AS APP_ID"
-                            + "   ,SUBS.LAST_ACCESSED AS LAST_ACCESSED" + "   ,SUBS.SUB_STATUS AS SUB_STATUS"
-                            + "   ,SUBS.SUBS_CREATE_STATE AS SUBS_CREATE_STATE" + "   ,APP.NAME AS APP_NAME "
-                            + "   ,APP.CALLBACK_URL AS CALLBACK_URL " + "FROM " + "   AM_SUBSCRIBER SUB,"
-                            + "   AM_APPLICATION APP, " + "   AM_SUBSCRIPTION SUBS, " + "   AM_API API " + "WHERE "
-                            + "   LOWER(SUB.USER_ID) = LOWER(?) "
-                            + "   AND SUB.TENANT_ID = ? "
-                            + "   AND APP.APPLICATION_ID=SUBS.APPLICATION_ID " + "   AND API.API_ID=SUBS.API_ID"
-                            + "   AND APP.NAME= ? " + " AND APP.GROUP_ID =?" + "   AND SUBS.SUBS_CREATE_STATE = '"
-                            + APIConstants.SubscriptionCreatedStatus.SUBSCRIBE + "'";
+                    sqlQuery = "SELECT " + 
+                            "   SUBS.SUBSCRIPTION_ID" + 
+                            "   ,API.API_PROVIDER AS API_PROVIDER"+ 
+                            "   ,API.API_NAME AS API_NAME" + 
+                            "   ,API.API_VERSION AS API_VERSION" + 
+                            "   ,SUBS.TIER_ID AS TIER_ID" + 
+                            "   ,APP.APPLICATION_ID AS APP_ID"+ 
+                            "   ,SUBS.LAST_ACCESSED AS LAST_ACCESSED" + 
+                            "   ,SUBS.SUB_STATUS AS SUB_STATUS"+ 
+                            "   ,SUBS.SUBS_CREATE_STATE AS SUBS_CREATE_STATE" + 
+                            "   ,APP.NAME AS APP_NAME "+ 
+                            "   ,APP.CALLBACK_URL AS CALLBACK_URL " +
+                            "FROM " + 
+                            "   AM_SUBSCRIBER SUB,"+ 
+                            "   AM_APPLICATION APP, " + 
+                            "   AM_SUBSCRIPTION SUBS, " + 
+                            "   AM_API API " + 
+                            "WHERE "+ 
+                            "   LOWER(SUB.USER_ID) = LOWER(?) "+
+                            "   AND SUB.TENANT_ID = ? "+ 
+                            "   AND APP.APPLICATION_ID=SUBS.APPLICATION_ID " + 
+                            "   AND API.API_ID=SUBS.API_ID"+ 
+                            "   AND APP.NAME= ? " +
+                            "   AND APP.GROUP_ID =?" + 
+                            "   AND SUBS.SUBS_CREATE_STATE = '"+
+                            APIConstants.SubscriptionCreatedStatus.SUBSCRIBE + "'";
                 }
             }
          
@@ -1577,15 +1604,62 @@ public class ApiMgtDAO {
         return subscribedAPIs;
     }
 
- /**
-     * This method returns the set of APIs for given subscriber, subscribed under the specified application.
-     *
-     * @param subscriber      subscriber
-     * @param applicationName Application Name
-     * @return Set<API>
-     * @throws org.wso2.carbon.apimgt.api.APIManagementException if failed to get SubscribedAPIs
-     */
-    public Set<SubscribedAPI> getSubscribedAPIs(Subscriber subscriber, String applicationName)
+    public Integer getSubscriptionCount(Subscriber subscriber,String applicationName)
+            throws APIManagementException {
+        Integer subscriptionCount = 0;
+        Connection connection = null;
+        PreparedStatement ps = null;
+        ResultSet result = null;
+
+        try {
+            connection = APIMgtDBUtil.getConnection();
+
+            String sqlQuery = "SELECT COUNT(*) AS SUB_COUNT " +
+                              " FROM AM_SUBSCRIPTION SUBS"+
+                              " ,AM_APPLICATION APP"+
+                              " ,AM_SUBSCRIBER SUB "+
+                              " WHERE SUBS.SUBS_CREATE_STATE ='" + APIConstants.SubscriptionCreatedStatus.SUBSCRIBE + "'"+
+                              " AND SUBS.APPLICATION_ID = APP.APPLICATION_ID"+
+                              " AND APP.NAME=?"+
+                              " AND APP.SUBSCRIBER_ID= SUB.SUBSCRIBER_ID"+
+                              " AND SUB.USER_ID =?"+
+                              " AND SUB.TENANT_ID=?";
+
+            if (forceCaseInsensitiveComparisons) {
+                sqlQuery = "SELECT COUNT(*) AS SUB_COUNT " +
+                            " FROM AM_SUBSCRIPTION SUBS"+
+                            " ,AM_APPLICATION APP"+
+                            " ,AM_SUBSCRIBER SUB "+
+                            " WHERE SUBS.SUBS_CREATE_STATE ='" + APIConstants.SubscriptionCreatedStatus.SUBSCRIBE + "'"+
+                            " AND SUBS.APPLICATION_ID = APP.APPLICATION_ID"+
+                            " AND APP.NAME=?"+
+                            " AND APP.SUBSCRIBER_ID= SUB.SUBSCRIBER_ID"+
+                            " AND LOWER(SUB.USER_ID) = LOWER(?)"+
+                            " AND SUB.TENANT_ID=?";
+            }
+            
+            ps = connection.prepareStatement(sqlQuery);
+            ps.setString(1, applicationName);
+            ps.setString(2, subscriber.getName());
+            int tenantId = IdentityUtil.getTenantIdOFUser(subscriber.getName());
+            ps.setInt(3, tenantId);
+            result = ps.executeQuery();
+
+            while (result.next()) {
+                subscriptionCount = result.getInt("SUB_COUNT");
+            }
+
+        } catch (SQLException e) {
+            handleException("Failed to get SubscribedAPI of :" + subscriber.getName(), e);
+        } catch (IdentityException e) {
+            handleException("Failed get tenant id of user " + subscriber.getName(), e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(ps, connection, result);
+        }
+        return subscriptionCount;
+    }
+
+    public Set<SubscribedAPI> getPaginatedSubscribedAPIs(Subscriber subscriber,String applicationName, int startSubIndex, int endSubIndex)
             throws APIManagementException {
         Set<SubscribedAPI> subscribedAPIs = new LinkedHashSet<SubscribedAPI>();
         Connection connection = null;
@@ -1595,31 +1669,58 @@ public class ApiMgtDAO {
         try {
             connection = APIMgtDBUtil.getConnection();
 
-            String sqlQuery = "SELECT " + "   SUBS.SUBSCRIPTION_ID" + "   ,API.API_PROVIDER AS API_PROVIDER"
-                    + "   ,API.API_NAME AS API_NAME" + "   ,API.API_VERSION AS API_VERSION"
-                    + "   ,SUBS.TIER_ID AS TIER_ID" + "   ,APP.APPLICATION_ID AS APP_ID"
-                    + "   ,SUBS.LAST_ACCESSED AS LAST_ACCESSED" + "   ,SUBS.SUB_STATUS AS SUB_STATUS"
-                    + "   ,SUBS.SUBS_CREATE_STATE AS SUBS_CREATE_STATE" + "   ,APP.NAME AS APP_NAME "
-                    + "   ,APP.CALLBACK_URL AS CALLBACK_URL " + "FROM " + "   AM_SUBSCRIBER SUB,"
-                    + "   AM_APPLICATION APP, " + "   AM_SUBSCRIPTION SUBS, " + "   AM_API API " + "WHERE "
-                    + "   SUB.USER_ID = ? " + "   AND SUB.TENANT_ID = ? "
-                    + "   AND SUB.SUBSCRIBER_ID=APP.SUBSCRIBER_ID " + "   AND APP.APPLICATION_ID=SUBS.APPLICATION_ID "
-                    + "   AND API.API_ID=SUBS.API_ID" + "   AND APP.NAME= ? " + "   AND SUBS.SUBS_CREATE_STATE = '"
-                    + APIConstants.SubscriptionCreatedStatus.SUBSCRIBE + "'";
+            String sqlQuery = "SELECT " +
+                    "   SUBS.SUBSCRIPTION_ID" +
+                    "   ,API.API_PROVIDER AS API_PROVIDER" +
+                    "   ,API.API_NAME AS API_NAME" +
+                    "   ,API.API_VERSION AS API_VERSION" +
+                    "   ,SUBS.TIER_ID AS TIER_ID" +
+                    "   ,APP.APPLICATION_ID AS APP_ID" +
+                    "   ,SUBS.LAST_ACCESSED AS LAST_ACCESSED" +
+                    "   ,SUBS.SUB_STATUS AS SUB_STATUS" +
+                    "   ,SUBS.SUBS_CREATE_STATE AS SUBS_CREATE_STATE" +
+                    "   ,APP.NAME AS APP_NAME " +
+                    "   ,APP.CALLBACK_URL AS CALLBACK_URL " +
+                    "FROM " +
+                    "   AM_SUBSCRIBER SUB," +
+                    "   AM_APPLICATION APP, " +
+                    "   AM_SUBSCRIPTION SUBS, " +
+                    "   AM_API API " +
+                    "WHERE " +
+                    "   SUB.USER_ID = ? " +
+                    "   AND SUB.TENANT_ID = ? " +
+                    "   AND SUB.SUBSCRIBER_ID=APP.SUBSCRIBER_ID " +
+                    "   AND APP.APPLICATION_ID=SUBS.APPLICATION_ID " +
+                    "   AND API.API_ID=SUBS.API_ID" +
+                    "   AND APP.NAME= ? " +
+                    "   AND SUBS.SUBS_CREATE_STATE = '" + APIConstants.SubscriptionCreatedStatus.SUBSCRIBE + "'";
 
             if (forceCaseInsensitiveComparisons) {
-                sqlQuery = "SELECT " + "   SUBS.SUBSCRIPTION_ID" + "   ,API.API_PROVIDER AS API_PROVIDER"
-                        + "   ,API.API_NAME AS API_NAME" + "   ,API.API_VERSION AS API_VERSION"
-                        + "   ,SUBS.TIER_ID AS TIER_ID" + "   ,APP.APPLICATION_ID AS APP_ID"
-                        + "   ,SUBS.LAST_ACCESSED AS LAST_ACCESSED" + "   ,SUBS.SUB_STATUS AS SUB_STATUS"
-                        + "   ,SUBS.SUBS_CREATE_STATE AS SUBS_CREATE_STATE" + "   ,APP.NAME AS APP_NAME "
-                        + "   ,APP.CALLBACK_URL AS CALLBACK_URL " + "FROM " + "   AM_SUBSCRIBER SUB,"
-                        + "   AM_APPLICATION APP, " + "   AM_SUBSCRIPTION SUBS, " + "   AM_API API " + "WHERE "
-                        + "   LOWER(SUB.USER_ID) = LOWER(?) " + "   AND SUB.TENANT_ID = ? "
-                        + "   AND SUB.SUBSCRIBER_ID=APP.SUBSCRIBER_ID "
-                        + "   AND APP.APPLICATION_ID=SUBS.APPLICATION_ID " + "   AND API.API_ID=SUBS.API_ID"
-                        + "   AND APP.NAME= ? " + "   AND SUBS.SUBS_CREATE_STATE = '"
-                        + APIConstants.SubscriptionCreatedStatus.SUBSCRIBE + "'";
+                sqlQuery = "SELECT " +
+                        "   SUBS.SUBSCRIPTION_ID" +
+                        "   ,API.API_PROVIDER AS API_PROVIDER" +
+                        "   ,API.API_NAME AS API_NAME" +
+                        "   ,API.API_VERSION AS API_VERSION" +
+                        "   ,SUBS.TIER_ID AS TIER_ID" +
+                        "   ,APP.APPLICATION_ID AS APP_ID" +
+                        "   ,SUBS.LAST_ACCESSED AS LAST_ACCESSED" +
+                        "   ,SUBS.SUB_STATUS AS SUB_STATUS" +
+                        "   ,SUBS.SUBS_CREATE_STATE AS SUBS_CREATE_STATE" +
+                        "   ,APP.NAME AS APP_NAME " +
+                        "   ,APP.CALLBACK_URL AS CALLBACK_URL " +
+                        "FROM " +
+                        "   AM_SUBSCRIBER SUB," +
+                        "   AM_APPLICATION APP, " +
+                        "   AM_SUBSCRIPTION SUBS, " +
+                        "   AM_API API " +
+                        "WHERE " +
+                        "   LOWER(SUB.USER_ID) = LOWER(?) " +
+                        "   AND SUB.TENANT_ID = ? " +
+                        "   AND SUB.SUBSCRIBER_ID=APP.SUBSCRIBER_ID " +
+                        "   AND APP.APPLICATION_ID=SUBS.APPLICATION_ID " +
+                        "   AND API.API_ID=SUBS.API_ID" +
+                        "   AND APP.NAME= ? " +
+                        "   AND SUBS.SUBS_CREATE_STATE = '" + APIConstants.SubscriptionCreatedStatus.SUBSCRIBE + "'";
             }
 
             ps = connection.prepareStatement(sqlQuery);
@@ -1633,19 +1734,29 @@ public class ApiMgtDAO {
                 return subscribedAPIs;
             }
 
+            int index = 0;
+
             while (result.next()) {
-                APIIdentifier apiIdentifier = new APIIdentifier(APIUtil.replaceEmailDomain(result
-                        .getString("API_PROVIDER")), result.getString("API_NAME"), result.getString("API_VERSION"));
+                if(index >= startSubIndex && index < endSubIndex) {
+                    APIIdentifier apiIdentifier = new APIIdentifier(APIUtil.replaceEmailDomain(result.getString("API_PROVIDER")),
+                            result.getString("API_NAME"), result.getString("API_VERSION"));
 
-                SubscribedAPI subscribedAPI = new SubscribedAPI(subscriber, apiIdentifier);
-                subscribedAPI.setSubStatus(result.getString("SUB_STATUS"));
-                subscribedAPI.setSubCreatedStatus(result.getString("SUBS_CREATE_STATE"));
-                subscribedAPI.setTier(new Tier(result.getString(APIConstants.SUBSCRIPTION_FIELD_TIER_ID)));
-                subscribedAPI.setLastAccessed(result.getDate(APIConstants.SUBSCRIPTION_FIELD_LAST_ACCESS));
+                    SubscribedAPI subscribedAPI = new SubscribedAPI(subscriber, apiIdentifier);
+                    subscribedAPI.setSubStatus(result.getString("SUB_STATUS"));
+                    subscribedAPI.setSubCreatedStatus(result.getString("SUBS_CREATE_STATE"));
+                    subscribedAPI.setTier(new Tier(
+                            result.getString(APIConstants.SUBSCRIPTION_FIELD_TIER_ID)));
+                    subscribedAPI.setLastAccessed(result.getDate(
+                            APIConstants.SUBSCRIPTION_FIELD_LAST_ACCESS));
 
-                Application application = new Application(result.getString("APP_NAME"), subscriber);
-                subscribedAPI.setApplication(application);
-                subscribedAPIs.add(subscribedAPI);
+                    Application application = new Application(result.getString("APP_NAME"), subscriber);
+                    subscribedAPI.setApplication(application);
+                    subscribedAPIs.add(subscribedAPI);
+                    if(index == endSubIndex-1){
+                        break;
+                    }
+                }
+                index++;
             }
 
         } catch (SQLException e) {
@@ -1658,7 +1769,130 @@ public class ApiMgtDAO {
         return subscribedAPIs;
     }
 
+    
+    
+    /**
+     * Gets the subscribed API's, by the group for the application.
+     * @param subscriber the subscriber subscribing for the api
+     * @param applicationName the application to which the api's are subscribed
+     * @param startSubIndex the start index for pagination
+     * @param endSubIndex end index for pagination
+     * @param groupId the group id of the application
+     * @return the set of subscribed API's.
+     * @throws APIManagementException
+     */
+    public Set<SubscribedAPI> getPaginatedSubscribedAPIsbyGroupId(Subscriber subscriber,String applicationName, int startSubIndex, int endSubIndex, String groupId)
+            throws APIManagementException {
+        Set<SubscribedAPI> subscribedAPIs = new LinkedHashSet<SubscribedAPI>();
+        Connection connection = null;
+        PreparedStatement ps = null;
+        ResultSet result = null;
 
+        try {
+            connection = APIMgtDBUtil.getConnection();
+
+            String sqlQuery = "SELECT " +
+                    "   SUBS.SUBSCRIPTION_ID" +
+                    "   ,API.API_PROVIDER AS API_PROVIDER" +
+                    "   ,API.API_NAME AS API_NAME" +
+                    "   ,API.API_VERSION AS API_VERSION" +
+                    "   ,SUBS.TIER_ID AS TIER_ID" +
+                    "   ,APP.APPLICATION_ID AS APP_ID" +
+                    "   ,SUBS.LAST_ACCESSED AS LAST_ACCESSED" +
+                    "   ,SUBS.SUB_STATUS AS SUB_STATUS" +
+                    "   ,SUBS.SUBS_CREATE_STATE AS SUBS_CREATE_STATE" +
+                    "   ,APP.NAME AS APP_NAME " +
+                    "   ,APP.CALLBACK_URL AS CALLBACK_URL " +
+                    "FROM " +
+                    "   AM_SUBSCRIBER SUB," +
+                    "   AM_APPLICATION APP, " +
+                    "   AM_SUBSCRIPTION SUBS, " +
+                    "   AM_API API " +
+                    "WHERE " +
+                    "   SUB.USER_ID = ? " +
+                    "   AND SUB.TENANT_ID = ? " +
+                    "   AND APP.GROUP_ID =?" + 
+                    "   AND APP.APPLICATION_ID=SUBS.APPLICATION_ID " +
+                    "   AND API.API_ID=SUBS.API_ID" +
+                    "   AND APP.NAME= ? " +
+                    "   AND SUBS.SUBS_CREATE_STATE = '" + APIConstants.SubscriptionCreatedStatus.SUBSCRIBE + "'";
+
+            if (forceCaseInsensitiveComparisons) {
+                sqlQuery = "SELECT " +
+                        "   SUBS.SUBSCRIPTION_ID" +
+                        "   ,API.API_PROVIDER AS API_PROVIDER" +
+                        "   ,API.API_NAME AS API_NAME" +
+                        "   ,API.API_VERSION AS API_VERSION" +
+                        "   ,SUBS.TIER_ID AS TIER_ID" +
+                        "   ,APP.APPLICATION_ID AS APP_ID" +
+                        "   ,SUBS.LAST_ACCESSED AS LAST_ACCESSED" +
+                        "   ,SUBS.SUB_STATUS AS SUB_STATUS" +
+                        "   ,SUBS.SUBS_CREATE_STATE AS SUBS_CREATE_STATE" +
+                        "   ,APP.NAME AS APP_NAME " +
+                        "   ,APP.CALLBACK_URL AS CALLBACK_URL " +
+                        "FROM " +
+                        "   AM_SUBSCRIBER SUB," +
+                        "   AM_APPLICATION APP, " +
+                        "   AM_SUBSCRIPTION SUBS, " +
+                        "   AM_API API " +
+                        "WHERE " +
+                        "   LOWER(SUB.USER_ID) = LOWER(?) " +
+                        "   AND SUB.TENANT_ID = ? " +
+                        "   AND APP.GROUP_ID =?" + 
+                        "   AND APP.APPLICATION_ID=SUBS.APPLICATION_ID " +
+                        "   AND API.API_ID=SUBS.API_ID" +
+                        "   AND APP.NAME= ? " +
+                        "   AND SUBS.SUBS_CREATE_STATE = '" + APIConstants.SubscriptionCreatedStatus.SUBSCRIBE + "'";
+            }
+
+            ps = connection.prepareStatement(sqlQuery);
+            ps.setString(1, subscriber.getName());
+            int tenantId = IdentityUtil.getTenantIdOFUser(subscriber.getName());
+            ps.setInt(2, tenantId);
+            ps.setString(3, applicationName);
+            if (groupId != null && !groupId.equals("")) {
+                ps.setString(4, groupId);
+            }
+            result = ps.executeQuery();
+
+            if (result == null) {
+                return subscribedAPIs;
+            }
+
+            int index = 0;
+
+            while (result.next()) {
+                if(index >= startSubIndex && index < endSubIndex) {
+                    APIIdentifier apiIdentifier = new APIIdentifier(APIUtil.replaceEmailDomain(result.getString("API_PROVIDER")),
+                            result.getString("API_NAME"), result.getString("API_VERSION"));
+
+                    SubscribedAPI subscribedAPI = new SubscribedAPI(subscriber, apiIdentifier);
+                    subscribedAPI.setSubStatus(result.getString("SUB_STATUS"));
+                    subscribedAPI.setSubCreatedStatus(result.getString("SUBS_CREATE_STATE"));
+                    subscribedAPI.setTier(new Tier(
+                            result.getString(APIConstants.SUBSCRIPTION_FIELD_TIER_ID)));
+                    subscribedAPI.setLastAccessed(result.getDate(
+                            APIConstants.SUBSCRIPTION_FIELD_LAST_ACCESS));
+
+                    Application application = new Application(result.getString("APP_NAME"), subscriber);
+                    subscribedAPI.setApplication(application);
+                    subscribedAPIs.add(subscribedAPI);
+                    if(index == endSubIndex-1){
+                        break;
+                    }
+                }
+                index++;
+            }
+
+        } catch (SQLException e) {
+            handleException("Failed to get SubscribedAPI of :" + subscriber.getName(), e);
+        } catch (IdentityException e) {
+            handleException("Failed get tenant id of user " + subscriber.getName(), e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(ps, connection, result);
+        }
+        return subscribedAPIs;
+    }
     /**
      * This method returns the set of APIs for given subscriber
      *
@@ -1812,7 +2046,6 @@ public class ApiMgtDAO {
         }
         return subscribedAPIs;
     }
-
 
     private Set<APIKey> getAPIKeysBySubscription(int subscriptionId) throws APIManagementException {
         Connection connection = null;
@@ -6198,11 +6431,12 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
                 String authScheme = resultSet.getString("AUTH_SCHEME");
                 String throttlingTier = resultSet.getString("THROTTLING_TIER");
                 InputStream mediationScriptBlob = resultSet.getBinaryStream("MEDIATION_SCRIPT");
-                if(mediationScriptBlob!=null){
+                if (mediationScriptBlob != null) {
                     script = APIMgtDBUtil.getStringFromInputStream(mediationScriptBlob);
                     // set null if the script is empty. Otherwise ArrayIndexOutOfBoundsException occurs when trying to split by ::
-                    if(script.isEmpty())
-                    	script=null;
+                    if (script.isEmpty()) {
+                        script = null;
+                    }
                 }
                 urlMappings.put(uriPattern + "::" + httpMethod + "::" + authScheme + "::" + throttlingTier + "::" + script, null);
                 // urlMappings.put(uriPattern + "::" + httpMethod + "::" + authScheme, null);

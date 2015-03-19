@@ -80,6 +80,7 @@
                         if(groupId == null){
                           groupId = "";
                         }
+                      
 			            session.put("groupId", groupId)
 			            var subscriber = store.getSubscriber(username);
     			        if (!subscriber) {

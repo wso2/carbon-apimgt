@@ -2548,8 +2548,7 @@ public class APIStoreHostObject extends ScriptableObject {
 		return prodKeyScope;
 	}
 
-    public static NativeArray jsFunction_getAllSubscriptions(Context cx,
-                                                             Scriptable thisObj, Object[] args, Function funObj)
+    public static NativeObject jsFunction_getAllSubscriptions(Context cx,Scriptable thisObj, Object[] args, Function funObj)
             throws ScriptException, APIManagementException {
 
         if (args == null || args.length == 0 || !isStringArray(args)) {
@@ -2557,6 +2556,8 @@ public class APIStoreHostObject extends ScriptableObject {
         }
 
         NativeArray applicationList = new NativeArray(0);
+        Integer subscriptionCount = 0;
+        NativeObject result = new NativeObject();
         boolean isTenantFlowStarted = false;
         
         long startTime = 0;
@@ -2568,9 +2569,11 @@ public class APIStoreHostObject extends ScriptableObject {
             String username = args[0].toString();
             String appName = args[1].toString();
             String groupId = null;
-            if(args.length > 2 && args[2] != null){
-            	groupId = args[2].toString();
+            if(args.length > 4 && args[4] != null){
+            	groupId = args[4].toString();
             }
+            int startSubIndex = Integer.parseInt(args[2].toString());
+            int endSubIndex = Integer.parseInt(args[3].toString());
 
             String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(username));
             if (tenantDomain != null &&
@@ -2589,6 +2592,7 @@ public class APIStoreHostObject extends ScriptableObject {
             else{
                     applications = apiConsumer.getApplications(new Subscriber(username), groupId);
                 }
+
             if (applications != null) {
                 int i = 0;
                 for (Application application : applications) {
@@ -2601,17 +2605,19 @@ public class APIStoreHostObject extends ScriptableObject {
 	                NativeArray apisArray = new NativeArray(0);
 	                Set<Scope> scopeSet = new LinkedHashSet<Scope>();
 	                NativeArray scopesArray = new NativeArray(0);
+
 	                if (((appName == null || appName.isEmpty()) && i == 0) ||
 	                    appName.equals(application.getName())) {
 
-		                //get subscribed APIs set for application
+	                    //get subscribed APIs set as per the starting and ending indexes for application.
 	                	Set<SubscribedAPI> subscribedAPIs;
                         if (groupId == null || groupId.isEmpty()) {
-                            subscribedAPIs = apiConsumer.getSubscribedAPIs(subscriber, application.getName());
+                            subscribedAPIs = apiConsumer.getPaginatedSubscribedAPIs(subscriber, application.getName(),startSubIndex,endSubIndex);
+                         
                         } else {
-                            subscribedAPIs = apiConsumer.getSubscribedAPIs(subscriber, application.getName(), groupId);
+                            subscribedAPIs = apiConsumer.getPaginatedSubscribedAPIsbyGroupId(subscriber, application.getName(),startSubIndex,endSubIndex, groupId);
                         }
-	
+
 		                List<APIIdentifier> identifiers = new ArrayList<APIIdentifier>();
 		                for (SubscribedAPI subscribedAPI : subscribedAPIs) {
 			                addAPIObj(subscribedAPI, apisArray, thisObj, application);
@@ -2765,6 +2771,8 @@ public class APIStoreHostObject extends ScriptableObject {
                         appObj.put("subscriptions", appObj, apisArray);
                         appObj.put("scopes", appObj, scopesArray);
                         applicationList.put(i++, applicationList, appObj);
+                        result.put("applications", result, applicationList);
+                        result.put("totalLength", result, subscriptionCount);
                     }
                 }
             }
@@ -2779,7 +2787,8 @@ public class APIStoreHostObject extends ScriptableObject {
         if (log.isDebugEnabled()) {
             log.debug("jsFunction_getMySubscriptionDetail took : " + (System.currentTimeMillis() - startTime) + "ms");
         }
-        return applicationList;
+
+        return result;
     }
 
     private static void addAPIObj(SubscribedAPI subscribedAPI, NativeArray apisArray,
@@ -2850,7 +2859,7 @@ public class APIStoreHostObject extends ScriptableObject {
             apiObj.put("hasMultipleEndpoints", apiObj, String.valueOf(api.getSandboxUrl() != null));
             apisArray.put(apisArray.getIds().length, apisArray, apiObj);
         } catch (APIManagementException e) {
-            handleException("Error while obtaining application metadata", e);
+            log.error("Error while obtaining application metadata", e);
         }
     }
 
@@ -3574,12 +3583,24 @@ public class APIStoreHostObject extends ScriptableObject {
         APIIdentifier apiId = new APIIdentifier(provider, name, version);
 
         APIConsumer apiConsumer = getAPIConsumer(thisObj);
+        boolean isTenantFlowStarted = false;
+
         try {
+            String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(username));
+            if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
+                isTenantFlowStarted = true;
+                PrivilegedCarbonContext.startTenantFlow();
+                PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
+            }
             apiConsumer.removeSubscription(apiId, username, applicationId);
             return true;
         } catch (APIManagementException e) {
             handleException("Error while removing the subscription of" + name + "-" + version, e);
             return false;
+        } finally {
+            if (isTenantFlowStarted) {
+                PrivilegedCarbonContext.endTenantFlow();
+            }
         }
     }
 
