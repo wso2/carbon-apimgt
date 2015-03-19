@@ -6151,11 +6151,12 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
                 String authScheme = resultSet.getString("AUTH_SCHEME");
                 String throttlingTier = resultSet.getString("THROTTLING_TIER");
                 InputStream mediationScriptBlob = resultSet.getBinaryStream("MEDIATION_SCRIPT");
-                if(mediationScriptBlob!=null){
+                if (mediationScriptBlob != null) {
                     script = APIMgtDBUtil.getStringFromInputStream(mediationScriptBlob);
                     // set null if the script is empty. Otherwise ArrayIndexOutOfBoundsException occurs when trying to split by ::
-                    if(script.isEmpty())
-                    	script=null;
+                    if (script.isEmpty()) {
+                        script = null;
+                    }
                 }
                 urlMappings.put(uriPattern + "::" + httpMethod + "::" + authScheme + "::" + throttlingTier + "::" + script, null);
                 // urlMappings.put(uriPattern + "::" + httpMethod + "::" + authScheme, null);
