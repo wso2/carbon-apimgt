@@ -19,6 +19,8 @@
 
 package org.apache.synapse.core.axis2;
 
+import org.apache.axiom.om.OMAbstractFactory;
+import org.apache.axiom.soap.SOAPEnvelope;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.synapse.FaultHandler;
@@ -154,13 +156,25 @@ public class TimeoutHandler extends TimerTask {
                                 msgContext.setProperty(SynapseConstants.ERROR_MESSAGE,
                                         SEND_TIMEOUT_MESSAGE);
 
-                                Stack faultStack = msgContext.getFaultStack();
 
-                                for (int j = 0; j < faultStack.size(); j++) {
-                                    Object o = faultStack.pop();
-                                    if (o instanceof FaultHandler) {
-                                        ((FaultHandler) o).handleFault(msgContext);
-                                    }
+                                SOAPEnvelope soapEnvelope;
+                                if(msgContext.isSOAP11()){
+                                    soapEnvelope = OMAbstractFactory.getSOAP11Factory().createSOAPEnvelope();
+                                    soapEnvelope.addChild(OMAbstractFactory.getSOAP11Factory().createSOAPBody());
+                                } else {
+                                    soapEnvelope = OMAbstractFactory.getSOAP12Factory().createSOAPEnvelope();
+                                    soapEnvelope.addChild(OMAbstractFactory.getSOAP12Factory().createSOAPBody());
+                                 }
+                                try {
+                                    msgContext.setEnvelope(soapEnvelope);
+                                } catch (Exception ex) {
+                                    log.error("Error resetting SOAP Envelope",ex);
+                                }
+ 
+                                Stack<FaultHandler> faultStack = msgContext.getFaultStack();
+                                FaultHandler f = faultStack.pop();
+                                if(f != null){
+                                	f.handleFault(msgContext);
                                 }
 
                             }
