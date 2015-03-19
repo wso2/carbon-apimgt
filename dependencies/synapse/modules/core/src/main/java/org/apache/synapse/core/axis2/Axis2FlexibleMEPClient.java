@@ -265,7 +265,7 @@ public class Axis2FlexibleMEPClient {
             if (endpoint.getCharSetEncoding() != null) {
                 axisOutMsgCtx.setProperty(Constants.Configuration.CHARACTER_SET_ENCODING,
                         endpoint.getCharSetEncoding());
-                //This is very dirty hack. We need to clean this up. TargetRequest line 176 contains a code block which over writes the
+                //Need to Clean this up. TargetRequest line 176 contains a code block which over writes the
                 //Content-Type returned by the message formatter with the Content-Type in TRANSPORT_HEADERS. Because of that, even when
                 //the Character set encoding is set by the message formatter, it will be replaced by the Content-Type header in TRANSPORT_HEADERS.
                 //So Im setting a property to check in TargetRequest before over writing the header.
