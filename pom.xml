@@ -724,7 +724,7 @@
         <javax.servlet.imp.pkg.version>[2.6.0, 3.0.0)</javax.servlet.imp.pkg.version>
 
         <!-- Jaggery Version -->
-        <jaggery.version>0.9.0.ALPHA4.wso2v3</jaggery.version>
+        <jaggery.version>0.9.0</jaggery.version>
 
         <!-- Misc Versions -->
         <orbit.version.h2.engine>1.2.140.wso2v3</orbit.version.h2.engine>
