@@ -178,11 +178,14 @@ include("/jagg/jagg.jag");
             }
             return;
         }
+
         var application = request.getParameter("application");
         var keyType = request.getParameter("keytype");
         var callbackUrl = request.getParameter("callbackUrl");
         var username = user.username;
         var accessAllowDomains = request.getParameter("authorizedDomains");
+	var tokenScope = request.getParameter("tokenScope"); 
+
         var accessAllowDomainsArr = accessAllowDomains.split(",");
         var validityTime = request.getParameter("validityTime");
         var retryAfterFailure = request.getParameter("retryAfterFailure");
@@ -198,8 +201,9 @@ include("/jagg/jagg.jag");
         }
 
         mod = jagg.module("subscription");
+
         result = mod.generateApplicationKey(username, application , keyType, callbackUrl, accessAllowDomainsArr,
-                validityTime, retryAfterFailure, jsonParams);
+                validityTime, retryAfterFailure, tokenScope, jsonParams);
 
         if (result.error) {
             obj = {
@@ -233,6 +237,7 @@ include("/jagg/jagg.jag");
          }*/
         mod = jagg.module("subscription");
         result = mod.updateAuthClient(authAppParams);
+
 
         if (result.error) {
             obj = {
@@ -296,8 +301,9 @@ include("/jagg/jagg.jag");
         clientId = request.getParameter("clientId");
         clientSecret = request.getParameter("clientSecret");
         validityTime = request.getParameter("validityTime");
+        tokenScope = request.getParameter("tokenScope");
         mod = jagg.module("subscription");
-        result = mod.refreshToken(username,application,keyType,oldAccessToken,accessAllowDomainsArr,clientId, clientSecret,validityTime);
+        result = mod.refreshToken(username,application,keyType,oldAccessToken,accessAllowDomainsArr,clientId, clientSecret,validityTime,tokenScope);
 
         if (result.error) {
             obj = {
@@ -313,7 +319,7 @@ include("/jagg/jagg.jag");
             }
         }
         print(obj);
-     }else if (action == "saveAuthapp" && request.getMethod() == 'POST') {
+     }else if (action == "mapExistingOauthClient" && request.getMethod() == 'POST') {
 
         if (!user) {
             print({
@@ -329,11 +335,12 @@ include("/jagg/jagg.jag");
         saveAuthAppParams.applicationName = request.getParameter("applicationName");
 
 
+
         //log.info(saveAuthAppParams);
 
         mod = jagg.module("subscription");
 
-        result = mod.saveAuthapp(saveAuthAppParams);
+        result = mod.mapExistingOauthClient(saveAuthAppParams);
 
         if (result.error) {
             obj = {

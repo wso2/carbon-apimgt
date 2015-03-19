@@ -1,6 +1,11 @@
 <% jagg.template("stats/faulty-invocations", function(inputs, outputs, jagg) { %>
 <link type="text/css" rel="stylesheet" href="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("templates/utils/dojo-release-1.8.3/dijit/themes/claro/claro.css"))%>"  media="screen"/>
 
+<!--stacked area chart-->
+<script type="text/javascript" src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("templates/utils/nvd3/js/d3.v3.js"))%>"></script>
+<script type="text/javascript" src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("templates/utils/nvd3/js/nv.d3.js"))%>"></script>
+<link type="text/css" rel="stylesheet" href="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("templates/utils/nvd3/css/nv.d3.css"))%>"/>
+
 <!--datepicker-->
 <script type="text/javascript" src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("templates/utils/datepicker/js/moment.js"))%>"></script>
 <script type="text/javascript" src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("templates/utils/datepicker/js/jquery.daterangepicker.js"))%>"></script>
@@ -43,13 +48,14 @@
      <div id="container">
 
      <div class="span12" style="overflow-x:auto">
-     <div id="faultyCountChart" >
+     <div id="tempLoadingSpace" >
              <div class="progress progress-striped active">
                  <div class="bar" style="width: 10%;"></div>
              </div>
      </div>
      </div>
          <div class="span11">
+             <div id="chartContainer"  style="margin-bottom :20px;height: 100%"></div>
              <div id="tableContainer" style="margin-top:20px"></div>
          </div>
          </div>

@@ -87,20 +87,14 @@ require(["dojo/dom", "dojo/domReady!"], function (dom) {
                             shortcuts:'hide',
                             endDate:currentDay
                         })
-                        .bind('datepicker-change',function(event,obj)
-                        {
-
-                        })
                         .bind('datepicker-apply',function(event,obj)
                         {
+                             btnActiveToggle(this);
                              var from = convertDate(obj.date1);
                              var to = convertDate(obj.date2);
                              $('#date-range').html(from + " to "+ to);
-                             drawProviderAPIVersionUserLastAccess(from,to);
-                        })
-                        .bind('datepicker-close',function()
-                        {
-                    });
+                             drawProviderAPIServiceTime(from,to);
+                        });
 
                     //setting default date
                     var to = new Date();
@@ -173,7 +167,7 @@ var drawProviderAPIServiceTime = function (from, to) {
                         $dataTable.append($('<thead class="tableHead"><tr>' +
                             '<th width="10%"></th>' +
                             '<th>API</th>' +
-                            '<th width="30%" style="text-transform:none;">RESPONSE TIME(ms)</th>'+
+                            '<th width="30%" style="text-transform:none;text-align:right">RESPONSE TIME(ms)</th>'+
                             '</tr></thead>'));
 
 
@@ -257,6 +251,13 @@ var drawProviderAPIServiceTime = function (from, to) {
                              "order": [
                                  [ 2, "desc" ]
                              ],
+                            "fnDrawCallback": function(){
+                                if(this.fnSettings().fnRecordsDisplay()<=$("#apiSelectTable_length option:selected" ).val()
+                                || $("#apiSelectTable_length option:selected" ).val()==-1)
+                                    $('#apiSelectTable_paginate').hide();
+                                else
+                                    $('#apiSelectTable_paginate').show();
+                            },
                              "aoColumns": [
                                  { "bSortable": false },
                                  null,
@@ -341,7 +342,7 @@ var drawProviderAPIServiceTime = function (from, to) {
                         $('#chartContainer').hide();
                         $('#tableContainer').hide();
                         $('#tempLoadingSpace').html('');
-                        $('#tempLoadingSpace').append($('<span class="label label-info">' + i18n.t('errorMsgs.noData') + '</span>'));
+                        $('#tempLoadingSpace').append($('<h3 class="no-data-heading center-wrapper">No Data Available</h3>'));
                     }
             } else {
                 if (json.message == "AuthenticateError") {
@@ -399,3 +400,7 @@ function convertDate(date) {
         + hour +":"+(('' + minute).length < 2 ? '0' : '')+ minute;
 }
 
+function btnActiveToggle(button){
+    $(button).siblings().removeClass('active');
+    $(button).addClass('active');
+}

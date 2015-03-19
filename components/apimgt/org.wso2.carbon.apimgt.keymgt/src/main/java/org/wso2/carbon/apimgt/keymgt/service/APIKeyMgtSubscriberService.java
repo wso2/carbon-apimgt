@@ -56,6 +56,7 @@ import org.wso2.carbon.utils.CarbonUtils;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -67,6 +68,7 @@ public class APIKeyMgtSubscriberService extends AbstractAdmin {
     private static final Log log = LogFactory.getLog(APIKeyMgtSubscriberService.class);
     private static final String GRANT_TYPE_CLIENT_CREDENTIALS = "client_credentials";
     private static final String OAUTH_RESPONSE_ACCESSTOKEN = "access_token";
+    private static final String OAUTH_RESPONSE_TOKEN_SCOPE = "scope";
     private static final String OAUTH_RESPONSE_EXPIRY_TIME = "expires_in";
 
     /**
@@ -106,17 +108,20 @@ public class APIKeyMgtSubscriberService extends AbstractAdmin {
      * @param userId          User/Developer name
      * @param applicationName Name of the application
      * @param tokenType       Type (scope) of the required access token
+     * @param tokenScope      Scope of the token
      * @return Access token
      * @throws APIKeyMgtException on error
      */
     public ApplicationKeysDTO getApplicationAccessToken(String userId, String applicationName, String tokenType,
-                                                        String callbackUrl, String[] allowedDomains, String validityTime)
+                                                        String callbackUrl, String[] allowedDomains,
+                                                        String validityTime, String tokenScope)
             throws APIKeyMgtException, APIManagementException, IdentityException {
 
         ApiMgtDAO apiMgtDAO = new ApiMgtDAO();
 
         OAuthApplicationInfo oAuthApplicationInfo = null;
         String accessToken = apiMgtDAO.getAccessKeyForApplication(userId, applicationName, tokenType);
+
         Application application = apiMgtDAO.getApplicationByName(applicationName, userId);
         oAuthApplicationInfo = apiMgtDAO.getProductionClientOfApplication(application.getId(), tokenType);
         if (oAuthApplicationInfo == null) {
@@ -126,6 +131,7 @@ public class APIKeyMgtSubscriberService extends AbstractAdmin {
                 throw new APIKeyMgtException("Consumer key value is null can not get application access token");
             } else if (oAuthApplicationInfo.getParameter("client_secret") == null) {
                 throw new APIKeyMgtException("Consumer secret value is null can not get application access token");
+
             }
 
             String consumerKey = oAuthApplicationInfo.getClientId();
@@ -140,7 +146,7 @@ public class APIKeyMgtSubscriberService extends AbstractAdmin {
 
                     accessToken = apiMgtDAO.registerApplicationAccessToken(oAuthApplicationInfo.getClientId(), application.getId(),
                             applicationName,
-                            tenantAwareUserId, tokenType, allowedDomains, validityTime);
+                            tenantAwareUserId, tokenType, allowedDomains, validityTime,tokenScope);
                 }
 
             }
@@ -188,8 +194,9 @@ public class APIKeyMgtSubscriberService extends AbstractAdmin {
                                    String[] allowedDomains, String clientId, String clientSecret,
                                    String validityTime) throws Exception {
         String newAccessToken = null;
+        String tokenScope = null;
         long validityPeriod = 0;
-        
+
 
         String tokenEndpointName = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration().
                 getFirstProperty(APIConstants.API_KEY_MANAGER_TOKEN_ENDPOINT_NAME);
@@ -232,6 +239,7 @@ public class APIKeyMgtSubscriberService extends AbstractAdmin {
         tokParams.add(new BasicNameValuePair(OAuth.OAUTH_GRANT_TYPE, GRANT_TYPE_CLIENT_CREDENTIALS));
         tokParams.add(new BasicNameValuePair(OAuth.OAUTH_CLIENT_ID, clientId));
         tokParams.add(new BasicNameValuePair(OAuth.OAUTH_CLIENT_SECRET, clientSecret));
+        tokParams.add(new BasicNameValuePair(OAuth.OAUTH_SCOPE, tokenType));
 
         revokeParams.add(new BasicNameValuePair(OAuth.OAUTH_CLIENT_ID, clientId));
         revokeParams.add(new BasicNameValuePair(OAuth.OAUTH_CLIENT_SECRET, clientSecret));
@@ -264,6 +272,7 @@ public class APIKeyMgtSubscriberService extends AbstractAdmin {
                 JSONObject obj = new JSONObject(responseStr);
                 newAccessToken = obj.get(OAUTH_RESPONSE_ACCESSTOKEN).toString();
                 validityPeriod = Long.parseLong(obj.get(OAUTH_RESPONSE_EXPIRY_TIME).toString());
+                tokenScope = obj.get(OAUTH_RESPONSE_TOKEN_SCOPE).toString();
 
                 if (validityTime != null && !"".equals(validityTime)) {
                     validityPeriod = Long.parseLong(validityTime);
@@ -276,7 +285,7 @@ public class APIKeyMgtSubscriberService extends AbstractAdmin {
         }
         
         ApiMgtDAO apiMgtDAO = new ApiMgtDAO();
-        apiMgtDAO.updateRefreshedApplicationAccessToken(tokenType, newAccessToken,
+        apiMgtDAO.updateRefreshedApplicationAccessToken(tokenScope, newAccessToken,
                 validityPeriod);
         return newAccessToken;
 
@@ -333,8 +342,8 @@ public class APIKeyMgtSubscriberService extends AbstractAdmin {
             }
         }
         if (mappings.size() > 0) {
-            List<Environment> gatewayEnvs = config.getApiGatewayEnvironments();
-            for (Environment environment : gatewayEnvs) {
+            Map<String, Environment> gatewayEnvs = config.getApiGatewayEnvironments();
+            for (Environment environment : gatewayEnvs.values()) {
                 APIAuthenticationAdminClient client = new APIAuthenticationAdminClient(environment);
                 client.invalidateKeys(mappings);
             }

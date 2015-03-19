@@ -84,20 +84,14 @@ require(["dojo/dom", "dojo/domReady!"], function(dom){
                             shortcuts:'hide',
                             endDate:currentDay
                         })
-                        .bind('datepicker-change',function(event,obj)
-                        {
-
-                        })
                         .bind('datepicker-apply',function(event,obj)
                         {
+                             btnActiveToggle(this);
                              var from = convertDate(obj.date1);
                              var to = convertDate(obj.date2);
                              $('#date-range').html(from + " to "+ to);
                              drawAPIUsageByDestination(from,to);
-                        })
-                        .bind('datepicker-close',function()
-                        {
-                    });
+                        });
 
                     //setting default date
                     var to = new Date();
@@ -169,7 +163,7 @@ var drawAPIUsageByDestination = function(from,to){
                                         '<th>VERSION</th>'+
                                         '<th>CONTEXT</th>'+
                                         '<th>DESTINATION ADDRESS</th>'+
-                                        '<th>NO OF ACCESS</th>'+
+                                        '<th style="text-align:right">NO OF ACCESS</th>'+
                                     '</tr></thead>'));
 
                 for (var i = 0; i < json.usage.length; i++) {
@@ -178,13 +172,20 @@ var drawAPIUsageByDestination = function(from,to){
                 if (length == 0) {
                     $('#destinationBasedUsageTable').hide();
                     $('#tempLoadingSpaceDestination').html('');
-                    $('#tempLoadingSpaceDestination').append($('<span class="label label-info">'+i18n.t('errorMsgs.noData')+'</span>'));
+                    $('#tempLoadingSpaceDestination').append($('<h3 class="no-data-heading center-wrapper">No Data Available</h3>'));
 
                 }else{
                     $('#tableContainer').append($dataTable);
                     $('#tableContainer').show();
                     $('#destinationBasedUsageTable').DataTable({
-                     "order": [[ 4, "desc" ]]
+                     "order": [[ 4, "desc" ]],
+                     "fnDrawCallback": function(){
+                         if(this.fnSettings().fnRecordsDisplay()<=$("#destinationBasedUsageTable_length option:selected" ).val()
+                         || $("#destinationBasedUsageTable_length option:selected" ).val()==-1)
+                             $('#destinationBasedUsageTable_paginate').hide();
+                         else
+                             $('#destinationBasedUsageTable_paginate').show();
+                     },
                     });
                     $('select').css('width','60px');
                 }
@@ -246,3 +247,7 @@ function convertDate(date) {
         + hour +":"+(('' + minute).length < 2 ? '0' : '')+ minute;
 }
 
+function btnActiveToggle(button){
+    $(button).siblings().removeClass('active');
+    $(button).addClass('active');
+}

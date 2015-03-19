@@ -20,6 +20,7 @@ package org.wso2.carbon.apimgt.api;
 
 import org.wso2.carbon.apimgt.api.model.*;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -168,6 +169,19 @@ public interface APIConsumer extends APIManager {
                                                    String  applicationName) throws APIManagementException;
 
     /**
+     * Returns a set of SubscribedAPIs filtered by the given application name and in between starting and ending indexes.
+     *
+     * @param subscriber Subscriber
+     * @param applicationName Application needed to find subscriptions
+     * @param startSubIndex Starting index of subscriptions to be listed
+     * @param endSubIndex Ending index of Subscriptions to be listed
+     * @return
+     * @throws APIManagementException
+     */
+    public Set<SubscribedAPI> getPaginatedSubscribedAPIs(Subscriber subscriber, String applicationName, int startSubIndex, int endSubIndex)
+            throws APIManagementException;
+
+    /**
      * Returns true if a given user has subscribed to the API
      *
      * @param apiIdentifier APIIdentifier
@@ -176,6 +190,16 @@ public interface APIConsumer extends APIManager {
      * @throws APIManagementException if failed to check the subscribed state
      */
     public boolean isSubscribed(APIIdentifier apiIdentifier, String userId) throws APIManagementException;
+
+    /**
+     * Returns the number of subscriptions for the given subscriber and app.
+     *
+     * @param subscriber Subscriber
+     * @param applicationName Application
+     * @return The number of subscriptions
+     * @throws APIManagementException if failed to count the number of subscriptions.
+     */
+    public Integer getSubscriptionCount(Subscriber subscriber,String applicationName) throws APIManagementException;
 
     /**
      * Add new Subscriber
@@ -263,8 +287,8 @@ public interface APIConsumer extends APIManager {
      * @param  applicationName of the Application.
      * @param tokenType Token type (PRODUCTION | SANDBOX)
      * @param callbackUrl Callback URL for the Application.
-     * @param
-     * @throws APIManagementException if failed to applications for given subscriber
+     * @param tokenScope scope of the acces token to be generated.
+     * @throws org.wso2.carbon.apimgt.api.APIManagementException if failed to applications for given subscriber
      */
     public Map<String,String> requestApprovalForApplicationRegistration(String userId, String applicationName, String tokenType,
                                                             String callbackUrl, String[] allowedDomains, String validityTime)
@@ -284,6 +308,7 @@ public interface APIConsumer extends APIManager {
                                                                         String tokenType,
                                                                         String callbackUrl, String[] allowedDomains,
                                                                         String validityTime,
+									                                    String tokenScope,
                                                                         String jsonString)
             throws APIManagementException;
 
@@ -407,10 +432,13 @@ public interface APIConsumer extends APIManager {
      * @param userId Tenant Aware userID
      * @param applicationName Name of the Application
      * @param tokenType Type of the Token (PRODUCTION | SANDBOX)
+     * @param tokenScope scope of the token
      * @return a Map containing the details of the OAuth application.
      * @throws APIManagementException if failed to get the tiers
      */
-    public Map<String,String> completeApplicationRegistration(String userId, String applicationName, String tokenType) throws APIManagementException;
+
+    public Map<String,String> completeApplicationRegistration(String userId, String applicationName, String tokenType, String tokenScope) throws APIManagementException;
+
 
     /**
      * Returns details of an API information in low profile
@@ -431,6 +459,7 @@ public interface APIConsumer extends APIManager {
      * @return set of API
      * @throws APIManagementException if failed to API set
      */
+
     public Map<String,Object> getAllPaginatedAPIsByStatus(String tenantDomain,int start,int end, String Status) throws APIManagementException;
 
     /**
@@ -446,5 +475,38 @@ public interface APIConsumer extends APIManager {
      * @throws APIManagementException
      */
     AccessTokenInfo renewAccessToken(String oldAccessToken, String clientId, String clientSecret, String validityTime,
-                                     String[] accessAllowDomainsArray, String jsonInput) throws APIManagementException;
+                                     String[] accessAllowDomainsArray,String[] requestedScopes, String jsonInput) throws
+            APIManagementException;
+
+	/**
+	 * Returns a set of scopes associated with a list of API identifiers.
+	 *
+	 * @param identifiers list of API identifiers
+	 * @return set of scopes.
+	 * @throws APIManagementException
+	 */
+	public Set<Scope> getScopesBySubscribedAPIs(List<APIIdentifier> identifiers)
+			throws APIManagementException;
+
+	/**
+	 * Returns the scopes of an access token as a string
+	 *
+	 * @param accessToken access token you want to receive scopes for
+	 * @return scopes of the access token as a string
+	 * @throws APIManagementException
+	 */
+	public String getScopesByToken(String accessToken) throws APIManagementException;
+
+	/**
+	 * Returns a set of scopes for a given space seperated scope key string
+	 *
+	 * @param scopeKeys a space seperated string of scope keys
+	 * @param tenantId  tenant id
+	 * @return set of scopes
+	 * @throws APIManagementException
+	 */
+	public Set<Scope> getScopesByScopeKeys(String scopeKeys, int tenantId)
+			throws APIManagementException;
+
+
 }

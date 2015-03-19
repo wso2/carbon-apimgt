@@ -298,3 +298,11 @@
 #iDivSandBoxSaveSectionWrapper{
     display: none;
 }
+
+.btn-generatekeys{
+    width: 125px;
+}
+
+.btn-providekeys{
+    width: 125px;
+}

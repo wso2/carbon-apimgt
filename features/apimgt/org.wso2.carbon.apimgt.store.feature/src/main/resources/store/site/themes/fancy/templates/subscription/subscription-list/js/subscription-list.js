@@ -13,6 +13,21 @@ function showHideKeys(){
     }
 
 $(document).ready(function () {
+    
+    $('#scopeSelectButtonPop').click(function() {
+    	var selected = ($('.Checkbox:checked').map(function() {
+    	    return this.value;
+    	}).get().join(' '));
+    	$('#scopeInput').attr('value', selected);
+    	$('#scopeInput').attr('value', selected);
+    	});
+    
+    /*$("select[name='scope']").change(function() {
+        var multipleValues = $(this).val() || [];
+        var spaced_string = multipleValues.join(" ");
+        $('#scopeInput').attr('value', spaced_string);
+
+    });*/
 
     $.ajaxSetup({
         contentType: "application/x-www-form-urlencoded; charset=utf-8"
@@ -83,32 +98,64 @@ $(document).ready(function () {
         var validityTime;
         if (keyType == 'PRODUCTION') {
             authoDomains = $('#allowedDomainsPro').val();
-            validityTime = $('#refreshProdValidityTime').val();
+            validityTime=$('#refreshProdValidityTime').val();
         } else {
             authoDomains = $('#allowedDomainsSand').val();
-            validityTime = $('#refreshSandValidityTime').val();
+            validityTime=$('#refreshSandValidityTime').val();
         }
-
-        /*
-         if we have additional parameters we can pass them as a json object.
-         */
-        var oJsonParams = {
-            username : userName
-        };
-
+        var tokenScope = $('#scopeInput').val();
+        console.log("app-key-generate-button accessed");
         jagg.post("/site/blocks/subscription/subscription-add/ajax/subscription-add.jag", {
-            action: "generateApplicationKey",
-            application: elem.attr("data-application"),
-            keytype: elem.attr("data-keytype"),
-            callbackUrl: elem.attr("data-callbackUrl"),
-            authorizedDomains: authoDomains,
-            validityTime: validityTime,
-            jsonParams: JSON.stringify(oJsonParams)
+            action:"generateApplicationKey",
+            application:elem.attr("data-application"),
+            keytype:elem.attr("data-keytype"),
+            callbackUrl:elem.attr("data-callbackUrl"),
+            authorizedDomains:authoDomains,
+            validityTime:validityTime,
+            tokenScope:tokenScope
         }, function (result) {
             if (!result.error) {
                 location.reload();
             } else {
-                jagg.message({content: result.message, type: "error"});
+                jagg.message({content:result.message,type:"error"});
+            }
+        }, "json");
+
+        $(this).html(i18n.t('info.wait'));
+    });
+
+    $('.app-create-key-button').click(function () {
+        var elem = $(this);
+        var i = elem.attr("iteration");
+        var keyType = elem.attr("data-keytype");
+        var authoDomains;
+        var domainsDiv;
+        var regen;
+        var link;
+        var validityTime;
+        var tokenScope;
+        
+        if (keyType == 'PRODUCTION') {
+            authoDomains = $('#allowedDomainsPro').val();
+            validityTime=$('#refreshProdValidityTime').val();
+        } else {
+            authoDomains = $('#allowedDomainsSand').val();
+            validityTime=$('#refreshSandValidityTime').val();
+        }
+        tokenScope=$('#scopeInput').val();
+        jagg.post("/site/blocks/subscription/subscription-add/ajax/subscription-add.jag", {
+            action:"generateApplicationKey",
+            application:elem.attr("data-application"),
+            keytype:elem.attr("data-keytype"),
+            callbackUrl:elem.attr("data-callbackUrl"),
+            authorizedDomains:authoDomains,
+            validityTime:validityTime,
+	    retryAfterFailure:true
+        }, function (result) {
+            if (!result.error) {
+                location.reload();
+            } else {
+                jagg.message({content:result.message,type:"error"});
             }
         }, "json");
 
@@ -159,59 +206,92 @@ $(document).ready(function () {
 	   });
 	    return false;
 	 });
-	  
-	    
+
+   $('#btnProvideKeyProduction').click(function () {
+       $('.cDivParentOfManualAuthAppCreateProduction').show();
+       $('.cDivDefaultBtnSet').hide();
+   });
+
+    $('#btnProvideKeySandBox').click(function () {
+        $('.cDivParentOfManualAuthAppCreateSandBox').show();
+        $('.defaultBtnSetForSandBox').hide();
+    });
+
+
+    $('#btnProvideKeyProductionCancle').click(function () {
+        $('.cDivParentOfManualAuthAppCreateProduction').hide();
+        $('.cDivDefaultBtnSet').show();
+    });
+
+    $('#btnProvideKeySandBoxCancel').click(function () {
+        $('.cDivParentOfManualAuthAppCreateSandBox').hide();
+        $('.defaultBtnSetForSandBox').show();
+    });
+
+    $("#btnProvideKeyProductionSave").click(function () {
+        mapExistingOauthClient($(this));
+    });
+
+    $("#btnProvideKeySandBoxSave").click(function () {
+        mapExistingOauthClient($(this));
+    });
+
 });
 
-var saveAuthApp=function(oBtnElement,keyType){
-//alert("Inside Function");
+var mapExistingOauthClient=function(oBtnElement){
 
+    ////////////////////////////////////////////////////////////////////////////////////////////
+
+    var elem = oBtnElement;
+    var i = elem.attr("iteration");
+    var keyType = elem.attr("data-keytype");
+    var authoDomains;
     var clientId;
     var clientSecret;
-    //this is application ID
-    var appId = $(".cApplicationId").val();
-    //application name
-    var applicationName = $(oBtnElement).attr("data-application");
-
+    var userName = elem.attr("data-username");
+    var validityTime;
     if (keyType == 'PRODUCTION') {
-        clientId = $('#optionTwoClientIdProduction').val();
-        clientSecret = $('#optionTwoClientSecretProduction').val();
+        authoDomains = $('#allowedDomainsPro').val();
+        validityTime = $('#refreshProdValidityTime').val();
+        clientId = $('#inputConsumerKeyProduction').val();
+        clientSecret = $('#inputConsumerSecretProduction').val();
+    } else {
+        authoDomains = $('#allowedDomainsSand').val();
+        validityTime = $('#refreshSandValidityTime').val();
+        clientId = $('#inputConsumerKeySandBox').val();
+        clientSecret = $('#inputConsumerSecretSandBox').val();
     }
-    else if(keyType == 'SANDBOX'){
-        clientId = $('#optionTwoClientIdSandbox').val();
-        clientSecret = $('#optionTwoClientSecretSandbox').val();
-    }
-    var elem = $(oBtnElement);
 
-    var oJsonParams =
-        {
-            "client_name":elem.attr("data-application"),
-            "key_type" : keyType,
-            "client_secret":clientSecret
-
-        };
-
-    if(!clientId || !clientSecret){
-        alert("Client id and Client secret can not be empty");
-        return false;
-    }
+    /*
+     if we have additional parameters we can pass them as a json object.
+     */
+    var oJsonParams = {
+        "username" : userName,
+        "key_type" : keyType,
+        "client_secret":clientSecret,
+        "applicationName" : "erere"
+    };
+    console.log(oJsonParams);
 
     jagg.post("/site/blocks/subscription/subscription-add/ajax/subscription-add.jag", {
-
-        action:"saveAuthapp",
-        jsonParams:JSON.stringify(oJsonParams),
-        "client_id":clientId,
-        "applicationName" : applicationName
-
+        action: "mapExistingOauthClient",
+        applicationName: elem.attr("data-application"),
+        keytype: elem.attr("data-keytype"),
+        callbackUrl: elem.attr("data-callbackUrl"),
+        authorizedDomains: authoDomains,
+        validityTime: validityTime,
+        jsonParams: JSON.stringify(oJsonParams),
+        client_id : clientId
     }, function (result) {
-           if (!result.error) {
-                location.reload();
-            } else {
-                jagg.message({content:result.message,type:"error"});
-            }
-
+        if (!result.error) {
+            location.reload();
+        } else {
+            jagg.message({content: result.message, type: "error"});
+        }
     }, "json");
+
     $(this).html(i18n.t('info.wait'));
+
 }
 
 
@@ -231,6 +311,7 @@ var regenerate=function(appName,keyType,i,btn,div,clientId,clientSecret) {
     var clientId;
     var clientSecret;
     var validityTime;
+    var tokenScope;
 
     if (keyType == 'PRODUCTION') {
         oldAccessToken = $('.prodAccessTokenHidden').val();
@@ -244,6 +325,8 @@ var regenerate=function(appName,keyType,i,btn,div,clientId,clientSecret) {
         validityTime=$('#refreshSandValidityTime').val();
     }
     
+    tokenScope=$('#scopeInput').val();
+    
     jagg.post("/site/blocks/subscription/subscription-add/ajax/subscription-add.jag", {
         action:"refreshToken",
         application:appName,
@@ -252,7 +335,8 @@ var regenerate=function(appName,keyType,i,btn,div,clientId,clientSecret) {
         authorizedDomains:authorizedDomainsTemp,
         clientId:clientId,
         clientSecret:clientSecret,
-        validityTime:validityTime
+        validityTime:validityTime,
+        tokenScope:tokenScope
     }, function (result) {
         if (!result.error) {
             $(btn).parent().show();
@@ -262,11 +346,14 @@ var regenerate=function(appName,keyType,i,btn,div,clientId,clientSecret) {
                 $('.prodAccessTokenHidden').val(result.data.key.accessToken);
                 if(!regenerateOption){ $('.proRegenerateForm').hide(); }
                 $('.accessTokenDisplayPro').html(result.data.key.accessToken).attr('data-value',result.data.key.accessToken);
+                $('.accessTokenScopeDisplayPro').html(result.data.key.tokenScope).attr('data-value',result.data.key.tokenScope);
                 showHideKeys();
             } else{
                 $('.sandAccessTokenHidden').val(result.data.key.accessToken);
                 if(!regenerateOption){ $('.sandRegenerateForm').hide(); }
                 $('.accessTokenDisplaySand').html(result.data.key.accessToken).attr('data-value',result.data.key.accessToken);
+                $('.sandScopeDisplayPro').html(result.data.key.tokenScope).attr('data-value',result.data.key.tokenScope);
+                //change sandScopeDisplayPro name
                 showHideKeys();
             }
 

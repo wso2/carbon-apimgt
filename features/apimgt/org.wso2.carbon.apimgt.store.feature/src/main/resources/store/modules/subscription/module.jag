@@ -34,8 +34,8 @@ jagg.module("subscription", {
     updateAuthClient:function () {
         return jagg.require(jagg.getModulesDir() + "subscription/key.jag").updateAuthClient.apply(this, arguments);
     },
-    saveAuthapp:function () {
-        return jagg.require(jagg.getModulesDir() + "subscription/key.jag").saveAuthapp.apply(this, arguments);
+    mapExistingOauthClient:function () {
+        return jagg.require(jagg.getModulesDir() + "subscription/key.jag").mapExistingOauthClient.apply(this, arguments);
     },
     hasSubscribePermission:function () {
         return jagg.require(jagg.getModulesDir() + "subscription/check-permissions.jag").hasSubscribePermission.apply(this, arguments);

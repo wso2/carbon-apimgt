@@ -174,9 +174,18 @@ public class APITemplateBuilderImpl implements APITemplateBuilder {
             VelocityContext context = configcontext.getContext();
             context.put("defaultVersion", defaultVersion);
             String fwdApiContext = this.api.getContext();
-            if (fwdApiContext != null && fwdApiContext.charAt(0) == '/')
+            if (fwdApiContext != null && fwdApiContext.charAt(0) == '/') {
                 fwdApiContext = fwdApiContext.substring(1);
+            }
             context.put("fwdApiContext", fwdApiContext);
+
+            // for default version, we remove the {version} param from the apiContext
+            String apiContext = this.api.getContextTemplate();
+            if(apiContext.contains(APIConstants.SYNAPSE_REST_CONTEXT_VERSION_VARIABLE)){
+                apiContext = apiContext.replace(APIConstants.SYNAPSE_REST_CONTEXT_VERSION_VARIABLE,"");
+            }
+
+            context.put("apiContext", apiContext);
 
             Template t = velocityengine.getTemplate(this.getDefaultAPITemplatePath());
 

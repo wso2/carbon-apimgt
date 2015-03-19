@@ -23,7 +23,7 @@ var generateAPIKey = function (api, context, application, username, keyType, cal
 };
 
 var generateApplicationKey = function (application, username, keyType, callbackUrl, accessAllowDomainsArr,
-                                       validityTime, retryAfterFailure, jsonParams) {
+                                       validityTime, afterFailure,tokenScope,tokenScope,jsonParams) {
 
     afterFailure = typeof afterFailure !== 'undefined' ? afterFailure : false;
     var key,
@@ -33,10 +33,11 @@ var generateApplicationKey = function (application, username, keyType, callbackU
     try {
 	if(afterFailure == true){
         key = store.createApplicationKeys(application, username, keyType, callbackUrl, accessAllowDomainsArr,
-                validityTime, retryAfterFailure, jsonParams);
+                validityTime, afterFailure,tokenScope,jsonParams);
 	}else{
 	    key = store.getApplicationKey(application, username, keyType, callbackUrl, accessAllowDomainsArr,
-                validityTime, retryAfterFailure, jsonParams);
+                validityTime, afterFailure,tokenScope,jsonParams);
+
 	}
         if (log.isDebugEnabled()) {
             log.debug("generateAPIKey");
@@ -110,14 +111,14 @@ var updateAuthClient = function (authAppParams) {
     }
 };
 
-var saveAuthapp = function (authAppParams) {
+var mapExistingOauthClient = function (authAppParams) {
 
     var key,
             log = new Log(),
             store = jagg.module("manager").getAPIStoreObj();
     try {
 
-        key = store.saveAuthapp(authAppParams);
+        key = store.mapExistingOauthClient(authAppParams);
 
         if (log.isDebugEnabled()) {
             log.debug("generateAPIKey");
@@ -137,14 +138,14 @@ var saveAuthapp = function (authAppParams) {
 
 
 var refreshToken = function (username,application, keyType ,oldAccessToken, accessAllowDomains ,
-		clientId, clientSecret, validityTime) {
+		clientId, clientSecret, validityTime,tokenScope) {
     var key,
             log = new Log(),
             store = jagg.module("manager").getAPIStoreObj();
 
     try {
         key = store.refreshToken(username,application, keyType,oldAccessToken, accessAllowDomains, 
-        		clientId, clientSecret,validityTime);
+        		clientId, clientSecret,validityTime,tokenScope);
         if (log.isDebugEnabled()) {
             log.debug("generateAPIKey");
         }

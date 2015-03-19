@@ -73,8 +73,9 @@ public class SubscriberKeyMgtClient {
     }
 
     public ApplicationKeysDTO getApplicationAccessKey(String userId, String applicationName,
-                                                      String keyType, String callbackUrl, String[] allowedDomains,String validityTime) throws Exception {
-        return subscriberServiceStub.getApplicationAccessToken(userId, applicationName, keyType, callbackUrl, allowedDomains, validityTime);
+                                                      String keyType, String callbackUrl, String[] allowedDomains,String validityTime, String tokenScope) throws Exception {
+        ApplicationKeysDTO keys = subscriberServiceStub.getApplicationAccessToken(userId, applicationName, keyType, callbackUrl, allowedDomains, validityTime, tokenScope);
+        return keys;
     }
 
     public String regenerateApplicationAccessKey(String keyType, String oldAccessToken, String[] allowedDomains,

@@ -38,10 +38,19 @@ public class APIAuthenticationService extends AbstractServiceBusAdmin {
 
         Cache cache = Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER).getCache(APIConstants.KEY_CACHE_NAME);
         for (APIKeyMapping mapping : mappings) {
-            String cacheKey = mapping.getKey() + ":" + mapping.getContext() + ":" + mapping.getApiVersion();
+            //According to new cache design we will use cache key to clear cache if its available in mapping
+            //Later we construct key using attributes. Now cache key will pass as key
+            String cacheKey = mapping.getKey();
+            if(cacheKey!=null){
+                cache.remove(cacheKey);
+            }
+            //If cache key not present we will construct cache key
+            /*else{
+            cacheKey = mapping.getKey() + ":" + mapping.getContext() + ":" + mapping.getApiVersion();
             if(cache.containsKey(cacheKey)){
                 cache.remove(cacheKey);
             }
+            } */
             //TODO Review and fix
            /* Set keys = cache.keySet();
             for (Object cKey : keys) {
@@ -121,7 +130,7 @@ public class APIAuthenticationService extends AbstractServiceBusAdmin {
              * } else if (cache.get(resourceCacheKey) != null) {
              * cache.remove(resourceVerbCacheKey);
              * }
-             * 
+             *
              * cache.remove(resourceCacheKey);
              * }
              */

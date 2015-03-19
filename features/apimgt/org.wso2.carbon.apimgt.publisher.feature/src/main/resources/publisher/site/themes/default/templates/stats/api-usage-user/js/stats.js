@@ -89,20 +89,14 @@ require(["dojo/dom", "dojo/domReady!"], function (dom) {
                             shortcuts:'hide',
                             endDate:currentDay
                         })
-                        .bind('datepicker-change',function(event,obj)
-                        {
-
-                        })
                         .bind('datepicker-apply',function(event,obj)
                         {
+                             btnActiveToggle(this);
                              var from = convertDate(obj.date1);
                              var to = convertDate(obj.date2);
                              $('#date-range').html(from + " to "+ to);
                              drawAPIUsage(from,to);
-                        })
-                        .bind('datepicker-close',function()
-                        {
-                    });
+                        });
 
                     //setting default date
                     var to = new Date();
@@ -285,7 +279,7 @@ var drawChart = function (from, to) {
                 if (length == 0){
                     $('#apiUsageByUserTable').hide();
                     $('#tempLoadingSpaceUsageByUser').html('');
-                    $('#tempLoadingSpaceUsageByUser').append($('<span class="label label-info">' + i18n.t('errorMsgs.noData') + '</span>'));
+                    $('#tempLoadingSpaceUsageByUser').append($('<h3 class="no-data-heading center-wrapper">No Data Available</h3>'));
 
                 } else {
                     var inputData=[];
@@ -431,7 +425,7 @@ var drawChart = function (from, to) {
                     $dataTable.append($('<thead class="tableHead"><tr>'+
                                             '<th width="10%"></th>'+
                                             '<th>API</th>'+
-                                            '<th width="30%" >Subscriber Count</th>'+
+                                            '<th style="text-align:right" width="30%" >Subscriber Count</th>'+
                                         '</tr></thead>'));
 
                     sortData = dimple.filterData(data, "API", filterValues);
@@ -439,7 +433,7 @@ var drawChart = function (from, to) {
                         return obj2.Hits - obj1.Hits;
                     });
 
-                    //default display of 15 checked entries on table
+                    //default display of 20 checked entries on table
                     for(var n=0;n<sortData.length;n++){
                         if(n<20){
                             $dataTable.append($('<tr><td >'
@@ -466,6 +460,13 @@ var drawChart = function (from, to) {
 
                     $('#apiSelectTable').DataTable({
                         "order": [[ 2, "desc" ]],
+                        "fnDrawCallback": function(){
+                            if(this.fnSettings().fnRecordsDisplay()<=$("#apiSelectTable_length option:selected" ).val()
+                            || $("#apiSelectTable_length option:selected" ).val()==-1)
+                                $('#apiSelectTable_paginate').hide();
+                            else
+                                $('#apiSelectTable_paginate').show();
+                        },
                         "aoColumns": [
                         { "bSortable": false },
                         null,
@@ -618,5 +619,10 @@ function convertDate(date) {
     return date.getFullYear() + '-' + (('' + month).length < 2 ? '0' : '')
         + month + '-' + (('' + day).length < 2 ? '0' : '') + day +" "+ (('' + hour).length < 2 ? '0' : '')
         + hour +":"+(('' + minute).length < 2 ? '0' : '')+ minute;
+}
+
+function btnActiveToggle(button){
+    $(button).siblings().removeClass('active');
+    $(button).addClass('active');
 }
 

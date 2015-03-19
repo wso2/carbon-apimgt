@@ -88,7 +88,7 @@
                     path = jagg.getMappedUrl("/site/pages/item-info.jag") + "?name=" + api.name + "&version=" + api.version + "&provider=" + api.provider+urlPostfix;
 
                     var nameSubstring = api.name;
-                    if (api.name.length > 15) {
+                    if (nameSubstring != null && api.name.length > 15) {
                         nameSubstring = api.name.substring(0, 15)+"..";
                     }
 

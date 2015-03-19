@@ -49,7 +49,7 @@ require(["dojo/dom", "dojo/domReady!"], function(dom){
                         $("#date-range").html(dateStr);
                         $('#date-range').data('dateRangePicker').setDateRange(from,to);
                         drawAPIResponseFaultCountChart(from,to);
-
+                        btnActiveToggle(this);
                     })
 
                     //week picker
@@ -60,7 +60,7 @@ require(["dojo/dom", "dojo/domReady!"], function(dom){
                         $("#date-range").html(dateStr);
                         $('#date-range').data('dateRangePicker').setDateRange(from,to);
                         drawAPIResponseFaultCountChart(from,to);
-
+                        btnActiveToggle(this);
                     })
 
                     //month picker
@@ -72,7 +72,7 @@ require(["dojo/dom", "dojo/domReady!"], function(dom){
                         $("#date-range").html(dateStr);
                         $('#date-range').data('dateRangePicker').setDateRange(from,to);
                         drawAPIResponseFaultCountChart(from,to);
-
+                        btnActiveToggle(this);
                     });
 
                     //date picker
@@ -88,21 +88,15 @@ require(["dojo/dom", "dojo/domReady!"], function(dom){
                             shortcuts:'hide',
                             endDate:currentDay
                         })
-                        .bind('datepicker-change',function(event,obj)
-                        {
-
-                        })
                         .bind('datepicker-apply',function(event,obj)
                         {
+                             btnActiveToggle(this);
                              var from = convertDate(obj.date1);
                              var to = convertDate(obj.date2);
                              $('#date-range').html(from + " to "+ to);
                              drawAPIResponseFaultCountChart(from,to);
 
-                        })
-                        .bind('datepicker-close',function()
-                        {
-                    });
+                        });
 
                     //setting default date
                     var to = new Date();
@@ -115,15 +109,13 @@ require(["dojo/dom", "dojo/domReady!"], function(dom){
                     drawAPIResponseFaultCountChart(fromStr,toStr);
 
 
-
-
                     $('#date-range').click(function (event) {
                     event.stopPropagation();
                     });
 
                     $('body').on('click', '.btn-group button', function (e) {
-                        $(this).addClass('active');
                         $(this).siblings().removeClass('active');
+                        $(this).addClass('active');
                     });
 
                     var width = $("#rangeSliderWrapper").width();
@@ -163,41 +155,45 @@ var drawAPIResponseFaultCountTable = function(from,to){
             if (!json.error) {
                 $('#apiFaultyTable').find("tr:gt(0)").remove();
                 var length = json.usage.length;
-                $('#tempLoadingAPIFaulty').empty();
+                $('#tempLoadingSpace').empty();
                 $('#tableContainer').empty();
 
-                $('#chartContainer').empty();
+                if(length>0){
 
                 $('div#apiFaultyTable_wrapper.dataTables_wrapper.no-footer').remove();
                 var chart;
-                var $dataTable =$('<table class="table defaultTable" id="apiFaultyTable"></table>');
+                var $dataTable =$('<table class="display defaultTable" width="100%" cellspacing="0" id="apiFaultyTable"></table>');
 
                 $dataTable.append($('<thead class="tableHead"><tr>'+
                                         '<th>api</th>'+
                                         '<th>version</th>'+
                                         '<th>count</th>'+
-                                        '<th>percentage</th>'+
+                                        '<th width="20%" >percentage</th>'+
                                     '</tr></thead>'));
 
                 for (var i = 0; i < json.usage.length; i++) {
-                    $dataTable.append($('<tr><td>' + json.usage[i].apiName + '</td><td>' + json.usage[i].version + '</td><td>' + json.usage[i].count + '</td><td><span class="pull-right">' + json.usage[i].faultPercentage +'%</span></td></tr>'));
+                    $dataTable.append($('<tr><td>' + json.usage[i].apiName + '</td><td>' + json.usage[i].version + '</td><td>' + json.usage[i].count + '</td><td style="text-align:right">' + Math.round(json.usage[i].faultPercentage * 100) / 100 +'%</span></td></tr>'));
                 }
-                if (length == 0) {
-                    $('#apiFaultyTable').hide();
-                    $('#tempLoadingAPIFaulty').html('');
-                    $('#tempLoadingAPIFaulty').append($('<span class="label label-info">'+i18n.t('errorMsgs.noData')+'</span>'));
 
-                }else{
-                    $('#tempLoadingAPIFaulty').hide();
-                    $('#tableContainer').append($dataTable);
-                    $('#tableContainer').show();
-                    $('#apiFaultyTable').DataTable({
-                         "order": [
-                            [ 3, "desc" ]
-                        ]
-                    });
-                    $('select').css('width','60px');
+                $('#tableContainer').append($dataTable);
+                $('#tableContainer').show();
+                $('#apiFaultyTable').DataTable({
+                     "order": [
+                        [ 3, "desc" ]
+                     ],
+                     "fnDrawCallback": function(){
+                         if(this.fnSettings().fnRecordsDisplay()<=$("#apiFaultyTable_length option:selected" ).val()
+                         || $("#apiFaultyTable_length option:selected" ).val()==-1)
+                             $('#apiFaultyTable_paginate').hide();
+                         else
+                             $('#apiFaultyTable_paginate').show();
+                     },
+                });
+                $('select').css('width','60px');
 
+                }else if (length == 0) {
+                    $('#tableContainer').hide();
+                    $('#tempLoadingSpace').append($('<h3 class="no-data-heading center-wrapper">No Data Available</h3>'));
                 }
 
             } else {
@@ -219,93 +215,85 @@ var drawAPIResponseFaultCountChart = function(from,to){
         function (json) {
             if (!json.error) {
                 var length = json.usage.length,s1 = [];
-                $('#faultyCountChart').empty();
-                var data = [];
-                for (var i = 0; i < length; i++) {
-                    data[i] = [json.usage[i].apiName, parseFloat(json.usage[i].count)];
-                    //add fake value to overcome dojo chart single series issue
-                    if(length === 1){
-                        data.push(["",0]);
-                    }
-                }
+                $('#chartContainer').empty();
+                $('#tempLoadingSpace').empty();
+
                 if (length > 0) {
-                    /*var width = 300;
-                     if (30 * length > 300) width = 35 * length;
-                     $('#faultyCountChart').width(width);*/
-                    require([
-                        // Require the basic chart class
-                        "dojox/charting/Chart",
+                    var faultData = [];
+                    var data=[];
 
-                        // Require the theme of our choosing
-                        "dojox/charting/themes/ApimDefault",
+                    //chart data
+                    for (var i = 0; i < length; i++) {
+                        faultData.push({x:i, y:parseFloat(json.usage[i].count), label: json.usage[i].apiName +" v"+json.usage[i].version});
+                        data.push({x:i, y:parseFloat(json.usage[i].totalRequestCount)-parseFloat(json.usage[i].count), label: json.usage[i].apiName});
+                    }
 
-                        // Tooltip
-                        "dojox/charting/action2d/Tooltip",
-                        // Require the highlighter
-                        "dojox/charting/action2d/Highlight",
 
-                        //  We want to plot Columns
-                        "dojox/charting/plot2d/Columns",
+                    var dataStructure = [{
+                            "key": "Fault",
+                            "values": faultData
+                        },
+                        {
+                            "key": "Successful",
+                            "values": data
+                        }];
 
-                        //  We want to use Markers
-                        "dojox/charting/plot2d/Markers",
+                    (function (data) {
+                    var colorRangeArray=["#e74c3c","#4aa3df"];
+                        var colors = d3.scale.ordinal()
+                           .range(colorRangeArray);
+                        keyColor = function (d, i) {
+                            return colors(d.key)
+                        };
 
-                        //  We'll use default x/y axes
-                        "dojox/charting/axis2d/Default",
+                        var chart;
+                        nv.addGraph(function () {
+                            chart = nv.models.stackedAreaChart()
+                                .x(function (d) {
+                                return d.x
+                            })
+                                .y(function (d) {
+                                return d.y
+                            })
+                                .color(keyColor)
+                                .clipEdge(true)
+                                .useInteractiveGuideline(true)
+                                .margin({left: 80});;
 
-                        //mouse zoom and pan
-                        "dojox/charting/action2d/MouseZoomAndPan",
+                            if (dataStructure[0].values.length > 5) chart.margin({bottom: 160});
 
-                        // Wait until the DOM is ready
-                        "dojo/domReady!"
-                    ], function(Chart, theme,MouseZoomAndPan,Highlight) {
-
-                        // Create the chart within it's "holding" node
-                        var faultyCountChart = new Chart("faultyCountChart");
-
-                        // Set the theme
-                        faultyCountChart.setTheme(theme);
-
-                        // Add the only/default plot
-                        faultyCountChart.addPlot("default", {
-                            type: "Columns",
-                            markers: true,
-                            gap: 5,
-                            animate:{duration:600}
-                        });
-
-                        // Add axes
-                        faultyCountChart.addAxis("x", { title: 'API',titleOrientation: "away",minorTicks:false,labels:dojo.map(data, function(value, index){
-                            return {value: index + 1, text: value[0]};
-                        })
-                        });
-                        faultyCountChart.addAxis("y",{vertical:true,fixLower: "major", fixUpper: "major",minorTicks:false,title: 'Count'});
-
-                        // Define the data
-                        var chartData; var color = -1;
-                        require(["dojo/_base/array"], function(array){
-                            chartData= array.map(data, function(d){
-                                color++;
-                                return {y: d[1],text:d[0], tooltip: "<b>"+d[0]+"</b><br /><i>"+d[1]+" call(s)</i>",fill:chartColorScheme2[color]};
+                            chart.xAxis
+                                .axisLabel('API')
+                                .tickFormat(function (d) {
+                                var label = dataStructure[0].values[d].label;
+                                return label;
                             });
-                        });
+                            chart.xAxis.tickValues(dataStructure[0].values.map( function(d){return d.x;}));
+                            if (dataStructure[0].values.length > 5) chart.xAxis.rotateLabels(-45);
 
-                        // Add the series of data
-                        faultyCountChart.addSeries("API Service Time",chartData);
+                            chart.yAxis.axisLabel('Total Hits');
+                            chart.yAxis.tickFormat(d3.format(',d'));
 
-                        new MouseZoomAndPan(faultyCountChart, "default", { axis: "x"});
+                            d3.select('#faultyCountChart svg')
+                              .datum(data)
+                              .transition().duration(0)
+                              .call(chart);
 
-                        new Highlight(faultyCountChart,"default");
+                            nv.utils.windowResize(chart.update);
+                            return chart;
+                      });
+                    })(dataStructure);
+                    $('#chartContainer').append($('<div id="faultyCountChart" class="with-3d-shadow with-transitions"><svg style="height:500px;"></svg></div>'));
+                    $('#chartContainer').show();
+                    $('#faultyCountChart svg').show();
 
-                        // Render the chart!
-                        faultyCountChart.render();
-
-                    });
                     drawAPIResponseFaultCountTable(fromDate,toDate);
 
                 } else {
-                    $('#faultyCountChart').css("fontSize", 14);
-                    $('#faultyCountChart').append($('<span class="label label-info">'+i18n.t('errorMsgs.noData')+'</span>'));
+                    $('#tableContainer').hide();
+                    $('#chartContainer').hide();
+                    $('#tempLoadingSpace').html('');
+                    $('#tempLoadingSpace').append($('<h3 class="no-data-heading center-wrapper">No Data Available</h3>'));
                 }
 
             } else {
@@ -362,4 +350,9 @@ function convertDate(date) {
     return date.getFullYear() + '-' + (('' + month).length < 2 ? '0' : '')
         + month + '-' + (('' + day).length < 2 ? '0' : '') + day +" "+ (('' + hour).length < 2 ? '0' : '')
         + hour +":"+(('' + minute).length < 2 ? '0' : '')+ minute;
+}
+
+function btnActiveToggle(button){
+    $(button).siblings().removeClass('active');
+    $(button).addClass('active');
 }

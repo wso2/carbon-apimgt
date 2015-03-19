@@ -110,11 +110,13 @@ public class ApplicationUtils {
      * Further it will initiate new OauthAppRequest  object and set applicationInfo object as its own property.
      * @param clientName This consumer key of the application
      * @param callbackURL This is the call back URL of the application
+     * @param tokenScope
      * @param clientDetails
      * @return appRequest object of OauthAppRequest.
      * @throws APIManagementException
      */
-    public static OauthAppRequest createOauthAppRequest(String clientName, String callbackURL, String clientDetails)
+    public static OauthAppRequest createOauthAppRequest(String clientName, String callbackURL,String tokenScope, String
+                                                        clientDetails)
             throws
             APIManagementException {
 
@@ -123,6 +125,7 @@ public class ApplicationUtils {
         OAuthApplicationInfo authApplicationInfo = new OAuthApplicationInfo();
         authApplicationInfo.setClientName(clientName);
         authApplicationInfo.setCallBackURL(callbackURL);
+        authApplicationInfo.addParameter("tokenScope",tokenScope);
 
         if (clientDetails != null) {
             //parse json string and set applicationInfo parameters.

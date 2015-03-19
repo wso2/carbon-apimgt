@@ -513,7 +513,7 @@ form.form-search .tierHelp {
 #rangeSliderWrapper{
     height: 20px;
     position: relative;
-    border: 2px solid #C8C8C8 !important;
+    border: 2px solid #eee !important;
 }
 #rangeSliderWrapper #rangeSlider{
     position: relative;
@@ -1363,7 +1363,36 @@ thumbnails
     width:60px;
 }
 
-.nvd3.nv-line .nvd3.nv-scatter .nv-groups .nv-point {
-fill-opacity: 100 !important;
-stroke-opacity: 100 !importan;
+.nvd3.nv-line .nvd3.nv-scatter .nv-groups .nv-point{
+    fill-opacity: 100 !important;
+    stroke-opacity: 100 !important;
+    fill: #1f77b4;
+    stroke: #1f77b4;
 }
+
+.textVal{
+    font-size:9px !important;
+    color:#333;
+}
+
+svg.pie{
+    margin:0 auto;
+    height:400px !important;
+    width:500px !important;
+}
+
+.center-wrapper{
+    margin:0 auto;
+	margin-left:auto;
+	margin-right:auto;
+	align:center;
+	text-align:center;
+    padding-top: 100px;
+    padding-bottom: 100px;
+}
+
+.no-data-heading{
+    color:#818791;
+}
+
+

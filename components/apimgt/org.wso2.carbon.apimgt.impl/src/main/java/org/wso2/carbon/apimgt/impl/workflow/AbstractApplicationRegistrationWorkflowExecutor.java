@@ -155,6 +155,7 @@ public abstract class AbstractApplicationRegistrationWorkflowExecutor extends Wo
             }
             workflowDTO.setAccessTokenInfo(tokenInfo);
         } catch (APIManagementException e) {
+
             APIUtil.handleException("Error occurred while executing SubscriberKeyMgtClient.", e);
         }
     }
