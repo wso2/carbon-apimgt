@@ -158,6 +158,19 @@ public interface APIConsumer extends APIManager {
             throws APIManagementException;
 
     /**
+     * Returns a set of SubscribedAPIs filtered by the given application name and in between starting and ending indexes.
+     *
+     * @param subscriber Subscriber
+     * @param applicationName Application needed to find subscriptions
+     * @param startSubIndex Starting index of subscriptions to be listed
+     * @param endSubIndex Ending index of Subscriptions to be listed
+     * @return
+     * @throws APIManagementException
+     */
+    public Set<SubscribedAPI> getPaginatedSubscribedAPIs(Subscriber subscriber, String applicationName, int startSubIndex, int endSubIndex)
+            throws APIManagementException;
+
+    /**
      * Returns true if a given user has subscribed to the API
      *
      * @param apiIdentifier APIIdentifier
@@ -166,6 +179,16 @@ public interface APIConsumer extends APIManager {
      * @throws org.wso2.carbon.apimgt.api.APIManagementException if failed to check the subscribed state
      */
     public boolean isSubscribed(APIIdentifier apiIdentifier, String userId) throws APIManagementException;
+
+    /**
+     * Returns the number of subscriptions for the given subscriber and app.
+     *
+     * @param subscriber Subscriber
+     * @param applicationName Application
+     * @return The number of subscriptions
+     * @throws APIManagementException if failed to count the number of subscriptions.
+     */
+    public Integer getSubscriptionCount(Subscriber subscriber,String applicationName) throws APIManagementException;
 
     /**
      * Add new Subscriber
@@ -288,11 +311,12 @@ public interface APIConsumer extends APIManager {
      * @param providerId , provider id
      * @param loggedUser logged user
      * @param limit Maximum number of results to return. Pass -1 to get all.
+     * @param apiOwner Owner name which is used to filter APIs
      * @return set of API
      * @throws org.wso2.carbon.apimgt.api.APIManagementException if failed to get set of API
      */
     public Set<API> getPublishedAPIsByProvider(String providerId, String loggedUser, int limit, String apiOwner)
-            throws APIManagementException;/**
+            throws APIManagementException;
 
      /** Get a list of published APIs by the given provider.
      *

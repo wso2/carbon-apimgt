@@ -9,6 +9,12 @@
     var page = 1;
     var numberOfPages = parseInt(length / itemsPerPage);
     var urlPrefix ="";
+    var tenant = request.getParameter("tenant");
+        if(tenant != null) {
+            urlPrefix = "tenant=" + tenant;
+        }else{
+            urlPrefix = 'carbon.super';
+        }
 
     if (length % itemsPerPage != 0) {
        numberOfPages++;
