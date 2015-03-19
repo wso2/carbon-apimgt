@@ -533,7 +533,61 @@ public class ServerWorker implements Runnable {
             msgContext.setProperty(PassThroughConstants.FORCE_SOAP_FAULT, Boolean.TRUE);
             AxisEngine.sendFault(faultContext);
             
-        } catch (Exception ignored) {}
+        } catch (Exception ex) {
+        	NHttpServerConnection conn = request.getConnection();
+			SourceResponse sourceResponse;
+			msgContext.removeProperty(MessageContext.TRANSPORT_HEADERS);
+			if (log.isDebugEnabled()) {
+				log.debug("Sending ACK response with status "
+						+ msgContext.getProperty(NhttpConstants.HTTP_SC)
+						+ ", for MessageID : " + msgContext.getMessageID());
+			}
+			sourceResponse = SourceResponseFactory.create(msgContext, request,
+					sourceConfiguration);
+			sourceResponse.addHeader(HTTP.CONTENT_TYPE, "text/html");
+			sourceResponse.setStatus(HttpStatus.SC_INTERNAL_SERVER_ERROR);
+
+			Pipe pipe = new Pipe(sourceConfiguration.getBufferFactory()
+					.getBuffer(), "Test", sourceConfiguration);
+			msgContext
+					.setProperty(PassThroughConstants.PASS_THROUGH_PIPE, pipe);
+			msgContext.setProperty(
+					PassThroughConstants.MESSAGE_BUILDER_INVOKED, Boolean.TRUE);
+			pipe.attachConsumer(conn);
+			sourceResponse.connect(pipe);
+
+			OutputStream os = pipe.getOutputStream();
+
+			try {
+				String body = "<html><body><h1>"
+						+ "Failed to process the request" + "</h1><p>" + msg
+						+ "</p>";
+				if (e != null) {
+					body = body + "<p>" + e.getMessage() + "</p></body></html>";
+				}
+				if (ex != null) {
+					body = body + "<p>" + ex.getMessage()
+							+ "</p></body></html>";
+				}
+				os.write(body.getBytes());
+				os.flush();
+				os.close();
+			} catch (Exception ignore) {
+			}
+
+			pipe.setSerializationCompleteWithoutData(true);
+
+			SourceContext.setResponse(conn, sourceResponse);
+			ProtocolState state = SourceContext.getState(conn);
+			if (state != null
+					&& state.compareTo(ProtocolState.REQUEST_DONE) <= 0) {
+				conn.requestOutput();
+			} else {
+				SourceContext.updateState(conn, ProtocolState.CLOSED);
+				sourceConfiguration.getSourceConnections().shutDownConnection(
+						conn,true);
+			}
+        }
     }
 
     private String inferContentType() {
