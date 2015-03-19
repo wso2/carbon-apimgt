@@ -112,7 +112,7 @@ public class HostConnections {
         }
         lock.lock();
         try {
-            freeConnections.add(conn);
+        	busyConnections.add(conn);
         } finally {
             lock.unlock();
         }

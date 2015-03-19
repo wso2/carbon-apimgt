@@ -193,7 +193,7 @@ public class DeliveryAgent {
      * @param host name of the remote host
      * @param port remote port number
      */
-    public void connected(HttpRoute route) {
+    public void connected(HttpRoute route,NHttpClientConnection conn) {
         Queue<MessageContext> queue = null;
         lock.lock();
         try {
@@ -203,13 +203,16 @@ public class DeliveryAgent {
         }
 
         while (queue.size() > 0) {
-            NHttpClientConnection conn = targetConnections.getConnection(route);
+			if (conn == null) {
+				conn = targetConnections.getExistingConnection(route);
+			}
             if (conn != null) {
                 MessageContext messageContext = queue.poll();
 
                 if (messageContext != null) {
                     tryNextMessage(messageContext, route, conn);
                 }
+                conn = null;
             } else {
                 break;
             }
