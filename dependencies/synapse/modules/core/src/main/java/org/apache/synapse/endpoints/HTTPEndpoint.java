@@ -29,10 +29,7 @@ import org.apache.synapse.util.xpath.SynapseXPath;
 import com.damnhandy.uri.template.UriTemplate;
 
 import java.io.UnsupportedEncodingException;
-import java.net.MalformedURLException;
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.net.URLDecoder;
+import java.net.*;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -109,6 +106,17 @@ public class HTTPEndpoint extends AbstractEndpoint {
         }
     }
 
+    private String decodeString(String value) {
+        if (value == null) {
+            return "";
+        }
+        try {
+            return URLDecoder.decode(value, "UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            return value;
+        }
+    }
+    
     private void processUrlTemplate(MessageContext synCtx) throws ExpressionParseException {
         Map<String, Object> variables = new HashMap<String, Object>();
 
@@ -119,8 +127,8 @@ public class HTTPEndpoint extends AbstractEndpoint {
             if (propertyKey.toString() != null&&
                     (propertyKey.toString().startsWith(RESTConstants.REST_URI_VARIABLE_PREFIX)
                             || propertyKey.toString().startsWith(RESTConstants.REST_QUERY_PARAM_PREFIX))) {
-                if (synCtx.getProperty(propertyKey.toString()) != null) {
-                    variables.put(propertyKey.toString(), synCtx.getProperty(propertyKey.toString()));
+            	if (synCtx.getProperty(propertyKey.toString()) != null) {
+                    variables.put(propertyKey.toString(), decodeString((String) synCtx.getProperty(propertyKey.toString())));
                 }
             }
         }
@@ -132,7 +140,7 @@ public class HTTPEndpoint extends AbstractEndpoint {
             if(property.getName().toString() != null
                     && (property.getName().toString().startsWith(RESTConstants.REST_URI_VARIABLE_PREFIX) ||
                     property.getName().toString().startsWith(RESTConstants.REST_QUERY_PARAM_PREFIX) )) {
-                variables.put(property.getName(), property.getValue());
+            	variables.put(property.getName(), decodeString((String) property.getValue()));
             }
         }
 
@@ -149,22 +157,19 @@ public class HTTPEndpoint extends AbstractEndpoint {
         if(variables.isEmpty()){
         	evaluatedUri = template.getTemplate();
         }else{
-            try {
-                URL url = new URL(URLDecoder.decode(template.expand(), "UTF-8"));
-                evaluatedUri = url.toURI().toString();
-                /*evaluatedUri = template.expand();
-                evaluatedUri=evaluatedUri.replace("%3A", ":");
-                evaluatedUri=evaluatedUri.replace("%2F", "/");*/
+        	try {
+                // Decode needs to avoid replacing special characters(e.g %20 -> %2520) when creating URL.
+                String decodedString = URLDecoder.decode(template.expand(), "UTF-8");
+                URL url = new URL(decodedString);
+                URI uri = new URI(url.getProtocol(), url.getUserInfo(), url.getHost(), url.getPort(),
+                        url.getPath(), url.getQuery(), url.getRef());// this to avoid url.toURI which causes exceptions
+                evaluatedUri = uri.toURL().toString();
+                if (log.isDebugEnabled()) {
+                    log.debug("Expanded URL : " + evaluatedUri);
+                }
             } catch(URISyntaxException e) {
                 log.debug("Invalid URL syntax for HTTP Endpoint: " + this.getName());
-                URL url;
-                try{
-                    url = new URL(URLDecoder.decode(template.expand(), "UTF-8"));
-                    evaluatedUri = url.toString();
-                } catch (Exception e1){
-                    log.debug("Error while decoding URL: " + this.getName());
-                }
-
+                evaluatedUri = template.getTemplate();
             } catch(MalformedURLException e) {
                 log.debug("Invalid URL for HTTP Endpoint: " + this.getName());
                 evaluatedUri = template.getTemplate();
