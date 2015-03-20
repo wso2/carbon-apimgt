@@ -3287,7 +3287,7 @@ public final class APIUtil {
         return token;
     }
 
-    public static void loadTenantRegistry(int tenantId){
+    public static void loadTenantRegistry(int tenantId)throws org.wso2.carbon.registry.core.exceptions.RegistryException{
         TenantRegistryLoader tenantRegistryLoader = APIManagerComponent.getTenantRegistryLoader();
         ServiceReferenceHolder.getInstance().getIndexLoaderService().loadTenantIndex(tenantId);
         tenantRegistryLoader.loadTenantRegistry(tenantId);
@@ -3342,7 +3342,7 @@ public final class APIUtil {
         }
         if (port != -1 && path != null) {
             String tenantDomain =
-                    PrivilegedCarbonContext.getCurrentContext().getTenantDomain(true);
+            		PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain(true);
             return webContext +
             		( (tenantDomain != null &&
             		!MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) ?

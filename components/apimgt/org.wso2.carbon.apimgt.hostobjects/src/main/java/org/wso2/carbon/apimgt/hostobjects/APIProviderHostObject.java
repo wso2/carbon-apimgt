@@ -3693,6 +3693,9 @@ public class APIProviderHostObject extends ScriptableObject {
             } catch (org.wso2.carbon.user.api.UserStoreException e) {
                 log.error("Could not load tenant registry. Error while getting tenant id from tenant domain " +
                         tenantDomain);
+            }catch (org.wso2.carbon.registry.core.exceptions.RegistryException e) {
+            	log.error("Could not load tenant registry. Error while loading tenant registry " +
+                        tenantDomain);
             }
         }
 

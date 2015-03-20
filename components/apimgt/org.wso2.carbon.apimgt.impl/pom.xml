@@ -94,7 +94,7 @@
             </exclusions>
         </dependency>
         <dependency>
-            <groupId>org.wso2.carbon</groupId>
+            <groupId>org.wso2.carbon.mediation</groupId>
             <artifactId>org.wso2.carbon.rest.api.stub</artifactId>
         </dependency>
         <dependency>
@@ -102,11 +102,11 @@
             <artifactId>org.wso2.carbon.apimgt.handlers.security.stub</artifactId>
         </dependency>
         <dependency>
-             <groupId>org.wso2.carbon</groupId>
+             <groupId>org.wso2.carbon.commons</groupId>
              <artifactId>org.wso2.carbon.user.mgt.stub</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.wso2.carbon</groupId>
+            <groupId>org.wso2.carbon.commons</groupId>
             <artifactId>org.wso2.carbon.um.ws.api</artifactId>
         </dependency>
         <dependency>
@@ -118,11 +118,11 @@
             <artifactId>gson</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.wso2.carbon</groupId>
+            <groupId>org.wso2.carbon.mediation</groupId>
             <artifactId>org.wso2.carbon.mediation.dependency.mgt</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.wso2.carbon</groupId>
+            <groupId>org.wso2.carbon.mediation</groupId>
             <artifactId>org.wso2.carbon.mediation.registry</artifactId>
         </dependency>
         <dependency>
@@ -130,11 +130,11 @@
           <artifactId>httpmime</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.wso2.carbon</groupId>
+            <groupId>org.wso2.carbon.commons</groupId>
             <artifactId>org.wso2.carbon.event.core</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.wso2.carbon</groupId>
+            <groupId>org.wso2.carbon.mediation</groupId>
             <artifactId>org.wso2.carbon.mediation.initializer</artifactId>
         </dependency>
 		<dependency>
@@ -142,7 +142,7 @@
             <artifactId>org.wso2.carbon.sequences.stub</artifactId>
         </dependency>
 		<dependency>
-			<groupId>org.wso2.carbon</groupId>
+			<groupId>org.wso2.carbon.mediation</groupId>
 			<artifactId>org.wso2.carbon.mediation.security.stub</artifactId>
 		</dependency>
         <dependency>
@@ -158,7 +158,7 @@
 			<artifactId>org.wso2.carbon.apimgt.keymgt.stub</artifactId>
 		</dependency>
         <dependency>
-            <groupId>org.wso2.carbon</groupId>
+            <groupId>org.wso2.carbon.commons</groupId>
             <artifactId>org.wso2.carbon.databridge.agent.thrift</artifactId>
         </dependency>
     </dependencies>
