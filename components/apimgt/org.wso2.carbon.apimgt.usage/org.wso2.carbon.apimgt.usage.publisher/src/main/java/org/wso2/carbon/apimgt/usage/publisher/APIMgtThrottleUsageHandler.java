@@ -31,17 +31,13 @@ import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 */
 public class APIMgtThrottleUsageHandler extends AbstractMediator {
 
-    private boolean enabled = DataPublisherUtil.getApiManagerAnalyticsConfiguration().isEnabled();
-
     private volatile APIMgtUsageDataPublisher publisher;
 
-    public APIMgtThrottleUsageHandler() {
+    public boolean mediate(MessageContext messageContext) {
 
-        if (!enabled) {
-            return;
-        }
+        boolean enabled = DataPublisherUtil.getApiManagerAnalyticsConfiguration().isEnabled();
 
-        if (publisher == null) {
+        if (enabled && publisher == null) {
             synchronized (this) {
                 if (publisher == null) {
                     String publisherClass = DataPublisherUtil.getApiManagerAnalyticsConfiguration()
@@ -61,10 +57,6 @@ public class APIMgtThrottleUsageHandler extends AbstractMediator {
                 }
             }
         }
-    }
-
-    public boolean mediate(MessageContext messageContext) {
-
         try {
             if (!enabled) {
                 return true;

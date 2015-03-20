@@ -42,17 +42,13 @@ import java.util.Map;
 
 public class APIMgtResponseHandler extends AbstractMediator {
 
-    private boolean enabled = DataPublisherUtil.getApiManagerAnalyticsConfiguration().isEnabled();
-
     private volatile APIMgtUsageDataPublisher publisher;
 
-    public APIMgtResponseHandler() {
+    public boolean mediate(MessageContext mc) {
 
-        if (!enabled) {
-            return;
-        }
+        boolean enabled = DataPublisherUtil.getApiManagerAnalyticsConfiguration().isEnabled();
 
-        if (publisher == null) {
+        if (enabled && publisher == null) {
             synchronized (this) {
                 if (publisher == null) {
                     String publisherClass = DataPublisherUtil.getApiManagerAnalyticsConfiguration().
@@ -72,9 +68,6 @@ public class APIMgtResponseHandler extends AbstractMediator {
                 }
             }
         }
-    }
-
-    public boolean mediate(MessageContext mc) {
 
         try {
             if (!enabled) {

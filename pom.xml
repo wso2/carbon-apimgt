@@ -653,11 +653,19 @@
                 <artifactId>org.wso2.carbon.ndatasource.core</artifactId>
                 <version>${carbon.kernel.version}</version>
             </dependency>
+
             <dependency>
                 <groupId>org.wso2.carbon</groupId>
                 <artifactId>org.wso2.carbon.ndatasource.rdbms</artifactId>
                 <version>${carbon.kernel.version}</version>
             </dependency>
+
+            <dependency>
+                <groupId>org.wso2.carbon</groupId>
+                <artifactId>org.wso2.carbon.bam.toolbox.deployer.stub</artifactId>
+                <version>${carbon.platform.version}</version>
+            </dependency>
+
         </dependencies>
     </dependencyManagement>
 
