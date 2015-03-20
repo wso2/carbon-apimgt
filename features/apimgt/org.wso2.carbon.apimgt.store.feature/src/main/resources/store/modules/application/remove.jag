@@ -4,7 +4,8 @@ var removeApplication = function (application,username) {
             store = jagg.module("manager").getAPIStoreObj();
 
     try {
-        var success=store.removeApplication(application, username);
+        var groupId = session.get("groupId");
+        var success=store.removeApplication(application, username, groupId);
         if (log.isDebugEnabled()) {
             log.debug("removeApplication");
         }
