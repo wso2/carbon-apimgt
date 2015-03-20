@@ -3850,13 +3850,14 @@ public class APIStoreHostObject extends ScriptableObject {
         if (args != null && args.length != 0) {
             //String tokenType = (String) args[2];
             //Token type would be default with new scopes implementation introduced in 1.7.0
-            String[] requestedScopes = (String[])args[8];
+            String requestedScopes = (String)args[8];
             String oldAccessToken = (String) args[3];
             NativeArray accessAllowDomainsArr = (NativeArray) args[4];
             String[] accessAllowDomainsArray = new String[(int) accessAllowDomainsArr.getLength()];
             String clientId = (String) args[5];
             String clientSecret = (String) args[6];
             String validityTime = (String) args[7];
+            String[] requestedScopeArray = new String[]{requestedScopes};
 
             //TODO:should take JSON input as an argument.
             String jsonInput = null;
@@ -3874,7 +3875,7 @@ public class APIStoreHostObject extends ScriptableObject {
             try {
                 response = apiConsumer.renewAccessToken(oldAccessToken, clientId, clientSecret,
                                                         validityTime,
-                                                        accessAllowDomainsArray, requestedScopes, jsonInput);
+                                                        accessAllowDomainsArray, requestedScopeArray, jsonInput);
             } catch (APIManagementException e) {
                 handleException("Error while renewing AccessToken");
             }
