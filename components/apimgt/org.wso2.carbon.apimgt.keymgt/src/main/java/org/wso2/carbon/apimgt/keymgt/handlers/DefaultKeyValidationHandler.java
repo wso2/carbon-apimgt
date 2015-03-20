@@ -125,10 +125,21 @@ public class DefaultKeyValidationHandler extends AbstractKeyValidationHandler {
 
         accessTokenDO.setAccessToken(validationContext.getAccessToken());
 
+        String actualVersion = validationContext.getVersion();
+                //Check if the api version has been prefixed with _default_
+                        if (actualVersion != null && actualVersion.startsWith(APIConstants.DEFAULT_VERSION_PREFIX)) {
+                        //Remove the prefix from the version.
+                                actualVersion = actualVersion.split(APIConstants.DEFAULT_VERSION_PREFIX)[1];
+                    }
+                String resource = validationContext.getContext() + "/" + actualVersion + validationContext
+                        .getMatchingResource()
+                                  + ":" +
+                                  validationContext.getHttpVerb();
+
         try {
             if(scopeValidator != null){
                 if(scopeValidator.validateScope(accessTokenDO,
-                                                validationContext.getMatchingResource())){
+                                                resource)){
                     return true;
 
                 }else {
