@@ -65,9 +65,9 @@ public class UserAwareAPIProvider extends APIProviderImpl {
     public Map<String, List<String>> updateManageAPI(API api) throws APIManagementException {
         boolean permitted = APIUtil.checkPermissionQuietly(username, APIConstants.Permissions.API_CREATE) ||
                 APIUtil.checkPermissionQuietly(username, APIConstants.Permissions.API_PUBLISH);
-        String permission = APIConstants.Permissions.API_CREATE + " or " + APIConstants.Permissions.API_PUBLISH;
 
         if(!permitted){
+            String permission = APIConstants.Permissions.API_CREATE + " or " + APIConstants.Permissions.API_PUBLISH;
             throw new APIManagementException("User '" + username + "' does not have the " +
                     "required permission: " + permission);
         }

@@ -293,7 +293,7 @@ public class APIProviderHostObject extends ScriptableObject {
     }
     
     /**
-     * This method is to functionality of managing an API in API-Provider     *
+     * This method is to functionality of managing an API in API-Provider
      * @param cx      Rhino context
      * @param thisObj Scriptable object
      * @param args    Passing arguments
