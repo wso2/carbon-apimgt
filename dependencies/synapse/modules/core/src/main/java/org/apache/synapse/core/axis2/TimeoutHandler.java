@@ -199,7 +199,14 @@ public class TimeoutHandler extends TimerTask {
                 }
 
                 for(Object key : toRemove) {
-                    if (!"true".equals(((AsyncCallback) callbackStore.get(key)).getSynapseOutMsgCtx().getProperty(SynapseConstants.OUT_ONLY))) {
+
+                    AsyncCallback callback = (AsyncCallback) callbackStore.get(key);
+                    if (callback == null) {
+                        // we will get here if we get a response from the Backend while clearing callbacks
+                        continue;
+                    }
+
+                    if (!"true".equals(callback.getSynapseOutMsgCtx().getProperty(SynapseConstants.OUT_ONLY))) {
                         log.warn("Expiring message ID : " + key + "; dropping message after " +
                                 "global timeout of : " + (globalTimeout / 1000) + " seconds");
                     }
