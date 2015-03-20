@@ -87,7 +87,9 @@ public class TimeoutHandler extends TimerTask {
             try {
                 processCallbacks();
             } catch (Exception ignore) {}
-            alreadyExecuting = false;
+            finally {
+                alreadyExecuting = false;
+            }
         }
     }
 
