@@ -158,7 +158,7 @@ public interface APIProvider extends APIManager {
      * @return failed environments during gateway operation
      * @throws APIManagementException failed environments during gateway operation
      */
-    public Map<String, List<String>> updateManageAPI(API api) throws APIManagementException;
+    public Map<String, List<String>> manageAPI(API api) throws APIManagementException;
 
     /**
      * Change the lifecycle state of the specified API

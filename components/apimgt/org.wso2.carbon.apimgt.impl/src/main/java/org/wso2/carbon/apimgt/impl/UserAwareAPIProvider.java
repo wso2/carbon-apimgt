@@ -62,7 +62,7 @@ public class UserAwareAPIProvider extends APIProviderImpl {
     }
 
     @Override
-    public Map<String, List<String>> updateManageAPI(API api) throws APIManagementException {
+    public Map<String, List<String>> manageAPI(API api) throws APIManagementException {
         boolean permitted = APIUtil.checkPermissionQuietly(username, APIConstants.Permissions.API_CREATE) ||
                 APIUtil.checkPermissionQuietly(username, APIConstants.Permissions.API_PUBLISH);
         if(!permitted){
