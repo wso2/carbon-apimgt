@@ -185,7 +185,7 @@ public class HTTPEndpoint extends AbstractEndpoint {
         if (evaluatedUri != null) {
             synCtx.setTo(new EndpointReference(evaluatedUri));
             if (super.getDefinition() != null) {
-                super.getDefinition().setAddress(evaluatedUri);
+            	synCtx.setProperty(EndpointDefinition.DYNAMIC_URL_VALUE, evaluatedUri);
             }
         }
     }
