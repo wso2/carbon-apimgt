@@ -72,6 +72,7 @@ public class MediatorFaultHandler extends FaultHandler {
         if (faultMediator instanceof SequenceMediator) {
             name = ((SequenceMediator) faultMediator).getName();
             ContinuationStackManager.clearStack(synCtx);
+            synCtx.setProperty(SynapseConstants.CONTINUATION_CALL, false);
         }
         if (name == null) {
             name = faultMediator.getClass().getName();
