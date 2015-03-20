@@ -418,7 +418,7 @@ public class PassThroughHttpListener implements TransportListener {
         log.info("Destroying PassThroughHttpListener");
        /* sourceConfiguration.getConfigurationContext().
                 getAxisConfiguration().getObserversList().remove(axisObserver);*/
-        serviceTracker.stop();
+//        serviceTracker.stop();
         sourceConfiguration.getMetrics().destroy();
     }
 

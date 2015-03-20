@@ -157,6 +157,34 @@ public interface APIConsumer extends APIManager {
     public Set<SubscribedAPI> getSubscribedAPIs(Subscriber subscriber, String applicationName)
             throws APIManagementException;
 
+    public Set<SubscribedAPI> getSubscribedAPIs(Subscriber subscriber, String applicationName, String groupId) throws APIManagementException;
+
+    /**
+     * Returns a set of SubscribedAPIs filtered by the given application name and in between starting and ending indexes.
+     *
+     * @param subscriber Subscriber
+     * @param applicationName Application needed to find subscriptions
+     * @param startSubIndex Starting index of subscriptions to be listed
+     * @param endSubIndex Ending index of Subscriptions to be listed
+     * @return
+     * @throws APIManagementException
+     */
+    public Set<SubscribedAPI> getPaginatedSubscribedAPIs(Subscriber subscriber, String applicationName, int startSubIndex, int endSubIndex)
+            throws APIManagementException;
+
+    
+    /**
+     * Gets the subscribed API's, by the group for the application.
+     * @param subscriber the subscriber subscribing for the api
+     * @param applicationName the application to which the api's are subscribed
+     * @param startSubIndex the start index for pagination
+     * @param endSubIndex end index for pagination
+     * @param groupId the group id of the application
+     * @return the set of subscribed API's.
+     * @throws APIManagementException
+     */
+    public Set<SubscribedAPI> getPaginatedSubscribedAPIsbyGroupId(Subscriber subscriber, String applicationName, int startSubIndex, int endSubIndex, String groupId) 
+            throws APIManagementException;
     /**
      * Returns true if a given user has subscribed to the API
      *
@@ -166,6 +194,16 @@ public interface APIConsumer extends APIManager {
      * @throws org.wso2.carbon.apimgt.api.APIManagementException if failed to check the subscribed state
      */
     public boolean isSubscribed(APIIdentifier apiIdentifier, String userId) throws APIManagementException;
+
+    /**
+     * Returns the number of subscriptions for the given subscriber and app.
+     *
+     * @param subscriber Subscriber
+     * @param applicationName Application
+     * @return The number of subscriptions
+     * @throws APIManagementException if failed to count the number of subscriptions.
+     */
+    public Integer getSubscriptionCount(Subscriber subscriber,String applicationName) throws APIManagementException;
 
     /**
      * Add new Subscriber
@@ -260,7 +298,7 @@ public interface APIConsumer extends APIManager {
                                                                         String tokenType,
                                                                         String callbackUrl, String[] allowedDomains,
                                                                         String validityTime,
-                                                                        String tokenScope)
+                                                                        String tokenScope, int applicationId)
         throws APIManagementException;
 
     /**
@@ -271,6 +309,8 @@ public interface APIConsumer extends APIManager {
      * @throws org.wso2.carbon.apimgt.api.APIManagementException if failed to applications for given subscriber
      */
     public Application[] getApplications(Subscriber subscriber) throws APIManagementException;
+
+    public Application[] getApplications(Subscriber subscriber, String groupId) throws APIManagementException;
 
     public Set<SubscribedAPI> getSubscribedIdentifiers(Subscriber subscriber,
                                                        APIIdentifier identifier) throws APIManagementException;
@@ -288,11 +328,12 @@ public interface APIConsumer extends APIManager {
      * @param providerId , provider id
      * @param loggedUser logged user
      * @param limit Maximum number of results to return. Pass -1 to get all.
+     * @param apiOwner Owner name which is used to filter APIs
      * @return set of API
      * @throws org.wso2.carbon.apimgt.api.APIManagementException if failed to get set of API
      */
     public Set<API> getPublishedAPIsByProvider(String providerId, String loggedUser, int limit, String apiOwner)
-            throws APIManagementException;/**
+            throws APIManagementException;
 
      /** Get a list of published APIs by the given provider.
      *
@@ -348,7 +389,8 @@ public interface APIConsumer extends APIManager {
      */
     public Map<String, String> completeApplicationRegistration(String userId,
                                                                String applicationName,
-                                                               String tokenType, String tokenScope)
+                                                               String tokenType, String tokenScope,
+															   int applicationId)
 		    throws APIManagementException;
 
     /**
@@ -402,5 +444,7 @@ public interface APIConsumer extends APIManager {
 	 */
 	public Set<Scope> getScopesByScopeKeys(String scopeKeys, int tenantId)
 			throws APIManagementException;
+
+    public String getGroupIds(String response) throws APIManagementException;
 
 }

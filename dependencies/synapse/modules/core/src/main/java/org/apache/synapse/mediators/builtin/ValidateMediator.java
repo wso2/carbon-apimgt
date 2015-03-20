@@ -103,6 +103,11 @@ public class ValidateMediator extends AbstractListMediator implements FlowContin
     private final SchemaFactory factory = SchemaFactory.newInstance(
             XMLConstants.W3C_XML_SCHEMA_NS_URI);
 
+    /**
+     * This is the cached schema key.
+     */
+    private String cachedPropKey;
+    
     @SuppressWarnings({"ThrowableResultOfMethodCallIgnored"})
     public boolean mediate(MessageContext synCtx) {
 
@@ -122,6 +127,9 @@ public class ValidateMediator extends AbstractListMediator implements FlowContin
         for (Value schemaKey : schemaKeys) {
             // Derive actual key from message context
             String propKey = schemaKey.evaluateValue(synCtx);
+            if (!propKey.equals(cachedPropKey)) {
+                reCreate = true;       // request re-initialization of Validator
+            }
             Entry dp = synCtx.getConfiguration().getEntryDefinition(propKey);
             if (dp != null && dp.isDynamic()) {
                 if (!dp.isCached() || dp.isExpired()) {
@@ -144,6 +152,7 @@ public class ValidateMediator extends AbstractListMediator implements FlowContin
                     // Derive actual key from message context
                     String propName = schemaKey.evaluateValue(synCtx);
                     sources[i++] = SynapseConfigUtils.getStreamSource(synCtx.getEntry(propName));
+                    cachedPropKey = propName;
                 }
                 // load the UserDefined SchemaURIResolver implementations
                 try {
@@ -168,6 +177,7 @@ public class ValidateMediator extends AbstractListMediator implements FlowContin
                     //reset the errorhandler state
                     errorHandler.setValidationError(false);
                     cachedSchema = null;
+                    cachedPropKey = null;
                     handleException("Error creating a new schema objects for schemas : "
                             + schemaKeys.toString(), errorHandler.getSaxParseException(), synCtx);
                 }

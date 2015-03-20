@@ -24,6 +24,7 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.LoginPostExecutor;
 import org.wso2.carbon.apimgt.api.model.*;
 import org.wso2.carbon.apimgt.api.model.Tag;
 import org.wso2.carbon.apimgt.handlers.security.stub.types.APIKeyMapping;
@@ -1145,7 +1146,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             Map<String, API> latestPublishedAPIs = new HashMap<String, API>();
             List<API> multiVersionedAPIs = new ArrayList<API>();
             Comparator<API> versionComparator = new APIVersionComparator();
-            Boolean allowMultipleVersions =APIUtil.isAllowDisplayMultipleVersions();
+            Boolean allowMultipleVersions = APIUtil.isAllowDisplayMultipleVersions();
             Boolean showAllAPIs = APIUtil.isAllowDisplayAPIsWithMultipleStatus();
 
             String providerDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(providerId));
@@ -1178,7 +1179,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 String path = RegistryUtils.getAbsolutePath(RegistryContext.getBaseInstance(),
                                                             APIUtil.getMountedPath(RegistryContext.getBaseInstance(),
                                                                                    RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH) +
-                                                                    apiPath);
+                                                            apiPath);
                 boolean checkAuthorized = false;
                 String userNameWithoutDomain = loggedUsername;
 
@@ -1227,10 +1228,18 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 
                     }
                     if (api != null) {
-                        if(apiOwner!=null && !apiOwner.isEmpty()){
-                            if(APIUtil.replaceEmailDomainBack(providerId).equals(APIUtil.replaceEmailDomainBack(apiOwner)) && api.getApiOwner()!=null && !api.getApiOwner().isEmpty() && !APIUtil.replaceEmailDomainBack(apiOwner).equals(APIUtil.replaceEmailDomainBack(api.getApiOwner()))){
+                        // apiOwner is the value coming from front end and compared against the API instance
+                        if (apiOwner != null && !apiOwner.isEmpty()) {
+                            if (APIUtil.replaceEmailDomainBack(providerId)
+                                        .equals(APIUtil.replaceEmailDomainBack(apiOwner)) &&
+                                api.getApiOwner() != null && !api.getApiOwner().isEmpty() &&
+                                !APIUtil.replaceEmailDomainBack(apiOwner)
+                                        .equals(APIUtil.replaceEmailDomainBack(api.getApiOwner()))) {
                                 continue; // reject remote APIs when local admin user's API selected
-                            }else if(!APIUtil.replaceEmailDomainBack(providerId).equals(APIUtil.replaceEmailDomainBack(apiOwner)) && !APIUtil.replaceEmailDomainBack(apiOwner).equals(APIUtil.replaceEmailDomainBack(api.getApiOwner()))){
+                            } else if (!APIUtil.replaceEmailDomainBack(providerId).equals(
+                                    APIUtil.replaceEmailDomainBack(apiOwner)) &&
+                                       !APIUtil.replaceEmailDomainBack(apiOwner)
+                                               .equals(APIUtil.replaceEmailDomainBack(api.getApiOwner()))) {
                                 continue; // reject local admin's APIs when remote API selected
                             }
                         }
@@ -1412,14 +1421,14 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         Set<SubscribedAPI> originalSubscribedAPIs = null;
         Set<SubscribedAPI> subscribedAPIs = new HashSet<SubscribedAPI>();
         try {
-            originalSubscribedAPIs=apiMgtDAO.getSubscribedAPIs(subscriber);
-            if(originalSubscribedAPIs!=null && !originalSubscribedAPIs.isEmpty()){
-            	Map<String, Tier> tiers=APIUtil.getTiers(tenantId);
-            	for(SubscribedAPI subscribedApi:originalSubscribedAPIs) {
-            		Tier tier=tiers.get(subscribedApi.getTier().getName());
-	                subscribedApi.getTier().setDisplayName(tier!=null?tier.getDisplayName():subscribedApi.getTier().getName());
-	                subscribedAPIs.add(subscribedApi);
-	            }
+            originalSubscribedAPIs = apiMgtDAO.getSubscribedAPIs(subscriber);
+            if (originalSubscribedAPIs != null && !originalSubscribedAPIs.isEmpty()) {
+                Map<String, Tier> tiers = APIUtil.getTiers(tenantId);
+                for (SubscribedAPI subscribedApi : originalSubscribedAPIs) {
+                    Tier tier = tiers.get(subscribedApi.getTier().getName());
+                    subscribedApi.getTier().setDisplayName(tier != null ? tier.getDisplayName() : subscribedApi.getTier().getName());
+                    subscribedAPIs.add(subscribedApi);
+                }
             }
         } catch (APIManagementException e) {
             handleException("Failed to get APIs of " + subscriber.getName(), e);
@@ -1427,10 +1436,10 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         return subscribedAPIs;
     }
 
-    public Set<SubscribedAPI> getSubscribedAPIs(Subscriber subscriber, String applicationName) throws APIManagementException {
+     public Set<SubscribedAPI> getSubscribedAPIs(Subscriber subscriber, String applicationName) throws APIManagementException {
         Set<SubscribedAPI> subscribedAPIs = null;
         try {
-        	subscribedAPIs = apiMgtDAO.getSubscribedAPIs(subscriber, applicationName);
+        	subscribedAPIs = apiMgtDAO.getSubscribedAPIs(subscriber, applicationName, null);
             if(subscribedAPIs!=null && !subscribedAPIs.isEmpty()){
             	Map<String, Tier> tiers=APIUtil.getTiers(tenantId);
             	for(SubscribedAPI subscribedApi:subscribedAPIs) {
@@ -1443,6 +1452,47 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             handleException("Failed to get APIs of " + subscriber.getName() + " under application " + applicationName, e);
         }
         return subscribedAPIs;
+    }
+
+    public Set<SubscribedAPI> getPaginatedSubscribedAPIs(Subscriber subscriber, String applicationName, int startSubIndex, int endSubIndex) throws APIManagementException {
+        Set<SubscribedAPI> subscribedAPIs = null;
+        try {
+            subscribedAPIs = apiMgtDAO.getPaginatedSubscribedAPIs(subscriber, applicationName, startSubIndex,endSubIndex);
+            if(subscribedAPIs!=null && !subscribedAPIs.isEmpty()){
+                Map<String, Tier> tiers=APIUtil.getTiers(tenantId);
+                for(SubscribedAPI subscribedApi:subscribedAPIs) {
+                    Tier tier=tiers.get(subscribedApi.getTier().getName());
+                    subscribedApi.getTier().setDisplayName(tier!=null?tier.getDisplayName():subscribedApi.getTier().getName());
+                    subscribedAPIs.add(subscribedApi);
+                }
+            }
+        } catch (APIManagementException e) {
+            handleException("Failed to get APIs of " + subscriber.getName() + " under application " + applicationName, e);
+        }
+        return subscribedAPIs;
+    }
+    
+    public Set<SubscribedAPI> getPaginatedSubscribedAPIsbyGroupId(Subscriber subscriber, String applicationName, int startSubIndex, int endSubIndex, String groupId) throws APIManagementException {
+        Set<SubscribedAPI> subscribedAPIs = null;
+        try {
+            subscribedAPIs = apiMgtDAO.getPaginatedSubscribedAPIsbyGroupId(subscriber, applicationName, startSubIndex,endSubIndex, groupId);
+            if(subscribedAPIs!=null && !subscribedAPIs.isEmpty()){
+                Map<String, Tier> tiers=APIUtil.getTiers(tenantId);
+                for(SubscribedAPI subscribedApi:subscribedAPIs) {
+                    Tier tier=tiers.get(subscribedApi.getTier().getName());
+                    subscribedApi.getTier().setDisplayName(tier!=null?tier.getDisplayName():subscribedApi.getTier().getName());
+                    subscribedAPIs.add(subscribedApi);
+                }
+            }
+        } catch (APIManagementException e) {
+            handleException("Failed to get APIs of " + subscriber.getName() + " under application " + applicationName, e);
+        }
+        return subscribedAPIs;
+    }
+
+    public Integer getSubscriptionCount(Subscriber subscriber,String applicationName)
+            throws APIManagementException {
+        return apiMgtDAO.getSubscriptionCount(subscriber,applicationName);
     }
 
     public Set<APIIdentifier> getAPIByConsumerKey(String accessToken) throws APIManagementException {
@@ -1728,10 +1778,10 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     public Map<String,String> requestApprovalForApplicationRegistration(String userId, String applicationName,
                                                                         String tokenType, String callbackUrl,
                                                                         String[] allowedDomains, String validityTime,
-                                                                        String tokenScope)
+                                                                        String tokenScope, int applicationId)
 		    throws APIManagementException {
 
-        Application application  = apiMgtDAO.getApplicationByName(applicationName,userId);
+       	Application application  = apiMgtDAO.getApplicationById(applicationId);
 
         if(!WorkflowStatus.APPROVED.toString().equals(application.getStatus())){
             throw new APIManagementException("Application should be approved before registering.");
@@ -1810,10 +1860,11 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 
     public Map<String, String> completeApplicationRegistration(String userId,
                                                                String applicationName,
-                                                               String tokenType, String tokenScope)
+                                                               String tokenType, String tokenScope,
+															   int applicationId)
             throws APIManagementException {
 
-        Application application = apiMgtDAO.getApplicationByName(applicationName, userId);
+    	Application application = apiMgtDAO.getApplicationById(applicationId);
         String status = apiMgtDAO.getRegistrationApprovalState(application.getId(), tokenType);
         Map<String, String> keyDetails = null;
 
@@ -2138,6 +2189,51 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 		return apiMgtDAO.getScopesByScopeKeys(scopeKeys, tenantId);
 	}
 
-	
+	@Override
+    public String getGroupIds(String response) throws APIManagementException{
+                String groupingExtractorClass = APIUtil.getGroupingExtractorImplementation();
+                if (groupingExtractorClass != null) {
+                        try {
+                                LoginPostExecutor groupingExtractor = (LoginPostExecutor)Class.forName(groupingExtractorClass).newInstance();
+                                return  groupingExtractor.getGroupingIdentifiers(response);
+                            } catch (ClassNotFoundException e) {
+                                handleException(groupingExtractorClass+" is not found in run time", e);
+                                return null;
+                            } catch (IllegalAccessException e) {
+                                handleException("Error occurred while invocation of getGroupingIdentifier method", e);
+                                return null;
+                            } catch (InstantiationException e) {
+                                handleException("Error occurred while instantiating "+groupingExtractorClass+" class", e);
+                                return null;
+                            }
+                    }
+                return null;
+            }
+
+	@Override
+	public Set<SubscribedAPI> getSubscribedAPIs(Subscriber subscriber,
+			String applicationName, String groupId)throws APIManagementException{
+			Set<SubscribedAPI> subscribedAPIs = null;
+    try {
+        subscribedAPIs = apiMgtDAO.getSubscribedAPIs(subscriber, applicationName, groupId);
+        if(subscribedAPIs!=null && !subscribedAPIs.isEmpty()){
+            Map<String, Tier> tiers=APIUtil.getTiers(tenantId);
+            for(SubscribedAPI subscribedApi:subscribedAPIs) {
+                Tier tier=tiers.get(subscribedApi.getTier().getName());
+                subscribedApi.getTier().setDisplayName(tier!=null?tier.getDisplayName():subscribedApi.getTier().getName());
+                subscribedAPIs.add(subscribedApi);
+            }
+        }
+    } catch (APIManagementException e) {
+        handleException("Failed to get APIs of " + subscriber.getName() + " under application " + applicationName, e);
+    }
+    return subscribedAPIs;
+	}
+
+	@Override
+	public Application[] getApplications(Subscriber subscriber, String groupId)
+			throws APIManagementException {
+		return apiMgtDAO.getApplications(subscriber, groupId);
+	}
 
 }

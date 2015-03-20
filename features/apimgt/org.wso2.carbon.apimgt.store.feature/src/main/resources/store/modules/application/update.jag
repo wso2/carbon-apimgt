@@ -4,7 +4,8 @@ var updateApplication = function (applicationNew,applicationOld,username,tier,ca
             store = jagg.module("manager").getAPIStoreObj();
 
     try {
-        store.updateApplication(applicationNew,applicationOld,username,tier,callbackUrlNew,descriptionNew);
+        var groupId = session.get("groupId");
+        store.updateApplication(applicationNew,applicationOld,username,tier,callbackUrlNew,descriptionNew,groupId);
         if (log.isDebugEnabled()) {
             log.debug("updateApplication");
         }

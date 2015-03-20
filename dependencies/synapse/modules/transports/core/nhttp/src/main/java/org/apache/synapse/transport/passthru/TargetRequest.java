@@ -171,17 +171,18 @@ public class TargetRequest {
 				headers.remove(HTTP.CONTENT_TYPE);
 			}
 		}        
-        
+		// The content type in the transport headers is used to over write the Content-Type returned from the message
+        // formatter. This will support <property name="Content-Type" value="foo"/> so that the final Content-Type
+        // will be "foo" irrespective of what the message formatter returned.
+        // To support this, the property mediator changes Content-Type header when messageType axis2 property is used
+        // which is wrong. This is a hack we need to properly fix.        
         
         Object o = requestMsgCtx.getProperty(MessageContext.TRANSPORT_HEADERS);
 		if (o != null && o instanceof TreeMap) {
 			Map _headers = (Map) o;
 			String trpContentType = (String) _headers.get(HTTP.CONTENT_TYPE);
 			if (trpContentType != null && !trpContentType.equals("")) {
-				if (!trpContentType
-						.contains(PassThroughConstants.CONTENT_TYPE_MULTIPART_RELATED)
-						&& !trpContentType
-								.contains(PassThroughConstants.CONTENT_TYPE_MULTIPART_FORM_DATA)) {
+                if (!trpContentType.contains(PassThroughConstants.CONTENT_TYPE_MULTIPART_RELATED)) {
 					addHeader(HTTP.CONTENT_TYPE, trpContentType);
 				}
 

@@ -77,6 +77,16 @@
     <div class="alert alert-error" id="addAPIError" style="display:none">
         <span id="addErrorSpan"></span>
     </div>
+<%
+    if(api != null && api.subs > 0){%>
+    <div class="alert alert-block" id="editAPIWarn" style="display:block">
+        <span id="editWarnSpan"><b>Warning!</b><br/>
+        You are editing an API with active subscribers. Tier Availability changes will not be reflected on
+        active subscriptions.<br/>
+        API Definition for Swagger will not be overriden with the changes you will do to the API.
+        </span>
+    </div>
+  <%  }%>
 
     <div class="row-fluid">
         <div class="span12">                           

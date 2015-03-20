@@ -19,6 +19,8 @@
 
 package org.apache.synapse.core.axis2;
 
+import org.apache.axiom.om.OMAbstractFactory;
+import org.apache.axiom.soap.SOAPEnvelope;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.synapse.FaultHandler;
@@ -84,8 +86,12 @@ public class TimeoutHandler extends TimerTask {
             alreadyExecuting = true;
             try {
                 processCallbacks();
-            } catch (Exception ignore) {}
-            alreadyExecuting = false;
+            } catch (Exception ex) {
+            	log.warn("Exception occurred while processing callbacks", ex);
+            }
+            finally {
+                alreadyExecuting = false;
+            }
         }
     }
 
@@ -154,16 +160,37 @@ public class TimeoutHandler extends TimerTask {
                                 msgContext.setProperty(SynapseConstants.ERROR_MESSAGE,
                                         SEND_TIMEOUT_MESSAGE);
 
-                                Stack faultStack = msgContext.getFaultStack();
 
-                                for (int j = 0; j < faultStack.size(); j++) {
-                                    Object o = faultStack.pop();
-                                    if (o instanceof FaultHandler) {
-                                        ((FaultHandler) o).handleFault(msgContext);
-                                    }
+                                SOAPEnvelope soapEnvelope;
+                                if(msgContext.isSOAP11()){
+                                    soapEnvelope = OMAbstractFactory.getSOAP11Factory().createSOAPEnvelope();
+                                    soapEnvelope.addChild(OMAbstractFactory.getSOAP11Factory().createSOAPBody());
+                                } else {
+                                    soapEnvelope = OMAbstractFactory.getSOAP12Factory().createSOAPEnvelope();
+                                    soapEnvelope.addChild(OMAbstractFactory.getSOAP12Factory().createSOAPBody());
+                                 }
+                                try {
+                                    msgContext.setEnvelope(soapEnvelope);
+                                } catch (Exception ex) {
+                                    log.error("Error resetting SOAP Envelope",ex);
+                                    continue;
                                 }
-
-                            }
+ 
+								Stack<FaultHandler> faultStack = msgContext.getFaultStack();
+								if (!faultStack.isEmpty()) {
+									FaultHandler faultHandler = faultStack.pop();
+									if (faultHandler != null) {
+										try {
+											faultHandler.handleFault(msgContext);
+										} catch (Exception ex) {
+											log.warn("Exception occurred while executing the fault handler",
+											         ex);
+											continue;
+										}
+									}
+								}
+							}
+                            
                         }
 
                     } else if (currentTime > globalTimeout + callback.getTimeOutOn()) {
@@ -172,7 +199,14 @@ public class TimeoutHandler extends TimerTask {
                 }
 
                 for(Object key : toRemove) {
-                    if (!"true".equals(((AsyncCallback) callbackStore.get(key)).getSynapseOutMsgCtx().getProperty(SynapseConstants.OUT_ONLY))) {
+
+                    AsyncCallback callback = (AsyncCallback) callbackStore.get(key);
+                    if (callback == null) {
+                        // we will get here if we get a response from the Backend while clearing callbacks
+                        continue;
+                    }
+
+                    if (!"true".equals(callback.getSynapseOutMsgCtx().getProperty(SynapseConstants.OUT_ONLY))) {
                         log.warn("Expiring message ID : " + key + "; dropping message after " +
                                 "global timeout of : " + (globalTimeout / 1000) + " seconds");
                     }

@@ -71,9 +71,6 @@ public class SendMediator extends AbstractMediator implements ManagedLifecycle {
                     receivingSequence.evaluateValue(synCtx));
         }
 
-        // Disable continuation as send is a leaf mediator
-        synCtx.setContinuationEnabled(false);
-
         // if no endpoints are defined, send where implicitly stated
         if (endpoint == null) {
 
