@@ -37,6 +37,10 @@ function generate_swagger_object(swagger){
     var url;
 
     if (uri != null) {
+        // replacing @ signs for matcher to work with reverse proxies
+        if(callPath.indexOf("@") > -1){
+            callPath = callPath.replace("@","%40");
+        }
         var uriMatcher = new URIMatcher(callPath);
         var providerVal,apiNameVal,apiVersionVal,subContext;
         providerVal = apiNameVal = apiVersionVal = subContext = "";

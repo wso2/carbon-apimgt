@@ -98,33 +98,42 @@ $(document).ready(function () {
         var validityTime;
         if (keyType == 'PRODUCTION') {
             authoDomains = $('#allowedDomainsPro').val();
-            validityTime=$('#refreshProdValidityTime').val();
+            validityTime = $('#refreshProdValidityTime').val();
         } else {
             authoDomains = $('#allowedDomainsSand').val();
-            validityTime=$('#refreshSandValidityTime').val();
+            validityTime = $('#refreshSandValidityTime').val();
         }
-        var tokenScope = $('#scopeInput').val();
-        console.log("app-key-generate-button accessed");
+
+        /*
+         if we have additional parameters we can pass them as a json object.
+         */
+        var oJsonParams = {
+            username : userName
+        };
+        console.log("here i am");
+	    var tokenScope = $('#scopeInput').val();
+
         jagg.post("/site/blocks/subscription/subscription-add/ajax/subscription-add.jag", {
-            action:"generateApplicationKey",
-            application:elem.attr("data-application"),
-            keytype:elem.attr("data-keytype"),
-            callbackUrl:elem.attr("data-callbackUrl"),
-            authorizedDomains:authoDomains,
-            validityTime:validityTime,
-            tokenScope:tokenScope
+            action: "generateApplicationKey",
+            application: elem.attr("data-application"),
+            keytype: elem.attr("data-keytype"),
+            callbackUrl: elem.attr("data-callbackUrl"),
+            authorizedDomains: authoDomains,
+            validityTime: validityTime,
+            tokenScope:tokenScope,
+            jsonParams: JSON.stringify(oJsonParams)
         }, function (result) {
             if (!result.error) {
                 location.reload();
             } else {
-                jagg.message({content:result.message,type:"error"});
+                jagg.message({content: result.message, type: "error"});
             }
         }, "json");
 
         $(this).html(i18n.t('info.wait'));
     });
 
-    $('.app-create-key-button').click(function () {
+ $('.app-create-key-button').click(function () {
         var elem = $(this);
         var i = elem.attr("iteration");
         var keyType = elem.attr("data-keytype");

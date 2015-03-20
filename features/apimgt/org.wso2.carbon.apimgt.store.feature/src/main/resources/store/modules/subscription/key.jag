@@ -23,7 +23,7 @@ var generateAPIKey = function (api, context, application, username, keyType, cal
 };
 
 var generateApplicationKey = function (application, username, keyType, callbackUrl, accessAllowDomainsArr,
-                                       validityTime, afterFailure,tokenScope,tokenScope,jsonParams) {
+                                       validityTime, afterFailure,tokenScope,jsonParams) {
 
     afterFailure = typeof afterFailure !== 'undefined' ? afterFailure : false;
     var key,

@@ -184,15 +184,15 @@ include("/jagg/jagg.jag");
         var callbackUrl = request.getParameter("callbackUrl");
         var username = user.username;
         var accessAllowDomains = request.getParameter("authorizedDomains");
-	var tokenScope = request.getParameter("tokenScope"); 
+	    //var tokenScope = request.getParameter("tokenScope");
+        var tokenScope = "default";
 
         var accessAllowDomainsArr = accessAllowDomains.split(",");
         var validityTime = request.getParameter("validityTime");
         var retryAfterFailure = request.getParameter("retryAfterFailure");
         var jsonParams = request.getParameter("jsonParams");
 
-        var log = new Log();
-        log.info("json Params" + jsonParams);
+
 
 
 

@@ -688,7 +688,7 @@ public class APIStoreHostObject extends ScriptableObject {
             }
             try {
                 String validityPeriod = (String) args[5];
-	            String scopes = (String) args[6];
+	            String scopes = (String) args[7];
 	            String username = String.valueOf(args[0]);
 	            String tenantDomain = MultitenantUtils.getTenantDomain(username);
 	            int tenantId =
@@ -705,10 +705,10 @@ public class APIStoreHostObject extends ScriptableObject {
                         validityPeriod = String.valueOf(defaultValidityPeriod);
                     }
                 }
-                //if length = 7 we can ensure we have additional parameters to pass.
+
                 String jsonParams = null;
-                if(args.length == 8){
-                    jsonParams = (String) args[7];
+                if(args.length == 9){
+                    jsonParams = (String) args[8];
                 }else{
                     jsonParams = null;
                 }
