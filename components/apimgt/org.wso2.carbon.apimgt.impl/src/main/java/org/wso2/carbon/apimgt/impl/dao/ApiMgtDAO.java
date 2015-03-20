@@ -952,31 +952,41 @@ public class ApiMgtDAO {
     public boolean validateSubscriptionDetails(String context, String version, String consumerKey,
                                                APIKeyValidationInfoDTO infoDTO) throws APIManagementException {
 
+
+        boolean defaultVersionInvoked = false;
+
+        //Check if the api version has been prefixed with _default_
+        if(version != null && version.startsWith(APIConstants.DEFAULT_VERSION_PREFIX)){
+            defaultVersionInvoked = true;
+            //Remove the prefix from the version.
+            version = version.split(APIConstants.DEFAULT_VERSION_PREFIX)[1];
+        }
+
         String sql = "SELECT "+
-                "   SUB.TIER_ID," +
-                "   SUBS.USER_ID," +
-                "   SUB.SUB_STATUS," +
-                "   APP.APPLICATION_ID," +
-                "   APP.NAME," +
-                "   APP.APPLICATION_TIER," +
-                "   AKM.KEY_TYPE," +
-                "   API.API_NAME," +
-                "   API.API_PROVIDER" +
-                " FROM " +
-                "   AM_SUBSCRIPTION SUB," +
-                "   AM_SUBSCRIBER SUBS," +
-                "   AM_APPLICATION APP," +
-                "   AM_APPLICATION_KEY_MAPPING AKM," +
-                "   AM_API API" +
-                " WHERE " +
-                " API.CONTEXT = ? " +
-                " AND API.API_VERSION = ? " +
-                " AND AKM.CONSUMER_KEY = ? " +
-                "   AND SUB.APPLICATION_ID = APP.APPLICATION_ID" +
-                "   AND APP.SUBSCRIBER_ID = SUBS.SUBSCRIBER_ID" +
-                "   AND API.API_ID = SUB.API_ID" +
-                "   AND AKM.APPLICATION_ID=APP.APPLICATION_ID"+
-                "   AND AKM.APPLICATION_ID=APP.APPLICATION_ID";
+                     "   SUB.TIER_ID," +
+                     "   SUBS.USER_ID," +
+                     "   SUB.SUB_STATUS," +
+                     "   APP.APPLICATION_ID," +
+                     "   APP.NAME," +
+                     "   APP.APPLICATION_TIER," +
+                     "   AKM.KEY_TYPE," +
+                     "   API.API_NAME," +
+                     "   API.API_PROVIDER" +
+                     " FROM " +
+                     "   AM_SUBSCRIPTION SUB," +
+                     "   AM_SUBSCRIBER SUBS," +
+                     "   AM_APPLICATION APP," +
+                     "   AM_APPLICATION_KEY_MAPPING AKM," +
+                     "   AM_API API" +
+                     " WHERE " +
+                     " API.CONTEXT = ? " +
+                     (defaultVersionInvoked ? "" : " AND API.API_VERSION = ? ") +
+                     " AND AKM.CONSUMER_KEY = ? " +
+                     "   AND SUB.APPLICATION_ID = APP.APPLICATION_ID" +
+                     "   AND APP.SUBSCRIBER_ID = SUBS.SUBSCRIBER_ID" +
+                     "   AND API.API_ID = SUB.API_ID" +
+                     "   AND AKM.APPLICATION_ID=APP.APPLICATION_ID"+
+                     "   AND AKM.APPLICATION_ID=APP.APPLICATION_ID";
         Connection conn = null;
         PreparedStatement ps = null;
         ResultSet rs = null;
@@ -986,7 +996,9 @@ public class ApiMgtDAO {
             ps = conn.prepareStatement(sql);
             ps.setString(1, context);
             ps.setString(2, version);
-            ps.setString(3,consumerKey);
+            if(!defaultVersionInvoked){
+                ps.setString(3,consumerKey);
+            }
             rs = ps.executeQuery();
             if(rs.next()){
                 String subscriptionStatus = rs.getString("SUB_STATUS");
@@ -997,13 +1009,13 @@ public class ApiMgtDAO {
                     infoDTO.setAuthorized(false);
                     return false;
                 } else if(APIConstants.SubscriptionStatus.ON_HOLD.equals(subscriptionStatus) ||
-                        APIConstants.SubscriptionStatus.REJECTED.equals(subscriptionStatus)){
+                          APIConstants.SubscriptionStatus.REJECTED.equals(subscriptionStatus)){
                     infoDTO.setValidationStatus(APIConstants.KeyValidationStatus.SUBSCRIPTION_INACTIVE);
                     infoDTO.setAuthorized(false);
                     return false;
                 }
                 else if (subscriptionStatus.equals(APIConstants.SubscriptionStatus.PROD_ONLY_BLOCKED) &&
-                        !APIConstants.API_KEY_TYPE_SANDBOX.equals(type)) {
+                         !APIConstants.API_KEY_TYPE_SANDBOX.equals(type)) {
                     infoDTO.setValidationStatus(
                             APIConstants.KeyValidationStatus.API_BLOCKED);
                     infoDTO.setType(type);

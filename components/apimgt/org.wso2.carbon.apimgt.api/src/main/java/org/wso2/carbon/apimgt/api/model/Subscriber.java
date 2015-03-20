@@ -21,9 +21,9 @@ import java.util.Date;
 
 /**
  * Subscriber of API. Mapping between a particular Subscriber using a selected API is captured in
- * {@link SubscribedAPI}.
+ * {@link org.wso2.carbon.apimgt.api.model.SubscribedAPI}.
  *
- * @see SubscribedAPI
+ * @see org.wso2.carbon.apimgt.api.model.SubscribedAPI
  */
 @SuppressWarnings("unused")
 public class Subscriber {
