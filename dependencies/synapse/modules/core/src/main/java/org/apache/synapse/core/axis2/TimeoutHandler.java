@@ -86,7 +86,9 @@ public class TimeoutHandler extends TimerTask {
             alreadyExecuting = true;
             try {
                 processCallbacks();
-            } catch (Exception ignore) {}
+            } catch (Exception ex) {
+            	log.warn("Exception occurred while processing callbacks", ex);
+            }
             finally {
                 alreadyExecuting = false;
             }
@@ -171,15 +173,24 @@ public class TimeoutHandler extends TimerTask {
                                     msgContext.setEnvelope(soapEnvelope);
                                 } catch (Exception ex) {
                                     log.error("Error resetting SOAP Envelope",ex);
+                                    continue;
                                 }
  
-                                Stack<FaultHandler> faultStack = msgContext.getFaultStack();
-                                FaultHandler f = faultStack.pop();
-                                if(f != null){
-                                	f.handleFault(msgContext);
-                                }
-
-                            }
+								Stack<FaultHandler> faultStack = msgContext.getFaultStack();
+								if (!faultStack.isEmpty()) {
+									FaultHandler faultHandler = faultStack.pop();
+									if (faultHandler != null) {
+										try {
+											faultHandler.handleFault(msgContext);
+										} catch (Exception ex) {
+											log.warn("Exception occurred while executing the fault handler",
+											         ex);
+											continue;
+										}
+									}
+								}
+							}
+                            
                         }
 
                     } else if (currentTime > globalTimeout + callback.getTimeOutOn()) {
