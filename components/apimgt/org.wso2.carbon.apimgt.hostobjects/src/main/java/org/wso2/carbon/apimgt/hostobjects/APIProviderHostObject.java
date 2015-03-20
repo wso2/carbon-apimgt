@@ -96,6 +96,7 @@ public class APIProviderHostObject extends ScriptableObject {
     private static Pattern pathParamValidatorPattern=Pattern.compile("\\{uri\\.var\\.[\\w]+\\}");
 
     private String username;
+    private static String VERSION_PARAM="{version}";
 
     private APIProvider apiProvider;
 
@@ -1406,11 +1407,11 @@ public class APIProviderHostObject extends ScriptableObject {
     private static String checkAndSetVersionParam(String context) {
         // This is to support the new Pluggable version strategy
         // if the context does not contain any {version} segment, we use the default version strategy.
-        if(!context.contains(APIConstants.SYNAPSE_REST_CONTEXT_VERSION_VARIABLE)){
+        if(!context.contains(VERSION_PARAM)){
             if(!context.endsWith("/")){
                 context = context + "/";
             }
-            context = context + APIConstants.SYNAPSE_REST_CONTEXT_VERSION_VARIABLE;
+            context = context + VERSION_PARAM;
         }
         return context;
     }
@@ -1788,9 +1789,9 @@ public class APIProviderHostObject extends ScriptableObject {
         if (version == null) {
             // context template patterns - /{version}/foo or /foo/{version}
             // if the version is null, then we remove the /{version} part from the context
-            context = contextVal.replace("/" + APIConstants.SYNAPSE_REST_CONTEXT_VERSION_VARIABLE, "");
+            context = contextVal.replace("/" + VERSION_PARAM, "");
         }else{
-            context = context.replace(APIConstants.SYNAPSE_REST_CONTEXT_VERSION_VARIABLE, version);
+            context = context.replace(VERSION_PARAM, version);
         }
         return context;
     }
@@ -2900,10 +2901,9 @@ public class APIProviderHostObject extends ScriptableObject {
             if (fileHostObject != null && fileHostObject.getJavaScriptFile().getLength() != 0) {
             	String contentType = (String) args[10];
                 Icon icon = new Icon(fileHostObject.getInputStream(), contentType);
+                
+                String filePath = APIUtil.getDocumentationFilePath(apiId, fileHostObject.getName());
                 String fname = fileHostObject.getName();
-                int index = fname.lastIndexOf("//");
-                fname = fname.substring(index+1);
-                String filePath = APIUtil.getDocumentationFilePath(apiId, fname);
                 API api = apiProvider.getAPI(apiId);
                 String apiPath=APIUtil.getAPIPath(apiId);
                 String visibleRolesList = api.getVisibleRoles();
@@ -2914,7 +2914,7 @@ public class APIProviderHostObject extends ScriptableObject {
                 APIUtil.setResourcePermissions(api.getId().getProviderName(),
                                                api.getVisibility(), visibleRoles,filePath);
                 doc.setFilePath(apiProvider.addIcon(filePath, icon));
-            } else if (sourceType.equalsIgnoreCase(Documentation.DocumentSourceType.FILE.toString())) {
+            } else {
                 throw new APIManagementException("Empty File Attachment.");
             }
 
@@ -3842,10 +3842,7 @@ public class APIProviderHostObject extends ScriptableObject {
             if (fileHostObject != null && fileHostObject.getJavaScriptFile().getLength() != 0) {
                 Icon icon = new Icon(fileHostObject.getInputStream(),
                                      fileHostObject.getJavaScriptFile().getContentType());
-                String fName = fileHostObject.getName();
-                int index = fName.lastIndexOf("\\");
-                fName = fName.substring(index + 1);
-                String filePath = APIUtil.getDocumentationFilePath(apiId, fName);
+                String filePath = APIUtil.getDocumentationFilePath(apiId, fileHostObject.getName());
                 doc.setFilePath(apiProvider.addIcon(filePath, icon));
             } else if (oldDoc.getFilePath() != null) {
                 doc.setFilePath(oldDoc.getFilePath());

@@ -255,22 +255,36 @@ public class APIMgtDAOTest extends TestCase {
 		subscriber1.setEmail("laf@wso2.com");
 		subscriber1.setSubscribedDate(new Date());
 		subscriber1.setTenantId(MultitenantConstants.SUPER_TENANT_ID);
+		subscriber1.setGroupId("");
 		apiMgtDAO.addSubscriber(subscriber1);
 		assertTrue(subscriber1.getId() > 0);
 		Subscriber subscriber2 = apiMgtDAO.getSubscriber(subscriber1.getId());
 		this.checkSubscribersEqual(subscriber1, subscriber2);
 	}
 
+	public void testAddGetSubscriberWithGroupId() throws Exception {
+		Subscriber subscriber1 = new Subscriber("LA_F_GROUPID");
+		subscriber1.setEmail("laf@wso2.com");
+		subscriber1.setSubscribedDate(new Date());
+		subscriber1.setTenantId(MultitenantConstants.SUPER_TENANT_ID);
+		subscriber1.setGroupId("1");
+		apiMgtDAO.addSubscriber(subscriber1);
+		assertTrue(subscriber1.getId() > 0);
+		Subscriber subscriber2 = apiMgtDAO.getSubscriber(subscriber1.getId());
+		this.checkSubscribersEqual(subscriber1, subscriber2);
+	}
 	public void testUpdateGetSubscriber() throws Exception {
 		Subscriber subscriber1 = new Subscriber("LA_F2");
 		subscriber1.setEmail("laf@wso2.com");
 		subscriber1.setSubscribedDate(new Date());
 		subscriber1.setTenantId(MultitenantConstants.SUPER_TENANT_ID);
+		subscriber1.setGroupId("2");
 		apiMgtDAO.addSubscriber(subscriber1);
 		assertTrue(subscriber1.getId() > 0);
 		subscriber1.setEmail("laf2@wso2.com");
 		subscriber1.setSubscribedDate(new Date());
 		subscriber1.setTenantId(MultitenantConstants.SUPER_TENANT_ID);
+		subscriber1.setGroupId("2");
 		apiMgtDAO.updateSubscriber(subscriber1);
 		Subscriber subscriber2 = apiMgtDAO.getSubscriber(subscriber1.getId());
 		this.checkSubscribersEqual(subscriber1, subscriber2);

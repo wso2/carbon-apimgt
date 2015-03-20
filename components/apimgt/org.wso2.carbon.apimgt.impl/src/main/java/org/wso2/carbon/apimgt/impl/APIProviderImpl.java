@@ -535,16 +535,21 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                                     new HashSet<String>(oldApi.getEnvironments());
                             if (!environmentsToPublish.isEmpty() && !environmentsToRemove.isEmpty()) {
                                 environmentsRemoved.retainAll(environmentsToPublish);
+                                environmentsToPublish.removeAll(environmentsToRemove);
                                 environmentsToRemove.removeAll(environmentsRemoved);
                             }
-                            List<String> failedToPublishEnvironments =
-                                    publishToGateway(apiPublished);
                             apiPublished.setEnvironments(environmentsToRemove);
                             List<String> failedToRemoveEnvironments =
                                     removeFromGateway(apiPublished);
-                            environmentsToPublish.removeAll(failedToPublishEnvironments);
-                            environmentsToPublish.addAll(failedToRemoveEnvironments);
                             apiPublished.setEnvironments(environmentsToPublish);
+                            List<String> failedToPublishEnvironments =
+                                    publishToGateway(apiPublished);
+                            environmentsRemoved.addAll(environmentsToPublish);
+                            environmentsRemoved.removeAll(failedToPublishEnvironments);
+                            environmentsRemoved.addAll(failedToRemoveEnvironments);
+                            environmentsToRemove.removeAll(failedToRemoveEnvironments);
+                            environmentsRemoved.removeAll(environmentsToRemove);
+                            apiPublished.setEnvironments(environmentsRemoved);
                             updateApiArtifact(apiPublished, true, false);
                             failedGateways.clear();
                             failedGateways.put("UNPUBLISHED", failedToRemoveEnvironments);
@@ -559,7 +564,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                                 updateApiArtifact(api, true, false);
                                 failedGateways.clear();
                                 failedGateways.put("PUBLISHED", failedToPublishEnvironments);
-                                failedGateways.put("UNPUBLISHED", Collections.EMPTY_LIST);
+                                failedGateways.put("UNPUBLISHED", new ArrayList<String>(0));
                             }
                         }
                     } else {
@@ -1128,9 +1133,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             // We need to change the context by setting the new version
             // This is a change that is coming with the context version strategy
             String contextTemplate = artifact.getAttribute(APIConstants.API_OVERVIEW_CONTEXT_TEMPLATE);
-            artifact.setAttribute(APIConstants.API_OVERVIEW_CONTEXT,
-                                  contextTemplate.replace(APIConstants.SYNAPSE_REST_CONTEXT_VERSION_VARIABLE,
-                                                          newVersion));
+            artifact.setAttribute(APIConstants.API_OVERVIEW_CONTEXT, contextTemplate.replace("{version}", newVersion));
 
             artifactManager.addGenericArtifact(artifact);
             String artifactPath = GovernanceUtils.getArtifactPath(registry, artifact.getId());
