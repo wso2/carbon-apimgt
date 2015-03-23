@@ -350,9 +350,9 @@
             </dependency>
 
             <dependency>
-                <groupId>org.wso2.carbon.registry</groupId>
+                <groupId>org.wso2.carbon</groupId>
                 <artifactId>org.wso2.carbon.registry.core</artifactId>
-                <version>${carbon.registry.version}</version>
+                <version>${carbon.kernel.version}</version>
             </dependency>
 
             <dependency>
@@ -684,7 +684,7 @@
      <carbon.kernel.version>4.4.0-SNAPSHOT</carbon.kernel.version>
 	   <carbon.commons.version>4.3.6</carbon.commons.version>
 
-         <carbon.registry.version>4.3.2-SNAPSHOT</carbon.registry.version>
+         
         <carbon.registry.imp.pkg.version>[1.0.1, 1.1.0)</carbon.registry.imp.pkg.version>
         <commons.logging.imp.pkg.version>[1.1.0, 1.2.0)</commons.logging.imp.pkg.version>
 
