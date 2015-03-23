@@ -690,10 +690,10 @@
 
 
         <!-- Carbon platform version comes here-->
-        <carbon.platform.version>4.2.0</carbon.platform.version>
-        <carbon.platform.package.export.version>4.2.0</carbon.platform.package.export.version>
-        <carbon.platform.package.import.version.range>[4.2.0, 4.4.0)</carbon.platform.package.import.version.range>
-        <carbon.apimgt.handlers.stub.package.import.version.range>4.4.0</carbon.apimgt.handlers.stub.package.import.version.range>
+        <carbon.platform.version>4.3.0</carbon.platform.version>
+        <carbon.platform.package.export.version>4.3.0</carbon.platform.package.export.version>
+        <carbon.platform.package.import.version.range>[4.3.0, 4.4.0)</carbon.platform.package.import.version.range>
+        <carbon.apimgt.handlers.stub.package.import.version.range>[4.3.0, 4.4.0)</carbon.apimgt.handlers.stub.package.import.version.range>
 
 	<!-- Carbon Governance -->
         <carbon.governance.version>4.3.1-SNAPSHOT</carbon.governance.version>
