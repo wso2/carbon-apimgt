@@ -20,6 +20,7 @@ import org.wso2.carbon.identity.oauth2.IdentityOAuth2Exception;
 import org.wso2.carbon.identity.oauth2.dto.OAuth2AccessTokenRespDTO;
 import org.wso2.carbon.identity.oauth2.token.OAuthTokenReqMessageContext;
 import org.wso2.carbon.identity.oauth2.token.handlers.grant.AuthorizationCodeGrantHandler;
+import org.wso2.carbon.identity.oauth2.InvalidRefreshTokenException;
 
 public class ExtendedAuthorizationCodeGrantHandler extends AuthorizationCodeGrantHandler{
 
@@ -30,7 +31,7 @@ public class ExtendedAuthorizationCodeGrantHandler extends AuthorizationCodeGran
 
     @Override
     public OAuth2AccessTokenRespDTO issue(OAuthTokenReqMessageContext tokReqMsgCtx)
-            throws IdentityOAuth2Exception{
+            throws IdentityOAuth2Exception,InvalidRefreshTokenException{
         return super.issue(tokReqMsgCtx);
     }
 
