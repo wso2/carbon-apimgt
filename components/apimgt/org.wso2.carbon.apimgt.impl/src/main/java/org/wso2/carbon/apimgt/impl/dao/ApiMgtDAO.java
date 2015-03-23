@@ -268,7 +268,7 @@ public class ApiMgtDAO {
                 ps.setString(4, dto.getKeyType());
                 ps.setString(5, dto.getDomainList());
                 ps.setLong(6, dto.getValidityTime());
-		        ps.setString(7, (String) dto.getAppInfoDTO().getoAuthApplicationInfo().getParameter("tokenScope"));
+		        ps.setString(7,(String) dto.getAppInfoDTO().getoAuthApplicationInfo().getParameter("tokenScope"));
 	            ps.setString(8,jsonString);
                 ps.execute();
                 ps.close();
