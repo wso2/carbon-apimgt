@@ -350,9 +350,9 @@
             </dependency>
 
             <dependency>
-                <groupId>org.wso2.carbon</groupId>
+                <groupId>org.wso2.carbon.registry</groupId>
                 <artifactId>org.wso2.carbon.registry.core</artifactId>
-                <version>${carbon.kernel.version}</version>
+                <version>${carbon.registry.version}</version>
             </dependency>
 
             <dependency>
@@ -451,9 +451,9 @@
             </dependency>
 
             <dependency>
-                <groupId>org.wso2.carbon</groupId>
+                <groupId>org.wso2.carbon.mediation</groupId>
                 <artifactId>org.wso2.carbon.sequences.stub</artifactId>
-                <version>4.2.1</version>
+                <version>${carbon.mediation.version}</version>
             </dependency>
 
             <dependency>
@@ -481,15 +481,15 @@
             </dependency>
 
             <dependency>
-                <groupId>org.wso2.carbon</groupId>
+                <groupId>org.wso2.carbon.identity</groupId>
                 <artifactId>org.wso2.carbon.identity.core</artifactId>
-                <version>4.2.3</version>
+                <version>${carbon.identity.version}</version>
             </dependency>
 
             <dependency>
-                <groupId>org.wso2.carbon</groupId>
+                <groupId>org.wso2.carbon.identity</groupId>
                 <artifactId>org.wso2.carbon.identity.oauth</artifactId>
-                <version>4.2.4</version>
+                <version>${carbon.identity.version}</version>
             </dependency>
 
             <dependency>
@@ -517,9 +517,9 @@
             </dependency>
 
             <dependency>
-                <groupId>org.wso2.carbon</groupId>
+                <groupId>org.wso2.carbon.identity</groupId>
                 <artifactId>org.wso2.carbon.identity.thrift.authentication</artifactId>
-                <version>4.2.1</version>
+                <version>${carbon.identity.version}</version>
             </dependency>
 
             <dependency>

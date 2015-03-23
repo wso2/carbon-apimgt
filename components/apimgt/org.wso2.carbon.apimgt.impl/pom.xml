@@ -68,11 +68,11 @@
           <artifactId>org.wso2.carbon.apimgt.keymgt.client</artifactId>
       </dependency>
         <dependency>
-            <groupId>org.wso2.carbon</groupId>
+            <groupId>org.wso2.carbon.identity</groupId>
             <artifactId>org.wso2.carbon.identity.core</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.wso2.carbon</groupId>
+            <groupId>org.wso2.carbon.identity</groupId>
             <artifactId>org.wso2.carbon.identity.oauth</artifactId>
         </dependency>
         <dependency>
@@ -138,7 +138,7 @@
             <artifactId>org.wso2.carbon.mediation.initializer</artifactId>
         </dependency>
 		<dependency>
-           <groupId>org.wso2.carbon</groupId>
+           <groupId>org.wso2.carbon.mediation</groupId>
             <artifactId>org.wso2.carbon.sequences.stub</artifactId>
         </dependency>
 		<dependency>
