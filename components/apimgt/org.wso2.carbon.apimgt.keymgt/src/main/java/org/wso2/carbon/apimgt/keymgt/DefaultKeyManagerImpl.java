@@ -55,10 +55,7 @@ import org.wso2.carbon.identity.application.common.model.xsd.InboundAuthenticati
 import org.wso2.carbon.identity.application.common.model.xsd.Property;
 import org.wso2.carbon.identity.application.common.model.xsd.ServiceProvider;
 import org.wso2.carbon.identity.oauth.stub.dto.OAuthConsumerAppDTO;
-import org.wso2.carbon.identity.oauth2.OAuth2TokenValidationService;
-import org.wso2.carbon.identity.oauth2.dto.OAuth2ClientApplicationDTO;
-import org.wso2.carbon.identity.oauth2.dto.OAuth2TokenValidationRequestDTO;
-import org.wso2.carbon.identity.oauth2.dto.OAuth2TokenValidationResponseDTO;
+import org.wso2.carbon.identity.oauth2.stub.dto.OAuth2ClientApplicationDTO;
 
 import javax.xml.stream.XMLStreamException;
 import java.io.ByteArrayInputStream;
@@ -341,7 +338,7 @@ public class DefaultKeyManagerImpl extends AbstractKeyManager {
     public AccessTokenInfo getTokenMetaData(String accessToken) throws APIManagementException {
 
         AccessTokenInfo tokenInfo = new AccessTokenInfo();
-/*
+
         OAuth2ClientApplicationDTO oAuth2ClientApplicationDTO;
         OAuth2TokenValidationServiceClient oAuth2TokenValidationServiceClient = new
                 OAuth2TokenValidationServiceClient();
@@ -349,30 +346,18 @@ public class DefaultKeyManagerImpl extends AbstractKeyManager {
                 validateAuthenticationRequest(accessToken);
         org.wso2.carbon.identity.oauth2.stub.dto.OAuth2TokenValidationResponseDTO oAuth2TokenValidationResponseDTO = oAuth2ClientApplicationDTO.
                 getAccessTokenValidationResponse();
-*/
-        OAuth2TokenValidationService oAuth2TokenValidationService = new OAuth2TokenValidationService();
-        OAuth2TokenValidationRequestDTO requestDTO = new OAuth2TokenValidationRequestDTO();
-        OAuth2TokenValidationRequestDTO.OAuth2AccessToken token = requestDTO. new OAuth2AccessToken();
 
-        token.setIdentifier(accessToken);
-        token.setTokenType("bearer");
-        requestDTO.setAccessToken(token);
-        OAuth2ClientApplicationDTO clientApplicationDTO = oAuth2TokenValidationService.findOAuthConsumerIfTokenIsValid
-                (requestDTO);
-        OAuth2TokenValidationResponseDTO responseDTO = clientApplicationDTO.getAccessTokenValidationResponse();
-
-
-        if (!responseDTO.isValid()) {
-            log.error("Invalid OAuth Token : "+responseDTO.getErrorMsg());
-            throw new APIManagementException("Invalid OAuth Token : "+responseDTO.getErrorMsg());
+        if (!oAuth2TokenValidationResponseDTO.getValid()) {
+            log.error("Invalid OAuth Token : "+oAuth2TokenValidationResponseDTO.getErrorMsg());
+            throw new APIManagementException("Invalid OAuth Token : "+oAuth2TokenValidationResponseDTO.getErrorMsg());
         }
 
-        tokenInfo.setTokenValid(responseDTO.isValid());
-        tokenInfo.setEndUserName(responseDTO.getAuthorizedUser());
-        tokenInfo.setConsumerKey(clientApplicationDTO.getConsumerKey());
-        tokenInfo.setValidityPeriod(responseDTO.getExpiryTime());
+        tokenInfo.setTokenValid(oAuth2TokenValidationResponseDTO.getValid());
+        tokenInfo.setEndUserName(oAuth2TokenValidationResponseDTO.getAuthorizedUser());
+        tokenInfo.setConsumerKey(oAuth2ClientApplicationDTO.getConsumerKey());
+        tokenInfo.setValidityPeriod(oAuth2TokenValidationResponseDTO.getExpiryTime());
         tokenInfo.setIssuedTime(System.currentTimeMillis());
-        tokenInfo.setScope(responseDTO.getScope());
+        tokenInfo.setScope(oAuth2TokenValidationResponseDTO.getScope());
 
         if(APIUtil.checkAccessTokenPartitioningEnabled() &&
            APIUtil.checkUserNameAssertionEnabled()){
