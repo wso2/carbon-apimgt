@@ -144,19 +144,30 @@ public abstract class AbstractApplicationRegistrationWorkflowExecutor extends Wo
 
             workflowDTO.setApplicationInfo(oAuthApplication);
 
+            /*keyMgtClient.getApplicationAccessKey(workflowDTO.getUserName(),workflowDTO.getApplication().getName(),
+                                                 workflowDTO.getKeyType(),workflowDTO.getCallbackUrl(),
+                                                 workflowDTO.getAllowedDomains(),
+                                                 Long.toString(workflowDTO.getValidityTime()),
+                                                 (String)oAuthApplication.getParameter("tokenScope"));
+                                                 */
+
+
             AccessTokenRequest tokenRequest = ApplicationUtils.createAccessTokenRequest(oAuthApplication,null);
             AccessTokenInfo tokenInfo = keyManager.getNewApplicationAccessToken(tokenRequest);
 
+            /*
             AccessTokenInfo info = TokenMgtDao.getAccessTokenForConsumerId(tokenRequest.getClientId());
             if (info == null) {
                 TokenMgtDao.insertAccessTokenForConsumerKey(tokenRequest.getClientId(), tokenInfo);
             } else {
                 TokenMgtDao.updateTokenForConsumerKey(tokenRequest.getClientId(), tokenInfo);
             }
+            */
             workflowDTO.setAccessTokenInfo(tokenInfo);
-        } catch (APIManagementException e) {
 
+        } catch (Exception e) {
             APIUtil.handleException("Error occurred while executing SubscriberKeyMgtClient.", e);
+            e.printStackTrace();
         }
     }
 
