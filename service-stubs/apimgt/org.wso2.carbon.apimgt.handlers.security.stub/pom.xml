@@ -27,7 +27,7 @@
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
-    <version>4.4.0</version>
+    <version>${apimgt.handlers.security.stub.version}</version>
     <artifactId>org.wso2.carbon.apimgt.handlers.security.stub</artifactId>
     <packaging>bundle</packaging>
     <name>WSO2 Carbon - API Security Handler Service Stub</name>

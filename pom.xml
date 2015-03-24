@@ -662,8 +662,8 @@
         <apimgt.startup.publisher.version>1.2.5-SNAPSHOT</apimgt.startup.publisher.version>
         <apimgt.usage.client>1.2.5-SNAPSHOT</apimgt.usage.client>
         <apimgt.usage.publisher>1.2.5-SNAPSHOT</apimgt.usage.publisher>
-        <apimgt.keymgt.stub.version>4.4.0-SNAPSHOT</apimgt.keymgt.stub.version>
-        <apimgt.handlers.security.stub.version>4.4.0</apimgt.handlers.security.stub.version>
+        <apimgt.keymgt.stub.version>4.3.0-SNAPSHOT</apimgt.keymgt.stub.version>
+        <apimgt.handlers.security.stub.version>4.3.0</apimgt.handlers.security.stub.version>
         <carbon.forum.version>1.2.5-SNAPSHOT</carbon.forum.version>
         <carbon.forum.feature.version>1.2.5-SNAPSHOT</carbon.forum.feature.version>
         <carbon.forum.server.feature.version>1.2.5-SNAPSHOT</carbon.forum.server.feature.version>
