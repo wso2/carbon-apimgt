@@ -1477,19 +1477,19 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 
         String callBackURL = null;
 
-//        OauthAppRequest oauthAppRequest = ApplicationUtils.createOauthAppRequest(applicationName, callBackURL,
-//                                                                                  jsonString);
-//
-//        KeyManager keyManager = KeyManagerFactory.getKeyManager();
-//        //createApplication on oAuthorization server.
-//        OAuthApplicationInfo oAuthApplication = keyManager.createSemiManualAuthApplication(oauthAppRequest);
-//        //Do application mapping with consumerKey.
-//        apiMgtDAO.createApplicationKeyTypeMappingForManualClients(oauthAppRequest, applicationName, userName, clientId);
-//
-//
-//        AccessTokenRequest tokenRequest = ApplicationUtils.createAccessTokenRequest(oAuthApplication,null);
-//        AccessTokenInfo tokenInfo = keyManager.getNewApplicationAccessToken(tokenRequest);
-//
+        OauthAppRequest oauthAppRequest = ApplicationUtils.createOauthAppRequest(applicationName, callBackURL,null,
+                                                                                  jsonString);
+
+        KeyManager keyManager = KeyManagerFactory.getKeyManager();
+        //createApplication on oAuthorization server.
+        OAuthApplicationInfo oAuthApplication = keyManager.createSemiManualAuthApplication(oauthAppRequest);
+        //Do application mapping with consumerKey.
+        apiMgtDAO.createApplicationKeyTypeMappingForManualClients(oauthAppRequest, applicationName, userName, clientId);
+
+
+        AccessTokenRequest tokenRequest = ApplicationUtils.createAccessTokenRequest(oAuthApplication,null);
+        AccessTokenInfo tokenInfo = keyManager.getNewApplicationAccessToken(tokenRequest);
+
 //        AccessTokenInfo info = TokenMgtDao.getAccessTokenForConsumerId(tokenRequest.getClientId());
 //        if (info == null) {
 //            TokenMgtDao.insertAccessTokenForConsumerKey(tokenRequest.getClientId(), tokenInfo);
@@ -1500,11 +1500,16 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 
         //#TODO get actuall values from response and pass.
         Map<String, Object> keyDetails = new HashMap<String, Object>();
-        keyDetails.put("validityTime", "3600");
-        keyDetails.put("accessToken", "NULL");
-        keyDetails.put("consumerKey", "NULL");
-        keyDetails.put("consumerSecret", "NULL");
-        keyDetails.put("validityTime", "3600");
+
+        if(tokenInfo != null){
+            keyDetails.put("validityTime", Long.toString(tokenInfo.getValidityPeriod()));
+            keyDetails.put("accessToken", tokenInfo.getAccessToken());
+        }
+
+        if(oAuthApplication != null){
+            keyDetails.put("consumerKey", oAuthApplication.getClientId());
+            keyDetails.put("consumerSecret", oAuthApplication.getParameter("client_secret"));
+        }
 
         return null;
 
