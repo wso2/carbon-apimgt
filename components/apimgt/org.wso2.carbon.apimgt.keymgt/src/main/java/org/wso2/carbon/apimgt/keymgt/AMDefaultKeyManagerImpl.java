@@ -57,9 +57,7 @@ import org.wso2.carbon.apimgt.keymgt.stub.types.carbon.ApplicationKeysDTO;
 
 import javax.xml.stream.XMLStreamException;
 import java.io.ByteArrayInputStream;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 
 /**
  * This class holds the key manager implementation considering WSO2 as the identity provider
@@ -85,6 +83,10 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
         String userId = (String)oAuthApplicationInfo.getParameter(ApplicationConstants.
                 OAUTH_CLIENT_USERNAME);
         String applicationName = oAuthApplicationInfo.getClientName();
+
+        if (log.isDebugEnabled()) {
+            log.debug("Trying to create OAuth application :" + applicationName);
+        }
 
         String callBackURL = "";
         if(oAuthApplicationInfo.getParameter("callback_url") != null){
@@ -126,27 +128,8 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
 
     @Override
     public OAuthApplicationInfo updateApplication(OauthAppRequest appInfoDTO) throws APIManagementException {
-        OAuthAdminClient oAuthAdminClient = APIUtil.getOauthAdminClient();
-        OAuthConsumerAppDTO oAuthConsumerAppDTO = getOAuthConsumerAppDTOFromAppInfo(appInfoDTO);
-        String oAuthAppName = (String) appInfoDTO.getoAuthApplicationInfo().getParameter(ApplicationConstants.
-                OAUTH_CLIENT_NAME);
-        String username = (String) appInfoDTO.getoAuthApplicationInfo().getParameter(ApplicationConstants.
-                OAUTH_CLIENT_USERNAME);
-
-        try {
-            oAuthAdminClient.updateOAuthApplicationData(oAuthConsumerAppDTO, username);
-        } catch (Exception e) {
-            handleException("Can not update OAuth application : " + oAuthAppName, e);
-        }
-
-        try {
-            oAuthConsumerAppDTO = oAuthAdminClient.
-                    getOAuthApplicationDataByAppName(oAuthAppName, username);
-        } catch (Exception e) {
-            handleException("Can not retrieve updated OAuth application : " + oAuthAppName, e);
-        }
-
-        return createOAuthAppFromResponse(oAuthConsumerAppDTO);
+        // TO DO
+        return null;
 
     }
 
@@ -154,58 +137,49 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
     @Override
     public void deleteApplication(String consumerKey) throws APIManagementException {
 
-        OAuthAdminClient oAuthAdminClient = APIUtil.getOauthAdminClient();
-        String username = ApiMgtDAO.getUserFromOauthToken(consumerKey);
+        SubscriberKeyMgtClient keyMgtClient = APIUtil.getKeyManagementClient();
 
-        ApplicationManagementServiceClient applicationManagementServiceClient = APIUtil.
-                getApplicationManagementServiceClient();
-        OAuthConsumerAppDTO oAuthConsumerAppDTO = new OAuthConsumerAppDTO();
-        String serviceProviderApplicationName = null;
-        try {
-            oAuthConsumerAppDTO = oAuthAdminClient.getOAuthApplicationData(consumerKey, username);
-            serviceProviderApplicationName = oAuthConsumerAppDTO.getApplicationName();
-        } catch (Exception e) {
-            handleException("Something wrong while get OAuth Application data for the given consumer key : " +
-                    consumerKey, e);
+        if (log.isDebugEnabled()) {
+            log.debug("Trying to delete OAuth application for consumer key :" + consumerKey);
         }
-        if (serviceProviderApplicationName != null) {
-            if (serviceProviderApplicationName.endsWith("_PRODUCTION") ||
-                    serviceProviderApplicationName.endsWith("_SANDBOX")) {
-
-                if (log.isDebugEnabled()) {
-                    log.debug("Trying to delete apim created service provider.");
-                }
-
-                try {
-                    applicationManagementServiceClient.deleteApplication(serviceProviderApplicationName, username);
-                } catch (Exception e) {
-                    handleException("Can not remove service provider for the given consumer key : " + consumerKey, e);
-                }
-            }
-        }
-
 
         try {
-            oAuthAdminClient.removeOAuthApplicationData(consumerKey, username);
+            keyMgtClient.deleteOAuthApplication(consumerKey);
         } catch (Exception e) {
-            handleException("Can not remove OAuth application for the given consumer key : " + consumerKey, e);
+            handleException("Can not remove service provider for the given consumer key : " + consumerKey, e);
         }
-
     }
 
     @Override
     public OAuthApplicationInfo retrieveApplication(String consumerKey) throws APIManagementException {
-        OAuthAdminClient oAuthAdminClient = APIUtil.getOauthAdminClient();
-        OAuthConsumerAppDTO oAuthConsumerAppDTO = new OAuthConsumerAppDTO();
+        SubscriberKeyMgtClient keyMgtClient = APIUtil.getKeyManagementClient();
 
-        String username = ApiMgtDAO.getUserFromOauthToken(consumerKey);
-        try {
-            oAuthConsumerAppDTO = oAuthAdminClient.getOAuthApplicationData(consumerKey, username);
-        } catch (Exception e) {
-            handleException("Can not retrieve OAuth application information from given key: " + consumerKey, e);
+        if (log.isDebugEnabled()) {
+            log.debug("Trying to retrieve OAuth application for consumer key :" + consumerKey);
         }
 
-        return createOAuthAppFromResponse(oAuthConsumerAppDTO);
+        OAuthApplicationInfo oAuthApplicationInfo = new OAuthApplicationInfo();
+        try {
+            org.wso2.carbon.apimgt.api.model.xsd.OAuthApplicationInfo info = keyMgtClient.
+                    getOAuthApplication(consumerKey);
+            oAuthApplicationInfo.setClientName(info.getClientName());
+            oAuthApplicationInfo.setClientId(info.getClientId());
+            oAuthApplicationInfo.setCallBackURL(info.getCallBackURL());
+
+            JSONObject jsonObject  = new JSONObject(info.getJsonString());
+            oAuthApplicationInfo.addParameter(ApplicationConstants.
+                    OAUTH_CLIENT_SECRET, jsonObject.get(ApplicationConstants.OAUTH_CLIENT_SECRET));
+            oAuthApplicationInfo.addParameter(ApplicationConstants.
+                    OAUTH_REDIRECT_URIS, jsonObject.get(ApplicationConstants.OAUTH_REDIRECT_URIS));
+            oAuthApplicationInfo.addParameter(ApplicationConstants.
+                    OAUTH_CLIENT_NAME, jsonObject.get(ApplicationConstants.OAUTH_CLIENT_NAME));
+            oAuthApplicationInfo.addParameter(ApplicationConstants.
+                    OAUTH_CLIENT_GRANT, jsonObject.get(ApplicationConstants.OAUTH_CLIENT_GRANT));
+
+        } catch (Exception e) {
+            handleException("Can not retrieve OAuth application for the given consumer key : " + consumerKey, e);
+        }
+        return oAuthApplicationInfo;
     }
 
     @Override
