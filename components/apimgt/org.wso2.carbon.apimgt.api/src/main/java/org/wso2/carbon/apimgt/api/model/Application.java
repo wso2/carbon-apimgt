@@ -36,6 +36,7 @@ public class Application {
     private String callbackUrl;
     private String description;
     private String status;
+    private String groupId;
 
     /**Holds workflow status**/
     private String applicationWorkFlowStatus; 
@@ -170,5 +171,13 @@ public class Application {
 
 	public void setApplicationWorkFlowStatus(String applicationWorkFlowStatus) {
 	    this.applicationWorkFlowStatus = applicationWorkFlowStatus;
+    }
+
+    public String getGroupId() {
+        return groupId;
+    }
+
+    public void setGroupId(String groupId) {
+        this.groupId = groupId;
     }
 }

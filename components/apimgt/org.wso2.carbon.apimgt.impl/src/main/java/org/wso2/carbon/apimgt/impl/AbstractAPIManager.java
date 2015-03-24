@@ -120,11 +120,10 @@ public abstract class AbstractAPIManager implements APIManager {
         String tagsQueryPath = RegistryConstants.QUERIES_COLLECTION_PATH + "/tag-summary";
         String latestAPIsQueryPath = RegistryConstants.QUERIES_COLLECTION_PATH + "/latest-apis";
         String resourcesByTag = RegistryConstants.QUERIES_COLLECTION_PATH + "/resource-by-tag";
-        String path =
-                      RegistryUtils.getAbsolutePath(RegistryContext.getBaseInstance(),
+        String path = RegistryUtils.getAbsolutePath(RegistryContext.getBaseInstance(),
                                                     APIUtil.getMountedPath(RegistryContext.getBaseInstance(),
                                                                            RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH) +
-                                                            "/repository/components/org.wso2.carbon.governance");
+                                                    APIConstants.GOVERNANCE_COMPONENT_REGISTRY_LOCATION);
         if (username == null) {
             try {
                 UserRealm realm = ServiceReferenceHolder.getUserRealm();
@@ -155,11 +154,9 @@ public abstract class AbstractAPIManager implements APIManager {
             //'MOCK_PATH' used to bypass ChrootWrapper -> filterSearchResult. A valid registry path is
             // a must for executeQuery results to be passed to client side
             String sql1 =
-                    "SELECT  " +
-                                  "   '" +
-                                  APIUtil.getMountedPath(RegistryContext.getBaseInstance(),
-                                                         RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH) +
-                                  "/repository/components/org.wso2.carbon.governance' AS MOCK_PATH, " +
+                    "SELECT '" + APIUtil.getMountedPath(RegistryContext.getBaseInstance(),
+                                                        RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH) +
+                    APIConstants.GOVERNANCE_COMPONENT_REGISTRY_LOCATION + "' AS MOCK_PATH, " +
                     "   RT.REG_TAG_NAME AS TAG_NAME, " +
                     "   COUNT(RT.REG_TAG_NAME) AS USED_COUNT " +
                     "FROM " +
@@ -223,11 +220,9 @@ public abstract class AbstractAPIManager implements APIManager {
         if(!registry.resourceExists(resourcesByTag)){
             Resource resource = registry.newResource();
             String sql =
-                    "SELECT " +
-                                 "   '" +
-                                 APIUtil.getMountedPath(RegistryContext.getBaseInstance(),
+                    "SELECT '" + APIUtil.getMountedPath(RegistryContext.getBaseInstance(),
                                                         RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH) +
-                                 "/repository/components/org.wso2.carbon.governance' AS MOCK_PATH, " +
+                    APIConstants.GOVERNANCE_COMPONENT_REGISTRY_LOCATION + "' AS MOCK_PATH, " +
                     "   R.REG_UUID AS REG_UUID " +
                     "FROM " +
                     "   REG_RESOURCE_TAG RRT, " +
@@ -235,7 +230,7 @@ public abstract class AbstractAPIManager implements APIManager {
                     "   REG_RESOURCE R, " +
                     "   REG_PATH RP " +
                     "WHERE " +
-                    "   RT.REG_TAG_NAME = ? "+
+                    "   RT.REG_TAG_NAME = ? " +
                     "   AND R.REG_MEDIA_TYPE = 'application/vnd.wso2-api+xml' " +
                     "   AND RP.REG_PATH_ID = R.REG_PATH_ID " +
                     "   AND RT.REG_ID = RRT.REG_TAG_ID " +

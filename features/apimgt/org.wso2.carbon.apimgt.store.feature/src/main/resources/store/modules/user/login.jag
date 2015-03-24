@@ -32,9 +32,15 @@ var login = function (username, password,tenantMode) {
             message:message
         };
     }
+    var groupId = store.getGroupIds(stringify(result));
+    if(groupId == null){
+     //Set group Id to empty string to avoid null value being passed to backend.
+    	groupId="";
+    }
+    session.put("groupId", groupId);
     var subscriber = store.getSubscriber(username);
     if (!subscriber) {
-        store.addSubscriber(username);
+        store.addSubscriber(username, groupId);
         subscriber = store.getSubscriber(username);
     }
     cookie = result.sessionId;

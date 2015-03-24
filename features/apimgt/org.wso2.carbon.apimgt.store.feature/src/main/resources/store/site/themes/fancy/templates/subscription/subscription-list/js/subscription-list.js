@@ -96,6 +96,7 @@ $(document).ready(function () {
         var link;
         var userName = elem.attr("data-username");
         var validityTime;
+        var applicationId=$('option:selected','#appListSelected').attr('appId');
         if (keyType == 'PRODUCTION') {
             authoDomains = $('#allowedDomainsPro').val();
             validityTime = $('#refreshProdValidityTime').val();
@@ -114,6 +115,7 @@ $(document).ready(function () {
 	    var tokenScope = $('#scopeInput').val();
 
         jagg.post("/site/blocks/subscription/subscription-add/ajax/subscription-add.jag", {
+
             action: "generateApplicationKey",
             application: elem.attr("data-application"),
             keytype: elem.attr("data-keytype"),
@@ -121,7 +123,9 @@ $(document).ready(function () {
             authorizedDomains: authoDomains,
             validityTime: validityTime,
             tokenScope:tokenScope,
+	    selectedAppID:applicationId,
             jsonParams: JSON.stringify(oJsonParams)
+
         }, function (result) {
             if (!result.error) {
                 location.reload();
@@ -143,6 +147,7 @@ $(document).ready(function () {
         var link;
         var validityTime;
         var tokenScope;
+        var applicationId=$('#appListSelected').val();
         
         if (keyType == 'PRODUCTION') {
             authoDomains = $('#allowedDomainsPro').val();
@@ -159,7 +164,8 @@ $(document).ready(function () {
             callbackUrl:elem.attr("data-callbackUrl"),
             authorizedDomains:authoDomains,
             validityTime:validityTime,
-	    retryAfterFailure:true
+	        retryAfterFailure:true,
+            applicationId:applicationId
         }, function (result) {
             if (!result.error) {
                 location.reload();

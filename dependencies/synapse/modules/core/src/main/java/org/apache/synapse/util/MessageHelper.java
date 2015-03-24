@@ -379,7 +379,7 @@ public class MessageHelper {
         if (envelope.getBody() != null) {
             // treat the SOAPFault cloning as a special case otherwise a cloning OMElement as the
             // fault would lead to class cast exceptions if accessed through the getFault method
-            if (envelope.getBody().hasFault()) {
+            if (envelope.getBody().getFirstElement() instanceof SOAPFault && envelope.getBody().hasFault()) {
                 SOAPFault fault = envelope.getBody().getFault();
                 newEnvelope.getBody().addFault(cloneSOAPFault(fault));
             } else {

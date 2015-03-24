@@ -35,7 +35,8 @@ include("/jagg/jagg.jag");
         }
 
         mod = jagg.module("subscription");
-        result = mod.getAllSubscriptions(username,selectedApp);
+        var groupId = session.get("groupId");
+        result = mod.getAllSubscriptions(username,selectedApp, groupId);
 
         if (result.error) {
             obj = {

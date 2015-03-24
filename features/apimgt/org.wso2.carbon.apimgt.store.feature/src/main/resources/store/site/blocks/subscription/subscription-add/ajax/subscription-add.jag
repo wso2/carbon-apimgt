@@ -4,7 +4,7 @@ include("/jagg/jagg.jag");
     var site = require("/site/conf/site.json");
     var ssoEnabled = site.ssoConfiguration.enabled;
     response.contentType = "application/json; charset=UTF-8";
-    var mod, obj, name, version, provider, tier, application, applicationId, applicationName, context, result, username, accessAllowDomains,
+    var mod, obj, name, version, provider, tier, application, applicationId, tokenScope, applicationName, context, result, username, accessAllowDomains,
             user = jagg.getUser(),
             msg = require("/site/conf/ui-messages.jag"),
             action = request.getParameter("action");
@@ -188,13 +188,11 @@ include("/jagg/jagg.jag");
         var tokenScope = "default";
 
         var accessAllowDomainsArr = accessAllowDomains.split(",");
+
         var validityTime = request.getParameter("validityTime");
         var retryAfterFailure = request.getParameter("retryAfterFailure");
         var jsonParams = request.getParameter("jsonParams");
-
-
-
-
+	var applicationId=request.getParameter("selectedAppID");
 
         if (retryAfterFailure == null) {
             retryAfterFailure = false;
@@ -203,7 +201,7 @@ include("/jagg/jagg.jag");
         mod = jagg.module("subscription");
 
         result = mod.generateApplicationKey(username, application , keyType, callbackUrl, accessAllowDomainsArr,
-                validityTime, retryAfterFailure, tokenScope, jsonParams);
+                validityTime, retryAfterFailure, tokenScope,applicationId, jsonParams);
 
         if (result.error) {
             obj = {

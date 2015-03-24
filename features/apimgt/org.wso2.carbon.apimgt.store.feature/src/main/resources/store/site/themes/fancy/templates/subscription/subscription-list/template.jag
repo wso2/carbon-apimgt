@@ -22,7 +22,7 @@
         </script>
         <select id="appListSelected" class="input-large">
             <%
-                var i, j, app, selectedApp, api, apis, key,  clazz, path, totalLength = outputs.totalLength;
+                var i, j, app, selectedApp, api, apis, key,  clazz, path;
                 selectedApp = '';
             %>
             <%
@@ -30,7 +30,7 @@
             for(i = 0; i < lenI; i++) {
                 app = apps[i];
                 %>
-                <option value="<%= encode.forHtmlAttribute(app.name)%>" <%
+                <option value="<%= encode.forHtmlAttribute(app.name)%>" appId="<%= encode.forHtmlAttribute(app.id)%>" <%
                     if(request.getParameter('selectedApp') == null ){
                         if(session.get('selectedApp') == null){
                             if(i==0){ selectedApp = app; %> selected="selected" <% }
@@ -44,10 +44,11 @@
                         if(request.getParameter('selectedApp') == app.name){
                             selectedApp = app;
                             session.put('selectedApp',app.name);
+                       
                             %> selected="selected" <%
                         }
                     }
-                %>><%= encode.forHtml(app.name)%></option>
+                 %>><%= encode.forHtml(app.name)%></option>
             <% } %>
         </select>
         <%
@@ -58,7 +59,7 @@
 
                 <div class="row-fluid">
                     <div class="span12">
-                        <% jagg.includeBlock("subscription/subscription-list-element", {app:selectedApp,i:900,length:totalLength,page:outputs.page,itemsPerPage:outputs.itemsPerPage}); %>
+                        <% jagg.includeBlock("subscription/subscription-list-element", {app:selectedApp,i:900}); %>
                     </div>
                 </div>
             </div>

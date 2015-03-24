@@ -180,6 +180,11 @@ public class DeliveryAgent {
                         "Error connecting to the back end",
                         null,
                         ProtocolState.REQUEST_READY);
+                synchronized (msgCtx) {
+                    msgCtx.setProperty(PassThroughConstants.WAIT_BUILDER_IN_STREAM_COMPLETE,
+                            Boolean.TRUE);
+                    msgCtx.notifyAll();
+                }
             }
         } else {
             throw new IllegalStateException("Queue cannot be null for: " + route);
@@ -193,7 +198,7 @@ public class DeliveryAgent {
      * @param host name of the remote host
      * @param port remote port number
      */
-    public void connected(HttpRoute route) {
+    public void connected(HttpRoute route,NHttpClientConnection conn) {
         Queue<MessageContext> queue = null;
         lock.lock();
         try {
@@ -203,13 +208,16 @@ public class DeliveryAgent {
         }
 
         while (queue.size() > 0) {
-            NHttpClientConnection conn = targetConnections.getConnection(route);
+			if (conn == null) {
+				conn = targetConnections.getExistingConnection(route);
+			}
             if (conn != null) {
                 MessageContext messageContext = queue.poll();
 
                 if (messageContext != null) {
                     tryNextMessage(messageContext, route, conn);
                 }
+                conn = null;
             } else {
                 break;
             }
