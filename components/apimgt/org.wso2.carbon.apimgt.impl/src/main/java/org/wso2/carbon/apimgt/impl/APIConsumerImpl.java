@@ -592,12 +592,12 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             tokenRequest = ApplicationUtils.populateTokenRequest(jsonInput, tokenRequest);
             KeyManager keyManager = KeyManagerFactory.getKeyManager();
             AccessTokenInfo tokenResponse = keyManager.getNewApplicationAccessToken(tokenRequest);
-            AccessTokenInfo info = TokenMgtDao.getAccessTokenForConsumerId(tokenRequest.getClientId());
-            if (info == null) {
-                TokenMgtDao.insertAccessTokenForConsumerKey(tokenRequest.getClientId(), tokenResponse);
-            } else {
-                TokenMgtDao.updateTokenForConsumerKey(tokenRequest.getClientId(), tokenResponse);
-            }
+//            AccessTokenInfo info = TokenMgtDao.getAccessTokenForConsumerId(tokenRequest.getClientId());
+//            if (info == null) {
+//                TokenMgtDao.insertAccessTokenForConsumerKey(tokenRequest.getClientId(), tokenResponse);
+//            } else {
+//                TokenMgtDao.updateTokenForConsumerKey(tokenRequest.getClientId(), tokenResponse);
+//            }
 
             return tokenResponse;
 

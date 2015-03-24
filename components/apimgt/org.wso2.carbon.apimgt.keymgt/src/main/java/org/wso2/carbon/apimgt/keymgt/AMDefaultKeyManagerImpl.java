@@ -48,6 +48,8 @@ import org.wso2.carbon.apimgt.impl.clients.OAuth2TokenValidationServiceClient;
 import org.wso2.carbon.apimgt.impl.clients.OAuthAdminClient;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.apimgt.keymgt.client.SubscriberKeyMgtClient;
+import org.wso2.carbon.apimgt.keymgt.stub.types.carbon.*;
 import org.wso2.carbon.apimgt.keymgt.util.APIKeyMgtDataHolder;
 import org.wso2.carbon.apimgt.keymgt.util.APIKeyMgtUtil;
 import org.wso2.carbon.identity.application.common.model.xsd.InboundAuthenticationConfig;
@@ -55,11 +57,7 @@ import org.wso2.carbon.identity.application.common.model.xsd.InboundAuthenticati
 import org.wso2.carbon.identity.application.common.model.xsd.Property;
 import org.wso2.carbon.identity.application.common.model.xsd.ServiceProvider;
 import org.wso2.carbon.identity.oauth.stub.dto.OAuthConsumerAppDTO;
-import org.wso2.carbon.identity.oauth2.OAuth2TokenValidationService;
-import org.wso2.carbon.identity.oauth2.dto.OAuth2ClientApplicationDTO;
-import org.wso2.carbon.identity.oauth2.dto.OAuth2TokenValidationRequestDTO;
-import org.wso2.carbon.identity.oauth2.dto.OAuth2TokenValidationResponseDTO;
-import org.wso2.carbon.identity.oauth2.stub.dto.OAuth2TokenValidationRequestDTO_TokenValidationContextParam;
+import org.wso2.carbon.identity.oauth2.stub.dto.OAuth2ClientApplicationDTO;
 
 import javax.xml.stream.XMLStreamException;
 import java.io.ByteArrayInputStream;
@@ -71,91 +69,62 @@ import java.util.List;
  * This class holds the key manager implementation considering WSO2 as the identity provider
  * This is the default key manager supported by API Manager
  */
-public class DefaultKeyManagerImpl extends AbstractKeyManager {
+public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
 
     private static final String OAUTH_RESPONSE_ACCESSTOKEN = "access_token";
     private static final String OAUTH_RESPONSE_EXPIRY_TIME = "expires_in";
-    //private static final String GRANT_TYPE_VALUE = "open_keymanager";
-    private static final String GRANT_TYPE_VALUE = "client_credentials";
-    //private static final String GRANT_TYPE_PARAM_VALIDITY = "validity_period";
+    private static final String GRANT_TYPE_VALUE = "open_keymanager";
+    private static final String GRANT_TYPE_PARAM_VALIDITY = "validity_period";
 
     private KeyManagerConfiguration configuration;
 
-    private static final Log log = LogFactory.getLog(DefaultKeyManagerImpl.class);
+    private static final Log log = LogFactory.getLog(AMDefaultKeyManagerImpl.class);
 
     @Override
     public OAuthApplicationInfo createApplication(OauthAppRequest oauthAppRequest) throws APIManagementException {
-        OAuthAdminClient oAuthAdminClient = APIUtil.getOauthAdminClient();
-        ApplicationManagementServiceClient applicationManagementServiceClient = APIUtil.
-                getApplicationManagementServiceClient();
 
-        OAuthConsumerAppDTO oAuthConsumerAppDTO = new OAuthConsumerAppDTO();
+        SubscriberKeyMgtClient keyMgtClient = APIUtil.getKeyManagementClient();
 
         OAuthApplicationInfo oAuthApplicationInfo = oauthAppRequest.getoAuthApplicationInfo();
-        oAuthConsumerAppDTO.setApplicationName(oAuthApplicationInfo.getClientName());
 
-        String username = (String)oAuthApplicationInfo.getParameter(ApplicationConstants.
-                                                                            OAUTH_CLIENT_USERNAME);
-
-
+        String userId = (String)oAuthApplicationInfo.getParameter(ApplicationConstants.
+                OAUTH_CLIENT_USERNAME);
+        String applicationName = oAuthApplicationInfo.getClientName();
+        String keyType = "PRODUCTION";
+        String callBackURL = "";
         if(oAuthApplicationInfo.getParameter("callback_url") != null){
             JSONArray jsonArray = (JSONArray) oAuthApplicationInfo.getParameter("callback_url");
-            String callbackUrl = null;
-
             for (Object callbackUrlObject : jsonArray) {
-                callbackUrl = (String) callbackUrlObject;
+                callBackURL = (String) callbackUrlObject;
             }
 
-            oAuthConsumerAppDTO.setCallbackUrl(callbackUrl);
         }
 
+        String[] allowedDomains = null;
+        String validityTime = "3600";
+        String tokenScope = (String)oAuthApplicationInfo.getParameter("tokenScope");
+
+        String tokenScopes[] = new String[1];
+        tokenScopes[0]= tokenScope;
+
+        oAuthApplicationInfo.addParameter("tokenScope", tokenScopes);
+        org.wso2.carbon.apimgt.keymgt.stub.types.carbon.ApplicationKeysDTO keysDTO = null;
         try {
-            oAuthAdminClient.registerOAuthApplicationData(oAuthConsumerAppDTO,username);
-
+            keysDTO = keyMgtClient.getApplicationAccessKey(userId, applicationName, keyType, callBackURL, allowedDomains, validityTime, tokenScope);
         } catch (Exception e) {
-            handleException("OAuth application registration failed", e);
+            e.printStackTrace();
         }
 
-        try {
-            oAuthConsumerAppDTO = oAuthAdminClient.
-                    getOAuthApplicationDataByAppName(oAuthApplicationInfo.getClientName(),username);
-        } catch (Exception e) {
-            handleException("Can not retrieve registered OAuth application information ", e);
-        }
+        //set client ID.
+        Object clientId = keysDTO.getConsumerKey();
+        oAuthApplicationInfo.setClientId((String) clientId);
 
-        oAuthApplicationInfo = createOAuthAppFromResponse(oAuthConsumerAppDTO);
+        Object clientSecret = keysDTO.getConsumerSecret();
+        oAuthApplicationInfo.addParameter(ApplicationConstants.OAUTH_CLIENT_SECRET, clientSecret);
 
-        ServiceProvider serviceProvider = new ServiceProvider();
-        serviceProvider.setApplicationName((String) oAuthApplicationInfo.getParameter("client_name"));
-        serviceProvider.setDescription("Service Provider for application " + oAuthApplicationInfo.getParameter("client_name"));
+//        Object grantType = keysDTO.get
+        oAuthApplicationInfo.addParameter(ApplicationConstants.OAUTH_CLIENT_GRANT, null);
 
-
-        InboundAuthenticationConfig inboundAuthenticationConfig = new InboundAuthenticationConfig();
-        InboundAuthenticationRequestConfig[] inboundAuthenticationRequestConfigs = new
-                InboundAuthenticationRequestConfig[1];
-        InboundAuthenticationRequestConfig inboundAuthenticationRequestConfig = new
-                InboundAuthenticationRequestConfig();
-
-        inboundAuthenticationRequestConfig.setInboundAuthKey(oAuthConsumerAppDTO.getOauthConsumerKey());
-        inboundAuthenticationRequestConfig.setInboundAuthType("oauth2");
-        if (oAuthConsumerAppDTO.getOauthConsumerSecret()!= null && !oAuthConsumerAppDTO.
-                getOauthConsumerSecret().isEmpty()) {
-            Property property = new Property();
-            property.setName("oauthConsumerSecret");
-            property.setValue(oAuthConsumerAppDTO.getOauthConsumerSecret());
-            Property[] properties = {property};
-            inboundAuthenticationRequestConfig.setProperties(properties);
-        }
-
-        inboundAuthenticationRequestConfigs[0] = inboundAuthenticationRequestConfig;
-        inboundAuthenticationConfig.setInboundAuthenticationRequestConfigs(inboundAuthenticationRequestConfigs);
-        serviceProvider.setInboundAuthenticationConfig(inboundAuthenticationConfig);
-
-        try {
-            applicationManagementServiceClient.createApplication(serviceProvider, username);
-        } catch (Exception e) {
-            handleException("Service Provider creation failed", e);
-        }
 
         return oAuthApplicationInfo;
 
@@ -306,8 +275,8 @@ public class DefaultKeyManagerImpl extends AbstractKeyManager {
             HttpPost httpTokpost = new HttpPost(tokenEndpoint);
             List<NameValuePair> tokParams = new ArrayList<NameValuePair>(3);
             tokParams.add(new BasicNameValuePair(OAuth.OAUTH_GRANT_TYPE, GRANT_TYPE_VALUE));
-            //tokParams.add(new BasicNameValuePair(GRANT_TYPE_PARAM_VALIDITY,
-            //                                     Long.toString(tokenRequest.getValidityPeriod())));
+            tokParams.add(new BasicNameValuePair(GRANT_TYPE_PARAM_VALIDITY,
+                                                 Long.toString(tokenRequest.getValidityPeriod())));
             tokParams.add(new BasicNameValuePair(OAuth.OAUTH_CLIENT_ID, tokenRequest.getClientId()));
             tokParams.add(new BasicNameValuePair(OAuth.OAUTH_CLIENT_SECRET, tokenRequest.getClientSecret()));
             tokParams.add(new BasicNameValuePair("scope", applicationScope));
@@ -343,7 +312,7 @@ public class DefaultKeyManagerImpl extends AbstractKeyManager {
     public AccessTokenInfo getTokenMetaData(String accessToken) throws APIManagementException {
 
         AccessTokenInfo tokenInfo = new AccessTokenInfo();
-/*
+
         OAuth2ClientApplicationDTO oAuth2ClientApplicationDTO;
         OAuth2TokenValidationServiceClient oAuth2TokenValidationServiceClient = new
                 OAuth2TokenValidationServiceClient();
@@ -351,41 +320,18 @@ public class DefaultKeyManagerImpl extends AbstractKeyManager {
                 validateAuthenticationRequest(accessToken);
         org.wso2.carbon.identity.oauth2.stub.dto.OAuth2TokenValidationResponseDTO oAuth2TokenValidationResponseDTO = oAuth2ClientApplicationDTO.
                 getAccessTokenValidationResponse();
-*/
-        OAuth2TokenValidationService oAuth2TokenValidationService = new OAuth2TokenValidationService();
-        OAuth2TokenValidationRequestDTO requestDTO = new OAuth2TokenValidationRequestDTO();
-        OAuth2TokenValidationRequestDTO.OAuth2AccessToken token = requestDTO. new OAuth2AccessToken();
 
-        token.setIdentifier(accessToken);
-        token.setTokenType("bearer");
-        requestDTO.setAccessToken(token);
-
-        //TODO: If these values are not set, validation will fail giving an NPE. Need to see why that happens
-        OAuth2TokenValidationRequestDTO.TokenValidationContextParam contextParam = requestDTO. new
-                TokenValidationContextParam();
-        contextParam.setKey("dummy");
-        contextParam.setValue("dummy");
-
-        OAuth2TokenValidationRequestDTO.TokenValidationContextParam[] contextParams =
-                new OAuth2TokenValidationRequestDTO.TokenValidationContextParam[1];
-        contextParams[0] = contextParam;
-        requestDTO.setContext(contextParams);
-
-        OAuth2ClientApplicationDTO clientApplicationDTO = oAuth2TokenValidationService.findOAuthConsumerIfTokenIsValid
-                (requestDTO);
-        OAuth2TokenValidationResponseDTO responseDTO = clientApplicationDTO.getAccessTokenValidationResponse();
-
-        if (!responseDTO.isValid()) {
-            log.error("Invalid OAuth Token : "+responseDTO.getErrorMsg());
-            throw new APIManagementException("Invalid OAuth Token : "+responseDTO.getErrorMsg());
+        if (!oAuth2TokenValidationResponseDTO.getValid()) {
+            log.error("Invalid OAuth Token : "+oAuth2TokenValidationResponseDTO.getErrorMsg());
+            throw new APIManagementException("Invalid OAuth Token : "+oAuth2TokenValidationResponseDTO.getErrorMsg());
         }
 
-        tokenInfo.setTokenValid(responseDTO.isValid());
-        tokenInfo.setEndUserName(responseDTO.getAuthorizedUser());
-        tokenInfo.setConsumerKey(clientApplicationDTO.getConsumerKey());
-        tokenInfo.setValidityPeriod(responseDTO.getExpiryTime());
+        tokenInfo.setTokenValid(oAuth2TokenValidationResponseDTO.getValid());
+        tokenInfo.setEndUserName(oAuth2TokenValidationResponseDTO.getAuthorizedUser());
+        tokenInfo.setConsumerKey(oAuth2ClientApplicationDTO.getConsumerKey());
+        tokenInfo.setValidityPeriod(oAuth2TokenValidationResponseDTO.getExpiryTime());
         tokenInfo.setIssuedTime(System.currentTimeMillis());
-        tokenInfo.setScope(responseDTO.getScope());
+        tokenInfo.setScope(oAuth2TokenValidationResponseDTO.getScope());
 
         if(APIUtil.checkAccessTokenPartitioningEnabled() &&
            APIUtil.checkUserNameAssertionEnabled()){
@@ -410,7 +356,7 @@ public class DefaultKeyManagerImpl extends AbstractKeyManager {
      *
      * @param appInfoRequest oAuth application properties will contain in this object
      * @return OAuthApplicationInfo with created oAuth application details.
-     * @throws APIManagementException
+     * @throws org.wso2.carbon.apimgt.api.APIManagementException
      */
     @Override
     public OAuthApplicationInfo createSemiManualAuthApplication(OauthAppRequest appInfoRequest)
@@ -459,7 +405,7 @@ public class DefaultKeyManagerImpl extends AbstractKeyManager {
      *
      * @param msg this parameter contain error message that we need to throw.
      * @param e   Exception object.
-     * @throws APIManagementException
+     * @throws org.wso2.carbon.apimgt.api.APIManagementException
      */
     private void handleException(String msg, Exception e) throws APIManagementException {
         log.error(msg, e);
