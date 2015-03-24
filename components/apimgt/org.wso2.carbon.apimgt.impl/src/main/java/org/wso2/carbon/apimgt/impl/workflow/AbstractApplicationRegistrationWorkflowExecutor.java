@@ -115,7 +115,11 @@ public abstract class AbstractApplicationRegistrationWorkflowExecutor extends Wo
      */
     protected void generateKeysForApplication(ApplicationRegistrationWorkflowDTO workflowDTO) throws
             APIManagementException {
-        dogenerateKeysForApplication(workflowDTO);
+        if(WorkflowStatus.APPROVED.equals(workflowDTO.getStatus())) {
+            dogenerateKeysForApplication(workflowDTO);
+            dao.updateApplicationRegistration(APIConstants.AppRegistrationStatus.REGISTRATION_COMPLETED,
+                                              workflowDTO.getKeyType(),workflowDTO.getApplication().getId());
+        }
     }
 
     public static void dogenerateKeysForApplication(ApplicationRegistrationWorkflowDTO workflowDTO) throws
