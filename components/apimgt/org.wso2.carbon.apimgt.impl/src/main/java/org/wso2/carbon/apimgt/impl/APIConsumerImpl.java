@@ -184,36 +184,26 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     private Set<API> getAPIsWithTag(Registry registry, String tag)
             throws APIManagementException {
         Set<API> apiSet = new TreeSet<API>(new APINameComparator());
-        boolean isTenantFlowStarted = false;
         try {
-        	if(tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)){
-        		isTenantFlowStarted = true;
-                PrivilegedCarbonContext.startTenantFlow();
-                PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
-        	}
             String resourceByTagQueryPath = RegistryConstants.QUERIES_COLLECTION_PATH + "/resource-by-tag";
             Map<String, String> params = new HashMap<String, String>();
             params.put("1", tag);
             params.put(RegistryConstants.RESULT_TYPE_PROPERTY_NAME, RegistryConstants.RESOURCE_UUID_RESULT_TYPE);
             Collection collection = registry.executeQuery(resourceByTagQueryPath, params);
 
-            GenericArtifactManager artifactManager = APIUtil.getArtifactManager(registry,
-                    APIConstants.API_KEY);
+            GenericArtifactManager artifactManager = APIUtil.getArtifactManager(registry, APIConstants.API_KEY);
 
             for (String row : collection.getChildren()) {
                 String uuid = row.substring(row.indexOf(";") + 1, row.length());
                 GenericArtifact genericArtifact = artifactManager.getGenericArtifact(uuid);
-                if (genericArtifact != null && genericArtifact.getAttribute(APIConstants.API_OVERVIEW_STATUS).equals(APIConstants.PUBLISHED)) {
-                apiSet.add(APIUtil.getAPI(genericArtifact));
+                if (genericArtifact != null &&
+                    genericArtifact.getAttribute(APIConstants.API_OVERVIEW_STATUS).equals(APIConstants.PUBLISHED)) {
+                    apiSet.add(APIUtil.getAPI(genericArtifact));
                 }
             }
 
         } catch (RegistryException e) {
             handleException("Failed to get API for tag " + tag, e);
-        } finally {
-        	if (isTenantFlowStarted) {
-        		PrivilegedCarbonContext.endTenantFlow();
-        	}
         }
         return apiSet;
     }
@@ -931,6 +921,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         });
         Registry userRegistry = null;
         String tagsQueryPath = null;
+        boolean isTenantFlowStarted = false;
         try {
             tagsQueryPath = RegistryConstants.QUERIES_COLLECTION_PATH + "/tag-summary";
             Map<String, String> params = new HashMap<String, String>();
@@ -942,6 +933,11 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                         getRegistryService().getGovernanceUserRegistry(CarbonConstants.REGISTRY_ANONNYMOUS_USERNAME, tenantId);
             } else {
                 userRegistry = registry;
+            }
+            if (requestedTenant != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(requestedTenant)) {
+                isTenantFlowStarted = true;
+                PrivilegedCarbonContext.startTenantFlow();
+                PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(requestedTenant, true);
             }
             Collection collection = userRegistry.executeQuery(tagsQueryPath, params);
             for (String fullTag : collection.getChildren()) {
@@ -990,6 +986,10 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             handleException("Failed to get all the tags", e);
         } catch (UserStoreException e) {
             handleException("Failed to get all the tags", e);
+        } finally {
+            if (isTenantFlowStarted) {
+                PrivilegedCarbonContext.endTenantFlow();
+            }
         }
         return tagSet;
     }
