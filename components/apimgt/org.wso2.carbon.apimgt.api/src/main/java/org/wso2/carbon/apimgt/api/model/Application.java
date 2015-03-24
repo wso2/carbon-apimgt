@@ -102,19 +102,6 @@ public class Application {
         oauthApps.put(keyType, oAuthApplication);
     }
 
-    public void addOAuthApp(OAuthApplicationInfo oAuthApplication){
-   //     oauthApps.put(oAuthApplication.getKeyType(), oAuthApplication);
-    }
-
-    public void updateAssociateOAuthApp(String keyType, OAuthApplicationInfo oAuthApplication){
-
-    }
-
-    public void updateAssociateOAuthApp(OAuthApplicationInfo oAuthApplication){
-
-    }
-
-
     public int getId() {
         return id;
     }

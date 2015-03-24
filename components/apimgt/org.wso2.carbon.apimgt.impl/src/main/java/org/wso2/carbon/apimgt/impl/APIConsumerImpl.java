@@ -1509,6 +1509,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         if(oAuthApplication != null){
             keyDetails.put("consumerKey", oAuthApplication.getClientId());
             keyDetails.put("consumerSecret", oAuthApplication.getParameter("client_secret"));
+            keyDetails.put("appDetails",oAuthApplication.getJsonString());
         }
 
         return null;
