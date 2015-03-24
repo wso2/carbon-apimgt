@@ -24,11 +24,8 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
-<<<<<<< HEAD
 import org.wso2.carbon.apimgt.api.model.OauthAppRequest;
-=======
 import org.wso2.carbon.apimgt.api.LoginPostExecutor;
->>>>>>> release-1.9.0
 import org.wso2.carbon.apimgt.api.model.*;
 import org.wso2.carbon.apimgt.api.model.Tag;
 import org.wso2.carbon.apimgt.handlers.security.stub.types.APIKeyMapping;
@@ -1893,13 +1890,14 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
      * @throws APIManagementException
      */
     @Override
-       public Map<String,String> requestApprovalForApplicationRegistration(String userId, String applicationName,
-                                                                        String tokenType, String callbackUrl,
-                                                                        String[] allowedDomains, String validityTime,
-                                                                        String tokenScope, int applicationId,String jsonString)
+       public Map<String, Object> requestApprovalForApplicationRegistration(String userId, String applicationName,
+                                                                            String tokenType, String callbackUrl,
+                                                                            String[] allowedDomains, String validityTime,
+                                                                            String tokenScope, int applicationId,
+                                                                            String jsonString)
 		    throws APIManagementException {
 
-       	Application application  = apiMgtDAO.getApplicationById(applicationId);
+
 
         boolean isTenantFlowStarted = false;
         // we should have unique names for applications. There for we will append, the word 'production' or 'sandbox'
@@ -2005,7 +2003,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         if(workflowReference != null) {
             WorkflowDTO workflowDTO = apiMgtDAO.retrieveWorkflow(workflowReference);
             if(workflowDTO != null){
-            WorkflowStatus status = workflowDTO.getStatus();
+            //WorkflowStatus status = workflowDTO.getStatus();
             ApplicationRegistrationWorkflowDTO registrationWorkflowDTO = (ApplicationRegistrationWorkflowDTO)
                     workflowDTO;
 

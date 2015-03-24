@@ -707,8 +707,8 @@ public class APIStoreHostObject extends ScriptableObject {
                 }
 
                 String jsonParams = null;
-                if(args.length == 9){
-                    jsonParams = (String) args[8];
+                if(args.length == 10){
+                    jsonParams = (String) args[9];
                 }else{
                     jsonParams = null;
                 }
@@ -737,7 +737,8 @@ public class APIStoreHostObject extends ScriptableObject {
 
                 Map<String, Object> keyDetails = getAPIConsumer(thisObj).requestApprovalForApplicationRegistration(
 		                (String) args[0], (String) args[1], (String) args[2], (String) args[3],
-		                accessAllowDomainsArray, validityPeriod, authScopeString, Integer.parseInt((String)args[7]), jsonParams);
+		                accessAllowDomainsArray, validityPeriod, authScopeString, Integer.parseInt((String)args[8]),
+                        jsonParams);
 
 
 
