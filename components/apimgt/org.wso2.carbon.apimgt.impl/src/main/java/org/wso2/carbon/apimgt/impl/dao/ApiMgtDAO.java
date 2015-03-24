@@ -41,7 +41,6 @@ import org.wso2.carbon.apimgt.impl.utils.ApplicationUtils;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowConstants;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowExecutorFactory;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowStatus;
-import org.wso2.carbon.apimgt.keymgt.stub.types.carbon.ApplicationKeysDTO;
 import org.wso2.carbon.core.util.CryptoException;
 import org.wso2.carbon.apimgt.impl.utils.APIVersionComparator;
 import org.wso2.carbon.apimgt.impl.utils.LRUCache;
@@ -51,6 +50,7 @@ import org.wso2.carbon.identity.core.util.IdentityDatabaseUtil;
 import org.wso2.carbon.identity.core.util.IdentityUtil;
 import org.wso2.carbon.identity.oauth.IdentityOAuthAdminException;
 import org.wso2.carbon.identity.oauth.OAuthUtil;
+import org.wso2.carbon.identity.oauth.common.OAuthConstants;
 import org.wso2.carbon.identity.oauth.config.OAuthServerConfiguration;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 import org.wso2.carbon.apimgt.api.model.Comment;
@@ -3661,10 +3661,13 @@ public class ApiMgtDAO {
                 " (ACCESS_TOKEN, REFRESH_TOKEN, CONSUMER_KEY, TOKEN_STATE, TOKEN_SCOPE," +
                 " AUTHZ_USER, USER_TYPE, TIME_CREATED, VALIDITY_PERIOD)  VALUES (?,?,?,?,?,?,?,?,?)";
 
-        String addApplicationKeyMapping = "UPDATE " +
-                                          "AM_APPLICATION_KEY_MAPPING SET " +
-                                          "CONSUMER_KEY = ?, STATE =? " +
-                                          "WHERE APPLICATION_ID = ? AND KEY_TYPE = ?";
+//        ///////////////////////////
+//
+//        ////
+//        String addApplicationKeyMapping = "UPDATE " +
+//                                          "AM_APPLICATION_KEY_MAPPING SET " +
+//                                          "CONSUMER_KEY = ?, STATE =? " +
+//                                          "WHERE APPLICATION_ID = ? AND KEY_TYPE = ?";
 
         String sqlAddAccessAllowDomains = "INSERT" +
                                           " INTO AM_APP_KEY_DOMAIN_MAPPING (CONSUMER_KEY, AUTHZ_DOMAIN) " +
@@ -3701,29 +3704,29 @@ public class ApiMgtDAO {
             prepStmt.execute();
             prepStmt.close();
 
-            prepStmt = connection.prepareStatement(addApplicationKeyMapping);
-            prepStmt.setString(1, consumerKey);
-            prepStmt.setString(2, APIConstants.AppRegistrationStatus.REGISTRATION_COMPLETED);
-            prepStmt.setInt(3, appId);
-            prepStmt.setString(4, keyType);
-            prepStmt.execute();
-            prepStmt.close();
+//            prepStmt = connection.prepareStatement(addApplicationKeyMapping);
+//            prepStmt.setString(1, consumerKey);
+//            prepStmt.setString(2, APIConstants.AppRegistrationStatus.REGISTRATION_COMPLETED);
+//            prepStmt.setInt(3, appId);
+//            prepStmt.setString(4, keyType);
+//            prepStmt.execute();
+//            prepStmt.close();
 
-            if (accessAllowDomains != null && !accessAllowDomains[0].trim().equals("")) {
-                for (int i = 0; i < accessAllowDomains.length; i++) {
-                    prepStmt = connection.prepareStatement(sqlAddAccessAllowDomains);
-                    prepStmt.setString(1, consumerKey);
-                    prepStmt.setString(2, accessAllowDomains[i].trim());
-                    prepStmt.execute();
-                    prepStmt.close();
-                }
-            } else {
-                prepStmt = connection.prepareStatement(sqlAddAccessAllowDomains);
-                prepStmt.setString(1, consumerKey);
-                prepStmt.setString(2, "ALL");
-                prepStmt.execute();
-                prepStmt.close();
-            }
+//            if (accessAllowDomains != null && !accessAllowDomains[0].trim().equals("")) {
+//                for (int i = 0; i < accessAllowDomains.length; i++) {
+//                    prepStmt = connection.prepareStatement(sqlAddAccessAllowDomains);
+//                    prepStmt.setString(1, consumerKey);
+//                    prepStmt.setString(2, accessAllowDomains[i].trim());
+//                    prepStmt.execute();
+//                    prepStmt.close();
+//                }
+//            } else {
+//                prepStmt = connection.prepareStatement(sqlAddAccessAllowDomains);
+//                prepStmt.setString(1, consumerKey);
+//                prepStmt.setString(2, "ALL");
+//                prepStmt.execute();
+//                prepStmt.close();
+//            }
             connection.commit();
         } catch (SQLException e) {
             handleException("Error while generating the application access token for the application :"+applicationName, e);
@@ -3745,7 +3748,7 @@ public class ApiMgtDAO {
                 }
             }
         } finally {
-            IdentityDatabaseUtil.closeAllConnections(connection, null, prepStmt);
+            // IdentityDatabaseUtil.closeAllConnections(connection, null, prepStmt);
         }
         return accessToken;
     }
@@ -4198,30 +4201,30 @@ public class ApiMgtDAO {
                 consumerKey = APIUtil.encryptToken(consumerKey);
                 consumerSecret = APIUtil.encryptToken(consumerSecret);
             }
-//            } else {
-//
-//                String sqlStmt = "INSERT INTO IDN_OAUTH_CONSUMER_APPS " +
-//                                 "(CONSUMER_KEY, CONSUMER_SECRET, USERNAME, TENANT_ID, OAUTH_VERSION, APP_NAME, CALLBACK_URL) VALUES (?,?,?,?,?,?, ?) ";
-//                consumerSecret = OAuthUtil.getRandomNumber();
-//
-//                do {
-//                    consumerKey = OAuthUtil.getRandomNumber();
-//                }
-//                while (isDuplicateConsumer(consumerKey));
-//
-//                consumerKey = APIUtil.encryptToken(consumerKey);
-//                consumerSecret = APIUtil.encryptToken(consumerSecret);
-//
-//                prepStmt = connection.prepareStatement(sqlStmt);
-//                prepStmt.setString(1, consumerKey);
-//                prepStmt.setString(2, consumerSecret);
-//                prepStmt.setString(3, loginUserName.toLowerCase());
-//                prepStmt.setInt(4, tenantId);
-//                prepStmt.setString(5, OAuthConstants.OAuthVersions.VERSION_2);
-//                prepStmt.setString(6, appName);
-//                prepStmt.setString(7, callbackUrl);
-//                prepStmt.execute();
-//            }
+            else {
+
+                String sqlStmt = "INSERT INTO IDN_OAUTH_CONSUMER_APPS " +
+                                 "(CONSUMER_KEY, CONSUMER_SECRET, USERNAME, TENANT_ID, OAUTH_VERSION, APP_NAME, CALLBACK_URL) VALUES (?,?,?,?,?,?, ?) ";
+                consumerSecret = OAuthUtil.getRandomNumber();
+
+                do {
+                    consumerKey = OAuthUtil.getRandomNumber();
+                }
+                while (isDuplicateConsumer(consumerKey));
+
+                consumerKey = APIUtil.encryptToken(consumerKey);
+                consumerSecret = APIUtil.encryptToken(consumerSecret);
+
+                prepStmt = connection.prepareStatement(sqlStmt);
+                prepStmt.setString(1, consumerKey);
+                prepStmt.setString(2, consumerSecret);
+                prepStmt.setString(3, loginUserName.toLowerCase());
+                prepStmt.setInt(4, tenantId);
+                prepStmt.setString(5, OAuthConstants.OAuthVersions.VERSION_2);
+                prepStmt.setString(6, appName);
+                prepStmt.setString(7, callbackUrl);
+                prepStmt.execute();
+            }
 
             connection.commit();
 
