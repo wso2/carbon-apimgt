@@ -53,6 +53,7 @@ import org.wso2.carbon.identity.oauth.cache.CacheKey;
 import org.wso2.carbon.identity.oauth.cache.OAuthCache;
 import org.wso2.carbon.identity.oauth.cache.OAuthCacheKey;
 import org.wso2.carbon.identity.oauth.config.OAuthServerConfiguration;
+import org.wso2.carbon.identity.oauth2.IdentityOAuth2Exception;
 import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.utils.CarbonUtils;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
@@ -105,6 +106,45 @@ public class APIKeyMgtSubscriberService extends AbstractAdmin {
     }
 
     /**
+     * Register an OAuth application for the given user
+     * @param userId
+     * @param applicationName
+     * @param callbackUrl
+     * @return
+     * @throws APIKeyMgtException
+     * @throws APIManagementException
+     * @throws IdentityException
+     */
+    public ApplicationKeysDTO createOAuthApplication(String userId, String applicationName, String callbackUrl)
+            throws APIKeyMgtException, APIManagementException, IdentityException {
+
+        ApiMgtDAO apiMgtDAO = new ApiMgtDAO();
+
+        OAuthApplicationInfo oAuthApplicationInfo = null;
+
+
+        String tenantAwareUserId = userId;
+        int tenantId;
+
+        try {
+            tenantId = IdentityUtil.getTenantIdOFUser(userId);
+        } catch (IdentityException e) {
+            throw new IdentityOAuth2Exception(e.getMessage(), e);
+        }
+
+
+        String credentials[] = apiMgtDAO.addOAuthConsumer(tenantAwareUserId, tenantId, applicationName, callbackUrl);
+
+        String consumerKey = credentials[0];
+
+        ApplicationKeysDTO keys = new ApplicationKeysDTO();
+        keys.setConsumerKey(consumerKey);
+        keys.setConsumerSecret(credentials[1]);
+        return keys;
+
+    }
+
+    /**
      * Get the access token for the specified application. This token can be used as an OAuth
      * 2.0 bearer token to access any API in the given application.
      *
@@ -123,23 +163,44 @@ public class APIKeyMgtSubscriberService extends AbstractAdmin {
         ApiMgtDAO apiMgtDAO = new ApiMgtDAO();
 
         OAuthApplicationInfo oAuthApplicationInfo = null;
+        String accessToken = apiMgtDAO.getAccessKeyForApplication(userId, applicationName, tokenType);
 
+        Application application = apiMgtDAO.getApplicationByName(applicationName, userId);
+        oAuthApplicationInfo = apiMgtDAO.getProductionClientOfApplication(application.getId(), tokenType);
+        if (oAuthApplicationInfo == null) {
+            throw new APIKeyMgtException("Unable to locate oAuth Application");
+        } else {
+            if (oAuthApplicationInfo.getClientId() == null) {
+                throw new APIKeyMgtException("Consumer key value is null can not get application access token");
+            } else if (oAuthApplicationInfo.getParameter("client_secret") == null) {
+                throw new APIKeyMgtException("Consumer secret value is null can not get application access token");
 
-        String tenantAwareUserId = userId;
-        String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(userId));
-        RealmService realmService = ServiceReferenceHolder.getInstance().getRealmService();
-        int tenantId = -1234;
+            }
 
-        String credentials[] = apiMgtDAO.addOAuthConsumer(tenantAwareUserId, tenantId, applicationName, callbackUrl);
+            String consumerKey = oAuthApplicationInfo.getClientId();
+            String consumerSecret = (String) oAuthApplicationInfo.getParameter("client_secret");
+            if (accessToken == null) {
+                //get the tenant id for the corresponding domain
+                String tenantAwareUserId = userId;
 
-        String consumerKey = credentials[0];
+                String state = apiMgtDAO.getRegistrationApprovalState(application.getId(), tokenType);
+                if (APIConstants.AppRegistrationStatus.REGISTRATION_APPROVED.equals(state)) {
+                    //credentials = apiMgtDAO.addOAuthConsumer(tenantAwareUserId, tenantId, applicationName, callbackUrl);
 
-        ApplicationKeysDTO keys = new ApplicationKeysDTO();
-        //keys.setApplicationAccessToken(accessToken);
-        keys.setConsumerKey(consumerKey);
-        keys.setConsumerSecret(credentials[1]);
-        //keys.setValidityTime(validityTime);
-        return keys;
+                    accessToken = apiMgtDAO.registerApplicationAccessToken(oAuthApplicationInfo.getClientId(), application.getId(),
+                            applicationName,
+                            tenantAwareUserId, tokenType, allowedDomains, validityTime,tokenScope);
+                }
+
+            }
+
+            ApplicationKeysDTO keys = new ApplicationKeysDTO();
+            keys.setApplicationAccessToken(accessToken);
+            keys.setConsumerKey(consumerKey);
+            keys.setConsumerSecret(consumerSecret);
+            keys.setValidityTime(validityTime);
+            return keys;
+        }
 
     }
 

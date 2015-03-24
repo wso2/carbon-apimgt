@@ -49,15 +49,11 @@ import org.wso2.carbon.apimgt.impl.clients.OAuthAdminClient;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.keymgt.client.SubscriberKeyMgtClient;
-import org.wso2.carbon.apimgt.keymgt.stub.types.carbon.*;
 import org.wso2.carbon.apimgt.keymgt.util.APIKeyMgtDataHolder;
 import org.wso2.carbon.apimgt.keymgt.util.APIKeyMgtUtil;
-import org.wso2.carbon.identity.application.common.model.xsd.InboundAuthenticationConfig;
-import org.wso2.carbon.identity.application.common.model.xsd.InboundAuthenticationRequestConfig;
-import org.wso2.carbon.identity.application.common.model.xsd.Property;
-import org.wso2.carbon.identity.application.common.model.xsd.ServiceProvider;
 import org.wso2.carbon.identity.oauth.stub.dto.OAuthConsumerAppDTO;
 import org.wso2.carbon.identity.oauth2.stub.dto.OAuth2ClientApplicationDTO;
+import org.wso2.carbon.apimgt.keymgt.stub.types.carbon.ApplicationKeysDTO;
 
 import javax.xml.stream.XMLStreamException;
 import java.io.ByteArrayInputStream;
@@ -84,35 +80,35 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
     public OAuthApplicationInfo createApplication(OauthAppRequest oauthAppRequest) throws APIManagementException {
 
         SubscriberKeyMgtClient keyMgtClient = APIUtil.getKeyManagementClient();
-
         OAuthApplicationInfo oAuthApplicationInfo = oauthAppRequest.getoAuthApplicationInfo();
 
         String userId = (String)oAuthApplicationInfo.getParameter(ApplicationConstants.
                 OAUTH_CLIENT_USERNAME);
         String applicationName = oAuthApplicationInfo.getClientName();
-        String keyType = "PRODUCTION";
+
         String callBackURL = "";
         if(oAuthApplicationInfo.getParameter("callback_url") != null){
             JSONArray jsonArray = (JSONArray) oAuthApplicationInfo.getParameter("callback_url");
             for (Object callbackUrlObject : jsonArray) {
                 callBackURL = (String) callbackUrlObject;
             }
-
         }
 
-        String[] allowedDomains = null;
-        String validityTime = "3600";
         String tokenScope = (String)oAuthApplicationInfo.getParameter("tokenScope");
-
         String tokenScopes[] = new String[1];
         tokenScopes[0]= tokenScope;
 
         oAuthApplicationInfo.addParameter("tokenScope", tokenScopes);
-        org.wso2.carbon.apimgt.keymgt.stub.types.carbon.ApplicationKeysDTO keysDTO = null;
+        ApplicationKeysDTO keysDTO = null;
         try {
-            keysDTO = keyMgtClient.getApplicationAccessKey(userId, applicationName, keyType, callBackURL, allowedDomains, validityTime, tokenScope);
+            keysDTO = keyMgtClient.createOAuthApplication(userId, applicationName, callBackURL);
         } catch (Exception e) {
-            e.printStackTrace();
+            handleException("Can not create OAuth application  : " + applicationName, e);
+        }
+
+        if(keysDTO == null || keysDTO.getConsumerKey() == null || keysDTO.getConsumerSecret() == null){
+            handleException("OAuth app does not contains required data  : " + applicationName,
+                    new APIManagementException("OAuth app does not contains required data"));
         }
 
         //set client ID.
@@ -122,9 +118,7 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
         Object clientSecret = keysDTO.getConsumerSecret();
         oAuthApplicationInfo.addParameter(ApplicationConstants.OAUTH_CLIENT_SECRET, clientSecret);
 
-//        Object grantType = keysDTO.get
         oAuthApplicationInfo.addParameter(ApplicationConstants.OAUTH_CLIENT_GRANT, null);
-
 
         return oAuthApplicationInfo;
 
