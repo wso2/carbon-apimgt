@@ -59,6 +59,7 @@ import org.wso2.carbon.identity.oauth2.OAuth2TokenValidationService;
 import org.wso2.carbon.identity.oauth2.dto.OAuth2ClientApplicationDTO;
 import org.wso2.carbon.identity.oauth2.dto.OAuth2TokenValidationRequestDTO;
 import org.wso2.carbon.identity.oauth2.dto.OAuth2TokenValidationResponseDTO;
+import org.wso2.carbon.identity.oauth2.stub.dto.OAuth2TokenValidationRequestDTO_TokenValidationContextParam;
 
 import javax.xml.stream.XMLStreamException;
 import java.io.ByteArrayInputStream;
@@ -358,10 +359,21 @@ public class DefaultKeyManagerImpl extends AbstractKeyManager {
         token.setIdentifier(accessToken);
         token.setTokenType("bearer");
         requestDTO.setAccessToken(token);
+
+        //TODO: If these values are not set, validation will fail giving an NPE. Need to see why that happens
+        OAuth2TokenValidationRequestDTO.TokenValidationContextParam contextParam = requestDTO. new
+                TokenValidationContextParam();
+        contextParam.setKey("dummy");
+        contextParam.setValue("dummy");
+
+        OAuth2TokenValidationRequestDTO.TokenValidationContextParam[] contextParams =
+                new OAuth2TokenValidationRequestDTO.TokenValidationContextParam[1];
+        contextParams[0] = contextParam;
+        requestDTO.setContext(contextParams);
+
         OAuth2ClientApplicationDTO clientApplicationDTO = oAuth2TokenValidationService.findOAuthConsumerIfTokenIsValid
                 (requestDTO);
         OAuth2TokenValidationResponseDTO responseDTO = clientApplicationDTO.getAccessTokenValidationResponse();
-
 
         if (!responseDTO.isValid()) {
             log.error("Invalid OAuth Token : "+responseDTO.getErrorMsg());
