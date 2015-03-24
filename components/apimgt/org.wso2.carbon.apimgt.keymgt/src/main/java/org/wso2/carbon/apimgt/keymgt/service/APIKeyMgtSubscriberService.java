@@ -145,6 +145,36 @@ public class APIKeyMgtSubscriberService extends AbstractAdmin {
     }
 
     /**
+     * Retrieve OAuth application for given consumer key
+     * @param consumerKey
+     * @return
+     * @throws APIKeyMgtException
+     * @throws APIManagementException
+     * @throws IdentityException
+     */
+    public OAuthApplicationInfo retrieveOAuthApplication(String consumerKey)
+            throws APIKeyMgtException, APIManagementException, IdentityException {
+
+        ApiMgtDAO apiMgtDAO = new ApiMgtDAO();
+        OAuthApplicationInfo oAuthApplicationInfo = apiMgtDAO.getOAuthApplication(consumerKey);
+        return oAuthApplicationInfo;
+    }
+
+    /**
+     * Delete OAuth application for given consumer key
+     * @param consumerKey
+     * @throws APIKeyMgtException
+     * @throws APIManagementException
+     * @throws IdentityException
+     */
+    public void deleteOAuthApplication(String consumerKey)
+            throws APIKeyMgtException, APIManagementException, IdentityException {
+
+        ApiMgtDAO apiMgtDAO = new ApiMgtDAO();
+        apiMgtDAO.deleteOAuthApplication(consumerKey);
+    }
+
+    /**
      * Get the access token for the specified application. This token can be used as an OAuth
      * 2.0 bearer token to access any API in the given application.
      *

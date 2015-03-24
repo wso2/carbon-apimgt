@@ -27,6 +27,14 @@
                <xs:element minOccurs="0" name="tenantId" type="xs:int"></xs:element>
             </xs:sequence>
          </xs:complexType>
+         <xs:complexType name="OAuthApplicationInfo">
+            <xs:sequence>
+               <xs:element minOccurs="0" name="callBackURL" nillable="true" type="xs:string"></xs:element>
+               <xs:element minOccurs="0" name="clientId" nillable="true" type="xs:string"></xs:element>
+               <xs:element minOccurs="0" name="clientName" nillable="true" type="xs:string"></xs:element>
+               <xs:element minOccurs="0" name="jsonString" nillable="true" type="xs:string"></xs:element>
+            </xs:sequence>
+         </xs:complexType>
       </xs:schema>
       <xs:schema attributeFormDefault="qualified" elementFormDefault="qualified" targetNamespace="http://util.java/xsd">
          <xs:complexType abstract="true" name="Set">
@@ -86,6 +94,34 @@
                </xs:sequence>
             </xs:complexType>
          </xs:element>
+         <xs:element name="APIKeyMgtSubscriberServiceAPIKeyMgtException">
+            <xs:complexType>
+               <xs:sequence>
+                  <xs:element minOccurs="0" name="APIKeyMgtException" nillable="true" type="ax217:APIKeyMgtException"></xs:element>
+               </xs:sequence>
+            </xs:complexType>
+         </xs:element>
+         <xs:element name="APIKeyMgtSubscriberServiceIdentityException">
+            <xs:complexType>
+               <xs:sequence>
+                  <xs:element minOccurs="0" name="IdentityException" nillable="true" type="ax219:IdentityException"></xs:element>
+               </xs:sequence>
+            </xs:complexType>
+         </xs:element>
+         <xs:element name="retrieveOAuthApplication">
+            <xs:complexType>
+               <xs:sequence>
+                  <xs:element minOccurs="0" name="consumerKey" nillable="true" type="xs:string"></xs:element>
+               </xs:sequence>
+            </xs:complexType>
+         </xs:element>
+         <xs:element name="retrieveOAuthApplicationResponse">
+            <xs:complexType>
+               <xs:sequence>
+                  <xs:element minOccurs="0" name="return" nillable="true" type="ax215:OAuthApplicationInfo"></xs:element>
+               </xs:sequence>
+            </xs:complexType>
+         </xs:element>
          <xs:element name="APIKeyMgtSubscriberServiceException">
             <xs:complexType>
                <xs:sequence>
@@ -114,20 +150,6 @@
             <xs:complexType>
                <xs:sequence>
                   <xs:element minOccurs="0" name="return" nillable="true" type="xs:string"></xs:element>
-               </xs:sequence>
-            </xs:complexType>
-         </xs:element>
-         <xs:element name="APIKeyMgtSubscriberServiceAPIKeyMgtException">
-            <xs:complexType>
-               <xs:sequence>
-                  <xs:element minOccurs="0" name="APIKeyMgtException" nillable="true" type="ax217:APIKeyMgtException"></xs:element>
-               </xs:sequence>
-            </xs:complexType>
-         </xs:element>
-         <xs:element name="APIKeyMgtSubscriberServiceIdentityException">
-            <xs:complexType>
-               <xs:sequence>
-                  <xs:element minOccurs="0" name="IdentityException" nillable="true" type="ax219:IdentityException"></xs:element>
                </xs:sequence>
             </xs:complexType>
          </xs:element>
@@ -180,6 +202,13 @@
             <xs:complexType>
                <xs:sequence>
                   <xs:element minOccurs="0" name="return" nillable="true" type="xs:string"></xs:element>
+               </xs:sequence>
+            </xs:complexType>
+         </xs:element>
+         <xs:element name="deleteOAuthApplication">
+            <xs:complexType>
+               <xs:sequence>
+                  <xs:element minOccurs="0" name="consumerKey" nillable="true" type="xs:string"></xs:element>
                </xs:sequence>
             </xs:complexType>
          </xs:element>
@@ -250,6 +279,21 @@
    <wsdl:message name="unsubscribeFromAPIRequest">
       <wsdl:part name="parameters" element="ns1:unsubscribeFromAPI"></wsdl:part>
    </wsdl:message>
+   <wsdl:message name="retrieveOAuthApplicationRequest">
+      <wsdl:part name="parameters" element="ns1:retrieveOAuthApplication"></wsdl:part>
+   </wsdl:message>
+   <wsdl:message name="retrieveOAuthApplicationResponse">
+      <wsdl:part name="parameters" element="ns1:retrieveOAuthApplicationResponse"></wsdl:part>
+   </wsdl:message>
+   <wsdl:message name="APIKeyMgtSubscriberServiceAPIKeyMgtException">
+      <wsdl:part name="parameters" element="ns1:APIKeyMgtSubscriberServiceAPIKeyMgtException"></wsdl:part>
+   </wsdl:message>
+   <wsdl:message name="APIKeyMgtSubscriberServiceAPIManagementException">
+      <wsdl:part name="parameters" element="ns1:APIKeyMgtSubscriberServiceAPIManagementException"></wsdl:part>
+   </wsdl:message>
+   <wsdl:message name="APIKeyMgtSubscriberServiceIdentityException">
+      <wsdl:part name="parameters" element="ns1:APIKeyMgtSubscriberServiceIdentityException"></wsdl:part>
+   </wsdl:message>
    <wsdl:message name="renewAccessTokenRequest">
       <wsdl:part name="parameters" element="ns1:renewAccessToken"></wsdl:part>
    </wsdl:message>
@@ -265,15 +309,6 @@
    <wsdl:message name="createOAuthApplicationResponse">
       <wsdl:part name="parameters" element="ns1:createOAuthApplicationResponse"></wsdl:part>
    </wsdl:message>
-   <wsdl:message name="APIKeyMgtSubscriberServiceAPIKeyMgtException">
-      <wsdl:part name="parameters" element="ns1:APIKeyMgtSubscriberServiceAPIKeyMgtException"></wsdl:part>
-   </wsdl:message>
-   <wsdl:message name="APIKeyMgtSubscriberServiceAPIManagementException">
-      <wsdl:part name="parameters" element="ns1:APIKeyMgtSubscriberServiceAPIManagementException"></wsdl:part>
-   </wsdl:message>
-   <wsdl:message name="APIKeyMgtSubscriberServiceIdentityException">
-      <wsdl:part name="parameters" element="ns1:APIKeyMgtSubscriberServiceIdentityException"></wsdl:part>
-   </wsdl:message>
    <wsdl:message name="getSubscribedAPIsOfUserRequest">
       <wsdl:part name="parameters" element="ns1:getSubscribedAPIsOfUser"></wsdl:part>
    </wsdl:message>
@@ -285,6 +320,9 @@
    </wsdl:message>
    <wsdl:message name="getApplicationAccessTokenResponse">
       <wsdl:part name="parameters" element="ns1:getApplicationAccessTokenResponse"></wsdl:part>
+   </wsdl:message>
+   <wsdl:message name="deleteOAuthApplicationRequest">
+      <wsdl:part name="parameters" element="ns1:deleteOAuthApplication"></wsdl:part>
    </wsdl:message>
    <wsdl:message name="revokeAccessTokenBySubscriberRequest">
       <wsdl:part name="parameters" element="ns1:revokeAccessTokenBySubscriber"></wsdl:part>
@@ -311,6 +349,13 @@
       <wsdl:operation name="unsubscribeFromAPI">
          <wsdl:input message="tns:unsubscribeFromAPIRequest" wsaw:Action="urn:unsubscribeFromAPI"></wsdl:input>
       </wsdl:operation>
+      <wsdl:operation name="retrieveOAuthApplication">
+         <wsdl:input message="tns:retrieveOAuthApplicationRequest" wsaw:Action="urn:retrieveOAuthApplication"></wsdl:input>
+         <wsdl:output message="tns:retrieveOAuthApplicationResponse" wsaw:Action="urn:retrieveOAuthApplicationResponse"></wsdl:output>
+         <wsdl:fault message="tns:APIKeyMgtSubscriberServiceAPIKeyMgtException" name="APIKeyMgtSubscriberServiceAPIKeyMgtException" wsaw:Action="urn:retrieveOAuthApplicationAPIKeyMgtSubscriberServiceAPIKeyMgtException"></wsdl:fault>
+         <wsdl:fault message="tns:APIKeyMgtSubscriberServiceAPIManagementException" name="APIKeyMgtSubscriberServiceAPIManagementException" wsaw:Action="urn:retrieveOAuthApplicationAPIKeyMgtSubscriberServiceAPIManagementException"></wsdl:fault>
+         <wsdl:fault message="tns:APIKeyMgtSubscriberServiceIdentityException" name="APIKeyMgtSubscriberServiceIdentityException" wsaw:Action="urn:retrieveOAuthApplicationAPIKeyMgtSubscriberServiceIdentityException"></wsdl:fault>
+      </wsdl:operation>
       <wsdl:operation name="renewAccessToken">
          <wsdl:input message="tns:renewAccessTokenRequest" wsaw:Action="urn:renewAccessToken"></wsdl:input>
          <wsdl:output message="tns:renewAccessTokenResponse" wsaw:Action="urn:renewAccessTokenResponse"></wsdl:output>
@@ -336,6 +381,12 @@
          <wsdl:fault message="tns:APIKeyMgtSubscriberServiceAPIKeyMgtException" name="APIKeyMgtSubscriberServiceAPIKeyMgtException" wsaw:Action="urn:getApplicationAccessTokenAPIKeyMgtSubscriberServiceAPIKeyMgtException"></wsdl:fault>
          <wsdl:fault message="tns:APIKeyMgtSubscriberServiceAPIManagementException" name="APIKeyMgtSubscriberServiceAPIManagementException" wsaw:Action="urn:getApplicationAccessTokenAPIKeyMgtSubscriberServiceAPIManagementException"></wsdl:fault>
          <wsdl:fault message="tns:APIKeyMgtSubscriberServiceIdentityException" name="APIKeyMgtSubscriberServiceIdentityException" wsaw:Action="urn:getApplicationAccessTokenAPIKeyMgtSubscriberServiceIdentityException"></wsdl:fault>
+      </wsdl:operation>
+      <wsdl:operation name="deleteOAuthApplication">
+         <wsdl:input message="tns:deleteOAuthApplicationRequest" wsaw:Action="urn:deleteOAuthApplication"></wsdl:input>
+         <wsdl:fault message="tns:APIKeyMgtSubscriberServiceAPIKeyMgtException" name="APIKeyMgtSubscriberServiceAPIKeyMgtException" wsaw:Action="urn:deleteOAuthApplicationAPIKeyMgtSubscriberServiceAPIKeyMgtException"></wsdl:fault>
+         <wsdl:fault message="tns:APIKeyMgtSubscriberServiceAPIManagementException" name="APIKeyMgtSubscriberServiceAPIManagementException" wsaw:Action="urn:deleteOAuthApplicationAPIKeyMgtSubscriberServiceAPIManagementException"></wsdl:fault>
+         <wsdl:fault message="tns:APIKeyMgtSubscriberServiceIdentityException" name="APIKeyMgtSubscriberServiceIdentityException" wsaw:Action="urn:deleteOAuthApplicationAPIKeyMgtSubscriberServiceIdentityException"></wsdl:fault>
       </wsdl:operation>
       <wsdl:operation name="revokeAccessTokenBySubscriber">
          <wsdl:input message="tns:revokeAccessTokenBySubscriberRequest" wsaw:Action="urn:revokeAccessTokenBySubscriber"></wsdl:input>
@@ -366,6 +417,24 @@
    </wsdl:portType>
    <wsdl:binding name="APIKeyMgtSubscriberServiceSoap11Binding" type="tns:APIKeyMgtSubscriberServicePortType">
       <soap:binding transport="http://schemas.xmlsoap.org/soap/http" style="document"></soap:binding>
+      <wsdl:operation name="retrieveOAuthApplication">
+         <soap:operation soapAction="urn:retrieveOAuthApplication" style="document"></soap:operation>
+         <wsdl:input>
+            <soap:body use="literal"></soap:body>
+         </wsdl:input>
+         <wsdl:output>
+            <soap:body use="literal"></soap:body>
+         </wsdl:output>
+         <wsdl:fault name="APIKeyMgtSubscriberServiceAPIKeyMgtException">
+            <soap:fault use="literal" name="APIKeyMgtSubscriberServiceAPIKeyMgtException"></soap:fault>
+         </wsdl:fault>
+         <wsdl:fault name="APIKeyMgtSubscriberServiceIdentityException">
+            <soap:fault use="literal" name="APIKeyMgtSubscriberServiceIdentityException"></soap:fault>
+         </wsdl:fault>
+         <wsdl:fault name="APIKeyMgtSubscriberServiceAPIManagementException">
+            <soap:fault use="literal" name="APIKeyMgtSubscriberServiceAPIManagementException"></soap:fault>
+         </wsdl:fault>
+      </wsdl:operation>
       <wsdl:operation name="unsubscribeFromAPI">
          <soap:operation soapAction="urn:unsubscribeFromAPI" style="document"></soap:operation>
          <wsdl:input>
@@ -438,11 +507,20 @@
             <soap:fault use="literal" name="APIKeyMgtSubscriberServiceAPIManagementException"></soap:fault>
          </wsdl:fault>
       </wsdl:operation>
-      <wsdl:operation name="clearOAuthCache">
-         <soap:operation soapAction="urn:clearOAuthCache" style="document"></soap:operation>
+      <wsdl:operation name="deleteOAuthApplication">
+         <soap:operation soapAction="urn:deleteOAuthApplication" style="document"></soap:operation>
          <wsdl:input>
             <soap:body use="literal"></soap:body>
          </wsdl:input>
+         <wsdl:fault name="APIKeyMgtSubscriberServiceAPIKeyMgtException">
+            <soap:fault use="literal" name="APIKeyMgtSubscriberServiceAPIKeyMgtException"></soap:fault>
+         </wsdl:fault>
+         <wsdl:fault name="APIKeyMgtSubscriberServiceIdentityException">
+            <soap:fault use="literal" name="APIKeyMgtSubscriberServiceIdentityException"></soap:fault>
+         </wsdl:fault>
+         <wsdl:fault name="APIKeyMgtSubscriberServiceAPIManagementException">
+            <soap:fault use="literal" name="APIKeyMgtSubscriberServiceAPIManagementException"></soap:fault>
+         </wsdl:fault>
       </wsdl:operation>
       <wsdl:operation name="revokeAccessTokenBySubscriber">
          <soap:operation soapAction="urn:revokeAccessTokenBySubscriber" style="document"></soap:operation>
@@ -452,6 +530,12 @@
          <wsdl:fault name="APIKeyMgtSubscriberServiceAPIManagementException">
             <soap:fault use="literal" name="APIKeyMgtSubscriberServiceAPIManagementException"></soap:fault>
          </wsdl:fault>
+      </wsdl:operation>
+      <wsdl:operation name="clearOAuthCache">
+         <soap:operation soapAction="urn:clearOAuthCache" style="document"></soap:operation>
+         <wsdl:input>
+            <soap:body use="literal"></soap:body>
+         </wsdl:input>
       </wsdl:operation>
       <wsdl:operation name="revokeKeysByTier">
          <soap:operation soapAction="urn:revokeKeysByTier" style="document"></soap:operation>
@@ -501,6 +585,24 @@
    </wsdl:binding>
    <wsdl:binding name="APIKeyMgtSubscriberServiceSoap12Binding" type="tns:APIKeyMgtSubscriberServicePortType">
       <soap12:binding transport="http://schemas.xmlsoap.org/soap/http" style="document"></soap12:binding>
+      <wsdl:operation name="retrieveOAuthApplication">
+         <soap12:operation soapAction="urn:retrieveOAuthApplication" style="document"></soap12:operation>
+         <wsdl:input>
+            <soap12:body use="literal"></soap12:body>
+         </wsdl:input>
+         <wsdl:output>
+            <soap12:body use="literal"></soap12:body>
+         </wsdl:output>
+         <wsdl:fault name="APIKeyMgtSubscriberServiceAPIKeyMgtException">
+            <soap12:fault use="literal" name="APIKeyMgtSubscriberServiceAPIKeyMgtException"></soap12:fault>
+         </wsdl:fault>
+         <wsdl:fault name="APIKeyMgtSubscriberServiceIdentityException">
+            <soap12:fault use="literal" name="APIKeyMgtSubscriberServiceIdentityException"></soap12:fault>
+         </wsdl:fault>
+         <wsdl:fault name="APIKeyMgtSubscriberServiceAPIManagementException">
+            <soap12:fault use="literal" name="APIKeyMgtSubscriberServiceAPIManagementException"></soap12:fault>
+         </wsdl:fault>
+      </wsdl:operation>
       <wsdl:operation name="unsubscribeFromAPI">
          <soap12:operation soapAction="urn:unsubscribeFromAPI" style="document"></soap12:operation>
          <wsdl:input>
@@ -573,11 +675,20 @@
             <soap12:fault use="literal" name="APIKeyMgtSubscriberServiceAPIManagementException"></soap12:fault>
          </wsdl:fault>
       </wsdl:operation>
-      <wsdl:operation name="clearOAuthCache">
-         <soap12:operation soapAction="urn:clearOAuthCache" style="document"></soap12:operation>
+      <wsdl:operation name="deleteOAuthApplication">
+         <soap12:operation soapAction="urn:deleteOAuthApplication" style="document"></soap12:operation>
          <wsdl:input>
             <soap12:body use="literal"></soap12:body>
          </wsdl:input>
+         <wsdl:fault name="APIKeyMgtSubscriberServiceAPIKeyMgtException">
+            <soap12:fault use="literal" name="APIKeyMgtSubscriberServiceAPIKeyMgtException"></soap12:fault>
+         </wsdl:fault>
+         <wsdl:fault name="APIKeyMgtSubscriberServiceIdentityException">
+            <soap12:fault use="literal" name="APIKeyMgtSubscriberServiceIdentityException"></soap12:fault>
+         </wsdl:fault>
+         <wsdl:fault name="APIKeyMgtSubscriberServiceAPIManagementException">
+            <soap12:fault use="literal" name="APIKeyMgtSubscriberServiceAPIManagementException"></soap12:fault>
+         </wsdl:fault>
       </wsdl:operation>
       <wsdl:operation name="revokeAccessTokenBySubscriber">
          <soap12:operation soapAction="urn:revokeAccessTokenBySubscriber" style="document"></soap12:operation>
@@ -587,6 +698,12 @@
          <wsdl:fault name="APIKeyMgtSubscriberServiceAPIManagementException">
             <soap12:fault use="literal" name="APIKeyMgtSubscriberServiceAPIManagementException"></soap12:fault>
          </wsdl:fault>
+      </wsdl:operation>
+      <wsdl:operation name="clearOAuthCache">
+         <soap12:operation soapAction="urn:clearOAuthCache" style="document"></soap12:operation>
+         <wsdl:input>
+            <soap12:body use="literal"></soap12:body>
+         </wsdl:input>
       </wsdl:operation>
       <wsdl:operation name="revokeKeysByTier">
          <soap12:operation soapAction="urn:revokeKeysByTier" style="document"></soap12:operation>
@@ -636,6 +753,15 @@
    </wsdl:binding>
    <wsdl:binding name="APIKeyMgtSubscriberServiceHttpBinding" type="tns:APIKeyMgtSubscriberServicePortType">
       <http:binding verb="POST"></http:binding>
+      <wsdl:operation name="retrieveOAuthApplication">
+         <http:operation location="retrieveOAuthApplication"></http:operation>
+         <wsdl:input>
+            <mime:content type="text/xml" part="parameters"></mime:content>
+         </wsdl:input>
+         <wsdl:output>
+            <mime:content type="text/xml" part="parameters"></mime:content>
+         </wsdl:output>
+      </wsdl:operation>
       <wsdl:operation name="unsubscribeFromAPI">
          <http:operation location="unsubscribeFromAPI"></http:operation>
          <wsdl:input>
@@ -678,14 +804,20 @@
             <mime:content type="text/xml" part="parameters"></mime:content>
          </wsdl:output>
       </wsdl:operation>
-      <wsdl:operation name="clearOAuthCache">
-         <http:operation location="clearOAuthCache"></http:operation>
+      <wsdl:operation name="deleteOAuthApplication">
+         <http:operation location="deleteOAuthApplication"></http:operation>
          <wsdl:input>
             <mime:content type="text/xml" part="parameters"></mime:content>
          </wsdl:input>
       </wsdl:operation>
       <wsdl:operation name="revokeAccessTokenBySubscriber">
          <http:operation location="revokeAccessTokenBySubscriber"></http:operation>
+         <wsdl:input>
+            <mime:content type="text/xml" part="parameters"></mime:content>
+         </wsdl:input>
+      </wsdl:operation>
+      <wsdl:operation name="clearOAuthCache">
+         <http:operation location="clearOAuthCache"></http:operation>
          <wsdl:input>
             <mime:content type="text/xml" part="parameters"></mime:content>
          </wsdl:input>

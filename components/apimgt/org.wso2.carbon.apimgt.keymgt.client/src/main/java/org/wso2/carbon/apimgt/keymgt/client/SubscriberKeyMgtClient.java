@@ -24,6 +24,7 @@ import org.apache.axis2.context.ServiceContext;
 import org.apache.axis2.transport.http.HTTPConstants;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.apimgt.api.model.xsd.OAuthApplicationInfo;
 import org.wso2.carbon.apimgt.impl.dto.xsd.APIInfoDTO;
 import org.wso2.carbon.apimgt.keymgt.stub.subscriber.APIKeyMgtSubscriberServiceStub;
 import org.wso2.carbon.apimgt.keymgt.stub.types.carbon.ApplicationKeysDTO;
@@ -67,6 +68,22 @@ public class SubscriberKeyMgtClient {
         }
     }
 
+
+    public ApplicationKeysDTO createOAuthApplication(String userId, String applicationName, String callbackUrl) throws Exception {
+        ApplicationKeysDTO keys = subscriberServiceStub.createOAuthApplication(userId, applicationName, callbackUrl);
+        return keys;
+    }
+
+
+    public OAuthApplicationInfo getOAuthApplication(String consumerKey) throws Exception {
+        OAuthApplicationInfo oAuthApplicationInfo = subscriberServiceStub.retrieveOAuthApplication(consumerKey);
+        return oAuthApplicationInfo;
+    }
+
+    public void deleteOAuthApplication(String consumerKey) throws Exception {
+        subscriberServiceStub.deleteOAuthApplication(consumerKey);
+    }
+
     public String getAccessKey(String userId, APIInfoDTO apiInfoDTO,
                                String applicationName, String keyType, String callbackUrl) throws Exception {
         return subscriberServiceStub.getAccessToken(userId, apiInfoDTO, applicationName, keyType, callbackUrl);
@@ -75,11 +92,6 @@ public class SubscriberKeyMgtClient {
     public ApplicationKeysDTO getApplicationAccessKey(String userId, String applicationName,
                                                       String keyType, String callbackUrl, String[] allowedDomains,String validityTime, String tokenScope) throws Exception {
         ApplicationKeysDTO keys = subscriberServiceStub.getApplicationAccessToken(userId, applicationName, keyType, callbackUrl, allowedDomains, validityTime, tokenScope);
-        return keys;
-    }
-    
-    public ApplicationKeysDTO createOAuthApplication(String userId, String applicationName, String callbackUrl) throws Exception {
-        ApplicationKeysDTO keys = subscriberServiceStub.createOAuthApplication(userId, applicationName, callbackUrl);
         return keys;
     }
 
