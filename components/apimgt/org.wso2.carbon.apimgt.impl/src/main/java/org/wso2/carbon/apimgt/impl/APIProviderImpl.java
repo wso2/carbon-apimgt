@@ -689,8 +689,17 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                             updateApiArtifact.setAttribute(APIConstants.API_OVERVIEW_WSDL, api.getWsdlUrl());
                         }
                     }
-                }                
-
+                } else if (registry != null && wsdlURL != null && !wsdlURL.isEmpty()) {
+                    String[] wsdlUrlRelativePath =
+                            wsdlURL.split(RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH);
+                    String wsdlRegistryPath = null;
+                    if (wsdlUrlRelativePath.length == 2) {
+                        wsdlRegistryPath = wsdlUrlRelativePath[1];
+                    }
+                    registry.delete(wsdlRegistryPath);
+                    registry.removeAssociation(artifactPath, wsdlURL, CommonConstants.ASSOCIATION_TYPE01);
+                    updateApiArtifact.setAttribute(APIConstants.API_OVERVIEW_WSDL, "");
+                }
                 if (api.getUrl() != null && !"".equals(api.getUrl())){
                     String path = APIUtil.createEndpoint(api.getUrl(), registry);
                     if (path != null) {
