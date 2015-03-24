@@ -77,6 +77,11 @@ public class SubscriberKeyMgtClient {
         ApplicationKeysDTO keys = subscriberServiceStub.getApplicationAccessToken(userId, applicationName, keyType, callbackUrl, allowedDomains, validityTime, tokenScope);
         return keys;
     }
+    
+    public ApplicationKeysDTO createOAuthApplication(String userId, String applicationName, String callbackUrl) throws Exception {
+        ApplicationKeysDTO keys = subscriberServiceStub.createOAuthApplication(userId, applicationName, callbackUrl);
+        return keys;
+    }
 
     public String regenerateApplicationAccessKey(String keyType, String oldAccessToken, String[] allowedDomains,
                                                  String clientId, String clientSecret, String validityTime)
