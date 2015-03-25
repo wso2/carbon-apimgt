@@ -5439,11 +5439,9 @@ public class ApiMgtDAO {
         String deleteSubscriptionsQuery = "DELETE FROM AM_SUBSCRIPTION WHERE APPLICATION_ID = ?";
         String deleteApplicationKeyQuery = "DELETE FROM AM_APPLICATION_KEY_MAPPING WHERE APPLICATION_ID = ?";
         String deleteDomainAppQuery = "DELETE FROM AM_APP_KEY_DOMAIN_MAPPING WHERE CONSUMER_KEY = ?";
-        String deleteConsumerAppQuery = "DELETE FROM IDN_OAUTH_CONSUMER_APPS WHERE CONSUMER_KEY = ?";
         String deleteApplicationQuery = "DELETE FROM AM_APPLICATION WHERE APPLICATION_ID = ?";
         String deleteRegistrationEntry = "DELETE FROM AM_APPLICATION_REGISTRATION WHERE APP_ID = ?";
-        String deleteKeyAccessTokenMappingQuery = "DELETE FROM CONSUMER_KEY_ACCESS_TOKEN_MAPPING WHERE CONSUMER_KEY =" +
-                " ?";
+
 
 
         try {
@@ -5492,10 +5490,6 @@ public class ApiMgtDAO {
                     //delete on oAuthorization server.
                     keyManager.deleteApplication(consumerKey);
 
-                    prepStmt = connection.prepareStatement(deleteKeyAccessTokenMappingQuery);
-                    prepStmt.setString(1, consumerKey);
-                    prepStmt.execute();
-                    prepStmt.close();
                 }
             }
             prepStmtGetConsumerKey.close();
