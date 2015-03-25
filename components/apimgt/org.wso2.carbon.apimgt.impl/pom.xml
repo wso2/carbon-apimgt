@@ -164,61 +164,6 @@
     </dependencies>
     <build>
         <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-dependency-plugin</artifactId>
-                <version>2.0-alpha-4</version>
-                <inherited>false</inherited>
-                <executions>
-
-                    <execution>
-                        <id>unpack-kernel-patch</id>
-                        <phase>initialize</phase>
-                        <goals>
-                            <goal>unpack</goal>
-                        </goals>
-                        <configuration>
-                            <artifactItems>
-                                <artifactItem>
-                                    <groupId>org.wso2.carbon</groupId>
-                                    <artifactId>WSO2-CARBON-PATCH-4.2.0</artifactId>
-                                    <version>0001</version>
-                                    <type>zip</type>
-                                    <overWrite>true</overWrite>
-                                    <outputDirectory>target</outputDirectory>
-                                </artifactItem>
-                            </artifactItems>
-                        </configuration>
-                    </execution>
-
-                </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>exec-maven-plugin</artifactId>
-                <version>1.2.1</version>
-                <executions>
-                    <execution>
-                        <phase>process-resources</phase>
-                        <goals>
-                            <goal>exec</goal>
-                        </goals>
-                        <configuration>
-                            <executable>mvn</executable>
-                            <workingDirectory>${project.basedir}</workingDirectory>
-                            <arguments>
-                                <argument>install:install-file</argument>
-                                <argument>-Dfile=${project.build.directory}/WSO2-CARBON-PATCH-4.2.0-0001/patch0001/org.wso2.carbon.registry.core_4.2.0.jar</argument>
-                                <argument>-DgroupId=org.wso2.carbon</argument>
-                                <argument>-DartifactId=org.wso2.carbon.registry.core</argument>
-                                <argument>-Dversion=4.2.0</argument>
-                                <argument>-Dpackaging=jar</argument>
-                            </arguments>
-                        </configuration>
-
-                    </execution>
-                </executions>
-            </plugin>
 
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
