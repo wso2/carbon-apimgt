@@ -536,21 +536,16 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                                     new HashSet<String>(oldApi.getEnvironments());
                             if (!environmentsToPublish.isEmpty() && !environmentsToRemove.isEmpty()) {
                                 environmentsRemoved.retainAll(environmentsToPublish);
-                                environmentsToPublish.removeAll(environmentsToRemove);
                                 environmentsToRemove.removeAll(environmentsRemoved);
                             }
+                            List<String> failedToPublishEnvironments =
+                                    publishToGateway(apiPublished);
                             apiPublished.setEnvironments(environmentsToRemove);
                             List<String> failedToRemoveEnvironments =
                                     removeFromGateway(apiPublished);
+                            environmentsToPublish.removeAll(failedToPublishEnvironments);
+                            environmentsToPublish.addAll(failedToRemoveEnvironments);
                             apiPublished.setEnvironments(environmentsToPublish);
-                            List<String> failedToPublishEnvironments =
-                                    publishToGateway(apiPublished);
-                            environmentsRemoved.addAll(environmentsToPublish);
-                            environmentsRemoved.removeAll(failedToPublishEnvironments);
-                            environmentsRemoved.addAll(failedToRemoveEnvironments);
-                            environmentsToRemove.removeAll(failedToRemoveEnvironments);
-                            environmentsRemoved.removeAll(environmentsToRemove);
-                            apiPublished.setEnvironments(environmentsRemoved);
                             updateApiArtifact(apiPublished, true, false);
                             failedGateways.clear();
                             failedGateways.put("UNPUBLISHED", failedToRemoveEnvironments);
@@ -565,7 +560,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                                 updateApiArtifact(api, true, false);
                                 failedGateways.clear();
                                 failedGateways.put("PUBLISHED", failedToPublishEnvironments);
-                                failedGateways.put("UNPUBLISHED", new ArrayList<String>(0));
+                                failedGateways.put("UNPUBLISHED", Collections.EMPTY_LIST);
                             }
                         }
                     } else {
