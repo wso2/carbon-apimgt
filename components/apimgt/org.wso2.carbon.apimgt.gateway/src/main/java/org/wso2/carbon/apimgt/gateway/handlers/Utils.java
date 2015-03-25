@@ -226,10 +226,8 @@ public class Utils {
     }
 
     public static boolean isStatsEnabled() {
-        String statsEnabled = config.
-                getFirstProperty(APIConstants.API_USAGE_ENABLED);
-
-        return Boolean.parseBoolean(statsEnabled);
+        return ServiceReferenceHolder.getInstance().getApiManagerConfigurationService().
+                getAPIAnalyticsConfiguration().isEnabled();
     }
 
     /**

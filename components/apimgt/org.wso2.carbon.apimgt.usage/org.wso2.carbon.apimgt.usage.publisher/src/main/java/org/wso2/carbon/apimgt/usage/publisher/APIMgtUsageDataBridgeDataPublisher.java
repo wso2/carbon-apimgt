@@ -131,6 +131,9 @@ public class APIMgtUsageDataBridgeDataPublisher implements APIMgtUsageDataPublis
     public void publishEvent(ResponsePublisherDTO responsePublisherDTO) {
         DataBridgeResponsePublisherDTO dataBridgeResponsePublisherDTO = new DataBridgeResponsePublisherDTO(responsePublisherDTO);
         try {
+            DataPublisherUtil.getApiManagerAnalyticsConfiguration().getResponseStreamName();
+            DataPublisherUtil.getApiManagerAnalyticsConfiguration().getResponseStreamVersion();
+            dataBridgeResponsePublisherDTO.createPayload();
             //Publish Response Data
             dataPublisher.publish(DataPublisherUtil.getApiManagerAnalyticsConfiguration().getResponseStreamName(),
                     DataPublisherUtil.getApiManagerAnalyticsConfiguration().getResponseStreamVersion() ,

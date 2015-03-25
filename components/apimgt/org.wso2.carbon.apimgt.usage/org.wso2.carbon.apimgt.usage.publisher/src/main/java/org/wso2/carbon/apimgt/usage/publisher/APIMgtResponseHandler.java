@@ -29,6 +29,9 @@ import org.apache.synapse.rest.RESTConstants;
 import org.apache.synapse.transport.passthru.util.RelayUtils;
 import org.wso2.carbon.apimgt.usage.publisher.dto.ResponsePublisherDTO;
 import org.wso2.carbon.apimgt.usage.publisher.internal.UsageComponent;
+import org.wso2.carbon.base.MultitenantConstants;
+import org.wso2.carbon.context.CarbonContext;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import javax.xml.stream.XMLStreamException;
@@ -51,10 +54,17 @@ public class APIMgtResponseHandler extends AbstractMediator {
         if (enabled && publisher == null) {
             synchronized (this) {
                 if (publisher == null) {
+                    //The data publisher class is defined in the api-manager.xml
                     String publisherClass = DataPublisherUtil.getApiManagerAnalyticsConfiguration().
                             getPublisherClass();
                     try {
                         log.debug("Instantiating Data Publisher");
+                        /*Tenant domain is used to get the data publisher. As the data publisher class is defined in
+                        the api-manager.xml the publisher is initialized in the super tenant mode
+                         */
+                        PrivilegedCarbonContext.startTenantFlow();
+                        PrivilegedCarbonContext.getThreadLocalCarbonContext().
+                                setTenantDomain(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME, true);
                         publisher = (APIMgtUsageDataPublisher) Class.forName(publisherClass).
                                 newInstance();
                         publisher.init();
@@ -64,6 +74,8 @@ public class APIMgtResponseHandler extends AbstractMediator {
                         log.error("Error instantiating " + publisherClass);
                     } catch (IllegalAccessException e) {
                         log.error("Illegal access to " + publisherClass);
+                    } finally {
+                        PrivilegedCarbonContext.endTenantFlow();
                     }
                 }
             }
