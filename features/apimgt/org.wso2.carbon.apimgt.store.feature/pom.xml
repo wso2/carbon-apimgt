@@ -102,7 +102,7 @@
                                 <importFeatureDef>org.wso2.carbon.identity.self.registration.server:${carbon.platform.version}</importFeatureDef>
                             </importFeatures>
                             <importBundles>
-                                <importBundleDef>org.wso2.carbon:org.wso2.carbon.hostobjects.sso:4.2.2</importBundleDef>
+                                <importBundleDef>org.wso2.carbon.commons:org.wso2.carbon.hostobjects.sso:${carbon.commons.version}</importBundleDef>
 
                             </importBundles>
                         </configuration>
