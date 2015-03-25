@@ -1,6 +1,8 @@
 <% jagg.template("item-manage", function(inputs, outputs, jagg) { 
     var isSynapseGateway = outputs.isSynapseGateway;
+
     var api = outputs.api;
+    var createPermitted = outputs.isCreatePermitted;
     var apiUrlId = "name="+encode.forHtml(api.name)+"&version="+encode.forHtml(api.version)+"&provider="+encode.forHtml(api.provider);
     //get environments detail from api-manager.xml
     var provider = jagg.module("manager").getAPIProviderObj();
@@ -43,6 +45,7 @@
     var manage_w_link = jagg.url('/manage?'+apiUrlId);    
 %>
 <center>
+<%if(createPermitted){%>
 <ul class="new-sub-menu-wizard" style="margin:0 auto">
     <li>
         <a href="<%= design_w_link %>" class="wizard-done">
@@ -58,14 +61,16 @@
     </li>
     <li>
         <a href="<%= manage_w_link %>" class="wizard-active">
-            <div class="wizard-number" >3</div>
+            <div class="wizard-number">3</div>
             <span>Manage</span>
         </a>
     </li>
 </ul>
-</center> 
+<%}%>
+
+</center>
     <div class="title-section">
-        <h2><%= encode.forHtml(api.name) %> : <%= encode.forHtml(api.context) %>/<%= encode.forHtml(api.version) %></h2>
+        <h2>Manage API: <%= encode.forHtml(api.name) %> : <%= encode.forHtml(api.context) %>/<%= encode.forHtml(api.version) %></h2>
     </div>     
     <div class="content-section shadow-up">
     <div class="content-data">   

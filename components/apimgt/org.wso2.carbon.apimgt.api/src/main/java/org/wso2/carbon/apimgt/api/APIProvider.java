@@ -139,7 +139,7 @@ public interface APIProvider extends APIManager {
     public void addAPI(API api) throws APIManagementException;
 
     /**
-     * Updates an existing API. This method must not be used to change API status. Implementations
+     * Updates design and implementation of an existing API. This method must not be used to change API status. Implementations
      * should throw an exceptions when such attempts are made. All life cycle state changes
      * should be carried out using the changeAPIStatus method of this interface.
      *
@@ -148,6 +148,17 @@ public interface APIProvider extends APIManager {
      * @return  failed environments during gateway operation
      */
     public Map<String, List<String>> updateAPI(API api) throws APIManagementException;
+
+    /**
+     * Updates manage of an existing API. This method must not be used to change API status. Implementations
+     * should throw an exceptions when such attempts are made. All life cycle state changes
+     * should be carried out using the changeAPIStatus method of this interface.
+     *
+     * @param api API
+     * @return failed environments during gateway operation
+     * @throws APIManagementException failed environments during gateway operation
+     */
+    public Map<String, List<String>> manageAPI(API api) throws APIManagementException;
 
     /**
      * Change the lifecycle state of the specified API

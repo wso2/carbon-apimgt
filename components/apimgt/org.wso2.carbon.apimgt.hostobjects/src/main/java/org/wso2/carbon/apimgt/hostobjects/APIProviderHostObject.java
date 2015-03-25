@@ -296,7 +296,7 @@ public class APIProviderHostObject extends ScriptableObject {
     }
     
     /**
-     * This method is to functionality of managing an API in API-Provider     *
+     * This method is to functionality of managing an API in API-Provider
      * @param cx      Rhino context
      * @param thisObj Scriptable object
      * @param args    Passing arguments
@@ -835,7 +835,7 @@ public class APIProviderHostObject extends ScriptableObject {
             	apiProvider.addAPI(api);
                 success = createFailedGatewaysAsJsonString(Collections.<String, List<String>>emptyMap());
             } else {
-                Map<String, List<String>> failedGateways = apiProvider.updateAPI(api);
+                Map<String, List<String>> failedGateways = apiProvider.manageAPI(api);
                 success = createFailedGatewaysAsJsonString(failedGateways);
             }
 
