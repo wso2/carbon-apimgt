@@ -421,8 +421,7 @@ public class DefaultKeyManagerImpl extends AbstractKeyManager {
         if (log.isDebugEnabled()) {
             log.debug("Creating semi-manual application for consumer id  :  " + oAuthApplicationInfo.getClientId());
         }
-        //Insert a record to CLIENT_INFO table.
-        //oidcDao.createSemiManualClient(oAuthApplicationInfo);
+        
         return oAuthApplicationInfo;
     }
 

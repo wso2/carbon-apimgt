@@ -29,7 +29,6 @@ import org.wso2.carbon.apimgt.api.model.KeyManager;
 import org.wso2.carbon.apimgt.api.model.OAuthApplicationInfo;
 import org.wso2.carbon.apimgt.api.model.OauthAppRequest;
 import org.wso2.carbon.apimgt.api.model.Subscriber;
-import org.wso2.carbon.apimgt.impl.applications.ApplicationImpl;
 import org.wso2.carbon.apimgt.impl.factory.KeyManagerFactory;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 
@@ -53,19 +52,7 @@ public class ApplicationUtils {
      */
     public static Application getNewApplication(String appName, String userId) {
         //initiate ApplicationImpl
-        Application application = new ApplicationImpl(appName, new Subscriber(userId));
-        return application;
-    }
-
-    /**
-     * This method will return object Application  object by application Id.
-     * When initiating ApplicationImpl, it will call it's super class's(Application) constructor
-     * @param appId APIM application ID
-     * @return APIM application.
-     */
-    public static Application getNewApplication(int appId) {
-        //initiate ApplicationImpl
-        Application application = new ApplicationImpl(appId);
+        Application application = new Application(appName, new Subscriber(userId));
         return application;
     }
 
@@ -76,12 +63,9 @@ public class ApplicationUtils {
      * @return APIM application object will return.
      */
     public static Application retrieveApplication(String appName, String userId) throws APIManagementException {
-        Application application = getNewApplication(appName, userId);
-        if(application == null){
-            handleException("Application " + appName + " is not found.. ");
-        }
-        ((ApplicationImpl) application).populateApplication();
-        return application;
+
+        return dao.getApplicationByName(appName, userId);
+
     }
 
     /**
@@ -93,17 +77,10 @@ public class ApplicationUtils {
     public static Application populateApplication(String workflowReference)
             throws APIManagementException {
         int appId = dao.getApplicationIdForAppRegistration(workflowReference);
-        Application application = getNewApplication(appId);
-        ((ApplicationImpl) application).populateApplication();
+        Application application = dao.getApplicationById(appId);
         return application;
     }
 
-
-    public static OauthAppRequest createAppInfoDTO(Map<String, Object> params) {
-//        OauthAppRequest appInfoDTO = new OIDCOauthAppRequest();
-//        appInfoDTO.initialiseDTO(params);
-        return null;
-    }
 
     /**
      * This method will parse json String and set properties in  OAuthApplicationInfo object.
@@ -200,5 +177,11 @@ public class ApplicationUtils {
     private static void handleException(String msg) throws APIManagementException {
         log.error(msg);
         throw new APIManagementException(msg);
+    }
+
+    public static void updateOAuthAppAssociation(Application application, String keyType,
+                                                 OAuthApplicationInfo oAuthApplication) {
+        application.addOAuthApp(keyType,oAuthApplication);
+        dao.updateApplicationKeyTypeMapping(application,keyType);
     }
 }

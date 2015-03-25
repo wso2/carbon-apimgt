@@ -144,7 +144,8 @@ public abstract class AbstractApplicationRegistrationWorkflowExecutor extends Wo
             //dao.createApplicationRegistrationEntry(workflowDTO, true);
 
             //update associateApplication
-            application.updateAssociateOAuthApp(workflowDTO.getKeyType(), oAuthApplication);
+            //application.updateAssociateOAuthApp(workflowDTO.getKeyType(), oAuthApplication);
+            ApplicationUtils.updateOAuthAppAssociation(application,workflowDTO.getKeyType(),oAuthApplication);
 
             workflowDTO.setApplicationInfo(oAuthApplication);
 
