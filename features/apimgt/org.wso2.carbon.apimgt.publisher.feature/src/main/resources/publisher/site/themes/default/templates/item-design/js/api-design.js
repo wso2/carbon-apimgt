@@ -566,6 +566,16 @@ $(document).ready(function(){
     var designer = new APIDesigner();
     designer.load_api_document(api_doc);
 
+    $("#swaggerEditer").on("keyup", function () {
+        try {
+            jsyaml.load(designer.swagger_editor.getSession().getValue());
+            document.getElementById('output_string').innerHTML = "";
+        } catch (err) {
+            document.getElementById('output_string').innerHTML = err;
+            console.log(err);
+        }
+    });
+
     $("#clearThumb").on("click", function () {
         $('#apiThumb-container').html('<input type="file" class="input-xlarge" name="apiThumb" />');
     });
@@ -592,7 +602,7 @@ $(document).ready(function(){
     var v = $("#design_form").validate({
         contentType : "application/x-www-form-urlencoded;charset=utf-8",
         dataType: "json",
-        onkeyup: false,
+	    onkeyup: false,
         submitHandler: function(form) {            
         var designer = APIDesigner();
         

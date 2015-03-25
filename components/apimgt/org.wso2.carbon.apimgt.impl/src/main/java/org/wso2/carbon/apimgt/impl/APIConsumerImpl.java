@@ -24,6 +24,7 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.LoginPostExecutor;
 import org.wso2.carbon.apimgt.api.model.*;
 import org.wso2.carbon.apimgt.api.model.Tag;
 import org.wso2.carbon.apimgt.handlers.security.stub.types.APIKeyMapping;
@@ -183,36 +184,26 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     private Set<API> getAPIsWithTag(Registry registry, String tag)
             throws APIManagementException {
         Set<API> apiSet = new TreeSet<API>(new APINameComparator());
-        boolean isTenantFlowStarted = false;
         try {
-        	if(tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)){
-        		isTenantFlowStarted = true;
-                PrivilegedCarbonContext.startTenantFlow();
-                PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
-        	}
             String resourceByTagQueryPath = RegistryConstants.QUERIES_COLLECTION_PATH + "/resource-by-tag";
             Map<String, String> params = new HashMap<String, String>();
             params.put("1", tag);
             params.put(RegistryConstants.RESULT_TYPE_PROPERTY_NAME, RegistryConstants.RESOURCE_UUID_RESULT_TYPE);
             Collection collection = registry.executeQuery(resourceByTagQueryPath, params);
 
-            GenericArtifactManager artifactManager = APIUtil.getArtifactManager(registry,
-                    APIConstants.API_KEY);
+            GenericArtifactManager artifactManager = APIUtil.getArtifactManager(registry, APIConstants.API_KEY);
 
             for (String row : collection.getChildren()) {
                 String uuid = row.substring(row.indexOf(";") + 1, row.length());
                 GenericArtifact genericArtifact = artifactManager.getGenericArtifact(uuid);
-                if (genericArtifact != null && genericArtifact.getAttribute(APIConstants.API_OVERVIEW_STATUS).equals(APIConstants.PUBLISHED)) {
-                apiSet.add(APIUtil.getAPI(genericArtifact));
+                if (genericArtifact != null &&
+                    genericArtifact.getAttribute(APIConstants.API_OVERVIEW_STATUS).equals(APIConstants.PUBLISHED)) {
+                    apiSet.add(APIUtil.getAPI(genericArtifact));
                 }
             }
 
         } catch (RegistryException e) {
             handleException("Failed to get API for tag " + tag, e);
-        } finally {
-        	if (isTenantFlowStarted) {
-        		PrivilegedCarbonContext.endTenantFlow();
-        	}
         }
         return apiSet;
     }
@@ -930,6 +921,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         });
         Registry userRegistry = null;
         String tagsQueryPath = null;
+        boolean isTenantFlowStarted = false;
         try {
             tagsQueryPath = RegistryConstants.QUERIES_COLLECTION_PATH + "/tag-summary";
             Map<String, String> params = new HashMap<String, String>();
@@ -941,6 +933,11 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                         getRegistryService().getGovernanceUserRegistry(CarbonConstants.REGISTRY_ANONNYMOUS_USERNAME, tenantId);
             } else {
                 userRegistry = registry;
+            }
+            if (requestedTenant != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(requestedTenant)) {
+                isTenantFlowStarted = true;
+                PrivilegedCarbonContext.startTenantFlow();
+                PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(requestedTenant, true);
             }
             Collection collection = userRegistry.executeQuery(tagsQueryPath, params);
             for (String fullTag : collection.getChildren()) {
@@ -989,6 +986,10 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             handleException("Failed to get all the tags", e);
         } catch (UserStoreException e) {
             handleException("Failed to get all the tags", e);
+        } finally {
+            if (isTenantFlowStarted) {
+                PrivilegedCarbonContext.endTenantFlow();
+            }
         }
         return tagSet;
     }
@@ -1435,17 +1436,17 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         return subscribedAPIs;
     }
 
-    public Set<SubscribedAPI> getSubscribedAPIs(Subscriber subscriber, String applicationName) throws APIManagementException {
+     public Set<SubscribedAPI> getSubscribedAPIs(Subscriber subscriber, String applicationName) throws APIManagementException {
         Set<SubscribedAPI> subscribedAPIs = null;
         try {
-            subscribedAPIs = apiMgtDAO.getSubscribedAPIs(subscriber, applicationName);
-            if (subscribedAPIs != null && !subscribedAPIs.isEmpty()) {
-                Map<String, Tier> tiers = APIUtil.getTiers(tenantId);
-                for (SubscribedAPI subscribedApi : subscribedAPIs) {
-                    Tier tier = tiers.get(subscribedApi.getTier().getName());
-                    subscribedApi.getTier().setDisplayName(tier != null ? tier.getDisplayName() : subscribedApi.getTier().getName());
-                    subscribedAPIs.add(subscribedApi);
-                }
+        	subscribedAPIs = apiMgtDAO.getSubscribedAPIs(subscriber, applicationName, null);
+            if(subscribedAPIs!=null && !subscribedAPIs.isEmpty()){
+            	Map<String, Tier> tiers=APIUtil.getTiers(tenantId);
+            	for(SubscribedAPI subscribedApi:subscribedAPIs) {
+            		Tier tier=tiers.get(subscribedApi.getTier().getName());
+	                subscribedApi.getTier().setDisplayName(tier!=null?tier.getDisplayName():subscribedApi.getTier().getName());
+	                subscribedAPIs.add(subscribedApi);
+	            }
             }
         } catch (APIManagementException e) {
             handleException("Failed to get APIs of " + subscriber.getName() + " under application " + applicationName, e);
@@ -1457,6 +1458,24 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         Set<SubscribedAPI> subscribedAPIs = null;
         try {
             subscribedAPIs = apiMgtDAO.getPaginatedSubscribedAPIs(subscriber, applicationName, startSubIndex,endSubIndex);
+            if(subscribedAPIs!=null && !subscribedAPIs.isEmpty()){
+                Map<String, Tier> tiers=APIUtil.getTiers(tenantId);
+                for(SubscribedAPI subscribedApi:subscribedAPIs) {
+                    Tier tier=tiers.get(subscribedApi.getTier().getName());
+                    subscribedApi.getTier().setDisplayName(tier!=null?tier.getDisplayName():subscribedApi.getTier().getName());
+                    subscribedAPIs.add(subscribedApi);
+                }
+            }
+        } catch (APIManagementException e) {
+            handleException("Failed to get APIs of " + subscriber.getName() + " under application " + applicationName, e);
+        }
+        return subscribedAPIs;
+    }
+    
+    public Set<SubscribedAPI> getPaginatedSubscribedAPIsbyGroupId(Subscriber subscriber, String applicationName, int startSubIndex, int endSubIndex, String groupId) throws APIManagementException {
+        Set<SubscribedAPI> subscribedAPIs = null;
+        try {
+            subscribedAPIs = apiMgtDAO.getPaginatedSubscribedAPIsbyGroupId(subscriber, applicationName, startSubIndex,endSubIndex, groupId);
             if(subscribedAPIs!=null && !subscribedAPIs.isEmpty()){
                 Map<String, Tier> tiers=APIUtil.getTiers(tenantId);
                 for(SubscribedAPI subscribedApi:subscribedAPIs) {
@@ -1759,10 +1778,10 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     public Map<String,String> requestApprovalForApplicationRegistration(String userId, String applicationName,
                                                                         String tokenType, String callbackUrl,
                                                                         String[] allowedDomains, String validityTime,
-                                                                        String tokenScope)
+                                                                        String tokenScope, int applicationId)
 		    throws APIManagementException {
 
-        Application application  = apiMgtDAO.getApplicationByName(applicationName,userId);
+       	Application application  = apiMgtDAO.getApplicationById(applicationId);
 
         if(!WorkflowStatus.APPROVED.toString().equals(application.getStatus())){
             throw new APIManagementException("Application should be approved before registering.");
@@ -1841,10 +1860,11 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 
     public Map<String, String> completeApplicationRegistration(String userId,
                                                                String applicationName,
-                                                               String tokenType, String tokenScope)
+                                                               String tokenType, String tokenScope,
+															   int applicationId)
             throws APIManagementException {
 
-        Application application = apiMgtDAO.getApplicationByName(applicationName, userId);
+    	Application application = apiMgtDAO.getApplicationById(applicationId);
         String status = apiMgtDAO.getRegistrationApprovalState(application.getId(), tokenType);
         Map<String, String> keyDetails = null;
 
@@ -2169,6 +2189,51 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 		return apiMgtDAO.getScopesByScopeKeys(scopeKeys, tenantId);
 	}
 
-	
+	@Override
+    public String getGroupIds(String response) throws APIManagementException{
+                String groupingExtractorClass = APIUtil.getGroupingExtractorImplementation();
+                if (groupingExtractorClass != null) {
+                        try {
+                                LoginPostExecutor groupingExtractor = (LoginPostExecutor)Class.forName(groupingExtractorClass).newInstance();
+                                return  groupingExtractor.getGroupingIdentifiers(response);
+                            } catch (ClassNotFoundException e) {
+                                handleException(groupingExtractorClass+" is not found in run time", e);
+                                return null;
+                            } catch (IllegalAccessException e) {
+                                handleException("Error occurred while invocation of getGroupingIdentifier method", e);
+                                return null;
+                            } catch (InstantiationException e) {
+                                handleException("Error occurred while instantiating "+groupingExtractorClass+" class", e);
+                                return null;
+                            }
+                    }
+                return null;
+            }
+
+	@Override
+	public Set<SubscribedAPI> getSubscribedAPIs(Subscriber subscriber,
+			String applicationName, String groupId)throws APIManagementException{
+			Set<SubscribedAPI> subscribedAPIs = null;
+    try {
+        subscribedAPIs = apiMgtDAO.getSubscribedAPIs(subscriber, applicationName, groupId);
+        if(subscribedAPIs!=null && !subscribedAPIs.isEmpty()){
+            Map<String, Tier> tiers=APIUtil.getTiers(tenantId);
+            for(SubscribedAPI subscribedApi:subscribedAPIs) {
+                Tier tier=tiers.get(subscribedApi.getTier().getName());
+                subscribedApi.getTier().setDisplayName(tier!=null?tier.getDisplayName():subscribedApi.getTier().getName());
+                subscribedAPIs.add(subscribedApi);
+            }
+        }
+    } catch (APIManagementException e) {
+        handleException("Failed to get APIs of " + subscriber.getName() + " under application " + applicationName, e);
+    }
+    return subscribedAPIs;
+	}
+
+	@Override
+	public Application[] getApplications(Subscriber subscriber, String groupId)
+			throws APIManagementException {
+		return apiMgtDAO.getApplications(subscriber, groupId);
+	}
 
 }

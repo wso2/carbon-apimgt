@@ -36,6 +36,7 @@ import java.util.regex.Pattern;
  */
 public class EndpointDefinition implements AspectConfigurable {
 
+	public static final String DYNAMIC_URL_VALUE = "DYNAMIC_URL_VALUE";
     /** Who is the leaf level Endpoint which uses me? */
     private Endpoint leafEndpoint = null;
     /**
@@ -187,21 +188,27 @@ public class EndpointDefinition implements AspectConfigurable {
         if (address == null) {
             return null;
         }
-
+        
+        String addressString = address;
+        String dynamicUrl = (String) messageContext.getProperty(DYNAMIC_URL_VALUE); // See ESBJAVA-3183.
+        if (dynamicUrl != null && !dynamicUrl.isEmpty()) {
+            addressString = dynamicUrl;
+        }
+        
         boolean matches = false;
         int s = 0;
         Pattern pattern = Pattern.compile("\\$\\{.*?\\}");
 
         StringBuffer computedAddress = new StringBuffer();
 
-        Matcher matcher = pattern.matcher(address);
+        Matcher matcher = pattern.matcher(addressString);
         while (matcher.find()) {
 
 
             Object property = messageContext.getProperty(
-                    address.substring(matcher.start() + 2, matcher.end() - 1));
+                    addressString.substring(matcher.start() + 2, matcher.end() - 1));
             if (property != null) {
-                computedAddress.append(address.substring(s, matcher.start()));
+                computedAddress.append(addressString.substring(s, matcher.start()));
                 computedAddress.append(property.toString());
                 s = matcher.end();
                 matches = true;
@@ -209,9 +216,9 @@ public class EndpointDefinition implements AspectConfigurable {
         }
 
         if (!matches) {
-            return address;
+            return addressString;
         } else {
-            computedAddress.append(address.substring(s, address.length()));
+            computedAddress.append(addressString.substring(s, addressString.length()));
             return computedAddress.toString();
         }
     }

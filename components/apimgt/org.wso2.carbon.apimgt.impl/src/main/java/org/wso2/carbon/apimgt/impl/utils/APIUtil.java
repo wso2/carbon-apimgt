@@ -3954,7 +3954,38 @@ public final class APIUtil {
         }
         return publishedEnvironments.toString();
     }
+  /**
+     * Given the apps and the application name to check for, it will check if the application already exists.
+     * 
+     * @param apps The collection of applications
+     * @param name The application to be checked if exists
+     * @return true - if an application of the name <name> already exists in the collection <apps>
+     *         false-  if an application of the name <name>  does not already exists in the collection <apps> 
+     */
+    public static boolean doesApplicationExist(Application[] apps, String name){
+    	boolean doesApplicationExist = false;
+        if (apps != null) {
+            for (Application app : apps) {
+                if (app.getName().equals(name)) {
+                	doesApplicationExist = true;
+                }
+            }
+        }
+        return doesApplicationExist;
+    }
 
+    /**
+     * Read the group id extractor class reference from api-manager.xml.
+     *
+     * @return group id extractor class reference.
+     */
+    public static String getGroupingExtractorImplementation() {
+        APIManagerConfiguration config = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
+                .getAPIManagerConfiguration();
+
+        String gropingExtractorClass = config.getFirstProperty(APIConstants.API_STORE_GROUP_EXTRACTOR_IMPLEMENTATION);
+        return gropingExtractorClass;
+	}
     /**
      * This method will update the permission cache of the tenant which is related to the given usename
      *

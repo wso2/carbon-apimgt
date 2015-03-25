@@ -176,7 +176,7 @@ $('#editStatus option').each(  //when refreshed page the default is not selected
                         var t = setTimeout("hideMsg()", 3000);
 
                         // call after lifecycle change to display message if the API is published to external stores
-                        and status is not published
+                        // and status is not published
                         checkExternalStores(lastLcChange.newStatus);
 
                   }else{

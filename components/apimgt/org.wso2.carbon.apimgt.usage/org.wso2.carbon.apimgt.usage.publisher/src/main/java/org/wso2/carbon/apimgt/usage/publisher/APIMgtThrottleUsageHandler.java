@@ -19,7 +19,6 @@ package org.wso2.carbon.apimgt.usage.publisher;
 
 import org.apache.synapse.MessageContext;
 import org.apache.synapse.mediators.AbstractMediator;
-import org.apache.synapse.rest.RESTConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityUtils;
 import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationContext;
 import org.wso2.carbon.apimgt.usage.publisher.dto.ThrottlePublisherDTO;
@@ -72,15 +71,17 @@ public class APIMgtThrottleUsageHandler extends AbstractMediator {
                 throttlePublisherDTO.setUsername(username);
                 throttlePublisherDTO.setTenantDomain(MultitenantUtils.getTenantDomain(username));
                 throttlePublisherDTO.setApiname((String) messageContext.getProperty(
-                        "API_NAME"));
+                        APIMgtUsagePublisherConstants.API));
                 throttlePublisherDTO.setVersion((String) messageContext.getProperty(
-                        RESTConstants.SYNAPSE_REST_API_VERSION));
+                        APIMgtUsagePublisherConstants.API_VERSION));
                 throttlePublisherDTO.setContext((String) messageContext.getProperty(
-                        RESTConstants.REST_API_CONTEXT));
+                        APIMgtUsagePublisherConstants.CONTEXT));
                 throttlePublisherDTO.setProvider((String) messageContext.getProperty(
-                        "API_PUBLISHER"));
-                throttlePublisherDTO.setApplicationName(authContext.getApplicationName());
-                throttlePublisherDTO.setApplicationId(authContext.getApplicationId());
+                        APIMgtUsagePublisherConstants.API_PUBLISHER));
+                throttlePublisherDTO.setApplicationName((String) messageContext.getProperty(
+                        APIMgtUsagePublisherConstants.APPLICATION_NAME));
+                throttlePublisherDTO.setApplicationId((String) messageContext.getProperty(
+                        APIMgtUsagePublisherConstants.APPLICATION_ID));
                 throttlePublisherDTO.setThrottledTime(currentTime);
                 publisher.publishEvent(throttlePublisherDTO);
 

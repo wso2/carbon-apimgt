@@ -607,7 +607,7 @@ public class Axis2MessageContext implements MessageContext {
     }
 
     public boolean isContinuationEnabled() {
-        return continuationEnabled;
+    	 return continuationEnabled ? true : synEnv.isContinuationEnabled();
     }
 
     public void setContinuationEnabled(boolean continuationEnabled) {
