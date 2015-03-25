@@ -36,6 +36,7 @@ import org.codehaus.jettison.json.JSONObject;
 import org.json.simple.JSONArray;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.*;
+import org.wso2.carbon.apimgt.api.model.OAuthApplicationInfo;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.AbstractKeyManager;
 import org.wso2.carbon.apimgt.impl.clients.ApplicationManagementServiceClient;
@@ -160,8 +161,7 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
 
         OAuthApplicationInfo oAuthApplicationInfo = new OAuthApplicationInfo();
         try {
-            org.wso2.carbon.apimgt.api.model.xsd.OAuthApplicationInfo info = keyMgtClient.
-                    getOAuthApplication(consumerKey);
+            org.wso2.carbon.apimgt.api.model.xsd.OAuthApplicationInfo info = keyMgtClient.getOAuthApplication(consumerKey);
             oAuthApplicationInfo.setClientName(info.getClientName());
             oAuthApplicationInfo.setClientId(info.getClientId());
             oAuthApplicationInfo.setCallBackURL(info.getCallBackURL());
