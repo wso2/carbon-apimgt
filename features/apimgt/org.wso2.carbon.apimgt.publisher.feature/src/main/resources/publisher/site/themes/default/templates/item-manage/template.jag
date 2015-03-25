@@ -574,6 +574,9 @@
             if(!validate_tiers()){
                 return false;
             }
+            if(!validate_Transports()){
+                return false;
+            }
             var designer = APIDesigner();
             $('#swagger').val(JSON.stringify(designer.api_doc));
             $('#saveMessage').show();
