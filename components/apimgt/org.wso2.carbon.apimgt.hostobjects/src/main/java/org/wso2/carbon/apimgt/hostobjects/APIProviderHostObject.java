@@ -44,6 +44,7 @@ import org.json.simple.parser.ParseException;
 import org.mozilla.javascript.*;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
+import org.wso2.carbon.apimgt.api.FaultGatewaysException;
 import org.wso2.carbon.apimgt.api.dto.UserApplicationAPIUsage;
 import org.wso2.carbon.apimgt.api.model.*;
 import org.wso2.carbon.apimgt.hostobjects.internal.HostObjectComponent;
@@ -147,7 +148,9 @@ public class APIProviderHostObject extends ScriptableObject {
         log.error(msg, t);
         throw new APIManagementException(msg, t);
     }
-
+    private static void handleFaultGateWayException(FaultGatewaysException e) throws FaultGatewaysException {
+        throw e;
+    }
     public static NativeObject jsFunction_login(Context cx, Scriptable thisObj,
                                                 Object[] args, Function funObj)
             throws APIManagementException {
@@ -301,11 +304,12 @@ public class APIProviderHostObject extends ScriptableObject {
      * @param thisObj Scriptable object
      * @param args    Passing arguments
      * @param funObj  Function object
-     * @return json String of environments failed
+     * @return true if the API was added successfully
      * @throws APIManagementException Wrapped exception by org.wso2.carbon.apimgt.api.APIManagementException
      */
-    public static String jsFunction_manageAPI(Context cx, Scriptable thisObj,
-                                              Object[] args, Function funObj) throws APIManagementException, ScriptException {
+    public static boolean jsFunction_manageAPI(Context cx, Scriptable thisObj,
+                                               Object[] args, Function funObj)
+            throws APIManagementException, ScriptException, FaultGatewaysException {
     	boolean success = false;
     	
     	if (args==null||args.length == 0) {
@@ -486,12 +490,12 @@ public class APIProviderHostObject extends ScriptableObject {
      * @param thisObj Scriptable object
      * @param args    Passing arguments
      * @param funObj  Function object
-     * @return json string of failed environments
+     * @return true if the API was added successfully
      * @throws APIManagementException Wrapped exception by org.wso2.carbon.apimgt.api.APIManagementException
      */
-    public static String jsFunction_updateAPIImplementation(Context cx, Scriptable thisObj,
+    public static boolean jsFunction_updateAPIImplementation(Context cx, Scriptable thisObj,
                                                             Object[] args, Function funObj)
-            throws APIManagementException, ScriptException {
+            throws APIManagementException, ScriptException, FaultGatewaysException {
     	
     	if (args==null||args.length == 0) {
             handleException("Invalid number of input parameters.");
@@ -577,12 +581,12 @@ public class APIProviderHostObject extends ScriptableObject {
      * @param thisObj Scriptable object
      * @param args    Passing arguments
      * @param funObj  Function object
-     * @return json string of failed environments
+     * @return true if the API was added successfully
      * @throws APIManagementException Wrapped exception by org.wso2.carbon.apimgt.api.APIManagementException
      */
-    public static String jsFunction_updateAPIDesign(Context cx, Scriptable thisObj,
-                                                    Object[] args, Function funObj)
-            throws APIManagementException, ScriptException {
+    public static boolean jsFunction_updateAPIDesign(Context cx, Scriptable thisObj,
+                                                     Object[] args, Function funObj)
+            throws APIManagementException, ScriptException, FaultGatewaysException {
 
         if (args==null||args.length == 0) {
             handleException("Invalid number of input parameters.");
@@ -686,12 +690,12 @@ public class APIProviderHostObject extends ScriptableObject {
      * @param thisObj Scriptable object
      * @param args    Passing arguments
      * @param funObj  Function object
-     * @return json string of failed Environments
+     * @return true if the API was added successfully
      * @throws APIManagementException Wrapped exception by org.wso2.carbon.apimgt.api.APIManagementException
      */
-    public static String jsFunction_createAPI(Context cx, Scriptable thisObj,
-                                              Object[] args, Function funObj)
-            throws APIManagementException, ScriptException {
+    public static boolean jsFunction_createAPI(Context cx, Scriptable thisObj,
+                                               Object[] args, Function funObj)
+            throws APIManagementException, ScriptException, FaultGatewaysException {
 
         if (args==null||args.length == 0) {
             handleException("Invalid number of input parameters.");
@@ -805,12 +809,13 @@ public class APIProviderHostObject extends ScriptableObject {
      * @param api
      * @param fileHostObject
      * @param create
-     * @return json string of failed Environments
+     * @return true if the API was added successfully
      * @throws APIManagementException
      */
-    private static String saveAPI(APIProvider apiProvider, API api,
-                                  FileHostObject fileHostObject, boolean create) throws APIManagementException {
-        String success = null;
+    private static boolean saveAPI(APIProvider apiProvider,API api,
+                                  FileHostObject fileHostObject, boolean create)
+            throws APIManagementException, FaultGatewaysException {
+    	boolean success = false;
     	boolean isTenantFlowStarted = false;
         try {
             String tenantDomain =
@@ -833,16 +838,17 @@ public class APIProviderHostObject extends ScriptableObject {
             }  
             if (create) {
             	apiProvider.addAPI(api);
-                success = createFailedGatewaysAsJsonString(Collections.<String, List<String>>emptyMap());
             } else {
-                Map<String, List<String>> failedGateways = apiProvider.updateAPI(api);
-                success = createFailedGatewaysAsJsonString(failedGateways);
+                apiProvider.updateAPI(api);
             }
-
+            success = true;
         } catch (ScriptException e) {
             handleException("Error while adding the API- " + api.getId().getApiName() + "-" + api.getId().getVersion(),
                             e);
-            return createFailedGatewaysAsJsonString(Collections.<String, List<String>>emptyMap());
+            return false;
+        } catch (FaultGatewaysException e) {
+            handleFaultGateWayException(e);
+            return false;
         } finally {
         	if (isTenantFlowStarted) {
         		PrivilegedCarbonContext.endTenantFlow();
@@ -1800,19 +1806,19 @@ public class APIProviderHostObject extends ScriptableObject {
      * @param thisObj Scriptable object
      * @param args Passing arguments
      * @param funObj Function object
-     * @return json string of failed environments
+     * @return true if the API was added successfully
      * @throws APIManagementException
      */
-    public static String jsFunction_updateAPIStatus(Context cx, Scriptable thisObj,
+    public static boolean jsFunction_updateAPIStatus(Context cx, Scriptable thisObj,
                                                     Object[] args,
                                                     Function funObj)
-            throws APIManagementException {
+            throws APIManagementException, FaultGatewaysException {
         if (args == null || args.length == 0) {
             handleException("Invalid number of input parameters.");
         }
-        Map<String, List<String>> failedGateways = new ConcurrentHashMap<String, List<String>>();
+
         NativeObject apiData = (NativeObject) args[0];
-        String success = null;
+        boolean success = false;
         String provider = (String) apiData.get("provider", apiData);
         String providerTenantMode = (String) apiData.get("provider", apiData);
         provider = APIUtil.replaceEmailDomain(provider);
@@ -1839,7 +1845,7 @@ public class APIProviderHostObject extends ScriptableObject {
                 APIStatus oldStatus = api.getStatus();
                 APIStatus newStatus = getApiStatus(status);
                 String currentUser = ((APIProviderHostObject) thisObj).getUsername();
-                failedGateways = apiProvider.changeAPIStatus(api, newStatus, currentUser, publishToGateway);
+                apiProvider.changeAPIStatus(api, newStatus, currentUser, publishToGateway);
 
                 if (oldStatus.equals(APIStatus.CREATED) && newStatus.equals(APIStatus.PUBLISHED)) {
                     if (makeKeysForwardCompatible) {
@@ -1853,25 +1859,28 @@ public class APIProviderHostObject extends ScriptableObject {
                             if (oldAPI.getId().getApiName().equals(name) &&
                                 versionComparator.compare(oldAPI, api) < 0 &&
                                 (oldAPI.getStatus().equals(APIStatus.PUBLISHED))) {
-                                failedGateways = apiProvider.changeAPIStatus(oldAPI, APIStatus.DEPRECATED,
+                                apiProvider.changeAPIStatus(oldAPI, APIStatus.DEPRECATED,
                                                                              currentUser, publishToGateway);
                             }
                         }
                     }
                 }
-
+                success = true;
             } else {
                 handleException("Couldn't find an API with the name-" + name + "version-" + version);
             }
         } catch (APIManagementException e) {
             handleException("Error while updating API status", e);
-            return createFailedGatewaysAsJsonString(failedGateways);
-        }finally {
+            return false;
+        } catch (FaultGatewaysException e) {
+            handleFaultGateWayException(e);
+            return false;
+        } finally {
         	if (isTenantFlowStarted) {
         		PrivilegedCarbonContext.endTenantFlow();
         	}
         }
-        return createFailedGatewaysAsJsonString(failedGateways);
+        return success;
     }
 
     public static boolean jsFunction_updateSubscriptionStatus(Context cx, Scriptable thisObj,
@@ -4747,34 +4756,4 @@ public class APIProviderHostObject extends ScriptableObject {
         }
         return myn;
     }
-
-    /**
-     * @param failedGateways map of failed environments
-     * @return json string of input map
-     */
-    private static String createFailedGatewaysAsJsonString(Map<String, List<String>> failedGateways) {
-        String failedJson = "{\"PUBLISHED\" : \"\" ,\"UNPUBLISHED\":\"\"}";
-        if (failedGateways != null) {
-            if (!failedGateways.isEmpty()) {
-                StringBuilder failedToPublish = new StringBuilder();
-                StringBuilder failedToUnPublish = new StringBuilder();
-                for (String environmentName : failedGateways.get("PUBLISHED")) {
-                    failedToPublish.append(environmentName + ",");
-                }
-                for (String environmentName : failedGateways.get("UNPUBLISHED")) {
-                    failedToUnPublish.append(environmentName + ",");
-                }
-                if (!"".equals(failedToPublish.toString())) {
-                    failedToPublish.deleteCharAt(failedToPublish.length() - 1);
-                }
-                if (!"".equals(failedToUnPublish.toString())) {
-                    failedToUnPublish.deleteCharAt(failedToUnPublish.length() - 1);
-                }
-                failedJson = "{\"PUBLISHED\" : \"" + failedToPublish.toString() + "\" ,\"UNPUBLISHED\":\"" +
-                             failedToUnPublish.toString() + "\"}";
-            }
-        }
-        return failedJson;
-    }
-
 }

@@ -32,6 +32,7 @@ import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
+import org.wso2.carbon.apimgt.api.FaultGatewaysException;
 import org.wso2.carbon.apimgt.api.dto.UserApplicationAPIUsage;
 import org.wso2.carbon.apimgt.api.model.*;
 import org.wso2.carbon.apimgt.impl.dto.Environment;
@@ -459,9 +460,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      * @param api API
      * @throws org.wso2.carbon.apimgt.api.APIManagementException
      *          if failed to update API
-     * @return map of failed environments
+     * @throws org.wso2.carbon.apimgt.api.FaultGatewaysException on Gateway Failure
      */
-    public Map<String, List<String>> updateAPI(API api) throws APIManagementException {
+    public void updateAPI(API api) throws APIManagementException, FaultGatewaysException {
         Map<String, List<String>> failedGateways = new HashMap<String, List<String>>();
         API oldApi = getAPI(api.getId());
         if (oldApi.getStatus().equals(api.getStatus())) {
@@ -629,7 +630,10 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             // Use changeAPIStatus for that kind of updates.
             throw new APIManagementException("Invalid API update operation involving API status changes");
         }
-        return failedGateways;
+        if (!failedGateways.isEmpty() &&
+            (!failedGateways.get("UNPUBLISHED").isEmpty() || !failedGateways.get("PUBLISHED").isEmpty())) {
+            throw new FaultGatewaysException(failedGateways);
+        }
     }
 
 
@@ -685,8 +689,17 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                             updateApiArtifact.setAttribute(APIConstants.API_OVERVIEW_WSDL, api.getWsdlUrl());
                         }
                     }
-                }                
-
+                } else if (registry != null && wsdlURL != null && !wsdlURL.isEmpty()) {
+                    String[] wsdlUrlRelativePath =
+                            wsdlURL.split(RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH);
+                    String wsdlRegistryPath = null;
+                    if (wsdlUrlRelativePath.length == 2) {
+                        wsdlRegistryPath = wsdlUrlRelativePath[1];
+                    }
+                    registry.delete(wsdlRegistryPath);
+                    registry.removeAssociation(artifactPath, wsdlURL, CommonConstants.ASSOCIATION_TYPE01);
+                    updateApiArtifact.setAttribute(APIConstants.API_OVERVIEW_WSDL, "");
+                }
                 if (api.getUrl() != null && !"".equals(api.getUrl())){
                     String path = APIUtil.createEndpoint(api.getUrl(), registry);
                     if (path != null) {
@@ -793,8 +806,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 		}
     }
 
-    public Map<String, List<String>> changeAPIStatus(API api, APIStatus status, String userId,
-                                                     boolean updateGatewayConfig) throws APIManagementException {
+    public void changeAPIStatus(API api, APIStatus status, String userId,
+                                boolean updateGatewayConfig)
+            throws APIManagementException, FaultGatewaysException {
         Map<String, List<String>> failedGateways = new ConcurrentHashMap<String, List<String>>();
         APIStatus currentStatus = api.getStatus();
         if (!currentStatus.equals(status)) {
@@ -858,7 +872,10 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 PrivilegedCarbonContext.endTenantFlow();
             }
         }
-        return failedGateways;
+        if (!failedGateways.isEmpty() &&
+            (!failedGateways.get("UNPUBLISHED").isEmpty() || !failedGateways.get("PUBLISHED").isEmpty())) {
+            throw new FaultGatewaysException(failedGateways);
+        }
     }
 
     /**
