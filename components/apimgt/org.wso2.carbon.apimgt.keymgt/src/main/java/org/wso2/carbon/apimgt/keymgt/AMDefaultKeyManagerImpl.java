@@ -67,9 +67,8 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
 
     private static final String OAUTH_RESPONSE_ACCESSTOKEN = "access_token";
     private static final String OAUTH_RESPONSE_EXPIRY_TIME = "expires_in";
-    //private static final String GRANT_TYPE_VALUE = "open_keymanager";
-    private static final String GRANT_TYPE_VALUE = "client_credentials";
-    //private static final String GRANT_TYPE_PARAM_VALIDITY = "validity_period";
+    private static final String GRANT_TYPE_VALUE = "open_keymanager";
+    private static final String GRANT_TYPE_PARAM_VALIDITY = "validity_period";
 
     private KeyManagerConfiguration configuration;
 
@@ -243,8 +242,8 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
             HttpPost httpTokpost = new HttpPost(tokenEndpoint);
             List<NameValuePair> tokParams = new ArrayList<NameValuePair>(3);
             tokParams.add(new BasicNameValuePair(OAuth.OAUTH_GRANT_TYPE, GRANT_TYPE_VALUE));
-            //tokParams.add(new BasicNameValuePair(GRANT_TYPE_PARAM_VALIDITY,
-            //                                     Long.toString(tokenRequest.getValidityPeriod())));
+            tokParams.add(new BasicNameValuePair(GRANT_TYPE_PARAM_VALIDITY,
+                                                 Long.toString(tokenRequest.getValidityPeriod())));
             tokParams.add(new BasicNameValuePair(OAuth.OAUTH_CLIENT_ID, tokenRequest.getClientId()));
             tokParams.add(new BasicNameValuePair(OAuth.OAUTH_CLIENT_SECRET, tokenRequest.getClientSecret()));
             tokParams.add(new BasicNameValuePair("scope", applicationScope));
