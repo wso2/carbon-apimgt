@@ -140,7 +140,7 @@
     "dark":"Light",
 
     "pwHelpMsgLine1":"For a more secure password:",
-    "pwHelpMsgLine2":"Use 6 to 32 characters",
+    "pwHelpMsgLine2":"Use 6 to 30 characters",
     "pwHelpMsgLine3":"Use both letters and numbers",
     "pwHelpMsgLine4":"Add special characters (such as @, ?, %)",
     "pwHelpMsgLine5":"Mix capital and lowercase letters",
