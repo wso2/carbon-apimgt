@@ -4074,8 +4074,8 @@ public class ApiMgtDAO {
 
         if (consumerKey != null) {
             String addApplicationKeyMapping = "INSERT INTO " +
-                    "AM_APPLICATION_KEY_MAPPING (APPLICATION_ID,CONSUMER_KEY,KEY_TYPE,STATE) " +
-                    "VALUES (?,?,?,?)";
+                    "AM_APPLICATION_KEY_MAPPING (APPLICATION_ID,CONSUMER_KEY,KEY_TYPE,STATE,MAPPED) " +
+                    "VALUES (?,?,?,?,?)";
             try {
                 connection = APIMgtDBUtil.getConnection();
 
@@ -4084,6 +4084,7 @@ public class ApiMgtDAO {
                 ps.setString(2, consumerKey);
                 ps.setString(3, (String) oAuthApplicationInfo.getParameter(ApplicationConstants.APP_KEY_TYPE));
                 ps.setString(4, APIConstants.AppRegistrationStatus.REGISTRATION_COMPLETED);
+                ps.setBoolean(5,true);
                 ps.execute();
                 //create client at keyManager after adding record to table.Why? becaues  if something goes wrong
                 //adding to AM_APPLICATION_KEY_MAPPING create client at key manager will not happen.
