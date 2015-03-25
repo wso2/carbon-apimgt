@@ -139,4 +139,42 @@ public interface KeyManager {
                                                            AccessTokenRequest tokenRequest) throws APIManagementException;
 
     void loadConfiguration(String configuration) throws APIManagementException;
+
+    /**
+     * This Method will talk to APIResource registration end point  of  authorization server and creates a new resource
+     *
+     * @param  api this is a API object which contains all details about a API.
+     * @param  resourceAttributes this param will contains additional details if required.
+     * @return true if sucessfully registered. false if there is a error while registering a new resource.
+     * @throws APIManagementException
+     */
+
+    boolean registerNewResource(API api , Map resourceAttributes) throws APIManagementException;
+
+    /**
+     * This method will be used to retrieve registered resource by given API ID.
+     *
+     * @param apiId APIM api id.
+     * @return It will return a Map with registered resource details.
+     * @throws APIManagementException
+     */
+    Map getResourceByApiId(String apiId) throws APIManagementException;
+
+    /**
+     * This method is responsible for update given APIResource  by its resourceId.
+     *
+     * @param  api this is a API object which contains all details about a API.
+     * @param  resourceAttributes this param will contains additional details if required.
+     * @return TRUE|FALSE. if it is successfully updated it will return TRUE or else FALSE.
+     * @throws APIManagementException
+     */
+    boolean updateRegisteredResource(API api , Map resourceAttributes) throws APIManagementException;
+
+    /**
+     * This method will accept API id  as a parameter  and will delete the registered resource.
+     *
+     * @param apiID API id.
+     * @throws APIManagementException
+     */
+    void deleteRegisteredResourceByAPIId(String apiID) throws APIManagementException;
 }

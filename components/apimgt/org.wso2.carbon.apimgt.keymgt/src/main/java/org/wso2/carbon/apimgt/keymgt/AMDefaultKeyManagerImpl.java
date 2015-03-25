@@ -35,12 +35,7 @@ import org.apache.http.util.EntityUtils;
 import org.codehaus.jettison.json.JSONObject;
 import org.json.simple.JSONArray;
 import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.api.model.AccessTokenInfo;
-import org.wso2.carbon.apimgt.api.model.AccessTokenRequest;
-import org.wso2.carbon.apimgt.api.model.ApplicationConstants;
-import org.wso2.carbon.apimgt.api.model.KeyManagerConfiguration;
-import org.wso2.carbon.apimgt.api.model.OAuthApplicationInfo;
-import org.wso2.carbon.apimgt.api.model.OauthAppRequest;
+import org.wso2.carbon.apimgt.api.model.*;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.AbstractKeyManager;
 import org.wso2.carbon.apimgt.impl.clients.ApplicationManagementServiceClient;
@@ -64,6 +59,7 @@ import java.io.ByteArrayInputStream;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 /**
  * This class holds the key manager implementation considering WSO2 as the identity provider
@@ -398,6 +394,26 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
             }
 
         }
+    }
+
+    @Override
+    public boolean registerNewResource(API api, Map resourceAttributes) throws APIManagementException {
+        return true;
+    }
+
+    @Override
+    public Map getResourceByApiId(String apiId) throws APIManagementException {
+        return null;
+    }
+
+    @Override
+    public boolean updateRegisteredResource(API api, Map resourceAttributes) throws APIManagementException {
+        return false;
+    }
+
+    @Override
+    public void deleteRegisteredResourceByAPIId(String apiID) throws APIManagementException {
+
     }
 
     /**
