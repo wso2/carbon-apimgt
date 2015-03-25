@@ -296,9 +296,9 @@
             </dependency>
 
             <dependency>
-                <groupId>org.wso2.carbon</groupId>
-                <artifactId>org.wso2.carbon.usage.agent</artifactId>
-                <version>2.1.2</version>
+                <groupId>org.wso2.carbon.multitenancy</groupId>
+                <artifactId>org.wso2.carbon.tenant.usage.agent</artifactId>
+                <version>${carbon.multitenancy.version}</version>
             </dependency>
 
             <dependency>
@@ -576,9 +576,9 @@
             </dependency>
 
             <dependency>
-                <groupId>org.wso2.carbon</groupId>
+                <groupId>org.wso2.carbon.commons</groupId>
                 <artifactId>org.wso2.carbon.ganalytics.publisher</artifactId>
-                <version>${ganalytics.version}</version>
+                <version>${carbon.commons.version}</version>
             </dependency>
 
             <dependency>
@@ -750,11 +750,11 @@
         <throttle.version.handlers>3.3.0</throttle.version.handlers>
 
         <libthrift.wso2.version>0.7.wso2v1</libthrift.wso2.version>
-        <ganalytics.version>4.2.0</ganalytics.version>
         <orbit.version.json>2.0.0.wso2v1</orbit.version.json>
 
         <javax.xml.soap.imp.pkg.version>[1.0.0, 1.1.0)</javax.xml.soap.imp.pkg.version>
         <javax.xml.stream.imp.pkg.version>[1.0.1, 1.1.0)</javax.xml.stream.imp.pkg.version>
+        <carbon.multitenancy.version>4.3.4</carbon.multitenancy.version>
     </properties>
 </project>
 
