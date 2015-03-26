@@ -60,7 +60,7 @@ public class UserAwareAPIProvider extends APIProviderImpl {
     }
 
     @Override
-    public Map<String, List<String>> manageAPI(API api) throws APIManagementException {
+    public void manageAPI(API api) throws APIManagementException,FaultGatewaysException {
         boolean permitted = APIUtil.checkPermissionQuietly(username, APIConstants.Permissions.API_CREATE) ||
                 APIUtil.checkPermissionQuietly(username, APIConstants.Permissions.API_PUBLISH);
         if(!permitted){
@@ -68,7 +68,7 @@ public class UserAwareAPIProvider extends APIProviderImpl {
             throw new APIManagementException("User '" + username + "' does not have the " +
                     "required permission: " + permission);
         }
-        return super.updateAPI(api);
+        super.updateAPI(api);
     }
 
     @Override
