@@ -840,7 +840,7 @@ public class APIProviderHostObject extends ScriptableObject {
             	apiProvider.addAPI(api);
             } else {
 
-                apiProvider.updateAPI(api);
+                apiProvider.manageAPI(api);
             }
             success = true;
         } catch (ScriptException e) {
