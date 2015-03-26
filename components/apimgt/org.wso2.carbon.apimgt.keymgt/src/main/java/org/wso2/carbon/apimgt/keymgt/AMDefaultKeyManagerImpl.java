@@ -27,37 +27,45 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
+import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
+import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 import org.json.simple.JSONArray;
 import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.api.model.*;
+import org.wso2.carbon.apimgt.api.model.API;
+import org.wso2.carbon.apimgt.api.model.AccessTokenInfo;
+import org.wso2.carbon.apimgt.api.model.AccessTokenRequest;
+import org.wso2.carbon.apimgt.api.model.ApplicationConstants;
+import org.wso2.carbon.apimgt.api.model.KeyManagerConfiguration;
 import org.wso2.carbon.apimgt.api.model.OAuthApplicationInfo;
+import org.wso2.carbon.apimgt.api.model.OauthAppRequest;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.AbstractKeyManager;
-import org.wso2.carbon.apimgt.impl.clients.ApplicationManagementServiceClient;
-import org.wso2.carbon.apimgt.impl.clients.OAuth2TokenValidationServiceClient;
-import org.wso2.carbon.apimgt.impl.clients.OAuthAdminClient;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.keymgt.client.SubscriberKeyMgtClient;
+import org.wso2.carbon.apimgt.keymgt.stub.types.carbon.ApplicationKeysDTO;
 import org.wso2.carbon.apimgt.keymgt.util.APIKeyMgtDataHolder;
 import org.wso2.carbon.apimgt.keymgt.util.APIKeyMgtUtil;
 import org.wso2.carbon.identity.oauth.stub.dto.OAuthConsumerAppDTO;
-import org.wso2.carbon.apimgt.keymgt.stub.types.carbon.ApplicationKeysDTO;
 import org.wso2.carbon.identity.oauth2.OAuth2TokenValidationService;
 import org.wso2.carbon.identity.oauth2.dto.OAuth2ClientApplicationDTO;
 import org.wso2.carbon.identity.oauth2.dto.OAuth2TokenValidationRequestDTO;
 import org.wso2.carbon.identity.oauth2.dto.OAuth2TokenValidationResponseDTO;
 
-
 import javax.xml.stream.XMLStreamException;
 import java.io.ByteArrayInputStream;
-import java.util.*;
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 
 /**
  * This class holds the key manager implementation considering WSO2 as the identity provider
@@ -161,19 +169,35 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
         OAuthApplicationInfo oAuthApplicationInfo = new OAuthApplicationInfo();
         try {
             org.wso2.carbon.apimgt.api.model.xsd.OAuthApplicationInfo info = keyMgtClient.getOAuthApplication(consumerKey);
+
+            if (info == null || info.getClientId() == null){
+                return null;
+            }
             oAuthApplicationInfo.setClientName(info.getClientName());
             oAuthApplicationInfo.setClientId(info.getClientId());
             oAuthApplicationInfo.setCallBackURL(info.getCallBackURL());
 
             JSONObject jsonObject  = new JSONObject(info.getJsonString());
-            oAuthApplicationInfo.addParameter(ApplicationConstants.
-                    OAUTH_CLIENT_SECRET, jsonObject.get(ApplicationConstants.OAUTH_CLIENT_SECRET));
-            oAuthApplicationInfo.addParameter(ApplicationConstants.
-                    OAUTH_REDIRECT_URIS, jsonObject.get(ApplicationConstants.OAUTH_REDIRECT_URIS));
-            oAuthApplicationInfo.addParameter(ApplicationConstants.
-                    OAUTH_CLIENT_NAME, jsonObject.get(ApplicationConstants.OAUTH_CLIENT_NAME));
-            oAuthApplicationInfo.addParameter(ApplicationConstants.
-                    OAUTH_CLIENT_GRANT, jsonObject.get(ApplicationConstants.OAUTH_CLIENT_GRANT));
+            if(jsonObject.has(ApplicationConstants.OAUTH_CLIENT_SECRET)) {
+                oAuthApplicationInfo.addParameter(ApplicationConstants.
+                                                          OAUTH_CLIENT_SECRET, jsonObject.get(ApplicationConstants.OAUTH_CLIENT_SECRET));
+            }
+
+            if(jsonObject.has(ApplicationConstants.
+                                      OAUTH_REDIRECT_URIS)) {
+                oAuthApplicationInfo.addParameter(ApplicationConstants.
+                                                          OAUTH_REDIRECT_URIS, jsonObject.get(ApplicationConstants.OAUTH_REDIRECT_URIS));
+            }
+
+            if (jsonObject.has(ApplicationConstants.OAUTH_CLIENT_NAME)) {
+                oAuthApplicationInfo.addParameter(ApplicationConstants.
+                                                          OAUTH_CLIENT_NAME, jsonObject.get(ApplicationConstants.OAUTH_CLIENT_NAME));
+            }
+
+            if (jsonObject.has(ApplicationConstants.OAUTH_CLIENT_GRANT)) {
+                oAuthApplicationInfo.addParameter(ApplicationConstants.
+                                                          OAUTH_CLIENT_GRANT, jsonObject.get(ApplicationConstants.OAUTH_CLIENT_GRANT));
+            }
 
         } catch (Exception e) {
             handleException("Can not retrieve OAuth application for the given consumer key : " + consumerKey, e);
@@ -189,7 +213,7 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
         long validityPeriod = 0;
         AccessTokenInfo tokenInfo = null;
 
-        if(tokenRequest == null){
+        if (tokenRequest == null) {
             log.warn("No information available to generate Token.");
             return null;
         }
@@ -236,7 +260,6 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
 
             String applicationScope = APIKeyMgtDataHolder.getApplicationTokenScope();
 
-
             //Generate New Access Token
             HttpClient tokenEPClient = APIKeyMgtUtil.getHttpClient(keyMgtPort, keyMgtProtocol);
             HttpPost httpTokpost = new HttpPost(tokenEndpoint);
@@ -248,13 +271,12 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
             tokParams.add(new BasicNameValuePair(OAuth.OAUTH_CLIENT_SECRET, tokenRequest.getClientSecret()));
             tokParams.add(new BasicNameValuePair("scope", applicationScope));
 
-
             httpTokpost.setEntity(new UrlEncodedFormEntity(tokParams, "UTF-8"));
             HttpResponse tokResponse = tokenEPClient.execute(httpTokpost);
             HttpEntity tokEntity = tokResponse.getEntity();
 
             if (tokResponse.getStatusLine().getStatusCode() != 200) {
-                throw new RuntimeException("Failed : HTTP error code : " +
+                throw new RuntimeException("Error occurred while calling token endpoint: HTTP error code : " +
                                            tokResponse.getStatusLine().getStatusCode());
             } else {
                 tokenInfo = new AccessTokenInfo();
@@ -266,10 +288,14 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
                 tokenInfo.setValidityPeriod(validityPeriod);
 
             }
-        } catch (Exception e) {
-            String errMsg = "Error in getting new accessToken";
-            log.error(errMsg, e);
-            throw new APIManagementException(errMsg, e);
+        } catch (ClientProtocolException e) {
+            handleException("Error while creating token - Invalid protocol used", e);
+        } catch (UnsupportedEncodingException e) {
+            handleException("Error while preparing request for token/revoke APIs", e);
+        } catch (IOException e) {
+            handleException("Error while creating tokens - " + e.getMessage(), e);
+        } catch (JSONException e) {
+            handleException("Error while parsing response from token api", e);
         }
 
         return tokenInfo;
@@ -279,15 +305,6 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
     public AccessTokenInfo getTokenMetaData(String accessToken) throws APIManagementException {
 
         AccessTokenInfo tokenInfo = new AccessTokenInfo();
-/*
-        OAuth2ClientApplicationDTO oAuth2ClientApplicationDTO;
-        OAuth2TokenValidationServiceClient oAuth2TokenValidationServiceClient = new
-                OAuth2TokenValidationServiceClient();
-        oAuth2ClientApplicationDTO = oAuth2TokenValidationServiceClient.
-                validateAuthenticationRequest(accessToken);
-        org.wso2.carbon.identity.oauth2.stub.dto.OAuth2TokenValidationResponseDTO oAuth2TokenValidationResponseDTO = oAuth2ClientApplicationDTO.
-                getAccessTokenValidationResponse();
-*/
         OAuth2TokenValidationService oAuth2TokenValidationService = new OAuth2TokenValidationService();
         OAuth2TokenValidationRequestDTO requestDTO = new OAuth2TokenValidationRequestDTO();
         OAuth2TokenValidationRequestDTO.OAuth2AccessToken token = requestDTO. new OAuth2AccessToken();
@@ -357,8 +374,7 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
         if (log.isDebugEnabled()) {
             log.debug("Creating semi-manual application for consumer id  :  " + oAuthApplicationInfo.getClientId());
         }
-        //Insert a record to CLIENT_INFO table.
-        //oidcDao.createSemiManualClient(oAuthApplicationInfo);
+
         return oAuthApplicationInfo;
     }
 

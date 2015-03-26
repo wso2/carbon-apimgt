@@ -4074,8 +4074,8 @@ public class ApiMgtDAO {
 
         if (consumerKey != null) {
             String addApplicationKeyMapping = "INSERT INTO " +
-                    "AM_APPLICATION_KEY_MAPPING (APPLICATION_ID,CONSUMER_KEY,KEY_TYPE,STATE) " +
-                    "VALUES (?,?,?,?)";
+                    "AM_APPLICATION_KEY_MAPPING (APPLICATION_ID,CONSUMER_KEY,KEY_TYPE,STATE,CREATE_MODE) " +
+                    "VALUES (?,?,?,?,?)";
             try {
                 connection = APIMgtDBUtil.getConnection();
 
@@ -4084,6 +4084,8 @@ public class ApiMgtDAO {
                 ps.setString(2, consumerKey);
                 ps.setString(3, (String) oAuthApplicationInfo.getParameter(ApplicationConstants.APP_KEY_TYPE));
                 ps.setString(4, APIConstants.AppRegistrationStatus.REGISTRATION_COMPLETED);
+                // If the CK/CS pair is pasted on the screen set this to MAPPED
+                ps.setString(5,"MAPPED");
                 ps.execute();
                 //create client at keyManager after adding record to table.Why? becaues  if something goes wrong
                 //adding to AM_APPLICATION_KEY_MAPPING create client at key manager will not happen.
@@ -5429,10 +5431,10 @@ public class ApiMgtDAO {
                                        " APPLICATION_ID = ?";
 
         String getConsumerKeyQuery = "SELECT" +
-                                       " CONSUMER_KEY " +
-                                       "FROM" +
+                                       " CONSUMER_KEY , CREATE_MODE" +
+                                       " FROM" +
                                        " AM_APPLICATION_KEY_MAPPING " +
-                                       "WHERE" +
+                                       " WHERE" +
                                        " APPLICATION_ID = ?";
 
         String deleteKeyMappingQuery = "DELETE FROM AM_SUBSCRIPTION_KEY_MAPPING WHERE SUBSCRIPTION_ID = ?";
@@ -5479,6 +5481,9 @@ public class ApiMgtDAO {
             String consumerKey = null;
             while (rs.next()) {
                 consumerKey=rs.getString("CONSUMER_KEY");
+
+                // This is true when OAuth app has been created by pasting consumer key/secret in the screen.
+                String mode = rs.getString("CREATE_MODE");
                 if (consumerKey != null) {
                     prepStmt = connection.prepareStatement(deleteDomainAppQuery);
                     prepStmt.setString(1, consumerKey);
@@ -5488,7 +5493,12 @@ public class ApiMgtDAO {
                     //get new key manager
                     KeyManager keyManager = KeyManagerFactory.getKeyManager();
                     //delete on oAuthorization server.
-                    keyManager.deleteApplication(consumerKey);
+
+                    // OAuth app is deleted if only it has been created from API Store. For mapped clients we don't
+                    // call delete.
+                    if(!"MAPPED".equals(mode)) {
+                        keyManager.deleteApplication(consumerKey);
+                    }
 
                 }
             }
