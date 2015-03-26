@@ -27,37 +27,45 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
+import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
+import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 import org.json.simple.JSONArray;
 import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.api.model.*;
+import org.wso2.carbon.apimgt.api.model.API;
+import org.wso2.carbon.apimgt.api.model.AccessTokenInfo;
+import org.wso2.carbon.apimgt.api.model.AccessTokenRequest;
+import org.wso2.carbon.apimgt.api.model.ApplicationConstants;
+import org.wso2.carbon.apimgt.api.model.KeyManagerConfiguration;
 import org.wso2.carbon.apimgt.api.model.OAuthApplicationInfo;
+import org.wso2.carbon.apimgt.api.model.OauthAppRequest;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.AbstractKeyManager;
-import org.wso2.carbon.apimgt.impl.clients.ApplicationManagementServiceClient;
-import org.wso2.carbon.apimgt.impl.clients.OAuth2TokenValidationServiceClient;
-import org.wso2.carbon.apimgt.impl.clients.OAuthAdminClient;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.keymgt.client.SubscriberKeyMgtClient;
+import org.wso2.carbon.apimgt.keymgt.stub.types.carbon.ApplicationKeysDTO;
 import org.wso2.carbon.apimgt.keymgt.util.APIKeyMgtDataHolder;
 import org.wso2.carbon.apimgt.keymgt.util.APIKeyMgtUtil;
 import org.wso2.carbon.identity.oauth.stub.dto.OAuthConsumerAppDTO;
-import org.wso2.carbon.apimgt.keymgt.stub.types.carbon.ApplicationKeysDTO;
 import org.wso2.carbon.identity.oauth2.OAuth2TokenValidationService;
 import org.wso2.carbon.identity.oauth2.dto.OAuth2ClientApplicationDTO;
 import org.wso2.carbon.identity.oauth2.dto.OAuth2TokenValidationRequestDTO;
 import org.wso2.carbon.identity.oauth2.dto.OAuth2TokenValidationResponseDTO;
 
-
 import javax.xml.stream.XMLStreamException;
 import java.io.ByteArrayInputStream;
-import java.util.*;
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 
 /**
  * This class holds the key manager implementation considering WSO2 as the identity provider
@@ -218,66 +226,76 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
         String keyMgtProtocol = keymgtURL.getProtocol();
 
         // Call the /revoke only if there's a token to be revoked.
-        if (tokenRequest.getTokenToRevoke() != null) {
-            URL revokeEndpointURL = new URL(revokeEndpoint);
-            String revokeEndpointProtocol = revokeEndpointURL.getProtocol();
-            int revokeEndpointPort = revokeEndpointURL.getPort();
+        try {
+            if (tokenRequest.getTokenToRevoke() != null) {
+                URL revokeEndpointURL = new URL(revokeEndpoint);
+                String revokeEndpointProtocol = revokeEndpointURL.getProtocol();
+                int revokeEndpointPort = revokeEndpointURL.getPort();
 
-            HttpClient revokeEPClient = APIKeyMgtUtil.getHttpClient(revokeEndpointPort, revokeEndpointProtocol);
+                HttpClient revokeEPClient = APIKeyMgtUtil.getHttpClient(revokeEndpointPort, revokeEndpointProtocol);
 
-            HttpPost httpRevokepost = new HttpPost(revokeEndpoint);
+                HttpPost httpRevokepost = new HttpPost(revokeEndpoint);
 
-            // Request parameters.
-            List<NameValuePair> revokeParams = new ArrayList<NameValuePair>(3);
-            revokeParams.add(new BasicNameValuePair(OAuth.OAUTH_CLIENT_ID, tokenRequest.getClientId()));
-            revokeParams.add(new BasicNameValuePair(OAuth.OAUTH_CLIENT_SECRET, tokenRequest.getClientSecret()));
-            revokeParams.add(new BasicNameValuePair("token", tokenRequest.getTokenToRevoke()));
+                // Request parameters.
+                List<NameValuePair> revokeParams = new ArrayList<NameValuePair>(3);
+                revokeParams.add(new BasicNameValuePair(OAuth.OAUTH_CLIENT_ID, tokenRequest.getClientId()));
+                revokeParams.add(new BasicNameValuePair(OAuth.OAUTH_CLIENT_SECRET, tokenRequest.getClientSecret()));
+                revokeParams.add(new BasicNameValuePair("token", tokenRequest.getTokenToRevoke()));
 
 
-            //Revoke the Old Access Token
-            httpRevokepost.setEntity(new UrlEncodedFormEntity(revokeParams, "UTF-8"));
-            HttpResponse revokeResponse = revokeEPClient.execute(httpRevokepost);
+                //Revoke the Old Access Token
+                httpRevokepost.setEntity(new UrlEncodedFormEntity(revokeParams, "UTF-8"));
+                HttpResponse revokeResponse = revokeEPClient.execute(httpRevokepost);
 
-            if (revokeResponse.getStatusLine().getStatusCode() != 200) {
-                throw new RuntimeException("Token revoke failed : HTTP error code : " +
-                                           revokeResponse.getStatusLine().getStatusCode());
-            } else {
-                if (log.isDebugEnabled()) {
-                    log.debug("Successfully submitted revoke request for old application token. HTTP status : 200");
+                if (revokeResponse.getStatusLine().getStatusCode() != 200) {
+                    throw new RuntimeException("Token revoke failed : HTTP error code : " +
+                                               revokeResponse.getStatusLine().getStatusCode());
+                } else {
+                    if (log.isDebugEnabled()) {
+                        log.debug("Successfully submitted revoke request for old application token. HTTP status : 200");
+                    }
                 }
             }
-        }
-        //get default application access token name from config.
+            //get default application access token name from config.
 
-        String applicationScope = APIKeyMgtDataHolder.getApplicationTokenScope();
+            String applicationScope = APIKeyMgtDataHolder.getApplicationTokenScope();
 
-        //Generate New Access Token
-        HttpClient tokenEPClient = APIKeyMgtUtil.getHttpClient(keyMgtPort, keyMgtProtocol);
-        HttpPost httpTokpost = new HttpPost(tokenEndpoint);
-        List<NameValuePair> tokParams = new ArrayList<NameValuePair>(3);
-        tokParams.add(new BasicNameValuePair(OAuth.OAUTH_GRANT_TYPE, GRANT_TYPE_VALUE));
-        tokParams.add(new BasicNameValuePair(GRANT_TYPE_PARAM_VALIDITY,
-                                             Long.toString(tokenRequest.getValidityPeriod())));
-        tokParams.add(new BasicNameValuePair(OAuth.OAUTH_CLIENT_ID, tokenRequest.getClientId()));
-        tokParams.add(new BasicNameValuePair(OAuth.OAUTH_CLIENT_SECRET, tokenRequest.getClientSecret()));
-        tokParams.add(new BasicNameValuePair("scope", applicationScope));
+            //Generate New Access Token
+            HttpClient tokenEPClient = APIKeyMgtUtil.getHttpClient(keyMgtPort, keyMgtProtocol);
+            HttpPost httpTokpost = new HttpPost(tokenEndpoint);
+            List<NameValuePair> tokParams = new ArrayList<NameValuePair>(3);
+            tokParams.add(new BasicNameValuePair(OAuth.OAUTH_GRANT_TYPE, GRANT_TYPE_VALUE));
+            tokParams.add(new BasicNameValuePair(GRANT_TYPE_PARAM_VALIDITY,
+                                                 Long.toString(tokenRequest.getValidityPeriod())));
+            tokParams.add(new BasicNameValuePair(OAuth.OAUTH_CLIENT_ID, tokenRequest.getClientId()));
+            tokParams.add(new BasicNameValuePair(OAuth.OAUTH_CLIENT_SECRET, tokenRequest.getClientSecret()));
+            tokParams.add(new BasicNameValuePair("scope", applicationScope));
 
-        httpTokpost.setEntity(new UrlEncodedFormEntity(tokParams, "UTF-8"));
-        HttpResponse tokResponse = tokenEPClient.execute(httpTokpost);
-        HttpEntity tokEntity = tokResponse.getEntity();
+            httpTokpost.setEntity(new UrlEncodedFormEntity(tokParams, "UTF-8"));
+            HttpResponse tokResponse = tokenEPClient.execute(httpTokpost);
+            HttpEntity tokEntity = tokResponse.getEntity();
 
-        if (tokResponse.getStatusLine().getStatusCode() != 200) {
-            throw new RuntimeException("Error occurred while calling token endpoint: HTTP error code : " +
-                                       tokResponse.getStatusLine().getStatusCode());
-        } else {
-            tokenInfo = new AccessTokenInfo();
-            String responseStr = EntityUtils.toString(tokEntity);
-            JSONObject obj = new JSONObject(responseStr);
-            newAccessToken = obj.get(OAUTH_RESPONSE_ACCESSTOKEN).toString();
-            validityPeriod = Long.parseLong(obj.get(OAUTH_RESPONSE_EXPIRY_TIME).toString());
-            tokenInfo.setAccessToken(newAccessToken);
-            tokenInfo.setValidityPeriod(validityPeriod);
+            if (tokResponse.getStatusLine().getStatusCode() != 200) {
+                throw new RuntimeException("Error occurred while calling token endpoint: HTTP error code : " +
+                                           tokResponse.getStatusLine().getStatusCode());
+            } else {
+                tokenInfo = new AccessTokenInfo();
+                String responseStr = EntityUtils.toString(tokEntity);
+                JSONObject obj = new JSONObject(responseStr);
+                newAccessToken = obj.get(OAUTH_RESPONSE_ACCESSTOKEN).toString();
+                validityPeriod = Long.parseLong(obj.get(OAUTH_RESPONSE_EXPIRY_TIME).toString());
+                tokenInfo.setAccessToken(newAccessToken);
+                tokenInfo.setValidityPeriod(validityPeriod);
 
+            }
+        } catch (ClientProtocolException e) {
+            handleException("Error while creating token - Invalid protocol used", e);
+        } catch (UnsupportedEncodingException e) {
+            handleException("Error while preparing request for token/revoke APIs", e);
+        } catch (IOException e) {
+            handleException("Error while creating tokens - " + e.getMessage(), e);
+        } catch (JSONException e) {
+            handleException("Error while parsing response from token api", e);
         }
 
         return tokenInfo;
