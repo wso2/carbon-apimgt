@@ -63,6 +63,7 @@ public class OAuthApplicationInfo {
     public void setCallBackURL(String callBackURL){
         this.callBackURL = callBackURL;
     }
+
     public void addParameter(String name,Object value){
         parameters.put(name,value);
     }
