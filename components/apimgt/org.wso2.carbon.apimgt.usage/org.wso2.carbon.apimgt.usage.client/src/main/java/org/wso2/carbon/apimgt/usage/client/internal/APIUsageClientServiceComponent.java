@@ -59,8 +59,6 @@ public class APIUsageClientServiceComponent {
 
     protected void unsetAPIManagerConfigurationService(APIManagerConfigurationService amcService) {
         log.debug("API manager configuration service unbound from the API usage client component");
-        configuration = null;
-        analyticsConfiguration = null;
     }
 
     public static APIManagerConfiguration getAPIManagerConfiguration() {
