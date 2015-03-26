@@ -441,15 +441,22 @@ public class ClientHandler implements NHttpClientEventHandler {
             String message = getErrorMessage("HTTP protocol violation : " + ex.getMessage(), conn);
             log.error(message, ex);
             checkAxisRequestComplete(conn, NhttpConstants.PROTOCOL_VIOLATION, message, ex);
-        } if (ex instanceof IOException) {
-            String message = getErrorMessage("I/O error : " + ex.getMessage(), conn);
-            if (message.toLowerCase().indexOf("reset") != -1) {
-                log.warn(message);
-            } else {
-                log.error(message, ex);
-            }
-            checkAxisRequestComplete(conn, NhttpConstants.SND_IO_ERROR_SENDING, message, ex);
-        } else {
+		}
+		if (ex instanceof IOException) {
+			String message = getErrorMessage("I/O error : " + ex.getMessage(), conn);
+			if (message.toLowerCase().indexOf("reset") != -1) {
+				log.warn(message);
+			} else {
+				log.error(message, ex);
+			}
+			Axis2HttpRequest axis2Request =
+			                                (Axis2HttpRequest) conn.getContext()
+			                                                       .getAttribute(ATTACHMENT_KEY);
+			if (axis2Request != null && !axis2Request.isCompleted()) {
+				markRequestCompletedWithError(axis2Request, NhttpConstants.SND_IO_ERROR_SENDING,
+				                              message, ex);
+			}
+		} else {
             log.error(ex.getMessage(), ex);
         }
         shutdownConnection(conn);

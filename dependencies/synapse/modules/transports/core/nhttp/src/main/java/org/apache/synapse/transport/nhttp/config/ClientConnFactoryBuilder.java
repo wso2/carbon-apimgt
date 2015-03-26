@@ -199,6 +199,17 @@ public class ClientConnFactoryBuilder {
                     }
                 }
             }
+            if (transportOut.getParameter("http.proxyHost") != null &&
+                    transportOut.getParameter("http.proxyPort") != null) {
+                Parameter proxyhost = transportOut.getParameter("http.proxyHost");
+                Parameter proxyport = transportOut.getParameter("http.proxyPort");
+                String host = proxyhost.getParameterElement().getText();
+                String port = proxyport.getParameterElement().getText();
+                String address = host + ":" + port;
+                if (!contextMap.containsKey(address)) {
+                    contextMap.put(address, sslContext);
+                }
+            }
         }
 
         if (contextMap.size() > 0) {

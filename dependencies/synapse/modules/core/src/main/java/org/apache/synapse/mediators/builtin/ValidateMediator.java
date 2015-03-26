@@ -211,7 +211,7 @@ public class ValidateMediator extends AbstractListMediator implements FlowContin
 
                 // set error message and detail (stack trace) into the message context
                 synCtx.setProperty(SynapseConstants.ERROR_MESSAGE,
-                    errorHandler.getSaxParseException().getMessage());
+                    errorHandler.getAllExceptions());
                 synCtx.setProperty(SynapseConstants.ERROR_EXCEPTION,
                     errorHandler.getSaxParseException());
                 synCtx.setProperty(SynapseConstants.ERROR_DETAIL,
@@ -323,15 +323,18 @@ public class ValidateMediator extends AbstractListMediator implements FlowContin
 
         private boolean validationError = false;
         private SAXParseException saxParseException = null;
-
+        private List<SAXParseException> saxParseExceptionList = new ArrayList<SAXParseException>();
+        
         public void error(SAXParseException exception) throws SAXException {
             validationError = true;
             saxParseException = exception;
+            saxParseExceptionList.add(exception);
         }
 
         public void fatalError(SAXParseException exception) throws SAXException {
             validationError = true;
             saxParseException = exception;
+            saxParseExceptionList.add(exception);
         }
 
         public void warning(SAXParseException exception) throws SAXException {
@@ -344,6 +347,21 @@ public class ValidateMediator extends AbstractListMediator implements FlowContin
         public SAXParseException getSaxParseException() {
             return saxParseException;
         }
+        
+        public List<SAXParseException> getSaxParseExceptionList() {
+            return saxParseExceptionList;
+        }
+
+        public String getAllExceptions() {
+            StringBuilder errors = new StringBuilder();
+            for(SAXParseException e: saxParseExceptionList) {
+                errors.append(e.getMessage());
+                errors.append("\n");
+            }
+
+            return errors.toString();
+        }
+
 
         /**
          * To set explicitly validation error condition
