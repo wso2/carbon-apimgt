@@ -22,7 +22,8 @@ import org.apache.synapse.mediators.AbstractMediator;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityUtils;
 import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationContext;
 import org.wso2.carbon.apimgt.usage.publisher.dto.ThrottlePublisherDTO;
-import org.wso2.carbon.apimgt.usage.publisher.internal.UsageComponent;
+import org.wso2.carbon.base.MultitenantConstants;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 /*
@@ -36,13 +37,21 @@ public class APIMgtThrottleUsageHandler extends AbstractMediator {
 
         boolean enabled = DataPublisherUtil.getApiManagerAnalyticsConfiguration().isEnabled();
 
+        // The publisher initializes in the first request only
         if (enabled && publisher == null) {
             synchronized (this) {
                 if (publisher == null) {
+                    //The data publisher class is defined in the api-manager.xml
                     String publisherClass = DataPublisherUtil.getApiManagerAnalyticsConfiguration()
                             .getPublisherClass();
                     try {
                         log.debug("Instantiating Data Publisher");
+                        /*Tenant domain is used to get the data publisher. As the data publisher class is defined in
+                         the api-manager.xml the publisher is initialized in the super tenant mode
+                        */
+                        PrivilegedCarbonContext.startTenantFlow();
+                        PrivilegedCarbonContext.getThreadLocalCarbonContext().
+                                setTenantDomain(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME, true);
                         publisher = (APIMgtUsageDataPublisher) Class.forName(publisherClass).
                                 newInstance();
                         publisher.init();
@@ -52,6 +61,8 @@ public class APIMgtThrottleUsageHandler extends AbstractMediator {
                         log.error("Error instantiating " + publisherClass);
                     } catch (IllegalAccessException e) {
                         log.error("Illegal access to " + publisherClass);
+                    } finally {
+                        PrivilegedCarbonContext.endTenantFlow();
                     }
                 }
             }

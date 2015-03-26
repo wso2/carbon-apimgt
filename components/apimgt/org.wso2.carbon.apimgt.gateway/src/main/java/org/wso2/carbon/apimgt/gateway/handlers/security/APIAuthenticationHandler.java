@@ -86,6 +86,10 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
         String authenticatorType = ServiceReferenceHolder.getInstance().getAPIManagerConfiguration().
                 getFirstProperty(APISecurityConstants.API_SECURITY_AUTHENTICATOR);
         if (authenticatorType == null) {
+            /*
+            if the APIManagerConfigurationService is not set at the time the APIAuthenticationHandler intializes
+            the authenticator is null. Then we need to initialize the authenticator in the first request
+             */
             authenticatorType = OAuthAuthenticator.class.getName();
         }
         try {

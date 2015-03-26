@@ -30,7 +30,6 @@ import org.apache.synapse.transport.passthru.util.RelayUtils;
 import org.wso2.carbon.apimgt.usage.publisher.dto.ResponsePublisherDTO;
 import org.wso2.carbon.apimgt.usage.publisher.internal.UsageComponent;
 import org.wso2.carbon.base.MultitenantConstants;
-import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
@@ -51,6 +50,7 @@ public class APIMgtResponseHandler extends AbstractMediator {
 
         boolean enabled = DataPublisherUtil.getApiManagerAnalyticsConfiguration().isEnabled();
 
+        // The publisher initializes in the first request only
         if (enabled && publisher == null) {
             synchronized (this) {
                 if (publisher == null) {

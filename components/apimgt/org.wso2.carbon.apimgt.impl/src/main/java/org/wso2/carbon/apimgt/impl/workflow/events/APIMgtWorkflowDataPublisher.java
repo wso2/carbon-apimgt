@@ -18,7 +18,6 @@
 
 package org.wso2.carbon.apimgt.impl.workflow.events;
 
-import org.apache.axis2.util.JavaUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.impl.APIConstants;

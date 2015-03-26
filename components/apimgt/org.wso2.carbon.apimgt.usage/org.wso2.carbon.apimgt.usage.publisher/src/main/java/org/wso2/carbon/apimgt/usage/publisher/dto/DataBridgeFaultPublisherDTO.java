@@ -44,7 +44,7 @@ public class DataBridgeFaultPublisherDTO extends FaultPublisherDTO{
 
     public static String getStreamDefinition() {
 
-        String streamDefinition =  "{" +
+        return  "{" +
                 "  'name':'" +
                 DataPublisherUtil.getApiManagerAnalyticsConfiguration().getFaultStreamName() + "'," +
                 "  'version':'" +
@@ -76,7 +76,6 @@ public class DataBridgeFaultPublisherDTO extends FaultPublisherDTO{
 
                 "}";
 
-        return streamDefinition;
     }
 
     public Object createPayload(){

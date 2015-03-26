@@ -59,6 +59,7 @@ public class APIMgtUsageHandler extends AbstractHandler {
             }
 
             if (publisher == null) {
+                // The publisher initializes in the first request only
                 synchronized (this) {
                     if (publisher == null) {
                         try {

@@ -142,7 +142,7 @@ var addDatasourceConfig = function (configData) {
         stub.addDataSource(dataSourceMetaInfo);
         log.info("Datasource '" + dsName + "' saved");
         org.wso2.carbon.apimgt.usage.client.APIUsageStatisticsClient.initializeDataSource();
-        log.info("Intialized datasource '" + dsName);
+        log.info("Initialized datasource '" + dsName);
         return {
             error: false
         };
@@ -163,7 +163,7 @@ var addToolbox = function (configData) {
         var toolBoxPath = process.getProperty('carbon.home') + '/statistics';
         var toolBoxName = '';
 
-        if ('oracle.jdbc.OracleDriver' == configData.statDsDriver) {
+        if (configData.statDsDriver.toLowerCase().indexOf('oracle') !=-1) {
             toolBoxName = 'API_Manager_Analytics_Oracle.tbox';
         } else {
             toolBoxName = 'API_Manager_Analytics.tbox';
