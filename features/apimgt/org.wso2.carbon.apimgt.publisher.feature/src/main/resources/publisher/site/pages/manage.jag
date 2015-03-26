@@ -8,10 +8,8 @@ var localeResourcesBasePath="/site/conf/locales/jaggery/";
 i18n.init(request,localeResourcesBasePath);
 
 (function () {
-    var  isPermitted,user = jagg.getUser(),permit=jagg.getCreatePermitted();
-    if(permit){
-    isPermitted= permit.permitted;
-    }
+    var  isPermitted = jagg.getPublishPermitted().permitted || jagg.getCreatePermitted().permitted,user = jagg.getUser();
+
     if (!user) {
         response.sendRedirect(getRedirectPathForNonAuthenticatedUser());
         return;
