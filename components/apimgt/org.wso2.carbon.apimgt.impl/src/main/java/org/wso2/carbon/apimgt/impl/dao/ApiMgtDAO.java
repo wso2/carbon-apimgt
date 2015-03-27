@@ -332,7 +332,41 @@ public class ApiMgtDAO {
 
     }
 
-    public void deleteOAuthApplication(String consumerKey) throws APIManagementException {
+    public static String getOwnerForConsumerApp(String consumerKey) throws APIManagementException {
+        Connection conn = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+        String userId = null;
+        String sqlQuery =
+                "SELECT USER_ID from " +
+                " AM_SUBSCRIBER AS SUB," +
+                " AM_APPLICATION AS APP," +
+                " AM_APPLICATION_KEY_MAPPING AS AKM " +
+                " WHERE " +
+                " SUB.SUBSCRIBER_ID = APP.SUBSCRIBER_ID AND" +
+                " AKM.APPLICATION_ID = APP.APPLICATION_ID AND" +
+                " CONSUMER_KEY = ?";
+
+        try {
+            conn = APIMgtDBUtil.getConnection();
+            ps = conn.prepareStatement(sqlQuery);
+            ps.setString(1, consumerKey);
+            rs = ps.executeQuery();
+            while (rs.next()) {
+                userId = rs.getString("USER_ID");
+            }
+        } catch (SQLException e) {
+            handleException("Error while executing SQL for getting User Id : SQL "+sqlQuery, e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(ps, conn, rs);
+        }
+
+        return userId;
+
+    }
+
+
+    public static void deleteOAuthApplication(String consumerKey) throws APIManagementException {
         OAuthApplicationInfo oAuthApplicationInfo = new OAuthApplicationInfo();
         Connection conn = null;
         PreparedStatement ps = null;
