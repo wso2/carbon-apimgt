@@ -2900,7 +2900,7 @@ public class ApiMgtDAO {
 
             preparedStatement = connection.prepareStatement(sql);
             preparedStatement.setInt(1, applicationId);
-            preparedStatement.setString(2, userName.toLowerCase());
+            preparedStatement.setString(2, MultitenantUtils.getTenantAwareUsername(userName.toLowerCase()));
             preparedStatement.setString(3, APIConstants.ACCESS_TOKEN_USER_TYPE_APPLICATION);
             resultSet = preparedStatement.executeQuery();
             while (resultSet.next()) {
@@ -3014,7 +3014,7 @@ public class ApiMgtDAO {
 
             preparedStatement = connection.prepareStatement(sql);
             preparedStatement.setInt(1, applicationId);
-            preparedStatement.setString(2, userName.toLowerCase());
+            preparedStatement.setString(2, MultitenantUtils.getTenantAwareUsername(userName.toLowerCase()));
             preparedStatement.setString(3, APIConstants.ACCESS_TOKEN_USER_TYPE_APPLICATION);
             resultSet = preparedStatement.executeQuery();
             while (resultSet.next()) {
