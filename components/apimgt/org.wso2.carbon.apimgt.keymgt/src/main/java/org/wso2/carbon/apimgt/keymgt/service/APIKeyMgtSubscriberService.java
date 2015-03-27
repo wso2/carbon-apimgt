@@ -230,8 +230,50 @@ public class APIKeyMgtSubscriberService extends AbstractAdmin {
     public void deleteOAuthApplication(String consumerKey)
             throws APIKeyMgtException, APIManagementException, IdentityException {
 
-        ApiMgtDAO apiMgtDAO = new ApiMgtDAO();
-        apiMgtDAO.deleteOAuthApplication(consumerKey);
+        if (consumerKey == null || consumerKey.isEmpty()) {
+            return;
+        }
+
+        String username = ApiMgtDAO.getOwnerForConsumerApp(consumerKey);
+        String baseUser = CarbonContext.getThreadLocalCarbonContext().getUsername();
+        String tenantDomain = MultitenantUtils.getTenantDomain(username);
+        String tenantAwareUsername = MultitenantUtils.getTenantAwareUsername(username);
+
+        PrivilegedCarbonContext.getThreadLocalCarbonContext().startTenantFlow();
+        PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
+        PrivilegedCarbonContext.getThreadLocalCarbonContext().setUsername(tenantAwareUsername);
+
+        try {
+
+            OAuthAdminService oAuthAdminService = new OAuthAdminService();
+            ApplicationManagementService appMgtService = ApplicationManagementService.getInstance();
+
+            log.debug("Getting OAuth App for " + consumerKey);
+            OAuthConsumerAppDTO oAuthConsumerAppDTO = oAuthAdminService.getOAuthApplicationData(consumerKey);
+
+            if (oAuthConsumerAppDTO == null) {
+                log.debug("Couldn't find OAuth App for Consumer Key : " + consumerKey);
+                return;
+            }
+
+            log.debug("Retrieved OAuth App for " + consumerKey);
+
+            if (oAuthConsumerAppDTO.getApplicationName() != null) {
+                log.debug("Removing Service Provider with name : " + oAuthConsumerAppDTO.getApplicationName());
+                appMgtService.deleteApplication(oAuthConsumerAppDTO.getApplicationName());
+               // log.debug("Removing OAuth App for " + consumerKey);
+             //   oAuthAdminService.removeOAuthApplicationData(consumerKey);
+                ApiMgtDAO.deleteOAuthApplication(consumerKey);
+            }
+
+        } catch (IdentityApplicationManagementException e) {
+            APIUtil.handleException("Error occurred while deleting ServiceProvider", e);
+        } catch (Exception e) {
+            APIUtil.handleException("Error occurred while deleting OAuthApp", e);
+        } finally {
+            PrivilegedCarbonContext.getThreadLocalCarbonContext().endTenantFlow();
+            PrivilegedCarbonContext.getThreadLocalCarbonContext().setUsername(baseUser);
+        }
     }
 
     /**
