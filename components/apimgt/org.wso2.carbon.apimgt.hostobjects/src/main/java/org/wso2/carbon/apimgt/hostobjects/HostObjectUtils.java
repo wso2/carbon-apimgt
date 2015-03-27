@@ -226,11 +226,17 @@ public class HostObjectUtils {
         }
     }
 
-    protected static  boolean isUsageDataSourceSpecified() {
+    protected static boolean isUsageDataSourceSpecified() {
         try {
-            return (null != HostObjectComponent.getDataSourceService().getDataSource(APIConstants.API_USAGE_DATA_SOURCE_NAME));
+            return (null != HostObjectComponent.getDataSourceService().
+                    getDataSource(APIConstants.API_USAGE_DATA_SOURCE_NAME));
         } catch (DataSourceException e) {
             return false;
         }
+    }
+
+    protected static boolean isStatPublishingEnabled() {
+            return ServiceReferenceHolder.getInstance().
+                    getAPIManagerConfigurationService().getAPIAnalyticsConfiguration().isEnabled();
     }
 }

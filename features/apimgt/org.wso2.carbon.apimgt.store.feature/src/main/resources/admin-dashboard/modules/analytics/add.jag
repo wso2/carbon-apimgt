@@ -26,6 +26,10 @@ var enableAnalytics = function (enable) {
             log.info("Disabling Analytics...");
             eventingConfigData.setServiceStatsEnable(false);
             stub.configureEventing(eventingConfigData);
+            var configReaderService = org.wso2.carbon.apimgt.impl.APIManagerAnalyticsConfiguration.getInstance();
+            log.info(configReaderService.getRequestStreamName());
+            log.info(configReaderService.getResponseStreamName());
+            configReaderService.setEnabled(false);
             log.info("Analytics disabled");
         } else if(enable === "true" && eventingConfigData.getUrl() !== "" && eventingConfigData.getUrl() !== null) {
             log.info("Enabling Analytics...");
