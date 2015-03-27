@@ -44,7 +44,14 @@ var jagg = jagg || (function () {
     };
 
     var getUser = function () {
-        return session.get("logged.user");
+        var user = session.get("logged.user");
+
+        // If user is null then check for mutual auth
+        if (!user) {
+            user = mutualAuthVerifier(user);
+        }
+
+	return user;
     };
 
     var setUser = function (user) {
@@ -56,6 +63,44 @@ var jagg = jagg || (function () {
             session = request.getSession(true);
         }
         session.put("logged.user", user);
+    };
+
+    var mutualAuthVerifier = function(user){
+
+        var log = new Log();
+        var site = require("/site/conf/site.json");
+
+	    if(site.mutualAuthConfiguration){
+            if (site.mutualAuthConfiguration.enabled) {
+
+                // cert will be available only if trust store holds client certificate. Otherwise it is null
+                var cert = request.getAttribute("javax.servlet.request.X509Certificate");
+                var userName = request.getHeader("MutualAuthUserName");
+
+                // proceed mutul ssl validation if cert and user name set properly
+
+                if (cert != null) {
+
+                    if (userName) {
+                        var security = require("apistore");
+                        var mutualAuthHostObject = new security.MutualAuthHostObject();
+                        var isValidUser = mutualAuthHostObject.validateUserNameHeader(userName);
+                        if (isValidUser) {
+                            log.info("Mutual Auth authentication success for user : " + userName);
+                            user = {username: userName, cookie: null, hasPublisherAccess: false};
+                            return  user;
+                        } else {
+                            log.debug("Mutual authentication failed for invalid user : " + userName);
+                        }
+
+                    } else {
+                        log.debug("Mutual authentication failed for invalid user : MutualAuthUserName header is empty");
+                    }
+                } else {
+                    log.debug("Mutual Authentication failed due to no trusted certificate");
+                }
+            }
+        }
     };
 
     var getThemeFile = function (path) {
