@@ -60,6 +60,7 @@
                         </Export-Package>
                         <Private-Package>
                             org.wso2.carbon.apimgt.usage.client.internal,
+                            org.wso2.carbon.apimgt.usage.client.internal.APIUsageClientServiceComponent,
                         </Private-Package>
                         <Import-Package>
                             org.wso2.carbon.bam.presentation.*;version="${carbon.platform.package.import.version.range}",
