@@ -131,15 +131,20 @@ public class APIKeyMgtSubscriberService extends AbstractAdmin {
     public ApplicationKeysDTO createOAuthApplication(String userId, String applicationName, String callbackUrl)
             throws APIKeyMgtException, APIManagementException, IdentityException {
 
-        String tenantDomain = MultitenantUtils.getTenantDomain(MultitenantUtils.getTenantAwareUsername(userId));
+        if(userId == null || userId.isEmpty()){
+            return null;
+        }
+
+        String tenantDomain = MultitenantUtils.getTenantDomain(userId);
         String baseUser = CarbonContext.getThreadLocalCarbonContext().getUsername();
+        String userName = MultitenantUtils.getTenantAwareUsername(userId);
 
         PrivilegedCarbonContext.startTenantFlow();
         PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain,true);
 
         // Enacting as the provided user. When creating Service Provider/OAuth App,
         // username is fetched from CarbonContext.
-        PrivilegedCarbonContext.getThreadLocalCarbonContext().setUsername(userId);
+        PrivilegedCarbonContext.getThreadLocalCarbonContext().setUsername(userName);
 
         try {
 
@@ -147,6 +152,7 @@ public class APIKeyMgtSubscriberService extends AbstractAdmin {
         OAuthAdminService oAuthAdminService = new OAuthAdminService();
         ApplicationManagementService appMgtService = ApplicationManagementService.getInstance();
         OAuthConsumerAppDTO oAuthConsumerAppDTO = new OAuthConsumerAppDTO();
+        applicationName = userName+"_"+applicationName;
         oAuthConsumerAppDTO.setApplicationName(applicationName);
         oAuthConsumerAppDTO.setCallbackUrl(callbackUrl);
             log.debug("Creating OAuth App "+applicationName);
