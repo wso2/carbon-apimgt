@@ -269,7 +269,14 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
                                                  Long.toString(tokenRequest.getValidityPeriod())));
             tokParams.add(new BasicNameValuePair(OAuth.OAUTH_CLIENT_ID, tokenRequest.getClientId()));
             tokParams.add(new BasicNameValuePair(OAuth.OAUTH_CLIENT_SECRET, tokenRequest.getClientSecret()));
-            tokParams.add(new BasicNameValuePair("scope", applicationScope));
+            StringBuilder builder = new StringBuilder();
+            builder.append(applicationScope);
+
+            for (String scope : tokenRequest.getScope()) {
+                builder.append(" " + scope);
+            }
+
+            tokParams.add(new BasicNameValuePair("scope", builder.toString()));
 
             httpTokpost.setEntity(new UrlEncodedFormEntity(tokParams, "UTF-8"));
             HttpResponse tokResponse = tokenEPClient.execute(httpTokpost);
