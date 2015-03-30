@@ -1,0 +1,57 @@
+<script>
+    var isSocial = ('{{features.social.enabled}}' == 'true');
+</script>
+<h1>{{assets.name}}</h1>	
+<div class='container-fluid'>
+		<div class='row-fluid'>
+			<div class='span3'>
+				<div class ='row'>
+					<a><i class='icon-user'></i> {{assets.attributes.overview_provider}}</a>
+					<img src='{{url ""}}/extensions/assets/api/themes/store/imgs/03-twitter-icon.png' class='img-polaroid'></img>
+				</div>	
+			</div>
+			<div class='span9'>
+				<table class='table'>
+					<thead>
+					</thead>
+					<tbody>
+						<tr>
+							<td><b>{{t "Rating"}}</b></td>
+							<td>
+								{{t "Your rating:"}}
+								<span class="asset-rating">
+                            		<div style="width:{{ratingPx}}px"></div>
+                    			</span>
+							</td>
+						</tr>
+						<tr>
+							<td><b>{{t "Version"}}</b></td>
+							<td>{{assets.attributes.overview_version}}</td>
+						</tr>
+						<tr>
+							<td><b>{{t "Status"}}</b></td>
+							<td>{{assets.lifecycleState}}</td>
+						</tr>
+						<tr>
+							<td><b>{{t "Updated"}}</b></td>
+							<td></td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+		</div>	
+</div>
+<ul class='nav nav-tabs'>
+	<li><a href='#api-overview'>{{t "Overview"}}</a></li>
+	<li><a href='#api-docs'>{{t "Documentation"}}</a></li>
+	<li><a href='#'>{{t "API Console"}}</a></li>
+	<li><a href='#'>{{t "Throttling Info"}}</a></li>
+	<li><a href='#'>{{t "Forum"}}</a></li>
+</ul>
+
+<div class='tab-content'>
+	<div class='tab-pane active' id='api-overview'>
+		{{> api_overview .}}
+	</div>
+	<div class='tab-pane' id='api-docs'>{{t "Docs"}}</div>
+</div>

@@ -1,0 +1,40 @@
+<form class='form-horizontal' method='post' id='form-document-create' action='{{url ""}}/apis/assets?type=document'>
+	<div class='control-group'>
+			<label class='control-label'>{{t "Name"}}</label>
+			<div class='controls'>
+				<input type='text' id='overview_name' name='overview_name' />				
+			</div>
+	</div>
+	<div class='control-group'>
+			<label class='control-label'>{{t "Summary"}}</label>
+			<div class='controls'>
+				<textarea name='overview_summary'></textarea>
+			</div>
+	</div>
+	<div class='control-group'>
+			<label class='control-label'>{{t "Type"}}</label>
+			<div class='controls'>
+				<select name='overview_type'>
+					<option>How To</option>
+					<option>Samples and SDK</option>
+					<option>Public Forum</option>
+					<option>Support Forum</option>
+					<option>Other (specify)</option>
+				</select>
+			</div>
+	</div>
+	<div class='control-group'>
+			<label class='control-label'>{{t "Source"}}</label>
+			<div class='controls'>
+				<select name='overview_source'>
+					<option>In-line</option>
+					<option>URL</option>
+					<option>File</option>
+				</select>
+			</div>
+	</div>
+	<div class='form-actions'>
+		<input type='submit' class='btn btn-primary' value='{{t "Add Document"}}' />
+		<input class='btn' type='button' value='{{t "Cancel"}}' >
+	</div>
+</form>

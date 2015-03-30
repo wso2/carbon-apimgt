@@ -1,0 +1,78 @@
+<ul class='nav nav-tabs'>
+	<li><a href='{{url ""}}/asts/api/create'>Design</a></li>
+	<li><a href='{{url ""}}/asts/api/implement'>Implement</a></li>
+	<li><a href='{{url ""}}/asts/api/manage'>Manage</a></li>
+</ul>
+<h1>Design API</h1>
+<div>
+	<a href='' class='btn'><i class='icon-download-alt'></i>Import Swagger Definition</a>
+</div>
+
+<form id="form-asset-create" class='form-horizontal' method='post' action='{{url ""}}/apis/assets?type={{rxt.shortName}}' data-redirect-url='{{url ""}}/asts/api/list'>
+	<legend>General Details</legend>
+	<div class='control-group'>
+		<label class='control-label' for='overview_name'>Name:</label>
+		<div class='controls'>
+			<input type='text' id='overview_name' class='input-large' name='overview_name' >
+		</div>
+	</div>
+	<div class='control-group'>
+		<label class='control-label'>Context:</label>
+		<div class='controls'>
+			<input type='text' id='overview_context' name='overview_context' class='input-large' >
+		</div>
+	</div>
+	<div class='control-group'>
+		<label class='control-label'>Version:</label>
+		<div class='controls'>
+			<input type='text' id='overview_version' name='overview_version' >
+		</div>
+	</div>
+	<div class='control-group'>
+		<label class='control-label'>Visibility:</label>
+		<div class='controls'>
+			<input type='text' name='overview_visibility' class='input-large' >
+		</div>
+	</div>
+	<div class='control-group'>
+		<label class='control-label'>Thumbnail Image:</label>
+		<div class='controls'>
+			<input type='file' name='overview_thumbnail' >
+		</div>
+	</div>
+	<div class='control-group'>
+		<label class='control-label'>Description:</label>
+		<div class='controls'>
+			<textarea name='overview_description'></textarea>
+		</div>
+	</div>
+	<div class='control-group'>
+		<label class='control-label'>Tags:</label>
+		<div class='controls'>
+			<input type='text'/>
+		</div>
+	</div>
+	<legend>Resources</legend>
+	<div class='control-group'>
+		<label class='control-label'>URL Pattern:</label>
+		<div class='controls'>
+			<div class='input-prepend'>
+				<span class='add-on'>/{context}/{version}/</span>
+				<input class='input-xxlarge' type='text' placeholder='Url Pattern Ex: path/to/resource' >
+			</div>
+		</div>
+	</div>
+	<div class='control-group'>
+		<label class='control-label' for='resources_name'>Resource Name:</label>
+		<div class='controls'>
+			<input type='text' id='overview_name' class='input-large' name='resources_name' />
+		</div>
+	</div>
+	<div class='control-group'>
+		<input type='submit' id='btn-create-asset' class='btn btn-primary' name='addNewAssetButton' value='{{t "Save"}}' >
+		<button class='btn'>Implement</button>
+		<button class='btn'>Cancel</button>
+		<input type='hidden' name='overview_provider' value='admin'>
+	</div>
+</form>
+<hr/>

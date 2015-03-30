@@ -1,0 +1,53 @@
+<ul class='nav nav-tabs'>
+	<li><a href='{{url ""}}/asts/api/create'>Design</a></li>
+	<li><a href='{{url ""}}/asts/api/implement'>Implement</a></li>
+	<li><a href='{{url ""}}/asts/api/manage'>Manage</a></li>
+</ul>
+<form id='form-api-endpoints' class='form-horizontal' method='post' action='{{url ""}}/asts/api/apis/endpoints'>
+	<div class=' control-group well'>
+		<label class='control-label'>{{t "Implementation Method"}}</label>
+		<label class='radio inline'>
+					<input type='radio' id='bronze_allow'> Backend Endpoint
+		</label>
+		<label class='radio inline'>
+					<input type='radio' id='bronze_allow'> Specify Inline
+		</label>
+	</div>
+	<legend>{{t "Endpoints"}}</legend>
+	<div class='control-group'>
+		<label class='control-label'>{{t "Endpoint Type"}}:</label>
+		<div class='controls'>
+			<input type='text' class='input-large' >
+		</div>
+	</div>
+	<div class='control-group'>
+		<label class='control-label'>{{t "Production Endpoint"}}:</label>
+		<div class='controls'>
+			<input type='text' class='input-xlarge' >
+		</div>
+		<div class='controls'>
+			<small>Ex : http://appserver/resource</small>			
+		</div>
+	</div>
+	<div class='control-group well'>
+		<label class='control-label'>{{t "Sandbox Endpoint"}}:</label>
+		<div class='controls'>
+			<input type='text' class='input-xlarge' >
+		</div>
+		<div class='controls'>
+			<small>Ex : http://appserver/resource</small>			
+		</div>
+	</div>
+	<div class='control-group'>
+		<div class='controls'>
+			<a href='#more-options-link'>{{t "Show More Options"}}</a>
+		</div>
+	</div>
+	<hr />
+	<div class='control-group'>
+		<input type='submit' id='btn-save-endpoints' class='btn btn-primary'  value='{{t "Save"}}' >
+		<button class='btn btn-primary' id='btn-deploy-prototype'>{{t "Deploy Prototype"}}</button>
+		<a class='btn' href='{{url ""}}/asts/api/manage' id='btn-manage-prototype'>{{t "Manage"}}</a>
+		<button class='btn'>{{t "Cancel"}}</button>
+	</div>
+</form>

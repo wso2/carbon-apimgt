@@ -1,0 +1,15 @@
+{{#if ribbon.enabled}}
+	<div class='row'>
+	<h1>{{assets.name}}</h1>
+	<a href="{{url ""}}/asts/api/update">
+		<i class="icon-edit"></i>{{t "Edit"}}
+	</a>	
+	</div>
+		<ul class='nav nav-tabs'>
+			<li><a href='{{url ""}}/asts/api/details/{{assets.id}}'><i class='icon-list-alt'></i>{{t "Overview"}}</a></li>
+			<li><a href='{{url ""}}/asts/api/lifecycle/{{assets.id}}'><i class='icon-list-alt'></i>{{t "Lifecycle"}}</a></li>
+			<li><a href='#'><i class='icon-th-list'></i>{{t "Versions"}}</a></li>
+			<li><a href='{{url ""}}/asts/api/documents/{{assets.id}}'><i class='icon-file'></i>{{t "Docs"}}</a></li>
+			<li><a href='#'><i class='icon-user'></i>{{t "Users"}}</a></li>
+		</ul>
+{{/if}}

@@ -1,0 +1,23 @@
+<table class='table table-bordered'>
+	<thead>
+		<tr>
+			<th>{{t "Name"}}</th>
+			<th>{{t "Type"}}</th>
+			<th>{{t "Modified On"}}</th>
+			<th>{{t "Actions"}}</th>
+		</tr>
+	</thead>
+	<tbody>
+		{{#each documents}}
+		<tr>
+			<td>{{name}}</td>
+			<td>{{attributes.overview_type}}</td>
+			<td></td>
+			<td>
+					<a><i class='icon-edit'></i> {{t "Edit Content"}}</a>
+					<a><i class='icon-trash'></i> {{t "Update"}}</a>
+			</td>
+		</tr>
+		{{/each}}		
+	</tbody>
+</table>

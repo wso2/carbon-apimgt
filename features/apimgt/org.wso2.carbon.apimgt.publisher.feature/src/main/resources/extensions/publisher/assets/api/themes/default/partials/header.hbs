@@ -1,0 +1,31 @@
+<div class="container" id="container-header">
+	<div class="row">
+		<div class="span12">
+			<div class="navbar">
+				<div class="navbar-inner">
+					<div class="container">
+
+						<a href='{{url ""}}{{meta.landingPage}}'><img style="height: 39px; padding-top: 4px;"  src='{{url ""}}/extensions/assets/api/themes/default/imgs/logo.png'></a> 
+						
+						<ul class="nav menu pull-right">
+				
+							<li>
+
+								<a class="dropdown-toggle" data-toggle="dropdown" href="#"><i
+								class="icon-user"></i>{{cuser.username}} <b class="caret"></b></a>
+								<ul class="dropdown-menu dropdown-account" role="menu" aria-labelledby="dLabel">
+									<li>
+										<a onclick="window.location.href='{{url "/logout"}}'" href="#"><i class="icon-signout"></i>{{t "Sign out"}}</a>
+									</li>
+								</ul>
+
+							</li>
+							
+
+						</ul>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
