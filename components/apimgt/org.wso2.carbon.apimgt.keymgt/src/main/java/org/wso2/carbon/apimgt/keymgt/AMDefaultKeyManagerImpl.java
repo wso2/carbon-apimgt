@@ -109,26 +109,47 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
         tokenScopes[0]= tokenScope;
 
         oAuthApplicationInfo.addParameter("tokenScope", tokenScopes);
-        ApplicationKeysDTO keysDTO = null;
+        org.wso2.carbon.apimgt.api.model.xsd.OAuthApplicationInfo info = null;
         try {
-            keysDTO = keyMgtClient.createOAuthApplication(userId, applicationName, callBackURL);
+            info = keyMgtClient.createOAuthApplication(userId, applicationName, callBackURL);
         } catch (Exception e) {
             handleException("Can not create OAuth application  : " + applicationName, e);
         }
 
-        if(keysDTO == null || keysDTO.getConsumerKey() == null || keysDTO.getConsumerSecret() == null){
+        if(info == null || info.getJsonString() == null){
             handleException("OAuth app does not contains required data  : " + applicationName,
                     new APIManagementException("OAuth app does not contains required data"));
         }
 
-        //set client ID.
-        Object clientId = keysDTO.getConsumerKey();
-        oAuthApplicationInfo.setClientId((String) clientId);
+        oAuthApplicationInfo.setClientName(info.getClientName());
+        oAuthApplicationInfo.setClientId(info.getClientId());
+        oAuthApplicationInfo.setCallBackURL(info.getCallBackURL());
 
-        Object clientSecret = keysDTO.getConsumerSecret();
-        oAuthApplicationInfo.addParameter(ApplicationConstants.OAUTH_CLIENT_SECRET, clientSecret);
+        try {
+            JSONObject jsonObject  = new JSONObject(info.getJsonString());
+            if(jsonObject.has(ApplicationConstants.OAUTH_CLIENT_SECRET)) {
+                oAuthApplicationInfo.addParameter(ApplicationConstants.
+                        OAUTH_CLIENT_SECRET, jsonObject.get(ApplicationConstants.OAUTH_CLIENT_SECRET));
+            }
 
-        oAuthApplicationInfo.addParameter(ApplicationConstants.OAUTH_CLIENT_GRANT, null);
+            if(jsonObject.has(ApplicationConstants.
+                    OAUTH_REDIRECT_URIS)) {
+                oAuthApplicationInfo.addParameter(ApplicationConstants.
+                        OAUTH_REDIRECT_URIS, jsonObject.get(ApplicationConstants.OAUTH_REDIRECT_URIS));
+            }
+
+            if (jsonObject.has(ApplicationConstants.OAUTH_CLIENT_NAME)) {
+                oAuthApplicationInfo.addParameter(ApplicationConstants.
+                        OAUTH_CLIENT_NAME, jsonObject.get(ApplicationConstants.OAUTH_CLIENT_NAME));
+            }
+
+            if (jsonObject.has(ApplicationConstants.OAUTH_CLIENT_GRANT)) {
+                oAuthApplicationInfo.addParameter(ApplicationConstants.
+                        OAUTH_CLIENT_GRANT, jsonObject.get(ApplicationConstants.OAUTH_CLIENT_GRANT));
+            }
+        } catch (JSONException e) {
+            handleException("Can not retrieve information of the created OAuth application", e);
+        }
 
         return oAuthApplicationInfo;
 

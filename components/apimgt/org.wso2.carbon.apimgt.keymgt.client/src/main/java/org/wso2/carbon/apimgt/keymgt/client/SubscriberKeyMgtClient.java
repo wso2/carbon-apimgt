@@ -69,9 +69,9 @@ public class SubscriberKeyMgtClient {
     }
 
 
-    public ApplicationKeysDTO createOAuthApplication(String userId, String applicationName, String callbackUrl) throws Exception {
-        ApplicationKeysDTO keys = subscriberServiceStub.createOAuthApplication(userId, applicationName, callbackUrl);
-        return keys;
+    public OAuthApplicationInfo createOAuthApplication(String userId, String applicationName, String callbackUrl) throws Exception {
+        OAuthApplicationInfo oAuthApplicationInfo = subscriberServiceStub.createOAuthApplication(userId, applicationName, callbackUrl);
+        return oAuthApplicationInfo;
     }
 
 
