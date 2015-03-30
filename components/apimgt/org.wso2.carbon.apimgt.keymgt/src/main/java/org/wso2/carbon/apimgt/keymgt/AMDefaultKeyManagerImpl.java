@@ -291,6 +291,9 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
                 JSONObject obj = new JSONObject(responseStr);
                 newAccessToken = obj.get(OAUTH_RESPONSE_ACCESSTOKEN).toString();
                 validityPeriod = Long.parseLong(obj.get(OAUTH_RESPONSE_EXPIRY_TIME).toString());
+                if(obj.has("scope")){
+                    tokenInfo.setScope(((String)obj.get("scope")).split(" "));
+                }
                 tokenInfo.setAccessToken(newAccessToken);
                 tokenInfo.setValidityPeriod(validityPeriod);
 

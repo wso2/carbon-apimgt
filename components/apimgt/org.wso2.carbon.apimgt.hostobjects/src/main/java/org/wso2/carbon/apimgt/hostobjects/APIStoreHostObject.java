@@ -2681,12 +2681,17 @@ public class APIStoreHostObject extends ScriptableObject {
 						break;
 					}
 				}
-				scopeBuilder.append(scopeName);
-				scopeBuilder.append(", ");
+
+                if(scopeName != null && !scopeName.isEmpty()) {
+                    scopeBuilder.append(scopeName);
+                    scopeBuilder.append(", ");
+                }
 			}
 		}
 		prodKeyScope = scopeBuilder.toString();
-		prodKeyScope = prodKeyScope.substring(0, prodKeyScope.length() - 2);
+        if(prodKeyScope.length() > 1) {
+            prodKeyScope = prodKeyScope.substring(0, prodKeyScope.length() - 2);
+        }
 		return prodKeyScope;
 	}
 
