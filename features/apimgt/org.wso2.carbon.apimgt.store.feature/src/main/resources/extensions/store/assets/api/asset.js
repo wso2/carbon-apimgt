@@ -48,10 +48,6 @@ asset.server = function(ctx) {
                 title: 'Statistics',
                 url: 'statistics',
                 path: 'statistics.jag'
-            }, {
-                title: 'Tools',
-                url: 'tools',
-                path: 'tools.jag'
             }]
         }
     };
