@@ -234,13 +234,12 @@ public class APIKeyMgtSubscriberService extends AbstractAdmin {
             return;
         }
 
-        String username = ApiMgtDAO.getOwnerForConsumerApp(consumerKey);
+        Subscriber subscriber = ApiMgtDAO.getOwnerForConsumerApp(consumerKey);
         String baseUser = CarbonContext.getThreadLocalCarbonContext().getUsername();
-        String tenantDomain = MultitenantUtils.getTenantDomain(username);
-        String tenantAwareUsername = MultitenantUtils.getTenantAwareUsername(username);
+        String tenantAwareUsername = subscriber.getName();
 
         PrivilegedCarbonContext.getThreadLocalCarbonContext().startTenantFlow();
-        PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
+        PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantId(subscriber.getTenantId(), true);
         PrivilegedCarbonContext.getThreadLocalCarbonContext().setUsername(tenantAwareUsername);
 
         try {
@@ -256,14 +255,19 @@ public class APIKeyMgtSubscriberService extends AbstractAdmin {
                 return;
             }
 
-            log.debug("Retrieved OAuth App for " + consumerKey);
-
             if (oAuthConsumerAppDTO.getApplicationName() != null) {
-                log.debug("Removing Service Provider with name : " + oAuthConsumerAppDTO.getApplicationName());
-                appMgtService.deleteApplication(oAuthConsumerAppDTO.getApplicationName());
-               // log.debug("Removing OAuth App for " + consumerKey);
-             //   oAuthAdminService.removeOAuthApplicationData(consumerKey);
-                ApiMgtDAO.deleteOAuthApplication(consumerKey);
+                log.debug("Getting Service Provider App for " + oAuthConsumerAppDTO.getApplicationName());
+                ServiceProvider serviceProvider = appMgtService.getApplication(oAuthConsumerAppDTO.getApplicationName());
+
+                // When deleting a non-existent ServiceProvider, AppMgtService throws and exception. It's to prevent
+                // this error, the existence of the SP is checked.
+                if (serviceProvider != null) {
+                    log.debug("Removing Service Provider with name : " + oAuthConsumerAppDTO.getApplicationName());
+                    appMgtService.deleteApplication(oAuthConsumerAppDTO.getApplicationName());
+                }
+
+                log.debug("Removing OAuth App for " + consumerKey);
+                oAuthAdminService.removeOAuthApplicationData(consumerKey);
             }
 
         } catch (IdentityApplicationManagementException e) {

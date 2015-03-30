@@ -332,19 +332,23 @@ public class ApiMgtDAO {
 
     }
 
-    public static String getOwnerForConsumerApp(String consumerKey) throws APIManagementException {
+    /**
+     * Get the creator of the OAuth App.
+     * @param consumerKey Client ID of the OAuth App
+     * @return {@code Subscriber} with name and TenantId set.
+     * @throws APIManagementException
+     */
+    public static Subscriber getOwnerForConsumerApp(String consumerKey) throws APIManagementException {
         Connection conn = null;
         PreparedStatement ps = null;
         ResultSet rs = null;
-        String userId = null;
+        String username = null;
+        Subscriber subscriber = null;
+
         String sqlQuery =
-                "SELECT USER_ID from " +
-                " AM_SUBSCRIBER AS SUB," +
-                " AM_APPLICATION AS APP," +
-                " AM_APPLICATION_KEY_MAPPING AS AKM " +
+                "SELECT USERNAME,TENANT_ID FROM " +
+                " IDN_OAUTH_CONSUMER_APPS " +
                 " WHERE " +
-                " SUB.SUBSCRIBER_ID = APP.SUBSCRIBER_ID AND" +
-                " AKM.APPLICATION_ID = APP.APPLICATION_ID AND" +
                 " CONSUMER_KEY = ?";
 
         try {
@@ -353,7 +357,9 @@ public class ApiMgtDAO {
             ps.setString(1, consumerKey);
             rs = ps.executeQuery();
             while (rs.next()) {
-                userId = rs.getString("USER_ID");
+                username = rs.getString("USERNAME");
+                subscriber = new Subscriber(username);
+                subscriber.setTenantId(rs.getInt("TENANT_ID"));
             }
         } catch (SQLException e) {
             handleException("Error while executing SQL for getting User Id : SQL "+sqlQuery, e);
@@ -361,7 +367,7 @@ public class ApiMgtDAO {
             APIMgtDBUtil.closeAllConnections(ps, conn, rs);
         }
 
-        return userId;
+        return subscriber;
 
     }
 
@@ -5512,9 +5518,10 @@ public class ApiMgtDAO {
             prepStmtGetConsumerKey = connection.prepareStatement(getConsumerKeyQuery);
             prepStmtGetConsumerKey.setInt(1, application.getId());
             rs = prepStmtGetConsumerKey.executeQuery();
-            String consumerKey = null;
+            ArrayList<String> consumerKeys = new ArrayList<String>();
+
             while (rs.next()) {
-                consumerKey=rs.getString("CONSUMER_KEY");
+                String consumerKey=rs.getString("CONSUMER_KEY");
 
                 // This is true when OAuth app has been created by pasting consumer key/secret in the screen.
                 String mode = rs.getString("CREATE_MODE");
@@ -5524,14 +5531,11 @@ public class ApiMgtDAO {
                     prepStmt.execute();
                     prepStmt.close();
 
-                    //get new key manager
-                    KeyManager keyManager = KeyManagerFactory.getKeyManager();
-                    //delete on oAuthorization server.
-
                     // OAuth app is deleted if only it has been created from API Store. For mapped clients we don't
                     // call delete.
                     if(!"MAPPED".equals(mode)) {
-                        keyManager.deleteApplication(consumerKey);
+                        // Adding clients to be deleted.
+                        consumerKeys.add(consumerKey);
                     }
 
                 }
@@ -5549,6 +5553,11 @@ public class ApiMgtDAO {
             prepStmt.execute();
 
             connection.commit();
+
+            for (String consumerKey : consumerKeys){
+                //delete on oAuthorization server.
+                KeyManagerFactory.getKeyManager().deleteApplication(consumerKey);
+            }
         } catch (SQLException e) {
             handleException("Error while removing application details from the database", e);
         } finally {
