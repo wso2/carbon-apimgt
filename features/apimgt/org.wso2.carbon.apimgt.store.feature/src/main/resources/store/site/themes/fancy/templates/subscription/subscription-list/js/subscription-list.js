@@ -108,9 +108,8 @@ $(document).ready(function () {
         /*
          if we have additional parameters we can pass them as a json object.
          */
-        var oJsonParams = {
-            username : userName
-        };
+        //var oJsonParams= "";
+
         console.log("here i am");
 	    var tokenScope = $('#scopeInput').val();
 
@@ -123,8 +122,8 @@ $(document).ready(function () {
             authorizedDomains: authoDomains,
             validityTime: validityTime,
             tokenScope:tokenScope,
-	    selectedAppID:applicationId,
-            jsonParams: JSON.stringify(oJsonParams)
+	    selectedAppID:applicationId
+            //jsonParams: oJsonParams
 
         }, function (result) {
             if (!result.error) {

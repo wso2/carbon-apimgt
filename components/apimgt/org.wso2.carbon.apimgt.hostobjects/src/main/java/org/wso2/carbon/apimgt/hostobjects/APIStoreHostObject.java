@@ -2817,6 +2817,8 @@ public class APIStoreHostObject extends ScriptableObject {
 			                appObj.put("prodKeyScope", appObj, prodKeyScope);
                             appObj.put("prodConsumerKey", appObj, prodConsumerKey);
                             appObj.put("prodConsumerSecret", appObj, prodConsumerSecret);
+                            appObj.put("prodJsonString", appObj, jsonString);
+
                             if (prodKey.getValidityPeriod() == Long.MAX_VALUE) {
                                 prodEnableRegenarateOption = false;
                             }
@@ -2836,6 +2838,7 @@ public class APIStoreHostObject extends ScriptableObject {
                             appObj.put("prodConsumerSecret", appObj, null);
                             appObj.put("prodRegenarateOption", appObj, prodEnableRegenarateOption);
                             appObj.put("prodAuthorizedDomains", appObj, null);
+                            appObj.put("prodJsonString", appObj, null);
                             if (isApplicationAccessTokenNeverExpire(
                                     getApplicationAccessTokenValidityPeriodInSeconds())) {
                                 appObj.put("prodValidityTime", appObj, -1);
@@ -2858,6 +2861,7 @@ public class APIStoreHostObject extends ScriptableObject {
                                 appObj.put("prodValidityTime", appObj,
                                         getApplicationAccessTokenValidityPeriodInSeconds() * 1000);
                             }
+                            appObj.put("prodJsonString", appObj, null);
 
                         }
 
@@ -2887,6 +2891,7 @@ public class APIStoreHostObject extends ScriptableObject {
                             appObj.put("sandboxConsumerKey", appObj, sandboxConsumerKey);
                             appObj.put("sandboxConsumerSecret", appObj, sandboxConsumerSecret);
                             appObj.put("sandboxKeyState", appObj, sandboxKey.getState());
+                            appObj.put("sandboxJsonString", appObj, jsonString);
                             if (sandboxKey.getValidityPeriod() == Long.MAX_VALUE) {
 	                            sandEnableRegenarateOption = false;
                             }
@@ -2913,6 +2918,7 @@ public class APIStoreHostObject extends ScriptableObject {
                             appObj.put("sandRegenarateOption", appObj, sandEnableRegenarateOption);
                             appObj.put("sandboxAuthorizedDomains", appObj, null);
                             appObj.put("sandboxKeyState", appObj, sandboxKey.getState());
+                            appObj.put("sandboxJsonString", appObj, null);
                             if (isApplicationAccessTokenNeverExpire(
                                     getApplicationAccessTokenValidityPeriodInSeconds())) {
                                 appObj.put("sandValidityTime", appObj, -1);
@@ -2927,6 +2933,7 @@ public class APIStoreHostObject extends ScriptableObject {
                             appObj.put("sandboxConsumerSecret", appObj, null);
                             appObj.put("sandRegenarateOption", appObj, sandEnableRegenarateOption);
                             appObj.put("sandboxAuthorizedDomains", appObj, null);
+                            appObj.put("sandboxJsonString", appObj, null);
                             if (isApplicationAccessTokenNeverExpire(
                                     getApplicationAccessTokenValidityPeriodInSeconds())) {
                                 appObj.put("sandValidityTime", appObj, -1);
