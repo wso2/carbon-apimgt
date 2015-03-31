@@ -108,6 +108,7 @@
 
     "done": "Hecho",
     "copy": "Copiar",
+    "CreateNewVersion": "Create New Version",    
     "search": "Buscar",
     "filterAPIs": "Filtrar APIs",
     "filterTokens": "Filtrar Tokens de Acceso",

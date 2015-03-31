@@ -248,9 +248,13 @@ var drawAPIUsage = function (from,to) {
                                   });
                                  }
                                  drawChart(from,to);
-                        }
-                    }
-                    else {
+                        } else {
+				//No subscriber details available.
+				$('#apiUsageByUserTable').hide();
+                    		$('#tempLoadingSpaceUsageByUser').html('');
+                    		$('#tempLoadingSpaceUsageByUser').append($('<h3 class="no-data-heading center-wrapper">No Data Available</h3>'));
+			}
+                    } else {
                                 if (json.message == "AuthenticateError") {
                                     jagg.showLogin();
                                 } else {
