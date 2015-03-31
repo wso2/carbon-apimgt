@@ -94,6 +94,7 @@ $(document).ready(function () {
         var regen;
         var link;
         var validityTime;
+        var applicationId=$('option:selected','#appListSelected').attr('appId');
         if (keyType == 'PRODUCTION') {
             authoDomains = $('#allowedDomainsPro').val();
             validityTime=$('#refreshProdValidityTime').val();
@@ -110,7 +111,9 @@ $(document).ready(function () {
             callbackUrl:elem.attr("data-callbackUrl"),
             authorizedDomains:authoDomains,
             validityTime:validityTime,
-            tokenScope:tokenScope
+            tokenScope:tokenScope,
+	    selectedAppID:applicationId
+
         }, function (result) {
             if (!result.error) {
                 location.reload();
@@ -132,6 +135,7 @@ $(document).ready(function () {
         var link;
         var validityTime;
         var tokenScope;
+        var applicationId=$('#appListSelected').val();
         
         if (keyType == 'PRODUCTION') {
             authoDomains = $('#allowedDomainsPro').val();
@@ -148,7 +152,8 @@ $(document).ready(function () {
             callbackUrl:elem.attr("data-callbackUrl"),
             authorizedDomains:authoDomains,
             validityTime:validityTime,
-	    retryAfterFailure:true
+	        retryAfterFailure:true,
+            applicationId:applicationId
         }, function (result) {
             if (!result.error) {
                 location.reload();

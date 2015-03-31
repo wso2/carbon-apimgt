@@ -37,10 +37,8 @@ import org.wso2.carbon.apimgt.impl.observers.TenantServiceCreator;
 import org.wso2.carbon.apimgt.impl.utils.APIMgtDBUtil;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.utils.RemoteAuthorizationManager;
-import org.wso2.carbon.apimgt.impl.workflow.events.DataPublisherAlreadyExistsException;
 import org.wso2.carbon.base.MultitenantConstants;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
-import org.wso2.carbon.databridge.agent.thrift.lb.LoadBalancingDataPublisher;
 import org.wso2.carbon.governance.api.util.GovernanceConstants;
 import org.wso2.carbon.registry.core.ActionConstants;
 import org.wso2.carbon.registry.core.RegistryConstants;
@@ -110,7 +108,6 @@ public class APIManagerComponent {
 
     private static TenantRegistryLoader tenantRegistryLoader;
 
-    private static Map<String, LoadBalancingDataPublisher> dataPublisherMap;
 
     protected void activate(ComponentContext componentContext) throws Exception {
         if (log.isDebugEnabled()) {
@@ -157,26 +154,26 @@ public class APIManagerComponent {
             APIStatusObserverList.getInstance().init(configuration);
 
             AuthorizationUtils.addAuthorizeRoleListener(APIConstants.AM_CREATOR_APIMGT_EXECUTION_ID,
-                    RegistryUtils.getAbsolutePath(RegistryContext.getBaseInstance(),
+                                                        RegistryUtils.getAbsolutePath(RegistryContext.getBaseInstance(),
                                                                                       APIUtil.getMountedPath(RegistryContext.getBaseInstance(),
                                                                                                              RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH) +
-                                                                                              APIConstants.API_APPLICATION_DATA_LOCATION),
-                    APIConstants.Permissions.API_CREATE,
-                    UserMgtConstants.EXECUTE_ACTION, null);
+                                                                                      APIConstants.API_APPLICATION_DATA_LOCATION),
+                                                        APIConstants.Permissions.API_CREATE,
+                                                        UserMgtConstants.EXECUTE_ACTION, null);
             AuthorizationUtils.addAuthorizeRoleListener(APIConstants.AM_CREATOR_GOVERNANCE_EXECUTION_ID,
-                    RegistryUtils.getAbsolutePath(RegistryContext.getBaseInstance(),
+                                                        RegistryUtils.getAbsolutePath(RegistryContext.getBaseInstance(),
                                                                                       APIUtil.getMountedPath(RegistryContext.getBaseInstance(),
                                                                                                              RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH) +
-                                                                                              "/trunk"),
-                    APIConstants.Permissions.API_CREATE,
-                    UserMgtConstants.EXECUTE_ACTION, null);
+                                                                                      "/trunk"),
+                                                        APIConstants.Permissions.API_CREATE,
+                                                        UserMgtConstants.EXECUTE_ACTION, null);
             AuthorizationUtils.addAuthorizeRoleListener(APIConstants.AM_PUBLISHER_APIMGT_EXECUTION_ID,
-                    RegistryUtils.getAbsolutePath(RegistryContext.getBaseInstance(),
+                                                        RegistryUtils.getAbsolutePath(RegistryContext.getBaseInstance(),
                                                                                       APIUtil.getMountedPath(RegistryContext.getBaseInstance(),
                                                                                                              RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH) +
-                                                                                              APIConstants.API_APPLICATION_DATA_LOCATION),
-                    APIConstants.Permissions.API_PUBLISH,
-                    UserMgtConstants.EXECUTE_ACTION, null);
+                                                                                      APIConstants.API_APPLICATION_DATA_LOCATION),
+                                                        APIConstants.Permissions.API_PUBLISH,
+                                                        UserMgtConstants.EXECUTE_ACTION, null);
             
             setupImagePermissions();
             RemoteAuthorizationManager authorizationManager = RemoteAuthorizationManager.getInstance();
@@ -214,7 +211,6 @@ public class APIManagerComponent {
             	APIUtil.addBamServerProfile(bamServerURL, bamServerUser, bamServerPassword, 
             			bamServerThriftPort, MultitenantConstants.SUPER_TENANT_ID);
             }
-            dataPublisherMap = new ConcurrentHashMap<String, LoadBalancingDataPublisher>();
             
         } catch (APIManagementException e) {
             log.error("Error while initializing the API manager component", e);
@@ -327,14 +323,14 @@ public class APIManagerComponent {
                     getRealmService().getTenantUserRealm(MultitenantConstants.SUPER_TENANT_ID).
                     getAuthorizationManager();
             String imageLocation =
-                                   APIUtil.getMountedPath(RegistryContext.getBaseInstance(),
-                                                          RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH) +
-                                           APIConstants.API_IMAGE_LOCATION;
+                    APIUtil.getMountedPath(RegistryContext.getBaseInstance(),
+                                           RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH) +
+                    APIConstants.API_IMAGE_LOCATION;
             if (!accessControlAdmin.isRoleAuthorized(CarbonConstants.REGISTRY_ANONNYMOUS_ROLE_NAME,
-                    imageLocation, ActionConstants.GET)) {
+                                                     imageLocation, ActionConstants.GET)) {
                 // Can we get rid of this?
                 accessControlAdmin.authorizeRole(CarbonConstants.REGISTRY_ANONNYMOUS_ROLE_NAME,
-                        imageLocation, ActionConstants.GET);
+                                                 imageLocation, ActionConstants.GET);
             }
         } catch (UserStoreException e) {
             throw new APIManagementException("Error while setting up permissions for image collection", e);
@@ -516,37 +512,5 @@ public class APIManagerComponent {
         return tenantRegistryLoader;
     }
 
-    /**
-     * Fetch the data publisher which has been registered under the tenant domain.
-     *
-     * @param tenantDomain - The tenant domain under which the data publisher is registered
-     * @return - Instance of the LoadBalancingDataPublisher which was registered. Null if not registered.
-     */
-    public static LoadBalancingDataPublisher getDataPublisher(String tenantDomain) {
-        if (dataPublisherMap.containsKey(tenantDomain)) {
-            return dataPublisherMap.get(tenantDomain);
-        }
-        return null;
-    }
-
-    /**
-     * Adds a LoadBalancingDataPublisher to the data publisher map.
-     *
-     * @param tenantDomain  - The tenant domain under which the data publisher will be registered.
-     * @param dataPublisher - Instance of the LoadBalancingDataPublisher
-     * @throws org.wso2.carbon.apimgt.impl.workflow.events.DataPublisherAlreadyExistsException
-     *          - If a data publisher has already been registered under the
-     *          tenant domain
-     */
-    public static void addDataPublisher(String tenantDomain,
-                                        LoadBalancingDataPublisher dataPublisher)
-            throws DataPublisherAlreadyExistsException {
-        if (dataPublisherMap.containsKey(tenantDomain)) {
-            throw new DataPublisherAlreadyExistsException("A DataPublisher has already been created for the tenant " +
-                                                          tenantDomain);
-        }
-
-        dataPublisherMap.put(tenantDomain, dataPublisher);
-    }
 
 }

@@ -37,6 +37,10 @@ function generate_swagger_object(swagger){
     var url;
 
     if (uri != null) {
+        // replacing @ signs for matcher to work with reverse proxies
+        if(callPath.indexOf("@") > -1){
+            callPath = callPath.replace("@","%40");
+        }
         var uriMatcher = new URIMatcher(callPath);
         var providerVal,apiNameVal,apiVersionVal,subContext;
         providerVal = apiNameVal = apiVersionVal = subContext = "";
@@ -128,11 +132,14 @@ function generate_swagger_object(swagger){
                 };
             };
             if(urlArr.length===1){
-                jsonObj.basePath=urlArr[0]+context+"/"+apiVersionVal;
+                // We do not need to append the version since with the context versioning, the version is embedded in the context.
+                jsonObj.basePath=urlArr[0]+context;
+                //jsonObj.basePath=urlArr[0]+context+"/"+apiVersionVal;
             }else{
                 for(var i=0; i < urlArr.length ; i++){
                     if(urlArr[i].indexOf(accessProtocol) > -1){
-                        jsonObj.basePath=urlArr[i]+context+"/"+apiVersionVal;
+                        jsonObj.basePath=urlArr[i]+context;
+                        // jsonObj.basePath=urlArr[i]+context+"/"+apiVersionVal;
                     }
                 }
             }

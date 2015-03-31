@@ -526,7 +526,8 @@ public class APIUsageStatisticsClient {
                 if (providerAPI.getId().getApiName().equals(usage.apiName) &&
                         providerAPI.getId().getVersion().equals(usage.apiVersion) &&
                         providerAPI.getContext().equals(usage.context)) {
-                    String apiName = usage.apiName + " (" + providerAPI.getId().getProviderName() + ")";
+                    String[] apiData = {usage.apiName, usage.apiVersion,  providerAPI.getId().getProviderName()};
+                    String apiName = "[\""+apiData[0]+"\",\""+apiData[1]+"\",\""+apiData[2]+"\"]";
                     APIUsageDTO usageDTO = usageByAPIs.get(apiName);
                     if (usageDTO != null) {
                         usageDTO.setCount(usageDTO.getCount() + usage.requestCount);
@@ -1045,7 +1046,7 @@ public class APIUsageStatisticsClient {
         });
         if (usageData.size() > limit) {
             APIUsageDTO other = new APIUsageDTO();
-            other.setApiName("[Other]");
+            other.setApiName("[\"Other\"]");
             for (int i = limit; i < usageData.size(); i++) {
                 other.setCount(other.getCount() + usageData.get(i).getCount());
             }
@@ -1915,7 +1916,8 @@ public class APIUsageStatisticsClient {
             return AXIOMUtil.stringToOM(returnString);
 
         } catch (Exception e) {
-            throw new APIMgtUsageQueryServiceClientException("Error occurred while querying from JDBC database", e);
+            throw new APIMgtUsageQueryServiceClientException("Error occurred while querying from JDBC database" +
+                                                             e.getMessage(), e);
         } finally {
             if (rs != null) {
                 try {

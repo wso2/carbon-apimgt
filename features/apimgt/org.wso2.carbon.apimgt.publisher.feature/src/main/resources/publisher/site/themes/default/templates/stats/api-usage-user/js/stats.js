@@ -248,9 +248,13 @@ var drawAPIUsage = function (from,to) {
                                   });
                                  }
                                  drawChart(from,to);
-                        }
-                    }
-                    else {
+                        } else {
+				//No subscriber details available.
+				$('#apiUsageByUserTable').hide();
+                    		$('#tempLoadingSpaceUsageByUser').html('');
+                    		$('#tempLoadingSpaceUsageByUser').append($('<h3 class="no-data-heading center-wrapper">No Data Available</h3>'));
+			}
+                    } else {
                                 if (json.message == "AuthenticateError") {
                                     jagg.showLogin();
                                 } else {
@@ -279,7 +283,7 @@ var drawChart = function (from, to) {
                 if (length == 0){
                     $('#apiUsageByUserTable').hide();
                     $('#tempLoadingSpaceUsageByUser').html('');
-                    $('#tempLoadingSpaceUsageByUser').append($('<span class="label label-info">' + i18n.t('errorMsgs.noData') + '</span>'));
+                    $('#tempLoadingSpaceUsageByUser').append($('<h3 class="no-data-heading center-wrapper">No Data Available</h3>'));
 
                 } else {
                     var inputData=[];
@@ -433,7 +437,7 @@ var drawChart = function (from, to) {
                         return obj2.Hits - obj1.Hits;
                     });
 
-                    //default display of 15 checked entries on table
+                    //default display of 20 checked entries on table
                     for(var n=0;n<sortData.length;n++){
                         if(n<20){
                             $dataTable.append($('<tr><td >'

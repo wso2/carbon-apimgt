@@ -34,6 +34,7 @@ include("/jagg/jagg.jag");
         print(obj);
     } else if (action === "logout" && request.getMethod() == 'POST') {
         jagg.setUser(null);
+        jagg.setWorkflowCookie(null);
         print({
             error:false
         });

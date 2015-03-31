@@ -123,6 +123,7 @@
 
     "done": "Done",
     "copy": "Copy",
+    "CreateNewVersion": "Create New Version",    
     "search": "Search",
     "filterAPIs": "Filter APIs",
     "filterTokens": "Filter Access Tokens",
@@ -317,5 +318,6 @@
 	"techOwnerMail" : "Technical Owner Email",
 
     "apiUnavailable" : "API does not exist",
-    "removeAPIFromExternalStoresWarning" : "This API is not PUBLISHED. Please remove from external stores."
+    "removeAPIFromExternalStoresWarning" : "This API is not PUBLISHED. Please remove from external stores.",
+    "SampleAPI" : "Deploy Sample API"
 }

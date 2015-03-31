@@ -171,11 +171,15 @@ var saveDoc=function(){
     var docVisibility=$("#docVisibility option:selected").val();
     var docName = $("#docName").val();
     var errorCondition = false;
+    var illegalChars = /([~!&@#;%^*+={}\|\\<>\"\',])/;
+    var illegalCharsCondition = illegalChars.test(docId.val());
     if($('#saveDocBtn').val() != "Update"){
         errorCondition = isAvailableDoc(apiName + "-" + docId.val());
     }
     if (apiName && !validInput(docId, 'Duplicate Document Name.', errorCondition)) {
         return;
+    } else if (!validInput(docId, 'Name contains one or more illegal characters  (~ ! & @ #  ; % ^ * + = { } | &lt; &gt;, \' " \\ ) .', illegalCharsCondition)) {
+	return;
     } else if (sourceType == 'url' && !validInput(docUrlDiv, 'This field is required.', errCondition)) {
         return;
     } else if (sourceType == 'url' && !validInputUrl(docUrlDiv)) {

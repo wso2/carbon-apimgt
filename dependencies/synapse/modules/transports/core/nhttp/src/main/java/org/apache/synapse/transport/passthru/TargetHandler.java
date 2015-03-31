@@ -90,7 +90,7 @@ public class TargetHandler implements NHttpClientEventHandler {
         targetConfiguration.getConnections().addConnection(conn);
 
         // notify about the new connection
-        deliveryAgent.connected(pool.getRoute());
+        deliveryAgent.connected(pool.getRoute(), conn);
         
         HttpContext context = conn.getContext();
         context.setAttribute(PassThroughConstants.REQ_DEPARTURE_TIME, System.currentTimeMillis());

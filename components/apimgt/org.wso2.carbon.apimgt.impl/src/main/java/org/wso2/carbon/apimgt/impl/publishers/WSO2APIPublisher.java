@@ -44,11 +44,7 @@ import org.apache.http.protocol.HttpContext;
 import org.apache.http.util.EntityUtils;
 
 import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.api.model.API;
-import org.wso2.carbon.apimgt.api.model.APIIdentifier;
-import org.wso2.carbon.apimgt.api.model.APIStore;
-import org.wso2.carbon.apimgt.api.model.Tier;
-import org.wso2.carbon.apimgt.api.model.URITemplate;
+import org.wso2.carbon.apimgt.api.model.*;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
@@ -614,30 +610,30 @@ public class WSO2APIPublisher implements APIPublisher {
         try {
 			registry = ServiceReferenceHolder.getInstance().getRegistryService()
                     .getGovernanceSystemRegistry(tenantId);
-			if (registry.resourceExists(APIConstants.EXTERNAL_API_STORES_LOCATION)) {
+            if (registry.resourceExists(APIConstants.EXTERNAL_API_STORES_LOCATION)) {
                 Resource resource = registry.get(APIConstants.EXTERNAL_API_STORES_LOCATION);
                 String content = new String((byte[]) resource.getContent());
                 OMElement element = AXIOMUtil.stringToOM(content);
-                OMElement storeURL=element.getFirstChildWithName(new QName(APIConstants.EXTERNAL_API_STORES_STORE_URL));
-                if(storeURL != null){
-                	redirectURL = storeURL.getText();
-                }else{
-                	String msg = "Store URL not found in External Stores Configuration";
+                OMElement storeURL = element.getFirstChildWithName(new QName(APIConstants.EXTERNAL_API_STORES_STORE_URL));
+                if (storeURL != null) {
+                    redirectURL = storeURL.getText();
+                } else {
+                    String msg = "Store URL element is missing in External APIStores configuration";
                     log.error(msg);
                     throw new APIManagementException(msg);
                 }
-			}
-			return redirectURL;
-		} catch (RegistryException e) {
-			String msg = "Error while retrieving External Stores Configuration from registry";
+            }
+            return redirectURL;
+        } catch (RegistryException e) {
+            String msg = "Error while retrieving External Stores Configuration from registry";
             log.error(msg, e);
             throw new APIManagementException(msg, e);
-		} catch (XMLStreamException e) {
-			String msg = "Malformed XML found in the External Stores Configuration resource";
+        } catch (XMLStreamException e) {
+            String msg = "Malformed XML found in the External Stores Configuration resource";
             log.error(msg, e);
             throw new APIManagementException(msg, e);
-		}
-         
+        }
+
     }
 
     private MultipartEntity getMultipartEntity(API api,String externalPublisher, String action) 

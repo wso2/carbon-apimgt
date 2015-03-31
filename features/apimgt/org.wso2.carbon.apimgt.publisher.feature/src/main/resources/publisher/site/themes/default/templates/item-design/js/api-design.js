@@ -280,8 +280,9 @@ APIDesigner.prototype.init_controllers = function(){
 
     $("#version").change(function(e){
         APIDesigner().api_doc.apiVersion = $(this).val();
-        APIDesigner().baseURLValue = "http://localhost:8280/"+$("#context").val().replace("/","")+"/"+$(this).val()});
-    $("#context").change(function(e){ APIDesigner().baseURLValue = "http://localhost:8280/"+$(this).val().replace("/","")+"/"+$("#version").val()});
+        // We do not need the version anymore. With the new plugable version strategy the context will have the version
+        APIDesigner().baseURLValue = "http://localhost:8280/"+$("#context").val().replace("/","")});
+    $("#context").change(function(e){ APIDesigner().baseURLValue = "http://localhost:8280/"+$(this).val().replace("/","")});
     $("#name").change(function(e){ APIDesigner().api_doc.info.title = $(this).val() });
     $("#description").change(function(e){ APIDesigner().api_doc.info.description = $(this).val() });
 
@@ -565,6 +566,16 @@ $(document).ready(function(){
     var designer = new APIDesigner();
     designer.load_api_document(api_doc);
 
+    $("#swaggerEditer").on("keyup", function () {
+        try {
+            jsyaml.load(designer.swagger_editor.getSession().getValue());
+            document.getElementById('output_string').innerHTML = "";
+        } catch (err) {
+            document.getElementById('output_string').innerHTML = err;
+            console.log(err);
+        }
+    });
+
     $("#clearThumb").on("click", function () {
         $('#apiThumb-container').html('<input type="file" class="input-xlarge" name="apiThumb" />');
     });
@@ -666,5 +677,28 @@ function getContextValue() {
             context = "/" + context;
         }
         $('.contextForUrl').html(context + "/" + version);
+    }
+    updateContextPattern();
+}
+
+function updateContextPattern(){
+    var context = $('#context').val();
+    var version = $('#version').val();
+
+    if(context != ""){
+        if(context.indexOf("{version}") < 0){
+            if(!context.endsWith('/')){
+                context = context + '/';
+            }
+            context = context + "{version}";
+        }
+        $('#resource_url_pattern_refix').text(context);
+    }else{
+        $('#resource_url_pattern_refix').text("/{context}/{version}/");
+    }
+
+    if(version){
+        context = context.replace("{version}",version);
+        $('#resource_url_pattern_refix').text(context);
     }
 }

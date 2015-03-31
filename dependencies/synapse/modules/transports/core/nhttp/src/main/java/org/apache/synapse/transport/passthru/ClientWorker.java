@@ -83,7 +83,9 @@ public class ClientWorker implements Runnable {
             headers.remove(PassThroughConstants.LOCATION);
             String prfix = (String) outMsgCtx.getProperty(PassThroughConstants.SERVICE_PREFIX);
             if (prfix != null) {
-                headers.put(PassThroughConstants.LOCATION, prfix + url.getFile());
+                headers.put(PassThroughConstants.LOCATION, prfix
+                                                           + (url.getFile().startsWith("/") ? url.getFile().substring(1)
+                                                                                            : url.getFile()));
             }
 
         }
@@ -126,7 +128,7 @@ public class ClientWorker implements Runnable {
         responseMsgCtx.setTransportOut(outMsgCtx.getTransportOut());
 
         //setting the responseMsgCtx PassThroughConstants.INVOKED_REST property to the one set inside PassThroughTransportUtils
-        responseMsgCtx.setProperty(PassThroughConstants.INVOKED_REST, outMsgCtx.getProperty(PassThroughConstants.INVOKED_REST));
+        responseMsgCtx.setProperty(PassThroughConstants.INVOKED_REST, outMsgCtx.isDoingREST());
 
         // set any transport headers received
         Set<Map.Entry<String, String>> headerEntries = response.getHeaders().entrySet();

@@ -44,6 +44,7 @@ import org.json.simple.parser.ParseException;
 import org.mozilla.javascript.*;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
+import org.wso2.carbon.apimgt.api.FaultGatewaysException;
 import org.wso2.carbon.apimgt.api.dto.UserApplicationAPIUsage;
 import org.wso2.carbon.apimgt.api.model.*;
 import org.wso2.carbon.apimgt.hostobjects.internal.HostObjectComponent;
@@ -96,6 +97,7 @@ public class APIProviderHostObject extends ScriptableObject {
     private static Pattern pathParamValidatorPattern=Pattern.compile("\\{uri\\.var\\.[\\w]+\\}");
 
     private String username;
+    private static String VERSION_PARAM="{version}";
 
     private APIProvider apiProvider;
 
@@ -146,7 +148,9 @@ public class APIProviderHostObject extends ScriptableObject {
         log.error(msg, t);
         throw new APIManagementException(msg, t);
     }
-
+    private static void handleFaultGateWayException(FaultGatewaysException e) throws FaultGatewaysException {
+        throw e;
+    }
     public static NativeObject jsFunction_login(Context cx, Scriptable thisObj,
                                                 Object[] args, Function funObj)
             throws APIManagementException {
@@ -244,25 +248,28 @@ public class APIProviderHostObject extends ScriptableObject {
      * @param thisObj Scriptable object
      * @param args    Passing arguments
      * @param funObj  Function object
-     * @return
+     * @return true if update successful, false otherwise
      * @throws APIManagementException
      */
     public static boolean jsFunction_updatePermissionCache(Context cx, Scriptable thisObj,
-                                                           Object[] args, Function funObj)throws APIManagementException {
-        if (args==null || args.length == 0) {
+                                                           Object[] args, Function funObj)
+            throws APIManagementException {
+        if (args == null || args.length == 0) {
             handleException("Invalid input parameters to the login method");
         }
+        String username = (String) args[0];
+        boolean updated = false;
+        try {
 
-        boolean updated=false;
-        try{
-            String username = (String) args[0];
-
-            String tenantDomain = MultitenantUtils.getTenantDomain(username);
-            int tenantId =  ServiceReferenceHolder.getInstance().getRealmService().getTenantManager().getTenantId(tenantDomain);
-            PermissionUpdateUtil.updatePermissionTree(tenantId);
+            APIUtil.updatePermissionCache(username);
             updated = true;
         } catch (Exception e) {
-            log.error("Error while updating permissions", e);
+            // If the user creation or permission change done in another node in distributed setup, users may not be
+            // able to login into the system using SSO until permission cache updated. We call this method internally
+            // to update the permission cache, when user trying to login into the system. If this request fails user
+            // may not able to login into the systems and user will be getting an invalid credentials message. User
+            // can login into the system once permission cache automatically updated in predefined interval.
+            log.error("Error while updating permissions for user " + username, e);
         }
         return updated;
     }
@@ -297,11 +304,12 @@ public class APIProviderHostObject extends ScriptableObject {
      * @param thisObj Scriptable object
      * @param args    Passing arguments
      * @param funObj  Function object
-     * @return json String of environments failed
+     * @return true if the API was added successfully
      * @throws APIManagementException Wrapped exception by org.wso2.carbon.apimgt.api.APIManagementException
      */
-    public static String jsFunction_manageAPI(Context cx, Scriptable thisObj,
-                                              Object[] args, Function funObj) throws APIManagementException, ScriptException {
+    public static boolean jsFunction_manageAPI(Context cx, Scriptable thisObj,
+                                               Object[] args, Function funObj)
+            throws APIManagementException, ScriptException, FaultGatewaysException {
     	boolean success = false;
     	
     	if (args==null||args.length == 0) {
@@ -455,7 +463,7 @@ public class APIProviderHostObject extends ScriptableObject {
 
         if (apiData.get("swagger", apiData) != null) {
             Set<URITemplate> uriTemplates = parseResourceConfig(apiProvider, apiId, (String) apiData
-                    .get("swagger", apiData), api);
+                    .get("swagger", apiData), api, true);
             api.setUriTemplates(uriTemplates);
         }
 
@@ -482,12 +490,12 @@ public class APIProviderHostObject extends ScriptableObject {
      * @param thisObj Scriptable object
      * @param args    Passing arguments
      * @param funObj  Function object
-     * @return json string of failed environments
+     * @return true if the API was added successfully
      * @throws APIManagementException Wrapped exception by org.wso2.carbon.apimgt.api.APIManagementException
      */
-    public static String jsFunction_updateAPIImplementation(Context cx, Scriptable thisObj,
+    public static boolean jsFunction_updateAPIImplementation(Context cx, Scriptable thisObj,
                                                             Object[] args, Function funObj)
-            throws APIManagementException, ScriptException {
+            throws APIManagementException, ScriptException, FaultGatewaysException {
     	
     	if (args==null||args.length == 0) {
             handleException("Invalid number of input parameters.");
@@ -559,7 +567,7 @@ public class APIProviderHostObject extends ScriptableObject {
         
         if (apiData.get("swagger", apiData) != null) {
             Set<URITemplate> uriTemplates = parseResourceConfig(apiProvider, apiId, (String) apiData
-                    .get("swagger", apiData), api);
+                    .get("swagger", apiData), api, false);
             api.setUriTemplates(uriTemplates);
         }
                 
@@ -573,12 +581,12 @@ public class APIProviderHostObject extends ScriptableObject {
      * @param thisObj Scriptable object
      * @param args    Passing arguments
      * @param funObj  Function object
-     * @return json string of failed environments
+     * @return true if the API was added successfully
      * @throws APIManagementException Wrapped exception by org.wso2.carbon.apimgt.api.APIManagementException
      */
-    public static String jsFunction_updateAPIDesign(Context cx, Scriptable thisObj,
-                                                    Object[] args, Function funObj)
-            throws APIManagementException, ScriptException {
+    public static boolean jsFunction_updateAPIDesign(Context cx, Scriptable thisObj,
+                                                     Object[] args, Function funObj)
+            throws APIManagementException, ScriptException, FaultGatewaysException {
 
         if (args==null||args.length == 0) {
             handleException("Invalid number of input parameters.");
@@ -654,7 +662,7 @@ public class APIProviderHostObject extends ScriptableObject {
         
         if (apiData.get("swagger", apiData) != null) {
             Set<URITemplate> uriTemplates = parseResourceConfig(apiProvider, apiId, (String) apiData
-                    .get("swagger", apiData), api);
+                    .get("swagger", apiData), api, false);
             api.setUriTemplates(uriTemplates);
         }
                 
@@ -682,12 +690,12 @@ public class APIProviderHostObject extends ScriptableObject {
      * @param thisObj Scriptable object
      * @param args    Passing arguments
      * @param funObj  Function object
-     * @return json string of failed Environments
+     * @return true if the API was added successfully
      * @throws APIManagementException Wrapped exception by org.wso2.carbon.apimgt.api.APIManagementException
      */
-    public static String jsFunction_createAPI(Context cx, Scriptable thisObj,
-                                              Object[] args, Function funObj)
-            throws APIManagementException, ScriptException {
+    public static boolean jsFunction_createAPI(Context cx, Scriptable thisObj,
+                                               Object[] args, Function funObj)
+            throws APIManagementException, ScriptException, FaultGatewaysException {
 
         if (args==null||args.length == 0) {
             handleException("Invalid number of input parameters.");
@@ -715,6 +723,7 @@ public class APIProviderHostObject extends ScriptableObject {
         provider = (provider != null ? provider.trim() : null);
         name = (name != null ? name.trim() : null);
         version = (version != null ? version.trim() : null);
+
         APIIdentifier apiId = new APIIdentifier(provider, name, version);
         APIProvider apiProvider = getAPIProvider(thisObj);
 
@@ -725,6 +734,14 @@ public class APIProviderHostObject extends ScriptableObject {
 
         API api = new API(apiId);
         api.setStatus(APIStatus.CREATED);
+
+        // This is to support the new Pluggable version strategy
+        // if the context does not contain any {version} segment, we use the default version strategy.
+        context = checkAndSetVersionParam(context);
+        api.setContextTemplate(context);
+
+        context = updateContextWithVersion(version, contextVal, context);
+
         api.setContext(context);
         api.setVisibility(APIConstants.API_GLOBAL_VISIBILITY);
         api.setLastUpdated(new Date());
@@ -792,12 +809,13 @@ public class APIProviderHostObject extends ScriptableObject {
      * @param api
      * @param fileHostObject
      * @param create
-     * @return json string of failed Environments
+     * @return true if the API was added successfully
      * @throws APIManagementException
      */
-    private static String saveAPI(APIProvider apiProvider, API api,
-                                  FileHostObject fileHostObject, boolean create) throws APIManagementException {
-        String success = null;
+    private static boolean saveAPI(APIProvider apiProvider,API api,
+                                  FileHostObject fileHostObject, boolean create)
+            throws APIManagementException, FaultGatewaysException {
+    	boolean success = false;
     	boolean isTenantFlowStarted = false;
         try {
             String tenantDomain =
@@ -820,16 +838,17 @@ public class APIProviderHostObject extends ScriptableObject {
             }  
             if (create) {
             	apiProvider.addAPI(api);
-                success = createFailedGatewaysAsJsonString(Collections.<String, List<String>>emptyMap());
             } else {
-                Map<String, List<String>> failedGateways = apiProvider.updateAPI(api);
-                success = createFailedGatewaysAsJsonString(failedGateways);
+                apiProvider.updateAPI(api);
             }
-
+            success = true;
         } catch (ScriptException e) {
             handleException("Error while adding the API- " + api.getId().getApiName() + "-" + api.getId().getVersion(),
                             e);
-            return createFailedGatewaysAsJsonString(Collections.<String, List<String>>emptyMap());
+            return false;
+        } catch (FaultGatewaysException e) {
+            handleFaultGateWayException(e);
+            return false;
         } finally {
         	if (isTenantFlowStarted) {
         		PrivilegedCarbonContext.endTenantFlow();
@@ -848,7 +867,7 @@ public class APIProviderHostObject extends ScriptableObject {
      */
     private static Set<URITemplate> parseResourceConfig(APIProvider apiProvider,
                                                         APIIdentifier apiId,
-                                                        String resourceConfigsJSON, API api)
+                                                        String resourceConfigsJSON, API api, boolean isManagePhase)
             throws APIManagementException {
         JSONParser parser = new JSONParser();
         JSONObject resourceConfigs = null;
@@ -894,8 +913,7 @@ public class APIProviderHostObject extends ScriptableObject {
             		}
             	}
             }
-            
-        
+
 	        JSONArray resources = (JSONArray) resourceConfigs.get("resources");
 	                
 	        //Iterating each resourcePath config
@@ -942,7 +960,10 @@ public class APIProviderHostObject extends ScriptableObject {
                 if(ep.endsWith(RegistryConstants.PATH_SEPARATOR)){
                     ep.substring(0,ep.length()-1);
                 }
-                String basePath = ep+api.getContext()+RegistryConstants.PATH_SEPARATOR+apiId.getVersion();
+                // We do not need the version in the base path since with the context version strategy, the version is
+                // embedded in the context
+                String basePath = ep+api.getContext();
+//                String basePath = ep+api.getContext()+RegistryConstants.PATH_SEPARATOR+apiId.getVersion();
                 resourceConfig.put("basePath",basePath);
 	            String resourceJSON = resourceConfig.toJSONString();
 	            
@@ -977,8 +998,10 @@ public class APIProviderHostObject extends ScriptableObject {
 			                     if (authType.equals("Application User")) {
 			                         authType = "Application_User";
 			                     }
-		                     } else {
+		                     } else if (isManagePhase) {
 		                    	 authType = APIConstants.AUTH_NO_AUTHENTICATION;
+		                     } else { //saving new resources in design/implement phase
+		                         authType = APIConstants.AUTH_APPLICATION_OR_USER_LEVEL_TOKEN;
 		                     }
 		                     template.setThrottlingTier((String) operation.get("throttling_tier"));
 		                     template.setMediationScript((String) operation.get("mediation_script"));
@@ -1004,7 +1027,6 @@ public class APIProviderHostObject extends ScriptableObject {
         }
         return uriTemplates;
     }
-
     /**
      * This method is to functionality of add a new API in API-Provider
      *
@@ -1029,6 +1051,7 @@ public class APIProviderHostObject extends ScriptableObject {
         if (provider != null) {
             provider = APIUtil.replaceEmailDomain(provider);
         }
+
         String name = (String) apiData.get("apiName", apiData);
         String version = (String) apiData.get("version", apiData);
         String defaultVersion=(String)apiData.get("defaultVersion",apiData);
@@ -1109,6 +1132,13 @@ public class APIProviderHostObject extends ScriptableObject {
             //Create tenant aware context for API
             context= "/t/"+ providerDomain+context;
         }
+
+        // This is to support the new Pluggable version strategy
+        // if the context does not contain any {version} segment, we use the default version strategy.
+        context = checkAndSetVersionParam(context);
+
+        String contextTemplate = context;
+        context = updateContextWithVersion(version, contextVal, context);
 
         NativeArray uriTemplateArr = (NativeArray) apiData.get("uriTemplateArr", apiData);
 
@@ -1311,6 +1341,7 @@ public class APIProviderHostObject extends ScriptableObject {
         }
         api.setStatus(APIStatus.CREATED);
         api.setContext(context);
+        api.setContextTemplate(contextTemplate);
         api.setBusinessOwner(bizOwner);
         api.setBusinessOwnerEmail(bizOwnerEmail);
         api.setTechnicalOwner(techOwner);
@@ -1378,6 +1409,18 @@ public class APIProviderHostObject extends ScriptableObject {
         }
         return success;
 
+    }
+
+    private static String checkAndSetVersionParam(String context) {
+        // This is to support the new Pluggable version strategy
+        // if the context does not contain any {version} segment, we use the default version strategy.
+        if(!context.contains(VERSION_PARAM)){
+            if(!context.endsWith("/")){
+                context = context + "/";
+            }
+            context = context + VERSION_PARAM;
+        }
+        return context;
     }
 
     private static String getTransports(NativeObject apiData) {
@@ -1523,6 +1566,13 @@ public class APIProviderHostObject extends ScriptableObject {
             context= "/t/"+ providerDomain+context;
         }
 
+        // This is to support the new Pluggable version strategy
+        // if the context does not contain any {version} segment, we use the default version strategy.
+        context = checkAndSetVersionParam(context);
+
+        String contextTemplate = context;
+        context = updateContextWithVersion(version, contextVal, context);
+
         APIIdentifier apiId = new APIIdentifier(provider, name, version);
         API api = new API(apiId);
 
@@ -1647,6 +1697,7 @@ public class APIProviderHostObject extends ScriptableObject {
         api.setSandboxUrl(sandboxUrl);
         api.addTags(tag);
         api.setContext(context);
+        api.setContextTemplate(contextTemplate);
         api.setVisibility(visibility);
         api.setVisibleRoles(visibleRoles != null ? visibleRoles.trim() : null);
         api.setVisibleTenants(visibleTenants != null ? visibleTenants.trim() : null);
@@ -1739,25 +1790,37 @@ public class APIProviderHostObject extends ScriptableObject {
         return success;
     }
 
+    private static String updateContextWithVersion(String version, String contextVal, String context) {
+        // This condition should not be true for any occasion but we keep it so that there are no loopholes in
+        // the flow.
+        if (version == null) {
+            // context template patterns - /{version}/foo or /foo/{version}
+            // if the version is null, then we remove the /{version} part from the context
+            context = contextVal.replace("/" + VERSION_PARAM, "");
+        }else{
+            context = context.replace(VERSION_PARAM, version);
+        }
+        return context;
+    }
     /**
      *
      * @param cx Rhino context
      * @param thisObj Scriptable object
      * @param args Passing arguments
      * @param funObj Function object
-     * @return json string of failed environments
+     * @return true if the API was added successfully
      * @throws APIManagementException
      */
-    public static String jsFunction_updateAPIStatus(Context cx, Scriptable thisObj,
+    public static boolean jsFunction_updateAPIStatus(Context cx, Scriptable thisObj,
                                                     Object[] args,
                                                     Function funObj)
-            throws APIManagementException {
+            throws APIManagementException, FaultGatewaysException {
         if (args == null || args.length == 0) {
             handleException("Invalid number of input parameters.");
         }
-        Map<String, List<String>> failedGateways = new ConcurrentHashMap<String, List<String>>();
+
         NativeObject apiData = (NativeObject) args[0];
-        String success = null;
+        boolean success = false;
         String provider = (String) apiData.get("provider", apiData);
         String providerTenantMode = (String) apiData.get("provider", apiData);
         provider = APIUtil.replaceEmailDomain(provider);
@@ -1784,7 +1847,7 @@ public class APIProviderHostObject extends ScriptableObject {
                 APIStatus oldStatus = api.getStatus();
                 APIStatus newStatus = getApiStatus(status);
                 String currentUser = ((APIProviderHostObject) thisObj).getUsername();
-                failedGateways = apiProvider.changeAPIStatus(api, newStatus, currentUser, publishToGateway);
+                apiProvider.changeAPIStatus(api, newStatus, currentUser, publishToGateway);
 
                 if (oldStatus.equals(APIStatus.CREATED) && newStatus.equals(APIStatus.PUBLISHED)) {
                     if (makeKeysForwardCompatible) {
@@ -1798,25 +1861,28 @@ public class APIProviderHostObject extends ScriptableObject {
                             if (oldAPI.getId().getApiName().equals(name) &&
                                 versionComparator.compare(oldAPI, api) < 0 &&
                                 (oldAPI.getStatus().equals(APIStatus.PUBLISHED))) {
-                                failedGateways = apiProvider.changeAPIStatus(oldAPI, APIStatus.DEPRECATED,
+                                apiProvider.changeAPIStatus(oldAPI, APIStatus.DEPRECATED,
                                                                              currentUser, publishToGateway);
                             }
                         }
                     }
                 }
-
+                success = true;
             } else {
                 handleException("Couldn't find an API with the name-" + name + "version-" + version);
             }
         } catch (APIManagementException e) {
             handleException("Error while updating API status", e);
-            return createFailedGatewaysAsJsonString(failedGateways);
-        }finally {
+            return false;
+        } catch (FaultGatewaysException e) {
+            handleFaultGateWayException(e);
+            return false;
+        } finally {
         	if (isTenantFlowStarted) {
         		PrivilegedCarbonContext.endTenantFlow();
         	}
         }
-        return createFailedGatewaysAsJsonString(failedGateways);
+        return success;
     }
 
     public static boolean jsFunction_updateSubscriptionStatus(Context cx, Scriptable thisObj,
@@ -2858,7 +2924,7 @@ public class APIProviderHostObject extends ScriptableObject {
                 APIUtil.setResourcePermissions(api.getId().getProviderName(),
                                                api.getVisibility(), visibleRoles,filePath);
                 doc.setFilePath(apiProvider.addIcon(filePath, icon));
-            } else {
+            } else if (sourceType.equalsIgnoreCase(Documentation.DocumentSourceType.FILE.toString())) {
                 throw new APIManagementException("Empty File Attachment.");
             }
 
@@ -4379,8 +4445,9 @@ public class APIProviderHostObject extends ScriptableObject {
 		                for (Object store : externalAPIStores) {
 		                	inputStores.add(APIUtil.getExternalAPIStore((String) store, tenantId));
 		                }
-		                updated = apiProvider.updateAPIsInExternalAPIStores(api,inputStores);
-	                 }
+                        updated = apiProvider.updateAPIsInExternalAPIStores(api,inputStores);
+
+                    }
 	                return updated;
                 } catch (UserStoreException e) {
                 	handleException("Error while updating external api stores", e);
@@ -4433,26 +4500,21 @@ public class APIProviderHostObject extends ScriptableObject {
     return false;
     }
     }
-    
-	/**
-	 * Evaluate HTTP end-point URI to validate path parameter and query
-	 * parameter formats<br>
-	 * Sample URI format<br>
-	 * http[s]//[www.]anyhost[.com][:port]/{uri.var.param}?param1=value&param2={
-	 * uri.var.value}
-	 * 
-	 * @param endpointConfig
-	 *            JSON representation of end-point configuration.
-	 * @return true if valid URI
-	 * @throws APIManagementException
-	 *             If the endpointConfig is invalid or URI is invalid
-	 */
-	private static boolean validateEndpointURI(String endpointConfig)
-			throws APIManagementException {
-		boolean isInvalid = false;
-		if (endpointConfig != null) {
+
+    /**
+     * Evaluate HTTP end-point URI to validate path parameter and query
+     * parameter formats<br>
+     * Sample URI format<br>
+     * http[s]//[www.]anyhost[.com][:port]/{uri.var.param}?param1=value&param2={uri.var.value}
+     *
+     * @param endpointConfig JSON representation of end-point configuration.
+     * @return true if valid URI
+     * @throws APIManagementException If the endpointConfig is invalid or URI is invalid
+     */
+    private static boolean validateEndpointURI(String endpointConfig)
+            throws APIManagementException {
+        if (endpointConfig != null) {
             try {
-                List<String> uriList= new ArrayList<String>();
                 JSONParser parser = new JSONParser();
                 JSONObject jsonObject = (JSONObject) parser.parse(endpointConfig);
                 Object epType = jsonObject.get("endpoint_type");
@@ -4461,62 +4523,70 @@ public class APIProviderHostObject extends ScriptableObject {
                     Object prodEPs = (JSONObject) jsonObject.get("production_endpoints");
                     if (prodEPs instanceof JSONObject) {
                         Object url = ((JSONObject) prodEPs).get("url");
-                        if (url instanceof String) {
-                            uriList.add(url.toString());
+                        if (url instanceof String && !isValidURI(url.toString())) {
+                            handleException("Invalid Production Endpoint URI. Please refer HTTP Endpoint " +
+                                            "documentation of the WSO2 ESB for details.");
                         }
                     }
                     // extract sandbox uri from config
                     Object sandEPs = (JSONObject) jsonObject.get("sandbox_endpoints");
                     if (sandEPs instanceof JSONObject) {
                         Object url = ((JSONObject) sandEPs).get("url");
-                        if (url instanceof String) {
-                            uriList.add(url.toString());
-                        }
-                    }
-                }
-                for(String uri:uriList){
-                    // validate only if uri contains { or }
-                    if(uri.contains("{") || uri.contains("}")){
-                        // check { and } are matched or not. otherwise invalid
-                        int startCount = 0, endCount = 0;
-                        for(char c:uri.toCharArray()){
-                            if(c=='{'){
-                                startCount++;
-                            }else if(c=='}'){
-                                endCount++;
-                            }
-                            // this check guarantee the order of '{' and '}'. Ex: {uri.var.name} not }uri.var.name{
-                            if(endCount>startCount){
-                                isInvalid=true;
-                                break;
-                            }
-                        }
-                        // continue only if the matching brackets are found. otherwise invalid
-                        if(startCount==endCount){
-                            // extract content including { } brackets
-                            Matcher pathParamMatcher=pathParamExtractorPattern.matcher(uri);
-                            while(pathParamMatcher.find()){
-                                // validate the format of { } content
-                                Matcher formatMatcher=pathParamValidatorPattern.matcher(pathParamMatcher.group());
-                                if(!formatMatcher.matches()){
-                                    isInvalid=true;
-                                    break;
-                                }
-                            }
-                        }else{
-                            isInvalid=true;
+                        if (url instanceof String && !isValidURI(url.toString())) {
+                            handleException("Invalid Sandbox Endpoint URI. Please refer HTTP Endpoint " +
+                                            "documentation of the WSO2 ESB for details.");
                         }
                     }
                 }
             } catch (ParseException e) {
                 handleException("Invalid Endpoint config", e);
             }
-            if (isInvalid) {
-                handleException("Invalid Endpoint URI. Please refer HTTP Endpoint documentation of the WSO2 ESB for details.");
+        }
+        return true;
+    }
+
+    /**
+     * This method returns whether the given url is contain valid uri params or not
+     *
+     * @param url URL to be validated
+     * @return true if URI doesn't contain params or contains valid params
+     */
+    private static boolean isValidURI(String url) {
+        boolean isInvalid = false;
+        // validate only if uri contains { or }
+        if (url != null && (url.contains("{") || url.contains("}"))) {
+            // check { and } are matched or not. otherwise invalid
+            int startCount = 0, endCount = 0;
+            for (char c : url.toCharArray()) {
+                if (c == '{') {
+                    startCount++;
+                } else if (c == '}') {
+                    endCount++;
+                }
+                // this check guarantee the order of '{' and '}'. Ex: {uri.var.name} not }uri.var.name{
+                if (endCount > startCount) {
+                    isInvalid = true;
+                    break;
+                }
+            }
+            // continue only if the matching no of brackets are found. otherwise invalid
+            if (startCount == endCount) {
+                // extract content including { } brackets
+                Matcher pathParamMatcher = pathParamExtractorPattern.matcher(url);
+                while (pathParamMatcher.find()) {
+                    // validate the format of { } content
+                    Matcher formatMatcher = pathParamValidatorPattern.matcher(pathParamMatcher.group());
+                    if (!formatMatcher.matches()) {
+                        isInvalid = true;
+                        break;
+                    }
+                }
+            } else {
+                isInvalid = true;
             }
         }
-		return isInvalid;
-	}
+        return !isInvalid;
+    }
 
     /**
      * Validate the backend by sending HTTP HEAD
@@ -4688,34 +4758,4 @@ public class APIProviderHostObject extends ScriptableObject {
         }
         return myn;
     }
-
-    /**
-     * @param failedGateways map of failed environments
-     * @return json string of input map
-     */
-    private static String createFailedGatewaysAsJsonString(Map<String, List<String>> failedGateways) {
-        String failedJson = "{\"PUBLISHED\" : \"\" ,\"UNPUBLISHED\":\"\"}";
-        if (failedGateways != null) {
-            if (!failedGateways.isEmpty()) {
-                StringBuilder failedToPublish = new StringBuilder();
-                StringBuilder failedToUnPublish = new StringBuilder();
-                for (String environmentName : failedGateways.get("PUBLISHED")) {
-                    failedToPublish.append(environmentName + ",");
-                }
-                for (String environmentName : failedGateways.get("UNPUBLISHED")) {
-                    failedToUnPublish.append(environmentName + ",");
-                }
-                if (!"".equals(failedToPublish.toString())) {
-                    failedToPublish.deleteCharAt(failedToPublish.length() - 1);
-                }
-                if (!"".equals(failedToUnPublish.toString())) {
-                    failedToUnPublish.deleteCharAt(failedToUnPublish.length() - 1);
-                }
-                failedJson = "{\"PUBLISHED\" : \"" + failedToPublish.toString() + "\" ,\"UNPUBLISHED\":\"" +
-                             failedToUnPublish.toString() + "\"}";
-            }
-        }
-        return failedJson;
-    }
-
 }
