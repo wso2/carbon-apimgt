@@ -23,6 +23,7 @@ import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 
+import java.rmi.registry.Registry;
 import java.util.Set;
 
 /**
@@ -36,20 +37,32 @@ public abstract class APIDefinition {
      *
      * @return URI templates
      */
-    public abstract Set<URITemplate> getURITemplatesFromDefinition(APIIdentifier apiIdentifier, String resourceConfigsJSON, API api, APIProvider apiProvider) throws APIManagementException;
+    public abstract Set<URITemplate> getURITemplates(API api, String resourceConfigsJSON) throws APIManagementException;
 
     /**
      * This method extracts the scopes from the API definition
      *
+     * @param resourceConfigsJSON resource json
      * @return scopes
      */
-    public abstract Set<Scope> getScopeFromDefinition(String resourceConfigsJSON) throws APIManagementException;
+    public abstract Set<Scope> getScopes(String resourceConfigsJSON) throws APIManagementException;
 
     /**
      * This method saves the API definition
      *
-     * @return status of the save operation
+     * @param api API to be saved
+     * @param apiDefinitionJSON API definition as JSON string
+     * @param apiProvider api provider
      */
-    public abstract void saveAPIDefinition(APIIdentifier apiIdentifier, String resourceConfigsJSON, API api, APIProvider apiProvider) throws ParseException, APIManagementException;
+    public abstract void saveAPIDefinition(API api, String apiDefinitionJSON, APIProvider apiProvider) throws ParseException, APIManagementException;
+
+    /**
+     * This method reads the API definition from registry
+     *
+     * @param apiIdentifier api identifier
+     * @param registry      registry
+     * @return API definition
+     */
+    public abstract String getAPIDefinition(APIIdentifier apiIdentifier, Registry registry);
 
 }
