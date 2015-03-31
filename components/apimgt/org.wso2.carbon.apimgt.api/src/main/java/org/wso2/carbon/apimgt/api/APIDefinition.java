@@ -22,8 +22,8 @@ import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
+import org.wso2.carbon.registry.api.Registry;
 
-import java.rmi.registry.Registry;
 import java.util.Set;
 
 /**
@@ -50,11 +50,11 @@ public abstract class APIDefinition {
     /**
      * This method saves the API definition
      *
-     * @param api API to be saved
+     * @param api               API to be saved
      * @param apiDefinitionJSON API definition as JSON string
-     * @param apiProvider api provider
+     * @param registry          registry
      */
-    public abstract void saveAPIDefinition(API api, String apiDefinitionJSON, APIProvider apiProvider) throws ParseException, APIManagementException;
+    public abstract void saveAPIDefinition(API api, String apiDefinitionJSON, Registry registry) throws ParseException, APIManagementException;
 
     /**
      * This method reads the API definition from registry
@@ -63,6 +63,6 @@ public abstract class APIDefinition {
      * @param registry      registry
      * @return API definition
      */
-    public abstract String getAPIDefinition(APIIdentifier apiIdentifier, Registry registry);
+    public abstract String getAPIDefinition(APIIdentifier apiIdentifier, Registry registry) throws APIManagementException;
 
 }
