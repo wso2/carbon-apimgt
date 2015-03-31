@@ -49,10 +49,7 @@ import org.wso2.carbon.apimgt.api.dto.UserApplicationAPIUsage;
 import org.wso2.carbon.apimgt.api.model.*;
 import org.wso2.carbon.apimgt.hostobjects.internal.HostObjectComponent;
 import org.wso2.carbon.apimgt.hostobjects.internal.ServiceReferenceHolder;
-import org.wso2.carbon.apimgt.impl.APIConstants;
-import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
-import org.wso2.carbon.apimgt.impl.APIManagerFactory;
-import org.wso2.carbon.apimgt.impl.UserAwareAPIProvider;
+import org.wso2.carbon.apimgt.impl.*;
 import org.wso2.carbon.apimgt.impl.dto.Environment;
 import org.wso2.carbon.apimgt.impl.dto.TierPermissionDTO;
 import org.wso2.carbon.apimgt.impl.utils.APIAuthenticationAdminClient;
@@ -84,7 +81,6 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.*;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -104,6 +100,9 @@ public class APIProviderHostObject extends ScriptableObject {
     public String getClassName() {
         return "APIProvider";
     }
+
+    //
+    static APIDefinitionFromSwagger12 definitionFromSwagger = new APIDefinitionFromSwagger12();
 
     // The zero-argument constructor used for create instances for runtime
     public APIProviderHostObject() throws APIManagementException {
@@ -462,8 +461,9 @@ public class APIProviderHostObject extends ScriptableObject {
         api.setLastUpdated(new Date());
 
         if (apiData.get("swagger", apiData) != null) {
-            Set<URITemplate> uriTemplates = parseResourceConfig(apiProvider, apiId, (String) apiData
-                    .get("swagger", apiData), api);
+            //Set<URITemplate> uriTemplates = parseResourceConfig(apiProvider, apiId, (String) apiData.get("swagger", apiData), api);
+            //Read URI Templates from swagger resource
+            Set<URITemplate> uriTemplates = definitionFromSwagger.getURITemplatesFromDefinition(apiId, (String) apiData.get("swagger", apiData), api, apiProvider);
             api.setUriTemplates(uriTemplates);
         }
 
@@ -566,8 +566,9 @@ public class APIProviderHostObject extends ScriptableObject {
         	        
         
         if (apiData.get("swagger", apiData) != null) {
-            Set<URITemplate> uriTemplates = parseResourceConfig(apiProvider, apiId, (String) apiData
-                    .get("swagger", apiData), api);
+            //Set<URITemplate> uriTemplates = parseResourceConfig(apiProvider, apiId, (String) apiData.get("swagger", apiData), api);
+            //Read URI Templates from swagger resource
+            Set<URITemplate> uriTemplates = definitionFromSwagger.getURITemplatesFromDefinition(apiId, (String) apiData.get("swagger", apiData), api, apiProvider);
             api.setUriTemplates(uriTemplates);
         }
                 
@@ -661,8 +662,9 @@ public class APIProviderHostObject extends ScriptableObject {
         }
         
         if (apiData.get("swagger", apiData) != null) {
-            Set<URITemplate> uriTemplates = parseResourceConfig(apiProvider, apiId, (String) apiData
-                    .get("swagger", apiData), api);
+            //Set<URITemplate> uriTemplates = parseResourceConfig(apiProvider, apiId, (String) apiData.get("swagger", apiData), api);
+            //Read URI Templates from swagger resource
+            Set<URITemplate> uriTemplates = definitionFromSwagger.getURITemplatesFromDefinition(apiId, (String) apiData.get("swagger", apiData), api, apiProvider);
             api.setUriTemplates(uriTemplates);
         }
                 

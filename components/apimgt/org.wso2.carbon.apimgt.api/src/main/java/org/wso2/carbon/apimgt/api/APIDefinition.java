@@ -17,6 +17,9 @@
 */
 package org.wso2.carbon.apimgt.api;
 
+import org.json.simple.parser.ParseException;
+import org.wso2.carbon.apimgt.api.model.API;
+import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 
@@ -26,27 +29,27 @@ import java.util.Set;
  * APIDefinition is responsible for providing uri templates, scopes and
  * save the api definition according to the permission and visibility
  */
-public interface APIDefinition {
+public abstract class APIDefinition {
 
     /**
      * This method extracts the URI templates from the API definition
      *
      * @return URI templates
      */
-    public Set<URITemplate> getURITemplatesFromDefinition();
+    public abstract Set<URITemplate> getURITemplatesFromDefinition(APIIdentifier apiIdentifier, String resourceConfigsJSON, API api, APIProvider apiProvider) throws APIManagementException;
 
     /**
-     * This method extracts the xcopes from the API definition
+     * This method extracts the scopes from the API definition
      *
      * @return scopes
      */
-    public Set<Scope> getScopeFromDefinition();
+    public abstract Set<Scope> getScopeFromDefinition(String resourceConfigsJSON) throws APIManagementException;
 
     /**
      * This method saves the API definition
      *
      * @return status of the save operation
      */
-    public boolean saveAPIDefinition();
+    public abstract void saveAPIDefinition(APIIdentifier apiIdentifier, String resourceConfigsJSON, API api, APIProvider apiProvider) throws ParseException, APIManagementException;
 
 }
