@@ -76,12 +76,14 @@ public class TenantServiceCreator extends AbstractAxis2ConfigurationContextObser
     private String throttleOutSequenceName = "_throttle_out_handler_";
     private String faultSequenceName = "fault";
     private String mainSequenceName = "main";
+    private String corsSequenceName = "cors";
     private String synapseConfigRootPath = CarbonBaseUtils.getCarbonHome() + "/repository/resources/apim-synapse-config/";
     private SequenceMediator authFailureHandlerSequence = null;
     private SequenceMediator resourceMisMatchSequence = null;
     private SequenceMediator throttleOutSequence = null;    
     private SequenceMediator sandboxKeyErrorSequence = null;
     private SequenceMediator productionKeyErrorSequence = null;
+    private SequenceMediator corsSequence = null;
 
 
     public void createdConfigurationContext(ConfigurationContext configurationContext) {
@@ -267,6 +269,12 @@ public class TenantServiceCreator extends AbstractAxis2ConfigurationContextObser
                 productionKeyErrorSequence = (SequenceMediator) factory.createMediator(builder.getDocumentElement(), new Properties());
                 productionKeyErrorSequence.setFileName(productionKeyErrorSequenceName + ".xml");
             }
+            if (corsSequence == null) {
+                in = FileUtils.openInputStream(new File(synapseConfigRootPath + corsSequenceName + ".xml"));
+                builder = new StAXOMBuilder(in);
+                corsSequence = (SequenceMediator) factory.createMediator(builder.getDocumentElement(), new Properties());
+                corsSequence.setFileName(corsSequenceName + ".xml");
+            }
             FileUtils.copyFile(new File(synapseConfigRootPath + mainSequenceName + ".xml"),
                     new File(synapseConfigDir.getAbsolutePath() + File.separator + "sequences" + File.separator + mainSequenceName + ".xml"));
 
@@ -292,6 +300,7 @@ public class TenantServiceCreator extends AbstractAxis2ConfigurationContextObser
             serializer.serializeSequence(productionKeyErrorSequence, initialSynCfg, null);
             serializer.serializeSequence(throttleOutSequence, initialSynCfg, null);
             serializer.serializeSequence(resourceMisMatchSequence, initialSynCfg, null);
+            serializer.serializeSequence(corsSequence, initialSynCfg, null);
             serializer.serializeSynapseRegistry(registry, initialSynCfg, null);
         } catch (Exception e) {
             handleException("Couldn't serialise the initial synapse configuration " +

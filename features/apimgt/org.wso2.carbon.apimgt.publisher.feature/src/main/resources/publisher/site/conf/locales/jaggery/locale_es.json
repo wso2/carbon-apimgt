@@ -178,6 +178,7 @@
     "tenantRoleHelpMsg" : "Esta opción controla la visibilidad de la API en función del usuario." ,
     "aboutAPIs" : "The following APIs have been created. APIs that are marked as PUBLISHED can be subscribed through the API Store. ",
     "tagsHelpMsg":"Lista separada por comas (Ex: tag1, tag2, tag3)",
+    "optionsHelpMsg":"Está enviando opción de compra al backend",
     "rolesHelpMsg":"Lista separada por comas (Ex: role1,role2,role3)",
     "allowTenantsHelpMsg":"Lista separada por comas (Ex: tenant1.com,tenant2.com). La API será accesible a los usuarios definidos en esta lista..",
     "wadlHelpMsg":"Ex:http://example.com/service.wadl",

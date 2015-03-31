@@ -1019,6 +1019,32 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         APITemplateBuilderImpl vtb = new APITemplateBuilderImpl(api);
 
         if(!api.getStatus().equals(APIStatus.PROTOTYPED)) {
+            Map<String, String> corsProperties = new HashMap<String, String>();
+            corsProperties.put("inline", api.getImplementation());
+            String corsFilePath = APIUtil.getAPIPath(api.getId()) + "/cors.xml";
+            String tenantAwareUserName = APIUtil.replaceEmailDomainBack(api.getId().getProviderName());
+            String tenantDomain = MultitenantUtils.getTenantDomain(tenantAwareUserName);
+            int tenantId;
+            try {
+                tenantId = ServiceReferenceHolder
+                        .getInstance().getRealmService().getTenantManager()
+                        .getTenantId(tenantDomain);
+                if (tenantId != MultitenantConstants.SUPER_TENANT_ID) {
+                    tenantAwareUserName = tenantAwareUserName.split("@" + tenantDomain)[0];
+                }
+                Registry govRegistry = ServiceReferenceHolder.getInstance().getRegistryService()
+                                                             .getGovernanceUserRegistry(tenantAwareUserName, tenantId);
+                //check cors.xml file exists in according to api
+                if (govRegistry.resourceExists(corsFilePath)) {
+                    corsProperties.put("cors", "gov:" + corsFilePath);
+                }
+            } catch (org.wso2.carbon.user.api.UserStoreException e) {
+                log.error("Couldn't retrieve Tenant Domain for User " + tenantAwareUserName, e);
+            } catch (RegistryException e) {
+                log.error("Couldn't retrieve registry for User " + tenantAwareUserName + " Tenant " + tenantDomain,
+                          e);
+            }
+            vtb.addHandler("org.wso2.carbon.apimgt.gateway.handlers.security.CORSRequestHandler", corsProperties);
             vtb.addHandler("org.wso2.carbon.apimgt.gateway.handlers.security.APIAuthenticationHandler", Collections.EMPTY_MAP);
 
             Map<String, String> properties = new HashMap<String, String>();

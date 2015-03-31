@@ -71,6 +71,22 @@ function APIDesigner(){
 
     this.init_controllers();
 
+    $( "#api_designer" ).delegate( "#more", "click", this, function( event ) {
+                        $("#options").css("display", "inline");
+                        $("#more").hide();
+    });
+  $( "#api_designer" ).delegate( "#less", "click", this, function( event ) {
+                         $("#options").hide();
+                         $("#more").css("display", "inline");
+    });
+         $( "#api_designer" ).delegate( "a.help_popup", "mouseover", this, function( event ) {
+    $('a.help_popup').popover({
+        html : true,
+        content: function() {
+            return $('#'+$(this).attr('help_data')).html();
+        }
+    });
+            });
     $( "#api_designer" ).delegate( ".resource_expand", "click", this, function( event ) {
         if(this.resource_created == undefined){
             event.data.render_resource($(this).parent().next().find('.resource_body'));
@@ -147,7 +163,7 @@ function APIDesigner(){
 		var method = $(this).val();               
                 var tempPara = parameters.concat();                
                      
-                if(method == "POST" || method == "PUT") {   
+                if((method == "POST" || method == "PUT")) {
                         tempPara.push({
 		            name : "body",
 		      	    "description": "Request Body",
@@ -156,12 +172,14 @@ function APIDesigner(){
 		            "paramType": "body",
 		            "type":"string"
                         });
-                } 
+                }
+                if(method != "OPTIONS"){
                 resource.operations.push({ 
                     method : $(this).val(),
                     parameters : tempPara,
                     nickname : $(this).val().toLowerCase() + '_' +$("#resource_url_pattern").val()
                 });
+                }
                 ic++
                 }
                 vc++;                

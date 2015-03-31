@@ -312,7 +312,7 @@ public class APIKeyValidator {
                 log.debug("Resource not found in cache for key: ".concat(resourceCacheKey));
             }
         }
-
+        String resourceString = (String) synCtx.getProperty(APIConstants.API_ELECTED_RESOURCE);
         String apiContext = (String) synCtx.getProperty(RESTConstants.REST_API_CONTEXT);
         String apiVersion = (String) synCtx.getProperty(RESTConstants.SYNAPSE_REST_API_VERSION);
         String fullRequestPath = (String)synCtx.getProperty(RESTConstants.REST_FULL_REQUEST_PATH);
@@ -329,45 +329,45 @@ public class APIKeyValidator {
 
         String httpMethod = (String)((Axis2MessageContext) synCtx).getAxis2MessageContext().
                 getProperty(Constants.Configuration.HTTP_METHOD);
+        if (resourceString == null) {
+            API selectedApi = null;
+            Resource selectedResource = null;
 
-        API selectedApi = null;
-        Resource selectedResource = null;
-
-        for(API api : synCtx.getConfiguration().getAPIs()){
-            if(apiContext.equals(api.getContext()) && apiVersion.equals(api.getVersion())){
-                if(log.isDebugEnabled()){
-                    log.debug("Selected API: ".concat(apiContext).concat(", Version: ").concat(apiVersion));
-                }
-                selectedApi = api;
-                break;
-            }
-        }
-
-        if (selectedApi.getResources().length > 0) {
-            for (RESTDispatcher dispatcher : RESTUtils.getDispatchers()) {
-                Resource resource = dispatcher.findResource(synCtx, Arrays.asList(selectedApi.getResources()));
-                if (resource != null && Arrays.asList(resource.getMethods()).contains(httpMethod)) {
-                    selectedResource = resource;
+            for (API api : synCtx.getConfiguration().getAPIs()) {
+                if (apiContext.equals(api.getContext()) && apiVersion.equals(api.getVersion())) {
+                    if (log.isDebugEnabled()) {
+                        log.debug("Selected API: ".concat(apiContext).concat(", Version: ").concat(apiVersion));
+                    }
+                    selectedApi = api;
                     break;
                 }
             }
+
+            if (selectedApi.getResources().length > 0) {
+                for (RESTDispatcher dispatcher : RESTUtils.getDispatchers()) {
+                    Resource resource = dispatcher.findResource(synCtx, Arrays.asList(selectedApi.getResources()));
+                    if (resource != null && Arrays.asList(resource.getMethods()).contains(httpMethod)) {
+                        selectedResource = resource;
+                        break;
+                    }
+                }
+            }
+
+            if (selectedResource == null) {
+                //No matching resource found.
+                log.error("Could not find matching resource for " + requestPath);
+                throw new ResourceNotFoundException("Could not find matching resource for " + requestPath);
+            }
+
+            resourceString = selectedResource.getDispatcherHelper().getString();
+            resourceCacheKey = APIUtil.getResourceInfoDTOCacheKey(apiContext, apiVersion, resourceString, httpMethod);
+
+            if (log.isDebugEnabled()) {
+                log.debug("Selected Resource: ".concat(resourceString));
+            }
+            //Set the elected resource
+            synCtx.setProperty(APIConstants.API_ELECTED_RESOURCE, resourceString);
         }
-
-        if(selectedResource == null){
-            //No matching resource found.
-            log.error("Could not find matching resource for " + requestPath);
-            throw new ResourceNotFoundException("Could not find matching resource for " + requestPath);
-        }
-
-        String resourceString = selectedResource.getDispatcherHelper().getString();
-        resourceCacheKey = APIUtil.getResourceInfoDTOCacheKey(apiContext, apiVersion, resourceString, httpMethod);
-
-        if(log.isDebugEnabled()){
-            log.debug("Selected Resource: ".concat(resourceString));
-        }
-        //Set the elected resource
-        synCtx.setProperty(APIConstants.API_ELECTED_RESOURCE, resourceString);
-
         verb = (VerbInfoDTO) getResourceCache().get(resourceCacheKey);
 
         //Cache hit

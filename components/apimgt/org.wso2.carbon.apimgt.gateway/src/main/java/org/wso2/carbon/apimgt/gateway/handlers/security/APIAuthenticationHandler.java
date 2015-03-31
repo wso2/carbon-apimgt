@@ -119,18 +119,6 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
             long currentTime = System.currentTimeMillis();
             messageContext.setProperty("api.ut.backendRequestEndTime", Long.toString(currentTime));
         }
-    	if (Utils.isCORSEnabled()) {
-	    	/* For CORS support adding required headers to the response */
-	    	org.apache.axis2.context.MessageContext axis2MC = ((Axis2MessageContext) messageContext).
-	                getAxis2MessageContext();
-	    	Map<String, String> headers = (Map) axis2MC.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
-	    		    	    	
-	    	headers.put(APIConstants.CORSHeaders.ACCESS_CONTROL_ALLOW_ORIGIN, Utils.getAllowedOrigin(authenticator.getRequestOrigin()));
-	        headers.put(APIConstants.CORSHeaders.ACCESS_CONTROL_ALLOW_METHODS, Utils.getAllowedMethods());
-	        headers.put(APIConstants.CORSHeaders.ACCESS_CONTROL_ALLOW_HEADERS, Utils.getAllowedHeaders());
-	        axis2MC.setProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS, headers);
-    	}
- 
         return true;
     }
 
@@ -169,7 +157,8 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
             status = HttpStatus.SC_FORBIDDEN;
         } else {
             status = HttpStatus.SC_UNAUTHORIZED;
-            Map<String, String> headers = new HashMap<String, String>();
+            Map<String, String> headers =
+                    (Map) axis2MC.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
             headers.put(HttpHeaders.WWW_AUTHENTICATE, authenticator.getChallengeString());
             axis2MC.setProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS, headers);
         }
@@ -179,15 +168,6 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
         } else {
             Utils.setSOAPFault(messageContext, "Client", "Authentication Failure", e.getMessage());
         }
-        if (Utils.isCORSEnabled()) {
-        	/* For CORS support adding required headers to the fault response */
-        	Map<String, String> headers = (Map) axis2MC.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
-            headers.put(APIConstants.CORSHeaders.ACCESS_CONTROL_ALLOW_ORIGIN, Utils.getAllowedOrigin(authenticator.getRequestOrigin()));
-            headers.put(APIConstants.CORSHeaders.ACCESS_CONTROL_ALLOW_METHODS, Utils.getAllowedMethods());
-            headers.put(APIConstants.CORSHeaders.ACCESS_CONTROL_ALLOW_HEADERS, Utils.getAllowedHeaders());
-            axis2MC.setProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS, headers);
-        }
-        
         Utils.sendFault(messageContext, status);
     }
 
