@@ -52,7 +52,7 @@ public class DefaultKeyValidationHandler extends AbstractKeyValidationHandler {
         try {
             tokenInfo = KeyManagerFactory.getKeyManager().getTokenMetaData(validationContext.getAccessToken());
 
-            if (tokenInfo == null || !tokenInfo.isTokenValid()) {
+            if (tokenInfo == null) {
                 return false;
             }
 
@@ -61,6 +61,14 @@ public class DefaultKeyValidationHandler extends AbstractKeyValidationHandler {
 
             APIKeyValidationInfoDTO apiKeyValidationInfoDTO = new APIKeyValidationInfoDTO();
             validationContext.setValidationInfoDTO(apiKeyValidationInfoDTO);
+
+            if (!tokenInfo.isTokenValid()) {
+                apiKeyValidationInfoDTO.setAuthorized(false);
+                if (tokenInfo.getParameter("errorMsg") != null) {
+                    apiKeyValidationInfoDTO.setValidationStatus((Integer)tokenInfo.getParameter("errorMsg"));
+                }
+                return false;
+            }
 
             if (!hasTokenRequiredAuthLevel(validationContext.getRequiredAuthenticationLevel(), tokenInfo)) {
                 apiKeyValidationInfoDTO.setAuthorized(false);
