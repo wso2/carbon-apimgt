@@ -18,11 +18,9 @@
 
 package org.wso2.carbon.apimgt.impl.definitions;
 
-import java_cup.parser;
 import org.json.simple.parser.ParseException;
 import org.wso2.carbon.apimgt.api.APIDefinition;
 import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.Scope;
@@ -34,13 +32,10 @@ import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
-import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.registry.api.Registry;
 import org.wso2.carbon.registry.core.RegistryConstants;
 import org.wso2.carbon.registry.api.Resource;
 import org.wso2.carbon.registry.api.RegistryException;
-import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
-import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.apimgt.impl.dto.Environment;
 
 import java.util.LinkedHashSet;
@@ -204,6 +199,7 @@ public class APIDefinitionFromSwagger12 extends APIDefinition {
 
         try {
             String resourcePath = APIUtil.getSwagger12DefinitionFilePath(apiName, apiVersion, apiProviderName);
+            //todo remove APIConstants.API_DOC_1_2_RESOURCE_NAME and add filename
             resourcePath = resourcePath + APIConstants.API_DOC_1_2_RESOURCE_NAME;
             Resource resource = registry.newResource();
 
@@ -211,7 +207,7 @@ public class APIDefinitionFromSwagger12 extends APIDefinition {
             resource.setMediaType("application/json");
             registry.put(resourcePath, resource);
 
-    		//Set visibility as same as the API visibility
+            //Set visibility as same as the API visibility
             APIUtil.setResourcePermissions(apiProviderName, api.getVisibility(), null, resourcePath);
 
         } catch (RegistryException e) {
