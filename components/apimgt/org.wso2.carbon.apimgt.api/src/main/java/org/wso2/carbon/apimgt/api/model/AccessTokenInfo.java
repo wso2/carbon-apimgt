@@ -97,7 +97,7 @@ public class AccessTokenInfo {
     }
 
     public void addParameter(String paramName, Object paramValue){
-        parameters.put(paramName,paramName);
+        parameters.put(paramName,paramValue);
     }
 
     public Object getParameter(String paramName){
