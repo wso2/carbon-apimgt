@@ -16,7 +16,7 @@
  *  under the License.
  *
  */
-app.dependencies = ['publisher_common'];
+app.dependencies = ['publisher-common'];
 app.server = function(ctx) {
     return {
         configs: {

@@ -16,7 +16,7 @@
  *  under the License.
  *
  */
-app.dependencies = ['store_common'];
+app.dependencies = ['store-common'];
 app.server = function(ctx) {
     return {
         endpoints: {
