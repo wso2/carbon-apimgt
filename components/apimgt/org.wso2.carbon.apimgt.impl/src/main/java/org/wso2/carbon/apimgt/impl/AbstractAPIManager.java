@@ -278,10 +278,14 @@ public abstract class AbstractAPIManager implements APIManager {
 
     public API getAPI(APIIdentifier identifier) throws APIManagementException {
         String apiPath = APIUtil.getAPIPath(identifier);
+        API api;
         try {
             String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(identifier.getProviderName()));
             Registry registry;
-            if (!tenantDomain.equals(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)) {
+            if(isTenantDomainNotMatching(tenantDomain)){
+                throw new APIManagementException("Invalid Operation: Cannot access " +  apiPath);
+            }
+            else if (!tenantDomain.equals(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)) {
                 int id = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager().getTenantId(tenantDomain);
                 registry = ServiceReferenceHolder.getInstance().
                         getRegistryService().getGovernanceSystemRegistry(id);
@@ -301,7 +305,7 @@ public abstract class AbstractAPIManager implements APIManager {
                 throw new APIManagementException("artifact id is null for : " + apiPath);
             }
             GenericArtifact apiArtifact = artifactManager.getGenericArtifact(artifactId);
-            return APIUtil.getAPIForPublishing(apiArtifact, registry);
+            api =  APIUtil.getAPIForPublishing(apiArtifact, registry);
 
         } catch (RegistryException e) {
             handleException("Failed to get API from : " + apiPath, e);
@@ -310,6 +314,7 @@ public abstract class AbstractAPIManager implements APIManager {
             handleException("Failed to get API from : " + apiPath, e);
             return null;
         }
+        return api;
     }
 
     public API getAPI(String apiPath) throws APIManagementException {
