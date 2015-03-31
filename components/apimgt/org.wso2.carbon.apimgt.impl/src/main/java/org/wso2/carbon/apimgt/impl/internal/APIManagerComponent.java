@@ -37,11 +37,9 @@ import org.wso2.carbon.apimgt.impl.observers.TenantServiceCreator;
 import org.wso2.carbon.apimgt.impl.utils.APIMgtDBUtil;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.utils.RemoteAuthorizationManager;
-import org.wso2.carbon.apimgt.impl.workflow.events.DataPublisherAlreadyExistsException;
 import org.wso2.carbon.bam.service.data.publisher.services.ServiceDataPublisherAdmin;
 import org.wso2.carbon.base.MultitenantConstants;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
-import org.wso2.carbon.databridge.agent.thrift.lb.LoadBalancingDataPublisher;
 import org.wso2.carbon.governance.api.util.GovernanceConstants;
 import org.wso2.carbon.registry.core.ActionConstants;
 import org.wso2.carbon.registry.core.RegistryConstants;
@@ -73,8 +71,6 @@ import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 
 /**
@@ -115,7 +111,6 @@ public class APIManagerComponent {
 
     private static TenantRegistryLoader tenantRegistryLoader;
 
-    private static Map<String, LoadBalancingDataPublisher> dataPublisherMap;
 
     protected void activate(ComponentContext componentContext) throws Exception {
         if (log.isDebugEnabled()) {
@@ -210,8 +205,6 @@ public class APIManagerComponent {
                 }
             }
             APIUtil.createSelfSignUpRoles(MultitenantConstants.SUPER_TENANT_ID);
-
-            dataPublisherMap = new ConcurrentHashMap<String, LoadBalancingDataPublisher>();
             
         } catch (APIManagementException e) {
             log.error("Error while initializing the API manager component", e);
@@ -527,37 +520,5 @@ public class APIManagerComponent {
         return tenantRegistryLoader;
     }
 
-    /**
-     * Fetch the data publisher which has been registered under the tenant domain.
-     *
-     * @param tenantDomain - The tenant domain under which the data publisher is registered
-     * @return - Instance of the LoadBalancingDataPublisher which was registered. Null if not registered.
-     */
-    public static LoadBalancingDataPublisher getDataPublisher(String tenantDomain) {
-        if (dataPublisherMap.containsKey(tenantDomain)) {
-            return dataPublisherMap.get(tenantDomain);
-        }
-        return null;
-    }
-
-    /**
-     * Adds a LoadBalancingDataPublisher to the data publisher map.
-     *
-     * @param tenantDomain  - The tenant domain under which the data publisher will be registered.
-     * @param dataPublisher - Instance of the LoadBalancingDataPublisher
-     * @throws org.wso2.carbon.apimgt.impl.workflow.events.DataPublisherAlreadyExistsException
-     *          - If a data publisher has already been registered under the
-     *          tenant domain
-     */
-    public static void addDataPublisher(String tenantDomain,
-                                        LoadBalancingDataPublisher dataPublisher)
-            throws DataPublisherAlreadyExistsException {
-        if (dataPublisherMap.containsKey(tenantDomain)) {
-            throw new DataPublisherAlreadyExistsException("A DataPublisher has already been created for the tenant " +
-                                                          tenantDomain);
-        }
-
-        dataPublisherMap.put(tenantDomain, dataPublisher);
-    }
 
 }

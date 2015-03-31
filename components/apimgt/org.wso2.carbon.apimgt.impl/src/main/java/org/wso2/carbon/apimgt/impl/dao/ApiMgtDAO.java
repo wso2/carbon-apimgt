@@ -255,9 +255,8 @@ public class ApiMgtDAO {
 
         try {
             conn = APIMgtDBUtil.getConnection();
-
             conn.setAutoCommit(false);
-
+            
             if (!onlyKeyMappingEntry) {
                 ps = conn.prepareStatement(registrationEntry);
                 ps.setInt(1, subscriber.getId());
@@ -277,6 +276,7 @@ public class ApiMgtDAO {
             ps.setString(3, dto.getStatus().toString());
             ps.execute();
             ps.close();
+            
             conn.commit();
         } catch (SQLException e) {
             try {
@@ -577,6 +577,8 @@ public class ApiMgtDAO {
         try {
 
             conn = APIMgtDBUtil.getConnection();
+            conn.setAutoCommit(false);
+                        
             ps = conn.prepareStatement(sqlQuery);
             ps.setString(1, statusEnum);
             ps.setString(2, tenantAwareUsername);
@@ -589,6 +591,7 @@ public class ApiMgtDAO {
             if (log.isDebugEnabled()) {
                 log.debug("Number of rows being updated : " + count);
             }
+            
             conn.commit();
         } catch (SQLException e) {
             try {
@@ -710,7 +713,9 @@ public class ApiMgtDAO {
                                      "   AND AKM.APPLICATION_ID=APP.APPLICATION_ID";
 
         try {
-            conn = APIMgtDBUtil.getConnection();
+            conn = APIMgtDBUtil.getConnection();            
+            conn.setAutoCommit(false);
+            
             ps = conn.prepareStatement(applicationSqlQuery);
             String encryptedAccessToken = APIUtil.encryptToken(accessToken);
             ps.setString(1, encryptedAccessToken);
@@ -820,6 +825,7 @@ public class ApiMgtDAO {
                         }
                         //update token status as expired
                         updateTokenState(accessToken, conn, ps);
+                        
                         conn.commit();
                     } else {
                         keyValidationInfoDTO.setAuthorized(true);
@@ -976,7 +982,9 @@ public class ApiMgtDAO {
         ResultSet rs = null;
         PreparedStatement ps = null;
         try {
-            conn = APIMgtDBUtil.getConnection();
+            conn = APIMgtDBUtil.getConnection();            
+            conn.setAutoCommit(false);
+            
             String query = "INSERT" +
                            " INTO AM_SUBSCRIBER (USER_ID, TENANT_ID, EMAIL_ADDRESS, DATE_SUBSCRIBED)" +
                            " VALUES (?,?,?,?)";
@@ -989,6 +997,7 @@ public class ApiMgtDAO {
             ps.setString(3, subscriber.getEmail());
             ps.setTimestamp(4, new Timestamp(subscriber.getSubscribedDate().getTime()));
             ps.executeUpdate();
+                       
 
             int subscriberId = 0;
             rs = ps.getGeneratedKeys();
@@ -998,7 +1007,9 @@ public class ApiMgtDAO {
             }
             subscriber.setId(subscriberId);
             String groupId = subscriber.getGroupId();
-
+            
+            conn.commit();
+            
             // Check for duplicate default applications if group id is available.
             if (!groupId.isEmpty() && groupId != null) {
                 Application[] apps = getApplications(subscriber, subscriber.getGroupId());
@@ -1013,8 +1024,7 @@ public class ApiMgtDAO {
             defaultApp.setTier(APIConstants.UNLIMITED_TIER);
             defaultApp.setGroupId(subscriber.getGroupId());
             addApplication(defaultApp, subscriber.getName(), conn);
-
-            conn.commit();
+                        
         } catch (SQLException e) {
             if (conn != null) {
                 try {
@@ -1035,6 +1045,8 @@ public class ApiMgtDAO {
         PreparedStatement ps = null;
         try {
             conn = APIMgtDBUtil.getConnection();
+            conn.setAutoCommit(false);
+            
             String query = "UPDATE" +
                            " AM_SUBSCRIBER SET USER_ID=?, TENANT_ID=?, EMAIL_ADDRESS=?, DATE_SUBSCRIBED=?" +
                            " WHERE SUBSCRIBER_ID=?";
@@ -1045,7 +1057,16 @@ public class ApiMgtDAO {
             ps.setTimestamp(4, new Timestamp(subscriber.getSubscribedDate().getTime()));
             ps.setInt(5, subscriber.getId());
             ps.executeUpdate();
+                        
+            conn.commit();
         } catch (SQLException e) {
+            if (conn != null) {
+                try {
+                    conn.rollback();
+                } catch (SQLException e1) {
+                    log.error("Error while rolling back the failed operation", e);
+                }
+            }
             handleException("Error in updating subscriber: " + e.getMessage(), e);
         } finally {
             APIMgtDBUtil.closeAllConnections(ps, conn, rs);
@@ -1098,6 +1119,7 @@ public class ApiMgtDAO {
 
         try {
             conn = APIMgtDBUtil.getConnection();
+            conn.setAutoCommit(false);
             apiId = getAPIID(identifier, conn);
 
             //Query to check if this subscription already exists
@@ -1165,7 +1187,7 @@ public class ApiMgtDAO {
                 //subscriptionId = rs.getInt(1);
                 subscriptionId = Integer.valueOf(rs.getString(1)).intValue();
             }
-
+            
             // finally commit transaction
             conn.commit();
 
@@ -1197,6 +1219,7 @@ public class ApiMgtDAO {
 
         try {
             conn = APIMgtDBUtil.getConnection();
+                        
             apiId = getAPIID(identifier, conn);
 
             String subscriptionStatusQuery = "SELECT " +
@@ -1214,6 +1237,8 @@ public class ApiMgtDAO {
             if (resultSet.next())   {
                 subStatus = resultSet.getString("SUB_STATUS");
             }
+            
+            conn.setAutoCommit(false);
 
             // If the user was unblocked, remove the entry from DB, else change the status and keep the entry.
 
@@ -1238,7 +1263,7 @@ public class ApiMgtDAO {
             }
 
             preparedStForUpdateOrDelete.executeUpdate();
-
+            
             // finally commit transaction
             conn.commit();
 
@@ -1258,33 +1283,35 @@ public class ApiMgtDAO {
     }
 
     public void removeSubscriptionById(int subscription_id) throws APIManagementException {
-            Connection conn = null;
-            ResultSet resultSet = null;
-            PreparedStatement ps = null;
+        Connection conn = null;
+        ResultSet resultSet = null;
+        PreparedStatement ps = null;
 
-            try {
-                conn = APIMgtDBUtil.getConnection();
-                //Remove entry from AM_SUBSCRIPTION table
-                String sqlQuery = "DELETE FROM AM_SUBSCRIPTION WHERE SUBSCRIPTION_ID = ?";
+        try {
+            conn = APIMgtDBUtil.getConnection();
+            conn.setAutoCommit(false);
+            
+            // Remove entry from AM_SUBSCRIPTION table
+            String sqlQuery = "DELETE FROM AM_SUBSCRIPTION WHERE SUBSCRIPTION_ID = ?";
 
-                ps = conn.prepareStatement(sqlQuery);
-                ps.setInt(1, subscription_id);
-                ps.executeUpdate();
-
-                //Commit transaction
-                conn.commit();
-            } catch (SQLException e) {
-                if (conn != null) {
-                    try {
-                        conn.rollback();
-                    } catch (SQLException e1) {
-                        log.error("Failed to rollback remove subscription ", e);
-                    }
+            ps = conn.prepareStatement(sqlQuery);
+            ps.setInt(1, subscription_id);
+            ps.executeUpdate();
+            
+            // Commit transaction
+            conn.commit();
+        } catch (SQLException e) {
+            if (conn != null) {
+                try {
+                    conn.rollback();
+                } catch (SQLException e1) {
+                    log.error("Failed to rollback remove subscription ", e);
                 }
-                handleException("Failed to remove subscription data ", e);
-            } finally {
-                APIMgtDBUtil.closeAllConnections(ps, conn, resultSet);
             }
+            handleException("Failed to remove subscription data ", e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(ps, conn, resultSet);
+        }
     }
 
     public String getSubscriptionStatusById(int subscriptionId) throws APIManagementException {
@@ -2827,6 +2854,8 @@ public class ApiMgtDAO {
 
         try {
             conn = APIMgtDBUtil.getConnection();
+            conn.setAutoCommit(false);
+            
             String getTierPermissionQuery = "SELECT TIER_PERMISSIONS_ID FROM AM_TIER_PERMISSIONS WHERE TIER = ? AND TENANT_ID = ?";
             ps = conn.prepareStatement(getTierPermissionQuery);
             ps.setString(1, tierName);
@@ -2836,7 +2865,8 @@ public class ApiMgtDAO {
                 tierPermissionId = resultSet.getInt("TIER_PERMISSIONS_ID");
             }
             resultSet.close();
-            ps.close();
+            ps.close();           
+            
 
             if (tierPermissionId == -1) {
                 String query = "INSERT INTO" +
@@ -2860,6 +2890,7 @@ public class ApiMgtDAO {
                 ps.setInt(5, tenantId);
                 ps.executeUpdate();
             }
+            
             conn.commit();
 
         } catch (SQLException e) {
@@ -3234,6 +3265,8 @@ public class ApiMgtDAO {
 
         try {
             conn = APIMgtDBUtil.getConnection();
+            conn.setAutoCommit(false);
+            
             String getApiQuery = "SELECT API_ID FROM AM_API API WHERE API_PROVIDER = ? AND " +
                                  "API_NAME = ? AND API_VERSION = ?";
             ps = conn.prepareStatement(getApiQuery);
@@ -3262,7 +3295,7 @@ public class ApiMgtDAO {
             ps.setInt(2, apiId);
             ps.setInt(3, applicationId);
             ps.execute();
-
+            
             // finally commit transaction
             conn.commit();
 
@@ -3288,7 +3321,8 @@ public class ApiMgtDAO {
 
         try {
             conn = APIMgtDBUtil.getConnection();
-
+            conn.setAutoCommit(false);
+            
             //This query is to update the AM_SUBSCRIPTION table
             String sqlQuery ="UPDATE AM_SUBSCRIPTION SET SUB_STATUS = ? WHERE SUBSCRIPTION_ID = ?";
 
@@ -3296,7 +3330,7 @@ public class ApiMgtDAO {
             ps.setString(1, status);
             ps.setInt(2, subscriptionId);
             ps.execute();
-
+            
             //Commit transaction
             conn.commit();
 
@@ -3342,6 +3376,7 @@ public class ApiMgtDAO {
         try {
             connection = APIMgtDBUtil.getConnection();
             connection.setAutoCommit(false);
+            
             prepStmt = connection.prepareStatement(sqlUpdateNewAccessToken);
             prepStmt.setString(1, APIConstants.ACCESS_TOKEN_USER_TYPE_APPLICATION);
             if (validityPeriod < 0) {
@@ -3354,7 +3389,7 @@ public class ApiMgtDAO {
 
             prepStmt.execute();
             prepStmt.close();
-
+            
             connection.commit();
 
         } catch (SQLException e) {
@@ -3398,6 +3433,8 @@ public class ApiMgtDAO {
 
             consumerKey = APIUtil.encryptToken(consumerKey);
             connection = APIMgtDBUtil.getConnection();
+            connection.setAutoCommit(false);
+            
             //first delete the existing domain list for access token
             prepStmt = connection.prepareStatement(sqlDeleteAccessAllowDomains);
             prepStmt.setString(1, consumerKey);
@@ -3419,7 +3456,8 @@ public class ApiMgtDAO {
                 prepStmt.setString(2, "ALL");
                 prepStmt.execute();
                 prepStmt.close();
-            }
+            }            
+            
             connection.commit();
         } catch (SQLException e) {
             handleException("Failed to update the access allow domains.", e);
@@ -3513,6 +3551,8 @@ public class ApiMgtDAO {
         try {
             consumerKey = APIUtil.encryptToken(consumerKey);
             connection = APIMgtDBUtil.getConnection();
+            connection.setAutoCommit(false);
+                        
             String encryptedAccessToken = APIUtil.encryptToken(accessToken);
             //Add access token
             prepStmt = connection.prepareStatement(sqlAddAccessToken);
@@ -3544,7 +3584,7 @@ public class ApiMgtDAO {
             prepStmt.setString(3, keyType);
             prepStmt.execute();
             prepStmt.close();
-
+            
             connection.commit();
         } catch (SQLException e) {
             log.error(e.getMessage(), e);
@@ -3649,6 +3689,8 @@ public class ApiMgtDAO {
         try {
             consumerKey = APIUtil.encryptToken(consumerKey);
             connection = APIMgtDBUtil.getConnection();
+            connection.setAutoCommit(false);
+            
             //Add access token
             prepStmt = connection.prepareStatement(sqlAddAccessToken);
             prepStmt.setString(1, APIUtil.encryptToken(accessToken));
@@ -3691,6 +3733,7 @@ public class ApiMgtDAO {
                 prepStmt.execute();
                 prepStmt.close();
             }
+            
             connection.commit();
         } catch (SQLException e) {
             handleException("Error while generating the application access token for the application :"+applicationName, e);
@@ -3735,13 +3778,15 @@ public class ApiMgtDAO {
 
         try {
             conn = APIMgtDBUtil.getConnection();
-
+            conn.setAutoCommit(false);
+            
             ps = conn.prepareStatement(sqlStmt);
             ps.setString(1, state);
             ps.setInt(2, appId);
             ps.setString(3, keyType);
             ps.execute();
             ps.close();
+                        
             conn.commit();
         } catch (SQLException e) {
             handleException("Error while updating registration entry.", e);
@@ -4057,6 +4102,8 @@ public class ApiMgtDAO {
 
         try{
             connection = APIMgtDBUtil.getConnection();
+            connection.setAutoCommit(false);
+            
             prepStmt = connection.prepareStatement(sqlCheckStmt);
             prepStmt.setString(1, loginUserName.toLowerCase());
             prepStmt.setInt(2, tenantId);
@@ -4091,7 +4138,7 @@ public class ApiMgtDAO {
                 prepStmt.setString(7, callbackUrl);
                 prepStmt.execute();
             }
-
+            
             connection.commit();
 
         } catch (SQLException e) {
@@ -4118,10 +4165,13 @@ public class ApiMgtDAO {
                          "SET CALLBACK_URL = ? WHERE APP_NAME = ?";
         try {
             connection = APIMgtDBUtil.getConnection();
+            connection.setAutoCommit(false);
+            
             prepStmt = connection.prepareStatement(sqlStmt);
             prepStmt.setString(1, callbackUrl);
             prepStmt.setString(2, appName);
             prepStmt.execute();
+                        
             connection.commit();
         } catch (SQLException e) {
             handleException("Error when updating OAuth consumer App for " + appName, e);
@@ -4168,7 +4218,10 @@ public class ApiMgtDAO {
         String loginUserName = getLoginUserName(userId);
         try {
             conn = APIMgtDBUtil.getConnection();
+            conn.setAutoCommit(false);
+            
             applicationId = addApplication(application,loginUserName, conn);
+                        
             conn.commit();
         } catch (SQLException e) {
             if (conn != null) {
@@ -4190,7 +4243,10 @@ public class ApiMgtDAO {
         Connection conn = null;
         try {
             conn = APIMgtDBUtil.getConnection();
+            conn.setAutoCommit(false);
+            
             addRating(apiId,rating,user, conn);
+                        
             conn.commit();
         } catch (SQLException e) {
             if (conn != null) {
@@ -4290,7 +4346,10 @@ public class ApiMgtDAO {
         Connection conn = null;
         try {
             conn = APIMgtDBUtil.getConnection();
+            conn.setAutoCommit(false);
+            
             removeAPIRating(apiId, user, conn);
+            
             conn.commit();
         } catch (SQLException e) {
             if (conn != null) {
@@ -4381,7 +4440,10 @@ public class ApiMgtDAO {
         int userRating=0;
         try {
             conn = APIMgtDBUtil.getConnection();
+            conn.setAutoCommit(false);
+            
             userRating = getUserRating(apiId, user, conn);
+                        
             conn.commit();
         } catch (SQLException e) {
             if (conn != null) {
@@ -4461,7 +4523,10 @@ public class ApiMgtDAO {
         float avrRating = 0;
         try {
             conn = APIMgtDBUtil.getConnection();
+            conn.setAutoCommit(false);
+            
             avrRating = getAverageRating(apiId, conn);
+                        
             conn.commit();
         } catch (SQLException e) {
             if (conn != null) {
@@ -4528,6 +4593,8 @@ public class ApiMgtDAO {
     public int addApplication(Application application, String userId, Connection conn)
             throws APIManagementException, SQLException {
         PreparedStatement ps = null;
+        conn.setAutoCommit(false);
+        
         int applicationId = 0;
         try {
             int tenantId;
@@ -4570,12 +4637,15 @@ public class ApiMgtDAO {
             }
             ps.setString(7, application.getGroupId());
             ps.executeUpdate();
+                        
             ResultSet rs = ps.getGeneratedKeys();
             while (rs.next()) {
                 applicationId = Integer.valueOf(rs.getString(1)).intValue();
             }
 
             ps.close();
+            
+            conn.commit();
         } catch (SQLException e) {
             handleException("Failed to add Application", e);
         } finally {
@@ -4592,7 +4662,8 @@ public class ApiMgtDAO {
 
         try {
             conn = APIMgtDBUtil.getConnection();
-
+            conn.setAutoCommit(false);
+            
             //This query to update the AM_APPLICATION table
             String sqlQuery = "UPDATE " +
                               "AM_APPLICATION" +
@@ -4612,6 +4683,7 @@ public class ApiMgtDAO {
 
             ps.executeUpdate();
             ps.close();
+                        
             // finally commit transaction
             conn.commit();
 
@@ -4646,7 +4718,8 @@ public class ApiMgtDAO {
 
         try {
             conn = APIMgtDBUtil.getConnection();
-
+            conn.setAutoCommit(false);
+            
             String updateSqlQuery = "UPDATE " +
                               " AM_APPLICATION" +
                               " SET APPLICATION_STATUS = ? " +
@@ -4659,7 +4732,7 @@ public class ApiMgtDAO {
 
             ps.executeUpdate();
             ps.close();
-
+            
             conn.commit();
 
         } catch (SQLException e) {
@@ -4683,39 +4756,42 @@ public class ApiMgtDAO {
 	 * @return
 	 * @throws org.wso2.carbon.apimgt.api.APIManagementException
 	 */
-	public String getApplicationStatus(String appName,String userId) throws APIManagementException {
-		Connection conn = null;
-		ResultSet resultSet = null;
-		PreparedStatement ps = null;
-		String status = null;
-        int applicationId=getApplicationId(appName,userId);
-		try {
-			conn = APIMgtDBUtil.getConnection();
-			String sqlQuery = "SELECT   APPLICATION_STATUS FROM   AM_APPLICATION " + "WHERE "
-			                          + "   APPLICATION_ID= ?";
+    public String getApplicationStatus(String appName, String userId) throws APIManagementException {
+        Connection conn = null;
+        ResultSet resultSet = null;
+        PreparedStatement ps = null;
+        String status = null;
+        int applicationId = getApplicationId(appName, userId);
+        try {
+            conn = APIMgtDBUtil.getConnection();
+            conn.setAutoCommit(false);
+            
+            String sqlQuery = "SELECT   APPLICATION_STATUS FROM   AM_APPLICATION " + "WHERE " 
+                            + "   APPLICATION_ID= ?";
 
-			ps = conn.prepareStatement(sqlQuery);
-			ps.setInt(1, applicationId);
-			resultSet = ps.executeQuery();
-			while (resultSet.next()) {
-				status = resultSet.getString("APPLICATION_STATUS");
-			}
-			ps.close();
-			conn.commit();
-		} catch (SQLException e) {
-			if (conn != null) {
-				try {
-					conn.rollback();
-				} catch (SQLException e1) {
-					log.error("Failed to rollback the update Application ", e);
-				}
-			}
-			handleException("Failed to update Application", e);
-		} finally {
-			APIMgtDBUtil.closeAllConnections(ps, conn, resultSet);
-		}
-		return status;
-	}
+            ps = conn.prepareStatement(sqlQuery);
+            ps.setInt(1, applicationId);
+            resultSet = ps.executeQuery();
+            while (resultSet.next()) {
+                status = resultSet.getString("APPLICATION_STATUS");
+            }
+            ps.close();
+            
+            conn.commit();
+        } catch (SQLException e) {
+            if (conn != null) {
+                try {
+                    conn.rollback();
+                } catch (SQLException e1) {
+                    log.error("Failed to rollback the update Application ", e);
+                }
+            }
+            handleException("Failed to update Application", e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(ps, conn, resultSet);
+        }
+        return status;
+    }
 
     /**
      * @param username Subscriber
@@ -5051,6 +5127,8 @@ public class ApiMgtDAO {
 
         try {
             connection = APIMgtDBUtil.getConnection();
+            connection.setAutoCommit(false);
+            
             prepStmt = connection.prepareStatement(getSubscriptionsQuery);
             prepStmt.setInt(1, application.getId());
             rs = prepStmt.executeQuery();
@@ -5106,7 +5184,7 @@ public class ApiMgtDAO {
             prepStmt = connection.prepareStatement(deleteApplicationQuery);
             prepStmt.setInt(1, application.getId());
             prepStmt.execute();
-
+            
             connection.commit();
         } catch (SQLException e) {
             handleException("Error while removing application details from the database", e);
@@ -5186,7 +5264,7 @@ public class ApiMgtDAO {
             throws APIManagementException {
         Connection conn = null;
         try {
-            conn = APIMgtDBUtil.getConnection();
+            conn = APIMgtDBUtil.getConnection();            
             recordAPILifeCycleEvent(identifier, oldStatus, newStatus, userId, conn);
         } catch (SQLException e) {
             handleException("Failed to record API state change", e);
@@ -5234,6 +5312,8 @@ public class ApiMgtDAO {
                           " VALUES (?,?,?,?,?,?)";
 
         try {
+            conn.setAutoCommit(false);
+            
             //conn = APIMgtDBUtil.getConnection();
             ps = conn.prepareStatement(getAPIQuery);
             ps.setString(1, APIUtil.replaceEmailDomainBack(identifier.getProviderName()));
@@ -5264,7 +5344,7 @@ public class ApiMgtDAO {
             ps.setTimestamp(6, new Timestamp(System.currentTimeMillis()));
 
             ps.executeUpdate();
-
+            
             // finally commit transaction
             conn.commit();
 
@@ -5288,7 +5368,8 @@ public class ApiMgtDAO {
         Connection conn = null;
         try {
             conn = APIMgtDBUtil.getConnection();
-
+            conn.setAutoCommit(false);
+            
             if(!oldStatus.equals(newStatus)){
                 if((newStatus.equals(APIStatus.CREATED) || newStatus.equals(APIStatus.RETIRED)) && (oldStatus.equals(APIStatus.PUBLISHED)
                         || oldStatus.equals(APIStatus.DEPRECATED) || oldStatus.equals(APIStatus.BLOCKED))){
@@ -5297,6 +5378,7 @@ public class ApiMgtDAO {
                     setPublishedDefVersion(identifier,conn,identifier.getVersion());
                 }
             }
+            
             conn.commit();
 
         } catch (SQLException e) {
@@ -5411,6 +5493,7 @@ public class ApiMgtDAO {
         try {
             // Retrieve all the existing subscription for the old version
             connection = APIMgtDBUtil.getConnection();
+                        
             prepStmt = connection.prepareStatement(getSubscriptionDataQuery);
             prepStmt.setString(1, APIUtil.replaceEmailDomainBack(provider));
             prepStmt.setString(2, apiName);
@@ -5449,8 +5532,11 @@ public class ApiMgtDAO {
             			}
             			subscriptionIdMap.put(info.subscriptionId, subscriptionId);
             		}
-
+            		
             		int subscriptionId = subscriptionIdMap.get(info.subscriptionId);
+            		
+            		connection.setAutoCommit(false);
+            		
             		prepStmt = connection.prepareStatement(addSubKeyMapping);
             		prepStmt.setInt(1, subscriptionId);
             		prepStmt.setString(2, info.accessToken);
@@ -5458,6 +5544,8 @@ public class ApiMgtDAO {
             		prepStmt.execute();
             		prepStmt.close();
 
+            		connection.commit();
+            		
             		subscribedApplications.add(info.applicationId);
                     // catching the exception because when copy the api without the option "require re-subscription"
                     // need to go forward rather throwing the exception
@@ -5484,9 +5572,8 @@ public class ApiMgtDAO {
                         log.error("Error while adding subscription" + e.getMessage(), e);
                     }
                 }
-            }
-
-            connection.commit();
+            }           
+            
         } catch (SQLException e) {
             handleException("Error when executing the SQL queries", e);
         } finally {
@@ -5504,6 +5591,8 @@ public class ApiMgtDAO {
 
         try {
             connection = APIMgtDBUtil.getConnection();
+            connection.setAutoCommit(false);
+            
             prepStmt = connection.prepareStatement(query, new String[]{"api_id"});
             prepStmt.setString(1, APIUtil.replaceEmailDomainBack(api.getId().getProviderName()));
             prepStmt.setString(2, api.getId().getApiName());
@@ -5516,7 +5605,8 @@ public class ApiMgtDAO {
             int applicationId = -1;
             if (rs.next()) {
                 applicationId = rs.getInt(1);
-            }
+            }            
+            
             connection.commit();
 
             if(api.getScopes()!= null){
@@ -5589,6 +5679,8 @@ public class ApiMgtDAO {
             Timestamp cratedDateStamp = new Timestamp(workflow.getCreatedTime());
 
             connection = APIMgtDBUtil.getConnection();
+            connection.setAutoCommit(false);
+            
             prepStmt = connection.prepareStatement(query);
             prepStmt.setString(1, workflow.getWorkflowReference());
             prepStmt.setString(2, workflow.getWorkflowType());
@@ -5600,7 +5692,7 @@ public class ApiMgtDAO {
             prepStmt.setString(8, workflow.getExternalWorkflowReference());
 
             prepStmt.execute();
-
+            
             connection.commit();
         } catch (SQLException e) {
             handleException("Error while adding Workflow : " + workflow.getExternalWorkflowReference() + " to the database", e);
@@ -5620,6 +5712,8 @@ public class ApiMgtDAO {
             Timestamp updatedTimeStamp = new Timestamp(workflowDTO.getUpdatedTime());
 
             connection = APIMgtDBUtil.getConnection();
+            connection.setAutoCommit(false);
+            
             prepStmt = connection.prepareStatement(query);
             prepStmt.setString(1, workflowDTO.getStatus().toString());
             prepStmt.setString(2, workflowDTO.getWorkflowDescription());
@@ -5627,7 +5721,7 @@ public class ApiMgtDAO {
             prepStmt.setString(4, workflowDTO.getExternalWorkflowReference());
 
             prepStmt.execute();
-
+            
             connection.commit();
         }catch (SQLException e) {
             handleException("Error while updating Workflow Status of workflow " +
@@ -6006,6 +6100,8 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
         String deleteOldMappingsQuery = "DELETE FROM AM_API_URL_MAPPING WHERE API_ID = ?";
         try {
             connection = APIMgtDBUtil.getConnection();
+            connection.setAutoCommit(false);
+
             apiId = getAPIID(api.getId(),connection);
             if (apiId == -1) {
                 //application addition has failed
@@ -6017,7 +6113,7 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
             prepStmt.close();
 
             addURLTemplates(apiId,api, connection);
-
+            
             connection.commit();
         } catch (SQLException e) {
             handleException("Error while deleting URL template(s) for API : " + api.getId().toString(), e);
@@ -6088,6 +6184,8 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
                        " API_VERSION = ? ";
         try {
             connection = APIMgtDBUtil.getConnection();
+            connection.setAutoCommit(false);
+            
             if(api.isApiHeaderChanged()){
                 prepStmt = connection.prepareStatement(query);
                 prepStmt.setString(1, api.getContext());
@@ -6105,6 +6203,7 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
                     removeAPIFromDefaultVersion(api.getId(), connection);
                 }
             }
+                        
             connection.commit();
 
             updateScopes(api, tenantId);
@@ -6167,6 +6266,8 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
      
         try {
             connection = APIMgtDBUtil.getConnection();
+            connection.setAutoCommit(false);
+            
             id = getAPIID(apiId,connection);
             
             removeAPIScope(apiId);
@@ -6208,7 +6309,7 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
             }else if(apiId.getVersion().equals(pubDefaultVersion)){
                 setPublishedDefVersion(apiId, connection, null);
             }
-
+            
             connection.commit();
 
         } catch (SQLException e) {
@@ -6237,10 +6338,13 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
         PreparedStatement ps = null;
         try {
             conn = APIMgtDBUtil.getConnection();
+            conn.setAutoCommit(false);
+            
             String query = "UPDATE " + accessTokenStoreTable + " SET TOKEN_STATE='REVOKED' WHERE ACCESS_TOKEN= ? ";
             ps = conn.prepareStatement(query);
             ps.setString(1, APIUtil.encryptToken(key));
-            ps.execute();
+            ps.execute();            
+            
             conn.commit();
         } catch (SQLException e) {
             handleException("Error in revoking access token: " + e.getMessage(), e);
@@ -6567,6 +6671,8 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
 
         try {
             connection = APIMgtDBUtil.getConnection();
+            connection.setAutoCommit(false);
+            
             String getApiQuery = "SELECT API_ID FROM AM_API API WHERE API_PROVIDER = ? AND " +
                                  "API_NAME = ? AND API_VERSION = ?";
             prepStmt = connection.prepareStatement(getApiQuery);
@@ -6606,7 +6712,7 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
                 commentId = Integer.valueOf(rs.getString(1)).intValue();
             }
             prepStmt.close();
-
+            
             /* finally commit transaction */
             connection.commit();
 
@@ -6985,6 +7091,8 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
         boolean state = false;
         try {
             conn = APIMgtDBUtil.getConnection();
+            conn.setAutoCommit(false);
+            
             //This query to add external APIStores to database table
             String sqlQuery = "INSERT" +
                     " INTO AM_EXTERNAL_STORES (API_ID, STORE_ID,STORE_DISPLAY_NAME, STORE_ENDPOINT,STORE_TYPE)" +
@@ -7011,7 +7119,8 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
             }
 
             ps.executeBatch();
-            //           ps.clearBatch();
+            //           ps.clearBatch();         
+
             conn.commit();
             state = true;
         } catch (SQLException e) {
@@ -7048,7 +7157,8 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
         boolean state = false;
         try {
             conn = APIMgtDBUtil.getConnection();
-
+            conn.setAutoCommit(false);
+                        
             String sqlQuery = "DELETE" +
                     " FROM AM_EXTERNAL_STORES WHERE API_ID=? AND STORE_ID=? AND STORE_TYPE=?";
 
@@ -7071,7 +7181,8 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
             }
 
             ps.executeBatch();
-            //           ps.clearBatch();
+            //           ps.clearBatch();           
+            
             conn.commit();
             state = true;
         } catch (SQLException e) {
@@ -7099,7 +7210,10 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
         Connection conn = null;
         try {
             conn = APIMgtDBUtil.getConnection();
-            updateExternalAPIStoresDetails(apiId,apiStoreSet, conn);
+            conn.setAutoCommit(false);
+            
+            updateExternalAPIStoresDetails(apiId,apiStoreSet, conn);           
+            
             conn.commit();
         } catch (SQLException e) {
             if (conn != null) {
@@ -7132,6 +7246,8 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
 
         try {
             conn = APIMgtDBUtil.getConnection();
+            conn.setAutoCommit(false);
+            
             //This query to add external APIStores to database table
             String sqlQuery = "UPDATE " +
                               "AM_EXTERNAL_STORES"  +
@@ -7165,7 +7281,8 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
 
             ps.executeBatch();
             ps.clearBatch();
-
+            
+            conn.commit();
 
         } catch (SQLException e) {
             log.error("Error while updating External APIStore details to the database for API : ", e);
@@ -7186,7 +7303,10 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
         Set<APIStore> storesSet = new HashSet<APIStore>();
         try {
             conn = APIMgtDBUtil.getConnection();
-            storesSet=getExternalAPIStoresDetails(apiId, conn);
+            conn.setAutoCommit(false);
+
+            storesSet = getExternalAPIStoresDetails(apiId, conn);         
+            
             conn.commit();
         } catch (SQLException e) {
             if (conn != null) {
@@ -7595,7 +7715,8 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
         String deleteScopes = "DELETE FROM IDN_OAUTH2_SCOPE WHERE SCOPE_ID IN ( SELECT SCOPE_ID FROM AM_API_SCOPES WHERE API_ID = ? )";
         try {
             connection = APIMgtDBUtil.getConnection();
-
+            connection.setAutoCommit(false);
+                            
             apiId = getAPIID(api.getId(),connection);
             if (apiId == -1) {
                 //application addition has failed
@@ -7606,6 +7727,7 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
             prepStmt.setInt(1,apiId);
             prepStmt.execute();
             prepStmt.close();
+
             connection.commit();
         } catch (SQLException e) {
             handleException("Error while deleting Scopes for API : " + api.getId().toString(), e);
@@ -7710,7 +7832,8 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
 
 		try {
 			connection = APIMgtDBUtil.getConnection();
-
+			connection.setAutoCommit(false);
+			
 			prepStmt = connection.prepareStatement(deleteAPIScopeQuery);
 			prepStmt.setInt(1, apiId);
 			prepStmt.execute();
@@ -7729,8 +7852,8 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
 					prepStmt.execute();
 				}
 			}
-
-			connection.commit();
+            
+            connection.commit();
 
 		} catch (SQLException e) {
 			handleException("Error while removing the scopes for the API: " +

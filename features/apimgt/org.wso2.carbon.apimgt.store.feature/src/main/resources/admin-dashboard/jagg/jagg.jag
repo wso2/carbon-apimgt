@@ -79,6 +79,12 @@ var getThemeFile = function (path) {
 }
 return getThemePath() + path;
 };
+ var getWorkflowCookie = function () {
+        return session.get("workflowCookie");
+            };
+    var setWorkflowCookie = function (workflowCookie) {
+        return session.put("workflowCookie",workflowCookie);
+    };
 
     var getThemesPath = function () {
         return "/site/themes/";
@@ -554,6 +560,10 @@ return getThemePath() + path;
         getPublishPermitted:getPublishPermitted,
 	    setManageTierPermitted:setManageTierPermitted,
 	    getManageTierPermitted:getManageTierPermitted,
+	    setManageTierPermitted:setManageTierPermitted,
+	    getManageTierPermitted:getManageTierPermitted,
+        setWorkflowCookie:setWorkflowCookie,
+        getWorkflowCookie:getWorkflowCookie,
         block:block,
         module:module,
         initializer:initializer,

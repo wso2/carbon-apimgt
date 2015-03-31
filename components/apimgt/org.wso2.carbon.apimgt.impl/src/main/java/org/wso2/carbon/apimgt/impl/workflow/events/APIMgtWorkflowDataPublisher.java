@@ -24,7 +24,6 @@ import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerAnalyticsConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.dto.WorkflowDTO;
-import org.wso2.carbon.apimgt.impl.internal.APIManagerComponent;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.databridge.agent.thrift.exception.AgentException;
@@ -34,11 +33,11 @@ import org.wso2.carbon.databridge.agent.thrift.lb.ReceiverGroup;
 import org.wso2.carbon.databridge.commons.exception.AuthenticationException;
 import org.wso2.carbon.databridge.commons.exception.TransportException;
 
-
 import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /*
 * This class will act as data-publisher for workflow events.Reason for not re-using the usage
@@ -68,7 +67,7 @@ public class APIMgtWorkflowDataPublisher {
             if (log.isDebugEnabled()) {
                 log.debug("Initializing APIMgtUsageDataBridgeDataPublisher");
             }
-
+            dataPublisherMap = new ConcurrentHashMap<String, LoadBalancingDataPublisher>();
             this.dataPublisher = getDataPublisher();
             wfStreamName =
                     config.getFirstProperty(APIConstants.API_WF_STREAM_NAME);
@@ -108,8 +107,7 @@ public class APIMgtWorkflowDataPublisher {
         String tenantDomain = CarbonContext.getThreadLocalCarbonContext().getTenantDomain();
 
         //Get LoadBalancingDataPublisher which has been registered for the tenant.
-        LoadBalancingDataPublisher loadBalancingDataPublisher = APIManagerComponent.
-                getDataPublisher(tenantDomain);
+        LoadBalancingDataPublisher loadBalancingDataPublisher = getDataPublisher(tenantDomain);
         String bamServerURL = analyticsConfig.getBamServerUrlGroups();
         String bamServerUser = analyticsConfig.getBamServerUser();
         String bamServerPassword = analyticsConfig.getBamServerPassword();
@@ -140,11 +138,11 @@ public class APIMgtWorkflowDataPublisher {
             loadBalancingDataPublisher = new LoadBalancingDataPublisher((ArrayList) allReceiverGroups);
             try {
                 //Add created LoadBalancingDataPublisher.
-                APIManagerComponent.addDataPublisher(tenantDomain, loadBalancingDataPublisher);
+                addDataPublisher(tenantDomain, loadBalancingDataPublisher);
             } catch (DataPublisherAlreadyExistsException e) {
                 log.warn("Attempting to register a data publisher for the tenant " + tenantDomain +
                          " when one already exists. Returning existing data publisher");
-                return APIManagerComponent.getDataPublisher(tenantDomain);
+                return getDataPublisher(tenantDomain);
             }
         }
 
@@ -221,4 +219,38 @@ public class APIMgtWorkflowDataPublisher {
     public static String getWFStreamVersion() {
         return wfStreamVersion;
     }
+
+    /**
+     * Fetch the data publisher which has been registered under the tenant domain.
+     *
+     * @param tenantDomain - The tenant domain under which the data publisher is registered
+     * @return - Instance of the LoadBalancingDataPublisher which was registered. Null if not registered.
+     */
+    public static LoadBalancingDataPublisher getDataPublisher(String tenantDomain) {
+        if (dataPublisherMap.containsKey(tenantDomain)) {
+            return dataPublisherMap.get(tenantDomain);
+        }
+        return null;
+    }
+
+    /**
+     * Adds a LoadBalancingDataPublisher to the data publisher map.
+     *
+     * @param tenantDomain  - The tenant domain under which the data publisher will be registered.
+     * @param dataPublisher - Instance of the LoadBalancingDataPublisher
+     * @throws org.wso2.carbon.apimgt.impl.workflow.events.DataPublisherAlreadyExistsException
+     *          - If a data publisher has already been registered under the
+     *          tenant domain
+     */
+    public static void addDataPublisher(String tenantDomain,
+                                        LoadBalancingDataPublisher dataPublisher)
+            throws DataPublisherAlreadyExistsException {
+        if (dataPublisherMap.containsKey(tenantDomain)) {
+            throw new DataPublisherAlreadyExistsException("A DataPublisher has already been created for the tenant " +
+                                                          tenantDomain);
+        }
+
+        dataPublisherMap.put(tenantDomain, dataPublisher);
+    }
+
 }
