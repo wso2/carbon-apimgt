@@ -219,7 +219,7 @@ public class Utils {
 
     public static boolean isStatsEnabled() {
         return ServiceReferenceHolder.getInstance().getApiManagerConfigurationService().
-                getAPIAnalyticsConfiguration().isEnabled();
+                getAPIAnalyticsConfiguration().isAnalyticsEnabled();
     }
 
     /**

@@ -6,12 +6,14 @@ var enableAnalytics = function (enable) {
     try {
         var carbon = require('carbon');
         var process = require('process');
-        var userMgtConf = carbon.server.loadConfig('user-mgt.xml');
-        var confXml = new XML(userMgtConf);
-        var username = confXml.*::['Realm'].*::['Configuration'].*::['AdminUser'].*::['UserName'].text();
-        var password = confXml.*::['Realm'].*::['Configuration'].*::['AdminUser'].*::['Password'].text();
-        var url = 'https://' + process.getProperty('carbon.local.ip') + ':' + process.getProperty('mgt.transport.https.port');
-        var stub = new org.wso2.carbon.bam.service.data.publisher.stub.ServiceDataPublisherAdminStub(url + '/services/ServiceDataPublisherAdmin');
+        var realmConfiguration = new org.wso2.carbon.user.core.config.RealmConfigXMLProcessor().
+                buildRealmConfigurationFromFile();
+        var username = realmConfiguration.getAdminUserName();
+        var password = realmConfiguration.getAdminPassword();
+        var url = 'https://' + process.getProperty('carbon.local.ip') + ':' +
+                process.getProperty('mgt.transport.https.port');
+        var stub = new org.wso2.carbon.bam.service.data.publisher.stub.
+                ServiceDataPublisherAdminStub(url + '/services/ServiceDataPublisherAdmin');
         var client = stub._getServiceClient();
         var options = client.getOptions();
         var authenticator = new org.apache.axis2.transport.http.HttpTransportProperties.Authenticator();
@@ -29,7 +31,7 @@ var enableAnalytics = function (enable) {
             var configReaderService = org.wso2.carbon.apimgt.impl.APIManagerAnalyticsConfiguration.getInstance();
             log.info(configReaderService.getRequestStreamName());
             log.info(configReaderService.getResponseStreamName());
-            configReaderService.setEnabled(false);
+            configReaderService.setAnalyticsEnabled(false);
             log.info("Analytics disabled");
         } else if(enable === "true" && eventingConfigData.getUrl() !== "" && eventingConfigData.getUrl() !== null) {
             log.info("Enabling Analytics...");
@@ -56,12 +58,14 @@ var addAnalyticsConfig = function (configData) {
     try {
         var carbon = require('carbon');
         var process = require('process');
-        var userMgtConf = carbon.server.loadConfig('user-mgt.xml');
-        var confXml = new XML(userMgtConf);
-        var username = confXml.*::['Realm'].*::['Configuration'].*::['AdminUser'].*::['UserName'].text();
-        var password = confXml.*::['Realm'].*::['Configuration'].*::['AdminUser'].*::['Password'].text();
-        var url = 'https://' + process.getProperty('carbon.local.ip') + ':' + process.getProperty('mgt.transport.https.port');
-        var stub = new org.wso2.carbon.bam.service.data.publisher.stub.ServiceDataPublisherAdminStub(url + '/services/ServiceDataPublisherAdmin');
+        var realmConfiguration = new org.wso2.carbon.user.core.config.RealmConfigXMLProcessor().
+                buildRealmConfigurationFromFile();
+        var username = realmConfiguration.getAdminUserName();
+        var password = realmConfiguration.getAdminPassword();
+        var url = 'https://' + process.getProperty('carbon.local.ip') + ':' +
+                process.getProperty('mgt.transport.https.port');
+        var stub = new org.wso2.carbon.bam.service.data.publisher.stub.
+                ServiceDataPublisherAdminStub(url + '/services/ServiceDataPublisherAdmin');
         var client = stub._getServiceClient();
         var options = client.getOptions();
         var authenticator = new org.apache.axis2.transport.http.HttpTransportProperties.Authenticator();
@@ -87,7 +91,7 @@ var addAnalyticsConfig = function (configData) {
         var configReaderService = org.wso2.carbon.apimgt.impl.APIManagerAnalyticsConfiguration.getInstance();
         log.info(configReaderService.getRequestStreamName());
         log.info(configReaderService.getResponseStreamName());
-        configReaderService.setEnabled(true);
+        configReaderService.setAnalyticsEnabled(true);
         configReaderService.setBamServerUrlGroups(configData.eventReceiverURL);
         configReaderService.setBamServerUser(configData.eventReceiverUsername);
         configReaderService.setBamServerPassword(configData.eventReceiverPassword);
@@ -112,11 +116,12 @@ var addDatasourceConfig = function (configData) {
     try {
         var carbon = require('carbon');
         var process = require('process');
-        var userMgtConf = carbon.server.loadConfig('user-mgt.xml');
-        var confXml = new XML(userMgtConf);
-        var username = confXml.*::['Realm'].*::['Configuration'].*::['AdminUser'].*::['UserName'].text();
-        var password = confXml.*::['Realm'].*::['Configuration'].*::['AdminUser'].*::['Password'].text();
-        var url = 'https://' + process.getProperty('carbon.local.ip') + ':' + process.getProperty('mgt.transport.https.port');
+        var realmConfiguration = new org.wso2.carbon.user.core.config.RealmConfigXMLProcessor()
+                .buildRealmConfigurationFromFile();
+        var username = realmConfiguration.getAdminUserName();
+        var password = realmConfiguration.getAdminPassword();
+        var url = 'https://' + process.getProperty('carbon.local.ip') + ':' +
+                process.getProperty('mgt.transport.https.port');
         var stub = new org.wso2.carbon.ndatasource.ui.stub.NDataSourceAdminStub(url + '/services/NDataSourceAdmin');
         var client = stub._getServiceClient();
         var options = client.getOptions();
@@ -133,7 +138,8 @@ var addDatasourceConfig = function (configData) {
         jndiConfig.setName(dsJndiName);
 
         var configString = getDataSourceConfigString(configData).result;
-        var dataSourceDefinition = new org.wso2.carbon.ndatasource.ui.stub.core.services.xsd.WSDataSourceMetaInfo_WSDataSourceDefinition();
+        var dataSourceDefinition = new org.wso2.carbon.ndatasource.ui.stub.core.services.xsd.
+                WSDataSourceMetaInfo_WSDataSourceDefinition();
         dataSourceDefinition.setType("RDBMS");
         dataSourceDefinition.setDsXMLConfiguration(configString);
 
@@ -178,7 +184,8 @@ var addToolbox = function (configData) {
         var byteArray = org.apache.commons.io.FileUtils.readFileToByteArray(file);
         var dataHandler = new javax.activation.DataHandler(byteArray, "application/octet-stream");
 
-        var stub = new org.wso2.carbon.bam.toolbox.deployer.stub.BAMToolboxDepolyerServiceStub(configData.eventAnalyserURL + '/services/BAMToolboxDepolyerService');
+        var stub = new org.wso2.carbon.bam.toolbox.deployer.stub.BAMToolboxDepolyerServiceStub(configData.
+                eventAnalyserURL + '/services/BAMToolboxDepolyerService');
         var client = stub._getServiceClient();
         var options = client.getOptions();
         var authenticator = new org.apache.axis2.transport.http.HttpTransportProperties.Authenticator();

@@ -125,7 +125,7 @@ public abstract class WorkflowExecutor implements Serializable {
         APIManagerAnalyticsConfiguration analyticsConfiguration = ServiceReferenceHolder.getInstance().
                 getAPIManagerConfigurationService().
                 getAPIAnalyticsConfiguration();
-        boolean enabled = analyticsConfiguration.isEnabled();
+        boolean enabled = analyticsConfiguration.isAnalyticsEnabled();
         if (enabled) {
             APIMgtWorkflowDataPublisher publisher = new APIMgtWorkflowDataPublisher();
             publisher.publishEvent(workflowDTO);

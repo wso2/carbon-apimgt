@@ -29,11 +29,10 @@ public class APIManagerAnalyticsConfiguration {
     private String bamServerUrlGroups;
     private String bamServerUser;
     private String bamServerPassword;
-    private boolean enabled;
+    private boolean analyticsEnabled;
+    private boolean skipEventReceiverConnection;
     private boolean buildMsg;
     private String publisherClass;
-    private boolean googleAnalyticsTrackingEnabled;
-    private String googleAnalyticsTrackingID;
 	private String requestStreamName;
 	private String requestStreamVersion;
 	private String responseStreamName;
@@ -46,8 +45,8 @@ public class APIManagerAnalyticsConfiguration {
 	private static Log log = LogFactory.getLog(APIManagerAnalyticsConfiguration.class);
 
     private APIManagerAnalyticsConfiguration() {
-        enabled = APIUtil.isAnalyticsEnabled();
-        if(enabled) {
+        analyticsEnabled = APIUtil.isAnalyticsEnabled();
+        if(analyticsEnabled) {
             Map<String, String> analyticsConfigs = APIUtil.getAnalyticsConfigFromRegistry();
             bamServerUrlGroups = analyticsConfigs.get(APIConstants.API_USAGE_BAM_SERVER_URL_GROUPS);
             bamServerUser = analyticsConfigs.get(APIConstants.API_USAGE_BAM_SERVER_USER);
@@ -63,6 +62,9 @@ public class APIManagerAnalyticsConfiguration {
     }
 
     public void setAPIManagerConfiguration(APIManagerConfiguration config){
+        String skipEventReceiverConnStr = config.getFirstProperty(APIConstants.API_USAGE_SKIP_EVENT_RECEIVER_CONN);
+        skipEventReceiverConnection = skipEventReceiverConnStr != null &&
+                JavaUtils.isTrueExplicitly(skipEventReceiverConnStr);
         publisherClass = config.getFirstProperty(APIConstants.API_USAGE_PUBLISHER_CLASS);
         requestStreamName =
                 config.getFirstProperty(APIConstants.API_REQUEST_STREAM_NAME);
@@ -108,20 +110,16 @@ public class APIManagerAnalyticsConfiguration {
         return bamServerUrlGroups;
     }
 
-    public boolean isEnabled() {
-        return enabled;
+    public boolean isAnalyticsEnabled() {
+        return analyticsEnabled;
+    }
+
+    public boolean isSkipEventReceiverConnection() {
+        return skipEventReceiverConnection;
     }
 
     public String getPublisherClass() {
         return publisherClass;
-    }
-
-    public String getGoogleAnalyticsTrackingID() {
- 		return googleAnalyticsTrackingID;
- 	}
-
-    public boolean isGoogleAnalyticsTrackingEnabled() {
-    	return googleAnalyticsTrackingEnabled;
     }
 
 	public String getRequestStreamName() {
@@ -168,8 +166,8 @@ public class APIManagerAnalyticsConfiguration {
         this.bamServerPassword = bamServerPassword;
     }
 
-    public void setEnabled(boolean enabled) {
-        this.enabled = enabled;
+    public void setAnalyticsEnabled(boolean analyticsEnabled) {
+        this.analyticsEnabled = analyticsEnabled;
     }
 
     public boolean isBuildMsg() {

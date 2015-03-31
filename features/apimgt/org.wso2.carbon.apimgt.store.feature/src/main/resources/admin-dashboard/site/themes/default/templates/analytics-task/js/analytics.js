@@ -75,15 +75,15 @@ $(document).ready(function(){
             $('#eventReceiverUsername').val(multi_urls[0].username);
             $('#eventReceiverPassword').val(multi_urls[0].password);
 
-            $('.ui_message').html("Saving Configurations...");
+            $('.ui_message').html(i18n.t('analyticsConfigSaving.inProgress'));
             $('.ui_message').fadeIn('slow');
             $(form).ajaxSubmit({
                 success:function(responseText, statusText, xhr, $form){
                     if (!responseText.error) {
-                        $('.ui_message').html("Configurations Saved!");
+                        $('.ui_message').html(i18n.t('analyticsConfigSaving.success'));
                         $('.ui_message').delay(4000).fadeOut('slow');
                     } else {
-                        $('.ui_message').html("Error occurred while saving configurations!");
+                        $('.ui_message').html(i18n.t('analyticsConfigSaving.error'));
                         if (responseText.message == "timeout") {
                             if (ssoEnabled) {
                                  var currentLoc = window.location.pathname;

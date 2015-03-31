@@ -242,6 +242,14 @@ $(document).ready(function(){
         return false;
     });
 
+    $('.less-options').click(function(){
+        var id = $(this).attr('ref');
+        var div = $('#'+id);
+        $('.more-options').text("Show More Options");
+        div.toggle('fast');
+        return false;
+    });
+
     $('a.help_popup').popover({
         html : true,
         content: function() {

@@ -47,14 +47,17 @@ public class APIMgtUsageHandler extends AbstractHandler {
 
     public boolean handleRequest(MessageContext mc) {
 
-        boolean enabled = DataPublisherUtil.getApiManagerAnalyticsConfiguration().isEnabled();
+        boolean enabled = DataPublisherUtil.getApiManagerAnalyticsConfiguration().isAnalyticsEnabled();
+
+        boolean skipEventReceiverConnection = DataPublisherUtil.getApiManagerAnalyticsConfiguration().
+                isSkipEventReceiverConnection();
 
         String publisherClass = UsageComponent.getAmConfigService().
                 getAPIAnalyticsConfiguration().getPublisherClass();
         try {
             long currentTime = System.currentTimeMillis();
 
-            if (!enabled) {
+            if (!enabled || skipEventReceiverConnection) {
                 return true;
             }
 

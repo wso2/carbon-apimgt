@@ -1165,6 +1165,17 @@ ol.progtrckr li.progtrckr-todo:before {
     background: transparent;
 }
 
+.wr-guide-text {
+    border-bottom:1px solid #e4e4e4;
+    padding:0px 0px 10px 0px;
+    margin-bottom:0px;
+}
+
+.wr-enable-chk {
+    background:#f0f0f0;
+    padding:15px 0px 15px 15px;
+}
+
 #more-options-datasource select{
     width: 284px !important;
 }

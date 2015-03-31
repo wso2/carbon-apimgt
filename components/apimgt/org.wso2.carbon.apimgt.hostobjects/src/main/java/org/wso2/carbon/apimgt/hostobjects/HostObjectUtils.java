@@ -191,10 +191,14 @@ public class HostObjectUtils {
 
     }
 
+    /**
+    *This methos is to check whether stat publishing is enabled
+    * @return boolean
+     */
     protected static boolean checkDataPublishingEnabled() {
         APIManagerAnalyticsConfiguration analyticsConfiguration =
                 ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIAnalyticsConfiguration();
-        return analyticsConfiguration.isEnabled();
+        return analyticsConfiguration.isAnalyticsEnabled();
     }
 
     /**
@@ -237,6 +241,6 @@ public class HostObjectUtils {
 
     protected static boolean isStatPublishingEnabled() {
             return ServiceReferenceHolder.getInstance().
-                    getAPIManagerConfigurationService().getAPIAnalyticsConfiguration().isEnabled();
+                    getAPIManagerConfigurationService().getAPIAnalyticsConfiguration().isAnalyticsEnabled();
     }
 }

@@ -10,9 +10,16 @@ var datasourceData = outputs.datasourceData;
     <div class="content-section shadow-up">
         <div class="content-data">
         <div class="control-group" >
-            <label class="control-label" for="enableStats" style="display: inline">Enable</label>
-            <div class="controls" style="display: inline">
-                <input type="checkbox" id="enableStats" class="stats-enabled but" ref="configuration_form" style="margin: 4px 5px 5px 52px"/>
+            <div class="wr-guide-text">
+                <p>API usage tracker configuration used to publish event statistics data.
+                </p>
+            </div>
+
+            <div class="wr-enable-chk">
+                <label class="control-label" for="enableStats" style="display: inline">Enable</label>
+                <div class="controls" style="display: inline">
+                    <input type="checkbox" id="enableStats" class="stats-enabled but" ref="configuration_form" style="margin: 4px 5px 5px 52px"/>
+                </div>
             </div>
         </div>
         <form action="<%= jagg.url("/site/blocks/analytics-task/ajax/add.jag") %>" id="configuration_form"
@@ -178,7 +185,7 @@ var datasourceData = outputs.datasourceData;
                     <div class="control-group">
                         <div class="controls">
                             <a href="" class="more-options but" ref="more-options-datasource">Show More Options</a>
-                         </div>
+                        </div>
                      </div>
                     <div id="more-options-datasource" style="display:none">
                         <div class="control-group">
@@ -500,6 +507,11 @@ var datasourceData = outputs.datasourceData;
                                 <p id="statDsValidationQueryTimeoutHelp" class="hide">Validation Query Timeout</p>
                             </div>
                         </div>
+                        <div class="control-group">
+                            <div class="controls">
+                                <a href="" class="less-options but" ref="more-options-datasource">Show Less Options</a>
+                            </div>
+                        </div>
                     </div>
                 </td>
             </tr>
@@ -535,23 +547,26 @@ var datasourceData = outputs.datasourceData;
 </script>
 
 <script>
-$(document).ready(function(){
-
-    <% if(analyticsData.analytics != null){ %>
+$(document).ready(function() {
+    <% if(analyticsData.analytics.eventReceiverURL != '') { %>
             createMultiUrlArrayAndView("<%=analyticsData.analytics.eventReceiverURL%>",
                                         "<%=analyticsData.analytics.eventReceiverUsername%>",
                                         "<%=analyticsData.analytics.eventReceiverPassword%>");
             var enableAnalytics = "<%=analyticsData.analytics.enableAnalytics%>";
             expandViewIfAnalyticsEnabled(enableAnalytics);
-            document.getElementById("eventAnalyserURL").value = "<%=analyticsData.analytics.eventAnalyserURL%>";
-            document.getElementById("eventAnalyserUsername").value = "<%=analyticsData.analytics.eventAnalyserUsername%>";
-            document.getElementById("eventAnalyserPassword").value = "<%=analyticsData.analytics.eventAnalyserPassword%>";
     <% } else {%>
             document.getElementById("eventReceiverURL").value = "tcp://localhost:7614";
-            document.getElementById("eventReceiverUsername").value = "admin";
-            document.getElementById("eventAnalyserURL").value = "https://localhost:9446";
-            document.getElementById("eventAnalyserUsername").value = "admin";
+            document.getElementById("eventReceiverUsername").value = "<%=analyticsData.analytics.eventReceiverUsername%>";
+            document.getElementById("eventReceiverPassword").value = "<%=analyticsData.analytics.eventReceiverPassword%>";
     <% } %>
+    <% if(analyticsData.analytics.eventAnalyserURL != '') { %>
+            document.getElementById("eventAnalyserURL").value = "<%=analyticsData.analytics.eventAnalyserURL%>";
+    <% } else {%>
+            document.getElementById("eventAnalyserURL").value = "https://localhost:9446";
+    <% } %>
+
+    document.getElementById("eventAnalyserUsername").value = "<%=analyticsData.analytics.eventAnalyserUsername%>";
+    document.getElementById("eventAnalyserPassword").value = "<%=analyticsData.analytics.eventAnalyserPassword%>";
 
     <% if(datasourceData.dataSource != null){ %>
             document.getElementById("statDsURL").value = "<%=datasourceData.dataSource.statDsURL%>";

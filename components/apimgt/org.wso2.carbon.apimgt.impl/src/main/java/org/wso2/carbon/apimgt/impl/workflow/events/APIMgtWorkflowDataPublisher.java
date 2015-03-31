@@ -56,7 +56,7 @@ public class APIMgtWorkflowDataPublisher {
     static APIManagerAnalyticsConfiguration analyticsConfig = ServiceReferenceHolder.getInstance().
             getAPIManagerConfigurationService().
             getAPIAnalyticsConfiguration();
-    boolean enabled = analyticsConfig.isEnabled();
+    boolean enabled = analyticsConfig.isAnalyticsEnabled();
     private static String wfStreamName;
     private static String wfStreamVersion;
 

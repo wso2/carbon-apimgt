@@ -22,7 +22,7 @@ public class BAMMediatorConfigContext extends ConfigContextDecorator {
                 ServiceReferenceHolder.getInstance()
                         .getAPIManagerConfigurationService()
                         .getAPIAnalyticsConfiguration();
-        boolean enabledStats = analyticsConfiguration.isEnabled();
+        boolean enabledStats = analyticsConfiguration.isAnalyticsEnabled();
         if (enabledStats) {
             context.put("statsEnabled", true);
         } else {
