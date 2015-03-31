@@ -34,51 +34,29 @@ require(["dojo/dom", "dojo/domReady!"], function (dom) {
 
                     //day picker
                     $('#today-btn').on('click',function(){
-                        var to = convertTimeString(currentDay);
-                        var from = convertTimeString(currentDay-86400000);
-                        var dateStr= from+" to "+to;
-                        $("#date-range").html(dateStr);
-                        $('#date-range').data('dateRangePicker').setDateRange(from,to);
-                        drawProviderAPIServiceTime(from,to);
-
+                        getDateTime(currentDay,currentDay-86400000);
                     });
 
                     //hour picker
                     $('#hour-btn').on('click',function(){
-                        var to = convertTimeString(currentDay);
-                        var from = convertTimeString(currentDay-3600000);
-                        var dateStr= from+" to "+to;
-                        $("#date-range").html(dateStr);
-                        $('#date-range').data('dateRangePicker').setDateRange(from,to);
-                        drawProviderAPIServiceTime(from,to);
+                        getDateTime(currentDay,currentDay-3600000);
                     })
 
                     //week picker
                     $('#week-btn').on('click',function(){
-                        var to = convertTimeString(currentDay);
-                        var from = convertTimeString(currentDay-604800000);
-                        var dateStr= from+" to "+to;
-                        $("#date-range").html(dateStr);
-                        $('#date-range').data('dateRangePicker').setDateRange(from,to);
-                        drawProviderAPIServiceTime(from,to);
+                        getDateTime(currentDay,currentDay-604800000);
                     })
 
                     //month picker
                     $('#month-btn').on('click',function(){
-
-                        var to = convertTimeString(currentDay);
-                        var from = convertTimeString(currentDay-(604800000*4));
-                        var dateStr= from+" to "+to;
-                        $("#date-range").html(dateStr);
-                        $('#date-range').data('dateRangePicker').setDateRange(from,to);
-                        drawProviderAPIServiceTime(from,to);
+                        getDateTime(currentDay,currentDay-(604800000*4));
                     });
 
                     //date picker
                     $('#date-range').dateRangePicker(
                         {
                             startOfWeek: 'monday',
-                            separator : ' to ',
+                            separator : ' <b>to</b> ',
                             format: 'YYYY-MM-DD HH:mm',
                             autoClose: false,
                             time: {
@@ -92,7 +70,10 @@ require(["dojo/dom", "dojo/domReady!"], function (dom) {
                              btnActiveToggle(this);
                              var from = convertDate(obj.date1);
                              var to = convertDate(obj.date2);
-                             $('#date-range').html(from + " to "+ to);
+                             var fromStr = from.split(" ");
+                             var toStr = to.split(" ");
+                             var dateStr = fromStr[0] + " <i>" + fromStr[1] + "</i> <b>to</b> " + toStr[0] + " <i>" + toStr[1] + "</i>";
+                             $("#date-range").html(dateStr);
                              drawProviderAPIServiceTime(from,to);
                         });
 
@@ -100,12 +81,7 @@ require(["dojo/dom", "dojo/domReady!"], function (dom) {
                     var to = new Date();
                     var from = new Date(to.getTime() - 1000 * 60 * 60 * 24 * 30);
 
-                    $('#date-range').data('dateRangePicker').setDateRange(from,to);
-                    $('#date-range').html($('#date-range').val());
-                    var fromStr = convertDate(from);
-                    var toStr = convertDate(to);
-                    drawProviderAPIServiceTime(fromStr,toStr);
-
+                    getDateTime(to,from);
 
                     $('#date-range').click(function (event) {
                     event.stopPropagation();
@@ -217,14 +193,14 @@ var drawProviderAPIServiceTime = function (from, to) {
                             chart = nv.models.multiBarHorizontalChart()
                                 .x(function(d) { return d.label })
                                 .y(function(d) { return d.value })
-                                .margin({top: 30, right: 70, left: 145,bottom:50})
-                                .showValues(true)
+                                .margin({top: 0, right: 25, left: 25,bottom:50})
                                 .barColor(d3.scale.category20().range())
                                 .tooltips(false)
-                                .duration(50)
-                                .showControls(false);
+                                .showControls(true);
 
-                        chart.yAxis.axisLabel('Response Time(ms)');
+                        chart.yAxis
+                            .axisLabel('Response Time(ms)');
+
                         chart.yAxis.tickFormat(d3.format('d'));
                         chart.valueFormat(d3.format('d'));
 
@@ -232,16 +208,24 @@ var drawProviderAPIServiceTime = function (from, to) {
                                 .datum(data_chart)
                                 .call(chart);
 
-                            nv.utils.windowResize(chart.update);
+                            d3.selectAll(".nv-bar")
+                                .append("text")
+                                .attr("y", chart.xAxis.rangeBand() /2)
+                                .attr("x", function(d) {
+                                  return d3.select(this.previousSibling).attr('width')+5 ;
+                                })
+                                .text(function(d) {
+                                  return d.label +" : "+ d.value;
+                                })
 
-                            chart.dispatch.on('stateChange', function(e) { nv.log('New State:', JSON.stringify(e)); });
-                            chart.state.dispatch.on('change', function(state){
-                                nv.log('state', JSON.stringify(state));
-                            });
                             return chart;
                         });
 
-                        $('#chartContainer').append($('<div id="serviceTimeChart" class="with-3d-shadow with-transitions"><svg style="height:450px;"></svg></div>'));
+                        if(length<2||length==2){
+                            $('#chartContainer').append($('<div id="serviceTimeChart" class="with-3d-shadow with-transitions"><svg style="height:300px;"></svg></div>'));
+                        }else{
+                            $('#chartContainer').append($('<div id="serviceTimeChart" class="with-3d-shadow with-transitions"><svg style="height:500px;"></svg></div>'));
+                        }
                         $('#chartContainer').show();
                         $('#serviceTimeChart svg').show();
                         $('#tableContainer').append($dataTable);
@@ -311,11 +295,9 @@ var drawProviderAPIServiceTime = function (from, to) {
                                     chart = nv.models.multiBarHorizontalChart()
                                         .x(function(d) { return d.label })
                                         .y(function(d) { return d.value })
-                                        .margin({top: 30, right: 70, bottom: 50, left: 145})
-                                        .showValues(true)
+                                        .margin({top: 0, right: 25, left: 25,bottom:50})
                                         .barColor(d3.scale.category20().range())
                                         .tooltips(false)
-                                        .duration(50)
                                         .showControls(false);
 
                                 chart.yAxis.axisLabel('Response Time(ms)');
@@ -326,16 +308,24 @@ var drawProviderAPIServiceTime = function (from, to) {
                                     .datum(data_chart)
                                     .call(chart);
 
-                                nv.utils.windowResize(chart.update);
+                                d3.selectAll(".nv-bar")
+                                    .append("text")
+                                    .attr("y", chart.xAxis.rangeBand() /2)
+                                    .attr("x", function(d) {
+                                      return d3.select(this.previousSibling).attr('width');
+                                    })
+                                    .text(function(d) {
+                                      return d.label + " : "+ d.value;
+                                    })
 
-                                chart.dispatch.on('stateChange', function(e) { nv.log('New State:', JSON.stringify(e)); });
-                                chart.state.dispatch.on('change', function(state){
-                                    nv.log('state', JSON.stringify(state));
-                                });
                                 return chart;
                             });
 
-                            $('#chartContainer').append($('<div id="serviceTimeChart" class="with-3d-shadow with-transitions"><svg style="height:450px;"></svg></div>'));
+                            if(draw_chart.length<2||draw_chart.length==2){
+                                $('#chartContainer').append($('<div id="serviceTimeChart" class="with-3d-shadow with-transitions"><svg style="height:300px;"></svg></div>'));
+                            }else{
+                                $('#chartContainer').append($('<div id="serviceTimeChart" class="with-3d-shadow with-transitions"><svg style="height:500px;"></svg></div>'));
+                            }
                             $('#serviceTimeChart svg').show();
                         });
                     }else if(length == 0) {
@@ -404,3 +394,15 @@ function btnActiveToggle(button){
     $(button).siblings().removeClass('active');
     $(button).addClass('active');
 }
+
+function getDateTime(currentDay,fromDay){
+    var to = convertTimeString(currentDay);
+    var from = convertTimeString(fromDay);
+    var toDate = to.split(" ");
+    var fromDate = from.split(" ");
+    var dateStr= fromDate[0]+" <i>"+fromDate[1]+"</i> <b>to</b> "+toDate[0]+" <i>"+toDate[1]+"</i>";
+    $("#date-range").html(dateStr);
+    $('#date-range').data('dateRangePicker').setDateRange(from,to);
+    drawProviderAPIServiceTime(from,to);
+}
+

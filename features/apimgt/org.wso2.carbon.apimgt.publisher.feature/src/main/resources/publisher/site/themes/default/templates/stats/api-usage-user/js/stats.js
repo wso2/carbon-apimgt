@@ -32,48 +32,24 @@ require(["dojo/dom", "dojo/domReady!"], function (dom) {
                     var firstAccessDay = new Date(json.usage[0].year, json.usage[0].month - 1, json.usage[0].day);
                     var currentDay = new Date(d.getFullYear(), d.getMonth(), d.getDate(),d.getHours(),d.getMinutes());
 
-
                     //day picker
                     $('#today-btn').on('click',function(){
-                        var to = convertTimeString(currentDay);
-                        var from = convertTimeString(currentDay-86400000);
-                        var dateStr= from+" to "+to;
-                        $("#date-range").html(dateStr);
-                        $('#date-range').data('dateRangePicker').setDateRange(from,to);
-
-                        drawAPIUsage(from,to);
-
+                        getDateTime(currentDay,currentDay-86400000);
                     });
 
                     //hour picker
                     $('#hour-btn').on('click',function(){
-                        var to = convertTimeString(currentDay);
-                        var from = convertTimeString(currentDay-3600000);
-                        var dateStr= from+" to "+to;
-                        $("#date-range").html(dateStr);
-                        $('#date-range').data('dateRangePicker').setDateRange(from,to);
-                        drawAPIUsage(from,to);
+                       getDateTime(currentDay,currentDay-3600000);
                     })
 
                     //week picker
                     $('#week-btn').on('click',function(){
-                        var to = convertTimeString(currentDay);
-                        var from = convertTimeString(currentDay-604800000);
-                        var dateStr= from+" to "+to;
-                        $("#date-range").html(dateStr);
-                        $('#date-range').data('dateRangePicker').setDateRange(from,to);
-                        drawAPIUsage(from,to);
+                        getDateTime(currentDay,currentDay-604800000);
                     })
 
                     //month picker
                     $('#month-btn').on('click',function(){
-
-                        var to = convertTimeString(currentDay);
-                        var from = convertTimeString(currentDay-(604800000*4));
-                        var dateStr= from+" to "+to;
-                        $("#date-range").html(dateStr);
-                        $('#date-range').data('dateRangePicker').setDateRange(from,to);
-                        drawAPIUsage(from,to);
+                        getDateTime(currentDay,currentDay-(604800000*4));
                     });
 
                     //date picker
@@ -94,7 +70,10 @@ require(["dojo/dom", "dojo/domReady!"], function (dom) {
                              btnActiveToggle(this);
                              var from = convertDate(obj.date1);
                              var to = convertDate(obj.date2);
-                             $('#date-range').html(from + " to "+ to);
+                             var fromStr = from.split(" ");
+                             var toStr = to.split(" ");
+                             var dateStr = fromStr[0] + " <i>" + fromStr[1] + "</i> <b>to</b> " + toStr[0] + " <i>" + toStr[1] + "</i>";
+                             $("#date-range").html(dateStr);
                              drawAPIUsage(from,to);
                         });
 
@@ -102,11 +81,7 @@ require(["dojo/dom", "dojo/domReady!"], function (dom) {
                     var to = new Date();
                     var from = new Date(to.getTime() - 1000 * 60 * 60 * 24 * 30);
 
-                    $('#date-range').data('dateRangePicker').setDateRange(from,to);
-                    $('#date-range').html($('#date-range').val());
-                    var fromStr = convertDate(from);
-                    var toStr = convertDate(to);
-                    drawAPIUsage(fromStr,toStr);
+                    getDateTime(to,from);
 
 
                     $('#date-range').click(function (event) {
@@ -248,13 +223,15 @@ var drawAPIUsage = function (from,to) {
                                   });
                                  }
                                  drawChart(from,to);
-                        } else {
-				//No subscriber details available.
-				$('#apiUsageByUserTable').hide();
-                    		$('#tempLoadingSpaceUsageByUser').html('');
-                    		$('#tempLoadingSpaceUsageByUser').append($('<h3 class="no-data-heading center-wrapper">No Data Available</h3>'));
-			}
-                    } else {
+                        }
+                        else{
+                                $('#apiUsageByUserTable').hide();
+                                $('#tempLoadingSpaceUsageByUser').html('');
+                                $('#tempLoadingSpaceUsageByUser').append($('<h3 class="no-data-heading center-wrapper">No Data Available</h3>'));
+
+                        }
+                    }
+                    else {
                                 if (json.message == "AuthenticateError") {
                                     jagg.showLogin();
                                 } else {
@@ -383,7 +360,7 @@ var drawChart = function (from, to) {
                                     subscriberDetails[z].check=true;
                                     data.push({
                                         API_name:app,
-                                        Subscriber_Count:allSubCount,
+                                        SubscriberCount:allSubCount,
                                         Hits:allcount,
                                         API:app
                                     });
@@ -396,7 +373,7 @@ var drawChart = function (from, to) {
                             if(subscriberDetails[z].check == false){
                                 data.push({
                                             API_name:subscriberDetails[z].api_name,
-                                            Subscriber_Count:subscriberDetails[z].sub_count,
+                                            SubscriberCount:subscriberDetails[z].sub_count,
                                             Hits:0,
                                             API:subscriberDetails[z].api_name
                                 });
@@ -411,8 +388,9 @@ var drawChart = function (from, to) {
                     chart.setMargins("60px", "30px", "110px", "70px");
                     chart.setBounds("10%", "10%", "75%", "60%");
                     var x= chart.addCategoryAxis("x", "API");
-                    var y=chart.addMeasureAxis("y", "Subscriber_Count");
-                    y.title = "Subscriber Count";
+                    var y=chart.addMeasureAxis("y", "SubscriberCount");
+                    y.title = "Subscription Count";
+                    x.title = "APIs";
                     y.tickFormat = '1d';
                     chart.addMeasureAxis("z", "Hits");
                     s=chart.addSeries("API", dimple.plot.bubble);
@@ -434,7 +412,7 @@ var drawChart = function (from, to) {
 
                     sortData = dimple.filterData(data, "API", filterValues);
                     sortData.sort(function(obj1, obj2) {
-                        return obj2.Hits - obj1.Hits;
+                        return obj2.SubscriberCount - obj1.SubscriberCount;
                     });
 
                     //default display of 20 checked entries on table
@@ -444,7 +422,7 @@ var drawChart = function (from, to) {
                                                 +'<input name="item_checkbox'+n+'"  checked   id='+n+'  type="checkbox"  data-item='+sortData[n].API_name +' class="inputCheckbox"/>'
                                                 +'</td>'
                                                 +'<td style="text-align:left;"><label for='+n+'>'+sortData[n].API_name +'</label></td>'
-                                                +'<td style="text-align:right;"><label for='+n+'>'+sortData[n].Subscriber_Count +'</label></td></tr>'));
+                                                +'<td style="text-align:right;"><label for='+n+'>'+sortData[n].SubscriberCount +'</label></td></tr>'));
                             state_array.push(true);
                             defaultFilterValues.push(sortData[n].API_name);
                             chartData.push(sortData[n].API_name);
@@ -453,7 +431,7 @@ var drawChart = function (from, to) {
                                                 +'<input name="item_checkbox'+n+'"  id='+n+'  type="checkbox"  data-item='+sortData[n].API_name +' class="inputCheckbox"/>'
                                                 +'</td>'
                                                 +'<td style="text-align:left;"><label for='+n+'>'+sortData[n].API_name +'</label></td>'
-                                                +'<td style="text-align:right;"><label for='+n+'>'+sortData[n].Subscriber_Count +'</label></td></tr>'));
+                                                +'<td style="text-align:right;"><label for='+n+'>'+sortData[n].SubscriberCount +'</label></td></tr>'));
                             state_array.push(false);
                             chartData.push(sortData[n].API_name);
                         }
@@ -548,8 +526,7 @@ var drawChart = function (from, to) {
                                 div.style("top", d3.event.pageY-25+"px");
                                 div.style("display", "inline-block");
 
-
-                                div.html('<table class="table graphTable" id="tooltipTable"><thead><tr><th>version</th><th>Hits</th></tr></thead><tbody></tbody></table>');
+                                div.html('<div style="color:#555; text-align:left">API : '+app +'</div><div style="color:#666;margin-top:5px;text-align:left">Subscription Count : '+data[i].SubscriberCount+'</div><table class="table" id="tooltipTable"><thead><tr><th>Version</th><th>Hits</th></tr></thead><tbody></tbody></table>');
                                     for (var l=0;l<versionCount.length;l++){
                                         var versionName=versionCount[l].version;
                                         var version_Count=versionCount[l].count;
@@ -630,3 +607,13 @@ function btnActiveToggle(button){
     $(button).addClass('active');
 }
 
+function getDateTime(currentDay,fromDay){
+    var to = convertTimeString(currentDay);
+    var from = convertTimeString(fromDay);
+    var toDate = to.split(" ");
+    var fromDate = from.split(" ");
+    var dateStr= fromDate[0]+" <i>"+fromDate[1]+"</i> <b>to</b> "+toDate[0]+" <i>"+toDate[1]+"</i>";
+    $("#date-range").html(dateStr);
+    $('#date-range').data('dateRangePicker').setDateRange(from,to);
+    drawAPIUsage(from,to);
+}

@@ -194,7 +194,7 @@
 
 .date-picker-wrapper .drp_top-bar .apply-btn.disabled
 {
-	cursor: pointer;
+    pointer-events: none;
 	color: #606060;
 	border: solid 1px #b7b7b7;
 	background: #fff;
