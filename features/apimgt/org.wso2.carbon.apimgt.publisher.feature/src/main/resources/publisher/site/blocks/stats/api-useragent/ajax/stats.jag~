@@ -1,0 +1,37 @@
+<%
+include("/jagg/jagg.jag");
+
+(function () {
+    response.contentType = "application/json; charset=UTF-8";
+    var mod, obj, result,
+            action = request.getParameter("action"),
+            site = require("/site/conf/site.json"),
+            msg = require("/site/conf/ui-messages.jag")
+    allProviders = "__all_providers__";
+    if (jagg.getUser() == null) {
+        print({
+            error: true,
+            message: 'timeout'
+        });
+    } else {
+        if (action === "getUserAgentSummaryForALLAPIs") {
+            mod = jagg.module("statistics");
+                result = mod.getUserAgentSummaryForALLAPIs();
+            if (result.error == "true") {
+                obj = {
+                    error: result.error,
+                    message: msg.error.backendError(action)
+                };
+            } else {
+                obj = {
+                    error: false,
+                    usage: result
+                }
+            }
+            print(obj);
+
+
+        } 
+    }
+}());
+%>

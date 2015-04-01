@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>IGViz.js - Interactive Generic Visualization library for Javascript that is based on d3.js</title>
+    <!--dependencies for igviz -->
+    <link rel="stylesheet" href="bootstrap.min.css">
+    <script src="d3.min.js"></script>
+    <script src="vega.js"></script>
+
+    <script type='text/javascript' src='https://www.google.com/jsapi'></script>
+
+    <script type="text/javascript">
+        google.load('visualization', '1', {
+            'packages': ['map', 'geochart']
+        });
+    </script>
+    <!-- end of the dependencies -->
+
+
+    <!-- Intergration of igviz  -->
+    <script src="../igviz.js"></script>
+    <link rel="stylesheet" href="../igviz.css">
+
+
+
+<meta charset="utf-8">
+
+    <style type="text/css">
+        body{ padding-top: 40px;}
+
+    </style>
+</head>
+
+<body>
+
+
+      <div class="container">
+
+        <div class="jumbotron">
+            <h1>IGViz.js<small> Drawing a chart has never been this easy!</small></h1>
+            <p>Interactive Generic Visualization library for Javascript that is based on d3.js</p>
+        </div>
+
+        <div class="row">
+             <a href="bar/" class="tile">
+              <div class="col-md-6" class="tile">
+                  <div class="panel panel-default">
+                      <div class="panel-heading">
+                        <h3 class="panel-title">
+                          Bar Chart Sample
+                        </h3>
+                      </div>
+                      <div class="panel-body">
+                        <div id="bar"></div>
+                      </div>
+                        
+                  </div>
+              </div>
+                 </a>
+
+            <a href="line/index.html">
+                <div class="col-md-6" class="tile">
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            <h3 class="panel-title">
+                                Line Graph  Sample
+                            </h3>
+                        </div>
+                        <div class="panel-body">
+                            <div id="line">
+
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </a>
+
+
+
+
+
+        </div>
+
+
+          <div class="row">
+
+              <a href="area/">
+                  <div class="col-md-6" class="tile">
+                      <div class="panel panel-default">
+                          <div class="panel-heading">
+                              <h3 class="panel-title">
+                                  Area Sample
+                              </h3>
+                          </div>
+                          <div class="panel-body">
+                              <div id="area"></div>
+                          </div>
+
+                      </div>
+                  </div>
+
+              </a>
+
+
+
+
+              <a href="scatter/index.html">
+                <div class="col-md-6" class="tile">
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                          <h3 class="panel-title">
+                            Scatter Chart Sample
+                          </h3>
+                        </div>
+                        <div class="panel-body">
+                          <div id="scatter"></div>
+                        </div>  
+                    </div>
+                </div>
+              </a>
+             
+
+          </div>
+
+             <!-- /.row -->
+
+          <div class="row">
+              <a href="table/" class="tile">
+                  <div class="col-md-6" class="tile">
+                      <div class="panel panel-default">
+                          <div class="panel-heading">
+                              <h3 class="panel-title">
+                                  Table Sample
+                              </h3>
+                          </div>
+                          <div class="panel-body">
+                              <div id="table"></div>
+                          </div>
+
+                      </div>
+                  </div>
+              </a>
+
+              <a href="drillDown/">
+                  <div class="col-md-6" class="tile">
+                      <div class="panel panel-default">
+                          <div class="panel-heading">
+                              <h3 class="panel-title">
+                                  Drill-Down  Sample
+                              </h3>
+                          </div>
+                          <div class="panel-body">
+                              <div id="drill">
+
+                              </div>
+                          </div>
+
+                      </div>
+                  </div>
+              </a>
+
+
+          </div>
+          <div class="row">
+
+
+              <a href="map/index.html">
+                  <div class="col-md-6" class="tile">
+                      <div class="panel panel-default">
+                          <div class="panel-heading">
+                              <h3 class="panel-title">
+                                  Map  Sample
+                              </h3>
+                          </div>
+                          <div class="panel-body">
+                              <div id="map">
+
+                              </div>
+                          </div>
+
+                      </div>
+                  </div>
+              </a>
+
+              <div class="col-md-6" class="tile">
+                  <div class="panel panel-default">
+                      <div class="panel-heading">
+                          <h3 class="panel-title">
+                              Arc Sample
+                          </h3>
+                      </div>
+                      <div class="panel-body">
+                          <div id="arc"></div>
+                      </div>
+
+                  </div>
+              </div>
+
+              
+          </div>
+
+
+
+
+      </div><!-- /.container -->
+
+      
+
+</body>
+
+<script>
+
+
+//dataset used to plot charts
+var dataTable = {
+      "metadata":{
+        "names":["Country","Area","GDP","Inflation","Life.expect","Military","Pop.growth","Unemployment"],
+        "types":['C', 'N', 'N', 'N', 'N', 'N', 'N','N']
+      },
+      "data": [
+        ["Austria",83871,41600,3.5,79.91,0.8,0.03,4.2],
+        ["Belgium",30528,37800,3.5,79.65,1.3,0.06,7.2],
+        ["Bulgaria",110879,13800,4.2,73.84,2.6,-0.8,9.6],
+        ["Croatia",56594,18000,2.3,75.99,2.39,-0.09,17.7],
+        ["Czech Republic",78867,27100,1.9,77.38,1.15,-0.13,8.5],
+        ["Denmark",43094,37000,2.8,78.78,1.3,0.24,6.1],
+        ["Estonia",45228,20400,5,73.58,2,-0.65,12.5],
+        ["Finland",338145,36000,3.3,79.41,2,0.07,7.8],
+        ["Germany",357022,38100,2.5,80.19,1.5,-0.2,6],
+        ["Greece",131957,26300,3.3,80.05,4.3,0.06,17.4],
+        ["Hungary",93028,19600,3.9,75.02,1.75,-0.18,10.9],
+        ["Iceland",103000,38100,4,81,0,0.67,7.4],
+        ["Ireland",70273,40800,2.6,80.32,0.9,1.11,14.4],
+        ["Italy",301340,30500,2.9,81.86,1.8,0.38,8.4],
+        ["Latvia",64589,16800,4.4,72.93,1.1,-0.6,12.8]
+
+      ]
+    }
+
+    var width = document.getElementById("bar").offsetWidth; //canvas width
+    var height = 270;   //canvas height
+
+    var barChartConfig = {
+        "title": "Area By Country",
+        "yAxis": 1,
+        "xAxis": 0,
+        "pointLabel": 0,
+        "width": width,
+        "height": height-50,
+        "padding": 60,
+        "chartType": "bar",
+        "xAxisLabelConfig":{
+            "fontSize" :"15px"
+        },
+        "yAxisLabelConfig":{
+            "fontSize" :"15px"
+        }
+    }
+
+    var scatterChartConfig = {
+        "title": "Area By Country",
+        "yAxis": 1,
+        "xAxis": 0,
+        "pointLabel": 0,
+        "width": width,
+        "height": height,
+        "padding": 60,
+        "pointColor": 3,
+        "pointSize": 2,
+        "chartType": "scatter",
+        "textAngle":-90,
+        "maxColor":"#ffff00",
+"minColor":"#ff00ff"
+        ,"xAxisLabelConfig":{
+            "fontSize" :"15px"
+        },
+        "yAxisLabelConfig":{
+            "fontSize" :"15px"
+        }
+    }
+
+    var mapConfig={
+        "title": "Map By Country",
+        "width": width,
+        "height": height,
+        "padding": 60,
+        "pointColor": 3,
+        "pointSize": 1,
+        "chartType": "map",
+        "mapLocation" : 0,
+        "mode" :"regions",   // "markers"| "normal" | "satellite"
+        "region" : 150       //  "LK" | "US" | "GB" ...
+    }
+
+
+    
+
+    var tableConfig = {
+        "title": "Area By Country",
+        "xAxis": 1,
+        "padding": 60,
+        "width": width,
+        "height": height,
+        "chartType": "table",
+        "colorBasedStyle" :true
+
+    }
+
+    var arcConfig = {
+        "width": width,
+        "height": height,
+        "chartType": "arc",
+        "diameter" : 200,
+        "value" : 75
+    }
+
+
+    var lineChartConfig = {
+        "title": "Area By Country",
+        "xAxis": 0,
+        "yAxis": [1,2],
+        "padding": 60,
+        "width": width,
+        "height": height,
+        "textAngle" : -90,
+        "chartType": "line",
+        "lineColors": ["yellow"]
+    }
+
+
+
+var dataTable2 = {
+    "metadata":{
+        "names":["Country","Area","GDP","Inflation","Life.expect","Military","Pop.growth"],
+        "types":['C', 'N', 'N', 'N', 'N', 'N', 'N']
+    },
+    "data": [
+        ["Austria",83871,41600,3.5,79.91,0.8,0.03],
+        ["Belgium",30528,37800,3.5,79.65,1.3,0.06],
+        ["Bulgaria",110879,13800,4.2,73.84,2.6,-0.8],
+        ["Croatia",56594,18000,2.3,75.99,2.39,-0.09],
+        ["Czech Republic",78867,27100,1.9,77.38,1.15,-0.13],
+        ["Denmark",43094,37000,2.8,78.78,1.3,0.24],
+        ["Estonia",45228,20400,5,73.58,2,-0.65],
+        ["Finland",338145,36000,3.3,79.41,2,0.07]]
+}
+    //draw a bar chart on div #bar
+    igviz.plot("#bar",barChartConfig,dataTable);
+    
+    //draw a scatter chart on div #scatter
+    igviz.plot("#scatter",scatterChartConfig,dataTable);
+
+
+    var lineData = new igviz.DataTable();
+    lineData.addColumn("Year","C");
+    lineData.addColumn("Sales","N");
+    lineData.addColumn("Expenses","N");
+             
+    lineData.addRows(
+        [
+            [2004,  1000,      400],
+            [2005,  1170,      460],
+            [2006,  660,       1120],
+            [2007,  1030,      540]
+        ]
+    );
+
+//draw a line chart on
+igviz.plot("#line",lineChartConfig,lineData);
+
+
+igviz.plot("#map",mapConfig,dataTable);
+
+
+//draw a table on div #table
+igviz.plot("#table",tableConfig,dataTable2);
+
+igviz.plot("#arc",arcConfig,dataTable2);
+
+var drillDataTable = {
+    "metadata":{
+        "names":["Year","City",'Province',"Votes"],
+        "types":['C', 'C','C','N']
+    },
+    "data": [
+        ['2005','Ampara','Eastern',28],
+        ['2005','Anuradhapura','North Central',20],
+        ['2005','Badulla','Uva',78],
+        ['2005','Batticaloa','Eastern',8],
+        ['2005','Colombo','Western',48],
+        ['2005','Galle','Southern',72],
+        ['2005','Gampaha','Western',26],
+        ['2005','Hambantota','Southern',73],
+        ['2005','Jaffna','Northern',6],
+        ['2005','Kalutara','Western',69],
+        ['2005','Kandy','Central',70],
+        ['2005','Kegalle','Sabaragamuwa',29],
+        ['2005','Kilinochchi','Northern',10],
+        ['2005','Kurunegala','North Western',8],
+        ['2005','Mannar','Northern',12],
+        ['2005','Matale','Central',29],
+        ['2005','Matara','Southern',7],
+        ['2005','Moneragala','Uva',31],
+        ['2005','Mullaitivu','Northern',42],
+        ['2005','Nuwara Eliya','Central',42],
+        ['2005','Polonnaruwa','North Central',95],
+        ['2005','Puttalam','North Western',37],
+        ['2005','Ratnapura','Sabaragamuwa',7],
+        ['2005','Trincomalee','Eastern',31],
+        ['2005','Vavuniya','Northern',72],
+        ['2010','Ampara','Eastern',24],
+        ['2010','Anuradhapura','North Central',7],
+        ['2010','Badulla','Uva',40],
+        ['2010','Batticaloa','Eastern',43],
+        ['2010','Colombo','Western',13],
+        ['2010','Galle','Southern',12],
+        ['2010','Gampaha','Western',33],
+        ['2010','Hambantota','Southern',87],
+        ['2010','Jaffna','Northern',74],
+        ['2010','Kalutara','Western',91],
+        ['2010','Kandy','Central',26],
+        ['2010','Kegalle','Sabaragamuwa',19],
+        ['2010','Kilinochchi','Northern',15],
+        ['2010','Kurunegala','North Western',42],
+        ['2010','Mannar','Northern',64],
+        ['2010','Matale','Central',66],
+        ['2010','Matara','Southern',46],
+        ['2010','Moneragala','Uva',28],
+        ['2010','Mullaitivu','Northern',7],
+        ['2010','Nuwara Eliya','Central',59],
+        ['2010','Polonnaruwa','North Central',36],
+        ['2010','Puttalam','North Western',61],
+        ['2010','Ratnapura','Sabaragamuwa',65],
+        ['2010','Trincomalee','Eastern',38],
+        ['2010','Vavuniya','Northern',60],
+        ['2015','Ampara','Eastern',47],
+        ['2015','Anuradhapura','North Central',49],
+        ['2015','Badulla','Uva',54],
+        ['2015','Batticaloa','Eastern',97],
+        ['2015','Colombo','Western',59],
+        ['2015','Galle','Southern',46],
+        ['2015','Gampaha','Western',70],
+        ['2015','Hambantota','Southern',51],
+        ['2015','Jaffna','Northern',7],
+        ['2015','Kalutara','Western',0],
+        ['2015','Kandy','Central',54],
+        ['2015','Kegalle','Sabaragamuwa',81],
+        ['2015','Kilinochchi','Northern',32],
+        ['2015','Kurunegala','North Western',16],
+        ['2015','Mannar','Northern',16],
+        ['2015','Matale','Central',87],
+        ['2015','Matara','Southern',44],
+        ['2015','Moneragala','Uva',81],
+        ['2015','Mullaitivu','Northern',35],
+        ['2015','Nuwara Eliya','Central',74],
+        ['2015','Polonnaruwa','North Central',46],
+        ['2015','Puttalam','North Western',47],
+        ['2015','Ratnapura','Sabaragamuwa',96],
+        ['2015','Trincomalee','Eastern',19],
+        ['2015','Vavuniya','Northern',45]
+
+    ]
+}
+
+var drillWidth = document.getElementById("drill").offsetWidth; //canvas width
+var drillHeight = 280;   //canvas height
+
+var drillconfig = {
+    "title": "Area By Country",
+    "yAxis": 3,
+    "xAxis": [{"index":0,"child":2,"div":"drill"},{"index":2,"child":1,"div":"drill"}],
+    "pointLabel": 0,
+    "width": drillWidth,
+    "height": drillHeight,
+    "padding": 60,
+    "chartType": "drill"
+}
+
+
+
+//draw a drill downing  chart on div
+igviz.plot("#drill",drillconfig,drillDataTable);
+
+
+
+var areaConfig = {
+    "title": "Area By Country",
+    "yAxis": 3,
+    "xAxis":7,
+    "pointLabel": 0,
+    "width": width-100,
+    "height": height-40,
+    "padding": 60,
+    "chartType": "area"
+
+}
+
+
+
+//draw a bar chart on div #bar
+chart=igviz.setUp("#area",areaConfig,dataTable);
+chart.plot(dataTable.data);
+
+
+
+</script>
+
+</html>

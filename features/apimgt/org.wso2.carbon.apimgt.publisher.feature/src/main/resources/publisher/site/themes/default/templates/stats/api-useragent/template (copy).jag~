@@ -1,0 +1,39 @@
+<% jagg.template("stats/api-useragent", function(inputs, outputs, jagg) { %>
+
+<link type="text/css" rel="stylesheet" href="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("templates/utils/barchart/bootstrap.min.css"))%>"/>
+<script type="text/javascript" src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("templates/utils/barchart/d3.min.js"))%>"></script>
+<script type="text/javascript" src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("templates/utils/barchart/vega.js"))%>"></script>
+<script type="text/javascript" src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("templates/utils/barchart/igviz.js"))%>"></script>
+<link type="text/css" rel="stylesheet" href="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("templates/utils/barchart/igviz.css"))%>"/>
+
+
+
+
+
+
+  <!--[if lt IE 9]><script language="javascript" type="text/javascript" src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("templates/utils/jqplot/excanvas.min.js"))%>" ></script><![endif]-->
+
+<div class="title-section"> <h2><%=i18n.localize("overallAPISubscriptionsTitle")%></h2> </div>
+
+<div class="content-section shadow-up">
+<div class="content-data">
+    <div class="well" id="bar">
+  		<svg id="svg_donut" width="600" height="400"></svg>
+    </div>
+</div>
+</div>
+
+
+<script>
+for(var i = 0 ; i < 1000; i++){
+var vis = d3.select("#svg_donut"); 
+var arc = d3.svg.arc() .innerRadius(50) .outerRadius(100) .startAngle(0) .endAngle(i/10*Math.PI);
+
+vis.append("path") .attr("d", arc) .attr("transform", "translate(300,200)");
+
+}
+
+</script>
+
+
+<% }); %>
