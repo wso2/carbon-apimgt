@@ -2282,5 +2282,38 @@ public class APIUsageStatisticsClient {
                     APIUsageStatisticsClientConstants.REQUEST)).getText());*/
         }
     }
+    public static class APIUserAgent{
+        private String apiName;
+        private String apiVersion;
+        private String userAgent;
+        private int totalRequestCount;
+        public APIUserAgent(OMElement row){
+            String nameVersion = row.getFirstChildWithName(new QName(
+                    APIUsageStatisticsClientConstants.API_VERSION)).getText();
+            int index = nameVersion.lastIndexOf(":v");
+            apiName = nameVersion.substring(0, index);
+            apiVersion = nameVersion.substring(index + 2);
+            userAgent = row.getFirstChildWithName(new QName("useragent")).getText();
+            totalRequestCount =  Integer.parseInt(row.getFirstChildWithName(new QName("total_request_count")).getText());
+        }
+
+    }
+
+    public static class APIRequestsByHour{
+        private String apiName;
+        private String apiVersion;
+        private String requestCount;
+        private String date;
+        private String tier;
+
+        public APIRequestsByHour(OMElement row){
+            apiName = row.getFirstChildWithName(new QName("api")).getText();
+            apiVersion = row.getFirstChildWithName(new QName("api_version")).getText();
+            requestCount = row.getFirstChildWithName(new QName("total_request_count")).getText();
+            date = row.getFirstChildWithName(new QName("requesttime")).getText();
+            tier = row.getFirstChildWithName(new QName("tier")).getText();
+        }
+
+    }
 
 }
