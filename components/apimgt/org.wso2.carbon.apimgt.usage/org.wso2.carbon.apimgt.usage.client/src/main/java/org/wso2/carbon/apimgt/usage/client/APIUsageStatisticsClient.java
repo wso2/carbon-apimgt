@@ -847,6 +847,55 @@ public class APIUsageStatisticsClient {
         return getTopEntries(new ArrayList<PerUserAPIUsageDTO>(usageByUsername.values()), limit);
     }
 
+    public List<APIRequestsByUserAgentsDTO> getUserAgentSummaryForALLAPIs() throws APIMgtUsageQueryServiceClientException{
+
+        OMElement omElement = this.queryDatabase("API_USERAGENT_SUMMARY");
+        Collection<APIUserAgent> userAgentData = getUserAgent(omElement);
+        Map<String, APIRequestsByUserAgentsDTO> apiRequestByUserAgents = new TreeMap<String, APIRequestsByUserAgentsDTO>();
+        APIRequestsByUserAgentsDTO userAgentsDTO = null;
+        for (APIUserAgent usageEntry : userAgentData) {
+            if(!apiRequestByUserAgents.containsKey(usageEntry.userAgent)) {
+                userAgentsDTO = new APIRequestsByUserAgentsDTO();
+                userAgentsDTO.setUserAgent(usageEntry.userAgent);
+                userAgentsDTO.setCount(usageEntry.totalRequestCount);
+                apiRequestByUserAgents.put(usageEntry.userAgent, userAgentsDTO);
+            }else{
+                userAgentsDTO = new APIRequestsByUserAgentsDTO();
+                userAgentsDTO=(APIRequestsByUserAgentsDTO)apiRequestByUserAgents.get(usageEntry.userAgent);
+                userAgentsDTO.setCount(userAgentsDTO.getCount()+usageEntry.totalRequestCount);
+                apiRequestByUserAgents.remove(usageEntry.userAgent);
+                apiRequestByUserAgents.put(usageEntry.userAgent, userAgentsDTO);
+            }
+        }
+        return new ArrayList<APIRequestsByUserAgentsDTO>(apiRequestByUserAgents.values());
+    }
+
+    public List<APIRequestsByHourDTO> getAPIRequestsByHour(String fromDate, String toDate,String apiName) throws APIMgtUsageQueryServiceClientException{
+        String Date = null ;
+        OMElement omElement = this.queryBetweenTwoDaysForAPIRequestsByHour("API_REQUESTS_PERHOUR", fromDate, toDate,apiName);
+        Collection<APIRequestsByHour> apiRequestsByHoursData = getAPIRequestsByHour(omElement);
+        Map<String, APIRequestsByHourDTO> apiRequestsByHour = new TreeMap<String, APIRequestsByHourDTO>();
+        APIRequestsByHourDTO apiRequestsByHourDTO = null;
+        for (APIRequestsByHour usageEntry : apiRequestsByHoursData) {
+            apiRequestsByHourDTO = new APIRequestsByHourDTO();
+            apiRequestsByHourDTO.setApi(usageEntry.apiName);
+            apiRequestsByHourDTO.setApi_version(usageEntry.apiVersion);
+            apiRequestsByHourDTO.setDate(usageEntry.date);
+            apiRequestsByHourDTO.setRequestCount(usageEntry.requestCount);
+            apiRequestsByHourDTO.setTier(usageEntry.tier);
+            apiRequestsByHour.put(usageEntry.date.concat(usageEntry.tier),apiRequestsByHourDTO);
+        }
+        return new ArrayList<APIRequestsByHourDTO>(apiRequestsByHour.values());
+    }
+
+    public List<String> getAPIsFromAPIRequestsPerHourTable(String fromDate, String toDate) throws APIMgtUsageQueryServiceClientException{
+        String Date = null ;
+        OMElement omElement = this.queryBetweenTwoDaysForAPIsFromAPIRequestsPerHourTable("API_REQUESTS_PERHOUR", fromDate, toDate);
+        Collection<String> apisList = getAPIsFromAPIRequestByHour(omElement);
+
+        return new ArrayList<String>(apisList);
+    }
+
     public List<APIResponseFaultCountDTO> getAPIResponseFaultCount(String providerName, String fromDate, String toDate)
             throws APIMgtUsageQueryServiceClientException {
 
@@ -1203,6 +1252,136 @@ public class APIUsageStatisticsClient {
                     String xmlEscapedValue = StringEscapeUtils.escapeXml(columnValue);
                     returnStringBuilder.append("<" + columnName.toLowerCase() + ">" + xmlEscapedValue +
                             "</" + columnName.toLowerCase() + ">");
+                }
+                returnStringBuilder.append("</row>");
+            }
+            returnStringBuilder.append("</rows></omElement>");
+            String returnString = returnStringBuilder.toString();
+            return AXIOMUtil.stringToOM(returnString);
+
+        } catch (Exception e) {
+            throw new APIMgtUsageQueryServiceClientException("Error occurred while querying from JDBC database", e);
+        } finally {
+            if (rs != null) {
+                try {
+                    rs.close();
+                } catch (SQLException ignore) {
+
+                }
+            }
+            if (statement != null) {
+                try {
+                    statement.close();
+                } catch (SQLException e) {
+
+                }
+            }
+            if (connection != null) {
+                try {
+                    connection.close();
+                } catch (SQLException e) {
+
+                }
+            }
+        }
+    }
+
+    private OMElement queryBetweenTwoDaysForAPIRequestsByHour(String columnFamily, String fromDate, String toDate,String apiName)
+            throws APIMgtUsageQueryServiceClientException {
+
+        if (dataSource == null) {
+            throw new APIMgtUsageQueryServiceClientException("BAM data source hasn't been initialized. Ensure " +
+                                                             "that the data source is properly configured in the APIUsageTracker configuration.");
+        }
+
+        Connection connection = null;
+        Statement statement = null;
+        ResultSet rs = null;
+        try {
+            connection = dataSource.getConnection();
+            statement = connection.createStatement();
+            String query;
+            //TODO: API_FAULT_COUNT need to populate according to match withQuery given time range
+
+            query = "SELECT * FROM  " + columnFamily + " WHERE " + " API =\'" + apiName + "\' AND "+" requestTime "+ " BETWEEN " +
+                    "\'" + fromDate + "\' AND \'" + toDate + "\' ";
+
+            rs = statement.executeQuery(query);
+            StringBuilder returnStringBuilder = new StringBuilder("<omElement><rows>");
+            int columnCount = rs.getMetaData().getColumnCount();
+            while (rs.next()) {
+                returnStringBuilder.append("<row>");
+                for (int i = 1; i <= columnCount; i++) {
+                    String columnName = rs.getMetaData().getColumnName(i);
+                    String columnValue = rs.getString(columnName);
+                    String xmlEscapedValue = StringEscapeUtils.escapeXml(columnValue);
+                    returnStringBuilder.append("<" + columnName.toLowerCase() + ">" + xmlEscapedValue +
+                                               "</" + columnName.toLowerCase() + ">");
+                }
+                returnStringBuilder.append("</row>");
+            }
+            returnStringBuilder.append("</rows></omElement>");
+            String returnString = returnStringBuilder.toString();
+            return AXIOMUtil.stringToOM(returnString);
+
+        } catch (Exception e) {
+            throw new APIMgtUsageQueryServiceClientException("Error occurred while querying from JDBC database", e);
+        } finally {
+            if (rs != null) {
+                try {
+                    rs.close();
+                } catch (SQLException ignore) {
+
+                }
+            }
+            if (statement != null) {
+                try {
+                    statement.close();
+                } catch (SQLException e) {
+
+                }
+            }
+            if (connection != null) {
+                try {
+                    connection.close();
+                } catch (SQLException e) {
+
+                }
+            }
+        }
+    }
+
+    private OMElement queryBetweenTwoDaysForAPIsFromAPIRequestsPerHourTable(String columnFamily, String fromDate, String toDate)
+            throws APIMgtUsageQueryServiceClientException {
+
+        if (dataSource == null) {
+            throw new APIMgtUsageQueryServiceClientException("BAM data source hasn't been initialized. Ensure " +
+                                                             "that the data source is properly configured in the APIUsageTracker configuration.");
+        }
+
+        Connection connection = null;
+        Statement statement = null;
+        ResultSet rs = null;
+        try {
+            connection = dataSource.getConnection();
+            statement = connection.createStatement();
+            String query;
+            //TODO: API_FAULT_COUNT need to populate according to match with given time range
+
+            query = "SELECT DISTINCT API FROM  " + columnFamily + " WHERE TIER<>\'Unauthenticated\' AND"+" requestTime "+ " BETWEEN " +
+                    "\'" + fromDate + "\' AND \'" + toDate + "\' ";
+
+            rs = statement.executeQuery(query);
+            StringBuilder returnStringBuilder = new StringBuilder("<omElement><rows>");
+            int columnCount = rs.getMetaData().getColumnCount();
+            while (rs.next()) {
+                returnStringBuilder.append("<row>");
+                for (int i = 1; i <= columnCount; i++) {
+                    String columnName = rs.getMetaData().getColumnName(i);
+                    String columnValue = rs.getString(columnName);
+                    String xmlEscapedValue = StringEscapeUtils.escapeXml(columnValue);
+                    returnStringBuilder.append("<" + columnName.toLowerCase() + ">" + xmlEscapedValue +
+                                               "</" + columnName.toLowerCase() + ">");
                 }
                 returnStringBuilder.append("</row>");
             }
