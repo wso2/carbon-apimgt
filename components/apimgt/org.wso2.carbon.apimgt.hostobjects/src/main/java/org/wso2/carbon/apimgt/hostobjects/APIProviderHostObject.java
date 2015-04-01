@@ -4883,4 +4883,24 @@ public class APIProviderHostObject extends ScriptableObject {
         }
         return myn;
     }
+
+    public static String userAgentParser(String userAgent){
+        String userBrowser;
+        if(userAgent.contains("Chrome")){
+            userBrowser = "Chrome";
+        }
+        else if(userAgent.contains("Firefox")){
+            userBrowser = "Firefox";
+        }
+        else if(userAgent.contains("Opera")){
+            userBrowser = "Opera";
+        }
+        else if(userAgent.contains("MSIE")){
+            userBrowser = "Internet Explorer";
+        }
+        else{
+            userBrowser = "Other";
+        }
+        return userBrowser;
+    }
 }
