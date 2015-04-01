@@ -35,6 +35,14 @@ public abstract class AbstractKeyValidationHandler implements KeyValidationHandl
 
         APIKeyValidationInfoDTO dto = validationContext.getValidationInfoDTO();
 
+        if (validationContext.getTokenInfo() != null) {
+            if (validationContext.getTokenInfo().isApplicationToken()) {
+                dto.setUserType(APIConstants.ACCESS_TOKEN_USER_TYPE_APPLICATION);
+            } else {
+                dto.setUserType("APPLICATION_USER");
+            }
+        }
+
         boolean state = false;
 
         try {
@@ -55,7 +63,7 @@ public abstract class AbstractKeyValidationHandler implements KeyValidationHandl
             }
 
 
-            if (log.isDebugEnabled() && dto != null) {
+            if (log.isDebugEnabled()) {
                 log.debug("After validating subscriptions : " + dto);
             }
 

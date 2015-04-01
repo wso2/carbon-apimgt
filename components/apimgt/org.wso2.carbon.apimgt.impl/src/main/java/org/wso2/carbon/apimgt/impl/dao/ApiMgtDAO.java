@@ -1078,8 +1078,8 @@ public class ApiMgtDAO {
                      "   AM_API API" +
                      " WHERE " +
                      " API.CONTEXT = ? " +
-                     (defaultVersionInvoked ? "" : " AND API.API_VERSION = ? ") +
                      " AND AKM.CONSUMER_KEY = ? " +
+                     (defaultVersionInvoked ? "" : " AND API.API_VERSION = ? ") +
                      "   AND SUB.APPLICATION_ID = APP.APPLICATION_ID" +
                      "   AND APP.SUBSCRIBER_ID = SUBS.SUBSCRIBER_ID" +
                      "   AND API.API_ID = SUB.API_ID" +
@@ -1093,9 +1093,9 @@ public class ApiMgtDAO {
             conn = APIMgtDBUtil.getConnection();
             ps = conn.prepareStatement(sql);
             ps.setString(1, context);
-            ps.setString(2, version);
+            ps.setString(2,consumerKey);
             if(!defaultVersionInvoked){
-                ps.setString(3,consumerKey);
+                ps.setString(3, version);
             }
             rs = ps.executeQuery();
             if(rs.next()){
