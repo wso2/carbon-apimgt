@@ -37,6 +37,10 @@ import org.wso2.carbon.registry.core.RegistryConstants;
 import org.wso2.carbon.registry.api.Resource;
 import org.wso2.carbon.registry.api.RegistryException;
 import org.wso2.carbon.apimgt.impl.dto.Environment;
+import org.wso2.carbon.registry.core.service.RegistryService;
+import org.wso2.carbon.registry.core.session.UserRegistry;
+import org.wso2.carbon.user.api.UserStoreException;
+import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.util.LinkedHashSet;
 import java.util.Map;
@@ -103,6 +107,19 @@ public class APIDefinitionFromSwagger12 extends APIDefinition {
                 resourceConfig.put("basePath", basePath);
                 //String resourceJSON = resourceConfig.toJSONString();
 
+                /*String resourcePath = (String) resourceConfig.get("resourcePath");
+                RegistryService registryService = ServiceReferenceHolder.getInstance().getRegistryService();
+                int tenantId;
+                UserRegistry registry = null;
+                String userName = APIUtil.replaceEmailDomainBack(api.getId().getProviderName());
+                String tenantDomain =  MultitenantUtils.getTenantDomain(userName);
+
+                tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager().getTenantId(tenantDomain);
+                registry = registryService.getGovernanceSystemRegistry(tenantId);
+                saveAPIDefinition(api, resourceConfig.toJSONString(), registry, resourcePath);
+
+                //apiProvider.updateSwagger12Definition(apiId, resourcePath, resourceConfig.toJSONString());
+                */
                 JSONArray resource_configs = (JSONArray) resourceConfig.get("apis");
 
                 //Iterating each Sub resourcePath config
@@ -199,7 +216,6 @@ public class APIDefinitionFromSwagger12 extends APIDefinition {
 
         try {
             String resourcePath = APIUtil.getSwagger12DefinitionFilePath(apiName, apiVersion, apiProviderName);
-            //todo remove APIConstants.API_DOC_1_2_RESOURCE_NAME and add filename
             resourcePath = resourcePath + APIConstants.API_DOC_1_2_RESOURCE_NAME;
             Resource resource = registry.newResource();
 
