@@ -467,7 +467,8 @@ public class APIProviderHostObject extends ScriptableObject {
         api.setLastUpdated(new Date());
 
         if (apiData.get("swagger", apiData) != null) {
-            Set<URITemplate> uriTemplates = parseResourceConfig(apiProvider, apiId, (String) apiData.get("swagger", apiData), api);
+            Set<URITemplate> uriTemplates = parseResourceConfig(apiProvider, apiId, (String) apiData
+                    .get("swagger", apiData), api, true);
             api.setUriTemplates(uriTemplates);
 
             //Uncomment following section to enable swagger 2.0 functionality
@@ -595,7 +596,8 @@ public class APIProviderHostObject extends ScriptableObject {
         	        
         
         if (apiData.get("swagger", apiData) != null) {
-            Set<URITemplate> uriTemplates = parseResourceConfig(apiProvider, apiId, (String) apiData.get("swagger", apiData), api);
+            Set<URITemplate> uriTemplates = parseResourceConfig(apiProvider, apiId, (String) apiData
+                    .get("swagger", apiData), api, false);
             api.setUriTemplates(uriTemplates);
             /*
             //Read URI Templates from swagger resource
@@ -694,7 +696,8 @@ public class APIProviderHostObject extends ScriptableObject {
         }
         
         if (apiData.get("swagger", apiData) != null) {
-            Set<URITemplate> uriTemplates = parseResourceConfig(apiProvider, apiId, (String) apiData.get("swagger", apiData), api);
+            Set<URITemplate> uriTemplates = parseResourceConfig(apiProvider, apiId, (String) apiData
+                    .get("swagger", apiData), api, false);
             api.setUriTemplates(uriTemplates);
             /*
             //Read URI Templates from swagger resource
@@ -904,7 +907,7 @@ public class APIProviderHostObject extends ScriptableObject {
      */
     private static Set<URITemplate> parseResourceConfig(APIProvider apiProvider,
                                                         APIIdentifier apiId,
-                                                        String resourceConfigsJSON, API api)
+                                                        String resourceConfigsJSON, API api, boolean isManagePhase)
             throws APIManagementException {
         JSONParser parser = new JSONParser();
         JSONObject resourceConfigs = null;
@@ -1035,8 +1038,10 @@ public class APIProviderHostObject extends ScriptableObject {
 			                     if (authType.equals("Application User")) {
 			                         authType = "Application_User";
 			                     }
-		                     } else {
+		                     } else if (isManagePhase) {
 		                    	 authType = APIConstants.AUTH_NO_AUTHENTICATION;
+		                     } else { //saving new resources in design/implement phase
+		                         authType = APIConstants.AUTH_APPLICATION_OR_USER_LEVEL_TOKEN;
 		                     }
 		                     template.setThrottlingTier((String) operation.get("throttling_tier"));
 		                     template.setMediationScript((String) operation.get("mediation_script"));
