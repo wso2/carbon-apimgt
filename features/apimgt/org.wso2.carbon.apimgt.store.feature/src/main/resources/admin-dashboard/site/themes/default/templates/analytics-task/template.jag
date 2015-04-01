@@ -11,7 +11,7 @@ var datasourceData = outputs.datasourceData;
         <div class="content-data">
         <div class="control-group" >
             <div class="wr-guide-text">
-                <p>API usage tracker configuration used to publish event statistics data.
+                <p>Enable API usage publishing and Statistics aggregation
                 </p>
             </div>
 
@@ -28,7 +28,7 @@ var datasourceData = outputs.datasourceData;
             <table class="analytics_table" width="100%">
             <tr>
                 <td colspan="4">
-                    <legend>Event Receiver</legend>
+                    <legend>Event Receiver Configurations</legend>
                 </td>
             </tr>
             <tr>
@@ -88,7 +88,7 @@ var datasourceData = outputs.datasourceData;
             </tr>
             <tr>
                 <td colspan="4">
-                    <legend>Data Analyser</legend>
+                    <legend>Data Analyser Configurations</legend>
                 </td>
             </tr>
             <tr>
@@ -109,7 +109,7 @@ var datasourceData = outputs.datasourceData;
                         <div class="controls">
                             <input type="text" class="input-xlarge validInput noSpace notEmpty" id="eventAnalyserURL" name="eventAnalyserURL" autofocus="autofocus" value=""/>
                             <a class="icon-question-sign help_popup" help_data="eventAnalyserURLHelp"></a>
-                            <p id="eventAnalyserURLHelp" class="hide">Event Analyser URL</p>
+                            <p id="eventAnalyserURLHelp" class="hide">Event Analyser URL. Please make sure the Analyzer node is running on the given URL</p>
                         </div>
                     </div>
                 </td>
