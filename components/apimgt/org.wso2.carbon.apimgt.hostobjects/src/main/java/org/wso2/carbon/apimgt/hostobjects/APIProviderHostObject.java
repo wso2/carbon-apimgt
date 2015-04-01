@@ -431,7 +431,9 @@ public class APIProviderHostObject extends ScriptableObject {
 		if (!"none".equals(outSequence)) {
 			api.setOutSequence(outSequence);
 		}
-		if (!"none".equals(faultSequence)) {
+		
+		List<String> sequenceList = apiProvider.getCustomFaultSequences();
+		if (!"none".equals(faultSequence) && sequenceList.contains(faultSequence)) {
 			api.setFaultSequence(faultSequence);
 		}
 	
@@ -1326,7 +1328,9 @@ public class APIProviderHostObject extends ScriptableObject {
         if(!"none".equals(outSequence)){
             api.setOutSequence(outSequence);
         }
-        if(!"none".equals(faultSequence)){
+        
+        List<String> sequenceList = apiProvider.getCustomFaultSequences();
+        if(!"none".equals(faultSequence) && sequenceList.contains(faultSequence)) {
             api.setFaultSequence(faultSequence);
         }
 
@@ -1724,7 +1728,9 @@ public class APIProviderHostObject extends ScriptableObject {
         if(!"none".equals(outSequence)){
             api.setOutSequence(outSequence);
         }
-        if(!"none".equals(faultSequence)){
+        
+        List<String> sequenceList = apiProvider.getCustomFaultSequences();
+        if(!"none".equals(faultSequence) && sequenceList.contains(faultSequence)) {
             api.setFaultSequence(faultSequence);
         }
         api.setOldInSequence(oldApi.getInSequence());
