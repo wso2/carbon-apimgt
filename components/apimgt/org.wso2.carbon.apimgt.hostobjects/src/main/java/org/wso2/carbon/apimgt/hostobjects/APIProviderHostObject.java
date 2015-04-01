@@ -3170,6 +3170,9 @@ public class APIProviderHostObject extends ScriptableObject {
             handleException("Invalid input parameters.");
         }
         NativeArray myn = new NativeArray(0);
+        if (!HostObjectUtils.isStatPublishingEnabled()) {
+            return myn;
+        }
         if (!HostObjectUtils.isUsageDataSourceSpecified()) {
             return myn;
         }
@@ -3204,8 +3207,11 @@ public class APIProviderHostObject extends ScriptableObject {
                                                              Object[] args, Function funObj)
             throws APIManagementException {
 
+        NativeArray myn = new NativeArray(0);
+        if (!HostObjectUtils.isStatPublishingEnabled()) {
+            return myn;
+        }
         if (!HostObjectUtils.isUsageDataSourceSpecified()) {
-            NativeArray myn = new NativeArray(0);
             return myn;
         }
 
@@ -3222,7 +3228,6 @@ public class APIProviderHostObject extends ScriptableObject {
         } catch (APIMgtUsageQueryServiceClientException e) {
             handleException("Error while invoking APIUsageStatisticsClient for ProviderAPIUsage", e);
         }
-        NativeArray myn = new NativeArray(0);
         Iterator it = null;
         if (list != null) {
             it = list.iterator();
@@ -3238,6 +3243,7 @@ public class APIProviderHostObject extends ScriptableObject {
                 myn.put(i, myn, row);
                 i++;
 
+
             }
         }
         return myn;
@@ -3251,6 +3257,9 @@ public class APIProviderHostObject extends ScriptableObject {
             handleException("Invalid number of parameters.");
         }
         NativeArray myn = new NativeArray(0);
+        if (!HostObjectUtils.isStatPublishingEnabled()) {
+            return myn;
+        }
         if (!HostObjectUtils.isUsageDataSourceSpecified()) {
             return myn;
         }
@@ -3286,6 +3295,9 @@ public class APIProviderHostObject extends ScriptableObject {
             throws APIManagementException {
         List<APIResourcePathUsageDTO> list = null;
         NativeArray myn = new NativeArray(0);
+        if (!HostObjectUtils.isStatPublishingEnabled()) {
+            return myn;
+        }
         if (!HostObjectUtils.isUsageDataSourceSpecified()) {
             return myn;
         }
@@ -3332,6 +3344,9 @@ public class APIProviderHostObject extends ScriptableObject {
     		            Object[] args, Function funObj) throws APIManagementException {
     	List<APIDestinationUsageDTO> list = null;
     	NativeArray myn = new NativeArray(0);
+        if (!HostObjectUtils.isStatPublishingEnabled()) {
+            return myn;
+        }
     	if (!HostObjectUtils.isUsageDataSourceSpecified()) {
     		return myn;
     	}
@@ -3378,6 +3393,9 @@ public class APIProviderHostObject extends ScriptableObject {
             throws APIManagementException {
         List<APIUsageByUserDTO> list = null;
         NativeArray myn = new NativeArray(0);
+        if (!HostObjectUtils.isStatPublishingEnabled()) {
+            return myn;
+        }
         if(!HostObjectUtils.isUsageDataSourceSpecified()){
             return myn;
         }
@@ -3428,6 +3446,9 @@ public class APIProviderHostObject extends ScriptableObject {
             handleException("Invalid number of parameters.");
         }
         NativeArray myn = new NativeArray(0);
+        if (!HostObjectUtils.isStatPublishingEnabled()) {
+            return myn;
+        }
         if (!HostObjectUtils.isUsageDataSourceSpecified()) {
             return myn;
         }
@@ -3469,6 +3490,9 @@ public class APIProviderHostObject extends ScriptableObject {
             handleException("Invalid number of parameters.");
         }
         NativeArray myn = new NativeArray(0);
+        if (!HostObjectUtils.isStatPublishingEnabled()) {
+            return myn;
+        }
         if (!HostObjectUtils.isUsageDataSourceSpecified()) {
             return myn;
         }
@@ -3512,6 +3536,9 @@ public class APIProviderHostObject extends ScriptableObject {
             handleException("Invalid number of parameters.");
         }
         NativeArray myn = new NativeArray(0);
+        if (!HostObjectUtils.isStatPublishingEnabled()) {
+            return myn;
+        }
         if (!HostObjectUtils.isUsageDataSourceSpecified()) {
             return myn;
         }
@@ -4141,6 +4168,9 @@ public class APIProviderHostObject extends ScriptableObject {
             throws APIManagementException {
         List<APIResponseFaultCountDTO> list = null;
         NativeArray myn = new NativeArray(0);
+        if (!HostObjectUtils.isStatPublishingEnabled()) {
+            return myn;
+        }
         if (!HostObjectUtils.isUsageDataSourceSpecified()) {
             return myn;
         }
@@ -4186,6 +4216,9 @@ public class APIProviderHostObject extends ScriptableObject {
             throws APIManagementException {
         List<APIResponseFaultCountDTO> list = null;
         NativeArray myn = new NativeArray(0);
+        if (!HostObjectUtils.isStatPublishingEnabled()) {
+            return myn;
+        }
         if (!HostObjectUtils.isUsageDataSourceSpecified()) {
             return myn;
         }
@@ -4227,8 +4260,11 @@ public class APIProviderHostObject extends ScriptableObject {
                                                             Object[] args, Function funObj)
             throws APIManagementException {
 
+        NativeArray myn = new NativeArray(0);
+        if (!HostObjectUtils.isStatPublishingEnabled()) {
+            return myn;
+        }
         if(!HostObjectUtils.isUsageDataSourceSpecified()){
-            NativeArray myn = new NativeArray(0);
             return myn;
         }
 
@@ -4243,7 +4279,6 @@ public class APIProviderHostObject extends ScriptableObject {
         } catch (APIMgtUsageQueryServiceClientException e) {
             log.error("Error while invoking APIUsageStatisticsClient for ProviderAPIUsage", e);
         }
-        NativeArray myn = new NativeArray(0);
         NativeObject row = new NativeObject();
 
         if (!list.isEmpty()) {
@@ -4764,4 +4799,34 @@ public class APIProviderHostObject extends ScriptableObject {
         }
         return myn;
     }
+
+    /**
+     * @param failedGateways map of failed environments
+     * @return json string of input map
+     */
+    private static String createFailedGatewaysAsJsonString(Map<String, List<String>> failedGateways) {
+        String failedJson = "{\"PUBLISHED\" : \"\" ,\"UNPUBLISHED\":\"\"}";
+        if (failedGateways != null) {
+            if (!failedGateways.isEmpty()) {
+                StringBuilder failedToPublish = new StringBuilder();
+                StringBuilder failedToUnPublish = new StringBuilder();
+                for (String environmentName : failedGateways.get("PUBLISHED")) {
+                    failedToPublish.append(environmentName + ",");
+                }
+                for (String environmentName : failedGateways.get("UNPUBLISHED")) {
+                    failedToUnPublish.append(environmentName + ",");
+                }
+                if (!"".equals(failedToPublish.toString())) {
+                    failedToPublish.deleteCharAt(failedToPublish.length() - 1);
+                }
+                if (!"".equals(failedToUnPublish.toString())) {
+                    failedToUnPublish.deleteCharAt(failedToUnPublish.length() - 1);
+                }
+                failedJson = "{\"PUBLISHED\" : \"" + failedToPublish.toString() + "\" ,\"UNPUBLISHED\":\"" +
+                             failedToUnPublish.toString() + "\"}";
+            }
+        }
+        return failedJson;
+    }
+
 }

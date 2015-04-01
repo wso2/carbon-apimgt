@@ -18,9 +18,7 @@
 
 package org.wso2.carbon.apimgt.usage.publisher.dto;
 
-import org.wso2.carbon.apimgt.usage.publisher.APIMgtUsagePublisherConstants;
-import org.wso2.carbon.apimgt.usage.publisher.internal.UsageComponent;
-import org.wso2.carbon.apimgt.usage.publisher.service.APIMGTConfigReaderService;
+import org.wso2.carbon.apimgt.usage.publisher.DataPublisherUtil;
 
 public class DataBridgeThrottlePublisherDTO extends ThrottlePublisherDTO {
 
@@ -40,14 +38,13 @@ public class DataBridgeThrottlePublisherDTO extends ThrottlePublisherDTO {
     }
 
     public static String getStreamDefinition() {
-        APIMGTConfigReaderService apimgtConfigReaderService =
-                UsageComponent.getApiMgtConfigReaderService();
+
         return "{" +
                "  'name':'" +
-               apimgtConfigReaderService.getThrottleStreamName() +
+                DataPublisherUtil.getApiManagerAnalyticsConfiguration().getThrottleStreamName() +
                "'," +
                "  'version':'" +
-               apimgtConfigReaderService.getThrottleStreamVersion() +
+                DataPublisherUtil.getApiManagerAnalyticsConfiguration().getThrottleStreamVersion() +
                "'," +
                "  'nickName': 'API Manager Throttle Data'," +
                "  'description': 'Throttle Data'," +

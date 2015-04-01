@@ -22,7 +22,9 @@ import org.apache.synapse.mediators.AbstractMediator;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityUtils;
 import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationContext;
 import org.wso2.carbon.apimgt.usage.publisher.dto.ThrottlePublisherDTO;
-import org.wso2.carbon.apimgt.usage.publisher.internal.UsageComponent;
+import org.wso2.carbon.apimgt.usage.publisher.internal.ServiceReferenceHolder;
+import org.wso2.carbon.base.MultitenantConstants;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 /*
@@ -30,22 +32,36 @@ import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 */
 public class APIMgtThrottleUsageHandler extends AbstractMediator {
 
-    private boolean enabled = UsageComponent.getApiMgtConfigReaderService().isEnabled();
+    private boolean enabled;
+
+    private boolean skipEventReceiverConnection;
 
     private volatile APIMgtUsageDataPublisher publisher;
 
     public APIMgtThrottleUsageHandler() {
+        if (ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService() != null) {
+            this.initializeDataPublisher();
+        }
+    }
 
-        if (!enabled) {
+    private void initializeDataPublisher() {
+
+        enabled = DataPublisherUtil.getApiManagerAnalyticsConfiguration().isAnalyticsEnabled();
+        skipEventReceiverConnection = DataPublisherUtil.getApiManagerAnalyticsConfiguration().
+                isSkipEventReceiverConnection();
+        if (!enabled || skipEventReceiverConnection) {
             return;
         }
-
         if (publisher == null) {
             synchronized (this) {
                 if (publisher == null) {
-                    String publisherClass = UsageComponent.getApiMgtConfigReaderService().getPublisherClass();
+                    String publisherClass = DataPublisherUtil.getApiManagerAnalyticsConfiguration()
+                            .getPublisherClass();
                     try {
                         log.debug("Instantiating Data Publisher");
+                        PrivilegedCarbonContext.startTenantFlow();
+                        PrivilegedCarbonContext.getThreadLocalCarbonContext().
+                                setTenantDomain(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME, true);
                         publisher = (APIMgtUsageDataPublisher) Class.forName(publisherClass).
                                 newInstance();
                         publisher.init();
@@ -55,6 +71,8 @@ public class APIMgtThrottleUsageHandler extends AbstractMediator {
                         log.error("Error instantiating " + publisherClass);
                     } catch (IllegalAccessException e) {
                         log.error("Illegal access to " + publisherClass);
+                    } finally {
+                        PrivilegedCarbonContext.endTenantFlow();
                     }
                 }
             }
@@ -63,8 +81,12 @@ public class APIMgtThrottleUsageHandler extends AbstractMediator {
 
     public boolean mediate(MessageContext messageContext) {
 
+        if (publisher == null) {
+            this.initializeDataPublisher();
+        }
+
         try {
-            if (!enabled) {
+            if (!enabled || skipEventReceiverConnection) {
                 return true;
             }
             // gets the access token and username
