@@ -1966,6 +1966,55 @@ public class APIUsageStatisticsClient {
         return usageData;
     }
 
+    private Collection<APIUserAgent> getUserAgent(OMElement data) {
+        List<APIUserAgent> userAgentData = new ArrayList<APIUserAgent>();
+        OMElement rowsElement = data.getFirstChildWithName(new QName(
+                APIUsageStatisticsClientConstants.ROWS));
+        Iterator rowIterator = rowsElement.getChildrenWithName(new QName(
+                APIUsageStatisticsClientConstants.ROW));
+        if (rowIterator != null) {
+            while (rowIterator.hasNext()) {
+                OMElement rowElement = (OMElement) rowIterator.next();
+                userAgentData.add(new APIUserAgent(rowElement));
+            }
+        }
+        return userAgentData;
+    }
+
+    private Collection<APIRequestsByHour> getAPIRequestsByHour(OMElement data) {
+        List<APIRequestsByHour> apiRequestsByHours = new ArrayList<APIRequestsByHour>();
+        OMElement rowsElement = data.getFirstChildWithName(new QName(
+                APIUsageStatisticsClientConstants.ROWS));
+        Iterator rowIterator = rowsElement.getChildrenWithName(new QName(
+                APIUsageStatisticsClientConstants.ROW));
+        if (rowIterator != null) {
+            while (rowIterator.hasNext()) {
+                OMElement rowElement = (OMElement) rowIterator.next();
+                if(!rowElement.getFirstChildWithName(new QName("tier")).getText().equalsIgnoreCase("Unauthenticated")){
+                    apiRequestsByHours.add(new APIRequestsByHour(rowElement));
+                }
+
+            }
+        }
+        return apiRequestsByHours;
+    }
+
+    private Collection<String> getAPIsFromAPIRequestByHour(OMElement data) {
+        List<String> apisList = new ArrayList<String>();
+        OMElement rowsElement = data.getFirstChildWithName(new QName(
+                APIUsageStatisticsClientConstants.ROWS));
+        Iterator rowIterator = rowsElement.getChildrenWithName(new QName(
+                APIUsageStatisticsClientConstants.ROW));
+        if (rowIterator != null) {
+            while (rowIterator.hasNext()) {
+                OMElement rowElement = (OMElement) rowIterator.next();
+                apisList.add(new String(rowElement.getFirstChildWithName(new QName("api")).getText()));
+
+            }
+        }
+        return apisList;
+    }
+
     private Collection<APIVersionUsageByUser> getUsageAPIBySubscriber(OMElement data) {
         List<APIVersionUsageByUser> usageData = new ArrayList<APIVersionUsageByUser>();
         OMElement rowsElement = data.getFirstChildWithName(new QName(
