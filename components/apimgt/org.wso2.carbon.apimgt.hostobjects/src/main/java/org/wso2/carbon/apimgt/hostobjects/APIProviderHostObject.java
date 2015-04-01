@@ -50,6 +50,7 @@ import org.wso2.carbon.apimgt.api.model.*;
 import org.wso2.carbon.apimgt.hostobjects.internal.HostObjectComponent;
 import org.wso2.carbon.apimgt.hostobjects.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.*;
+import org.wso2.carbon.apimgt.impl.definitions.*;
 import org.wso2.carbon.apimgt.impl.dto.Environment;
 import org.wso2.carbon.apimgt.impl.dto.TierPermissionDTO;
 import org.wso2.carbon.apimgt.impl.utils.APIAuthenticationAdminClient;
@@ -66,6 +67,9 @@ import org.wso2.carbon.base.ServerConfiguration;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.core.util.PermissionUpdateUtil;
 import org.wso2.carbon.registry.core.RegistryConstants;
+import org.wso2.carbon.registry.core.exceptions.RegistryException;
+import org.wso2.carbon.registry.core.service.RegistryService;
+import org.wso2.carbon.registry.core.session.UserRegistry;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.user.mgt.stub.UserAdminStub;
 import org.wso2.carbon.utils.CarbonUtils;
@@ -101,8 +105,9 @@ public class APIProviderHostObject extends ScriptableObject {
         return "APIProvider";
     }
 
-    //
-    static APIDefinitionFromSwagger12 definitionFromSwagger = new APIDefinitionFromSwagger12();
+    // API definitions from swagger v1.2 and v2.0
+    static APIDefinitionFromSwagger12 definitionFromSwagger12 = new APIDefinitionFromSwagger12();
+    static APIDefinitionFromSwagger20 definitionFromSwagger20 = new APIDefinitionFromSwagger20();
 
     // The zero-argument constructor used for create instances for runtime
     public APIProviderHostObject() throws APIManagementException {
@@ -401,8 +406,9 @@ public class APIProviderHostObject extends ScriptableObject {
         APIProvider apiProvider = getAPIProvider(thisObj);
         API api = null;
         boolean isTenantFlowStarted = false;
+        String tenantDomain = null;
         try {
-            String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(provider));
+            tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(provider));
             if(tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
             	isTenantFlowStarted = true;
                 PrivilegedCarbonContext.startTenantFlow();
@@ -461,10 +467,33 @@ public class APIProviderHostObject extends ScriptableObject {
         api.setLastUpdated(new Date());
 
         if (apiData.get("swagger", apiData) != null) {
-            //Set<URITemplate> uriTemplates = parseResourceConfig(apiProvider, apiId, (String) apiData.get("swagger", apiData), api);
-            //Read URI Templates from swagger resource
-            Set<URITemplate> uriTemplates = definitionFromSwagger.getURITemplatesFromDefinition(apiId, (String) apiData.get("swagger", apiData), api, apiProvider);
+            Set<URITemplate> uriTemplates = parseResourceConfig(apiProvider, apiId, (String) apiData.get("swagger", apiData), api);
             api.setUriTemplates(uriTemplates);
+
+            //Uncomment following section to enable swagger 2.0 functionality
+            /*
+            //Read URI Templates from swagger resource
+            Set<URITemplate> uriTemplates = definitionFromSwagger12.getURITemplates(api, (String) apiData.get("swagger", apiData));
+            api.setUriTemplates(uriTemplates);
+
+            //Get user registry to save api definition
+            RegistryService registryService = ServiceReferenceHolder.getInstance().getRegistryService();
+            int tenantId;
+            UserRegistry registry;
+            try {
+                tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager().getTenantId(tenantDomain);
+                registry = registryService.getGovernanceSystemRegistry(tenantId);
+
+                //Save API definition in the registry
+                definitionFromSwagger12.saveAPIDefinition(api, (String) apiData.get("swagger", apiData), registry);
+            } catch (RegistryException e) {
+                handleException("Error when create registry instance ", e);
+            } catch (UserStoreException e) {
+                handleException("Error while reading tenant information ", e);
+            } catch (ParseException e) {
+                handleException("Error while saving api definition in the registry ", e);
+            }
+            */
         }
 
         // removing scopes from cache
@@ -566,10 +595,13 @@ public class APIProviderHostObject extends ScriptableObject {
         	        
         
         if (apiData.get("swagger", apiData) != null) {
-            //Set<URITemplate> uriTemplates = parseResourceConfig(apiProvider, apiId, (String) apiData.get("swagger", apiData), api);
-            //Read URI Templates from swagger resource
-            Set<URITemplate> uriTemplates = definitionFromSwagger.getURITemplatesFromDefinition(apiId, (String) apiData.get("swagger", apiData), api, apiProvider);
+            Set<URITemplate> uriTemplates = parseResourceConfig(apiProvider, apiId, (String) apiData.get("swagger", apiData), api);
             api.setUriTemplates(uriTemplates);
+            /*
+            //Read URI Templates from swagger resource
+            Set<URITemplate> uriTemplates = definitionFromSwagger12.getURITemplates(api, (String) apiData.get("swagger", apiData));
+            api.setUriTemplates(uriTemplates);
+            */
         }
                 
         return saveAPI(apiProvider, api, null, false);
@@ -662,10 +694,13 @@ public class APIProviderHostObject extends ScriptableObject {
         }
         
         if (apiData.get("swagger", apiData) != null) {
-            //Set<URITemplate> uriTemplates = parseResourceConfig(apiProvider, apiId, (String) apiData.get("swagger", apiData), api);
-            //Read URI Templates from swagger resource
-            Set<URITemplate> uriTemplates = definitionFromSwagger.getURITemplatesFromDefinition(apiId, (String) apiData.get("swagger", apiData), api, apiProvider);
+            Set<URITemplate> uriTemplates = parseResourceConfig(apiProvider, apiId, (String) apiData.get("swagger", apiData), api);
             api.setUriTemplates(uriTemplates);
+            /*
+            //Read URI Templates from swagger resource
+            Set<URITemplate> uriTemplates = definitionFromSwagger12.getURITemplates(api, (String) apiData.get("swagger", apiData));
+            api.setUriTemplates(uriTemplates);
+            */
         }
                 
         api.setDescription(StringEscapeUtils.escapeHtml(description));
