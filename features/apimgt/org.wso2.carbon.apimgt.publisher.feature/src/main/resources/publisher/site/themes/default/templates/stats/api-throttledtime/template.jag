@@ -1,0 +1,72 @@
+<% jagg.template("stats/api-throttledtime", function(inputs, outputs, jagg) { %>
+<link type="text/css" rel="stylesheet" href="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("templates/utils/dojo-release-1.8.3/dijit/themes/claro/claro.css"))%>"  media="screen"/>
+
+<script type="text/javascript" src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("templates/utils/barchart/d3.min.js"))%>"></script>
+<script type="text/javascript" src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("templates/utils/barchart/vega.js"))%>"></script>
+<script type="text/javascript" src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("templates/utils/barchart/igviz.js"))%>"></script>
+<link type="text/css" rel="stylesheet" href="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("templates/utils/barchart/igviz.css"))%>"/>
+
+<!--datepicker-->
+<script type="text/javascript" src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("templates/utils/datepicker/js/moment.js"))%>"></script>
+<script type="text/javascript" src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("templates/utils/datepicker/js/jquery.daterangepicker.js"))%>"></script>
+<script type="text/javascript" src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("templates/utils/dojo-release-1.8.3/dojo/dojo.js"))%>"></script>
+<script type="text/javascript" src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("templates/stats/api-throttledtime/js/stats.js"))%>"></script>
+<link type="text/css" rel="stylesheet" href="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("templates/utils/datepicker/css/daterangepicker.css"))%>"/>
+
+<link type="text/css" rel="stylesheet" href="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("templates/utils/nvd3/css/nv.d3.css"))%>"/>
+  <!--[if lt IE 9]><script language="javascript" type="text/javascript" src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("templates/utils/jqplot/excanvas.min.js"))%>" ></script><![endif]-->
+<%
+var mod = jagg.module("api");
+var result = mod.getTiers();
+%>
+<script>
+var res = <%=result%>;
+</script>
+<div class="title-section"> <h2>API Requests Count With Throttling Tiers</h2></div>
+
+<div class="content-section shadow-up">
+<div class="content-data">
+    <div id="rangeSliderWrapper" class="well">
+        <div class="row-fluid">
+        <div class="span12">
+            <div id="dateRangePickerContainer">
+                <div class="btn-group" role="group">
+                    <button id="hour-btn" type="button" class="btn btn-default date-range">Hour</button>
+                    <button id="today-btn" type="button" class="btn btn-default date-range">Day
+                    </button>
+                    <button id="week-btn" type="button" class="btn btn-default date-range">Week</button>
+                    <button id="month-btn" type="button" class="btn btn-default date-range active">
+                        Month
+                    </button>
+                    <button id="date-range" type="button" class="btn btn-default date-range last-child"
+                            data-toggle="popup" title="Click to set custom date range">.
+                    </button>
+                </div>
+                <span class="add-on-cal"><i style="margin-right:0px;" class="icon-calendar"></i></span>
+            </div>
+        </div>
+        </div>
+    </div>
+    
+    <div class="well">
+    <div class="row-fluid">
+    <div class="span11">
+    <div id="chartContainer"  style="margin-bottom :20px;height: 100%"></div>
+        <div id="tableContainer"></div>
+    </div>
+    </div>
+    </div>
+    <div class="well" id="bar"></div>
+</div>
+        
+
+</div>
+</div>
+
+
+
+
+
+<% }); %>
+
+
