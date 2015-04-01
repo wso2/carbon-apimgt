@@ -77,6 +77,7 @@ public final class APIConstants {
     public static final String API_DOC_LOCATION = API_APPLICATION_DATA_LOCATION + "/api-docs";
     
     public static final String API_DOC_1_2_LOCATION = "1.2";
+    public static final String API_DOC_2_0_LOCATION = "2.0";
     
     //registry location for Custom sequences
     public static final String API_CUSTOM_SEQUENCE_LOCATION = APIMGT_REGISTRY_LOCATION+"/customsequences";
@@ -100,6 +101,7 @@ public final class APIConstants {
     public static final String API_DOC_RESOURCE_NAME = "api-doc.json";
     
     public static final String API_DOC_1_2_RESOURCE_NAME = "/api-doc";
+    public static final String API_DOC_2_0_RESOURCE_NAME = "/api-doc";
     
     public static final String API_DEFINITION_DOC_NAME = "Swagger API Definition";
 
