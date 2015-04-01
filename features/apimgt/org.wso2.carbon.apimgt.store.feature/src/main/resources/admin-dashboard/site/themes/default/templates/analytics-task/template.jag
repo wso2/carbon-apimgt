@@ -88,7 +88,7 @@ var datasourceData = outputs.datasourceData;
             </tr>
             <tr>
                 <td colspan="4">
-                    <legend>Data Analyser Configurations</legend>
+                    <legend>Data Analyzer Configurations</legend>
                 </td>
             </tr>
             <tr>
