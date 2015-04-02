@@ -40,7 +40,7 @@ import javax.xml.namespace.QName;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import java.util.*;
 import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
-import org.wso2.carbon.identity.oauth2.stub.dto.OAuth2TokenValidationResponseDTO_TokenValidationContextParam;
+// import org.wso2.carbon.identity.oauth2.stub.dto.OAuth2TokenValidationResponseDTO_TokenValidationContextParam;
 
 
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
@@ -202,18 +202,6 @@ public class Utils {
     	return allowedOrigins;
     }
 
-    public static Map<String,String> constructParameterMap(OAuth2TokenValidationResponseDTO_TokenValidationContextParam[] params){
-        Map<String,String> paramMap = null;
-        if(params != null){
-            paramMap = new HashMap<String, String>(params.length);
-            for(OAuth2TokenValidationResponseDTO_TokenValidationContextParam param : params){
-                paramMap.put(param.getKey(),param.getValue());
-            }
-        }
-
-        return paramMap;
-    }
-    
     public static String getAllowedHeaders() {
     	return ServiceReferenceHolder.getInstance().getAPIManagerConfiguration().
     	        getFirstProperty(APIConstants.CORS_CONFIGURATION_ACCESS_CTL_ALLOW_HEADERS);
