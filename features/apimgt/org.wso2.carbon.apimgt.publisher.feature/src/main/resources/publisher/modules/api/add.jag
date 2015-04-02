@@ -9,29 +9,26 @@ var manageAPI = function (api) {
             log.debug("manageAPI : " + api.name + "-" + api.version);
         }
         if(success){
-               var failedToPublishEnvironments = JSON.parse(success).PUBLISHED;
-               var failedToUnPublishEnvironments = JSON.parse(success).UNPUBLISHED;
-               if(failedToPublishEnvironments == "" && failedToUnPublishEnvironments == ""){
                return {
                            error:false
                      };
-               }else{
-                return {
-                           error:true,
-                           message:success + '||warning'
-                       };
-               }
         }else{
         return {
             error:true
         }; }
     } catch (e) {
-        log.error(e);
-        return {
-            error:true,
-            message:e.message.split(":")[1]
-        };
-    }
+     if(e.javaException instanceof org.wso2.carbon.apimgt.api.FaultGatewaysException){
+                     return {
+                                error:true,
+                                message:e.javaException.getFaultGateWayString() + '||warning'
+                            };
+                    }else{
+                                    return {
+                                error:true,
+                                message:e.message.split(":")[1]
+                            };
+                    }
+     }
 };
 
 var checkIfResourceExists = function (api) {

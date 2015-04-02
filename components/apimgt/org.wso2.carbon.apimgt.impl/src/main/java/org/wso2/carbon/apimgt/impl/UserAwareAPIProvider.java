@@ -17,11 +17,9 @@
 package org.wso2.carbon.apimgt.impl;
 
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.FaultGatewaysException;
 import org.wso2.carbon.apimgt.api.model.*;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
-
-import java.util.List;
-import java.util.Map;
 
 /**
  * User aware APIProvider implementation which ensures that the invoking user has the
@@ -56,9 +54,9 @@ public class UserAwareAPIProvider extends APIProviderImpl {
     }
 
     @Override
-    public Map<String, List<String>> updateAPI(API api) throws APIManagementException {
+    public void updateAPI(API api) throws APIManagementException, FaultGatewaysException {
         checkCreatePermission();
-        return super.updateAPI(api);
+        super.updateAPI(api);
     }
 
     @Override
@@ -68,10 +66,10 @@ public class UserAwareAPIProvider extends APIProviderImpl {
     }
 
     @Override
-    public Map<String, List<String>> changeAPIStatus(API api, APIStatus status, String userId,
-                                                     boolean updateGatewayConfig) throws APIManagementException {
+    public void changeAPIStatus(API api, APIStatus status, String userId,
+                                boolean updateGatewayConfig) throws APIManagementException, FaultGatewaysException {
         checkPublishPermission();
-        return super.changeAPIStatus(api, status, userId, updateGatewayConfig);
+        super.changeAPIStatus(api, status, userId, updateGatewayConfig);
     }
 
     @Override

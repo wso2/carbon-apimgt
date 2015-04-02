@@ -1353,7 +1353,9 @@ public class APIStoreHostObject extends ScriptableObject {
 	                        currentApi.put("visibility", currentApi, api.getVisibility());
 	                        currentApi.put("visibleRoles", currentApi, api.getVisibleRoles());
 	                        currentApi.put("description", currentApi, api.getDescription());
-	
+	                        currentApi.put("isAdvertiseOnly", currentApi, api.isAdvertiseOnly());
+	                        currentApi.put("apiOwner", currentApi, api.getApiOwner());
+	                        
 	                        apiArray.put(i, apiArray, currentApi);
 	                        i++;
 	                    }

@@ -36,7 +36,7 @@
         <div class="controls">
             <div class="row-fluid">
                     <div class="span6">
-                        <input type="password" class="input-large password" id="newPassword" name="newPassword" />
+                        <input type="password" class="input-large password validPassword" id="newPassword" name="newPassword" />
 
                         <div class="help-block" id="password-help" style="display:none">
                           <%=i18n.localize("pwHelpMsgLine1")%>

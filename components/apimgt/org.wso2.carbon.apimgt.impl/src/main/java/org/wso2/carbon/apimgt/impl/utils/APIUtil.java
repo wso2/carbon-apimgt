@@ -1413,6 +1413,9 @@ public final class APIUtil {
                     APIStore store=new APIStore();
                     OMElement storeElem = (OMElement)apistoreIterator.next();
                     String type=storeElem.getAttributeValue(new QName(APIConstants.EXTERNAL_API_STORE_TYPE));
+                    String className =
+                            storeElem.getAttributeValue(new QName(APIConstants.EXTERNAL_API_STORE_CLASS_NAME));
+                    store.setPublisher((APIPublisher) Class.forName(className).newInstance());
                     store.setType(type); //Set Store type [eg:wso2]
                     String name=storeElem.getAttributeValue(new QName(APIConstants.EXTERNAL_API_STORE_ID));
                     if (name == null) {
@@ -1462,6 +1465,12 @@ public final class APIUtil {
             String msg = "Malformed XML found in the External Stores Configuration resource";
             log.error(msg, e);
             throw new APIManagementException(msg, e);
+        } catch (ClassNotFoundException e) {
+            log.error("Requested APIPublisher Class couldn't found", e);
+        } catch (InstantiationException e) {
+            log.error("Requested APIPublisher Class couldn't load", e);
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
         }
         return externalAPIStores;
     }

@@ -58,7 +58,7 @@
                         <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
                         <Bundle-Name>${project.artifactId}</Bundle-Name>
                         <Private-Package>
-                            org.wso2.carbon.apimgt.startup.publisher.internal
+                            org.wso2.carbon.apimgt.startup.publisher.internal,
                             org.wso2.carbon.apimgt.impl.dao.*,
                             org.wso2.carbon.apimgt.impl.utils.*,
                         </Private-Package>
