@@ -28,7 +28,10 @@ import org.apache.synapse.mediators.AbstractMediator;
 import org.apache.synapse.rest.RESTConstants;
 import org.apache.synapse.transport.passthru.util.RelayUtils;
 import org.wso2.carbon.apimgt.usage.publisher.dto.ResponsePublisherDTO;
+import org.wso2.carbon.apimgt.usage.publisher.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.usage.publisher.internal.UsageComponent;
+import org.wso2.carbon.base.MultitenantConstants;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import javax.xml.stream.XMLStreamException;
@@ -42,23 +45,36 @@ import java.util.Map;
 
 public class APIMgtResponseHandler extends AbstractMediator {
 
-    private boolean enabled = UsageComponent.getApiMgtConfigReaderService().isEnabled();
+    private boolean enabled;
+
+    private boolean skipEventReceiverConnection;
 
     private volatile APIMgtUsageDataPublisher publisher;
 
     public APIMgtResponseHandler() {
+        if (ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService() != null) {
+            this.initializeDataPublisher();
+        }
+    }
 
-        if (!enabled) {
+    private void initializeDataPublisher() {
+
+        enabled = DataPublisherUtil.getApiManagerAnalyticsConfiguration().isAnalyticsEnabled();
+        skipEventReceiverConnection = DataPublisherUtil.getApiManagerAnalyticsConfiguration().
+                isSkipEventReceiverConnection();
+        if (!enabled || skipEventReceiverConnection) {
             return;
         }
-
         if (publisher == null) {
             synchronized (this) {
                 if (publisher == null) {
-                    String publisherClass = UsageComponent.getApiMgtConfigReaderService().
+                    String publisherClass = DataPublisherUtil.getApiManagerAnalyticsConfiguration().
                             getPublisherClass();
                     try {
                         log.debug("Instantiating Data Publisher");
+                        PrivilegedCarbonContext.startTenantFlow();
+                        PrivilegedCarbonContext.getThreadLocalCarbonContext().
+                                setTenantDomain(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME, true);
                         publisher = (APIMgtUsageDataPublisher) Class.forName(publisherClass).
                                 newInstance();
                         publisher.init();
@@ -68,6 +84,8 @@ public class APIMgtResponseHandler extends AbstractMediator {
                         log.error("Error instantiating " + publisherClass);
                     } catch (IllegalAccessException e) {
                         log.error("Illegal access to " + publisherClass);
+                    } finally {
+                        PrivilegedCarbonContext.endTenantFlow();
                     }
                 }
             }
@@ -76,8 +94,12 @@ public class APIMgtResponseHandler extends AbstractMediator {
 
     public boolean mediate(MessageContext mc) {
 
+        if (publisher == null) {
+            this.initializeDataPublisher();
+        }
+
         try {
-            if (!enabled) {
+            if (!enabled || skipEventReceiverConnection) {
                 return true;
             }
             long responseSize = 0;
@@ -95,7 +117,7 @@ public class APIMgtResponseHandler extends AbstractMediator {
                     APIMgtUsagePublisherConstants.BACKEND_REQUEST_END_TIME)));
             //Check the config property is set to true to build the response message in-order
             //to get the response message size
-            boolean isBuildMsg = UsageComponent.getApiMgtConfigReaderService()
+            boolean isBuildMsg = UsageComponent.getAmConfigService().getAPIAnalyticsConfiguration()
                     .isBuildMsg();
             if (isBuildMsg) {
                 org.apache.axis2.context.MessageContext axis2MC = ((Axis2MessageContext) mc).

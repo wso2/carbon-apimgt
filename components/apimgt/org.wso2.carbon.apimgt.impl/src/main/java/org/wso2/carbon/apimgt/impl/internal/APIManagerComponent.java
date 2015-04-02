@@ -37,10 +37,9 @@ import org.wso2.carbon.apimgt.impl.observers.TenantServiceCreator;
 import org.wso2.carbon.apimgt.impl.utils.APIMgtDBUtil;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.utils.RemoteAuthorizationManager;
-import org.wso2.carbon.apimgt.impl.workflow.events.DataPublisherAlreadyExistsException;
+import org.wso2.carbon.bam.service.data.publisher.services.ServiceDataPublisherAdmin;
 import org.wso2.carbon.base.MultitenantConstants;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
-import org.wso2.carbon.databridge.agent.thrift.lb.LoadBalancingDataPublisher;
 import org.wso2.carbon.governance.api.util.GovernanceConstants;
 import org.wso2.carbon.registry.core.ActionConstants;
 import org.wso2.carbon.registry.core.RegistryConstants;
@@ -72,8 +71,6 @@ import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 
 /**
@@ -99,7 +96,9 @@ import java.util.concurrent.ConcurrentHashMap;
  * @scr.reference name="tenant.indexloader"
  * interface="org.wso2.carbon.registry.indexing.service.TenantIndexingLoader" cardinality="1..1" policy="dynamic"
  * bind="setIndexLoader" unbind="unsetIndexLoader"
-
+ * @scr.reference name="bam.service.data.publisher"
+ * interface="org.wso2.carbon.bam.service.data.publisher.services.ServiceDataPublisherAdmin" cardinality="1..1"
+ * policy="dynamic" bind="setDataPublisherService" unbind="unsetDataPublisherService"
  */
 public class APIManagerComponent {
     //TODO refactor caching implementation
@@ -108,9 +107,10 @@ public class APIManagerComponent {
 
     private ServiceRegistration registration;
 
+    private static ServiceDataPublisherAdmin dataPublisherAdminService;
+
     private static TenantRegistryLoader tenantRegistryLoader;
 
-    private static Map<String, LoadBalancingDataPublisher> dataPublisherMap;
 
     protected void activate(ComponentContext componentContext) throws Exception {
         if (log.isDebugEnabled()) {
@@ -155,6 +155,9 @@ public class APIManagerComponent {
                     APIManagerConfigurationService.class.getName(),
                     configurationService, null);
             APIStatusObserverList.getInstance().init(configuration);
+
+            APIManagerAnalyticsConfiguration analyticsConfiguration = APIManagerAnalyticsConfiguration.getInstance();
+            analyticsConfiguration.setAPIManagerConfiguration(configuration);
 
             AuthorizationUtils.addAuthorizeRoleListener(APIConstants.AM_CREATOR_APIMGT_EXECUTION_ID,
                                                         RegistryUtils.getAbsolutePath(RegistryContext.getBaseInstance(),
@@ -203,19 +206,6 @@ public class APIManagerComponent {
             }
             APIUtil.createSelfSignUpRoles(MultitenantConstants.SUPER_TENANT_ID);
             
-            /* Add Bam Server Profile for collecting southbound statistics*/
-            String enabledStr = configuration.getFirstProperty(APIConstants.API_USAGE_ENABLED);
-            boolean enabled = enabledStr != null && JavaUtils.isTrueExplicitly(enabledStr);
-            if (enabled) {
-            	String bamServerURL = configuration.getFirstProperty(APIConstants.API_USAGE_BAM_SERVER_URL);
-                String bamServerUser = configuration.getFirstProperty(APIConstants.API_USAGE_BAM_SERVER_USER);
-                String bamServerPassword = configuration.getFirstProperty(APIConstants.API_USAGE_BAM_SERVER_PASSWORD);
-                String bamServerThriftPort = configuration.getFirstProperty(APIConstants.API_USAGE_THRIFT_PORT);
-            	APIUtil.addBamServerProfile(bamServerURL, bamServerUser, bamServerPassword, 
-            			bamServerThriftPort, MultitenantConstants.SUPER_TENANT_ID);
-            }
-            dataPublisherMap = new ConcurrentHashMap<String, LoadBalancingDataPublisher>();
-            
         } catch (APIManagementException e) {
             log.error("Error while initializing the API manager component", e);
         }
@@ -240,6 +230,20 @@ public class APIManagerComponent {
 
     protected void unsetRegistryService(RegistryService registryService) {
         ServiceReferenceHolder.getInstance().setRegistryService(null);
+    }
+
+    protected void setDataPublisherService(ServiceDataPublisherAdmin service) {
+        log.debug("Event Data Publisher service bound to the API usage handler");
+        dataPublisherAdminService = service;
+    }
+
+    protected void unsetDataPublisherService(ServiceDataPublisherAdmin service) {
+        log.debug("Event Data Publisher service unbound from the API usage handler");
+        dataPublisherAdminService = null;
+    }
+
+    public static ServiceDataPublisherAdmin getDataPublisherAdminService() {
+        return dataPublisherAdminService;
     }
 
     protected void setIndexLoader(TenantIndexingLoader indexLoader) {
@@ -516,37 +520,5 @@ public class APIManagerComponent {
         return tenantRegistryLoader;
     }
 
-    /**
-     * Fetch the data publisher which has been registered under the tenant domain.
-     *
-     * @param tenantDomain - The tenant domain under which the data publisher is registered
-     * @return - Instance of the LoadBalancingDataPublisher which was registered. Null if not registered.
-     */
-    public static LoadBalancingDataPublisher getDataPublisher(String tenantDomain) {
-        if (dataPublisherMap.containsKey(tenantDomain)) {
-            return dataPublisherMap.get(tenantDomain);
-        }
-        return null;
-    }
-
-    /**
-     * Adds a LoadBalancingDataPublisher to the data publisher map.
-     *
-     * @param tenantDomain  - The tenant domain under which the data publisher will be registered.
-     * @param dataPublisher - Instance of the LoadBalancingDataPublisher
-     * @throws org.wso2.carbon.apimgt.impl.workflow.events.DataPublisherAlreadyExistsException
-     *          - If a data publisher has already been registered under the
-     *          tenant domain
-     */
-    public static void addDataPublisher(String tenantDomain,
-                                        LoadBalancingDataPublisher dataPublisher)
-            throws DataPublisherAlreadyExistsException {
-        if (dataPublisherMap.containsKey(tenantDomain)) {
-            throw new DataPublisherAlreadyExistsException("A DataPublisher has already been created for the tenant " +
-                                                          tenantDomain);
-        }
-
-        dataPublisherMap.put(tenantDomain, dataPublisher);
-    }
 
 }
