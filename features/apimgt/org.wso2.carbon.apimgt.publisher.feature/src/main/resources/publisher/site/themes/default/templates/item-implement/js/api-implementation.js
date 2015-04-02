@@ -21,13 +21,31 @@ $(document).ready(function(){
       e.preventDefault();
     });*/
 
+
+    var thisID='';
+    $('#saveBtn').click(function(e){
+        $(this).siblings('button').button('reset');
+        thisID = $(this).attr('id');
+    });
+
+    $('#prototyped_api').click(function(e){
+        $(this).siblings('button').button('reset');
+        thisID = $(this).attr('id');
+    });
+
+    $('#go_to_manage').click(function(e){
+        $(this).siblings('button').button('reset');
+        thisID = $(this).attr('id');
+    });
+
     var v = $("#implement_form").validate({
         submitHandler: function(form) {        
         var designer = APIDesigner();
         APP.update_ep_config();
         $('#swagger').val(JSON.stringify(designer.api_doc));
-        $('#saveMessage').show();
-        $('#saveButtons').hide();
+
+        $('#'+thisID).button('loading');
+
         $(form).ajaxSubmit({
             success:function(responseText, statusText, xhr, $form) {
              if (!responseText.error) {
@@ -35,9 +53,8 @@ $(document).ready(function(){
                 designer.saved_api = {};
                 designer.saved_api.name = responseText.data.apiName;
                 designer.saved_api.version = responseText.data.version;
-                designer.saved_api.provider = responseText.data.provider;                
-                $('#saveMessage').hide();
-                $('#saveButtons').show();                
+                designer.saved_api.provider = responseText.data.provider;
+                $('#'+thisID).button('reset');
                 $( "body" ).trigger( "api_saved" );                             
              } else {
                  if (responseText.message == "timeout") {
@@ -54,8 +71,7 @@ $(document).ready(function(){
                  } else {
                      jagg.message({content:responseText.message,type:"error"});
                  }
-                 $('#saveMessage').hide();
-                 $('#saveButtons').show();
+                 $('#'+thisID).button('reset');
              }
             }, dataType: 'json'
         });
@@ -64,7 +80,7 @@ $(document).ready(function(){
     
     $("#prototyped_api").click(function(e){
         $("body").on("api_saved", function(e){
-            $("body").unbind("api_saved");    
+            $("body").unbind("api_saved");
                 var designer = APIDesigner();            
                 $.ajax({
                     type: "POST",

@@ -1,4 +1,3 @@
-
 //This is the default place holder
 var api_doc = 
 {
@@ -581,14 +580,28 @@ $(document).ready(function(){
     });
 
     $('#import_swagger').click(function(){
+
+        if($('#swagger_import_url').val().length == 0){
+        }else{
+        $('#import_swagger').button('loading');
+        $('#swagger_help').hide();
         var data = {
             "swagger_url" : $("#swagger_import_url").val() // "http://petstore.swagger.wordnik.com/api/api-docs"
         }
         $.get( jagg.site.context + "/site/blocks/item-design/ajax/import.jag", data , function( data ) {
             var designer = APIDesigner();
             designer.load_api_document(data);
+            $('#swagger_help').hide();
+            $('#import_swagger').button('reset');
             $("#swaggerUpload").modal('hide');
+        }).fail(function(data){
+            $('#swagger_help').show();
+            $('#import_swagger').button('reset');
+            $('#errorMsgClose').on('click', function(e) {
+                $('#swagger_help').hide();
+            });
         });
+        }
     });
 
     $("#resource_url_pattern").live('change',function(){
@@ -598,14 +611,24 @@ $(document).ready(function(){
             $('#inputResource').val(arr[0]);
     });
 
+    var thisID;
+    $('#saveBtn').click(function(e){
+        $(this).siblings('button').button('reset');
+        thisID = $(this).attr('id');
+    });
+
+    $('#go_to_implement').click(function(e){
+        $(this).siblings('button').button('reset');
+        thisID = $(this).attr('id');
+    });
 
     var v = $("#design_form").validate({
         contentType : "application/x-www-form-urlencoded;charset=utf-8",
         dataType: "json",
 	    onkeyup: false,
-        submitHandler: function(form) {            
+        submitHandler: function(form) {
         var designer = APIDesigner();
-        
+
         if(designer.has_resources() == false){
             jagg.message({
                 content:"At least one resource should be specified. Do you want to add a wildcard resource (/*)." ,
@@ -622,12 +645,13 @@ $(document).ready(function(){
         }
 
         $('#swagger').val(JSON.stringify(designer.api_doc));
-        $('#saveMessage').show();
-        $('#saveButtons').hide();
+
+        $('#'+thisID).button('loading');
+
         $(form).ajaxSubmit({
             success:function(responseText, statusText, xhr, $form){
-                $('#saveMessage').hide();
-                $('#saveButtons').show();
+
+                $('#'+thisID).button('reset');
                 if (!responseText.error) {
                     var designer = APIDesigner();
                     designer.saved_api = {};
