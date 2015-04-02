@@ -21,11 +21,15 @@ $(document).ready(function() {
     $.validator.addMethod('validRegistryName', function(value, element) {
         var illegalChars = /([~!@#;%^*+={}\|\\<>\"\'\/,])/;
         return !illegalChars.test(value);
-    }, 'Name contains one or more illegal characters  (~ ! @ #  ; % ^ * + = { } | &lt; &gt;, \' / " \\ ) .');
+    }, 'Input contains one or more illegal characters  (~ ! @ #  ; % ^ * + = { } | &lt; &gt;, \' / " \\ ) .');
 
     $.validator.addMethod('noSpace', function(value, element) {
         return !/\s/g.test(value);
-    },'Name contains white spaces.');
+    },'Input contains white spaces.');
+
+    $.validator.addMethod('notEmpty', function(value, element) {
+        return value !== null && jQuery.trim(value).length > 0;
+    },'Input cannot be empty.');
 
     $.validator.addMethod('validInput', function(value, element) {
         var illegalChars = /([<>\"\'])/;

@@ -18,8 +18,6 @@
 package org.wso2.carbon.apimgt.usage.publisher.dto;
 
 import org.wso2.carbon.apimgt.usage.publisher.DataPublisherUtil;
-import org.wso2.carbon.apimgt.usage.publisher.internal.UsageComponent;
-import org.wso2.carbon.apimgt.usage.publisher.service.APIMGTConfigReaderService;
 
 public class DataBridgeResponsePublisherDTO extends ResponsePublisherDTO {
 
@@ -48,12 +46,11 @@ public class DataBridgeResponsePublisherDTO extends ResponsePublisherDTO {
 
     public static String getStreamDefinition() {
 
-        APIMGTConfigReaderService apimgtConfigReaderService =
-                UsageComponent.getApiMgtConfigReaderService();
-
         return "{" +
-               "  'name':'" + apimgtConfigReaderService.getResponseStreamName() + "'," +
-               "  'version':'" + apimgtConfigReaderService.getResponseStreamVersion() + "'," +
+               "  'name':'" +
+                DataPublisherUtil.getApiManagerAnalyticsConfiguration().getResponseStreamName() + "'," +
+               "  'version':'" +
+                DataPublisherUtil.getApiManagerAnalyticsConfiguration().getResponseStreamVersion() + "'," +
                "  'nickName': 'API Manager Response Data'," +
                "  'description': 'Response Data'," +
                "  'metaData':[" +

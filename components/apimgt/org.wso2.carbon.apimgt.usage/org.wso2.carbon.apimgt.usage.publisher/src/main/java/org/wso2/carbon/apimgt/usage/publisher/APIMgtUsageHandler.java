@@ -45,20 +45,24 @@ public class APIMgtUsageHandler extends AbstractHandler {
 
     private volatile APIMgtUsageDataPublisher publisher;
 
-    private boolean enabled = UsageComponent.getApiMgtConfigReaderService().isEnabled();
-
-    private String publisherClass = UsageComponent.getApiMgtConfigReaderService().getPublisherClass();
-
     public boolean handleRequest(MessageContext mc) {
 
+        boolean enabled = DataPublisherUtil.getApiManagerAnalyticsConfiguration().isAnalyticsEnabled();
+
+        boolean skipEventReceiverConnection = DataPublisherUtil.getApiManagerAnalyticsConfiguration().
+                isSkipEventReceiverConnection();
+
+        String publisherClass = UsageComponent.getAmConfigService().
+                getAPIAnalyticsConfiguration().getPublisherClass();
         try {
             long currentTime = System.currentTimeMillis();
 
-            if (!enabled) {
+            if (!enabled || skipEventReceiverConnection) {
                 return true;
             }
 
             if (publisher == null) {
+                // The publisher initializes in the first request only
                 synchronized (this) {
                     if (publisher == null) {
                         try {
