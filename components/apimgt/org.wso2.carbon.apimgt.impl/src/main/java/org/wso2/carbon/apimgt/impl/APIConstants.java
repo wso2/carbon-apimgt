@@ -118,6 +118,8 @@ public final class APIConstants {
     public static final String DOC_SHARED_VISIBILITY = "PRIVATE";
 
     public static final String ACCESS_TOKEN_STORE_TABLE = "IDN_OAUTH2_ACCESS_TOKEN";
+
+    public static final String CONSUMER_KEY_ACCESS_TOKEN_MAPPING_TABLE = "CONSUMER_KEY_ACCESS_TOKEN_MAPPING";
     
     public static final String EXTERNAL_API_STORES_LOCATION = APIMGT_REGISTRY_LOCATION + "/externalstores/external-api-stores.xml";
     
@@ -315,6 +317,23 @@ public final class APIConstants {
     public static final String API_KEY_MANGER_THRIFT_SERVER_PORT = API_KEY_MANAGER + "ThriftServerPort";
     public static final String API_KEY_MANGER_THRIFT_SERVER_HOST = API_KEY_MANAGER + "ThriftServerHost";
     public static final String API_KEY_MANGER_CONNECTION_TIMEOUT = API_KEY_MANAGER + "ThriftClientConnectionTimeOut";
+
+    // Constants needed for KeyManager section
+    public static final String KEY_MANAGER = "KeyManager";
+    public static final String AUTHSERVER_URL = "AuthorizationServerURL";
+    public static final String TOKEN_URL = "TokenURL";
+    public static final String REVOKE_URL = "RevokeURL";
+
+    public static final String API_KEY_MANGER_APPLICATION_CLASS_NAME = API_KEY_MANAGER + "ApplicationClassName";
+    public static final String API_KEY_MANGER_IMPLEMENTATION_CLASS_NAME = API_KEY_MANAGER + "KeyManagerImplementationClassName";
+    public static final String API_RESOURCE_MANGER_IMPLEMENTATION_CLASS_NAME = API_KEY_MANAGER +
+            "ResourceManagerImplementationClassName";
+    public static final String API_KEY_MANGER_VALIDATIONHANDLER_CLASS_NAME = API_KEY_MANAGER + "KeyValidationHandlerClassName";
+    public static final String API_KEY_MANGER_KEY_VALIDATION_HANDLER_CLASS_NAME = API_KEY_MANAGER + "KeyValidationHandlerClassName";
+    public static final String API_KEY_MANGER_EXT_DAO_CLASS_NAME = API_KEY_MANAGER + "ExtDAOClassName";
+    public static final String API_KEY_MANGER_DCR_END_POINT_URL = API_KEY_MANAGER + "DCREndpointURL";
+
+
     public static final String API_KEY_MANAGER_THRIFT_SERVER_HOST = API_KEY_MANAGER + "ThriftServerHost";
     public static final String API_KEY_VALIDATOR_CLIENT_TYPE = API_KEY_MANAGER + "KeyValidatorClientType";
     public static final String API_KEY_VALIDATOR_WS_CLIENT = "WSClient";
@@ -329,6 +348,7 @@ public final class APIConstants {
     public static final String API_KEY_MANAGER_ENABLE_ACCESS_TOKEN_PARTITIONING = API_KEY_MANAGER + "AccessTokenPartitioning." + "EnableAccessTokenPartitioning";
     public static final String API_KEY_MANAGER_ACCESS_TOKEN_PARTITIONING_DOMAINS = API_KEY_MANAGER + "AccessTokenPartitioning." + "AccessTokenPartitioningDomains";
     public static final String API_KEY_MANAGER_ENCRYPT_TOKENS = API_KEY_MANAGER + "EncryptPersistedTokens";
+    public static final String API_KEY_MANAGER_APPLICATION_TOKEN_SCOPE = API_KEY_MANAGER +"ApplicationTokenScope";
 
     public static final String API_STORE = "APIStore.";
     public static final String SHOW_API_STORE_URL_FROM_PUBLISHER = "APIStore."+"DisplayURL";
@@ -340,6 +360,7 @@ public final class APIConstants {
     public static final String API_STORE_FORCE_CI_COMPARISIONS = API_STORE + "CompareCaseInsensitively";
     public static final String API_STORE_TAG_CACHE_DURATION = API_STORE + "TagCacheDuration";
     public static final String API_STORE_REUSE_APP_NAME = API_STORE + "ReuseAppName";
+    public static final String API_STORE_DISABLE_PERMISSION_CHECK = API_STORE + "DisablePermissionCheck";
 
     public static final String API_PUBLISHER = "APIPublisher.";
     public static final String SHOW_API_PUBLISHER_URL_FROM_STORE = "APIPublisher."+"DisplayURL";
@@ -589,6 +610,20 @@ public final class APIConstants {
         public static final String REGISTRATION_COMPLETED = "COMPLETED";
 
     }
+
+    public interface KeyValidationRequestConstants {
+        String RESOURCE_CONTEXT = "context";
+        String RESOURCE_VERSION = "apiVersion";
+        String RESOURCE_AUTH_LEVEL = "authLevel";
+        String RESOURCE_PATH = "resource";
+        String RESOURCE_VERB = "httpVerb";
+        String KEY_DOMAIN = "clientDomain";
+        String CACHE_KEY = "cacheKey";
+
+        String RESOURCE_PARAMS = "keymgt_resource_params";
+        String VALIDATED_DTO = "validatedDTO";
+        String KM_CACHE_HIT = "km_cacheHit";
+    }
     
     //key  of the endpoint securevault
     public static final String API_SECUREVAULT_ENABLE = "EnableSecureVault";
@@ -614,6 +649,9 @@ public final class APIConstants {
     public static final String CLAIM_URI = "ClaimUri";
 
     public static final String DEFAULT_VERSION_PREFIX = "_default_";
+    public static final String OAUTH_HEADER_SPLITTER = ",";
+    public static final String CONSUMER_KEY_SEGMENT = "Bearer";
+    public static final String CONSUMER_KEY_SEGMENT_DELIMITER = " ";
 
     public static final String HTTP_PROXY_HOST = "http.proxyHost";
     public static final String HTTP_PROXY_PORT = "http.proxyPort";

@@ -47,7 +47,7 @@ public abstract class AbstractAPIGatewayAdminClient {
      * for any subsequent admin service invocations.
      * 
      * @param stub A client stub to be setup
-     * @throws org.apache.axis2.AxisFault if an error occurs when logging into the API gateway
+     * @throws AxisFault if an error occurs when logging into the API gateway
      */
     protected void setup(Stub stub, Environment environment) throws AxisFault {
         String cookie = login(environment);
@@ -64,7 +64,7 @@ public abstract class AbstractAPIGatewayAdminClient {
      * Login to the API gateway as an admin
      * 
      * @return A session cookie string
-     * @throws org.apache.axis2.AxisFault if an error occurs while logging in
+     * @throws AxisFault if an error occurs while logging in
      */
     private String login(Environment environment) throws AxisFault {
         String user = environment.getUserName();

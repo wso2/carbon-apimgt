@@ -42,6 +42,12 @@ public class ScopesIssuer {
 
     private static final String DEFAULT_SCOPE_NAME = "default";
 
+    private List<String> scopeSkipList = new ArrayList<String>();
+
+    public ScopesIssuer(){
+        scopeSkipList.add("am_application_scope");
+    }
+
     public boolean setScopes(OAuthTokenReqMessageContext tokReqMsgCtx){
         String[] requestedScopes = tokReqMsgCtx.getScope();
         String[] defaultScope = new String[]{DEFAULT_SCOPE_NAME};
@@ -148,7 +154,8 @@ public class ScopesIssuer {
                 //The requested scope is defined for the context of the App but no roles have been associated with the scope
                 //OR
                 //The scope string starts with 'device_'.
-                else if(appScopes.containsKey(scope) || scope.startsWith(DEVICE_SCOPE_PREFIX)){
+                else if(appScopes.containsKey(scope) || scope.startsWith(DEVICE_SCOPE_PREFIX) || scopeSkipList
+                        .contains(scope)){
                     authorizedScopes.add(scope);
                 }
             }
@@ -205,6 +212,12 @@ public class ScopesIssuer {
         if(authorizedScopes.isEmpty()){
             authorizedScopes.add(DEFAULT_SCOPE_NAME);
         }
+
+        scopeSkipList.retainAll(requestedScopes);
+        if(!scopeSkipList.isEmpty()){
+            authorizedScopes.addAll(scopeSkipList);
+        }
+
         return authorizedScopes.toArray(new String[authorizedScopes.size()]);
     }
 }

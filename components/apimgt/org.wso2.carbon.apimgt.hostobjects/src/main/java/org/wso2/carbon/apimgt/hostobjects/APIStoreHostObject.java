@@ -28,21 +28,21 @@ import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.jaggeryjs.scriptengine.exceptions.ScriptException;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 import org.mozilla.javascript.*;
 import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.*;
 import org.wso2.carbon.apimgt.hostobjects.internal.HostObjectComponent;
-import org.wso2.carbon.apimgt.impl.APIConstants;
-import org.wso2.carbon.apimgt.impl.APIConstants.ApplicationStatus;
-import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
-import org.wso2.carbon.apimgt.impl.APIManagerFactory;
-import org.wso2.carbon.apimgt.impl.UserAwareAPIConsumer;
+import org.wso2.carbon.apimgt.impl.*;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dto.Environment;
 import org.wso2.carbon.apimgt.impl.dto.UserRegistrationConfigDTO;
 import org.wso2.carbon.apimgt.impl.dto.WorkflowDTO;
 import org.wso2.carbon.apimgt.impl.dto.xsd.APIInfoDTO;
+import org.wso2.carbon.apimgt.impl.workflow.WorkflowStatus;
 import org.wso2.carbon.apimgt.hostobjects.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.utils.SelfSignUpUtil;
@@ -58,6 +58,8 @@ import org.wso2.carbon.base.MultitenantConstants;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.core.util.PermissionUpdateUtil;
 import org.wso2.carbon.identity.base.IdentityConstants;
+import org.wso2.carbon.identity.oauth.config.OAuthServerConfiguration;
+import org.wso2.carbon.apimgt.impl.APIConstants.ApplicationStatus;
 import org.wso2.carbon.identity.oauth.config.OAuthServerConfiguration;
 import org.wso2.carbon.identity.oauth.internal.OAuthComponentServiceHolder;
 import org.wso2.carbon.registry.core.RegistryConstants;
@@ -673,10 +675,19 @@ public class APIStoreHostObject extends ScriptableObject {
         }
     }
 
-    /*
-     * getting key for a subscribed Application - args[] list String subscriberID, String
-	 * application name, String keyType
-	 */
+    /**
+     * This method is responsible to create oAuth Application and Application keys for a given APIM application
+     * @param cx      will be used to store information about the executing of the script.
+     *                This is a object of org.mozilla.javascript.Context package.
+     * @param thisObj Object of Scriptable interface provides for the management of properties and for
+     *                performing conversions.
+     * @param args    this will contain parameter list from jag files.
+     * @param funObj  this object  provides for calling functions and constructors.
+     * @return this will return response of oAuthApplication registration.
+     * @throws ScriptException
+     * @throws APIManagementException
+     * @throws ParseException
+     */
     public static NativeObject jsFunction_getApplicationKey(Context cx, Scriptable thisObj,
                                                             Object[] args, Function funObj)
             throws ScriptException, APIManagementException {
@@ -689,7 +700,7 @@ public class APIStoreHostObject extends ScriptableObject {
             }
             try {
                 String validityPeriod = (String) args[5];
-	            String scopes = (String) args[6];
+	            String scopes = (String) args[7];
 	            String username = String.valueOf(args[0]);
 	            String tenantDomain = MultitenantUtils.getTenantDomain(username);
 	            int tenantId =
@@ -706,6 +717,14 @@ public class APIStoreHostObject extends ScriptableObject {
                         validityPeriod = String.valueOf(defaultValidityPeriod);
                     }
                 }
+
+                String jsonParams = null;
+                if(args.length == 10){
+                    jsonParams = (String) args[9];
+                }else{
+                    jsonParams = null;
+                }
+
 
 	            //checking for authorized scopes
 	            Set<Scope> scopeSet = new LinkedHashSet<Scope>();
@@ -728,9 +747,12 @@ public class APIStoreHostObject extends ScriptableObject {
 		            authScopeString = APIConstants.OAUTH2_DEFAULT_SCOPE;
 	            }
 
-                Map<String, String> keyDetails = getAPIConsumer(thisObj).requestApprovalForApplicationRegistration(
-		                username, (String) args[1], (String) args[2], (String) args[3],
-		                accessAllowDomainsArray, validityPeriod, authScopeString,  Integer.parseInt((String)args[7]));
+                Map<String, Object> keyDetails = getAPIConsumer(thisObj).requestApprovalForApplicationRegistration(
+		                (String) args[0], (String) args[1], (String) args[2], (String) args[3],
+		                accessAllowDomainsArray, validityPeriod, authScopeString, Integer.parseInt((String)args[8]),
+                        jsonParams);
+
+
 
                 NativeObject row = new NativeObject();
                 String authorizedDomains = "";
@@ -744,9 +766,9 @@ public class APIStoreHostObject extends ScriptableObject {
                     }
                 }
 
-                Set<Map.Entry<String, String>> entries = keyDetails.entrySet();
+                Set<Map.Entry<String, Object>> entries = keyDetails.entrySet();
 
-                for (Map.Entry<String, String> entry : entries) {
+                for (Map.Entry<String, Object> entry : entries) {
                     row.put(entry.getKey(), row, entry.getValue());
                 }
 
@@ -766,6 +788,125 @@ public class APIStoreHostObject extends ScriptableObject {
             handleException("Invalid input parameters.");
             return null;
         }
+    }
+
+
+    /**
+     * This method is responsible for update given oAuthApplication.
+     * @param cx      will be used to store information about the executing of the script.
+     *                This is a object of org.mozilla.javascript.Context package.
+     * @param thisObj Object of Scriptable interface provides for the management of
+     *                properties and for performing conversions.
+     * @param args    this will contain parameter list from jag files.
+     * @param funObj  this object  provides for calling functions and constructors.
+     * @return this will return response of oAuthApplication registration.
+     * @throws ScriptException
+     * @throws APIManagementException
+     * @throws ParseException
+     */
+    public static NativeObject jsFunction_updateAuthClient_new(Context cx, Scriptable thisObj,
+                                                           Object[] args, Function funObj)
+            throws ScriptException, APIManagementException, ParseException {
+        if (args != null && args.length != 0) {
+
+
+            NativeObject apiData = (NativeObject) args[0];
+            //this parameter will hold oAuthApplication properties that required to create new oAuthApplication.
+            String jsonString = (String) apiData.get(ApplicationConstants.OAUTH_CLIENT_JSONPARAMSTRING, apiData);
+            //logged in user name.
+            String userName = (String) apiData.get(ApplicationConstants.OAUTH_CLIENT_USERNAME, apiData);
+            //APIM application name.
+            String applicationName = (String) apiData.get(ApplicationConstants.OAUTH_CLIENT_USERNAME);
+            //Key type whether its a sandBox or production oAuth application.
+            String keytype = (String) apiData.get("key_type");
+            //this map will hold response that we are getting from Application registration process.
+            Map<String, Object> keyDetails;
+            //call update application registration process.
+            keyDetails = getAPIConsumer(thisObj).updateAuthClient(userName, applicationName, keytype, jsonString);
+            //set Response.
+            Set<Map.Entry<String, Object>> entries = keyDetails.entrySet();
+            //initiate native object in order to hold response.
+            NativeObject row = new NativeObject();
+            //Read the response and set key/value pair in to Native object.
+            for (Map.Entry<String, Object> entry : entries) {
+                row.put(entry.getKey(), row, entry.getValue());
+            }
+            //return the response native object.
+            return row;
+        } else {
+            handleException("Invalid input parameters given while trying to update auth client");
+            return null;
+        }
+    }
+
+    /**
+     * This method is responsible for deleting oAuthApplication by consumerKey.
+     * @param cx      will be used to store information about the executing of the script.
+     *                This is a object of org.mozilla.javascript.Context package.
+     * @param thisObj Object of Scriptable interface provides for the management of
+     *                properties and for performing conversions.
+     * @param args    this will contain parameter list from jag files.
+     * @param funObj  this object  provides for calling functions and constructors.
+     * @throws ScriptException
+     * @throws APIManagementException
+     * @throws ParseException
+     */
+    public static void jsFunction_deleteAuthApplication(Context cx, Scriptable thisObj,
+                                                        Object[] args, Function funObj)
+            throws ScriptException, APIManagementException, ParseException {
+
+        if (args != null && args.length != 0) {
+            NativeObject argsData = (NativeObject) args[0];
+            //consumer key of oAuthApplication
+            String consumerKey = (String) argsData.get("consumerKey", argsData);
+            //delete oAuthApplication
+            getAPIConsumer(thisObj).deleteAuthApplication(consumerKey);
+        } else {
+            handleException("Invalid input parameters given while trying to delete auth application.");
+        }
+    }
+
+    /**
+     * This method is responsible semi-manual client registration.
+     *
+     * @param cx      will be used to store information about the executing of the script.
+     *                This is a object of org.mozilla.javascript.Context package.
+     * @param thisObj Object of Scriptable interface provides for the management of
+     *                properties and for performing conversions.
+     * @param args    this will contain parameter list from jag files.
+     * @param funObj  this object  provides for calling functions and constructors.
+     * @throws ScriptException
+     * @throws APIManagementException
+     * @throws ParseException
+     */
+    public static void jsFunction_mapExistingOauthClient(Context cx, Scriptable thisObj,
+                                                      Object[] args, Function funObj)
+            throws ScriptException, APIManagementException, ParseException {
+        if (args != null && args.length != 0) {
+
+            try {
+                NativeObject apiData = (NativeObject) args[0];
+
+                //this parameter will hold oAuthApplication properties that required to create new oAuthApplication.
+                String jsonString = (String) apiData.get("jsonParams", apiData);
+                //logged in user name.
+                String userName = (String) apiData.get("username", apiData);
+                //this is consumer key of the oAuthApplication.
+                String clientId = (String) apiData.get("client_id", apiData);
+                //APIM application name.
+                String applicationName = (String) apiData.get("applicationName", apiData);
+                //this map will hold response that we are getting from Application registration process.
+                Map<String, Object> keyDetails;
+                getAPIConsumer(thisObj).saveSemiManualClient(jsonString, userName, clientId, applicationName);
+
+            } catch (Exception e) {
+                handleException("Error while obtaining the application access token for the application" + e
+                        .getMessage(), e);
+            }
+        } else {
+            handleException("Invalid input parameters.");
+        }
+
     }
 
     public static NativeObject jsFunction_login(Context cx, Scriptable thisObj,
@@ -2395,6 +2536,7 @@ public class APIStoreHostObject extends ScriptableObject {
         }
     }
 
+
     /**
      * Returns the Swagger definition
      * @param cx
@@ -2553,12 +2695,17 @@ public class APIStoreHostObject extends ScriptableObject {
 						break;
 					}
 				}
-				scopeBuilder.append(scopeName);
-				scopeBuilder.append(", ");
+
+                if(scopeName != null && !scopeName.isEmpty()) {
+                    scopeBuilder.append(scopeName);
+                    scopeBuilder.append(", ");
+                }
 			}
 		}
 		prodKeyScope = scopeBuilder.toString();
-		prodKeyScope = prodKeyScope.substring(0, prodKeyScope.length() - 2);
+        if(prodKeyScope.length() > 1) {
+            prodKeyScope = prodKeyScope.substring(0, prodKeyScope.length() - 2);
+        }
 		return prodKeyScope;
 	}
 
@@ -2667,23 +2814,37 @@ public class APIStoreHostObject extends ScriptableObject {
                         appObj.put("callbackUrl", appObj, application.getCallbackUrl());
                         APIKey prodKey = getAppKey(application, APIConstants.API_KEY_TYPE_PRODUCTION);
 
-                        boolean prodEnableRegenarateOption = true;
+                        OAuthApplicationInfo prodApp = application.getOAuthApp("PRODUCTION");
+                        JSONParser parser = new JSONParser();
+                        JSONObject jsonObject = null;
+                         
 	                    String prodKeyScope = "";
 	                    if (prodKey != null && prodKey.getTokenScope() != null) {
 		                    //convert scope keys to names
 		                    prodKeyScope = getScopeNamesbyKey(prodKey.getTokenScope(), scopeSet);
 	                    }
 
-                        boolean prodEnableReganarateOption = true;
+                        boolean prodEnableRegenarateOption = true;
+
                         if (prodKey != null && prodKey.getAccessToken() != null) {
+                            String jsonString = prodApp.getJsonString();
+                            jsonObject = (JSONObject) parser.parse(jsonString);
+
+                            String prodConsumerKey = (String) prodApp.getClientId();
+                            String prodConsumerSecret = (String) jsonObject.get(ApplicationConstants.
+                                    OAUTH_CLIENT_SECRET);
                             appObj.put("prodKey", appObj, prodKey.getAccessToken());
-                            appObj.put("prodKeyScope", appObj, prodKeyScope);
-                            appObj.put("prodConsumerKey", appObj, prodKey.getConsumerKey());
-                            appObj.put("prodConsumerSecret", appObj, prodKey.getConsumerSecret());
+
+			                appObj.put("prodKeyScope", appObj, prodKeyScope);
+                            appObj.put("prodConsumerKey", appObj, prodConsumerKey);
+                            appObj.put("prodConsumerSecret", appObj, prodConsumerSecret);
+                            appObj.put("prodJsonString", appObj, jsonString);
+
                             if (prodKey.getValidityPeriod() == Long.MAX_VALUE) {
                                 prodEnableRegenarateOption = false;
                             }
-                            appObj.put("prodRegenarateOption", appObj, prodEnableRegenarateOption);
+                            appObj.put("prodRegenerateOption", appObj, prodEnableRegenarateOption);
+
                             appObj.put("prodAuthorizedDomains", appObj, prodKey.getAuthorizedDomains());
 
                             if (isApplicationAccessTokenNeverExpire(prodKey.getValidityPeriod())) {
@@ -2698,6 +2859,7 @@ public class APIStoreHostObject extends ScriptableObject {
                             appObj.put("prodConsumerSecret", appObj, null);
                             appObj.put("prodRegenarateOption", appObj, prodEnableRegenarateOption);
                             appObj.put("prodAuthorizedDomains", appObj, null);
+                            appObj.put("prodJsonString", appObj, null);
                             if (isApplicationAccessTokenNeverExpire(
                                     getApplicationAccessTokenValidityPeriodInSeconds())) {
                                 appObj.put("prodValidityTime", appObj, -1);
@@ -2720,10 +2882,15 @@ public class APIStoreHostObject extends ScriptableObject {
                                 appObj.put("prodValidityTime", appObj,
                                         getApplicationAccessTokenValidityPeriodInSeconds() * 1000);
                             }
+                            appObj.put("prodJsonString", appObj, null);
+
                         }
 
                         APIKey sandboxKey = getAppKey(application, APIConstants.API_KEY_TYPE_SANDBOX);
+
+                        OAuthApplicationInfo sandApp = application.getOAuthApp("SANDBOX");
                         boolean sandEnableRegenarateOption = true;
+
 
                         String sandKeyScope="";
                         if (sandboxKey != null && sandboxKey.getTokenScope() != null){
@@ -2731,16 +2898,26 @@ public class APIStoreHostObject extends ScriptableObject {
                             sandKeyScope = getScopeNamesbyKey(sandboxKey.getTokenScope(), scopeSet);
                         }
 
+
                         if (sandboxKey != null && sandboxKey.getConsumerKey() != null) {
+                            String jsonString = sandApp.getJsonString();
+                            jsonObject = (JSONObject) parser.parse(jsonString);
+
+                            String sandboxConsumerKey = (String) sandApp.getClientId();
+                            String sandboxConsumerSecret = (String) jsonObject.
+                                    get(ApplicationConstants.OAUTH_CLIENT_SECRET);
                             appObj.put("sandboxKey", appObj, sandboxKey.getAccessToken());
+
                             appObj.put("sandKeyScope", appObj, sandKeyScope);
-                            appObj.put("sandboxConsumerKey", appObj, sandboxKey.getConsumerKey());
-                            appObj.put("sandboxConsumerSecret", appObj, sandboxKey.getConsumerSecret());
+                            appObj.put("sandboxConsumerKey", appObj, sandboxConsumerKey);
+                            appObj.put("sandboxConsumerSecret", appObj, sandboxConsumerSecret);
                             appObj.put("sandboxKeyState", appObj, sandboxKey.getState());
+                            appObj.put("sandboxJsonString", appObj, jsonString);
                             if (sandboxKey.getValidityPeriod() == Long.MAX_VALUE) {
 	                            sandEnableRegenarateOption = false;
                             }
                             appObj.put("sandRegenarateOption", appObj, sandEnableRegenarateOption);
+
                             appObj.put("sandboxAuthorizedDomains", appObj, sandboxKey.getAuthorizedDomains());
                             if (isApplicationAccessTokenNeverExpire(sandboxKey.getValidityPeriod())) {
                                 if (tenantDomain != null &&
@@ -2762,6 +2939,7 @@ public class APIStoreHostObject extends ScriptableObject {
                             appObj.put("sandRegenarateOption", appObj, sandEnableRegenarateOption);
                             appObj.put("sandboxAuthorizedDomains", appObj, null);
                             appObj.put("sandboxKeyState", appObj, sandboxKey.getState());
+                            appObj.put("sandboxJsonString", appObj, null);
                             if (isApplicationAccessTokenNeverExpire(
                                     getApplicationAccessTokenValidityPeriodInSeconds())) {
                                 appObj.put("sandValidityTime", appObj, -1);
@@ -2776,6 +2954,7 @@ public class APIStoreHostObject extends ScriptableObject {
                             appObj.put("sandboxConsumerSecret", appObj, null);
                             appObj.put("sandRegenarateOption", appObj, sandEnableRegenarateOption);
                             appObj.put("sandboxAuthorizedDomains", appObj, null);
+                            appObj.put("sandboxJsonString", appObj, null);
                             if (isApplicationAccessTokenNeverExpire(
                                     getApplicationAccessTokenValidityPeriodInSeconds())) {
                                 appObj.put("sandValidityTime", appObj, -1);
@@ -2785,8 +2964,28 @@ public class APIStoreHostObject extends ScriptableObject {
                             }
                         }
 
+
+                        if (appName == null || appName.isEmpty() || appName.equals(application.getName())) {
+
+                            startLoop = 0;
+                            if (log.isDebugEnabled()) {
+                                startLoop = System.currentTimeMillis();
+                            }
+
+                            Set<SubscribedAPI> subscribedAPIs = apiConsumer.getSubscribedAPIs(subscriber,
+                                    application.getName());
+                            for (SubscribedAPI subscribedAPI : subscribedAPIs) {
+                                addAPIObj(subscribedAPI, apisArray, thisObj,application);
+                            }
+
+                            if (log.isDebugEnabled()) {
+                                log.debug("getSubscribedAPIs loop took : " +
+                                        (System.currentTimeMillis() - startLoop) + "ms");
+                            }
+                        }
                         appObj.put("subscriptions", appObj, apisArray);
-                        appObj.put("scopes", appObj, scopesArray);
+			            appObj.put("scopes", appObj, scopesArray);
+
                         applicationList.put(i++, applicationList, appObj);
                         result.put("applications", result, applicationList);
                         result.put("totalLength", result, subscriptionCount);
@@ -2795,6 +2994,8 @@ public class APIStoreHostObject extends ScriptableObject {
             }
         } catch (APIManagementException e) {
             handleException("Error while obtaining application data", e);
+        } catch (ParseException e) {
+            handleException("Error while parsing json string.", e);
         } finally {
             if (isTenantFlowStarted) {
                 PrivilegedCarbonContext.endTenantFlow();
@@ -2970,6 +3171,42 @@ public class APIStoreHostObject extends ScriptableObject {
             }
         }
         return myn;
+    }
+
+    /**
+     * This method helps to get an APIM application by given name.
+     * @param cx      will be used to store information about the executing of the script.
+     *                This is a object of org.mozilla.javascript.Context package.
+     * @param thisObj Object of Scriptable interface provides for the management of
+     *                properties and for performing conversions.
+     * @param args    this will contain parameter list from jag files.
+     * @param funObj  this object  provides for calling functions and constructors.
+     * @return this will return response of oAuthApplication registration.
+     * @throws ScriptException
+     * @throws APIManagementException
+     *
+     */
+    public static NativeObject jsFunction_getApplicationByName(Context cx,
+                                                               Scriptable thisObj, Object[] args, Function funObj)
+            throws ScriptException, APIManagementException {
+
+        NativeObject row = new NativeObject();
+        if (args != null) {
+            String userId = (String) args[0];
+            String applicationName = (String) args[1];
+            APIConsumer apiConsumer = getAPIConsumer(thisObj);
+            Application application = apiConsumer.getApplicationsByName(userId, applicationName);
+            if (application != null) {
+
+                row.put("name", row, application.getName());
+                row.put("tier", row, application.getTier());
+                row.put("id", row, application.getId());
+                row.put("callbackUrl", row, application.getCallbackUrl());
+                row.put("status", row, application.getStatus());
+                row.put("description", row, application.getDescription());
+            }
+        }
+        return row;
     }
 
     public static String jsFunction_addApplication(Context cx,
@@ -3500,7 +3737,7 @@ public class APIStoreHostObject extends ScriptableObject {
 	 * @param signupConfig
 	 *            tenant based configuration
 	 * @param serverURL
-	 * @throws java.rmi.RemoteException
+	 * @throws RemoteException
 	 * @throws UserAdminUserAdminException
 	 */
 	private static void removeTenantUser(String username, UserRegistrationConfigDTO signupConfig,
@@ -3693,12 +3930,10 @@ public class APIStoreHostObject extends ScriptableObject {
     public static NativeObject jsFunction_refreshToken(Context cx, Scriptable thisObj,
                                                        Object[] args,
                                                        Function funObj)
-            throws APIManagementException, AxisFault {
+            throws AxisFault, APIManagementException {
 
         NativeObject row = new NativeObject();
         if (args != null && args.length != 0) {
-            String userId = (String) args[0];
-            String applicationName = (String) args[1];
             //String tokenType = (String) args[2];
             //Token type would be default with new scopes implementation introduced in 1.7.0
             String requestedScopes = (String)args[8];
@@ -3708,6 +3943,10 @@ public class APIStoreHostObject extends ScriptableObject {
             String clientId = (String) args[5];
             String clientSecret = (String) args[6];
             String validityTime = (String) args[7];
+            String[] requestedScopeArray = new String[]{requestedScopes};
+
+            //TODO:should take JSON input as an argument.
+            String jsonInput = null;
 
             for (Object domain : accessAllowDomainsArr.getIds()) {
                 int index = (Integer) domain;
@@ -3716,62 +3955,50 @@ public class APIStoreHostObject extends ScriptableObject {
 
             APIConsumer apiConsumer = getAPIConsumer(thisObj);
             //Check whether old access token is already available
-            if (apiConsumer.isApplicationTokenExists(oldAccessToken)) {
-                SubscriberKeyMgtClient keyMgtClient = HostObjectUtils.getKeyManagementClient();
-                ApplicationKeysDTO dto = new ApplicationKeysDTO();
-                String accessToken;
-                String tokenScope;
-                try {
-                    //Regenerate the application access key
-                    accessToken = keyMgtClient.regenerateApplicationAccessKey(requestedScopes, oldAccessToken,
-                            accessAllowDomainsArray, clientId, clientSecret, validityTime);
-                    if (accessToken != null) {
-                        //Set newly generated application access token
-                        dto.setApplicationAccessToken(accessToken);
-                    }
 
-	                tokenScope = apiConsumer.getScopesByToken(accessToken);
-	                Set<Scope> scopeSet = new LinkedHashSet<Scope>();
-	                String tokenScopeNames = "";
-	                Subscriber subscriber = new Subscriber(userId);
-	                //get subscribed APIs set for application
-	                Set<SubscribedAPI> subscribedAPIs =
-			                apiConsumer.getSubscribedAPIs(subscriber, applicationName);
-	                List<APIIdentifier> identifiers = new ArrayList<APIIdentifier>();
 
-	                for (SubscribedAPI subscribedAPI : subscribedAPIs) {
-		                identifiers.add(subscribedAPI.getApiId());
-	                }
-
-	                if(!identifiers.isEmpty()){
-		                //get scopes for subscribed apis
-		                scopeSet = apiConsumer.getScopesBySubscribedAPIs(identifiers);
-		                //convert scope keys to names
-		                tokenScopeNames = getScopeNamesbyKey(tokenScope, scopeSet);
-	                }
-
-                    row.put("accessToken", row, dto.getApplicationAccessToken());
-                    row.put("consumerKey", row, dto.getConsumerKey());
-                    row.put("consumerSecret", row, dto.getConsumerSecret());
-                    row.put("validityTime", row, validityTime);
-	                row.put("tokenScope", row, tokenScopeNames );
-                    boolean isRegenarateOptionEnabled = true;
-                    if (getApplicationAccessTokenValidityPeriodInSeconds() < 0) {
-                        isRegenarateOptionEnabled = false;
-                    }
-                    row.put("enableRegenarate", row, isRegenarateOptionEnabled);
-                } catch (APIManagementException e) {
-                    handleException("Error while refreshing the access token.", e);
-                } catch (Exception e) {
-                    handleException(e.getMessage(), e);
-                }
-            } else {
-                handleException("Cannot regenerate a new access token. There's no access token available as : " + oldAccessToken);
+            AccessTokenInfo response = null;
+            try {
+                response = apiConsumer.renewAccessToken(oldAccessToken, clientId, clientSecret,
+                                                        validityTime,
+                                                        accessAllowDomainsArray, requestedScopeArray, jsonInput);
+            } catch (APIManagementException e) {
+                handleException("Error while renewing AccessToken");
             }
+
+            row.put("accessToken", row, response.getAccessToken());
+            row.put("consumerKey", row, response.getConsumerKey());
+            row.put("consumerSecret", row, response.getConsumerKey());
+            row.put("validityTime", row, response.getValidityPeriod());
+            row.put("responseParams", row, response.getJSONString());
+
+            boolean isRegenarateOptionEnabled = true;
+            if (getApplicationAccessTokenValidityPeriodInSeconds() < 0) {
+                isRegenarateOptionEnabled = false;
+            }
+            row.put("enableRegenarate", row, isRegenarateOptionEnabled);
             return row;
-        } else {
-            handleException("Invalid types of input parameters.");
-            return null;
+        }
+        return null;
+    }
+
+
+    public static void jsFunction_addAccessAllowDomains(Context cx, Scriptable thisObj,
+                                                                  Object[] args,
+                                                                  Function funObj) throws APIManagementException {
+        String oAuthConsumerKey = args[0].toString();
+        NativeArray accessAllowDomainsArr = (NativeArray) args[1];
+        String[] accessAllowDomainsArray = new String[(int) accessAllowDomainsArr.getLength()];
+
+        for (Object domain : accessAllowDomainsArr.getIds()) {
+            int index = (Integer) domain;
+            accessAllowDomainsArray[index] = (String) accessAllowDomainsArr.get(index, null);
+        }
+        try {
+            APIConsumer apiConsumer = getAPIConsumer(thisObj);
+            apiConsumer.addAccessAllowDomains(oAuthConsumerKey, accessAllowDomainsArray);
+        } catch (APIManagementException e) {
+            handleException("Error while adding allowed domains for oauth consumer: " + oAuthConsumerKey, e);
         }
     }
 

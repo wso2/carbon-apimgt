@@ -30,17 +30,17 @@ import org.wso2.carbon.apimgt.api.dto.UserApplicationAPIUsage;
 import org.wso2.carbon.apimgt.api.model.*;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
+import org.wso2.carbon.apimgt.impl.factory.KeyManagerFactory;
 import org.wso2.carbon.apimgt.impl.dto.*;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
-import org.wso2.carbon.apimgt.impl.token.ClaimsRetriever;
 import org.wso2.carbon.apimgt.impl.token.JWTGenerator;
 import org.wso2.carbon.apimgt.impl.token.TokenGenerator;
 import org.wso2.carbon.apimgt.impl.utils.APIMgtDBUtil;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.apimgt.impl.utils.ApplicationUtils;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowConstants;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowExecutorFactory;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowStatus;
-import org.wso2.carbon.apimgt.keymgt.stub.types.carbon.ApplicationKeysDTO;
 import org.wso2.carbon.core.util.CryptoException;
 import org.wso2.carbon.apimgt.impl.utils.APIVersionComparator;
 import org.wso2.carbon.apimgt.impl.utils.LRUCache;
@@ -49,8 +49,8 @@ import org.wso2.carbon.identity.base.IdentityException;
 import org.wso2.carbon.identity.core.util.IdentityDatabaseUtil;
 import org.wso2.carbon.identity.core.util.IdentityUtil;
 import org.wso2.carbon.identity.oauth.IdentityOAuthAdminException;
-import org.wso2.carbon.identity.oauth.common.OAuthConstants;
 import org.wso2.carbon.identity.oauth.OAuthUtil;
+import org.wso2.carbon.identity.oauth.common.OAuthConstants;
 import org.wso2.carbon.identity.oauth.config.OAuthServerConfiguration;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 import org.wso2.carbon.apimgt.api.model.Comment;
@@ -127,7 +127,7 @@ public class ApiMgtDAO {
      * @param identifier      APIIdentifier
      * @param keyType         Type of the key required
      * @return Access token
-     * @throws org.wso2.carbon.apimgt.api.APIManagementException if failed to get Access token
+     * @throws APIManagementException if failed to get Access token
      * @throws org.wso2.carbon.identity.base.IdentityException
      *                                if failed to get tenant id
      */
@@ -232,7 +232,7 @@ public class ApiMgtDAO {
      *
      * @param dto  DTO related to Application Registration.
      * @param onlyKeyMappingEntry When this flag is enabled, only AM_APPLICATION_KEY_MAPPING will get affected.
-     * @throws org.wso2.carbon.apimgt.api.APIManagementException if failed to create entries in  AM_APPLICATION_REGISTRATION and
+     * @throws APIManagementException if failed to create entries in  AM_APPLICATION_REGISTRATION and
      * AM_APPLICATION_KEY_MAPPING tables.
      */
 
@@ -244,10 +244,12 @@ public class ApiMgtDAO {
         ResultSet rs = null;
         Application application = dto.getApplication();
         Subscriber subscriber = application.getSubscriber();
+        String jsonString = dto.getAppInfoDTO().getoAuthApplicationInfo().getJsonString();
+
 
         String registrationEntry = "INSERT INTO " +
-                " AM_APPLICATION_REGISTRATION (SUBSCRIBER_ID,WF_REF,APP_ID,TOKEN_TYPE,ALLOWED_DOMAINS,VALIDITY_PERIOD,TOKEN_SCOPE) " +
-                "  VALUES(?,?,?,?,?,?,?)";
+                " AM_APPLICATION_REGISTRATION (SUBSCRIBER_ID,WF_REF,APP_ID,TOKEN_TYPE,ALLOWED_DOMAINS,VALIDITY_PERIOD,TOKEN_SCOPE,INPUTS) " +
+                "  VALUES(?,?,?,?,?,?,?,?)";
 
         String keyMappingEntry = "INSERT INTO " +
                 "AM_APPLICATION_KEY_MAPPING (APPLICATION_ID,KEY_TYPE,STATE) " +
@@ -265,7 +267,8 @@ public class ApiMgtDAO {
                 ps.setString(4, dto.getKeyType());
                 ps.setString(5, dto.getDomainList());
                 ps.setLong(6, dto.getValidityTime());
-	            ps.setString(7, dto.getKeyDetails().getTokenScope());
+		        ps.setString(7,(String) dto.getAppInfoDTO().getoAuthApplicationInfo().getParameter("tokenScope"));
+	            ps.setString(8,jsonString);
                 ps.execute();
                 ps.close();
             }
@@ -286,6 +289,104 @@ public class ApiMgtDAO {
             }
             handleException("Error occurred while creating an " +
                     "Application Registration Entry for Application : " + application.getName(), e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(ps, conn, rs);
+        }
+
+    }
+
+    public OAuthApplicationInfo getOAuthApplication(String consumerKey) throws APIManagementException {
+        OAuthApplicationInfo oAuthApplicationInfo = new OAuthApplicationInfo();
+        Connection conn = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+        String sqlQuery =
+                "SELECT CONSUMER_SECRET, USERNAME, TENANT_ID, APP_NAME, APP_NAME, CALLBACK_URL, GRANT_TYPES " +
+                        "FROM IDN_OAUTH_CONSUMER_APPS " +
+                        "WHERE CONSUMER_KEY = ?";
+
+        try {
+            conn = APIMgtDBUtil.getConnection();
+            ps = conn.prepareStatement(sqlQuery);
+            ps.setString(1, consumerKey);
+            rs = ps.executeQuery();
+            while (rs.next()) {
+                oAuthApplicationInfo.setClientId(consumerKey);
+                oAuthApplicationInfo.setCallBackURL(rs.getString("CALLBACK_URL"));
+                oAuthApplicationInfo.addParameter(ApplicationConstants.
+                        OAUTH_CLIENT_SECRET, rs.getString("CONSUMER_SECRET"));
+                oAuthApplicationInfo.addParameter(ApplicationConstants.
+                        OAUTH_REDIRECT_URIS, rs.getString("CALLBACK_URL"));
+                oAuthApplicationInfo.addParameter(ApplicationConstants.
+                        OAUTH_CLIENT_NAME, rs.getString("APP_NAME"));
+                oAuthApplicationInfo.addParameter(ApplicationConstants.
+                        OAUTH_CLIENT_GRANT, rs.getString("GRANT_TYPES"));
+            }
+        } catch (SQLException e) {
+            handleException("Error while executing SQL for getting OAuth application info", e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(ps, conn, rs);
+        }
+
+        return oAuthApplicationInfo;
+
+    }
+
+    /**
+     * Get the creator of the OAuth App.
+     * @param consumerKey Client ID of the OAuth App
+     * @return {@code Subscriber} with name and TenantId set.
+     * @throws APIManagementException
+     */
+    public static Subscriber getOwnerForConsumerApp(String consumerKey) throws APIManagementException {
+        Connection conn = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+        String username = null;
+        Subscriber subscriber = null;
+
+        String sqlQuery =
+                "SELECT USERNAME,TENANT_ID FROM " +
+                " IDN_OAUTH_CONSUMER_APPS " +
+                " WHERE " +
+                " CONSUMER_KEY = ?";
+
+        try {
+            conn = APIMgtDBUtil.getConnection();
+            ps = conn.prepareStatement(sqlQuery);
+            ps.setString(1, consumerKey);
+            rs = ps.executeQuery();
+            while (rs.next()) {
+                username = rs.getString("USERNAME");
+                subscriber = new Subscriber(username);
+                subscriber.setTenantId(rs.getInt("TENANT_ID"));
+            }
+        } catch (SQLException e) {
+            handleException("Error while executing SQL for getting User Id : SQL "+sqlQuery, e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(ps, conn, rs);
+        }
+
+        return subscriber;
+
+    }
+
+
+    public static void deleteOAuthApplication(String consumerKey) throws APIManagementException {
+        OAuthApplicationInfo oAuthApplicationInfo = new OAuthApplicationInfo();
+        Connection conn = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+        String sqlQuery = "DELETE FROM IDN_OAUTH_CONSUMER_APPS WHERE CONSUMER_KEY = ?";
+
+        try {
+            conn = APIMgtDBUtil.getConnection();
+            ps = conn.prepareStatement(sqlQuery);
+            ps.setString(1, consumerKey);
+            ps.executeUpdate();
+
+        } catch (SQLException e) {
+            handleException("Error while executing SQL for deleting OAuth application", e);
         } finally {
             APIMgtDBUtil.closeAllConnections(ps, conn, rs);
         }
@@ -385,7 +486,7 @@ public class ApiMgtDAO {
      *
      * @param userId id of the user
      * @return APIInfoDTO[]
-     * @throws org.wso2.carbon.apimgt.api.APIManagementException if failed to get Subscribed APIs
+     * @throws APIManagementException if failed to get Subscribed APIs
      * @throws org.wso2.carbon.identity.base.IdentityException
      *                                if failed to get tenant id
      */
@@ -463,7 +564,7 @@ public class ApiMgtDAO {
      *
      * @param apiInfoDTO API info
      * @return APIKeyInfoDTO[]
-     * @throws org.wso2.carbon.apimgt.api.APIManagementException if failed to get key info for given API
+     * @throws APIManagementException if failed to get key info for given API
      */
     public APIKeyInfoDTO[] getSubscribedUsersForAPI(APIInfoDTO apiInfoDTO)
             throws APIManagementException {
@@ -525,7 +626,7 @@ public class ApiMgtDAO {
      * @param userId     id of the user
      * @param apiInfoDTO Api info
      * @param statusEnum Status of the access key
-     * @throws org.wso2.carbon.apimgt.api.APIManagementException if failed to update the access token
+     * @throws APIManagementException if failed to update the access token
      * @throws org.wso2.carbon.identity.base.IdentityException
      *                                if failed to get tenant id
      */
@@ -616,7 +717,7 @@ public class ApiMgtDAO {
      * @param accessToken Provided Access Token
      * @return APIKeyValidationInfoDTO instance with authorization status and tier information if
      *         authorized.
-     * @throws org.wso2.carbon.apimgt.api.APIManagementException Error when accessing the database or registry.
+     * @throws APIManagementException Error when accessing the database or registry.
      */
     public APIKeyValidationInfoDTO validateKey(String context, String version, String accessToken, String requiredAuthenticationLevel)
             throws APIManagementException {
@@ -882,6 +983,170 @@ public class ApiMgtDAO {
         return keyValidationInfoDTO;
     }
 
+    public Map<String,Object> getSubscriptionDetails(String context,String version, String consumerKey) throws APIManagementException {
+
+        String sql = "SELECT "+
+                "   SUB.TIER_ID," +
+                "   SUBS.USER_ID," +
+                "   SUB.SUB_STATUS," +
+                "   APP.APPLICATION_ID," +
+                "   APP.NAME," +
+                "   APP.APPLICATION_TIER," +
+                "   AKM.KEY_TYPE," +
+                "   API.API_NAME," +
+                "   API.API_PROVIDER" +
+                " FROM " +
+                "   AM_SUBSCRIPTION SUB," +
+                "   AM_SUBSCRIBER SUBS," +
+                "   AM_APPLICATION APP," +
+                "   AM_APPLICATION_KEY_MAPPING AKM," +
+                "   AM_API API" +
+                " WHERE " +
+                " API.CONTEXT = ? " +
+                " AND API.API_VERSION = ? " +
+                " AND AKM.CONSUMER_KEY = ? " +
+                "   AND SUB.APPLICATION_ID = APP.APPLICATION_ID" +
+                "   AND APP.SUBSCRIBER_ID = SUBS.SUBSCRIBER_ID" +
+                "   AND API.API_ID = SUB.API_ID" +
+                "   AND AKM.APPLICATION_ID=APP.APPLICATION_ID";
+        Connection conn = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+        Map<String,Object> results = null;
+        try {
+            conn = APIMgtDBUtil.getConnection();
+            ps = conn.prepareStatement(sql);
+            ps.setString(1, context);
+            ps.setString(2, version);
+            ps.setString(3,consumerKey);
+            rs = ps.executeQuery();
+            if(rs.next()){
+             results = new HashMap<String,Object>();
+/*
+                "   SUBS.USER_ID," +
+                        "   SUB.SUB_STATUS," +
+                        "   APP.APPLICATION_ID," +
+                        "   APP.NAME," +
+                        "   APP.APPLICATION_TIER," +
+                        "   AKM.KEY_TYPE," +
+                        "   API.API_NAME," +
+                        "   API.API_PROVIDER" +
+                        */
+                results.put("tier_id",rs.getString("TIER_ID"));
+                results.put("user_id",rs.getString("USER_ID"));
+                results.put("subs_status",rs.getString("SUB_STATUS"));
+                results.put("app_id",rs.getString("APPLICATION_ID"));
+                results.put("key_type",rs.getString("KEY_TYPE"));
+                results.put("api_name",rs.getString("API_NAME"));
+                results.put("api_provider",rs.getString("API_PROVIDER"));
+                results.put("app_name",rs.getString("NAME"));
+                results.put("app_tier",rs.getString("APPLICATION_TIER"));
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+        } finally {
+            APIMgtDBUtil.closeAllConnections(ps,conn,rs);
+        }
+       return results;
+    }
+
+
+
+    public boolean validateSubscriptionDetails(String context, String version, String consumerKey,
+                                               APIKeyValidationInfoDTO infoDTO) throws APIManagementException {
+
+
+        boolean defaultVersionInvoked = false;
+
+        //Check if the api version has been prefixed with _default_
+        if(version != null && version.startsWith(APIConstants.DEFAULT_VERSION_PREFIX)){
+            defaultVersionInvoked = true;
+            //Remove the prefix from the version.
+            version = version.split(APIConstants.DEFAULT_VERSION_PREFIX)[1];
+        }
+
+        String sql = "SELECT "+
+                     "   SUB.TIER_ID," +
+                     "   SUBS.USER_ID," +
+                     "   SUB.SUB_STATUS," +
+                     "   APP.APPLICATION_ID," +
+                     "   APP.NAME," +
+                     "   APP.APPLICATION_TIER," +
+                     "   AKM.KEY_TYPE," +
+                     "   API.API_NAME," +
+                     "   API.API_PROVIDER" +
+                     " FROM " +
+                     "   AM_SUBSCRIPTION SUB," +
+                     "   AM_SUBSCRIBER SUBS," +
+                     "   AM_APPLICATION APP," +
+                     "   AM_APPLICATION_KEY_MAPPING AKM," +
+                     "   AM_API API" +
+                     " WHERE " +
+                     " API.CONTEXT = ? " +
+                     " AND AKM.CONSUMER_KEY = ? " +
+                     (defaultVersionInvoked ? "" : " AND API.API_VERSION = ? ") +
+                     "   AND SUB.APPLICATION_ID = APP.APPLICATION_ID" +
+                     "   AND APP.SUBSCRIBER_ID = SUBS.SUBSCRIBER_ID" +
+                     "   AND API.API_ID = SUB.API_ID" +
+                     "   AND AKM.APPLICATION_ID=APP.APPLICATION_ID"+
+                     "   AND AKM.APPLICATION_ID=APP.APPLICATION_ID";
+        Connection conn = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+        Map<String,Object> results = null;
+        try {
+            conn = APIMgtDBUtil.getConnection();
+            ps = conn.prepareStatement(sql);
+            ps.setString(1, context);
+            ps.setString(2,consumerKey);
+            if(!defaultVersionInvoked){
+                ps.setString(3, version);
+            }
+            rs = ps.executeQuery();
+            if(rs.next()){
+                String subscriptionStatus = rs.getString("SUB_STATUS");
+                String type = rs.getString("KEY_TYPE");
+                if (subscriptionStatus.equals(APIConstants.SubscriptionStatus.BLOCKED)) {
+                    infoDTO.setValidationStatus(
+                            APIConstants.KeyValidationStatus.API_BLOCKED);
+                    infoDTO.setAuthorized(false);
+                    return false;
+                } else if(APIConstants.SubscriptionStatus.ON_HOLD.equals(subscriptionStatus) ||
+                          APIConstants.SubscriptionStatus.REJECTED.equals(subscriptionStatus)){
+                    infoDTO.setValidationStatus(APIConstants.KeyValidationStatus.SUBSCRIPTION_INACTIVE);
+                    infoDTO.setAuthorized(false);
+                    return false;
+                }
+                else if (subscriptionStatus.equals(APIConstants.SubscriptionStatus.PROD_ONLY_BLOCKED) &&
+                         !APIConstants.API_KEY_TYPE_SANDBOX.equals(type)) {
+                    infoDTO.setValidationStatus(
+                            APIConstants.KeyValidationStatus.API_BLOCKED);
+                    infoDTO.setType(type);
+                    infoDTO.setAuthorized(false);
+                    return false;
+                }
+
+                infoDTO.setTier(rs.getString("TIER_ID"));
+                infoDTO.setSubscriber(rs.getString("USER_ID"));
+                infoDTO.setApplicationId(rs.getString("APPLICATION_ID"));
+                infoDTO.setApiName(rs.getString("API_NAME"));
+                infoDTO.setApiPublisher(rs.getString("API_PROVIDER"));
+                infoDTO.setApplicationName(rs.getString("NAME"));
+                infoDTO.setApplicationTier(rs.getString("APPLICATION_TIER"));
+                infoDTO.setType(type);
+                return true;
+            }
+            infoDTO.setAuthorized(false);
+
+        } catch (SQLException e) {
+            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+        } finally {
+            APIMgtDBUtil.closeAllConnections(ps,conn,rs);
+        }
+        return false;
+    }
+
     private String generateJWTToken(APIKeyValidationInfoDTO keyValidationInfoDTO,
                                     String context, String version) throws APIManagementException {
 
@@ -903,50 +1168,6 @@ public class ApiMgtDAO {
         return tokenGenerator.generateToken(keyValidationInfoDTO, context, version, accessToken);
     }
 
-    public long getApplicationAccessTokenRemainingValidityPeriod (String accessToken) throws APIManagementException {
-        String accessTokenStoreTable = APIConstants.ACCESS_TOKEN_STORE_TABLE;
-        if (APIUtil.checkAccessTokenPartitioningEnabled() &&
-            APIUtil.checkUserNameAssertionEnabled()) {
-            accessTokenStoreTable = APIUtil.getAccessTokenStoreTableFromAccessToken(accessToken);
-        }
-        Connection conn = null;
-        PreparedStatement ps = null;
-        ResultSet rs = null;
-
-        long validityPeriod;
-        long issuedTime;
-        long timestampSkew;
-        long currentTime;
-        long remainingTime = 0;
-
-        String applicationSqlQuery = "SELECT " +
-                                     " IAT.VALIDITY_PERIOD, " +
-                                     " IAT.TIME_CREATED " +
-                                     " FROM " + accessTokenStoreTable + " IAT" +
-                                     " WHERE " +
-                                     " IAT.ACCESS_TOKEN = ? " ;
-
-        try {
-            conn = APIMgtDBUtil.getConnection();
-            ps = conn.prepareStatement(applicationSqlQuery);
-            ps.setString(1, accessToken);
-            rs = ps.executeQuery();
-            if (rs.next()) {
-                issuedTime = rs.getTimestamp(APIConstants.IDENTITY_OAUTH2_FIELD_TIME_CREATED,
-                                             Calendar.getInstance(TimeZone.getTimeZone("UTC"))).getTime();
-                validityPeriod = rs.getLong(APIConstants.IDENTITY_OAUTH2_FIELD_VALIDITY_PERIOD);
-                timestampSkew = OAuthServerConfiguration.getInstance().
-                        getTimeStampSkewInSeconds() * 1000;
-                currentTime = System.currentTimeMillis();
-                remainingTime = ((currentTime) - (issuedTime + validityPeriod));
-            }
-        } catch (SQLException e) {
-            handleException("Error when executing the SQL ", e);
-        } finally {
-            APIMgtDBUtil.closeAllConnections(ps, conn, rs);
-        }
-        return remainingTime;
-    }
 
     //This returns the authorized client domains into a List
     public static List<String> getAuthorizedDomainList(String apiKey) throws APIManagementException {
@@ -1346,7 +1567,7 @@ public class ApiMgtDAO {
      *
      * @param subscriberName id
      * @return Subscriber
-     * @throws org.wso2.carbon.apimgt.api.APIManagementException if failed to get Subscriber from subscriber id
+     * @throws APIManagementException if failed to get Subscriber from subscriber id
      */
     public Subscriber getSubscriber(String subscriberName) throws APIManagementException {
 
@@ -2032,6 +2253,10 @@ public class ApiMgtDAO {
                     for (APIKey key : keys) {
                         application.addKey(key);
                     }
+                    Map<String,OAuthApplicationInfo> oauthApps = getOAuthApplications(applicationId);
+                    for(String keyType : oauthApps.keySet()){
+                        application.addOAuthApp(keyType,oauthApps.get(keyType));
+                    }
                     applicationCache.put(applicationId, application);
                 }
                 subscribedAPI.setApplication(application);
@@ -2570,6 +2795,61 @@ public class ApiMgtDAO {
         return apiKeys;
     }
 
+    private Map<String,OAuthApplicationInfo> getOAuthApplications(int applicationId) throws APIManagementException {
+        Map<String,OAuthApplicationInfo> map = new HashMap<String,OAuthApplicationInfo>();
+        OAuthApplicationInfo prodApp = getProductionClientOfApplication(applicationId,"PRODUCTION");
+        if(prodApp != null){
+           map.put("PRODUCTION",prodApp);
+        }
+
+        OAuthApplicationInfo sandboxApp = getProductionClientOfApplication(applicationId,"SANDBOX");
+        if(sandboxApp != null){
+            map.put("SANDBOX",sandboxApp);
+        }
+
+        return map;
+    }
+
+    public OAuthApplicationInfo getProductionClientOfApplication(int applicationID,
+                                                            String keyType) throws APIManagementException {
+        String sqlQuery = "SELECT " +
+                "CONSUMER_KEY " +
+                "FROM AM_APPLICATION_KEY_MAPPING WHERE APPLICATION_ID = ? AND KEY_TYPE = ?";
+
+        KeyManager keyManager = null;
+        OAuthApplicationInfo oAuthApplication = null;
+        Connection connection = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+        String consumerKey = null;
+        try {
+            connection = APIMgtDBUtil.getConnection();
+            ps = connection.prepareStatement(sqlQuery);
+            ps.setInt(1,applicationID);
+            ps.setString(2,keyType);
+            rs = ps.executeQuery();
+
+            while (rs.next()){
+                consumerKey = rs.getString(1);
+            }
+
+            if(consumerKey != null){
+            keyManager = KeyManagerFactory.getKeyManager();
+            oAuthApplication = keyManager.retrieveApplication(consumerKey);
+           // oAuthApplication.setJsonString(jsonString);
+            }
+        } catch (SQLException e) {
+            handleException("Failed to get  client of application. SQL error", e);
+        } catch (APIManagementException e) {
+            handleException("Failed to get client of application " + applicationID + " Client Id " +
+                    consumerKey, e);
+        } finally {
+             APIMgtDBUtil.closeAllConnections(ps,connection,rs);
+        }
+
+        return oAuthApplication;
+    }
+
     private APIKey getKeyStatusOfApplication(String keyType, int applicationId) throws APIManagementException{
         Connection connection = null;
         PreparedStatement preparedStatement = null;
@@ -2687,7 +2967,7 @@ public class ApiMgtDAO {
 
             preparedStatement = connection.prepareStatement(sql);
             preparedStatement.setInt(1, applicationId);
-            preparedStatement.setString(2, userName.toLowerCase());
+            preparedStatement.setString(2, MultitenantUtils.getTenantAwareUsername(userName.toLowerCase()));
             preparedStatement.setString(3, APIConstants.ACCESS_TOKEN_USER_TYPE_APPLICATION);
             resultSet = preparedStatement.executeQuery();
             while (resultSet.next()) {
@@ -2699,6 +2979,7 @@ public class ApiMgtDAO {
                 String consumerSecret = resultSet.getString("CONSUMER_SECRET");
                 apiKey.setConsumerSecret(APIUtil.decryptToken(consumerSecret));
                 apiKey.setAccessToken(accessToken);
+
                 apiKey.setTokenScope(tokenScope);
                 authorizedDomains = getAuthorizedDomains(accessToken);
                 apiKey.setType(resultSet.getString("TOKEN_TYPE"));
@@ -2800,7 +3081,7 @@ public class ApiMgtDAO {
 
             preparedStatement = connection.prepareStatement(sql);
             preparedStatement.setInt(1, applicationId);
-            preparedStatement.setString(2, userName.toLowerCase());
+            preparedStatement.setString(2, MultitenantUtils.getTenantAwareUsername(userName.toLowerCase()));
             preparedStatement.setString(3, APIConstants.ACCESS_TOKEN_USER_TYPE_APPLICATION);
             resultSet = preparedStatement.executeQuery();
             while (resultSet.next()) {
@@ -3021,7 +3302,7 @@ public class ApiMgtDAO {
      *
      * @param subscriptionId Subscription Id
      * @return access token data
-     * @throws org.wso2.carbon.apimgt.api.APIManagementException
+     * @throws APIManagementException
      */
     public Map<String, String> getAccessTokenData(int subscriptionId)
             throws APIManagementException {
@@ -3096,7 +3377,7 @@ public class ApiMgtDAO {
      *
      * @param providerName name of the provider
      * @return Set<Subscriber>
-     * @throws org.wso2.carbon.apimgt.api.APIManagementException if failed to get subscribers for given provider
+     * @throws APIManagementException if failed to get subscribers for given provider
      */
     public Set<Subscriber> getSubscribersOfProvider(String providerName)
             throws APIManagementException {
@@ -3354,8 +3635,8 @@ public class ApiMgtDAO {
      * @param newAccessToken
      * @param validityPeriod
      * @return
-     * @throws org.wso2.carbon.identity.base.IdentityException
-     * @throws org.wso2.carbon.apimgt.api.APIManagementException
+     * @throws IdentityException
+     * @throws APIManagementException
      */
     public void updateRefreshedApplicationAccessToken(String keyType, String newAccessToken,
                                                       long validityPeriod) throws IdentityException,
@@ -3415,6 +3696,52 @@ public class ApiMgtDAO {
         }
 
     }
+
+    public static void addAccessAllowDomains(String oAuthConsumerKey, String[] accessAllowDomains) throws
+            APIManagementException {
+
+        String sqlAddAccessAllowDomains = "INSERT" +
+                " INTO AM_APP_KEY_DOMAIN_MAPPING (CONSUMER_KEY, AUTHZ_DOMAIN) " +
+                " VALUES (?,?)";
+
+        Connection connection = null;
+        PreparedStatement prepStmt = null;
+
+        try {
+            connection = APIMgtDBUtil.getConnection();
+
+            if (accessAllowDomains != null && !accessAllowDomains[0].trim().equals("")) {
+                for (int i = 0; i < accessAllowDomains.length; i++) {
+                    prepStmt = connection.prepareStatement(sqlAddAccessAllowDomains);
+                    prepStmt.setString(1, oAuthConsumerKey);
+                    prepStmt.setString(2, accessAllowDomains[i].trim());
+                    prepStmt.execute();
+                    prepStmt.close();
+                }
+            } else {
+                prepStmt = connection.prepareStatement(sqlAddAccessAllowDomains);
+                prepStmt.setString(1, oAuthConsumerKey);
+                prepStmt.setString(2, "ALL");
+                prepStmt.execute();
+                prepStmt.close();
+            }
+            connection.commit();
+        } catch (SQLException e) {
+            handleException("Error while adding allowed domains for application identified " +
+                    "by consumer key :" + oAuthConsumerKey, e);
+            if (connection != null) {
+                try {
+                    connection.rollback();
+                } catch (SQLException e1) {
+                    log.error("Failed to rollback the add access token ", e);
+                }
+            }
+        } finally {
+            IdentityDatabaseUtil.closeAllConnections(connection, null, prepStmt);
+        }
+
+    }
+
 
     public void updateAccessAllowDomains(String accessToken, String[] accessAllowDomains)
             throws APIManagementException {
@@ -3477,7 +3804,7 @@ public class ApiMgtDAO {
      * @param apiInfoDTO      Application Info DTO
      * @param keyType         Type (scope) of the key
      * @return accessToken
-     * @throws org.wso2.carbon.identity.base.IdentityException if failed to register accessToken
+     * @throws IdentityException if failed to register accessToken
      */
     public String registerAccessToken(String consumerKey, String applicationName, String userId,
                                       int tenantId, APIInfoDTO apiInfoDTO, String keyType)
@@ -3668,10 +3995,13 @@ public class ApiMgtDAO {
                 " (ACCESS_TOKEN, REFRESH_TOKEN, CONSUMER_KEY, TOKEN_STATE, TOKEN_SCOPE," +
                 " AUTHZ_USER, USER_TYPE, TIME_CREATED, VALIDITY_PERIOD)  VALUES (?,?,?,?,?,?,?,?,?)";
 
-        String addApplicationKeyMapping = "UPDATE " +
-                                          "AM_APPLICATION_KEY_MAPPING SET " +
-                                          "CONSUMER_KEY = ?, STATE =? " +
-                                          "WHERE APPLICATION_ID = ? AND KEY_TYPE = ?";
+//        ///////////////////////////
+//
+//        ////
+//        String addApplicationKeyMapping = "UPDATE " +
+//                                          "AM_APPLICATION_KEY_MAPPING SET " +
+//                                          "CONSUMER_KEY = ?, STATE =? " +
+//                                          "WHERE APPLICATION_ID = ? AND KEY_TYPE = ?";
 
         String sqlAddAccessAllowDomains = "INSERT" +
                                           " INTO AM_APP_KEY_DOMAIN_MAPPING (CONSUMER_KEY, AUTHZ_DOMAIN) " +
@@ -3689,8 +4019,6 @@ public class ApiMgtDAO {
         try {
             consumerKey = APIUtil.encryptToken(consumerKey);
             connection = APIMgtDBUtil.getConnection();
-            connection.setAutoCommit(false);
-            
             //Add access token
             prepStmt = connection.prepareStatement(sqlAddAccessToken);
             prepStmt.setString(1, APIUtil.encryptToken(accessToken));
@@ -3710,30 +4038,29 @@ public class ApiMgtDAO {
             prepStmt.execute();
             prepStmt.close();
 
-            prepStmt = connection.prepareStatement(addApplicationKeyMapping);
-            prepStmt.setString(1, consumerKey);
-            prepStmt.setString(2, APIConstants.AppRegistrationStatus.REGISTRATION_COMPLETED);
-            prepStmt.setInt(3, appId);
-            prepStmt.setString(4, keyType);
-            prepStmt.execute();
-            prepStmt.close();
+//            prepStmt = connection.prepareStatement(addApplicationKeyMapping);
+//            prepStmt.setString(1, consumerKey);
+//            prepStmt.setString(2, APIConstants.AppRegistrationStatus.REGISTRATION_COMPLETED);
+//            prepStmt.setInt(3, appId);
+//            prepStmt.setString(4, keyType);
+//            prepStmt.execute();
+//            prepStmt.close();
 
-            if (accessAllowDomains != null && !accessAllowDomains[0].trim().equals("")) {
-                for (int i = 0; i < accessAllowDomains.length; i++) {
-                    prepStmt = connection.prepareStatement(sqlAddAccessAllowDomains);
-                    prepStmt.setString(1, consumerKey);
-                    prepStmt.setString(2, accessAllowDomains[i].trim());
-                    prepStmt.execute();
-                    prepStmt.close();
-                }
-            } else {
-                prepStmt = connection.prepareStatement(sqlAddAccessAllowDomains);
-                prepStmt.setString(1, consumerKey);
-                prepStmt.setString(2, "ALL");
-                prepStmt.execute();
-                prepStmt.close();
-            }
-            
+//            if (accessAllowDomains != null && !accessAllowDomains[0].trim().equals("")) {
+//                for (int i = 0; i < accessAllowDomains.length; i++) {
+//                    prepStmt = connection.prepareStatement(sqlAddAccessAllowDomains);
+//                    prepStmt.setString(1, consumerKey);
+//                    prepStmt.setString(2, accessAllowDomains[i].trim());
+//                    prepStmt.execute();
+//                    prepStmt.close();
+//                }
+//            } else {
+//                prepStmt = connection.prepareStatement(sqlAddAccessAllowDomains);
+//                prepStmt.setString(1, consumerKey);
+//                prepStmt.setString(2, "ALL");
+//                prepStmt.execute();
+//                prepStmt.close();
+//            }
             connection.commit();
         } catch (SQLException e) {
             handleException("Error while generating the application access token for the application :"+applicationName, e);
@@ -3755,9 +4082,106 @@ public class ApiMgtDAO {
                 }
             }
         } finally {
-            IdentityDatabaseUtil.closeAllConnections(connection, null, prepStmt);
+            // IdentityDatabaseUtil.closeAllConnections(connection, null, prepStmt);
         }
         return accessToken;
+    }
+
+    /**
+     * Update the consumer key and application status for the given key type and application.
+     * @param application
+     * @param keyType
+     */
+    public void updateApplicationKeyTypeMapping(Application application, String keyType){
+
+        OAuthApplicationInfo app = application.getOAuthApp(keyType);
+        String consumerKey = null;
+        if(app != null){
+            consumerKey = app.getClientId();
+        }
+
+        if(consumerKey != null && application.getId() != -1){
+        String addApplicationKeyMapping = "UPDATE " +
+                "AM_APPLICATION_KEY_MAPPING SET " +
+                "CONSUMER_KEY = ? " +
+                "WHERE APPLICATION_ID = ? AND KEY_TYPE = ?";
+
+            try {
+                Connection connection = APIMgtDBUtil.getConnection();
+                PreparedStatement ps = connection.prepareStatement(addApplicationKeyMapping);
+                ps.setString(1,consumerKey);
+//                ps.setString(2,APIConstants.AppRegistrationStatus.REGISTRATION_COMPLETED);
+                ps.setInt(2,application.getId());
+                ps.setString(3,keyType);
+
+                ps.executeUpdate();
+                ps.close();
+                connection.commit();
+                APIMgtDBUtil.closeAllConnections(ps,connection,null);
+            } catch (SQLException e) {
+                e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+            }
+
+        }
+
+    }
+
+    /**
+     * This method will create a new client at key-manager side.further it will add new record to
+     * the AM_APPLICATION_KEY_MAPPING table
+     * @param oauthAppRequest details of oAuthApplication.
+     * @param applicationName apim application name.
+     * @param userName apim user name
+     * @param clientId this is the consumner key.
+     * @throws APIManagementException
+     */
+    public void createApplicationKeyTypeMappingForManualClients(OauthAppRequest oauthAppRequest, String applicationName,
+                                                                String userName, String clientId) throws APIManagementException {
+
+        String consumerKey = null;
+        if (clientId != null) {
+            consumerKey = clientId;
+        }
+        Connection connection = null;
+        PreparedStatement ps = null;
+        //initiate key manager.
+        KeyManager keyManager = KeyManagerFactory.getKeyManager();
+        //get oAuthApplicationInfo object.
+        OAuthApplicationInfo oAuthApplicationInfo = oauthAppRequest.getoAuthApplicationInfo();
+        oAuthApplicationInfo.setClientId(clientId);
+        //APIM application id.
+        int applicationId = getApplicationId(applicationName, userName);
+
+        if (consumerKey != null) {
+            String addApplicationKeyMapping = "INSERT INTO " +
+                    "AM_APPLICATION_KEY_MAPPING (APPLICATION_ID,CONSUMER_KEY,KEY_TYPE,STATE,CREATE_MODE) " +
+                    "VALUES (?,?,?,?,?)";
+            try {
+                connection = APIMgtDBUtil.getConnection();
+
+                ps = connection.prepareStatement(addApplicationKeyMapping);
+                ps.setInt(1, applicationId);
+                ps.setString(2, consumerKey);
+                ps.setString(3, (String) oAuthApplicationInfo.getParameter(ApplicationConstants.APP_KEY_TYPE));
+                ps.setString(4, APIConstants.AppRegistrationStatus.REGISTRATION_COMPLETED);
+                // If the CK/CS pair is pasted on the screen set this to MAPPED
+                ps.setString(5,"MAPPED");
+                ps.execute();
+                //create client at keyManager after adding record to table.Why? becaues  if something goes wrong
+                //adding to AM_APPLICATION_KEY_MAPPING create client at key manager will not happen.
+                keyManager.createSemiManualAuthApplication(oauthAppRequest);
+                ps.close();
+                connection.commit();
+
+            } catch (SQLException e) {
+                handleException("Error while inserting record to the AM_APPLICATION_KEY_MAPPING table,  " +
+                        "error is =  " + e.getMessage(), e);
+            } finally {
+                APIMgtDBUtil.closeAllConnections(ps, connection, null);
+            }
+
+        }
+
     }
 
 
@@ -3766,7 +4190,7 @@ public class ApiMgtDAO {
      * @param state State of the registration.
      * @param keyType PRODUCTION | SANDBOX
      * @param appId ID of the Application.
-     * @throws org.wso2.carbon.apimgt.api.APIManagementException if updating fails.
+     * @throws APIManagementException if updating fails.
      */
     public void updateApplicationRegistration(String state, String keyType, int appId) throws APIManagementException {
         Connection conn = null;
@@ -3801,7 +4225,7 @@ public class ApiMgtDAO {
      * @param apiIdentifier APIIdentifier
      * @param userId        User Id
      * @return true if user subscribed for given APIIdentifier
-     * @throws org.wso2.carbon.apimgt.api.APIManagementException if failed to check subscribed or not
+     * @throws APIManagementException if failed to check subscribed or not
      */
     public boolean isSubscribed(APIIdentifier apiIdentifier, String userId)
             throws APIManagementException {
@@ -3982,7 +4406,7 @@ public class ApiMgtDAO {
      *
      * @param accessToken AccessToken
      * @return Subscriber
-     * @throws org.wso2.carbon.apimgt.api.APIManagementException if failed to get subscriber for given access token
+     * @throws APIManagementException if failed to get subscriber for given access token
      */
     public Subscriber getSubscriberById(String accessToken) throws APIManagementException {
         Connection connection = null;
@@ -4111,10 +4535,13 @@ public class ApiMgtDAO {
 
             rs = prepStmt.executeQuery();
 
-            if (isReuseAppName && rs.next()) {
+            if (rs.next()) {
                 consumerKey = rs.getString("CONSUMER_KEY");
-                consumerSecret =  rs.getString("CONSUMER_SECRET");
-            } else {
+                consumerSecret = rs.getString("CONSUMER_SECRET");
+                consumerKey = APIUtil.encryptToken(consumerKey);
+                consumerSecret = APIUtil.encryptToken(consumerSecret);
+            }
+            else {
 
                 String sqlStmt = "INSERT INTO IDN_OAUTH_CONSUMER_APPS " +
                                  "(CONSUMER_KEY, CONSUMER_SECRET, USERNAME, TENANT_ID, OAUTH_VERSION, APP_NAME, CALLBACK_URL) VALUES (?,?,?,?,?,?, ?) ";
@@ -4265,7 +4692,7 @@ public class ApiMgtDAO {
     /**
      * @param apiIdentifier API Identifier
      * @param userId      User Id
-     * @throws org.wso2.carbon.apimgt.api.APIManagementException if failed to add Application
+     * @throws APIManagementException if failed to add Application
      */
     public void addRating(APIIdentifier apiIdentifier,int rating,String userId,Connection conn)
             throws APIManagementException, SQLException {
@@ -4368,7 +4795,7 @@ public class ApiMgtDAO {
     /**
      * @param apiIdentifier API Identifier
      * @param userId        User Id
-     * @throws org.wso2.carbon.apimgt.api.APIManagementException if failed to add Application
+     * @throws APIManagementException if failed to add Application
      */
     public void removeAPIRating(APIIdentifier apiIdentifier, String userId, Connection conn)
             throws APIManagementException, SQLException {
@@ -4463,7 +4890,7 @@ public class ApiMgtDAO {
     /**
      * @param apiIdentifier API Identifier
      * @param userId        User Id
-     * @throws org.wso2.carbon.apimgt.api.APIManagementException if failed to add Application
+     * @throws APIManagementException if failed to add Application
      */
     public int getUserRating(APIIdentifier apiIdentifier, String userId, Connection conn)
             throws APIManagementException, SQLException {
@@ -4545,7 +4972,7 @@ public class ApiMgtDAO {
 
     /**
      * @param apiIdentifier API Identifier
-     * @throws org.wso2.carbon.apimgt.api.APIManagementException if failed to add Application
+     * @throws APIManagementException if failed to add Application
      */
     public static float getAverageRating(APIIdentifier apiIdentifier, Connection conn)
             throws APIManagementException, SQLException {
@@ -4588,7 +5015,7 @@ public class ApiMgtDAO {
     /**
      * @param application Application
      * @param userId      User Id
-     * @throws org.wso2.carbon.apimgt.api.APIManagementException if failed to add Application
+     * @throws APIManagementException if failed to add Application
      */
     public int addApplication(Application application, String userId, Connection conn)
             throws APIManagementException, SQLException {
@@ -4709,7 +5136,7 @@ public class ApiMgtDAO {
      * Update the status of the Application creation process
      * @param applicationId
      * @param status
-     * @throws org.wso2.carbon.apimgt.api.APIManagementException
+     * @throws APIManagementException
      */
     public void updateApplicationStatus(int applicationId, String status) throws APIManagementException {
         Connection conn = null;
@@ -4754,7 +5181,7 @@ public class ApiMgtDAO {
 	 *
 	 * @param appName
 	 * @return
-	 * @throws org.wso2.carbon.apimgt.api.APIManagementException
+	 * @throws APIManagementException
 	 */
     public String getApplicationStatus(String appName, String userId) throws APIManagementException {
         Connection conn = null;
@@ -4796,7 +5223,7 @@ public class ApiMgtDAO {
     /**
      * @param username Subscriber
      * @return ApplicationId for given appname.
-     * @throws org.wso2.carbon.apimgt.api.APIManagementException if failed to get Applications for given subscriber.
+     * @throws APIManagementException if failed to get Applications for given subscriber.
      */
     public int getApplicationId(String appName, String username) throws APIManagementException {
         if (username == null) {
@@ -4842,7 +5269,7 @@ public class ApiMgtDAO {
      * Find the name of the application by Id
      * @param applicationId - applicatoin id
      * @return - application name
-     * @throws org.wso2.carbon.apimgt.api.APIManagementException
+     * @throws APIManagementException
      */
     public String getApplicationNameFromId(int applicationId) throws APIManagementException{
 
@@ -4877,7 +5304,7 @@ public class ApiMgtDAO {
     /**
      * @param subscriber Subscriber
      * @return Applications for given subscriber.
-     * @throws org.wso2.carbon.apimgt.api.APIManagementException if failed to get Applications for given subscriber.
+     * @throws APIManagementException if failed to get Applications for given subscriber.
      */
     public Application[] getApplications(Subscriber subscriber) throws APIManagementException {
         if (subscriber == null) {
@@ -4943,6 +5370,11 @@ public class ApiMgtDAO {
                 application.setDescription(rs.getString("DESCRIPTION"));
                 application.setStatus(rs.getString("APPLICATION_STATUS"));
                 Set<APIKey> keys = getApplicationKeys(tenantAwareUserId, application.getId());
+                Map<String,OAuthApplicationInfo> keyMap = getOAuthApplications(application.getId());
+                for (String keyType : keyMap.keySet()){
+                    application.addOAuthApp(keyType,keyMap.get(keyType));
+                }
+
                 for (APIKey key : keys) {
                     application.addKey(key);
                 }
@@ -5101,6 +5533,7 @@ public class ApiMgtDAO {
     public void deleteApplication(Application application) throws APIManagementException {
         Connection connection = null;
         PreparedStatement prepStmt = null;
+        PreparedStatement prepStmtGetConsumerKey = null;
         ResultSet rs = null;
 
         String getSubscriptionsQuery = "SELECT" +
@@ -5111,19 +5544,20 @@ public class ApiMgtDAO {
                                        " APPLICATION_ID = ?";
 
         String getConsumerKeyQuery = "SELECT" +
-                                       " CONSUMER_KEY " +
-                                       "FROM" +
+                                       " CONSUMER_KEY , CREATE_MODE" +
+                                       " FROM" +
                                        " AM_APPLICATION_KEY_MAPPING " +
-                                       "WHERE" +
+                                       " WHERE" +
                                        " APPLICATION_ID = ?";
 
         String deleteKeyMappingQuery = "DELETE FROM AM_SUBSCRIPTION_KEY_MAPPING WHERE SUBSCRIPTION_ID = ?";
         String deleteSubscriptionsQuery = "DELETE FROM AM_SUBSCRIPTION WHERE APPLICATION_ID = ?";
         String deleteApplicationKeyQuery = "DELETE FROM AM_APPLICATION_KEY_MAPPING WHERE APPLICATION_ID = ?";
         String deleteDomainAppQuery = "DELETE FROM AM_APP_KEY_DOMAIN_MAPPING WHERE CONSUMER_KEY = ?";
-        String deleteConsumerAppQuery = "DELETE FROM IDN_OAUTH_CONSUMER_APPS WHERE CONSUMER_KEY = ?";
         String deleteApplicationQuery = "DELETE FROM AM_APPLICATION WHERE APPLICATION_ID = ?";
         String deleteRegistrationEntry = "DELETE FROM AM_APPLICATION_REGISTRATION WHERE APP_ID = ?";
+
+
 
         try {
             connection = APIMgtDBUtil.getConnection();
@@ -5156,26 +5590,34 @@ public class ApiMgtDAO {
             prepStmt.execute();
             prepStmt.close();
 
-            prepStmt = connection.prepareStatement(getConsumerKeyQuery);
-            prepStmt.setInt(1, application.getId());
-            rs = prepStmt.executeQuery();
-            String consumerKey = null;
-            while (rs.next()) {
-                consumerKey=rs.getString("CONSUMER_KEY");
-            }
-            prepStmt.close();
-            rs.close();
-            if(consumerKey!=null){
-            prepStmt = connection.prepareStatement(deleteDomainAppQuery);
-            prepStmt.setString(1, consumerKey);
-            prepStmt.execute();
-            prepStmt.close();
+            prepStmtGetConsumerKey = connection.prepareStatement(getConsumerKeyQuery);
+            prepStmtGetConsumerKey.setInt(1, application.getId());
+            rs = prepStmtGetConsumerKey.executeQuery();
+            ArrayList<String> consumerKeys = new ArrayList<String>();
 
-            prepStmt = connection.prepareStatement(deleteConsumerAppQuery);
-            prepStmt.setString(1, consumerKey);
-            prepStmt.execute();
-            prepStmt.close();
+            while (rs.next()) {
+                String consumerKey=rs.getString("CONSUMER_KEY");
+
+                // This is true when OAuth app has been created by pasting consumer key/secret in the screen.
+                String mode = rs.getString("CREATE_MODE");
+                if (consumerKey != null) {
+                    prepStmt = connection.prepareStatement(deleteDomainAppQuery);
+                    prepStmt.setString(1, consumerKey);
+                    prepStmt.execute();
+                    prepStmt.close();
+
+                    // OAuth app is deleted if only it has been created from API Store. For mapped clients we don't
+                    // call delete.
+                    if(!"MAPPED".equals(mode)) {
+                        // Adding clients to be deleted.
+                        consumerKeys.add(consumerKey);
+                    }
+
+                }
             }
+            prepStmtGetConsumerKey.close();
+            rs.close();
+
             prepStmt = connection.prepareStatement(deleteApplicationKeyQuery);
             prepStmt.setInt(1, application.getId());
             prepStmt.execute();
@@ -5186,6 +5628,11 @@ public class ApiMgtDAO {
             prepStmt.execute();
             
             connection.commit();
+
+            for (String consumerKey : consumerKeys){
+                //delete on oAuthorization server.
+                KeyManagerFactory.getKeyManager().deleteApplication(consumerKey);
+            }
         } catch (SQLException e) {
             handleException("Error while removing application details from the database", e);
         } finally {
@@ -5193,6 +5640,33 @@ public class ApiMgtDAO {
         }
     }
 
+    /*
+        Delete mapping record by given consumer key
+     */
+    public void deleteApplicationKeyMappingByConsumerKey(String consumerKey) throws APIManagementException {
+
+        Connection connection = null;
+        PreparedStatement ps = null;
+        try {
+            connection = APIMgtDBUtil.getConnection();
+            String deleteKeyMappingQuery = "DELETE " +
+                    "FROM" +
+                    "   AM_APPLICATION_KEY_MAPPING " +
+                    "WHERE" +
+                    "   CONSUMER_KEY = ?";
+            if (log.isDebugEnabled()) {
+                log.debug("trying to delete key mapping for consumer id " + consumerKey);
+            }
+            ps = connection.prepareStatement(deleteKeyMappingQuery);
+            ps.setString(1, consumerKey);
+            ps.executeUpdate();
+            connection.commit();
+        } catch (SQLException e) {
+            handleException("Error while removing application mapping table", e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(ps,connection,null);
+        }
+    }
 
     /**
      * returns a subscriber record for given username,tenant Id
@@ -5201,7 +5675,7 @@ public class ApiMgtDAO {
      * @param tenantId   Tenant Id
      * @param connection
      * @return Subscriber
-     * @throws org.wso2.carbon.apimgt.api.APIManagementException if failed to get subscriber
+     * @throws APIManagementException if failed to get subscriber
      */
     private Subscriber getSubscriber(String username, int tenantId, Connection connection)
             throws APIManagementException {
@@ -5666,7 +6140,7 @@ public class ApiMgtDAO {
     /**
      * Persists WorkflowDTO to Database
      * @param workflow
-     * @throws org.wso2.carbon.apimgt.api.APIManagementException
+     * @throws APIManagementException
      */
     public void addWorkflowEntry(WorkflowDTO workflow) throws APIManagementException {
         Connection connection = null;
@@ -5735,7 +6209,7 @@ public class ApiMgtDAO {
      * Returns a workflow object for a given external workflow reference.
      * @param workflowReference
      * @return
-     * @throws org.wso2.carbon.apimgt.api.APIManagementException
+     * @throws APIManagementException
      */
     public WorkflowDTO retrieveWorkflow(String workflowReference) throws APIManagementException {
         Connection connection = null;
@@ -5801,7 +6275,7 @@ public class ApiMgtDAO {
          * @param apiId
          * @param connection
          * @return
-         * @throws org.wso2.carbon.apimgt.api.APIManagementException
+         * @throws APIManagementException
          */
 
 
@@ -5893,7 +6367,7 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
      * @param apiId
      * @param api
      * @param connection
-     * @throws org.wso2.carbon.apimgt.api.APIManagementException
+     * @throws APIManagementException
      */
     public void addURLTemplates(int apiId, API api, Connection connection) throws APIManagementException {
         if (apiId == -1) {
@@ -5964,7 +6438,7 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
      *
      * @param applicationName Name of the Application
      * @param userId Name of the User.
-     * @throws org.wso2.carbon.apimgt.api.APIManagementException
+     * @throws APIManagementException
      */
     public Application getApplicationByName(String applicationName, String userId) throws APIManagementException {
         //mysql> select APP.APPLICATION_ID, APP.NAME, APP.SUBSCRIBER_ID,APP.APPLICATION_TIER,APP.CALLBACK_URL,APP.DESCRIPTION,
@@ -6007,8 +6481,9 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
             prepStmt.setString(2, applicationName);
 
             rs = prepStmt.executeQuery();
-            application = new Application(applicationName, subscriber);
+            //application = new Application(applicationName, subscriber);
             while (rs.next()) {
+                application = new Application(applicationName, subscriber);
                 application.setDescription(rs.getString("DESCRIPTION"));
                 application.setStatus(rs.getString("APPLICATION_STATUS"));
                 application.setCallbackUrl(rs.getString("CALLBACK_URL"));
@@ -6089,7 +6564,7 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
      * update URI templates define for an API
      *
      * @param api
-     * @throws org.wso2.carbon.apimgt.api.APIManagementException
+     * @throws APIManagementException
      */
     public void updateURLTemplates(API api) throws APIManagementException {
 
@@ -6248,7 +6723,33 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
         return id;
     }
 
+    /**
+     * Delete a record from AM_APPLICATION_KEY_MAPPING table
+     * @param consumerKey
+     * @throws APIManagementException
+     */
+    public static void deleteApplicationMappingByConsumerKey(String consumerKey)
+            throws APIManagementException{
+        Connection connection = null;
+        PreparedStatement prepStmt = null;
 
+        String deleteApplicationKeyQuery = "DELETE " +
+                "FROM " +
+                "   AM_APPLICATION_KEY_MAPPING " +
+                "WHERE " +
+                "   CONSUMER_KEY = ?";
+
+        try {
+            prepStmt = connection.prepareStatement(deleteApplicationKeyQuery);
+            prepStmt.setString(1, consumerKey);
+            prepStmt.execute();
+            prepStmt.close();
+            connection.commit();
+        } catch (SQLException e) {
+            handleException("Error while deleting mapping: consumer key " + consumerKey + " from the database", e);
+        }
+
+    }
 
     public void deleteAPI(APIIdentifier apiId) throws APIManagementException {
         Connection connection = null;
@@ -6324,7 +6825,7 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
      * Change access token status in to revoked in database level.
      *
      * @param key API Key to be revoked
-     * @throws org.wso2.carbon.apimgt.api.APIManagementException on error in revoking access token
+     * @throws APIManagementException on error in revoking access token
      */
     public void revokeAccessToken(String key) throws APIManagementException {
 
@@ -6362,7 +6863,7 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
      *
      * @param accessToken String access token
      * @return APIIdentifier set for all API's associated with given access token
-     * @throws org.wso2.carbon.apimgt.api.APIManagementException error in getting APIIdentifiers
+     * @throws APIManagementException error in getting APIIdentifiers
      */
     public Set<APIIdentifier> getAPIByAccessToken(String accessToken)
             throws APIManagementException {
@@ -6406,7 +6907,7 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
      *
      * @param tier String tier name
      * @return Application object array associated with tier
-     * @throws org.wso2.carbon.apimgt.api.APIManagementException on error in getting applications array
+     * @throws APIManagementException on error in getting applications array
      */
     public Application[] getApplicationsByTier(String tier) throws APIManagementException {
         if (tier == null) {
@@ -6460,7 +6961,7 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
      * @param version         version of API
      * @param keyValidationInfoDTO   APIKeyValidationInfoDTO
      * @return signed JWT token string
-     * @throws org.wso2.carbon.apimgt.api.APIManagementException error in generating token
+     * @throws APIManagementException error in generating token
      */
     public String createJWTTokenString(String context, String version, APIKeyValidationInfoDTO keyValidationInfoDTO)
             throws APIManagementException {
@@ -6483,7 +6984,7 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
      * @param version         version of API
      * @param keyValidationInfoDTO   APIKeyValidationInfoDTO
      * @return signed JWT token string
-     * @throws org.wso2.carbon.apimgt.api.APIManagementException error in generating token
+     * @throws APIManagementException error in generating token
      */
     public String createJWTTokenString(String context, String version, APIKeyValidationInfoDTO keyValidationInfoDTO, String accessToken)
             throws APIManagementException {
@@ -6618,6 +7119,86 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
         return authorizedDomains;
     }
 
+    // This should be only used only when Token Partitioning is enabled.
+    public static  String getConsumerKeyForTokenWhenTokenPartitioningEnabled(String accessToken) throws APIManagementException {
+
+        if (APIUtil.checkAccessTokenPartitioningEnabled() &&
+            APIUtil.checkUserNameAssertionEnabled()) {
+            String accessTokenStoreTable = APIUtil.getAccessTokenStoreTableFromAccessToken(accessToken);
+            String authorizedDomains = "";
+            String accessAllowDomainsSql = "SELECT CONSUMER_KEY " +
+                                           " FROM " +accessTokenStoreTable+
+                                           " WHERE ACCESS_TOKEN = ? ";
+
+            Connection connection = null;
+            PreparedStatement prepStmt = null;
+            ResultSet rs = null;
+            try {
+                connection = APIMgtDBUtil.getConnection();
+                prepStmt = connection.prepareStatement(accessAllowDomainsSql);
+                prepStmt.setString(1, APIUtil.encryptToken(accessToken));
+                rs = prepStmt.executeQuery();
+                boolean first = true;
+                while (rs.next()) {  //if(rs.next==true) -> domain != null
+                    String domain = rs.getString(1);
+                    if (first) {
+                        authorizedDomains = domain;
+                        first = false;
+                    } else {
+                        authorizedDomains = authorizedDomains + "," + domain;
+                    }
+                }
+                prepStmt.close();
+            } catch (SQLException e) {
+                throw new APIManagementException
+                        ("Error in retrieving access allowing domain list from table.", e);
+            } catch (CryptoException e) {
+                throw new APIManagementException
+                        ("Error in retrieving access allowing domain list from table.", e);
+            } finally {
+                APIMgtDBUtil.closeAllConnections(prepStmt, connection, rs);
+            }
+            return authorizedDomains;
+        }
+
+        return null;
+    }
+
+    public static String getAuthorizedDomainsByConsumerKey(String consumerKey) throws APIManagementException {
+
+        String authorizedDomains = "";
+        String accessAllowDomainsSql = "SELECT AUTHZ_DOMAIN " +
+                                       " FROM AM_APP_KEY_DOMAIN_MAPPING" +
+                                       " WHERE CONSUMER_KEY = ? ";
+
+        Connection connection = null;
+        PreparedStatement prepStmt = null;
+        ResultSet rs = null;
+        try {
+            connection = APIMgtDBUtil.getConnection();
+            prepStmt = connection.prepareStatement(accessAllowDomainsSql);
+            prepStmt.setString(1, consumerKey);
+            rs = prepStmt.executeQuery();
+            boolean first = true;
+            while (rs.next()) {
+                String domain = rs.getString(1);
+                if (first) {
+                    authorizedDomains = domain;
+                    first = false;
+                } else {
+                    authorizedDomains = authorizedDomains + "," + domain;
+                }
+            }
+            prepStmt.close();
+        } catch (SQLException e) {
+            throw new APIManagementException
+                    ("Error in retrieving access allowing domain list from table.", e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(prepStmt, connection, rs);
+        }
+        return authorizedDomains;
+    }
+
     public static String findConsumerKeyFromAccessToken(String accessToken)
             throws APIManagementException {
         String accessTokenStoreTable = APIConstants.ACCESS_TOKEN_STORE_TABLE;
@@ -6736,7 +7317,7 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
      * Returns all the Comments on an API
      * @param identifier	API Identifier
      * @return				Comment Array
-     * @throws org.wso2.carbon.apimgt.api.APIManagementException
+     * @throws APIManagementException
      */
     public Comment[] getComments(APIIdentifier identifier) throws APIManagementException {
         List<Comment> commentList = new ArrayList<Comment>();
@@ -6880,12 +7461,15 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
                 application.setTier(rs.getString("APPLICATION_TIER"));
                 workflowDTO.setApplication(application);
                 workflowDTO.setKeyType(rs.getString("TOKEN_TYPE"));
-	            ApplicationKeysDTO appKeys = new ApplicationKeysDTO();
-	            appKeys.setTokenScope(rs.getString("TOKEN_SCOPE"));
-	            workflowDTO.setKeyDetails(appKeys);
+	            //ApplicationKeysDTO appKeys = new ApplicationKeysDTO();
+	            //appKeys.setTokenScope(rs.getString("TOKEN_SCOPE"));
+	            //workflowDTO.setKeyDetails(appKeys);
                 workflowDTO.setUserName(subscriber.getName());
                 workflowDTO.setDomainList(rs.getString("ALLOWED_DOMAINS"));
                 workflowDTO.setValidityTime(rs.getLong("VALIDITY_PERIOD"));
+                OauthAppRequest request = ApplicationUtils.createOauthAppRequest(application.getName(),
+                        application.getCallbackUrl(), rs.getString("TOKEN_SCOPE"),rs.getString("INPUTS"));
+                workflowDTO.setAppInfoDTO(request);
 
             }
 
@@ -6912,7 +7496,7 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
         String registrationEntry = "SELECT " +
                 "REG.TOKEN_TYPE," +
                 "REG.ALLOWED_DOMAINS," +
-                "REG.VALIDITY_PERIOD" +
+                "REG.VALIDITY_PERIOD," +
                 " FROM " +
                 "AM_APPLICATION_REGISTRATION REG, " +
                 "AM_APPLICATION APP " +
@@ -6942,6 +7526,144 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
             APIMgtDBUtil.closeAllConnections(ps, conn, rs);
         }
         return workflowDTO;
+    }
+
+    public ApplicationRegistrationWorkflowDTO populateAppRegistrationWorkflowDTO(Application application) throws
+                                                                                          APIManagementException {
+
+//        Connection conn = null;
+//        PreparedStatement ps = null;
+//        ResultSet rs = null;
+//
+//        ApplicationRegistrationWorkflowDTO workflowDTO = null;
+//
+//
+//        //TODO: Need to create a different Entity for holding Registration Info.
+//        String registrationEntry = "SELECT " +
+//                                   "REG.TOKEN_TYPE," +
+//                                   "REG.ALLOWED_DOMAINS," +
+//                                   "REG.VALIDITY_PERIOD," +
+//                                   "APP.NAME," +
+//                                   "INPUTS" +
+//                                   " FROM " +
+//                                   "AM_APPLICATION_REGISTRATION REG, " +
+//                                   "AM_APPLICATION APP " +
+//                                   " WHERE " +
+//                                   "REG.APP_ID = APP.APPLICATION_ID AND APP.APPLICATION_ID=?";
+//
+//
+//        try {
+//            conn = APIMgtDBUtil.getConnection();
+//            ps = conn.prepareStatement(registrationEntry);
+//            ps.setInt(1, application.getId());
+//            rs = ps.executeQuery();
+//
+//            while (rs.next()) {
+//                workflowDTO = (ApplicationRegistrationWorkflowDTO)
+//                        WorkflowExecutorFactory.getInstance().createWorkflowDTO(WorkflowConstants.WF_TYPE_AM_APPLICATION_REGISTRATION_PRODUCTION);
+//                workflowDTO.setKeyType(rs.getString("TOKEN_TYPE"));
+//                workflowDTO.setDomainList(rs.getString("ALLOWED_DOMAINS"));
+//                workflowDTO.setValidityTime(rs.getLong("VALIDITY_PERIOD"));
+//                OauthAppRequest request = ApplicationUtils.createOauthAppRequest(application.getName(),
+//                                                                                 application.getCallbackUrl(),
+//                                                                                 rs.getString("INPUTS"));
+//                workflowDTO.setApplicationInfo(request.getoAuthApplicationInfo());
+//                workflowDTO.setAppInfoDTO(request);
+//
+//            }
+//
+//            ps.close();
+//        } catch (SQLException e) {
+//            handleException("Error occurred while retrieving an " +
+//                            "Application Registration Entry for Application : " + application.getName(), e);
+//        } finally {
+//            APIMgtDBUtil.closeAllConnections(ps, conn, rs);
+//        }
+        //return workflowDTO;
+        return null;
+    }
+
+    public int getApplicationIdForAppRegistration(String workflowReference) throws APIManagementException {
+
+        Connection conn = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+        Application application = null;
+        Subscriber subscriber = null;
+        int appId = -1;
+
+        String registrationEntry = "SELECT " +
+                "APP_ID " +
+                " FROM " +
+                " AM_APPLICATION_REGISTRATION" +
+                " WHERE " +
+                " WF_REF=?";
+
+        try {
+            conn = APIMgtDBUtil.getConnection();
+            ps = conn.prepareStatement(registrationEntry);
+            ps.setString(1, workflowReference);
+            rs = ps.executeQuery();
+
+            while (rs.next()) {
+
+                appId = rs.getInt("APP_ID");
+            }
+
+            ps.close();
+        } catch (SQLException e) {
+            handleException("Error occurred while retrieving an " +
+                    "Application Registration Entry for Workflow : " + workflowReference, e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(ps, conn, rs);
+        }
+        return appId;
+    }
+
+    /**
+     * Fetches WorkflowReference when given Application Name and UserId.
+     *
+     * @param applicationName
+     * @param userId
+     * @return WorkflowReference
+     * @throws APIManagementException
+     */
+    public String getWorkflowReference(String applicationName, String userId) throws APIManagementException {
+        Connection conn = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+        String workflowReference = null;
+
+        String sqlQuery = "SELECT REG.WF_REF FROM " +
+                          "AM_APPLICATION APP, " +
+                          "AM_APPLICATION_REGISTRATION REG, " +
+                          "AM_SUBSCRIBER SUB WHERE " +
+                          "APP.NAME=? AND " +
+                          "SUB.USER_ID=? AND " +
+                          "SUB.SUBSCRIBER_ID = APP.SUBSCRIBER_ID AND " +
+                          "REG.APP_ID=APP.APPLICATION_ID";
+
+        try {
+            conn = APIMgtDBUtil.getConnection();
+            ps = conn.prepareStatement(sqlQuery);
+            ps.setString(1, applicationName);
+            ps.setString(2, userId);
+            rs = ps.executeQuery();
+
+            while (rs.next()) {
+
+                workflowReference = rs.getString("WF_REF");
+            }
+
+            ps.close();
+        } catch (SQLException e) {
+            handleException("Error occurred while getting workflow entry for " +
+                            "Application : " + applicationName + " created by " + userId, e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(ps, conn, rs);
+        }
+        return workflowReference;
+
     }
 
 
@@ -7028,7 +7750,7 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
      *
      * @param login
      * @return
-     * @throws org.wso2.carbon.apimgt.api.APIManagementException
+     * @throws APIManagementException 
      */
     private String getPrimaryloginFromSecondary(String login) throws APIManagementException {
         Map<String, Map<String, String>> loginConfiguration = ServiceReferenceHolder.getInstance()
@@ -7062,7 +7784,7 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
      *
      * @param userID
      * @return
-     * @throws org.wso2.carbon.apimgt.api.APIManagementException
+     * @throws APIManagementException 
      */
     private String getLoginUserName(String userID) throws APIManagementException {
         String primaryLogin = userID;
@@ -7082,7 +7804,7 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
      * @param apiId APIIdentifier
      * @param apiStoreSet APIStores set
      * @return   added/failed
-     * @throws org.wso2.carbon.apimgt.api.APIManagementException
+     * @throws APIManagementException
      */
     public boolean addExternalAPIStoresDetails(APIIdentifier apiId, Set<APIStore> apiStoreSet)
             throws APIManagementException {
@@ -7148,7 +7870,7 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
      * @param apiId APIIdentifier
      * @param apiStoreSet APIStores set
      * @return   added/failed
-     * @throws org.wso2.carbon.apimgt.api.APIManagementException
+     * @throws APIManagementException
      */
     public boolean deleteExternalAPIStoresDetails(APIIdentifier apiId, Set<APIStore> apiStoreSet)
             throws APIManagementException {
@@ -7237,7 +7959,7 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
     /**
      * Updateexternal APIStores details to which APIs published
      * @param apiIdentifier API Identifier
-     * @throws org.wso2.carbon.apimgt.api.APIManagementException if failed to add Application
+     * @throws APIManagementException if failed to add Application
      */
     public void updateExternalAPIStoresDetails(APIIdentifier apiIdentifier,
                                                Set<APIStore> apiStoreSet, Connection conn)
@@ -7295,7 +8017,7 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
      * Return external APIStore details on successfully APIs published
      * @param apiId  APIIdentifier
      * @return  Set of APIStore
-     * @throws org.wso2.carbon.apimgt.api.APIManagementException
+     * @throws APIManagementException
      */
     public Set<APIStore> getExternalAPIStoresDetails(APIIdentifier apiId)
             throws APIManagementException {
@@ -7330,7 +8052,7 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
      * Get external APIStores details which are stored in database
      *
      * @param apiIdentifier API Identifier
-     * @throws org.wso2.carbon.apimgt.api.APIManagementException if failed to get external APIStores
+     * @throws APIManagementException if failed to get external APIStores
      */
     public Set<APIStore> getExternalAPIStoresDetails(APIIdentifier apiIdentifier
             , Connection conn)
@@ -7703,7 +8425,7 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
      * update URI templates define for an API
      *
      * @param api
-     * @throws org.wso2.carbon.apimgt.api.APIManagementException
+     * @throws APIManagementException
      */
     public void updateScopes(API api, int tenantId)
             throws APIManagementException {
@@ -7811,7 +8533,38 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
         return null;
     }
 
-	/**
+    public static String getUserFromOauthToken(String oauthToken) throws APIManagementException {
+
+        Connection conn = null;
+        ResultSet resultSet = null;
+        PreparedStatement ps = null;
+        String tokenOwner = null;
+
+        try {
+            conn = APIMgtDBUtil.getConnection();
+            String getUserQuery = "SELECT DISTINCT AMS.USER_ID  ,AKM.CONSUMER_KEY " +
+                    "FROM AM_APPLICATION_KEY_MAPPING AKM, AM_APPLICATION AA, AM_SUBSCRIBER AMS " +
+                    "WHERE AKM.CONSUMER_KEY = ? AND " +
+                    "AKM.APPLICATION_ID = AA.APPLICATION_ID AND AA.SUBSCRIBER_ID = AMS.SUBSCRIBER_ID";
+            ps = conn.prepareStatement(getUserQuery);
+            ps.setString(1, oauthToken);
+            resultSet = ps.executeQuery();
+            if (resultSet.next()) {
+                tokenOwner = resultSet.getString("USER_ID");
+            }
+            resultSet.close();
+            ps.close();
+            return tokenOwner;
+        } catch (SQLException e) {
+            handleException("Failed to retrieve user ID for given OAuth token", e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(ps, conn, resultSet);
+        }
+        return null;
+    }
+
+
+    /**
 	 * Remove scope entries from DB, when delete APIs
 	 * 
 	 * @param apiIdentifier

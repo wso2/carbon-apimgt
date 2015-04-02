@@ -53,7 +53,7 @@ public class MediationSecurityAdminServiceClient extends AbstractAPIGatewayAdmin
 	 * 
 	 * @param api
 	 * @param tenantDomain
-	 * @throws org.wso2.carbon.apimgt.api.APIManagementException
+	 * @throws APIManagementException 
 	 * 
 	 */
 	public void addSecureVaultProperty(API api, String tenantDomain) throws APIManagementException  {		
@@ -82,7 +82,7 @@ public class MediationSecurityAdminServiceClient extends AbstractAPIGatewayAdmin
 	 * 
 	 * @param api
 	 * @param tenantDomain
-	 * @throws org.wso2.carbon.apimgt.api.APIManagementException
+	 * @throws APIManagementException
 	 */
 	public void deleteSecureVaultProperty(API api, String tenantDomain) throws APIManagementException  {
 		
@@ -109,7 +109,7 @@ public class MediationSecurityAdminServiceClient extends AbstractAPIGatewayAdmin
 	 * 
 	 * @param api
 	 * @param tenantDomain
-	 * @throws org.wso2.carbon.apimgt.api.APIManagementException
+	 * @throws APIManagementException
 	 */
 	public void updateSecureVaultProperty(API api,String tenantDomain) throws APIManagementException {	
 		UserRegistry registry;
@@ -138,7 +138,7 @@ public class MediationSecurityAdminServiceClient extends AbstractAPIGatewayAdmin
 	 * @param plainTextPass
 	 *            plain text password
 	 * @return encrypted password
-	 * @throws org.wso2.carbon.apimgt.api.APIManagementException
+	 * @throws APIManagementException
 	 */
 	private String doEncryption(String plainTextPass) throws APIManagementException {
 		
@@ -160,7 +160,7 @@ public class MediationSecurityAdminServiceClient extends AbstractAPIGatewayAdmin
 	 * 
 	 * @param tenantDomain
 	 * @return
-	 * @throws org.wso2.carbon.apimgt.api.APIManagementException
+	 * @throws APIManagementException
 	 */
 	private UserRegistry getRegistry(String tenantDomain) throws APIManagementException {
 		PrivilegedCarbonContext.startTenantFlow();

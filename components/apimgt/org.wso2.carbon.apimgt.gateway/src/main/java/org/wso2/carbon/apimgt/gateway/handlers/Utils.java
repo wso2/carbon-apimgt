@@ -36,10 +36,12 @@ import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 
 import javax.xml.namespace.QName;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+
+import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
+import java.util.*;
+import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
+// import org.wso2.carbon.identity.oauth2.stub.dto.OAuth2TokenValidationResponseDTO_TokenValidationContextParam;
+
 
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
@@ -199,7 +201,7 @@ public class Utils {
     	
     	return allowedOrigins;
     }
-    
+
     public static String getAllowedHeaders() {
     	return ServiceReferenceHolder.getInstance().getAPIManagerConfiguration().
     	        getFirstProperty(APIConstants.CORS_CONFIGURATION_ACCESS_CTL_ALLOW_HEADERS);

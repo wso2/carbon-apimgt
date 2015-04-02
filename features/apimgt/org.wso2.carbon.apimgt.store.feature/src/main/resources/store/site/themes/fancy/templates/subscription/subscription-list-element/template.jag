@@ -2,6 +2,9 @@
 <% var i=outputs.i, app = outputs.app, thumbURL = '';
    var str_i = String(i).replace('.','_');
    var gatewayurlendpoint = outputs.gatewayurl;
+	var log = new Log();
+	var userName=jagg.getUser().username;
+
    if(app!=null){
 	   var apis = app.subscriptions;
 	   var length = outputs.length;
@@ -21,12 +24,14 @@
         <div class="keyBoxOut">
             <div class="container-fluid">
 	   			<div class="span6">
+
                         <%
                          var log = new Log();
                          var prodVadidataionTime = app.prodValidityTime;
                          var sandVadidataionTime = app.sandValidityTime;
                          var scopes = app.scopes;
                          lenS = scopes.length;
+
 
                          <!-- If token is not set to never expire, then take the expiration in seconds -->
                          if (prodVadidataionTime > 0) {
@@ -38,12 +43,13 @@
 
                          <!-- This is required to remove the decimal points getting added by jaggery to validation time-->
                          if (prodVadidataionTime != null) {
-                            var prod_tmp = String(prodVadidataionTime).split();
+                            var prod_tmp = String(Math.ceil(prodVadidataionTime)).split(".");
                             var prodValidityTime = prod_tmp[0];
+
                          }
 
                          if (sandVadidataionTime != null) {
-                            var sand_tmp = String(sandVadidataionTime).split();
+                            var sand_tmp = String(Math.ceil(sandVadidataionTime)).split(".");
                             var sandValidityTime = sand_tmp[0];
                          }
 
@@ -137,10 +143,12 @@
 											</div>
 											<div class="span10">
 												<div class="form-inline proRegenerateForm">
-												    <% if(lenS > 0){ %>
+
+													<% if(lenS > 0){ %>
 												        <a href="#scopePopup" role="button" class="btn" data-toggle="modal" id="selectScopeText" ><%=i18n.localize("selectScopes")%></a>
-                                                    <% } %>
-													Validity Time: <input type="text" class="input-mini token-validity-input" id="refreshProdValidityTime" value='<%=prodValidityTime%>' maxlength="70"  autofocus="autofocus" /> Seconds
+                                            						            <% } %>		
+													Validity Time: <input type="text" class="input-mini token-validity-input" id="refreshProdValidityTime" value='<%=prodValidityTime %>' maxlength="70"  autofocus="autofocus" /> Seconds
+
 													<span class="label label-warning" id = "timeWarn" style="display:none;"><%=i18n.localize("timeWarn")%></span>
 													<button class="show-hide-key btn btn-primary" onclick="regenerate('<%=app.name%>','PRODUCTION',200,this,'pull-right','<%=app.prodConsumerKey%>','<%=app.prodConsumerSecret%>')" ><i class="fa fa-repeat"></i> <%=i18n.localize("regenerate")%></button>
 												</div>
@@ -174,11 +182,51 @@
                             <a href="#scopePopup" role="button" class="btn" data-toggle="modal" ><%=i18n.localize("selectScopes")%></a>
                         <% } %>
                         <div class="gen-btn-wrapper">
-                        	<button  class="app-key-generate-button btn btn-primary" onclick="jagg.sessionAwareJS({redirect:'/site/pages/subscriptions.jag'})"
-                                   data-application="<%=app.name%>"
-                                   data-callbackUrl="<%=app.callbackUrl%>"
-                                   data-keytype="PRODUCTION"
-                                   iteration="200"><%=i18n.localize("generate")%></button>
+                        	<div class="cDivParentOfManualAuthAppCreateProduction">
+                        		<div class="cDivRowOfElements">
+                        			<div class="cDivTextMappingExternalAuthApp">
+                        			Consumer key :
+                        			</div>
+									<div class="cDivInputMappingExternalAuthApp">
+										<input type="text" class="input-xlarge token-validity-input"
+										id="inputConsumerKeyProduction" value=""  maxlength="200"
+										autofocus="autofocus"
+										style="margin-top:5px;"  />
+									</div>
+                        		</div>
+                        		<div class="cDivRowOfElements">
+                        			<div class="cDivTextMappingExternalAuthApp">
+									Consumer secret :
+									</div>
+									<div class="cDivInputMappingExternalAuthApp">
+										<input type="text" class="input-xlarge token-validity-input"
+										id="inputConsumerSecretProduction" value="" maxlength="200"
+										autofocus="autofocus"
+										style="margin-top:5px;"  />
+									</div>
+                        		</div>
+                        		<button  class="btn btn-primary "
+                        		id="btnProvideKeyProductionSave" data-application="<%=app.name%>"
+									   data-callbackUrl="<%=app.callbackUrl%>"
+									   data-keytype="PRODUCTION"
+									   data-username="<%= userName %>"
+									   iteration="200">Save</button>
+                            	<button  class="btn btn-primary "
+                            	id="btnProvideKeyProductionCancle">Cancel</button>
+                        	</div>
+                        	<div class="cDivDefaultBtnSet">
+								<button  class="app-key-generate-button btn btn-primary btn-generatekeys" onclick="jagg
+								.sessionAwareJS({redirect:'/site/pages/subscriptions.jag'})"
+									   data-application="<%=app.name%>"
+									   data-callbackUrl="<%=app.callbackUrl%>"
+									   data-keytype="PRODUCTION"
+									   data-username="<%= userName %>"
+									   iteration="200">Generate keys</button>
+								<button  class="btn btn-primary btn-providekeys"
+								id="btnProvideKeyProduction">Provide
+								keys</button>
+                            </div>
+
                         </div>
                         <% } %>
                     </div>
@@ -351,11 +399,50 @@
                            <a href="#scopePopup" role="button" class="btn" data-toggle="modal" ><%=i18n.localize("selectScopes")%></a>
                        <% } %>
                        <div class="gen-btn-wrapper" <% if(app.sandboxKey!=null){%>style="display:none"<% } %> >
-                           <button class="app-key-generate-button btn btn-primary" onclick="jagg.sessionAwareJS({redirect:'/site/pages/subscriptions.jag'})"
-                          		data-application="<%=app.name%>"
-                          		data-callbackUrl="<%=app.callbackUrl%>"
-                          		data-keytype="SANDBOX"
-                          		iteration="200"><%=i18n.localize("generate")%></button>
+                       		<div class="cDivParentOfManualAuthAppCreateSandBox">
+                        		<div class="cDivRowOfElements">
+                        			<div class="cDivTextMappingExternalAuthApp">
+                        			Consumer key :
+                        			</div>
+									<div class="cDivInputMappingExternalAuthApp">
+										<input type="text" class="input-xlarge token-validity-input"
+										id="inputConsumerKeySandBox" value=""  maxlength="200"
+										autofocus="autofocus"
+										style="margin-top:5px;"  />
+									</div>
+                        		</div>
+                        		<div class="cDivRowOfElements">
+                        			<div class="cDivTextMappingExternalAuthApp">
+									Consumer secreat :
+									</div>
+									<div class="cDivInputMappingExternalAuthApp">
+										<input type="text" class="input-xlarge token-validity-input"
+										id="inputConsumerSecretSandBox" value="" maxlength="200"
+										autofocus="autofocus"
+										style="margin-top:5px;"  />
+									</div>
+                        		</div>
+                        		<button  class="btn btn-primary "
+                        		id="btnProvideKeySandBoxSave" data-application="<%=app.name%>"
+									   data-callbackUrl="<%=app.callbackUrl%>"
+									   data-keytype="SANDBOX"
+									   data-username="<%= userName %>"
+									   iteration="200">Save</button>
+                            	<button  class="btn btn-primary "
+                            	id="btnProvideKeySandBoxCancel">Cancel</button>
+                        	</div>
+                        	<div class="defaultBtnSetForSandBox">
+							   <button  class="app-key-generate-button btn btn-primary btn-generatekeys" onclick="jagg
+								.sessionAwareJS({redirect:'/site/pages/subscriptions.jag'})"
+									   data-application="<%=app.name%>"
+									   data-callbackUrl="<%=app.callbackUrl%>"
+									   data-keytype="SANDBOX"
+									   data-username="<%= userName %>"
+									   iteration="200">Generate keys</button>
+								<button  class="btn btn-primary btn-providekeys"
+									id="btnProvideKeySandBox">Provide
+									keys</button>
+							</div>
                        </div>
                        <% } %>
                        <!-- END Show key info -->
