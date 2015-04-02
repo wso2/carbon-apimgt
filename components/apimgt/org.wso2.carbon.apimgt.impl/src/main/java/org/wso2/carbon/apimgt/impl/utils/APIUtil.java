@@ -65,6 +65,7 @@ import org.wso2.carbon.apimgt.impl.dto.Environment;
 import org.wso2.carbon.apimgt.impl.internal.APIManagerComponent;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.keymgt.client.SubscriberKeyMgtClient;
+import org.wso2.carbon.bam.service.data.publisher.conf.EventingConfigData;
 import org.wso2.carbon.base.MultitenantConstants;
 import org.wso2.carbon.base.ServerConfiguration;
 import org.wso2.carbon.context.CarbonContext;
@@ -2424,29 +2425,18 @@ public final class APIUtil {
      * publishing
      * @throws APIManagementException
      */
-    public static void addBamServerProfile(String bamServerURL, String bamServerUser,
-    		String bamServerPassword, String bamServerThriftPort, int tenantId) throws APIManagementException {
+    public static void addBamServerProfile(String bamServerURL, String bamServerUser, 
+    		String bamServerPassword, int tenantId) throws APIManagementException {
     	RegistryService registryService = ServiceReferenceHolder.getInstance().getRegistryService();
         try {
             UserRegistry registry = registryService.getConfigSystemRegistry(tenantId);
             log.debug("Adding Bam Server Profile to the registry");
             InputStream inputStream = APIManagerComponent.class.getResourceAsStream("/bam/profile/bam-profile.xml");
             String bamProfile = IOUtils.toString(inputStream);
-
-            int strIndex = bamServerURL.indexOf("://");
-            int endIndex = bamServerURL.lastIndexOf(":");
-
-            bamServerURL = bamServerURL.substring(strIndex + 3, endIndex);
-            bamServerPassword = encryptPassword(bamServerPassword);
-            int bamServerThriftPortVal = Integer.parseInt(bamServerThriftPort);
-            String bamServerThriftAuthPort = String.valueOf(bamServerThriftPortVal + 100);
-
+                        
             String bamProfileConfig = bamProfile.replaceAll("\\[1\\]", bamServerURL).
-            		replaceAll("\\[2\\]", bamServerThriftAuthPort).
-            		replaceAll("\\[3\\]", bamServerThriftPort).
-            		replaceAll("\\[4\\]", bamServerUser).
-            		replaceAll("\\[5\\]", bamServerPassword);
-
+            		replaceAll("\\[2\\]", bamServerUser).
+            		replaceAll("\\[3\\]", bamServerPassword);
 
             Resource resource = registry.newResource();
             resource.setContent(bamProfileConfig);
@@ -2460,6 +2450,21 @@ public final class APIUtil {
         			"configuration file content", e);
 		}
 	}
+
+    public static boolean isAnalyticsEnabled() {
+        return APIManagerComponent.getDataPublisherAdminService().getEventingConfigData().isServiceStatsEnable();
+    }
+
+    public static Map<String, String> getAnalyticsConfigFromRegistry() {
+
+        Map<String,String> propertyMap = new HashMap<String, String>();
+        EventingConfigData eventingConfigData = APIManagerComponent.
+                getDataPublisherAdminService().getEventingConfigData();
+        propertyMap.put(APIConstants.API_USAGE_BAM_SERVER_URL_GROUPS, eventingConfigData.getUrl());
+        propertyMap.put(APIConstants.API_USAGE_BAM_SERVER_USER, eventingConfigData.getUserName());
+        propertyMap.put(APIConstants.API_USAGE_BAM_SERVER_PASSWORD, eventingConfigData.getPassword());
+        return propertyMap;
+    }
 
     public static void writeDefinedSequencesToTenantRegistry(int tenantID)
             throws APIManagementException {

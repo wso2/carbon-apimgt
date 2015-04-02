@@ -33,6 +33,7 @@ var newDocFormToggle = function(){
     $('#docName').removeAttr("disabled").val('');
     $('#summary').val('');
     $('#docUrl').val('');
+    $("#docLocation").val('');
     $('#specifyBox').val('');
     $('#optionsRadios6').attr("checked","checked");
     $('#optionsRadios1').attr("checked","checked");

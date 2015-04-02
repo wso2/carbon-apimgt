@@ -22,15 +22,15 @@
     <% }else{
     %>
    <script type="text/javascript">
-   
+   	var user = <%=jagg.getUser()%>;
+	var username = user.username ; 
 	var s3 = "	{'apiVersion':'1.0.0','swaggerVersion':'1.2','authorizations':{'oauth2':{'scopes':[],'type':'oauth2'}},'apis':[{'file':{'apiVersion':'1.0.0','basePath':'http://10.100.4.11:8280/weatherapi/1.0.0','swaggerVersion':'1.2','resourcePath':'/default','apis':[{'path':'/*','operations':[{'nickname':'get_*','method':'GET','parameters':[{'description':'Name of the City','name':'q','allowMultiple':false,'required':false,'type':'string','paramType':'query'}],'auth_type':'Application & Application User','throttling_tier':'Unlimited'},{'nickname':'options_*','method':'OPTIONS','parameters':[{'description':'Request Body','name':'body','allowMultiple':false,'required':false,'type':'string','paramType':'body'}],'auth_type':'None','throttling_tier':'Unlimited'}]}]},'description':'','path':'/default'}],'info':{'title':'WeatherAPI','termsOfServiceUrl':'','description':'Description','license':'','contact':'','licenseUrl':''}}";
 	
 	var deploySampleAPI = function(){
-
 		var formData = new FormData();
 		formData.append("action", "sampleDesign");
 		formData.append("name", "WeatherAPI");
-		formData.append("provider", "admin");
+		formData.append("provider", username);
 		formData.append("version", "1.0.0");
 		formData.append("description", "The WeatherAPI gives the weather details according to the city name");
 		formData.append("tags", "weather");
@@ -62,16 +62,17 @@
   			if (request.readyState==4 && request.status==200)
     		{
     			var urlDesign = '/site/blocks/item-design/ajax/add.jag';
-    			var resultImplement = jagg.post(urlDesign,{action:"implement",name:"WeatherAPI",provider:"admin",version:"1.0.0",provider:"admin",implementation_methods:"endpoint",endpoint_type:"http",endpoint_config:'{"production_endpoints":{"url":"http://api.openweathermap.org/data/2.5/weather","config":null},"endpoint_type":"http"}',production_endpoints:"http://api.openweathermap.org/data/2.5/weather",sandbox_endpoints:" ",endpointType:"nonsecured",swagger:s3},
+    			var dataJSON = '{action:"implement",name:"WeatherAPI",provider:username,version:"1.0.0",provider:"'+username+'",implementation_methods:"endpoint",endpoint_type:"http",endpoint_config:\'{"production_endpoints":{"url":"http://api.openweathermap.org/data/2.5/weather","config":null},"endpoint_type":"http"}\',production_endpoints:"http://api.openweathermap.org/data/2.5/weather",sandbox_endpoints:" ",endpointType:"nonsecured",swagger:s3}';
+    			var resultImplement = jagg.post(urlDesign,{action:"implement",name:"WeatherAPI",version:"1.0.0",provider:username,implementation_methods:"endpoint",endpoint_type:"http",endpoint_config:'{"production_endpoints":{"url":"http://api.openweathermap.org/data/2.5/weather","config":null},"endpoint_type":"http"}',production_endpoints:"http://api.openweathermap.org/data/2.5/weather",sandbox_endpoints:" ",endpointType:"nonsecured",swagger:s3},
 			
 				function(result){
 				
-				var resultManage = jagg.post(urlDesign,{action:"manage",name:"WeatherAPI",provider:"admin",version:"1.0.0",provider:"admin",default_version_checked:" ",tier:"Unlimited",tiersCollection:"Unlimited",transport_http:"http",transport_https:"https",subscriptions:"all_tenants",swagger:s3},
+				var resultManage = jagg.post(urlDesign,{action:"manage",name:"WeatherAPI",provider:username,version:"1.0.0",default_version_checked:" ",tier:"Unlimited",tiersCollection:"Unlimited",transport_http:"http",transport_https:"https",subscriptions:"all_tenants",swagger:s3},
 				
 				function(result){
 					var urlPublished="/site/blocks/life-cycles/ajax/life-cycles.jag";
 
-					var result2 = jagg.post(urlPublished,{action:"updateStatus",name:"WeatherAPI",version:"1.0.0",provider:"admin",status:"PUBLISHED",publishToGateway:true,requireResubscription:true},
+					var result2 = jagg.post(urlPublished,{action:"updateStatus",name:"WeatherAPI",version:"1.0.0",provider:username,status:"PUBLISHED",publishToGateway:true,requireResubscription:true},
 					function(result){
 						if(!result.error){
 							window.location.assign("/publisher/site/pages/index.jag");
@@ -88,13 +89,11 @@
 				},'json');
 			
 			
-			},'json');
-			
+			},'json');	
 		}
-	
   } 
-	
 } 
+
    function hideMsg() {
        $('#apiInfo').hide("fast");
    }

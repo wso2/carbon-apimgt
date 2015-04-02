@@ -28,11 +28,13 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.hostobjects.internal.HostObjectComponent;
 import org.wso2.carbon.apimgt.hostobjects.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.APIManagerAnalyticsConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.keymgt.client.SubscriberKeyMgtClient;
 import org.wso2.carbon.apimgt.keymgt.client.ProviderKeyMgtClient;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.identity.user.registration.stub.dto.UserFieldDTO;
+import org.wso2.carbon.ndatasource.common.DataSourceException;
 import org.wso2.carbon.utils.CarbonUtils;
 import org.wso2.carbon.utils.ConfigurationContextService;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
@@ -189,11 +191,14 @@ public class HostObjectUtils {
 
     }
 
+    /**
+    *This methos is to check whether stat publishing is enabled
+    * @return boolean
+     */
     protected static boolean checkDataPublishingEnabled() {
-        APIManagerConfiguration configuration =
-                ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration();
-        String enabledStr = configuration.getFirstProperty(APIConstants.API_USAGE_ENABLED);
-        return enabledStr != null && Boolean.parseBoolean(enabledStr);
+        APIManagerAnalyticsConfiguration analyticsConfiguration =
+                ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIAnalyticsConfiguration();
+        return analyticsConfiguration.isAnalyticsEnabled();
     }
 
     /**
@@ -225,10 +230,17 @@ public class HostObjectUtils {
         }
     }
 
-    protected static  boolean isUsageDataSourceSpecified() {
-        APIManagerConfiguration configuration =
-                ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration();
+    protected static boolean isUsageDataSourceSpecified() {
+        try {
+            return (null != HostObjectComponent.getDataSourceService().
+                    getDataSource(APIConstants.API_USAGE_DATA_SOURCE_NAME));
+        } catch (DataSourceException e) {
+            return false;
+        }
+    }
 
-        return (null != configuration.getFirstProperty(APIConstants.API_USAGE_DATA_SOURCE_NAME));
+    protected static boolean isStatPublishingEnabled() {
+            return ServiceReferenceHolder.getInstance().
+                    getAPIManagerConfigurationService().getAPIAnalyticsConfiguration().isAnalyticsEnabled();
     }
 }
