@@ -94,7 +94,6 @@ $(document).ready(function () {
         var regen;
         var link;
         var validityTime;
-        var applicationId=$('option:selected','#appListSelected').attr('appId');
         if (keyType == 'PRODUCTION') {
             authoDomains = $('#allowedDomainsPro').val();
             validityTime=$('#refreshProdValidityTime').val();
@@ -112,8 +111,7 @@ $(document).ready(function () {
             authorizedDomains:authoDomains,
             validityTime:validityTime,
             tokenScope:tokenScope,
-	    selectedAppID:applicationId
-
+	  
         }, function (result) {
             if (!result.error) {
                 location.reload();
@@ -135,7 +133,6 @@ $(document).ready(function () {
         var link;
         var validityTime;
         var tokenScope;
-        var applicationId=$('#appListSelected').val();
         
         if (keyType == 'PRODUCTION') {
             authoDomains = $('#allowedDomainsPro').val();
@@ -152,8 +149,7 @@ $(document).ready(function () {
             callbackUrl:elem.attr("data-callbackUrl"),
             authorizedDomains:authoDomains,
             validityTime:validityTime,
-	        retryAfterFailure:true,
-            applicationId:applicationId
+	        retryAfterFailure:true
         }, function (result) {
             if (!result.error) {
                 location.reload();
@@ -405,7 +401,7 @@ function toggleTokenTimeSection(link){
     }
 }
 
-function removeSubscription(apiName, version, provider, applicationId, delLink) {
+function removeSubscription(apiName, version, provider,  delLink) {
     jagg.sessionAwareJS({redirect:'/site/pages/subscriptions.jag'});
     $('#messageModal').html($('#confirmation-data').html());
     $('#messageModal h3.modal-title').html(i18n.t('confirm.delete'));
@@ -418,8 +414,7 @@ function removeSubscription(apiName, version, provider, applicationId, delLink) 
         name:apiName,
         version:version,
         provider:provider,
-        applicationId:applicationId
-    }, function (result) {
+       }, function (result) {
         if (!result.error) {
             $('#messageModal').modal("hide");
             location.href = '?removeSession=true&'+urlPrefix;

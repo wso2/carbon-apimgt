@@ -4,7 +4,7 @@ include("/jagg/jagg.jag");
     var site = require("/site/conf/site.json");
     var ssoEnabled = site.ssoConfiguration.enabled;
     response.contentType = "application/json; charset=UTF-8";
-    var mod, obj, result, username,
+    var mod, obj, result, username, selectedApp , page,
             msg = require("/site/conf/ui-messages.jag"),
             action = request.getParameter("action"),
             user = jagg.getUser();
@@ -34,9 +34,15 @@ include("/jagg/jagg.jag");
             selectedApp= "";
         }
 
+		page = request.getParameter("page");
+         if(page == null){
+				page = 1;
+		}
+     
         mod = jagg.module("subscription");
         var groupId = session.get("groupId");
-        result = mod.getAllSubscriptions(username,selectedApp, groupId);
+        result = mod.getAllSubscriptions(username,selectedApp,page);
+        
 
         if (result.error) {
             obj = {
@@ -46,7 +52,7 @@ include("/jagg/jagg.jag");
         } else {
             obj = {
                 error:false,
-                subscriptions:result.applications
+                subscriptions:result.result.applications
             }
         }
         print(obj);

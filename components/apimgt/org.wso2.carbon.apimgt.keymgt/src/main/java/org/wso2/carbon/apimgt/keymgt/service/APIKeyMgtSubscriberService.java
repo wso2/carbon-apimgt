@@ -127,7 +127,7 @@ public class APIKeyMgtSubscriberService extends AbstractAdmin {
             //get the tenant id for the corresponding domain
             String tenantAwareUserId = userId;
             int tenantId = IdentityUtil.getTenantIdOFUser(userId);
-            Application application = apiMgtDAO.getApplicationByName(applicationName, userId);
+            Application application = apiMgtDAO.getApplicationByName(applicationName, userId, null);
             String state = apiMgtDAO.getRegistrationApprovalState(application.getId(), tokenType);
             if (APIConstants.AppRegistrationStatus.REGISTRATION_APPROVED.equals(state)) {
                 credentials = apiMgtDAO.addOAuthConsumer(tenantAwareUserId, tenantId, applicationName, callbackUrl);
@@ -317,7 +317,7 @@ public class APIKeyMgtSubscriberService extends AbstractAdmin {
         dao = new ApiMgtDAO();
         if (gatewayExists) {
             keys = dao.getApplicationKeys(application.getId());
-            apiSet = dao.getSubscribedAPIs(application.getSubscriber());
+            apiSet = dao.getSubscribedAPIs(application.getSubscriber(), null);
         }
         List<APIKeyMapping> mappings = new ArrayList<APIKeyMapping>();
         for (String key : keys) {
@@ -353,7 +353,7 @@ public class APIKeyMgtSubscriberService extends AbstractAdmin {
             APIManagementException, AxisFault {
         ApiMgtDAO dao;
         dao = new ApiMgtDAO();
-        Application[] applications = dao.getApplications(subscriber);
+        Application[] applications = dao.getApplications(subscriber, null);
         for (Application app : applications) {
             revokeAccessTokenForApplication(app);
         }

@@ -4,7 +4,7 @@ include("/jagg/jagg.jag");
     var site = require("/site/conf/site.json");
     var ssoEnabled = site.ssoConfiguration.enabled;
     response.contentType = "application/json; charset=UTF-8";
-    var mod, obj, name, version, provider, tier, applicationId, application, context, result, username,
+    var mod, obj, name, version, provider, tier,  application, context, result, username,
             user = jagg.getUser(),
             msg = require("/site/conf/ui-messages.jag"),
             action = request.getParameter("action");
@@ -22,7 +22,7 @@ include("/jagg/jagg.jag");
         apiName = request.getParameter("name");
         version = request.getParameter("version");
         provider = request.getParameter("provider");
-        applicationId = parseInt(request.getParameter("applicationId"), 10);
+        applicationId = session.get("groupId");
         username = user.username;
 
         mod = jagg.module("subscription");

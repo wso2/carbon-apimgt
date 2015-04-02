@@ -12,7 +12,7 @@ jagg.block("subscription/subscription-list", {
 
     getOutputs:function (inputs) {
 
-        var applications, result, response, selectedApp, totalLength, page = request.getParameter("page"), user = inputs.user;
+        var applications, result, response, selectedApp, totalLength,  user = inputs.user, page;
         if(request.getParameter('selectedApp')!=null){
             selectedApp = request.getParameter('selectedApp');
         }else if(session.get('selectedApp') != null){
@@ -21,19 +21,17 @@ jagg.block("subscription/subscription-list", {
             selectedApp = "";
         }
         
+        page = request.getParameter("page");
          if(page == null){
 				page = 1;
 		}
-		var itemsPerPage = 10; //change this to change the number of items per page.
-		var startIndex = (page-1)*itemsPerPage, endIndex = startIndex + itemsPerPage;
-		response = jagg.module("subscription").getAllSubscriptions(user.username, selectedApp, startIndex, endIndex);
+		response = jagg.module("subscription").getAllSubscriptions(user.username, selectedApp, page);
 		applications = response.result.applications;
 		totalLength = response.result.totalLength;
 		return {
 			"applications":applications,
 			"totalLength":totalLength,
-			"page":page,
-			"itemsPerPage":itemsPerPage
+			"page":page
 		};
      },
 

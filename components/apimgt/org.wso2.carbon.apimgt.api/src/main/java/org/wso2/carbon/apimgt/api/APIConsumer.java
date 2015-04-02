@@ -146,6 +146,15 @@ public interface APIConsumer extends APIManager {
      * @throws org.wso2.carbon.apimgt.api.APIManagementException if failed to get API for subscriber
      */
     public Set<SubscribedAPI> getSubscribedAPIs(Subscriber subscriber) throws APIManagementException;
+    
+    /**
+     * @param subscriber the subscriber to be subscribed to the API
+     * @param groupingId the groupId of the subscriber
+     * @return the subscribed API's
+     * @throws APIManagementException
+     */
+    public Set<SubscribedAPI> getSubscribedAPIs(Subscriber subscriber, String groupingId) throws APIManagementException;
+
 
     /**
      * Returns a set of SubscribedAPIs filtered by the given application name.
@@ -154,10 +163,8 @@ public interface APIConsumer extends APIManager {
      * @return Set<API>
      * @throws org.wso2.carbon.apimgt.api.APIManagementException if failed to get API for subscriber
      */
-    public Set<SubscribedAPI> getSubscribedAPIs(Subscriber subscriber, String applicationName)
+    public Set<SubscribedAPI> getSubscribedAPIs(Subscriber subscriber, String applicationName, String groupingId)
             throws APIManagementException;
-
-    public Set<SubscribedAPI> getSubscribedAPIs(Subscriber subscriber, String applicationName, String groupId) throws APIManagementException;
 
     /**
      * Returns a set of SubscribedAPIs filtered by the given application name and in between starting and ending indexes.
@@ -166,26 +173,14 @@ public interface APIConsumer extends APIManager {
      * @param applicationName Application needed to find subscriptions
      * @param startSubIndex Starting index of subscriptions to be listed
      * @param endSubIndex Ending index of Subscriptions to be listed
+     * @param groupingId the group id of the application
      * @return
      * @throws APIManagementException
      */
-    public Set<SubscribedAPI> getPaginatedSubscribedAPIs(Subscriber subscriber, String applicationName, int startSubIndex, int endSubIndex)
+    public Set<SubscribedAPI> getPaginatedSubscribedAPIs(Subscriber subscriber, String applicationName, int startSubIndex, int endSubIndex, String groupingId)
             throws APIManagementException;
 
-    
-    /**
-     * Gets the subscribed API's, by the group for the application.
-     * @param subscriber the subscriber subscribing for the api
-     * @param applicationName the application to which the api's are subscribed
-     * @param startSubIndex the start index for pagination
-     * @param endSubIndex end index for pagination
-     * @param groupId the group id of the application
-     * @return the set of subscribed API's.
-     * @throws APIManagementException
-     */
-    public Set<SubscribedAPI> getPaginatedSubscribedAPIsbyGroupId(Subscriber subscriber, String applicationName, int startSubIndex, int endSubIndex, String groupId) 
-            throws APIManagementException;
-    /**
+      /**
      * Returns true if a given user has subscribed to the API
      *
      * @param apiIdentifier APIIdentifier
@@ -292,28 +287,35 @@ public interface APIConsumer extends APIManager {
      * @param tokenType Token type (PRODUCTION | SANDBOX)
      * @param callbackUrl Callback URL for the Application.
      * @param tokenScope scope of the acces token to be generated.
+     * @param groupingId the groupId the application belongs to
      * @throws org.wso2.carbon.apimgt.api.APIManagementException if failed to applications for given subscriber
      */
     public Map<String,String> requestApprovalForApplicationRegistration(String userId, String applicationName,
                                                                         String tokenType,
                                                                         String callbackUrl, String[] allowedDomains,
                                                                         String validityTime,
-                                                                        String tokenScope, int applicationId)
+                                                                        String tokenScope, String groupingId)
         throws APIManagementException;
 
     /**
      * Returns a list of applications for a given subscriber
      *
      * @param subscriber Subscriber
+     * @param groupingId the groupId to which the applications must belong.
      * @return Applications
      * @throws org.wso2.carbon.apimgt.api.APIManagementException if failed to applications for given subscriber
      */
-    public Application[] getApplications(Subscriber subscriber) throws APIManagementException;
+    public Application[] getApplications(Subscriber subscriber, String groupingId) throws APIManagementException;
 
-    public Application[] getApplications(Subscriber subscriber, String groupId) throws APIManagementException;
-
+    /**
+     * @param subscriber the subscriber in relation to the identifiers
+     * @param identifier the identifiers of the API's the subscriber is subscribed to
+     * @param groupingId the grouping Id the subscriber.
+     * @return the set of subscribed API's.
+     * @throws APIManagementException
+     */
     public Set<SubscribedAPI> getSubscribedIdentifiers(Subscriber subscriber,
-                                                       APIIdentifier identifier) throws APIManagementException;
+                                                       APIIdentifier identifier, String groupingId) throws APIManagementException;
     
     public Set<APIIdentifier> getAPIByConsumerKey(String accessToken) throws APIManagementException;
 
@@ -384,13 +386,14 @@ public interface APIConsumer extends APIManager {
      * @param applicationName Name of the Application
      * @param tokenType Type of the Token (PRODUCTION | SANDBOX)
      * @param tokenScope scope of the token
+     * @param the groupingId the application belongs to.
      * @return a Map containing the details of the OAuth application.
      * @throws org.wso2.carbon.apimgt.api.APIManagementException if failed to get the tiers
      */
     public Map<String, String> completeApplicationRegistration(String userId,
                                                                String applicationName,
                                                                String tokenType, String tokenScope,
-															   int applicationId)
+															   String groupingId)
 		    throws APIManagementException;
 
     /**
