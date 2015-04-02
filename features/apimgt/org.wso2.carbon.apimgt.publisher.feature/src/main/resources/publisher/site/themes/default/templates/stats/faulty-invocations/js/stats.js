@@ -31,48 +31,22 @@ require(["dojo/dom", "dojo/domReady!"], function(dom){
 
                     //day picker
                     $('#today-btn').on('click',function(){
-                        var to = convertTimeString(currentDay);
-                        var from = convertTimeString(currentDay-86400000);
-                        var dateStr= from+" to "+to;
-                        $("#date-range").html(dateStr);
-                        $('#date-range').data('dateRangePicker').setDateRange(from,to);
-                        drawAPIResponseFaultCountChart(from,to);
-
-
+                        getDateTime(currentDay,currentDay-86400000);
                     });
 
                     //hour picker
                     $('#hour-btn').on('click',function(){
-                        var to = convertTimeString(currentDay);
-                        var from = convertTimeString(currentDay-3600000);
-                        var dateStr= from+" to "+to;
-                        $("#date-range").html(dateStr);
-                        $('#date-range').data('dateRangePicker').setDateRange(from,to);
-                        drawAPIResponseFaultCountChart(from,to);
-                        btnActiveToggle(this);
+                        getDateTime(currentDay,currentDay-3600000);
                     })
 
                     //week picker
                     $('#week-btn').on('click',function(){
-                        var to = convertTimeString(currentDay);
-                        var from = convertTimeString(currentDay-604800000);
-                        var dateStr= from+" to "+to;
-                        $("#date-range").html(dateStr);
-                        $('#date-range').data('dateRangePicker').setDateRange(from,to);
-                        drawAPIResponseFaultCountChart(from,to);
-                        btnActiveToggle(this);
+                        getDateTime(currentDay,currentDay-604800000);
                     })
 
                     //month picker
                     $('#month-btn').on('click',function(){
-
-                        var to = convertTimeString(currentDay);
-                        var from = convertTimeString(currentDay-(604800000*4));
-                        var dateStr= from+" to "+to;
-                        $("#date-range").html(dateStr);
-                        $('#date-range').data('dateRangePicker').setDateRange(from,to);
-                        drawAPIResponseFaultCountChart(from,to);
-                        btnActiveToggle(this);
+                        getDateTime(currentDay,currentDay-(604800000*4));
                     });
 
                     //date picker
@@ -93,7 +67,10 @@ require(["dojo/dom", "dojo/domReady!"], function(dom){
                              btnActiveToggle(this);
                              var from = convertDate(obj.date1);
                              var to = convertDate(obj.date2);
-                             $('#date-range').html(from + " to "+ to);
+                             var fromStr = from.split(" ");
+                             var toStr = to.split(" ");
+                             var dateStr = fromStr[0] + " <i>" + fromStr[1] + "</i> <b>to</b> " + toStr[0] + " <i>" + toStr[1] + "</i>";
+                             $("#date-range").html(dateStr);
                              drawAPIResponseFaultCountChart(from,to);
 
                         });
@@ -102,12 +79,7 @@ require(["dojo/dom", "dojo/domReady!"], function(dom){
                     var to = new Date();
                     var from = new Date(to.getTime() - 1000 * 60 * 60 * 24 * 30);
 
-                    $('#date-range').data('dateRangePicker').setDateRange(from,to);
-                    $('#date-range').html($('#date-range').val());
-                    var fromStr = convertDate(from);
-                    var toStr = convertDate(to);
-                    drawAPIResponseFaultCountChart(fromStr,toStr);
-
+                    getDateTime(to,from);
 
                     $('#date-range').click(function (event) {
                     event.stopPropagation();
@@ -234,7 +206,7 @@ var drawAPIResponseFaultCountChart = function(from,to){
                             "values": faultData
                         },
                         {
-                            "key": "Successful",
+                            "key": "Success",
                             "values": data
                         }];
 
@@ -248,7 +220,7 @@ var drawAPIResponseFaultCountChart = function(from,to){
 
                         var chart;
                         nv.addGraph(function () {
-                            chart = nv.models.stackedAreaChart()
+                            chart = nv.models.stackedAreaChart().margin({left:80,right:50})
                                 .x(function (d) {
                                 return d.x
                             })
@@ -256,20 +228,18 @@ var drawAPIResponseFaultCountChart = function(from,to){
                                 return d.y
                             })
                                 .color(keyColor)
-                                .clipEdge(true)
-                                .useInteractiveGuideline(true)
-                                .margin({left: 80});;
+                                .useInteractiveGuideline(true);
 
-                            if (dataStructure[0].values.length > 5) chart.margin({bottom: 160});
+                            if (dataStructure[0].values.length > 4) chart.margin({bottom: 160});
 
                             chart.xAxis
-                                .axisLabel('API')
+                                .axisLabel('APIs')
                                 .tickFormat(function (d) {
                                 var label = dataStructure[0].values[d].label;
                                 return label;
                             });
                             chart.xAxis.tickValues(dataStructure[0].values.map( function(d){return d.x;}));
-                            if (dataStructure[0].values.length > 5) chart.xAxis.rotateLabels(-45);
+                            if (dataStructure[0].values.length > 4) chart.xAxis.rotateLabels(-45);
 
                             chart.yAxis.axisLabel('Total Hits');
                             chart.yAxis.tickFormat(d3.format(',d'));
@@ -355,4 +325,15 @@ function convertDate(date) {
 function btnActiveToggle(button){
     $(button).siblings().removeClass('active');
     $(button).addClass('active');
+}
+
+function getDateTime(currentDay,fromDay){
+    var to = convertTimeString(currentDay);
+    var from = convertTimeString(fromDay);
+    var toDate = to.split(" ");
+    var fromDate = from.split(" ");
+    var dateStr= fromDate[0]+" <i>"+fromDate[1]+"</i> <b>to</b> "+toDate[0]+" <i>"+toDate[1]+"</i>";
+    $("#date-range").html(dateStr);
+    $('#date-range').data('dateRangePicker').setDateRange(from,to);
+    drawAPIResponseFaultCountChart(from,to);
 }

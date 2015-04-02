@@ -246,6 +246,13 @@ $(document).ready(function(){
         }
     });
 
+    $('html').on('click', function(e) {
+      if (typeof $(e.target).data('original-title') == 'undefined' &&
+         !$(e.target).parents().is('.popover.in')) {
+        $('[data-original-title]').popover('hide');
+      }
+    });
+
     $('.more-options').click(function(){
         var id = $(this).attr('ref');
         var div = $('#'+id);
