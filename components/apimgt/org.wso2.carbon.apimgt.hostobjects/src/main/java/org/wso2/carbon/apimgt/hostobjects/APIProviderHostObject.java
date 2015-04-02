@@ -2122,7 +2122,9 @@ public class APIProviderHostObject extends ScriptableObject {
         boolean isTenantFlowStarted = false;
         try {
             String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(providerNameTenantFlow));
-            
+            if(!tenantDomain.equals(userTenantDomain)){
+                throw new APIManagementException("Invalid Operation: Cannot access API:" + apiId + "from current tenant.");
+            }
             if(tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
             	isTenantFlowStarted = true;
                 PrivilegedCarbonContext.startTenantFlow();
