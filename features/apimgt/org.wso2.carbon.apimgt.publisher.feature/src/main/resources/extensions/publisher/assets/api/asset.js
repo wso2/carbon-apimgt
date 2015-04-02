@@ -64,6 +64,7 @@ asset.configure = function(ctx) {
     };
 };
 asset.renderer = function(ctx) {
+    var type = ctx.assetType;
     var listLinks = function(ribbon, utils) {
         ribbon.enabled = false;
         ribbon.list = [];
@@ -75,6 +76,27 @@ asset.renderer = function(ctx) {
         navList.push('Version', 'icon-list-alt', utils.buildUrl('version'));
         ribbon.enabled = true;
         ribbon.list = navList;
+    };
+    var buildAddLeftNav = function (page, util) {
+        return [];
+    };
+    var buildListLeftNav = function(page, util) {
+        var navList = util.navList();
+        navList.push('Add ' + type,'fa-plus', util.buildUrl('create'));
+        navList.push('All Statistics', 'fa-area-chart', '/asts/' + type + '/statistics');
+	navList.push('Subscriptions', 'fa fa-bookmark', '/asts/' + type + '/statistics');
+	navList.push('Statistics', 'fa-area-chart', '/asts/' + type + '/statistics');
+	navList.push('Tier Permissions', 'fa fa-cog', '/asts/' + type + '/statistics');
+        //navList.push('Configuration', 'icon-dashboard', util.buildUrl('configuration'));
+        return navList.list();
+    };
+    var buildDefaultLeftNav = function(page, util) {
+        var id = page.assets.id;
+        var navList = util.navList();
+        navList.push('Edit', 'fa-pencil', util.buildUrl('update') + '/' + id);
+        navList.push('Overview', 'fa-list-alt', util.buildUrl('details') + '/' + id);
+        navList.push('Life Cycle' , 'fa-recycle', util.buildUrl('lifecycle') + '/' + id);
+        return navList.list();
     };
     return {
         pageDecorators: {
@@ -96,6 +118,26 @@ asset.renderer = function(ctx) {
                         break;
                     default:
                         apiLinks(ribbon, this);
+                        break;
+                }
+                return page;
+            },
+            leftNav: function (page) {
+                if(log.isDebugEnabled()){
+                    log.debug('Using default leftNav');
+                }
+                switch (page.meta.pageName) {
+                    case 'list':
+                        page.leftNav = buildListLeftNav(page, this);
+                        break;
+                    case 'create':
+                        page.leftNav = buildListLeftNav(page, this);
+                        break;
+                    case 'statistics':
+                        page.leftNav = buildListLeftNav(page, this);
+                        break;
+                    default:
+                        page.leftNav = buildListLeftNav(page, this);
                         break;
                 }
                 return page;
