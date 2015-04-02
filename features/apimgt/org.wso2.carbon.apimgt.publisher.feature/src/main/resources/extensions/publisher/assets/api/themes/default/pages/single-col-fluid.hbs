@@ -6,64 +6,50 @@
 <html class="no-js">
 <!--<![endif]-->
 <head>
-    <title>{{include title}} | WSO2 Enterprise Store back-office</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{include title}} | WSO2 Enterprise Store back-office</title>
     <!-- Bootstrap -->
     <link href="{{url "/themes/default/css/bootstrap.min.css"}}" rel="stylesheet" media="screen">
-    <link href="{{url "/themes/default/css/bootstrap-responsive.min.css"}}" rel="stylesheet">
+    <link href="{{url "/themes/default/css/custom.css"}}" rel="stylesheet">
+    <link href="{{url "/themes/default/css/custom-theme.css"}}" rel="stylesheet">
+
     <!-- fontawesome -->
     <link rel="stylesheet" href="{{url "/themes/default/css/font-awesome.min.css"}}">
 
     <!-- Token input -->
     <link rel="stylesheet" href="{{url "/themes/default/js/token.input/css/token-input-facebook.css"}}">
-
-    <!-- publisher styles -->
-    <link rel="shortcut icon" href="http://wso2.com/files/favicon.ico" type="image/x-icon" />
-    <link href="{{url "/themes/default/css/es-publisher-commons.css"}}" rel="stylesheet" media="screen">
-    <link href="{{url "/themes/default/css/navigation.css"}}" rel="stylesheet" media="screen">
-    <script src="{{url "/themes/default/js/modernizr.custom.js"}}"></script>
-    <!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
-    <!--[if IE]>
-    <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
-    <script src="{{url "/themes/default/js/respond.min.js"}}"></script>
-    <script src="{{url "/themes/default/js/selectivizr-min.js"}}"></script>
-    <link rel="stylesheet" href="{{url "/themes/default/css/ie.css"}}" type="text/css">
-    <![endif]-->
+    <!-- Helper css injections -->
     {{css}}
-    <style>
-        .ribbon-cont{ border:0px }
-    </style>
+
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+    <script src="{{url "/themes/default/js/html5shiv.min.js"}}"></script>
+    <script src="{{url "/themes/default/js/respond.min.js"}}"></script>
+    <![endif]-->
+
 </head>
+
 <body>
-    {{ include header}}
-<div class="container-assets container">
 
-    <div class="content-area-cont">
-        <div class="row-fluid content-area">
-            <div class="span3 publisher-left">
-                {{include leftnav}}
-            </div>
-            <div class="span9 publisher-right">
-
-            <div class="ribbon-cont">
-                <div class="row-fluid ribbon">
-                    {{include ribbon}}
-                </div>
-            </div>
-
-                {{include listassets}}
-            </div>
+    <div class="wrapper">
+        <div class="container-fluid">
+            {{ include header}}
         </div>
-       
+        <div class="container-fluid ribbon-container">
+            {{include ribbon}}
+        </div>
+        <div class="container-fluid">
+            {{include listassets}}
+        </div>
+        {{>footer}}
+
     </div>
-</div>
-<div class="container-footer container">
-	<div class="content-area-cont">
-                {{>footer}}
- 
-     </div>
-</div>
+
+    <!-- /content/body -->
+
+
 
 
 <script src="{{url "/themes/default/js/jquery-1.10.2.min.js"}}"></script>
@@ -77,10 +63,35 @@
 <script src="{{url "/themes/default/js/graph.js"}}"></script>
 <script src="{{url "/themes/default/js/token.input/jquery.tokeninput.js"}}"></script>
 <script src="{{url "/themes/default/js/handlebars.js"}}"></script>
-    {{js}}
-    {{code}}
+<!-- Helper files js injector -->
+{{js}}
+{{code}}
+
 <script src="{{url "/themes/default/js/caramel.handlebars.client.js"}}"></script>
 <script src="{{url "/themes/default/js/caramel-client.js"}}"></script>
+
+
+
+
+<script type="text/javascript">
+
+$( document ).ready(function() {
+    $("[data-toggle=popover]").popover();
+
+    $(".ctrl-asset-type-switcher").popover({
+        html : true,
+        content: function() {
+            return $('#content-asset-types').html();
+        }
+    });
+
+    $('#nav').affix({
+        offset: {
+            top: $('header').height()
+        }
+    });
+});
+
+</script>
 </body>
 </html>
-
