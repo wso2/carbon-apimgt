@@ -457,6 +457,9 @@ var jagg = jagg || (function () {
 
     var getRegistryPath = function(path){
         if(isReverseProxyEnabled()){
+            if(site.reverseProxy.regContext != undefined){
+                return site.reverseProxy.regContext + path;
+            }
             return site.reverseProxy.context + path;
         }
 

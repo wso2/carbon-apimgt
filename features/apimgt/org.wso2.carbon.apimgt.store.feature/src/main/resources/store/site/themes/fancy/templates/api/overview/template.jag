@@ -35,8 +35,11 @@
     	        for (i = 1; i < epParams.length; i++) {
     	            %>
     	            <div  class="well well-small api_urls"><%=epParams[i]%><%=api.context%>
-                        <%if (api.isDefaultVersion){%>
-                            <br><%=epParams[i]%><%=api.context%>
+                        <%if (api.isDefaultVersion){
+                            var apiContext = api.context;
+                            apiContext = apiContext.replace(api.version + "/", "");
+                            apiContext = apiContext.replace(api.version, "");%>
+                            <br><%=epParams[i]%><%=apiContext%>
                         <%}%>
                     </div>
 

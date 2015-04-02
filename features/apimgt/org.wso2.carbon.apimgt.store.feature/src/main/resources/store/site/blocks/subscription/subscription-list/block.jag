@@ -11,6 +11,10 @@ jagg.block("subscription/subscription-list", {
     },
 
     getOutputs:function (inputs) {
+        /*
+         This will fetch the application information for the given user and the subscription information about the given application,
+         when the store/mysubscriptions web page called.
+        */
 
         var applications, result, response, selectedApp, totalLength,  user = inputs.user, page;
         if(request.getParameter('selectedApp')!=null){
@@ -25,7 +29,12 @@ jagg.block("subscription/subscription-list", {
          if(page == null){
 				page = 1;
 		}
-		response = jagg.module("subscription").getAllSubscriptions(user.username, selectedApp, page);
+
+		var itemsPerPage = 10; //change this to change the number of items per page.
+		var startIndex = (page-1)*itemsPerPage, endIndex = startIndex + itemsPerPage;
+
+		response = jagg.module("subscription").getAllSubscriptions(user.username, selectedApp, startIndex, endIndex);
+
 		applications = response.result.applications;
 		totalLength = response.result.totalLength;
 		return {
