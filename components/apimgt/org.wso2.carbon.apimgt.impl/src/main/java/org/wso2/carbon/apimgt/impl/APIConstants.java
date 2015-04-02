@@ -415,15 +415,26 @@ public final class APIConstants {
     
 
     public static final String API_USAGE_TRACKING = "APIUsageTracking.";
-    public static final String API_USAGE_ENABLED = API_USAGE_TRACKING + "Enabled";
+    public static final String API_USAGE_BAM_SERVER_URL_GROUPS = API_USAGE_TRACKING + "BAMServerURL";
     public static final String API_USAGE_BUILD_MSG = API_USAGE_TRACKING + "PublishResponseMessageSize";
-    public static final String API_USAGE_THRIFT_PORT = API_USAGE_TRACKING + "ThriftPort";
-    public static final String API_USAGE_BAM_SERVER_URL = API_USAGE_TRACKING + "BAMServerURL";
     public static final String API_USAGE_BAM_SERVER_USER = API_USAGE_TRACKING + "BAMUsername";
     public static final String API_USAGE_BAM_SERVER_PASSWORD = API_USAGE_TRACKING + "BAMPassword";
+    public static final String API_USAGE_SKIP_EVENT_RECEIVER_CONN = API_USAGE_TRACKING + "SkipEventReceiverConnection";
     public static final String API_USAGE_PUBLISHER_CLASS = API_USAGE_TRACKING + "PublisherClass";
-    public static final String API_USAGE_DATA_SOURCE_NAME = API_USAGE_TRACKING + "DataSourceName";
+    public static final String API_USAGE_DATA_SOURCE_NAME = "WSO2AM_STATS_DB";
     public static final String API_USAGE_STREAMS = API_USAGE_TRACKING + "Streams.";
+    public static final String API_USAGE_REQUEST_STREAM = API_USAGE_STREAMS + "Request.";
+    public static final String API_USAGE_RESPONSE_STREAM = API_USAGE_STREAMS + "Response.";
+    public static final String API_USAGE_FAULT_STREAM = API_USAGE_STREAMS + "Fault.";
+    public static final String API_USAGE_THROTTLE_STREAM = API_USAGE_STREAMS + "Throttle.";
+    public static final String API_REQUEST_STREAM_NAME = API_USAGE_REQUEST_STREAM + "Name";
+    public static final String API_REQUEST_STREAM_VERSION = API_USAGE_REQUEST_STREAM + "Version";
+    public static final String API_RESPONSE_STREAM_NAME = API_USAGE_RESPONSE_STREAM + "Name";
+    public static final String API_RESPONSE_STREAM_VERSION = API_USAGE_RESPONSE_STREAM + "Version";
+    public static final String API_FAULT_STREAM_NAME = API_USAGE_FAULT_STREAM + "Name";
+    public static final String API_FAULT_STREAM_VERSION = API_USAGE_FAULT_STREAM + "Version";
+    public static final String API_THROTTLE_STREAM_NAME = API_USAGE_THROTTLE_STREAM + "Name";
+    public static final String API_THRORRLE_STREAM_VERSION = API_USAGE_THROTTLE_STREAM + "Version";
     public static final String API_USAGE_WF_STREAM = API_USAGE_STREAMS + "Workflow.";
     public static final String API_WF_STREAM_NAME = API_USAGE_WF_STREAM + "Name";
     public static final String API_WF_STREAM_VERSION = API_USAGE_WF_STREAM + "Version";

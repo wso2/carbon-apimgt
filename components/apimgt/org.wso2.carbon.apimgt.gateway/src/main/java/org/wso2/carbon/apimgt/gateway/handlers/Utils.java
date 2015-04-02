@@ -30,10 +30,7 @@ import org.apache.synapse.MessageContext;
 import org.apache.synapse.config.xml.rest.VersionStrategyFactory;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.core.axis2.Axis2Sender;
-import org.apache.synapse.rest.API;
 import org.apache.synapse.rest.RESTConstants;
-import org.apache.synapse.rest.version.ContextVersionStrategy;
-import org.apache.synapse.rest.version.VersionStrategy;
 import org.apache.synapse.transport.nhttp.NhttpConstants;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.APIConstants;
@@ -221,10 +218,8 @@ public class Utils {
     }
 
     public static boolean isStatsEnabled() {
-        String statsEnabled = config.
-                getFirstProperty(APIConstants.CORS_CONFIGURATION_ENABLED);
-
-        return Boolean.parseBoolean(statsEnabled);
+        return ServiceReferenceHolder.getInstance().getApiManagerConfigurationService().
+                getAPIAnalyticsConfiguration().isAnalyticsEnabled();
     }
 
     /**
@@ -234,7 +229,6 @@ public class Utils {
      * @return
      */
     public static boolean hasAccessTokenExpired(APIKeyValidationInfoDTO accessTokenDO) {
-        long timestampSkew;
         long currentTime;
         long validityPeriod;
         if (accessTokenDO.getValidityPeriod() != Long.MAX_VALUE) {

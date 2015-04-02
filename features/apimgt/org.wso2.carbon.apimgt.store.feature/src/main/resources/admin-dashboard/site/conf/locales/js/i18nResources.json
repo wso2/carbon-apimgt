@@ -1,5 +1,10 @@
 {
     "errorMsgs":{
         "login":"Unable to log you in!"
+    },
+    "analyticsConfigSaving" : {
+        "inProgress" : "Saving Configurations...",
+        "success" : "Configurations Saved!",
+        "error" : "Error occurred while saving configurations!"
     }
 }
