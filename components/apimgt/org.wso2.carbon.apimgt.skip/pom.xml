@@ -52,10 +52,12 @@
              <phase>compile</phase>
                 
                 <configuration>
+                	
                    <target name="copy oauth patch to m2">
-                       <copy file="${project.build.directory}/../lib/org.wso2.carbon.identity.oauth-4.2.4.jar" tofile="${user.home}/.m2/repository/org/wso2/carbon/org.wso2.carbon.identity.oauth/4.2.4/org.wso2.carbon.identity.oauth-4.2.4.jar" />
+                      <copy file="${project.build.directory}/../lib/org.wso2.carbon.identity.oauth-4.2.4.jar" tofile="${settings.localRepository}/org/wso2/carbon/org.wso2.carbon.identity.oauth/4.2.4/org.wso2.carbon.identity.oauth-4.2.4.jar" />
 
-                    </target>
+                   </target>
+
                  </configuration>
 		<goals>
                    <goal>run</goal>
