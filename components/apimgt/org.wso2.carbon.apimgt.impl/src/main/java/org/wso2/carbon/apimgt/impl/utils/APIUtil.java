@@ -20,6 +20,11 @@ package org.wso2.carbon.apimgt.impl.utils;
 
 import com.google.gson.Gson;
 
+import org.apache.commons.lang.ArrayUtils;
+import org.apache.http.HttpHeaders;
+import org.json.JSONException;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.impl.builder.StAXOMBuilder;
 import org.apache.axiom.om.util.AXIOMUtil;
@@ -52,6 +57,8 @@ import org.wso2.carbon.apimgt.api.doc.model.Parameter;
 import org.wso2.carbon.apimgt.api.model.*;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
+import org.wso2.carbon.apimgt.impl.clients.ApplicationManagementServiceClient;
+import org.wso2.carbon.apimgt.impl.clients.OAuthAdminClient;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
 import org.wso2.carbon.apimgt.impl.dto.Environment;
@@ -143,7 +150,7 @@ public final class APIUtil {
      * @param artifact API artifact
      * @param registry Registry
      * @return API
-     * @throws org.wso2.carbon.apimgt.api.APIManagementException if failed to get API from artifact
+     * @throws APIManagementException if failed to get API from artifact
      */
     public static API getAPI(GovernanceArtifact artifact, Registry registry)
             throws APIManagementException {
@@ -567,7 +574,7 @@ public final class APIUtil {
      *
      * @param artifact provider artifact
      * @return Provider
-     * @throws org.wso2.carbon.apimgt.api.APIManagementException if failed to get Provider from provider artifact.
+     * @throws APIManagementException if failed to get Provider from provider artifact.
      */
     public static Provider getProvider(GenericArtifact artifact) throws APIManagementException {
         Provider provider;
@@ -590,7 +597,7 @@ public final class APIUtil {
      * @param scopeKey
      * @param provider
      * @return
-     * @throws org.wso2.carbon.apimgt.api.APIManagementException
+     * @throws APIManagementException
      */
     public static Set<Scope> getScopeByScopeKey(String scopeKey, String provider) throws APIManagementException {
         Set<Scope> scopeList = null;
@@ -714,7 +721,7 @@ public final class APIUtil {
      *
      * @param artifact Documentation artifact
      * @return Documentation
-     * @throws org.wso2.carbon.apimgt.api.APIManagementException if failed to create Documentation from artifact
+     * @throws APIManagementException if failed to create Documentation from artifact
      */
     public static Documentation getDocumentation(GenericArtifact artifact)
             throws APIManagementException {
@@ -786,7 +793,7 @@ public final class APIUtil {
      *
      * @param artifact Documentation artifact
      * @return Documentation
-     * @throws org.wso2.carbon.apimgt.api.APIManagementException if failed to create Documentation from artifact
+     * @throws APIManagementException if failed to create Documentation from artifact
      */
     public static Documentation getDocumentation(GenericArtifact artifact,String docCreatorName)
             throws APIManagementException {
@@ -982,7 +989,7 @@ public final class APIUtil {
      * @param apiId         APIIdentifier
      * @param documentation Documentation
      * @return GenericArtifact
-     * @throws org.wso2.carbon.apimgt.api.APIManagementException if failed to get GovernanceArtifact from Documentation
+     * @throws APIManagementException if failed to get GovernanceArtifact from Documentation
      */
     public static GenericArtifact createDocArtifactContent(GenericArtifact artifact,
                                                            APIIdentifier apiId,
@@ -1031,7 +1038,7 @@ public final class APIUtil {
      * @param registry Registry
      * @param key      , key name of the key
      * @return GenericArtifactManager
-     * @throws org.wso2.carbon.apimgt.api.APIManagementException if failed to initialized GenericArtifactManager
+     * @throws APIManagementException if failed to initialized GenericArtifactManager
      */
     public static GenericArtifactManager getArtifactManager(Registry registry, String key)
             throws APIManagementException {
@@ -1082,13 +1089,36 @@ public final class APIUtil {
         }
     }
 
+    public static OAuthAdminClient getOauthAdminClient() throws APIManagementException {
+
+        try {
+            return new OAuthAdminClient();
+        } catch (Exception e) {
+            handleException("Error while initializing the OAuth admin client", e);
+            return null;
+        }
+    }
+
+
+    public static ApplicationManagementServiceClient getApplicationManagementServiceClient() throws APIManagementException {
+        APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
+                getAPIManagerConfigurationService().getAPIManagerConfiguration();
+        try {
+            return new ApplicationManagementServiceClient();
+        } catch (Exception e) {
+            handleException("Error while initializing the Application Management Service client", e);
+            return null;
+        }
+    }
+
+
     /**
      * Crate an WSDL from given wsdl url. Reset the endpoint details to gateway node
      ** 
      * @param registry - Governance Registry space to save the WSDL
      * @param api      -API instance
      * @return Path of the created resource
-     * @throws org.wso2.carbon.apimgt.api.APIManagementException If an error occurs while adding the WSDL
+     * @throws APIManagementException If an error occurs while adding the WSDL
      */
 
     public static String createWSDL(Registry registry, API api) throws RegistryException, APIManagementException {
@@ -1269,7 +1299,7 @@ public final class APIUtil {
      * @param endpointUrl Endpoint url
      * @param registry    Registry space to save the endpoint
      * @return Path of the created resource
-     * @throws org.wso2.carbon.apimgt.api.APIManagementException If an error occurs while adding the endpoint
+     * @throws APIManagementException If an error occurs while adding the endpoint
      */
     public static String createEndpoint(String endpointUrl, Registry registry) throws APIManagementException {
         try {
@@ -1289,7 +1319,7 @@ public final class APIUtil {
      * registry.
      *
      * @return a Map of tier names and Tier objects - possibly empty
-     * @throws org.wso2.carbon.apimgt.api.APIManagementException if an error occurs when loading tiers from the registry
+     * @throws APIManagementException if an error occurs when loading tiers from the registry
      */
     public static Map<String, Tier> getTiers() throws APIManagementException {
         Map<String, Tier> tiers = new TreeMap<String, Tier>();
@@ -1359,7 +1389,7 @@ public final class APIUtil {
      * registry.
      *
      * @return a Map of tier names and Tier objects - possibly empty
-     * @throws org.wso2.carbon.apimgt.api.APIManagementException if an error occurs when loading tiers from the registry
+     * @throws APIManagementException if an error occurs when loading tiers from the registry
      */
     public static Set<APIStore> getExternalStores(int tenantId) throws APIManagementException {
         // First checking if ExternalStores are defined in api-manager.xml
@@ -1451,7 +1481,7 @@ public final class APIUtil {
      * Returns the External API Store Configuration with the given Store Name
      * @param apiStoreName
      * @return
-     * @throws org.wso2.carbon.apimgt.api.APIManagementException
+     * @throws APIManagementException
      */
     public static APIStore getExternalAPIStore(String apiStoreName, int tenantId) throws APIManagementException {
     	Set<APIStore> externalAPIStoresConfig = APIUtil.getExternalStores(tenantId);
@@ -1469,7 +1499,7 @@ public final class APIUtil {
      * registry.
      *
      * @return a Map of tier names and Tier objects - possibly empty
-     * @throws org.wso2.carbon.apimgt.api.APIManagementException if an error occurs when loading tiers from the registry
+     * @throws APIManagementException if an error occurs when loading tiers from the registry
      */
     public static Map<String, Tier> getTiers(int tenantId) throws APIManagementException {
         Map<String, Tier> tiers = new TreeMap<String, Tier>();
@@ -1537,7 +1567,7 @@ public final class APIUtil {
      * Returns the tier display name for a particular tier
      *
      * @return the relevant tier display name
-     * @throws org.wso2.carbon.apimgt.api.APIManagementException if an error occurs when loading tiers from the registry
+     * @throws APIManagementException if an error occurs when loading tiers from the registry
      */
     public static String getTierDisplayName(int tenantId,String tierName) throws APIManagementException {
         String displayName = null;
@@ -1582,7 +1612,7 @@ public final class APIUtil {
      *
      * @param username   A username
      * @param permission A valid Carbon permission
-     * @throws org.wso2.carbon.apimgt.api.APIManagementException If the user does not have the specified permission or if an error occurs
+     * @throws APIManagementException If the user does not have the specified permission or if an error occurs
      */
     public static void checkPermission(String username, String permission)
             throws APIManagementException {
@@ -1604,7 +1634,7 @@ public final class APIUtil {
                                                       CarbonConstants.UI_PERMISSION_ACTION);
             } else {
                 RemoteAuthorizationManager authorizationManager = RemoteAuthorizationManager.getInstance();
-                authorized = authorizationManager.isUserAuthorized(MultitenantUtils.getTenantAwareUsername(username), permission);
+                authorized = authorizationManager.isUserAuthorized(username, permission);
             }
             if (!authorized) {
                 throw new APIManagementException("User '" + username + "' does not have the " +
@@ -1655,7 +1685,7 @@ public final class APIUtil {
      * Retrieves the role list of a user
      *
      * @param username   A username
-     * @throws org.wso2.carbon.apimgt.api.APIManagementException If an error occurs
+     * @throws APIManagementException If an error occurs
      */
     public static String[] getListOfRoles(String username) throws APIManagementException {
         if (username == null) {
@@ -1685,7 +1715,7 @@ public final class APIUtil {
      * Sets permission for uploaded file resource.
      *
      * @param filePath Registry path for the uploaded file
-     * @throws org.wso2.carbon.apimgt.api.APIManagementException
+     * @throws APIManagementException
      */
 
     private static void setFilePermission(String filePath) throws APIManagementException {
@@ -1710,7 +1740,7 @@ public final class APIUtil {
         * @param artifact API artifact
         * @param registry Registry
         * @return API
-        * @throws org.wso2.carbon.apimgt.api.APIManagementException if failed to get API from artifact
+        * @throws APIManagementException if failed to get API from artifact
         */
        public static API getAPI(GovernanceArtifact artifact, Registry registry,APIIdentifier oldId, String oldContext)
                throws APIManagementException {
@@ -1825,6 +1855,23 @@ public final class APIUtil {
            return api;
        }
 
+
+    /**
+     * Gets the List of Authorized Domains by consumer key.
+     * @param consumerKey
+     * @return
+     * @throws APIManagementException
+     */
+    public static List<String> getListOfAuthorizedDomainsByConsumerKey(String consumerKey)
+            throws APIManagementException {
+        String list = ApiMgtDAO.getAuthorizedDomainsByConsumerKey(consumerKey);
+        if(list != null || !list.isEmpty()){
+            return Arrays.asList(list.split(","));
+        }
+
+        return null;
+    }
+    
     public static boolean checkAccessTokenPartitioningEnabled() {
         return OAuthServerConfiguration.getInstance().isAccessTokenPartitioningEnabled();
     }
@@ -1992,7 +2039,7 @@ public final class APIUtil {
      * @param visibility   API visibility
      * @param roles        Authorized roles
      * @param artifactPath API resource path
-     * @throws org.wso2.carbon.apimgt.api.APIManagementException Throwing exception
+     * @throws APIManagementException Throwing exception
      */
     public static void setResourcePermissions(String username, String visibility, String[] roles, String artifactPath)
             throws APIManagementException {
@@ -2104,7 +2151,7 @@ public final class APIUtil {
 	 *
 	 * @param tenant
 	 * @param tenantID
-	 * @throws org.wso2.carbon.apimgt.api.APIManagementException
+	 * @throws APIManagementException
 	 */
 
 	public static void loadTenantAPIPolicy(String tenant, int tenantID)
@@ -2192,7 +2239,7 @@ public final class APIUtil {
 	 * Load the Google Analytics Configuration  to the registry
 	 *
 	 * @param tenantID
-	 * @throws org.wso2.carbon.apimgt.api.APIManagementException
+	 * @throws APIManagementException
 	 */
 
 	public static void loadTenantGAConfig(int tenantID) throws APIManagementException {
@@ -2280,7 +2327,7 @@ public final class APIUtil {
     /**
      *
      * @param tenantId
-     * @throws org.wso2.carbon.apimgt.api.APIManagementException
+     * @throws APIManagementException
      */
     public static void loadTenantSelfSignUpConfigurations(int tenantId)
     		throws APIManagementException {
@@ -2321,7 +2368,7 @@ public final class APIUtil {
     /**
      *
      * @param tenantId
-     * @throws org.wso2.carbon.apimgt.api.APIManagementException
+     * @throws APIManagementException
      */
     public static void createSelfSignUpRoles(int tenantId)
     		throws APIManagementException {
@@ -2376,7 +2423,7 @@ public final class APIUtil {
 	 /**
      * Add BAM Server Profile Configuration which is used for southbound statistics
      * publishing
-     * @throws org.wso2.carbon.apimgt.api.APIManagementException
+     * @throws APIManagementException
      */
     public static void addBamServerProfile(String bamServerURL, String bamServerUser, 
     		String bamServerPassword, int tenantId) throws APIManagementException {
@@ -2484,7 +2531,7 @@ public final class APIUtil {
 	 *
 	 * @param tenant
 	 * @param tenantID
-	 * @throws org.wso2.carbon.apimgt.api.APIManagementException
+	 * @throws APIManagementException
 	 */
 
     public static void loadloadTenantAPIRXT(String tenant, int tenantID) throws APIManagementException {
@@ -2813,7 +2860,7 @@ public final class APIUtil {
      * Get active tenant domains
      *
      * @return
-     * @throws org.wso2.carbon.user.api.UserStoreException
+     * @throws UserStoreException
      */
     public static Set<String> getActiveTenantDomains() throws UserStoreException {
         Set<String> tenantDomains = null;
@@ -2838,7 +2885,7 @@ public final class APIUtil {
     /**
      * Retrieves the role list of system
 
-     * @throws org.wso2.carbon.apimgt.api.APIManagementException If an error occurs
+     * @throws APIManagementException If an error occurs
      */
     public static String[] getRoleNames(String username) throws APIManagementException {
 
@@ -2868,7 +2915,7 @@ public final class APIUtil {
      * @param api API
      * @throws org.wso2.carbon.apimgt.api.APIManagementException
      *          if failed to generate the content and save
-     * @throws org.json.simple.parser.ParseException
+     * @throws ParseException 
      */
     public static String createSwagger12JSONContent(API api) throws APIManagementException {
 
@@ -3141,7 +3188,7 @@ public final class APIUtil {
      *
      * @param userName
      * @return tenantId
-     * @throws org.wso2.carbon.apimgt.api.APIManagementException
+     * @throws APIManagementException
      */
     public static int getTenantId(String userName){
         //get tenant domain from user name
@@ -3215,7 +3262,7 @@ public final class APIUtil {
 	 *            - Direction indicates which sequences to fetch. Values would be
 	 *             "in", "out" or "fault"
 	 * @return
-	 * @throws org.wso2.carbon.apimgt.api.APIManagementException
+	 * @throws APIManagementException
 	 */
 	public static OMElement getCustomSequence(String sequenceName, int tenantId,
 	                                                 String direction)
@@ -3409,7 +3456,7 @@ public final class APIUtil {
        * @param artifact API artifact
        * @param registry Registry
        * @return API
-       * @throws org.wso2.carbon.apimgt.api.APIManagementException if failed to get API from artifact
+       * @throws APIManagementException if failed to get API from artifact
      */
      public static API getAPIInformation(GovernanceArtifact artifact, Registry registry)
                                         throws APIManagementException {
@@ -3789,6 +3836,60 @@ public final class APIUtil {
      *
      * @param registryContext Registry Context instance which holds path mappings
      * @param path            default path of the registry
+     * @return mounted path or path
+     */
+    public static String extractCustomerKeyFromAuthHeader(Map headersMap) {
+
+        //From 1.0.7 version of this component onwards remove the OAuth authorization header from
+        // the message is configurable. So we dont need to remove headers at this point.
+        String authHeader = (String) headersMap.get(HttpHeaders.AUTHORIZATION);
+        if (authHeader == null) {
+            return null;
+        }
+
+        if (authHeader.startsWith("OAuth ") || authHeader.startsWith("oauth ")) {
+            authHeader = authHeader.substring(authHeader.indexOf("o"));
+        }
+
+        String[] headers = authHeader.split(APIConstants.OAUTH_HEADER_SPLITTER);
+        if (headers != null) {
+            for (int i = 0; i < headers.length; i++) {
+                String[] elements = headers[i].split(APIConstants.CONSUMER_KEY_SEGMENT_DELIMITER);
+                if (elements != null && elements.length > 1) {
+                    int j = 0;
+                    boolean isConsumerKeyHeaderAvailable = false;
+                    for (String element : elements) {
+                        if (!"".equals(element.trim())) {
+                            if (APIConstants.CONSUMER_KEY_SEGMENT.equals(elements[j].trim())) {
+                                isConsumerKeyHeaderAvailable = true;
+                            } else if (isConsumerKeyHeaderAvailable) {
+                                return removeLeadingAndTrailing(elements[j].trim());
+                            }
+                        }
+                        j++;
+                    }
+                }
+            }
+        }
+        return null;
+    }
+    private static String removeLeadingAndTrailing(String base) {
+        String result = base;
+
+        if (base.startsWith("\"") || base.endsWith("\"")) {
+            result = base.replace("\"", "");
+        }
+        return result.trim();
+    }
+    
+    /**
+     * This method will return mounted path of the path if the path
+     * is mounted. Else path will be returned.
+     * 
+     * @param registryContext
+     *            Registry Context instance which holds path mappings
+     * @param path
+     *            default path of the registry
      * @return mounted path or path
      */
     public static String getMountedPath(RegistryContext registryContext, String path) {

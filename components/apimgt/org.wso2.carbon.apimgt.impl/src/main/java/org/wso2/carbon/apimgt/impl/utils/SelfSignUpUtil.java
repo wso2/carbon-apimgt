@@ -66,7 +66,7 @@ public final class SelfSignUpUtil {
 	 *            Domain name of the tenant
 	 * @return UserRegistrationConfigDTO self signup configuration for the
 	 *         tenant
-	 * @throws org.wso2.carbon.apimgt.api.APIManagementException
+	 * @throws APIManagementException
 	 */
 	public static UserRegistrationConfigDTO getSignupConfiguration(String tenantDomain)
 			throws APIManagementException {
@@ -118,7 +118,7 @@ public final class SelfSignUpUtil {
 	 * 
 	 * @param tenantDomain
 	 * @return
-	 * @throws org.wso2.carbon.apimgt.api.APIManagementException
+	 * @throws APIManagementException
 	 */
 	private static UserRegistrationConfigDTO getSignupConfigurationFromRegistry(String tenantDomain)
 			throws APIManagementException {
@@ -194,7 +194,7 @@ public final class SelfSignUpUtil {
 	 * @param userName
 	 * @param realm
 	 * @return
-	 * @throws org.wso2.carbon.apimgt.api.APIManagementException
+	 * @throws APIManagementException
 	 */
 	public static boolean isUserNameWithAllowedDomainName(String userName, UserRealm realm)
 			throws APIManagementException {

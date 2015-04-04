@@ -35,44 +35,23 @@ require(["dojo/dom", "dojo/domReady!"], function (dom) {
 
                         //day picker
                         $('#today-btn').on('click',function(){
-                            var to = convertTimeString(currentDay);
-                            var from = convertTimeString(currentDay-86400000);
-                            var dateStr= from+" to "+to;
-                            $("#date-range").html(dateStr);
-                            $('#date-range').data('dateRangePicker').setDateRange(from,to);
-                            drawProviderAPIVersionUserLastAccess(from,to);
+                            getDateTime(currentDay,currentDay-86400000);
 
                         });
 
                         //hour picker
                         $('#hour-btn').on('click',function(){
-                            var to = convertTimeString(currentDay);
-                            var from = convertTimeString(currentDay-3600000);
-                            var dateStr= from+" to "+to;
-                            $("#date-range").html(dateStr);
-                            $('#date-range').data('dateRangePicker').setDateRange(from,to);
-                            drawProviderAPIVersionUserLastAccess(from,to);
+                            getDateTime(currentDay,currentDay-3600000);
                         })
 
                         //week picker
                         $('#week-btn').on('click',function(){
-                            var to = convertTimeString(currentDay);
-                            var from = convertTimeString(currentDay-604800000);
-                            var dateStr= from+" to "+to;
-                            $("#date-range").html(dateStr);
-                            $('#date-range').data('dateRangePicker').setDateRange(from,to);
-                            drawProviderAPIVersionUserLastAccess(from,to);
+                            getDateTime(currentDay,currentDay-604800000);
                         })
 
                         //month picker
                         $('#month-btn').on('click',function(){
-
-                            var to = convertTimeString(currentDay);
-                            var from = convertTimeString(currentDay-(604800000*4));
-                            var dateStr= from+" to "+to;
-                            $("#date-range").html(dateStr);
-                            $('#date-range').data('dateRangePicker').setDateRange(from,to);
-                            drawProviderAPIVersionUserLastAccess(from,to);
+                            getDateTime(currentDay,currentDay-(604800000*4));
                         });
 
                         //date picker
@@ -92,8 +71,11 @@ require(["dojo/dom", "dojo/domReady!"], function (dom) {
                             {
                                  btnActiveToggle(this);
                                  var from = convertDate(obj.date1);
+                                 var fromStr = from.split(" ");
                                  var to = convertDate(obj.date2);
-                                 $('#date-range').html(from + " to "+ to);
+                                 var toStr = to.split(" ");
+                                 var dateStr= fromStr[0]+" <i>"+fromStr[1]+"</i> <b>to</b> "+toStr[0]+" <i>"+toStr[1]+"</i>";
+                                 $("#date-range").html(dateStr);
                                  drawProviderAPIVersionUserLastAccess(from,to);
                             });
 
@@ -101,11 +83,7 @@ require(["dojo/dom", "dojo/domReady!"], function (dom) {
                         var to = new Date();
                         var from = new Date(to.getTime() - 1000 * 60 * 60 * 24 * 30);
 
-                        $('#date-range').data('dateRangePicker').setDateRange(from,to);
-                        $('#date-range').html($('#date-range').val());
-                        var fromStr = convertDate(from);
-                        var toStr = convertDate(to);
-                        drawProviderAPIVersionUserLastAccess(fromStr,toStr);
+                        getDateTime(to,from);
 
 
                         $('#date-range').click(function (event) {
@@ -271,3 +249,13 @@ function btnActiveToggle(button){
     $(button).addClass('active');
 }
 
+function getDateTime(currentDay,fromDay){
+    var to = convertTimeString(currentDay);
+    var from = convertTimeString(fromDay);
+    var toDate = to.split(" ");
+    var fromDate = from.split(" ");
+    var dateStr= fromDate[0]+" <i>"+fromDate[1]+"</i> <b>to</b> "+toDate[0]+" <i>"+toDate[1]+"</i>";
+    $("#date-range").html(dateStr);
+    $('#date-range').data('dateRangePicker').setDateRange(from,to);
+    drawProviderAPIVersionUserLastAccess(from,to);
+}

@@ -18,32 +18,32 @@
 <div class="content-section shadow-up">
 
 <div class="content-data">
-    <div id="rangeSliderWrapper" class="well">
-        <div class="row-fluid">
-        <div class="span12">
-          <div id="dateRangePickerContainer">
-              <div class="btn-group" role="group">
-                  <button id="hour-btn" type="button" class="btn btn-default date-range">Hour</button>
-                  <button id="today-btn" type="button" class="btn btn-default date-range">Day
-                  </button>
-                  <button id="week-btn" type="button" class="btn btn-default date-range">Week</button>
-                  <button id="month-btn" type="button" class="btn btn-default date-range active">
-                      Month
-                  </button>
-                  <button id="date-range" type="button" class="btn btn-default date-range last-child"
-                          data-toggle="popup" title="Click to set custom date range">.
-                  </button>
-              </div>
-          <span class="add-on-cal"><i style="margin-right:0px;" class="icon-calendar"></i></span>
-          </div>
-        </div>
-        </div>
-    </div>
 
 <div class="well">
     <div class="row-fluid">
-        <div class="span12">
-            <div id="tempLoadingSpaceResourcePath">
+    <div id="rangeSliderWrapper" class="pull-right">
+            <div class="row-fluid">
+            <div class="span12">
+              <div id="dateRangePickerContainer">
+                  <div class="btn-group" role="group">
+                      <button id="hour-btn" type="button" class="btn btn-default date-range">Hour</button>
+                      <button id="today-btn" type="button" class="btn btn-default date-range">Day
+                      </button>
+                      <button id="week-btn" type="button" class="btn btn-default date-range">Week</button>
+                      <button id="month-btn" type="button" class="btn btn-default date-range active">
+                          Month
+                      </button>
+                      <button id="date-range" type="button" class="btn btn-default date-range last-child"
+                              data-toggle="popup" title="Click to set custom date range">.
+                      </button>
+                  </div>
+              <span class="add-on-cal"><i style="margin-right:0px;" class="icon-calendar"></i></span>
+              </div>
+            </div>
+            </div>
+        </div>
+        <div class="span11">
+            <div id="tempLoadingSpaceResourcePath" style="margin-top:15px">
                 <div class="progress progress-striped active">
                     <div class="bar" style="width: 10%;"></div>
                 </div>

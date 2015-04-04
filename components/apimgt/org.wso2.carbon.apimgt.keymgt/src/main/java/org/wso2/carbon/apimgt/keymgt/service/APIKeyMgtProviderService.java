@@ -46,7 +46,7 @@ public class APIKeyMgtProviderService extends AbstractAdmin {
      *
      * @param apiInfoDTO Information about the API. Provider Name, API Name and Version uniquely identifies an API.
      * @return An array of APIKeyInfoDTO. Each APIKeyInfoDTO contains the user id and the status of the key.
-     * @throws org.wso2.carbon.apimgt.keymgt.APIKeyMgtException Error has occurred when processing reading API Key Info from the database.
+     * @throws APIKeyMgtException Error has occurred when processing reading API Key Info from the database.
      */
     public APIKeyInfoDTO[] getIssuedKeyInfo(APIInfoDTO apiInfoDTO) throws APIKeyMgtException,
             APIManagementException {
@@ -60,7 +60,7 @@ public class APIKeyMgtProviderService extends AbstractAdmin {
      * @param userId     User Id
      * @param providerId Provider Id
      * @return Array of APIInfoDTO objects for each API that the user has subscribed for a given provider.
-     * @throws org.wso2.carbon.apimgt.keymgt.APIKeyMgtException Error has occurred when processing reading API Info from the database.
+     * @throws APIKeyMgtException Error has occurred when processing reading API Info from the database.
      */
     public APIInfoDTO[] getAPIsOfUser(String userId, String providerId) throws APIKeyMgtException,
             APIManagementException, IdentityException {
@@ -80,7 +80,7 @@ public class APIKeyMgtProviderService extends AbstractAdmin {
      * Activate the keys of the set of users subscribed for the given API
      * @param users Subscribed Users whose keys will be activated
      * @param apiInfoDTO API Information
-     * @throws org.wso2.carbon.apimgt.keymgt.APIKeyMgtException Error has occurred when processing updating the key Info from the database.
+     * @throws APIKeyMgtException Error has occurred when processing updating the key Info from the database.
      */
     public void activateAccessTokens(String[] users, APIInfoDTO apiInfoDTO) throws APIKeyMgtException,
             APIManagementException, IdentityException {
@@ -94,7 +94,7 @@ public class APIKeyMgtProviderService extends AbstractAdmin {
      * Block the keys of the set of users subscribed for the given API
      * @param users Subscribed Users whose keys will be blocked
      * @param apiInfoDTO API Information
-     * @throws org.wso2.carbon.apimgt.keymgt.APIKeyMgtException Error has occurred when processing updating the key Info from the database.
+     * @throws APIKeyMgtException Error has occurred when processing updating the key Info from the database.
      */
     public void BlockAccessTokens(String[] users, APIInfoDTO apiInfoDTO) throws APIKeyMgtException,
             APIManagementException, IdentityException {
@@ -108,7 +108,7 @@ public class APIKeyMgtProviderService extends AbstractAdmin {
      * Revoke the keys of the set of users subscribed for the given API
      * @param users Subscribed Users whose keys will be revoked.
      * @param apiInfoDTO API Information
-     * @throws org.wso2.carbon.apimgt.keymgt.APIKeyMgtException Error has occurred when processing updating the key Info from the database.
+     * @throws APIKeyMgtException Error has occurred when processing updating the key Info from the database.
      */
     public void revokeAccessTokens(String[] users, APIInfoDTO apiInfoDTO) throws APIKeyMgtException,
             APIManagementException, IdentityException {

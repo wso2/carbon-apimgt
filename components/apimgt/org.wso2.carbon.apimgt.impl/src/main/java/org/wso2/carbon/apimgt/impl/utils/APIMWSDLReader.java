@@ -78,8 +78,8 @@ public class APIMWSDLReader {
 	 * Read the wsdl and clean the actual service endpoint instead of that set
 	 * the gateway endpoint.
 	 * 
-	 * @return {@link org.apache.axiom.om.OMElement} - the OMElemnt of the new WSDL content
-	 * @throws org.wso2.carbon.apimgt.api.APIManagementException
+	 * @return {@link OMElement} - the OMElemnt of the new WSDL content
+	 * @throws APIManagementException 
 	 * 
 	 */
 	
@@ -181,10 +181,10 @@ public class APIMWSDLReader {
 	 * Create the WSDL definition <javax.wsdl.Definition> from the baseURI of
 	 * the WSDL
 	 * 
-	 * @return {@link javax.wsdl.Definition} - WSDL4j definition constructed form the wsdl
+	 * @return {@link Definition} - WSDL4j definition constructed form the wsdl
 	 *         original baseuri
-	 * @throws org.wso2.carbon.apimgt.api.APIManagementException
-	 * @throws javax.wsdl.WSDLException
+	 * @throws APIManagementException
+	 * @throws WSDLException
 	 */
 	
 	private Definition readWSDLFile() throws APIManagementException, WSDLException {
@@ -208,10 +208,10 @@ public class APIMWSDLReader {
      * Create the WSDL definition <javax.wsdl.Definition> from the baseURI of
      * the WSDL
      *
-     * @return {@link javax.wsdl.Definition} - WSDL4j definition constructed form the wsdl
+     * @return {@link Definition} - WSDL4j definition constructed form the wsdl
      *         original baseuri
-     * @throws org.wso2.carbon.apimgt.api.APIManagementException
-     * @throws javax.wsdl.WSDLException
+     * @throws APIManagementException
+     * @throws WSDLException
      */
 
     private Definition readWSDLFile(API api) throws APIManagementException, WSDLException {
@@ -234,8 +234,8 @@ public class APIMWSDLReader {
 	 * actual Endpoint.
 	 * 
 	 * @param definition
-	 *            - {@link javax.wsdl.Definition} - WSDL4j wsdl definition
-	 * @throws org.wso2.carbon.apimgt.api.APIManagementException
+	 *            - {@link Definition} - WSDL4j wsdl definition
+	 * @throws APIManagementException
 	 */
 	
 	private void setServiceDefinition(Definition definition, API api) throws APIManagementException {
@@ -279,9 +279,9 @@ public class APIMWSDLReader {
 
 	/**
 	 * Get the addressURl from the Extensibility element
-	 * @param exElement - {@link javax.wsdl.extensions.ExtensibilityElement}
+	 * @param exElement - {@link ExtensibilityElement}
 	 * @return {@link String}
-	 * @throws org.wso2.carbon.apimgt.api.APIManagementException
+	 * @throws APIManagementException
 	 */
 
 	private String getAddressUrl(ExtensibilityElement exElement) throws APIManagementException {
@@ -301,9 +301,9 @@ public class APIMWSDLReader {
 
 	/**
 	 * Get the addressURl from the Extensibility element
-	 * @param exElement - {@link javax.wsdl.extensions.ExtensibilityElement}
+	 * @param exElement - {@link ExtensibilityElement}
 	 * @return {@link String}
-	 * @throws org.wso2.carbon.apimgt.api.APIManagementException
+	 * @throws APIManagementException
 	 */
 
 	private void setAddressUrl(ExtensibilityElement exElement, String transports, API api) throws APIManagementException {

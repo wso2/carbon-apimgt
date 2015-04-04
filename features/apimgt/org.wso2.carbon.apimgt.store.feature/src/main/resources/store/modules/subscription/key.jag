@@ -21,19 +21,107 @@ var generateAPIKey = function (api, context, application, username, keyType, cal
         };
     }
 };
-var generateApplicationKey = function (application, username, keyType, callbackUrl, accessAllowDomains, validityTime,afterFailure,tokenScope, groupId) {
+
+
+var generateApplicationKey = function (application, username, keyType, callbackUrl, accessAllowDomainsArr,
+                                       validityTime, afterFailure,tokenScope,groupingId,jsonParams) {
+
     afterFailure = typeof afterFailure !== 'undefined' ? afterFailure : false;
     var key,
             log = new Log(),
             store = jagg.module("manager").getAPIStoreObj();
 
     try {
-	if(afterFailure){
-        key = store.createApplicationKeys( username,application, keyType, callbackUrl, accessAllowDomains, validityTime, tokenScope, groupId);
+
+	if(afterFailure == true){
+        key = store.createApplicationKeys(application, username, keyType, callbackUrl, accessAllowDomainsArr,
+                validityTime, afterFailure,tokenScope,groupingId,jsonParams);
 	}else{
-	    key = store.getApplicationKey( username,application, keyType, callbackUrl, accessAllowDomains, validityTime, tokenScope, groupId);
-        
+	    key = store.getApplicationKey(application, username, keyType, callbackUrl, accessAllowDomainsArr,
+                validityTime, afterFailure,tokenScope,groupingId,jsonParams);
+
 	}
+        if (log.isDebugEnabled()) {
+            log.debug("generateAPIKey");
+        }
+        return {
+            error:false,
+            key:key
+        };
+    } catch (e) {
+        log.error(e.message);
+        return {
+            error:true,
+            key:null
+        };
+    }
+};
+
+
+var deleteAuthApplication = function (authAppParams) {
+
+    afterFailure = typeof afterFailure !== 'undefined' ? afterFailure : false;
+    var key,
+            log = new Log(),
+            store = jagg.module("manager").getAPIStoreObj();
+
+    try {
+
+        key = store.deleteAuthApplication(authAppParams);
+
+        if (log.isDebugEnabled()) {
+            log.debug("generateAPIKey");
+        }
+        return {
+            error:false,
+            key:key
+        };
+    } catch (e) {
+        log.error(e.message);
+        return {
+            error:true,
+            key:null
+        };
+    }
+};
+
+
+var updateAuthClient = function (authAppParams) {
+
+    afterFailure = typeof afterFailure !== 'undefined' ? afterFailure : false;
+    var key,
+            log = new Log(),
+            store = jagg.module("manager").getAPIStoreObj();
+
+    try {
+
+        key = store.updateAuthClient(authAppParams);
+
+        if (log.isDebugEnabled()) {
+            log.debug("generateAPIKey");
+        }
+        return {
+            error:false,
+            key:key
+        };
+    } catch (e) {
+        log.error(e.message);
+        return {
+            error:true,
+            key:null
+        };
+    }
+};
+
+var mapExistingOauthClient = function (authAppParams) {
+
+    var key,
+            log = new Log(),
+            store = jagg.module("manager").getAPIStoreObj();
+    try {
+
+        key = store.mapExistingOauthClient(authAppParams);
+
         if (log.isDebugEnabled()) {
             log.debug("generateAPIKey");
         }

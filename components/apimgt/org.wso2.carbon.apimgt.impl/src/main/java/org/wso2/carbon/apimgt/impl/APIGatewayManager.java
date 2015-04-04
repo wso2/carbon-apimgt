@@ -294,8 +294,8 @@ public class APIGatewayManager {
 	 *            -API object
 	 * @param tenantDomain
 	 * @param environment
-	 * @throws org.wso2.carbon.apimgt.api.APIManagementException
-	 * @throws org.apache.axis2.AxisFault
+	 * @throws APIManagementException
+	 * @throws AxisFault
 	 */
     private void deployCustomSequences(API api, String tenantDomain, Environment environment)
             throws APIManagementException,
@@ -369,7 +369,7 @@ public class APIGatewayManager {
 	 * @param api
 	 * @param tenantDomain
 	 * @param environment
-	 * @throws org.wso2.carbon.apimgt.api.APIManagementException
+	 * @throws APIManagementException
 	 */
     private void undeployCustomSequences(API api, String tenantDomain, Environment environment) {
 
@@ -407,7 +407,7 @@ public class APIGatewayManager {
 	 * @param api
 	 * @param tenantDomain
 	 * @param environment
-	 * @throws org.wso2.carbon.apimgt.api.APIManagementException
+	 * @throws APIManagementException
 	 */
 	private void updateCustomSequences(API api, String tenantDomain, Environment environment)
 	                                                                                         throws APIManagementException {
@@ -528,7 +528,7 @@ public class APIGatewayManager {
      * @param tenantDomain
      * @param environment
      * @param operation -add,delete,update operations for an API
-     * @throws org.wso2.carbon.apimgt.api.APIManagementException
+     * @throws APIManagementException
      */
 	private void setSecurevaultProperty(API api, String tenantDomain, Environment environment,String operation)
 	                                                                                          throws APIManagementException {

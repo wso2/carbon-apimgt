@@ -3,5 +3,9 @@
             <className>org.wso2.carbon.apimgt.hostobjects.APIStoreHostObject</className>
             <name>APIStore</name>
         </hostObject>
+        <hostObject>
+                <className>org.wso2.carbon.apimgt.hostobjects.MutualAuthHostObject</className>
+                <name>MutualAuthHostObject</name>
+        </hostObject>
 </module>
 

@@ -1520,15 +1520,15 @@ public class APIUsageStatisticsClient {
                         "FROM API_REQUEST_SUMMARY" + " WHERE " + APIUsageStatisticsClientConstants.TIME + " BETWEEN " +
                         "\'" + fromDate + "\' AND \'" + toDate + "\'" + " AND " +
                         APIUsageStatisticsClientConstants.API_PUBLISHER + " = \'" + tenantDomain + "\'" +
-                        " GROUP BY API, API_VERSION, USERID, VERSION, APIPUBLISHER, CONTEXT ORDER BY TOTAL_REQUEST_COUNT DESC LIMIT " + resultsLimit;
+                        " GROUP BY API, API_VERSION, USERID, VERSION, APIPUBLISHER, CONTEXT ORDER BY TOTAL_REQUEST_COUNT DESC ";
 
                 oracleQuery = "SELECT API, API_VERSION, VERSION, APIPUBLISHER, USERID, SUM(TOTAL_REQUEST_COUNT) AS TOTAL_REQUEST_COUNT, CONTEXT " +
                               "FROM API_REQUEST_SUMMARY" + " WHERE " + APIUsageStatisticsClientConstants.TIME + " BETWEEN " +
                               "\'" + fromDate + "\' AND \'" + toDate + "\'" + " AND " +
                               APIUsageStatisticsClientConstants.API_PUBLISHER + " = \'" + tenantDomain + "\'" +
-                              " AND ROWNUM <= " + resultsLimit + " GROUP BY API, API_VERSION, VERSION, USERID, APIPUBLISHER, CONTEXT ORDER BY TOTAL_REQUEST_COUNT DESC";
+                              " GROUP BY API, API_VERSION, VERSION, USERID, APIPUBLISHER, CONTEXT ORDER BY TOTAL_REQUEST_COUNT DESC";
 
-                mssqlQuery = "SELECT TOP " + resultsLimit + " API, API_VERSION, VERSION, APIPUBLISHER, USERID, SUM(TOTAL_REQUEST_COUNT) AS TOTAL_REQUEST_COUNT, CONTEXT " +
+                mssqlQuery = "SELECT API, API_VERSION, VERSION, APIPUBLISHER, USERID, SUM(TOTAL_REQUEST_COUNT) AS TOTAL_REQUEST_COUNT, CONTEXT " +
                              "FROM API_REQUEST_SUMMARY" + " WHERE " + APIUsageStatisticsClientConstants.TIME + " BETWEEN " +
                              "\'" + fromDate + "\' AND \'" + toDate + "\'" + " AND " +
                              APIUsageStatisticsClientConstants.API_PUBLISHER + " = \'" + tenantDomain + "\'" +
@@ -1536,13 +1536,13 @@ public class APIUsageStatisticsClient {
             } else {
                 query = "SELECT API, API_VERSION, VERSION, APIPUBLISHER, USERID, SUM(TOTAL_REQUEST_COUNT) AS TOTAL_REQUEST_COUNT, CONTEXT " +
                         "FROM API_REQUEST_SUMMARY" + " WHERE " + APIUsageStatisticsClientConstants.API_PUBLISHER + " = \'" + tenantDomain + "\'" +
-                        " GROUP BY API, API_VERSION, APIPUBLISHER, USERID ORDER BY TOTAL_REQUEST_COUNT DESC LIMIT " + resultsLimit;
+                        " GROUP BY API, API_VERSION, APIPUBLISHER, USERID ORDER BY TOTAL_REQUEST_COUNT DESC ";
 
                 oracleQuery = "SELECT API, API_VERSION, VERSION, APIPUBLISHER, USERID, SUM(TOTAL_REQUEST_COUNT) AS TOTAL_REQUEST_COUNT, CONTEXT " +
                               "FROM API_REQUEST_SUMMARY WHERE " + APIUsageStatisticsClientConstants.API_PUBLISHER + " = \'" + tenantDomain + "\'" +
-                              " AND ROWNUM <= " + resultsLimit + " GROUP BY API, API_VERSION, VERSION, APIPUBLISHER, USERID, CONTEXT ORDER BY TOTAL_REQUEST_COUNT DESC ";
+                              " GROUP BY API, API_VERSION, VERSION, APIPUBLISHER, USERID, CONTEXT ORDER BY TOTAL_REQUEST_COUNT DESC ";
 
-                mssqlQuery = "SELECT TOP " + resultsLimit + " API, API_VERSION, VERSION, APIPUBLISHER, USERID, SUM(TOTAL_REQUEST_COUNT) AS TOTAL_REQUEST_COUNT, CONTEXT " +
+                mssqlQuery = "SELECT  API, API_VERSION, VERSION, APIPUBLISHER, USERID, SUM(TOTAL_REQUEST_COUNT) AS TOTAL_REQUEST_COUNT, CONTEXT " +
                              "FROM API_REQUEST_SUMMARY" + " WHERE " + APIUsageStatisticsClientConstants.API_PUBLISHER + " = \'" + tenantDomain + "\'" +
                              " GROUP BY API, API_VERSION, APIPUBLISHER, USERID ORDER BY TOTAL_REQUEST_COUNT DESC ";
 

@@ -68,7 +68,7 @@ public class RemoteUserManagerClient {
 	 * @param claim
 	 * @param claimValue
 	 * @return
-	 * @throws org.wso2.carbon.apimgt.api.APIManagementException
+	 * @throws APIManagementException
 	 */
 	public String[] getUserList(String claim, String claimValue) throws APIManagementException {
 		String[] user ;

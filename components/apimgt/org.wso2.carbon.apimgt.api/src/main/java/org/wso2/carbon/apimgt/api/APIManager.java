@@ -40,7 +40,7 @@ public interface APIManager {
      * calling the getAPI(APIIdentifier) method.
      *
      * @return a List of API objects (partially initialized), possibly empty
-     * @throws org.wso2.carbon.apimgt.api.APIManagementException on error
+     * @throws APIManagementException on error
      */
     public List<API> getAllAPIs() throws APIManagementException;
     /**
@@ -48,7 +48,7 @@ public interface APIManager {
      *
      * @param apiPath APIIdentifier
      * @return An API object related to the given identifier or null
-     * @throws org.wso2.carbon.apimgt.api.APIManagementException if failed get API from APIIdentifier
+     * @throws APIManagementException if failed get API from APIIdentifier
      */
     public API getAPI(String apiPath) throws APIManagementException;
     /**
@@ -56,7 +56,7 @@ public interface APIManager {
      *
      * @param identifier APIIdentifier
      * @return An API object related to the given identifier or null
-     * @throws org.wso2.carbon.apimgt.api.APIManagementException if failed get API from APIIdentifier
+     * @throws APIManagementException if failed get API from APIIdentifier
      */
     public API getAPI(APIIdentifier identifier) throws APIManagementException;
 
@@ -65,7 +65,7 @@ public interface APIManager {
      *
      * @param identifier APIIdentifier
      * @return true, if already exists. False, otherwise
-     * @throws org.wso2.carbon.apimgt.api.APIManagementException if failed to get API availability
+     * @throws APIManagementException if failed to get API availability
      */
     public boolean isAPIAvailable(APIIdentifier identifier) throws APIManagementException;
 
@@ -74,7 +74,7 @@ public interface APIManager {
      *
      * @param context A String representing an API context
      * @return true if the context already exists and false otherwise
-     * @throws org.wso2.carbon.apimgt.api.APIManagementException if failed to check the context availability
+     * @throws APIManagementException if failed to check the context availability
      */
     public boolean isContextExist(String context) throws APIManagementException;
 
@@ -83,7 +83,7 @@ public interface APIManager {
      *
      * @param apiName A String representing an API name
      * @return true if the api name already exists and false otherwise
-     * @throws org.wso2.carbon.apimgt.api.APIManagementException if failed to check the context availability
+     * @throws APIManagementException if failed to check the context availability
      */
     public boolean isApiNameExist(String apiName) throws APIManagementException;
 
@@ -93,7 +93,7 @@ public interface APIManager {
      * @param providerName name of the provider (common)
      * @param apiName      name of the api
      * @return Set of version strings (possibly empty)
-     * @throws org.wso2.carbon.apimgt.api.APIManagementException if failed to get version for api
+     * @throws APIManagementException if failed to get version for api
      */
     public Set<String> getAPIVersions(String providerName, String apiName)
             throws APIManagementException;
@@ -103,7 +103,7 @@ public interface APIManager {
      *
      * @param apiId APIIdentifier
      * @return List<Documentation>
-     * @throws org.wso2.carbon.apimgt.api.APIManagementException if failed to get Documentations
+     * @throws APIManagementException if failed to get Documentations
      */
     public List<Documentation> getAllDocumentation(APIIdentifier apiId)
             throws APIManagementException;
@@ -113,9 +113,9 @@ public interface APIManager {
      *
      * @param apiId APIIdentifier
      * @return List<Documentation>
-     * @throws org.wso2.carbon.apimgt.api.APIManagementException if failed to get Documentations
+     * @throws APIManagementException if failed to get Documentations
      */
-    public List<Documentation> getAllDocumentation(APIIdentifier apiId, String loggedUserName)
+    public List<Documentation> getAllDocumentation(APIIdentifier apiId,String loggedUserName)
             throws APIManagementException;
 
     /**
@@ -125,10 +125,11 @@ public interface APIManager {
      * @param docType type of the documentation
      * @param docName name of the doc
      * @return Documentation
-     * @throws org.wso2.carbon.apimgt.api.APIManagementException if failed to get Documentation
+     * @throws APIManagementException if failed to get Documentation
      */
-    public Documentation getDocumentation(APIIdentifier apiId, DocumentationType docType, String docName)
-            throws APIManagementException;
+    public Documentation getDocumentation(APIIdentifier apiId,
+                                          DocumentationType docType,
+                                          String docName) throws APIManagementException;
 
     /**
      * This method used to get the content of a documentation
@@ -136,7 +137,7 @@ public interface APIManager {
      * @param identifier,        API identifier
      * @param documentationName, name of the inline documentation
      * @return if failed to get doc content
-     * @throws org.wso2.carbon.apimgt.api.APIManagementException if the asking documentation content is unavailable
+     * @throws APIManagementException if the asking documentation content is unavailable
      */
     public String getDocumentationContent(APIIdentifier identifier, String documentationName)
             throws APIManagementException;
@@ -146,7 +147,7 @@ public interface APIManager {
      *
      * @param accessToken Subscriber key
      * @return Subscriber
-     * @throws org.wso2.carbon.apimgt.api.APIManagementException if failed to get Subscriber from access token
+     * @throws APIManagementException if failed to get Subscriber from access token
      */
     public Subscriber getSubscriberById(String accessToken) throws APIManagementException;
 
@@ -163,7 +164,7 @@ public interface APIManager {
      * Updates the details of the given subscriber.
      *
      * @param subscriber The subscriber to be updated
-     * @throws org.wso2.carbon.apimgt.api.APIManagementException if failed to update subscriber
+     * @throws APIManagementException if failed to update subscriber
      */
     public void updateSubscriber(Subscriber subscriber) throws APIManagementException;
 
@@ -172,7 +173,7 @@ public interface APIManager {
      *
      * @param subscriberId The subscriber id of the subscriber to be returned
      * @return The looked up subscriber or null if the requested subscriber does not exist
-     * @throws org.wso2.carbon.apimgt.api.APIManagementException if failed to get Subscriber
+     * @throws APIManagementException if failed to get Subscriber
      */
     public Subscriber getSubscriber(int subscriberId) throws APIManagementException;
 
@@ -181,7 +182,7 @@ public interface APIManager {
      *
      * @param subscriber Subscriber
      * @return Set<API>
-     * @throws org.wso2.carbon.apimgt.api.APIManagementException if failed to get API for subscriber
+     * @throws APIManagementException if failed to get API for subscriber
      */
     public Set<API> getSubscriberAPIs(Subscriber subscriber) throws APIManagementException;
 
@@ -191,7 +192,7 @@ public interface APIManager {
      * @param resourcePath a String representing the relative path of a resource.
      * @param icon         to be saved
      * @return a String URL pointing to the image that was added
-     * @throws org.wso2.carbon.apimgt.api.APIManagementException if an error occurs while adding the icon image
+     * @throws APIManagementException if an error occurs while adding the icon image
      */
     public String addIcon(String resourcePath, Icon icon) throws APIManagementException;
 
@@ -200,7 +201,7 @@ public interface APIManager {
      *
      * @param identifier ID representing the API
      * @return an Icon containing image content and content type information
-     * @throws org.wso2.carbon.apimgt.api.APIManagementException if an error occurs while retrieving the image
+     * @throws APIManagementException if an error occurs while retrieving the image
      */
     public Icon getIcon(APIIdentifier identifier) throws APIManagementException;
 
@@ -208,7 +209,7 @@ public interface APIManager {
      * Cleans up any resources acquired by this APIManager instance. It is recommended
      * to call this method once the APIManager instance is no longer required.
      *
-     * @throws org.wso2.carbon.apimgt.api.APIManagementException if an error occurs while cleaning up
+     * @throws APIManagementException if an error occurs while cleaning up
      */
     public void cleanup() throws APIManagementException;
 
@@ -218,7 +219,7 @@ public interface APIManager {
      *
      * @param accessToken
      * @return
-     * @throws org.wso2.carbon.apimgt.api.APIManagementException
+     * @throws APIManagementException
      */
     public boolean isApplicationTokenExists(String accessToken) throws APIManagementException;
 
@@ -227,7 +228,7 @@ public interface APIManager {
      *
      * @param accessToken
      * @return
-     * @throws org.wso2.carbon.apimgt.api.APIManagementException
+     * @throws APIManagementException
      */
     public boolean isApplicationTokenRevoked(String accessToken) throws APIManagementException;
 
@@ -236,7 +237,7 @@ public interface APIManager {
      *
      * @param accessToken AccessToken
      * @return
-     * @throws org.wso2.carbon.apimgt.api.APIManagementException
+     * @throws APIManagementException
      */
     public APIKey getAccessTokenData(String accessToken) throws APIManagementException;
     /**
@@ -248,7 +249,7 @@ public interface APIManager {
      * @param searchTerm
      * @param loggedInUser
      * @return
-     * @throws org.wso2.carbon.apimgt.api.APIManagementException
+     * @throws APIManagementException
      */
     public Map<Integer, APIKey> searchAccessToken(String searchType, String searchTerm, String loggedInUser)
             throws APIManagementException;
@@ -258,7 +259,7 @@ public interface APIManager {
      *
      * @param accessToken
      * @return
-     * @throws org.wso2.carbon.apimgt.api.APIManagementException
+     * @throws APIManagementException
      */
     public Set<APIIdentifier> getAPIByAccessToken(String accessToken) throws APIManagementException;
 
@@ -266,7 +267,7 @@ public interface APIManager {
     * Returns a list of pre-defined # {@link org.wso2.carbon.apimgt.api.model.Tier} in the system.
     *
     * @return Set<Tier>
-    * @throws org.wso2.carbon.apimgt.api.APIManagementException if failed to get the predefined tiers
+    * @throws APIManagementException if failed to get the predefined tiers
     */
     public Set<Tier> getTiers() throws APIManagementException;
 
@@ -276,7 +277,7 @@ public interface APIManager {
      * Returns a list of pre-defined # {@link org.wso2.carbon.apimgt.api.model.Tier} in the system.
      *
      * @return Set<Tier>
-     * @throws org.wso2.carbon.apimgt.api.APIManagementException if failed to get the predefined tiers
+     * @throws APIManagementException if failed to get the predefined tiers
      */
     public Set<Tier> getTiers(String tenantDomain) throws APIManagementException;
 
@@ -284,7 +285,7 @@ public interface APIManager {
      * Returns the Swagger definition as a string
      * @param apiId
      * @return
-     * @throws org.wso2.carbon.apimgt.api.APIManagementException
+     * @throws APIManagementException
      */
     public String getSwaggerDefinition(APIIdentifier apiId) throws APIManagementException;
 

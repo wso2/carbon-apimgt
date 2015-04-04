@@ -210,9 +210,9 @@
                     <div class="btn loadingButton">Saving API. Please wait..</div>
                 </div>
                 <div class="form-actions" id="saveButtons">
-                    <input type="submit" class="btn btn-primary manageSaveButton" value="Save"/>
-                     <%if(outputs.isPermitted){%> <a class="btn btn-warning manageSaveButton" id="prototyped_api">Deploy Prototype</a><%}%>
-                    <a id="go_to_manage" class="btn btn-primary manageSaveButton" >Manage</a> 
+                    <button type="submit" class="btn btn-info manageSaveButton" id="saveBtn" data-loading-text="<i class='fa fa-spinner fa-pulse' id='loader'></i>Loading">Save</button>
+                     <%if(outputs.isPermitted){%> <button class="btn btn-warning manageSaveButton" id="prototyped_api" data-loading-text="<i class='fa fa-spinner fa-pulse' id='loader'></i>Loading">Deploy Prototype</button><%}%>
+                    <button id="go_to_manage" class="btn btn-primary manageSaveButton" data-loading-text="<i class='fa fa-spinner fa-pulse' id='loader'></i>Loading">Manage</button>
                     <input type="reset" class="btn" value="<%=i18n.localize("cancel")%>" onclick="javascript:window.location.href='./'" />                                                            
                 </div>
             </form>

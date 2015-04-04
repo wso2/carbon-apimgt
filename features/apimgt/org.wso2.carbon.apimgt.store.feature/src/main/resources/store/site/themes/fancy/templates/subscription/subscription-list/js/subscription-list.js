@@ -86,6 +86,7 @@ $(document).ready(function () {
     });
 
     $('.app-key-generate-button').click(function () {
+
         var elem = $(this);
         var i = elem.attr("iteration");
         var keyType = elem.attr("data-keytype");
@@ -93,37 +94,47 @@ $(document).ready(function () {
         var domainsDiv;
         var regen;
         var link;
+        var userName = elem.attr("data-username");
         var validityTime;
         if (keyType == 'PRODUCTION') {
             authoDomains = $('#allowedDomainsPro').val();
-            validityTime=$('#refreshProdValidityTime').val();
+            validityTime = $('#refreshProdValidityTime').val();
         } else {
             authoDomains = $('#allowedDomainsSand').val();
-            validityTime=$('#refreshSandValidityTime').val();
+            validityTime = $('#refreshSandValidityTime').val();
         }
-        var tokenScope = $('#scopeInput').val();
-        console.log("app-key-generate-button accessed");
+
+        /*
+         if we have additional parameters we can pass them as a json object.
+         */
+        //var oJsonParams= "";
+
+        console.log("here i am");
+	    var tokenScope = $('#scopeInput').val();
+
         jagg.post("/site/blocks/subscription/subscription-add/ajax/subscription-add.jag", {
-            action:"generateApplicationKey",
-            application:elem.attr("data-application"),
-            keytype:elem.attr("data-keytype"),
-            callbackUrl:elem.attr("data-callbackUrl"),
-            authorizedDomains:authoDomains,
-            validityTime:validityTime,
+
+            action: "generateApplicationKey",
+            application: elem.attr("data-application"),
+            keytype: elem.attr("data-keytype"),
+            callbackUrl: elem.attr("data-callbackUrl"),
+            authorizedDomains: authoDomains,
+            validityTime: validityTime,
             tokenScope:tokenScope,
-	  
+	    //jsonParams: oJsonParams
+
         }, function (result) {
             if (!result.error) {
                 location.reload();
             } else {
-                jagg.message({content:result.message,type:"error"});
+                jagg.message({content: result.message, type: "error"});
             }
         }, "json");
 
         $(this).html(i18n.t('info.wait'));
     });
 
-    $('.app-create-key-button').click(function () {
+ $('.app-create-key-button').click(function () {
         var elem = $(this);
         var i = elem.attr("iteration");
         var keyType = elem.attr("data-keytype");
@@ -160,6 +171,7 @@ $(document).ready(function () {
 
         $(this).html(i18n.t('info.wait'));
     });
+
 
        $('.key-table-content textarea').focus(function() {
         var $this = $(this);
@@ -204,9 +216,94 @@ $(document).ready(function () {
 	   });
 	    return false;
 	 });
-	  
-	    
+
+   $('#btnProvideKeyProduction').click(function () {
+       $('.cDivParentOfManualAuthAppCreateProduction').show();
+       $('.cDivDefaultBtnSet').hide();
+   });
+
+    $('#btnProvideKeySandBox').click(function () {
+        $('.cDivParentOfManualAuthAppCreateSandBox').show();
+        $('.defaultBtnSetForSandBox').hide();
+    });
+
+
+    $('#btnProvideKeyProductionCancle').click(function () {
+        $('.cDivParentOfManualAuthAppCreateProduction').hide();
+        $('.cDivDefaultBtnSet').show();
+    });
+
+    $('#btnProvideKeySandBoxCancel').click(function () {
+        $('.cDivParentOfManualAuthAppCreateSandBox').hide();
+        $('.defaultBtnSetForSandBox').show();
+    });
+
+    $("#btnProvideKeyProductionSave").click(function () {
+        mapExistingOauthClient($(this));
+    });
+
+    $("#btnProvideKeySandBoxSave").click(function () {
+        mapExistingOauthClient($(this));
+    });
+
 });
+
+var mapExistingOauthClient=function(oBtnElement){
+
+    ////////////////////////////////////////////////////////////////////////////////////////////
+
+    var elem = oBtnElement;
+    var i = elem.attr("iteration");
+    var keyType = elem.attr("data-keytype");
+    var authoDomains;
+    var clientId;
+    var clientSecret;
+    var userName = elem.attr("data-username");
+    var validityTime;
+    if (keyType == 'PRODUCTION') {
+        authoDomains = $('#allowedDomainsPro').val();
+        validityTime = $('#refreshProdValidityTime').val();
+        clientId = $('#inputConsumerKeyProduction').val();
+        clientSecret = $('#inputConsumerSecretProduction').val();
+    } else {
+        authoDomains = $('#allowedDomainsSand').val();
+        validityTime = $('#refreshSandValidityTime').val();
+        clientId = $('#inputConsumerKeySandBox').val();
+        clientSecret = $('#inputConsumerSecretSandBox').val();
+    }
+
+    /*
+     if we have additional parameters we can pass them as a json object.
+     */
+    var oJsonParams = {
+        "username" : userName,
+        "key_type" : keyType,
+        "client_secret":clientSecret,
+        "applicationName" : "erere"
+    };
+    console.log(oJsonParams);
+
+    jagg.post("/site/blocks/subscription/subscription-add/ajax/subscription-add.jag", {
+        action: "mapExistingOauthClient",
+        applicationName: elem.attr("data-application"),
+        keytype: elem.attr("data-keytype"),
+        callbackUrl: elem.attr("data-callbackUrl"),
+        authorizedDomains: authoDomains,
+        validityTime: validityTime,
+        jsonParams: JSON.stringify(oJsonParams),
+        client_id : clientId
+    }, function (result) {
+        if (!result.error) {
+            location.reload();
+        } else {
+            jagg.message({content: result.message, type: "error"});
+        }
+    }, "json");
+
+    $(this).html(i18n.t('info.wait'));
+
+}
+
 
 var regenerate=function(appName,keyType,i,btn,div,clientId,clientSecret) {
     if(jagg.sessionExpired()){

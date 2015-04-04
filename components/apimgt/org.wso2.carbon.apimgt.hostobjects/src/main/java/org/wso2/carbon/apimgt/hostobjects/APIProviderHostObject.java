@@ -53,6 +53,7 @@ import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.impl.UserAwareAPIProvider;
+import org.wso2.carbon.apimgt.impl.factory.KeyManagerFactory;
 import org.wso2.carbon.apimgt.impl.dto.Environment;
 import org.wso2.carbon.apimgt.impl.dto.TierPermissionDTO;
 import org.wso2.carbon.apimgt.impl.utils.APIAuthenticationAdminClient;
@@ -240,6 +241,7 @@ public class APIProviderHostObject extends ScriptableObject {
 
         return row;
     }
+
 
     /**
      * This method is used to update the permission cache from jaggery side. user name should be passed as a parameter
@@ -480,6 +482,26 @@ public class APIProviderHostObject extends ScriptableObject {
         } catch (APIManagementException e) {
             //swallowing the excepion since the api update should happen even if cache update fails
             log.error("Error while removing the scope cache", e);
+        }
+        //get new key manager instance for  resource registration.
+        KeyManager keyManager = KeyManagerFactory.getKeyManager();
+
+        Map registeredResource = keyManager.getResourceByApiId(api.getId().toString());
+
+        if (registeredResource == null) {
+            boolean isNewResourceRegistered = keyManager.registerNewResource(api , null);
+            if (!isNewResourceRegistered) {
+                handleException("APIResource registration is failed while adding the API- " + api.getId().getApiName
+                        () + "-" + api
+                        .getId().getVersion());
+            }
+        } else {
+            //update APIResource.
+            String resourceId = (String) registeredResource.get("resourceId");
+            if (resourceId == null) {
+                handleException("APIResource update is failed because of empty resourceID.");
+            }
+            keyManager.updateRegisteredResource(api , registeredResource);
         }
         
         return saveAPI(apiProvider, api, null, false);
@@ -2288,6 +2310,10 @@ public class APIProviderHostObject extends ScriptableObject {
                 myn.put(42, myn, checkValue(Boolean.toString(api.isDefaultVersion())));
                 myn.put(43, myn, api.getImplementation());
                 myn.put(44, myn, APIUtil.writeEnvironmentsToArtifact(api));
+                //get new key manager
+                KeyManager keyManager = KeyManagerFactory.getKeyManager();
+                Map registeredResource = keyManager.getResourceByApiId(api.getId().toString());
+                myn.put(45, myn, JSONObject.toJSONString(registeredResource));
 
 
             } else {
@@ -3818,6 +3844,12 @@ public class APIProviderHostObject extends ScriptableObject {
             }
             APIProvider apiProvider = getAPIProvider(thisObj);
             apiProvider.deleteAPI(apiId);
+            KeyManager keyManager = KeyManagerFactory.getKeyManager();
+
+            if (apiId.toString() != null) {
+                keyManager.deleteRegisteredResourceByAPIId(apiId.toString());
+            }
+
         } finally {
         	if (isTenantFlowStarted) {
         		PrivilegedCarbonContext.endTenantFlow();

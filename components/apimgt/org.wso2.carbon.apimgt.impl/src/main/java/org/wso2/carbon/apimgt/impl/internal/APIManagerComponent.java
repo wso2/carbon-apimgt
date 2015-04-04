@@ -29,6 +29,7 @@ import org.osgi.service.component.ComponentContext;
 import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.impl.*;
+import org.wso2.carbon.apimgt.impl.factory.KeyManagerFactory;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.listners.UserAddListener;
 import org.wso2.carbon.apimgt.impl.observers.APIStatusObserverList;
@@ -134,6 +135,10 @@ public class APIManagerComponent {
             String filePath = CarbonUtils.getCarbonHome() + File.separator + "repository" +
                     File.separator + "conf" + File.separator + "api-manager.xml";
             configuration.load(filePath);
+
+            String keyManagerFile = CarbonUtils.getCarbonHome() + File.separator + "repository" +
+                                    File.separator + "conf" + File.separator + "key-manager.xml";
+            KeyManagerFactory.initializeKeyManager(keyManagerFile);
 
             //WorkflowExecutorFactory.getInstance().load(filePath);
 
@@ -474,7 +479,7 @@ public class APIManagerComponent {
     
     /**
      * Add the External API Stores Configuration to registry
-     * @throws org.wso2.carbon.apimgt.api.APIManagementException
+     * @throws APIManagementException
      */
     private void addExternalStoresConfigs() throws APIManagementException {
         RegistryService registryService = ServiceReferenceHolder.getInstance().getRegistryService();
