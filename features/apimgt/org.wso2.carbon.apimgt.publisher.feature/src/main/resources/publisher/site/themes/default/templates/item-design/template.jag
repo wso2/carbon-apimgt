@@ -114,10 +114,14 @@
                     <br /> -->
                     <label>Definition URL :</label>
                     <input type="text" placeholder="" class="span12" id="swagger_import_url" name="swagger_import_url">
-                    <span class="help-block">Example : http://petstore.swagger.wordnik.com/api/api-docs </span>                                                              
+                    <span class="help-block">Example : http://petstore.swagger.wordnik.com/api/api-docs </span>
+                    <div id="swagger_help" class="alert alert-danger hide" role="alert">
+                      Enter a valid url
+                       <button type="button" class="close" id="errorMsgClose"><span aria-hidden="true">&times;</span></button>
+                    </div>
                 </div>                    
                 <div class="modal-footer">
-                <button class="btn btn-primary" id="import_swagger">Import</button>                    
+                <button class="btn btn-primary" id="import_swagger" data-loading-text="<i class='fa fa-spinner fa-pulse' id='loader'></i>Loading">Import</button>
                 <button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
                 </div>
             </div>
@@ -311,9 +315,9 @@
                     <div class="btn loadingButton">Saving API. Please wait..</div>
                 </div>
                 <div class="form-actions" id="saveButtons">
-                    <input type="submit" class="btn btn-primary" value="Save" action="design"/>
-                    <a class="btn btn-primary" id="go_to_implement">Implement</a>                     
-                    <input type="reset"  class="btn" value="<%=i18n.localize("cancel")%>" onclick="javascript:window.location.href='./'" />                    
+                    <button type="submit" class="btn btn-info loader-btn" id="saveBtn" data-loading-text="<i class='fa fa-spinner fa-pulse' id='loader'></i>Loading"action="design">Save</button>
+                    <button class="btn btn-primary loader-btn" id="go_to_implement" data-loading-text="<i class='fa fa-spinner fa-pulse' id='loader'></i>Loading">Implement</button>
+                    <input type="reset"  class="btn" value="<%=i18n.localize("cancel")%>" onclick="javascript:window.location.href='./'" />
                 </div>
             </form>
 
@@ -400,10 +404,11 @@
         <div class="control-group">
             <label class="control-label" for="inputResource">Resource Name</label>
             <div class="controls">
-                <input type="text" id="inputResource" placeholder="Resource">
+                <input type="text" id="inputResource" placeholder="Resource"></br>
+                <button class="btn" type="button" id="add_resource" style="margin:10px 0 0px 0px;"><i class="icon-plus-sign"></i>&nbsp;<%=i18n.localize("addNewResource")%></button>
             </div>
         </div>
-        <button class="btn" type="button" id="add_resource" style="margin:0 0 10px 10px;"><i class="icon-plus-sign"></i>&nbsp;<%=i18n.localize("addNewResource")%></button>
+
     </div>
 <table style="width:100%">                       
 {{#each api_doc.apis}}

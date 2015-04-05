@@ -28,6 +28,7 @@ import org.apache.synapse.rest.RESTConstants;
 import org.apache.synapse.rest.RESTUtils;
 import org.apache.synapse.rest.Resource;
 import org.apache.synapse.rest.dispatch.RESTDispatcher;
+import org.apache.synapse.rest.dispatch.URITemplateBasedDispatcher;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.gateway.handlers.Utils;
 import org.wso2.carbon.apimgt.gateway.handlers.security.keys.APIKeyDataStore;
@@ -45,6 +46,7 @@ import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import javax.cache.Cache;
 import javax.cache.Caching;
 import java.util.*;
+import org.wso2.carbon.apimgt.gateway.handlers.Utils;
 
 /**
  * This class is used to validate a given API key against a given API context and a version.
@@ -104,7 +106,7 @@ public class APIKeyValidator {
      * @param apiKey     API key to be validated
      * @param apiVersion API version number
      * @return An APIKeyValidationInfoDTO object
-     * @throws org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityException If an error occurs while accessing backend services
+     * @throws APISecurityException If an error occurs while accessing backend services
      */
     public APIKeyValidationInfoDTO getKeyValidationInfo(String context, String apiKey,
                                                         String apiVersion, String authenticationScheme, String clientDomain,

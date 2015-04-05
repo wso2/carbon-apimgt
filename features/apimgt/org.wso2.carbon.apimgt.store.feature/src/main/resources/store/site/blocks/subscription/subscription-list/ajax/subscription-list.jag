@@ -9,6 +9,9 @@ include("/jagg/jagg.jag");
             action = request.getParameter("action"),
             user = jagg.getUser();
     if (action == "getAllSubscriptions") {
+        /*
+         This will be called when the user calls listAllSubscription via the Rest API.
+        */
         if (!user) {
             if(!ssoEnabled){
 		print({
@@ -36,7 +39,24 @@ include("/jagg/jagg.jag");
 
         mod = jagg.module("subscription");
         var groupId = session.get("groupId");
-        result = mod.getAllSubscriptions(username,selectedApp, groupId);
+
+        var startIndex = request.getParameter("start");
+        var endIndex = request.getParameter("end");
+
+        if(startIndex==null && endIndex==null){
+            //If startIndex and endIndex of the subscriptions are not specified by the user, give first 100.
+            startIndex = 1;
+            endIndex = 100;
+        }
+        else if(startIndex==null && endIndex!=null){
+            startIndex = 1;
+        }
+        else  if(startIndex!=null && endIndex==null){
+            endIndex = 100;
+        }
+        startIndex--;
+
+        result = mod.getAllSubscriptions(username,selectedApp,startIndex,endIndex);
 
         if (result.error) {
             obj = {
@@ -46,7 +66,7 @@ include("/jagg/jagg.jag");
         } else {
             obj = {
                 error:false,
-                subscriptions:result.applications
+                subscriptions:result.result
             }
         }
         print(obj);

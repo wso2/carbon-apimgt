@@ -339,6 +339,17 @@ return getThemePath() + path;
         return url ? url : path;
     };
 
+    var url = function(path,parameters){
+        var params = ""
+        if(parameters){
+            params = "?";
+            for (var key in parameters) {
+                params = key+"="+parameters[key];
+            }
+        }
+        return  "/admin-dashboard" + path;
+    };
+
     var getMappedUrl = function (path) {
         return getAbsoluteUrl(getUrlMapping(path));
     };
@@ -547,8 +558,10 @@ return getThemePath() + path;
         getCreatePermitted:getCreatePermitted,
         setPublishPermitted:setPublishPermitted,
         getPublishPermitted:getPublishPermitted,
-	setManageTierPermitted:setManageTierPermitted,
-	getManageTierPermitted:getManageTierPermitted,
+	    setManageTierPermitted:setManageTierPermitted,
+	    getManageTierPermitted:getManageTierPermitted,
+	    setManageTierPermitted:setManageTierPermitted,
+	    getManageTierPermitted:getManageTierPermitted,
         setWorkflowCookie:setWorkflowCookie,
         getWorkflowCookie:getWorkflowCookie,
         block:block,
@@ -575,6 +588,7 @@ return getThemePath() + path;
         addFooterJSCode:addFooterJSCode,
         addFooterCode:addFooterCode,
         includeJag:includeJag,
+        url:url,
         getUserTheme:getUserTheme,
         getThemeFile:getThemeFile
     };

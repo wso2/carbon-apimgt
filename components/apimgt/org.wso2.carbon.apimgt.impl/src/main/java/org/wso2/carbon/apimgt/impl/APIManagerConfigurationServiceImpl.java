@@ -27,4 +27,8 @@ public class APIManagerConfigurationServiceImpl implements APIManagerConfigurati
     public APIManagerConfiguration getAPIManagerConfiguration() {
         return configuration;
     }
+
+    public APIManagerAnalyticsConfiguration getAPIAnalyticsConfiguration() {
+        return APIManagerAnalyticsConfiguration.getInstance();
+    }
 }

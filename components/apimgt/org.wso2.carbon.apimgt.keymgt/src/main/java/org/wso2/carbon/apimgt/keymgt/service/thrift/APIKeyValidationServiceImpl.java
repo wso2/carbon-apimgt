@@ -60,7 +60,7 @@ public class APIKeyValidationServiceImpl extends AbstractAdmin
      * throws APIKeyMgtException
      */
     private void populateCurrentCarbonContextFromAuthSession(
-            PrivilegedCarbonContext carbonContextHolder, ThriftSession authSession) throws APIKeyMgtException {
+            PrivilegedCarbonContext carbonContextHolder, ThriftSession authSession) throws org.wso2.carbon.apimgt.keymgt.APIKeyMgtException {
 
         //read parameters from it and set it in current carbon context for this thread
         PrivilegedCarbonContext storedCarbonCtxHolder = (PrivilegedCarbonContext)

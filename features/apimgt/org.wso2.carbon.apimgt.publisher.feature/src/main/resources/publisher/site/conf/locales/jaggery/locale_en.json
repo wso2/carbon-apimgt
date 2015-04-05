@@ -46,6 +46,7 @@
     "apiOwner" : "API Owner",
     "businessInformationTitle" : "Business Information",
     "apiResourcesTitle" : "API Resources",
+    "invalidSwaggerUrlErrorMsg": "Invalid swagger url",
 
     "private": "Visible to my domain",
     "public": "Public",
@@ -194,7 +195,7 @@
 
     "usageByCurrentSubscribers": "Usage by Current Subscribers",
     "usageByCurrentSubscribersAcrossAll": "Usage by Current Subscribers (Across All Versions)",
-    "addNewResource": "Add New Resource",
+    "addNewResource": "Add Resource",
     "changeIcon": "Change Icon",
     "lifecycleHistory": "Lifecycle History",
     "testURI": "Test URI",

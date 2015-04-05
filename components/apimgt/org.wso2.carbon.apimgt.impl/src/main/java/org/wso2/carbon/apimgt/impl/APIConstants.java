@@ -118,6 +118,8 @@ public final class APIConstants {
     public static final String DOC_SHARED_VISIBILITY = "PRIVATE";
 
     public static final String ACCESS_TOKEN_STORE_TABLE = "IDN_OAUTH2_ACCESS_TOKEN";
+
+    public static final String CONSUMER_KEY_ACCESS_TOKEN_MAPPING_TABLE = "CONSUMER_KEY_ACCESS_TOKEN_MAPPING";
     
     public static final String EXTERNAL_API_STORES_LOCATION = APIMGT_REGISTRY_LOCATION + "/externalstores/external-api-stores.xml";
     
@@ -315,6 +317,23 @@ public final class APIConstants {
     public static final String API_KEY_MANGER_THRIFT_SERVER_PORT = API_KEY_MANAGER + "ThriftServerPort";
     public static final String API_KEY_MANGER_THRIFT_SERVER_HOST = API_KEY_MANAGER + "ThriftServerHost";
     public static final String API_KEY_MANGER_CONNECTION_TIMEOUT = API_KEY_MANAGER + "ThriftClientConnectionTimeOut";
+
+    // Constants needed for KeyManager section
+    public static final String KEY_MANAGER = "KeyManager";
+    public static final String AUTHSERVER_URL = "AuthorizationServerURL";
+    public static final String TOKEN_URL = "TokenURL";
+    public static final String REVOKE_URL = "RevokeURL";
+
+    public static final String API_KEY_MANGER_APPLICATION_CLASS_NAME = API_KEY_MANAGER + "ApplicationClassName";
+    public static final String API_KEY_MANGER_IMPLEMENTATION_CLASS_NAME = API_KEY_MANAGER + "KeyManagerImplementationClassName";
+    public static final String API_RESOURCE_MANGER_IMPLEMENTATION_CLASS_NAME = API_KEY_MANAGER +
+            "ResourceManagerImplementationClassName";
+    public static final String API_KEY_MANGER_VALIDATIONHANDLER_CLASS_NAME = API_KEY_MANAGER + "KeyValidationHandlerClassName";
+    public static final String API_KEY_MANGER_KEY_VALIDATION_HANDLER_CLASS_NAME = API_KEY_MANAGER + "KeyValidationHandlerClassName";
+    public static final String API_KEY_MANGER_EXT_DAO_CLASS_NAME = API_KEY_MANAGER + "ExtDAOClassName";
+    public static final String API_KEY_MANGER_DCR_END_POINT_URL = API_KEY_MANAGER + "DCREndpointURL";
+
+
     public static final String API_KEY_MANAGER_THRIFT_SERVER_HOST = API_KEY_MANAGER + "ThriftServerHost";
     public static final String API_KEY_VALIDATOR_CLIENT_TYPE = API_KEY_MANAGER + "KeyValidatorClientType";
     public static final String API_KEY_VALIDATOR_WS_CLIENT = "WSClient";
@@ -329,6 +348,7 @@ public final class APIConstants {
     public static final String API_KEY_MANAGER_ENABLE_ACCESS_TOKEN_PARTITIONING = API_KEY_MANAGER + "AccessTokenPartitioning." + "EnableAccessTokenPartitioning";
     public static final String API_KEY_MANAGER_ACCESS_TOKEN_PARTITIONING_DOMAINS = API_KEY_MANAGER + "AccessTokenPartitioning." + "AccessTokenPartitioningDomains";
     public static final String API_KEY_MANAGER_ENCRYPT_TOKENS = API_KEY_MANAGER + "EncryptPersistedTokens";
+    public static final String API_KEY_MANAGER_APPLICATION_TOKEN_SCOPE = API_KEY_MANAGER +"ApplicationTokenScope";
 
     public static final String API_STORE = "APIStore.";
     public static final String SHOW_API_STORE_URL_FROM_PUBLISHER = "APIStore."+"DisplayURL";
@@ -340,6 +360,7 @@ public final class APIConstants {
     public static final String API_STORE_FORCE_CI_COMPARISIONS = API_STORE + "CompareCaseInsensitively";
     public static final String API_STORE_TAG_CACHE_DURATION = API_STORE + "TagCacheDuration";
     public static final String API_STORE_REUSE_APP_NAME = API_STORE + "ReuseAppName";
+    public static final String API_STORE_DISABLE_PERMISSION_CHECK = API_STORE + "DisablePermissionCheck";
 
     public static final String API_PUBLISHER = "APIPublisher.";
     public static final String SHOW_API_PUBLISHER_URL_FROM_STORE = "APIPublisher."+"DisplayURL";
@@ -415,15 +436,26 @@ public final class APIConstants {
     
 
     public static final String API_USAGE_TRACKING = "APIUsageTracking.";
-    public static final String API_USAGE_ENABLED = API_USAGE_TRACKING + "Enabled";
+    public static final String API_USAGE_BAM_SERVER_URL_GROUPS = API_USAGE_TRACKING + "BAMServerURL";
     public static final String API_USAGE_BUILD_MSG = API_USAGE_TRACKING + "PublishResponseMessageSize";
-    public static final String API_USAGE_THRIFT_PORT = API_USAGE_TRACKING + "ThriftPort";
-    public static final String API_USAGE_BAM_SERVER_URL = API_USAGE_TRACKING + "BAMServerURL";
     public static final String API_USAGE_BAM_SERVER_USER = API_USAGE_TRACKING + "BAMUsername";
     public static final String API_USAGE_BAM_SERVER_PASSWORD = API_USAGE_TRACKING + "BAMPassword";
+    public static final String API_USAGE_SKIP_EVENT_RECEIVER_CONN = API_USAGE_TRACKING + "SkipEventReceiverConnection";
     public static final String API_USAGE_PUBLISHER_CLASS = API_USAGE_TRACKING + "PublisherClass";
-    public static final String API_USAGE_DATA_SOURCE_NAME = API_USAGE_TRACKING + "DataSourceName";
+    public static final String API_USAGE_DATA_SOURCE_NAME = "WSO2AM_STATS_DB";
     public static final String API_USAGE_STREAMS = API_USAGE_TRACKING + "Streams.";
+    public static final String API_USAGE_REQUEST_STREAM = API_USAGE_STREAMS + "Request.";
+    public static final String API_USAGE_RESPONSE_STREAM = API_USAGE_STREAMS + "Response.";
+    public static final String API_USAGE_FAULT_STREAM = API_USAGE_STREAMS + "Fault.";
+    public static final String API_USAGE_THROTTLE_STREAM = API_USAGE_STREAMS + "Throttle.";
+    public static final String API_REQUEST_STREAM_NAME = API_USAGE_REQUEST_STREAM + "Name";
+    public static final String API_REQUEST_STREAM_VERSION = API_USAGE_REQUEST_STREAM + "Version";
+    public static final String API_RESPONSE_STREAM_NAME = API_USAGE_RESPONSE_STREAM + "Name";
+    public static final String API_RESPONSE_STREAM_VERSION = API_USAGE_RESPONSE_STREAM + "Version";
+    public static final String API_FAULT_STREAM_NAME = API_USAGE_FAULT_STREAM + "Name";
+    public static final String API_FAULT_STREAM_VERSION = API_USAGE_FAULT_STREAM + "Version";
+    public static final String API_THROTTLE_STREAM_NAME = API_USAGE_THROTTLE_STREAM + "Name";
+    public static final String API_THRORRLE_STREAM_VERSION = API_USAGE_THROTTLE_STREAM + "Version";
     public static final String API_USAGE_WF_STREAM = API_USAGE_STREAMS + "Workflow.";
     public static final String API_WF_STREAM_NAME = API_USAGE_WF_STREAM + "Name";
     public static final String API_WF_STREAM_VERSION = API_USAGE_WF_STREAM + "Version";
@@ -578,6 +610,20 @@ public final class APIConstants {
         public static final String REGISTRATION_COMPLETED = "COMPLETED";
 
     }
+
+    public interface KeyValidationRequestConstants {
+        String RESOURCE_CONTEXT = "context";
+        String RESOURCE_VERSION = "apiVersion";
+        String RESOURCE_AUTH_LEVEL = "authLevel";
+        String RESOURCE_PATH = "resource";
+        String RESOURCE_VERB = "httpVerb";
+        String KEY_DOMAIN = "clientDomain";
+        String CACHE_KEY = "cacheKey";
+
+        String RESOURCE_PARAMS = "keymgt_resource_params";
+        String VALIDATED_DTO = "validatedDTO";
+        String KM_CACHE_HIT = "km_cacheHit";
+    }
     
     //key  of the endpoint securevault
     public static final String API_SECUREVAULT_ENABLE = "EnableSecureVault";
@@ -603,6 +649,9 @@ public final class APIConstants {
     public static final String CLAIM_URI = "ClaimUri";
 
     public static final String DEFAULT_VERSION_PREFIX = "_default_";
+    public static final String OAUTH_HEADER_SPLITTER = ",";
+    public static final String CONSUMER_KEY_SEGMENT = "Bearer";
+    public static final String CONSUMER_KEY_SEGMENT_DELIMITER = " ";
 
     public static final String HTTP_PROXY_HOST = "http.proxyHost";
     public static final String HTTP_PROXY_PORT = "http.proxyPort";

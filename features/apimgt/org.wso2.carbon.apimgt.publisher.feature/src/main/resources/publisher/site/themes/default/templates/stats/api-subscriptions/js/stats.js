@@ -184,7 +184,7 @@ var drawSubscriberCountByAPIs = function () {
                         var div = d3.select("body").append("div").attr("class", "toolTip");
 
                         var w = 250;
-                        var h = 270;
+                        var h = 250;
                         var r = 60;
                         var ir = 35;
                         var textOffset = 24;
@@ -219,11 +219,11 @@ var drawSubscriberCountByAPIs = function () {
 
                         var vis = d3.select("#pie-chart").append("svg:svg")
                             .attr("width", w)
-                            .attr("height", h);
+                            .attr("height", h-40);
 
                         vis.append("text").attr("class", "title_text")
                                .attr("x", 125)
-                               .attr("y", 265)
+                               .attr("y", 17)
                                .style("font-size", "14px").style("font-weight", "10px")
                                .style("font-family", "'Helvetica Neue',Helvetica,Arial,sans-serif")
                                .style("z-index", "19")
@@ -305,11 +305,14 @@ var drawSubscriberCountByAPIs = function () {
 
 
                             paths.on("mousemove", function(d){
+
+                                var percentage = (d.value/sliceProportion)*100;
+
                                 //show tooltip
                                 div.style("left", d3.event.pageX+10+"px");
                                 div.style("top", d3.event.pageY-25+"px");
                                 div.style("display", "inline-block");
-                                div.html("version: "+(d.data.version)+"<br>Count: "+(d.data.Count));
+                                div.html("Version : "+(d.data.version)+"<br>Count : "+(d.data.Count)+"<br>Percentage : "+percentage.toFixed(1) + "%");
 
                                 if(d.data.version=="other"){
                                     div.style("display", "none");
@@ -370,13 +373,6 @@ var drawSubscriberCountByAPIs = function () {
                                     return "beginning";
                                 } else {
                                     return "end";
-                                }
-                            }).text(function(d){
-                                var percentage = (d.value/sliceProportion)*100;
-                                if(d.name=="other"){
-                                      return "";
-                                }else{
-                                      return percentage.toFixed(1) + "%";
                                 }
                             });
 
@@ -476,6 +472,9 @@ var drawSubscriberCountByAPIs = function () {
                     //paginator
                     var items = $("svg");
                     var numItems = items.length;
+                    if (numItems<=6){
+                        $('#pagination').hide();
+                    }else{
                     var perPage = 6;
                     items.slice(perPage).hide();
 
@@ -491,7 +490,9 @@ var drawSubscriberCountByAPIs = function () {
                              .slice(showFrom, showTo).show();
                         }
                     });
+                    }
                 }else{
+                    $('#pie-chart').css("background-color","#f5f5f5");
                     $('#pie-chart').html($('<h3 class="no-data-heading center-wrapper">No Data Available</h3>'));
                 }
             } else {

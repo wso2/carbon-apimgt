@@ -82,6 +82,7 @@ public class APIKeyMgtServiceComponent {
             ServiceReferenceHolder.getInstance().setAPIManagerConfigurationService(configurationService);
 
             APIKeyMgtDataHolder.initData();
+
             //Based on configuration we have to decide thrift server run or not
             if (APIKeyMgtDataHolder.getThriftServerEnabled()) {
                 APIKeyValidationServiceImpl.init(thriftAuthenticationService);

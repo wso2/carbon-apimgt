@@ -31,9 +31,7 @@ public class APIKeyValidationService {
 
   public interface Iface {
 
-    public APIKeyValidationInfoDTO validateKey(String context, String version, String accessToken, String sessionId,
-                                               String requiredAuthenticationLevel, String clientDomain,
-                                               String matchingResource, String httpVerb) throws APIKeyMgtException, APIManagementException, org.apache.thrift.TException;
+    public APIKeyValidationInfoDTO validateKey(String context, String version, String accessToken, String sessionId, String requiredAuthenticationLevel, String clientDomain, String matchingResource, String httpVerb) throws APIKeyMgtException, APIManagementException, org.apache.thrift.TException;
 
     public List<URITemplate> getAllURITemplates(String context, String apiVersion, String sessionId) throws APIKeyMgtException, APIManagementException, org.apache.thrift.TException;
 
