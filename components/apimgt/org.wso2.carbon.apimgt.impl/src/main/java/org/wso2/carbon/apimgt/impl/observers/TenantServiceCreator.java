@@ -76,7 +76,7 @@ public class TenantServiceCreator extends AbstractAxis2ConfigurationContextObser
     private String throttleOutSequenceName = "_throttle_out_handler_";
     private String faultSequenceName = "fault";
     private String mainSequenceName = "main";
-    private String corsSequenceName = "cors";
+    private String corsSequenceName = "_cors_request_handler";
     private String synapseConfigRootPath = CarbonBaseUtils.getCarbonHome() + "/repository/resources/apim-synapse-config/";
     private SequenceMediator authFailureHandlerSequence = null;
     private SequenceMediator resourceMisMatchSequence = null;

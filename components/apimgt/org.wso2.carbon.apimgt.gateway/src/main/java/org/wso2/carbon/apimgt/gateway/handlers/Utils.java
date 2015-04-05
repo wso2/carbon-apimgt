@@ -182,9 +182,7 @@ public class Utils {
         }
     }
     
-    public static String getAllowedOrigin(String currentRequestOrigin) {
-    	String allowedOrigins = ServiceReferenceHolder.getInstance().getAPIManagerConfiguration().
-    	        getFirstProperty(APIConstants.CORS_CONFIGURATION_ACCESS_CTL_ALLOW_ORIGIN);
+    public static String getAllowedOrigin(String currentRequestOrigin,String allowedOrigins) {
     	if (allowedOrigins != null) {
     		String[] origins = allowedOrigins.split(",");
     		List<String> originsList = new LinkedList<String>();
