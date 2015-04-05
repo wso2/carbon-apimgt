@@ -172,13 +172,11 @@ function APIDesigner(){
 		            "type":"string"
                         });
                 }
-                if(method != "OPTIONS"){
                 resource.operations.push({ 
                     method : $(this).val(),
                     parameters : tempPara,
                     nickname : $(this).val().toLowerCase() + '_' +$("#resource_url_pattern").val()
                 });
-                }
                 ic++
                 }
                 vc++;                
@@ -231,7 +229,7 @@ APIDesigner.prototype.set_default_management_values = function(){
 
 APIDesigner.prototype.add_default_resource = function(){
     $("#resource_url_pattern").val("*");
-    $(".http_verb_select").attr("checked","checked");    
+    $(".http_verb_select:lt(4)").attr("checked","checked");
     $("#inputResource").val("Default");
     $("#add_resource").trigger('click');
 }
