@@ -467,14 +467,13 @@ public class APIProviderHostObject extends ScriptableObject {
         api.setLastUpdated(new Date());
 
         if (apiData.get("swagger", apiData) != null) {
-            Set<URITemplate> uriTemplates = parseResourceConfig(apiProvider, apiId, (String) apiData
-                    .get("swagger", apiData), api, true);
-            api.setUriTemplates(uriTemplates);
+            //Set<URITemplate> uriTemplates = parseResourceConfig(apiProvider, apiId, (String) apiData.get("swagger", apiData), api, true);
+            //api.setUriTemplates(uriTemplates);
 
             //Uncomment following section to enable swagger 2.0 functionality
-            /*
+
             //Read URI Templates from swagger resource
-            Set<URITemplate> uriTemplates = definitionFromSwagger12.getURITemplates(api, (String) apiData.get("swagger", apiData));
+            Set<URITemplate> uriTemplates = definitionFromSwagger20.getURITemplates(api, (String) apiData.get("swagger", apiData));
             api.setUriTemplates(uriTemplates);
 
             //Get user registry to save api definition
@@ -486,7 +485,7 @@ public class APIProviderHostObject extends ScriptableObject {
                 registry = registryService.getGovernanceSystemRegistry(tenantId);
 
                 //Save API definition in the registry
-                definitionFromSwagger12.saveAPIDefinition(api, (String) apiData.get("swagger", apiData), registry);
+                definitionFromSwagger20.saveAPIDefinition(api, (String) apiData.get("swagger", apiData), registry);
             } catch (RegistryException e) {
                 handleException("Error when create registry instance ", e);
             } catch (UserStoreException e) {
@@ -494,7 +493,7 @@ public class APIProviderHostObject extends ScriptableObject {
             } catch (ParseException e) {
                 handleException("Error while saving api definition in the registry ", e);
             }
-            */
+
         }
 
         // removing scopes from cache
@@ -596,14 +595,13 @@ public class APIProviderHostObject extends ScriptableObject {
         	        
         
         if (apiData.get("swagger", apiData) != null) {
-            Set<URITemplate> uriTemplates = parseResourceConfig(apiProvider, apiId, (String) apiData
-                    .get("swagger", apiData), api, false);
-            api.setUriTemplates(uriTemplates);
-            /*
+            //Set<URITemplate> uriTemplates = parseResourceConfig(apiProvider, apiId, (String) apiData.get("swagger", apiData), api, false);
+            //api.setUriTemplates(uriTemplates);
+
             //Read URI Templates from swagger resource
-            Set<URITemplate> uriTemplates = definitionFromSwagger12.getURITemplates(api, (String) apiData.get("swagger", apiData));
+            Set<URITemplate> uriTemplates = definitionFromSwagger20.getURITemplates(api, (String) apiData.get("swagger", apiData));
             api.setUriTemplates(uriTemplates);
-            */
+
         }
                 
         return saveAPI(apiProvider, api, null, false);
@@ -696,14 +694,13 @@ public class APIProviderHostObject extends ScriptableObject {
         }
         
         if (apiData.get("swagger", apiData) != null) {
-            Set<URITemplate> uriTemplates = parseResourceConfig(apiProvider, apiId, (String) apiData
-                    .get("swagger", apiData), api, false);
-            api.setUriTemplates(uriTemplates);
-            /*
+            //Set<URITemplate> uriTemplates = parseResourceConfig(apiProvider, apiId, (String) apiData.get("swagger", apiData), api, false);
+            //api.setUriTemplates(uriTemplates);
+
             //Read URI Templates from swagger resource
-            Set<URITemplate> uriTemplates = definitionFromSwagger12.getURITemplates(api, (String) apiData.get("swagger", apiData));
+            Set<URITemplate> uriTemplates = definitionFromSwagger20.getURITemplates(api, (String) apiData.get("swagger", apiData));
             api.setUriTemplates(uriTemplates);
-            */
+
         }
                 
         api.setDescription(StringEscapeUtils.escapeHtml(description));
