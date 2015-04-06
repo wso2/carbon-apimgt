@@ -16,7 +16,7 @@
 				</property>
 				<property name="request" value="1" type="INTEGER"
 					isExpression="false"></property>
-				<property name="apiPublisher" value="get-property('API_PUBLISHER')"
+				<property name="apiPublisher" value="get-property('api.ut.apiPublisher')"
 					type="STRING" isExpression="true">
 				</property>
 				<property name="context" value="get-property('REST_API_CONTEXT')"
