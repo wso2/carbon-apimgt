@@ -194,7 +194,7 @@ public class OAuthAuthenticator implements Authenticator {
             
             /* Synapse properties required for BAM Mediator*/
             String tenantDomain = MultitenantUtils.getTenantDomain(info.getApiPublisher());
-            synCtx.setProperty("API_PUBLISHER", tenantDomain);
+            synCtx.setProperty("api.ut.apiPublisher", info.getApiPublisher());
             synCtx.setProperty("API_NAME", info.getApiName());
 
             try {
