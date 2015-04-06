@@ -30,7 +30,6 @@ var generateApplicationKey = function (application, username, keyType, callbackU
     var key,
             log = new Log(),
             store = jagg.module("manager").getAPIStoreObj();
-
     try {
 
 	if(afterFailure == true){

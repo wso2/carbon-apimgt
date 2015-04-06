@@ -310,7 +310,7 @@ public class APIKeyMgtSubscriberService extends AbstractAdmin {
         OAuthApplicationInfo oAuthApplicationInfo = null;
         String accessToken = apiMgtDAO.getAccessKeyForApplication(userId, applicationName, tokenType);
 
-        Application application = apiMgtDAO.getApplicationByName(applicationName, userId);
+        Application application = apiMgtDAO.getApplicationByName(applicationName, userId, null);
         oAuthApplicationInfo = apiMgtDAO.getProductionClientOfApplication(application.getId(), tokenType);
         if (oAuthApplicationInfo == null) {
             throw new APIKeyMgtException("Unable to locate oAuth Application");

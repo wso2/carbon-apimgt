@@ -750,7 +750,7 @@ public class APIStoreHostObject extends ScriptableObject {
 	            String applicationName = (String) args[1];
                 String tokenType = (String) args[2];
                 String callbackUrl = (String) args[3]; 
-                String groupingId = (String)args[7];
+                String groupingId = (String)args[8];
         
                 Map<String, Object> keyDetails = getAPIConsumer(thisObj).requestApprovalForApplicationRegistration(
                         username, applicationName, tokenType, callbackUrl,
@@ -2741,7 +2741,7 @@ public class APIStoreHostObject extends ScriptableObject {
             String appName = args[1].toString();
             String groupingId = null;
             if(args.length > 4 && args[4] != null){
-                groupingId = args[4].toString();
+                groupingId = (String)args[4];
             }
             int startSubIndex = Integer.parseInt(args[2].toString());
             int endSubIndex = Integer.parseInt(args[3].toString());
@@ -2972,7 +2972,7 @@ public class APIStoreHostObject extends ScriptableObject {
                             }
 
                             Set<SubscribedAPI> subscribedAPIs = apiConsumer.getSubscribedAPIs(subscriber,
-                                    application.getName());
+                                    application.getName(), groupingId);
                             for (SubscribedAPI subscribedAPI : subscribedAPIs) {
                                 addAPIObj(subscribedAPI, apisArray, thisObj,application);
                             }
@@ -2998,8 +2998,8 @@ public class APIStoreHostObject extends ScriptableObject {
         } finally {
             if (isTenantFlowStarted) {
                 PrivilegedCarbonContext.endTenantFlow();
-            }
-        }
+             }
+          }
         
         if (log.isDebugEnabled()) {
             log.debug("jsFunction_getMySubscriptionDetail took : " + (System.currentTimeMillis() - startTime) + "ms");

@@ -44,8 +44,13 @@ import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIRating;
 import org.wso2.carbon.apimgt.api.model.APIStatus;
+import org.wso2.carbon.apimgt.api.model.AccessTokenInfo;
+import org.wso2.carbon.apimgt.api.model.AccessTokenRequest;
 import org.wso2.carbon.apimgt.api.model.Application;
+import org.wso2.carbon.apimgt.api.model.ApplicationConstants;
 import org.wso2.carbon.apimgt.api.model.Documentation;
+import org.wso2.carbon.apimgt.api.model.KeyManager;
+import org.wso2.carbon.apimgt.api.model.OAuthApplicationInfo;
 import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
 import org.wso2.carbon.apimgt.api.model.Subscriber;
@@ -1951,7 +1956,12 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             appRegWFDto.setWorkflowReference(appRegWFDto.getExternalWorkflowReference());
             appRegWFDto.setApplication(application);
             request.setMappingId(appRegWFDto.getWorkflowReference());
-            appRegWFDto.setUserName(userId);
+            if(!application.getSubscriber().getName().equals(userId)){
+                appRegWFDto.setUserName(application.getSubscriber().getName());
+            }else{
+                appRegWFDto.setUserName(userId);
+            }
+      
             appRegWFDto.setCallbackUrl(appRegistrationWorkflow.getCallbackURL());
             appRegWFDto.setAppInfoDTO(request);
             appRegWFDto.setDomainList(allowedDomains);
@@ -1999,6 +2009,9 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     	Application application = apiMgtDAO.getApplicationByName(applicationName, null, groupingId);
         String status = apiMgtDAO.getRegistrationApprovalState(application.getId(), tokenType);
         Map<String, String> keyDetails = null;
+        if(!application.getSubscriber().getName().equals(userId)){
+            userId = application.getSubscriber().getName();
+        }
         String workflowReference = apiMgtDAO.getWorkflowReference(applicationName, userId);
         if(workflowReference != null) {
             WorkflowDTO workflowDTO = apiMgtDAO.retrieveWorkflow(workflowReference);
@@ -2033,11 +2046,6 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         return keyDetails;
     }
 
-
-    public Application[] getApplications(Subscriber subscriber) throws APIManagementException {
-        return apiMgtDAO.getApplications(subscriber);
-    }
-
     /**
      *
      * @param userId APIM subscriber user ID.
@@ -2045,10 +2053,10 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
      * @return
      * @throws APIManagementException
      */
-    public Application getApplicationsByName(String userId, String ApplicationName) throws
+    public Application getApplicationsByName(String userId, String ApplicationName, String groupingId) throws
             APIManagementException {
 
-        return apiMgtDAO.getApplicationByName(ApplicationName, userId);
+        return apiMgtDAO.getApplicationByName(ApplicationName, userId, groupingId);
 
     }
 
@@ -2420,6 +2428,12 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         KeyManager keyManager = KeyManagerFactory.getKeyManager();
         //delete oAuthApplication by calling key manager implementation
         keyManager.deleteApplication(consumerKey);
+    }
+
+    @Override
+    public Application getApplicationsByName(String userId, String ApplicationName) throws APIManagementException {
+        // TODO Auto-generated method stub
+        return null;
     }
 
 }
