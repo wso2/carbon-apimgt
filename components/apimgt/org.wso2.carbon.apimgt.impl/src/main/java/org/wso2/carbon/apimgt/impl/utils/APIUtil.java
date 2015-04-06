@@ -1620,6 +1620,12 @@ public final class APIUtil {
             throw new APIManagementException("Attempt to execute privileged operation as" +
                                              " the anonymous user");
         }
+
+        if (isPermissionCheckDisabled()) {
+            log.debug("Permission verification is disabled by APIStore configuration");
+            return;
+        }
+
         String tenantDomain = MultitenantUtils.getTenantDomain(username);
         PrivilegedCarbonContext.startTenantFlow();
         PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
@@ -1646,6 +1652,23 @@ public final class APIUtil {
             PrivilegedCarbonContext.endTenantFlow();
         }
     }
+
+    /**
+     * Checks whether the disablePermissionCheck parameter enabled
+     *
+     * @return boolean
+     */
+    public static boolean isPermissionCheckDisabled() {
+        APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
+                getAPIManagerConfigurationService().getAPIManagerConfiguration();
+        String disablePermissionCheck = config.getFirstProperty(APIConstants.API_STORE_DISABLE_PERMISSION_CHECK);
+        if (disablePermissionCheck == null) {
+            return false;
+        }
+
+        return Boolean.parseBoolean(disablePermissionCheck);
+    }
+
     /**
      * Checks whether the specified user has the specified permission without throwing
      * any exceptions.
