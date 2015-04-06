@@ -5,6 +5,7 @@ import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Map;
+import java.util.UUID;
 
 import javax.xml.namespace.QName;
 
@@ -142,6 +143,8 @@ public class APIMgtGoogleAnalyticsTrackingHandler extends AbstractHandler {
                 .setDocumentPath(documentPath)
                 .setDocumentHostName(domainName)
                 .setDocumentTitle(httpMethod)
+                .setSessionControl("end")
+                .setCacheBuster(getCacheBusterId())
                 .build();
 
         String payload = GoogleAnalyticsDataPublisher.buildPayloadString(data);
@@ -220,5 +223,33 @@ public class APIMgtGoogleAnalyticsTrackingHandler extends AbstractHandler {
 	public void setConfigKey(String configKey) {
 		this.configKey = configKey;
 	}
+	
+    /**
+     * Generates a 32 character length random number for cacheBusterId
+     * @return cacheBusterId
+     * @throws NoSuchAlgorithmException
+     * @throws UnsupportedEncodingException
+     */
+    private static String getCacheBusterId() throws NoSuchAlgorithmException, UnsupportedEncodingException {
+        String message = getRandomNumber() + UUID.randomUUID().toString();
+        MessageDigest m = MessageDigest.getInstance("MD5");
+        m.update(message.getBytes("UTF-8"), 0, message.length());
+        byte[] sum = m.digest();
+        BigInteger messageAsNumber = new BigInteger(1, sum);
+        String md5String = messageAsNumber.toString(16);
+        /* Pad to make sure id is 32 characters long. */
+        while (md5String.length() < 32) {
+            md5String = "0" + md5String;
+        }
+        return "0x" + md5String.substring(0, 16);
+    }
+
+    /**
+     * Generate a random number
+     * @return random number
+     */
+    private static String getRandomNumber() {
+        return Integer.toString((int) (Math.random() * 0x7fffffff));
+    }
 
 }
