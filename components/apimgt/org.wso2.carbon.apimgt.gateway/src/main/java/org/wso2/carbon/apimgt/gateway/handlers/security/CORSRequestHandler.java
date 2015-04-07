@@ -42,9 +42,17 @@ public class CORSRequestHandler extends AbstractHandler implements ManagedLifecy
 	private String inline;
 	private String allowHeaders;
 	private List<String> allowedOrigins;
-
+	private boolean headerStatus;
 	public void init(SynapseEnvironment synapseEnvironment) {
-		log.debug("Initializing CORSRequest Handler instance");
+		if (log.isDebugEnabled()) {
+			log.debug("Initializing CORSRequest Handler instance");
+		}
+		if (ServiceReferenceHolder.getInstance().getApiManagerConfigurationService() != null) {
+			headerStatus = initializeHeaders();
+		}
+	}
+
+	public boolean initializeHeaders() {
 		if (allowHeaders == null) {
 			allowHeaders = Utils
 					.getAllowedHeaders();
@@ -53,13 +61,16 @@ public class CORSRequestHandler extends AbstractHandler implements ManagedLifecy
 			allowedOrigins = Arrays.asList(ServiceReferenceHolder.getInstance().getAPIManagerConfiguration().
 					getFirstProperty(APIConstants.CORS_CONFIGURATION_ACCESS_CTL_ALLOW_ORIGIN).split(","));
 		}
+		return true;
 	}
-
 	public void destroy() {
 		log.debug("Destroying CORSRequest Handler handler instance");
 	}
 
 	public boolean handleRequest(MessageContext messageContext) {
+		if (!headerStatus) {
+			headerStatus = initializeHeaders();
+		}
 		String apiContext = (String) messageContext.getProperty(RESTConstants.REST_API_CONTEXT);
 		String apiVersion = (String) messageContext.getProperty(RESTConstants.SYNAPSE_REST_API_VERSION);
 		String httpMethod = (String) ((Axis2MessageContext) messageContext).getAxis2MessageContext().
