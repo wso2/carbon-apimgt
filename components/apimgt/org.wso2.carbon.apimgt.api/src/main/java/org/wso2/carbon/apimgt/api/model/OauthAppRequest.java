@@ -36,11 +36,11 @@ public class OAuthAppRequest {
         this.mappingId = mappingId;
     }
 
-    public OAuthApplicationInfo getoAuthApplicationInfo() {
+    public OAuthApplicationInfo getOAuthApplicationInfo() {
         return oAuthApplicationInfo;
     }
 
-    public void setoAuthApplicationInfo(OAuthApplicationInfo oAuthApplicationInfo) {
+    public void setOAuthApplicationInfo(OAuthApplicationInfo oAuthApplicationInfo) {
         this.oAuthApplicationInfo = oAuthApplicationInfo;
     }
 }

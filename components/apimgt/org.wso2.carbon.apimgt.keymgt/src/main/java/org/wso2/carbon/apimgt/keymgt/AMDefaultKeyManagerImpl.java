@@ -84,7 +84,7 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
     public OAuthApplicationInfo createApplication(OAuthAppRequest oauthAppRequest) throws APIManagementException {
 
         SubscriberKeyMgtClient keyMgtClient = APIUtil.getKeyManagementClient();
-        OAuthApplicationInfo oAuthApplicationInfo = oauthAppRequest.getoAuthApplicationInfo();
+        OAuthApplicationInfo oAuthApplicationInfo = oauthAppRequest.getOAuthApplicationInfo();
 
         String userId = (String)oAuthApplicationInfo.getParameter(ApplicationConstants.
                 OAUTH_CLIENT_USERNAME);
@@ -406,7 +406,7 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
             throws APIManagementException {
 
         //initiate OAuthApplicationInfo
-        OAuthApplicationInfo oAuthApplicationInfo = appInfoRequest.getoAuthApplicationInfo();
+        OAuthApplicationInfo oAuthApplicationInfo = appInfoRequest.getOAuthApplicationInfo();
         if (log.isDebugEnabled()) {
             log.debug("Creating semi-manual application for consumer id  :  " + oAuthApplicationInfo.getClientId());
         }

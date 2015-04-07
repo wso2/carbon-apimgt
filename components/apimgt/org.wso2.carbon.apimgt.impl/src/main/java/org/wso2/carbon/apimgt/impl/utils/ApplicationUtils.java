@@ -116,7 +116,7 @@ public class ApplicationUtils {
             }
         }
         //set applicationInfo object
-        appRequest.setoAuthApplicationInfo(authApplicationInfo);
+        appRequest.setOAuthApplicationInfo(authApplicationInfo);
         return appRequest;
     }
 
