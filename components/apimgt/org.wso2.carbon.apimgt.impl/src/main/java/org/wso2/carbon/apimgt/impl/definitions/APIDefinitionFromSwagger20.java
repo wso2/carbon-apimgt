@@ -112,16 +112,15 @@ public class APIDefinitionFromSwagger20 extends APIDefinition {
                     if (oauth2.get("scopes") != null) {
                         JSONArray scopes = (JSONArray) oauth2.get("scopes");
                         if (scopes != null) {
-                            for (int i=0; i < scopes.size(); i++)
-                            {
-                                Map scope = (Map) scopes.get(i);
-                                if (scope.get("key") != null) {
-                                    Scope scopeObj = new Scope();
-                                    scopeObj.setKey((String) scope.get("key"));
-                                    scopeObj.setName((String) scope.get("name"));
-                                    scopeObj.setRoles((String) scope.get("roles"));
-                                    scopeObj.setDescription((String) scope.get("description"));
-                                    scopeList.add(scopeObj);
+                            for (Object scopeObj : scopes) {
+                                Map scopeMap = (Map) scopeObj;
+                                if (scopeMap.get("key") != null) {
+                                    Scope scope = new Scope();
+                                    scope.setKey((String) scopeMap.get("key"));
+                                    scope.setName((String) scopeMap.get("name"));
+                                    scope.setRoles((String) scopeMap.get("roles"));
+                                    scope.setDescription((String) scopeMap.get("description"));
+                                    scopeList.add(scope);
                                 }
                             }
                         }
@@ -170,12 +169,14 @@ public class APIDefinitionFromSwagger20 extends APIDefinition {
                 apiIdentifier.getVersion(), apiIdentifier.getProviderName());
 
         JSONParser parser = new JSONParser();
-        JSONObject apiJSON = null;
+        JSONObject apiJSON;
+        String apiDefinition = null;
         try {
             if (registry.resourceExists(resourcePath + APIConstants.API_DOC_2_0_RESOURCE_NAME)) {
                 Resource apiDocResource = registry.get(resourcePath + APIConstants.API_DOC_2_0_RESOURCE_NAME);
                 String apiDocContent = new String((byte[]) apiDocResource.getContent());
                 apiJSON = (JSONObject) parser.parse(apiDocContent);
+                apiDefinition = apiJSON.toJSONString();
             }
         } catch (RegistryException e) {
             handleException("Error while retrieving Swagger v2.0 Definition for " + apiIdentifier.getApiName() + "-" +
@@ -184,6 +185,6 @@ public class APIDefinitionFromSwagger20 extends APIDefinition {
             handleException("Error while parsing Swagger v2.0 Definition for " + apiIdentifier.getApiName() + "-" +
                     apiIdentifier.getVersion() + " in " + resourcePath, e);
         }
-        return apiJSON.toJSONString();
+        return apiDefinition;
     }
 }
