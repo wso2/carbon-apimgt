@@ -17,6 +17,7 @@
 */
 package org.wso2.carbon.apimgt.api;
 
+import org.json.simple.JSONObject;
 import org.wso2.carbon.apimgt.api.dto.UserApplicationAPIUsage;
 import org.wso2.carbon.apimgt.api.model.*;
 import java.util.List;
@@ -425,4 +426,32 @@ public interface APIProvider extends APIManager {
      * @throws APIManagementException
      */
     public String[] getConsumerKeys(APIIdentifier apiIdentifier) throws APIManagementException;
+    /**
+     * Returns success/not as a string
+     * @param apiObj
+     * @return
+     * @throws org.wso2.carbon.apimgt.api.APIManagementException
+     */
+    public String designAPI(JSONObject apiObj) throws APIManagementException;
+    /**
+     * Returns success/not as a string
+     * @param apiObj
+     * @return
+     * @throws org.wso2.carbon.apimgt.api.APIManagementException
+     */
+    public String manageAPI(JSONObject apiObj) throws APIManagementException;
+    /**
+     * Returns success/not as a string
+     * @param apiObj
+     * @return
+     * @throws org.wso2.carbon.apimgt.api.APIManagementException
+     */
+    public String updateDesignAPI(JSONObject apiObj) throws APIManagementException;
+    /**
+     * Returns success/not as a string
+     * @param apiObj
+     * @return
+     * @throws org.wso2.carbon.apimgt.api.APIManagementException
+     */
+    public String implementAPI(JSONObject apiObj) throws APIManagementException;
 }

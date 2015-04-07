@@ -24,6 +24,7 @@ import org.apache.axiom.om.OMFactory;
 import org.apache.axiom.om.util.AXIOMUtil;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.Constants;
+import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.simple.JSONArray;
@@ -33,14 +34,32 @@ import org.json.simple.parser.ParseException;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.dto.UserApplicationAPIUsage;
-import org.wso2.carbon.apimgt.api.model.*;
+import org.wso2.carbon.apimgt.api.model.API;
+import org.wso2.carbon.apimgt.api.model.APIIdentifier;
+import org.wso2.carbon.apimgt.api.model.APIStatus;
+import org.wso2.carbon.apimgt.api.model.APIStore;
+import org.wso2.carbon.apimgt.api.model.Documentation;
+import org.wso2.carbon.apimgt.api.model.DuplicateAPIException;
+import org.wso2.carbon.apimgt.api.model.Icon;
+import org.wso2.carbon.apimgt.api.model.LifeCycleEvent;
+import org.wso2.carbon.apimgt.api.model.Provider;
+import org.wso2.carbon.apimgt.api.model.Scope;
+import org.wso2.carbon.apimgt.api.model.Subscriber;
+import org.wso2.carbon.apimgt.api.model.Tier;
+import org.wso2.carbon.apimgt.api.model.URITemplate;
+import org.wso2.carbon.apimgt.api.model.Usage;
 import org.wso2.carbon.apimgt.impl.dto.Environment;
 import org.wso2.carbon.apimgt.impl.dto.TierPermissionDTO;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.observers.APIStatusObserverList;
+import org.wso2.carbon.apimgt.impl.publishers.WSO2APIPublisher;
 import org.wso2.carbon.apimgt.impl.template.APITemplateBuilder;
 import org.wso2.carbon.apimgt.impl.template.APITemplateBuilderImpl;
-import org.wso2.carbon.apimgt.impl.utils.*;
+import org.wso2.carbon.apimgt.impl.utils.APIAuthenticationAdminClient;
+import org.wso2.carbon.apimgt.impl.utils.APINameComparator;
+import org.wso2.carbon.apimgt.impl.utils.APIStoreNameComparator;
+import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.apimgt.impl.utils.APIVersionComparator;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.governance.api.common.dataobjects.GovernanceArtifact;
 import org.wso2.carbon.governance.api.exception.GovernanceException;
@@ -48,7 +67,12 @@ import org.wso2.carbon.governance.api.generic.GenericArtifactManager;
 import org.wso2.carbon.governance.api.generic.dataobjects.GenericArtifact;
 import org.wso2.carbon.governance.api.util.GovernanceUtils;
 import org.wso2.carbon.registry.common.CommonConstants;
-import org.wso2.carbon.registry.core.*;
+import org.wso2.carbon.registry.core.ActionConstants;
+import org.wso2.carbon.registry.core.Association;
+import org.wso2.carbon.registry.core.CollectionImpl;
+import org.wso2.carbon.registry.core.Registry;
+import org.wso2.carbon.registry.core.RegistryConstants;
+import org.wso2.carbon.registry.core.Resource;
 import org.wso2.carbon.registry.core.config.RegistryContext;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.core.jdbc.realm.RegistryAuthorizationManager;
@@ -58,16 +82,27 @@ import org.wso2.carbon.user.api.AuthorizationManager;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
-import org.wso2.carbon.apimgt.impl.publishers.WSO2APIPublisher;
 
 import javax.cache.Cache;
 import javax.cache.Caching;
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
-
 import java.io.File;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.SortedSet;
+import java.util.StringTokenizer;
+import java.util.TreeSet;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -377,7 +412,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      *          if failed to add API
      */
     public void addAPI(API api) throws APIManagementException {
-        try {           
+        try {
             createAPI(api);
             int tenantId = -1234;
             String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(api.getId().getProviderName()));
@@ -2505,7 +2540,422 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
         return apiMgtDAO.getConsumerKeys(apiIdentifier);
     }
-	
+
+    public String designAPI(JSONObject apiObj) throws APIManagementException {
+        String provider = (String) apiObj.get("provider");
+        String contextVal = (String) apiObj.get("context");
+        String name = (String) apiObj.get("name");
+        String version = (String) apiObj.get("version");
+
+        String providerDomain = MultitenantUtils.getTenantDomain(provider);
+
+        String context = contextVal.startsWith("/") ? contextVal : ("/" + contextVal);
+        if (!org.wso2.carbon.base.MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equalsIgnoreCase(providerDomain)) {
+            //Create tenant aware context for API
+            context = "/t/" + providerDomain + context;
+        }
+
+        if (provider != null) {
+            provider = APIUtil.replaceEmailDomain(provider);
+        }
+        provider = (provider != null ? provider.trim() : null);
+        name = (name != null ? name.trim() : null);
+        version = (version != null ? version.trim() : null);
+        APIIdentifier apiId = new APIIdentifier(provider, name, version);
+        if (isAPIAvailable(apiId)) {
+            handleException("Error occurred while adding the API. A duplicate API already exists for " +
+                            name + "-" + version);
+        }
+        API api = new API(apiId);
+        api.setStatus(APIStatus.CREATED);
+
+        // This is to support the new Pluggable version strategy
+        // if the context does not contain any {version} segment, we use the default version strategy.
+        //-------------------------------------------context = checkAndSetVersionParam(context);
+        api.setContextTemplate(context);
+
+        //----------------------------------- context = updateContextWithVersion(version, contextVal, context);
+
+        api.setContext(context);
+        api.setVisibility(APIConstants.API_GLOBAL_VISIBILITY);
+        api.setLastUpdated(new Date());
+        return saveAPI(api, true);
+
+    }
+
+    public String manageAPI(JSONObject apiObj)
+            throws APIManagementException {
+        String provider = (String) apiObj.get("provider");
+        String name = (String) apiObj.get("name");
+        String version = (String) apiObj.get("version");
+        String swaggerContent = (String) apiObj.get("swagger");
+        JSONParser parser = new JSONParser();
+        JSONObject resourceConfigs = null;
+        Set<Scope> scopeList = new LinkedHashSet<Scope>();
+        try {
+            JSONObject apiDocument = (JSONObject) parser.parse(swaggerContent);
+            if (apiDocument.get("api_doc") != null) {
+                resourceConfigs = (JSONObject) apiDocument.get("api_doc");
+                if (resourceConfigs.get("authorizations") != null) {
+                    JSONObject authorizations = (JSONObject) resourceConfigs.get("authorizations");
+                    if (authorizations.get("oauth2") != null) {
+                        JSONObject oauth2 = (JSONObject) authorizations.get("oauth2");
+                        if (oauth2.get("scopes") != null) {
+                            JSONArray scopes = (JSONArray) oauth2.get("scopes");
+
+                            if (scopes != null) {
+                                for (int i = 0; i < scopes.size(); i++) {
+                                    Map scope = (Map) scopes.get(i);
+                                    if (scope.get("key") != null) {
+                                        Scope scopeObj = new Scope();
+                                        scopeObj.setKey((String) scope.get("key"));
+                                        scopeObj.setName((String) scope.get("name"));
+                                        scopeObj.setRoles((String) scope.get("roles"));
+                                        scopeObj.setDescription((String) scope.get("description"));
+                                        scopeList.add(scopeObj);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        } catch (ParseException e) {
+            handleException("Error while processing Api Definition.");
+        }
+
+        String subscriptionAvailability = (String) apiObj.get("subscriptionAvailability");
+        String subscriptionAvailableTenants = "";
+        if (subscriptionAvailability != null && subscriptionAvailability.equals(APIConstants.SUBSCRIPTION_TO_SPECIFIC_TENANTS)) {
+            subscriptionAvailableTenants = (String) apiObj.get("subscriptionTenants");
+        }
+
+        String defaultVersion = (String) apiObj.get("defaultVersion");
+        String transport = "";//-------getTransports(apiData);
+
+        String tier = (String) apiObj.get("tier");
+
+        String inSequence = (String) apiObj.get("inSequence");
+        String outSequence = (String) apiObj.get("outSequence");
+        String faultSequence = (String) apiObj.get("faultSequence");
+        String businessOwner = (String) apiObj.get("bizOwner");
+        String businessOwnerEmail = (String) apiObj.get("bizOwnerMail");
+        String technicalOwner = (String) apiObj.get("techOwner");
+        String technicalOwnerEmail = (String) apiObj.get("techOwnerMail");
+        String environments = (String) apiObj.get("environments");
+        String responseCache = (String) apiObj.get("responseCache");
+        int cacheTimeOut = APIConstants.API_RESPONSE_CACHE_TIMEOUT;
+        if (APIConstants.ENABLED.equalsIgnoreCase(responseCache)) {
+            responseCache = APIConstants.ENABLED;
+            try {
+                cacheTimeOut = Integer.parseInt((String) apiObj.get("cacheTimeout"));
+            } catch (NumberFormatException e) {
+                //ignore
+            }
+        } else {
+            responseCache = APIConstants.DISABLED;
+        }
+
+
+        if (provider != null) {
+            provider = APIUtil.replaceEmailDomain(provider);
+        }
+        provider = (provider != null ? provider.trim() : null);
+        name = (name != null ? name.trim() : null);
+        version = (version != null ? version.trim() : null);
+
+        APIIdentifier apiId = new APIIdentifier(provider, name, version);
+        API api = null;
+        boolean isTenantFlowStarted = false;
+        try {
+            String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(provider));
+            if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
+                isTenantFlowStarted = true;
+                PrivilegedCarbonContext.startTenantFlow();
+                PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
+            }
+            api = getAPI(apiId);
+        } finally {
+            if (isTenantFlowStarted) {
+                PrivilegedCarbonContext.endTenantFlow();
+            }
+        }
+
+        api.setTransports(transport);
+        api.setSubscriptionAvailability(subscriptionAvailability);
+        api.setSubscriptionAvailableTenants(subscriptionAvailableTenants);
+        api.setResponseCache(responseCache);
+        api.setCacheTimeout(cacheTimeOut);
+        api.setAsDefaultVersion("default_version".equals(defaultVersion));
+        api.setScopes(scopeList);
+
+        api.removeCustomSequences();
+        if (!"none".equals(inSequence)) {
+            api.setInSequence(inSequence);
+        }
+        if (!"none".equals(outSequence)) {
+            api.setOutSequence(outSequence);
+        }
+        if (!"none".equals(faultSequence)) {
+            api.setFaultSequence(faultSequence);
+        }
+
+        if (!"none".equals(businessOwner)) {
+            api.setBusinessOwner(businessOwner);
+        }
+        if (!"none".equals(businessOwnerEmail)) {
+            api.setBusinessOwnerEmail(businessOwnerEmail);
+        }
+        if (!"none".equals(technicalOwner)) {
+            api.setTechnicalOwner(technicalOwner);
+        }
+        if (!"none".equals(technicalOwnerEmail)) {
+            api.setTechnicalOwnerEmail(technicalOwnerEmail);
+        }
+        api.setEnvironments(APIUtil.extractEnvironmentsForAPI(environments));
+
+        Set<Tier> availableTier = new HashSet<Tier>();
+        String[] tierNames;
+        if (tier != null) {
+            tierNames = tier.split(",");
+            for (String tierName : tierNames) {
+                availableTier.add(new Tier(tierName));
+            }
+            api.removeAllTiers();
+            api.addAvailableTiers(availableTier);
+        }
+        api.setLastUpdated(new Date());
+
+        if (swaggerContent != null) {
+            //---------   Set<URITemplate> uriTemplates = parseResourceConfig(apiProvider, apiId, (String) apiData
+            //--------- .get("swagger", apiData), api);
+            //-----------  api.setUriTemplates(uriTemplates);
+        }
+
+        // removing scopes from cache
+        //--------- ProviderKeyMgtClient providerClient = HostObjectUtils.getProviderClient();
+        //--------try {
+        //------    String[] consumerKeys = apiProvider.getConsumerKeys(new APIIdentifier(provider, name, version));
+        //--------    if (consumerKeys != null && consumerKeys.length != 0) {
+        //---------        providerClient.removeScopeCache(consumerKeys);
+        //---------    }
+
+        //------- } catch (APIManagementException e) {
+        //swallowing the excepion since the api update should happen even if cache update fails
+        //--------------     log.error("Error while removing the scope cache", e);
+        //------------------- }
+        return saveAPI(api, false);
+    }
+
+    public String updateDesignAPI(JSONObject apiObj)
+            throws APIManagementException {
+        String provider = (String) apiObj.get("provider");
+        String contextVal = (String) apiObj.get("context");
+        String name = (String) apiObj.get("name");
+        String version = (String) apiObj.get("version");
+        //---------FileHostObject fileHostObject = (FileHostObject) apiData.get("imageUrl", apiData);
+        String description = (String) apiObj.get("description");
+
+        /* Business Information*/
+        String techOwner = (String) apiObj.get("techOwner");
+        String techOwnerEmail = (String) apiObj.get("techOwnerEmail");
+        String bizOwner = (String) apiObj.get("bizOwner");
+        String bizOwnerEmail = (String) apiObj.get("bizOwnerEmail");
+
+        String context = contextVal.startsWith("/") ? contextVal : ("/" + contextVal);
+        String providerDomain = MultitenantUtils.getTenantDomain(provider);
+        if (!MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equalsIgnoreCase(providerDomain)) {
+            //Create tenant aware context for API
+            context = "/t/" + providerDomain + context;
+        }
+
+        String tags = (String) apiObj.get("tags");
+        Set<String> tag = new HashSet<String>();
+
+        if (tags != null) {
+            if (tags.contains(",")) {
+                String[] userTag = tags.split(",");
+                tag.addAll(Arrays.asList(userTag).subList(0, tags.split(",").length));
+            } else {
+                tag.add(tags);
+            }
+        }
+
+        String visibility = (String) apiObj.get("visibility");
+        String visibleRoles = "";
+
+
+        if (visibility != null && visibility.equals(APIConstants.API_RESTRICTED_VISIBILITY)) {
+            visibleRoles = (String) apiObj.get("visibleRoles");
+        }
+
+        if (provider != null) {
+            provider = APIUtil.replaceEmailDomain(provider);
+        }
+        provider = (provider != null ? provider.trim() : null);
+        name = (name != null ? name.trim() : null);
+        version = (version != null ? version.trim() : null);
+        APIIdentifier apiId = new APIIdentifier(provider, name, version);
+        API api = null;
+        boolean isTenantFlowStarted = false;
+        try {
+            String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(provider));
+            if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
+                isTenantFlowStarted = true;
+                PrivilegedCarbonContext.startTenantFlow();
+                PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
+            }
+            api = getAPI(apiId);
+        } finally {
+            if (isTenantFlowStarted) {
+                PrivilegedCarbonContext.endTenantFlow();
+            }
+        }
+        String swaggerContent = (String) apiObj.get("swagger");
+        if (swaggerContent != null) {
+            //---------- Set<URITemplate> uriTemplates = parseResourceConfig(apiProvider, apiId, (String) swaggerContent, api);
+            //------------- api.setUriTemplates(uriTemplates);
+        }
+
+        api.setDescription(StringEscapeUtils.escapeHtml(description));
+        HashSet<String> deletedTags = new HashSet<String>(api.getTags());
+        deletedTags.removeAll(tag);
+        api.removeTags(deletedTags);
+        api.addTags(tag);
+        api.setBusinessOwner(bizOwner);
+        api.setBusinessOwnerEmail(bizOwnerEmail);
+        api.setTechnicalOwner(techOwner);
+        api.setTechnicalOwnerEmail(techOwnerEmail);
+        api.setVisibility(visibility);
+        api.setVisibleRoles(visibleRoles != null ? visibleRoles.trim() : null);
+        api.setLastUpdated(new Date());
+        return saveAPI(api, false);
+    }
+
+    public String implementAPI(JSONObject apiObj) throws APIManagementException {
+        String provider = (String) apiObj.get("provider");
+        String name = (String) apiObj.get("name");
+        String version = (String) apiObj.get("version");
+        String implementationType = (String) apiObj.get("implementation_type");
+
+        if (provider != null) {
+            provider = APIUtil.replaceEmailDomain(provider);
+        }
+        provider = (provider != null ? provider.trim() : null);
+        name = (name != null ? name.trim() : null);
+        version = (version != null ? version.trim() : null);
+
+        APIIdentifier apiId = new APIIdentifier(provider, name, version);
+        API api = null;
+        boolean isTenantFlowStarted = false;
+        try {
+            String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(provider));
+            if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
+                isTenantFlowStarted = true;
+                PrivilegedCarbonContext.startTenantFlow();
+                PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
+            }
+            api = getAPI(apiId);
+        } finally {
+            if (isTenantFlowStarted) {
+                PrivilegedCarbonContext.endTenantFlow();
+            }
+        }
+
+        api.setLastUpdated(new Date());
+
+        api.setImplementation(implementationType);
+
+        String wsdl = (String) apiObj.get("wsdl");
+        String wadl = (String) apiObj.get("wadl");
+        String endpointSecured = (String) apiObj.get("endpointSecured");
+        String endpointUTUsername = (String) apiObj.get("endpointUTUsername");
+        String endpointUTPassword = (String) apiObj.get("endpointUTPassword");
+
+        api.setWadlUrl(wadl);
+        api.setWsdlUrl(wsdl);
+        api.setEndpointConfig((String) apiObj.get("endpoint_config"));
+
+        // Validate endpoint URI format
+        //---------------validateEndpointURI(api.getEndpointConfig());
+
+        String destinationStats = (String) apiObj.get("destinationStats");
+        if (APIConstants.ENABLED.equalsIgnoreCase(destinationStats)) {
+            destinationStats = APIConstants.ENABLED;
+        } else {
+            destinationStats = APIConstants.DISABLED;
+        }
+        api.setDestinationStatsEnabled(destinationStats);
+
+        //set secured endpoint parameters
+        if ("secured".equals(endpointSecured)) {
+            api.setEndpointSecured(true);
+            api.setEndpointUTUsername(endpointUTUsername);
+            api.setEndpointUTPassword(endpointUTPassword);
+        }
+        String swaggerContent = (String) apiObj.get("swagger");
+
+        if (swaggerContent != null) {
+            // Set<URITemplate> uriTemplates = parseResourceConfig(apiProvider, apiId, (String) swaggerContent, api);
+            // api.setUriTemplates(uriTemplates);
+        }
+        return saveAPI(api, false);
+    }
+
+    /**
+     * This method save or update the API object
+     *
+     * @param api    API object
+     * @param create
+     * @return json string of failed Environments
+     * @throws APIManagementException
+     */
+    private String saveAPI(API api,
+                           boolean create) throws APIManagementException {
+        String success = null;
+        boolean isTenantFlowStarted = false;
+        try {
+            String tenantDomain =
+                    MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(api.getId().getProviderName()));
+            if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
+                isTenantFlowStarted = true;
+                PrivilegedCarbonContext.startTenantFlow();
+                PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
+            }
+
+          /*------------  if (fileHostObject != null && fileHostObject.getJavaScriptFile().getLength() != 0) {
+                Icon icon = new Icon(fileHostObject.getInputStream(),
+                                     fileHostObject.getJavaScriptFile().getContentType());
+                String thumbPath = APIUtil.getIconPath(api.getId());
+
+                String thumbnailUrl = apiProvider.addIcon(thumbPath, icon);
+                api.setThumbnailUrl(APIUtil.prependTenantPrefix(thumbnailUrl, api.getId().getProviderName()));
+
+                /*Set permissions to anonymous role for thumbPath*/
+            // APIUtil.setResourcePermissions(api.getId().getProviderName(), null, null, thumbPath);
+            //}------------
+            if (create) {
+                addAPI(api);
+                //----------------success = createFailedGatewaysAsJsonString(Collections.<String, List<String>>emptyMap());
+            } else {
+                Map<String, List<String>> failedGateways = updateAPI(api);
+                //------------------success = createFailedGatewaysAsJsonString(failedGateways);
+            }
+
+        } catch (APIManagementException e) {
+            handleException("Error while adding the API- " + api.getId().getApiName() + "-" + api.getId().getVersion(),
+                            e);
+            //------------- return createFailedGatewaysAsJsonString(Collections.<String, List<String>>emptyMap());
+        } finally {
+            if (isTenantFlowStarted) {
+                PrivilegedCarbonContext.endTenantFlow();
+            }
+        }
+
+        return success;
+    }
+
+
 }
 
 

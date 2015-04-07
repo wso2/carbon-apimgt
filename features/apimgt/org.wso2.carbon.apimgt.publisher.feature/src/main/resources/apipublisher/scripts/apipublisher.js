@@ -22,15 +22,36 @@ var apipublisher = {};
 
 (function (apipublisher) {
 
-    var APIManagerFactory = Packages.org.wso2.carbon.apimgt.impl.APIManagerFactory;
+
     var log = new Log("jaggery-modules.api-manager.publisher");
 
-	apipublisher.getAPIProvider = function (username){
+
+    apipublisher.getAllProviders = function (username) {
+        var APIManagerFactory = Packages.org.wso2.carbon.apimgt.impl.APIManagerFactory;
         var APIProvider =  APIManagerFactory.getInstance().getAPIProvider(username);
+        return APIProvider.getAllProviders();
     };
 
-	apipublisher.getAllProviders = function (APIProvider) {
-        return APIProvider.getAllProviders();
+
+    apipublisher.designAPI = function (api,username) {
+        var APIManagerFactory = Packages.org.wso2.carbon.apimgt.impl.APIManagerFactory;
+        var APIProvider =  APIManagerFactory.getInstance().getAPIProvider(username);
+        return APIProvider.designAPI(api);
+    };
+    apipublisher.implementAPI = function (api,username) {
+        var APIManagerFactory = Packages.org.wso2.carbon.apimgt.impl.APIManagerFactory;
+        var APIProvider =  APIManagerFactory.getInstance().getAPIProvider(username);
+        return APIProvider.implementAPI(api);
+    };
+    apipublisher.manageAPI = function (api,username) {
+        var APIManagerFactory = Packages.org.wso2.carbon.apimgt.impl.APIManagerFactory;
+        var APIProvider =  APIManagerFactory.getInstance().getAPIProvider(username);
+        return APIProvider.manageAPI(api);
+    };
+    apipublisher.updateDesignAPI = function (api,username) {
+        var APIManagerFactory = Packages.org.wso2.carbon.apimgt.impl.APIManagerFactory;
+        var APIProvider =  APIManagerFactory.getInstance().getAPIProvider(username);
+        return APIProvider.updateDesignAPI(api);
     };
            
 })(apipublisher);
