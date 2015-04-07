@@ -116,6 +116,8 @@ public class APIMgtGoogleAnalyticsTrackingHandler extends AbstractHandler {
 			domainName = "";
 		}
 
+        // Get client IP
+        String userIP = (String) ((Axis2MessageContext) msgCtx).getAxis2MessageContext().getProperty("REMOTE_ADDR");
 		String path = (String) msgCtx
 				.getProperty(RESTConstants.REST_FULL_REQUEST_PATH);
 		String documentPath = path;
@@ -145,6 +147,7 @@ public class APIMgtGoogleAnalyticsTrackingHandler extends AbstractHandler {
                 .setDocumentTitle(httpMethod)
                 .setSessionControl("end")
                 .setCacheBuster(getCacheBusterId())
+                .setIPOverride(userIP)
                 .build();
 
         String payload = GoogleAnalyticsDataPublisher.buildPayloadString(data);
