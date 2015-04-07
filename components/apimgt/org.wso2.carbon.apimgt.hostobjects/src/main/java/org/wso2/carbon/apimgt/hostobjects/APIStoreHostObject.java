@@ -2616,7 +2616,8 @@ public class APIStoreHostObject extends ScriptableObject {
         if (args != null && args.length != 0) {
             try {
 
-                Map<String, String> keyDetails = getAPIConsumer(thisObj).completeApplicationRegistration((String) args[0], (String) args[1], (String) args[2],(String) args[6],(Integer) args[7]);
+                Map<String, String> keyDetails = getAPIConsumer(thisObj).completeApplicationRegistration((String)
+                                                                                                                 args[0], (String) args[1], (String) args[2],Integer.parseInt((String)args[8]));
                 NativeObject object = new NativeObject();
 
                 if (keyDetails != null) {
