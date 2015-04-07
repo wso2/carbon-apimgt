@@ -143,7 +143,11 @@ public class APIDefinitionFromSwagger20 extends APIDefinition {
         try {
             String resourcePath = APIUtil.getSwagger20DefinitionFilePath(apiName, apiVersion, apiProviderName);
             resourcePath = resourcePath + "/swagger.json";
-            Resource resource = registry.newResource();
+            Resource resource;
+            if(registry.get(resourcePath)==null)
+                resource = registry.newResource();
+            else
+                resource = registry.get(resourcePath);
 
             resource.setContent(apiDefinitionJSON);
             resource.setMediaType("application/json");
