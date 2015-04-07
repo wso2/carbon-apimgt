@@ -24,12 +24,19 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Created by Amila on 2/26/15.
+ * Stores configurations specific for a KeyManager implementation. Certain features will be made available based on
+ * the values set in this Config.
  */
 public class KeyManagerConfiguration {
     private Map<String, String> configuration = new HashMap<String, String>();
+
+    // If set to false, resource registration will not be enabled.
     private boolean resourceRegistrationEnabled;
+
+    // If set to false, input to set validity period will not be shown.
     private boolean tokenValidityConfigurable;
+
+    // If set to false, pasting OAuth app details will not be supported.
     private boolean manualModeSupported;
 
     public boolean isResourceRegistrationEnabled() {

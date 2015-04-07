@@ -29,9 +29,6 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.*;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 
-
-import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
-
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamException;
@@ -52,6 +49,12 @@ public class KeyManagerFactory {
     private static KeyManager keyManager = null;
 
 
+    /**
+     * Initialises KeyManager by reading key-manager.xml.
+     *
+     * @param configPath Path to key-manager.xml
+     * @throws APIManagementException
+     */
     public static void initializeKeyManager(String configPath) throws APIManagementException {
 
         InputStream in = null;
@@ -65,6 +68,7 @@ public class KeyManagerFactory {
 
             log.debug("Reading key-manager.xml");
 
+            // Instantiating the class implementing KeyManager interface.
             String clazz = document.getAttribute(new QName("class")).getAttributeValue();
             keyManager = (KeyManager) Class.forName(clazz).newInstance();
 
@@ -77,6 +81,9 @@ public class KeyManagerFactory {
 
             log.debug("Loading KeyManager configuration,");
 
+            // Reading contents inside <Configuration> block and pass it to specific KeyManager implementation.
+            // Implementers can provide specific parameters needed for their implementation withing the Configuration
+            // block.
             XMLOutputFactory xof = XMLOutputFactory.newInstance();
             XMLStreamWriter streamWriter;
             StringWriter stringStream = new StringWriter();
@@ -88,25 +95,28 @@ public class KeyManagerFactory {
             log.debug("Successfully loaded KeyManager configuration.");
 
         } catch (IOException e) {
-            log.error(e.getMessage());
+            log.error(e);
             throw new APIManagementException("I/O error while reading the API manager " +
                                              "configuration: " + configPath, e);
         } catch (XMLStreamException e) {
-            log.error(e.getMessage());
+            log.error(e);
             throw new APIManagementException("Error while parsing the API manager " +
                                              "configuration: " + configPath, e);
         } catch (OMException e) {
-            log.error(e.getMessage());
+            log.error(e);
             throw new APIManagementException("Error while parsing API Manager configuration: " + configPath, e);
         } catch (ClassNotFoundException e) {
-            log.error("Error occurred while instantiating KeyManager implementation");
+            log.error(e);
             throw new APIManagementException("Error occurred while instantiating KeyManager implementation", e);
         } catch (InstantiationException e) {
-            e.printStackTrace();
+            log.error(e);
+            throw new APIManagementException("Error occurred while instantiating KeyManager implementation", e);
         } catch (IllegalAccessException e) {
-            e.printStackTrace();
+            log.error(e);
+            throw new APIManagementException("Error occurred while instantiating KeyManager implementation", e);
         } catch (APIManagementException e) {
-            e.printStackTrace();
+            log.error(e);
+            throw new APIManagementException("Error occurred while instantiating KeyManager implementation", e);
         } finally {
             IOUtils.closeQuietly(in);
         }
@@ -115,29 +125,11 @@ public class KeyManagerFactory {
     /**
      * This method will take hardcoded class name from api-manager.xml file and will return that class's instance.
      * This class should be implementation class of keyManager.
+     *
      * @return keyManager instance.
      */
     public static KeyManager getKeyManager() {
         return keyManager;
     }
-
-    public static ResourceManager getResourceManager() {
-        ResourceManager resourceManager = null;
-        try {
-            resourceManager = (ResourceManager) Class.forName(ServiceReferenceHolder.getInstance().
-                    getAPIManagerConfigurationService().getAPIManagerConfiguration().
-                    getFirstProperty(APIConstants.API_RESOURCE_MANGER_IMPLEMENTATION_CLASS_NAME)).newInstance();
-            log.info("Created instance successfully");
-        } catch (InstantiationException e) {
-            log.error("Error while instantiating class" + e.toString());
-        } catch (IllegalAccessException e) {
-            log.error("Error while accessing class" + e.toString());
-        } catch (ClassNotFoundException e) {
-            log.error("Error while creating keyManager instance" + e.toString());
-        }
-        return resourceManager;
-    }
-
-
 
 }

@@ -24,13 +24,12 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.api.model.OauthAppRequest;
+import org.wso2.carbon.apimgt.api.model.OAuthAppRequest;
 import org.wso2.carbon.apimgt.api.LoginPostExecutor;
 import org.wso2.carbon.apimgt.api.model.*;
 import org.wso2.carbon.apimgt.api.model.Tag;
 import org.wso2.carbon.apimgt.handlers.security.stub.types.APIKeyMapping;
 import org.wso2.carbon.apimgt.impl.factory.KeyManagerFactory;
-import org.wso2.carbon.apimgt.impl.dao.TokenMgtDao;
 import org.wso2.carbon.apimgt.impl.dto.*;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.*;
@@ -582,13 +581,6 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             tokenRequest = ApplicationUtils.populateTokenRequest(jsonInput, tokenRequest);
             KeyManager keyManager = KeyManagerFactory.getKeyManager();
             AccessTokenInfo tokenResponse = keyManager.getNewApplicationAccessToken(tokenRequest);
-//            AccessTokenInfo info = TokenMgtDao.getAccessTokenForConsumerId(tokenRequest.getClientId());
-//            if (info == null) {
-//                TokenMgtDao.insertAccessTokenForConsumerKey(tokenRequest.getClientId(), tokenResponse);
-//            } else {
-//                TokenMgtDao.updateTokenForConsumerKey(tokenRequest.getClientId(), tokenResponse);
-//            }
-
             return tokenResponse;
 
         } catch (APIManagementException e) {
@@ -1477,7 +1469,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 
         String callBackURL = null;
 
-        OauthAppRequest oauthAppRequest = ApplicationUtils.createOauthAppRequest(applicationName, callBackURL,null,
+        OAuthAppRequest oauthAppRequest = ApplicationUtils.createOauthAppRequest(applicationName, callBackURL,null,
                                                                                   jsonString);
 
         KeyManager keyManager = KeyManagerFactory.getKeyManager();
@@ -1938,7 +1930,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 applicationNameAfterAppend.append("_SANDBOX");
             }
             //Build key manager instance and create oAuthAppRequest by jsonString.
-            OauthAppRequest request = ApplicationUtils.createOauthAppRequest(applicationNameAfterAppend.toString(),
+            OAuthAppRequest request = ApplicationUtils.createOauthAppRequest(applicationNameAfterAppend.toString(),
                     callbackUrl, tokenScope,jsonString);
 
             appRegWFDto.setStatus(WorkflowStatus.CREATED);

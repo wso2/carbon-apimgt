@@ -33,12 +33,12 @@ import java.util.Map;
 public interface KeyManager {
 
     /**
-     * Create new auth application in oAuth server.
+     * Create a new OAuth application in the Authorization Server.
      *
      * @param oauthAppRequest - this object contains values of oAuth app properties.
      * @return OAuthApplicationInfo object with oAuthApplication properties.
      */
-    OAuthApplicationInfo createApplication(OauthAppRequest oauthAppRequest) throws APIManagementException;
+    OAuthApplicationInfo createApplication(OAuthAppRequest oauthAppRequest) throws APIManagementException;
 
 
     /**
@@ -47,7 +47,7 @@ public interface KeyManager {
      * @param appInfoDTO accept an appinfoDTO object
      * @return OAuthApplicationInfo this object will  contain all the properties of updated oAuth application
      */
-    OAuthApplicationInfo updateApplication(OauthAppRequest appInfoDTO) throws APIManagementException;
+    OAuthApplicationInfo updateApplication(OAuthAppRequest appInfoDTO) throws APIManagementException;
 
     /**
      * Delete auth application
@@ -74,11 +74,10 @@ public interface KeyManager {
     AccessTokenInfo getNewApplicationAccessToken(AccessTokenRequest tokenRequest) throws APIManagementException;
 
     /**
-     * Call Introspection API + User API. This should retrieve two things including user claims.
-     *
-     * @return json String
+     * Get details about an access token. As a part of the response, consumer key against which token was obtained
+     * must be returned.
+     * @return {@code AccessTokenInfo}
      */
-    //TODO:Change the Exception to APIKeyMgtException
     AccessTokenInfo getTokenMetaData(String accessToken) throws APIManagementException;
 
     /**
@@ -126,7 +125,7 @@ public interface KeyManager {
      * @return OAuthApplicationInfo with oAuth application properties.
      * @throws APIManagementException
      */
-    OAuthApplicationInfo createSemiManualAuthApplication(OauthAppRequest appInfoRequest) throws APIManagementException;
+    OAuthApplicationInfo createSemiManualAuthApplication(OAuthAppRequest appInfoRequest) throws APIManagementException;
 
     /**
      * This method will create an AccessTokenRequest using OAuthApplicationInfo object. If tokenRequest is null,

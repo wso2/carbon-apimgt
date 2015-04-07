@@ -4135,7 +4135,7 @@ public class ApiMgtDAO {
      * @param clientId this is the consumner key.
      * @throws APIManagementException
      */
-    public void createApplicationKeyTypeMappingForManualClients(OauthAppRequest oauthAppRequest, String applicationName,
+    public void createApplicationKeyTypeMappingForManualClients(OAuthAppRequest oauthAppRequest, String applicationName,
                                                                 String userName, String clientId) throws APIManagementException {
 
         String consumerKey = null;
@@ -7468,7 +7468,7 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
                 workflowDTO.setUserName(subscriber.getName());
                 workflowDTO.setDomainList(rs.getString("ALLOWED_DOMAINS"));
                 workflowDTO.setValidityTime(rs.getLong("VALIDITY_PERIOD"));
-                OauthAppRequest request = ApplicationUtils.createOauthAppRequest(application.getName(),
+                OAuthAppRequest request = ApplicationUtils.createOauthAppRequest(application.getName(),
                         application.getCallbackUrl(), rs.getString("TOKEN_SCOPE"),rs.getString("INPUTS"));
                 workflowDTO.setAppInfoDTO(request);
 
