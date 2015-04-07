@@ -143,7 +143,7 @@ public class APIDefinitionFromSwagger20 extends APIDefinition {
             String resourcePath = APIUtil.getSwagger20DefinitionFilePath(apiName, apiVersion, apiProviderName);
             resourcePath = resourcePath + "/swagger.json";
             Resource resource;
-            if(registry.get(resourcePath)==null)
+            if(!registry.resourceExists(resourcePath))
                 resource = registry.newResource();
             else
                 resource = registry.get(resourcePath);
@@ -165,15 +165,15 @@ public class APIDefinitionFromSwagger20 extends APIDefinition {
 
     @Override
     public String getAPIDefinition(APIIdentifier apiIdentifier, Registry registry) throws APIManagementException {
-        String resourcePath = APIUtil.getSwagger12DefinitionFilePath(apiIdentifier.getApiName(),
+        String resourcePath = APIUtil.getSwagger20DefinitionFilePath(apiIdentifier.getApiName(),
                 apiIdentifier.getVersion(), apiIdentifier.getProviderName());
 
         JSONParser parser = new JSONParser();
         JSONObject apiJSON;
         String apiDefinition = null;
         try {
-            if (registry.resourceExists(resourcePath + APIConstants.API_DOC_2_0_RESOURCE_NAME)) {
-                Resource apiDocResource = registry.get(resourcePath + APIConstants.API_DOC_2_0_RESOURCE_NAME);
+            if (registry.resourceExists(resourcePath + "/swagger.json")) {
+                Resource apiDocResource = registry.get(resourcePath + "/swagger.json");
                 String apiDocContent = new String((byte[]) apiDocResource.getContent());
                 apiJSON = (JSONObject) parser.parse(apiDocContent);
                 apiDefinition = apiJSON.toJSONString();

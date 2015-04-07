@@ -473,7 +473,7 @@ public class APIProviderHostObject extends ScriptableObject {
             //Uncomment following section to enable swagger 2.0 functionality
 
             //Read URI Templates from swagger resource
-            Set<URITemplate> uriTemplates = definitionFromSwagger20.getURITemplates(api, (String) apiData.get("swagger", apiData));
+            Set<URITemplate> uriTemplates = definitionFromSwagger20.getURITemplates(api, String.valueOf(apiData.get("swagger", apiData)));//(String) apiData.get("swagger", apiData)
             api.setUriTemplates(uriTemplates);
 
             //Get user registry to save api definition
@@ -547,8 +547,9 @@ public class APIProviderHostObject extends ScriptableObject {
         APIProvider apiProvider = getAPIProvider(thisObj);
         API api = null;
         boolean isTenantFlowStarted = false;
+        String tenantDomain;
         try {
-            String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(provider));
+            tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(provider));
             if(tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
             	isTenantFlowStarted = true;
                 PrivilegedCarbonContext.startTenantFlow();
@@ -598,10 +599,23 @@ public class APIProviderHostObject extends ScriptableObject {
             //Set<URITemplate> uriTemplates = parseResourceConfig(apiProvider, apiId, (String) apiData.get("swagger", apiData), api, false);
             //api.setUriTemplates(uriTemplates);
 
-            //Read URI Templates from swagger resource
-            Set<URITemplate> uriTemplates = definitionFromSwagger20.getURITemplates(api, (String) apiData.get("swagger", apiData));
-            api.setUriTemplates(uriTemplates);
+            //Get user registry to save api definition
+            RegistryService registryService = ServiceReferenceHolder.getInstance().getRegistryService();
+            int tenantId;
+            UserRegistry registry;
+            try {
+                tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager().getTenantId(tenantDomain);
+                registry = registryService.getGovernanceSystemRegistry(tenantId);
 
+                //Read URI Templates from swagger resource
+                String swaggerFromRegistry = definitionFromSwagger20.getAPIDefinition(api.getId(),registry);
+                Set<URITemplate> uriTemplates = definitionFromSwagger20.getURITemplates(api, swaggerFromRegistry);
+                api.setUriTemplates(uriTemplates);
+            } catch (RegistryException e) {
+                handleException("Error when create registry instance ", e);
+            } catch (UserStoreException e) {
+                handleException("Error while reading tenant information ", e);
+            }
         }
                 
         return saveAPI(apiProvider, api, null, false);
@@ -679,8 +693,9 @@ public class APIProviderHostObject extends ScriptableObject {
         APIProvider apiProvider = getAPIProvider(thisObj);
         API api = null;
         boolean isTenantFlowStarted = false;
+        String tenantDomain;
         try {
-            String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(provider));
+            tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(provider));
             if(tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
             	isTenantFlowStarted = true;
                 PrivilegedCarbonContext.startTenantFlow();
@@ -699,6 +714,23 @@ public class APIProviderHostObject extends ScriptableObject {
 
             //Read URI Templates from swagger resource
             Set<URITemplate> uriTemplates = definitionFromSwagger20.getURITemplates(api, (String) apiData.get("swagger", apiData));
+            //Get user registry to save api definition
+            RegistryService registryService = ServiceReferenceHolder.getInstance().getRegistryService();
+            int tenantId;
+            UserRegistry registry;
+            try {
+                tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager().getTenantId(tenantDomain);
+                registry = registryService.getGovernanceSystemRegistry(tenantId);
+
+                //Save API definition in the registry
+                definitionFromSwagger20.saveAPIDefinition(api, (String) apiData.get("swagger", apiData), registry);
+            } catch (UserStoreException e) {
+                handleException("Error while reading tenant information ", e);
+            } catch (RegistryException e) {
+                handleException("Error when create registry instance ", e);
+            } catch (ParseException e) {
+                handleException("Error while saving api definition in the registry ", e);
+            }
             api.setUriTemplates(uriTemplates);
 
         }
@@ -787,7 +819,7 @@ public class APIProviderHostObject extends ScriptableObject {
     }
     
     /**
-     * Returns the Swagger12 definition 
+     * Returns the Swagger12 definition //todo this actually returns swagger v2.0, create a new method
      * @param cx
      * @param thisObj
      * @param args
@@ -825,8 +857,19 @@ public class APIProviderHostObject extends ScriptableObject {
                 PrivilegedCarbonContext.startTenantFlow();
                 PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
             }
-        
-            apiJSON = apiProvider.getSwagger12Definition(apiId);
+            RegistryService registryService = ServiceReferenceHolder.getInstance().getRegistryService();
+            int tenantId;
+            UserRegistry registry;
+            try {
+                tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager().getTenantId(tenantDomain);
+                registry = registryService.getGovernanceSystemRegistry(tenantId);
+
+                apiJSON = definitionFromSwagger20.getAPIDefinition(apiId,registry); //apiProvider.getSwagger12Definition(apiId);
+            } catch (RegistryException e) {
+                handleException("Error when create registry instance ", e);
+            } catch (UserStoreException e) {
+                handleException("Error while reading tenant information ", e);
+            }
         } finally {
         	if (isTenantFlowStarted) {
         		PrivilegedCarbonContext.endTenantFlow();

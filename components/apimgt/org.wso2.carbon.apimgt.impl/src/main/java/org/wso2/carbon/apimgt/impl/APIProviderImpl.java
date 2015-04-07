@@ -2520,7 +2520,63 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
         return apiMgtDAO.getConsumerKeys(apiIdentifier);
     }
-	
+
+    @Override
+    public String getSwagger20Definition(APIIdentifier apiId) throws APIManagementException {
+        String resourcePath = APIUtil.getSwagger20DefinitionFilePath(apiId.getApiName(), apiId.getVersion(), apiId.getProviderName());
+
+        JSONParser parser = new JSONParser();
+        JSONObject apiJSON = null;
+        try {
+            if (!registry.resourceExists(resourcePath + APIConstants.API_DOC_2_0_RESOURCE_NAME)) {
+                return APIUtil.createSwagger20JSONContent(getAPI(apiId));
+            }
+            Resource apiDocResource = registry.get(resourcePath + APIConstants.API_DOC_2_0_RESOURCE_NAME);
+            String apiDocContent = new String((byte[]) apiDocResource.getContent());
+            apiJSON = (JSONObject) parser.parse(apiDocContent);
+            JSONArray pathConfigs = (JSONArray) apiJSON.get("apis");
+
+            for (int k = 0; k < pathConfigs.size(); k++) {
+                JSONObject pathConfig = (JSONObject) pathConfigs.get(k);
+                String pathName = (String) pathConfig.get("path");
+                pathName = pathName.startsWith("/") ? pathName : ("/" + pathName);
+
+                Resource pathResource = registry.get(resourcePath + pathName);
+                String pathContent = new String((byte[]) pathResource.getContent());
+                JSONObject pathJSON = (JSONObject) parser.parse(pathContent);
+                pathConfig.put("file", pathJSON);
+            }
+        } catch (RegistryException e) {
+            handleException("Error while retrieving Swagger Definition for " + apiId.getApiName() + "-" +
+                    apiId.getVersion(), e);
+        } catch (ParseException e) {
+            handleException("Error while parsing Swagger Definition for " + apiId.getApiName() + "-" +
+                    apiId.getVersion() + " in " + resourcePath, e);
+        }
+        return apiJSON.toJSONString();
+    }
+
+    @Override
+    public void updateSwagger20Definition(APIIdentifier apiId, String fileName, String jsonText) throws APIManagementException {
+        try{
+            String resourcePath = APIUtil.getSwagger20DefinitionFilePath(apiId.getApiName(), apiId.getVersion(), apiId.getProviderName());
+            resourcePath = resourcePath + fileName;
+            Resource resource = registry.newResource();
+
+            resource.setContent(jsonText);
+            resource.setMediaType("application/json");
+            registry.put(resourcePath, resource);
+
+    		/*Set permissions to anonymous role */
+            APIUtil.setResourcePermissions(apiId.getProviderName(), null, null, resourcePath);
+
+        } catch (RegistryException e) {
+            handleException("Error while adding Swagger v2.0 Definition for " + apiId.getApiName() + "-" + apiId.getVersion(), e);
+        } catch (APIManagementException e) {
+            handleException("Error while adding Swagger v2.0 Definition for " + apiId.getApiName() + "-" + apiId.getVersion(), e);
+        }
+    }
+
 }
 
 
