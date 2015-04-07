@@ -102,43 +102,43 @@ public class APIMgtGoogleAnalyticsTrackingHandler extends AbstractHandler {
 	 * 
 	 * @throws Exception
 	 */
-	private void trackPageView(MessageContext msgCtx) throws Exception {
-		@SuppressWarnings("rawtypes")
-		Map headers = (Map) ((Axis2MessageContext) msgCtx).getAxis2MessageContext().
-			getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
+    private void trackPageView(MessageContext msgCtx) throws Exception {
+        @SuppressWarnings("rawtypes")
+        Map headers = (Map) ((Axis2MessageContext) msgCtx).getAxis2MessageContext()
+                                               .getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
 
-		String host = (String) headers.get(HttpHeaders.HOST);
-		String domainName = host;
-		if (host != null && host.indexOf(":") != -1){
-			domainName = host.substring(0, host.indexOf(":"));
-		}
-		if (isEmpty(domainName)) {
-			domainName = "";
-		}
+        String host = (String) headers.get(HttpHeaders.HOST);
+        String domainName = host;
+        if (host != null && host.indexOf(":") != -1) {
+            domainName = host.substring(0, host.indexOf(":"));
+        }
+        if (isEmpty(domainName)) {
+            domainName = "";
+        }
 
         // Get client IP
         String userIP = (String) ((Axis2MessageContext) msgCtx).getAxis2MessageContext().getProperty("REMOTE_ADDR");
-		String path = (String) msgCtx
-				.getProperty(RESTConstants.REST_FULL_REQUEST_PATH);
-		String documentPath = path;
-		if (isEmpty(documentPath)) {
-			documentPath = "";
-		} 
+        String path = (String) msgCtx.getProperty(RESTConstants.REST_FULL_REQUEST_PATH);
+        String documentPath = path;
+        if (isEmpty(documentPath)) {
+            documentPath = "";
+        }
 
-		String account = config.googleAnalyticsTrackingID;
+        String account = config.googleAnalyticsTrackingID;
 
-		String userAgent = (String) headers.get(HttpHeaders.USER_AGENT);
-		if (isEmpty(userAgent)) {
-			userAgent = "";
-		}
+        String userAgent = (String) headers.get(HttpHeaders.USER_AGENT);
+        if (isEmpty(userAgent)) {
+            userAgent = "";
+        }
 
-		String visitorId = getVisitorId(account, userAgent, msgCtx);
+        String visitorId = getVisitorId(account, userAgent, msgCtx);
 
-		/* Set the visitorId in MessageContext */
-		msgCtx.setProperty(COOKIE_NAME, visitorId);
+        /* Set the visitorId in MessageContext */
+        msgCtx.setProperty(COOKIE_NAME, visitorId);
 
-		String httpMethod = (String)((Axis2MessageContext) msgCtx).getAxis2MessageContext().
-                getProperty(Constants.Configuration.HTTP_METHOD);
+        String httpMethod =
+                            (String) ((Axis2MessageContext) msgCtx).getAxis2MessageContext()
+                                                                   .getProperty(Constants.Configuration.HTTP_METHOD);
 		
 		GoogleAnalyticsData data = new GoogleAnalyticsData
                 .DataBuilder(account, GOOGLE_ANALYTICS_TRACKER_VERSION , visitorId , GoogleAnalyticsConstants.HIT_TYPE_PAGEVIEW)
