@@ -176,19 +176,6 @@ public class APIDefinitionFromSwagger20 extends APIDefinition {
                 Resource apiDocResource = registry.get(resourcePath + APIConstants.API_DOC_2_0_RESOURCE_NAME);
                 String apiDocContent = new String((byte[]) apiDocResource.getContent());
                 apiJSON = (JSONObject) parser.parse(apiDocContent);
-                //todo not "apis"
-                JSONArray pathConfigs = (JSONArray) apiJSON.get("apis");
-
-                for (int k = 0; k < pathConfigs.size(); k++) {
-                    JSONObject pathConfig = (JSONObject) pathConfigs.get(k);
-                    String pathName = (String) pathConfig.get("path");
-                    pathName = pathName.startsWith("/") ? pathName : ("/" + pathName);
-
-                    Resource pathResource = registry.get(resourcePath + pathName);
-                    String pathContent = new String((byte[]) pathResource.getContent());
-                    JSONObject pathJSON = (JSONObject) parser.parse(pathContent);
-                    pathConfig.put("file", pathJSON);
-                }
             }
         } catch (RegistryException e) {
             handleException("Error while retrieving Swagger v2.0 Definition for " + apiIdentifier.getApiName() + "-" +
