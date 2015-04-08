@@ -96,6 +96,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -167,31 +168,44 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      *          if failed to get set of API
      */
     public List<API> getAPIsByProvider(String providerId) throws APIManagementException {
-
         List<API> apiSortedList = new ArrayList<API>();
+        if (providerId != null) {
+            boolean isTenantFlowStarted = false;
+            try {
+                String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(providerId));
+                if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
+                    isTenantFlowStarted = true;
+                    PrivilegedCarbonContext.startTenantFlow();
+                    PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
+                }
 
-        try {
-            providerId = APIUtil.replaceEmailDomain(providerId);
-            String providerPath = APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR +
-                                  providerId;
-            GenericArtifactManager artifactManager = APIUtil.getArtifactManager(registry,
-                                                                                APIConstants.API_KEY);
-            Association[] associations = registry.getAssociations(providerPath,
-                                                                  APIConstants.PROVIDER_ASSOCIATION);
-            for (Association association : associations) {
-                String apiPath = association.getDestinationPath();
-                Resource resource = registry.get(apiPath);
-                String apiArtifactId = resource.getUUID();
-                if (apiArtifactId != null) {
-                    GenericArtifact apiArtifact = artifactManager.getGenericArtifact(apiArtifactId);
-                    apiSortedList.add(APIUtil.getAPI(apiArtifact, registry));
-                } else {
-                    throw new GovernanceException("artifact id is null of " + apiPath);
+
+                providerId = APIUtil.replaceEmailDomain(providerId);
+                String providerPath = APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR +
+                                      providerId;
+                GenericArtifactManager artifactManager = APIUtil.getArtifactManager(registry,
+                                                                                    APIConstants.API_KEY);
+                Association[] associations = registry.getAssociations(providerPath,
+                                                                      APIConstants.PROVIDER_ASSOCIATION);
+                for (Association association : associations) {
+                    String apiPath = association.getDestinationPath();
+                    Resource resource = registry.get(apiPath);
+                    String apiArtifactId = resource.getUUID();
+                    if (apiArtifactId != null) {
+                        GenericArtifact apiArtifact = artifactManager.getGenericArtifact(apiArtifactId);
+                        apiSortedList.add(APIUtil.getAPI(apiArtifact, registry));
+                    } else {
+                        throw new GovernanceException("artifact id is null of " + apiPath);
+                    }
+                }
+
+            } catch (RegistryException e) {
+                handleException("Failed to get APIs for provider : " + providerId, e);
+            } finally {
+                if (isTenantFlowStarted) {
+                    PrivilegedCarbonContext.endTenantFlow();
                 }
             }
-
-        } catch (RegistryException e) {
-            handleException("Failed to get APIs for provider : " + providerId, e);
         }
         Collections.sort(apiSortedList, new APINameComparator());
 
@@ -201,13 +215,13 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
 
     /**
-     * Get a list of all the consumers for all APIs
-     *
-     * @param providerId if of the provider
-     * @return Set<Subscriber>
-     * @throws org.wso2.carbon.apimgt.api.APIManagementException
-     *          if failed to get subscribed APIs of given provider
-     */
+         * Get a list of all the consumers for all APIs
+         *
+         * @param providerId if of the provider
+         * @return Set<Subscriber>
+         * @throws org.wso2.carbon.apimgt.api.APIManagementException
+         *          if failed to get subscribed APIs of given provider
+         */
     public Set<Subscriber> getSubscribersOfProvider(String providerId)
             throws APIManagementException {
 
@@ -305,16 +319,41 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      * @throws org.wso2.carbon.apimgt.api.APIManagementException
      *          if failed to get Subscribers
      */
-    public Set<Subscriber> getSubscribersOfAPI(APIIdentifier identifier)
+    public JSONArray getSubscribersOfAPI(JSONObject identifier)
             throws APIManagementException {
-
+        JSONArray subscribersArr=new JSONArray();
+        String providerName = (String) identifier.get("provider");
+        String apiName = (String) identifier.get("name");
+        String version = (String) identifier.get("version");
+        APIIdentifier apiId = new APIIdentifier(providerName, apiName, version);
         Set<Subscriber> subscriberSet = null;
         try {
-            subscriberSet = apiMgtDAO.getSubscribersOfAPI(identifier);
+            subscriberSet = apiMgtDAO.getSubscribersOfAPI(apiId);
+            subscribersArr=getJSONfySubscribersSet(subscriberSet);
         } catch (APIManagementException e) {
-            handleException("Failed to get subscribers for API : " + identifier.getApiName(), e);
+            handleException("Failed to get subscribers for API : " + apiId.getApiName(), e);
         }
-        return subscriberSet;
+        return subscribersArr ;
+    }
+
+    private JSONArray getJSONfySubscribersSet(Set<Subscriber> subscribers){
+        JSONArray subscribersArr=   new JSONArray();
+        Iterator it = subscribers.iterator();
+        int i = 0;
+        while (it.hasNext()) {
+            JSONObject row = new JSONObject();
+            Object subscriberObject = it.next();
+            Subscriber user = (Subscriber) subscriberObject;
+            row.put("userName",  user.getName());
+            row.put("subscribedDate", checkValue(Long.valueOf(user.getSubscribedDate().getTime()).toString()));
+            subscribersArr.add(i,row);
+            i++;
+        }
+        return subscribersArr;
+    }
+
+    private static String checkValue(String input) {
+        return input != null ? input : "";
     }
 
     /**
@@ -464,18 +503,24 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
 
-    public String getDefaultVersion(APIIdentifier apiid) throws APIManagementException{
+    public String getDefaultVersion(JSONObject apiObj) throws APIManagementException {
+        String provider = (String) apiObj.get("provider");
+        provider = APIUtil.replaceEmailDomain(provider);
+        String apiname = (String) apiObj.get("name");
+        String version = ""; // unused attribute
+        APIIdentifier apiid = new APIIdentifier(provider, apiname, version);
+        return getDefaultVersion(apiid);
+    }
 
-        String defaultVersion=null;
-        try{
-            defaultVersion=apiMgtDAO.getDefaultVersion(apiid);
+    private String getDefaultVersion(APIIdentifier apiid) throws APIManagementException {
+        String defaultVersion = null;
+        try {
+            defaultVersion = apiMgtDAO.getDefaultVersion(apiid);
         } catch (APIManagementException e) {
-            handleException("Error while getting default version :" +apiid.getApiName(),e);
+            handleException("Error while getting default version :" + apiid.getApiName(), e);
         }
         return defaultVersion;
     }
-
-
 
     public String getPublishedDefaultVersion(APIIdentifier apiid) throws APIManagementException{
 
@@ -2515,9 +2560,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 	 * @throws org.wso2.carbon.apimgt.api.APIManagementException
 	 */
 
-	public List<String> getCustomInSequences() throws APIManagementException {
+	public JSONArray getCustomInSequences() throws APIManagementException {
 
-		List<String> sequenceList = new ArrayList<String>();
+		JSONArray sequenceArr = new JSONArray();
 		try {
 			UserRegistry registry = ServiceReferenceHolder.getInstance().getRegistryService()
 			                                              .getGovernanceSystemRegistry(tenantId);
@@ -2530,7 +2575,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 	                for (int i = 0; i < inSeqChildPaths.length; i++) {
 		                Resource inSequence = registry.get(inSeqChildPaths[i]);
 		                OMElement seqElment = APIUtil.buildOMElement(inSequence.getContentStream());
-		                sequenceList.add(seqElment.getAttributeValue(new QName("name")));		               
+		                sequenceArr.add(seqElment.getAttributeValue(new QName("name")));
 	                }
                 }
             }
@@ -2538,7 +2583,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 		} catch (Exception e) {
 			handleException("Issue is in getting custom InSequences from the Registry", e);
 		}
-		return sequenceList;
+		return sequenceArr;
 	}
 
 	/**
@@ -2579,22 +2624,20 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      * @throws org.wso2.carbon.apimgt.api.APIManagementException
      */
 
-    public List<String> getCustomFaultSequences() throws APIManagementException {
-
-        List<String> sequenceList = new ArrayList<String>();
+    public JSONArray getCustomFaultSequences() throws APIManagementException {
+        JSONArray sequenceArr = new JSONArray();
         try {
             UserRegistry registry = ServiceReferenceHolder.getInstance().getRegistryService()
                     .getGovernanceSystemRegistry(tenantId);
             if (registry.resourceExists(APIConstants.API_CUSTOM_FAULTSEQUENCE_LOCATION)) {
                 org.wso2.carbon.registry.api.Collection faultSeqCollection =
                         (org.wso2.carbon.registry.api.Collection) registry.get(APIConstants.API_CUSTOM_FAULTSEQUENCE_LOCATION);
-                if (faultSeqCollection !=null) {
+                if (faultSeqCollection != null) {
                     String[] faultSeqChildPaths = faultSeqCollection.getChildren();
-                    for (int i = 0; i < faultSeqChildPaths.length; i++) {
-                        Resource outSequence = registry.get(faultSeqChildPaths[i]);
+                    for (String faultSeqChildPath : faultSeqChildPaths) {
+                        Resource outSequence = registry.get(faultSeqChildPath);
                         OMElement seqElment = APIUtil.buildOMElement(outSequence.getContentStream());
-
-                        sequenceList.add(seqElment.getAttributeValue(new QName("name")));
+                        sequenceArr.add(seqElment.getAttributeValue(new QName("name")));
                     }
                 }
             }
@@ -2602,10 +2645,10 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         } catch (Exception e) {
             handleException("Issue is in getting custom Fault Sequences from the Registry", e);
         }
-        return sequenceList;
+        return sequenceArr;
     }
 
-	@Override
+    @Override
 	public boolean isSynapseGateway() throws APIManagementException {
 		APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
                 getAPIManagerConfigurationService().getAPIManagerConfiguration();
