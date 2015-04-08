@@ -200,11 +200,11 @@
                 <version>${apimgt.gateway.version}</version>
             </dependency>
 
-            <dependency>
+            <!--dependency>
                 <groupId>org.wso2.carbon.apimgt</groupId>
                 <artifactId>org.wso2.carbon.apimgt.hostobjects</artifactId>
                 <version>${apimgt.hostobjects.version}</version>
-            </dependency>
+            </dependency-->
 
             <dependency>
                 <groupId>org.wso2.carbon.apimgt</groupId>
