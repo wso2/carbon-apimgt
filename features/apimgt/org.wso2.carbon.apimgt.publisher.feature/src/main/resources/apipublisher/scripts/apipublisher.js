@@ -22,35 +22,28 @@ var apipublisher = {};
 
 (function (apipublisher) {
 
-
+    var APIManagerFactory = Packages.org.wso2.carbon.apimgt.impl.APIManagerFactory;
     var log = new Log("jaggery-modules.api-manager.publisher");
 
 
-    apipublisher.getAllProviders = function (username) {
-        var APIManagerFactory = Packages.org.wso2.carbon.apimgt.impl.APIManagerFactory;
-        var APIProvider =  APIManagerFactory.getInstance().getAPIProvider(username);
-        return APIProvider.getAllProviders();
+    apipublisher.getAPIProvider = function (username){
+    var APIProvider =  APIManagerFactory.getInstance().getAPIProvider(username);
     };
 
+    apipublisher.getAllProviders = function (APIProvider) {
+    return APIProvider.getAllProviders();
+    };
 
-    apipublisher.designAPI = function (api,username) {
-        var APIManagerFactory = Packages.org.wso2.carbon.apimgt.impl.APIManagerFactory;
-        var APIProvider =  APIManagerFactory.getInstance().getAPIProvider(username);
+    apipublisher.designAPI = function (APIProvider,api) {
         return APIProvider.designAPI(api);
     };
-    apipublisher.implementAPI = function (api,username) {
-        var APIManagerFactory = Packages.org.wso2.carbon.apimgt.impl.APIManagerFactory;
-        var APIProvider =  APIManagerFactory.getInstance().getAPIProvider(username);
+    apipublisher.implementAPI = function (APIProvider,api) {
         return APIProvider.implementAPI(api);
     };
-    apipublisher.manageAPI = function (api,username) {
-        var APIManagerFactory = Packages.org.wso2.carbon.apimgt.impl.APIManagerFactory;
-        var APIProvider =  APIManagerFactory.getInstance().getAPIProvider(username);
+    apipublisher.manageAPI = function (APIProvider,api) {
         return APIProvider.manageAPI(api);
     };
-    apipublisher.updateDesignAPI = function (api,username) {
-        var APIManagerFactory = Packages.org.wso2.carbon.apimgt.impl.APIManagerFactory;
-        var APIProvider =  APIManagerFactory.getInstance().getAPIProvider(username);
+    apipublisher.updateDesignAPI = function (APIProvider,api) {
         return APIProvider.updateDesignAPI(api);
     };
            
