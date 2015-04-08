@@ -1990,41 +1990,52 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 
     public Map<String, String> completeApplicationRegistration(String userId,
                                                                String applicationName,
-                                                               String tokenType, String tokenScope,
-															   int applicationId)
+                                                               String tokenType,
+                                                               int applicationId)
             throws APIManagementException {
 
-    	Application application = apiMgtDAO.getApplicationById(applicationId);
+        Application application = apiMgtDAO.getApplicationById(applicationId);
         String status = apiMgtDAO.getRegistrationApprovalState(application.getId(), tokenType);
         Map<String, String> keyDetails = null;
         String workflowReference = apiMgtDAO.getWorkflowReference(applicationName, userId);
-        if(workflowReference != null) {
-            WorkflowDTO workflowDTO = apiMgtDAO.retrieveWorkflow(workflowReference);
-            if(workflowDTO != null){
-            //WorkflowStatus status = workflowDTO.getStatus();
-            ApplicationRegistrationWorkflowDTO registrationWorkflowDTO = (ApplicationRegistrationWorkflowDTO)
-                    workflowDTO;
+        if (workflowReference != null) {
+            WorkflowDTO workflowDTO = null;
 
-            if (APIConstants.AppRegistrationStatus.REGISTRATION_APPROVED.equals(status)) {
-                apiMgtDAO.populateAppRegistrationWorkflowDTO(registrationWorkflowDTO);
-                if (workflowDTO == null) {
-                    throw new APIManagementException("Couldn't populate WorkFlow details.");
-                }
-                try {
-                    AbstractApplicationRegistrationWorkflowExecutor.dogenerateKeysForApplication(registrationWorkflowDTO);
-                    AccessTokenInfo tokenInfo = registrationWorkflowDTO.getAccessTokenInfo();
-                    OAuthApplicationInfo oauthApp = registrationWorkflowDTO.getApplicationInfo();
-                    keyDetails = new HashMap<String, String>();
-                    keyDetails.put("accessToken", tokenInfo.getAccessToken());
-                    keyDetails.put("consumerKey", oauthApp.getClientId());
-                    keyDetails.put("consumerSecret", (String) oauthApp.getParameter(ApplicationConstants
-                                                                                      .OAUTH_CLIENT_SECRET));
-                    keyDetails.put("validityTime", Long.toString(tokenInfo.getValidityPeriod()));
-                    keyDetails.put("accessallowdomains", registrationWorkflowDTO.getDomainList());
-                } catch (APIManagementException e) {
-                    APIUtil.handleException("Error occurred while Creating Keys.", e);
-                }
+            // Creating workflowDTO for the correct key type.
+            if (APIConstants.API_KEY_TYPE_PRODUCTION.equals(tokenType)) {
+                workflowDTO = WorkflowExecutorFactory.getInstance().createWorkflowDTO(WorkflowConstants
+                                                                                              .WF_TYPE_AM_APPLICATION_REGISTRATION_PRODUCTION);
+            } else if (APIConstants.API_KEY_TYPE_SANDBOX.equals(tokenType)) {
+                workflowDTO = WorkflowExecutorFactory.getInstance().createWorkflowDTO(WorkflowConstants
+                                                                                              .WF_TYPE_AM_APPLICATION_REGISTRATION_SANDBOX);
             }
+            if (workflowDTO != null) {
+
+                ApplicationRegistrationWorkflowDTO registrationWorkflowDTO = (ApplicationRegistrationWorkflowDTO)
+                        workflowDTO;
+                registrationWorkflowDTO.setExternalWorkflowReference(workflowReference);
+
+                if (APIConstants.AppRegistrationStatus.REGISTRATION_APPROVED.equals(status)) {
+                    apiMgtDAO.populateAppRegistrationWorkflowDTO(registrationWorkflowDTO);
+                    try {
+                        AbstractApplicationRegistrationWorkflowExecutor.dogenerateKeysForApplication(registrationWorkflowDTO);
+                        AccessTokenInfo tokenInfo = registrationWorkflowDTO.getAccessTokenInfo();
+                        OAuthApplicationInfo oauthApp = registrationWorkflowDTO.getApplicationInfo();
+                        keyDetails = new HashMap<String, String>();
+
+                        if(tokenInfo != null){
+                            keyDetails.put("accessToken", tokenInfo.getAccessToken());
+                            keyDetails.put("validityTime", Long.toString(tokenInfo.getValidityPeriod()));
+                        }
+
+                        keyDetails.put("consumerKey", oauthApp.getClientId());
+                        keyDetails.put("consumerSecret", (String) oauthApp.getParameter(ApplicationConstants
+                                                                                                .OAUTH_CLIENT_SECRET));
+                        keyDetails.put("accessallowdomains", registrationWorkflowDTO.getDomainList());
+                    } catch (APIManagementException e) {
+                        APIUtil.handleException("Error occurred while Creating Keys.", e);
+                    }
+                }
 
             }
         }

@@ -146,8 +146,8 @@ $(document).ready(function () {
         var link;
         var validityTime;
         var tokenScope;
-        var applicationId=$('#appListSelected').val();
-        
+        var applicationId=$('option:selected','#appListSelected').attr('appId');
+
         if (keyType == 'PRODUCTION') {
             authoDomains = $('#allowedDomainsPro').val();
             validityTime=$('#refreshProdValidityTime').val();
@@ -164,7 +164,7 @@ $(document).ready(function () {
             authorizedDomains:authoDomains,
             validityTime:validityTime,
 	        retryAfterFailure:true,
-            applicationId:applicationId
+            selectedAppID:applicationId
         }, function (result) {
             if (!result.error) {
                 location.reload();

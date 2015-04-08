@@ -455,13 +455,12 @@ public interface APIConsumer extends APIManager {
      * @param userId Tenant Aware userID
      * @param applicationName Name of the Application
      * @param tokenType Type of the Token (PRODUCTION | SANDBOX)
-     * @param tokenScope scope of the token
      * @return a Map containing the details of the OAuth application.
      * @throws APIManagementException if failed to get the tiers
      */
 
 
-    public Map<String,String> completeApplicationRegistration(String userId, String applicationName, String tokenType, String tokenScope,int applicationId) throws APIManagementException;
+    public Map<String,String> completeApplicationRegistration(String userId, String applicationName, String tokenType, int applicationId) throws APIManagementException;
 
 
 

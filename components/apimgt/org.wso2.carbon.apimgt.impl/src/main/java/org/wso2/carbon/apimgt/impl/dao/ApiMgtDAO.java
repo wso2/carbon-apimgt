@@ -7435,7 +7435,8 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
                 "APP.APPLICATION_STATUS," +
                 "SUB.USER_ID," +
                 "REG.ALLOWED_DOMAINS," +
-                "REG.VALIDITY_PERIOD" +
+                "REG.VALIDITY_PERIOD," +
+                "REG.INPUTS" +
                 " FROM " +
                 "AM_APPLICATION_REGISTRATION REG," +
                 "AM_APPLICATION APP," +

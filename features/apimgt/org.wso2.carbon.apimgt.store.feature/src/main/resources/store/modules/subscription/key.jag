@@ -31,7 +31,7 @@ var generateApplicationKey = function (application, username, keyType, callbackU
 
     try {
 
-	if(afterFailure == true){
+	if(afterFailure){
         key = store.createApplicationKeys(application, username, keyType, callbackUrl, accessAllowDomainsArr,
                 validityTime, afterFailure,tokenScope,applicationId,jsonParams);
 	}else{
