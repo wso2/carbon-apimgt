@@ -35,7 +35,7 @@
     <modules>
         <module>org.wso2.carbon.apimgt.api</module>
         <module>org.wso2.carbon.apimgt.impl</module>
-        <module>org.wso2.carbon.apimgt.hostobjects</module>
+        <!--module>org.wso2.carbon.apimgt.hostobjects</module-->
         <module>org.wso2.carbon.apimgt.keymgt</module>
 	    <module>org.wso2.carbon.apimgt.keymgt.client</module>
         <module>org.wso2.carbon.apimgt.gateway</module>
