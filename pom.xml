@@ -26,11 +26,14 @@
     <modules>
         <module>dependencies/synapse</module>
         <module>service-stubs/apimgt</module>
+	<module>service-stubs/oidc-authenticator</module>
         <module>components/apimgt</module>
         <module>components/forum</module>
+        <module>components/oidc-authenticator</module>
         <module>features/apimgt</module>
         <module>features/forum</module>
         <module>features/synapse</module>
+	<module>features/oidc-authenticator</module>
     </modules>
 
     <build>
