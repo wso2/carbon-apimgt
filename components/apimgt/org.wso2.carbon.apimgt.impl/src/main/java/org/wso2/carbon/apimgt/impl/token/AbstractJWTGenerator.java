@@ -308,7 +308,7 @@ public abstract class AbstractJWTGenerator implements TokenGenerator {
      * Helper method to add public certificate to JWT_HEADER to signature verification.
      *
      * @param endUserName
-     * @throws org.wso2.carbon.apimgt.api.APIManagementException
+     * @throws APIManagementException
      */
     private String addCertToHeader(String endUserName) throws APIManagementException {
 

@@ -1718,3 +1718,35 @@ thumbnails
     height: 26px;
     background: linear-gradient(to right, rgba(255, 255, 255, 0), rgba(255, 255, 255, 0.9) 50%);
 }
+.cDivRowOfElements{
+
+}
+.cDivTextConsumerKey{
+    text-align: left;
+    display: inline-block;
+    vertical-align: top;
+    *display: inline;
+    *zoom: 1;
+}
+.cDivTextMappingExternalAuthApp{
+    text-align: left;
+    display: inline-block;
+    vertical-align: middle;
+    *display: inline;
+    *zoom: 1;
+    width: 150px;
+}
+.cDivInputMappingExternalAuthApp{
+    text-align: left;
+    display: inline-block;
+    vertical-align: top;
+    *display: inline;
+    *zoom: 1;
+}
+.cDivParentOfManualAuthAppCreateProduction{
+    display: none;
+}
+
+.cDivParentOfManualAuthAppCreateSandBox{
+    display: none;
+}

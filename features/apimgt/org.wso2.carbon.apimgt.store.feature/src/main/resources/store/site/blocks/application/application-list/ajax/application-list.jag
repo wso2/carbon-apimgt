@@ -37,7 +37,37 @@ include("/jagg/jagg.jag");
             }
         }
         print(obj);
-    } else {
+    } else if(action == "getApplicationByName"){
+        if (!user) {
+            if(!ssoEnabled){
+                print({
+                    error:true,
+                    message:msg.error.loginRequired(action)
+                });
+            }
+            return;
+        }
+
+        username = user.username;
+        var applicationName = request.getParameter("applicationName");
+
+        mod = jagg.module("application");
+        result = mod.getApplicationByName(username,applicationName);
+
+        if (result.error) {
+            obj = {
+                error:result.error,
+                message:msg.error.authError(action, username)
+            };
+        } else {
+            obj = {
+                error:false,
+                application:result.application
+            }
+        }
+        print(obj);
+    }
+    else {
         print({
             error:true,
             message:msg.error.invalidAction(action)

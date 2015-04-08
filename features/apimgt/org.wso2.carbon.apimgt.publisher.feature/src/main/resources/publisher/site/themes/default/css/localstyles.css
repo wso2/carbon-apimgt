@@ -512,16 +512,18 @@ form.form-search .tierHelp {
 }
 #rangeSliderWrapper{
     height: 20px;
-    position: relative;
-    border: 2px solid #eee !important;
+
+
 }
-#rangeSliderWrapper #rangeSlider{
+/*#rangeSliderWrapper #rangeSlider{
     position: relative;
     top: 40px;
     width:96%;
     left:10px;
 
 }
+*/
+
 .affix{
     position: fixed!important;
     top:10px;
@@ -1305,14 +1307,15 @@ thumbnails
 }*/
 
 .add-on-cal {
-    right: 32px;
-    position: absolute;
-    top: 18px;
+    right: 31px;
+    float: right;
+    position: relative;
+    top: 6px;
 }
 
 #date-range{
     padding-right:30px;
-    width:290px;
+    width:300px;
     height:100%;
     display:inline-block;
 }
@@ -1377,7 +1380,7 @@ thumbnails
 
 svg.pie{
     margin:0 auto;
-    height:400px !important;
+    height:450px !important;
     width:500px !important;
 }
 
@@ -1399,4 +1402,53 @@ div.error{
     padding:5px;
 }
 
+.dataTables_wrapper .dataTables_paginate .paginate_button{
+    color:#428BCA !important;
+    border: 1px solid #cacaca;
+    padding: 0.3em 0.8em;
+    background:white;
+    margin-left:-1px;
+}
 
+.dataTables_wrapper .dataTables_paginate .paginate_button.current, .dataTables_wrapper .dataTables_paginate .paginate_button.current:hover {
+    color :#666 !important;
+    background: #f5f5f5 !important;
+    border: 1px solid #cacaca;
+}
+
+
+
+.dataTables_wrapper .dataTables_paginate .paginate_button:hover {
+    background:#f5f5f5;
+    border: 1px solid #cacaca;
+    color:#005580 !important;
+}
+
+.dataTables_wrapper .dataTables_paginate .paginate_button.disabled, .dataTables_wrapper .dataTables_paginate .paginate_button.disabled:hover, .dataTables_wrapper .dataTables_paginate .paginate_button.disabled:active{
+    border: 1px solid #cacaca;
+    color:#bbb !important;
+}
+
+a.previous {
+	border-radius: 5px 0 0 5px !important;
+}
+
+a.next {
+	border-radius: 0 5px 5px 0;
+}
+
+#faultyCountChart svg text {
+    font: normal 10px Arial;
+}
+
+#loader{
+    margin-right: 5px;
+}
+
+.nv-multiBarHorizontalChart .nv-x text {
+    display: none;
+}
+
+.nvd3 .nv-multibarHorizontal .nv-groups text {
+    fill: #333 !important;
+}

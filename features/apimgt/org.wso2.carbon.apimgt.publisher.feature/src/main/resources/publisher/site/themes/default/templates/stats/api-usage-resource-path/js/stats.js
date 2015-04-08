@@ -41,12 +41,7 @@ require(["dojo/dom", "dojo/domReady!"], function (dom) {
 
                     //day picker
                     $('#today-btn').on('click',function(){
-                        var to = convertTimeString(currentDay);
-                        var from = convertTimeString(currentDay-86400000);
-                        var dateStr= from+" to "+to;
-                        $("#date-range").html(dateStr);
-                        $('#date-range').data('dateRangePicker').setDateRange(from,to);
-                        drawAPIUsageByResourcePath(from,to);
+                        getDateTime(currentDay,currentDay-86400000);
                         isToday=true;
                         isWeek,isMonth,isDefault,isHour=false;
 
@@ -54,36 +49,21 @@ require(["dojo/dom", "dojo/domReady!"], function (dom) {
 
                     //hour picker
                     $('#hour-btn').on('click',function(){
-                        var to = convertTimeString(currentDay);
-                        var from = convertTimeString(currentDay-3600000);
-                        var dateStr= from+" to "+to;
-                        $("#date-range").html(dateStr);
-                        $('#date-range').data('dateRangePicker').setDateRange(from,to);
-                        drawAPIUsageByResourcePath(from,to);
+                        getDateTime(currentDay,currentDay-3600000);
                         isHour=true;
                         isWeek,isMonth,isDefault,isToday=false;
                     })
 
                     //week picker
                     $('#week-btn').on('click',function(){
-                        var to = convertTimeString(currentDay);
-                        var from = convertTimeString(currentDay-604800000);
-                        var dateStr= from+" to "+to;
-                        $("#date-range").html(dateStr);
-                        $('#date-range').data('dateRangePicker').setDateRange(from,to);
-                        drawAPIUsageByResourcePath(from,to);
+                        getDateTime(currentDay,currentDay-604800000);
                         isWeek=true;
                         isToday,isMonth,isDefault,isHour=false;
                     })
 
                     //month picker
                     $('#month-btn').on('click',function(){
-                        var to = convertTimeString(currentDay);
-                        var from = convertTimeString(currentDay-(604800000*4));
-                        var dateStr= from+" to "+to;
-                        $("#date-range").html(dateStr);
-                        $('#date-range').data('dateRangePicker').setDateRange(from,to);
-                        drawAPIUsageByResourcePath(from,to);
+                        getDateTime(currentDay,currentDay-(604800000*4));
                         isMonth=true;
                         isWeek,isToday,isDefault,isHour=false;
                     });
@@ -106,11 +86,15 @@ require(["dojo/dom", "dojo/domReady!"], function (dom) {
                              btnActiveToggle(this);
                              var from = convertDate(obj.date1);
                              var to = convertDate(obj.date2);
-                             $('#date-range').html(from + " to "+ to);
+                             var fromStr = from.split(" ");
+                             var toStr = to.split(" ");
+                             var dateStr = fromStr[0] + " <i>" + fromStr[1] + "</i> <b>to</b> " + toStr[0] + " <i>" + toStr[1] + "</i>";
+                             $("#date-range").html(dateStr);
                              drawAPIUsageByResourcePath(from,to);
+
                              $('.apply-btn').on('click',function(){
-                             isDefault=true;
-                             isWeek,isMonth,isToday,isHour=false;
+                                 isDefault=true;
+                                 isWeek,isMonth,isToday,isHour=false;
                              });
                         });
 
@@ -118,11 +102,7 @@ require(["dojo/dom", "dojo/domReady!"], function (dom) {
                     var to = new Date();
                     var from = new Date(to.getTime() - 1000 * 60 * 60 * 24 * 30);
 
-                    $('#date-range').data('dateRangePicker').setDateRange(from,to);
-                    $('#date-range').html($('#date-range').val());
-                    var fromStr = convertDate(from);
-                    var toStr = convertDate(to);
-                    drawAPIUsageByResourcePath(fromStr,toStr);
+                    getDateTime(to,from);
                     isMonth=true;
                     isWeek,isToday,isDefault,isHour=false;
 
@@ -375,12 +355,13 @@ var drawAPIUsageByResourcePath = function (from, to) {
 
 
                                                 nv.addGraph(function () {
-                                                    chart = nv.models.lineWithFocusChart().margin({right: 120,top: 100,left: 100});
+                                                    chart = nv.models.lineWithFocusChart().margin({right: 120,top: 100,left: 120});
                                                     var fitScreen = false;
 
                                                     chart.color(d3.scale.category20b().range());
                                                     chart.xAxis.axisLabel('Time');
                                                     chart.yAxis.axisLabel('Hits');
+                                                    chart.clipEdge(false);
 
                                                     //chart.lines.xScale(d3.time.scale());
                                                     //chart.lines2.xScale(d3.time.scale());
@@ -447,6 +428,7 @@ var drawAPIUsageByResourcePath = function (from, to) {
                                                         .call(chart);
 
                                                     nv.utils.windowResize(chart.update);
+
                                                 return chart;
                                                 });
 
@@ -579,4 +561,15 @@ function onClose(){
             e.preventDefault();
         e.returnValue = true;
     };
+}
+
+function getDateTime(currentDay,fromDay){
+    var to = convertTimeString(currentDay);
+    var from = convertTimeString(fromDay);
+    var toDate = to.split(" ");
+    var fromDate = from.split(" ");
+    var dateStr= fromDate[0]+" <i>"+fromDate[1]+"</i> <b>to</b> "+toDate[0]+" <i>"+toDate[1]+"</i>";
+    $("#date-range").html(dateStr);
+    $('#date-range').data('dateRangePicker').setDateRange(from,to);
+    drawAPIUsageByResourcePath(from,to);
 }

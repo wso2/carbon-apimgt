@@ -32,7 +32,7 @@ public interface APIProvider extends APIManager {
      * Returns a list of all #{@link org.wso2.carbon.apimgt.api.model.Provider} available on the system.
      *
      * @return Set<Provider>
-     * @throws org.wso2.carbon.apimgt.api.APIManagementException if failed to get Providers
+     * @throws APIManagementException if failed to get Providers
      */
     public Set<Provider> getAllProviders() throws APIManagementException;
 
@@ -43,7 +43,7 @@ public interface APIProvider extends APIManager {
      *
      * @param providerId , provider id
      * @return set of API
-     * @throws org.wso2.carbon.apimgt.api.APIManagementException if failed to get set of API
+     * @throws APIManagementException if failed to get set of API
      */
     public List<API> getAPIsByProvider(String providerId) throws APIManagementException;
 
@@ -52,7 +52,7 @@ public interface APIProvider extends APIManager {
      *
      * @param providerId if of the provider
      * @return Set<Subscriber>
-     * @throws org.wso2.carbon.apimgt.api.APIManagementException if failed to get subscribed APIs of given provider
+     * @throws APIManagementException if failed to get subscribed APIs of given provider
      */
     public Set<Subscriber> getSubscribersOfProvider(String providerId)
             throws APIManagementException;
@@ -62,7 +62,7 @@ public interface APIProvider extends APIManager {
      *
      * @param providerName name of the provider
      * @return Provider
-     * @throws org.wso2.carbon.apimgt.api.APIManagementException if failed to get Provider
+     * @throws APIManagementException if failed to get Provider
      */
     public Provider getProvider(String providerName) throws APIManagementException;
 
@@ -88,7 +88,7 @@ public interface APIProvider extends APIManager {
      *
      * @param providerId Provider Id
      * @return UserApplicationAPIUsages for given provider
-     * @throws org.wso2.carbon.apimgt.api.APIManagementException If failed to get UserApplicationAPIUsage
+     * @throws APIManagementException If failed to get UserApplicationAPIUsage
      */
     public UserApplicationAPIUsage[] getAllAPIUsageByProvider(String providerId)
             throws APIManagementException;
@@ -107,7 +107,7 @@ public interface APIProvider extends APIManager {
      *
      * @param identifier APIIdentifier
      * @return Set<Subscriber>
-     * @throws org.wso2.carbon.apimgt.api.APIManagementException if failed to get Subscribers
+     * @throws APIManagementException if failed to get Subscribers
      */
     public Set<Subscriber> getSubscribersOfAPI(APIIdentifier identifier)
             throws APIManagementException;
@@ -117,7 +117,7 @@ public interface APIProvider extends APIManager {
      *
      * @param identifier APIIdentifier
      * @return Set<APISubscriptionCount>
-     * @throws org.wso2.carbon.apimgt.api.APIManagementException if failed to get APISubscriptionCountByAPI
+     * @throws APIManagementException if failed to get APISubscriptionCountByAPI
      */
     public long getAPISubscriptionCountByAPI(APIIdentifier identifier)
             throws APIManagementException;
@@ -134,7 +134,7 @@ public interface APIProvider extends APIManager {
      * Adds a new API to the Store
      *
      * @param api API
-     * @throws org.wso2.carbon.apimgt.api.APIManagementException if failed to add API
+     * @throws APIManagementException if failed to add API
      */
     public void addAPI(API api) throws APIManagementException;
 
@@ -169,7 +169,7 @@ public interface APIProvider extends APIManager {
      * version of the API
      *
      * @param api An API object with which the old API keys will be associated
-     * @throws org.wso2.carbon.apimgt.api.APIManagementException on error
+     * @throws APIManagementException on error
      */
     public void makeAPIKeysForwardCompatible(API api) throws APIManagementException;
 
@@ -178,8 +178,8 @@ public interface APIProvider extends APIManager {
      *
      * @param api        The API to be copied
      * @param newVersion The version of the new API
-     * @throws org.wso2.carbon.apimgt.api.model.DuplicateAPIException  If the API trying to be created already exists
-     * @throws org.wso2.carbon.apimgt.api.APIManagementException If an error occurs while trying to create
+     * @throws DuplicateAPIException  If the API trying to be created already exists
+     * @throws APIManagementException If an error occurs while trying to create
      *                                the new version of the API
      */
     public void createNewAPIVersion(API api, String newVersion) throws DuplicateAPIException,
@@ -191,26 +191,26 @@ public interface APIProvider extends APIManager {
      * @param apiId   APIIdentifier
      * @param docType the type of the documentation
      * @param docName name of the document
-     * @throws org.wso2.carbon.apimgt.api.APIManagementException if failed to remove documentation
+     * @throws APIManagementException if failed to remove documentation
      */
-    public void removeDocumentation(APIIdentifier apiId, String docType, String docName)
-            throws APIManagementException;
+    public void removeDocumentation(APIIdentifier apiId,
+                                    String docType, String docName) throws APIManagementException;
 
     /**
      * Adds Documentation to an API
      *
      * @param apiId         APIIdentifier
      * @param documentation Documentation
-     * @throws org.wso2.carbon.apimgt.api.APIManagementException if failed to add documentation
+     * @throws APIManagementException if failed to add documentation
      */
-    public void addDocumentation(APIIdentifier apiId, Documentation documentation)
-            throws APIManagementException;
+    public void addDocumentation(APIIdentifier apiId,
+                                 Documentation documentation) throws APIManagementException;
 
     /**
      * Checks if a given API exists in the registry
      * @param apiId
      * @return boolean result
-     * @throws org.wso2.carbon.apimgt.api.APIManagementException
+     * @throws APIManagementException
      */
     public boolean checkIfAPIExists(APIIdentifier apiId) throws APIManagementException;
 
@@ -220,7 +220,7 @@ public interface APIProvider extends APIManager {
      * @param api,        API
      * @param documentationName, name of the inline documentation
      * @param text,              content of the inline documentation
-     * @throws org.wso2.carbon.apimgt.api.APIManagementException if failed to add the document as a resource to registry
+     * @throws APIManagementException if failed to add the document as a resource to registry
      */
     public void addDocumentationContent(API api, String documentationName, String text)
             throws APIManagementException;
@@ -242,17 +242,17 @@ public interface APIProvider extends APIManager {
      *
      * @param apiId         APIIdentifier
      * @param documentation Documentation
-     * @throws org.wso2.carbon.apimgt.api.APIManagementException if failed to update docs
+     * @throws APIManagementException if failed to update docs
      */
-    public void updateDocumentation(APIIdentifier apiId, Documentation documentation)
-            throws APIManagementException;
+    public void updateDocumentation(APIIdentifier apiId,
+                                    Documentation documentation) throws APIManagementException;
 
     /**
      * Copies current Documentation into another version of the same API.
      *
      * @param toVersion Version to which Documentation should be copied.
      * @param apiId     id of the APIIdentifier
-     * @throws org.wso2.carbon.apimgt.api.APIManagementException if failed to copy docs
+     * @throws APIManagementException if failed to copy docs
      */
     public void copyAllDocumentation(APIIdentifier apiId, String toVersion)
             throws APIManagementException;
@@ -262,7 +262,7 @@ public interface APIProvider extends APIManager {
      *
      * @param apiId     id of the APIIdentifier
      * @return List of life-cycle events per given API
-     * @throws org.wso2.carbon.apimgt.api.APIManagementException if failed to copy docs
+     * @throws APIManagementException if failed to copy docs
      */
     public List<LifeCycleEvent> getLifeCycleEvents(APIIdentifier apiId)
             throws APIManagementException;
@@ -271,7 +271,7 @@ public interface APIProvider extends APIManager {
      * Delete an API
      *
      * @param identifier APIIdentifier
-     * @throws org.wso2.carbon.apimgt.api.APIManagementException if failed to remove the API
+     * @throws APIManagementException if failed to remove the API
      */
     public void deleteAPI(APIIdentifier identifier) throws APIManagementException;
 
@@ -281,7 +281,7 @@ public interface APIProvider extends APIManager {
      * @param searchTerm  Search Term
      * @param searchType  Search Type
      * @return   Set of APIs
-     * @throws org.wso2.carbon.apimgt.api.APIManagementException
+     * @throws APIManagementException
      */
     public List<API> searchAPIs(String searchTerm, String searchType, String providerId) throws APIManagementException;
     /**
@@ -320,7 +320,7 @@ public interface APIProvider extends APIManager {
     /**
      * Get the list of Custom InSequences.
      * @return List of available sequences
-     * @throws org.wso2.carbon.apimgt.api.APIManagementException
+     * @throws APIManagementException
      */
     
     public List<String> getCustomInSequences()  throws APIManagementException;
@@ -329,7 +329,7 @@ public interface APIProvider extends APIManager {
     /**
      * Get the list of Custom OutSequences.
      * @return List of available sequences
-     * @throws org.wso2.carbon.apimgt.api.APIManagementException
+     * @throws APIManagementException
      */
     
     public List<String> getCustomOutSequences()  throws APIManagementException;
@@ -337,7 +337,7 @@ public interface APIProvider extends APIManager {
     /**
      * Get the list of Custom Fault Sequences.
      * @return List of available fault sequences
-     * @throws org.wso2.carbon.apimgt.api.APIManagementException
+     * @throws APIManagementException
      */
 
     public List<String> getCustomFaultSequences()  throws APIManagementException;
@@ -396,7 +396,7 @@ public interface APIProvider extends APIManager {
      * @param searchTerm  Search Term
      * @param searchType  Search Type
      * @return   Set of Documents and APIs
-     * @throws org.wso2.carbon.apimgt.api.APIManagementException
+     * @throws APIManagementException
      */
     public Map<Documentation, API> searchAPIsByDoc(String searchTerm, String searchType) throws APIManagementException;
     
@@ -404,7 +404,7 @@ public interface APIProvider extends APIManager {
      * This method updates Swagger 1.2 resources in the registry
      * @param fileName
      * @param jsonText
-     * @throws org.wso2.carbon.apimgt.api.APIManagementException
+     * @throws APIManagementException
      */
     public void updateSwagger12Definition(APIIdentifier apiId, String fileName, String jsonText) throws APIManagementException;
     
@@ -413,7 +413,7 @@ public interface APIProvider extends APIManager {
      * Returns the Swagger12 definition as a string
      * @param apiId
      * @return
-     * @throws org.wso2.carbon.apimgt.api.APIManagementException
+     * @throws APIManagementException
      */
     public String getSwagger12Definition(APIIdentifier apiId) throws APIManagementException;
 

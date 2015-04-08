@@ -30,19 +30,18 @@ import org.apache.synapse.MessageContext;
 import org.apache.synapse.config.xml.rest.VersionStrategyFactory;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.core.axis2.Axis2Sender;
-import org.apache.synapse.rest.API;
 import org.apache.synapse.rest.RESTConstants;
-import org.apache.synapse.rest.version.ContextVersionStrategy;
-import org.apache.synapse.rest.version.VersionStrategy;
 import org.apache.synapse.transport.nhttp.NhttpConstants;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 
 import javax.xml.namespace.QName;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+
+import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
+import java.util.*;
+import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
+// import org.wso2.carbon.identity.oauth2.stub.dto.OAuth2TokenValidationResponseDTO_TokenValidationContextParam;
+
 
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
@@ -202,7 +201,7 @@ public class Utils {
     	
     	return allowedOrigins;
     }
-    
+
     public static String getAllowedHeaders() {
     	return ServiceReferenceHolder.getInstance().getAPIManagerConfiguration().
     	        getFirstProperty(APIConstants.CORS_CONFIGURATION_ACCESS_CTL_ALLOW_HEADERS);
@@ -221,10 +220,8 @@ public class Utils {
     }
 
     public static boolean isStatsEnabled() {
-        String statsEnabled = config.
-                getFirstProperty(APIConstants.CORS_CONFIGURATION_ENABLED);
-
-        return Boolean.parseBoolean(statsEnabled);
+        return ServiceReferenceHolder.getInstance().getApiManagerConfigurationService().
+                getAPIAnalyticsConfiguration().isAnalyticsEnabled();
     }
 
     /**
@@ -234,7 +231,6 @@ public class Utils {
      * @return
      */
     public static boolean hasAccessTokenExpired(APIKeyValidationInfoDTO accessTokenDO) {
-        long timestampSkew;
         long currentTime;
         long validityPeriod;
         if (accessTokenDO.getValidityPeriod() != Long.MAX_VALUE) {

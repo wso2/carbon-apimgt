@@ -1,0 +1,21 @@
+<%
+jagg.block("subscription/subscription-authapp-sandbox/subscription-authapp-main", {
+    initializer:function (data) {
+
+    },
+
+    getInputs:function () {
+        return {
+            "user":null
+        }
+    },
+
+    getOutputs:function (inputs) {
+
+        return {
+
+        };
+    }
+
+});
+%>

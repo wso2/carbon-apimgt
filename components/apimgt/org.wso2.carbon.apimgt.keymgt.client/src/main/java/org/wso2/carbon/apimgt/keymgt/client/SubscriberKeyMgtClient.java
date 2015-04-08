@@ -24,6 +24,7 @@ import org.apache.axis2.context.ServiceContext;
 import org.apache.axis2.transport.http.HTTPConstants;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.apimgt.api.model.xsd.OAuthApplicationInfo;
 import org.wso2.carbon.apimgt.impl.dto.xsd.APIInfoDTO;
 import org.wso2.carbon.apimgt.keymgt.stub.subscriber.APIKeyMgtSubscriberServiceStub;
 import org.wso2.carbon.apimgt.keymgt.stub.types.carbon.ApplicationKeysDTO;
@@ -65,6 +66,22 @@ public class SubscriberKeyMgtClient {
             log.error(errorMsg, e);
             throw e;
         }
+    }
+
+
+    public OAuthApplicationInfo createOAuthApplication(String userId, String applicationName, String callbackUrl) throws Exception {
+        OAuthApplicationInfo oAuthApplicationInfo = subscriberServiceStub.createOAuthApplication(userId, applicationName, callbackUrl);
+        return oAuthApplicationInfo;
+    }
+
+
+    public OAuthApplicationInfo getOAuthApplication(String consumerKey) throws Exception {
+        OAuthApplicationInfo oAuthApplicationInfo = subscriberServiceStub.retrieveOAuthApplication(consumerKey);
+        return oAuthApplicationInfo;
+    }
+
+    public void deleteOAuthApplication(String consumerKey) throws Exception {
+        subscriberServiceStub.deleteOAuthApplication(consumerKey);
     }
 
     public String getAccessKey(String userId, APIInfoDTO apiInfoDTO,

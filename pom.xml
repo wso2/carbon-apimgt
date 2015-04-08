@@ -26,11 +26,14 @@
     <modules>
         <module>dependencies/synapse</module>
         <module>service-stubs/apimgt</module>
+	<module>service-stubs/oidc-authenticator</module>
         <module>components/apimgt</module>
         <module>components/forum</module>
+        <module>components/oidc-authenticator</module>
         <module>features/apimgt</module>
         <module>features/forum</module>
         <module>features/synapse</module>
+	<module>features/oidc-authenticator</module>
     </modules>
 
     <build>
@@ -641,6 +644,31 @@
                 <artifactId>org.wso2.carbon.user.api</artifactId>
                 <version>${carbon.kernel.version}</version>
             </dependency>
+
+            <dependency>
+                <groupId>org.wso2.carbon.deployment</groupId>
+                <artifactId>org.wso2.carbon.bam.service.data.publisher</artifactId>
+                <version>4.2.2-SNAPSHOT</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.wso2.carbon</groupId>
+                <artifactId>org.wso2.carbon.ndatasource.core</artifactId>
+                <version>${carbon.kernel.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.wso2.carbon</groupId>
+                <artifactId>org.wso2.carbon.ndatasource.rdbms</artifactId>
+                <version>${carbon.kernel.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.wso2.carbon</groupId>
+                <artifactId>org.wso2.carbon.bam.toolbox.deployer.stub</artifactId>
+                <version>${carbon.platform.version}</version>
+            </dependency>
+
         </dependencies>
     </dependencyManagement>
 

@@ -49,8 +49,12 @@ import org.wso2.carbon.apimgt.api.dto.UserApplicationAPIUsage;
 import org.wso2.carbon.apimgt.api.model.*;
 import org.wso2.carbon.apimgt.hostobjects.internal.HostObjectComponent;
 import org.wso2.carbon.apimgt.hostobjects.internal.ServiceReferenceHolder;
-import org.wso2.carbon.apimgt.impl.*;
-import org.wso2.carbon.apimgt.impl.definitions.*;
+import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
+import org.wso2.carbon.apimgt.impl.APIManagerFactory;
+import org.wso2.carbon.apimgt.impl.UserAwareAPIProvider;
+import org.wso2.carbon.apimgt.impl.factory.KeyManagerFactory;
+import org.wso2.carbon.apimgt.impl.definitions.APIDefinitionFromSwagger20;
 import org.wso2.carbon.apimgt.impl.dto.Environment;
 import org.wso2.carbon.apimgt.impl.dto.TierPermissionDTO;
 import org.wso2.carbon.apimgt.impl.utils.APIAuthenticationAdminClient;
@@ -244,6 +248,7 @@ public class APIProviderHostObject extends ScriptableObject {
         return row;
     }
 
+
     /**
      * This method is used to update the permission cache from jaggery side. user name should be passed as a parameter
      *
@@ -435,7 +440,9 @@ public class APIProviderHostObject extends ScriptableObject {
 		if (!"none".equals(outSequence)) {
 			api.setOutSequence(outSequence);
 		}
-		if (!"none".equals(faultSequence)) {
+		
+		List<String> sequenceList = apiProvider.getCustomFaultSequences();
+		if (!"none".equals(faultSequence) && sequenceList.contains(faultSequence)) {
 			api.setFaultSequence(faultSequence);
 		}
 	
@@ -489,6 +496,26 @@ public class APIProviderHostObject extends ScriptableObject {
         } catch (APIManagementException e) {
             //swallowing the excepion since the api update should happen even if cache update fails
             log.error("Error while removing the scope cache", e);
+        }
+        //get new key manager instance for  resource registration.
+        KeyManager keyManager = KeyManagerFactory.getKeyManager();
+
+        Map registeredResource = keyManager.getResourceByApiId(api.getId().toString());
+
+        if (registeredResource == null) {
+            boolean isNewResourceRegistered = keyManager.registerNewResource(api , null);
+            if (!isNewResourceRegistered) {
+                handleException("APIResource registration is failed while adding the API- " + api.getId().getApiName
+                        () + "-" + api
+                        .getId().getVersion());
+            }
+        } else {
+            //update APIResource.
+            String resourceId = (String) registeredResource.get("resourceId");
+            if (resourceId == null) {
+                handleException("APIResource update is failed because of empty resourceID.");
+            }
+            keyManager.updateRegisteredResource(api , registeredResource);
         }
         
         return saveAPI(apiProvider, api, null, false);
@@ -1361,7 +1388,9 @@ public class APIProviderHostObject extends ScriptableObject {
         if(!"none".equals(outSequence)){
             api.setOutSequence(outSequence);
         }
-        if(!"none".equals(faultSequence)){
+        
+        List<String> sequenceList = apiProvider.getCustomFaultSequences();
+        if(!"none".equals(faultSequence) && sequenceList.contains(faultSequence)) {
             api.setFaultSequence(faultSequence);
         }
 
@@ -1759,7 +1788,9 @@ public class APIProviderHostObject extends ScriptableObject {
         if(!"none".equals(outSequence)){
             api.setOutSequence(outSequence);
         }
-        if(!"none".equals(faultSequence)){
+        
+        List<String> sequenceList = apiProvider.getCustomFaultSequences();
+        if(!"none".equals(faultSequence) && sequenceList.contains(faultSequence)) {
             api.setFaultSequence(faultSequence);
         }
         api.setOldInSequence(oldApi.getInSequence());
@@ -2317,6 +2348,10 @@ public class APIProviderHostObject extends ScriptableObject {
                 myn.put(42, myn, checkValue(Boolean.toString(api.isDefaultVersion())));
                 myn.put(43, myn, api.getImplementation());
                 myn.put(44, myn, APIUtil.writeEnvironmentsToArtifact(api));
+                //get new key manager
+                KeyManager keyManager = KeyManagerFactory.getKeyManager();
+                Map registeredResource = keyManager.getResourceByApiId(api.getId().toString());
+                myn.put(45, myn, JSONObject.toJSONString(registeredResource));
 
 
             } else {
@@ -3199,6 +3234,9 @@ public class APIProviderHostObject extends ScriptableObject {
             handleException("Invalid input parameters.");
         }
         NativeArray myn = new NativeArray(0);
+        if (!HostObjectUtils.isStatPublishingEnabled()) {
+            return myn;
+        }
         if (!HostObjectUtils.isUsageDataSourceSpecified()) {
             return myn;
         }
@@ -3233,8 +3271,11 @@ public class APIProviderHostObject extends ScriptableObject {
                                                              Object[] args, Function funObj)
             throws APIManagementException {
 
+        NativeArray myn = new NativeArray(0);
+        if (!HostObjectUtils.isStatPublishingEnabled()) {
+            return myn;
+        }
         if (!HostObjectUtils.isUsageDataSourceSpecified()) {
-            NativeArray myn = new NativeArray(0);
             return myn;
         }
 
@@ -3251,7 +3292,6 @@ public class APIProviderHostObject extends ScriptableObject {
         } catch (APIMgtUsageQueryServiceClientException e) {
             handleException("Error while invoking APIUsageStatisticsClient for ProviderAPIUsage", e);
         }
-        NativeArray myn = new NativeArray(0);
         Iterator it = null;
         if (list != null) {
             it = list.iterator();
@@ -3267,6 +3307,7 @@ public class APIProviderHostObject extends ScriptableObject {
                 myn.put(i, myn, row);
                 i++;
 
+
             }
         }
         return myn;
@@ -3280,6 +3321,9 @@ public class APIProviderHostObject extends ScriptableObject {
             handleException("Invalid number of parameters.");
         }
         NativeArray myn = new NativeArray(0);
+        if (!HostObjectUtils.isStatPublishingEnabled()) {
+            return myn;
+        }
         if (!HostObjectUtils.isUsageDataSourceSpecified()) {
             return myn;
         }
@@ -3315,6 +3359,9 @@ public class APIProviderHostObject extends ScriptableObject {
             throws APIManagementException {
         List<APIResourcePathUsageDTO> list = null;
         NativeArray myn = new NativeArray(0);
+        if (!HostObjectUtils.isStatPublishingEnabled()) {
+            return myn;
+        }
         if (!HostObjectUtils.isUsageDataSourceSpecified()) {
             return myn;
         }
@@ -3361,6 +3408,9 @@ public class APIProviderHostObject extends ScriptableObject {
     		            Object[] args, Function funObj) throws APIManagementException {
     	List<APIDestinationUsageDTO> list = null;
     	NativeArray myn = new NativeArray(0);
+        if (!HostObjectUtils.isStatPublishingEnabled()) {
+            return myn;
+        }
     	if (!HostObjectUtils.isUsageDataSourceSpecified()) {
     		return myn;
     	}
@@ -3407,6 +3457,9 @@ public class APIProviderHostObject extends ScriptableObject {
             throws APIManagementException {
         List<APIUsageByUserDTO> list = null;
         NativeArray myn = new NativeArray(0);
+        if (!HostObjectUtils.isStatPublishingEnabled()) {
+            return myn;
+        }
         if(!HostObjectUtils.isUsageDataSourceSpecified()){
             return myn;
         }
@@ -3457,6 +3510,9 @@ public class APIProviderHostObject extends ScriptableObject {
             handleException("Invalid number of parameters.");
         }
         NativeArray myn = new NativeArray(0);
+        if (!HostObjectUtils.isStatPublishingEnabled()) {
+            return myn;
+        }
         if (!HostObjectUtils.isUsageDataSourceSpecified()) {
             return myn;
         }
@@ -3498,6 +3554,9 @@ public class APIProviderHostObject extends ScriptableObject {
             handleException("Invalid number of parameters.");
         }
         NativeArray myn = new NativeArray(0);
+        if (!HostObjectUtils.isStatPublishingEnabled()) {
+            return myn;
+        }
         if (!HostObjectUtils.isUsageDataSourceSpecified()) {
             return myn;
         }
@@ -3541,6 +3600,9 @@ public class APIProviderHostObject extends ScriptableObject {
             handleException("Invalid number of parameters.");
         }
         NativeArray myn = new NativeArray(0);
+        if (!HostObjectUtils.isStatPublishingEnabled()) {
+            return myn;
+        }
         if (!HostObjectUtils.isUsageDataSourceSpecified()) {
             return myn;
         }
@@ -3820,6 +3882,12 @@ public class APIProviderHostObject extends ScriptableObject {
             }
             APIProvider apiProvider = getAPIProvider(thisObj);
             apiProvider.deleteAPI(apiId);
+            KeyManager keyManager = KeyManagerFactory.getKeyManager();
+
+            if (apiId.toString() != null) {
+                keyManager.deleteRegisteredResourceByAPIId(apiId.toString());
+            }
+
         } finally {
         	if (isTenantFlowStarted) {
         		PrivilegedCarbonContext.endTenantFlow();
@@ -4170,6 +4238,9 @@ public class APIProviderHostObject extends ScriptableObject {
             throws APIManagementException {
         List<APIResponseFaultCountDTO> list = null;
         NativeArray myn = new NativeArray(0);
+        if (!HostObjectUtils.isStatPublishingEnabled()) {
+            return myn;
+        }
         if (!HostObjectUtils.isUsageDataSourceSpecified()) {
             return myn;
         }
@@ -4215,6 +4286,9 @@ public class APIProviderHostObject extends ScriptableObject {
             throws APIManagementException {
         List<APIResponseFaultCountDTO> list = null;
         NativeArray myn = new NativeArray(0);
+        if (!HostObjectUtils.isStatPublishingEnabled()) {
+            return myn;
+        }
         if (!HostObjectUtils.isUsageDataSourceSpecified()) {
             return myn;
         }
@@ -4256,8 +4330,11 @@ public class APIProviderHostObject extends ScriptableObject {
                                                             Object[] args, Function funObj)
             throws APIManagementException {
 
+        NativeArray myn = new NativeArray(0);
+        if (!HostObjectUtils.isStatPublishingEnabled()) {
+            return myn;
+        }
         if(!HostObjectUtils.isUsageDataSourceSpecified()){
-            NativeArray myn = new NativeArray(0);
             return myn;
         }
 
@@ -4272,7 +4349,6 @@ public class APIProviderHostObject extends ScriptableObject {
         } catch (APIMgtUsageQueryServiceClientException e) {
             log.error("Error while invoking APIUsageStatisticsClient for ProviderAPIUsage", e);
         }
-        NativeArray myn = new NativeArray(0);
         NativeObject row = new NativeObject();
 
         if (!list.isEmpty()) {
@@ -4793,4 +4869,34 @@ public class APIProviderHostObject extends ScriptableObject {
         }
         return myn;
     }
+
+    /**
+     * @param failedGateways map of failed environments
+     * @return json string of input map
+     */
+    private static String createFailedGatewaysAsJsonString(Map<String, List<String>> failedGateways) {
+        String failedJson = "{\"PUBLISHED\" : \"\" ,\"UNPUBLISHED\":\"\"}";
+        if (failedGateways != null) {
+            if (!failedGateways.isEmpty()) {
+                StringBuilder failedToPublish = new StringBuilder();
+                StringBuilder failedToUnPublish = new StringBuilder();
+                for (String environmentName : failedGateways.get("PUBLISHED")) {
+                    failedToPublish.append(environmentName + ",");
+                }
+                for (String environmentName : failedGateways.get("UNPUBLISHED")) {
+                    failedToUnPublish.append(environmentName + ",");
+                }
+                if (!"".equals(failedToPublish.toString())) {
+                    failedToPublish.deleteCharAt(failedToPublish.length() - 1);
+                }
+                if (!"".equals(failedToUnPublish.toString())) {
+                    failedToUnPublish.deleteCharAt(failedToUnPublish.length() - 1);
+                }
+                failedJson = "{\"PUBLISHED\" : \"" + failedToPublish.toString() + "\" ,\"UNPUBLISHED\":\"" +
+                             failedToUnPublish.toString() + "\"}";
+            }
+        }
+        return failedJson;
+    }
+
 }

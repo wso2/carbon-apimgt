@@ -20,6 +20,8 @@ middlePage="application-task";
 middlePage="app-registration-task";
 }else if(pageName=="themeUpload"){
 middlePage="theme-upload-task";
+}else if(pageName=="analytics"){
+middlePage="analytics-task";
 }
 
 (function () {

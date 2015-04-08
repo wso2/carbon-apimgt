@@ -2,7 +2,19 @@
 <% var i=outputs.i, app = outputs.app, thumbURL = '';
    var str_i = String(i).replace('.','_');
    var gatewayurlendpoint = outputs.gatewayurl;
+	var log = new Log();
+	var userName=jagg.getUser().username;
+
    if(app!=null){
+	   var apis = app.subscriptions;
+	   var length = outputs.length;
+
+	   var page = outputs.page;
+	   var itemsPerPage = outputs.itemsPerPage;
+	   var numberOfPages = parseInt(length / itemsPerPage);
+	   if (length % itemsPerPage != 0) {
+	   		numberOfPages++;
+	   }
 %>
 
         <input type="hidden"  class="prodAccessTokenHidden" id="prodAccessTokenHiddenID" value="<%=app.prodKey%>" >
@@ -12,12 +24,14 @@
         <div class="keyBoxOut">
             <div class="container-fluid">
 	   			<div class="span6">
+
                         <%
                          var log = new Log();
                          var prodVadidataionTime = app.prodValidityTime;
                          var sandVadidataionTime = app.sandValidityTime;
                          var scopes = app.scopes;
                          lenS = scopes.length;
+
 
                          <!-- If token is not set to never expire, then take the expiration in seconds -->
                          if (prodVadidataionTime > 0) {
@@ -29,12 +43,13 @@
 
                          <!-- This is required to remove the decimal points getting added by jaggery to validation time-->
                          if (prodVadidataionTime != null) {
-                            var prod_tmp = String(prodVadidataionTime).split();
+                            var prod_tmp = String(Math.ceil(prodVadidataionTime)).split(".");
                             var prodValidityTime = prod_tmp[0];
+
                          }
 
                          if (sandVadidataionTime != null) {
-                            var sand_tmp = String(sandVadidataionTime).split();
+                            var sand_tmp = String(Math.ceil(sandVadidataionTime)).split(".");
                             var sandValidityTime = sand_tmp[0];
                          }
 
@@ -128,10 +143,12 @@
 											</div>
 											<div class="span10">
 												<div class="form-inline proRegenerateForm">
-												    <% if(lenS > 0){ %>
+
+													<% if(lenS > 0){ %>
 												        <a href="#scopePopup" role="button" class="btn" data-toggle="modal" id="selectScopeText" ><%=i18n.localize("selectScopes")%></a>
-                                                    <% } %>
-													Validity Time: <input type="text" class="input-mini token-validity-input" id="refreshProdValidityTime" value='<%=prodValidityTime%>' maxlength="70"  autofocus="autofocus" /> Seconds
+                                            						            <% } %>		
+													Validity Time: <input type="text" class="input-mini token-validity-input" id="refreshProdValidityTime" value='<%=prodValidityTime %>' maxlength="70"  autofocus="autofocus" /> Seconds
+
 													<span class="label label-warning" id = "timeWarn" style="display:none;"><%=i18n.localize("timeWarn")%></span>
 													<button class="show-hide-key btn btn-primary" onclick="regenerate('<%=app.name%>','PRODUCTION',200,this,'pull-right','<%=app.prodConsumerKey%>','<%=app.prodConsumerSecret%>')" ><i class="fa fa-repeat"></i> <%=i18n.localize("regenerate")%></button>
 												</div>
@@ -165,11 +182,51 @@
                             <a href="#scopePopup" role="button" class="btn" data-toggle="modal" ><%=i18n.localize("selectScopes")%></a>
                         <% } %>
                         <div class="gen-btn-wrapper">
-                        	<button  class="app-key-generate-button btn btn-primary" onclick="jagg.sessionAwareJS({redirect:'/site/pages/subscriptions.jag'})"
-                                   data-application="<%=app.name%>"
-                                   data-callbackUrl="<%=app.callbackUrl%>"
-                                   data-keytype="PRODUCTION"
-                                   iteration="200"><%=i18n.localize("generate")%></button>
+                        	<div class="cDivParentOfManualAuthAppCreateProduction">
+                        		<div class="cDivRowOfElements">
+                        			<div class="cDivTextMappingExternalAuthApp">
+                        			Consumer key :
+                        			</div>
+									<div class="cDivInputMappingExternalAuthApp">
+										<input type="text" class="input-xlarge token-validity-input"
+										id="inputConsumerKeyProduction" value=""  maxlength="200"
+										autofocus="autofocus"
+										style="margin-top:5px;"  />
+									</div>
+                        		</div>
+                        		<div class="cDivRowOfElements">
+                        			<div class="cDivTextMappingExternalAuthApp">
+									Consumer secret :
+									</div>
+									<div class="cDivInputMappingExternalAuthApp">
+										<input type="text" class="input-xlarge token-validity-input"
+										id="inputConsumerSecretProduction" value="" maxlength="200"
+										autofocus="autofocus"
+										style="margin-top:5px;"  />
+									</div>
+                        		</div>
+                        		<button  class="btn btn-primary "
+                        		id="btnProvideKeyProductionSave" data-application="<%=app.name%>"
+									   data-callbackUrl="<%=app.callbackUrl%>"
+									   data-keytype="PRODUCTION"
+									   data-username="<%= userName %>"
+									   iteration="200">Save</button>
+                            	<button  class="btn btn-primary "
+                            	id="btnProvideKeyProductionCancle">Cancel</button>
+                        	</div>
+                        	<div class="cDivDefaultBtnSet">
+								<button  class="app-key-generate-button btn btn-primary btn-generatekeys" onclick="jagg
+								.sessionAwareJS({redirect:'/site/pages/subscriptions.jag'})"
+									   data-application="<%=app.name%>"
+									   data-callbackUrl="<%=app.callbackUrl%>"
+									   data-keytype="PRODUCTION"
+									   data-username="<%= userName %>"
+									   iteration="200">Generate keys</button>
+								<button  class="btn btn-primary btn-providekeys"
+								id="btnProvideKeyProduction">Provide
+								keys</button>
+                            </div>
+
                         </div>
                         <% } %>
                     </div>
@@ -342,11 +399,50 @@
                            <a href="#scopePopup" role="button" class="btn" data-toggle="modal" ><%=i18n.localize("selectScopes")%></a>
                        <% } %>
                        <div class="gen-btn-wrapper" <% if(app.sandboxKey!=null){%>style="display:none"<% } %> >
-                           <button class="app-key-generate-button btn btn-primary" onclick="jagg.sessionAwareJS({redirect:'/site/pages/subscriptions.jag'})"
-                          		data-application="<%=app.name%>"
-                          		data-callbackUrl="<%=app.callbackUrl%>"
-                          		data-keytype="SANDBOX"
-                          		iteration="200"><%=i18n.localize("generate")%></button>
+                       		<div class="cDivParentOfManualAuthAppCreateSandBox">
+                        		<div class="cDivRowOfElements">
+                        			<div class="cDivTextMappingExternalAuthApp">
+                        			Consumer key :
+                        			</div>
+									<div class="cDivInputMappingExternalAuthApp">
+										<input type="text" class="input-xlarge token-validity-input"
+										id="inputConsumerKeySandBox" value=""  maxlength="200"
+										autofocus="autofocus"
+										style="margin-top:5px;"  />
+									</div>
+                        		</div>
+                        		<div class="cDivRowOfElements">
+                        			<div class="cDivTextMappingExternalAuthApp">
+									Consumer secreat :
+									</div>
+									<div class="cDivInputMappingExternalAuthApp">
+										<input type="text" class="input-xlarge token-validity-input"
+										id="inputConsumerSecretSandBox" value="" maxlength="200"
+										autofocus="autofocus"
+										style="margin-top:5px;"  />
+									</div>
+                        		</div>
+                        		<button  class="btn btn-primary "
+                        		id="btnProvideKeySandBoxSave" data-application="<%=app.name%>"
+									   data-callbackUrl="<%=app.callbackUrl%>"
+									   data-keytype="SANDBOX"
+									   data-username="<%= userName %>"
+									   iteration="200">Save</button>
+                            	<button  class="btn btn-primary "
+                            	id="btnProvideKeySandBoxCancel">Cancel</button>
+                        	</div>
+                        	<div class="defaultBtnSetForSandBox">
+							   <button  class="app-key-generate-button btn btn-primary btn-generatekeys" onclick="jagg
+								.sessionAwareJS({redirect:'/site/pages/subscriptions.jag'})"
+									   data-application="<%=app.name%>"
+									   data-callbackUrl="<%=app.callbackUrl%>"
+									   data-keytype="SANDBOX"
+									   data-username="<%= userName %>"
+									   iteration="200">Generate keys</button>
+								<button  class="btn btn-primary btn-providekeys"
+									id="btnProvideKeySandBox">Provide
+									keys</button>
+							</div>
                        </div>
                        <% } %>
                        <!-- END Show key info -->
@@ -452,6 +548,86 @@
                 </div>
             <% } %>
             </div><!-- End row -->
+            <%
+	   if(numberOfPages > 1) { %>
+            <div class="pagination">
+                <ul>
+                    <li <% if(page == 1) { %> class="disabled" <% } %> >
+                        <a
+							<% if(page != 1) { %>
+                                	href="?page=<%=String((page-1))%>&<%=urlPrefix%>"
+							 <%}%> >&lt;&lt;
+						</a>
+					</li>
+                    <!-- Displaying differently for lengthy pagination -->
+                    <%
+		   var pConst = 7;
+		   if(numberOfPages <= (pConst+6)){
+			   for(var i=1;i<=numberOfPages;i++) { %>
+                    					<li <% if(parseInt(i)==parseInt(page)){ %> class="active" <% } %>><a href="?page=<%=String(i)%>&<%=urlPrefix%>"><%=String(i).split('.')[0]%></a></li>
+                    		  <%}
+		   }
+
+		   else{
+			   if (page <= (pConst+6)){
+				   if(page<pConst){
+					   for(var i=1;i<=((pConst+6) -4);i++) { %>
+                    						<li <% if(parseInt(i)==parseInt(page)){ %> class="active" <% } %>><a href="?page=<%=String(i)%>&<%=urlPrefix%>"><%=String(i).split('.')[0]%></a></li>
+                    				 <% } %>
+                    					<li class="disabled"><a href="#">...</a></li>
+                    					<li><a href="?page=<%=String(numberOfPages-1)%>&<%=urlPrefix%>"><%=String(numberOfPages-1).split('.')[0]%></a></li>
+                    					<li><a href="?page=<%=String(numberOfPages)%>&<%=urlPrefix%>"><%=String(numberOfPages).split('.')[0]%></a></li>
+                    			<% }
+				   else if((numberOfPages - page) < pConst){ %>
+                    					<li><a href="?page=<%=String(1)%>&<%=urlPrefix%>">1</a></li>
+                    					<li><a href="?page=<%=String(2)%>&<%=urlPrefix%>">2</a></li>
+                    					<li class="disabled"><a href="#">...</a></li>
+                                        <%
+					   for(var i=(numberOfPages - pConst-1);i<= numberOfPages;i++) { %>
+                   							 <li <% if(parseInt(i)==parseInt(page)){ %> class="active" <% } %>><a href="?page=<%=String(i)%>&<%=urlPrefix%>"><%=String(i).split('.')[0]%></a></li>
+                    		         <% }
+
+				   }
+				   else { %>
+											<li><a href="?page=<%=String(1)%>&<%=urlPrefix%>">1</a></li>
+                    						<li><a href="?page=<%=String(2)%>&<%=urlPrefix%>">2</a></li>
+                    						<li class="disabled"><a href="#">...</a></li>
+
+                    			         <%for(var i=(page-3);i<= (page +3);i++) { %>
+                    							<li <% if(parseInt(i)==parseInt(page)){ %> class="active" <% } %>><a href="?page=<%=String(i)%>&<%=urlPrefix%>"><%=String(i).split('.')[0]%></a></li>
+                    					<% } %>
+                    					   <li class="disabled"><a href="#">...</a></li>
+                    					   <li><a href="?page=<%=String(numberOfPages-1)%>&<%=urlPrefix%>"><%=String(numberOfPages-1).split('.')[0]%></a></li>
+                    					   <li><a href="?page=<%=String(numberOfPages)%>&<%=urlPrefix%>"><%=String(numberOfPages).split('.')[0]%></a></li>
+                    		   <% }
+			   }
+			   else{ //  cp 14, 15 ...
+				   if (numberOfPages - page < pConst){   %>
+                   					 <li><a href="?page=<%=String(1)%>&<%=urlPrefix%>">1</a></li>
+                    				 <li><a href="?page=<%=String(2)%>&<%=urlPrefix%>">2</a></li>
+                   				     <li class="disabled"><a href="#">...</a></li>
+                    		        <%for(var i=(numberOfPages - pConst-1);i<= numberOfPages;i++) { %>
+                                     	<li <% if(parseInt(i)==parseInt(page)){ %> class="active" <% } %>><a href="?page=<%=String(i)%>&<%=urlPrefix%>"><%=String(i).split('.')[0]%></a></li>
+                     			   <% }
+				   }else{  %>
+                    					<li><a href="?page=<%=String(1)%>&<%=urlPrefix%>">1</a></li>
+                    					<li><a href="?page=<%=String(2)%>&<%=urlPrefix%>">2</a></li>
+                    					<li class="disabled"><a href="#">...</a></li>
+
+                   					 <%for(var i=(page-3);i<= (page +3);i++) { %>
+                    						<li <% if(parseInt(i)==parseInt(page)){ %> class="active" <% } %>><a href="?page=<%=String(i)%>&<%=urlPrefix%>"><%=String(i).split('.')[0]%></a></li>
+                                    <% } %>
+                    					<li class="disabled"><a href="#">...</a></li>
+                    					<li><a href="?page=<%=String(numberOfPages-1)%>&<%=urlPrefix%>"><%=String(numberOfPages-1).split('.')[0]%></a></li>
+                    					<li><a href="?page=<%=String(numberOfPages)%>&<%=urlPrefix%>"><%=String(numberOfPages).split('.')[0]%></a></li>
+                             <% }
+			   }
+		   }%>
+
+                      <li <% if(page == numberOfPages) { %> class="disabled" <% } %>><a <% if(page != numberOfPages) { %>href="?page=<%=String((page+1))%>&<%=urlPrefix%>"<% } %>>&gt;&gt;</a></li>
+                </ul>
+            </div>
+ <% } %>
         </div><!-- End container-fluid -->
 
         <% if(lenS > 0){ %>

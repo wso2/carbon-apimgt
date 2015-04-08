@@ -32,44 +32,22 @@ require(["dojo/dom", "dojo/domReady!"], function(dom){
 
                     //day picker
                     $('#today-btn').on('click',function(){
-                        var to = convertTimeString(currentDay);
-                        var from = convertTimeString(currentDay-86400000);
-                        var dateStr= from+" to "+to;
-                        $("#date-range").html(dateStr);
-                        $('#date-range').data('dateRangePicker').setDateRange(from,to);
-                        drawProviderAPIUsage(from,to);
-
+                        getDateTime(currentDay,currentDay-86400000);
                     });
 
                     //hour picker
                     $('#hour-btn').on('click',function(){
-                        var to = convertTimeString(currentDay);
-                        var from = convertTimeString(currentDay-3600000);
-                        var dateStr= from+" to "+to;
-                        $("#date-range").html(dateStr);
-                        $('#date-range').data('dateRangePicker').setDateRange(from,to);
-                        drawProviderAPIUsage(from,to);
+                        getDateTime(currentDay,currentDay-3600000);
                     })
 
                     //week picker
                     $('#week-btn').on('click',function(){
-                        var to = convertTimeString(currentDay);
-                        var from = convertTimeString(currentDay-604800000);
-                        var dateStr= from+" to "+to;
-                        $("#date-range").html(dateStr);
-                        $('#date-range').data('dateRangePicker').setDateRange(from,to);
-                        drawProviderAPIUsage(from,to);
+                        getDateTime(currentDay,currentDay-604800000);
                     })
 
                     //month picker
                     $('#month-btn').on('click',function(){
-
-                        var to = convertTimeString(currentDay);
-                        var from = convertTimeString(currentDay-(604800000*4));
-                        var dateStr= from+" to "+to;
-                        $("#date-range").html(dateStr);
-                        $('#date-range').data('dateRangePicker').setDateRange(from,to);
-                        drawProviderAPIUsage(from,to);
+                        getDateTime(currentDay,currentDay-(604800000*4));
                     });
 
                     //date picker
@@ -90,7 +68,10 @@ require(["dojo/dom", "dojo/domReady!"], function(dom){
                              btnActiveToggle(this);
                              var from = convertDate(obj.date1);
                              var to = convertDate(obj.date2);
-                             $('#date-range').html(from + " to "+ to);
+                             var fromStr = from.split(" ");
+                             var toStr = to.split(" ");
+                             var dateStr = fromStr[0] + " <i>" + fromStr[1] + "</i> <b>to</b> " + toStr[0] + " <i>" + toStr[1] + "</i>";
+                             $("#date-range").html(dateStr);
                              drawProviderAPIUsage(from,to);
                     });
 
@@ -98,12 +79,7 @@ require(["dojo/dom", "dojo/domReady!"], function(dom){
                     var to = new Date();
                     var from = new Date(to.getTime() - 1000 * 60 * 60 * 24 * 30);
 
-                    $('#date-range').data('dateRangePicker').setDateRange(from,to);
-                    $('#date-range').html($('#date-range').val());
-                    var fromStr = convertDate(from);
-                    var toStr = convertDate(to);
-                    drawProviderAPIUsage(fromStr,toStr);
-
+                    getDateTime(to,from);
 
                     $('#date-range').click(function (event) {
                     event.stopPropagation();
@@ -232,7 +208,7 @@ var drawProviderAPIUsage = function(from,to){
                      }
                 });
 
-                    colors = d3.scale.category10();
+                    colors = d3.scale.category20();
                     // Synthetic data generation ------------------------------------------------
                     var data = [];
                     var children = [];
@@ -292,8 +268,9 @@ var drawProviderAPIUsage = function(from,to){
                             arcGroup = svg.append("svg:g")
                               .attr("class", "arcGroup")
                               //.attr("filter", "url(#shadow)")
-                              .attr("transform", "translate(" + (width / 2 ) + "," + (height / 2) + ")");
-
+                              .attr("transform", "translate(" + (width / 2 ) + "," + (height / 2 +30) + ")"),
+                            header = svg.append("text")
+                              .attr("transform", "translate(30, 40)").attr("class", "header").style({'font-size':'16px','fill':'#555'}).text("");
                             // Declare shadow filter
                             var shadow = defs.append("filter").attr("id", "shadow")
                                           .attr("filterUnits", "userSpaceOnUse")
@@ -314,11 +291,11 @@ var drawProviderAPIUsage = function(from,to){
 
 
                         function findChildenByCat(cat){
-                              var breadcumb = "Parent";
+                              var breadcumb = "";
                               for(i=-1; i++ < data.length - 1; ){
                                 if(data[i].cat == cat){
-                                  breadcumb += ' → '+cat;
-                                  d3.select(".header").text(breadcumb);
+                                  breadcumb += cat;
+                                  $(".header").text(' APIs → ' + data[i].name);
                                   return data[i].children;
                                 }else{
                                 }
@@ -348,7 +325,11 @@ var drawProviderAPIUsage = function(from,to){
                               var paths = arcGroup.selectAll("path")
                                             .data(pieChart(currData), function(d) {return d.data.cat;} );
 
-                              var pathsG = paths.enter().append("g").attr("class", "slice").append("path").attr("class", "sector");
+                              var pathsG = paths.enter().append("g")
+                                                .attr("class", "slice")
+                                                .attr("cursor","pointer")
+                                                .append("path")
+                                                .attr("class", "sector");
 
                               // Each sector will refer to its gradient fill
                               pathsG.attr("fill", function(d, i) { return "url(#gradient"+d.data.cat+")"; })
@@ -366,6 +347,7 @@ var drawProviderAPIUsage = function(from,to){
                                 .attrTween("d", tweenOut).remove();
 
                               pathsG.on("click", function(d){
+                              $(".header").text("");
 
                                 if(d.data.name=="Other"){
                                      d.stopPropagation();
@@ -410,11 +392,18 @@ var drawProviderAPIUsage = function(from,to){
                                     div.style("left", d3.event.pageX+10+"px");
                                     div.style("top", d3.event.pageY-25+"px");
                                     div.style("display", "inline-block");
-                                    var test=d.data.children;
-                                    if(test !== undefined){
+                                    var children=d.data.children;
+                                    if(children !== undefined){
                                        div.html(d.data.name+"<br>"+round((d.data.percentage = d.data.val  / tots*100),2)+"%");
                                     }else{
-                                       div.html("v"+d.data.name+"<br>"+round(d.data.percentage.toFixed(2),2)+"%");
+                                       var name =d.data.name;
+                                       if(name.indexOf('v') === -1)
+                                       {
+                                           div.html("v"+d.data.name+"<br>"+round(d.data.percentage.toFixed(2),2)+"%");
+                                       }
+                                       else{
+                                           div.html(d.data.name+"<br>"+round(d.data.percentage.toFixed(2),2)+"%");
+                                       }
                                     }
 
                               }).on("mouseout", function(d){
@@ -544,4 +533,15 @@ function btnActiveToggle(button){
 
 function round(value, decimals) {
     return Number(Math.round(value+'e'+decimals)+'e-'+decimals);
+}
+
+function getDateTime(currentDay,fromDay){
+    var to = convertTimeString(currentDay);
+    var from = convertTimeString(fromDay);
+    var toDate = to.split(" ");
+    var fromDate = from.split(" ");
+    var dateStr= fromDate[0]+" <i>"+fromDate[1]+"</i> <b>to</b> "+toDate[0]+" <i>"+toDate[1]+"</i>";
+    $("#date-range").html(dateStr);
+    $('#date-range').data('dateRangePicker').setDateRange(from,to);
+    drawProviderAPIUsage(from,to);
 }
