@@ -1,29 +1,18 @@
 //This is the default place holder
 var api_doc = 
 {
-    "apiVersion": "",
-    "swaggerVersion": "1.2",
-    "apis": [
-
-
-    ],
+    "swaggerVersion": "2.0",
+    "paths": {},
     "info": {
         "title": "",
-        "description": "",
-        "termsOfServiceUrl": "",
-        "contact": "",
-        "license": "",
-        "licenseUrl": ""
+        "version": ""
     },
-    "authorizations":{
-        "oauth2":{
-            "type": "oauth2",
-            "scopes":[]
-        }
-    }
+    apis:[]
 };
 
-
+Handlebars.registerHelper('countKeys', function(value){
+    return Object.keys(value).length * 2 + 1;
+});
 
 Handlebars.registerHelper('setIndex', function(value){
     this.index = Number(value);
@@ -83,8 +72,8 @@ function APIDesigner(){
 
     $( "#api_designer" ).delegate( "#add_resource", "click", this, function( event ) {
         var designer = APIDesigner();
-        if($("#resource_url_pattern").val() == "" || $('#inputResource').val() == ""){
-            jagg.message({content:"URL pattern & Resource cannot be empty.",type:"error"});
+        if($("#resource_url_pattern").val() == ""){
+            jagg.message({content:"URL pattern cannot be empty.",type:"error"});
             return;
         }
         var path = $("#resource_url_pattern").val();
@@ -107,20 +96,11 @@ function APIDesigner(){
         }
         
         var resource = {
-            path: path
+
         };
         //create parameters
         var re = /\{[a-zA-Z0-9_-]*\}/g;
         var parameters = [];
-
-        /*parameters.push({
-            "name": "Authorization",
-            "description": "Access Token",
-            "paramType": "header",
-            "required": true,
-            "allowMultiple": false,
-            "dataType": "String"
-        });*/ // Authorization will be set globaly in swagger console.
 	
         while ((m = re.exec($("#resource_url_pattern").val())) != null) {
             if (m.index === re.lastIndex) {
@@ -128,14 +108,13 @@ function APIDesigner(){
             }
             parameters.push({
                 name : m[0].replace("{","").replace("}",""),
-                "paramType": "path",
+                "in": "path",
                 "allowMultiple": false,
                 "required": true,
 				"type":"string"
             })            
         }        
 
-        resource.operations = [];
         var vc=0;
         var ic=0;
         $(".http_verb_select").each(function(){
@@ -143,7 +122,7 @@ function APIDesigner(){
                 if(!designer.check_if_resource_exist( path , $(this).val() ) ){
                 parameters = $.extend(true, [], parameters);
 		
-		var method = $(this).val();               
+		        var method = $(this).val();               
                 var tempPara = parameters.concat();                
                      
                 if(method == "POST" || method == "PUT") {   
@@ -152,15 +131,14 @@ function APIDesigner(){
 		      	    "description": "Request Body",
 		            "allowMultiple": false,
 		            "required": false,
-		            "paramType": "body",
+		            "in": "body",
 		            "type":"string"
                         });
                 } 
-                resource.operations.push({ 
-                    method : $(this).val(),
+                resource[method] = { 
                     parameters : tempPara,
-                    nickname : $(this).val().toLowerCase() + '_' +$("#resource_url_pattern").val()
-                });
+                    responses : { '200':{}}
+                };
                 ic++
                 }
                 vc++;                
@@ -170,7 +148,7 @@ function APIDesigner(){
             jagg.message({content:"You should select at least one HTTP verb." ,type:"error"});            
             return;
         }
-        event.data.add_resource(resource,$('#inputResource').val());
+        event.data.add_resource(resource, path);
         //RESOURCES.unshift(resource);
         $("#resource_url_pattern").val("");
         $(".http_verb_select").attr("checked",false);
@@ -180,33 +158,27 @@ function APIDesigner(){
 }
 
 APIDesigner.prototype.check_if_resource_exist = function(path, method){    
-    var apis = this.query("$.apis[*].file.apis[*]");
-    for(var i=0; i< apis.length;i++){
-        if(apis[i].path == path){
-            for(var j=0; j < apis[i].operations.length; j++){
-                if(apis[i].operations[j].method == method){
-                    return true;
-                }
-            }
-        }
+    if(this.api_doc.paths[path] == undefined || this.api_doc.paths[path][method] == undefined){
+        return false;
     }
-    return false;
+    return true;
 }
 
 
 APIDesigner.prototype.set_default_management_values = function(){
-    var operations = this.query("$.apis[*].file.apis[*].operations[*]");
+    var operations = this.query("$.paths.*.*");
+    console.log(operations);
     for(var i=0;i < operations.length;i++){
-        if(!operations[i].auth_type){
+        if(!operations[i]["x-auth-type"]){
             if(operations[i].method == "OPTIONS"){
-                operations[i].auth_type = OPTION_DEFAULT_AUTH;
+                operations[i]["x-auth-type"] = OPTION_DEFAULT_AUTH;
             }
             else{
-                operations[i].auth_type = DEFAULT_AUTH;                
+                operations[i]["x-auth-type"] = DEFAULT_AUTH;                
             }
         }
-        if(!operations[i].throttling_tier){
-            operations[i].throttling_tier = DEFAULT_TIER;
+        if(!operations[i]["x-throttling-tier"]){
+            operations[i]["x-throttling-tier"] = DEFAULT_TIER;
         }
     }
 }
@@ -230,7 +202,10 @@ APIDesigner.prototype.get_scopes = function(){
 }
 
 APIDesigner.prototype.has_resources = function(){
-    if(this.api_doc.apis.length == 0) return false;
+    if(Object.keys(this.api_doc.paths).length == 0) 
+        return false;
+    else
+        return true;
 }
 
 APIDesigner.prototype.display_elements = function(value,source){
@@ -261,24 +236,11 @@ APIDesigner.prototype.update_elements_boolean = function(resource, newValue){
     obj[i] = newValue;
 };
 
-APIDesigner.prototype.clean_resources = function(){
-    for(var i =0 ; i < this.api_doc.apis.length ; i++){
-        for(var j=0; j < this.api_doc.apis[i].file.apis.length; j++){
-            if(this.api_doc.apis[i].file.apis[j].operations.length == 0){
-                this.api_doc.apis[i].file.apis.splice(j,1);
-            }
-        }
-        if(this.api_doc.apis[i].file.apis.length == 0){
-            this.api_doc.apis.splice(i,1);
-        }        
-    }
-}
-
 APIDesigner.prototype.init_controllers = function(){
     var API_DESIGNER = this;
 
     $("#version").change(function(e){
-        APIDesigner().api_doc.apiVersion = $(this).val();
+        APIDesigner().api_doc.info.version = $(this).val();
         // We do not need the version anymore. With the new plugable version strategy the context will have the version
         APIDesigner().baseURLValue = "http://localhost:8280/"+$("#context").val().replace("/","")});
     $("#context").change(function(e){ APIDesigner().baseURLValue = "http://localhost:8280/"+$(this).val().replace("/","")});
@@ -290,11 +252,11 @@ APIDesigner.prototype.init_controllers = function(){
         var operations = operations[0]
         var i = $(this).attr('data-index');
         var pn = $(this).attr('data-path-name');
-        jagg.message({content:'Do you want to remove "'+operations[i].method+' : '+pn+'" resource from list.',type:'confirm',title:"Remove Resource",
+        var op = $(this).attr('data-operation');        
+        jagg.message({content:'Do you want to remove "'+op+' : '+pn+'" resource from list.',type:'confirm',title:"Remove Resource",
         okCallback:function(){
             API_DESIGNER = APIDesigner();
-            operations.splice(i, 1);
-            API_DESIGNER.clean_resources();
+            console.log(i, pn, op, operations);
             API_DESIGNER.render_resources(); 
         }});
         //delete resource if no operations       
@@ -393,7 +355,7 @@ APIDesigner.prototype.load_api_document = function(api_document){
     this.api_doc = api_document
     this.render_resources();
     this.render_scopes();
-    $("#version").val(api_document.apiVersion);
+    $("#version").val(api_document.info.version);
     $("#name").val(api_document.info.title);
     if(api_document.info.description){
     	$("#description").val(api_document.info.description);
@@ -411,10 +373,23 @@ APIDesigner.prototype.render_scopes = function(){
     }    
 };
 
+APIDesigner.prototype.transform = function(api_doc){
+    var swagger = jQuery.extend(true, {}, this.api_doc);
+    for(var pathkey in swagger.paths){
+        var path = swagger.paths[pathkey];
+        var parameters = path.parameters;
+        delete path.parameters;
+        for(var verbkey in path){
+            var verb = path[verbkey];
+            verb.path = pathkey;
+        }
+    }
+    return swagger;
+}
 
 APIDesigner.prototype.render_resources = function(){
     context = {
-        "api_doc" : jQuery.extend(true, {}, this.api_doc),
+        "doc" : this.transform(this.api_doc),
         "verbs" :VERBS,
         "has_resources" : this.has_resources()
     }
@@ -452,7 +427,7 @@ APIDesigner.prototype.render_resources = function(){
 };
 
 APIDesigner.prototype.render_resource = function(container){
-    var operation = this.query(container.attr('data-path'));    
+    var operation = this.query(container.attr('data-path'));
     var context = jQuery.extend(true, {}, operation[0]);
     context.resource_path = container.attr('data-path');
     var output = Handlebars.partials['designer-resource-template'](context);
@@ -464,7 +439,9 @@ APIDesigner.prototype.render_resource = function(container){
         var decorator = container.find('.editor').data('ace');
         var aceInstance = decorator.editor.ace;
         aceInstance.getSession().on('change', function(e) {
-            operation[0].mediation_script = aceInstance.getValue();
+            console.log(operation);
+            console.log(aceInstance.getValue());    
+            operation[0]["x-mediation-script"] = aceInstance.getValue();
         });
     }
 
@@ -513,30 +490,12 @@ APIDesigner.prototype.add_resource = function(resource, path){
     var path = path.toLowerCase();
     if(path.charAt(0) != "/")
         path = "/" + path;
-    var i = 0;
-    var api = undefined;
-    for(i=0; i < this.api_doc.apis.length ; i++ ){
-        if(this.api_doc.apis[i].path == path){
-            api = this.api_doc.apis[i];
-            break;
-        }
+    if(this.api_doc.paths[path] == undefined){
+        this.api_doc.paths[path] = resource;  
     }
-    if(api == undefined){
-        this.api_doc.apis.push({
-            path : path,
-            description : ""
-        });
-    }
-    if(this.api_doc.apis[i].file == undefined){
-        this.api_doc.apis[i].file = { 
-            "apiVersion": this.api_doc.apiVersion,
-            "swaggerVersion": "1.2",
-            "basePath":this.baseURLValue,
-            "resourcePath": path ,
-            apis : [] 
-        };
-    }    
-    this.api_doc.apis[i].file.apis.push(resource);    
+    else{
+        this.api_doc.paths[path] = $.extend({}, this.api_doc.paths[path], resource);
+    } 
     this.render_resources();
 };
 

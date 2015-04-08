@@ -15,7 +15,7 @@
     }
 %> 
 <script language="javascript">
-    var VERBS = [ 'GET' , 'POST' , 'PUT' , 'DELETE', 'OPTIONS'];
+    var VERBS = [ 'get' , 'post' , 'put' , 'delete', 'options'];
     var AUTH_TYPES = [
       { "value": "<%=i18n.localize("none")%>", "text":"<%=i18n.localize("none")%>"} ,
       { "value": "<%=i18n.localize("application")%>", "text":"<%=i18n.localize("application")%>"},
@@ -103,25 +103,21 @@
             <div id="swaggerUpload" class="modal hide fade" tabindex="-1" role="dialog" aria-hidden="true">
                 <div class="modal-header">
                 <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-                <h3 id="swaggerUploadLabel">Import Swagger Definition</h3>                    
+                <h3 id="swaggerUploadLabel">Import Swagger 2 Definition</h3>                    
                 </div>
                 <div class="modal-body">
-                    <!-- <label>Upload a zip file containing swagger definitions :</label>
+                    <label>Upload swagger definition:</label>
                     <input type="file" name="somename" size="chars"> 
                     <br />
                     <br />                        
                     <h6>OR</h6>
-                    <br /> -->
-                    <label>Definition URL :</label>
+                    <br />
+                    <label>Definition URL:</label>
                     <input type="text" placeholder="" class="span12" id="swagger_import_url" name="swagger_import_url">
-                    <span class="help-block">Example : http://petstore.swagger.wordnik.com/api/api-docs </span>
-                    <div id="swagger_help" class="alert alert-danger hide" role="alert">
-                      Enter a valid url
-                       <button type="button" class="close" id="errorMsgClose"><span aria-hidden="true">&times;</span></button>
-                    </div>
+                    <span class="help-block">Example : http://petstore.swagger.io/v2/swagger.json </span>                                                              
                 </div>                    
                 <div class="modal-footer">
-                <button class="btn btn-primary" id="import_swagger" data-loading-text="<i class='fa fa-spinner fa-pulse' id='loader'></i>Loading">Import</button>
+                <button class="btn btn-primary" id="import_swagger">Import</button>                    
                 <button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
                 </div>
             </div>
@@ -315,9 +311,9 @@
                     <div class="btn loadingButton">Saving API. Please wait..</div>
                 </div>
                 <div class="form-actions" id="saveButtons">
-                    <button type="submit" class="btn btn-info loader-btn" id="saveBtn" data-loading-text="<i class='fa fa-spinner fa-pulse' id='loader'></i>Loading"action="design">Save</button>
-                    <button class="btn btn-primary loader-btn" id="go_to_implement" data-loading-text="<i class='fa fa-spinner fa-pulse' id='loader'></i>Loading">Implement</button>
-                    <input type="reset"  class="btn" value="<%=i18n.localize("cancel")%>" onclick="javascript:window.location.href='./'" />
+                    <input type="submit" class="btn btn-primary" value="Save" action="design"/>
+                    <a class="btn btn-primary" id="go_to_implement">Implement</a>                     
+                    <input type="reset"  class="btn" value="<%=i18n.localize("cancel")%>" onclick="javascript:window.location.href='./'" />                    
                 </div>
             </form>
 
@@ -333,8 +329,8 @@
 
 <script id="designer-resource-template" type="text/x-handlebars-template">
 <div class="resource_body_padding">
-    <h5>Implementation Notes :</h5>
-    <a class="notes" data-path="{{resource_path}}" data-attr="notes">{{ notes }}</a>
+    <h5>Description :</h5>
+    <a class="notes" data-path="{{resource_path}}" data-attr="description">{{ description }}</a>
     <br />
     <br />        
     <h5>Response Content Type : <a href="#" data-path="{{resource_path}}" data-attr="content_type" class="content_type" data-type="typeahead" data-pk="1" data-title="Responce Content Type">{{ content_type }}</a></h5>
@@ -353,7 +349,7 @@
         <tr>
         <td>{{ name }}</td>
         <td><a class="param_desc" data-path="{{ ../resource_path}}.parameters[{{@index}}]" data-attr="description">{{ description }}</a></td>
-        <td><a class="param_paramType" data-type="select" data-path="{{ ../resource_path}}.parameters[{{@index}}]" data-attr="paramType">{{ paramType }}</a></td>
+        <td><a class="param_paramType" data-type="select" data-path="{{ ../resource_path}}.parameters[{{@index}}]" data-attr="in">{{ in }}</a></td>
         <td><a class="param_type" data-path="{{../resource_path}}.parameters[{{@index}}]" data-attr="type">{{ type }}</a></td>
         <td><a class="param_required" data-type="select" data-path="{{../resource_path}}.parameters[{{@index}}]" data-attr="required" data-value="{{toString required }}"></a></td>
         </tr> 
@@ -393,35 +389,27 @@
             </div>
         </div>
         <div class="control-group">
-            <label class="control-label" for="inputResource">Resource Name</label>
+            <label class="control-label" for="inputResourceTags">Tags</label>
             <div class="controls">
-                <input type="text" id="inputResource" placeholder="Resource"></br>
+                <input type="text" id="inputResourceTags" placeholder="tags">
                 <button class="btn" type="button" id="add_resource" style="margin:10px 0 0px 0px;"><i class="icon-plus-sign"></i>&nbsp;<%=i18n.localize("addNewResource")%></button>
             </div>
         </div>
 
     </div>
 <table style="width:100%">                       
-{{#each api_doc.apis}}
-{{ setIndex @index}}
-    <tr>
-    <td colspan="4"><h4 class="resource_group_title">{{ path }}</h4></td>
-    </tr>
-    {{# each file.apis}}
-        {{ setIndex @index}}
-        {{# each operations}}
-        <tr class="resource_container" data-path="$.apis[{{ ../../index}}].file.apis[{{ ../index }}].operations[{{ @index }}]">
-            <td class="resource-method-td resource_expand" data-path="$.apis[{{ ../../index}}].file.apis[{{ ../index }}].operations[{{ @index }}]">
-                <span class=" resource-method resource-method-{{ method }}">{{ method }}</span>
+{{#each doc.paths}}
+    {{# each this}}
+        <tr class="resource_container" data-path="$.paths.{{ path }}.{{@key}}">
+            <td class="resource-method-td resource_expand" data-path="$.paths.{{ path}}.{{ @key }}">
+                <span class=" resource-method resource-method-{{ @key }}">{{ @key }}</span>
             </td>
-            <td class="resource_expand"><a class="resource-path">{{ ../path }}</a></td>    
-            <td  width="99%"><span class="operation-summary change_summary" data-path="$.apis[{{ ../../index}}].file.apis[{{ ../index }}].operations[{{ @index }}]" data-attr="summary" >{{ summary }}</span></td>
-            <td class="delete_resource_td "><a class='operation-summary delete_resource' data-path-name="{{ ../path }}" data-path="$.apis[{{ ../../index}}].file.apis[{{ ../index }}].operations" data-index="{{ @index }}"><i class='icon-trash'></i></a></td>
+            <td class="resource_expand"><a class="resource-path">{{ path }}</a></td>    
+            <td  width="99%"><span class="operation-summary change_summary" data-path="$.paths.{{ path }}.{{@key}}" data-attr="summary" >{{ summary }}</span></td>
+            <td class="delete_resource_td "><a class='operation-summary delete_resource' data-operation="{{ @key }}" data-path-name="{{ ../path }}" data-path="$.paths.{{ path }}.{{@key}}" data-index="{{ @index }}"><i class='icon-trash'></i></a></td>
         </tr>
-        <tr><td colspan="4" class="resource_body hide" data-path="$.apis[{{ ../../index}}].file.apis[{{ ../index }}].operations[{{ @index }}]"></td></tr>
-        {{/each}}
+        <tr><td colspan="4" class="resource_body hide" data-path="$.paths.{{ path }}.{{@key}}"></td></tr>
     {{/each}}
-
 {{/each}}
 </table>                                         
 </script>
