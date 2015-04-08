@@ -17,6 +17,7 @@
 */
 package org.wso2.carbon.apimgt.api;
 
+import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.wso2.carbon.apimgt.api.dto.UserApplicationAPIUsage;
 import org.wso2.carbon.apimgt.api.model.*;
@@ -110,7 +111,7 @@ public interface APIProvider extends APIManager {
      * @return Set<Subscriber>
      * @throws org.wso2.carbon.apimgt.api.APIManagementException if failed to get Subscribers
      */
-    public Set<Subscriber> getSubscribersOfAPI(APIIdentifier identifier)
+    public JSONArray getSubscribersOfAPI(JSONObject identifier)
             throws APIManagementException;
 
     /**
@@ -129,7 +130,7 @@ public interface APIProvider extends APIManager {
     
     public void removeTier(Tier tier) throws APIManagementException;
 
-    public String getDefaultVersion(APIIdentifier apiid) throws APIManagementException;
+    public String getDefaultVersion(JSONObject apiid) throws APIManagementException;
 
     /**
      * Adds a new API to the Store
@@ -325,7 +326,7 @@ public interface APIProvider extends APIManager {
      * @throws org.wso2.carbon.apimgt.api.APIManagementException
      */
     
-    public List<String> getCustomInSequences()  throws APIManagementException;
+    public JSONArray getCustomInSequences()  throws APIManagementException;
     
     
     /**
@@ -334,7 +335,7 @@ public interface APIProvider extends APIManager {
      * @throws org.wso2.carbon.apimgt.api.APIManagementException
      */
     
-    public List<String> getCustomOutSequences()  throws APIManagementException;
+    public JSONArray getCustomOutSequences()  throws APIManagementException;
 
     /**
      * Get the list of Custom Fault Sequences.
@@ -342,7 +343,7 @@ public interface APIProvider extends APIManager {
      * @throws org.wso2.carbon.apimgt.api.APIManagementException
      */
 
-    public List<String> getCustomFaultSequences()  throws APIManagementException;
+    public JSONArray getCustomFaultSequences()  throws APIManagementException;
 
 
     /**

@@ -2592,31 +2592,31 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 	 * @throws org.wso2.carbon.apimgt.api.APIManagementException
 	 */
 
-	public List<String> getCustomOutSequences() throws APIManagementException {
+    public JSONArray getCustomOutSequences() throws APIManagementException {
 
-		List<String> sequenceList = new ArrayList<String>();
-		try {
-			UserRegistry registry = ServiceReferenceHolder.getInstance().getRegistryService()
-			                                              .getGovernanceSystemRegistry(tenantId);
-			if (registry.resourceExists(APIConstants.API_CUSTOM_OUTSEQUENCE_LOCATION)) {
-	            org.wso2.carbon.registry.api.Collection outSeqCollection =
-	                                                                       (org.wso2.carbon.registry.api.Collection) registry.get(APIConstants.API_CUSTOM_OUTSEQUENCE_LOCATION);
-	            if (outSeqCollection !=null) {
-	                String[] outSeqChildPaths = outSeqCollection.getChildren();
-	                for (int i = 0; i < outSeqChildPaths.length; i++) {
-		                Resource outSequence = registry.get(outSeqChildPaths[i]);
-		                OMElement seqElment = APIUtil.buildOMElement(outSequence.getContentStream());
-		         
-		                sequenceList.add(seqElment.getAttributeValue(new QName("name")));		               
-	                }
+        JSONArray sequenceArr = new JSONArray();
+        try {
+            UserRegistry registry = ServiceReferenceHolder.getInstance().getRegistryService()
+                    .getGovernanceSystemRegistry(tenantId);
+            if (registry.resourceExists(APIConstants.API_CUSTOM_OUTSEQUENCE_LOCATION)) {
+                org.wso2.carbon.registry.api.Collection outSeqCollection =
+                        (org.wso2.carbon.registry.api.Collection) registry.get(APIConstants.API_CUSTOM_OUTSEQUENCE_LOCATION);
+                if (outSeqCollection != null) {
+                    String[] outSeqChildPaths = outSeqCollection.getChildren();
+                    for (int i = 0; i < outSeqChildPaths.length; i++) {
+                        Resource outSequence = registry.get(outSeqChildPaths[i]);
+                        OMElement seqElment = APIUtil.buildOMElement(outSequence.getContentStream());
+
+                        sequenceArr.add(seqElment.getAttributeValue(new QName("name")));
+                    }
                 }
             }
 
-		} catch (Exception e) {
-			handleException("Issue is in getting custom OutSequences from the Registry", e);
-		}
-		return sequenceList;
-	}
+        } catch (Exception e) {
+            handleException("Issue is in getting custom OutSequences from the Registry", e);
+        }
+        return sequenceArr;
+    }
 
     /**
      * Get stored custom fault sequences from governanceSystem registry
