@@ -18,6 +18,8 @@
 
 package org.wso2.carbon.apimgt.impl.definitions;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -43,6 +45,7 @@ import static org.wso2.carbon.apimgt.impl.utils.APIUtil.handleException;
 
 public class APIDefinitionFromSwagger20 extends APIDefinition {
 
+    private static final Log log = LogFactory.getLog(APIDefinitionFromSwagger20.class);
     private final String SWAGGER_2_0_FILE_NAME = "/swagger.json";
 
     @Override
@@ -65,17 +68,13 @@ public class APIDefinitionFromSwagger20 extends APIDefinition {
                         if (!"PATCH".equals(httpVerb)) {
                             URITemplate template = new URITemplate();
                             //Scope scope= APIUtil.findScopeByKey(scopeList,(String) operation.get("scope"));
-
-                            String authType = (String) operation.get("x-auth-type");
-                            if (authType != null) {
-                                if (authType.equals("Application & Application User")) {
-                                    authType = APIConstants.AUTH_APPLICATION_OR_USER_LEVEL_TOKEN;
-                                }
-                                if (authType.equals("Application User")) {
-                                    authType = "Application_User";
-                                }
+                            String authType = (String) operation.get("auth_type");
+                            if ("Application & Application User".equals(authType)) {
+                                authType = APIConstants.AUTH_APPLICATION_OR_USER_LEVEL_TOKEN;
+                            } else if ("Application User".equals(authType)) {
+                                authType = APIConstants.AUTH_APPLICATION_USER_LEVEL_TOKEN;
                             } else {
-                                authType = APIConstants.AUTH_NO_AUTHENTICATION;
+                                authType = APIConstants.AUTH_APPLICATION_OR_USER_LEVEL_TOKEN;
                             }
                             template.setThrottlingTier((String) operation.get("x-throttling-tier"));
                             template.setMediationScript((String) operation.get("x-mediation-script"));
@@ -98,6 +97,7 @@ public class APIDefinitionFromSwagger20 extends APIDefinition {
     }
 
     @Override
+    //TODO check security req obj
     public Set<Scope> getScopes(String resourceConfigsJSON) throws APIManagementException {
         Set<Scope> scopeList = new LinkedHashSet<Scope>();
         JSONObject swaggerObject;
@@ -145,11 +145,12 @@ public class APIDefinitionFromSwagger20 extends APIDefinition {
             String resourcePath = APIUtil.getSwagger20DefinitionFilePath(apiName, apiVersion, apiProviderName);
             resourcePath = resourcePath + SWAGGER_2_0_FILE_NAME;
             Resource resource;
-            if (!registry.resourceExists(resourcePath))
+            if (!registry.resourceExists(resourcePath)) {
                 resource = registry.newResource();
-            else
+            }
+            else {
                 resource = registry.get(resourcePath);
-
+            }
             resource.setContent(apiDefinitionJSON);
             resource.setMediaType("application/json");
             registry.put(resourcePath, resource);
@@ -179,6 +180,10 @@ public class APIDefinitionFromSwagger20 extends APIDefinition {
                 String apiDocContent = new String((byte[]) apiDocResource.getContent());
                 apiJSON = (JSONObject) parser.parse(apiDocContent);
                 apiDefinition = apiJSON.toJSONString();
+            } else {
+                if (log.isDebugEnabled()) {
+                    log.debug("Resource " + SWAGGER_2_0_FILE_NAME + " not found at " + resourcePath);
+                }
             }
         } catch (RegistryException e) {
             handleException("Error while retrieving Swagger v2.0 Definition for " + apiIdentifier.getApiName() + "-" +
