@@ -621,4 +621,14 @@ public final class APIConstants {
     public static final String SYNAPSE_REST_CONTEXT_VERSION_VARIABLE = RESTConstants
             .SYNAPSE_REST_CONTEXT_VERSION_VARIABLE;
 
+    public static final String PROPERTY_HOSTNAME = "HostName";
+    public static final String PROTOCOL_HTTP = "http";
+    public static final String PROTOCOL_HTTPS = "https";
+
+    // Auth type labels which are using in APIM publisher
+    public static final String AUTH_NO_AUTHENTICATION_LABEL = "None";
+    public static final String AUTH_APPLICATION_LABEL = "Application";
+    public static final String AUTH_APPLICATION_USER_LABEL = "Application User";
+    public static final String AUTH_APPLICATION_AND_APPLICATION_USER_LABEL = "Application & Application User";
+
 }
