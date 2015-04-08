@@ -244,7 +244,7 @@ public class ApiMgtDAO {
         ResultSet rs = null;
         Application application = dto.getApplication();
         Subscriber subscriber = application.getSubscriber();
-        String jsonString = dto.getAppInfoDTO().getoAuthApplicationInfo().getJsonString();
+        String jsonString = dto.getAppInfoDTO().getOAuthApplicationInfo().getJsonString();
 
 
         String registrationEntry = "INSERT INTO " +
@@ -267,7 +267,7 @@ public class ApiMgtDAO {
                 ps.setString(4, dto.getKeyType());
                 ps.setString(5, dto.getDomainList());
                 ps.setLong(6, dto.getValidityTime());
-		        ps.setString(7,(String) dto.getAppInfoDTO().getoAuthApplicationInfo().getParameter("tokenScope"));
+		        ps.setString(7,(String) dto.getAppInfoDTO().getOAuthApplicationInfo().getParameter("tokenScope"));
 	            ps.setString(8,jsonString);
                 ps.execute();
                 ps.close();
@@ -4135,7 +4135,7 @@ public class ApiMgtDAO {
      * @param clientId this is the consumner key.
      * @throws APIManagementException
      */
-    public void createApplicationKeyTypeMappingForManualClients(OauthAppRequest oauthAppRequest, String applicationName,
+    public void createApplicationKeyTypeMappingForManualClients(OAuthAppRequest oauthAppRequest, String applicationName,
                                                                 String userName, String clientId) throws APIManagementException {
 
         String consumerKey = null;
@@ -4147,7 +4147,7 @@ public class ApiMgtDAO {
         //initiate key manager.
         KeyManager keyManager = KeyManagerFactory.getKeyManager();
         //get oAuthApplicationInfo object.
-        OAuthApplicationInfo oAuthApplicationInfo = oauthAppRequest.getoAuthApplicationInfo();
+        OAuthApplicationInfo oAuthApplicationInfo = oauthAppRequest.getOAuthApplicationInfo();
         oAuthApplicationInfo.setClientId(clientId);
         //APIM application id.
         int applicationId = getApplicationId(applicationName, userName);
@@ -7468,7 +7468,7 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
                 workflowDTO.setUserName(subscriber.getName());
                 workflowDTO.setDomainList(rs.getString("ALLOWED_DOMAINS"));
                 workflowDTO.setValidityTime(rs.getLong("VALIDITY_PERIOD"));
-                OauthAppRequest request = ApplicationUtils.createOauthAppRequest(application.getName(),
+                OAuthAppRequest request = ApplicationUtils.createOauthAppRequest(application.getName(),
                         application.getCallbackUrl(), rs.getString("TOKEN_SCOPE"),rs.getString("INPUTS"));
                 workflowDTO.setAppInfoDTO(request);
 
@@ -7568,7 +7568,7 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
 //                OauthAppRequest request = ApplicationUtils.createOauthAppRequest(application.getName(),
 //                                                                                 application.getCallbackUrl(),
 //                                                                                 rs.getString("INPUTS"));
-//                workflowDTO.setApplicationInfo(request.getoAuthApplicationInfo());
+//                workflowDTO.setApplicationInfo(request.getOAuthApplicationInfo());
 //                workflowDTO.setAppInfoDTO(request);
 //
 //            }

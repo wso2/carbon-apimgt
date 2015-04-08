@@ -26,13 +26,11 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.AccessTokenRequest;
 import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.api.model.KeyManager;
+import org.wso2.carbon.apimgt.api.model.OAuthAppRequest;
 import org.wso2.carbon.apimgt.api.model.OAuthApplicationInfo;
-import org.wso2.carbon.apimgt.api.model.OauthAppRequest;
 import org.wso2.carbon.apimgt.api.model.Subscriber;
 import org.wso2.carbon.apimgt.impl.factory.KeyManagerFactory;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
-
-import java.util.Map;
 
 /**
  * Utility class for performing Operations related to Applications, OAuth clients.
@@ -92,13 +90,13 @@ public class ApplicationUtils {
      * @return appRequest object of OauthAppRequest.
      * @throws APIManagementException
      */
-    public static OauthAppRequest createOauthAppRequest(String clientName, String callbackURL,String tokenScope, String
+    public static OAuthAppRequest createOauthAppRequest(String clientName, String callbackURL,String tokenScope, String
                                                         clientDetails)
             throws
             APIManagementException {
 
         //initiate OauthAppRequest object.
-        OauthAppRequest appRequest = new OauthAppRequest();
+        OAuthAppRequest appRequest = new OAuthAppRequest();
         OAuthApplicationInfo authApplicationInfo = new OAuthApplicationInfo();
         authApplicationInfo.setClientName(clientName);
         authApplicationInfo.setCallBackURL(callbackURL);
@@ -118,7 +116,7 @@ public class ApplicationUtils {
             }
         }
         //set applicationInfo object
-        appRequest.setoAuthApplicationInfo(authApplicationInfo);
+        appRequest.setOAuthApplicationInfo(authApplicationInfo);
         return appRequest;
     }
 

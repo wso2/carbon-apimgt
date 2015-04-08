@@ -18,8 +18,12 @@
 
 package org.wso2.carbon.apimgt.api.model;
 
-public class OauthAppRequest {
+/**
+ * Represents a request to create an OAuth App.
+ */
+public class OAuthAppRequest {
 
+    // A string uniquely representing an OAuth App request. Can be used in serialising/de-serialising.
     private String mappingId;
 
     private OAuthApplicationInfo oAuthApplicationInfo;
@@ -32,11 +36,11 @@ public class OauthAppRequest {
         this.mappingId = mappingId;
     }
 
-    public OAuthApplicationInfo getoAuthApplicationInfo() {
+    public OAuthApplicationInfo getOAuthApplicationInfo() {
         return oAuthApplicationInfo;
     }
 
-    public void setoAuthApplicationInfo(OAuthApplicationInfo oAuthApplicationInfo) {
+    public void setOAuthApplicationInfo(OAuthApplicationInfo oAuthApplicationInfo) {
         this.oAuthApplicationInfo = oAuthApplicationInfo;
     }
 }
