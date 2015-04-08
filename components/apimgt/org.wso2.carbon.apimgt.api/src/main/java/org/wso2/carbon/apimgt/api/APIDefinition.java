@@ -30,6 +30,8 @@ import java.util.Set;
  * APIDefinition is responsible for providing uri templates, scopes and
  * save the api definition according to the permission and visibility
  */
+
+@SuppressWarnings("unused")
 public abstract class APIDefinition {
 
     /**
@@ -52,7 +54,7 @@ public abstract class APIDefinition {
      *
      * @param api               API to be saved
      * @param apiDefinitionJSON API definition as JSON string
-     * @param registry          registry
+     * @param registry          user registry
      */
     public abstract void saveAPIDefinition(API api, String apiDefinitionJSON, Registry registry) throws ParseException, APIManagementException;
 
@@ -60,7 +62,7 @@ public abstract class APIDefinition {
      * This method reads the API definition from registry
      *
      * @param apiIdentifier api identifier
-     * @param registry      registry
+     * @param registry      user registry
      * @return API definition
      */
     public abstract String getAPIDefinition(APIIdentifier apiIdentifier, Registry registry) throws APIManagementException;

@@ -43,6 +43,8 @@ import static org.wso2.carbon.apimgt.impl.utils.APIUtil.handleException;
 
 public class APIDefinitionFromSwagger20 extends APIDefinition {
 
+    private final String SWAGGER_2_0_FILE_NAME = "/swagger.json";
+
     @Override
     public Set<URITemplate> getURITemplates(API api, String resourceConfigsJSON) throws APIManagementException {
         JSONParser parser = new JSONParser();
@@ -141,9 +143,9 @@ public class APIDefinitionFromSwagger20 extends APIDefinition {
 
         try {
             String resourcePath = APIUtil.getSwagger20DefinitionFilePath(apiName, apiVersion, apiProviderName);
-            resourcePath = resourcePath + "/swagger.json";
+            resourcePath = resourcePath + SWAGGER_2_0_FILE_NAME;
             Resource resource;
-            if(!registry.resourceExists(resourcePath))
+            if (!registry.resourceExists(resourcePath))
                 resource = registry.newResource();
             else
                 resource = registry.get(resourcePath);
@@ -172,8 +174,8 @@ public class APIDefinitionFromSwagger20 extends APIDefinition {
         JSONObject apiJSON;
         String apiDefinition = null;
         try {
-            if (registry.resourceExists(resourcePath + "/swagger.json")) {
-                Resource apiDocResource = registry.get(resourcePath + "/swagger.json");
+            if (registry.resourceExists(resourcePath + SWAGGER_2_0_FILE_NAME)) {
+                Resource apiDocResource = registry.get(resourcePath + SWAGGER_2_0_FILE_NAME);
                 String apiDocContent = new String((byte[]) apiDocResource.getContent());
                 apiJSON = (JSONObject) parser.parse(apiDocContent);
                 apiDefinition = apiJSON.toJSONString();
