@@ -894,6 +894,7 @@ public class APIProviderHostObject extends ScriptableObject {
     	return success;
     }
 
+
     /**
      * This method parses the JSON resource config and returns the UriTemplates. Also it saves the swagger
      * 1.2 resources in the registry
@@ -901,6 +902,7 @@ public class APIProviderHostObject extends ScriptableObject {
      * @return set of Uri Templates according to api
      * @throws APIManagementException
      */
+    /*
     private static Set<URITemplate> parseResourceConfig(APIProvider apiProvider,
                                                         APIIdentifier apiId,
                                                         String resourceConfigsJSON, API api, boolean isManagePhase)
@@ -924,7 +926,7 @@ public class APIProviderHostObject extends ScriptableObject {
             }
             apiProvider.updateSwagger12Definition(apiId, APIConstants.API_DOC_1_2_RESOURCE_NAME, apiJSON);
             
-            /* Get Scopes*/
+            //Get Scopes
             if (api_doc.get("authorizations") != null) {
             	JSONObject authorizations = (JSONObject) api_doc.get("authorizations");
             	if (authorizations.get("oauth2") != null) {
@@ -1020,8 +1022,7 @@ public class APIProviderHostObject extends ScriptableObject {
 	                for (int k = 0; k < operations.size(); k++) {
 	                	JSONObject operation = (JSONObject) operations.get(k);
 	                	String httpVerb = (String) operation.get("method");
-	                	/* Right Now PATCH is not supported. Need to remove
-	                	 * this check when PATCH is supported*/
+	                	//Right Now PATCH is not supported. Need to remove this check when PATCH is supported
 	                	if (!"PATCH".equals(httpVerb)) {
 	                		URITemplate template = new URITemplate();
 		                	Scope scope= APIUtil.findScopeByKey(scopeList,(String) operation.get("scope"));
@@ -1059,6 +1060,8 @@ public class APIProviderHostObject extends ScriptableObject {
         }
         return uriTemplates;
     }
+
+    */
     /**
      * This method is to functionality of add a new API in API-Provider
      *
