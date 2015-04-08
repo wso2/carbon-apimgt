@@ -14,8 +14,7 @@ jagg.initializer("item-add", {
     jagg.addFooterJS("jsonform", "jagg", "templates/item-add/js/jsonform.js");
     jagg.addFooterJS("multiselect", "jagg", "lib/bootstrap-multiselect.js");
     jagg.addFooterJS("endpoint-ui", "jagg", "templates/item-add/js/endpoint-ui.js");
-
-    
+    jagg.addFooterJS("create-options", "jagg", "templates/item-add/js/item-add.js");
     }
 });
 %>

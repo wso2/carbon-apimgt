@@ -21,6 +21,11 @@ $(document).ready(function(){
       e.preventDefault();
     });*/
 
+    $('.slideContainer').hide();
+    $('.api-implement-type').click(function(){
+        $('.slideContainer').slideUp();
+        $($(this).attr('value').toString()).slideDown();
+    });
 
     var thisID='';
     $('#saveBtn').click(function(e){
@@ -34,6 +39,11 @@ $(document).ready(function(){
     });
 
     $('#go_to_manage').click(function(e){
+        $(this).siblings('button').button('reset');
+        thisID = $(this).attr('id');
+    });
+
+    $('#savePrototypeBtn').click(function(e){
         $(this).siblings('button').button('reset');
         thisID = $(this).attr('id');
     });

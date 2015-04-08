@@ -1452,3 +1452,41 @@ a.next {
 .nvd3 .nv-multibarHorizontal .nv-groups text {
     fill: #333 !important;
 }
+
+.create-options:hover, .api-implement-type:hover, .selected {
+    background-color:#d0d0d0;
+    cursor:pointer;
+}
+
+.create-options{
+    padding:10px 20px 10px 10px;
+}
+
+.api-implement-type{
+    padding:20px;
+    display:block;
+    min-height:50px;
+    background-color:#e3e3e3;
+}
+
+.sub-select-label{
+    padding-right:3em;
+    font-weight:normal;
+}
+
+.create-options>p{
+    margin-left:20px;
+}
+
+.sub-labels{
+    padding-right:3em;
+}
+
+.select-label{
+    font-weight:bold;
+    font-size:14px;
+}
+
+#designNewAPI {
+    margin-top:-40px;
+}

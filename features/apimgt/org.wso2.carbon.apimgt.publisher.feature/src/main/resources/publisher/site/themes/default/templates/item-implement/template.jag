@@ -71,151 +71,189 @@
   <%  }%>
 
     <div class="row-fluid">
-        <div class="span12">                             
-            <form class="form-horizontal" method="POST" id="implement_form" enctype="multipart/form-data" 
-                action="<%= jagg.url("/site/blocks/item-design/ajax/add.jag?action=implement&"+apiUrlId ) %>">
-    <div class="well well-small" style="padding:0px">        
-    <fieldset>    
-    <div class="control-group">
-        <label class="control-label" for="context">Implementation Method</label>
-        <div class="controls">
-            <% if(api.implementation && api.implementation == "inline"){ 
-                var inline_impl = "checked='checked'"; var hide_endpoint="hide" }else{var endpoint_impl = "checked='checked'"; var hide_impl="hide"} %>
-            <label class="radio inline">
-            <input class="implementation_methods" type="radio" value="endpoint" name="implementation_methods" <%= endpoint_impl%> > Backend Endpoint
-            </label>
-            <label class="radio inline">
-            <input class="implementation_methods" type="radio" value="inline" name="implementation_methods" <%= inline_impl%> > Specify Inline
-            </label>
-        </div>
-    </div>        
-    </fieldset>
-    </div> <!-- closing the well for endpoints -->    
-                <div class="clear"></div>
-                <fieldset class="implementation_method_endpoint implementation_method <%= hide_endpoint %>">
-                <legend style="margin-left:0px;text-indent:10px"><%=i18n.localize("endpointTitle")%></legend>
+        <div class="span12">
+            <div class="api-implement-type" value="#managed-api">
+                <div class="span1">
+                    <i class="fa fa-cogs fa-3x"></i>
+                </div>
+                <div class="span7">
+                    <h4>Managed API</h4>
+                    <p>description</p>
+                </div>
+            </div>
 
-
-                <div class="control-group">
-                    <label class="control-label" for="endpoint_type">Endpoint Type:<span class="requiredAstrix">*</span></label>
-                        <div class="controls">
-                            <select class="select required" id="endpoint_type" name="endpoint_type">
-                                <option value="http"  selected="selected">HTTP Endpoint</option>
-                                <option value="address">Address Endpoint</option>
-                                <option value="wsdl">WSDL Endpoint</option>
-                                <option value="failover">Failover Endpoint</option>
-                                <option value="load_balance">Load balanced Endpoint</option>
-                            </select>
-                            <a class="icon-question-sign help_popup" help_data="endpoint_help"></a>
+            <div class="slideContainer" id="managed-api">
+                <div class="well" >
+                    <form class="form-horizontal" method="POST" id="implement_form" enctype="multipart/form-data"
+                                    action="<%= jagg.url("/site/blocks/item-design/ajax/add.jag?action=implement&"+apiUrlId ) %>">
+                    <fieldset >
+                        <legend style="margin-left:0px;text-indent:10px"><%=i18n.localize("endpointTitle")%></legend>
+                        <div class="control-group">
+                            <label class="control-label" for="endpoint_type">Endpoint Type:<span class="requiredAstrix">*</span></label>
+                                <div class="controls">
+                                    <select class="select required" id="endpoint_type" name="endpoint_type">
+                                        <option value="http"  selected="selected">HTTP Endpoint</option>
+                                        <option value="address">Address Endpoint</option>
+                                        <option value="wsdl">WSDL Endpoint</option>
+                                        <option value="failover">Failover Endpoint</option>
+                                        <option value="load_balance">Load balanced Endpoint</option>
+                                    </select>
+                                    <a class="icon-question-sign help_popup" help_data="endpoint_help"></a>
+                                </div>
                         </div>
+
+                        <input type="hidden" id="endpoint_config" name="endpoint_config" value="<%= encode.forHtmlAttribute(api.endpointConfig) %>"/>
+
+                        <div id="endpoint_help" class="hide">
+                         <strong>HTTP Endpoint </strong><p>A REST service endpoint based on a URI template</p>
+                         <strong>Address Endpoint</strong><p>The direct URL of the service</p>
+                         <strong>WSDL Endpoint</strong><p>The WSDL, service and port</p>
+                         <strong>Failover Group </strong><p>The endpoints that the service tries to connect to in case of a failure. This happens in a round robin manner.</p>
+                         <strong>Load Balance</strong><p>The endpoints where the incoming requests are directed to in a round robin manner. They automatically handle fail-over as well.</p>
+                        </div>
+
+                        <div id="endpoint_form" class="endpoint_dives" >
+                        </div>
+
+                         <div class="control-group">
+                            <div class="controls">
+                                <a href="#" class="more-options but" ref="more-options-endpoints"><%=i18n.localize("moreOptions")%></a>
+                             </div>
+                         </div>
+                        <div id="more-options-endpoints" style="display:none">
+
+
+                        <div class="control-group">
+                            <label class="control-label" for="endpointType"><%=i18n.localize("endpointType")%>:<span class="requiredAstrix">*</span></label>
+                            <div class="controls">
+                            <select class="select required" id="endpointType" name="endpointType" >
+                                <option value="nonsecured" <%if( api.endpointTypeSecured=="false"){%> selected="selected" <%}%>><%=i18n.localize("nonsecured")%></option>
+                                <option value="secured" <%if(api.endpointTypeSecured=="true"){%> selected="selected" <%}%>><%=i18n.localize("secured")%></option>
+                            </select>
+                            <a class="icon-question-sign help_popup" help_data="endpointSec_help"></a>
+                            <p id="endpointSec_help" class="hide"><%=i18n.localize("endpointSecHelpMsg")%></p>
+                            </div>
+                        </div>
+
+                        <div class="control-group" id="credentials" <%if(api.endpointTypeSecured=="false"){%>style="display: none;"<%}%>>
+                            <label class="control-label" for="credentials"><%=i18n.localize("credentials")%>:<span class="requiredAstrix">*</span></label>
+                            <div class="controls">
+                                <input type="text" class="input-small required validInput" id="epUsername" name="epUsername"  value="<%=api.epUsername%>">
+                                <input type="password" class="input-small required" id="epPassword" name="epPassword" value="<%=api.epPassword%>">
+                            </div>
+                        </div>
+
+                         <div class="control-group api_wsdl">
+                             <label class="control-label" for="wsdl"><%=i18n.localize("wsdl")%>:</label>
+                             <div class="controls">
+                                 <div class="input-append">
+                                 <input type="text" class="input-xlarge validInput" id="wsdl" name="wsdl"  value="<%=api.wsdl%>" />
+                                 <button class="btn check_url_valid" url-type="wsdl" type="button" ><%=i18n.localize("testURI")%></button>
+                                 <a class="icon-question-sign help_popup" help_data="wsdldesc_help"></a>
+                                 <p id="wsdldesc_help" class="hide"><%=i18n.localize("wsdlDescHelpMsg")%></p>
+                                 </div>
+                             <p class="help-block"><%=i18n.localize("wsdlHelpMsg")%></p>
+                             </div>
+                         </div>
+
+                         <div class="control-group">
+                             <label class="control-label" for="wadl"><%=i18n.localize("wadl")%>:</label>
+                             <div class="controls">
+                                 <div class="input-append">
+                                 <input type="text" class="input-xlarge validInput" id="wadl" name="wadl" value="<%=api.wadl%>" />
+                                 <button class="btn check_url_valid"  type="button"  ><%=i18n.localize("testURI")%></button>
+                                 </div>
+                             <p class="help-block"><%=i18n.localize("wadlHelpMsg")%></p>
+                             </div>
+                         </div>
+
+                        <% if(isDataPublishingEnabled) { %>
+                        <!--Southboud statistics -->
+                        <div class="control-group">
+                            <label class="control-label" for="destinationStats"><%=i18n.localize("destinationStats")%>:</label>
+                              <div class="controls">
+                               <select class="select required" id="destinationStats" name="destinationStats">
+                                    <option value="disabled" <%if(api.destinationStats != "Enabled"){%> selected <%}%>><%=i18n.localize("disabled")%></option>
+                                    <option value="enabled" <%if(api.destinationStats == "Enabled"){%> selected <%}%>><%=i18n.localize("enabled")%></option>
+                                </select>
+                                <a class="icon-question-sign help_popup" help_data="stats_help"></a>
+                                <p id="stats_help" class="hide"><%=i18n.localize("statsHelpMsg")%></p>
+                             </div>
+                        </div>
+                        <!--Southboud statistics End -->
+                        <% }%>
+
+                        </div><!-- more option endpoint -->
+                    </fieldset>
+
+                    <input type="hidden" name="name" value="<%= encode.forHtml(api.name) %>" />
+                    <input type="hidden" name="version" value="<%= encode.forHtml(api.version) %>" />
+                    <input type="hidden" name="provider" value="<%= encode.forHtml(api.provider) %>" />
+                    <input type="hidden" name="action" value="implement" />
+                    <input type="hidden" id="swagger" name="swagger" value="" />
+
+                    <div class="form-actions" id="saveButtons">
+                        <button type="submit" class="btn btn-info manageSaveButton" id="saveBtn" data-loading-text="<i class='fa fa-spinner fa-pulse' id='loader'></i>Loading">Save</button>
+                        <button id="go_to_manage" class="btn btn-primary manageSaveButton pull-right" data-loading-text="<i class='fa fa-spinner fa-pulse' id='loader'></i>Loading">Next : Manage ></button>
+                    </div>
+                    </form>
                 </div>
-                
-
-                <input type="hidden" id="endpoint_config" name="endpoint_config" value="<%= encode.forHtmlAttribute(api.endpointConfig) %>"/>
-
-                <div id="endpoint_help" class="hide">
-                 <strong>HTTP Endpoint </strong><p>A REST service endpoint based on a URI template</p>
-                 <strong>Address Endpoint</strong><p>The direct URL of the service</p>
-                 <strong>WSDL Endpoint</strong><p>The WSDL, service and port</p>
-                 <strong>Failover Group </strong><p>The endpoints that the service tries to connect to in case of a failure. This happens in a round robin manner.</p>
-                 <strong>Load Balance</strong><p>The endpoints where the incoming requests are directed to in a round robin manner. They automatically handle fail-over as well.</p>
+            </div>
+            <br>
+            <div class="api-implement-type" value="#endpoint">
+                <div class="span1">
+                    <i class="fa fa-cog fa-3x" ></i>
                 </div>
-
-                <div id="endpoint_form" class="endpoint_dives" >
+                <div class="span7">
+                    <h4 >Prototype</h4>
+                    <p>description</p>
                 </div>
+            </div>
 
-                 <div class="control-group">
-                    <div class="controls">
-                        <a href="#" class="more-options but" ref="more-options-endpoints"><%=i18n.localize("moreOptions")%></a>
-                     </div>
-                 </div>
-                <div id="more-options-endpoints" style="display:none">
-
-
+            <div class="slideContainer" id="endpoint">
+            <div class="well">
+            <form class="form-horizontal" method="POST" id="implement_prototype_form" enctype="multipart/form-data"
+                action="<%= jagg.url("/site/blocks/item-design/ajax/add.jag?action=implement&"+apiUrlId ) %>">
+                <fieldset>
                 <div class="control-group">
-                    <label class="control-label" for="endpointType"><%=i18n.localize("endpointType")%>:<span class="requiredAstrix">*</span></label>
+                    <label class="control-label" for="context">Implementation Method</label>
                     <div class="controls">
-                    <select class="select required" id="endpointType" name="endpointType" >
-                        <option value="nonsecured" <%if( api.endpointTypeSecured=="false"){%> selected="selected" <%}%>><%=i18n.localize("nonsecured")%></option>
-                        <option value="secured" <%if(api.endpointTypeSecured=="true"){%> selected="selected" <%}%>><%=i18n.localize("secured")%></option>
-                    </select>
-   					<a class="icon-question-sign help_popup" help_data="endpointSec_help"></a>
-            		<p id="endpointSec_help" class="hide"><%=i18n.localize("endpointSecHelpMsg")%></p>
+                        <% if(api.implementation && api.implementation == "inline"){
+                            var inline_impl = "checked='checked'"; var hide_endpoint="hide" }else{var endpoint_impl = "checked='checked'"; var hide_impl="hide"} %>
+                        <label class="radio inline">
+                        <input class="implementation_methods" type="radio" value="inline" name="implementation_methods" <%= inline_impl%> > Inline
+                        </label>
+                        <label class="radio inline">
+                        <input class="implementation_methods" type="radio" value="endpoint" name="implementation_methods" <%= endpoint_impl%> > Endpoint
+                        </label>
                     </div>
                 </div>
-
-                <div class="control-group" id="credentials" <%if(api.endpointTypeSecured=="false"){%>style="display: none;"<%}%>>
-                    <label class="control-label" for="credentials"><%=i18n.localize("credentials")%>:<span class="requiredAstrix">*</span></label>
-                    <div class="controls">
-                        <input type="text" class="input-small required validInput" id="epUsername" name="epUsername"  value="<%=api.epUsername%>">
-                        <input type="password" class="input-small required" id="epPassword" name="epPassword" value="<%=api.epPassword%>">
-                    </div>
-                </div>
-
-                 <div class="control-group api_wsdl">
-                 <label class="control-label" for="wsdl"><%=i18n.localize("wsdl")%>:</label>
-                 <div class="controls">
-                 <div class="input-append">
-                 <input type="text" class="input-xlarge validInput" id="wsdl" name="wsdl"  value="<%=api.wsdl%>" />
-                 <button class="btn check_url_valid" url-type="wsdl" type="button" ><%=i18n.localize("testURI")%></button>
-                 <a class="icon-question-sign help_popup" help_data="wsdldesc_help"></a>
-                 <p id="wsdldesc_help" class="hide"><%=i18n.localize("wsdlDescHelpMsg")%></p>
-                 </div>
-                 <p class="help-block"><%=i18n.localize("wsdlHelpMsg")%></p>
-                
-                 </div>
-                 </div>
-                 <div class="control-group">
-                 <label class="control-label" for="wadl"><%=i18n.localize("wadl")%>:</label>
-                 <div class="controls">
-                 <div class="input-append">
-                 <input type="text" class="input-xlarge validInput" id="wadl" name="wadl" value="<%=api.wadl%>" />
-                 <button class="btn check_url_valid"  type="button"  ><%=i18n.localize("testURI")%></button>
-                 </div>
-                 <p class="help-block"><%=i18n.localize("wadlHelpMsg")%></p>
-                 </div>
-                 </div>
-
-                <% if(isDataPublishingEnabled) { %>
-                <!--Southboud statistics -->
-                <div class="control-group">
-                    <label class="control-label" for="destinationStats"><%=i18n.localize("destinationStats")%>:</label>
-                      <div class="controls">
-                       <select class="select required" id="destinationStats" name="destinationStats">
-                            <option value="disabled" <%if(api.destinationStats != "Enabled"){%> selected <%}%>><%=i18n.localize("disabled")%></option>
-                            <option value="enabled" <%if(api.destinationStats == "Enabled"){%> selected <%}%>><%=i18n.localize("enabled")%></option>
-                        </select>
-                        <a class="icon-question-sign help_popup" help_data="stats_help"></a>
-                        <p id="stats_help" class="hide"><%=i18n.localize("statsHelpMsg")%></p>
-                     </div>
-                </div>
-                <!--Southboud statistics End -->
-                <% }%>
-
-                </div><!-- more option endpoint -->
-
                 </fieldset>
 
-                
                 <div id="api_designer">
                     <div id ="apidoc_details"></div>
                     <div id ="resource_details"></div>
-                </div>            
-                <input type="hidden" name="name" value="<%= encode.forHtml(api.name) %>" />
-                <input type="hidden" name="version" value="<%= encode.forHtml(api.version) %>" />
-                <input type="hidden" name="provider" value="<%= encode.forHtml(api.provider) %>" />
-                <input type="hidden" name="action" value="implement" />
-                <input type="hidden" id="swagger" name="swagger" value="" />
-                <div class="form-actions" style="display:none" id="saveMessage">
-                    <div class="btn loadingButton">Saving API. Please wait..</div>
                 </div>
+
+                <div class="clear"></div>
+
+                <fieldset class="implementation_method_endpoint implementation_method <%= hide_endpoint %>">
+                    <div class="control-group">
+                        <label class="control-label" for="prototype_endpoint">Endpoint:</label>
+                        <div class="controls">
+                        <input type="text" class="input-xlarge validInput" id="wadl" name="wadl" value="<%=api.wadl%>" />
+                        </div>
+                    </div>
+                </fieldset>
+
                 <div class="form-actions" id="saveButtons">
-                    <button type="submit" class="btn btn-info manageSaveButton" id="saveBtn" data-loading-text="<i class='fa fa-spinner fa-pulse' id='loader'></i>Loading">Save</button>
-                     <%if(outputs.isPermitted){%> <button class="btn btn-warning manageSaveButton" id="prototyped_api" data-loading-text="<i class='fa fa-spinner fa-pulse' id='loader'></i>Loading">Deploy Prototype</button><%}%>
-                    <button id="go_to_manage" class="btn btn-primary manageSaveButton" data-loading-text="<i class='fa fa-spinner fa-pulse' id='loader'></i>Loading">Manage</button>
-                    <input type="reset" class="btn" value="<%=i18n.localize("cancel")%>" onclick="javascript:window.location.href='./'" />                                                            
+                    <button type="submit" class="btn btn-info manageSaveButton" id="savePrototypeBtn" data-loading-text="<i class='fa fa-spinner fa-pulse' id='loader'></i>Loading">Save</button>
+                    <button class="btn btn-warning manageSaveButton pull-right" id="prototyped_api" data-loading-text="<i class='fa fa-spinner fa-pulse' id='loader'></i>Loading">Deploy as a Prototype</button>
                 </div>
             </form>
+            </div>
+            </div>
+            </div>
         </div>
     </div>
     </div>
