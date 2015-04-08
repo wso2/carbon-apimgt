@@ -40,6 +40,7 @@ import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIStatus;
 import org.wso2.carbon.apimgt.api.model.APIStore;
 import org.wso2.carbon.apimgt.api.model.Documentation;
+import org.wso2.carbon.apimgt.api.model.DocumentationType;
 import org.wso2.carbon.apimgt.api.model.DuplicateAPIException;
 import org.wso2.carbon.apimgt.api.model.Icon;
 import org.wso2.carbon.apimgt.api.model.LifeCycleEvent;
@@ -1092,7 +1093,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     /**
      * Create a new version of the <code>api</code>, with version <code>newVersion</code>
      *
-     * @param api        The API to be copied
+     * @param apiObj       The API to be copied
      * @param newVersion The version of the new API
      * @throws org.wso2.carbon.apimgt.api.model.DuplicateAPIException
      *          If the API trying to be created already exists
@@ -1100,8 +1101,26 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      *          If an error occurs while trying to create
      *          the new version of the API
      */
-    public void createNewAPIVersion(API api, String newVersion) throws DuplicateAPIException,
+    public boolean createNewAPIVersion(JSONObject apiObj, String newVersion) throws DuplicateAPIException,
                                                                        APIManagementException {
+        String providerName = (String) apiObj.get("provider");
+        String apiName = (String) apiObj.get("name");
+        String version = (String) apiObj.get("version");
+        String dVersion=(String) apiObj.get("defaultVersion");
+
+        APIIdentifier apiId = new APIIdentifier(APIUtil.replaceEmailDomain(providerName), apiName, version);
+        API api = new API(apiId);
+        api.setAsDefaultVersion(dVersion.equals("default_version"));
+
+        boolean isTenantFlowStarted = false;
+        try {
+            String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(providerName));
+            if(tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
+                isTenantFlowStarted = true;
+                PrivilegedCarbonContext.startTenantFlow();
+                PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
+            }
+
         String apiSourcePath = APIUtil.getAPIPath(api.getId());
 
         String targetPath = APIConstants.API_LOCATION + RegistryConstants.PATH_SEPARATOR +
@@ -1109,7 +1128,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                             RegistryConstants.PATH_SEPARATOR + api.getId().getApiName() +
                             RegistryConstants.PATH_SEPARATOR + newVersion +
                             APIConstants.API_RESOURCE_NAME;
-        try {
+
             if (registry.resourceExists(targetPath)) {
                 throw new DuplicateAPIException("API version already exist with version :"
                                                 + newVersion);
@@ -1278,7 +1297,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             artifactManager.updateGenericArtifact(oldArtifact);
 
             int tenantId = -1234;
-            String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(api.getId().getProviderName()));
             try {
                 tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager().getTenantId(tenantDomain);
             } catch (UserStoreException e) {
@@ -1292,7 +1310,20 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             String msg = "Failed to create new version : " + newVersion + " of : "
                          + api.getId().getApiName();
             handleException(msg, e);
+            return false;
+        } catch (DuplicateAPIException e) {
+            handleException("Error occurred while creating a new API version. A duplicate API " +
+                            "already exists by the same name.", e);
+            return false;
+        } catch (Exception e) {
+            handleException("Error occurred while creating a new API version- " + newVersion, e);
+            return false;
+        } finally {
+            if (isTenantFlowStarted) {
+                PrivilegedCarbonContext.endTenantFlow();
+            }
         }
+        return true;
     }
 
     /**
@@ -1410,53 +1441,171 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     /**
      * Adds Documentation to an API
      *
-     * @param apiId         APIIdentifier
-     * @param documentation Documentation
+     * @param apiObj API json object
+     * @param docObj Documentation json object
      * @throws org.wso2.carbon.apimgt.api.APIManagementException
      *          if failed to add documentation
      */
-    public void addDocumentation(APIIdentifier apiId, Documentation documentation)
-    		throws APIManagementException {
-    	API api = getAPI(apiId);
-    	createDocumentation(api, documentation);
+    public void addDocumentation(JSONObject apiObj, JSONObject docObj)
+            throws APIManagementException {
+
+        String providerName = (String) apiObj.get("provider");
+        String apiName = (String) apiObj.get("name");
+        String version = (String) apiObj.get("version");
+        String docName = (String) docObj.get("docName");
+        String docType = (String) docObj.get("docType");
+        String summary = (String) docObj.get("summary");
+        String sourceType = (String) docObj.get("sourceType");
+        String visibility = (String) docObj.get("visibility");
+        //------------ FileHostObject fileHostObject = null;
+        String sourceURL = null;
+
+        APIIdentifier apiId = new APIIdentifier(APIUtil.replaceEmailDomain(providerName), apiName, version);
+        Documentation doc = new Documentation(null, docName);  //---------replace null with getDocType(docType)
+        if (doc.getType() == DocumentationType.OTHER) {
+            String docOtherTypeName = (String) docObj.get("docOtherTypeName");
+            doc.setOtherTypeName(docOtherTypeName);
+        }
+
+        if (sourceType.equalsIgnoreCase(Documentation.DocumentSourceType.URL.toString())) {
+            doc.setSourceType(Documentation.DocumentSourceType.URL);
+            sourceURL = (String) docObj.get("docUrl");
+        } else if (sourceType.equalsIgnoreCase(Documentation.DocumentSourceType.FILE.toString())) {
+            doc.setSourceType(Documentation.DocumentSourceType.FILE);
+            //---------   fileHostObject = (FileHostObject) args[8];
+        } else {
+            doc.setSourceType(Documentation.DocumentSourceType.INLINE);
+        }
+
+        doc.setSummary(summary);
+        doc.setSourceUrl(sourceURL);
+        if (visibility == null) {
+            visibility = APIConstants.DOC_API_BASED_VISIBILITY;
+        }
+        if (visibility.equalsIgnoreCase(Documentation.DocumentVisibility.API_LEVEL.toString())) {
+            doc.setVisibility(Documentation.DocumentVisibility.API_LEVEL);
+        } else if (visibility.equalsIgnoreCase(Documentation.DocumentVisibility.PRIVATE.toString())) {
+            doc.setVisibility(Documentation.DocumentVisibility.PRIVATE);
+        } else {
+            doc.setVisibility(Documentation.DocumentVisibility.OWNER_ONLY);
+        }
+        try {
+
+       /*-----     if (fileHostObject != null && fileHostObject.getJavaScriptFile().getLength() != 0) {
+                String contentType = (String) args[10];
+                Icon icon = new Icon(fileHostObject.getInputStream(), contentType);
+                String fname = fileHostObject.getName();
+                int index = fname.lastIndexOf("//");
+                fname = fname.substring(index + 1);
+                String filePath = APIUtil.getDocumentationFilePath(apiId, fname);
+                API api = getAPI(apiId);
+                String apiPath = APIUtil.getAPIPath(apiId);
+                String visibleRolesList = api.getVisibleRoles();
+                String[] visibleRoles = new String[0];
+                if (visibleRolesList != null) {
+                    visibleRoles = visibleRolesList.split(",");
+                }
+                APIUtil.setResourcePermissions(api.getId().getProviderName(),
+                                               api.getVisibility(), visibleRoles, filePath);
+                doc.setFilePath(addIcon(filePath, icon));
+            } else if (sourceType.equalsIgnoreCase(Documentation.DocumentSourceType.FILE.toString())) {
+                throw new APIManagementException("Empty File Attachment.");
+            } -----*/
+        } catch (Exception e) {
+            handleException("Error while creating an attachment for Document- " + docName + "-" + version + ". " +
+                            e.getMessage(), e);
+
+        }
+        boolean isTenantFlowStarted = false;
+        try {
+            String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(providerName));
+            if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
+                isTenantFlowStarted = true;
+                PrivilegedCarbonContext.startTenantFlow();
+                PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
+            }
+        } finally {
+            if (isTenantFlowStarted) {
+                PrivilegedCarbonContext.endTenantFlow();
+            }
+        }
+
+        API api = getAPI(apiId);
+        createDocumentation(api, doc);
+
+
     }
 
     /**
      * This method used to save the documentation content
      *
-     * @param api,        API
-     * @param documentationName, name of the inline documentation
-     * @param text,              content of the inline documentation
+     * @param apiObj,     API json object
+     * @param docName,    name of the inline documentation
+     * @param text, content of the inline documentation
      * @throws org.wso2.carbon.apimgt.api.APIManagementException
      *          if failed to add the document as a resource to registry
-     */    
-    public void addDocumentationContent(API api, String documentationName, String text)
+     */
+    public void addDocumentationContent(JSONObject apiObj, String docName, String text)
             throws APIManagementException {
-    	
-    	APIIdentifier identifier = api.getId();
-    	String documentationPath = APIUtil.getAPIDocPath(identifier) + documentationName;
-    	String contentPath = APIUtil.getAPIDocPath(identifier) + APIConstants.INLINE_DOCUMENT_CONTENT_DIR +
-    			RegistryConstants.PATH_SEPARATOR + documentationName;
+        String providerName = (String) apiObj.get("provider");
+        String apiName = (String) apiObj.get("name");
+        String version = (String) apiObj.get("version");
+        if (text != null) {
+            text = text.replaceAll("\n", "");
+        }
+        APIIdentifier apiId = new APIIdentifier(APIUtil.replaceEmailDomain(providerName), apiName,
+                                                version);
+        String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(providerName));
+        boolean isTenantFlowStarted = false;
+        if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
+            isTenantFlowStarted = true;
+            PrivilegedCarbonContext.startTenantFlow();
+            PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
+        }
+        try {
+            if (docName.equals(APIConstants.API_DEFINITION_DOC_NAME)) {
+                addAPIDefinitionContent(apiId, docName, text);
+            } else {
+                API api = getAPI(apiId);
+                addDocumentationContent(api, docName, text);
+            }
+
+
+        } catch (APIManagementException e) {
+            handleException("Error occurred while adding the content of the documentation- " + docName, e);
+        } finally {
+            if (isTenantFlowStarted) {
+                PrivilegedCarbonContext.endTenantFlow();
+            }
+        }
+    }
+
+    private void addDocumentationContent(API api, String docName, String text)
+            throws APIManagementException {
+        APIIdentifier identifier = api.getId();
+        String documentationPath = APIUtil.getAPIDocPath(identifier) + docName;
+        String contentPath = APIUtil.getAPIDocPath(identifier) + APIConstants.INLINE_DOCUMENT_CONTENT_DIR +
+                             RegistryConstants.PATH_SEPARATOR + docName;
         try {
             Resource docResource = registry.get(documentationPath);
             GenericArtifactManager artifactManager = new GenericArtifactManager(registry,
-                                                         APIConstants.DOCUMENTATION_KEY);
+                                                                                APIConstants.DOCUMENTATION_KEY);
             GenericArtifact docArtifact = artifactManager.getGenericArtifact(
-                                          docResource.getUUID());
+                    docResource.getUUID());
             Documentation doc = APIUtil.getDocumentation(docArtifact);
-            
+
             Resource docContent = null;
-            
+
             if (!registry.resourceExists(contentPath)) {
-            	docContent = registry.newResource();
+                docContent = registry.newResource();
             } else {
-            	docContent = registry.get(contentPath);            	
+                docContent = registry.get(contentPath);
             }
-            
-            /* This is a temporary fix for doc content replace issue. We need to add 
+
+            /* This is a temporary fix for doc content replace issue. We need to add
              * separate methods to add inline content resource in document update */
             if (!APIConstants.NO_CONTENT_UPDATE.equals(text)) {
-            	docContent.setContent(text);
+                docContent.setContent(text);
             }
             docContent.setMediaType(APIConstants.DOCUMENTATION_INLINE_CONTENT_TYPE);
             registry.put(contentPath, docContent);
@@ -1464,31 +1613,31 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                                     APIConstants.DOCUMENTATION_CONTENT_ASSOCIATION);
             String apiPath = APIUtil.getAPIPath(identifier);
             String[] authorizedRoles = getAuthorizedRoles(apiPath);
-            String docVisibility=doc.getVisibility().name();
-            String visibility=api.getVisibility();
-            if(docVisibility!=null){
-                if(APIConstants.DOC_SHARED_VISIBILITY.equalsIgnoreCase(docVisibility)){
-                    authorizedRoles=null;
-                    visibility=APIConstants.DOC_SHARED_VISIBILITY;
-                } else if(APIConstants.DOC_OWNER_VISIBILITY.equalsIgnoreCase(docVisibility)){
-                    authorizedRoles=null;
-                    visibility=APIConstants.DOC_OWNER_VISIBILITY;
+            String docVisibility = doc.getVisibility().name();
+            String visibility = api.getVisibility();
+            if (docVisibility != null) {
+                if (APIConstants.DOC_SHARED_VISIBILITY.equalsIgnoreCase(docVisibility)) {
+                    authorizedRoles = null;
+                    visibility = APIConstants.DOC_SHARED_VISIBILITY;
+                } else if (APIConstants.DOC_OWNER_VISIBILITY.equalsIgnoreCase(docVisibility)) {
+                    authorizedRoles = null;
+                    visibility = APIConstants.DOC_OWNER_VISIBILITY;
                 }
             }
 
-            APIUtil.setResourcePermissions(api.getId().getProviderName(),visibility
-            		,authorizedRoles,contentPath);
+            APIUtil.setResourcePermissions(api.getId().getProviderName(), visibility
+                    , authorizedRoles, contentPath);
         } catch (RegistryException e) {
             String msg = "Failed to add the documentation content of : "
-                         + documentationName + " of API :" + identifier.getApiName();
+                         + docName + " of API :" + identifier.getApiName();
             handleException(msg, e);
         } catch (UserStoreException e) {
             String msg = "Failed to add the documentation content of : "
-                         + documentationName + " of API :" + identifier.getApiName();
+                         + docName + " of API :" + identifier.getApiName();
             handleException(msg, e);
         }
     }
-    
+
     /**
      * This method used to update the API definition content - Swagger
      *

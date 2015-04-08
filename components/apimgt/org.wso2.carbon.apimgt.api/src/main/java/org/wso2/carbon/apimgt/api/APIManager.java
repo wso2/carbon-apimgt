@@ -182,7 +182,7 @@ public interface APIManager {
      * @return Set<API>
      * @throws org.wso2.carbon.apimgt.api.APIManagementException if failed to get API for subscriber
      */
-    public Set<API> getSubscriberAPIs(Subscriber subscriber) throws APIManagementException;
+    public Set<API> getSubscriberAPIs(String subscriber) throws APIManagementException;
 
     /**
      * Associates the given icon image with the specified path.

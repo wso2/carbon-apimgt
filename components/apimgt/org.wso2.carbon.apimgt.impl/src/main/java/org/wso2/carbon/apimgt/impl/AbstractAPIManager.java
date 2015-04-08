@@ -685,8 +685,9 @@ public abstract class AbstractAPIManager implements APIManager {
         return null;
     }
 
-    public Set<API> getSubscriberAPIs(Subscriber subscriber) throws APIManagementException {
+    public Set<API> getSubscriberAPIs(String userName) throws APIManagementException {
         SortedSet<API> apiSortedSet = new TreeSet<API>(new APINameComparator());
+        Subscriber subscriber = new Subscriber(userName);
         Set<SubscribedAPI> subscribedAPIs = apiMgtDAO.getSubscribedAPIs(subscriber);
         boolean isTenantFlowStarted = false;
         try {

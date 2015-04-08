@@ -16,6 +16,7 @@
 
 package org.wso2.carbon.apimgt.impl;
 
+import org.json.simple.JSONObject;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.*;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
@@ -49,10 +50,11 @@ public class UserAwareAPIProvider extends APIProviderImpl {
     }
 
     @Override
-    public void createNewAPIVersion(API api, String newVersion) throws DuplicateAPIException,
+    public boolean createNewAPIVersion(JSONObject api, String newVersion) throws DuplicateAPIException,
             APIManagementException {
         checkCreatePermission();
         super.createNewAPIVersion(api, newVersion);
+        return true;
     }
 
     @Override
@@ -75,10 +77,10 @@ public class UserAwareAPIProvider extends APIProviderImpl {
     }
 
     @Override
-    public void addDocumentation(APIIdentifier apiId,
-                                 Documentation documentation) throws APIManagementException {
+    public void addDocumentation(JSONObject api,
+                                 JSONObject documentation) throws APIManagementException {
         checkCreatePermission();
-        super.addDocumentation(apiId, documentation);
+        super.addDocumentation(api, documentation);
     }
 
     @Override
@@ -101,7 +103,7 @@ public class UserAwareAPIProvider extends APIProviderImpl {
     }
    
     @Override
-    public void addDocumentationContent(API api, String documentationName,
+    public void addDocumentationContent(JSONObject api, String documentationName,
                                         String text) throws APIManagementException {
         checkCreatePermission();
         super.addDocumentationContent(api, documentationName, text);
