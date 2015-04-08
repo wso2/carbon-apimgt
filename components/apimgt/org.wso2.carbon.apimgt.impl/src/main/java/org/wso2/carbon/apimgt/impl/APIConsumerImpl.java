@@ -1859,17 +1859,6 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         }
     }
 
-    @Override
-
-    public Map<String, String> requestApprovalForApplicationRegistration(String userId, String applicationName, String tokenType, String callbackUrl, String[] allowedDomains, String validityTime) throws APIManagementException {
-        return null;
-    }
-
-
-
-
-
-
 
     /**
      * @param userId          Subsriber name.
@@ -1956,8 +1945,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 
             if (applicationInfo != null) {
                 keyDetails.put("consumerKey", applicationInfo.getClientId());
-                keyDetails.put("consumerSecret", (String) applicationInfo.getParameter(ApplicationConstants
-                        .OAUTH_CLIENT_SECRET));
+                keyDetails.put("consumerSecret", applicationInfo.getClientSecret());
                 keyDetails.put("appDetails", applicationInfo.getJsonString());
             }
 
@@ -2021,8 +2009,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                         }
 
                         keyDetails.put("consumerKey", oauthApp.getClientId());
-                        keyDetails.put("consumerSecret", (String) oauthApp.getParameter(ApplicationConstants
-                                                                                                .OAUTH_CLIENT_SECRET));
+                        keyDetails.put("consumerSecret", oauthApp.getClientSecret());
                         keyDetails.put("accessallowdomains", registrationWorkflowDTO.getDomainList());
                     } catch (APIManagementException e) {
                         APIUtil.handleException("Error occurred while Creating Keys.", e);

@@ -128,7 +128,7 @@ public abstract class AbstractKeyManager implements KeyManager {
             tokenRequest = new AccessTokenRequest();
         }
         tokenRequest.setClientId(oAuthApplication.getClientId());
-        tokenRequest.setClientSecret((String) oAuthApplication.getParameter(ApplicationConstants.OAUTH_CLIENT_SECRET));
+        tokenRequest.setClientSecret(oAuthApplication.getClientSecret());
         tokenRequest.setScope((String[]) oAuthApplication.getParameter("tokenScope"));
 
         return tokenRequest;
