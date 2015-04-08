@@ -179,11 +179,12 @@ public interface APIProvider extends APIManager {
      *
      * @param api        The API to be copied
      * @param newVersion The version of the new API
+     * @return true/false Created successfully/not
      * @throws org.wso2.carbon.apimgt.api.model.DuplicateAPIException  If the API trying to be created already exists
      * @throws org.wso2.carbon.apimgt.api.APIManagementException If an error occurs while trying to create
      *                                the new version of the API
      */
-    public void createNewAPIVersion(API api, String newVersion) throws DuplicateAPIException,
+    public boolean createNewAPIVersion(JSONObject api, String newVersion) throws DuplicateAPIException,
             APIManagementException;
 
     /**
@@ -200,11 +201,11 @@ public interface APIProvider extends APIManager {
     /**
      * Adds Documentation to an API
      *
-     * @param apiId         APIIdentifier
-     * @param documentation Documentation
+     * @param api         API json object
+     * @param documentation Documentation json object
      * @throws org.wso2.carbon.apimgt.api.APIManagementException if failed to add documentation
      */
-    public void addDocumentation(APIIdentifier apiId, Documentation documentation)
+    public void addDocumentation(JSONObject api, JSONObject documentation)
             throws APIManagementException;
 
     /**
@@ -220,10 +221,10 @@ public interface APIProvider extends APIManager {
      *
      * @param api,        API
      * @param documentationName, name of the inline documentation
-     * @param text,              content of the inline documentation
+     * @param docContent,              content of the inline documentation
      * @throws org.wso2.carbon.apimgt.api.APIManagementException if failed to add the document as a resource to registry
      */
-    public void addDocumentationContent(API api, String documentationName, String text)
+    public void addDocumentationContent(JSONObject api, String documentationName, String docContent)
             throws APIManagementException;
     
     /**
@@ -427,30 +428,30 @@ public interface APIProvider extends APIManager {
      */
     public String[] getConsumerKeys(APIIdentifier apiIdentifier) throws APIManagementException;
     /**
-     * Returns success/not as a string
+     * Create an API in Design phase.
      * @param apiObj
-     * @return
+     * @return Returns success/not as a string
      * @throws org.wso2.carbon.apimgt.api.APIManagementException
      */
     public String designAPI(JSONObject apiObj) throws APIManagementException;
     /**
-     * Returns success/not as a string
+     * Update an API with Manage phase data.
      * @param apiObj
-     * @return
+     * @return Returns success/not as a string
      * @throws org.wso2.carbon.apimgt.api.APIManagementException
      */
     public String manageAPI(JSONObject apiObj) throws APIManagementException;
     /**
-     * Returns success/not as a string
+     * Update an API in Design phase.
      * @param apiObj
-     * @return
+     * @return Returns success/not as a string
      * @throws org.wso2.carbon.apimgt.api.APIManagementException
      */
     public String updateDesignAPI(JSONObject apiObj) throws APIManagementException;
     /**
-     * Returns success/not as a string
+     * Update an API with Implement phase data.
      * @param apiObj
-     * @return
+     * @return Returns success/not as a string
      * @throws org.wso2.carbon.apimgt.api.APIManagementException
      */
     public String implementAPI(JSONObject apiObj) throws APIManagementException;
