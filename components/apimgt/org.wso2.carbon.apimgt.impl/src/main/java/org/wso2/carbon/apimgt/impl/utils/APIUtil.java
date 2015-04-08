@@ -926,10 +926,8 @@ public final class APIUtil {
     }
 
     public static String getSwagger20DefinitionFilePath(String apiName, String apiVersion, String apiProvider) {
-        String resourcePath = APIConstants.API_DOC_LOCATION + RegistryConstants.PATH_SEPARATOR +
-                apiName +"-"  + apiVersion + "-" + apiProvider + RegistryConstants.PATH_SEPARATOR + APIConstants.API_DOC_2_0_LOCATION;
-
-        return resourcePath;
+        return APIConstants.API_DOC_LOCATION + RegistryConstants.PATH_SEPARATOR +
+                apiName +"-"  + apiVersion + "-" + apiProvider + RegistryConstants.PATH_SEPARATOR;
     }
 
     /**

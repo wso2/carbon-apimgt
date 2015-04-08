@@ -105,8 +105,7 @@ public class APIProviderHostObject extends ScriptableObject {
         return "APIProvider";
     }
 
-    // API definitions from swagger v1.2 and v2.0
-    static APIDefinitionFromSwagger12 definitionFromSwagger12 = new APIDefinitionFromSwagger12();
+    // API definitions from swagger v2.0
     static APIDefinitionFromSwagger20 definitionFromSwagger20 = new APIDefinitionFromSwagger20();
 
     // The zero-argument constructor used for create instances for runtime
@@ -470,29 +469,12 @@ public class APIProviderHostObject extends ScriptableObject {
             //Set<URITemplate> uriTemplates = parseResourceConfig(apiProvider, apiId, (String) apiData.get("swagger", apiData), api, true);
             //api.setUriTemplates(uriTemplates);
 
-            //Uncomment following section to enable swagger 2.0 functionality
-
-            //Read URI Templates from swagger resource
-            Set<URITemplate> uriTemplates = definitionFromSwagger20.getURITemplates(api, String.valueOf(apiData.get("swagger", apiData)));//(String) apiData.get("swagger", apiData)
+            //Read URI Templates from swagger resource and set to api object
+            Set<URITemplate> uriTemplates = definitionFromSwagger20.getURITemplates(api, String.valueOf(apiData.get("swagger", apiData)));
             api.setUriTemplates(uriTemplates);
 
-            //Get user registry to save api definition
-            RegistryService registryService = ServiceReferenceHolder.getInstance().getRegistryService();
-            int tenantId;
-            UserRegistry registry;
-            try {
-                tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager().getTenantId(tenantDomain);
-                registry = registryService.getGovernanceSystemRegistry(tenantId);
-
-                //Save API definition in the registry
-                definitionFromSwagger20.saveAPIDefinition(api, (String) apiData.get("swagger", apiData), registry);
-            } catch (RegistryException e) {
-                handleException("Error when create registry instance ", e);
-            } catch (UserStoreException e) {
-                handleException("Error while reading tenant information ", e);
-            } catch (ParseException e) {
-                handleException("Error while saving api definition in the registry ", e);
-            }
+            //Save swagger in the registry
+            apiProvider.saveSwagger20Definition(api.getId(),(String) apiData.get("swagger", apiData));
 
         }
 
@@ -599,23 +581,12 @@ public class APIProviderHostObject extends ScriptableObject {
             //Set<URITemplate> uriTemplates = parseResourceConfig(apiProvider, apiId, (String) apiData.get("swagger", apiData), api, false);
             //api.setUriTemplates(uriTemplates);
 
-            //Get user registry to save api definition
-            RegistryService registryService = ServiceReferenceHolder.getInstance().getRegistryService();
-            int tenantId;
-            UserRegistry registry;
-            try {
-                tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager().getTenantId(tenantDomain);
-                registry = registryService.getGovernanceSystemRegistry(tenantId);
+            //Read swagger from the registry
+            String swaggerFromRegistry = apiProvider.getSwagger20Definition(api.getId());
 
-                //Read URI Templates from swagger resource
-                String swaggerFromRegistry = definitionFromSwagger20.getAPIDefinition(api.getId(),registry);
-                Set<URITemplate> uriTemplates = definitionFromSwagger20.getURITemplates(api, swaggerFromRegistry);
-                api.setUriTemplates(uriTemplates);
-            } catch (RegistryException e) {
-                handleException("Error when create registry instance ", e);
-            } catch (UserStoreException e) {
-                handleException("Error while reading tenant information ", e);
-            }
+            //Read URI Templates from swagger resource and set to api object
+            Set<URITemplate> uriTemplates = definitionFromSwagger20.getURITemplates(api, swaggerFromRegistry);
+            api.setUriTemplates(uriTemplates);
         }
                 
         return saveAPI(apiProvider, api, null, false);
@@ -712,27 +683,12 @@ public class APIProviderHostObject extends ScriptableObject {
             //Set<URITemplate> uriTemplates = parseResourceConfig(apiProvider, apiId, (String) apiData.get("swagger", apiData), api, false);
             //api.setUriTemplates(uriTemplates);
 
-            //Read URI Templates from swagger resource
+            //Read URI Templates from swagger resource and set it to api object
             Set<URITemplate> uriTemplates = definitionFromSwagger20.getURITemplates(api, (String) apiData.get("swagger", apiData));
-            //Get user registry to save api definition
-            RegistryService registryService = ServiceReferenceHolder.getInstance().getRegistryService();
-            int tenantId;
-            UserRegistry registry;
-            try {
-                tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager().getTenantId(tenantDomain);
-                registry = registryService.getGovernanceSystemRegistry(tenantId);
-
-                //Save API definition in the registry
-                definitionFromSwagger20.saveAPIDefinition(api, (String) apiData.get("swagger", apiData), registry);
-            } catch (UserStoreException e) {
-                handleException("Error while reading tenant information ", e);
-            } catch (RegistryException e) {
-                handleException("Error when create registry instance ", e);
-            } catch (ParseException e) {
-                handleException("Error while saving api definition in the registry ", e);
-            }
             api.setUriTemplates(uriTemplates);
 
+            //Save the swagger definition in the registry
+            apiProvider.saveSwagger20Definition(api.getId(), (String) apiData.get("swagger", apiData));
         }
                 
         api.setDescription(StringEscapeUtils.escapeHtml(description));
@@ -1069,21 +1025,17 @@ public class APIProviderHostObject extends ScriptableObject {
 	                	if (!"PATCH".equals(httpVerb)) {
 	                		URITemplate template = new URITemplate();
 		                	Scope scope= APIUtil.findScopeByKey(scopeList,(String) operation.get("scope"));
-		                	
-		                	 String authType = (String) operation.get("auth_type");
-		                     if (authType != null) {
-			                	 if (authType.equals("Application & Application User")) {
-			                         authType = APIConstants.AUTH_APPLICATION_OR_USER_LEVEL_TOKEN;
-			                     }
-			                     if (authType.equals("Application User")) {
-			                         authType = "Application_User";
-			                     }
-		                     } else if (isManagePhase) {
-		                    	 authType = APIConstants.AUTH_NO_AUTHENTICATION;
-		                     } else { //saving new resources in design/implement phase
-		                         authType = APIConstants.AUTH_APPLICATION_OR_USER_LEVEL_TOKEN;
-		                     }
-		                     template.setThrottlingTier((String) operation.get("throttling_tier"));
+                            //TODO : handle none
+                            // TODO create enum and add suppotrted http verbs
+                            String authType = (String) operation.get("auth_type");
+                            if ("Application & Application User".equals(authType)) {
+                                authType = APIConstants.AUTH_APPLICATION_OR_USER_LEVEL_TOKEN;
+                            } else if ("Application User".equals(authType)) {
+                                authType = APIConstants.AUTH_APPLICATION_USER_LEVEL_TOKEN;
+                            } else { //saving new resources in design/implement phase
+                                authType = APIConstants.AUTH_APPLICATION_OR_USER_LEVEL_TOKEN;
+                            }
+                            template.setThrottlingTier((String) operation.get("throttling_tier"));
 		                     template.setMediationScript((String) operation.get("mediation_script"));
 		                     template.setUriTemplate(uriTempVal);
 		                 	 template.setHTTPVerb(httpVerb);
