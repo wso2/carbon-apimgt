@@ -35,6 +35,7 @@ import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.FaultGatewaysException;
 import org.wso2.carbon.apimgt.api.dto.UserApplicationAPIUsage;
 import org.wso2.carbon.apimgt.api.model.*;
+import org.wso2.carbon.apimgt.impl.definitions.APIDefinitionFromSwagger20;
 import org.wso2.carbon.apimgt.impl.dto.Environment;
 import org.wso2.carbon.apimgt.impl.dto.TierPermissionDTO;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
@@ -87,6 +88,8 @@ import java.util.regex.Pattern;
 class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 	
 	private static final Log log = LogFactory.getLog(APIProviderImpl.class);
+    // API definitions from swagger v2.0
+    static APIDefinitionFromSwagger20 definitionFromSwagger20 = new APIDefinitionFromSwagger20();
 
     public APIProviderImpl(String username) throws APIManagementException {
         super(username);
@@ -2523,54 +2526,15 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
     @Override
     public String getSwagger20Definition(APIIdentifier apiId) throws APIManagementException {
-        String resourcePath = APIUtil.getSwagger20DefinitionFilePath(apiId.getApiName(), apiId.getVersion(), apiId.getProviderName());
-
-        JSONParser parser = new JSONParser();
-        JSONObject apiJSON = null;
-        try {
-            if (!registry.resourceExists(resourcePath + APIConstants.API_DOC_2_0_RESOURCE_NAME)) {
-                return APIUtil.createSwagger20JSONContent(getAPI(apiId));
-            }
-            Resource apiDocResource = registry.get(resourcePath + APIConstants.API_DOC_2_0_RESOURCE_NAME);
-            String apiDocContent = new String((byte[]) apiDocResource.getContent());
-            apiJSON = (JSONObject) parser.parse(apiDocContent);
-            JSONArray pathConfigs = (JSONArray) apiJSON.get("apis");
-
-            for (int k = 0; k < pathConfigs.size(); k++) {
-                JSONObject pathConfig = (JSONObject) pathConfigs.get(k);
-                String pathName = (String) pathConfig.get("path");
-                pathName = pathName.startsWith("/") ? pathName : ("/" + pathName);
-
-                Resource pathResource = registry.get(resourcePath + pathName);
-                String pathContent = new String((byte[]) pathResource.getContent());
-                JSONObject pathJSON = (JSONObject) parser.parse(pathContent);
-                pathConfig.put("file", pathJSON);
-            }
-        } catch (RegistryException e) {
-            handleException("Error while retrieving Swagger Definition for " + apiId.getApiName() + "-" +
-                    apiId.getVersion(), e);
-        } catch (ParseException e) {
-            handleException("Error while parsing Swagger Definition for " + apiId.getApiName() + "-" +
-                    apiId.getVersion() + " in " + resourcePath, e);
-        }
-        return apiJSON.toJSONString();
+        return definitionFromSwagger20.getAPIDefinition(apiId, registry);
     }
 
     @Override
-    public void updateSwagger20Definition(APIIdentifier apiId, String fileName, String jsonText) throws APIManagementException {
-        try{
-            String resourcePath = APIUtil.getSwagger20DefinitionFilePath(apiId.getApiName(), apiId.getVersion(), apiId.getProviderName());
-            resourcePath = resourcePath + fileName;
-            Resource resource = registry.newResource();
+    public void saveSwagger20Definition(APIIdentifier apiId, String jsonText) throws APIManagementException {
+        try {
+            definitionFromSwagger20.saveAPIDefinition(getAPI(apiId), jsonText, registry);
 
-            resource.setContent(jsonText);
-            resource.setMediaType("application/json");
-            registry.put(resourcePath, resource);
-
-    		/*Set permissions to anonymous role */
-            APIUtil.setResourcePermissions(apiId.getProviderName(), null, null, resourcePath);
-
-        } catch (RegistryException e) {
+        } catch (ParseException e) {
             handleException("Error while adding Swagger v2.0 Definition for " + apiId.getApiName() + "-" + apiId.getVersion(), e);
         } catch (APIManagementException e) {
             handleException("Error while adding Swagger v2.0 Definition for " + apiId.getApiName() + "-" + apiId.getVersion(), e);
