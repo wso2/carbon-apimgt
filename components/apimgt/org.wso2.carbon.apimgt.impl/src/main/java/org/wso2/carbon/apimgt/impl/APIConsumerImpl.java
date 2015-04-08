@@ -2168,7 +2168,4 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 			throws APIManagementException {
 		return apiMgtDAO.getScopesByScopeKeys(scopeKeys, tenantId);
 	}
-
-	
-
 }

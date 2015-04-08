@@ -31,6 +31,7 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
+import org.mozilla.javascript.NativeObject;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.dto.UserApplicationAPIUsage;
@@ -61,6 +62,9 @@ import org.wso2.carbon.apimgt.impl.utils.APINameComparator;
 import org.wso2.carbon.apimgt.impl.utils.APIStoreNameComparator;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.utils.APIVersionComparator;
+import org.wso2.carbon.apimgt.impl.utils.APIVersionStringComparator;
+import org.wso2.carbon.apimgt.impl.utils.CommonUtil;
+import org.wso2.carbon.base.ServerConfiguration;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.governance.api.common.dataobjects.GovernanceArtifact;
 import org.wso2.carbon.governance.api.exception.GovernanceException;
@@ -81,6 +85,7 @@ import org.wso2.carbon.registry.core.session.UserRegistry;
 import org.wso2.carbon.registry.core.utils.RegistryUtils;
 import org.wso2.carbon.user.api.AuthorizationManager;
 import org.wso2.carbon.user.api.UserStoreException;
+import org.wso2.carbon.utils.CarbonUtils;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
@@ -89,6 +94,10 @@ import javax.cache.Caching;
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
 import java.io.File;
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -3147,7 +3156,90 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         return success;
     }
 
+    /**
+     * This method check whether API older version exist or not
+     *
+     * @param apiObj    json object
+     * @return apiOlderVersionExist
+     * @throws APIManagementException
+     */
+    private boolean isAPIOlderVersionExist(NativeObject apiObj) throws APIManagementException {
+        boolean apiOlderVersionExist = false;
+        if (apiObj == null) {
+            handleException("Invalid number of input parameters.");
+        }
+        String provider = (String) apiObj.get("provider", apiObj);
+        provider = APIUtil.replaceEmailDomain(provider);
+        String name = (String) apiObj.get("name", apiObj);
+        String currentVersion = (String) apiObj.get("version", apiObj);
+        boolean isTenantFlowStarted = false;
+        try {
+            String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(provider));
+            if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
+                isTenantFlowStarted = true;
+                PrivilegedCarbonContext.startTenantFlow();
+                PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
+            }
+            Set<String> versions = getAPIVersions(provider, name);
+            APIVersionStringComparator comparator = new APIVersionStringComparator();
+            for (String version : versions) {
+                if (comparator.compare(version, currentVersion) < 0) {
+                    apiOlderVersionExist = true;
+                    break;
+                }
+            }
+        } finally {
+            if (isTenantFlowStarted) {
+                PrivilegedCarbonContext.endTenantFlow();
+            }
+        }
+        return apiOlderVersionExist;
+    }
 
+    /**
+     * This method check whether URL valid or not
+     *
+     * @param type
+     * @param urlVal
+     * @return response
+     * @throws APIManagementException
+     */
+    public String isURLValid(String type, String urlVal) throws APIManagementException {
+        String response = "";
+        if (type == null || urlVal == null) {
+            handleException("Invalid input parameters.");
+        }
+
+        if (urlVal != null && !urlVal.isEmpty()) {
+            try {
+                URL url = new URL(urlVal);
+                if (type != null && "wsdl".equals(type)) {
+                    CommonUtil.validateWsdl(urlVal);
+                    response = "success";
+                }
+                // checking http,https endpoints up to resource level by doing http HEAD.
+                // Other endpoint validation do through basic url connect.
+                else if (url.getProtocol().matches(APIConstants.PROTOCOL_HTTPS)) {
+                    ServerConfiguration serverConfig = CarbonUtils.getServerConfiguration();
+                    String trustStorePath = serverConfig.getFirstProperty("Security.TrustStore.Location");
+                    String trustStorePassword = serverConfig.getFirstProperty("Security.TrustStore.Password");
+                    System.setProperty("javax.net.ssl.trustStore", trustStorePath);
+                    System.setProperty("javax.net.ssl.trustStorePassword", trustStorePassword);
+
+                    return CommonUtil.sendHttpHEADRequest(urlVal);
+                } else if (url.getProtocol().matches(APIConstants.PROTOCOL_HTTP)) {
+                    return CommonUtil.sendHttpHEADRequest(urlVal);
+                } else {
+                    return "error while connecting";
+                }
+            } catch (MalformedURLException e) {
+                handleException("Invalid URL : " + urlVal, e);
+            } catch (IOException e) {
+                handleException("Error occurred while validating the wsdl", e);
+            }
+        }
+        return response;
+    }
 }
 
 
