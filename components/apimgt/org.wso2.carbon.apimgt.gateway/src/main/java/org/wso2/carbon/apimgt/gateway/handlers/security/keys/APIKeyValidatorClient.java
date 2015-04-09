@@ -52,9 +52,9 @@ public class APIKeyValidatorClient {
     
     public APIKeyValidatorClient() throws APISecurityException {
         APIManagerConfiguration config = ServiceReferenceHolder.getInstance().getAPIManagerConfiguration();
-        String serviceURL = config.getFirstProperty(APIConstants.API_KEY_MANAGER_URL);
-        username = config.getFirstProperty(APIConstants.API_KEY_MANAGER_USERNAME);
-        password = config.getFirstProperty(APIConstants.API_KEY_MANAGER_PASSWORD);
+        String serviceURL = config.getFirstProperty(APIConstants.API_KEY_VALIDATOR_URL);
+        username = config.getFirstProperty(APIConstants.API_KEY_VALIDATOR_USERNAME);
+        password = config.getFirstProperty(APIConstants.API_KEY_VALIDATOR_PASSWORD);
         if (serviceURL == null || username == null || password == null) {
             throw new APISecurityException(APISecurityConstants.API_AUTH_GENERAL_ERROR,
                     "Required connection details for the key management server not provided");
