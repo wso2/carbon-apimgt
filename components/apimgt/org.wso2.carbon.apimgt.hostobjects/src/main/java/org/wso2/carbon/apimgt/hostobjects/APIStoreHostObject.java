@@ -49,7 +49,6 @@ import org.wso2.carbon.apimgt.impl.utils.SelfSignUpUtil;
 import org.wso2.carbon.apimgt.impl.workflow.*;
 import org.wso2.carbon.apimgt.keymgt.client.APIAuthenticationServiceClient;
 import org.wso2.carbon.apimgt.keymgt.client.SubscriberKeyMgtClient;
-import org.wso2.carbon.apimgt.keymgt.stub.types.carbon.ApplicationKeysDTO;
 import org.wso2.carbon.apimgt.usage.client.APIUsageStatisticsClient;
 import org.wso2.carbon.apimgt.usage.client.dto.*;
 import org.wso2.carbon.apimgt.usage.client.exception.APIMgtUsageQueryServiceClientException;
@@ -57,10 +56,8 @@ import org.wso2.carbon.authenticator.stub.AuthenticationAdminStub;
 import org.wso2.carbon.base.MultitenantConstants;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.core.util.PermissionUpdateUtil;
-import org.wso2.carbon.identity.base.IdentityConstants;
 import org.wso2.carbon.identity.oauth.config.OAuthServerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIConstants.ApplicationStatus;
-import org.wso2.carbon.identity.oauth.config.OAuthServerConfiguration;
 import org.wso2.carbon.identity.oauth.internal.OAuthComponentServiceHolder;
 import org.wso2.carbon.registry.core.RegistryConstants;
 import org.wso2.carbon.user.core.UserCoreConstants;
@@ -860,7 +857,7 @@ public class APIStoreHostObject extends ScriptableObject {
             //consumer key of oAuthApplication
             String consumerKey = (String) argsData.get("consumerKey", argsData);
             //delete oAuthApplication
-            getAPIConsumer(thisObj).deleteAuthApplication(consumerKey);
+            getAPIConsumer(thisObj).deleteOAuthApplication(consumerKey);
         } else {
             handleException("Invalid input parameters given while trying to delete auth application.");
         }
