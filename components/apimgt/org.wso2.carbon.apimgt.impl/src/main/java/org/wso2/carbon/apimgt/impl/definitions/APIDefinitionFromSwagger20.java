@@ -97,7 +97,6 @@ public class APIDefinitionFromSwagger20 extends APIDefinition {
     }
 
     @Override
-    //TODO check security req obj
     public Set<Scope> getScopes(String resourceConfigsJSON) throws APIManagementException {
         Set<Scope> scopeList = new LinkedHashSet<Scope>();
         JSONObject swaggerObject;
@@ -107,30 +106,25 @@ public class APIDefinitionFromSwagger20 extends APIDefinition {
 
             //Check whether security definitions are defined or not
             if (swaggerObject.get("securityDefinitions") != null) {
-                JSONObject securityDefinitionsObj = (JSONObject) swaggerObject.get("securityDefinitions");
-                //check for oauth2
-                if (securityDefinitionsObj.get("oauth2") != null) {
-                    JSONObject oauth2 = (JSONObject) securityDefinitionsObj.get("oauth2");
-                    if (oauth2.get("scopes") != null) {
-                        JSONArray scopes = (JSONArray) oauth2.get("scopes");
-                        if (scopes != null) {
-                            for (Object scopeObj : scopes) {
-                                Map scopeMap = (Map) scopeObj;
-                                if (scopeMap.get("key") != null) {
-                                    Scope scope = new Scope();
-                                    scope.setKey((String) scopeMap.get("key"));
-                                    scope.setName((String) scopeMap.get("name"));
-                                    scope.setRoles((String) scopeMap.get("roles"));
-                                    scope.setDescription((String) scopeMap.get("description"));
-                                    scopeList.add(scope);
-                                }
-                            }
+                JSONObject securityDefinitionsObjects = (JSONObject) swaggerObject.get("securityDefinitions");
+                Iterator<JSONObject> definitionIterator = securityDefinitionsObjects.values().iterator();
+                while (definitionIterator.hasNext()) {
+                    JSONObject securityDefinition = definitionIterator.next();
+                    if (securityDefinition.get("scopes") != null) {
+                        JSONObject scopes = (JSONObject) securityDefinition.get("scopes");
+                        Set keySet = scopes.keySet();
+                        for (Object key : keySet) {
+                            Scope scope = new Scope();
+                            scope.setKey(key.toString());
+                            scope.setDescription((String) scopes.get(key));
+                            scopeList.add(scope);
+
                         }
                     }
                 }
             }
         } catch (ParseException e) {
-            handleException("Invalid resource configuration ", e);
+            e.printStackTrace();
         }
         return scopeList;
     }
