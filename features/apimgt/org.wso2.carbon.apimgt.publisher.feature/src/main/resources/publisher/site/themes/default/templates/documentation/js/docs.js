@@ -52,6 +52,10 @@ var removeDocumentation = function (provider, apiName, version, docName, docType
                 if (!result.error) {
                     $('#messageModal').modal('hide');
                     $('#' + apiName + '-' + docName.replace(/ /g,'__')).remove();
+                    //////////////////////////////////////////////////////////////////
+                    clearDocs();
+                    ///////////////////////////////////////
+
                     if ($('#docTable tr').length == 1) {
                         $('#docTable').append($('<tr><td colspan="6">'+i18n.t('resultMsgs.noDocs')+'</td></tr>'));
                     }
