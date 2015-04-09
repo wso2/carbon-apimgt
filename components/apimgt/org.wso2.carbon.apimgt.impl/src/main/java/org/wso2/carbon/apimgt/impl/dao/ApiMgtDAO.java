@@ -313,8 +313,9 @@ public class ApiMgtDAO {
             while (rs.next()) {
                 oAuthApplicationInfo.setClientId(consumerKey);
                 oAuthApplicationInfo.setCallBackURL(rs.getString("CALLBACK_URL"));
-                oAuthApplicationInfo.addParameter(ApplicationConstants.
-                        OAUTH_CLIENT_SECRET, rs.getString("CONSUMER_SECRET"));
+                oAuthApplicationInfo.setClientSecret(rs.getString("CONSUMER_SECRET"));
+//                oAuthApplicationInfo.addParameter(ApplicationConstants.
+//                        OAUTH_CLIENT_SECRET, rs.getString("CONSUMER_SECRET"));
                 oAuthApplicationInfo.addParameter(ApplicationConstants.
                         OAUTH_REDIRECT_URIS, rs.getString("CALLBACK_URL"));
                 oAuthApplicationInfo.addParameter(ApplicationConstants.

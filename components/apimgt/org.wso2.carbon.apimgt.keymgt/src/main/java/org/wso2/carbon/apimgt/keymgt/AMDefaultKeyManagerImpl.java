@@ -83,11 +83,13 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
     @Override
     public OAuthApplicationInfo createApplication(OAuthAppRequest oauthAppRequest) throws APIManagementException {
 
+        // OAuthApplications are created by calling to APIKeyMgtSubscriber Service
         SubscriberKeyMgtClient keyMgtClient = APIUtil.getKeyManagementClient();
         OAuthApplicationInfo oAuthApplicationInfo = oauthAppRequest.getOAuthApplicationInfo();
 
-        String userId = (String)oAuthApplicationInfo.getParameter(ApplicationConstants.
-                OAUTH_CLIENT_USERNAME);
+        // Subscriber's name should be passed as a parameter, since it's under the subscriber the OAuth App is created.
+        String userId = (String) oAuthApplicationInfo.getParameter(ApplicationConstants.
+                                                                           OAUTH_CLIENT_USERNAME);
         String applicationName = oAuthApplicationInfo.getClientName();
 
         if (log.isDebugEnabled()) {
@@ -95,16 +97,16 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
         }
 
         String callBackURL = "";
-        if(oAuthApplicationInfo.getParameter("callback_url") != null){
+        if (oAuthApplicationInfo.getParameter("callback_url") != null) {
             JSONArray jsonArray = (JSONArray) oAuthApplicationInfo.getParameter("callback_url");
             for (Object callbackUrlObject : jsonArray) {
                 callBackURL = (String) callbackUrlObject;
             }
         }
 
-        String tokenScope = (String)oAuthApplicationInfo.getParameter("tokenScope");
+        String tokenScope = (String) oAuthApplicationInfo.getParameter("tokenScope");
         String tokenScopes[] = new String[1];
-        tokenScopes[0]= tokenScope;
+        tokenScopes[0] = tokenScope;
 
         oAuthApplicationInfo.addParameter("tokenScope", tokenScopes);
         org.wso2.carbon.apimgt.api.model.xsd.OAuthApplicationInfo info = null;
@@ -114,36 +116,37 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
             handleException("Can not create OAuth application  : " + applicationName, e);
         }
 
-        if(info == null || info.getJsonString() == null){
+        if (info == null || info.getJsonString() == null) {
             handleException("OAuth app does not contains required data  : " + applicationName,
-                    new APIManagementException("OAuth app does not contains required data"));
+                            new APIManagementException("OAuth app does not contains required data"));
         }
 
         oAuthApplicationInfo.setClientName(info.getClientName());
         oAuthApplicationInfo.setClientId(info.getClientId());
         oAuthApplicationInfo.setCallBackURL(info.getCallBackURL());
+        oAuthApplicationInfo.setClientSecret(info.getClientSecret());
 
         try {
-            JSONObject jsonObject  = new JSONObject(info.getJsonString());
-            if(jsonObject.has(ApplicationConstants.OAUTH_CLIENT_SECRET)) {
-                oAuthApplicationInfo.addParameter(ApplicationConstants.
-                        OAUTH_CLIENT_SECRET, jsonObject.get(ApplicationConstants.OAUTH_CLIENT_SECRET));
-            }
+            JSONObject jsonObject = new JSONObject(info.getJsonString());
+//            if (jsonObject.has(ApplicationConstants.OAUTH_CLIENT_SECRET)) {
+//                oAuthApplicationInfo.addParameter(ApplicationConstants.
+//                                                          OAUTH_CLIENT_SECRET, jsonObject.get(ApplicationConstants.OAUTH_CLIENT_SECRET));
+//            }
 
-            if(jsonObject.has(ApplicationConstants.
-                    OAUTH_REDIRECT_URIS)) {
+            if (jsonObject.has(ApplicationConstants.
+                                       OAUTH_REDIRECT_URIS)) {
                 oAuthApplicationInfo.addParameter(ApplicationConstants.
-                        OAUTH_REDIRECT_URIS, jsonObject.get(ApplicationConstants.OAUTH_REDIRECT_URIS));
+                                                          OAUTH_REDIRECT_URIS, jsonObject.get(ApplicationConstants.OAUTH_REDIRECT_URIS));
             }
 
             if (jsonObject.has(ApplicationConstants.OAUTH_CLIENT_NAME)) {
                 oAuthApplicationInfo.addParameter(ApplicationConstants.
-                        OAUTH_CLIENT_NAME, jsonObject.get(ApplicationConstants.OAUTH_CLIENT_NAME));
+                                                          OAUTH_CLIENT_NAME, jsonObject.get(ApplicationConstants.OAUTH_CLIENT_NAME));
             }
 
             if (jsonObject.has(ApplicationConstants.OAUTH_CLIENT_GRANT)) {
                 oAuthApplicationInfo.addParameter(ApplicationConstants.
-                        OAUTH_CLIENT_GRANT, jsonObject.get(ApplicationConstants.OAUTH_CLIENT_GRANT));
+                                                          OAUTH_CLIENT_GRANT, jsonObject.get(ApplicationConstants.OAUTH_CLIENT_GRANT));
             }
         } catch (JSONException e) {
             handleException("Can not retrieve information of the created OAuth application", e);
@@ -189,21 +192,22 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
         try {
             org.wso2.carbon.apimgt.api.model.xsd.OAuthApplicationInfo info = keyMgtClient.getOAuthApplication(consumerKey);
 
-            if (info == null || info.getClientId() == null){
+            if (info == null || info.getClientId() == null) {
                 return null;
             }
             oAuthApplicationInfo.setClientName(info.getClientName());
             oAuthApplicationInfo.setClientId(info.getClientId());
             oAuthApplicationInfo.setCallBackURL(info.getCallBackURL());
+            oAuthApplicationInfo.setClientSecret(info.getClientSecret());
 
-            JSONObject jsonObject  = new JSONObject(info.getJsonString());
-            if(jsonObject.has(ApplicationConstants.OAUTH_CLIENT_SECRET)) {
-                oAuthApplicationInfo.addParameter(ApplicationConstants.
-                                                          OAUTH_CLIENT_SECRET, jsonObject.get(ApplicationConstants.OAUTH_CLIENT_SECRET));
-            }
+            JSONObject jsonObject = new JSONObject(info.getJsonString());
+//            if (jsonObject.has(ApplicationConstants.OAUTH_CLIENT_SECRET)) {
+//                oAuthApplicationInfo.addParameter(ApplicationConstants.
+//                                                          OAUTH_CLIENT_SECRET, jsonObject.get(ApplicationConstants.OAUTH_CLIENT_SECRET));
+//            }
 
-            if(jsonObject.has(ApplicationConstants.
-                                      OAUTH_REDIRECT_URIS)) {
+            if (jsonObject.has(ApplicationConstants.
+                                       OAUTH_REDIRECT_URIS)) {
                 oAuthApplicationInfo.addParameter(ApplicationConstants.
                                                           OAUTH_REDIRECT_URIS, jsonObject.get(ApplicationConstants.OAUTH_REDIRECT_URIS));
             }
@@ -228,8 +232,8 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
     public AccessTokenInfo getNewApplicationAccessToken(AccessTokenRequest tokenRequest)
             throws APIManagementException {
 
-        String newAccessToken = null;
-        long validityPeriod = 0;
+        String newAccessToken;
+        long validityPeriod;
         AccessTokenInfo tokenInfo = null;
 
         if (tokenRequest == null) {
@@ -310,8 +314,8 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
                 JSONObject obj = new JSONObject(responseStr);
                 newAccessToken = obj.get(OAUTH_RESPONSE_ACCESSTOKEN).toString();
                 validityPeriod = Long.parseLong(obj.get(OAUTH_RESPONSE_EXPIRY_TIME).toString());
-                if(obj.has("scope")){
-                    tokenInfo.setScope(((String)obj.get("scope")).split(" "));
+                if (obj.has("scope")) {
+                    tokenInfo.setScope(((String) obj.get("scope")).split(" "));
                 }
                 tokenInfo.setAccessToken(newAccessToken);
                 tokenInfo.setValidityPeriod(validityPeriod);
@@ -336,14 +340,14 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
         AccessTokenInfo tokenInfo = new AccessTokenInfo();
         OAuth2TokenValidationService oAuth2TokenValidationService = new OAuth2TokenValidationService();
         OAuth2TokenValidationRequestDTO requestDTO = new OAuth2TokenValidationRequestDTO();
-        OAuth2TokenValidationRequestDTO.OAuth2AccessToken token = requestDTO. new OAuth2AccessToken();
+        OAuth2TokenValidationRequestDTO.OAuth2AccessToken token = requestDTO.new OAuth2AccessToken();
 
         token.setIdentifier(accessToken);
         token.setTokenType("bearer");
         requestDTO.setAccessToken(token);
 
         //TODO: If these values are not set, validation will fail giving an NPE. Need to see why that happens
-        OAuth2TokenValidationRequestDTO.TokenValidationContextParam contextParam = requestDTO. new
+        OAuth2TokenValidationRequestDTO.TokenValidationContextParam contextParam = requestDTO.new
                 TokenValidationContextParam();
         contextParam.setKey("dummy");
         contextParam.setValue("dummy");
@@ -376,8 +380,8 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
         tokenInfo.setIssuedTime(System.currentTimeMillis());
         tokenInfo.setScope(responseDTO.getScope());
 
-        if(APIUtil.checkAccessTokenPartitioningEnabled() &&
-           APIUtil.checkUserNameAssertionEnabled()){
+        if (APIUtil.checkAccessTokenPartitioningEnabled() &&
+            APIUtil.checkUserNameAssertionEnabled()) {
             tokenInfo.setConsumerKey(ApiMgtDAO.getConsumerKeyForTokenWhenTokenPartitioningEnabled(accessToken));
         }
 
@@ -415,22 +419,22 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
     }
 
     @Override
-    public void loadConfiguration(String configuration) throws APIManagementException{
-        if(configuration != null && !configuration.isEmpty()){
+    public void loadConfiguration(String configuration) throws APIManagementException {
+        if (configuration != null && !configuration.isEmpty()) {
             StAXOMBuilder builder = null;
             try {
                 builder = new StAXOMBuilder(new ByteArrayInputStream(configuration.getBytes()));
                 OMElement document = builder.getDocumentElement();
-                if(this.configuration == null) {
+                if (this.configuration == null) {
                     synchronized (this) {
                         this.configuration = new KeyManagerConfiguration();
                         this.configuration.setManualModeSupported(true);
                         this.configuration.setResourceRegistrationEnabled(true);
                         this.configuration.setTokenValidityConfigurable(true);
                         Iterator<OMElement> elementIterator = document.getChildElements();
-                        while (elementIterator.hasNext()){
+                        while (elementIterator.hasNext()) {
                             OMElement element = elementIterator.next();
-                            this.configuration.addParameter(element.getLocalName(),element.getText());
+                            this.configuration.addParameter(element.getLocalName(), element.getText());
                         }
                     }
                 }
