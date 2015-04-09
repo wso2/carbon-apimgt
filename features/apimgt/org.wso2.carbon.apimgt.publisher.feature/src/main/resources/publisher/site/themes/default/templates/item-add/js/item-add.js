@@ -24,6 +24,31 @@ $( document ).ready(function() {
             }, dataType: 'json'
         });
     });
+
+    $("#startFromExistingSOAPEndpoint").click(function(){
+        $('#startFromExistingSOAPEndpoint-form').ajaxSubmit({
+            success:function(responseText, statusText, xhr, $form){
+                if (!responseText.error) {
+                    window.location = jagg.site.context + "/design"
+                }else {
+                    if (responseText.message == "timeout") {
+                        if (ssoEnabled) {
+                             var currentLoc = window.location.pathname;
+                             if (currentLoc.indexOf(".jag") >= 0) {
+                                 location.href = "index.jag";
+                             } else {
+                                 location.href = 'site/pages/index.jag';
+                             }
+                        } else {
+                             jagg.showLogin();
+                        }
+                    } else {
+                        jagg.message({content:responseText.message,type:"error"});
+                    }
+                }                
+            }, dataType: 'json'
+        });
+    });
     
 
     $('.create-api').click(function(){

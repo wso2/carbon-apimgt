@@ -292,12 +292,28 @@
                     </div>
                 </div>
     </fieldset>
+
+                <% if(session.get("wsdl")) { 
+                   session.put( "wsdl", null );
+                %>
                 <div id="api_designer">
-            <a  href="#swaggerUpload" role="button" class="btn pull-right" data-toggle="modal" ><i class="icon-download-alt" ></i> Import </a>
-            <a  href="#swaggerEditer" id="swaggerEditor" role="button" class="btn pull-right"  data-toggle="modal"  style="margin:0 10px" ><i class="icon-edit" ></i> Edit Source</a>                
+                    <a  href="#wsdlUpload" role="button" class="btn pull-right" data-toggle="modal" ><i class="icon-download-alt" ></i> Import </a>
+                    <legend>API Definition</legend>
+                    <div class="control-group">
+                        <label class="control-label" for="inputResourceTags">WSDL :</label>
+                        <div class="controls">
+                            <a href="#">Open</a>
+                        </div>
+                    </div>                    
+                </div>
+                <% }else{ %>
+                <div id="api_designer">
+                    <a  href="#swaggerUpload" role="button" class="btn pull-right" data-toggle="modal" ><i class="icon-download-alt" ></i> Import </a>
+                    <a  href="#swaggerEditer" id="swaggerEditor" role="button" class="btn pull-right"  data-toggle="modal"  style="margin:0 10px" ><i class="icon-edit" ></i> Edit Source</a>                
                     <div id ="resource_details">
                     </div>
-                </div>            
+                </div>      
+                <% } %>      
     <%if(api!=null){%>
                 <input type = "hidden" name = "bizOwner" value = "<%=api.bizOwner%>" />
                 <input type = "hidden" name = "bizOwnerMail" value = "<%=api.bizOwnerMail%>" />
@@ -311,7 +327,7 @@
                 </div>
                 <div class="form-actions" id="saveButtons">
                     <input type="submit" class="btn btn-default" value="Save" action="design"/>
-                    <a class="btn btn-primary pull-right" id="go_to_implement">Next: Implement &gt;</a>                     
+                    <a class="btn btn-primary" id="go_to_implement">Next: Implement &gt;</a>                     
                 </div>
             </form>
 
@@ -361,9 +377,7 @@
 
 
 <script id="designer-resources-template" type="text/x-handlebars-template">
-<legend>API Definition
-<div class="help-legend">Define API resources to control throttling and security individually.</div>
-</legend>
+<legend>API Definition</legend>
     <div class="resource_create">
         <div class="control-group">
             <label class="control-label" for="inputPassword">URL Pattern</label>

@@ -94,7 +94,6 @@
                                     <select class="select required" id="endpoint_type" name="endpoint_type">
                                         <option value="http"  selected="selected">HTTP Endpoint</option>
                                         <option value="address">Address Endpoint</option>
-                                        <option value="wsdl">WSDL Endpoint</option>
                                         <option value="failover">Failover Endpoint</option>
                                         <option value="load_balance">Load balanced Endpoint</option>
                                     </select>
@@ -143,30 +142,6 @@
                             </div>
                         </div>
 
-                         <div class="control-group api_wsdl">
-                             <label class="control-label" for="wsdl"><%=i18n.localize("wsdl")%>:</label>
-                             <div class="controls">
-                                 <div class="input-append">
-                                 <input type="text" class="input-xlarge validInput" id="wsdl" name="wsdl"  value="<%=api.wsdl%>" />
-                                 <button class="btn check_url_valid" url-type="wsdl" type="button" ><%=i18n.localize("testURI")%></button>
-                                 <a class="icon-question-sign help_popup" help_data="wsdldesc_help"></a>
-                                 <p id="wsdldesc_help" class="hide"><%=i18n.localize("wsdlDescHelpMsg")%></p>
-                                 </div>
-                             <p class="help-block"><%=i18n.localize("wsdlHelpMsg")%></p>
-                             </div>
-                         </div>
-
-                         <div class="control-group">
-                             <label class="control-label" for="wadl"><%=i18n.localize("wadl")%>:</label>
-                             <div class="controls">
-                                 <div class="input-append">
-                                 <input type="text" class="input-xlarge validInput" id="wadl" name="wadl" value="<%=api.wadl%>" />
-                                 <button class="btn check_url_valid"  type="button"  ><%=i18n.localize("testURI")%></button>
-                                 </div>
-                             <p class="help-block"><%=i18n.localize("wadlHelpMsg")%></p>
-                             </div>
-                         </div>
-
                         <% if(isDataPublishingEnabled) { %>
                         <!--Southboud statistics -->
                         <div class="control-group">
@@ -193,7 +168,7 @@
                     <input type="hidden" id="swagger" name="swagger" value="" />
                     <input type="hidden" value="endpoint" name="implementation_methods" >
                     <div class="form-actions" id="saveButtons">
-                        <button type="submit" class="btn btn-info manageSaveButton" id="saveBtn" data-loading-text="<i class='fa fa-spinner fa-pulse' id='loader'></i>Loading">Save</button>
+                        <button type="submit" class="btn btn-default manageSaveButton" id="saveBtn" data-loading-text="<i class='fa fa-spinner fa-pulse' id='loader'></i>Loading">Save</button>
                         <button id="go_to_manage" class="btn btn-primary manageSaveButton pull-right" data-loading-text="<i class='fa fa-spinner fa-pulse' id='loader'></i>Loading">Next : Manage &gt;</button>
                     </div>
                     </form>
@@ -247,6 +222,11 @@
                 </fieldset>
 
                 <div class="form-actions" id="saveButtons">
+                    <input type="hidden" name="name" value="<%= encode.forHtml(api.name) %>" />
+                    <input type="hidden" name="version" value="<%= encode.forHtml(api.version) %>" />
+                    <input type="hidden" name="provider" value="<%= encode.forHtml(api.provider) %>" />
+                    <input type="hidden" name="action" value="implement" />
+                    <input type="hidden" id="swagger" name="swagger" value="" />
                     <button type="submit" class="btn btn-info manageSaveButton" id="savePrototypeBtn" data-loading-text="<i class='fa fa-spinner fa-pulse' id='loader'></i>Loading">Save</button>
                     <button class="btn btn-warning manageSaveButton pull-right" id="prototyped_api" data-loading-text="<i class='fa fa-spinner fa-pulse' id='loader'></i>Loading">Deploy as a Prototype</button>
                 </div>

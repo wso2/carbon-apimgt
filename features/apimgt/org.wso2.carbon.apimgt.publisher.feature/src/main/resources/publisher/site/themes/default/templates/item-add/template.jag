@@ -50,24 +50,24 @@
                      <div class="form-inline">
                         <div class="control-group">
                            <div class="controls toggleRadios">
-                              <label class="control-label sub-select-label">Provide WSDL as</label>
-                               <label class="radio sub-labels"><input type="radio" name="import-wsdl" id="import-wsdl-file" value="WSDL-file"/>File</label>
-                               <label class="radio sub-labels " ><input type="radio" name="import-wsdl" id="import-wsdl-url" value="WSDL-url"/>URL</label>
+                              <label class="control-label sub-select-label">Provide WSDL URL</label>
+                               <!-- label class="radio sub-labels"><input type="radio" name="import-wsdl" id="import-wsdl-file" value="WSDL-file"/>File</label>
+                               <label class="radio sub-labels " ><input type="radio" name="import-wsdl" id="import-wsdl-url" value="WSDL-url"/>URL</label -->
                            </div>
                         </div>
                      </div>
                      <div class="control-group">
                         <div class="control-group toggleContainers">
-                           <div class="controls hide">
-                               <input id="WSDL-url" class="input-xxlarge" type="text"/>
+                           <div class="controls">
+                               <input name="wsdl-url" class="input-xxlarge" type="text"/>
                            </div>
                            <div class="controls hide">
-                              <input id="WSDL-file" type="file" />
+                              <input name="wsdl-file" type="file" />
                            </div>
                         </div>
                         <input name="action" value="start" type="hidden"/>
                         <input name="type" value="soap" type="hidden"/>                        
-                        <button id="startFromExistingSOAPEndpoint" class="btn btn-primary pull-right hide" type="button">Start Creating</button>
+                        <button id="startFromExistingSOAPEndpoint" class="btn btn-primary pull-right" type="button">Start Creating</button>
                      </div>
                   </fieldset>
                </form>

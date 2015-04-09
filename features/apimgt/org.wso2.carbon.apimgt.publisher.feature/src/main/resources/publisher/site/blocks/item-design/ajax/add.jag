@@ -22,6 +22,7 @@ var log = new Log();
             var l = new Log();
             var type = request.getParameter("type");
             var swagger = null;
+            var wsdl = null;
             if(type == "rest"){
                 var url = request.getParameter("swagger-url");
                 var file = request.getFile("swagger-file"); 
@@ -42,10 +43,29 @@ var log = new Log();
                 }
             }
             else if(type == "soap"){
-            //todo need to add validation
+                var url = request.getParameter("wsdl-url");
+                var file = request.getFile("wsdl-file"); 
+                var import_type = request.getParameter("import-definition");  
+                wsdl = "soap";             
+                if(import_type == "wsdl-url" && url){
+                    wsdl = url.trim();
+                    /*var data = { };
+                    var content = get(url, data ,"json");
+                    wsdl = content.data;*/                
+                }
+                else if(import_type == "wsdl-file" && file){
+                    file.open("r");
+                    wsdl = file.readAll();
+                    file.close();                    
+                }
+                var obj = require("/site/blocks/item-design/ajax/default_swagger.json");
+                swagger = stringify(obj);            
             }
             if(swagger){
                 session.put("swagger", swagger);
+            }            
+            if(wsdl){
+                session.put("wsdl", wsdl);
             }
             print({
                 error:false,
@@ -136,7 +156,7 @@ var log = new Log();
 
             apiData.implementation_type = request.getParameter("implementation_methods");
             apiData.wsdl = request.getParameter("wsdl");
-            apiData.wadl = request.getParameter("wadl");
+            //apiData.wadl = request.getParameter("wadl");
             apiData.endpointSecured = request.getParameter("endpointType");
             apiData.endpointUTUsername = request.getParameter("epUsername");
             apiData.endpointUTPassword = request.getParameter("epPassword");
