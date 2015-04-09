@@ -19,7 +19,7 @@
         <BAMUsername>admin</BAMUsername>
         <BAMPassword>admin</BAMPassword>
     </APIUsageTracking>
-    <APIKeyManager>
+    <APIKeyValidator>
         <ServerURL>https://${carbon.local.ip}:${mgt.transport.https.port}${carbon.context}/services/</ServerURL>
         <Username>${admin.username}</Username>
         <Password>${admin.password}</Password>
@@ -33,5 +33,5 @@
         <TokenEndPointName>/oauth2/token</TokenEndPointName>
         <RevokeAPIURL>https://${carbon.local.ip}:${https.nio.port}/revoke</RevokeAPIURL>
         <EncryptPersistedTokens>false</EncryptPersistedTokens>
-    </APIKeyManager>
+    </APIKeyValidator>
 </APIManager>

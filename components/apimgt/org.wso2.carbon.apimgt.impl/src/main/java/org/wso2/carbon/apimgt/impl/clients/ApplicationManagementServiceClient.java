@@ -47,8 +47,8 @@ public class ApplicationManagementServiceClient {
     public ApplicationManagementServiceClient() throws APIManagementException {
         APIManagerConfiguration config = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().
                 getAPIManagerConfiguration();
-        String serviceURL = config.getFirstProperty(APIConstants.API_KEY_MANAGER_URL);
-        //username = config.getFirstProperty(APIConstants.API_KEY_MANAGER_USERNAME);
+        String serviceURL = config.getFirstProperty(APIConstants.API_KEY_VALIDATOR_URL);
+        //username = config.getFirstProperty(APIConstants.API_KEY_VALIDATOR_USERNAME);
 
         if (serviceURL == null) {
             throw new APIManagementException("Required connection details for the key management server not provided");

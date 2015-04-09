@@ -22,7 +22,6 @@ import com.google.gson.Gson;
 
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.http.HttpHeaders;
-import org.json.JSONException;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.apache.axiom.om.OMElement;
@@ -35,7 +34,6 @@ import org.apache.axis2.context.ConfigurationContext;
 import org.apache.axis2.transport.http.HTTPConstants;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.solr.common.SolrDocument;
@@ -43,8 +41,6 @@ import org.apache.solr.common.SolrDocumentList;
 import org.apache.woden.WSDLException;
 import org.apache.woden.WSDLFactory;
 import org.apache.woden.WSDLReader;
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.w3c.dom.Document;
@@ -1070,13 +1066,13 @@ public final class APIUtil {
     public static SubscriberKeyMgtClient getKeyManagementClient() throws APIManagementException {
         APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
                 getAPIManagerConfigurationService().getAPIManagerConfiguration();
-        String url = config.getFirstProperty(APIConstants.API_KEY_MANAGER_URL);
+        String url = config.getFirstProperty(APIConstants.API_KEY_VALIDATOR_URL);
         if (url == null) {
             handleException("API key manager URL unspecified");
         }
 
-        String username = config.getFirstProperty(APIConstants.API_KEY_MANAGER_USERNAME);
-        String password = config.getFirstProperty(APIConstants.API_KEY_MANAGER_PASSWORD);
+        String username = config.getFirstProperty(APIConstants.API_KEY_VALIDATOR_USERNAME);
+        String password = config.getFirstProperty(APIConstants.API_KEY_VALIDATOR_PASSWORD);
         if (username == null || password == null) {
             handleException("Authentication credentials for API key manager unspecified");
         }
@@ -3350,7 +3346,7 @@ public final class APIUtil {
         APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
                 getAPIManagerConfigurationService().getAPIManagerConfiguration();
 
-        if(Boolean.parseBoolean(config.getFirstProperty(APIConstants.API_KEY_MANAGER_ENCRYPT_TOKENS))){
+        if(Boolean.parseBoolean(config.getFirstProperty(APIConstants.API_KEY_VALIDATOR_ENCRYPT_TOKENS))){
             return new String(CryptoUtil.getDefaultCryptoUtil().base64DecodeAndDecrypt(token));
         }
         return token;
@@ -3365,7 +3361,7 @@ public final class APIUtil {
         APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
                 getAPIManagerConfigurationService().getAPIManagerConfiguration();
 
-        if(Boolean.parseBoolean(config.getFirstProperty(APIConstants.API_KEY_MANAGER_ENCRYPT_TOKENS))){
+        if(Boolean.parseBoolean(config.getFirstProperty(APIConstants.API_KEY_VALIDATOR_ENCRYPT_TOKENS))){
             return CryptoUtil.getDefaultCryptoUtil().encryptAndBase64Encode(token.getBytes());
         }
         return token;

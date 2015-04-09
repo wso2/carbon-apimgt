@@ -41,18 +41,6 @@ public class ApplicationUtils {
 
     private static Log log = LogFactory.getLog(ApplicationUtils.class);
 
-    /**
-     * This method will return object Application object by application name and Subscriber.
-     * When initiating ApplicationImpl, it will call it's super class's(Application) constructor
-     * @param appName APIM application name
-     * @param userId Logged in user.
-     * @return APIM application.
-     */
-    public static Application getNewApplication(String appName, String userId) {
-        //initiate ApplicationImpl
-        Application application = new Application(appName, new Subscriber(userId));
-        return application;
-    }
 
     /**
      * This method will take application name and user id as parameters and will return application object.
@@ -67,9 +55,9 @@ public class ApplicationUtils {
     }
 
     /**
-     *
-     * @param workflowReference
-     * @return
+     * Get details of an Application referred by an Application Registration workflow.
+     * @param workflowReference Reference ID for an Application Registration Workflow
+     * @return {@code Application} Details of the Application.
      * @throws APIManagementException
      */
     public static Application populateApplication(String workflowReference)

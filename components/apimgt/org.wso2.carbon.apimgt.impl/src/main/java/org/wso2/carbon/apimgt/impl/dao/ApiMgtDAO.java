@@ -92,7 +92,7 @@ public class ApiMgtDAO {
 		        } else {
             String enableJWTGeneration = configuration.getFirstProperty(APIConstants.ENABLE_JWT_GENERATION);
             removeUserNameInJWTForAppToken = Boolean.parseBoolean(configuration.getFirstProperty(
-                    APIConstants.API_KEY_MANAGER_REMOVE_USERNAME_TO_JWT_FOR_APP_TOKEN));
+                    APIConstants.API_KEY_VALIDATOR_REMOVE_USERNAME_TO_JWT_FOR_APP_TOKEN));
             if (enableJWTGeneration != null && JavaUtils.isTrueExplicitly(enableJWTGeneration)) {
                 String clazz = configuration.getFirstProperty(APIConstants.TOKEN_GENERATOR_IMPL);
                 if (clazz == null) {
