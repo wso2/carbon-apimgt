@@ -191,10 +191,10 @@
                     <input type="hidden" name="provider" value="<%= encode.forHtml(api.provider) %>" />
                     <input type="hidden" name="action" value="implement" />
                     <input type="hidden" id="swagger" name="swagger" value="" />
-
+                    <input type="hidden" value="endpoint" name="implementation_methods" >
                     <div class="form-actions" id="saveButtons">
                         <button type="submit" class="btn btn-info manageSaveButton" id="saveBtn" data-loading-text="<i class='fa fa-spinner fa-pulse' id='loader'></i>Loading">Save</button>
-                        <button id="go_to_manage" class="btn btn-primary manageSaveButton pull-right" data-loading-text="<i class='fa fa-spinner fa-pulse' id='loader'></i>Loading">Next : Manage ></button>
+                        <button id="go_to_manage" class="btn btn-primary manageSaveButton pull-right" data-loading-text="<i class='fa fa-spinner fa-pulse' id='loader'></i>Loading">Next : Manage &gt;</button>
                     </div>
                     </form>
                 </div>

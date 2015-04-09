@@ -36,6 +36,9 @@ var log = new Log();
                     file.open("r");
                     swagger = file.readAll();
                     file.close();                    
+                }else{
+                    var obj = require("/site/blocks/item-design/ajax/default_swagger.json");
+                    swagger = stringify(obj);
                 }
             }
             else if(type == "soap"){
