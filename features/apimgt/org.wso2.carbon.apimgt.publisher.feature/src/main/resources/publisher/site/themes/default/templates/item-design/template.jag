@@ -92,7 +92,6 @@
         <span id="editWarnSpan"><b>Warning!</b><br/>
         You are editing an API with active subscribers. Tier Availability changes will not be reflected on
         active subscriptions.<br/>
-        API Definition for Swagger will not be overriden with the changes you will do to the API.
         </span>
     </div>
   <%  }%>
@@ -141,10 +140,7 @@
               id="design_form"
               enctype="multipart/form-data" action="<%= jagg.url("/site/blocks/item-design/ajax/add.jag?" + apiUrlId ) %>">
 <fieldset>
-    <legend><%=i18n.localize("generalDetailsTitle")%>
-            <a  href="#swaggerUpload" role="button" class="btn pull-right" data-toggle="modal" ><i class="icon-download-alt" ></i> Import Swagger Definition</a>
-            <a  href="#swaggerEditer" id="swaggerEditor" role="button" class="btn pull-right"  data-toggle="modal"  style="margin:0 10px" ><i class="icon-edit" ></i> Edit Swagger Definition</a>
-    </legend>
+    <legend><%=i18n.localize("generalDetailsTitle")%></legend>
     <% if(!api){ %>    
     <div class="control-group">
         <label class="control-label" for="name"><%=i18n.localize("name")%>:<span class="requiredAstrix">*</span></label>
@@ -297,7 +293,10 @@
                 </div>
     </fieldset>
                 <div id="api_designer">
-                    <div id ="resource_details"></div>
+            <a  href="#swaggerUpload" role="button" class="btn pull-right" data-toggle="modal" ><i class="icon-download-alt" ></i> Import </a>
+            <a  href="#swaggerEditer" id="swaggerEditor" role="button" class="btn pull-right"  data-toggle="modal"  style="margin:0 10px" ><i class="icon-edit" ></i> Edit Source</a>                
+                    <div id ="resource_details">
+                    </div>
                 </div>            
     <%if(api!=null){%>
                 <input type = "hidden" name = "bizOwner" value = "<%=api.bizOwner%>" />
@@ -311,9 +310,8 @@
                     <div class="btn loadingButton">Saving API. Please wait..</div>
                 </div>
                 <div class="form-actions" id="saveButtons">
-                    <input type="submit" class="btn btn-primary" value="Save" action="design"/>
-                    <a class="btn btn-primary" id="go_to_implement">Implement</a>                     
-                    <input type="reset"  class="btn" value="<%=i18n.localize("cancel")%>" onclick="javascript:window.location.href='./'" />                    
+                    <input type="submit" class="btn btn-default" value="Save" action="design"/>
+                    <a class="btn btn-primary" id="go_to_implement">Implement </a>                     
                 </div>
             </form>
 
@@ -363,7 +361,9 @@
 
 
 <script id="designer-resources-template" type="text/x-handlebars-template">
-<legend>Resources</legend>
+<legend>Resources
+<div class="help-legend">Define API resources to control throttling and security individually.</div>
+</legend>
     <div class="resource_create">
         <div class="control-group">
             <label class="control-label" for="inputPassword">URL Pattern</label>
@@ -382,20 +382,24 @@
             <label class="control-label" for=""></label>
             <div class="controls">
                 {{#each verbs}}
-                    <label class="checkbox inline">
+                    <label class="checkbox inline" style="text-transform:uppercase;">
                     <input type="checkbox" value="{{ . }}" class="http_verb_select" >  {{ . }}
                     </label>
                 {{/each}}
             </div>
         </div>
-        <div class="control-group">
+        <!-- div class="control-group">
             <label class="control-label" for="inputResourceTags">Tags</label>
             <div class="controls">
                 <input type="text" id="inputResourceTags" placeholder="tags">
-                <button class="btn" type="button" id="add_resource" style="margin:10px 0 0px 0px;"><i class="icon-plus-sign"></i>&nbsp;<%=i18n.localize("addNewResource")%></button>
             </div>
-        </div>
-
+        </div -->
+        <div class="control-group">
+            <label class="control-label"></label>
+            <div class="controls">
+                <button class="btn" type="button" id="add_resource" style="margin:10px 0 0px 0px;"><i class="icon-plus-sign"></i>&nbsp;Add</button>
+            </div>
+        </div>        
     </div>
 <table style="width:100%">                       
 {{#each doc.paths}}
