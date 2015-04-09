@@ -2946,6 +2946,7 @@ public final class APIUtil {
      *          if failed to generate the content and save
      * @throws ParseException 
      */
+    @Deprecated
     public static String createSwagger12JSONContent(API api) throws APIManagementException {
 
     	JSONParser parser = new JSONParser();
@@ -3113,6 +3114,7 @@ public final class APIUtil {
      * @throws org.wso2.carbon.apimgt.api.APIManagementException
      *          if failed to generate the content and save
      */
+    @Deprecated
     public static String createSwaggerJSONContent(API api) throws APIManagementException {
     	APIIdentifier identifier = api.getId();
 

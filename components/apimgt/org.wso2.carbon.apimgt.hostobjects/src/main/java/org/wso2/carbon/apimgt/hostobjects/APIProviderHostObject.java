@@ -929,7 +929,8 @@ public class APIProviderHostObject extends ScriptableObject {
      * @return set of Uri Templates according to api
      * @throws APIManagementException
      */
-    /*
+
+    @Deprecated
     private static Set<URITemplate> parseResourceConfig(APIProvider apiProvider,
                                                         APIIdentifier apiId,
                                                         String resourceConfigsJSON, API api, boolean isManagePhase)
@@ -1053,14 +1054,14 @@ public class APIProviderHostObject extends ScriptableObject {
 	                	if (!"PATCH".equals(httpVerb)) {
 	                		URITemplate template = new URITemplate();
 		                	Scope scope= APIUtil.findScopeByKey(scopeList,(String) operation.get("scope"));
-                            //TODO : handle none
-                            // TODO create enum and add suppotrted http verbs
                             String authType = (String) operation.get("auth_type");
                             if ("Application & Application User".equals(authType)) {
                                 authType = APIConstants.AUTH_APPLICATION_OR_USER_LEVEL_TOKEN;
                             } else if ("Application User".equals(authType)) {
                                 authType = APIConstants.AUTH_APPLICATION_USER_LEVEL_TOKEN;
-                            } else { //saving new resources in design/implement phase
+                            } else if ("None".equals(authType)) {
+                                authType = APIConstants.AUTH_TYPE_NONE;
+                            } else {
                                 authType = APIConstants.AUTH_APPLICATION_OR_USER_LEVEL_TOKEN;
                             }
                             template.setThrottlingTier((String) operation.get("throttling_tier"));
@@ -1088,7 +1089,6 @@ public class APIProviderHostObject extends ScriptableObject {
         return uriTemplates;
     }
 
-    */
     /**
      * This method is to functionality of add a new API in API-Provider
      *
