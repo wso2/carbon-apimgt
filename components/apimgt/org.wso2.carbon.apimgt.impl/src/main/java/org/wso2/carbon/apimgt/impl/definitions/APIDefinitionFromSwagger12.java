@@ -21,6 +21,9 @@ package org.wso2.carbon.apimgt.impl.definitions;
 import org.json.simple.parser.ParseException;
 import org.wso2.carbon.apimgt.api.APIDefinition;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.doc.model.APIResource;
+import org.wso2.carbon.apimgt.api.doc.model.Operation;
+import org.wso2.carbon.apimgt.api.doc.model.Parameter;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.Scope;
@@ -38,14 +41,13 @@ import org.wso2.carbon.registry.api.Resource;
 import org.wso2.carbon.registry.api.RegistryException;
 import org.wso2.carbon.apimgt.impl.dto.Environment;
 
-import java.util.LinkedHashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import static org.wso2.carbon.apimgt.impl.utils.APIUtil.handleException;
 
 public class APIDefinitionFromSwagger12 extends APIDefinition {
     @Override
+    @Deprecated
     public Set<URITemplate> getURITemplates(API api, String resourceConfigsJSON) throws APIManagementException {
         JSONParser parser = new JSONParser();
         JSONObject resourceConfigs;
@@ -101,21 +103,7 @@ public class APIDefinitionFromSwagger12 extends APIDefinition {
                 // embedded in the context
                 String basePath = endpoint + api.getContext();
                 resourceConfig.put("basePath", basePath);
-                //String resourceJSON = resourceConfig.toJSONString();
 
-                /*String resourcePath = (String) resourceConfig.get("resourcePath");
-                RegistryService registryService = ServiceReferenceHolder.getInstance().getRegistryService();
-                int tenantId;
-                UserRegistry registry = null;
-                String userName = APIUtil.replaceEmailDomainBack(api.getId().getProviderName());
-                String tenantDomain =  MultitenantUtils.getTenantDomain(userName);
-
-                tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager().getTenantId(tenantDomain);
-                registry = registryService.getGovernanceSystemRegistry(tenantId);
-                saveAPIDefinition(api, resourceConfig.toJSONString(), registry, resourcePath);
-
-                //apiProvider.updateSwagger12Definition(apiId, resourcePath, resourceConfig.toJSONString());
-                */
                 JSONArray resource_configs = (JSONArray) resourceConfig.get("apis");
 
                 //Iterating each Sub resourcePath config
@@ -167,6 +155,7 @@ public class APIDefinitionFromSwagger12 extends APIDefinition {
     }
 
     @Override
+    @Deprecated
     public Set<Scope> getScopes(String resourceConfigsJSON) throws APIManagementException {
         Set<Scope> scopeList = new LinkedHashSet<Scope>();
         JSONObject resourceConfigs;
@@ -205,7 +194,8 @@ public class APIDefinitionFromSwagger12 extends APIDefinition {
     }
 
     @Override
-    public void saveAPIDefinition(API api, String apiDefinitionJSON, Registry registry) throws ParseException, APIManagementException {
+    @Deprecated
+    public void saveAPIDefinition(API api, String apiDefinitionJSON, Registry registry) throws APIManagementException {
         String apiName = api.getId().getApiName();
         String apiVersion = api.getId().getVersion();
         String apiProviderName = api.getId().getProviderName();
@@ -230,6 +220,7 @@ public class APIDefinitionFromSwagger12 extends APIDefinition {
     }
 
     @Override
+    @Deprecated
     public String getAPIDefinition(APIIdentifier apiIdentifier, Registry registry) throws APIManagementException {
         String resourcePath = APIUtil.getSwagger12DefinitionFilePath(apiIdentifier.getApiName(),
                 apiIdentifier.getVersion(), apiIdentifier.getProviderName());
@@ -263,5 +254,165 @@ public class APIDefinitionFromSwagger12 extends APIDefinition {
         }
         return apiJSON.toJSONString();
 
+    }
+
+    @Override
+    @Deprecated
+    public String createAPIDefinition(API api) throws APIManagementException {
+        JSONParser parser = new JSONParser();
+        String pathJsonTemplate = "{\n    \"path\": \"\",\n    \"operations\": []\n}";
+        String operationJsonTemplate = "{\n    \"method\": \"\",\n    \"parameters\": []\n}";
+        String apiJsonTemplate = "{\n    \"apiVersion\": \"\",\n    \"swaggerVersion\": \"1.2\",\n    \"apis\": [],\n    \"info\": {\n        \"title\": \"\",\n        \"description\": \"\",\n        \"termsOfServiceUrl\": \"\",\n        \"contact\": \"\",\n        \"license\": \"\",\n        \"licenseUrl\": \"\"\n    },\n    \"authorizations\": {\n        \"oauth2\": {\n            \"type\": \"oauth2\",\n            \"scopes\": []\n        }\n    }\n}";
+        String apiResourceJsontemplate = "{\n    \"apiVersion\": \"\",\n    \"swaggerVersion\": \"1.2\",\n    \"resourcePath\":\"\",\n    \"apis\": [],\n    \"info\": {\n        \"title\": \"\",\n        \"description\": \"\",\n        \"termsOfServiceUrl\": \"\",\n        \"contact\": \"\",\n        \"license\": \"\",\n        \"licenseUrl\": \"\"\n    },\n    \"authorizations\": {\n        \"oauth2\": {\n            \"type\": \"oauth2\",\n            \"scopes\": []\n        }\n    }\n}";
+
+
+        APIIdentifier identifier = api.getId();
+
+        APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
+                getAPIManagerConfigurationService().getAPIManagerConfiguration();
+
+        Environment environment = (Environment) config.getApiGatewayEnvironments().values().toArray()[0];
+        String endpoints = environment.getApiGatewayEndpoint();
+        String[] endpointsSet = endpoints.split(",");
+        String apiContext = api.getContext();
+        String version = identifier.getVersion();
+        Set<URITemplate> uriTemplates = api.getUriTemplates();
+        String description = api.getDescription();
+
+        if (endpointsSet.length < 1) {
+            throw new APIManagementException("Error in creating JSON representation of the API" + identifier.getApiName());
+        }
+        if (description == null || description.equals("")) {
+            description = "";
+        } else {
+            description = description.trim();
+        }
+
+
+        Map<String, List<String>> resourceNamepaths = new HashMap<String, List<String>>();
+
+        Map<String, JSONObject> resourceNameJSONs = new HashMap<String, JSONObject>();
+
+        Map<String, List<JSONObject>> resourcePathJSONs = new HashMap<String, List<JSONObject>>();
+
+        List<APIResource> apis = new ArrayList<APIResource>();
+
+        JSONObject mainAPIJson = null;
+
+        try {
+            mainAPIJson = (JSONObject) parser.parse(apiJsonTemplate);
+
+            for (URITemplate template : uriTemplates) {
+                List<Operation> ops;
+                List<Parameter> parameters = null;
+
+                String path = template.getUriTemplate();
+
+                if (path != null && (path.equals("/*") || (path.equals("/")))) {
+                    path = "/*";
+                }
+                List<String> resourcePaths;
+                int resourceNameEndIndex = path.indexOf("/", 1);
+                String resourceName = "/default";
+                if(resourceNameEndIndex != -1) {
+                    resourceName = path.substring(1, resourceNameEndIndex);
+                }
+
+                if(!resourceName.startsWith("/")) {
+                    resourceName = "/" + resourceName;
+                }
+
+                if(resourceNamepaths.get(resourceName) != null) {
+                    resourcePaths = resourceNamepaths.get(resourceName);
+                    if (!resourcePaths.contains(path)) {
+                        resourcePaths.add(path);
+                    }
+                    String httpVerbsStrng = template.getMethodsAsString();
+                    String[] httpVerbs = httpVerbsStrng.split(" ");
+                    for (String httpVerb : httpVerbs) {
+                        final JSONObject operationJson = (JSONObject) parser.parse(operationJsonTemplate);
+                        operationJson.put("method", httpVerb);
+                        operationJson.put("auth_type", template.getAuthType());
+                        operationJson.put("throttling_tier", template.getThrottlingTier());
+
+                        if(resourcePathJSONs.get(path) != null) {
+                            resourcePathJSONs.get(path).add(operationJson);
+
+                        } else {
+                            resourcePathJSONs.put(path, new ArrayList<JSONObject>() {{
+                                add(operationJson);
+                            }});
+                        }
+                    }
+                    resourceNamepaths.put(resourceName, resourcePaths);
+                } else {
+                    JSONObject resourcePathJson = (JSONObject) parser.parse(apiResourceJsontemplate);
+
+                    resourcePathJson.put("apiVersion", version);
+                    resourcePathJson.put("resourcePath", resourceName);
+                    resourceNameJSONs.put(resourceName, resourcePathJson);
+
+                    resourcePaths = new ArrayList<String>();
+                    resourcePaths.add(path);
+
+                    String httpVerbsStrng = template.getMethodsAsString();
+                    String[] httpVerbs = httpVerbsStrng.split(" ");
+                    for (String httpVerb : httpVerbs) {
+                        final JSONObject operationJson = (JSONObject) parser.parse(operationJsonTemplate);
+                        operationJson.put("method", httpVerb);
+                        operationJson.put("auth_type", template.getAuthType());
+                        operationJson.put("throttling_tier", template.getThrottlingTier());
+
+                        if(resourcePathJSONs.get(path) != null) {
+                            resourcePathJSONs.get(path).add(operationJson);
+
+                        } else {
+                            resourcePathJSONs.put(path, new ArrayList<JSONObject>() {{
+                                add(operationJson);
+                            }});
+                        }
+                    }
+                    resourceNamepaths.put(resourceName, resourcePaths);
+                }
+            }
+
+            for (Map.Entry<String, List<String>> entry : resourceNamepaths.entrySet()) {
+                String resourcePath = entry.getKey();
+                JSONObject jsonOb = resourceNameJSONs.get(resourcePath);
+                List<String> pathItems = entry.getValue();
+                for (String pathItem : pathItems) {
+                    JSONObject pathJson = (JSONObject) parser.parse(pathJsonTemplate);
+                    pathJson.put("path", pathItem);
+                    List<JSONObject> methodJsons = resourcePathJSONs.get(pathItem);
+                    for (JSONObject methodJson : methodJsons) {
+                        JSONArray operations = (JSONArray) pathJson.get("operations");
+                        operations.add(methodJson);
+                    }
+                    JSONArray apis1 = (JSONArray) jsonOb.get("apis");
+                    apis1.add(pathJson);
+                }
+            }
+
+            mainAPIJson.put("apiVersion", version);
+            ((JSONObject)mainAPIJson.get("info")).put("description", description);
+            for (Map.Entry<String, List<String>> entry : resourceNamepaths.entrySet()) {
+                String resourcePath = entry.getKey();
+                JSONObject jsonOb = resourceNameJSONs.get(resourcePath);
+                JSONArray apis1 = (JSONArray) mainAPIJson.get("apis");
+                JSONObject pathjob = new JSONObject();
+                pathjob.put("path",resourcePath);
+                pathjob.put("description","");
+                pathjob.put("file",jsonOb);
+                apis1.add(pathjob);
+
+            }
+        } catch(ParseException e) {
+            throw new APIManagementException("Error while generating swagger 1.2 resource for api " + api.getId().getProviderName()
+                    + "-" + api.getId().getApiName()
+                    + "-" + api.getId().getVersion(), e);
+        }
+
+
+        return mainAPIJson.toJSONString();
     }
 }
