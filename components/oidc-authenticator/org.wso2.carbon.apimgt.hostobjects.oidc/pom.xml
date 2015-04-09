@@ -106,7 +106,7 @@
                         <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
                         <Bundle-Name>${project.artifactId}</Bundle-Name>
                         <Export-Package>
-                            org.wso2.carbon.hostobjects.oidc.*;
+                            org.wso2.carbon.apimgt.hostobjects.oidc.*;
                         </Export-Package>
                         <Import-Package>
                             com.nimbusds.*; version="[0.0.0,3.0.0)",
