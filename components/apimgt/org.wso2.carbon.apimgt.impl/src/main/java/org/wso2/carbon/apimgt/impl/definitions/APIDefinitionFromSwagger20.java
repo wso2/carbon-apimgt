@@ -131,19 +131,32 @@ public class APIDefinitionFromSwagger20 extends APIDefinition {
                     if (securityDefinition.get("scopes") != null) {
                         JSONObject scopes = (JSONObject) securityDefinition.get("scopes");
                         JSONObject roles = null;
-                        if (securityDefinition.get("x-scope-roles") != null) {
+                        JSONObject roleNames = null;
+                        if(securityDefinition.get("x-scope-roles") != null) {
                             roles = (JSONObject) securityDefinition.get("x-scope-roles");
+                        }
+                        if(securityDefinition.get("x-scope-names") != null) {
+                            roleNames = (JSONObject) securityDefinition.get("x-scope-names");
                         }
                         Set keySet = scopes.keySet();
                         for (Object key : keySet) {
                             Scope scope = new Scope();
                             scope.setKey(key.toString());
                             scope.setDescription((String) scopes.get(key));
+                            //Check roles
                             if (roles != null) {
                                 if (roles.get(key) != null) {
                                     scope.setRoles(roles.get(key).toString());
                                 } else {
                                     scope.setRoles("[]");
+                                }
+                            }
+                            //Check role names
+                            if (roleNames != null) {
+                                if (roleNames.get(key) != null) {
+                                    scope.setName(roleNames.get(key).toString());
+                                } else {
+                                    scope.setName("");
                                 }
                             }
                             scopeList.add(scope);
