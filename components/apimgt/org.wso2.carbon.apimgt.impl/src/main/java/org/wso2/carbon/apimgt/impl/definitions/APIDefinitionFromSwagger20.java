@@ -20,7 +20,6 @@ package org.wso2.carbon.apimgt.impl.definitions;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
@@ -38,7 +37,6 @@ import org.wso2.carbon.registry.api.Resource;
 
 import java.util.Iterator;
 import java.util.LinkedHashSet;
-import java.util.Map;
 import java.util.Set;
 
 import static org.wso2.carbon.apimgt.impl.utils.APIUtil.handleException;
@@ -48,6 +46,14 @@ public class APIDefinitionFromSwagger20 extends APIDefinition {
     private static final Log log = LogFactory.getLog(APIDefinitionFromSwagger20.class);
     private final String SWAGGER_2_0_FILE_NAME = "/swagger.json";
 
+    /**
+     * This method returns URI templates according to the given swagger file
+     *
+     * @param api                 API
+     * @param resourceConfigsJSON swaggerJSON
+     * @return URI Templates
+     * @throws APIManagementException
+     */
     @Override
     public Set<URITemplate> getURITemplates(API api, String resourceConfigsJSON) throws APIManagementException {
         JSONParser parser = new JSONParser();
@@ -96,6 +102,13 @@ public class APIDefinitionFromSwagger20 extends APIDefinition {
         return uriTemplates;
     }
 
+    /**
+     * This method returns the oauth scopes according to the given swagger
+     *
+     * @param resourceConfigsJSON resource json
+     * @return scope set
+     * @throws APIManagementException
+     */
     @Override
     public Set<Scope> getScopes(String resourceConfigsJSON) throws APIManagementException {
         Set<Scope> scopeList = new LinkedHashSet<Scope>();
@@ -112,23 +125,43 @@ public class APIDefinitionFromSwagger20 extends APIDefinition {
                     JSONObject securityDefinition = definitionIterator.next();
                     if (securityDefinition.get("scopes") != null) {
                         JSONObject scopes = (JSONObject) securityDefinition.get("scopes");
+                        JSONObject roles = null;
+                        if (securityDefinition.get("x-scope-roles") != null) {
+                            roles = (JSONObject) securityDefinition.get("x-scope-roles");
+                        }
                         Set keySet = scopes.keySet();
                         for (Object key : keySet) {
                             Scope scope = new Scope();
                             scope.setKey(key.toString());
                             scope.setDescription((String) scopes.get(key));
+                            if (roles != null) {
+                                if (roles.get(key) != null) {
+                                    scope.setRoles(roles.get(key).toString());
+                                } else {
+                                    scope.setRoles("[]");
+                                }
+                            }
                             scopeList.add(scope);
-
                         }
                     }
                 }
+
             }
         } catch (ParseException e) {
-            e.printStackTrace();
+            handleException("Invalid resource configuration ", e);
         }
         return scopeList;
     }
 
+    /**
+     * This method saves api definition json in the registry
+     *
+     * @param api               API to be saved
+     * @param apiDefinitionJSON API definition as JSON string
+     * @param registry          user registry
+     * @throws ParseException
+     * @throws APIManagementException
+     */
     @Override
     public void saveAPIDefinition(API api, String apiDefinitionJSON, Registry registry) throws ParseException, APIManagementException {
         String apiName = api.getId().getApiName();
@@ -141,8 +174,7 @@ public class APIDefinitionFromSwagger20 extends APIDefinition {
             Resource resource;
             if (!registry.resourceExists(resourcePath)) {
                 resource = registry.newResource();
-            }
-            else {
+            } else {
                 resource = registry.get(resourcePath);
             }
             resource.setContent(apiDefinitionJSON);
@@ -160,6 +192,15 @@ public class APIDefinitionFromSwagger20 extends APIDefinition {
 
     }
 
+
+    /**
+     * This method returns api definition json for given api
+     *
+     * @param apiIdentifier api identifier
+     * @param registry      user registry
+     * @return api definition json as json string
+     * @throws APIManagementException
+     */
     @Override
     public String getAPIDefinition(APIIdentifier apiIdentifier, Registry registry) throws APIManagementException {
         String resourcePath = APIUtil.getSwagger20DefinitionFilePath(apiIdentifier.getApiName(),
