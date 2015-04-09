@@ -2534,8 +2534,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         try {
             definitionFromSwagger20.saveAPIDefinition(getAPI(apiId), jsonText, registry);
 
-        } catch (ParseException e) {
-            handleException("Error while adding Swagger v2.0 Definition for " + apiId.getApiName() + "-" + apiId.getVersion(), e);
         } catch (APIManagementException e) {
             handleException("Error while adding Swagger v2.0 Definition for " + apiId.getApiName() + "-" + apiId.getVersion(), e);
         }
