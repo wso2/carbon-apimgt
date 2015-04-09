@@ -491,7 +491,7 @@ public final class APIConstants {
     
     public static final String SUBSCRIPTION_TO_CURRENT_TENANT = "current_tenant";
     public static final String SUBSCRIPTION_TO_ALL_TENANTS = "all_tenants";
-    public static final String SUBSCRIPTION_TO_SPECIFIC_TENANTS = "specific_tennats";
+    public static final String SUBSCRIPTION_TO_SPECIFIC_TENANTS = "specific_tenants";
     public static final String NO_PERMISSION_ERROR="noPermissions";
     public static final String JSON_PARSE_ERROR="parseErrors";
 
