@@ -925,11 +925,17 @@ public final class APIUtil {
     	return resourcePath;
     }
 
+    //remove getSwagger12DefinitionFilePath once getSwagger20DefinitionFilePath operates
     public static String getSwagger12DefinitionFilePath(String apiName, String apiVersion, String apiProvider) {
     	String resourcePath = APIConstants.API_DOC_LOCATION + RegistryConstants.PATH_SEPARATOR +
     			apiName +"-"  + apiVersion + "-" + apiProvider + RegistryConstants.PATH_SEPARATOR + APIConstants.API_DOC_1_2_LOCATION;
 
     	return resourcePath;
+    }
+
+    public static String getSwagger20DefinitionFilePath(String apiName, String apiVersion, String apiProvider) {
+        return APIConstants.API_DOC_LOCATION + RegistryConstants.PATH_SEPARATOR +
+                apiName +"-"  + apiVersion + "-" + apiProvider + RegistryConstants.PATH_SEPARATOR;
     }
 
     /**
@@ -2940,6 +2946,7 @@ public final class APIUtil {
      *          if failed to generate the content and save
      * @throws ParseException 
      */
+    @Deprecated
     public static String createSwagger12JSONContent(API api) throws APIManagementException {
 
     	JSONParser parser = new JSONParser();
@@ -3099,6 +3106,7 @@ public final class APIUtil {
     	return mainAPIJson.toJSONString();
      }
 
+
     /**
      * Create API Definition in JSON
      *
@@ -3106,6 +3114,7 @@ public final class APIUtil {
      * @throws org.wso2.carbon.apimgt.api.APIManagementException
      *          if failed to generate the content and save
      */
+    @Deprecated
     public static String createSwaggerJSONContent(API api) throws APIManagementException {
     	APIIdentifier identifier = api.getId();
 

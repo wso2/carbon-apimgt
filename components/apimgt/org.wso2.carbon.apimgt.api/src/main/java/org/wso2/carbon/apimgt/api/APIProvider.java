@@ -425,4 +425,23 @@ public interface APIProvider extends APIManager {
      * @throws APIManagementException
      */
     public String[] getConsumerKeys(APIIdentifier apiIdentifier) throws APIManagementException;
+
+    /**
+     * Returns the swagger v2.0 definition as a string
+     *
+     * @param apiId id of the APIIdentifier
+     * @return swagger string
+     * @throws APIManagementException
+     */
+    public String getSwagger20Definition(APIIdentifier apiId) throws APIManagementException;
+
+
+    /**
+     * This method updates Swagger 2.0 resources in the registry
+     *
+     * @param apiId    id of the APIIdentifier
+     * @param jsonText json text to be saved in the registry
+     * @throws APIManagementException
+     */
+    public void saveSwagger20Definition(APIIdentifier apiId, String jsonText) throws APIManagementException;
 }

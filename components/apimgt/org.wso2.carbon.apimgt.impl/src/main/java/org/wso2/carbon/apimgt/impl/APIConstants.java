@@ -18,6 +18,7 @@
 
 package org.wso2.carbon.apimgt.impl;
 
+import javax.ws.rs.POST;
 import javax.xml.namespace.QName;
 
 /**
@@ -100,6 +101,7 @@ public final class APIConstants {
     public static final String API_DOC_RESOURCE_NAME = "api-doc.json";
     
     public static final String API_DOC_1_2_RESOURCE_NAME = "/api-doc";
+    public static final String API_DOC_2_0_RESOURCE_NAME = "/api-doc";
     
     public static final String API_DEFINITION_DOC_NAME = "Swagger API Definition";
 
@@ -531,6 +533,7 @@ public final class APIConstants {
     public static final String AUTH_NO_AUTHENTICATION = "None";
     public static final String AUTH_APPLICATION_LEVEL_TOKEN = "Application";
     public static final String AUTH_APPLICATION_USER_LEVEL_TOKEN = "Application_User";
+    public static final String AUTH_APP_AND_USER ="Application_User";
     public static final String AUTH_APPLICATION_OR_USER_LEVEL_TOKEN = "Any";
     public static final String NO_MATCHING_AUTH_SCHEME = "noMatchedAuthScheme";
 
@@ -668,5 +671,12 @@ public final class APIConstants {
     public static final String API_STORE_GROUP_EXTRACTOR_IMPLEMENTATION = API_STORE + "GroupingExtractor";
 
 
+    public static enum SupportedHTTPVerbs {
+        GET,
+        POST,
+        PUT,
+        DELETE,
+        OPTIONS
+    }
 
 }

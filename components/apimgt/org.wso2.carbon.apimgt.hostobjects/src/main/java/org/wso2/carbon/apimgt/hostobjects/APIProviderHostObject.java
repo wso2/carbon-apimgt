@@ -54,6 +54,7 @@ import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.impl.UserAwareAPIProvider;
 import org.wso2.carbon.apimgt.impl.factory.KeyManagerFactory;
+import org.wso2.carbon.apimgt.impl.definitions.APIDefinitionFromSwagger20;
 import org.wso2.carbon.apimgt.impl.dto.Environment;
 import org.wso2.carbon.apimgt.impl.dto.TierPermissionDTO;
 import org.wso2.carbon.apimgt.impl.utils.APIAuthenticationAdminClient;
@@ -70,6 +71,9 @@ import org.wso2.carbon.base.ServerConfiguration;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.core.util.PermissionUpdateUtil;
 import org.wso2.carbon.registry.core.RegistryConstants;
+import org.wso2.carbon.registry.core.exceptions.RegistryException;
+import org.wso2.carbon.registry.core.service.RegistryService;
+import org.wso2.carbon.registry.core.session.UserRegistry;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.user.mgt.stub.UserAdminStub;
 import org.wso2.carbon.utils.CarbonUtils;
@@ -85,7 +89,6 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.*;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -105,6 +108,9 @@ public class APIProviderHostObject extends ScriptableObject {
     public String getClassName() {
         return "APIProvider";
     }
+
+    // API definitions from swagger v2.0
+    static APIDefinitionFromSwagger20 definitionFromSwagger20 = new APIDefinitionFromSwagger20();
 
     // The zero-argument constructor used for create instances for runtime
     public APIProviderHostObject() throws APIManagementException {
@@ -404,8 +410,9 @@ public class APIProviderHostObject extends ScriptableObject {
         APIProvider apiProvider = getAPIProvider(thisObj);
         API api = null;
         boolean isTenantFlowStarted = false;
+        String tenantDomain = null;
         try {
-            String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(provider));
+            tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(provider));
             if(tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
             	isTenantFlowStarted = true;
                 PrivilegedCarbonContext.startTenantFlow();
@@ -466,9 +473,16 @@ public class APIProviderHostObject extends ScriptableObject {
         api.setLastUpdated(new Date());
 
         if (apiData.get("swagger", apiData) != null) {
-            Set<URITemplate> uriTemplates = parseResourceConfig(apiProvider, apiId, (String) apiData
-                    .get("swagger", apiData), api, true);
+            //Set<URITemplate> uriTemplates = parseResourceConfig(apiProvider, apiId, (String) apiData.get("swagger", apiData), api, true);
+            //api.setUriTemplates(uriTemplates);
+
+            //Read URI Templates from swagger resource and set to api object
+            Set<URITemplate> uriTemplates = definitionFromSwagger20.getURITemplates(api, String.valueOf(apiData.get("swagger", apiData)));
             api.setUriTemplates(uriTemplates);
+
+            //Save swagger in the registry
+            apiProvider.saveSwagger20Definition(api.getId(),(String) apiData.get("swagger", apiData));
+
         }
 
         // removing scopes from cache
@@ -542,8 +556,9 @@ public class APIProviderHostObject extends ScriptableObject {
         APIProvider apiProvider = getAPIProvider(thisObj);
         API api = null;
         boolean isTenantFlowStarted = false;
+        String tenantDomain;
         try {
-            String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(provider));
+            tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(provider));
             if(tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
             	isTenantFlowStarted = true;
                 PrivilegedCarbonContext.startTenantFlow();
@@ -590,8 +605,14 @@ public class APIProviderHostObject extends ScriptableObject {
         	        
         
         if (apiData.get("swagger", apiData) != null) {
-            Set<URITemplate> uriTemplates = parseResourceConfig(apiProvider, apiId, (String) apiData
-                    .get("swagger", apiData), api, false);
+            //Set<URITemplate> uriTemplates = parseResourceConfig(apiProvider, apiId, (String) apiData.get("swagger", apiData), api, false);
+            //api.setUriTemplates(uriTemplates);
+
+            //Read swagger from the registry
+            String swaggerFromRegistry = apiProvider.getSwagger20Definition(api.getId());
+
+            //Read URI Templates from swagger resource and set to api object
+            Set<URITemplate> uriTemplates = definitionFromSwagger20.getURITemplates(api, swaggerFromRegistry);
             api.setUriTemplates(uriTemplates);
         }
                 
@@ -670,8 +691,9 @@ public class APIProviderHostObject extends ScriptableObject {
         APIProvider apiProvider = getAPIProvider(thisObj);
         API api = null;
         boolean isTenantFlowStarted = false;
+        String tenantDomain;
         try {
-            String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(provider));
+            tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(provider));
             if(tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
             	isTenantFlowStarted = true;
                 PrivilegedCarbonContext.startTenantFlow();
@@ -685,9 +707,15 @@ public class APIProviderHostObject extends ScriptableObject {
         }
         
         if (apiData.get("swagger", apiData) != null) {
-            Set<URITemplate> uriTemplates = parseResourceConfig(apiProvider, apiId, (String) apiData
-                    .get("swagger", apiData), api, false);
+            //Set<URITemplate> uriTemplates = parseResourceConfig(apiProvider, apiId, (String) apiData.get("swagger", apiData), api, false);
+            //api.setUriTemplates(uriTemplates);
+
+            //Read URI Templates from swagger resource and set it to api object
+            Set<URITemplate> uriTemplates = definitionFromSwagger20.getURITemplates(api, (String) apiData.get("swagger", apiData));
             api.setUriTemplates(uriTemplates);
+
+            //Save the swagger definition in the registry
+            apiProvider.saveSwagger20Definition(api.getId(), (String) apiData.get("swagger", apiData));
         }
                 
         api.setDescription(StringEscapeUtils.escapeHtml(description));
@@ -774,7 +802,7 @@ public class APIProviderHostObject extends ScriptableObject {
     }
     
     /**
-     * Returns the Swagger12 definition 
+     * Returns the Swagger12 definition //todo this actually returns swagger v2.0, create a new method
      * @param cx
      * @param thisObj
      * @param args
@@ -812,8 +840,19 @@ public class APIProviderHostObject extends ScriptableObject {
                 PrivilegedCarbonContext.startTenantFlow();
                 PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
             }
-        
-            apiJSON = apiProvider.getSwagger12Definition(apiId);
+            RegistryService registryService = ServiceReferenceHolder.getInstance().getRegistryService();
+            int tenantId;
+            UserRegistry registry;
+            try {
+                tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager().getTenantId(tenantDomain);
+                registry = registryService.getGovernanceSystemRegistry(tenantId);
+
+                apiJSON = definitionFromSwagger20.getAPIDefinition(apiId,registry); //apiProvider.getSwagger12Definition(apiId);
+            } catch (RegistryException e) {
+                handleException("Error when create registry instance ", e);
+            } catch (UserStoreException e) {
+                handleException("Error while reading tenant information ", e);
+            }
         } finally {
         	if (isTenantFlowStarted) {
         		PrivilegedCarbonContext.endTenantFlow();
@@ -882,6 +921,7 @@ public class APIProviderHostObject extends ScriptableObject {
     	return success;
     }
 
+
     /**
      * This method parses the JSON resource config and returns the UriTemplates. Also it saves the swagger
      * 1.2 resources in the registry
@@ -889,6 +929,8 @@ public class APIProviderHostObject extends ScriptableObject {
      * @return set of Uri Templates according to api
      * @throws APIManagementException
      */
+
+    @Deprecated
     private static Set<URITemplate> parseResourceConfig(APIProvider apiProvider,
                                                         APIIdentifier apiId,
                                                         String resourceConfigsJSON, API api, boolean isManagePhase)
@@ -912,7 +954,7 @@ public class APIProviderHostObject extends ScriptableObject {
             }
             apiProvider.updateSwagger12Definition(apiId, APIConstants.API_DOC_1_2_RESOURCE_NAME, apiJSON);
             
-            /* Get Scopes*/
+            //Get Scopes
             if (api_doc.get("authorizations") != null) {
             	JSONObject authorizations = (JSONObject) api_doc.get("authorizations");
             	if (authorizations.get("oauth2") != null) {
@@ -1008,26 +1050,21 @@ public class APIProviderHostObject extends ScriptableObject {
 	                for (int k = 0; k < operations.size(); k++) {
 	                	JSONObject operation = (JSONObject) operations.get(k);
 	                	String httpVerb = (String) operation.get("method");
-	                	/* Right Now PATCH is not supported. Need to remove
-	                	 * this check when PATCH is supported*/
+	                	//Right Now PATCH is not supported. Need to remove this check when PATCH is supported
 	                	if (!"PATCH".equals(httpVerb)) {
 	                		URITemplate template = new URITemplate();
 		                	Scope scope= APIUtil.findScopeByKey(scopeList,(String) operation.get("scope"));
-		                	
-		                	 String authType = (String) operation.get("auth_type");
-		                     if (authType != null) {
-			                	 if (authType.equals("Application & Application User")) {
-			                         authType = APIConstants.AUTH_APPLICATION_OR_USER_LEVEL_TOKEN;
-			                     }
-			                     if (authType.equals("Application User")) {
-			                         authType = "Application_User";
-			                     }
-		                     } else if (isManagePhase) {
-		                    	 authType = APIConstants.AUTH_NO_AUTHENTICATION;
-		                     } else { //saving new resources in design/implement phase
-		                         authType = APIConstants.AUTH_APPLICATION_OR_USER_LEVEL_TOKEN;
-		                     }
-		                     template.setThrottlingTier((String) operation.get("throttling_tier"));
+                            String authType = (String) operation.get("auth_type");
+                            if ("Application & Application User".equals(authType)) {
+                                authType = APIConstants.AUTH_APPLICATION_OR_USER_LEVEL_TOKEN;
+                            } else if ("Application User".equals(authType)) {
+                                authType = APIConstants.AUTH_APPLICATION_USER_LEVEL_TOKEN;
+                            } else if ("None".equals(authType)) {
+                                authType = APIConstants.AUTH_TYPE_NONE;
+                            } else {
+                                authType = APIConstants.AUTH_APPLICATION_OR_USER_LEVEL_TOKEN;
+                            }
+                            template.setThrottlingTier((String) operation.get("throttling_tier"));
 		                     template.setMediationScript((String) operation.get("mediation_script"));
 		                     template.setUriTemplate(uriTempVal);
 		                 	 template.setHTTPVerb(httpVerb);
@@ -1051,6 +1088,7 @@ public class APIProviderHostObject extends ScriptableObject {
         }
         return uriTemplates;
     }
+
     /**
      * This method is to functionality of add a new API in API-Provider
      *

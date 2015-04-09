@@ -35,6 +35,7 @@ import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.FaultGatewaysException;
 import org.wso2.carbon.apimgt.api.dto.UserApplicationAPIUsage;
 import org.wso2.carbon.apimgt.api.model.*;
+import org.wso2.carbon.apimgt.impl.definitions.APIDefinitionFromSwagger20;
 import org.wso2.carbon.apimgt.impl.dto.Environment;
 import org.wso2.carbon.apimgt.impl.dto.TierPermissionDTO;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
@@ -87,6 +88,8 @@ import java.util.regex.Pattern;
 class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 	
 	private static final Log log = LogFactory.getLog(APIProviderImpl.class);
+    // API definitions from swagger v2.0
+    static APIDefinitionFromSwagger20 definitionFromSwagger20 = new APIDefinitionFromSwagger20();
 
     public APIProviderImpl(String username) throws APIManagementException {
         super(username);
@@ -2520,7 +2523,22 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
         return apiMgtDAO.getConsumerKeys(apiIdentifier);
     }
-	
+
+    @Override
+    public String getSwagger20Definition(APIIdentifier apiId) throws APIManagementException {
+        return definitionFromSwagger20.getAPIDefinition(apiId, registry);
+    }
+
+    @Override
+    public void saveSwagger20Definition(APIIdentifier apiId, String jsonText) throws APIManagementException {
+        try {
+            definitionFromSwagger20.saveAPIDefinition(getAPI(apiId), jsonText, registry);
+
+        } catch (APIManagementException e) {
+            handleException("Error while adding Swagger v2.0 Definition for " + apiId.getApiName() + "-" + apiId.getVersion(), e);
+        }
+    }
+
 }
 
 
