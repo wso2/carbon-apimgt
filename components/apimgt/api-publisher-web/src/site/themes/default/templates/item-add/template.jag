@@ -388,7 +388,7 @@ var RESOURCES = [
 	                	<label class="control-label" for="subscriptions"><%=i18n.localize("subscriptionsTitle")%>:</label>
 	                			
 						<div class="controls">
-		                	<select class="select required" id="subscriptions" name="subscriptions" onchange="showHideTennats()">
+		                	<select class="select required" id="subscriptions" name="subscriptions" onchange="showHideTenants()">
 			                	<option value="current_tenant"><%=i18n.localize("availableToCurrentTenant")%></option>
 			                	<option value="all_tenants"><%=i18n.localize("availableToAllTenants")%></option>
 			                	<option value="specific_tennats"><%=i18n.localize("availableToSpecificTenants")%></option>

@@ -406,7 +406,7 @@ API Definition for Swagger will not be overriden with the changes you will do to
 	                	<label class="control-label" for="subscriptions"><%=i18n.localize("subscriptionsTitle")%>:</label>
 	                			
 						<div class="controls">
-		                	<select class="select required" id="subscriptions" name="subscriptions" onchange="showHideTennats()">
+		                	<select class="select required" id="subscriptions" name="subscriptions" onchange="showHideTenants()">
 			                	<option value="current_tenant" <%if(api.subscriptionAvailability=="current_tenant"){%> selected="selected" <%}%> ><%=i18n.localize("availableToCurrentTenant")%></option>
 			                	<option value="all_tenants" <%if(api.subscriptionAvailability=="all_tenants"){%> selected="selected" <%}%> ><%=i18n.localize("availableToAllTenants")%></option>
 			                	<option value="specific_tennats" <%if(api.subscriptionAvailability=="specific_tennats"){%> selected="selected" <%}%> ><%=i18n.localize("availableToSpecificTenants")%></option>
