@@ -235,7 +235,7 @@ function showHideRoles(){
     }
 }
 
-function showHideTennats(){
+function showHideTenants(){
     var subscription = $('#subscriptions').find(":selected").val();
 
     if (subscription == "current_tenant" || subscription == "all_tenants"){
