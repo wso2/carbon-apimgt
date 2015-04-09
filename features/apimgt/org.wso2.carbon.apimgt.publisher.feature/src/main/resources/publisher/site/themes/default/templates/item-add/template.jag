@@ -11,9 +11,9 @@
                 <label class="radio select-label"><input class="create-api" type="radio" name="create-api" data-target="#existingAPI"/>I have an Existing API</label>
                <p><%=i18n.localize("createFromExistingAPI")%></p>
             </div>
-            <div id="existingAPI" class="slideContainer">
+            <div id="existingAPI" class="slideContainer hide">
                <div class="well">
-                  <form role="form" id="startFromExistingAPI-form">
+                  <form role="form" id="startFromExistingAPI-form" enctype="multipart/form-data" action="<%= jagg.url("/site/blocks/item-design/ajax/add.jag") %>">
                      <fieldset>
                         <div class="form-inline">
                            <div class="control-group toggleRadios">
@@ -26,12 +26,14 @@
                         </div>
                         <div class="control-group toggleContainers">
                            <div class="controls hide">
-                               <input id="swagger-url" class="input-xxlarge" type="text"/>
+                               <input name="swagger-url" id="swagger-url" class="input-xxlarge" type="text"/>
                            </div>
                            <div class="controls hide">
-                              <input id="swagger-file" type="file" class="upload" />
+                              <input name="swagger-file" id="swagger-file" type="file" class="upload" />
                            </div>
                         </div>
+                        <input name="action" value="start" type="hidden"/>
+                        <input name="type" value="rest" type="hidden"/>
                         <button id="startFromExistingAPI" class="btn btn-primary pull-right" type="button">Start Creating</button>
                </fieldset>
                </form>
@@ -41,9 +43,9 @@
             <label class="radio select-label"><input class="create-api" type="radio" name="create-api" data-target="#soapEndpoint">I have a SOAP Endpoint</label>
             <p><%=i18n.localize("createFromExistingSOAPEndpoint")%></p>
          </div>
-         <div id="soapEndpoint" class="slideContainer">
+         <div id="soapEndpoint" class="slideContainer hide">
             <div class="well">
-               <form role="form" id="startFromExistingSOAPEndpoint-form">
+               <form role="form" id="startFromExistingSOAPEndpoint-form" action="<%= jagg.url("/site/blocks/item-design/ajax/add.jag") %>">
                   <fieldset>
                      <div class="form-inline">
                         <div class="control-group">
@@ -63,7 +65,9 @@
                               <input id="WSDL-file" type="file" />
                            </div>
                         </div>
-                        <button id="startFromExistingSOAPEndpoint" class="btn btn-primary pull-right" type="button">Start Creating</button>
+                        <input name="action" value="start" type="hidden"/>
+                        <input name="type" value="soap" type="hidden"/>                        
+                        <button id="startFromExistingSOAPEndpoint" class="btn btn-primary pull-right hide" type="button">Start Creating</button>
                      </div>
                   </fieldset>
                </form>

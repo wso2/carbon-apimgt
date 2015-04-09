@@ -449,6 +449,15 @@
             });
             $("#design_form").submit();
         });
+
+        <% 
+            var swagger = session.get("swagger");
+            if(swagger){ %>
+                $.get( jagg.site.context + "/site/blocks/item-design/ajax/import.jag", { "action" : "session" } , function( data ) {
+                    var designer = APIDesigner();
+                    designer.load_api_document(data);
+                });
+        <% } %>
     });
 </script>    
 <% }); %>

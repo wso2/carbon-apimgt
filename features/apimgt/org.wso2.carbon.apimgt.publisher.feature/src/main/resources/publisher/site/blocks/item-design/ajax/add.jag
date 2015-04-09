@@ -18,7 +18,38 @@ var log = new Log();
             message:'timeout'
         });
     }else{
-        if (request.getMethod() == 'POST' && (action === "design")) {
+        if (request.getMethod() == 'POST' && (action === "start")) {
+            var l = new Log();
+            var type = request.getParameter("type");
+            var swagger = null;
+            if(type == "rest"){
+                var url = request.getParameter("swagger-url");
+                var file = request.getFile("swagger-file"); 
+                var import_type = request.getParameter("import-definition");               
+                if(import_type == "swagger-url" && url){
+                    url = url.trim();
+                    var data = { };
+                    var content = get(url, data ,"json");
+                    swagger = content.data;                    
+                }
+                else if(import_type == "swagger-file" && file){
+                    file.open("r");
+                    swagger = file.readAll();
+                    file.close();                    
+                }
+            }
+            else if(type == "soap"){
+            //todo need to add validation
+            }
+            if(swagger){
+                session.put("swagger", swagger);
+            }
+            print({
+                error:false,
+                message:'imported'
+            });
+
+        }else if (request.getMethod() == 'POST' && (action === "design")) {
             mod = jagg.module("api");
             var apiData = {};
             apiData.apiName = request.getParameter("name", "UTF-8");
