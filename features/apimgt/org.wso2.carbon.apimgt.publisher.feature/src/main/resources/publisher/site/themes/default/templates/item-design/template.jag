@@ -361,7 +361,7 @@
 
 
 <script id="designer-resources-template" type="text/x-handlebars-template">
-<legend>Resources
+<legend>API Definition
 <div class="help-legend">Define API resources to control throttling and security individually.</div>
 </legend>
     <div class="resource_create">
