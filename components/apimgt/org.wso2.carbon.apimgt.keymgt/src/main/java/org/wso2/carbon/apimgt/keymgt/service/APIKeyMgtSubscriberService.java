@@ -191,8 +191,9 @@ public class APIKeyMgtSubscriberService extends AbstractAdmin {
             OAuthApplicationInfo oAuthApplicationInfo = new OAuthApplicationInfo();
             oAuthApplicationInfo.setClientId(createdApp.getOauthConsumerKey());
             oAuthApplicationInfo.setCallBackURL(createdApp.getCallbackUrl());
-            oAuthApplicationInfo.addParameter(ApplicationConstants.
-                    OAUTH_CLIENT_SECRET, createdApp.getOauthConsumerSecret());
+            oAuthApplicationInfo.setClientSecret(createdApp.getOauthConsumerSecret());
+//            oAuthApplicationInfo.addParameter(ApplicationConstants.
+//                    OAUTH_CLIENT_SECRET, createdApp.getOauthConsumerSecret());
             oAuthApplicationInfo.addParameter(ApplicationConstants.
                     OAUTH_REDIRECT_URIS, createdApp.getCallbackUrl());
             oAuthApplicationInfo.addParameter(ApplicationConstants.
@@ -377,7 +378,6 @@ public class APIKeyMgtSubscriberService extends AbstractAdmin {
      * @return
      * @throws Exception
      */
-
     public String renewAccessToken(String tokenType, String oldAccessToken,
                                    String[] allowedDomains, String clientId, String clientSecret,
                                    String validityTime) throws Exception {

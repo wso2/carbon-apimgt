@@ -2829,11 +2829,11 @@ public class APIStoreHostObject extends ScriptableObject {
 
                         if (prodKey != null && prodKey.getAccessToken() != null) {
                             String jsonString = prodApp.getJsonString();
-                            jsonObject = (JSONObject) parser.parse(jsonString);
 
-                            String prodConsumerKey = (String) prodApp.getClientId();
-                            String prodConsumerSecret = (String) jsonObject.get(ApplicationConstants.
-                                    OAUTH_CLIENT_SECRET);
+                            String prodConsumerKey = prodApp.getClientId();
+                            String prodConsumerSecret = prodApp.getClientSecret();
+//                            String prodConsumerSecret = (String) jsonObject.get(ApplicationConstants.
+//                                    OAUTH_CLIENT_SECRET);
                             appObj.put("prodKey", appObj, prodKey.getAccessToken());
 
 			                appObj.put("prodKeyScope", appObj, prodKeyScope);
@@ -2902,11 +2902,11 @@ public class APIStoreHostObject extends ScriptableObject {
 
                         if (sandboxKey != null && sandboxKey.getConsumerKey() != null) {
                             String jsonString = sandApp.getJsonString();
-                            jsonObject = (JSONObject) parser.parse(jsonString);
 
-                            String sandboxConsumerKey = (String) sandApp.getClientId();
-                            String sandboxConsumerSecret = (String) jsonObject.
-                                    get(ApplicationConstants.OAUTH_CLIENT_SECRET);
+                            String sandboxConsumerKey = sandApp.getClientId();
+                            String sandboxConsumerSecret = sandApp.getClientSecret();
+//                            String sandboxConsumerSecret = (String) jsonObject.
+//                                    get(ApplicationConstants.OAUTH_CLIENT_SECRET);
                             appObj.put("sandboxKey", appObj, sandboxKey.getAccessToken());
 
                             appObj.put("sandKeyScope", appObj, sandKeyScope);
@@ -2989,8 +2989,6 @@ public class APIStoreHostObject extends ScriptableObject {
             }
         } catch (APIManagementException e) {
             handleException("Error while obtaining application data", e);
-        } catch (ParseException e) {
-            handleException("Error while parsing json string.", e);
         } finally {
             if (isTenantFlowStarted) {
                 PrivilegedCarbonContext.endTenantFlow();

@@ -32,7 +32,7 @@ if(tenant!=null) {
     	var subscriptionAvailability = api.subscriptionAvailability;
     	if (subscriptionAvailability == 'all_tenants') {
     		subsPermitted = true;
-    	} else if (subscriptionAvailability == 'specific_tennats') {
+    	} else if (subscriptionAvailability == 'specific_tenants') {
     		subsPermitted = false;
     		var subscriptionAvailableTenants = api.subscriptionAvailableTenants;
     		if (subscriptionAvailableTenants != null) {

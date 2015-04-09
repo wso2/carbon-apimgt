@@ -25,12 +25,15 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
-
+/*
+* Captures common attributes used in an OAuth Application.
+* */
 public class OAuthApplicationInfo {
 
     private String clientId;
     private String clientName;
     private String callBackURL;
+    private String clientSecret;
     private Map<String,Object> parameters = new HashMap<String, Object>();
 
     /**
@@ -46,6 +49,14 @@ public class OAuthApplicationInfo {
      */
     public void setClientId(String clientId) {
         this.clientId = clientId;
+    }
+
+    public String getClientSecret() {
+        return clientSecret;
+    }
+
+    public void setClientSecret(String clientSecret) {
+        this.clientSecret = clientSecret;
     }
 
     /**
