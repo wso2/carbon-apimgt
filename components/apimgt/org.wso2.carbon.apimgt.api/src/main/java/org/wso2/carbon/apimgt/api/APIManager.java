@@ -18,6 +18,8 @@
 
 package org.wso2.carbon.apimgt.api;
 
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
 import org.wso2.carbon.apimgt.api.model.*;
 
 import java.util.List;
@@ -58,7 +60,7 @@ public interface APIManager {
      * @return An API object related to the given identifier or null
      * @throws org.wso2.carbon.apimgt.api.APIManagementException if failed get API from APIIdentifier
      */
-    public API getAPI(APIIdentifier identifier) throws APIManagementException;
+    public JSONObject getAPI(JSONObject identifier) throws APIManagementException;
 
     /**
      * Checks the Availability of given APIIdentifier
@@ -294,4 +296,24 @@ public interface APIManager {
      * @throws org.wso2.carbon.apimgt.api.APIManagementException if failed to get the predefined tiers
      */
     public Map<String,String> getTenantDomainMappings(String tenantDomain) throws APIManagementException;
+
+    /**
+     * When enabled publishing to external APIStores support,get all the external apistore details which are
+     * published and stored in db and which are not unpublished
+     * @param apiId The API Identifier which need to update in db
+     * @throws APIManagementException
+     *          If failed to update subscription status
+     */
+
+    public Set<APIStore> getExternalAPIStores(APIIdentifier apiId) throws APIManagementException;
+    /**
+     * Returns full list of Subscribers of an API
+     *
+     * @param identifier APIIdentifier
+     * @return Set<Subscriber>
+     * @throws org.wso2.carbon.apimgt.api.APIManagementException if failed to get Subscribers
+     */
+    public JSONArray getSubscribersOfAPI(JSONObject identifier)
+            throws APIManagementException;
+
 }

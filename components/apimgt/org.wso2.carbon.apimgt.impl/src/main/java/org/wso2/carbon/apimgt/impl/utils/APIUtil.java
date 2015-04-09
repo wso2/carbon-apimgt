@@ -40,9 +40,11 @@ import org.apache.woden.WSDLFactory;
 import org.apache.woden.WSDLReader;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
+import org.json.simple.JSONValue;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.mozilla.javascript.NativeArray;
+import org.mozilla.javascript.NativeObject;
 import org.w3c.dom.Document;
 import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.apimgt.api.APIManagementException;
@@ -4661,4 +4663,26 @@ public final class APIUtil {
     }
 
     // End of APIStore related methods.
+
+    public static String checkValue(String input) {
+        return input != null ? input : "";
+    }
+
+    public static String checkTransport(String compare, String transport)
+            throws APIManagementException {
+        if (transport != null) {
+            List<String> transportList = new ArrayList<String>();
+            transportList.addAll(Arrays.asList(transport.split(",")));
+            if (transportList.contains(compare)) {
+                return "checked";
+            } else {
+                return "";
+            }
+
+        } else {
+            return "";
+        }
+    }
+
+
 }

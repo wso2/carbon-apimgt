@@ -19,8 +19,18 @@ package org.wso2.carbon.apimgt.api;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
-import org.wso2.carbon.apimgt.api.dto.UserApplicationAPIUsage;
-import org.wso2.carbon.apimgt.api.model.*;
+import org.wso2.carbon.apimgt.api.model.API;
+import org.wso2.carbon.apimgt.api.model.APIIdentifier;
+import org.wso2.carbon.apimgt.api.model.APIStatus;
+import org.wso2.carbon.apimgt.api.model.APIStore;
+import org.wso2.carbon.apimgt.api.model.Documentation;
+import org.wso2.carbon.apimgt.api.model.DuplicateAPIException;
+import org.wso2.carbon.apimgt.api.model.LifeCycleEvent;
+import org.wso2.carbon.apimgt.api.model.Provider;
+import org.wso2.carbon.apimgt.api.model.Subscriber;
+import org.wso2.carbon.apimgt.api.model.Tier;
+import org.wso2.carbon.apimgt.api.model.Usage;
+
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -92,7 +102,7 @@ public interface APIProvider extends APIManager {
      * @return UserApplicationAPIUsages for given provider
      * @throws org.wso2.carbon.apimgt.api.APIManagementException If failed to get UserApplicationAPIUsage
      */
-    public UserApplicationAPIUsage[] getAllAPIUsageByProvider(String providerId)
+    public JSONArray getAllAPIUsageByProvider(String providerId)
             throws APIManagementException;
 
     /**
@@ -104,15 +114,7 @@ public interface APIProvider extends APIManager {
      */
     public Usage getAPIUsageBySubscriber(APIIdentifier apiIdentifier, String consumerEmail);
 
-    /**
-     * Returns full list of Subscribers of an API
-     *
-     * @param identifier APIIdentifier
-     * @return Set<Subscriber>
-     * @throws org.wso2.carbon.apimgt.api.APIManagementException if failed to get Subscribers
-     */
-    public JSONArray getSubscribersOfAPI(JSONObject identifier)
-            throws APIManagementException;
+
 
     /**
      * this method returns the Set<APISubscriptionCount> for given provider and api
@@ -196,7 +198,7 @@ public interface APIProvider extends APIManager {
      * @param docName name of the document
      * @throws org.wso2.carbon.apimgt.api.APIManagementException if failed to remove documentation
      */
-    public void removeDocumentation(APIIdentifier apiId, String docType, String docName)
+    public boolean removeDocumentation(JSONObject apiId, String docType, String docName)
             throws APIManagementException;
 
     /**
@@ -276,7 +278,7 @@ public interface APIProvider extends APIManager {
      * @param identifier APIIdentifier
      * @throws org.wso2.carbon.apimgt.api.APIManagementException if failed to remove the API
      */
-    public void deleteAPI(APIIdentifier identifier) throws APIManagementException;
+    public void deleteAPI(JSONObject identifier) throws APIManagementException;
 
     /**
      * Search API
@@ -297,7 +299,7 @@ public interface APIProvider extends APIManager {
      * @throws APIManagementException
      *          If failed to update subscription status
      */
-    public void updateSubscription(APIIdentifier apiId, String subStatus, int appId) throws APIManagementException;
+    public boolean updateSubscription(JSONObject apiId, String subStatus, int appId) throws APIManagementException;
     
     /**
      * Update the Tier Permissions
@@ -364,16 +366,6 @@ public interface APIProvider extends APIManager {
      */
     public boolean updateAPIsInExternalAPIStores(API api, Set<APIStore> apiStoreSet) throws APIManagementException;
 
-
-    /**
-     * When enabled publishing to external APIStores support,get all the external apistore details which are
-     * published and stored in db and which are not unpublished
-     * @param apiId The API Identifier which need to update in db
-     * @throws APIManagementException
-     *          If failed to update subscription status
-     */
-
-    public Set<APIStore> getExternalAPIStores(APIIdentifier apiId) throws APIManagementException;
 
     /**
      * When enabled publishing to external APIStores support,get only the published external apistore details which are
