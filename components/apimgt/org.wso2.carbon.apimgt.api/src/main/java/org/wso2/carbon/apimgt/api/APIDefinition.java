@@ -56,7 +56,7 @@ public abstract class APIDefinition {
      * @param apiDefinitionJSON API definition as JSON string
      * @param registry          user registry
      */
-    public abstract void saveAPIDefinition(API api, String apiDefinitionJSON, Registry registry) throws ParseException, APIManagementException;
+    public abstract void saveAPIDefinition(API api, String apiDefinitionJSON, Registry registry) throws APIManagementException;
 
     /**
      * This method reads the API definition from registry
@@ -66,5 +66,14 @@ public abstract class APIDefinition {
      * @return API definition
      */
     public abstract String getAPIDefinition(APIIdentifier apiIdentifier, Registry registry) throws APIManagementException;
+
+    /**
+     * This method generates API definition to the given api
+     *
+     * @param api api
+     * @return API definition in string format
+     * @throws APIManagementException
+     */
+    public abstract String createAPIDefinition(API api) throws APIManagementException;
 
 }

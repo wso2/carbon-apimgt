@@ -30,6 +30,9 @@ import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
+import org.wso2.carbon.apimgt.impl.dto.Environment;
+import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.registry.api.Registry;
 import org.wso2.carbon.registry.api.RegistryException;
@@ -79,6 +82,8 @@ public class APIDefinitionFromSwagger20 extends APIDefinition {
                                 authType = APIConstants.AUTH_APPLICATION_OR_USER_LEVEL_TOKEN;
                             } else if ("Application User".equals(authType)) {
                                 authType = APIConstants.AUTH_APPLICATION_USER_LEVEL_TOKEN;
+                            } else if ("None".equals(authType)) {
+                                authType = APIConstants.AUTH_TYPE_NONE;
                             } else {
                                 authType = APIConstants.AUTH_APPLICATION_OR_USER_LEVEL_TOKEN;
                             }
@@ -159,11 +164,10 @@ public class APIDefinitionFromSwagger20 extends APIDefinition {
      * @param api               API to be saved
      * @param apiDefinitionJSON API definition as JSON string
      * @param registry          user registry
-     * @throws ParseException
      * @throws APIManagementException
      */
     @Override
-    public void saveAPIDefinition(API api, String apiDefinitionJSON, Registry registry) throws ParseException, APIManagementException {
+    public void saveAPIDefinition(API api, String apiDefinitionJSON, Registry registry) throws APIManagementException {
         String apiName = api.getId().getApiName();
         String apiVersion = api.getId().getVersion();
         String apiProviderName = api.getId().getProviderName();
@@ -229,4 +233,89 @@ public class APIDefinitionFromSwagger20 extends APIDefinition {
         }
         return apiDefinition;
     }
+
+    /**
+     * This method generates swagger 2.0 definition to the given api
+     *
+     * @param api api
+     * @return swagger v2.0 doc as string
+     * @throws APIManagementException
+     */
+    @Override
+    public String createAPIDefinition(API api) throws APIManagementException {
+        JSONParser parser = new JSONParser();
+        String contactObjectTemplate = "{\"name\":\"\", \"url\":\"\", \"email\":\"\"}";
+        String licenceObjectTemplate = "{\"name\":\"\", \"url\":\"\"}";
+        String infoObjectTemplate = "{\"title\":\"\",\"description\":\"\",\"termsOfService\":\"\",\"contact\":[]," +
+                "\"licence\":[],\"version\":\"\"}";
+
+        String pathsObjectTemplate = "{}";
+
+        String pathItemObjectTemplate = "{\"$ref\":\"\",\"get\":\"\",\"put\":\"\",\"post\":\"\",\"delete\":\"\"," +
+                "\"options\":\"\",\"head\":\"\",\"patch\":\"\",\"parameters\":\"\"}";
+        String externalDocObjectTemplate = "{\"description\":\"\",\"url\":\"\"}";
+        String parameterObjectTemplate = "{\"name\":\"\", \"in\":\"\", \"description\":\"\", \"required\":\"\"}";
+        String schemaObjectTemplate = "{\"discriminator\":\"\", \"readOnly\":\"\", \"xml\":[], \"externalDocs\":[], \"example\":\"\"}";
+        String xmlObjectTemplate = "{\"name\":\"\",\"namespace\":\"\",\"prefix\":\"\",\"attribute\":\"\",\"wrapped\":\"\"}";
+        String responsesObjectTemplate = "{\"default\":\"\"}";
+        String responseObjectTemplate = "{\"description\":\"\",\"schema\":[],\"headers\":[],\"example\":[]}";
+
+        String headersObject = "{}";
+        String exampleObject = "{}";
+        String definitionObject = "{}";
+        String parameterDefinitionObject = "{}";
+        String responsesDefinitionObject = "{}";
+        String securityDefinitionObject = "{}";
+
+        String securitySchemeObjectTemplate = "{\"type\":\"\",\"description\":\"\",\"name\":\"\",\"in\":\"\"," +
+                "\"flow\":\"\",\"authorizationUrl\":\"\",\"tokenUrl\":\"\",\"scopes\":[]}";
+
+        String scopesObject = "{}";
+        String securityRequirementObject = "{}";
+
+        String tagObjectTemplate = "{\"name\":\"\", \"description\":\"\",\"externalDocs\":[]}";
+
+
+        String swaggerObjectTemplate = "{\"swagger\":\"2.0\",\"info\":[],\"host\":\"\",\"basePath\":\"\",\"schemes\":[]," +
+                "\"consumes\":[],\"produces\":[],\"paths\":[],\"definitions\":[],\"parameters\":[],\"responses\":[]," +
+                "\"securityDefinitions\":[],\"security\":[],\"tags\":[],\"externalDocs\":[]}";
+
+        APIIdentifier identifier = api.getId();
+        APIManagerConfiguration config = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration();
+
+        Environment environment = (Environment) config.getApiGatewayEnvironments().values().toArray()[0];
+        String endpoints = environment.getApiGatewayEndpoint();
+        String[] endpointsSet = endpoints.split(",");
+        String apiContext = api.getContext();
+        String version = identifier.getVersion();
+        Set<URITemplate> uriTemplates = api.getUriTemplates();
+        String description = api.getDescription();
+
+
+        if (endpointsSet.length < 1) {
+            throw new APIManagementException("Error in creating JSON representation of the API" + identifier.getApiName());
+        }
+        if (description == null || description.equals("")) {
+            description = "";
+        } else {
+            description = description.trim();
+        }
+
+        JSONObject swaggerObject;
+
+        try {
+            swaggerObject = (JSONObject) parser.parse(swaggerObjectTemplate);
+            swaggerObject.put("host","localhost");
+            for (URITemplate uriTemplate : uriTemplates) {
+
+            }
+        } catch (ParseException e) {
+            throw new APIManagementException("Error while generating swagger v2.0 resource for api " + api.getId().getProviderName()
+                    + "-" + api.getId().getApiName()
+                    + "-" + api.getId().getVersion(), e);
+        }
+
+        return  swaggerObject.toJSONString();
+    }
+
 }
