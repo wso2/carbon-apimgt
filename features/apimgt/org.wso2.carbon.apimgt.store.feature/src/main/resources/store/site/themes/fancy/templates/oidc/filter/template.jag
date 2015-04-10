@@ -4,7 +4,7 @@
 
     var security =require("oidc");
 
-	var ssoRelyingParty = new security.OIDCRelyingParty(site.ssoConfiguration.issuer);
+	var ssoRelyingParty = new security.OIDCRelyingParty(site.oidcConfiguration.issuer);
 	var sessionId = session.getId();
 	var isAuthenticated = ssoRelyingParty.isSessionAuthenticated(sessionId);
 

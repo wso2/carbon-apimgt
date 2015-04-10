@@ -334,7 +334,7 @@ public interface APIConsumer extends APIManager {
      * @param consumerKey Client id of oAuthApplication.
      * @throws APIManagementException
      */
-    public void deleteAuthApplication(String consumerKey)
+    public void deleteOAuthApplication(String consumerKey)
             throws APIManagementException;
 
 
@@ -445,8 +445,6 @@ public interface APIConsumer extends APIManager {
      * @return a Map containing the details of the OAuth application.
      * @throws APIManagementException if failed to get the tiers
      */
-
-
     public Map<String,String> completeApplicationRegistration(String userId, String applicationName, String tokenType, int applicationId) throws APIManagementException;
 
 

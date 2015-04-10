@@ -44,7 +44,6 @@ public final class APIMgtDBUtil {
     private static final Log log = LogFactory.getLog(APIMgtDBUtil.class);
 
     private static volatile DataSource dataSource = null;
-    private static volatile DataSource externalKeyManagerDataSource = null;
     private static final String DB_CHECK_SQL = "SELECT * FROM AM_SUBSCRIBER";
     
     private static final String DB_CONFIG = "Database.";
@@ -54,7 +53,6 @@ public final class APIMgtDBUtil {
     private static final String DB_PASSWORD = DB_CONFIG + "Password";
 
     private static final String DATA_SOURCE_NAME = "DataSourceName";
-    private static final String AUTH_DATA_SOURCE_NAME = "OauthServerClientDataSource";
 
     /**
      * Initializes the data source
@@ -107,38 +105,6 @@ public final class APIMgtDBUtil {
     }
 
     /**
-     * This method will create a database connection to the external key manager implementation database.In
-     * api-manager.xml we have a config element named OauthServerClientDataSource. so in there we can set our
-     * data source name. Afterwards we can put database configuration details on master-datasource.xml.
-     * @return This will return Third party key manager implementation database connection.
-     * @throws SQLException
-     * @throws APIManagementException
-     */
-    public static Connection getExternalKeyManagerConnection() throws SQLException, APIManagementException {
-
-        synchronized (APIMgtDBUtil.class) {
-            APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
-                    getAPIManagerConfigurationService().getAPIManagerConfiguration();
-            String oAuthDataSourceName = config.getFirstProperty(AUTH_DATA_SOURCE_NAME);
-
-            if (oAuthDataSourceName != null) {
-                try {
-                    Context ctx = new InitialContext();
-                    externalKeyManagerDataSource = (DataSource) ctx.lookup(oAuthDataSourceName);
-                } catch (NamingException e) {
-                    throw new APIManagementException("Error while looking up the data " +
-                            "source: " + oAuthDataSourceName);
-                }
-            }
-        }
-        if (externalKeyManagerDataSource != null) {
-            return externalKeyManagerDataSource.getConnection();
-        } else {
-            throw new SQLException("OIDC Data source is not configured properly.");
-        }
-
-    }
-    /**
      * Creates the APIManager Database if not created already.
      *
      * @throws Exception if an error occurs while creating the APIManagerDatabase.
@@ -173,36 +139,6 @@ public final class APIMgtDBUtil {
         }
         throw new SQLException("Data source is not configured properly.");
     }
-
-    /**
-     * Utility method to get a new database connection by datasource name
-     *
-     * @return Connection
-     * @throws java.sql.SQLException if failed to get Connection
-     */
-    public static Connection getConnection(String dataSoruce) throws SQLException, APIManagementException {
-        synchronized (APIMgtDBUtil.class) {
-            APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
-                    getAPIManagerConfigurationService().getAPIManagerConfiguration();
-            String oAuthDataSourceName = config.getFirstProperty(dataSoruce);
-
-            if (oAuthDataSourceName != null) {
-                try {
-                    Context ctx = new InitialContext();
-                    externalKeyManagerDataSource = (DataSource) ctx.lookup(oAuthDataSourceName);
-                } catch (NamingException e) {
-                    throw new APIManagementException("Error while looking up the data " +
-                            "source: " + oAuthDataSourceName);
-                }
-            }
-        }
-        if (externalKeyManagerDataSource != null) {
-            return externalKeyManagerDataSource.getConnection();
-        } else {
-            throw new SQLException("Data source is not configured properly.");
-        }
-    }
-
 
     /**
      * Utility method to close the connection streams.

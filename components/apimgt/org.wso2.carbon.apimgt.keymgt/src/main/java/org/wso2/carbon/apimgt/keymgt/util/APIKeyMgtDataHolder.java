@@ -18,15 +18,8 @@
 
 package org.wso2.carbon.apimgt.keymgt.util;
 
-import org.apache.axiom.om.OMElement;
-import org.apache.axiom.om.OMException;
-import org.apache.axiom.om.impl.builder.StAXOMBuilder;
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.api.model.KeyManager;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
@@ -34,15 +27,6 @@ import org.wso2.carbon.apimgt.impl.token.JWTGenerator;
 import org.wso2.carbon.apimgt.impl.token.TokenGenerator;
 import org.wso2.carbon.registry.core.service.RegistryService;
 import org.wso2.carbon.user.core.service.RealmService;
-
-import javax.xml.namespace.QName;
-import javax.xml.stream.XMLOutputFactory;
-import javax.xml.stream.XMLStreamException;
-import javax.xml.stream.XMLStreamWriter;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.StringWriter;
 
 public class APIKeyMgtDataHolder {
 
@@ -110,9 +94,9 @@ public class APIKeyMgtDataHolder {
 
     public static void initData() {
         try {
-            APIKeyMgtDataHolder.isJWTCacheEnabledKeyMgt = getInitValues(APIConstants.API_KEY_MANAGER_ENABLE_JWT_CACHE);
-            APIKeyMgtDataHolder.isKeyCacheEnabledKeyMgt = getInitValues(APIConstants.API_KEY_MANAGER_ENABLE_VALIDATION_INFO_CACHE);
-            APIKeyMgtDataHolder.isThriftServerEnabled = getInitValues(APIConstants.API_KEY_MANAGER_ENABLE_THRIFT_SERVER);
+            APIKeyMgtDataHolder.isJWTCacheEnabledKeyMgt = getInitValues(APIConstants.API_KEY_VALIDATOR_ENABLE_JWT_CACHE);
+            APIKeyMgtDataHolder.isKeyCacheEnabledKeyMgt = getInitValues(APIConstants.API_KEY_VALIDATOR_ENABLE_VALIDATION_INFO_CACHE);
+            APIKeyMgtDataHolder.isThriftServerEnabled = getInitValues(APIConstants.API_KEY_VALIDATOR_ENABLE_THRIFT_SERVER);
 
             APIManagerConfiguration configuration = org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder.getInstance()
                     .getAPIManagerConfigurationService().getAPIManagerConfiguration();
@@ -121,7 +105,7 @@ public class APIKeyMgtDataHolder {
                 log.error("API Manager configuration is not initialized");
             } else {
                 applicationTokenScope = configuration.getFirstProperty(APIConstants
-                                                                               .API_KEY_MANAGER_APPLICATION_TOKEN_SCOPE);
+                                                                               .API_KEY_VALIDATOR_APPLICATION_TOKEN_SCOPE);
                 jwtGenerationEnabled = Boolean.parseBoolean(configuration.getFirstProperty(APIConstants
                                                                                                    .ENABLE_JWT_GENERATION));
                 if (log.isDebugEnabled()) {

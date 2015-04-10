@@ -58,7 +58,7 @@ $(document).ready(function () {
          );
     };
     var showLoginForm = function(event){
-	if(ssoEnabled && ssoEnabled == 'true'){
+	if((ssoEnabled && ssoEnabled == 'true') || (oidcEnabled && oidcEnabled == 'true')){
 		var targetLocation = $(this).attr('href');
 		if(targetLocation == undefined){
 		targetLocation = window.location.href;		
@@ -87,7 +87,7 @@ $(document).ready(function () {
 
 
     $("#logout-link").click(function () {
-        if (ssoEnabled=='true') {
+        if (ssoEnabled=='true' || oidcEnabled=='true') {
             location.href = requestURL + '/site/pages/logout.jag';
         } else {
             login.loginbox.logout();

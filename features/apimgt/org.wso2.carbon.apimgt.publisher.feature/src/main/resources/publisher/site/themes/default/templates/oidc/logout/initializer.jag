@@ -1,0 +1,8 @@
+<%
+jagg.initializer("oidc/logout", {
+
+    preInitialize:function () {
+
+    }
+});
+%>

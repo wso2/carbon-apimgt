@@ -64,8 +64,8 @@ public abstract class AbstractKeyManager implements KeyManager {
         try {
             jsonObject = (JSONObject) parser.parse(jsonInput);
             // Getting parameters from input string and setting in TokenRequest.
-            if (jsonObject instanceof Map && !jsonObject.isEmpty()) {
-                Map<String, Object> params = (Map) jsonObject;
+            if (jsonObject != null && !jsonObject.isEmpty()) {
+                Map<String, Object> params = (Map<String, Object>) jsonObject;
 
                 if (null != params.get(ApplicationConstants.OAUTH_CLIENT_ID)) {
                     tokenRequest.setClientId((String) params.get(ApplicationConstants.OAUTH_CLIENT_ID));
@@ -92,7 +92,7 @@ public abstract class AbstractKeyManager implements KeyManager {
      * @throws APIManagementException
      */
     public OAuthApplicationInfo buildFromJSON(OAuthApplicationInfo oAuthApplicationInfo, String jsonInput) throws
-            APIManagementException {
+                                                                                                           APIManagementException {
         //initiate json parser.
         JSONParser parser = new JSONParser();
         JSONObject jsonObject;
@@ -100,12 +100,12 @@ public abstract class AbstractKeyManager implements KeyManager {
         try {
             //parse json String
             jsonObject = (JSONObject) parser.parse(jsonInput);
-            if (jsonObject instanceof Map) {
+            if (jsonObject != null) {
                 //create a map to hold json parsed objects.
                 Map<String, Object> params = (Map) jsonObject;
 
                 //set client Id
-                if ((String) params.get("client_id") != null) {
+                if (params.get("client_id") != null) {
                     oAuthApplicationInfo.setClientId((String) params.get("client_id"));
                 }
                 //copy all params map in to OAuthApplicationInfo's Map object.
@@ -119,12 +119,12 @@ public abstract class AbstractKeyManager implements KeyManager {
     }
 
     public AccessTokenRequest buildAccessTokenRequestFromOAuthApp(OAuthApplicationInfo oAuthApplication,
-                                                           AccessTokenRequest tokenRequest) throws
-                                                                                            APIManagementException{
-        if(oAuthApplication == null){
+                                                                  AccessTokenRequest tokenRequest) throws
+                                                                                                   APIManagementException {
+        if (oAuthApplication == null) {
             return tokenRequest;
         }
-        if(tokenRequest == null){
+        if (tokenRequest == null) {
             tokenRequest = new AccessTokenRequest();
         }
         tokenRequest.setClientId(oAuthApplication.getClientId());
