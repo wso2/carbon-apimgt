@@ -64,18 +64,24 @@ $( document ).ready(function() {
         $('#designNewAPI').show();
     });
 
-    $('.slideContainer').hide();
+
     $('.create-options input[type=radio]').click(function(){
-        $('.slideContainer').slideUp();
-        $('.create-options input[type=radio]').prop('checked', false);
-        $($(this).attr('data-target')).slideDown();
-        $(this).prop('checked', true);
+       $(this).prop('checked', true);
+
+       $('.create-options input[type=radio]').each(function(){
+           if(!$(this).is(':checked')){
+              $($(this).attr('data-target')).slideUp();
+           }
+           else {
+               $($(this).attr('data-target')).slideToggle();
+           }
+       });
     });
 
     $('.toggleRadios input[type=radio]').click(function(){
         $('.toggleContainers .controls').hide();
         $('.toggleRadios input[type=radio]').prop('checked', false);
-        $('#' + $(this).val()).closest('div').show();
+        $('#' + $(this).val()).closest('div').fadeIn();
         $(this).prop('checked', true);
     });
 

@@ -7,10 +7,11 @@
    <div class="content-data">
       <div class="row-fluid">
          <div class="span12">
-            <div class="create-options">
-                <label class="radio select-label"><input class="create-api" type="radio" name="create-api" data-target="#existingAPI"/>I have an Existing API</label>
-               <p><%=i18n.localize("createFromExistingAPI")%></p>
-            </div>
+
+           <label class="radio select-label create-options"><input class="create-api" type="radio" name="create-api" data-target="#existingAPI"/>I have an Existing API
+           <p><%=i18n.localize("createFromExistingAPI")%></p>
+            </label>
+
             <div id="existingAPI" class="slideContainer hide">
                <div class="well">
                   <form role="form" id="startFromExistingAPI-form" enctype="multipart/form-data" action="<%= jagg.url("/site/blocks/item-design/ajax/add.jag") %>">
@@ -39,10 +40,10 @@
                </form>
             </div>
          </div>
-         <div class= "create-options">
-            <label class="radio select-label"><input class="create-api" type="radio" name="create-api" data-target="#soapEndpoint">I have a SOAP Endpoint</label>
-            <p><%=i18n.localize("createFromExistingSOAPEndpoint")%></p>
-         </div>
+
+         <label class="radio select-label create-options"><input class="create-api" type="radio" name="create-api" data-target="#soapEndpoint">I have a SOAP Endpoint
+         <p><%=i18n.localize("createFromExistingSOAPEndpoint")%></p></label>
+
          <div id="soapEndpoint" class="slideContainer hide">
             <div class="well">
                <form role="form" id="startFromExistingSOAPEndpoint-form" action="<%= jagg.url("/site/blocks/item-design/ajax/add.jag") %>">
@@ -73,9 +74,10 @@
                </form>
             </div>
          </div>
-         <div class = "create-options">
-             <label class="radio  select-label"><input class="create-api" id="create-new-api" type="radio" name="create-api"/>Design new API</label>
-            <p><%=i18n.localize("designNewAPI")%></p>
+
+            <label class="radio  select-label create-options"><input class="create-api" id="create-new-api" type="radio" name="create-api"/>Design new API
+            <p><%=i18n.localize("designNewAPI")%></p></label>
+
             <a href="<%= jagg.url("/design")%>" id="designNewAPI" class="btn btn-primary pull-right hide" type="button">Start Creating</a>
          </div>
       </div>

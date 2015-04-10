@@ -82,7 +82,7 @@
                 </div>
             </div>
 
-            <div class="slideContainer" id="managed-api">
+            <div class="slideContainer hide" id="managed-api">
                 <div class="well" >
                     <form class="form-horizontal" method="POST" id="implement_form" enctype="multipart/form-data"
                                     action="<%= jagg.url("/site/blocks/item-design/ajax/add.jag?action=implement&"+apiUrlId ) %>">
@@ -175,7 +175,7 @@
                 </div>
             </div>
             <br>
-            <div class="api-implement-type" value="#endpoint">
+            <div class="api-implement-type" value="#prototype">
                 <div class="span1">
                     <i class="fa fa-cog fa-3x" ></i>
                 </div>
@@ -185,7 +185,7 @@
                 </div>
             </div>
 
-            <div class="slideContainer" id="endpoint">
+            <div class="slideContainer hide" id="prototype">
             <div class="well">
             <form class="form-horizontal" method="POST" id="implement_prototype_form" enctype="multipart/form-data"
                 action="<%= jagg.url("/site/blocks/item-design/ajax/add.jag?action=implement&"+apiUrlId ) %>">

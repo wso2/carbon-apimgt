@@ -21,10 +21,13 @@ $(document).ready(function(){
       e.preventDefault();
     });*/
 
-    $('.slideContainer').hide();
+   var previousClicked = "";
     $('.api-implement-type').click(function(){
-        $('.slideContainer').slideUp();
-        $($(this).attr('value').toString()).slideDown();
+        $($(this).attr('value')).slideToggle();
+        if(previousClicked !="" && previousClicked != $(this).attr('value')){
+            $(previousClicked).slideUp();
+        }
+        previousClicked=$(this).attr('value');
     });
 
     var thisID='';
