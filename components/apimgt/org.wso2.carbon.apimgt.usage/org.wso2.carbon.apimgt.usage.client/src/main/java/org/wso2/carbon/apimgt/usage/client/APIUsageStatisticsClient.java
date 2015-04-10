@@ -57,6 +57,7 @@ import java.text.DateFormat;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import org.json.simple.JSONArray;
 
 
 public class APIUsageStatisticsClient {
@@ -518,7 +519,13 @@ public class APIUsageStatisticsClient {
                         providerAPI.getId().getVersion().equals(usage.apiVersion) &&
                         providerAPI.getContext().equals(usage.context)) {
                     String[] apiData = {usage.apiName, usage.apiVersion,  providerAPI.getId().getProviderName()};
-                    String apiName = "[\""+apiData[0]+"\",\""+apiData[1]+"\",\""+apiData[2]+"\"]";
+
+                    JSONArray jsonArray = new JSONArray();
+                    jsonArray.add(0,apiData[0]);
+                    jsonArray.add(1,apiData[1]);
+                    jsonArray.add(2,apiData[2]);
+                    String apiName = jsonArray.toJSONString();
+
                     APIUsageDTO usageDTO = usageByAPIs.get(apiName);
                     if (usageDTO != null) {
                         usageDTO.setCount(usageDTO.getCount() + usage.requestCount);

@@ -2366,7 +2366,13 @@ public class APIProviderHostObject extends ScriptableObject {
                     }
 
                     String[] apiData = {api.getId().getApiName(), api.getId().getVersion(),  api.getId().getProviderName()};
-                    String key = "[\""+apiData[0]+"\",\""+apiData[1]+"\",\""+apiData[2]+"\"]";
+                    
+                    JSONArray jsonArray = new JSONArray();
+                    jsonArray.add(0,apiData[0]);
+                    jsonArray.add(1,apiData[1]);
+                    jsonArray.add(2,apiData[2]);
+                    String key = jsonArray.toJSONString();
+
                     Long currentCount = subscriptions.get(key);
                     if (currentCount != null) {
                         subscriptions.put(key, currentCount + count);
