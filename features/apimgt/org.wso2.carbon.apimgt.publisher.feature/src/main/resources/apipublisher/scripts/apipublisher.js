@@ -88,9 +88,24 @@ var apipublisher = {};
     apipublisher.deleteAPI = function (APIProvider,apiId) {
         return APIProvider.deleteAPI(apiId);
     };
-
-
-
+    apipublisher.getAPI = function (APIProvider,apiId) {
+        return APIProvider.getAPI(apiId);
+    };
+    apipublisher.getAllDocumentation = function (APIProvider,apiId) {
+        return APIProvider.getAllDocumentation(apiId);
+    };
+    apipublisher.getAllDocumentation = function (APIProvider,apiId) {
+        return APIProvider.getAllDocumentation(apiId);
+    };
+    apipublisher.getInlineContent = function (APIProvider,apiId,docName) {
+        return APIProvider.getDocumentationContent(apiId,docName);
+    };
+    apipublisher.getTiers = function (APIProvider,tenantDomain) {
+        return APIProvider.getTiers(tenantDomain);
+    };
+    apipublisher.getSubscriberAPIs = function (APIProvider,subscriberName) {
+        return APIProvider.getSubscriberAPIs(subscriberName);
+    };
 
 
 })(apipublisher);
