@@ -92,7 +92,7 @@ public class ApiMgtDAO {
 		        } else {
             String enableJWTGeneration = configuration.getFirstProperty(APIConstants.ENABLE_JWT_GENERATION);
             removeUserNameInJWTForAppToken = Boolean.parseBoolean(configuration.getFirstProperty(
-                    APIConstants.API_KEY_MANAGER_REMOVE_USERNAME_TO_JWT_FOR_APP_TOKEN));
+                    APIConstants.API_KEY_VALIDATOR_REMOVE_USERNAME_TO_JWT_FOR_APP_TOKEN));
             if (enableJWTGeneration != null && JavaUtils.isTrueExplicitly(enableJWTGeneration)) {
                 String clazz = configuration.getFirstProperty(APIConstants.TOKEN_GENERATOR_IMPL);
                 if (clazz == null) {
@@ -313,8 +313,9 @@ public class ApiMgtDAO {
             while (rs.next()) {
                 oAuthApplicationInfo.setClientId(consumerKey);
                 oAuthApplicationInfo.setCallBackURL(rs.getString("CALLBACK_URL"));
-                oAuthApplicationInfo.addParameter(ApplicationConstants.
-                        OAUTH_CLIENT_SECRET, rs.getString("CONSUMER_SECRET"));
+                oAuthApplicationInfo.setClientSecret(rs.getString("CONSUMER_SECRET"));
+//                oAuthApplicationInfo.addParameter(ApplicationConstants.
+//                        OAUTH_CLIENT_SECRET, rs.getString("CONSUMER_SECRET"));
                 oAuthApplicationInfo.addParameter(ApplicationConstants.
                         OAUTH_REDIRECT_URIS, rs.getString("CALLBACK_URL"));
                 oAuthApplicationInfo.addParameter(ApplicationConstants.

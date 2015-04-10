@@ -1859,17 +1859,6 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         }
     }
 
-    @Override
-
-    public Map<String, String> requestApprovalForApplicationRegistration(String userId, String applicationName, String tokenType, String callbackUrl, String[] allowedDomains, String validityTime) throws APIManagementException {
-        return null;
-    }
-
-
-
-
-
-
 
     /**
      * @param userId          Subsriber name.
@@ -1880,19 +1869,18 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
      * @throws APIManagementException
      */
     @Override
-       public Map<String, Object> requestApprovalForApplicationRegistration(String userId, String applicationName,
-                                                                            String tokenType, String callbackUrl,
-                                                                            String[] allowedDomains, String validityTime,
-                                                                            String tokenScope, int applicationId,
-                                                                            String jsonString)
-		    throws APIManagementException {
-
+    public Map<String, Object> requestApprovalForApplicationRegistration(String userId, String applicationName,
+                                                                         String tokenType, String callbackUrl,
+                                                                         String[] allowedDomains, String validityTime,
+                                                                         String tokenScope, int applicationId,
+                                                                         String jsonString)
+            throws APIManagementException {
 
 
         boolean isTenantFlowStarted = false;
         // we should have unique names for applications. There for we will append, the word 'production' or 'sandbox'
         // according to the token type.
-        StringBuilder applicationNameAfterAppend  = new StringBuilder(applicationName);
+        StringBuilder applicationNameAfterAppend = new StringBuilder(applicationName);
 
         try {
             if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
@@ -1906,8 +1894,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             ApplicationRegistrationWorkflowDTO appRegWFDto = null;
 
             ApplicationKeysDTO appKeysDto = new ApplicationKeysDTO();
-            //#TODO uncomment this shit.
-            //appKeysDto.setTokenScope(tokenScope);
+
             //get APIM application by Application Name and userId.
             Application application = ApplicationUtils.retrieveApplication(applicationName, userId);
 
@@ -1931,8 +1918,10 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             }
             //Build key manager instance and create oAuthAppRequest by jsonString.
             OAuthAppRequest request = ApplicationUtils.createOauthAppRequest(applicationNameAfterAppend.toString(),
-                    callbackUrl, tokenScope,jsonString);
+                                                                             callbackUrl, tokenScope, jsonString);
 
+            // Setting request values in WorkflowDTO - In future we should keep Application/OAuthApplication related
+            // information in the respective entities not in the workflowDTO.
             appRegWFDto.setStatus(WorkflowStatus.CREATED);
             appRegWFDto.setCreatedTime(System.currentTimeMillis());
             appRegWFDto.setTenantDomain(tenantDomain);
@@ -1956,11 +1945,12 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 
             if (applicationInfo != null) {
                 keyDetails.put("consumerKey", applicationInfo.getClientId());
-                keyDetails.put("consumerSecret", (String) applicationInfo.getParameter(ApplicationConstants
-                        .OAUTH_CLIENT_SECRET));
+                keyDetails.put("consumerSecret", applicationInfo.getClientSecret());
                 keyDetails.put("appDetails", applicationInfo.getJsonString());
             }
 
+            // There can be instances where generating the Application Token is not required. In those cases,
+            // token info will have nothing.
             AccessTokenInfo tokenInfo = appRegWFDto.getAccessTokenInfo();
             if (tokenInfo != null) {
                 keyDetails.put("accessToken", tokenInfo.getAccessToken());
@@ -1987,6 +1977,9 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             throws APIManagementException {
 
         Application application = apiMgtDAO.getApplicationById(applicationId);
+
+        // Check if the Application has been approved before the OAuth App got created. Continue only if workflow has
+        // been completed.
         String status = apiMgtDAO.getRegistrationApprovalState(application.getId(), tokenType);
         Map<String, String> keyDetails = null;
         String workflowReference = apiMgtDAO.getWorkflowReference(applicationName, userId);
@@ -2003,6 +1996,8 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             }
             if (workflowDTO != null) {
 
+                // Set the workflow reference in the workflow dto and the populate method will fill in other details
+                // using the persisted request.
                 ApplicationRegistrationWorkflowDTO registrationWorkflowDTO = (ApplicationRegistrationWorkflowDTO)
                         workflowDTO;
                 registrationWorkflowDTO.setExternalWorkflowReference(workflowReference);
@@ -2018,12 +2013,13 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                         if(tokenInfo != null){
                             keyDetails.put("accessToken", tokenInfo.getAccessToken());
                             keyDetails.put("validityTime", Long.toString(tokenInfo.getValidityPeriod()));
+                            keyDetails.put("tokenDetails",tokenInfo.getJSONString());
                         }
 
                         keyDetails.put("consumerKey", oauthApp.getClientId());
-                        keyDetails.put("consumerSecret", (String) oauthApp.getParameter(ApplicationConstants
-                                                                                                .OAUTH_CLIENT_SECRET));
+                        keyDetails.put("consumerSecret", oauthApp.getClientSecret());
                         keyDetails.put("accessallowdomains", registrationWorkflowDTO.getDomainList());
+                        keyDetails.put("appDetails", oauthApp.getJsonString());
                     } catch (APIManagementException e) {
                         APIUtil.handleException("Error occurred while Creating Keys.", e);
                     }
@@ -2435,7 +2431,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
      * @throws APIManagementException
      */
     @Override
-    public void deleteAuthApplication(String consumerKey) throws APIManagementException {
+    public void deleteOAuthApplication(String consumerKey) throws APIManagementException {
         //get key manager instance.
         KeyManager keyManager = KeyManagerFactory.getKeyManager();
         //delete oAuthApplication by calling key manager implementation

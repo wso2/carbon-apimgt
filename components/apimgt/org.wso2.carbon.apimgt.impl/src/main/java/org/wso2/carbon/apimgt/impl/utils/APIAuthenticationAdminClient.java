@@ -91,7 +91,7 @@ public class APIAuthenticationAdminClient { // extends AbstractAPIGatewayAdminCl
         boolean loggedIn = false;
 
         String keyMgtKeyCacheEnabledString =
-                config.getFirstProperty(APIConstants.API_KEY_MANAGER_ENABLE_VALIDATION_INFO_CACHE);
+                config.getFirstProperty(APIConstants.API_KEY_VALIDATOR_ENABLE_VALIDATION_INFO_CACHE);
 
         //If keyMgt server key cache enabled we login to KM
         if (keyMgtKeyCacheEnabledString != null) {
@@ -175,9 +175,9 @@ public class APIAuthenticationAdminClient { // extends AbstractAPIGatewayAdminCl
     private String loginKeyMgt() throws AxisFault {
         APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
                 getAPIManagerConfigurationService().getAPIManagerConfiguration();
-        String user = config.getFirstProperty(APIConstants.API_KEY_MANAGER_USERNAME);
-        String password = config.getFirstProperty(APIConstants.API_KEY_MANAGER_PASSWORD);
-        String url = config.getFirstProperty(APIConstants.API_KEY_MANAGER_URL);
+        String user = config.getFirstProperty(APIConstants.API_KEY_VALIDATOR_USERNAME);
+        String password = config.getFirstProperty(APIConstants.API_KEY_VALIDATOR_PASSWORD);
+        String url = config.getFirstProperty(APIConstants.API_KEY_VALIDATOR_URL);
 
         if (url == null || user == null || password == null) {
             throw new AxisFault("Required API keyMgt admin configuration unspecified");
@@ -225,17 +225,17 @@ public class APIAuthenticationAdminClient { // extends AbstractAPIGatewayAdminCl
                 return environment.getServerURL() + serviceName;
             }
         }
-        String keyMgtKeyCacheEnabledString = config.getFirstProperty(APIConstants.API_KEY_MANAGER_ENABLE_VALIDATION_INFO_CACHE);
+        String keyMgtKeyCacheEnabledString = config.getFirstProperty(APIConstants.API_KEY_VALIDATOR_ENABLE_VALIDATION_INFO_CACHE);
         //If keyMgt server key cache enabled we return gateway URL
         if (keyMgtKeyCacheEnabledString != null) {
             Boolean keyMgtKeyCacheEnabled = Boolean.parseBoolean(keyMgtKeyCacheEnabledString);
             if (keyMgtKeyCacheEnabled) {
-                String url = config.getFirstProperty(APIConstants.API_KEY_MANAGER_URL);
+                String url = config.getFirstProperty(APIConstants.API_KEY_VALIDATOR_URL);
                 return url + serviceName;
             }
         }
         //By default return url of Gateway
-        //String url = config.getFirstProperty(APIConstants.API_KEY_MANAGER_URL);
+        //String url = config.getFirstProperty(APIConstants.API_KEY_VALIDATOR_URL);
         String url = environment.getServerURL();
         return url + serviceName;
     }

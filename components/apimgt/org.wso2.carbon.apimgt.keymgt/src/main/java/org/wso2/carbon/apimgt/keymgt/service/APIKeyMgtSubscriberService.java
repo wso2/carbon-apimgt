@@ -32,14 +32,11 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
 import org.codehaus.jettison.json.JSONObject;
-import org.json.simple.JSONArray;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.*;
 import org.wso2.carbon.apimgt.handlers.security.stub.types.APIKeyMapping;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
-import org.wso2.carbon.apimgt.impl.clients.ApplicationManagementServiceClient;
-import org.wso2.carbon.apimgt.impl.clients.OAuthAdminClient;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dto.APIInfoDTO;
 import org.wso2.carbon.apimgt.impl.dto.Environment;
@@ -66,8 +63,6 @@ import org.wso2.carbon.identity.oauth.cache.OAuthCache;
 import org.wso2.carbon.identity.oauth.cache.OAuthCacheKey;
 import org.wso2.carbon.identity.oauth.config.OAuthServerConfiguration;
 import org.wso2.carbon.identity.oauth.dto.OAuthConsumerAppDTO;
-import org.wso2.carbon.identity.oauth2.IdentityOAuth2Exception;
-import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.utils.CarbonUtils;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
@@ -191,8 +186,9 @@ public class APIKeyMgtSubscriberService extends AbstractAdmin {
             OAuthApplicationInfo oAuthApplicationInfo = new OAuthApplicationInfo();
             oAuthApplicationInfo.setClientId(createdApp.getOauthConsumerKey());
             oAuthApplicationInfo.setCallBackURL(createdApp.getCallbackUrl());
-            oAuthApplicationInfo.addParameter(ApplicationConstants.
-                    OAUTH_CLIENT_SECRET, createdApp.getOauthConsumerSecret());
+            oAuthApplicationInfo.setClientSecret(createdApp.getOauthConsumerSecret());
+//            oAuthApplicationInfo.addParameter(ApplicationConstants.
+//                    OAUTH_CLIENT_SECRET, createdApp.getOauthConsumerSecret());
             oAuthApplicationInfo.addParameter(ApplicationConstants.
                     OAUTH_REDIRECT_URIS, createdApp.getCallbackUrl());
             oAuthApplicationInfo.addParameter(ApplicationConstants.
@@ -377,7 +373,6 @@ public class APIKeyMgtSubscriberService extends AbstractAdmin {
      * @return
      * @throws Exception
      */
-
     public String renewAccessToken(String tokenType, String oldAccessToken,
                                    String[] allowedDomains, String clientId, String clientSecret,
                                    String validityTime) throws Exception {
@@ -387,9 +382,9 @@ public class APIKeyMgtSubscriberService extends AbstractAdmin {
 
 
         String tokenEndpointName = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration().
-                getFirstProperty(APIConstants.API_KEY_MANAGER_TOKEN_ENDPOINT_NAME);
+                getFirstProperty(APIConstants.API_KEY_VALIDATOR_TOKEN_ENDPOINT_NAME);
         String keyMgtServerURL = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration().
-                getFirstProperty(APIConstants.API_KEY_MANAGER_URL);
+                getFirstProperty(APIConstants.API_KEY_VALIDATOR_URL);
         URL keymgtURL = new URL(keyMgtServerURL);
         int keyMgtPort = keymgtURL.getPort();
         String keyMgtProtocol= keymgtURL.getProtocol();
@@ -408,7 +403,7 @@ public class APIKeyMgtSubscriberService extends AbstractAdmin {
       
         //To revoke tokens we should call revoke API deployed in API gateway.
         String revokeEndpoint = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration().
-                getFirstProperty(APIConstants.API_KEY_MANAGER_REVOKE_API_URL);
+                getFirstProperty(APIConstants.API_KEY_VALIDATOR_REVOKE_API_URL);
 
 		URL revokeEndpointURL = new URL(revokeEndpoint);
 		String revokeEndpointProtocol = revokeEndpointURL.getProtocol();

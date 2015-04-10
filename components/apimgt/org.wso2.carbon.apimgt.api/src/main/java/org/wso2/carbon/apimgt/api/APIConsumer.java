@@ -295,19 +295,6 @@ public interface APIConsumer extends APIManager {
 
     public void removeApplication(Application application) throws APIManagementException;
 
-    /**
-     * Creates a request for getting Approval for Application Registration.
-     *
-     * @param userId Subsriber name.
-     * @param  applicationName of the Application.
-     * @param tokenType Token type (PRODUCTION | SANDBOX)
-     * @param callbackUrl Callback URL for the Application.
-     * @param tokenScope scope of the acces token to be generated.
-     * @throws org.wso2.carbon.apimgt.api.APIManagementException if failed to applications for given subscriber
-     */
-    public Map<String,String> requestApprovalForApplicationRegistration(String userId, String applicationName, String tokenType,
-                                                            String callbackUrl, String[] allowedDomains, String validityTime)
-        throws APIManagementException;
 
     /**
      * Creates a request for getting Approval for Application Registration.
@@ -316,15 +303,15 @@ public interface APIConsumer extends APIManager {
      * @param  applicationName of the Application.
      * @param tokenType Token type (PRODUCTION | SANDBOX)
      * @param jsonString Callback URL for the Application.
-     * @param
+     * @param tokenScope Scopes for the requested tokens.
      * @throws APIManagementException if failed to applications for given subscriber
      */
     public Map<String,Object> requestApprovalForApplicationRegistration(String userId, String applicationName,
                                                                         String tokenType,
                                                                         String callbackUrl, String[] allowedDomains,
                                                                         String validityTime,
-									String tokenScope,
-									int applicationId,
+                                                                        String tokenScope,
+                                                                        int applicationId,
                                                                         String jsonString)
             throws APIManagementException;
 
@@ -347,7 +334,7 @@ public interface APIConsumer extends APIManager {
      * @param consumerKey Client id of oAuthApplication.
      * @throws APIManagementException
      */
-    public void deleteAuthApplication(String consumerKey)
+    public void deleteOAuthApplication(String consumerKey)
             throws APIManagementException;
 
 
@@ -458,8 +445,6 @@ public interface APIConsumer extends APIManager {
      * @return a Map containing the details of the OAuth application.
      * @throws APIManagementException if failed to get the tiers
      */
-
-
     public Map<String,String> completeApplicationRegistration(String userId, String applicationName, String tokenType, int applicationId) throws APIManagementException;
 
 

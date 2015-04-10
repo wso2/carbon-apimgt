@@ -308,17 +308,17 @@ public final class APIConstants {
     public static final String API_GATEWAY_TYPE = "GatewayType";
     public static final String API_GATEWAY_TYPE_SYNAPSE = "Synapse";
     
-    public static final String API_KEY_MANAGER = "APIKeyManager.";
-    public static final String API_KEY_MANAGER_URL = API_KEY_MANAGER + "ServerURL";
-    public static final String API_KEY_MANAGER_REVOKE_API_URL = API_KEY_MANAGER + "RevokeAPIURL";
-    public static final String API_KEY_MANAGER_TOKEN_ENDPOINT_NAME = API_KEY_MANAGER + "TokenEndPointName";
-    public static final String API_KEY_MANAGER_USERNAME = API_KEY_MANAGER + "Username";
-    public static final String API_KEY_MANAGER_PASSWORD = API_KEY_MANAGER + "Password";
-    public static final String API_KEY_MANAGER_APPLICATION_ACCESS_TOKEN_VALIDATION_PERIOD = API_KEY_MANAGER + "ApplicationTokenDefaultValidityPeriod";
-    public static final String API_KEY_MANGER_THRIFT_CLIENT_PORT = API_KEY_MANAGER + "ThriftClientPort";
-    public static final String API_KEY_MANGER_THRIFT_SERVER_PORT = API_KEY_MANAGER + "ThriftServerPort";
-    public static final String API_KEY_MANGER_THRIFT_SERVER_HOST = API_KEY_MANAGER + "ThriftServerHost";
-    public static final String API_KEY_MANGER_CONNECTION_TIMEOUT = API_KEY_MANAGER + "ThriftClientConnectionTimeOut";
+    public static final String API_KEY_VALIDATOR = "APIKeyValidator.";
+    public static final String API_KEY_VALIDATOR_URL = API_KEY_VALIDATOR + "ServerURL";
+    public static final String API_KEY_VALIDATOR_REVOKE_API_URL = API_KEY_VALIDATOR + "RevokeAPIURL";
+    public static final String API_KEY_VALIDATOR_TOKEN_ENDPOINT_NAME = API_KEY_VALIDATOR + "TokenEndPointName";
+    public static final String API_KEY_VALIDATOR_USERNAME = API_KEY_VALIDATOR + "Username";
+    public static final String API_KEY_VALIDATOR_PASSWORD = API_KEY_VALIDATOR + "Password";
+    public static final String API_KEY_VALIDATOR_APPLICATION_ACCESS_TOKEN_VALIDATION_PERIOD = API_KEY_VALIDATOR + "ApplicationTokenDefaultValidityPeriod";
+    public static final String API_KEY_VALIDATOR_THRIFT_CLIENT_PORT = API_KEY_VALIDATOR + "ThriftClientPort";
+    public static final String API_KEY_VALIDATOR_THRIFT_SERVER_PORT = API_KEY_VALIDATOR + "ThriftServerPort";
+    public static final String API_KEY_VALIDATOR_THRIFT_SERVER_HOST = API_KEY_VALIDATOR + "ThriftServerHost";
+    public static final String API_KEY_VALIDATOR_CONNECTION_TIMEOUT = API_KEY_VALIDATOR + "ThriftClientConnectionTimeOut";
 
     // Constants needed for KeyManager section
     public static final String KEY_MANAGER = "KeyManager";
@@ -326,31 +326,23 @@ public final class APIConstants {
     public static final String TOKEN_URL = "TokenURL";
     public static final String REVOKE_URL = "RevokeURL";
 
-    public static final String API_KEY_MANGER_APPLICATION_CLASS_NAME = API_KEY_MANAGER + "ApplicationClassName";
-    public static final String API_KEY_MANGER_IMPLEMENTATION_CLASS_NAME = API_KEY_MANAGER + "KeyManagerImplementationClassName";
-    public static final String API_RESOURCE_MANGER_IMPLEMENTATION_CLASS_NAME = API_KEY_MANAGER +
-            "ResourceManagerImplementationClassName";
-    public static final String API_KEY_MANGER_VALIDATIONHANDLER_CLASS_NAME = API_KEY_MANAGER + "KeyValidationHandlerClassName";
-    public static final String API_KEY_MANGER_KEY_VALIDATION_HANDLER_CLASS_NAME = API_KEY_MANAGER + "KeyValidationHandlerClassName";
-    public static final String API_KEY_MANGER_EXT_DAO_CLASS_NAME = API_KEY_MANAGER + "ExtDAOClassName";
-    public static final String API_KEY_MANGER_DCR_END_POINT_URL = API_KEY_MANAGER + "DCREndpointURL";
+    public static final String API_KEY_MANGER_VALIDATIONHANDLER_CLASS_NAME = API_KEY_VALIDATOR + "KeyValidationHandlerClassName";
 
-
-    public static final String API_KEY_MANAGER_THRIFT_SERVER_HOST = API_KEY_MANAGER + "ThriftServerHost";
-    public static final String API_KEY_VALIDATOR_CLIENT_TYPE = API_KEY_MANAGER + "KeyValidatorClientType";
+    public static final String API_KEY_MANAGER_THRIFT_SERVER_HOST = API_KEY_VALIDATOR + "ThriftServerHost";
+    public static final String API_KEY_VALIDATOR_CLIENT_TYPE = API_KEY_VALIDATOR + "KeyValidatorClientType";
     public static final String API_KEY_VALIDATOR_WS_CLIENT = "WSClient";
-    public static final String API_KEY_MANAGER_ENABLE_THRIFT_SERVER = API_KEY_MANAGER + "EnableThriftServer";
+    public static final String API_KEY_VALIDATOR_ENABLE_THRIFT_SERVER = API_KEY_VALIDATOR + "EnableThriftServer";
     public static final String API_KEY_VALIDATOR_THRIFT_CLIENT = "ThriftClient";
-    public static final String API_KEY_SECURITY_CONTEXT_TTL = API_KEY_MANAGER + "SecurityContextTTL";
-    public static final String API_KEY_MANAGER_ENABLE_JWT_CACHE = API_KEY_MANAGER + "EnableJWTCache";
-    public static final String API_KEY_MANAGER_ENABLE_VALIDATION_INFO_CACHE = API_KEY_MANAGER + "EnableKeyMgtValidationInfoCache";
-    public static final String API_KEY_MANAGER_REMOVE_USERNAME_TO_JWT_FOR_APP_TOKEN = API_KEY_MANAGER + "RemoveUserNameFromJWTForApplicationToken";
-    public static final String API_KEY_MANAGER_ENABLE_ASSERTIONS = API_KEY_MANAGER + "EnableAssertions.";
-    public static final String API_KEY_MANAGER_ENABLE_ASSERTIONS_USERNAME = API_KEY_MANAGER_ENABLE_ASSERTIONS + "UserName";
-    public static final String API_KEY_MANAGER_ENABLE_ACCESS_TOKEN_PARTITIONING = API_KEY_MANAGER + "AccessTokenPartitioning." + "EnableAccessTokenPartitioning";
-    public static final String API_KEY_MANAGER_ACCESS_TOKEN_PARTITIONING_DOMAINS = API_KEY_MANAGER + "AccessTokenPartitioning." + "AccessTokenPartitioningDomains";
-    public static final String API_KEY_MANAGER_ENCRYPT_TOKENS = API_KEY_MANAGER + "EncryptPersistedTokens";
-    public static final String API_KEY_MANAGER_APPLICATION_TOKEN_SCOPE = API_KEY_MANAGER +"ApplicationTokenScope";
+    public static final String API_KEY_SECURITY_CONTEXT_TTL = API_KEY_VALIDATOR + "SecurityContextTTL";
+    public static final String API_KEY_VALIDATOR_ENABLE_JWT_CACHE = API_KEY_VALIDATOR + "EnableJWTCache";
+    public static final String API_KEY_VALIDATOR_ENABLE_VALIDATION_INFO_CACHE = API_KEY_VALIDATOR + "EnableKeyMgtValidationInfoCache";
+    public static final String API_KEY_VALIDATOR_REMOVE_USERNAME_TO_JWT_FOR_APP_TOKEN = API_KEY_VALIDATOR + "RemoveUserNameFromJWTForApplicationToken";
+    public static final String API_KEY_VALIDATOR_ENABLE_ASSERTIONS = API_KEY_VALIDATOR + "EnableAssertions.";
+    public static final String API_KEY_MANAGER_ENABLE_ASSERTIONS_USERNAME = API_KEY_VALIDATOR_ENABLE_ASSERTIONS + "UserName";
+    public static final String API_KEY_MANAGER_ENABLE_ACCESS_TOKEN_PARTITIONING = API_KEY_VALIDATOR + "AccessTokenPartitioning." + "EnableAccessTokenPartitioning";
+    public static final String API_KEY_MANAGER_ACCESS_TOKEN_PARTITIONING_DOMAINS = API_KEY_VALIDATOR + "AccessTokenPartitioning." + "AccessTokenPartitioningDomains";
+    public static final String API_KEY_VALIDATOR_ENCRYPT_TOKENS = API_KEY_VALIDATOR + "EncryptPersistedTokens";
+    public static final String API_KEY_VALIDATOR_APPLICATION_TOKEN_SCOPE = API_KEY_VALIDATOR +"ApplicationTokenScope";
 
     public static final String API_STORE = "APIStore.";
     public static final String SHOW_API_STORE_URL_FROM_PUBLISHER = "APIStore."+"DisplayURL";
@@ -493,7 +485,7 @@ public final class APIConstants {
     
     public static final String SUBSCRIPTION_TO_CURRENT_TENANT = "current_tenant";
     public static final String SUBSCRIPTION_TO_ALL_TENANTS = "all_tenants";
-    public static final String SUBSCRIPTION_TO_SPECIFIC_TENANTS = "specific_tennats";
+    public static final String SUBSCRIPTION_TO_SPECIFIC_TENANTS = "specific_tenants";
     public static final String NO_PERMISSION_ERROR="noPermissions";
     public static final String JSON_PARSE_ERROR="parseErrors";
 
@@ -662,7 +654,7 @@ public final class APIConstants {
 
     public static final String KEYMANAGER_HOSTNAME = "keyManagerHostname";
     public static final String KEYMANAGER_PORT = "keyManagerPort";
-    public static final String KEYMANAGER_SERVERURL = "APIKeyManager.ServerURL";
+    public static final String KEYMANAGER_SERVERURL = API_KEY_VALIDATOR+"ServerURL";
     public static final String CARBON_LOCALIP = "carbon.local.ip";
 
     public static final String APIPROVIDER_HOSTCACHE = "apiProvideHostObjectCache";

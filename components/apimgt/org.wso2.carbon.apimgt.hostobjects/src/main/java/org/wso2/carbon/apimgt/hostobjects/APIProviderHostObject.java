@@ -1126,11 +1126,8 @@ public class APIProviderHostObject extends ScriptableObject {
 
         if (visibility != null && visibility.equals(APIConstants.API_RESTRICTED_VISIBILITY)) {
         	visibleRoles = (String) apiData.get("visibleRoles", apiData);
-        }
-
-        String visibleTenants = "";
-        if (visibility != null && visibility.equals(APIConstants.API_CONTROLLED_VISIBILITY)) {
-        	visibleTenants = (String) apiData.get("visibleTenants", apiData);
+        } else {
+            visibility = APIConstants.API_GLOBAL_VISIBILITY;
         }
 
         if (sandboxUrl != null && sandboxUrl.trim().length() == 0) {
@@ -1412,7 +1409,6 @@ public class APIProviderHostObject extends ScriptableObject {
         api.setTechnicalOwnerEmail(techOwnerEmail);
         api.setVisibility(visibility);
         api.setVisibleRoles(visibleRoles != null ? visibleRoles.trim() : null);
-        api.setVisibleTenants(visibleTenants != null ? visibleTenants.trim() : null);
 
         // @todo needs to be validated
         api.setEndpointConfig((String) apiData.get("endpoint_config", apiData));
