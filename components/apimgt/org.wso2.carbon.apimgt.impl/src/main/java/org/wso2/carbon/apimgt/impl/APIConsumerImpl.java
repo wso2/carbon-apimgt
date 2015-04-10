@@ -21,18 +21,25 @@ package org.wso2.carbon.apimgt.impl;
 import org.apache.axis2.AxisFault;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import org.mozilla.javascript.NativeArray;
+import org.mozilla.javascript.NativeObject;
 import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.*;
 import org.wso2.carbon.apimgt.api.model.Tag;
 import org.wso2.carbon.apimgt.handlers.security.stub.types.APIKeyMapping;
+import org.wso2.carbon.apimgt.impl.APIConstants.ApplicationStatus;
+import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dto.*;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.*;
 import org.wso2.carbon.apimgt.impl.workflow.*;
 import org.wso2.carbon.apimgt.keymgt.client.SubscriberKeyMgtClient;
 import org.wso2.carbon.apimgt.keymgt.stub.types.carbon.ApplicationKeysDTO;
+import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.governance.api.common.dataobjects.GovernanceArtifact;
 import org.wso2.carbon.governance.api.exception.GovernanceException;
@@ -125,7 +132,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         if (taggedAPIs != null) {
             return taggedAPIs.get(tag);
         }
-        this.getAllTags(this.tenantDomain);
+        this.getAllTags();
         if (taggedAPIs != null) {
             return taggedAPIs.get(tag);
         }
@@ -139,7 +146,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
      * @return
      * @throws org.wso2.carbon.apimgt.api.APIManagementException
      */
-    public Map<String,Object> getPaginatedAPIsWithTag(String tag,int start,int end) throws APIManagementException {
+    public JSONObject getPaginatedAPIsWithTag(String tag,int start,int end) throws APIManagementException {
         List<API> apiSet = new ArrayList<API>();
         Set<API> resultSet = new TreeSet<API>(new APIVersionComparator());
         Map<String, Object> results = new HashMap<String, Object>();
@@ -168,11 +175,50 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             results.put("length", 0);
 
         }
-        return results;
+        return getPaginatedAPIsWithTagObject(results);
     }
 
 
-    /**
+    private JSONObject getPaginatedAPIsWithTagObject(Map<String, Object> results) {
+        //resultMap = apiConsumer.getPaginatedAPIsWithTag(tagName, start, end);
+    	JSONObject paginatedAPIswithtags = new JSONObject();
+    	JSONArray apiArray = new JSONArray();
+    	Set<API> apiSet = (Set<API>) results.get("apis");
+        if (apiSet != null) {
+            Iterator it = apiSet.iterator();
+            int i = 0;
+            while (it.hasNext()) {
+                JSONObject currentApi = new JSONObject();
+                Object apiObject = it.next();
+                API api = (API) apiObject;
+                APIIdentifier apiIdentifier = api.getId();
+                currentApi.put("name", apiIdentifier.getApiName());
+                currentApi.put("provider",
+                        APIUtil.replaceEmailDomainBack(apiIdentifier.getProviderName()));
+                currentApi.put("version",
+                        apiIdentifier.getVersion());
+                currentApi.put("description", api.getDescription());
+                currentApi.put("rates",  api.getRating());
+                if (api.getThumbnailUrl() == null) {
+                    currentApi.put("thumbnailurl",
+                            "images/api-default.png");
+                } else {
+                    currentApi.put("thumbnailurl",
+                            APIUtil.prependWebContextRoot(api.getThumbnailUrl()));
+                }
+                currentApi.put("visibility", api.getVisibility());
+                currentApi.put("visibleRoles",  api.getVisibleRoles());
+                currentApi.put("description", api.getDescription());
+                apiArray.add(i, currentApi);
+                i++;
+            }
+            paginatedAPIswithtags.put("apis", apiArray);
+            paginatedAPIswithtags.put("totalLength", results.get("length"));
+        }
+		return paginatedAPIswithtags;
+	}
+
+	/**
      * Returns the set of APIs with the given tag, retrieved from registry
      *
      * @param registry - Current registry; tenant/SuperTenant
@@ -321,7 +367,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
      * @return Set<API>  Set of APIs
      * @throws org.wso2.carbon.apimgt.api.APIManagementException
      */
-    public Map<String,Object> getAllPaginatedPublishedAPIs(String tenantDomain,int start,int end) throws APIManagementException {
+    public JSONObject getAllPaginatedPublishedAPIs(String tenantDomain,int start,int end) throws APIManagementException {
 
     	Boolean displayAPIsWithMultipleStatus = APIUtil.isAllowDisplayAPIsWithMultipleStatus();
     	Map<String, List<String>> listMap = new HashMap<String, List<String>>();
@@ -336,7 +382,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         }
 
 
-        Map<String,Object> result=new HashMap<String, Object>();
+        JSONObject result=new JSONObject();
         SortedSet<API> apiSortedSet = new TreeSet<API>(new APINameComparator());
         SortedSet<API> apiVersionsSortedSet = new TreeSet<API>(new APIVersionComparator());
         int totalLength=0;
@@ -443,7 +489,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
      * @throws org.wso2.carbon.apimgt.api.APIManagementException
      */
     @Override
-	public Map<String, Object> getAllPaginatedAPIsByStatus(String tenantDomain,
+	public JSONObject getAllPaginatedAPIsByStatus(String tenantDomain,
 			int start, int end, final String apiStatus) throws APIManagementException {
     	Boolean displayAPIsWithMultipleStatus = APIUtil.isAllowDisplayAPIsWithMultipleStatus();
     	Map<String, List<String>> listMap = new HashMap<String, List<String>>();
@@ -498,7 +544,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 if (genericArtifacts == null || genericArtifacts.length == 0) {
                     result.put("apis",apiSortedSet);
                     result.put("totalLength",totalLength);
-                    return result;
+                    return getAllPaginatedAPIsByStatusJsonObject(result);
                 }
 
                 for (GenericArtifact artifact : genericArtifacts) {
@@ -536,7 +582,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                     }
                     result.put("apis",apiSortedSet);
                     result.put("totalLength",totalLength);
-                    return result;
+                    return getAllPaginatedAPIsByStatusJsonObject(result);
 
                 } else {
                     for (API api : multiVersionedAPIs) {
@@ -544,7 +590,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                     }
                     result.put("apis",apiVersionsSortedSet);
                     result.put("totalLength",totalLength);
-                    return result;
+                    return getAllPaginatedAPIsByStatusJsonObject(result);
 
                 }
             }
@@ -558,17 +604,62 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         }
         result.put("apis",apiSortedSet);
         result.put("totalLength",totalLength);
-        return result;
+        return getAllPaginatedAPIsByStatusJsonObject(result);
 	}
 
-    /**
+    private JSONObject getAllPaginatedAPIsByStatusJsonObject(
+			Map<String, Object> resultMap) {
+    	Set<API> apiSet;
+    	JSONObject paginatedAPIsByStatusObject = new JSONObject();
+    	JSONArray myn = new JSONArray();
+        if (resultMap != null) {
+            apiSet = (Set<API>) resultMap.get("apis");
+            if (apiSet != null) {
+                Iterator it = apiSet.iterator();
+                int i = 0;
+                while (it.hasNext()) {
+                    JSONObject row = new JSONObject();
+                    Object apiObject = it.next();
+                    API api = (API) apiObject;
+                    APIIdentifier apiIdentifier = api.getId();
+                    row.put("name", apiIdentifier.getApiName());
+                    row.put("provider", APIUtil.replaceEmailDomainBack(apiIdentifier.getProviderName()));
+                    row.put("version", apiIdentifier.getVersion());
+                    row.put("context", api.getContext());
+                    row.put("status", "Deployed"); // api.getStatus().toString()
+                    if (api.getThumbnailUrl() == null) {
+                        row.put("thumbnailurl", "images/api-default.png");
+                    } else {
+                        row.put("thumbnailurl", APIUtil.prependWebContextRoot(api.getThumbnailUrl()));
+                    }
+                    row.put("visibility", api.getVisibility());
+                    row.put("visibleRoles", api.getVisibleRoles());
+                    row.put("description", api.getDescription());
+                    String apiOwner = APIUtil.replaceEmailDomainBack(api.getApiOwner());
+                    if (apiOwner == null) {
+                        apiOwner = APIUtil.replaceEmailDomainBack(apiIdentifier.getProviderName());
+                    }
+                    row.put("apiOwner", apiOwner);
+                    row.put("isAdvertiseOnly", api.isAdvertiseOnly());
+                    myn.add(i, row);
+                    i++;
+                }
+                paginatedAPIsByStatusObject.put("apis", myn);
+                paginatedAPIsByStatusObject.put("totalLength", resultMap.get("totalLength"));
+
+            }
+        }
+		return paginatedAPIsByStatusObject;
+	}
+
+	/**
      * The method to get All PUBLISHED and DEPRECATED APIs, to Store view
      *
      * @return Set<API>  Set of APIs
      * @throws org.wso2.carbon.apimgt.api.APIManagementException
      */
-    public Map<String,Object> getAllPaginatedAPIs(String tenantDomain,int start,int end) throws APIManagementException {
-        Map<String,Object> result=new HashMap<String, Object>();
+    public JSONObject getAllPaginatedAPIs(String tenantDomain,int start,int end) throws APIManagementException {
+        JSONObject result=new JSONObject();
         SortedSet<API> apiSortedSet = new TreeSet<API>(new APINameComparator());
         SortedSet<API> apiVersionsSortedSet = new TreeSet<API>(new APIVersionComparator());
         int totalLength=0;
@@ -775,8 +866,9 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
      * @return Set<API>
      * @throws org.wso2.carbon.apimgt.api.APIManagementException
      */
-    public Set<API> getRecentlyAddedAPIs(int limit, String tenantDomain)
+    public JSONArray getRecentlyAddedAPIs(int limit)
             throws APIManagementException {
+    	String tenantDomain = CarbonContext.getThreadLocalCarbonContext() .getTenantDomain();
         SortedSet<API> recentlyAddedAPIs = new TreeSet<API>(new APINameComparator());
         SortedSet<API> recentlyAddedAPIsWithMultipleVersions = new TreeSet<API>(new APIVersionComparator());
         Registry userRegistry = null;
@@ -829,7 +921,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 
                     }
                     if (!isStatusChanged) {
-                        return recentlyAddedAPI;
+                        return getRecentlyAddedAPIsArray(recentlyAddedAPI);
                     }
                 }
             }
@@ -879,7 +971,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 						       .getCache(APIConstants.RECENTLY_ADDED_API_CACHE_NAME)
 						       .put(username + ":" + tenantDomain, allAPIs);
 					}
-					return recentlyAddedAPIs;
+					return getRecentlyAddedAPIsArray(recentlyAddedAPIs);
 				} else {
         			recentlyAddedAPIsWithMultipleVersions.addAll(allAPIs);
 					if (isRecentlyAddedAPICacheEnabled) {
@@ -887,7 +979,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 						       .getCache(APIConstants.RECENTLY_ADDED_API_CACHE_NAME)
 						       .put(username + ":" + tenantDomain, allAPIs);
 					}
-        			return recentlyAddedAPIsWithMultipleVersions;
+        			return getRecentlyAddedAPIsArray(recentlyAddedAPIsWithMultipleVersions);
         		}
         	 }
         } catch (RegistryException e) {
@@ -900,11 +992,47 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         		PrivilegedCarbonContext.endTenantFlow();
         	}
         }
-        return recentlyAddedAPIs;
+        return getRecentlyAddedAPIsArray(recentlyAddedAPIs);
     }
+    
 
-    public Set<Tag> getAllTags(String requestedTenantDomain) throws APIManagementException {
+	private JSONArray getRecentlyAddedAPIsArray(Set<API> apiSet) {
+		JSONArray recentApis = new JSONArray();
+		Iterator it = apiSet.iterator();
+		int i = 0;
+		while (it.hasNext()) {
+			JSONObject currentApi = new JSONObject();
+			Object apiObject = it.next();
+			API api = (API) apiObject;
+			APIIdentifier apiIdentifier = api.getId();
+			currentApi.put("name", apiIdentifier.getApiName());
+			currentApi.put("provider", APIUtil
+					.replaceEmailDomainBack(apiIdentifier.getProviderName()));
+			currentApi.put("version", apiIdentifier.getVersion());
+			currentApi.put("description", api.getDescription());
+			currentApi.put("rates", api.getRating());
+			if (api.getThumbnailUrl() == null) {
+				currentApi.put("thumbnailurl", "images/api-default.png");
+			} else {
+				currentApi.put("thumbnailurl",
+						APIUtil.prependWebContextRoot(api.getThumbnailUrl()));
+			}
+			currentApi.put("isAdvertiseOnly", api.isAdvertiseOnly());
+			if (api.isAdvertiseOnly()) {
+				currentApi.put("owner",
+						APIUtil.replaceEmailDomainBack(api.getApiOwner()));
+			}
+			currentApi.put("visibility", api.getVisibility());
+			currentApi.put("visibleRoles", api.getVisibleRoles());
+			recentApis.add(i, currentApi);
+			i++;
+		}
+		return recentApis;
+	}
 
+	public JSONArray getAllTags() throws APIManagementException {
+		
+		String requestedTenantDomain = CarbonContext.getThreadLocalCarbonContext().getTenantDomain();
         this.isTenantModeStoreView = (requestedTenantDomain != null);
 
         if(requestedTenantDomain != null){
@@ -917,7 +1045,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         long currentTimeAtStart = System.currentTimeMillis();
         if(isTagCacheEnabled && ( (currentTimeAtStart- lastUpdatedTimeAtStart) < tagCacheValidityTime)){
             if(tagSet != null){
-                return tagSet;
+                return getTagArray(tagSet);
             }
         }
 
@@ -981,7 +1109,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         		// give a warn.
 				if (!userRegistry.resourceExists(tagsQueryPath)) {
 					log.warn("Failed to retrieve tags query resource at " + tagsQueryPath);
-					return tagSet;
+					return getTagArray(tagSet);
 				}
 			} catch (RegistryException e1) {
 				//ignore
@@ -990,20 +1118,46 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         } catch (UserStoreException e) {
             handleException("Failed to get all the tags", e);
         }
-        return tagSet;
+        return getTagArray(tagSet);
     }
 
+	private JSONArray getTagArray(Set<Tag> tags) {
+		
+		JSONArray tagArray = new JSONArray();
+		if (tags != null) {
+			Iterator<Tag> tagsI = tags.iterator();
+			int i = 0;
+            while (tagsI.hasNext()) {
+
+                JSONObject currentTag = new JSONObject();
+                Object tagObject = tagsI.next();
+                Tag tag = (Tag) tagObject;
+
+                currentTag.put("name", tag.getName());
+                currentTag.put("count", tag.getNoOfOccurrences());
+
+                tagArray.add(i, currentTag);
+                i++;
+            }
+		}
+
+		return tagArray;
+	}
+
 	@Override
-	public Set<Tag> getTagsWithAttributes(String tenantDomain) throws APIManagementException {
+	public JSONArray getTagsWithAttributes() throws APIManagementException {
 		// Fetch the all the tags first.
-		Set<Tag> tags = getAllTags(tenantDomain);
+		//String tenantDomain = CarbonContext.getThreadLocalCarbonContext().getTenantDomain();
+		JSONArray tags = getAllTags();
 		// For each and every tag get additional attributes from the registry.
 		String descriptionPathPattern =
 		                                APIConstants.TAGS_INFO_ROOT_LOCATION +
 		                                        "/%s/description.txt";
 		String thumbnailPathPattern = APIConstants.TAGS_INFO_ROOT_LOCATION + "/%s/thumbnail.png";
-		for (Tag tag : tags) {
+		//for (Tag tag : tags) {
+		for (int i = 0, y = tags.size(); i < y; i++) {
 			// Get the description.
+			Tag tag = (Tag) tags.get(i);
 			Resource descriptionResource = null;
 			String descriptionPath = String.format(descriptionPathPattern, tag.getName());
 			try {
@@ -1030,10 +1184,34 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 				         e);
 			}
 		}
-		return tags;
+		return getTagArrayWithAttributes(tags);
 	}
 
-    public void rateAPI(APIIdentifier apiId, APIRating rating,
+    private JSONArray getTagArrayWithAttributes(JSONArray tags) {
+		JSONArray tagArray = new JSONArray();
+		if (tags != null) {
+			Iterator<Tag> tagsI = tags.iterator();
+			int i = 0;
+            while (tagsI.hasNext()) {
+
+                JSONObject currentTag = new JSONObject();
+                Object tagObject = tagsI.next();
+                Tag tag = (Tag) tagObject;
+
+                currentTag.put("name", tag.getName());
+                currentTag.put("description", tag.getDescription());
+                currentTag.put("isThumbnailExists", tag.isThumbnailExists());
+                currentTag.put("count", tag.getNoOfOccurrences());
+
+                tagArray.add(i, currentTag);
+                i++;
+            }
+		}
+
+		return tagArray;
+	}
+
+	public void rateAPI(APIIdentifier apiId, APIRating rating,
                         String user) throws APIManagementException {
         apiMgtDAO.addRating(apiId, rating.getRating(), user);
 
@@ -1048,7 +1226,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         return apiMgtDAO.getUserRating(apiId, user);
     }
 
-    public Set<API> getPublishedAPIsByProvider(String providerId, int limit)
+    public JSONArray getPublishedAPIsByProvider(String providerId, int limit)
             throws APIManagementException {
         SortedSet<API> apiSortedSet = new TreeSet<API>(new APINameComparator());
         SortedSet<API> apiVersionsSortedSet = new TreeSet<API>(new APIVersionComparator());
@@ -1121,12 +1299,12 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 for (API api : latestPublishedAPIs.values()) {
                     apiSortedSet.add(api);
                 }
-                return apiSortedSet;
+                return getPublishedAPIsByProviderArray(apiSortedSet);
             } else {
                 for (API api : multiVersionedAPIs) {
                     apiVersionsSortedSet.add(api);
                 }
-                return apiVersionsSortedSet;
+                return getPublishedAPIsByProviderArray(apiVersionsSortedSet);
             }
 
         } catch (RegistryException e) {
@@ -1137,7 +1315,43 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 
     }
 
-    public Set<API> getPublishedAPIsByProvider(String providerId, String loggedUsername, int limit, String apiOwner)
+    private JSONArray getPublishedAPIsByProviderArray(
+Set<API> apiSet) throws APIManagementException {
+		JSONArray publishedAPIsByProvider = new JSONArray();
+		if (apiSet != null) {
+			Iterator it = apiSet.iterator();
+			int i = 0;
+			while (it.hasNext()) {
+				JSONObject currentApi = new JSONObject();
+				Object apiObject = it.next();
+				API api = (API) apiObject;
+				APIIdentifier apiIdentifier = api.getId();
+				currentApi.put("name", apiIdentifier.getApiName());
+				currentApi.put("provider",
+						APIUtil.replaceEmailDomainBack(apiIdentifier
+								.getProviderName()));
+				currentApi.put("version", apiIdentifier.getVersion());
+				currentApi.put("description", api.getDescription());
+				// Rating should retrieve from db
+				currentApi
+						.put("rates", ApiMgtDAO.getAverageRating(api.getId()));
+				if (api.getThumbnailUrl() == null) {
+					currentApi.put("thumbnailurl", "images/api-default.png");
+				} else {
+					currentApi.put("thumbnailurl", APIUtil
+							.prependWebContextRoot(api.getThumbnailUrl()));
+				}
+				currentApi.put("visibility", api.getVisibility());
+				currentApi.put("visibleRoles", api.getVisibleRoles());
+				publishedAPIsByProvider.add(i, currentApi);
+				i++;
+			}
+
+		}
+		return publishedAPIsByProvider;
+	}
+
+	public Set<API> getPublishedAPIsByProvider(String providerId, String loggedUsername, int limit, String apiOwner)
             throws APIManagementException {
         SortedSet<API> apiSortedSet = new TreeSet<API>(new APINameComparator());
         SortedSet<API> apiVersionsSortedSet = new TreeSet<API>(new APIVersionComparator());
@@ -1875,11 +2089,29 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         return keyDetails;
     }
 
-    public Application[] getApplications(Subscriber subscriber) throws APIManagementException {
-        return apiMgtDAO.getApplications(subscriber);
+    public JSONArray getApplications(String userName) throws APIManagementException {
+        return getApplicationsArray(apiMgtDAO.getApplications(new Subscriber(userName)));
     }
 
-    public boolean isApplicationTokenExists(String accessToken) throws APIManagementException {
+    private JSONArray getApplicationsArray(Application[] applications) {
+    	JSONArray applicationArray = new JSONArray();
+        if (applications != null) {
+            int i = 0;
+            for (Application application : applications) {
+                JSONObject row = new JSONObject();
+                row.put("name", application.getName());
+                row.put("tier", application.getTier());
+                row.put("id", application.getId());
+                row.put("callbackUrl", application.getCallbackUrl());
+                row.put("status", application.getStatus());
+                row.put("description", application.getDescription());
+                applicationArray.add(i++, row);
+            }
+        }
+		return applicationArray;
+	}
+
+	public boolean isApplicationTokenExists(String accessToken) throws APIManagementException {
         return apiMgtDAO.isAccessTokenExists(accessToken);
     }
 
@@ -1906,7 +2138,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
      *
      * @return Set<Tier>
      */
-    public Set<String> getDeniedTiers() throws APIManagementException {
+    public JSONArray getDeniedTiers() throws APIManagementException {
         Set<String> deniedTiers = new HashSet<String>();
         String[] currentUserRoles = new String[0];
         try {
@@ -1939,10 +2171,22 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         } catch (UserStoreException e) {
             log.error("cannot retrieve user role list for tenant" + tenantDomain);
         }
-        return deniedTiers;
+        return getDeniedTiersArray(deniedTiers);
     }
 
-    /**
+    private JSONArray getDeniedTiersArray(Set<String> tiers) {
+    	JSONArray deniedTiersArray = new JSONArray();
+        int i = 0;
+        for (String tier : tiers) {
+            JSONObject row = new JSONObject();
+            row.put("tierName", tier);
+            deniedTiersArray.add(i, row);
+            i++;
+        }
+		return deniedTiersArray;
+	}
+
+	/**
      * Check whether given Tier is denied for the user
      *
      * @param tierName
@@ -2168,4 +2412,125 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 			throws APIManagementException {
 		return apiMgtDAO.getScopesByScopeKeys(scopeKeys, tenantId);
 	}
+
+	@Override
+	public JSONArray getSubscriptions(String providerName, String apiName, String version, String user) throws APIManagementException{
+		
+        APIIdentifier apiIdentifier = new APIIdentifier(APIUtil.replaceEmailDomain(providerName), apiName, version);
+        Subscriber subscriber = new Subscriber(user);
+        JSONArray subscriptions = new JSONArray();
+        Set<SubscribedAPI> apis = getSubscribedIdentifiers(subscriber, apiIdentifier);
+        
+        int i = 0;
+        if (apis != null) {
+            for (SubscribedAPI api : apis) {
+                JSONObject row = new JSONObject();
+                row.put("application", api.getApplication().getName());
+                row.put("applicationId", api.getApplication().getId());
+                row.put("prodKey", getKey(api, APIConstants.API_KEY_TYPE_PRODUCTION));
+                row.put("sandboxKey", getKey(api, APIConstants.API_KEY_TYPE_SANDBOX));
+                ArrayList<APIKey> keys = (ArrayList<APIKey>) api.getApplication().getKeys();
+                for(APIKey key : keys){
+                    row.put(key.getType()+"_KEY", key.getAccessToken());
+                }
+                subscriptions.add(i++, row);
+            }
+        }
+		return subscriptions;
+		
+	}
+	
+	@Override
+	public JSONArray getAllSubscriptions(String userName, String appName,
+			int startSubIndex, int endSubIndex) throws APIManagementException {
+		return null;
+	}
+	
+    private static APIKey getKey(SubscribedAPI api, String keyType) {
+        List<APIKey> apiKeys = api.getKeys();
+        return getKeyOfType(apiKeys, keyType);
+    }
+    
+    private static APIKey getKeyOfType(List<APIKey> apiKeys, String keyType) {
+        for (APIKey key : apiKeys) {
+            if (keyType.equals(key.getType())) {
+                return key;
+            }
+        }
+        return null;
+    }
+
+    @Override
+	public JSONObject getSwaggerResource(String name, String version,
+			String provider) throws APIManagementException {
+		if (provider != null) {
+			provider = APIUtil.replaceEmailDomain(provider);
+		}
+		provider = (provider != null ? provider.trim() : null);
+		name = (name != null ? name.trim() : null);
+		version = (version != null ? version.trim() : null);
+		
+		APIIdentifier apiId = new APIIdentifier(provider, name, version);
+
+		boolean isTenantFlowStarted = false;
+		String apiJSON = null;
+		try {
+			String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil
+					.replaceEmailDomainBack(provider));
+			if (tenantDomain != null
+					&& !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME
+							.equals(tenantDomain)) {
+				isTenantFlowStarted = true;
+				PrivilegedCarbonContext.startTenantFlow();
+				PrivilegedCarbonContext.getThreadLocalCarbonContext()
+						.setTenantDomain(tenantDomain, true);
+			}
+			apiJSON = getSwaggerDefinition(apiId);
+		} finally {
+			if (isTenantFlowStarted) {
+				PrivilegedCarbonContext.endTenantFlow();
+			}
+		}
+
+		JSONObject row = new JSONObject();
+		row.put("swagger", apiJSON);
+		
+		return row;
+	}
+    
+    @Override
+    public JSONArray getSubscriptionsByApplication(String applicationName, String userName) throws APIManagementException{
+        boolean isTenantFlowStarted = false;
+        JSONArray subscriptionArray = new JSONArray();
+        try {
+            String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(userName));
+            if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
+                isTenantFlowStarted = true;
+                PrivilegedCarbonContext.startTenantFlow();
+                PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
+            }
+            Subscriber subscriber = new Subscriber(userName);
+            Set<SubscribedAPI> subscribedAPIs = getSubscribedAPIs(subscriber, applicationName);
+
+            int i = 0;
+            for (SubscribedAPI subscribedAPI : subscribedAPIs) {
+                API api = getAPI(subscribedAPI.getApiId());
+                JSONObject row = new JSONObject();
+                row.put("apiName", subscribedAPI.getApiId().getApiName());
+                row.put("apiVersion", subscribedAPI.getApiId().getVersion());
+                row.put("apiProvider", APIUtil.replaceEmailDomainBack(subscribedAPI.getApiId().getProviderName()));
+                row.put("description", api.getDescription());
+                row.put("subscribedTier", subscribedAPI.getTier().getName());
+                row.put("status", api.getStatus().getStatus());
+                subscriptionArray.add(i, row);
+                i++;
+            }
+        } finally {
+            if (isTenantFlowStarted) {
+                PrivilegedCarbonContext.endTenantFlow();
+            }
+        }
+    	return null;
+    }
+
 }

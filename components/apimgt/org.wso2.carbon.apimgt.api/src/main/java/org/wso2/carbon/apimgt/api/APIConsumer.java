@@ -18,6 +18,8 @@
 
 package org.wso2.carbon.apimgt.api;
 
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
 import org.wso2.carbon.apimgt.api.model.*;
 
 import java.util.List;
@@ -54,7 +56,7 @@ public interface APIConsumer extends APIManager {
      * @return set of API having the given tag name
      * @throws org.wso2.carbon.apimgt.api.APIManagementException if failed to get set of API
      */
-    public Map<String,Object> getPaginatedAPIsWithTag(String tag, int start, int end) throws APIManagementException;
+    public JSONObject getPaginatedAPIsWithTag(String tag, int start, int end) throws APIManagementException;
 
     /**
      * Returns a list of all published APIs. If a given API has multiple APIs,
@@ -75,7 +77,7 @@ public interface APIConsumer extends APIManager {
      * @return set of API
      * @throws org.wso2.carbon.apimgt.api.APIManagementException if failed to API set
      */
-    public Map<String,Object> getAllPaginatedPublishedAPIs(String tenantDomain, int start, int end)
+    public JSONObject getAllPaginatedPublishedAPIs(String tenantDomain, int start, int end)
             throws APIManagementException;
 
     /**
@@ -94,7 +96,7 @@ public interface APIConsumer extends APIManager {
      * @return set of API
      * @throws org.wso2.carbon.apimgt.api.APIManagementException if failed to get recently added APIs
      */
-    public Set<API> getRecentlyAddedAPIs(int limit, String tenantDomain) throws APIManagementException;
+    public JSONArray getRecentlyAddedAPIs(int limit) throws APIManagementException;
 
     /**
      * Get all tags of published APIs
@@ -102,7 +104,7 @@ public interface APIConsumer extends APIManager {
      * @return a list of all Tags applied to all APIs published.
      * @throws org.wso2.carbon.apimgt.api.APIManagementException if failed to get All the tags
      */
-    public Set<Tag> getAllTags(String tenantDomain) throws APIManagementException;
+    public JSONArray getAllTags() throws APIManagementException;
 
     /**
      * Returns all tags with their descriptions.
@@ -118,7 +120,7 @@ public interface APIConsumer extends APIManager {
      * @return The description of the tag.
      * @throws org.wso2.carbon.apimgt.api.APIManagementException if there is a failure in getting the description.
      */
-    public Set<Tag> getTagsWithAttributes(String tenantDomain)throws APIManagementException;
+    public JSONArray getTagsWithAttributes() throws APIManagementException;
 
     /**
      * Rate a particular API. This will be called when subscribers rate an API
@@ -293,7 +295,7 @@ public interface APIConsumer extends APIManager {
      * @return Applications
      * @throws org.wso2.carbon.apimgt.api.APIManagementException if failed to applications for given subscriber
      */
-    public Application[] getApplications(Subscriber subscriber) throws APIManagementException;
+    public JSONArray getApplications(String userName) throws APIManagementException;
 
     public Set<SubscribedAPI> getSubscribedIdentifiers(Subscriber subscriber,
                                                        APIIdentifier identifier) throws APIManagementException;
@@ -325,7 +327,7 @@ public interface APIConsumer extends APIManager {
      * @return set of API
      * @throws org.wso2.carbon.apimgt.api.APIManagementException if failed to get set of API
      */
-    public Set<API> getPublishedAPIsByProvider(String providerId, int limit) throws APIManagementException;
+    public JSONArray getPublishedAPIsByProvider(String providerId, int limit) throws APIManagementException;
 
     /**
      * Check whether an application access token is already persist in database.
@@ -349,7 +351,7 @@ public interface APIConsumer extends APIManager {
      * @return Set<String>
      * @throws org.wso2.carbon.apimgt.api.APIManagementException if failed to get the tiers
      */
-    public Set<String> getDeniedTiers()throws APIManagementException;
+    public JSONArray getDeniedTiers()throws APIManagementException;
     
     /**
      * Check whether given Tier is denied for the user
@@ -394,7 +396,7 @@ public interface APIConsumer extends APIManager {
      * @return set of API
      * @throws org.wso2.carbon.apimgt.api.APIManagementException if failed to API set
      */
-    public Map<String,Object> getAllPaginatedAPIsByStatus(String tenantDomain, int start, int end, String Status)
+    public JSONObject getAllPaginatedAPIsByStatus(String tenantDomain, int start, int end, String Status)
             throws APIManagementException;
 
 	/**
@@ -426,5 +428,13 @@ public interface APIConsumer extends APIManager {
 	 */
 	public Set<Scope> getScopesByScopeKeys(String scopeKeys, int tenantId)
 			throws APIManagementException;
+	
+	public JSONArray getSubscriptions(String providerName, String apiName, String version, String user) throws APIManagementException;
+	
+	public JSONArray getAllSubscriptions(String userName, String appName, int startSubIndex, int endSubIndex) throws APIManagementException;
+	
+	public JSONObject getSwaggerResource(String name, String version, String provider) throws APIManagementException;
+	
+	public JSONArray getSubscriptionsByApplication(String applicationName, String userName) throws APIManagementException;
 
 }
