@@ -1418,10 +1418,25 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 
                 GenericArtifact[] genericArtifacts = artifactManager.findGenericArtifacts(listMap);
                 totalLength = PaginationContext.getInstance().getLength();
+
+                boolean isFound = true;
                 if (genericArtifacts == null || genericArtifacts.length == 0) {
 
-                    result.put("apis",apiSet);
-                    result.put("length",0);
+                    if (criteria.equals(APIConstants.API_OVERVIEW_PROVIDER)) {
+                        genericArtifacts = searchAPIsByOwner(artifactManager, searchValue);
+
+                        if (genericArtifacts == null || genericArtifacts.length == 0) {
+                            isFound = false;
+                        }
+                    }
+                    else {
+                        isFound = false;
+                    }
+                }
+
+                if (!isFound) {
+                    result.put("apis", apiSet);
+                    result.put("length", 0);
                     return result;
                 }
 
@@ -1453,6 +1468,15 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         result.put("apis",apiSet);
         result.put("length",totalLength);
         return result;
+    }
+
+    private  GenericArtifact[] searchAPIsByOwner(GenericArtifactManager artifactManager, final String searchValue) throws GovernanceException {
+        Map<String, List<String>> listMap = new HashMap<String, List<String>>();
+        listMap.put(APIConstants.API_OVERVIEW_OWNER, new ArrayList<String>() {
+            {
+                add(searchValue);
+            }});
+        return artifactManager.findGenericArtifacts(listMap);
     }
 
     /**
