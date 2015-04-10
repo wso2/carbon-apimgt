@@ -22,10 +22,57 @@ var apistore = {};
 
 (function (apistore) {
 
-
+	var APIManagerFactory = Packages.org.wso2.carbon.apimgt.impl.APIManagerFactory;
     var log = new Log("jaggery-modules.api-manager.store");
 
+    apistore.getAPIConsumer = function (username){
+		return APIManagerFactory.getInstance().getAPIConsumer(username);
+	};
 
-           
+    apistore.getAllTags(){
+    	return this.getAPIConsumer.getAllTags();
+    };
+
+    apistore.getTagsWithAttributes(){
+    	return this.getAPIConsumer.getTagsWithAttributes();
+    };
+
+    apistore.getRecentlyAddedAPIs(limit){
+    	return this.getAPIConsumer.getRecentlyAddedAPIs(limit);
+    };
+
+    apistore.getPublishedAPIsByProvider(providerId, limit){
+    	return this.getAPIConsumer.getPublishedAPIsByProvider(providerId, limit);
+    };
+
+    apistore.getSubscriptions(providerName, apiName, version, user){
+    	return this.getAPIConsumer.getSubscriptions(providerName, apiName, version, user);
+    };
+
+    apistore.getAllSubscriptions(userName, appName, startSubIndex, endSubIndex){
+    	return this.getAPIConsumer.getAllSubscriptions(userName, appName, startSubIndex, endSubIndex);
+    };
+
+    apistore.getApplications(userName){
+    	return this.getAPIConsumer.getApplications(userName);
+    };
+
+    apistore.getSwaggerResource(){
+    	return this.getAPIConsumer.getSwaggerResource();
+    };
+
+    apistore.getDeniedTiers(){
+    	return this.getAPIConsumer.getDeniedTiers();
+    };
+
+    apistore.getSubscriptionsByApplication(applicationName, userName){
+    	return this.getAPIConsumer.getSubscriptionsByApplication(applicationName,userName);
+    };
+
+    apistore.getPaginatedAPIsWithTag(tag, start, end){
+    	return this.getAPIConsumer.getPaginatedAPIsWithTag();
+    };
+
+
 })(apistore);
 
