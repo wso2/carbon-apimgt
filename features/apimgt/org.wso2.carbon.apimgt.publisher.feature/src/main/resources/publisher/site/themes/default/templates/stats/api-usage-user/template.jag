@@ -40,6 +40,7 @@
                 </div>
             </div>
             </div>
+            <div class="pull-right hide" id ="apiUsage_note"><%=i18n.localize("apiUsageNote")%></div>
         </div>
 
        <div class="span11">

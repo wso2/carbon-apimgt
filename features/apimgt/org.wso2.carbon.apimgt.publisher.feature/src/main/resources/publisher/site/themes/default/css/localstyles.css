@@ -1452,3 +1452,8 @@ a.next {
 .nvd3 .nv-multibarHorizontal .nv-groups text {
     fill: #333 !important;
 }
+
+#apiUsage_note{
+    margin-right:20px;
+    color:#7d7d7d;
+}

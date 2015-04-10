@@ -172,6 +172,7 @@
     "login": "Login",
     "apisByProviderTitle": "APIs By Provider -",
     "lastModified": "Last Modified",
+    "apiUsageNote": "Note : Date Range only applies to hit count.",
 
     "usageSummary": "Usage Summary",
     "activeSubscriptions": "Active Subscriptions",
