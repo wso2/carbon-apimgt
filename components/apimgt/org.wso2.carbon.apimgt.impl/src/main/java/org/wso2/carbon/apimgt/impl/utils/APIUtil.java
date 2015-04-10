@@ -40,11 +40,15 @@ import org.apache.woden.WSDLFactory;
 import org.apache.woden.WSDLReader;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
+import org.json.simple.JSONValue;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
+import org.mozilla.javascript.NativeArray;
+import org.mozilla.javascript.NativeObject;
 import org.w3c.dom.Document;
 import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.doc.model.APIDefinition;
 import org.wso2.carbon.apimgt.api.doc.model.APIResource;
 import org.wso2.carbon.apimgt.api.doc.model.Operation;
@@ -106,6 +110,7 @@ import javax.cache.Cache;
 import javax.cache.CacheConfiguration;
 import javax.cache.CacheManager;
 import javax.cache.Caching;
+import javax.script.ScriptException;
 import javax.xml.namespace.QName;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -123,6 +128,11 @@ import java.rmi.RemoteException;
 import java.util.*;
 import java.util.Map.Entry;
 import java.util.concurrent.TimeUnit;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import org.apache.commons.lang.StringUtils;
+
 /**
  * This class contains the utility methods used by the implementations of APIManager, APIProvider
  * and APIConsumer interfaces.
@@ -135,6 +145,24 @@ public final class APIUtil {
 
     private static Set<Integer> registryInitializedTenants = new HashSet<Integer>();
     private static GenericArtifactManager genericArtifactManager;
+
+    private static ConfigurationContextService configContextService = null;
+
+    public static void setConfigContextService(ConfigurationContextService configContext) {
+        APIUtil.configContextService = configContext;
+    }
+
+    public static ConfigurationContext getConfigContext() throws APIManagementException {
+        if (configContextService == null) {
+            handleException("ConfigurationContextService is null");
+        }
+
+        return configContextService.getServerConfigContext();
+
+    }
+
+    private static Pattern pathParamExtractorPattern=Pattern.compile("\\{.*?\\}");
+    private static Pattern pathParamValidatorPattern=Pattern.compile("\\{uri\\.var\\.[\\w]+\\}");
 
     /**
      * This method used to get API from governance artifact
@@ -593,6 +621,7 @@ public final class APIUtil {
      */
     public static Set<Scope> getScopeByScopeKey(String scopeKey, String provider) throws APIManagementException {
         Set<Scope> scopeList = null;
+        provider = APIUtil.replaceEmailDomain(provider);
         String tenantDomainName = MultitenantUtils.getTenantDomain(replaceEmailDomainBack(provider));
         try {
             int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
@@ -3961,4 +3990,699 @@ public final class APIUtil {
         int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager().getTenantId(tenantDomain);
         PermissionUpdateUtil.updatePermissionTree(tenantId);
     }
+
+    // Start of APIProvider related methods.
+
+    /**
+     * Get Documentation type
+     *
+     * @return docType DocumentationType
+     */
+    public static DocumentationType getDocType(String docType) {
+        DocumentationType docsType = null;
+        for (DocumentationType type : DocumentationType.values()) {
+            if (type.getType().equalsIgnoreCase(docType)) {
+                docsType = type;
+            }
+        }
+        return docsType;
+    }
+
+    /**
+     * Get WebContext Root
+     *
+     * @return postfixUrl String
+     */
+    public static String getWebContextRoot(String postfixUrl) {
+        String webContext = CarbonUtils.getServerConfiguration().getFirstProperty("WebContextRoot");
+        if (StringUtils.isNotBlank(postfixUrl) && StringUtils.isNotBlank(webContext) && !webContext.equals("/")) {
+            postfixUrl = webContext + postfixUrl;
+        }
+        return postfixUrl;
+    }
+
+    /**
+     * Is API Doc can show
+     *
+     * @return bool
+     */
+    // TODO: method signature should changed as isAPIDocCanShow()
+    public boolean showAPIDocVisibility() {
+
+        APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
+                getAPIManagerConfigurationService().getAPIManagerConfiguration();
+        if (config != null) {
+            return Boolean
+                    .parseBoolean(config.getFirstProperty(APIConstants.API_PUBLISHER_ENABLE_API_DOC_VISIBILITY_LEVELS));
+        } else {
+            return false;
+        }
+    }
+
+    /**
+     * Is API store URL can show
+     *
+     * @return bool
+     */
+    // TODO: method signature should changed as isAPIStoreURLCanShow()
+    public static boolean showAPIStoreURL() {
+
+        APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
+                getAPIManagerConfigurationService().getAPIManagerConfiguration();
+        if (config != null) {
+            return Boolean.parseBoolean(config.getFirstProperty(APIConstants.SHOW_API_STORE_URL_FROM_PUBLISHER));
+        } else {
+            return false;
+        }
+    }
+
+    /**
+     * Get the API store URL
+     *
+     * @return url String
+     */
+    public static String getAPIStoreURL() {
+
+        APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
+                getAPIManagerConfigurationService().getAPIManagerConfiguration();
+        if (config != null) {
+            return config.getFirstProperty(APIConstants.API_STORE_URL);
+        } else {
+            return null;
+        }
+    }
+
+    /**
+     * Get the authenticator server URL
+     *
+     * @return url
+     */
+    public static boolean isDataPublishingEnabled() {
+        APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
+                getAPIManagerConfigurationService().getAPIManagerConfiguration();
+        String enabledStr = config.getFirstProperty(APIConstants.API_USAGE_ENABLED);
+        return enabledStr != null && Boolean.parseBoolean(enabledStr);
+    }
+
+    /**
+     * Get the authenticator server URL
+     *
+     * @return url String
+     * @throws APIManagementException If API key manager URL unspecified
+     */
+    public static String getAuthServerURL() throws APIManagementException {
+
+        APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
+                getAPIManagerConfigurationService().getAPIManagerConfiguration();
+        String url = config.getFirstProperty(APIConstants.AUTH_MANAGER_URL);
+        if (StringUtils.isBlank(url)) {
+            handleException("API key manager URL unspecified");
+        }
+        return url;
+    }
+
+    /**
+     * Get the running transport port
+     *
+     * @param transport [http/https]
+     * @return port int
+     */
+    public static String getBackendPort(String transport) {
+        int port;
+        String backendPort;
+        try {
+            port = CarbonUtils.getTransportProxyPort(getConfigContext(), transport);
+            if (port == -1) {
+                port = CarbonUtils.getTransportPort(getConfigContext(), transport);
+            }
+            backendPort = Integer.toString(port);
+            return backendPort;
+        } catch (APIManagementException e) {
+            log.error(e.getMessage());
+            return null;
+
+        }
+    }
+
+    /**
+     * Get the running HTTPS URL
+     *
+     * @return "https://" + hostName + ":" + backendHttpsPort String
+     */
+    public static String getHTTPsURL() {
+        String hostName = CarbonUtils.getServerConfiguration().getFirstProperty(APIConstants.PROPERTY_HOSTNAME);
+        String backendHttpsPort = getBackendPort(APIConstants.PROTOCOL_HTTPS);
+        if (hostName == null) {
+            hostName = System.getProperty(APIConstants.CARBON_LOCALIP);
+        }
+        return "https://" + hostName + ":" + backendHttpsPort;
+
+    }
+
+    /**
+     * Evaluate HTTP end-point URI to validate path parameter and query
+     * parameter formats<br>
+     * Sample URI format<br>
+     * http[s]//[www.]anyhost[.com][:port]/{uri.var.param}?param1=value&param2={uri.var.value}
+     *
+     * @param endpointConfig JSON representation of end-point configuration.
+     * @return true if valid URI
+     * @throws APIManagementException If the endpointConfig is invalid or URI is invalid
+     */
+    public static boolean validateEndpointURI(String endpointConfig) throws APIManagementException {
+        if (endpointConfig != null) {
+            try {
+                JSONParser parser = new JSONParser();
+                JSONObject jsonObject = (JSONObject) parser.parse(endpointConfig);
+                Object epType = jsonObject.get("endpoint_type");
+                if (epType instanceof String && APIConstants.PROTOCOL_HTTP.equals(epType)) {
+                    // extract production uri from config
+                    Object prodEPs = (JSONObject) jsonObject.get("production_endpoints");
+                    if (prodEPs instanceof JSONObject) {
+                        Object url = ((JSONObject) prodEPs).get("url");
+                        if (url instanceof String && !isValidURI(url.toString())) {
+                            handleException("Invalid Production Endpoint URI. Please refer HTTP Endpoint "
+                                    + "documentation of the WSO2 ESB for details.");
+                        }
+                    }
+                    // extract sandbox uri from config
+                    Object sandEPs = (JSONObject) jsonObject.get("sandbox_endpoints");
+                    if (sandEPs instanceof JSONObject) {
+                        Object url = ((JSONObject) sandEPs).get("url");
+                        if (url instanceof String && !isValidURI(url.toString())) {
+                            handleException("Invalid Sandbox Endpoint URI. Please refer HTTP Endpoint "
+                                    + "documentation of the WSO2 ESB for details.");
+                        }
+                    }
+                }
+            } catch (ParseException e) {
+                handleException("Invalid Endpoint config", e);
+            }
+        }
+        return true;
+    }
+
+    /**
+     * This method returns whether the given url is contain valid uri params or not
+     *
+     * @param url URL to be validated
+     * @return true if URI doesn't contain params or contains valid params
+     */
+    private static boolean isValidURI(String url) {
+        boolean isInvalid = false;
+        // validate only if uri contains { or }
+        if (url != null && (url.contains("{") || url.contains("}"))) {
+            // check { and } are matched or not. otherwise invalid
+            int startCount = 0, endCount = 0;
+            for (char c : url.toCharArray()) {
+                if (c == '{') {
+                    startCount++;
+                } else if (c == '}') {
+                    endCount++;
+                }
+                // this check guarantee the order of '{' and '}'. Ex: {uri.var.name} not }uri.var.name{
+                if (endCount > startCount) {
+                    isInvalid = true;
+                    break;
+                }
+            }
+            // continue only if the matching no of brackets are found. otherwise invalid
+            if (startCount == endCount) {
+                // extract content including { } brackets
+                Matcher pathParamMatcher = pathParamExtractorPattern.matcher(url);
+                while (pathParamMatcher.find()) {
+                    // validate the format of { } content
+                    Matcher formatMatcher = pathParamValidatorPattern.matcher(pathParamMatcher.group());
+                    if (!formatMatcher.matches()) {
+                        isInvalid = true;
+                        break;
+                    }
+                }
+            } else {
+                isInvalid = true;
+            }
+        }
+        return !isInvalid;
+    }
+
+    /**
+     * This method parses the JSON resource config and returns the UriTemplates. Also it saves the swagger
+     * 1.2 resources in the registry
+     *
+     * @param resourceConfigsJSON
+     * @return set of Uri Templates according to api
+     * @throws APIManagementException
+     */
+    public static Set<URITemplate> parseResourceConfig(APIProvider apiProvider, APIIdentifier apiId,
+            String resourceConfigsJSON, API api) throws APIManagementException {
+        JSONParser parser = new JSONParser();
+        JSONObject resourceConfigs = null;
+        JSONObject api_doc = null;
+        Set<URITemplate> uriTemplates = new LinkedHashSet<URITemplate>();
+        Set<Scope> scopeList = new LinkedHashSet<Scope>();
+        boolean isTenantFlowStarted = false;
+        try {
+            resourceConfigs = (JSONObject) parser.parse(resourceConfigsJSON);
+            api_doc = (JSONObject) resourceConfigs.get("api_doc");
+            String apiJSON = api_doc.toJSONString();
+
+            String tenantDomain = MultitenantUtils
+                    .getTenantDomain(APIUtil.replaceEmailDomainBack(apiId.getProviderName()));
+            if (tenantDomain != null
+                    && !org.wso2.carbon.utils.multitenancy.MultitenantConstants.SUPER_TENANT_DOMAIN_NAME
+                    .equals(tenantDomain)) {
+                isTenantFlowStarted = true;
+                PrivilegedCarbonContext.startTenantFlow();
+                PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
+            }
+            apiProvider.updateSwagger12Definition(apiId, APIConstants.API_DOC_1_2_RESOURCE_NAME, apiJSON);
+
+            /* Get Scopes*/
+            if (api_doc.get("authorizations") != null) {
+                JSONObject authorizations = (JSONObject) api_doc.get("authorizations");
+                if (authorizations.get("oauth2") != null) {
+                    JSONObject oauth2 = (JSONObject) authorizations.get("oauth2");
+                    if (oauth2.get("scopes") != null) {
+                        JSONArray scopes = (JSONArray) oauth2.get("scopes");
+
+                        if (scopes != null) {
+                            for (int i = 0; i < scopes.size(); i++) {
+                                Map scope = (Map) scopes.get(i);
+                                if (scope.get("key") != null) {
+                                    Scope scopeObj = new Scope();
+                                    scopeObj.setKey((String) scope.get("key"));
+                                    scopeObj.setName((String) scope.get("name"));
+                                    scopeObj.setRoles((String) scope.get("roles"));
+                                    scopeObj.setDescription((String) scope.get("description"));
+                                    scopeList.add(scopeObj);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            JSONArray resources = (JSONArray) resourceConfigs.get("resources");
+
+            //Iterating each resourcePath config
+            for (int i = 0; i < resources.size(); i++) {
+                JSONObject resourceConfig = (JSONObject) resources.get(i);
+                APIManagerConfiguration config = ServiceReferenceHolder.getInstance()
+                        .getAPIManagerConfigurationService().getAPIManagerConfiguration();
+                Map<String, Environment> environments = config.getApiGatewayEnvironments();
+                Environment env = null;
+                String endpoint = "";
+                if (environments != null) {
+                    Set<String> publishedEnvironments = api.getEnvironments();
+                    if (publishedEnvironments.isEmpty() || publishedEnvironments.contains("none")) {
+
+                        env = environments.values().toArray(new Environment[environments.size()])[0];
+                        String gatewayEndpoint = env.getApiGatewayEndpoint();
+                        if (gatewayEndpoint.contains(",")) {
+                            endpoint = gatewayEndpoint.split(",")[0];
+                        } else {
+                            endpoint = gatewayEndpoint;
+                        }
+                    } else {
+                        for (String environmentName : publishedEnvironments) {
+                            // find environment that have hybrid type
+                            if (APIConstants.GATEWAY_ENV_TYPE_HYBRID
+                                    .equals(environments.get(environmentName).getType())) {
+                                env = environments.get(environmentName);
+                                break;
+                            }
+                        }
+                        //if not having any hybrid environment give 1st environment in api published list
+                        if (env == null) {
+                            env = environments.get(publishedEnvironments.toArray()[0]);
+                        }
+                        String gatewayEndpoint = env.getApiGatewayEndpoint();
+                        if (gatewayEndpoint != null && gatewayEndpoint.contains(",")) {
+                            endpoint = gatewayEndpoint.split(",")[0];
+                        } else {
+                            endpoint = gatewayEndpoint;
+                        }
+                    }
+                }
+                String apiPath = APIUtil.getAPIPath(apiId);
+                if (StringUtils.isNotBlank(endpoint) && endpoint.endsWith(RegistryConstants.PATH_SEPARATOR)) {
+                    endpoint.substring(0, endpoint.length() - 1);
+                }
+                // We do not need the version in the base path since with the context version strategy, the version is
+                // embedded in the context
+                String basePath = endpoint + api.getContext();
+                // String basePath = ep+api.getContext()+RegistryConstants.PATH_SEPARATOR+apiId.getVersion();
+                resourceConfig.put("basePath", basePath);
+                String resourceJSON = resourceConfig.toJSONString();
+
+                String resourcePath = (String) resourceConfig.get("resourcePath");
+
+                apiProvider.updateSwagger12Definition(apiId, resourcePath, resourceConfig.toJSONString());
+
+                JSONArray resource_configs = (JSONArray) resourceConfig.get("apis");
+
+                //Iterating each Sub resourcePath config
+                for (int j = 0; j < resource_configs.size(); j++) {
+                    JSONObject resource = (JSONObject) resource_configs.get(j);
+                    String uriTempVal = (String) resource.get("path");
+                    uriTempVal = uriTempVal.startsWith("/") ? uriTempVal : ("/" + uriTempVal);
+
+                    JSONArray operations = (JSONArray) resource.get("operations");
+                    //Iterating each operation config
+                    for (int k = 0; k < operations.size(); k++) {
+                        JSONObject operation = (JSONObject) operations.get(k);
+                        String httpVerb = (String) operation.get("method");
+                        /* Right Now PATCH is not supported. Need to remove
+                         * this check when PATCH is supported*/
+                        if (!"PATCH".equals(httpVerb)) {
+                            URITemplate template = new URITemplate();
+                            Scope scope = APIUtil.findScopeByKey(scopeList, (String) operation.get("scope"));
+
+                            String authType = (String) operation.get("auth_type");
+                            if (authType != null) {
+                                if (APIConstants.AUTH_APPLICATION_AND_APPLICATION_USER_LABEL.equals(authType)) {
+                                    authType = APIConstants.AUTH_APPLICATION_OR_USER_LEVEL_TOKEN;
+                                }
+                                if (APIConstants.AUTH_APPLICATION_USER_LABEL.equals(authType)) {
+                                    authType = APIConstants.AUTH_APPLICATION_USER_LEVEL_TOKEN;
+                                }
+                            } else {
+                                authType = APIConstants.AUTH_NO_AUTHENTICATION;
+                            }
+                            template.setThrottlingTier((String) operation.get("throttling_tier"));
+                            template.setMediationScript((String) operation.get("mediation_script"));
+                            template.setUriTemplate(uriTempVal);
+                            template.setHTTPVerb(httpVerb);
+                            template.setAuthType(authType);
+                            template.setScope(scope);
+
+                            uriTemplates.add(template);
+                        }
+                    }
+                }
+            }
+        } catch (ParseException e) {
+            handleException("Invalid resource config", e);
+        } catch (ClassCastException e) {
+            handleException("Unable to create JSON object from resource config", e);
+        } finally {
+            if (isTenantFlowStarted) {
+                PrivilegedCarbonContext.endTenantFlow();
+            }
+        }
+        return uriTemplates;
+    }
+
+    // End of APIProvider related methods.
+
+    // Start of APIStore related methods.
+
+    /**
+     * This method returns application access token validity period in seconds
+     *
+     * @return Access token validity period in seconds, this is a long value
+     */
+    public static long getApplicationAccessTokenValidityPeriodInSeconds() {
+        return OAuthServerConfiguration.getInstance().getApplicationAccessTokenValidityPeriodInSeconds();
+    }
+
+    /**
+     * This method returns bool expression whether access token get expired later or not
+     *
+     * @return boolean
+     */
+    public static boolean isApplicationAccessTokenNeverExpire(long validityPeriod) {
+        return validityPeriod == Long.MAX_VALUE;
+    }
+
+    /**
+     * This method returns filtered URL list by transport
+     *
+     * @param apiData
+     * @param transports
+     * @return urlString or apiData if apiData == null
+     */
+    public static String filterUrls(String apiData, String transports) {
+        if (apiData != null && transports != null) {
+            List<String> urls = new ArrayList<String>();
+            List<String> transportList = new ArrayList<String>();
+            urls.addAll(Arrays.asList(apiData.split(",")));
+            transportList.addAll(Arrays.asList(transports.split(",")));
+            urls = filterUrlsByTransport(urls, transportList, APIConstants.PROTOCOL_HTTPS);
+            urls = filterUrlsByTransport(urls, transportList, APIConstants.PROTOCOL_HTTP);
+            String urlString = urls.toString();
+            return urlString.substring(1, urlString.length() - 1);
+        }
+        return apiData;
+    }
+
+    /**
+     * This method returns filtered URL list by transport
+     * this is for use in filterUrls(String apiData, String transports) function
+     *
+     * @param urlsList
+     * @param transportList
+     * @return urlsList
+     */
+    private static List<String> filterUrlsByTransport(List<String> urlsList, List<String> transportList,
+            String transportName) {
+        if (!transportList.contains(transportName)) {
+            ListIterator<String> it = urlsList.listIterator();
+            while (it.hasNext()) {
+                String url = it.next();
+                if (url.startsWith(transportName + ":")) {
+                    it.remove();
+                }
+            }
+            return urlsList;
+        }
+        return urlsList;
+    }
+
+    /**
+     * This method returns app key of the relevant app and key type.
+     *
+     * @param app
+     * @param keyType
+     * @return getKeyOfType(apiKeys, keyType)
+     */
+    public static APIKey getAppKey(Application app, String keyType) {
+        List<APIKey> apiKeys = app.getKeys();
+        return getKeyOfType(apiKeys, keyType);
+    }
+
+    /**
+     * This method returns the key of the relevant key type.
+     *
+     * @param apiKeys
+     * @param keyType
+     * @return key
+     */
+    private static APIKey getKeyOfType(List<APIKey> apiKeys, String keyType) {
+        for (APIKey key : apiKeys) {
+            if (keyType.equals(key.getType())) {
+                return key;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * This method returns the allowed scopes for user application.
+     *
+     * @param username
+     * @param reqScopeSet
+     * @return authorizedScopes
+     */
+    public static List<Scope> getAllowedScopesForUserApplication(String username, Set<Scope> reqScopeSet) {
+        String[] userRoles = null;
+        List<Scope> authorizedScopes = new ArrayList<Scope>();
+        List<String> userRoleList = null;
+        try {
+            userRoles = getListOfRoles(username);
+        } catch (APIManagementException e) {
+            log.error("Error while getting the roles for user", e);
+        }
+
+        if (userRoles != null && userRoles.length > 0) {
+            userRoleList = new ArrayList<String>(Arrays.asList(userRoles));
+        } else {
+            log.error("No user roles were defined for " + username + "!");
+        }
+
+        // Iterate the requested scopes list.
+        for (Scope scope : reqScopeSet) {
+            // Get the set of roles associated with the requested scope.
+            String roles = scope.getRoles();
+
+            // If the scope has been defined in the context of the App and if roles have been defined for the scope
+            if (roles != null && roles.length() != 0) {
+                List<String> roleList = new ArrayList<String>(Arrays.asList(roles.replaceAll(" ", "").split(",")));
+                //Check if user has at least one of the roles associated with the scope
+                roleList.retainAll(userRoleList);
+                if (!roleList.isEmpty()) {
+                    authorizedScopes.add(scope);
+                }
+            }
+        }
+
+        return authorizedScopes;
+    }
+
+    /**
+     * This method returns the scope names by key.
+     *
+     * @param scopeKey
+     * @param availableScopeSet
+     * @return prodKeyScope
+     */
+    public static String getScopeNamesByKey(String scopeKey, Set<Scope> availableScopeSet) {
+        //convert scope keys to names
+        StringBuilder scopeBuilder = new StringBuilder("");
+        String prodKeyScope;
+
+        if (APIConstants.OAUTH2_DEFAULT_SCOPE.equals(scopeKey)) {
+            scopeBuilder.append("Default  ");
+        } else {
+            List<String> inputScopeList = new ArrayList<String>(Arrays.asList(scopeKey.split(" ")));
+            String scopeName = "";
+            for (String inputScope : inputScopeList) {
+                for (Scope availableScope : availableScopeSet) {
+                    if (availableScope.getKey().equals(inputScope)) {
+                        scopeName = availableScope.getName();
+                        break;
+                    }
+                }
+                scopeBuilder.append(scopeName);
+                scopeBuilder.append(", ");
+            }
+        }
+        prodKeyScope = scopeBuilder.toString();
+        prodKeyScope = prodKeyScope.substring(0, prodKeyScope.length() - 2);
+        return prodKeyScope;
+    }
+
+    /**
+     * Returns all the HTTPs Gateway Endpoint URLs of all the Gateway Endpoints
+     *
+     * @return List of HTTPs Gateway Endpoint URLs
+     */
+    public static NativeArray getHTTPsGatewayEndpointURLs() {
+        NativeArray myn = new NativeArray(0);
+
+        APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
+                getAPIManagerConfigurationService().getAPIManagerConfiguration();
+        Map<String, Environment> environments = config.getApiGatewayEnvironments();
+
+        int index = 0;
+        for (Environment environment : environments.values()) {
+            String apiGatewayEndpoints = environment.getApiGatewayEndpoint();
+
+            List<String> urlsList = new ArrayList<String>();
+            urlsList.addAll(Arrays.asList(apiGatewayEndpoints.split(",")));
+            ListIterator<String> it = urlsList.listIterator();
+
+            while (it.hasNext()) {
+                String url = it.next();
+                if (StringUtils.isNotBlank(url) && url.startsWith(APIConstants.PROTOCOL_HTTPS + ":")) {
+                    myn.put(index, myn, url);
+                    index++;
+                }
+            }
+        }
+        return myn;
+    }
+
+    /**
+     * This method is to check whether billing enabled or not.
+     *
+     * @return true if billing enabled else false
+     */
+    public static boolean isBillingEnabled() {
+        APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
+                getAPIManagerConfigurationService().getAPIManagerConfiguration();
+        String billingConfig = config.getFirstProperty(APIConstants.BILLING_AND_USAGE_CONFIGURATION);
+        return Boolean.parseBoolean(billingConfig);
+    }
+
+    /**
+     * Get the API publisher URL
+     *
+     * @return url String
+     */
+    public static String getAPIPublisherURL() {
+
+        APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
+                getAPIManagerConfigurationService().getAPIManagerConfiguration();
+        if (config != null) {
+            return config.getFirstProperty(APIConstants.API_PUBLISHER_URL);
+        }
+        return null;
+    }
+
+    /**
+     * This method check email username is enable or not
+     *
+     * @return bool
+     */
+    public static boolean isEnableEmailUsername() {
+        return Boolean.parseBoolean(CarbonUtils.getServerConfiguration().getFirstProperty("EnableEmailUserName"));
+    }
+
+    public static boolean hasPublisherAccess(String username) {
+        String usernameWithDomain = getUserNameWithTenantSuffix(username);
+        String tenantDomain = MultitenantUtils.getTenantDomain(usernameWithDomain);
+        if (!tenantDomain.equals(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)) {
+            usernameWithDomain = usernameWithDomain + APIConstants.EMAIL_DOMAIN_SEPARATOR + tenantDomain;
+        }
+        boolean displayPublishUrlFromStore = false;
+        APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
+                getAPIManagerConfigurationService().getAPIManagerConfiguration();
+        if (config != null) {
+            displayPublishUrlFromStore = Boolean
+                    .parseBoolean(config.getFirstProperty(APIConstants.SHOW_API_PUBLISHER_URL_FROM_STORE));
+        }
+        boolean loginUserHasPublisherAccess = false;
+        if (displayPublishUrlFromStore) {
+            loginUserHasPublisherAccess =
+                    checkPermissionQuietly(usernameWithDomain, APIConstants.Permissions.API_CREATE)
+                            || checkPermissionQuietly(usernameWithDomain, APIConstants.Permissions.API_PUBLISH);
+        }
+        return loginUserHasPublisherAccess;
+    }
+
+    /**
+     * This method check whether user permissions
+     *
+     * @return bool
+     */
+    public static boolean hasUserPermissions(String username) {
+        String usernameWithDomain = getUserNameWithTenantSuffix(username);
+        return checkPermissionQuietly(usernameWithDomain, APIConstants.Permissions.API_CREATE)
+                || checkPermissionQuietly(usernameWithDomain, APIConstants.Permissions.API_PUBLISH);
+    }
+
+    // End of APIStore related methods.
+
+    public static String checkValue(String input) {
+        return input != null ? input : "";
+    }
+
+    public static String checkTransport(String compare, String transport)
+            throws APIManagementException {
+        if (transport != null) {
+            List<String> transportList = new ArrayList<String>();
+            transportList.addAll(Arrays.asList(transport.split(",")));
+            if (transportList.contains(compare)) {
+                return "checked";
+            } else {
+                return "";
+            }
+
+        } else {
+            return "";
+        }
+    }
+
+
 }
