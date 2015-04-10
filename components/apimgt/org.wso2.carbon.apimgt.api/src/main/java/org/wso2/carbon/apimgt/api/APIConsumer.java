@@ -201,7 +201,7 @@ public interface APIConsumer extends APIManager {
      * @return String subscription status
      * @throws org.wso2.carbon.apimgt.api.APIManagementException if failed to add subscription details to database
      */
-    public String addSubscription(APIIdentifier identifier, String userId, int applicationId)
+    public String addSubscription(String providerName, String apiName, String version, String tier, int applicationId, String userId)
             throws APIManagementException;
 
     /**
@@ -259,7 +259,7 @@ public interface APIConsumer extends APIManager {
      * @param userId      User Id
      * @throws org.wso2.carbon.apimgt.api.APIManagementException if failed to add Application
      */
-    public String addApplication(Application application, String userId) throws APIManagementException;
+    public String addApplication(String appname, String username, String tier, String callbackUrl, String description) throws APIManagementException;
 
     /**
      * Updates the details of the specified user application.
