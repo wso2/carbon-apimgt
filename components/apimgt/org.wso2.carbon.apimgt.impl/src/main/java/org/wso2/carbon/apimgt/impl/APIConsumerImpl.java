@@ -39,6 +39,7 @@ import org.wso2.carbon.apimgt.impl.utils.*;
 import org.wso2.carbon.apimgt.impl.workflow.*;
 import org.wso2.carbon.apimgt.keymgt.client.SubscriberKeyMgtClient;
 import org.wso2.carbon.apimgt.keymgt.stub.types.carbon.ApplicationKeysDTO;
+import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.governance.api.common.dataobjects.GovernanceArtifact;
@@ -1712,8 +1713,13 @@ Set<API> apiSet) throws APIManagementException {
         return isSubscribed;
     }
 
-    public String addSubscription(APIIdentifier identifier, String userId, int applicationId)
+    public String addSubscription(String providerName, String apiName, String version, String tier, int applicationId, String userId)
             throws APIManagementException {
+
+        providerName = APIUtil.replaceEmailDomain(providerName);
+    	
+        APIIdentifier identifier =  getAPIidentifier(providerName, apiName, version, tier, userId);
+    	
         API api = getAPI(identifier);
         if (api.getStatus().equals(APIStatus.PUBLISHED)) {
             int subscriptionId = apiMgtDAO.addSubscription(identifier, api.getContext(), applicationId,
@@ -1774,7 +1780,81 @@ Set<API> apiSet) throws APIManagementException {
         }
     }
 
-    public void removeSubscription(APIIdentifier identifier, String userId, int applicationId)
+    private APIIdentifier getAPIidentifier(String providerName, String apiName, String version, String tier, String userId) throws APIManagementException {
+    	APIIdentifier apiIdentifier = new APIIdentifier(providerName, apiName, version);
+        boolean isTenantFlowStarted = false;
+        try {
+            String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(providerName));
+            if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
+                isTenantFlowStarted = true;
+                PrivilegedCarbonContext.startTenantFlow();
+                PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
+            }
+
+	        // Validation for allowed throttling tiers
+            API api = getAPI(apiIdentifier);
+            Set<Tier> tiers = api.getAvailableTiers();
+
+            Iterator<Tier> iterator = tiers.iterator();
+            boolean isTierAllowed = false;
+            List<String> allowedTierList = new ArrayList<String>();
+            while (iterator.hasNext()) {
+                Tier t = iterator.next();
+                if (t.getName() != null && (t.getName()).equals(tier)) {
+                    isTierAllowed = true;
+                }
+                allowedTierList.add(t.getName());
+            }
+            if (!isTierAllowed) {
+                throw new APIManagementException("Tier " + tier + " is not allowed for API " + apiName + "-" + version + ". Only "
+                        + Arrays.toString(allowedTierList.toArray()) + " Tiers are alllowed.");
+            }
+            if (isTierDeneid(tier)) {
+                throw new APIManagementException("Tier " + tier + " is not allowed for user " + userId);
+            }
+	    	// Tenant based validation for subscription
+            String userDomain = MultitenantUtils.getTenantDomain(userId);
+            boolean subscriptionAllowed = false;
+            if (!userDomain.equals(tenantDomain)) {
+                String subscriptionAvailability = api.getSubscriptionAvailability();
+                if (APIConstants.SUBSCRIPTION_TO_ALL_TENANTS.equals(subscriptionAvailability)) {
+                    subscriptionAllowed = true;
+                } else if (APIConstants.SUBSCRIPTION_TO_SPECIFIC_TENANTS.equals(subscriptionAvailability)) {
+                    String subscriptionAllowedTenants = api.getSubscriptionAvailableTenants();
+                    String allowedTenants[] = null;
+                    if (subscriptionAllowedTenants != null) {
+                        allowedTenants = subscriptionAllowedTenants.split(",");
+                        if (allowedTenants != null) {
+                            for (String tenant : allowedTenants) {
+                                if (tenant != null && userDomain.equals(tenant.trim())) {
+                                    subscriptionAllowed = true;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                }
+            } else {
+                subscriptionAllowed = true;
+            }
+            if (!subscriptionAllowed) {
+                throw new APIManagementException("Subscription is not allowed for " + userDomain);
+            }
+            apiIdentifier.setTier(tier);
+           
+            return apiIdentifier;
+        } catch (APIManagementException e) {
+            handleException("Error while adding subscription for user: " + userId + " Reason: " + e.getMessage(), e);
+            return null;
+        } finally {
+            if (isTenantFlowStarted) {
+                PrivilegedCarbonContext.endTenantFlow();
+            }
+        }
+		
+	}
+
+	public void removeSubscription(APIIdentifier identifier, String userId, int applicationId)
             throws APIManagementException {
         apiMgtDAO.removeSubscription(identifier, applicationId);
         if (APIUtil.isAPIGatewayKeyCacheEnabled()) {
@@ -1863,50 +1943,74 @@ Set<API> apiSet) throws APIManagementException {
      * @return {@link String}
      */
 
-    public String addApplication(Application application, String userId)
-            throws APIManagementException {
+    public String addApplication(String appName, String userName, String tier, String callbackUrl, String description)
+			throws APIManagementException {
 
-        int applicationId = apiMgtDAO.addApplication(application, userId);
+		Subscriber subscriber = new Subscriber(username);
+		JSONArray apps = getApplications(username);
 
-        boolean isTenantFlowStarted = false;
-        if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
-            isTenantFlowStarted = true;
-            PrivilegedCarbonContext.startTenantFlow();
-            PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
-        }
+		for (int i = 0; i < apps.size(); i++) {
+			Application app = (Application) apps.get(i);
+			if (app.getName().equals(appName)) {
+				handleException("A duplicate application already exists by the name - "
+						+ appName);
+			}
+		}
 
-        try {
+		Application application = new Application(appName, subscriber);
+		application.setTier(tier);
+		application.setCallbackUrl(callbackUrl);
+		application.setDescription(description);
 
-            WorkflowExecutor appCreationWFExecutor = WorkflowExecutorFactory.getInstance().
-                    getWorkflowExecutor(WorkflowConstants.WF_TYPE_AM_APPLICATION_CREATION);
-            ApplicationWorkflowDTO appWFDto = new ApplicationWorkflowDTO();
-            appWFDto.setApplication(application);
+		int applicationId = apiMgtDAO.addApplication(application, userName);
 
-            appWFDto.setExternalWorkflowReference(appCreationWFExecutor.generateUUID());
-            appWFDto.setWorkflowReference(String.valueOf(applicationId));
-            appWFDto.setWorkflowType(WorkflowConstants.WF_TYPE_AM_APPLICATION_CREATION);
-            appWFDto.setCallbackUrl(appCreationWFExecutor.getCallbackURL());
-            appWFDto.setStatus(WorkflowStatus.CREATED);
-            appWFDto.setTenantDomain(tenantDomain);
-            appWFDto.setTenantId(tenantId);
-            appWFDto.setUserName(userId);
-            appWFDto.setCreatedTime(System.currentTimeMillis());
+		boolean isTenantFlowStarted = false;
+		if (tenantDomain != null
+				&& !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME
+						.equals(tenantDomain)) {
+			isTenantFlowStarted = true;
+			PrivilegedCarbonContext.startTenantFlow();
+			PrivilegedCarbonContext.getThreadLocalCarbonContext()
+					.setTenantDomain(tenantDomain, true);
+		}
 
-            appCreationWFExecutor.execute(appWFDto);
-        } catch (WorkflowException e) {
-            //If the workflow execution fails, roll back transaction by removing the application entry.
-            application.setId(applicationId);
-            apiMgtDAO.deleteApplication(application);
-            log.error("Unable to execute Application Creation Workflow", e);
-            handleException("Unable to execute Application Creation Workflow", e);
-        } finally {
-            if (isTenantFlowStarted) {
-                PrivilegedCarbonContext.endTenantFlow();
-            }
-        }
-        String status = apiMgtDAO.getApplicationStatus(application.getName(), userId);
-        return status;
-    }
+		try {
+
+			WorkflowExecutor appCreationWFExecutor = WorkflowExecutorFactory
+					.getInstance().getWorkflowExecutor(
+							WorkflowConstants.WF_TYPE_AM_APPLICATION_CREATION);
+			ApplicationWorkflowDTO appWFDto = new ApplicationWorkflowDTO();
+			appWFDto.setApplication(application);
+
+			appWFDto.setExternalWorkflowReference(appCreationWFExecutor
+					.generateUUID());
+			appWFDto.setWorkflowReference(String.valueOf(applicationId));
+			appWFDto.setWorkflowType(WorkflowConstants.WF_TYPE_AM_APPLICATION_CREATION);
+			appWFDto.setCallbackUrl(appCreationWFExecutor.getCallbackURL());
+			appWFDto.setStatus(WorkflowStatus.CREATED);
+			appWFDto.setTenantDomain(tenantDomain);
+			appWFDto.setTenantId(tenantId);
+			appWFDto.setUserName(userName);
+			appWFDto.setCreatedTime(System.currentTimeMillis());
+
+			appCreationWFExecutor.execute(appWFDto);
+		} catch (WorkflowException e) {
+			// If the workflow execution fails, roll back transaction by
+			// removing the application entry.
+			application.setId(applicationId);
+			apiMgtDAO.deleteApplication(application);
+			log.error("Unable to execute Application Creation Workflow", e);
+			handleException("Unable to execute Application Creation Workflow",
+					e);
+		} finally {
+			if (isTenantFlowStarted) {
+				PrivilegedCarbonContext.endTenantFlow();
+			}
+		}
+		String status = apiMgtDAO.getApplicationStatus(application.getName(),
+				username);
+		return status;
+	}
 
     public void updateApplication(Application application) throws APIManagementException {
         Application app = apiMgtDAO.getApplicationById(application.getId());
@@ -2053,6 +2157,40 @@ Set<API> apiSet) throws APIManagementException {
         return keyDetails;
     }
 
+    public JSONObject createApplicationKeys(String userId, String applicationName, String tokenType, String tokenScope)
+			throws APIManagementException {
+
+		try {
+			Map<String, String> keyDetails = completeApplicationRegistration(userId, applicationName, tokenType, tokenScope);
+			JSONObject object = new JSONObject();
+
+			if (keyDetails != null) {
+				Iterator<Map.Entry<String, String>> entryIterator = keyDetails
+						.entrySet().iterator();
+				Map.Entry<String, String> entry = null;
+				while (entryIterator.hasNext()) {
+					entry = entryIterator.next();
+					object.put(entry.getKey(), entry.getValue());
+				}
+				boolean isRegenarateOptionEnabled = true;
+				//TODO implement getApplicationAccessTokenValidityPeriodInSeconds
+				if (APIUtil.getApplicationAccessTokenValidityPeriodInSeconds() < 0) {
+					isRegenarateOptionEnabled = false;
+				}
+				object.put("enableRegenarate", isRegenarateOptionEnabled);
+
+			}
+
+			return object;
+		} catch (APIManagementException e) {
+			String msg = "Error while obtaining the application access token for the application:"
+					+ applicationName;
+			log.error(msg, e);
+			throw new APIManagementException(msg, e);
+		}
+
+	}
+    
     public Map<String, String> completeApplicationRegistration(String userId,
                                                                String applicationName,
                                                                String tokenType, String tokenScope)
