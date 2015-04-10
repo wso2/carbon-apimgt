@@ -46,6 +46,52 @@ var apipublisher = {};
     apipublisher.updateDesignAPI = function (APIProvider,api) {
         return APIProvider.updateDesignAPI(api);
     };
-           
+    apipublisher.addDocumentation = function (APIProvider,api,document) {
+        return APIProvider.addDocumentation(api);
+    };
+    apipublisher.addInlineContent = function (APIProvider,api,docName,content) {
+        return APIProvider.addInlineContent(api,docName,content);
+    };
+    apipublisher.createNewAPIVersion = function (APIProvider,api,newVersion) {
+        return APIProvider.createNewAPIVersion(api,newVersion);
+    };
+    apipublisher.getAllAPIUsageByProvider = function (APIProvider,providerName) {
+        return APIProvider.getAllAPIUsageByProvider(providerName);
+    };
+    apipublisher.getSubscribersOfAPI = function (APIProvider,apiId) {
+        return APIProvider.getSubscribersOfAPI(apiId);
+    };
+    apipublisher.getAPIsByProvider = function (APIProvider,providerName) {
+        return APIProvider.getAPIsByProvider(providerName);
+    };
+    apipublisher.getSubscribersOfAPI = function (APIProvider,apiId) {
+        return APIProvider.getSubscribersOfAPI(apiId);
+    };
+    apipublisher.getDefaultVersion = function (APIProvider,apiId) {
+        return APIProvider.getDefaultVersion(apiId);
+    };
+    apipublisher.getCustomFaultSequences = function (APIProvider) {
+        return APIProvider.getCustomFaultSequences();
+    };
+    apipublisher.getCustomInSequences = function (APIProvider) {
+        return APIProvider.getCustomInSequences();
+    };
+    apipublisher.getCustomOutSequences = function (APIProvider) {
+        return APIProvider.getCustomOutSequences();
+    };
+    apipublisher.updateSubscription = function (APIProvider,apiId,status,appId) {
+        return APIProvider.updateSubscription(apiId,status,appId);
+    };
+    apipublisher.removeDocumentation = function (APIProvider,apiId,docName,docType) {
+        return APIProvider.removeDocumentation(apiId,docName,docType);
+    };
+    apipublisher.deleteAPI = function (APIProvider,apiId) {
+        return APIProvider.deleteAPI(apiId);
+    };
+
+
+
+
+
 })(apipublisher);
 

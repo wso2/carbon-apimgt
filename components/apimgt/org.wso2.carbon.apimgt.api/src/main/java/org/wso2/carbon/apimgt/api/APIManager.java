@@ -107,7 +107,7 @@ public interface APIManager {
      * @return List<Documentation>
      * @throws org.wso2.carbon.apimgt.api.APIManagementException if failed to get Documentations
      */
-    public List<Documentation> getAllDocumentation(APIIdentifier apiId)
+    public JSONArray getAllDocumentation(JSONObject apiId)
             throws APIManagementException;
 
     /**
@@ -140,7 +140,7 @@ public interface APIManager {
      * @return if failed to get doc content
      * @throws org.wso2.carbon.apimgt.api.APIManagementException if the asking documentation content is unavailable
      */
-    public String getDocumentationContent(APIIdentifier identifier, String documentationName)
+    public JSONObject getDocumentationContent(JSONObject identifier, String documentationName)
             throws APIManagementException;
 
     /**
@@ -271,15 +271,13 @@ public interface APIManager {
     */
     public Set<Tier> getTiers() throws APIManagementException;
 
-
-
     /**
      * Returns a list of pre-defined # {@link org.wso2.carbon.apimgt.api.model.Tier} in the system.
      *
      * @return Set<Tier>
      * @throws org.wso2.carbon.apimgt.api.APIManagementException if failed to get the predefined tiers
      */
-    public Set<Tier> getTiers(String tenantDomain) throws APIManagementException;
+    public JSONArray getTiers(String tenantDomain) throws APIManagementException;
 
     /**
      * Returns the Swagger definition as a string
