@@ -43,6 +43,7 @@ public class CORSRequestHandler extends AbstractHandler implements ManagedLifecy
 	private String allowHeaders;
 	private List<String> allowedOrigins;
 	private boolean headerStatus;
+
 	public void init(SynapseEnvironment synapseEnvironment) {
 		if (log.isDebugEnabled()) {
 			log.debug("Initializing CORSRequest Handler instance");
@@ -63,8 +64,11 @@ public class CORSRequestHandler extends AbstractHandler implements ManagedLifecy
 		}
 		return true;
 	}
+
 	public void destroy() {
-		log.debug("Destroying CORSRequest Handler handler instance");
+		if (log.isDebugEnabled()) {
+			log.debug("Destroying CORSRequest Handler handler instance");
+		}
 	}
 
 	public boolean handleRequest(MessageContext messageContext) {
@@ -76,6 +80,7 @@ public class CORSRequestHandler extends AbstractHandler implements ManagedLifecy
 		String httpMethod = (String) ((Axis2MessageContext) messageContext).getAxis2MessageContext().
 				getProperty(Constants.Configuration.HTTP_METHOD);
 		API selectedApi = null;
+		Resource selectedResourceWithVerb = null;
 		Resource selectedResource = null;
 		boolean status;
 
@@ -101,27 +106,37 @@ public class CORSRequestHandler extends AbstractHandler implements ManagedLifecy
 		if (selectedApi.getResources().length > 0) {
 			for (RESTDispatcher dispatcher : RESTUtils.getDispatchers()) {
 				Resource resource = dispatcher.findResource(messageContext, Arrays.asList(selectedApi.getResources()));
-				if (resource != null && Arrays.asList(resource.getMethods()).contains(httpMethod)) {
+				if (resource != null) {
 					selectedResource = resource;
-					break;
+					if (Arrays.asList(resource.getMethods()).contains(httpMethod)) {
+						selectedResourceWithVerb = resource;
+						break;
+					}
 				}
 			}
 		}
-		String resourceString = selectedResource != null ? selectedResource.getDispatcherHelper().getString() : null;
+		String resourceString =
+				selectedResourceWithVerb != null ? selectedResourceWithVerb.getDispatcherHelper().getString() : null;
 		String resourceCacheKey = APIUtil
 				.getResourceInfoDTOCacheKey(apiContext, apiVersion, resourceString, httpMethod);
 		messageContext.setProperty(APIConstants.API_ELECTED_RESOURCE, resourceString);
 		messageContext.setProperty(APIConstants.API_RESOURCE_CACHE_KEY, resourceCacheKey);
-		setCORSHeaders(messageContext, selectedResource);
-		if (selectedResource !=null) {
-			if ("inline".equals(inline)) {
-				messageContext.getSequence("_cors_request_handler").mediate(messageContext);
+		setCORSHeaders(messageContext, selectedResourceWithVerb);
+		if (selectedResource != null) {
+			if (selectedResourceWithVerb != null) {
+				if ("OPTIONS".equalsIgnoreCase(httpMethod)) {
+					messageContext.getSequence("_cors_request_handler").mediate(messageContext);
+					Utils.send(messageContext, HttpStatus.SC_OK);
+					return false;
+				} else if ("inline".equals(inline)) {
+					messageContext.getSequence("_cors_request_handler").mediate(messageContext);
+				}
+				return true;
+			} else {
+				return true;
 			}
-			return true;
 		} else {
-			messageContext.getSequence("_cors_request_handler").mediate(messageContext);
-			Utils.sendFault(messageContext, HttpStatus.SC_OK);
-			return false;
+			return true;
 		}
 	}
 
@@ -132,7 +147,7 @@ public class CORSRequestHandler extends AbstractHandler implements ManagedLifecy
 
 	/**
 	 * @param messageContext   message context for set cors headers as properties
-	 * @param selectedResource  resource according to the request
+	 * @param selectedResource resource according to the request
 	 */
 	public void setCORSHeaders(MessageContext messageContext, Resource selectedResource) {
 		org.apache.axis2.context.MessageContext axis2MC =
@@ -143,15 +158,15 @@ public class CORSRequestHandler extends AbstractHandler implements ManagedLifecy
 		messageContext
 				.setProperty(APIConstants.CORSHeaders.ACCESS_CONTROL_ALLOW_ORIGIN, getAllowedOrigins(requestOrigin));
 		String allowedMethods = "";
-		if (selectedResource!=null){
+		if (selectedResource != null) {
 			for (String method : selectedResource.getMethods()) {
 				allowedMethods += method + ",";
 			}
 			if (!allowedMethods.isEmpty()) {
 				allowedMethods = allowedMethods.substring(0, allowedMethods.length() - 1);
 			}
-		}else{
-			allowedMethods = "GET,POST,DELETE,OPTIONS" ;
+		} else {
+			allowedMethods = "GET,POST,DELETE,OPTIONS";
 		}
 		messageContext.setProperty(APIConstants.CORS_CONFIGURATION_ENABLED, Utils.isCORSEnabled());
 		messageContext.setProperty(APIConstants.CORSHeaders.ACCESS_CONTROL_ALLOW_METHODS, allowedMethods);
