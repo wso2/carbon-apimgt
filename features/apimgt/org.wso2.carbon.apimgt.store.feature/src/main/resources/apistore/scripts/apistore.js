@@ -29,47 +29,47 @@ var apistore = {};
 		return APIManagerFactory.getInstance().getAPIConsumer(username);
 	};
 
-    apistore.getAllTags(){
+    apistore.getAllTags = function(){
     	return this.getAPIConsumer.getAllTags();
     };
 
-    apistore.getTagsWithAttributes(){
+    apistore.getTagsWithAttributes = function(){
     	return this.getAPIConsumer.getTagsWithAttributes();
     };
 
-    apistore.getRecentlyAddedAPIs(limit){
+    apistore.getRecentlyAddedAPIs = function(limit){
     	return this.getAPIConsumer.getRecentlyAddedAPIs(limit);
     };
 
-    apistore.getPublishedAPIsByProvider(providerId, limit){
+    apistore.getPublishedAPIsByProvider = function(providerId, limit){
     	return this.getAPIConsumer.getPublishedAPIsByProvider(providerId, limit);
     };
 
-    apistore.getSubscriptions(providerName, apiName, version, user){
+    apistore.getSubscriptions = function(providerName, apiName, version, user){
     	return this.getAPIConsumer.getSubscriptions(providerName, apiName, version, user);
     };
 
-    apistore.getAllSubscriptions(userName, appName, startSubIndex, endSubIndex){
+    apistore.getAllSubscriptions = function(userName, appName, startSubIndex, endSubIndex){
     	return this.getAPIConsumer.getAllSubscriptions(userName, appName, startSubIndex, endSubIndex);
     };
 
-    apistore.getApplications(userName){
+    apistore.getApplications = function(userName){
     	return this.getAPIConsumer.getApplications(userName);
     };
 
-    apistore.getSwaggerResource(){
+    apistore.getSwaggerResource = function(){
     	return this.getAPIConsumer.getSwaggerResource();
     };
 
-    apistore.getDeniedTiers(){
+    apistore.getDeniedTiers = function(){
     	return this.getAPIConsumer.getDeniedTiers();
     };
 
-    apistore.getSubscriptionsByApplication(applicationName, userName){
+    apistore.getSubscriptionsByApplication = function(applicationName, userName){
     	return this.getAPIConsumer.getSubscriptionsByApplication(applicationName,userName);
     };
 
-    apistore.getPaginatedAPIsWithTag(tag, start, end){
+    apistore.getPaginatedAPIsWithTag = function(tag, start, end){
     	return this.getAPIConsumer.getPaginatedAPIsWithTag();
     };
 
