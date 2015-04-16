@@ -49,7 +49,7 @@ var log = new Log();
 
         var tenantDomain = "";
         var tenantID = -1234;
-	var isTenantFlowStarted = false;
+	    var isTenantFlowStarted = false;
 
         if(providerVal.indexOf("@") > -1){
             tenantDomain = providerVal.split("@")[1];
@@ -63,66 +63,67 @@ var log = new Log();
              providerVal = providerVal.replace("-DOM-","/");
         }
 
-	try {
-		//start tenant flow before fetching swagger resource from the registry
-		if (tenantDomain != "" && tenantDomain != 'carbon.super') {
-			var PrivilegedCarbonContext = Packages.org.wso2.carbon.context.PrivilegedCarbonContext;
-			isTenantFlowStarted = true;
-			PrivilegedCarbonContext.startTenantFlow();
-		        PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
-		}
+    	try {
+    		//start tenant flow before fetching swagger resource from the registry
+    		if (tenantDomain != "" && tenantDomain != 'carbon.super') {
+    			var PrivilegedCarbonContext = Packages.org.wso2.carbon.context.PrivilegedCarbonContext;
+    			isTenantFlowStarted = true;
+    			PrivilegedCarbonContext.startTenantFlow();
+    		        PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
+    		}
 
-		var registry = carbon.server.osgiService('org.wso2.carbon.registry.core.service.RegistryService').getGovernanceUserRegistry("wso2.anonymous.user", tenantID);
-		var prefix = "/apimgt/applicationdata/api-docs/"
+    		var registry = carbon.server.osgiService('org.wso2.carbon.registry.core.service.RegistryService').getGovernanceUserRegistry("wso2.anonymous.user", tenantID);
+    		var prefix = "/apimgt/applicationdata/api-docs/"
 
 
 
-		url = prefix + apiNameVal + "-" + apiVersionVal + "-" + providerVal +"/swagger.json";
+    		url = prefix + apiNameVal + "-" + apiVersionVal + "-" + providerVal +"/swagger.json";
 
-		    
+    		    
 
-		var data = registry.get(url);
-	}finally {
-		if (isTenantFlowStarted) {
-            PrivilegedCarbonContext.endTenantFlow();
-        }
-	}
+    		var data = registry.get(url);
+    	}finally {
+    		if (isTenantFlowStarted) {
+                PrivilegedCarbonContext.endTenantFlow();
+            }
+    	}
         var output = new Packages.java.lang.String(data.content);
         var jsonObj = JSON.parse(output);
-        if(jsonObj.basePath){
-            var basePathValue = jsonObj.basePath;
-            var username=null;
-            result = jagg.module("api").getAPIDescription({
-                    name:apiNameVal,
-                    version:apiVersionVal,
-                    provider:providerVal
-                }, username);
-                var api = result.api;
-            var serverURL = api.serverURL;
-            var context = api.context;
-            var splitVal = serverURL.split(",");
-            var urlArr = new Array();
-            var count = 0;
-            for(var i=0; i < splitVal.length ; i++){
-                if(splitVal[i].trim().indexOf("http") > -1){
-                    urlArr[count] = splitVal[i];
-                    count++;
-                };
+
+        var basePathValue = jsonObj.basePath;
+        var username=null;
+        result = jagg.module("api").getAPIDescription({
+                name:apiNameVal,
+                version:apiVersionVal,
+                provider:providerVal
+            }, username);
+            var api = result.api;
+        var serverURL = api.serverURL;
+        var context = api.context;
+        var splitVal = serverURL.split(",");
+        var urlArr = new Array();
+        var count = 0;
+        for(var i=0; i < splitVal.length ; i++){
+            if(splitVal[i].trim().indexOf("http") > -1){
+                urlArr[count] = splitVal[i];
+                count++;
             };
-            if(urlArr.length===1){
-                // We do not need to append the version since with the context versioning, the version is embedded in the context.
-                jsonObj.basePath=urlArr[0]+context;
-                //jsonObj.basePath=urlArr[0]+context+"/"+apiVersionVal;
-            }else{
-                for(var i=0; i < urlArr.length ; i++){
-                    if(urlArr[i].indexOf(accessProtocol) > -1){
-                        jsonObj.basePath=urlArr[i]+context;
-                        // jsonObj.basePath=urlArr[i]+context+"/"+apiVersionVal;
-                    }
+        };
+        if(urlArr.length===1){
+            // We do not need to append the version since with the context versioning, the version is embedded in the context.
+            jsonObj.basePath=urlArr[0]+context;
+            //jsonObj.basePath=urlArr[0]+context+"/"+apiVersionVal;
+        }else{
+            for(var i=0; i < urlArr.length ; i++){
+                if(urlArr[i].indexOf(accessProtocol) > -1){
+                    jsonObj.basePath=urlArr[i]+context;
+                    // jsonObj.basePath=urlArr[i]+context+"/"+apiVersionVal;
                 }
             }
         }
 
+        jsonObj.basePath = api.context;
+        jsonObj.host = urlArr[1].trim().replace("https://","");
         //@todo fix for '*' whild card 
 
         print(jsonObj);
