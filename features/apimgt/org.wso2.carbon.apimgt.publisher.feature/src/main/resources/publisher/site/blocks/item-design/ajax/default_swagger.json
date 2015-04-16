@@ -1,27 +1,23 @@
 {
-  "swaggerVersion": "2.0",
+  "swagger": "2.0",
   "paths": {
     "/*": {
       "get": {
-        "parameters": [],
         "responses": {
           "200": {}
         }
       },
       "post": {
-        "parameters": [],
         "responses": {
           "200": {}
         }
       },
       "put": {
-        "parameters": [],
         "responses": {
           "200": {}
         }
       },
       "delete": {
-        "parameters": [],
         "responses": {
           "200": {}
         }
