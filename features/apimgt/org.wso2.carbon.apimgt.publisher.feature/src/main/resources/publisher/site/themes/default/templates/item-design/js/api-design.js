@@ -1,7 +1,7 @@
 //This is the default place holder
 var api_doc = 
 {
-    "swaggerVersion": "2.0",
+    "swagger": "2.0",
     "paths": {},
     "info": {
         "title": "",
@@ -120,26 +120,28 @@ function APIDesigner(){
         $(".http_verb_select").each(function(){
             if($(this).is(':checked')){
                 if(!designer.check_if_resource_exist( path , $(this).val() ) ){
-                parameters = $.extend(true, [], parameters);
-		
-		        var method = $(this).val();               
-                var tempPara = parameters.concat();                
-                     
-                if(method == "POST" || method == "PUT") {   
-                        tempPara.push({
-		            name : "body",
-		      	    "description": "Request Body",
-		            "allowMultiple": false,
-		            "required": false,
-		            "in": "body",
-		            "type":"string"
-                        });
-                } 
-                resource[method] = { 
-                    parameters : tempPara,
-                    responses : { '200':{}}
-                };
-                ic++
+                    parameters = $.extend(true, [], parameters);
+    		
+    		        var method = $(this).val();               
+                    var tempPara = parameters.concat();                
+                         
+                    if(method == "POST" || method == "PUT") {   
+                            tempPara.push({
+    		            name : "body",
+    		      	    "description": "Request Body",
+    		            "allowMultiple": false,
+    		            "required": false,
+    		            "in": "body",
+    		            "type":"string"
+                            });
+                    } 
+                    resource[method] = { 
+                        responses : { '200':{}}
+                    };
+                    if(tempPara.length > 0){
+                       resource[method].parameters = tempPara;
+                    }
+                    ic++
                 }
                 vc++;                
             }

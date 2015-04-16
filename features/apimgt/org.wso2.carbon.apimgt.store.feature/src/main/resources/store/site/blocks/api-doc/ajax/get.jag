@@ -9,19 +9,6 @@ store = jagg.module("manager").getAPIStoreObj();
 
 var log = new Log();
 
-function generate_swagger_object(swagger){
-   swaggerObj = {
-        api_doc : parse(swagger),
-        resources : []
-    };
-
-    for(i = 0 ; i < swaggerObj.api_doc.apis.length ; i++ ){
-        swaggerObj.resources.push(swaggerObj.api_doc.apis[i].file);
-        delete swaggerObj.api_doc.apis[i].file
-    }
-    return stringify(swaggerObj);
-}
-
 (function () {
     response.contentType = "application/json; charset=UTF-8";
     var mod, obj, result, username,
@@ -30,7 +17,6 @@ function generate_swagger_object(swagger){
     msg = require("/site/conf/ui-messages.jag");
 
     var carbon = require('carbon');
-
 
     var uri = request.getRequestURI();
     var callPath = uri.replace("/store/api-docs", "");
@@ -42,19 +28,14 @@ function generate_swagger_object(swagger){
             callPath = callPath.replace("@","%40");
         }
         var uriMatcher = new URIMatcher(callPath);
-        var providerVal,apiNameVal,apiVersionVal,subContext;
-        providerVal = apiNameVal = apiVersionVal = subContext = "";
+        var providerVal,apiNameVal,apiVersionVal;
+        providerVal = apiNameVal = apiVersionVal = "";
 
         if (uriMatcher.match("/{providerVal}/{apiNameVal}/{apiVersionVal}")) {
             providerVal = uriMatcher.elements().providerVal;
             apiNameVal = uriMatcher.elements().apiNameVal;
             apiVersionVal = uriMatcher.elements().apiVersionVal;
-        }else if (uriMatcher.match("/{providerVal}/{apiNameVal}/{apiVersionVal}/{subContext}")) {
-            providerVal = uriMatcher.elements().providerVal;
-            apiNameVal = uriMatcher.elements().apiNameVal;
-            apiVersionVal = uriMatcher.elements().apiVersionVal;
-            subContext = uriMatcher.elements().subContext;
-        } else {
+        }else {
             print({
                 error:true,
                 message:msg.error.invalidAction(action)
@@ -95,20 +76,16 @@ function generate_swagger_object(swagger){
 		var prefix = "/apimgt/applicationdata/api-docs/"
 
 
-		    if (subContext === "") {
 
-			url = prefix + apiNameVal + "-" + apiVersionVal + "-" + providerVal +"/1.2/api-doc";
+		url = prefix + apiNameVal + "-" + apiVersionVal + "-" + providerVal +"/swagger.json";
 
-		    }else{
-			url = prefix + apiNameVal + "-" + apiVersionVal + "-" + providerVal +"/1.2/" + subContext;
-		    }
+		    
 
 		var data = registry.get(url);
-	 } finally {
+	}finally {
 		if (isTenantFlowStarted) {
-                    PrivilegedCarbonContext.endTenantFlow();
-                }
-
+            PrivilegedCarbonContext.endTenantFlow();
+        }
 	}
         var output = new Packages.java.lang.String(data.content);
         var jsonObj = JSON.parse(output);
@@ -146,29 +123,9 @@ function generate_swagger_object(swagger){
             }
         }
 
-        // fix for '*' whild card 
-        if(jsonObj.apis){
-            for(var i=0;i < jsonObj.apis.length; i++){
-		if (jsonObj.apis[i].path.indexOf("/*") > -1) {
-		        jsonObj.apis[i].path = jsonObj.apis[i].path.replace("/*", "/");
-		        /*if(jsonObj.apis[i].operations){
-		            for(var j=0;j < jsonObj.apis[i].operations.length; j++){    
-		                jsonObj.apis[i].operations[j].parameters.push({
-		                    "dataType": "String",
-		                    "description": "Resource",
-		                    "name": "resource",
-		                    "allowMultiple": false,
-		                    "required": false,
-		                    "paramType": "path"
-		                });
-		            }
-		        }*/
-		}
-            }
-        }
+        //@todo fix for '*' whild card 
 
         print(jsonObj);
-
     }
 
 }());
