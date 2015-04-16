@@ -1,6 +1,6 @@
 <%
 /*
- *  Copyright (c) 2005-2014, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *  Copyright (c) 2005-2015, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  *  WSO2 Inc. licenses this file to you under the Apache License,
  *  Version 2.0 (the "License"); you may not use this file except
@@ -20,6 +20,7 @@
 var caramel;
 require('/modules/store.js').exec(function(ctx) {
     caramel = require('caramel');
+    var log = new Log();
     var ui = require('rxt').ui;
     var asset = require('rxt').asset;
     var uriMatcher = new URIMatcher(ctx.request.getRequestURI());
@@ -27,8 +28,9 @@ require('/modules/store.js').exec(function(ctx) {
     var type = options.type;
     var am = asset.createUserAssetManager(ctx.session, type);
     var page = ui.buildPage(ctx.session, ctx.request);
-    // var assets = {};
-    var output = am.render(page)._custom();
+    // var appList = am.list();
+    // var output = am.renderBasic(appList,page)._custom();
+    var output = am.renderBasic(page)._custom();
     caramel.render(output);
 }, request, response, session);
 %>
