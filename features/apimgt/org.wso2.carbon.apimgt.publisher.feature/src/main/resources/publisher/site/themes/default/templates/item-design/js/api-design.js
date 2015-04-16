@@ -611,17 +611,6 @@ $(document).ready(function(){
             $('#inputResource').val(arr[0]);
     });
 
-    var thisID;
-    $('#saveBtn').click(function(e){
-        $(this).siblings('button').button('reset');
-        thisID = $(this).attr('id');
-    });
-
-    $('#go_to_implement').click(function(e){
-        $(this).siblings('button').button('reset');
-        thisID = $(this).attr('id');
-    });
-
     var v = $("#design_form").validate({
         contentType : "application/x-www-form-urlencoded;charset=utf-8",
         dataType: "json",
@@ -646,12 +635,12 @@ $(document).ready(function(){
 
         $('#swagger').val(JSON.stringify(designer.api_doc));
 
-        $('#'+thisID).button('loading');
+        $('#'+thisID).addClass('active');
 
         $(form).ajaxSubmit({
             success:function(responseText, statusText, xhr, $form){
 
-                $('#'+thisID).button('reset');
+                $('#'+thisID).removeClass('active');
                 if (!responseText.error) {
                     var designer = APIDesigner();
                     designer.saved_api = {};
@@ -679,6 +668,17 @@ $(document).ready(function(){
         });
         }
     });
+});
+
+var thisID;
+$('#saveBtn').click(function(e){
+    $(this).siblings('button').button('reset');
+    thisID = $(this).attr('id');
+});
+
+$('#go_to_implement').click(function(e){
+    $(this).siblings('button').button('reset');
+    thisID = $(this).attr('id');
 });
 
 function getContextValue() {

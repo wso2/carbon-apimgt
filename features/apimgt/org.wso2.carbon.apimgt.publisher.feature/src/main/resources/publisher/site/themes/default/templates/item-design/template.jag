@@ -315,8 +315,8 @@
                     <div class="btn loadingButton">Saving API. Please wait..</div>
                 </div>
                 <div class="form-actions" id="saveButtons">
-                    <button type="submit" class="btn btn-info loader-btn" id="saveBtn" data-loading-text="<i class='fa fa-spinner fa-pulse' id='loader'></i>Loading"action="design">Save</button>
-                    <button class="btn btn-primary loader-btn" id="go_to_implement" data-loading-text="<i class='fa fa-spinner fa-pulse' id='loader'></i>Loading">Implement</button>
+                    <button type="submit" class="btn btn-info has-spinner" id="saveBtn"><span class="spinner"><i class='fa fa-spinner fa-pulse'></i></span><span>Save</span></button>
+                    <a class="btn btn-primary loader-btn has-spinner" id="go_to_implement"><span class="spinner"><i class='fa fa-spinner fa-pulse'></i></span><span>Implement</span></a>
                     <input type="reset"  class="btn" value="<%=i18n.localize("cancel")%>" onclick="javascript:window.location.href='./'" />
                 </div>
             </form>

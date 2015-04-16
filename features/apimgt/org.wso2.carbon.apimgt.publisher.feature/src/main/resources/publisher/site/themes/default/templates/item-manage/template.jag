@@ -391,8 +391,8 @@
                     <div class="btn loadingButton">Saving API. Please wait..</div>
                 </div>
                 <div class="form-actions" id="saveButtons"> 
-                    <button class="btn btn-info" id="save_api" data-loading-text="<i class='fa fa-spinner fa-pulse' id='loader'></i>Loading"><%=i18n.localize("save")%></button>
-                    <%if(outputs.isPermitted){%> <button class="btn btn-primary" id="publish_api" data-loading-text="<i class='fa fa-spinner fa-pulse' id='loader'></i>Loading">Save & Publish</button>  <%}%>
+                    <button class="btn btn-info has-spinner" id="save_api"><span class="spinner"><i class='fa fa-spinner fa-pulse'></i></span><span><%=i18n.localize("save")%></span></button>
+                    <%if(outputs.isPermitted){%> <a class="btn btn-primary has-spinner" id="publish_api"><span class="spinner"><i class='fa fa-spinner fa-pulse'></i></span><span>Save & Publish</span></a>  <%}%>
                     <input type="reset" class="btn" value="<%=i18n.localize("cancel")%>" onclick="javascript:window.location.href='./'" />                                         
                 </div>
             </form>
@@ -579,10 +579,10 @@
             }
             var designer = APIDesigner();
             $('#swagger').val(JSON.stringify(designer.api_doc));
-            $('#'+$this).button('loading');
+            $('#'+thisID).addClass('active');
             $(form).ajaxSubmit({
                 success:function(responseText, statusText, xhr, $form) {
-                    $('#'+$this).button('reset');
+                    $('#'+thisID).removeClass('active');
                     if (!responseText.error) {                
                         $( "body" ).trigger( "api_saved" );       
                     } else {
@@ -635,15 +635,15 @@
             }
         });
 
-        var $this='';
+        var thisID='';
         $('#publish_api').click(function(e){
             $("body").on("api_saved", publish_api);
-            $this = $(this).attr('id');
+            thisID = $(this).attr('id');
             $("#manage_form").submit();
         });
 
         $('#save_api').click(function(e){
-            $this=$(this).attr('id');
+            thisID=$(this).attr('id');
         });
 
         
