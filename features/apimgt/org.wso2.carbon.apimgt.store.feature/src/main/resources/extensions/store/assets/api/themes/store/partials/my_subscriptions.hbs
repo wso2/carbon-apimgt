@@ -1,0 +1,62 @@
+<div>
+    <h4>Subscriptions</h4>
+
+    <small>Keys are generated per Application which allows to use a single key for multiple APIs and subscribe multiple
+        times to a single API ,with different SLA levels.
+    </small>
+    <hr/>
+
+    <div class='well'>
+        <h5>Applications With Subscriptions</h5>
+
+        <select id='subscription-selection'>
+            {{#each appsWithSubs}}
+                <option>{{name}}</option>
+            {{/each}}
+        </select>
+    </div>
+
+    <div id='subscription-control-panel'>
+        <!--The control elements will be rendered in this container-->
+    </div>
+
+    <div id='subscription-keys'>
+
+        <!--Production details-->
+        <div>
+            <div class='row-fluid'>
+                <legend>{{t "Keys - Production "}}</legend>
+            </div>
+            <div class='row-fluid'>
+                <div class='span7 well' id='prod-token-view'>
+                    Production tokens
+                </div>
+
+                <div class='span5 well' id='prod-domain-view'>
+                    Production domains
+                </div>
+            </div>
+        </div>
+
+        <!--Sandbox details-->
+        <div>
+            <div class='row-fluid'>
+                <legend>{{t "Keys - Sandbox "}}</legend>
+            </div>
+            <div class='row-fluid'>
+                <div class='span7 well' id='sand-token-view'>
+                    Sandbox tokens
+                </div>
+
+                <div class='span5 well' id='sand-domain-view'>
+                    Sandbox domains
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <div id='subscription-list'>
+        <!-- The subscribed APIs will be rendered here-->
+    </div>
+</div>

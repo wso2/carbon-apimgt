@@ -1,0 +1,31 @@
+<!--Visible keys
+    The view displays all the keys
+-->
+
+<form>
+    <fieldset>
+        <h5>Access Token</h5>
+        <span class='badge badge-success input-xlarge'>{{accessToken}}</span>
+    </fieldset>
+</form>
+
+<form class='form form-inline'>
+    <button type='button' class='btn btn-primary btn-small' value='Regenerate Key' id='btn-refresh-{{environment}}-token'>
+        <i class='icon-refresh'> Regenerate Key</i>
+    </button>
+    <label>Token Validity</label>
+    <input type='text' class='input input-small' value='{{validityTime}}'/>
+    <label> seconds </label>
+</form>
+<form>
+    <fieldset>
+        <h5>Consumer Key</h5>
+        <span class='badge badge-success input-xlarge'>{{consumerKey}}</span>
+
+        <h5>Consumer Secret</h5>
+        <span class='badge badge-success input-xlarge'>{{consumerSecret}}</span>
+    </fieldset>
+</form>
+
+
+

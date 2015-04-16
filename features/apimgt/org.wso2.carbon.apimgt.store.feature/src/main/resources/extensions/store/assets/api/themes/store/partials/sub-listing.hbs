@@ -1,0 +1,17 @@
+<!--
+Subscription listing page
+-->
+<hr/><h4>Subscribed APIs</h4>
+<div class="row-fluid">{{#each subscriptions}}
+    <div class="span3 asset">
+        <div class="asset-icon">
+            <img src="/store/extensions/assets/api/themes/store/img/default_thumb.jpg"/>
+        </div>
+        <div class="asset-details">
+            <div class="asset-name">
+                {{name}} {{version}}
+            </div>
+        </div>
+    </div>
+    {{/each}}
+</div>

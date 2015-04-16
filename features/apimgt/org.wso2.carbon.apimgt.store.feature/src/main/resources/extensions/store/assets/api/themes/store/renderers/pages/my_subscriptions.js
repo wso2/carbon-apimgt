@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2005-2014, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *  Copyright (c) 2015, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  *  WSO2 Inc. licenses this file to you under the Apache License,
  *  Version 2.0 (the "License"); you may not use this file except
@@ -38,12 +38,14 @@ var render = function(theme, data, meta, require) {
             context: navigationContext
         }],
         body: [{
-            partial: 'sort-assets',
+            partial: 'my_subscriptions',
             context: data
-        }, {
-            partial: 'assets',
-            context: data
-        }],
+        }
+            // , {
+            //     partial: 'sub-keys-hidden',
+            //     context: data
+            // }
+        ],
         right: [{
             partial: 'my-assets-link',
             context: data
