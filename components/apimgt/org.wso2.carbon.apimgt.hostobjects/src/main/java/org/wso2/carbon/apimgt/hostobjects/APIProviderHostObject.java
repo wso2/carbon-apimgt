@@ -329,43 +329,6 @@ public class APIProviderHostObject extends ScriptableObject {
         String name = (String) apiData.get("apiName", apiData);
         String version = (String) apiData.get("version", apiData);
 
-        String swaggerContent = (String) apiData.get("swagger", apiData);
-        JSONParser parser = new JSONParser();
-        JSONObject resourceConfigs = null;
-        Set<Scope> scopeList = new LinkedHashSet<Scope>();
-        try {
-            JSONObject apiDocument = (JSONObject) parser.parse(swaggerContent);
-            if(apiDocument.get("api_doc") != null){
-                resourceConfigs = (JSONObject) apiDocument.get("api_doc");
-                if (resourceConfigs.get("authorizations") != null) {
-                    JSONObject authorizations = (JSONObject) resourceConfigs.get("authorizations");
-                    if (authorizations.get("oauth2") != null) {
-                        JSONObject oauth2 = (JSONObject) authorizations.get("oauth2");
-                        if (oauth2.get("scopes") != null) {
-                            JSONArray scopes = (JSONArray) oauth2.get("scopes");
-
-                            if (scopes != null) {
-                                for (int i=0; i < scopes.size(); i++)
-                                {
-                                    Map scope = (Map) scopes.get(i);
-                                    if (scope.get("key") != null) {
-                                        Scope scopeObj = new Scope();
-                                        scopeObj.setKey((String) scope.get("key"));
-                                        scopeObj.setName((String) scope.get("name"));
-                                        scopeObj.setRoles((String) scope.get("roles"));
-                                        scopeObj.setDescription((String) scope.get("description"));
-                                        scopeList.add(scopeObj);
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        } catch (ParseException e) {
-            handleException("Error while processing Api Definition.");
-        }
-
         String subscriptionAvailability = (String) apiData.get("subscriptionAvailability", apiData);
         String subscriptionAvailableTenants = "";
         if (subscriptionAvailability != null && subscriptionAvailability.equals(APIConstants.SUBSCRIPTION_TO_SPECIFIC_TENANTS)) {
@@ -381,9 +344,9 @@ public class APIProviderHostObject extends ScriptableObject {
         String outSequence = (String) apiData.get("outSequence", apiData);
         String faultSequence = (String) apiData.get("faultSequence", apiData);
         String businessOwner = (String) apiData.get("bizOwner", apiData);
-	String businessOwnerEmail = (String) apiData.get("bizOwnerMail", apiData);
-	String technicalOwner = (String) apiData.get("techOwner", apiData);
-	String technicalOwnerEmail = (String) apiData.get("techOwnerMail", apiData);
+        String businessOwnerEmail = (String) apiData.get("bizOwnerMail", apiData);
+        String technicalOwner = (String) apiData.get("techOwner", apiData);
+        String technicalOwnerEmail = (String) apiData.get("techOwnerMail", apiData);
         String environments = (String) apiData.get("environments", apiData);
         String responseCache = (String) apiData.get("responseCache", apiData);
         int cacheTimeOut = APIConstants.API_RESPONSE_CACHE_TIMEOUT;
@@ -431,7 +394,6 @@ public class APIProviderHostObject extends ScriptableObject {
         api.setResponseCache(responseCache);
         api.setCacheTimeout(cacheTimeOut);
         api.setAsDefaultVersion("default_version".equals(defaultVersion) ? true : false);
-        api.setScopes(scopeList);
 
 		api.removeCustomSequences();
 		if (!"none".equals(inSequence)) {
@@ -473,13 +435,17 @@ public class APIProviderHostObject extends ScriptableObject {
         api.setLastUpdated(new Date());
 
         if (apiData.get("swagger", apiData) != null) {
-            // Read URI Templates from swagger resource and set to api object
-            Set<URITemplate> uriTemplates = definitionFromSwagger20.getURITemplates(api,
-                                                            String.valueOf(apiData.get("swagger", apiData)));
+
+            //Read URI Templates from swagger resource and set to api object
+            Set<URITemplate> uriTemplates = definitionFromSwagger20.getURITemplates(api, String.valueOf(apiData.get("swagger", apiData)));
             api.setUriTemplates(uriTemplates);
 
-            // Save swagger in the registry
-            apiProvider.saveSwagger20Definition(api.getId(), (String) apiData.get("swagger", apiData));
+            //scopes
+            Set<Scope> scopes = definitionFromSwagger20.getScopes(String.valueOf(apiData.get("swagger", apiData)));
+            api.setScopes(scopes);
+
+            //Save swagger in the registry
+            apiProvider.saveSwagger20Definition(api.getId(),(String) apiData.get("swagger", apiData));
         }
 
         // removing scopes from cache

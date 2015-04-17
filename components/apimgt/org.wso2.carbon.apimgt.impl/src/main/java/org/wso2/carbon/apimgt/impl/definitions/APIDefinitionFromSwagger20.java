@@ -129,24 +129,21 @@ public class APIDefinitionFromSwagger20 extends APIDefinition {
                 while (definitionIterator.hasNext()) {
                     JSONObject securityDefinition = definitionIterator.next();
                     //Read scopes from custom wso2 scopes
-                    if (securityDefinition.get("apim") != null) {
-                        JSONObject scopes = (JSONObject) securityDefinition.get("apim");
-                        if (scopes.get("x-wso2-scopes") != null) {
-                            JSONArray oauthScope = (JSONArray) scopes.get("x-wso2-scopes");
-                            for (Object anOauthScope : oauthScope) {
-                                Scope scope = new Scope();
-                                JSONObject scopeObj = (JSONObject) anOauthScope;
-                                scope.setKey((String) scopeObj.get("key"));
-                                scope.setName((String) scopeObj.get("name"));
-                                scope.setDescription((String) scopeObj.get("description"));
-                                scope.setRoles(scopeObj.get("roles").toString());
 
-                                scopeList.add(scope);
-                            }
+                    if (securityDefinition.get("x-wso2-scopes") != null) {
+                        JSONArray oauthScope = (JSONArray) securityDefinition.get("x-wso2-scopes");
+                        for (Object anOauthScope : oauthScope) {
+                            Scope scope = new Scope();
+                            JSONObject scopeObj = (JSONObject) anOauthScope;
+                            scope.setKey((String) scopeObj.get("key"));
+                            scope.setName((String) scopeObj.get("name"));
+                            scope.setDescription((String) scopeObj.get("description"));
+                            scope.setRoles(scopeObj.get("roles").toString());
+
+                            scopeList.add(scope);
                         }
                     }
                 }
-
             }
         } catch (ParseException e) {
             handleException("Invalid resource configuration ", e);
