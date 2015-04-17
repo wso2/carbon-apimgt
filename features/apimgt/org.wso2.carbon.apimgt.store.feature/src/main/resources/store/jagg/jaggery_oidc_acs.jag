@@ -52,6 +52,10 @@
 
     jagg.setUser({username: oidcUser, cookie: null, hasPublisherAccess: hasPublisherAccess});
     session.put("LOGGED_IN_USER", oidcUser);
+    
+    // Group ID feature not supported here
+    var groupId="";
+    session.put("groupId", groupId)
 
     //First check whether user is having sufficent permissions [create/publish]
     if (!isUserPermitted.permitted) {
@@ -63,7 +67,7 @@
         var store = manager.getAPIStoreObj();
         var subscriber = store.getSubscriber(username);
         if (!subscriber) {
-            store.addSubscriber(username);
+            store.addSubscriber(username, groupId);
             subscriber = store.getSubscriber(username);
         }
         session.put("hasPublisherAccess", hasPublisherAccess);
