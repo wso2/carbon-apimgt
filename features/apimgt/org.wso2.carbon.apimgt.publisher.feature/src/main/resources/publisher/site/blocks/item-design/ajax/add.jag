@@ -298,7 +298,7 @@ var log = new Log();
             apiData.visibility = request.getParameter("visibility");
             apiData.visibleRoles = request.getParameter("roles","UTF-8");
 
-            apiData.swagger = generate_swagger_object(request.getParameter("swagger", "UTF-8"));
+            apiData.swagger = stringify(parse(request.getParameter("swagger", "UTF-8")));
 
             result = mod.updateAPIDesign(apiData);
             if (result.error==true) {
