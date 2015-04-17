@@ -46,18 +46,10 @@ var log = new Log();
                 var url = request.getParameter("wsdl-url");
                 var file = request.getFile("wsdl-file"); 
                 var import_type = request.getParameter("import-definition");  
-                wsdl = "soap";             
-                if(import_type == "wsdl-url" && url){
-                    wsdl = url.trim();
-                    /*var data = { };
-                    var content = get(url, data ,"json");
-                    wsdl = content.data;*/                
-                }
-                else if(import_type == "wsdl-file" && file){
-                    file.open("r");
-                    wsdl = file.readAll();
-                    file.close();                    
-                }
+                wsdl = "soap";
+                if(url){
+                    wsdl = url.trim();    
+                }                
                 var obj = require("/site/blocks/item-design/ajax/default_swagger.json");
                 swagger = stringify(obj);            
             }
@@ -124,6 +116,7 @@ var log = new Log();
             apiData.techOwnerEmail = request.getParameter("techOwnerMail","UTF-8");
             apiData.visibility = request.getParameter("visibility");
             apiData.visibleRoles = request.getParameter("roles","UTF-8");
+            apiData.wsdl = request.getParameter("wsdl");            
 
             apiData.swagger = request.getParameter("swagger", "UTF-8");
 

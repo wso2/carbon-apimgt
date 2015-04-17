@@ -164,6 +164,7 @@
                     <input type="hidden" name="version" value="<%= encode.forHtml(api.version) %>" />
                     <input type="hidden" name="provider" value="<%= encode.forHtml(api.provider) %>" />
                     <input type="hidden" name="action" value="implement" />
+                    <input type="hidden" name="wsdl" value="<%= encode.forHtml(api.wsdl) %>" />                                        
                     <input type="hidden" id="swagger" name="swagger" class="swagger" value="" />
                     <input type="hidden" value="endpoint" name="implementation_methods" >
                     <div class="form-actions" id="saveButtons">

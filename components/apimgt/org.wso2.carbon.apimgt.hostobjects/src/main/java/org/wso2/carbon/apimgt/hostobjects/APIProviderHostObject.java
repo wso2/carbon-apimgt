@@ -544,7 +544,9 @@ public class APIProviderHostObject extends ScriptableObject {
         String endpointUTPassword = (String) apiData.get("endpointUTPassword", apiData);
             
         api.setWadlUrl(wadl);
-        api.setWsdlUrl(wsdl);
+        if(wsdl != null && !wsdl.isEmpty()){
+            api.setWsdlUrl(wsdl);
+        }
         api.setEndpointConfig((String) apiData.get("endpoint_config", apiData));
         
         // Validate endpoint URI format
@@ -665,6 +667,11 @@ public class APIProviderHostObject extends ScriptableObject {
         	if (isTenantFlowStarted) {
         		PrivilegedCarbonContext.endTenantFlow();
         	}
+        }
+
+        String wsdl = (String) apiData.get("wsdl", apiData);
+        if(wsdl != null && !wsdl.isEmpty()) {
+            api.setWsdlUrl(wsdl);
         }
         
         if (apiData.get("swagger", apiData) != null) {
