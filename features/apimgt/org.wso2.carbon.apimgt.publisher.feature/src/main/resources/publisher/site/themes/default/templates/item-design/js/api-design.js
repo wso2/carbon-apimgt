@@ -441,9 +441,7 @@ APIDesigner.prototype.render_resource = function(container){
         var textarea = container.find('.editor').ace({ theme: 'textmate', lang: 'javascript' ,fontSize: "10pt"});
         var decorator = container.find('.editor').data('ace');
         var aceInstance = decorator.editor.ace;
-        aceInstance.getSession().on('change', function(e) {
-            console.log(operation);
-            console.log(aceInstance.getValue());    
+        aceInstance.getSession().on('change', function(e) {   
             operation[0]["x-mediation-script"] = aceInstance.getValue();
         });
     }

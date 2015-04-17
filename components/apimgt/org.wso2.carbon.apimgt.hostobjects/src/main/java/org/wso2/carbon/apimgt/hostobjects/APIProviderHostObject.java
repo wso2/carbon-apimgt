@@ -567,15 +567,14 @@ public class APIProviderHostObject extends ScriptableObject {
         	        
         
         if (apiData.get("swagger", apiData) != null) {
-            //Set<URITemplate> uriTemplates = parseResourceConfig(apiProvider, apiId, (String) apiData.get("swagger", apiData), api, false);
-            //api.setUriTemplates(uriTemplates);
-
-            //Read swagger from the registry
-            String swaggerFromRegistry = apiProvider.getSwagger20Definition(api.getId());
+            //Read swagger from the registry todo: check why was this done
+            //String swaggerFromRegistry = apiProvider.getSwagger20Definition(api.getId());
 
             //Read URI Templates from swagger resource and set to api object
-            Set<URITemplate> uriTemplates = definitionFromSwagger20.getURITemplates(api, swaggerFromRegistry);
+            Set<URITemplate> uriTemplates = definitionFromSwagger20.getURITemplates(api, (String) apiData.get("swagger", apiData));
             api.setUriTemplates(uriTemplates);
+
+            apiProvider.saveSwagger20Definition(api.getId(),(String) apiData.get("swagger", apiData));
         }
                 
         return saveAPI(apiProvider, api, null, false);

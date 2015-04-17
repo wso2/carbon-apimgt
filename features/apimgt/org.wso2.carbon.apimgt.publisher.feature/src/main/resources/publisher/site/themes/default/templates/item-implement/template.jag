@@ -164,7 +164,7 @@
                     <input type="hidden" name="version" value="<%= encode.forHtml(api.version) %>" />
                     <input type="hidden" name="provider" value="<%= encode.forHtml(api.provider) %>" />
                     <input type="hidden" name="action" value="implement" />
-                    <input type="hidden" id="swagger" name="swagger" value="" />
+                    <input type="hidden" id="swagger" name="swagger" class="swagger" value="" />
                     <input type="hidden" value="endpoint" name="implementation_methods" >
                     <div class="form-actions" id="saveButtons">
                         <button type="submit" class="btn btn-default manageSaveButton" id="saveBtn" data-loading-text="<i class='fa fa-spinner fa-pulse' id='loader'></i>Loading">Save</button>
@@ -186,7 +186,7 @@
 
             <div class="slideContainer hide" id="prototype">
             <div class="well">
-            <form class="form-horizontal" method="POST" id="implement_prototype_form" enctype="multipart/form-data"
+            <form class="form-horizontal" method="POST" id="prototype_form" enctype="multipart/form-data"
                 action="<%= jagg.url("/site/blocks/item-design/ajax/add.jag?action=implement&"+apiUrlId ) %>">
                 <fieldset>
                 <div class="control-group">
@@ -225,8 +225,8 @@
                     <input type="hidden" name="version" value="<%= encode.forHtml(api.version) %>" />
                     <input type="hidden" name="provider" value="<%= encode.forHtml(api.provider) %>" />
                     <input type="hidden" name="action" value="implement" />
-                    <input type="hidden" id="swagger" name="swagger" value="" />
-                    <button type="submit" class="btn btn-info manageSaveButton" id="savePrototypeBtn" data-loading-text="<i class='fa fa-spinner fa-pulse' id='loader'></i>Loading">Save</button>
+                    <input type="hidden" id="swagger" name="swagger" class="swagger" value="" />
+                    <button type="submit" class="btn btn-default manageSaveButton" id="savePrototypeBtn" data-loading-text="<i class='fa fa-spinner fa-pulse' id='loader'></i>Loading">Save</button>
                     <button class="btn btn-warning manageSaveButton pull-right" id="prototyped_api" data-loading-text="<i class='fa fa-spinner fa-pulse' id='loader'></i>Loading">Deploy as a Prototype</button>
                 </div>
             </form>
