@@ -181,8 +181,9 @@ public class APIDefinitionFromSwagger20 extends APIDefinition {
             resource.setMediaType("application/json");
             registry.put(resourcePath, resource);
 
-            //Set visibility as same as the API visibility
-            APIUtil.setResourcePermissions(apiProviderName, api.getVisibility(), null, resourcePath);
+            //@todo Set visibility as same as the API visibility
+            //Need to set anonymous if the visibility is public
+            APIUtil.setResourcePermissions(apiProviderName, null, null, resourcePath);
 
         } catch (RegistryException e) {
             handleException("Error while adding Swagger Definition for " + apiName + "-" + apiVersion, e);
