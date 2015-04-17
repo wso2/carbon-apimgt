@@ -102,8 +102,6 @@ public final class APIConstants {
     
     public static final String API_DOC_1_2_RESOURCE_NAME = "/api-doc";
     public static final String API_DOC_2_0_RESOURCE_NAME = "/api-doc";
-    
-    public static final String API_DEFINITION_DOC_NAME = "Swagger API Definition";
 
     public static final String API_ICON_IMAGE = "icon";
     

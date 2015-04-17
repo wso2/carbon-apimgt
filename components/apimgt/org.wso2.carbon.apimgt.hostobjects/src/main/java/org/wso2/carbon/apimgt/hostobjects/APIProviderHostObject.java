@@ -435,6 +435,7 @@ public class APIProviderHostObject extends ScriptableObject {
         api.setLastUpdated(new Date());
 
         if (apiData.get("swagger", apiData) != null) {
+
             //Read URI Templates from swagger resource and set to api object
             Set<URITemplate> uriTemplates = definitionFromSwagger20.getURITemplates(api, String.valueOf(apiData.get("swagger", apiData)));
             api.setUriTemplates(uriTemplates);
@@ -675,14 +676,12 @@ public class APIProviderHostObject extends ScriptableObject {
         }
         
         if (apiData.get("swagger", apiData) != null) {
-            //Set<URITemplate> uriTemplates = parseResourceConfig(apiProvider, apiId, (String) apiData.get("swagger", apiData), api, false);
-            //api.setUriTemplates(uriTemplates);
-
-            //Read URI Templates from swagger resource and set it to api object
-            Set<URITemplate> uriTemplates = definitionFromSwagger20.getURITemplates(api, (String) apiData.get("swagger", apiData));
+            // Read URI Templates from swagger resource and set it to api object
+            Set<URITemplate> uriTemplates = definitionFromSwagger20.getURITemplates(api,
+                                                                 (String) apiData.get("swagger", apiData));
             api.setUriTemplates(uriTemplates);
 
-            //Save the swagger definition in the registry
+            // Save the swagger definition in the registry
             apiProvider.saveSwagger20Definition(api.getId(), (String) apiData.get("swagger", apiData));
         }
                 
@@ -887,174 +886,6 @@ public class APIProviderHostObject extends ScriptableObject {
         }
         
     	return success;
-    }
-
-
-    /**
-     * This method parses the JSON resource config and returns the UriTemplates. Also it saves the swagger
-     * 1.2 resources in the registry
-     * @param resourceConfigsJSON
-     * @return set of Uri Templates according to api
-     * @throws APIManagementException
-     */
-
-    @Deprecated
-    private static Set<URITemplate> parseResourceConfig(APIProvider apiProvider,
-                                                        APIIdentifier apiId,
-                                                        String resourceConfigsJSON, API api, boolean isManagePhase)
-            throws APIManagementException {
-        JSONParser parser = new JSONParser();
-        JSONObject resourceConfigs = null;
-        JSONObject api_doc = null;
-        Set<URITemplate> uriTemplates = new LinkedHashSet<URITemplate>();
-        Set<Scope> scopeList = new LinkedHashSet<Scope>();
-        boolean isTenantFlowStarted = false;
-        try {
-            resourceConfigs = (JSONObject) parser.parse(resourceConfigsJSON);
-            api_doc = (JSONObject) resourceConfigs.get("api_doc");
-            String apiJSON = api_doc.toJSONString();
-            
-            String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(apiId.getProviderName()));
-            if(tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
-            	isTenantFlowStarted = true;
-                PrivilegedCarbonContext.startTenantFlow();
-                PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
-            }
-            apiProvider.updateSwagger12Definition(apiId, APIConstants.API_DOC_1_2_RESOURCE_NAME, apiJSON);
-            
-            //Get Scopes
-            if (api_doc.get("authorizations") != null) {
-            	JSONObject authorizations = (JSONObject) api_doc.get("authorizations");
-            	if (authorizations.get("oauth2") != null) {
-            		JSONObject oauth2 = (JSONObject) authorizations.get("oauth2");
-            		if (oauth2.get("scopes") != null) {
-            			JSONArray scopes = (JSONArray) oauth2.get("scopes");
-                        
-                        if (scopes != null) {
-            	            for (int i=0; i < scopes.size(); i++)
-            	            {
-            	                Map scope = (Map) scopes.get(i); 
-            	                if (scope.get("key") != null) {
-	            	                Scope scopeObj = new Scope();
-	            	                scopeObj.setKey((String) scope.get("key"));
-	            	                scopeObj.setName((String) scope.get("name"));
-                                    scopeObj.setRoles((String) scope.get("roles"));
-	            	                scopeObj.setDescription((String) scope.get("description"));
-	            	                scopeList.add(scopeObj);
-            	                }
-            	            }
-                        }
-            		}
-            	}
-            }
-
-	        JSONArray resources = (JSONArray) resourceConfigs.get("resources");
-	                
-	        //Iterating each resourcePath config
-	        for (int i = 0; i < resources.size(); i++) {
-	            JSONObject resourceConfig = (JSONObject) resources.get(i);
-                APIManagerConfiguration config = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration();
-                Map<String, Environment> environments = config.getApiGatewayEnvironments();
-                Environment env = null;
-                String ep = "";
-                if(environments!=null) {
-                    Set<String> publishedEnvironments = api.getEnvironments();
-                    if (publishedEnvironments.isEmpty() || publishedEnvironments.contains("none")) {
-
-                        env = environments.values()
-                                          .toArray(new Environment[environments.size()])[0];
-                    String gatewayEndpoint = env.getApiGatewayEndpoint();
-                    if (gatewayEndpoint.contains(",")) {
-                        ep = gatewayEndpoint.split(",")[0];
-                    } else {
-                        ep = gatewayEndpoint;
-                    }
-                    } else {
-                        for (String environmentName : publishedEnvironments) {
-                            // find environment that have hybrid type
-                            if (APIConstants.GATEWAY_ENV_TYPE_HYBRID
-                                    .equals(environments.get(environmentName).getType())) {
-                                env = environments.get(environmentName);
-                                break;
-                            }
-                        }
-                        //if not having any hybrid environment give 1st environment in api published list
-                        if (env == null) {
-                            env = environments.get(publishedEnvironments.toArray()[0]);
-                        }
-                        String gatewayEndpoint = env.getApiGatewayEndpoint();
-                        if (gatewayEndpoint != null && gatewayEndpoint.contains(",")) {
-                            ep = gatewayEndpoint.split(",")[0];
-                        } else {
-                            ep = gatewayEndpoint;
-                        }
-                    }
-                }
-                String apiPath = APIUtil.getAPIPath(apiId);
-                if(ep.endsWith(RegistryConstants.PATH_SEPARATOR)){
-                    ep.substring(0,ep.length()-1);
-                }
-                // We do not need the version in the base path since with the context version strategy, the version is
-                // embedded in the context
-                String basePath = ep+api.getContext();
-//                String basePath = ep+api.getContext()+RegistryConstants.PATH_SEPARATOR+apiId.getVersion();
-                resourceConfig.put("basePath",basePath);
-	            String resourceJSON = resourceConfig.toJSONString();
-	            
-	            String resourcePath = (String) resourceConfig.get("resourcePath");
-	            
-	            apiProvider.updateSwagger12Definition(apiId, resourcePath, resourceConfig.toJSONString());
-	            
-	            JSONArray resource_configs = (JSONArray) resourceConfig.get("apis");
-	            
-	            //Iterating each Sub resourcePath config
-	            for (int j = 0; j < resource_configs.size(); j++) {
-	            	JSONObject resource = (JSONObject) resource_configs.get(j);
-	            	String uriTempVal = (String) resource.get("path");
-	                uriTempVal = uriTempVal.startsWith("/") ? uriTempVal : ("/" + uriTempVal);
-	                
-	                JSONArray operations = (JSONArray) resource.get("operations");
-	            	//Iterating each operation config
-	                for (int k = 0; k < operations.size(); k++) {
-	                	JSONObject operation = (JSONObject) operations.get(k);
-	                	String httpVerb = (String) operation.get("method");
-	                	//Right Now PATCH is not supported. Need to remove this check when PATCH is supported
-	                	if (!"PATCH".equals(httpVerb)) {
-	                		URITemplate template = new URITemplate();
-		                	Scope scope= APIUtil.findScopeByKey(scopeList,(String) operation.get("scope"));
-                            String authType = (String) operation.get("auth_type");
-                            if ("Application & Application User".equals(authType)) {
-                                authType = APIConstants.AUTH_APPLICATION_OR_USER_LEVEL_TOKEN;
-                            } else if ("Application User".equals(authType)) {
-                                authType = APIConstants.AUTH_APPLICATION_USER_LEVEL_TOKEN;
-                            } else if ("None".equals(authType)) {
-                                authType = APIConstants.AUTH_TYPE_NONE;
-                            } else {
-                                authType = APIConstants.AUTH_APPLICATION_OR_USER_LEVEL_TOKEN;
-                            }
-                            template.setThrottlingTier((String) operation.get("throttling_tier"));
-		                     template.setMediationScript((String) operation.get("mediation_script"));
-		                     template.setUriTemplate(uriTempVal);
-		                 	 template.setHTTPVerb(httpVerb);
-		                 	 template.setAuthType(authType);
-		                 	 template.setScope(scope);
-		                 	 
-		                 	 uriTemplates.add(template);
-	                	}
-	                }
-	            	
-	            }
-	        }
-        } catch(ParseException e) {
-            handleException("Invalid resource config", e);
-        } catch(ClassCastException e) {
-            handleException("Unable to create JSON object from resource config", e);
-        } finally {
-        	if (isTenantFlowStarted) {
-        		PrivilegedCarbonContext.endTenantFlow();
-        	}
-        }
-        return uriTemplates;
     }
 
     /**
@@ -2880,18 +2711,14 @@ public class APIProviderHostObject extends ScriptableObject {
             PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
         }
         try {
-            if (docName.equals(APIConstants.API_DEFINITION_DOC_NAME)) {
-                apiProvider.addAPIDefinitionContent(apiId, docName, docContent);
-            } else {
-            	API api = apiProvider.getAPI(apiId);
-            	apiProvider.addDocumentationContent(api, docName, docContent);
-            }
+            API api = apiProvider.getAPI(apiId);
+            apiProvider.addDocumentationContent(api, docName, docContent);
         } catch (APIManagementException e) {
             handleException("Error occurred while adding the content of the documentation- " + docName, e);
         } finally {
-        	if (isTenantFlowStarted) {
-        		PrivilegedCarbonContext.endTenantFlow();
-        	}
+            if (isTenantFlowStarted) {
+                PrivilegedCarbonContext.endTenantFlow();
+            }
         }
     }
 
@@ -3911,25 +3738,6 @@ public class APIProviderHostObject extends ScriptableObject {
             doc.setVisibility(Documentation.DocumentVisibility.OWNER_ONLY);
         }
         APIProvider apiProvider = getAPIProvider(thisObj);
-        if(!docName.equals(APIConstants.API_DEFINITION_DOC_NAME)){
-        Documentation oldDoc = apiProvider.getDocumentation(apiId, doc.getType(), doc.getName());
-
-        try {
-
-            if (fileHostObject != null && fileHostObject.getJavaScriptFile().getLength() != 0) {
-                Icon icon = new Icon(fileHostObject.getInputStream(),
-                                     fileHostObject.getJavaScriptFile().getContentType());
-                String filePath = APIUtil.getDocumentationFilePath(apiId, fileHostObject.getName());
-                doc.setFilePath(apiProvider.addIcon(filePath, icon));
-            } else if (oldDoc.getFilePath() != null) {
-                doc.setFilePath(oldDoc.getFilePath());
-            }
-
-        } catch (Exception e) {
-            handleException("Error while creating an attachment for Document- " + docName + "-" + version, e);
-            return false;
-        }
-        }
         boolean isTenantFlowStarted = false;
         try {
             String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(providerName));
