@@ -350,8 +350,9 @@ public class APIManagerStartupPublisher implements ServerStartupHandler {
 					api.getVisibility(), visibleRoles, artifactPath);
 			registry.commitTransaction();
 
-			// Generate API Definition for Swagger
-			createUpdateAPIDefinition(api);
+			// Generate API Definition for Swagger. 
+			//TO DO: Need to re-write this method to generate swagger 2.0 resource
+			//createUpdateAPIDefinition(api);
 
 		} catch (RegistryException e) {
 			try {
@@ -404,45 +405,6 @@ public class APIManagerStartupPublisher implements ServerStartupHandler {
             handleException("Failed to add documentation", e);
         } 
     }
-
-
-	/**
-	 * Create API Definition in JSON and save in the registry
-	 * 
-	 * @param api
-	 *            API
-	 * @throws org.wso2.carbon.apimgt.api.APIManagementException
-	 *             if failed to generate the content and save
-	 */
-	private void createUpdateAPIDefinition(API api)
-			throws APIManagementException {
-		APIIdentifier identifier = api.getId();
-
-		try {
-			String jsonText = APIUtil.createSwaggerJSONContent(api);
-
-			String resourcePath = APIUtil.getAPIDefinitionFilePath(identifier.getApiName(), identifier.getVersion(), identifier.getProviderName());
-
-			Resource resource = registry.newResource();
-
-			resource.setContent(jsonText);
-			resource.setMediaType("application/json");
-			registry.put(resourcePath, resource);
-
-			/* Set permissions to anonymous role */
-			APIUtil.setResourcePermissions(api.getId().getProviderName(), null,
-					null, resourcePath);
-
-		} catch (RegistryException e) {
-			handleException("Error while adding API Definition for "
-					+ identifier.getApiName() + "-" + identifier.getVersion(),
-					e);
-		} catch (APIManagementException e) {
-			handleException("Error while adding API Definition for "
-					+ identifier.getApiName() + "-" + identifier.getVersion(),
-					e);
-		}
-	}
 
 	/**
 	 * Persist API Status into a property of API Registry resource
