@@ -61,6 +61,7 @@ public class APIDefinitionFromSwagger20 extends APIDefinition {
         JSONParser parser = new JSONParser();
         JSONObject swagger;
         Set<URITemplate> uriTemplates = new LinkedHashSet<URITemplate>();
+        Set<Scope> scopes = getScopes(resourceConfigsJSON);
         try {
             swagger = (JSONObject) parser.parse(resourceConfigsJSON);
             if (swagger.get("paths") != null) {
@@ -75,7 +76,7 @@ public class APIDefinitionFromSwagger20 extends APIDefinition {
                         //PATCH is not supported. Need to remove this check when PATCH is supported
                         if (!"PATCH".equals(httpVerb)) {
                             URITemplate template = new URITemplate();
-                            //Scope scope= APIUtil.findScopeByKey(scopeList,(String) operation.get("scope"));
+                            Scope scope= APIUtil.findScopeByKey(scopes,(String) operation.get("x-scope"));
                             String authType = (String) operation.get("auth_type");
                             if ("Application & Application User".equals(authType)) {
                                 authType = APIConstants.AUTH_APPLICATION_OR_USER_LEVEL_TOKEN;
@@ -91,7 +92,7 @@ public class APIDefinitionFromSwagger20 extends APIDefinition {
                             template.setUriTemplate(uriTempVal);
                             template.setHTTPVerb(httpVerb.toUpperCase());
                             template.setAuthType(authType);
-                            //template.setScope(scope);
+                            template.setScope(scope);
 
                             uriTemplates.add(template);
                         }
@@ -128,10 +129,10 @@ public class APIDefinitionFromSwagger20 extends APIDefinition {
                 while (definitionIterator.hasNext()) {
                     JSONObject securityDefinition = definitionIterator.next();
                     //Read scopes from custom wso2 scopes
-                    if (securityDefinition.get("x-wso2-scopes") != null) {
-                        JSONObject scopes = (JSONObject) securityDefinition.get("x-wso2-scopes");
-                        if (scopes.get("oauth-scope") != null) {
-                            JSONArray oauthScope = (JSONArray) scopes.get("oauth-scope");
+                    if (securityDefinition.get("apim") != null) {
+                        JSONObject scopes = (JSONObject) securityDefinition.get("apim");
+                        if (scopes.get("x-wso2-scopes") != null) {
+                            JSONArray oauthScope = (JSONArray) scopes.get("x-wso2-scopes");
                             for (Object anOauthScope : oauthScope) {
                                 Scope scope = new Scope();
                                 JSONObject scopeObj = (JSONObject) anOauthScope;
