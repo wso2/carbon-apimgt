@@ -184,6 +184,7 @@ if(tenant!=null) {
                         <Label><b><%=i18n.localize("tiers")%></b></Label>
                         <select id="tiers-list" name="tiers-list">
                             <%var tiersList = api.tiers, denied = false, tiersAvailable = false;
+                            var existingFirstTierDesc = [];
 
                             for(var j=0;j<tiersList.length;j++){
                             	for (var k=0;k<deniedTiers.length;k++) {
@@ -195,6 +196,9 @@ if(tenant!=null) {
                             		var tier=tiersList[j].tierName;
                             		var tierDisplayName=tiersList[j].tierDisplayName;
                             		tiersAvailable = true;
+
+                            		//adding the description of existing tiers to the list
+                                    existingFirstTierDesc.push(tiersList[j].tierDescription);
                             %>
                             <option value="<%=tier%>"><%=tierDisplayName%></option>
                             <%}
@@ -202,13 +206,12 @@ if(tenant!=null) {
                              } %>
                         </select>
                         <%
-                            var tierArr = api.tiers;
                             var firstTierDesc = '';
-                            if(tierArr != null){
-                                firstTierDesc = tierArr[0].tierDescription;
-                                if(firstTierDesc == "null"){
-                                    firstTierDesc='';
-                                }
+                            if(existingFirstTierDesc.length ==0){
+                                firstTierDesc = '';
+                            }
+                            else{
+                               firstTierDesc = existingFirstTierDesc[0];
                             }
                         %>
                         <span class="help-block" id="tierDesc"><%=firstTierDesc%>
