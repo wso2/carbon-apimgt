@@ -6,8 +6,7 @@ var api_doc =
     "info": {
         "title": "",
         "version": ""
-    },
-    apis:[]
+    }
 };
 
 Handlebars.registerHelper('countKeys', function(value){
@@ -193,8 +192,8 @@ APIDesigner.prototype.add_default_resource = function(){
 }
 
 APIDesigner.prototype.get_scopes = function(){
-     if(typeof(this.api_doc.authorizations)!='undefined'){
-	var scopes = this.api_doc.authorizations.oauth2.scopes;
+    if(typeof(this.api_doc.securityDefinitions)!='undefined'){
+	var scopes = this.api_doc.securityDefinitions.apim['x-wso2-scopes'];
 	var options = [{ "value": "" , "text": "" }]
 	for(var i =0; i < scopes.length ; i++ ){
 	    options.push({ "value": scopes[i].key , "text": scopes[i].name });
@@ -304,7 +303,7 @@ APIDesigner.prototype.init_controllers = function(){
 
     this.container.delegate(".delete_scope","click", function(){
         var i = $(this).attr("data-index");
-        API_DESIGNER.api_doc.authorizations.oauth2.scopes.splice(i, 1);
+        API_DESIGNER.api_doc.securityDefinitions.apim['x-wso2-scopes'].splice(i, 1);
         API_DESIGNER.render_scopes();
     });
 
@@ -316,37 +315,39 @@ APIDesigner.prototype.init_controllers = function(){
         $("#define_scope_modal").modal('show');
     });
 
-	    $("#scope_submit")
-			.click(
-					function() {
-						var scope = {
-							name : $("#scopeName").val(),
-							description : $("#scopeDescription").val(),
-							key : $("#scopeKey").val(),
-							roles : $("#scopeRoles").val()
-						};
-						if (API_DESIGNER.api_doc.authorizations.oauth2.scopes == undefined) {
-							SCOPES = [];
-						}
-						for (var i = 0; i < API_DESIGNER.api_doc.authorizations.oauth2.scopes.length; i++) {
-							if (API_DESIGNER.api_doc.authorizations.oauth2.scopes[i].key === $(
-									"#scopeKey").val() || API_DESIGNER.api_doc.authorizations.oauth2.scopes[i].key === $(
-									"#scopeName").val()) {
-								jagg
-										.message({
-											content : "You should not define same scope.",
-											type : "error"
-										});
-								return;
-							}
-						}
-						
-						API_DESIGNER.api_doc.authorizations.oauth2.scopes
-								.push(scope);
-						$("#define_scope_modal").modal('hide');
-						API_DESIGNER.render_scopes();
-						API_DESIGNER.render_resources();
-					}); 
+    $("#scope_submit").click(function(){
+        var securityDefinitions = {
+            "apim":{
+                "x-wso2-scopes":[]
+            }
+        };
+        var API_DESIGNER = APIDesigner();        
+		var scope = {
+			name : $("#scopeName").val(),
+			description : $("#scopeDescription").val(),
+			key : $("#scopeKey").val(),
+			roles : $("#scopeRoles").val()
+		};
+
+        API_DESIGNER.api_doc.securityDefinitions = $.extend({}, securityDefinitions, API_DESIGNER.api_doc.securityDefinitions);
+
+		for (var i = 0; i < API_DESIGNER.api_doc.securityDefinitions.apim['x-wso2-scopes'].length; i++) {
+			if (API_DESIGNER.api_doc.securityDefinitions.apim['x-wso2-scopes'][i].key === $(
+					"#scopeKey").val() || API_DESIGNER.api_doc.securityDefinitions.apim['x-wso2-scopes'][i].key === $(
+					"#scopeName").val()) {
+				jagg.message({
+					content : "You should not define same scope.",
+					type : "error"
+				});
+				return;
+			}
+		}
+		
+        API_DESIGNER.api_doc.securityDefinitions.apim['x-wso2-scopes'].push(scope);
+		$("#define_scope_modal").modal('hide');
+		API_DESIGNER.render_scopes();
+		API_DESIGNER.render_resources();
+	}); 
 
     $("#swaggerEditor").click(API_DESIGNER.edit_swagger);
 
@@ -397,6 +398,7 @@ APIDesigner.prototype.render_resources = function(){
     }
     var output = Handlebars.partials['designer-resources-template'](context);
     $('#resource_details').html(output);
+    console.log(this.get_scopes());
     $('#resource_details').find('.scope_select').editable({
         emptytext: '+ Scope',
         source: this.get_scopes(),

@@ -124,7 +124,14 @@ var log = new Log();
 
         jsonObj.basePath = api.context;
         jsonObj.host = urlArr[1].trim().replace("https://","");
-        //@todo fix for '*' whild card 
+
+        var paths = {}; //fix for /*
+        for (var property in jsonObj.paths) {
+            if (jsonObj.paths.hasOwnProperty(property)) {
+                paths[property.replace("/*","/")] = jsonObj.paths[property];
+            }
+        }
+        jsonObj.paths = paths;
 
         print(jsonObj);
     }

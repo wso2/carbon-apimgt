@@ -461,10 +461,10 @@
 
 <script id="scopes-template" type="text/x-handlebars-template">
     <div class="scope_container">
-    {{#if api_doc.authorizations.oauth2.scopes}}
+    {{#if api_doc.securityDefinitions.apim.x-wso2-scopes }}
         <h4>Scopes</h4>
         <ul>
-            {{#each api_doc.authorizations.oauth2.scopes}}
+            {{#each api_doc.securityDefinitions.apim.x-wso2-scopes }}
             <li>
                 <h6><a data-index='{{ @index }}' class='delete_scope'><i class='icon-trash'></i></a> &nbsp;&nbsp; {{ key }} {{#if name }}: {{ name }}{{/if}}  </h6>
                 <strong>Roles</strong> : {{ roles }}    
