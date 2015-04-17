@@ -40,13 +40,12 @@ import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
-import static org.wso2.carbon.apimgt.impl.utils.APIUtil.getApplicationId;
 import static org.wso2.carbon.apimgt.impl.utils.APIUtil.handleException;
 
 public class APIDefinitionFromSwagger20 extends APIDefinition {
 
     private static final Log log = LogFactory.getLog(APIDefinitionFromSwagger20.class);
-    private final String SWAGGER_2_0_FILE_NAME = "/swagger.json";
+    private final String SWAGGER_2_0_FILE_NAME = "swagger.json";
 
     /**
      * This method returns URI templates according to the given swagger file
