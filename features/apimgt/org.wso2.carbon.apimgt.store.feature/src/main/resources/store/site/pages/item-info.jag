@@ -23,7 +23,7 @@ i18n.init(request,localeResourcesBasePath);
     api = result.api;
     error = result.error;
     message = result.message;
-    swaggerString=result.swaggerString;
+    //swaggerString=result.swaggerString;
     uriTemplates = result.uriTemplates;
     var apiName="";
     var apiVersion=null;
@@ -68,7 +68,6 @@ i18n.init(request,localeResourcesBasePath);
                             "name":"api/api-info",
                             "inputs":{
                                      "api":api,
-                                     "swaggerString":swaggerString,
                                      "uriTemplates":uriTemplates,
                                      "error":error,
                                      "message":message
