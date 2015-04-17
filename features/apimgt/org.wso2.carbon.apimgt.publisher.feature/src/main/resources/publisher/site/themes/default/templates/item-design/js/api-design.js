@@ -398,7 +398,6 @@ APIDesigner.prototype.render_resources = function(){
     }
     var output = Handlebars.partials['designer-resources-template'](context);
     $('#resource_details').html(output);
-    console.log(this.get_scopes());
     $('#resource_details').find('.scope_select').editable({
         emptytext: '+ Scope',
         source: this.get_scopes(),
