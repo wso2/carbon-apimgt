@@ -15,7 +15,7 @@
     var infoMappedUrl=jagg.getMappedUrl("/site/pages/item-info.jag");
     var addUrl=jagg.getAbsoluteUrl("/site/pages/add.jag");
     var addMappedUrl=jagg.getMappedUrl("/site/pages/add.jag");
-    var addDesignUrl=jagg.getMappedUrl("/site/pages/design.jag");    
+    var addDesignUrl=jagg.getMappedUrl("/site/pages/design.jag");
     var subsUrl=jagg.getAbsoluteUrl("/site/pages/subscriptions.jag");
     var subsMappedUrl=jagg.getMappedUrl("/site/pages/subscriptions.jag");
     var userUrl=jagg.getAbsoluteUrl("/site/pages/user.jag");
@@ -73,7 +73,7 @@
     <ul class="nav nav-list">
        <li class="nav-header"><%=i18n.localize("apis")%></li>
         <li <%if(reqUrl.equals(jagg.url(""))||reqUrl.equals(jagg.url("/"))||reqUrl.indexOf(listUrl)>=0 || reqUrl.indexOf(listMappedUrl)>=0||reqUrl.indexOf(infoUrl)>=0 || reqUrl.indexOf(infoMappedUrl)>=0|| reqUrl.indexOf(userUrl)>=0||reqUrl.indexOf(userMappedUrl)>=0){%>class="active"<% } %>><a href="<%=listMappedUrl%>?page=1<%=urlPostfix%>"  onclick="jagg.sessionAwareJS({redirect:'<%=listMappedUrl%>?page=1<%=urlPostfix%>',e:event,ssoEnabled:<%=ssoEnabled%>})"><%=i18n.localize("browse")%></a></li>
-        <%if(isPermitted){%><li <% if(reqUrl.indexOf(addUrl)>=0 || reqUrl.indexOf(addDesignUrl)>=0){%>class="active"<% } %>><a href="<%=addDesignUrl%><%=urlPrefix%>" onclick="jagg.sessionAwareJS({redirect:'<%=addDesignUrl%><%=urlPrefix%>',e:event,ssoEnabled:<%=ssoEnabled%>})"><%=i18n.localize("add")%></a></li><%}%>                
+        <%if(isPermitted){%><li <% if(reqUrl.indexOf(addUrl)>=0 || reqUrl.indexOf(addDesignUrl)>=0){%>class="active"<% } %>><a href="<%=addUrl%><%=urlPrefix%>" onclick="jagg.sessionAwareJS({redirect:'<%=addDesignUrl%><%=urlPrefix%>',e:event,ssoEnabled:<%=ssoEnabled%>})"><%=i18n.localize("add")%></a></li><%}%>
         <!-- <%if(isPermitted){%><li <% if(reqUrl.indexOf(addUrl)>=0 || reqUrl.indexOf(addMappedUrl)>=0){%>class="active"<% } %>><a href="<%=addMappedUrl%><%=urlPrefix%>" onclick="jagg.sessionAwareJS({redirect:'<%=addMappedUrl%><%=urlPrefix%>',e:event,ssoEnabled:<%=ssoEnabled%>})"></a></li><%}%>-->
         <li <% if(reqUrl.indexOf(allStatsUrl)>=0 || reqUrl.indexOf(allStatsMappedUrl)>=0){%>class="active"<% } %>><a href="<%=allStatsMappedUrl%>?stat=all-stat&page=api-subscriptions<%=urlPrefix%>" onclick="jagg.sessionAwareJS({redirect:'<%=allStatsMappedUrl%>?stat=all-stat&page=api-subscriptions<%=urlPrefix%>',e:event,ssoEnabled:<%=ssoEnabled%>})"><%=i18n.localize("allStats")%><i style="margin-left:10px;" class="icon-chevron-down"></i></a></li>
          <%       var stat;

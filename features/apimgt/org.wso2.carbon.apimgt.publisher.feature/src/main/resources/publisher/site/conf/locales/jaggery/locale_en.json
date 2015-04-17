@@ -47,6 +47,9 @@
     "businessInformationTitle" : "Business Information",
     "apiResourcesTitle" : "API Resources",
     "invalidSwaggerUrlErrorMsg": "Invalid swagger url",
+    "createFromExistingAPI" : "Use an existing API endpoint to create a managed API. If you have API definition you can import it to speed up API creation.",
+    "createFromExistingSOAPEndpoint" : "Use an existing SOAP endpoint to create a managed API. Import WSDL of the SOAP service.",
+    "designNewAPI" : "Design and prototype a new API with API Manager.",
 
     "private": "Visible to my domain",
     "public": "Public",
