@@ -20,15 +20,13 @@ package org.wso2.carbon.apimgt.impl.definitions;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.wso2.carbon.apimgt.api.APIDefinition;
 import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.api.model.API;
-import org.wso2.carbon.apimgt.api.model.APIIdentifier;
-import org.wso2.carbon.apimgt.api.model.Scope;
-import org.wso2.carbon.apimgt.api.model.URITemplate;
+import org.wso2.carbon.apimgt.api.model.*;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.dto.Environment;
@@ -42,6 +40,7 @@ import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
+import static org.wso2.carbon.apimgt.impl.utils.APIUtil.getApplicationId;
 import static org.wso2.carbon.apimgt.impl.utils.APIUtil.handleException;
 
 public class APIDefinitionFromSwagger20 extends APIDefinition {
@@ -128,25 +127,21 @@ public class APIDefinitionFromSwagger20 extends APIDefinition {
                 Iterator<JSONObject> definitionIterator = securityDefinitionsObjects.values().iterator();
                 while (definitionIterator.hasNext()) {
                     JSONObject securityDefinition = definitionIterator.next();
-                    if (securityDefinition.get("scopes") != null) {
-                        JSONObject scopes = (JSONObject) securityDefinition.get("scopes");
-                        JSONObject roles = null;
-                        if (securityDefinition.get("x-scope-roles") != null) {
-                            roles = (JSONObject) securityDefinition.get("x-scope-roles");
-                        }
-                        Set keySet = scopes.keySet();
-                        for (Object key : keySet) {
-                            Scope scope = new Scope();
-                            scope.setKey(key.toString());
-                            scope.setDescription((String) scopes.get(key));
-                            if (roles != null) {
-                                if (roles.get(key) != null) {
-                                    scope.setRoles(roles.get(key).toString());
-                                } else {
-                                    scope.setRoles("[]");
-                                }
+                    //Read scopes from custom wso2 scopes
+                    if (securityDefinition.get("x-wso2-scopes") != null) {
+                        JSONObject scopes = (JSONObject) securityDefinition.get("x-wso2-scopes");
+                        if (scopes.get("oauth-scope") != null) {
+                            JSONArray oauthScope = (JSONArray) scopes.get("oauth-scope");
+                            for (Object anOauthScope : oauthScope) {
+                                Scope scope = new Scope();
+                                JSONObject scopeObj = (JSONObject) anOauthScope;
+                                scope.setKey((String) scopeObj.get("key"));
+                                scope.setName((String) scopeObj.get("name"));
+                                scope.setDescription((String) scopeObj.get("description"));
+                                scope.setRoles(scopeObj.get("roles").toString());
+
+                                scopeList.add(scope);
                             }
-                            scopeList.add(scope);
                         }
                     }
                 }
@@ -242,6 +237,7 @@ public class APIDefinitionFromSwagger20 extends APIDefinition {
      * @throws APIManagementException
      */
     @Override
+    @SuppressWarnings("unchecked")
     public String createAPIDefinition(API api) throws APIManagementException {
         JSONParser parser = new JSONParser();
         String contactObjectTemplate = "{\"name\":\"\", \"url\":\"\", \"email\":\"\"}";
@@ -286,29 +282,45 @@ public class APIDefinitionFromSwagger20 extends APIDefinition {
         Environment environment = (Environment) config.getApiGatewayEnvironments().values().toArray()[0];
         String endpoints = environment.getApiGatewayEndpoint();
         String[] endpointsSet = endpoints.split(",");
-        String apiContext = api.getContext();
-        String version = identifier.getVersion();
         Set<URITemplate> uriTemplates = api.getUriTemplates();
-        String description = api.getDescription();
-
 
         if (endpointsSet.length < 1) {
             throw new APIManagementException("Error in creating JSON representation of the API" + identifier.getApiName());
-        }
-        if (description == null || description.equals("")) {
-            description = "";
-        } else {
-            description = description.trim();
         }
 
         JSONObject swaggerObject;
 
         try {
             swaggerObject = (JSONObject) parser.parse(swaggerObjectTemplate);
-            swaggerObject.put("host","localhost");
+
+            //Create info object
+            JSONObject infoObject = (JSONObject) parser.parse(infoObjectTemplate);
+            infoObject.put("title", api.getId().getApiName());
+            infoObject.put("description", api.getDescription());
+
+            //Create contact object and map business owner info
+            JSONObject contactObject = (JSONObject) parser.parse(contactObjectTemplate);
+            contactObject.put("name", api.getBusinessOwner());
+            contactObject.put("email", api.getBusinessOwnerEmail());
+            //put contact object to info object
+            infoObject.put("contact", contactObject);
+
+            //Create licence object
+            JSONObject licenceObject = (JSONObject) parser.parse(licenceObjectTemplate);
+
+            infoObject.put("licence", licenceObject);
+            infoObject.put("version", api.getId().getVersion());
+
+            //add info object to swaggerObject
+            swaggerObject.put("info", infoObject);
+
             for (URITemplate uriTemplate : uriTemplates) {
 
             }
+
+            //Create security scheme object
+            JSONObject securitySchemeObject = (JSONObject) parser.parse(securitySchemeObjectTemplate);
+
         } catch (ParseException e) {
             throw new APIManagementException("Error while generating swagger v2.0 resource for api " + api.getId().getProviderName()
                     + "-" + api.getId().getApiName()
