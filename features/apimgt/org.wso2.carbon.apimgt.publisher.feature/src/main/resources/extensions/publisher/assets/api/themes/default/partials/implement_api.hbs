@@ -4,22 +4,45 @@
 	<li><a href='{{url ""}}/asts/api/manage'>Manage</a></li>
 </ul>
 <form id='form-api-endpoints' class='form-horizontal' method='post' action='{{url ""}}/asts/api/apis/endpoints'>
+    <div class="well well-small" style="padding:0px"> 
+    <fieldset> 
 	<div class=' control-group well'>
 		<label class='control-label'>{{t "Implementation Method"}}</label>
+		<div class="controls">
 		<label class='radio inline'>
-					<input type='radio' id='bronze_allow'> Backend Endpoint
+					<input type='radio' class="implementation_methods" id='bronze_allow'> Backend Endpoint
 		</label>
 		<label class='radio inline'>
-					<input type='radio' id='bronze_allow'> Specify Inline
+					<input type='radio' class="implementation_methods" id='bronze_allow'> Specify Inline
 		</label>
-	</div>
-	<legend>{{t "Endpoints"}}</legend>
-	<div class='control-group'>
-		<label class='control-label'>{{t "Endpoint Type"}}:</label>
-		<div class='controls'>
-			<input type='text' class='input-large' >
 		</div>
 	</div>
+	</fieldset> 
+	</div>
+	 <div class="clear"></div>	
+	<legend style="margin-left:0px;text-indent:10px">{{t "Endpoints"}}</legend>
+	<div class='control-group'>
+		<label class='control-label'>{{t "Endpoint Type"}}:</label>
+		 <div class="controls">
+                            <select class="select required" id="endpoint_type" name="endpoint_type">
+                                <option value="http"  selected="selected">HTTP Endpoint</option>
+                                <option value="address">Address Endpoint</option>
+                                <option value="wsdl">WSDL Endpoint</option>
+                                <option value="failover">Failover Endpoint</option>
+                                <option value="load_balance">Load balanced Endpoint</option>
+                            </select>
+                            <a class="icon-question-sign help_popup" help_data="endpoint_help"></a>
+                        </div>
+	</div>
+	<div id="endpoint_help" class="hide">
+                 <strong>HTTP Endpoint </strong><p>A REST service endpoint based on a URI template</p>
+                 <strong>Address Endpoint</strong><p>The direct URL of the service</p>
+                 <strong>WSDL Endpoint</strong><p>The WSDL, service and port</p>
+                 <strong>Failover Group </strong><p>The endpoints that the service tries to connect to in case of a failure. This happens in a round robin manner.</p>
+                 <strong>Load Balance</strong><p>The endpoints where the incoming requests are directed to in a round robin manner. They automatically handle fail-over as well.</p>
+    </div>
+
+      
 	<div class='control-group'>
 		<label class='control-label'>{{t "Production Endpoint"}}:</label>
 		<div class='controls'>
@@ -38,16 +61,85 @@
 			<small>Ex : http://appserver/resource</small>			
 		</div>
 	</div>
-	<div class='control-group'>
-		<div class='controls'>
-			<a href='#more-options-link'>{{t "Show More Options"}}</a>
-		</div>
-	</div>
+		 <div class="control-group">
+    <div class="controls">
+    <a href="#" class="more-options but" ref="more-options-endpoints">{{t "Show More Options"}}</a>
+    </div>
+    </div>
+      <div id="more-options-endpoints" style="display:none">
 	<hr />
-	<div class='control-group'>
-		<input type='submit' id='btn-save-endpoints' class='btn btn-primary'  value='{{t "Save"}}' >
-		<button class='btn btn-primary' id='btn-deploy-prototype'>{{t "Deploy Prototype"}}</button>
-		<a class='btn' href='{{url ""}}/asts/api/manage' id='btn-manage-prototype'>{{t "Manage"}}</a>
-		<button class='btn'>{{t "Cancel"}}</button>
-	</div>
+
+   <div class="control-group">
+                    <label class="control-label" for="endpointType">{{t "Endpoint Security Scheme"}}:<span class="requiredAstrix">*</span></label>
+                    <div class="controls">
+                    <select class="select required" id="endpointType" name="endpointType" >
+                        <option value="nonsecured" selected="selected" >{{t "Non Decured"}}</option>
+                        <option value="secured">{{t "Secured"}}</option>
+                    </select>
+   					<a class="icon-question-sign help_popup" help_data="endpointSec_help"></a>
+            		<p id="endpointSec_help" class="hide">{{t "To connect to secured endpoints, you need to pass the credentials of the backend service."}}</p>
+                    </div>
+                </div>
+
+                <div class="control-group" id="credentials">
+                    <label class="control-label" for="credentials">{{t "Credentials"}}:<span class="requiredAstrix">*</span></label>
+                    <div class="controls">
+                        <input type="text" class="input-small required validInput" id="epUsername" name="epUsername"  value="">
+                        <input type="password" class="input-small required" id="epPassword" name="epPassword" value="">
+                    </div>
+                </div>
+
+                 <div class="control-group api_wsdl">
+                 <label class="control-label" for="wsdl">{{t "WSDL"}}:</label>
+                 <div class="controls">
+                 <div class="input-append">
+                 <input type="text" class="input-xlarge validInput" id="wsdl" name="wsdl"  value="" />
+                 <button class="btn check_url_valid" url-type="wsdl" type="button" >{{t "Test URI"}}</button>
+                 <a class="icon-question-sign help_popup" help_data="wsdldesc_help"></a>
+                 <p id="wsdldesc_help" class="hide">{{t "The content the WSDL is saved as a resource in /system/governance/apimgt/applicationdata/wsdls registry location. API artifacts have a dependency to this resource. Its original service address is reset to the API Gateway's address to prevent direct calls to the service endpoint. The registry permlink of the WSDL resource is shown in the API Store and users can download and create a service out of it."}}</p>
+                 </div>
+                 <p class="help-block">{{t "E.g.:http://appserver/services/echo?wsdl"}}</p>
+                
+                 </div>
+                 </div>
+                 <div class="control-group">
+                 <label class="control-label" for="wadl">{{t "WADL"}}:</label>
+                 <div class="controls">
+                 <div class="input-append">
+                 <input type="text" class="input-xlarge validInput" id="wadl" name="wadl" value="" />
+                 <button class="btn check_url_valid"  type="button"  >{{t "Test URI"}}</button>
+                 </div>
+                 <p class="help-block">{{t "E.g.,:http://example.com/service.wadl"}}</p>
+                 </div>
+                 </div>
+                 <!--% if(isDataPublishingEnabled) { %-->
+                <!--Southboud statistics -->
+                <div class="control-group">
+                    <label class="control-label" for="destinationStats"><%=i18n.localize("destinationStats")%>:</label>
+                      <div class="controls">
+                       <select class="select required" id="destinationStats" name="destinationStats">
+                            <option value="disabled" selected >{{t "disabled"}}</option>
+                            <option value="enabled">{{t "enabled"}}</option>
+                        </select>
+                        <a class="icon-question-sign help_popup" help_data="stats_help"></a>
+                        <p id="stats_help" class="hide"><%=i18n.localize("statsHelpMsg")%></p>
+                     </div>
+                </div>
+                <!--Southboud statistics End -->
+                <!--% }%-->
+</div>
+
+               
+                       
+                
+                <div class="form-actions" style="display:none" id="saveMessage">
+                    <div class="btn loadingButton">Saving API. Please wait..</div>
+                </div>
+                <div class="form-actions" id="saveButtons">
+                    <input type="submit" class="btn btn-primary manageSaveButton" value="Save"/>
+                    <a class="btn btn-warning manageSaveButton" id="prototyped_api">{{t "Deploy Prototype"}}</a>
+                    <a id="go_to_manage" class="btn btn-primary manageSaveButton" >{{t "Manage"}}</a> 
+                    <input type="reset" class="btn" value="{{t "Cancel"}}" onclick="javascript:window.location.href='./'" />                                                            
+                </div>
+
 </form>
