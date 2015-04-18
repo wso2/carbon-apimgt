@@ -42,6 +42,7 @@ var i, length, app, thumbURL, api = outputs.api, templatesList = outputs.uriTemp
                                                   var methods = templatesList[i][1].split(",");
                                                   var authTypes = templatesList[i][2].split(",");
                                                   var throttlingTiers = templatesList[i][3].split(",");
+                                                  //below vars are reseted at the end of the loop
                                                   var getVal,putVal,postVal,deleteVal,optionVal,method;
                                                   var getThrottlingTier,postThrottlingTier,deleteThrottlingTier,optionsThrottlingTier,putThrottlingTier;
                                                   var getAuthVal,putAuthVal,postAuthVal,deleteAuthVal,optionAuthVal,method;
@@ -118,7 +119,7 @@ var i, length, app, thumbURL, api = outputs.api, templatesList = outputs.uriTemp
 
                                     <% getVal=putVal=postVal=deleteVal=optionVal=""; %>
 
-
+                                <% getThrottlingTier=postThrottlingTier=deleteThrottlingTier=optionsThrottlingTier=putThrottlingTier=""; %>
                                 <% getAuthVal=putAuthVal=postAuthVal=deleteAuthVal=optionAuthVal=""; %>
                             </tr>
                             <%
