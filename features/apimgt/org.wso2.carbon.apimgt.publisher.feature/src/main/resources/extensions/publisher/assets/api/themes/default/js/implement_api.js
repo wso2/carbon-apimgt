@@ -31,5 +31,18 @@ $(function() {
                 });
             }
         });
+
+        $('.more-options').click(function(){
+            $('.more-options').css({'display':'none'});
+            $('.less-options').css({'display':'block'});
+            $('#more-options-endpoints').css({'display':'block'});
+       });
+
+        $('.less-options').click(function(){
+            $('.more-options').css({'display':'block'});
+            $('.less-options').css({'display':'none'});
+            $('#more-options-endpoints').css({'display':'none'});
+       });
+
     });
 });

@@ -64,6 +64,7 @@
 		 <div class="control-group">
     <div class="controls">
     <a href="#" class="more-options but" ref="more-options-endpoints">{{t "Show More Options"}}</a>
+    <a href="#" class="less-options but" style="display:none" ref="less-options-endpoints">{{t "Show Less Options"}}</a>
     </div>
     </div>
       <div id="more-options-endpoints" style="display:none">
@@ -115,14 +116,14 @@
                  <!--% if(isDataPublishingEnabled) { %-->
                 <!--Southboud statistics -->
                 <div class="control-group">
-                    <label class="control-label" for="destinationStats"><%=i18n.localize("destinationStats")%>:</label>
+                    <label class="control-label" for="destinationStats">{{t "Destination Stats"}}:</label>
                       <div class="controls">
                        <select class="select required" id="destinationStats" name="destinationStats">
                             <option value="disabled" selected >{{t "disabled"}}</option>
                             <option value="enabled">{{t "enabled"}}</option>
                         </select>
                         <a class="icon-question-sign help_popup" help_data="stats_help"></a>
-                        <p id="stats_help" class="hide"><%=i18n.localize("statsHelpMsg")%></p>
+                        <p id="stats_help" class="hide">{t Stats Help}</p>
                      </div>
                 </div>
                 <!--Southboud statistics End -->
