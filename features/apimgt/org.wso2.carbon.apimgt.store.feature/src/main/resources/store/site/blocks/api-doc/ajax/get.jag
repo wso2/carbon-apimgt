@@ -9,19 +9,6 @@ store = jagg.module("manager").getAPIStoreObj();
 
 var log = new Log();
 
-function generate_swagger_object(swagger){
-   swaggerObj = {
-        api_doc : parse(swagger),
-        resources : []
-    };
-
-    for(i = 0 ; i < swaggerObj.api_doc.apis.length ; i++ ){
-        swaggerObj.resources.push(swaggerObj.api_doc.apis[i].file);
-        delete swaggerObj.api_doc.apis[i].file
-    }
-    return stringify(swaggerObj);
-}
-
 (function () {
     response.contentType = "application/json; charset=UTF-8";
     var mod, obj, result, username,
@@ -30,7 +17,6 @@ function generate_swagger_object(swagger){
     msg = require("/site/conf/ui-messages.jag");
 
     var carbon = require('carbon');
-
 
     var uri = request.getRequestURI();
     var callPath = uri.replace("/store/api-docs", "");
@@ -42,19 +28,14 @@ function generate_swagger_object(swagger){
             callPath = callPath.replace("@","%40");
         }
         var uriMatcher = new URIMatcher(callPath);
-        var providerVal,apiNameVal,apiVersionVal,subContext;
-        providerVal = apiNameVal = apiVersionVal = subContext = "";
+        var providerVal,apiNameVal,apiVersionVal;
+        providerVal = apiNameVal = apiVersionVal = "";
 
         if (uriMatcher.match("/{providerVal}/{apiNameVal}/{apiVersionVal}")) {
             providerVal = uriMatcher.elements().providerVal;
             apiNameVal = uriMatcher.elements().apiNameVal;
             apiVersionVal = uriMatcher.elements().apiVersionVal;
-        }else if (uriMatcher.match("/{providerVal}/{apiNameVal}/{apiVersionVal}/{subContext}")) {
-            providerVal = uriMatcher.elements().providerVal;
-            apiNameVal = uriMatcher.elements().apiNameVal;
-            apiVersionVal = uriMatcher.elements().apiVersionVal;
-            subContext = uriMatcher.elements().subContext;
-        } else {
+        }else {
             print({
                 error:true,
                 message:msg.error.invalidAction(action)
@@ -68,7 +49,7 @@ function generate_swagger_object(swagger){
 
         var tenantDomain = "";
         var tenantID = -1234;
-	var isTenantFlowStarted = false;
+	    var isTenantFlowStarted = false;
 
         if(providerVal.indexOf("@") > -1){
             tenantDomain = providerVal.split("@")[1];
@@ -82,93 +63,77 @@ function generate_swagger_object(swagger){
              providerVal = providerVal.replace("-DOM-","/");
         }
 
-	try {
-		//start tenant flow before fetching swagger resource from the registry
-		if (tenantDomain != "" && tenantDomain != 'carbon.super') {
-			var PrivilegedCarbonContext = Packages.org.wso2.carbon.context.PrivilegedCarbonContext;
-			isTenantFlowStarted = true;
-			PrivilegedCarbonContext.startTenantFlow();
-		        PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
-		}
+    	try {
+    		//start tenant flow before fetching swagger resource from the registry
+    		if (tenantDomain != "" && tenantDomain != 'carbon.super') {
+    			var PrivilegedCarbonContext = Packages.org.wso2.carbon.context.PrivilegedCarbonContext;
+    			isTenantFlowStarted = true;
+    			PrivilegedCarbonContext.startTenantFlow();
+    		        PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
+    		}
 
-		var registry = carbon.server.osgiService('org.wso2.carbon.registry.core.service.RegistryService').getGovernanceUserRegistry("wso2.anonymous.user", tenantID);
-		var prefix = "/apimgt/applicationdata/api-docs/"
+    		var registry = carbon.server.osgiService('org.wso2.carbon.registry.core.service.RegistryService').getGovernanceUserRegistry("wso2.anonymous.user", tenantID);
+    		var prefix = "/apimgt/applicationdata/api-docs/"
 
 
-		    if (subContext === "") {
 
-			url = prefix + apiNameVal + "-" + apiVersionVal + "-" + providerVal +"/1.2/api-doc";
+    		url = prefix + apiNameVal + "-" + apiVersionVal + "-" + providerVal +"/swagger.json";
 
-		    }else{
-			url = prefix + apiNameVal + "-" + apiVersionVal + "-" + providerVal +"/1.2/" + subContext;
-		    }
+    		    
 
-		var data = registry.get(url);
-	 } finally {
-		if (isTenantFlowStarted) {
-                    PrivilegedCarbonContext.endTenantFlow();
-                }
-
-	}
+    		var data = registry.get(url);
+    	}finally {
+    		if (isTenantFlowStarted) {
+                PrivilegedCarbonContext.endTenantFlow();
+            }
+    	}
         var output = new Packages.java.lang.String(data.content);
         var jsonObj = JSON.parse(output);
-        if(jsonObj.basePath){
-            var basePathValue = jsonObj.basePath;
-            var username=null;
-            result = jagg.module("api").getAPIDescription({
-                    name:apiNameVal,
-                    version:apiVersionVal,
-                    provider:providerVal
-                }, username);
-                var api = result.api;
-            var serverURL = api.serverURL;
-            var context = api.context;
-            var splitVal = serverURL.split(",");
-            var urlArr = new Array();
-            var count = 0;
-            for(var i=0; i < splitVal.length ; i++){
-                if(splitVal[i].trim().indexOf("http") > -1){
-                    urlArr[count] = splitVal[i];
-                    count++;
-                };
+
+        var basePathValue = jsonObj.basePath;
+        var username=null;
+        result = jagg.module("api").getAPIDescription({
+                name:apiNameVal,
+                version:apiVersionVal,
+                provider:providerVal
+            }, username);
+            var api = result.api;
+        var serverURL = api.serverURL;
+        var context = api.context;
+        var splitVal = serverURL.split(",");
+        var urlArr = new Array();
+        var count = 0;
+        for(var i=0; i < splitVal.length ; i++){
+            if(splitVal[i].trim().indexOf("http") > -1){
+                urlArr[count] = splitVal[i];
+                count++;
             };
-            if(urlArr.length===1){
-                // We do not need to append the version since with the context versioning, the version is embedded in the context.
-                jsonObj.basePath=urlArr[0]+context;
-                //jsonObj.basePath=urlArr[0]+context+"/"+apiVersionVal;
-            }else{
-                for(var i=0; i < urlArr.length ; i++){
-                    if(urlArr[i].indexOf(accessProtocol) > -1){
-                        jsonObj.basePath=urlArr[i]+context;
-                        // jsonObj.basePath=urlArr[i]+context+"/"+apiVersionVal;
-                    }
+        };
+        if(urlArr.length===1){
+            // We do not need to append the version since with the context versioning, the version is embedded in the context.
+            jsonObj.basePath=urlArr[0]+context;
+            //jsonObj.basePath=urlArr[0]+context+"/"+apiVersionVal;
+        }else{
+            for(var i=0; i < urlArr.length ; i++){
+                if(urlArr[i].indexOf(accessProtocol) > -1){
+                    jsonObj.basePath=urlArr[i]+context;
+                    // jsonObj.basePath=urlArr[i]+context+"/"+apiVersionVal;
                 }
             }
         }
 
-        // fix for '*' whild card 
-        if(jsonObj.apis){
-            for(var i=0;i < jsonObj.apis.length; i++){
-		if (jsonObj.apis[i].path.indexOf("/*") > -1) {
-		        jsonObj.apis[i].path = jsonObj.apis[i].path.replace("/*", "/");
-		        /*if(jsonObj.apis[i].operations){
-		            for(var j=0;j < jsonObj.apis[i].operations.length; j++){    
-		                jsonObj.apis[i].operations[j].parameters.push({
-		                    "dataType": "String",
-		                    "description": "Resource",
-		                    "name": "resource",
-		                    "allowMultiple": false,
-		                    "required": false,
-		                    "paramType": "path"
-		                });
-		            }
-		        }*/
-		}
+        jsonObj.basePath = api.context;
+        jsonObj.host = urlArr[1].trim().replace("https://","");
+
+        var paths = {}; //fix for /*
+        for (var property in jsonObj.paths) {
+            if (jsonObj.paths.hasOwnProperty(property)) {
+                paths[property.replace("/*","/")] = jsonObj.paths[property];
             }
         }
+        jsonObj.paths = paths;
 
         print(jsonObj);
-
     }
 
 }());

@@ -36,7 +36,7 @@ var version = outputs.api.version;
     if(providerValUe.indexOf("@") > -1){
         providerValUe = providerValUe.replace("@","%40");
     }
-	if(providerValUe.indexOf("/") > -1){
+	  if(providerValUe.indexOf("/") > -1){
         providerValUe = providerValUe.replace("/","-DOM-");
     }
 
@@ -52,35 +52,14 @@ var api = outputs.api;%>
       dom_id: "swagger-ui-container",
       supportedSubmitMethods: ['get', 'post', 'put', 'delete'],
       onComplete: function(swaggerApi, swaggerUi){
-        log("Loaded SwaggerUI");
-        if(typeof initOAuth == "function") {
-          /*
-          initOAuth({
-            clientId: "your-client-id",
-            realm: "your-realms",
-            appName: "your-app-name"
-          });
-          */
-        }
-        $('pre code').each(function(i, e) {
-          hljs.highlightBlock(e)
-        });
+        console.log("Loaded SwaggerUI");        
       },
       onFailure: function(data) {
-        log("Unable to Load SwaggerUI");
+        console.log("Unable to Load SwaggerUI");
       },
-      docExpansion: "list",
-      sorter : "alpha"
+      docExpansion: "list"
     });
 
-    $('#input_apiKey').change(function() {
-      var key = $('#input_apiKey')[0].value;
-      log("key: " + key);
-      if(key && key.trim() != "") {
-        log("added key " + key);
-        window.authorizations.add("key", new ApiKeyAuthorization("api_key", key, "query"));      
-      }
-    })
     window.swaggerUi.load();
   });
 
@@ -106,13 +85,15 @@ $(document).ready(function(){
   };
 
   $("#access_token").change(function(){
-    window.authorizations.add("key", new ApiKeyAuthorization("Authorization", "Bearer "+ $(this).val() , "header"));
+    var key = $(this).val();
+    if(key && key.trim() != "") {
+      swaggerUi.api.clientAuthorizations.add("key", new SwaggerClient.ApiKeyAuthorization("Authorization", "Bearer "+ key, "header"));
+    }        
   });
 
   $("#sub_app_list").change(change_token);
   $("#key_type").change(change_token);
   change_token();
-
 });  
 </script>
 <div id="authorizations" class="">
@@ -160,68 +141,11 @@ $(document).ready(function(){
     </form>
 </div>
 
-<% } //if api status %>
+<% } %>
 
 <div class="swagger-section">
-
 <div id="message-bar" class="swagger-ui-wrap">&nbsp;</div>
-<div id="Download" style="float:right;font-size:14px"><a href='<%=swaggerAPI%>' target="_blank" style="font-size:14px"><i class="icon-share-alt" ></i> Swagger Resource Listing ( /api-docs )</a></div>
+<div id="Download" style="float:right;font-size:14px"><a href='<%=swaggerAPI%>' target="_blank" style="font-size:14px"><i class="icon-share-alt" ></i> Swagger ( /swagger.json )</a></div>
 <div id="swagger-ui-container" class="swagger-ui-wrap"></div>
 </div>
-<style>
-html, body, div, span, applet, object, iframe, h1, h2, h3, h4, h5, h6, p, blockquote, pre, a, abbr, acronym, address, big, cite, code, del, dfn, em, img, ins, kbd, q, s, samp, small, strike, strong, sub, sup, tt, var, b, u, i, center, dl, dt, dd, ol, ul, li, fieldset, form, label, legend, table, caption, tbody, tfoot, thead, tr, th, td, article, aside, canvas, details, embed, figure, figcaption, footer, header, hgroup, menu, nav, output, ruby, section, summary, time, mark, audio, video{
-    font-family: Arial, Helvetica, Verdana, monospace, san-serif;
-    font-size:12px;
-    line-height:20px;
-}
-div#overview ul{
-	list-style:disc;
-	margin:5px 5px 5px 18px;
-}
-div#overview li{
-	padding-bottom:5px;
-}
-h2 {
-    font-size : 24px;
-    line-height : normal;
-    font-weight:bold;
-}
-.search-back body{
-	line-hieight:18px;
-}
-body ul#resources li.resource div.heading h2 a{
-	color:#111111;
-}
-.search-back {
-	padding:0 0 0 20px;
-}
-ul.endpoints{
-    padding:10px;
-    border:solid 1px #efefef;
-}
-body ul#resources li.resource div.heading{
-    background: #EFEFEF;
-    padding:0 10px;
-}
-body ul#resources li.resource div.heading ul.options{
-    margin:23px 10px 0 0;
-}
-h6{
-    color: inherit;
-    font-family: inherit;
-    font-weight: bold;
-    line-height: 20px;
-    margin: 0 0 10px 0;
-    text-rendering: optimizelegibility;
-}
-h5{
-    color: inherit;
-    font-family: inherit;
-    font-size:18px;
-    font-weight: bold;
-    line-height: 20px;
-    margin: 10px 0;
-    text-rendering: optimizelegibility;
-}
-</style>
 <%  }); %>
