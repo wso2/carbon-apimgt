@@ -108,9 +108,7 @@ $(document).ready(function () {
         /*
          if we have additional parameters we can pass them as a json object.
          */
-        //var oJsonParams= "";
 
-        console.log("here i am");
 	    var tokenScope = $('#scopeInput').val();
 
         jagg.post("/site/blocks/subscription/subscription-add/ajax/subscription-add.jag", {
@@ -122,7 +120,7 @@ $(document).ready(function () {
             authorizedDomains: authoDomains,
             validityTime: validityTime,
             tokenScope:tokenScope,
-	    selectedAppID:applicationId
+	        selectedAppID:applicationId
             //jsonParams: oJsonParams
 
         }, function (result) {
