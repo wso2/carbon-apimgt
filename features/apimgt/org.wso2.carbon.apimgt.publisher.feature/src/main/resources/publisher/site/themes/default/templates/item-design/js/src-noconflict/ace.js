@@ -3564,8 +3564,7 @@ var USE_IE_MIME_TYPE =  useragent.isIE;
 
 var TextInput = function(parentNode, host) {
     var text = dom.createElement("textarea");
-    text.className = "ace_text-input";
-    text.id="swagger-input";
+    text.className = "ace_text-input"
 
     if (useragent.isTouchPad)
         text.setAttribute("x-palm-disable-auto-cap", true);
