@@ -166,7 +166,7 @@
     vertical-align: top;
 }
 
-.resource_expand { cursor: pointer; }
+.resource_expand { cursor: pointer; word-wrap:none;}
 
 .resource_container .editable{ padding-top: 0px !important;}
 
@@ -189,33 +189,34 @@
     color:white;
     font-weight: bolder;
     margin-top: -5px;
+    text-transform: uppercase;
 }
 
 .resource_container td{
     border-top: 2px #FFF solid;
 }
 
-.resource-method-GET{
+.resource-method-get{
     background-color: #0F6AB4;
 }
 
-.resource-method-POST{
+.resource-method-post{
     background-color: #10A54A;
 }
 
-.resource-method-PUT{
+.resource-method-put{
     background-color: #C5862B;
 }
 
-.resource-method-PATCH{
+.resource-method-patch{
     background-color: #D38042;
 }
 
-.resource-method-DELETE{
+.resource-method-delete{
     background-color: #A41E22;
 }
 
-.resource-method-OPTIONS{
+.resource-method-options{
     background-color: #777;
 }
 

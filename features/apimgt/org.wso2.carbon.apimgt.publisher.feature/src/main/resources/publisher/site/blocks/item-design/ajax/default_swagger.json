@@ -1,0 +1,31 @@
+{
+  "swagger": "2.0",
+  "paths": {
+    "/*": {
+      "get": {
+        "responses": {
+          "200": {}
+        }
+      },
+      "post": {
+        "responses": {
+          "200": {}
+        }
+      },
+      "put": {
+        "responses": {
+          "200": {}
+        }
+      },
+      "delete": {
+        "responses": {
+          "200": {}
+        }
+      }
+    }
+  },
+  "info": {
+    "title": "",
+    "version": ""
+  }
+}
