@@ -669,10 +669,11 @@ public class APIProviderHostObject extends ScriptableObject {
         		PrivilegedCarbonContext.endTenantFlow();
         	}
         }
-
-        String wsdl = (String) apiData.get("wsdl", apiData);
-        if(wsdl != null && !wsdl.isEmpty()) {
-            api.setWsdlUrl(wsdl);
+        if (apiData.containsKey("wsdl")) {
+            String wsdl = (String) apiData.get("wsdl", apiData);
+            if(wsdl != null && !wsdl.isEmpty()) {
+                api.setWsdlUrl(wsdl);
+            }
         }
         
         if (apiData.get("swagger", apiData) != null) {
