@@ -130,16 +130,19 @@ public class APIDefinitionFromSwagger20 extends APIDefinition {
                     //Read scopes from custom wso2 scopes
 
                     if (securityDefinition.get("x-wso2-scopes") != null) {
-                        JSONArray oauthScope = (JSONArray) securityDefinition.get("x-wso2-scopes");
-                        for (Object anOauthScope : oauthScope) {
-                            Scope scope = new Scope();
-                            JSONObject scopeObj = (JSONObject) anOauthScope;
-                            scope.setKey((String) scopeObj.get("key"));
-                            scope.setName((String) scopeObj.get("name"));
-                            scope.setDescription((String) scopeObj.get("description"));
-                            scope.setRoles(scopeObj.get("roles").toString());
+                        JSONObject oauthScopes = (JSONObject) securityDefinition.get("x-wso2-scopes");
+                        if (oauthScopes.get("oauth-scope") != null) {
+                            JSONArray oauthScopeArray = (JSONArray) oauthScopes.get("oauth-scope");
+                            for (Object anOauthScope : oauthScopeArray) {
+                                Scope scope = new Scope();
+                                JSONObject scopeObj = (JSONObject) anOauthScope;
+                                scope.setKey((String) scopeObj.get("key"));
+                                scope.setName((String) scopeObj.get("name"));
+                                scope.setDescription((String) scopeObj.get("description"));
+                                scope.setRoles(scopeObj.get("roles").toString());
 
-                            scopeList.add(scope);
+                                scopeList.add(scope);
+                            }
                         }
                     }
                 }

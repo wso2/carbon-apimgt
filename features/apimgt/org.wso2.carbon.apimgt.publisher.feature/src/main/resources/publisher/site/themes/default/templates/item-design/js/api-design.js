@@ -193,7 +193,7 @@ APIDesigner.prototype.add_default_resource = function(){
 
 APIDesigner.prototype.get_scopes = function(){
     if(typeof(this.api_doc.securityDefinitions)!='undefined'){
-	var scopes = this.api_doc.securityDefinitions.apim['x-wso2-scopes'];
+	var scopes = this.api_doc.securityDefinitions.oauth2['x-wso2-scopes'];
 	var options = [{ "value": "" , "text": "" }]
 	for(var i =0; i < scopes.length ; i++ ){
 	    options.push({ "value": scopes[i].key , "text": scopes[i].name });
