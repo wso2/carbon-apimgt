@@ -74,14 +74,12 @@ var jagg = jagg || (function () {
             if (site.mutualAuthConfiguration.enabled) {
 
                 // cert will be available only if trust store holds client certificate. Otherwise it is null
-                // var cert = request.getAttribute("javax.servlet.request.X509Certificate");
-                var cert = null;
+                var cert = request.getAttribute("javax.servlet.request.X509Certificate");
                 var userName = request.getHeader("MutualAuthUserName");
 
                 // proceed mutul ssl validation if cert and user name set properly
 
                 if (cert != null) {
-
                     if (userName) {
                         var security = require("apistore");
                         var mutualAuthHostObject = new security.MutualAuthHostObject();

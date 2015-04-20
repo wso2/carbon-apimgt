@@ -281,14 +281,6 @@ public interface APIManager {
     public Set<Tier> getTiers(String tenantDomain) throws APIManagementException;
 
     /**
-     * Returns the Swagger definition as a string
-     * @param apiId
-     * @return
-     * @throws APIManagementException
-     */
-    public String getSwaggerDefinition(APIIdentifier apiId) throws APIManagementException;
-
-    /**
      * Returns a list of domain name mappings.
      *
      * @return Set<Tier>
