@@ -33,6 +33,9 @@ jagg.module("user", {
     },
     checkIfUserExsits:function (username) {
         return jagg.require(jagg.getModulesDir() + "user/user.jag").checkIfUserExsits.apply(this, arguments);
-    }
+    },
+    changePassword:function () {
+            return jagg.require(jagg.getModulesDir() + "user/add.jag").changePassword.apply(this, arguments);
+        }
 });
 %>

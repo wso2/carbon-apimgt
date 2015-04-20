@@ -36,6 +36,7 @@ import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.*;
 import org.wso2.carbon.apimgt.hostobjects.internal.HostObjectComponent;
+import org.wso2.carbon.apimgt.hostobjects.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.*;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dto.Environment;
@@ -53,6 +54,7 @@ import org.wso2.carbon.apimgt.usage.client.APIUsageStatisticsClient;
 import org.wso2.carbon.apimgt.usage.client.dto.*;
 import org.wso2.carbon.apimgt.usage.client.exception.APIMgtUsageQueryServiceClientException;
 import org.wso2.carbon.authenticator.stub.AuthenticationAdminStub;
+import org.wso2.carbon.authenticator.stub.LoginAuthenticationExceptionException;
 import org.wso2.carbon.base.MultitenantConstants;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.core.util.PermissionUpdateUtil;
@@ -74,10 +76,7 @@ import org.wso2.carbon.identity.user.registration.stub.dto.UserDTO;
 import org.wso2.carbon.identity.user.registration.stub.dto.UserFieldDTO;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.net.URLDecoder;
+import java.net.*;
 import java.rmi.RemoteException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -3707,6 +3706,136 @@ public class APIStoreHostObject extends ScriptableObject {
             handleException("Invalid input parameters.");
         }
     }
+
+	public static boolean jsFunction_changePassword(Context cx, Scriptable thisObj, Object[] args,
+	                                                Function funObj) throws APIManagementException {
+
+		String username = (String) args[0];
+		String currentPassword = (String) args[1];
+		String newPassword = (String) args[2];
+
+		APIManagerConfiguration config = HostObjectComponent.getAPIManagerConfiguration();
+		String serverURL = config.getFirstProperty(APIConstants.AUTH_MANAGER_URL);
+		String tenantDomain =
+				MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(username));
+
+		//if the current password is wrong return false and ask to retry.
+		if (!isAbleToLogin(username, currentPassword, serverURL, tenantDomain)) {
+			return false;
+		}
+
+		boolean isTenantFlowStarted = false;
+
+		try {
+			if (tenantDomain != null &&
+			    !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
+				isTenantFlowStarted = true;
+				PrivilegedCarbonContext.startTenantFlow();
+				PrivilegedCarbonContext.getThreadLocalCarbonContext()
+				                       .setTenantDomain(tenantDomain, true);
+			}
+			// get the signup configuration
+			UserRegistrationConfigDTO signupConfig =
+					SelfSignUpUtil.getSignupConfiguration(tenantDomain);
+			// set tenant specific sign up user storage
+			if (signupConfig != null && signupConfig.getSignUpDomain() != "") {
+				if (!signupConfig.isSignUpEnabled()) {
+					handleException("Self sign up has been disabled for this tenant domain");
+				}
+			}
+
+			changeTenantUserPassword(username, signupConfig, serverURL, newPassword);
+
+			//if unable to login with new password
+			if (!isAbleToLogin(username, newPassword, serverURL, tenantDomain)) {
+				throw new APIManagementException("Password change failed");
+			}
+
+		} catch (Exception e) {
+			handleException("Error while changing the password for: " + username, e);
+
+		} finally {
+			if (isTenantFlowStarted) {
+				PrivilegedCarbonContext.endTenantFlow();
+			}
+		}
+		return true;
+	}
+
+	/***
+	 *
+	 * @param username username
+	 * @param signupConfig signup configuration of user
+	 * @param serverURL server URL
+	 * @param newPassword new password to be set.
+	 *
+	 */
+	private static void changeTenantUserPassword(String username,
+	                                             UserRegistrationConfigDTO signupConfig,
+	                                             String serverURL, String newPassword)
+			throws RemoteException, UserAdminUserAdminException {
+
+		UserAdminStub userAdminStub = new UserAdminStub(null, serverURL + "UserAdmin");
+		String adminUsername = signupConfig.getAdminUserName();
+		String adminPassword = signupConfig.getAdminPassword();
+
+		CarbonUtils.setBasicAccessSecurityHeaders(adminUsername, adminPassword, true,
+		                                          userAdminStub._getServiceClient());
+
+		String tenantAwareUserName = MultitenantUtils.getTenantAwareUsername(username);
+		int index = tenantAwareUserName.indexOf(UserCoreConstants.DOMAIN_SEPARATOR);
+		//remove the 'PRIMARY' part from the user name
+		if (index > 0) {
+			if (tenantAwareUserName.substring(0, index).equalsIgnoreCase(
+					UserCoreConstants.PRIMARY_DEFAULT_DOMAIN_NAME)) {
+				tenantAwareUserName = tenantAwareUserName.substring(index + 1);
+			}
+		}
+		userAdminStub.changePassword(tenantAwareUserName, newPassword);
+	}
+
+	/***
+	 *
+	 * @param username username to be ckecked
+	 * @param password password of the user
+	 * @param serverURL server URL
+	 * @param tenantDomain denant domain of the user
+	 *
+	 */
+	private static boolean isAbleToLogin(String username, String password, String serverURL,
+	                                     String tenantDomain) throws APIManagementException {
+
+		boolean loginStatus = false;
+		//String serverURL = config.getFirstProperty(APIConstants.AUTH_MANAGER_URL);
+		if (serverURL == null) {
+			handleException("API key manager URL unspecified");
+		}
+
+		try {
+			AuthenticationAdminStub authAdminStub =
+					new AuthenticationAdminStub(null, serverURL + "AuthenticationAdmin");
+			//String tenantDomain = MultitenantUtils.getTenantDomain(username);
+			//update permission cache before validate user
+			int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
+			                                     .getTenantId(tenantDomain);
+			PermissionUpdateUtil.updatePermissionTree(tenantId);
+			String host = new URL(serverURL).getHost();
+			if (authAdminStub.login(username, password, host)) {
+				loginStatus = true;
+			}
+		} catch (AxisFault axisFault) {
+			log.error("Error while checking the ability to login", axisFault );
+		} catch (org.wso2.carbon.user.api.UserStoreException e) {
+			log.error("Error while checking the ability to login", e );
+		} catch (MalformedURLException e) {
+			log.error("Error while checking the ability to login", e);
+		} catch (RemoteException e) {
+			log.error("Error while checking the ability to login", e);
+		} catch (LoginAuthenticationExceptionException e) {
+			log.error("Error while checking the ability to login", e );
+		}
+		return loginStatus;
+	}
 
     private static void removeUser(String username, APIManagerConfiguration config, String serverURL)
 			throws RemoteException,
