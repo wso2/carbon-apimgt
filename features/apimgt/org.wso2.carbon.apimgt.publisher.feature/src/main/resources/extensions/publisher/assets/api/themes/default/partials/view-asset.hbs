@@ -3,7 +3,11 @@
 		<div class="container-fluid">
 			<div class="row">
 				<div class="col-lg-2">
-					<img src='{{url ""}}/storage/{{../rxt.shortName}}/{{id}}/{{thumbnail}}' class="" alt="Thumb"/>
+					{{#if thumbnail }}
+						<img src='{{url ""}}/storage/{{../rxt.shortName}}/{{id}}/{{thumbnail}}' class="" alt="Thumb"/>
+					{{else}}
+						<img src="{{url ""}}/extensions/assets/api/themes/default/imgs/api.png"/>
+					{{/if}}
 				</div>
 				<div class="col-lg-10">
 					<h1>{{name}}</h1>

@@ -116,6 +116,9 @@ asset.renderer = function (ctx) {
         navList.push('Edit', 'fa-pencil', util.buildUrl('update') + '/' + id);
         navList.push('Overview', 'fa-list-alt', util.buildUrl('details') + '/' + id);
         navList.push('Life Cycle', 'fa-recycle', util.buildUrl('lifecycle') + '/' + id);
+        navList.push('Versions', 'fa-recycle', util.buildUrl('versions') + '/' + id);
+        navList.push('Docs', 'fa-recycle', util.buildUrl('docs') + '/' + id);
+        navList.push('Users', 'fa-recycle', util.buildUrl('users') + '/' + id);
         return navList.list();
     };
 
