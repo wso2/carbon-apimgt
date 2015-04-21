@@ -1,54 +1,38 @@
-<div class='container-fluid'>
-		<div class='row-fluid'>
-			<div class='span3'>
-				<div class ='row'>
-					<img src='{{url ""}}/extensions/assets/api/themes/default/imgs/03-twitter-icon.png' class='img-polaroid'></img>
+{{#with assets}}
+	<div class="well asset-well">
+		<div class="container-fluid">
+			<div class="row">
+				<div class="col-lg-2">
+					{{#if thumbnail }}
+						<img src='{{url ""}}/storage/{{../rxt.shortName}}/{{id}}/{{thumbnail}}' class="" alt="Thumb"/>
+					{{else}}
+						<img src="{{url ""}}/extensions/assets/api/themes/default/imgs/api.png"/>
+					{{/if}}
 				</div>
-				<div class='row'>
-					<a href=''><i class='icon-user'></i> Users</a>
+				<div class="col-lg-10">
+					<h1>{{name}}</h1>
+					<i class="fa fa-circle"></i> {{lifecycleState}}
+					<div class="well-description">{{tables.0.fields.createdtime.value}}</div>
+					<div class="well-description">{{tables.0.fields.description.value}}</div>
+					<div>
+						{{> asset-version-info .}}
+					</div>
 				</div>
-				<div class='row'>
-					<a href=''><i class='icon-pencil'></i> PROTOTYPED</a>
-				</div>
-				<div class='row'>
-					<a href=''><i class='icon-th-large'></i> 1.0.0</a>
-				</div>
-				<div class='row'>
-					<a href=''><i class='icon-file'></i> Docs</a>
-				</div>
-				
 			</div>
-			<div class='span9'>
-				<table class='table table-bordered'>
-					<thead>
-					</thead>
-					<tbody>
-						<tr>
-							<td>Context</td>
-							<td></td>
-						</tr>
-						<tr>
-							<td>Production URL</td>
-							<td></td>
-						</tr>
-						<tr>
-							<td>Sandbox URL</td>
-							<td></td>
-						</tr>
-						<tr>
-							<td>Date Last Updated</td>
-							<td></td>
-						</tr>
-						<tr>
-							<td>Tier Availability</td>
-							<td></td>
-						</tr>
-						<tr>
-							<td>Default API Version</td>
-							<td></td>
-						</tr>
-					</tbody>
-				</table>
-			</div>
-		</div>		
+		</div>
+
 	</div>
+	{{#each tables}}
+		{{renderTablePreview .}}
+	{{/each}}
+
+	{{#if tags}}
+		<a data-toggle="collapse" href="#collapseTags" class="collapsing-h2"><h2>Tags</h2></a>
+		<div class="collapse" id="collapseTags">
+			{{#each tags}}
+				<span class="view-tag">{{this}}</span>
+			{{/each}}
+		</div>
+	{{/if}}
+{{/with}}
+
