@@ -1,21 +1,21 @@
 /*
-* Copyright (c) 2005-2015, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
-*
-* WSO2 Inc. licenses this file to you under the Apache License,
-* Version 2.0 (the "License"); you may not use this file except
-* in compliance with the License.
-* You may obtain a copy of the License at
-*
-* http://www.apache.org/licenses/LICENSE-2.0
-*
-* Unless required by applicable law or agreed to in writing,
-* software distributed under the License is distributed on an
-* "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
-* KIND, either express or implied. See the License for the
-* specific language governing permissions and limitations
-* under the License.
-*
-*/
+ * Copyright (c) 2005-2015, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *
+ * WSO2 Inc. licenses this file to you under the Apache License,
+ * Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ *
+ */
 
 //TODO add proper introduction to the module
 var apipublisher = {};
@@ -25,88 +25,85 @@ var apipublisher = {};
     var APIManagerFactory = Packages.org.wso2.carbon.apimgt.impl.APIManagerFactory;
     var log = new Log("jaggery-modules.api-manager.publisher");
 
+    function APIProviderProxy(username) {
+        this.username = username;
+        this.impl = APIManagerFactory.getInstance().getAPIProvider(this.username);
+    }
 
-    apipublisher.getAPIProvider = function (username){
-    var APIProvider =  APIManagerFactory.getInstance().getAPIProvider(username);
+    apipublisher.getAllProviders = function () {
+        return this.impl.getAllProviders();
     };
-
-    apipublisher.getAllProviders = function (APIProvider) {
-    return APIProvider.getAllProviders();
+    apipublisher.designAPI = function (api) {
+        return this.impl.designAPI(api);
     };
-
-    apipublisher.designAPI = function (APIProvider,api) {
-        return APIProvider.designAPI(api);
+    apipublisher.implementAPI = function (api) {
+        return this.impl.implementAPI(api);
     };
-    apipublisher.implementAPI = function (APIProvider,api) {
-        return APIProvider.implementAPI(api);
+    apipublisher.manageAPI = function (api) {
+        return this.impl.manageAPI(api);
     };
-    apipublisher.manageAPI = function (APIProvider,api) {
-        return APIProvider.manageAPI(api);
+    apipublisher.updateDesignAPI = function (APIProvider, api) {
+        return this.impl.updateDesignAPI(api);
     };
-    apipublisher.updateDesignAPI = function (APIProvider,api) {
-        return APIProvider.updateDesignAPI(api);
+    apipublisher.addDocumentation = function (api, document) {
+        return this.impl.addDocumentation(api);
     };
-    apipublisher.addDocumentation = function (APIProvider,api,document) {
-        return APIProvider.addDocumentation(api);
+    apipublisher.addInlineContent = function (api, docName, content) {
+        return this.impl.addInlineContent(api, docName, content);
     };
-    apipublisher.addInlineContent = function (APIProvider,api,docName,content) {
-        return APIProvider.addInlineContent(api,docName,content);
+    apipublisher.createNewAPIVersion = function (api, newVersion) {
+        return this.impl.createNewAPIVersion(api, newVersion);
     };
-    apipublisher.createNewAPIVersion = function (APIProvider,api,newVersion) {
-        return APIProvider.createNewAPIVersion(api,newVersion);
+    apipublisher.getAllAPIUsageByProvider = function (providerName) {
+        return this.impl.getAllAPIUsageByProvider(providerName);
     };
-    apipublisher.getAllAPIUsageByProvider = function (APIProvider,providerName) {
-        return APIProvider.getAllAPIUsageByProvider(providerName);
+    apipublisher.getSubscribersOfAPI = function (apiId) {
+        return this.impl.getSubscribersOfAPI(apiId);
     };
-    apipublisher.getSubscribersOfAPI = function (APIProvider,apiId) {
-        return APIProvider.getSubscribersOfAPI(apiId);
+    apipublisher.getAPIsByProvider = function (providerName) {
+        return this.impl.getAPIsByProvider(providerName);
     };
-    apipublisher.getAPIsByProvider = function (APIProvider,providerName) {
-        return APIProvider.getAPIsByProvider(providerName);
+    apipublisher.getSubscribersOfAPI = function (apiId) {
+        return this.impl.getSubscribersOfAPI(apiId);
     };
-    apipublisher.getSubscribersOfAPI = function (APIProvider,apiId) {
-        return APIProvider.getSubscribersOfAPI(apiId);
+    apipublisher.getDefaultVersion = function (apiId) {
+        return this.impl.getDefaultVersion(apiId);
     };
-    apipublisher.getDefaultVersion = function (APIProvider,apiId) {
-        return APIProvider.getDefaultVersion(apiId);
+    apipublisher.getCustomFaultSequences = function () {
+        return this.impl.getCustomFaultSequences();
     };
-    apipublisher.getCustomFaultSequences = function (APIProvider) {
-        return APIProvider.getCustomFaultSequences();
+    apipublisher.getCustomInSequences = function () {
+        return this.impl.getCustomInSequences();
     };
-    apipublisher.getCustomInSequences = function (APIProvider) {
-        return APIProvider.getCustomInSequences();
+    apipublisher.getCustomOutSequences = function () {
+        return this.impl.getCustomOutSequences();
     };
-    apipublisher.getCustomOutSequences = function (APIProvider) {
-        return APIProvider.getCustomOutSequences();
+    apipublisher.updateSubscription = function (apiId, status, appId) {
+        return this.impl.updateSubscription(apiId, status, appId);
     };
-    apipublisher.updateSubscription = function (APIProvider,apiId,status,appId) {
-        return APIProvider.updateSubscription(apiId,status,appId);
+    apipublisher.removeDocumentation = function (apiId, docName, docType) {
+        return this.impl.removeDocumentation(apiId, docName, docType);
     };
-    apipublisher.removeDocumentation = function (APIProvider,apiId,docName,docType) {
-        return APIProvider.removeDocumentation(apiId,docName,docType);
+    apipublisher.deleteAPI = function (apiId) {
+        return this.impl.deleteAPI(apiId);
     };
-    apipublisher.deleteAPI = function (APIProvider,apiId) {
-        return APIProvider.deleteAPI(apiId);
+    apipublisher.getAPI = function (apiId) {
+        return this.impl.getAPI(apiId);
     };
-    apipublisher.getAPI = function (APIProvider,apiId) {
-        return APIProvider.getAPI(apiId);
+    apipublisher.getAllDocumentation = function (apiId) {
+        return this.impl.getAllDocumentation(apiId);
     };
-    apipublisher.getAllDocumentation = function (APIProvider,apiId) {
-        return APIProvider.getAllDocumentation(apiId);
+    apipublisher.getAllDocumentation = function (apiId) {
+        return this.impl.getAllDocumentation(apiId);
     };
-    apipublisher.getAllDocumentation = function (APIProvider,apiId) {
-        return APIProvider.getAllDocumentation(apiId);
+    apipublisher.getInlineContent = function (apiId, docName) {
+        return this.impl.getDocumentationContent(apiId, docName);
     };
-    apipublisher.getInlineContent = function (APIProvider,apiId,docName) {
-        return APIProvider.getDocumentationContent(apiId,docName);
+    apipublisher.getTiers = function (tenantDomain) {
+        return this.impl.getTiers(tenantDomain);
     };
-    apipublisher.getTiers = function (APIProvider,tenantDomain) {
-        return APIProvider.getTiers(tenantDomain);
+    apipublisher.getSubscriberAPIs = function (subscriberName) {
+        return this.impl.getSubscriberAPIs(subscriberName);
     };
-    apipublisher.getSubscriberAPIs = function (APIProvider,subscriberName) {
-        return APIProvider.getSubscriberAPIs(subscriberName);
-    };
-
-
 })(apipublisher);
 

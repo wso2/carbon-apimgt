@@ -23,6 +23,10 @@
                     <img src="{{url ""}}/extensions/assets/api/themes/default/imgs/api.png"/>
 	            </a>
             {{/if}}
+	        <div id="delete-btn-div">
+		        <button title="Delete API" type="button" class="close btn-api-del" onclick="removeAPI('{{this.attributes.overview_name}}',
+				        '{{this.attributes.overview_version}}','{{this.attributes.overview_provider}}',this);return false;">×</button>
+	        </div>
             <div class="ast-desc">
 
                 <a href='{{url ""}}/asts/{{type}}/details/{{this.id}}'>
