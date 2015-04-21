@@ -29,7 +29,7 @@ import org.wso2.carbon.apimgt.api.LoginPostExecutor;
 import org.wso2.carbon.apimgt.api.model.*;
 import org.wso2.carbon.apimgt.api.model.Tag;
 import org.wso2.carbon.apimgt.handlers.security.stub.types.APIKeyMapping;
-import org.wso2.carbon.apimgt.impl.factory.KeyManagerFactory;
+import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.impl.dto.*;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.*;
@@ -579,7 +579,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         try {
             // Populating additional parameters.
             tokenRequest = ApplicationUtils.populateTokenRequest(jsonInput, tokenRequest);
-            KeyManager keyManager = KeyManagerFactory.getKeyManager();
+            KeyManager keyManager = KeyManagerHolder.getKeyManagerInstance();
             AccessTokenInfo tokenResponse = keyManager.getNewApplicationAccessToken(tokenRequest);
             return tokenResponse;
 
@@ -1496,7 +1496,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         OAuthAppRequest oauthAppRequest = ApplicationUtils.createOauthAppRequest(applicationName, callBackURL,null,
                                                                                   jsonString);
 
-        KeyManager keyManager = KeyManagerFactory.getKeyManager();
+        KeyManager keyManager = KeyManagerHolder.getKeyManagerInstance();
         //createApplication on oAuthorization server.
         OAuthApplicationInfo oAuthApplication = keyManager.createSemiManualAuthApplication(oauthAppRequest);
         //Do application mapping with consumerKey.
@@ -2435,7 +2435,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 //        //Create OauthAppRequest object by passing json String.
 //        OauthAppRequest request = ApplicationUtils.createOauthAppRequest(applicationName, callbackURL, jsonString);
 //        //get key manager instant.
-//        KeyManager keyManager = KeyManagerFactory.getKeyManager();
+//        KeyManager keyManager = KeyManagerFactory.getKeyManagerInstance();
 //        //call update method.
 //        keyManager.updateApplication(request);
 //
@@ -2457,7 +2457,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     @Override
     public void deleteOAuthApplication(String consumerKey) throws APIManagementException {
         //get key manager instance.
-        KeyManager keyManager = KeyManagerFactory.getKeyManager();
+        KeyManager keyManager = KeyManagerHolder.getKeyManagerInstance();
         //delete oAuthApplication by calling key manager implementation
         keyManager.deleteApplication(consumerKey);
     }

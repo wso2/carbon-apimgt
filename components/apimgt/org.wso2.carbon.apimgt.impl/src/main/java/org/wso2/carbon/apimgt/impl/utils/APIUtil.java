@@ -22,7 +22,6 @@ import com.google.gson.Gson;
 
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.http.HttpHeaders;
-import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.impl.builder.StAXOMBuilder;
@@ -58,6 +57,7 @@ import org.wso2.carbon.apimgt.impl.clients.OAuthAdminClient;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
 import org.wso2.carbon.apimgt.impl.dto.Environment;
+import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.impl.internal.APIManagerComponent;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.keymgt.client.SubscriberKeyMgtClient;
@@ -1063,21 +1063,22 @@ public final class APIUtil {
     }
 
     public static SubscriberKeyMgtClient getKeyManagementClient() throws APIManagementException {
-        APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
-                getAPIManagerConfigurationService().getAPIManagerConfiguration();
-        String url = config.getFirstProperty(APIConstants.API_KEY_VALIDATOR_URL);
-        if (url == null) {
+
+        KeyManagerConfiguration configuration = KeyManagerHolder.getKeyManagerInstance().getKeyManagerConfiguration();
+        String serverURL = configuration.getParameter(APIConstants.AUTHSERVER_URL);
+        String username = configuration.getParameter(APIConstants.KEY_MANAGER_USERNAME);
+        String password = configuration.getParameter(APIConstants.KEY_MANAGER_PASSWORD);
+
+        if (serverURL == null) {
             handleException("API key manager URL unspecified");
         }
 
-        String username = config.getFirstProperty(APIConstants.API_KEY_VALIDATOR_USERNAME);
-        String password = config.getFirstProperty(APIConstants.API_KEY_VALIDATOR_PASSWORD);
         if (username == null || password == null) {
             handleException("Authentication credentials for API key manager unspecified");
         }
 
         try {
-            return new SubscriberKeyMgtClient(url, username, password);
+            return new SubscriberKeyMgtClient(serverURL, username, password);
         } catch (Exception e) {
             handleException("Error while initializing the subscriber key management client", e);
             return null;

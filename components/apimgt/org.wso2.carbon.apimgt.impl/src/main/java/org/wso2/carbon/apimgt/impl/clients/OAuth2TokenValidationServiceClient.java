@@ -29,9 +29,7 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.KeyManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIConstants;
-import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
-import org.wso2.carbon.apimgt.impl.factory.KeyManagerFactory;
-import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
+import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.identity.oauth2.stub.OAuth2TokenValidationServiceStub;
 import org.wso2.carbon.identity.oauth2.stub.dto.*;
 import org.wso2.carbon.utils.CarbonUtils;
@@ -49,7 +47,7 @@ public class OAuth2TokenValidationServiceClient {
     private String cookie;
 
     public OAuth2TokenValidationServiceClient() throws APIManagementException {
-        KeyManagerConfiguration config = KeyManagerFactory.getKeyManager().getKeyManagerConfiguration();
+        KeyManagerConfiguration config = KeyManagerHolder.getKeyManagerInstance().getKeyManagerConfiguration();
         String serviceURL = config.getParameter(APIConstants.AUTHSERVER_URL);
         username = "admin";
         password = "admin";
