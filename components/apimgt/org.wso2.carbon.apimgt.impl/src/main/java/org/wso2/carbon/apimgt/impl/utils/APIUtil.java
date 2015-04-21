@@ -1063,10 +1063,9 @@ public final class APIUtil {
     }
 
     public static SubscriberKeyMgtClient getKeyManagementClient() throws APIManagementException {
-        APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
-                getAPIManagerConfigurationService().getAPIManagerConfiguration();
+
         KeyManagerConfiguration configuration = KeyManagerHolder.getKeyManagerInstance().getKeyManagerConfiguration();
-        String serverURL = configuration.getParameter(APIConstants.KEY_MANAGER);
+        String serverURL = configuration.getParameter(APIConstants.AUTHSERVER_URL);
         String username = configuration.getParameter(APIConstants.KEY_MANAGER_USERNAME);
         String password = configuration.getParameter(APIConstants.KEY_MANAGER_PASSWORD);
 

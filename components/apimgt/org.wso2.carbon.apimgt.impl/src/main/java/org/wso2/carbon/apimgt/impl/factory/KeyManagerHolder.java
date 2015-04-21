@@ -28,6 +28,8 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.*;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
+import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLOutputFactory;
@@ -37,6 +39,8 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringWriter;
+import java.util.List;
+import java.util.Map;
 
 /**
  * This is a factory class.you have to use this when you need to initiate classes by reading config file.
@@ -62,37 +66,46 @@ public class KeyManagerHolder {
             in = FileUtils.openInputStream(new File(configPath));
             StAXOMBuilder builder = new StAXOMBuilder(in);
             OMElement document = builder.getDocumentElement();
-            if (document == null || !APIConstants.KEY_MANAGER.equals(document.getQName().getLocalPart())) {
-                throw new APIManagementException("KeyManager section not found. key-manager.xml may be corrupted.");
+            if (document == null) {
+                throw new APIManagementException("api-manager.xml not found.");
             }
 
-            log.debug("Reading key-manager.xml");
+            log.debug("Reading api-manager.xml");
+            OMElement keyManagerElement = document.getFirstChildWithName(new QName("APIKeyManager"));
+            // Run this if APIKeyManager section is not specified.
+            if (keyManagerElement == null) {
+                keyManager = (KeyManager) Class.forName("org.wso2.carbon.apimgt.keymgt.AMDefaultKeyManagerImpl").newInstance();
+                keyManager.loadConfiguration(null);
+            } else {
+                // Instantiating the class implementing KeyManager interface.
+                log.debug("Initialised KeyManager implementation");
+                APIManagerConfiguration configuration = ServiceReferenceHolder.getInstance()
+                        .getAPIManagerConfigurationService().getAPIManagerConfiguration();
 
-            // Instantiating the class implementing KeyManager interface.
-            String clazz = document.getAttribute(new QName("class")).getAttributeValue();
-            keyManager = (KeyManager) Class.forName(clazz).newInstance();
+                String keyManagerClass = configuration.getFirstProperty(APIConstants.KEY_MANAGER_CLIENT);
+                keyManager = (KeyManager) Class.forName(keyManagerClass).newInstance();
+                OMElement configElement = keyManagerElement.getFirstChildWithName(new QName("Configuration"));
 
-            log.debug("Initialised KeyManager implementation");
+                if (configElement == null) {
+                    throw new APIManagementException("Configuration section not found. api-manager.xml may be " +
+                                                     "corrupted.");
+                }
 
-            OMElement configElement = document.getFirstElement();
-            if (!"Configuration".equals(configElement.getQName().getLocalPart())) {
-                throw new APIManagementException("Configuration section not found. key-manager.xml may be corrupted.");
+                log.debug("Loading KeyManager configuration,");
+
+                // Reading contents inside <Configuration> block and pass it to specific KeyManager implementation.
+                // Implementers can provide specific parameters needed for their implementation withing the Configuration
+                // block.
+                XMLOutputFactory xof = XMLOutputFactory.newInstance();
+                XMLStreamWriter streamWriter;
+                StringWriter stringStream = new StringWriter();
+                streamWriter = xof.createXMLStreamWriter(stringStream);
+                configElement.serialize(streamWriter);
+                streamWriter.close();
+                keyManager.loadConfiguration(stringStream.toString());
+
+                log.debug("Successfully loaded KeyManager configuration.");
             }
-
-            log.debug("Loading KeyManager configuration,");
-
-            // Reading contents inside <Configuration> block and pass it to specific KeyManager implementation.
-            // Implementers can provide specific parameters needed for their implementation withing the Configuration
-            // block.
-            XMLOutputFactory xof = XMLOutputFactory.newInstance();
-            XMLStreamWriter streamWriter;
-            StringWriter stringStream = new StringWriter();
-            streamWriter = xof.createXMLStreamWriter(stringStream);
-            configElement.serialize(streamWriter);
-            streamWriter.close();
-            keyManager.loadConfiguration(stringStream.toString());
-
-            log.debug("Successfully loaded KeyManager configuration.");
 
         } catch (IOException e) {
             log.error(e);

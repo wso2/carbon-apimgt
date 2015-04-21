@@ -206,7 +206,7 @@ public class APIManagerComponent {
             }
             APIUtil.createSelfSignUpRoles(MultitenantConstants.SUPER_TENANT_ID);
 
-            // Initialising KeyManager.
+            // Initialise KeyManager.
             KeyManagerHolder.initializeKeyManager(filePath);
         } catch (APIManagementException e) {
             log.error("Error while initializing the API manager component", e);
