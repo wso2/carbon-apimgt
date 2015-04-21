@@ -30,7 +30,7 @@ import org.wso2.carbon.apimgt.api.dto.UserApplicationAPIUsage;
 import org.wso2.carbon.apimgt.api.model.*;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
-import org.wso2.carbon.apimgt.impl.factory.KeyManagerFactory;
+import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.impl.dto.*;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.token.JWTGenerator;
@@ -2835,7 +2835,7 @@ public class ApiMgtDAO {
             }
 
             if(consumerKey != null){
-            keyManager = KeyManagerFactory.getKeyManager();
+            keyManager = KeyManagerHolder.getKeyManagerInstance();
             oAuthApplication = keyManager.retrieveApplication(consumerKey);
            // oAuthApplication.setJsonString(jsonString);
             }
@@ -4146,7 +4146,7 @@ public class ApiMgtDAO {
         Connection connection = null;
         PreparedStatement ps = null;
         //initiate key manager.
-        KeyManager keyManager = KeyManagerFactory.getKeyManager();
+        KeyManager keyManager = KeyManagerHolder.getKeyManagerInstance();
         //get oAuthApplicationInfo object.
         OAuthApplicationInfo oAuthApplicationInfo = oauthAppRequest.getOAuthApplicationInfo();
         oAuthApplicationInfo.setClientId(clientId);
@@ -5632,7 +5632,7 @@ public class ApiMgtDAO {
 
             for (String consumerKey : consumerKeys){
                 //delete on oAuthorization server.
-                KeyManagerFactory.getKeyManager().deleteApplication(consumerKey);
+                KeyManagerHolder.getKeyManagerInstance().deleteApplication(consumerKey);
             }
         } catch (SQLException e) {
             handleException("Error while removing application details from the database", e);

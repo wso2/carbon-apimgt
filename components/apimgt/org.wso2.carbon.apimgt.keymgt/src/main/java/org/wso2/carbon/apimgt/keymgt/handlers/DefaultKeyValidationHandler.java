@@ -5,7 +5,7 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.AccessTokenInfo;
 import org.wso2.carbon.apimgt.impl.APIConstants;
-import org.wso2.carbon.apimgt.impl.factory.KeyManagerFactory;
+import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
@@ -50,7 +50,7 @@ public class DefaultKeyValidationHandler extends AbstractKeyValidationHandler {
         AccessTokenInfo tokenInfo = null;
 
         try {
-            tokenInfo = KeyManagerFactory.getKeyManager().getTokenMetaData(validationContext.getAccessToken());
+            tokenInfo = KeyManagerHolder.getKeyManagerInstance().getTokenMetaData(validationContext.getAccessToken());
 
             if (tokenInfo == null) {
                 return false;

@@ -42,10 +42,10 @@ import java.io.StringWriter;
  * This is a factory class.you have to use this when you need to initiate classes by reading config file.
  * for example key manager class will be initiate from here.
  */
-public class KeyManagerFactory {
+public class KeyManagerHolder {
 
 
-    private static Log log = LogFactory.getLog(KeyManagerFactory.class);
+    private static Log log = LogFactory.getLog(KeyManagerHolder.class);
     private static KeyManager keyManager = null;
 
 
@@ -128,7 +128,7 @@ public class KeyManagerFactory {
      *
      * @return keyManager instance.
      */
-    public static KeyManager getKeyManager() {
+    public static KeyManager getKeyManagerInstance() {
         return keyManager;
     }
 

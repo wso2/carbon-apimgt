@@ -19,7 +19,6 @@
 package org.wso2.carbon.apimgt.impl.internal;
 
 import org.apache.axis2.engine.ListenerManager;
-import org.apache.axis2.util.JavaUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -29,7 +28,7 @@ import org.osgi.service.component.ComponentContext;
 import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.impl.*;
-import org.wso2.carbon.apimgt.impl.factory.KeyManagerFactory;
+import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.listners.UserAddListener;
 import org.wso2.carbon.apimgt.impl.observers.APIStatusObserverList;
@@ -136,7 +135,6 @@ public class APIManagerComponent {
                     File.separator + "conf" + File.separator + "api-manager.xml";
             configuration.load(filePath);
 
-
             //WorkflowExecutorFactory.getInstance().load(filePath);
 
             String gatewayType = configuration.getFirstProperty(APIConstants.API_GATEWAY_TYPE);
@@ -208,10 +206,8 @@ public class APIManagerComponent {
             }
             APIUtil.createSelfSignUpRoles(MultitenantConstants.SUPER_TENANT_ID);
 
-            //Load and initiate the key-manager implementation class.
-            String keyManagerFile = CarbonUtils.getCarbonHome() + File.separator + "repository" +
-                                    File.separator + "conf" + File.separator + "key-manager.xml";
-            KeyManagerFactory.initializeKeyManager(keyManagerFile);
+            // Initialising KeyManager.
+            KeyManagerHolder.initializeKeyManager(filePath);
         } catch (APIManagementException e) {
             log.error("Error while initializing the API manager component", e);
         }
