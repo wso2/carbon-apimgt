@@ -136,9 +136,6 @@ public class APIManagerComponent {
                     File.separator + "conf" + File.separator + "api-manager.xml";
             configuration.load(filePath);
 
-            String keyManagerFile = CarbonUtils.getCarbonHome() + File.separator + "repository" +
-                                    File.separator + "conf" + File.separator + "key-manager.xml";
-            KeyManagerFactory.initializeKeyManager(keyManagerFile);
 
             //WorkflowExecutorFactory.getInstance().load(filePath);
 
@@ -210,7 +207,11 @@ public class APIManagerComponent {
                 }
             }
             APIUtil.createSelfSignUpRoles(MultitenantConstants.SUPER_TENANT_ID);
-            
+
+            //Load and initiate the key-manager implementation class.
+            String keyManagerFile = CarbonUtils.getCarbonHome() + File.separator + "repository" +
+                                    File.separator + "conf" + File.separator + "key-manager.xml";
+            KeyManagerFactory.initializeKeyManager(keyManagerFile);
         } catch (APIManagementException e) {
             log.error("Error while initializing the API manager component", e);
         }
