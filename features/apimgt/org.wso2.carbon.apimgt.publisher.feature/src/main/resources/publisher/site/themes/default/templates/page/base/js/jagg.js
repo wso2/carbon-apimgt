@@ -260,7 +260,7 @@ $(document).ready(function(){
             $(this).text("Show More Options");
         }
         else{
-            $(this).text("Show Less Options");
+            $(this).text("Show Fewer Options");
         }
         div.toggle('fast');
         return false; 
