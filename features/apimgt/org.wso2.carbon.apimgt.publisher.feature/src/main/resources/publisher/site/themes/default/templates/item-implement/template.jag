@@ -76,7 +76,7 @@
                 <div class="span1">
                     <i class="fa fa-cogs fa-3x"></i>
                 </div>
-                <div class="span7">
+                <div class="span11">
                     <h4>Managed API</h4>
                     <p>description</p>
                 </div>
@@ -168,8 +168,8 @@
                     <input type="hidden" id="swagger" name="swagger" class="swagger" value="" />
                     <input type="hidden" value="endpoint" name="implementation_methods" >
                     <div class="form-actions" id="saveButtons">
-                        <button type="submit" class="btn btn-default manageSaveButton" id="saveBtn" data-loading-text="<i class='fa fa-spinner fa-pulse' id='loader'></i>Loading">Save</button>
-                        <button id="go_to_manage" class="btn btn-primary manageSaveButton pull-right" data-loading-text="<i class='fa fa-spinner fa-pulse' id='loader'></i>Loading">Next : Manage &gt;</button>
+                        <button type="submit" class="btn btn-default manageSaveButton has-spinner" id="saveBtn" ><span class="spinner"><i class='fa fa-spinner fa-pulse'></i></span><span>Save</span></button>
+                        <button id="go_to_manage" class="btn btn-primary manageSaveButton pull-right has-spinner" "><span class="spinner"><i class='fa fa-spinner fa-pulse'></i></span><span>Next : Manage &gt;</span></button>
                     </div>
                     </form>
                 </div>
@@ -179,7 +179,7 @@
                 <div class="span1">
                     <i class="fa fa-cog fa-3x" ></i>
                 </div>
-                <div class="span7">
+                <div class="span11">
                     <h4 >Prototype</h4>
                     <p>description</p>
                 </div>
@@ -222,13 +222,15 @@
                 </fieldset>
 
                 <div class="form-actions" id="saveButtons">
+
                     <input type="hidden" name="name" value="<%= encode.forHtml(api.name) %>" />
                     <input type="hidden" name="version" value="<%= encode.forHtml(api.version) %>" />
                     <input type="hidden" name="provider" value="<%= encode.forHtml(api.provider) %>" />
                     <input type="hidden" name="action" value="implement" />
                     <input type="hidden" id="swagger" name="swagger" class="swagger" value="" />
-                    <button type="submit" class="btn btn-default manageSaveButton" id="savePrototypeBtn" data-loading-text="<i class='fa fa-spinner fa-pulse' id='loader'></i>Loading">Save</button>
-                    <button class="btn btn-warning manageSaveButton pull-right" id="prototyped_api" data-loading-text="<i class='fa fa-spinner fa-pulse' id='loader'></i>Loading">Deploy as a Prototype</button>
+                    <button type="submit" class="btn btn-default manageSaveButton has-spinner" id="savePrototypeBtn" ><span class="spinner"><i class='fa fa-spinner fa-pulse'></i></span><span>Save</span></button>
+                    <button class="btn btn-warning manageSaveButton pull-right has-spinner" id="prototyped_api" ><span class="spinner"><i class='fa fa-spinner fa-pulse'></i></span><span>Deploy as a Prototype</span></button>
+
                 </div>
             </form>
             </div>
