@@ -81,6 +81,9 @@ var apistore = {};
     StoreAPIProxy.prototype.addApplication = function (appName, userName, tier, callbackUrl, description) {
         return this.impl.addApplication(appName, userName, tier, callbackUrl, description);
     };
+    StoreAPIProxy.prototype.getAllPaginatedAPIsByStatus = function (tenantDomain, start, end,apiStatus) {
+        return this.impl.getAllPaginatedAPIsByStatus(tenantDomain, start, end,apiStatus);
+    };
 
 })(apistore);
 
