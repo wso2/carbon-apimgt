@@ -24,6 +24,10 @@ app.server = function(ctx) {
                 url: 'widget',
                 path: 'widget.jag',
                 secured:false
+            }, {
+                url: 'applications',
+                path: 'applications.jag',
+                secured:false
             }]
         },
         configs: {

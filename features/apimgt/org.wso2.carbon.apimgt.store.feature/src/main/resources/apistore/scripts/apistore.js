@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2005-2015, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+* Copyright (c) 2015, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
 *
 * WSO2 Inc. licenses this file to you under the Apache License,
 * Version 2.0 (the "License"); you may not use this file except
@@ -81,6 +81,7 @@ var apistore = {};
     StoreAPIProxy.prototype.addApplication = function (appName, userName, tier, callbackUrl, description) {
         return this.impl.addApplication(appName, userName, tier, callbackUrl, description);
     };
+
     StoreAPIProxy.prototype.getAllPaginatedAPIsByStatus = function (tenantDomain, start, end,apiStatus) {
         return this.impl.getAllPaginatedAPIsByStatus(tenantDomain, start, end,apiStatus);
     };
