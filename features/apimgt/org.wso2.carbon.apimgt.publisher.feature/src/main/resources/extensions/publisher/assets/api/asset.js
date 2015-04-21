@@ -16,6 +16,21 @@
  *  under the License.
  *
  */
+asset.manager = function(ctx) {
+    var notifier = require('store').notificationManager;
+    var storeConstants = require('store').storeConstants;
+    var apiPublisher =  require('apipublisher').apipublisher;
+    var social = carbon.server.osgiService('org.wso2.carbon.social.core.service.SocialActivityService');
+    var session = ctx.session;
+    var LOGGED_IN_USER = 'LOGGED_IN_USER';
+    var log = new Log('default-asset');
+    return {
+        delete : function(id) {
+            apiPublisher.APIProviderProxy(session.get(LOGGED_IN_USER));
+            return apiPublisher.deleteAPI(id);
+        }
+    };
+};
 asset.server = function (ctx) {
     return {
         endpoints: {
