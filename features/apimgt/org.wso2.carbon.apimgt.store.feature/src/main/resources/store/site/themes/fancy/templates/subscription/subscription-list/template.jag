@@ -30,7 +30,7 @@
             for(i = 0; i < lenI; i++) {
                 app = apps[i];
                 %>
-                <option value="<%= encode.forHtmlAttribute(app.name)%>" appId="<%= encode.forHtmlAttribute(app.id)%>" <%
+                <option value="<%= encode.forHtmlAttribute(app.name)%>" <%
                     if(request.getParameter('selectedApp') == null ){
                         if(session.get('selectedApp') == null){
                             if(i==0){ selectedApp = app; %> selected="selected" <% }

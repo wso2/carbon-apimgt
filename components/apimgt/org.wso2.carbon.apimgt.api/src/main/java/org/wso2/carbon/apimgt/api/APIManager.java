@@ -155,9 +155,10 @@ public interface APIManager {
      * Creates a new subscriber. The newly created subscriber id will be set in the given object.
      *
      * @param subscriber The subscriber to be added
-     * @throws APIManagementException if failed add subscriber
+     * @param the groupId to which the subscriber belongs to
+     * @throws org.wso2.carbon.apimgt.api.APIManagementException if failed add subscriber
      */
-    public void addSubscriber(Subscriber subscriber) throws APIManagementException;
+    public void addSubscriber(Subscriber subscriber, String groupingId) throws APIManagementException;
 
     /**
      * Updates the details of the given subscriber.

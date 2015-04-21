@@ -47,9 +47,9 @@ public class ApplicationUtils {
      * @param userId logged in userID
      * @return APIM application object will return.
      */
-    public static Application retrieveApplication(String appName, String userId) throws APIManagementException {
+    public static Application retrieveApplication(String appName, String userId, String groupingId) throws APIManagementException {
 
-        return dao.getApplicationByName(appName, userId);
+        return dao.getApplicationByName(appName, userId, groupingId);
 
     }
 
