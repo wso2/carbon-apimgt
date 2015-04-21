@@ -263,6 +263,7 @@ var drawChart = function (from, to) {
                     $('#tempLoadingSpaceUsageByUser').append($('<h3 class="no-data-heading center-wrapper">No Data Available</h3>'));
 
                 } else {
+                    $('#apiUsage_note').show();
                     var inputData=[];
                     for (var i = 0; i < length; i++) {
                         inputData.push({
