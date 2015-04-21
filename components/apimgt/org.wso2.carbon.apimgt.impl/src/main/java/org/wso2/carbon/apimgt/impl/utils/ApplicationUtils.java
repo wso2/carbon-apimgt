@@ -28,8 +28,7 @@ import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.api.model.KeyManager;
 import org.wso2.carbon.apimgt.api.model.OAuthAppRequest;
 import org.wso2.carbon.apimgt.api.model.OAuthApplicationInfo;
-import org.wso2.carbon.apimgt.api.model.Subscriber;
-import org.wso2.carbon.apimgt.impl.factory.KeyManagerFactory;
+import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 
 /**
@@ -92,7 +91,7 @@ public class ApplicationUtils {
 
         if (clientDetails != null) {
             //parse json string and set applicationInfo parameters.
-            authApplicationInfo = KeyManagerFactory.getKeyManager().buildFromJSON(authApplicationInfo, clientDetails);
+            authApplicationInfo = KeyManagerHolder.getKeyManagerInstance().buildFromJSON(authApplicationInfo, clientDetails);
 
             if (log.isDebugEnabled()) {
                 log.debug("Additional json parameters when building OauthAppRequest =  " + clientDetails);
@@ -122,7 +121,7 @@ public class ApplicationUtils {
             tokenRequest = new AccessTokenRequest();
         }
 
-        KeyManager keyManager = KeyManagerFactory.getKeyManager();
+        KeyManager keyManager = KeyManagerHolder.getKeyManagerInstance();
         if (keyManager != null) {
             return keyManager.buildAccessTokenRequestFromJSON(jsonParams, tokenRequest);
         }
@@ -136,7 +135,7 @@ public class ApplicationUtils {
             tokenRequest = new AccessTokenRequest();
         }
 
-        KeyManager keyManager = KeyManagerFactory.getKeyManager();
+        KeyManager keyManager = KeyManagerHolder.getKeyManagerInstance();
         if (keyManager != null) {
             return keyManager.buildAccessTokenRequestFromOAuthApp(oAuthApplication, tokenRequest);
         }
