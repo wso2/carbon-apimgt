@@ -16,27 +16,27 @@
 
 package org.wso2.carbon.apimgt.impl;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
+import javax.xml.namespace.QName;
+
 import org.apache.axiom.om.OMElement;
 import org.apache.axis2.AxisFault;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.API;
+import org.wso2.carbon.apimgt.impl.clients.MediationSecurityAdminServiceClient;
+import org.wso2.carbon.apimgt.impl.clients.SequenceAdminServiceClient;
 import org.wso2.carbon.apimgt.impl.dto.Environment;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.template.APITemplateBuilder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.utils.RESTAPIAdminClient;
-import org.wso2.carbon.apimgt.impl.clients.MediationSecurityAdminServiceClient;
-import org.wso2.carbon.apimgt.impl.clients.SequenceAdminServiceClient;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-
-import javax.xml.namespace.QName;
 
 public class APIGatewayManager {
 
