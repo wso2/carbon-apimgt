@@ -490,35 +490,46 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
      * @throws org.wso2.carbon.apimgt.api.APIManagementException
      */
     @Override
-	public JSONObject getAllPaginatedAPIsByStatus(String tenantDomain,
-			int start, int end, final String apiStatus) throws APIManagementException {
-    	Boolean displayAPIsWithMultipleStatus = APIUtil.isAllowDisplayAPIsWithMultipleStatus();
-    	Map<String, List<String>> listMap = new HashMap<String, List<String>>();
-        //Check the api-manager.xml config file entry <DisplayAllAPIs> value is false
-        if (APIConstants.PROTOTYPED.equals(apiStatus)) {
-            listMap.put(APIConstants.API_OVERVIEW_STATUS, new ArrayList<String>() {{
-                add(apiStatus);
-            }});
-        } else {
+    public JSONObject getAllPaginatedAPIsByStatus(String tenantDomain,
+                                                  int start, int end, final String apiStatus)
+            throws APIManagementException {
 
-            if (!displayAPIsWithMultipleStatus) {
-                //Create the search attribute map
+            Boolean displayAPIsWithMultipleStatus = APIUtil.isAllowDisplayAPIsWithMultipleStatus();
+            Map<String, List<String>> listMap = new HashMap<String, List<String>>();
+            //Check the api-manager.xml config file entry <DisplayAllAPIs> value is false
+            if (APIConstants.PROTOTYPED.equals(apiStatus)) {
                 listMap.put(APIConstants.API_OVERVIEW_STATUS, new ArrayList<String>() {{
                     add(apiStatus);
                 }});
             } else {
-                return getAllPaginatedAPIs(tenantDomain, start, end);
-            }
-        }
 
-        Map<String,Object> result=new HashMap<String, Object>();
-        SortedSet<API> apiSortedSet = new TreeSet<API>(new APINameComparator());
-        SortedSet<API> apiVersionsSortedSet = new TreeSet<API>(new APIVersionComparator());
-        int totalLength=0;
-        try {
+                if (!displayAPIsWithMultipleStatus) {
+                    //Create the search attribute map
+                    listMap.put(APIConstants.API_OVERVIEW_STATUS, new ArrayList<String>() {{
+                        add(apiStatus);
+                    }});
+                } else {
+                    return getAllPaginatedAPIs(tenantDomain, start, end);
+                }
+            }
+
+            Map<String, Object> result = new HashMap<String, Object>();
+            SortedSet<API> apiSortedSet = new TreeSet<API>(new APINameComparator());
+            SortedSet<API> apiVersionsSortedSet = new TreeSet<API>(new APIVersionComparator());
+            int totalLength = 0;
             Registry userRegistry;
-            boolean isTenantMode=(tenantDomain != null);
-            if ((isTenantMode && this.tenantDomain==null) || (isTenantMode && isTenantDomainNotMatching(tenantDomain))) {//Tenant store anonymous mode
+            boolean isTenantMode = (tenantDomain != null);
+            try {
+                if (tenantDomain != null && !org.wso2.carbon.base.MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
+                    PrivilegedCarbonContext.startTenantFlow();
+                    PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
+                } else {
+                    PrivilegedCarbonContext.startTenantFlow();
+                    PrivilegedCarbonContext.getThreadLocalCarbonContext().
+                            setTenantDomain(org.wso2.carbon.base.MultitenantConstants.SUPER_TENANT_DOMAIN_NAME, true);
+
+                }
+            if ((isTenantMode && this.tenantDomain == null) || (isTenantMode && isTenantDomainNotMatching(tenantDomain))) {//Tenant store anonymous mode
                 int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
                         .getTenantId(tenantDomain);
                 userRegistry = ServiceReferenceHolder.getInstance().
@@ -541,10 +552,10 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             GenericArtifactManager artifactManager = APIUtil.getArtifactManager(userRegistry, APIConstants.API_KEY);
             if (artifactManager != null) {
                 GenericArtifact[] genericArtifacts = artifactManager.findGenericArtifacts(listMap);
-                totalLength=PaginationContext.getInstance().getLength();
+                totalLength = PaginationContext.getInstance().getLength();
                 if (genericArtifacts == null || genericArtifacts.length == 0) {
-                    result.put("apis",apiSortedSet);
-                    result.put("totalLength",totalLength);
+                    result.put("apis", apiSortedSet);
+                    result.put("totalLength", totalLength);
                     return getAllPaginatedAPIsByStatusJsonObject(result);
                 }
 
@@ -552,7 +563,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                     // adding the API provider can mark the latest API .
                     String status = artifact.getAttribute(APIConstants.API_OVERVIEW_STATUS);
 
-                    API api  = APIUtil.getAPI(artifact);
+                    API api = APIUtil.getAPI(artifact);
 
                     if (api != null) {
                         String key;
@@ -581,16 +592,16 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                     for (API api : latestPublishedAPIs.values()) {
                         apiSortedSet.add(api);
                     }
-                    result.put("apis",apiSortedSet);
-                    result.put("totalLength",totalLength);
+                    result.put("apis", apiSortedSet);
+                    result.put("totalLength", totalLength);
                     return getAllPaginatedAPIsByStatusJsonObject(result);
 
                 } else {
                     for (API api : multiVersionedAPIs) {
                         apiVersionsSortedSet.add(api);
                     }
-                    result.put("apis",apiVersionsSortedSet);
-                    result.put("totalLength",totalLength);
+                    result.put("apis", apiVersionsSortedSet);
+                    result.put("totalLength", totalLength);
                     return getAllPaginatedAPIsByStatusJsonObject(result);
 
                 }
@@ -600,13 +611,15 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             handleException("Failed to get all published APIs", e);
         } catch (UserStoreException e) {
             handleException("Failed to get all published APIs", e);
-        }finally {
+        } finally {
             PaginationContext.destroy();
+            PrivilegedCarbonContext.endTenantFlow();
+
         }
-        result.put("apis",apiSortedSet);
-        result.put("totalLength",totalLength);
+        result.put("apis", apiSortedSet);
+        result.put("totalLength", totalLength);
         return getAllPaginatedAPIsByStatusJsonObject(result);
-	}
+    }
 
     private JSONObject getAllPaginatedAPIsByStatusJsonObject(
 			Map<String, Object> resultMap) {
