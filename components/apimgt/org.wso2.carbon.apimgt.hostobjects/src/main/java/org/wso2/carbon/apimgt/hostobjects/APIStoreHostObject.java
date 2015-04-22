@@ -2881,12 +2881,6 @@ public class APIStoreHostObject extends ScriptableObject {
                                 startLoop = System.currentTimeMillis();
                             }
 
-                            Set<SubscribedAPI> subscribedAPIs = apiConsumer.getSubscribedAPIs(subscriber,
-                                    application.getName(), groupingId);
-                            for (SubscribedAPI subscribedAPI : subscribedAPIs) {
-                                addAPIObj(subscribedAPI, apisArray, thisObj,application);
-                            }
-
                             if (log.isDebugEnabled()) {
                                 log.debug("getSubscribedAPIs loop took : " +
                                         (System.currentTimeMillis() - startLoop) + "ms");
