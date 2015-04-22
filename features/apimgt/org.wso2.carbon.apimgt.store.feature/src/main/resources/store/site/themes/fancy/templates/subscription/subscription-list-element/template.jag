@@ -19,7 +19,8 @@
 
         <input type="hidden"  class="prodAccessTokenHidden" id="prodAccessTokenHiddenID" value="<%=app.prodKey%>" >
         <input type="hidden"  class="sandAccessTokenHidden" id="sandAccessTokenHiddenID" value="<%=app.sandboxKey%>" >
-        <input type="hidden" type="text"  id="scopeInput" value='<%=app.prodKeyScope %>'/>
+        <input type="hidden" type="text"  id="prodScopeInput" value='<%=app.prodKeyScopeValue %>'/>
+        <input type="hidden" type="text"  id="sandScopeInput" value='<%=app.sandKeyScopeValue %>'/>
         <h3 data-section="key-prod" class="js_toggle"><%=i18n.localize("keysPro")%> <i class="icon-chevron-down icon-keys"></i></h3>
         <div class="keyBoxOut">
             <div class="container-fluid">
