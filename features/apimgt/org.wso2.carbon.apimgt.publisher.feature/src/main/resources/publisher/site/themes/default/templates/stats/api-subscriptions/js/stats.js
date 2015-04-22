@@ -18,43 +18,6 @@ require(["dojo/dom", "dojo/domReady!"], function (dom) {
     jagg.fillProgress('serviceTimeChart');
     jagg.fillProgress('tempLoadingSpace');
 
-    jagg.post("/site/blocks/stats/api-subscriptions/ajax/stats.jag", { action: "getFirstAccessTime", currentLocation: currentLocation  },
-        function (json) {
-
-            if (!json.error) {
-
-                if (json.usage && json.usage.length > 0) {
-                    var d = new Date();
-                    var firstAccessDay = new Date(json.usage[0].year, json.usage[0].month - 1, json.usage[0].day);
-                    var currentDay = new Date(d.getFullYear(), d.getMonth(), d.getDate(),d.getHours(),d.getMinutes());
-                    drawSubscriberCountByAPIs();
-                }
-
-                else if (json.usage && json.usage.length == 0 && statsEnabled) {
-                    $('#middle').html("");
-                    $('#middle').append($('<div class="errorWrapper"><img src="../themes/default/templates/stats/images/statsEnabledThumb.png" alt="Stats Enabled"></div>'));
-                }
-
-                else {
-                    $('#middle').html("");
-                    $('#middle').append($('<div class="errorWrapper"><span class="label top-level-warning"><i class="icon-warning-sign icon-white"></i>'
-                        + i18n.t('errorMsgs.checkBAMConnectivity') + '</span><br/><img src="../themes/default/templates/stats/api-subscriptions/images/statsThumb.png" alt="Smiley face"></div>'));
-                }
-            }
-            else {
-                if (json.message == "AuthenticateError") {
-                    jagg.showLogin();
-                } else {
-                    jagg.message({content: json.message, type: "error"});
-                }
-            }
-            t_on['apiChart'] = 0;
-        }, "json");
-
-});
-
-var drawSubscriberCountByAPIs = function () {
-
     jagg.post("/site/blocks/stats/api-subscriptions/ajax/stats.jag", { action: "getSubscriberCountByAPIs", currentLocation: currentLocation  },
         function (json) {
             if (!json.error) {
@@ -503,7 +466,9 @@ var drawSubscriberCountByAPIs = function () {
                 }
             }
         }, "json");
-}
+
+});
+
 
 function isDataPublishingEnabled(){
     jagg.post("/site/blocks/stats/api-subscriptions/ajax/stats.jag", { action: "isDataPublishingEnabled"},
