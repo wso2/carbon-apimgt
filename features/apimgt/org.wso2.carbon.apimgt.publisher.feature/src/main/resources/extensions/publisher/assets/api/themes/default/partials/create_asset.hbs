@@ -8,7 +8,7 @@
 	<a href='' class='btn'><i class='icon-download-alt'></i>Import Swagger Definition</a>
 </div>
 
-<form id="form-asset-create" class='form-horizontal' method='post' action='{{url ""}}/apis/assets?type={{rxt.shortName}}' data-redirect-url='{{url ""}}/asts/api/list'>
+<form id="form-asset-create" class='form-horizontal' method='post' action='{{url ""}}/apis/assets?type={{rxt.shortName}}' enctype="multipart/form-data">
 	<legend>General Details</legend>
 	<div class='control-group'>
 		<label class='control-label' for='overview_name'>Name:</label>
@@ -39,45 +39,89 @@
 
                 </div>
 	</div>
-	<div class='control-group'>
-		<label class='control-label'>Thumbnail Image:</label>
-		<div class='controls'>
-			<input type='file' name='overview_thumbnail' >
-		</div>
-	</div>
-	<div class='control-group'>
+	 <div class="control-group">
+     <label class="control-label" for="apiThumb">{{t "Thumbnail"}}:</label>
+     <div class="controls">
+     <div id="inpFile" class="pull-left">
+     <div id="apiThumb-container"  style="display: inline;">
+     <input type="file" class="input-xlarge" id="apiThumb" name="apiThumb"/></div>
+     </div>
+     <input type="button" class="btn pull-left" id="clearThumb" value="{{t "clear"}}"/>
+     <div class="help-block pull-left inline-help">
+     <ul>
+     <li>{{t "Size (max): 1MB"}}</li>
+     <li>{{t "Dimensions (max): 100 x 100 pixels"}}</li>
+     </ul>
+     </div>
+     </div>
+     </div>
+</div>
+
+	<div class="control-group">
 		<label class='control-label'>Description:</label>
-		<div class='controls'>
-			<textarea name='overview_description'></textarea>
+		<div class="controls">
+			<textarea name="overview_description"></textarea>
 		</div>
 	</div>
-	<div class='control-group'>
-		<label class='control-label'>Tags:</label>
-		<div class='controls'>
+	<div class="control-group">
+		<label class="control-label">Tags:</label>
+		<div class="controls">
 			<input type='text'/>
 		</div>
 	</div>
-	<legend>Resources</legend>
-	<div class='control-group'>
-		<label class='control-label'>URL Pattern:</label>
-		<div class='controls'>
-			<div class='input-prepend'>
-				<span class='add-on'>/{context}/{version}/</span>
-				<input class='input-xxlarge' type='text' placeholder='Url Pattern Ex: path/to/resource' >
-			</div>
-		</div>
-	</div>
-	<div class='control-group'>
-		<label class='control-label' for='resources_name'>Resource Name:</label>
-		<div class='controls'>
-			<input type='text' id='overview_name' class='input-large' name='resources_name' />
-		</div>
-	</div>
-	<div class='control-group'>
-		<input type='submit' id='btn-create-asset' class='btn btn-primary' name='addNewAssetButton' value='{{t "Save"}}' >
-		<button class='btn'>Implement</button>
-		<button class='btn'>Cancel</button>
-		<input type='hidden' name='overview_provider' value='admin'>
-	</div>
+	<div id="api_designer">
+        <div id ="resource_details">
+<legend>Resources</legend>
+    <div class="resource_create">
+        <div class="control-group">
+            <label class="control-label" for="inputPassword">URL Pattern</label>
+            <div class="controls">
+                <div class="input-prepend">
+                    <span class="add-on">/{context}/{version}/</span>
+                    <input style="width:500px" id="resource_url_pattern" type="text" placeholder="Url Pattern Ex: path/to/resource" class="resource_url_pattern"/>
+                </div>
+            </div>
+        </div>
+         <div class="control-group">
+            <label class="control-label" for=""></label>
+            <div class="controls">              
+                    
+                    <input type="checkbox" value="GET" class="http_verb_select">  GET  
+                    <input type="checkbox" value="POST" class="http_verb_select">  POST                
+                    <input type="checkbox" value="PUT" class="http_verb_select">  PUT
+                    <input type="checkbox" value="DELETE" class="http_verb_select">  DELETE
+                    <input type="checkbox" value="OPTIONS" class="http_verb_select">  OPTIONS                  
+                
+            </div>
+        </div>
+        <div class="control-group">
+            <label class="control-label" for="inputResource">Resource Name</label>
+            <div class="controls">
+                <input type="text" id="inputResource" placeholder="Resource">
+            </div>
+        </div>
+        <button class="btn" type="button" id="add_resource" style="margin:0 0 10px 10px;"><i class="icon-plus-sign"></i>&nbsp;{{t "Add New Resource"}}</button>
+    </div> 
+</div>
+    </div>  
+   <input type="hidden" name="action" value="design" />
+                <input type="hidden" id="swagger" name="swagger" value="" />
+                <div class="form-actions" style="display:none" id="saveMessage">
+                    <div class="btn loadingButton">Saving API. Please wait..</div>
+                </div>
+    <div class="form-actions" id="saveButtons">
+                    <input type="submit" class="btn btn-primary" value="Save" action="design"/>
+                    <a class="btn btn-primary" id="go_to_implement">Implement</a>                     
+                    <input type="reset"  class="btn" value="{{t "cancel"}}" onclick="javascript:window.location.href='./'" />                    
+                </div>
 </form>
+<script id="designer-apidoc-template" type="text/x-handlebars-template">
+
+</script>
+
+
+
+
+
 <hr/>
+
