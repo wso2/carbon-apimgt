@@ -25,7 +25,8 @@ asset.manager = function(ctx) {
     var LOGGED_IN_USER = 'LOGGED_IN_USER';
     var log = new Log('default-asset');
     return {
-        delete : function(id) {
+        remove : function(id) {
+            log.info("Calleeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee");
             apiPublisher.APIProviderProxy(session.get(LOGGED_IN_USER));
             return apiPublisher.deleteAPI(id);
         }
@@ -116,7 +117,7 @@ asset.renderer = function (ctx) {
 
     var buildListLeftNav = function (page, util) {
         var navList = util.navList();
-        navList.push('Add ' + type, 'fa-plus', util.buildUrl('create'));
+        navList.push('ADD ' + type.toUpperCase(), 'fa-plus', util.buildUrl('create'));
         navList.push('All Statistics', 'fa-area-chart', '/asts/' + type + '/statistics');
         navList.push('Subscriptions', 'fa fa-bookmark', '/asts/' + type + '/statistics');
         navList.push('Statistics', 'fa-area-chart', '/asts/' + type + '/statistics');
