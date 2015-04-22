@@ -1452,3 +1452,94 @@ a.next {
 .nvd3 .nv-multibarHorizontal .nv-groups text {
     fill: #333 !important;
 }
+
+#apiUsage_note{
+    margin-right:20px;
+    color:#7d7d7d;
+}
+
+.spinner {
+  display: inline-block;
+  opacity: 0;
+  width: 0;
+
+  -webkit-transition: opacity 0.25s, width 0.25s;
+  -moz-transition: opacity 0.25s, width 0.25s;
+  -o-transition: opacity 0.25s, width 0.25s;
+  transition: opacity 0.25s, width 0.25s;
+}
+
+.has-spinner.active {
+  opacity: 0.7;
+  cursor:progress;
+
+}
+.has-spinner.active:after{
+  content:'Loading';
+}
+
+.has-spinner.active span:not(.spinner){
+    display:none;
+}
+
+.has-spinner.active .spinner {
+  opacity: 1;
+  width: auto;
+}
+
+.create-options:hover, .api-implement-type:hover, .selected {
+    background-color:#d0d0d0;
+    cursor:pointer;
+}
+
+.create-options{
+    padding:10px 10px 10px 10px;
+}
+
+.create-options>p{
+    margin-left:32px;
+}
+
+.api-implement-type{
+    padding:20px;
+    display:block;
+    min-height:50px;
+    background-color:#e3e3e3;
+}
+
+.sub-select-label{
+    padding-right:3em;
+    font-weight:normal;
+}
+
+.sub-labels{
+    padding-right:3em;
+}
+
+.select-label{
+    font-weight:bold;
+    font-size:14px;
+    margin-bottom:0px;
+}
+
+.select-label>p{
+    font-weight:normal;
+    font-size:12px;
+}
+
+#designNewAPI {
+    margin-top: -50px;
+    margin-right: 20px;
+}
+
+.slideContainer > .well{
+  -webkit-border-radius: 0 !important;
+     -moz-border-radius: 0 !important;
+          border-radius: 0 !important;
+}
+
+.radio input[name="create-api"]{
+    margin-left:10px;
+    margin-right:10px;
+
+}

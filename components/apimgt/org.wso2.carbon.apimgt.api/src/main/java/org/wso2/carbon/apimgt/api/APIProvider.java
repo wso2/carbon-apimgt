@@ -224,19 +224,7 @@ public interface APIProvider extends APIManager {
      */
     public void addDocumentationContent(API api, String documentationName, String text)
             throws APIManagementException;
-    
-    /**
-     * This method used to update the API definition content - Swagger
-     *
-     * @param identifier,        API identifier
-     * @param documentationName, name of the inline documentation
-     * @param text,              content of the inline documentation
-     * @throws APIManagementException
-     *          if failed to add the document as a resource to registry
-     */
-    public void addAPIDefinitionContent(APIIdentifier identifier, String documentationName, String text) 
-    					throws APIManagementException;
-
+   
     /**
      * Updates a given documentation
      *
@@ -398,24 +386,7 @@ public interface APIProvider extends APIManager {
      * @return   Set of Documents and APIs
      * @throws APIManagementException
      */
-    public Map<Documentation, API> searchAPIsByDoc(String searchTerm, String searchType) throws APIManagementException;
-    
-    /**
-     * This method updates Swagger 1.2 resources in the registry
-     * @param fileName
-     * @param jsonText
-     * @throws APIManagementException
-     */
-    public void updateSwagger12Definition(APIIdentifier apiId, String fileName, String jsonText) throws APIManagementException;
-    
-    
-    /**
-     * Returns the Swagger12 definition as a string
-     * @param apiId
-     * @return
-     * @throws APIManagementException
-     */
-    public String getSwagger12Definition(APIIdentifier apiId) throws APIManagementException;
+    public Map<Documentation, API> searchAPIsByDoc(String searchTerm, String searchType) throws APIManagementException;   
 
     /**
      * Returns all the Consumer keys of applications which are subscribed to given API
@@ -425,4 +396,23 @@ public interface APIProvider extends APIManager {
      * @throws APIManagementException
      */
     public String[] getConsumerKeys(APIIdentifier apiIdentifier) throws APIManagementException;
+
+    /**
+     * Returns the swagger v2.0 definition as a string
+     *
+     * @param apiId id of the APIIdentifier
+     * @return swagger string
+     * @throws APIManagementException
+     */
+    public String getSwagger20Definition(APIIdentifier apiId) throws APIManagementException;
+
+
+    /**
+     * This method updates Swagger 2.0 resources in the registry
+     *
+     * @param apiId    id of the APIIdentifier
+     * @param jsonText json text to be saved in the registry
+     * @throws APIManagementException
+     */
+    public void saveSwagger20Definition(APIIdentifier apiId, String jsonText) throws APIManagementException;
 }

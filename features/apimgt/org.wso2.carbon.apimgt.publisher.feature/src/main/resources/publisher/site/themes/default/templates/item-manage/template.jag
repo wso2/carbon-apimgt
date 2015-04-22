@@ -391,8 +391,10 @@
                     <div class="btn loadingButton">Saving API. Please wait..</div>
                 </div>
                 <div class="form-actions" id="saveButtons"> 
-                    <button class="btn btn-info" id="save_api" data-loading-text="<i class='fa fa-spinner fa-pulse' id='loader'></i>Loading"><%=i18n.localize("save")%></button>
-                    <%if(outputs.isPermitted){%> <button class="btn btn-primary" id="publish_api" data-loading-text="<i class='fa fa-spinner fa-pulse' id='loader'></i>Loading">Save & Publish</button>  <%}%>
+
+                    <button class="btn btn-default has-spinner" id="save_api"><span class="spinner"><i class='fa fa-spinner fa-pulse'></i></span><span><%=i18n.localize("save")%></span></button>
+                    <%if(outputs.isPermitted){%> <a class="btn btn-primary has-spinner" id="publish_api"><span class="spinner"><i class='fa fa-spinner fa-pulse'></i></span><span>Save & Publish</span></a>  <%}%>
+
                     <input type="reset" class="btn" value="<%=i18n.localize("cancel")%>" onclick="javascript:window.location.href='./'" />                                         
                 </div>
             </form>
@@ -408,13 +410,13 @@
 
 <script id="designer-resource-template" type="text/x-handlebars-template">
 <div class="resource_body_padding">
-    <h5>Implementation Notes</h5>
-    <a class="notes" data-path="{{resource_path}}" data-attr="notes">{{ notes }}</a>
+    <h5>Description :</h5>
+    <a class="notes" data-path="{{resource_path}}" data-attr="description">{{ description }}</a>
     <br />
-    <br />    
+    <br />        
     <h5>Response Content Type : <a href="#" data-path="{{resource_path}}" data-attr="content_type" class="content_type" data-type="typeahead" data-pk="1" data-title="Responce Content Type">{{ content_type }}</a></h5>
     <br />
-    <h5>Parameters</h5>
+    <h5>Parameters :</h5>
     {{#if parameters}}
     <table class="table table-condensed table-hover table-bordered">
         <tr>
@@ -428,9 +430,9 @@
         <tr>
         <td>{{ name }}</td>
         <td>{{ description }}</td>
-        <td>{{ paramType }}</td>
+        <td>{{ in }}</td>
         <td>{{ type }}</td>
-        <td>{{ required }}</td>
+        <td>{{toString required }}</td>
         </tr> 
     {{/each}}
     {{/if}}
@@ -439,40 +441,32 @@
 </script>
 
 
-<script id="designer-resources-template" type="text/x-handlebars-template"> 
+<script id="designer-resources-template" type="text/x-handlebars-template">
+<br />
 <table style="width:100%">                       
-{{#each api_doc.apis}}
-{{ setIndex @index}}
-    <tr>
-    <td colspan="6"><h4 class="resource_group_title">{{ path }}</h4></td>
-    </tr>
-    {{# each file.apis}}
-        {{ setIndex @index}}
-        {{# each operations}}
-        <tr class="resource_container" data-path="$.apis[{{ ../../index}}].file.apis[{{ ../index }}].operations[{{ @index }}]">
-            <td class="resource-method-td resource_expand" data-path="$.apis[{{ ../../index}}].file.apis[{{ ../index }}].operations[{{ @index }}]">
-                <span class=" resource-method resource-method-{{ method }}">{{ method }}</span>
+{{#each doc.paths}}
+    {{# each this}}
+        <tr class="resource_container" data-path="$.paths.{{ path }}.{{@key}}">
+            <td class="resource-method-td resource_expand" data-path="$.paths.{{ path}}.{{ @key }}">
+                <span class=" resource-method resource-method-{{ @key }}">{{ @key }}</span>
             </td>
-            <td class="resource_expand"><a class="resource-path">{{ ../path }}</a></td>   
-            <td width="99%"><span class="operation-summary change_summary" data-path="$.apis[{{ ../../index}}].file.apis[{{ ../index }}].operations[{{ @index }}]" data-attr="summary" >{{ summary }}</span></td>
-            <td><a class="operation-summary auth_type_select"  data-type="select" data-path="$.apis[{{ ../../index}}].file.apis[{{ ../index }}].operations[{{ @index }}]" data-attr="auth_type" data-value="{{ auth_type }}"></a></td>        
-            <td><a class='operation-summary throttling_select'  data-type="select" data-path="$.apis[{{ ../../index}}].file.apis[{{ ../index }}].operations[{{ @index }}]" data-attr="throttling_tier">{{ throttling_tier }}</a></td>
-            <td><a class="operation-summary scope_select"  data-type="select" data-path="$.apis[{{ ../../index}}].file.apis[{{ ../index }}].operations[{{ @index }}]" data-attr="scope">{{ scope }}</a></td>
-        </tr>
-        <tr><td colspan="6" class="resource_body hide" data-path="$.apis[{{ ../../index}}].file.apis[{{ ../index }}].operations[{{ @index }}]"></td></tr>
-        {{/each}}
+            <td class="resource_expand"><a class="resource-path">{{ path }}</a></td>    
+            <td  width="99%"><span class="operation-summary change_summary" data-path="$.paths.{{ path }}.{{@key}}" data-attr="summary" >{{ summary }}</span></td>
+            <td><a class="operation-summary auth_type_select"  data-type="select" data-path="$.paths.{{ path }}.{{@key}}" data-attr="x-auth-type" data-value="{{ x-auth-type }}"></a></td>        
+            <td><a class='operation-summary throttling_select'  data-type="select" data-path="$.paths.{{ path }}.{{@key}}" data-attr="x-throttling-tier">{{ x-throttling-tier }}</a></td>
+            <td><a class="operation-summary scope_select"  data-type="select" data-path="$.paths.{{ path }}.{{@key}}" data-attr="x-scope">{{ scope }}</a></td>        </tr>
+        <tr><td colspan="6" class="resource_body hide" data-path="$.paths.{{ path }}.{{@key}}"></td></tr>
     {{/each}}
-
 {{/each}}
 </table>                           
 </script>
 
 <script id="scopes-template" type="text/x-handlebars-template">
     <div class="scope_container">
-    {{#if api_doc.authorizations.oauth2.scopes}}
+    {{#if api_doc.securityDefinitions.apim.x-wso2-scopes }}
         <h4>Scopes</h4>
         <ul>
-            {{#each api_doc.authorizations.oauth2.scopes}}
+            {{#each api_doc.securityDefinitions.apim.x-wso2-scopes }}
             <li>
                 <h6><a data-index='{{ @index }}' class='delete_scope'><i class='icon-trash'></i></a> &nbsp;&nbsp; {{ key }} {{#if name }}: {{ name }}{{/if}}  </h6>
                 <strong>Roles</strong> : {{ roles }}    
@@ -579,10 +573,10 @@
             }
             var designer = APIDesigner();
             $('#swagger').val(JSON.stringify(designer.api_doc));
-            $('#'+$this).button('loading');
+            $('#'+thisID).addClass('active');
             $(form).ajaxSubmit({
                 success:function(responseText, statusText, xhr, $form) {
-                    $('#'+$this).button('reset');
+                    $('#'+thisID).removeClass('active');
                     if (!responseText.error) {                
                         $( "body" ).trigger( "api_saved" );       
                     } else {
@@ -635,15 +629,15 @@
             }
         });
 
-        var $this='';
+        var thisID='';
         $('#publish_api').click(function(e){
             $("body").on("api_saved", publish_api);
-            $this = $(this).attr('id');
+            thisID = $(this).attr('id');
             $("#manage_form").submit();
         });
 
         $('#save_api').click(function(e){
-            $this=$(this).attr('id');
+            thisID=$(this).attr('id');
         });
 
         

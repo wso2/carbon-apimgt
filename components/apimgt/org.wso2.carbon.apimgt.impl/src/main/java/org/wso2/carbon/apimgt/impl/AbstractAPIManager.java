@@ -18,6 +18,16 @@
 
 package org.wso2.carbon.apimgt.impl;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.simple.JSONObject;
@@ -26,7 +36,15 @@ import org.json.simple.parser.ParseException;
 import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIManager;
-import org.wso2.carbon.apimgt.api.model.*;
+import org.wso2.carbon.apimgt.api.model.API;
+import org.wso2.carbon.apimgt.api.model.APIIdentifier;
+import org.wso2.carbon.apimgt.api.model.APIKey;
+import org.wso2.carbon.apimgt.api.model.Documentation;
+import org.wso2.carbon.apimgt.api.model.DocumentationType;
+import org.wso2.carbon.apimgt.api.model.Icon;
+import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
+import org.wso2.carbon.apimgt.api.model.Subscriber;
+import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APINameComparator;
@@ -35,8 +53,12 @@ import org.wso2.carbon.apimgt.impl.utils.TierNameComparator;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.governance.api.generic.GenericArtifactManager;
 import org.wso2.carbon.governance.api.generic.dataobjects.GenericArtifact;
-import org.wso2.carbon.registry.core.*;
+import org.wso2.carbon.registry.core.ActionConstants;
+import org.wso2.carbon.registry.core.Association;
 import org.wso2.carbon.registry.core.Collection;
+import org.wso2.carbon.registry.core.Registry;
+import org.wso2.carbon.registry.core.RegistryConstants;
+import org.wso2.carbon.registry.core.Resource;
 import org.wso2.carbon.registry.core.config.RegistryContext;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.core.jdbc.realm.RegistryAuthorizationManager;
@@ -47,8 +69,6 @@ import org.wso2.carbon.user.core.UserRealm;
 import org.wso2.carbon.user.core.UserStoreException;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
-
-import java.util.*;
 
 /**
  * The basic abstract implementation of the core APIManager interface. This implementation uses
@@ -423,28 +443,6 @@ public abstract class AbstractAPIManager implements APIManager {
 
                 documentationList.add(doc);
             }
-            /* Document for loading API definition Content - Swagger*/
-            Documentation documentation = new Documentation(DocumentationType.SWAGGER_DOC, APIConstants.API_DEFINITION_DOC_NAME);
-            Documentation.DocumentSourceType docSourceType = Documentation.DocumentSourceType.INLINE;
-            documentation.setSourceType(docSourceType);
-            documentation.setVisibility(Documentation.DocumentVisibility.API_LEVEL);
-
-            String swaggerDocPath = APIConstants.API_DOC_LOCATION + RegistryConstants.PATH_SEPARATOR + 
-            		apiId.getApiName() +"-"  + apiId.getVersion() +'-'+apiId.getProviderName() + RegistryConstants.PATH_SEPARATOR + APIConstants.API_DOC_RESOURCE_NAME;
-            if (registry.resourceExists(swaggerDocPath)) {
-            	Resource docResource = registry.get(swaggerDocPath);
-            	documentation.setLastUpdated(docResource.getLastModified());
-                String visibility=docResource.getProperty(APIConstants.VISIBILITY);
-                if(visibility==null){visibility=APIConstants.DOC_API_BASED_VISIBILITY;}
-                if (visibility.equalsIgnoreCase(Documentation.DocumentVisibility.API_LEVEL.toString())) {
-                    documentation.setVisibility(Documentation.DocumentVisibility.API_LEVEL);
-                } else if (visibility.equalsIgnoreCase(Documentation.DocumentVisibility.PRIVATE.toString())) {
-                    documentation.setVisibility(Documentation.DocumentVisibility.PRIVATE);
-                } else {
-                    documentation.setVisibility(Documentation.DocumentVisibility.OWNER_ONLY);
-                }
-            	documentationList.add(documentation);
-            }
 
         } catch (RegistryException e) {
             handleException("Failed to get documentations for api " + apiId.getApiName(), e);
@@ -562,21 +560,6 @@ public abstract class AbstractAPIManager implements APIManager {
                     return new String((byte[]) docContent.getContent());
                 }
             }
-            /* Loading API definition Content - Swagger*/
-            if(documentationName != null && documentationName.equals(APIConstants.API_DEFINITION_DOC_NAME))
-            {
-                String swaggerDocPath = APIConstants.API_DOC_LOCATION + RegistryConstants.PATH_SEPARATOR +
-                        identifier.getApiName() +"-"  + identifier.getVersion() + "-" + identifier.getProviderName() + RegistryConstants.PATH_SEPARATOR + APIConstants.API_DOC_RESOURCE_NAME;
-                /* API Definition content will be loaded only in API Provider. Hence globally initialized
-           * registry can be used here.*/
-                if (this.registry.resourceExists(swaggerDocPath)) {
-                    Resource docContent = registry.get(swaggerDocPath);
-                    Object content = docContent.getContent();
-                    if (content != null) {
-                        return new String((byte[]) docContent.getContent());
-                    }
-                }
-            }
         } catch (RegistryException e) {
             String msg = "No document content found for documentation: "
                          + documentationName + " of API: "+identifier.getApiName();
@@ -652,9 +635,9 @@ public abstract class AbstractAPIManager implements APIManager {
         return false;
     }
 
-    public void addSubscriber(Subscriber subscriber)
+    public void addSubscriber(Subscriber subscriber, String groupingId)
             throws APIManagementException {
-        apiMgtDAO.addSubscriber(subscriber);
+        apiMgtDAO.addSubscriber(subscriber, groupingId);
     }
 
     public void updateSubscriber(Subscriber subscriber)
@@ -687,7 +670,7 @@ public abstract class AbstractAPIManager implements APIManager {
 
     public Set<API> getSubscriberAPIs(Subscriber subscriber) throws APIManagementException {
         SortedSet<API> apiSortedSet = new TreeSet<API>(new APINameComparator());
-        Set<SubscribedAPI> subscribedAPIs = apiMgtDAO.getSubscribedAPIs(subscriber);
+        Set<SubscribedAPI> subscribedAPIs = apiMgtDAO.getSubscribedAPIs(subscriber, null);
         boolean isTenantFlowStarted = false;
         try {
 	        if(tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)){
@@ -825,58 +808,6 @@ public abstract class AbstractAPIManager implements APIManager {
         tiers.addAll(tierMap.values());
         PrivilegedCarbonContext.endTenantFlow();
         return tiers;
-    }
-
-    @Override
-    public String getSwaggerDefinition(APIIdentifier apiId) throws APIManagementException {
-        String resourcePath = APIUtil.getAPIDefinitionFilePath(apiId.getApiName(),
-                apiId.getVersion(), apiId.getProviderName());
-
-        JSONParser parser = new JSONParser();
-        JSONObject apiJSON = null;
-        try {
-            Resource apiDocResource;
-            String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(apiId.getProviderName()));
-            Registry registryType;
-            /* If the API provider is a tenant, load tenant registry*/
-            boolean isTenantMode=(tenantDomain != null);
-            if ((isTenantMode && this.tenantDomain==null) || (isTenantMode && isTenantDomainNotMatching(tenantDomain))) {//Tenant store anonymous mode
-                int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
-                        .getTenantId(tenantDomain);
-                registryType = ServiceReferenceHolder.getInstance().
-                        getRegistryService().getGovernanceUserRegistry(CarbonConstants.REGISTRY_ANONNYMOUS_USERNAME, tenantId);
-            } else {
-                registryType = registry;
-            }
-            if (registryType.resourceExists(resourcePath)) {
-            try{
-            apiDocResource= registryType.get(resourcePath);
-            String apiDocContent = new String((byte []) apiDocResource.getContent());
-            apiJSON = (JSONObject) parser.parse(apiDocContent);
-            }catch (org.wso2.carbon.registry.core.secure.AuthorizationFailedException e) {
-            //Permission not allowed to access the doc.
-            return  APIConstants.NO_PERMISSION_ERROR;
-            }
-
-            }else{
-            return  APIConstants.NO_PERMISSION_ERROR;
-            }
-
-
-        } catch (RegistryException e) {
-            log.error("Error while retrieving Swagger Definition for " + apiId.getApiName() + "-" +
-                    apiId.getVersion(), e);
-            return  APIConstants.NO_PERMISSION_ERROR;
-        } catch (ParseException e) {
-            log.error("Error while parsing Swagger Definition for " + apiId.getApiName() + "-" +
-                    apiId.getVersion() + " in " + resourcePath, e);
-            return  APIConstants.JSON_PARSE_ERROR;
-        } catch (org.wso2.carbon.user.api.UserStoreException e) {
-            log.error("Error while parsing Swagger Definition for " + apiId.getApiName() + "-" +
-                    apiId.getVersion() + " in " + resourcePath, e);
-            return  APIConstants.JSON_PARSE_ERROR;
-        }
-        return apiJSON.toJSONString();
     }
 
     /**

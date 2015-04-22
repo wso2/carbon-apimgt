@@ -22,29 +22,23 @@ $(document).ready(function(){
     });*/
 
 
-    var thisID='';
-    $('#saveBtn').click(function(e){
-        $(this).siblings('button').button('reset');
-        thisID = $(this).attr('id');
+   var previousClicked = "";
+    $('.api-implement-type').click(function(){
+        $($(this).attr('value')).slideToggle();
+        if(previousClicked !="" && previousClicked != $(this).attr('value')){
+            $(previousClicked).slideUp();
+        }
+        previousClicked=$(this).attr('value');
     });
 
-    $('#prototyped_api').click(function(e){
-        $(this).siblings('button').button('reset');
-        thisID = $(this).attr('id');
-    });
-
-    $('#go_to_manage').click(function(e){
-        $(this).siblings('button').button('reset');
-        thisID = $(this).attr('id');
-    });
 
     var v = $("#implement_form").validate({
         submitHandler: function(form) {        
         var designer = APIDesigner();
         APP.update_ep_config();
-        $('#swagger').val(JSON.stringify(designer.api_doc));
+        $('.swagger').val(JSON.stringify(designer.api_doc));
 
-        $('#'+thisID).button('loading');
+        $('#'+thisID).addClass('active');
 
         $(form).ajaxSubmit({
             success:function(responseText, statusText, xhr, $form) {
@@ -54,7 +48,7 @@ $(document).ready(function(){
                 designer.saved_api.name = responseText.data.apiName;
                 designer.saved_api.version = responseText.data.version;
                 designer.saved_api.provider = responseText.data.provider;
-                $('#'+thisID).button('reset');
+                $('#'+thisID).removeClass('active');
                 $( "body" ).trigger( "api_saved" );                             
              } else {
                  if (responseText.message == "timeout") {
@@ -71,7 +65,47 @@ $(document).ready(function(){
                  } else {
                      jagg.message({content:responseText.message,type:"error"});
                  }
-                 $('#'+thisID).button('reset');
+                 $('#'+thisID).removeClass('active');
+             }
+            }, dataType: 'json'
+        });
+        }
+    });
+
+    var v = $("#prototype_form").validate({
+        submitHandler: function(form) {        
+        var designer = APIDesigner();
+        APP.update_ep_config();
+        $('.swagger').val(JSON.stringify(designer.api_doc));
+
+        $('#'+thisID).addClass('active');
+
+        $(form).ajaxSubmit({
+            success:function(responseText, statusText, xhr, $form) {
+             if (!responseText.error) {
+                var designer = APIDesigner();
+                designer.saved_api = {};
+                designer.saved_api.name = responseText.data.apiName;
+                designer.saved_api.version = responseText.data.version;
+                designer.saved_api.provider = responseText.data.provider;
+                $('#'+thisID).removeClass('active');
+                $( "body" ).trigger( "prototype_saved" );                             
+             } else {
+                 if (responseText.message == "timeout") {
+                     if (ssoEnabled) {
+                         var currentLoc = window.location.pathname;
+                         if (currentLoc.indexOf(".jag") >= 0) {
+                             location.href = "index.jag";
+                         } else {
+                             location.href = 'site/pages/index.jag';
+                         }
+                     } else {
+                         jagg.showLogin();
+                     }
+                 } else {
+                     jagg.message({content:responseText.message,type:"error"});
+                 }
+                 $('#'+thisID).removeClass('active');
              }
             }, dataType: 'json'
         });
@@ -79,8 +113,8 @@ $(document).ready(function(){
     });
     
     $("#prototyped_api").click(function(e){
-        $("body").on("api_saved", function(e){
-            $("body").unbind("api_saved");
+        $("body").on("prototype_saved", function(e){
+            $("body").unbind("prototype_saved");
                 var designer = APIDesigner();            
                 $.ajax({
                     type: "POST",
@@ -117,7 +151,28 @@ $(document).ready(function(){
                     dataType: "json"
                 });               
             });
-            $("#implement_form").submit();                        
-        });
+        $("#prototype_form").submit();                        
+    });
 
+});
+
+var thisID='';
+$('#saveBtn').click(function(e){
+    $(this).siblings('button').button('reset');
+    thisID = $(this).attr('id');
+});
+
+$('#savePrototypeBtn').click(function(e){
+    $(this).siblings('button').button('reset');
+    thisID = $(this).attr('id');
+});
+
+$('#prototyped_api').click(function(e){
+    $(this).siblings('button').button('reset');
+    thisID = $(this).attr('id');
+});
+
+$('#go_to_manage').click(function(e){
+    $(this).siblings('button').button('reset');
+    thisID = $(this).attr('id');
 });

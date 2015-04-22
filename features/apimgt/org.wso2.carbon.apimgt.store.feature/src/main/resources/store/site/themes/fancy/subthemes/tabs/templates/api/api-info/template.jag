@@ -164,6 +164,7 @@
                                                                 <Label><b><%=i18n.localize("tiers")%></b></Label>
                                                                 <select id="tiers-list" name="tiers-list">
                                                                     <%var tiersList = api.tiers, denied;
+                                                                    var existingFirstTierDesc = [];
 
                                                                     for(var j=0;j<tiersList.length;j++){
                                                                         for (var k=0;k<deniedTiers.length;k++) {
@@ -175,6 +176,8 @@
                                                                             var tier=tiersList[j].tierName;
                                                                             var tierDisplayName=tiersList[j].tierDisplayName;
 
+                                                                            //adding the description of existing tiers to the array
+                                                                            existingFirstTierDesc.push(tiersList[j].tierDescription);
 
                                                                     %>
                                                                     <option value="<%=tier%>"><%=tierDisplayName%></option>
@@ -182,8 +185,13 @@
                                                                     denied = false;
                                                                      } %>
                                                                 </select>
-                                                                <%var firstTierDesc=api.tiers[0].tierDescription;
-                                                                if(firstTierDesc=="null"){firstTierDesc='';}
+                                                                <% var firstTierDesc = '';
+                                                                if(existingFirstTierDesc.length==0){
+                                                                   firstTierDesc = '';
+                                                                }
+                                                                else{
+                                                                   firstTierDesc = existingFirstTierDesc[0];
+                                                                }
                                                                 %>
                                                                 <span class="help-block" id="tierDesc"><%=firstTierDesc%>
                                                                 <%if(api.tiers[0].tierAttributes!=null){

@@ -15,7 +15,7 @@
     }
 %> 
 <script language="javascript">
-    var VERBS = [ 'GET' , 'POST' , 'PUT' , 'DELETE'];
+    var VERBS = [ 'get' , 'post' , 'put' , 'delete'];
     var AUTH_TYPES = [
       { "value": "<%=i18n.localize("none")%>", "text":"<%=i18n.localize("none")%>"} ,
       { "value": "<%=i18n.localize("application")%>", "text":"<%=i18n.localize("application")%>"},
@@ -92,7 +92,6 @@
         <span id="editWarnSpan"><b>Warning!</b><br/>
         You are editing an API with active subscribers. Tier Availability changes will not be reflected on
         active subscriptions.<br/>
-        API Definition for Swagger will not be overriden with the changes you will do to the API.
         </span>
     </div>
   <%  }%>
@@ -103,25 +102,25 @@
             <div id="swaggerUpload" class="modal hide fade" tabindex="-1" role="dialog" aria-hidden="true">
                 <div class="modal-header">
                 <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-                <h3 id="swaggerUploadLabel">Import Swagger Definition</h3>                    
+                <h3 id="swaggerUploadLabel">Import Swagger 2 Definition</h3>                    
                 </div>
                 <div class="modal-body">
-                    <!-- <label>Upload a zip file containing swagger definitions :</label>
+                    <label>Upload swagger definition:</label>
                     <input type="file" name="somename" size="chars"> 
                     <br />
                     <br />                        
                     <h6>OR</h6>
-                    <br /> -->
-                    <label>Definition URL :</label>
+                    <br />
+                    <label>Definition URL:</label>
                     <input type="text" placeholder="" class="span12" id="swagger_import_url" name="swagger_import_url">
-                    <span class="help-block">Example : http://petstore.swagger.wordnik.com/api/api-docs </span>
+                    <span class="help-block">Example : http://petstore.swagger.io/v2/swagger.json </span>
                     <div id="swagger_help" class="alert alert-danger hide" role="alert">
-                      Enter a valid url
-                       <button type="button" class="close" id="errorMsgClose"><span aria-hidden="true">&times;</span></button>
+                        Enter a valid url
+                        <button type="button" class="close" id="errorMsgClose"><span aria-hidden="true">&times;</span></button>
                     </div>
                 </div>                    
                 <div class="modal-footer">
-                <button class="btn btn-primary" id="import_swagger" data-loading-text="<i class='fa fa-spinner fa-pulse' id='loader'></i>Loading">Import</button>
+                <button class="btn btn-primary has-spinner" id="import_swagger"><span class="spinner"><i class='fa fa-spinner fa-pulse'></i></span><span>Import</span></button>
                 <button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
                 </div>
             </div>
@@ -145,10 +144,7 @@
               id="design_form"
               enctype="multipart/form-data" action="<%= jagg.url("/site/blocks/item-design/ajax/add.jag?" + apiUrlId ) %>">
 <fieldset>
-    <legend><%=i18n.localize("generalDetailsTitle")%>
-            <a  href="#swaggerUpload" role="button" class="btn pull-right" data-toggle="modal" ><i class="icon-download-alt" ></i> Import Swagger Definition</a>
-            <a  href="#swaggerEditer" id="swaggerEditor" role="button" class="btn pull-right"  data-toggle="modal"  style="margin:0 10px" ><i class="icon-edit" ></i> Edit Swagger Definition</a>
-    </legend>
+    <legend><%=i18n.localize("generalDetailsTitle")%></legend>
     <% if(!api){ %>    
     <div class="control-group">
         <label class="control-label" for="name"><%=i18n.localize("name")%>:<span class="requiredAstrix">*</span></label>
@@ -300,9 +296,37 @@
                     </div>
                 </div>
     </fieldset>
+
+                <% if(session.get("wsdl") || ( api && api.wsdl )) {
+                    var wsdl = session.get("wsdl");
+                    if(api && api.wsdl){
+                        wsdl = api.wsdl;
+                    }
+
+                    session.put( "wsdl", null );
+                %>
                 <div id="api_designer">
-                    <div id ="resource_details"></div>
-                </div>            
+                    <a  href="#wsdlUpload" role="button" class="btn pull-right" data-toggle="modal" ><i class="icon-download-alt" ></i> Import </a>
+                    <legend>API Definition</legend>
+                    <div class="control-group api_wsdl">
+                        <label class="control-label" for="wsdl"><%=i18n.localize("wsdl")%>:</label>
+                        <div class="controls">
+                        <div class="input-append">
+                        <input type="text" class="input-xlarge validInput" id="wsdl" name="wsdl"  value="<%= wsdl %>" />
+                        <button class="btn check_url_valid" url-type="wsdl" type="button" ><%=i18n.localize("testURI")%></button>
+                        <a class="icon-question-sign help_popup" help_data="wsdldesc_help"></a>
+                        <p id="wsdldesc_help" class="hide"><%=i18n.localize("wsdlDescHelpMsg")%></p>
+                    </div>
+                    <p class="help-block"><%=i18n.localize("wsdlHelpMsg")%></p>                
+                </div>
+                <% }else{ %>
+                <div id="api_designer">
+                    <a  href="#swaggerUpload" role="button" class="btn pull-right" data-toggle="modal" ><i class="icon-download-alt" ></i> Import </a>
+                    <a  href="#swaggerEditer" id="swaggerEditor" role="button" class="btn pull-right"  data-toggle="modal"  style="margin:0 10px" ><i class="icon-edit" ></i> Edit Source</a>                
+                    <div id ="resource_details">
+                    </div>
+                </div>      
+                <% } %>      
     <%if(api!=null){%>
                 <input type = "hidden" name = "bizOwner" value = "<%=api.bizOwner%>" />
                 <input type = "hidden" name = "bizOwnerMail" value = "<%=api.bizOwnerMail%>" />
@@ -315,9 +339,12 @@
                     <div class="btn loadingButton">Saving API. Please wait..</div>
                 </div>
                 <div class="form-actions" id="saveButtons">
-                    <button type="submit" class="btn btn-info loader-btn" id="saveBtn" data-loading-text="<i class='fa fa-spinner fa-pulse' id='loader'></i>Loading"action="design">Save</button>
-                    <button class="btn btn-primary loader-btn" id="go_to_implement" data-loading-text="<i class='fa fa-spinner fa-pulse' id='loader'></i>Loading">Implement</button>
-                    <input type="reset"  class="btn" value="<%=i18n.localize("cancel")%>" onclick="javascript:window.location.href='./'" />
+
+                    <button type="submit" class="btn btn-default has-spinner" id="saveBtn"><span class="spinner"><i class='fa fa-spinner fa-pulse'></i></span><span>Save</span></button>
+                    <input type="hidden" value="Save" action="design"/>
+
+                    <a class="btn btn-primary has-spinner" id="go_to_implement"><span class="spinner"><i class='fa fa-spinner fa-pulse'></i></span><span>Next: Implement &gt;</span></a>
+
                 </div>
             </form>
 
@@ -333,8 +360,8 @@
 
 <script id="designer-resource-template" type="text/x-handlebars-template">
 <div class="resource_body_padding">
-    <h5>Implementation Notes :</h5>
-    <a class="notes" data-path="{{resource_path}}" data-attr="notes">{{ notes }}</a>
+    <h5>Description :</h5>
+    <a class="notes" data-path="{{resource_path}}" data-attr="description">{{ description }}</a>
     <br />
     <br />        
     <h5>Response Content Type : <a href="#" data-path="{{resource_path}}" data-attr="content_type" class="content_type" data-type="typeahead" data-pk="1" data-title="Responce Content Type">{{ content_type }}</a></h5>
@@ -353,7 +380,7 @@
         <tr>
         <td>{{ name }}</td>
         <td><a class="param_desc" data-path="{{ ../resource_path}}.parameters[{{@index}}]" data-attr="description">{{ description }}</a></td>
-        <td><a class="param_paramType" data-type="select" data-path="{{ ../resource_path}}.parameters[{{@index}}]" data-attr="paramType">{{ paramType }}</a></td>
+        <td><a class="param_paramType" data-type="select" data-path="{{ ../resource_path}}.parameters[{{@index}}]" data-attr="in">{{ in }}</a></td>
         <td><a class="param_type" data-path="{{../resource_path}}.parameters[{{@index}}]" data-attr="type">{{ type }}</a></td>
         <td><a class="param_required" data-type="select" data-path="{{../resource_path}}.parameters[{{@index}}]" data-attr="required" data-value="{{toString required }}"></a></td>
         </tr> 
@@ -367,7 +394,7 @@
 
 
 <script id="designer-resources-template" type="text/x-handlebars-template">
-<legend>Resources</legend>
+<legend>API Definition</legend>
     <div class="resource_create">
         <div class="control-group">
             <label class="control-label" for="inputPassword">URL Pattern</label>
@@ -386,7 +413,7 @@
             <label class="control-label" for=""></label>
             <div class="controls">
                 {{#each verbs}}
-                    <label class="checkbox inline">
+                    <label class="checkbox inline" style="text-transform:uppercase;">
                     <input type="checkbox" value="{{ . }}" class="http_verb_select" >  {{ . }}
                     </label>
                 {{/each}}
@@ -401,36 +428,32 @@
                      <label id="more" style="display:inline;">more</label>
             </div>
         </div>
-        <div class="control-group">
-            <label class="control-label" for="inputResource">Resource Name</label>
+        <!-- div class="control-group">
+            <label class="control-label" for="inputResourceTags">Tags</label>
             <div class="controls">
-                <input type="text" id="inputResource" placeholder="Resource"></br>
-                <button class="btn" type="button" id="add_resource" style="margin:10px 0 0px 0px;"><i class="icon-plus-sign"></i>&nbsp;<%=i18n.localize("addNewResource")%></button>
+                <input type="text" id="inputResourceTags" placeholder="tags">
             </div>
-        </div>
-
+        </div -->
+        <div class="control-group">
+            <label class="control-label"></label>
+            <div class="controls">
+                <button class="btn" type="button" id="add_resource" style="margin:10px 0 0px 0px;"><i class="icon-plus-sign"></i>&nbsp;Add</button>
+            </div>
+        </div>        
     </div>
 <table style="width:100%">                       
-{{#each api_doc.apis}}
-{{ setIndex @index}}
-    <tr>
-    <td colspan="4"><h4 class="resource_group_title">{{ path }}</h4></td>
-    </tr>
-    {{# each file.apis}}
-        {{ setIndex @index}}
-        {{# each operations}}
-        <tr class="resource_container" data-path="$.apis[{{ ../../index}}].file.apis[{{ ../index }}].operations[{{ @index }}]">
-            <td class="resource-method-td resource_expand" data-path="$.apis[{{ ../../index}}].file.apis[{{ ../index }}].operations[{{ @index }}]">
-                <span class=" resource-method resource-method-{{ method }}">{{ method }}</span>
+{{#each doc.paths}}
+    {{# each this}}
+        <tr class="resource_container" data-path="$.paths.{{ path }}.{{@key}}">
+            <td class="resource-method-td resource_expand" data-path="$.paths.{{ path}}.{{ @key }}">
+                <span class=" resource-method resource-method-{{ @key }}">{{ @key }}</span>
             </td>
-            <td class="resource_expand"><a class="resource-path">{{ ../path }}</a></td>    
-            <td  width="99%"><span class="operation-summary change_summary" data-path="$.apis[{{ ../../index}}].file.apis[{{ ../index }}].operations[{{ @index }}]" data-attr="summary" >{{ summary }}</span></td>
-            <td class="delete_resource_td "><a class='operation-summary delete_resource' data-path-name="{{ ../path }}" data-path="$.apis[{{ ../../index}}].file.apis[{{ ../index }}].operations" data-index="{{ @index }}"><i class='icon-trash'></i></a></td>
+            <td class="resource_expand"><a class="resource-path">{{ path }}</a></td>    
+            <td  width="99%"><span class="operation-summary change_summary" data-path="$.paths.{{ path }}.{{@key}}" data-attr="summary" >{{ summary }}</span></td>
+            <td class="delete_resource_td "><a class='operation-summary delete_resource' data-operation="{{ @key }}" data-path-name="{{ ../path }}" data-path="$.paths.{{ path }}.{{@key}}" data-index="{{ @index }}"><i class='icon-trash'></i></a></td>
         </tr>
-        <tr><td colspan="4" class="resource_body hide" data-path="$.apis[{{ ../../index}}].file.apis[{{ ../index }}].operations[{{ @index }}]"></td></tr>
-        {{/each}}
+        <tr><td colspan="4" class="resource_body hide" data-path="$.paths.{{ path }}.{{@key}}"></td></tr>
     {{/each}}
-
 {{/each}}
 </table>                                         
 </script>
@@ -470,6 +493,15 @@
             });
             $("#design_form").submit();
         });
+
+        <% 
+            var swagger = session.get("swagger");
+            if(swagger){ %>
+                $.get( jagg.site.context + "/site/blocks/item-design/ajax/import.jag", { "action" : "session" } , function( data ) {
+                    var designer = APIDesigner();
+                    designer.load_api_document(data);
+                });
+        <% } %>
     });
 </script>    
 <% }); %>
