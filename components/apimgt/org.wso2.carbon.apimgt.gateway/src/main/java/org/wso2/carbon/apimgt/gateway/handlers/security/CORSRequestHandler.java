@@ -82,7 +82,7 @@ public class CORSRequestHandler extends AbstractHandler implements ManagedLifecy
 		API selectedApi = null;
 		Resource selectedResourceWithVerb = null;
 		Resource selectedResource = null;
-		boolean status;
+		boolean status = false;
 
 		for (API api : messageContext.getConfiguration().getAPIs()) {
 			if (apiContext.equals(api.getContext()) && apiVersion.equals(api.getVersion())) {
@@ -122,22 +122,21 @@ public class CORSRequestHandler extends AbstractHandler implements ManagedLifecy
 		messageContext.setProperty(APIConstants.API_ELECTED_RESOURCE, resourceString);
 		messageContext.setProperty(APIConstants.API_RESOURCE_CACHE_KEY, resourceCacheKey);
 		setCORSHeaders(messageContext, selectedResourceWithVerb);
-		if (selectedResource != null) {
-			if (selectedResourceWithVerb != null) {
-				if ("OPTIONS".equalsIgnoreCase(httpMethod)) {
-					messageContext.getSequence("_cors_request_handler").mediate(messageContext);
-					Utils.send(messageContext, HttpStatus.SC_OK);
-					return false;
-				} else if ("inline".equals(inline)) {
+		if (selectedResource != null && selectedResourceWithVerb != null) {
+				if ("inline".equals(inline)) {
 					messageContext.getSequence("_cors_request_handler").mediate(messageContext);
 				}
-				return true;
-			} else {
-				return true;
+				status =  true;
+			}else if (selectedResource != null && selectedResourceWithVerb == null ){
+			if ("OPTIONS".equalsIgnoreCase(httpMethod)) {
+				messageContext.getSequence("_cors_request_handler").mediate(messageContext);
+				Utils.send(messageContext, HttpStatus.SC_OK);
+				status = false;
 			}
-		} else {
-			return true;
+		}else{
+			status = true;
 		}
+		return status;
 	}
 
 	public boolean handleResponse(MessageContext messageContext) {
