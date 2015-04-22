@@ -21,7 +21,15 @@ app.server = function(ctx) {
     return {
         configs: {
             landingPage: '/asts/api/list',
-            disabledAssets: ['gadget','schema','site','uri','ebook', 'api', 'wsdl', 'service','policy','proxy','servicex','sequence','wadl']
+            disabledAssets: ['gadget','schema','site','uri','ebook', 'wsdl', 'service','policy','proxy','servicex','sequence','wadl',
+            'document', 'provider']
+        },
+        endpoints: {
+            apis: [{
+                       url: 'apis',
+                       path: 'api_operation.jag',
+                       secured: true
+                   }]
         }
     }
 };

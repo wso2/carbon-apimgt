@@ -25,54 +25,65 @@ var apistore = {};
 	var APIManagerFactory = Packages.org.wso2.carbon.apimgt.impl.APIManagerFactory;
     var log = new Log("jaggery-modules.api-manager.store");
 
-    apistore.getAPIConsumer = function (username){
-		return APIManagerFactory.getInstance().getAPIConsumer(username);
-	};
+    function StoreAPIProxy (username){
+        this.username = username;
+        this.impl = APIManagerFactory.getInstance().getAPIConsumer(username);
+    }
 
-    apistore.getAllTags = function(){
-    	return this.getAPIConsumer.getAllTags();
+    apistore.instance = function(username){
+        return new StoreAPIProxy(username);
     };
 
-    apistore.getTagsWithAttributes = function(){
-    	return this.getAPIConsumer.getTagsWithAttributes();
+    StoreAPIProxy.prototype.getAllTags = function(){
+        return this.impl.getAllTags();
     };
 
-    apistore.getRecentlyAddedAPIs = function(limit){
-    	return this.getAPIConsumer.getRecentlyAddedAPIs(limit);
+    StoreAPIProxy.prototype.getTagsWithAttributes = function(){
+        return this.impl.getTagsWithAttributes();
     };
 
-    apistore.getPublishedAPIsByProvider = function(providerId, limit){
-    	return this.getAPIConsumer.getPublishedAPIsByProvider(providerId, limit);
+    StoreAPIProxy.prototype.getRecentlyAddedAPIs = function(limit){
+        return this.impl.getRecentlyAddedAPIs(limit);
     };
 
-    apistore.getSubscriptions = function(providerName, apiName, version, user){
-    	return this.getAPIConsumer.getSubscriptions(providerName, apiName, version, user);
+    StoreAPIProxy.prototype.getPublishedAPIsByProvider = function(providerId, limit){
+        return this.impl.getPublishedAPIsByProvider(providerId, limit);
     };
 
-    apistore.getAllSubscriptions = function(userName, appName, startSubIndex, endSubIndex){
-    	return this.getAPIConsumer.getAllSubscriptions(userName, appName, startSubIndex, endSubIndex);
+    StoreAPIProxy.prototype.getSubscriptions = function(providerName, apiName, version, user){
+        return this.impl.getSubscriptions(providerName, apiName, version, user);
     };
 
-    apistore.getApplications = function(userName){
-    	return this.getAPIConsumer.getApplications(userName);
+    StoreAPIProxy.prototype.getAllSubscriptions = function(userName, appName, startSubIndex, endSubIndex){
+        return this.impl.getAllSubscriptions(userName, appName, startSubIndex, endSubIndex);
     };
 
-    apistore.getSwaggerResource = function(){
-    	return this.getAPIConsumer.getSwaggerResource();
+    StoreAPIProxy.prototype.getApplications = function(userName){
+        return this.impl.getApplications(userName);
     };
 
-    apistore.getDeniedTiers = function(){
-    	return this.getAPIConsumer.getDeniedTiers();
+    StoreAPIProxy.prototype.getSwaggerResource = function(){
+        return this.impl.getSwaggerResource();
     };
 
-    apistore.getSubscriptionsByApplication = function(applicationName, userName){
-    	return this.getAPIConsumer.getSubscriptionsByApplication(applicationName,userName);
+    StoreAPIProxy.prototype.getDeniedTiers = function(){
+        return this.impl.getDeniedTiers();
     };
 
-    apistore.getPaginatedAPIsWithTag = function(tag, start, end){
-    	return this.getAPIConsumer.getPaginatedAPIsWithTag();
+    StoreAPIProxy.prototype.getSubscriptionsByApplication = function(applicationName, userName){
+        return this.impl.getSubscriptionsByApplication(applicationName,userName);
     };
 
+    StoreAPIProxy.prototype.getPaginatedAPIsWithTag = function(tag, start, end){
+        return this.impl.getPaginatedAPIsWithTag(tag, start, end);
+    };
+
+    StoreAPIProxy.prototype.addApplication = function (appName, userName, tier, callbackUrl, description) {
+        return this.impl.addApplication(appName, userName, tier, callbackUrl, description);
+    };
+    StoreAPIProxy.prototype.getAllPaginatedAPIsByStatus = function (tenantDomain, start, end,apiStatus) {
+        return this.impl.getAllPaginatedAPIsByStatus(tenantDomain, start, end,apiStatus);
+    };
 
 })(apistore);
 

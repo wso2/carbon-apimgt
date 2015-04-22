@@ -46,7 +46,7 @@ body {
      padding-top: 46px;*/
 
     /* background: url(../img/search-bg.png) repeat-x left -7px #ecf0f1;*/
-    background: url(../img/header-bg.gif) repeat-x left -10px #ecf0f1;
+    background: url(../img/header-bg.gif) repeat-x left -10px #ffffff;
 }
 
 ul {
@@ -1058,7 +1058,7 @@ select, textarea, input[type="text"], input[type="password"], input[type="dateti
     width: 580px;
     position: absolute;
     left: 0;
-    border-bottom: 1px solid #ECF0F1;
+    border-bottom: 1px solid #FFFFFF;
     overflow: hidden;
 }
 .asset-intro-box {
@@ -1476,6 +1476,28 @@ ol.linenums li {
 
 }
 
+.app-logo {
+    height:60px;
+    margin-top : -10px;
+}
+
+.itm-ast{
+    background : #FFFFFF;
+    position: relative;
+}
+
+button.btn-api-del {
+    background: none repeat scroll 0 0 #444;
+    border-radius: 3px;
+    color: #fff;
+    font-weight: 200;
+    margin-left: 0;
+    opacity: 0.8;
+    padding: 3px 5px;
+    position: absolute;
+    right: 5px;
+    top: 5px;
+}
 /*
 @media all and (min-width: 1212px) {
    .asset-description-header .asset-intro-box {
