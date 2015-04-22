@@ -2609,7 +2609,7 @@ public class ApiMgtDAO {
         Set<APIKey> apiKeys = new HashSet<APIKey>();
 
         try{
-            APIKey productionKey = getProductionKeyOfApplication(username, applicationId, accessTokenStoreTable);
+            APIKey productionKey = getProductionKeyOfApplication(applicationId, accessTokenStoreTable);
             if(productionKey != null){
                 apiKeys.add(productionKey);
             } else {
@@ -2620,7 +2620,7 @@ public class ApiMgtDAO {
                 }
             }
 
-            APIKey sandboxKey = getSandboxKeyOfApplication(username, applicationId, accessTokenStoreTable);
+            APIKey sandboxKey = getSandboxKeyOfApplication(applicationId, accessTokenStoreTable);
             if(sandboxKey != null){
                 apiKeys.add(sandboxKey);
             }  else {
@@ -2721,7 +2721,7 @@ public class ApiMgtDAO {
         return key;
     }
 
-    private APIKey getProductionKeyOfApplication(String userName, int applicationId, String accessTokenStoreTable)
+    private APIKey getProductionKeyOfApplication(int applicationId, String accessTokenStoreTable)
                                                 throws SQLException, CryptoException, APIManagementException {
 
         Connection connection = null;
@@ -2743,7 +2743,6 @@ public class ApiMgtDAO {
                         " IDN_OAUTH_CONSUMER_APPS ICA " +
                         "WHERE" +
                         " AKM.APPLICATION_ID = ? AND" +
-                        " ICA.USERNAME = ? AND" +
                         " IAT.USER_TYPE = ? AND" +
                         " ICA.CONSUMER_KEY = AKM.CONSUMER_KEY AND" +
                         " IAT.CONSUMER_KEY = ICA.CONSUMER_KEY AND" +
@@ -2770,7 +2769,6 @@ public class ApiMgtDAO {
                         " IDN_OAUTH_CONSUMER_APPS ICA " +
                         " WHERE" +
                         " AKM.APPLICATION_ID = ? AND" +
-                        " ICA.USERNAME = ? AND" +
                         " IAT.USER_TYPE = ? AND" +
                         " ICA.CONSUMER_KEY = AKM.CONSUMER_KEY AND" +
                         " IAT.CONSUMER_KEY = ICA.CONSUMER_KEY AND" +
@@ -2810,8 +2808,7 @@ public class ApiMgtDAO {
 
             preparedStatement = connection.prepareStatement(sql);
             preparedStatement.setInt(1, applicationId);
-            preparedStatement.setString(2, MultitenantUtils.getTenantAwareUsername(userName.toLowerCase()));
-            preparedStatement.setString(3, APIConstants.ACCESS_TOKEN_USER_TYPE_APPLICATION);
+            preparedStatement.setString(2, APIConstants.ACCESS_TOKEN_USER_TYPE_APPLICATION);
             resultSet = preparedStatement.executeQuery();
             while (resultSet.next()) {
                 APIKey apiKey = new APIKey();
@@ -2837,7 +2834,7 @@ public class ApiMgtDAO {
         }
     }
 
-    private APIKey getSandboxKeyOfApplication(String userName, int applicationId, String accessTokenStoreTable)
+    private APIKey getSandboxKeyOfApplication(int applicationId, String accessTokenStoreTable)
             throws SQLException, CryptoException, APIManagementException {
 
         Connection connection = null;
@@ -2858,7 +2855,6 @@ public class ApiMgtDAO {
                         " IDN_OAUTH_CONSUMER_APPS ICA " +
                         "WHERE" +
                         " AKM.APPLICATION_ID = ? AND" +
-                        " ICA.USERNAME = ? AND" +
                         " IAT.USER_TYPE = ? AND" +
                         " ICA.CONSUMER_KEY = AKM.CONSUMER_KEY AND" +
                         " IAT.CONSUMER_KEY = ICA.CONSUMER_KEY AND" +
@@ -2884,7 +2880,6 @@ public class ApiMgtDAO {
                         " IDN_OAUTH_CONSUMER_APPS ICA " +
                         "WHERE" +
                         " AKM.APPLICATION_ID = ? AND" +
-                        " ICA.USERNAME = ? AND" +
                         " IAT.USER_TYPE = ? AND" +
                         " ICA.CONSUMER_KEY = AKM.CONSUMER_KEY AND" +
                         " IAT.CONSUMER_KEY = ICA.CONSUMER_KEY AND" +
@@ -2924,8 +2919,7 @@ public class ApiMgtDAO {
 
             preparedStatement = connection.prepareStatement(sql);
             preparedStatement.setInt(1, applicationId);
-            preparedStatement.setString(2, MultitenantUtils.getTenantAwareUsername(userName.toLowerCase()));
-            preparedStatement.setString(3, APIConstants.ACCESS_TOKEN_USER_TYPE_APPLICATION);
+            preparedStatement.setString(2, APIConstants.ACCESS_TOKEN_USER_TYPE_APPLICATION);
             resultSet = preparedStatement.executeQuery();
             while (resultSet.next()) {
                 APIKey apiKey = new APIKey();
@@ -5190,11 +5184,6 @@ public class ApiMgtDAO {
            //  String tenantAwareUserId = MultitenantUtils.getTenantAwareUsername(subscriber.getName());
            Application application;
            while (rs.next()) {
-               if (subscriber.getName() != rs.getString("USER_ID")) 
-               {
-                   subscriber.setName(rs.getString("USER_ID"));
-                   subscriber.setId(Integer.parseInt(rs.getString("SUBSCRIBER_ID")));
-               }
                 application = new Application(rs.getString("NAME"), subscriber);
                 application.setId(rs.getInt("APPLICATION_ID"));
                 application.setTier(rs.getString("APPLICATION_TIER"));
