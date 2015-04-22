@@ -305,7 +305,7 @@ public final class APIConstants {
     public static final String API_GATEWAY_CLIENT_DOMAIN_HEADER = API_GATEWAY + "ClientDomainHeader";
     public static final String API_GATEWAY_TYPE = "GatewayType";
     public static final String API_GATEWAY_TYPE_SYNAPSE = "Synapse";
-    
+
     public static final String API_KEY_VALIDATOR = "APIKeyValidator.";
     public static final String API_KEY_VALIDATOR_URL = API_KEY_VALIDATOR + "ServerURL";
     public static final String API_KEY_VALIDATOR_REVOKE_API_URL = API_KEY_VALIDATOR + "RevokeAPIURL";
@@ -319,8 +319,13 @@ public final class APIConstants {
     public static final String API_KEY_VALIDATOR_CONNECTION_TIMEOUT = API_KEY_VALIDATOR + "ThriftClientConnectionTimeOut";
 
     // Constants needed for KeyManager section
+    public static final String API_KEY_MANAGER = "APIKeyManager.";
+    public static final String KEY_MANAGER_CLIENT = API_KEY_MANAGER+"KeyManagerClientImpl";
     public static final String KEY_MANAGER = "KeyManager";
-    public static final String AUTHSERVER_URL = "AuthorizationServerURL";
+    public static final String KEY_MANAGER_USERNAME = "Username";
+    public static final String KEY_MANAGER_PASSWORD = "Password";
+    public static final String AUTHSERVER_URL = "ServerURL";
+
     public static final String TOKEN_URL = "TokenURL";
     public static final String REVOKE_URL = "RevokeURL";
 
