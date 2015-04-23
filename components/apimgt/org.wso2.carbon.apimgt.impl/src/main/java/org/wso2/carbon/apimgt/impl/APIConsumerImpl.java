@@ -1967,8 +1967,7 @@ Set<API> apiSet) throws APIManagementException {
         Application[] apps = getAllApplications(username);
 
         if (apps != null) {
-            for (int i = 0; i < apps.length; i++) {
-                Application app = apps[i];
+            for(Application app : apps) {
                 if (app.getName().equals(appName)) {
                     handleException("A duplicate application already exists by the name - " + appName);
                 }

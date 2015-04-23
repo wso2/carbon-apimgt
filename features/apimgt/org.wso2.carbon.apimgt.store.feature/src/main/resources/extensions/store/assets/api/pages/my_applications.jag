@@ -31,6 +31,13 @@ require('/modules/store.js').exec(function(ctx) {
     // var appList = am.list();
     // var output = am.renderBasic(appList,page)._custom();
     var output = am.renderBasic(page)._custom();
+    var server = require('store').server;
+    var user = server.current(ctx.session);
+    var apistore = require('apistore').apistore.instance(user.username);
+    var data = apistore.getApplications(user.username);
+    if(data != null){
+        output.applications = JSON.parse(data);
+    }
     caramel.render(output);
 }, request, response, session);
 %>
