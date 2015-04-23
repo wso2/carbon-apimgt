@@ -21,6 +21,7 @@ $(document).ready(function(){
       e.preventDefault();
     });*/
 
+
    var previousClicked = "";
     $('.api-implement-type').click(function(){
         $($(this).attr('value')).slideToggle();
@@ -30,26 +31,6 @@ $(document).ready(function(){
         previousClicked=$(this).attr('value');
     });
 
-    var thisID='';
-    $('#saveBtn').click(function(e){
-        $(this).siblings('button').button('reset');
-        thisID = $(this).attr('id');
-    });
-
-    $('#prototyped_api').click(function(e){
-        $(this).siblings('button').button('reset');
-        thisID = $(this).attr('id');
-    });
-
-    $('#go_to_manage').click(function(e){
-        $(this).siblings('button').button('reset');
-        thisID = $(this).attr('id');
-    });
-
-    $('#savePrototypeBtn').click(function(e){
-        $(this).siblings('button').button('reset');
-        thisID = $(this).attr('id');
-    });
 
     var v = $("#implement_form").validate({
         submitHandler: function(form) {        
@@ -57,7 +38,7 @@ $(document).ready(function(){
         APP.update_ep_config();
         $('.swagger').val(JSON.stringify(designer.api_doc));
 
-        $('#'+thisID).button('loading');
+        $('#'+thisID).addClass('active');
 
         $(form).ajaxSubmit({
             success:function(responseText, statusText, xhr, $form) {
@@ -67,7 +48,7 @@ $(document).ready(function(){
                 designer.saved_api.name = responseText.data.apiName;
                 designer.saved_api.version = responseText.data.version;
                 designer.saved_api.provider = responseText.data.provider;
-                $('#'+thisID).button('reset');
+                $('#'+thisID).removeClass('active');
                 $( "body" ).trigger( "api_saved" );                             
              } else {
                  if (responseText.message == "timeout") {
@@ -84,7 +65,7 @@ $(document).ready(function(){
                  } else {
                      jagg.message({content:responseText.message,type:"error"});
                  }
-                 $('#'+thisID).button('reset');
+                 $('#'+thisID).removeClass('active');
              }
             }, dataType: 'json'
         });
@@ -97,7 +78,7 @@ $(document).ready(function(){
         APP.update_ep_config();
         $('.swagger').val(JSON.stringify(designer.api_doc));
 
-        $('#'+thisID).button('loading');
+        $('#'+thisID).addClass('active');
 
         $(form).ajaxSubmit({
             success:function(responseText, statusText, xhr, $form) {
@@ -107,7 +88,7 @@ $(document).ready(function(){
                 designer.saved_api.name = responseText.data.apiName;
                 designer.saved_api.version = responseText.data.version;
                 designer.saved_api.provider = responseText.data.provider;
-                $('#'+thisID).button('reset');
+                $('#'+thisID).removeClass('active');
                 $( "body" ).trigger( "prototype_saved" );                             
              } else {
                  if (responseText.message == "timeout") {
@@ -124,7 +105,7 @@ $(document).ready(function(){
                  } else {
                      jagg.message({content:responseText.message,type:"error"});
                  }
-                 $('#'+thisID).button('reset');
+                 $('#'+thisID).removeClass('active');
              }
             }, dataType: 'json'
         });
@@ -173,4 +154,25 @@ $(document).ready(function(){
         $("#prototype_form").submit();                        
     });
 
+});
+
+var thisID='';
+$('#saveBtn').click(function(e){
+    $(this).siblings('button').button('reset');
+    thisID = $(this).attr('id');
+});
+
+$('#savePrototypeBtn').click(function(e){
+    $(this).siblings('button').button('reset');
+    thisID = $(this).attr('id');
+});
+
+$('#prototyped_api').click(function(e){
+    $(this).siblings('button').button('reset');
+    thisID = $(this).attr('id');
+});
+
+$('#go_to_manage').click(function(e){
+    $(this).siblings('button').button('reset');
+    thisID = $(this).attr('id');
 });

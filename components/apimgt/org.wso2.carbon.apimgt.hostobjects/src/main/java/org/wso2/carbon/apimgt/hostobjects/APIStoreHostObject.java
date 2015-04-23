@@ -744,12 +744,15 @@ public class APIStoreHostObject extends ScriptableObject {
 		            authScopeString = APIConstants.OAUTH2_DEFAULT_SCOPE;
 	            }
 
+	            String applicationName = (String) args[1];
+                String tokenType = (String) args[2];
+                String callbackUrl = (String) args[3]; 
+                String groupingId = (String)args[8];
+        
                 Map<String, Object> keyDetails = getAPIConsumer(thisObj).requestApprovalForApplicationRegistration(
-		                (String) args[0], (String) args[1], (String) args[2], (String) args[3],
-		                accessAllowDomainsArray, validityPeriod, authScopeString, Integer.parseInt((String)args[8]),
+                        username, applicationName, tokenType, callbackUrl,
+		                accessAllowDomainsArray, validityPeriod, authScopeString, groupingId,
                         jsonParams);
-
-
 
                 NativeObject row = new NativeObject();
                 String authorizedDomains = "";
@@ -2476,11 +2479,12 @@ public class APIStoreHostObject extends ScriptableObject {
             String apiName = (String) args[1];
             String version = (String) args[2];
             String user = (String) args[3];
+            String groupingId = (String) args[4];
 
             APIIdentifier apiIdentifier = new APIIdentifier(APIUtil.replaceEmailDomain(providerName), apiName, version);
             Subscriber subscriber = new Subscriber(user);
             APIConsumer apiConsumer = getAPIConsumer(thisObj);
-            Set<SubscribedAPI> apis = apiConsumer.getSubscribedIdentifiers(subscriber, apiIdentifier);
+            Set<SubscribedAPI> apis = apiConsumer.getSubscribedIdentifiers(subscriber, apiIdentifier, groupingId);
             int i = 0;
             if (apis != null) {
                 for (SubscribedAPI api : apis) {
@@ -2522,11 +2526,16 @@ public class APIStoreHostObject extends ScriptableObject {
     public static NativeObject jsFunction_createApplicationKeys(Context cx,
                                                                 Scriptable thisObj, Object[] args, Function funObj)
             throws ScriptException, APIManagementException {
-        if (args != null && args.length != 0) {
+        if (args != null && args.length > 7) {
             try {
-
-                Map<String, String> keyDetails = getAPIConsumer(thisObj).completeApplicationRegistration((String)
-                                                                                                                 args[0], (String) args[1], (String) args[2],Integer.parseInt((String)args[8]));
+              
+                String userId = (String) args[0];
+                String applicationName =(String) args[1];
+                String tokenType = (String) args[2];
+                String tokenScope = (String) args[6];
+                String groupingId = (String) args[7];
+                Map<String, String> keyDetails = getAPIConsumer(thisObj).completeApplicationRegistration(userId, 
+                                                                   applicationName, tokenType, tokenScope, groupingId);
                 NativeObject object = new NativeObject();
 
                 if (keyDetails != null) {
@@ -2640,9 +2649,9 @@ public class APIStoreHostObject extends ScriptableObject {
         try {
             String username = args[0].toString();
             String appName = args[1].toString();
-            String groupId = null;
+            String groupingId = null;
             if(args.length > 4 && args[4] != null){
-            	groupId = args[4].toString();
+                groupingId = (String)args[4];
             }
             int startSubIndex = Integer.parseInt(args[2].toString());
             int endSubIndex = Integer.parseInt(args[3].toString());
@@ -2658,13 +2667,8 @@ public class APIStoreHostObject extends ScriptableObject {
             Subscriber subscriber = new Subscriber(username);
             APIConsumer apiConsumer = getAPIConsumer(thisObj);
             Application[] applications;
-            if(groupId == null || groupId.isEmpty()){
-                    applications = apiConsumer.getApplications(new Subscriber(username));
-                }
-            else{
-                    applications = apiConsumer.getApplications(new Subscriber(username), groupId);
-                }
-
+            applications = apiConsumer.getApplications(new Subscriber(username), groupingId);
+            
             if (applications != null) {
                 int i = 0;
                 for (Application application : applications) {
@@ -2685,14 +2689,9 @@ public class APIStoreHostObject extends ScriptableObject {
                         subscriptionCount = apiConsumer.getSubscriptionCount(subscriber,application.getName());
 	                    //get subscribed APIs set as per the starting and ending indexes for application.
 	                	Set<SubscribedAPI> subscribedAPIs;
-                        if (groupId == null || groupId.isEmpty()) {
-                            subscribedAPIs = apiConsumer.getPaginatedSubscribedAPIs(subscriber, application.getName(),startSubIndex,endSubIndex);
+                        subscribedAPIs = apiConsumer.getPaginatedSubscribedAPIs(subscriber, application.getName(),startSubIndex,endSubIndex, groupingId);
                          
-                        } else {
-                            subscribedAPIs = apiConsumer.getPaginatedSubscribedAPIsbyGroupId(subscriber, application.getName(),startSubIndex,endSubIndex, groupId);
-                        }
-
-		                List<APIIdentifier> identifiers = new ArrayList<APIIdentifier>();
+                        List<APIIdentifier> identifiers = new ArrayList<APIIdentifier>();
 		                for (SubscribedAPI subscribedAPI : subscribedAPIs) {
 			                addAPIObj(subscribedAPI, apisArray, thisObj, application);
 			                identifiers.add(subscribedAPI.getApiId());
@@ -2907,8 +2906,8 @@ public class APIStoreHostObject extends ScriptableObject {
         } finally {
             if (isTenantFlowStarted) {
                 PrivilegedCarbonContext.endTenantFlow();
-            }
-        }
+             }
+          }
         
         if (log.isDebugEnabled()) {
             log.debug("jsFunction_getMySubscriptionDetail took : " + (System.currentTimeMillis() - startTime) + "ms");
@@ -3024,7 +3023,6 @@ public class APIStoreHostObject extends ScriptableObject {
         if (args != null && isStringArray(args)) {
             Subscriber subscriber = new Subscriber((String) args[0]);
             String groupId = (String) args[1];
-            subscriber.setGroupId(groupId);
             subscriber.setSubscribedDate(new Date());
             //TODO : need to set the proper email
             subscriber.setEmail("");
@@ -3032,7 +3030,7 @@ public class APIStoreHostObject extends ScriptableObject {
             try {
                 int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager().getTenantId(MultitenantUtils.getTenantDomain((String) args[0]));
                 subscriber.setTenantId(tenantId);
-                apiConsumer.addSubscriber(subscriber);
+                apiConsumer.addSubscriber(subscriber, groupId);
             } catch (APIManagementException e) {
                 handleException("Error while adding the subscriber" + subscriber.getName(), e);
                 return false;
@@ -3058,12 +3056,8 @@ public class APIStoreHostObject extends ScriptableObject {
             if(args.length >1 && args[1] != null){
             	 groupId = args[1].toString();
             }
-            if (groupId == null || groupId.isEmpty() ) {
-                applications = apiConsumer.getApplications(new Subscriber(username));
-            } else {
-                applications = apiConsumer.getApplications(new Subscriber(username), groupId);
-            }
-
+             applications = apiConsumer.getApplications(new Subscriber(username), groupId);
+           
             if (applications != null) {
                 int i = 0;
                 for (Application application : applications) {
@@ -3137,14 +3131,8 @@ public class APIStoreHostObject extends ScriptableObject {
             Subscriber subscriber = new Subscriber(username);
 
             Application[] apps = null;
-            if (groupId == null || groupId.isEmpty()) {
-                apps = apiConsumer.getApplications(subscriber);
-
-            } else {
-                apps = apiConsumer.getApplications(subscriber, groupId);
-            }
-
-
+            apps = apiConsumer.getApplications(subscriber, groupId);
+            
             if(APIUtil.doesApplicationExist(apps, name)){
             	handleException("A duplicate application already exists by the name - " + name);
             }
@@ -3184,15 +3172,12 @@ public class APIStoreHostObject extends ScriptableObject {
         if (args != null && args.length > 2 && isStringArray(args)) {
             String name = (String) args[0];
             String username = (String) args[1];
-            String groupId = (String) args[2];
+            String groupingId = (String) args[2];
             Subscriber subscriber = new Subscriber(username);
             APIConsumer apiConsumer = getAPIConsumer(thisObj);
             Application[] apps;
-            if(groupId != null && !groupId.isEmpty()){
-            	apps = apiConsumer.getApplications(subscriber, groupId);
-            }else{
-            	apps = apiConsumer.getApplications(subscriber);
-            }
+           	apps = apiConsumer.getApplications(subscriber, groupingId);
+            
             if (apps == null || apps.length == 0) {
                 return false;
             }
@@ -3224,7 +3209,7 @@ public class APIStoreHostObject extends ScriptableObject {
                 }
                 Subscriber subscriber = new Subscriber(username);
                 APIConsumer apiConsumer = getAPIConsumer(thisObj);
-                Set<SubscribedAPI> subscribedAPIs = apiConsumer.getSubscribedAPIs(subscriber, applicationName);
+                Set<SubscribedAPI> subscribedAPIs = apiConsumer.getSubscribedAPIs(subscriber, applicationName, null);
 
                 int i = 0;
                 for (SubscribedAPI subscribedAPI : subscribedAPIs) {
@@ -3259,19 +3244,15 @@ public class APIStoreHostObject extends ScriptableObject {
             String tier = (String) args[3];
             String callbackUrl = (String) args[4];
             String description = (String) args[5];
-            String groupId = null;
+            String groupingId = null;
             if(args.length > 6 && args[6] != null){
-            	groupId = (String) args[6];
+                groupingId = (String) args[6];
             }
            
             Subscriber subscriber = new Subscriber(username);
             APIConsumer apiConsumer = getAPIConsumer(thisObj);
             Application[] apps;
-            if(groupId == null || groupId.isEmpty() ){
-            	apps = apiConsumer.getApplications(subscriber);
-            }else{
-            	apps = apiConsumer.getApplications(subscriber, groupId);
-            }
+           	apps = apiConsumer.getApplications(subscriber, groupingId);
            if (apps == null || apps.length == 0) {
                 return false;
             }
@@ -3373,7 +3354,7 @@ public class APIStoreHostObject extends ScriptableObject {
             String username = (String) args[2];
             Subscriber subscriber = new Subscriber(username);
             APIConsumer apiConsumer = getAPIConsumer(thisObj);
-            Application[] apps = apiConsumer.getApplications(subscriber);
+            Application[] apps = apiConsumer.getApplications(subscriber, null);
             if (apps == null || apps.length == 0) {
                 return false;
             }
@@ -3863,8 +3844,6 @@ public class APIStoreHostObject extends ScriptableObject {
 
             APIConsumer apiConsumer = getAPIConsumer(thisObj);
             //Check whether old access token is already available
-
-
             AccessTokenInfo response = null;
             try {
                 response = apiConsumer.renewAccessToken(oldAccessToken, clientId, clientSecret,
@@ -3887,8 +3866,10 @@ public class APIStoreHostObject extends ScriptableObject {
             }
             row.put("enableRegenarate", row, isRegenarateOptionEnabled);
             return row;
-        }
-        return null;
+         } else {
+            handleException("Invalid types of input parameters.");
+            return null;
+            }
     }
 
 
