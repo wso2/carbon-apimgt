@@ -77,11 +77,7 @@ function APIDesigner(){
 
     this.container = $( "#api_designer" );
 
-    //initialise the partials
-    source   = $("#designer-resources-template").html();
-    Handlebars.partials['designer-resources-template'] = Handlebars.compile(source);
-    source   = $("#designer-resource-template").html();
-    Handlebars.partials['designer-resource-template'] = Handlebars.compile(source);
+   
     if($('#scopes-template').length){
         source   = $("#scopes-template").html();
         Handlebars.partials['scopes-template'] = Handlebars.compile(source);        
@@ -461,8 +457,12 @@ APIDesigner.prototype.render_resources_template = function(){
         "verbs" :VERBS,
         "has_resources" : this.has_resources()
     }
-   
+ Handlebars.registerHelper('setIndex', function(value){
+    this.index = Number(value);
+});  
 var partial='add_resource';
+ //source   = $("#add_resource").html();
+   // Handlebars.partials['add_resource'] = Handlebars.compile(source);
 var container='resource_details';
  renderPartial(partial, container,context);
    /* $('#resource_details').find('.scope_select').editable({
@@ -487,20 +487,25 @@ var container='resource_details';
         });
     }
 
-    $('#resource_details').find('.change_summary').editable({
+   /* $('#resource_details').find('.change_summary').editable({
         emptytext: '+ Summary',        
         success : this.update_elements,
         inputclass : 'resource_summary'
-    });  
+    }); */ 
 };
 
 APIDesigner.prototype.render_resource = function(container){
     var operation = this.query(container.attr('data-path'));    
     var context = jQuery.extend(true, {}, operation[0]);
     context.resource_path = container.attr('data-path');
-    var output = Handlebars.partials['designer-resource-template'](context);
-    container.html(output);
-    container.show();
+    var partial='add_resource';
+ //source   = $("#add_resource").html();
+   // Handlebars.partials['add_resource'] = Handlebars.compile(source);
+
+ renderPartial(partial, container,context);
+    //var output = Handlebars.partials['designer-resource-template'](context);
+    //container.html(output);
+    //container.show();
 
     if(container.find('.editor').length){
         var textarea = container.find('.editor').ace({ theme: 'textmate', lang: 'javascript' ,fontSize: "10pt"});
@@ -616,12 +621,12 @@ $(document).ready(function(){
         });
     });
 
-    $("#resource_url_pattern").live('change',function(){
+  /*  $("#resource_url_pattern").live('change',function(){
         var re = new RegExp("^/?([a-zA-Z0-9]|-|_)+");
         var arr = re.exec($(this).val());
         if(arr && arr.length)
             $('#inputResource').val(arr[0]);
-    });
+    });*/
 
 
     var v = $("#form-asset-create").validate({
