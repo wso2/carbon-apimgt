@@ -27,7 +27,7 @@ app.server = function(ctx) {
             }, {
                 url: 'applications',
                 path: 'applications.jag',
-                secured:false
+                secured:true
             }]
         },
         configs: {
