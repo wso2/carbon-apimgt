@@ -20,13 +20,13 @@
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>apimgt-feature</artifactId>
-        <version>1.3.3</version>
+        <version>1.4.0</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
     <artifactId>org.wso2.carbon.apimgt.core.feature</artifactId>
-    <version>1.3.3</version>
+    <version>1.4.0</version>
     <packaging>pom</packaging>
     <name>WSO2 Carbon - Api management Core Feature</name>
     <url>http://wso2.org</url>
@@ -261,7 +261,7 @@
                                 <bundleDef>org.wso2.carbon:org.wso2.carbon.sequences.stub:4.2.1</bundleDef>
                                 <bundleDef>org.wso2.carbon.identity:org.wso2.carbon.identity.user.registration.stub:${identity.version}</bundleDef>
                                 <bundleDef>org.wso2.carbon.apimgt:org.wso2.carbon.bam.presentation.stub:${carbon.apimgt.version}</bundleDef>
-                                <bundleDef>org.wso2.carbon.mediation:org.wso2.carbon.mediation.security.stub:${carbon.kernel.version}</bundleDef>
+                                <bundleDef>org.wso2.carbon.mediation:org.wso2.carbon.mediation.security.stub:${carbon.mediation.version}</bundleDef>
                                 <bundleDef>org.apache.woden.wso2:woden</bundleDef>
                             </bundles>
                             <importBundles>
