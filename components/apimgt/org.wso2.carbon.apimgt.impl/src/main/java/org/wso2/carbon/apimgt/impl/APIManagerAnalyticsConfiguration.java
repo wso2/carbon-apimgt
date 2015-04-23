@@ -60,7 +60,10 @@ public class APIManagerAnalyticsConfiguration {
         }
         return instance;
     }
-
+    public static synchronized APIManagerAnalyticsConfiguration createNewInstance(){
+            instance = new APIManagerAnalyticsConfiguration();
+        return instance;
+    }
     public void setAPIManagerConfiguration(APIManagerConfiguration config){
         String skipEventReceiverConnStr = config.getFirstProperty(APIConstants.API_USAGE_SKIP_EVENT_RECEIVER_CONN);
         skipEventReceiverConnection = skipEventReceiverConnStr != null &&

@@ -28,9 +28,7 @@ import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
 import org.wso2.carbon.apimgt.api.model.Subscriber;
-import org.wso2.carbon.apimgt.impl.APIConstants;
-import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
-import org.wso2.carbon.apimgt.impl.APIManagerFactory;
+import org.wso2.carbon.apimgt.impl.*;
 import org.wso2.carbon.apimgt.impl.utils.APIMgtDBUtil;
 import org.wso2.carbon.apimgt.usage.client.billing.APIUsageRangeCost;
 import org.wso2.carbon.apimgt.usage.client.billing.PaymentPlan;
@@ -100,8 +98,13 @@ public class APIUsageStatisticsClient {
             throws APIMgtUsageQueryServiceClientException {
         OMElement element = null;
         APIManagerConfiguration config;
+        APIManagerAnalyticsConfiguration apiManagerAnalyticsConfiguration;
         try {
             config = APIUsageClientServiceComponent.getAPIManagerConfiguration();
+            apiManagerAnalyticsConfiguration = APIManagerAnalyticsConfiguration.getInstance();
+            if (apiManagerAnalyticsConfiguration.isAnalyticsEnabled() && dataSource == null) {
+                initializeDataSource();
+            }
             // text = config.getFirstProperty("BillingConfig");
             String billingConfig = config.getFirstProperty("EnableBillingAndUsage");
             boolean isBillingEnabled = Boolean.parseBoolean(billingConfig);
@@ -110,7 +113,7 @@ public class APIUsageStatisticsClient {
                 element = buildOMElement(new FileInputStream(filePath));
                 paymentPlan = new PaymentPlan(element);
             }
-            String targetEndpoint = APIUsageClientServiceComponent.getAnalyticsConfiguration().getBamServerUrlGroups();
+            String targetEndpoint = apiManagerAnalyticsConfiguration.getBamServerUrlGroups();
             if (targetEndpoint == null || targetEndpoint.equals(""))
                 throw new APIMgtUsageQueryServiceClientException("Required BAM server URL parameter unspecified");
             apiProviderImpl = APIManagerFactory.getInstance().getAPIProvider(username);
