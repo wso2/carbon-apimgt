@@ -2744,9 +2744,9 @@ public class APIStoreHostObject extends ScriptableObject {
 //                                    OAUTH_CLIENT_SECRET);
                             appObj.put("prodKey", appObj, prodKey.getAccessToken());
 
-	                        appObj.put("prodKeyScope", appObj, prodKeyScope);
+			                appObj.put("prodKeyScope", appObj, prodKeyScope);
 	                        appObj.put("prodKeyScopeValue", appObj, prodKey.getTokenScope());
-	                        appObj.put("prodConsumerKey", appObj, prodConsumerKey);
+                            appObj.put("prodConsumerKey", appObj, prodConsumerKey);
                             appObj.put("prodConsumerSecret", appObj, prodConsumerSecret);
                             appObj.put("prodJsonString", appObj, jsonString);
 
@@ -2764,9 +2764,9 @@ public class APIStoreHostObject extends ScriptableObject {
                             }
                         } else if (prodKey != null) {
                             appObj.put("prodKey", appObj, null);
-	                        appObj.put("prodKeyScope", appObj, null);
+                            appObj.put("prodKeyScope", appObj, null);
 	                        appObj.put("prodKeyScopeValue", appObj, null);
-	                        appObj.put("prodConsumerKey", appObj, null);
+                            appObj.put("prodConsumerKey", appObj, null);
                             appObj.put("prodConsumerSecret", appObj, null);
                             appObj.put("prodRegenarateOption", appObj, prodEnableRegenarateOption);
                             appObj.put("prodAuthorizedDomains", appObj, null);
@@ -2781,9 +2781,9 @@ public class APIStoreHostObject extends ScriptableObject {
                             appObj.put("prodKeyState", appObj, prodKey.getState());
                         } else {
                             appObj.put("prodKey", appObj, null);
-	                        appObj.put("prodKeyScope", appObj, null);
+                            appObj.put("prodKeyScope", appObj, null);
 	                        appObj.put("prodKeyScopeValue", appObj, null);
-	                        appObj.put("prodConsumerKey", appObj, null);
+                            appObj.put("prodConsumerKey", appObj, null);
                             appObj.put("prodConsumerSecret", appObj, null);
                             appObj.put("prodRegenarateOption", appObj, prodEnableRegenarateOption);
                             appObj.put("prodAuthorizedDomains", appObj, null);
@@ -2820,9 +2820,9 @@ public class APIStoreHostObject extends ScriptableObject {
 //                                    get(ApplicationConstants.OAUTH_CLIENT_SECRET);
                             appObj.put("sandboxKey", appObj, sandboxKey.getAccessToken());
 
-	                        appObj.put("sandKeyScope", appObj, sandKeyScope);
+                            appObj.put("sandKeyScope", appObj, sandKeyScope);
 	                        appObj.put("sandKeyScopeValue", appObj, sandboxKey.getTokenScope());
-	                        appObj.put("sandboxConsumerKey", appObj, sandboxConsumerKey);
+                            appObj.put("sandboxConsumerKey", appObj, sandboxConsumerKey);
                             appObj.put("sandboxConsumerSecret", appObj, sandboxConsumerSecret);
                             appObj.put("sandboxKeyState", appObj, sandboxKey.getState());
                             appObj.put("sandboxJsonString", appObj, jsonString);
@@ -2846,9 +2846,9 @@ public class APIStoreHostObject extends ScriptableObject {
                             }
                         } else if (sandboxKey != null) {
                             appObj.put("sandboxKey", appObj, null);
-	                        appObj.put("sandKeyScope", appObj, null);
+                            appObj.put("sandKeyScope", appObj, null);
 	                        appObj.put("sandKeyScopeValue", appObj, null);
-	                        appObj.put("sandboxConsumerKey", appObj, null);
+                            appObj.put("sandboxConsumerKey", appObj, null);
                             appObj.put("sandboxConsumerSecret", appObj, null);
                             appObj.put("sandRegenarateOption", appObj, sandEnableRegenarateOption);
                             appObj.put("sandboxAuthorizedDomains", appObj, null);
@@ -2863,9 +2863,9 @@ public class APIStoreHostObject extends ScriptableObject {
                             }
                         } else {
                             appObj.put("sandboxKey", appObj, null);
-	                        appObj.put("sandKeyScope", appObj, null);
+                            appObj.put("sandKeyScope", appObj, null);
 	                        appObj.put("sandKeyScopeValue", appObj, null);
-	                        appObj.put("sandboxConsumerKey", appObj, null);
+                            appObj.put("sandboxConsumerKey", appObj, null);
                             appObj.put("sandboxConsumerSecret", appObj, null);
                             appObj.put("sandRegenarateOption", appObj, sandEnableRegenarateOption);
                             appObj.put("sandboxAuthorizedDomains", appObj, null);
@@ -3857,7 +3857,7 @@ public class APIStoreHostObject extends ScriptableObject {
             row.put("consumerKey", row, response.getConsumerKey());
             row.put("consumerSecret", row, response.getConsumerKey());
             row.put("validityTime", row, response.getValidityPeriod());
-	        row.put("responseParams", row, response.getJSONString());
+            row.put("responseParams", row, response.getJSONString());
 	        row.put("tokenScope", row, response.getScopes());
 
             boolean isRegenarateOptionEnabled = true;
