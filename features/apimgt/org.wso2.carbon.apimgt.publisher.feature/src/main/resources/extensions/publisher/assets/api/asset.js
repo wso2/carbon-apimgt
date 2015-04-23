@@ -17,18 +17,15 @@
  *
  */
 asset.manager = function(ctx) {
-    var notifier = require('store').notificationManager;
-    var storeConstants = require('store').storeConstants;
     var apiPublisher =  require('apipublisher').apipublisher;
-    var social = carbon.server.osgiService('org.wso2.carbon.social.core.service.SocialActivityService');
-    var session = ctx.session;
     var LOGGED_IN_USER = 'LOGGED_IN_USER';
     var log = new Log('default-asset');
     return {
         remove : function(id) {
-            log.info("Calleeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee");
-            apiPublisher.APIProviderProxy(session.get(LOGGED_IN_USER));
-            return apiPublisher.deleteAPI(id);
+            var asset = this.get.call(this, id);
+            log.debug("Removing API of Id" +id+ "Name" + asset.attributes.overview_name);
+            var apiProxy = apiPublisher.instance(ctx.username);
+            return apiProxy.deleteAPI(asset.attributes.overview_provider, asset.attributes.overview_name, asset.version);
         }
     };
 };
