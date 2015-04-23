@@ -479,7 +479,7 @@ public class APIProviderHostObject extends ScriptableObject {
             }
             keyManager.updateRegisteredResource(api , registeredResource);
         }
-        
+        //definitionFromSwagger20.generateAPIDefinition(api);
         return saveAPI(apiProvider, api, null, false);
     }
     

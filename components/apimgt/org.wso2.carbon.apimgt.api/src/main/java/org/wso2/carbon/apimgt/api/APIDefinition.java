@@ -17,7 +17,6 @@
 */
 package org.wso2.carbon.apimgt.api;
 
-import org.json.simple.parser.ParseException;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.Scope;
@@ -74,6 +73,6 @@ public abstract class APIDefinition {
      * @return API definition in string format
      * @throws APIManagementException
      */
-    public abstract String createAPIDefinition(API api) throws APIManagementException;
+    public abstract String generateAPIDefinition(API api) throws APIManagementException;
 
 }
