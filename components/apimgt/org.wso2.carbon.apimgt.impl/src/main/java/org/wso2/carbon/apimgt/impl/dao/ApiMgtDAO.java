@@ -1767,14 +1767,20 @@ public class ApiMgtDAO {
                 "   AND SUBS.SUBS_CREATE_STATE = '"+
                 APIConstants.SubscriptionCreatedStatus.SUBSCRIBE + "'";
         
-        String whereClauseWithGroupId =  " AND APP.GROUP_ID =?"  ;
+        String whereClausewithGroupId = " AND (APP.GROUP_ID = ? OR (APP.GROUP_ID = '' AND SUB.USER_ID = ?))" ; 
+        String whereClausewithGroupIdorceCaseInsensitiveComp = " AND (APP.GROUP_ID = ? OR (APP.GROUP_ID = '' " +
+                "AND LOWER(SUB.USER_ID) = LOWER(?)))" ; 
         String whereClause = " AND SUB.USER_ID = ? ";
         String whereClauseCaseSensitive =" AND LOWER(SUB.USER_ID) = LOWER(?) ";
 
         try {
             connection = APIMgtDBUtil.getConnection();
              if (groupingId != null && !groupingId.equals("null") && !groupingId.isEmpty()) {
-                 sqlQuery += whereClauseWithGroupId; 
+                 if (forceCaseInsensitiveComparisons) {
+                     sqlQuery += whereClausewithGroupIdorceCaseInsensitiveComp; 
+                 } else {
+                     sqlQuery += whereClausewithGroupId; 
+                 }                 
              } else {
     		    if (forceCaseInsensitiveComparisons) {
                     sqlQuery += whereClauseCaseSensitive; 
@@ -1790,7 +1796,8 @@ public class ApiMgtDAO {
                               
             if (groupingId != null && !groupingId.equals("null") && !groupingId.equals("")) {
                 ps.setString(3, groupingId);
-            }else{
+                ps.setString(4, subscriber.getName());
+            } else {
                 ps.setString(3, subscriber.getName());
             }
             result = ps.executeQuery();
@@ -1926,32 +1933,38 @@ public class ApiMgtDAO {
         
             String whereClause = " AND  SUB.USER_ID = ? " ;  
             String whereClauseForceCaseInsensitiveComp = " AND LOWER(SUB.USER_ID) = LOWER(?)  ";
-            String whereClausewithGroupId = " AND APP.GROUP_ID =?" ; 
+            String whereClausewithGroupId = " AND (APP.GROUP_ID = ? OR (APP.GROUP_ID = '' AND SUB.USER_ID = ?))" ; 
+            String whereClausewithGroupIdorceCaseInsensitiveComp = " AND (APP.GROUP_ID = ? OR (APP.GROUP_ID = '' " +
+                    "AND LOWER(SUB.USER_ID) = LOWER(?)))" ; 
         try {
             connection = APIMgtDBUtil.getConnection();
             int tenantId = IdentityUtil.getTenantIdOFUser(subscriber.getName());  
-         if (groupingId != null && !groupingId.equals("null") &&  !groupingId.equals("")) {
-             
-                 sqlQuery +=  whereClausewithGroupId;
-                 
+            if (groupingId != null && !groupingId.equals("null") && !groupingId.equals("")) {
+                if (forceCaseInsensitiveComparisons) {
+                    sqlQuery += whereClausewithGroupIdorceCaseInsensitiveComp;
+                } else {
+                    sqlQuery += whereClausewithGroupId;
+                }
+
                 ps = connection.prepareStatement(sqlQuery);
                 ps.setInt(1, tenantId);
                 ps.setString(2, applicationName);
                 ps.setString(3, groupingId);
-                             
-            }else{
-                
+                ps.setString(4, subscriber.getName());
+
+            } else {
+
                 if (forceCaseInsensitiveComparisons) {
                     sqlQuery += whereClauseForceCaseInsensitiveComp;
-                }else{
+                } else {
                     sqlQuery += whereClause;
-                } 
-                
+                }
+
                 ps = connection.prepareStatement(sqlQuery);
                 ps.setInt(1, tenantId);
                 ps.setString(2, applicationName);
                 ps.setString(3, subscriber.getName());
-                
+
             }
 
             result = ps.executeQuery();
@@ -2039,16 +2052,22 @@ public class ApiMgtDAO {
                 "   AND SUBS.SUBS_CREATE_STATE = '" + APIConstants.SubscriptionCreatedStatus.SUBSCRIBE + "'";
         String whereClause =  " AND  SUB.USER_ID = ? " ;
         String whereClauseCaseInSensitive = " AND  LOWER(SUB.USER_ID) = LOWER(?) ";
-        String whereClauseGroupingId = "  AND APP.GROUP_ID=? ";
+        String whereClausewithGroupId = " AND (APP.GROUP_ID = ? OR (APP.GROUP_ID = '' AND SUB.USER_ID = ?))" ; 
+        String whereClausewithGroupIdorceCaseInsensitiveComp = " AND (APP.GROUP_ID = ? OR (APP.GROUP_ID = '' " +
+                "AND LOWER(SUB.USER_ID) = LOWER(?)))" ; 
         try {
             connection = APIMgtDBUtil.getConnection();
 
-            if(groupingId != null && !groupingId.equals("null") && !groupingId.isEmpty()){
-                sqlQuery += whereClauseGroupingId;
-            }else{
+            if (groupingId != null && !groupingId.equals("null") && !groupingId.isEmpty()) {
+                if (forceCaseInsensitiveComparisons) {
+                    sqlQuery += whereClausewithGroupIdorceCaseInsensitiveComp;
+                } else {
+                    sqlQuery += whereClausewithGroupId;
+                }
+            } else {
                 if (forceCaseInsensitiveComparisons) {
                     sqlQuery += whereClauseCaseInSensitive;
-                }else{
+                } else {
                     sqlQuery += whereClause;
                 }
             }
@@ -2058,6 +2077,7 @@ public class ApiMgtDAO {
             ps.setInt(1, tenantId);
             if(groupingId != null && !groupingId.equals("null") && !groupingId.isEmpty()){
                 ps.setString(2, groupingId);
+                ps.setString(3, subscriber.getName());
             }else{
                 ps.setString(2, subscriber.getName());
             }
