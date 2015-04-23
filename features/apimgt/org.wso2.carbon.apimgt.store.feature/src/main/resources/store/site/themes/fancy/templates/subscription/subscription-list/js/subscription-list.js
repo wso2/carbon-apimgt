@@ -364,13 +364,15 @@ var regenerate=function(appName,keyType,i,btn,div,clientId,clientSecret) {
                 //generating comma seperated string of scope names.
                 var generatedScopesArr = result.data.key.tokenScope;
                 for(var i = 0; i<generatedScopesArr.length; i++){
-                    if(generatedScopesArr[i] == "am_application_scope"){
-                        continue;
-                    }
                     var scopeId = "#"+generatedScopesArr[i];
-                    generatedScopesNames+=$(scopeId).attr('name');
-                    if(i<generatedScopesArr.length - 1){
-                        generatedScopesNames+=", ";
+                    var attr = $(scopeId).attr('name');
+                    // For some browsers, `attr` is undefined; for others,
+                    // `attr` is false.  Check for both.
+                    if (typeof attr !== typeof undefined && attr !== false) {
+                        generatedScopesNames+=$(scopeId).attr('name');
+                        if(i<generatedScopesArr.length - 1){
+                            generatedScopesNames+=", ";
+                        }
                     }
                 }
             }

@@ -117,7 +117,7 @@
 
                                         <% if(lenS > 0){ %>
 										<div class="token">
-											<% if(app.prodKeyScope != null && lenS<0 && app.prodKeyScope.length > 60){ %>
+											<% if(app.prodKeyScope != null && app.prodKeyScope.length > 60){ %>
 											   <textarea class="tokenTextarea accessTokenScopeDisplayPro keyValues" data-value="<%=app.prodKeyScope%>"><%=app.prodKeyScope%></textarea>
 											<% } else  { %>
 											   <span class="accessTokenScopeDisplayPro keyValues" id="prodAccessScope" data-value="<%=app.prodKeyScope%>"><%=app.prodKeyScope%></span>
