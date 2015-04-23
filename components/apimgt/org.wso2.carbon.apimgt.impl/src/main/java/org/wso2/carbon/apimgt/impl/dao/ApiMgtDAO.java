@@ -8507,6 +8507,12 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
         ResultSet resultSet = null;
         PreparedStatement ps = null;
         try {
+            consumerKey = APIUtil.encryptToken(consumerKey);
+        } catch (CryptoException e) {
+            log.error("Could not encrypt consumerKey " + consumerKey + ". " + e.getMessage());
+            throw new APIManagementException("Could not encrypt consumerKey " + consumerKey + ". " + e.getMessage());
+        }
+        try {
             conn = APIMgtDBUtil.getConnection();
 
             String sqlQuery = "SELECT IOS.SCOPE_KEY, IOS.ROLES " +
