@@ -5,7 +5,7 @@ $(function(){
 
     var refreshApplicationList = function () {
         $.ajax({
-            url: "https://localhost:9443/store/apis/applications", success: function (result) {
+            url: caramel.context + '/apis/applications', success: function (result) {
                 var partial = 'list_applications';
                 var container = 'list_applications';
                 var data = {};
