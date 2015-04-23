@@ -236,7 +236,8 @@
 
 	"forum.addReply.title" : "Add reply",
 	"forum.addReply.replyToThread" : "Reply to Thread",
-    "selectScopes" : "Select Scopes"
+    "selectScopes" : "Select Scopes",
+    "scope" : "Scope"
 
    
 }
