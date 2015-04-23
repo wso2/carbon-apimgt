@@ -22,21 +22,23 @@ var generateAPIKey = function (api, context, application, username, keyType, cal
     }
 };
 
+
 var generateApplicationKey = function (application, username, keyType, callbackUrl, accessAllowDomainsArr,
-                                       validityTime, afterFailure,tokenScope,applicationId,jsonParams) {
+                                       validityTime, afterFailure,tokenScope,groupingId,jsonParams) {
+
     afterFailure = typeof afterFailure !== 'undefined' ? afterFailure : false;
     var key,
             log = new Log(),
             store = jagg.module("manager").getAPIStoreObj();
-
     try {
 
 	if(afterFailure){
         key = store.createApplicationKeys(application, username, keyType, callbackUrl, accessAllowDomainsArr,
-                validityTime, afterFailure,tokenScope,applicationId,jsonParams);
+                validityTime, afterFailure,tokenScope,groupingId,jsonParams);
 	}else{
 	    key = store.getApplicationKey(application, username, keyType, callbackUrl, accessAllowDomainsArr,
-                validityTime, afterFailure,tokenScope,applicationId,jsonParams);
+                validityTime, afterFailure,tokenScope,groupingId,jsonParams);
+
 	}
         if (log.isDebugEnabled()) {
             log.debug("generateAPIKey");

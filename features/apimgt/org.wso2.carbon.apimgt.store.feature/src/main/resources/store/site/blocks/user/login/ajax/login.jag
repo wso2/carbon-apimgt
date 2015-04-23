@@ -38,14 +38,6 @@ include("/jagg/jagg.jag");
                 error:false
             }
         jagg.setUser({username:result.username, isSuperTenant:result.isSuperTenant, cookie:result.cookie, hasPublisherAccess:result.hasPublisherAccess});
-        //Call to get Group ID's.
-       groupId = store.getGroupIds(result.toString());
-       if(groupId == null)
-       {
-         //Avoid groupId null being sent to the backend.
-         groupId="";
-       }
-        session.put("groupId", groupId);
         session.put("showLogin", "false");
         }
         print(obj);
@@ -76,13 +68,7 @@ include("/jagg/jagg.jag");
              mod = jagg.module("user");
              var samlToken = request.getParameter("samlToken");
                  result = mod.loginWithSAMLToken(samlToken);
-                 groupId = store.getGroupIds(result);
-                 if(groupId==null){
-                    groupId="";
-                 }
-                 session.put("groupId", groupId);
-
-             if (result.error) {
+            if (result.error) {
                  obj = {
                      error:result.error,
                      message:result.message

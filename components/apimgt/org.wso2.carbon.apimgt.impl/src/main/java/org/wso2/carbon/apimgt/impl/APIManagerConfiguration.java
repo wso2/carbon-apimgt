@@ -52,8 +52,8 @@ import java.util.concurrent.ConcurrentHashMap;
  * approach to keep track of XML parameters.
  */
 public class APIManagerConfiguration {
-    
-    private Map<String,List<String>> configuration = new ConcurrentHashMap<String, List<String>>();
+
+    private Map<String, List<String>> configuration = new ConcurrentHashMap<String, List<String>>();
 
     private static Log log = LogFactory.getLog(APIManagerConfiguration.class);
 
@@ -62,7 +62,7 @@ public class APIManagerConfiguration {
     private static final String PRIMARY_LOGIN = "primary";
     private static final String CLAIM_URI = "ClaimUri";
 
-    private Map<String,Map<String,String>> loginConfiguration = new ConcurrentHashMap<String, Map<String,String>>();
+    private Map<String, Map<String, String>> loginConfiguration = new ConcurrentHashMap<String, Map<String, String>>();
 
     private SecretResolver secretResolver;
 
@@ -72,7 +72,7 @@ public class APIManagerConfiguration {
     private Set<APIStore> externalAPIStores = new HashSet<APIStore>();
 
     public Map<String, Map<String, String>> getLoginConfiguration() {
-           return loginConfiguration;
+        return loginConfiguration;
     }
 
     /**
@@ -98,19 +98,18 @@ public class APIManagerConfiguration {
         } catch (IOException e) {
             log.error(e.getMessage());
             throw new APIManagementException("I/O error while reading the API manager " +
-                    "configuration: " + filePath, e);
+                                             "configuration: " + filePath, e);
         } catch (XMLStreamException e) {
             log.error(e.getMessage());
             throw new APIManagementException("Error while parsing the API manager " +
-                    "configuration: " + filePath, e);
-        } catch (OMException e){
+                                             "configuration: " + filePath, e);
+        } catch (OMException e) {
             log.error(e.getMessage());
             throw new APIManagementException("Error while parsing API Manager configuration: " + filePath, e);
-        } catch (Exception e){
+        } catch (Exception e) {
             log.error(e.getMessage());
             throw new APIManagementException("Unexpected error occurred while parsing configuration: " + filePath, e);
-        }
-        finally {
+        } finally {
             IOUtils.closeQuietly(in);
         }
     }
@@ -122,13 +121,13 @@ public class APIManagerConfiguration {
         }
         return value.get(0);
     }
-    
+
     public List<String> getProperty(String key) {
         return configuration.get(key);
     }
-    
+
     public void reloadSystemProperties() {
-        for (Map.Entry<String,List<String>> entry : configuration.entrySet()) {
+        for (Map.Entry<String, List<String>> entry : configuration.entrySet()) {
             List<String> list = entry.getValue();
             for (int i = 0; i < list.size(); i++) {
                 String text = list.remove(i);
@@ -140,7 +139,7 @@ public class APIManagerConfiguration {
     private void readChildElements(OMElement serverConfig,
                                    Stack<String> nameStack) {
         for (Iterator childElements = serverConfig.getChildElements(); childElements
-                .hasNext();) {
+                .hasNext(); ) {
             OMElement element = (OMElement) childElements.next();
             String localName = element.getLocalName();
             nameStack.push(localName);
@@ -151,8 +150,7 @@ public class APIManagerConfiguration {
                     value = secretResolver.resolve(key);
                 }
                 addToConfiguration(key, replaceSystemProperty(value));
-            }
-            else if("Environments".equals(localName)) {
+            } else if ("Environments".equals(localName)) {
                 Iterator environmentIterator = element.getChildrenWithLocalName("Environment");
                 apiGatewayEnvironments = new HashMap<String, Environment>();
 
@@ -181,7 +179,7 @@ public class APIManagerConfiguration {
                     environment.setPassword(replaceSystemProperty(value));
                     environment.setApiGatewayEndpoint(replaceSystemProperty(
                             environmentElem.getFirstChildWithName(new QName(
-                                                            APIConstants.API_GATEWAY_ENDPOINT)).getText()));
+                                    APIConstants.API_GATEWAY_ENDPOINT)).getText()));
                     OMElement description =
                             environmentElem.getFirstChildWithName(new QName("Description"));
                     if (description != null) {
@@ -247,10 +245,10 @@ public class APIManagerConfiguration {
                     }
                     externalAPIStores.add(store);
                 }
-            }else if(APIConstants.LOGIN_CONFIGS.equals(localName)){
+            } else if (APIConstants.LOGIN_CONFIGS.equals(localName)) {
                 Iterator loginConfigIterator = element.getChildrenWithLocalName(APIConstants.LOGIN_CONFIGS);
-                while(loginConfigIterator.hasNext()){
-                    OMElement loginOMElement = (OMElement)loginConfigIterator.next();
+                while (loginConfigIterator.hasNext()) {
+                    OMElement loginOMElement = (OMElement) loginConfigIterator.next();
                     parseLoginConfig(loginOMElement);
                 }
 
@@ -262,14 +260,15 @@ public class APIManagerConfiguration {
 
     /**
      * Read the primary/secondary login configuration
-     *      <LoginConfig>
-     *              <UserIdLogin  primary="true">
-     *                      <ClaimUri></ClaimUri>
-     *              </UserIdLogin>
-     *              <EmailLogin  primary="false">
-     *                      <ClaimUri>http://wso2.org/claims/emailaddress</ClaimUri>
-     *              </EmailLogin>           loginOMElement
-     *      </LoginConfig>
+     * <LoginConfig>
+     * <UserIdLogin  primary="true">
+     * <ClaimUri></ClaimUri>
+     * </UserIdLogin>
+     * <EmailLogin  primary="false">
+     * <ClaimUri>http://wso2.org/claims/emailaddress</ClaimUri>
+     * </EmailLogin>           loginOMElement
+     * </LoginConfig>
+     *
      * @param loginConfigElem
      */
     private void parseLoginConfig(OMElement loginConfigElem) {
@@ -280,7 +279,7 @@ public class APIManagerConfiguration {
             // Primary/Secondary supported login mechanisms
             OMElement emailConfigElem = loginConfigElem.getFirstChildWithName(new QName(EMAIL_LOGIN));
 
-            OMElement userIdConfigElem =  loginConfigElem.getFirstChildWithName(new QName(USERID_LOGIN));
+            OMElement userIdConfigElem = loginConfigElem.getFirstChildWithName(new QName(USERID_LOGIN));
 
             Map<String, String> emailConf = new HashMap<String, String>(2);
             emailConf.put(PRIMARY_LOGIN, emailConfigElem.getAttributeValue(new QName(PRIMARY_LOGIN)));
@@ -288,7 +287,7 @@ public class APIManagerConfiguration {
 
             Map<String, String> userIdConf = new HashMap<String, String>(2);
             userIdConf.put(PRIMARY_LOGIN, userIdConfigElem.getAttributeValue(new QName(PRIMARY_LOGIN)));
-            userIdConf.put(CLAIM_URI,userIdConfigElem.getFirstChildWithName(new QName(CLAIM_URI)).getText());
+            userIdConf.put(CLAIM_URI, userIdConfigElem.getFirstChildWithName(new QName(CLAIM_URI)).getText());
 
             loginConfiguration.put(EMAIL_LOGIN, emailConf);
             loginConfiguration.put(USERID_LOGIN, userIdConf);
@@ -322,7 +321,7 @@ public class APIManagerConfiguration {
         }
     }
 
-    private String replaceSystemProperty(String text) {
+    public static String replaceSystemProperty(String text) {
         int indexOfStartingChars = -1;
         int indexOfClosingBrace;
 
@@ -330,12 +329,12 @@ public class APIManagerConfiguration {
         // Properties are specified as ${system.property},
         // and are assumed to be System properties
         while (indexOfStartingChars < text.indexOf("${")
-                && (indexOfStartingChars = text.indexOf("${")) != -1
-                && (indexOfClosingBrace = text.indexOf('}')) != -1) { // Is a
+               && (indexOfStartingChars = text.indexOf("${")) != -1
+               && (indexOfClosingBrace = text.indexOf('}')) != -1) { // Is a
             // property
             // used?
             String sysProp = text.substring(indexOfStartingChars + 2,
-                    indexOfClosingBrace);
+                                            indexOfClosingBrace);
             String propValue = System.getProperty(sysProp);
             if (propValue == null) {
                 if (sysProp.equals("carbon.context")) {
@@ -357,10 +356,10 @@ public class APIManagerConfiguration {
             }
             if (propValue != null) {
                 text = text.substring(0, indexOfStartingChars) + propValue
-                        + text.substring(indexOfClosingBrace + 1);
+                       + text.substring(indexOfClosingBrace + 1);
             }
             if (sysProp.equals("carbon.home") && propValue != null
-                    && propValue.equals(".")) {
+                && propValue.equals(".")) {
 
                 text = new File(".").getAbsolutePath() + File.separator + text;
 
@@ -377,7 +376,8 @@ public class APIManagerConfiguration {
         return externalAPIStores;
     }
 
-    public APIStore getExternalAPIStore(String storeName) { //Return APIStore object,based on store name/Here we assume store name is unique.
+    public APIStore getExternalAPIStore(
+            String storeName) { //Return APIStore object,based on store name/Here we assume store name is unique.
         for (APIStore apiStore : externalAPIStores) {
             if (apiStore.getName().equals(storeName)) {
                 return apiStore;
@@ -396,16 +396,15 @@ public class APIManagerConfiguration {
             keyManagerURL = new URL(configuration.get(APIConstants.KEYMANAGER_SERVERURL).get(0));
             String hostname = keyManagerURL.getHost();
             int port = keyManagerURL.getPort();
-            System.setProperty(APIConstants.KEYMANAGER_PORT,String.valueOf(port));
-            if(hostname.equals(System.getProperty(APIConstants.CARBON_LOCALIP))){
-                System.setProperty(APIConstants.KEYMANAGER_HOSTNAME,"localhost");
+            System.setProperty(APIConstants.KEYMANAGER_PORT, String.valueOf(port));
+            if (hostname.equals(System.getProperty(APIConstants.CARBON_LOCALIP))) {
+                System.setProperty(APIConstants.KEYMANAGER_HOSTNAME, "localhost");
+            } else {
+                System.setProperty(APIConstants.KEYMANAGER_HOSTNAME, hostname);
             }
-            else{
-                System.setProperty(APIConstants.KEYMANAGER_HOSTNAME,hostname);
-            }
-        //Since this is the server startup.Ignore the exceptions,invoked at the server startup
+            //Since this is the server startup.Ignore the exceptions,invoked at the server startup
         } catch (MalformedURLException e) {
-            log.error("Exception While resolving KeyManager Server URL or Port "+e.getMessage(), e);
+            log.error("Exception While resolving KeyManager Server URL or Port " + e.getMessage(), e);
         }
     }
 

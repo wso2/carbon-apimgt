@@ -543,7 +543,7 @@ $(document).ready(function(){
 
         if($('#swagger_import_url').val().length == 0){
         }else{
-        $('#import_swagger').button('loading');
+        $('#import_swagger').addClass('active');
         $('#swagger_help').hide();
         var data = {
             "swagger_url" : $("#swagger_import_url").val() // "http://petstore.swagger.wordnik.com/api/api-docs"
@@ -552,11 +552,11 @@ $(document).ready(function(){
             var designer = APIDesigner();
             designer.load_api_document(data);
             $('#swagger_help').hide();
-            $('#import_swagger').button('reset');
+            $('#import_swagger').removeClass('active');
             $("#swaggerUpload").modal('hide');
         }).fail(function(data){
             $('#swagger_help').show();
-            $('#import_swagger').button('reset');
+            $('#import_swagger').removeClass('active');
             $('#errorMsgClose').on('click', function(e) {
                 $('#swagger_help').hide();
             });
@@ -569,17 +569,6 @@ $(document).ready(function(){
         var arr = re.exec($(this).val());
         if(arr && arr.length)
             $('#inputResource').val(arr[0]);
-    });
-
-    var thisID;
-    $('#saveBtn').click(function(e){
-        $(this).siblings('button').button('reset');
-        thisID = $(this).attr('id');
-    });
-
-    $('#go_to_implement').click(function(e){
-        $(this).siblings('button').button('reset');
-        thisID = $(this).attr('id');
     });
 
     var v = $("#design_form").validate({
@@ -606,12 +595,12 @@ $(document).ready(function(){
 
         $('#swagger').val(JSON.stringify(designer.api_doc));
 
-        $('#'+thisID).button('loading');
+        $('#'+thisID).addClass('active');
 
         $(form).ajaxSubmit({
             success:function(responseText, statusText, xhr, $form){
 
-                $('#'+thisID).button('reset');
+                $('#'+thisID).removeClass('active');
                 if (!responseText.error) {
                     var designer = APIDesigner();
                     designer.saved_api = {};
@@ -639,6 +628,17 @@ $(document).ready(function(){
         });
         }
     });
+});
+
+var thisID;
+$('#saveBtn').click(function(e){
+    $(this).siblings('button').button('reset');
+    thisID = $(this).attr('id');
+});
+
+$('#go_to_implement').click(function(e){
+    $(this).siblings('button').button('reset');
+    thisID = $(this).attr('id');
 });
 
 function getContextValue() {
