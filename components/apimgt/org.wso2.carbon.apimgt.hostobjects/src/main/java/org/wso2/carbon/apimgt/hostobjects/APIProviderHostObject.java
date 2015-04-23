@@ -53,7 +53,7 @@ import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.impl.UserAwareAPIProvider;
-import org.wso2.carbon.apimgt.impl.factory.KeyManagerFactory;
+import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.impl.definitions.APIDefinitionFromSwagger20;
 import org.wso2.carbon.apimgt.impl.dto.Environment;
 import org.wso2.carbon.apimgt.impl.dto.TierPermissionDTO;
@@ -70,7 +70,6 @@ import org.wso2.carbon.authenticator.stub.AuthenticationAdminStub;
 import org.wso2.carbon.base.ServerConfiguration;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.core.util.PermissionUpdateUtil;
-import org.wso2.carbon.registry.core.RegistryConstants;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.core.service.RegistryService;
 import org.wso2.carbon.registry.core.session.UserRegistry;
@@ -461,7 +460,7 @@ public class APIProviderHostObject extends ScriptableObject {
             log.error("Error while removing the scope cache", e);
         }
         //get new key manager instance for  resource registration.
-        KeyManager keyManager = KeyManagerFactory.getKeyManager();
+        KeyManager keyManager = KeyManagerHolder.getKeyManagerInstance();
 
         Map registeredResource = keyManager.getResourceByApiId(api.getId().toString());
 
@@ -669,10 +668,11 @@ public class APIProviderHostObject extends ScriptableObject {
         		PrivilegedCarbonContext.endTenantFlow();
         	}
         }
-
-        String wsdl = (String) apiData.get("wsdl", apiData);
-        if(wsdl != null && !wsdl.isEmpty()) {
-            api.setWsdlUrl(wsdl);
+        if (apiData.containsKey("wsdl")) {
+            String wsdl = (String) apiData.get("wsdl", apiData);
+            if(wsdl != null && !wsdl.isEmpty()) {
+                api.setWsdlUrl(wsdl);
+            }
         }
         
         if (apiData.get("swagger", apiData) != null) {
@@ -2144,7 +2144,7 @@ public class APIProviderHostObject extends ScriptableObject {
                 myn.put(43, myn, api.getImplementation());
                 myn.put(44, myn, APIUtil.writeEnvironmentsToArtifact(api));
                 //get new key manager
-                KeyManager keyManager = KeyManagerFactory.getKeyManager();
+                KeyManager keyManager = KeyManagerHolder.getKeyManagerInstance();
                 Map registeredResource = keyManager.getResourceByApiId(api.getId().toString());
                 myn.put(45, myn, JSONObject.toJSONString(registeredResource));
 
@@ -2203,7 +2203,13 @@ public class APIProviderHostObject extends ScriptableObject {
                     }
 
                     String[] apiData = {api.getId().getApiName(), api.getId().getVersion(),  api.getId().getProviderName()};
-                    String key = "[\""+apiData[0]+"\",\""+apiData[1]+"\",\""+apiData[2]+"\"]";
+                    
+                    JSONArray jsonArray = new JSONArray();
+                    jsonArray.add(0,apiData[0]);
+                    jsonArray.add(1,apiData[1]);
+                    jsonArray.add(2,apiData[2]);
+                    String key = jsonArray.toJSONString();
+
                     Long currentCount = subscriptions.get(key);
                     if (currentCount != null) {
                         subscriptions.put(key, currentCount + count);
@@ -3673,7 +3679,7 @@ public class APIProviderHostObject extends ScriptableObject {
             }
             APIProvider apiProvider = getAPIProvider(thisObj);
             apiProvider.deleteAPI(apiId);
-            KeyManager keyManager = KeyManagerFactory.getKeyManager();
+            KeyManager keyManager = KeyManagerHolder.getKeyManagerInstance();
 
             if (apiId.toString() != null) {
                 keyManager.deleteRegisteredResourceByAPIId(apiId.toString());

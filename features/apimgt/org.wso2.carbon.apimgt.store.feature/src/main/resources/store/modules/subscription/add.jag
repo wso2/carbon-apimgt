@@ -5,7 +5,8 @@ var addSubscription = function (api, tier, applicationId, username) {
             store = jagg.module("manager").getAPIStoreObj();
 
     try {
-        status = store.addSubscription(api.provider, api.name, api.version, tier, applicationId, username);
+        var groupingId = session.get("groupId");
+        status = store.addSubscription(api.provider, api.name, api.version, tier, applicationId,  username);
         if (log.isDebugEnabled()) {
             log.debug("addAPISubscription");
         }
