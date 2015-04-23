@@ -559,6 +559,9 @@ public class APIThrottleHandler extends AbstractHandler {
                     } else {
                         resourceLevelRoleId = resourceAndHTTPVerbThrottlingTier;
                     }
+                    //adding consumerKey and authz_user combination instead of access token to resourceAndHTTPVerbKey
+                    //This avoids sending more than the permitted number of requests in a minute by
+                    // regenerating the access token
                     String resourceAndHTTPVerbKey = verbInfoDTO.getRequestKey() + "-" + consumerKey + ":" + authorizedUser;
                     //resourceLevelTier should get from auth context or request synapse context
                     // getResourceAuthenticationScheme(apiContext, apiVersion, requestPath, httpMethod);
@@ -647,6 +650,9 @@ public class APIThrottleHandler extends AbstractHandler {
 
                         apiContext = apiContext != null ? apiContext : "";
                         apiVersion = apiVersion != null ? apiVersion : "";
+                        //adding consumerKey and authz_user combination instead of access token to apiKey
+                        //This avoids sending more than the permitted number of requests in a minute by
+                        // regenerating the access token
                         String apiKey = apiContext + ":" + apiVersion + ":" + consumerKey + ":" + authorizedUser;
                         //If the application has not been subscribed to the Unlimited Tier and
                         //if application level throttling has passed
