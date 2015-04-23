@@ -2090,7 +2090,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      *          If failed to remove the API
      **/
 
-    public void deleteAPI(JSONObject id) throws APIManagementException {
+    public boolean deleteAPI(JSONObject id) throws APIManagementException {
         String providerName = (String) id.get("provider");
         providerName = APIUtil.replaceEmailDomain(providerName);
         String apiName = (String) id.get("name");
@@ -2226,6 +2226,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 PrivilegedCarbonContext.endTenantFlow();
             }
         }
+        //Indicate successful deletion
+        return true;
     }
   
     public Map<Documentation, API> searchAPIsByDoc(String searchTerm, String searchType) throws APIManagementException {
