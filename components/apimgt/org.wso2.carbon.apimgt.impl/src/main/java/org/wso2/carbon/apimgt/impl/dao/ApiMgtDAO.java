@@ -107,6 +107,7 @@ import org.wso2.carbon.identity.oauth.IdentityOAuthAdminException;
 import org.wso2.carbon.identity.oauth.OAuthUtil;
 import org.wso2.carbon.identity.oauth.common.OAuthConstants;
 import org.wso2.carbon.identity.oauth.config.OAuthServerConfiguration;
+import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 /**
@@ -8504,6 +8505,51 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
         } finally {
             APIMgtDBUtil.closeAllConnections(ps, null, null);
         }
+    }
+
+    /**
+     * Check the given api name is already available in the api table under given tenant domain
+     *
+     * @param apiName candidate api name
+     * @param tenantDomain tenant domain name
+     * @return true if the name is already available
+     * @throws APIManagementException
+     */
+    public boolean isApiNameExist(String apiName, String tenantDomain) throws APIManagementException {
+        Connection connection = null;
+        PreparedStatement prepStmt = null;
+        ResultSet resultSet = null;
+        String contextParam = "/t/";
+
+        String query = "SELECT COUNT(API_ID) AS API_COUNT FROM AM_API WHERE API_NAME = ? AND CONTEXT NOT LIKE ?";
+        if (!MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
+            query = "SELECT COUNT(API_ID) AS API_COUNT FROM AM_API WHERE API_NAME = ? AND CONTEXT LIKE ?";
+            contextParam += tenantDomain + "/";
+        }
+
+        try {
+            connection = APIMgtDBUtil.getConnection();
+
+            prepStmt = connection.prepareStatement(query);
+            prepStmt.setString(1, apiName);
+            prepStmt.setString(2, contextParam + "%");
+            resultSet = prepStmt.executeQuery();
+
+            int apiCount = 0;
+            if (resultSet != null) {
+                while (resultSet.next()) {
+                    apiCount = resultSet.getInt("API_COUNT");
+                }
+            }
+            if (apiCount > 0) {
+                return true;
+            }
+        } catch (SQLException e) {
+            handleException("Failed to check api Name availability : " + apiName, e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(prepStmt, connection, resultSet);
+        }
+        return false;
     }
 
 }
