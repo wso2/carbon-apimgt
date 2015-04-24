@@ -18,8 +18,8 @@ $(document).ready(function () {
     	var selected = ($('.Checkbox:checked').map(function() {
     	    return this.value;
     	}).get().join(' '));
-    	$('#scopeInput').attr('value', selected);
-    	$('#scopeInput').attr('value', selected);
+    	$('#prodScopeInput').attr('value', selected);
+    	$('#sandScopeInput').attr('value', selected);
     	});
     
     /*$("select[name='scope']").change(function() {
@@ -96,19 +96,22 @@ $(document).ready(function () {
         var link;
         var userName = elem.attr("data-username");
         var validityTime;
+        var tokenScope;
         if (keyType == 'PRODUCTION') {
             authoDomains = $('#allowedDomainsPro').val();
             validityTime = $('#refreshProdValidityTime').val();
+            tokenScope = $('#prodScopeInput').val();
         } else {
             authoDomains = $('#allowedDomainsSand').val();
             validityTime = $('#refreshSandValidityTime').val();
+            tokenScope = $('#sandScopeInput').val();
         }
 
         /*
          if we have additional parameters we can pass them as a json object.
          */
 
-	    var tokenScope = $('#scopeInput').val();
+
 
         jagg.post("/site/blocks/subscription/subscription-add/ajax/subscription-add.jag", {
 
@@ -325,15 +328,16 @@ var regenerate=function(appName,keyType,i,btn,div,clientId,clientSecret) {
         authorizedDomainsTemp = $('#allowedDomainsPro').val();
         if(authorizedDomainsTemp == ''){$('#allowedDomainsPro').val('ALL')}
         validityTime=$('#refreshProdValidityTime').val();
+        tokenScope=$('#prodScopeInput').val();
     } else {
         oldAccessToken = $('.sandAccessTokenHidden').val();
         authorizedDomainsTemp = $('#allowedDomainsSand').val();
         if(authorizedDomainsTemp == ''){$('#allowedDomainsSand').val('ALL')}
         validityTime=$('#refreshSandValidityTime').val();
+        tokenScope=$('#sandScopeInput').val();
     }
-    
-    tokenScope=$('#scopeInput').val();
-    
+
+
     jagg.post("/site/blocks/subscription/subscription-add/ajax/subscription-add.jag", {
         action:"refreshToken",
         application:appName,
@@ -349,17 +353,36 @@ var regenerate=function(appName,keyType,i,btn,div,clientId,clientSecret) {
             $(btn).parent().show();
             $(btn).parent().prev().hide();
             var regenerateOption=result.data.key.enableRegenarate;
+            var generatedScopesNames = "";
+
+            if(result.data.key.tokenScope.length > 1){
+                //generating comma seperated string of scope names.
+                var generatedScopesArr = result.data.key.tokenScope;
+                for(var i = 0; i<generatedScopesArr.length; i++){
+                    var scopeId = "#"+generatedScopesArr[i];
+                    var attr = $(scopeId).attr('name');
+                    // For some browsers, `attr` is undefined; for others,
+                    // `attr` is false.  Check for both.
+                    if (typeof attr !== typeof undefined && attr !== false) {
+                        generatedScopesNames+=$(scopeId).attr('name');
+                        if(i<generatedScopesArr.length - 1){
+                            generatedScopesNames+=", ";
+                        }
+                    }
+                }
+            }
+
             if(keyType == "PRODUCTION"){
                 $('.prodAccessTokenHidden').val(result.data.key.accessToken);
                 if(!regenerateOption){ $('.proRegenerateForm').hide(); }
                 $('.accessTokenDisplayPro').html(result.data.key.accessToken).attr('data-value',result.data.key.accessToken);
-                $('.accessTokenScopeDisplayPro').html(result.data.key.tokenScope).attr('data-value',result.data.key.tokenScope);
+                $('.accessTokenScopeDisplayPro').html(generatedScopesNames).attr('data-value',generatedScopesNames);
                 showHideKeys();
             } else{
                 $('.sandAccessTokenHidden').val(result.data.key.accessToken);
                 if(!regenerateOption){ $('.sandRegenerateForm').hide(); }
                 $('.accessTokenDisplaySand').html(result.data.key.accessToken).attr('data-value',result.data.key.accessToken);
-                $('.sandScopeDisplayPro').html(result.data.key.tokenScope).attr('data-value',result.data.key.tokenScope);
+                $('.sandScopeDisplayPro').html(generatedScopesNames).attr('data-value',generatedScopesNames);
                 //change sandScopeDisplayPro name
                 showHideKeys();
             }

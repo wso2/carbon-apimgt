@@ -2812,6 +2812,7 @@ public class APIStoreHostObject extends ScriptableObject {
                             appObj.put("prodKey", appObj, prodKey.getAccessToken());
 
 			                appObj.put("prodKeyScope", appObj, prodKeyScope);
+                            appObj.put("prodKeyScopeValue", appObj, prodKey.getTokenScope());
                             appObj.put("prodConsumerKey", appObj, prodConsumerKey);
                             appObj.put("prodConsumerSecret", appObj, prodConsumerSecret);
                             appObj.put("prodJsonString", appObj, jsonString);
@@ -2832,6 +2833,7 @@ public class APIStoreHostObject extends ScriptableObject {
                             String jsonString = prodApp.getJsonString();
                             appObj.put("prodKey", appObj, null);
                             appObj.put("prodKeyScope", appObj, null);
+                            appObj.put("prodKeyScopeValue", appObj, null);
                             appObj.put("prodConsumerKey", appObj, null);
                             appObj.put("prodConsumerSecret", appObj, null);
                             appObj.put("prodRegenarateOption", appObj, prodEnableRegenarateOption);
@@ -2848,6 +2850,7 @@ public class APIStoreHostObject extends ScriptableObject {
                         } else {
                             appObj.put("prodKey", appObj, null);
                             appObj.put("prodKeyScope", appObj, null);
+                            appObj.put("prodKeyScopeValue", appObj, null);
                             appObj.put("prodConsumerKey", appObj, null);
                             appObj.put("prodConsumerSecret", appObj, null);
                             appObj.put("prodRegenarateOption", appObj, prodEnableRegenarateOption);
@@ -2886,6 +2889,7 @@ public class APIStoreHostObject extends ScriptableObject {
                             appObj.put("sandboxKey", appObj, sandboxKey.getAccessToken());
 
                             appObj.put("sandKeyScope", appObj, sandKeyScope);
+                            appObj.put("sandKeyScopeValue", appObj, sandboxKey.getTokenScope());
                             appObj.put("sandboxConsumerKey", appObj, sandboxConsumerKey);
                             appObj.put("sandboxConsumerSecret", appObj, sandboxConsumerSecret);
                             appObj.put("sandboxKeyState", appObj, sandboxKey.getState());
@@ -2912,6 +2916,7 @@ public class APIStoreHostObject extends ScriptableObject {
                             String jsonString = sandApp.getJsonString();
                             appObj.put("sandboxKey", appObj, null);
                             appObj.put("sandKeyScope", appObj, null);
+                            appObj.put("sandKeyScopeValue", appObj, null);
                             appObj.put("sandboxConsumerKey", appObj, null);
                             appObj.put("sandboxConsumerSecret", appObj, null);
                             appObj.put("sandRegenarateOption", appObj, sandEnableRegenarateOption);
@@ -2928,6 +2933,7 @@ public class APIStoreHostObject extends ScriptableObject {
                         } else {
                             appObj.put("sandboxKey", appObj, null);
                             appObj.put("sandKeyScope", appObj, null);
+                            appObj.put("sandKeyScopeValue", appObj, null);
                             appObj.put("sandboxConsumerKey", appObj, null);
                             appObj.put("sandboxConsumerSecret", appObj, null);
                             appObj.put("sandRegenarateOption", appObj, sandEnableRegenarateOption);
@@ -4051,6 +4057,7 @@ public class APIStoreHostObject extends ScriptableObject {
             row.put("consumerSecret", row, response.getConsumerKey());
             row.put("validityTime", row, response.getValidityPeriod());
             row.put("responseParams", row, response.getJSONString());
+            row.put("tokenScope", row, response.getScopes());
 
             boolean isRegenarateOptionEnabled = true;
             if (getApplicationAccessTokenValidityPeriodInSeconds() < 0) {
