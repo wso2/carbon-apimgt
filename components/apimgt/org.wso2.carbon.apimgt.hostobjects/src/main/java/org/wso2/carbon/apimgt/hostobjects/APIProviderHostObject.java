@@ -42,6 +42,7 @@ import org.json.simple.JSONValue;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.mozilla.javascript.*;
+import org.wso2.carbon.apimgt.api.APIDefinition;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.FaultGatewaysException;
@@ -109,7 +110,7 @@ public class APIProviderHostObject extends ScriptableObject {
     }
 
     // API definitions from swagger v2.0
-    static APIDefinitionFromSwagger20 definitionFromSwagger20 = new APIDefinitionFromSwagger20();
+    static APIDefinition definitionFromSwagger20 = new APIDefinitionFromSwagger20();
 
     // The zero-argument constructor used for create instances for runtime
     public APIProviderHostObject() throws APIManagementException {
@@ -479,7 +480,6 @@ public class APIProviderHostObject extends ScriptableObject {
             }
             keyManager.updateRegisteredResource(api , registeredResource);
         }
-        //definitionFromSwagger20.generateAPIDefinition(api);
         return saveAPI(apiProvider, api, null, false);
     }
     
@@ -1266,6 +1266,8 @@ public class APIProviderHostObject extends ScriptableObject {
         		PrivilegedCarbonContext.endTenantFlow();
         	}
         }
+        String apiDefinitionJSON = definitionFromSwagger20.generateAPIDefinition(api);
+        apiProvider.saveSwagger20Definition(api.getId(), apiDefinitionJSON);
         return success;
 
     }
