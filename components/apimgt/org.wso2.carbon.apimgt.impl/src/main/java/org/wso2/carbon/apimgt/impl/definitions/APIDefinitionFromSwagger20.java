@@ -313,6 +313,9 @@ public class APIDefinitionFromSwagger20 extends APIDefinition {
         JSONObject pathsObject = new JSONObject();
         JSONObject pathItemObject = null;
         JSONObject operationObject;
+        JSONObject responseObject = new JSONObject();
+        //add default response
+        responseObject.put("200","{}");
 
         for (URITemplate uriTemplate : uriTemplates) {
             String pathName = uriTemplate.getUriTemplate();
@@ -326,7 +329,7 @@ public class APIDefinitionFromSwagger20 extends APIDefinition {
                 operationObject = new JSONObject();
                 operationObject.put("x-auth-type", uriTemplate.getAuthType());
                 operationObject.put("x-throttling-tier", uriTemplate.getThrottlingTier());
-                operationObject.put("responses", "");//where to find responses
+                operationObject.put("responses", responseObject);
                 pathItemObject.put(httpVerb.toLowerCase(), operationObject);
             }
             pathsObject.put(pathName, pathItemObject);
