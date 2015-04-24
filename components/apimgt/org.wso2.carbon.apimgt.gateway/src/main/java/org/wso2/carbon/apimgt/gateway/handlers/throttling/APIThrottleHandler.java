@@ -432,6 +432,8 @@ public class APIThrottleHandler extends AbstractHandler {
             // gets the remote caller role name
             AuthenticationContext authContext = APISecurityUtils.getAuthenticationContext(synCtx);
             String accessToken;
+            String consumerKey;
+            String authorizedUser;
             String roleID;
             String applicationId;
             String applicationTier;
@@ -439,6 +441,8 @@ public class APIThrottleHandler extends AbstractHandler {
             if (authContext != null) {
                 //Although the method says getApiKey, what is actually returned is the Bearer header (accessToken)
                 accessToken = authContext.getApiKey();
+                consumerKey = authContext.getConsumerKey();
+                authorizedUser = authContext.getUsername();
                 roleID = authContext.getTier();
                 applicationTier = authContext.getApplicationTier();
                 applicationId = authContext.getApplicationId();
@@ -555,7 +559,10 @@ public class APIThrottleHandler extends AbstractHandler {
                     } else {
                         resourceLevelRoleId = resourceAndHTTPVerbThrottlingTier;
                     }
-                    String resourceAndHTTPVerbKey = verbInfoDTO.getRequestKey() + "-" + accessToken;
+                    //adding consumerKey and authz_user combination instead of access token to resourceAndHTTPVerbKey
+                    //This avoids sending more than the permitted number of requests in a unit time by
+                    // regenerating the access token
+                    String resourceAndHTTPVerbKey = verbInfoDTO.getRequestKey() + "-" + consumerKey + ":" + authorizedUser;
                     //resourceLevelTier should get from auth context or request synapse context
                     // getResourceAuthenticationScheme(apiContext, apiVersion, requestPath, httpMethod);
                     //api + resource+http verb combination as verb_resource_api_combined_key
@@ -643,7 +650,10 @@ public class APIThrottleHandler extends AbstractHandler {
 
                         apiContext = apiContext != null ? apiContext : "";
                         apiVersion = apiVersion != null ? apiVersion : "";
-                        String apiKey = apiContext + ":" + apiVersion + ":" + accessToken;
+                        //adding consumerKey and authz_user combination instead of access token to apiKey
+                        //This avoids sending more than the permitted number of requests in a unit time by
+                        // regenerating the access token
+                        String apiKey = apiContext + ":" + apiVersion + ":" + consumerKey + ":" + authorizedUser;
                         //If the application has not been subscribed to the Unlimited Tier and
                         //if application level throttling has passed
                         if (!APIConstants.UNLIMITED_TIER.equals(roleID) &&
