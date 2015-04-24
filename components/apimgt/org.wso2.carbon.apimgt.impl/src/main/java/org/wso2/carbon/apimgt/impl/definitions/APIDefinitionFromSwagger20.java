@@ -82,7 +82,7 @@ public class APIDefinitionFromSwagger20 extends APIDefinition {
                             } else if ("Application User".equals(authType)) {
                                 authType = APIConstants.AUTH_APPLICATION_USER_LEVEL_TOKEN;
                             } else if ("None".equals(authType)) {
-                                authType = APIConstants.AUTH_TYPE_NONE;
+                                authType = APIConstants.AUTH_NO_AUTHENTICATION;
                             } else {
                                 authType = APIConstants.AUTH_APPLICATION_OR_USER_LEVEL_TOKEN;
                             }
