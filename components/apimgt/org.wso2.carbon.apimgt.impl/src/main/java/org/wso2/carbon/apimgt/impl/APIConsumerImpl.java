@@ -2416,36 +2416,47 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 	}
 
     /**
-     * @param userId          Subsriber name.
+     * @param userId Subsriber name.
      * @param applicationName of the Application.
-     * @param tokenType       Token type (PRODUCTION | SANDBOX)
-     * @param jsonString      json String with oAuthApplication parameters.
+     * @param tokenType Token type (PRODUCTION | SANDBOX)
+     * @param callbackUrl callback URL
+     * @param allowedDomains allowedDomains for token.
+     * @param validityTime validity time period.
+     * @param applicationId APIM application id.
+     * @param jsonString Callback URL for the Application.
+     * @param tokenScope Scopes for the requested tokens.
      * @return
      * @throws APIManagementException
      */
     @Override
-    public Map<String, Object> updateAuthClient(String userId, String applicationName, String tokenType,
+    public Map<String, Object> updateAuthClient(String userId, String applicationName,
+                                                String tokenType,
+                                                String callbackUrl, String[] allowedDomains,
+                                                String validityTime,
+                                                String tokenScope,
+                                                int applicationId,
                                                 String jsonString) throws APIManagementException {
 
-//        if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
-//            PrivilegedCarbonContext.startTenantFlow();
-//            PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
-//        }
-//        String callbackURL= null;
-//        //Create OauthAppRequest object by passing json String.
-//        OauthAppRequest request = ApplicationUtils.createOauthAppRequest(applicationName, callbackURL, jsonString);
-//        //get key manager instant.
-//        KeyManager keyManager = KeyManagerFactory.getKeyManager();
-//        //call update method.
-//        keyManager.updateApplication(request);
-//
-//        //TODO: Return  ApplicationKeysDTO or WorkflowDTO without creating a Map.To do this has to move either
-//        // into api module.
-//        Map<String, Object> keyDetails = new HashMap<String, Object>();
-//        keyDetails.put("validityTime", "3600");
-//
-        //return keyDetails;
-        return null;
+        if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
+            PrivilegedCarbonContext.startTenantFlow();
+            PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
+        }
+
+        //Create OauthAppRequest object by passing json String.
+        OAuthAppRequest oauthAppRequest = ApplicationUtils.createOauthAppRequest(applicationName, callbackUrl ,tokenScope,
+                jsonString);
+        //get key manager instant.
+        KeyManager keyManager = KeyManagerFactory.getKeyManager();
+        //call update method.
+        keyManager.updateApplication(oauthAppRequest);
+
+        //TODO: Return  ApplicationKeysDTO or WorkflowDTO without creating a Map.To do this has to move either
+        // into api module.
+        Map<String, Object> keyDetails = new HashMap<String, Object>();
+        keyDetails.put("validityTime", "3600");
+
+        return keyDetails;
+        //return null;
     }
 
     /**
@@ -2460,6 +2471,22 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         KeyManager keyManager = KeyManagerFactory.getKeyManager();
         //delete oAuthApplication by calling key manager implementation
         keyManager.deleteApplication(consumerKey);
+
+        Map<String, String> applicationIdAndTokenTypeMap =
+                apiMgtDAO.getApplicationIdAndTokenTypeByConsumerKey(consumerKey);
+
+        if (applicationIdAndTokenTypeMap != null) {
+            String applicationId = applicationIdAndTokenTypeMap.get("application_id");
+            String tokenType = applicationIdAndTokenTypeMap.get("token_type");
+
+            if (applicationId != null && tokenType != null) {
+                apiMgtDAO.deleteApplicationKeyMappingByConsumerKey(consumerKey);
+                apiMgtDAO.deleteApplicationRegistration(applicationId, tokenType);
+            }
+        }
     }
+
+
+
 
 }

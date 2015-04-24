@@ -801,37 +801,105 @@ public class APIStoreHostObject extends ScriptableObject {
      * @throws APIManagementException
      * @throws ParseException
      */
-    public static NativeObject jsFunction_updateAuthClient_new(Context cx, Scriptable thisObj,
+    public static NativeObject jsFunction_updateAuthClient(Context cx, Scriptable thisObj,
                                                            Object[] args, Function funObj)
             throws ScriptException, APIManagementException, ParseException {
+
         if (args != null && args.length != 0) {
-
-
-            NativeObject apiData = (NativeObject) args[0];
-            //this parameter will hold oAuthApplication properties that required to create new oAuthApplication.
-            String jsonString = (String) apiData.get(ApplicationConstants.OAUTH_CLIENT_JSONPARAMSTRING, apiData);
-            //logged in user name.
-            String userName = (String) apiData.get(ApplicationConstants.OAUTH_CLIENT_USERNAME, apiData);
-            //APIM application name.
-            String applicationName = (String) apiData.get(ApplicationConstants.OAUTH_CLIENT_USERNAME);
-            //Key type whether its a sandBox or production oAuth application.
-            String keytype = (String) apiData.get("key_type");
-            //this map will hold response that we are getting from Application registration process.
-            Map<String, Object> keyDetails;
-            //call update application registration process.
-            keyDetails = getAPIConsumer(thisObj).updateAuthClient(userName, applicationName, keytype, jsonString);
-            //set Response.
-            Set<Map.Entry<String, Object>> entries = keyDetails.entrySet();
-            //initiate native object in order to hold response.
-            NativeObject row = new NativeObject();
-            //Read the response and set key/value pair in to Native object.
-            for (Map.Entry<String, Object> entry : entries) {
-                row.put(entry.getKey(), row, entry.getValue());
+            NativeArray accessAllowDomainsArr = (NativeArray) args[4]; // args[4] is not mandatory
+            String[] accessAllowDomainsArray = new String[(int) accessAllowDomainsArr.getLength()];
+            for (Object domain : accessAllowDomainsArr.getIds()) {
+                int index = (Integer) domain;
+                accessAllowDomainsArray[index] = (String) accessAllowDomainsArr.get(index, null);
             }
-            //return the response native object.
-            return row;
+            try {
+                String validityPeriod = (String) args[5];
+                String scopes = (String) args[7];
+                String username = String.valueOf(args[0]);
+                String tenantDomain = MultitenantUtils.getTenantDomain(username);
+                int tenantId =
+                        ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
+                                .getTenantId(tenantDomain);
+
+                if (null == validityPeriod || validityPeriod.isEmpty()) { // In case a validity period is unspecified
+                    long defaultValidityPeriod = getApplicationAccessTokenValidityPeriodInSeconds();
+
+                    if (defaultValidityPeriod < 0) {
+                        validityPeriod = String.valueOf(Long.MAX_VALUE);
+                    }
+                    else {
+                        validityPeriod = String.valueOf(defaultValidityPeriod);
+                    }
+                }
+
+                String jsonParams = null;
+                if(args.length == 10){
+                    jsonParams = (String) args[9];
+                }else{
+                    jsonParams = null;
+                }
+
+
+                //checking for authorized scopes
+                Set<Scope> scopeSet = new LinkedHashSet<Scope>();
+                List<Scope> authorizedScopes = new ArrayList<Scope>();
+                String authScopeString;
+                APIConsumer apiConsumer = getAPIConsumer(thisObj);
+                if (scopes != null && scopes.length() != 0 &&
+                        !scopes.equals(APIConstants.OAUTH2_DEFAULT_SCOPE)) {
+                    scopeSet.addAll(apiConsumer.getScopesByScopeKeys(scopes, tenantId));
+                    authorizedScopes = getAllowedScopesForUserApplication(username, scopeSet);
+                }
+
+                if (!authorizedScopes.isEmpty()) {
+                    StringBuilder scopeBuilder = new StringBuilder();
+                    for (Scope scope : authorizedScopes) {
+                        scopeBuilder.append(scope.getKey()).append(" ");
+                    }
+                    authScopeString = scopeBuilder.toString();
+                } else {
+                    authScopeString = APIConstants.OAUTH2_DEFAULT_SCOPE;
+                }
+
+                Map<String, Object> keyDetails = getAPIConsumer(thisObj).updateAuthClient(
+                        (String) args[0], (String) args[1], (String) args[2], (String) args[3],
+                        accessAllowDomainsArray, validityPeriod, authScopeString, Integer.parseInt((String)args[8]),
+                        jsonParams);
+
+
+
+                NativeObject row = new NativeObject();
+                String authorizedDomains = "";
+                boolean first = true;
+                for (String anAccessAllowDomainsArray : accessAllowDomainsArray) {
+                    if (first) {
+                        authorizedDomains = anAccessAllowDomainsArray;
+                        first = false;
+                    } else {
+                        authorizedDomains = authorizedDomains + ", " + anAccessAllowDomainsArray;
+                    }
+                }
+
+                Set<Map.Entry<String, Object>> entries = keyDetails.entrySet();
+
+                for (Map.Entry<String, Object> entry : entries) {
+                    row.put(entry.getKey(), row, entry.getValue());
+                }
+
+                boolean isRegenarateOptionEnabled = true;
+                if (getApplicationAccessTokenValidityPeriodInSeconds() < 0) {
+                    isRegenarateOptionEnabled = false;
+                }
+                row.put("enableRegenarate", row, isRegenarateOptionEnabled);
+                row.put("accessallowdomains", row, authorizedDomains);
+                return row;
+            } catch (Exception e) {
+                String msg = "Error while obtaining the application access token for the application:" + args[1];
+                log.error(msg, e);
+                throw new ScriptException(msg, e);
+            }
         } else {
-            handleException("Invalid input parameters given while trying to update auth client");
+            handleException("Invalid input parameters.");
             return null;
         }
     }
@@ -2763,13 +2831,14 @@ public class APIStoreHostObject extends ScriptableObject {
                                 appObj.put("prodValidityTime", appObj, prodKey.getValidityPeriod());
                             }
                         } else if (prodKey != null) {
+                            String jsonString = prodApp.getJsonString();
                             appObj.put("prodKey", appObj, null);
                             appObj.put("prodKeyScope", appObj, null);
                             appObj.put("prodConsumerKey", appObj, null);
                             appObj.put("prodConsumerSecret", appObj, null);
                             appObj.put("prodRegenarateOption", appObj, prodEnableRegenarateOption);
                             appObj.put("prodAuthorizedDomains", appObj, null);
-                            appObj.put("prodJsonString", appObj, null);
+                            appObj.put("prodJsonString", appObj, jsonString);
                             if (isApplicationAccessTokenNeverExpire(
                                     getApplicationAccessTokenValidityPeriodInSeconds())) {
                                 appObj.put("prodValidityTime", appObj, -1);
@@ -2842,6 +2911,7 @@ public class APIStoreHostObject extends ScriptableObject {
                                 appObj.put("sandValidityTime", appObj, sandboxKey.getValidityPeriod());
                             }
                         } else if (sandboxKey != null) {
+                            String jsonString = sandApp.getJsonString();
                             appObj.put("sandboxKey", appObj, null);
                             appObj.put("sandKeyScope", appObj, null);
                             appObj.put("sandboxConsumerKey", appObj, null);
@@ -2849,7 +2919,7 @@ public class APIStoreHostObject extends ScriptableObject {
                             appObj.put("sandRegenarateOption", appObj, sandEnableRegenarateOption);
                             appObj.put("sandboxAuthorizedDomains", appObj, null);
                             appObj.put("sandboxKeyState", appObj, sandboxKey.getState());
-                            appObj.put("sandboxJsonString", appObj, null);
+                            appObj.put("sandboxJsonString", appObj, jsonString);
                             if (isApplicationAccessTokenNeverExpire(
                                     getApplicationAccessTokenValidityPeriodInSeconds())) {
                                 appObj.put("sandValidityTime", appObj, -1);

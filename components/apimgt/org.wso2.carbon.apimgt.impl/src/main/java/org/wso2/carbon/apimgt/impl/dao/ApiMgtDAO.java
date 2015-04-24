@@ -5641,6 +5641,57 @@ public class ApiMgtDAO {
         }
     }
 
+    /**
+     * This method will return a java Map that contains application ID and token type.
+     * @param consumerKey consumer key of the oAuth application.
+     * @return Map.
+     * @throws APIManagementException
+     */
+    public Map<String,String>  getApplicationIdAndTokenTypeByConsumerKey(String consumerKey) throws APIManagementException {
+
+
+
+        Map<String,String> appIdandConsumerKey = new HashMap<String, String>();
+
+        if (log.isDebugEnabled()) {
+            log.debug("fetching application id and token type by consumer key " + consumerKey);
+        }
+
+        Connection connection = null;
+        PreparedStatement prepStmt = null;
+        ResultSet rs = null;
+
+        String sqlQuery = "SELECT " +
+                "   MAP.APPLICATION_ID, " +
+                "   MAP.KEY_TYPE " +
+                "FROM " +
+                "   AM_APPLICATION_KEY_MAPPING MAP " +
+                "WHERE " +
+                "   MAP.CONSUMER_KEY = ? ";
+
+        try {
+
+            connection = APIMgtDBUtil.getConnection();
+
+            prepStmt = connection.prepareStatement(sqlQuery);
+            prepStmt.setString(1, consumerKey);
+            rs = prepStmt.executeQuery();
+
+            while (rs.next()) {
+                appIdandConsumerKey.put("application_id", rs.getString("APPLICATION_ID"));
+                appIdandConsumerKey.put("token_type", rs.getString("KEY_TYPE"));
+            }
+
+        } catch (SQLException e) {
+            handleException("Error when reading application subscription information", e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(prepStmt, connection, rs);
+        }
+
+        return appIdandConsumerKey;
+
+    }
+
     /*
         Delete mapping record by given consumer key
      */
@@ -5664,6 +5715,41 @@ public class ApiMgtDAO {
             connection.commit();
         } catch (SQLException e) {
             handleException("Error while removing application mapping table", e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(ps,connection,null);
+        }
+    }
+    /**
+     * Delete a record from AM_APPLICATION_REGISTRATION table by application ID and token type.
+     * @param applicationId APIM application ID.
+     * @param tokenType Token type (PRODUCTION || SANDBOX)
+     * @throws APIManagementException if failed to delete the record.
+     */
+    public void deleteApplicationRegistration(String applicationId, String tokenType) throws APIManagementException {
+
+        Connection connection = null;
+        PreparedStatement ps = null;
+        try {
+            connection = APIMgtDBUtil.getConnection();
+            String deleteRegistrationEntry = "DELETE " +
+                    "FROM" +
+                    "   AM_APPLICATION_REGISTRATION " +
+                    "WHERE" +
+                    "   APP_ID = ?" +
+                    "AND" +
+                    "   TOKEN_TYPE = ?";
+
+            if (log.isDebugEnabled()) {
+                log.debug("trying to delete a record from AM_APPLICATION_REGISTRATION table by application ID " +
+                        applicationId + " and Token type" + tokenType);
+            }
+            ps = connection.prepareStatement(deleteRegistrationEntry);
+            ps.setString(1, applicationId);
+            ps.setString(2, tokenType);
+            ps.executeUpdate();
+            connection.commit();
+        } catch (SQLException e) {
+            handleException("Error while removing AM_APPLICATION_REGISTRATION table", e);
         } finally {
             APIMgtDBUtil.closeAllConnections(ps,connection,null);
         }
