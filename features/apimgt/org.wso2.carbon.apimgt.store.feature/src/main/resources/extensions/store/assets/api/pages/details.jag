@@ -1,0 +1,79 @@
+<%
+/*
+ * Copyright (c) WSO2 Inc. (http://wso2.com) All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+var caramel;
+require('/modules/store.js').exec(function(ctx) {
+	var log = new Log();
+
+	log.info('============== renderer ==========');
+    caramel = require('caramel');
+    var rxt = require('rxt');
+    var ratingApi = require('/modules/rating-api.js').api;
+    var tenantApi = require('/modules/tenant-api.js').api;
+    var asset = rxt.asset;
+    var ui = rxt.ui;
+    var core = rxt.core;
+    var user = ctx.user;
+    var constants = rxt.constants;
+    var log = ctx.log;
+    var pageEndpoint = constants.ASSET_DETAIL_URL_PATTERN;
+	log.info('============== Renderer details ==========  '+pageEndpoint);
+    //'/{context}/asts/{type}/{pageName}/{+id}';
+    var tenantedPageEndpoint = constants.ASSET_DETAIL_TENANT_URL_PATTERN;
+    log.info('============== Renderer tenantedpageendpoint ==========  '+tenantedPageEndpoint);
+    //'/{context}/t/{domain}/asts/{type}/{pageName}/{+id}';
+    var uriMatcher = new URIMatcher(ctx.request.getRequestURI());
+    var options = uriMatcher.match(pageEndpoint) || uriMatcher.match(tenantedPageEndpoint);
+    if (!options) {
+        response.sendError(400, 'Could not locate an endpoint for your request.Make sure that you provide an id');
+    } else if (!options.id) {
+        response.sendError(400, 'An id must be provided when viewing details of a particular asset');
+    } else {
+        var type = options.type;
+        var am;
+        var username;
+        var carbon = require('carbon');
+        var context;
+        var tenantResources = tenantApi.createTenantAwareAssetResources(ctx.session, options);
+        //Support for cross tenant views
+        context = tenantResources.context;
+        am = tenantResources.am;
+        var page = ui.buildPage(ctx.session, ctx.request);
+        var assets = null;
+        //The asset retrieval may fail when attempting to obtain an asset which is not accessible
+        try {
+	 log.info('============== Renderer check2 ==========');
+            assets = am.get(options.id);
+            var assetsArray = [];
+            assetsArray.push(assets);
+            ratingApi.addRatings(assetsArray, am, context.tenantId, context.username);
+            //Cross tenant view could be anonymous
+            if (!context.isAnonContext) {
+                assets.isSubscribed = am.isSubscribed(options.id, ctx.session);
+            }
+        } catch (e) {
+		log.info('============== Renderer error ==========');
+            log.error('Unable to retrieve asset with id: ' + options.id + ' due to ', e);
+        }
+	log.info('============== Renderer check1 ==========');
+        if (assets == null) {
+            response.sendError(404, 'The asset with id: ' + options.id + ' could not be located.');
+        } else {
+            var output = am.renderBasic(assets, page).details();
+            caramel.render(output);
+        }
+    }
+}, request, response, session); %>
