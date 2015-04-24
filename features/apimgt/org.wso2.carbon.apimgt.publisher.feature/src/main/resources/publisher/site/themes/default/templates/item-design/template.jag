@@ -427,7 +427,7 @@
                 {{/each}}
                 <div class "checkbox inline" id="options" style="display: none;" >
                     <label class="checkbox inline">
-                    <input type="checkbox" value="OPTIONS" class="http_verb_select"> OPTIONS
+                    <input type="checkbox" value="options" class="http_verb_select"> OPTIONS
                     </label>
                     <a class="icon-question-sign help_popup" help_data="options_help" data-trigger="hover"></a>
                     <p id="options_help" class="hide"><%=i18n.localize("optionsHelpMsg")%></p>
