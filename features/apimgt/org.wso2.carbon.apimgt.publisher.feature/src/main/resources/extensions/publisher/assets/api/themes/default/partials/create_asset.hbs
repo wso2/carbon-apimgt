@@ -1,45 +1,62 @@
-<ul class='nav nav-tabs'>
-	<li><a href='{{url ""}}/asts/api/create'>Design</a></li>
-	<li><a href='{{url ""}}/asts/api/implement'>Implement</a></li>
-	<li><a href='{{url ""}}/asts/api/manage'>Manage</a></li>
+<center>
+<ul class="new-sub-menu-wizard" style="margin:0 auto">
+    <li>
+        <a href='{{url ""}}/asts/api/create' class="wizard-active">
+            <div class="wizard-number">1</div>
+            <span>Design</span>
+        </a>
+    </li>
+    <li>
+        <a href='{{url ""}}/asts/api/implement' class="<%= implement_wlabel%>">
+            <div class="wizard-number">2</div>
+            <span>Implement</span>
+        </a>
+    </li>
+    <li>
+        <a href='{{url ""}}/asts/api/manage' class="<%= manage_wlabel%>">
+            <div class="wizard-number" >3</div>
+            <span>Manage</span>
+        </a>
+    </li>
 </ul>
+</center> 
 <h1>Design API</h1>
 <div>
-	<a href='' class='btn'><i class='icon-download-alt'></i>Import Swagger Definition</a>
+    <a href='' class='btn'><i class='icon-download-alt'></i>Import Swagger Definition</a>
 </div>
 
 <form id="form-asset-create" class='form-horizontal' method='post' action='{{url ""}}/apis/assets?type={{rxt.shortName}}' enctype="multipart/form-data">
-	<legend>General Details</legend>
-	<div class='control-group'>
-		<label class='control-label' for='overview_name'>Name:</label>
-		<div class='controls'>
-			<input type='text' id='overview_name' class='input-large' name='overview_name' >
-		</div>
-	</div>
-	<div class='control-group'>
-		<label class='control-label'>Context:</label>
-		<div class='controls'>
-			<input type='text' id='overview_context' name='overview_context' class='input-large' >
-		</div>
-	</div>
-	<div class='control-group'>
-		<label class='control-label'>Version:</label>
-		<div class='controls'>
-			<input type='text' id='overview_version' name='overview_version' >
-		</div>
-	</div>
-	<div class='control-group'>
-		<label class='control-label'>Visibility:</label>
+    <legend>General Details</legend>
+    <div class='control-group'>
+        <label class='control-label' for='overview_name'>Name:</label>
+        <div class='controls'>
+            <input type='text' id='overview_name' class='input-large' name='overview_name' >
+        </div>
+    </div>
+    <div class='control-group'>
+        <label class='control-label'>Context:</label>
+        <div class='controls'>
+            <input type='text' id='overview_context' name='overview_context' class='input-large' >
+        </div>
+    </div>
+    <div class='control-group'>
+        <label class='control-label'>Version:</label>
+        <div class='controls'>
+            <input type='text' id='overview_version' name='overview_version' >
+        </div>
+    </div>
+    <div class='control-group'>
+        <label class='control-label'>Visibility:</label>
 
-		<div class="controls">
+        <div class="controls">
                     <select id="visibility" name="visibility">
-                    	    <option value="public">Public</option>
+                            <option value="public">Public</option>
                             <option value="private">Restricted by Roles</option>
                     </select>
 
                 </div>
-	</div>
-	 <div class="control-group">
+    </div>
+     <div class="control-group">
      <label class="control-label" for="apiThumb">{{t "Thumbnail"}}:</label>
      <div class="controls">
      <div id="inpFile" class="pull-left">
@@ -57,19 +74,19 @@
      </div>
 </div>
 
-	<div class="control-group">
-		<label class='control-label'>Description:</label>
-		<div class="controls">
-			<textarea name="overview_description"></textarea>
-		</div>
-	</div>
-	<div class="control-group">
-		<label class="control-label">Tags:</label>
-		<div class="controls">
-			<input type='text'/>
-		</div>
-	</div>
-	<div id="api_designer">
+    <div class="control-group">
+        <label class='control-label'>Description:</label>
+        <div class="controls">
+            <textarea name="overview_description"></textarea>
+        </div>
+    </div>
+    <div class="control-group">
+        <label class="control-label">Tags:</label>
+        <div class="controls">
+            <input type='text'/>
+        </div>
+    </div>
+    <div id="api_designer">
         <div id ="resource_details">
 <legend>Resources</legend>
     <div class="resource_create">
@@ -123,5 +140,6 @@
 
 
 
-<hr/>
 
+
+<hr/>

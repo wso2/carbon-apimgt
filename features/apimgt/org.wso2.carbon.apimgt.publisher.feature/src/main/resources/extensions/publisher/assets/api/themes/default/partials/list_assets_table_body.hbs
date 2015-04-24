@@ -24,11 +24,10 @@
 	            </a>
             {{/if}}
 	        <div id="delete-btn-div">
-		        <button title="Delete API" type="button" class="close btn-api-del" onclick="removeAPI('{{this.attributes.overview_name}}',
-				        '{{this.attributes.overview_version}}','{{this.attributes.overview_provider}}',this);return false;">×</button>
+		        <button title="Delete API" type="button" class="close btn-api-del" onclick="removeAPI('{{this.id}}','{{type}}');
+                        return false;">×</button>
 	        </div>
             <div class="ast-desc">
-
                 <a href='{{url ""}}/asts/{{type}}/details/{{this.id}}'>
                     <h3 class="ast-name">{{this.attributes.overview_name}}</h3>
                 </a>

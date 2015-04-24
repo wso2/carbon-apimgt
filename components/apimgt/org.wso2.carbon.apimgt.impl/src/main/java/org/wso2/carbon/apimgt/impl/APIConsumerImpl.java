@@ -1949,6 +1949,10 @@ Set<API> apiSet) throws APIManagementException {
         return apiMgtDAO.getComments(identifier);
     }
 
+    private Application[] getAllApplications(String userName) throws APIManagementException {
+        return apiMgtDAO.getApplications(new Subscriber(userName));
+    }
+
     /**
      * Add a new Application from the store.
      * @param application - {@link org.wso2.carbon.apimgt.api.model.Application}
@@ -1960,15 +1964,15 @@ Set<API> apiSet) throws APIManagementException {
 			throws APIManagementException {
 
 		Subscriber subscriber = new Subscriber(username);
-		JSONArray apps = getApplications(username);
+        Application[] apps = getAllApplications(username);
 
-		for (int i = 0; i < apps.size(); i++) {
-			Application app = (Application) apps.get(i);
-			if (app.getName().equals(appName)) {
-				handleException("A duplicate application already exists by the name - "
-						+ appName);
-			}
-		}
+        if (apps != null) {
+            for(Application app : apps) {
+                if (app.getName().equals(appName)) {
+                    handleException("A duplicate application already exists by the name - " + appName);
+                }
+            }
+        }
 
 		Application application = new Application(appName, subscriber);
 		application.setTier(tier);

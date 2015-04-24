@@ -1,27 +1,29 @@
-<table class='table table-bordered'>
-	<thead>
-		<tr>
-			<th>{{t "Name"}}</th>
-			<th>{{t "Tier"}}</th>
-			<th>{{t "Status"}}</th>
-			<th>{{t "Callback URL"}}</th>
-			<th>{{t "Description"}}</th>
-			<th>{{t "Actions"}}</th>
-		</tr>
-	</thead>
-	<tbody>
-		{{#each assets}}
-		<tr>
-			<td>{{name}}</td>
-			<td>{{attributes.overview_throttlingtier}}</td>
-			<td>{{lifecycleState}}</td>
-			<td>{{attributes.overview_callbackurl}}</td>
-			<td>{{attributes.overview_description}}</td>
-			<td>
-					<a><i class='icon-edit'></i> {{t "Edit"}}</a>
-					<a><i class='icon-trash'></i> {{t "Delete"}}</a>
-			</td>
-		</tr>
-		{{/each}}		
-	</tbody>
-</table>
+<div id='application-table-data'>
+    <table class='table table-bordered'>
+        <thead>
+        <tr>
+            <th>{{t "Name"}}</th>
+            <th>{{t "Tier"}}</th>
+            <th>{{t "Status"}}</th>
+            <th>{{t "Callback URL"}}</th>
+            <th>{{t "Description"}}</th>
+            <th>{{t "Actions"}}</th>
+        </tr>
+        </thead>
+        <tbody>
+        {{#each applications}}
+            <tr>
+                <td>{{name}}</td>
+                <td>{{tier}}</td>
+                <td>{{status}}</td>
+                <td>{{callbackUrl}}</td>
+                <td>{{description}}</td>
+                <td>
+                    <a><i class='icon-edit'></i> {{t "Edit"}}</a>
+                    <a><i class='icon-trash'></i> {{t "Delete"}}</a>
+                </td>
+            </tr>
+        {{/each}}
+        </tbody>
+    </table>
+</div>
