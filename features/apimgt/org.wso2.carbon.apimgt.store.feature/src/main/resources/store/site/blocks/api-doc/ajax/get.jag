@@ -73,11 +73,10 @@ var log = new Log();
     		}
 
     		var registry = carbon.server.osgiService('org.wso2.carbon.registry.core.service.RegistryService').getGovernanceUserRegistry("wso2.anonymous.user", tenantID);
-    		var prefix = "/apimgt/applicationdata/api-docs/"
+            var prefix = "/apimgt/applicationdata/provider/" + providerVal + "/" + apiNameVal + "/" + apiVersionVal;
 
 
-
-    		url = prefix + apiNameVal + "-" + apiVersionVal + "-" + providerVal +"/swagger.json";
+    		url = prefix + "/swagger.json";
 
     		    
 
