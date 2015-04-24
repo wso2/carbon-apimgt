@@ -181,9 +181,7 @@ public class Utils {
         }
     }
     
-    public static String getAllowedOrigin(String currentRequestOrigin) {
-    	String allowedOrigins = ServiceReferenceHolder.getInstance().getAPIManagerConfiguration().
-    	        getFirstProperty(APIConstants.CORS_CONFIGURATION_ACCESS_CTL_ALLOW_ORIGIN);
+    public static String getAllowedOrigin(String currentRequestOrigin,String allowedOrigins) {
     	if (allowedOrigins != null) {
     		String[] origins = allowedOrigins.split(",");
     		List<String> originsList = new LinkedList<String>();
@@ -277,4 +275,15 @@ public class Utils {
         return requestPath;
     }
 
+    public static void send(MessageContext messageContext, int status) {
+        org.apache.axis2.context.MessageContext axis2MC =
+                ((Axis2MessageContext) messageContext).getAxis2MessageContext();
+        axis2MC.setProperty(NhttpConstants.HTTP_SC, status);
+        messageContext.setResponse(true);
+        messageContext.setProperty("RESPONSE", "true");
+        messageContext.setTo(null);
+        axis2MC.removeProperty(Constants.Configuration.CONTENT_TYPE);
+        Map headers = (Map) axis2MC.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
+        Axis2Sender.sendBack(messageContext);
+    }
 }

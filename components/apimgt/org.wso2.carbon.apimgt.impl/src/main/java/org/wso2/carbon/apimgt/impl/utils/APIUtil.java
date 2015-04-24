@@ -62,6 +62,7 @@ import org.wso2.carbon.apimgt.impl.internal.APIManagerComponent;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.keymgt.client.SubscriberKeyMgtClient;
 import org.wso2.carbon.bam.service.data.publisher.conf.EventingConfigData;
+import org.wso2.carbon.bam.service.data.publisher.services.ServiceDataPublisherAdmin;
 import org.wso2.carbon.base.MultitenantConstants;
 import org.wso2.carbon.base.ServerConfiguration;
 import org.wso2.carbon.context.CarbonContext;
@@ -2471,7 +2472,11 @@ public final class APIUtil {
 	}
 
     public static boolean isAnalyticsEnabled() {
-        return APIManagerComponent.getDataPublisherAdminService().getEventingConfigData().isServiceStatsEnable();
+     ServiceDataPublisherAdmin serviceDataPublisherAdmin = APIManagerComponent.getDataPublisherAdminService();
+        if (serviceDataPublisherAdmin != null){
+            return serviceDataPublisherAdmin.getEventingConfigData().isServiceStatsEnable();
+        }
+        return false;
     }
 
     public static Map<String, String> getAnalyticsConfigFromRegistry() {

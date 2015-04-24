@@ -15,7 +15,7 @@
     }
 %> 
 <script language="javascript">
-    var VERBS = [ 'get' , 'post' , 'put' , 'delete', 'options'];
+    var VERBS = [ 'get' , 'post' , 'put' , 'delete'];
     var AUTH_TYPES = [
       { "value": "<%=i18n.localize("none")%>", "text":"<%=i18n.localize("none")%>"} ,
       { "value": "<%=i18n.localize("application")%>", "text":"<%=i18n.localize("application")%>"},
@@ -131,7 +131,7 @@
                     </div>
                 </div>                    
                 <div class="modal-footer">
-                <button class="btn btn-primary has-spinner" id="import_swagger"><span class="spinner"><i class='fa fa-spinner fa-pulse'></i></span><span>Import</span></button>
+                <button class="btn btn-primary has-spinner" id="import_swagger">Import</button>
                 <button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
                 </div>
             </div>
@@ -348,10 +348,10 @@
                 </div>
                 <div class="form-actions" id="saveButtons">
 
-                    <button type="submit" class="btn btn-default has-spinner" id="saveBtn"><span class="spinner"><i class='fa fa-spinner fa-pulse'></i></span><span>Save</span></button>
+                    <button type="submit" class="btn btn-default has-spinner" id="saveBtn">Save</button>
                     <input type="hidden" value="Save" action="design"/>
 
-                    <a class="btn btn-primary has-spinner" id="go_to_implement"><span class="spinner"><i class='fa fa-spinner fa-pulse'></i></span><span>Next: Implement &gt;</span></a>
+                    <a class="btn btn-primary has-spinner" id="go_to_implement">Next: Implement &gt;</a>
 
                 </div>
             </form>
@@ -425,6 +425,15 @@
                     <input type="checkbox" value="{{ . }}" class="http_verb_select" >  {{ . }}
                     </label>
                 {{/each}}
+                <div class "checkbox inline" id="options" style="display: none;" >
+                    <label class="checkbox inline">
+                    <input type="checkbox" value="OPTIONS" class="http_verb_select"> OPTIONS
+                    </label>
+                    <a class="icon-question-sign help_popup" help_data="options_help" data-trigger="hover"></a>
+                    <p id="options_help" class="hide"><%=i18n.localize("optionsHelpMsg")%></p>
+                    <label id="less" style="display:inline;">less</label>
+                    </div>
+                     <label id="more" style="display:inline;">more</label>
             </div>
         </div>
         <!-- div class="control-group">

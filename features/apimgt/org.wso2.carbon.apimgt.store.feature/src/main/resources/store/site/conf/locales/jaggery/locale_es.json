@@ -151,5 +151,10 @@
     "ShareonGoogle":"Share on Google +",
     "ShareonLinkedIn":"Share on LinkedIn",
     "ShareonFacebook":"Share on Facebook",
-    "selectScopes" : "Select Scopes"
+    "selectScopes" : "Select Scopes",    
+    "changePassword" : "Change Password",
+    "currentPassword" : "Current Password",
+    "newPassword" : "New Password",
+    "userDetails" : "User Details"
+    "scope" : "Scope"
 }

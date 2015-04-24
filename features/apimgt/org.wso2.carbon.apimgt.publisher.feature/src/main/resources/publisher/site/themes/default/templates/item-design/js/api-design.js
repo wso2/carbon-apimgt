@@ -58,6 +58,22 @@ function APIDesigner(){
 
     this.init_controllers();
 
+    $( "#api_designer" ).delegate( "#more", "click", this, function( event ) {
+                        $("#options").css("display", "inline");
+                        $("#more").hide();
+    });
+  $( "#api_designer" ).delegate( "#less", "click", this, function( event ) {
+                         $("#options").hide();
+                         $("#more").css("display", "inline");
+    });
+         $( "#api_designer" ).delegate( "a.help_popup", "mouseover", this, function( event ) {
+    $('a.help_popup').popover({
+        html : true,
+        content: function() {
+            return $('#'+$(this).attr('help_data')).html();
+        }
+    });
+            });
     $( "#api_designer" ).delegate( ".resource_expand", "click", this, function( event ) {
         if(this.resource_created == undefined){
             event.data.render_resource($(this).parent().next().find('.resource_body'));
@@ -186,7 +202,7 @@ APIDesigner.prototype.set_default_management_values = function(){
 
 APIDesigner.prototype.add_default_resource = function(){
     $("#resource_url_pattern").val("*");
-    $(".http_verb_select").attr("checked","checked");    
+    $(".http_verb_select:lt(4)").attr("checked","checked");
     $("#inputResource").val("Default");
     $("#add_resource").trigger('click');
 }
@@ -553,7 +569,7 @@ $(document).ready(function(){
 
         if($('#swagger_import_url').val().length == 0){
         }else{
-        $('#import_swagger').addClass('active');
+        $('#import_swagger').buttonLoader('start');
         $('#swagger_help').hide();
         var data = {
             "swagger_url" : $("#swagger_import_url").val() // "http://petstore.swagger.wordnik.com/api/api-docs"
@@ -562,11 +578,11 @@ $(document).ready(function(){
             var designer = APIDesigner();
             designer.load_api_document(data);
             $('#swagger_help').hide();
-            $('#import_swagger').removeClass('active');
+            $('#import_swagger').buttonLoader('stop');
             $("#swaggerUpload").modal('hide');
         }).fail(function(data){
             $('#swagger_help').show();
-            $('#import_swagger').removeClass('active');
+            $('#import_swagger').buttonLoader('stop');
             $('#errorMsgClose').on('click', function(e) {
                 $('#swagger_help').hide();
             });
@@ -605,12 +621,12 @@ $(document).ready(function(){
 
         $('#swagger').val(JSON.stringify(designer.api_doc));
 
-        $('#'+thisID).addClass('active');
+        $('#'+thisID).buttonLoader('start');
 
         $(form).ajaxSubmit({
             success:function(responseText, statusText, xhr, $form){
 
-                $('#'+thisID).removeClass('active');
+                $('#'+thisID).buttonLoader('stop');
                 if (!responseText.error) {
                     var designer = APIDesigner();
                     designer.saved_api = {};
@@ -642,12 +658,10 @@ $(document).ready(function(){
 
 var thisID;
 $('#saveBtn').click(function(e){
-    $(this).siblings('button').button('reset');
     thisID = $(this).attr('id');
 });
 
 $('#go_to_implement').click(function(e){
-    $(this).siblings('button').button('reset');
     thisID = $(this).attr('id');
 });
 

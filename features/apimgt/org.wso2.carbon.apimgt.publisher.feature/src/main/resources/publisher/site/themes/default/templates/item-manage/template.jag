@@ -392,8 +392,8 @@
                 </div>
                 <div class="form-actions" id="saveButtons"> 
 
-                    <button class="btn btn-default has-spinner" id="save_api"><span class="spinner"><i class='fa fa-spinner fa-pulse'></i></span><span><%=i18n.localize("save")%></span></button>
-                    <%if(outputs.isPermitted){%> <a class="btn btn-primary has-spinner" id="publish_api"><span class="spinner"><i class='fa fa-spinner fa-pulse'></i></span><span>Save & Publish</span></a>  <%}%>
+                    <button class="btn btn-default has-spinner" id="save_api"><%=i18n.localize("save")%></button>
+                    <%if(outputs.isPermitted){%> <a class="btn btn-primary has-spinner" id="publish_api">Save & Publish</a>  <%}%>
 
                     <input type="reset" class="btn" value="<%=i18n.localize("cancel")%>" onclick="javascript:window.location.href='./'" />                                         
                 </div>
@@ -573,10 +573,10 @@
             }
             var designer = APIDesigner();
             $('#swagger').val(JSON.stringify(designer.api_doc));
-            $('#'+thisID).addClass('active');
+            $('#'+thisID).buttonLoader('start');
             $(form).ajaxSubmit({
                 success:function(responseText, statusText, xhr, $form) {
-                    $('#'+thisID).removeClass('active');
+                    $('#'+thisID).buttonLoader('stop');
                     if (!responseText.error) {                
                         $( "body" ).trigger( "api_saved" );       
                     } else {
