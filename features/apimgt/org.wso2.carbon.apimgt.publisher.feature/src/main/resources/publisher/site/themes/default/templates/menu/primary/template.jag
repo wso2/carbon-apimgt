@@ -17,6 +17,7 @@
 <link rel="apple-touch-icon" sizes="72x72" href="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("images/apple-touch-icon-72x72.png"))%>">
 <link rel="apple-touch-icon" sizes="114x114" href="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("images/apple-touch-icon-114x114.png"))%>">
 <link href="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("lib/font-awesome/css/font-awesome.min.css"))%>" rel="stylesheet">
+<link href="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("templates/utils/button-loader/buttonLoader.css"))%>" rel="stylesheet">
 <link href="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("css/localstyles.css"))%>" rel="stylesheet">
 
 <%var statUrl = request.getParameter("stat");

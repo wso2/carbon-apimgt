@@ -168,8 +168,8 @@
                     <input type="hidden" id="swagger" name="swagger" class="swagger" value="" />
                     <input type="hidden" value="endpoint" name="implementation_methods" >
                     <div class="form-actions" id="saveButtons">
-                        <button type="submit" class="btn btn-default manageSaveButton has-spinner" id="saveBtn" ><span class="spinner"><i class='fa fa-spinner fa-pulse'></i></span><span>Save</span></button>
-                        <button id="go_to_manage" class="btn btn-primary manageSaveButton pull-right has-spinner" "><span class="spinner"><i class='fa fa-spinner fa-pulse'></i></span><span>Next : Manage &gt;</span></button>
+                        <button type="submit" class="btn btn-default manageSaveButton has-spinner" id="saveBtn" >Save</button>
+                        <button id="go_to_manage" class="btn btn-primary manageSaveButton pull-right has-spinner">Next : Manage &gt;</button>
                     </div>
                     </form>
                 </div>
@@ -233,8 +233,8 @@
                     <input type="hidden" name="provider" value="<%= encode.forHtml(api.provider) %>" />
                     <input type="hidden" name="action" value="implement" />
                     <input type="hidden" id="swagger" name="swagger" class="swagger" value="" />
-                    <button type="submit" class="btn btn-default manageSaveButton has-spinner" id="savePrototypeBtn" ><span class="spinner"><i class='fa fa-spinner fa-pulse'></i></span><span>Save</span></button>
-                    <button class="btn btn-warning manageSaveButton pull-right has-spinner" id="prototyped_api" ><span class="spinner"><i class='fa fa-spinner fa-pulse'></i></span><span>Deploy as a Prototype</span></button>
+                    <button type="submit" class="btn btn-default manageSaveButton has-spinner" id="savePrototypeBtn" >Save</button>
+                    <button class="btn btn-warning manageSaveButton pull-right has-spinner" id="prototyped_api" >Deploy as a Prototype</button>
 
                 </div>
             </form>
