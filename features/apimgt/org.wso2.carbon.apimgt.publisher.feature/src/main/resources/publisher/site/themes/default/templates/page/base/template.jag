@@ -133,6 +133,7 @@ var editUrl="info";
     <script type="text/javascript" src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("lib/bootstrap/js/bootstrap-typeahead.js"))%>"></script>
     <script type="text/javascript" src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("lib/bootstrap/js/bootstrap-affix.js"))%>"></script>
     <script type="text/javascript" src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("templates/item-design/js/bootstrap-editable.js"))%>"></script>
+    <script type="text/javascript" src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("templates/utils/button-loader/jquery.buttonLoader.js"))%>"></script>
 
 
 </body>
