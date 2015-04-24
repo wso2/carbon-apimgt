@@ -576,63 +576,19 @@ public abstract class AbstractAPIManager implements APIManager {
     }
 
     public boolean isContextExist(String context) throws APIManagementException {
-    	boolean isTenantFlowStarted = false;
-        try {
-        	if(tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)){
-        		isTenantFlowStarted = true;
-                PrivilegedCarbonContext.startTenantFlow();
-                PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
-        	}
-            GenericArtifactManager artifactManager = new GenericArtifactManager(registry,
-                                                                                APIConstants.API_KEY);
-            GenericArtifact[] artifacts = artifactManager.getAllGenericArtifacts();
-            for (GenericArtifact artifact : artifacts) {
-                String artifactContext = artifact.getAttribute(APIConstants.API_OVERVIEW_CONTEXT_TEMPLATE);
-                // With context version strategy we have to check endswith first
-                // ex: /{version}/foo/ --> /{version}/foo
-                if(artifactContext.endsWith("/")){
-                    artifactContext=artifactContext.substring(artifactContext.lastIndexOf("/"));
-                }
-                if (artifactContext.equalsIgnoreCase(context)) {
-                    return true;
-                }
-            }
-        } catch (RegistryException e) {
-            handleException("Failed to check context availability : " + context, e);
-        } finally {
-        	if (isTenantFlowStarted) {
-        		PrivilegedCarbonContext.endTenantFlow();
-        	}
+    	if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
+            context = "/t/" + tenantDomain + context;
         }
-        return false;
+        return apiMgtDAO.isContextExist(context);
     }
 
 
     public boolean isApiNameExist(String apiName) throws APIManagementException {
-        boolean isTenantFlowStarted = false;
-        try {
-            if(tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)){
-                isTenantFlowStarted = true;
-                PrivilegedCarbonContext.startTenantFlow();
-                PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
-            }
-            GenericArtifactManager artifactManager = new GenericArtifactManager(registry,
-                                                                                APIConstants.API_KEY);
-            GenericArtifact[] artifacts = artifactManager.getAllGenericArtifacts();
-            for (GenericArtifact artifact : artifacts) {
-                String artifactName = artifact.getAttribute(APIConstants.API_OVERVIEW_NAME);
-                if (artifactName.equalsIgnoreCase(apiName)) {
-                    return true;
-                }
-            }
-        } catch (RegistryException e) {
-            handleException("Failed to check api name availability : " + apiName, e);
-        } finally {
-            if (isTenantFlowStarted) {
-                PrivilegedCarbonContext.endTenantFlow();
-            }
+        String tenantName = MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
+        if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
+            tenantName = tenantDomain;
         }
-        return false;
+        return apiMgtDAO.isApiNameExist(apiName, tenantName);
     }
 
     public void addSubscriber(Subscriber subscriber, String groupingId)
