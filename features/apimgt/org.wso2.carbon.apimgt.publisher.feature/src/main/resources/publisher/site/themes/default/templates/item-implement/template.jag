@@ -78,7 +78,7 @@
                 </div>
                 <div class="span11">
                     <h4>Managed API</h4>
-                    <p>description</p>
+                    <p>Provide endpoints of the production API and sandbox API to be managed.</p>
                 </div>
             </div>
 
@@ -181,7 +181,7 @@
                 </div>
                 <div class="span11">
                     <h4 >Prototype</h4>
-                    <p>description</p>
+                    <p>Use the inbuilt javascript engine to prototype the API or provide an endpoint to a prototype API. Inbuilt javascript engine do not have support to prototype SOAP APIs</p>
                 </div>
             </div>
 
