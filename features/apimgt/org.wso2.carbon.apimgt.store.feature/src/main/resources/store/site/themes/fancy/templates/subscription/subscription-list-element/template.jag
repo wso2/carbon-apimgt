@@ -211,10 +211,8 @@
 									   data-keytype="PRODUCTION"
 									   data-username="<%= userName %>"
 									   iteration="200">Save</button>
-								<% if(site.mapExistingAuthApps != false){ %>
 									<button  class="btn btn-primary "
 									id="btnProvideKeyProductionCancle">Cancel</button>
-                            	<% } %>
                         	</div>
                         	<div class="cDivDefaultBtnSet">
 								<button  class="app-key-generate-button btn btn-primary btn-generatekeys" onclick="jagg
@@ -224,9 +222,11 @@
 									   data-keytype="PRODUCTION"
 									   data-username="<%= userName %>"
 									   iteration="200">Generate keys</button>
+									   <% if(site.mapExistingAuthApps != false){ %>
 								<button  class="btn btn-primary btn-providekeys"
 								id="btnProvideKeyProduction">Provide
 								keys</button>
+								<% } %>
                             </div>
 
                         </div>
