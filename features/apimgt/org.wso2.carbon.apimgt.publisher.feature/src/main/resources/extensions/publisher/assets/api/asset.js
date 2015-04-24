@@ -23,9 +23,13 @@ asset.manager = function(ctx) {
     return {
         remove : function(id) {
             var asset = this.get.call(this, id);
-            log.debug("Removing API of Id" +id+ "Name" + asset.attributes.overview_name);
+            log.debug("Removing API of Id " +id+ "Name " + asset.attributes.overview_name);
             var apiProxy = apiPublisher.instance(ctx.username);
             return apiProxy.deleteAPI(asset.attributes.overview_provider, asset.attributes.overview_name, asset.version);
+        },
+        list: function(paging) {
+            log.info(this._super.list.call(this, paging));
+            return this._super.list.call(this, paging);
         }
     };
 };
@@ -136,6 +140,25 @@ asset.renderer = function (ctx) {
     };
 
     return {
+        list: function(page) {
+            var assets = page.assets;
+            for (var index in assets) {
+                var asset = assets[index];
+                //Doing this because when there are no value specified in column such as thumbnail column it return string "null"
+                // value which need be explicitly set to null
+                if(asset.thumbnail == 'null') {
+                    asset.thumbnail = null;
+                }
+            }
+        },
+        details: function (page) {
+            log.info(page);
+            //Doing this because when there are no value specified in column such as thumbnail column it return string "null"
+            // value which need be explicitly set to null
+            if (page.assets.thumbnail == 'null') {
+                page.assets.thumbnail = null;
+            }
+        },
         pageDecorators: {
             ribbon: function (page) {
                 var ribbon = page.ribbon = {};
