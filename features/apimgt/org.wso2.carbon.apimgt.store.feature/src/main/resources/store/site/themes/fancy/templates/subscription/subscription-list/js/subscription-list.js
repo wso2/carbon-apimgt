@@ -495,7 +495,7 @@ function toggleTokenTimeSection(link){
     }
 }
 
-function removeSubscription(apiName, version, provider,  delLink) {
+function removeSubscription(apiName, version, provider,  applicationId, delLink) {
     jagg.sessionAwareJS({redirect:'/site/pages/subscriptions.jag'});
     $('#messageModal').html($('#confirmation-data').html());
     $('#messageModal h3.modal-title').html(i18n.t('confirm.delete'));
@@ -508,6 +508,7 @@ function removeSubscription(apiName, version, provider,  delLink) {
         name:apiName,
         version:version,
         provider:provider,
+	 applicationId:applicationId
        }, function (result) {
         if (!result.error) {
             $('#messageModal').modal("hide");

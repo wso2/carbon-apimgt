@@ -1487,6 +1487,35 @@ a.next {
   width: auto;
 }
 
+td.details-control> div.showDetail:before {
+    font-family: FontAwesome;
+    content: "\f13a";
+    display: inline;
+    padding-left: 10px !important;
+    vertical-align: middle;
+    cursor:pointer;
+}
+td.details-control{
+    cursor:pointer;
+}
+
+div.slider{
+    display:none;
+}
+tr.shown td.details-control> div.showDetail:before {
+    font-family: FontAwesome;
+    content:  "\f139";
+    display: inline;
+    padding-left: 10px !important;
+    vertical-align: middle;
+    cursor:pointer;
+}
+
+
+table.dataTable tbody td.no-padding {
+    padding: 0;
+}
+
 .create-options:hover, .api-implement-type:hover, .selected {
     background-color:#d0d0d0;
     cursor:pointer;
@@ -1542,4 +1571,24 @@ a.next {
     margin-left:10px;
     margin-right:10px;
 
+}
+
+.center-div{
+    margin:0 auto;
+	margin-left:auto;
+	margin-right:auto;
+	align:center;
+	text-align:center;
+    padding-top: 20px;
+    padding-bottom: 20px;
+}
+
+.slider th {
+    font-size: 10px !important;
+    text-transform: none !important;
+    border-left: 1px solid #ddd !important;
+}
+
+.slider td{
+    border-left: 1px solid #ddd !important;
 }

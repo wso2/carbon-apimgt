@@ -555,6 +555,16 @@ $(document).ready(function(){
         $('#apiThumb-container').html('<input type="file" class="input-xlarge" name="apiThumb" />');
     });
 
+    $('#import_swagger').attr('disabled','disabled');
+    $('.toggleRadios input[type=radio]').click(function(){
+        $('#import_swagger').removeAttr("disabled");
+        $('#swagger_help').hide();
+        $('.toggleContainers .controls').hide();
+        $('.toggleRadios input[type=radio]').prop('checked', false);
+        $('#' + $(this).val()).closest('div').fadeIn();
+        $(this).prop('checked', true);
+    });
+
     $('#import_swagger').click(function(){
 
         if($('#swagger_import_url').val().length == 0){

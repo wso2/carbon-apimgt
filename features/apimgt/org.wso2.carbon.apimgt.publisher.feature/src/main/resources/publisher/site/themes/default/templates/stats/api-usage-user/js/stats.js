@@ -123,6 +123,7 @@ require(["dojo/dom", "dojo/domReady!"], function (dom) {
 });
 
 var subscriberDetails=[];
+var groupData = [];
 var drawAPIUsage = function (from,to) {
 
     var fromDate = from;
@@ -142,7 +143,6 @@ var drawAPIUsage = function (from,to) {
                              var inputDataStr="";
                              var apiData="";
                              var apiName_Provider="";
-                             var groupData = [];
 
                              for (var i = 0; i < length; i++) {
 
@@ -241,8 +241,7 @@ var drawAPIUsage = function (from,to) {
                     }, "json");
 
 }
-
-
+var parsedResponse;
 var drawChart = function (from, to) {
     var fromDate = from;
     var toDate = to;
@@ -333,14 +332,14 @@ var drawChart = function (from, to) {
                          };
                     }
 
-                    var parsedResponse = JSON.parse(JSON.stringify(webapps));
+                    parsedResponse = JSON.parse(JSON.stringify(webapps));
                     var data=[];
                         for ( var i = 0; i < parsedResponse.length; i++) {
                         var count = 0;
                         var app =(parsedResponse[i][0].replace(/\s+/g, ''));
                         var maximumUsers = 0;
                         var allSubCount =0;
-                        var allcount = 0;
+                        var hitCount = 0;
                             for ( var j = 0; j < parsedResponse[i][1].length; j++) {
 
                         allSubCount = allSubCount+parsedResponse[i][1][j][1].length
@@ -349,34 +348,43 @@ var drawChart = function (from, to) {
 
                             for ( var k = 0; k < maximumUsers; k++) {
                                 count++;
-                                allcount = Number(allcount)+Number(parsedResponse[i][1][j][1][k][1]);
+                                hitCount = Number(hitCount)+Number(parsedResponse[i][1][j][1][k][1]);
 
                             }
 
                             }
-
+                            var status = false;
                             for(var z =0;z<subscriberDetails.length;z++){
                                 if(app == subscriberDetails[z].api_name){
+                                    status = true;
                                     allSubCount = subscriberDetails[z].sub_count;
                                     subscriberDetails[z].check=true;
                                     data.push({
                                         API_name:app,
                                         SubscriberCount:allSubCount,
-                                        Hits:allcount,
+                                        Hits:hitCount,
                                         API:app
                                     });
                                 }
                             }
 
                             userParsedResponse = parsedResponse;
+                            if(!status){
+                                data.push({
+                                API_name: app,
+                                SubscriberCount: 0,
+                                Hits: hitCount,
+                                API: app
+                                });
+                            }
                         }
                         for(var z =0;z<subscriberDetails.length;z++){
                             if(subscriberDetails[z].check == false){
                                 data.push({
-                                            API_name:subscriberDetails[z].api_name,
-                                            SubscriberCount:subscriberDetails[z].sub_count,
-                                            Hits:0,
-                                            API:subscriberDetails[z].api_name
+                                    API_name:subscriberDetails[z].api_name,
+                                    SubscriberCount:subscriberDetails[z].sub_count,
+                                    Hits:0,
+                                    API:subscriberDetails[z].api_name
                                 });
                             }
                         }
@@ -408,7 +416,8 @@ var drawChart = function (from, to) {
                     $dataTable.append($('<thead class="tableHead"><tr>'+
                                             '<th width="10%"></th>'+
                                             '<th>API</th>'+
-                                            '<th style="text-align:right" width="30%" >Subscriber Count</th>'+
+                                            '<th style="text-align:right" width="20%" >Subscriber Count</th>'+
+                                            '<th class="details-control pull-right sorting_disabled"></th>'+
                                         '</tr></thead>'));
 
                     sortData = dimple.filterData(data, "API", filterValues);
@@ -423,7 +432,8 @@ var drawChart = function (from, to) {
                                                 +'<input name="item_checkbox'+n+'"  checked   id='+n+'  type="checkbox"  data-item='+sortData[n].API_name +' class="inputCheckbox"/>'
                                                 +'</td>'
                                                 +'<td style="text-align:left;"><label for='+n+'>'+sortData[n].API_name +'</label></td>'
-                                                +'<td style="text-align:right;"><label for='+n+'>'+sortData[n].SubscriberCount +'</label></td></tr>'));
+                                                +'<td style="text-align:right;"><label for='+n+'>'+sortData[n].SubscriberCount +'</label></td>'
+                                                +'<td class="details-control sorting_disabled" style="text-align:right;padding-right:30px;">Show more details<div style="display :inline"class="showDetail"></div></td></tr>'));
                             state_array.push(true);
                             defaultFilterValues.push(sortData[n].API_name);
                             chartData.push(sortData[n].API_name);
@@ -432,7 +442,8 @@ var drawChart = function (from, to) {
                                                 +'<input name="item_checkbox'+n+'"  id='+n+'  type="checkbox"  data-item='+sortData[n].API_name +' class="inputCheckbox"/>'
                                                 +'</td>'
                                                 +'<td style="text-align:left;"><label for='+n+'>'+sortData[n].API_name +'</label></td>'
-                                                +'<td style="text-align:right;"><label for='+n+'>'+sortData[n].SubscriberCount +'</label></td></tr>'));
+                                                +'<td style="text-align:right;"><label for='+n+'>'+sortData[n].SubscriberCount +'</label></td>'
+                                                +'<td class="details-control" style="text-align:right;padding-right:30px;">Show more details<div style="display :inline"class="showDetail"></div></td></tr>'));
                             state_array.push(false);
                             chartData.push(sortData[n].API_name);
                         }
@@ -441,7 +452,7 @@ var drawChart = function (from, to) {
                     $('#tableContainer').append($dataTable);
                     $('#tableContainer').show();
 
-                    $('#apiSelectTable').DataTable({
+                    var table =$('#apiSelectTable').DataTable({
                         "order": [[ 2, "desc" ]],
                         "fnDrawCallback": function(){
                             if(this.fnSettings().fnRecordsDisplay()<=$("#apiSelectTable_length option:selected" ).val()
@@ -453,9 +464,31 @@ var drawChart = function (from, to) {
                         "aoColumns": [
                         { "bSortable": false },
                         null,
-                        null
+                        null,
+                        false,
                         ],
                     });
+                    $('.details-control').removeClass('sorting');
+
+                    // show more detail table display
+                    var detailRows = [];
+                    $('#apiSelectTable tbody').on( 'click', 'tr td.details-control', function () {
+                       var tr = $(this).closest('tr');
+                               var row = table.row( tr );
+                               if ( row.child.isShown() ) {
+                                   // This row is already open - close it
+                                   $('div.slider', row.child()).slideUp( function () {
+                                                   row.child.hide();
+                                                   tr.removeClass('shown');
+                                               } );
+                               }
+                               else {
+                                   row.child( format(row.data()), 'no-padding' ).show();
+                                   tr.addClass('shown');
+                                   $('div.slider', row.child()).slideDown();
+                               }
+                    } );
+
                     $('select').css('width','60px');
                     chart.data = dimple.filterData(data, "API", defaultFilterValues);
 
@@ -512,15 +545,14 @@ var drawChart = function (from, to) {
                                           app =(parsedResponse[i][0]);
 
                                           var maximumUsers = parsedResponse[i][1][j][1].length;
-                                          maxrowspan = parsedResponse[i][1][j][1].length;
 
-                                          allcount = 0;
+                                          hitCount = 0;
                                           for ( var k = 0; k < maximumUsers; k++) {
                                             count++;
-                                            allcount = Number(allcount)+Number(parsedResponse[i][1][j][1][k][1]);
+                                            hitCount = Number(hitCount)+Number(parsedResponse[i][1][j][1][k][1]);
                                           }
 
-                                        versionCount.push({version:parsedResponse[i][1][j][0],count:allcount});
+                                        versionCount.push({version:parsedResponse[i][1][j][0],count:hitCount});
                                     }
 
                                 div.style("left", d3.event.pageX+10+"px");
@@ -558,6 +590,66 @@ var drawChart = function (from, to) {
         }, "json");
 }
 
+function format ( d ) {
+    var subTable=$('<div class="slider pull-right " ><table cellpadding="5" cellspacing="0" border="0" style="padding-left:50px;"></table></div>');
+    subTable.append($('<thead><tr><th>Version</th><th>Subscriber Count</th><th>Hit Count</th></tr></thead>'));
+
+    var versions=[];
+    var isChecked=false;
+    for (var i = 0; i < groupData.length; i++) {
+        if(groupData[i].api_name == $(d[0]).attr('data-item')){
+            for(var j=0;j<groupData[i].versions.length;j++){
+                versions.push({"apiName":groupData[i].api_name,"version":groupData[i].versions[j].version,"SubCount":groupData[i].versions[j].Count,"isChecked":isChecked,"hitCount":0});
+            }
+        }
+    }
+
+    for ( var i = 0; i < parsedResponse.length; i++) {
+        var count = 0;
+        var app ='';
+
+        if( $(d[0]).attr('data-item')== parsedResponse[i][0].replace(/\s+/g, '')){
+            var versionCount=[];
+            for ( var j = 0; j < parsedResponse[i][1].length; j++) {
+                  app =(parsedResponse[i][0]);
+                  var maximumUsers = parsedResponse[i][1][j][1].length;
+                  hitCount = 0;
+
+                  for ( var l = 0; l < versions.length; l++) {
+                      if(parsedResponse[i][1][j][0]==versions[l].version){
+                          versions[l].isChecked=true;
+                          for ( var k = 0; k < maximumUsers; k++) {
+                            count++;
+                            hitCount = Number(hitCount)+Number(parsedResponse[i][1][j][1][k][1]);
+                          }
+                          versionCount.push({version:parsedResponse[i][1][j][0],count:hitCount});
+                          versions[l].hitCount = hitCount;
+                      }
+                  }
+            }
+
+            for ( var l = 0; l < versions.length; l++) {
+                if(versions[l].isChecked==false){
+                   versionCount.push({version:versions[l].version,count:0});
+                   versions[l].isChecked=true;
+                }
+            }
+
+            for(var k = 0; k < versions.length;k++){
+                subTable.append($('<tr><td >'+versions[k].version +'</td><td style="text-align:right">'+versions[k].SubCount+'</td><td style="text-align:right">'+versions[k].hitCount+'</td></tr>'));
+            }
+        }
+    }
+
+    for ( var l = 0; l < versions.length; l++) {
+        if($(d[0]).attr('data-item')==versions[l].apiName){
+            if(versions[l].isChecked==false){
+                   subTable.append($('<tr style="text-align:right"><td >'+versions[l].version +'</td><td >'+versions[l].SubCount+'</td><td style="text-align:right">'+versions[l].hitCount+'</td></tr>'));
+            }
+        }
+    }
+    return subTable;
+}
 function isDataPublishingEnabled(){
     jagg.post("/site/blocks/stats/api-usage-user/ajax/stats.jag", { action: "isDataPublishingEnabled"},
         function (json) {
