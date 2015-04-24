@@ -30,6 +30,7 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
+import org.wso2.carbon.apimgt.api.APIDefinition;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.FaultGatewaysException;
@@ -89,7 +90,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 	
 	private static final Log log = LogFactory.getLog(APIProviderImpl.class);
     // API definitions from swagger v2.0
-    static APIDefinitionFromSwagger20 definitionFromSwagger20 = new APIDefinitionFromSwagger20();
+    static APIDefinition definitionFromSwagger20 = new APIDefinitionFromSwagger20();
 
     public APIProviderImpl(String username) throws APIManagementException {
         super(username);
@@ -685,9 +686,11 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     if (wsdlUrlRelativePath.length == 2) {
                         wsdlRegistryPath = wsdlUrlRelativePath[1];
                     }
-                    registry.delete(wsdlRegistryPath);
-                    registry.removeAssociation(artifactPath, wsdlURL, CommonConstants.ASSOCIATION_TYPE01);
-                    updateApiArtifact.setAttribute(APIConstants.API_OVERVIEW_WSDL, "");
+                    if (wsdlRegistryPath != null) {
+                        registry.delete(wsdlRegistryPath);
+                        registry.removeAssociation(artifactPath, wsdlURL, CommonConstants.ASSOCIATION_TYPE01);
+                        updateApiArtifact.setAttribute(APIConstants.API_OVERVIEW_WSDL, "");
+                    }
                 }
                 if (api.getUrl() != null && !"".equals(api.getUrl())){
                     String path = APIUtil.createEndpoint(api.getUrl(), registry);
@@ -985,6 +988,15 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         APITemplateBuilderImpl vtb = new APITemplateBuilderImpl(api);
 
         if(!api.getStatus().equals(APIStatus.PROTOTYPED)) {
+            Map<String, String> corsProperties = new HashMap<String, String>();
+            corsProperties.put("inline", api.getImplementation());
+            if (api.getAllowedHeaders() != null && api.getAllowedHeaders() != "") {
+                corsProperties.put("allowHeaders", api.getAllowedHeaders());
+            }
+            if (api.getAllowedOrigins() != null && api.getAllowedOrigins() != "") {
+                corsProperties.put("allowedOrigins", api.getAllowedOrigins());
+            }
+            vtb.addHandler("org.wso2.carbon.apimgt.gateway.handlers.security.CORSRequestHandler", corsProperties);
             vtb.addHandler("org.wso2.carbon.apimgt.gateway.handlers.security.APIAuthenticationHandler", Collections.EMPTY_MAP);
 
             Map<String, String> properties = new HashMap<String, String>();

@@ -257,8 +257,7 @@ public class APIDefinitionFromSwagger12 extends APIDefinition {
     }
 
     @Override
-    @Deprecated
-    public String createAPIDefinition(API api) throws APIManagementException {
+    public String generateAPIDefinition(API api) throws APIManagementException {
         JSONParser parser = new JSONParser();
         String pathJsonTemplate = "{\n    \"path\": \"\",\n    \"operations\": []\n}";
         String operationJsonTemplate = "{\n    \"method\": \"\",\n    \"parameters\": []\n}";

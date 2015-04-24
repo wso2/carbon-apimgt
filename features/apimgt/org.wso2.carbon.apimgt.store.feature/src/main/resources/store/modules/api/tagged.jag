@@ -28,7 +28,8 @@ var getPaginatedAPIsByTag = function (tag,start,end) {
             store = jagg.module("manager").getAPIStoreObj();
 
     try {
-        result = store.getPaginatedAPIsWithTag(tag,String(start),String(end+1));
+        //changed end+1 to end to fix viewing incorrect number of APIs in a page when view APIs by tag
+        result = store.getPaginatedAPIsWithTag(tag,String(start),String(end));
         if (log.isDebugEnabled()) {
             log.debug("getAPIsByTag : " + stringify(result.apis));
         }

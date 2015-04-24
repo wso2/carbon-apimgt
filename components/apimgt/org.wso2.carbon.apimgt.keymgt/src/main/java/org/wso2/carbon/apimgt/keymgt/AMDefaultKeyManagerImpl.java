@@ -414,6 +414,13 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
 
         //initiate OAuthApplicationInfo
         OAuthApplicationInfo oAuthApplicationInfo = appInfoRequest.getOAuthApplicationInfo();
+        String tokenScope = (String) oAuthApplicationInfo.getParameter("tokenScope");
+        String tokenScopes[] = new String[1];
+        tokenScopes[0] = tokenScope;
+        String clientSecret = (String) oAuthApplicationInfo.getParameter("client_secret");
+        oAuthApplicationInfo.setClientSecret(clientSecret);
+
+        oAuthApplicationInfo.addParameter("tokenScope", tokenScopes);
         if (log.isDebugEnabled()) {
             log.debug("Creating semi-manual application for consumer id  :  " + oAuthApplicationInfo.getClientId());
         }

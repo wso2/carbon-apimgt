@@ -76,13 +76,13 @@ public class APIDefinitionFromSwagger20 extends APIDefinition {
                         if (!"PATCH".equals(httpVerb)) {
                             URITemplate template = new URITemplate();
                             Scope scope= APIUtil.findScopeByKey(scopes,(String) operation.get("x-scope"));
-                            String authType = (String) operation.get("auth_type");
+                            String authType = (String) operation.get("x-auth-type");
                             if ("Application & Application User".equals(authType)) {
                                 authType = APIConstants.AUTH_APPLICATION_OR_USER_LEVEL_TOKEN;
                             } else if ("Application User".equals(authType)) {
                                 authType = APIConstants.AUTH_APPLICATION_USER_LEVEL_TOKEN;
                             } else if ("None".equals(authType)) {
-                                authType = APIConstants.AUTH_TYPE_NONE;
+                                authType = APIConstants.AUTH_NO_AUTHENTICATION;
                             } else {
                                 authType = APIConstants.AUTH_APPLICATION_OR_USER_LEVEL_TOKEN;
                             }
@@ -236,8 +236,8 @@ public class APIDefinitionFromSwagger20 extends APIDefinition {
      */
     @Override
     @SuppressWarnings("unchecked")
-    public String createAPIDefinition(API api) throws APIManagementException {
-        JSONParser parser = new JSONParser();
+    public String generateAPIDefinition(API api) throws APIManagementException {
+        /*JSONParser parser = new JSONParser();
         String contactObjectTemplate = "{\"name\":\"\", \"url\":\"\", \"email\":\"\"}";
         String licenceObjectTemplate = "{\"name\":\"\", \"url\":\"\"}";
         String infoObjectTemplate = "{\"title\":\"\",\"description\":\"\",\"termsOfService\":\"\",\"contact\":[]," +
@@ -272,7 +272,7 @@ public class APIDefinitionFromSwagger20 extends APIDefinition {
 
         String swaggerObjectTemplate = "{\"swagger\":\"2.0\",\"info\":[],\"host\":\"\",\"basePath\":\"\",\"schemes\":[]," +
                 "\"consumes\":[],\"produces\":[],\"paths\":[],\"definitions\":[],\"parameters\":[],\"responses\":[]," +
-                "\"securityDefinitions\":[],\"security\":[],\"tags\":[],\"externalDocs\":[]}";
+                "\"securityDefinitions\":[],\"security\":[],\"tags\":[],\"externalDocs\":[]}";*/
 
         APIIdentifier identifier = api.getId();
         APIManagerConfiguration config = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration();
@@ -281,51 +281,71 @@ public class APIDefinitionFromSwagger20 extends APIDefinition {
         String endpoints = environment.getApiGatewayEndpoint();
         String[] endpointsSet = endpoints.split(",");
         Set<URITemplate> uriTemplates = api.getUriTemplates();
+        Set scopes = api.getScopes();
 
         if (endpointsSet.length < 1) {
             throw new APIManagementException("Error in creating JSON representation of the API" + identifier.getApiName());
         }
 
-        JSONObject swaggerObject;
+        JSONObject swaggerObject = new JSONObject();
 
-        try {
-            swaggerObject = (JSONObject) parser.parse(swaggerObjectTemplate);
+        //Create info object
+        JSONObject infoObject = new JSONObject();
+        infoObject.put("title", api.getId().getApiName());
+        infoObject.put("description", api.getDescription());
 
-            //Create info object
-            JSONObject infoObject = (JSONObject) parser.parse(infoObjectTemplate);
-            infoObject.put("title", api.getId().getApiName());
-            infoObject.put("description", api.getDescription());
+        //Create contact object and map business owner info
+        JSONObject contactObject = new JSONObject();
+        contactObject.put("name", api.getBusinessOwner());
+        contactObject.put("email", api.getBusinessOwnerEmail());
+        //put contact object to info object
+        infoObject.put("contact", contactObject);
 
-            //Create contact object and map business owner info
-            JSONObject contactObject = (JSONObject) parser.parse(contactObjectTemplate);
-            contactObject.put("name", api.getBusinessOwner());
-            contactObject.put("email", api.getBusinessOwnerEmail());
-            //put contact object to info object
-            infoObject.put("contact", contactObject);
+        //Create licence object
+        JSONObject licenceObject = new JSONObject();
 
-            //Create licence object
-            JSONObject licenceObject = (JSONObject) parser.parse(licenceObjectTemplate);
+        infoObject.put("licence", licenceObject);
+        infoObject.put("version", api.getId().getVersion());
 
-            infoObject.put("licence", licenceObject);
-            infoObject.put("version", api.getId().getVersion());
+        //add info object to swaggerObject
+        swaggerObject.put("info", infoObject);
 
-            //add info object to swaggerObject
-            swaggerObject.put("info", infoObject);
+        JSONObject pathsObject = new JSONObject();
+        JSONObject pathItemObject = null;
+        JSONObject operationObject;
+        JSONObject responseObject = new JSONObject();
+        //add default response
+        responseObject.put("200","{}");
 
-            for (URITemplate uriTemplate : uriTemplates) {
-
+        for (URITemplate uriTemplate : uriTemplates) {
+            String pathName = uriTemplate.getUriTemplate();
+            if (pathsObject.get(pathName) == null) {
+                pathsObject.put(pathName, "{}");
+                pathItemObject = new JSONObject();
             }
 
-            //Create security scheme object
-            JSONObject securitySchemeObject = (JSONObject) parser.parse(securitySchemeObjectTemplate);
-
-        } catch (ParseException e) {
-            throw new APIManagementException("Error while generating swagger v2.0 resource for api " + api.getId().getProviderName()
-                    + "-" + api.getId().getApiName()
-                    + "-" + api.getId().getVersion(), e);
+            String httpVerb = uriTemplate.getHTTPVerb();
+            if (pathItemObject != null) {
+                operationObject = new JSONObject();
+                operationObject.put("x-auth-type", uriTemplate.getAuthType());
+                operationObject.put("x-throttling-tier", uriTemplate.getThrottlingTier());
+                operationObject.put("responses", responseObject);
+                pathItemObject.put(httpVerb.toLowerCase(), operationObject);
+            }
+            pathsObject.put(pathName, pathItemObject);
         }
 
-        return  swaggerObject.toJSONString();
+        swaggerObject.put("paths", pathsObject);
+        swaggerObject.put("swagger", "2.0");
+
+        JSONObject securityDefinitionObject = new JSONObject();
+        JSONObject scopesObject = new JSONObject();
+        scopesObject.put("x-wso2-scopes", scopes);
+        securityDefinitionObject.put("apim", scopesObject);
+
+        swaggerObject.put("securityDefinitions", securityDefinitionObject);
+
+        return swaggerObject.toJSONString();
     }
 
 }

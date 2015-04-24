@@ -36,6 +36,7 @@ import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.*;
 import org.wso2.carbon.apimgt.hostobjects.internal.HostObjectComponent;
+import org.wso2.carbon.apimgt.hostobjects.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.*;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dto.Environment;
@@ -53,6 +54,7 @@ import org.wso2.carbon.apimgt.usage.client.APIUsageStatisticsClient;
 import org.wso2.carbon.apimgt.usage.client.dto.*;
 import org.wso2.carbon.apimgt.usage.client.exception.APIMgtUsageQueryServiceClientException;
 import org.wso2.carbon.authenticator.stub.AuthenticationAdminStub;
+import org.wso2.carbon.authenticator.stub.LoginAuthenticationExceptionException;
 import org.wso2.carbon.base.MultitenantConstants;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.core.util.PermissionUpdateUtil;
@@ -74,10 +76,7 @@ import org.wso2.carbon.identity.user.registration.stub.dto.UserDTO;
 import org.wso2.carbon.identity.user.registration.stub.dto.UserFieldDTO;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.net.URLDecoder;
+import java.net.*;
 import java.rmi.RemoteException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -804,37 +803,105 @@ public class APIStoreHostObject extends ScriptableObject {
      * @throws APIManagementException
      * @throws ParseException
      */
-    public static NativeObject jsFunction_updateAuthClient_new(Context cx, Scriptable thisObj,
+    public static NativeObject jsFunction_updateAuthClient(Context cx, Scriptable thisObj,
                                                            Object[] args, Function funObj)
             throws ScriptException, APIManagementException, ParseException {
+
         if (args != null && args.length != 0) {
-
-
-            NativeObject apiData = (NativeObject) args[0];
-            //this parameter will hold oAuthApplication properties that required to create new oAuthApplication.
-            String jsonString = (String) apiData.get(ApplicationConstants.OAUTH_CLIENT_JSONPARAMSTRING, apiData);
-            //logged in user name.
-            String userName = (String) apiData.get(ApplicationConstants.OAUTH_CLIENT_USERNAME, apiData);
-            //APIM application name.
-            String applicationName = (String) apiData.get(ApplicationConstants.OAUTH_CLIENT_USERNAME);
-            //Key type whether its a sandBox or production oAuth application.
-            String keytype = (String) apiData.get("key_type");
-            //this map will hold response that we are getting from Application registration process.
-            Map<String, Object> keyDetails;
-            //call update application registration process.
-            keyDetails = getAPIConsumer(thisObj).updateAuthClient(userName, applicationName, keytype, jsonString);
-            //set Response.
-            Set<Map.Entry<String, Object>> entries = keyDetails.entrySet();
-            //initiate native object in order to hold response.
-            NativeObject row = new NativeObject();
-            //Read the response and set key/value pair in to Native object.
-            for (Map.Entry<String, Object> entry : entries) {
-                row.put(entry.getKey(), row, entry.getValue());
+            NativeArray accessAllowDomainsArr = (NativeArray) args[4]; // args[4] is not mandatory
+            String[] accessAllowDomainsArray = new String[(int) accessAllowDomainsArr.getLength()];
+            for (Object domain : accessAllowDomainsArr.getIds()) {
+                int index = (Integer) domain;
+                accessAllowDomainsArray[index] = (String) accessAllowDomainsArr.get(index, null);
             }
-            //return the response native object.
-            return row;
+            try {
+                String validityPeriod = (String) args[5];
+                String scopes = (String) args[7];
+                String username = String.valueOf(args[0]);
+                String tenantDomain = MultitenantUtils.getTenantDomain(username);
+                int tenantId =
+                        ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
+                                .getTenantId(tenantDomain);
+
+                if (null == validityPeriod || validityPeriod.isEmpty()) { // In case a validity period is unspecified
+                    long defaultValidityPeriod = getApplicationAccessTokenValidityPeriodInSeconds();
+
+                    if (defaultValidityPeriod < 0) {
+                        validityPeriod = String.valueOf(Long.MAX_VALUE);
+                    }
+                    else {
+                        validityPeriod = String.valueOf(defaultValidityPeriod);
+                    }
+                }
+
+                String jsonParams = null;
+                if(args.length == 10){
+                    jsonParams = (String) args[9];
+                }else{
+                    jsonParams = null;
+                }
+
+
+                //checking for authorized scopes
+                Set<Scope> scopeSet = new LinkedHashSet<Scope>();
+                List<Scope> authorizedScopes = new ArrayList<Scope>();
+                String authScopeString;
+                APIConsumer apiConsumer = getAPIConsumer(thisObj);
+                if (scopes != null && scopes.length() != 0 &&
+                        !scopes.equals(APIConstants.OAUTH2_DEFAULT_SCOPE)) {
+                    scopeSet.addAll(apiConsumer.getScopesByScopeKeys(scopes, tenantId));
+                    authorizedScopes = getAllowedScopesForUserApplication(username, scopeSet);
+                }
+
+                if (!authorizedScopes.isEmpty()) {
+                    StringBuilder scopeBuilder = new StringBuilder();
+                    for (Scope scope : authorizedScopes) {
+                        scopeBuilder.append(scope.getKey()).append(" ");
+                    }
+                    authScopeString = scopeBuilder.toString();
+                } else {
+                    authScopeString = APIConstants.OAUTH2_DEFAULT_SCOPE;
+                }
+
+                Map<String, Object> keyDetails = getAPIConsumer(thisObj).updateAuthClient(
+                        (String) args[0], (String) args[1], (String) args[2], (String) args[3],
+                        accessAllowDomainsArray, validityPeriod, authScopeString, Integer.parseInt((String)args[8]),
+                        jsonParams);
+
+
+
+                NativeObject row = new NativeObject();
+                String authorizedDomains = "";
+                boolean first = true;
+                for (String anAccessAllowDomainsArray : accessAllowDomainsArray) {
+                    if (first) {
+                        authorizedDomains = anAccessAllowDomainsArray;
+                        first = false;
+                    } else {
+                        authorizedDomains = authorizedDomains + ", " + anAccessAllowDomainsArray;
+                    }
+                }
+
+                Set<Map.Entry<String, Object>> entries = keyDetails.entrySet();
+
+                for (Map.Entry<String, Object> entry : entries) {
+                    row.put(entry.getKey(), row, entry.getValue());
+                }
+
+                boolean isRegenarateOptionEnabled = true;
+                if (getApplicationAccessTokenValidityPeriodInSeconds() < 0) {
+                    isRegenarateOptionEnabled = false;
+                }
+                row.put("enableRegenarate", row, isRegenarateOptionEnabled);
+                row.put("accessallowdomains", row, authorizedDomains);
+                return row;
+            } catch (Exception e) {
+                String msg = "Error while obtaining the application access token for the application:" + args[1];
+                log.error(msg, e);
+                throw new ScriptException(msg, e);
+            }
         } else {
-            handleException("Invalid input parameters given while trying to update auth client");
+            handleException("Invalid input parameters.");
             return null;
         }
     }
@@ -2745,6 +2812,7 @@ public class APIStoreHostObject extends ScriptableObject {
                             appObj.put("prodKey", appObj, prodKey.getAccessToken());
 
 			                appObj.put("prodKeyScope", appObj, prodKeyScope);
+                            appObj.put("prodKeyScopeValue", appObj, prodKey.getTokenScope());
                             appObj.put("prodConsumerKey", appObj, prodConsumerKey);
                             appObj.put("prodConsumerSecret", appObj, prodConsumerSecret);
                             appObj.put("prodJsonString", appObj, jsonString);
@@ -2762,13 +2830,15 @@ public class APIStoreHostObject extends ScriptableObject {
                                 appObj.put("prodValidityTime", appObj, prodKey.getValidityPeriod());
                             }
                         } else if (prodKey != null) {
+                            String jsonString = prodApp.getJsonString();
                             appObj.put("prodKey", appObj, null);
                             appObj.put("prodKeyScope", appObj, null);
+                            appObj.put("prodKeyScopeValue", appObj, null);
                             appObj.put("prodConsumerKey", appObj, null);
                             appObj.put("prodConsumerSecret", appObj, null);
                             appObj.put("prodRegenarateOption", appObj, prodEnableRegenarateOption);
                             appObj.put("prodAuthorizedDomains", appObj, null);
-                            appObj.put("prodJsonString", appObj, null);
+                            appObj.put("prodJsonString", appObj, jsonString);
                             if (isApplicationAccessTokenNeverExpire(
                                     getApplicationAccessTokenValidityPeriodInSeconds())) {
                                 appObj.put("prodValidityTime", appObj, -1);
@@ -2780,6 +2850,7 @@ public class APIStoreHostObject extends ScriptableObject {
                         } else {
                             appObj.put("prodKey", appObj, null);
                             appObj.put("prodKeyScope", appObj, null);
+                            appObj.put("prodKeyScopeValue", appObj, null);
                             appObj.put("prodConsumerKey", appObj, null);
                             appObj.put("prodConsumerSecret", appObj, null);
                             appObj.put("prodRegenarateOption", appObj, prodEnableRegenarateOption);
@@ -2818,6 +2889,7 @@ public class APIStoreHostObject extends ScriptableObject {
                             appObj.put("sandboxKey", appObj, sandboxKey.getAccessToken());
 
                             appObj.put("sandKeyScope", appObj, sandKeyScope);
+                            appObj.put("sandKeyScopeValue", appObj, sandboxKey.getTokenScope());
                             appObj.put("sandboxConsumerKey", appObj, sandboxConsumerKey);
                             appObj.put("sandboxConsumerSecret", appObj, sandboxConsumerSecret);
                             appObj.put("sandboxKeyState", appObj, sandboxKey.getState());
@@ -2841,14 +2913,16 @@ public class APIStoreHostObject extends ScriptableObject {
                                 appObj.put("sandValidityTime", appObj, sandboxKey.getValidityPeriod());
                             }
                         } else if (sandboxKey != null) {
+                            String jsonString = sandApp.getJsonString();
                             appObj.put("sandboxKey", appObj, null);
                             appObj.put("sandKeyScope", appObj, null);
+                            appObj.put("sandKeyScopeValue", appObj, null);
                             appObj.put("sandboxConsumerKey", appObj, null);
                             appObj.put("sandboxConsumerSecret", appObj, null);
                             appObj.put("sandRegenarateOption", appObj, sandEnableRegenarateOption);
                             appObj.put("sandboxAuthorizedDomains", appObj, null);
                             appObj.put("sandboxKeyState", appObj, sandboxKey.getState());
-                            appObj.put("sandboxJsonString", appObj, null);
+                            appObj.put("sandboxJsonString", appObj, jsonString);
                             if (isApplicationAccessTokenNeverExpire(
                                     getApplicationAccessTokenValidityPeriodInSeconds())) {
                                 appObj.put("sandValidityTime", appObj, -1);
@@ -2859,6 +2933,7 @@ public class APIStoreHostObject extends ScriptableObject {
                         } else {
                             appObj.put("sandboxKey", appObj, null);
                             appObj.put("sandKeyScope", appObj, null);
+                            appObj.put("sandKeyScopeValue", appObj, null);
                             appObj.put("sandboxConsumerKey", appObj, null);
                             appObj.put("sandboxConsumerSecret", appObj, null);
                             appObj.put("sandRegenarateOption", appObj, sandEnableRegenarateOption);
@@ -3601,6 +3676,136 @@ public class APIStoreHostObject extends ScriptableObject {
         }
     }
 
+	public static boolean jsFunction_changePassword(Context cx, Scriptable thisObj, Object[] args,
+	                                                Function funObj) throws APIManagementException {
+
+		String username = (String) args[0];
+		String currentPassword = (String) args[1];
+		String newPassword = (String) args[2];
+
+		APIManagerConfiguration config = HostObjectComponent.getAPIManagerConfiguration();
+		String serverURL = config.getFirstProperty(APIConstants.AUTH_MANAGER_URL);
+		String tenantDomain =
+				MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(username));
+
+		//if the current password is wrong return false and ask to retry.
+		if (!isAbleToLogin(username, currentPassword, serverURL, tenantDomain)) {
+			return false;
+		}
+
+		boolean isTenantFlowStarted = false;
+
+		try {
+			if (tenantDomain != null &&
+			    !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
+				isTenantFlowStarted = true;
+				PrivilegedCarbonContext.startTenantFlow();
+				PrivilegedCarbonContext.getThreadLocalCarbonContext()
+				                       .setTenantDomain(tenantDomain, true);
+			}
+			// get the signup configuration
+			UserRegistrationConfigDTO signupConfig =
+					SelfSignUpUtil.getSignupConfiguration(tenantDomain);
+			// set tenant specific sign up user storage
+			if (signupConfig != null && signupConfig.getSignUpDomain() != "") {
+				if (!signupConfig.isSignUpEnabled()) {
+					handleException("Self sign up has been disabled for this tenant domain");
+				}
+			}
+
+			changeTenantUserPassword(username, signupConfig, serverURL, newPassword);
+
+			//if unable to login with new password
+			if (!isAbleToLogin(username, newPassword, serverURL, tenantDomain)) {
+				throw new APIManagementException("Password change failed");
+			}
+
+		} catch (Exception e) {
+			handleException("Error while changing the password for: " + username, e);
+
+		} finally {
+			if (isTenantFlowStarted) {
+				PrivilegedCarbonContext.endTenantFlow();
+			}
+		}
+		return true;
+	}
+
+	/***
+	 *
+	 * @param username username
+	 * @param signupConfig signup configuration of user
+	 * @param serverURL server URL
+	 * @param newPassword new password to be set.
+	 *
+	 */
+	private static void changeTenantUserPassword(String username,
+	                                             UserRegistrationConfigDTO signupConfig,
+	                                             String serverURL, String newPassword)
+			throws RemoteException, UserAdminUserAdminException {
+
+		UserAdminStub userAdminStub = new UserAdminStub(null, serverURL + "UserAdmin");
+		String adminUsername = signupConfig.getAdminUserName();
+		String adminPassword = signupConfig.getAdminPassword();
+
+		CarbonUtils.setBasicAccessSecurityHeaders(adminUsername, adminPassword, true,
+		                                          userAdminStub._getServiceClient());
+
+		String tenantAwareUserName = MultitenantUtils.getTenantAwareUsername(username);
+		int index = tenantAwareUserName.indexOf(UserCoreConstants.DOMAIN_SEPARATOR);
+		//remove the 'PRIMARY' part from the user name
+		if (index > 0) {
+			if (tenantAwareUserName.substring(0, index).equalsIgnoreCase(
+					UserCoreConstants.PRIMARY_DEFAULT_DOMAIN_NAME)) {
+				tenantAwareUserName = tenantAwareUserName.substring(index + 1);
+			}
+		}
+		userAdminStub.changePassword(tenantAwareUserName, newPassword);
+	}
+
+	/***
+	 *
+	 * @param username username to be ckecked
+	 * @param password password of the user
+	 * @param serverURL server URL
+	 * @param tenantDomain denant domain of the user
+	 *
+	 */
+	private static boolean isAbleToLogin(String username, String password, String serverURL,
+	                                     String tenantDomain) throws APIManagementException {
+
+		boolean loginStatus = false;
+		//String serverURL = config.getFirstProperty(APIConstants.AUTH_MANAGER_URL);
+		if (serverURL == null) {
+			handleException("API key manager URL unspecified");
+		}
+
+		try {
+			AuthenticationAdminStub authAdminStub =
+					new AuthenticationAdminStub(null, serverURL + "AuthenticationAdmin");
+			//String tenantDomain = MultitenantUtils.getTenantDomain(username);
+			//update permission cache before validate user
+			int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
+			                                     .getTenantId(tenantDomain);
+			PermissionUpdateUtil.updatePermissionTree(tenantId);
+			String host = new URL(serverURL).getHost();
+			if (authAdminStub.login(username, password, host)) {
+				loginStatus = true;
+			}
+		} catch (AxisFault axisFault) {
+			log.error("Error while checking the ability to login", axisFault );
+		} catch (org.wso2.carbon.user.api.UserStoreException e) {
+			log.error("Error while checking the ability to login", e );
+		} catch (MalformedURLException e) {
+			log.error("Error while checking the ability to login", e);
+		} catch (RemoteException e) {
+			log.error("Error while checking the ability to login", e);
+		} catch (LoginAuthenticationExceptionException e) {
+			log.error("Error while checking the ability to login", e );
+		}
+		return loginStatus;
+	}
+
     private static void removeUser(String username, APIManagerConfiguration config, String serverURL)
 			throws RemoteException,
 			UserAdminUserAdminException {
@@ -3852,6 +4057,7 @@ public class APIStoreHostObject extends ScriptableObject {
             row.put("consumerSecret", row, response.getConsumerKey());
             row.put("validityTime", row, response.getValidityPeriod());
             row.put("responseParams", row, response.getJSONString());
+            row.put("tokenScope", row, response.getScopes());
 
             boolean isRegenarateOptionEnabled = true;
             if (getApplicationAccessTokenValidityPeriodInSeconds() < 0) {

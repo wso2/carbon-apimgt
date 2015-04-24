@@ -72,12 +72,12 @@ var log = new Log();
     		        PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
     		}
 
+            var APIUtil = Packages.org.wso2.carbon.apimgt.impl.utils.APIUtil;
+            var apiUtil = new APIUtil();
+            var swaggerPath = apiUtil.getSwagger20DefinitionFilePath(apiNameVal,apiVersionVal, providerVal);
     		var registry = carbon.server.osgiService('org.wso2.carbon.registry.core.service.RegistryService').getGovernanceUserRegistry("wso2.anonymous.user", tenantID);
-    		var prefix = "/apimgt/applicationdata/api-docs/"
 
-
-
-    		url = prefix + apiNameVal + "-" + apiVersionVal + "-" + providerVal +"/swagger.json";
+    		url = swaggerPath + "swagger.json";
 
     		    
 

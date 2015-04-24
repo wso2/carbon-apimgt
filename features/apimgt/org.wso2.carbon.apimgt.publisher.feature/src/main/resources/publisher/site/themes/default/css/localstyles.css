@@ -1458,33 +1458,35 @@ a.next {
     color:#7d7d7d;
 }
 
-.spinner {
-  display: inline-block;
-  opacity: 0;
-  width: 0;
 
-  -webkit-transition: opacity 0.25s, width 0.25s;
-  -moz-transition: opacity 0.25s, width 0.25s;
-  -o-transition: opacity 0.25s, width 0.25s;
-  transition: opacity 0.25s, width 0.25s;
+
+td.details-control> div.showDetail:before {
+    font-family: FontAwesome;
+    content: "\f13a";
+    display: inline;
+    padding-left: 10px !important;
+    vertical-align: middle;
+    cursor:pointer;
+}
+td.details-control{
+    cursor:pointer;
 }
 
-.has-spinner.active {
-  opacity: 0.7;
-  cursor:progress;
-
-}
-.has-spinner.active:after{
-  content:'Loading';
-}
-
-.has-spinner.active span:not(.spinner){
+div.slider{
     display:none;
 }
+tr.shown td.details-control> div.showDetail:before {
+    font-family: FontAwesome;
+    content:  "\f139";
+    display: inline;
+    padding-left: 10px !important;
+    vertical-align: middle;
+    cursor:pointer;
+}
 
-.has-spinner.active .spinner {
-  opacity: 1;
-  width: auto;
+
+table.dataTable tbody td.no-padding {
+    padding: 0;
 }
 
 .create-options:hover, .api-implement-type:hover, .selected {
@@ -1542,4 +1544,24 @@ a.next {
     margin-left:10px;
     margin-right:10px;
 
+}
+
+.center-div{
+    margin:0 auto;
+	margin-left:auto;
+	margin-right:auto;
+	align:center;
+	text-align:center;
+    padding-top: 20px;
+    padding-bottom: 20px;
+}
+
+.slider th {
+    font-size: 10px !important;
+    text-transform: none !important;
+    border-left: 1px solid #ddd !important;
+}
+
+.slider td{
+    border-left: 1px solid #ddd !important;
 }

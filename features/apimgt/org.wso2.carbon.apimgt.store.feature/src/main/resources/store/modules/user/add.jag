@@ -56,4 +56,36 @@ var getUserFields = function () {
         };
     }
 };
+
+var changePassword = function (username, currentPassword, newPassword) {
+	var log = new Log(),
+            store = jagg.module("manager").getAPIStoreObj();
+
+    try {
+        var changed = store.changePassword(username, currentPassword, newPassword);
+        if (log.isDebugEnabled()) {
+            log.debug("changePassword");
+        }
+        if(changed){
+        	return {
+        		error:false
+        	};
+        }
+        else {
+        	return {
+        		error:true,
+        		message:"Wrong username or password. Please retry with correct info"
+        	};
+        	
+        }        
+
+    } catch (e) {
+        log.error(e.message);
+        return {
+            error:e,
+            message:e.message.split("Exception:")[1]
+        };
+    }
+};
+
 %>
