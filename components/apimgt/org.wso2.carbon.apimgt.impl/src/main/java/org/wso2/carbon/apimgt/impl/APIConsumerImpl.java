@@ -1523,18 +1523,18 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 
         String callBackURL = null;
 
-        OAuthAppRequest oauthAppRequest = ApplicationUtils.createOauthAppRequest(applicationName, callBackURL,null,
+        OAuthAppRequest oauthAppRequest = ApplicationUtils.createOauthAppRequest(applicationName, callBackURL,"default",
                                                                                   jsonString);
 
         KeyManager keyManager = KeyManagerHolder.getKeyManagerInstance();
         //createApplication on oAuthorization server.
         OAuthApplicationInfo oAuthApplication = keyManager.createSemiManualAuthApplication(oauthAppRequest);
-        //Do application mapping with consumerKey.
-        apiMgtDAO.createApplicationKeyTypeMappingForManualClients(oauthAppRequest, applicationName, userName, clientId);
-
 
         AccessTokenRequest tokenRequest = ApplicationUtils.createAccessTokenRequest(oAuthApplication,null);
         AccessTokenInfo tokenInfo = keyManager.getNewApplicationAccessToken(tokenRequest);
+
+        //Do application mapping with consumerKey.
+        apiMgtDAO.createApplicationKeyTypeMappingForManualClients(oauthAppRequest, applicationName, userName, clientId);
 
         //#TODO get actuall values from response and pass.
         Map<String, Object> keyDetails = new HashMap<String, Object>();
@@ -1550,7 +1550,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             keyDetails.put("appDetails",oAuthApplication.getJsonString());
         }
 
-        return null;
+        return keyDetails;
 
     }
 

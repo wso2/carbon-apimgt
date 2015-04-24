@@ -4024,9 +4024,6 @@ public class ApiMgtDAO {
                 // If the CK/CS pair is pasted on the screen set this to MAPPED
                 ps.setString(5,"MAPPED");
                 ps.execute();
-                //create client at keyManager after adding record to table.Why? becaues  if something goes wrong
-                //adding to AM_APPLICATION_KEY_MAPPING create client at key manager will not happen.
-                keyManager.createSemiManualAuthApplication(oauthAppRequest);
                 ps.close();
                 connection.commit();
 
