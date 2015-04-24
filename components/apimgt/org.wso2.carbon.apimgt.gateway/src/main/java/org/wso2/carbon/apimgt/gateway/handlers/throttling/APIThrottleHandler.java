@@ -213,18 +213,7 @@ public class APIThrottleHandler extends AbstractHandler {
             Utils.setSOAPFault(messageContext, "Server", "Message Throttled Out",
                                "You have exceeded your quota");
         }
-        org.apache.axis2.context.MessageContext axis2MC = ((Axis2MessageContext) messageContext).
-                getAxis2MessageContext();
-
-        if (Utils.isCORSEnabled()) {
-            /* For CORS support adding required headers to the fault response */
-            Map<String, String> headers = (Map) axis2MC.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
-            headers.put(APIConstants.CORSHeaders.ACCESS_CONTROL_ALLOW_ORIGIN, Utils.getAllowedOrigin((String) headers.get("Origin")));
-            headers.put(APIConstants.CORSHeaders.ACCESS_CONTROL_ALLOW_METHODS, Utils.getAllowedMethods());
-            headers.put(APIConstants.CORSHeaders.ACCESS_CONTROL_ALLOW_HEADERS, Utils.getAllowedHeaders());
-            axis2MC.setProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS, headers);
-        }
-        Utils.sendFault(messageContext, HttpStatus.SC_SERVICE_UNAVAILABLE);
+           Utils.sendFault(messageContext, HttpStatus.SC_SERVICE_UNAVAILABLE);
     }
 
     private OMElement getFaultPayload() {

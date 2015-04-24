@@ -97,7 +97,7 @@ import java.util.List;
  * interface="org.wso2.carbon.registry.indexing.service.TenantIndexingLoader" cardinality="1..1" policy="dynamic"
  * bind="setIndexLoader" unbind="unsetIndexLoader"
  * @scr.reference name="bam.service.data.publisher"
- * interface="org.wso2.carbon.bam.service.data.publisher.services.ServiceDataPublisherAdmin" cardinality="1..1"
+ * interface="org.wso2.carbon.bam.service.data.publisher.services.ServiceDataPublisherAdmin" cardinality="0..1"
  * policy="dynamic" bind="setDataPublisherService" unbind="unsetDataPublisherService"
  */
 public class APIManagerComponent {
@@ -110,6 +110,7 @@ public class APIManagerComponent {
     private static ServiceDataPublisherAdmin dataPublisherAdminService;
 
     private static TenantRegistryLoader tenantRegistryLoader;
+    private APIManagerConfiguration configuration = new APIManagerConfiguration();
 
 
     protected void activate(ComponentContext componentContext) throws Exception {
@@ -130,7 +131,6 @@ public class APIManagerComponent {
             APIUtil.loadTenantSelfSignUpConfigurations(tenantId);
             
             
-            APIManagerConfiguration configuration = new APIManagerConfiguration();
             String filePath = CarbonUtils.getCarbonHome() + File.separator + "repository" +
                     File.separator + "conf" + File.separator + "api-manager.xml";
             configuration.load(filePath);
@@ -237,6 +237,7 @@ public class APIManagerComponent {
     protected void setDataPublisherService(ServiceDataPublisherAdmin service) {
         log.debug("Event Data Publisher service bound to the API usage handler");
         dataPublisherAdminService = service;
+        APIManagerAnalyticsConfiguration.createNewInstance().setAPIManagerConfiguration(configuration);
     }
 
     protected void unsetDataPublisherService(ServiceDataPublisherAdmin service) {

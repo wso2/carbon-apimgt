@@ -15,7 +15,7 @@
     }
 %> 
 <script language="javascript">
-    var VERBS = [ 'get' , 'post' , 'put' , 'delete', 'options'];
+    var VERBS = [ 'get' , 'post' , 'put' , 'delete'];
     var AUTH_TYPES = [
       { "value": "<%=i18n.localize("none")%>", "text":"<%=i18n.localize("none")%>"} ,
       { "value": "<%=i18n.localize("application")%>", "text":"<%=i18n.localize("application")%>"},
@@ -425,6 +425,15 @@
                     <input type="checkbox" value="{{ . }}" class="http_verb_select" >  {{ . }}
                     </label>
                 {{/each}}
+                <div class "checkbox inline" id="options" style="display: none;" >
+                    <label class="checkbox inline">
+                    <input type="checkbox" value="OPTIONS" class="http_verb_select"> OPTIONS
+                    </label>
+                    <a class="icon-question-sign help_popup" help_data="options_help" data-trigger="hover"></a>
+                    <p id="options_help" class="hide"><%=i18n.localize("optionsHelpMsg")%></p>
+                    <label id="less" style="display:inline;">less</label>
+                    </div>
+                     <label id="more" style="display:inline;">more</label>
             </div>
         </div>
         <!-- div class="control-group">

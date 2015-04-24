@@ -58,6 +58,22 @@ function APIDesigner(){
 
     this.init_controllers();
 
+    $( "#api_designer" ).delegate( "#more", "click", this, function( event ) {
+                        $("#options").css("display", "inline");
+                        $("#more").hide();
+    });
+  $( "#api_designer" ).delegate( "#less", "click", this, function( event ) {
+                         $("#options").hide();
+                         $("#more").css("display", "inline");
+    });
+         $( "#api_designer" ).delegate( "a.help_popup", "mouseover", this, function( event ) {
+    $('a.help_popup').popover({
+        html : true,
+        content: function() {
+            return $('#'+$(this).attr('help_data')).html();
+        }
+    });
+            });
     $( "#api_designer" ).delegate( ".resource_expand", "click", this, function( event ) {
         if(this.resource_created == undefined){
             event.data.render_resource($(this).parent().next().find('.resource_body'));
@@ -186,7 +202,7 @@ APIDesigner.prototype.set_default_management_values = function(){
 
 APIDesigner.prototype.add_default_resource = function(){
     $("#resource_url_pattern").val("*");
-    $(".http_verb_select").attr("checked","checked");    
+    $(".http_verb_select:lt(4)").attr("checked","checked");
     $("#inputResource").val("Default");
     $("#add_resource").trigger('click');
 }

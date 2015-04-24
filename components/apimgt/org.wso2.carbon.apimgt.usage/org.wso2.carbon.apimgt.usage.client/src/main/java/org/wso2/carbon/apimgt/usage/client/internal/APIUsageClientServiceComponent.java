@@ -24,6 +24,7 @@ import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
 import org.wso2.carbon.apimgt.usage.client.APIUsageStatisticsClient;
 import org.wso2.carbon.apimgt.usage.client.exception.APIMgtUsageQueryServiceClientException;
+import org.wso2.carbon.bam.service.data.publisher.services.ServiceDataPublisherAdmin;
 
 /**
  * @scr.component name="org.wso2.apimgt.usage.client" immediate="true"
@@ -44,7 +45,9 @@ public class APIUsageClientServiceComponent {
         if (log.isDebugEnabled()) {
             log.debug("API usage client component activated");
         }
-        APIUsageStatisticsClient.initializeDataSource();
+        if (analyticsConfiguration.isAnalyticsEnabled()){
+            APIUsageStatisticsClient.initializeDataSource();
+        }
     }
 
     protected void deactivate(ComponentContext componentContext) {
