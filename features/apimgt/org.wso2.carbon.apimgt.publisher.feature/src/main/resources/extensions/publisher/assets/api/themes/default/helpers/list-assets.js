@@ -39,5 +39,6 @@ var resources = function(page, meta) {
     o.js.push('jquery.history.js');
     o.js.push('assets.js');
     o.js.push('asset-helpers.js');
+    o.js.push('remove-asset.js');
     return o;
 };

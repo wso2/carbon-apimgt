@@ -64,9 +64,9 @@ public class UserAwareAPIProvider extends APIProviderImpl {
     }
 
     @Override
-    public void deleteAPI(JSONObject identifier) throws APIManagementException {
+    public boolean deleteAPI(JSONObject identifier) throws APIManagementException {
         checkCreatePermission();
-        super.deleteAPI(identifier);
+        return super.deleteAPI(identifier);
     }
 
     @Override

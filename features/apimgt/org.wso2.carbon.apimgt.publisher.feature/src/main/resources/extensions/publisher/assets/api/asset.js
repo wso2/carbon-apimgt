@@ -17,17 +17,19 @@
  *
  */
 asset.manager = function(ctx) {
-    var notifier = require('store').notificationManager;
-    var storeConstants = require('store').storeConstants;
     var apiPublisher =  require('apipublisher').apipublisher;
-    var social = carbon.server.osgiService('org.wso2.carbon.social.core.service.SocialActivityService');
-    var session = ctx.session;
     var LOGGED_IN_USER = 'LOGGED_IN_USER';
     var log = new Log('default-asset');
     return {
-        delete : function(id) {
-            apiPublisher.APIProviderProxy(session.get(LOGGED_IN_USER));
-            return apiPublisher.deleteAPI(id);
+        remove : function(id) {
+            var asset = this.get.call(this, id);
+            log.debug("Removing API of Id " +id+ "Name " + asset.attributes.overview_name);
+            var apiProxy = apiPublisher.instance(ctx.username);
+            return apiProxy.deleteAPI(asset.attributes.overview_provider, asset.attributes.overview_name, asset.version);
+        },
+        list: function(paging) {
+            log.info(this._super.list.call(this, paging));
+            return this._super.list.call(this, paging);
         }
     };
 };
@@ -116,7 +118,7 @@ asset.renderer = function (ctx) {
 
     var buildListLeftNav = function (page, util) {
         var navList = util.navList();
-        navList.push('Add ' + type, 'fa-plus', util.buildUrl('create'));
+        navList.push('ADD ' + type.toUpperCase(), 'fa-plus', util.buildUrl('create'));
         navList.push('All Statistics', 'fa-area-chart', '/asts/' + type + '/statistics');
         navList.push('Subscriptions', 'fa fa-bookmark', '/asts/' + type + '/statistics');
         navList.push('Statistics', 'fa-area-chart', '/asts/' + type + '/statistics');
@@ -138,6 +140,25 @@ asset.renderer = function (ctx) {
     };
 
     return {
+        list: function(page) {
+            var assets = page.assets;
+            for (var index in assets) {
+                var asset = assets[index];
+                //Doing this because when there are no value specified in column such as thumbnail column it return string "null"
+                // value which need be explicitly set to null
+                if(asset.thumbnail == 'null') {
+                    asset.thumbnail = null;
+                }
+            }
+        },
+        details: function (page) {
+            log.info(page);
+            //Doing this because when there are no value specified in column such as thumbnail column it return string "null"
+            // value which need be explicitly set to null
+            if (page.assets.thumbnail == 'null') {
+                page.assets.thumbnail = null;
+            }
+        },
         pageDecorators: {
             ribbon: function (page) {
                 var ribbon = page.ribbon = {};

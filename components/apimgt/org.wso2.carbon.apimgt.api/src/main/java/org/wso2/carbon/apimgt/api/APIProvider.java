@@ -279,7 +279,7 @@ public interface APIProvider extends APIManager {
      * @param identifier APIIdentifier
      * @throws org.wso2.carbon.apimgt.api.APIManagementException if failed to remove the API
      */
-    public void deleteAPI(JSONObject identifier) throws APIManagementException;
+    public boolean deleteAPI(JSONObject identifier) throws APIManagementException;
 
     /**
      * Search API

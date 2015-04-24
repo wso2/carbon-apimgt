@@ -1,0 +1,22 @@
+var removeAPI;
+$(function () {
+    removeAPI = function (id, type) {
+        $.ajax({
+                   url: getDeleteUrl(id, type),
+                   type: 'DELETE',
+                   success: function (result) {
+                       $('#modal-redirect').modal('show');
+                       setTimeout(function() {
+                           window.location.reload();
+                       }, 2000);
+                   },
+                   error : function(result) {
+                       alert("failure");
+                   }
+               });
+    };
+
+    function getDeleteUrl(id, type) {
+        return caramel.context+'/apis/assets/' + id + '?type='+type;
+    }
+});

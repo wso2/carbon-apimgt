@@ -22,6 +22,11 @@ var apipublisher = {};
 
 (function (apipublisher) {
 
+    //Defining constant fields
+    var API_PROVIDER = "provider";
+    var API_NAME = "name";
+    var API_VERSION = "version";
+
     var APIManagerFactory = Packages.org.wso2.carbon.apimgt.impl.APIManagerFactory;
     var log = new Log("jaggery-modules.api-manager.publisher");
 
@@ -30,79 +35,95 @@ var apipublisher = {};
         this.impl = APIManagerFactory.getInstance().getAPIProvider(this.username);
     }
 
-    apipublisher.getAllProviders = function () {
+    apipublisher.instance = function(username){
+        return new APIProviderProxy(username);
+    };
+
+    APIProviderProxy.prototype.getAllProviders = function () {
         return this.impl.getAllProviders();
     };
-    apipublisher.designAPI = function (api) {
+    APIProviderProxy.prototype.designAPI = function (api) {
         return this.impl.designAPI(api);
     };
-    apipublisher.implementAPI = function (api) {
+    APIProviderProxy.prototype.implementAPI = function (api) {
         return this.impl.implementAPI(api);
     };
-    apipublisher.manageAPI = function (api) {
+    APIProviderProxy.prototype.manageAPI = function (api) {
         return this.impl.manageAPI(api);
     };
-    apipublisher.updateDesignAPI = function (APIProvider, api) {
+    APIProviderProxy.prototype.updateDesignAPI = function (APIProvider, api) {
         return this.impl.updateDesignAPI(api);
     };
-    apipublisher.addDocumentation = function (api, document) {
+    APIProviderProxy.prototype.addDocumentation = function (api, document) {
         return this.impl.addDocumentation(api);
     };
-    apipublisher.addInlineContent = function (api, docName, content) {
+    APIProviderProxy.prototype.addInlineContent = function (api, docName, content) {
         return this.impl.addInlineContent(api, docName, content);
     };
-    apipublisher.createNewAPIVersion = function (api, newVersion) {
+    APIProviderProxy.prototype.createNewAPIVersion = function (api, newVersion) {
         return this.impl.createNewAPIVersion(api, newVersion);
     };
-    apipublisher.getAllAPIUsageByProvider = function (providerName) {
+    APIProviderProxy.prototype.getAllAPIUsageByProvider = function (providerName) {
         return this.impl.getAllAPIUsageByProvider(providerName);
     };
-    apipublisher.getSubscribersOfAPI = function (apiId) {
+    APIProviderProxy.prototype.getSubscribersOfAPI = function (apiId) {
         return this.impl.getSubscribersOfAPI(apiId);
     };
-    apipublisher.getAPIsByProvider = function (providerName) {
+    APIProviderProxy.prototype.getAPIsByProvider = function (providerName) {
         return this.impl.getAPIsByProvider(providerName);
     };
-    apipublisher.getSubscribersOfAPI = function (apiId) {
+    APIProviderProxy.prototype.getSubscribersOfAPI = function (apiId) {
         return this.impl.getSubscribersOfAPI(apiId);
     };
-    apipublisher.getDefaultVersion = function (apiId) {
+    APIProviderProxy.prototype.getDefaultVersion = function (apiId) {
         return this.impl.getDefaultVersion(apiId);
     };
-    apipublisher.getCustomFaultSequences = function () {
+    APIProviderProxy.prototype.getCustomFaultSequences = function () {
         return this.impl.getCustomFaultSequences();
     };
-    apipublisher.getCustomInSequences = function () {
+    APIProviderProxy.prototype.getCustomInSequences = function () {
         return this.impl.getCustomInSequences();
     };
-    apipublisher.getCustomOutSequences = function () {
+    APIProviderProxy.prototype.getCustomOutSequences = function () {
         return this.impl.getCustomOutSequences();
     };
-    apipublisher.updateSubscription = function (apiId, status, appId) {
+    APIProviderProxy.prototype.updateSubscription = function (apiId, status, appId) {
         return this.impl.updateSubscription(apiId, status, appId);
     };
-    apipublisher.removeDocumentation = function (apiId, docName, docType) {
+    APIProviderProxy.prototype.removeDocumentation = function (apiId, docName, docType) {
         return this.impl.removeDocumentation(apiId, docName, docType);
     };
-    apipublisher.deleteAPI = function (apiId) {
-        return this.impl.deleteAPI(apiId);
+
+    /**
+     * Delete a API
+     * @param apiProvider name of the api provider
+     * @param apiName name of the api to be removed
+     * @param version the version of the api to be removed
+     * @returns {boolean} whether successfully removed or not
+     */
+    APIProviderProxy.prototype.deleteAPI = function (apiProvider, apiName, apiVersion) {
+        var identifier = new Packages.org.json.simple.JSONObject();
+        identifier.put(API_PROVIDER, apiProvider);
+        identifier.put(API_NAME, apiName);
+        identifier.put(API_VERSION, apiVersion);
+        return this.impl.deleteAPI(identifier);
     };
-    apipublisher.getAPI = function (apiId) {
+    APIProviderProxy.prototype.getAPI = function (apiId) {
         return this.impl.getAPI(apiId);
     };
-    apipublisher.getAllDocumentation = function (apiId) {
+    APIProviderProxy.prototype.getAllDocumentation = function (apiId) {
         return this.impl.getAllDocumentation(apiId);
     };
-    apipublisher.getAllDocumentation = function (apiId) {
+    APIProviderProxy.prototype.getAllDocumentation = function (apiId) {
         return this.impl.getAllDocumentation(apiId);
     };
-    apipublisher.getInlineContent = function (apiId, docName) {
+    APIProviderProxy.prototype.getInlineContent = function (apiId, docName) {
         return this.impl.getDocumentationContent(apiId, docName);
     };
-    apipublisher.getTiers = function (tenantDomain) {
+    APIProviderProxy.prototype.getTiers = function (tenantDomain) {
         return this.impl.getTiers(tenantDomain);
     };
-    apipublisher.getSubscriberAPIs = function (subscriberName) {
+    APIProviderProxy.prototype.getSubscriberAPIs = function (subscriberName) {
         return this.impl.getSubscriberAPIs(subscriberName);
     };
 })(apipublisher);
