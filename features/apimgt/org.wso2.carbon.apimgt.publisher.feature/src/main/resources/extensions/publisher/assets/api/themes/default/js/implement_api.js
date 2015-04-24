@@ -18,6 +18,13 @@
  */
 $(function() {
     $(document).ready(function() {
+
+        var failoverepcount = 1;
+        var failoversandboxepcount = 1;
+        var loadbalanceepcount = 1;
+        var loadbalancesandboxepcount = 1;
+
+
         $('#form-api-endpoints').ajaxForm({
             success: function() {
                 var options = obtainFormMeta('#form-api-endpoints');
@@ -32,17 +39,131 @@ $(function() {
             }
         });
 
-        $('.more-options').click(function(){
-            $('.more-options').css({'display':'none'});
-            $('.less-options').css({'display':'block'});
-            $('#more-options-endpoints').css({'display':'block'});
+        $('input:radio').change(
+            function(){
+                if($('input:radio:checked').val() == 'inline') {
+                    $('#api-implement-endpoints').css({'display':'none'});
+                    $('#api-implement-resources').css({'display':'block'});
+                } else {
+                    $('#api-implement-endpoints').css({'display':'block'});
+                    $('#api-implement-resources').css({'display':'none'}); 
+                }
+            }
+        );  
+
+        $('#api-implement-show-more').click(function(){
+            $('#api-implement-show-more').css({'display':'none'});
+            $('#api-implement-show-less').css({'display':'block'});
+            $('#api-implement-more').css({'display':'block'});
        });
 
-        $('.less-options').click(function(){
-            $('.more-options').css({'display':'block'});
-            $('.less-options').css({'display':'none'});
-            $('#more-options-endpoints').css({'display':'none'});
+        $('#api-implement-show-less').click(function(){
+            $('#api-implement-show-more').css({'display':'block'});
+            $('#api-implement-show-less').css({'display':'none'});
+            $('#api-implement-more').css({'display':'none'});
        });
+
+        $( "#api-implement-more-security" ).change(function() {
+          if($(this).val() == "secured"){
+            $('#api-implement-more-credentials').css({'display':'block'});
+          }else{
+            $('#api-implement-more-credentials').css({'display':'none'});
+          }
+        });
+
+        $( "#api-implement-endpoint-type" ).change(function() {
+            var endpointType = $(this).val();
+          if(endpointType === "http"){
+            $('#api-implement-endpoints-http').css({'display':'block'});
+            $('#api-implement-endpoints-address').css({'display':'none'});
+            $('#api-implement-endpoints-wsdl').css({'display':'none'});
+            $('#api-implement-endpoints-failover').css({'display':'none'});
+            $('#api-implement-endpoints-load_balance').css({'display':'none'});
+          }else if (endpointType === "address"){
+            $('#api-implement-endpoints-http').css({'display':'none'});
+            $('#api-implement-endpoints-address').css({'display':'block'});
+            $('#api-implement-endpoints-wsdl').css({'display':'none'});
+            $('#api-implement-endpoints-failover').css({'display':'none'});
+            $('#api-implement-endpoints-load_balance').css({'display':'none'});
+          }else if (endpointType === "wsdl"){
+            $('#api-implement-endpoints-http').css({'display':'none'});
+            $('#api-implement-endpoints-address').css({'display':'none'});
+            $('#api-implement-endpoints-wsdl').css({'display':'block'});
+            $('#api-implement-endpoints-failover').css({'display':'none'});
+            $('#api-implement-endpoints-load_balance').css({'display':'none'});
+          }else if (endpointType === "failover"){
+            $('#api-implement-endpoints-http').css({'display':'none'});
+            $('#api-implement-endpoints-address').css({'display':'none'});
+            $('#api-implement-endpoints-wsdl').css({'display':'none'});
+            $('#api-implement-endpoints-failover').css({'display':'block'});
+            $('#api-implement-endpoints-load_balance').css({'display':'none'});
+          }else if (endpointType === "load_balance"){
+            $('#api-implement-endpoints-http').css({'display':'none'});
+            $('#api-implement-endpoints-address').css({'display':'none'});
+            $('#api-implement-endpoints-wsdl').css({'display':'none'});
+            $('#api-implement-endpoints-failover').css({'display':'none'});
+            $('#api-implement-endpoints-load_balance').css({'display':'block'});
+          }
+        });
+
+        $( "#api-implement-endpoints-load_balance-algoritm" ).change(function() {
+          if($(this).val() == "other"){
+            $('#api-implement-endpoints-load_balance-algo-div').css({'display':'block'});
+          }else{
+            $('#api-implement-endpoints-load_balance-algo-div').css({'display':'none'});
+          }
+        });
+
+        //Failover EP related- START
+        $('#prod-failover-endpoint-add-btn').click(function(){
+            failoverepcount ++;
+            $( "#prod-failover-endpoints" ).append('<span id= "prod-failover-endpoint-' +failoverepcount+'"><br/>Endpoint '+ failoverepcount +') <br/> <input type ="text" id= "api-implement-endpoints-loadbalance-production-loadbalance-'+ failoverepcount +'"><br/><span>');
+       });
+
+        $('#prod-failover-endpoint-remove-btn').click(function(){
+            if(failoverepcount >=1){        
+               $( "#prod-failover-endpoint-" + failoverepcount ).remove();
+               failoverepcount --;
+            }
+       });
+
+        $('#sandbox-failover-endpoint-add-btn').click(function(){
+            failoversandboxepcount ++;
+            $( "#sandbox-failover-endpoints" ).append('<span id= "sandbox-failover-endpoint-' +failoversandboxepcount+'"><br/>Endpoint '+ failoversandboxepcount +') <br/> <input type ="text" id= "api-implement-endpoints-failover-sandbox-endpoint-'+ failoversandboxepcount +'"><br/><span>');
+       });
+
+        $('#sandbox-failover-endpoint-remove-btn').click(function(){
+            if(failoversandboxepcount >=1){        
+                $( "#sandbox-failover-endpoint-" + failoversandboxepcount ).remove();
+                failoversandboxepcount --;
+            }
+       });
+        //Failover EP related- END
+        //LB EP related- START
+        $('#prod-loadbalance-endpoint-add-btn').click(function(){
+            loadbalanceepcount ++;
+            $( "#prod-loadbalance-endpoints" ).append('<span id= "prod-loadbalance-endpoint-' +loadbalanceepcount+'"><br/>Endpoint '+ loadbalanceepcount +') <br/> <input type ="text" id= "api-implement-endpoints-loadbalance-production-loadbalance-'+ loadbalanceepcount +'"><br/><span>');
+       });
+
+        $('#prod-loadbalance-endpoint-remove-btn').click(function(){
+            if(loadbalanceepcount >=1){        
+               $( "#prod-loadbalance-endpoint-" + loadbalanceepcount ).remove();
+               loadbalanceepcount --;
+            }
+       });
+
+        $('#sandbox-loadbalance-endpoint-add-btn').click(function(){
+            loadbalancesandboxepcount ++;
+            $( "#sandbox-loadbalance-endpoints" ).append('<span id= "sandbox-loadbalance-endpoint-' +loadbalancesandboxepcount+'"><br/>Endpoint '+ loadbalancesandboxepcount +') <br/> <input type ="text" id= "api-implement-endpoints-loadbalance-sandbox-endpoint-'+ loadbalancesandboxepcount +'"><br/><span>');
+       });
+
+        $('#sandbox-loadbalance-endpoint-remove-btn').click(function(){
+            if(loadbalancesandboxepcount >=1){        
+                $( "#sandbox-loadbalance-endpoint-" + loadbalancesandboxepcount ).remove();
+                loadbalancesandboxepcount --;
+            }
+       });
+        //LB EP related- END
 
     });
 });
