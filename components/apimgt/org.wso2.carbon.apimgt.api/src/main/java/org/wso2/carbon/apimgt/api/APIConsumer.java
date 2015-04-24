@@ -296,10 +296,15 @@ public interface APIConsumer extends APIManager {
      * Creates a request for getting Approval for Application Registration.
      *
      * @param userId Subsriber name.
-     * @param  applicationName of the Application.
+     * @param applicationName of the Application.
      * @param tokenType Token type (PRODUCTION | SANDBOX)
+     * @param callbackUrl callback URL
+     * @param allowedDomains allowedDomains for token.
+     * @param validityTime validity time period.
+     * @param applicationId APIM application id.
      * @param jsonString Callback URL for the Application.
      * @param tokenScope Scopes for the requested tokens.
+     *
      * @throws APIManagementException if failed to applications for given subscriber
      */
     public Map<String,Object> requestApprovalForApplicationRegistration(String userId, String applicationName,
@@ -314,13 +319,22 @@ public interface APIConsumer extends APIManager {
      * Creates a request for application update.
      *
      * @param userId Subsriber name.
-     * @param  applicationName of the Application.
+     * @param applicationName of the Application.
      * @param tokenType Token type (PRODUCTION | SANDBOX)
-     * @param jsonString json String with oAuthApplication parameters.
-     * @param
+     * @param callbackUrl callback URL
+     * @param allowedDomains allowedDomains for token.
+     * @param validityTime validity time period.
+     * @param applicationId APIM application id.
+     * @param jsonString Callback URL for the Application.
+     * @param tokenScope Scopes for the requested tokens.
      * @throws APIManagementException if failed to applications for given subscriber
      */
-    public Map<String,Object> updateAuthClient(String userId, String applicationName, String tokenType,
+    public Map<String,Object> updateAuthClient(String userId, String applicationName,
+                                               String tokenType,
+                                               String callbackUrl, String[] allowedDomains,
+                                               String validityTime,
+                                               String tokenScope,
+                                               int applicationId,
                                                String jsonString)
             throws APIManagementException;
 
