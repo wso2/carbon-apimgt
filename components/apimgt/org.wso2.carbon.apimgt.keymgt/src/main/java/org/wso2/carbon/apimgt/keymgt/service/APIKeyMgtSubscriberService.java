@@ -306,7 +306,7 @@ public class APIKeyMgtSubscriberService extends AbstractAdmin {
         OAuthApplicationInfo oAuthApplicationInfo = null;
         String accessToken = apiMgtDAO.getAccessKeyForApplication(userId, applicationName, tokenType);
 
-        Application application = apiMgtDAO.getApplicationByName(applicationName, userId);
+        Application application = apiMgtDAO.getApplicationByName(applicationName, userId, null);
         oAuthApplicationInfo = apiMgtDAO.getProductionClientOfApplication(application.getId(), tokenType);
         if (oAuthApplicationInfo == null) {
             throw new APIKeyMgtException("Unable to locate oAuth Application");
@@ -510,7 +510,7 @@ public class APIKeyMgtSubscriberService extends AbstractAdmin {
         dao = new ApiMgtDAO();
         if (gatewayExists) {
             keys = dao.getApplicationKeys(application.getId());
-            apiSet = dao.getSubscribedAPIs(application.getSubscriber());
+            apiSet = dao.getSubscribedAPIs(application.getSubscriber(), null);
         }
         List<APIKeyMapping> mappings = new ArrayList<APIKeyMapping>();
         for (String key : keys) {
@@ -546,7 +546,7 @@ public class APIKeyMgtSubscriberService extends AbstractAdmin {
             APIManagementException, AxisFault {
         ApiMgtDAO dao;
         dao = new ApiMgtDAO();
-        Application[] applications = dao.getApplications(subscriber);
+        Application[] applications = dao.getApplications(subscriber, null);
         for (Application app : applications) {
             revokeAccessTokenForApplication(app);
         }
@@ -578,3 +578,4 @@ public class APIKeyMgtSubscriberService extends AbstractAdmin {
         }
     }
 }
+

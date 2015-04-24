@@ -45,8 +45,10 @@ import org.wso2.carbon.apimgt.api.model.KeyManagerConfiguration;
 import org.wso2.carbon.apimgt.api.model.OAuthAppRequest;
 import org.wso2.carbon.apimgt.api.model.OAuthApplicationInfo;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.AbstractKeyManager;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
+import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.keymgt.client.SubscriberKeyMgtClient;
 import org.wso2.carbon.apimgt.keymgt.util.APIKeyMgtDataHolder;
@@ -60,6 +62,7 @@ import javax.xml.stream.XMLStreamException;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -434,13 +437,43 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
                         Iterator<OMElement> elementIterator = document.getChildElements();
                         while (elementIterator.hasNext()) {
                             OMElement element = elementIterator.next();
-                            this.configuration.addParameter(element.getLocalName(), element.getText());
+                            this.configuration.addParameter(element.getLocalName(),
+                                                            APIManagerConfiguration.replaceSystemProperty(element
+                                                                                                                  .getText()));
                         }
                     }
                 }
 
             } catch (XMLStreamException e) {
                 e.printStackTrace();
+            }
+
+        } else {
+
+            // If Configuration block is not found, read the Server-URL and other properties from APIKeyValidator
+            // section.
+            APIManagerConfiguration config = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
+                    .getAPIManagerConfiguration();
+            if (this.configuration == null) {
+                synchronized (this) {
+                    this.configuration = new KeyManagerConfiguration();
+                    this.configuration.setManualModeSupported(true);
+                    this.configuration.setResourceRegistrationEnabled(true);
+                    this.configuration.setTokenValidityConfigurable(true);
+                    this.configuration.addParameter(APIConstants.AUTHSERVER_URL, config.getFirstProperty(APIConstants
+                                                                                                                 .KEYMANAGER_SERVERURL));
+                    this.configuration.addParameter(APIConstants.KEY_MANAGER_USERNAME, config.getFirstProperty(APIConstants.API_KEY_VALIDATOR_USERNAME));
+                    this.configuration.addParameter(APIConstants.KEY_MANAGER_PASSWORD, config.getFirstProperty(APIConstants.API_KEY_VALIDATOR_PASSWORD))
+                    ;
+                    this.configuration.addParameter(APIConstants.REVOKE_URL, config.getFirstProperty(APIConstants
+                                                                                                             .API_KEY_VALIDATOR_REVOKE_API_URL));
+                    String revokeUrl = config.getFirstProperty(APIConstants.API_KEY_VALIDATOR_REVOKE_API_URL);
+
+                    // Read the revoke url and replace revoke part to get token url.
+                    String tokenUrl = revokeUrl != null ? revokeUrl.replace("revoke", "token") : null;
+                    this.configuration.addParameter(APIConstants.TOKEN_URL, tokenUrl);
+
+                }
             }
 
         }
