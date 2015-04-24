@@ -79,7 +79,7 @@ $(document).ready(function(){
         $('.swagger').val(JSON.stringify(designer.api_doc));
 
         $('#'+thisID).addClass('active');
-
+        $(".prototype_config").val('{"production_endpoints":{"url":"'+$("#prototype_endpoint").val()+'","config":null},"endpoint_type":"http"}');
         $(form).ajaxSubmit({
             success:function(responseText, statusText, xhr, $form) {
              if (!responseText.error) {

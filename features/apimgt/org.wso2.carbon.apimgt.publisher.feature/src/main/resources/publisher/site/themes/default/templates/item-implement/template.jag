@@ -78,7 +78,7 @@
                 </div>
                 <div class="span11">
                     <h4>Managed API</h4>
-                    <p>description</p>
+                    <p>Provide endpoints of the production API and sandbox API to be managed.</p>
                 </div>
             </div>
 
@@ -181,7 +181,7 @@
                 </div>
                 <div class="span11">
                     <h4 >Prototype</h4>
-                    <p>description</p>
+                    <p>Use the inbuilt javascript engine to prototype the API or provide an endpoint to a prototype API. Inbuilt javascript engine do not have support to prototype SOAP APIs</p>
                 </div>
             </div>
 
@@ -213,11 +213,16 @@
                 <div class="clear"></div>
 
                 <fieldset class="implementation_method_endpoint implementation_method <%= hide_endpoint %>">
+                    <input type="hidden" class="prototype_config" name="endpoint_config" value="<%= encode.forHtmlAttribute(api.endpointConfig) %>"/>
                     <div class="control-group">
-                        <label class="control-label" for="prototype_endpoint">Endpoint:</label>
+                        <label class="control-label">Prototype Endpoint:</label>
                         <div class="controls">
-                        <input type="text" class="input-xlarge validInput" id="wadl" name="wadl" value="<%=api.wadl%>" />
+                            <div class="input-append">
+                            <input type="text" id="prototype_endpoint" value="http://localhost" name="prototype_endpoint" class="required">
+                            <button type="button" class="btn check_url_valid">Test</button>
                         </div>
+                        <p class="help-block">E.g.,: http://appserver/resource</p>
+                        <span style="display:none;" class="help-block jsonform-errortext"></span>
                     </div>
                 </fieldset>
 
