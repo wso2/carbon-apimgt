@@ -132,6 +132,8 @@ public class CORSRequestHandler extends AbstractHandler implements ManagedLifecy
 				messageContext.getSequence("_cors_request_handler").mediate(messageContext);
 				Utils.send(messageContext, HttpStatus.SC_OK);
 				status = false;
+			} else {
+				status = true;
 			}
 		}else{
 			status = true;
