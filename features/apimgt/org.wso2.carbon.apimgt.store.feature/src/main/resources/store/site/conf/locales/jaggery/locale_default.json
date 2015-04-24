@@ -232,7 +232,14 @@
     "forum.topicEdit.description" : "Edit Topic Description",
 
     "forum.addReply.title" : "Add reply",
-    "forum.addReply.replyToThread" : "Reply to Thread"
+    "forum.addReply.replyToThread" : "Reply to Thread",
+    "selectScopes" : "Select Scopes",
+    
+    "changePassword" : "Change Password",
+    "currentPassword" : "Current Password",
+    "newPassword" : "New Password",
+    "userDetails" : "User Details"
+    
   
     
 }
