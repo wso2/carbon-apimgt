@@ -38,7 +38,7 @@ $(document).ready(function(){
         APP.update_ep_config();
         $('.swagger').val(JSON.stringify(designer.api_doc));
 
-        $('#'+thisID).addClass('active');
+        $('#'+thisID).buttonLoader('start');
 
         $(form).ajaxSubmit({
             success:function(responseText, statusText, xhr, $form) {
@@ -48,7 +48,7 @@ $(document).ready(function(){
                 designer.saved_api.name = responseText.data.apiName;
                 designer.saved_api.version = responseText.data.version;
                 designer.saved_api.provider = responseText.data.provider;
-                $('#'+thisID).removeClass('active');
+                $('#'+thisID).buttonLoader('stop');
                 $( "body" ).trigger( "api_saved" );                             
              } else {
                  if (responseText.message == "timeout") {
@@ -65,7 +65,7 @@ $(document).ready(function(){
                  } else {
                      jagg.message({content:responseText.message,type:"error"});
                  }
-                 $('#'+thisID).removeClass('active');
+                 $('#'+thisID).buttonLoader('stop');
              }
             }, dataType: 'json'
         });
@@ -78,7 +78,7 @@ $(document).ready(function(){
         APP.update_ep_config();
         $('.swagger').val(JSON.stringify(designer.api_doc));
 
-        $('#'+thisID).addClass('active');
+        $('#'+thisID).buttonLoader('start');
 
         $(form).ajaxSubmit({
             success:function(responseText, statusText, xhr, $form) {
@@ -88,7 +88,7 @@ $(document).ready(function(){
                 designer.saved_api.name = responseText.data.apiName;
                 designer.saved_api.version = responseText.data.version;
                 designer.saved_api.provider = responseText.data.provider;
-                $('#'+thisID).removeClass('active');
+                $('#'+thisID).buttonLoader('stop');
                 $( "body" ).trigger( "prototype_saved" );                             
              } else {
                  if (responseText.message == "timeout") {
@@ -105,7 +105,7 @@ $(document).ready(function(){
                  } else {
                      jagg.message({content:responseText.message,type:"error"});
                  }
-                 $('#'+thisID).removeClass('active');
+                 $('#'+thisID).buttonLoader('stop');
              }
             }, dataType: 'json'
         });
@@ -158,21 +158,17 @@ $(document).ready(function(){
 
 var thisID='';
 $('#saveBtn').click(function(e){
-    $(this).siblings('button').button('reset');
     thisID = $(this).attr('id');
 });
 
 $('#savePrototypeBtn').click(function(e){
-    $(this).siblings('button').button('reset');
     thisID = $(this).attr('id');
 });
 
 $('#prototyped_api').click(function(e){
-    $(this).siblings('button').button('reset');
     thisID = $(this).attr('id');
 });
 
 $('#go_to_manage').click(function(e){
-    $(this).siblings('button').button('reset');
     thisID = $(this).attr('id');
 });
