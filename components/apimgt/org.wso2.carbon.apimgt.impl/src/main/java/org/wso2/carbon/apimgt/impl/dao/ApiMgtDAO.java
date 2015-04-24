@@ -1767,14 +1767,20 @@ public class ApiMgtDAO {
                 "   AND SUBS.SUBS_CREATE_STATE = '"+
                 APIConstants.SubscriptionCreatedStatus.SUBSCRIBE + "'";
         
-        String whereClauseWithGroupId =  " AND APP.GROUP_ID =?"  ;
+        String whereClausewithGroupId = " AND (APP.GROUP_ID = ? OR (APP.GROUP_ID = '' AND SUB.USER_ID = ?))" ; 
+        String whereClausewithGroupIdorceCaseInsensitiveComp = " AND (APP.GROUP_ID = ? OR (APP.GROUP_ID = '' " +
+                "AND LOWER(SUB.USER_ID) = LOWER(?)))" ; 
         String whereClause = " AND SUB.USER_ID = ? ";
         String whereClauseCaseSensitive =" AND LOWER(SUB.USER_ID) = LOWER(?) ";
 
         try {
             connection = APIMgtDBUtil.getConnection();
              if (groupingId != null && !groupingId.equals("null") && !groupingId.isEmpty()) {
-                 sqlQuery += whereClauseWithGroupId; 
+                 if (forceCaseInsensitiveComparisons) {
+                     sqlQuery += whereClausewithGroupIdorceCaseInsensitiveComp; 
+                 } else {
+                     sqlQuery += whereClausewithGroupId; 
+                 }                 
              } else {
     		    if (forceCaseInsensitiveComparisons) {
                     sqlQuery += whereClauseCaseSensitive; 
@@ -1790,7 +1796,8 @@ public class ApiMgtDAO {
                               
             if (groupingId != null && !groupingId.equals("null") && !groupingId.equals("")) {
                 ps.setString(3, groupingId);
-            }else{
+                ps.setString(4, subscriber.getName());
+            } else {
                 ps.setString(3, subscriber.getName());
             }
             result = ps.executeQuery();
@@ -1926,32 +1933,38 @@ public class ApiMgtDAO {
         
             String whereClause = " AND  SUB.USER_ID = ? " ;  
             String whereClauseForceCaseInsensitiveComp = " AND LOWER(SUB.USER_ID) = LOWER(?)  ";
-            String whereClausewithGroupId = " AND APP.GROUP_ID =?" ; 
+            String whereClausewithGroupId = " AND (APP.GROUP_ID = ? OR (APP.GROUP_ID = '' AND SUB.USER_ID = ?))" ; 
+            String whereClausewithGroupIdorceCaseInsensitiveComp = " AND (APP.GROUP_ID = ? OR (APP.GROUP_ID = '' " +
+                    "AND LOWER(SUB.USER_ID) = LOWER(?)))" ; 
         try {
             connection = APIMgtDBUtil.getConnection();
             int tenantId = IdentityUtil.getTenantIdOFUser(subscriber.getName());  
-         if (groupingId != null && !groupingId.equals("null") &&  !groupingId.equals("")) {
-             
-                 sqlQuery +=  whereClausewithGroupId;
-                 
+            if (groupingId != null && !groupingId.equals("null") && !groupingId.equals("")) {
+                if (forceCaseInsensitiveComparisons) {
+                    sqlQuery += whereClausewithGroupIdorceCaseInsensitiveComp;
+                } else {
+                    sqlQuery += whereClausewithGroupId;
+                }
+
                 ps = connection.prepareStatement(sqlQuery);
                 ps.setInt(1, tenantId);
                 ps.setString(2, applicationName);
                 ps.setString(3, groupingId);
-                             
-            }else{
-                
+                ps.setString(4, subscriber.getName());
+
+            } else {
+
                 if (forceCaseInsensitiveComparisons) {
                     sqlQuery += whereClauseForceCaseInsensitiveComp;
-                }else{
+                } else {
                     sqlQuery += whereClause;
-                } 
-                
+                }
+
                 ps = connection.prepareStatement(sqlQuery);
                 ps.setInt(1, tenantId);
                 ps.setString(2, applicationName);
                 ps.setString(3, subscriber.getName());
-                
+
             }
 
             result = ps.executeQuery();
@@ -2039,16 +2052,22 @@ public class ApiMgtDAO {
                 "   AND SUBS.SUBS_CREATE_STATE = '" + APIConstants.SubscriptionCreatedStatus.SUBSCRIBE + "'";
         String whereClause =  " AND  SUB.USER_ID = ? " ;
         String whereClauseCaseInSensitive = " AND  LOWER(SUB.USER_ID) = LOWER(?) ";
-        String whereClauseGroupingId = "  AND APP.GROUP_ID=? ";
+        String whereClausewithGroupId = " AND (APP.GROUP_ID = ? OR (APP.GROUP_ID = '' AND SUB.USER_ID = ?))" ; 
+        String whereClausewithGroupIdorceCaseInsensitiveComp = " AND (APP.GROUP_ID = ? OR (APP.GROUP_ID = '' " +
+                "AND LOWER(SUB.USER_ID) = LOWER(?)))" ; 
         try {
             connection = APIMgtDBUtil.getConnection();
 
-            if(groupingId != null && !groupingId.equals("null") && !groupingId.isEmpty()){
-                sqlQuery += whereClauseGroupingId;
-            }else{
+            if (groupingId != null && !groupingId.equals("null") && !groupingId.isEmpty()) {
+                if (forceCaseInsensitiveComparisons) {
+                    sqlQuery += whereClausewithGroupIdorceCaseInsensitiveComp;
+                } else {
+                    sqlQuery += whereClausewithGroupId;
+                }
+            } else {
                 if (forceCaseInsensitiveComparisons) {
                     sqlQuery += whereClauseCaseInSensitive;
-                }else{
+                } else {
                     sqlQuery += whereClause;
                 }
             }
@@ -2058,6 +2077,7 @@ public class ApiMgtDAO {
             ps.setInt(1, tenantId);
             if(groupingId != null && !groupingId.equals("null") && !groupingId.isEmpty()){
                 ps.setString(2, groupingId);
+                ps.setString(3, subscriber.getName());
             }else{
                 ps.setString(2, subscriber.getName());
             }
@@ -2609,7 +2629,7 @@ public class ApiMgtDAO {
         Set<APIKey> apiKeys = new HashSet<APIKey>();
 
         try{
-            APIKey productionKey = getProductionKeyOfApplication(username, applicationId, accessTokenStoreTable);
+            APIKey productionKey = getProductionKeyOfApplication(applicationId, accessTokenStoreTable);
             if(productionKey != null){
                 apiKeys.add(productionKey);
             } else {
@@ -2620,7 +2640,7 @@ public class ApiMgtDAO {
                 }
             }
 
-            APIKey sandboxKey = getSandboxKeyOfApplication(username, applicationId, accessTokenStoreTable);
+            APIKey sandboxKey = getSandboxKeyOfApplication(applicationId, accessTokenStoreTable);
             if(sandboxKey != null){
                 apiKeys.add(sandboxKey);
             }  else {
@@ -2721,7 +2741,7 @@ public class ApiMgtDAO {
         return key;
     }
 
-    private APIKey getProductionKeyOfApplication(String userName, int applicationId, String accessTokenStoreTable)
+    private APIKey getProductionKeyOfApplication(int applicationId, String accessTokenStoreTable)
                                                 throws SQLException, CryptoException, APIManagementException {
 
         Connection connection = null;
@@ -2743,7 +2763,6 @@ public class ApiMgtDAO {
                         " IDN_OAUTH_CONSUMER_APPS ICA " +
                         "WHERE" +
                         " AKM.APPLICATION_ID = ? AND" +
-                        " ICA.USERNAME = ? AND" +
                         " IAT.USER_TYPE = ? AND" +
                         " ICA.CONSUMER_KEY = AKM.CONSUMER_KEY AND" +
                         " IAT.CONSUMER_KEY = ICA.CONSUMER_KEY AND" +
@@ -2770,7 +2789,6 @@ public class ApiMgtDAO {
                         " IDN_OAUTH_CONSUMER_APPS ICA " +
                         " WHERE" +
                         " AKM.APPLICATION_ID = ? AND" +
-                        " ICA.USERNAME = ? AND" +
                         " IAT.USER_TYPE = ? AND" +
                         " ICA.CONSUMER_KEY = AKM.CONSUMER_KEY AND" +
                         " IAT.CONSUMER_KEY = ICA.CONSUMER_KEY AND" +
@@ -2810,8 +2828,7 @@ public class ApiMgtDAO {
 
             preparedStatement = connection.prepareStatement(sql);
             preparedStatement.setInt(1, applicationId);
-            preparedStatement.setString(2, MultitenantUtils.getTenantAwareUsername(userName.toLowerCase()));
-            preparedStatement.setString(3, APIConstants.ACCESS_TOKEN_USER_TYPE_APPLICATION);
+            preparedStatement.setString(2, APIConstants.ACCESS_TOKEN_USER_TYPE_APPLICATION);
             resultSet = preparedStatement.executeQuery();
             while (resultSet.next()) {
                 APIKey apiKey = new APIKey();
@@ -2837,7 +2854,7 @@ public class ApiMgtDAO {
         }
     }
 
-    private APIKey getSandboxKeyOfApplication(String userName, int applicationId, String accessTokenStoreTable)
+    private APIKey getSandboxKeyOfApplication(int applicationId, String accessTokenStoreTable)
             throws SQLException, CryptoException, APIManagementException {
 
         Connection connection = null;
@@ -2858,7 +2875,6 @@ public class ApiMgtDAO {
                         " IDN_OAUTH_CONSUMER_APPS ICA " +
                         "WHERE" +
                         " AKM.APPLICATION_ID = ? AND" +
-                        " ICA.USERNAME = ? AND" +
                         " IAT.USER_TYPE = ? AND" +
                         " ICA.CONSUMER_KEY = AKM.CONSUMER_KEY AND" +
                         " IAT.CONSUMER_KEY = ICA.CONSUMER_KEY AND" +
@@ -2884,7 +2900,6 @@ public class ApiMgtDAO {
                         " IDN_OAUTH_CONSUMER_APPS ICA " +
                         "WHERE" +
                         " AKM.APPLICATION_ID = ? AND" +
-                        " ICA.USERNAME = ? AND" +
                         " IAT.USER_TYPE = ? AND" +
                         " ICA.CONSUMER_KEY = AKM.CONSUMER_KEY AND" +
                         " IAT.CONSUMER_KEY = ICA.CONSUMER_KEY AND" +
@@ -2924,8 +2939,7 @@ public class ApiMgtDAO {
 
             preparedStatement = connection.prepareStatement(sql);
             preparedStatement.setInt(1, applicationId);
-            preparedStatement.setString(2, MultitenantUtils.getTenantAwareUsername(userName.toLowerCase()));
-            preparedStatement.setString(3, APIConstants.ACCESS_TOKEN_USER_TYPE_APPLICATION);
+            preparedStatement.setString(2, APIConstants.ACCESS_TOKEN_USER_TYPE_APPLICATION);
             resultSet = preparedStatement.executeQuery();
             while (resultSet.next()) {
                 APIKey apiKey = new APIKey();
@@ -5190,11 +5204,6 @@ public class ApiMgtDAO {
            //  String tenantAwareUserId = MultitenantUtils.getTenantAwareUsername(subscriber.getName());
            Application application;
            while (rs.next()) {
-               if (subscriber.getName() != rs.getString("USER_ID")) 
-               {
-                   subscriber.setName(rs.getString("USER_ID"));
-                   subscriber.setId(Integer.parseInt(rs.getString("SUBSCRIBER_ID")));
-               }
                 application = new Application(rs.getString("NAME"), subscriber);
                 application.setId(rs.getInt("APPLICATION_ID"));
                 application.setTier(rs.getString("APPLICATION_TIER"));
@@ -5392,6 +5401,57 @@ public class ApiMgtDAO {
         }
     }
 
+    /**
+     * This method will return a java Map that contains application ID and token type.
+     * @param consumerKey consumer key of the oAuth application.
+     * @return Map.
+     * @throws APIManagementException
+     */
+    public Map<String,String>  getApplicationIdAndTokenTypeByConsumerKey(String consumerKey) throws APIManagementException {
+
+
+
+        Map<String,String> appIdandConsumerKey = new HashMap<String, String>();
+
+        if (log.isDebugEnabled()) {
+            log.debug("fetching application id and token type by consumer key " + consumerKey);
+        }
+
+        Connection connection = null;
+        PreparedStatement prepStmt = null;
+        ResultSet rs = null;
+
+        String sqlQuery = "SELECT " +
+                "   MAP.APPLICATION_ID, " +
+                "   MAP.KEY_TYPE " +
+                "FROM " +
+                "   AM_APPLICATION_KEY_MAPPING MAP " +
+                "WHERE " +
+                "   MAP.CONSUMER_KEY = ? ";
+
+        try {
+
+            connection = APIMgtDBUtil.getConnection();
+
+            prepStmt = connection.prepareStatement(sqlQuery);
+            prepStmt.setString(1, consumerKey);
+            rs = prepStmt.executeQuery();
+
+            while (rs.next()) {
+                appIdandConsumerKey.put("application_id", rs.getString("APPLICATION_ID"));
+                appIdandConsumerKey.put("token_type", rs.getString("KEY_TYPE"));
+            }
+
+        } catch (SQLException e) {
+            handleException("Error when reading application subscription information", e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(prepStmt, connection, rs);
+        }
+
+        return appIdandConsumerKey;
+
+    }
+
     /*
         Delete mapping record by given consumer key
      */
@@ -5415,6 +5475,41 @@ public class ApiMgtDAO {
             connection.commit();
         } catch (SQLException e) {
             handleException("Error while removing application mapping table", e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(ps,connection,null);
+        }
+    }
+    /**
+     * Delete a record from AM_APPLICATION_REGISTRATION table by application ID and token type.
+     * @param applicationId APIM application ID.
+     * @param tokenType Token type (PRODUCTION || SANDBOX)
+     * @throws APIManagementException if failed to delete the record.
+     */
+    public void deleteApplicationRegistration(String applicationId, String tokenType) throws APIManagementException {
+
+        Connection connection = null;
+        PreparedStatement ps = null;
+        try {
+            connection = APIMgtDBUtil.getConnection();
+            String deleteRegistrationEntry = "DELETE " +
+                    "FROM" +
+                    "   AM_APPLICATION_REGISTRATION " +
+                    "WHERE" +
+                    "   APP_ID = ?" +
+                    "AND" +
+                    "   TOKEN_TYPE = ?";
+
+            if (log.isDebugEnabled()) {
+                log.debug("trying to delete a record from AM_APPLICATION_REGISTRATION table by application ID " +
+                        applicationId + " and Token type" + tokenType);
+            }
+            ps = connection.prepareStatement(deleteRegistrationEntry);
+            ps.setString(1, applicationId);
+            ps.setString(2, tokenType);
+            ps.executeUpdate();
+            connection.commit();
+        } catch (SQLException e) {
+            handleException("Error while removing AM_APPLICATION_REGISTRATION table", e);
         } finally {
             APIMgtDBUtil.closeAllConnections(ps,connection,null);
         }

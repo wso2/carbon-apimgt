@@ -105,18 +105,29 @@
                 <h3 id="swaggerUploadLabel">Import Swagger 2 Definition</h3>                    
                 </div>
                 <div class="modal-body">
-                    <label>Upload swagger definition:</label>
-                    <input type="file" name="somename" size="chars"> 
-                    <br />
-                    <br />                        
-                    <h6>OR</h6>
-                    <br />
-                    <label>Definition URL:</label>
-                    <input type="text" placeholder="" class="span12" id="swagger_import_url" name="swagger_import_url">
-                    <span class="help-block">Example : http://petstore.swagger.io/v2/swagger.json </span>
                     <div id="swagger_help" class="alert alert-danger hide" role="alert">
-                        Enter a valid url
-                        <button type="button" class="close" id="errorMsgClose"><span aria-hidden="true">&times;</span></button>
+                         Enter a valid url
+                         <button type="button" class="close" id="errorMsgClose"><span aria-hidden="true">&times;</span></button>
+                    </div>
+                    <div class="form-inline">
+                       <div class="control-group toggleRadios">
+                          <div class="controls">
+                              <label class="control-label sub-select-label">Upload swagger definition as</label>
+                              <label class="radio sub-labels"><input type="radio" class="select-file" name="import-definition" id="" value="swagger_import_file"/>Swagger File</label>
+                              <label class="radio sub-labels urlSelect-label"><input type="radio" class="select-url" name="import-definition" value="swagger_import_url"/>Swagger Url</label>
+                          </div>
+
+                       </div>
+                    </div>
+                    <div class="control-group toggleContainers">
+                        <div class="controls hide">
+                            <input type="file" id="swagger_import_file" name="swagger_import_file" size="chars">
+                        </div>
+                        <div class="controls hide">
+                            <label>Definition URL:</label>
+                            <input type="text" placeholder="" class="span12" id="swagger_import_url" name="swagger_import_url">
+                            <span class="help-block">Example : http://petstore.swagger.io/v2/swagger.json </span>
+                        </div>
                     </div>
                 </div>                    
                 <div class="modal-footer">
@@ -256,7 +267,7 @@
                     </div>
                 </div>
             </div>
-<% }else{ %>                
+<% }else{ %>
 
                 <div class="control-group">
                     <label class="control-label" for="apiThumb"><%=i18n.localize("thumbnail")%>:</label>
