@@ -261,7 +261,6 @@
                         <input class="pull-left btn" type="button" id="clearThumb" value="<%=i18n.localize("clear")%>"/>
                         <div class="help-block pull-left inline-help">
                             <ul>
-                                <li><%=i18n.localize("imgHelpMsg1")%></li>
                                 <li><%=i18n.localize("imgHelpMsg2")%></li>
                             </ul>
                         </div>
@@ -280,9 +279,7 @@
                         <input type="button" class="btn pull-left" id="clearThumb" value="<%=i18n.localize("clear")%>"/>
                         <div class="help-block pull-left inline-help">
                             <ul>
-                            	<li><%=i18n.localize("imgHelpMsg1")%></li>
-                            	<li><%=i18n.localize("imgHelpMsg2")%></li>
-                              
+                            	<li><%=i18n.localize("imgHelpMsg2")%></li>                              
                             </ul>
                         </div>
                     </div>
