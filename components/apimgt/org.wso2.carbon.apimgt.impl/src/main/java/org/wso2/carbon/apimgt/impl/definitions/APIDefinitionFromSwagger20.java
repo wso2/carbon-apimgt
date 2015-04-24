@@ -76,7 +76,7 @@ public class APIDefinitionFromSwagger20 extends APIDefinition {
                         if (!"PATCH".equals(httpVerb)) {
                             URITemplate template = new URITemplate();
                             Scope scope= APIUtil.findScopeByKey(scopes,(String) operation.get("x-scope"));
-                            String authType = (String) operation.get("auth_type");
+                            String authType = (String) operation.get("x-auth-type");
                             if ("Application & Application User".equals(authType)) {
                                 authType = APIConstants.AUTH_APPLICATION_OR_USER_LEVEL_TOKEN;
                             } else if ("Application User".equals(authType)) {
