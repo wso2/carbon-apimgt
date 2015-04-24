@@ -16,6 +16,41 @@
  *  under the License.
  *
  */
+asset.manager = function(ctx){
+    return {
+	get:function(id){
+	   log.info('Calling custom get of asset');
+	   return this._super.get.call(this,id);
+	},
+	search:function(query,paging){
+	  var carbonAPI = require('carbon');
+	  var tenantDomain =  carbonAPI.server.tenantDomain({ tenantId:ctx.tenantId });
+	  var server = require('store').server;
+	  var user = server.current(ctx.session);
+	  var userName = '__wso2.am.anon__';
+	
+	  if(user != null){
+		userName = user.username;		
+	  }
+	 log.info('============== user name =========='+ userName);
+	  var apistore = require('apistore').apistore.instance(userName);
+	  var assetApi = apistore.getAllPaginatedAPIsByStatus0(tenantDomain,0,100,'');
+	  log.info('This is the custom APIM search method');
+	 log.info('============== api json  =========='+ assetApi);
+	//  return assetApi;
+
+	var json = JSON.parse(assetApi);
+
+        var apisArray = [];
+	if(json.apis.length > 0){
+		apisArray = json.apis;
+	}
+	log.info('============== array ==========='+apisArray);
+	return apisArray;
+	}	
+    };
+};
+
 asset.configure = function(ctx) {
     return {
         meta: {
@@ -36,7 +71,12 @@ asset.server = function(ctx) {
                 title: 'My Applications',
                 url: 'my_applications',
                 path: 'my_applications.jag'
-            }, {
+            },/** {
+            title: 'API Details'
+            url: 'details'
+            path: 'details.jag'
+        	},*/ 
+            {
                 title: 'My Subscriptions',
                 url: 'my_subscriptions',
                 path: 'my_subscriptions.jag'

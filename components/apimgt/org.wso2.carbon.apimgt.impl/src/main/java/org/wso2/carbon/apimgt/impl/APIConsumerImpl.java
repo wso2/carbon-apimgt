@@ -642,7 +642,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                     row.put("context", api.getContext());
                     row.put("status", "Deployed"); // api.getStatus().toString()
                     if (api.getThumbnailUrl() == null) {
-                        row.put("thumbnailurl", "images/api-default.png");
+                        //row.put("thumbnailurl", "images/api-default.png");
                     } else {
                         row.put("thumbnailurl", APIUtil.prependWebContextRoot(api.getThumbnailUrl()));
                     }
