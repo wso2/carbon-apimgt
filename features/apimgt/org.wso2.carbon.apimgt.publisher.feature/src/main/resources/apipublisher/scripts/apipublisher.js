@@ -126,5 +126,8 @@ var apipublisher = {};
     APIProviderProxy.prototype.getSubscriberAPIs = function (subscriberName) {
         return this.impl.getSubscriberAPIs(subscriberName);
     };
+    APIProviderProxy.prototype.checkIfAPIExists = function (apiProvider, apiName, apiVersion) {       
+        return this.impl.checkIfAPIExists(apiProvider, apiName, apiVersion);
+    };
 })(apipublisher);
 
