@@ -1,66 +1,722 @@
-<ul class='nav nav-tabs'>
-	<li><a href='{{url ""}}/asts/api/create'>Design</a></li>
-	<li><a href='{{url ""}}/asts/api/implement'>Implement</a></li>
-	<li><a href='{{url ""}}/asts/api/manage'>Manage</a></li>
-</ul>
-<h3>name/version</h3>
-<form class='form-horizontal' method='post' action='{{url ""}}/asts/api/apis/prototype'>
-	<legend>Configurations</legend>
-	<div class='control-group'>
-		<label class='control-label'>{{t "Make this default version"}}:</label>
-		<div class='controls' name='default_version'>
-			<input type='checkbox'> <br />
-			<small>{{t "No defeault version defined for the current api"}}</small>
+<script language="javascript">
+	var VERBS = ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'];
+	var AUTH_TYPES = [
+		{"value": "None", "text": "{{t "None"}}"},
+		{"value": "Application", "text": "{{t "Application"}}"},
+		{"value": "Application User", "text": "{{t "Application User"}}"},
+		{"value": "Application & Application User", "text": "{{t "Application & Application User"}}"}
+	];
+	var TIERS = [
+		{{#each tiers}}
+			{"value": "<%= {{this.tierName}}", "text": "{{this.tierDisplayName}}"},
+		{{/each}}
+	];
+
+	var DEFAULT_TIER = "<%= tiers[tiers.length -1].tierName%>";
+	var DEFAULT_AUTH = "Application & Application User";
+	var OPTION_DEFAULT_AUTH = "None";
+
+	var insequence = "{{api.inSequence}}";
+	var outsequence = "{{api.outSequence}}";
+	var faultsequence = "{{api.faultSequence}}";
+	var inSequencesLoaded = false;
+	var outSequencesLoaded = false;
+	var faultSequencesLoaded = false;
+</script>
+<div id="item-add">
+	<ul class='nav nav-tabs'>
+		<li><a href='{{url ""}}/asts/api/create'>Design</a></li>
+		<li><a href='{{url ""}}/asts/api/implement'>Implement</a></li>
+		<li><a href='{{url ""}}/asts/api/manage'>Manage</a></li>
+	</ul>
+	<div class="title-section">
+		<h2>{{t api.name}}({{t api.version}}) : {{t api.context}}</h2>
+	</div>
+	<div class="content-section shadow-up">
+		<div class="content-data">
+			<div class="alert alert-error" id="addAPIError" style="display:none">
+				<span id="addErrorSpan"></span>
+			</div>
+			{{#if api}}
+				{{#if api.subs.length}}
+					<div class="alert alert-block" id="editAPIWarn" style="display:block">
+        			<span id="editWarnSpan"><b>Warning!</b><br/>
+       				You are editing an API with active subscribers. Tier Availability changes will not be reflected on
+        			active subscriptions.<br/>
+        			API Definition for Swagger will not be overriden with the changes you will do to the API.
+        			</span>
+					</div>
+				{{/if}}
+			{{/if}}
+
+			<div class="row-fluid">
+				<div class="span12">
+					<form class="form-horizontal" method="POST"
+					      id="manage_form"
+					      enctype="multipart/form-data" action="apis/asts/update?&action=manage">
+						<fieldset>
+							<legend>Configurations</legend>
+							<div class="control-section">
+								<div class="control-group col-md-8">
+									<div class="col-md-2">
+										<label class="control-label">Make this default version</label>
+									</div>
+									<div class="controls">
+										<div class="col-md-2">
+											<input type="checkbox" class="default_version_check" id="default_version"
+											       name="default_version" value="default_version"
+												   {{#if api.isDefaultVersion}}checked{{/if}}/>
+											<a class="icon-question-sign help_popup" help_data="default_api_help"></a>
+
+											<p id="default_api_help" class="hide">
+												{{t "Marks one API version in a group as the default, \so that it can be invoked
+										without specifying the version number in the URL. For example, i
+										f you mark http://host:port/youtube/2.0 as the default API,
+										requests made to http://host:port/youtube/ are automatically
+										routed to version 2.0. If you mark an unpublished API as the default,
+										the previous default, published API will still be used as the default until
+										the new default API is published"}}</p>
+											{{#if api.isDefaultVersion}}
+											{{else}}
+												{{#if api.hasDefaultVersion}}
+													<p class="help-block">Currently set to version
+													                      : {{api.currentDefaultVersion}}</p>
+												{{else}}
+													<p class="help-block">No default version defined for the current API</p>
+												{{/if}}
+											{{/if}}
+											<input type="hidden" id="default_version_checked" name="default_version_checked"
+											       value="{{#if api.isDefaultVersion}}default_version{{else}} {{/if}}"
+										</div>
+									</div>
+								</div>
+							</div>
+							<div class="control-group col-md-8">
+								<div class="col-md-2">
+									<label class="control-label" for="tier">{{t "Tier Availability"}}:<span
+											class="requiredAstrix">*</span></label>
+								</div>
+								<div class="controls col-md-2">
+									<select id="tier" name="tier"  class="multiselect selected hide required" multiple="multiple">
+										{{#each api.tiers}}
+											<option value="<%= tiers[i].tierName %>">{{this.tierDisplayName}}</option>
+										{{/each}}
+									</select>
+								</div>
+							</div>
+							<div class="control-group transport-styles col-md-8">
+								<div class="col-md-2">
+									<label class="control-label" for="transports">{{t "transports"}}:<span
+											class="requiredAstrix">*</span></label>
+								</div>
+								<div class="controls">
+									<div class="col-md-2">
+										<div class="checkbox">
+											<label class="checkbox inline">
+												<input type="checkbox" id="transport_http" name="transport_http" value="http"
+													{{#if api.transport_http.checked}} checked {{/if}}/> {{t "http"}}
+											</label>
+											<label class="checkbox inline">
+												<input type="checkbox" id="transport_https" name="transport_https"
+												       value="https"
+													{{#if api.transport_https.checked}} checked {{/if}}/>{{t "https"}}
+											</label>
+										</div>
+									</div>
+								</div>
+							</div>
+
+							{{#if isSynapseGateway}}
+								<div class="control-group col-md-8">
+									<label class="control-label" for="sequence">{{t "sequence"}}:</label>
+
+									<div class="controls">
+										<label class="checkbox">
+											<input type="checkbox" id="toggleSequence" name="sequence_check"
+											       id="sequence_check"
+										</label>
+										<table class="table table-bordered table-striped" id="seqTable"
+										<thead>
+										<tr>
+											<th>{{t "inFlow"}}</th>
+											<th>{{t "outFlow"}}</th>
+											<th>{{t "faultFlow"}}</th>
+										</tr>
+										</thead>
+										<tr>
+											<td>
+												<select id="inSequence" name="inSequence">
+													<option value="none" selected="selected">{{t "none"}}</option>
+												</select>
+											</td>
+											<td>
+												<select id="outSequence" name="outSequence">
+													<option value="none" selected="selected">{{t "none"}}</option>
+												</select>
+											</td>
+											<td>
+												<select id="faultSequence" name="faultSequence">
+													<option value="none" selected="selected">{{t "none"}}</option>
+												</select>
+											</td>
+										</tr>
+										</table>
+									</div>
+								</div>
+							{{/if}}
+							<!--Response Caching -->
+							<div class="control-group col-md-8">
+								<div class="col-md-2">
+									<label class="control-label" for="responseCache">{{t "responseCache"}}:</label>
+								</div>
+								<div class="controls col-md-2">
+									<select class="select required" id="responseCache" name="responseCache">
+										<option value="disabled"
+										</option>
+										<option value="enabled"
+										</option>
+									</select>
+									<a class="icon-question-sign help_popup" help_data="cache_help"></a>
+
+									<p id="cache_help" class="hide">{{t "cacheHelpMsg"}}</p>
+								</div>
+							</div>
+							<div class="control-group col-md-8" id="cacheTimeout">
+								<label class="control-label" for="cacheTimeout">{{t "cacheTimeout"}}:<span
+										class="requiredAstrix">*</span></label>
+
+								<div class="controls">
+									<input type="text" style="text-align:right;"
+									       class="input-small required validInput number" id="cacheTimeout"
+									       name="cacheTimeout" value={{api.cacheTimeout}}>
+								</div>
+							</div>
+							<!--Response Caching End -->
+							<div class="control-group col-md-8">
+								<label class="control-label" for="subscriptions">{{t "subscriptionsTitle"}}:</label>
+
+								<div class="controls">
+									<select class="select required" id="subscriptions" name="subscriptions">
+										<option value="current_tenant"
+										        selected="selected">{{t "availableToCurrentTenant"}}</option>
+									</select>
+									<a class="icon-question-sign help_popup" help_data="subscriptions_help"></a>
+
+									<div id="subscriptions_help" class="hide">{{t "subscriptionHelpMsg"}}</div>
+								</div>
+								<br/>
+
+								<div class="control-group" id="tennatsDiv">
+									<label class="control-label" for="tenants" id="tennatLabel" name="tennatLabel">
+										{{t "tenants"}}:<span class="requiredAstrix">*</span>
+									</label>
+									<div class="controls">
+										<input type="text" class="input required"
+										       id="tenants" name="tenants" value="<%=api.subscriptionTenants%>"/>
+										<p class="help-block" id="tennatsHelp">{{t "tenantsHelpMsg"}}</p>
+									</div>
+								</div>
+							</div>
+						</fieldset>
+
+						<fieldset>
+							<legend class="legend-with-hidden-info js_hidden_section_title">Gateway Environments<i
+									class="icon-chevron-right icon-keys"></i></legend>
+							<div style="display: none">
+								<!--legend>Environments</legend-->
+								<div class="environments_headings">
+									<div class="environments_checkbox"></div>
+									<div class="environments_data">Environment Name</div>
+									<div class="environments_data">Type</div>
+									<div class="environments_data">Description</div>
+								</div>
+
+								{{#each api.environments}}
+									<div class="environments_headings">
+										<div class="environments_checkbox"><input type="checkbox" value="{{this.name}}"
+										                                          class="env"></div>
+										<div class="environments_data">{{this.name}}</div>
+										<div class="environments_data">{{this.tyoe}}</div>
+										<div class="environments_data">{{this.description}}</div>
+									</div>
+								{{/each}}
+							</div>
+							<script>
+								$('input').on('change', function () {
+									var values = $('input:checked.env').map(function () {
+										return this.value;
+									}).get();
+									if (values == "") {
+										values = "none";
+									}
+									$('#environments').val(values.toString());
+								});
+							</script>
+							<style>
+								.environments_headings {
+									border-bottom: solid 1px;
+									border-bottom-color: gainsboro;
+									padding-bottom: 5px;
+									alignment-baseline: auto;
+									font-weight: bold;
+								}
+
+								.data_headings {
+									border-bottom: solid 1px;
+									border-bottom-color: gainsboro;
+									padding-bottom: 5px;
+									alignment-baseline: auto;
+								}
+
+								.environments_checkbox {
+									text-align: left;
+									display: inline-block;
+									vertical-align: top;
+									*display: inline;
+									padding: 5px;
+									width: 20px;
+								}
+
+								.environments_data {
+									text-align: left;
+									display: inline-block;
+									vertical-align: top;
+									*display: inline;
+									*zoom: 1;
+									padding: 5px;
+									text-align: left;
+									width: 200px;
+								}
+							</style>
+						</fieldset>
+						<fieldset>
+							<legend class="legend-with-hidden-info js_hidden_section_title">{{t "businessInformationTitle"}}
+								<i class="icon-chevron-right icon-keys"></i></legend>
+							<div style="display: none">
+								<!--legend>Business Information</legend-->
+
+								<div class="control-group">
+									<label class="control-label" for="bizOwner">{{t "busiOwner"}}:</label>
+
+									<div class="controls">
+										<input type="text" class="input-xlarge validInput" id="bizOwner" name="bizOwner"
+										       value="{{api.bizOwner}}"/>
+									</div>
+								</div>
+								<div class="control-group">
+									<label class="control-label" for="bizOwnerMail">{{t "busiOwnerMail"}}:</label>
+
+									<div class="controls">
+										<input type="text" class="input-xlarge email" id="bizOwnerMail" name="bizOwnerMail"
+										       value="{{api.bizOwnerMail}}"/>
+									</div>
+								</div>
+								<div class="control-group">
+									<label class="control-label" for="techOwner">{{t "techOwner"}}:</label>
+
+									<div class="controls">
+										<input type="text" class="input-xlarge validInput" id="techOwner" name="techOwner"
+										       value="{{api.techOwner}}"/>
+									</div>
+								</div>
+								<div class="control-group">
+									<label class="control-label" for="techOwnerMail">{{t "techOwnerMail"}}:</label>
+
+									<div class="controls">
+										<input type="text" class="input-xlarge email" id="techOwnerMail" name="techOwnerMail"
+										       value="{{api.techOwnerMail}}"/>
+									</div>
+								</div>
+							</div>
+						</fieldset>
+
+						<div id="api_designer">
+							<div id="apidoc_details"></div>
+							<legend>Resources</legend>
+							<div id="scopes_view"></div>
+							<div id="resource_details"></div>
+						</div>
+						<input type="hidden" id="environments" name="environments" value='<%=environmentsJson%>'/>
+						<input type="hidden" name="name" value="<%= encode.forHtml(api.name) %>"/>
+						<input type="hidden" name="version" value="<%= encode.forHtml(api.version) %>"/>
+						<input type="hidden" name="provider" value="<%= encode.forHtml(api.provider) %>"/>
+						<input type="hidden" name="action" value="manage"/>
+						<input type="hidden" id="swagger" name="swagger" value=""/>
+
+						<div class="form-actions" style="display:none" id="saveMessage">
+							<div class="btn loadingButton">Saving API. Please wait..</div>
+						</div>
+						<div class="form-actions" id="saveButtons">
+							<button class="btn btn-info" id="save_api" data-loading-text="<i class='fa fa-spinner fa-pulse'
+				id='loader'></i>Loading">{{t "save"}}</button>
+							{{#if outputs.isPermitted}}
+								<button class="btn btn-primary" id="publish_api" data-loading-text="<i
+				class='fa fa-spinner fa-pulse' id='loader'></i>Loading">Save & Publish
+								</button>  {{/if}}
+							<input type="reset" class="btn" value="<%=i18n.localize(" cancel")%>"
+							                                                                onclick="javascript:window.location.href='./'"
+							                                                                />
+						</div>
+					</form>
+
+				</div>
+			</div>
 		</div>
 	</div>
-	<div class='control-group'>
-		<label class='control-label'>{{t "Tier Availability"}}:</label>
-		<div class='controls'>
-			<select>
-				<option>Placeholder</option>
-			</select>
-		</div>
+</div>
+
+<script id="designer-apidoc-template" type="text/x-handlebars-template">
+</script>
+
+<script id="designer-resource-template" type="text/x-handlebars-template">
+	<div class="resource_body_padding">
+		<h5>Implementation Notes</h5>
+		<a class="notes" data-path="{{resource_path}}" data-attr="notes">{{ notes }}</a>
+		<br/>
+		<br/>
+		<h5>Response Content Type : <a href="#" data-path="{{resource_path}}" data-attr="content_type" class="content_type"
+		                               data-type="typeahead" data-pk="1"
+		                               data-title="Responce Content Type">{{ content_type }}</a></h5>
+		<br/>
+		<h5>Parameters</h5>
+		{{#if parameters}}
+		<table class="table table-condensed table-hover table-bordered">
+			<tr>
+				<th width="200px">Parameter Name</th>
+				<th>Description</th>
+				<th width="100px">Parameter Type</th>
+				<th width="100px">Data Type</th>
+				<th width="100px">Required</th>
+			</tr>
+			{{#each parameters}}
+				<tr>
+					<td>{{ name }}</td>
+					<td>{{ description }}</td>
+					<td>{{ paramType }}</td>
+					<td>{{ type }}</td>
+					<td>{{ required }}</td>
+				</tr>
+			{{/each}}
+		{{/if}}
+	</table>
 	</div>
-	<div class='control-group'>
-		<label class='control-label'>{{t "Transports"}}:</label>
-		<div class='controls'>
-			<label class='checkbox inline'>
-				<input type='checkbox' name='transport_http'> HTTP
-			</label>
-			<label class='checkbox inline'>
-				<input type='checkbox' name='transport_https'> HTTPS 
-			</label>	
-		</div>
+</script>
+
+
+<script id="designer-resources-template" type="text/x-handlebars-template">
+	<table style="width:100%">
+		{{#each api_doc.apis}}
+			<tr>
+				<td colspan="6"><h4 class="resource_group_title">{{ path }}</h4></td>
+			</tr>
+			{{# each file.apis}}
+				{{# each operations}}
+					<tr class="resource_container"
+					    data-path="$.apis[{{ ../../index}}].file.apis[{{ ../index }}].operations[{{ @index }}]">
+						<td class="resource-method-td resource_expand"
+						    data-path="$.apis[{{ ../../index}}].file.apis[{{ ../index }}].operations[{{ @index }}]">
+							<span class=" resource-method resource-method-{{ method }}">{{ method }}</span>
+						</td>
+						<td class="resource_expand"><a class="resource-path">{{ ../path }}</a></td>
+						<td width="99%"><span class="operation-summary change_summary"
+						                      data-path="$.apis[{{ ../../index}}].file.apis[{{ ../index }}].operations[{{ @index }}]"
+						                      data-attr="summary">{{ summary }}</span></td>
+						<td><a class="operation-summary auth_type_select" data-type="select"
+						       data-path="$.apis[{{ ../../index}}].file.apis[{{ ../index }}].operations[{{ @index }}]"
+						       data-attr="auth_type" data-value="{{ auth_type }}"></a></td>
+						<td><a class='operation-summary throttling_select' data-type="select"
+						       data-path="$.apis[{{ ../../index}}].file.apis[{{ ../index }}].operations[{{ @index }}]"
+						       data-attr="throttling_tier">{{ throttling_tier }}</a></td>
+						<td><a class="operation-summary scope_select" data-type="select"
+						       data-path="$.apis[{{ ../../index}}].file.apis[{{ ../index }}].operations[{{ @index }}]"
+						       data-attr="scope">{{ scope }}</a></td>
+					</tr>
+					<tr>
+						<td colspan="6" class="resource_body hide"
+						    data-path="$.apis[{{ ../../index}}].file.apis[{{ ../index }}].operations[{{ @index }}]"></td>
+					</tr>
+				{{/each}}
+			{{/each}}
+
+		{{/each}}
+	</table>
+</script>
+
+<script id="scopes-template" type="text/x-handlebars-template">
+	<div class="scope_container">
+		{{#if api_doc.authorizations.oauth2.scopes}}
+			<h4>Scopes</h4>
+			<ul>
+				{{#each api_doc.authorizations.oauth2.scopes}}
+					<li>
+						<h6><a data-index='{{ @index }}' class='delete_scope'><i class='icon-trash'></i></a>
+							&nbsp;&nbsp; {{ key }} {{#if name }}: {{ name }}{{/if}}  </h6>
+						<strong>Roles</strong> : {{ roles }}
+						<p>{{ description }}</p>
+					</li>
+				{{/each}}
+			</ul>
+		{{/if}}
+		<a id="define_scopes" class="pointer btn"><i class="icon-plus-sign"></i>&nbsp;Add Scopes</a>
 	</div>
-	<div class='control-group'>
-		<label class='control-label'>{{t "Sequences"}}:</label>
-		<div class='controls'>
-			<input type='checkbox' name='sequences_enabled'> 
-			<small>Check to select a custom sequence to be executed in the message flow</small>
-		</div>
+</script>
+
+<script>
+	$(document).ready(function () {
+		$.ajaxSetup({
+			            contentType: "application/x-www-form-urlencoded; charset=utf-8"
+		            });
+
+		$.get("<%= jagg.url(" / site / blocks / item - design / ajax / add.jag ? " + apiUrlId ) %>&action=swagger", function (data) {
+			var data = jQuery.parseJSON(data);
+			var designer = APIDesigner();
+			designer.load_api_document(data);
+			designer.set_default_management_values();
+			designer.render_resources();
+			$("#swaggerUpload").modal('hide');
+		});
+
+		var publish_api = function (e) {
+			$.ajax({
+				       type: "POST",
+				       url: "<%= jagg.url(" / site / blocks / life - cycles / ajax / life - cycles.jag") %>",
+				       async: false,
+				       data: {
+					       action: "updateStatus",
+					       name: "<%=api.name%>",
+					       version: "<%=api.version%>",
+					       provider: "<%=api.provider%>",
+					       status: "PUBLISHED",
+					       publishToGateway: true,
+					       requireResubscription: true
+				       },
+				       success: function (responseText) {
+					       $("body").unbind('api_saved');
+					       if (!responseText.error) {
+						       //jagg.message({content:"API Published",type:"info"});
+						       location.href = "<%= jagg.url(" / info ? "+ apiUrlId ) %>";
+					       } else {
+						       if (responseText.message == "timeout") {
+							       if (ssoEnabled) {
+								       var currentLoc = window.location.pathname;
+								       if (currentLoc.indexOf(".jag") >= 0) {
+									       location.href = "index.jag";
+								       } else {
+									       location.href = 'site/pages/index.jag';
+								       }
+							       } else {
+								       jagg.showLogin();
+							       }
+						       } else {
+							       var message = responseText.message;
+							       if (message.split("||")[1] == "warning") {
+								       var environmentsFailed = JSON.parse(message.split("||")[0]);
+								       var failedToPublishEnvironments = environmentsFailed.PUBLISHED;
+								       var failedToUnpublishedEnvironments = environmentsFailed.UNPUBLISHED;
+								       var divPublish = "", divUnpublished = "";
+								       for (i = 0; i < failedToPublishEnvironments.split(",").length; i++) {
+									       divPublish += failedToPublishEnvironments.split(",")[i] + "<br>";
+								       }
+								       for (i = 0; i < failedToUnpublishedEnvironments.split(",").length; i++) {
+									       divUnpublished += failedToUnpublishedEnvironments.split(",")[i] + "<br>";
+								       }
+								       $("#modal-published-content").empty();
+								       $("#modal-unpublished-content").empty();
+								       $("#modal-published-content").append(divPublish);
+								       $("#modal-unpublished-content").append(divUnpublished);
+								       if (failedToPublishEnvironments == "") {
+									       $("#modal-published-header").hide();
+									       $("#modal-published-content").hide();
+								       }
+								       if (failedToUnpublishedEnvironments == "") {
+									       $("#modal-unpublished-header").hide();
+									       $("#modal-unpublished-content").hide();
+								       }
+								       $("#retryType").val("manage");
+								       $("#environmentsRetry-modal").modal('show');
+							       }
+							       else {
+								       jagg.message({content: responseText.message, type: "error"});
+							       }
+						       }
+					       }
+				       },
+				       dataType: "json"
+			       });
+		};
+
+		var v = $("#manage_form").validate({
+			                                   submitHandler: function (form) {
+				                                   if (!validate_tiers()) {
+					                                   return false;
+				                                   }
+				                                   if (!validate_Transports()) {
+					                                   return false;
+				                                   }
+				                                   var designer = APIDesigner();
+				                                   $('#swagger').val(JSON.stringify(designer.api_doc));
+				                                   $('#' + $this).button('loading');
+				                                   $(form).ajaxSubmit({
+					                                                      success: function (responseText, statusText, xhr,
+					                                                                         $form) {
+						                                                      $('#' + $this).button('reset');
+						                                                      if (!responseText.error) {
+							                                                      $("body").trigger("api_saved");
+						                                                      } else {
+							                                                      if (responseText.message == "timeout") {
+								                                                      if (ssoEnabled) {
+									                                                      var currentLoc = window.location.pathname;
+									                                                      if (currentLoc.indexOf(".jag") >= 0) {
+										                                                      location.href = "index.jag";
+									                                                      } else {
+										                                                      location.href = 'site/pages/index.jag';
+									                                                      }
+								                                                      } else {
+									                                                      jagg.showLogin();
+								                                                      }
+							                                                      } else {
+								                                                      var message = responseText.message;
+								                                                      if (message.split("||")[1] == "warning") {
+									                                                      var environmentsFailed = JSON.parse(message.split("||")[0]);
+									                                                      var failedToPublishEnvironments = environmentsFailed.PUBLISHED;
+									                                                      var failedToUnpublishedEnvironments = environmentsFailed.UNPUBLISHED;
+									                                                      var divPublish = "", divUnpublished = "";
+									                                                      for (i = 0; i < failedToPublishEnvironments.split(",").length; i++) {
+										                                                      divPublish += failedToPublishEnvironments.split(",")[i] + "<br>";
+									                                                      }
+									                                                      for (i = 0; i < failedToUnpublishedEnvironments.split(",").length; i++) {
+										                                                      divUnpublished += failedToUnpublishedEnvironments.split(",")[i] + "<br>";
+									                                                      }
+									                                                      $("#modal-published-content").empty();
+									                                                      $("#modal-unpublished-content").empty();
+									                                                      $("#modal-published-content").append(divPublish);
+									                                                      $("#modal-unpublished-content").append(divUnpublished);
+									                                                      if (failedToPublishEnvironments == "") {
+										                                                      $("#modal-published-header").hide();
+										                                                      $("#modal-published-content").hide();
+									                                                      }
+									                                                      if (failedToUnpublishedEnvironments == "") {
+										                                                      $("#modal-unpublished-header").hide();
+										                                                      $("#modal-unpublished-content").hide();
+									                                                      }
+									                                                      $("#retryType").val("lifeCycle");
+									                                                      $("#environmentsRetry-modal").modal('show');
+								                                                      }
+								                                                      else {
+									                                                      jagg.message({
+										                                                                   content: responseText.message,
+										                                                                   type: "error"
+									                                                                   });
+								                                                      }
+							                                                      }
+						                                                      }
+					                                                      }, dataType: 'json'
+				                                                      });
+			                                   }
+		                                   });
+
+		var $this = '';
+		$('#publish_api').click(function (e) {
+			$("body").on("api_saved", publish_api);
+			$this = $(this).attr('id');
+			$("#manage_form").submit();
+		});
+
+		$('#save_api').click(function (e) {
+			$this = $(this).attr('id');
+		});
+
+
+		$('#responseCache').change(function () {
+			var cache = $('#responseCache').find(":selected").val();
+			if (cache == "enabled") {
+				$('#cacheTimeout').show();
+			}
+			else {
+				$('#cacheTimeout').hide();
+			}
+		});
+
+	});
+</script>
+
+<div id="define_scope_modal" class="modal hide fade">
+	<div class="modal-header">
+		<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+		<h3>Define Scope</h3>
 	</div>
-	<div class='control-group'>
-		<label class='control-label'>{{t "Response Caching"}}:</label>
-		<div class='controls'>
-			<select name='response_caching'>
-				<option>Disabled</option>
-			</select>
-		</div>
+	<div class="modal-body">
+		<form id="scope_form" class="form-horizontal">
+			<div class="control-group">
+				<label class="control-label" for="scopeKey">Scope Key</label>
+
+				<div class="controls">
+					<input type="text" id="scopeKey" placeholder="Eg: api_name_read">
+				</div>
+			</div>
+			<div class="control-group">
+				<label class="control-label" for="scopeName">Scope Name</label>
+
+				<div class="controls">
+					<input type="text" id="scopeName" placeholder="Eg: Read My Data">
+				</div>
+			</div>
+			<div class="control-group">
+				<label class="control-label" for="scopeRoles">Roles</label>
+
+				<div class="controls">
+					<input type="text" id="scopeRoles" placeholder="Eg: role1,role2,role3">
+				</div>
+			</div>
+			<div class="control-group">
+				<label class="control-label" for="inputEmail">Description</label>
+
+				<div class="controls">
+					<textarea id="scopeDescription"
+					          placeholder="Eg: This scope will group all the administration APIs"></textarea>
+				</div>
+			</div>
+		</form>
 	</div>
-	<div class='control-group'>
-		<label class='control-label'>{{t "Subscriptions"}}:</label>
-		<div class='controls'>
-			<select>
-				<option>Available to current Tenant Only</option>
-			</select>
-		</div>
+	<div class="modal-footer">
+		<div id="res" class="hide" style="color:red;float:left"></div>
+		<a class="btn" data-dismiss="modal">Close</a>
+		<a class="btn btn-primary" id="scope_submit">Add Scope</a>
 	</div>
-	<hr />
-	<div class='control-group'>
-		<div class='controls'>
-			<input class='btn' type='submit' name='{{t "Save"}}'>
-			<button class='btn btn-primary' id='btn-deploy-prototype'>{{t "Save&Publish"}}</button>
-			<button class='btn' id='btn-deploy-prototype'>{{t "Cancel"}}</button>
-		</div>
+</div>
+
+<div id="environmentsRetry-modal" class="modal hide fade">
+	<div class="modal-header">
+		<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+		<h3>Gateway Failures</h3>
 	</div>
-</form>
+	<div class="modal-body">
+		<div id="modal-published-header">
+			Failed to Publish Environments
+		</div>
+		<div id="modal-published-content">
+		</div>
+		<div id="modal-unpublished-header">
+			Failed to UnPublish Environments
+		</div>
+		<div id="modal-unpublished-content">
+		</div>
+		<input type="hidden" id="retryType"/>
+	</div>
+	<div class="modal-footer">
+		<div id="res" class="hide" style="color:red;float:left"></div>
+		<a class="btn btn-primary" id="retry" onClick="doGatewayAction()">OK</a>
+		<script type="text/javascript">
+			function doGatewayAction() {
+				var type = $("#retryType").val();
+				if (type == "manage") {
+					$("#environmentsRetry-modal").modal('hide');
+					$("body").trigger("api_saved");
+					location.href = "<%= jagg.url(" / info ? "+ apiUrlId ) %>";
+				} else {
+					location.href = "<%= jagg.url(" / info ? "+ apiUrlId ) %>";
+				}
+			}
+		</script>
+	</div>
+	<% }); %>

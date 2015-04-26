@@ -27,6 +27,10 @@
             <groupId>com.googlecode.json-simple.wso2</groupId>
             <artifactId>json-simple</artifactId>            
         </dependency>
+        <dependency>
+            <groupId>rhino.wso2</groupId>
+            <artifactId>js</artifactId>
+        </dependency>
     </dependencies>
     <build>
         <plugins>

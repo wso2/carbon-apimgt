@@ -19,16 +19,38 @@
  */
 var caramel;
 require('/modules/publisher.js').exec(function(ctx) {
+    var log = new Log();
+    var rxtModule = require('rxt');
+    var asset = rxtModule.asset;
     caramel = require('caramel');
-    var ui = require('rxt').ui;
-    var asset = require('rxt').asset;
+    var am;
     var uriMatcher = new URIMatcher(ctx.request.getRequestURI());
-    var options = uriMatcher.match('/{context}/asts/{type}/{pageName}');
-    var type = options.type;
-    var am = asset.createUserAssetManager(ctx.session, type);
-    var page = ui.buildPage(ctx.session, ctx.request);
-    // var assets = {};
-    var output = am.render(page)._custom();
+    var options = uriMatcher.match('/{context}/asts/{type}/{pageName}/{+id}') || uriMatcher.match('/{context}/asts/{type}/{pageName}');
+    var page;
+    var output;
+    var asset;
+    if (!options.id) {
+        ctx.response.sendError(400, 'Cannot render the implementation details without an asset id');
+        return;
+    }
+    am = asset.createUserAssetManager(ctx.session, options.type);
+    try {
+        asset = am.get(options.id);
+    }
+    catch(e){
+        log.error(e);
+        ctx.response.sendError(404,'Asset was not found');
+        return;
+    }
+    var apiPublisher =  require('apipublisher').apipublisher;
+    var apiProxy = apiPublisher.instance(ctx.username);
+    var api = apiProxy.getAPI(asset.attributes.overview_provider, asset.attributes.overview_name, asset.version).api;
+    var tiers = apiProxy.getTiers();
+    log.info(api);
+    page = rxtModule.ui.buildPage(ctx.session, ctx.request);
+    output = am.render(asset,page)._custom();
+    output.api = api;
+    output.api.tiers = tiers;
     caramel.render(output);
 }, request, response, session);
 %>
