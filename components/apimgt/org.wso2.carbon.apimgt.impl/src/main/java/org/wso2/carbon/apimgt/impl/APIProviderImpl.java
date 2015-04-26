@@ -953,11 +953,14 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
     /**
      * Function returns true if the specified API already exists in the registry
-     * @param identifier
+     * @param apiName API Name
+     * @param version Version
+     * @param providerName Provider
      * @return
      * @throws org.wso2.carbon.apimgt.api.APIManagementException
      */
-    public boolean checkIfAPIExists(APIIdentifier identifier) throws APIManagementException {
+    public boolean checkIfAPIExists(String providerName,String apiName,String version) throws APIManagementException {
+        APIIdentifier identifier=new APIIdentifier(providerName,apiName,version);
         String apiPath = APIUtil.getAPIPath(identifier);
         try {
             String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(identifier.getProviderName()));

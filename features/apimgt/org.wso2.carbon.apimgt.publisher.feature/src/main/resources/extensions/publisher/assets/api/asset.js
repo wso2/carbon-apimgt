@@ -19,8 +19,85 @@
 asset.manager = function(ctx) {
     var apiPublisher =  require('apipublisher').apipublisher;
     var LOGGED_IN_USER = 'LOGGED_IN_USER';
-    var log = new Log('default-asset');
+    var log = new Log('default-asset'); 
+    
+    var generate_swagger_object=function(swagger){
+    swaggerObj = {
+        api_doc : parse(swagger),
+        resources : []
+     };
+
+    for(i = 0 ; i < swaggerObj.api_doc.apis.length ; i++ ){
+        swaggerObj.resources.push(swaggerObj.api_doc.apis[i].file);
+        delete swaggerObj.api_doc.apis[i].file
+    }
+    return stringify(swaggerObj);
+    }  
     return {
+        importAssetFromHttpRequest: function(options) {
+            return options;
+        },        
+        create: function(options) {
+            var result,obj,error,message,data;
+            var api = {};
+            if(options.action=="design"){
+            api.apiName = options.overview_name;
+            api.name = options.overview_name;
+            api.version = options.overview_version;
+            if (options.provider == null) {
+                api.provider = ctx.username;
+            } else {
+                api.provider = options.overview_provider;
+            }                    
+            api.context = options.overview_context;
+           //  api.imageUrl = request.getFile("apiThumb");
+
+            //validate uploaded image
+           /* if(api.imageUrl != null &&!jagg.isValiedImage(apiData.imageUrl)){
+                obj = {
+                    error:true,
+                    message:"Please upload a valid image file for the API icon."
+                };
+                print(obj);
+                return;
+            }*/
+            //If API not exist create
+            var apiProxy = apiPublisher.instance(ctx.username);
+            result=apiProxy.checkIfAPIExists(api.provider,api.name,api.version);           
+            if(!result){
+                result = apiProxy.designAPI(api);
+                if (result.error==true) {
+                    obj = {
+                        error:true,
+                        message:result.message
+                    };
+                    print(obj);
+                    return;
+                }
+            }
+
+            api.description = options.overview_description;
+            api.tags = options.overview_tags;           
+            api.visibility = options.visibility;
+            api.visibleRoles = options.roles;
+            api.swagger = generate_swagger_object(options.swagger);
+            result = apiProxy.updateDesignAPI(api);
+            if (result.error==true) {
+                obj = {
+                    error:true,
+                    message:result.message
+                };
+            } else {
+                obj = {
+                    error:false,
+                    data :apiId
+                }
+            }
+            return obj;
+            }          
+            
+
+        },
         remove : function(id) {
             var asset = this.get.call(this, id);
             log.debug("Removing API of Id " +id+ "Name " + asset.attributes.overview_name);
@@ -33,6 +110,7 @@ asset.manager = function(ctx) {
         }
     };
 };
+
 asset.server = function (ctx) {
     return {
         endpoints: {
