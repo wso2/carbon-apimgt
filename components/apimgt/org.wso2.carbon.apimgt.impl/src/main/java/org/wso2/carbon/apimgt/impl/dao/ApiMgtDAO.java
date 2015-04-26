@@ -350,12 +350,12 @@ public class ApiMgtDAO {
         try {
             conn = APIMgtDBUtil.getConnection();
             ps = conn.prepareStatement(sqlQuery);
-            ps.setString(1, consumerKey);
+            ps.setString(1, APIUtil.encryptToken(consumerKey));
             rs = ps.executeQuery();
             while (rs.next()) {
                 oAuthApplicationInfo.setClientId(consumerKey);
                 oAuthApplicationInfo.setCallBackURL(rs.getString("CALLBACK_URL"));
-                oAuthApplicationInfo.setClientSecret(rs.getString("CONSUMER_SECRET"));
+                oAuthApplicationInfo.setClientSecret(APIUtil.decryptToken(rs.getString("CONSUMER_SECRET")));
 //                oAuthApplicationInfo.addParameter(ApplicationConstants.
 //                        OAUTH_CLIENT_SECRET, rs.getString("CONSUMER_SECRET"));
                 oAuthApplicationInfo.addParameter(ApplicationConstants.
@@ -367,6 +367,9 @@ public class ApiMgtDAO {
             }
         } catch (SQLException e) {
             handleException("Error while executing SQL for getting OAuth application info", e);
+        } catch (CryptoException e) {
+            handleException("Unable to encrypt consumer key " + consumerKey + " or unable to decrypt consumer secret " +
+                    "of the same", e);
         } finally {
             APIMgtDBUtil.closeAllConnections(ps, conn, rs);
         }
@@ -2661,12 +2664,12 @@ public class ApiMgtDAO {
 
     private Map<String,OAuthApplicationInfo> getOAuthApplications(int applicationId) throws APIManagementException {
         Map<String,OAuthApplicationInfo> map = new HashMap<String,OAuthApplicationInfo>();
-        OAuthApplicationInfo prodApp = getProductionClientOfApplication(applicationId,"PRODUCTION");
+        OAuthApplicationInfo prodApp = getClientOfApplication(applicationId, "PRODUCTION");
         if(prodApp != null){
            map.put("PRODUCTION",prodApp);
         }
 
-        OAuthApplicationInfo sandboxApp = getProductionClientOfApplication(applicationId,"SANDBOX");
+        OAuthApplicationInfo sandboxApp = getClientOfApplication(applicationId, "SANDBOX");
         if(sandboxApp != null){
             map.put("SANDBOX",sandboxApp);
         }
@@ -2674,8 +2677,8 @@ public class ApiMgtDAO {
         return map;
     }
 
-    public OAuthApplicationInfo getProductionClientOfApplication(int applicationID,
-                                                            String keyType) throws APIManagementException {
+    public OAuthApplicationInfo getClientOfApplication(int applicationID,
+                                                       String keyType) throws APIManagementException {
         String sqlQuery = "SELECT " +
                 "CONSUMER_KEY " +
                 "FROM AM_APPLICATION_KEY_MAPPING WHERE APPLICATION_ID = ? AND KEY_TYPE = ?";
@@ -2694,19 +2697,19 @@ public class ApiMgtDAO {
             rs = ps.executeQuery();
 
             while (rs.next()){
-                consumerKey = rs.getString(1);
+                consumerKey = APIUtil.decryptToken(rs.getString(1));
             }
 
             if(consumerKey != null){
-            keyManager = KeyManagerHolder.getKeyManagerInstance();
-            oAuthApplication = keyManager.retrieveApplication(consumerKey);
-           // oAuthApplication.setJsonString(jsonString);
+                keyManager = KeyManagerHolder.getKeyManagerInstance();
+                oAuthApplication = keyManager.retrieveApplication(consumerKey);
+                // oAuthApplication.setJsonString(jsonString);
             }
         } catch (SQLException e) {
             handleException("Failed to get  client of application. SQL error", e);
-        } catch (APIManagementException e) {
-            handleException("Failed to get client of application " + applicationID + " Client Id " +
-                    consumerKey, e);
+        }  catch (CryptoException e) {
+            handleException("Failed to decrypt consumer key of Application ID " + applicationID +
+                    " and Key Type " + keyType, e);
         } finally {
              APIMgtDBUtil.closeAllConnections(ps,connection,rs);
         }
@@ -3571,14 +3574,14 @@ public class ApiMgtDAO {
             if (accessAllowDomains != null && !accessAllowDomains[0].trim().equals("")) {
                 for (int i = 0; i < accessAllowDomains.length; i++) {
                     prepStmt = connection.prepareStatement(sqlAddAccessAllowDomains);
-                    prepStmt.setString(1, oAuthConsumerKey);
+                    prepStmt.setString(1, APIUtil.encryptToken(oAuthConsumerKey));
                     prepStmt.setString(2, accessAllowDomains[i].trim());
                     prepStmt.execute();
                     prepStmt.close();
                 }
             } else {
                 prepStmt = connection.prepareStatement(sqlAddAccessAllowDomains);
-                prepStmt.setString(1, oAuthConsumerKey);
+                prepStmt.setString(1, APIUtil.encryptToken(oAuthConsumerKey));
                 prepStmt.setString(2, "ALL");
                 prepStmt.execute();
                 prepStmt.close();
@@ -3594,6 +3597,11 @@ public class ApiMgtDAO {
                     log.error("Failed to rollback the add access token ", e);
                 }
             }
+        } catch (CryptoException e) {
+            log.error("Error occurred while attempting to encrypt consumer key " + oAuthConsumerKey +
+                      " before inserting to AM_APP_KEY_DOMAIN_MAPPING", e);
+            throw new APIManagementException("Error occurred while attempting to encrypt consumer key " + oAuthConsumerKey +
+                    " before inserting to AM_APP_KEY_DOMAIN_MAPPING", e);
         } finally {
             IdentityDatabaseUtil.closeAllConnections(connection, null, prepStmt);
         }
@@ -3950,7 +3958,7 @@ public class ApiMgtDAO {
      * @param application
      * @param keyType
      */
-    public void updateApplicationKeyTypeMapping(Application application, String keyType){
+    public void updateApplicationKeyTypeMapping(Application application, String keyType) throws APIManagementException {
 
         OAuthApplicationInfo app = application.getOAuthApp(keyType);
         String consumerKey = null;
@@ -3967,7 +3975,7 @@ public class ApiMgtDAO {
             try {
                 Connection connection = APIMgtDBUtil.getConnection();
                 PreparedStatement ps = connection.prepareStatement(addApplicationKeyMapping);
-                ps.setString(1,consumerKey);
+                ps.setString(1, APIUtil.encryptToken(consumerKey));
 //                ps.setString(2,APIConstants.AppRegistrationStatus.REGISTRATION_COMPLETED);
                 ps.setInt(2,application.getId());
                 ps.setString(3,keyType);
@@ -3977,7 +3985,11 @@ public class ApiMgtDAO {
                 connection.commit();
                 APIMgtDBUtil.closeAllConnections(ps,connection,null);
             } catch (SQLException e) {
-                e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+                handleException("Error updating the CONSUMER KEY of the AM_APPLICATION_KEY_MAPPING table where " +
+                        "APPLICATION_ID = " + application.getId() + " and KEY_TYPE = " + keyType, e);
+            } catch (CryptoException e) {
+                handleException("Error while encrypting the consumer key " + consumerKey + " before updating the " +
+                        "AM_APPLICATION_KEY_MAPPING table", e);
             }
 
         }
@@ -4019,7 +4031,7 @@ public class ApiMgtDAO {
 
                 ps = connection.prepareStatement(addApplicationKeyMapping);
                 ps.setInt(1, applicationId);
-                ps.setString(2, consumerKey);
+                ps.setString(2, APIUtil.encryptToken(consumerKey));
                 ps.setString(3, (String) oAuthApplicationInfo.getParameter(ApplicationConstants.APP_KEY_TYPE));
                 ps.setString(4, APIConstants.AppRegistrationStatus.REGISTRATION_COMPLETED);
                 // If the CK/CS pair is pasted on the screen set this to MAPPED
@@ -4031,6 +4043,9 @@ public class ApiMgtDAO {
             } catch (SQLException e) {
                 handleException("Error while inserting record to the AM_APPLICATION_KEY_MAPPING table,  " +
                         "error is =  " + e.getMessage(), e);
+            } catch (CryptoException e) {
+                handleException("Error while encrypting the consumer key " + consumerKey + " before inserting to the " +
+                        "AM_APPLICATION_KEY_MAPPING table", e);
             } finally {
                 APIMgtDBUtil.closeAllConnections(ps, connection, null);
             }
@@ -8367,6 +8382,12 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
         Connection conn = null;
         ResultSet resultSet = null;
         PreparedStatement ps = null;
+        try {
+            consumerKey = APIUtil.encryptToken(consumerKey);
+        } catch (CryptoException e) {
+            log.error("Could not encrypt consumerKey " + consumerKey + ". " + e.getMessage());
+            throw new APIManagementException("Could not encrypt consumerKey " + consumerKey + ". " + e.getMessage());
+        }
         try {
             conn = APIMgtDBUtil.getConnection();
 

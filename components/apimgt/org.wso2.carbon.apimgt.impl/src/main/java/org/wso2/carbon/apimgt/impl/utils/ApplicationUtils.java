@@ -165,7 +165,7 @@ public class ApplicationUtils {
     }
 
     public static void updateOAuthAppAssociation(Application application, String keyType,
-                                                 OAuthApplicationInfo oAuthApplication) {
+                                                 OAuthApplicationInfo oAuthApplication) throws APIManagementException {
         application.addOAuthApp(keyType,oAuthApplication);
         dao.updateApplicationKeyTypeMapping(application,keyType);
     }
