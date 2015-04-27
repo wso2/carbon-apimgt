@@ -30,8 +30,6 @@ import org.wso2.carbon.apimgt.api.model.Provider;
 import org.wso2.carbon.apimgt.api.model.Subscriber;
 import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.api.model.Usage;
-import org.mozilla.javascript.NativeArray;
-
 
 import java.util.List;
 import java.util.Map;
@@ -453,6 +451,4 @@ public interface APIProvider extends APIManager {
      * @throws org.wso2.carbon.apimgt.api.APIManagementException
      */
     public String implementAPI(JSONObject apiObj) throws APIManagementException;
-
-    public NativeArray getAPI(String name, String providr, String version1) throws APIManagementException;
 }
