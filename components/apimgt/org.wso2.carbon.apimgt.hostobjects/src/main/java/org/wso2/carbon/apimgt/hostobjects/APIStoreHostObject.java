@@ -3126,10 +3126,12 @@ public class APIStoreHostObject extends ScriptableObject {
             	 groupId = args[1].toString();
             }
              applications = apiConsumer.getApplications(new Subscriber(username), groupId);
+	        Subscriber subscriber = new Subscriber(username);
            
             if (applications != null) {
                 int i = 0;
                 for (Application application : applications) {
+	                int subscriptionCount = apiConsumer.getSubscriptionCount(subscriber,application.getName());
                     NativeObject row = new NativeObject();
                     row.put("name", row, application.getName());
                     row.put("tier", row, application.getTier());
@@ -3137,6 +3139,7 @@ public class APIStoreHostObject extends ScriptableObject {
                     row.put("callbackUrl", row, application.getCallbackUrl());
                     row.put("status", row, application.getStatus());
                     row.put("description", row, application.getDescription());
+	                row.put("apiCount", row, subscriptionCount);
                     myn.put(i++, myn, row);
                 }
             }
