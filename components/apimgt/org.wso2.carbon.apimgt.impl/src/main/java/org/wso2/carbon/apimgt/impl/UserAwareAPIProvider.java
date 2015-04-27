@@ -115,6 +115,11 @@ public class UserAwareAPIProvider extends APIProviderImpl {
         checkCreatePermission();
         return  super.designAPI(api);
     }
+    @Override
+    public String updateDesignAPI(JSONObject api) throws APIManagementException {
+        checkCreatePermission();
+        return  super.updateDesignAPI(api);
+    }
 
     @Override
     public void copyAllDocumentation(APIIdentifier apiId, String toVersion) throws APIManagementException {

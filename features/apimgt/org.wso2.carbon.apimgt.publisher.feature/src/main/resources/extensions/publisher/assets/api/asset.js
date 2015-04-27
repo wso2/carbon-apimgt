@@ -106,7 +106,7 @@ asset.manager = function(ctx) {
             return apiProxy.deleteAPI(asset.attributes.overview_provider, asset.attributes.overview_name, asset.version);
         },
         list: function(paging) {
-            log.info(this._super.list.call(this, paging));
+            //log.info(this._super.list.call(this, paging));
             return this._super.list.call(this, paging);
         }
     };

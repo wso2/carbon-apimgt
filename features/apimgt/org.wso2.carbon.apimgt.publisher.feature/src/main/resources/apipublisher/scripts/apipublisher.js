@@ -56,8 +56,22 @@ var apipublisher = {};
     APIProviderProxy.prototype.manageAPI = function (api) {
         return this.impl.manageAPI(api);
     };
-    APIProviderProxy.prototype.updateDesignAPI = function (APIProvider, api) {
-        return this.impl.updateDesignAPI(api);
+    APIProviderProxy.prototype.updateDesignAPI = function (api) {
+             var apiObj = new Packages.org.json.simple.JSONObject();
+             apiObj.put("provider", api.provider);
+             apiObj.put("context", api.context);
+             apiObj.put("name", api.name);
+             apiObj.put("version", api.version);
+             apiObj.put("description", api.description);
+             apiObj.put("tags", api.tags);
+             apiObj.put("visibility", api.visibility);
+             apiObj.put("visibleRoles", api.visibility);
+             apiObj.put("swagger", api.swagger);
+             apiObj.put("techOwner", api.techOwner);
+             apiObj.put("techOwnerEmail", api.techOwnerEmail);
+             apiObj.put("bizOwner", api.bizOwner);
+             apiObj.put("bizOwnerEmail", api.bizOwnerEmail);
+        return this.impl.updateDesignAPI(apiObj);
     };
     APIProviderProxy.prototype.addDocumentation = function (api, document) {
         return this.impl.addDocumentation(api);
