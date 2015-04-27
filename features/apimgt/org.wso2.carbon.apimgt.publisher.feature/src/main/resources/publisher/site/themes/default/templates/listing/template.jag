@@ -23,6 +23,7 @@
     %>
    <script type="text/javascript">
    	var user = <%=jagg.getUser()%>;
+	var isPublishPermitted = <%=outputs.isPublishPermitted%>;
 	var username = user.username ; 
 	var s3 = "{\"paths\":{ \"/*\":{\"get\":{\"parameters\":[{\"description\":\"Name of the City\",\"name\":\"q\",\"type\":\"string\",\"required\":false,\"in\":\"query\",\"paramType\":\"query\"}],\"responses\":{\"200\":{ } },\"x-auth-type\":\"Application & Application User\", \"x-throttling-tier\":\"Unlimited\" },\"options\":{\"responses\":{\"200\":{ }},\"x-auth-type\":\"None\",\"x-throttling-tier\":\"Unlimited\"}}},\"swagger\":\"2.0\",\"info\":{ \"title\":\"WeatherAPI\",\"version\":\"1.0.0\"}}";
 	
@@ -70,21 +71,31 @@
 				var resultManage = jagg.post(urlDesign,{action:"manage",name:"WeatherAPI",provider:username,version:"1.0.0",default_version_checked:" ",tier:"Unlimited",tiersCollection:"Unlimited",transport_http:"http",transport_https:"https",subscriptions:"all_tenants",swagger:s3},
 				
 				function(result){
-					var urlPublished="/site/blocks/life-cycles/ajax/life-cycles.jag";
+					if (isPublishPermitted) {
+						var urlPublished="/site/blocks/life-cycles/ajax/life-cycles.jag";
 
-					var result2 = jagg.post(urlPublished,{action:"updateStatus",name:"WeatherAPI",version:"1.0.0",provider:username,status:"PUBLISHED",publishToGateway:true,requireResubscription:true},
-					function(result){
-						if(!result.error){
-							window.location.assign("/publisher/site/pages/index.jag");
-							$(".modal-body").removeClass("loadingButton");
-							jagg.message({
- 								content:"Sample WeatherAPI is Deployed Successfully" ,
-    							type:"info",
-     							title:"Success",
-							});
-						}
+						var result2 = jagg.post(urlPublished,{action:"updateStatus",name:"WeatherAPI",version:"1.0.0",provider:username,status:"PUBLISHED",publishToGateway:true,requireResubscription:true},
+						function(result){
+							if(!result.error){
+								window.location.assign("/publisher/site/pages/index.jag");
+								$(".modal-body").removeClass("loadingButton");
+								jagg.message({
+	 								content:"Sample WeatherAPI is Deployed Successfully" ,
+	    							type:"info",
+	     							title:"Success",
+								});
+							}
 					
-					},'json');	
+						},'json');
+					} else {
+						window.location.assign("/publisher/site/pages/index.jag");
+						$(".modal-body").removeClass("loadingButton");
+						jagg.message({
+	 						content:"Sample WeatherAPI is Deployed Successfully" ,
+	    						type:"info",
+	     						title:"Success",
+						});
+					}	
 				
 				},'json');
 			
