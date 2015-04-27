@@ -43,7 +43,12 @@ var apipublisher = {};
         return this.impl.getAllProviders();
     };
     APIProviderProxy.prototype.designAPI = function (api) {
-        return this.impl.designAPI(api);
+        var apiObj = new Packages.org.json.simple.JSONObject();
+        apiObj.put("provider", api.provider);
+        apiObj.put("context", api.context);
+        apiObj.put("name", api.name);
+        apiObj.put("version", api.version);
+        return this.impl.designAPI(apiObj);
     };
     APIProviderProxy.prototype.implementAPI = function (api) {
         return this.impl.implementAPI(api);

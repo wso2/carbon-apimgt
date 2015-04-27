@@ -3179,16 +3179,16 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             //}------------
             if (create) {
                 addAPI(api);
-                //----------------success = createFailedGatewaysAsJsonString(Collections.<String, List<String>>emptyMap());
+                success = createFailedGatewaysAsJsonString(Collections.<String, List<String>>emptyMap());
             } else {
                 Map<String, List<String>> failedGateways = updateAPI(api);
-                //------------------success = createFailedGatewaysAsJsonString(failedGateways);
+                success = createFailedGatewaysAsJsonString(failedGateways);
             }
 
         } catch (APIManagementException e) {
             handleException("Error while adding the API- " + api.getId().getApiName() + "-" + api.getId().getVersion(),
                             e);
-            //------------- return createFailedGatewaysAsJsonString(Collections.<String, List<String>>emptyMap());
+            return createFailedGatewaysAsJsonString(Collections.<String, List<String>>emptyMap());
         } finally {
             if (isTenantFlowStarted) {
                 PrivilegedCarbonContext.endTenantFlow();
@@ -3197,6 +3197,36 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
         return success;
     }
+
+    /**
+     * @param failedGateways map of failed environments
+     * @return json string of input map
+     */
+    private static String createFailedGatewaysAsJsonString(Map<String, List<String>> failedGateways) {
+        String failedJson = "{\"PUBLISHED\" : \"\" ,\"UNPUBLISHED\":\"\"}";
+        if (failedGateways != null) {
+            if (!failedGateways.isEmpty()) {
+                StringBuilder failedToPublish = new StringBuilder();
+                StringBuilder failedToUnPublish = new StringBuilder();
+                for (String environmentName : failedGateways.get("PUBLISHED")) {
+                    failedToPublish.append(environmentName + ",");
+                }
+                for (String environmentName : failedGateways.get("UNPUBLISHED")) {
+                    failedToUnPublish.append(environmentName + ",");
+                }
+                if (!"".equals(failedToPublish.toString())) {
+                    failedToPublish.deleteCharAt(failedToPublish.length() - 1);
+                }
+                if (!"".equals(failedToUnPublish.toString())) {
+                    failedToUnPublish.deleteCharAt(failedToUnPublish.length() - 1);
+                }
+                failedJson = "{\"PUBLISHED\" : \"" + failedToPublish.toString() + "\" ,\"UNPUBLISHED\":\"" +
+                             failedToUnPublish.toString() + "\"}";
+            }
+        }
+        return failedJson;
+    }
+
 
     /**
      * This method check whether API older version exist or not

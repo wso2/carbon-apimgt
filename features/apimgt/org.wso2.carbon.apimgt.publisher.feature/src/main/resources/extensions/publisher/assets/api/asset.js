@@ -63,9 +63,10 @@ asset.manager = function(ctx) {
             }*/
             //If API not exist create
             var apiProxy = apiPublisher.instance(ctx.username);
-            result=apiProxy.checkIfAPIExists(api.provider,api.name,api.version);           
-            if(!result){
-                result = apiProxy.designAPI(api);
+            result=apiProxy.checkIfAPIExists(api.provider,api.name,api.version);             
+        
+            if(!result){ 
+                result = apiProxy.designAPI(api);                
                 if (result.error==true) {
                     obj = {
                         error:true,
@@ -80,7 +81,7 @@ asset.manager = function(ctx) {
             api.tags = options.overview_tags;           
             api.visibility = options.visibility;
             api.visibleRoles = options.roles;
-            api.swagger = generate_swagger_object(options.swagger);
+            api.swagger = generate_swagger_object(options.swagger);                 
             result = apiProxy.updateDesignAPI(api);
             if (result.error==true) {
                 obj = {
