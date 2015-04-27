@@ -47,11 +47,29 @@
 	var faultSequencesLoaded = false;
 </script>
 <div id="item-add">
-	<ul class='nav nav-tabs'>
-		<li><a href='{{url ""}}/asts/api/create'>Design</a></li>
-		<li><a href='{{url ""}}/asts/api/implement'>Implement</a></li>
-		<li><a href='{{url ""}}/asts/api/manage'>Manage</a></li>
-	</ul>
+	<center>
+		<ul class="new-sub-menu-wizard" style="margin:0 auto">
+			<li>
+				<a href='{{url ""}}/asts/api/create' class="wizard-active">
+					<div class="wizard-number">1</div>
+					<span>Design</span>
+				</a>
+			</li>
+			<li>
+				<a href='{{url ""}}/asts/api/implement' class="<%= implement_wlabel%>">
+					<div class="wizard-number">2</div>
+					<span>Implement</span>
+				</a>
+			</li>
+			<li>
+				<a href='{{url ""}}/asts/api/manage' class="<%= manage_wlabel%>">
+					<div class="wizard-number" >3</div>
+					<span>Manage</span>
+				</a>
+			</li>
+		</ul>
+	</center>
+	<h1>Manage API</h1>
 	<div class="title-section">
 		<h2>{{t api.name}}({{t api.version}}) : {{t api.context}}</h2>
 	</div>

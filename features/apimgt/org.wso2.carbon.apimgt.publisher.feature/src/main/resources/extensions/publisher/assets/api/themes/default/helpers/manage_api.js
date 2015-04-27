@@ -20,6 +20,7 @@
 var resources = function(page,meta){
 	return {
 		js:['manage_api.js', 'bootstrap-multiselect.js', 'manage_api_page.js', 'create_asset.js','handlebars.js'],
-		css:['api_designer.css', 'localstyles.css','style-ie7.css','style-ie8.css', 'bootstrap-editable.css']
-	}
+		css:['api_designer.css', 'localstyles.css', 'bootstrap/bootstrap-editable.css',
+             'bootstrap/bootstrap-tagsinput.css','api_designer.css','bootstrap/bootsrap.css']
+    }
 };

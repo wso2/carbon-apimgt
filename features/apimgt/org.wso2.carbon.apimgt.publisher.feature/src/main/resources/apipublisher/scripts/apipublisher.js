@@ -57,20 +57,20 @@ var apipublisher = {};
         return this.impl.manageAPI(api);
     };
     APIProviderProxy.prototype.updateDesignAPI = function (api) {
-             var apiObj = new Packages.org.json.simple.JSONObject();
-             apiObj.put("provider", api.provider);
-             apiObj.put("context", api.context);
-             apiObj.put("name", api.name);
-             apiObj.put("version", api.version);
-             apiObj.put("description", api.description);
-             apiObj.put("tags", api.tags);
-             apiObj.put("visibility", api.visibility);
-             apiObj.put("visibleRoles", api.visibility);
-             apiObj.put("swagger", api.swagger);
-             apiObj.put("techOwner", api.techOwner);
-             apiObj.put("techOwnerEmail", api.techOwnerEmail);
-             apiObj.put("bizOwner", api.bizOwner);
-             apiObj.put("bizOwnerEmail", api.bizOwnerEmail);
+        var apiObj = new Packages.org.json.simple.JSONObject();
+        apiObj.put("provider", api.provider);
+        apiObj.put("context", api.context);
+        apiObj.put("name", api.name);
+        apiObj.put("version", api.version);
+        apiObj.put("description", api.description);
+        apiObj.put("tags", api.tags);
+        apiObj.put("visibility", api.visibility);
+        apiObj.put("visibleRoles", api.visibility);
+        apiObj.put("swagger", api.swagger);
+        apiObj.put("techOwner", api.techOwner);
+        apiObj.put("techOwnerEmail", api.techOwnerEmail);
+        apiObj.put("bizOwner", api.bizOwner);
+        apiObj.put("bizOwnerEmail", api.bizOwnerEmail);
         return this.impl.updateDesignAPI(apiObj);
     };
     APIProviderProxy.prototype.addDocumentation = function (api, document) {
@@ -136,12 +136,60 @@ var apipublisher = {};
         hasDefaultVersion = (defaultVersion != null);
         var api;
         try {
-            api = this.impl.getAPI(identifier);
+            result = this.impl.getAPI(identifier);
             if (log.isDebugEnabled()) {
-                log.debug("getAPI : " + stringify(api));
+                log.debug("getAPI : " + stringify(result));
             }
-            api.hasDefaultVersion = hasDefaultVersion;
-            api.currentDefaultVersion = defaultVersion;
+
+            api = {
+                name: result.get('name'),
+                version: result.get('version'),
+                description: result.get('description'),
+                endpoint: result.get('name'),
+                wsdl: result.get('wsdlUrl'),
+                tags: result.get('tags'),
+                availableTiers: result.get('tiers'),
+                status: result.get('status'),
+                thumb: result.get('thumbnailUrl'),
+                context: result.get('context'),
+                lastUpdated: result.get('lastUpdatedTime'),
+                subs: result.get('subscribersCount'),
+                templates: result.get('name'),
+                sandbox: result.get('sandboxUrl'),
+                tierDescs: result.get('tierDescriptions'),
+                bizOwner: result.get('businessOwner'),
+                bizOwnerMail: result.get('businessOwnerMail'),
+                techOwner: result.get('techOwner'),
+                techOwnerMail: result.get('techOwnerMail'),
+                wadl: result.get('wadlUrl'),
+                visibility: result.get('visibility'),
+                roles: result.get('visibleRoles'),
+                tenants: result.get('visibleTenants'),
+                epUsername: result.get('UTUsername'),
+                epPassword: result.get('UTPassword'),
+                endpointTypeSecured: result.get('isEndpointSecured'),
+                provider: result.get('provider'),
+                transport_http: result.get('httpTransport'),
+                transport_https: result.get('httpsTransport'),
+                apiStores: result.get('externalAPIStores'),
+                inSequence: result.get('insequence'),
+                outSequence: result.get('outsequence'),
+                subscriptionAvailability: result.get('subscriptionAvailability'),
+                subscriptionTenants: result.get('subscriptionAvailableTenants'),
+                endpointConfig: result.get('endpointConfig'),
+                responseCache: result.get('responseCache'),
+                cacheTimeout: result.get('cacheTimeout'),
+                availableTiersDisplayNames: result.get('tierDislayNames'),
+                faultSequence: result.get('faultsequence'),
+                destinationStats: result.get('destinationStatsEnabled'),
+                resources: result.get('apiResources'),
+                scopes: result.get('scopes'),
+                isDefaultVersion: result.get('defaultVersion'),
+                implementation: result.get('implementation'),
+                environments: result.get('publishedEnvironments'),
+                hasDefaultVersion: hasDefaultVersion,
+                currentDefaultVersion: defaultVersion
+            }
             return {
                 error:false,
                 api:api
@@ -171,7 +219,7 @@ var apipublisher = {};
     APIProviderProxy.prototype.getSubscriberAPIs = function (subscriberName) {
         return this.impl.getSubscriberAPIs(subscriberName);
     };
-    APIProviderProxy.prototype.checkIfAPIExists = function (apiProvider, apiName, apiVersion) {       
+    APIProviderProxy.prototype.checkIfAPIExists = function (apiProvider, apiName, apiVersion) {
         return this.impl.checkIfAPIExists(apiProvider, apiName, apiVersion);
     };
 
