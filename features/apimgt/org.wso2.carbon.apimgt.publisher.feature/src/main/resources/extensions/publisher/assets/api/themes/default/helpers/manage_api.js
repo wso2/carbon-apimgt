@@ -19,7 +19,7 @@
 
 var resources = function(page,meta){
 	return {
-		js:['manage_api.js', 'bootstrap-multiselect.js'],
-		css:['api_designer.css.css', 'localstyles.css','style-ie7.css','style-ie8.css', 'bootstrap-editable.css']
+		js:['manage_api.js', 'bootstrap-multiselect.js', 'manage_api_page.js', 'create_asset.js','handlebars.js'],
+		css:['api_designer.css', 'localstyles.css','style-ie7.css','style-ie8.css', 'bootstrap-editable.css']
 	}
 };

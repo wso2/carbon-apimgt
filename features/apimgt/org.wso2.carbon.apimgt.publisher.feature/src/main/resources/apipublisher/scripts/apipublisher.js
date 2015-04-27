@@ -132,63 +132,16 @@ var apipublisher = {};
         identifier.put(API_PROVIDER, apiProvider);
         identifier.put(API_NAME, apiName);
         identifier.put(API_VERSION, apiVersion);
-        defaultVersion= this.getDefaultVersion(identifier);
-        hasDefaultVersion=(defaultVersion!=null);
+        defaultVersion = this.getDefaultVersion(identifier);
+        hasDefaultVersion = (defaultVersion != null);
+        var api;
         try {
-            result = this.impl.getAPI(apiName, apiProvider, apiVersion);
+            api = this.impl.getAPI(identifier);
             if (log.isDebugEnabled()) {
-                log.debug("getAPI : " + stringify(result));
+                log.debug("getAPI : " + stringify(api));
             }
-
-            api = {
-                name:result[0],
-                version:result[4],
-                description:result[1],
-                endpoint:result[2],
-                wsdl:result[3],
-                tags:result[5],
-                availableTiers:result[6],
-                status:result[7],
-                thumb:result[8],
-                context:result[9],
-                lastUpdated:result[10],
-                subs:result[11],
-                templates:result[12],
-                sandbox:result[13],
-                tierDescs:result[14],
-                bizOwner:result[15],
-                bizOwnerMail:result[16],
-                techOwner:result[17],
-                techOwnerMail:result[18],
-                wadl:result[19],
-                visibility:result[20],
-                roles:result[21],
-                tenants:result[22],
-                epUsername:result[23],
-                epPassword:result[24],
-                endpointTypeSecured:result[25],
-                provider:result[26],
-                transport_http:result[27],
-                transport_https:result[28],
-                apiStores:result[29],
-                inSequence:result[30],
-                outSequence:result[31],
-                subscriptionAvailability:result[32],
-                subscriptionTenants:result[33],
-                endpointConfig:result[34],
-                responseCache:result[35],
-                cacheTimeout:result[36],
-                availableTiersDisplayNames:result[37],
-                faultSequence:result[38],
-                destinationStats:result[39],
-                resources:result[40],
-                scopes:result[41],
-                isDefaultVersion:result[42],
-                implementation:result[43],
-                environments:result[44],
-                hasDefaultVersion:hasDefaultVersion,
-                currentDefaultVersion: defaultVersion
-            };
+            api.hasDefaultVersion = hasDefaultVersion;
+            api.currentDefaultVersion = defaultVersion;
             return {
                 error:false,
                 api:api
@@ -213,12 +166,6 @@ var apipublisher = {};
     };
     APIProviderProxy.prototype.getTiers = function (tenantDomain) {
         var tierSet = this.impl.getTiers(tenantDomain);
-        var tiers = new Array();
-        for(var i = 0; i < tierSet.length; i++) {
-            tiers[i].tierName = tierSet[i].getName();
-            tiers[i].tierDisplayName = tierSet[i].getDisplayName();
-            tiers[i].tierDescription = t != null ? tierSet[i].getDescription() : "";
-        }
         return tiers;
     };
     APIProviderProxy.prototype.getSubscriberAPIs = function (subscriberName) {
@@ -226,6 +173,14 @@ var apipublisher = {};
     };
     APIProviderProxy.prototype.checkIfAPIExists = function (apiProvider, apiName, apiVersion) {       
         return this.impl.checkIfAPIExists(apiProvider, apiName, apiVersion);
+    };
+
+    APIProviderProxy.prototype.getSwagger12Resource = function (apiProvider, apiName, apiVersion) {
+        var identifier = new Packages.org.json.simple.JSONObject();
+        identifier.put(API_PROVIDER, apiProvider);
+        identifier.put(API_NAME, apiName);
+        identifier.put(API_VERSION, apiVersion);
+        return this.impl.getSwagger12Resource(identifier);
     };
 })(apipublisher);
 

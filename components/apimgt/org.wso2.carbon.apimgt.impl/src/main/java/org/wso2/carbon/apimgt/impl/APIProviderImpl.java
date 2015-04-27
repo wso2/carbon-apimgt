@@ -2736,9 +2736,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 		}
 		
 	}
-	
+
 	@Override
-	public String getSwagger12Definition(APIIdentifier apiId) throws APIManagementException {
+	public JSONObject getSwagger12Definition(APIIdentifier apiId) throws APIManagementException {
 		String resourcePath = APIUtil.getSwagger12DefinitionFilePath(apiId.getApiName(),
                 apiId.getVersion(), apiId.getProviderName());
 		
@@ -2770,9 +2770,51 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 			handleException("Error while parsing Swagger Definition for " + apiId.getApiName() + "-" + 
 											apiId.getVersion() + " in " + resourcePath, e);
 		}
-		return apiJSON.toJSONString();
+		return apiJSON;
 	}
 
+
+	/**
+	 * //TODO rearrange this in a proper way
+	 * @param apiIdentifier
+	 * @return
+	 * @throws APIManagementException
+	 */
+	public JSONObject getSwagger12Resource(APIIdentifier apiIdentifier) throws APIManagementException {
+		if (apiIdentifier == null) {
+			handleException("Invalid number of input parameters.");
+		}
+
+		String provider = apiIdentifier.getProviderName();
+		String name = apiIdentifier.getApiName();
+		String version = apiIdentifier.getVersion();
+
+		if (provider != null) {
+			provider = APIUtil.replaceEmailDomain(provider);
+		}
+		provider = (provider != null ? provider.trim() : null);
+		name = (name != null ? name.trim() : null);
+		version = (version != null ? version.trim() : null);
+		APIIdentifier apiId = new APIIdentifier(provider, name, version);
+
+		boolean isTenantFlowStarted = false;
+		JSONObject apiJSON = null;
+		try {
+			String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(provider));
+			if(tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
+				isTenantFlowStarted = true;
+				PrivilegedCarbonContext.startTenantFlow();
+				PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
+			}
+
+			apiJSON = getSwagger12Definition(apiId);
+		} finally {
+			if (isTenantFlowStarted) {
+				PrivilegedCarbonContext.endTenantFlow();
+			}
+		}
+		return apiJSON;
+	}
     /**
      * Returns the all the Consumer keys of applications which are subscribed to the given API
      *
