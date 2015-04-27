@@ -45,12 +45,12 @@ require('/modules/publisher.js').exec(function(ctx) {
     var apiPublisher =  require('apipublisher').apipublisher;
     var apiProxy = apiPublisher.instance(ctx.username);
     var api = apiProxy.getAPI(asset.attributes.overview_provider, asset.attributes.overview_name, asset.version).api;
-    var tiers = apiProxy.getTiers();
     log.info(api);
     page = rxtModule.ui.buildPage(ctx.session, ctx.request);
     output = am.render(asset,page)._custom();
     output.api = api;
-    output.api.tiers = tiers;
+    output.api.tiers = {"tiers": [{ "tierName": "gold", "tierDisplayName" : "gold", "tierDescription" :"test"}]};
+    output.api.isSynapseGateway = true;
     caramel.render(output);
 }, request, response, session);
 %>

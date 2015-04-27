@@ -12,6 +12,29 @@
 		{{/each}}
 	];
 
+	var addSelectedTiers;
+	$(document).ready(function() {
+		addSelectedTiers = function(target) {
+			var tierDescs,tiersList,tiersDescList,tiers = [];
+			tiersList = "{{api.availableTiers}}";
+			tiersDescList = "{{api.tierDescs}}";
+			tiers = tiersList.split(",");
+			tierDescs = tiersDescList.split(",");
+			for (var i = 0; i < tiers.length; i++) {
+				var tier = tiers[i];
+				var tierDesc = tierDescs[i];
+				for (var j = 0; j < target.options.length; j++) {
+					if (tier == target.options[j].value) {
+						target.options[j].selected = "selected";
+						if (tierDesc != "null") {
+							$("#editTiersHelp").html(tierDesc);
+						}
+					}
+				}
+			}
+		}
+	});
+
 	var DEFAULT_TIER = "<%= tiers[tiers.length -1].tierName%>";
 	var DEFAULT_AUTH = "Application & Application User";
 	var OPTION_DEFAULT_AUTH = "None";
@@ -98,15 +121,15 @@
 								</div>
 								<div class="controls col-md-2">
 									<select id="tier" name="tier"  class="multiselect selected hide required" multiple="multiple">
-										{{#each api.tiers}}
-											<option value="<%= tiers[i].tierName %>">{{this.tierDisplayName}}</option>
+										{{#each api.configuredTiers}}
+											<option value="{{this.tierName}}">{{this.tierDisplayName}}</option>
 										{{/each}}
 									</select>
 								</div>
 							</div>
 							<div class="control-group transport-styles col-md-8">
 								<div class="col-md-2">
-									<label class="control-label" for="transports">{{t "transports"}}:<span
+									<label class="control-label" for="transports">{{t "Transports"}}:<span
 											class="requiredAstrix">*</span></label>
 								</div>
 								<div class="controls">
@@ -126,7 +149,7 @@
 								</div>
 							</div>
 
-							{{#if isSynapseGateway}}
+							{{#if api.isSynapseGateway}}
 								<div class="control-group col-md-8">
 									<label class="control-label" for="sequence">{{t "sequence"}}:</label>
 
