@@ -42,7 +42,7 @@ i18n.init(request,localeResourcesBasePath);
                     <form id="themeSelectForm" action="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("templates/user/theme/template.jag?theme=modern"))%>">
                         <input type="hidden" id="themeToApply" name="themeToApply" />
                         <input type="hidden" id="subthemeToApply" name="subthemeToApply" />
-                        <input type="hidden" id="pathToSend" name="pathToSend" value="<%=currentURL%>" />
+                        <input type="hidden" id="pathToSend" name="pathToSend" value="<%= encode.forHtmlAttribute(currentURL)%>" />
                         <table class="table">
                             <tr>
                                 <td>

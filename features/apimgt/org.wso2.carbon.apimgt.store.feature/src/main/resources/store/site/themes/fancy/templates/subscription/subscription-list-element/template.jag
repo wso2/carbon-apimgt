@@ -178,8 +178,8 @@
                         		<%=i18n.localize("prodKeyApprovedMsg")%>
                         		<div class="gen-btn-wrapper">
                                    <button  class="app-create-key-button btn btn-primary"
-                                   		data-application="<%=app.name%>"
-                                   		data-callbackUrl="<%=app.callbackUrl%>"
+                                   		data-application="<%=encode.forHtmlAttribute(app.name)%>"
+                                   		data-callbackUrl="<%=encode.forHtmlAttribute(app.callbackUrl)%>"
                                    		data-keytype="PRODUCTION"
                                    		iteration="200"><%=i18n.localize("generateKey")%></button>
                         		</div>
@@ -215,8 +215,8 @@
 									</div>
                         		</div>
                         		<button  class="btn btn-primary "
-                        		id="btnProvideKeyProductionSave" data-application="<%=app.name%>"
-									   data-callbackUrl="<%=app.callbackUrl%>"
+                        		id="btnProvideKeyProductionSave" data-application="<%= encode.forHtmlAttribute(app.name)%>"
+									   data-callbackUrl="<%=encode.forHtmlAttribute(app.callbackUrl)%>"
 									   data-keytype="PRODUCTION"
 									   data-username="<%= userName %>"
 									   iteration="200">Save</button>
@@ -226,8 +226,8 @@
                         	<div class="cDivDefaultBtnSet">
 								<button  class="app-key-generate-button btn btn-primary btn-generatekeys" onclick="jagg
 								.sessionAwareJS({redirect:'/site/pages/subscriptions.jag'})"
-									   data-application="<%=app.name%>"
-									   data-callbackUrl="<%=app.callbackUrl%>"
+									   data-application="<%=encode.forHtmlAttribute(app.name)%>"
+									   data-callbackUrl="<%=encode.forHtmlAttribute(app.callbackUrl)%>"
 									   data-keytype="PRODUCTION"
 									   data-username="<%= userName %>"
 									   iteration="200">Generate keys</button>
@@ -402,8 +402,8 @@
                         		<%=i18n.localize("sandboxKeyApprovedMsg")%>
                         		<div class="gen-btn-wrapper">
                                     <button  class="app-create-key-button btn btn-primary"
-                                   		data-application="<%=app.name%>"
-                                   		data-callbackUrl="<%=app.callbackUrl%>"
+                                   		data-application="<%=encode.forHtmlAttribute(app.name)%>"
+                                   		data-callbackUrl="<%=encode.forHtmlAttribute(app.callbackUrl)%>"
                                    		data-keytype="SANDBOX"
                                    		iteration="200"><%=i18n.localize("generateKey")%></button>
                         		</div>
@@ -439,8 +439,8 @@
 									</div>
                         		</div>
                         		<button  class="btn btn-primary "
-                        		id="btnProvideKeySandBoxSave" data-application="<%=app.name%>"
-									   data-callbackUrl="<%=app.callbackUrl%>"
+                        		id="btnProvideKeySandBoxSave" data-application="<%=encode.forHtmlAttribute(app.name)%>"
+									   data-callbackUrl="<%=encode.forHtmlAttribute(app.callbackUrl)%>"
 									   data-keytype="SANDBOX"
 									   data-username="<%= userName %>"
 									   iteration="200">Save</button>
@@ -450,8 +450,8 @@
                         	<div class="defaultBtnSetForSandBox">
 							   <button  class="app-key-generate-button btn btn-primary btn-generatekeys" onclick="jagg
 								.sessionAwareJS({redirect:'/site/pages/subscriptions.jag'})"
-									   data-application="<%=app.name%>"
-									   data-callbackUrl="<%=app.callbackUrl%>"
+									   data-application="<%=encode.forHtmlAttribute(app.name)%>"
+									   data-callbackUrl="<%=encode.forHtmlAttribute(app.callbackUrl)%>"
 									   data-keytype="SANDBOX"
 									   data-username="<%= userName %>"
 									   iteration="200">Generate keys</button>
