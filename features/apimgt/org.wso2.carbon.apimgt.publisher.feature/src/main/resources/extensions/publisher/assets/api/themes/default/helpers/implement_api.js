@@ -19,6 +19,7 @@
 
 var resources = function(page,meta){
 	return {
-		js:['implement_api.js']
+		js:['jquery-validate.min.js', 'implement_api.js', 'underscore.js', 'jsonform.js','api-design.js', 'custom-validation.js', 'url-validation.js','bootstrap-multiselect.js', 'endpoint-ui.js'],
+		css:['bootstrap-multiselect.css']
 	};
 };
