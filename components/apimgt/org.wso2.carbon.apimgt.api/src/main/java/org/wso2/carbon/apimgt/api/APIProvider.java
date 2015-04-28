@@ -214,11 +214,13 @@ public interface APIProvider extends APIManager {
 
     /**
      * Checks if a given API exists in the registry
-     * @param apiId
+     * @param apiName API Name
+     * @param version Version
+     * @param providerName Provider
      * @return boolean result
      * @throws org.wso2.carbon.apimgt.api.APIManagementException
      */
-    public boolean checkIfAPIExists(APIIdentifier apiId) throws APIManagementException;
+    public boolean checkIfAPIExists(String providerName,String apiName,String version) throws APIManagementException;
 
     /**
      * This method used to save the documentation content

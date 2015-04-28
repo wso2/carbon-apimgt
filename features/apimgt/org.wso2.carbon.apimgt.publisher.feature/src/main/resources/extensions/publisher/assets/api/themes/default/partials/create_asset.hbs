@@ -83,7 +83,7 @@
     <div class="control-group">
         <label class="control-label">Tags:</label>
         <div class="controls">
-            <input type='text'/>
+            <input name="overview_tags" type='text'/>
         </div>
     </div>
     <div id="api_designer">
@@ -120,9 +120,9 @@
         <button class="btn" type="button" id="add_resource" style="margin:0 0 10px 10px;"><i class="icon-plus-sign"></i>&nbsp;{{t "Add New Resource"}}</button>
     </div> 
 </div>
-    </div>  
+    </div>      
    <input type="hidden" name="action" value="design" />
-                <input type="hidden" id="swagger" name="swagger" value="" />
+                <input type="hidden" id="swagger" name="swagger" />
                 <div class="form-actions" style="display:none" id="saveMessage">
                     <div class="btn loadingButton">Saving API. Please wait..</div>
                 </div>

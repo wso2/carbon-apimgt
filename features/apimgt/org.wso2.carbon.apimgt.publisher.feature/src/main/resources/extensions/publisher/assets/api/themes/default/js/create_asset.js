@@ -460,9 +460,7 @@ APIDesigner.prototype.render_resources_template = function(){
  Handlebars.registerHelper('setIndex', function(value){
     this.index = Number(value);
 });  
-var partial='add_resource';
- //source   = $("#add_resource").html();
-   // Handlebars.partials['add_resource'] = Handlebars.compile(source);
+var partial='designer-resources-template'; 
 var container='resource_details';
  renderPartial(partial, container,context);
    /* $('#resource_details').find('.scope_select').editable({
@@ -498,7 +496,7 @@ APIDesigner.prototype.render_resource = function(container){
     var operation = this.query(container.attr('data-path'));    
     var context = jQuery.extend(true, {}, operation[0]);
     context.resource_path = container.attr('data-path');
-    var partial='add_resource';
+    var partial='designer-resource-template';
  //source   = $("#add_resource").html();
    // Handlebars.partials['add_resource'] = Handlebars.compile(source);
 

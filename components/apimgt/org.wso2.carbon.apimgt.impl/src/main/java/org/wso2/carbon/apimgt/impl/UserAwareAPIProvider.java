@@ -92,8 +92,8 @@ public class UserAwareAPIProvider extends APIProviderImpl {
     }
 
     @Override
-    public boolean checkIfAPIExists(APIIdentifier apiId) throws APIManagementException {
-        return super.checkIfAPIExists(apiId);
+    public boolean checkIfAPIExists(String providerName,String apiName,String version) throws APIManagementException {
+        return super.checkIfAPIExists(providerName,apiName,version);
     }
 
     @Override
@@ -108,6 +108,17 @@ public class UserAwareAPIProvider extends APIProviderImpl {
                                         String text) throws APIManagementException {
         checkCreatePermission();
         super.addDocumentationContent(api, documentationName, text);
+    }
+
+    @Override
+    public String designAPI(JSONObject api) throws APIManagementException {
+        checkCreatePermission();
+        return  super.designAPI(api);
+    }
+    @Override
+    public String updateDesignAPI(JSONObject api) throws APIManagementException {
+        checkCreatePermission();
+        return  super.updateDesignAPI(api);
     }
 
     @Override
