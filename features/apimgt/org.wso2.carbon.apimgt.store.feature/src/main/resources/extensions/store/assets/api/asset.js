@@ -34,7 +34,7 @@ asset.manager = function(ctx){
 	  }
 	 log.info('============== user name =========='+ userName);
 	  var apistore = require('apistore').apistore.instance(userName);
-	  var assetApi = apistore.getAllPaginatedAPIsByStatus0(tenantDomain,0,100,'');
+	  var assetApi = apistore.getAllPaginatedAPIsByStatus(tenantDomain,0,100,'');
 	  log.info('This is the custom APIM search method');
 	 log.info('============== api json  =========='+ assetApi);
 	//  return assetApi;
