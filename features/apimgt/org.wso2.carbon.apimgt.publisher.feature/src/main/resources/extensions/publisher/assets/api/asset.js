@@ -136,6 +136,10 @@ asset.server = function (ctx) {
                         title: 'Tier Permissions',
                         url: 'tier_permissions',
                         path: 'tier_permissions.jag'
+                    }, {
+                        title: 'Manage',
+                        url: 'manage',
+                        path: 'manage.jag'
                     }],
             apis: [{
                        url: 'endpoints',
@@ -143,6 +147,9 @@ asset.server = function (ctx) {
                    }, {
                        url: 'prototype',
                        path: 'prototype.jag'
+                   }, {
+                       url: 'swagger',
+                       path: 'swagger.jag'
                    }, {
                        url: 'tiers',
                        path: 'tiers.jag'

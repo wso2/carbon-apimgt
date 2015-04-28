@@ -109,6 +109,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.StringTokenizer;
+import java.util.TreeMap;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
@@ -2735,43 +2736,75 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 		}
 		
 	}
-	
-	@Override
-	public String getSwagger12Definition(APIIdentifier apiId) throws APIManagementException {
-		String resourcePath = APIUtil.getSwagger12DefinitionFilePath(apiId.getApiName(),
-                apiId.getVersion(), apiId.getProviderName());
-		
-		JSONParser parser = new JSONParser();
+
+	/**
+	 * //TODO rearrange this in a proper way
+	 * @param apiIdentifier
+	 * @return
+	 * @throws APIManagementException
+	 */
+	public JSONObject getSwagger12Definition(APIIdentifier apiIdentifier) throws APIManagementException {
+		if (apiIdentifier == null) {
+			handleException("Invalid number of input parameters.");
+		}
+
+		String provider = apiIdentifier.getProviderName();
+		String name = apiIdentifier.getApiName();
+		String version = apiIdentifier.getVersion();
+
+		if (provider != null) {
+			provider = APIUtil.replaceEmailDomain(provider);
+		}
+		provider = (provider != null ? provider.trim() : null);
+		name = (name != null ? name.trim() : null);
+		version = (version != null ? version.trim() : null);
+		APIIdentifier apiId = new APIIdentifier(provider, name, version);
+
+		boolean isTenantFlowStarted = false;
 		JSONObject apiJSON = null;
 		try {
-			if (!registry.resourceExists(resourcePath + APIConstants.API_DOC_1_2_RESOURCE_NAME)) {
-				return APIUtil.createSwagger12JSONContent(getAPI(apiId));
+			String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(provider));
+			if(tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
+				isTenantFlowStarted = true;
+				PrivilegedCarbonContext.startTenantFlow();
+				PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
 			}
-			Resource apiDocResource = registry.get(resourcePath + APIConstants.API_DOC_1_2_RESOURCE_NAME);
-			String apiDocContent = new String((byte []) apiDocResource.getContent());
-			apiJSON = (JSONObject) parser.parse(apiDocContent);
-			JSONArray pathConfigs = (JSONArray) apiJSON.get("apis");
-			
-			for (int k = 0; k < pathConfigs.size(); k++) {
-				JSONObject pathConfig = (JSONObject) pathConfigs.get(k);
-				String pathName = (String) pathConfig.get("path");
-				pathName = pathName.startsWith("/") ? pathName : ("/" + pathName);
-				
-				Resource pathResource = registry.get(resourcePath + pathName);
-				String pathContent = new String((byte []) pathResource.getContent());
-				JSONObject pathJSON = (JSONObject) parser.parse(pathContent);
-				pathConfig.put("file", pathJSON);
-		       }
-		} catch (RegistryException e) {
-			handleException("Error while retrieving Swagger Definition for " + apiId.getApiName() + "-" + 
-											apiId.getVersion(), e);
-		} catch (ParseException e) {
-			handleException("Error while parsing Swagger Definition for " + apiId.getApiName() + "-" + 
-											apiId.getVersion() + " in " + resourcePath, e);
-		}
-		return apiJSON.toJSONString();
-	}
+			String resourcePath = APIUtil.getSwagger12DefinitionFilePath(apiId.getApiName(),
+					apiId.getVersion(), apiId.getProviderName());
+			JSONParser parser = new JSONParser();
+			try {
+				if (!registry.resourceExists(resourcePath + APIConstants.API_DOC_1_2_RESOURCE_NAME)) {
+					return APIUtil.createSwagger12JSONContent(getAPI(apiId));
+				}
+				Resource apiDocResource = registry.get(resourcePath + APIConstants.API_DOC_1_2_RESOURCE_NAME);
+				String apiDocContent = new String((byte []) apiDocResource.getContent());
+				apiJSON = (JSONObject) parser.parse(apiDocContent);
+				JSONArray pathConfigs = (JSONArray) apiJSON.get("apis");
 
+				for (int k = 0; k < pathConfigs.size(); k++) {
+					JSONObject pathConfig = (JSONObject) pathConfigs.get(k);
+					String pathName = (String) pathConfig.get("path");
+					pathName = pathName.startsWith("/") ? pathName : ("/" + pathName);
+
+					Resource pathResource = registry.get(resourcePath + pathName);
+					String pathContent = new String((byte []) pathResource.getContent());
+					JSONObject pathJSON = (JSONObject) parser.parse(pathContent);
+					pathConfig.put("file", pathJSON);
+				}
+			} catch (RegistryException e) {
+				handleException("Error while retrieving Swagger Definition for " + apiId.getApiName() + "-" +
+				                apiId.getVersion(), e);
+			} catch (ParseException e) {
+				handleException("Error while parsing Swagger Definition for " + apiId.getApiName() + "-" +
+				                apiId.getVersion() + " in " + resourcePath, e);
+			}
+			return apiJSON;
+		} finally {
+			if (isTenantFlowStarted) {
+				PrivilegedCarbonContext.endTenantFlow();
+			}
+		}
+	}
     /**
      * Returns the all the Consumer keys of applications which are subscribed to the given API
      *
