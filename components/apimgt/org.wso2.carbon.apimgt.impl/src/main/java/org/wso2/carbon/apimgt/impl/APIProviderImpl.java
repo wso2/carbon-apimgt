@@ -1201,6 +1201,15 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     addDocumentationContent(newAPI, doc.getName(), content);
                 }
             }
+
+            //Copy Swagger 2.0 resources for New version. 
+            String resourcePath = APIUtil.getSwagger20DefinitionFilePath(api.getId().getApiName(), 
+                                                                         api.getId().getVersion(),
+                                                                         api.getId().getProviderName());
+            if (registry.resourceExists(resourcePath + APIConstants.API_DOC_2_0_RESOURCE_NAME)) {
+                definitionFromSwagger20.saveAPIDefinition(newAPI, 
+                                          definitionFromSwagger20.getAPIDefinition(api.getId(), registry), registry);
+            }
             
             // Make sure to unset the isLatest flag on the old version
             GenericArtifact oldArtifact = artifactManager.getGenericArtifact(
