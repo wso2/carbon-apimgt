@@ -16,7 +16,7 @@ jagg.block("api/api-listing-all", {
                 query = request.getParameter("query")
                 apiStatus = request.getParameter("apiStatus");
         //fix for broken listing page if the query had one quote
-        if( (query.split("\"").length - 1 ) % 2 == 1){
+        if( query != null && ((query.split("\"").length - 1 ) % 2 == 1)){
             var query = query+"\""
         }
 
