@@ -59,6 +59,82 @@ public class OAuthAuthenticator implements Authenticator {
     private String clientDomainHeader = "referer";
     private String requestOrigin;
 
+    public String getSecurityHeader() {
+        return securityHeader;
+    }
+
+    public void setSecurityHeader(String securityHeader) {
+        this.securityHeader = securityHeader;
+    }
+
+    public String getDefaultAPIHeader() {
+        return defaultAPIHeader;
+    }
+
+    public void setDefaultAPIHeader(String defaultAPIHeader) {
+        this.defaultAPIHeader = defaultAPIHeader;
+    }
+
+    public String getConsumerKeyHeaderSegment() {
+        return consumerKeyHeaderSegment;
+    }
+
+    public void setConsumerKeyHeaderSegment(String consumerKeyHeaderSegment) {
+        this.consumerKeyHeaderSegment = consumerKeyHeaderSegment;
+    }
+
+    public String getOauthHeaderSplitter() {
+        return oauthHeaderSplitter;
+    }
+
+    public void setOauthHeaderSplitter(String oauthHeaderSplitter) {
+        this.oauthHeaderSplitter = oauthHeaderSplitter;
+    }
+
+    public String getConsumerKeySegmentDelimiter() {
+        return consumerKeySegmentDelimiter;
+    }
+
+    public void setConsumerKeySegmentDelimiter(String consumerKeySegmentDelimiter) {
+        this.consumerKeySegmentDelimiter = consumerKeySegmentDelimiter;
+    }
+
+    public String getSecurityContextHeader() {
+        return securityContextHeader;
+    }
+
+    public void setSecurityContextHeader(String securityContextHeader) {
+        this.securityContextHeader = securityContextHeader;
+    }
+
+    public boolean isRemoveOAuthHeadersFromOutMessage() {
+        return removeOAuthHeadersFromOutMessage;
+    }
+
+    public void setRemoveOAuthHeadersFromOutMessage(boolean removeOAuthHeadersFromOutMessage) {
+        this.removeOAuthHeadersFromOutMessage = removeOAuthHeadersFromOutMessage;
+    }
+
+    public String getClientDomainHeader() {
+        return clientDomainHeader;
+    }
+
+    public void setClientDomainHeader(String clientDomainHeader) {
+        this.clientDomainHeader = clientDomainHeader;
+    }
+
+    public boolean isRemoveDefaultAPIHeaderFromOutMessage() {
+        return removeDefaultAPIHeaderFromOutMessage;
+    }
+
+    public void setRemoveDefaultAPIHeaderFromOutMessage(boolean removeDefaultAPIHeaderFromOutMessage) {
+        this.removeDefaultAPIHeaderFromOutMessage = removeDefaultAPIHeaderFromOutMessage;
+    }
+
+    public void setRequestOrigin(String requestOrigin) {
+        this.requestOrigin = requestOrigin;
+    }
+
     public void init(SynapseEnvironment env) {
         this.keyValidator = new APIKeyValidator(env.getSynapseConfiguration().getAxisConfiguration());
         initOAuthParams();
