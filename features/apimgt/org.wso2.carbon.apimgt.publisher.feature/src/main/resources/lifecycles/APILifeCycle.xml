@@ -27,7 +27,6 @@
                         <data name="transitionExecution">
                             <execution forEvent="Promote"
                                        class="org.wso2.carbon.apimgt.impl.executors.ApiPublisherExecutor">
-                                <parameter name="apim.test" value="Dummy"/>
                             </execution>
                         </data>
                     </datamodel>
@@ -39,11 +38,9 @@
                         <data name="transitionExecution">
                             <execution forEvent="Publish"
                                        class="org.wso2.carbon.apimgt.impl.executors.ApiPublisherExecutor">
-                                <parameter name="apim.test" value="Dummy"/>
                             </execution>
                             <execution forEvent="Demote"
                                        class="org.wso2.carbon.apimgt.impl.executors.ApiPublisherExecutor">
-                                <parameter name="apim.test" value="Dummy"/>
                             </execution>
                         </data>
                     </datamodel>
@@ -57,11 +54,9 @@
                         <data name="transitionExecution">
                             <execution forEvent="Block"
                                        class="org.wso2.carbon.apimgt.impl.executors.ApiPublisherExecutor">
-                                <parameter name="apim.test" value="Dummy"/>
                             </execution>
                             <execution forEvent="Demote"
                                        class="org.wso2.carbon.apimgt.impl.executors.ApiPublisherExecutor">
-                                <parameter name="apim.test" value="Dummy"/>
                             </execution>
                         </data>
                     </datamodel>
@@ -74,11 +69,9 @@
                         <data name="transitionExecution">
                             <execution forEvent="Re-Publish"
                                        class="org.wso2.carbon.apimgt.impl.executors.ApiPublisherExecutor">
-                                <parameter name="apim.test" value="Dummy"/>
                             </execution>
                             <execution forEvent="Deprecate"
                                        class="org.wso2.carbon.apimgt.impl.executors.ApiPublisherExecutor">
-                                <parameter name="apim.test" value="Dummy"/>
                             </execution>
                         </data>
                     </datamodel>

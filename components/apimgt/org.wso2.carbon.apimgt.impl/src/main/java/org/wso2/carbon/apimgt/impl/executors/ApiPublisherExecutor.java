@@ -41,22 +41,12 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * This class is an implementation of the interface {@link org.wso2.carbon.governance.registry.extensions.interfaces.Execution}
- * This class consists methods that will publish an API to API Manager.
+ * This class is an implementation of the
+ * interface {@link org.wso2.carbon.governance.registry.extensions.interfaces.Execution}
+ * This class consists methods that will create, prototype, publish, block, deprecate and
+ * retire  an API to API Manager.
  *
- * This class gets initiated when a REST Service lifecycle is added to a REST Service. In initialization following
- * static configuration parameters should be defined in the lifecycle.
- *  Eg:- <execution forEvent="Publish" class="org.wso2.carbon.governance.registry.extensions.executors.APIPublishExecutor">
- *           <parameter name="apim.endpoint" value="http://localhost:9763/"/>
- *           <parameter name="apim.username" value="admin"/>
- *           <parameter name="apim.password" value="admin"/>
- *           <parameter name="default.tier" value="Unlimited"/>
- *           <parameter name="throttlingTier" value="Unlimited,Unlimited,Unlimited,Unlimited,Unlimited"/>
- *       </execution>
- *
- * Once the REST Service is is set to publish to API Manager, the execute method will get called. The execute method
- * contains the logic to publish an API to API Manager through a http POST request to API Publisher. The method will
- * return true if the API published successfully and false if fails to publish the API.
+ * This executor used to publish a service to API store as a API.
  *
  * @see org.wso2.carbon.governance.registry.extensions.interfaces.Execution
  */
@@ -105,10 +95,10 @@ public class ApiPublisherExecutor implements Execution {
                 executed = true;
             }
         } catch (RegistryException e) {
-            log.error("Failed to get the generic artifact ", e);
+            log.error("Failed to get the generic artifact, While executing ApiPublisherExecutor. ", e);
             return false;
         } catch (APIManagementException e) {
-            log.error("Failed to publish service to API store ", e);
+            log.error("Failed to publish service to API store, While executing ApiPublisherExecutor. ", e);
             return false;
         }
         return executed;
