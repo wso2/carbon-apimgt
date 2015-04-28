@@ -22,33 +22,36 @@ asset.manager = function(ctx){
 	   log.info('Calling custom get of asset');
 	   return this._super.get.call(this,id);
 	},
-	search:function(query,paging){
-	  var carbonAPI = require('carbon');
-	  var tenantDomain =  carbonAPI.server.tenantDomain({ tenantId:ctx.tenantId });
-	  var server = require('store').server;
-	  var user = server.current(ctx.session);
-	  var userName = '__wso2.am.anon__';
-	
-	  if(user != null){
-		userName = user.username;		
-	  }
-	 log.info('============== user name =========='+ userName);
-	  var apistore = require('apistore').apistore.instance(userName);
-	  var assetApi = apistore.getAllPaginatedAPIsByStatus(tenantDomain,0,100,'');
-	  log.info('This is the custom APIM search method');
-	 log.info('============== api json  =========='+ assetApi);
-	//  return assetApi;
+		/*search : function(query, paging) {
+			var carbonAPI = require('carbon');
+			var tenantDomain = carbonAPI.server.tenantDomain({
+				tenantId : ctx.tenantId
+			});
+			var server = require('store').server;
+			var user = server.current(ctx.session);
+			var userName = '__wso2.am.anon__';
 
-	var json = JSON.parse(assetApi);
+			if (user != null) {
+				userName = user.username;
+			}
+			log.info('============== user name ==========' + userName);
+			var apistore = require('apistore').apistore.instance(userName);
+			var assetApi = apistore.getAllPaginatedAPIsByStatus(tenantDomain,
+					0, 100, '');
+			log.info('This is the custom APIM search method');
+			log.info('============== api json  ==========' + assetApi);
+			// return assetApi;
 
-        var apisArray = [];
-	if(json.apis.length > 0){
-		apisArray = json.apis;
-	}
-	log.info('============== array ==========='+apisArray);
-	return apisArray;
-	}	
-    };
+			var json = JSON.parse(assetApi);
+
+			var apisArray = [];
+			if (json.apis.length > 0) {
+				apisArray = json.apis;
+			}
+			log.info('============== array ===========' + apisArray);
+			return apisArray;
+		}*/
+	};
 };
 
 asset.configure = function(ctx) {
@@ -108,6 +111,9 @@ asset.renderer = function(ctx) {
         return 'https://digg.com/submit?url=' + assetUrl;
     };
     return {
+    	details:function(page){
+    		log.info('Details page rendered!!!');
+    	},
         pageDecorators: {
             socialSitePopulator: function(page, meta) {
                 var utils = require('utils');
