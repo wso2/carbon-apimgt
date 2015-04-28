@@ -189,7 +189,7 @@ var apipublisher = {};
                 environments: result.get('publishedEnvironments'),
                 hasDefaultVersion: hasDefaultVersion,
                 currentDefaultVersion: defaultVersion
-            }
+            };
             return {
                 error:false,
                 api:api
@@ -213,8 +213,8 @@ var apipublisher = {};
         return this.impl.getDocumentationContent(apiId, docName);
     };
     APIProviderProxy.prototype.getTiers = function (tenantDomain) {
-        var tierSet = this.impl.getTiers(tenantDomain);
-        return tiers;
+        var availableTiers = this.impl.getTiers(tenantDomain);
+        return JSON.parse(availableTiers);
     };
     APIProviderProxy.prototype.getSubscriberAPIs = function (subscriberName) {
         return this.impl.getSubscriberAPIs(subscriberName);
@@ -224,11 +224,8 @@ var apipublisher = {};
     };
 
     APIProviderProxy.prototype.getSwagger12Resource = function (apiProvider, apiName, apiVersion) {
-        var identifier = new Packages.org.json.simple.JSONObject();
-        identifier.put(API_PROVIDER, apiProvider);
-        identifier.put(API_NAME, apiName);
-        identifier.put(API_VERSION, apiVersion);
-        return this.impl.getSwagger12Resource(identifier);
+        var identifier = new Packages.org.wso2.carbon.apimgt.api.model.APIIdentifier(apiProvider, apiName, apiVersion);
+        return JSON.parse(this.impl.getSwagger12Definition(identifier));
     };
 })(apipublisher);
 

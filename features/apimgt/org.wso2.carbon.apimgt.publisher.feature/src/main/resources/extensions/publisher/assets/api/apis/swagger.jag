@@ -23,7 +23,7 @@
  ENDPOINTS:
  GET
  /apis/asts/swagger
-*/
+ */
 
 require('/modules/publisher.js').exec(function (ctx) {
 	var log = new Log('asset_api_endpoints');
@@ -36,7 +36,7 @@ require('/modules/publisher.js').exec(function (ctx) {
 
 	var uriMatcher = new URIMatcher(req.getRequestURI());
 
-	var GET_SWAGGER_DOC_URL = '/{context}/apis/swagger';
+	var GET_SWAGGER_DOC_URL = '/{context}/asts/api/apis/swagger';
 
 	var method = req.getMethod();
 	var options = ref.getQueryOptions(req.getQueryString());
@@ -44,7 +44,7 @@ require('/modules/publisher.js').exec(function (ctx) {
 	response.contentType = 'application/json';
 
 	var constants = require("rxt").constants;
-
+	log.info("Calling Swagger API");
 	switch (method) {
 		case 'GET':// GET endpoints
 			options.type = req.getParameter('type');

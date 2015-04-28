@@ -2737,50 +2737,13 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 		
 	}
 
-	@Override
-	public JSONObject getSwagger12Definition(APIIdentifier apiId) throws APIManagementException {
-		String resourcePath = APIUtil.getSwagger12DefinitionFilePath(apiId.getApiName(),
-                apiId.getVersion(), apiId.getProviderName());
-		
-		JSONParser parser = new JSONParser();
-		JSONObject apiJSON = null;
-		try {
-			if (!registry.resourceExists(resourcePath + APIConstants.API_DOC_1_2_RESOURCE_NAME)) {
-				return APIUtil.createSwagger12JSONContent(getAPI(apiId));
-			}
-			Resource apiDocResource = registry.get(resourcePath + APIConstants.API_DOC_1_2_RESOURCE_NAME);
-			String apiDocContent = new String((byte []) apiDocResource.getContent());
-			apiJSON = (JSONObject) parser.parse(apiDocContent);
-			JSONArray pathConfigs = (JSONArray) apiJSON.get("apis");
-			
-			for (int k = 0; k < pathConfigs.size(); k++) {
-				JSONObject pathConfig = (JSONObject) pathConfigs.get(k);
-				String pathName = (String) pathConfig.get("path");
-				pathName = pathName.startsWith("/") ? pathName : ("/" + pathName);
-				
-				Resource pathResource = registry.get(resourcePath + pathName);
-				String pathContent = new String((byte []) pathResource.getContent());
-				JSONObject pathJSON = (JSONObject) parser.parse(pathContent);
-				pathConfig.put("file", pathJSON);
-		       }
-		} catch (RegistryException e) {
-			handleException("Error while retrieving Swagger Definition for " + apiId.getApiName() + "-" + 
-											apiId.getVersion(), e);
-		} catch (ParseException e) {
-			handleException("Error while parsing Swagger Definition for " + apiId.getApiName() + "-" + 
-											apiId.getVersion() + " in " + resourcePath, e);
-		}
-		return apiJSON;
-	}
-
-
 	/**
 	 * //TODO rearrange this in a proper way
 	 * @param apiIdentifier
 	 * @return
 	 * @throws APIManagementException
 	 */
-	public JSONObject getSwagger12Resource(APIIdentifier apiIdentifier) throws APIManagementException {
+	public JSONObject getSwagger12Definition(APIIdentifier apiIdentifier) throws APIManagementException {
 		if (apiIdentifier == null) {
 			handleException("Invalid number of input parameters.");
 		}
@@ -2806,14 +2769,41 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 				PrivilegedCarbonContext.startTenantFlow();
 				PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
 			}
+			String resourcePath = APIUtil.getSwagger12DefinitionFilePath(apiId.getApiName(),
+					apiId.getVersion(), apiId.getProviderName());
+			JSONParser parser = new JSONParser();
+			try {
+				if (!registry.resourceExists(resourcePath + APIConstants.API_DOC_1_2_RESOURCE_NAME)) {
+					return APIUtil.createSwagger12JSONContent(getAPI(apiId));
+				}
+				Resource apiDocResource = registry.get(resourcePath + APIConstants.API_DOC_1_2_RESOURCE_NAME);
+				String apiDocContent = new String((byte []) apiDocResource.getContent());
+				apiJSON = (JSONObject) parser.parse(apiDocContent);
+				JSONArray pathConfigs = (JSONArray) apiJSON.get("apis");
 
-			apiJSON = getSwagger12Definition(apiId);
+				for (int k = 0; k < pathConfigs.size(); k++) {
+					JSONObject pathConfig = (JSONObject) pathConfigs.get(k);
+					String pathName = (String) pathConfig.get("path");
+					pathName = pathName.startsWith("/") ? pathName : ("/" + pathName);
+
+					Resource pathResource = registry.get(resourcePath + pathName);
+					String pathContent = new String((byte []) pathResource.getContent());
+					JSONObject pathJSON = (JSONObject) parser.parse(pathContent);
+					pathConfig.put("file", pathJSON);
+				}
+			} catch (RegistryException e) {
+				handleException("Error while retrieving Swagger Definition for " + apiId.getApiName() + "-" +
+				                apiId.getVersion(), e);
+			} catch (ParseException e) {
+				handleException("Error while parsing Swagger Definition for " + apiId.getApiName() + "-" +
+				                apiId.getVersion() + " in " + resourcePath, e);
+			}
+			return apiJSON;
 		} finally {
 			if (isTenantFlowStarted) {
 				PrivilegedCarbonContext.endTenantFlow();
 			}
 		}
-		return apiJSON;
 	}
     /**
      * Returns the all the Consumer keys of applications which are subscribed to the given API

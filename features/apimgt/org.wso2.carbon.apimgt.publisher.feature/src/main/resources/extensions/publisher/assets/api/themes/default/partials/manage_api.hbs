@@ -6,8 +6,9 @@
 		{"value": "Application User", "text": "{{t "Application User"}}"},
 		{"value": "Application & Application User", "text": "{{t "Application & Application User"}}"}
 	];
+
 	var TIERS = [
-		{{#each api.configuredTiers}}
+		{{#each pi.configuredTiers}}
 			{"value": "{{this.tierName}}", "text": "{{this.tierDisplayName}}"},
 		{{/each}}
 	];
@@ -103,32 +104,30 @@
 										<label class="control-label">Make this default version</label>
 									</div>
 									<div class="controls">
-										<div class="col-md-2">
-											<input type="checkbox" class="default_version_check" id="default_version"
-											       name="default_version" value="default_version"
-												   {{#if api.isDefaultVersion}}checked{{/if}}/>
-											<a class="icon-question-sign help_popup" help_data="default_api_help"></a>
+										<input type="checkbox" class="default_version_check" id="default_version"
+										       name="default_version" value="default_version"
+											   {{#if api.isDefaultVersion}}checked{{/if}}/>
+										<a class="icon-question-sign help_popup" help_data="default_api_help"></a>
 
-											<p id="default_api_help" class="hide">
-												{{t "Marks one API version in a group as the default, \so that it can be invoked
+										<p id="default_api_help" class="hide">
+											{{t "Marks one API version in a group as the default, \so that it can be invoked
 										without specifying the version number in the URL. For example, i
 										f you mark http://host:port/youtube/2.0 as the default API,
 										requests made to http://host:port/youtube/ are automatically
 										routed to version 2.0. If you mark an unpublished API as the default,
 										the previous default, published API will still be used as the default until
 										the new default API is published"}}</p>
-											{{#if api.isDefaultVersion}}
+										{{#if api.isDefaultVersion}}
+										{{else}}
+											{{#if api.hasDefaultVersion}}
+												<p class="help-block">Currently set to version
+												                      : {{api.currentDefaultVersion}}</p>
 											{{else}}
-												{{#if api.hasDefaultVersion}}
-													<p class="help-block">Currently set to version
-													                      : {{api.currentDefaultVersion}}</p>
-												{{else}}
-													<p class="help-block">No default version defined for the current API</p>
-												{{/if}}
+												<p class="help-block">No default version defined for the current API</p>
 											{{/if}}
-											<input type="hidden" id="default_version_checked" name="default_version_checked"
-											       value="{{#if api.isDefaultVersion}}default_version{{else}} {{/if}}"
-										</div>
+										{{/if}}
+										<input type="hidden" id="default_version_checked" name="default_version_checked"
+										       value="{{#if api.isDefaultVersion}}default_version{{else}} {{/if}}"
 									</div>
 								</div>
 							</div>
@@ -137,7 +136,7 @@
 									<label class="control-label" for="tier">{{t "Tier Availability"}}:<span
 											class="requiredAstrix">*</span></label>
 								</div>
-								<div class="controls col-md-2">
+								<div class="controls">
 									<select id="tier" name="tier" class="multiselect selected hide required"
 									        multiple="multiple">
 									</select>
@@ -149,18 +148,17 @@
 											class="requiredAstrix">*</span></label>
 								</div>
 								<div class="controls">
-									<div class="col-md-2">
-										<div class="checkbox">
-											<label class="checkbox inline">
-												<input type="checkbox" id="transport_http" name="transport_http" value="http"
-													{{#if api.transport_http.checked}} checked {{/if}}/> {{t "http"}}
-											</label>
-											<label class="checkbox inline">
-												<input type="checkbox" id="transport_https" name="transport_https"
-												       value="https"
-													{{#if api.transport_https.checked}} checked {{/if}}/>{{t "https"}}
-											</label>
-										</div>
+
+									<div class="checkbox">
+										<label class="checkbox inline">
+											<input type="checkbox" id="transport_http" name="transport_http" value="http"
+												{{#if api.transport_http.checked}} checked {{/if}}/> {{t "http"}}
+										</label>
+										<label class="checkbox inline">
+											<input type="checkbox" id="transport_https" name="transport_https"
+											       value="https"
+												{{#if api.transport_https.checked}} checked {{/if}}/>{{t "https"}}
+										</label>
 									</div>
 								</div>
 							</div>
@@ -224,7 +222,7 @@
 								<div class="col-md-2">
 									<label class="control-label" for="responseCache">{{t "Response Caching"}}:</label>
 								</div>
-								<div class="controls col-md-2">
+								<div class="controls">
 									<select class="select required" id="responseCache" name="responseCache">
 										<option value="disabled {{#if api.responseCache.enabled}}checked{{/if}}">{{t
 										"Disabled"}}</option>
@@ -293,13 +291,13 @@
 									{{/if}}
 								{{/if}}
 								<br/>
-									<div class="control-group col-md-8" id="tennatsDiv" {{#if api.subscriptionAvailability
+									<div class="control-group" id="tennatsDiv" {{#if api.subscriptionAvailability
 							.specificTenants}}style="display: none;"{{/if}}
-								<label class="control-label" for="tenants" id="tennatLabel" name="tennatLabel">
+								<label class="control-label col-md-2" for="tenants" id="tennatLabel" name="tennatLabel">
 									{{t "Tenants"}}:<span class="requiredAstrix">*</span>
 								</label>
 
-								<div class="controls">
+								<div class="controls col-md-4">
 									<input type="text" class="input required"
 									       id="tenants" name="tenants" value="{{api.subscriptionTenants}}"/>
 
@@ -493,39 +491,31 @@
 				</script>
 
 				<script id="designer-resources-template" type="text/x-handlebars-template">
+					<br />
 					<table style="width:100%">
-						{{#each api_doc.apis}}
-							{{ setIndex @index}}
-							<tr>
-								<td colspan="6"><h4 class="resource_group_title">{{ path }}</h4></td>
-							</tr>
-							{{# each file.apis}}
-								{{ setIndex @index}}
-								{{# each operations}}
-									<tr class="resource_container" data-path="$.apis[{{ ../../index}}].file.apis[{{ ../index }}].operations[{{ @index }}]">
-										<td class="resource-method-td resource_expand" data-path="$.apis[{{ ../../index}}].file.apis[{{ ../index }}].operations[{{ @index }}]">
-											<span class=" resource-method resource-method-{{ method }}">{{ method }}</span>
-										</td>
-										<td class="resource_expand"><a class="resource-path">{{ ../path }}</a></td>
-										<td width="99%"><span class="operation-summary change_summary" data-path="$.apis[{{ ../../index}}].file.apis[{{ ../index }}].operations[{{ @index }}]" data-attr="summary" >{{ summary }}</span></td>
-										<td><a class="operation-summary auth_type_select"  data-type="select" data-path="$.apis[{{ ../../index}}].file.apis[{{ ../index }}].operations[{{ @index }}]" data-attr="auth_type" data-value="{{ auth_type }}"></a></td>
-										<td><a class='operation-summary throttling_select'  data-type="select" data-path="$.apis[{{ ../../index}}].file.apis[{{ ../index }}].operations[{{ @index }}]" data-attr="throttling_tier">{{ throttling_tier }}</a></td>
-										<td><a class="operation-summary scope_select"  data-type="select" data-path="$.apis[{{ ../../index}}].file.apis[{{ ../index }}].operations[{{ @index }}]" data-attr="scope">{{ scope }}</a></td>
-									</tr>
-									<tr><td colspan="6" class="resource_body hide" data-path="$.apis[{{ ../../index}}].file.apis[{{ ../index }}].operations[{{ @index }}]"></td></tr>
-								{{/each}}
+						{{#each doc.paths}}
+							{{# each this}}
+								<tr class="resource_container" data-path="$.paths.{{ path }}.{{@key}}">
+									<td class="resource-method-td resource_expand" data-path="$.paths.{{ path}}.{{ @key }}">
+										<span class=" resource-method resource-method-{{ @key }}">{{ @key }}</span>
+									</td>
+									<td class="resource_expand"><a class="resource-path">{{ path }}</a></td>
+									<td  width="99%"><span class="operation-summary change_summary" data-path="$.paths.{{ path }}.{{@key}}" data-attr="summary" >{{ summary }}</span></td>
+									<td><a class="operation-summary auth_type_select"  data-type="select" data-path="$.paths.{{ path }}.{{@key}}" data-attr="x-auth-type" data-value="{{ x-auth-type }}"></a></td>
+									<td><a class='operation-summary throttling_select'  data-type="select" data-path="$.paths.{{ path }}.{{@key}}" data-attr="x-throttling-tier">{{ x-throttling-tier }}</a></td>
+									<td><a class="operation-summary scope_select"  data-type="select" data-path="$.paths.{{ path }}.{{@key}}" data-attr="x-scope">{{ scope }}</a></td>        </tr>
+								<tr><td colspan="6" class="resource_body hide" data-path="$.paths.{{ path }}.{{@key}}"></td></tr>
 							{{/each}}
-
 						{{/each}}
 					</table>
 				</script>
 
 				<script id="scopes-template" type="text/x-handlebars-template">
 					<div class="scope_container">
-						{{#if api_doc.authorizations.oauth2.scopes}}
+						{{#if api_doc.securityDefinitions.apim.x-wso2-scopes }}
 							<h4>Scopes</h4>
 							<ul>
-								{{#each api_doc.authorizations.oauth2.scopes}}
+								{{#each api_doc.securityDefinitions.apim.x-wso2-scopes }}
 									<li>
 										<h6><a data-index='{{ @index }}' class='delete_scope'><i class='icon-trash'></i></a> &nbsp;&nbsp; {{ key }} {{#if name }}: {{ name }}{{/if}}  </h6>
 										<strong>Roles</strong> : {{ roles }}
@@ -537,7 +527,10 @@
 						<a id="define_scopes" class="pointer btn"><i class="icon-plus-sign"></i>&nbsp;Add Scopes</a>
 					</div>
 				</script>
-
+				<div id="api_designer">
+					<div id ="resource_details">
+						</div>
+					</div>
 			</div>
 		</div>
 	</div>
