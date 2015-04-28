@@ -1670,6 +1670,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             GenericArtifact apiArtifact = artifactManager.getGenericArtifact(apiArtifactResourceId);
             String inSequence = apiArtifact.getAttribute(APIConstants.API_OVERVIEW_INSEQUENCE);
             String outSequence = apiArtifact.getAttribute(APIConstants.API_OVERVIEW_OUTSEQUENCE);
+            String environments = apiArtifact.getAttribute(APIConstants.API_OVERVIEW_ENVIRONMENTS);
             
             //Delete the dependencies associated  with the api artifact
 			GovernanceArtifact[] dependenciesArray = apiArtifact.getDependencies();
@@ -1703,16 +1704,18 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             api.setAsDefaultVersion(Boolean.valueOf(isDefaultVersion));
             api.setAsPublishedDefaultVersion(api.getId().getVersion().equals(apiMgtDAO.getPublishedDefaultVersion(api.getId())));
 
-            // gatewayType check is required when API Management is deployed on other servers to avoid synapse
+            // gatewayType check is required when API Management is deployed on
+            // other servers to avoid synapse
             if (gatewayExists && gatewayType.equals("Synapse")) {
-                //if (isAPIPublished(api)) {
-            		api.setInSequence(inSequence); //need to remove the custom sequences
-            		api.setOutSequence(outSequence);
-                    removeFromGateway(api);
-                    if(api.isDefaultVersion()){
-                        removeDefaultAPIFromGateway(api);
-                    }
-                //}
+                // if (isAPIPublished(api)) {
+                api.setInSequence(inSequence); // need to remove the custom sequences
+                api.setOutSequence(outSequence);
+                api.setEnvironments(APIUtil.extractEnvironmentsForAPI(environments));
+                removeFromGateway(api);
+                if (api.isDefaultVersion()) {
+                    removeDefaultAPIFromGateway(api);
+                }
+                // }
             } else {
                 log.debug("Gateway is not existed for the current API Provider");
             }
