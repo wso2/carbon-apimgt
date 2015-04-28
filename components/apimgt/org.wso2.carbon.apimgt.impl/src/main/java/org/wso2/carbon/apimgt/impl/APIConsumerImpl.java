@@ -2428,7 +2428,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
      * @param callbackUrl callback URL
      * @param allowedDomains allowedDomains for token.
      * @param validityTime validity time period.
-     * @param applicationId APIM application id.
+     * @param groupingId APIM application id.
      * @param jsonString Callback URL for the Application.
      * @param tokenScope Scopes for the requested tokens.
      * @return
@@ -2440,7 +2440,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                                                 String callbackUrl, String[] allowedDomains,
                                                 String validityTime,
                                                 String tokenScope,
-                                                int applicationId,
+                                                String groupingId,
                                                 String jsonString) throws APIManagementException {
 
         if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
