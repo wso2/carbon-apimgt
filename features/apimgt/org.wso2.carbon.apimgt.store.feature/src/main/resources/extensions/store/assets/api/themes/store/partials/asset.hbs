@@ -1,6 +1,8 @@
 <script>
     var isSocial = ('{{features.social.enabled}}' == 'true');
+
 </script>
+{{dump .}}
 <h1>{{assets.name}}</h1>	
 <div class='container-fluid'>
 		<div class='row-fluid'>
@@ -38,6 +40,34 @@
 						</tr>
 					</tbody>
 				</table>
+			</div>
+			
+			<div class='span5' appStyleFix>
+				<div class='well'>
+				<legend></legend>
+				<select id='application-selection'>
+				     <option selected="" value="1">DefaultApplication</option>
+				    {{#each applications}}
+					<option>{{name}}</option>
+				    {{/each}}
+				</select>
+
+				<select id="tiers-list" name="tiers-list">
+                            
+		                    <option value="Unlimited">Unlimited</option>
+				    {{#each rxt.content.table.overview.fields.tier.values.0.value}}
+					<option>{{value}}</option>
+				    {{/each}}
+		                    
+		                </select>
+				<div class="simple-space-maker">
+		                    <button onclick="triggerSubscribe()" id="subscribe-button" class="btn btn-primary ">{{t "Subscribe"}}
+					<a href="{{url "/asts"}}/api/my_subscriptions/{{id}}">
+		                    </button>
+		                    
+		                </div>
+
+				</div>
 			</div>
 		</div>	
 </div>

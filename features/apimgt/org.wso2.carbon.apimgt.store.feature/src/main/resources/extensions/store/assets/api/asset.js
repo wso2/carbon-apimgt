@@ -113,6 +113,37 @@ asset.renderer = function(ctx) {
     return {
     	details:function(page){
     		log.info('Details page rendered!!!');
+		
+	//=================== Getting subscription details ========================
+
+	var carbonAPI = require('carbon');
+	var tenantDomain = carbonAPI.server.tenantDomain({
+		tenantId : ctx.tenantId
+	});
+	var server = require('store').server;
+	var user = server.current(ctx.session);
+	var userName = '__wso2.am.anon__';
+
+	if (user != null) {
+		userName = user.username;
+	}
+	log.info('============== user name ==========' + userName);
+	var apistore = require('apistore').apistore.instance(userName);
+	var assetApi = apistore.getApplications(userName);
+	log.info('This is the custom APIM search method');
+	log.info('============== api json  ==========' + assetApi);
+	// return assetApi;
+
+	var json = JSON.parse(assetApi);
+	page.applications= json;
+
+	var apisArray = [];
+	if (json.length > 0) {
+		apisArray = json;
+	}
+	log.info('============== array ===========' + json.length);
+
+	//=================== Getting subscription details ========================
     	},
         pageDecorators: {
             socialSitePopulator: function(page, meta) {
