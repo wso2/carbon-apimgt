@@ -129,8 +129,6 @@ public abstract class AbstractApplicationRegistrationWorkflowExecutor extends Wo
             dao.populateAppRegistrationWorkflowDTO(workflowDTO);
         }
 
-        SubscriberKeyMgtClient keyMgtClient = APIUtil.getKeyManagementClient();
-
         try {
             //get new key manager
             KeyManager keyManager = KeyManagerHolder.getKeyManagerInstance();
@@ -168,7 +166,6 @@ public abstract class AbstractApplicationRegistrationWorkflowExecutor extends Wo
 
         } catch (Exception e) {
             APIUtil.handleException("Error occurred while executing SubscriberKeyMgtClient.", e);
-            e.printStackTrace();
         }
     }
 

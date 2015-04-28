@@ -863,9 +863,14 @@ public class APIStoreHostObject extends ScriptableObject {
                     authScopeString = APIConstants.OAUTH2_DEFAULT_SCOPE;
                 }
 
+                String applicationName = (String) args[1];
+                String tokenType = (String) args[2];
+                String callbackUrl = (String) args[3];
+                String groupingId = (String)args[8];
+
                 Map<String, Object> keyDetails = getAPIConsumer(thisObj).updateAuthClient(
-                        (String) args[0], (String) args[1], (String) args[2], (String) args[3],
-                        accessAllowDomainsArray, validityPeriod, authScopeString, Integer.parseInt((String)args[8]),
+                        username, applicationName, tokenType, callbackUrl,
+                        accessAllowDomainsArray, validityPeriod, authScopeString, groupingId,
                         jsonParams);
 
 

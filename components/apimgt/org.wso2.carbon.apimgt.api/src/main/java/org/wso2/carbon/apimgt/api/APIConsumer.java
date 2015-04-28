@@ -301,7 +301,7 @@ public interface APIConsumer extends APIManager {
      * @param callbackUrl callback URL
      * @param allowedDomains allowedDomains for token.
      * @param validityTime validity time period.
-     * @param applicationId APIM application id.
+     * @param groupingId APIM application id.
      * @param jsonString Callback URL for the Application.
      * @param tokenScope Scopes for the requested tokens.
      *
@@ -324,7 +324,7 @@ public interface APIConsumer extends APIManager {
      * @param callbackUrl callback URL
      * @param allowedDomains allowedDomains for token.
      * @param validityTime validity time period.
-     * @param applicationId APIM application id.
+     * @param groupingId APIM application id.
      * @param jsonString Callback URL for the Application.
      * @param tokenScope Scopes for the requested tokens.
      * @throws APIManagementException if failed to applications for given subscriber
@@ -334,7 +334,7 @@ public interface APIConsumer extends APIManager {
                                                String callbackUrl, String[] allowedDomains,
                                                String validityTime,
                                                String tokenScope,
-                                               int applicationId,
+                                               String groupingId,
                                                String jsonString)
             throws APIManagementException;
 
