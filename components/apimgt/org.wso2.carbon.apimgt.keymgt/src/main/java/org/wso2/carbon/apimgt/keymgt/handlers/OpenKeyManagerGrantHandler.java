@@ -10,6 +10,9 @@ import org.wso2.carbon.identity.oauth2.token.OAuthTokenReqMessageContext;
 import org.wso2.carbon.identity.oauth2.token.handlers.grant.ClientCredentialsGrantHandler;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 
+/**
+ * This grant handler will accept validity period as a parameter.
+ */
 public class OpenKeyManagerGrantHandler extends ClientCredentialsGrantHandler {
 
     private static Log log = LogFactory.getLog(OpenKeyManagerGrantHandler.class);
