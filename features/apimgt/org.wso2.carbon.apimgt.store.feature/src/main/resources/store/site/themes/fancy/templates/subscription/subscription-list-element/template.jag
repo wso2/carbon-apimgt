@@ -97,13 +97,13 @@
 	                        </div>
                         </div>
 
+                        <% if(lenS > 0 && app.prodKeyScope != ""){ %>
                         <div class="row-fluid keys">
 							<div class="span3">
 								<b><%=i18n.localize("scope")%>:</b>
 							</div>
 							<div class="span9">
 			
-								<% if(lenS > 0){ %>
 								<div class="token">
 									<% if(app.prodKeyScope != null && app.prodKeyScope.length > 60){ %>
 									<textarea
@@ -115,9 +115,9 @@
 									</span>
 									<% } %>
 								</div>
-								<% } %>			
 							</div>
 						</div>
+						<% } %>	
 
                         <div class="row-fluid keys">
 							<div class="span12">
@@ -327,12 +327,12 @@
 	                        </div>
                         </div>
 
+                        <% if(lenS > 0 && app.sandKeyScope != ""){ %>
                         <div class="row-fluid keys">
 							<div class="span3">
 								<b><%=i18n.localize("scope")%>:</b>
 							</div>
 							<div class="span9">
-								<% if(lenS > 0){ %>
 								<div class="token">
 									<% if(app.sandKeyScope != null && app.sandKeyScope.length > 60){ %>
 									<textarea class="tokenTextarea sandScopeDisplayPro keyValues"
@@ -342,9 +342,9 @@
 										data-value="<%=app.sandKeyScope%>"><%=app.sandKeyScope%> </span>
 									<% } %>
 								</div>
-								<% } %>
 							</div>
 						</div>
+						<% } %>
 
                         <div class="row-fluid keys">
 							<div class="span12">
