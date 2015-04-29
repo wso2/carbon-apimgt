@@ -552,7 +552,7 @@ $(document).ready(function(){
     });
 
     $("#clearThumb").on("click", function () {
-        $('#apiThumb-container').html('<input type="file" class="input-xlarge" name="apiThumb" />');
+        $('#apiThumb-container').html('<input type="file" class="input-xlarge validateImageFile" name="apiThumb" />');
     });
 
     $('#import_swagger').attr('disabled','disabled');

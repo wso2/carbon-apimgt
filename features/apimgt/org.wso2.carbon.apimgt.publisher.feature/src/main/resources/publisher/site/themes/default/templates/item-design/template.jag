@@ -274,7 +274,7 @@
                     <div class="controls">
                         <div id="inpFile" class="pull-left">
                             <div id="apiThumb-container"  style="display: inline;">
-                                <input type="file" class="input-xlarge" id="apiThumb" name="apiThumb"/></div>
+                                <input type="file" class="input-xlarge validateImageFile" id="apiThumb"  name="apiThumb" /></div>
                             </div>
                         <input type="button" class="btn pull-left" id="clearThumb" value="<%=i18n.localize("clear")%>"/>
                         <div class="help-block pull-left inline-help">
