@@ -273,7 +273,8 @@ APIDesigner.prototype.init_controllers = function(){
         jagg.message({content:'Do you want to remove "'+op+' : '+pn+'" resource from list.',type:'confirm',title:"Remove Resource",
         okCallback:function(){
             API_DESIGNER = APIDesigner();
-            console.log(i, pn, op, operations);
+            //console.log(i, pn, op, operations);
+            delete API_DESIGNER.api_doc.paths[pn][op];
             API_DESIGNER.render_resources(); 
         }});
         //delete resource if no operations       
