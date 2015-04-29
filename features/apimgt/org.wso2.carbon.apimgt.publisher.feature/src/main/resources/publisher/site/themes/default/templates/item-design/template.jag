@@ -249,7 +249,7 @@
             <div class="control-group">
                 <label class="control-label" for="imageUrl"><%=i18n.localize("thumbnail")%></label>
                 <div class="controls">
-                    <div class="pull-left">
+                    <div>
                          <% if(api.thumb==null){%> <div><img id="apiEditThumb" alt="" src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("images/api-default.png"))%>"/></div><%}else{%>
                         <div><img id="apiEditThumb" alt="" src="<%=jagg.getRegistryPath(api.thumb)%>"/></div> <%}%>
                         <a onclick="javascript:$('#imageUrl').toggle('slow')" style="cursor: pointer">
