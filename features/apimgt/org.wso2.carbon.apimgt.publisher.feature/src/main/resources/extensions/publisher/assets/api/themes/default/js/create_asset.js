@@ -689,7 +689,7 @@ $(document).ready(function(){
     $("body").unbind("api_saved");            
     $("body").on("api_saved" , function(e){
     var designer = APIDesigner();
-    //location.href = "<%= jagg.url("/implement")%>?name="+designer.saved_api.name+"&version="+designer.saved_api.version+"&provider="+designer.saved_api.provider;                
+    location.href = caramel.configs().context + "/asts/api/implement?name="+designer.saved_api.name+"&version="+designer.saved_api.version+"&provider="+designer.saved_api.provider;                
     });
     $("#design_form").submit();
     });

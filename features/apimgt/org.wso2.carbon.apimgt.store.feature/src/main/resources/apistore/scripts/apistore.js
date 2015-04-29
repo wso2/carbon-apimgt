@@ -85,9 +85,14 @@ var apistore = {};
     StoreAPIProxy.prototype.getAllPaginatedAPIsByStatus = function (tenantDomain, start, end,apiStatus) {
         return this.impl.getAllPaginatedAPIsByStatus(tenantDomain, start, end,apiStatus);
     };
-
+    
     StoreAPIProxy.prototype.createApplicationKeys = function (userId, applicationName, tokenType, tokenScope) {
         return this.impl.createApplicationKeys(userId, applicationName, tokenType, tokenScope);
     };
+
+    StoreAPIProxy.prototype.addSubscription = function (providerName, apiName,version, tier, applicationId, userId) {
+        return this.impl.addSubscription(providerName, apiName,version, tier, applicationId, userId);
+    };
+
 })(apistore);
 

@@ -1,186 +1,184 @@
 <ul class='nav nav-tabs'>
-	<li><a href='{{url ""}}/asts/api/create'>Design</a></li>
-	<li><a href='{{url ""}}/asts/api/implement'>Implement</a></li>
-	<li><a href='{{url ""}}/asts/api/manage'>Manage</a></li>
+    <li><a href='{{url ""}}/asts/api/create'>Design</a></li>
+    <li><a href='{{url ""}}/asts/api/implement'>Implement</a></li>
+    <li><a href='{{url ""}}/asts/api/manage'>Manage</a></li>
 </ul>
-
-<form id="api-implement">
-    {{t "Implementation Method"}}
-    <input type="radio" name="api-implementation-method" value="endpoint" checked>{{t "Backend Endpoint"}}
-    <input type="radio" name="api-implementation-method" value="inline">{{t "Specify Inline"}}
-
-    <div id ="api-implement-endpoints">
-
-    {{t "Endpoints"}}
-    <br/>
-
-    {{t "Endpoint Type"}}
-        <select id = "api-implement-endpoint-type">
-            <option value="http" selected="selected">{{t "HTTP Endpoint"}}</option>
-            <option value="address">{{t "Address Endpoint"}}</option>
-            <option value="wsdl">{{t "WSDL Endpoint"}}</option>
-            <option value="failover">{{t "Failover Endpoint"}}</option>
-            <option value="load_balance">{{t "Load Balanced Endpoint"}}</option>
-        </select>
-        <br/>
-
-        <div id="api-implement-endpoints-http">
-            {{t "Production Endpoint"}} <input type="text" id= "api-implement-endpoints-http-production-endpoint">
-            <br/>
-            {{t "Sandbox Endpoint"}} <input type="text" id= "api-implement-endpoints-http-sandbox-endpoint">
-        </div>
-
-        <div id="api-implement-endpoints-address" style="display:none;">
-            {{t "Production Endpoint"}} <input type="text" id= "api-implement-endpoints-address-production-endpoint">
-            <br/>
-            {{t "Sandbox Endpoint"}} <input type="text" id= "api-implement-endpoints-address-sandbox-endpoint">
-        </div>
-
-        <div id="api-implement-endpoints-wsdl" style="display:none;">
-            {{t "Production WSDL"}} <input type="text" id= "api-implement-endpoints-wsdl-production-wsdl">
-            <br/>
-            {{t "service"}} <input type ="text" id ="api-implement-endpoints-wsdl-service">
-            <br/>
-            {{t "Port"}} <input type ="text" id="api-implement-endpoints-wsdl-port">
-            <br/>
-            {{t "Sandbox Endpoint"}} <input type="text" id= "api-implement-endpoints-address-sandbox-endpoint">
-            <br/>
-            {{t "service"}} <input type ="text" id ="api-implement-endpoints-wsdl-sandbox-service">
-            <br/>
-            {{t "Port"}} <input type ="text" id="api-implement-endpoints-wsdl-sandbox-port">
-            <br/>
-        </div>
-
-        <div id="api-implement-endpoints-failover" style="display:none;">
-            {{t "Production Endpoint"}} <input type="text" id= "api-implement-endpoints-failover-production-failover">
-            <br/>
-            {{t "Production Failover Endpoints"}} 
-            <div id = "prod-failover-endpoints">
-                <span id= "prod-failover-endpoint-1">
-                    {{t "Endpoint 1 )"}} <br/>
-                    <input type="text" id= "api-implement-endpoints-failover-production-endpoint-1">
-                </span>
-            </div>
-            <div id = "prod-failover-endpoints-btns">
-            <!-- TODO add font awesome css and use appropriate buttons-->
-            <input type = "button" id = "prod-failover-endpoint-add-btn" value="Add">
-            <input type = "button" id = "prod-failover-endpoint-remove-btn" value="Remove last">
-            </div>
-            <br/>
-            {{t "Sandbox Endpoint"}} <input type="text" id= "api-implement-endpoints-address-sandbox-endpoint-failover">
-            <br/>
-            {{t "Sandbox Failover Endpoints"}} 
-            <div id ="sandbox-failover-endpoints">
-                <span id= "sandbox-failover-endpoint-1">
-                    {{t "Endpoint 1 )"}} <br/>
-                    <input type ="text" id ="api-implement-endpoints-failover-sandbox-endpoint-1">
-                </span>
-            </div>
-            <div id = "sandbox-failover-endpoints-btns">
-            <!-- TODO add font awesome css and use appropriate buttons-->
-            <input type = "button" id = "sandbox-failover-endpoint-add-btn" value="Add">
-            <input type = "button" id = "sandbox-failover-endpoint-remove-btn" value="Remove last">
-            </div>
-            <br/>
-        </div>
-
-        <div id="api-implement-endpoints-load_balance" style="display:none;">
-            {{t "Production Endpoint"}} <input type="text" id= "api-implement-endpoints-load_balance-production-load_balance">
-            <br/>
-            <div id = "prod-loadbalance-endpoints">
-                <span id="prod-loadbalance-endpoint-1">
-                    {{t "Endpoint 1 )"}} <br/>
-                    <input type="text" id= "api-implement-endpoints-loadbalance-production-loadbalance-1">
-                <span>
-            </div>
-            <div id = "prod-loadbalance-endpoints-btns">
-            <!-- TODO add font awesome css and use appropriate buttons-->
-            <input type = "button" id = "prod-loadbalance-endpoint-add-btn" value="Add">
-            <input type = "button" id = "prod-loadbalance-endpoint-remove-btn" value="Remove last">
-            </div>
-            <br/>
-            {{t "Algorithm"}} 
-             <select id ="api-implement-endpoints-load_balance-algoritm">
-              <option value="round-robin" selected="selected">{{t "Round Robin"}}</option>
-              <option value="other">{{t "Other"}}</option>
-            </select> 
-            <br/>
-            {{t "Failover State"}}
-            <select id ="api-implement-endpoints-load_balance-failover-state">
-              <option value="true" selected="selected">{{t "True"}}</option>
-              <option value="false">{{t "False"}}</option>
-            </select> 
-            <br/>
-            <div id = "api-implement-endpoints-load_balance-algo-div" style="display:none;">
-            {{t "Class Name for Algorithm"}}
-            <input type ="text" id = "api-implement-endpoints-load_balance-classname">
-            <br/>
-            </div>
-            {{t "Session Management"}} 
-             <select id ="api-implement-endpoints-load_balance-session-mgt">
-              <option value="transport" selected="selected">{{t "Transport"}}</option>
-              <option value="soap">{{t "SOAP"}}</option>
-              <option value="clientid">{{t "Clien ID"}}</option>
-              <option value="none">{{t "None"}}</option>
-            </select> 
-            <br/>
-            {{t "Session Timeout (Millis)"}}
-            <input type ="text" id = "api-implement-endpoints-load_balance-session-timeout">
-            <br/>
-            {{t "Sandbox Endpoint"}} <input type="text" id= "api-implement-endpoints-address-sandbox-endpoint-failover">
-            <br/>
-            {{t "Sandbox Endpoints"}} 
-            <div id ="sandbox-loadbalance-endpoints">
-                <span id="sandbox-loadbalance-endpoint-1">
-                    {{t "Endpoint 1 )"}} <br/>
-                    <input type ="text" id ="api-implement-endpoints-loadbalance-sandbox-endpoint-1">
-                </span>
-            </div>
-            <div id = "sandbox-loadbalance-endpoints-btns">
-            <!-- TODO add font awesome css and use appropriate buttons-->
-            <input type = "button" id = "sandbox-loadbalance-endpoint-add-btn" value="Add">
-            <input type = "button" id = "sandbox-loadbalance-endpoint-remove-btn" value="Remove last">
-            </div>
-            <br/>
-        </div>
-
-        <a href="#" id = "api-implement-show-more">Show More Options</a>
-        <a href="#" id = "api-implement-show-less" style="display:none;">Show Less Options</a>
-
-        <div id ="api-implement-more" style="display:none;"><br/>
-            {{t "Endpoint Security Scheme"}} 
-             <select id ="api-implement-more-security">
-              <option value="non-secured" selected="selected">{{t "Non Secured"}}</option>
-              <option value="secured">{{t "Secured"}}</option>
-            </select> 
-            <br/>
-
-            <div id ="api-implement-more-credentials" style="display:none;">
-            {{t "Credentials"}} <input type="text"><input type="password">
-            </div>
-
-            {{t "WSDL"}} <input type ="text" id="api-implement-more-wsdl">
-            <br/>
-            {{t "WADL"}} <input type ="text" id="api-implement-more-wadl">
-        </div>
+    <div class="title-section">
+        <h2>API name goes here</h2>
+    </div>     
+    <div class="content-section shadow-up">
+    <div class="content-data">   
+    <div class="alert alert-error" id="addAPIError" style="display:none">
+        <span id="addErrorSpan"></span>
     </div>
 
-    <div id ="api-implement-resources" style="display:none;">
-    {{t "Resources"}}
+    <div class="row-fluid">
+        <div class="span12">                             
+            <form class="form-horizontal" method="POST" id="implement_form" enctype="multipart/form-data" 
+                action="#">
+    <div class="well well-small" style="padding:0px">        
+    <fieldset>    
+    <div class="control-group">
+        <label class="control-label" for="context">Implementation Method</label>
+        <div class="controls">
+
+            <label class="radio inline">
+            <input class="implementation_methods" type="radio" value="endpoint" name="implementation_methods" selected="selected" > Backend Endpoint
+            </label>
+            <label class="radio inline">
+            <input class="implementation_methods" type="radio" value="inline" name="implementation_methods"> Specify Inline
+            </label>
+        </div>
+    </div>        
+    </fieldset>
+    </div> <!-- closing the well for endpoints -->    
+                <div class="clear"></div>
+                <fieldset class="implementation_method_endpoint implementation_method">
+                <legend style="margin-left:0px;text-indent:10px"></legend>
+
+
+                <div class="control-group">
+                    <label class="control-label" for="endpoint_type">Endpoint Type:<span class="requiredAstrix">*</span></label>
+                        <div class="controls">
+                            <select class="select required" id="endpoint_type" name="endpoint_type">
+                                <option value="http"  selected="selected">HTTP Endpoint</option>
+                                <option value="address">Address Endpoint</option>
+                                <option value="wsdl">WSDL Endpoint</option>
+                                <option value="failover">Failover Endpoint</option>
+                                <option value="load_balance">Load balanced Endpoint</option>
+                            </select>
+                            <a class="icon-question-sign help_popup" help_data="endpoint_help"></a>
+                        </div>
+                </div>
+                
+
+                <input id="endpoint_config" type="hidden" value="" name="endpoint_config">
+
+                <div id="endpoint_help" class="hide">
+                 <strong>HTTP Endpoint </strong><p>A REST service endpoint based on a URI template</p>
+                 <strong>Address Endpoint</strong><p>The direct URL of the service</p>
+                 <strong>WSDL Endpoint</strong><p>The WSDL, service and port</p>
+                 <strong>Failover Group </strong><p>The endpoints that the service tries to connect to in case of a failure. This happens in a round robin manner.</p>
+                 <strong>Load Balance</strong><p>The endpoints where the incoming requests are directed to in a round robin manner. They automatically handle fail-over as well.</p>
+                </div>
+
+                <div id="endpoint_form" class="endpoint_dives" style="display:block">
+                </div>
+
+                 <div class="control-group">
+                    <div class="controls">
+                        <a href="#" class="more-options but" ref="more-options-endpoints">Show More</a>
+                     </div>
+                 </div>
+                <div id="more-options-endpoints" style="display:block">
+
+
+                <div class="control-group">
+                    <label class="control-label" for="endpointType">{{t "Endpoint Security Scheme"}}:<span class="requiredAstrix">*</span></label>
+                    <div class="controls">
+                    <select class="select required" id="endpointType" name="endpointType" >
+                        <option value="nonsecured"  selected="selected">Non Secured</option>
+                        <option value="secured">Secured</option>
+                    </select>
+                    <a class="icon-question-sign help_popup" help_data="endpointSec_help"></a>
+                    <p id="endpointSec_help" class="hide"></p>
+                    </div>
+                </div>
+
+                <div class="control-group" id="credentials">
+                    <label class="control-label" for="credentials">{{t "Credentials"}}:<span class="requiredAstrix">*</span></label>
+                    <div class="controls">
+                        <input type="text" class="input-small required validInput" id="epUsername" name="epUsername"  value="">
+                        <input type="password" class="input-small required" id="epPassword" name="epPassword" value="">
+                    </div>
+                </div>
+
+                 <div class="control-group api_wsdl">
+                 <label class="control-label" for="wsdl">{{t "WSDL"}}:</label>
+                 <div class="controls">
+                 <div class="input-append">
+                 <input type="text" class="input-xlarge validInput" id="wsdl" name="wsdl"  value="" />
+                 <button class="btn check_url_valid" url-type="wsdl" type="button" >{{t "Test URI"}}</button>
+                 <a class="icon-question-sign help_popup" help_data="wsdldesc_help"></a>
+                 <p id="wsdldesc_help" class="hide"></p>
+                 </div>
+                 <p class="help-block"></p>
+                
+                 </div>
+                 </div>
+                 <div class="control-group">
+                 <label class="control-label" for="wadl">{{t "WADL"}}:</label>
+                 <div class="controls">
+                 <div class="input-append">
+                 <input type="text" class="input-xlarge validInput" id="wadl" name="wadl" value="" />
+                 <button class="btn check_url_valid"  type="button" >{{t "Test URI"}}</button>
+                 </div>
+                 <p class="help-block"></p>
+                 </div>
+                 </div>
+
+                
+                <!--Southboud statistics -->
+                <div class="control-group">
+                    <label class="control-label" for="destinationStats">{{t "Destination Stats"}}:</label>
+                      <div class="controls">
+                       <select class="select required" id="destinationStats" name="destinationStats">
+                            <option value="disabled" </option>
+                            <option value="enabled" </option>
+                        </select>
+                        <a class="icon-question-sign help_popup" help_data="stats_help"></a>
+                        <p id="stats_help" class="hide"></p>
+                     </div>
+                </div>
+                <!--Southboud statistics End -->
+                
+
+                </div><!-- more option endpoint -->
+
+                </fieldset>
+
+                
+                <div id="api_designer">
+                    <div id ="apidoc_details"></div>
+                    <div id ="resource_details"></div>
+                </div>            
+                <input type="hidden" name="name" value="" />
+                <input type="hidden" name="version" value="" />
+                <input type="hidden" name="provider" value="" />
+                <input type="hidden" name="action" value="implement" />
+                <input type="hidden" id="swagger" name="swagger" value="" />
+                <div class="form-actions" style="display:none" id="saveMessage">
+                    <div class="btn loadingButton">Saving API. Please wait..</div>
+                </div>
+                <div class="form-actions" id="saveButtons">
+                    <input type="submit" class="btn btn-primary manageSaveButton" value="Save"/>
+                    <!--TODO-->
+                     <a class="btn btn-warning manageSaveButton" id="prototyped_api">Deploy Prototype</a>
+                    <a id="go_to_manage" class="btn btn-primary manageSaveButton" >Manage</a> 
+                    <input type="reset" class="btn" value="cancel" onclick="javascript:window.location.href='./'" />                                                            
+                </div>
+            </form>
+        </div>
     </div>
-
-    <!--TODO check values within following hidden fields-->
-    <input type="hidden" name="name" value="{{api.name}}}" />
-    <input type="hidden" name="version" value="<%= {{api.version}}" />
-    <input type="hidden" name="provider" value="<%= encode.forHtml(api.provider) %>" />
-    <input type="hidden" name="action" value="implement" />
-    <input type="hidden" id="swagger" name="swagger" value="" />
-
-    <div id="api-implement-action-buttons">
-        <input type="submit" value="Save"/>
-        <input type="button" value="Deploy Prototype"/>
-        <input type="submit" value="Manage"/>
-        <input type="reset" value="Cancel"/>
     </div>
+    </div>
+</div>
 
-</form>
+<div  id="advance_endpoint_config" class="modal fade" role="dialog" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+            <h3>Advanced Endpoint Configuration</h3>
+            </div>
+            <div class="modal-body">
+            <form id="advance_form"></form>
+            </div>
+            <div class="modal-footer">
+            <div id="res" class="hide" style="color:red;float:left"></div>
+            <a href="#" class="btn" data-dismiss="modal">Close</a>
+            <a href="#" class="btn btn-primary" id="advance_ep_submit">Save changes</a>
+            </div>
+        </div>
+    </div>
+</div>

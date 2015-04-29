@@ -2885,7 +2885,7 @@ public final class APIUtil {
      *          if failed to generate the content and save
      * @throws org.json.simple.parser.ParseException
      */
-    public static String createSwagger12JSONContent(API api) throws APIManagementException {
+    public static JSONObject createSwagger12JSONContent(API api) throws APIManagementException {
 
     	JSONParser parser = new JSONParser();
 		String pathJsonTemplate = "{\n    \"path\": \"\",\n    \"operations\": []\n}";
@@ -3041,7 +3041,7 @@ public final class APIUtil {
     	}
 
 
-    	return mainAPIJson.toJSONString();
+    	return mainAPIJson;
      }
 
     /**
