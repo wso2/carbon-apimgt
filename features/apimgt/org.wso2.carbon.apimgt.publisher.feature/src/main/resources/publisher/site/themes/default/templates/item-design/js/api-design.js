@@ -168,6 +168,7 @@ function APIDesigner(){
         event.data.add_resource(resource, path);
         //RESOURCES.unshift(resource);
         $("#resource_url_pattern").val("");
+        updateContextPattern();
         $(".http_verb_select").attr("checked",false);
     });
 
@@ -695,7 +696,7 @@ function updateContextPattern(){
 
     if(context != ""){
         if(context.indexOf("{version}") < 0){
-            if(!context.endsWith('/')){
+            if(context.lastIndexOf('/') < 0){
                 context = context + '/';
             }
             context = context + "{version}";
