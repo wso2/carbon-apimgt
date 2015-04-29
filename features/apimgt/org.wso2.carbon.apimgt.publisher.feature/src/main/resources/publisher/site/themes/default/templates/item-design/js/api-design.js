@@ -266,14 +266,15 @@ APIDesigner.prototype.init_controllers = function(){
 
     this.container.delegate( ".delete_resource", "click", function( event ) {        
         var operations = API_DESIGNER.query($(this).attr('data-path'));
-        var operations = operations[0]
+        var operation = operations[0];
         var i = $(this).attr('data-index');
         var pn = $(this).attr('data-path-name');
         var op = $(this).attr('data-operation');        
         jagg.message({content:'Do you want to remove "'+op+' : '+pn+'" resource from list.',type:'confirm',title:"Remove Resource",
         okCallback:function(){
             API_DESIGNER = APIDesigner();
-            console.log(i, pn, op, operations);
+            //console.log(i, pn, op, operations);
+            delete API_DESIGNER.api_doc.paths[pn][op];
             API_DESIGNER.render_resources(); 
         }});
         //delete resource if no operations       
