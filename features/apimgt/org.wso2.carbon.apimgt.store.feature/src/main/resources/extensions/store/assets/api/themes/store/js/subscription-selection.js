@@ -1,12 +1,6 @@
 $(function () {
 
     /*
-     The location of the templates used in the rendering
-     */
-
-    var API_SUBSCRIPTION = caramel.context+'/apis/application/prod'
-
-    /*
      The containers in which the UI components will be rendered
      */
     var CONTROL_CONTAINER = '#subscription-control-panel';
@@ -30,6 +24,12 @@ $(function () {
 
     var APP_STORE = {};
 
+    /*
+     This function generate the location of the templates used in the rendering
+     */
+    var getSubscriptionAPI = function(appName){
+        return caramel.context + '/apis/application/' + appName + '/subscriptions';
+    }
     /*
      The function returns the subscriptions of the given application
      */
@@ -79,7 +79,7 @@ $(function () {
             tokenRequestData['validityTime'] = appDetails.prodValidityTime;
             $.ajax({
                 type: 'POST',
-                url: API_SUBSCRIPTION,
+                url: getSubscriptionAPI(appName),
                 data: tokenRequestData,
                 success: function (data) {
                     var jsonData = JSON.parse(data);

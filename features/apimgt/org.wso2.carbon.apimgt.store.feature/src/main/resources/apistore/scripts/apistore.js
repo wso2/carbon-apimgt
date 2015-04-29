@@ -86,5 +86,8 @@ var apistore = {};
         return this.impl.getAllPaginatedAPIsByStatus(tenantDomain, start, end,apiStatus);
     };
 
+    StoreAPIProxy.prototype.createApplicationKeys = function (userId, applicationName, tokenType, tokenScope) {
+        return this.impl.createApplicationKeys(userId, applicationName, tokenType, tokenScope);
+    };
 })(apistore);
 
