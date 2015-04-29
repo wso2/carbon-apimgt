@@ -137,15 +137,29 @@ public class APIKeyMgtSubscriberService extends AbstractAdmin {
         PrivilegedCarbonContext.startTenantFlow();
         PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
 
-        // Enacting as the provided user. When creating Service Provider/OAuth App,
+        // Acting as the provided user. When creating Service Provider/OAuth App,
         // username is fetched from CarbonContext.
         PrivilegedCarbonContext.getThreadLocalCarbonContext().setUsername(userName);
 
         try {
 
-            // Creating OAuthApp
-            OAuthAdminService oAuthAdminService = new OAuthAdminService();
+            // Create the Service Provider
+            ServiceProvider serviceProvider = new ServiceProvider();
+            serviceProvider.setApplicationName(applicationName);
+            serviceProvider.setDescription("Service Provider for application " + applicationName);
+
             ApplicationManagementService appMgtService = ApplicationManagementService.getInstance();
+            appMgtService.createApplication(serviceProvider);
+
+            ServiceProvider createdServiceProvider = appMgtService.getApplication(applicationName);
+
+            if (createdServiceProvider == null) {
+                throw new APIKeyMgtException("Couldn't create Service Provider Application " + applicationName);
+            }
+
+            // Then Create OAuthApp
+            OAuthAdminService oAuthAdminService = new OAuthAdminService();
+
             OAuthConsumerAppDTO oAuthConsumerAppDTO = new OAuthConsumerAppDTO();
             applicationName = userName + "_" + applicationName;
             oAuthConsumerAppDTO.setApplicationName(applicationName);
@@ -154,47 +168,46 @@ public class APIKeyMgtSubscriberService extends AbstractAdmin {
             oAuthAdminService.registerOAuthApplicationData(oAuthConsumerAppDTO);
             log.debug("Created OAuth App " + applicationName);
             OAuthConsumerAppDTO createdApp = oAuthAdminService.getOAuthApplicationDataByAppName(oAuthConsumerAppDTO
-                    .getApplicationName());
+                                                                                                        .getApplicationName());
             log.debug("Retrieved Details for OAuth App " + createdApp.getApplicationName());
-            ServiceProvider serviceProvider = new ServiceProvider();
-            serviceProvider.setApplicationName(applicationName);
-            serviceProvider.setDescription("Service Provider for application " + applicationName);
+
+            // Set the OAuthApp in InboundAuthenticationConfig
             InboundAuthenticationConfig inboundAuthenticationConfig = new InboundAuthenticationConfig();
             InboundAuthenticationRequestConfig[] inboundAuthenticationRequestConfigs = new
                     InboundAuthenticationRequestConfig[1];
             InboundAuthenticationRequestConfig inboundAuthenticationRequestConfig = new
                     InboundAuthenticationRequestConfig();
 
-            inboundAuthenticationRequestConfig.setInboundAuthKey(oAuthConsumerAppDTO.getOauthConsumerKey());
+            inboundAuthenticationRequestConfig.setInboundAuthKey(createdApp.getOauthConsumerKey());
             inboundAuthenticationRequestConfig.setInboundAuthType("oauth2");
-            if (oAuthConsumerAppDTO.getOauthConsumerSecret() != null && !oAuthConsumerAppDTO.
+            if (createdApp.getOauthConsumerSecret() != null && !createdApp.
                     getOauthConsumerSecret().isEmpty()) {
                 Property property = new Property();
                 property.setName("oauthConsumerSecret");
-                property.setValue(oAuthConsumerAppDTO.getOauthConsumerSecret());
+                property.setValue(createdApp.getOauthConsumerSecret());
                 Property[] properties = {property};
                 inboundAuthenticationRequestConfig.setProperties(properties);
             }
 
             inboundAuthenticationRequestConfigs[0] = inboundAuthenticationRequestConfig;
             inboundAuthenticationConfig.setInboundAuthenticationRequestConfigs(inboundAuthenticationRequestConfigs);
-            serviceProvider.setInboundAuthenticationConfig(inboundAuthenticationConfig);
+            createdServiceProvider.setInboundAuthenticationConfig(inboundAuthenticationConfig);
 
+            // Update the Service Provider app to add OAuthApp as an Inbound Authentication Config
+            appMgtService.updateApplication(createdServiceProvider);
 
-            appMgtService.createApplication(serviceProvider);
 
             OAuthApplicationInfo oAuthApplicationInfo = new OAuthApplicationInfo();
             oAuthApplicationInfo.setClientId(createdApp.getOauthConsumerKey());
             oAuthApplicationInfo.setCallBackURL(createdApp.getCallbackUrl());
             oAuthApplicationInfo.setClientSecret(createdApp.getOauthConsumerSecret());
-//            oAuthApplicationInfo.addParameter(ApplicationConstants.
-//                    OAUTH_CLIENT_SECRET, createdApp.getOauthConsumerSecret());
+
             oAuthApplicationInfo.addParameter(ApplicationConstants.
-                    OAUTH_REDIRECT_URIS, createdApp.getCallbackUrl());
+                                                      OAUTH_REDIRECT_URIS, createdApp.getCallbackUrl());
             oAuthApplicationInfo.addParameter(ApplicationConstants.
-                    OAUTH_CLIENT_NAME, createdApp.getApplicationName());
+                                                      OAUTH_CLIENT_NAME, createdApp.getApplicationName());
             oAuthApplicationInfo.addParameter(ApplicationConstants.
-                    OAUTH_CLIENT_GRANT, createdApp.getGrantTypes());
+                                                      OAUTH_CLIENT_GRANT, createdApp.getGrantTypes());
 
             return oAuthApplicationInfo;
 
