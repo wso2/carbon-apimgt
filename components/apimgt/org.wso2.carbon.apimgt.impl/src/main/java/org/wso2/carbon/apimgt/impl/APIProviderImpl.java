@@ -109,7 +109,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.StringTokenizer;
-import java.util.TreeMap;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
@@ -466,9 +465,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      * @throws org.wso2.carbon.apimgt.api.APIManagementException
      *          if failed to add API
      */
-    public void addAPI(API api) throws APIManagementException {
+    public String addAPI(API api) throws APIManagementException {
         try {
-            createAPI(api);
+            String id=createAPI(api);
             int tenantId = -1234;
             String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(api.getId().getProviderName()));
             try {
@@ -488,6 +487,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     contextCache.put(api.getContext(), true);
                 }
             }
+            return id;
         } catch (APIManagementException e) {          
             throw new APIManagementException("Error in adding API :"+api.getId().getApiName(),e);
         }
@@ -1877,10 +1877,10 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      * @param api API
      * @throws org.wso2.carbon.apimgt.api.APIManagementException if failed to create API
      */
-    private void createAPI(API api) throws APIManagementException {
+    private String createAPI(API api) throws APIManagementException {
         GenericArtifactManager artifactManager = APIUtil.getArtifactManager(registry,
                                                                             APIConstants.API_KEY);
-
+        String id = null;
         //Validate Transports
         validateAndSetTransports(api);
         try {
@@ -1890,6 +1890,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             GenericArtifact artifact = APIUtil.createAPIArtifactContent(genericArtifact, api);
             artifactManager.addGenericArtifact(artifact);
             String artifactPath = GovernanceUtils.getArtifactPath(registry, artifact.getId());
+            id=artifact.getId();
             String providerPath = APIUtil.getAPIProviderPath(api.getId());
             //provider ------provides----> API
             registry.addAssociation(providerPath, artifactPath, APIConstants.PROVIDER_ASSOCIATION);
@@ -1943,7 +1944,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
              }
              handleException("Error while performing registry transaction operation", e);
         }
-        
+        return id;
     }
 
     /**
@@ -2855,7 +2856,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         api.setContext(context);
         api.setVisibility(APIConstants.API_GLOBAL_VISIBILITY);
         api.setLastUpdated(new Date());
-        return saveAPI(api, true);
+        Map<String,String> results=new HashMap<String, String>();
+        results=saveAPI(api, true);
+        return results.get("id");
 
     }
 
@@ -3020,7 +3023,10 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         //swallowing the excepion since the api update should happen even if cache update fails
         //--------------     log.error("Error while removing the scope cache", e);
         //------------------- }
-        return saveAPI(api, false);
+        Map<String,String> results=new HashMap<String, String>();
+        results=saveAPI(api, false);
+        return results.get("failedGateways");
+
     }
 
     public String updateDesignAPI(JSONObject apiObj)
@@ -3105,7 +3111,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         api.setVisibility(visibility);
         api.setVisibleRoles(visibleRoles != null ? visibleRoles.trim() : null);
         api.setLastUpdated(new Date());
-        return saveAPI(api, false);
+        Map<String,String> results=new HashMap<String, String>();
+        results=saveAPI(api, false);
+        return results.get("failedGateways");
     }
 
     public String implementAPI(JSONObject apiObj) throws APIManagementException {
@@ -3175,7 +3183,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             // Set<URITemplate> uriTemplates = parseResourceConfig(apiProvider, apiId, (String) swaggerContent, api);
             // api.setUriTemplates(uriTemplates);
         }
-        return saveAPI(api, false);
+        Map<String,String> results= new HashMap<String, String>();
+        results=saveAPI(api, false);
+        return results.get("id");
     }
 
     /**
@@ -3186,8 +3196,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      * @return json string of failed Environments
      * @throws APIManagementException
      */
-    private String saveAPI(API api,
+    private Map<String,String> saveAPI(API api,
                            boolean create) throws APIManagementException {
+        Map<String,String> results=new HashMap<String,String>();
         String success = null;
         boolean isTenantFlowStarted = false;
         try {
@@ -3210,25 +3221,31 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 /*Set permissions to anonymous role for thumbPath*/
             // APIUtil.setResourcePermissions(api.getId().getProviderName(), null, null, thumbPath);
             //}------------
+            String id;
             if (create) {
-                addAPI(api);
+                id=addAPI(api);
                 success = createFailedGatewaysAsJsonString(Collections.<String, List<String>>emptyMap());
+                results.put("id",id);
+                results.put("failedGateways",success);
             } else {
                 Map<String, List<String>> failedGateways = updateAPI(api);
                 success = createFailedGatewaysAsJsonString(failedGateways);
+                results.put("id",null);
+                results.put("failedGateways",success);
             }
 
         } catch (APIManagementException e) {
             handleException("Error while adding the API- " + api.getId().getApiName() + "-" + api.getId().getVersion(),
                             e);
-            return createFailedGatewaysAsJsonString(Collections.<String, List<String>>emptyMap());
+            results.put("id",null);
+            results.put("failedGateways",createFailedGatewaysAsJsonString(Collections.<String, List<String>>emptyMap()));
         } finally {
             if (isTenantFlowStarted) {
                 PrivilegedCarbonContext.endTenantFlow();
             }
         }
 
-        return success;
+        return results;
     }
 
     /**

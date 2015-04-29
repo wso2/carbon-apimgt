@@ -20,6 +20,7 @@ asset.manager = function(ctx) {
     var apiPublisher =  require('apipublisher').apipublisher;
     var LOGGED_IN_USER = 'LOGGED_IN_USER';
     var log = new Log('default-asset'); 
+
     
     var generate_swagger_object=function(swagger){
     swaggerObj = {
@@ -35,26 +36,31 @@ asset.manager = function(ctx) {
     }  
     return {
         importAssetFromHttpRequest: function(options) {
-            return options;
+            var asset = {};
+            var attributes = {};            
+            if (options.id) {
+            asset.id = options.id;
+            }       
+            asset.attributes=options;
+            //asset.name = this._super.getName.call(asset);
+            return asset;
         },        
         create: function(options) {
             var result,obj,error,message,data;
-            var api = {};           
-            if(options.action=="design"){
-            api.apiName = options.overview_name;
-            api.name = options.overview_name;
-            api.version = options.overview_version;
-            if (options.provider == null) {
+            var api = {}; 
+            var rxtModule = require('rxt');
+            var assetMod = rxtModule.asset;          
+            if(options.attributes.action=="design"){
+            api.apiName = options.attributes.overview_name;
+            api.name = options.attributes.overview_name;
+            api.version = options.attributes.overview_version;
+            if (options.attributes.provider == null) {
                 api.provider = ctx.username;
             } else {
-                api.provider = options.overview_provider;
+                api.provider = options.attributes.overview_provider;
             }                    
-            api.context = options.overview_context;
-             var apiId = {
-                apiName : api.name,
-                version : api.version,
-                provider: api.provider
-            }; 
+            api.context = options.attributes.overview_context;
+           
            //  api.imageUrl = request.getFile("apiThumb");
 
             //validate uploaded image
@@ -80,26 +86,19 @@ asset.manager = function(ctx) {
                     print(obj);
                     return;
                 }
-            }
-
-            api.description = options.overview_description;
-            api.tags = options.overview_tags;           
-            api.visibility = options.visibility;
-            api.visibleRoles = options.roles;
-            api.swagger = generate_swagger_object(options.swagger);                 
-            result = apiProxy.updateDesignAPI(api);
-            if (result.error==true) {
-                obj = {
-                    error:true,
-                    message:result.message
-                };
-            } else {
-                obj = {
-                    error:false,
-                    data :apiId
+                else{
+                options.id=result; 
+                options.name=api.name; 
+                options.attributes.overview_provider=api.provider;
+                options.attributes.overview_status='CREATED';               
                 }
-            }
-            return obj;
+            }            
+            api.description = options.attributes.overview_description;
+            api.tags = options.attributes.overview_tags;           
+            api.visibility = options.attributes.visibility;
+            api.visibleRoles = options.attributes.roles;
+            api.swagger = generate_swagger_object(options.attributes.swagger);                 
+            result = apiProxy.updateDesignAPI(api);           
             }          
             
 
@@ -171,7 +170,7 @@ asset.configure = function (ctx) {
                 name: 'APILifeCycle',
                 commentRequired: false,
                 defaultLifecycleEnabled:true,
-                defaultAction: 'Promote',
+                defaultAction: '',
                 deletableStates: [],
                 publishedStates: ['Published'],
                 lifecycleEnabled: true
@@ -206,7 +205,7 @@ asset.renderer = function (ctx) {
         }
         for (var index in activatedAssets) {
             if (activatedAssets[index] == assetType) {
-                log.info(activatedAssets[index] + "&" + assetType);
+                //log.info(activatedAssets[index] + "&" + assetType);
                 return true;
             }
         }
@@ -253,7 +252,7 @@ asset.renderer = function (ctx) {
             }
         },
         details: function (page) {
-            log.info(page);
+            //log.info(page);
             //Doing this because when there are no value specified in column such as thumbnail column it return string "null"
             // value which need be explicitly set to null
             if (page.assets.thumbnail == 'null') {

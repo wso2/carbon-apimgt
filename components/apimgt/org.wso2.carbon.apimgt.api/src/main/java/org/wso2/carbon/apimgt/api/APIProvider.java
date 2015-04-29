@@ -141,7 +141,7 @@ public interface APIProvider extends APIManager {
      * @param api API
      * @throws org.wso2.carbon.apimgt.api.APIManagementException if failed to add API
      */
-    public void addAPI(API api) throws APIManagementException;
+    public String addAPI(API api) throws APIManagementException;
 
     /**
      * Updates an existing API. This method must not be used to change API status. Implementations
