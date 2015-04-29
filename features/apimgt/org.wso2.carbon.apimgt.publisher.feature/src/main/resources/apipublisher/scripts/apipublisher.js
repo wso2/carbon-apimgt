@@ -98,13 +98,84 @@ var apipublisher = {};
         return this.impl.getDefaultVersion(apiId);
     };
     APIProviderProxy.prototype.getCustomFaultSequences = function () {
-        return this.impl.getCustomFaultSequences();
+        var sequences;
+        try {
+            sequences = JSON.parse(this.impl.getCustomFaultSequences());
+            if (log.isDebugEnabled()) {
+                log.debug("getCustomInSequences " +  " : " + sequences);
+            }
+
+            return {
+                error:false,
+                sequences:sequences
+            };
+        } catch (e) {
+            log.error(e.message);
+            return {
+                error:e,
+                sequences:null
+            };
+        }
     };
     APIProviderProxy.prototype.getCustomInSequences = function () {
-        return this.impl.getCustomInSequences();
+        var sequences;
+        try {
+            sequences = JSON.parse(this.impl.getCustomInSequences());
+            if (log.isDebugEnabled()) {
+                log.debug("getCustomInSequences " +  " : " + sequences);
+            }
+
+            return {
+                error:false,
+                sequences:sequences
+            };
+        } catch (e) {
+            log.error(e.message);
+            return {
+                error:e,
+                sequences:null
+            };
+        }
     };
     APIProviderProxy.prototype.getCustomOutSequences = function () {
-        return this.impl.getCustomOutSequences();
+        var sequences;
+        try {
+            sequences = JSON.parse(this.impl.getCustomOutSequences());
+            if (log.isDebugEnabled()) {
+                log.debug("getCustomOutSequences " +  " : " + sequences);
+            }
+
+            return {
+                error:false,
+                sequences:sequences
+            };
+        } catch (e) {
+            log.error(e.message);
+            return {
+                error:e,
+                sequences:null
+            };
+        }
+    };
+    APIProviderProxy.prototype.getEnvironments = function () {
+        var environments;
+        try {
+            environments = JSON.parse(this.impl.getEnvironments());
+            if (log.isDebugEnabled()) {
+                log.debug("getCustomOutSequences " +  " : " + sequences);
+            }
+
+            return {
+                error:false,
+                environments:environments
+            };
+        } catch (e) {
+            log.error(e.message);
+            return {
+                error:e,
+                environments:null
+            };
+        }
     };
     APIProviderProxy.prototype.updateSubscription = function (apiId, status, appId) {
         return this.impl.updateSubscription(apiId, status, appId);
@@ -132,15 +203,14 @@ var apipublisher = {};
         identifier.put(API_PROVIDER, apiProvider);
         identifier.put(API_NAME, apiName);
         identifier.put(API_VERSION, apiVersion);
-        defaultVersion = this.getDefaultVersion(identifier);
-        hasDefaultVersion = (defaultVersion != null);
+        var defaultVersion = this.getDefaultVersion(identifier);
+        var hasDefaultVersion = (defaultVersion != null);
         var api;
         try {
             result = this.impl.getAPI(identifier);
             if (log.isDebugEnabled()) {
                 log.debug("getAPI : " + stringify(result));
             }
-
             api = {
                 name: result.get('name'),
                 version: result.get('version'),
@@ -223,9 +293,47 @@ var apipublisher = {};
         return this.impl.checkIfAPIExists(apiProvider, apiName, apiVersion);
     };
 
+    APIProviderProxy.prototype.isSynapseGateway = function () {
+        var result;
+        try {
+            result = this.impl.isSynapseGateway();
+            if (log.isDebugEnabled()) {
+                log.debug("Invoke getExternalAPIStores()" );
+            }
+            return {
+                error:false,
+                isSynapseGateway:result
+            };
+        } catch (e) {
+            log.error(e.message);
+            return {
+                error:e
+            };
+        }
+    };
+
     APIProviderProxy.prototype.getSwagger12Resource = function (apiProvider, apiName, apiVersion) {
         var identifier = new Packages.org.wso2.carbon.apimgt.api.model.APIIdentifier(apiProvider, apiName, apiVersion);
         return JSON.parse(this.impl.getSwagger12Definition(identifier));
+    };
+
+    APIProviderProxy.prototype.isMultipleTenantsAvailable = function(){
+        try {
+            result = this.impl.isMultipleTenantsAvailable();
+            if (log.isDebugEnabled()) {
+                log.debug("Invoke isMultipleTenantsAvailable()" );
+            }
+            return {
+                error:false,
+                status:result
+            };
+        } catch (e) {
+            log.error(e.message);
+            return {
+                error:true,
+                message:e
+            };
+        }
     };
 })(apipublisher);
 

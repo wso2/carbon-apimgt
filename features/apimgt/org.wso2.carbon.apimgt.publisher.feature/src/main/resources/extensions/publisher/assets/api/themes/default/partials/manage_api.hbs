@@ -14,11 +14,11 @@
 		{{/each}}
 	];
 
-	{{#each api.configuredTiers}}
-		{{#if this.last}},
-		var DEFAULT_TIER = "{{this.tierName}}";
-		{{/if}}
-	{{/each}}
+		{{#each api.configuredTiers}}
+			{{#if this.last}}
+			var DEFAULT_TIER = "{{this.tierName}}";
+			{{/if}}
+		{{/each}}
 	var DEFAULT_AUTH = "Application & Application User";
 	var OPTION_DEFAULT_AUTH = "None";
 	var insequence = "{{api.inSequence}}";
@@ -120,7 +120,13 @@
 									<div class="controls">
 										<select id="tier" name="tier" class="multiselect selected hide required"
 										        multiple="multiple">
+											{{#each api.filteredTiers}}
+												<option value="{{this.tierName}}"{{#if this.available}}selected="selected"{{/if}}>{{this.tierDisplayName}}</option>
+											{{/each}}
 										</select>
+										<script type="text/javascript">
+
+										</script>
 									</div>
 								</div>
 								<div class="control-group transport-styles col-md-8">
@@ -129,16 +135,15 @@
 												class="requiredAstrix">*</span></label>
 									</div>
 									<div class="controls">
-
 										<div class="checkbox">
 											<label class="checkbox inline">
 												<input type="checkbox" id="transport_http" name="transport_http" value="http"
-													{{#if api.transport_http.checked}} checked {{/if}}/> {{t "http"}}
+													{{#if api.transport_http_configured}} checked {{/if}}/> {{t "http"}}
 											</label>
 											<label class="checkbox inline">
 												<input type="checkbox" id="transport_https" name="transport_https"
 												       value="https"
-													{{#if api.transport_https.checked}} checked {{/if}}/>{{t "https"}}
+													{{#if api.transport_https_configured}} checked {{/if}}/>{{t "https"}}
 											</label>
 										</div>
 									</div>
@@ -165,7 +170,7 @@
 											<table class="table table-bordered table-striped" id="seqTable"
 												{{#unless api.inSequence}}
 													{{#unless api.outSequence}}
-														{{#unless api.outSequence}}
+														{{#unless api.faultSequence}}
                                                    style="display:none"
 														{{/unless}}
 													{{/unless}}
@@ -234,29 +239,28 @@
 								<!--Response Caching End -->
 
 								<div class="control-group col-md-8">
-									{{#if api.visibility.public}}
-										{{#if isMultipleTenantsAvailable}}
+									{{#if api.publicVisibility}}
+										{{#if api.isMultipleTenantsAvailable}}
 											<label class="control-label" for="subscriptions">{{t "Subscriptions"}}:</label>
 
 											<div class="controls">
-												{{#if api.visibility.public}}
+												{{#if api.publicVisibility}}
 													<select class="select required" id="subscriptions" name="subscriptions">
 														<option value="current_tenant"
-														        selected="selected">{{t "Available to current tenant only"}}</option>
+															{{#if api.subscriptionAvailabilityCurrentTenant}}
+															    selected="selected" {{/if}}>{{t "Available to current tenant only"}}</option>
+														<option value="all_tenants"
+															{{#if api.subscriptionAvailabilityAllTenants}}
+															    selected="selected" {{/if}}
+																>{{t "Available to all the tenants"}}</option>
+														{{#unless apiConfig.enableSelectedTenantSubscription}}
+															<option value="specific_tennats" {{#if api
+															.subscriptionAvailabilitySpecificTenants}}selected="selected"{{/if}} >{{t "Available to specific tenants"}}</option>
+														{{/unless}}
 													</select>
 												{{else}}
 													<select class="select required" id="subscriptions" name="subscriptions">
-														<option value="current_tenant"
-															{{#if api.subscriptionAvailability.currentTenant}}
-															    selected="selected" {{/if}}>{{t "Available to current tenant only"}}</option>
-														<option value="all_tenants"
-															{{#if api.subscriptionAvailability.allTenants}}
-															    selected="selected" {{/if}}
-																>{{t "Available to all the tenants"}}</option>
-														{{#unless enableSelectedTenantSubscription}}
-															<option value="specific_tennats" {{#if api.subscriptionAvailability
-															.specificTenants}}selected="selected"{{/if}} >{{t "Available to specific tenants"}}</option>
-														{{/unless}}
+														<option value="current_tenant" selected="selected">{{t "Available to current tenant only"}}</option>
 													</select>
 												{{/if}}
 												<a class="icon-question-sign help_popup" help_data="subscriptions_help"></a>
@@ -272,174 +276,155 @@
 										{{/if}}
 									{{/if}}
 									<br/>
-										<div class="control-group" id="tennatsDiv" {{#if api.subscriptionAvailability
-								.specificTenants}}style="display: none;"{{/if}}
-									<label class="control-label col-md-2" for="tenants" id="tennatLabel" name="tennatLabel">
-										{{t "Tenants"}}:<span class="requiredAstrix">*</span>
-									</label>
+									<div class="control-group" id="tennatsDiv" {{#unless api
+									.subscriptionAvailabilitySpecificTenants}}style="display: none;"{{/unless}}>
+										<label class="control-label" for="tenants" id="tennatLabel" name="tennatLabel">
+											{{t "Tenants"}}:<span class="requiredAstrix">*</span>
+										</label>
 
-									<div class="controls col-md-4">
-										<input type="text" class="input required"
-										       id="tenants" name="tenants" value="{{api.subscriptionTenants}}"/>
+										<div class="controls">
+											<input type="text" class="input required"
+											       id="tenants" name="tenants" value="{{api.subscriptionTenants}}"/>
 
-										<p class="help-block"
-										   id="tennatsHelp">{{t "Comma separated list (e.g.,: tenant1,tenant2,tenant3)"}}</p>
+											<p class="help-block"
+											   id="tennatsHelp">{{t "Comma separated list (e.g.,: tenant1,tenant2,tenant3)"}}</p>
+										</div>
 									</div>
 								</div>
-					</div>
-					</fieldset>
-					<fieldset>
-						<legend class="legend-with-hidden-info js_hidden_section_title">Gateway Environments<i class="icon-chevron-right icon-keys"></i></legend>
-						<div style="display: none">
-							<!--legend>Environments</legend-->
-							<div class="environments_headings">
-								<div class="environments_checkbox"></div>
-								<div class="environments_data">Environment Name</div>
-								<div class="environments_data">Type</div>
-								<div class="environments_data">Description</div>
-							</div>
-
-							{{#if api.environments.none}}
-								{{#each api.environments}}
+							</fieldset>
+							<fieldset>
+								<legend class="legend-with-hidden-info js_hidden_section_title">Gateway Environments<i class="icon-chevron-right icon-keys"></i></legend>
+								<div style="display: none">
+									<!--legend>Environments</legend-->
 									<div class="environments_headings">
-										<div class="environments_checkbox"><input type="checkbox" value="{{this.name}}" class="env"></div>
-										<div class="environments_data">{{this.name}}</div>
-										<div class="environments_data">{{this.type}}</div>
-										<div class="environments_data">{{this.description}}</div>
+										<div class="environments_checkbox"></div>
+										<div class="environments_data">Environment Name</div>
+										<div class="environments_data">Type</div>
+										<div class="environments_data">Description</div>
 									</div>
-								{{/each}}
-							{{else}}
-								{{#each api.environments}}
-									{{#if environmentsJson.split}}
-										<div class="data_headings">
-											<div class="environments_checkbox"><input type="checkbox" value="{{this.name}}" checked class="env"></div>
+
+									{{#each api.filteredEnvironmentList}}
+										<div class="environments_headings">
+											<div class="environments_checkbox"><input type="checkbox" value="{{this.name}}"
+																					  {{#if this.contained}}checked{{/if}}  class="env"></div>
 											<div class="environments_data">{{this.name}}</div>
 											<div class="environments_data">{{this.type}}</div>
 											<div class="environments_data">{{this.description}}</div>
 										</div>
-									{{/if}}
-								{{else}}
-									<div class="data_headings">
-										<div class="environments_checkbox"><input type="checkbox" value="{{this.name}}" class="env"></div>
-										<div class="environments_data">{{this.name}}</div>
-										<div class="environments_data">{{this.type}}</div>
-										<div class="environments_data">{{this.description}}</div>
-									</div>
-								{{/each}}
-							{{/if}}
-						</div>
-						<script>
-							$('input').on('change', function() {
-								var values = $('input:checked.env').map(function() {
-									return this.value;
-								}).get();
-								if(values==""){
-									values="none";
-								}
-								$('#environments').val(values.toString());
-							});
-						</script>
-						<style>
-							.environments_headings{
-								border-bottom: solid 1px;
-								border-bottom-color: gainsboro;
-								padding-bottom: 5px;
-								alignment-baseline: auto;
-								font-weight:bold;
-							}
+									{{/each}}
+								</div>
+								<script>
+									$('input').on('change', function() {
+										var values = $('input:checked.env').map(function() {
+											return this.value;
+										}).get();
+										if(values==""){
+											values="none";
+										}
+										$('#environments').val(values.toString());
+									});
+								</script>
+								<style>
+									.environments_headings{
+										border-bottom: solid 1px;
+										border-bottom-color: gainsboro;
+										padding-bottom: 5px;
+										alignment-baseline: auto;
+										font-weight:bold;
+									}
 
-							.data_headings{
-								border-bottom: solid 1px;
-								border-bottom-color: gainsboro;
-								padding-bottom: 5px;
-								alignment-baseline: auto;
-							}
+									.data_headings{
+										border-bottom: solid 1px;
+										border-bottom-color: gainsboro;
+										padding-bottom: 5px;
+										alignment-baseline: auto;
+									}
 
-							.environments_checkbox{
-								text-align: left;
-								display: inline-block;
-								vertical-align: top;
-								*display: inline;
-								padding :5px;
-								width:20px;
-							}
-							.environments_data{
-								text-align: left;
-								display: inline-block;
-								vertical-align: top;
-								*display: inline;
-								*zoom: 1;
-								padding :5px;
-								text-align:left;
-								width:200px;
-							}
-						</style>
-					</fieldset>
+									.environments_checkbox{
+										text-align: left;
+										display: inline-block;
+										vertical-align: top;
+										*display: inline;
+										padding :5px;
+										width:20px;
+									}
+									.environments_data{
+										text-align: left;
+										display: inline-block;
+										vertical-align: top;
+										*display: inline;
+										*zoom: 1;
+										padding :5px;
+										text-align:left;
+										width:200px;
+									}
+								</style>
+							</fieldset>
 
-					<fieldset>
-						<legend class="legend-with-hidden-info js_hidden_section_title">{{t "Business Information"}} <i
-								class="icon-chevron-right
+							<fieldset>
+								<legend class="legend-with-hidden-info js_hidden_section_title">{{t "Business Information"}} <i
+										class="icon-chevron-right
 					icon-keys"></i></legend>
-						<div style="display: none">
-							<!--legend>Business Information</legend-->
+								<div style="display: none">
+									<!--legend>Business Information</legend-->
 
-							<div class="control-group col-md-8">
-								<label class="control-label" for="bizOwner">{{t "Business Owner"}}:</label>
-								<div class="controls">
-									<input type="text" class="input-xlarge validInput" id="bizOwner" name="bizOwner"
-									       value="{{api.bizOwner}}"/>
+									<div class="control-group col-md-8">
+										<label class="control-label" for="bizOwner">{{t "Business Owner"}}:</label>
+										<div class="controls">
+											<input type="text" class="input-xlarge validInput" id="bizOwner" name="bizOwner"
+											       value="{{api.bizOwner}}"/>
+										</div>
+									</div>
+									<div class="control-group col-md-8">
+										<label class="control-label" for="bizOwnerMail">{{t "Business Owner Email"}} :</label>
+										<div class="controls">
+											<input type="text" class="input-xlarge email" id="bizOwnerMail" name="bizOwnerMail"
+											       value="{{api.bizOwnerMail}}"/>
+										</div>
+									</div>
+									<div class="control-group col-md-8">
+										<label class="control-label" for="techOwner">{{t "Technical  Owner"}} :</label>
+										<div class="controls">
+											<input type="text" class="input-xlarge validInput" id="techOwner" name="techOwner"
+											       value="{{api.techOwner}}"/>
+										</div>
+									</div>
+									<div class="control-group col-md-8">
+										<label class="control-label" for="techOwnerMail">{{t "Technical Owner Email"}} :</label>
+										<div class="controls">
+											<input type="text" class="input-xlarge email" id="techOwnerMail" name="techOwnerMail"
+											       value="{{api.techOwnerMail}}"/>
+										</div>
+									</div>
 								</div>
-							</div>
-							<div class="control-group col-md-8">
-								<label class="control-label" for="bizOwnerMail">{{t "Business Owner Email"}} :</label>
-								<div class="controls">
-									<input type="text" class="input-xlarge email" id="bizOwnerMail" name="bizOwnerMail"
-									       value="{{api.bizOwnerMail}}"/>
-								</div>
-							</div>
-							<div class="control-group col-md-8">
-								<label class="control-label" for="techOwner">{{t "Technical  Owner"}} :</label>
-								<div class="controls">
-									<input type="text" class="input-xlarge validInput" id="techOwner" name="techOwner"
-									       value="{{api.techOwner}}"/>
-								</div>
-							</div>
-							<div class="control-group col-md-8">
-								<label class="control-label" for="techOwnerMail">{{t "Technical Owner Email"}} :</label>
-								<div class="controls">
-									<input type="text" class="input-xlarge email" id="techOwnerMail" name="techOwnerMail"
-									       value="{{api.techOwnerMail}}"/>
-								</div>
-							</div>
-						</div>
-					</fieldset>
+							</fieldset>
 
-					<div id="api_designer">
-						<div id ="apidoc_details"></div>
-						<legend>Resources</legend>
-						<div id="scopes_view"></div>
-						<div id ="resource_details"></div>
-					</div>
-					<input type="hidden" id="environments" name="environments" value='{{environmentsJson}}'/>
-					<input type="hidden" name="name" value="{{api.name}}" />
-					<input type="hidden" name="version" value="{{api.version}}" />
-					<input type="hidden" name="provider" value="{{api.provider}}" />
-					<input type="hidden" name="action" value="manage" />
-					<input type="hidden" id="swagger" name="swagger" value="" />
-					<div class="form-actions" style="display:none" id="saveMessage">
-						<div class="btn loadingButton">Saving API. Please wait..</div>
-					</div>
-					<div class="form-actions" id="saveButtons">
-						<button class="btn btn-info" id="save_api" data-loading-text="<i class='fa fa-spinner fa-pulse'
+							<div id="api_designer">
+								<div id ="apidoc_details"></div>
+								<legend>Resources</legend>
+								<div id="scopes_view"></div>
+								<div id ="resource_details"></div>
+							</div>
+							<input type="hidden" id="environments" name="environments" value='{{environmentsJson}}'/>
+							<input type="hidden" name="name" value="{{api.name}}" />
+							<input type="hidden" name="version" value="{{api.version}}" />
+							<input type="hidden" name="provider" value="{{api.provider}}" />
+							<input type="hidden" name="action" value="manage" />
+							<input type="hidden" id="swagger" name="swagger" value="" />
+							<div class="form-actions" style="display:none" id="saveMessage">
+								<div class="btn loadingButton">Saving API. Please wait..</div>
+							</div>
+							<div class="form-actions" id="saveButtons">
+								<button class="btn btn-info" id="save_api" data-loading-text="<i class='fa fa-spinner fa-pulse'
 					id='loader'></i>Loading">{{t "Save"}}</button>
-						{{#if outputs.isPermitted}} <button class="btn btn-primary" id="publish_api" data-loading-text="<i
+								{{#if outputs.isPermitted}} <button class="btn btn-primary" id="publish_api" data-loading-text="<i
 					class='fa fa-spinner fa-pulse' id='loader'></i>Loading">Save & Publish</button> {{/if}}
-						<input type="reset" class="btn" value="{{t "Cancel"}}" onclick="javascript:window.location.href='./'" />
+								<input type="reset" class="btn" value="{{t "Cancel"}}" onclick="javascript:window.location.href='./'" />
+							</div>
+						</form>
 					</div>
-					</form>
 				</div>
 			</div>
 		</div>
 	</div>
-</div>
 </div>
