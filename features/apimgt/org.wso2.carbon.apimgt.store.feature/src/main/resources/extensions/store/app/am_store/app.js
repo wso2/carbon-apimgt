@@ -28,6 +28,10 @@ app.server = function(ctx) {
                 url: 'applications',
                 path: 'applications.jag',
                 secured:true
+            }, {
+                url: 'subscriptions',
+                path: 'subscriptions.jag',
+                secured:true
             }]
         },
         configs: {

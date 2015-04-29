@@ -39,7 +39,7 @@ asset.manager = function(ctx) {
         },        
         create: function(options) {
             var result,obj,error,message,data;
-            var api = {};
+            var api = {};           
             if(options.action=="design"){
             api.apiName = options.overview_name;
             api.name = options.overview_name;
@@ -50,6 +50,11 @@ asset.manager = function(ctx) {
                 api.provider = options.overview_provider;
             }                    
             api.context = options.overview_context;
+             var apiId = {
+                apiName : api.name,
+                version : api.version,
+                provider: api.provider
+            }; 
            //  api.imageUrl = request.getFile("apiThumb");
 
             //validate uploaded image
@@ -101,7 +106,7 @@ asset.manager = function(ctx) {
         },
         remove : function(id) {
             var asset = this.get.call(this, id);
-            log.debug("Removing API of Id " +id+ "Name " + asset.attributes.overview_name);
+           // log.debug("Removing API of Id " +id+ "Name " + asset.attributes.overview_name);
             var apiProxy = apiPublisher.instance(ctx.username);
             return apiProxy.deleteAPI(asset.attributes.overview_provider, asset.attributes.overview_name, asset.version);
         },
@@ -131,6 +136,10 @@ asset.server = function (ctx) {
                         title: 'Tier Permissions',
                         url: 'tier_permissions',
                         path: 'tier_permissions.jag'
+                    }, {
+                        title: 'Manage',
+                        url: 'manage',
+                        path: 'manage.jag'
                     }],
             apis: [{
                        url: 'endpoints',
@@ -138,6 +147,9 @@ asset.server = function (ctx) {
                    }, {
                        url: 'prototype',
                        path: 'prototype.jag'
+                   }, {
+                       url: 'swagger',
+                       path: 'swagger.jag'
                    }, {
                        url: 'tiers',
                        path: 'tiers.jag'
@@ -155,8 +167,18 @@ asset.configure = function (ctx) {
             }
         },
         meta: {
+            lifecycle: {
+                name: 'APILifeCycle',
+                commentRequired: false,
+                defaultLifecycleEnabled:true,
+                defaultAction: 'Promote',
+                deletableStates: [],
+                publishedStates: ['Published'],
+                lifecycleEnabled: true
+            },
             thumbnail: 'overview_thumbnail'
         }
+
     };
 };
 asset.renderer = function (ctx) {

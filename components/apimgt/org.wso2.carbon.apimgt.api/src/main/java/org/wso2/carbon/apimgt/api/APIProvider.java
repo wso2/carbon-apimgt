@@ -413,7 +413,7 @@ public interface APIProvider extends APIManager {
      * @return
      * @throws org.wso2.carbon.apimgt.api.APIManagementException
      */
-    public String getSwagger12Definition(APIIdentifier apiId) throws APIManagementException;
+    public JSONObject getSwagger12Definition(APIIdentifier apiId) throws APIManagementException;
 
     /**
      * Returns all the Consumer keys of applications which are subscribed to given API
