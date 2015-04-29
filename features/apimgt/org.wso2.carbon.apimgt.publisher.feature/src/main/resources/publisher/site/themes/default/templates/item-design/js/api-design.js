@@ -266,7 +266,7 @@ APIDesigner.prototype.init_controllers = function(){
 
     this.container.delegate( ".delete_resource", "click", function( event ) {        
         var operations = API_DESIGNER.query($(this).attr('data-path'));
-        var operation = operations[0];
+        var operations = operations[0]
         var i = $(this).attr('data-index');
         var pn = $(this).attr('data-path-name');
         var op = $(this).attr('data-operation');        
