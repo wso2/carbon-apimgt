@@ -2685,7 +2685,7 @@ Set<API> apiSet) throws APIManagementException {
                 PrivilegedCarbonContext.endTenantFlow();
             }
         }
-    	return null;
+    	return subscriptionArray;
     }
 
 }
