@@ -23,23 +23,21 @@ require('/modules/store.js').exec(function (ctx) {
     var user = server.current(ctx.session);
     var apistore = require('apistore').apistore.instance(user.username);
     var options = request.getAllParameters('UTF-8');
-    var method = request.getMethod();
+    var httpMethod = request.getMethod();
 
-    switch (method) {
+    switch (httpMethod) {
         case 'GET':
-            var data = apistore.getApplications(user.username);
-            response.contentType = 'application/json';
-            // log.info('data :: ' + data);
-            print(JSON.parse(data));
+            log.info('GET :: ' + httpMethod);
             break;
 
         case 'POST':
+            log.info('POST :: ' + httpMethod);
             apistore.addApplication(options.overview_name, user.username, options.overview_tier,
                     options.overview_callbackurl, options.overview_description);
             break;
 
         default:
-            log.info('default :: ' + method);
+            log.info('default :: ' + httpMethod);
             break;
     }
 

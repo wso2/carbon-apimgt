@@ -1,6 +1,6 @@
 <%
 /*
- *  Copyright (c) 2005-2015, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *  Copyright (c) 2015, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  *  WSO2 Inc. licenses this file to you under the Apache License,
  *  Version 2.0 (the "License"); you may not use this file except
@@ -17,27 +17,27 @@
  *  under the License.
  *
  */
-var caramel;
-require('/modules/store.js').exec(function(ctx) {
-    caramel = require('caramel');
+require('/modules/store.js').exec(function (ctx) {
     var log = new Log();
-    var ui = require('rxt').ui;
-    var asset = require('rxt').asset;
-    var uriMatcher = new URIMatcher(ctx.request.getRequestURI());
-    var options = uriMatcher.match('/{context}/asts/{type}/{pageName}');
-    var type = options.type;
-    var am = asset.createUserAssetManager(ctx.session, type);
-    var page = ui.buildPage(ctx.session, ctx.request);
-    // var appList = am.list();
-    // var output = am.renderBasic(appList,page)._custom();
-    var output = am.renderBasic(page)._custom();
     var server = require('store').server;
     var user = server.current(ctx.session);
     var apistore = require('apistore').apistore.instance(user.username);
-    var data = apistore.getApplications(user.username);
-    if(data != null){
-        output.appsWithSubs = JSON.parse(data);
+    var options = request.getAllParameters('UTF-8');
+    var httpMethod = request.getMethod();
+
+    switch (httpMethod) {
+        case 'GET':
+            log.info('GET :: ' + httpMethod);
+            break;
+
+        case 'POST':
+            log.info('POST :: ' + httpMethod);
+            break;
+
+        default:
+            log.info('default :: ' + httpMethod);
+            break;
     }
-    caramel.render(output);
+
 }, request, response, session);
 %>
