@@ -28,9 +28,13 @@
                             <execution forEvent="Promote"
                                        class="org.wso2.carbon.apimgt.impl.executors.ApiPublisherExecutor">
                             </execution>
+                            <execution forEvent="Publish"
+                                       class="org.wso2.carbon.apimgt.impl.executors.ApiPublisherExecutor">
+                            </execution>
                         </data>
                     </datamodel>
                     <transition event="Promote" target="Prototyped"/>
+                    <transition event="Publish" target="Published"/>
                 </state>
 
                 <state id="Prototyped">
@@ -58,10 +62,14 @@
                             <execution forEvent="Demote"
                                        class="org.wso2.carbon.apimgt.impl.executors.ApiPublisherExecutor">
                             </execution>
+                            <execution forEvent="Deprecate"
+                                       class="org.wso2.carbon.apimgt.impl.executors.ApiPublisherExecutor">
+                            </execution>
                         </data>
                     </datamodel>
                     <transition event="Block" target="Blocked"/>
                     <transition event="Demote" target="Prototyped"/>
+                    <transition event="Deprecate" target="Deprecated"/>
                 </state>
 
                 <state id="Blocked">
@@ -84,7 +92,6 @@
                         <data name="transitionExecution">
                             <execution forEvent="Retire"
                                        class="org.wso2.carbon.apimgt.impl.executors.ApiPublisherExecutor">
-                                <parameter name="apim.test" value="Dummy"/>
                             </execution>
                         </data>
                     </datamodel>
