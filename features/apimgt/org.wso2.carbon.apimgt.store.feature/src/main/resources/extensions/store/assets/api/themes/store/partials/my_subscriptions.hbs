@@ -18,6 +18,7 @@
 
     <div id='subscription-control-panel'>
         <!--The control elements will be rendered in this container-->
+        {{> sub-control-panel .}}
     </div>
 
     <div id='subscription-keys'>
@@ -29,11 +30,11 @@
             </div>
             <div class='row-fluid'>
                 <div class='span7 well' id='prod-token-view'>
-                    Production tokens
+                    {{> sub-keys-generate-prod .}}
                 </div>
 
                 <div class='span5 well' id='prod-domain-view'>
-                    Production domains
+                    {{> sub-domain-token-prod .}}
                 </div>
             </div>
         </div>
@@ -45,18 +46,24 @@
             </div>
             <div class='row-fluid'>
                 <div class='span7 well' id='sand-token-view'>
-                    Sandbox tokens
+                    {{> sub-keys-generate-sand .}}
                 </div>
 
                 <div class='span5 well' id='sand-domain-view'>
-                    Sandbox domains
+                    {{> sub-domain-token-sand .}}
                 </div>
             </div>
         </div>
 
     </div>
 
+    <!-- The subscribed APIs will be rendered here-->
     <div id='subscription-list'>
-        <!-- The subscribed APIs will be rendered here-->
+        <div class='row-fluid'>
+            <legend>{{t "Subscribed APIs "}}</legend>
+        </div>
+        <div id='sand-token-view'>
+            {{> sub-listing .}}
+        </div>
     </div>
 </div>

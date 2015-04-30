@@ -8,38 +8,19 @@
 	];
 
 	var TIERS = [
-		{{#each pi.configuredTiers}}
-			{"value": "{{this.tierName}}", "text": "{{this.tierDisplayName}}"},
+		{{#each api.configuredTiers}}
+			{"value": "{{this.tierName}}", "text": "{{this.tierDisplayName}}"}
+			{{#unless this.last}},{{/unless}}
 		{{/each}}
 	];
 
-	var DEFAULT_TIER = "Unlimited";
+		{{#each api.configuredTiers}}
+			{{#if this.last}}
+			var DEFAULT_TIER = "{{this.tierName}}";
+			{{/if}}
+		{{/each}}
 	var DEFAULT_AUTH = "Application & Application User";
 	var OPTION_DEFAULT_AUTH = "None";
-
-	var addSelectedTiers;
-	$(document).ready(function () {
-		addSelectedTiers = function (target) {
-			var tierDescs, tiersList, tiersDescList, tiers = [];
-			tiersList = "{{api.availableTiers}}";
-			tiersDescList = "{{api.tierDescs}}";
-			tiers = tiersList.split(",");
-			tierDescs = tiersDescList.split(",");
-			for (var i = 0; i < tiers.length; i++) {
-				var tier = tiers[i];
-				var tierDesc = tierDescs[i];
-				for (var j = 0; j < target.options.length; j++) {
-					if (tier == target.options[j].value) {
-						target.options[j].selected = "selected";
-						if (tierDesc != "null") {
-							$("#editTiersHelp").html(tierDesc);
-						}
-					}
-				}
-			}
-		}
-	});
-
 	var insequence = "{{api.inSequence}}";
 	var outsequence = "{{api.outSequence}}";
 	var faultsequence = "{{api.faultSequence}}";
@@ -47,421 +28,403 @@
 	var outSequencesLoaded = false;
 	var faultSequencesLoaded = false;
 </script>
-<div id="item-add">
-	<center>
-		<ul class="new-sub-menu-wizard" style="margin:0 auto">
-			<li>
-				<a href='{{url ""}}/asts/api/create' class="wizard-active">
-					<div class="wizard-number">1</div>
-					<span>Design</span>
-				</a>
-			</li>
-			<li>
-				<a href='{{url ""}}/asts/api/implement' class="<%= implement_wlabel%>">
-					<div class="wizard-number">2</div>
-					<span>Implement</span>
-				</a>
-			</li>
-			<li>
-				<a href='{{url ""}}/asts/api/manage' class="<%= manage_wlabel%>">
-					<div class="wizard-number" >3</div>
-					<span>Manage</span>
-				</a>
-			</li>
-		</ul>
-	</center>
-	<h1>Manage API</h1>
-	<div class="title-section">
-		<h2>{{t api.name}}({{t api.version}}) : {{t api.context}}</h2>
-	</div>
-	<div class="content-section shadow-up">
-		<div class="content-data">
-			<div class="alert alert-error" id="addAPIError" style="display:none">
-				<span id="addErrorSpan"></span>
-			</div>
-			{{#if api}}
-				{{#if api.subs.length}}
-					<div class="alert alert-block" id="editAPIWarn" style="display:block">
+<div id = "api-manage">
+	<div id="item-manage">
+		<center>
+			<ul class="new-sub-menu-wizard" style="margin:0 auto">
+				<li>
+					<a href='{{url ""}}/asts/api/create' class="wizard-active">
+						<div class="wizard-number">1</div>
+						<span>Design</span>
+					</a>
+				</li>
+				<li>
+					<a href='{{url ""}}/asts/api/implement' class="<%= implement_wlabel%>">
+						<div class="wizard-number">2</div>
+						<span>Implement</span>
+					</a>
+				</li>
+				<li>
+					<a href='{{url ""}}/asts/api/manage' class="<%= manage_wlabel%>">
+						<div class="wizard-number" >3</div>
+						<span>Manage</span>
+					</a>
+				</li>
+			</ul>
+		</center>
+		<h1>Manage API</h1>
+		<div class="title-section">
+			<h2>{{api.name}}({{api.version}}) : {{api.context}}</h2>
+		</div>
+		<div class="content-section shadow-up">
+			<div class="content-data">
+				<div class="alert alert-error" id="addAPIError" style="display:none">
+					<span id="addErrorSpan"></span>
+				</div>
+				{{#if api}}
+					{{#if api.subs}}
+						<div class="alert alert-block" id="editAPIWarn" style="display:block">
         			<span id="editWarnSpan"><b>Warning!</b><br/>
        				You are editing an API with active subscribers. Tier Availability changes will not be reflected on
         			active subscriptions.<br/>
         			API Definition for Swagger will not be overriden with the changes you will do to the API.
         			</span>
-					</div>
+						</div>
+					{{/if}}
 				{{/if}}
-			{{/if}}
 
-			<div class="row-fluid">
-				<div class="span12">
-					<form class="form-horizontal" method="POST"
-					      id="manage_form"
-					      enctype="multipart/form-data" action="apis/asts/update?&action=manage">
-						<fieldset>
-							<legend>Configurations</legend>
-							<div class="control-section">
-								<div class="control-group col-md-8">
-									<div class="col-md-2">
-										<label class="control-label">Make this default version</label>
-									</div>
-									<div class="controls">
-										<input type="checkbox" class="default_version_check" id="default_version"
-										       name="default_version" value="default_version"
-											   {{#if api.isDefaultVersion}}checked{{/if}}/>
-										<a class="icon-question-sign help_popup" help_data="default_api_help"></a>
+				<div class="row-fluid">
+					<div class="span12">
+						<form class="form-horizontal" method="POST"
+						      id="manage_form"
+						      enctype="multipart/form-data" action="apis/asts/update?&action=manage">
+							<fieldset>
+								<legend>Configurations</legend>
+								<div class="control-section">
+									<div class="control-group col-md-8">
+										<div class="col-md-2">
+											<label class="control-label">Make this default version</label>
+										</div>
+										<div class="controls">
+											<input type="checkbox" class="default_version_check" id="default_version"
+											       name="default_version" value="default_version"
+												   {{#if api.isDefaultVersion}}checked{{/if}}/>
+											<a class="icon-question-sign help_popup" help_data="default_api_help"></a>
 
-										<p id="default_api_help" class="hide">
-											{{t "Marks one API version in a group as the default, \so that it can be invoked
+											<p id="default_api_help" class="hide">
+												{{t "Marks one API version in a group as the default, \so that it can be invoked
 										without specifying the version number in the URL. For example, i
 										f you mark http://host:port/youtube/2.0 as the default API,
 										requests made to http://host:port/youtube/ are automatically
 										routed to version 2.0. If you mark an unpublished API as the default,
 										the previous default, published API will still be used as the default until
 										the new default API is published"}}</p>
-										{{#if api.isDefaultVersion}}
-										{{else}}
-											{{#if api.hasDefaultVersion}}
-												<p class="help-block">Currently set to version
-												                      : {{api.currentDefaultVersion}}</p>
-											{{else}}
-												<p class="help-block">No default version defined for the current API</p>
-											{{/if}}
-										{{/if}}
-										<input type="hidden" id="default_version_checked" name="default_version_checked"
-										       value="{{#if api.isDefaultVersion}}default_version{{else}} {{/if}}"
+											{{#unless api.isDefaultVersion}}
+												{{#if api.hasDefaultVersion}}
+													<p class="help-block">Currently set to version
+													                      : {{api.currentDefaultVersion}}</p>
+												{{else}}
+													<p class="help-block">No default version defined for the current API</p>
+												{{/if}}
+											{{/unless}}
+											<input type="hidden" id="default_version_checked" name="default_version_checked"
+											       value="{{#if api.isDefaultVersion}}default_version{{/if}}"
+										</div>
 									</div>
 								</div>
-							</div>
-							<div class="control-group col-md-8">
-								<div class="col-md-2">
-									<label class="control-label" for="tier">{{t "Tier Availability"}}:<span
-											class="requiredAstrix">*</span></label>
-								</div>
-								<div class="controls">
-									<select id="tier" name="tier" class="multiselect selected hide required"
-									        multiple="multiple">
-									</select>
-								</div>
-							</div>
-							<div class="control-group transport-styles col-md-8">
-								<div class="col-md-2">
-									<label class="control-label" for="transports">{{t "Transports"}}:<span
-											class="requiredAstrix">*</span></label>
-								</div>
-								<div class="controls">
-
-									<div class="checkbox">
-										<label class="checkbox inline">
-											<input type="checkbox" id="transport_http" name="transport_http" value="http"
-												{{#if api.transport_http.checked}} checked {{/if}}/> {{t "http"}}
-										</label>
-										<label class="checkbox inline">
-											<input type="checkbox" id="transport_https" name="transport_https"
-											       value="https"
-												{{#if api.transport_https.checked}} checked {{/if}}/>{{t "https"}}
-										</label>
-									</div>
-								</div>
-							</div>
-							{{#if api.isSynapseGateway}}
 								<div class="control-group col-md-8">
 									<div class="col-md-2">
-										<label class="control-label" for="sequence">{{t "Sequences"}}:</label>
+										<label class="control-label" for="tier">{{t "Tier Availability"}}:<span
+												class="requiredAstrix">*</span></label>
 									</div>
 									<div class="controls">
-										<label class="checkbox">
-											<input type="checkbox" id="toggleSequence" name="sequence_check"
-											       id="sequence_check"
-												{{#if api.inSequence}}
-													{{#if api.outSequence}}
-														{{#if api.faultSequence}}
-											       checked="checked"
-														{{/if}}
-													{{/if}}
-												{{/if}}
-													> {{t "Check to select a custom sequence to be
-											       executed in the message flow"}}
-										</label>
-										<table class="table table-bordered table-striped" id="seqTable"
-											{{#unless api.inSequence}}
-												{{#unless api.outSequence}}
-													{{#unless api.outSequence}}
-                                               style="display:none"
-													{{/unless}}
-												{{/unless}}
-											{{/unless}}>
-											<thead>
-											<tr>
-												<th>{{t "In Flow"}}</th>
-												<th>{{t "Out Flow"}}</th>
-												<th>{{t "Fualt Flow"}}</th>
-											</tr>
-											</thead>
-											<tr>
-												<td>
-													<select id="inSequence" name="inSequence">
-														<option value="none" selected="selected">{{t "none"}}</option>
-													</select>
-												</td>
-												<td>
-													<select id="outSequence" name="outSequence">
-														<option value="none" selected="selected">{{t "none"}}</option>
-													</select>
-												</td>
-												<td>
-													<select id="faultSequence" name="faultSequence">
-														<option value="none" selected="selected">{{t "none"}}</option>
-													</select>
-												</td>
-											</tr>
-										</table>
+										<select id="tier" name="tier" class="multiselect selected hide required"
+										        multiple="multiple">
+											{{#each api.filteredTiers}}
+												<option value="{{this.tierName}}"{{#if this.available}}selected="selected"{{/if}}>{{this.tierDisplayName}}</option>
+											{{/each}}
+										</select>
+										<script type="text/javascript">
+
+										</script>
 									</div>
 								</div>
-							{{/if}}
-							<!--Response Caching -->
-							<div class="control-group col-md-8">
-								<div class="col-md-2">
-									<label class="control-label" for="responseCache">{{t "Response Caching"}}:</label>
+								<div class="control-group transport-styles col-md-8">
+									<div class="col-md-2">
+										<label class="control-label" for="transports">{{t "Transports"}}:<span
+												class="requiredAstrix">*</span></label>
+									</div>
+									<div class="controls">
+										<div class="checkbox">
+											<label class="checkbox inline">
+												<input type="checkbox" id="transport_http" name="transport_http" value="http"
+													{{#if api.transport_http_configured}} checked {{/if}}/> {{t "http"}}
+											</label>
+											<label class="checkbox inline">
+												<input type="checkbox" id="transport_https" name="transport_https"
+												       value="https"
+													{{#if api.transport_https_configured}} checked {{/if}}/>{{t "https"}}
+											</label>
+										</div>
+									</div>
 								</div>
-								<div class="controls">
-									<select class="select required" id="responseCache" name="responseCache">
-										<option value="disabled {{#if api.responseCache.enabled}}checked{{/if}}">{{t
-										"Disabled"}}</option>
-										<option value="enabled" {{#if api.responseCache.distabled}}checked{{/if}}>{{t
-										"Enabled"}}</option>
-									</select>
-									<a class="icon-question-sign help_popup" help_data="cache_help"></a>
+								{{#if api.isSynapseGateway}}
+									<div class="control-group col-md-8">
+										<div class="col-md-2">
+											<label class="control-label" for="sequence">{{t "Sequences"}}:</label>
+										</div>
+										<div class="controls">
+											<label class="checkbox">
+												<input type="checkbox" id="toggleSequence" name="sequence_check"
+												       id="sequence_check"
+													{{#if api.inSequence}}
+														{{#if api.outSequence}}
+															{{#if api.faultSequence}}
+												       checked="checked"
+															{{/if}}
+														{{/if}}
+													{{/if}}
+														> {{t "Check to select a custom sequence to be
+											       executed in the message flow"}}
+											</label>
+											<table class="table table-bordered table-striped" id="seqTable"
+												{{#unless api.inSequence}}
+													{{#unless api.outSequence}}
+														{{#unless api.faultSequence}}
+                                                   style="display:none"
+														{{/unless}}
+													{{/unless}}
+												{{/unless}}>
+												<thead>
+												<tr>
+													<th>{{t "In Flow"}}</th>
+													<th>{{t "Out Flow"}}</th>
+													<th>{{t "Fualt Flow"}}</th>
+												</tr>
+												</thead>
+												<tr>
+													<td>
+														<select id="inSequence" name="inSequence">
+															<option value="none" selected="selected">{{t "none"}}</option>
+														</select>
+													</td>
+													<td>
+														<select id="outSequence" name="outSequence">
+															<option value="none" selected="selected">{{t "none"}}</option>
+														</select>
+													</td>
+													<td>
+														<select id="faultSequence" name="faultSequence">
+															<option value="none" selected="selected">{{t "none"}}</option>
+														</select>
+													</td>
+												</tr>
+											</table>
+										</div>
+									</div>
+								{{/if}}
+								<!--Response Caching -->
+								<div class="control-group col-md-8">
+									<div class="col-md-2">
+										<label class="control-label" for="responseCache">{{t "Response Caching"}}:</label>
+									</div>
+									<div class="controls">
+										<select class="select required" id="responseCache" name="responseCache">
+											<option value="disabled {{#if api.responseCache.enabled}}checked{{/if}}">{{t
+											"Disabled"}}</option>
+											<option value="enabled" {{#if api.responseCache.distabled}}checked{{/if}}>{{t
+											"Enabled"}}</option>
+										</select>
+										<a class="icon-question-sign help_popup" help_data="cache_help"></a>
 
-									<p id="cache_help" class="hide">{{t "This option determines whether to cache the response
+										<p id="cache_help" class="hide">{{t "This option determines whether to cache the response
 										messages of the API. Caching improves performance,
 									 because the backend server does not have to process the
 									 same data for a request multiple times.
 									 To offset the risk of stale data in the cache,
 									 set an appropriate timeout period when prompted."}}</p>
+									</div>
 								</div>
-							</div>
-							<div class="control-group col-md-8" id="cacheTimeout" {{#unless api.responseCache
-							.enabled}}style="display:none;"{{/unless}}>
-								<label class="control-label" for="cacheTimeout">{{t "Cache Timeout"}}:<span
-										class="requiredAstrix">*</span></label>
+								<div class="control-group col-md-8" id="cacheTimeout" {{#unless api.responseCache
+								.enabled}}style="display:none;"{{/unless}}>
+									<label class="control-label" for="cacheTimeout">{{t "Cache Timeout"}}:<span
+											class="requiredAstrix">*</span></label>
 
-								<div class="controls">
-									<input type="text" style="text-align:right;"
-									       class="input-small required validInput number" id="cacheTimeout"
-									       name="cacheTimeout" value={{api.cacheTimeout}}>
+									<div class="controls">
+										<input type="text" style="text-align:right;"
+										       class="input-small required validInput number" id="cacheTimeout"
+										       name="cacheTimeout" value={{api.cacheTimeout}}>
+									</div>
 								</div>
-							</div>
-							<!--Response Caching End -->
+								<!--Response Caching End -->
 
-							<div class="control-group col-md-8">
-								{{#if api.visibility.public}}
-									{{#if isMultipleTenantsAvailable}}
-										<label class="control-label" for="subscriptions">{{t "Subscriptions"}}:</label>
+								<div class="control-group col-md-8">
+									{{#if api.publicVisibility}}
+										{{#if api.isMultipleTenantsAvailable}}
+											<label class="control-label" for="subscriptions">{{t "Subscriptions"}}:</label>
 
-										<div class="controls">
-											{{#if api.visibility.public}}
-												<select class="select required" id="subscriptions" name="subscriptions">
-													<option value="current_tenant"
-													        selected="selected">{{t "Available to current tenant only"}}</option>
-												</select>
-											{{else}}
-												<select class="select required" id="subscriptions" name="subscriptions">
-													<option value="current_tenant"
-														{{#if api.subscriptionAvailability.currentTenant}}
-														    selected="selected" {{/if}}>{{t "Available to current tenant only"}}</option>
-													<option value="all_tenants"
-														{{#if api.subscriptionAvailability.allTenants}}
-														    selected="selected" {{/if}}
-															>{{t "Available to all the tenants"}}</option>
-													{{#unless enableSelectedTenantSubscription}}
-														<option value="specific_tennats" {{#if api.subscriptionAvailability
-														.specificTenants}}selected="selected"{{/if}} >{{t "Available to specific tenants"}}</option>
-													{{/unless}}
-												</select>
-											{{/if}}
-											<a class="icon-question-sign help_popup" help_data="subscriptions_help"></a>
+											<div class="controls">
+												{{#if api.publicVisibility}}
+													<select class="select required" id="subscriptions" name="subscriptions">
+														<option value="current_tenant"
+															{{#if api.subscriptionAvailabilityCurrentTenant}}
+															    selected="selected" {{/if}}>{{t "Available to current tenant only"}}</option>
+														<option value="all_tenants"
+															{{#if api.subscriptionAvailabilityAllTenants}}
+															    selected="selected" {{/if}}
+																>{{t "Available to all the tenants"}}</option>
+														{{#unless apiConfig.enableSelectedTenantSubscription}}
+															<option value="specific_tennats" {{#if api
+															.subscriptionAvailabilitySpecificTenants}}selected="selected"{{/if}} >{{t "Available to specific tenants"}}</option>
+														{{/unless}}
+													</select>
+												{{else}}
+													<select class="select required" id="subscriptions" name="subscriptions">
+														<option value="current_tenant" selected="selected">{{t "Available to current tenant only"}}</option>
+													</select>
+												{{/if}}
+												<a class="icon-question-sign help_popup" help_data="subscriptions_help"></a>
 
-											<div id="subscriptions_help" class="hide">{{t "This option specifies the tenants who
+												<div id="subscriptions_help" class="hide">{{t "This option specifies the tenants who
 									can subscribe to an API in a multi-tenanted setup. <strong> Available to
 									current Tenant Only:</strong> only users in the current organization/tenant
 									domain can subscribe to the API <strong>Available to All the Tenants:</strong>
 									users of all organizations/tenant domains can subscribe to the API <strong> Available
 									to Specific Tenants:</strong> users of the organizations/tenant domains you specify as
 									well as the current tenant domain can subscribe to the API"}}</div>
-										</div>
+											</div>
+										{{/if}}
 									{{/if}}
-								{{/if}}
-								<br/>
-									<div class="control-group" id="tennatsDiv" {{#if api.subscriptionAvailability
-							.specificTenants}}style="display: none;"{{/if}}
-								<label class="control-label col-md-2" for="tenants" id="tennatLabel" name="tennatLabel">
-									{{t "Tenants"}}:<span class="requiredAstrix">*</span>
-								</label>
+									<br/>
+									<div class="control-group" id="tennatsDiv" {{#unless api
+									.subscriptionAvailabilitySpecificTenants}}style="display: none;"{{/unless}}>
+										<label class="control-label" for="tenants" id="tennatLabel" name="tennatLabel">
+											{{t "Tenants"}}:<span class="requiredAstrix">*</span>
+										</label>
 
-								<div class="controls col-md-4">
-									<input type="text" class="input required"
-									       id="tenants" name="tenants" value="{{api.subscriptionTenants}}"/>
+										<div class="controls">
+											<input type="text" class="input required"
+											       id="tenants" name="tenants" value="{{api.subscriptionTenants}}"/>
 
-									<p class="help-block"
-									   id="tennatsHelp">{{t "Comma separated list (e.g.,: tenant1,tenant2,tenant3)"}}</p>
-								</div>
-							</div>
-				</div>
-				</fieldset>
-				<fieldset>
-					<legend class="legend-with-hidden-info js_hidden_section_title">Gateway Environments<i class="icon-chevron-right icon-keys"></i></legend>
-					<div style="display: none">
-						<!--legend>Environments</legend-->
-						<div class="environments_headings">
-							<div class="environments_checkbox"></div>
-							<div class="environments_data">Environment Name</div>
-							<div class="environments_data">Type</div>
-							<div class="environments_data">Description</div>
-						</div>
-
-						{{#if api.environments.none}}
-							{{#each api.environments}}
-								<div class="environments_headings">
-									<div class="environments_checkbox"><input type="checkbox" value="{{this.name}}" class="env"></div>
-									<div class="environments_data">{{this.name}}</div>
-									<div class="environments_data">{{this.type}}</div>
-									<div class="environments_data">{{this.description}}</div>
-								</div>
-							{{/each}}
-						{{else}}
-							{{#each api.environments}}
-								{{#if environmentsJson.split}}
-									<div class="data_headings">
-										<div class="environments_checkbox"><input type="checkbox" value="{{this.name}}" checked class="env"></div>
-										<div class="environments_data">{{this.name}}</div>
-										<div class="environments_data">{{this.type}}</div>
-										<div class="environments_data">{{this.description}}</div>
+											<p class="help-block"
+											   id="tennatsHelp">{{t "Comma separated list (e.g.,: tenant1,tenant2,tenant3)"}}</p>
+										</div>
 									</div>
-								{{/if}}
-							{{else}}
-								<div class="data_headings">
-									<div class="environments_checkbox"><input type="checkbox" value="{{this.name}}" class="env"></div>
-									<div class="environments_data">{{this.name}}</div>
-									<div class="environments_data">{{this.type}}</div>
-									<div class="environments_data">{{this.description}}</div>
 								</div>
-							{{/each}}
-						{{/if}}
-					</div>
-					<script>
-						$('input').on('change', function() {
-							var values = $('input:checked.env').map(function() {
-								return this.value;
-							}).get();
-							if(values==""){
-								values="none";
-							}
-							$('#environments').val(values.toString());
-						});
-					</script>
-					<style>
-						.environments_headings{
-							border-bottom: solid 1px;
-							border-bottom-color: gainsboro;
-							padding-bottom: 5px;
-							alignment-baseline: auto;
-							font-weight:bold;
-						}
+							</fieldset>
+							<fieldset>
+								<legend class="legend-with-hidden-info js_hidden_section_title">Gateway Environments<i class="icon-chevron-right icon-keys"></i></legend>
+								<div style="display: none">
+									<!--legend>Environments</legend-->
+									<div class="environments_headings">
+										<div class="environments_checkbox"></div>
+										<div class="environments_data">Environment Name</div>
+										<div class="environments_data">Type</div>
+										<div class="environments_data">Description</div>
+									</div>
 
-						.data_headings{
-							border-bottom: solid 1px;
-							border-bottom-color: gainsboro;
-							padding-bottom: 5px;
-							alignment-baseline: auto;
-						}
+									{{#each api.filteredEnvironmentList}}
+										<div class="environments_headings">
+											<div class="environments_checkbox"><input type="checkbox" value="{{this.name}}"
+																					  {{#if this.contained}}checked{{/if}}  class="env"></div>
+											<div class="environments_data">{{this.name}}</div>
+											<div class="environments_data">{{this.type}}</div>
+											<div class="environments_data">{{this.description}}</div>
+										</div>
+									{{/each}}
+								</div>
+								<script>
+									$('input').on('change', function() {
+										var values = $('input:checked.env').map(function() {
+											return this.value;
+										}).get();
+										if(values==""){
+											values="none";
+										}
+										$('#environments').val(values.toString());
+									});
+								</script>
+								<style>
+									.environments_headings{
+										border-bottom: solid 1px;
+										border-bottom-color: gainsboro;
+										padding-bottom: 5px;
+										alignment-baseline: auto;
+										font-weight:bold;
+									}
 
-						.environments_checkbox{
-							text-align: left;
-							display: inline-block;
-							vertical-align: top;
-							*display: inline;
-							padding :5px;
-							width:20px;
-						}
-						.environments_data{
-							text-align: left;
-							display: inline-block;
-							vertical-align: top;
-							*display: inline;
-							*zoom: 1;
-							padding :5px;
-							text-align:left;
-							width:200px;
-						}
-					</style>
-				</fieldset>
+									.data_headings{
+										border-bottom: solid 1px;
+										border-bottom-color: gainsboro;
+										padding-bottom: 5px;
+										alignment-baseline: auto;
+									}
 
-				<fieldset>
-					<legend class="legend-with-hidden-info js_hidden_section_title">{{t "Business Information"}} <i
-							class="icon-chevron-right
+									.environments_checkbox{
+										text-align: left;
+										display: inline-block;
+										vertical-align: top;
+										*display: inline;
+										padding :5px;
+										width:20px;
+									}
+									.environments_data{
+										text-align: left;
+										display: inline-block;
+										vertical-align: top;
+										*display: inline;
+										*zoom: 1;
+										padding :5px;
+										text-align:left;
+										width:200px;
+									}
+								</style>
+							</fieldset>
+
+							<fieldset>
+								<legend class="legend-with-hidden-info js_hidden_section_title">{{t "Business Information"}} <i
+										class="icon-chevron-right
 					icon-keys"></i></legend>
-					<div style="display: none">
-						<!--legend>Business Information</legend-->
+								<div style="display: none">
+									<!--legend>Business Information</legend-->
 
-						<div class="control-group col-md-8">
-							<label class="control-label" for="bizOwner">{{t "Business Owner"}}:</label>
-							<div class="controls">
-								<input type="text" class="input-xlarge validInput" id="bizOwner" name="bizOwner"
-								       value="{{api.bizOwner}}"/>
-							</div>
-						</div>
-						<div class="control-group col-md-8">
-							<label class="control-label" for="bizOwnerMail">{{t "Business Owner Email"}} :</label>
-							<div class="controls">
-								<input type="text" class="input-xlarge email" id="bizOwnerMail" name="bizOwnerMail"
-								       value="{{api.bizOwnerMail}}"/>
-							</div>
-						</div>
-						<div class="control-group col-md-8">
-							<label class="control-label" for="techOwner">{{t "Technical  Owner"}} :</label>
-							<div class="controls">
-								<input type="text" class="input-xlarge validInput" id="techOwner" name="techOwner"
-								       value="{{api.techOwner}}"/>
-							</div>
-						</div>
-						<div class="control-group col-md-8">
-							<label class="control-label" for="techOwnerMail">{{t "Technical Owner Email"}} :</label>
-							<div class="controls">
-								<input type="text" class="input-xlarge email" id="techOwnerMail" name="techOwnerMail"
-								       value="{{api.techOwnerMail}}"/>
-							</div>
-						</div>
-					</div>
-				</fieldset>
+									<div class="control-group col-md-8">
+										<label class="control-label" for="bizOwner">{{t "Business Owner"}}:</label>
+										<div class="controls">
+											<input type="text" class="input-xlarge validInput" id="bizOwner" name="bizOwner"
+											       value="{{api.bizOwner}}"/>
+										</div>
+									</div>
+									<div class="control-group col-md-8">
+										<label class="control-label" for="bizOwnerMail">{{t "Business Owner Email"}} :</label>
+										<div class="controls">
+											<input type="text" class="input-xlarge email" id="bizOwnerMail" name="bizOwnerMail"
+											       value="{{api.bizOwnerMail}}"/>
+										</div>
+									</div>
+									<div class="control-group col-md-8">
+										<label class="control-label" for="techOwner">{{t "Technical  Owner"}} :</label>
+										<div class="controls">
+											<input type="text" class="input-xlarge validInput" id="techOwner" name="techOwner"
+											       value="{{api.techOwner}}"/>
+										</div>
+									</div>
+									<div class="control-group col-md-8">
+										<label class="control-label" for="techOwnerMail">{{t "Technical Owner Email"}} :</label>
+										<div class="controls">
+											<input type="text" class="input-xlarge email" id="techOwnerMail" name="techOwnerMail"
+											       value="{{api.techOwnerMail}}"/>
+										</div>
+									</div>
+								</div>
+							</fieldset>
 
-				<div id="api_designer">
-					<div id ="apidoc_details"></div>
-					<legend>Resources</legend>
-					<div id="scopes_view"></div>
-					<div id ="resource_details"></div>
-				</div>
-				<input type="hidden" id="environments" name="environments" value='{{environmentsJson}}'/>
-				<input type="hidden" name="name" value="{{api.name}}" />
-				<input type="hidden" name="version" value="{{api.version}}" />
-				<input type="hidden" name="provider" value="{{api.provider}}" />
-				<input type="hidden" name="action" value="manage" />
-				<input type="hidden" id="swagger" name="swagger" value="" />
-				<div class="form-actions" style="display:none" id="saveMessage">
-					<div class="btn loadingButton">Saving API. Please wait..</div>
-				</div>
-				<div class="form-actions" id="saveButtons">
-					<button class="btn btn-info" id="save_api" data-loading-text="<i class='fa fa-spinner fa-pulse'
+							<div id="api_designer">
+								<div id ="apidoc_details"></div>
+								<legend>Resources</legend>
+								<div id="scopes_view"></div>
+								<div id ="resource_details"></div>
+							</div>
+							<input type="hidden" id="environments" name="environments" value='{{environmentsJson}}'/>
+							<input type="hidden" name="name" value="{{api.name}}" />
+							<input type="hidden" name="version" value="{{api.version}}" />
+							<input type="hidden" name="provider" value="{{api.provider}}" />
+							<input type="hidden" name="action" value="manage" />
+							<input type="hidden" id="swagger" name="swagger" value="" />
+							<div class="form-actions" style="display:none" id="saveMessage">
+								<div class="btn loadingButton">Saving API. Please wait..</div>
+							</div>
+							<div class="form-actions" id="saveButtons">
+								<button class="btn btn-info" id="save_api" data-loading-text="<i class='fa fa-spinner fa-pulse'
 					id='loader'></i>Loading">{{t "Save"}}</button>
-					{{#if outputs.isPermitted}} <button class="btn btn-primary" id="publish_api" data-loading-text="<i
+								{{#if outputs.isPermitted}} <button class="btn btn-primary" id="publish_api" data-loading-text="<i
 					class='fa fa-spinner fa-pulse' id='loader'></i>Loading">Save & Publish</button> {{/if}}
-					<input type="reset" class="btn" value="{{t "Cancel"}}" onclick="javascript:window.location.href='./'" />
+								<input type="reset" class="btn" value="{{t "Cancel"}}" onclick="javascript:window.location.href='./'" />
+							</div>
+						</form>
+					</div>
 				</div>
-				</form>
 			</div>
 		</div>
 	</div>
-</div>
-</div>
-</form>
-</div>
-</div>
 </div>

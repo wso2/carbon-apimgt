@@ -431,10 +431,15 @@ public interface APIConsumer extends APIManager {
 	
 	public JSONArray getSubscriptions(String providerName, String apiName, String version, String user) throws APIManagementException;
 	
-	public JSONArray getAllSubscriptions(String userName, String appName, int startSubIndex, int endSubIndex) throws APIManagementException;
+	public JSONObject getAllSubscriptions(String userName, String appName, int startSubIndex, int endSubIndex) throws APIManagementException;
 	
 	public JSONObject getSwaggerResource(String name, String version, String provider) throws APIManagementException;
 	
 	public JSONArray getSubscriptionsByApplication(String applicationName, String userName) throws APIManagementException;
+
+    public JSONObject getApplicationKey(String username, String applicationName, String tokenType,
+                                        String scopes, String validityPeriod, String callbackUrl,
+                                        JSONArray accessAllowDomainsArr)
+            throws APIManagementException;
 
 }

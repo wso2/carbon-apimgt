@@ -141,7 +141,7 @@ public interface APIProvider extends APIManager {
      * @param api API
      * @throws org.wso2.carbon.apimgt.api.APIManagementException if failed to add API
      */
-    public void addAPI(API api) throws APIManagementException;
+    public String addAPI(API api) throws APIManagementException;
 
     /**
      * Updates an existing API. This method must not be used to change API status. Implementations
@@ -451,4 +451,19 @@ public interface APIProvider extends APIManager {
      * @throws org.wso2.carbon.apimgt.api.APIManagementException
      */
     public String implementAPI(JSONObject apiObj) throws APIManagementException;
+
+	/**
+	 * Retrieves active tenant domains and return true or false to display private
+	 * visibility
+	 *
+	 * @return boolean true If display private visibility
+	 */
+	public boolean isMultipleTenantsAvailable() throws APIManagementException;
+
+	/**
+	 * This method is to functionality of get list of environments that list in api-manager.xml
+	 *
+	 * @return list of environments with details of environments
+	 */
+	public JSONArray getEnvironments();
 }
