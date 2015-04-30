@@ -78,6 +78,7 @@ import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.net.*;
 import java.rmi.RemoteException;
+import java.sql.Array;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -3330,15 +3331,18 @@ public class APIStoreHostObject extends ScriptableObject {
            if (apps == null || apps.length == 0) {
                 return false;
             }
-            //check whether there is an app with same name
+
+            Map appsMap = new HashMap();
             for (Application app : apps) {
-                if (app.getName().equals(name)) {
-                    return false;
-                }
+                appsMap.put(app.getName(), app);
             }
 
             for (Application app : apps) {
-                if (app.getName().equals(oldName)) {
+                if(appsMap.containsKey(app.getName())){
+                    //check whether there is an app with same name
+                    if(!name.equals(oldName) && appsMap.containsKey(name)){
+                        return false;
+                    }
                     Application application = new Application(name, subscriber);
                     application.setId(app.getId());
                     application.setTier(tier);
@@ -3349,6 +3353,7 @@ public class APIStoreHostObject extends ScriptableObject {
                 }
             }
         }
+
         return false;
     }
 
