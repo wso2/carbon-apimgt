@@ -79,7 +79,7 @@ i18n.init(request,localeResourcesBasePath);
                    <%=i18n.localize("logged")%> <h4><%=user.username%></h4>
                </li>
                <% if(isSelfSignupEnabled) { %>
-               <li><a href="<%= jagg.getHttpsUrl('/')%>site/pages/user-info.jag"><%=i18n.localize("userDetails")%></a></li> <% } %>
+               <li><a href="<%= jagg.getHttpsUrl('/')%>site/pages/user-info.jag"><%=i18n.localize("privacy")%></a></li> <% } %>
                <li class="logout-link-special"><button id="logout-link" class="btn btn-danger"><%=i18n.localize("logout")%></button></li>
              </ul>
            </li>

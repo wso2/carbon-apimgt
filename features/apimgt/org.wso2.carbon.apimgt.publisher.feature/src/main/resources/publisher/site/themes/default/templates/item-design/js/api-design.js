@@ -168,6 +168,7 @@ function APIDesigner(){
         event.data.add_resource(resource, path);
         //RESOURCES.unshift(resource);
         $("#resource_url_pattern").val("");
+        updateContextPattern();
         $(".http_verb_select").attr("checked",false);
     });
 
@@ -273,7 +274,8 @@ APIDesigner.prototype.init_controllers = function(){
         jagg.message({content:'Do you want to remove "'+op+' : '+pn+'" resource from list.',type:'confirm',title:"Remove Resource",
         okCallback:function(){
             API_DESIGNER = APIDesigner();
-            console.log(i, pn, op, operations);
+            //console.log(i, pn, op, operations);
+            delete API_DESIGNER.api_doc.paths[pn][op];
             API_DESIGNER.render_resources(); 
         }});
         //delete resource if no operations       
@@ -552,7 +554,7 @@ $(document).ready(function(){
     });
 
     $("#clearThumb").on("click", function () {
-        $('#apiThumb-container').html('<input type="file" class="input-xlarge" name="apiThumb" />');
+        $('#apiThumb-container').html('<input type="file" class="input-xlarge validateImageFile" name="apiThumb" />');
     });
 
     $('#import_swagger').attr('disabled','disabled');
@@ -695,7 +697,7 @@ function updateContextPattern(){
 
     if(context != ""){
         if(context.indexOf("{version}") < 0){
-            if(!context.endsWith('/')){
+            if(context.lastIndexOf('/') < 0){
                 context = context + '/';
             }
             context = context + "{version}";
