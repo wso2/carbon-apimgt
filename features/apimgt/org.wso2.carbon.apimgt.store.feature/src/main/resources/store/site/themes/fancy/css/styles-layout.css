@@ -1438,3 +1438,9 @@ filter: grayscale(100%);
     text-align: right!important;
 }
 
+.app_name_new, .callback_new, .description-new{
+    width:180%;
+}
+.applicationTierSelect{
+    width:100%;
+}
