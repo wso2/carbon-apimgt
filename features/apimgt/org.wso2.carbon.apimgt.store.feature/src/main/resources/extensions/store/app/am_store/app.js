@@ -29,8 +29,8 @@ app.server = function(ctx) {
                 path: 'applications.jag',
                 secured:true
             }, {
-                url: 'subscriptions',
-                path: 'subscriptions.jag',
+                url: 'application',
+                path: 'application.jag',
                 secured:true
             }]
         },

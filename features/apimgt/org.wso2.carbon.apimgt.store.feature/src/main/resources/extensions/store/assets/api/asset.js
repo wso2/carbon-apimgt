@@ -129,12 +129,12 @@ asset.renderer = function(ctx) {
 	}
 	log.info('============== user name ==========' + userName);
 	var apistore = require('apistore').apistore.instance(userName);
-	var assetApi = apistore.getApplications(userName);
+	var application = apistore.getApplications(userName);
 	log.info('This is the custom APIM search method');
-	log.info('============== api json  ==========' + assetApi);
-	// return assetApi;
+	log.info('============== api json  ==========' + application);
+	// return application;
 
-	var json = JSON.parse(assetApi);
+	var json = JSON.parse(application);
 	page.applications= json;
 
 	var apisArray = [];
