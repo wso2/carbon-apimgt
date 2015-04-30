@@ -138,7 +138,7 @@ public class APIKeyMgtSubscriberService extends AbstractAdmin {
         PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
 
         // Acting as the provided user. When creating Service Provider/OAuth App,
-        // username is fetched from CarbonContext.
+        // username is fetched from CarbonContext
         PrivilegedCarbonContext.getThreadLocalCarbonContext().setUsername(userName);
 
         try {
@@ -262,31 +262,19 @@ public class APIKeyMgtSubscriberService extends AbstractAdmin {
 
         try {
 
-            OAuthAdminService oAuthAdminService = new OAuthAdminService();
             ApplicationManagementService appMgtService = ApplicationManagementService.getInstance();
 
             log.debug("Getting OAuth App for " + consumerKey);
-            OAuthConsumerAppDTO oAuthConsumerAppDTO = oAuthAdminService.getOAuthApplicationData(consumerKey);
+            String spAppName = appMgtService.getServiceProviderNameByClientId(consumerKey, "oauth2");
 
-            if (oAuthConsumerAppDTO == null) {
+            if (spAppName == null) {
                 log.debug("Couldn't find OAuth App for Consumer Key : " + consumerKey);
                 return;
             }
 
-            if (oAuthConsumerAppDTO.getApplicationName() != null) {
-                log.debug("Getting Service Provider App for " + oAuthConsumerAppDTO.getApplicationName());
-                ServiceProvider serviceProvider = appMgtService.getApplication(oAuthConsumerAppDTO.getApplicationName());
+            log.debug("Removing Service Provider with name : " + spAppName);
+            appMgtService.deleteApplication(spAppName);
 
-                // When deleting a non-existent ServiceProvider, AppMgtService throws and exception. It's to prevent
-                // this error, the existence of the SP is checked.
-                if (serviceProvider != null) {
-                    log.debug("Removing Service Provider with name : " + oAuthConsumerAppDTO.getApplicationName());
-                    appMgtService.deleteApplication(oAuthConsumerAppDTO.getApplicationName());
-                }
-
-                log.debug("Removing OAuth App for " + consumerKey);
-                oAuthAdminService.removeOAuthApplicationData(consumerKey);
-            }
 
         } catch (IdentityApplicationManagementException e) {
             APIUtil.handleException("Error occurred while deleting ServiceProvider", e);
