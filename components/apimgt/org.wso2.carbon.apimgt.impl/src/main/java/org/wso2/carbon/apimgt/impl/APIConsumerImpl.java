@@ -2174,6 +2174,93 @@ Set<API> apiSet) throws APIManagementException {
         return keyDetails;
     }
 
+    /*
+    * getting key for a subscribed Application - args[] list String subscriberID, String
+    * application name, String keyType
+    */
+    public JSONObject getApplicationKey(String username, String applicationName, String tokenType,
+                                        String scopes, String validityPeriod, String callbackUrl,
+                                        JSONArray accessAllowDomainsArr)
+            throws APIManagementException {
+
+        String[] accessAllowDomainsArray = new String[accessAllowDomainsArr.size()];
+        for (Object domain : accessAllowDomainsArr) {
+            int index = (Integer) domain;
+            accessAllowDomainsArray[index] = (String) accessAllowDomainsArr.get(index);
+        }
+        try {
+            String tenantDomain = MultitenantUtils.getTenantDomain(username);
+            int tenantId =
+                    ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
+                            .getTenantId(tenantDomain);
+
+            if (null == validityPeriod || validityPeriod.isEmpty()) { // In case a validity period is unspecified
+                long defaultValidityPeriod = APIUtil.getApplicationAccessTokenValidityPeriodInSeconds();
+
+                if (defaultValidityPeriod < 0) {
+                    validityPeriod = String.valueOf(Long.MAX_VALUE);
+                } else {
+                    validityPeriod = String.valueOf(defaultValidityPeriod);
+                }
+            }
+
+            //checking for authorized scopes
+            Set<Scope> scopeSet = new LinkedHashSet<Scope>();
+            List<Scope> authorizedScopes = new ArrayList<Scope>();
+            String authScopeString;
+            if (scopes != null && scopes.length() != 0 &&
+                !scopes.equals(APIConstants.OAUTH2_DEFAULT_SCOPE)) {
+                scopeSet.addAll(getScopesByScopeKeys(scopes, tenantId));
+                authorizedScopes = APIUtil.getAllowedScopesForUserApplication(username, scopeSet);
+            }
+
+            if (!authorizedScopes.isEmpty()) {
+                StringBuilder scopeBuilder = new StringBuilder();
+                for (Scope scope : authorizedScopes) {
+                    scopeBuilder.append(scope.getKey()).append(" ");
+                }
+                authScopeString = scopeBuilder.toString();
+            } else {
+                authScopeString = APIConstants.OAUTH2_DEFAULT_SCOPE;
+            }
+            Map<String, String> keyDetails = requestApprovalForApplicationRegistration(
+                    username, applicationName, tokenType, callbackUrl, accessAllowDomainsArray,
+                    validityPeriod, authScopeString);
+
+            JSONObject row = new JSONObject();
+            String authorizedDomains = "";
+            boolean first = true;
+            for (String anAccessAllowDomainsArray : accessAllowDomainsArray) {
+                if (first) {
+                    authorizedDomains = anAccessAllowDomainsArray;
+                    first = false;
+                } else {
+                    authorizedDomains = authorizedDomains + ", " + anAccessAllowDomainsArray;
+                }
+            }
+
+            Set<Map.Entry<String, String>> entries = keyDetails.entrySet();
+
+            for (Map.Entry<String, String> entry : entries) {
+                row.put(entry.getKey(), entry.getValue());
+            }
+
+            boolean isRegenarateOptionEnabled = true;
+            if (APIUtil.getApplicationAccessTokenValidityPeriodInSeconds() < 0) {
+                isRegenarateOptionEnabled = false;
+            }
+            row.put("enableRegenarate", isRegenarateOptionEnabled);
+            row.put("accessallowdomains", authorizedDomains);
+            return row;
+        } catch (Exception e) {
+            String msg = "Error while obtaining the application access token for the application:" + applicationName;
+            log.error(msg, e);
+            throw new APIManagementException(msg, e);
+        }
+
+    }
+
+
     public JSONObject createApplicationKeys(String userId, String applicationName, String tokenType, String tokenScope)
 			throws APIManagementException {
 

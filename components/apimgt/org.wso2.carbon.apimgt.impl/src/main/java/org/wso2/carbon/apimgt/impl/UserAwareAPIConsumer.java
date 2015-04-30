@@ -16,6 +16,8 @@
 
 package org.wso2.carbon.apimgt.impl;
 
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.Application;
@@ -73,6 +75,14 @@ public class UserAwareAPIConsumer extends APIConsumerImpl {
     public void removeApplication(Application application) throws APIManagementException {
         checkSubscribePermission();
         super.removeApplication(application);
+    }
+
+    @Override
+    public JSONObject getApplicationKey(String username, String applicationName, String tokenType,
+                                  String scopes, String validityPeriod, String callbackUrl,
+                                  JSONArray accessAllowDomainsArr) throws APIManagementException {
+        checkSubscribePermission();
+        return super.getApplicationKey(username,applicationName,tokenType,scopes,validityPeriod,callbackUrl,accessAllowDomainsArr);
     }
 
     @Override

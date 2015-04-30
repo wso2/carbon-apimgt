@@ -437,4 +437,9 @@ public interface APIConsumer extends APIManager {
 	
 	public JSONArray getSubscriptionsByApplication(String applicationName, String userName) throws APIManagementException;
 
+    public JSONObject getApplicationKey(String username, String applicationName, String tokenType,
+                                        String scopes, String validityPeriod, String callbackUrl,
+                                        JSONArray accessAllowDomainsArr)
+            throws APIManagementException;
+
 }
