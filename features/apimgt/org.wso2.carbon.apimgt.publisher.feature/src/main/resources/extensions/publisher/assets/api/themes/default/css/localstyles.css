@@ -1141,3 +1141,7 @@ ol.progtrckr li.progtrckr-todo:before {
 #design_form div.control-group, #implement_form div.control-group, #manage_form div.control-group{
     margin-bottom: 8px;
 }
+
+footer{
+    position: relative;
+}

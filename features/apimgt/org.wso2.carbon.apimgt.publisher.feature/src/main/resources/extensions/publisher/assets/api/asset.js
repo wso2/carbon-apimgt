@@ -149,6 +149,9 @@ asset.server = function (ctx) {
                    }, {
                        url: 'swagger',
                        path: 'swagger.jag'
+                   },{
+                       url: 'sequences',
+                       path: 'sequences.jag'
                    }, {
                        url: 'tiers',
                        path: 'tiers.jag'

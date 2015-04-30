@@ -3362,6 +3362,72 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
         return response;
     }
+
+	/**
+	 * retrieves active tenant domains and return true or false to display private
+	 * visibility
+	 *
+	 * @return boolean true If display private visibility
+	 */
+	public boolean isMultipleTenantsAvailable() {
+		int tenantsDomainSize;
+		Object cacheObj = Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER).
+				getCache(APIConstants.APIPROVIDER_HOSTCACHE).get(APIConstants.TENANTCOUNT_CACHEKEY);
+		//if tenantDomainSize is not in the cache, Then the cache object is null
+		if (cacheObj == null) {
+			tenantsDomainSize = 0;
+		} else {
+			tenantsDomainSize = Integer.parseInt(cacheObj.toString());
+		}
+		//if there only super tenant in the system, tenantDomainSize is 1
+		if (tenantsDomainSize < 2) {
+			try {
+				Set<String> tenantDomains = APIUtil.getActiveTenantDomains();
+				//if there is more than than one tenant
+				if (tenantDomains.size() > 1) {
+					Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER).
+							getCache(APIConstants.APIPROVIDER_HOSTCACHE).
+							put(APIConstants.TENANTCOUNT_CACHEKEY, String.valueOf(tenantDomains.size()));
+					return true;
+				} else {
+					return false;
+				}
+			} catch (UserStoreException e) {
+                /*If there are errors in getting active tenant domains from user store,
+                 Minimum privileges are allocated to the user
+                */
+				log.error("Errors in getting active tenants form UserStore " + e.getMessage(), e);
+				return false;
+			}
+		} else {
+			return true;
+		}
+	}
+
+	/**
+	 * This method is to functionality of get list of environments that list in api-manager.xml
+	 *
+	 * @return list of environments with details of environments
+	 */
+	public JSONArray getEnvironments() {
+		JSONArray result = new JSONArray();
+		APIManagerConfiguration config =
+				ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
+						.getAPIManagerConfiguration();
+		Map<String, Environment> environments = config.getApiGatewayEnvironments();
+		int i = 0;
+		if (environments != null) {
+			for (Environment environment : environments.values()) {
+				JSONObject row = new JSONObject();
+				row.put("name", environment.getName());
+				row.put("description", environment.getDescription());
+				row.put("type", environment.getType());
+				result.add(i, row);
+				i++;
+			}
+		}
+		return result;
+	}
 }
 
 
