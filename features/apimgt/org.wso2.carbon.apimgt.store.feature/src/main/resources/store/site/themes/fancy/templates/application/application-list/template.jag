@@ -61,12 +61,12 @@
     <table cellspacing="0" cellpadding="0" class="table table-bordered table-striped" id="applicationTable">
         <thead>
             <tr class="alt first last">
-                <th value="Name" rel="0" style="width:200px;"><%=i18n.localize("name")%></th>
-                <th value="Tier" rel="0" style="width:100px;"><%=i18n.localize("throttlingTier")%></th>
-                <th value="Status" rel="0" style="width:100px;"><%=i18n.localize("status")%></th>
-                <th value="callbackUrl" rel="0" style="width:150px;"><%=i18n.localize("callbackUrl")%></th>
-                <th value="callbackUrl" rel="0" style="width:150px;">Description</th>
-                <th value="Actions" rel="1" colspan="2" style="width:150px;"><%=i18n.localize("actions")%></th>
+                <th value="Name" rel="0" style="width:20%;"><%=i18n.localize("name")%></th>
+                <th value="Tier" rel="0" style="width:15%;"><%=i18n.localize("throttlingTier")%></th>
+                <th value="Status" rel="0" style="width:10%;"><%=i18n.localize("status")%></th>
+                <th value="callbackUrl" rel="0" style="width:15%;"><%=i18n.localize("callbackUrl")%></th>
+                <th value="callbackUrl" rel="0" style="width:15%;">Description</th>
+                <th value="Actions" rel="1" colspan="2" style="width:25%;"><%=i18n.localize("actions")%></th>
             </tr>
         </thead>
         <tbody>
@@ -88,7 +88,7 @@
             <tr class="<%=classes%>" data-value="<%= encode.forHtmlAttribute(app.name)%>" tier-value="<%= encode.forHtml(app.tier)%>" callback-value="<%=  encode.forHtmlAttribute(callbackUrl)%>" description-value="<%=  encode.forHtmlAttribute(description)%>" >
                 <td class="app_name_cell"><%= encode.forHtml(app.name)%></td>
                 <td class="app_name_cell">
-                    <select id="<%="tiers" + i%>" name="<%="tiers" + i%>" disabled="disabled">
+                    <select id="<%="tiers" + i%>" name="<%="tiers" + i%>" class="applicationTierSelect" disabled="disabled">
                         <%for(j=0; j<tiers.length; j++){%>
                             <option value="<%=tiers[j].tierName%>"
                                 <%if(app.tier == tiers[j].tierName){print("selected=\"selected\"")}%>>
