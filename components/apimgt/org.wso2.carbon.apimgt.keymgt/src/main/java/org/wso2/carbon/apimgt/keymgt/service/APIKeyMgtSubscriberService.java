@@ -143,6 +143,9 @@ public class APIKeyMgtSubscriberService extends AbstractAdmin {
 
         try {
 
+            // Append the username before Application name to make application name unique across two users.
+            applicationName = userName + "_" + applicationName;
+
             // Create the Service Provider
             ServiceProvider serviceProvider = new ServiceProvider();
             serviceProvider.setApplicationName(applicationName);
@@ -161,7 +164,7 @@ public class APIKeyMgtSubscriberService extends AbstractAdmin {
             OAuthAdminService oAuthAdminService = new OAuthAdminService();
 
             OAuthConsumerAppDTO oAuthConsumerAppDTO = new OAuthConsumerAppDTO();
-            applicationName = userName + "_" + applicationName;
+
             oAuthConsumerAppDTO.setApplicationName(applicationName);
             oAuthConsumerAppDTO.setCallbackUrl(callbackUrl);
             log.debug("Creating OAuth App " + applicationName);
