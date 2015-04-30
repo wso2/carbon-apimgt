@@ -78,7 +78,6 @@ import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.net.*;
 import java.rmi.RemoteException;
-import java.sql.Array;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
