@@ -91,6 +91,12 @@ public class UserAwareAPIConsumer extends APIConsumerImpl {
         super.addComment(identifier, s, user);
     }
 
+    @Override
+    public JSONObject getAllSubscriptions(String userName, String appName, int startSubIndex, int endSubIndex) throws APIManagementException {
+        checkSubscribePermission();
+        return super.getAllSubscriptions(userName,appName,startSubIndex,endSubIndex);
+    }
+
     public void checkSubscribePermission() throws APIManagementException {
         APIUtil.checkPermission(username, APIConstants.Permissions.API_SUBSCRIBE);
     }
