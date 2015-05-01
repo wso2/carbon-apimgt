@@ -1,0 +1,15 @@
+	<div class="scope_container">
+		{{#if api_doc.authorizations.oauth2.scopes}}
+			<h4>Scopes</h4>
+			<ul>
+				{{#each api_doc.authorizations.oauth2.scopes}}
+					<li>
+						<h6><a data-index='{{ @index }}' class='delete_scope'><i class='icon-trash'></i></a> &nbsp;&nbsp; {{ key }} {{#if name }}: {{ name }}{{/if}}  </h6>
+						<strong>Roles</strong> : {{ roles }}
+						<p>{{ description }}</p>
+					</li>
+				{{/each}}
+			</ul>
+		{{/if}}
+		<a id="define_scopes" class="pointer btn"><i class="icon-plus-sign"></i>&nbsp;Add Scopes</a>
+	</div>
