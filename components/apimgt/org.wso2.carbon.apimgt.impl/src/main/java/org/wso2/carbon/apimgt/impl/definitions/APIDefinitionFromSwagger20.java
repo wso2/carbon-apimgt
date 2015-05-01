@@ -18,7 +18,6 @@
 
 package org.wso2.carbon.apimgt.impl.definitions;
 
-import com.google.gson.Gson;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.simple.JSONArray;
@@ -222,7 +221,7 @@ public class APIDefinitionFromSwagger20 extends APIDefinition {
             handleException("Error while retrieving Swagger v2.0 Definition for " + apiIdentifier.getApiName() + "-" +
                     apiIdentifier.getVersion(), e);
         } catch (ParseException e) {
-            handleException("Error while parsing   Swagger v2.0 Definition for " + apiIdentifier.getApiName() + "-" +
+            handleException("Error while parsing Swagger v2.0 Definition for " + apiIdentifier.getApiName() + "-" +
                     apiIdentifier.getVersion() + " in " + resourcePath, e);
         }
         return apiDefinition;
@@ -358,7 +357,7 @@ public class APIDefinitionFromSwagger20 extends APIDefinition {
 
         swaggerObject.put("securityDefinitions", securityDefinitionObject);
 
-        return swaggerObject.toJSONString().replace("\\","");
+        return swaggerObject.toJSONString();
     }
 
 }
