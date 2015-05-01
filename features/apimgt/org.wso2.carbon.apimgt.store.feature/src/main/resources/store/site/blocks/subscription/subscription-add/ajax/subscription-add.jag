@@ -197,14 +197,10 @@ include("/jagg/jagg.jag");
             retryAfterFailure = false;
         }
 
-        if(jsonParams != null){
-            var jsonParams = JSON.stringify(jsonParams);
-        }else{
+        if(jsonParams == null){
             var jsonParams = {
                 username : user.username
             };
-            var jsonParams = JSON.stringify(jsonParams);
-
         }
 
         mod = jagg.module("subscription");
