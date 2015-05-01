@@ -47,5 +47,5 @@ public final class  ApplicationConstants {
     public static final String OAUTH_CLIENT_JSONPARAMSTRING = "jsonParams";
     public static final String OAUTH_CLIENT_USERNAME = "username";
     public static final String OAUTH_CLIENT_APPLICATION = "application";
-
+    public static final String VALIDITY_PERIOD = "validityPeriod";
 }

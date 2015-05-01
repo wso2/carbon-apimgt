@@ -137,64 +137,80 @@ public class APIKeyMgtSubscriberService extends AbstractAdmin {
         PrivilegedCarbonContext.startTenantFlow();
         PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
 
-        // Enacting as the provided user. When creating Service Provider/OAuth App,
-        // username is fetched from CarbonContext.
+        // Acting as the provided user. When creating Service Provider/OAuth App,
+        // username is fetched from CarbonContext
         PrivilegedCarbonContext.getThreadLocalCarbonContext().setUsername(userName);
 
         try {
 
-            // Creating OAuthApp
-            OAuthAdminService oAuthAdminService = new OAuthAdminService();
-            ApplicationManagementService appMgtService = ApplicationManagementService.getInstance();
-            OAuthConsumerAppDTO oAuthConsumerAppDTO = new OAuthConsumerAppDTO();
+            // Append the username before Application name to make application name unique across two users.
             applicationName = userName + "_" + applicationName;
+
+            // Create the Service Provider
+            ServiceProvider serviceProvider = new ServiceProvider();
+            serviceProvider.setApplicationName(applicationName);
+            serviceProvider.setDescription("Service Provider for application " + applicationName);
+
+            ApplicationManagementService appMgtService = ApplicationManagementService.getInstance();
+            appMgtService.createApplication(serviceProvider);
+
+            ServiceProvider createdServiceProvider = appMgtService.getApplication(applicationName);
+
+            if (createdServiceProvider == null) {
+                throw new APIKeyMgtException("Couldn't create Service Provider Application " + applicationName);
+            }
+
+            // Then Create OAuthApp
+            OAuthAdminService oAuthAdminService = new OAuthAdminService();
+
+            OAuthConsumerAppDTO oAuthConsumerAppDTO = new OAuthConsumerAppDTO();
+
             oAuthConsumerAppDTO.setApplicationName(applicationName);
             oAuthConsumerAppDTO.setCallbackUrl(callbackUrl);
             log.debug("Creating OAuth App " + applicationName);
             oAuthAdminService.registerOAuthApplicationData(oAuthConsumerAppDTO);
             log.debug("Created OAuth App " + applicationName);
             OAuthConsumerAppDTO createdApp = oAuthAdminService.getOAuthApplicationDataByAppName(oAuthConsumerAppDTO
-                    .getApplicationName());
+                                                                                                        .getApplicationName());
             log.debug("Retrieved Details for OAuth App " + createdApp.getApplicationName());
-            ServiceProvider serviceProvider = new ServiceProvider();
-            serviceProvider.setApplicationName(applicationName);
-            serviceProvider.setDescription("Service Provider for application " + applicationName);
+
+            // Set the OAuthApp in InboundAuthenticationConfig
             InboundAuthenticationConfig inboundAuthenticationConfig = new InboundAuthenticationConfig();
             InboundAuthenticationRequestConfig[] inboundAuthenticationRequestConfigs = new
                     InboundAuthenticationRequestConfig[1];
             InboundAuthenticationRequestConfig inboundAuthenticationRequestConfig = new
                     InboundAuthenticationRequestConfig();
 
-            inboundAuthenticationRequestConfig.setInboundAuthKey(oAuthConsumerAppDTO.getOauthConsumerKey());
+            inboundAuthenticationRequestConfig.setInboundAuthKey(createdApp.getOauthConsumerKey());
             inboundAuthenticationRequestConfig.setInboundAuthType("oauth2");
-            if (oAuthConsumerAppDTO.getOauthConsumerSecret() != null && !oAuthConsumerAppDTO.
+            if (createdApp.getOauthConsumerSecret() != null && !createdApp.
                     getOauthConsumerSecret().isEmpty()) {
                 Property property = new Property();
                 property.setName("oauthConsumerSecret");
-                property.setValue(oAuthConsumerAppDTO.getOauthConsumerSecret());
+                property.setValue(createdApp.getOauthConsumerSecret());
                 Property[] properties = {property};
                 inboundAuthenticationRequestConfig.setProperties(properties);
             }
 
             inboundAuthenticationRequestConfigs[0] = inboundAuthenticationRequestConfig;
             inboundAuthenticationConfig.setInboundAuthenticationRequestConfigs(inboundAuthenticationRequestConfigs);
-            serviceProvider.setInboundAuthenticationConfig(inboundAuthenticationConfig);
+            createdServiceProvider.setInboundAuthenticationConfig(inboundAuthenticationConfig);
 
+            // Update the Service Provider app to add OAuthApp as an Inbound Authentication Config
+            appMgtService.updateApplication(createdServiceProvider);
 
-            appMgtService.createApplication(serviceProvider);
 
             OAuthApplicationInfo oAuthApplicationInfo = new OAuthApplicationInfo();
             oAuthApplicationInfo.setClientId(createdApp.getOauthConsumerKey());
             oAuthApplicationInfo.setCallBackURL(createdApp.getCallbackUrl());
             oAuthApplicationInfo.setClientSecret(createdApp.getOauthConsumerSecret());
-//            oAuthApplicationInfo.addParameter(ApplicationConstants.
-//                    OAUTH_CLIENT_SECRET, createdApp.getOauthConsumerSecret());
+
             oAuthApplicationInfo.addParameter(ApplicationConstants.
-                    OAUTH_REDIRECT_URIS, createdApp.getCallbackUrl());
+                                                      OAUTH_REDIRECT_URIS, createdApp.getCallbackUrl());
             oAuthApplicationInfo.addParameter(ApplicationConstants.
-                    OAUTH_CLIENT_NAME, createdApp.getApplicationName());
+                                                      OAUTH_CLIENT_NAME, createdApp.getApplicationName());
             oAuthApplicationInfo.addParameter(ApplicationConstants.
-                    OAUTH_CLIENT_GRANT, createdApp.getGrantTypes());
+                                                      OAUTH_CLIENT_GRANT, createdApp.getGrantTypes());
 
             return oAuthApplicationInfo;
 
@@ -249,31 +265,19 @@ public class APIKeyMgtSubscriberService extends AbstractAdmin {
 
         try {
 
-            OAuthAdminService oAuthAdminService = new OAuthAdminService();
             ApplicationManagementService appMgtService = ApplicationManagementService.getInstance();
 
             log.debug("Getting OAuth App for " + consumerKey);
-            OAuthConsumerAppDTO oAuthConsumerAppDTO = oAuthAdminService.getOAuthApplicationData(consumerKey);
+            String spAppName = appMgtService.getServiceProviderNameByClientId(consumerKey, "oauth2");
 
-            if (oAuthConsumerAppDTO == null) {
+            if (spAppName == null) {
                 log.debug("Couldn't find OAuth App for Consumer Key : " + consumerKey);
                 return;
             }
 
-            if (oAuthConsumerAppDTO.getApplicationName() != null) {
-                log.debug("Getting Service Provider App for " + oAuthConsumerAppDTO.getApplicationName());
-                ServiceProvider serviceProvider = appMgtService.getApplication(oAuthConsumerAppDTO.getApplicationName());
+            log.debug("Removing Service Provider with name : " + spAppName);
+            appMgtService.deleteApplication(spAppName);
 
-                // When deleting a non-existent ServiceProvider, AppMgtService throws and exception. It's to prevent
-                // this error, the existence of the SP is checked.
-                if (serviceProvider != null) {
-                    log.debug("Removing Service Provider with name : " + oAuthConsumerAppDTO.getApplicationName());
-                    appMgtService.deleteApplication(oAuthConsumerAppDTO.getApplicationName());
-                }
-
-                log.debug("Removing OAuth App for " + consumerKey);
-                oAuthAdminService.removeOAuthApplicationData(consumerKey);
-            }
 
         } catch (IdentityApplicationManagementException e) {
             APIUtil.handleException("Error occurred while deleting ServiceProvider", e);

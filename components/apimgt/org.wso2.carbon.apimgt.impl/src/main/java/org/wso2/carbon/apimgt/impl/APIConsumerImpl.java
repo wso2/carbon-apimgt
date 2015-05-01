@@ -1914,7 +1914,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                                                                          String[] allowedDomains, String validityTime,
                                                                          String tokenScope, String groupingId,
                                                                          String jsonString)
-                                                                                           throws APIManagementException {
+            throws APIManagementException {
 
         boolean isTenantFlowStarted = false;
         // we should have unique names for applications. There for we will
@@ -1943,32 +1943,33 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 // initiate workflow type. By default simple work flow will be
                 // executed.
                 appRegistrationWorkflow =
-                                          WorkflowExecutorFactory.getInstance()
-                                                                 .getWorkflowExecutor(WorkflowConstants.WF_TYPE_AM_APPLICATION_REGISTRATION_PRODUCTION);
+                        WorkflowExecutorFactory.getInstance()
+                                .getWorkflowExecutor(WorkflowConstants.WF_TYPE_AM_APPLICATION_REGISTRATION_PRODUCTION);
                 appRegWFDto =
-                              (ApplicationRegistrationWorkflowDTO) WorkflowExecutorFactory.getInstance()
-                                                                                          .createWorkflowDTO(WorkflowConstants.WF_TYPE_AM_APPLICATION_REGISTRATION_PRODUCTION);
+                        (ApplicationRegistrationWorkflowDTO) WorkflowExecutorFactory.getInstance()
+                                .createWorkflowDTO(WorkflowConstants.WF_TYPE_AM_APPLICATION_REGISTRATION_PRODUCTION);
                 applicationNameAfterAppend.append("_PRODUCTION");
 
             }// if it is a sandBox application.
             else if (APIConstants.API_KEY_TYPE_SANDBOX.equals(tokenType)) { // if
-                                                                            // its
-                                                                            // a
-                                                                            // SANDBOX
-                                                                            // application.
+                // its
+                // a
+                // SANDBOX
+                // application.
                 appRegistrationWorkflow =
-                                          WorkflowExecutorFactory.getInstance()
-                                                                 .getWorkflowExecutor(WorkflowConstants.WF_TYPE_AM_APPLICATION_REGISTRATION_SANDBOX);
+                        WorkflowExecutorFactory.getInstance()
+                                .getWorkflowExecutor(WorkflowConstants.WF_TYPE_AM_APPLICATION_REGISTRATION_SANDBOX);
                 appRegWFDto =
-                              (ApplicationRegistrationWorkflowDTO) WorkflowExecutorFactory.getInstance()
-                                                                                          .createWorkflowDTO(WorkflowConstants.WF_TYPE_AM_APPLICATION_REGISTRATION_SANDBOX);
+                        (ApplicationRegistrationWorkflowDTO) WorkflowExecutorFactory.getInstance()
+                                .createWorkflowDTO(WorkflowConstants.WF_TYPE_AM_APPLICATION_REGISTRATION_SANDBOX);
                 applicationNameAfterAppend.append("_SANDBOX");
             }
             // Build key manager instance and create oAuthAppRequest by
             // jsonString.
             OAuthAppRequest request =
-                                      ApplicationUtils.createOauthAppRequest(applicationNameAfterAppend.toString(),
-                                                                             callbackUrl, tokenScope, jsonString);
+                    ApplicationUtils.createOauthAppRequest(applicationNameAfterAppend.toString(),
+                                                           callbackUrl, tokenScope, jsonString);
+            request.getOAuthApplicationInfo().addParameter(ApplicationConstants.VALIDITY_PERIOD, validityTime);
 
             // Setting request values in WorkflowDTO - In future we should keep
             // Application/OAuthApplication related
@@ -1990,7 +1991,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             appRegWFDto.setCallbackUrl(appRegistrationWorkflow.getCallbackURL());
             appRegWFDto.setAppInfoDTO(request);
             appRegWFDto.setDomainList(allowedDomains);
-            appRegWFDto.setValidityTime(Long.parseLong(validityTime));
+
             appRegWFDto.setKeyDetails(appKeysDto);
             appRegistrationWorkflow.execute(appRegWFDto);
 

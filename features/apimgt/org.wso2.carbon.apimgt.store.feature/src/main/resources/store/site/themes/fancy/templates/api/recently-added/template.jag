@@ -31,7 +31,7 @@
                            <div class="span7">
                                <a data-content="#tooltipcontentID1" href="<%=path%>" class="title" title="<%=api.name%>">
                                    <%=api.name%>-<%=api.version%></a>
-                               <div><a class="item-provider"><%=apiProvider%></a></div>
+                               <div><a href="<%=path%>" class="item-provider"><%=apiProvider%></a></div>
                                <div class="star-ratings"><%=stars.getStaticStars(jagg.getSiteContext(), api.rates, jagg.getUserTheme().base)%></div>
                            </div>
                        </div>
@@ -79,7 +79,7 @@
                                                                                                          '<div class="span7">' +
                                                                                                              '<a data-content="#tooltipcontentID1" href="' + path + '" class="title" title="' + api.name +'">' + api.name + '-' + api.version +
                                                                                                                  '</a>' +
-                                                                                                             '<div><a class="item-provider">' + api.owner + '</a></div>' +
+                                                                                                             '<div><a href="' + path + '" class="item-provider">' + api.owner + '</a></div>' +
                                                                                                              '<div class="star-ratings">' + starsText + '</div>' +
                                                                                                          '</div>' +
                                                                                                      '</div></div>');
@@ -93,7 +93,7 @@
                                                                                                          '<div class="span7">' +
                                                                                                              '<a data-content="#tooltipcontentID1" href="' + path + '" class="title" title="' + api.name +'">' + api.name + '-' + api.version +
                                                                                                                  '</a>' +
-                                                                                                             '<div><a class="item-provider">' + api.provider + '</a></div>' +
+                                                                                                             '<div><a href="' + path + '" class="item-provider">' + api.provider + '</a></div>' +
                                                                                                              '<div class="star-ratings">' + starsText + '</div>' +
                                                                                                          '</div>' +
                                                                                                      '</div></div>');

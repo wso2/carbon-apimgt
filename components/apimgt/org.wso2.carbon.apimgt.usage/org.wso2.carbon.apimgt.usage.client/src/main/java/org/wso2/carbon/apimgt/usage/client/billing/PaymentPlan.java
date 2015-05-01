@@ -137,7 +137,7 @@ public class PaymentPlan extends BillingBase {
      * @throws Exception at Illegal range of usage value or error in configuration
      */
     public List<APIUsageRangeCost>  evaluate (String parameterName,int usedAmount) throws Exception {
-        List<APIUsageRangeCost> rangeCosts = null;
+        List<APIUsageRangeCost> rangeCosts = new ArrayList<APIUsageRangeCost>();
         for(DataParameter iterator : elementVector){
             if(iterator.objectName.equals(parameterName)){
                 rangeCosts = iterator.evaluateInvocationCost(usedAmount);
