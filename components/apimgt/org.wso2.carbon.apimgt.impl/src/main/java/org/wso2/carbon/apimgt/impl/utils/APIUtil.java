@@ -3965,4 +3965,5 @@ public final class APIUtil {
         int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager().getTenantId(tenantDomain);
         PermissionUpdateUtil.updatePermissionTree(tenantId);
     }
+
 }

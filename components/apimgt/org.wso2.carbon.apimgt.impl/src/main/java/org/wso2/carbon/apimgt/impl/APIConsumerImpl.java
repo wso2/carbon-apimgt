@@ -20,6 +20,7 @@ package org.wso2.carbon.apimgt.impl;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -1795,6 +1796,14 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     public String addApplication(Application application, String userId)
             throws APIManagementException {
 
+        List<Application> applications = apiMgtDAO.getBasicApplicationDetails(userId, null);
+
+        if (applications != null || !applications.isEmpty()) {
+            if (APIUtil.doesApplicationExist(applications.toArray(new Application[applications.size()]), userId)) {
+                handleException("A duplicate application already exists by the name - " + application.getName());
+            }
+        }
+
         int applicationId = apiMgtDAO.addApplication(application, userId);
 
         boolean isTenantFlowStarted = false;
@@ -2005,6 +2014,12 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 keyDetails.put("appDetails", applicationInfo.getJsonString());
             }
 
+
+            HashMap<String,Object> mapObject = new HashMap<String, Object>();
+            mapObject.put("add1",new String[]{"test1","test2","test3"});
+            mapObject.put("add2","simpleType");
+
+            keyDetails.put("complexType",mapObject);
             // There can be instances where generating the Application Token is
             // not required. In those cases,
             // token info will have nothing.
