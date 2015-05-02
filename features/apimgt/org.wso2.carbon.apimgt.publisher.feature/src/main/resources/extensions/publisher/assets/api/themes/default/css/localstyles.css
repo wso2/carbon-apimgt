@@ -42,7 +42,7 @@ label, input, button, select, textarea{
     list-style-type:none;
 }
 .icon-blog{
-    background:transparent url(../images/mailList.png) no-repeat left top;
+    background:transparent url(../imgs/mailList.png) no-repeat left top;
     display:block;
     height:20px;
     margin-left:10px;
@@ -50,7 +50,7 @@ label, input, button, select, textarea{
     cursor:pointer;
 }
 .icon-twitter{
-    background:transparent url(../images/twitter.png) no-repeat left top;
+    background:transparent url(../imgs/twitter.png) no-repeat left top;
     display:block;
     height:30px;
     margin-left:10px;
@@ -58,7 +58,7 @@ label, input, button, select, textarea{
     cursor:pointer;
 }
 .icon-facebook{
-    background:transparent url(../images/facebook.png) no-repeat left top;
+    background:transparent url(../imgs/facebook.png) no-repeat left top;
     display:block;
     height:30px;
     margin-left:10px;
@@ -66,7 +66,7 @@ label, input, button, select, textarea{
     cursor:pointer;
 }
 .icon-rss{
-    background:transparent url(../images/rss.png) no-repeat left top;
+    background:transparent url(../imgs/rss.png) no-repeat left top;
     display:block;
     height:20px;
     margin-left:10px;
@@ -220,7 +220,7 @@ div.navbar-inner {
     height:50px;
 }
 a.powered-by-logo {
-    background: transparent url(../images/poweredByLogo.png) no-repeat 0 0;
+    background: transparent url(../imgs/poweredByLogo.png) no-repeat 0 0;
     display: block;
     width: 208px;
     height: 23px;
@@ -244,7 +244,7 @@ a.powered-by-logo {
     width: 84px;
 }
 .icon-lifecycle{
-    background:transparent url(../images/lifecycle.png) no-repeat 0 0;
+    background:transparent url(../imgs/lifecycle.png) no-repeat 0 0;
     width:14px;
     height:14px;
 }
@@ -261,7 +261,7 @@ a.powered-by-logo {
     cursor:pointer;
 }
 .loadingButton, .loadingButton:hover{
-    background-image:url(../images/ajax-loader-black.gif);
+    background-image:url(../imgs/ajax-loader-black.gif);
     background-repeat:no-repeat;
     background-position:10px center;
     text-indent:30px;
@@ -368,7 +368,7 @@ a.powered-by-logo {
     margin-top:20px;
 }
 .form-horizontal .controls .tierHelp,form.form-search .tierHelp {
-    background:transparent url(../images/help.png) no-repeat;
+    background:transparent url(../imgs/help.png) no-repeat;
     width:16px;
     height:16px;
     margin-top:-26px;
@@ -420,7 +420,7 @@ form.form-search .tierHelp {
     text-transform: uppercase;
     text-align: left;
     padding: 6px 6px 6px 12px;
-    background: #CAE8EA url(images/bg_header.jpg) no-repeat;
+    background: #CAE8EA url(imgs/bg_header.jpg) no-repeat;
 }
 
 .graphTable  th.nobg {
@@ -682,21 +682,21 @@ body {
     color: #efefef;
 }
 .share-pane a.facebook{
-    background:transparent url(../images/facebook_16.png) no-repeat left top;
+    background:transparent url(../imgs/facebook_16.png) no-repeat left top;
     display: block;
     width: 16px;
     height: 16px;
     margin-bottom:6px;
 }
 .share-pane a.linkedin{
-    background:transparent url(../images/linkedin_16.png) no-repeat left top;
+    background:transparent url(../imgs/linkedin_16.png) no-repeat left top;
     display: block;
     width: 16px;
     height: 16px;
     margin-bottom:6px;
 }
 .share-pane a.twitter{
-    background:transparent url(../images/twitter_16.png) no-repeat left top;
+    background:transparent url(../imgs/twitter_16.png) no-repeat left top;
     display: block;
     width: 16px;
     height: 16px;
@@ -932,7 +932,7 @@ label.errorTier {
     color:#547f00;
 }
 .left-menu-back01{
-    background: transparent url(../images/left-menu-back02.png) repeat left top;
+    background: transparent url(../imgs/left-menu-back02.png) repeat left top;
 }
 .doc-search-result-content {
     margin:10px 0;
@@ -971,7 +971,7 @@ label.errorTier {
 }
 @media all and (min-width: 900px){
     body{
-        background: #fff url(../images/back-normal.png) repeat-y left top;
+        background: #fff url(../imgs/back-normal.png) repeat-y left top;
     }
     #middle{
         width:60%;
