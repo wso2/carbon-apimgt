@@ -15,7 +15,6 @@ $(function () {
         return false;
     }
 
-    $(document).ready(function(){
         $('.multiselect').multiselect();
 
         $('#tier').change(validate_tiers);
@@ -75,8 +74,6 @@ $(function () {
         else {
             $('#toggleSequence').parent().next().hide();
         }
-
-    });
 
     $('.js_hidden_section_title').click(function(){
         var $next = $(this).next();

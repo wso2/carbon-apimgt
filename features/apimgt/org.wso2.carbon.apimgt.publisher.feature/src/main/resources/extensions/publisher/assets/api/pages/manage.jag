@@ -167,7 +167,9 @@ require('/modules/publisher.js').exec(function(ctx) {
 
 	output.api.configuredTiers = configuredTiers;
 	output.api.filteredTiers = filteredTiers;
-	log.info(api);
+	//TODO remove this
+	output.api.isPermitted = true;
+	log.info(output);
 	caramel.render(output);
 }, request, response, session);
 %>
