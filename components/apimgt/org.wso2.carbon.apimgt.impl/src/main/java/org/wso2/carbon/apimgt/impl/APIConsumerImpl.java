@@ -2014,12 +2014,6 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 keyDetails.put("appDetails", applicationInfo.getJsonString());
             }
 
-
-            HashMap<String,Object> mapObject = new HashMap<String, Object>();
-            mapObject.put("add1",new String[]{"test1","test2","test3"});
-            mapObject.put("add2","simpleType");
-
-            keyDetails.put("complexType",mapObject);
             // There can be instances where generating the Application Token is
             // not required. In those cases,
             // token info will have nothing.
