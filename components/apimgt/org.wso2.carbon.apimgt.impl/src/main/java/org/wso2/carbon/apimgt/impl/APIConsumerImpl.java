@@ -20,6 +20,7 @@ package org.wso2.carbon.apimgt.impl;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -1794,6 +1795,14 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 
     public String addApplication(Application application, String userId)
             throws APIManagementException {
+
+        List<Application> applications = apiMgtDAO.getBasicApplicationDetails(userId, null);
+
+        if (applications != null || !applications.isEmpty()) {
+            if (APIUtil.doesApplicationExist(applications.toArray(new Application[applications.size()]), userId)) {
+                handleException("A duplicate application already exists by the name - " + application.getName());
+            }
+        }
 
         int applicationId = apiMgtDAO.addApplication(application, userId);
 

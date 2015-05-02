@@ -3197,19 +3197,13 @@ public class APIStoreHostObject extends ScriptableObject {
             String callbackUrl = (String) args[3];
             String description = (String) args[4];
             String groupId = null;
-            if(args.length > 5 && args[5] != null){
-            	 groupId = (String) args[5];
+            if (args.length > 5 && args[5] != null) {
+                groupId = (String) args[5];
             }
-            
+
             APIConsumer apiConsumer = getAPIConsumer(thisObj);
             Subscriber subscriber = new Subscriber(username);
 
-            Application[] apps = null;
-            apps = apiConsumer.getApplications(subscriber, groupId);
-            
-            if(APIUtil.doesApplicationExist(apps, name)){
-            	handleException("A duplicate application already exists by the name - " + name);
-            }
             Application application = new Application(name, subscriber);
             application.setTier(tier);
             application.setCallbackUrl(callbackUrl);

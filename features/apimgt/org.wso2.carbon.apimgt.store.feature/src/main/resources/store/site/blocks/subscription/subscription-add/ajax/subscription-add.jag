@@ -201,6 +201,7 @@ include("/jagg/jagg.jag");
             var jsonParams = {
                 username : user.username
             };
+            jsonParams = stringify(jsonParams);
         }
 
         mod = jagg.module("subscription");
