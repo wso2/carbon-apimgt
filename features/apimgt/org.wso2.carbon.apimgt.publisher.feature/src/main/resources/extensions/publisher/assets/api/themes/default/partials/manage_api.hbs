@@ -34,20 +34,25 @@
 		<center>
 			<ul class="new-sub-menu-wizard" style="margin:0 auto">
 				<li>
-					<a href='{{url ""}}/asts/api/create' class="wizard-active">
+					<a href='{{url ""}}/asts/api/design/{{assets.id}}?name={{api.name}}&version={{api
+					.version}}&provider={{api
+					.provider}}'  class="wizard-done">
 						<div class="wizard-number">1</div>
 						<span>Design</span>
 					</a>
 				</li>
 				<li>
-					<a href='{{url ""}}/asts/api/implement' class="<%= implement_wlabel%>">
+					<a href='{{url ""}}/asts/api/implement/{{assets.id}}?name={{api.name}}&version={{api.version}}&provider={{api
+					.provider}}'
+					   class="wizard-done">
 						<div class="wizard-number">2</div>
 						<span>Implement</span>
 					</a>
 				</li>
 				<li>
-					<a href='{{url ""}}/asts/api/manage' class="<%= manage_wlabel%>">
-						<div class="wizard-number" >3</div>
+					<a href='{{url ""}}/asts/api/manage/{{assets.id}}?name={{api.name}}&version={{api.version}}&provider={{api
+					.provider}}'  class="wizard-active">
+						<div class="wizard-number">3</div>
 						<span>Manage</span>
 					</a>
 				</li>
@@ -277,7 +282,7 @@
 										{{/if}}
 									{{/if}}
 									<br/>
-										<div class="control-group" id="tennatsDiv" {{#unless api
+										<div class="control-group" id="tenantsDiv" {{#unless api
 								.subscriptionAvailabilitySpecificTenants}}style="display: none;"{{/unless}}>
 									<label class="control-label" for="tenants" id="tennatLabel" name="tennatLabel">
 										{{t "Tenants"}}:<span class="requiredAstrix">*</span>

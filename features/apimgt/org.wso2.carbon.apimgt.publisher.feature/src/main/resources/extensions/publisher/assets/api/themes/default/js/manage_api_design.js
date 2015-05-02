@@ -85,7 +85,7 @@ $(function () {
             var designer = APIDesigner();
             if ($("#resource_url_pattern").val() == "" || $('#inputResource').val() == "") {
                 //jagg.message({content:"URL pattern & Resource cannot be empty.",type:"error"});
-                alert("ERROR");
+                alert("URL pattern & Resource cannot be empty.");
                 return;
             }
             var path = $("#resource_url_pattern").val();
@@ -100,7 +100,7 @@ $(function () {
                         resource_exist = true;
                         var err_message = "Resource already exist for URL Pattern " + path + " and Verb " + $(this).val();
                         //jagg.message({content:err_message,type:"error"});
-                        alert("ERROR");
+                        alert("error");
                         return;
                     }
                 }
@@ -171,7 +171,7 @@ $(function () {
             });
             if (vc == 0) {
                 //jagg.message({content:"You should select at least one HTTP verb." ,type:"error"});
-                alert("ERROR");
+                alert("You should select at least one HTTP verb.");
                 return;
             }
             event.data.add_resource(resource, $('#inputResource').val());
@@ -390,7 +390,7 @@ $(function () {
                              content : "You should not define same scope.",
                              type : "error"
                              });*/
-                            alert("ERROR");
+                            alert("ou should not define same scope.");
                             return;
                         }
                     }
