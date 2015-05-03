@@ -197,17 +197,23 @@ include("/jagg/jagg.jag");
             retryAfterFailure = false;
         }
 
-        if(jsonParams == null){
-            var jsonParams = {
+        if(jsonParams != null){
+            //convert json string in to a javascript array. Then we can add user name attribute in to it.
+            var jsonParamsObject = JSON.parse(jsonParams);
+
+            jsonParamsObject.username = user.username;
+
+        }else{
+            var jsonParamsObject = {
                 username : user.username
             };
-            jsonParams = stringify(jsonParams);
+
         }
 
         mod = jagg.module("subscription");
 
         result = mod.generateApplicationKey(username, application , keyType, callbackUrl, accessAllowDomainsArr,
-                validityTime, retryAfterFailure, tokenScope,groupingId, jsonParams);
+                validityTime, retryAfterFailure, tokenScope,groupingId, JSON.stringify(jsonParamsObject));
 
         if (result.error) {
             obj = {
@@ -225,22 +231,55 @@ include("/jagg/jagg.jag");
         print(obj);
 
     } else if (action == "updateClientApplication" && request.getMethod() == 'POST') {
+
         if (!user) {
-            print({
-                error:true,
-                message:msg.error.loginRequired(action)
-            });
+            if (!ssoEnabled) {
+                print({
+                    error: true,
+                    message: msg.error.loginRequired(action)
+                });
+            }
             return;
         }
-        var authAppParams = {};
-        authAppParams.username = user.username;
-        authAppParams.jsonParams = request.getParameter("jsonParams");
 
-        /*if(retryAfterFailure == null){
-         retryAfterFailure = false;
-         }*/
+        var application = request.getParameter("application");
+        var keyType = request.getParameter("keytype");
+        var callbackUrl = request.getParameter("callbackUrl");
+        var username = user.username;
+        var accessAllowDomains = request.getParameter("authorizedDomains");
+        //var tokenScope = request.getParameter("tokenScope");
+        var tokenScope = "default";
+
+        var accessAllowDomainsArr = accessAllowDomains.split(",");
+
+        var validityTime = request.getParameter("validityTime");
+        var retryAfterFailure = request.getParameter("retryAfterFailure");
+        var jsonParams = request.getParameter("jsonParams");
+        var groupingId=session.get("groupId");
+
+        if (retryAfterFailure == null) {
+            retryAfterFailure = false;
+        }
+        var log = new Log();
+
+        if(jsonParams != null){
+            //convert json string in to a javascript array. Then we can add user name attribute in to it.
+            var jsonParamsObject = JSON.parse(jsonParams);
+
+            jsonParamsObject.username = user.username;
+
+        }else{
+            var jsonParamsObject = {
+                username : user.username
+            };
+
+        }
+
+
         mod = jagg.module("subscription");
-        result = mod.updateAuthClient(authAppParams);
+
+        result = mod.updateAuthClient(username, application , keyType, callbackUrl, accessAllowDomainsArr,
+                validityTime, retryAfterFailure, tokenScope,groupingId, JSON.stringify(jsonParamsObject));
 
 
         if (result.error) {
