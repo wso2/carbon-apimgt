@@ -9,7 +9,21 @@ include("/jagg/jagg.jag");
             msg = require("/site/conf/ui-messages.jag"),
             action = request.getParameter("action"),
             user = jagg.getUser();
-    if (action == "searchAPIs" && request.getMethod() == 'POST') {
+
+    var validation = {
+        "action": { type: "safetext"},
+        "start": { type: "number"},
+        "end": { type: "number"},
+    };
+
+    var validation_errors = jagg.validateInputs(validation);
+
+    if(validation_errors != true){
+            print({
+                error:true,
+                message: msg.error.invalidInputs(validation_errors)
+            });        
+    }else if (action == "searchAPIs" && request.getMethod() == 'POST') {
         if (!user) {
             if(!ssoEnabled){
 		print({

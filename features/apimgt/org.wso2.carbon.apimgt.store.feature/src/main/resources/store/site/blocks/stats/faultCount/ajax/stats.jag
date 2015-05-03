@@ -9,13 +9,27 @@ log = new Log();
             site = require("/site/conf/site.json"),
             msg = require("/site/conf/ui-messages.jag")
 
+
     if (jagg.getUser() == null) {
         print({
                   error:true,
                   message:'timeout'
               });
     } else {
-    if (action === "getPerAppAPIFaultCount") {
+
+        var validation = {
+            "action": { type: "safetext"},
+        };
+
+        var validation_errors = jagg.validateInputs(validation);
+               
+        if(validation_errors != true){
+            print({
+                error:true,
+                message: msg.error.invalidInputs(validation_errors)
+            });        
+        }
+        else if (action === "getPerAppAPIFaultCount") {
         mod = jagg.module("statistics");
         var subscriber = jagg.getUser().username;
         from = request.getParameter("fromDate");

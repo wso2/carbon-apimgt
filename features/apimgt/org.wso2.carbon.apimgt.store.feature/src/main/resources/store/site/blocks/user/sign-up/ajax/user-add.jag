@@ -5,6 +5,14 @@ var localeResourcesBasePath="/site/conf/locales/jaggery/";
 i18n.init(request,localeResourcesBasePath);
 var log = new Log();
 
+var validation = {
+    "action": { type: "safetext"},
+    "username": { type: "names"},
+    "password": { type: "password"},
+};
+
+var validation_errors = jagg.validateInputs(validation);
+
 (function () {
     response.contentType = "application/json; charset=UTF-8";
     response.addHeader('Pragma', 'No-cache');
@@ -13,7 +21,19 @@ var log = new Log();
             msg = require("/site/conf/ui-messages.jag"),
             action = request.getParameter("action"),showWorkflowTip,
             user = jagg.getUser();
-    if (action == "addUser" && request.getMethod() == 'POST') {
+    if( request.getMethod() == 'POST' && !jagg.isCSRFTokenValid()){
+        print({
+            error:true,
+            message: msg.error.csrfError
+        });
+    }
+    else if(validation_errors != true){
+        print({
+            error:true,
+            message: msg.error.invalidInputs(validation_errors)
+        });        
+    }            
+    else if (action == "addUser" && request.getMethod() == 'POST') {
 
         username = request.getParameter("username");
         password = request.getParameter("password");

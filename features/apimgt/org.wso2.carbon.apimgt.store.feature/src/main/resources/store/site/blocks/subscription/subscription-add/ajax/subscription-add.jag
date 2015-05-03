@@ -8,7 +8,27 @@ include("/jagg/jagg.jag");
             user = jagg.getUser(),
             msg = require("/site/conf/ui-messages.jag"),
             action = request.getParameter("action");
-    if (action == "addSubscription" && request.getMethod() == 'POST') {
+
+
+    var validation = {
+        "action": { type: "safetext"},
+        "application":{ type:"name"}
+    };
+
+    var validation_errors = jagg.validateInputs(validation);
+
+    if(validation_errors != true){
+            print({
+                error:true,
+                message: msg.error.invalidInputs(validation_errors)
+            });        
+    }else if( request.getMethod() == 'POST' && !jagg.isCSRFTokenValid()){
+        print({
+            error:true,
+            message: msg.error.csrfError
+        });
+    }            
+    else if (action == "addSubscription" && request.getMethod() == 'POST') {
         if (!user) {
             if(!ssoEnabled){
 		print({
