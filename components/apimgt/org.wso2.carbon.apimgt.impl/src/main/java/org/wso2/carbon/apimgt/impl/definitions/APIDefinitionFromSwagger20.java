@@ -281,7 +281,7 @@ public class APIDefinitionFromSwagger20 extends APIDefinition {
         String endpoints = environment.getApiGatewayEndpoint();
         String[] endpointsSet = endpoints.split(",");
         Set<URITemplate> uriTemplates = api.getUriTemplates();
-        Set scopes = api.getScopes();
+        Set<Scope> scopes = api.getScopes();
 
         if (endpointsSet.length < 1) {
             throw new APIManagementException("Error in creating JSON representation of the API" + identifier.getApiName());
@@ -340,7 +340,19 @@ public class APIDefinitionFromSwagger20 extends APIDefinition {
 
         JSONObject securityDefinitionObject = new JSONObject();
         JSONObject scopesObject = new JSONObject();
-        scopesObject.put("x-wso2-scopes", scopes);
+
+        JSONObject xWso2ScopesObject = new JSONObject();
+        if (scopes != null) {
+            for (Scope scope : scopes) {
+                xWso2ScopesObject.put("key", scope.getKey());
+                xWso2ScopesObject.put("name", scope.getName());
+                xWso2ScopesObject.put("roles", scope.getRoles());
+                xWso2ScopesObject.put("description", scope.getDescription());
+
+            }
+        }
+
+        scopesObject.put("x-wso2-scopes", xWso2ScopesObject);
         securityDefinitionObject.put("apim", scopesObject);
 
         swaggerObject.put("securityDefinitions", securityDefinitionObject);
