@@ -2,10 +2,11 @@
     <%
     var log = new Log();
     var application = inputs.application;
+    var prodJsonString = inputs.app.prodJsonString;
 
-    if(typeof(inputs.app.jsonParameters) != "undefined"){
+    if(typeof(prodJsonString) != "undefined" && prodJsonString != null){
 
-        var jsonParameters = parse(inputs.app.jsonParameters);
+        var jsonParameters = parse(prodJsonString);
         var clientName = jsonParameters.client_name;
 
         log.info(jsonParameters.iProductionAuthAppContact);

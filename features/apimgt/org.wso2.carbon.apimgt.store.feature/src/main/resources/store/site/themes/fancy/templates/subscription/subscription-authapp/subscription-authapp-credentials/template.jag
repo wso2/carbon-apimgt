@@ -2,9 +2,10 @@
     <%
     var log = new Log();
     var application = inputs.application;
+    var prodJsonString = inputs.app.prodJsonString;
 
-    if(typeof(inputs.app.jsonParameters) != "undefined"){
-        var jsonParameters = parse(inputs.app.jsonParameters);
+    if(typeof(prodJsonString) != "undefined" && prodJsonString != null){
+        var jsonParameters = parse(prodJsonString);
         if(typeof(jsonParameters.token_endpoint_auth_method) !="undefined"  && jsonParameters.token_endpoint_auth_method){
             var authMethod = jsonParameters.token_endpoint_auth_method;
 

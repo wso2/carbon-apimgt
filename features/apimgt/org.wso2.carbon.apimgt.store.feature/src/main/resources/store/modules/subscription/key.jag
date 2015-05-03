@@ -85,7 +85,8 @@ var deleteAuthApplication = function (authAppParams) {
 };
 
 
-var updateAuthClient = function (authAppParams) {
+var updateAuthClient = function (username, application , keyType, callbackUrl, accessAllowDomainsArr,
+                                 validityTime, retryAfterFailure, tokenScope,applicationId, jsonParams) {
 
     afterFailure = typeof afterFailure !== 'undefined' ? afterFailure : false;
     var key,
@@ -94,7 +95,8 @@ var updateAuthClient = function (authAppParams) {
 
     try {
 
-        key = store.updateAuthClient(authAppParams);
+        key = store.updateAuthClient(username, application , keyType, callbackUrl, accessAllowDomainsArr,
+                validityTime, retryAfterFailure, tokenScope,applicationId, jsonParams);;
 
         if (log.isDebugEnabled()) {
             log.debug("generateAPIKey");
