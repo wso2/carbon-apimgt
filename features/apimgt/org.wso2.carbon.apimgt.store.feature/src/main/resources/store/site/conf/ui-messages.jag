@@ -56,6 +56,13 @@ var error = {
 
         return "Please provide valid credentials.";
 
-    }
+    },
+    csrfError: "Invalid CSRF Token please try refreshing the page.",
+    invalidInputs:function (errors) {
+        var params = stringify(errors);
+        return "Invalid inputs "+params;
+
+    },
+
 };
 %>

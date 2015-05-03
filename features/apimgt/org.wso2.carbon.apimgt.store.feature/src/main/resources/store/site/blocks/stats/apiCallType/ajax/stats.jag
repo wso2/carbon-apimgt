@@ -15,7 +15,19 @@ log = new Log();
                   message:'timeout'
               });
     } else {
-     if (action === "getAppApiCallType") {
+        var validation = {
+            "action": { type: "safetext"}
+        };
+
+        var validation_errors = jagg.validateInputs(validation);
+               
+        if(validation_errors != true){
+            print({
+                error:true,
+                message: msg.error.invalidInputs(validation_errors)
+            });        
+        }
+        else if (action === "getAppApiCallType") {
         mod = jagg.module("statistics");
         var subscriber = jagg.getUser().username;
         from = request.getParameter("fromDate");

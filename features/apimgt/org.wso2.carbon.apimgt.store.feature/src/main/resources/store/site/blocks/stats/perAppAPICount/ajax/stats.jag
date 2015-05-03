@@ -16,10 +16,19 @@ log = new Log();
               });
     } else {
 
+        var validation = {
+            "action": { type: "safetext"},
+        };
 
-       
-        
-     if (action === "getProviderAPIUsage") {
+        var validation_errors = jagg.validateInputs(validation);
+               
+        if(validation_errors != true){
+            print({
+                error:true,
+                message: msg.error.invalidInputs(validation_errors)
+            });        
+        }
+        else if (action === "getProviderAPIUsage") {
         mod = jagg.module("statistics");
         var subscriber = jagg.getUser().username;
         from = request.getParameter("fromDate");

@@ -714,6 +714,94 @@ var jagg = jagg || (function () {
         return request.getParameter("tenant");
     }
 
+    var setCSRFToken = function(){
+        var cookie = request.getCookie("csrftoken");         
+        var user = jagg.getUser();
+        var csrfuser =  session.get('csrfuser');
+        //set CSRF if it is not set + you need to refresh the token if the user has changed.
+        if( !cookie || user != csrfuser){
+            //Use a secure random as the CSRF token.
+            var SecureRandom = Packages.java.security.SecureRandom;
+            var random = new SecureRandom();
+            var BigInteger = Packages.java.math.BigInteger;
+            var token = new BigInteger(130, random).toString(32);
+
+            var cookie= {'name':'csrftoken','value': token , 'maxAge': 86400, 'path':"/"};
+            session.put('csrfuser',user);
+            response.addCookie(cookie);
+        }     
+    }
+
+    var isCSRFTokenValid = function(){
+        var log = new Log();
+        var cookie = request.getCookie("csrftoken");
+        var token = request.getHeader("X-CSRFToken");
+        var user = jagg.getUser();
+        if(cookie == null || cookie.value == token){
+            return true;
+        }
+        else{
+            log.info("CSRF Token error at "+request.getRequestURI());
+            return false;
+        }
+    }
+
+    var validateInputs = function(config){
+        var errors = [];
+        //set most used parapeters
+        config.name = { type:"name"};
+        config.provider = { type:"name"};
+        config.version = { type:"name"};        
+
+        for(var key in config){
+            var value = request.getParameter(key);
+            if(value == null){
+                if(config[key].required)
+                    errors.push(key);
+                continue;
+            }
+            switch (config[key].type) {
+              case "url":
+                break;
+              case "input":
+                var regex = /([<>\"\'])/;
+                if(regex.test(value)) errors.push(key);
+                break;                 
+              case "number":
+                var regex = /^[0-9]*$/;
+                if(!regex.test(value)) errors.push(key); 
+                break;  
+              case "safetext":
+                var regex = /^[a-zA-Z0-9]*$/;
+                if(!regex.test(value)) errors.push(key); 
+                break;        
+              case "uuid":
+                var regex = /^[a-zA-Z0-9\-]*$/;
+                if(!regex.test(value)) errors.push(key); 
+                break;                                        
+              case "name":
+                var regex = /([~!#$;%^*+={}\|\\<>\"\'\/,])/;  
+                if(regex.test(value)) errors.push(key);                
+                break;
+              case "password":
+                var regex = /^[\S]{5,30}$/;
+                if(!regex.test(value)) errors.push(key);                
+                break;
+              case "email":
+                var regex = /^([A-Za-z0-9_\-\.])+\@([A-Za-z0-9_\-\.])+\.([A-Za-z]{2,4})$/;
+                if(!regex.test(value)) errors.push(key);              
+                break;
+              default:
+            }            
+        }
+        if(errors.length > 0){
+            return errors;
+        }
+        else{
+            return true;
+        }
+    }
+
     return {
         setUser:setUser,
         getUser:getUser,
@@ -747,7 +835,10 @@ var jagg = jagg || (function () {
         getRegistryPath:getRegistryPath,
         getSiteContext:getSiteContext,
         getHttpsUrl:getHttpsUrl,
-        getTenantDomain:getTenantDomain
+        getTenantDomain:getTenantDomain,
+        setCSRFToken:setCSRFToken,
+        isCSRFTokenValid:isCSRFTokenValid,
+        validateInputs:validateInputs,
     };
 
 }());

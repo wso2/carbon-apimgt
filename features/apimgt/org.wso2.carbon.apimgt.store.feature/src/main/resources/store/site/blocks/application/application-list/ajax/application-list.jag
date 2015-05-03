@@ -10,7 +10,19 @@ include("/jagg/jagg.jag");
             action = request.getParameter("action"),
             user = jagg.getUser();
 
-    if (action == "getApplications") {
+    var validation = {
+        "action": { type: "safetext"},
+        "applicationName": { type: "name"},
+    };
+
+    var validation_errors = jagg.validateInputs(validation);
+
+    if(validation_errors != true){
+            print({
+                error:true,
+                message: msg.error.invalidInputs(validation_errors)
+            });        
+    }else if (action == "getApplications") {
         if (!user) {
             if(!ssoEnabled){
 		print({

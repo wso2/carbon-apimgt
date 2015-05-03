@@ -8,7 +8,19 @@ include("/jagg/jagg.jag");
         action = request.getParameter("action");
     var tenant = jagg.getTenantDomain();
 
-    if (action == "getAllTags") {
+
+    var validation = {
+        "action": { type: "safetext"}
+    };
+
+    var validation_errors = jagg.validateInputs(validation);
+
+    if(validation_errors != true){
+            print({
+                error:true,
+                message: msg.error.invalidInputs(validation_errors)
+            });        
+    }else if (action == "getAllTags") {
 
         mod = jagg.module("tag");
         if (tenant != null) {

@@ -9,7 +9,19 @@ include("/jagg/jagg.jag");
             msg = require("/site/conf/ui-messages.jag"),
             action = request.getParameter("action"),
             user = jagg.getUser();
-    if (action == "getProviderAPIUsage") {
+
+    var validation = {
+        "action": { type: "safetext"},
+    };
+
+    var validation_errors = jagg.validateInputs(validation);
+
+    if(validation_errors != true){
+            print({
+                error:true,
+                message: msg.error.invalidInputs(validation_errors)
+            });        
+    }else if (action == "getProviderAPIUsage") {
         if (!user) {
             if(!ssoEnabled){
 		print({

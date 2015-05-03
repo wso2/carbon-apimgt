@@ -5,6 +5,7 @@ include("/jagg/jagg.jag");
     response.contentType = "application/json; charset=UTF-8";
     response.addHeader('Pragma', 'No-cache');
     response.addHeader('Cache-control', 'no-cache');
+    response.contentType = "application/json; charset=UTF-8";    
     var manager = jagg.module("manager"), 
         store = manager.getAPIStoreObj(),
         groupId = "";
@@ -13,41 +14,19 @@ include("/jagg/jagg.jag");
             action = request.getParameter("action"),
             site = require("/site/conf/site.json"),
             msg = require("/site/conf/ui-messages.jag");
-    if (action === "login" && request.getMethod() == 'POST') {
-        mod = jagg.module("user");
-        username = request.getParameter("username");
-        var MultitenantConstants = Packages.org.wso2.carbon.utils.multitenancy.MultitenantConstants;
-		var MultitenantUtils = Packages.org.wso2.carbon.utils.multitenancy.MultitenantUtils;
-    	var user= MultitenantUtils.getTenantAwareUsername(username);
-		var domain= MultitenantUtils.getTenantDomain(username);
-		if (MultitenantConstants.SUPER_TENANT_DOMAIN_NAME === domain) {
-			username = user;
-		} else {
-			username = user + "@" + domain;
-		}
-        username = String(username);
-        var tenant = jagg.getTenantDomain();
-        result = mod.login(username, request.getParameter("password"),tenant);
-        if (result.error) {
-            obj = {
-                error:result.error,
-                message:result.message
-            };
-        } else {
-            obj = {
-                error:false
-            }
-        jagg.setUser({username:result.username, isSuperTenant:result.isSuperTenant, cookie:result.cookie, hasPublisherAccess:result.hasPublisherAccess});
-        session.put("showLogin", "false");
-        }
-        print(obj);
-    } else if (action === "logout") {
-        jagg.setUser(null);
-	    session.remove("selectedApp");
-        print({
-            error:false
-        });
-    } else if (action === "getAPIPublisherURL") {
+
+    var validation = {
+        "action": { type: "safetext"},
+    };
+
+    var validation_errors = jagg.validateInputs(validation);
+
+    if(validation_errors != true){
+            print({
+                error:true,
+                message: msg.error.invalidInputs(validation_errors)
+            });        
+    }else if (action === "getAPIPublisherURL") {
              mod = jagg.module("manager");
              var resultVal=mod.getAPIPublisherURL();
              if (resultVal.error) {
@@ -83,6 +62,46 @@ include("/jagg/jagg.jag");
              session.put("showLogin", "false");
 
              print(obj);
+    }else if (action === "logout") {
+        jagg.setUser(null);
+        session.remove("selectedApp");
+        print({
+            error:false
+        });
+    }else if( request.getMethod() == 'POST' && !jagg.isCSRFTokenValid()){
+        print({
+            error:true,
+            message: msg.error.csrfError
+        });
+    }            
+    else if (action === "login" && request.getMethod() == 'POST') {
+        mod = jagg.module("user");
+        username = request.getParameter("username");
+        var MultitenantConstants = Packages.org.wso2.carbon.utils.multitenancy.MultitenantConstants;
+		var MultitenantUtils = Packages.org.wso2.carbon.utils.multitenancy.MultitenantUtils;
+    	var user= MultitenantUtils.getTenantAwareUsername(username);
+		var domain= MultitenantUtils.getTenantDomain(username);
+		if (MultitenantConstants.SUPER_TENANT_DOMAIN_NAME === domain) {
+			username = user;
+		} else {
+			username = user + "@" + domain;
+		}
+        username = String(username);
+        var tenant = jagg.getTenantDomain();
+        result = mod.login(username, request.getParameter("password"),tenant);
+        if (result.error) {
+            obj = {
+                error:result.error,
+                message:result.message
+            };
+        } else {
+            obj = {
+                error:false
+            }
+        jagg.setUser({username:result.username, isSuperTenant:result.isSuperTenant, cookie:result.cookie, hasPublisherAccess:result.hasPublisherAccess});
+        session.put("showLogin", "false");
+        }
+        print(obj);
     } else {
         print({
             error:true,
