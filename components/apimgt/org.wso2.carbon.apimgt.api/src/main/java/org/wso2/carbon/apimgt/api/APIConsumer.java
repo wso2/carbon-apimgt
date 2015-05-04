@@ -329,7 +329,7 @@ public interface APIConsumer extends APIManager {
      * @param tokenScope Scopes for the requested tokens.
      * @throws APIManagementException if failed to applications for given subscriber
      */
-    public Map<String,Object> updateAuthClient(String userId, String applicationName,
+    public OAuthApplicationInfo updateAuthClient(String userId, String applicationName,
                                                String tokenType,
                                                String callbackUrl, String[] allowedDomains,
                                                String validityTime,

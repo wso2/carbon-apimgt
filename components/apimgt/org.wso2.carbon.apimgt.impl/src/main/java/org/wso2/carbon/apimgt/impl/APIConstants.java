@@ -622,6 +622,13 @@ public final class APIConstants {
         String VALIDATED_DTO = "validatedDTO";
         String KM_CACHE_HIT = "km_cacheHit";
     }
+
+    public static class FrontEndParameterNames {
+        public static final String CONSUMER_KEY = "consumerKey";
+        public static final String CONSUMER_SECRET = "consumerSecret";
+        public static final String CLIENT_DETAILS = "appDetails";
+        public static final String CALLBACK_URL = "callbackUrl";
+    }
     
     //key  of the endpoint securevault
     public static final String API_SECUREVAULT_ENABLE = "EnableSecureVault";

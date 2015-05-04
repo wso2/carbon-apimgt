@@ -1798,7 +1798,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 
         List<Application> applications = apiMgtDAO.getBasicApplicationDetails(userId, null);
 
-        if (applications != null || !applications.isEmpty()) {
+        if (applications != null && !applications.isEmpty()) {
             if (APIUtil.doesApplicationExist(applications.toArray(new Application[applications.size()]), userId)) {
                 handleException("A duplicate application already exists by the name - " + application.getName());
             }
@@ -2445,7 +2445,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
      * @throws APIManagementException
      */
     @Override
-    public Map<String, Object> updateAuthClient(String userId, String applicationName,
+    public OAuthApplicationInfo updateAuthClient(String userId, String applicationName,
                                                 String tokenType,
                                                 String callbackUrl, String[] allowedDomains,
                                                 String validityTime,
@@ -2457,22 +2457,19 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             PrivilegedCarbonContext.startTenantFlow();
             PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
         }
-
         //Create OauthAppRequest object by passing json String.
-        OAuthAppRequest oauthAppRequest = ApplicationUtils.createOauthAppRequest(applicationName, callbackUrl ,tokenScope,
-                jsonString);
+        OAuthAppRequest oauthAppRequest = ApplicationUtils.createOauthAppRequest(applicationName, callbackUrl, tokenScope,
+                                                                                 jsonString);
+
+        String consumerKey = apiMgtDAO.getConsumerKeyForApplicationKeyType(applicationName, userId, tokenType,
+                                                                           groupingId);
+
+        oauthAppRequest.getOAuthApplicationInfo().setClientId(consumerKey);
         //get key manager instant.
         KeyManager keyManager = KeyManagerHolder.getKeyManagerInstance();
         //call update method.
-        keyManager.updateApplication(oauthAppRequest);
+        return keyManager.updateApplication(oauthAppRequest);
 
-        //TODO: Return  ApplicationKeysDTO or WorkflowDTO without creating a Map.To do this has to move either
-        // into api module.
-        Map<String, Object> keyDetails = new HashMap<String, Object>();
-        keyDetails.put("validityTime", "3600");
-
-        return keyDetails;
-        //return null;
     }
 
     /**

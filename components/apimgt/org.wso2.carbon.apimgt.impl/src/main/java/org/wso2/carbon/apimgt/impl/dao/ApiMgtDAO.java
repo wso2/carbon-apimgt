@@ -3804,6 +3804,9 @@ public class ApiMgtDAO {
         return accessToken;
     }
 
+
+
+
     public String getRegistrationApprovalState(int appId, String keyType) throws APIManagementException {
         Connection conn = null;
         ResultSet resultSet = null;
@@ -5491,6 +5494,70 @@ public class ApiMgtDAO {
         } finally {
             APIMgtDBUtil.closeAllConnections(prepStmt, connection, rs);
         }
+    }
+
+    /**
+     * Returns the consumer Key for a given Application Name, Subscriber Name, Key Type, Grouping Id combination.
+     * @param applicationName Name of the Application.
+     * @param subscriberId Name of Subscriber.
+     * @param keyType PRODUCTION | SANDBOX.
+     * @param groupingId Grouping ID. When set to null query will be performed using the other three values.
+     * @return Consumer Key matching the provided combination.
+     * @throws APIManagementException
+     */
+    public String getConsumerKeyForApplicationKeyType(String applicationName, String subscriberId, String keyType,
+                                                      String groupingId) throws APIManagementException {
+
+        String consumerKey = null;
+        Connection connection = null;
+        PreparedStatement prepStmt = null;
+        ResultSet rs = null;
+        String sqlQuery = "SELECT AKM.CONSUMER_KEY " +
+                          "FROM " +
+                          "AM_APPLICATION as APP," +
+                          "AM_APPLICATION_KEY_MAPPING as AKM," +
+                          "AM_SUBSCRIBER as SUB " +
+                          "WHERE " +
+                          "SUB.SUBSCRIBER_ID=APP.SUBSCRIBER_ID AND APP.APPLICATION_ID = AKM.APPLICATION_ID " +
+                          "AND APP.NAME = ? AND AKM.KEY_TYPE=?  ";
+        String whereClauseWithGroupId = "   AND "
+                                        + "     (GROUP_ID= ? "
+                                        + "      OR "
+                                        + "     (GROUP_ID='' AND SUB.USER_ID=?))";
+        String whereClause = "   AND "
+                             + " SUB.USER_ID=?";
+
+        if (groupingId != null && !groupingId.equals("null") && !groupingId.isEmpty()) {
+            sqlQuery += whereClauseWithGroupId;
+        } else {
+            sqlQuery += whereClause;
+        }
+        try {
+            connection = APIMgtDBUtil.getConnection();
+            prepStmt = connection.prepareStatement(sqlQuery);
+            prepStmt.setString(1, applicationName);
+            prepStmt.setString(2, keyType);
+            if (groupingId != null && !groupingId.equals("null") && !groupingId.isEmpty()) {
+                prepStmt.setString(3, groupingId);
+                prepStmt.setString(4, subscriberId);
+
+            } else {
+                prepStmt.setString(3, subscriberId);
+            }
+            rs = prepStmt.executeQuery();
+
+            while (rs.next()) {
+                consumerKey = rs.getString("CONSUMER_KEY");
+            }
+
+        } catch (SQLException e) {
+            handleException("Error when reading the application information from" +
+                            " the persistence store.", e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(prepStmt, connection, rs);
+        }
+
+        return consumerKey;
     }
 
     /**
