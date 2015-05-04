@@ -112,7 +112,50 @@ asset.manager = function(ctx) {
         list: function(paging) {
             //log.info(this._super.list.call(this, paging));
             return this._super.list.call(this, paging);
-        }
+        },
+        update: function(options){
+            if(options.attributes.action == "implement"){
+                var result, obj;
+                var api = {};
+                api.apiName = options.attributes.overview_name;
+                api.version = options.attributes.overview_version;
+                api.provider= options.attributes.overview_provider;
+                var apiId = {
+                    apiName : options.attributes.overview_name,
+                    version : options.attributes.overview_version,
+                    provider: options.attributes.overview_provider
+                };
+                api.context = options.attributes.overview_context;
+
+              //api.implementation_type = options.attributes.implementation_methods;
+                api.wsdl = options.attributes.wsdl;
+                api.wadl = options.attributes.wadl;
+                api.endpointSecured = options.attributes.endpointType;
+                api.endpointUTUsername = options.attributes.epUsername;
+                api.endpointUTPassword = options.attributes.epPassword;
+                api.endpoint_config= options.attributes.endpoint_config;
+                api.destinationStats= options.attributes.destinationStats;
+                api.advertiseOnly= options.attributes.overview_advertiseOnly;           
+                //api.swagger = generate_swagger_object(options.attributes.swagger);
+
+                var apiProxy = apiPublisher.instance(ctx.username);
+                result = apiProxy.implementAPI(api);
+
+                if (result.error==true) {
+                    obj = {
+                        error:true,
+                        message:result.message,
+                        data :apiId,
+                    };
+                } else {
+                    obj = {
+                        error:false,
+                        data :apiId,
+                    }
+                }
+               return obj;
+            }  
+        },
     };
 };
 
