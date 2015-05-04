@@ -828,16 +828,15 @@ public class APIStoreHostObject extends ScriptableObject {
 
                     if (defaultValidityPeriod < 0) {
                         validityPeriod = String.valueOf(Long.MAX_VALUE);
-                    }
-                    else {
+                    } else {
                         validityPeriod = String.valueOf(defaultValidityPeriod);
                     }
                 }
 
                 String jsonParams = null;
-                if(args.length == 10){
+                if (args.length == 10) {
                     jsonParams = (String) args[9];
-                }else{
+                } else {
                     jsonParams = null;
                 }
 
@@ -848,7 +847,7 @@ public class APIStoreHostObject extends ScriptableObject {
                 String authScopeString;
                 APIConsumer apiConsumer = getAPIConsumer(thisObj);
                 if (scopes != null && scopes.length() != 0 &&
-                        !scopes.equals(APIConstants.OAUTH2_DEFAULT_SCOPE)) {
+                    !scopes.equals(APIConstants.OAUTH2_DEFAULT_SCOPE)) {
                     scopeSet.addAll(apiConsumer.getScopesByScopeKeys(scopes, tenantId));
                     authorizedScopes = getAllowedScopesForUserApplication(username, scopeSet);
                 }
@@ -866,39 +865,22 @@ public class APIStoreHostObject extends ScriptableObject {
                 String applicationName = (String) args[1];
                 String tokenType = (String) args[2];
                 String callbackUrl = (String) args[3];
-                String groupingId = (String)args[8];
+                String groupingId = (String) args[8];
 
-                Map<String, Object> keyDetails = getAPIConsumer(thisObj).updateAuthClient(
+                OAuthApplicationInfo applicationInfo = getAPIConsumer(thisObj).updateAuthClient(
                         username, applicationName, tokenType, callbackUrl,
                         accessAllowDomainsArray, validityPeriod, authScopeString, groupingId,
                         jsonParams);
 
-
-
                 NativeObject row = new NativeObject();
-                String authorizedDomains = "";
-                boolean first = true;
-                for (String anAccessAllowDomainsArray : accessAllowDomainsArray) {
-                    if (first) {
-                        authorizedDomains = anAccessAllowDomainsArray;
-                        first = false;
-                    } else {
-                        authorizedDomains = authorizedDomains + ", " + anAccessAllowDomainsArray;
-                    }
+
+                if (applicationInfo != null) {
+                    row.put(APIConstants.FrontEndParameterNames.CONSUMER_KEY, row, applicationInfo.getClientId());
+                    row.put(APIConstants.FrontEndParameterNames.CONSUMER_SECRET, row, applicationInfo.getClientSecret());
+                    row.put(APIConstants.FrontEndParameterNames.CALLBACK_URL, row, applicationInfo.getCallBackURL());
+                    row.put(APIConstants.FrontEndParameterNames.CLIENT_DETAILS, row, applicationInfo.getJsonString());
                 }
 
-                Set<Map.Entry<String, Object>> entries = keyDetails.entrySet();
-
-                for (Map.Entry<String, Object> entry : entries) {
-                    row.put(entry.getKey(), row, entry.getValue());
-                }
-
-                boolean isRegenarateOptionEnabled = true;
-                if (getApplicationAccessTokenValidityPeriodInSeconds() < 0) {
-                    isRegenarateOptionEnabled = false;
-                }
-                row.put("enableRegenarate", row, isRegenarateOptionEnabled);
-                row.put("accessallowdomains", row, authorizedDomains);
                 return row;
             } catch (Exception e) {
                 String msg = "Error while obtaining the application access token for the application:" + args[1];
