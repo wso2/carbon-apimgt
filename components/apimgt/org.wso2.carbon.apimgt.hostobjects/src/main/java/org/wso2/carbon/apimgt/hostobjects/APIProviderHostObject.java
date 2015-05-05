@@ -1,4 +1,3 @@
-
 /*
 *  Copyright (c) 2005-2010, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
 *
@@ -870,7 +869,7 @@ public class APIProviderHostObject extends ScriptableObject {
             if (create) {
             	apiProvider.addAPI(api);
             } else {
-                apiProvider.updateAPI(api);
+                apiProvider.manageAPI(api);
             }
             success = true;
         } catch (ScriptException e) {
