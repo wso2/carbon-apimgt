@@ -208,11 +208,9 @@ public class ScopesIssuer {
 
         //Iterate the requested scopes list.
         for (String scope : requestedScopes) {
-            if(scope.startsWith(DEVICE_SCOPE_PREFIX)){
+            if (scope.startsWith(DEVICE_SCOPE_PREFIX)) {
                 authorizedScopes.add(scope);
-            } 
-            
-            if(scope.equalsIgnoreCase(OPEN_ID_SCOPE_NAME)){
+            } else if (scope.equalsIgnoreCase(OPEN_ID_SCOPE_NAME)) {
                 authorizedScopes.add(scope);
             }
         }
