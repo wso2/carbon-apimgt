@@ -2753,7 +2753,7 @@ public class APIStoreHostObject extends ScriptableObject {
 	                    appName.equals(application.getName())) {
 
                         //get Number of subscriptions for the given application by the subscriber.
-                        subscriptionCount = apiConsumer.getSubscriptionCount(subscriber,application.getName());
+                        subscriptionCount = apiConsumer.getSubscriptionCount(subscriber,application.getName(),groupingId);
 	                    //get subscribed APIs set as per the starting and ending indexes for application.
 	                	Set<SubscribedAPI> subscribedAPIs;
                         subscribedAPIs = apiConsumer.getPaginatedSubscribedAPIs(subscriber, application.getName(),startSubIndex,endSubIndex, groupingId);
@@ -3131,7 +3131,7 @@ public class APIStoreHostObject extends ScriptableObject {
             if (applications != null) {
                 int i = 0;
                 for (Application application : applications) {
-                    int subscriptionCount = apiConsumer.getSubscriptionCount(subscriber,application.getName());
+                    int subscriptionCount = apiConsumer.getSubscriptionCount(subscriber,application.getName(),groupId);
                     NativeObject row = new NativeObject();
                     row.put("name", row, application.getName());
                     row.put("tier", row, application.getTier());
