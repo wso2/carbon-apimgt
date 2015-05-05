@@ -75,8 +75,9 @@ $(document).ready(function(){
     var v = $("#prototype_form").validate({
         submitHandler: function(form) {        
         var designer = APIDesigner();
-        APP.update_ep_config();
+        var endpoint_config = {"production_endpoints":{"url": $("#prototype_endpoint").val(),"config":null},"endpoint_type":"http"}
         $('.swagger').val(JSON.stringify(designer.api_doc));
+        $('.prototype_config').val(JSON.stringify(endpoint_config));        
 
         $('#'+thisID).buttonLoader('start');
 

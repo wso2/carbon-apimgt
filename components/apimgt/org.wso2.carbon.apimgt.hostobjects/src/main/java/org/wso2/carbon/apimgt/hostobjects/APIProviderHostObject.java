@@ -534,9 +534,7 @@ public class APIProviderHostObject extends ScriptableObject {
         }
         
         api.setLastUpdated(new Date());
-        
-        api.setImplementation(implementationType);
-                        
+
         String wsdl = (String) apiData.get("wsdl", apiData);
         String wadl = (String) apiData.get("wadl", apiData);
         String endpointSecured = (String) apiData.get("endpointSecured", apiData);
@@ -548,9 +546,18 @@ public class APIProviderHostObject extends ScriptableObject {
             api.setWsdlUrl(wsdl);
         }
         api.setEndpointConfig((String) apiData.get("endpoint_config", apiData));
-        
-        // Validate endpoint URI format
-        validateEndpointURI(api.getEndpointConfig());
+
+        if(implementationType.equalsIgnoreCase(APIConstants.IMPLEMENTATION_TYPE_INLINE)){
+            api.setImplementation(APIConstants.IMPLEMENTATION_TYPE_INLINE);
+        }
+        else if(implementationType.equalsIgnoreCase(APIConstants.IMPLEMENTATION_TYPE_ENDPOINT)){
+            api.setImplementation(APIConstants.IMPLEMENTATION_TYPE_ENDPOINT);
+            // Validate endpoint URI format
+            validateEndpointURI(api.getEndpointConfig());
+        }else{
+            throw new APIManagementException("Invalid Implementation Type.");
+        }
+
 
         String destinationStats = (String) apiData.get("destinationStats", apiData);
         if (APIConstants.ENABLED.equalsIgnoreCase(destinationStats)) {
