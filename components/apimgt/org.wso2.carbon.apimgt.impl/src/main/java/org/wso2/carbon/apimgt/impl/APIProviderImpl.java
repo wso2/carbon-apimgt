@@ -63,6 +63,7 @@ import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.utils.APIVersionComparator;
 import org.wso2.carbon.apimgt.impl.utils.APIVersionStringComparator;
 import org.wso2.carbon.apimgt.impl.utils.CommonUtil;
+import org.wso2.carbon.apimgt.keymgt.client.ProviderKeyMgtClient;
 import org.wso2.carbon.base.ServerConfiguration;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.governance.api.common.dataobjects.GovernanceArtifact;
@@ -2910,7 +2911,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
 
         String defaultVersion = (String) apiObj.get("defaultVersion");
-        String transport = "";//-------getTransports(apiData);
+        String transport = APIUtil.getTransports(apiObj);
 
         String tier = (String) apiObj.get("tier");
 
@@ -3006,25 +3007,27 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         api.setLastUpdated(new Date());
 
         if (swaggerContent != null) {
-            //---------   Set<URITemplate> uriTemplates = parseResourceConfig(apiProvider, apiId, (String) apiData
-            //--------- .get("swagger", apiData), api);
-            //-----------  api.setUriTemplates(uriTemplates);
+            Set<URITemplate> uriTemplates = APIUtil.parseResourceConfig(this, apiId, (String) apiObj.get("swagger"), api);
+            api.setUriTemplates(uriTemplates);
         }
 
         // removing scopes from cache
-        //--------- ProviderKeyMgtClient providerClient = HostObjectUtils.getProviderClient();
-        //--------try {
-        //------    String[] consumerKeys = apiProvider.getConsumerKeys(new APIIdentifier(provider, name, version));
-        //--------    if (consumerKeys != null && consumerKeys.length != 0) {
-        //---------        providerClient.removeScopeCache(consumerKeys);
-        //---------    }
+	    // removing scopes from cache
+	    ProviderKeyMgtClient providerClient = APIUtil.getProviderClient(ServiceReferenceHolder.getInstance()
+			    .getAPIManagerConfigurationService().getAPIManagerConfiguration());
+	    try {
+		    String[] consumerKeys = getConsumerKeys(new APIIdentifier(provider, name, version));
+		    if (consumerKeys != null && consumerKeys.length != 0) {
+			    providerClient.removeScopeCache(consumerKeys);
+		    }
 
-        //------- } catch (APIManagementException e) {
-        //swallowing the excepion since the api update should happen even if cache update fails
-        //--------------     log.error("Error while removing the scope cache", e);
-        //------------------- }
+	    } catch (APIManagementException e) {
+		    //swallowing the excepion since the api update should happen even if cache update fails
+		    log.error("Error while removing the scope cache", e);
+	    }
+
         Map<String,String> results=new HashMap<String, String>();
-        results=saveAPI(api, false);
+        results= saveAPI(api, false);
         return results.get("failedGateways");
 
     }
