@@ -31,7 +31,9 @@ require('/modules/publisher.js').exec(function (ctx) {
 	var responseProcessor = require('utils').response;
 	var res = ctx.response;
 	var req = ctx.request;
-	var username = ctx.username;
+	var server = require('store').server;
+	var user = server.current(ctx.session);
+	var username = user.username;
 	var session = ctx.session;
 	var uriMatcher = new URIMatcher(req.getRequestURI());
 	var GET_SWAGGER_DOC_URL = '/{context}/asts/api/apis/swagger';

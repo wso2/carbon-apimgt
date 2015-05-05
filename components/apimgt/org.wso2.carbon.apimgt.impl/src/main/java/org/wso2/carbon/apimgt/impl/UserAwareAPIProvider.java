@@ -111,10 +111,17 @@ public class UserAwareAPIProvider extends APIProviderImpl {
     }
 
     @Override
-    public String designAPI(JSONObject api) throws APIManagementException {
+    public String manageAPI(JSONObject api) throws APIManagementException {
         checkCreatePermission();
-        return  super.designAPI(api);
+	    return  super.manageAPI(api);
     }
+
+	@Override
+	public String designAPI(JSONObject api) throws APIManagementException {
+		checkCreatePermission();
+		return  super.designAPI(api);
+	}
+
     @Override
     public String updateDesignAPI(JSONObject api) throws APIManagementException {
         checkCreatePermission();
