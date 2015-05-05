@@ -15,6 +15,10 @@
         <table class="table table-bordered">
             <tbody>
             <tr>
+                <td class="span3"><%=i18n.localize("visibility")%></td>
+                <td id="inUrl"><%if(api.visibility == "restricted"){%> <%="Restricted by roles, only visible to " + api.roles +"."%><%}else{%><%=i18n.localize(api.visibility)%><%}%></td>
+            </tr>
+            <tr>
                 <td class="span3"><%=i18n.localize("context")%></td>
                 <td id="inUrl"><%=api.context%></td>
             </tr>
