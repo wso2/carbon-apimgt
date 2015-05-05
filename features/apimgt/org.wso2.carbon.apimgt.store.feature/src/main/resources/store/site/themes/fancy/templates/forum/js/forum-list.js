@@ -22,7 +22,6 @@ function forum_load_topics(page, search) {
     }
 
     $.getJSON(requestURL + 'forum/api/topic', params, function (result) {
-        console.log(result);
         if (result.error == false) {
 
             var template = Handlebars.partials['topics_list']({
@@ -130,8 +129,6 @@ function forum_load_replies(page) {
 
 
 $(document).ready(function () {
-
-
     // START - Topic bindings
 
     // Add new forum topic.

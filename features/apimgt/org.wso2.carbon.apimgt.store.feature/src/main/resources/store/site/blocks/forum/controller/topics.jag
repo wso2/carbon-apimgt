@@ -59,7 +59,14 @@ var message = { error : false };
 //Handle exceptions related to user checks
 try{
 
-if (verb == "DELETE" && topicId != null) {
+if( ( request.getMethod() == 'POST' || 
+      request.getMethod() == 'DELETE' || 
+      request.getMethod() == 'PUT' ) && !jagg.isCSRFTokenValid()){
+    print({
+        error:true,
+        message: msg.error.csrfError
+    });
+}else if (verb == "DELETE" && topicId != null) {
 
     var user = getUser();
     forum.removeTopic(topicId, user.username, tenantDomain);
@@ -313,7 +320,7 @@ if (verb == "DELETE" && topicId != null) {
 }
 }catch(err){
     message.error = true;
-    message.message = err.message;
+    message.message = "An error occord unable to retrive topics";
 }
 
 print(message);

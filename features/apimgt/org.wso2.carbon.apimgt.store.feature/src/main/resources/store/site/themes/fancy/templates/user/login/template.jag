@@ -42,7 +42,7 @@ i18n.init(request,localeResourcesBasePath);
                     <form id="themeSelectForm" action="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("templates/user/theme/template.jag?theme=modern"))%>">
                         <input type="hidden" id="themeToApply" name="themeToApply" />
                         <input type="hidden" id="subthemeToApply" name="subthemeToApply" />
-                        <input type="hidden" id="pathToSend" name="pathToSend" value="<%=currentURL%>" />
+                        <input type="hidden" id="pathToSend" name="pathToSend" value="<%= encode.forHtmlAttribute(currentURL)%>" />
                         <table class="table">
                             <tr>
                                 <td>
@@ -79,7 +79,7 @@ i18n.init(request,localeResourcesBasePath);
                    <%=i18n.localize("logged")%> <h4><%=user.username%></h4>
                </li>
                <% if(isSelfSignupEnabled) { %>
-               <li><a href="<%= jagg.getHttpsUrl('/')%>site/pages/user-info.jag"><%=i18n.localize("userDetails")%></a></li> <% } %>
+               <li><a href="<%= jagg.getHttpsUrl('/')%>site/pages/user-info.jag"><%=i18n.localize("privacy")%></a></li> <% } %>
                <li class="logout-link-special"><button id="logout-link" class="btn btn-danger"><%=i18n.localize("logout")%></button></li>
              </ul>
            </li>

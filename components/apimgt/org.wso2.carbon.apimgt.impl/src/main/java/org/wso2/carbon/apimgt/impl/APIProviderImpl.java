@@ -626,7 +626,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
     }
 
-
+    public void manageAPI(API api) throws APIManagementException, FaultGatewaysException {
+        updateAPI(api);
+    }
 
     private void updateApiArtifact(API api, boolean updateMetadata,boolean updatePermissions) throws APIManagementException {
 
@@ -1201,6 +1203,15 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     addDocumentationContent(newAPI, doc.getName(), content);
                 }
             }
+
+            //Copy Swagger 2.0 resources for New version. 
+            String resourcePath = APIUtil.getSwagger20DefinitionFilePath(api.getId().getApiName(), 
+                                                                         api.getId().getVersion(),
+                                                                         api.getId().getProviderName());
+            if (registry.resourceExists(resourcePath + APIConstants.API_DOC_2_0_RESOURCE_NAME)) {
+                definitionFromSwagger20.saveAPIDefinition(newAPI, 
+                                          definitionFromSwagger20.getAPIDefinition(api.getId(), registry), registry);
+            }
             
             // Make sure to unset the isLatest flag on the old version
             GenericArtifact oldArtifact = artifactManager.getGenericArtifact(
@@ -1390,6 +1401,10 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     visibility = APIConstants.DOC_OWNER_VISIBILITY;
                 }
             }
+            
+            GenericArtifact updateApiArtifact = APIUtil.createDocArtifactContent(artifact, apiId, documentation);
+            artifactManager.updateGenericArtifact(updateApiArtifact);
+            clearResourcePermissions(docPath, apiId);
 
             APIUtil.setResourcePermissions(api.getId().getProviderName(), visibility, authorizedRoles,
                                            artifact.getPath());
@@ -1670,6 +1685,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             GenericArtifact apiArtifact = artifactManager.getGenericArtifact(apiArtifactResourceId);
             String inSequence = apiArtifact.getAttribute(APIConstants.API_OVERVIEW_INSEQUENCE);
             String outSequence = apiArtifact.getAttribute(APIConstants.API_OVERVIEW_OUTSEQUENCE);
+            String environments = apiArtifact.getAttribute(APIConstants.API_OVERVIEW_ENVIRONMENTS);
             
             //Delete the dependencies associated  with the api artifact
 			GovernanceArtifact[] dependenciesArray = apiArtifact.getDependencies();
@@ -1703,16 +1719,18 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             api.setAsDefaultVersion(Boolean.valueOf(isDefaultVersion));
             api.setAsPublishedDefaultVersion(api.getId().getVersion().equals(apiMgtDAO.getPublishedDefaultVersion(api.getId())));
 
-            // gatewayType check is required when API Management is deployed on other servers to avoid synapse
+            // gatewayType check is required when API Management is deployed on
+            // other servers to avoid synapse
             if (gatewayExists && gatewayType.equals("Synapse")) {
-                //if (isAPIPublished(api)) {
-            		api.setInSequence(inSequence); //need to remove the custom sequences
-            		api.setOutSequence(outSequence);
-                    removeFromGateway(api);
-                    if(api.isDefaultVersion()){
-                        removeDefaultAPIFromGateway(api);
-                    }
-                //}
+                // if (isAPIPublished(api)) {
+                api.setInSequence(inSequence); // need to remove the custom sequences
+                api.setOutSequence(outSequence);
+                api.setEnvironments(APIUtil.extractEnvironmentsForAPI(environments));
+                removeFromGateway(api);
+                if (api.isDefaultVersion()) {
+                    removeDefaultAPIFromGateway(api);
+                }
+                // }
             } else {
                 log.debug("Gateway is not existed for the current API Provider");
             }

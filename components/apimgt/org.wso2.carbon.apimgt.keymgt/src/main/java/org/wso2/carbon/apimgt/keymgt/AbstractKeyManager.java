@@ -18,7 +18,7 @@
  * /
  */
 
-package org.wso2.carbon.apimgt.impl;
+package org.wso2.carbon.apimgt.keymgt;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -30,7 +30,6 @@ import org.wso2.carbon.apimgt.api.model.AccessTokenRequest;
 import org.wso2.carbon.apimgt.api.model.ApplicationConstants;
 import org.wso2.carbon.apimgt.api.model.KeyManager;
 import org.wso2.carbon.apimgt.api.model.OAuthApplicationInfo;
-import org.wso2.carbon.identity.oauth2.dto.OAuth2AccessTokenReqDTO;
 
 import java.util.Map;
 
@@ -73,6 +72,10 @@ public abstract class AbstractKeyManager implements KeyManager {
 
                 if (null != params.get(ApplicationConstants.OAUTH_CLIENT_SECRET)) {
                     tokenRequest.setClientSecret((String) params.get(ApplicationConstants.OAUTH_CLIENT_SECRET));
+                }
+
+                if (null != params.get(ApplicationConstants.VALIDITY_PERIOD)) {
+                    tokenRequest.setValidityPeriod(Long.parseLong((String) params.get(ApplicationConstants.VALIDITY_PERIOD)));
                 }
 
                 return tokenRequest;
@@ -127,9 +130,21 @@ public abstract class AbstractKeyManager implements KeyManager {
         if (tokenRequest == null) {
             tokenRequest = new AccessTokenRequest();
         }
+
+        if (oAuthApplication.getClientId() == null || oAuthApplication.getClientSecret() == null) {
+            throw new APIManagementException("Consumer key or Consumer Secret missing.");
+        }
         tokenRequest.setClientId(oAuthApplication.getClientId());
         tokenRequest.setClientSecret(oAuthApplication.getClientSecret());
-        tokenRequest.setScope((String[]) oAuthApplication.getParameter("tokenScope"));
+
+        if (oAuthApplication.getParameter("tokenScope") != null) {
+            tokenRequest.setScope((String[]) oAuthApplication.getParameter("tokenScope"));
+        }
+
+        if (oAuthApplication.getParameter(ApplicationConstants.VALIDITY_PERIOD) != null) {
+            tokenRequest.setValidityPeriod(Long.parseLong((String) oAuthApplication.getParameter(ApplicationConstants
+                                                                                                         .VALIDITY_PERIOD)));
+        }
 
         return tokenRequest;
     }

@@ -1,6 +1,8 @@
 <% jagg.template("item-manage", function(inputs, outputs, jagg) { 
     var isSynapseGateway = outputs.isSynapseGateway;
+
     var api = outputs.api;
+    var createPermitted = outputs.isCreatePermitted;
     var apiUrlId = "name="+encode.forHtml(api.name)+"&version="+encode.forHtml(api.version)+"&provider="+encode.forHtml(api.provider);
     //get environments detail from api-manager.xml
     var provider = jagg.module("manager").getAPIProviderObj();
@@ -43,6 +45,7 @@
     var manage_w_link = jagg.url('/manage?'+apiUrlId);    
 %>
 <center>
+<%if(createPermitted){%>
 <ul class="new-sub-menu-wizard" style="margin:0 auto">
     <li>
         <a href="<%= design_w_link %>" class="wizard-done">
@@ -58,14 +61,18 @@
     </li>
     <li>
         <a href="<%= manage_w_link %>" class="wizard-active">
-            <div class="wizard-number" >3</div>
+            <div class="wizard-number">3</div>
             <span>Manage</span>
         </a>
     </li>
 </ul>
-</center> 
+<%}%>
+
+</center>
     <div class="title-section">
-        <h2><%= encode.forHtml(api.name) %>(<%= encode.forHtml(api.version) %>) : <%= encode.forHtml(api.context) %></h2>
+
+        <h2>Manage API: <%= encode.forHtml(api.name) %> : <%= encode.forHtml(api.context) %>/<%= encode.forHtml(api.version) %></h2>
+
     </div>     
     <div class="content-section shadow-up">
     <div class="content-data">   
@@ -134,16 +141,18 @@
                 <label class="control-label" for="transports"><%=i18n.localize("transports")%>:<span class="requiredAstrix">*</span></label>
                 <div class="controls">
                     <div class="checkbox">
+                        <label  class="checkbox inline" >
+                            <input type="checkbox" id="transport_https" name="transport_https"  value="https" <%if(api.transport_https=="checked"){%>checked<%}%>/>
+
+                            <%=i18n.localize("httpsTransport")%>
+                        </label>
                         <label  class="checkbox inline " >
-                            <input type="checkbox"  id="transport_http" name="transport_http"  value="http" <%if(api.transport_http=="checked"){%>checked<%}%> />
+                            <input type="checkbox"  id="transport_http" name="transport_http"  value="http"/>
                          
                             <%=i18n.localize("httpTransport")%>
                         </label>
-                        <label  class="checkbox inline" >
-                            <input type="checkbox" id="transport_https" name="transport_https"  value="https" <%if(api.transport_https=="checked"){%>checked<%}%>/>
-                            
-                            <%=i18n.localize("httpsTransport")%>
-                        </label>
+                        <a class="icon-question-sign help_popup" help_data="http_help"></a>
+                        <p id="http_help" class="hide"><%=i18n.localize("httpHelpMsg")%></p>
                     </div>
                 </div>
              </div> 

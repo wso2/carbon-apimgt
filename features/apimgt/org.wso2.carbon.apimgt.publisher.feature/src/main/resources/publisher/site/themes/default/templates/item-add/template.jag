@@ -28,6 +28,8 @@
                         <div class="control-group toggleContainers">
                            <div class="controls hide">
                                <input name="swagger-url" id="swagger-url" class="input-xxlarge" type="text"/>
+                               <br/>
+                               <span class="label label-info">Ex: http://petstore.swagger.io/v2/swagger.json</span>
                            </div>
                            <div class="controls hide">
                               <input name="swagger-file" id="swagger-file" type="file" class="upload" />

@@ -35,7 +35,7 @@ var i, length, app, thumbURL, api = outputs.api, templatesList = outputs.uriTemp
 
                             %>
                             <tr id="item-<%=String(i)%>" class="resourceRow">
-                                <td><span id="contextForUrlDefault"><%=api.context%>/<%=api.version%></span></td>
+                                <td><span id="contextForUrlDefault"><%=api.context%></span></td>
                                  <td><span id="contextForUrlDefault1"><%=templatesList[i][0]%></span></td>
 
                                                   <%

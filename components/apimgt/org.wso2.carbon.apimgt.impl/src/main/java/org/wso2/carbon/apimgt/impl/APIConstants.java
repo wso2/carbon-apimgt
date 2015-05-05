@@ -101,7 +101,7 @@ public final class APIConstants {
     public static final String API_DOC_RESOURCE_NAME = "api-doc.json";
     
     public static final String API_DOC_1_2_RESOURCE_NAME = "/api-doc";
-    public static final String API_DOC_2_0_RESOURCE_NAME = "/api-doc";
+    public static final String API_DOC_2_0_RESOURCE_NAME = "swagger.json";
 
     public static final String API_ICON_IMAGE = "icon";
     
@@ -621,6 +621,13 @@ public final class APIConstants {
         String RESOURCE_PARAMS = "keymgt_resource_params";
         String VALIDATED_DTO = "validatedDTO";
         String KM_CACHE_HIT = "km_cacheHit";
+    }
+
+    public static class FrontEndParameterNames {
+        public static final String CONSUMER_KEY = "consumerKey";
+        public static final String CONSUMER_SECRET = "consumerSecret";
+        public static final String CLIENT_DETAILS = "appDetails";
+        public static final String CALLBACK_URL = "callbackUrl";
     }
     
     //key  of the endpoint securevault

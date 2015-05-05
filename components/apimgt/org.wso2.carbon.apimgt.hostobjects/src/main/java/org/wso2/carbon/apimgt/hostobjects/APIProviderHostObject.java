@@ -869,7 +869,7 @@ public class APIProviderHostObject extends ScriptableObject {
             if (create) {
             	apiProvider.addAPI(api);
             } else {
-                apiProvider.updateAPI(api);
+                apiProvider.manageAPI(api);
             }
             success = true;
         } catch (ScriptException e) {
@@ -1985,6 +1985,10 @@ public class APIProviderHostObject extends ScriptableObject {
         boolean isTenantFlowStarted = false;
         try {
             String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(providerNameTenantFlow));
+            String userTenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(((APIProviderHostObject) thisObj).getUsername()));
+            if(!tenantDomain.equals(userTenantDomain)){
+                throw new APIManagementException("Invalid Operation: Cannot access API:" + apiId + "from current tenant.");
+            }
             if(tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
             	isTenantFlowStarted = true;
                 PrivilegedCarbonContext.startTenantFlow();
@@ -2105,10 +2109,10 @@ public class APIProviderHostObject extends ScriptableObject {
                 myn.put(38, myn, checkValue(api.getFaultSequence()));
                 myn.put(39, myn, checkValue(api.getDestinationStatsEnabled()));
 
-///??????
+
                 myn.put(39, myn, checkValue(api.getDestinationStatsEnabled()));
                 myn.put(39, myn, checkValue(api.getDestinationStatsEnabled()));
-////?????
+
 
                 //todo implement resource load
 
@@ -3390,6 +3394,86 @@ public class APIProviderHostObject extends ScriptableObject {
         }
         return myn;
     }
+
+    public static NativeArray jsFunction_getUserAgentSummaryForALLAPIs(Context cx,
+                                                                       Scriptable thisObj,
+                                                                       Object[] args,
+                                                                       Function funObj)
+            throws APIManagementException {
+        List<APIRequestsByUserAgentsDTO> list = null;
+        try {
+            APIUsageStatisticsClient client = new APIUsageStatisticsClient(((APIProviderHostObject) thisObj).getUsername());
+            list = client.getUserAgentSummaryForALLAPIs();
+        } catch (APIMgtUsageQueryServiceClientException e) {
+            log.error("Error while invoking APIUsageStatisticsClient for ProviderAPIVersionLastAccess", e);
+        }
+        NativeArray myn = new NativeArray(0);
+        Iterator it = null;
+        if (list != null) {
+            it = list.iterator();
+        }
+        int i = 0;
+        if (it != null) {
+            while (it.hasNext()) {
+                NativeObject row = new NativeObject();
+                Object usageObject = it.next();
+                APIRequestsByUserAgentsDTO usage = (APIRequestsByUserAgentsDTO) usageObject;
+                row.put("user_agent", row, userAgentParser(usage.getUserAgent()));
+                row.put("request_count", row, usage.getCount());
+                myn.put(i, myn, row);
+                i++;
+            }
+        }
+        return myn;
+    }
+
+    public static NativeArray jsFunction_getAPIRequestsPerHour(Context cx,
+                                                               Scriptable thisObj,
+                                                               Object[] args,
+                                                               Function funObj)
+            throws APIManagementException {
+
+        List<APIRequestsByHourDTO> list = null ;
+        if (args == null ||  args.length==0) {
+            handleException("Invalid number of parameters.");
+        }
+        NativeArray myn = new NativeArray(0);
+        if (!HostObjectUtils.isUsageDataSourceSpecified()) {
+            //return myn;
+        }
+        String fromDate = (String) args[0];
+        String toDate = (String) args[1];
+        String apiName = (String)args[2];
+        try {
+            APIUsageStatisticsClient client = new APIUsageStatisticsClient(((APIProviderHostObject) thisObj).getUsername());
+            list = client.getAPIRequestsByHour(fromDate, toDate,apiName);
+        } catch (APIMgtUsageQueryServiceClientException e) {
+            log.error("Error while invoking APIUsageStatisticsClient for ProviderAPIVersionLastAccess", e);
+        }
+        Iterator it = null;
+        if (list != null) {
+            it = list.iterator();
+        }
+        int i = 0;
+        if (it != null) {
+            while (it.hasNext()) {
+                NativeObject row = new NativeObject();
+                Object usageObject = it.next();
+                APIRequestsByHourDTO usage = (APIRequestsByHourDTO) usageObject;
+                row.put("apiName", row, usage.getApi());
+                row.put("DateTierCount", row, usage.getDate().concat("|").concat(usage.getTier()).concat("|").concat(usage.getRequestCount()));
+                row.put("Date", row, usage.getDate());
+                row.put("request_count", row, usage.getRequestCount());
+                row.put("tier", row, usage.getTier());
+                myn.put(i, myn, row);
+                i++;
+            }
+        }
+        return myn;
+
+    }
+
+
 
     public static NativeArray jsFunction_getProviderAPIServiceTime(Context cx, Scriptable thisObj,
                                                                    Object[] args, Function funObj)
@@ -4679,4 +4763,23 @@ public class APIProviderHostObject extends ScriptableObject {
         return failedJson;
     }
 
+    public static String userAgentParser(String userAgent){
+        String userBrowser;
+        if(userAgent.contains("Chrome")){
+            userBrowser = "Chrome";
+        }
+        else if(userAgent.contains("Firefox")){
+            userBrowser = "Firefox";
+        }
+        else if(userAgent.contains("Opera")){
+            userBrowser = "Opera";
+        }
+        else if(userAgent.contains("MSIE")){
+            userBrowser = "Internet Explorer";
+        }
+        else{
+            userBrowser = "Other";
+        }
+        return userBrowser;
+    }
 }

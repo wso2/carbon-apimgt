@@ -55,7 +55,14 @@ var message = {error:false};
 
 try{
 
-if (verb == "DELETE" && replyId != null) {
+if( ( request.getMethod() == 'POST' || 
+      request.getMethod() == 'DELETE' || 
+      request.getMethod() == 'PUT' ) && !jagg.isCSRFTokenValid()){
+    print({
+        error:true,
+        message: msg.error.csrfError
+    });
+}else if (verb == "DELETE" && replyId != null) {
 
     forum.removeReply(replyId, user.username, tenantDomain);
 

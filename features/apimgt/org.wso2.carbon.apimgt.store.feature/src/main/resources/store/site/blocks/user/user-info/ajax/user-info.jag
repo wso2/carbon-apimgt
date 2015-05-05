@@ -14,7 +14,24 @@ var log = new Log();
             action = request.getParameter("action"),showWorkflowTip,
             user = jagg.getUser();
 
-    if (action == "changePassword" && request.getMethod() == 'POST') {
+    var validation = {
+        "action": { type: "safetext"},
+    };
+
+    var validation_errors = jagg.validateInputs(validation);
+
+    if(validation_errors != true){
+            print({
+                error:true,
+                message: msg.error.invalidInputs(validation_errors)
+            });        
+    }else if( request.getMethod() == 'POST' && !jagg.isCSRFTokenValid()){
+        print({
+            error:true,
+            message: msg.error.csrfError
+        });
+    }            
+    else if (action == "changePassword" && request.getMethod() == 'POST') {
         username = request.getParameter("username");
         currentPassword = request.getParameter("currentPassword");
 		newPassword = request.getParameter("newPassword");

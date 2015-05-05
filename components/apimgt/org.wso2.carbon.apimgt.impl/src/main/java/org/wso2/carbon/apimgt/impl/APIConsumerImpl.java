@@ -20,6 +20,7 @@ package org.wso2.carbon.apimgt.impl;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -1795,6 +1796,14 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     public String addApplication(Application application, String userId)
             throws APIManagementException {
 
+        List<Application> applications = apiMgtDAO.getBasicApplicationDetails(userId, null);
+
+        if (applications != null && !applications.isEmpty()) {
+            if (APIUtil.doesApplicationExist(applications.toArray(new Application[applications.size()]), userId)) {
+                handleException("A duplicate application already exists by the name - " + application.getName());
+            }
+        }
+
         int applicationId = apiMgtDAO.addApplication(application, userId);
 
         boolean isTenantFlowStarted = false;
@@ -1914,7 +1923,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                                                                          String[] allowedDomains, String validityTime,
                                                                          String tokenScope, String groupingId,
                                                                          String jsonString)
-                                                                                           throws APIManagementException {
+            throws APIManagementException {
 
         boolean isTenantFlowStarted = false;
         // we should have unique names for applications. There for we will
@@ -1943,32 +1952,33 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 // initiate workflow type. By default simple work flow will be
                 // executed.
                 appRegistrationWorkflow =
-                                          WorkflowExecutorFactory.getInstance()
-                                                                 .getWorkflowExecutor(WorkflowConstants.WF_TYPE_AM_APPLICATION_REGISTRATION_PRODUCTION);
+                        WorkflowExecutorFactory.getInstance()
+                                .getWorkflowExecutor(WorkflowConstants.WF_TYPE_AM_APPLICATION_REGISTRATION_PRODUCTION);
                 appRegWFDto =
-                              (ApplicationRegistrationWorkflowDTO) WorkflowExecutorFactory.getInstance()
-                                                                                          .createWorkflowDTO(WorkflowConstants.WF_TYPE_AM_APPLICATION_REGISTRATION_PRODUCTION);
+                        (ApplicationRegistrationWorkflowDTO) WorkflowExecutorFactory.getInstance()
+                                .createWorkflowDTO(WorkflowConstants.WF_TYPE_AM_APPLICATION_REGISTRATION_PRODUCTION);
                 applicationNameAfterAppend.append("_PRODUCTION");
 
             }// if it is a sandBox application.
             else if (APIConstants.API_KEY_TYPE_SANDBOX.equals(tokenType)) { // if
-                                                                            // its
-                                                                            // a
-                                                                            // SANDBOX
-                                                                            // application.
+                // its
+                // a
+                // SANDBOX
+                // application.
                 appRegistrationWorkflow =
-                                          WorkflowExecutorFactory.getInstance()
-                                                                 .getWorkflowExecutor(WorkflowConstants.WF_TYPE_AM_APPLICATION_REGISTRATION_SANDBOX);
+                        WorkflowExecutorFactory.getInstance()
+                                .getWorkflowExecutor(WorkflowConstants.WF_TYPE_AM_APPLICATION_REGISTRATION_SANDBOX);
                 appRegWFDto =
-                              (ApplicationRegistrationWorkflowDTO) WorkflowExecutorFactory.getInstance()
-                                                                                          .createWorkflowDTO(WorkflowConstants.WF_TYPE_AM_APPLICATION_REGISTRATION_SANDBOX);
+                        (ApplicationRegistrationWorkflowDTO) WorkflowExecutorFactory.getInstance()
+                                .createWorkflowDTO(WorkflowConstants.WF_TYPE_AM_APPLICATION_REGISTRATION_SANDBOX);
                 applicationNameAfterAppend.append("_SANDBOX");
             }
             // Build key manager instance and create oAuthAppRequest by
             // jsonString.
             OAuthAppRequest request =
-                                      ApplicationUtils.createOauthAppRequest(applicationNameAfterAppend.toString(),
-                                                                             callbackUrl, tokenScope, jsonString);
+                    ApplicationUtils.createOauthAppRequest(applicationNameAfterAppend.toString(),
+                                                           callbackUrl, tokenScope, jsonString);
+            request.getOAuthApplicationInfo().addParameter(ApplicationConstants.VALIDITY_PERIOD, validityTime);
 
             // Setting request values in WorkflowDTO - In future we should keep
             // Application/OAuthApplication related
@@ -1990,7 +2000,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             appRegWFDto.setCallbackUrl(appRegistrationWorkflow.getCallbackURL());
             appRegWFDto.setAppInfoDTO(request);
             appRegWFDto.setDomainList(allowedDomains);
-            appRegWFDto.setValidityTime(Long.parseLong(validityTime));
+
             appRegWFDto.setKeyDetails(appKeysDto);
             appRegistrationWorkflow.execute(appRegWFDto);
 
@@ -2428,41 +2438,38 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
      * @param callbackUrl callback URL
      * @param allowedDomains allowedDomains for token.
      * @param validityTime validity time period.
-     * @param applicationId APIM application id.
+     * @param groupingId APIM application id.
      * @param jsonString Callback URL for the Application.
      * @param tokenScope Scopes for the requested tokens.
      * @return
      * @throws APIManagementException
      */
     @Override
-    public Map<String, Object> updateAuthClient(String userId, String applicationName,
+    public OAuthApplicationInfo updateAuthClient(String userId, String applicationName,
                                                 String tokenType,
                                                 String callbackUrl, String[] allowedDomains,
                                                 String validityTime,
                                                 String tokenScope,
-                                                int applicationId,
+                                                String groupingId,
                                                 String jsonString) throws APIManagementException {
 
         if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
             PrivilegedCarbonContext.startTenantFlow();
             PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
         }
-
         //Create OauthAppRequest object by passing json String.
-        OAuthAppRequest oauthAppRequest = ApplicationUtils.createOauthAppRequest(applicationName, callbackUrl ,tokenScope,
-                jsonString);
+        OAuthAppRequest oauthAppRequest = ApplicationUtils.createOauthAppRequest(applicationName, callbackUrl, tokenScope,
+                                                                                 jsonString);
+
+        String consumerKey = apiMgtDAO.getConsumerKeyForApplicationKeyType(applicationName, userId, tokenType,
+                                                                           groupingId);
+
+        oauthAppRequest.getOAuthApplicationInfo().setClientId(consumerKey);
         //get key manager instant.
         KeyManager keyManager = KeyManagerHolder.getKeyManagerInstance();
         //call update method.
-        keyManager.updateApplication(oauthAppRequest);
+        return keyManager.updateApplication(oauthAppRequest);
 
-        //TODO: Return  ApplicationKeysDTO or WorkflowDTO without creating a Map.To do this has to move either
-        // into api module.
-        Map<String, Object> keyDetails = new HashMap<String, Object>();
-        keyDetails.put("validityTime", "3600");
-
-        return keyDetails;
-        //return null;
     }
 
     /**
