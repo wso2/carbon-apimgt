@@ -211,7 +211,8 @@ public interface APIConsumer extends APIManager {
      * @return The number of subscriptions
      * @throws APIManagementException if failed to count the number of subscriptions.
      */
-    public Integer getSubscriptionCount(Subscriber subscriber,String applicationName,String groupingId) throws APIManagementException;
+    public Integer getSubscriptionCount(Subscriber subscriber, String applicationName, String groupingId)
+                                                                                         throws APIManagementException;
 
     /**
      * Add new Subscriber
