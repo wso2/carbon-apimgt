@@ -31,6 +31,12 @@ jagg.module("statistics", {
         return jagg.require(jagg.getModulesDir() + "statistics/usage.jag").getFirstAccessTime.apply(this, arguments);
     },isDataPublishingEnabled:function () {
         return jagg.require(jagg.getModulesDir() + "statistics/usage.jag").isDataPublishingEnabled.apply(this, arguments);        
+    },getUserAgentSummaryForALLAPIs:function () {
+        return jagg.require(jagg.getModulesDir() + "statistics/usage.jag").getUserAgentSummaryForALLAPIs.apply(this, arguments);        
+    },getAPIRequestsPerHour:function () {
+        return jagg.require(jagg.getModulesDir() + "statistics/usage.jag").getAPIRequestsPerHour.apply(this, arguments);        
+    },getAPIsFromAPIRequestsPerHourTable:function () {
+        return jagg.require(jagg.getModulesDir() + "statistics/usage.jag").getAPIsFromAPIRequestsPerHourTable.apply(this, arguments);        
     }
 
 });

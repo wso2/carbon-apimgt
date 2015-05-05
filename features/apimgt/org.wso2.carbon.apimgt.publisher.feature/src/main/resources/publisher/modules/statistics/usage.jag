@@ -435,4 +435,88 @@ function isDataPublishingEnabled(providerName, server) {
     }
 }
 
+function getUserAgentSummaryForALLAPIs(){
+    var usage = [];
+    try {
+        usage = apiProvider.getUserAgentSummaryForALLAPIs();
+        if (log.isDebugEnabled()) {
+            log.debug("getUserAgentSummaryForALLAPIs check");
+        }
+        if (usage == null) {
+            return {
+                error:true
+            };
+
+        } else {
+            return {
+                error:false,
+                usage:usage
+            };
+        }
+    } catch (e) {
+        log.error(e.message);
+        return {
+            error:e,
+            usage:null
+
+        };
+    }
+}
+
+function getAPIRequestsPerHour(from,to,api){
+    var usage = [];
+    try {
+        usage = apiProvider.getAPIRequestsPerHour(from,to,api);
+        if (log.isDebugEnabled()) {
+            log.debug("getAPIRequestsPerHour check");
+        }
+        if (usage == null) {
+            return {
+                error:true
+            };
+
+        } else {
+            return {
+                error:false,
+                usage:usage
+            };
+        }
+    } catch (e) {
+        log.error(e.message);
+        return {
+            error:e,
+            usage:null
+
+        };
+    }
+}
+
+function getAPIsFromAPIRequestsPerHourTable(from,to){
+    var usage = [];
+    try {
+        usage = apiProvider.getAPIsFromAPIRequestsPerHourTable(from,to);
+        if (log.isDebugEnabled()) {
+            log.debug("getAPIRequestsPerHour check");
+        }
+        if (usage == null) {
+            return {
+                error:true
+            };
+
+        } else {
+            return {
+                error:false,
+                usage:usage
+            };
+        }
+    } catch (e) {
+        log.error(e.message);
+        return {
+            error:e,
+            usage:null
+
+        };
+    }
+}
+
 %>
