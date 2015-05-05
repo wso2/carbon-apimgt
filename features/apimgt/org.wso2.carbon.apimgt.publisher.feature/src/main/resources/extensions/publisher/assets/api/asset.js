@@ -19,9 +19,9 @@
 asset.manager = function(ctx) {
     var apiPublisher =  require('apipublisher').apipublisher;
     var LOGGED_IN_USER = 'LOGGED_IN_USER';
-    var log = new Log('default-asset'); 
+    var log = new Log('default-asset');
 
-    
+
     var generate_swagger_object=function(swagger){
     swaggerObj = {
         api_doc : parse(swagger),
@@ -33,23 +33,23 @@ asset.manager = function(ctx) {
         delete swaggerObj.api_doc.apis[i].file
     }
     return stringify(swaggerObj);
-    }  
+    }
     return {
         importAssetFromHttpRequest: function(options) {
             var asset = {};
-            var attributes = {};            
+            var attributes = {};
             if (options.id) {
             asset.id = options.id;
-            }       
+            }
             asset.attributes=options;
             //asset.name = this._super.getName.call(asset);
             return asset;
-        },        
+        },
         create: function(options) {
             var result,obj,error,message,data;
-            var api = {}; 
+            var api = {};
             var rxtModule = require('rxt');
-            var assetMod = rxtModule.asset;          
+            var assetMod = rxtModule.asset;
             if(options.attributes.action=="design"){
             api.apiName = options.attributes.overview_name;
             api.name = options.attributes.overview_name;
@@ -58,9 +58,9 @@ asset.manager = function(ctx) {
                 api.provider = ctx.username;
             } else {
                 api.provider = options.attributes.overview_provider;
-            }                    
+            }
             api.context = options.attributes.overview_context;
-           
+
            //  api.imageUrl = request.getFile("apiThumb");
 
             //validate uploaded image
@@ -74,10 +74,10 @@ asset.manager = function(ctx) {
             }*/
             //If API not exist create
             var apiProxy = apiPublisher.instance(ctx.username);
-            result=apiProxy.checkIfAPIExists(api.provider,api.name,api.version);             
-        
-            if(!result){ 
-                result = apiProxy.designAPI(api);                
+            result=apiProxy.checkIfAPIExists(api.provider,api.name,api.version);
+
+            if(!result){
+                result = apiProxy.designAPI(api);
                 if (result.error==true) {
                     obj = {
                         error:true,
@@ -87,20 +87,20 @@ asset.manager = function(ctx) {
                     return;
                 }
                 else{
-                options.id=result; 
-                options.name=api.name; 
+                options.id=result;
+                options.name=api.name;
                 options.attributes.overview_provider=api.provider;
-                options.attributes.overview_status='CREATED';               
+                options.attributes.overview_status='CREATED';
                 }
-            }            
+            }
             api.description = options.attributes.overview_description;
-            api.tags = options.attributes.overview_tags;           
+            api.tags = options.attributes.overview_tags;
             api.visibility = options.attributes.visibility;
             api.visibleRoles = options.attributes.roles;
-            api.swagger = generate_swagger_object(options.attributes.swagger);                 
-            result = apiProxy.updateDesignAPI(api);           
-            }          
-            
+            api.swagger = generate_swagger_object(options.attributes.swagger);
+            result = apiProxy.updateDesignAPI(api);
+            }
+
 
         },
         remove : function(id) {
@@ -135,7 +135,7 @@ asset.manager = function(ctx) {
                 api.endpointUTPassword = options.attributes.epPassword;
                 api.endpoint_config= options.attributes.endpoint_config;
                 api.destinationStats= options.attributes.destinationStats;
-                api.advertiseOnly= options.attributes.overview_advertiseOnly;           
+                api.advertiseOnly= options.attributes.overview_advertiseOnly;
                 //api.swagger = generate_swagger_object(options.attributes.swagger);
 
                 var apiProxy = apiPublisher.instance(ctx.username);
@@ -154,7 +154,7 @@ asset.manager = function(ctx) {
                     }
                 }
                return obj;
-            }  
+            }
         },
     };
 };
@@ -192,6 +192,9 @@ asset.server = function (ctx) {
                    }, {
                        url: 'swagger',
                        path: 'swagger.jag'
+                   },{
+                       url: 'apimanage',
+                       path: 'apimanage.jag'
                    },{
                        url: 'sequences',
                        path: 'sequences.jag'

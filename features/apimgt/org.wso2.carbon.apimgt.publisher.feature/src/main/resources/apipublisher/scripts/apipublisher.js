@@ -349,5 +349,61 @@ var apipublisher = {};
             };
         }
     };
+
+    APIProviderProxy.prototype.manageAPI = function (api) {
+        var success;
+        var log = new Log();
+        try {
+            var apiJson = new Packages.org.json.simple.JSONObject();
+            apiJson.put("name", api.apiName);
+            apiJson.put("provider", api.provider);
+            apiJson.put("version", api.version);
+            apiJson.put("context", api.context);
+            apiJson.put("defaultVersion", api.defaultVersion);
+            apiJson.put("swagger", api.swagger);
+            apiJson.put("tier", api.tier);
+            apiJson.put("inSequence", api.inSequence);
+            apiJson.put("outSequence", api.outSequence);
+            apiJson.put("responseCache", api.responseCache);
+            apiJson.put("subscriptionAvailability", api.subscriptionAvailability);
+            apiJson.put("subscriptionTenants", api.subscriptionTenants);
+            apiJson.put("bizOwner", api.bizOwner);
+            apiJson.put("bizOwnerMail", api.bizOwnerMail);
+            apiJson.put("techOwner", api.techOwner);
+            apiJson.put("techOwnerMail", api.techOwnerMail);
+            apiJson.put("faultSequence", api.faultSequence);
+            apiJson.put("cacheTimeout", api.cacheTimeout);
+            apiJson.put("destinationStats", api.destinationStats);
+            apiJson.put("environments", api.environments);
+            success = this.impl.manageAPI(apiJson);
+            log.info("=============================================");
+            if (log.isDebugEnabled()) {
+                log.debug("manageAPI : " + api.name + "-" + api.version);
+            }
+            if(success){
+                var failedToPublishEnvironments = JSON.parse(success).PUBLISHED;
+                var failedToUnPublishEnvironments = JSON.parse(success).UNPUBLISHED;
+                if(failedToPublishEnvironments == "" && failedToUnPublishEnvironments == ""){
+                    return {
+                        error:false
+                    };
+                }else{
+                    return {
+                        error:true,
+                        message:success + '||warning'
+                    };
+                }
+            }else{
+                return {
+                    error:true
+                }; }
+        } catch (e) {
+            log.error(e);
+            return {
+                error:true,
+                message:e.message.split(":")[1]
+            };
+        }
+    };
 })(apipublisher);
 
