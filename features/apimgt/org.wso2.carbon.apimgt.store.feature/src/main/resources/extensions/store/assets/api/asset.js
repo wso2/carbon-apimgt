@@ -73,7 +73,8 @@ asset.server = function(ctx) {
             }, {
                 title: 'My Applications',
                 url: 'my_applications',
-                path: 'my_applications.jag'
+                path: 'my_applications.jag',
+                secured: true
             },/** {
             title: 'API Details'
             url: 'details'
@@ -82,7 +83,8 @@ asset.server = function(ctx) {
             {
                 title: 'My Subscriptions',
                 url: 'my_subscriptions',
-                path: 'my_subscriptions.jag'
+                path: 'my_subscriptions.jag',
+                secured: true
             }, {
                 title: 'Forum',
                 url: 'forum',
