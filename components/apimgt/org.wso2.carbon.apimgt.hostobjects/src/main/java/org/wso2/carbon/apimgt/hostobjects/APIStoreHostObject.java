@@ -2740,7 +2740,7 @@ public class APIStoreHostObject extends ScriptableObject {
                         appName.equals(application.getName())) {
 
                         //get Number of subscriptions for the given application by the subscriber.
-                        subscriptionCount = apiConsumer.getSubscriptionCount(subscriber, application.getName());
+                        subscriptionCount = apiConsumer.getSubscriptionCount(subscriber, application.getName(), groupingId);
                         //get subscribed APIs set as per the starting and ending indexes for application.
                         Set<SubscribedAPI> subscribedAPIs;
                         subscribedAPIs = apiConsumer.getPaginatedSubscribedAPIs(subscriber, application.getName(), startSubIndex, endSubIndex, groupingId);
