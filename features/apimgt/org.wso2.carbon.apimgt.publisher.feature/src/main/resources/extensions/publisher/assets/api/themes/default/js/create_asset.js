@@ -415,7 +415,7 @@ var id = function(name) {
         obj[partialName] = partial(partialName);
         caramel.partials(obj, function() {
             var template = Handlebars.partials[partialName](data);
-            $(id(containerName)).html(template);
+            $(containerName).html(template);
             fn(containerName);
         });
     };
@@ -461,7 +461,7 @@ APIDesigner.prototype.render_resources_template = function(){
     this.index = Number(value);
 });  
 var partial='designer-resources-template'; 
-var container='resource_details';
+var container='#resource_details';
  renderPartial(partial, container,context);
    /* $('#resource_details').find('.scope_select').editable({
         emptytext: '+ Scope',
@@ -497,10 +497,12 @@ APIDesigner.prototype.render_resource = function(container){
     var context = jQuery.extend(true, {}, operation[0]);
     context.resource_path = container.attr('data-path');
     var partial='designer-resource-template';
+    var containerName='.resource_body';
  //source   = $("#add_resource").html();
    // Handlebars.partials['add_resource'] = Handlebars.compile(source);
 
- renderPartial(partial, container,context);
+ renderPartial(partial, containerName,context);
+ $(containerName).show();
     //var output = Handlebars.partials['designer-resource-template'](context);
     //container.html(output);
     //container.show();
