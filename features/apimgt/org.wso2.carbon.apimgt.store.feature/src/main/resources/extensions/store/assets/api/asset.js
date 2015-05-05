@@ -18,40 +18,40 @@
  */
 asset.manager = function(ctx){
     return {
-	get:function(id){
-	   log.info('Calling custom get of asset');
-	   return this._super.get.call(this,id);
-	},
-		/*search : function(query, paging) {
-			var carbonAPI = require('carbon');
-			var tenantDomain = carbonAPI.server.tenantDomain({
-				tenantId : ctx.tenantId
-			});
-			var server = require('store').server;
-			var user = server.current(ctx.session);
-			var userName = '__wso2.am.anon__';
+    get:function(id){
+       log.info('Calling custom get of asset');
+       return this._super.get.call(this,id);
+    },
+        /*search : function(query, paging) {
+            var carbonAPI = require('carbon');
+            var tenantDomain = carbonAPI.server.tenantDomain({
+                tenantId : ctx.tenantId
+            });
+            var server = require('store').server;
+            var user = server.current(ctx.session);
+            var userName = '__wso2.am.anon__';
 
-			if (user != null) {
-				userName = user.username;
-			}
-			log.info('============== user name ==========' + userName);
-			var apistore = require('apistore').apistore.instance(userName);
-			var assetApi = apistore.getAllPaginatedAPIsByStatus(tenantDomain,
-					0, 100, '');
-			log.info('This is the custom APIM search method');
-			log.info('============== api json  ==========' + assetApi);
-			// return assetApi;
+            if (user != null) {
+                userName = user.username;
+            }
+            log.info('============== user name ==========' + userName);
+            var apistore = require('apistore').apistore.instance(userName);
+            var assetApi = apistore.getAllPaginatedAPIsByStatus(tenantDomain,
+                    0, 100, '');
+            log.info('This is the custom APIM search method');
+            log.info('============== api json  ==========' + assetApi);
+            // return assetApi;
 
-			var json = JSON.parse(assetApi);
+            var json = JSON.parse(assetApi);
 
-			var apisArray = [];
-			if (json.apis.length > 0) {
-				apisArray = json.apis;
-			}
-			log.info('============== array ===========' + apisArray);
-			return apisArray;
-		}*/
-	};
+            var apisArray = [];
+            if (json.apis.length > 0) {
+                apisArray = json.apis;
+            }
+            log.info('============== array ===========' + apisArray);
+            return apisArray;
+        }*/
+    };
 };
 
 asset.configure = function(ctx) {
@@ -65,6 +65,14 @@ asset.configure = function(ctx) {
 };
 asset.server = function(ctx) {
     return {
+         onUserLoggedIn : function(){            
+            var userName=ctx.username;
+            var apistore = require('apistore').apistore.instance(userName);
+            var subscriber=apistore.getSubscriber(userName);                      
+            if(!subscriber){
+            apistore.addSubscriber(userName,ctx.tenantId);    
+            }
+        },
         endpoints: {
             pages: [{
                 title: 'Prototyped APIs',
@@ -78,7 +86,7 @@ asset.server = function(ctx) {
             title: 'API Details'
             url: 'details'
             path: 'details.jag'
-        	},*/ 
+            },*/ 
             {
                 title: 'My Subscriptions',
                 url: 'my_subscriptions',
@@ -111,40 +119,85 @@ asset.renderer = function(ctx) {
         return 'https://digg.com/submit?url=' + assetUrl;
     };
     return {
-    	details:function(page){
-    		log.info('Details page rendered!!!');
-		
-	//=================== Getting subscription details ========================
+        details:function(page){
+            log.info('Details page rendered!!!');
+        
+    //=================== Getting subscription details ========================
 
-	var carbonAPI = require('carbon');
-	var tenantDomain = carbonAPI.server.tenantDomain({
-		tenantId : ctx.tenantId
-	});
-	var server = require('store').server;
-	var user = server.current(ctx.session);
-	var userName = '__wso2.am.anon__';
+    var carbonAPI = require('carbon');
+    var tenantDomain = carbonAPI.server.tenantDomain({
+        tenantId : ctx.tenantId
+    });
+    var server = require('store').server;
+    var user = server.current(ctx.session);
+    var userName = '__wso2.am.anon__';
 
-	if (user != null) {
-		userName = user.username;
-	}
-	log.info('============== user name ==========' + userName);
-	var apistore = require('apistore').apistore.instance(userName);
-	var application = apistore.getApplications(userName);
-	log.info('This is the custom APIM search method');
-	log.info('============== api json  ==========' + application);
-	// return application;
+    if (user != null) {
+        userName = user.username;
+    }    
+    var lenI,lenJ,i,j,result,apidata,deniedTiers,tiers,appsList=[],subscribedToDefault=false,showSubscribe=false,status;
+    var apistore = require('apistore').apistore.instance(userName);
+    var applications = JSON.parse(apistore.getApplications(userName));
+    var asset = page.assets;
+    var resultapi=apistore.getAPI(asset.attributes.overview_provider,asset.name,asset.attributes.overview_version);
+    var apidata=JSON.parse(resultapi);    
+    if(apidata!=null){
+    tiers=apidata.tiers; 
+    status=apidata.status;
+    if(status=="PUBLISHED"){
+    showSubscribe=true;
+    }   
+    }    
+    var subscriptions=JSON.parse(apistore.getAPISubscriptions(asset.attributes.overview_provider,asset.name,asset.attributes.overview_version,userName));    
+    if(applications!=null){
+                lenI = applications.length;
+            }if(subscriptions!=null){
+                lenJ = subscriptions.length;
+            }
+            Label1:
+                    for (i = 0; i < lenI; i++) {
+                        var application = applications[i];
+                        for (j = 0; j < lenJ; j++) {
+                            var subscription = subscriptions[j];
+                            if (subscription.applicationId == application.id) {
+                                continue Label1;
+                            }
+                        }
+                        if(application.name=="DefaultApplication"){
+                                   subscribedToDefault=true;
+                        }
+                        if(application.status=="APPROVED"){
+                        appsList.push(application);
+                        }
+                    }
+            result = apistore.getDeniedTiers();
+            deniedTiers = result.tiers;
+            var k,m,allowedTiers,denied = false, tiersAvailable = false;
 
-	var json = JSON.parse(application);
-	page.applications= json;
+                    for(var m=0;m<tiers.length;m++){
+                       for (var k=0;k<deniedTiers.length;k++) {
+                       if (tiers[m].tierName == deniedTiers[k].tierName) {
+                            denied = true;
+                       }
+                       }
+                       if (!denied) {
+                       allowedTiers+=tiers[m];
+                       tiersAvailable = true;                      
+                    }
+                    denied = false;
+                    }
+            
+       
+    page.applications= appsList;
+    page.tiersAvailable=tiersAvailable;
+    page.tiers=allowedTiers;
+    page.subscribedToDefault=subscribedToDefault;
+    page.showSubscribe=showSubscribe;
+    page.api=apidata;
+    
 
-	var apisArray = [];
-	if (json.length > 0) {
-		apisArray = json;
-	}
-	log.info('============== array ===========' + json.length);
-
-	//=================== Getting subscription details ========================
-    	},
+    //=================== Getting subscription details ========================
+        },
         pageDecorators: {
             socialSitePopulator: function(page, meta) {
                 var utils = require('utils');
