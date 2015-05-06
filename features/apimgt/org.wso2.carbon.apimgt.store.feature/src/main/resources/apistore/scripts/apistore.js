@@ -89,9 +89,14 @@ var apistore = {};
     StoreAPIProxy.prototype.getAllPaginatedAPIsByStatus = function (tenantDomain, start, end,apiStatus) {
         return this.impl.getAllPaginatedAPIsByStatus(tenantDomain, start, end,apiStatus);
     };
-    
-    StoreAPIProxy.prototype.getApplicationKey = function (userId, applicationName, tokenType, tokenScopes,validityPeriod,callbackUrl,accessAllowDomainsArr) {
-        return this.impl.getApplicationKey(userId, applicationName, tokenType, tokenScopes,validityPeriod,callbackUrl,accessAllowDomainsArr);
+
+    StoreAPIProxy.prototype.getApplicationKey = function (userId, applicationName, tokenType, tokenScopes,validityPeriod,callbackUrl,accessAllowDomains) {
+        var arr = new Packages.org.json.simple.JSONArray();
+        var domains = accessAllowDomains.split(",");
+        for(var index =0; index< domains.length; index++){
+            arr.add(domains[index]);
+        }
+        return this.impl.getApplicationKey(userId, applicationName, tokenType, tokenScopes,validityPeriod,callbackUrl,arr);
     };
 
     StoreAPIProxy.prototype.getSubscriber= function(userName){      
