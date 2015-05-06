@@ -656,6 +656,36 @@ $(document).ready(function(){
         });
         }
     });
+
+    $("#design_form").keypress(function(e){
+        $('.tagContainer .bootstrap-tagsinput input').keyup(function(e) {
+            var tagName = $(this).val();
+            $tag = $(this);
+
+            if(tagName.match(/[^a-zA-Z0-9_ -]/g)){
+                $tag.val( $tag.val().replace(/[^a-zA-Z0-9_ -]/g, function(str) {
+                        $('.add-tags-error').html('');
+                        $('.tags-error').html('The tag "' + tagName + '" contains one or more illegal characters  (~ ! @ #  ; % ^ * + = { } | &lt; &gt;, \' " \\ ) .');
+                        return '';
+                }));
+            }
+        });
+        $('.tags-error').html('');
+        $("#tags").on('itemAdded', function(event) {
+             $('.tags-error').html('');
+             $('.add-tags-error').html('');
+        });
+    });
+
+    $('.tagContainer .bootstrap-tagsinput input').blur(function() {
+        if($(this).val().length > 0){
+            $('.add-tags-error').html('Please press Enter to add the tag.')
+            $('.tags-error').html('');
+        }
+        else if($(this).val().length == 0){
+            $('.add-tags-error').html('');
+        }
+    });
 });
 
 var thisID;
