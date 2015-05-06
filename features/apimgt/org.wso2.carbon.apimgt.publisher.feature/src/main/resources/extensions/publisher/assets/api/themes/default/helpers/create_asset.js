@@ -17,8 +17,13 @@
  *
  */
 var resources = function(page,meta){
-	return {
-		js:['jquery.validate.min.js','create_asset.js','jsonpath-0.8.0.js','handlebars.js','jquery.noty.packaged.min.js','custom-validation.js','src-noconflict/theme-textmate.js','src-noconflict/mode-json.js','src-noconflict/ace.js','src-noconflict/mode-javascript.js','src-noconflict/mode-yaml.js','jquery-ace.min.js','bootstrap-tagsinput.min.js','js-yaml.min.js'],
-        css:['bootstrap/bootstrap-editable.css','bootstrap/bootstrap-tagsinput.css','api_designer.css','bootstrap/bootsrap.css']
-	};
+    return {
+        js:['create_api_design.js','src-noconflict/mode-javascript.js','src-noconflict/mode-yaml.js','jquery-ace.min.js','typeahead.bundle.js', 'bootstrap.js',
+            'jquery.form.js','jquery.cookie.js','bootstrap-tagsinput.min.js','jquery.validate.min.js','js-yaml.min.js',
+            'create_asset.js', 'src-noconflict/ace.js','bootstrap-editable.js' ,'bootstrap-multiselect.js', 'custom-validation.js','src-noconflict/theme-textmate.js',
+            'jsonpath-0.8.0.js','src-noconflict/mode-json.js','handlebars.js','jquery.noty.packaged.min.js' ,'typeaheadjs.js', 'bootstrap3-typeahead.min.js'],
+        code:['manage_api_meta.hbs'],
+        css:['api_designer.css', 'bootstrap/bootstrap-editable.css',
+             'bootstrap/bootstrap-tagsinput.css','api_designer.css','bootstrap/bootsrap.css', 'bootstrap-multiselect.css']
+    }
 };
