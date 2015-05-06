@@ -4,7 +4,7 @@ The view is used to display the domain details
 <form>
     <fieldset>
         <h5>Allowed Domains</h5>
-        <textarea class='input-xlarge' id='input-production-allowedDomains'>{{allowedDomains}}</textarea>
+        <textarea class='input-xlarge' id='input-{{ environment }}-allowedDomains'>{{allowedDomains}}</textarea>
         <span class='help-block'>Leaving empty or filling with ALL will allow all domains</span>
     </fieldset>
 </form>
@@ -13,7 +13,7 @@ The view is used to display the domain details
 <h5>Token Validity</h5>
 <form class='form form-inline'>
     <fieldset>
-        <input type='text' class='input-small' id='input-production-validityTime'/>
+        <input type='text' class='input-small' id='input-{{ environment }}-validityTime'/>
         <label>seconds</label>
     </fieldset>
 </form>
