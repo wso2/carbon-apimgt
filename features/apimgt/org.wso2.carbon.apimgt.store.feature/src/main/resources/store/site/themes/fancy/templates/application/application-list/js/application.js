@@ -126,9 +126,16 @@ function deleteApp(linkObj) {
     jagg.sessionAwareJS({redirect:'site/pages/applications.jag'});
     var theTr = $(linkObj).parent().parent();
     var appName = $(theTr).attr('data-value');
+    var apiCount = $(theTr).attr('api-count');
     $('#messageModal').html($('#confirmation-data').html());
-    $('#messageModal h3.modal-title').html(i18n.t('confirm.delete'));
-    $('#messageModal div.modal-body').text('\n\n'+i18n.t('confirm.deleteMsg')+'"' + appName + '"'+i18n.t('confirm.deleteMsgPostfix'));
+    if(apiCount > 0){
+        $('#messageModal h3.modal-title').html(i18n.t('confirm.delete'));
+        $('#messageModal div.modal-body').text('\n\n' +i18n.t('confirm.deleteSubsMsg1')
+            + apiCount + i18n.t('confirm.deleteSubsMsg2') +i18n.t('confirm.deleteMsg')+'"' + appName + '"'+i18n.t('confirm.deleteMsgPostfix'));
+    } else {
+        $('#messageModal h3.modal-title').html(i18n.t('confirm.delete'));
+        $('#messageModal div.modal-body').text('\n\n'+i18n.t('confirm.deleteMsg')+'"' + appName + '" ?');
+    }
     $('#messageModal a.btn-primary').html(i18n.t('info.yes'));
     $('#messageModal a.btn-other').html(i18n.t('info.no'));
     $('#messageModal a.btn-primary').click(function() {
