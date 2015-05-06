@@ -3,8 +3,8 @@
  -->
 <form>
     <fieldset>
-        <span class='help-block'>Production keys are not yet generated for this app </span>
-        <input type='button' class='btn btn-primary' value='Generate ' id='btn-generate-production-token'/>
+        <span class='help-block'>{{ environment }} keys are not yet generated for this app </span>
+        <input type='button' class='btn btn-primary' value='Generate ' id='btn-generate-{{ environment }}-token'/>
     </fieldset>
 </form>
 

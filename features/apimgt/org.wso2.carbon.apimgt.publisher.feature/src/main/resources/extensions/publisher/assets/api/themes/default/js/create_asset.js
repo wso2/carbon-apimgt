@@ -415,7 +415,7 @@ var id = function(name) {
         obj[partialName] = partial(partialName);
         caramel.partials(obj, function() {
             var template = Handlebars.partials[partialName](data);
-            $(id(containerName)).html(template);
+            $(containerName).html(template);
             fn(containerName);
         });
     };
@@ -461,7 +461,7 @@ APIDesigner.prototype.render_resources_template = function(){
     this.index = Number(value);
 });  
 var partial='designer-resources-template'; 
-var container='resource_details';
+var container='#resource_details';
  renderPartial(partial, container,context);
    /* $('#resource_details').find('.scope_select').editable({
         emptytext: '+ Scope',
@@ -497,10 +497,12 @@ APIDesigner.prototype.render_resource = function(container){
     var context = jQuery.extend(true, {}, operation[0]);
     context.resource_path = container.attr('data-path');
     var partial='designer-resource-template';
+    var containerName='.resource_body';
  //source   = $("#add_resource").html();
    // Handlebars.partials['add_resource'] = Handlebars.compile(source);
 
- renderPartial(partial, container,context);
+ renderPartial(partial, containerName,context);
+ $(containerName).show();
     //var output = Handlebars.partials['designer-resource-template'](context);
     //container.html(output);
     //container.show();
@@ -659,9 +661,10 @@ $(document).ready(function(){
                 if (!responseText.error) {
                     var designer = APIDesigner();
                     designer.saved_api = {};
-                    designer.saved_api.name = responseText.data.apiName;
+                    designer.saved_api.name = responseText.data.name;
                     designer.saved_api.version = responseText.data.version;
                     designer.saved_api.provider = responseText.data.provider;
+                    designer.saved_api.id = responseText.data.id;
                     $( "body" ).trigger( "api_saved" );
                 } else {
                     if (responseText.message == "timeout") {
@@ -686,12 +689,13 @@ $(document).ready(function(){
     $('#visibility').trigger('change');
 
     $('#go_to_implement').click(function(e){
-    $("body").unbind("api_saved");            
-    $("body").on("api_saved" , function(e){
+    //TODO
+    //$("body").unbind("api_saved");
+    //$("body").on("api_saved" , function(e){
     var designer = APIDesigner();
-    location.href = caramel.configs().context + "/asts/api/implement?name="+designer.saved_api.name+"&version="+designer.saved_api.version+"&provider="+designer.saved_api.provider;                
-    });
-    $("#design_form").submit();
+    location.href = caramel.context + "/asts/api/implement/"+designer.saved_api.id;
+    //});
+    //$("#design_form").submit();
     });
 });
 

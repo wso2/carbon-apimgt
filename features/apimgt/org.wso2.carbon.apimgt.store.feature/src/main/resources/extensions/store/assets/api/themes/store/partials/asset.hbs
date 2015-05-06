@@ -2,14 +2,17 @@
     var isSocial = ('{{features.social.enabled}}' == 'true');
 
 </script>
-{{dump .}}
 <h1>{{assets.name}}</h1>	
 <div class='container-fluid'>
 		<div class='row-fluid'>
 			<div class='span3'>
 				<div class ='row'>
-					<a><i class='icon-user'></i> {{assets.attributes.overview_provider}}</a>
-					<img src='{{url ""}}/extensions/assets/api/themes/store/imgs/03-twitter-icon.png' class='img-polaroid'></img>
+					<a><i class='icon-user'></i> {{api.provider}}</a>
+					{{#if api.thumbnailurl}}
+					<img src='{{api.thumbnailurl}}' class='img-polaroid'></img>
+					{{else}}
+					<img src='{{url ""}}/extensions/assets/api/themes/store/imgs/api-default.png' class='img-polaroid'></img>
+					{{/if}}
 				</div>	
 			</div>
 			<div class='span9'>
@@ -28,47 +31,58 @@
 						</tr>
 						<tr>
 							<td><b>{{t "Version"}}</b></td>
-							<td>{{assets.attributes.overview_version}}</td>
+							<td>{{api.version}}</td>
 						</tr>
 						<tr>
 							<td><b>{{t "Status"}}</b></td>
-							<td>{{assets.lifecycleState}}</td>
+							<td>{{api.status}}</td>
 						</tr>
 						<tr>
 							<td><b>{{t "Updated"}}</b></td>
-							<td></td>
+							<td>{{api.lastUpdatedTime}}</td>
 						</tr>
 					</tbody>
 				</table>
 			</div>
-			
+			{{#if showSubscribe}} 
 			<div class='span5' appStyleFix>
 				<div class='well'>
 				<legend></legend>
-				<select id='application-selection'>
-				     <option selected="" value="1">DefaultApplication</option>
+
+				<select id='application-selection'>	
+         {{#unless subscribedToDefault}} 
+         <option value="-">{{t "Select Application..."}}</option>		             
+         {{/unless}}        
+         <option value="createNewApp">{{t "New Application..."}}</option>			    
 				    {{#each applications}}
 					<option>{{name}}</option>
 				    {{/each}}
+				   
 				</select>
 
 				<select id="tiers-list" name="tiers-list">
-                            
+                       {{#if tiers}}  
 		                    <option value="Unlimited">Unlimited</option>
-				    {{#each rxt.content.table.overview.fields.tier.values.0.value}}
-					<option>{{value}}</option>
-				    {{/each}}
+				   {{#each tiers}}
+					<option value="{{tier}}">{{tierDisplayName}}</option>
+				    {{/each}}{{/if}}
 		                    
 		                </select>
 				<div class="simple-space-maker">
-		                    <button onclick="triggerSubscribe()" id="subscribe-button" class="btn btn-primary ">{{t "Subscribe"}}
-					<a href="{{url "/asts"}}/api/my_subscriptions/{{id}}">
+		                    <button onclick="triggerSubscribe()" id="subscribe-button" class="btn btn-primary " {{#unless tiersAvailable}} disabled="disabled" {{/unless}}>{{t "Subscribe"}}					
 		                    </button>
+		                     {{#unless tiersAvailable}}
+                                <span id="subsBtnDesc" class="help-block">{{t "You may not be entitled to any of the available tiers"}}</span>
+                            {{/unless}}
 		                    
 		                </div>
 
 				</div>
 			</div>
+			{{/if}}
+			<input type="hidden" id="apiname" value="{{api.name}}">
+			<input type="hidden" id="version" value="{{api.version}}">
+			<input type="hidden" id="provider" value="{{api.provider}}">
 		</div>	
 </div>
 <ul class='nav nav-tabs'>

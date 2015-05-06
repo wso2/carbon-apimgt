@@ -23,6 +23,10 @@ var apistore = {};
 (function (apistore) {
 
 	var APIManagerFactory = Packages.org.wso2.carbon.apimgt.impl.APIManagerFactory;
+        var APISubscriber=Packages.org.wso2.carbon.apimgt.api.model.Subscriber;
+        var APIIdentifier = Packages.org.wso2.carbon.apimgt.api.model.APIIdentifier;
+        var APIUtil=org.wso2.carbon.apimgt.impl.utils.APIUtil;
+        var Date=Packages.java.util.Date;
     var log = new Log("jaggery-modules.api-manager.store");
 
     function StoreAPIProxy (username){
@@ -90,8 +94,31 @@ var apistore = {};
         return this.impl.getApplicationKey(userId, applicationName, tokenType, tokenScopes,validityPeriod,callbackUrl,accessAllowDomainsArr);
     };
 
-    StoreAPIProxy.prototype.addSubscription = function (providerName, apiName,version, tier, applicationId, userId) {
-        return this.impl.addSubscription(providerName, apiName,version, tier, applicationId, userId);
+    StoreAPIProxy.prototype.getSubscriber= function(userName){      
+        return this.impl.getSubscriber(userName);
+    };
+    StoreAPIProxy.prototype.addSubscriber = function(userName,tenantId){
+        var subscriber=new APISubscriber(userName);
+        subscriber.setSubscribedDate(new Date());
+        subscriber.setEmail("");
+        subscriber.setTenantId(tenantId);
+        return this.impl.addSubscriber(subscriber);
+    };
+    StoreAPIProxy.prototype.getAPISubscriptions = function (provider, apiname, version,username) {
+        return this.impl.getSubscriptions(provider, apiname, version,username);
+    };
+    StoreAPIProxy.prototype.getAPI = function (provider, name, version) {
+        var identifier = new Packages.org.json.simple.JSONObject();
+        identifier.put("provider", provider);
+        identifier.put("name", name);
+        identifier.put("version", version);
+        return this.impl.getAPI(identifier);
+    };
+    StoreAPIProxy.prototype.addSubscription = function (apiname,version,provider,user,tier,appId) {       
+        provider=APIUtil.replaceEmailDomain(provider);
+        var apiIdentifier = new APIIdentifier(provider, apiname, version);
+        apiIdentifier.setTier(tier);
+        return this.impl.addSubscription(apiIdentifier, appId,user);
     };
 
 })(apistore);

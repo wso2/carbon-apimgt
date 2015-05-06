@@ -32,6 +32,10 @@ app.server = function(ctx) {
                 url: 'application',
                 path: 'application.jag',
                 secured:true
+            },{
+                url: 'apisubscriptions',
+                path: 'api-subscriptions.jag',
+                secured:false
             }]
         },
         configs: {

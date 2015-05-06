@@ -76,6 +76,7 @@ $(function () {
                            $("body").unbind('api_saved');
                            if (!responseText.error) {
                                //jagg.message({content:"API Published",type:"info"});
+                               alert("Error");
                                location.href = "TODO";
                            } else {
                                if (responseText.message == "timeout") {
@@ -133,7 +134,7 @@ $(function () {
                                                    if(!validate_tiers()){
                                                        return false;
                                                    }
-                                                   var designer = APIDesigner();
+                                                   var designer = APIMangerAPI.APIDesigner();
                                                    $('#swagger').val(JSON.stringify(designer.api_doc));
                                                    $('#saveMessage').show();
                                                    $('#saveButtons').hide();
@@ -194,8 +195,44 @@ $(function () {
                                            });
 
         $('#publish_api').click(function(e){
-            $("body").on("api_saved", publish_api);
+            $("body").on("api_saved", publishAPI);
             $("#manage_form").submit();
         });
+
+        var publishAPI = function() {
+
+            var data = {};
+            data.action = 'publish';
+
+            data.nextState = 'published';
+
+            data.comment = "comment";
+
+            $.ajax({
+                       url: '/publisher/apis/asset/'+store.publisher.api.id+ '/change-state?type=api&lifecycle=APILifeCycle',
+                       type: 'POST',
+                       data: JSON.stringify(data),
+                       contentType: 'application/json',
+                       success: function(data) {
+                           alert("success");
+                       },
+                       error: function() {
+                           alert("error");
+                       }
+                   });
+        };
+
+        //hack to validate tiers
+        function validate_tiers(){
+            var selectedValues = $('#tier').val();
+            if(selectedValues && selectedValues.length > 0){
+                $("button.multiselect").removeClass('error-multiselect');
+                $("#tier_error").remove();
+                return true;
+            }
+            //set error
+            $("button.multiselect").addClass('error-multiselect').after('<label id="tier_error" class="error" for="tenants" generated="true" style="display: block;">This field is required.</label>').focus();
+            return false;
+        }
 });
 });

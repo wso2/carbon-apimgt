@@ -91,6 +91,7 @@
                             </importFeatures>
                             <importBundles>
                                 <importBundleDef>org.wso2.carbon.commons:org.wso2.carbon.hostobjects.sso:${carbon.commons.version}</importBundleDef>
+                                <importBundleDef>org.wso2.carbon.mediation:org.wso2.carbon.rest.api.stub:${carbon.mediation.version}</importBundleDef>
 
                             </importBundles>
                         </configuration>

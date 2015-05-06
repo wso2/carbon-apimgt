@@ -163,7 +163,49 @@ $(function() {
                 loadbalancesandboxepcount --;
             }
        });
+
+        $('#go_to_manage').click(function(e){
+            //TODO
+            //$("body").unbind("api_saved");
+            //$("body").on("api_saved" , function(e){
+            location.href = caramel.context + "/asts/api/manage/"+store.publisher.api.id;
+            //});
+            //$("#design_form").submit();
+        });
         //LB EP related- END
 
+        var v = $("#implement_form").validate({
+                                                     contentType : "application/x-www-form-urlencoded;charset=utf-8",
+                                                     dataType: "json",
+                                                     onkeyup: false,
+                                                     submitHandler: function(form) {
+                                                         $('#saveMessage').show();
+                                                         $('#saveButtons').hide();
+                                                         $(form).ajaxSubmit({
+                                                                                success:function(responseText, statusText, xhr, $form){
+                                                                                    $('#saveMessage').hide();
+                                                                                    $('#saveButtons').show();
+                                                                                    if (!responseText.error) {
+                                                                                        $( "body" ).trigger( "api_saved" );
+                                                                                    } else {
+                                                                                        if (responseText.message == "timeout") {
+                                                                                            if (ssoEnabled) {
+                                                                                                var currentLoc = window.location.pathname;
+                                                                                                if (currentLoc.indexOf(".jag") >= 0) {
+                                                                                                    location.href = "index.jag";
+                                                                                                } else {
+                                                                                                    location.href = 'site/pages/index.jag';
+                                                                                                }
+                                                                                            } else {
+                                                                                                //jagg.showLogin();
+                                                                                            }
+                                                                                        } else {
+                                                                                            //jagg.message({content:responseText.message,type:"error"});
+                                                                                        }
+                                                                                    }
+                                                                                }, dataType: 'json'
+                                                                            });
+                                                     }
+                                                 });
     });
 });

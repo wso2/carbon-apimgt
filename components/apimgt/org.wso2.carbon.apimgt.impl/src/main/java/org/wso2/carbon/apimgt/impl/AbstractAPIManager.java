@@ -67,6 +67,8 @@ import org.wso2.carbon.user.core.UserStoreException;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -1153,7 +1155,10 @@ public abstract class AbstractAPIManager implements APIManager {
             apiObj.put("thumbnailUrl", APIUtil.prependWebContextRoot(api.getThumbnailUrl()));
         }
         apiObj.put("context", api.getContext());
-        apiObj.put("lastUpdatedTime", APIUtil.checkValue(Long.valueOf(api.getLastUpdated().getTime()).toString()));
+        //String updateTime=APIUtil.checkValue(Long.valueOf(api.getLastUpdated().getTime()).toString());
+        DateFormat dateFormat = new SimpleDateFormat("dd/MMM/yyyy HH:mm:ss a z");
+        String dateFormatted = dateFormat.format(api.getLastUpdated());
+        apiObj.put("lastUpdatedTime",dateFormatted );
         apiObj.put("subscribersCount", getSubscriberCount(api.getId()));
         String apiOwner = api.getApiOwner();
         if (apiOwner == null) {

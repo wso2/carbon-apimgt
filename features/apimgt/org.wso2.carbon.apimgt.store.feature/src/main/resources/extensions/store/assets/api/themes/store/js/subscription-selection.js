@@ -1,6 +1,15 @@
 $(function () {
 
     /*
+     The location of the templates used in the rendering
+     */
+    // var API_SUBS_URL = '/store/resources/api/v1/subscription/';
+    // var API_TOKEN_URL = '/store/resources/api/v1/apptoken/a';
+    //var API_TOKEN_URL = caramel.context+'/apis/applications';
+    // var API_DOMAIN_URL = '/store/resources/api/v1/domain/a';
+    //var API_SUBSCRIPTION = caramel.context+'/apis/application/subscriptions'
+
+    /*
      The containers in which the UI components will be rendered
      */
     var CONTROL_CONTAINER = '#subscription-control-panel';
@@ -29,11 +38,14 @@ $(function () {
      */
     var getSubscriptionAPI = function(appName){
         return caramel.context + '/apis/application/' + appName + '/subscriptions';
+        //return caramel.context + '/apis/applications/' + appName;
     }
+
     /*
-     The function returns the subscriptions of the given application
+     The function returns the curent subscriptions for the given application
      */
     var findSubscriptionDetails = function (appName) {
+        //log.info("appsWithSubs :: " + appsWithSubs);
         var apps = metadata.appsWithSubs;
         var app;
         for (var appIndex in apps) {
@@ -47,7 +59,7 @@ $(function () {
     };
 
     /*
-
+     The function returns the details of the given application
      */
     var findAppDetails = function (appName) {
         var apps = metadata.appsWithSubs;
@@ -68,8 +80,8 @@ $(function () {
         ///We need to prevent the afterRender function from been inherited by child views
         //otherwise this method will be invoked by child views
         //console.info('Attaching generate button');
-        $('#btn-generate-production-token').on('click', function () {
-            var appName = $('#subscription-selection').val();
+        $('#btn-generate-Production-token').on('click', function () {
+            var appName = $('#subscription_selection').val();
             var appDetails = findAppDetails(appName);
             var tokenRequestData = {};
             tokenRequestData['appName'] = appName;
@@ -92,8 +104,8 @@ $(function () {
 
     var attachGenerateSandToken = function () {
 
-        $('#btn-generate-sandbox-token').on('click', function () {
-            var appName = $('#subscription-selection').val();
+        $('#btn-generate-Sandbox-token').on('click', function () {
+            var appName = $('#subscription_selection').val();
             var appDetails = findAppDetails(appName);
             var tokenRequestData = {};
             tokenRequestData['appName'] = appName;
@@ -103,7 +115,7 @@ $(function () {
             tokenRequestData['validityTime'] = appDetails.prodValidityTime;
             $.ajax({
                 type: 'POST',
-                url: API_TOKEN_URL,
+                url: getSubscriptionAPI(appName),
                 data: tokenRequestData,
                 success: function (data) {
                     var jsonData = JSON.parse(data);
@@ -122,7 +134,7 @@ $(function () {
     var attachUpdateProductionDomains = function () {
 
         $('#btn-production-updateDomains').on('click', function () {
-            var allowedDomains = $('#input-production-allowedDomains').val();
+            var allowedDomains = $('#input-Production-allowedDomains').val();
             console.info(JSON.stringify(APP_STORE.productionKeys));
             var domainUpdateData = {};
             domainUpdateData['accessToken'] = APP_STORE.productionKeys.accessToken;
@@ -145,7 +157,7 @@ $(function () {
     var attachUpdateSandboxDomains = function () {
 
         $('#btn-sandbox-updateDomains').on('click', function () {
-            var allowedDomains = $('#input-sandbox-allowedDomains').val();
+            var allowedDomains = $('#input-Sandbox-allowedDomains').val();
             console.info(JSON.stringify(APP_STORE.productionKeys));
             var domainUpdateData = {};
             domainUpdateData['accessToken'] = APP_STORE.sandboxKeys.accessToken;
@@ -185,11 +197,20 @@ $(function () {
     };
 
     /*
-     The function is used to attach the logic which will regenerate the token
+     The function is used to attach the logic which will regenerate the Production token
      */
     var attachRegenerateProductionToken=function(){
-        $('#btn-refresh-production-token').on('click',function(){
-            console.info('The user wants to regenerate the token');
+        $('#btn-refresh-Production-token').on('click',function(){
+            console.info('The user wants to regenerate the Production token');
+        });
+    };
+
+    /*
+     The function is used to attach the logic which will regenerate the Sandbox token
+     */
+    var attachRegenerateSandboxToken=function(){
+        $('#btn-refresh-Sandbox-token').on('click',function(){
+            console.info('The user wants to regenerate the Sandbox token');
         });
     };
 
@@ -217,6 +238,12 @@ $(function () {
         beforeRender: function (data) {
             data['environment'] = Views.translate('Production');
         },
+        resolveRender:function(){
+            if(APP_STORE.productionKeys){
+                return false;
+            }
+            return true;
+        },
         afterRender: attachGenerateProdToken,
         subscriptions: [EV_APP_SELECT]
     });
@@ -224,9 +251,9 @@ $(function () {
     Views.extend('defaultProductionKeyView', {
         id: 'visibleProductionKeyView',
         partial: 'sub-keys-visible-prod',
-        subscriptions: [EV_SHOW_KEYS, EV_GENERATE_PROD_TOKEN],
+        subscriptions: [EV_APP_SELECT,EV_SHOW_KEYS, EV_GENERATE_PROD_TOKEN],
         resolveRender: function (data) {
-
+            //alert('Resolve rendering!');
             if(!APP_STORE.showKeys){
                 return false;
             }
@@ -247,7 +274,7 @@ $(function () {
 
     Views.extend('defaultProductionKeyView', {
         id: 'hiddenProductionKeyView',
-        subscriptions: [EV_SHOW_KEYS, EV_HIDE_KEYS, EV_GENERATE_PROD_TOKEN],
+        subscriptions: [EV_APP_SELECT,EV_SHOW_KEYS, EV_HIDE_KEYS, EV_GENERATE_PROD_TOKEN],
         partial: 'sub-keys-hidden-prod',
         resolveRender: function (data) {
             //Determine if the keys need to be visible
@@ -269,15 +296,23 @@ $(function () {
     Views.extend('defaultProductionKeyView', {
         id: 'defaultSandboxKeyView',
         container: SAND_KEYS_CONTAINER,
-        afterRender: attachGenerateSandToken,
+        partial: 'sub-keys-generate-prod',
         beforeRender: function (data) {
             data['environment'] = Views.translate('Sandbox');
-        }
+        },
+        resolveRender:function(){
+            if(APP_STORE.sandboxKeys){
+                return false;
+            }
+            return true;
+        },
+        afterRender: attachGenerateSandToken,
+        subscriptions: [EV_APP_SELECT]
     });
 
     Views.extend('defaultSandboxKeyView', {
         id: 'visibleSandboxKeyView',
-        partial: 'sub-keys-visible-sand',
+        partial: 'sub-keys-visible-prod',
         resolveRender: function (data) {
 
             if(!APP_STORE.sandboxKeys){
@@ -292,18 +327,17 @@ $(function () {
             return true;
             //}
         },
-        afterRender: function () {
-        },
-        subscriptions: [EV_SHOW_KEYS, EV_GENERATE_SAND_TOKEN]
+        afterRender: attachRegenerateSandboxToken,
+        subscriptions: [EV_APP_SELECT, EV_SHOW_KEYS, EV_GENERATE_SAND_TOKEN]
     });
 
     Views.extend('defaultSandboxKeyView', {
         id: 'hiddenSandboxKeyView',
         subscriptions: [EV_SHOW_KEYS, EV_HIDE_KEYS, EV_GENERATE_SAND_TOKEN],
-        partial: 'sub-keys-hidden-sand',
+        partial: 'sub-keys-hidden-prod',
         resolveRender: function (data) {
             console.info(APP_STORE.sandboxKeys);
-
+            //Determine if the keys need to be visible
             if(APP_STORE.showKeys){
                 return false;
             }
@@ -315,10 +349,12 @@ $(function () {
             Views.mirror(APP_STORE.sandboxKeys, data);
             return true;
         },
-        afterRender: function () {
-
-        }
+        afterRender: attachRegenerateSandboxToken
     });
+
+    /*
+     End of Keys View
+     */
 
     /*
      Domain View
@@ -357,7 +393,7 @@ $(function () {
 
     Views.extend('defaultSandboxDomainView', {
         id: 'updateSandboxDomainVIew',
-        partial: 'sub-domain-update-sand',
+        partial: 'sub-domain-update-prod',
         afterRender: attachUpdateSandboxDomains,
         subscriptions: [EV_GENERATE_SAND_TOKEN]
     });
@@ -392,19 +428,58 @@ $(function () {
         afterRender: attachShowCheckbox
     });
 
+    /*
+     The function returns the Production Keys of the given application
+     */
+    var findProdKeys = function (details) {
+        if(!details.prodKey){
+            return null;
+        }
+        var keys = {};
+        keys.accessToken = details.prodKey;
+        keys.environment = 'Production';
+        keys.validityTime = details.sandValidityTime;
+        keys.consumerKey = details.prodConsumerKey;
+        keys.consumerSecret = details.prodConsumerSecret;
 
-    var defaultAppName = $('#subscription-selection').val();
+        return keys;
+    };
+
+    /*
+     The function returns the Sandbox Keys of the given application
+     */
+    var findSandKeys = function (details) {
+        if(!details.sandboxKey){
+            return null;
+        }
+        var keys = {};
+        keys.accessToken = details.sandboxKey;
+        keys.environment = 'Sandbox';
+        keys.validityTime = details.sandValidityTime;
+        keys.consumerKey = details.sandboxConsumerKey;
+        keys.consumerSecret = details.sandboxConsumerSecret;
+
+        return keys;
+    };
+
+    var populateAppStore = function(appName){
+        var details = findAppDetails(appName);
+        APP_STORE.appName = appName;
+        APP_STORE.appDetails = details;
+        APP_STORE.productionKeys = findProdKeys(details);
+        APP_STORE.sandboxKeys = findSandKeys(details);
+        //APP_STORE.showKeys = false;
+    };
+
+    var defaultAppName = $('#subscription_selection').val();
+    populateAppStore(defaultAppName);
     events.publish(EV_APP_SELECT, {appName: defaultAppName});
 
     //Connect the events
-    $('#subscription-selection').on('change', function () {
-        var appName = $('#subscription-selection').val();
+    $('#subscription_selection').on('change', function () {
+        var appName = $('#subscription_selection').val();
         APP_STORE = {};
-        APP_STORE['appName'] = appName;
-        APP_STORE['appDetails'] = findAppDetails(appName);
-        APP_STORE['productionKeys'] = null;
-        APP_STORE['sandboxKeys'] = null;
-        APP_STORE['showKeys'] = false;
+        populateAppStore(appName);
         events.publish(EV_APP_SELECT, {appName: appName});
     });
 
