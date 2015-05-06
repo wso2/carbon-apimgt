@@ -195,9 +195,32 @@ $(function () {
                                            });
 
         $('#publish_api').click(function(e){
-            $("body").on("api_saved", publish_api);
+            $("body").on("api_saved", publishAPI);
             $("#manage_form").submit();
         });
+
+        var publishAPI = function() {
+
+            var data = {};
+            data.action = 'publish';
+
+            data.nextState = 'published';
+
+            data.comment = "comment";
+
+            $.ajax({
+                       url: '/publisher/apis/asset/'+store.publisher.api.id+ '/change-state?type=api&lifecycle=APILifeCycle',
+                       type: 'POST',
+                       data: JSON.stringify(data),
+                       contentType: 'application/json',
+                       success: function(data) {
+                           alert("success");
+                       },
+                       error: function() {
+                           alert("error");
+                       }
+                   });
+        };
 
         //hack to validate tiers
         function validate_tiers(){

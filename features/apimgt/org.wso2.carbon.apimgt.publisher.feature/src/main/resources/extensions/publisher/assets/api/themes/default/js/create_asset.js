@@ -661,9 +661,10 @@ $(document).ready(function(){
                 if (!responseText.error) {
                     var designer = APIDesigner();
                     designer.saved_api = {};
-                    designer.saved_api.name = responseText.data.apiName;
+                    designer.saved_api.name = responseText.data.name;
                     designer.saved_api.version = responseText.data.version;
                     designer.saved_api.provider = responseText.data.provider;
+                    designer.saved_api.id = responseText.data.id;
                     $( "body" ).trigger( "api_saved" );
                 } else {
                     if (responseText.message == "timeout") {
@@ -688,12 +689,13 @@ $(document).ready(function(){
     $('#visibility').trigger('change');
 
     $('#go_to_implement').click(function(e){
-    $("body").unbind("api_saved");            
-    $("body").on("api_saved" , function(e){
+    //TODO
+    //$("body").unbind("api_saved");
+    //$("body").on("api_saved" , function(e){
     var designer = APIDesigner();
-    location.href = caramel.configs().context + "/asts/api/implement?name="+designer.saved_api.name+"&version="+designer.saved_api.version+"&provider="+designer.saved_api.provider;                
-    });
-    $("#design_form").submit();
+    location.href = caramel.context + "/asts/api/implement/"+designer.saved_api.id;
+    //});
+    //$("#design_form").submit();
     });
 });
 
