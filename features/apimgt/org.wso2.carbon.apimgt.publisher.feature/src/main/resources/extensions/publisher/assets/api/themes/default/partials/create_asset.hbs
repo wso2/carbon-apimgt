@@ -1,3 +1,34 @@
+<script language="javascript">
+	//TODO move to code segment
+	var VERBS = ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'];
+	var AUTH_TYPES = [
+		{"value": "None", "text": "{{t "None"}}"},
+		{"value": "Application", "text": "{{t "Application"}}"},
+		{"value": "Application User", "text": "{{t "Application User"}}"},
+		{"value": "Application & Application User", "text": "{{t "Application & Application User"}}"}
+	];
+
+	var TIERS = [
+		{{#each api.configuredTiers}}
+			{"value": "{{this.tierName}}", "text": "{{this.tierDisplayName}}"}
+			{{#unless this.last}},{{/unless}}
+		{{/each}}
+	];
+
+		{{#each api.configuredTiers}}
+			{{#if this.last}}
+			var DEFAULT_TIER = "{{this.tierName}}";
+			{{/if}}
+		{{/each}}
+	var DEFAULT_AUTH = "Application & Application User";
+	var OPTION_DEFAULT_AUTH = "None";
+	var insequence = "{{api.inSequence}}";
+	var outsequence = "{{api.outSequence}}";
+	var faultsequence = "{{api.faultSequence}}";
+	var inSequencesLoaded = false;
+	var outSequencesLoaded = false;
+	var faultSequencesLoaded = false;
+</script>
 <center>
 <ul class="new-sub-menu-wizard" style="margin:0 auto">
     <li>
