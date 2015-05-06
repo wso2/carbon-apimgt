@@ -33,10 +33,17 @@ require('/modules/store.js').exec(function (ctx) {
     var API_SUBSCRIPTION_URL = '/{context}/apis/application/{appName}/subscriptions';
 
     var uriMatcher = new URIMatcher(req.getRequestURI());
-
+    uriMatcher.match(API_SUBSCRIPTION_URL);
     switch (httpMethod) {
         case 'GET':
             log.info('GET :: ' + httpMethod);
+            var elements = uriMatcher.elements();
+            options.appName = elements.appName;
+            var subscribedAPIsResult = apistore.getAllSubscriptions(user.username,options.appName,0,100);
+            var subscribedAPIs = [];
+            subscribedAPIs = JSON.parse(subscribedAPIsResult);
+            //log.info('Application.jag -- JSON.parse(subscribedAPIsResult) :: ' + subscribedAPIsResult);
+            //print(subscribedAPIs);
             break;
 
         case 'POST':
@@ -44,9 +51,9 @@ require('/modules/store.js').exec(function (ctx) {
             if (uriMatcher.match(API_SUBSCRIPTION_URL)) {
                 var elements = uriMatcher.elements();
                 options.appName = elements.appName;
-                //(userId, applicationName, tokenType, tokenScope)
+                //(userId, applicationName, tokenType, tokenScope) 
                 var check = apistore.createApplicationKeys(user.username, options.appName, 'Production', 'default');
-                log.info('check :: ' + check);
+                log.info('Application.jag-- apistore.createApplicationKeys:: ' + check);
 
             }
             break;

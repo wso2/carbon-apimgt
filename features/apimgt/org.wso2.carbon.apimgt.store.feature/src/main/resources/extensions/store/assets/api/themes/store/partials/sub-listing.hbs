@@ -1,17 +1,21 @@
 <!--
 Subscription listing page
 -->
-<hr/><h4>Subscribed APIs</h4>
+<div class='row-fluid'>
+    <legend>{{t "Subscribed APIs "}}</legend>
+</div>
 <div class="row-fluid">{{#each subscriptions}}
     <div class="span3 asset">
         <div class="asset-icon">
-            <img src="/store/extensions/assets/api/themes/store/img/default_thumb.jpg"/>
+            <img src="{{thumburl}}"/>
         </div>
         <div class="asset-details">
             <div class="asset-name">
-                {{name}} {{version}}
+                {{name}} - {{version}}
             </div>
+            <small>{{provider}}<br/>
+                {{tier}} Subscription</small>
         </div>
     </div>
-    {{/each}}
+{{/each}}
 </div>
