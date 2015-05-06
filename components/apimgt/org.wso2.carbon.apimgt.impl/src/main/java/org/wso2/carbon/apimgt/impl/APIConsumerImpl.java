@@ -1727,12 +1727,10 @@ Set<API> apiSet) throws APIManagementException {
         return isSubscribed;
     }
 
-    public String addSubscription(String providerName, String apiName, String version, String tier, int applicationId, String userId)
+    public String addSubscription(APIIdentifier apiId, int applicationId, String userId)
             throws APIManagementException {
 
-        providerName = APIUtil.replaceEmailDomain(providerName);
-    	
-        APIIdentifier identifier =  getAPIidentifier(providerName, apiName, version, tier, userId);
+        APIIdentifier identifier =  getAPIidentifier(apiId, userId);
     	
         API api = getAPI(identifier);
         if (api.getStatus().equals(APIStatus.PUBLISHED)) {
@@ -1794,11 +1792,10 @@ Set<API> apiSet) throws APIManagementException {
         }
     }
 
-    private APIIdentifier getAPIidentifier(String providerName, String apiName, String version, String tier, String userId) throws APIManagementException {
-    	APIIdentifier apiIdentifier = new APIIdentifier(providerName, apiName, version);
+    private APIIdentifier getAPIidentifier(APIIdentifier apiIdentifier, String userId) throws APIManagementException {
         boolean isTenantFlowStarted = false;
         try {
-            String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(providerName));
+            String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(apiIdentifier.getProviderName()));
             if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
                 isTenantFlowStarted = true;
                 PrivilegedCarbonContext.startTenantFlow();
@@ -1808,7 +1805,7 @@ Set<API> apiSet) throws APIManagementException {
 	        // Validation for allowed throttling tiers
             API api = getAPI(apiIdentifier);
             Set<Tier> tiers = api.getAvailableTiers();
-
+            String tier=apiIdentifier.getTier();
             Iterator<Tier> iterator = tiers.iterator();
             boolean isTierAllowed = false;
             List<String> allowedTierList = new ArrayList<String>();
@@ -1820,7 +1817,7 @@ Set<API> apiSet) throws APIManagementException {
                 allowedTierList.add(t.getName());
             }
             if (!isTierAllowed) {
-                throw new APIManagementException("Tier " + tier + " is not allowed for API " + apiName + "-" + version + ". Only "
+                throw new APIManagementException("Tier " + tier + " is not allowed for API " + apiIdentifier.getApiName() + "-" + apiIdentifier.getVersion() + ". Only "
                         + Arrays.toString(allowedTierList.toArray()) + " Tiers are alllowed.");
             }
             if (isTierDeneid(tier)) {
