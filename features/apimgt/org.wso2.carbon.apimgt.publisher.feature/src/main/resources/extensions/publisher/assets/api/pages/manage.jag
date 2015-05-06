@@ -115,6 +115,7 @@ require('/modules/publisher.js').exec(function(ctx) {
 		}
 	}
 	api.filteredEnvironmentList = filteredEnvironmentList;
+	api.id = options.id;
 	output.api = api;
 	output.api.isSynapseGateway = apiProxy.isSynapseGateway().isSynapseGateway;
 	//Set available tiers and last tiers

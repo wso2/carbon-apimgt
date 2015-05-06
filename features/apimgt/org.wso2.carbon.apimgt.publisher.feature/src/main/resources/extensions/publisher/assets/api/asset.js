@@ -140,8 +140,8 @@ asset.manager = function(ctx) {
 
                 var apiProxy = apiPublisher.instance(ctx.username);
                 result = apiProxy.implementAPI(api);
-
-                if (result.error==true) {
+                log.info(result);
+                if (result != null && result.error==true) {
                     obj = {
                         error:true,
                         message:result.message,
@@ -150,12 +150,12 @@ asset.manager = function(ctx) {
                 } else {
                     obj = {
                         error:false,
-                        data :apiId,
+                        data :apiId
                     }
                 }
                return obj;
             }
-        },
+        }
     };
 };
 
