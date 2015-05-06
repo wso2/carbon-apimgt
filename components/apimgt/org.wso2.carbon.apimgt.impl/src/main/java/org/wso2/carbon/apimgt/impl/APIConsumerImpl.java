@@ -1615,9 +1615,9 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         return subscribedAPIs;
     }
     
-    public Integer getSubscriptionCount(Subscriber subscriber,String applicationName)
+    public Integer getSubscriptionCount(Subscriber subscriber,String applicationName,String groupingId)
             throws APIManagementException {
-        return apiMgtDAO.getSubscriptionCount(subscriber,applicationName);
+        return apiMgtDAO.getSubscriptionCount(subscriber,applicationName,groupingId);
     }
 
     public Set<APIIdentifier> getAPIByConsumerKey(String accessToken) throws APIManagementException {
