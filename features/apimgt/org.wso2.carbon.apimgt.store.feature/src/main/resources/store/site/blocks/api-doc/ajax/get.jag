@@ -123,7 +123,19 @@ var log = new Log();
         }
 
         jsonObj.basePath = api.context;
-        jsonObj.host = urlArr[1].trim().replace("https://","");
+        if (urlArr.length > 1) {
+		if (urlArr[1].indexOf("https") > -1) {
+			jsonObj.host = urlArr[1].trim().replace("https://","");
+		} else {
+			jsonObj.host = urlArr[1].trim().replace("http://","");
+		}
+	} else {
+		if (urlArr[0].indexOf("https") > -1) {
+	        	jsonObj.host = urlArr[0].trim().replace("https://","");
+		} else {
+			jsonObj.host = urlArr[0].trim().replace("http://","");
+		}	
+	}
 
         var paths = {}; //fix for /*
         for (var property in jsonObj.paths) {
