@@ -99,6 +99,11 @@ function APIDesigner(){
     $( "#api_designer" ).delegate( "#add_resource", "click", this, function( event ) {
         var designer = APIDesigner();
         if($("#resource_url_pattern").val() == "" || $('#inputResource').val() == ""){
+            var message = {};
+            message.text = '<div><i class="icon-briefcase"></i> URL pattern & Resource cannot be empty</div>';
+            message.type = 'error';
+            message.layout ='topRight';
+            noty(message);
             //----jagg.message({content:"URL pattern & Resource cannot be empty.",type:"error"});
             return;
         }
@@ -112,6 +117,11 @@ function APIDesigner(){
                 if(designer.check_if_resource_exist( path , $(this).val() ) ){
                     resource_exist = true;
                     var err_message = "Resource already exist for URL Pattern "+path+" and Verb "+$(this).val();
+                    var message = {};
+                    message.text = '<div><i class="icon-briefcase"></i> '+err_message+'</div>';
+                    message.type = 'error';
+                    message.layout ='topRight';
+                    noty(message);
                    // jagg.message({content:err_message,type:"error"});
                     return;
                 }
@@ -175,6 +185,11 @@ function APIDesigner(){
             }
         });
         if(vc==0){
+            var message = {};
+                    message.text = '<div><i class="icon-briefcase"></i> You should select at least one HTTP verb.</div>';
+                    message.type = 'error';
+                    message.layout ='topRight';
+                    noty(message);
             //jagg.message({content:"You should select at least one HTTP verb." ,type:"error"});            
             return;
         }
@@ -275,13 +290,25 @@ APIDesigner.prototype.init_controllers = function(){
         var operations = operations[0]
         var i = $(this).attr('data-index');
         var pn = $(this).attr('data-path-name');
-        console.log(operations[i]);
+        console.log(operations[i]);        
+        noty({
+        text: 'Do you want to remove "'+operations[i].method+' : '+pn+'" resource from list.', 
+        buttons: [
+        {addClass: 'btn btn-primary', text: 'Ok', onClick: function($noty) {
+        API_DESIGNER = APIDesigner();
+        operations.splice(i, 1);
+        API_DESIGNER.clean_resources();
+        API_DESIGNER.render_resources(); 
+        $noty.close();
+        
+      }
+    }
+    ]
+    });
+
         /*jagg.message({content:'Do you want to remove "'+operations[i].method+' : '+pn+'" resource from list.',type:'confirm',title:"Remove Resource",
         okCallback:function(){
-            API_DESIGNER = APIDesigner();
-            operations.splice(i, 1);
-            API_DESIGNER.clean_resources();
-            API_DESIGNER.render_resources(); 
+           
         }});*/
         //delete resource if no operations       
     });
@@ -354,6 +381,12 @@ APIDesigner.prototype.init_controllers = function(){
                             if (API_DESIGNER.api_doc.authorizations.oauth2.scopes[i].key === $(
                                     "#scopeKey").val() || API_DESIGNER.api_doc.authorizations.oauth2.scopes[i].key === $(
                                     "#scopeName").val()) {
+                                var message = {};
+                                message.text = '<div><i class="icon-briefcase"></i> You should not define same scope.</div>';
+                                message.type = 'error';
+                                message.layout ='topRight';
+                                noty(message);
+
                               /*  jagg
                                         .message({
                                             content : "You should not define same scope.",
@@ -621,12 +654,12 @@ $(document).ready(function(){
         });
     });
 
-  /*  $("#resource_url_pattern").live('change',function(){
+   $("#resource_url_pattern").on('change',function(){
         var re = new RegExp("^/?([a-zA-Z0-9]|-|_)+");
         var arr = re.exec($(this).val());
         if(arr && arr.length)
             $('#inputResource').val(arr[0]);
-    });*/
+    });
 
 
     var v = $("#form-asset-create").validate({
@@ -637,6 +670,19 @@ $(document).ready(function(){
         var designer = APIDesigner();
         
         if(designer.has_resources() == false){
+            noty({
+        text: 'At least one resource should be specified. Do you want to add a wildcard resource (/*).', 
+        buttons: [
+        {addClass: 'btn btn-primary', text: 'Ok', onClick: function($noty) {
+         var designer = APIDesigner();
+                    designer.add_default_resource();
+                    $("#design_form").submit();
+        $noty.close();
+        
+       }
+       }
+       ]
+       });
            /* jagg.message({
                 content:"At least one resource should be specified. Do you want to add a wildcard resource (/*)." ,
                 type:"confirm",
@@ -679,6 +725,11 @@ $(document).ready(function(){
                              //jagg.showLogin();
                         }
                     } else {
+                    var message = {};
+                    message.text = '<div><i class="icon-briefcase"></i> API creation failed.</div>';
+                    message.type = 'error';
+                    message.layout ='topRight';
+                    noty(message);
                         //jagg.message({content:responseText.message,type:"error"});
                     }
                 }
