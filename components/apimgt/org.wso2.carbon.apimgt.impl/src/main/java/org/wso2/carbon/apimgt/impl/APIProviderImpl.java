@@ -2850,10 +2850,10 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
         // This is to support the new Pluggable version strategy
         // if the context does not contain any {version} segment, we use the default version strategy.
-        //-------------------------------------------context = checkAndSetVersionParam(context);
+        context = checkAndSetVersionParam(context);
         api.setContextTemplate(context);
 
-        //----------------------------------- context = updateContextWithVersion(version, contextVal, context);
+        context = updateContextWithVersion(version, contextVal, context);
 
         api.setContext(context);
         api.setVisibility(APIConstants.API_GLOBAL_VISIBILITY);
@@ -2862,6 +2862,31 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         results=saveAPI(api, true);
         return results.get("id");
 
+    }
+
+    private static String checkAndSetVersionParam(String context) {
+        // This is to support the new Pluggable version strategy
+        // if the context does not contain any {version} segment, we use the default version strategy.
+        if(!context.contains(APIConstants.SYNAPSE_REST_CONTEXT_VERSION_VARIABLE)){
+            if(!context.endsWith("/")){
+                context = context + "/";
+            }
+            context = context + APIConstants.SYNAPSE_REST_CONTEXT_VERSION_VARIABLE;
+        }
+        return context;
+    }
+
+    private static String updateContextWithVersion(String version, String contextVal, String context) {
+        // This condition should not be true for any occasion but we keep it so that there are no loopholes in
+        // the flow.
+        if (version == null) {
+            // context template patterns - /{version}/foo or /foo/{version}
+            // if the version is null, then we remove the /{version} part from the context
+            context = contextVal.replace("/" + APIConstants.SYNAPSE_REST_CONTEXT_VERSION_VARIABLE, "");
+        }else{
+            context = context.replace(APIConstants.SYNAPSE_REST_CONTEXT_VERSION_VARIABLE, version);
+        }
+        return context;
     }
 
     public String manageAPI(JSONObject apiObj)
