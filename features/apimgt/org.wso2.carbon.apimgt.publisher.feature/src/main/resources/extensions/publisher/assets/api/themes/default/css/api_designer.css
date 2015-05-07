@@ -239,3 +239,6 @@ margin: 20px 0px 10px 10px;
 .resource_summary{
     width: 400px;
 }
+.requiredAstrix{
+    color:red;
+}

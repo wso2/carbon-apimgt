@@ -33,27 +33,30 @@ require('/modules/store.js').exec(function (ctx) {
     var API_SUBSCRIPTION_URL = '/{context}/apis/application/{appName}/subscriptions';
 
     var uriMatcher = new URIMatcher(req.getRequestURI());
-    uriMatcher.match(API_SUBSCRIPTION_URL);
+    // uriMatcher.match(API_SUBSCRIPTION_URL);
     switch (httpMethod) {
         case 'GET':
             log.info('GET :: ' + httpMethod);
-            var elements = uriMatcher.elements();
-            options.appName = elements.appName;
-            var subscribedAPIsResult = apistore.getAllSubscriptions(user.username,options.appName,0,100);
-            var subscribedAPIs = [];
-            subscribedAPIs = JSON.parse(subscribedAPIsResult);
-            //log.info('Application.jag -- JSON.parse(subscribedAPIsResult) :: ' + subscribedAPIsResult);
-            //print(subscribedAPIs);
+            // var elements = uriMatcher.elements();
+            // options.appName = elements.appName;
+            // var subscribedAPIsResult = apistore.getAllSubscriptions(user.username,options.appName,0,100);
+            // var subscribedAPIs = [];
+            // subscribedAPIs = JSON.parse(subscribedAPIsResult);
+            // print(subscribedAPIs);
             break;
 
         case 'POST':
             log.info('POST :: ' + httpMethod);
             if (uriMatcher.match(API_SUBSCRIPTION_URL)) {
-                var elements = uriMatcher.elements();
-                options.appName = elements.appName;
-                //(userId, applicationName, tokenType, tokenScope) 
-                var check = apistore.createApplicationKeys(user.username, options.appName, 'Production', 'default');
-                log.info('Application.jag-- apistore.createApplicationKeys:: ' + check);
+                log.info('Application.jag-- options :: ' + JSON.stringify(options));
+                // (userId, applicationName, tokenType, tokenScopes,validityPeriod,callbackUrl,accessAllowDomainsArr)
+                var keyResult = apistore.getApplicationKey(user.username, options.appName, options.keyType.toUpperCase(), 'default', options.validityTime, options.callbackUrl, options.accessAllowDomains);
+                var keys = [];
+                keys = JSON.parse(keyResult);
+                //log.info('Application.jag-- apistore.getApplicationKey:: ' + JSON.stringify(keys));
+                if (keys.consumerKey != null ) {
+                    print(keys);
+                }
 
             }
             break;

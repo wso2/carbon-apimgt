@@ -23,23 +23,23 @@ asset.manager = function(ctx) {
 
 
     var generate_swagger_object=function(swagger){
-    swaggerObj = {
-        api_doc : parse(swagger),
-        resources : []
-     };
+        swaggerObj = {
+            api_doc : parse(swagger),
+            resources : []
+        };
 
-    for(i = 0 ; i < swaggerObj.api_doc.apis.length ; i++ ){
-        swaggerObj.resources.push(swaggerObj.api_doc.apis[i].file);
-        delete swaggerObj.api_doc.apis[i].file
-    }
-    return stringify(swaggerObj);
+        for(i = 0 ; i < swaggerObj.api_doc.apis.length ; i++ ){
+            swaggerObj.resources.push(swaggerObj.api_doc.apis[i].file);
+            delete swaggerObj.api_doc.apis[i].file
+        }
+        return stringify(swaggerObj);
     }
     return {
         importAssetFromHttpRequest: function(options) {
             var asset = {};
             var attributes = {};
             if (options.id) {
-            asset.id = options.id;
+                asset.id = options.id;
             }
             asset.attributes=options;
             //asset.name = this._super.getName.call(asset);
@@ -51,61 +51,61 @@ asset.manager = function(ctx) {
             var rxtModule = require('rxt');
             var assetMod = rxtModule.asset;
             if(options.attributes.action=="design"){
-            api.apiName = options.attributes.overview_name;
-            api.name = options.attributes.overview_name;
-            api.version = options.attributes.overview_version;
-            if (options.attributes.provider == null) {
-                api.provider = ctx.username;
-            } else {
-                api.provider = options.attributes.overview_provider;
-            }
-            api.context = options.attributes.overview_context;
-
-           //  api.imageUrl = request.getFile("apiThumb");
-
-            //validate uploaded image
-           /* if(api.imageUrl != null &&!jagg.isValiedImage(apiData.imageUrl)){
-                obj = {
-                    error:true,
-                    message:"Please upload a valid image file for the API icon."
-                };
-                print(obj);
-                return;
-            }*/
-            //If API not exist create
-            var apiProxy = apiPublisher.instance(ctx.username);
-            result=apiProxy.checkIfAPIExists(api.provider,api.name,api.version);
-
-            if(!result){
-                result = apiProxy.designAPI(api);
-                if (result.error==true) {
-                    obj = {
-                        error:true,
-                        message:result.message
-                    };
-                    print(obj);
-                    return;
+                api.apiName = options.attributes.overview_name;
+                api.name = options.attributes.overview_name;
+                api.version = options.attributes.overview_version;
+                if (options.attributes.provider == null) {
+                    api.provider = ctx.username;
+                } else {
+                    api.provider = options.attributes.overview_provider;
                 }
-                else{
-                options.id=result;
-                options.name=api.name;
-                options.attributes.overview_provider=api.provider;
-                options.attributes.overview_status='CREATED';
+                api.context = options.attributes.overview_context;
+
+                //  api.imageUrl = request.getFile("apiThumb");
+
+                //validate uploaded image
+                /* if(api.imageUrl != null &&!jagg.isValiedImage(apiData.imageUrl)){
+                 obj = {
+                 error:true,
+                 message:"Please upload a valid image file for the API icon."
+                 };
+                 print(obj);
+                 return;
+                 }*/
+                //If API not exist create
+                var apiProxy = apiPublisher.instance(ctx.username);
+                result=apiProxy.checkIfAPIExists(api.provider,api.name,api.version);
+
+                if(!result){
+                    result = apiProxy.designAPI(api);
+                    if (result.error==true) {
+                        obj = {
+                            error:true,
+                            message:result.message
+                        };
+                        print(obj);
+                        return;
+                    }
+                    else{
+                        options.id=result;
+                        options.name=api.name;
+                        options.attributes.overview_provider=api.provider;
+                        options.attributes.overview_status='CREATED';
+                    }
                 }
-            }
-            api.description = options.attributes.overview_description;
-            api.tags = options.attributes.overview_tags;
-            api.visibility = options.attributes.visibility;
-            api.visibleRoles = options.attributes.roles;
-            api.swagger = generate_swagger_object(options.attributes.swagger);
-            result = apiProxy.updateDesignAPI(api);
+                api.description = options.attributes.overview_description;
+                api.tags = options.attributes.overview_tags;
+                api.visibility = options.attributes.visibility;
+                api.visibleRoles = options.attributes.roles;
+                api.swagger = generate_swagger_object(options.attributes.swagger);
+                result = apiProxy.updateDesignAPI(api);
             }
 
 
         },
         remove : function(id) {
             var asset = this.get.call(this, id);
-           // log.debug("Removing API of Id " +id+ "Name " + asset.attributes.overview_name);
+            // log.debug("Removing API of Id " +id+ "Name " + asset.attributes.overview_name);
             var apiProxy = apiPublisher.instance(ctx.username);
             return apiProxy.deleteAPI(asset.attributes.overview_provider, asset.attributes.overview_name, asset.version);
         },
@@ -127,7 +127,7 @@ asset.manager = function(ctx) {
                 };
                 api.context = options.attributes.overview_context;
 
-              //api.implementation_type = options.attributes.implementation_methods;
+                //api.implementation_type = options.attributes.implementation_methods;
                 api.wsdl = options.attributes.wsdl;
                 api.wadl = options.attributes.wadl;
                 api.endpointSecured = options.attributes.endpointType;
@@ -153,7 +153,77 @@ asset.manager = function(ctx) {
                         data :apiId
                     }
                 }
-               return obj;
+                return obj;
+            } else if(options.attributes.action == "manage") {
+                var apiData = {};
+                log.info(options);
+                apiData.apiName = options.name;
+                apiData.version = options.attributes.version;
+                if (request.getParameter("provider") == null) {
+                    apiData.provider = ctx.username;
+                } else {
+                    apiData.provider = options.attributes.provider;
+                }
+                var apiId = {
+                    apiName : apiData.apiName,
+                    version : apiData.version,
+                    provider: apiData.provider
+                };
+
+                apiData.context = options.attributes.overview_context;
+                apiData.defaultVersion = options.attributes.default_version_checked;
+                apiData.swagger = generate_swagger_object(options.attributes.swagger);
+                apiData.tier = options.attributes.tiersCollection;
+                if(options.attributes.transport_http == null && options.attributes.transport_https == null){
+                    apiData.transports = null;
+                }
+                else if(options.attributes.transport_http != null && options.attributes.transport_https != null) {
+                    apiData.transports=options.attributes.transport_http+","+options.attributes.transport_https;
+
+                }else if(options.attributes.transport_http != null){
+                    apiData.transports=options.attributes.transport_http;
+                }else{
+                    apiData.transports=options.attributes.transport_https;
+                }
+                if(options.attributes.overview_inSequence == 'null') {
+                    options.attributes.overview_inSequence = null;
+                }
+                if(options.attributes.overview_outSequence == 'null') {
+                    options.attributes.overview_outSequence = null;
+                }if(options.attributes.overview_faultSequence == 'null') {
+                    options.attributes.overview_faultSequence = null;
+                }
+                apiData.inSequence = options.attributes.overview_inSequence;
+                apiData.outSequence= options.attributes.overview_outSequence;
+                apiData.responseCache = options.attributes.overview_responseCaching;
+                apiData.subscriptionAvailability = options.attributes.overview_subscriptionAvailability;
+                apiData.subscriptionTenants = options.attributes.overview_subscriptionTenants;
+                apiData.bizOwner = options.attributes.overview_businessOwner;
+                apiData.bizOwnerMail = options.attributes.overview_businessOwnerEmail;
+                apiData.techOwner = options.attributes.overview_technicalOwner;
+                apiData.techOwnerMail = options.attributes.overview_technicalOwnerEmail;
+                apiData.faultSequence = options.attributes.overview_faultSequence;
+                apiData.cacheTimeout= options.attributes.overview_cacheTimeout;
+                apiData.destinationStats= options.attributes.overview_destinationStatsEnabled;
+                apiData.environments = options.attributes.overview_environments;
+                var apiProxy = apiPublisher.instance(ctx.username);
+                log.info("+++++++++++++++++++++++++++++++++++++++++++++++");
+                result = apiProxy.manageAPI(apiData);
+                log.info("=============================================");
+                log.info(apiData);
+                if (result == null && result.error == false) {
+                    obj = {
+                        error: true,
+                        message: result.message,
+                        data: apiId
+                    };
+                } else {
+                    obj = {
+                        error: false,
+                        data: apiId
+                    }
+                }
+                return obj;
             }
         }
     };

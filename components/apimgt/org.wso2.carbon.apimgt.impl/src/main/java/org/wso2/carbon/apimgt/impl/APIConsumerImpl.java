@@ -2182,10 +2182,10 @@ Set<API> apiSet) throws APIManagementException {
             throws APIManagementException {
 
         String[] accessAllowDomainsArray = new String[accessAllowDomainsArr.size()];
-        for (Object domain : accessAllowDomainsArr) {
-            int index = (Integer) domain;
-            accessAllowDomainsArray[index] = (String) accessAllowDomainsArr.get(index);
+        for (int i=0;i<accessAllowDomainsArr.size();i++) {
+            accessAllowDomainsArray[i] = (String) accessAllowDomainsArr.get(i);
         }
+
         try {
             String tenantDomain = MultitenantUtils.getTenantDomain(username);
             int tenantId =

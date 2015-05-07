@@ -49,7 +49,6 @@ require('/modules/publisher.js').exec(function(ctx) {
 	var apiPublisher =  require('apipublisher').apipublisher;
 	var apiProxy = apiPublisher.instance(ctx.username);
 	var api = apiProxy.getAPI(asset.attributes.overview_provider, asset.attributes.overview_name, asset.version).api;
-	log.info(api);
 	//Formatting string types
 	if(api.isDefaultVersion == "true") {
 		api.isDefaultVersion = true;
@@ -84,7 +83,6 @@ require('/modules/publisher.js').exec(function(ctx) {
 	var environmentsList = apiProxy.getEnvironments().environments;
 	var availableEnvironments = api.environments;
 	var filteredEnvironmentList = new Array();
-	log.info(environmentsList);
 	var environment;
 	if(availableEnvironments=="none") {
 		for (i = 0; i < environmentsList.length; i++) {
@@ -171,7 +169,6 @@ require('/modules/publisher.js').exec(function(ctx) {
 	output.api.filteredTiers = filteredTiers;
 	//TODO remove this
 	output.api.isPermitted = true;
-	log.info(output);
 	caramel.render(output);
 }, request, response, session);
 %>

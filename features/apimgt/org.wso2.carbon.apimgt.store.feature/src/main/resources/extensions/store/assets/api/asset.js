@@ -177,6 +177,9 @@ asset.renderer = function(ctx) {
             var k,m,allowedTiers,denied = false, tiersAvailable = false;
 
                     for(var m=0;m<tiers.length;m++){
+                        if(deniedTiers == null || deniedTiers.length == 0){
+                            continue;
+                        }
                        for (var k=0;k<deniedTiers.length;k++) {
                        if (tiers[m].tierName == deniedTiers[k].tierName) {
                             denied = true;

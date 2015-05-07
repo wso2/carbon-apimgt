@@ -26,11 +26,11 @@ require('/modules/store.js').exec(function (ctx) {
     var httpMethod = request.getMethod();
     var APPLICATIONS_INFO_PATTERN ='/{context}/apis/applications/{appName}';
     var uriMatcher = new URIMatcher(request.getRequestURI());
-    var options;
+    // var options;
     switch (httpMethod) {
         case 'GET':
-            options = uriMatcher.match(APPLICATIONS_INFO_PATTERN);
-            if(options.appName){
+            // options = uriMatcher.match(APPLICATIONS_INFO_PATTERN);
+            // if(options.appName){
             //     var subscribedAPIsResult = apistore.getAllSubscriptions(user.username,options.appName,0,100);
             //     var subscribedAPIs = [];
             //      subscribedAPIs = JSON.parse(subscribedAPIsResult);
@@ -51,10 +51,10 @@ require('/modules/store.js').exec(function (ctx) {
             //             }
             //         };
             //     print(details);
-             } else {
-            log.error('Name of application has not been provided');
-            response.sendError(404,'Please provide the name of the application to retrieve details');
-        }
+            // } else {
+            // log.error('Name of application has not been provided');
+            // response.sendError(404,'Please provide the name of the application to retrieve details');
+        // }
             break;
 
         case 'POST':
