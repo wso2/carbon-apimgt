@@ -1865,6 +1865,94 @@ public class APIStoreHostObject extends ScriptableObject {
         }
         return result;
     }
+    
+    /**
+     * Returns all the Gateway Endpoint URLs of a given API
+     * 
+     * @param cx
+     * @param thisObj
+     * @param args
+     * @param funObj
+     * @return List of Gateway Endpoint URLs of the API
+     * @throws ScriptException
+     * @throws APIManagementException
+     */
+    public static NativeArray jsFunction_getAPIEndpointURLs(Context cx, Scriptable thisObj, Object[] args,
+                                                            Function funObj) throws ScriptException,
+                                                                            APIManagementException {
+        String providerName;
+        String apiName;
+        String version;
+        String userName;
+
+        NativeArray myn = new NativeArray(0);
+
+        if (args != null && args.length > 3) {
+            providerName = APIUtil.replaceEmailDomain((String) args[0]);
+            apiName = (String) args[1];
+            version = (String) args[2];
+            userName = (String) args[3];
+
+            APIIdentifier apiIdentifier = new APIIdentifier(providerName, apiName, version);
+            APIConsumer apiConsumer = getAPIConsumer(thisObj);
+            API api = apiConsumer.getAPI(apiIdentifier);
+
+            Map<String, String> domains = new HashMap<String, String>();
+
+            domains = apiConsumer.getTenantDomainMappings(MultitenantUtils.getTenantDomain(userName));
+            if (domains != null && domains.size() > 0) {
+                int index = 0;
+                Iterator it = domains.entrySet().iterator();
+                while (it.hasNext()) {
+                    Map.Entry pair = (Map.Entry) it.next();
+                    String domainValue = (String) pair.getValue();
+                    if (domainValue.endsWith("/")) {
+                        domainValue = domainValue.substring(0, domainValue.length() - 1);
+                    }
+                    String contextWithoutTenant =
+                                                  api.getContext()
+                                                     .replace("/t/" + MultitenantUtils.getTenantDomain(userName), "");
+                    myn.put(index, myn, domainValue + contextWithoutTenant);
+                    if (api.isDefaultVersion()) {
+                        contextWithoutTenant = contextWithoutTenant.replace(version + "/", "");
+                        myn.put(++index, myn, domainValue + contextWithoutTenant);
+                    }
+                    index++;
+                }
+            } else {
+                APIManagerConfiguration config = HostObjectComponent.getAPIManagerConfiguration();
+                Map<String, Environment> environments = config.getApiGatewayEnvironments();
+                Set<String> environmentsPublishedByAPI = new HashSet<String>(api.getEnvironments());
+                environmentsPublishedByAPI.remove("none");
+                int envCount = 0;
+                for (String environmentName : environmentsPublishedByAPI) {
+                    NativeObject appObj = new NativeObject();
+                    appObj.put("environmentName", appObj, environmentName);
+                    Environment environment = environments.get(environmentName);
+                    String envURLString = filterUrls(environment.getApiGatewayEndpoint(), api.getTransports());
+                    String[] envURLs = envURLString.split(",");
+
+                    NativeArray envs = new NativeArray(0);
+                    int index = 0;
+
+                    for (String envURL : envURLs) {
+                        envs.put(index, envs, envURL + api.getContext());
+                        if (api.isDefaultVersion()) {
+                            String apiContext = api.getContext();
+                            apiContext = apiContext.replace(version + "/", "");
+                            envs.put(++index, envs, envURL + apiContext);
+                        }
+                        index++;
+                    }
+                    appObj.put("environmentURLs", appObj, envs);
+                    myn.put(envCount, myn, appObj);
+                    envCount++;
+                }
+            }
+
+        }
+        return myn;
+    }
 
     public static NativeArray jsFunction_getAPI(Context cx, Scriptable thisObj,
                                                 Object[] args, Function funObj) throws ScriptException,
