@@ -463,26 +463,6 @@ var apipublisher = {};
         }
     };
 
-    APIProviderProxy.prototype.getTiers = function () {
-        var tier,tiers,list=[],log = new Log();
-        try {
-            tiers = this.impl.getTiersJSON();
-            if (log.isDebugEnabled()) {
-                log.debug("getTiers " +  " : " + tiers);
-            }
-            return {
-                error:false,
-                tiers:tiers
-            };
-        } catch (e) {
-            log.error(e.message);
-            return {
-                error:e,
-                tiers:null
-            };
-        }
-    };
-
     APIProviderProxy.prototype.validateRoles = function(roles,username) {
         var validRole, log = new Log();
         try {

@@ -966,29 +966,6 @@ public abstract class AbstractAPIManager implements APIManager {
         return tiers;
     }
 
-	/**
-	 * Returns json array of available tiers
-	 *
-	 * @return Set<Tier>
-	 */
-	public JSONArray getTiersJSON() throws APIManagementException {
-
-		Set<Tier> tiers = new TreeSet<Tier>(new TierNameComparator());
-
-		Map<String, Tier> tierMap;
-		if (tenantId == 0) {
-			tierMap = APIUtil.getTiers();
-		} else {
-			PrivilegedCarbonContext.startTenantFlow();
-			PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantId(tenantId, true);
-			tierMap = APIUtil.getTiers(tenantId);
-			PrivilegedCarbonContext.endTenantFlow();
-		}
-		tiers.addAll(tierMap.values());
-
-		return getTiers(tiers);
-	}
-
     private JSONArray getTiers(Set<Tier> tiers) {
         JSONArray tiersArr = new JSONArray();
         int i = 0;

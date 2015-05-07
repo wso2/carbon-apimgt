@@ -271,14 +271,6 @@ public interface APIManager {
     */
     public Set<Tier> getTiers() throws APIManagementException;
 
-	//TODO having two api methods for same function with different returns : Rearrange
-	/**
-	 * Returns a list of pre-defined # {@link org.wso2.carbon.apimgt.api.model.Tier} in the system.
-	 *
-	 * @return Set<Tier>
-	 * @throws org.wso2.carbon.apimgt.api.APIManagementException if failed to get the predefined tiers
-	 */
-	public JSONArray getTiersJSON() throws APIManagementException;
     /**
      * Returns a list of pre-defined # {@link org.wso2.carbon.apimgt.api.model.Tier} in the system.
      *
