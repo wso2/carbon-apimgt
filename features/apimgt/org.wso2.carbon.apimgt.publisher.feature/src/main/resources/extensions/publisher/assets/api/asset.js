@@ -173,7 +173,7 @@ asset.manager = function(ctx) {
                 apiData.context = options.attributes.overview_context;
                 apiData.defaultVersion = options.attributes.default_version_checked;
                 apiData.swagger = generate_swagger_object(options.attributes.swagger);
-                apiData.tier = options.attributes.overview_tier;
+                apiData.tier = options.attributes.tiersCollection;
                 if(options.attributes.transport_http == null && options.attributes.transport_https == null){
                     apiData.transports = null;
                 }
