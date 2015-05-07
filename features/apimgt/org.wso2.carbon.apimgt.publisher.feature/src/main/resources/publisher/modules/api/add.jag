@@ -69,7 +69,7 @@ var updateAPIImplementation = function (api) {
         log.error(e);
         return {
             error:true,
-            message:e.message.split(":")[1]
+            message:e.message.replace(e.message.split(":")[0] + ":", "")
         };
     }
 };

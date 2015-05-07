@@ -1741,9 +1741,6 @@ public class APIProviderHostObject extends ScriptableObject {
             } else {
                 handleException("Couldn't find an API with the name-" + name + "version-" + version);
             }
-        } catch (APIManagementException e) {
-            handleException("Error while updating API status", e);
-            return false;
         } catch (FaultGatewaysException e) {
             handleFaultGateWayException(e);
             return false;

@@ -613,7 +613,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 }
 
             } catch (APIManagementException e) {
-            	handleException("Error while updating the API :" +api.getId().getApiName(),e);
+            	handleException("Error while updating the API :" +api.getId().getApiName() + ". " + e.getMessage(), e);
             } 
         } else {
             // We don't allow API status updates via this method.
@@ -832,7 +832,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 }
 
             } catch (APIManagementException e) {
-            	handleException("Error occured in the status change : " + api.getId().getApiName() , e);
+            	handleException("Error occured in the status change : " + api.getId().getApiName() + ". " 
+            	                                                                                + e.getMessage(), e);
             }
             finally {
                 PrivilegedCarbonContext.endTenantFlow();
