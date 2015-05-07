@@ -4126,7 +4126,12 @@ public class APIStoreHostObject extends ScriptableObject {
                                                         validityTime,
                                                         accessAllowDomainsArray, requestedScopeArray, jsonInput);
             } catch (APIManagementException e) {
-                handleException("Error while renewing AccessToken");
+                String errorMessage = "Error while renewing Access Token for Consumer Key " + clientId;
+                if (args[0] != null) {
+                    errorMessage = "Error while renewing Access Token for Consumer Key " + clientId 
+                            + " and user " + args[0];
+                }
+                handleException(errorMessage);
             }
 
             row.put("accessToken", row, response.getAccessToken());
