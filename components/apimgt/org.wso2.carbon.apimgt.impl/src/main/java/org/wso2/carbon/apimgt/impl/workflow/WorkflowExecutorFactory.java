@@ -30,8 +30,9 @@ import org.wso2.carbon.registry.core.exceptions.RegistryException;
 
 import javax.cache.Cache;
 import javax.cache.Caching;
+import java.io.Serializable;
 
-public class WorkflowExecutorFactory {
+public class WorkflowExecutorFactory implements Serializable {
 
     private static final Log log = LogFactory.getLog(WorkflowExecutorFactory.class);
 
