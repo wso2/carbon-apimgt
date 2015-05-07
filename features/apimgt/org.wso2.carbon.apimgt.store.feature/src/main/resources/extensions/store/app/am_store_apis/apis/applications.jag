@@ -24,9 +24,9 @@ require('/modules/store.js').exec(function (ctx) {
     var apistore = require('apistore').apistore.instance(user.username);
     var options = request.getAllParameters('UTF-8');
     var httpMethod = request.getMethod();
-    var APPLICATIONS_INFO_PATTERN ='/{context}/apis/applications/{appName}';
-    var uriMatcher = new URIMatcher(request.getRequestURI());
-    var options;
+    // var APPLICATIONS_INFO_PATTERN ='/{context}/apis/applications/{appName}';
+    // var uriMatcher = new URIMatcher(request.getRequestURI());
+    // var options;
     switch (httpMethod) {
         case 'GET':
             // options = uriMatcher.match(APPLICATIONS_INFO_PATTERN);
@@ -51,17 +51,20 @@ require('/modules/store.js').exec(function (ctx) {
             //             }
             //         };
             //     print(details);
-            // }
-            // else{
-            //     log.error('Name of application has not been provided');
-            //     response.sendError(404,'Please provide the name of the application to retrieve details');
+            // } else {
+            // log.error('Name of application has not been provided');
+            // response.sendError(404,'Please provide the name of the application to retrieve details');
             // }
             break;
+
         case 'POST':
+            log.info('POST :: ' + httpMethod);
             apistore.addApplication(options.overview_name, user.username, options.overview_tier,
                     options.overview_callbackurl, options.overview_description);
             break;
+
         default:
+            log.info('default :: ' + httpMethod);
             break;
     }
 
