@@ -907,7 +907,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             observerList.notifyObservers(currentStatus, status, api);
             APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
                     getAPIManagerConfigurationService().getAPIManagerConfiguration();
-            String gatewSayType = config.getFirstProperty(APIConstants.API_GATEWAY_TYPE);
+            String gatewayType = config.getFirstProperty(APIConstants.API_GATEWAY_TYPE);
 
             api.setAsPublishedDefaultVersion(api.getId().getVersion().equals(apiMgtDAO.getPublishedDefaultVersion(api.getId())));
 
