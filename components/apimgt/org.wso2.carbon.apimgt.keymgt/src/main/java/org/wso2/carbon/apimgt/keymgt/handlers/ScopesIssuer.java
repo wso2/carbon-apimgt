@@ -41,6 +41,8 @@ public class ScopesIssuer {
     private static final String DEVICE_SCOPE_PREFIX = "device_";
 
     private static final String DEFAULT_SCOPE_NAME = "default";
+    
+    private static final String OPEN_ID_SCOPE_NAME = "openid";
 
     private List<String> scopeSkipList = new ArrayList<String>();
 
@@ -154,8 +156,10 @@ public class ScopesIssuer {
                 //The requested scope is defined for the context of the App but no roles have been associated with the scope
                 //OR
                 //The scope string starts with 'device_'.
-                else if(appScopes.containsKey(scope) || scope.startsWith(DEVICE_SCOPE_PREFIX) || scopeSkipList
-                        .contains(scope)){
+                else if (appScopes.containsKey(scope) || scope.startsWith(DEVICE_SCOPE_PREFIX) ||
+                         scopeSkipList.contains(scope)) {
+                    authorizedScopes.add(scope);
+                } else if (appScopes.containsKey(scope) || scope.equalsIgnoreCase(OPEN_ID_SCOPE_NAME)) {
                     authorizedScopes.add(scope);
                 }
             }
@@ -204,7 +208,9 @@ public class ScopesIssuer {
 
         //Iterate the requested scopes list.
         for (String scope : requestedScopes) {
-            if(scope.startsWith(DEVICE_SCOPE_PREFIX)){
+            if (scope.startsWith(DEVICE_SCOPE_PREFIX)) {
+                authorizedScopes.add(scope);
+            } else if (scope.equalsIgnoreCase(OPEN_ID_SCOPE_NAME)) {
                 authorizedScopes.add(scope);
             }
         }

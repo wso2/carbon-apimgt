@@ -54,4 +54,30 @@ var getTiers = function () {
         };
     }
 };
+
+var getAPIEndpointURLs = function (api, username) {
+    var log = new Log(),
+            store = jagg.module("manager").getAPIStoreObj();
+	
+	try {
+		var encode = require('encode');
+    		encode = new encode.Encode();
+        	var endpointURLs = store.getAPIEndpointURLs(api.provider, api.name, api.version, username);
+		        
+        if (log.isDebugEnabled()) {
+            log.debug("getAPIEndpointURLs : " + stringify(endpointURLs));
+        }
+
+        return {
+            error:false,
+            endpointURLs:endpointURLs
+        };
+    } catch (e) {
+        return {
+            error:true,
+            api:null,
+            message:e.message
+        };
+    }
+};
 %>

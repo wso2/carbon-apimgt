@@ -43,6 +43,9 @@ jagg.module("api", {
     },
     updatePermissionCache:function () {
      return jagg.require(jagg.getModulesDir() + "api/permissions.jag").updatePermissionCache.apply(this, arguments);
+    },
+    getAPIEndpointURLs:function () {
+     return jagg.require(jagg.getModulesDir() + "api/api.jag").getAPIEndpointURLs.apply(this, arguments);
     }
 });
 %>

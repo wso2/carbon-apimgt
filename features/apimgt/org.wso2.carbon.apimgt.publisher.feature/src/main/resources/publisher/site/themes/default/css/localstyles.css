@@ -1565,3 +1565,8 @@ table.dataTable tbody td.no-padding {
 .slider td{
     border-left: 1px solid #ddd !important;
 }
+
+.tags-error, .add-tags-error{
+    margin-left:3px;
+    color:#d10000;
+}

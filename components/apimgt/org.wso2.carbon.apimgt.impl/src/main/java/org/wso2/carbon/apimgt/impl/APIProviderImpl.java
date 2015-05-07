@@ -626,7 +626,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
     }
 
-
+    public void manageAPI(API api) throws APIManagementException, FaultGatewaysException {
+        updateAPI(api);
+    }
 
     private void updateApiArtifact(API api, boolean updateMetadata,boolean updatePermissions) throws APIManagementException {
 
@@ -661,7 +663,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 updateApiArtifact.setAttribute(APIConstants.API_OVERVIEW_IS_DEFAULT_VERSION, "false");
             }
 
-            if (updateMetadata && api.getEndpointConfig() != null) {
+            if (updateMetadata && api.getEndpointConfig() != null && !api.getEndpointConfig().isEmpty()) {
                 // If WSDL URL get change only we update registry WSDL resource. If its registry resource patch we
                 // will skip registry update. Only if this API created with WSDL end point type we need to update wsdls for each update.
                 //check for wsdl endpoint

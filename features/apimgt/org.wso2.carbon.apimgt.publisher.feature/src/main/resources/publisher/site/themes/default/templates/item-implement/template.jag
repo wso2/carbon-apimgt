@@ -339,7 +339,16 @@ mc.setPayloadJSON('{ "data" : "sample JSON"}');*/
                 location.href = "<%= jagg.url("/manage?"+apiUrlId)%>";
             });
             $("#implement_form").submit();
-        });        
+        });  
+
+        try{
+            var endpoint_config = jQuery.parseJSON($(".prototype_config").val());
+            if(endpoint_config.production_endpoints){
+                $("#prototype_endpoint").val(endpoint_config.production_endpoints.url);
+            }
+        }catch(e){
+            console.log("Invalid endpoint config");
+        }
     })
 </script>
 
