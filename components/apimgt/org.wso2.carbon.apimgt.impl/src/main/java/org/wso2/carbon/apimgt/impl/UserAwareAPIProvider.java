@@ -151,9 +151,9 @@ public class UserAwareAPIProvider extends APIProviderImpl {
 		return super.isContextExist(context);
 	}
 
-	public JSONArray getTiersJSON() throws APIManagementException {
+	public Set<Tier> getTiers() throws APIManagementException {
 		checkCreatePermission();
-		return super.getTiersJSON();
+		return super.getTiers();
 	}
 
 	public void checkCreatePermission() throws APIManagementException {
