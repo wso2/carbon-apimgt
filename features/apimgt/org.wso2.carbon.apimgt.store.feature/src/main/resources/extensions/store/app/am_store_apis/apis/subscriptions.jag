@@ -24,14 +24,16 @@ require('/modules/store.js').exec(function (ctx) {
     var apistore = require('apistore').apistore.instance(user.username);
     var options = request.getAllParameters('UTF-8');
     var httpMethod = request.getMethod();
+    log.info('Subscription :: ');
 
     switch (httpMethod) {
         case 'GET':
-            log.info('GET :: ' + httpMethod);
+        log.info('GET :: ' + httpMethod);
+
             break;
 
         case 'POST':
-            log.info('POST :: ' + httpMethod);
+log.info('POST :: ' + httpMethod);
             break;
 
         default:

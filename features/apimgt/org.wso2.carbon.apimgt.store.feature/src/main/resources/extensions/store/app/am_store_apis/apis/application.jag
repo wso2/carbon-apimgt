@@ -18,20 +18,19 @@
  *
  */
 require('/modules/store.js').exec(function (ctx) {
+
     var log = new Log();
+
     var res = ctx.response;
     var req = ctx.request;
     var session = ctx.session;
-
     var server = require('store').server;
     var user = server.current(ctx.session);
     var apistore = require('apistore').apistore.instance(user.username);
     var options = request.getAllParameters('UTF-8');
     var httpMethod = request.getMethod();
     res.contentType = 'application/json';
-
     var API_SUBSCRIPTION_URL = '/{context}/apis/application/{appName}/subscriptions';
-
     var uriMatcher = new URIMatcher(req.getRequestURI());
     // uriMatcher.match(API_SUBSCRIPTION_URL);
     switch (httpMethod) {
@@ -48,17 +47,17 @@ require('/modules/store.js').exec(function (ctx) {
         case 'POST':
             log.info('POST :: ' + httpMethod);
             if (uriMatcher.match(API_SUBSCRIPTION_URL)) {
-                // (userId, applicationName, tokenType, tokenScopes,validityPeriod,callbackUrl,accessAllowDomainsArr)
-                var keyResult = apistore.getApplicationKey(user.username, options.appName,
-                        options.keyType.toUpperCase(), 'default', options.validityTime,
-                        options.callbackUrl, options.accessAllowDomains);
+                log.info('Application.jag-- options :: ' + JSON.stringify(options));
+                // (userId, applicationName, tokenType, tokenScopes,validityPeriod,callbackUrl,accessAllowDomainsArr) 
+                var keyResult = apistore.getApplicationKey(user.username, options.appName, options.keyType.toUpperCase(), 'default', options.validityTime, options.callbackUrl, options.accessAllowDomains);
                 var keys = [];
                 keys = JSON.parse(keyResult);
-                if (keys.consumerKey != null) {
+                //log.info('Application.jag-- apistore.getApplicationKey:: ' + JSON.stringify(keys));
+                if (keys.consumerKey != null ) {
                     print(keys);
-                }
+                }   
 
-            }
+            } 
             break;
 
         default:
@@ -66,5 +65,6 @@ require('/modules/store.js').exec(function (ctx) {
             break;
     }
 
+    // caramel.render(output);
 }, request, response, session);
 %>

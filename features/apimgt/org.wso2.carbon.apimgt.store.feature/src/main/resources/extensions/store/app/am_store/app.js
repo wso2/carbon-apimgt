@@ -19,41 +19,9 @@
 app.dependencies = ['store-common'];
 app.server = function(ctx) {
     return {
-        endpoints: {
-            apis: [{
-                url: 'widget',
-                path: 'widget.jag',
-                secured:false
-            }, {
-                url: 'applications',
-                path: 'applications.jag',
-                secured:true
-            }, {
-                url: 'application',
-                path: 'application.jag',
-                secured:true
-            },{
-                url: 'apisubscriptions',
-                path: 'api-subscriptions.jag',
-                secured:false
-            }]
-        },
         configs: {
             landingPage: '/asts/api/list',
             disabledAssets: ['gadget', 'schema', 'site', 'uri', 'ebook', 'wsdl', 'service', 'policy', 'proxy', 'servicex', 'sequence', 'wadl']
         }
     }
-};
-
-app.apiHandlers = function(ctx) {
-    return {
-        onApiLoad: function() {
-            if ((ctx.isAnonContext) && (ctx.endpoint.secured)) {
-                //ctx.res.status='401';//sendRedirect(ctx.appContext+'/login');
-                print('{ error:"Authentication error" }'); //TODO: Fix this to return a proper status code
-                return false;
-            }
-            return true;
-        }
-    };
 };
