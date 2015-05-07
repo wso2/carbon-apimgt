@@ -576,6 +576,9 @@ public abstract class AbstractAPIManager implements APIManager {
     }
 
     public boolean isContextExist(String context) throws APIManagementException {
+        // Since we don't have tenant in the APIM table, we do the filtering using this hack
+        if(context!=null && context.startsWith("/t/"))
+            context = context.replace("/t/" + MultitenantUtils.getTenantDomainFromUrl(context),""); //removing prefix
     	if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
             context = "/t/" + tenantDomain + context;
         }

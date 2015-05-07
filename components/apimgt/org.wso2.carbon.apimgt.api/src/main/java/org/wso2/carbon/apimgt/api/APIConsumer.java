@@ -364,10 +364,11 @@ public interface APIConsumer extends APIManager {
      * This will return APIM application by giving name and subscriber
      * @param userId APIM subscriber ID.
      * @param ApplicationName APIM application name.
+     * @param groupId Group id.
      * @return it will return Application.
      * @throws APIManagementException
      */
-    public Application getApplicationsByName(String userId , String ApplicationName) throws
+    public Application getApplicationsByName(String userId , String ApplicationName , String groupId) throws
             APIManagementException;
 
 

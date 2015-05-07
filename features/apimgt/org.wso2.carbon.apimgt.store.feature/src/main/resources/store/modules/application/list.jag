@@ -28,9 +28,10 @@ var getApplications = function (username) {
  * This method will accept user name and application name and sends a request to host object and gets the response.
  * @param {string} username - subscriber name
  * @param {string} applicationName - application name
+ * @param {string} group id.
  * return {Application} a Application.
  */
-var getApplicationByName = function (username, applicationName) {
+var getApplicationByName = function (username, applicationName, groupId) {
     var application,
         log = new Log(),
             store = jagg.module("manager").getAPIStoreObj();
@@ -39,7 +40,7 @@ var getApplicationByName = function (username, applicationName) {
         var log = new Log();
         log.info("user name " + username);
         log.info("applicationName" + applicationName);
-        application = store.getApplicationByName(username , applicationName);
+        application = store.getApplicationByName(username , applicationName, groupId);
         if (log.isDebugEnabled()) {
             log.debug("getApplicationsByName : " + stringify(application));
         }
