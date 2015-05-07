@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2005-2014, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *  Copyright (c) 2015, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  *  WSO2 Inc. licenses this file to you under the Apache License,
  *  Version 2.0 (the "License"); you may not use this file except
@@ -37,10 +37,6 @@ app.server = function(ctx) {
                 path: 'api-subscriptions.jag',
                 secured:false
             }]
-        },
-        configs: {
-            landingPage: '/asts/api/list',
-            disabledAssets: ['gadget', 'schema', 'site', 'uri', 'ebook', 'wsdl', 'service', 'policy', 'proxy', 'servicex', 'sequence', 'wadl']
         }
     }
 };
