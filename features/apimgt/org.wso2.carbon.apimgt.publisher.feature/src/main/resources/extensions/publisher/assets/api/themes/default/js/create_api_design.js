@@ -691,6 +691,13 @@ $(function () {
         api_doc.test  = "ac";
         designer.load_api_document(api_doc);
 
+        $("#resource_url_pattern").on('change',function(){
+        var re = new RegExp("^/?([a-zA-Z0-9]|-|_)+");
+        var arr = re.exec($(this).val());
+        if(arr && arr.length)
+        $('#inputResource').val(arr[0]);
+         });
+
         $("#swaggerEditer").on("keyup", function () {
             try {
                 jsyaml.load(designer.swagger_editor.getSession().getValue());
