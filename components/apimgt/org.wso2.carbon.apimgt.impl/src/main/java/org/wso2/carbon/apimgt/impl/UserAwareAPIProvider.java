@@ -16,6 +16,7 @@
 
 package org.wso2.carbon.apimgt.impl;
 
+import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.*;
@@ -23,6 +24,7 @@ import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * User aware APIProvider implementation which ensures that the invoking user has the
@@ -134,7 +136,27 @@ public class UserAwareAPIProvider extends APIProviderImpl {
         super.copyAllDocumentation(apiId, toVersion);
     }
 
-    public void checkCreatePermission() throws APIManagementException {
+	public boolean isAPIAvailable(APIIdentifier api) throws APIManagementException {
+		checkCreatePermission();
+		return super.isAPIAvailable(api);
+	}
+
+	public boolean isApiNameExist(String apiName) throws APIManagementException {
+		checkCreatePermission();
+		return super.isApiNameExist(apiName);
+	}
+
+	public boolean isContextExist(String context) throws APIManagementException {
+		checkCreatePermission();
+		return super.isContextExist(context);
+	}
+
+	public JSONArray getTiersJSON() throws APIManagementException {
+		checkCreatePermission();
+		return super.getTiersJSON();
+	}
+
+	public void checkCreatePermission() throws APIManagementException {
         APIUtil.checkPermission(username, APIConstants.Permissions.API_CREATE);
     }
     
