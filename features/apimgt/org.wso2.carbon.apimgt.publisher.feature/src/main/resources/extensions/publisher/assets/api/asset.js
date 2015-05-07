@@ -268,6 +268,9 @@ asset.server = function (ctx) {
                    },{
                        url: 'sequences',
                        path: 'sequences.jag'
+                   },{
+                       url: 'validation',
+                       path: 'validation.jag'
                    }, {
                        url: 'tiers',
                        path: 'tiers.jag'
