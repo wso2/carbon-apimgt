@@ -2499,11 +2499,4 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         }
     }
 
-
-    @Override
-    public Application getApplicationsByName(String userId, String ApplicationName) throws APIManagementException {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
 }

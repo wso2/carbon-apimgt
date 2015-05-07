@@ -46,7 +46,7 @@ jagg.block("subscription/subscription-list", {
 
     getStaticBlocks:function() {
         return [
-            "subscription/subscription-list-element"
+            //"subscription/subscription-list-element"
         ];
     }
 

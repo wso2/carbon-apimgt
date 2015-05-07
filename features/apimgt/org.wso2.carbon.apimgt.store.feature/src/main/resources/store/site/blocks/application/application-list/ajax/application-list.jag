@@ -62,9 +62,10 @@ include("/jagg/jagg.jag");
 
         username = user.username;
         var applicationName = request.getParameter("applicationName");
+        var groupId = session.get("groupId");
 
         mod = jagg.module("application");
-        result = mod.getApplicationByName(username,applicationName);
+        result = mod.getApplicationByName(username,applicationName,groupId);
 
         if (result.error) {
             obj = {
