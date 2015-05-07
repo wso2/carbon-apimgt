@@ -3244,8 +3244,9 @@ public class APIStoreHostObject extends ScriptableObject {
         if (args != null) {
             String userId = (String) args[0];
             String applicationName = (String) args[1];
+            String groupId = (String) args[2];
             APIConsumer apiConsumer = getAPIConsumer(thisObj);
-            Application application = apiConsumer.getApplicationsByName(userId, applicationName);
+            Application application = apiConsumer.getApplicationsByName(userId, applicationName,groupId);
             if (application != null) {
 
                 row.put("name", row, application.getName());
