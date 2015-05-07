@@ -3033,7 +3033,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         Map<String,String> results=new HashMap<String, String>();
         results= saveAPI(api, false);
         return results.get("failedGateways");
-
     }
 
     public String updateDesignAPI(JSONObject apiObj)

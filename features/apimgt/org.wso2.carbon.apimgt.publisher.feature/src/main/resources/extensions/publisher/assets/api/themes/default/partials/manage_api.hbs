@@ -83,8 +83,7 @@
 					<div class="span12">
 						<form class="form-horizontal" method="POST"
 						      id="manage_form"
-						      enctype="multipart/form-data" action="{{url ""}}/asts/api/apis/apimanage/{{assets
-						.id}}?&action=manage">
+						      enctype="multipart/form-data" action="{{url ""}}/apis/assets/{{api.id}}?type=api">
 							<fieldset>
 								<legend>Configurations</legend>
 								<div class="control-section">
@@ -425,45 +424,49 @@
 </div>
 </div>
 
-<div  id="define_scope_modal" class="modal fade">
-	<div class="modal-header">
-		<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-		<h3>Define Scope</h3>
+	<div  id="define_scope_modal" class="modal fade">
+		<div class="modal-dialog">
+			<div class="modal-content">
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+					<h3>Define Scope</h3>
+				</div>
+				<div class="modal-body">
+					<form id="scope_form" class="form-horizontal">
+						<div class="control-group">
+							<label class="control-label" for="scopeKey">Scope Key</label>
+							<div class="controls">
+								<input type="text" id="scopeKey" placeholder="Eg: api_name_read">
+							</div>
+						</div>
+						<div class="control-group">
+							<label class="control-label" for="scopeName">Scope Name</label>
+							<div class="controls">
+								<input type="text" id="scopeName" placeholder="Eg: Read My Data">
+							</div>
+						</div>
+						<div class="control-group">
+							<label class="control-label" for="scopeRoles">Roles</label>
+							<div class="controls">
+								<input type="text" id="scopeRoles" placeholder="Eg: role1,role2,role3">
+							</div>
+						</div>
+						<div class="control-group">
+							<label class="control-label" for="inputEmail">Description</label>
+							<div class="controls">
+								<textarea id="scopeDescription" placeholder="Eg: This scope will group all the administration APIs"></textarea>
+							</div>
+						</div>
+					</form>
+				</div>
+				<div class="modal-footer">
+					<div id="res" class="hide" style="color:red;float:left"></div>
+					<a class="btn" data-dismiss="modal">Close</a>
+					<a class="btn btn-primary" id="scope_submit">Add Scope</a>
+				</div>
+			</div>
+		</div>
 	</div>
-	<div class="modal-body">
-		<form id="scope_form" class="form-horizontal">
-			<div class="control-group">
-				<label class="control-label" for="scopeKey">Scope Key</label>
-				<div class="controls">
-					<input type="text" id="scopeKey" placeholder="Eg: api_name_read">
-				</div>
-			</div>
-			<div class="control-group">
-				<label class="control-label" for="scopeName">Scope Name</label>
-				<div class="controls">
-					<input type="text" id="scopeName" placeholder="Eg: Read My Data">
-				</div>
-			</div>
-			<div class="control-group">
-				<label class="control-label" for="scopeRoles">Roles</label>
-				<div class="controls">
-					<input type="text" id="scopeRoles" placeholder="Eg: role1,role2,role3">
-				</div>
-			</div>
-			<div class="control-group">
-				<label class="control-label" for="inputEmail">Description</label>
-				<div class="controls">
-					<textarea id="scopeDescription" placeholder="Eg: This scope will group all the administration APIs"></textarea>
-				</div>
-			</div>
-		</form>
-	</div>
-	<div class="modal-footer">
-		<div id="res" class="hide" style="color:red;float:left"></div>
-		<a class="btn" data-dismiss="modal">Close</a>
-		<a class="btn btn-primary" id="scope_submit">Add Scope</a>
-	</div>
-</div>
 
 <div  id="environmentsRetry-modal" class="modal hide fade">
 	<div class="modal-header">
