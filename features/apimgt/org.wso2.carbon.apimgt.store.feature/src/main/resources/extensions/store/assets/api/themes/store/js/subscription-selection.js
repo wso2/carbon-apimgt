@@ -406,6 +406,8 @@ $(function () {
         partial: 'sub-domain-token-prod',
         beforeRender: function (data) {
             data['environment'] = Views.translate('Production');
+            data['allowedDomains'] = Views.translate('ALL');
+            data['validityTime'] = Views.translate('3600');
         },
         subscriptions: [EV_APP_SELECT],
         afterRender: function () {
@@ -425,6 +427,8 @@ $(function () {
         container: SAND_DOMAIN_CONTAINER,
         beforeRender: function (data) {
             data['environment'] = Views.translate('Sandbox');
+            data['allowedDomains'] = Views.translate('ALL');
+            data['validityTime'] = Views.translate('3600');
         },
         afterRender: function () {
         }
