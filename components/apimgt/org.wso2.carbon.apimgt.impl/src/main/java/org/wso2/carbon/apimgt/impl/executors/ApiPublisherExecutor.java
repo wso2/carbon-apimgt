@@ -76,7 +76,7 @@ public class ApiPublisherExecutor implements Execution {
     public boolean execute(RequestContext context, String currentState, String targetState) {
         boolean executed = false;
         String user = CarbonContext.getThreadLocalCarbonContext().getUsername();
-        Map<String, List<String>> failedGateways = new ConcurrentHashMap<String, List<String>>();
+        String failedGateways = null;
         try {
             GenericArtifactManager artifactManager = APIUtil
                     .getArtifactManager(context.getSystemRegistry(), APIConstants.API_KEY);
@@ -90,8 +90,8 @@ public class ApiPublisherExecutor implements Execution {
             API api = APIUtil.getAPI(apiArtifact);
             APIStatus newStatus = getApiStatus(targetState);
             APIProvider apiProvider = APIManagerFactory.getInstance().getAPIProvider(user);
-            failedGateways = apiProvider.changeAPIStatus(api, newStatus, user, true);
-            if (failedGateways == null || failedGateways.size() == 0) {
+            failedGateways = apiProvider.updateAPIStatus(api.getId(), targetState, true, false, true);
+            if (failedGateways == null || failedGateways.isEmpty()) {
                 executed = true;
             }
         } catch (RegistryException e) {
