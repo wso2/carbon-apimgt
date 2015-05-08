@@ -295,12 +295,14 @@
 
                 <div class="control-group">
                     <label class="control-label" for="tags"><%=i18n.localize("tags")%>:</label>
-                    <div class="controls">
+                    <div class="controls tagContainer">
                         <input type="text" placeholder="Add tags" class="input-xlarge validInput validRegistryName" id="tags" name="tags" value="<%= _tags %>" data-role="tagsinput"
                         onkeyup="$(this).validate()"/>
                         <a class="icon-question-sign help_popup" help_data="tag_help" data-trigger="hover"></a>
                         <p id="tag_help" class="hide"><%=i18n.localize("tagsHelpMsg")%></p>
 			<p class="help-block"><%=i18n.localize("tagsHelpLabel")%></p>
+                        <label class="tags-error pull-left"></label>
+                        <label class="add-tags-error pull-left"></label>
                     </div>
                 </div>
     </fieldset>

@@ -36,7 +36,7 @@ public class APIConfigContext extends ConfigContext {
     @Override
     public void validate() throws APITemplateException {
         //see if api name ,version, context sets
-        /*if(this.getAPIName(api) && api.getContext() && api.getId().getVersion()){
+        /*if(this.getAPIName(api) && api.getContext() && api.getApplicationId().getVersion()){
             return;
         }
         else{

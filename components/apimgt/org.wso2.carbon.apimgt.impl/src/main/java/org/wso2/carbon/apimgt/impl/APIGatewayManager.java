@@ -72,7 +72,8 @@ public class APIGatewayManager {
 	 * @param tenantDomain
 	 *            - Tenant Domain of the publisher
 	 */
-    public List<String> publishToGateway(API api, APITemplateBuilder builder, String tenantDomain) {
+    public List<String> publishToGateway(API api, APITemplateBuilder builder, String tenantDomain) 
+                                                                                       throws APIManagementException {
         List<String> failedEnvironmentsList = new ArrayList<String>(0);
         if (api.getEnvironments() == null) {
             return failedEnvironmentsList;
@@ -182,8 +183,9 @@ public class APIGatewayManager {
 				}
 			}
             } catch (AxisFault axisFault) {
-                log.error("Error occurred when publish to gateway " + environmentName, axisFault);
                 failedEnvironmentsList.add(environmentName);
+                log.error("Error occurred when publish to gateway " + environmentName, axisFault);
+                throw new APIManagementException(axisFault.getMessage(), axisFault);
             } catch (APIManagementException ex) {
                 log.error("Error occurred deploying sequences on " + environmentName, ex);
             }

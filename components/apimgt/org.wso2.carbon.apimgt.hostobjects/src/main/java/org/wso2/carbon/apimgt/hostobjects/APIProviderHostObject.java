@@ -577,7 +577,7 @@ public class APIProviderHostObject extends ScriptableObject {
         
         if (apiData.get("swagger", apiData) != null) {
             //Read swagger from the registry todo: check why was this done
-            //String swaggerFromRegistry = apiProvider.getSwagger20Definition(api.getId());
+            //String swaggerFromRegistry = apiProvider.getSwagger20Definition(api.getApplicationId());
 
             //Read URI Templates from swagger resource and set to api object
             Set<URITemplate> uriTemplates = definitionFromSwagger20.getURITemplates(api, (String) apiData.get("swagger", apiData));
@@ -1741,9 +1741,6 @@ public class APIProviderHostObject extends ScriptableObject {
             } else {
                 handleException("Couldn't find an API with the name-" + name + "version-" + version);
             }
-        } catch (APIManagementException e) {
-            handleException("Error while updating API status", e);
-            return false;
         } catch (FaultGatewaysException e) {
             handleFaultGateWayException(e);
             return false;
@@ -4082,7 +4079,8 @@ public class APIProviderHostObject extends ScriptableObject {
                 API apiDefinition = apiProvider.getAPI(apiIdentifier);
                 mapping.setApiVersion(apiIdentifier.getVersion());
                 mapping.setContext(apiDefinition.getContext());
-                mapping.setKey(accessToken);
+                //mapping.setKey(accessToken);
+
                 mappings.add(mapping);
             }
             if (mappings.size() > 0) {

@@ -7594,7 +7594,7 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
 //        try {
 //            conn = APIMgtDBUtil.getConnection();
 //            ps = conn.prepareStatement(registrationEntry);
-//            ps.setInt(1, application.getId());
+//            ps.setInt(1, application.getApplicationId());
 //            rs = ps.executeQuery();
 //
 //            while (rs.next()) {
@@ -8270,7 +8270,7 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
                     }
                     ps.close();
                     ps2.setInt(1,api_id);
-                    ps2.setInt(2,scope.getId());
+                    ps2.setInt(2,scope.getApplicationId());
                     ps2.execute();
                     ps2.close();
 
