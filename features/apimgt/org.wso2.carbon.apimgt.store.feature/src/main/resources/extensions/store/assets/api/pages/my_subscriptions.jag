@@ -36,7 +36,7 @@ require('/modules/store.js').exec(function (ctx) {
     var options2 = request.getAllParameters('UTF-8');
     var apistore = require('apistore').apistore.instance(user.username);
 
-// room to add session managment. 
+// room to add session management.
     if (options2.subscription_selection == null) {
         // getAllSubscriptions(userName, appName, startSubIndex, endSubIndex)
         var subscribedAPIsResult = apistore.getAllSubscriptions(user.username, '', 0, 100);
