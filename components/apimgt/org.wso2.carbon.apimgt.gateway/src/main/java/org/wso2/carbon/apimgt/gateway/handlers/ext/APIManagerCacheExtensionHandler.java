@@ -7,6 +7,7 @@ import org.apache.synapse.MessageContext;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.rest.AbstractHandler;
 import org.apache.synapse.rest.RESTConstants;
+import org.wso2.carbon.apimgt.gateway.handlers.common.GatewayKeyInfoCache;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
@@ -67,31 +68,28 @@ public class APIManagerCacheExtensionHandler extends AbstractHandler {
             Iterator iterator = Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER).
                                                                    getCache(APIConstants.GATEWAY_KEY_CACHE_NAME).keys();
             if (revokedToken != null) {
-                while (iterator.hasNext()) {
-                    String cacheKey = iterator.next().toString();
-                    if (cacheKey.contains(revokedToken)) {
-                        Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER).
-                                                         getCache(APIConstants.GATEWAY_KEY_CACHE_NAME).remove(cacheKey);
-                        if (log.isDebugEnabled()) {
-                            log.debug("clearing cache entries associated with token " + revokedToken);
-                        }
-                        break;
-                    }
+                GatewayKeyInfoCache.getInstance().removeFromCache(revokedToken);
+                if (log.isDebugEnabled()) {
+                    log.debug("Cleared cache entry associated with token " + revokedToken);
                 }
             }
 
             if (renewedToken != null) {
-                while (iterator.hasNext()) {
-                    String cacheKey = iterator.next().toString();
-                    if (cacheKey.contains(renewedToken)) {
-                        Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER).
-                                                         getCache(APIConstants.GATEWAY_KEY_CACHE_NAME).remove(cacheKey);
-                        if (log.isDebugEnabled()) {
-                            log.debug("clearing cache entries associated with token " + renewedToken);
+                GatewayKeyInfoCache.getInstance().removeFromCache(renewedToken);
+                if (log.isDebugEnabled()) {
+                            log.debug("Cleared cache entry associated with token " + renewedToken);
                         }
-                        break;
-                    }
-                }
+//                while (iterator.hasNext()) {
+//                    String cacheKey = iterator.next().toString();
+//                    if (cacheKey.contains(renewedToken)) {
+//                        Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER).
+//                                                         getCache(APIConstants.GATEWAY_KEY_CACHE_NAME).remove(cacheKey);
+//                        if (log.isDebugEnabled()) {
+//                            log.debug("clearing cache entries associated with token " + renewedToken);
+//                        }
+//                        break;
+//                    }
+//                }
             }
         } catch (Exception e) {
             log.error("Error while clearing cache");
