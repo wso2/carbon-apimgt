@@ -123,9 +123,9 @@ $(function () {
             var tokenRequestData = {};
             tokenRequestData['appName'] = appName;
             tokenRequestData['keyType'] = 'Production';
-            tokenRequestData['accessAllowDomains'] = 'ALL';
+            tokenRequestData['accessAllowDomains'] = $('#input-Production-allowedDomains').val() || 'ALL';
             tokenRequestData['callbackUrl'] = appDetails.callbackUrl || '';
-            tokenRequestData['validityTime'] = appDetails.prodValidityTime;
+            tokenRequestData['validityTime'] = $('#input-Production-validityTime').val();
             $.ajax({
                 type: 'POST',
                 url: getSubscriptionAPI(appName),
@@ -148,9 +148,9 @@ $(function () {
             var tokenRequestData = {};
             tokenRequestData['appName'] = appName;
             tokenRequestData['keyType'] = 'Sandbox';
-            tokenRequestData['accessAllowDomains'] = 'ALL';
+            tokenRequestData['accessAllowDomains'] = $('#input-Sandbox-allowedDomains').val() || 'ALL';
             tokenRequestData['callbackUrl'] = appDetails.callbackUrl || '';
-            tokenRequestData['validityTime'] = appDetails.sandValidityTime;
+            tokenRequestData['validityTime'] = $('#input-Sandbox-validityTime').val();
             $.ajax({
                 type: 'POST',
                 url: getSubscriptionAPI(appName),
