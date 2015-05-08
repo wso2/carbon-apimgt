@@ -165,12 +165,17 @@ asset.renderer = function(ctx) {
     var lenI,lenJ,i,j,result,apidata,deniedTiers,tiers,appsList=[],subscribedToDefault=false,showSubscribe=false,status;
     var apistore = require('apistore').apistore.instance(userName);
     var applications = JSON.parse(apistore.getApplications(userName));
-    var asset = page.assets;
+    var asset = page.assets;    
+    if(asset!=null){
+    status=asset.lifecycleState;
+    if(status!=null){
+    status=status.toUpperCase()    
+    }
+    }
     var resultapi=apistore.getAPI(asset.attributes.overview_provider,asset.name,asset.attributes.overview_version);
     var apidata=JSON.parse(resultapi);    
     if(apidata!=null){
-    tiers=apidata.tiers; 
-    status=apidata.status;
+    tiers=apidata.tiers;     
     if(status=="PUBLISHED"){
     showSubscribe=true;
     }   
@@ -202,9 +207,6 @@ asset.renderer = function(ctx) {
             var k,m,allowedTiers,denied = false, tiersAvailable = false;
 
                     for(var m=0;m<tiers.length;m++){
-                        if(deniedTiers == null || deniedTiers.length == 0){
-                            continue;
-                        }
                        for (var k=0;k<deniedTiers.length;k++) {
                        if (tiers[m].tierName == deniedTiers[k].tierName) {
                             denied = true;
@@ -224,7 +226,7 @@ asset.renderer = function(ctx) {
     page.subscribedToDefault=subscribedToDefault;
     page.showSubscribe=showSubscribe;
     page.api=apidata;
-    
+    page.status=status;
 
     //=================== Getting subscription details ========================
         },

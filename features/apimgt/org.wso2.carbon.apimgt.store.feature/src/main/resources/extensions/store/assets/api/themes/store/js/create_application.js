@@ -1,7 +1,7 @@
-$(function(){
-	var obtainFormMeta=function(formId){
-		return $(formId).data();
-	};
+$(function () {
+    var obtainFormMeta = function (formId) {
+        return $(formId).data();
+    };
 
     var refreshApplicationList = function () {
         $.ajax({
@@ -9,8 +9,8 @@ $(function(){
                 var partial = 'list_applications';
                 var container = 'list_applications';
                 var data = {};
-                data.applications = result;
-                renderPartial(partial, container, result);
+                data.applications = JSON.parse(result);
+                renderPartial(partial, container, data);
             }
         });
     };
@@ -40,26 +40,28 @@ $(function(){
         });
     };
 
-	$(document).ready(function(){
-		var appName = $('#overview_name').val();
-		$('#form-application-create').ajaxForm({
-			success:function(){
-				var options=obtainFormMeta('#form-application-create');
-				var message = {};
-				message.text = '<div><i class="icon-briefcase"></i> Application: '+appName+' has been created.</div>';
-				message.type = 'success';
-				message.layout ='topRight';
-				noty(message);
+    $(document).ready(function () {
+        var appName = $('#overview_name').val();
+        $('#form-application-create').ajaxForm({
+            success: function () {
+                var options = obtainFormMeta('#form-application-create');
+                var message = {};
+                message.text = '<div><i class="icon-briefcase"></i> Application: ' +
+                appName + ' has been created.</div>';
+                message.type = 'success';
+                message.layout = 'topRight';
+                noty(message);
                 refreshApplicationList();
-			},
-			error:function(){
-				var message ={};
-				message.text = '<div><i class="icon-briefcase"></i> Application: '+appName+' has not been created.</div>';
-				message.type = 'error';
-				message.layout = 'topRight';
-				noty(message);
-			}
-		});
-	});
+            },
+            error: function () {
+                var message = {};
+                message.text = '<div><i class="icon-briefcase"></i> Application: ' +
+                appName + ' has not been created.</div>';
+                message.type = 'error';
+                message.layout = 'topRight';
+                noty(message);
+            }
+        });
+    });
 
 });

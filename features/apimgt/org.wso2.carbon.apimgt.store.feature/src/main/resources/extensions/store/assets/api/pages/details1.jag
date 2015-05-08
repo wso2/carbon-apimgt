@@ -18,7 +18,6 @@ var caramel;
 require('/modules/store.js').exec(function(ctx) {
 	var log = new Log();
 
-	log.info('============== renderer ==========');
     caramel = require('caramel');
     var rxt = require('rxt');
     var ratingApi = require('/modules/rating-api.js').api;
@@ -50,7 +49,4 @@ require('/modules/store.js').exec(function(ctx) {
     output.provider = provider;
     
     caramel.render(output);
-    
-    log.info('============== apiName =========='+ apiName);
-    log.info('============== user =========='+ user.username);
 }, request, response, session); %>
