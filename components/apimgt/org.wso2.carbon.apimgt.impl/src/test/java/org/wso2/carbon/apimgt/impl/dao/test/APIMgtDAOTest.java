@@ -224,7 +224,7 @@ public class APIMgtDAOTest extends TestCase {
 		assertNotNull(applications);
 		assertTrue(applications.length > 0);
 		for (int a = 0; a < applications.length; a++) {
-			assertTrue(applications[a].getId() > 0);
+			assertTrue(applications[a].getApplicationId() > 0);
 			assertNotNull(applications[a].getName());
 		}
 	}
@@ -435,7 +435,7 @@ public class APIMgtDAOTest extends TestCase {
 		Set<SubscribedAPI> subscriptions = apiMgtDAO.getSubscribedAPIs(subscriber);
 		assertEquals(1, subscriptions.size());
 		SubscribedAPI sub = subscriptions.toArray(new SubscribedAPI[subscriptions.size()])[0];
-		apiMgtDAO.removeSubscription(sub.getApiId(), sub.getApplication().getId());
+		apiMgtDAO.removeSubscription(sub.getApiId(), sub.getApplication().getApplicationId());
 
 		subscriptions = apiMgtDAO.getSubscribedAPIs(subscriber);
 		assertTrue(subscriptions.isEmpty());

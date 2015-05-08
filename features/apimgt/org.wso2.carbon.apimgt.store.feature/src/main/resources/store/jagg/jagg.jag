@@ -71,7 +71,7 @@ var jagg = jagg || (function () {
         var site = require("/site/conf/site.json");
 
 	    if(site.mutualAuthConfiguration){
-            if (site.mutualAuthConfiguration.enabled) {
+            if (site.mutualAuthConfiguration.enabled == "true") {
 
                 // cert will be available only if trust store holds client certificate. Otherwise it is null
                 var cert = request.getAttribute("javax.servlet.request.X509Certificate");
@@ -84,6 +84,9 @@ var jagg = jagg || (function () {
                         var security = require("apistore");
                         var mutualAuthHostObject = new security.MutualAuthHostObject();
                         var isValidUser = mutualAuthHostObject.validateUserNameHeader(userName);
+                        // Group ID feature not supported here
+                        var groupId="";
+                        session.put("groupId", groupId);
                         if (isValidUser) {
                             log.info("Mutual Auth authentication success for user : " + userName);
                             user = {username: userName, cookie: null, hasPublisherAccess: false};

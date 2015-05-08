@@ -17,6 +17,8 @@
     "confirm": {
         "delete": "Confirme borrado",
         "deleteMsg": "�Est�s seguro que deseas eliminar la aplicaci�n?",
+        "deleteSubsMsg1": "This application is subscribed to " ,
+        "deleteSubsMsg2": " APIs. " ,
         "deleteMsgPostfix": "Esto cancelar� todas las suscripciones y las claves existentes asociados con la aplicaci�n.",
         "unsubscribeMsg": "�Est�s seguro que deseas cancelar la suscripci�n a "
 

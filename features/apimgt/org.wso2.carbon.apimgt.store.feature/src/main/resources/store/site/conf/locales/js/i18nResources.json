@@ -24,6 +24,8 @@
     "confirm": {
         "delete": "Confirm Delete",
         "deleteMsg": "Are you sure you want to remove the application " ,
+        "deleteSubsMsg1": "This application is subscribed to " ,
+        "deleteSubsMsg2": " APIs. " ,
         "deleteMsgPostfix": "? This will cancel all the existing subscriptions and keys associated with the application. " ,
         "unsubscribeMsg": "Are you sure you want to unsubscribe from ",
 		"deleteMsgForForumTopic": "Do you want to remove the topic ",

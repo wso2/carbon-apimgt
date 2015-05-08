@@ -1837,7 +1837,7 @@ public class ApiMgtDAO {
         return subscribedAPIs;
     }
 
-    public Integer getSubscriptionCount(Subscriber subscriber,String applicationName)
+    public Integer getSubscriptionCount(Subscriber subscriber,String applicationName,String groupingId)
             throws APIManagementException {
         Integer subscriptionCount = 0;
         Connection connection = null;
@@ -1855,7 +1855,6 @@ public class ApiMgtDAO {
                               " AND SUBS.APPLICATION_ID = APP.APPLICATION_ID"+
                               " AND APP.NAME=?"+
                               " AND APP.SUBSCRIBER_ID= SUB.SUBSCRIBER_ID"+
-                              " AND SUB.USER_ID =?"+
                               " AND SUB.TENANT_ID=?";
 
             if (forceCaseInsensitiveComparisons) {
@@ -1867,15 +1866,31 @@ public class ApiMgtDAO {
                             " AND SUBS.APPLICATION_ID = APP.APPLICATION_ID"+
                             " AND APP.NAME=?"+
                             " AND APP.SUBSCRIBER_ID= SUB.SUBSCRIBER_ID"+
-                            " AND LOWER(SUB.USER_ID) = LOWER(?)"+
                             " AND SUB.TENANT_ID=?";
+            }
+
+            String whereClauseWithGroupId = " AND APP.GROUP_ID = ? ";
+            String whereClauseWithUserId = " AND SUB.USER_ID = ? ";
+            String whereClauseCaseSensitive = " AND LOWER(SUB.USER_ID) = LOWER(?) ";
+            String appIdentifier;
+
+            if (groupingId != null && !groupingId.equals("null") && !groupingId.isEmpty()) {
+                sqlQuery += whereClauseWithGroupId;
+                appIdentifier = groupingId;
+            } else {
+                appIdentifier = subscriber.getName();
+                if (forceCaseInsensitiveComparisons) {
+                    sqlQuery += whereClauseCaseSensitive;
+                } else {
+                    sqlQuery += whereClauseWithUserId;
+                }
             }
             
             ps = connection.prepareStatement(sqlQuery);
             ps.setString(1, applicationName);
-            ps.setString(2, subscriber.getName());
             int tenantId = IdentityUtil.getTenantIdOFUser(subscriber.getName());
-            ps.setInt(3, tenantId);
+            ps.setInt(2, tenantId);
+            ps.setString(3, appIdentifier);
             result = ps.executeQuery();
 
             while (result.next()) {
@@ -7579,7 +7594,7 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
 //        try {
 //            conn = APIMgtDBUtil.getConnection();
 //            ps = conn.prepareStatement(registrationEntry);
-//            ps.setInt(1, application.getId());
+//            ps.setInt(1, application.getApplicationId());
 //            rs = ps.executeQuery();
 //
 //            while (rs.next()) {
@@ -8255,7 +8270,7 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
                     }
                     ps.close();
                     ps2.setInt(1,api_id);
-                    ps2.setInt(2,scope.getId());
+                    ps2.setInt(2,scope.getApplicationId());
                     ps2.execute();
                     ps2.close();
 
