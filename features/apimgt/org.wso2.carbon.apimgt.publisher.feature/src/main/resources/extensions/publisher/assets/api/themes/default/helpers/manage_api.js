@@ -23,6 +23,6 @@ var resources = function(page,meta){
             'bootstrap-multiselect.js','manage_api_design.js','jsonpath-0.8.0.js','handlebars.js', 'manage_api_inline.js', 'typeaheadjs.js', 'bootstrap3-typeahead.min.js'],
         code:['manage_api_meta.hbs'],
         css:['api_designer.css', 'localstyles.css', 'bootstrap/bootstrap-editable.css',
-             'bootstrap/bootstrap-tagsinput.css','api_designer.css','bootstrap/bootsrap.css', 'bootstrap-multiselect.css']
+             'bootstrap/bootstrap-tagsinput.css','api_designer.css', 'bootstrap-multiselect.css']
     }
 };

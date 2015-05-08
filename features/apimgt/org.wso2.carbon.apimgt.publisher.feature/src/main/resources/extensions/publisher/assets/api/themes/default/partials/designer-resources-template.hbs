@@ -1,35 +1,42 @@
 <legend>Resources</legend>
     <div class="resource_create">
-        <div class="control-group">
-            <label class="control-label" for="inputPassword">URL Pattern</label>
-            <div class="controls">
+        <div class="form-group">
+            <label class="custom-form-label col-lg-2 col-md-2 col-sm-12 col-xs-12" for="inputPassword">
+                URL Pattern<br/>
+                {{#if api}}
+                    <span class="add-on" id="resource_url_pattern_refix">{{api.context}}</span>
+                {{else}}
+                    <span class="add-on" id="resource_url_pattern_refix">/{context}/{version}/</span>
+                {{/if}}
+            </label>
+            <div class="custom-form-right col-lg-5 col-md-8 col-sm-8 col-xs-12">
                 <div class="input-prepend">
-                     {{#if api}}
-                        <span class="add-on" id="resource_url_pattern_refix">{{api.context}}</span>
-                    {{else}}
-                        <span class="add-on" id="resource_url_pattern_refix">/{context}/{version}/</span>
-                     {{/if}}
-                    <input style="width:500px" id="resource_url_pattern" type="text" placeholder="Url Pattern Ex: path/to/resource" class="resource_url_pattern"/>
+                    <input id="resource_url_pattern" type="text" placeholder="Url Pattern Ex: path/to/resource" class="resource_url_pattern form-control"/>
                 </div>
             </div>
         </div>
-        <div class="control-group">
-            <label class="control-label" for=""></label>
-            <div class="controls">
-                {{#each verbs}}
-                    <label class="checkbox inline">
+        <div class="form-group">
+            <label class="custom-form-label col-lg-2 col-md-2 col-sm-12 col-xs-12" for=""></label>
+            <div class="custom-form-right col-lg-5 col-md-8 col-sm-8 col-xs-12">
+            {{#each verbs}}
+                    <div class="checkbox">
+                    <label>
                     <input type="checkbox" value="{{ . }}" class="http_verb_select" >  {{ . }}
                     </label>
+                </div>
                 {{/each}}
+                </div>
+        </div>
+        <div class="form-group">
+            <label class="custom-form-label col-lg-2 col-md-2 col-sm-12 col-xs-12" for="inputResource">Resource Name</label>
+            <div class="custom-form-right col-lg-5 col-md-8 col-sm-9 col-xs-10">
+                <input type="text" id="inputResource" placeholder="Resource" class="form-control">
+            </div>
+            <div class="custom-form-right col-lg-1 col-md-4 col-sm-3 col-xs-2">
+            <button class="btn" type="button" id="add_resource" style="margin:0 0 10px 10px;"><i class="icon-plus-sign"></i>&nbsp;{{t "addNewResource"}}</button>
             </div>
         </div>
-        <div class="control-group">
-            <label class="control-label" for="inputResource">Resource Name</label>
-            <div class="controls">
-                <input type="text" id="inputResource" placeholder="Resource">
-            </div>
-        </div>
-        <button class="btn" type="button" id="add_resource" style="margin:0 0 10px 10px;"><i class="icon-plus-sign"></i>&nbsp;{{t "addNewResource"}}</button>
+
     </div>
 <table style="width:100%">                       
 {{#each api_doc.apis}}
