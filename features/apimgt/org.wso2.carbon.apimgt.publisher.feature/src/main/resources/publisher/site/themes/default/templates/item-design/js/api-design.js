@@ -508,7 +508,7 @@ APIDesigner.prototype.query = function(path){
 }
 
 APIDesigner.prototype.add_resource = function(resource, path){    
-    var path = path.toLowerCase();
+    
     if(path.charAt(0) != "/")
         path = "/" + path;
     if(this.api_doc.paths[path] == undefined){
