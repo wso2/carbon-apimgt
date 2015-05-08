@@ -320,7 +320,8 @@ if( ( request.getMethod() == 'POST' ||
 }
 }catch(err){
     message.error = true;
-    message.message = "An error occord unable to retrive topics";
+    message.message = err.message;
+    log.error(err.message);
 }
 
 print(message);

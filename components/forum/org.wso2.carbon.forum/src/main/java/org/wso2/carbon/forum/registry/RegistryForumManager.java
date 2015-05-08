@@ -166,8 +166,6 @@ public class RegistryForumManager implements ForumManager {
     @Override
     public void removeTopic(String topicId, String username, String tenantDomain) throws ForumException {
 
-        String tenantAwareRegistryOwner = MultitenantUtils.getTenantAwareUsername(username);
-
         //We set the username to null since we need the GovernanceSystemRegistry for removing artifacts.
         Registry registry = getRegistry(null, tenantDomain);
 
@@ -175,8 +173,8 @@ public class RegistryForumManager implements ForumManager {
         try {
             GenericArtifact genericArtifact = artifactManager.getGenericArtifact(topicId);
 
-            if(!isOwnerOfTopic(tenantAwareRegistryOwner, genericArtifact)){
-                throw new ForumException(String.format("'%s' is not the owner of this topic.", tenantAwareRegistryOwner));
+            if(!isOwnerOfTopic(username, genericArtifact)){
+                throw new ForumException(String.format("'%s' is not the owner of this topic.", username));
             }
 
             String resourceIdentifier = genericArtifact.getAttribute(ForumConstants.OVERVIEW_RESOURCE_IDENTIFIER);
