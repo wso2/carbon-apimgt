@@ -46,7 +46,8 @@ $(function () {
             success: function () {
                 var options = obtainFormMeta('#form-application-create');
                 var message = {};
-                message.text = '<div><i class="icon-briefcase"></i> Application: ' + appName + ' has been created.</div>';
+                message.text = '<div><i class="icon-briefcase"></i> Application: ' +
+                appName + ' has been created.</div>';
                 message.type = 'success';
                 message.layout = 'topRight';
                 noty(message);
@@ -54,7 +55,8 @@ $(function () {
             },
             error: function () {
                 var message = {};
-                message.text = '<div><i class="icon-briefcase"></i> Application: ' + appName + ' has not been created.</div>';
+                message.text = '<div><i class="icon-briefcase"></i> Application: ' +
+                appName + ' has not been created.</div>';
                 message.type = 'error';
                 message.layout = 'topRight';
                 noty(message);
