@@ -29,6 +29,7 @@ require('/modules/store.js').exec(function (ctx) {
     // var options;
     switch (httpMethod) {
         case 'GET':
+            // log.info('GET :: ' + httpMethod);
             // options = uriMatcher.match(APPLICATIONS_INFO_PATTERN);
             // if(options.appName){
             //     var subscribedAPIsResult = apistore.getAllSubscriptions(user.username,options.appName,0,100);
@@ -55,10 +56,16 @@ require('/modules/store.js').exec(function (ctx) {
             // log.error('Name of application has not been provided');
             // response.sendError(404,'Please provide the name of the application to retrieve details');
             // }
+            var appDataResult = apistore.getApplications(user.username);
+            var appData = [];
+            appData = JSON.parse(appDataResult);
+            if (appData != null) {
+                print(appData);
+            }
             break;
 
         case 'POST':
-            log.info('POST :: ' + httpMethod);
+            //log.info('POST :: ' + httpMethod);
             apistore.addApplication(options.overview_name, user.username, options.overview_tier,
                     options.overview_callbackurl, options.overview_description);
             break;

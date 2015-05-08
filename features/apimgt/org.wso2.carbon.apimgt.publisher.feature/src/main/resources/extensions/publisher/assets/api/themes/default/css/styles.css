@@ -1,6 +1,9 @@
 .app-logo {
-    height:60px;
-    margin-top : -10px;
+/*    height:60px;
+margin-top : -10px;*/
+}
+.navbar-themed .navbar-nav > li > a.no-right-pad{
+    /*padding-left: 10px!important;*/
 }
 
 .itm-ast{
