@@ -340,7 +340,8 @@ public abstract class AbstractAPIManager implements APIManager {
         Registry registry;
         String apiPath = APIUtil.getAPIPath(identifier);
         try {
-            if (!MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
+        	//adding tenantDomain check to provide access to the API details page to the anonymous user
+            if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
                 int id = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager().getTenantId(tenantDomain);
                 registry = ServiceReferenceHolder.getInstance().
                         getRegistryService().getGovernanceSystemRegistry(id);
@@ -1348,7 +1349,8 @@ public abstract class AbstractAPIManager implements APIManager {
     @Override
     public Set<APIStore> getExternalAPIStores(APIIdentifier apiId)
             throws APIManagementException {
-        if (APIUtil.isAPIsPublishToExternalAPIStores(tenantId)) {
+    	//adding tenantDomain check to provide access to the API details page to the anonymous user
+        if (tenantDomain != null && APIUtil.isAPIsPublishToExternalAPIStores(tenantId)) {
             SortedSet<APIStore> sortedApiStores = new TreeSet<APIStore>(new APIStoreNameComparator());
             Set<APIStore> publishedStores = apiMgtDAO.getExternalAPIStoresDetails(apiId);
             sortedApiStores.addAll(publishedStores);
