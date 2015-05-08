@@ -17,53 +17,30 @@
 package org.wso2.carbon.apimgt.gateway.handlers.security.service;
 
 
-
 import org.wso2.carbon.apimgt.gateway.handlers.common.GatewayKeyInfoCache;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
-import org.wso2.carbon.identity.core.util.IdentityUtil;
 import org.wso2.carbon.mediation.initializer.AbstractServiceBusAdmin;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
-import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import javax.cache.Cache;
 import javax.cache.Caching;
-
 import java.util.Iterator;
-import java.util.Set;
 
 public class APIAuthenticationService extends AbstractServiceBusAdmin {
 
+    /**
+     * When needed to clear cache entries associated to a particular API, this operation can be called.
+     * Version and the context of the API whose entries needed to deleted have to be set in APIKeyMapping Element. If
+     * an applicationId is specified, then cache entries created for that particular API,
+     * subscribed under that particular Application will be cleared.
+     * @param mappings A {@code List} of {@code APIKeyMapping} elements, representing the APIs that were changed.
+     */
     public void invalidateKeys(APIKeyMapping[] mappings) {
-
-        //Previously we were clearing API key manager side cache. But actually this service deployed at gateway side.
-        //Hence we will get cache from gateway cache
-        Cache keyManagerCache = Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER).getCache(APIConstants.KEY_CACHE_NAME);
-        Cache gatewayCache =  Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER).getCache(APIConstants.GATEWAY_KEY_CACHE_NAME);
         for (APIKeyMapping mapping : mappings) {
-            //According to new cache design we will use cache key to clear cache if its available in mapping
-            //Later we construct key using attributes. Now cache key will pass as key
-            //This is temporary fix for key cache invalidation at gateway. We need to fix this properly in public
-            // release.
-            //So far cache key created using API token+context+version combination, but now we generate complete key from
-            //cache key invalidate logic and pass here.
-            // String cacheKey = mapping.getKey() + ":" + mapping.getContext() + ":" + mapping.getApiVersion();
-//          String cacheKey = mapping.getKey();
-//                        if(gatewayCache.containsKey(cacheKey)){
-//                            gatewayCache.remove(cacheKey);
-//          }
-
-            GatewayKeyInfoCache.getInstance().removeFromCache(mapping.getContext(),mapping.getApiVersion());
-
-            //If cache key not present we will construct cache key
-            /*else{
-            cacheKey = mapping.getKey() + ":" + mapping.getContext() + ":" + mapping.getApiVersion();
-            if(cache.containsKey(cacheKey)){
-                cache.remove(cacheKey);
-            }
-            } */
-
+            // TODO: Need to switch tenant domain and remove entries from Tenant's Cache
+            GatewayKeyInfoCache.getInstance().removeFromCache(mapping.getContext(), mapping.getApiVersion());
         }
     }
 
@@ -74,7 +51,8 @@ public class APIAuthenticationService extends AbstractServiceBusAdmin {
 
     }
 
-    public void invalidateResourceCache(String apiContext, String apiVersion, String resourceURLContext, String httpVerb) {
+    public void invalidateResourceCache(String apiContext, String apiVersion, String resourceURLContext,
+                                        String httpVerb) {
         boolean isTenantFlowStarted = false;
         int tenantDomainIndex = apiContext.indexOf("/t/");
         String tenantDomain = MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
@@ -91,14 +69,14 @@ public class APIAuthenticationService extends AbstractServiceBusAdmin {
             }
 
             String resourceVerbCacheKey =
-                                          APIUtil.getResourceInfoDTOCacheKey(apiContext, apiVersion,
-                                                                             resourceURLContext, httpVerb);
+                    APIUtil.getResourceInfoDTOCacheKey(apiContext, apiVersion,
+                                                       resourceURLContext, httpVerb);
 
             String apiCacheKey = APIUtil.getAPIInfoDTOCacheKey(apiContext, apiVersion);
 
             Cache cache =
-                          Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER)
-                                 .getCache(APIConstants.RESOURCE_CACHE_NAME);
+                    Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER)
+                            .getCache(APIConstants.RESOURCE_CACHE_NAME);
 
             if (cache.containsKey(apiCacheKey)) {
                 cache.remove(apiCacheKey);

@@ -4082,7 +4082,8 @@ public class APIProviderHostObject extends ScriptableObject {
                 API apiDefinition = apiProvider.getAPI(apiIdentifier);
                 mapping.setApiVersion(apiIdentifier.getVersion());
                 mapping.setContext(apiDefinition.getContext());
-                mapping.setKey(accessToken);
+                //mapping.setKey(accessToken);
+
                 mappings.add(mapping);
             }
             if (mappings.size() > 0) {

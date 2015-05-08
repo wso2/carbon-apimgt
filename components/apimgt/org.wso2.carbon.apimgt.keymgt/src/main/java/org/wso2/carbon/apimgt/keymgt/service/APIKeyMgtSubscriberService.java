@@ -524,7 +524,7 @@ public class APIKeyMgtSubscriberService extends AbstractAdmin {
                 API apiDefinition = APIKeyMgtUtil.getAPI(api.getApiId());
                 mapping.setApiVersion(api.getApiId().getVersion());
                 mapping.setContext(apiDefinition.getContext());
-                mapping.setKey(key);
+                //mapping.setKey(key);
                 mappings.add(mapping);
             }
         }
