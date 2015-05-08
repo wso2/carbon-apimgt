@@ -123,9 +123,9 @@ $(function () {
             var tokenRequestData = {};
             tokenRequestData['appName'] = appName;
             tokenRequestData['keyType'] = 'Production';
-            tokenRequestData['accessAllowDomains'] = 'ALL';
+            tokenRequestData['accessAllowDomains'] = $('#input-Production-allowedDomains').val() || 'ALL';
             tokenRequestData['callbackUrl'] = appDetails.callbackUrl || '';
-            tokenRequestData['validityTime'] = appDetails.prodValidityTime;
+            tokenRequestData['validityTime'] = $('#input-Production-validityTime').val();
             $.ajax({
                 type: 'POST',
                 url: getSubscriptionAPI(appName),
@@ -148,9 +148,9 @@ $(function () {
             var tokenRequestData = {};
             tokenRequestData['appName'] = appName;
             tokenRequestData['keyType'] = 'Sandbox';
-            tokenRequestData['accessAllowDomains'] = 'ALL';
+            tokenRequestData['accessAllowDomains'] = $('#input-Sandbox-allowedDomains').val() || 'ALL';
             tokenRequestData['callbackUrl'] = appDetails.callbackUrl || '';
-            tokenRequestData['validityTime'] = appDetails.sandValidityTime;
+            tokenRequestData['validityTime'] = $('#input-Sandbox-validityTime').val();
             $.ajax({
                 type: 'POST',
                 url: getSubscriptionAPI(appName),
@@ -406,6 +406,8 @@ $(function () {
         partial: 'sub-domain-token-prod',
         beforeRender: function (data) {
             data['environment'] = Views.translate('Production');
+            data['allowedDomains'] = Views.translate('ALL');
+            data['validityTime'] = Views.translate('3600');
         },
         subscriptions: [EV_APP_SELECT],
         afterRender: function () {
@@ -425,6 +427,8 @@ $(function () {
         container: SAND_DOMAIN_CONTAINER,
         beforeRender: function (data) {
             data['environment'] = Views.translate('Sandbox');
+            data['allowedDomains'] = Views.translate('ALL');
+            data['validityTime'] = Views.translate('3600');
         },
         afterRender: function () {
         }
