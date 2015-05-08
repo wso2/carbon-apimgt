@@ -84,8 +84,7 @@ $(function () {
         $("#api_designer").delegate("#add_resource", "click", this, function (event) {
             var designer = APIDesigner();
             if ($("#resource_url_pattern").val() == "" || $('#inputResource').val() == "") {
-                //jagg.message({content:"URL pattern & Resource cannot be empty.",type:"error"});
-                alert("URL pattern & Resource cannot be empty.");
+                BootstrapDialog.alert("URL pattern & Resource cannot be empty.");
                 return;
             }
             var path = $("#resource_url_pattern").val();
@@ -99,8 +98,7 @@ $(function () {
                     if (designer.check_if_resource_exist(path, $(this).val())) {
                         resource_exist = true;
                         var err_message = "Resource already exist for URL Pattern " + path + " and Verb " + $(this).val();
-                        //jagg.message({content:err_message,type:"error"});
-                        alert("error");
+                        BootstrapDialog.alert(err_message);
                         return;
                     }
                 }
@@ -170,8 +168,7 @@ $(function () {
                 }
             });
             if (vc == 0) {
-                //jagg.message({content:"You should select at least one HTTP verb." ,type:"error"});
-                alert("You should select at least one HTTP verb.");
+                BootstrapDialog.alert("You should select at least one HTTP verb.");
                 return;
             }
             event.data.add_resource(resource, $('#inputResource').val());
@@ -304,14 +301,14 @@ $(function () {
             var operations = operations[0]
             var i = $(this).attr('data-index');
             var pn = $(this).attr('data-path-name');
-            //jagg.message({content:'Do you want to remove "'+operations[i].method+' : '+pn+'" resource from list.',type:'confirm',title:"Remove Resource",
-            //                 okCallback:function(){
-            //                    API_DESIGNER = APIDesigner();
-            //                    operations.splice(i, 1);
-            //                    API_DESIGNER.clean_resources();
-            //                   API_DESIGNER.render_resources();
-            //               }});
-            alert("ERROR");
+            BootstrapDialog.confirm('Do you want to remove "'+operations[i].method+' : '+pn+'" resource from list.', function(result){
+                if(result) {
+                    API_DESIGNER = APIDesigner();
+                    operations.splice(i, 1);
+                    API_DESIGNER.clean_resources();
+                    API_DESIGNER.render_resources();
+                }
+            });
             //delete resource if no operations
         });
 
@@ -385,12 +382,7 @@ $(function () {
                         if (API_DESIGNER.api_doc.authorizations.oauth2.scopes[i].key === $(
                                         "#scopeKey").val() || API_DESIGNER.api_doc.authorizations.oauth2.scopes[i].key === $(
                                         "#scopeName").val()) {
-                            /* jagg
-                             .message({
-                             content : "You should not define same scope.",
-                             type : "error"
-                             });*/
-                            alert("ou should not define same scope.");
+                            BootstrapDialog.alert('You should not define same scope.');
                             return;
                         }
                     }
@@ -420,14 +412,14 @@ $(function () {
 
 
     APIDesigner.prototype.render_scopes = function () {
-            context = {
-                "api_doc": this.api_doc
-            }
-            //var output = Handlebars.partials['scopes-template'](context);
-            //$('#scopes_view').html(output);
-            var partial = 'scope_template';
-            var container = 'scopes_view';
-            renderPartialWithContainerName(partial, container, context);
+        context = {
+            "api_doc": this.api_doc
+        }
+        //var output = Handlebars.partials['scopes-template'](context);
+        //$('#scopes_view').html(output);
+        var partial = 'scope_template';
+        var container = 'scopes_view';
+        renderPartialWithContainerName(partial, container, context);
 
     };
 
