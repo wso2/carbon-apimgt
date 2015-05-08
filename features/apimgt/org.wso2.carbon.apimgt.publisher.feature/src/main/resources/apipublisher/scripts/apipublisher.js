@@ -405,5 +405,82 @@ var apipublisher = {};
             };
         }
     };
+
+    APIProviderProxy.prototype.isApiNameExist = function (apiName) {
+        var exists, log = new Log();
+        try {
+            exists = result = this.impl.isApiNameExist(apiName);
+            if (log.isDebugEnabled()) {
+                log.debug("isApiName exist for : " + apiName + " : " + exists);
+            }
+            return {
+                error:false,
+                exist:exists
+            };
+        } catch (e) {
+            log.error(e.message);
+            return {
+                error:e
+            };
+        }
+    };
+
+    APIProviderProxy.prototype.isContextExist = function (context,oldContext) {
+        var exists, log = new Log();
+        try {
+            exists = this.impl.isContextExist(context);
+            if (log.isDebugEnabled()) {
+                log.debug("isContext exist for : " + context + " : " + exists);
+            }
+            return {
+                error:false,
+                exist:exists
+            };
+        } catch (e) {
+            log.error(e.message);
+            return {
+                error:e
+            };
+        }
+    };
+
+    APIProviderProxy.prototype.isURLValid = function (type,url) {
+        var result, log = new Log();
+        try {
+            result = this.impl.isURLValid(type,url);
+            if (log.isDebugEnabled()) {
+                log.debug("Invoke isURLValid" );
+            }
+            return {
+                error:false,
+                response:result
+            };
+        } catch (e) {
+            log.error(e.message);
+            return {
+                error:e
+            };
+        }
+    };
+
+    APIProviderProxy.prototype.validateRoles = function(roles,username) {
+        var validRole, log = new Log();
+        try {
+            validRole = this.impl.validateRoles(roles,username);
+            if (log.isDebugEnabled()) {
+                log.debug("Invoke validateRoles function.");
+            }
+            return {
+                error:false,
+                valid: validRole
+            };
+        } catch (e) {
+            log.error(e.message);
+            return {
+                error:e
+            };
+        }
+    };
+
 })(apipublisher);
 

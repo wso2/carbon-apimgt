@@ -60,77 +60,130 @@
 
 <form id="form-asset-create" class='form-horizontal' method='post' action='{{url ""}}/apis/assets?type={{rxt.shortName}}' enctype="multipart/form-data">
     <legend>General Details</legend>
-    <div class="form-group">
-        <label class="custom-form-label col-lg-2 col-md-2 col-sm-12 col-xs-12" for="overview_name">Name:<span class="requiredAstrix">*</span></label>
-        <div class="custom-form-right col-lg-5 col-md-8 col-sm-8 col-xs-12">
-            <input type='text' id='overview_name' class="form-control required" name='overview_name'>
+    {{#unless api}}
+    <div class='form-group'>
+        <label class='custom-form-label col-lg-2 col-md-2 col-sm-12 col-xs-12' for='overview_name'>Name:<span class="requiredAstrix">*</span></label>
+        <div class='custom-form-right col-lg-5 col-md-8 col-sm-8 col-xs-12'>
+            <input type='text' id='overview_name' class="form-control required" name='overview_name' >
             <a class="icon-question-sign help_popup" help_data="name_help"></a>
             <p id="name_help" class="hide">{{ t "Display name to be shown in the API Store."}}</p>
         </div>
     </div>
-    <div class="form-group">
-        <label class="custom-form-label col-lg-2 col-md-2 col-sm-12 col-xs-12">Context:<span class="requiredAstrix">*</span></label>
-        <div class="custom-form-right col-lg-5 col-md-8 col-sm-8 col-xs-12">
-            <input type='text' id='overview_context' name='overview_context' class="form-control required">
+    <div class='form-group'>
+        <label class='custom-form-label col-lg-2 col-md-2 col-sm-12 col-xs-12'>Context:<span class="requiredAstrix">*</span></label>
+        <div class='custom-form-right col-lg-5 col-md-8 col-sm-8 col-xs-12'>
+            <input type='text' id='overview_context' name='overview_context' class="form-control required" >
             <a class="icon-question-sign help_popup" help_data="context_help"></a>
             <p id="context_help" class="hide">{{t "contextHelpMsg"}}</p>
         </div>
     </div>
-    <div class="form-group">
-        <label class="custom-form-label col-lg-2 col-md-2 col-sm-12 col-xs-12">Version:<span class="requiredAstrix">*</span></label>
-        <div class="custom-form-right col-lg-5 col-md-8 col-sm-8 col-xs-12">
-            <input type='text' id='overview_version' name='overview_version' class="form-control required validInput noSpace">
+    <div class='form-group'>
+        <label class='custom-form-label col-lg-2 col-md-2 col-sm-12 col-xs-12'>Version:<span class="requiredAstrix">*</span></label>
+        <div class='custom-form-right col-lg-5 col-md-8 col-sm-8 col-xs-12'>
+            <input type='text' id='overview_version' name='overview_version' class="form-control required validInput noSpace" >
             <p class="help-block">{{t "E.g.,: v1.0.0 ,v1.0 , 1.0.0, 1.0"}}</p>
         </div>
     </div>
-    <div class="form-group">
-        <label class="custom-form-label col-lg-2 col-md-2 col-sm-12 col-xs-12">Visibility:</label>
+    {{else}}
+        <input type="hidden" name="overview_name" value="{{name}}" />
+        <input type="hidden" name="overview_version" value="{{version}}" />
+        <input type="hidden" name="overview_provider" value="{{provider}}" />
+        <input type="hidden" name="overview_context" value="{{context}}" />
+
+    {{/unless}}
+    <div class='form-group'>
+        <label class='custom-form-label col-lg-2 col-md-2 col-sm-12 col-xs-12'>Visibility:</label>
         <div class="custom-form-right col-lg-5 col-md-8 col-sm-8 col-xs-12">
             <select class="select required" id="visibility" name="visibility">
-                <option value="public">Public</option>
-                <option value="private">Restricted by Roles</option>
-            </select>
-        </div>
-    </div>
-    <div class="form-group" id="rolesDiv" style="display: none;">
-        <label class="custom-form-label col-lg-2 col-md-2 col-sm-12 col-xs-12" for="roles" id="rolesLabel" name="rolesLabel">
-            {{t "roles"}}:<span class="requiredAstrix">*</span>
-        </label>
+                {{#if api}}
+                    <option value="public"  {{#if public_visibility}} selected="selected" {{/if}}>Public</option>
+                    <option value="private" {{#if private_visibility}} selected="selected" {{/if}}>Restricted by Roles</option>
 
-        <div class="custom-form-right col-lg-5 col-md-8 col-sm-8 col-xs-12">
-            <input type="text" class="form-control required validInput validateRoles" id="roles" name="roles"/>
-            <p class="help-block" id="rolesHelp">{{t "Comma separated list (e.g.,: role1,role2,role3)"}}</p>
+                {{else}}
+                    <option value="public">Public</option>
+                    <option value="private">Restricted by Roles</option>
+                {{/if}}
+            </select>
+
         </div>
     </div>
-    <div class="form-group">
-        <label class="custom-form-label col-lg-2 col-md-2 col-sm-12 col-xs-12" for="apiThumb">{{t "Thumbnail"}}:</label>
-        <div class="custom-form-right col-lg-5 col-md-8 col-sm-9 col-xs-10">
-            <div id="inpFile">
-                <div id="apiThumb-container" style="display: inline;">
-                    <input type="file" class="form-control" id="apiThumb" name="apiThumb"/></div>
+    {{#if api }}
+        <div class="form-group" id="rolesDiv" {{#unless private_visibility}}style="display: none;"{{/unless}}>
+            <label class="custom-form-label col-lg-2 col-md-2 col-sm-12 col-xs-12" for="roles" id="rolesLabel" name="rolesLabel">
+                {{t "roles"}}:<span class="requiredAstrix">*</span>
+            </label>
+            <div class="custom-form-right col-lg-5 col-md-8 col-sm-8 col-xs-12">
+                <input type="text" class="form-control required validInput validateRoles" id="roles" name="roles"  value="{{roles}}"/>
+                <p class="help-block" id="rolesHelp">{{t "Comma separated list (e.g.,: role1,role2,role3)"}}</p>
             </div>
         </div>
-        <div class="custom-form-right col-lg-1 col-md-4 col-sm-3 col-xs-2">
-            <input type="button" class="btn btn-default" id="clearThumb" value="{{t "Clear"}}"/>
+    {{else}}
+        <div class="form-group" id="rolesDiv" style="display: none;">
+            <label class="custom-form-label col-lg-2 col-md-2 col-sm-12 col-xs-12" for="roles" id="rolesLabel" name="rolesLabel">
+                {{t "roles"}}:<span class="requiredAstrix">*</span>
+            </label>
+
+            <div class="custom-form-right col-lg-5 col-md-8 col-sm-8 col-xs-12">
+                <input type="text" class="form-control required validInput validateRoles" id="roles" name="roles"/>
+                <p class="help-block" id="rolesHelp">{{t "Comma separated list (e.g.,: role1,role2,role3)"}}</p>
+            </div>
         </div>
-        <div class="help-block inline-help custom-form-right col-lg-9 col-md-9 col-sm-12 col-xs-12 col-md-offset-3 col-lg-offset-2">
-            <ul>
-                <li>{{t "Size (max): 1MB"}}</li>
-                <li>{{t "Dimensions (max): 100 x 100 pixels"}}</li>
-            </ul>
+    {{/if}}
+
+    {{#if api}}
+        <div class="form-group">
+            <label class="custom-form-label col-lg-2 col-md-2 col-sm-12 col-xs-12" for="imageUrl">{{t "Thumbnail"}}</label>
+            <div class="custom-form-right col-lg-5 col-md-8 col-sm-9 col-xs-10">
+                <div class="pull-left">
+                    {{#unless thumb}} <div><img id="apiEditThumb" alt="" src="{{url "/themes/default/img/icons/ico-sort.png"}}"/></div>
+                    {{else}}
+                        <div><img id="apiEditThumb" alt="" src="<%=jagg.getRegistryPath(api.thumb)%>"/></div> {{/unless}}
+                    <a onclick="javascript:$('#imageUrl').toggle('slow')" style="cursor: pointer">
+                        <i class="icon-picture"></i> {{t "Change Icon"}}
+                    </a>
+                </div>
+                <div class="pull-left" id="imageUrl" style="display:none;">
+                    <div id="apiThumb-container" class="pull-left"> <input type="file" class="input-xlarge validateImageFile" name="apiThumb" /></div>
+                    <input class="pull-left btn" type="button" id="clearThumb" value="{{t "clear"}}"/>
+                    <div class="help-block pull-left inline-help">
+                        <ul>
+                            <li>{{t "Size (max): 1MB"}}</li>
+                            <li>{{t "Dimensions (max): 100 x 100 pixels"}}</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
         </div>
-    </div>
+    {{else}}
+        <div class="form-group">
+            <label class="control-label" for="apiThumb">{{t "Thumbnail"}}:</label>
+            <div class="controls">
+                <div id="inpFile" class="pull-left">
+                    <div id="apiThumb-container"  style="display: inline;">
+                        <input type="file" class="input-xlarge" id="overview_thumbnail" name="overview_thumbnail"/></div>
+                </div>
+                <input type="button" class="btn pull-left" id="clearThumb" value="{{t "clear"}}"/>
+                <div class="help-block pull-left inline-help">
+                    <ul>
+                        <li>{{t "Size (max): 1MB"}}</li>
+                        <li>{{t "Dimensions (max): 100 x 100 pixels"}}</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        </div>
+    {{/if}}
 
     <div class="form-group">
         <label class="custom-form-label col-lg-2 col-md-2 col-sm-12 col-xs-12">Description:</label>
         <div class="custom-form-right col-lg-5 col-md-8 col-sm-9 col-xs-10">
-         <textarea class="form-control" id="overview_description" name="overview_description" rows="3" style="width:100%; height:70px;"></textarea>
+         <textarea class="form-control" id="overview_description" name="overview_description" rows="3" style="width:100%; height:70px;">{{description}}</textarea>
         </div>
     </div>
     <div class="form-group">
         <label class="custom-form-label col-lg-2 col-md-2 col-sm-12 col-xs-12">Tags:</label>
         <div class="custom-form-right col-lg-5 col-md-8 col-sm-9 col-xs-10">
-            <input type="text" placeholder="Add tags" class="form-control validInput validRegistryName" id="overview_tags" name="overview_tags" data-role="tagsinput"/>
+            <input type="text" placeholder="Add tags" class="form-control validInput validRegistryName" id="overview_tags" name="overview_tags" value="{{tags}}" data-role="tagsinput"/>
             <a class="icon-question-sign help_popup" help_data="tag_help"></a>
             <p id="tag_help" class="hide">{{t "Use keywords and common search terms as tags to group APIs that have similar characteristics. After publishing the API, consumers can click these tags to jump to a group of similar APIs."}}</p>
         </div>

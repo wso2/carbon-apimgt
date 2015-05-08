@@ -1,6 +1,20 @@
 $(document).ready(function(){
-    // $.fn.editable.defaults.mode = 'inline';
     var designer = new APIMangerAPI.APIDesigner();
+    var swaggerUrl = caramel.context + "/asts/api/apis/swagger?provider="+store.publisher.api.provider+"&name="+store.publisher.api.name+ "&version="+store.publisher.api.version;
+    // $.fn.editable.defaults.mode = 'inline';
+    if(store.publisher.api.name!=""){
+     $.get(swaggerUrl , function( data ) {
+            var designer =new  APIMangerAPI.APIDesigner();
+            designer.load_api_document(data.data);
+            designer.set_default_management_values();
+            designer.render_resources_template();
+            $("#swaggerUpload").modal('hide');
+     });
+     }else{
+            $("body").on("api_saved" , function(e){
+            location.href = caramel.context+"/asts/api/design/"+designer.saved_api.id+"?name="+designer.saved_api.name+"&version="+designer.saved_api.version+"&provider="+designer.saved_api.provider;                
+            });  
+     }    
     $("#clearThumb").on("click", function () {
         $('#apiThumb-container').html('<input type="file" class="input-xlarge" name="apiThumb" />');
     });
@@ -15,14 +29,6 @@ $(document).ready(function(){
             $("#swaggerUpload").modal('hide');
         });
     });
-
-    /*  $("#resource_url_pattern").live('change',function(){
-     var re = new RegExp("^/?([a-zA-Z0-9]|-|_)+");
-     var arr = re.exec($(this).val());
-     if(arr && arr.length)
-     $('#inputResource').val(arr[0]);
-     });*/
-
 
     var v = $("#form-asset-create").validate({
                                                  contentType : "application/x-www-form-urlencoded;charset=utf-8",
@@ -51,7 +57,7 @@ $(document).ready(function(){
                                                                             success:function(responseText, statusText, xhr, $form){
                                                                                 $('#saveMessage').hide();
                                                                                 $('#saveButtons').show();
-                                                                                if (!responseText.error) {
+                                                                                if (responseText.data) {
                                                                                     designer.saved_api = {};
                                                                                     designer.saved_api.name = responseText.data.name;
                                                                                     designer.saved_api.version = responseText.data.version;
@@ -84,7 +90,7 @@ $(document).ready(function(){
         //TODO
         //$("body").unbind("api_saved");
         //$("body").on("api_saved" , function(e){
-        location.href = caramel.context + "/asts/api/implement/"+designer.saved_api.id;
+        location.href = caramel.context + "/asts/api/implement/"+store.publisher.api.id;
         //});
         //$("#design_form").submit();
     });

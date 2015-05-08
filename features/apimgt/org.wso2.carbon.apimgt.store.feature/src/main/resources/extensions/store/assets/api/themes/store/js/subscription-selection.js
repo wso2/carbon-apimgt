@@ -38,8 +38,7 @@ $(function () {
      */
     var getSubscriptionAPI = function(appName){
         return caramel.context + '/apis/application/' + appName + '/subscriptions';
-        //return caramel.context + '/apis/applications/' + appName;
-    }
+    };
 
     /*
      The function returns the curent subscriptions for the given application
@@ -75,6 +74,44 @@ $(function () {
         return null;
     };
 
+    /*
+     The function update the details of the given application
+     */
+    var updateMetadata = function (appName, newDetails, environment) {
+        var appData = findAppDetails(appName);
+        if (environment == 'Production'){
+
+            appData.prodKeyScope = newDetails.tokenScope;
+            appData.prodValidityTime = newDetails.validityTime;
+            appData.prodAuthorizedDomains = newDetails.accessallowdomains;
+            appData.prodKey = newDetails.accessToken;
+            appData.prodConsumerKey = newDetails.consumerKey;
+            appData.prodRegenarateOption = newDetails.enableRegenarate;
+            appData.prodConsumerSecret = newDetails.consumerSecret;
+        } else if (environment == 'Sandbox') {
+
+            appData.sandKeyScope = newDetails.tokenScope;
+            appData.sandValidityTime = newDetails.validityTime;
+            appData.sandboxAuthorizedDomains = newDetails.accessallowdomains;
+            appData.sandboxKey = newDetails.accessToken;
+            appData.sandboxConsumerKey = newDetails.consumerKey;
+            appData.sandRegenarateOption = newDetails.enableRegenarate;
+            appData.sandboxConsumerSecret = newDetails.consumerSecret;
+        }
+        updateAppDetails(appName, appData);
+    };
+
+    var updateAppDetails = function (appName, newAppData) {
+        var apps = metadata.appsWithSubs;
+        var app;
+        for (var appIndex in apps) {
+            app = apps[appIndex];
+
+            if (app.name == appName) {
+                metadata.appsWithSubs[appIndex] = newAppData;
+            }
+        }
+    };
 
     var attachGenerateProdToken = function () {
         ///We need to prevent the afterRender function from been inherited by child views
@@ -86,16 +123,17 @@ $(function () {
             var tokenRequestData = {};
             tokenRequestData['appName'] = appName;
             tokenRequestData['keyType'] = 'Production';
-            tokenRequestData['accessAllowDomains'] = 'ALL';
+            tokenRequestData['accessAllowDomains'] = $('#input-Production-allowedDomains').val() || 'ALL';
             tokenRequestData['callbackUrl'] = appDetails.callbackUrl || '';
-            tokenRequestData['validityTime'] = appDetails.prodValidityTime;
+            tokenRequestData['validityTime'] = $('#input-Production-validityTime').val();
             $.ajax({
                 type: 'POST',
                 url: getSubscriptionAPI(appName),
                 data: tokenRequestData,
                 success: function (data) {
-                    var jsonData = JSON.parse(data);
+                    var jsonData = data;
                     APP_STORE.productionKeys = jsonData;
+                    updateMetadata(appName, jsonData, 'Production');
                     events.publish(EV_GENERATE_PROD_TOKEN, jsonData);
                 }
             });
@@ -110,16 +148,17 @@ $(function () {
             var tokenRequestData = {};
             tokenRequestData['appName'] = appName;
             tokenRequestData['keyType'] = 'Sandbox';
-            tokenRequestData['accessAllowDomains'] = 'ALL';
+            tokenRequestData['accessAllowDomains'] = $('#input-Sandbox-allowedDomains').val() || 'ALL';
             tokenRequestData['callbackUrl'] = appDetails.callbackUrl || '';
-            tokenRequestData['validityTime'] = appDetails.prodValidityTime;
+            tokenRequestData['validityTime'] = $('#input-Sandbox-validityTime').val();
             $.ajax({
                 type: 'POST',
                 url: getSubscriptionAPI(appName),
                 data: tokenRequestData,
                 success: function (data) {
-                    var jsonData = JSON.parse(data);
+                    var jsonData = data;
                     APP_STORE.sandboxKeys = jsonData;
+                    updateMetadata(appName, jsonData, 'Sandbox');
                     events.publish(EV_GENERATE_SAND_TOKEN, jsonData);
                 }
             });
@@ -293,7 +332,7 @@ $(function () {
     });
 
     //Sandbox view
-    Views.extend('defaultProductionKeyView', {
+    Views.extend('defaultSandboxKeyView', {
         id: 'defaultSandboxKeyView',
         container: SAND_KEYS_CONTAINER,
         partial: 'sub-keys-generate-prod',
@@ -333,7 +372,7 @@ $(function () {
 
     Views.extend('defaultSandboxKeyView', {
         id: 'hiddenSandboxKeyView',
-        subscriptions: [EV_SHOW_KEYS, EV_HIDE_KEYS, EV_GENERATE_SAND_TOKEN],
+        subscriptions: [EV_APP_SELECT, EV_SHOW_KEYS, EV_HIDE_KEYS, EV_GENERATE_SAND_TOKEN],
         partial: 'sub-keys-hidden-prod',
         resolveRender: function (data) {
             console.info(APP_STORE.sandboxKeys);
@@ -367,6 +406,8 @@ $(function () {
         partial: 'sub-domain-token-prod',
         beforeRender: function (data) {
             data['environment'] = Views.translate('Production');
+            data['allowedDomains'] = Views.translate('ALL');
+            data['validityTime'] = Views.translate('3600');
         },
         subscriptions: [EV_APP_SELECT],
         afterRender: function () {
@@ -386,6 +427,8 @@ $(function () {
         container: SAND_DOMAIN_CONTAINER,
         beforeRender: function (data) {
             data['environment'] = Views.translate('Sandbox');
+            data['allowedDomains'] = Views.translate('ALL');
+            data['validityTime'] = Views.translate('3600');
         },
         afterRender: function () {
         }
@@ -438,7 +481,7 @@ $(function () {
         var keys = {};
         keys.accessToken = details.prodKey;
         keys.environment = 'Production';
-        keys.validityTime = details.sandValidityTime;
+        keys.validityTime = details.prodValidityTime;
         keys.consumerKey = details.prodConsumerKey;
         keys.consumerSecret = details.prodConsumerSecret;
 

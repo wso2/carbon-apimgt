@@ -890,67 +890,70 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                                                      boolean updateGatewayConfig) throws APIManagementException {
         Map<String, List<String>> failedGateways = new ConcurrentHashMap<String, List<String>>();
         APIStatus currentStatus = api.getStatus();
-        if (!currentStatus.equals(status)) {
-            api.setStatus(status);
-            MultitenantUtils.getTenantDomain(username);
-            PrivilegedCarbonContext.startTenantFlow();
-            PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
-            try {
-                //If API status changed to publish we should add it to recently added APIs list
-                //this should happen in store-publisher cluster domain if deployment is distributed
-                //IF new API published we will add it to recently added APIs
-                Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER).getCache(APIConstants.RECENTLY_ADDED_API_CACHE_NAME).removeAll();
-                APIStatusObserverList observerList = APIStatusObserverList.getInstance();
-                observerList.notifyObservers(currentStatus, status, api);
-                APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
-                        getAPIManagerConfigurationService().getAPIManagerConfiguration();
-                String gatewayType = config.getFirstProperty(APIConstants.API_GATEWAY_TYPE);
+        if (currentStatus.equals(status)) {
+        	throw new APIManagementException(" Both current status and next status are same !!!");
+        }
+        
+        api.setStatus(status);
+        MultitenantUtils.getTenantDomain(username);
+        PrivilegedCarbonContext.startTenantFlow();
+        PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
+        try {
+            //If API status changed to publish we should add it to recently added APIs list
+            //this should happen in store-publisher cluster domain if deployment is distributed
+            //IF new API published we will add it to recently added APIs
+            Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER).getCache(APIConstants.RECENTLY_ADDED_API_CACHE_NAME).removeAll();
+            APIStatusObserverList observerList = APIStatusObserverList.getInstance();
+            observerList.notifyObservers(currentStatus, status, api);
+            APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
+                    getAPIManagerConfigurationService().getAPIManagerConfiguration();
+            String gatewayType = config.getFirstProperty(APIConstants.API_GATEWAY_TYPE);
 
-                api.setAsPublishedDefaultVersion(api.getId().getVersion().equals(apiMgtDAO.getPublishedDefaultVersion(api.getId())));
+            api.setAsPublishedDefaultVersion(api.getId().getVersion().equals(apiMgtDAO.getPublishedDefaultVersion(api.getId())));
 
-                if (gatewayType.equalsIgnoreCase(APIConstants.API_GATEWAY_TYPE_SYNAPSE) && updateGatewayConfig) {
-                    if (status.equals(APIStatus.PUBLISHED) || status.equals(APIStatus.DEPRECATED) ||
-                        status.equals(APIStatus.BLOCKED) || status.equals(APIStatus.PROTOTYPED)) {
-                        List<String> failedToPublishEnvironments = publishToGateway(api);
-                        if (!failedToPublishEnvironments.isEmpty()) {
-                            Set<String> publishedEnvironments =
-                                    new HashSet<String>(api.getEnvironments());
-                            publishedEnvironments.removeAll(failedToPublishEnvironments);
-                            api.setEnvironments(publishedEnvironments);
-                            updateApiArtifact(api, true, false);
-                            failedGateways.clear();
-                            failedGateways.put("UNPUBLISHED", Collections.EMPTY_LIST);
-                            failedGateways.put("PUBLISHED", failedToPublishEnvironments);
-                        }
-                    } else {
-                        List<String> failedToRemoveEnvironments = removeFromGateway(api);
-                        if (!failedToRemoveEnvironments.isEmpty()) {
-                            Set<String> publishedEnvironments =
-                                    new HashSet<String>(api.getEnvironments());
-                            publishedEnvironments.addAll(failedToRemoveEnvironments);
-                            api.setEnvironments(publishedEnvironments);
-                            updateApiArtifact(api, true, false);
-                            failedGateways.clear();
-                            failedGateways.put("UNPUBLISHED", failedToRemoveEnvironments);
-                            failedGateways.put("PUBLISHED", Collections.EMPTY_LIST);
-                        }
+            if (gatewayType.equalsIgnoreCase(APIConstants.API_GATEWAY_TYPE_SYNAPSE) && updateGatewayConfig) {
+                if (status.equals(APIStatus.PUBLISHED) || status.equals(APIStatus.DEPRECATED) ||
+                    status.equals(APIStatus.BLOCKED) || status.equals(APIStatus.PROTOTYPED)) {
+                    List<String> failedToPublishEnvironments = publishToGateway(api);
+                    if (!failedToPublishEnvironments.isEmpty()) {
+                        Set<String> publishedEnvironments =
+                                new HashSet<String>(api.getEnvironments());
+                        publishedEnvironments.removeAll(failedToPublishEnvironments);
+                        api.setEnvironments(publishedEnvironments);
+                        updateApiArtifact(api, true, false);
+                        failedGateways.clear();
+                        failedGateways.put("UNPUBLISHED", Collections.EMPTY_LIST);
+                        failedGateways.put("PUBLISHED", failedToPublishEnvironments);
+                    }
+                } else {
+                    List<String> failedToRemoveEnvironments = removeFromGateway(api);
+                    if (!failedToRemoveEnvironments.isEmpty()) {
+                        Set<String> publishedEnvironments =
+                                new HashSet<String>(api.getEnvironments());
+                        publishedEnvironments.addAll(failedToRemoveEnvironments);
+                        api.setEnvironments(publishedEnvironments);
+                        updateApiArtifact(api, true, false);
+                        failedGateways.clear();
+                        failedGateways.put("UNPUBLISHED", failedToRemoveEnvironments);
+                        failedGateways.put("PUBLISHED", Collections.EMPTY_LIST);
                     }
                 }
-
-                updateApiArtifact(api, false,false);
-                apiMgtDAO.recordAPILifeCycleEvent(api.getId(), currentStatus, status, userId);
-
-                if(api.isDefaultVersion() || api.isPublishedDefaultVersion()){ //published default version need to be changed
-                    apiMgtDAO.updateDefaultAPIPublishedVersion(api.getId(), currentStatus, status);
-                }
-
-            } catch (APIManagementException e) {
-            	handleException("Error occured in the status change : " + api.getId().getApiName() , e);
             }
-            finally {
-                PrivilegedCarbonContext.endTenantFlow();
+
+            updateApiArtifact(api, false,false);
+            apiMgtDAO.recordAPILifeCycleEvent(api.getId(), currentStatus, status, userId);
+
+            if(api.isDefaultVersion() || api.isPublishedDefaultVersion()){ //published default version need to be changed
+                apiMgtDAO.updateDefaultAPIPublishedVersion(api.getId(), currentStatus, status);
             }
+
+        } catch (APIManagementException e) {
+        	handleException("Error occured in the status change : " + api.getId().getApiName() , e);
         }
+        finally {
+            PrivilegedCarbonContext.endTenantFlow();
+        }
+      
         return failedGateways;
     }
 
@@ -2850,10 +2853,10 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
         // This is to support the new Pluggable version strategy
         // if the context does not contain any {version} segment, we use the default version strategy.
-        //-------------------------------------------context = checkAndSetVersionParam(context);
+        context = checkAndSetVersionParam(context);
         api.setContextTemplate(context);
 
-        //----------------------------------- context = updateContextWithVersion(version, contextVal, context);
+        context = updateContextWithVersion(version, contextVal, context);
 
         api.setContext(context);
         api.setVisibility(APIConstants.API_GLOBAL_VISIBILITY);
@@ -2862,6 +2865,31 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         results=saveAPI(api, true);
         return results.get("id");
 
+    }
+
+    private static String checkAndSetVersionParam(String context) {
+        // This is to support the new Pluggable version strategy
+        // if the context does not contain any {version} segment, we use the default version strategy.
+        if(!context.contains(APIConstants.SYNAPSE_REST_CONTEXT_VERSION_VARIABLE)){
+            if(!context.endsWith("/")){
+                context = context + "/";
+            }
+            context = context + APIConstants.SYNAPSE_REST_CONTEXT_VERSION_VARIABLE;
+        }
+        return context;
+    }
+
+    private static String updateContextWithVersion(String version, String contextVal, String context) {
+        // This condition should not be true for any occasion but we keep it so that there are no loopholes in
+        // the flow.
+        if (version == null) {
+            // context template patterns - /{version}/foo or /foo/{version}
+            // if the version is null, then we remove the /{version} part from the context
+            context = contextVal.replace("/" + APIConstants.SYNAPSE_REST_CONTEXT_VERSION_VARIABLE, "");
+        }else{
+            context = context.replace(APIConstants.SYNAPSE_REST_CONTEXT_VERSION_VARIABLE, version);
+        }
+        return context;
     }
 
     public String manageAPI(JSONObject apiObj)
@@ -3030,7 +3058,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         Map<String,String> results=new HashMap<String, String>();
         results= saveAPI(api, false);
         return results.get("failedGateways");
-
     }
 
     public String updateDesignAPI(JSONObject apiObj)
@@ -3600,6 +3627,39 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 			}
 		}
 		return result;
+	}
+
+	public boolean validateRoles(String rolesSet) {
+		boolean valid=false;
+		String inputRolesSet = rolesSet;
+		String[] inputRoles=null;
+		if (inputRolesSet != null) {
+			inputRoles = inputRolesSet.split(",");
+		}
+
+		try {
+			String[] roles = APIUtil.getRoleNames(username);
+
+			if (roles != null && inputRoles != null) {
+				for (String inputRole : inputRoles) {
+					for (String role : roles) {
+						valid= (inputRole.equals(role));
+						if(valid){ //If we found a match for the input role,then no need to process the for loop further
+							break;
+						}
+					}
+					//If the input role doesn't match with any of the role existing in the system
+					if(!valid){
+						return valid;
+					}
+
+				}
+				return valid;
+			}
+		}catch (Exception e) {
+			log.error("Error while validating the input roles.",e);
+		}
+		return valid;
 	}
 }
 

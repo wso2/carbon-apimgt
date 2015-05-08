@@ -17,11 +17,36 @@
  *
  */
 asset.manager = function(ctx){
+
+    var buildPublishedQuery = function(query) {
+        query = query || {};
+        var isLCEnabled = ctx.rxtManager.isLifecycleEnabled(ctx.assetType);
+        //If lifecycles are not enabled then do nothing
+        if(!isLCEnabled){
+            log.warn('lifecycles disabled,not adding published states to search query');
+            return query;
+        }
+        //Get all of the published assets
+        var publishedStates = ctx.rxtManager.getPublishedStates(ctx.assetType) || [];
+        //Determine if there are any published states
+        if (publishedStates.length == 0) {
+            return query;
+        }
+        //TODO: Even though an array is sent in only the first search value is accepted
+        query.lcState=[publishedStates[0]];
+        return query;
+    };
+
     return {
+    search: function(query, paging) {
+        query=buildPublishedQuery(query);
+        var assets = this._super.search.call(this, query, paging);
+        return assets;
+    },
     get:function(id){
        log.info('Calling custom get of asset');
        return this._super.get.call(this,id);
-    },
+    }
         /*search : function(query, paging) {
             var carbonAPI = require('carbon');
             var tenantDomain = carbonAPI.server.tenantDomain({

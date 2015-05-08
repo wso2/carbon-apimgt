@@ -163,6 +163,10 @@ asset.server = function (ctx) {
     return {
         endpoints: {
             pages: [{
+                        title: 'Design an API',
+                        url: 'design',
+                        path: 'design.jag'
+                    }, {
                         title: 'Implement an API',
                         url: 'implement',
                         path: 'implement.jag'
