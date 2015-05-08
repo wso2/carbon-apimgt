@@ -76,7 +76,7 @@
                 <div class="control-group">
                     <label class="control-label" for="endpointType">{{t "Endpoint Security Scheme"}}:<span class="requiredAstrix">*</span></label>
                     <div class="controls">
-                    <select class="select required" id="endpointType" name="endpointType" >
+                    <select class="select required" id="api-implement-more-security" name="endpointType" >
                         <option value="nonsecured"  selected="selected">Non Secured</option>
                         <option value="secured">Secured</option>
                     </select>
@@ -85,7 +85,7 @@
                     </div>
                 </div>
 
-                <div class="control-group" id="credentials">
+                <div class="control-group" id="api-implement-more-credentials" style="display:none">
                     <label class="control-label" for="credentials">{{t "Credentials"}}:<span class="requiredAstrix">*</span></label>
                     <div class="controls">
                         <input type="text" class="input-small required validInput" id="epUsername" name="epUsername"  value="">
