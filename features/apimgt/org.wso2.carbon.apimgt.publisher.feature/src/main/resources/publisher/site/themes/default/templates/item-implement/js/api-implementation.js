@@ -131,7 +131,7 @@ $(document).ready(function(){
                     },
                     success: function(responseText){
                         if (!responseText.error) {
-                            jagg.message({content:"API deployed as a Prototype.",type:"info"});
+                             $("#prototype-success").modal('show');
                         }else{
                              if (responseText.message == "timeout") {
                                  if (ssoEnabled) {

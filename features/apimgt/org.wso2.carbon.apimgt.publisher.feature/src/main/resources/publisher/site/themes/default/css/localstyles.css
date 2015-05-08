@@ -1570,3 +1570,14 @@ table.dataTable tbody td.no-padding {
     margin-left:3px;
     color:#d10000;
 }
+
+#goToStore {
+    font-weight: normal;
+    font-size: 0.7em;
+    margin-left: 10px;
+    text-align:right;
+}
+
+.publish-label{
+    font-size:14px;
+}
