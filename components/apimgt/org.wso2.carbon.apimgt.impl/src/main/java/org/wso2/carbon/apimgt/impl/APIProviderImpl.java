@@ -733,7 +733,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         validateAndSetTransports(api);
 
         try {
-        	registry.beginTransaction();
+        	//registry.beginTransaction();
             String apiArtifactId = registry.get(APIUtil.getAPIPath(api.getId())).getUUID();
             GenericArtifactManager artifactManager = APIUtil.getArtifactManager(registry,
                                                                                 APIConstants.API_KEY);
@@ -806,7 +806,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
 
             }
-            registry.commitTransaction();
+            //registry.commitTransaction();
             if(updatePermissions){
             APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
                                              getAPIManagerConfigurationService().getAPIManagerConfiguration();
