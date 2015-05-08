@@ -466,4 +466,11 @@ public interface APIProvider extends APIManager {
 	 * @return list of environments with details of environments
 	 */
 	public JSONArray getEnvironments();
+
+	/**
+	 * Validate given set of roles
+	 * @param rolesSet comma separated roles list
+	 * @return
+	 */
+	public boolean validateRoles(String rolesSet);
 }

@@ -1,27 +1,38 @@
 $(document).ready(function() {
-    $.validator.addMethod('contextExists', function(value, element) {
+    var url = caramel.context + "/asts/api/apis/validation";
+
+
+    $.validator.addMethod('https://localhost:9443/publisher/asts/api/apis/sequences?action=getCustomInSequences', function(value, element) {
         if (value.charAt(0) != "/") {
             value = "/" + value;
         }
         var contextExist = false;
         var oldContext=$('#spanContext').text();
-        jagg.syncPost("/site/blocks/item-add/ajax/add.jag", { action:"isContextExist", context:value,oldContext:oldContext },
-                      function (result) {
-                          if (!result.error) {
-                              contextExist = result.exist;
-                          }
-                      });
+        var data = { action:"isContextExist", context:value,oldContext:oldContext };
+        $.ajax({
+                   url: url,
+                   type: 'POST',
+                   data: JSON.stringify(data),
+                   contentType: 'application/json',
+                   success: function(data) {
+                       contextExist = data.exist;
+                   }
+               });
         return this.optional(element) || contextExist != "true";
     }, 'Duplicate context value.');
 
     $.validator.addMethod('apiNameExists', function(value, element) {
         var apiNameExist = false;
-        jagg.syncPost("/site/blocks/item-add/ajax/add.jag", { action:"isAPINameExist", apiName:value },
-                      function (result) {
-                          if (!result.error) {
-                              apiNameExist = result.exist;
-                          }
-                      });
+        var data =  { action:"isAPINameExist", apiName:value };
+        $.ajax({
+                   url: url,
+                   type: 'POST',
+                   data: JSON.stringify(data),
+                   contentType: 'application/json',
+                   success: function(data) {
+                       apiNameExist = data.exist;
+                   }
+               });
         return this.optional(element) || apiNameExist != "true";
     }, 'Duplicate api name.');
 
@@ -46,45 +57,49 @@ $(document).ready(function() {
     $.validator.addMethod('validateRoles', function(value, element) {
         var valid = false;
         var oldContext=$('#spanContext').text();
-        jagg.syncPost("/site/blocks/item-add/ajax/add.jag", { action:"validateRoles", roles:value },
-                      function (result) {
-                          if (!result.error) {
-                              valid = result.response;
-                          }
-                      });
+        var data = { action:"validateRoles", roles:value };
+        $.ajax({
+                   url: url,
+                   type: 'POST',
+                   data: JSON.stringify(data),
+                   contentType: 'application/json',
+                   success: function(data) {
+                       valid = data.response;
+                   }
+               });
         return this.optional(element) || valid == true;
     }, 'Invalid role name[s]');
 
     $.validator.addMethod('validateEndpoints', function (value, element){
         return APP.is_production_endpoint_specified() || APP.is_sandbox_endpoint_specified();
     }, 'A Production or Sandbox URL must be provided.');
-    
+
     $.validator.addMethod('validateProdWSDLService', function (value, element){
-    	if (APP.is_production_endpoint_specified()) {
-    		return APP.is_production_wsdl_endpoint_service_specified();
-    	} 
-    	return true;        
-    }, 'Service Name must be provided for WSDL endpoint.');
-    
-    $.validator.addMethod('validateProdWSDLPort', function (value, element){
-    	if (APP.is_production_endpoint_specified()) {
-    		return APP.is_production_wsdl_endpoint_port_specified();
-    	} 
-    	return true;   
-    }, 'Service Port must be provided for WSDL endpoint.');
-    
-    $.validator.addMethod('validateSandboxWSDLService', function (value, element){
-    	if (APP.is_sandbox_endpoint_specified()) {
-    		return APP.is_sandbox_wsdl_endpoint_service_specified();
-    	}
+        if (APP.is_production_endpoint_specified()) {
+            return APP.is_production_wsdl_endpoint_service_specified();
+        }
         return true;
     }, 'Service Name must be provided for WSDL endpoint.');
-    
+
+    $.validator.addMethod('validateProdWSDLPort', function (value, element){
+        if (APP.is_production_endpoint_specified()) {
+            return APP.is_production_wsdl_endpoint_port_specified();
+        }
+        return true;
+    }, 'Service Port must be provided for WSDL endpoint.');
+
+    $.validator.addMethod('validateSandboxWSDLService', function (value, element){
+        if (APP.is_sandbox_endpoint_specified()) {
+            return APP.is_sandbox_wsdl_endpoint_service_specified();
+        }
+        return true;
+    }, 'Service Name must be provided for WSDL endpoint.');
+
     $.validator.addMethod('validateSandboxWSDLPort', function (value, element){
-    	if (APP.is_sandbox_endpoint_specified()) {
-    		return APP.is_sandbox_wsdl_endpoint_port_specified();
-    	}
-    	return true;
+        if (APP.is_sandbox_endpoint_specified()) {
+            return APP.is_sandbox_wsdl_endpoint_port_specified();
+        }
+        return true;
     }, 'Service Port must be provided for WSDL endpoint.');
 
     $.validator.addMethod('validateImageFile', function (value, element) {

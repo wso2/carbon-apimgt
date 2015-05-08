@@ -48,13 +48,13 @@ require('/modules/store.js').exec(function (ctx) {
         case 'POST':
             log.info('POST :: ' + httpMethod);
             if (uriMatcher.match(API_SUBSCRIPTION_URL)) {
-                log.info('Application.jag-- options :: ' + JSON.stringify(options));
                 // (userId, applicationName, tokenType, tokenScopes,validityPeriod,callbackUrl,accessAllowDomainsArr)
-                var keyResult = apistore.getApplicationKey(user.username, options.appName, options.keyType.toUpperCase(), 'default', options.validityTime, options.callbackUrl, options.accessAllowDomains);
+                var keyResult = apistore.getApplicationKey(user.username, options.appName,
+                        options.keyType.toUpperCase(), 'default', options.validityTime,
+                        options.callbackUrl, options.accessAllowDomains);
                 var keys = [];
                 keys = JSON.parse(keyResult);
-                //log.info('Application.jag-- apistore.getApplicationKey:: ' + JSON.stringify(keys));
-                if (keys.consumerKey != null ) {
+                if (keys.consumerKey != null) {
                     print(keys);
                 }
 

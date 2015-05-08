@@ -3628,6 +3628,39 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 		}
 		return result;
 	}
+
+	public boolean validateRoles(String rolesSet) {
+		boolean valid=false;
+		String inputRolesSet = rolesSet;
+		String[] inputRoles=null;
+		if (inputRolesSet != null) {
+			inputRoles = inputRolesSet.split(",");
+		}
+
+		try {
+			String[] roles = APIUtil.getRoleNames(username);
+
+			if (roles != null && inputRoles != null) {
+				for (String inputRole : inputRoles) {
+					for (String role : roles) {
+						valid= (inputRole.equals(role));
+						if(valid){ //If we found a match for the input role,then no need to process the for loop further
+							break;
+						}
+					}
+					//If the input role doesn't match with any of the role existing in the system
+					if(!valid){
+						return valid;
+					}
+
+				}
+				return valid;
+			}
+		}catch (Exception e) {
+			log.error("Error while validating the input roles.",e);
+		}
+		return valid;
+	}
 }
 
 

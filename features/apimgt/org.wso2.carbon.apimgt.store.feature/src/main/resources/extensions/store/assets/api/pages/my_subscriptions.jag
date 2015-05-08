@@ -1,6 +1,6 @@
 <%
 /*
- *  Copyright (c) 2005-2015, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *  Copyright (c) 2015, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  *  WSO2 Inc. licenses this file to you under the Apache License,
  *  Version 2.0 (the "License"); you may not use this file except
@@ -18,7 +18,7 @@
  *
  */
 var caramel;
-require('/modules/store.js').exec(function(ctx) {
+require('/modules/store.js').exec(function (ctx) {
     caramel = require('caramel');
     var log = new Log();
     var ui = require('rxt').ui;
@@ -33,11 +33,20 @@ require('/modules/store.js').exec(function(ctx) {
     var output = am.renderBasic(page)._custom();
     var server = require('store').server;
     var user = server.current(ctx.session);
+    var options2 = request.getAllParameters('UTF-8');
     var apistore = require('apistore').apistore.instance(user.username);
-    var data = apistore.getApplications(user.username);
-    if(data != null){
-        output.appsWithSubs = JSON.parse(data);
+
+// room to add session management.
+    if (options2.subscription_selection == null) {
+        // getAllSubscriptions(userName, appName, startSubIndex, endSubIndex)
+        var subscribedAPIsResult = apistore.getAllSubscriptions(user.username, '', 0, 100);
+        var subscribedAPIs = [];
+        subscribedAPIs = JSON.parse(subscribedAPIsResult);
+        if (subscribedAPIs.applications != null) {
+            output.appsWithSubs = subscribedAPIs.applications;
+        }
     }
+
     caramel.render(output);
 }, request, response, session);
 %>
