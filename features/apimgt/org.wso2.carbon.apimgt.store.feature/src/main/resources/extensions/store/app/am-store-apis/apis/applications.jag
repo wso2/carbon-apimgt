@@ -59,7 +59,7 @@ require('/modules/store.js').exec(function (ctx) {
             var appDataResult = apistore.getApplications(user.username);
             var appData = [];
             appData = JSON.parse(appDataResult);
-            if (appData != null) {
+            if(appData != null){
                 print(appData);
             }
             break;

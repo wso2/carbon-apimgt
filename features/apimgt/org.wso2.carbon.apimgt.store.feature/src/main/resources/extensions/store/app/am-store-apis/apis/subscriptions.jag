@@ -27,15 +27,15 @@ require('/modules/store.js').exec(function (ctx) {
 
     switch (httpMethod) {
         case 'GET':
-            // log.info('GET :: ' + httpMethod);
+            log.info('GET :: ' + httpMethod);
             break;
 
         case 'POST':
-            // log.info('POST :: ' + httpMethod);
+            log.info('POST :: ' + httpMethod);
             break;
 
         default:
-            // log.info('default :: ' + httpMethod);
+            log.info('default :: ' + httpMethod);
             break;
     }
 
