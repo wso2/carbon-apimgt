@@ -30,6 +30,7 @@ import java.util.Set;
  * Cache entry for grouping Cache Keys by Application Id.
  */
 public class ApplicationCacheEntry implements Serializable{
+    public static final String INVALID_APP = "INVALID";
     private String applicationId;
     private Set<String> cacheKeys = new HashSet<String>();
 
