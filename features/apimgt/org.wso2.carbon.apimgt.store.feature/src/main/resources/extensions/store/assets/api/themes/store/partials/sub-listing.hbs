@@ -4,14 +4,14 @@ Subscription listing page
 <div class='row-fluid'>
     <legend>{{t "Subscribed APIs "}}</legend>
 </div>
-<div class="row-fluid">{{#each subscriptions}}
+<div class="row-fluid">
+    {{#each subscriptions}}
     <div class="span3 asset">
         <div class="asset-icon">
             {{#if thumburl}}
-                <img src='{{thumburl}}' class='img-polaroid'></img>
+                <img src='{{thumburl}}'>
             {{else}}
-                <img src='{{url ""}}/extensions/assets/api/themes/store/imgs/api-default.png'
-                     class='img-polaroid'></img>
+                <img src='{{url ""}}/extensions/assets/api/themes/store/imgs/api-default.png'>
             {{/if}}
         </div>
         <div class="asset-details">
@@ -23,5 +23,5 @@ Subscription listing page
             </small>
         </div>
     </div>
-{{/each}}
+    {{/each}}
 </div>
