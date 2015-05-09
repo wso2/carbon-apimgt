@@ -1,10 +1,34 @@
-<ul class='nav nav-tabs'>
-    <li><a href='{{url ""}}/asts/api/create'>Design</a></li>
-    <li><a href='{{url ""}}/asts/api/implement'>Implement</a></li>
-    <li><a href='{{url ""}}/asts/api/manage'>Manage</a></li>
-</ul>
+    <div class="col-sm-12 text-center">
+            <ul class="new-sub-menu-wizard" style="margin:0 auto">
+                <li>
+                    <a href='{{url ""}}/asts/api/design/{{api.id}}?name={{api.name}}&version={{api
+                    .version}}&provider={{api
+                    .provider}}'  class="wizard-done">
+                        <div class="wizard-number">1</div>
+                        <span>Design</span>
+                    </a>
+                </li>
+                <li>
+                    <a href='{{url ""}}/asts/api/implement/{{api.id}}?name={{api.name}}&version={{api.version}}&provider={{api
+                    .provider}}'
+                       class="wizard-active">
+                        <div class="wizard-number">2</div>
+                        <span>Implement</span>
+                    </a>
+                </li>
+                <li>
+                    <a href='{{url ""}}/asts/api/manage/{{api.id}}?name={{api.name}}&version={{api.version}}&provider={{api
+                    .provider}}'  class="wazard">
+                        <div class="wizard-number">3</div>
+                        <span>Manage</span>
+                    </a>
+                </li>
+            </ul>
+        </center>
+    </div>
+    <h1>{{t "Implement API"}}</h1>
     <div class="title-section">
-        <h2>API name goes here</h2>
+        <h2>{{api.name}}({{api.version}}) : {{api.context}}</h2>
     </div>     
     <div class="content-section shadow-up">
     <div class="content-data">   

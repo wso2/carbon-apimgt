@@ -21,22 +21,29 @@ require('/modules/store.js').exec(function (ctx) {
     var log = new Log();
     // log.info("inside api");
     var server = require('store').server;
+    var responseProcessor = require('utils').response;
     var user = server.current(ctx.session);
     var apistore = require('apistore').apistore.instance(user.username);
+    var response = ctx.response;
     var options = request.getAllParameters('UTF-8');
     var method = request.getMethod();
     // log.info("methoddd"+method);
     // log.info(options.applicationId);
 
-    switch (method) {   
+    var constants = require("rxt").constants;
+
+    switch (method) {
         case 'POST':
-            // log.info("options.name"+options.name);
-            // log.info("options.provider"+options.provider);
-            // log.info("options.version"+options.version);
-            // log.info("options.name"+options.tier);
-            // log.info("options.name"+user.username);
-            apistore.addSubscription(options.name, options.version,options.provider,user.username, options.tier,
+            var obj;
+            var result=apistore.addSubscription(options.name, options.version,options.provider,user.username, options.tier,
                     options.applicationId);
+            if(result){
+            obj = {error:false,status:result};
+            response = responseProcessor.buildSuccessResponse(response, constants.STATUS_CODES.OK, obj);
+            }else{
+            obj={error:true,status:null};
+            response = responseProcessor.buildErrorResponse(response,constants.STATUS_CODES.NOT_IMPLEMENTED,obj);
+            }
             break;
 
         default:
