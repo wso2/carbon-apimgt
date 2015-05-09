@@ -376,7 +376,7 @@ var apipublisher = {};
             apiJson.put("destinationStats", api.destinationStats);
             apiJson.put("environments", api.environments);
             success = this.impl.manageAPI(apiJson);
-            log.info("=============================================");
+            // log.info("=============================================");
             if (log.isDebugEnabled()) {
                 log.debug("manageAPI : " + api.name + "-" + api.version);
             }

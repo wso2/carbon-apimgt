@@ -19,28 +19,28 @@
  */
 require('/modules/store.js').exec(function (ctx) {
     var log = new Log();
-    log.info("inside api");
+    // log.info("inside api");
     var server = require('store').server;
     var user = server.current(ctx.session);
     var apistore = require('apistore').apistore.instance(user.username);
     var options = request.getAllParameters('UTF-8');
     var method = request.getMethod();
-    log.info("methoddd"+method);
-    log.info(options.applicationId);
+    // log.info("methoddd"+method);
+    // log.info(options.applicationId);
 
     switch (method) {   
         case 'POST':
-            log.info("options.name"+options.name);
-            log.info("options.provider"+options.provider);
-            log.info("options.version"+options.version);
-            log.info("options.name"+options.tier);
-            log.info("options.name"+user.username);
+            // log.info("options.name"+options.name);
+            // log.info("options.provider"+options.provider);
+            // log.info("options.version"+options.version);
+            // log.info("options.name"+options.tier);
+            // log.info("options.name"+user.username);
             apistore.addSubscription(options.name, options.version,options.provider,user.username, options.tier,
                     options.applicationId);
             break;
 
         default:
-            log.info('default :: ' + method);
+            // log.info('default :: ' + method);
             break;
     }
 
