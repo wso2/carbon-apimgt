@@ -3318,7 +3318,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         return uriTemplates;
     }
 
-    public String implementAPI(JSONObject apiObj) throws APIManagementException {
+	    public String implementAPI(JSONObject apiObj) throws APIManagementException {
         String provider = (String) apiObj.get("provider");
         String name = (String) apiObj.get("name");
         String version = (String) apiObj.get("version");
@@ -3455,8 +3455,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      * @return json string of input map
      */
     private static String createFailedGatewaysAsJsonString(Map<String, List<String>> failedGateways) {
-        String failedJson = "{\"PUBLISHED\" : \"\" ,\"UNPUBLISHED\":\"\"}";
+        String failedJson = "";
         if (failedGateways != null) {
+	        failedJson = "{\"PUBLISHED\" : \"\" ,\"UNPUBLISHED\":\"\"}";
             if (!failedGateways.isEmpty()) {
                 StringBuilder failedToPublish = new StringBuilder();
                 StringBuilder failedToUnPublish = new StringBuilder();

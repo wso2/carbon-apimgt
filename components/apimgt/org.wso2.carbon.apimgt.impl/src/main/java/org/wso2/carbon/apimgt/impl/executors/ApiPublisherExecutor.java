@@ -91,7 +91,8 @@ public class ApiPublisherExecutor implements Execution {
             APIStatus newStatus = getApiStatus(targetState);
             APIProvider apiProvider = APIManagerFactory.getInstance().getAPIProvider(user);
             failedGateways = apiProvider.updateAPIStatus(api.getId(), targetState, true, false, true);
-            if (failedGateways == null || failedGateways.isEmpty()) {
+            if (failedGateways != null) {
+	            //TODO Failed gateways returns json string which need to be format and correct this place
                 executed = true;
             }
         } catch (RegistryException e) {
