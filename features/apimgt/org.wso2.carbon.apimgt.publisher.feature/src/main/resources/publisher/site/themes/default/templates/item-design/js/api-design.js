@@ -175,11 +175,19 @@ function APIDesigner(){
  
 }
 
-APIDesigner.prototype.check_if_resource_exist = function(path, method){    
-    if(this.api_doc.paths[path] == undefined || this.api_doc.paths[path][method] == undefined){
-        return false;
+APIDesigner.prototype.check_if_resource_exist = function(path, method){
+
+    for (var key in this.api_doc.paths) {
+
+        if(key.toLowerCase() == path.toLowerCase()){
+
+            if (this.api_doc.paths[key].hasOwnProperty(method)) {
+
+                return true;
+            }
+        }
     }
-    return true;
+    return false;
 }
 
 
