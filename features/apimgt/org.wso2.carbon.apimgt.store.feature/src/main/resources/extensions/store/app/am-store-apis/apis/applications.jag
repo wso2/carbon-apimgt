@@ -71,7 +71,7 @@ require('/modules/store.js').exec(function (ctx) {
             break;
 
         default:
-            log.info('default :: ' + httpMethod);
+            // log.info('default :: ' + httpMethod);
             break;
     }
 

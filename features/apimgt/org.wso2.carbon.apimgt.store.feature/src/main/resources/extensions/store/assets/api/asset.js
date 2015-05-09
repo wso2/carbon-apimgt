@@ -162,7 +162,7 @@ asset.renderer = function(ctx) {
     if (user != null) {
         userName = user.username;
     }    
-    var lenI,lenJ,i,j,result,apidata,deniedTiers,tiers,appsList=[],subscribedToDefault=false,showSubscribe=false,status;
+    var lenI,lenJ,i,j,result,apidata,deniedTiers,tiers,appsList=[],subscribedToDefault=false,showSubscribe=false,status,selectedDefault=false;
     var apistore = require('apistore').apistore.instance(userName);
     var applications = JSON.parse(apistore.getApplications(userName));
     var asset = page.assets;    
@@ -192,24 +192,32 @@ asset.renderer = function(ctx) {
                         for (j = 0; j < lenJ; j++) {
                             var subscription = subscriptions[j];
                             if (subscription.applicationId == application.id) {
+                                if(application.name=="DefaultApplication"){
+                                   selectedDefault=true;
+                                }
                                 continue Label1;
+                            }else{
+                              if(application.name=="DefaultApplication"){
+                                   subscribedToDefault=true;
+                                }  
                             }
                         }
-                        if(application.name=="DefaultApplication"){
-                                   subscribedToDefault=true;
-                        }
+                        
                         if(application.status=="APPROVED"){
+                        application.selectedDefault=selectedDefault;
                         appsList.push(application);
                         }
                     }
             result = apistore.getDeniedTiers();
             deniedTiers = result.tiers;
             var k,m,allowedTiers,denied = false, tiersAvailable = false;
-
+                    if(tiers!=null){
                     for(var m=0;m<tiers.length;m++){
+                       if(deniedTiers!=null){
                        for (var k=0;k<deniedTiers.length;k++) {
                        if (tiers[m].tierName == deniedTiers[k].tierName) {
                             denied = true;
+                       }
                        }
                        }
                        if (!denied) {
@@ -217,6 +225,7 @@ asset.renderer = function(ctx) {
                        tiersAvailable = true;                      
                     }
                     denied = false;
+                    }
                     }
             
        

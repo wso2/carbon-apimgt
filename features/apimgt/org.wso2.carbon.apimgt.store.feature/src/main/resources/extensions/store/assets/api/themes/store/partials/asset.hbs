@@ -49,13 +49,13 @@
 				<div class='well'>
 				<legend></legend>
 
-				<select id='application-selection'>	
+				<select id='application-list'>	
          {{#unless subscribedToDefault}} 
          <option value="-">{{t "Select Application..."}}</option>		             
          {{/unless}}        
          <option value="createNewApp">{{t "New Application..."}}</option>			    
 				    {{#each applications}}
-					<option>{{name}}</option>
+					<option value="{{id}}" {{#if selectedDefault}} selected {{/if}}>{{name}}</option>
 				    {{/each}}
 				   
 				</select>
