@@ -246,35 +246,41 @@ asset.renderer = function(ctx) {
         },
         pageDecorators: {
             populateEndPoints : function(page){
-                if(page.assets && page.assets.id){
-                    var prodEps = parse(page.assets.attributes.overview_endpointConfig).production_endpoints;
-                    var sandBoxEps = parse(page.assets.attributes.overview_endpointConfig).sandbox_endpoints;
+                if (page.assets && page.assets.id) {
+                    var httpEndpoint = page.api.serverURL.split(",")[1];
+                    var httpsEndpoint = page.api.serverURL.split(",")[2];
 
-                    if(prodEps != null){
-                        var prodEpArry = [];
+                    page.assets.httpEndpoint = httpEndpoint;
+                    page.assets.httpsEndpoint = httpsEndpoint;
 
-                        for(var i = 0; prodEps.length > i; i++){
-                            prodEpArry.push(prodEps[i].url);
-                        }
-
-                        page.assets.production_endpoint = prodEpArry.join(',');
-
-                    }else {
-                        page.assets.production_endpoint = parse(page.assets.attributes.overview_endpointConfig).production_endpoints.url;
-                    }
-
-                    if(sandBoxEps != null){
-                        var sandBoxEpArry = [];
-
-                        for(var i = 0; prodEps.length > i; i++){
-                            sandBoxEpArry.push(sandBoxEps[i].url);
-                        }
-
-                        page.assets.sandbox_endpoint = sandBoxEpArry.join(',');
-
-                    } else if(parse(page.assets.attributes.overview_endpointConfig).sandbox_endpoints != null && parse(page.assets.attributes.overview_endpointConfig).sandbox_endpoints.url != null) {
-                        page.assets.sandbox_endpoint = parse(page.assets.attributes.overview_endpointConfig).sandbox_endpoints.url;
-                    }
+                    //var prodEps = parse(page.assets.attributes.overview_endpointConfig).production_endpoints;
+                    //var sandBoxEps = parse(page.assets.attributes.overview_endpointConfig).sandbox_endpoints;
+                    //
+                    //if(prodEps != null){
+                    //    var prodEpArry = [];
+                    //
+                    //    for(var i = 0; prodEps.length > i; i++){
+                    //        prodEpArry.push(prodEps[i].url);
+                    //    }
+                    //
+                    //    page.assets.production_endpoint = prodEpArry.join(',');
+                    //
+                    //}else {
+                    //    page.assets.production_endpoint = parse(page.assets.attributes.overview_endpointConfig).production_endpoints.url;
+                    //}
+                    //
+                    //if(sandBoxEps != null){
+                    //    var sandBoxEpArry = [];
+                    //
+                    //    for(var i = 0; prodEps.length > i; i++){
+                    //        sandBoxEpArry.push(sandBoxEps[i].url);
+                    //    }
+                    //
+                    //    page.assets.sandbox_endpoint = sandBoxEpArry.join(',');
+                    //
+                    //} else if(parse(page.assets.attributes.overview_endpointConfig).sandbox_endpoints != null && parse(page.assets.attributes.overview_endpointConfig).sandbox_endpoints.url != null) {
+                    //    page.assets.sandbox_endpoint = parse(page.assets.attributes.overview_endpointConfig).sandbox_endpoints.url;
+                    //}
                 }
             },
             socialSitePopulator: function(page, meta) {
