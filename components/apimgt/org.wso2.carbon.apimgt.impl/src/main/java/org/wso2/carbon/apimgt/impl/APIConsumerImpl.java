@@ -1733,7 +1733,9 @@ Set<API> apiSet) throws APIManagementException {
         APIIdentifier identifier =  getAPIidentifier(apiId, userId);
     	
         API api = getAPI(identifier);
-        if (api.getStatus().equals(APIStatus.PUBLISHED)) {
+        //--------------Temporary commented out until the issue of api.status properly set when publishing
+
+        //if (api.getStatus().equals(APIStatus.PUBLISHED)) {
             int subscriptionId = apiMgtDAO.addSubscription(identifier, api.getContext(), applicationId,
                     APIConstants.SubscriptionStatus.ON_HOLD);
 
@@ -1786,10 +1788,10 @@ Set<API> apiSet) throws APIManagementException {
             }
 
             return apiMgtDAO.getSubscriptionStatusById(subscriptionId);
-        } else {
+        /*} else {
             throw new APIManagementException("Subscriptions not allowed on APIs in the state: " +
                     api.getStatus().getStatus());
-        }
+        }  */
     }
 
     private APIIdentifier getAPIidentifier(APIIdentifier apiIdentifier, String userId) throws APIManagementException {
