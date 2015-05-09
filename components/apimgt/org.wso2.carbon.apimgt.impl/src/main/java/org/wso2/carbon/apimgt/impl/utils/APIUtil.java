@@ -875,7 +875,7 @@ public final class APIUtil {
     public static APIStatus getApiStatus(String status) throws APIManagementException {
         APIStatus apiStatus = null;
         for (APIStatus aStatus : APIStatus.values()) {
-            if (aStatus.getStatus().equals(status)) {
+            if (aStatus.getStatus().equalsIgnoreCase(status)) {
                 apiStatus = aStatus;
             }
         }

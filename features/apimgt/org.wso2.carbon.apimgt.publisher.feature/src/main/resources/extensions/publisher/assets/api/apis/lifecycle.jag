@@ -29,12 +29,10 @@ require('/modules/publisher.js').exec(function (ctx) {
 	var log = new Log('asset_api_endpoints');
 	var ref = require('utils').request;
 	var responseProcessor = require('utils').response;
-	var res = ctx.response;
-	var req = ctx.request;
+	var request = ctx.request;
 	var server = require('store').server;
 	var user = server.current(ctx.session);
 	var username = user.username;
-	var session = ctx.session;
 	var uriMatcher = new URIMatcher(req.getRequestURI());
 	var UPDATE_LIFECYCLE_URL = '/{context}/asts/api/apis/lifecycle';
 	var method = req.getMethod();
