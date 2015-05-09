@@ -22,21 +22,20 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.API;
+import org.wso2.carbon.apimgt.impl.clients.MediationSecurityAdminServiceClient;
+import org.wso2.carbon.apimgt.impl.clients.SequenceAdminServiceClient;
 import org.wso2.carbon.apimgt.impl.dto.Environment;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.template.APITemplateBuilder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.utils.RESTAPIAdminClient;
-import org.wso2.carbon.apimgt.impl.clients.MediationSecurityAdminServiceClient;
-import org.wso2.carbon.apimgt.impl.clients.SequenceAdminServiceClient;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
+import javax.xml.namespace.QName;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-
-import javax.xml.namespace.QName;
 
 public class APIGatewayManager {
 
@@ -117,7 +116,7 @@ public class APIGatewayManager {
                     deployAPIFaultSequence(api, tenantDomain, environment);
 
                     operation ="update";
-
+                    api.setImplementation("ENDPOINT");
                     //Update the API
                     if(api.getImplementation().equalsIgnoreCase(APIConstants.IMPLEMENTATION_TYPE_INLINE)){
                         client.updateApiForInlineScript(builder, tenantDomain);
@@ -160,7 +159,7 @@ public class APIGatewayManager {
                     deployAPIFaultSequence(api, tenantDomain, environment);
 
                     operation ="add";
-
+                    api.setImplementation("ENDPOINT");
                     //Add the API
                     if(api.getImplementation().equalsIgnoreCase(APIConstants.IMPLEMENTATION_TYPE_INLINE)){
                         client.addPrototypeApiScriptImpl(builder, tenantDomain);
