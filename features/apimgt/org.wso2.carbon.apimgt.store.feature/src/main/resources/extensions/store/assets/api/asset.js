@@ -245,7 +245,7 @@ asset.renderer = function(ctx) {
                     var prodEps = parse(page.assets.attributes.overview_endpointConfig).production_endpoints;
                     var sandBoxEps = parse(page.assets.attributes.overview_endpointConfig).sandbox_endpoints;
 
-                    if(prodEps.length != null){
+                    if(prodEps != null){
                         var prodEpArry = [];
 
                         for(var i = 0; prodEps.length > i; i++){
@@ -258,7 +258,7 @@ asset.renderer = function(ctx) {
                         page.assets.production_endpoint = parse(page.assets.attributes.overview_endpointConfig).production_endpoints.url;
                     }
 
-                    if(sandBoxEps.length != null){
+                    if(sandBoxEps != null){
                         var sandBoxEpArry = [];
 
                         for(var i = 0; prodEps.length > i; i++){
@@ -267,7 +267,7 @@ asset.renderer = function(ctx) {
 
                         page.assets.sandbox_endpoint = sandBoxEpArry.join(',');
 
-                    } else {
+                    } else if(parse(page.assets.attributes.overview_endpointConfig).sandbox_endpoints != null && parse(page.assets.attributes.overview_endpointConfig).sandbox_endpoints.url != null) {
                         page.assets.sandbox_endpoint = parse(page.assets.attributes.overview_endpointConfig).sandbox_endpoints.url;
                     }
                 }
