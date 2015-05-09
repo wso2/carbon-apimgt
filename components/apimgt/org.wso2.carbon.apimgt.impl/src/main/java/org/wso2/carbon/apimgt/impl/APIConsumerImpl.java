@@ -2721,7 +2721,7 @@ Set<API> apiSet) throws APIManagementException {
                     Set<Scope> scopeSet = new LinkedHashSet<Scope>();
                     JSONArray scopesArray = new JSONArray();
 
-                    if (((appName == null || "".equals(appName)) && i == 0) ||
+                    if ((appName == null || "".equals(appName)) ||
                         appName.equals(application.getName())) {
 
                         //get subscribed APIs set as per the starting and ending indexes for application.
