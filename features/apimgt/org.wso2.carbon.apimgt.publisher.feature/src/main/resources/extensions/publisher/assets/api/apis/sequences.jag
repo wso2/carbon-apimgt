@@ -45,7 +45,7 @@ require('/modules/publisher.js').exec(function (ctx) {
 	response.contentType = 'application/json';
 	var constants = require("rxt").constants;
 	var result;
-	log.info("Calling Sequence API");
+	// log.info("Calling Sequence API");
 	switch (method) {
 		case 'POST':// POST endpoints
 			options.type = req.getParameter('type');

@@ -19,6 +19,6 @@
 	
 var resources = function(page, meta) {
     var log = new Log();
-    log.info('Add application loaded');
+    // log.info('Add application loaded');
     return {};
 };

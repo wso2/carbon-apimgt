@@ -44,7 +44,7 @@ asset.manager = function(ctx){
         return assets;
     },
     get:function(id){
-       log.info('Calling custom get of asset');
+       // log.info('Calling custom get of asset');
        return this._super.get.call(this,id);
     }
         /*search : function(query, paging) {
@@ -147,7 +147,7 @@ asset.renderer = function(ctx) {
     };
     return {
         details:function(page){
-            log.info('Details page rendered!!!');
+            // log.info('Details page rendered!!!');
         
     //=================== Getting subscription details ========================
 
