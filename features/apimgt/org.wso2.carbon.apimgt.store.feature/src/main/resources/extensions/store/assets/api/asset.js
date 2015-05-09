@@ -191,13 +191,17 @@ asset.renderer = function(ctx) {
                         var application = applications[i];
                         for (j = 0; j < lenJ; j++) {
                             var subscription = subscriptions[j];
+                            log.name("initiationn appp namee"+application.name);
                             if (subscription.applicationId == application.id) {
+                                log.name("inside if"+application.name);
                                 if(application.name=="DefaultApplication"){
                                    selectedDefault=true;
                                 }
                                 continue Label1;
                             }else{
+                              log.name("appp namee"+application.name);
                               if(application.name=="DefaultApplication"){
+                                  log.name("appp namee"+application.name);
                                    subscribedToDefault=true;
                                 }  
                             }
@@ -210,24 +214,25 @@ asset.renderer = function(ctx) {
                     }
             result = apistore.getDeniedTiers();
             deniedTiers = result.tiers;
-            var k,m,allowedTiers,denied = false, tiersAvailable = false;
+            var k,m,allowedTiers=[],denied = false, tiersAvailable = false;
                     if(tiers!=null){
-                    for(var m=0;m<tiers.length;m++){
+                    var tiersVal=tiers.split(",");                    
+                    for(var m=0;m<tiersVal.length;m++){
                        if(deniedTiers!=null){
-                       for (var k=0;k<deniedTiers.length;k++) {
-                       if (tiers[m].tierName == deniedTiers[k].tierName) {
+                       var deniedTiersVal=tiers.split(",");
+                       for (var k=0;k<deniedTiersVal.length;k++) {
+                       if (tiersVal[m].tierName == deniedTiersVal[k].tierName) {
                             denied = true;
                        }
                        }
                        }
-                       if (!denied) {
-                       allowedTiers+=tiers[m];
+                       if (!denied) {                       
+                       allowedTiers.push(tiersVal[m]);
                        tiersAvailable = true;                      
                     }
                     denied = false;
                     }
-                    }
-            
+                    }            
        
     page.applications= appsList;
     page.tiersAvailable=tiersAvailable;
