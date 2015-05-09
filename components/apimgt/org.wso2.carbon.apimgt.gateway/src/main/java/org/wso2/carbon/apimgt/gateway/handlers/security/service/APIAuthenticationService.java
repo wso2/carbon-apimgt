@@ -35,12 +35,35 @@ public class APIAuthenticationService extends AbstractServiceBusAdmin {
      * Version and the context of the API whose entries needed to deleted have to be set in APIKeyMapping Element. If
      * an applicationId is specified, then cache entries created for that particular API,
      * subscribed under that particular Application will be cleared.
+     *
      * @param mappings A {@code List} of {@code APIKeyMapping} elements, representing the APIs that were changed.
      */
     public void invalidateKeys(APIKeyMapping[] mappings) {
         for (APIKeyMapping mapping : mappings) {
-            // TODO: Need to switch tenant domain and remove entries from Tenant's Cache
-            GatewayKeyInfoCache.getInstance().removeFromCache(mapping.getContext(), mapping.getApiVersion());
+            if (mapping.getApiVersion() != null && mapping.getContext() != null) {
+
+                String domain = mapping.getDomain();
+
+                if (domain == null) {
+                    domain = APIUtil.getTenantDomainFromContext(mapping.getContext());
+                }
+
+                // Switching the tenant domain. Key will be cached in the Tenant's cache from where API is coming from.
+                PrivilegedCarbonContext.startTenantFlow();
+                PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(domain, true);
+
+                // This means we have to invalidate all the Cache entries related to that API
+                if (mapping.getApplicationId() == null) {
+
+                    GatewayKeyInfoCache.getInstance().removeFromCache(mapping.getContext(), mapping.getApiVersion());
+
+                } else {
+                    GatewayKeyInfoCache.getInstance().removeFromCache(mapping.getContext(), mapping.getApiVersion(),
+                                                                      mapping.getApplicationId());
+                }
+
+                PrivilegedCarbonContext.endTenantFlow();
+            }
         }
     }
 
@@ -54,12 +77,7 @@ public class APIAuthenticationService extends AbstractServiceBusAdmin {
     public void invalidateResourceCache(String apiContext, String apiVersion, String resourceURLContext,
                                         String httpVerb) {
         boolean isTenantFlowStarted = false;
-        int tenantDomainIndex = apiContext.indexOf("/t/");
-        String tenantDomain = MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
-        if (tenantDomainIndex != -1) {
-            String temp = apiContext.substring(tenantDomainIndex + 3, apiContext.length());
-            tenantDomain = temp.substring(0, temp.indexOf("/"));
-        }
+        String tenantDomain = APIUtil.getTenantDomainFromContext(apiContext);
 
         try {
             if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
