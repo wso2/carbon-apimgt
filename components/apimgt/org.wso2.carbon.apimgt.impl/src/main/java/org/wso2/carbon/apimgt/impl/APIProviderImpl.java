@@ -175,51 +175,53 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      *          if failed to get set of API
      */
     public JSONArray getAPIsByProvider(String providerId) throws APIManagementException {
-        List<API> apiSortedList = new ArrayList<API>();
-        if (providerId != null) {
-            boolean isTenantFlowStarted = false;
-            try {
-                String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(providerId));
-                if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
-                    isTenantFlowStarted = true;
-                    PrivilegedCarbonContext.startTenantFlow();
-                    PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
-                }
-
-
-                providerId = APIUtil.replaceEmailDomain(providerId);
-                String providerPath = APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR +
-                                      providerId;
-                GenericArtifactManager artifactManager = APIUtil.getArtifactManager(registry,
-                                                                                    APIConstants.API_KEY);
-                Association[] associations = registry.getAssociations(providerPath,
-                                                                      APIConstants.PROVIDER_ASSOCIATION);
-                for (Association association : associations) {
-                    String apiPath = association.getDestinationPath();
-                    Resource resource = registry.get(apiPath);
-                    String apiArtifactId = resource.getUUID();
-                    if (apiArtifactId != null) {
-                        GenericArtifact apiArtifact = artifactManager.getGenericArtifact(apiArtifactId);
-                        apiSortedList.add(APIUtil.getAPI(apiArtifact, registry));
-                    } else {
-                        throw new GovernanceException("artifact id is null of " + apiPath);
-                    }
-                }
-
-            } catch (RegistryException e) {
-                handleException("Failed to get APIs for provider : " + providerId, e);
-            } finally {
-                if (isTenantFlowStarted) {
-                    PrivilegedCarbonContext.endTenantFlow();
-                }
-            }
-        }
-        Collections.sort(apiSortedList, new APINameComparator());
-
-        return getJSONfyAPIsByProvider(apiSortedList);
+        return getJSONfyAPIsByProvider(getAPIsByProviderSet(providerId));
 
     }
 
+	private List<API> getAPIsByProviderSet(String providerId) throws APIManagementException {
+		List<API> apiSortedList = new ArrayList<API>();
+		if (providerId != null) {
+			boolean isTenantFlowStarted = false;
+			try {
+				String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(providerId));
+				if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
+					isTenantFlowStarted = true;
+					PrivilegedCarbonContext.startTenantFlow();
+					PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
+				}
+
+
+				providerId = APIUtil.replaceEmailDomain(providerId);
+				String providerPath = APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR +
+				                      providerId;
+				GenericArtifactManager artifactManager = APIUtil.getArtifactManager(registry,
+						APIConstants.API_KEY);
+				Association[] associations = registry.getAssociations(providerPath,
+						APIConstants.PROVIDER_ASSOCIATION);
+				for (Association association : associations) {
+					String apiPath = association.getDestinationPath();
+					Resource resource = registry.get(apiPath);
+					String apiArtifactId = resource.getUUID();
+					if (apiArtifactId != null) {
+						GenericArtifact apiArtifact = artifactManager.getGenericArtifact(apiArtifactId);
+						apiSortedList.add(APIUtil.getAPI(apiArtifact, registry));
+					} else {
+						throw new GovernanceException("artifact id is null of " + apiPath);
+					}
+				}
+
+			} catch (RegistryException e) {
+				handleException("Failed to get APIs for provider : " + providerId, e);
+			} finally {
+				if (isTenantFlowStarted) {
+					PrivilegedCarbonContext.endTenantFlow();
+				}
+			}
+		}
+		Collections.sort(apiSortedList, new APINameComparator());
+		return apiSortedList;
+	}
     private JSONArray getJSONfyAPIsByProvider(List<API> apiList) {
         JSONArray result = new JSONArray();
         if (apiList != null) {
@@ -3316,7 +3318,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         return uriTemplates;
     }
 
-    public String implementAPI(JSONObject apiObj) throws APIManagementException {
+	    public String implementAPI(JSONObject apiObj) throws APIManagementException {
         String provider = (String) apiObj.get("provider");
         String name = (String) apiObj.get("name");
         String version = (String) apiObj.get("version");
@@ -3453,8 +3455,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      * @return json string of input map
      */
     private static String createFailedGatewaysAsJsonString(Map<String, List<String>> failedGateways) {
-        String failedJson = "{\"PUBLISHED\" : \"\" ,\"UNPUBLISHED\":\"\"}";
+        String failedJson = "";
         if (failedGateways != null) {
+	        failedJson = "{\"PUBLISHED\" : \"\" ,\"UNPUBLISHED\":\"\"}";
             if (!failedGateways.isEmpty()) {
                 StringBuilder failedToPublish = new StringBuilder();
                 StringBuilder failedToUnPublish = new StringBuilder();
@@ -3660,6 +3663,77 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 			log.error("Error while validating the input roles.",e);
 		}
 		return valid;
+	}
+
+	/**
+	 * @return json string of failed environments
+	 * @throws APIManagementException
+	 */
+	public String updateAPIStatus(JSONObject apiData) throws APIManagementException {
+		String success = null;
+		String provider = (String) apiData.get("provider");
+		provider = APIUtil.replaceEmailDomain(provider);
+		String name = (String) apiData.get("apiName");
+		String version = (String) apiData.get("version");
+		String status = (String) apiData.get("status");
+		boolean publishToGateway = Boolean.parseBoolean((String) apiData.get("publishToGateway"));
+		boolean deprecateOldVersions = Boolean.parseBoolean((String) apiData.get("deprecateOldVersions"));
+		boolean makeKeysForwardCompatible =Boolean.parseBoolean((String) apiData.get("makeKeysForwardCompatible"));
+		APIIdentifier apiId = new APIIdentifier(provider, name, version);
+		return updateAPIStatus(apiId, status, publishToGateway, deprecateOldVersions,
+				makeKeysForwardCompatible);
+	}
+
+	public String updateAPIStatus(APIIdentifier apiId, String status, boolean
+		publishToGateway, boolean deprecateOldVersions, boolean makeKeysForwardCompatible) throws APIManagementException {
+		Map<String, List<String>> failedGateways = new ConcurrentHashMap<String, List<String>>();
+		boolean isTenantFlowStarted = false;
+		try {
+			String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(apiId.getProviderName()));
+			if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
+				isTenantFlowStarted = true;
+				PrivilegedCarbonContext.startTenantFlow();
+				PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
+			}
+			API api = getAPI(apiId);
+			if (api != null) {
+				APIStatus oldStatus = api.getStatus();
+				APIStatus newStatus = APIUtil.getApiStatus(status);
+				String currentUser = this.username;
+				failedGateways = changeAPIStatus(api, newStatus, currentUser, publishToGateway);
+
+				if ((oldStatus.equals(APIStatus.CREATED) || oldStatus.equals(APIStatus.PROTOTYPED)) && newStatus.equals(APIStatus
+						.PUBLISHED)) {
+					if (makeKeysForwardCompatible) {
+						makeAPIKeysForwardCompatible(api);
+					}
+
+					if (deprecateOldVersions) {
+						List<API> apiList = getAPIsByProviderSet(apiId.getProviderName());
+						APIVersionComparator versionComparator = new APIVersionComparator();
+						for (API oldAPI : apiList) {
+							if (oldAPI.getId().getApiName().equals(apiId.getApiName()) &&
+							    versionComparator.compare(oldAPI, api) < 0 &&
+							    (oldAPI.getStatus().equals(APIStatus.PUBLISHED))) {
+								failedGateways = changeAPIStatus(oldAPI, APIStatus.DEPRECATED,
+										currentUser, publishToGateway);
+							}
+						}
+					}
+				}
+
+			} else {
+				handleException("Couldn't find an API with the name-" + apiId.getApiName() + "version-" + apiId.getVersion());
+			}
+		} catch (APIManagementException e) {
+			handleException("Error while updating API status", e);
+			return createFailedGatewaysAsJsonString(failedGateways);
+		}finally {
+			if (isTenantFlowStarted) {
+				PrivilegedCarbonContext.endTenantFlow();
+			}
+		}
+		return createFailedGatewaysAsJsonString(failedGateways);
 	}
 }
 
