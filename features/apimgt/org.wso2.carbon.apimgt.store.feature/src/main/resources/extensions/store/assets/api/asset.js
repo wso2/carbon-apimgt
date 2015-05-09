@@ -240,6 +240,38 @@ asset.renderer = function(ctx) {
     //=================== Getting subscription details ========================
         },
         pageDecorators: {
+            populateEndPoints : function(page){
+                if(page.assets && page.assets.id){
+                    var prodEps = parse(page.assets.attributes.overview_endpointConfig).production_endpoints;
+                    var sandBoxEps = parse(page.assets.attributes.overview_endpointConfig).sandbox_endpoints;
+
+                    if(prodEps.length != null){
+                        var prodEpArry = [];
+
+                        for(var i = 0; prodEps.length > i; i++){
+                            prodEpArry.push(prodEps[i].url);
+                        }
+
+                        page.assets.production_endpoint = prodEpArry.join(',');
+
+                    }else {
+                        page.assets.production_endpoint = parse(page.assets.attributes.overview_endpointConfig).production_endpoints.url;
+                    }
+
+                    if(sandBoxEps.length != null){
+                        var sandBoxEpArry = [];
+
+                        for(var i = 0; prodEps.length > i; i++){
+                            sandBoxEpArry.push(sandBoxEps[i].url);
+                        }
+
+                        page.assets.sandbox_endpoint = sandBoxEpArry.join(',');
+
+                    } else {
+                        page.assets.sandbox_endpoint = parse(page.assets.attributes.overview_endpointConfig).sandbox_endpoints.url;
+                    }
+                }
+            },
             socialSitePopulator: function(page, meta) {
                 var utils = require('utils');
                 //If the 
