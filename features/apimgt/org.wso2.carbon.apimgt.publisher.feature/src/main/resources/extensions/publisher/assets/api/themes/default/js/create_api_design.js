@@ -85,7 +85,11 @@ $(function () {
             var designer = APIDesigner();
             if ($("#resource_url_pattern").val() == "" || $('#inputResource').val() == "") {
                 //jagg.message({content:"URL pattern & Resource cannot be empty.",type:"error"});
-                alert("URL pattern & Resource cannot be empty.");
+                BootstrapDialog.show({
+                type: 'BootstrapDialog.TYPE_DANGER',
+                title: 'Message type: ' + type,
+                message: 'URL pattern & Resource cannot be empty.'              
+            });  
                 return;
             }
             var path = $("#resource_url_pattern").val();
@@ -100,7 +104,11 @@ $(function () {
                         resource_exist = true;
                         var err_message = "Resource already exist for URL Pattern " + path + " and Verb " + $(this).val();
                         //jagg.message({content:err_message,type:"error"});
-                        alert("error");
+                        BootstrapDialog.show({
+                        type: 'BootstrapDialog.TYPE_DANGER',
+                        title: 'Message type: ' + type,
+                        message: err_message              
+                        });                          
                         return;
                     }
                 }
@@ -171,7 +179,12 @@ $(function () {
             });
             if (vc == 0) {
                 //jagg.message({content:"You should select at least one HTTP verb." ,type:"error"});
-                alert("You should select at least one HTTP verb.");
+                 BootstrapDialog.show({
+                        type: 'BootstrapDialog.TYPE_DANGER',
+                        title: 'Message type: ' + type,
+                        message: 'You should select at least one HTTP verb.'             
+                        });   
+               // alert("You should select at least one HTTP verb.");
                 return;
             }
             event.data.add_resource(resource, $('#inputResource').val());
@@ -311,7 +324,14 @@ $(function () {
             //                    API_DESIGNER.clean_resources();
             //                   API_DESIGNER.render_resources();
             //               }});
-            alert("ERROR");
+            BootstrapDialog.confirm('Do you want to remove "'+operations[i].method+' : '+pn+'" resource from list.', function(result){
+            if(result) {
+                API_DESIGNER = APIDesigner();
+                operations.splice(i, 1);
+                API_DESIGNER.clean_resources();
+                API_DESIGNER.render_resources();
+            }
+        });
             //delete resource if no operations
         });
 
@@ -390,7 +410,11 @@ $(function () {
                              content : "You should not define same scope.",
                              type : "error"
                              });*/
-                            alert("ou should not define same scope.");
+                             BootstrapDialog.show({
+                        type: 'BootstrapDialog.TYPE_DANGER',
+                        title: 'Message type: ' + type,
+                        message: 'You should not define same scope.'             
+                        });   
                             return;
                         }
                     }
