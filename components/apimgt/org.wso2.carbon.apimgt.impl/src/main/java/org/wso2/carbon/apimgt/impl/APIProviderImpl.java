@@ -3735,6 +3735,26 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 		}
 		return createFailedGatewaysAsJsonString(failedGateways);
 	}
+
+	//TODO implement
+	public boolean changeLifeCycleState(APIIdentifier identifier, String nextState) throws APIManagementException {
+		try {
+			GenericArtifactManager artifactManager = APIUtil.getArtifactManager(registry, APIConstants.API_KEY);
+			String apiPath = APIConstants.API_LOCATION + RegistryConstants.PATH_SEPARATOR +
+			                        identifier.getProviderName() +
+			                        RegistryConstants.PATH_SEPARATOR + identifier.getApiName() +
+			                        RegistryConstants.PATH_SEPARATOR + identifier.getVersion() +
+			                        APIConstants.API_RESOURCE_NAME;
+			Resource apiResource = registry.get(apiPath);
+			GenericArtifact apiArtifact = artifactManager.getGenericArtifact(
+					apiResource.getUUID());
+		} catch (RegistryException e) {
+			String msg = "Failed to update default API version : " + identifier.getVersion() + " of : "
+			             + identifier.getApiName();
+			handleException(msg, e);
+		}
+		return false;
+	}
 }
 
 

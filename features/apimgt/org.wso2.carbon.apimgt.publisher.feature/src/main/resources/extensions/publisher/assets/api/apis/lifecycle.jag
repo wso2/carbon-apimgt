@@ -42,7 +42,7 @@ require('/modules/publisher.js').exec(function (ctx) {
 	var constants = require("rxt").constants;
 	log.info("Calling Life Cycle API");
 	switch (method) {
-		case 'POST':// GET endpoints
+		case 'POST':
 			options.type = req.getParameter('type');
 			if (uriMatcher.match(UPDATE_LIFECYCLE_URL)) {//return assets by type
 				var apiPublisher =  require('apipublisher').apipublisher;
@@ -57,7 +57,6 @@ require('/modules/publisher.js').exec(function (ctx) {
 				var keyForward=request.getParameter("requireResubscription");
 				if(keyForward!=null && keyForward){apiData.makeKeysForwardCompatible='false';}else{apiData.makeKeysForwardCompatible='true';}
 				result = apiProxy.updateAPIStatus(apiData);
-				var lcs = mod.getLifeCyclesEvents({provider:request.getParameter("provider"),name:request.getParameter("name"),version:request.getParameter("version")}).lcs;
 				if (result.error==true) {
 					obj = {
 						error:true,
@@ -66,7 +65,7 @@ require('/modules/publisher.js').exec(function (ctx) {
 				} else {
 					obj = {
 						error:false,
-						lcs:lcs
+						lcs:'success'
 					}
 				}
 				response = responseProcessor.buildSuccessResponse(response, constants.STATUS_CODES.OK, obj);

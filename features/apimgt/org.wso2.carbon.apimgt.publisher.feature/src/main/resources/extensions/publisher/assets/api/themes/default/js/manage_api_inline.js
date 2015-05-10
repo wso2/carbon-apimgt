@@ -216,7 +216,7 @@ $(function () {
                     requireResubscription: true
                 };
                 $.ajax({
-                           url: caramel.context + '/asts/api/apis/' + store.publisher.api.id + '/lifecycle?type=api',
+                           url: caramel.context + '/asts/api/apis/lifecycle?type=api',
                            type: 'POST',
                            data: JSON.stringify(data),
                            contentType: 'application/json',
