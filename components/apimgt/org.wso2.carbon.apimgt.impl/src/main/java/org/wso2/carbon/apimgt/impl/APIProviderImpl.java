@@ -892,10 +892,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                                                      boolean updateGatewayConfig) throws APIManagementException {
         Map<String, List<String>> failedGateways = new ConcurrentHashMap<String, List<String>>();
         APIStatus currentStatus = api.getStatus();
-        if (currentStatus.equals(status)) {
-        	throw new APIManagementException(" Both current status and next status are same !!!");
-        }
-        
         api.setStatus(status);
         MultitenantUtils.getTenantDomain(username);
         PrivilegedCarbonContext.startTenantFlow();
@@ -3676,9 +3672,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 		String name = (String) apiData.get("apiName");
 		String version = (String) apiData.get("version");
 		String status = (String) apiData.get("status");
-		boolean publishToGateway = Boolean.parseBoolean((String) apiData.get("publishToGateway"));
-		boolean deprecateOldVersions = Boolean.parseBoolean((String) apiData.get("deprecateOldVersions"));
-		boolean makeKeysForwardCompatible =Boolean.parseBoolean((String) apiData.get("makeKeysForwardCompatible"));
+		boolean publishToGateway = (Boolean) apiData.get("publishToGateway");
+		boolean deprecateOldVersions = (Boolean) apiData.get("deprecateOldVersions");
+		boolean makeKeysForwardCompatible = (Boolean) apiData.get("makeKeysForwardCompatible");
 		APIIdentifier apiId = new APIIdentifier(provider, name, version);
 		return updateAPIStatus(apiId, status, publishToGateway, deprecateOldVersions,
 				makeKeysForwardCompatible);
