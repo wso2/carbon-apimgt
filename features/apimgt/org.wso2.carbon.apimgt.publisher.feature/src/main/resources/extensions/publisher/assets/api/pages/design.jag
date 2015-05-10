@@ -33,6 +33,7 @@ require('/modules/publisher.js').exec(function(ctx) {
 	var options = uriMatcher.match('/{context}/asts/{type}/{pageName}/{+id}') || uriMatcher.match('/{context}/asts/{type}/{pageName}');
 	var page;
 	var output;
+	if(options){
 	if (!options.id) {
 		ctx.response.sendError(400, 'Cannot render the implementation details without an asset id');
 		return;
@@ -65,6 +66,7 @@ require('/modules/publisher.js').exec(function(ctx) {
 	output.public_visibility = public_visibility;
 	output.private_visibility = private_visibility;	
 	// log.info(output);
+	}
 	caramel.render(output);
 }, request, response, session);
 %>

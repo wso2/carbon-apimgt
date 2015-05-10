@@ -61,10 +61,9 @@
 				</select>
 
 				<select id="tiers-list" name="tiers-list">
-                   {{#if tiers}}  
-		                    <option value="Unlimited">Unlimited</option>
+                   {{#if tiers}}		                   
 				   {{#each tiers}}
-					<option value="{{tier}}">{{tierDisplayName}}</option>
+					<option value="{{this}}">{{this}}</option>
 				    {{/each}}{{/if}}
 		                    
 		                </select>
