@@ -28,7 +28,7 @@ $(document).ready(function () {
     success: function (result) {
         $("#subscribe-button").html('Subscribe');
         $("#subscribe-button").removeAttr('disabled');
-        if (result.error == false) {
+        if (result.data.error == false) {
                 var message ={};
                 message.text = '<div><i class="icon-briefcase"></i> Successfully API subscribed.</div>';
                 message.type = 'success';

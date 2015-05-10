@@ -376,7 +376,7 @@ var apipublisher = {};
             apiJson.put("destinationStats", api.destinationStats);
             apiJson.put("environments", api.environments);
             success = this.impl.manageAPI(apiJson);
-            log.info("=============================================");
+            // log.info("=============================================");
             if (log.isDebugEnabled()) {
                 log.debug("manageAPI : " + api.name + "-" + api.version);
             }
@@ -482,5 +482,41 @@ var apipublisher = {};
         }
     };
 
+    APIProviderProxy.prototype.updateAPIStatus = function (api) {
+        var log = new Log();
+        try {
+            var success = this.impl.updateAPIStatus(api);
+            if (log.isDebugEnabled()) {
+                log.debug("updateAPIStatus : " + api.name + "-" + api.version);
+            }
+
+            if (!success) {
+                return {
+                    error:true
+                };
+            } else {
+                var failedToPublishEnvironments = JSON.parse(success).PUBLISHED;
+                var failedToUnPublishEnvironments = JSON.parse(success).UNPUBLISHED;
+                if(failedToPublishEnvironments == "" && failedToUnPublishEnvironments == ""){
+                    return {
+                        error:false
+                    };
+                }else{
+                    return {
+                        error:true,
+                        message:success + '||warning'
+                    };
+                }
+            }
+
+        } catch (e) {
+            log.error(e.message);
+            return {
+                error:true,
+                message:e.message.split(":")[1]
+
+            };
+        }
+    };
 })(apipublisher);
 

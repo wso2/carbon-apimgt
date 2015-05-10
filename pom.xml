@@ -24,7 +24,7 @@
     </scm>
 
     <modules>
-        <module>dependencies/synapse</module>
+        <!--module>dependencies/synapse</module-->
         <module>service-stubs/apimgt</module>
         <module>components/apimgt</module>
         <module>components/forum</module>

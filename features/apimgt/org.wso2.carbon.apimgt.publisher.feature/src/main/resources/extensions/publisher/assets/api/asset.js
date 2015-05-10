@@ -140,7 +140,7 @@ asset.manager = function(ctx) {
 
                 var apiProxy = apiPublisher.instance(ctx.username);
                 result = apiProxy.implementAPI(api);
-                log.info(result);
+                // log.info(result);
                 if (result != null && result.error==true) {
                     obj = {
                         error:true,
@@ -154,6 +154,75 @@ asset.manager = function(ctx) {
                     }
                 }
                return obj;
+            } else if(options.attributes.action == "manage") {
+                var apiData = {};
+                log.info(options);
+                apiData.apiName = options.name;
+                apiData.version = options.attributes.version;
+                if (request.getParameter("provider") == null) {
+                    apiData.provider = ctx.username;
+                } else {
+                    apiData.provider = options.attributes.provider;
+                }
+                var apiId = {
+                    apiName : apiData.apiName,
+                    version : apiData.version,
+                    provider: apiData.provider
+                };
+
+                apiData.context = options.attributes.overview_context;
+                apiData.defaultVersion = options.attributes.default_version_checked;
+                apiData.swagger = generate_swagger_object(options.attributes.swagger);
+                apiData.tier = options.attributes.tiersCollection;
+                if(options.attributes.transport_http == null && options.attributes.transport_https == null){
+                    apiData.transports = null;
+                }
+                else if(options.attributes.transport_http != null && options.attributes.transport_https != null) {
+                    apiData.transports=options.attributes.transport_http+","+options.attributes.transport_https;
+
+                }else if(options.attributes.transport_http != null){
+                    apiData.transports=options.attributes.transport_http;
+                }else{
+                    apiData.transports=options.attributes.transport_https;
+                }
+                if(options.attributes.inSequence == 'none') {
+                    options.attributes.inSequence = null;
+                }
+                if(options.attributes.outSequence == 'none') {
+                    options.attributes.outSequence = null;
+                }if(options.attributes.faultSequence == 'none') {
+                    options.attributes.faultSequence = null;
+                }
+                apiData.inSequence = options.attributes.inSequence;
+                apiData.outSequence= options.attributes.outSequence;
+                apiData.responseCache = options.attributes.responseCache;
+                apiData.subscriptionAvailability = options.attributes.subscriptions;
+                apiData.subscriptionTenants = options.attributes.tenants;
+                apiData.bizOwner = options.attributes.bizOwner;
+                apiData.bizOwnerMail = options.attributes.bizOwnerMail;
+                apiData.techOwner = options.attributes.techOwner;
+                apiData.techOwnerMail = options.attributes.techOwnerMail;
+                apiData.faultSequence = options.attributes.faultSequence;
+                apiData.cacheTimeout= options.attributes.cacheTimeout;
+                apiData.destinationStats= options.attributes.destinationStatsEnabled;
+                apiData.environments = options.attributes.environments;
+                var apiProxy = apiPublisher.instance(ctx.username);
+                log.info("+++++++++++++++++++++++++++++++++++++++++++++++");
+                result = apiProxy.manageAPI(apiData);
+                log.info("=============================================");
+                if (result == null && result.error == false) {
+                    obj = {
+                        error: true,
+                        message: result.message,
+                        data: apiId
+                    };
+                } else {
+                    obj = {
+                        error: false,
+                        data: apiId
+                    }
+                }
+                return obj;
             }
         }
     };
@@ -196,6 +265,9 @@ asset.server = function (ctx) {
                    }, {
                        url: 'swagger',
                        path: 'swagger.jag'
+                   }, {
+                       url: 'lifecycle',
+                       path: 'lifecycle.jag'
                    },{
                        url: 'apimanage',
                        path: 'apimanage.jag'
