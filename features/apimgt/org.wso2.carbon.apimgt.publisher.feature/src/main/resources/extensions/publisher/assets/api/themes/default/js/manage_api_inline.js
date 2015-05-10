@@ -133,79 +133,79 @@ $(function () {
         };
 
         $("#manage_form").validate({
-                                               submitHandler: function (form) {
-                                                   $('#submit').attr('disabled', 'disabled');
-                                                   if (!validate_tiers()) {
-                                                       return false;
-                                                   }
-                                                   var designer = APIMangerAPI.APIDesigner();
-                                                   $('#swagger').val(JSON.stringify(designer.api_doc));
-                                                   $('#saveMessage').show();
-                                                   $('#saveButtons').hide();
-                                                   $(form).ajaxSubmit({
-                                                                          success: function (responseText, statusText, xhr,
-                                                                                             $form) {
-                                                                              $('#saveMessage').hide();
-                                                                              $('#saveButtons').show();
-                                                                              if (!responseText.error) {
-                                                                                  $("body").trigger("api_saved");
-                                                                              } else {
-                                                                                  if (responseText.message == "timeout") {
-                                                                                      if (ssoEnabled) {
-                                                                                          var currentLoc = window.location.pathname;
-                                                                                          if (currentLoc.indexOf(".jag") >= 0) {
-                                                                                              location.href = "index.jag";
-                                                                                          } else {
-                                                                                              location.href = 'site/pages/index.jag';
-                                                                                          }
-                                                                                      } else {
-                                                                                          jagg.showLogin();
-                                                                                      }
+                                       submitHandler: function (form) {
+                                           $('#submit').attr('disabled', 'disabled');
+                                           if (!validate_tiers()) {
+                                               return false;
+                                           }
+                                           var designer = APIMangerAPI.APIDesigner();
+                                           $('#swagger').val(JSON.stringify(designer.api_doc));
+                                           $('#saveMessage').show();
+                                           $('#saveButtons').hide();
+                                           $(form).ajaxSubmit({
+                                                                  success: function (responseText, statusText, xhr,
+                                                                                     $form) {
+                                                                      $('#saveMessage').hide();
+                                                                      $('#saveButtons').show();
+                                                                      if (!responseText.error) {
+                                                                          $("body").trigger("api_saved");
+                                                                      } else {
+                                                                          if (responseText.message == "timeout") {
+                                                                              if (ssoEnabled) {
+                                                                                  var currentLoc = window.location.pathname;
+                                                                                  if (currentLoc.indexOf(".jag") >= 0) {
+                                                                                      location.href = "index.jag";
                                                                                   } else {
-                                                                                      var message = responseText.message;
-                                                                                      if (message.split("||")[1] == "warning") {
-                                                                                          var environmentsFailed = JSON.parse(message.split("||")[0]);
-                                                                                          var failedToPublishEnvironments = environmentsFailed.PUBLISHED;
-                                                                                          var failedToUnpublishedEnvironments = environmentsFailed.UNPUBLISHED;
-                                                                                          var divPublish = "", divUnpublished = "";
-                                                                                          for (i = 0; i < failedToPublishEnvironments.split(",").length; i++) {
-                                                                                              divPublish += failedToPublishEnvironments.split(",")[i] + "<br>";
-                                                                                          }
-                                                                                          for (i = 0; i < failedToUnpublishedEnvironments.split(",").length; i++) {
-                                                                                              divUnpublished += failedToUnpublishedEnvironments.split(",")[i] + "<br>";
-                                                                                          }
-                                                                                          $("#modal-published-content").empty();
-                                                                                          $("#modal-unpublished-content").empty();
-                                                                                          $("#modal-published-content").append(divPublish);
-                                                                                          $("#modal-unpublished-content").append(divUnpublished);
-                                                                                          if (failedToPublishEnvironments == "") {
-                                                                                              $("#modal-published-header").hide();
-                                                                                              $("#modal-published-content").hide();
-                                                                                          }
-                                                                                          if (failedToUnpublishedEnvironments == "") {
-                                                                                              $("#modal-unpublished-header").hide();
-                                                                                              $("#modal-unpublished-content").hide();
-                                                                                          }
-                                                                                          $("#retryType").val("lifeCycle");
-                                                                                          $("#environmentsRetry-modal").modal('show');
-                                                                                      }
-                                                                                      else {
-                                                                                          jagg.message({
-                                                                                                           content: responseText.message,
-                                                                                                           type: "error"
-                                                                                                       });
-                                                                                      }
+                                                                                      location.href = 'site/pages/index.jag';
                                                                                   }
+                                                                              } else {
+                                                                                  jagg.showLogin();
                                                                               }
-                                                                          }, dataType: 'json'
-                                                                      });
-                                               }
-                                           });
+                                                                          } else {
+                                                                              var message = responseText.message;
+                                                                              if (message.split("||")[1] == "warning") {
+                                                                                  var environmentsFailed = JSON.parse(message.split("||")[0]);
+                                                                                  var failedToPublishEnvironments = environmentsFailed.PUBLISHED;
+                                                                                  var failedToUnpublishedEnvironments = environmentsFailed.UNPUBLISHED;
+                                                                                  var divPublish = "", divUnpublished = "";
+                                                                                  for (i = 0; i < failedToPublishEnvironments.split(",").length; i++) {
+                                                                                      divPublish += failedToPublishEnvironments.split(",")[i] + "<br>";
+                                                                                  }
+                                                                                  for (i = 0; i < failedToUnpublishedEnvironments.split(",").length; i++) {
+                                                                                      divUnpublished += failedToUnpublishedEnvironments.split(",")[i] + "<br>";
+                                                                                  }
+                                                                                  $("#modal-published-content").empty();
+                                                                                  $("#modal-unpublished-content").empty();
+                                                                                  $("#modal-published-content").append(divPublish);
+                                                                                  $("#modal-unpublished-content").append(divUnpublished);
+                                                                                  if (failedToPublishEnvironments == "") {
+                                                                                      $("#modal-published-header").hide();
+                                                                                      $("#modal-published-content").hide();
+                                                                                  }
+                                                                                  if (failedToUnpublishedEnvironments == "") {
+                                                                                      $("#modal-unpublished-header").hide();
+                                                                                      $("#modal-unpublished-content").hide();
+                                                                                  }
+                                                                                  $("#retryType").val("lifeCycle");
+                                                                                  $("#environmentsRetry-modal").modal('show');
+                                                                              }
+                                                                              else {
+                                                                                  jagg.message({
+                                                                                                   content: responseText.message,
+                                                                                                   type: "error"
+                                                                                               });
+                                                                              }
+                                                                          }
+                                                                      }
+                                                                  }, dataType: 'json'
+                                                              });
+                                       }
+                                   });
 
         var publishAPI = function () {
             var data = {};
             $("body").off('api_saved');
-            if (store.publisher.api.lifeState == 'PUBLISHED') {
+            if (store.publisher.api.lifeState.toUpperCase() == 'PUBLISHED') {
                 data = {
                     action: "updateStatus",
                     name: store.publisher.api.name,
@@ -216,7 +216,7 @@ $(function () {
                     requireResubscription: true
                 };
                 $.ajax({
-                           url: caramel.context + '/apis/asset/' + store.publisher.api.id + '/lifecycle?type=api',
+                           url: caramel.context + '/asts/api/apis/lifecycle?type=api',
                            type: 'POST',
                            data: JSON.stringify(data),
                            contentType: 'application/json',

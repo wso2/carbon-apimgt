@@ -892,10 +892,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                                                      boolean updateGatewayConfig) throws APIManagementException {
         Map<String, List<String>> failedGateways = new ConcurrentHashMap<String, List<String>>();
         APIStatus currentStatus = api.getStatus();
-        if (currentStatus.equals(status)) {
-        	throw new APIManagementException(" Both current status and next status are same !!!");
-        }
-        
         api.setStatus(status);
         MultitenantUtils.getTenantDomain(username);
         PrivilegedCarbonContext.startTenantFlow();
@@ -3676,9 +3672,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 		String name = (String) apiData.get("apiName");
 		String version = (String) apiData.get("version");
 		String status = (String) apiData.get("status");
-		boolean publishToGateway = Boolean.parseBoolean((String) apiData.get("publishToGateway"));
-		boolean deprecateOldVersions = Boolean.parseBoolean((String) apiData.get("deprecateOldVersions"));
-		boolean makeKeysForwardCompatible =Boolean.parseBoolean((String) apiData.get("makeKeysForwardCompatible"));
+		boolean publishToGateway = (Boolean) apiData.get("publishToGateway");
+		boolean deprecateOldVersions = (Boolean) apiData.get("deprecateOldVersions");
+		boolean makeKeysForwardCompatible = (Boolean) apiData.get("makeKeysForwardCompatible");
 		APIIdentifier apiId = new APIIdentifier(provider, name, version);
 		return updateAPIStatus(apiId, status, publishToGateway, deprecateOldVersions,
 				makeKeysForwardCompatible);
@@ -3734,6 +3730,26 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 			}
 		}
 		return createFailedGatewaysAsJsonString(failedGateways);
+	}
+
+	//TODO implement
+	public boolean changeLifeCycleState(APIIdentifier identifier, String nextState) throws APIManagementException {
+		try {
+			GenericArtifactManager artifactManager = APIUtil.getArtifactManager(registry, APIConstants.API_KEY);
+			String apiPath = APIConstants.API_LOCATION + RegistryConstants.PATH_SEPARATOR +
+			                        identifier.getProviderName() +
+			                        RegistryConstants.PATH_SEPARATOR + identifier.getApiName() +
+			                        RegistryConstants.PATH_SEPARATOR + identifier.getVersion() +
+			                        APIConstants.API_RESOURCE_NAME;
+			Resource apiResource = registry.get(apiPath);
+			GenericArtifact apiArtifact = artifactManager.getGenericArtifact(
+					apiResource.getUUID());
+		} catch (RegistryException e) {
+			String msg = "Failed to update default API version : " + identifier.getVersion() + " of : "
+			             + identifier.getApiName();
+			handleException(msg, e);
+		}
+		return false;
 	}
 }
 
