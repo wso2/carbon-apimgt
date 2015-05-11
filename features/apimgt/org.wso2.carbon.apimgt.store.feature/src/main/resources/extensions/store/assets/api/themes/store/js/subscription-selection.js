@@ -240,7 +240,25 @@ $(function () {
      */
     var attachRegenerateProductionToken = function () {
         $('#btn-refresh-Production-token').on('click', function () {
-            console.info('The user wants to regenerate the Production token');
+            var appName = $('#subscription_selection').val();
+            var appDetails = findAppDetails(appName);
+            var tokenRequestData = {};
+            tokenRequestData['appName'] = appName;
+            tokenRequestData['keyType'] = 'Production';
+            tokenRequestData['accessAllowDomains'] = $('#input-Production-allowedDomains').val() || 'ALL';
+            tokenRequestData['callbackUrl'] = appDetails.callbackUrl || '';
+            tokenRequestData['validityTime'] = $('#input-Production-validityTime').val();
+            $.ajax({
+                type: 'POST',
+                url: getSubscriptionAPI(appName),
+                data: tokenRequestData,
+                success: function (data) {
+                    var jsonData = data;
+                    APP_STORE.productionKeys = jsonData;
+                    updateMetadata(appName, jsonData, 'Production');
+                    events.publish(EV_GENERATE_PROD_TOKEN, jsonData);
+                }
+            });
         });
     };
 
@@ -249,7 +267,25 @@ $(function () {
      */
     var attachRegenerateSandboxToken = function () {
         $('#btn-refresh-Sandbox-token').on('click', function () {
-            console.info('The user wants to regenerate the Sandbox token');
+            var appName = $('#subscription_selection').val();
+            var appDetails = findAppDetails(appName);
+            var tokenRequestData = {};
+            tokenRequestData['appName'] = appName;
+            tokenRequestData['keyType'] = 'Sandbox';
+            tokenRequestData['accessAllowDomains'] = $('#input-Sandbox-allowedDomains').val() || 'ALL';
+            tokenRequestData['callbackUrl'] = appDetails.callbackUrl || '';
+            tokenRequestData['validityTime'] = $('#input-Production-validityTime').val();
+            $.ajax({
+                type: 'POST',
+                url: getSubscriptionAPI(appName),
+                data: tokenRequestData,
+                success: function (data) {
+                    var jsonData = data;
+                    APP_STORE.productionKeys = jsonData;
+                    updateMetadata(appName, jsonData, 'Sandbox');
+                    events.publish(EV_GENERATE_SAND_TOKEN, jsonData);
+                }
+            });
         });
     };
 
@@ -414,7 +450,7 @@ $(function () {
             data.environment = Views.translate('Production');
             data.allowedDomains = Views.translate('ALL');
             data.validityTime = Views.translate('3600');
-            if (data.appName == null) {
+            if ($('#subscription_selection').val() == null) {
                 data.isAppNameAvailable = Views.translate('false');
             }
         },
@@ -438,7 +474,7 @@ $(function () {
             data.environment = Views.translate('Sandbox');
             data.allowedDomains = Views.translate('ALL');
             data.validityTime = Views.translate('3600');
-            if (data.appName == null) {
+            if ($('#subscription_selection').val() == null) {
                 data.isAppNameAvailable = Views.translate('false');
             }
         },
