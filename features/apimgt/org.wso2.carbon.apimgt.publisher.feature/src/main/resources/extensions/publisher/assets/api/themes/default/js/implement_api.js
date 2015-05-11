@@ -165,12 +165,11 @@ $(function() {
        });
 
         $('#go_to_manage').click(function(e){
-            //TODO
-            //$("body").unbind("api_saved");
-            //$("body").on("api_saved" , function(e){
-            location.href = caramel.context + "/asts/api/manage/"+store.publisher.api.id;
-            //});
-            //$("#design_form").submit();
+            $("body").unbind("api_saved");
+            $("body").on("api_saved" , function(e){
+              location.href = caramel.context + "/asts/api/manage/"+store.publisher.api.id;
+            });
+            $("#design_form").submit();
         });
         //LB EP related- END
 
