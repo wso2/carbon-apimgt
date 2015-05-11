@@ -42,7 +42,7 @@ require('/modules/store.js').exec(function (ctx) {
         var subscribedAPIsResult = apistore.getAllSubscriptions(user.username, '', 0, 100);
         var subscribedAPIs = [];
         subscribedAPIs = JSON.parse(subscribedAPIsResult);
-        if (subscribedAPIs.applications != null && subscribedAPIs.applications.subscriptions != null) {
+        if (subscribedAPIs.applications != null) {
             output.appsWithSubs = subscribedAPIs.applications;
         }
     }
