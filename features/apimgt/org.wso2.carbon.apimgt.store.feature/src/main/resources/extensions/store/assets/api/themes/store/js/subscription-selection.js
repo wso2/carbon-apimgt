@@ -28,15 +28,15 @@ $(function () {
     var EV_UPDATE_DOMAIN = 'eventUpdateDomain';
     var EV_GENERATE_PROD_TOKEN = 'eventGenerateProductionToken';
     var EV_GENERATE_SAND_TOKEN = 'eventGenerateSandboxToken';
-    var EV_RGEN_PROD_TOKEN='eventRegenerateProductionToken';
-    var EV_RGEN_SAND_TOKEN='eventRegenerateSandboxToken';
+    var EV_RGEN_PROD_TOKEN = 'eventRegenerateProductionToken';
+    var EV_RGEN_SAND_TOKEN = 'eventRegenerateSandboxToken';
 
     var APP_STORE = {};
 
     /*
      This function generate the location of the templates used in the rendering
      */
-    var getSubscriptionAPI = function(appName){
+    var getSubscriptionAPI = function (appName) {
         return caramel.context + '/apis/application/' + appName + '/subscriptions';
     };
 
@@ -79,7 +79,7 @@ $(function () {
      */
     var updateMetadata = function (appName, newDetails, environment) {
         var appData = findAppDetails(appName);
-        if (environment == 'Production'){
+        if (environment == 'Production') {
 
             appData.prodKeyScope = newDetails.tokenScope;
             appData.prodValidityTime = newDetails.validityTime;
@@ -238,8 +238,8 @@ $(function () {
     /*
      The function is used to attach the logic which will regenerate the Production token
      */
-    var attachRegenerateProductionToken=function(){
-        $('#btn-refresh-Production-token').on('click',function(){
+    var attachRegenerateProductionToken = function () {
+        $('#btn-refresh-Production-token').on('click', function () {
             console.info('The user wants to regenerate the Production token');
         });
     };
@@ -247,8 +247,8 @@ $(function () {
     /*
      The function is used to attach the logic which will regenerate the Sandbox token
      */
-    var attachRegenerateSandboxToken=function(){
-        $('#btn-refresh-Sandbox-token').on('click',function(){
+    var attachRegenerateSandboxToken = function () {
+        $('#btn-refresh-Sandbox-token').on('click', function () {
             console.info('The user wants to regenerate the Sandbox token');
         });
     };
@@ -275,10 +275,13 @@ $(function () {
         container: PROD_KEYS_CONTAINER,
         partial: 'sub-keys-generate-prod',
         beforeRender: function (data) {
-            data['environment'] = Views.translate('Production');
+            data.environment = Views.translate('Production');
+            if (data.appName == null) {
+                data.isAppNameAvailable = Views.translate('false');
+            }
         },
-        resolveRender:function(){
-            if(APP_STORE.productionKeys){
+        resolveRender: function () {
+            if (APP_STORE.productionKeys) {
                 return false;
             }
             return true;
@@ -290,14 +293,14 @@ $(function () {
     Views.extend('defaultProductionKeyView', {
         id: 'visibleProductionKeyView',
         partial: 'sub-keys-visible-prod',
-        subscriptions: [EV_APP_SELECT,EV_SHOW_KEYS, EV_GENERATE_PROD_TOKEN],
+        subscriptions: [EV_APP_SELECT, EV_SHOW_KEYS, EV_GENERATE_PROD_TOKEN],
         resolveRender: function (data) {
             //alert('Resolve rendering!');
-            if(!APP_STORE.showKeys){
+            if (!APP_STORE.showKeys) {
                 return false;
             }
 
-            if(!APP_STORE.productionKeys){
+            if (!APP_STORE.productionKeys) {
                 return false;
             }
 
@@ -313,7 +316,7 @@ $(function () {
 
     Views.extend('defaultProductionKeyView', {
         id: 'hiddenProductionKeyView',
-        subscriptions: [EV_APP_SELECT,EV_SHOW_KEYS, EV_HIDE_KEYS, EV_GENERATE_PROD_TOKEN],
+        subscriptions: [EV_APP_SELECT, EV_SHOW_KEYS, EV_HIDE_KEYS, EV_GENERATE_PROD_TOKEN],
         partial: 'sub-keys-hidden-prod',
         resolveRender: function (data) {
             //Determine if the keys need to be visible
@@ -321,7 +324,7 @@ $(function () {
                 return false;
             }
 
-            if(!APP_STORE.productionKeys){
+            if (!APP_STORE.productionKeys) {
                 return false;
             }
 
@@ -337,10 +340,13 @@ $(function () {
         container: SAND_KEYS_CONTAINER,
         partial: 'sub-keys-generate-prod',
         beforeRender: function (data) {
-            data['environment'] = Views.translate('Sandbox');
+            data.environment = Views.translate('Sandbox');
+            if (data.appName == null) {
+                data.isAppNameAvailable = Views.translate('false');
+            }
         },
-        resolveRender:function(){
-            if(APP_STORE.sandboxKeys){
+        resolveRender: function () {
+            if (APP_STORE.sandboxKeys) {
                 return false;
             }
             return true;
@@ -354,10 +360,10 @@ $(function () {
         partial: 'sub-keys-visible-prod',
         resolveRender: function (data) {
 
-            if(!APP_STORE.sandboxKeys){
+            if (!APP_STORE.sandboxKeys) {
                 return false;
             }
-            if(!APP_STORE.showKeys){
+            if (!APP_STORE.showKeys) {
                 return false;
             }
             //Only render the view if sandbox keys are present
@@ -377,11 +383,11 @@ $(function () {
         resolveRender: function (data) {
             console.info(APP_STORE.sandboxKeys);
             //Determine if the keys need to be visible
-            if(APP_STORE.showKeys){
+            if (APP_STORE.showKeys) {
                 return false;
             }
 
-            if(!APP_STORE.sandboxKeys){
+            if (!APP_STORE.sandboxKeys) {
                 return false;
             }
 
@@ -405,9 +411,12 @@ $(function () {
         container: PROD_DOMAIN_CONTAINER,
         partial: 'sub-domain-token-prod',
         beforeRender: function (data) {
-            data['environment'] = Views.translate('Production');
-            data['allowedDomains'] = Views.translate('ALL');
-            data['validityTime'] = Views.translate('3600');
+            data.environment = Views.translate('Production');
+            data.allowedDomains = Views.translate('ALL');
+            data.validityTime = Views.translate('3600');
+            if (data.appName == null) {
+                data.isAppNameAvailable = Views.translate('false');
+            }
         },
         subscriptions: [EV_APP_SELECT],
         afterRender: function () {
@@ -426,9 +435,12 @@ $(function () {
         id: 'defaultSandboxDomainView',
         container: SAND_DOMAIN_CONTAINER,
         beforeRender: function (data) {
-            data['environment'] = Views.translate('Sandbox');
-            data['allowedDomains'] = Views.translate('ALL');
-            data['validityTime'] = Views.translate('3600');
+            data.environment = Views.translate('Sandbox');
+            data.allowedDomains = Views.translate('ALL');
+            data.validityTime = Views.translate('3600');
+            if (data.appName == null) {
+                data.isAppNameAvailable = Views.translate('false');
+            }
         },
         afterRender: function () {
         }
@@ -450,7 +462,7 @@ $(function () {
         partial: 'sub-listing',
         beforeRender: function (data) {
             var appName = data.appName;
-            data['subscriptions'] = findSubscriptionDetails(appName);
+            data.subscriptions = findSubscriptionDetails(appName);
         },
         subscriptions: [EV_APP_SELECT],
         afterRender: function () {
@@ -475,7 +487,7 @@ $(function () {
      The function returns the Production Keys of the given application
      */
     var findProdKeys = function (details) {
-        if(!details.prodKey){
+        if (!details || !details.prodKey) {
             return null;
         }
         var keys = {};
@@ -492,7 +504,7 @@ $(function () {
      The function returns the Sandbox Keys of the given application
      */
     var findSandKeys = function (details) {
-        if(!details.sandboxKey){
+        if (!details || !details.sandboxKey) {
             return null;
         }
         var keys = {};
@@ -505,7 +517,7 @@ $(function () {
         return keys;
     };
 
-    var populateAppStore = function(appName){
+    var populateAppStore = function (appName) {
         var details = findAppDetails(appName);
         APP_STORE.appName = appName;
         APP_STORE.appDetails = details;
