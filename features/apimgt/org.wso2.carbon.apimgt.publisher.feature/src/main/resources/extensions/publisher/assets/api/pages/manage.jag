@@ -20,7 +20,7 @@
 var caramel;
 require('/modules/publisher.js').exec(function(ctx) {
 	var log = new Log();
-	log.info("MANAGE CALLED");
+	// log.info("MANAGE CALLED");
 	var rxtModule = require('rxt');
 	var carbon = require('carbon');
 	var server = require('store').server;

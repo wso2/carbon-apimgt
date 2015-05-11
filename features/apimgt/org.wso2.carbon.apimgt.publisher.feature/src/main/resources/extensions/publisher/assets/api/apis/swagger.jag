@@ -42,7 +42,7 @@ require('/modules/publisher.js').exec(function (ctx) {
 	var response = ctx.response;
 	response.contentType = 'application/json';
 	var constants = require("rxt").constants;
-	log.info("Calling Swagger API");
+	// log.info("Calling Swagger API");
 	switch (method) {
 		case 'GET':// GET endpoints
 			options.type = req.getParameter('type');

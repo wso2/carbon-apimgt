@@ -44,7 +44,7 @@ asset.manager = function(ctx){
         return assets;
     },
     get:function(id){
-       log.info('Calling custom get of asset');
+       // log.info('Calling custom get of asset');
        return this._super.get.call(this,id);
     }
         /*search : function(query, paging) {
@@ -147,7 +147,7 @@ asset.renderer = function(ctx) {
     };
     return {
         details:function(page){
-            log.info('Details page rendered!!!');
+            // log.info('Details page rendered!!!');
         
     //=================== Getting subscription details ========================
 
@@ -191,13 +191,17 @@ asset.renderer = function(ctx) {
                         var application = applications[i];
                         for (j = 0; j < lenJ; j++) {
                             var subscription = subscriptions[j];
+                            log.name("initiationn appp namee"+application.name);
                             if (subscription.applicationId == application.id) {
+                                log.name("inside if"+application.name);
                                 if(application.name=="DefaultApplication"){
                                    selectedDefault=true;
                                 }
                                 continue Label1;
                             }else{
+                              log.name("appp namee"+application.name);
                               if(application.name=="DefaultApplication"){
+                                  log.name("appp namee"+application.name);
                                    subscribedToDefault=true;
                                 }  
                             }
@@ -210,24 +214,25 @@ asset.renderer = function(ctx) {
                     }
             result = apistore.getDeniedTiers();
             deniedTiers = result.tiers;
-            var k,m,allowedTiers,denied = false, tiersAvailable = false;
+            var k,m,allowedTiers=[],denied = false, tiersAvailable = false;
                     if(tiers!=null){
-                    for(var m=0;m<tiers.length;m++){
+                    var tiersVal=tiers.split(",");                    
+                    for(var m=0;m<tiersVal.length;m++){
                        if(deniedTiers!=null){
-                       for (var k=0;k<deniedTiers.length;k++) {
-                       if (tiers[m].tierName == deniedTiers[k].tierName) {
+                       var deniedTiersVal=tiers.split(",");
+                       for (var k=0;k<deniedTiersVal.length;k++) {
+                       if (tiersVal[m].tierName == deniedTiersVal[k].tierName) {
                             denied = true;
                        }
                        }
                        }
-                       if (!denied) {
-                       allowedTiers+=tiers[m];
+                       if (!denied) {                       
+                       allowedTiers.push(tiersVal[m]);
                        tiersAvailable = true;                      
                     }
                     denied = false;
                     }
-                    }
-            
+                    }            
        
     page.applications= appsList;
     page.tiersAvailable=tiersAvailable;
@@ -241,35 +246,41 @@ asset.renderer = function(ctx) {
         },
         pageDecorators: {
             populateEndPoints : function(page){
-                if(page.assets && page.assets.id){
-                    var prodEps = parse(page.assets.attributes.overview_endpointConfig).production_endpoints;
-                    var sandBoxEps = parse(page.assets.attributes.overview_endpointConfig).sandbox_endpoints;
+                if (page.assets && page.assets.id) {
+                    var httpEndpoint = page.api.serverURL.split(",")[1];
+                    var httpsEndpoint = page.api.serverURL.split(",")[2];
 
-                    if(prodEps.length != null){
-                        var prodEpArry = [];
+                    page.assets.httpEndpoint = httpEndpoint;
+                    page.assets.httpsEndpoint = httpsEndpoint;
 
-                        for(var i = 0; prodEps.length > i; i++){
-                            prodEpArry.push(prodEps[i].url);
-                        }
-
-                        page.assets.production_endpoint = prodEpArry.join(',');
-
-                    }else {
-                        page.assets.production_endpoint = parse(page.assets.attributes.overview_endpointConfig).production_endpoints.url;
-                    }
-
-                    if(sandBoxEps.length != null){
-                        var sandBoxEpArry = [];
-
-                        for(var i = 0; prodEps.length > i; i++){
-                            sandBoxEpArry.push(sandBoxEps[i].url);
-                        }
-
-                        page.assets.sandbox_endpoint = sandBoxEpArry.join(',');
-
-                    } else {
-                        page.assets.sandbox_endpoint = parse(page.assets.attributes.overview_endpointConfig).sandbox_endpoints.url;
-                    }
+                    //var prodEps = parse(page.assets.attributes.overview_endpointConfig).production_endpoints;
+                    //var sandBoxEps = parse(page.assets.attributes.overview_endpointConfig).sandbox_endpoints;
+                    //
+                    //if(prodEps != null){
+                    //    var prodEpArry = [];
+                    //
+                    //    for(var i = 0; prodEps.length > i; i++){
+                    //        prodEpArry.push(prodEps[i].url);
+                    //    }
+                    //
+                    //    page.assets.production_endpoint = prodEpArry.join(',');
+                    //
+                    //}else {
+                    //    page.assets.production_endpoint = parse(page.assets.attributes.overview_endpointConfig).production_endpoints.url;
+                    //}
+                    //
+                    //if(sandBoxEps != null){
+                    //    var sandBoxEpArry = [];
+                    //
+                    //    for(var i = 0; prodEps.length > i; i++){
+                    //        sandBoxEpArry.push(sandBoxEps[i].url);
+                    //    }
+                    //
+                    //    page.assets.sandbox_endpoint = sandBoxEpArry.join(',');
+                    //
+                    //} else if(parse(page.assets.attributes.overview_endpointConfig).sandbox_endpoints != null && parse(page.assets.attributes.overview_endpointConfig).sandbox_endpoints.url != null) {
+                    //    page.assets.sandbox_endpoint = parse(page.assets.attributes.overview_endpointConfig).sandbox_endpoints.url;
+                    //}
                 }
             },
             socialSitePopulator: function(page, meta) {

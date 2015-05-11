@@ -473,4 +473,16 @@ public interface APIProvider extends APIManager {
 	 * @return
 	 */
 	public boolean validateRoles(String rolesSet);
+
+	/**
+	 * Change the lifecycle state of the specified API with required actions
+	 * @param apiId API identifier
+	 * @param status New status of the API
+	 * @param publishToGateway is publisher to gateway enabled
+	 * @param deprecateOldVersions is old versions deprecated
+	 * @param makeKeysForwardCompatible is keys forward compatible
+	 * @return string of failed gateways to publish
+	 */
+	public String updateAPIStatus(APIIdentifier apiId, String status, boolean publishToGateway, boolean
+			deprecateOldVersions, boolean makeKeysForwardCompatible) throws APIManagementException;
 }

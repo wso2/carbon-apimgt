@@ -156,6 +156,11 @@ public class UserAwareAPIProvider extends APIProviderImpl {
 		return super.getTiers();
 	}
 
+	public String updateAPIStatus(JSONObject apiData) throws APIManagementException {
+		checkCreatePermission();
+		return super.updateAPIStatus(apiData);
+	}
+
 	public void checkCreatePermission() throws APIManagementException {
         APIUtil.checkPermission(username, APIConstants.Permissions.API_CREATE);
     }
