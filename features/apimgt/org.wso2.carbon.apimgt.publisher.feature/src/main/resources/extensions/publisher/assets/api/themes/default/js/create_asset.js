@@ -47,6 +47,13 @@ $(document).ready(function(){
                                                           $("#design_form").submit();
                                                           }
                                                           });*/
+                                                          BootstrapDialog.confirm('At least one resource should be specified. Do you want to add a wildcard resource (/*).', function(result){
+                                                          if(result) {
+                                                          var designer = new APIMangerAPI.APIDesigner();
+                                                          designer.add_default_resource();
+                                                          $("#design_form").submit();
+                                                          }
+                                                          });
                                                          return false;
                                                      }
 

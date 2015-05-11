@@ -485,7 +485,15 @@ var apipublisher = {};
     APIProviderProxy.prototype.updateAPIStatus = function (api) {
         var log = new Log();
         try {
-            var success = this.impl.updateAPIStatus(api);
+            var apiData = new Packages.org.json.simple.JSONObject();
+            apiData.put("provider", api.provider);
+            apiData.put("apiName", api.apiName);
+            apiData.put("version", api.version);
+            apiData.put("status", api.status);
+            apiData.put("publishToGateway", api.publishToGateway);
+            apiData.put("deprecateOldVersions", api.deprecateOldVersions);
+            apiData.put("makeKeysForwardCompatible", api.makeKeysForwardCompatible);
+            var success = this.impl.updateAPIStatus(apiData);
             if (log.isDebugEnabled()) {
                 log.debug("updateAPIStatus : " + api.name + "-" + api.version);
             }

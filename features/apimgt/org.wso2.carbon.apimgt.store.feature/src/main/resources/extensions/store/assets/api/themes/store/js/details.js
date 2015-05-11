@@ -33,8 +33,7 @@ $(document).ready(function () {
                 message.text = '<div><i class="icon-briefcase"></i> Successfully API subscribed.</div>';
                 message.type = 'success';
                 message.layout = 'topRight';
-                noty(message);
-                window.location.reload();
+                noty(message);                
               
         } else {
            var message ={};
