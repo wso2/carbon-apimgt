@@ -1657,6 +1657,8 @@ public class APIProviderHostObject extends ScriptableObject {
         		PrivilegedCarbonContext.endTenantFlow();
         	}
         }
+        String apiDefinitionJSON = definitionFromSwagger20.generateAPIDefinition(api);
+        apiProvider.saveSwagger20Definition(api.getId(), apiDefinitionJSON);
         return success;
     }
 
