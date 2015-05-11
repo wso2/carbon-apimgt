@@ -71,6 +71,7 @@ import org.wso2.carbon.user.mgt.stub.UserAdminStub;
 import org.wso2.carbon.user.mgt.stub.UserAdminUserAdminException;
 import org.wso2.carbon.user.mgt.stub.types.carbon.FlaggedName;
 import org.wso2.carbon.utils.CarbonUtils;
+import org.wso2.carbon.identity.user.registration.stub.UserRegistrationAdminServiceException;
 import org.wso2.carbon.identity.user.registration.stub.UserRegistrationAdminServiceStub;
 import org.wso2.carbon.identity.user.registration.stub.dto.UserDTO;
 import org.wso2.carbon.identity.user.registration.stub.dto.UserFieldDTO;
@@ -3741,20 +3742,19 @@ public class APIStoreHostObject extends ScriptableObject {
 				}
 				
 
-			} catch (RemoteException e) {
-				handleException(e.getMessage(), e);
-			} catch (Exception e) {
-				if(customErrorMsg != null) {
-					handleException(customErrorMsg);
-				} else {
-					handleException("Error while adding the user: " + username, e);
-				}
-				
-			} finally {
-				if (isTenantFlowStarted) {
-					PrivilegedCarbonContext.endTenantFlow();
-				}
-			}
+            } catch (RemoteException e) {
+                handleException(e.getMessage(), e);
+            } catch (UserRegistrationAdminServiceException e) {
+                handleException("Error while adding the user: " + username + ". " + e.getMessage(), e);
+            } catch (WorkflowException e) {
+                handleException("Error while adding the user: " + username + ". " + e.getMessage(), e);
+            } catch (UserAdminUserAdminException e) {
+                handleException("Error while adding the user: " + username + ". " + e.getMessage(), e);
+            } finally {
+                if (isTenantFlowStarted) {
+                    PrivilegedCarbonContext.endTenantFlow();
+                }
+            }
         } else {
             handleException("Invalid input parameters.");
         }
