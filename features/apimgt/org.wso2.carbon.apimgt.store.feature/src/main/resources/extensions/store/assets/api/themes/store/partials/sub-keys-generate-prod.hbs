@@ -1,10 +1,16 @@
 <!--Key generation view
     This view is shown when a key has not been generated
  -->
-<form>
+{{#if isAppNameAvailable}}
     <fieldset>
-        <span class='help-block'>{{ environment }} keys are not yet generated for this app </span>
-        <input type='button' class='btn btn-primary' value='Generate ' id='btn-generate-{{ environment }}-token'/>
+        <span class='help-block'>Please subscribe to APIs to view tokens</span>
     </fieldset>
-</form>
+{{else}}
+    <form>
+        <fieldset>
+            <span class='help-block'>{{ environment }} keys are not yet generated for this app </span>
+            <input type='button' class='btn btn-primary' value='Generate ' id='btn-generate-{{ environment }}-token'/>
+        </fieldset>
+    </form>
+{{/if}}
 
