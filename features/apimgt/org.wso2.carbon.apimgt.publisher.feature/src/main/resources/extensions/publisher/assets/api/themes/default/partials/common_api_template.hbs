@@ -39,18 +39,33 @@
             <span>Design</span>
         </a>
     </li>
+{{#unless api}}
     <li>
-        <a href='{{url ""}}/asts/api/implement' class="<%= implement_wlabel%>">
+        <a href='#' class="">
             <div class="wizard-number">2</div>
             <span>Implement</span>
         </a>
     </li>
     <li>
-        <a href='{{url ""}}/asts/api/manage' class="<%= manage_wlabel%>">
+        <a href='#' class="">
             <div class="wizard-number" >3</div>
             <span>Manage</span>
         </a>
     </li>
+{{else}}
+   <li>
+        <a href='{{url ""}}/asts/api/implement/{{id}}' class="<%= implement_wlabel%>">
+            <div class="wizard-number">2</div>
+            <span>Implement</span>
+        </a>
+    </li>
+    <li>
+        <a href='#' class="<%= manage_wlabel%>">
+            <div class="wizard-number" >3</div>
+            <span>Manage</span>
+        </a>
+    </li>
+{{/unless}}
 </ul>
     <br/>
 </div>
