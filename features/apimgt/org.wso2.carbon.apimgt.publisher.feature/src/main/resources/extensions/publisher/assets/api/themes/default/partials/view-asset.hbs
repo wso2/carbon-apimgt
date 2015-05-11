@@ -11,9 +11,8 @@
 				</div>
 				<div class="col-lg-10">
 					<h1>{{name}}</h1>
-					<i class="fa fa-circle"></i> {{lifecycleState}}
-					<div class="well-description">{{tables.0.fields.createdtime.value}}</div>
-					<div class="well-description">{{tables.0.fields.description.value}}</div>
+					<b>{{tables.0.fields.version.value}}</b> </br></br>
+					<b>{{lifecycleState}}</b>					
 					<div>
 						{{> asset-version-info .}}
 					</div>
@@ -36,3 +35,4 @@
 	{{/if}}
 {{/with}}
 
+{{> sidebar-container .}}

@@ -190,18 +190,14 @@ asset.renderer = function(ctx) {
                     for (i = 0; i < lenI; i++) {
                         var application = applications[i];
                         for (j = 0; j < lenJ; j++) {
-                            var subscription = subscriptions[j];
-                            log.name("initiationn appp namee"+application.name);
-                            if (subscription.applicationId == application.id) {
-                                log.name("inside if"+application.name);
+                            var subscription = subscriptions[j];                            
+                            if (subscription.applicationId == application.id) {                                
                                 if(application.name=="DefaultApplication"){
                                    selectedDefault=true;
                                 }
                                 continue Label1;
-                            }else{
-                              log.name("appp namee"+application.name);
-                              if(application.name=="DefaultApplication"){
-                                  log.name("appp namee"+application.name);
+                            }else{                              
+                              if(application.name=="DefaultApplication"){                                  
                                    subscribedToDefault=true;
                                 }  
                             }
