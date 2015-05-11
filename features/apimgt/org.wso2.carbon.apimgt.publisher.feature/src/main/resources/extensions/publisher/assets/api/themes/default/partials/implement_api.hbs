@@ -1,7 +1,9 @@
     <div class="col-sm-12 text-center">
             <ul class="new-sub-menu-wizard" style="margin:0 auto">
                 <li>
-                    <a href='{{url ""}}/asts/api/design/{{api.id}}?name={{api.name}}&version={{api.version}}&provider={{api.provider}}' class="wizard-done">
+                    <a href='{{url ""}}/asts/api/design/{{api.id}}?name={{api.name}}&version={{api
+                    .version}}&provider={{api
+                    .provider}}'  class="wizard-done">
                         <div class="wizard-number">1</div>
                         <span>Design</span>
                     </a>
@@ -22,39 +24,46 @@
                     </a>
                 </li>
             </ul>
-    <br/>
+        </center>
     </div>
     <h1>{{t "Implement API"}}</h1>
     <div class="title-section">
         <h2>{{api.name}}({{api.version}}) : {{api.context}}</h2>
-    </div>
+    </div>     
     <div class="content-section shadow-up">
-    <div class="content-data">
-        <div class="alert alert-danger" id="addAPIError" style="display:none">
+    <div class="content-data">   
+    <div class="alert alert-error" id="addAPIError" style="display:none">
         <span id="addErrorSpan"></span>
     </div>
+
+    <div class="row-fluid">
+        <div class="span12">                             
             <form class="form-horizontal" method="POST" id="implement_form" enctype="multipart/form-data" 
                 action="{{url ""}}/apis/assets/{{api.id}}?type=api">
-    <legend>Implementation Method</legend>
-            <div class="form-group">
-        <label class="custom-form-label col-lg-2 col-md-2 col-sm-12 col-xs-12" for="context">Implementation Method</label>
-                <div class="checkbox">
-            <label>
+    <div class="well well-small" style="padding:0px">        
+    <fieldset>    
+    <div class="control-group">
+        <label class="control-label" for="context">Implementation Method</label>
+        <div class="controls">
+
+            <label class="radio inline">
             <input class="implementation_methods" type="radio" value="endpoint" name="implementation_methods" selected="selected" > Backend Endpoint
             </label>
-            <label>
+            <label class="radio inline">
             <input class="implementation_methods" type="radio" value="inline" name="implementation_methods"> Specify Inline
             </label>
         </div>
     </div>        
     </fieldset>
     </div> <!-- closing the well for endpoints -->    
-            <div class="clear"></div>
-            <br/><br/>
+                <div class="clear"></div>
                 <fieldset class="implementation_method_endpoint implementation_method">
-                <div class="form-group">
-                    <label class="custom-form-label col-lg-2 col-md-2 col-sm-12 col-xs-12" for="endpoint_type">Endpoint Type:<span class="requiredAstrix">*</span></label>
-                    <div class="custom-form-right col-lg-5 col-md-8 col-sm-9 col-xs-10">
+                <legend style="margin-left:0px;text-indent:10px"></legend>
+
+
+                <div class="control-group">
+                    <label class="control-label" for="endpoint_type">Endpoint Type:<span class="requiredAstrix">*</span></label>
+                        <div class="controls">
                             <select class="select required" id="endpoint_type" name="endpoint_type">
                                 <option value="http"  selected="selected">HTTP Endpoint</option>
                                 <option value="address">Address Endpoint</option>
@@ -65,110 +74,79 @@
                             <a class="icon-question-sign help_popup" help_data="endpoint_help"></a>
                         </div>
                 </div>
-                <br/><br/>
+                
+
                 <input id="endpoint_config" type="hidden" value="" name="endpoint_config">
+
                 <div id="endpoint_help" class="hide">
-                    <div class="form-group">
-                        <label class="custom-form-label col-lg-2 col-md-2 col-sm-12 col-xs-12" for="">HTTP Endpoint</label>
-                        <div class="custom-form-right col-lg-5 col-md-8 col-sm-9 col-xs-10">A REST service endpoint based on a URI template</div>
-                    </div>
-                    <div class="form-group">
-                        <label class="custom-form-label col-lg-2 col-md-2 col-sm-12 col-xs-12" for="">Address Endpoint</label>
-                        <div class="custom-form-right col-lg-5 col-md-8 col-sm-9 col-xs-10">The direct URL of the service</div>
-                    </div>
-                    <div class="form-group">
-                        <label class="custom-form-label col-lg-2 col-md-2 col-sm-12 col-xs-12" for="">WSDL Endpoint</label>
-                        <div class="custom-form-right col-lg-5 col-md-8 col-sm-9 col-xs-10">The WSDL, service and port</div>
-                    </div>
-                    <div class="form-group">
-                        <label class="custom-form-label col-lg-2 col-md-2 col-sm-12 col-xs-12" for="">Failover Group</label>
-                        <div class="custom-form-right col-lg-5 col-md-8 col-sm-9 col-xs-10">The endpoints that the service tries to connect to in case of a failure. This happens in a round robin manner</div>
-                    </div>
-                    <div class="form-group">
-                        <label class="custom-form-label col-lg-2 col-md-2 col-sm-12 col-xs-12" for="">Load Balance</label>
-                        <div class="custom-form-right col-lg-5 col-md-8 col-sm-9 col-xs-10">The endpoints where the incoming requests are directed to in a round robin manner. They automatically handle fail-over as well</div>
-                    </div>
+                 <strong>HTTP Endpoint </strong><p>A REST service endpoint based on a URI template</p>
+                 <strong>Address Endpoint</strong><p>The direct URL of the service</p>
+                 <strong>WSDL Endpoint</strong><p>The WSDL, service and port</p>
+                 <strong>Failover Group </strong><p>The endpoints that the service tries to connect to in case of a failure. This happens in a round robin manner.</p>
+                 <strong>Load Balance</strong><p>The endpoints where the incoming requests are directed to in a round robin manner. They automatically handle fail-over as well.</p>
                 </div>
 
                 <div id="endpoint_form" class="endpoint_dives" style="display:block">
                 </div>
 
-                <div class="form-group">
-                    <label class="custom-form-label col-lg-2 col-md-2 col-sm-12 col-xs-12" for=""></label>
-                    <div class="custom-form-right col-lg-5 col-md-8 col-sm-9 col-xs-10">
-                        <a href="#" class="more-options btn btn-default" ref="more-options-endpoints">Show More</a>
-                    </div>
-                </div>
+                 <div class="control-group">
+                    <div class="controls">
+                        <a href="#" class="more-options but" ref="more-options-endpoints">Show More</a>
+                     </div>
+                 </div>
                 <div id="more-options-endpoints" style="display:block">
 
-                    <div class="form-group">
-                        <label class="custom-form-label col-lg-2 col-md-2 col-sm-12 col-xs-12" for="endpointType">{{t "Endpoint Security Scheme"}}:<span
-                                class="requiredAstrix">*</span></label>
 
-                        <div class="custom-form-right col-lg-5 col-md-8 col-sm-9 col-xs-10">
+                <div class="control-group">
+                    <label class="control-label" for="endpointType">{{t "Endpoint Security Scheme"}}:<span class="requiredAstrix">*</span></label>
+                    <div class="controls">
                     <select class="select required" id="api-implement-more-security" name="endpointType" >
-                                <option value="nonsecured" selected="selected">Non Secured</option>
+                        <option value="nonsecured"  selected="selected">Non Secured</option>
                         <option value="secured">Secured</option>
                     </select>
                     <a class="icon-question-sign help_popup" help_data="endpointSec_help"></a>
-
                     <p id="endpointSec_help" class="hide"></p>
                     </div>
                 </div>
 
-                <div class="form-group" id="api-implement-more-credentials" style="display:none">
-                    <label class="custom-form-label col-lg-2 col-md-2 col-sm-12 col-xs-12" for="credentials">{{t "Credentials"}}:<span class="requiredAstrix">*</span></label>
-                        <div class="custom-form-label col-lg-5 col-md-12 col-sm-12 col-xs-12">
-                            <input type="text" class="form-control required validInput" id="epUsername"
-                                   name="epUsername" value="">
-                            </div>
-                        <div class="clearfix"></div><br/>
-                        <label class="custom-form-label col-lg-2 col-md-2 col-sm-12 col-xs-12" for=""></label>
-                        <div class="custom-form-label col-lg-5 col-md-12 col-sm-12 col-xs-12">
-                            <input type="password" class="form-control required" id="epPassword"
-                                   name="epPassword" value="">
-                        </div>
+                <div class="control-group" id="api-implement-more-credentials" style="display:none">
+                    <label class="control-label" for="credentials">{{t "Credentials"}}:<span class="requiredAstrix">*</span></label>
+                    <div class="controls">
+                        <input type="text" class="input-small required validInput" id="epUsername" name="epUsername"  value="">
+                        <input type="password" class="input-small required" id="epPassword" name="epPassword" value="">
                     </div>
+                </div>
 
-                 <div class="form-group api_wsdl">
-                 <label class="custom-form-label col-lg-2 col-md-2 col-sm-12 col-xs-12" for="wsdl">{{t "WSDL"}}:</label>
-
-                 <div class="custom-form-label col-lg-5 col-md-12 col-sm-12 col-xs-12">
+                 <div class="control-group api_wsdl">
+                 <label class="control-label" for="wsdl">{{t "WSDL"}}:</label>
+                 <div class="controls">
                  <div class="input-append">
-                 <input type="text" class="form-control validInput" id="wsdl" name="wsdl"  value="" />
+                 <input type="text" class="input-xlarge validInput" id="wsdl" name="wsdl"  value="" />
                  <button class="btn check_url_valid" url-type="wsdl" type="button" >{{t "Test URI"}}</button>
-
-                                <a class="icon-question-sign help_popup" help_data="wsdldesc_help"></a>
-
-                                <p id="wsdldesc_help" class="hide"></p>
-                            </div>
-                            <p class="help-block"></p>
-
-                        </div>
-                        <div class="custom-form-right col-lg-1 col-md-4 col-sm-3 col-xs-2">
-                            <button class="btn btn-default check_url_valid" url-type="wsdl" type="button">{{t "Test URI"}}</button>
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label class="custom-form-label col-lg-2 col-md-2 col-sm-12 col-xs-12" for="wadl">{{t "WADL"}}:</label>
-
-                        <div class="custom-form-label col-lg-5 col-md-8 col-sm-9 col-xs-10">
+                 <a class="icon-question-sign help_popup" help_data="wsdldesc_help"></a>
+                 <p id="wsdldesc_help" class="hide"></p>
+                 </div>
+                 <p class="help-block"></p>
+                
+                 </div>
+                 </div>
+                 <div class="control-group">
+                 <label class="control-label" for="wadl">{{t "WADL"}}:</label>
+                 <div class="controls">
                  <div class="input-append">
-                 <input type="text" class="form-control validInput" id="wadl" name="wadl" value="" />
+                 <input type="text" class="input-xlarge validInput" id="wadl" name="wadl" value="" />
+                 <button class="btn check_url_valid"  type="button" >{{t "Test URI"}}</button>
                  </div>
                  <p class="help-block"></p>
                  </div>
-                        <div class="custom-form-right col-lg-1 col-md-4 col-sm-3 col-xs-2">
-                            <button class="btn btn-default check_url_valid" type="button">{{t "Test URI"}}</button>
                  </div>
 
                 
                 <!--Southboud statistics -->
-                    <div class="form-group">
-                        <label class="custom-form-label col-lg-2 col-md-2 col-sm-12 col-xs-12" for="destinationStats">{{t "Destination Stats"}}:</label>
-
-                        <div class="custom-form-label col-lg-5 col-md-12 col-sm-12 col-xs-12">
-                       <select class="select required form-control" id="destinationStats" name="destinationStats">
+                <div class="control-group">
+                    <label class="control-label" for="destinationStats">{{t "Destination Stats"}}:</label>
+                      <div class="controls">
+                       <select class="select required" id="destinationStats" name="destinationStats">
                             <option value="disabled" </option>
                             <option value="enabled" </option>
                         </select>
@@ -201,7 +179,7 @@
                     <!--TODO-->
                      <a class="btn btn-warning manageSaveButton" id="prototyped_api">Deploy Prototype</a>
                     <a id="go_to_manage" class="btn btn-primary manageSaveButton" >Manage</a> 
-                    <input type="reset" class="btn btn-default" value="cancel" onclick="javascript:window.location.href='./'" />
+                    <input type="reset" class="btn" value="cancel" onclick="javascript:window.location.href='./'" />                                                            
                 </div>
             </form>
         </div>
@@ -222,7 +200,7 @@
             </div>
             <div class="modal-footer">
             <div id="res" class="hide" style="color:red;float:left"></div>
-            <a href="#" class="btn btn-default" data-dismiss="modal">Close</a>
+            <a href="#" class="btn" data-dismiss="modal">Close</a>
             <a href="#" class="btn btn-primary" id="advance_ep_submit">Save changes</a>
             </div>
         </div>
