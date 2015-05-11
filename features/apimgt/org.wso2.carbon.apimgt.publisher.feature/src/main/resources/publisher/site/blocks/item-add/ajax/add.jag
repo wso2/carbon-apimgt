@@ -113,10 +113,10 @@ include("/jagg/jagg.jag");
             apiData.throttlingTierArr = throttlingTierArr;
 
             if(action === "addAPI"){
-            apiData.provider= jagg.getUser().username;
+            apiData.provider = jagg.getUser().username;
             result = mod.addAPI(apiData);
             }else{
-            apiData.provider= jagg.getUser().username;
+            apiData.provider = jagg.getUser().username;
             result = mod.updateAPI(apiData);
             }
             if (result.error==true) {
