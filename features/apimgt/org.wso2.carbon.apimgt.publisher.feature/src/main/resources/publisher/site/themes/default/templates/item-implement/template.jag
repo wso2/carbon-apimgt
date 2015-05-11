@@ -65,8 +65,7 @@
     <div class="alert alert-block" id="editAPIWarn" style="display:block">
         <span id="editWarnSpan"><b>Warning!</b><br/>
         You are editing an API with active subscribers. Tier Availability changes will not be reflected on
-        active subscriptions.<br/>
-        API Definition for Swagger will not be overriden with the changes you will do to the API.
+        active subscriptions.
         </span>
     </div>
   <%  }%>
@@ -221,6 +220,12 @@
                             <div class="input-append">
                             <input type="text" id="prototype_endpoint" value="http://localhost" name="prototype_endpoint" class="required">
                             <button type="button" class="btn check_url_valid">Test</button>
+
+                            <a style="margin-left:3px" class="icon-question-sign help_popup" help_data="endpoint_test_help"></a>
+                            <div id="endpoint_test_help" class="hide">
+                                <p>WSO2 API Manager uses HTTP Head to check the validity of the endpoint.</p>
+                            </div>
+
                         </div>
                         <p class="help-block">E.g.,: http://appserver/resource</p>
                         <span style="display:none;" class="help-block jsonform-errortext"></span>

@@ -858,6 +858,23 @@ public final class APIUtil {
     }
 
     /**
+     * Extracts the Tenant Domain out from a context like /t/foo.com/context
+     * @param apiContext Context Of the API
+     * @return Tenant Domain as a String
+     */
+    public static String getTenantDomainFromContext(String apiContext){
+        String tenantDomain = org.wso2.carbon.utils.multitenancy.MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
+
+        int tenantDomainIndex = apiContext.indexOf("/t/");
+
+        if (tenantDomainIndex != -1) {
+            String temp = apiContext.substring(tenantDomainIndex + 3, apiContext.length());
+            tenantDomain = temp.substring(0, temp.indexOf("/"));
+        }
+        return tenantDomain;
+    }
+
+    /**
      * Prepends the Tenant Prefix to a registry path. ex: /t/test1.com
      * @param postfixUrl path to be prepended.
      * @return Path prepended with he Tenant domain prefix.
