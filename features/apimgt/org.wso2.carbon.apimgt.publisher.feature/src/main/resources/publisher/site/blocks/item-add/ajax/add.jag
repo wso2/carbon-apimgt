@@ -119,7 +119,7 @@ include("/jagg/jagg.jag");
             apiData.provider = jagg.getUser().username;
             result = mod.updateAPI(apiData);
             }
-            if (result.error==true) {
+            if (result.error == true) {
                 obj = {
                     error:true,
                     message:result.message
