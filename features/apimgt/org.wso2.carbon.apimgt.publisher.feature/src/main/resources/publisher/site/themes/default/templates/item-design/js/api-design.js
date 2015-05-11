@@ -175,11 +175,19 @@ function APIDesigner(){
  
 }
 
-APIDesigner.prototype.check_if_resource_exist = function(path, method){    
-    if(this.api_doc.paths[path] == undefined || this.api_doc.paths[path][method] == undefined){
-        return false;
+APIDesigner.prototype.check_if_resource_exist = function(path, method){
+
+    for (var key in this.api_doc.paths) {
+
+        if(key.toLowerCase() == path.toLowerCase()){
+
+            if (this.api_doc.paths[key].hasOwnProperty(method)) {
+
+                return true;
+            }
+        }
     }
-    return true;
+    return false;
 }
 
 
@@ -370,6 +378,8 @@ APIDesigner.prototype.init_controllers = function(){
     $("#swaggerEditor").click(API_DESIGNER.edit_swagger);
 
     $("#update_swagger").click(API_DESIGNER.update_swagger);
+
+    $("#close_swagger_editor").click(API_DESIGNER.close_swagger_editor);
 }
  
 APIDesigner.prototype.load_api_document = function(api_document){
@@ -506,7 +516,7 @@ APIDesigner.prototype.query = function(path){
 }
 
 APIDesigner.prototype.add_resource = function(resource, path){    
-    var path = path.toLowerCase();
+    
     if(path.charAt(0) != "/")
         path = "/" + path;
     if(this.api_doc.paths[path] == undefined){
@@ -519,21 +529,25 @@ APIDesigner.prototype.add_resource = function(resource, path){
 };
 
 APIDesigner.prototype.edit_swagger = function(){
-    var designer =  APIDesigner();
-    designer.swagger_editor = ace.edit("swagger_editor");
-    //var textarea = $('textarea[name="description"]').hide();    
-    designer.swagger_editor.setFontSize(16);
-    designer.swagger_editor.setTheme("ace/theme/textmate");
-    designer.swagger_editor.getSession().setMode("ace/mode/yaml");
-    designer.swagger_editor.getSession().setValue(jsyaml.safeDump(designer.api_doc));
-    
+    $("body").addClass("modal-open");
+    $("#swaggerEditer").append('<iframe id="se-iframe"  style="border:0px;" width="100%" height="100%"></iframe>');    
+    document.getElementById('se-iframe').src = $("#swaggerEditer").attr("editor-url");
+    $("#swaggerEditer").fadeIn("fast");
+};
+
+APIDesigner.prototype.close_swagger_editor = function(){
+    $("body").removeClass("modal-open");
+    $("#se-iframe").remove();
+    $("#swaggerEditer").fadeOut("fast");
 };
 
 APIDesigner.prototype.update_swagger = function(){
+    $("body").removeClass("modal-open");
+    $("#se-iframe").remove();
+    $("#swaggerEditer").fadeOut("fast");    
     var designer =  APIDesigner();
-    var json = jsyaml.safeLoad(designer.swagger_editor.getSession().getValue());
-    designer.load_api_document(json);
-    $('#swaggerEditer').modal('toggle');    
+    var json = jsyaml.safeLoad(designer.yaml);
+    designer.load_api_document(json);          
 };
 
 

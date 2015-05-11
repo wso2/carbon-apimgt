@@ -245,3 +245,15 @@ margin: 20px 0px 10px 10px;
     width: 100px;
     height:100px;
 }
+
+#swaggerEditer{
+}
+
+.swagger_editer_header{
+    padding: 10px;
+    background: #4a4a4a;
+}
+
+body.modal-open {
+    overflow: hidden;
+}
