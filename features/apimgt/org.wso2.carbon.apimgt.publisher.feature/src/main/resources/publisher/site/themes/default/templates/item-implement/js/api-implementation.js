@@ -1,5 +1,12 @@
 $(document).ready(function(){
 
+    $('a.help_popup').popover({
+        html : true,
+        content: function() {
+            return $('#'+$(this).attr('help_data')).html();
+        }
+    });
+
     $(".implementation_methods").change(function(event){
         $(".implementation_method").hide();
         $(".implementation_method_"+$(this).val()).show();
