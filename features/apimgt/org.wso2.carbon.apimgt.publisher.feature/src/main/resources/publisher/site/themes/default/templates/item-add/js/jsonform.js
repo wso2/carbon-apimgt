@@ -348,6 +348,8 @@ jsonform.elementTypes = {
       ' />'+
       '<button class="btn advance_endpoint_config" type="button" field-name="<%= node.name %>">Advanced Options</button>'+
       '<button class="btn check_url_valid" type="button" >Test</button>'+
+      '<a id="endpoint_tooltip" style="margin-left:3px" class="icon-question-sign help_popup"  help_data="test_help" data-original-title="" title=""></a>'+
+      '<div id="test_help" class="hide"><p>WSO2 API Manager uses HTTP Head to check the validity of the endpoint.</p></div>' +
       '</div>' +
       '<p class="help-block">E.g.,: http://appserver/resource</p>',
     'fieldtemplate': true,
