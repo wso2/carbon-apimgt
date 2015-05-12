@@ -793,7 +793,7 @@
         <apache.poi.version>3.9</apache.poi.version>
         <rhino.js.version>1.7.0.R4.wso2v1</rhino.js.version>
         <owasp.encoder.version>1.1</owasp.encoder.version>
-        <httpclient.version>4.1.1-wso2v1</httpclient.version>
+        <httpclient.version>4.2.5.wso2v1</httpclient.version>
         <commons-logging.version>1.1.1</commons-logging.version>
         <h2-database-engine.version>1.2.140.wso2v3</h2-database-engine.version>
         <Saxon-HE.version>9.4</Saxon-HE.version>
