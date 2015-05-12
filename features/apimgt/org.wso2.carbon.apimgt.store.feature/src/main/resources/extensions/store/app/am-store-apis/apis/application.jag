@@ -64,7 +64,6 @@ require('/modules/store.js').exec(function (ctx) {
                 var keyResult = apistore.getRefreshToken(user.username, options.appName, 'default', options.accessToken,
                         options.accessAllowDomains, options.consumerKey, options.consumerSecret, options.validityTime);
                 var keys = [];
-                log.info('keyResult :: ' + keyResult);
                 keys = JSON.parse(keyResult);
                 if (keys.accessToken != null) {
                     print(keys);
