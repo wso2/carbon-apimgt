@@ -500,6 +500,11 @@ $(document).ready(function () {
     // first load for edit page
     if(APP.endpoint_config != undefined && APP.endpoint_config.endpoint_type != undefined){
         $('#endpoint_type').val(APP.endpoint_config.endpoint_type);
+        if(APP.endpoint_config.endpoint_type=='wsdl'){
+            var wsdlOption = "<option value='wsdl'>WSDL Endpoint</option>";
+            $("#endpoint_type").append(wsdlOption);
+            $('#endpoint_type').val(APP.endpoint_config.endpoint_type);
+        }
     }
     $('#endpoint_type').trigger('change');
 
