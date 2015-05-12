@@ -85,9 +85,9 @@ $(function () {
             var designer = APIDesigner();
             if ($("#resource_url_pattern").val() == "" || $('#inputResource').val() == "") {
                 //jagg.message({content:"URL pattern & Resource cannot be empty.",type:"error"});
-                BootstrapDialog.show({
-                type: 'BootstrapDialog.TYPE_DANGER',
-                title: 'Message type: ' + type,
+                BootstrapDialog.show({ 
+                type: BootstrapDialog.TYPE_DANGER,            
+                title: 'Error',
                 message: 'URL pattern & Resource cannot be empty.'              
             });  
                 return;

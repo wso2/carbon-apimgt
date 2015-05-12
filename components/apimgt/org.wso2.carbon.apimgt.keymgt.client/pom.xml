@@ -88,6 +88,7 @@
 						</Bundle-SymbolicName>
 						<Import-Package>
 							org.apache.commons.logging.*; version="${commons.logging.imp.pkg.version}",
+							org.wso2.carbon.apimgt.api.model.xsd.*; version="${carbon.apimgt.version}",
 							*;resolution:=optional
 						</Import-Package>
 						<Export-Package>

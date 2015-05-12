@@ -126,6 +126,11 @@ require('/modules/publisher.js').exec(function(ctx) {
 		}
 	}
 
+	if(!api.subscribersCount || api.subscribersCount==0){
+	api.subs=false;
+	}else{
+	api.subs=true;
+	}
 	if(api.visibility == 'public') {
 		api.publicVisibility = true;
 	}
