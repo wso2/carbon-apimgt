@@ -1561,13 +1561,13 @@ public final class APIUtil {
         try {
             if (!tenantDomain.equals(org.wso2.carbon.utils.multitenancy.MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)) {
                 int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager().getTenantId(tenantDomain);
-                AuthorizationManager manager = ServiceReferenceHolder.getInstance().
+                org.wso2.carbon.user.api.AuthorizationManager manager = ServiceReferenceHolder.getInstance().
                         getRealmService().getTenantUserRealm(tenantId).
                         getAuthorizationManager();
                 authorized = manager.isUserAuthorized(MultitenantUtils.getTenantAwareUsername(username), permission,
                                                       CarbonConstants.UI_PERMISSION_ACTION);
             } else {
-                RemoteAuthorizationManager authorizationManager = RemoteAuthorizationManager.getInstance();
+                AuthorizationManager authorizationManager = AuthorizationManager.getInstance();
                 authorized = authorizationManager.isUserAuthorized(username, permission);
             }
             if (!authorized) {
@@ -1627,7 +1627,7 @@ public final class APIUtil {
                     " the anonymous user");
         }
 
-        RemoteAuthorizationManager authorizationManager = RemoteAuthorizationManager.getInstance();
+        AuthorizationManager authorizationManager = AuthorizationManager.getInstance();
         return authorizationManager.getRolesOfUser(username);
     }
 
@@ -1655,7 +1655,7 @@ public final class APIUtil {
     private static void setFilePermission(String filePath) throws APIManagementException {
         try {
             filePath = filePath.replaceFirst("/registry/resource/", "");
-            AuthorizationManager accessControlAdmin = ServiceReferenceHolder.getInstance().
+            org.wso2.carbon.user.api.AuthorizationManager accessControlAdmin = ServiceReferenceHolder.getInstance().
                     getRealmService().getTenantUserRealm(MultitenantConstants.SUPER_TENANT_ID).
                     getAuthorizationManager();
             if (!accessControlAdmin.isRoleAuthorized(CarbonConstants.REGISTRY_ANONNYMOUS_ROLE_NAME,
@@ -1928,7 +1928,7 @@ public final class APIUtil {
 
         try {
             int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager().getTenantId(tenantDomain);
-            AuthorizationManager authManager = ServiceReferenceHolder.getInstance().getRealmService().
+            org.wso2.carbon.user.api.AuthorizationManager authManager = ServiceReferenceHolder.getInstance().getRealmService().
                     getTenantUserRealm(tenantId).getAuthorizationManager();
             String[] allowedRoles = authManager.getAllowedRolesForResource(sourceResourcePath, ActionConstants.GET);
 
@@ -1969,7 +1969,7 @@ public final class APIUtil {
                 RegistryAuthorizationManager authorizationManager = new RegistryAuthorizationManager
                         (ServiceReferenceHolder.getUserRealm());
                 resourcePath = authorizationManager.computePathOnMount(resourcePath);
-        		AuthorizationManager authManager = ServiceReferenceHolder.getInstance().getRealmService().
+        		org.wso2.carbon.user.api.AuthorizationManager authManager = ServiceReferenceHolder.getInstance().getRealmService().
         				getTenantUserRealm(tenantId).getAuthorizationManager();
         		if (visibility != null && visibility.equalsIgnoreCase(APIConstants.API_RESTRICTED_VISIBILITY)) {
         			boolean isRoleEveryOne = false;
@@ -2132,7 +2132,7 @@ public final class APIUtil {
 			govRegistry.put(APIConstants.EXTERNAL_API_STORES_LOCATION, resource);
 			
 			/*set resource permission*/
-            AuthorizationManager authManager = ServiceReferenceHolder.getInstance().getRealmService().
+            org.wso2.carbon.user.api.AuthorizationManager authManager = ServiceReferenceHolder.getInstance().getRealmService().
     				getTenantUserRealm(tenantID).getAuthorizationManager();
             String resourcePath = RegistryUtils.getAbsolutePath(RegistryContext.getBaseInstance(),
                     APIUtil.getMountedPath(RegistryContext.getBaseInstance(), RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH) 
@@ -2178,7 +2178,7 @@ public final class APIUtil {
 			govRegistry.put(APIConstants.GA_CONFIGURATION_LOCATION, resource);
 			
 			/*set resource permission*/
-            AuthorizationManager authManager = ServiceReferenceHolder.getInstance().getRealmService().
+            org.wso2.carbon.user.api.AuthorizationManager authManager = ServiceReferenceHolder.getInstance().getRealmService().
     				getTenantUserRealm(tenantID).getAuthorizationManager();
             String resourcePath = RegistryUtils.getAbsolutePath(RegistryContext.getBaseInstance(),
                     APIUtil.getMountedPath(RegistryContext.getBaseInstance(), RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH)
@@ -2468,7 +2468,7 @@ public final class APIUtil {
                         (ServiceReferenceHolder.getUserRealm());
                 resourcePath = authorizationManager.computePathOnMount(resourcePath);
                 
-                AuthorizationManager authManager = ServiceReferenceHolder.getInstance().getRealmService().
+                org.wso2.carbon.user.api.AuthorizationManager authManager = ServiceReferenceHolder.getInstance().getRealmService().
                         getTenantUserRealm(tenantID).getAuthorizationManager();
                 
                  if (registry.resourceExists(govRelativePath)) {
@@ -2798,7 +2798,7 @@ public final class APIUtil {
 
                 return manager.getRoleNames();
             } else {
-                RemoteAuthorizationManager authorizationManager = RemoteAuthorizationManager.getInstance();
+                AuthorizationManager authorizationManager = AuthorizationManager.getInstance();
                 return authorizationManager.getRoleNames();
             }
         } catch (UserStoreException e) {

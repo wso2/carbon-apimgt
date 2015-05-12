@@ -14,54 +14,49 @@
  *  limitations under the License.
  */
 
-package org.wso2.carbon.apimgt.impl.utils;
+package org.wso2.carbon.apimgt.impl.auth.manager;
 
-import org.apache.commons.pool.BasePoolableObjectFactory;
-import org.apache.commons.pool.ObjectPool;
-import org.apache.commons.pool.impl.StackObjectPool;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 
 public class RemoteAuthorizationManager {
 
-    private static final RemoteAuthorizationManager instance = new RemoteAuthorizationManager();
-
-    private ObjectPool clientPool;
+    private AuthorizationManagerClientFactory clientFactory;
+    private static RemoteAuthorizationManager instance;
+    private String type;
 
     private ScheduledExecutorService exec;
     private ScheduledFuture future;
 
-    private RemoteAuthorizationManager() {
-
+    private RemoteAuthorizationManager(String type) {
+        AuthorizationManagerClientFactory.ClientType authClientType =
+                ("".equals(type) || type == null) ?
+                        AuthorizationManagerClientFactory.ClientType.STANDALONE :
+                        AuthorizationManagerClientFactory.ClientType.valueOf(type);
+        this.clientFactory = AuthorizationManagerClientFactory.getAuthorizationManagerClientFactory(authClientType);
     }
 
     public static RemoteAuthorizationManager getInstance() {
+        String type =
+                ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().
+                        getAPIManagerConfiguration().getFirstProperty("type");
+        if (instance == null) {
+            synchronized (RemoteAuthorizationManager.class) {
+                if (instance == null) {
+                    instance = new RemoteAuthorizationManager(type);
+                }
+            }
+        }
         return instance;
     }
 
-    public void init() {
-        clientPool = new StackObjectPool(new BasePoolableObjectFactory() {
-            @Override
-            public Object makeObject() throws Exception {
-                return new RemoteAuthorizationManagerClient();
-            }
-        });
-    }
-
-    public void destroy() {
-        try {
-            clientPool.close();
-        } catch (Exception ignored) {
-        }
-
-    }
-
     public boolean isUserAuthorized(String user, String permission) throws APIManagementException {
-        RemoteAuthorizationManagerClient client = null;
+        AuthorizationManagerClient client = null;
         try {
-            client = (RemoteAuthorizationManagerClient) clientPool.borrowObject();
+            client = clientFactory.getAuthorizationManagerClient();
             return client.isUserAuthorized(user, permission);
 
         } catch (Exception e) {
@@ -69,7 +64,7 @@ public class RemoteAuthorizationManager {
         } finally {
             try {
                 if (client != null) {
-                    clientPool.returnObject(client);
+                    clientFactory.releaseAuthorizationManagerClient(client);
                 }
             } catch (Exception ignored) {
             }
@@ -77,9 +72,9 @@ public class RemoteAuthorizationManager {
     }
 
     public String[] getRolesOfUser(String user) throws APIManagementException {
-        RemoteAuthorizationManagerClient client = null;
+        AuthorizationManagerClient client = null;
         try {
-            client = (RemoteAuthorizationManagerClient) clientPool.borrowObject();
+            client = clientFactory.getAuthorizationManagerClient();
             return client.getRolesOfUser(user);
 
         } catch (Exception e) {
@@ -87,7 +82,7 @@ public class RemoteAuthorizationManager {
         } finally {
             try {
                 if (client != null) {
-                    clientPool.returnObject(client);
+                    clientFactory.releaseAuthorizationManagerClient(client);
                 }
             } catch (Exception ignored) {
             }
@@ -95,9 +90,9 @@ public class RemoteAuthorizationManager {
     }
 
     public String[] getRoleNames() throws APIManagementException {
-        RemoteAuthorizationManagerClient client = null;
+        AuthorizationManagerClient client = null;
         try {
-            client = (RemoteAuthorizationManagerClient) clientPool.borrowObject();
+            client = clientFactory.getAuthorizationManagerClient();
             return client.getRoleNames();
 
         } catch (Exception e) {
@@ -105,7 +100,7 @@ public class RemoteAuthorizationManager {
         } finally {
             try {
                 if (client != null) {
-                    clientPool.returnObject(client);
+                    clientFactory.releaseAuthorizationManagerClient(client);
                 }
             } catch (Exception ignored) {
             }

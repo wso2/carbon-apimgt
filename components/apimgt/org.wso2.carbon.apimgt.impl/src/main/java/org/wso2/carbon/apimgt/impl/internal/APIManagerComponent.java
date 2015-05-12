@@ -36,7 +36,6 @@ import org.wso2.carbon.apimgt.impl.observers.SignupObserver;
 import org.wso2.carbon.apimgt.impl.observers.TenantServiceCreator;
 import org.wso2.carbon.apimgt.impl.utils.APIMgtDBUtil;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
-import org.wso2.carbon.apimgt.impl.utils.RemoteAuthorizationManager;
 import org.wso2.carbon.base.MultitenantConstants;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.governance.api.util.GovernanceConstants;
@@ -51,7 +50,6 @@ import org.wso2.carbon.registry.core.session.UserRegistry;
 import org.wso2.carbon.registry.core.utils.AuthorizationUtils;
 import org.wso2.carbon.registry.core.utils.RegistryUtils;
 import org.wso2.carbon.registry.indexing.service.TenantIndexingLoader;
-import org.wso2.carbon.user.api.AuthorizationManager;
 import org.wso2.carbon.user.api.Permission;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.user.api.UserStoreManager;
@@ -173,8 +171,8 @@ public class APIManagerComponent {
                     UserMgtConstants.EXECUTE_ACTION, null);
             
             setupImagePermissions();
-            RemoteAuthorizationManager authorizationManager = RemoteAuthorizationManager.getInstance();
-            authorizationManager.init();
+//            AuthorizationManager authorizationManager = AuthorizationManager.getInstance();
+//            authorizationManager.init();
             APIMgtDBUtil.initialize();
             //Check User add listener enabled or not
             boolean selfSignInProcessEnabled = Boolean.parseBoolean(configuration.getFirstProperty("WorkFlowExtensions.SelfSignIn.ProcessEnabled"));
@@ -221,7 +219,7 @@ public class APIManagerComponent {
         }
         registration.unregister();
         APIManagerFactory.getInstance().clearAll();
-        RemoteAuthorizationManager authorizationManager = RemoteAuthorizationManager.getInstance();
+        AuthorizationManager authorizationManager = AuthorizationManager.getInstance();
         authorizationManager.destroy();
     }
 
@@ -317,7 +315,7 @@ public class APIManagerComponent {
 
     private void setupImagePermissions() throws APIManagementException {
         try {
-            AuthorizationManager accessControlAdmin = ServiceReferenceHolder.getInstance().
+            org.wso2.carbon.user.api.AuthorizationManager accessControlAdmin = ServiceReferenceHolder.getInstance().
                     getRealmService().getTenantUserRealm(MultitenantConstants.SUPER_TENANT_ID).
                     getAuthorizationManager();
             String imageLocation =

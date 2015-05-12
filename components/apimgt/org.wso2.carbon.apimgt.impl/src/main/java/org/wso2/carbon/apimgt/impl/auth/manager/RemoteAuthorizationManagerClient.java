@@ -14,13 +14,16 @@
  *  limitations under the License.
  */
 
-package org.wso2.carbon.apimgt.impl.utils;
+package org.wso2.carbon.apimgt.impl.auth.manager;
 
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.client.Options;
 import org.apache.axis2.client.ServiceClient;
 import org.apache.axis2.context.ServiceContext;
 import org.apache.axis2.transport.http.HTTPConstants;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.opensaml.artifact.InvalidArgumentException;
 import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.impl.APIConstants;
@@ -39,7 +42,7 @@ import org.wso2.carbon.utils.CarbonUtils;
  * are properly secured with UsernameToken security. This implementation is not thread safe
  * and hence must not be shared among multiple threads at the same time.
  */
-class RemoteAuthorizationManagerClient {
+class RemoteAuthorizationManagerClient implements AuthorizationManagerClient {
 
     private static final int TIMEOUT_IN_MILLIS = 15 * 60 * 1000;
 
@@ -49,14 +52,16 @@ class RemoteAuthorizationManagerClient {
     private String password;
     private String cookie;
 
-    public RemoteAuthorizationManagerClient() throws APIManagementException {
+    private static final Log log = LogFactory.getLog(RemoteAuthorizationManager.class);
+
+    public RemoteAuthorizationManagerClient() {
         APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
                 getAPIManagerConfigurationService().getAPIManagerConfiguration();
         String serviceURL = config.getFirstProperty(APIConstants.AUTH_MANAGER_URL);
         username = config.getFirstProperty(APIConstants.AUTH_MANAGER_USERNAME);
         password = config.getFirstProperty(APIConstants.AUTH_MANAGER_PASSWORD);
         if (serviceURL == null || username == null || password == null) {
-            throw new APIManagementException("Required connection details for authentication " +
+            throw new InvalidArgumentException("Required connection details for authentication " +
                     "manager not provided");
         }
 
@@ -76,8 +81,9 @@ class RemoteAuthorizationManagerClient {
                 options.setManageSession(true);
             }
         } catch (AxisFault axisFault) {
-            throw new APIManagementException("Error while initializing the user management stubs",
-                    axisFault);
+            String msg = "Error occurred while initializing Remote Authorization Manager Client";
+            log.error(msg, axisFault);
+            throw new IllegalArgumentException(msg, axisFault);
         }
     }
 
