@@ -19,6 +19,7 @@
 package org.wso2.carbon.apimgt.impl;
 
 import org.apache.axis2.AxisFault;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.simple.JSONArray;
@@ -47,6 +48,7 @@ import org.wso2.carbon.governance.api.common.dataobjects.GovernanceArtifact;
 import org.wso2.carbon.governance.api.exception.GovernanceException;
 import org.wso2.carbon.governance.api.generic.GenericArtifactManager;
 import org.wso2.carbon.governance.api.generic.dataobjects.GenericArtifact;
+import org.wso2.carbon.identity.oauth.config.OAuthServerConfiguration;
 import org.wso2.carbon.registry.core.*;
 import org.wso2.carbon.registry.core.Collection;
 import org.wso2.carbon.registry.core.config.RegistryContext;
@@ -3085,4 +3087,91 @@ Set<API> apiSet) throws APIManagementException {
     	return subscriptionArray;
     }
 
+    public JSONObject getRefreshToken(String userId, String applicationName, String requestedScopes,
+            String oldAccessToken, JSONArray accessAllowDomainsArr, String consumerKey, String consumerSecret,
+            String validityTime) throws APIManagementException, AxisFault {
+
+        // NativeObject row = new NativeObject();
+        JSONObject row = new JSONObject();
+        if (isEmptyDataCheck(userId, applicationName, requestedScopes, oldAccessToken, consumerKey, consumerSecret,
+                validityTime)) {
+
+            String[] accessAllowDomainsArray = new String[accessAllowDomainsArr.size()];
+            for (int i = 0; i < accessAllowDomainsArr.size(); i++) {
+                accessAllowDomainsArray[i] = (String) accessAllowDomainsArr.get(i);
+            }
+
+            //Check whether old access token is already available
+            if (isApplicationTokenExists(oldAccessToken)) {
+                //SubscriberKeyMgtClient keyMgtClient = HostObjectUtils.getKeyManagementClient();
+                SubscriberKeyMgtClient keyMgtClient = APIUtil.getKeyManagementClient();
+                ApplicationKeysDTO dto = new ApplicationKeysDTO();
+                String accessToken;
+                String tokenScope;
+                try {
+                    //Regenerate the application access key
+                    accessToken = keyMgtClient
+                            .regenerateApplicationAccessKey(requestedScopes, oldAccessToken, accessAllowDomainsArray,
+                                    consumerKey, consumerSecret, validityTime);
+                    if (accessToken != null) {
+                        //Set newly generated application access token
+                        dto.setApplicationAccessToken(accessToken);
+                    }
+
+                    tokenScope = getScopesByToken(accessToken);
+                    Set<Scope> scopeSet = new LinkedHashSet<Scope>();
+                    String tokenScopeNames = "";
+                    Subscriber subscriber = new Subscriber(userId);
+                    //get subscribed APIs set for application
+                    Set<SubscribedAPI> subscribedAPIs = getSubscribedAPIs(subscriber, applicationName);
+                    List<APIIdentifier> identifiers = new ArrayList<APIIdentifier>();
+
+                    for (SubscribedAPI subscribedAPI : subscribedAPIs) {
+                        identifiers.add(subscribedAPI.getApiId());
+                    }
+
+                    if (!identifiers.isEmpty()) {
+                        //get scopes for subscribed apis
+                        scopeSet = getScopesBySubscribedAPIs(identifiers);
+                        //convert scope keys to names
+                        tokenScopeNames = getScopeNamesbyKey(tokenScope, scopeSet);
+                    }
+
+                    row.put("accessToken", dto.getApplicationAccessToken());
+                    row.put("consumerKey", dto.getConsumerKey());
+                    row.put("consumerSecret", dto.getConsumerSecret());
+                    row.put("validityTime", validityTime);
+                    row.put("tokenScope", tokenScopeNames);
+                    boolean isRegenerateOptionEnabled = true;
+                    if (getApplicationAccessTokenValidityPeriodInSeconds() < 0) {
+                        isRegenerateOptionEnabled = false;
+                    }
+                    row.put("enableRegenarate", isRegenerateOptionEnabled);
+                } catch (APIManagementException e) {
+                    handleException("Error while refreshing the access token.", e);
+                } catch (Exception e) {
+                    handleException(e.getMessage(), e);
+                }
+            } else {
+                handleException("Cannot regenerate a new access token. There's no access token available as : "
+                        + oldAccessToken);
+            }
+            return row;
+        } else {
+            handleException("Invalid types of input parameters.");
+            return null;
+        }
+    }
+
+    private static long getApplicationAccessTokenValidityPeriodInSeconds() {
+        return OAuthServerConfiguration.getInstance().getApplicationAccessTokenValidityPeriodInSeconds();
+    }
+
+    private boolean isEmptyDataCheck(String userId, String applicationName, String requestedScopes,
+            String oldAccessToken, String consumerKey, String consumerSecret, String validityTime) {
+        return (StringUtils.isNotBlank(userId) && StringUtils.isNotBlank(applicationName) && StringUtils
+                .isNotBlank(requestedScopes) && StringUtils.isNotBlank(oldAccessToken) && StringUtils
+                .isNotBlank(consumerKey) && StringUtils.isNotBlank(consumerSecret) && StringUtils
+                .isNotBlank(validityTime));
+    }
 }

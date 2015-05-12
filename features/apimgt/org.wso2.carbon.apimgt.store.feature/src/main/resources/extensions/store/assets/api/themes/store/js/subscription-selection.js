@@ -36,8 +36,8 @@ $(function () {
     /*
      This function generate the location of the templates used in the rendering
      */
-    var getSubscriptionAPI = function (appName) {
-        return caramel.context + '/apis/application/' + appName + '/subscriptions';
+    var getSubscriptionAPI = function (appName, action) {
+        return caramel.context + '/apis/application/' + appName + '/' + action + '/subscriptions';
     };
 
     /*
@@ -77,26 +77,44 @@ $(function () {
     /*
      The function update the details of the given application
      */
-    var updateMetadata = function (appName, newDetails, environment) {
+    var updateMetadata = function (appName, newDetails, environment, action) {
         var appData = findAppDetails(appName);
-        if (environment == 'Production') {
+        if (action == 'new') {
+            if (environment == 'Production') {
 
-            appData.prodKeyScope = newDetails.tokenScope;
-            appData.prodValidityTime = newDetails.validityTime;
-            appData.prodAuthorizedDomains = newDetails.accessallowdomains;
-            appData.prodKey = newDetails.accessToken;
-            appData.prodConsumerKey = newDetails.consumerKey;
-            appData.prodRegenarateOption = newDetails.enableRegenarate;
-            appData.prodConsumerSecret = newDetails.consumerSecret;
-        } else if (environment == 'Sandbox') {
+                appData.prodKeyScope = newDetails.tokenScope;
+                appData.prodValidityTime = newDetails.validityTime;
+                appData.prodAuthorizedDomains = newDetails.accessallowdomains;
+                appData.prodKey = newDetails.accessToken;
+                appData.prodConsumerKey = newDetails.consumerKey;
+                appData.prodRegenarateOption = newDetails.enableRegenarate;
+                appData.prodConsumerSecret = newDetails.consumerSecret;
+            } else if (environment == 'Sandbox') {
 
-            appData.sandKeyScope = newDetails.tokenScope;
-            appData.sandValidityTime = newDetails.validityTime;
-            appData.sandboxAuthorizedDomains = newDetails.accessallowdomains;
-            appData.sandboxKey = newDetails.accessToken;
-            appData.sandboxConsumerKey = newDetails.consumerKey;
-            appData.sandRegenarateOption = newDetails.enableRegenarate;
-            appData.sandboxConsumerSecret = newDetails.consumerSecret;
+                appData.sandKeyScope = newDetails.tokenScope;
+                appData.sandValidityTime = newDetails.validityTime;
+                appData.sandboxAuthorizedDomains = newDetails.accessallowdomains;
+                appData.sandboxKey = newDetails.accessToken;
+                appData.sandboxConsumerKey = newDetails.consumerKey;
+                appData.sandRegenarateOption = newDetails.enableRegenarate;
+                appData.sandboxConsumerSecret = newDetails.consumerSecret;
+            }
+        } else if (action == 'refresh') {
+            if (environment == 'Production') {
+
+                appData.prodKeyScope = newDetails.tokenScope;
+                appData.prodValidityTime = newDetails.validityTime;
+                appData.prodAuthorizedDomains = newDetails.accessallowdomains;
+                appData.prodKey = newDetails.accessToken;
+                appData.prodRegenarateOption = newDetails.enableRegenarate;
+            } else if (environment == 'Sandbox') {
+
+                appData.sandKeyScope = newDetails.tokenScope;
+                appData.sandValidityTime = newDetails.validityTime;
+                appData.sandboxAuthorizedDomains = newDetails.accessallowdomains;
+                appData.sandboxKey = newDetails.accessToken;
+                appData.sandRegenarateOption = newDetails.enableRegenarate;
+            }
         }
         updateAppDetails(appName, appData);
     };
@@ -128,12 +146,12 @@ $(function () {
             tokenRequestData['validityTime'] = $('#input-Production-validityTime').val();
             $.ajax({
                 type: 'POST',
-                url: getSubscriptionAPI(appName),
+                url: getSubscriptionAPI(appName, 'new'),
                 data: tokenRequestData,
                 success: function (data) {
                     var jsonData = data;
                     APP_STORE.productionKeys = jsonData;
-                    updateMetadata(appName, jsonData, 'Production');
+                    updateMetadata(appName, jsonData, 'Production', 'new');
                     events.publish(EV_GENERATE_PROD_TOKEN, jsonData);
                 }
             });
@@ -153,12 +171,12 @@ $(function () {
             tokenRequestData['validityTime'] = $('#input-Sandbox-validityTime').val();
             $.ajax({
                 type: 'POST',
-                url: getSubscriptionAPI(appName),
+                url: getSubscriptionAPI(appName, 'new'),
                 data: tokenRequestData,
                 success: function (data) {
                     var jsonData = data;
                     APP_STORE.sandboxKeys = jsonData;
-                    updateMetadata(appName, jsonData, 'Sandbox');
+                    updateMetadata(appName, jsonData, 'Sandbox', 'new');
                     events.publish(EV_GENERATE_SAND_TOKEN, jsonData);
                 }
             });
@@ -243,19 +261,23 @@ $(function () {
             var appName = $('#subscription_selection').val();
             var appDetails = findAppDetails(appName);
             var tokenRequestData = {};
-            tokenRequestData['appName'] = appName;
-            tokenRequestData['keyType'] = 'Production';
-            tokenRequestData['accessAllowDomains'] = $('#input-Production-allowedDomains').val() || 'ALL';
-            tokenRequestData['callbackUrl'] = appDetails.callbackUrl || '';
-            tokenRequestData['validityTime'] = $('#input-Production-validityTime').val();
+            tokenRequestData.appName = appName;
+            tokenRequestData.keyType = 'Production';
+            tokenRequestData.accessAllowDomains = $('#input-Production-allowedDomains').val() || 'ALL';
+            tokenRequestData.validityTime = $('#input-Production-validityTime').val();
+            tokenRequestData.accessToken = appDetails.prodKey;
+            tokenRequestData.consumerKey = appDetails.prodConsumerKey;
+            tokenRequestData.consumerSecret = appDetails.prodConsumerSecret;
             $.ajax({
                 type: 'POST',
-                url: getSubscriptionAPI(appName),
+                url: getSubscriptionAPI(appName, 'refresh'),
                 data: tokenRequestData,
                 success: function (data) {
+                    data.consumerKey = APP_STORE.productionKeys.consumerKey;
+                    data.consumerSecret = APP_STORE.productionKeys.consumerSecret;
                     var jsonData = data;
                     APP_STORE.productionKeys = jsonData;
-                    updateMetadata(appName, jsonData, 'Production');
+                    updateMetadata(appName, jsonData, 'Production', 'refresh');
                     events.publish(EV_GENERATE_PROD_TOKEN, jsonData);
                 }
             });
@@ -270,19 +292,23 @@ $(function () {
             var appName = $('#subscription_selection').val();
             var appDetails = findAppDetails(appName);
             var tokenRequestData = {};
-            tokenRequestData['appName'] = appName;
-            tokenRequestData['keyType'] = 'Sandbox';
-            tokenRequestData['accessAllowDomains'] = $('#input-Sandbox-allowedDomains').val() || 'ALL';
-            tokenRequestData['callbackUrl'] = appDetails.callbackUrl || '';
-            tokenRequestData['validityTime'] = $('#input-Production-validityTime').val();
+            tokenRequestData.appName = appName;
+            tokenRequestData.keyType = 'Sandbox';
+            tokenRequestData.accessAllowDomains = $('#input-Sandbox-allowedDomains').val() || 'ALL';
+            tokenRequestData.validityTime = $('#input-Sandbox-validityTime').val();
+            tokenRequestData.accessToken = appDetails.sandboxKey;
+            tokenRequestData.consumerKey = appDetails.sandboxConsumerKey;
+            tokenRequestData.consumerSecret = appDetails.sandboxConsumerSecret;
             $.ajax({
                 type: 'POST',
-                url: getSubscriptionAPI(appName),
+                url: getSubscriptionAPI(appName, 'refresh'),
                 data: tokenRequestData,
                 success: function (data) {
+                    data.consumerKey = APP_STORE.sandboxKeys.consumerKey;
+                    data.consumerSecret = APP_STORE.sandboxKeys.consumerSecret;
                     var jsonData = data;
-                    APP_STORE.productionKeys = jsonData;
-                    updateMetadata(appName, jsonData, 'Sandbox');
+                    APP_STORE.sandboxKeys = jsonData;
+                    updateMetadata(appName, jsonData, 'Sandbox', 'refresh');
                     events.publish(EV_GENERATE_SAND_TOKEN, jsonData);
                 }
             });
