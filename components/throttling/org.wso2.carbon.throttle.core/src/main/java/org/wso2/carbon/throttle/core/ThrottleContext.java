@@ -46,7 +46,7 @@ public abstract class ThrottleContext {
     private long nextCleanTime;
     /* The configuration of a throttle */
     private ThrottleConfiguration throttleConfiguration;
-    /* The configuration that corresponding to this context – this holds all
+    /* The configuration that corresponding to this context - this holds all
      static (configuration) data */
     private String throttleId;
     /* The pre-fix of key for any caller */
@@ -55,7 +55,7 @@ public abstract class ThrottleContext {
     private boolean debugOn;
 
     /**
-     * default constructor – expects a throttle configuration.
+     * default constructor - expects a throttle configuration.
      *
      * @param throttleConfiguration - configuration data according to the policy
      */

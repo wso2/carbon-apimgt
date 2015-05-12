@@ -19,7 +19,7 @@
 package org.wso2.carbon.throttle.core;
 
 /**
- * All the configuration data for a caller – this data have been defined according to the policy
+ * All the configuration data for a caller - this data have been defined according to the policy
  */
 
 public abstract class CallerConfiguration {

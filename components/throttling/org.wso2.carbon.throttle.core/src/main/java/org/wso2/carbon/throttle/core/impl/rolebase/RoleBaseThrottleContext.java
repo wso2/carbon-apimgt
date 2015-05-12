@@ -25,7 +25,7 @@ import java.util.Map;
 
 public class RoleBaseThrottleContext extends ThrottleContext {
     /**
-     * default constructor – expects a throttle configuration.
+     * default constructor - expects a throttle configuration.
      *
      * @param throttleConfiguration - configuration data according to the policy
      */
