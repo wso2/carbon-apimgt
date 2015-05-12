@@ -95,11 +95,11 @@ $(document).ready(function(){
 
     $('#go_to_implement').click(function(e){
         //TODO
-        //$("body").unbind("api_saved");
-        //$("body").on("api_saved" , function(e){
+        $("body").unbind("api_saved");
+        $("body").on("api_saved" , function(e){
         location.href = caramel.context + "/asts/api/implement/"+store.publisher.api.id;
-        //});
-        //$("#design_form").submit();
+        });
+        $("#form-asset-create").submit();
     });
 });
 
