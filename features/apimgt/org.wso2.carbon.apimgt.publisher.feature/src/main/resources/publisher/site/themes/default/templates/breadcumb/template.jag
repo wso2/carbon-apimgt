@@ -29,7 +29,7 @@
                 var allStatsMappedUrl=jagg.getMappedUrl("/site/pages/all-statistics.jag")+urlPrefix;
             %>
             <ul class="breadcrumb">
-                <% if(reqUrl.indexOf(listUrl)>=0 ||reqUrl.indexOf(listMappedUrl)>=0||reqUrl.equals(site.context+"/")){%>
+                <% if(reqUrl.indexOf(listUrl)>=0 ||reqUrl.indexOf(listMappedUrl)>=0||reqUrl.equals(jagg.url("/"))){%>
                     <li>
                     <%=i18n.localize("apis")%> <span class="divider">/</span>
                     </li>

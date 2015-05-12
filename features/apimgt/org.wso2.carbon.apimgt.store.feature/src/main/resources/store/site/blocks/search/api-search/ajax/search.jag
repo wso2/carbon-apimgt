@@ -2,6 +2,8 @@
 include("/jagg/jagg.jag");
 
 (function () {
+    var site = require("/site/conf/site.json");
+    var ssoEnabled = site.ssoConfiguration.enabled;
     response.contentType = "application/json; charset=UTF-8";
     var mod, obj, query, result, resultSearch,username, start,end, tenantDomain,
             msg = require("/site/conf/ui-messages.jag"),
@@ -9,11 +11,13 @@ include("/jagg/jagg.jag");
             user = jagg.getUser();
     if (action == "searchAPIs" && request.getMethod() == 'POST') {
         if (!user) {
-            print({
-                error:true,
-                message:msg.error.loginRequired(action)
-            });
-            return;
+            if(!ssoEnabled){
+		print({
+		    error:true,
+                    message:msg.error.loginRequired(action)
+            	});
+	    }
+	    return;
         }
 
         query = request.getParameter("query");

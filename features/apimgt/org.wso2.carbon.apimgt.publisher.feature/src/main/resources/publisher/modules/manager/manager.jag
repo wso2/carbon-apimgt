@@ -69,6 +69,26 @@ var loadTenantRegistry = function (tenantDomain) {
     }    
 };
 
+var loadTenantAxisConfiguration = function (tenantDomain) { 
+   
+    try {
+        if (tenantDomain != null && tenantDomain != "") {  
+             
+           getAPIProviderObj().loadAxisConfigOfTenant(String(tenantDomain));
+            return
+            {
+                error:false
+            }
+            ;
+        }
+    } catch (e) {
+        return {
+            error:true,
+            message:e.message
+        };
+    }    
+};
+
 var getAPIStoreObj = function() {
     var store = require('apistore');
     return new store.APIStore();

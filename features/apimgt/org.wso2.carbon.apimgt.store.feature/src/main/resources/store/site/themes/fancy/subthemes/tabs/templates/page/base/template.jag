@@ -15,10 +15,11 @@ i18n.init(request,localeResourcesBasePath);
     var tenant=request_tenant;
     var urlPrefix;
     if(tenant!=null) {urlPrefix="tenant="+tenant;}else{urlPrefix='';}
+    var currentURL = jagg.getAbsoluteUrl('/'); 
 
     %>
     <script>
-        var requestURL = '<%= request_url %>';
+        var requestURL = '<%= currentURL%>';
         var ssoEnabled = '<%=site.ssoConfiguration.enabled%>';
         var tenant = '<%=tenant%>';
         var urlPrefix = '<%=urlPrefix%>';

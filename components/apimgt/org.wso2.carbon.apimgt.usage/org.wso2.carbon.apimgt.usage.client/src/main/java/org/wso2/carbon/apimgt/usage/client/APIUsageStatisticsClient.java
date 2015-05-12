@@ -36,6 +36,7 @@ import org.wso2.carbon.apimgt.usage.client.dto.*;
 import org.wso2.carbon.apimgt.usage.client.exception.APIMgtUsageQueryServiceClientException;
 import org.wso2.carbon.apimgt.usage.client.internal.APIUsageClientServiceComponent;
 import org.wso2.carbon.bam.presentation.stub.QueryServiceStub;
+import org.wso2.carbon.bam.presentation.xsd.CompositeIndex;
 import org.wso2.carbon.core.util.CryptoUtil;
 import org.wso2.carbon.utils.CarbonUtils;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
@@ -551,8 +552,8 @@ public class APIUsageStatisticsClient {
     public List<APIVersionUsageDTO> getUsageByAPIVersions(String providerName,
                                                           String apiName) throws APIMgtUsageQueryServiceClientException {
 
-        QueryServiceStub.CompositeIndex[] compositeIndex = new QueryServiceStub.CompositeIndex[1];
-        compositeIndex[0] = new QueryServiceStub.CompositeIndex();
+        CompositeIndex[] compositeIndex = new CompositeIndex[1];
+        compositeIndex[0] = new CompositeIndex();
         compositeIndex[0].setIndexName("api");
         compositeIndex[0].setRangeFirst(apiName);
         compositeIndex[0].setRangeLast(getNextStringInLexicalOrder(apiName));
@@ -594,8 +595,8 @@ public class APIUsageStatisticsClient {
     public List<APIVersionUsageDTO> getUsageByAPIVersions(String providerName, String apiName,
                                                           String fromDate, String toDate) throws APIMgtUsageQueryServiceClientException {
 
-        QueryServiceStub.CompositeIndex[] compositeIndex = new QueryServiceStub.CompositeIndex[1];
-        compositeIndex[0] = new QueryServiceStub.CompositeIndex();
+        CompositeIndex[] compositeIndex = new CompositeIndex[1];
+        compositeIndex[0] = new CompositeIndex();
         compositeIndex[0].setIndexName("api");
         compositeIndex[0].setRangeFirst(apiName);
         compositeIndex[0].setRangeLast(getNextStringInLexicalOrder(apiName));
@@ -1119,7 +1120,7 @@ public class APIUsageStatisticsClient {
     }
 
     private OMElement queryDatabase(String columnFamily,
-                                    QueryServiceStub.CompositeIndex[] compositeIndex)
+                                    CompositeIndex[] compositeIndex)
             throws APIMgtUsageQueryServiceClientException {
 
         if (dataSource == null) {
@@ -1196,7 +1197,7 @@ public class APIUsageStatisticsClient {
     }
 
     private OMElement queryBetweenTwoDays(String columnFamily, String fromDate, String toDate,
-                                          QueryServiceStub.CompositeIndex[] compositeIndex)
+                                          CompositeIndex[] compositeIndex)
             throws APIMgtUsageQueryServiceClientException {
 
         if (dataSource == null) {
@@ -1282,7 +1283,7 @@ public class APIUsageStatisticsClient {
     }
 
     private OMElement queryBetweenTwoDaysForFaulty(String columnFamily, String fromDate, String toDate,
-                                                   QueryServiceStub.CompositeIndex[] compositeIndex)
+                                                   CompositeIndex[] compositeIndex)
             throws APIMgtUsageQueryServiceClientException {
 
         if (dataSource == null) {
@@ -1359,7 +1360,7 @@ public class APIUsageStatisticsClient {
     }
 
     private OMElement queryToGetAPIUsageByResourcePath(String columnFamily, String fromDate, String toDate,
-                                                       QueryServiceStub.CompositeIndex[] compositeIndex)
+                                                       CompositeIndex[] compositeIndex)
             throws APIMgtUsageQueryServiceClientException {
 
         if (dataSource == null) {
@@ -1436,7 +1437,7 @@ public class APIUsageStatisticsClient {
     }
 
     private OMElement queryToGetAPIUsageByDestination(String columnFamily, String fromDate, String toDate,
-                                                      QueryServiceStub.CompositeIndex[] compositeIndex)
+                                                      CompositeIndex[] compositeIndex)
             throws APIMgtUsageQueryServiceClientException {
         if (dataSource == null) {
             throw new APIMgtUsageQueryServiceClientException("BAM data source hasn't been initialized. Ensure " +
@@ -1512,7 +1513,7 @@ public class APIUsageStatisticsClient {
     }
 
     private OMElement queryBetweenTwoDaysForAPIUsageByVersion(String columnFamily, String fromDate, String toDate,
-                                                              QueryServiceStub.CompositeIndex[] compositeIndex)
+                                                              CompositeIndex[] compositeIndex)
             throws APIMgtUsageQueryServiceClientException {
 
         if (dataSource == null) {
@@ -1974,7 +1975,7 @@ public class APIUsageStatisticsClient {
     }
 
     private OMElement queryFirstAccess(String columnFamily,
-                                       QueryServiceStub.CompositeIndex[] compositeIndex)
+                                       CompositeIndex[] compositeIndex)
             throws APIMgtUsageQueryServiceClientException {
 
         if (dataSource == null) {

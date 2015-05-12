@@ -1,8 +1,13 @@
 <%
 
 //response.contentType = 'text/rjavascript';
+response.addHeader('Cache-Control','no-cache, no-store, must-revalidate'); // HTTP 1.1.
+response.addHeader('Pragma','no-cache'); // HTTP 1.0.
+response.addHeader('Expires','0');
+
 include("/jagg/jagg.jag");
 var site = require("/site/conf/site.json");
+
 
 var verb = request.getMethod();
 var search = request.getParameter('search');
@@ -17,6 +22,7 @@ var user = null;
 
 var topicsPerPage = parseInt(site.forum.topicsPerPage);
 var repliesPerPage = parseInt(site.forum.repliesPerPage);
+var resourceIdentifier= site.forum.resourceIdentifier;
 var tenantDomain = "carbon.super";
 var date = new Date();
 
@@ -146,7 +152,14 @@ if (verb == "DELETE" && topicId != null) {
         username = user.username;
     }catch(Err){}
 
-    var object = forum.searchTopicsBySubject(start, count,search, username, tenantDomain);
+    var parentId = request.getParameter('parentId');
+    // common forums
+    if(parentId == resourceIdentifier) {
+        var object = forum.searchTopicsBySubject(start, count,search, username, tenantDomain);
+    //particular api's forums
+    } else {
+        var object = forum.searchTopicsBySubjectForResourceId(start, count,search, parentId, username, tenantDomain);
+    }
 
 
     if (object != null) {

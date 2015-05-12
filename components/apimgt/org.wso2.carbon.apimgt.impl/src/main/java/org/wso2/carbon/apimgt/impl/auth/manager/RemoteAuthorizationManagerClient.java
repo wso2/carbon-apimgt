@@ -23,7 +23,6 @@ import org.apache.axis2.context.ServiceContext;
 import org.apache.axis2.transport.http.HTTPConstants;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.opensaml.artifact.InvalidArgumentException;
 import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.impl.APIConstants;
@@ -42,7 +41,7 @@ import org.wso2.carbon.utils.CarbonUtils;
  * are properly secured with UsernameToken security. This implementation is not thread safe
  * and hence must not be shared among multiple threads at the same time.
  */
-class RemoteAuthorizationManagerClient implements AuthorizationManagerClient {
+public class RemoteAuthorizationManagerClient implements AuthorizationManagerClient {
 
     private static final int TIMEOUT_IN_MILLIS = 15 * 60 * 1000;
 
@@ -61,7 +60,7 @@ class RemoteAuthorizationManagerClient implements AuthorizationManagerClient {
         username = config.getFirstProperty(APIConstants.AUTH_MANAGER_USERNAME);
         password = config.getFirstProperty(APIConstants.AUTH_MANAGER_PASSWORD);
         if (serviceURL == null || username == null || password == null) {
-            throw new InvalidArgumentException("Required connection details for authentication " +
+            throw new IllegalArgumentException("Required connection details for authentication " +
                     "manager not provided");
         }
 
@@ -81,9 +80,10 @@ class RemoteAuthorizationManagerClient implements AuthorizationManagerClient {
                 options.setManageSession(true);
             }
         } catch (AxisFault axisFault) {
-            String msg = "Error occurred while initializing Remote Authorization Manager Client";
-            log.error(msg, axisFault);
-            throw new IllegalArgumentException(msg, axisFault);
+
+            throw new IllegalArgumentException("Error while initializing the user management stubs. " +
+                    "Invalid parameter values passed into initializing the corresponding service clients might " +
+                    "potentially have been the issue", axisFault);
         }
     }
 
@@ -171,4 +171,5 @@ class RemoteAuthorizationManagerClient implements AuthorizationManagerClient {
                                              "getting list of all the roles.", e);
         }
     }
+
 }

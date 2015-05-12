@@ -7,7 +7,7 @@
 <div class="content-section shadow-up">
     <div class="content-data subs-section">
        <%if(lenI!=0){%>
-        Keys are generated per Application which allows to use a single key for multiple APIs and subscribe multiple times to a single API, with different SLA levels.<%}%>
+       Create access tokens to applications. Because an application is a logical collection of APIs, you can use a single access token to invoke multiple APIs and to subscribe to one API multiple times with different SLA levels.<%}%>
         <h3>Applications With Subscriptions</h3>
         <link rel="stylesheet" type="text/css" href="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("js/lib/select2-3.4.2/select2.css"))%>" />
         <script src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("js/lib/select2-3.4.2/select2.js"))%>"></script>

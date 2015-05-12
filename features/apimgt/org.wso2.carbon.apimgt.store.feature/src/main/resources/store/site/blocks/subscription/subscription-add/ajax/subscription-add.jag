@@ -1,6 +1,8 @@
 <%
 include("/jagg/jagg.jag");
 (function () {
+    var site = require("/site/conf/site.json");
+    var ssoEnabled = site.ssoConfiguration.enabled;
     response.contentType = "application/json; charset=UTF-8";
     var mod, obj, name, version, provider, tier, application, applicationId, applicationName, context, result, username, accessAllowDomains,
             user = jagg.getUser(),
@@ -8,11 +10,13 @@ include("/jagg/jagg.jag");
             action = request.getParameter("action");
     if (action == "addSubscription" && request.getMethod() == 'POST') {
         if (!user) {
-            print({
-                error:true,
-                message:msg.error.loginRequired(action)
-            });
-            return;
+            if(!ssoEnabled){
+		print({
+		    error:true,
+                    message:msg.error.loginRequired(action)
+            	});
+	    }
+	    return;
         }
 
         name = request.getParameter("name");
@@ -49,11 +53,13 @@ include("/jagg/jagg.jag");
         print(obj);
     }else if (action == "addAPISubscription" && request.getMethod() == 'POST') {
         if (!user) {
-            print({
-                error:true,
-                message:msg.error.loginRequired(action)
-            });
-            return;
+           if(!ssoEnabled){
+		print({
+		    error:true,
+                    message:msg.error.loginRequired(action)
+            	});
+	    }
+	    return;
         }
 
         name = request.getParameter("name");
@@ -83,11 +89,13 @@ include("/jagg/jagg.jag");
         print(obj);
     }else if (action == "generateAPIKey" && request.getMethod() == 'POST') {
         if (!user) {
-            print({
-                error:true,
-                message:msg.error.loginRequired(action)
-            });
-            return;
+            if(!ssoEnabled){
+		print({
+		    error:true,
+                    message:msg.error.loginRequired(action)
+            	});
+	    }
+	    return;
         }
 
         name = request.getParameter("name");
@@ -122,11 +130,13 @@ include("/jagg/jagg.jag");
         print(obj);
     } else if (action == "generateApplicationKey" && request.getMethod() == 'POST') {
         if (!user) {
-            print({
-                error:true,
-                message:msg.error.loginRequired(action)
-            });
-            return;
+            if(!ssoEnabled){
+		print({
+		    error:true,
+                    message:msg.error.loginRequired(action)
+            	});
+	    }
+	    return;
         }
         application = request.getParameter("application");
         keyType = request.getParameter("keytype");
@@ -160,11 +170,13 @@ include("/jagg/jagg.jag");
         print(obj);
      } else if (action == "updateAccessAllowDomains" && request.getMethod() == 'POST') {
         if (!user) {
-            print({
-                error:true,
-                message:msg.error.loginRequired(action)
-            });
-            return;
+           if(!ssoEnabled){
+		print({
+		    error:true,
+                    message:msg.error.loginRequired(action)
+            	});
+	    }
+	    return;
         }
 
         oldAccessToken = request.getParameter("oldAccessToken");
@@ -187,11 +199,13 @@ include("/jagg/jagg.jag");
         print(obj);
      } else if (action == "refreshToken" && request.getMethod() == 'POST') {
         if (!user) {
-            print({
-                error:true,
-                message:msg.error.loginRequired(action)
-            });
-            return;
+            if(!ssoEnabled){
+		print({
+		    error:true,
+                    message:msg.error.loginRequired(action)
+            	});
+	    }
+	    return;
         }
         application = request.getParameter("application");
         keyType = request.getParameter("keytype");

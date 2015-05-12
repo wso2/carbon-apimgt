@@ -12,14 +12,19 @@ jagg.block("subscription/subscription-list-element", {
 
     getOutputs:function (inputs) {
 
-        var comments, result;
+        var comments, result, store, gatewayURL;
+        
         //result = jagg.module("comment").getAPIComments(inputs.api);
         //comments = result.comments;
         var app = inputs.app;
-
+        
+        store = jagg.module("manager").getAPIStoreObj();
+        gatewayURL = store.getHTTPsGatewayEndpointURLs();
+        
         return {
             "app":app,
-            "i":inputs.i
+            "i":inputs.i,
+        	"gatewayurl":gatewayURL[0]
         };
     }
 });

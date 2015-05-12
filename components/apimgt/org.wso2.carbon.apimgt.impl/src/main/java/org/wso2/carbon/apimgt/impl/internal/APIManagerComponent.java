@@ -29,6 +29,7 @@ import org.osgi.service.component.ComponentContext;
 import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.impl.*;
+import org.wso2.carbon.apimgt.impl.auth.manager.RemoteAuthorizationManager;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.listners.UserAddListener;
 import org.wso2.carbon.apimgt.impl.observers.APIStatusObserverList;
@@ -171,7 +172,8 @@ public class APIManagerComponent {
                     UserMgtConstants.EXECUTE_ACTION, null);
             
             setupImagePermissions();
-//            AuthorizationManager authorizationManager = AuthorizationManager.getInstance();
+
+//            RemoteAuthorizationManager authorizationManager = RemoteAuthorizationManager.getInstance();
 //            authorizationManager.init();
             APIMgtDBUtil.initialize();
             //Check User add listener enabled or not
@@ -219,8 +221,6 @@ public class APIManagerComponent {
         }
         registration.unregister();
         APIManagerFactory.getInstance().clearAll();
-        AuthorizationManager authorizationManager = AuthorizationManager.getInstance();
-        authorizationManager.destroy();
     }
 
     protected void setRegistryService(RegistryService registryService) {

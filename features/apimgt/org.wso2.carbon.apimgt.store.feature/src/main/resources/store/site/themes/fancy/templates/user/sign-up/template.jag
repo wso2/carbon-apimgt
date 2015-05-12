@@ -6,11 +6,11 @@
         var httpsUrl= mod.getHTTPsURL();
         if(user){ %>
         <script>
-            location.href = "<%=site.context%>";
+            location.href = "<%= jagg.getSiteContext()%>";
         </script>
         <% } %>
         <script>
-            var context= "<%=site.context%>";
+            var context= "<%=jagg.getSiteContext()%>";
         </script>
 <div class="title-section"><h2><%=i18n.localize("signupTitle")%></h2></div>
 <div class="content-section shadow-up">
@@ -19,7 +19,16 @@
 <fieldset>
     <div class="control-group">
         <label class="control-label"  for="newUsername"><%=i18n.localize("username")%>:<span class="requiredAstrix">*</span></label>
-        <div class="controls"><input id="newUsername" name="newUsername" minlength="5" type="text" class="required validName input-medium noSpace" /></div>
+        <div class="controls">
+            <input id="newUsername" name="newUsername" minlength="5" type="text" class="required validName input-medium noSpace" />
+            <%              
+                if(request_tenant != null) { %>
+                     <label class="lblTenantDomainName"  for="newUsername"> @<%=request_tenant%></label>
+            <%    }
+            %>
+           
+            <input id="hiddenTenantDomain" type="hidden" value="<%=request_tenant%>"> 
+        </div>
     </div>
 
     <div class="control-group">
@@ -96,7 +105,7 @@
             		field = fields[i];
             		var required = field.required;
             		var claimUri = field.claimUri;
-			if(field.name == "Home Phone") {
+			if(field.name == "Home Phone" || field.name == "Telephone") {
 				field.name = "Land Phone";
 			} else if (field.name == "Mobile") {
 				field.name = "Mobile Phone";
@@ -130,7 +139,7 @@
 </div>
 </div>
 <form id="signUpRedirectForm" method="post" action="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("templates/user/sign-up/redirector.jag"))%>">
-        <input type="hidden" name="redirectToHome" id="redirectToHome" value="<%=site.context%>" />
+        <input type="hidden" name="redirectToHome" id="redirectToHome" value="<%= jagg.getSiteContext() %>" />
 </form>
 
 

@@ -3,7 +3,6 @@
         "base" : "fancy"
     },
     "context" : "/store",
-    "request_url":"READ_FROM_REQUEST",
     "showPublicStoreURL":true,
     "tagWiseMode" :"false",
     "tagGroupKey" :"-group",
@@ -20,7 +19,13 @@
         "topicsPerPage" : "5",
         "repliesPerPage" : "5",
         "resourceIdentifier" : "common"
-    }
+    },
 
+
+    "reverseProxy" : {
+        "enabled" : false,    // values true , false , "auto" - will look for  X-Forwarded-* headers
+        "host" : "sample.proxydomain.com", // If reverse proxy do not have a domain name use IP
+        "context":"",
+    },
 
 }

@@ -20,6 +20,7 @@
     "retired" : "Retired",
     "blocked" : "Blocked",
     "prodBlocked" : "Production Blocked",
+    "rejected" : "Rejected",
     "prototyped" : "PROTOTYPED",
     "viewprototypedapis" : "Prototyped APIs",
 
@@ -69,7 +70,7 @@
     "noAPIMsg1" : "No API available with the name -",
     "noAPIMsg2" : "or the user is not authorized to view the API.",
     "noSearchResultMsg" : "No matching results",
-    "appHelpMsg" : "Applications are required to make API subscriptions and consume them. You will be able to subscribe these applications to APIs from the API details page. Requests made from this application will be throttled by the Application level throttling tier and the subscription level throttling tier",
+    "appHelpMsg" : "An application is available at different levels of service. The maximum number of requests you can make to an API is determined by the tiers.",
     "noAppMsg" : "No applications yet",
     "commentMsg" : "Comment exceeds character limit",
     "noCommentMsg" : "No comments yet",
@@ -232,4 +233,6 @@
 
     "forum.addReply.title" : "Add reply",
     "forum.addReply.replyToThread" : "Reply to Thread"
+  
+    
 }

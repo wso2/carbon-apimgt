@@ -1,0 +1,314 @@
+<wsdl:definitions xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:ns1="http://org.apache.axis2/xsd" xmlns:ax213="http://presentation.bam.carbon.wso2.org/xsd" xmlns:wsaw="http://www.w3.org/2006/05/addressing/wsdl" xmlns:http="http://schemas.xmlsoap.org/wsdl/http/" xmlns:tns="http://presentation.bam.carbon.wso2.org" xmlns:ax211="http://exceptions.persistence.core.bam.carbon.wso2.org/xsd" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:mime="http://schemas.xmlsoap.org/wsdl/mime/" xmlns:soap12="http://schemas.xmlsoap.org/wsdl/soap12/" targetNamespace="http://presentation.bam.carbon.wso2.org">
+    <wsdl:documentation>QueryService</wsdl:documentation>
+    <wsdl:types>
+        <xs:schema xmlns:ax214="http://presentation.bam.carbon.wso2.org/xsd" xmlns:ns="http://org.apache.axis2/xsd" xmlns:ax212="http://exceptions.persistence.core.bam.carbon.wso2.org/xsd" attributeFormDefault="qualified" elementFormDefault="qualified" targetNamespace="http://org.apache.axis2/xsd">
+            <xs:import namespace="http://exceptions.persistence.core.bam.carbon.wso2.org/xsd" />
+            <xs:import namespace="http://presentation.bam.carbon.wso2.org/xsd" />
+            <xs:element name="QueryServiceStoreException">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element minOccurs="0" name="StoreException" nillable="true" type="ax212:StoreException" />
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="queryColumnFamily">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element minOccurs="0" name="table" nillable="true" type="xs:string" />
+                        <xs:element minOccurs="0" name="indexName" nillable="true" type="xs:string" />
+                        <xs:element maxOccurs="unbounded" minOccurs="0" name="indexes" nillable="true" type="ax214:CompositeIndex" />
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="queryColumnFamilyResponse">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:any processContents="skip"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="QueryServiceConfigurationException">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element minOccurs="0" name="ConfigurationException" nillable="true" type="ax212:ConfigurationException" />
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="getIndexes">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element minOccurs="0" name="cfName" nillable="true" type="xs:string" />
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="getIndexesResponse">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element maxOccurs="unbounded" minOccurs="0" name="return" nillable="true" type="xs:string" />
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="QueryServiceQueryException">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element minOccurs="0" name="QueryException" nillable="true" type="ax214:QueryException" />
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="getAllIndexValues">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element minOccurs="0" name="cfName" nillable="true" type="xs:string" />
+                        <xs:element minOccurs="0" name="indexName" nillable="true" type="xs:string" />
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="getAllIndexValuesResponse">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element maxOccurs="unbounded" minOccurs="0" name="return" nillable="true" type="xs:string" />
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="getAllColumnFamilies">
+                <xs:complexType>
+                    <xs:sequence />
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="getAllColumnFamiliesResponse">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element maxOccurs="unbounded" minOccurs="0" name="return" nillable="true" type="xs:string" />
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+        </xs:schema>
+        <xs:schema attributeFormDefault="qualified" elementFormDefault="qualified" targetNamespace="http://exceptions.persistence.core.bam.carbon.wso2.org/xsd">
+            <xs:complexType name="StoreException">
+                <xs:sequence />
+            </xs:complexType>
+            <xs:complexType name="ConfigurationException">
+                <xs:sequence />
+            </xs:complexType>
+        </xs:schema>
+        <xs:schema attributeFormDefault="qualified" elementFormDefault="qualified" targetNamespace="http://presentation.bam.carbon.wso2.org/xsd">
+            <xs:complexType name="CompositeIndex">
+                <xs:sequence>
+                    <xs:element minOccurs="0" name="indexName" nillable="true" type="xs:string" />
+                    <xs:element minOccurs="0" name="rangeFirst" nillable="true" type="xs:string" />
+                    <xs:element minOccurs="0" name="rangeLast" nillable="true" type="xs:string" />
+                </xs:sequence>
+            </xs:complexType>
+            <xs:complexType name="QueryException">
+                <xs:sequence />
+            </xs:complexType>
+        </xs:schema>
+    </wsdl:types>
+    <wsdl:message name="getAllIndexValuesRequest">
+        <wsdl:part name="parameters" element="ns1:getAllIndexValues" />
+    </wsdl:message>
+    <wsdl:message name="getAllIndexValuesResponse">
+        <wsdl:part name="parameters" element="ns1:getAllIndexValuesResponse" />
+    </wsdl:message>
+    <wsdl:message name="QueryServiceQueryException">
+        <wsdl:part name="parameters" element="ns1:QueryServiceQueryException" />
+    </wsdl:message>
+    <wsdl:message name="getAllColumnFamiliesRequest">
+        <wsdl:part name="parameters" element="ns1:getAllColumnFamilies" />
+    </wsdl:message>
+    <wsdl:message name="getAllColumnFamiliesResponse">
+        <wsdl:part name="parameters" element="ns1:getAllColumnFamiliesResponse" />
+    </wsdl:message>
+    <wsdl:message name="QueryServiceConfigurationException">
+        <wsdl:part name="parameters" element="ns1:QueryServiceConfigurationException" />
+    </wsdl:message>
+    <wsdl:message name="getIndexesRequest">
+        <wsdl:part name="parameters" element="ns1:getIndexes" />
+    </wsdl:message>
+    <wsdl:message name="getIndexesResponse">
+        <wsdl:part name="parameters" element="ns1:getIndexesResponse" />
+    </wsdl:message>
+    <wsdl:message name="queryColumnFamilyRequest">
+        <wsdl:part name="parameters" element="ns1:queryColumnFamily" />
+    </wsdl:message>
+    <wsdl:message name="queryColumnFamilyResponse">
+        <wsdl:part name="parameters" element="ns1:queryColumnFamilyResponse" />
+    </wsdl:message>
+    <wsdl:message name="QueryServiceStoreException">
+        <wsdl:part name="parameters" element="ns1:QueryServiceStoreException" />
+    </wsdl:message>
+    <wsdl:portType name="QueryServicePortType">
+        <wsdl:operation name="getAllIndexValues">
+            <wsdl:input message="tns:getAllIndexValuesRequest" wsaw:Action="urn:getAllIndexValues" />
+            <wsdl:output message="tns:getAllIndexValuesResponse" wsaw:Action="urn:getAllIndexValuesResponse" />
+            <wsdl:fault message="tns:QueryServiceQueryException" name="QueryServiceQueryException" wsaw:Action="urn:getAllIndexValuesQueryServiceQueryException" />
+        </wsdl:operation>
+        <wsdl:operation name="getAllColumnFamilies">
+            <wsdl:input message="tns:getAllColumnFamiliesRequest" wsaw:Action="urn:getAllColumnFamilies" />
+            <wsdl:output message="tns:getAllColumnFamiliesResponse" wsaw:Action="urn:getAllColumnFamiliesResponse" />
+            <wsdl:fault message="tns:QueryServiceConfigurationException" name="QueryServiceConfigurationException" wsaw:Action="urn:getAllColumnFamiliesQueryServiceConfigurationException" />
+        </wsdl:operation>
+        <wsdl:operation name="getIndexes">
+            <wsdl:input message="tns:getIndexesRequest" wsaw:Action="urn:getIndexes" />
+            <wsdl:output message="tns:getIndexesResponse" wsaw:Action="urn:getIndexesResponse" />
+            <wsdl:fault message="tns:QueryServiceConfigurationException" name="QueryServiceConfigurationException" wsaw:Action="urn:getIndexesQueryServiceConfigurationException" />
+        </wsdl:operation>
+        <wsdl:operation name="queryColumnFamily">
+            <wsdl:input message="tns:queryColumnFamilyRequest" wsaw:Action="urn:queryColumnFamily" />
+            <wsdl:output message="tns:queryColumnFamilyResponse" wsaw:Action="urn:queryColumnFamilyResponse" />
+            <wsdl:fault message="tns:QueryServiceStoreException" name="QueryServiceStoreException" wsaw:Action="urn:queryColumnFamilyQueryServiceStoreException" />
+        </wsdl:operation>
+    </wsdl:portType>
+    <wsdl:binding name="QueryServiceSoap11Binding" type="tns:QueryServicePortType">
+        <soap:binding transport="http://schemas.xmlsoap.org/soap/http" style="document" />
+        <wsdl:operation name="getAllIndexValues">
+            <soap:operation soapAction="urn:getAllIndexValues" style="document" />
+            <wsdl:input>
+                <soap:body use="literal" />
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal" />
+            </wsdl:output>
+            <wsdl:fault name="QueryServiceQueryException">
+                <soap:fault use="literal" name="QueryServiceQueryException" />
+            </wsdl:fault>
+        </wsdl:operation>
+        <wsdl:operation name="getAllColumnFamilies">
+            <soap:operation soapAction="urn:getAllColumnFamilies" style="document" />
+            <wsdl:input>
+                <soap:body use="literal" />
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal" />
+            </wsdl:output>
+            <wsdl:fault name="QueryServiceConfigurationException">
+                <soap:fault use="literal" name="QueryServiceConfigurationException" />
+            </wsdl:fault>
+        </wsdl:operation>
+        <wsdl:operation name="getIndexes">
+            <soap:operation soapAction="urn:getIndexes" style="document" />
+            <wsdl:input>
+                <soap:body use="literal" />
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal" />
+            </wsdl:output>
+            <wsdl:fault name="QueryServiceConfigurationException">
+                <soap:fault use="literal" name="QueryServiceConfigurationException" />
+            </wsdl:fault>
+        </wsdl:operation>
+        <wsdl:operation name="queryColumnFamily">
+            <soap:operation soapAction="urn:queryColumnFamily" style="document" />
+            <wsdl:input>
+                <soap:body use="literal" />
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal" />
+            </wsdl:output>
+            <wsdl:fault name="QueryServiceStoreException">
+                <soap:fault use="literal" name="QueryServiceStoreException" />
+            </wsdl:fault>
+        </wsdl:operation>
+    </wsdl:binding>
+    <wsdl:binding name="QueryServiceSoap12Binding" type="tns:QueryServicePortType">
+        <soap12:binding transport="http://schemas.xmlsoap.org/soap/http" style="document" />
+        <wsdl:operation name="getAllIndexValues">
+            <soap12:operation soapAction="urn:getAllIndexValues" style="document" />
+            <wsdl:input>
+                <soap12:body use="literal" />
+            </wsdl:input>
+            <wsdl:output>
+                <soap12:body use="literal" />
+            </wsdl:output>
+            <wsdl:fault name="QueryServiceQueryException">
+                <soap12:fault use="literal" name="QueryServiceQueryException" />
+            </wsdl:fault>
+        </wsdl:operation>
+        <wsdl:operation name="getAllColumnFamilies">
+            <soap12:operation soapAction="urn:getAllColumnFamilies" style="document" />
+            <wsdl:input>
+                <soap12:body use="literal" />
+            </wsdl:input>
+            <wsdl:output>
+                <soap12:body use="literal" />
+            </wsdl:output>
+            <wsdl:fault name="QueryServiceConfigurationException">
+                <soap12:fault use="literal" name="QueryServiceConfigurationException" />
+            </wsdl:fault>
+        </wsdl:operation>
+        <wsdl:operation name="getIndexes">
+            <soap12:operation soapAction="urn:getIndexes" style="document" />
+            <wsdl:input>
+                <soap12:body use="literal" />
+            </wsdl:input>
+            <wsdl:output>
+                <soap12:body use="literal" />
+            </wsdl:output>
+            <wsdl:fault name="QueryServiceConfigurationException">
+                <soap12:fault use="literal" name="QueryServiceConfigurationException" />
+            </wsdl:fault>
+        </wsdl:operation>
+        <wsdl:operation name="queryColumnFamily">
+            <soap12:operation soapAction="urn:queryColumnFamily" style="document" />
+            <wsdl:input>
+                <soap12:body use="literal" />
+            </wsdl:input>
+            <wsdl:output>
+                <soap12:body use="literal" />
+            </wsdl:output>
+            <wsdl:fault name="QueryServiceStoreException">
+                <soap12:fault use="literal" name="QueryServiceStoreException" />
+            </wsdl:fault>
+        </wsdl:operation>
+    </wsdl:binding>
+    <wsdl:binding name="QueryServiceHttpBinding" type="tns:QueryServicePortType">
+        <http:binding verb="POST" />
+        <wsdl:operation name="getAllIndexValues">
+            <http:operation location="getAllIndexValues" />
+            <wsdl:input>
+                <mime:content type="text/xml" part="parameters" />
+            </wsdl:input>
+            <wsdl:output>
+                <mime:content type="text/xml" part="parameters" />
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="getAllColumnFamilies">
+            <http:operation location="getAllColumnFamilies" />
+            <wsdl:input>
+                <mime:content type="text/xml" part="parameters" />
+            </wsdl:input>
+            <wsdl:output>
+                <mime:content type="text/xml" part="parameters" />
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="getIndexes">
+            <http:operation location="getIndexes" />
+            <wsdl:input>
+                <mime:content type="text/xml" part="parameters" />
+            </wsdl:input>
+            <wsdl:output>
+                <mime:content type="text/xml" part="parameters" />
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="queryColumnFamily">
+            <http:operation location="queryColumnFamily" />
+            <wsdl:input>
+                <mime:content type="text/xml" part="parameters" />
+            </wsdl:input>
+            <wsdl:output>
+                <mime:content type="text/xml" part="parameters" />
+            </wsdl:output>
+        </wsdl:operation>
+    </wsdl:binding>
+    <wsdl:service name="QueryService">
+        <wsdl:port name="QueryServiceHttpsSoap11Endpoint" binding="tns:QueryServiceSoap11Binding">
+            <soap:address location="https://192.168.0.101:9453/monitor/services/QueryService.QueryServiceHttpsSoap11Endpoint/" />
+        </wsdl:port>
+        <wsdl:port name="QueryServiceHttpsSoap12Endpoint" binding="tns:QueryServiceSoap12Binding">
+            <soap12:address location="https://192.168.0.101:9453/monitor/services/QueryService.QueryServiceHttpsSoap12Endpoint/" />
+        </wsdl:port>
+        <wsdl:port name="QueryServiceHttpsEndpoint" binding="tns:QueryServiceHttpBinding">
+            <http:address location="https://192.168.0.101:9453/monitor/services/QueryService.QueryServiceHttpsEndpoint/" />
+        </wsdl:port>
+    </wsdl:service>
+</wsdl:definitions>

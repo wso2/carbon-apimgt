@@ -12,6 +12,7 @@ $(document).ready(function () {
     }, "json");
 	
     $("#comment-add-button").click(function () {
+        jagg.sessionAwareJS({redirect:'site/pages/index.jag'});
         var comment = $("#comment-text").val();
         if(comment.length > 450){
             $('#commentAdd-error').show();

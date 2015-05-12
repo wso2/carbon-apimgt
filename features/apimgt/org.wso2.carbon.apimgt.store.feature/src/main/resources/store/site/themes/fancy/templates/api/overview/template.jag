@@ -1,8 +1,5 @@
 <% jagg.template("api/overview", function(inputs, outputs, jagg) { %>
 <% var api = outputs.api, user = outputs.user, log = new Log(); %>
- <%
-var discoveryUrl = outputs.discoveryURL;
-%>
 
 <div id="overview">
 	<%if (!api.isAdvertiseOnly) {%>
@@ -100,7 +97,6 @@ var discoveryUrl = outputs.discoveryURL;
     <% if(user) jagg.includeBlock("comment/comment-add", null); %>
     <% jagg.includeBlock("comment/comment-list", {api:api}); %>
 </div>
-<script type="text/javascript" src="/store/site/themes/fancy/templates/api/overview/js/jquery.sharrre.js"></script>
 <script language="javascript">
     $(document).ready(function(){
         var link = window.location+'';

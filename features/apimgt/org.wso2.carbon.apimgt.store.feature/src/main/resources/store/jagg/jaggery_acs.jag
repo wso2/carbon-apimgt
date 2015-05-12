@@ -31,30 +31,40 @@
 
                         // validating the signature
                         if(site.ssoConfiguration.responseSigningEnabled === 'true'){
-						var fullUserName = ssoRelyingParty.getSAMLResponseNameId(samlResponse);
-						var MultitenantConstants = Packages.org.wso2.carbon.utils.multitenancy.MultitenantConstants;
-						var MultitenantUtils = Packages.org.wso2.carbon.utils.multitenancy.MultitenantUtils;
-						if(fullUserName != null){
-							var domainName = MultitenantUtils.getTenantDomain(fullUserName);
+                            var fullUserName = ssoRelyingParty.getSAMLResponseNameId(samlResponse);
+                            var MultitenantConstants = Packages.org.wso2.carbon.utils.multitenancy.MultitenantConstants;
+                            var MultitenantUtils = Packages.org.wso2.carbon.utils.multitenancy.MultitenantUtils;
+                            if(fullUserName != null){
+                                var domainName = MultitenantUtils.getTenantDomain(fullUserName);
+                                if (MultitenantConstants.SUPER_TENANT_DOMAIN_NAME !== domainName) {
+                                    jagg.module("manager").loadTenantRegistry(domainName);
+                                    jagg.module("manager").loadTenantAxisConfiguration(domainName);
+                                }
+                            }
 
-							if (MultitenantConstants.SUPER_TENANT_DOMAIN_NAME !== domainName) {
-								jagg.module("manager").loadTenantRegistry(domainName);
-							}
-						}
+                            var isSignatureValid =ssoRelyingParty.validateSignature(samlResponse);
+                            if(!Boolean(isSignatureValid)){
+                                log.error("SAML response signature is verification failed.");
+                                response.sendRedirect("../error.jag");
+                                return;
+                            }
+                        }
 
-                        var isSignatureValid =ssoRelyingParty.validateSignature(samlResponse);
-                        if(!Boolean(isSignatureValid)){
-                            log.error("SAML response signature is verification failed.");
-                            response.sendRedirect("../error.jag");
-                            return;
-                        }
-                        }
                         ssoRelyingParty.setSessionAuthenticated(sessionId,samlResponse);
+                        ssoRelyingParty.addSession(session);
                         session.put("showLogin", "false");
                         var api = jagg.module("api");
+
+                        //update permission cache before validate user
+                        api.updatePermissionCache(ssoRelyingParty.getLoggedInUser(sessionId));
+
                         var isUserPermitted=api.hasUserPermissions(ssoRelyingParty.getLoggedInUser(sessionId));
                         var hasPublisherAccess=api.hasPublisherAccess(ssoRelyingParty.getLoggedInUser(sessionId));
-                        jagg.setUser({username:ssoRelyingParty.getLoggedInUser(sessionId), cookie:null, hasPublisherAccess:hasPublisherAccess});
+                        var showURL=false;
+                        if(hasPublisherAccess){
+                        showURL=hasPublisherAccess.permitted;
+                        }
+                        jagg.setUser({username:ssoRelyingParty.getLoggedInUser(sessionId), cookie:null, hasPublisherAccess:showURL});
                         session.put("LOGGED_IN_USER",ssoRelyingParty.getLoggedInUser(sessionId));
                         //First check whether user is having sufficent permissions [create/publish]
                          if(!isUserPermitted.permitted ){
@@ -69,13 +79,12 @@
         			        subscriber = store.getSubscriber(username);
     			        }
                         session.put("LOGGED_IN_USER",ssoRelyingParty.getLoggedInUser(sessionId));
-						session.put("hasPublisherAccess",hasPublisherAccess);
+						session.put("hasPublisherAccess",showURL);
                         response.sendRedirect(requestedURI);
+                        return;
                    } }else{
                         // if the saml response is log out request from IDP, we log out from web app.
                         ssoRelyingParty.invalidateSessionBySessionId(sessionId);
-                        jagg.setUser(null);
-                        session.invalidate();
                         response.sendRedirect("../");
                         return;
                     }
@@ -87,8 +96,6 @@
                     isLogoutRequest =ssoRelyingParty.isLogoutRequest(samlRequest);
                     if(Boolean(isLogoutRequest))  {
                         ssoRelyingParty.invalidateSessionBySAMLResponse(samlRequest);
-                        jagg.setUser(null);
-                        session.invalidate();
                     }
                 }
 

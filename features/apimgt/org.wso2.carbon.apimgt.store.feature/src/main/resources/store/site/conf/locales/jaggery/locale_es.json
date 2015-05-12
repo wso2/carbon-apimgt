@@ -20,6 +20,7 @@
     "retired" : "Retirado",
     "blocked" : "Bloqueado",
     "prodBlocked":"Producción Bloqueado",
+    "rejected" : "Rejected",
 
     "applications" : "Aplicaciones",
     "selectApp" : "Seleccione Aplicaci&oacute;n...",
