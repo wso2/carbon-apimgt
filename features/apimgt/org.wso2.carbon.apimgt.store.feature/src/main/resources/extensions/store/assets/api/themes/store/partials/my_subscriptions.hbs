@@ -11,7 +11,9 @@
 
         <select id='subscription_selection'>
             {{#each appsWithSubs}}
-                <option>{{name}}</option>
+                {{#if subscriptions}}
+                    <option>{{name}}</option>
+                {{/if}}
             {{/each}}
         </select>
     </div>

@@ -1,15 +1,22 @@
 <!-- Domain update view
 -->
-<form>
+{{#if isAppNameAvailable}}
     <fieldset>
-        <h5>Allowed Domains</h5>
-        <textarea class='input-xlarge' id='input-{{ environment }}-allowedDomains'>{{allowedDomains}}</textarea>
-        <span class='help-block'>Leaving empty or filling with ALL will allow all domains</span>
+        <span class='help-block'>Please subscribe to APIs to view domain information</span>
     </fieldset>
-</form>
+{{else}}
+    <form>
+        <fieldset>
+            <h5>Allowed Domains</h5>
+            <textarea class='input-xlarge' id='input-{{ environment }}-allowedDomains'>{{allowedDomains}}</textarea>
+            <span class='help-block'>Leaving empty or filling with ALL will allow all domains</span>
+        </fieldset>
+    </form>
 
-<form>
-    <fieldset>
-        <input type='button' class='btn btn-primary btn-block' value='Update Domains' id='btn-{{ environment }}-updateDomains'>
-    </fieldset>
-</form>
+    <form>
+        <fieldset>
+            <input type='button' class='btn btn-primary btn-block' value='Update Domains'
+                   id='btn-{{ environment }}-updateDomains'>
+        </fieldset>
+    </form>
+{{/if}}
