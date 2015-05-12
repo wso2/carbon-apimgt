@@ -3087,12 +3087,20 @@ Set<API> apiSet) throws APIManagementException {
     	return subscriptionArray;
     }
 
+    /**
+     * This method will return regenerated tokens according to the argument params
+     *
+     * @param userId,applicationName,requestedScopes,oldAccessToken,accessAllowDomainsArr
+     * @param consumerKey,consumerSecret,validityTime
+     * @return newAccessTokenJson
+     * @throws APIManagementException,AxisFault
+     */
     public JSONObject getRefreshToken(String userId, String applicationName, String requestedScopes,
             String oldAccessToken, JSONArray accessAllowDomainsArr, String consumerKey, String consumerSecret,
             String validityTime) throws APIManagementException, AxisFault {
 
         // NativeObject row = new NativeObject();
-        JSONObject row = new JSONObject();
+        JSONObject newAccessTokenJson = new JSONObject();
         if (isEmptyDataCheck(userId, applicationName, requestedScopes, oldAccessToken, consumerKey, consumerSecret,
                 validityTime)) {
 
@@ -3137,16 +3145,16 @@ Set<API> apiSet) throws APIManagementException {
                         tokenScopeNames = getScopeNamesbyKey(tokenScope, scopeSet);
                     }
 
-                    row.put("accessToken", dto.getApplicationAccessToken());
-                    row.put("consumerKey", dto.getConsumerKey());
-                    row.put("consumerSecret", dto.getConsumerSecret());
-                    row.put("validityTime", validityTime);
-                    row.put("tokenScope", tokenScopeNames);
+                    newAccessTokenJson.put("accessToken", dto.getApplicationAccessToken());
+                    newAccessTokenJson.put("consumerKey", dto.getConsumerKey());
+                    newAccessTokenJson.put("consumerSecret", dto.getConsumerSecret());
+                    newAccessTokenJson.put("validityTime", validityTime);
+                    newAccessTokenJson.put("tokenScope", tokenScopeNames);
                     boolean isRegenerateOptionEnabled = true;
                     if (getApplicationAccessTokenValidityPeriodInSeconds() < 0) {
                         isRegenerateOptionEnabled = false;
                     }
-                    row.put("enableRegenarate", isRegenerateOptionEnabled);
+                    newAccessTokenJson.put("enableRegenarate", isRegenerateOptionEnabled);
                 } catch (APIManagementException e) {
                     handleException("Error while refreshing the access token.", e);
                 } catch (Exception e) {
@@ -3156,7 +3164,7 @@ Set<API> apiSet) throws APIManagementException {
                 handleException("Cannot regenerate a new access token. There's no access token available as : "
                         + oldAccessToken);
             }
-            return row;
+            return newAccessTokenJson;
         } else {
             handleException("Invalid types of input parameters.");
             return null;
