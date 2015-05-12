@@ -13,19 +13,30 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package org.wso2.carbon.apimgt.impl.utils;
+package org.wso2.carbon.apimgt.impl.auth.manager;
 
-public class AuthorizationManagerClientFactory {
+import org.wso2.carbon.apimgt.api.APIManagementException;
 
-    public static AuthorizationManagerClient getAuthorizationManagerClient(AuthorizationManager.ClientType clientType) {
+public abstract class AuthorizationManagerClientFactory {
+
+    public enum ClientType {
+        REMOTE, STANDALONE
+    }
+
+    public static AuthorizationManagerClientFactory getAuthorizationManagerClientFactory(ClientType clientType) {
         switch (clientType) {
             case REMOTE:
-                return new RemoteAuthorizationManagerClient();
+                return new RemoteAuthorizationClientFactory();
             case STANDALONE:
-                return new StandaloneAuthorizationManagerClient();
+                return new StandaloneAuthorizationClientFactory();
             default:
                 throw new IllegalArgumentException("Invalid Authorization Manager Client Type found");
         }
     }
+
+    public abstract AuthorizationManagerClient getAuthorizationManagerClient() throws APIManagementException;
+
+    public abstract void releaseAuthorizationManagerClient(
+            AuthorizationManagerClient client) throws APIManagementException;
 
 }

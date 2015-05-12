@@ -14,13 +14,15 @@
  *  limitations under the License.
  */
 
-package org.wso2.carbon.apimgt.impl.utils;
+package org.wso2.carbon.apimgt.impl.auth.manager;
 
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.client.Options;
 import org.apache.axis2.client.ServiceClient;
 import org.apache.axis2.context.ServiceContext;
 import org.apache.axis2.transport.http.HTTPConstants;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.impl.APIConstants;
@@ -49,6 +51,8 @@ public class RemoteAuthorizationManagerClient implements AuthorizationManagerCli
     private String password;
     private String cookie;
 
+    private static final Log log = LogFactory.getLog(RemoteAuthorizationManager.class);
+
     public RemoteAuthorizationManagerClient() {
         APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
                 getAPIManagerConfigurationService().getAPIManagerConfiguration();
@@ -76,6 +80,7 @@ public class RemoteAuthorizationManagerClient implements AuthorizationManagerCli
                 options.setManageSession(true);
             }
         } catch (AxisFault axisFault) {
+
             throw new IllegalArgumentException("Error while initializing the user management stubs. " +
                     "Invalid parameter values passed into initializing the corresponding service clients might " +
                     "potentially have been the issue", axisFault);

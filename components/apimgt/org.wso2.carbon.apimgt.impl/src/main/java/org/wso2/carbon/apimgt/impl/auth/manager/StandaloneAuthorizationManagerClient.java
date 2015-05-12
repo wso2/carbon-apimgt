@@ -13,7 +13,7 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package org.wso2.carbon.apimgt.impl.utils;
+package org.wso2.carbon.apimgt.impl.auth.manager;
 
 import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.apimgt.api.APIManagementException;
@@ -22,10 +22,6 @@ import org.wso2.carbon.user.api.AuthorizationManager;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.user.api.UserStoreManager;
 
-/**
- * This class utilizes an in-JVM OSGi API to retrieve all required authorization decisions corresponding to all methods
- * defined within AuthorizationManagerClient.
- */
 public class StandaloneAuthorizationManagerClient implements AuthorizationManagerClient {
 
     private AuthorizationManager authorizationManager;

@@ -29,6 +29,7 @@ import org.osgi.service.component.ComponentContext;
 import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.impl.*;
+import org.wso2.carbon.apimgt.impl.auth.manager.RemoteAuthorizationManager;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.listners.UserAddListener;
 import org.wso2.carbon.apimgt.impl.observers.APIStatusObserverList;
@@ -50,7 +51,6 @@ import org.wso2.carbon.registry.core.session.UserRegistry;
 import org.wso2.carbon.registry.core.utils.AuthorizationUtils;
 import org.wso2.carbon.registry.core.utils.RegistryUtils;
 import org.wso2.carbon.registry.indexing.service.TenantIndexingLoader;
-import org.wso2.carbon.user.api.AuthorizationManager;
 import org.wso2.carbon.user.api.Permission;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.user.api.UserStoreManager;
@@ -172,6 +172,7 @@ public class APIManagerComponent {
                     UserMgtConstants.EXECUTE_ACTION, null);
             
             setupImagePermissions();
+
 //            RemoteAuthorizationManager authorizationManager = RemoteAuthorizationManager.getInstance();
 //            authorizationManager.init();
             APIMgtDBUtil.initialize();
@@ -220,7 +221,6 @@ public class APIManagerComponent {
         }
         registration.unregister();
         APIManagerFactory.getInstance().clearAll();
-        org.wso2.carbon.apimgt.impl.utils.AuthorizationManager.getInstance().destroy();
     }
 
     protected void setRegistryService(RegistryService registryService) {
@@ -315,7 +315,7 @@ public class APIManagerComponent {
 
     private void setupImagePermissions() throws APIManagementException {
         try {
-            AuthorizationManager accessControlAdmin = ServiceReferenceHolder.getInstance().
+            org.wso2.carbon.user.api.AuthorizationManager accessControlAdmin = ServiceReferenceHolder.getInstance().
                     getRealmService().getTenantUserRealm(MultitenantConstants.SUPER_TENANT_ID).
                     getAuthorizationManager();
             String imageLocation =

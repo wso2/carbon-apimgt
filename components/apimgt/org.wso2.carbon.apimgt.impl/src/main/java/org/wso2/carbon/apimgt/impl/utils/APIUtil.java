@@ -52,6 +52,7 @@ import org.wso2.carbon.apimgt.api.doc.model.Parameter;
 import org.wso2.carbon.apimgt.api.model.*;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
+import org.wso2.carbon.apimgt.impl.auth.manager.RemoteAuthorizationManager;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
 import org.wso2.carbon.apimgt.impl.dto.Environment;
@@ -1567,7 +1568,8 @@ public final class APIUtil {
                 authorized = manager.isUserAuthorized(MultitenantUtils.getTenantAwareUsername(username), permission,
                                                       CarbonConstants.UI_PERMISSION_ACTION);
             } else {
-                authorized = AuthorizationManager.getInstance().isUserAuthorized(MultitenantUtils.getTenantAwareUsername(username), permission);
+                authorized = RemoteAuthorizationManager.getInstance().isUserAuthorized(
+                        MultitenantUtils.getTenantAwareUsername(username), permission);
             }
             if (!authorized) {
                 throw new APIManagementException("User '" + username + "' does not have the " +
@@ -1625,8 +1627,7 @@ public final class APIUtil {
             throw new APIManagementException("Attempt to execute privileged operation as" +
                     " the anonymous user");
         }
-
-        return AuthorizationManager.getInstance().getRolesOfUser(username);
+        return RemoteAuthorizationManager.getInstance().getRolesOfUser(username);
     }
 
     /**
@@ -1967,9 +1968,9 @@ public final class APIUtil {
                 RegistryAuthorizationManager authorizationManager = new RegistryAuthorizationManager
                         (ServiceReferenceHolder.getUserRealm());
                 resourcePath = authorizationManager.computePathOnMount(resourcePath);
+
         		org.wso2.carbon.user.api.AuthorizationManager authManager =
-                        ServiceReferenceHolder.getInstance().getRealmService().
-        				getTenantUserRealm(tenantId).getAuthorizationManager();
+                        ServiceReferenceHolder.getInstance().getRealmService().getTenantUserRealm(tenantId).getAuthorizationManager();
         		if (visibility != null && visibility.equalsIgnoreCase(APIConstants.API_RESTRICTED_VISIBILITY)) {
         			boolean isRoleEveryOne = false;
                     /*If no roles have defined, authorize for everyone role */
@@ -2181,8 +2182,8 @@ public final class APIUtil {
 			
 			/*set resource permission*/
             org.wso2.carbon.user.api.AuthorizationManager authManager =
-                    ServiceReferenceHolder.getInstance().getRealmService().
-    				getTenantUserRealm(tenantID).getAuthorizationManager();
+                    ServiceReferenceHolder.getInstance().getRealmService().getTenantUserRealm(
+                            tenantID).getAuthorizationManager();
             String resourcePath = RegistryUtils.getAbsolutePath(RegistryContext.getBaseInstance(),
                     APIUtil.getMountedPath(RegistryContext.getBaseInstance(),
                             RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH) + APIConstants.GA_CONFIGURATION_LOCATION);
@@ -2801,7 +2802,7 @@ public final class APIUtil {
 
                 return manager.getRoleNames();
             } else {
-                return AuthorizationManager.getInstance().getRoleNames();
+                return RemoteAuthorizationManager.getInstance().getRoleNames();
             }
         } catch (UserStoreException e) {
             log.error("Error while getting all the roles", e);
