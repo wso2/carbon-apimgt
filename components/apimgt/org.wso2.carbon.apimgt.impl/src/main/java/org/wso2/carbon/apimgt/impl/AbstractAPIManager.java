@@ -777,21 +777,9 @@ public abstract class AbstractAPIManager implements APIManager {
     public Map<String,String> getTenantDomainMappings(String tenantDomain) throws APIManagementException {
         boolean isTenantFlowStarted = false;
         Map<String,String> domains;
-        try {
-            if(tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)){
-                isTenantFlowStarted = true;
-                PrivilegedCarbonContext.startTenantFlow();
-                PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
-            }
 
-            int requestedTenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
-            domains = APIUtil.getDomainMappings(requestedTenantId);
+        domains = APIUtil.getDomainMappings(tenantDomain);
 
-        } finally {
-            if (isTenantFlowStarted) {
-                PrivilegedCarbonContext.endTenantFlow();
-            }
-        }
         return domains;
     }
 }

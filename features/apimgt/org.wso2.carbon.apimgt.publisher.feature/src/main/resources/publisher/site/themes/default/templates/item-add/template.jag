@@ -60,7 +60,7 @@
                         </div>
                      </div>
                      <div class="control-group">
-                        <div class="control-group toggleContainers">
+                        <div class="control-group">
                            <div class="controls">
                                <input name="wsdl-url" class="input-xxlarge" type="text"/>
                            </div>
