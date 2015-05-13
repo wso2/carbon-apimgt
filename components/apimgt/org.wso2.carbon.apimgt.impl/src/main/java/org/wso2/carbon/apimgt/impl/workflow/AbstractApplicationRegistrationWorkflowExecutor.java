@@ -90,7 +90,7 @@ public abstract class AbstractApplicationRegistrationWorkflowExecutor extends Wo
             ApplicationRegistrationWorkflowDTO regWorkFlowDTO = (ApplicationRegistrationWorkflowDTO)workFlowDTO;
             dao.populateAppRegistrationWorkflowDTO(regWorkFlowDTO);
             if(((ApplicationRegistrationWorkflowDTO) workFlowDTO).getApplication() != null){
-                dao.updateApplicationRegistration(status,regWorkFlowDTO.getKeyType(),regWorkFlowDTO.getApplication().getApplicationId());
+                dao.updateApplicationRegistration(status,regWorkFlowDTO.getKeyType(),regWorkFlowDTO.getApplication().getId());
             }
             super.complete(workFlowDTO);
             if(((ApplicationRegistrationWorkflowDTO) workFlowDTO).getApplication() == null){

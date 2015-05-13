@@ -577,7 +577,7 @@ public class APIProviderHostObject extends ScriptableObject {
         
         if (apiData.get("swagger", apiData) != null) {
             //Read swagger from the registry todo: check why was this done
-            //String swaggerFromRegistry = apiProvider.getSwagger20Definition(api.getApplicationId());
+            //String swaggerFromRegistry = apiProvider.getSwagger20Definition(api.getId());
 
             //Read URI Templates from swagger resource and set to api object
             Set<URITemplate> uriTemplates = definitionFromSwagger20.getURITemplates(api, (String) apiData.get("swagger", apiData));
