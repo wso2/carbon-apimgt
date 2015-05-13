@@ -19,6 +19,8 @@ package org.wso2.carbon.apimgt.gateway.internal;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.service.component.ComponentContext;
+import org.wso2.carbon.apimgt.gateway.handlers.caching.GatewayCacheInvalidator;
+import org.wso2.carbon.apimgt.gateway.handlers.common.GatewayKeyInfoCache;
 import org.wso2.carbon.apimgt.gateway.handlers.security.keys.APIKeyValidatorClientPool;
 import org.wso2.carbon.apimgt.gateway.handlers.security.thrift.ThriftKeyValidatorClientPool;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
@@ -46,6 +48,7 @@ public class APIHandlerServiceComponent {
         }
         clientPool = APIKeyValidatorClientPool.getInstance();
         thriftClientPool = ThriftKeyValidatorClientPool.getInstance();
+        GatewayCacheInvalidator.loadInstance();
     }
 
     protected void deactivate(ComponentContext context) {

@@ -74,7 +74,7 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
 
     private static final String OAUTH_RESPONSE_ACCESSTOKEN = "access_token";
     private static final String OAUTH_RESPONSE_EXPIRY_TIME = "expires_in";
-    private static final String GRANT_TYPE_VALUE = "open_keymanager";
+    private static final String GRANT_TYPE_VALUE = "application_token";
     private static final String GRANT_TYPE_PARAM_VALIDITY = "validity_period";
 
     private KeyManagerConfiguration configuration;

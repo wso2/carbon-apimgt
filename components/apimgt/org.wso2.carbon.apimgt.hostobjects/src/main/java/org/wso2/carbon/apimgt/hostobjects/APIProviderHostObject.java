@@ -1657,6 +1657,8 @@ public class APIProviderHostObject extends ScriptableObject {
         		PrivilegedCarbonContext.endTenantFlow();
         	}
         }
+        String apiDefinitionJSON = definitionFromSwagger20.generateAPIDefinition(api);
+        apiProvider.saveSwagger20Definition(api.getId(), apiDefinitionJSON);
         return success;
     }
 
@@ -3834,6 +3836,24 @@ public class APIProviderHostObject extends ScriptableObject {
             doc.setVisibility(Documentation.DocumentVisibility.OWNER_ONLY);
         }
         APIProvider apiProvider = getAPIProvider(thisObj);
+        
+        Documentation oldDoc = apiProvider.getDocumentation(apiId, doc.getType(), doc.getName());
+
+        try {
+            if (fileHostObject != null && fileHostObject.getJavaScriptFile().getLength() != 0) {
+                Icon icon = new Icon(fileHostObject.getInputStream(),
+                                     fileHostObject.getJavaScriptFile().getContentType());
+                String filePath = APIUtil.getDocumentationFilePath(apiId, fileHostObject.getName());
+                doc.setFilePath(apiProvider.addIcon(filePath, icon));
+            } else if (oldDoc.getFilePath() != null) {
+                doc.setFilePath(oldDoc.getFilePath());
+            }
+
+        } catch (Exception e) {
+            handleException("Error while creating an attachment for Document- " + docName + "-" + version, e);
+            return false;
+        }
+        
         boolean isTenantFlowStarted = false;
         try {
             String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(providerName));
