@@ -19,11 +19,9 @@
             <label class="custom-form-label col-lg-2 col-md-2 col-sm-12 col-xs-12" for=""></label>
             <div class="custom-form-right col-lg-5 col-md-8 col-sm-8 col-xs-12">
             {{#each verbs}}
-                    <div class="checkbox">
-                    <label>
+                    <label class="checkbox-inline">
                     <input type="checkbox" value="{{ . }}" class="http_verb_select" >  {{ . }}
                     </label>
-                </div>
                 {{/each}}
                 </div>
         </div>
