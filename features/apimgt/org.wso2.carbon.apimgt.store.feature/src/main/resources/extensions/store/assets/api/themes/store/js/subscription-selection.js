@@ -17,6 +17,8 @@
  *
  */
 
+var removeAPISubscription;
+
 /*
  This js function will populate the UI after metadata generation in pages/my_subscription.jag
  */
@@ -145,6 +147,32 @@ $(function () {
                 metadata.appsWithSubs[appIndex] = newAppData;
             }
         }
+    };
+
+    /*
+     The function delete subscription metadata
+     */
+    var deleteSubscriptionMetadata = function (appName, apiName, apiProvider, apiVersion, action) {
+        var subscriptionDetails = findSubscriptionDetails(appName);
+        if (action == 'deleteSubscription') {
+            return getUpdatedSubscriptionIndex(appName, apiName, apiProvider, apiVersion);
+        }
+    };
+
+    /*
+     The function update metadata.appsWithSubs.subscriptions
+     */
+    var getUpdatedSubscriptionIndex = function (appName, apiName, apiProvider, apiVersion) {
+        var subscriptions = findSubscriptionDetails(appName);
+        var sub;
+        for (var subIndex in subscriptions) {
+            sub = subscriptions[subIndex];
+            if (sub.name == apiName && sub.provider == apiProvider && sub.version == apiVersion) {
+                subscriptions.splice(subIndex, 1);
+                return subIndex;
+            }
+        }
+        return [];
     };
 
     /*
@@ -336,6 +364,26 @@ $(function () {
         });
     };
 
+    removeAPISubscription = function (apiName, apiVersion, apiProvider) {
+        //(apiname, version, provider, user, tier, appId) 
+        var appName = $('#subscription_selection').val();
+        var appDetails = findAppDetails(appName);
+        var deleteAPISubscriptionData = {};
+        deleteAPISubscriptionData.apiName = apiName;
+        deleteAPISubscriptionData.apiVersion = apiVersion;
+        deleteAPISubscriptionData.apiProvider = apiProvider;
+        deleteAPISubscriptionData.appId = appDetails.id;
+        deleteAPISubscriptionData.appTier = appDetails.tier;
+        $.ajax({
+            type: 'POST',
+            url: getSubscriptionAPI(appName, 'deleteSubscription'),
+            data: deleteAPISubscriptionData,
+            success: function () {
+                var index = deleteSubscriptionMetadata(appName, apiName, apiProvider, apiVersion, 'deleteSubscription')
+                events.publish(EV_APP_SELECT, metadata.appsWithSubs[index].subscriptions);
+            }
+        });
+    };
 
     events.register(EV_APP_SELECT);
     events.register(EV_SHOW_KEYS);
