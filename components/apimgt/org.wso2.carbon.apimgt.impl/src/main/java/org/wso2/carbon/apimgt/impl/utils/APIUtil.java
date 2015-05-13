@@ -3770,34 +3770,39 @@ public final class APIUtil {
      * @return a Map of domain names for tenant
      * @throws org.wso2.carbon.apimgt.api.APIManagementException if an error occurs when loading tiers from the registry
      */
-    public static Map<String, String> getDomainMappings(int tenantId) throws APIManagementException {
+    public static Map<String, String> getDomainMappings(String tenantDomain) throws APIManagementException {
         Map<String, String> domains = new HashMap<String, String>();
+        String resourcePath;
         try {
             Registry registry = ServiceReferenceHolder.getInstance().getRegistryService().
-                    getGovernanceSystemRegistry(tenantId);
-            if (registry.resourceExists(APIConstants.API_DOMAIN_MAPPINGS)) {
-                Resource resource = registry.get(APIConstants.API_DOMAIN_MAPPINGS);
+                    getGovernanceSystemRegistry();
+            resourcePath = APIConstants.API_DOMAIN_MAPPINGS.replace("<tenant-id>",tenantDomain);
+            if (registry.resourceExists(resourcePath)) {
+                Resource resource = registry.get(resourcePath);
                 String content = new String((byte[]) resource.getContent());
                 JSONParser parser = new JSONParser();
                 JSONObject mappings = (JSONObject) parser.parse(content);
-                Iterator entries = mappings.entrySet().iterator();
-                while (entries.hasNext()) {
-                    Entry thisEntry = (Entry) entries.next();
-                    String key = (String) thisEntry.getKey();
-                    String value = (String) thisEntry.getValue();
-                    domains.put(key,value);
+                if(mappings.get("gateway") != null) {
+                    mappings = (JSONObject) mappings.get("gateway");
+                    Iterator entries = mappings.entrySet().iterator();
+                    while (entries.hasNext()) {
+                        Entry thisEntry = (Entry) entries.next();
+                        String key = (String) thisEntry.getKey();
+                        String value = (String) thisEntry.getValue();
+                        domains.put(key, value);
+                    }
                 }
             }
         } catch (RegistryException e) {
-            String msg = "Error while retrieving API tiers from registry";
+            String msg = "Error while retrieving gateway domain mappings from registry";
             log.error(msg, e);
             throw new APIManagementException(msg, e);
         } catch (ClassCastException e) {
-            String msg = "Invalid JSON found in the tenant domain mappings";
+            String msg = "Invalid JSON found in the gateway tenant domain mappings";
             log.error(msg, e);
             throw new APIManagementException(msg, e);
         } catch (ParseException e) {
-            String msg = "Malformed JSON found in the tenant domain mappings";
+            String msg = "Malformed JSON found in the gateway tenant domain mappings";
             log.error(msg, e);
             throw new APIManagementException(msg, e);
         }

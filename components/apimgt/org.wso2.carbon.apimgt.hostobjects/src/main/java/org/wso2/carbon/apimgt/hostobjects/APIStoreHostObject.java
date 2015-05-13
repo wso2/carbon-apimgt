@@ -2113,6 +2113,7 @@ public class APIStoreHostObject extends ScriptableObject {
                     row.put("subscriptionAvailability", row, api.getSubscriptionAvailability());
                     row.put("subscriptionAvailableTenants", row, api.getSubscriptionAvailableTenants());
                     row.put("isDefaultVersion",row,api.isDefaultVersion());
+                    row.put("transports",row,api.getTransports());
                     myn.put(0, myn, row);
                 }
 
