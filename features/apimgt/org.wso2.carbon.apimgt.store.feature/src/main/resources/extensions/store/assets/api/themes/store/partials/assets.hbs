@@ -9,6 +9,9 @@
                 {{#each .}}
                     <div class="span3 asset" data-id="{{name}}-{{version}}-{{attributes.overview_provider}}"
                          data-type="{{type}}">
+                        <button title="Delete Subscription" type="button" class="close btn-del-sub"
+                                onclick="removeAPISub('{{name}}','{{version}}');
+                                        return false;"><i class='icon-trash'></i></button>
                         {{#if thumbnail}}
                             <img src='{{thumbnail}}'>
                         {{else}}
