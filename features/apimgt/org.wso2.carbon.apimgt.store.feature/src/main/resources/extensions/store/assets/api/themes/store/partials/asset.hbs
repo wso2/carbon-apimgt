@@ -53,11 +53,12 @@
          {{#unless subscribedToDefault}} 
          <option value="-">{{t "Select Application..."}}</option>		             
          {{/unless}}        
-         <option value="createNewApp">{{t "New Application..."}}</option>			    
+         <option value="createNewApp">{{t "New Application..."}}</option>	
+         <optgroup label="My Applications">		    
 				    {{#each applications}}
 					<option value="{{id}}" {{#if selectedDefault}} selected {{/if}}>{{name}}</option>
 				    {{/each}}
-				   
+		 </optgroup>			   
 				</select>
 
 				<select id="tiers-list" name="tiers-list">

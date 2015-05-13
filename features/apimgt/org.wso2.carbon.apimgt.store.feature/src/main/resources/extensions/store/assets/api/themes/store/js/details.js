@@ -47,9 +47,12 @@ $(document).ready(function () {
         },
     dataType: "json"
     });   
-
-
-    }
-);
-
+    $('#application-list').change(
+            function(){
+                if($(this).val() == "createNewApp"){                   
+                    window.location.href =caramel.context+ '/asts/api/my_applications';
+                }
+            }
+            );
 });
+
