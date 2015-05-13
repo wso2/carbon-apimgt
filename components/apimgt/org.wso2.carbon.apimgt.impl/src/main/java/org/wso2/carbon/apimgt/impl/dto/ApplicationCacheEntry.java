@@ -27,7 +27,7 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * Cache entry for grouping Cache Keys by Application Id.
+ * Created by Amila on 5/6/15.
  */
 public class ApplicationCacheEntry implements Serializable{
     private String applicationId;
