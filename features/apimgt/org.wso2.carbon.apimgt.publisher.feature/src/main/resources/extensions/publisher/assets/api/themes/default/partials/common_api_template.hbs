@@ -7,19 +7,7 @@
 		{"value": "Application User", "text": "{{t "Application User"}}"},
 		{"value": "Application & Application User", "text": "{{t "Application & Application User"}}"}
 	];
-
-	var TIERS = [
-		{{#each api.configuredTiers}}
-			{"value": "{{this.tierName}}", "text": "{{this.tierDisplayName}}"}
-			{{#unless this.last}},{{/unless}}
-		{{/each}}
-	];
-
-		{{#each api.configuredTiers}}
-			{{#if this.last}}
-			var DEFAULT_TIER = "{{this.tierName}}";
-			{{/if}}
-		{{/each}}
+	
 	var DEFAULT_AUTH = "Application & Application User";
 	var OPTION_DEFAULT_AUTH = "None";
 	var insequence = "{{api.inSequence}}";

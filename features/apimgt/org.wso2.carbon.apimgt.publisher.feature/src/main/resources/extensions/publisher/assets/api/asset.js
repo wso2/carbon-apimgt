@@ -161,7 +161,7 @@ asset.manager = function(ctx) {
                return obj;
             } else if(options.attributes.action == "manage") {
                 var apiData = {};
-                log.info(options);
+                //log.info(options);
                 apiData.apiName = options.name;
                 apiData.version = options.attributes.version;
                 if (request.getParameter("provider") == null) {
@@ -213,7 +213,7 @@ asset.manager = function(ctx) {
                 apiData.environments = options.attributes.environments;
                 var apiProxy = apiPublisher.instance(ctx.username);                
                 result = apiProxy.manageAPI(apiData);                
-                if (result != null ||result.error) {
+                if (result != null && result.error) {
                     log.error(result.message);
                     throw "Error while updating the API."
                 } else {
