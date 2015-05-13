@@ -74,17 +74,12 @@ asset.manager = function(ctx) {
             }*/
             //If API not exist create
             var apiProxy = apiPublisher.instance(ctx.username);
-            result=apiProxy.checkIfAPIExists(api.provider,api.name,api.version);
-
+            result=apiProxy.checkIfAPIExists(api.provider,api.name,api.version);            
+            
             if(!result){
-                result = apiProxy.designAPI(api);
-                if (result.error==true) {
-                    obj = {
-                        error:true,
-                        message:result.message
-                    };
-                    print(obj);
-                    return;
+                result = apiProxy.designAPI(api);               
+                if (result!=null && result.error) {
+                    throw "Error while creating the API.";                    
                 }
                 else{
                 options.id=result;
@@ -99,6 +94,9 @@ asset.manager = function(ctx) {
             api.visibleRoles = options.attributes.roles;
             api.swagger = generate_swagger_object(options.attributes.swagger);
             result = apiProxy.updateDesignAPI(api);
+            if (result!=null && result.error) {
+            throw "Error while updating the API.";                    
+            }
             }
 
 
@@ -206,16 +204,11 @@ asset.manager = function(ctx) {
                 apiData.cacheTimeout= options.attributes.cacheTimeout;
                 apiData.destinationStats= options.attributes.destinationStatsEnabled;
                 apiData.environments = options.attributes.environments;
-                var apiProxy = apiPublisher.instance(ctx.username);
-                log.info("+++++++++++++++++++++++++++++++++++++++++++++++");
-                result = apiProxy.manageAPI(apiData);
-                log.info("=============================================");
-                if (result == null && result.error == false) {
-                    obj = {
-                        error: true,
-                        message: result.message,
-                        data: apiId
-                    };
+                var apiProxy = apiPublisher.instance(ctx.username);                
+                result = apiProxy.manageAPI(apiData);                
+                if (result != null ||result.error) {
+                    log.error(result.message);
+                    throw "Error while updating the API."
                 } else {
                     obj = {
                         error: false,

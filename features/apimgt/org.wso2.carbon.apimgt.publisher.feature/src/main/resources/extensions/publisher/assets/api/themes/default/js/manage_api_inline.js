@@ -221,10 +221,20 @@ $(function () {
                            data: JSON.stringify(data),
                            contentType: 'application/json',
                            success: function (data) {
-                               BootstrapDialog.alert('Successfully Changed the life cycle state');
+                               //BootstrapDialog.alert('Successfully Changed the life cycle state');
+                                BootstrapDialog.show({
+                                type: BootstrapDialog.TYPE_INFO,
+                                title: 'Success',
+                                message: 'Successfully Changed the life cycle state.'             
+                                });  
                            },
                            error: function (data) {
-                               BootstrapDialog.alert('Error while changing the life cycle state');
+                               //BootstrapDialog.alert('Error while changing the life cycle state');
+                            BootstrapDialog.show({
+                            type: BootstrapDialog.TYPE_DANGER,
+                            title: 'Error',
+                            message: 'Error while changing the life cycle state.'             
+                            });  
                            }
                        });
             } else {
