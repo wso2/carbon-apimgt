@@ -606,53 +606,6 @@ public class ApiMgtDAO {
     }
 
     /**
-     * Gives a list of APIs subscribed under the given Consumer Key.
-     *
-     * @param consumerKey
-     * @return List of Subscibed APIs as a List.
-     * @throws APIManagementException
-     * @throws IdentityException
-     */
-    public static List<APIInfoDTO> getSubscribedAPIsByConsumerKey(String consumerKey) throws APIManagementException {
-
-        List<APIInfoDTO> apiInfoDTOList = new ArrayList<APIInfoDTO>();
-        Connection conn = null;
-        PreparedStatement ps = null;
-        ResultSet rs = null;
-        String sqlQuery = "SELECT " +
-                          "API.API_PROVIDER, API.API_NAME, API.API_VERSION, API.CONTEXT " +
-                          "FROM AM_API AS API, " +
-                          "AM_SUBSCRIPTION AS SUB, " +
-                          "AM_APPLICATION AS APP, " +
-                          "AM_APPLICATION_KEY_MAPPING AS AKM " +
-                          "WHERE " +
-                          "AKM.APPLICATION_ID = APP.APPLICATION_ID AND " +
-                          "SUB.APPLICATION_ID = APP.APPLICATION_ID AND " +
-                          "SUB.API_ID = API.API_ID AND " +
-                          "AKM.CONSUMER_KEY = ?";
-
-        try {
-            conn = APIMgtDBUtil.getConnection();
-            ps = conn.prepareStatement(sqlQuery);
-            ps.setString(1, consumerKey);
-            rs = ps.executeQuery();
-            while (rs.next()) {
-                APIInfoDTO infoDTO = new APIInfoDTO();
-                infoDTO.setProviderId(APIUtil.replaceEmailDomain(rs.getString("API_PROVIDER")));
-                infoDTO.setApiName(rs.getString("API_NAME"));
-                infoDTO.setVersion(rs.getString("API_VERSION"));
-                infoDTO.setContext(rs.getString("CONTEXT"));
-                apiInfoDTOList.add(infoDTO);
-            }
-        } catch (SQLException e) {
-            handleException("Error while fetching API details for " + consumerKey, e);
-        } finally {
-            APIMgtDBUtil.closeAllConnections(ps, conn, rs);
-        }
-        return apiInfoDTOList;
-    }
-
-    /**
      * Get API key information for given API
      *
      * @param apiInfoDTO API info
