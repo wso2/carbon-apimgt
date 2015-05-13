@@ -16,8 +16,8 @@
 
 package org.wso2.carbon.apimgt.gateway.handlers.security.service;
 
-public class APIKeyMapping implements Comparable {
-
+public class APIKeyMapping {
+    
     private String context;
     private String apiVersion;
     private String applicationId;
@@ -53,28 +53,5 @@ public class APIKeyMapping implements Comparable {
 
     public void setDomain(String domain) {
         this.domain = domain;
-    }
-
-    @Override
-    public String toString() {
-        String strVal = "";
-        if (context != null) {
-            strVal += context;
-        }
-        if (apiVersion != null) {
-            strVal += apiVersion;
-        }
-        if (applicationId != null) {
-            strVal += applicationId;
-        }
-        if (domain != null) {
-            strVal += domain;
-        }
-
-        return strVal;
-    }
-
-    public int compareTo(Object o) {
-        return o.toString().compareTo(this.toString());
     }
 }

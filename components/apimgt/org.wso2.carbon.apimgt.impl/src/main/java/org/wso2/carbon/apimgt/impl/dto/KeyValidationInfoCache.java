@@ -28,9 +28,6 @@ import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import javax.cache.Cache;
 
 import javax.cache.Caching;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Set;
 
 /**
@@ -41,45 +38,213 @@ import java.util.Set;
 public class KeyValidationInfoCache {
 
 
+    private String cacheName;
     private String mainCacheName;
+    private String apiIndexCacheName;
+    private String tokenIndexCacheName;
     private static final Log log = LogFactory.getLog(KeyValidationInfoCache.class);
 
     public KeyValidationInfoCache(String cacheName) {
-        mainCacheName = cacheName;
+        mainCacheName = cacheName + "_main_cache";
+        apiIndexCacheName = cacheName + "_api_index_cache";
+        tokenIndexCacheName = cacheName + "_token_index";
     }
 
     public void addToCache(KeyValidationInfoCacheKey cacheKey, APIKeyValidationInfoDTO validationInfo) {
         Cache mainCache = Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER).getCache(mainCacheName);
+        Cache apiIndexCache = Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER).getCache(apiIndexCacheName);
+        Cache tokenIndexCache = Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER).getCache
+                (tokenIndexCacheName);
+
+        String apiCacheKey = APICacheEntry.createCacheKey(cacheKey.apiContext, cacheKey.apiVersion);
+        APICacheEntry apiCacheEntry = (APICacheEntry) apiIndexCache.get(apiCacheKey);
+
+        if (apiCacheEntry == null) {
+            apiCacheEntry = new APICacheEntry(cacheKey.apiContext, cacheKey.apiVersion);
+        }
+
+        String applicationId = validationInfo.getApplicationId();
+
+        if (applicationId == null && !validationInfo.isAuthorized()) {
+            // If APIKeyValidationInfoDTO is false then we don't get an ApplicationID. So if we have a key while
+            // having an unauthorized info dto, we are creating a special ApplicationCacheEntry for indexing the
+            // cachekey.
+            applicationId = ApplicationCacheEntry.INVALID_APP;
+        }
+
+        if (applicationId != null) {
+            ApplicationCacheEntry applicationCacheEntry = apiCacheEntry.getApplicationCacheEntry(applicationId);
+            if (applicationCacheEntry == null) {
+                applicationCacheEntry = new ApplicationCacheEntry(applicationId);
+            }
+
+            applicationCacheEntry.addCacheKey(cacheKey.cacheKey);
+            apiCacheEntry.addApplicationCacheEntry(applicationCacheEntry.getApplicationId(), applicationCacheEntry);
+        }
+
+        TokenCacheEntry tokenCacheEntry = (TokenCacheEntry) tokenIndexCache.get(cacheKey.accessToken);
+
+        if (tokenCacheEntry == null) {
+            tokenCacheEntry = new TokenCacheEntry(cacheKey.accessToken);
+        }
+
+        tokenCacheEntry.addCacheKey(cacheKey.cacheKey);
+
+        tokenIndexCache.put(tokenCacheEntry.getAccessToken(), tokenCacheEntry);
+        apiIndexCache.put(apiCacheKey, apiCacheEntry);
         mainCache.put(cacheKey.cacheKey, validationInfo);
     }
 
     public APIKeyValidationInfoDTO getFromCache(KeyValidationInfoCacheKey cacheKey) {
         Cache cache = Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER).getCache(mainCacheName);
-        return (APIKeyValidationInfoDTO) cache.get(cacheKey.cacheKey);
+        return (APIKeyValidationInfoDTO) cache.get(cacheKey.toString());
     }
 
+    public void removeFromCache(String accessToken) {
+        Cache mainCache = Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER).getCache(mainCacheName);
+        Cache tokenIndexCache = Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER).getCache
+                (tokenIndexCacheName);
+        TokenCacheEntry tokenCacheEntry = (TokenCacheEntry) tokenIndexCache.get(accessToken);
+        if (tokenCacheEntry != null) {
+            Set<String> cacheKeys = tokenCacheEntry.getCacheKeys();
+            if (cacheKeys != null) {
+                for (String cacheKey : cacheKeys) {
+                    mainCache.remove(cacheKey);
+                }
+
+            }
+            tokenCacheEntry.removeAll();
+            tokenIndexCache.remove(tokenCacheEntry.getAccessToken());
+            if (log.isDebugEnabled()) {
+                StringBuilder builder = new StringBuilder();
+                builder.append("Deleted Keys : ");
+                for (String cacheKey : cacheKeys) {
+                    builder.append(cacheKey + ", ");
+                }
+                log.debug(builder.toString());
+            }
+        }
+    }
+
+    public void removeFromCache(String context, String version) {
+        String cacheKey = APICacheEntry.createCacheKey(context, version);
+        Cache mainCache = Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER).getCache(mainCacheName);
+        Cache apiIndexCache = Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER).getCache(apiIndexCacheName);
+
+        APICacheEntry apiCacheEntry = (APICacheEntry) apiIndexCache.get(cacheKey);
+        if (apiCacheEntry != null) {
+            for (ApplicationCacheEntry applicationCacheEntry : apiCacheEntry.getApplicationEntries()) {
+                Set<String> cacheKeys = applicationCacheEntry.getCacheKeys();
+                if (cacheKeys != null) {
+                    for (String key : cacheKeys) {
+                        mainCache.remove(key);
+                    }
+                }
+            }
+            apiIndexCache.remove(apiCacheEntry.getCacheKey());
+
+        }
+
+    }
+
+    public void removeFromCache(String context, String version, String applicationId) {
+        String cacheKey = APICacheEntry.createCacheKey(context, version);
+        Cache mainCache = Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER).getCache(mainCacheName);
+        Cache apiIndexCache = Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER).getCache(apiIndexCacheName);
+
+        APICacheEntry apiCacheEntry = (APICacheEntry) apiIndexCache.get(cacheKey);
+        if (apiCacheEntry != null) {
+            ApplicationCacheEntry applicationCacheEntry = apiCacheEntry.getApplicationCacheEntry(applicationId);
+            if (applicationCacheEntry != null) {
+                Set<String> cacheKeys = applicationCacheEntry.getCacheKeys();
+                if (cacheKeys != null) {
+                    for (String key : cacheKeys) {
+                        mainCache.remove(key);
+                    }
+                }
+                apiCacheEntry.removeApplicationEntry(applicationId);
+                if (apiCacheEntry.isEmpty()) {
+                    apiIndexCache.remove(apiCacheEntry.getCacheKey());
+                } else {
+                    apiIndexCache.put(cacheKey, apiCacheEntry);
+                }
+            }
+
+            ApplicationCacheEntry invalidAppCacheEntry = apiCacheEntry.getApplicationCacheEntry
+                    (ApplicationCacheEntry.INVALID_APP);
+            if (invalidAppCacheEntry != null) {
+                Set<String> cacheKeys = invalidAppCacheEntry.getCacheKeys();
+                if (cacheKeys != null) {
+                    for (String key : cacheKeys) {
+                        mainCache.remove(key);
+                    }
+                }
+                apiCacheEntry.removeApplicationEntry(invalidAppCacheEntry.getApplicationId());
+
+                if (apiCacheEntry.isEmpty()) {
+                    apiIndexCache.remove(apiCacheEntry.getCacheKey());
+                } else {
+                    apiIndexCache.put(cacheKey, apiCacheEntry);
+                }
+            }
+        }
+
+    }
 
     public boolean removeFromCache(KeyValidationInfoCacheKey cacheKey) {
         Cache mainCache = Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER).getCache(mainCacheName);
-        return mainCache.remove(cacheKey.cacheKey);
+
+        removeFromAPIIndex(cacheKey);
+        removeFromTokenIndex(cacheKey);
+
+        return mainCache.remove(cacheKey.toString());
     }
 
-    public Collection<? extends String> getCacheKeys() {
-        Cache mainCache = Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER).getCache(mainCacheName);
-        Iterator keyIterator = mainCache.keys();
-        Set<String> set = new HashSet<String>();
-        while (keyIterator.hasNext()) {
-            set.add((String) keyIterator.next());
+    private void removeFromTokenIndex(KeyValidationInfoCacheKey cacheKey) {
+        Cache tokenIndexCache = Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER).getCache
+                (tokenIndexCacheName);
+        if (cacheKey.accessToken != null) {
+            TokenCacheEntry tokenCacheEntry = (TokenCacheEntry) tokenIndexCache.get(cacheKey.accessToken);
+            if (tokenCacheEntry != null) {
+                if (tokenCacheEntry.removeCacheKey(cacheKey.cacheKey)) {
+                    tokenIndexCache.put(cacheKey.accessToken, tokenCacheEntry);
+                }
+            }
         }
-        return set;
     }
 
-    public void removeFromCache(String cacheKey) {
-        Cache mainCache = Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER).getCache(mainCacheName);
-        boolean state = mainCache.remove(cacheKey);
-        if (log.isDebugEnabled()) {
-            log.debug("Removed entry for " + cacheKey + "from cache , state : " + state);
+    private void removeFromAPIIndex(KeyValidationInfoCacheKey cacheKey) {
+        Cache apiIndexCache = Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER).getCache(apiIndexCacheName);
+        String apiCacheKey = APICacheEntry.createCacheKey(cacheKey.apiContext, cacheKey.apiVersion);
+        APICacheEntry apiCacheEntry = (APICacheEntry) apiIndexCache.get(apiCacheKey);
+        if (apiCacheEntry != null) {
+            if (cacheKey.applicationId != null) {
+                ApplicationCacheEntry applicationCacheEntry = apiCacheEntry.getApplicationCacheEntry(cacheKey
+                                                                                                             .applicationId);
+
+                if (applicationCacheEntry != null) {
+                    applicationCacheEntry.removeCacheKey(cacheKey.cacheKey);
+                    if (applicationCacheEntry.getCacheKeys().size() == 0) {
+                        apiCacheEntry.removeApplicationEntry(applicationCacheEntry.getApplicationId());
+                        if (apiCacheEntry.isEmpty()) {
+                            // If Cache Entry doesn't have any elements. Remove it.
+                            apiIndexCache.remove(apiCacheEntry.getCacheKey());
+                        } else {
+                            // One Application Entry has been removed from APICacheEntry. We need to put the
+                            // APICacheEntry to make the changes visible to other nodes.
+                            apiIndexCache.put(apiCacheEntry.getCacheKey(), apiCacheEntry);
+                        }
+                    } else {
+                        // A cacheKey has been removed from ApplicationEntry. So we have to put the updated
+                        // APICacheEntry.
+                        apiIndexCache.put(apiCacheEntry.getCacheKey(), apiCacheEntry);
+                    }
+
+                }
+
+            }
         }
+
     }
 
     public class KeyValidationInfoCacheKey {

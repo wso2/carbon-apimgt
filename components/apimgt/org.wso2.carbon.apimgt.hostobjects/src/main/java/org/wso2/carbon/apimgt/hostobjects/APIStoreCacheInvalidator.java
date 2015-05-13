@@ -120,17 +120,17 @@ public class APIStoreCacheInvalidator {
                 List<APIKeyMapping> mappings = new ArrayList<APIKeyMapping>(clonedIdentifiers.size());
 
                 // Creating corresponding APIKeyMapping elements using APIIdentifiers.
-                for (APIIdentifier identifier : clonedIdentifiers) {
+                for(APIIdentifier identifier: clonedIdentifiers){
                     API api = getAPI(identifier);
-                    if (api != null) {
+                    if(api != null){
                         APIKeyMapping mapping = new APIKeyMapping();
                         mapping.setContext(api.getContext());
                         mapping.setApiVersion(identifier.getVersion());
-                        if (identifier.getApplicationId() != null) {
+                        if(identifier.getApplicationId() != null) {
                             mapping.setApplicationId(identifier.getApplicationId());
                         }
                         mapping.setDomain(MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(identifier
-                                                                                                                  .getProviderName())));
+                                                                                                                  .getProviderName()))) ;
                         mappings.add(mapping);
                     }
                 }
@@ -165,11 +165,10 @@ public class APIStoreCacheInvalidator {
          * of the API Provider, had to start Tenantflow and sent tenant, username details in the {@code
          * CarbonContext}. For these reasons it might be best if this is not used as a common Util method.
          * user regist
-         *
          * @param identifier ID of the API that needs to be fetched.
          * @return API object.
          */
-        private API getAPI(APIIdentifier identifier) {
+        private API getAPI(APIIdentifier identifier){
             String apiPath = APIUtil.getAPIPath(identifier);
             String baseUser = CarbonContext.getThreadLocalCarbonContext().getUsername();
             try {
@@ -194,7 +193,7 @@ public class APIStoreCacheInvalidator {
                 Resource apiResource = registry.get(apiPath);
                 String artifactId = apiResource.getUUID();
                 if (artifactId == null) {
-                    log.debug("Registry Artifact for API " + identifier.getApiName() + " is null");
+                    log.debug("Registry Artifact for API "+ identifier.getApiName() +" is null");
                     return null;
                 }
                 GenericArtifact apiArtifact = artifactManager.getGenericArtifact(artifactId);
@@ -204,19 +203,12 @@ public class APIStoreCacheInvalidator {
             // Exceptions aren't thrown, because it will break the loop from continuing. We'll simply log the
             // exception and continue with the work.
             catch (RegistryException e) {
-                log.error("Error occurred while reading Artifact for " + identifier.getApiName(), e);
+                log.error("Error occurred while reading Artifact for "+identifier.getApiName(),e);
             } catch (org.wso2.carbon.user.api.UserStoreException e) {
-                log.error("Error occurred while getting Tenant ID for " + identifier.getProviderName(), e);
+                log.error("Error occurred while getting Tenant ID for "+ identifier.getProviderName(),e);
             } catch (APIManagementException e) {
-                log.error("Error occurred while fetching API " + identifier.getApiName(), e);
-            } catch (IllegalStateException e) {
-                log.error("IllegalStateException occurred while clearing GatewayCache in thread " + Thread
-                        .currentThread()
-                        .getName(), e);
-            } catch (Throwable e) {
-                log.error("Error occurred while clearing GatewayCache in thread " + Thread.currentThread()
-                        .getName(), e);
-            } finally {
+                log.error("Error occurred while fetching API "+identifier.getApiName(),e);
+            }finally {
                 PrivilegedCarbonContext.getThreadLocalCarbonContext().endTenantFlow();
                 PrivilegedCarbonContext.getThreadLocalCarbonContext().setUsername(baseUser);
             }

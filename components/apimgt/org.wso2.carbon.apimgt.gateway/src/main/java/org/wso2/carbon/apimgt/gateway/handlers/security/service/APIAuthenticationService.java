@@ -17,10 +17,8 @@
 package org.wso2.carbon.apimgt.gateway.handlers.security.service;
 
 
-import org.wso2.carbon.apimgt.gateway.handlers.caching.GatewayCacheInvalidator;
 import org.wso2.carbon.apimgt.gateway.handlers.common.GatewayKeyInfoCache;
 import org.wso2.carbon.apimgt.impl.APIConstants;
-import org.wso2.carbon.apimgt.impl.dto.CacheInvalidationHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.mediation.initializer.AbstractServiceBusAdmin;
@@ -41,7 +39,32 @@ public class APIAuthenticationService extends AbstractServiceBusAdmin {
      * @param mappings A {@code List} of {@code APIKeyMapping} elements, representing the APIs that were changed.
      */
     public void invalidateKeys(APIKeyMapping[] mappings) {
-        GatewayCacheInvalidator.getInstance().addMappingForRemoval(mappings);
+        for (APIKeyMapping mapping : mappings) {
+            if (mapping.getApiVersion() != null && mapping.getContext() != null) {
+
+                String domain = mapping.getDomain();
+
+                if (domain == null) {
+                    domain = APIUtil.getTenantDomainFromContext(mapping.getContext());
+                }
+
+                // Switching the tenant domain. Key will be cached in the Tenant's cache from where API is coming from.
+                PrivilegedCarbonContext.startTenantFlow();
+                PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(domain, true);
+
+                // This means we have to invalidate all the Cache entries related to that API
+                if (mapping.getApplicationId() == null) {
+
+                    GatewayKeyInfoCache.getInstance().removeFromCache(mapping.getContext(), mapping.getApiVersion());
+
+                } else {
+                    GatewayKeyInfoCache.getInstance().removeFromCache(mapping.getContext(), mapping.getApiVersion(),
+                                                                      mapping.getApplicationId());
+                }
+
+                PrivilegedCarbonContext.endTenantFlow();
+            }
+        }
     }
 
     public void invalidateOAuthKeys(String consumerKey, String authorizedUser) {
