@@ -355,7 +355,7 @@ asset.renderer = function (ctx) {
     var buildDefaultLeftNav = function (page, util) {
         var id = page.assets.id;
         var navList = util.navList();
-        navList.push('Edit', 'fa-pencil', util.buildUrl('update') + '/' + id);
+        navList.push('Edit', 'fa-pencil', util.buildUrl('design') + '/' + id);
         navList.push('Overview', 'fa-list-alt', util.buildUrl('details') + '/' + id);
         navList.push('Life Cycle', 'fa-recycle', util.buildUrl('lifecycle') + '/' + id);
         navList.push('Versions', 'fa-recycle', util.buildUrl('versions') + '/' + id);
