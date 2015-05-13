@@ -12,6 +12,7 @@
     var tiers = mod.getTiers().tiers;
     var default_tier = tiers[tiers.length -1].tierName;
     var enableSelectedTenantSubscription = site.enableSelectedTenantSubscription;
+    var storeUrl = jagg.module("manager").getAPIStoreURL().url;
     %> 
 <script language="javascript">
     var VERBS = [ 'GET' , 'POST' , 'PUT' , 'DELETE', 'OPTIONS'];
@@ -36,7 +37,7 @@
     var faultsequence = "<%=api.faultSequence%>";
     var inSequencesLoaded = false;
     var outSequencesLoaded = false;
-    var faultSequencesLoaded = false;        
+    var faultSequencesLoaded = false;
 </script>
 <div id="item-add">
 <%
@@ -408,6 +409,25 @@
             </form>
 
         </div>
+
+        <div id="publish-success" class="modal hide fade" tabindex="-1" role="dialog" aria-hidden="true">
+            <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+            <h3>Congratulations</h3>
+            </div>
+            <div class="modal-body">
+                <label class="publish-label">You have successfully published your API : <%=api.name%>-<%=api.version%></label>
+                </br>
+                <label class="publish-label">What's Next</label>
+            </div>
+            <div class="modal-footer successMsgFooter">
+                <div class="pull-right">
+                <a href="<%= jagg.url("/info?"+ apiUrlId ) %>" class="btn btn-primary">Go to Overview</a>
+                <a href='<%=storeUrl%>/apis/info?name=<%=api.name%>&version=<%=api.version%>&provider=<%=api.provider%>' class="btn btn-default">Go to API Store</a>
+                <button id="editAPI-btn" class="btn btn-default" data-dismiss="modal" aria-hidden="true">Edit API</button>
+                </div>
+            </div>
+        </div>
     </div>
     </div>
     </div>
@@ -519,8 +539,11 @@
                 success: function(responseText){
                     $("body").unbind('api_saved');
                     if (!responseText.error) {
-                        //jagg.message({content:"API Published",type:"info"});
-                        location.href = "<%= jagg.url("/info?"+ apiUrlId ) %>";                                                
+                        $('#publish-success').modal({
+                            backdrop: 'static',
+                            keyboard: false
+                        });
+                        $('#publish-success').modal('show');
                     } else {
                          if (responseText.message == "timeout") {
                              if (ssoEnabled) {
