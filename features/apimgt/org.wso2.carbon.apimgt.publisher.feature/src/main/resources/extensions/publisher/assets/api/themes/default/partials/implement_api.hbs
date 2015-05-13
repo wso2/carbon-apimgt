@@ -24,10 +24,7 @@
             </ul>
     <br/>
     </div>
-    <h1>{{t "Implement API"}}</h1>
-    <div class="title-section">
-        <h2>{{api.name}}({{api.version}}) : {{api.context}}</h2>
-    </div>
+    <h1>{{t "Implement API"}}&nbsp;&nbsp;<span class="text-muted">{{api.name}}({{api.version}}) : {{api.context}}</span></h1>
     <div class="content-section shadow-up">
     <div class="content-data">
         <div class="alert alert-danger" id="addAPIError" style="display:none">
@@ -38,17 +35,17 @@
     <legend>Implementation Method</legend>
             <div class="form-group">
         <label class="custom-form-label col-lg-2 col-md-2 col-sm-12 col-xs-12" for="context">Implementation Method</label>
-                <div class="checkbox">
-            <label>
-            <input class="implementation_methods" type="radio" value="endpoint" name="implementation_methods" selected="selected" > Backend Endpoint
-            </label>
-            <label>
-            <input class="implementation_methods" type="radio" value="inline" name="implementation_methods"> Specify Inline
-            </label>
-        </div>
-    </div>        
-    </fieldset>
-    </div> <!-- closing the well for endpoints -->    
+                <label class="checkbox-inline">
+                            <input class="implementation_methods" type="radio" value="endpoint"
+                                   name="implementation_methods" selected="selected"> Backend Endpoint
+                        </label>
+                <label class="checkbox-inline">
+                            <input class="implementation_methods" type="radio" value="inline"
+                                   name="implementation_methods"> Specify Inline
+                        </label>
+
+                </div>
+            <!-- closing the well for endpoints -->
             <div class="clear"></div>
             <br/><br/>
                 <fieldset class="implementation_method_endpoint implementation_method">
@@ -136,7 +133,6 @@
                  <div class="custom-form-label col-lg-5 col-md-12 col-sm-12 col-xs-12">
                  <div class="input-append">
                  <input type="text" class="form-control validInput" id="wsdl" name="wsdl"  value="" />
-                 <button class="btn check_url_valid" url-type="wsdl" type="button" >{{t "Test URI"}}</button>
 
                                 <a class="icon-question-sign help_popup" help_data="wsdldesc_help"></a>
 
@@ -161,27 +157,22 @@
                         <div class="custom-form-right col-lg-1 col-md-4 col-sm-3 col-xs-2">
                             <button class="btn btn-default check_url_valid" type="button">{{t "Test URI"}}</button>
                  </div>
-
-                
-                <!--Southboud statistics -->
+                </div><!-- more option endpoint -->
+                    <!--Southboud statistics -->
                     <div class="form-group">
                         <label class="custom-form-label col-lg-2 col-md-2 col-sm-12 col-xs-12" for="destinationStats">{{t "Destination Stats"}}:</label>
 
                         <div class="custom-form-label col-lg-5 col-md-12 col-sm-12 col-xs-12">
-                       <select class="select required form-control" id="destinationStats" name="destinationStats">
-                            <option value="disabled" </option>
-                            <option value="enabled" </option>
-                        </select>
-                        <a class="icon-question-sign help_popup" help_data="stats_help"></a>
-                        <p id="stats_help" class="hide"></p>
-                     </div>
-                </div>
-                <!--Southboud statistics End -->
-                
-
-                </div><!-- more option endpoint -->
-
-                </fieldset>
+                            <select class="select required form-control" id="destinationStats" name="destinationStats">
+                                <option value="disabled"> </option>
+                                <option value="enabled"> </option>
+                            </select>
+                            <a class="icon-question-sign help_popup" help_data="stats_help"></a>
+                            <p id="stats_help" class="hide"></p>
+                        </div>
+                    </div>
+                    <!--Southboud statistics End -->
+            </fieldset>
 
                 
                 <div id="api_designer">
@@ -207,8 +198,6 @@
         </div>
     </div>
     </div>
-    </div>
-</div>
 
 <div  id="advance_endpoint_config" class="modal fade" role="dialog" aria-hidden="true">
     <div class="modal-dialog">
