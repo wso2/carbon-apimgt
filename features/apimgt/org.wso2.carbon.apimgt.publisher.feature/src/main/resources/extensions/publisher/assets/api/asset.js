@@ -105,7 +105,14 @@ asset.manager = function(ctx) {
             var asset = this.get.call(this, id);
            // log.debug("Removing API of Id " +id+ "Name " + asset.attributes.overview_name);
             var apiProxy = apiPublisher.instance(ctx.username);
-            return apiProxy.deleteAPI(asset.attributes.overview_provider, asset.attributes.overview_name, asset.version);
+            var result;
+            try{
+            result=apiProxy.deleteAPI(asset.attributes.overview_provider, asset.attributes.overview_name, asset.version);
+            return result;
+            } catch (e){
+            log.error("Error while deleting the API-"+asset.attributes.overview_name+"-"+asset.version);
+            throw e;
+            }
         },
         list: function(paging) {
             //log.info(this._super.list.call(this, paging));

@@ -11,7 +11,18 @@ $(function () {
                        }, 2000);
                    },
                    error : function(result) {
-                       alert("failure");
+                       //alert("Unable to delete the API.");
+                       BootstrapDialog.show({
+                                             type: BootstrapDialog.TYPE_DANGER,
+                                             title: 'Error',
+                                             message: 'Unable to delete the API.',
+                                             buttons: [{
+                                                      label: 'OK',
+                                                      action: function(dialogRef){
+                                                      dialogRef.close();
+                                                      }
+                                                      }]             
+                                                      });
                    }
                });
     };
