@@ -92,7 +92,6 @@ public class APIStoreHostObject extends ScriptableObject {
     private static final String httpPort = "mgt.transport.http.port";
     private static final String httpsPort = "mgt.transport.https.port";
     private static final String hostName = "carbon.local.ip";
-    private APIStoreCacheInvalidator cacheInvalidator;
 
     private APIConsumer apiConsumer;
 
@@ -100,12 +99,7 @@ public class APIStoreHostObject extends ScriptableObject {
 
     // The zero-argument constructor used for create instances for runtime
     public APIStoreHostObject() throws APIManagementException {
-
-//        APIManagerConfiguration config = org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder.getInstance().
-//                getAPIManagerConfigurationService().getAPIManagerConfiguration();
-//        if (config.getApiGatewayEnvironments().size() > 0) {
-            cacheInvalidator = new APIStoreCacheInvalidator();
-//        }
+        //apiConsumer = APIManagerFactory.getInstance().getAPIConsumer();
     }
 
     public APIStoreHostObject(String loggedUser) throws APIManagementException {

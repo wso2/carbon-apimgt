@@ -1,29 +1,25 @@
-<wsdl:definitions xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:ns1="http://org.apache.axis2/xsd" xmlns:ns="http://service.security.handlers.gateway.apimgt.carbon.wso2.org" xmlns:wsaw="http://www.w3.org/2006/05/addressing/wsdl" xmlns:http="http://schemas.xmlsoap.org/wsdl/http/" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:mime="http://schemas.xmlsoap.org/wsdl/mime/" xmlns:ax280="http://service.security.handlers.gateway.apimgt.carbon.wso2.org/xsd" xmlns:soap12="http://schemas.xmlsoap.org/wsdl/soap12/" targetNamespace="http://service.security.handlers.gateway.apimgt.carbon.wso2.org">
+<wsdl:definitions xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:ns1="http://org.apache.axis2/xsd" xmlns:ns="http://service.security.handlers.gateway.apimgt.carbon.wso2.org" xmlns:wsaw="http://www.w3.org/2006/05/addressing/wsdl" xmlns:ax25="http://service.security.handlers.gateway.apimgt.carbon.wso2.org/xsd" xmlns:http="http://schemas.xmlsoap.org/wsdl/http/" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:mime="http://schemas.xmlsoap.org/wsdl/mime/" xmlns:soap12="http://schemas.xmlsoap.org/wsdl/soap12/" targetNamespace="http://service.security.handlers.gateway.apimgt.carbon.wso2.org">
    <wsdl:documentation>APIAuthenticationService</wsdl:documentation>
    <wsdl:types>
       <xs:schema attributeFormDefault="qualified" elementFormDefault="qualified" targetNamespace="http://service.security.handlers.gateway.apimgt.carbon.wso2.org/xsd">
          <xs:complexType name="APIKeyMapping">
             <xs:sequence>
                <xs:element minOccurs="0" name="apiVersion" nillable="true" type="xs:string"></xs:element>
-               <xs:element minOccurs="0" name="applicationId" nillable="true" type="xs:string"></xs:element>
+               <xs:element minOccurs="0" name="cacheKey" nillable="true" type="xs:string"></xs:element>
                <xs:element minOccurs="0" name="context" nillable="true" type="xs:string"></xs:element>
-               <xs:element minOccurs="0" name="domain" nillable="true" type="xs:string"></xs:element>
+               <xs:element minOccurs="0" name="key" nillable="true" type="xs:string"></xs:element>
             </xs:sequence>
          </xs:complexType>
       </xs:schema>
-      <xs:schema xmlns:ax281="http://service.security.handlers.gateway.apimgt.carbon.wso2.org/xsd" attributeFormDefault="qualified" elementFormDefault="qualified" targetNamespace="http://service.security.handlers.gateway.apimgt.carbon.wso2.org">
+      <xs:schema xmlns:ax26="http://service.security.handlers.gateway.apimgt.carbon.wso2.org/xsd" attributeFormDefault="qualified" elementFormDefault="qualified" targetNamespace="http://service.security.handlers.gateway.apimgt.carbon.wso2.org">
          <xs:import namespace="http://service.security.handlers.gateway.apimgt.carbon.wso2.org/xsd"></xs:import>
-         <xs:element name="invalidateKey">
+         <xs:element name="invalidateResourceCache">
             <xs:complexType>
                <xs:sequence>
-                  <xs:element minOccurs="0" name="accessToken" nillable="true" type="xs:string"></xs:element>
-               </xs:sequence>
-            </xs:complexType>
-         </xs:element>
-         <xs:element name="invalidateKeys">
-            <xs:complexType>
-               <xs:sequence>
-                  <xs:element maxOccurs="unbounded" minOccurs="0" name="mappings" nillable="true" type="ax281:APIKeyMapping"></xs:element>
+                  <xs:element minOccurs="0" name="apiContext" nillable="true" type="xs:string"></xs:element>
+                  <xs:element minOccurs="0" name="apiVersion" nillable="true" type="xs:string"></xs:element>
+                  <xs:element minOccurs="0" name="resourceURLContext" nillable="true" type="xs:string"></xs:element>
+                  <xs:element minOccurs="0" name="httpVerb" nillable="true" type="xs:string"></xs:element>
                </xs:sequence>
             </xs:complexType>
          </xs:element>
@@ -35,13 +31,17 @@
                </xs:sequence>
             </xs:complexType>
          </xs:element>
-         <xs:element name="invalidateResourceCache">
+         <xs:element name="invalidateKeys">
             <xs:complexType>
                <xs:sequence>
-                  <xs:element minOccurs="0" name="apiContext" nillable="true" type="xs:string"></xs:element>
-                  <xs:element minOccurs="0" name="apiVersion" nillable="true" type="xs:string"></xs:element>
-                  <xs:element minOccurs="0" name="resourceURLContext" nillable="true" type="xs:string"></xs:element>
-                  <xs:element minOccurs="0" name="httpVerb" nillable="true" type="xs:string"></xs:element>
+                  <xs:element maxOccurs="unbounded" minOccurs="0" name="mappings" nillable="true" type="ax25:APIKeyMapping"></xs:element>
+               </xs:sequence>
+            </xs:complexType>
+         </xs:element>
+         <xs:element name="invalidateKey">
+            <xs:complexType>
+               <xs:sequence>
+                  <xs:element minOccurs="0" name="accessToken" nillable="true" type="xs:string"></xs:element>
                </xs:sequence>
             </xs:complexType>
          </xs:element>
@@ -156,13 +156,13 @@
    </wsdl:binding>
    <wsdl:service name="APIAuthenticationService">
       <wsdl:port name="APIAuthenticationServiceHttpsSoap11Endpoint" binding="ns:APIAuthenticationServiceSoap11Binding">
-         <soap:address location="https://Amilas-MacBook-Pro.local:8243/services/APIAuthenticationService.APIAuthenticationServiceHttpsSoap11Endpoint"></soap:address>
+         <soap:address location="https://sanjeewa-ThinkPad-T530:8243/services/APIAuthenticationService.APIAuthenticationServiceHttpsSoap11Endpoint"></soap:address>
       </wsdl:port>
       <wsdl:port name="APIAuthenticationServiceHttpsSoap12Endpoint" binding="ns:APIAuthenticationServiceSoap12Binding">
-         <soap12:address location="https://Amilas-MacBook-Pro.local:8243/services/APIAuthenticationService.APIAuthenticationServiceHttpsSoap12Endpoint"></soap12:address>
+         <soap12:address location="https://sanjeewa-ThinkPad-T530:8243/services/APIAuthenticationService.APIAuthenticationServiceHttpsSoap12Endpoint"></soap12:address>
       </wsdl:port>
       <wsdl:port name="APIAuthenticationServiceHttpsEndpoint" binding="ns:APIAuthenticationServiceHttpBinding">
-         <http:address location="https://Amilas-MacBook-Pro.local:8243/services/APIAuthenticationService.APIAuthenticationServiceHttpsEndpoint"></http:address>
+         <http:address location="https://sanjeewa-ThinkPad-T530:8243/services/APIAuthenticationService.APIAuthenticationServiceHttpsEndpoint"></http:address>
       </wsdl:port>
    </wsdl:service>
 </wsdl:definitions>
