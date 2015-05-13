@@ -91,7 +91,6 @@ public class ApiPublisherExecutor implements Execution {
                 executed = true;
             } else {
                 // TODO Failed gateways returns json string which need to be format and correct this place.
-                throw new APIManagementException("Failed gateways found! " + failedGateways);
             }
         } catch (RegistryException e) {
             log.error("Failed to get the generic artifact, While executing ApiPublisherExecutor. ", e);
