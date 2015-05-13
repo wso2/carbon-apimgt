@@ -877,6 +877,7 @@ public final class APIUtil {
         for (APIStatus aStatus : APIStatus.values()) {
             if (aStatus.getStatus().equalsIgnoreCase(status)) {
                 apiStatus = aStatus;
+                break;
             }
         }
         return apiStatus;
