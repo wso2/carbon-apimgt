@@ -4,24 +4,48 @@ Subscription listing page
 <div class='row-fluid'>
     <legend>{{t "Subscribed APIs "}}</legend>
 </div>
-<div class="row-fluid">
-    {{#each subscriptions}}
-    <div class="span3 asset">
-        <div class="asset-icon">
-            {{#if thumburl}}
-                <img src='{{thumburl}}'>
-            {{else}}
-                <img src='{{url ""}}/extensions/assets/api/themes/store/imgs/api-default.png'>
-            {{/if}}
-        </div>
-        <div class="asset-details">
-            <div class="asset-name">
-                {{name}} - {{version}}
+<div id="assets-container" data-pages="{{pages}}">
+    <div class="row-fluid">
+
+        {{#each subscriptions}}
+            <div class="span3 asset" data-id="{{name}}-{{version}}-{{provider}}"
+                 data-type="{{type}}">
+                <button title="Delete Subscription" type="button" class="close btn-del-sub"
+                        onclick="removeAPISubscription('{{name}}','{{version}}','{{provider}}');
+                                return false;"><i class='icon-trash'></i></button>
+                {{#if thumburl}}
+                    <img src='{{thumburl}}'>
+                {{else}}
+                    <img src='{{url ""}}/extensions/assets/api/themes/store/imgs/api-default.png'>
+                {{/if}}
+                <!--a href="{{url "/asts"}}/api/details/{{name}}-{{version}}-{{provider}}"-->
+                <a href="{{url "/asts"}}/api/details/{{id}}?name={{name}}&version={{version}}&provider={{provider}}">
+                    <div class="asset-details">
+                        <div class="asset-name">
+                            <ul>
+                                <li>
+                                    <h4>{{t "name"}}</h4>
+                                    <a class="asset-name" href="#">{{name}}</a>
+                                </li>
+                                <li>
+                                    <h4>{{t "version"}}</h4>
+                                    <a class="asset-version" href="#">{{version}}</a>
+
+                                </li>
+
+                                <li>
+                                    <h4>{{t "author"}}</h4>
+                                    <a class="asset-author" href="#">{{provider}}</a>
+
+                                </li>
+
+                            </ul>
+
+                        </div>
+                    </div>
+                </a>
             </div>
-            <small>{{provider}}<br/>
-                {{tier}} Subscription
-            </small>
-        </div>
+        {{/each}}
     </div>
-    {{/each}}
 </div>
+<div class="loading-inf-scroll"></div>
