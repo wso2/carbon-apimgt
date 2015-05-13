@@ -3098,7 +3098,7 @@ Set<API> apiSet) throws APIManagementException {
     public JSONObject getRefreshToken(String userId, String applicationName, String requestedScopes,
             String oldAccessToken, JSONArray accessAllowDomainsArr, String consumerKey, String consumerSecret,
             String validityTime) throws APIManagementException, AxisFault {
-        
+
         JSONObject newAccessTokenJson = new JSONObject();
         if (isEmptyDataCheck(userId, applicationName, requestedScopes, oldAccessToken, consumerKey, consumerSecret,
                 validityTime)) {

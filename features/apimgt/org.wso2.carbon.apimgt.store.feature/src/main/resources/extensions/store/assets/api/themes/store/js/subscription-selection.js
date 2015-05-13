@@ -1,13 +1,26 @@
-$(function () {
+/*
+ * Copyright (c) 2015, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *
+ * WSO2 Inc. licenses this file to you under the Apache License,
+ * Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ *
+ */
 
-    /*
-     The location of the templates used in the rendering
-     */
-    // var API_SUBS_URL = '/store/resources/api/v1/subscription/';
-    // var API_TOKEN_URL = '/store/resources/api/v1/apptoken/a';
-    //var API_TOKEN_URL = caramel.context+'/apis/applications';
-    // var API_DOMAIN_URL = '/store/resources/api/v1/domain/a';
-    //var API_SUBSCRIPTION = caramel.context+'/apis/application/subscriptions'
+/*
+ This js function will populate the UI after metadata generation in pages/my_subscription.jag
+ */
+$(function () {
 
     /*
      The containers in which the UI components will be rendered
@@ -119,6 +132,9 @@ $(function () {
         updateAppDetails(appName, appData);
     };
 
+    /*
+     The function update metadata.appsWithSubs for the given application
+     */
     var updateAppDetails = function (appName, newAppData) {
         var apps = metadata.appsWithSubs;
         var app;
@@ -131,10 +147,12 @@ $(function () {
         }
     };
 
+    /*
+     The function invokes when generating fresh production tokens
+     */
     var attachGenerateProdToken = function () {
         ///We need to prevent the afterRender function from been inherited by child views
         //otherwise this method will be invoked by child views
-        //console.info('Attaching generate button');
         $('#btn-generate-Production-token').on('click', function () {
             var appName = $('#subscription_selection').val();
             var appDetails = findAppDetails(appName);
@@ -158,6 +176,9 @@ $(function () {
         });
     };
 
+    /*
+     The function invokes when generating fresh sandbox tokens
+     */
     var attachGenerateSandToken = function () {
 
         $('#btn-generate-Sandbox-token').on('click', function () {
@@ -579,6 +600,10 @@ $(function () {
         return keys;
     };
 
+    /*
+     The function sets the APP_STORE each and every time,
+     when page gets refresh and change the application selected(#subscription_selection)
+     */
     var populateAppStore = function (appName) {
         var details = findAppDetails(appName);
         APP_STORE.appName = appName;
@@ -592,7 +617,9 @@ $(function () {
     populateAppStore(defaultAppName);
     events.publish(EV_APP_SELECT, {appName: defaultAppName});
 
-    //Connect the events
+    /*
+     The function publish the token data when ever user change the selected application(#subscription_selection)
+     */
     $('#subscription_selection').on('change', function () {
         var appName = $('#subscription_selection').val();
         APP_STORE = {};
