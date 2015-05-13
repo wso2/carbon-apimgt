@@ -5,7 +5,7 @@
 <div id="overview">
 	<%if (!api.isAdvertiseOnly) {%>
 
-	    <% log.info(stringify(api));
+	    <% 
         if(domains != null){
             for (var key in domains) {
                 var re = /\/$/g
