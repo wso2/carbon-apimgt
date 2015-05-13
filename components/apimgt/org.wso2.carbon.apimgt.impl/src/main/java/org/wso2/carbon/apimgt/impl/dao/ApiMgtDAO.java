@@ -1948,7 +1948,8 @@ public class ApiMgtDAO {
                     "   AND APP.APPLICATION_ID=SUBS.APPLICATION_ID " +
                     "   AND API.API_ID=SUBS.API_ID" +
                     "   AND APP.NAME= ? " +
-                    "   AND SUBS.SUBS_CREATE_STATE = '" + APIConstants.SubscriptionCreatedStatus.SUBSCRIBE + "'";
+                    "   AND SUBS.SUBS_CREATE_STATE = '" + APIConstants.SubscriptionCreatedStatus.SUBSCRIBE + "'" +
+                    "   AND SUBS.SUB_STATUS = '" + APIConstants.SubscriptionStatus.UNBLOCKED + "'";
         
             String whereClause = " AND  SUB.USER_ID = ? " ;  
             String whereClauseForceCaseInsensitiveComp = " AND LOWER(SUB.USER_ID) = LOWER(?)  ";
