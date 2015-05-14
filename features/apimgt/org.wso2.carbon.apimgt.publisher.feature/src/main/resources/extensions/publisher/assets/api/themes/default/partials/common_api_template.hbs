@@ -88,10 +88,10 @@
         </div>
     </div>
     {{else}}
-        <input type="hidden" name="overview_name" value="{{name}}" />
-        <input type="hidden" name="overview_version" value="{{version}}" />
-        <input type="hidden" name="overview_provider" value="{{provider}}" />
-        <input type="hidden" name="overview_context" value="{{context}}" />
+        <input type="hidden" name="overview_name" value="{{api.name}}" />
+        <input type="hidden" name="overview_version" value="{{api.version}}" />
+        <input type="hidden" name="overview_provider" value="{{api.provider}}" />
+        <input type="hidden" name="overview_context" value="{{api.context}}" />
 
     {{/unless}}
     <div class='form-group'>

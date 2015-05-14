@@ -7,7 +7,7 @@ $(document).ready(function(){
             var designer =new  APIMangerAPI.APIDesigner();
             designer.load_api_document(data.data);
             designer.set_default_management_values();
-            designer.render_resources_template();
+            designer.render_resources();
             $("#swaggerUpload").modal('hide');
      });
      }else{

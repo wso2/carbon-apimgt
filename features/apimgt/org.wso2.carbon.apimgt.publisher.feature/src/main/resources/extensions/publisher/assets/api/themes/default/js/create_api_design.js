@@ -222,9 +222,9 @@ $(function () {
                     operations[i].auth_type = DEFAULT_AUTH;
                 }
             }
-            if (!operations[i].throttling_tier) {
+            /*if (!operations[i].throttling_tier) {
                 operations[i].throttling_tier = DEFAULT_TIER;
-            }
+            }*/
         }
     }
 
