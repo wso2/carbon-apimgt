@@ -31,7 +31,7 @@ public class StandaloneAuthorizationClientFactory extends AuthorizationManagerCl
         this.clientPool = new StackObjectPool(new BasePoolableObjectFactory() {
             @Override
             public Object makeObject() throws Exception {
-                return new RemoteAuthorizationManagerClient();
+                return new StandaloneAuthorizationManagerClient();
             }
         });
     }
