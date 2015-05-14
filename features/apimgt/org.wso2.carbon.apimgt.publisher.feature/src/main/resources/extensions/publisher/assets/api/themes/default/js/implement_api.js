@@ -41,26 +41,26 @@ $(function() {
 
         $('input:radio').change(
             function(){
-                if($('input:radio:checked').val() == 'inline') {
-                    $('#api-implement-endpoints').css({'display':'none'});
-                    $('#api-implement-resources').css({'display':'block'});
-                } else {
-                    $('#api-implement-endpoints').css({'display':'block'});
-                    $('#api-implement-resources').css({'display':'none'}); 
-                }
+                /*if($('input:radio:checked').val() == 'inline') {
+                    $('.implementation_method_endpoint').css({'display':'none'});
+                    $('.api-implement-resources').css({'display':'block'});
+                } else {*/
+                    $('.implementation_method_endpoint').css({'display':'block'});
+                    $('.api-implement-resources').css({'display':'none'}); 
+                //}
             }
         );  
 
-        $('#api-implement-show-more').click(function(){
-            $('#api-implement-show-more').css({'display':'none'});
-            $('#api-implement-show-less').css({'display':'block'});
-            $('#api-implement-more').css({'display':'block'});
+        $('.more-options').click(function(){
+            $('.show-more').css({'display':'none'});
+            $('.show-less').css({'display':'block'});
+            $('#more-options-endpoints').css({'display':'block'});
        });
 
-        $('#api-implement-show-less').click(function(){
-            $('#api-implement-show-more').css({'display':'block'});
-            $('#api-implement-show-less').css({'display':'none'});
-            $('#api-implement-more').css({'display':'none'});
+        $('.less-options').click(function(){
+            $('.show-more').css({'display':'block'});
+            $('.show-less').css({'display':'none'});
+            $('#more-options-endpoints').css({'display':'none'});
        });
 
         $( "#api-implement-more-security" ).change(function() {
