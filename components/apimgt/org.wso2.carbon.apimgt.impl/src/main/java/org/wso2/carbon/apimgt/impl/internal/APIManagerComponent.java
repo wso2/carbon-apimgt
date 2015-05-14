@@ -126,6 +126,7 @@ public class APIManagerComponent {
             APIUtil.loadTenantGAConfig(MultitenantConstants.SUPER_TENANT_ID);
             int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
             APIUtil.loadTenantWorkFlowExtensions(tenantId);
+            APIUtil.loadTenantAPILifecycle(tenantId);
             //load self sigup configuration to the registry
             APIUtil.loadTenantSelfSignUpConfigurations(tenantId);
             
