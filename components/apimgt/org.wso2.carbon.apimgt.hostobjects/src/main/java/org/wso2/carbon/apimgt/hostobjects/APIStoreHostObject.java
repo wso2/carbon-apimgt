@@ -2222,59 +2222,67 @@ public class APIStoreHostObject extends ScriptableObject {
     public static NativeArray jsFunction_getAllDocumentation(Context cx,
                                                              Scriptable thisObj, Object[] args, Function funObj)
             throws ScriptException, APIManagementException {
-        List<Documentation> doclist = null;
-        String providerName = "";
-        String apiName = "";
-        String version = "";
-        String username = "";
-        if (args != null && args.length != 0) {
-            providerName = APIUtil.replaceEmailDomain((String) args[0]);
-            apiName = (String) args[1];
-            version = (String) args[2];
-            username = (String) args[3];
+        if (args == null || args.length == 0) {
+            handleException("Invalid number of parameters.");
         }
-        APIIdentifier apiIdentifier = new APIIdentifier(providerName, apiName, version);
-        NativeArray myn = new NativeArray(0);
+        boolean isTenantFlowStarted = false;
+        List<Documentation> doclist = null;
+        String providerName = APIUtil.replaceEmailDomain((String) args[0]);
+        String apiName = (String) args[1];
+        String version = (String) args[2];
+        String username = (String) args[3];
         APIConsumer apiConsumer = getAPIConsumer(thisObj);
+        NativeArray myn = new NativeArray(0);
         try {
+            String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(providerName));
+            if (tenantDomain != null && !org.wso2.carbon.utils.multitenancy.MultitenantConstants
+                    .SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
+                isTenantFlowStarted = true;
+                PrivilegedCarbonContext.startTenantFlow();
+                PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
+            }
+            APIIdentifier apiIdentifier = new APIIdentifier(providerName, apiName, version);
             doclist = apiConsumer.getAllDocumentation(apiIdentifier, username);
+            if (doclist != null) {
+                Iterator it = doclist.iterator();
+                int i = 0;
+                while (it.hasNext()) {
+                    NativeObject row = new NativeObject();
+                    Object docObject = it.next();
+                    Documentation documentation = (Documentation) docObject;
+                    Object objectSourceType = documentation.getSourceType();
+                    String strSourceType = objectSourceType.toString();
+                    row.put("name", row, documentation.getName());
+                    row.put("sourceType", row, strSourceType);
+                    row.put("summary", row, documentation.getSummary());
+                    String content;
+                    if (strSourceType.equals("INLINE")) {
+                        content = apiConsumer.getDocumentationContent(apiIdentifier, documentation.getName());
+                        row.put("content", row, content);
+                    }
+                    row.put("sourceUrl", row, documentation.getSourceUrl());
+                    row.put("filePath", row, documentation.getFilePath());
+                    DocumentationType documentationType = documentation.getType();
+                    row.put("type", row, documentationType.getType());
+
+                    if (documentationType == DocumentationType.OTHER) {
+                        row.put("otherTypeName", row, documentation.getOtherTypeName());
+                    }
+
+                    myn.put(i, myn, row);
+                    i++;
+                }
+            }
         } catch (APIManagementException e) {
             handleException("Error from Registry API while getting All Documentation on " + apiName, e);
         } catch (Exception e) {
             handleException("Error while getting All Documentation " + apiName, e);
-        }
-        if (doclist != null) {
-            Iterator it = doclist.iterator();
-            int i = 0;
-            while (it.hasNext()) {
-                NativeObject row = new NativeObject();
-                Object docObject = it.next();
-                Documentation documentation = (Documentation) docObject;
-                Object objectSourceType = documentation.getSourceType();
-                String strSourceType = objectSourceType.toString();
-                row.put("name", row, documentation.getName());
-                row.put("sourceType", row, strSourceType);
-                row.put("summary", row, documentation.getSummary());
-                String content;
-                if (strSourceType.equals("INLINE")) {
-                    content = apiConsumer.getDocumentationContent(apiIdentifier, documentation.getName());
-                    row.put("content", row, content);
-                }
-                row.put("sourceUrl", row, documentation.getSourceUrl());
-                row.put("filePath", row, documentation.getFilePath());
-                DocumentationType documentationType = documentation.getType();
-                row.put("type", row, documentationType.getType());
-
-                if (documentationType == DocumentationType.OTHER) {
-                    row.put("otherTypeName", row, documentation.getOtherTypeName());
-                }
-
-                myn.put(i, myn, row);
-                i++;
+        } finally {
+            if (isTenantFlowStarted) {
+                PrivilegedCarbonContext.endTenantFlow();
             }
         }
         return myn;
-
     }
 
     public static NativeArray jsFunction_getComments(Context cx,
