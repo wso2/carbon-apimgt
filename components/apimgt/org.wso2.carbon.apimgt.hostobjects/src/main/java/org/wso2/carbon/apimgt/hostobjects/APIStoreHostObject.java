@@ -1764,6 +1764,7 @@ public class APIStoreHostObject extends ScriptableObject {
             										throws ScriptException, APIManagementException {
     	APIConsumer apiConsumer = getAPIConsumer(thisObj);
     	String tenantDomain;
+    	boolean retuenAPItags = false;
         if (args[0] != null) {
         	tenantDomain = (String) args[0];
         } else {
@@ -1772,8 +1773,12 @@ public class APIStoreHostObject extends ScriptableObject {
             
         int start = Integer.parseInt((String) args[1]);
         int end = Integer.parseInt((String) args[2]);
+        
+        if (args.length > 3 && args[3] != null) {
+            retuenAPItags = Boolean.parseBoolean((String) args[3]);
+        }
             
-        return getPaginatedAPIsByStatus(apiConsumer, tenantDomain, start, end, APIConstants.PROTOTYPED);
+        return getPaginatedAPIsByStatus(apiConsumer, tenantDomain, start, end, APIConstants.PROTOTYPED, retuenAPItags);
     	
     }
 
@@ -1783,22 +1788,27 @@ public class APIStoreHostObject extends ScriptableObject {
     	
     	APIConsumer apiConsumer = getAPIConsumer(thisObj);
     	String tenantDomain;
+    	boolean returnAPItags = false;
         if (args[0] != null) {
         	tenantDomain = (String) args[0];
         } else {
         	tenantDomain = MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
         }
-            
+
         int start = Integer.parseInt((String) args[1]);
         int end = Integer.parseInt((String) args[2]);
+        
+        if (args.length > 3 && args[3] != null) {
+            returnAPItags = Boolean.parseBoolean((String) args[3]);
+        }
             
-        return getPaginatedAPIsByStatus(apiConsumer, tenantDomain, start, end, APIConstants.PUBLISHED);
+        return getPaginatedAPIsByStatus(apiConsumer, tenantDomain, start, end, APIConstants.PUBLISHED, returnAPItags);
             
             
     }
     
     private static NativeObject getPaginatedAPIsByStatus(APIConsumer apiConsumer, String tenantDomain, int start, 
-    		int end, String status) {
+    		int end, String status, boolean returnAPItags) {
     	
     	Set<API> apiSet;
         Map<String, Object> resultMap;
@@ -1814,7 +1824,7 @@ public class APIStoreHostObject extends ScriptableObject {
                 PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME, true);
 
             }
-            resultMap = apiConsumer.getAllPaginatedAPIsByStatus(tenantDomain, start, end, status);
+            resultMap = apiConsumer.getAllPaginatedAPIsByStatus(tenantDomain, start, end, status, returnAPItags);
 
         } catch (APIManagementException e) {
             log.error("Error from Registry API while getting API Information", e);
@@ -1856,6 +1866,31 @@ public class APIStoreHostObject extends ScriptableObject {
                     }
                     row.put("apiOwner", row, apiOwner);
                     row.put("isAdvertiseOnly", row, api.isAdvertiseOnly());
+                    
+                    NativeArray tierArr = new NativeArray(0);
+                    Set<Tier> tierSet = api.getAvailableTiers();
+                    if (tierSet != null) {
+                        Iterator tierIt = tierSet.iterator();
+                        int j = 0;
+                        while (tierIt.hasNext()) {
+                            Object tierObject = tierIt.next();
+                            Tier tier = (Tier) tierObject;
+                            tierArr.put(j, tierArr, tier.getName());
+                            j++;
+                        }
+                    }
+                    row.put("tiers", row, tierArr);
+                    
+                    if (returnAPItags) {                    
+                        StringBuilder tagsSet = new StringBuilder("");
+                        for (int k = 0; k < api.getTags().toArray().length; k++) {
+                            tagsSet.append(api.getTags().toArray()[k].toString());
+                            if (k != api.getTags().toArray().length - 1) {
+                                tagsSet.append(",");
+                            }
+                        }
+                        row.put("tags", row, tagsSet.toString());
+                    }
                     myn.put(i, myn, row);
                     i++;
                 }
@@ -2114,6 +2149,7 @@ public class APIStoreHostObject extends ScriptableObject {
                     row.put("subscriptionAvailableTenants", row, api.getSubscriptionAvailableTenants());
                     row.put("isDefaultVersion",row,api.isDefaultVersion());
                     row.put("transports",row,api.getTransports());
+
                     myn.put(0, myn, row);
                 }
 
