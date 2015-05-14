@@ -374,6 +374,7 @@ $(document).ready(function () {
         $('#forum_reply_info_temp').html(replyInfo);
 
         $('#forum_reply_editor').code("");
+        $(".note-editable").attr('contenteditable','false');
 
         setTimeout(function () {
             $('#forum_reply_added_block').hide();

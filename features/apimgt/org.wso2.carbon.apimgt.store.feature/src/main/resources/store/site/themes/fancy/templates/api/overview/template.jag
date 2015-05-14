@@ -1,10 +1,11 @@
 <% jagg.template("api/overview", function(inputs, outputs, jagg) { %>
 <% var api = outputs.api, user = outputs.user, log = new Log(); %>
 <% var domains = jagg.module("domains").getDomainMappings(jagg.getTenantDomain()).domains;%>
+<% var transports = api.transports.split(","); %>
 <div id="overview">
 	<%if (!api.isAdvertiseOnly) {%>
 
-	    <%
+	    <% 
         if(domains != null){
             for (var key in domains) {
                 var re = /\/$/g
@@ -12,13 +13,15 @@
                 var contextWithoutTenant = api.context.replace("/t/"+ jagg.getTenantDomain() , "");
                 // since we are using context versioning, we remove the api.version from the URL.
                 // The reason is that the context will have the version now
+                for(var t=0;t < transports.length;t++){
                 %>
-                <div  class="well well-small api_urls"><%=domainValue%><%= contextWithoutTenant %>
+                <div  class="well well-small api_urls"><%= transports[t] %>://<%=domainValue%><%= contextWithoutTenant %>
                     <%if (api.isDefaultVersion){%>
-                        <br><%=%><%= contextWithoutTenant %>
+                        <br><%= transports[t] %><%= contextWithoutTenant %>
                     <%}%>
                 </div>
                 <%
+                }
             }
         }
         else{

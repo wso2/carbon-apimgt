@@ -47,8 +47,11 @@ var getAnalyticsConfig = function (analyticsData) {
                 eventAnalyserUsername: analyzingConfigData.getUserName(),
                 eventAnalyserPassword: analyzingConfigData.getPassword()
             };
-        }
-
+        }else{
+	         conf = {
+              	enableAnalytics:eventingConfig.getServiceStatsEnable(),
+            };
+	}
         return {
             error: false,
             analytics: conf

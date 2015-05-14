@@ -548,11 +548,12 @@ var datasourceData = outputs.datasourceData;
 
 <script>
 $(document).ready(function() {
+        var enableAnalytics = "<%=analyticsData.analytics.enableAnalytics%>";
+if(enableAnalytics){
     <% if(analyticsData.analytics.eventReceiverURL != '') { %>
             createMultiUrlArrayAndView("<%=analyticsData.analytics.eventReceiverURL%>",
                                         "<%=analyticsData.analytics.eventReceiverUsername%>",
                                         "<%=analyticsData.analytics.eventReceiverPassword%>");
-            var enableAnalytics = "<%=analyticsData.analytics.enableAnalytics%>";
             expandViewIfAnalyticsEnabled(enableAnalytics);
     <% } else {%>
             document.getElementById("eventReceiverURL").value = "tcp://localhost:7614";
@@ -607,12 +608,12 @@ $(document).ready(function() {
             document.getElementById("statDsAlternateUsernameAllowed").value = "<%=datasourceData.dataSource.statDsAlternateUsernameAllowed%>";
             document.getElementById("statDsValidationQueryTimeout").value = "<%=datasourceData.dataSource.statDsValidationQueryTimeout%>";
     <% } else {%>
-            document.getElementById("statDsURL").value = "jdbc:h2:../wso2bam-2.5.0/repository/database/WSO2AM_STATS_DB;DB_CLOSE_ON_EXIT=FALSE";
+            document.getElementById("statDsURL").value = "jdbc:h2:../wso2bam-2.5.0/repository/database/WSO2AM_STATS_DB;DB_CLOSE_ON_EXIT=FALSE;AUTO_SERVER=TRUE";
             document.getElementById("statDsDriver").value = "org.h2.Driver";
             document.getElementById("statDsUsername").value = "wso2carbon";
             document.getElementById("statDsPassword").value = "wso2carbon";
-    <% } %>
-    });
+    <%}%>
+    }});
 </script>
 <% }); %>
 

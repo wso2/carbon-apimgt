@@ -40,15 +40,14 @@ import org.wso2.carbon.apimgt.keymgt.client.SubscriberKeyMgtClient;
 public abstract class AbstractApplicationRegistrationWorkflowExecutor extends WorkflowExecutor{
 
     private static final Log log = LogFactory.getLog(AbstractApplicationRegistrationWorkflowExecutor.class);
-    private ApiMgtDAO dao=new ApiMgtDAO();
-
+    
     public String getWorkflowType(){
        return WorkflowConstants.WF_TYPE_AM_APPLICATION_REGISTRATION_PRODUCTION;
     }
 
     public void execute(WorkflowDTO workFlowDTO) throws WorkflowException {
         log.debug("Executing AbstractApplicationRegistrationWorkflowExecutor...");
-
+        ApiMgtDAO dao = new ApiMgtDAO();
         try {
             //dao.createApplicationRegistrationEntry((ApplicationRegistrationWorkflowDTO) workFlowDTO, false);
             ApplicationRegistrationWorkflowDTO appRegDTO = (ApplicationRegistrationWorkflowDTO)workFlowDTO;
@@ -63,6 +62,7 @@ public abstract class AbstractApplicationRegistrationWorkflowExecutor extends Wo
 
     public void complete(WorkflowDTO workFlowDTO) throws WorkflowException {
         log.debug("Completing AbstractApplicationRegistrationWorkflowExecutor...");
+        ApiMgtDAO dao = new ApiMgtDAO();
         try {
             String status = null;
             if ("CREATED".equals(workFlowDTO.getStatus().toString())) {
@@ -90,7 +90,7 @@ public abstract class AbstractApplicationRegistrationWorkflowExecutor extends Wo
             ApplicationRegistrationWorkflowDTO regWorkFlowDTO = (ApplicationRegistrationWorkflowDTO)workFlowDTO;
             dao.populateAppRegistrationWorkflowDTO(regWorkFlowDTO);
             if(((ApplicationRegistrationWorkflowDTO) workFlowDTO).getApplication() != null){
-                dao.updateApplicationRegistration(status,regWorkFlowDTO.getKeyType(),regWorkFlowDTO.getApplication().getApplicationId());
+                dao.updateApplicationRegistration(status,regWorkFlowDTO.getKeyType(),regWorkFlowDTO.getApplication().getId());
             }
             super.complete(workFlowDTO);
             if(((ApplicationRegistrationWorkflowDTO) workFlowDTO).getApplication() == null){
@@ -111,6 +111,7 @@ public abstract class AbstractApplicationRegistrationWorkflowExecutor extends Wo
      */
     protected void generateKeysForApplication(ApplicationRegistrationWorkflowDTO workflowDTO) throws
             APIManagementException {
+        ApiMgtDAO dao = new ApiMgtDAO();
         if(WorkflowStatus.APPROVED.equals(workflowDTO.getStatus())) {
             dogenerateKeysForApplication(workflowDTO);
             dao.updateApplicationRegistration(APIConstants.AppRegistrationStatus.REGISTRATION_COMPLETED,

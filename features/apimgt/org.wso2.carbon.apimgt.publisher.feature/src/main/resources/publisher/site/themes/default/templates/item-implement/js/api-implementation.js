@@ -1,5 +1,12 @@
 $(document).ready(function(){
 
+    $('a.help_popup').popover({
+        html : true,
+        content: function() {
+            return $('#'+$(this).attr('help_data')).html();
+        }
+    });
+
     $(".implementation_methods").change(function(event){
         $(".implementation_method").hide();
         $(".implementation_method_"+$(this).val()).show();
@@ -131,7 +138,7 @@ $(document).ready(function(){
                     },
                     success: function(responseText){
                         if (!responseText.error) {
-                            jagg.message({content:"API deployed as a Prototype.",type:"info"});
+                             $("#prototype-success").modal('show');
                         }else{
                              if (responseText.message == "timeout") {
                                  if (ssoEnabled) {

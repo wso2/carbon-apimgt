@@ -22,6 +22,7 @@ jagg.initializer("item-design", {
 
 
         jagg.addFooterJS("yaml2json", "jagg", "templates/item-design/js/js-yaml.min.js");
+        jagg.addFooterJS("url-validation", "jagg", "templates/utils/url-validation/url-validation.js");
         jagg.addFooterJS("design-api", "jagg", "templates/item-design/js/api-design.js");
     }
 });

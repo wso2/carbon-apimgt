@@ -6,7 +6,8 @@
     var mod = jagg.module("api");
     var isDataPublishingEnabled = mod.isDataPublishingEnabled().isDataPublishingEnabled;
     var apiUrlId = "name="+encode.forHtml(api.name)+"&version="+encode.forHtml(api.version)+"&provider="+encode.forHtml(api.provider);
-%>    
+    var storeUrl = jagg.module("manager").getAPIStoreURL().url;
+%>
 <script language="javascript">
     var VERBS = [ 'GET' , 'POST' , 'PUT' , 'DELETE', 'OPTIONS'];
     var AUTH_TYPES = [
@@ -53,7 +54,7 @@
 </center> 
     <div class="title-section">
         <h2><%= encode.forHtml(api.name) %>(<%= encode.forHtml(api.version) %>) : <%= encode.forHtml(api.context) %></h2>
-    </div>     
+    </div>
     <div class="content-section shadow-up">
     <div class="content-data">   
     <div class="alert alert-error" id="addAPIError" style="display:none">
@@ -64,8 +65,7 @@
     <div class="alert alert-block" id="editAPIWarn" style="display:block">
         <span id="editWarnSpan"><b>Warning!</b><br/>
         You are editing an API with active subscribers. Tier Availability changes will not be reflected on
-        active subscriptions.<br/>
-        API Definition for Swagger will not be overriden with the changes you will do to the API.
+        active subscriptions.
         </span>
     </div>
   <%  }%>
@@ -220,6 +220,12 @@
                             <div class="input-append">
                             <input type="text" id="prototype_endpoint" value="http://localhost" name="prototype_endpoint" class="required">
                             <button type="button" class="btn check_url_valid">Test</button>
+
+                            <a style="margin-left:3px" class="icon-question-sign help_popup" help_data="endpoint_test_help"></a>
+                            <div id="endpoint_test_help" class="hide">
+                                <p>WSO2 API Manager uses HTTP Head to check the validity of the endpoint.</p>
+                            </div>
+
                         </div>
                         <p class="help-block">E.g.,: http://appserver/resource</p>
                         <span style="display:none;" class="help-block jsonform-errortext"></span>
@@ -238,6 +244,26 @@
 
                 </div>
             </form>
+            </div>
+
+            <div id="prototype-success" class="modal hide fade" tabindex="-1" role="dialog" aria-hidden="true">
+                <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                <h3>API Publisher - Notification</h3>
+                </div>
+                <div class="modal-body">
+                <table>
+                    <tbody>
+                        <tr>
+                            <td><img src="/publisher/site/themes/default/images/info.png" align="center" hspace="10"></td>
+                            <td><span class="messageText">API deployed as a Prototype.</span></td>
+                    </tbody>
+                </table>
+                </div>
+                <div class="modal-footer">
+                <button class="btn btn-primary" data-dismiss="modal" aria-hidden="true">OK</button>
+                <a href='<%=storeUrl%>/apis/info?name=<%=api.name%>&version=<%=api.version%>&provider=<%=api.provider%>' class="btn has-spinner">Go to API Store</a>
+                </div>
             </div>
             </div>
             </div>
