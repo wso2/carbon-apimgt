@@ -192,21 +192,12 @@
             </div>
         </div>
     {{/if}}
-   {{#if api}}
-    <div class="form-group">
+       <div class="form-group">
         <label class="custom-form-label col-lg-2 col-md-2 col-sm-12 col-xs-12">Description:</label>
         <div class="custom-form-right col-lg-5 col-md-8 col-sm-9 col-xs-10">
          <textarea class="form-control" id="overview_description" name="overview_description" rows="3" style="width:100%; height:70px;">{{api.description}}</textarea>
         </div>
     </div>
-    {{else}}
-     <div class="form-group">
-        <label class="custom-form-label col-lg-2 col-md-2 col-sm-12 col-xs-12">Description:</label>
-        <div class="custom-form-right col-lg-5 col-md-8 col-sm-9 col-xs-10">
-         <textarea class="form-control" id="overview_description" name="overview_description" rows="3" style="width:100%; height:70px;"></textarea>
-         </div>
-     {{/if}}
-      {{#if api}}
     <div class="form-group">
         <label class="custom-form-label col-lg-2 col-md-2 col-sm-12 col-xs-12">Tags:</label>
         <div class="custom-form-right col-lg-5 col-md-8 col-sm-9 col-xs-10">
@@ -215,16 +206,6 @@
             <p id="tag_help" class="hide">{{t "Use keywords and common search terms as tags to group APIs that have similar characteristics. After publishing the API, consumers can click these tags to jump to a group of similar APIs."}}</p>
         </div>
     </div>
-     {{else}}
-      <div class="form-group">
-        <label class="custom-form-label col-lg-2 col-md-2 col-sm-12 col-xs-12">Tags:</label>
-        <div class="custom-form-right col-lg-5 col-md-8 col-sm-9 col-xs-10">
-            <input type="text" placeholder="Add tags" class="form-control validInput validRegistryName" id="overview_tags" name="overview_tags" value="" data-role="tagsinput"/>
-            <a class="icon-question-sign help_popup" help_data="tag_help"></a>
-            <p id="tag_help" class="hide">{{t "Use keywords and common search terms as tags to group APIs that have similar characteristics. After publishing the API, consumers can click these tags to jump to a group of similar APIs."}}</p>
-        </div>
-    </div>
-     {{/if}}
     <br/><br/>
     <div id="api_designer">
         <div id="resource_details">
