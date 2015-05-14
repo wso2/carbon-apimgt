@@ -1210,8 +1210,12 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                                                                          api.getId().getVersion(),
                                                                          api.getId().getProviderName());
             if (registry.resourceExists(resourcePath + APIConstants.API_DOC_2_0_RESOURCE_NAME)) {
-                definitionFromSwagger20.saveAPIDefinition(newAPI, 
-                                          definitionFromSwagger20.getAPIDefinition(api.getId(), registry), registry);
+                JSONObject swaggerObject = (JSONObject) new JSONParser()
+                        .parse(definitionFromSwagger20.getAPIDefinition(api.getId(), registry));
+                JSONObject infoObject = (JSONObject) swaggerObject.get("info");
+                infoObject.remove("version");
+                infoObject.put("version", newAPI.getId().getVersion());
+                definitionFromSwagger20.saveAPIDefinition(newAPI, swaggerObject.toJSONString(), registry);
             }
             
             // Make sure to unset the isLatest flag on the old version
@@ -1233,6 +1237,10 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
         } catch (RegistryException e) {
             String msg = "Failed to create new version : " + newVersion + " of : "
+                         + api.getId().getApiName();
+            handleException(msg, e);
+        } catch (ParseException e) {
+            String msg = "Couldn't Create json Object from Swagger object for version" + newVersion + " of : "
                          + api.getId().getApiName();
             handleException(msg, e);
         }
