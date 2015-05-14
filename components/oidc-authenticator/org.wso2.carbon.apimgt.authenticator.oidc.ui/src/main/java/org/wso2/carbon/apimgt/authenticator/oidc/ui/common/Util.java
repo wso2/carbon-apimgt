@@ -92,7 +92,7 @@ public class Util {
         AuthenticatorsConfiguration.AuthenticatorConfig authenticatorConfig = authenticatorsConfiguration
                 .getAuthenticatorConfig(OIDCConstants.AUTHENTICATOR_NAME);
         // if the authenticator is disabled, then do not register the servlet filter.
-        return !authenticatorConfig.isDisabled();
+        return (authenticatorConfig == null) ? false : !authenticatorConfig.isDisabled();
     }
 
 
