@@ -7,19 +7,7 @@
 		{"value": "Application User", "text": "{{t "Application User"}}"},
 		{"value": "Application & Application User", "text": "{{t "Application & Application User"}}"}
 	];
-
-	var TIERS = [
-		{{#each api.configuredTiers}}
-			{"value": "{{this.tierName}}", "text": "{{this.tierDisplayName}}"}
-			{{#unless this.last}},{{/unless}}
-		{{/each}}
-	];
-
-		{{#each api.configuredTiers}}
-			{{#if this.last}}
-			var DEFAULT_TIER = "{{this.tierName}}";
-			{{/if}}
-		{{/each}}
+	
 	var DEFAULT_AUTH = "Application & Application User";
 	var OPTION_DEFAULT_AUTH = "None";
 	var insequence = "{{api.inSequence}}";
@@ -149,43 +137,59 @@
         <div class="form-group">
             <label class="custom-form-label col-lg-2 col-md-2 col-sm-12 col-xs-12" for="imageUrl">{{t "Thumbnail"}}</label>
             <div class="custom-form-right col-lg-5 col-md-8 col-sm-9 col-xs-10">
-                <div class="pull-left">
-                    {{#unless thumb}} <div><img id="apiEditThumb" alt="" src="{{url "/themes/default/img/icons/ico-sort.png"}}"/></div>
+                    {{#unless thumb}}
+                        <div class="col-lg-2 col-md-4 col-sm-6 col-xs-6">
+                            <img id="apiEditThumb" alt="" src="{{url "/themes/default/img/icons/ico-sort.png"}}"/>
+                        </div>
                     {{else}}
-                        <div><img id="apiEditThumb" alt="" src="<%=jagg.getRegistryPath(api.thumb)%>"/></div> {{/unless}}
-                    <a onclick="javascript:$('#imageUrl').toggle('slow')" style="cursor: pointer">
+                        <div class="col-lg-2 col-md-4 col-sm-6 col-xs-6">
+                            <img id="apiEditThumb" alt="" src="<%=jagg.getRegistryPath(api.thumb)%>"/>
+                        </div>
+                    {{/unless}}
+                <div class="col-lg-10 col-md-8 col-sm-6 col-xs-6">
+                    <a onclick="javascript:$('#imageUrl').toggle('slow')" class="btn btn-primary">
                         <i class="icon-picture"></i> {{t "Change Icon"}}
                     </a>
                 </div>
-                <div class="pull-left" id="imageUrl" style="display:none;">
-                    <div id="apiThumb-container" class="pull-left"> <input type="file" class="input-xlarge validateImageFile" name="apiThumb" /></div>
-                    <input class="pull-left btn" type="button" id="clearThumb" value="{{t "clear"}}"/>
-                    <div class="help-block pull-left inline-help">
-                        <ul>
-                            <li>{{t "Size (max): 1MB"}}</li>
-                            <li>{{t "Dimensions (max): 100 x 100 pixels"}}</li>
-                        </ul>
-                    </div>
+
+            </div>
+            </div>
+        <div class="form-group">
+            <label class="custom-form-label col-lg-2 col-md-2 col-sm-12 col-xs-12" for=""></label>
+            <div id="imageUrl" style="display:none;">
+                <div class="custom-form-right col-lg-5 col-md-8 col-sm-9 col-xs-10" id="apiThumb-container">
+                    <input type="file" class="form-control validateImageFile" name="apiThumb" />
                 </div>
+                <div class="custom-form-right col-lg-1 col-md-4 col-sm-3 col-xs-2">
+                    <input class="btn btn-default" type="button" id="clearThumb" value="{{t "clear"}}"/>
+                </div>
+            </div>
+
+            <div class="help-block pull-left inline-help custom-form-right col-lg-9 col-md-9 col-sm-12 col-xs-12 col-md-offset-3 col-lg-offset-2">
+                <ul>
+                    <li>{{t "Size (max): 1MB"}}</li>
+                    <li>{{t "Dimensions (max): 100 x 100 pixels"}}</li>
+                </ul>
             </div>
         </div>
     {{else}}
         <div class="form-group">
-            <label class="control-label" for="apiThumb">{{t "Thumbnail"}}:</label>
-            <div class="controls">
-                <div id="inpFile" class="pull-left">
+            <label class="custom-form-label col-lg-2 col-md-2 col-sm-12 col-xs-12" for="apiThumb">{{t "Thumbnail"}}:</label>
+            <div class="custom-form-right col-lg-5 col-md-8 col-sm-9 col-xs-10">
+                <div id="inpFile">
                     <div id="apiThumb-container"  style="display: inline;">
-                        <input type="file" class="input-xlarge" id="overview_thumbnail" name="overview_thumbnail"/></div>
-                </div>
-                <input type="button" class="btn pull-left" id="clearThumb" value="{{t "clear"}}"/>
-                <div class="help-block pull-left inline-help">
-                    <ul>
-                        <li>{{t "Size (max): 1MB"}}</li>
-                        <li>{{t "Dimensions (max): 100 x 100 pixels"}}</li>
-                    </ul>
+                        <input type="file" class="form-control" id="overview_thumbnail" name="overview_thumbnail"/></div>
                 </div>
             </div>
-        </div>
+            <div class="custom-form-right col-lg-1 col-md-4 col-sm-3 col-xs-2">
+                <input type="button" class="btn btn-default" id="clearThumb" value="{{t "Clear"}}"/>
+            </div>
+            <div class="help-block inline-help custom-form-right col-lg-9 col-md-9 col-sm-12 col-xs-12 col-md-offset-3 col-lg-offset-2">
+                <ul>
+                    <li>{{t "Size (max): 1MB"}}</li>
+                    <li>{{t "Dimensions (max): 100 x 100 pixels"}}</li>
+                </ul>
+            </div>
         </div>
     {{/if}}
 
@@ -220,11 +224,21 @@
                 <div class="form-group">
                     <label class="custom-form-label col-lg-2 col-md-2 col-sm-12 col-xs-12" for=""></label>
                     <div class="custom-form-right col-lg-5 col-md-8 col-sm-9 col-xs-10">
-                        <input type="checkbox" value="GET" class="http_verb_select"> GET
+                        <label class="checkbox-inline">
+                            <input type="checkbox" value="GET" class="http_verb_select"> GET
+                        </label>
+                        <label class="checkbox-inline">
                         <input type="checkbox" value="POST" class="http_verb_select"> POST
+                        </label>
+                            <label class="checkbox-inline">
                         <input type="checkbox" value="PUT" class="http_verb_select"> PUT
+                            </label>
+                                <label class="checkbox-inline">
                         <input type="checkbox" value="DELETE" class="http_verb_select"> DELETE
+                                </label>
+                                    <label class="checkbox-inline">
                         <input type="checkbox" value="OPTIONS" class="http_verb_select"> OPTIONS
+                                        </label>
                     </div>
                 </div>
                 <div class="control-group">

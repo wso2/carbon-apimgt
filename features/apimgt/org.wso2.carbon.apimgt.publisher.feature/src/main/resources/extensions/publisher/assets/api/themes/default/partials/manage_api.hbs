@@ -58,8 +58,9 @@
             </a>
         </li>
     </ul>
+    <br/>
 </div>
-<h1>Manage API <span class="text-muted">{{api.name}}({{api.version}}) : {{api.context}}</span></h1>
+<h1>Manage API&nbsp;&nbsp;<span class="text-muted">{{api.name}}({{api.version}}) : {{api.context}}</span></h1>
 		<div class="content-section shadow-up">
 			<div class="content-data">
 				<div class="alert alert-error" id="addAPIError" style="display:none">
@@ -67,7 +68,7 @@
 				</div>
 				{{#if api}}
 					{{#if api.subs}}
-						<div class="alert alert-danger" id="editAPIWarn">
+                <div class="alert alert-danger" role="alert" id="editAPIWarn">
         			<span id="editWarnSpan"><b>Warning!</b><br/>
        				You are editing an API with active subscribers. Tier Availability changes will not be reflected on
         			active subscriptions. API Definition for Swagger will not be overriden with the changes you will do to the API.
@@ -105,7 +106,7 @@
 												{{/if}}
 											{{/unless}}
 											<input type="hidden" id="default_version_checked" name="default_version_checked"
-											       value="{{#if api.isDefaultVersion}}default_version{{/if}}"
+											       value="{{#if api.isDefaultVersion}}default_version{{/if}}"/>
 										</div>
 									</div>
 								<div class="form-group">
@@ -115,7 +116,7 @@
 										<select id="tier" name="tier" class="multiselect selected hide required"
 										        multiple="multiple">
 											{{#each api.filteredTiers}}
-												<option value="{{this.tierName}}"{{#if this.available}}selected="selected"{{/if}}>{{this.tierDisplayName}}</option>
+												<option value="{{this.tierName}}" {{#if this.available}}selected="selected"{{/if}}>{{this.tierDisplayName}}</option>
 											{{/each}}
 										</select>
 										<script type="text/javascript">
@@ -124,8 +125,7 @@
 									</div>
 								</div>
             <div class="form-group transport-styles">
-                <label class="custom-form-label col-lg-2 col-md-2 col-sm-12 col-xs-12” for="
-                       transports">{{t "Transports"}}:<span class="requiredAstrix">*</span></label>
+                <label class="custom-form-label col-lg-2 col-md-2 col-sm-12 col-xs-12" for="transports">{{t "Transports"}}:<span class="requiredAstrix">*</span></label>
                 <div class="custom-form-right col-lg-5 col-md-8 col-sm-8 col-xs-12">
                     <div class="checkbox">
                         <label class="checkbox inline">
@@ -145,7 +145,7 @@
             </div>
             {{#if api.isSynapseGateway}}
                 <div class="form-group">
-                    <label class="custom-form-label col-lg-2 col-md-2 col-sm-12 col-xs-12” for="sequence">{{t "Sequences"}}:</label>
+                    <label class="custom-form-label col-lg-2 col-md-2 col-sm-12 col-xs-12" for="sequence">{{t "Sequences"}}:</label>
                     <div class="custom-form-right col-lg-5 col-md-8 col-sm-8 col-xs-12">
 												<input type="checkbox" id="toggleSequence" name="sequence_check"
 												       id="sequence_check"
@@ -196,7 +196,7 @@
 								{{/if}}
 								<!--Response Caching -->
             <div class="form-group">
-                <label class="custom-form-label col-lg-2 col-md-2 col-sm-12 col-xs-12” for="responseCache">{{t "Response Caching"}}:</label>
+                <label class="custom-form-label col-lg-2 col-md-2 col-sm-12 col-xs-12" for="responseCache">{{t "Response Caching"}}:</label>
                 <div class="custom-form-right col-lg-5 col-md-8 col-sm-8 col-xs-12">
 										<select class="select required" id="responseCache" name="responseCache">
 											<option value="disabled {{#if api.responseCache.enabled}}checked{{/if}}">{{t
@@ -280,8 +280,10 @@
 									</div>
 								</div>
 					</div>
-						<legend class="legend-with-hidden-info js_hidden_section_title">Gateway Environments<i class="icon-chevron-right icon-keys"></i></legend>
-						<div style="display: none">
+                            <br/><br/>
+
+                            <legend class="legend-with-hidden-info js_hidden_section_title">Gateway Environments<i class="icon-chevron-right icon-keys"></i></legend>
+						<div style="display: none" class="custom-form-right col-lg-10 col-md-10 col-sm-12 col-xs-12 col-lg-offset-2 col-md-offset-2">
 							<!--legend>Environments</legend-->
 							<div class="environments_headings">
 								<div class="environments_checkbox"></div>
@@ -291,7 +293,7 @@
 							</div>
 
 								{{#each api.filteredEnvironmentList}}
-									<div class="environments_headings">
+									<div>
 										<div class="environments_checkbox"><input type="checkbox" value="{{this.name}}"
 																	{{#if this.contained}}checked{{/if}}  class="env"></div>
 										<div class="environments_data">{{this.name}}</div>
@@ -300,6 +302,8 @@
 									</div>
 								{{/each}}
 						</div>
+                            <div class="clearfix"></div>
+                            <br/><br/>
 						<style>
 							.environments_headings{
 								border-bottom: solid 1px;
@@ -332,7 +336,7 @@
 								*zoom: 1;
 								padding :5px;
 								text-align:left;
-								width:200px;
+								width:350px;
 							}
 						</style>
 						<legend class="legend-with-hidden-info js_hidden_section_title">{{t "Business Information"}} <i
@@ -342,30 +346,30 @@
 							<!--legend>Business Information</legend-->
 
 							<div class="form-group">
-								<label class="custom-form-label col-lg-2 col-md-2 col-sm-12 col-xs-12” for="bizOwner">{{t "Business Owner"}}:</label>
+								<label class="custom-form-label col-lg-2 col-md-2 col-sm-12 col-xs-12" for="bizOwner">{{t "Business Owner"}}:</label>
 								<div class="custom-form-right col-lg-5 col-md-8 col-sm-8 col-xs-12">
 									<input type="text" class="form-control validInput" id="bizOwner" name="bizOwner"
 									       value="{{api.bizOwner}}"/>
 								</div>
 							</div>
 							<div class="form-group">
-								<label class="custom-form-label col-lg-2 col-md-2 col-sm-12 col-xs-12” for="bizOwnerMail">{{t "Business Owner Email"}} :</label>
+								<label class="custom-form-label col-lg-2 col-md-2 col-sm-12 col-xs-12" for="bizOwnerMail">{{t "Business Owner Email"}} :</label>
 								<div class="custom-form-right col-lg-5 col-md-8 col-sm-8 col-xs-12">
-									<input type="text" class="input-xlarge email" id="bizOwnerMail" name="bizOwnerMail"
+									<input type="text" class="form-control email" id="bizOwnerMail" name="bizOwnerMail"
 									       value="{{api.bizOwnerMail}}"/>
 								</div>
 							</div>
 							<div class="form-group">
-								<label class="custom-form-label col-lg-2 col-md-2 col-sm-12 col-xs-12” for="techOwner">{{t "Technical  Owner"}} :</label>
+								<label class="custom-form-label col-lg-2 col-md-2 col-sm-12 col-xs-12" for="techOwner">{{t "Technical  Owner"}} :</label>
 								<div class="custom-form-right col-lg-5 col-md-8 col-sm-8 col-xs-12">
-									<input type="text" class="input-xlarge validInput" id="techOwner" name="techOwner"
+									<input type="text" class="form-control validInput" id="techOwner" name="techOwner"
 									       value="{{api.techOwner}}"/>
 								</div>
 							</div>
-							<div class="form-group col-md-8">
-								<label class="custom-form-label col-lg-2 col-md-2 col-sm-12 col-xs-12” for="techOwnerMail">{{t "Technical Owner Email"}} :</label>
+							<div class="form-group">
+								<label class="custom-form-label col-lg-2 col-md-2 col-sm-12 col-xs-12" for="techOwnerMail">{{t "Technical Owner Email"}} :</label>
 								<div class="custom-form-right col-lg-5 col-md-8 col-sm-8 col-xs-12">
-									<input type="text" class="input-xlarge email" id="techOwnerMail" name="techOwnerMail"
+									<input type="text" class="form-control email" id="techOwnerMail" name="techOwnerMail"
 									       value="{{api.techOwnerMail}}"/>
 								</div>
 							</div>
@@ -373,6 +377,7 @@
 
 					<div id="api_designer">
 						<div id ="apidoc_details"></div>
+                        <br/><br/>
 						<legend>Resources</legend>
 						<div id="scopes_view"></div>
 						<div id ="resource_details"></div>

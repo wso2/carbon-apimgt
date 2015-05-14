@@ -105,8 +105,8 @@ $(function () {
                         var err_message = "Resource already exist for URL Pattern " + path + " and Verb " + $(this).val();
                         //jagg.message({content:err_message,type:"error"});
                         BootstrapDialog.show({
-                        type: 'BootstrapDialog.TYPE_DANGER',
-                        title: 'Message type: ' + type,
+                        type: BootstrapDialog.TYPE_DANGER,
+                        title: 'Error',
                         message: err_message              
                         });                          
                         return;
@@ -180,8 +180,8 @@ $(function () {
             if (vc == 0) {
                 //jagg.message({content:"You should select at least one HTTP verb." ,type:"error"});
                  BootstrapDialog.show({
-                        type: 'BootstrapDialog.TYPE_DANGER',
-                        title: 'Message type: ' + type,
+                        type: BootstrapDialog.TYPE_DANGER,
+                        title: 'Error',
                         message: 'You should select at least one HTTP verb.'             
                         });   
                // alert("You should select at least one HTTP verb.");

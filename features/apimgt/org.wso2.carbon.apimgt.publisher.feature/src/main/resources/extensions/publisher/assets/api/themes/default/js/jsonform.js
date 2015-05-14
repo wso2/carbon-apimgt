@@ -189,16 +189,16 @@ var initializeTabs = function (tabs) {
 
 // Twitter bootstrap-friendly HTML boilerplate for standard inputs
 jsonform.fieldTemplate = function(inner) {
-  return '<div class="control-group jsonform-error-<%= keydash %>' +
+  return '<div class="form-group jsonform-error-<%= keydash %>' +
     '<%= elt.htmlClass ? " " + elt.htmlClass : "" %>' +
     '<%= (node.schemaElement && node.schemaElement.required && (node.schemaElement.type !== "boolean") ? " jsonform-required" : "") %>' +
     '<%= (node.readOnly ? " jsonform-readonly" : "") %>' +
     '<%= (node.disabled ? " jsonform-disabled" : "") %>' +
     '">' +
     '<% if (node.title && !elt.notitle) { %>' +
-      '<label class="control-label" for="<%= node.id %>"><%= node.title %></label>' +
+      '<label class="custom-form-label col-lg-2 col-md-2 col-sm-12 col-xs-12" for="<%= node.id %>"><%= node.title %></label>' +
     '<% } %>' +
-    '<div class="controls">' +
+    '<div>' +
       '<% if (node.prepend || node.append) { %>' +
       '<div class="<% if (node.prepend) { %>input-prepend<% } %>' +
         '<% if (node.append) { %> input-append<% } %>">' +
@@ -335,10 +335,10 @@ jsonform.elementTypes = {
   },
   'endpoint':{
     'template':
-      '<div class="input-append">'+
+      '<div class="custom-form-label col-lg-5 col-md-12 col-sm-12 col-xs-12">'+
       '<input type="text" ' +
       '<%= (fieldHtmlClass ? "class=\'" + fieldHtmlClass + "\' " : "") %>' +
-      ' class="validateEndpoints" '+
+      ' class="form-control validateEndpoints" '+
       'name="<%= node.name %>" value="<%= escape(value) %>" id="<%= id %>"' +
       '<%= (node.disabled? " disabled" : "")%>' +
       '<%= (node.readOnly ? " readonly=\'readonly\'" : "") %>' +
@@ -346,10 +346,13 @@ jsonform.elementTypes = {
       '<%= (node.schemaElement && node.schemaElement.required && (node.schemaElement.type !== "boolean") ? " required=\'required\'" : "") %>' +
       '<%= (node.placeholder? "placeholder=" + \'"\' + escape(node.placeholder) + \'"\' : "")%>' +
       ' />'+
-      '<button class="btn advance_endpoint_config" ep-config-data="{}" type="button" field-name="<%= node.name %>">Advanced Options</button>'+
-      '<button class="btn check_url_valid" type="button" >Test</button>'+
-      '</div>' +
-      '<p class="help-block">E.g.,: http://appserver/resource</p>',
+      '<p class="help-block">E.g.,: http://appserver/resource</p>'+
+      '</div>'+
+      '<div class="custom-form-right col-lg-2 col-md-4 col-sm-3 col-xs-2">'+
+      '<button class="btn btn-success advance_endpoint_config" ep-config-data="{}" type="button" field-name="<%= node.name %>">Advanced Options</button>'+
+      '<button class="btn btn-default check_url_valid" type="button" >Test</button>'+
+      '</div>',
+
     'fieldtemplate': true,
     'inputfield': true
     },

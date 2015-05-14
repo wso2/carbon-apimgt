@@ -74,17 +74,12 @@ asset.manager = function(ctx) {
             }*/
             //If API not exist create
             var apiProxy = apiPublisher.instance(ctx.username);
-            result=apiProxy.checkIfAPIExists(api.provider,api.name,api.version);
-
+            result=apiProxy.checkIfAPIExists(api.provider,api.name,api.version);            
+            
             if(!result){
-                result = apiProxy.designAPI(api);
-                if (result.error==true) {
-                    obj = {
-                        error:true,
-                        message:result.message
-                    };
-                    print(obj);
-                    return;
+                result = apiProxy.designAPI(api);               
+                if (result!=null && result.error) {
+                    throw "Error while creating the API.";                    
                 }
                 else{
                 options.id=result;
@@ -99,6 +94,9 @@ asset.manager = function(ctx) {
             api.visibleRoles = options.attributes.roles;
             api.swagger = generate_swagger_object(options.attributes.swagger);
             result = apiProxy.updateDesignAPI(api);
+            if (result!=null && result.error) {
+            throw "Error while updating the API.";                    
+            }
             }
 
 
@@ -107,7 +105,14 @@ asset.manager = function(ctx) {
             var asset = this.get.call(this, id);
            // log.debug("Removing API of Id " +id+ "Name " + asset.attributes.overview_name);
             var apiProxy = apiPublisher.instance(ctx.username);
-            return apiProxy.deleteAPI(asset.attributes.overview_provider, asset.attributes.overview_name, asset.version);
+            var result;
+            try{
+            result=apiProxy.deleteAPI(asset.attributes.overview_provider, asset.attributes.overview_name, asset.version);
+            return result;
+            } catch (e){
+            log.error("Error while deleting the API-"+asset.attributes.overview_name+"-"+asset.version);
+            throw e;
+            }
         },
         list: function(paging) {
             //log.info(this._super.list.call(this, paging));
@@ -156,7 +161,7 @@ asset.manager = function(ctx) {
                return obj;
             } else if(options.attributes.action == "manage") {
                 var apiData = {};
-                log.info(options);
+                //log.info(options);
                 apiData.apiName = options.name;
                 apiData.version = options.attributes.version;
                 if (request.getParameter("provider") == null) {
@@ -206,16 +211,11 @@ asset.manager = function(ctx) {
                 apiData.cacheTimeout= options.attributes.cacheTimeout;
                 apiData.destinationStats= options.attributes.destinationStatsEnabled;
                 apiData.environments = options.attributes.environments;
-                var apiProxy = apiPublisher.instance(ctx.username);
-                log.info("+++++++++++++++++++++++++++++++++++++++++++++++");
-                result = apiProxy.manageAPI(apiData);
-                log.info("=============================================");
-                if (result == null && result.error == false) {
-                    obj = {
-                        error: true,
-                        message: result.message,
-                        data: apiId
-                    };
+                var apiProxy = apiPublisher.instance(ctx.username);                
+                result = apiProxy.manageAPI(apiData);                
+                if (result != null && result.error) {
+                    log.error(result.message);
+                    throw "Error while updating the API."
                 } else {
                     obj = {
                         error: false,
@@ -355,7 +355,7 @@ asset.renderer = function (ctx) {
     var buildDefaultLeftNav = function (page, util) {
         var id = page.assets.id;
         var navList = util.navList();
-        navList.push('Edit', 'fa-pencil', util.buildUrl('update') + '/' + id);
+        navList.push('Edit', 'fa-pencil', util.buildUrl('design') + '/' + id);
         navList.push('Overview', 'fa-list-alt', util.buildUrl('details') + '/' + id);
         navList.push('Life Cycle', 'fa-recycle', util.buildUrl('lifecycle') + '/' + id);
         navList.push('Versions', 'fa-recycle', util.buildUrl('versions') + '/' + id);

@@ -31,14 +31,11 @@ import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.governance.api.generic.GenericArtifactManager;
 import org.wso2.carbon.governance.api.generic.dataobjects.GenericArtifact;
 import org.wso2.carbon.governance.registry.extensions.interfaces.Execution;
-import org.wso2.carbon.governance.registry.extensions.internal.GovernanceRegistryExtensionsComponent;
 import org.wso2.carbon.registry.core.Resource;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.core.jdbc.handlers.RequestContext;
 
-import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * This class is an implementation of the
@@ -83,8 +80,7 @@ public class ApiPublisherExecutor implements Execution {
             Resource apiResource = context.getResource();
             String artifactId = apiResource.getUUID();
             if (artifactId == null) {
-                throw new APIManagementException(
-                        "artifact id is null for : " + context.getResourcePath().getCompletePath());
+                return executed;
             }
             GenericArtifact apiArtifact = artifactManager.getGenericArtifact(artifactId);
             API api = APIUtil.getAPI(apiArtifact);
@@ -92,15 +88,14 @@ public class ApiPublisherExecutor implements Execution {
             APIProvider apiProvider = APIManagerFactory.getInstance().getAPIProvider(user);
             failedGateways = apiProvider.updateAPIStatus(api.getId(), targetState, true, false, true);
             if (failedGateways != null) {
-	            //TODO Failed gateways returns json string which need to be format and correct this place
                 executed = true;
+            } else {
+                // TODO Failed gateways returns json string which need to be format and correct this place.
             }
         } catch (RegistryException e) {
             log.error("Failed to get the generic artifact, While executing ApiPublisherExecutor. ", e);
-            return false;
         } catch (APIManagementException e) {
             log.error("Failed to publish service to API store, While executing ApiPublisherExecutor. ", e);
-            return false;
         }
         return executed;
     }
@@ -110,6 +105,7 @@ public class ApiPublisherExecutor implements Execution {
         for (APIStatus aStatus : APIStatus.values()) {
             if (aStatus.getStatus().equalsIgnoreCase(status)) {
                 apiStatus = aStatus;
+                break;
             }
         }
         return apiStatus;

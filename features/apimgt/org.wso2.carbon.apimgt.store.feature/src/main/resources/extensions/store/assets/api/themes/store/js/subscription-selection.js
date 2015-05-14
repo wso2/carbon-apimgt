@@ -1,13 +1,28 @@
-$(function () {
+/*
+ * Copyright (c) 2015, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *
+ * WSO2 Inc. licenses this file to you under the Apache License,
+ * Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ *
+ */
 
-    /*
-     The location of the templates used in the rendering
-     */
-    // var API_SUBS_URL = '/store/resources/api/v1/subscription/';
-    // var API_TOKEN_URL = '/store/resources/api/v1/apptoken/a';
-    //var API_TOKEN_URL = caramel.context+'/apis/applications';
-    // var API_DOMAIN_URL = '/store/resources/api/v1/domain/a';
-    //var API_SUBSCRIPTION = caramel.context+'/apis/application/subscriptions'
+var removeAPISubscription;
+
+/*
+ This js function will populate the UI after metadata generation in pages/my_subscription.jag
+ */
+$(function () {
 
     /*
      The containers in which the UI components will be rendered
@@ -36,8 +51,8 @@ $(function () {
     /*
      This function generate the location of the templates used in the rendering
      */
-    var getSubscriptionAPI = function (appName) {
-        return caramel.context + '/apis/application/' + appName + '/subscriptions';
+    var getSubscriptionAPI = function (appName, action) {
+        return caramel.context + '/apis/application/' + appName + '/' + action + '/subscriptions';
     };
 
     /*
@@ -77,30 +92,51 @@ $(function () {
     /*
      The function update the details of the given application
      */
-    var updateMetadata = function (appName, newDetails, environment) {
+    var updateMetadata = function (appName, newDetails, environment, action) {
         var appData = findAppDetails(appName);
-        if (environment == 'Production') {
+        if (action == 'new') {
+            if (environment == 'Production') {
 
-            appData.prodKeyScope = newDetails.tokenScope;
-            appData.prodValidityTime = newDetails.validityTime;
-            appData.prodAuthorizedDomains = newDetails.accessallowdomains;
-            appData.prodKey = newDetails.accessToken;
-            appData.prodConsumerKey = newDetails.consumerKey;
-            appData.prodRegenarateOption = newDetails.enableRegenarate;
-            appData.prodConsumerSecret = newDetails.consumerSecret;
-        } else if (environment == 'Sandbox') {
+                appData.prodKeyScope = newDetails.tokenScope;
+                appData.prodValidityTime = newDetails.validityTime;
+                appData.prodAuthorizedDomains = newDetails.accessallowdomains;
+                appData.prodKey = newDetails.accessToken;
+                appData.prodConsumerKey = newDetails.consumerKey;
+                appData.prodRegenarateOption = newDetails.enableRegenarate;
+                appData.prodConsumerSecret = newDetails.consumerSecret;
+            } else if (environment == 'Sandbox') {
 
-            appData.sandKeyScope = newDetails.tokenScope;
-            appData.sandValidityTime = newDetails.validityTime;
-            appData.sandboxAuthorizedDomains = newDetails.accessallowdomains;
-            appData.sandboxKey = newDetails.accessToken;
-            appData.sandboxConsumerKey = newDetails.consumerKey;
-            appData.sandRegenarateOption = newDetails.enableRegenarate;
-            appData.sandboxConsumerSecret = newDetails.consumerSecret;
+                appData.sandKeyScope = newDetails.tokenScope;
+                appData.sandValidityTime = newDetails.validityTime;
+                appData.sandboxAuthorizedDomains = newDetails.accessallowdomains;
+                appData.sandboxKey = newDetails.accessToken;
+                appData.sandboxConsumerKey = newDetails.consumerKey;
+                appData.sandRegenarateOption = newDetails.enableRegenarate;
+                appData.sandboxConsumerSecret = newDetails.consumerSecret;
+            }
+        } else if (action == 'refresh') {
+            if (environment == 'Production') {
+
+                appData.prodKeyScope = newDetails.tokenScope;
+                appData.prodValidityTime = newDetails.validityTime;
+                appData.prodAuthorizedDomains = newDetails.accessallowdomains;
+                appData.prodKey = newDetails.accessToken;
+                appData.prodRegenarateOption = newDetails.enableRegenarate;
+            } else if (environment == 'Sandbox') {
+
+                appData.sandKeyScope = newDetails.tokenScope;
+                appData.sandValidityTime = newDetails.validityTime;
+                appData.sandboxAuthorizedDomains = newDetails.accessallowdomains;
+                appData.sandboxKey = newDetails.accessToken;
+                appData.sandRegenarateOption = newDetails.enableRegenarate;
+            }
         }
         updateAppDetails(appName, appData);
     };
 
+    /*
+     The function update metadata.appsWithSubs for the given application
+     */
     var updateAppDetails = function (appName, newAppData) {
         var apps = metadata.appsWithSubs;
         var app;
@@ -113,10 +149,38 @@ $(function () {
         }
     };
 
+    /*
+     The function delete subscription metadata
+     */
+    var deleteSubscriptionMetadata = function (appName, apiName, apiProvider, apiVersion, action) {
+        var subscriptionDetails = findSubscriptionDetails(appName);
+        if (action == 'deleteSubscription') {
+            return getUpdatedSubscriptionIndex(appName, apiName, apiProvider, apiVersion);
+        }
+    };
+
+    /*
+     The function update metadata.appsWithSubs.subscriptions
+     */
+    var getUpdatedSubscriptionIndex = function (appName, apiName, apiProvider, apiVersion) {
+        var subscriptions = findSubscriptionDetails(appName);
+        var sub;
+        for (var subIndex in subscriptions) {
+            sub = subscriptions[subIndex];
+            if (sub.name == apiName && sub.provider == apiProvider && sub.version == apiVersion) {
+                subscriptions.splice(subIndex, 1);
+                return subIndex;
+            }
+        }
+        return [];
+    };
+
+    /*
+     The function invokes when generating fresh production tokens
+     */
     var attachGenerateProdToken = function () {
         ///We need to prevent the afterRender function from been inherited by child views
         //otherwise this method will be invoked by child views
-        //console.info('Attaching generate button');
         $('#btn-generate-Production-token').on('click', function () {
             var appName = $('#subscription_selection').val();
             var appDetails = findAppDetails(appName);
@@ -128,18 +192,21 @@ $(function () {
             tokenRequestData['validityTime'] = $('#input-Production-validityTime').val();
             $.ajax({
                 type: 'POST',
-                url: getSubscriptionAPI(appName),
+                url: getSubscriptionAPI(appName, 'new'),
                 data: tokenRequestData,
                 success: function (data) {
                     var jsonData = data;
                     APP_STORE.productionKeys = jsonData;
-                    updateMetadata(appName, jsonData, 'Production');
+                    updateMetadata(appName, jsonData, 'Production', 'new');
                     events.publish(EV_GENERATE_PROD_TOKEN, jsonData);
                 }
             });
         });
     };
 
+    /*
+     The function invokes when generating fresh sandbox tokens
+     */
     var attachGenerateSandToken = function () {
 
         $('#btn-generate-Sandbox-token').on('click', function () {
@@ -153,12 +220,12 @@ $(function () {
             tokenRequestData['validityTime'] = $('#input-Sandbox-validityTime').val();
             $.ajax({
                 type: 'POST',
-                url: getSubscriptionAPI(appName),
+                url: getSubscriptionAPI(appName, 'new'),
                 data: tokenRequestData,
                 success: function (data) {
                     var jsonData = data;
                     APP_STORE.sandboxKeys = jsonData;
-                    updateMetadata(appName, jsonData, 'Sandbox');
+                    updateMetadata(appName, jsonData, 'Sandbox', 'new');
                     events.publish(EV_GENERATE_SAND_TOKEN, jsonData);
                 }
             });
@@ -240,7 +307,29 @@ $(function () {
      */
     var attachRegenerateProductionToken = function () {
         $('#btn-refresh-Production-token').on('click', function () {
-            console.info('The user wants to regenerate the Production token');
+            var appName = $('#subscription_selection').val();
+            var appDetails = findAppDetails(appName);
+            var tokenRequestData = {};
+            tokenRequestData.appName = appName;
+            tokenRequestData.keyType = 'Production';
+            tokenRequestData.accessAllowDomains = $('#input-Production-allowedDomains').val() || 'ALL';
+            tokenRequestData.validityTime = $('#input-Production-validityTime').val();
+            tokenRequestData.accessToken = appDetails.prodKey;
+            tokenRequestData.consumerKey = appDetails.prodConsumerKey;
+            tokenRequestData.consumerSecret = appDetails.prodConsumerSecret;
+            $.ajax({
+                type: 'POST',
+                url: getSubscriptionAPI(appName, 'refresh'),
+                data: tokenRequestData,
+                success: function (data) {
+                    data.consumerKey = APP_STORE.productionKeys.consumerKey;
+                    data.consumerSecret = APP_STORE.productionKeys.consumerSecret;
+                    var jsonData = data;
+                    APP_STORE.productionKeys = jsonData;
+                    updateMetadata(appName, jsonData, 'Production', 'refresh');
+                    events.publish(EV_GENERATE_PROD_TOKEN, jsonData);
+                }
+            });
         });
     };
 
@@ -249,10 +338,52 @@ $(function () {
      */
     var attachRegenerateSandboxToken = function () {
         $('#btn-refresh-Sandbox-token').on('click', function () {
-            console.info('The user wants to regenerate the Sandbox token');
+            var appName = $('#subscription_selection').val();
+            var appDetails = findAppDetails(appName);
+            var tokenRequestData = {};
+            tokenRequestData.appName = appName;
+            tokenRequestData.keyType = 'Sandbox';
+            tokenRequestData.accessAllowDomains = $('#input-Sandbox-allowedDomains').val() || 'ALL';
+            tokenRequestData.validityTime = $('#input-Sandbox-validityTime').val();
+            tokenRequestData.accessToken = appDetails.sandboxKey;
+            tokenRequestData.consumerKey = appDetails.sandboxConsumerKey;
+            tokenRequestData.consumerSecret = appDetails.sandboxConsumerSecret;
+            $.ajax({
+                type: 'POST',
+                url: getSubscriptionAPI(appName, 'refresh'),
+                data: tokenRequestData,
+                success: function (data) {
+                    data.consumerKey = APP_STORE.sandboxKeys.consumerKey;
+                    data.consumerSecret = APP_STORE.sandboxKeys.consumerSecret;
+                    var jsonData = data;
+                    APP_STORE.sandboxKeys = jsonData;
+                    updateMetadata(appName, jsonData, 'Sandbox', 'refresh');
+                    events.publish(EV_GENERATE_SAND_TOKEN, jsonData);
+                }
+            });
         });
     };
 
+    removeAPISubscription = function (apiName, apiVersion, apiProvider) {
+        //(apiname, version, provider, user, tier, appId) 
+        var appName = $('#subscription_selection').val();
+        var appDetails = findAppDetails(appName);
+        var deleteAPISubscriptionData = {};
+        deleteAPISubscriptionData.apiName = apiName;
+        deleteAPISubscriptionData.apiVersion = apiVersion;
+        deleteAPISubscriptionData.apiProvider = apiProvider;
+        deleteAPISubscriptionData.appId = appDetails.id;
+        deleteAPISubscriptionData.appTier = appDetails.tier;
+        $.ajax({
+            type: 'POST',
+            url: getSubscriptionAPI(appName, 'deleteSubscription'),
+            data: deleteAPISubscriptionData,
+            success: function () {
+                var index = deleteSubscriptionMetadata(appName, apiName, apiProvider, apiVersion, 'deleteSubscription')
+                events.publish(EV_APP_SELECT, metadata.appsWithSubs[index].subscriptions);
+            }
+        });
+    };
 
     events.register(EV_APP_SELECT);
     events.register(EV_SHOW_KEYS);
@@ -414,7 +545,7 @@ $(function () {
             data.environment = Views.translate('Production');
             data.allowedDomains = Views.translate('ALL');
             data.validityTime = Views.translate('3600');
-            if (data.appName == null) {
+            if ($('#subscription_selection').val() == null) {
                 data.isAppNameAvailable = Views.translate('false');
             }
         },
@@ -438,7 +569,7 @@ $(function () {
             data.environment = Views.translate('Sandbox');
             data.allowedDomains = Views.translate('ALL');
             data.validityTime = Views.translate('3600');
-            if (data.appName == null) {
+            if ($('#subscription_selection').val() == null) {
                 data.isAppNameAvailable = Views.translate('false');
             }
         },
@@ -517,6 +648,10 @@ $(function () {
         return keys;
     };
 
+    /*
+     The function sets the APP_STORE each and every time,
+     when page gets refresh and change the application selected(#subscription_selection)
+     */
     var populateAppStore = function (appName) {
         var details = findAppDetails(appName);
         APP_STORE.appName = appName;
@@ -530,7 +665,9 @@ $(function () {
     populateAppStore(defaultAppName);
     events.publish(EV_APP_SELECT, {appName: defaultAppName});
 
-    //Connect the events
+    /*
+     The function publish the token data when ever user change the selected application(#subscription_selection)
+     */
     $('#subscription_selection').on('change', function () {
         var appName = $('#subscription_selection').val();
         APP_STORE = {};

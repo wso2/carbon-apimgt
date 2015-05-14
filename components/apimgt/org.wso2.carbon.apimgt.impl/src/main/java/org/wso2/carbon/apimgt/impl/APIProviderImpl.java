@@ -2192,11 +2192,12 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             }
             apiMgtDAO.deleteAPI(identifier);
             //if manageAPIs == true
-            if (APIUtil.isAPIManagementEnabled()) {
+ //TODO this is commented out temporaly.
+            /*if (APIUtil.isAPIManagementEnabled()) {
                 Cache contextCache = APIUtil.getAPIContextCache();
                 contextCache.remove(api.getContext());
                 contextCache.put(api.getContext(), false);
-            }
+            } */
             /*remove empty directories*/
             String apiCollectionPath = APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR +
                                        identifier.getProviderName() + RegistryConstants.PATH_SEPARATOR +

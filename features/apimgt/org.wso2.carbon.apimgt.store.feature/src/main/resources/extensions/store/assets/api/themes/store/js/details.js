@@ -41,7 +41,6 @@ $(document).ready(function () {
                 message.type = 'error';
                 message.layout = 'topRight';
                 noty(message);
-
         }
           
         },
@@ -51,5 +50,12 @@ $(document).ready(function () {
 
     }
 );
+$('#application-list').change(
+            function(){
+                if($(this).val() == "createNewApp"){                   
+                    window.location.href =caramel.context+ '/asts/api/my_applications';
+                }
+            }
+            );
 
 });

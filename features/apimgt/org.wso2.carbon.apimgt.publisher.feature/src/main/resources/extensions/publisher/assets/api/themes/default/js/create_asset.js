@@ -87,7 +87,22 @@ $(document).ready(function(){
                                                                                         //jagg.message({content:responseText.message,type:"error"});
                                                                                     }
                                                                                 }
-                                                                            }, dataType: 'json'
+                                                                            }, 
+                                                                            error: function (data) {
+                                                                            BootstrapDialog.show({
+                                                                            type: BootstrapDialog.TYPE_DANGER,
+                                                                            title: 'Error',
+                                                                            message: 'Error while changing the life cycle state.',
+                                                                            buttons: [{
+                                                                            label: 'OK',
+                                                                            action: function(dialogRef){
+                                                                            dialogRef.close();
+                                                                            }
+                                                                            }]             
+                                                                            });  
+                                                                            },
+
+                                                                            dataType: 'json'
                                                                         });
                                                  }
                                              });
@@ -97,7 +112,11 @@ $(document).ready(function(){
         //TODO
         $("body").unbind("api_saved");
         $("body").on("api_saved" , function(e){
+        if(store.publisher.api.id!=""){
         location.href = caramel.context + "/asts/api/implement/"+store.publisher.api.id;
+        }else{
+        location.href = caramel.context + "/asts/api/implement/"+designer.saved_api.id;
+        }
         });
         $("#form-asset-create").submit();
     });
