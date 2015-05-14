@@ -51,7 +51,7 @@ $(document).ready(function(){
                                                           if(result) {
                                                           var designer = new APIMangerAPI.APIDesigner();
                                                           designer.add_default_resource();
-                                                          $("#design_form").submit();
+                                                          $("#form-asset-create").submit();
                                                           }
                                                           });
                                                          return false;
