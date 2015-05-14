@@ -36,30 +36,16 @@ public class APIAuthenticationService extends AbstractServiceBusAdmin {
 
     public void invalidateKeys(APIKeyMapping[] mappings) {
 
-        Cache cache = Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER).getCache(APIConstants.KEY_CACHE_NAME);
+        //Previously we were clearing API key manager side cache. But actually this service deployed at gateway side.
+        //Hence we will get cache from gateway cache
+        Cache gatewayCache =  Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER).getCache(APIConstants.GATEWAY_KEY_CACHE_NAME);
         for (APIKeyMapping mapping : mappings) {
             //According to new cache design we will use cache key to clear cache if its available in mapping
             //Later we construct key using attributes. Now cache key will pass as key
             String cacheKey = mapping.getKey();
             if(cacheKey!=null){
-                cache.remove(cacheKey);
+                gatewayCache.remove(cacheKey);
             }
-            //If cache key not present we will construct cache key
-            /*else{
-            cacheKey = mapping.getKey() + ":" + mapping.getContext() + ":" + mapping.getApiVersion();
-            if(cache.containsKey(cacheKey)){
-                cache.remove(cacheKey);
-            }
-            } */
-            //TODO Review and fix
-           /* Set keys = cache.keySet();
-            for (Object cKey : keys) {
-                String key = cKey.toString();
-                if (key.contains(cacheKey)) {
-                    cache.remove(key);
-
-                }
-            }*/
         }
     }
 
