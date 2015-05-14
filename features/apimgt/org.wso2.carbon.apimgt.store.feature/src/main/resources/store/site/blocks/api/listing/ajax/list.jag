@@ -90,8 +90,9 @@ include("/jagg/jagg.jag");
               tenant = jagg.getTenantDomain();
               var start=request.getParameter("start");
               var end=request.getParameter("end");
+              var returnAPITags = request.getParameter("returnAPITags");
               mod = jagg.module("api");
-              result = mod.getAllPaginatedPublishedAPIs(tenant,start,end);
+              result = mod.getAllPaginatedPublishedAPIs(tenant, start, end, returnAPITags);
 
               if (result.error) {
                   obj = {
