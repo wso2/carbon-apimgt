@@ -2298,6 +2298,32 @@ public final class APIUtil {
             throw new APIManagementException("Error while reading External Stores configuration file content", e);
         }
     }
+    
+    public static void loadTenantAPILifecycle(int tenantID)throws APIManagementException {
+        try {
+            UserRegistry govRegistry = getSystemConfigRegistry(tenantID);
+
+            if (govRegistry.resourceExists(APIConstants.API_LIFE_CYCLE_LOCATION)) {
+                log.debug("External Stores configuration already uploaded to the registry");
+                return;
+            }
+            if (log.isDebugEnabled()) {
+                log.debug("Adding External Stores configuration to the tenant's registry");
+            }
+            String relativePath = "/lifecycle/APILifeCycle.xml";
+            Resource resource = govRegistry.newResource();
+            resource.setContent(getResourceData(relativePath));
+            resource.setMediaType(APIConstants.XML_MEDIA_TYPE);
+            govRegistry.put(APIConstants.API_LIFE_CYCLE_LOCATION, resource);
+
+        } catch (RegistryException e) {
+            throw new APIManagementException("Error while saving External Stores configuration information to the registry", e);
+        } catch (IOException e) {
+            throw new APIManagementException("Error while reading External Stores configuration file content", e);
+        }
+    }
+    
+    
 
     /**
      *
@@ -4554,5 +4580,17 @@ public final class APIUtil {
 			return null;
 		}
 	}
+	
+	public static UserRegistry getSystemConfigRegistry(int tenantID) throws RegistryException{
+   	 RegistryService registryService = ServiceReferenceHolder.getInstance().getRegistryService();
+        UserRegistry govRegistry = registryService.getConfigSystemRegistry(tenantID);
+        return govRegistry;
+   }
+   
+   private static byte[] getResourceData(final String relativePath) throws IOException{
+   	InputStream inputStream = APIManagerComponent.class.getResourceAsStream(relativePath);
+       byte[] data = IOUtils.toByteArray(inputStream);
+       return data;
+   }
 
 }

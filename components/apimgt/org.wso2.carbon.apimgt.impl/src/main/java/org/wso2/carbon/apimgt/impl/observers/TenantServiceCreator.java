@@ -172,6 +172,12 @@ public class TenantServiceCreator extends AbstractAxis2ConfigurationContextObser
         }
         
         try {
+        	APIUtil.loadTenantAPILifecycle(tenantId);
+        } catch(Exception e) {
+            log.error("Failed to load APILifecycle.xml to tenant " + tenantDomain + "'s registry");
+        }
+        
+        try {
         	 //load self signup configurations to the registry            
             APIUtil.loadTenantSelfSignUpConfigurations(tenantId);
         } catch(Exception e) {
