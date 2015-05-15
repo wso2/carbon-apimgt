@@ -7,7 +7,7 @@
         {"value": "Application User", "text": "{{t "Application User"}}"},
         {"value": "Application & Application User", "text": "{{t "Application & Application User"}}"}
     ];
-    
+
     var DEFAULT_AUTH = "Application & Application User";
     var OPTION_DEFAULT_AUTH = "None";
     var insequence = "{{api.inSequence}}";
@@ -137,15 +137,15 @@
         <div class="form-group">
             <label class="custom-form-label col-lg-2 col-md-2 col-sm-12 col-xs-12" for="imageUrl">{{t "Thumbnail"}}</label>
             <div class="custom-form-right col-lg-5 col-md-8 col-sm-9 col-xs-10">
-                    {{#unless thumb}}
-                        <div class="col-lg-2 col-md-4 col-sm-6 col-xs-6">
-                            <img id="apiEditThumb" alt="" src="{{url "/extensions/assets/api/themes/default/imgs/api-default.png"}}"/>
-                        </div>
+                    {{#if api.thumb}}
+	                    <div class="col-lg-2 col-md-4 col-sm-6 col-xs-6">
+		                    <img src='{{url ""}}/storage/{{assets.type}}/{{id}}/{{api.thumb}}' alt="" id="apiEditThumb"/>
+	                    </div>
                     {{else}}
-                        <div class="col-lg-2 col-md-4 col-sm-6 col-xs-6">
-                            <img id="apiEditThumb" alt="" src="<%=jagg.getRegistryPath(api.thumb)%>"/>
-                        </div>
-                    {{/unless}}
+	                    <div class="col-lg-2 col-md-4 col-sm-6 col-xs-6">
+		                    <img id="apiEditThumb" alt="" src="{{url "/extensions/assets/api/themes/default/imgs/api-default.png"}}"/>
+	                    </div>
+                    {{/if}}
                 <div class="col-lg-10 col-md-8 col-sm-6 col-xs-6">
                     <a onclick="javascript:$('#imageUrl').toggle('slow')" class="btn btn-primary">
                         <i class="icon-picture"></i> {{t "Change Icon"}}
@@ -158,7 +158,7 @@
             <label class="custom-form-label col-lg-2 col-md-2 col-sm-12 col-xs-12" for=""></label>
             <div id="imageUrl" style="display:none;">
                 <div class="custom-form-right col-lg-5 col-md-8 col-sm-9 col-xs-10" id="apiThumb-container">
-                    <input type="file" class="form-control validateImageFile" name="apiThumb" />
+                    <input type="file" class="form-control validateImageFile" name="overview_thumbnail" id="overview_thumbnail" />
                 </div>
                 <div class="custom-form-right col-lg-1 col-md-4 col-sm-3 col-xs-2">
                     <input class="btn btn-default" type="button" id="clearThumb" value="{{t "clear"}}"/>

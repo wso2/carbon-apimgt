@@ -26,8 +26,8 @@ asset.manager = function(ctx) {
         var allowedImageUploads = ["png","gif","jpg","jpeg"]; //default allowed image extentions.
         var skipImageMimeCheck = false;
 
-        // put a config option to site.json
-        var site = require("/site/conf/site.json");
+        // put a config option to config.json
+        var site = require('/extensions/assets/api/config/config.json');
         if(site.allowedImageUploads){
             allowedImageUploads = site.allowedImageUploads;
         }
@@ -100,16 +100,16 @@ asset.manager = function(ctx) {
             api.thumbnailContent = request.getFile("overview_thumbnail");
             api.thumbnailUrl = null;
 
-            //validate uploaded image
-            if(api.thumbnailContent != null && !isValiedImage(api.thumbnailContent)){
-            obj = {
-               error:true,
-               message:"Please upload a valid image file for the API icon."
-            };
-            print(obj);
-            return;
-            } else {
-                api.thumbnailUrl = 'overview_thumbnail';
+            //validate uploaded image and set API has a image if content is valid
+            if(api.thumbnailContent != null && isValiedImage(api.thumbnailContent)){
+               api.thumbnailUrl = 'overview_thumbnail';
+            } else if(api.thumbnailContent != null && !isValiedImage(api.thumbnailContent)){
+                obj = {
+                    error:true,
+                    message:"Please upload a valid image file for the API icon."
+                };
+                print(obj);
+                return;
             }
 
             //If API not exist create
