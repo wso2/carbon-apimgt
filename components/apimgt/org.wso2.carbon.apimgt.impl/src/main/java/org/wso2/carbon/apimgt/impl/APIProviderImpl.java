@@ -3073,6 +3073,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         String techOwnerEmail = (String) apiObj.get("techOwnerEmail");
         String bizOwner = (String) apiObj.get("bizOwner");
         String bizOwnerEmail = (String) apiObj.get("bizOwnerEmail");
+        String thumbnailUrl = (String) apiObj.get("thumbnailUrl");
 
         String context = contextVal.startsWith("/") ? contextVal : ("/" + contextVal);
         String providerDomain = MultitenantUtils.getTenantDomain(provider);
@@ -3141,6 +3142,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         api.setVisibility(visibility);
         api.setVisibleRoles(visibleRoles != null ? visibleRoles.trim() : null);
         api.setLastUpdated(new Date());
+	    api.setThumbnailUrl(thumbnailUrl != null ? thumbnailUrl : null);
         Map<String,String> results=new HashMap<String, String>();
         results=saveAPI(api, false);
         return results.get("failedGateways");
