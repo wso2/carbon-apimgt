@@ -129,7 +129,7 @@ public final class APIConstants {
     
     public static final String WORKFLOW_MEDIA_TYPE = "workflow-config";
     
-    public static final String API_LIFE_CYCLE_LOCATION = GOVERNANCE_COMPONENT_REGISTRY_LOCATION + "/lifecycles/APILifeCycle.xml";
+    public static final String API_LIFE_CYCLE_LOCATION = GOVERNANCE_COMPONENT_REGISTRY_LOCATION + "/lifecycles/APILifeCycle";
     
     public static final String XML_MEDIA_TYPE = "application/xml";
     
