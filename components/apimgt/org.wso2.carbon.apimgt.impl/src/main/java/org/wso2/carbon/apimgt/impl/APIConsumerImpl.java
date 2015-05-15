@@ -70,6 +70,7 @@ import org.wso2.carbon.governance.api.common.dataobjects.GovernanceArtifact;
 import org.wso2.carbon.governance.api.exception.GovernanceException;
 import org.wso2.carbon.governance.api.generic.GenericArtifactManager;
 import org.wso2.carbon.governance.api.generic.dataobjects.GenericArtifact;
+import org.wso2.carbon.governance.api.util.GovernanceUtils;
 import org.wso2.carbon.registry.core.ActionConstants;
 import org.wso2.carbon.registry.core.Association;
 import org.wso2.carbon.registry.core.Collection;
@@ -466,7 +467,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
      */
     @Override
 	public Map<String, Object> getAllPaginatedAPIsByStatus(String tenantDomain,
-			int start, int end, final String apiStatus) throws APIManagementException {
+			int start, int end, final String apiStatus, boolean returnAPItags) throws APIManagementException {
     	Boolean displayAPIsWithMultipleStatus = APIUtil.isAllowDisplayAPIsWithMultipleStatus();
     	Map<String, List<String>> listMap = new HashMap<String, List<String>>();
         //Check the api-manager.xml config file entry <DisplayAllAPIs> value is false
@@ -528,7 +529,17 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                     String status = artifact.getAttribute(APIConstants.API_OVERVIEW_STATUS);
 
                     API api  = APIUtil.getAPI(artifact);
-
+                    
+                    if (returnAPItags) {
+                        String artifactPath = GovernanceUtils.getArtifactPath(registry, artifact.getId());
+                        Set<String> tags = new HashSet<String>();
+                        org.wso2.carbon.registry.core.Tag[] tag = registry.getTags(artifactPath);
+                        for (org.wso2.carbon.registry.core.Tag tag1 : tag) {
+                            tags.add(tag1.getTagName());
+                        }
+                        api.addTags(tags);
+                    }
+                    
                     if (api != null) {
                         String key;
                         //Check the configuration to allow showing multiple versions of an API true/false

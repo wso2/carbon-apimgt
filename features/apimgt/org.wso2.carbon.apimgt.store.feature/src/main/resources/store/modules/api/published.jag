@@ -22,13 +22,13 @@ var getAllPublishedAPIs = function (tenantDomain) {
         };
     }
 };
-var getAllPaginatedPublishedAPIs = function (tenantDomain,start,end) {
+var getAllPaginatedPublishedAPIs = function (tenantDomain, start, end, returnAPITags) {
     var list, i, length, api, result,
             log = new Log(),
             store = jagg.module("manager").getAPIStoreObj();
 
     try {
-        result = store.getAllPaginatedPublishedAPIs(tenantDomain,String(start),String(end));
+        result = store.getAllPaginatedPublishedAPIs(tenantDomain,String(start),String(end), returnAPITags);
         if (log.isDebugEnabled()) {
             log.debug("getAllPublishedAPIs : " + stringify(result.apis));
         }

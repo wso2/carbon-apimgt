@@ -535,6 +535,19 @@ public final class APIUtil {
             }
             api.setCacheTimeout(cacheTimeout);
 
+            Set<Tier> availableTier = new HashSet<Tier>();
+            String tiers = artifact.getAttribute(APIConstants.API_OVERVIEW_TIER);
+            if (tiers != null) {
+                String[] tierNames = tiers.split("\\|\\|");
+                for (String tierName : tierNames) {
+                    Tier tier = new Tier(tierName);
+                    availableTier.add(tier);
+
+                }
+
+                api.addAvailableTiers(availableTier);
+            }
+
             api.setRedirectURL(artifact.getAttribute(APIConstants.API_OVERVIEW_REDIRECT_URL));
             api.setApiOwner(artifact.getAttribute(APIConstants.API_OVERVIEW_OWNER));
             api.setAdvertiseOnly(Boolean.parseBoolean(artifact.getAttribute(APIConstants.API_OVERVIEW_ADVERTISE_ONLY)));
