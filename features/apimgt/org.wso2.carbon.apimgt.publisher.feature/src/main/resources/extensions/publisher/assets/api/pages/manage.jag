@@ -46,8 +46,9 @@ require('/modules/publisher.js').exec(function(ctx) {
 		ctx.response.sendError(404,'Asset was not found');
 		return;
 	}
+	
 	var apiPublisher =  require('apipublisher').apipublisher;
-	var apiProxy = apiPublisher.instance(ctx.username);
+	var apiProxy = apiPublisher.instance(user.username);
 	var api = apiProxy.getAPI(asset.attributes.overview_provider, asset.attributes.overview_name, asset.version).api;
 	//Formatting string types
 	if(api.isDefaultVersion == "true") {
@@ -127,9 +128,9 @@ require('/modules/publisher.js').exec(function(ctx) {
 	}
 
 	if(!api.subscribersCount || api.subscribersCount==0){
-	api.subs=false;
+		api.subs=false;
 	}else{
-	api.subs=true;
+		api.subs=true;
 	}
 	if(api.visibility == 'public') {
 		api.publicVisibility = true;
@@ -167,13 +168,19 @@ require('/modules/publisher.js').exec(function(ctx) {
 		filteredTiers.push(tier);
 	}
 
-	//output.apiConstants = apiConstants;
-	//output.apiConfig = apiConfig;
-
 	output.api.configuredTiers = configuredTiers;
 	output.api.filteredTiers = filteredTiers;
-	//TODO remove this
-	output.api.isPermitted = true;
+
+	output.api.isPermitted = apiProxy.hasPublishPermission().permitted;
+
+	//Check configurations specific properties
+	var config = require('/extensions/assets/api/config/config.json');
+	output.config = config;
+
+	//Set language specific helper messages and names
+	var locale = require('/extensions/assets/api/locale/locale_en.json');
+	output.locale = locale;
+
 	caramel.render(output);
 }, request, response, session);
 %>

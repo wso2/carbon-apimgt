@@ -21,6 +21,40 @@ asset.manager = function(ctx) {
     var LOGGED_IN_USER = 'LOGGED_IN_USER';
     var log = new Log('default-asset');
 
+    //TODO Move to common module
+    var isValiedImage = function(image){
+        var allowedImageUploads = ["png","gif","jpg","jpeg"]; //default allowed image extentions.
+        var skipImageMimeCheck = false;
+
+        // put a config option to site.json
+        var site = require("/site/conf/site.json");
+        if(site.allowedImageUploads){
+            allowedImageUploads = site.allowedImageUploads;
+        }
+        if(site.skipImageMimeCheck){
+            skipImageMimeCheck = site.skipImageMimeCheck;
+        }
+
+        var name = image.getName();
+        var extention = name.match( /\.[0-9a-z]{1,5}$/im )[0];
+        extention = extention.replace(".","");
+
+
+        if(allowedImageUploads.indexOf(extention) == -1){
+            return false;
+        }
+
+        var contentType = image.getContentType();
+        // following check was put in bcos if the mimetype was refered by the backend.
+        if(!skipImageMimeCheck && !contentType.match(/^image/i)){
+            return false;
+        }
+
+        // @todo magic number validation.
+        // @todo validate with image manipulation. this would be the ultimate solution.
+
+        return true;
+    };
 
     var generate_swagger_object=function(swagger){
     swaggerObj = {
@@ -61,25 +95,31 @@ asset.manager = function(ctx) {
             }
             api.context = options.attributes.overview_context;
 
-           //  api.imageUrl = request.getFile("apiThumb");
+            //TODO now we no need to save Icon through API manager as asset API does it for us
+            //Need to properly cope with that changed
+            api.thumbnailContent = request.getFile("overview_thumbnail");
+            api.thumbnailUrl = null;
 
             //validate uploaded image
-           /* if(api.imageUrl != null &&!jagg.isValiedImage(apiData.imageUrl)){
-                obj = {
-                    error:true,
-                    message:"Please upload a valid image file for the API icon."
-                };
-                print(obj);
-                return;
-            }*/
+            if(api.thumbnailContent != null && !isValiedImage(api.thumbnailContent)){
+            obj = {
+               error:true,
+               message:"Please upload a valid image file for the API icon."
+            };
+            print(obj);
+            return;
+            } else {
+                api.thumbnailUrl = 'overview_thumbnail';
+            }
+
             //If API not exist create
             var apiProxy = apiPublisher.instance(ctx.username);
-            result=apiProxy.checkIfAPIExists(api.provider,api.name,api.version);            
-            
+            result=apiProxy.checkIfAPIExists(api.provider,api.name,api.version);
+
             if(!result){
-                result = apiProxy.designAPI(api);               
+                result = apiProxy.designAPI(api);
                 if (result!=null && result.error) {
-                    throw "Error while creating the API.";                    
+                    throw "Error while creating the API.";
                 }
                 else{
                 options.id=result;
@@ -95,7 +135,7 @@ asset.manager = function(ctx) {
             api.swagger = generate_swagger_object(options.attributes.swagger);
             result = apiProxy.updateDesignAPI(api);
             if (result!=null && result.error) {
-            throw "Error while updating the API.";                    
+            throw "Error while updating the API.";
             }
             }
 
@@ -211,8 +251,8 @@ asset.manager = function(ctx) {
                 apiData.cacheTimeout= options.attributes.cacheTimeout;
                 apiData.destinationStats= options.attributes.destinationStatsEnabled;
                 apiData.environments = options.attributes.environments;
-                var apiProxy = apiPublisher.instance(ctx.username);                
-                result = apiProxy.manageAPI(apiData);                
+                var apiProxy = apiPublisher.instance(ctx.username);
+                result = apiProxy.manageAPI(apiData);
                 if (result != null && result.error) {
                     log.error(result.message);
                     throw "Error while updating the API."
@@ -285,11 +325,14 @@ asset.configure = function (ctx) {
     return {
         table: {
             overview: {
-                thumbnail: {
-                    type: 'file'
+                fields: {
+                    thumbnail: {
+                        type: 'file'
+                    }
                 }
             }
         },
+
         meta: {
             lifecycle: {
                 name: 'APILifeCycle',
