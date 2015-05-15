@@ -553,7 +553,7 @@ var apipublisher = {};
         }
     };
 
-    var hasPublishPermission = function () {
+    APIProviderProxy.prototype.hasPublishPermission = function () {
         var success, log = new Log();
         try {
             success = this.impl.hasPublishPermission();
