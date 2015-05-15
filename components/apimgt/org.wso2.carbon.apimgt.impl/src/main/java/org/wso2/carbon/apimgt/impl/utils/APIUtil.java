@@ -537,14 +537,16 @@ public final class APIUtil {
 
             Set<Tier> availableTier = new HashSet<Tier>();
             String tiers = artifact.getAttribute(APIConstants.API_OVERVIEW_TIER);
-            String[] tierNames = tiers.split("\\|\\|");
-            for (String tierName : tierNames) {
-                Tier tier = new Tier(tierName);
-                availableTier.add(tier);
+            if (tiers != null) {
+                String[] tierNames = tiers.split("\\|\\|");
+                for (String tierName : tierNames) {
+                    Tier tier = new Tier(tierName);
+                    availableTier.add(tier);
 
+                }
+
+                api.addAvailableTiers(availableTier);
             }
-
-            api.addAvailableTiers(availableTier);
 
             api.setRedirectURL(artifact.getAttribute(APIConstants.API_OVERVIEW_REDIRECT_URL));
             api.setApiOwner(artifact.getAttribute(APIConstants.API_OVERVIEW_OWNER));
