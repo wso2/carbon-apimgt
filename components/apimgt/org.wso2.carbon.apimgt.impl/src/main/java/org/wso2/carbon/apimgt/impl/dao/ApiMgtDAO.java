@@ -4243,6 +4243,7 @@ public class ApiMgtDAO {
                               "   AND API.API_PROVIDER = ? " +
                               "   AND API.API_ID = SUBS.API_ID " +
                               "   AND SUBS.SUBS_CREATE_STATE = '" + APIConstants.SubscriptionCreatedStatus.SUBSCRIBE + "'" +
+                              "   AND SUBS.SUB_STATUS != '" + APIConstants.SubscriptionStatus.REJECTED + "'" +
                               "ORDER BY " +
                               "   APP.NAME";
 
