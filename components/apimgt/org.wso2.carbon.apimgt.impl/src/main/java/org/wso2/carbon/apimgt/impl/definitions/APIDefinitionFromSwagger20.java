@@ -341,18 +341,21 @@ public class APIDefinitionFromSwagger20 extends APIDefinition {
         JSONObject securityDefinitionObject = new JSONObject();
         JSONObject scopesObject = new JSONObject();
 
-        JSONObject xWso2ScopesObject = new JSONObject();
+        JSONArray xWso2ScopesArray = new JSONArray();
+        JSONObject xWso2ScopesObject;
         if (scopes != null) {
             for (Scope scope : scopes) {
+                xWso2ScopesObject = new JSONObject();
                 xWso2ScopesObject.put("key", scope.getKey());
                 xWso2ScopesObject.put("name", scope.getName());
                 xWso2ScopesObject.put("roles", scope.getRoles());
                 xWso2ScopesObject.put("description", scope.getDescription());
 
+                xWso2ScopesArray.add(xWso2ScopesObject);
             }
         }
 
-        scopesObject.put("x-wso2-scopes", xWso2ScopesObject);
+        scopesObject.put("x-wso2-scopes", xWso2ScopesArray);
         securityDefinitionObject.put("apim", scopesObject);
 
         swaggerObject.put("securityDefinitions", securityDefinitionObject);
