@@ -1,13 +1,24 @@
 <legend>{{t "Production and Sandbox URLs"}}:</legend>
 <forum class='form-horizontal'>
-    <div class='control-group'>
+ {{if assets.isDefaultVersion}}
+ <div class='control-group'>
         <input class='input-xxlarge' type='text' disabled
-               value="{{assets.httpEndpoint}}/{{assets.attributes.overview_name}}/{{assets.attributes.overview_version}}"/>
+               value="{{assets.httpEndpoint}}{{assets.attributes.overview_context}}"/>
     </div>
     <div class='control-group'>
         <input class='input-xxlarge' type='text' disabled
-               value="{{assets.httpsEndpoint}}/{{assets.attributes.overview_name}}/{{assets.attributes.overview_version}}"/>
+               value="{{assets.httpsEndpoint}}{{assets.attributes.overview_context}}"/>
     </div>
+{{else}}
+    <div class='control-group'>
+        <input class='input-xxlarge' type='text' disabled
+               value="{{assets.httpEndpoint}}{{assets.attributes.overview_context}}/{{assets.attributes.overview_version}}"/>
+    </div>
+    <div class='control-group'>
+        <input class='input-xxlarge' type='text' disabled
+               value="{{assets.httpsEndpoint}}{{assets.attributes.overview_context}}/{{assets.attributes.overview_version}}"/>
+    </div>
+{{/if}}
 </forum>
 <legend>{{t "Share"}}:</legend>
 <div class='tabbable'>
