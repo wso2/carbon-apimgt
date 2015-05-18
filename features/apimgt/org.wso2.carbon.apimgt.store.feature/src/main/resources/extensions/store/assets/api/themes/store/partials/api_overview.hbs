@@ -1,6 +1,6 @@
 <legend>{{t "Production and Sandbox URLs"}}:</legend>
 <forum class='form-horizontal'>
- {{if assets.isDefaultVersion}}
+ {{#if assets.isDefaultVersion}}
  <div class='control-group'>
         <input class='input-xxlarge' type='text' disabled
                value="{{assets.httpEndpoint}}{{assets.attributes.overview_context}}"/>
