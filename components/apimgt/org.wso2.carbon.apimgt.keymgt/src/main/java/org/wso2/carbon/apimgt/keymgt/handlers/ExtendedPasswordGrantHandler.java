@@ -166,8 +166,7 @@ public class ExtendedPasswordGrantHandler extends PasswordGrantHandler {
 
     @Override
     public boolean validateScope(OAuthTokenReqMessageContext tokReqMsgCtx){
-        ScopesIssuer scopesIssuer = new ScopesIssuer();
-        return scopesIssuer.setScopes(tokReqMsgCtx);
+        return ScopesIssuer.getInstance().setScopes(tokReqMsgCtx);
     }
 
     /**
