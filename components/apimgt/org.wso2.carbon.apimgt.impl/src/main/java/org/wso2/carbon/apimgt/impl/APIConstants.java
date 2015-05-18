@@ -264,6 +264,7 @@ public final class APIConstants {
     public static final String CREATED = "CREATED";
     public static final String DEPRECATED = "DEPRECATED";
     public static final String PROTOTYPED = "PROTOTYPED";
+    public static final String VERB_INFO_DTO = "VERB_INFO";
 
 
     public static class TokenStatus {
