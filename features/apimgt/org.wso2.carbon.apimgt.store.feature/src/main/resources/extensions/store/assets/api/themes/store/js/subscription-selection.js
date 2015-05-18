@@ -668,7 +668,7 @@ $(function () {
         APP_STORE.appDetails = details;
         APP_STORE.productionKeys = findProdKeys(details);
         APP_STORE.sandboxKeys = findSandKeys(details);
-        //APP_STORE.showKeys = false;
+        APP_STORE.showKeys = true;
     };
 
     var defaultAppName = $('#subscription_selection').val();
