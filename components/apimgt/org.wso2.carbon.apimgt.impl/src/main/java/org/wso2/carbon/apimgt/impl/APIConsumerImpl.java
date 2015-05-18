@@ -1690,7 +1690,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             }
 
             if (APIUtil.isAPIGatewayKeyCacheEnabled()) {
-                invalidateCachedKeys(applicationId, identifier);
+                invalidateCachedKeys(applicationId);
             }
             if (log.isDebugEnabled()) {
                 String logMessage = "API Name: " + identifier.getApiName() + ", API Version "+identifier.getVersion()+" subscribe by " + userId + " for app "+ apiMgtDAO.getApplicationNameFromId(applicationId);
@@ -1708,7 +1708,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             throws APIManagementException {
         apiMgtDAO.removeSubscription(identifier, applicationId);
         if (APIUtil.isAPIGatewayKeyCacheEnabled()) {
-            invalidateCachedKeys(applicationId, identifier);
+            invalidateCachedKeys(applicationId);
         }
         if(log.isDebugEnabled()){
             String appName = apiMgtDAO.getApplicationNameFromId(applicationId);
@@ -1719,52 +1719,31 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     /**
      *
      * @param applicationId Application ID related cache keys to be cleared
-     * @param identifier API identifier of changed/unsubscribed API
      * @throws APIManagementException
      */
-    private void invalidateCachedKeys(int applicationId, APIIdentifier identifier) throws APIManagementException {
+    private void invalidateCachedKeys(int applicationId) throws APIManagementException {
         APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
                 getAPIManagerConfigurationService().getAPIManagerConfiguration();
         if (config.getApiGatewayEnvironments().size() <= 0) {
             return;
         }
 
-        Set<String> keys = apiMgtDAO.getApplicationKeys(applicationId);
-        if (keys.size() > 0) {
-            List<APIKeyMapping> mappings = new ArrayList<APIKeyMapping>();
-            API api = getAPI(identifier);
-            for (String key : keys) {
-                APIKeyMapping mapping = new APIKeyMapping();
-                //So far cache key created using API token+context+version combination, but now we generate complete key from
-                //cache key invalidate logic and pass to APIAuthenticationService.
-                URITemplate uriTemplate;
-                Iterator<URITemplate> itr = api.getUriTemplates().iterator();
-                //Iterate through URI templates for given API
-                while (itr.hasNext()) {
-                    uriTemplate = itr.next();
-                    //Create cache keys for all possible combinations of uri templates
-                    String cacheKey = key + ":" + api.getContext() + "/" + identifier.getVersion()
-                            + uriTemplate.getUriTemplate() + ":"
-                            + uriTemplate.getHTTPVerb() + ":"
-                            + uriTemplate.getAuthType();
-                    mapping.setKey(cacheKey);
-                    mappings.add(mapping);
-                }
-            }
+        Set<String> activeTokens = apiMgtDAO.getActiveTokensOfApplication(applicationId);
+        if(activeTokens == null || activeTokens.isEmpty()){
+            return;
+        }
 
-            try {
-                Map<String, Environment> gatewayEnvs = config.getApiGatewayEnvironments();
-                for (Environment environment : gatewayEnvs.values()) {
-                    APIAuthenticationAdminClient client = new APIAuthenticationAdminClient(environment);
-                    client.invalidateKeys(mappings);
-                }
-            } catch (AxisFault axisFault) {
-                log.warn("Error while invalidating API keys at the gateway", axisFault);
+        Map<String, Environment> gatewayEnvs = config.getApiGatewayEnvironments();
+        try {
+            for (Environment environment : gatewayEnvs.values()) {
+                APIAuthenticationAdminClient client = new APIAuthenticationAdminClient(environment);
+                client.invalidateCachedTokens(activeTokens);
             }
+        } catch (AxisFault axisFault) {
+            //log and ignore since we do not have to halt the user operation due to cache invalidation failures.
+            log.error("Error occurred while invalidating the Gateway Token Cache ", axisFault);
         }
     }
-
-
 
     public void removeSubscriber(APIIdentifier identifier, String userId)
             throws APIManagementException {
@@ -1855,58 +1834,19 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     }
 
 
-
+    /**
+     * Function to remove an Application from the API Store
+     * @param application - The Application Object that represents the Application
+     * @throws APIManagementException
+     */
     public void removeApplication(Application application) throws APIManagementException {
         APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
                 getAPIManagerConfigurationService().getAPIManagerConfiguration();
-        boolean gatewayExists = config.getApiGatewayEnvironments().size() > 0;
-        Set<SubscribedAPI> apiSet = null;
-        Set<String> keys = null;
-        if (gatewayExists) {
-            keys = apiMgtDAO.getApplicationKeys(application.getId());
-            apiSet = getSubscribedAPIs(application.getSubscriber());
-        }
+
+        //Remove from cache first since we won't be able to find active access tokens once the application is removed.
+        invalidateCachedKeys(application.getId());
+
         apiMgtDAO.deleteApplication(application);
-
-        if (gatewayExists && apiSet != null && keys != null) {
-            Set<SubscribedAPI> removables = new HashSet<SubscribedAPI>();
-            for (SubscribedAPI api : apiSet) {
-                if (!api.getApplication().getName().equals(application.getName())) {
-                    removables.add(api);
-                }
-            }
-
-            for (SubscribedAPI api : removables) {
-                apiSet.remove(api);
-            }
-
-            List<APIKeyMapping> mappings = new ArrayList<APIKeyMapping>();
-            for (String key : keys) {
-                for (SubscribedAPI api : apiSet) {
-                    APIKeyMapping mapping = new APIKeyMapping();
-                    API apiDefinition = getAPI(api.getApiId());
-                    mapping.setApiVersion(api.getApiId().getVersion());
-                    mapping.setContext(apiDefinition.getContext());
-                    mapping.setKey(key);
-                    mappings.add(mapping);
-                }
-            }
-
-            if (mappings.size() > 0) {
-                try {
-                    Map<String, Environment> gatewayEnvs = config.getApiGatewayEnvironments();
-                    for (Environment environment : gatewayEnvs.values()) {
-                        APIAuthenticationAdminClient client =
-                                new APIAuthenticationAdminClient(environment);
-                        client.invalidateKeys(mappings);
-                    }
-                } catch (AxisFault axisFault) {
-                    // Just logging the error is enough - We have already deleted the application
-                    // which is what's important
-                    log.warn("Error while invalidating API keys at the gateway", axisFault);
-                }
-            }
-        }
     }
 
     /**

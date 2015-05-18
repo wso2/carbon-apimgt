@@ -516,6 +516,7 @@ public final class APIConstants {
     public static final String API_CONTEXT_CACHE_MANAGER = "API_CONTEXT_CACHE_MANAGER";
     public static final String RESOURCE_CACHE_NAME = "resourceCache";
     public static final String GATEWAY_KEY_CACHE_NAME = "gatewayKeyCache";
+    public static final String GATEWAY_TOKEN_CACHE_NAME = "GATEWAY_TOKEN_CACHE";
     public static final String KEY_CACHE_NAME = "keyCache";
     public static final String JWT_CACHE_NAME = "jwtCache";
     public static final String API_CONTEXT_CACHE = "apiContextCache";

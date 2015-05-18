@@ -18,6 +18,9 @@ package org.wso2.carbon.apimgt.gateway.handlers.security.service;
 
 
 
+import edu.emory.mathcs.backport.java.util.Arrays;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
@@ -29,10 +32,12 @@ import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 import javax.cache.Cache;
 import javax.cache.Caching;
 
-import java.util.Iterator;
-import java.util.Set;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class APIAuthenticationService extends AbstractServiceBusAdmin {
+
+    private static final Log log = LogFactory.getLog(APIAuthenticationService.class);
 
     public void invalidateKeys(APIKeyMapping[] mappings) {
 
@@ -169,5 +174,108 @@ public class APIAuthenticationService extends AbstractServiceBusAdmin {
             }
 
         } */
+    }
+
+    /**
+     * Invalidate the cached access tokens from the API Gateway. This method is supposed to be used when you have to
+     * remove a bulk of access tokens from the cache. For example, a removal of a subscription would require the
+     * application's active access tokens to be removed from the cache. These access tokens can reside in different
+     * tenant caches since the subscription owning tenant and API owning tenant can be different.
+     * @param accessTokens String[] - The access tokens to be cleared from the cache.
+     */
+    public void invalidateCachedTokens(String[] accessTokens){
+
+        //Return if no elements to remove from cache
+        if(accessTokens == null || accessTokens.length == 0){
+            if(log.isDebugEnabled()){
+                log.debug("No access tokens received to invalidate Gateway Token Cache.");
+            }
+            return;
+        }
+
+        Cache gatewayCache = Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER).
+                getCache(APIConstants.GATEWAY_TOKEN_CACHE_NAME);
+
+        Map<String, String> cachedObjects = new HashMap<String, String>();
+        for(String accessToken : accessTokens){
+            Object cacheEntry = gatewayCache.get(accessToken);
+            if(cacheEntry != null){
+                //cachePut(accessToken, tenantDomain)
+                cachedObjects.put(accessToken, cacheEntry.toString());
+            }
+        }
+
+        //Return if no caches found
+        if(cachedObjects.isEmpty()){
+            if(log.isDebugEnabled()){
+                log.debug("No objects found in the super tenant token cache to invalidate.");
+            }
+            return;
+        }
+
+        //The map that groups access tokens by their respective tenant domains.
+        Map<String, Set<String>> tenantMap = new ConcurrentHashMap<String, Set<String>>();
+
+        //Iterate through the set of cached objects to group the cache by tenant domain
+        for(Object tokenObj : cachedObjects.keySet()){
+            String token = tokenObj.toString();
+
+            //Get the tenant domain of the access token
+            String tenantDomain = cachedObjects.get(token).toString();
+
+            if(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)){
+                //Continue to next since we won't have to delete cache entry from the tenant cache.
+                continue;
+            }
+
+            //If the tenant domain exists in the map
+            if(tenantMap.get(tenantDomain) != null){
+                //Add to the tenant's token list
+                tenantMap.get(tenantDomain).add(token);
+            }
+            else{
+                if(log.isDebugEnabled()){
+                    log.debug("Found token(s) of tenant " + tenantDomain + " to clear from cache");
+                }
+                //Add the tenant and his token list to the map.
+                Set<String> tokensOfDomain = new HashSet<String>();
+                tokensOfDomain.add(token);
+                tenantMap.put(tenantDomain, tokensOfDomain);
+            }
+        }
+
+        //Remove all tokens from the super tenant cache.
+        Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER).
+                getCache(APIConstants.GATEWAY_TOKEN_CACHE_NAME).removeAll(cachedObjects.keySet());
+
+        //For each each tenant
+        for(String tenantDomain : tenantMap.keySet()){
+            try{
+                PrivilegedCarbonContext.startTenantFlow();
+                PrivilegedCarbonContext.getThreadLocalCarbonContext().
+                        setTenantDomain(tenantDomain, true);
+
+                if(log.isDebugEnabled()){
+                    log.debug("About to delete " + tenantMap.get(tenantDomain).size() + " tokens from tenant " +
+                                tenantDomain + "'s cache");
+                }
+
+                Cache tenantGatewayCache = Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER).
+                        getCache(APIConstants.GATEWAY_TOKEN_CACHE_NAME);
+
+                //Remove all cached tokens from the tenant's cache
+                //Note: Best solution would have been to use the removeAll method of the cache. But it currently throws
+                //an NPE if at least one key in the list doesn't exist in the cache.
+                for(String accessToken : tenantMap.get(tenantDomain)){
+                    tenantGatewayCache.remove(accessToken);
+                }
+
+                if(log.isDebugEnabled()){
+                    log.debug("Removed all cached tokens of " + tenantDomain + " from cache");
+                }
+            }finally{
+                PrivilegedCarbonContext.endTenantFlow();
+            }
+        }
     }
 }
