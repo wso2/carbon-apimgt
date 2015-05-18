@@ -523,16 +523,10 @@ public class APIThrottleHandler extends AbstractHandler {
                 //get throttling information for given request with resource path and http verb
                 APIKeyValidator validator = new APIKeyValidator(ServiceReferenceHolder.getInstance().getConfigurationContextService().getServerConfigContext().getAxisConfiguration());
                 VerbInfoDTO verbInfoDTO = null;
-                try {
+
                     //verbInfoDTO = validator.getVerbInfoDTOFromAPIData(apiContext, apiVersion, requestPath, httpMethod);
-                    verbInfoDTO = validator.findMatchingVerb(synCtx);
-                } catch (APISecurityException e) {
-                    log.error("API Security Exception " + e.getMessage());
-                    e.printStackTrace();
-                } catch (ResourceNotFoundException e) {
-                    log.error("Could not find matching resource " + e.getMessage());
-                    e.printStackTrace();
-                }
+                verbInfoDTO = (VerbInfoDTO) synCtx.getProperty(APIConstants.VERB_INFO_DTO);
+
                 String resourceLevelRoleId = null;
                 //no data related to verb information data
                 if (verbInfoDTO == null) {
