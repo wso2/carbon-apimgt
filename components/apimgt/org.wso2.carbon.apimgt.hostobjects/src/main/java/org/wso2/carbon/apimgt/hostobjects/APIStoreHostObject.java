@@ -3451,12 +3451,12 @@ public class APIStoreHostObject extends ScriptableObject {
                 appsMap.put(app.getName(), app);
             }
             
-            //check whether there is an app with same name
-            if(!name.equals(oldName) && appsMap.containsKey(name)){
+            // check whether there is an app with same name
+            if (!name.equals(oldName) && appsMap.containsKey(name)) {
                 return false;
             }
 
-            for (Application app : apps) {                
+            for (Application app : apps) {
                 if (app.getName().equals(oldName)) {
                     Application application = new Application(name, subscriber);
                     application.setId(app.getId());
