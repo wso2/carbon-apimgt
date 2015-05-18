@@ -26,11 +26,13 @@ import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIStatus;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerFactory;
+import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.governance.api.generic.GenericArtifactManager;
 import org.wso2.carbon.governance.api.generic.dataobjects.GenericArtifact;
 import org.wso2.carbon.governance.registry.extensions.interfaces.Execution;
+import org.wso2.carbon.registry.core.Registry;
 import org.wso2.carbon.registry.core.Resource;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.core.jdbc.handlers.RequestContext;
@@ -77,6 +79,8 @@ public class ApiPublisherExecutor implements Execution {
         try {
             GenericArtifactManager artifactManager = APIUtil
                     .getArtifactManager(context.getSystemRegistry(), APIConstants.API_KEY);
+            Registry registry = ServiceReferenceHolder.getInstance().
+                    getRegistryService().getGovernanceUserRegistry(user);
             Resource apiResource = context.getResource();
             String artifactId = apiResource.getUUID();
             if (artifactId == null) {
@@ -84,9 +88,12 @@ public class ApiPublisherExecutor implements Execution {
             }
             GenericArtifact apiArtifact = artifactManager.getGenericArtifact(artifactId);
             API api = APIUtil.getAPI(apiArtifact);
-            APIStatus newStatus = getApiStatus(targetState);
             APIProvider apiProvider = APIManagerFactory.getInstance().getAPIProvider(user);
             failedGateways = apiProvider.updateAPIStatus(api.getId(), targetState, true, false, true);
+            //Setting resource again to the context as it's updated within updateAPIStatus method
+            String apiPath = APIUtil.getAPIPath(api.getId());
+            apiResource = registry.get(apiPath);
+            context.setResource(apiResource);
             if (failedGateways != null) {
                 executed = true;
             } else {
