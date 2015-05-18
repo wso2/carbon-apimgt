@@ -22,6 +22,8 @@ import org.apache.axis2.client.ServiceClient;
 import org.apache.axis2.client.Stub;
 import org.apache.axis2.context.ServiceContext;
 import org.apache.axis2.transport.http.HTTPConstants;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.handlers.security.stub.APIAuthenticationServiceStub;
 import org.wso2.carbon.apimgt.handlers.security.stub.types.APIKeyMapping;
 import org.wso2.carbon.apimgt.impl.APIConstants;
@@ -35,6 +37,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.rmi.RemoteException;
 import java.util.List;
+import java.util.Set;
 
 /**
  * A service client implementation for the APIAuthenticationService (an admin service offered
@@ -42,6 +45,8 @@ import java.util.List;
  */
 //TODO need to refactor code after design review
 public class APIAuthenticationAdminClient { // extends AbstractAPIGatewayAdminClient {
+
+    private static final Log log = LogFactory.getLog(APIAuthenticationAdminClient.class);
 
     private APIAuthenticationServiceStub stub;
 
@@ -71,6 +76,22 @@ public class APIAuthenticationAdminClient { // extends AbstractAPIGatewayAdminCl
             stub.invalidateResourceCache(apiContext,apiVersion,resourceURLContext,httpVerb);
         } catch (Exception e) {
             throw new AxisFault("Error while invalidating API keys", e);
+        }
+    }
+
+    /**
+     * Removes the active tokens that are cached on the API Gateway
+     * @param activeTokens - The active access tokens to be removed from the gateway cache.
+     * @throws AxisFault - If a communication error occurs.
+     */
+    public void invalidateCachedTokens(Set<String> activeTokens) throws AxisFault {
+        try {
+            stub.invalidateCachedTokens(activeTokens.toArray(new String[activeTokens.size()]));
+        } catch (RemoteException e) {
+            log.error("RemoteException occurred when calling service method 'invalidateCachedTokens' of " +
+                    "APIAuthenticationService", e);
+            throw new AxisFault("RemoteException occurred when calling service method 'invalidateCachedTokens' of " +
+                    " APIAuthenticationService" , e);
         }
     }
 

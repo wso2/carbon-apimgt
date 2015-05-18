@@ -8735,4 +8735,36 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
         return false;
     }
 
+    public Set<String> getActiveTokensOfApplication(int applicationId) throws APIManagementException {
+        Connection conn = null;
+        ResultSet resultSet = null;
+        PreparedStatement ps = null;
+        try {
+            conn = APIMgtDBUtil.getConnection();
+
+            String sqlQuery = "SELECT TKN.ACCESS_TOKEN" +
+                    " FROM IDN_OAUTH2_ACCESS_TOKEN TKN," +
+                    "      AM_APPLICATION_KEY_MAPPING AKM" +
+                    " WHERE AKM.APPLICATION_ID = ?" +
+                    " AND AKM.CONSUMER_KEY = TKN.CONSUMER_KEY" +
+                    " AND TKN.TOKEN_STATE = 'ACTIVE'";
+
+            ps = conn.prepareStatement(sqlQuery);
+            ps.setInt(1, applicationId);
+            resultSet = ps.executeQuery();
+            Set<String> tokens = new HashSet<String>();
+            while (resultSet.next()) {
+                tokens.add(APIUtil.decryptToken(resultSet.getString("ACCESS_TOKEN")));
+            }
+            return tokens;
+        } catch (SQLException e) {
+            handleException("Failed to get active access tokens of application " + applicationId, e);
+        } catch (CryptoException e) {
+            handleException("Token decryption failed of an active access token of application " + applicationId, e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(ps, conn, resultSet);
+        }
+        return null;
+    }
+
 }
