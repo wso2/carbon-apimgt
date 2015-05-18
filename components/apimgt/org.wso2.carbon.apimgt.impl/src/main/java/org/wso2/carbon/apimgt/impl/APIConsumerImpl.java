@@ -70,6 +70,7 @@ import org.wso2.carbon.governance.api.common.dataobjects.GovernanceArtifact;
 import org.wso2.carbon.governance.api.exception.GovernanceException;
 import org.wso2.carbon.governance.api.generic.GenericArtifactManager;
 import org.wso2.carbon.governance.api.generic.dataobjects.GenericArtifact;
+import org.wso2.carbon.governance.api.util.GovernanceUtils;
 import org.wso2.carbon.registry.core.ActionConstants;
 import org.wso2.carbon.registry.core.Association;
 import org.wso2.carbon.registry.core.Collection;
@@ -466,7 +467,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
      */
     @Override
 	public Map<String, Object> getAllPaginatedAPIsByStatus(String tenantDomain,
-			int start, int end, final String apiStatus) throws APIManagementException {
+			int start, int end, final String apiStatus, boolean returnAPItags) throws APIManagementException {
     	Boolean displayAPIsWithMultipleStatus = APIUtil.isAllowDisplayAPIsWithMultipleStatus();
     	Map<String, List<String>> listMap = new HashMap<String, List<String>>();
         //Check the api-manager.xml config file entry <DisplayAllAPIs> value is false
@@ -528,7 +529,17 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                     String status = artifact.getAttribute(APIConstants.API_OVERVIEW_STATUS);
 
                     API api  = APIUtil.getAPI(artifact);
-
+                    
+                    if (returnAPItags) {
+                        String artifactPath = GovernanceUtils.getArtifactPath(registry, artifact.getId());
+                        Set<String> tags = new HashSet<String>();
+                        org.wso2.carbon.registry.core.Tag[] tag = registry.getTags(artifactPath);
+                        for (org.wso2.carbon.registry.core.Tag tag1 : tag) {
+                            tags.add(tag1.getTagName());
+                        }
+                        api.addTags(tags);
+                    }
+                    
                     if (api != null) {
                         String key;
                         //Check the configuration to allow showing multiple versions of an API true/false
@@ -1723,10 +1734,48 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
      * @throws APIManagementException
      */
     private void invalidateCachedKeys(int applicationId, APIIdentifier identifier) throws APIManagementException {
-        identifier.setApplicationId(Integer.toString(applicationId));
-        CacheInvalidationHolder.getInstance().addApiKeyMapping(identifier);
-        log.debug("Added API Identifier " + identifier.toString() + " Subscribed under Application ID : " + applicationId);
+        APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
+                getAPIManagerConfigurationService().getAPIManagerConfiguration();
+        if (config.getApiGatewayEnvironments().size() <= 0) {
+            return;
+        }
+
+        Set<String> keys = apiMgtDAO.getApplicationKeys(applicationId);
+        if (keys.size() > 0) {
+            List<APIKeyMapping> mappings = new ArrayList<APIKeyMapping>();
+            API api = getAPI(identifier);
+            for (String key : keys) {
+                APIKeyMapping mapping = new APIKeyMapping();
+                //So far cache key created using API token+context+version combination, but now we generate complete key from
+                //cache key invalidate logic and pass to APIAuthenticationService.
+                URITemplate uriTemplate;
+                Iterator<URITemplate> itr = api.getUriTemplates().iterator();
+                //Iterate through URI templates for given API
+                while (itr.hasNext()) {
+                    uriTemplate = itr.next();
+                    //Create cache keys for all possible combinations of uri templates
+                    String cacheKey = key + ":" + api.getContext() + "/" + identifier.getVersion()
+                            + uriTemplate.getUriTemplate() + ":"
+                            + uriTemplate.getHTTPVerb() + ":"
+                            + uriTemplate.getAuthType();
+                    mapping.setKey(cacheKey);
+                    mappings.add(mapping);
+                }
+            }
+
+            try {
+                Map<String, Environment> gatewayEnvs = config.getApiGatewayEnvironments();
+                for (Environment environment : gatewayEnvs.values()) {
+                    APIAuthenticationAdminClient client = new APIAuthenticationAdminClient(environment);
+                    client.invalidateKeys(mappings);
+                }
+            } catch (AxisFault axisFault) {
+                log.warn("Error while invalidating API keys at the gateway", axisFault);
+            }
+        }
     }
+
+
 
     public void removeSubscriber(APIIdentifier identifier, String userId)
             throws APIManagementException {
@@ -1817,18 +1866,20 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     }
 
 
+
     public void removeApplication(Application application) throws APIManagementException {
         APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
                 getAPIManagerConfigurationService().getAPIManagerConfiguration();
         boolean gatewayExists = config.getApiGatewayEnvironments().size() > 0;
         Set<SubscribedAPI> apiSet = null;
-
+        Set<String> keys = null;
         if (gatewayExists) {
+            keys = apiMgtDAO.getApplicationKeys(application.getId());
             apiSet = getSubscribedAPIs(application.getSubscriber());
         }
         apiMgtDAO.deleteApplication(application);
 
-        if (gatewayExists && apiSet != null) {
+        if (gatewayExists && apiSet != null && keys != null) {
             Set<SubscribedAPI> removables = new HashSet<SubscribedAPI>();
             for (SubscribedAPI api : apiSet) {
                 if (!api.getApplication().getName().equals(application.getName())) {
@@ -1839,13 +1890,33 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             for (SubscribedAPI api : removables) {
                 apiSet.remove(api);
             }
-            for (SubscribedAPI api : apiSet) {
-                APIIdentifier apiId = api.getApiId();
-                apiId.setApplicationId(Integer.toString(application.getId()));
-                // Clear API Identifiers from Cache.
-                CacheInvalidationHolder.getInstance().addApiKeyMapping(apiId);
+
+            List<APIKeyMapping> mappings = new ArrayList<APIKeyMapping>();
+            for (String key : keys) {
+                for (SubscribedAPI api : apiSet) {
+                    APIKeyMapping mapping = new APIKeyMapping();
+                    API apiDefinition = getAPI(api.getApiId());
+                    mapping.setApiVersion(api.getApiId().getVersion());
+                    mapping.setContext(apiDefinition.getContext());
+                    mapping.setKey(key);
+                    mappings.add(mapping);
+                }
             }
 
+            if (mappings.size() > 0) {
+                try {
+                    Map<String, Environment> gatewayEnvs = config.getApiGatewayEnvironments();
+                    for (Environment environment : gatewayEnvs.values()) {
+                        APIAuthenticationAdminClient client =
+                                new APIAuthenticationAdminClient(environment);
+                        client.invalidateKeys(mappings);
+                    }
+                } catch (AxisFault axisFault) {
+                    // Just logging the error is enough - We have already deleted the application
+                    // which is what's important
+                    log.warn("Error while invalidating API keys at the gateway", axisFault);
+                }
+            }
         }
     }
 

@@ -4243,6 +4243,7 @@ public class ApiMgtDAO {
                               "   AND API.API_PROVIDER = ? " +
                               "   AND API.API_ID = SUBS.API_ID " +
                               "   AND SUBS.SUBS_CREATE_STATE = '" + APIConstants.SubscriptionCreatedStatus.SUBSCRIBE + "'" +
+                              "   AND SUBS.SUB_STATUS != '" + APIConstants.SubscriptionStatus.REJECTED + "'" +
                               "ORDER BY " +
                               "   APP.NAME";
 
@@ -7594,7 +7595,7 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
 //        try {
 //            conn = APIMgtDBUtil.getConnection();
 //            ps = conn.prepareStatement(registrationEntry);
-//            ps.setInt(1, application.getApplicationId());
+//            ps.setInt(1, application.getId());
 //            rs = ps.executeQuery();
 //
 //            while (rs.next()) {
@@ -8270,7 +8271,7 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
                     }
                     ps.close();
                     ps2.setInt(1,api_id);
-                    ps2.setInt(2,scope.getApplicationId());
+                    ps2.setInt(2,scope.getId());
                     ps2.execute();
                     ps2.close();
 

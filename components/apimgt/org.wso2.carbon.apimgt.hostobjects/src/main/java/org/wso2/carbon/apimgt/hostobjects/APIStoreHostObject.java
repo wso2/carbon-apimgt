@@ -92,7 +92,6 @@ public class APIStoreHostObject extends ScriptableObject {
     private static final String httpPort = "mgt.transport.http.port";
     private static final String httpsPort = "mgt.transport.https.port";
     private static final String hostName = "carbon.local.ip";
-    private APIStoreCacheInvalidator cacheInvalidator;
 
     private APIConsumer apiConsumer;
 
@@ -100,12 +99,7 @@ public class APIStoreHostObject extends ScriptableObject {
 
     // The zero-argument constructor used for create instances for runtime
     public APIStoreHostObject() throws APIManagementException {
-
-//        APIManagerConfiguration config = org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder.getInstance().
-//                getAPIManagerConfigurationService().getAPIManagerConfiguration();
-//        if (config.getApiGatewayEnvironments().size() > 0) {
-            cacheInvalidator = new APIStoreCacheInvalidator();
-//        }
+        //apiConsumer = APIManagerFactory.getInstance().getAPIConsumer();
     }
 
     public APIStoreHostObject(String loggedUser) throws APIManagementException {
@@ -1770,6 +1764,7 @@ public class APIStoreHostObject extends ScriptableObject {
             										throws ScriptException, APIManagementException {
     	APIConsumer apiConsumer = getAPIConsumer(thisObj);
     	String tenantDomain;
+    	boolean retuenAPItags = false;
         if (args[0] != null) {
         	tenantDomain = (String) args[0];
         } else {
@@ -1778,8 +1773,12 @@ public class APIStoreHostObject extends ScriptableObject {
             
         int start = Integer.parseInt((String) args[1]);
         int end = Integer.parseInt((String) args[2]);
+        
+        if (args.length > 3 && args[3] != null) {
+            retuenAPItags = Boolean.parseBoolean((String) args[3]);
+        }
             
-        return getPaginatedAPIsByStatus(apiConsumer, tenantDomain, start, end, APIConstants.PROTOTYPED);
+        return getPaginatedAPIsByStatus(apiConsumer, tenantDomain, start, end, APIConstants.PROTOTYPED, retuenAPItags);
     	
     }
 
@@ -1789,22 +1788,27 @@ public class APIStoreHostObject extends ScriptableObject {
     	
     	APIConsumer apiConsumer = getAPIConsumer(thisObj);
     	String tenantDomain;
+    	boolean returnAPItags = false;
         if (args[0] != null) {
         	tenantDomain = (String) args[0];
         } else {
         	tenantDomain = MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
         }
-            
+
         int start = Integer.parseInt((String) args[1]);
         int end = Integer.parseInt((String) args[2]);
+        
+        if (args.length > 3 && args[3] != null) {
+            returnAPItags = Boolean.parseBoolean((String) args[3]);
+        }
             
-        return getPaginatedAPIsByStatus(apiConsumer, tenantDomain, start, end, APIConstants.PUBLISHED);
+        return getPaginatedAPIsByStatus(apiConsumer, tenantDomain, start, end, APIConstants.PUBLISHED, returnAPItags);
             
             
     }
     
     private static NativeObject getPaginatedAPIsByStatus(APIConsumer apiConsumer, String tenantDomain, int start, 
-    		int end, String status) {
+    		int end, String status, boolean returnAPItags) {
     	
     	Set<API> apiSet;
         Map<String, Object> resultMap;
@@ -1820,7 +1824,7 @@ public class APIStoreHostObject extends ScriptableObject {
                 PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME, true);
 
             }
-            resultMap = apiConsumer.getAllPaginatedAPIsByStatus(tenantDomain, start, end, status);
+            resultMap = apiConsumer.getAllPaginatedAPIsByStatus(tenantDomain, start, end, status, returnAPItags);
 
         } catch (APIManagementException e) {
             log.error("Error from Registry API while getting API Information", e);
@@ -1862,6 +1866,31 @@ public class APIStoreHostObject extends ScriptableObject {
                     }
                     row.put("apiOwner", row, apiOwner);
                     row.put("isAdvertiseOnly", row, api.isAdvertiseOnly());
+                    
+                    NativeArray tierArr = new NativeArray(0);
+                    Set<Tier> tierSet = api.getAvailableTiers();
+                    if (tierSet != null) {
+                        Iterator tierIt = tierSet.iterator();
+                        int j = 0;
+                        while (tierIt.hasNext()) {
+                            Object tierObject = tierIt.next();
+                            Tier tier = (Tier) tierObject;
+                            tierArr.put(j, tierArr, tier.getName());
+                            j++;
+                        }
+                    }
+                    row.put("tiers", row, tierArr);
+                    
+                    if (returnAPItags) {                    
+                        StringBuilder tagsSet = new StringBuilder("");
+                        for (int k = 0; k < api.getTags().toArray().length; k++) {
+                            tagsSet.append(api.getTags().toArray()[k].toString());
+                            if (k != api.getTags().toArray().length - 1) {
+                                tagsSet.append(",");
+                            }
+                        }
+                        row.put("tags", row, tagsSet.toString());
+                    }
                     myn.put(i, myn, row);
                     i++;
                 }
@@ -2119,6 +2148,8 @@ public class APIStoreHostObject extends ScriptableObject {
                     row.put("subscriptionAvailability", row, api.getSubscriptionAvailability());
                     row.put("subscriptionAvailableTenants", row, api.getSubscriptionAvailableTenants());
                     row.put("isDefaultVersion",row,api.isDefaultVersion());
+                    row.put("transports",row,api.getTransports());
+
                     myn.put(0, myn, row);
                 }
 
@@ -2227,59 +2258,67 @@ public class APIStoreHostObject extends ScriptableObject {
     public static NativeArray jsFunction_getAllDocumentation(Context cx,
                                                              Scriptable thisObj, Object[] args, Function funObj)
             throws ScriptException, APIManagementException {
-        List<Documentation> doclist = null;
-        String providerName = "";
-        String apiName = "";
-        String version = "";
-        String username = "";
-        if (args != null && args.length != 0) {
-            providerName = APIUtil.replaceEmailDomain((String) args[0]);
-            apiName = (String) args[1];
-            version = (String) args[2];
-            username = (String) args[3];
+        if (args == null || args.length == 0) {
+            handleException("Invalid number of parameters.");
         }
-        APIIdentifier apiIdentifier = new APIIdentifier(providerName, apiName, version);
-        NativeArray myn = new NativeArray(0);
+        boolean isTenantFlowStarted = false;
+        List<Documentation> doclist = null;
+        String providerName = APIUtil.replaceEmailDomain((String) args[0]);
+        String apiName = (String) args[1];
+        String version = (String) args[2];
+        String username = (String) args[3];
         APIConsumer apiConsumer = getAPIConsumer(thisObj);
+        NativeArray myn = new NativeArray(0);
         try {
+            String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(providerName));
+            if (tenantDomain != null && !org.wso2.carbon.utils.multitenancy.MultitenantConstants
+                    .SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
+                isTenantFlowStarted = true;
+                PrivilegedCarbonContext.startTenantFlow();
+                PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
+            }
+            APIIdentifier apiIdentifier = new APIIdentifier(providerName, apiName, version);
             doclist = apiConsumer.getAllDocumentation(apiIdentifier, username);
+            if (doclist != null) {
+                Iterator it = doclist.iterator();
+                int i = 0;
+                while (it.hasNext()) {
+                    NativeObject row = new NativeObject();
+                    Object docObject = it.next();
+                    Documentation documentation = (Documentation) docObject;
+                    Object objectSourceType = documentation.getSourceType();
+                    String strSourceType = objectSourceType.toString();
+                    row.put("name", row, documentation.getName());
+                    row.put("sourceType", row, strSourceType);
+                    row.put("summary", row, documentation.getSummary());
+                    String content;
+                    if (strSourceType.equals("INLINE")) {
+                        content = apiConsumer.getDocumentationContent(apiIdentifier, documentation.getName());
+                        row.put("content", row, content);
+                    }
+                    row.put("sourceUrl", row, documentation.getSourceUrl());
+                    row.put("filePath", row, documentation.getFilePath());
+                    DocumentationType documentationType = documentation.getType();
+                    row.put("type", row, documentationType.getType());
+
+                    if (documentationType == DocumentationType.OTHER) {
+                        row.put("otherTypeName", row, documentation.getOtherTypeName());
+                    }
+
+                    myn.put(i, myn, row);
+                    i++;
+                }
+            }
         } catch (APIManagementException e) {
             handleException("Error from Registry API while getting All Documentation on " + apiName, e);
         } catch (Exception e) {
             handleException("Error while getting All Documentation " + apiName, e);
-        }
-        if (doclist != null) {
-            Iterator it = doclist.iterator();
-            int i = 0;
-            while (it.hasNext()) {
-                NativeObject row = new NativeObject();
-                Object docObject = it.next();
-                Documentation documentation = (Documentation) docObject;
-                Object objectSourceType = documentation.getSourceType();
-                String strSourceType = objectSourceType.toString();
-                row.put("name", row, documentation.getName());
-                row.put("sourceType", row, strSourceType);
-                row.put("summary", row, documentation.getSummary());
-                String content;
-                if (strSourceType.equals("INLINE")) {
-                    content = apiConsumer.getDocumentationContent(apiIdentifier, documentation.getName());
-                    row.put("content", row, content);
-                }
-                row.put("sourceUrl", row, documentation.getSourceUrl());
-                row.put("filePath", row, documentation.getFilePath());
-                DocumentationType documentationType = documentation.getType();
-                row.put("type", row, documentationType.getType());
-
-                if (documentationType == DocumentationType.OTHER) {
-                    row.put("otherTypeName", row, documentation.getOtherTypeName());
-                }
-
-                myn.put(i, myn, row);
-                i++;
+        } finally {
+            if (isTenantFlowStarted) {
+                PrivilegedCarbonContext.endTenantFlow();
             }
         }
         return myn;
-
     }
 
     public static NativeArray jsFunction_getComments(Context cx,

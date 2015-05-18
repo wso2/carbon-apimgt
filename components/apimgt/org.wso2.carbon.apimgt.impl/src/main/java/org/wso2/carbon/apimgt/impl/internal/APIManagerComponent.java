@@ -32,6 +32,7 @@ import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.listners.UserAddListener;
 import org.wso2.carbon.apimgt.impl.observers.APIStatusObserverList;
+import org.wso2.carbon.apimgt.impl.observers.CommonConfigDeployer;
 import org.wso2.carbon.apimgt.impl.observers.SignupObserver;
 import org.wso2.carbon.apimgt.impl.observers.TenantServiceCreator;
 import org.wso2.carbon.apimgt.impl.utils.APIMgtDBUtil;
@@ -144,6 +145,9 @@ public class APIManagerComponent {
                 bundleContext.registerService(
                         Axis2ConfigurationContextObserver.class.getName(), listener, null);
             }
+
+            CommonConfigDeployer configDeployer = new CommonConfigDeployer();
+            bundleContext.registerService(Axis2ConfigurationContextObserver.class.getName(), configDeployer, null);
 
             SignupObserver signupObserver = new SignupObserver();
             bundleContext.registerService(Axis2ConfigurationContextObserver.class.getName(), signupObserver,null);

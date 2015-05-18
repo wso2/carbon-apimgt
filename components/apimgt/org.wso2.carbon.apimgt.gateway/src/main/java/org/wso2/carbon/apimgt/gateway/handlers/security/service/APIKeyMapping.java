@@ -20,15 +20,15 @@ public class APIKeyMapping {
     
     private String context;
     private String apiVersion;
-    private String applicationId;
-    private String domain;
+    private String key;
+    private String cacheKey;
 
-    public String getApplicationId() {
-        return applicationId;
+    public String getCacheKey() {
+        return cacheKey;
     }
 
-    public void setApplicationId(String applicationId) {
-        this.applicationId = applicationId;
+    public void setCacheKey(String cacheKey) {
+        this.cacheKey = cacheKey;
     }
 
     public String getContext() {
@@ -47,11 +47,11 @@ public class APIKeyMapping {
         this.apiVersion = apiVersion;
     }
 
-    public String getDomain() {
-        return domain;
+    public String getKey() {
+        return key;
     }
 
-    public void setDomain(String domain) {
-        this.domain = domain;
+    public void setKey(String key) {
+        this.key = key;
     }
 }

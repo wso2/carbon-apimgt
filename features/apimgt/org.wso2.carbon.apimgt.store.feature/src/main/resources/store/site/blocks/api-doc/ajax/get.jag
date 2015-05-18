@@ -123,18 +123,26 @@ var log = new Log();
         }
 
         jsonObj.basePath = api.context;
-        if (urlArr.length > 1) {
-		if (urlArr[1].indexOf("https") > -1) {
-			jsonObj.host = urlArr[1].trim().replace("https://","");
-		} else {
-			jsonObj.host = urlArr[1].trim().replace("http://","");
+        
+	//assign default value to host with first environment address
+	if (urlArr.length > 0 && urlArr[0].indexOf("https") == 0) {
+	        jsonObj.host = urlArr[0].trim().replace("https://","");
+	} else {
+		jsonObj.host = urlArr[0].trim().replace("http://","");
+	}
+	
+	if (accessProtocol.indexOf("https:") == 0) {
+		for (var i =0; i < urlArr.length; i++) {
+			if (urlArr[i].indexOf("https") != -1) {
+				jsonObj.host = urlArr[i].trim().replace("https://","");
+			}
 		}
 	} else {
-		if (urlArr[0].indexOf("https") > -1) {
-	        	jsonObj.host = urlArr[0].trim().replace("https://","");
-		} else {
-			jsonObj.host = urlArr[0].trim().replace("http://","");
-		}	
+		for (var i =0; i < urlArr.length; i++) {
+			if (urlArr[i].indexOf("https") == -1) {
+				jsonObj.host = urlArr[i].trim().replace("http://","");
+			}
+		}
 	}
 
         var paths = {}; //fix for /*

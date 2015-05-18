@@ -17,52 +17,34 @@
 package org.wso2.carbon.apimgt.gateway.handlers.security.service;
 
 
-import org.wso2.carbon.apimgt.gateway.handlers.common.GatewayKeyInfoCache;
+
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
+import org.wso2.carbon.identity.core.util.IdentityUtil;
 import org.wso2.carbon.mediation.initializer.AbstractServiceBusAdmin;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
+import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import javax.cache.Cache;
 import javax.cache.Caching;
+
 import java.util.Iterator;
+import java.util.Set;
 
 public class APIAuthenticationService extends AbstractServiceBusAdmin {
 
-    /**
-     * When needed to clear cache entries associated to a particular API, this operation can be called.
-     * Version and the context of the API whose entries needed to deleted have to be set in APIKeyMapping Element. If
-     * an applicationId is specified, then cache entries created for that particular API,
-     * subscribed under that particular Application will be cleared.
-     *
-     * @param mappings A {@code List} of {@code APIKeyMapping} elements, representing the APIs that were changed.
-     */
     public void invalidateKeys(APIKeyMapping[] mappings) {
+
+        //Previously we were clearing API key manager side cache. But actually this service deployed at gateway side.
+        //Hence we will get cache from gateway cache
+        Cache gatewayCache =  Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER).getCache(APIConstants.GATEWAY_KEY_CACHE_NAME);
         for (APIKeyMapping mapping : mappings) {
-            if (mapping.getApiVersion() != null && mapping.getContext() != null) {
-
-                String domain = mapping.getDomain();
-
-                if (domain == null) {
-                    domain = APIUtil.getTenantDomainFromContext(mapping.getContext());
-                }
-
-                // Switching the tenant domain. Key will be cached in the Tenant's cache from where API is coming from.
-                PrivilegedCarbonContext.startTenantFlow();
-                PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(domain, true);
-
-                // This means we have to invalidate all the Cache entries related to that API
-                if (mapping.getApplicationId() == null) {
-
-                    GatewayKeyInfoCache.getInstance().removeFromCache(mapping.getContext(), mapping.getApiVersion());
-
-                } else {
-                    GatewayKeyInfoCache.getInstance().removeFromCache(mapping.getContext(), mapping.getApiVersion(),
-                                                                      mapping.getApplicationId());
-                }
-
-                PrivilegedCarbonContext.endTenantFlow();
+            //According to new cache design we will use cache key to clear cache if its available in mapping
+            //Later we construct key using attributes. Now cache key will pass as key
+            String cacheKey = mapping.getKey();
+            if(cacheKey!=null){
+                gatewayCache.remove(cacheKey);
             }
         }
     }
@@ -74,10 +56,14 @@ public class APIAuthenticationService extends AbstractServiceBusAdmin {
 
     }
 
-    public void invalidateResourceCache(String apiContext, String apiVersion, String resourceURLContext,
-                                        String httpVerb) {
+    public void invalidateResourceCache(String apiContext, String apiVersion, String resourceURLContext, String httpVerb) {
         boolean isTenantFlowStarted = false;
-        String tenantDomain = APIUtil.getTenantDomainFromContext(apiContext);
+        int tenantDomainIndex = apiContext.indexOf("/t/");
+        String tenantDomain = MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
+        if (tenantDomainIndex != -1) {
+            String temp = apiContext.substring(tenantDomainIndex + 3, apiContext.length());
+            tenantDomain = temp.substring(0, temp.indexOf("/"));
+        }
 
         try {
             if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
@@ -87,14 +73,14 @@ public class APIAuthenticationService extends AbstractServiceBusAdmin {
             }
 
             String resourceVerbCacheKey =
-                    APIUtil.getResourceInfoDTOCacheKey(apiContext, apiVersion,
-                                                       resourceURLContext, httpVerb);
+                                          APIUtil.getResourceInfoDTOCacheKey(apiContext, apiVersion,
+                                                                             resourceURLContext, httpVerb);
 
             String apiCacheKey = APIUtil.getAPIInfoDTOCacheKey(apiContext, apiVersion);
 
             Cache cache =
-                    Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER)
-                            .getCache(APIConstants.RESOURCE_CACHE_NAME);
+                          Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER)
+                                 .getCache(APIConstants.RESOURCE_CACHE_NAME);
 
             if (cache.containsKey(apiCacheKey)) {
                 cache.remove(apiCacheKey);
