@@ -179,7 +179,17 @@ APIDesigner.prototype.check_if_resource_exist = function(path, method){
 
     for (var key in this.api_doc.paths) {
 
-        if(key.toLowerCase() == path.toLowerCase()){
+	//remove tailing slash
+	if (path.lastIndexOf('/') == path.length -1) {
+		path = path.substring(0, path.length -1);
+	}
+
+	var keyWithoutTailingSlash = key;
+	if (key.lastIndexOf('/') == key.length -1) {
+		keyWithoutTailingSlash = key.substring(0, key.length -1);
+	}
+
+        if(keyWithoutTailingSlash.toLowerCase() == path.toLowerCase()){
 
             if (this.api_doc.paths[key].hasOwnProperty(method)) {
 
