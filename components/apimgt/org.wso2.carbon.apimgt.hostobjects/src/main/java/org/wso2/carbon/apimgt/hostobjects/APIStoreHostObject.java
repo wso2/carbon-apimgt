@@ -3450,13 +3450,14 @@ public class APIStoreHostObject extends ScriptableObject {
             for (Application app : apps) {
                 appsMap.put(app.getName(), app);
             }
+            
+            //check whether there is an app with same name
+            if(!name.equals(oldName) && appsMap.containsKey(name)){
+                return false;
+            }
 
-            for (Application app : apps) {
-                if(appsMap.containsKey(app.getName())){
-                    //check whether there is an app with same name
-                    if(!name.equals(oldName) && appsMap.containsKey(name)){
-                        return false;
-                    }
+            for (Application app : apps) {                
+                if (app.getName().equals(oldName)) {
                     Application application = new Application(name, subscriber);
                     application.setId(app.getId());
                     application.setTier(tier);
