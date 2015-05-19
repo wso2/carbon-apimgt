@@ -3692,11 +3692,12 @@ public final class APIUtil {
             clientDomain = clientDomain.trim();
         }
         List<String> authorizedDomains = apiKeyValidationInfoDTO.getAuthorizedDomains();
-        if (!(authorizedDomains.contains("ALL") || authorizedDomains.contains(clientDomain))) {
+        if (authorizedDomains != null && !(authorizedDomains.contains("ALL") || authorizedDomains.contains(clientDomain)
+        )) {
             log.error("Unauthorized client domain :" + clientDomain +
-                    ". Only \"" + authorizedDomains + "\" domains are authorized to access the API.");
+                      ". Only \"" + authorizedDomains + "\" domains are authorized to access the API.");
             throw new APIManagementException("Unauthorized client domain :" + clientDomain +
-                    ". Only \"" + authorizedDomains + "\" domains are authorized to access the API.");
+                                             ". Only \"" + authorizedDomains + "\" domains are authorized to access the API.");
         }
 
     }
