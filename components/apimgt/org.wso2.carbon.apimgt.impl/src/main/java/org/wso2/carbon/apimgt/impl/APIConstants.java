@@ -264,6 +264,7 @@ public final class APIConstants {
     public static final String CREATED = "CREATED";
     public static final String DEPRECATED = "DEPRECATED";
     public static final String PROTOTYPED = "PROTOTYPED";
+    public static final String VERB_INFO_DTO = "VERB_INFO";
 
 
     public static class TokenStatus {
@@ -330,7 +331,11 @@ public final class APIConstants {
     public static final String TOKEN_URL = "TokenURL";
     public static final String REVOKE_URL = "RevokeURL";
 
+
+    public static final String DEVICE_SCOPE_PATTERN = "^device_.*";
+    public static final String OPEN_ID_SCOPE_NAME = "openid";
     public static final String API_KEY_MANGER_VALIDATIONHANDLER_CLASS_NAME = API_KEY_VALIDATOR + "KeyValidationHandlerClassName";
+    public static final String API_KEY_MANGER_SCOPE_WHITELIST = API_KEY_VALIDATOR + "ScopeWhitelist.Scope";
 
     public static final String API_KEY_MANAGER_THRIFT_SERVER_HOST = API_KEY_VALIDATOR + "ThriftServerHost";
     public static final String API_KEY_VALIDATOR_CLIENT_TYPE = API_KEY_VALIDATOR + "KeyValidatorClientType";
@@ -516,6 +521,7 @@ public final class APIConstants {
     public static final String API_CONTEXT_CACHE_MANAGER = "API_CONTEXT_CACHE_MANAGER";
     public static final String RESOURCE_CACHE_NAME = "resourceCache";
     public static final String GATEWAY_KEY_CACHE_NAME = "gatewayKeyCache";
+    public static final String GATEWAY_TOKEN_CACHE_NAME = "GATEWAY_TOKEN_CACHE";
     public static final String KEY_CACHE_NAME = "keyCache";
     public static final String JWT_CACHE_NAME = "jwtCache";
     public static final String API_CONTEXT_CACHE = "apiContextCache";

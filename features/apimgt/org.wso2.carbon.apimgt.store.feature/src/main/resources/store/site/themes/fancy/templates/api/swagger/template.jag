@@ -169,7 +169,7 @@ var select_environment = function(){
         <div class="controls form-inline">
           <div class="input-prepend">
           <span class="add-on">Authorization : Bearer </span>
-          <input type="text" id="access_token" name="access_token" placeholder="Access Token" class="input-xxlarge">
+          <input type="text" id="access_token" name="access_token" placeholder="Access Token" class="input-xxlarge" onkeydown="return false;">
           </div>        
         </div>
       </div>

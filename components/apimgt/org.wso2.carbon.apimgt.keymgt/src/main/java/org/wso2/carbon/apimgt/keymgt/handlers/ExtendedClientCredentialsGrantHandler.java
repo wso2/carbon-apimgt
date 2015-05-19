@@ -20,27 +20,26 @@ import org.wso2.carbon.identity.oauth2.IdentityOAuth2Exception;
 import org.wso2.carbon.identity.oauth2.token.OAuthTokenReqMessageContext;
 import org.wso2.carbon.identity.oauth2.token.handlers.grant.ClientCredentialsGrantHandler;
 
-public class ExtendedClientCredentialsGrantHandler  extends ClientCredentialsGrantHandler{
+public class ExtendedClientCredentialsGrantHandler extends ClientCredentialsGrantHandler {
 
     @Override
     public boolean validateGrant(OAuthTokenReqMessageContext tokReqMsgCtx)
-            throws IdentityOAuth2Exception{
+            throws IdentityOAuth2Exception {
         return super.validateGrant(tokReqMsgCtx);
     }
 
     @Override
-    public boolean issueRefreshToken() throws IdentityOAuth2Exception{
+    public boolean issueRefreshToken() throws IdentityOAuth2Exception {
         return super.issueRefreshToken();
     }
 
     @Override
-    public boolean isOfTypeApplicationUser() throws IdentityOAuth2Exception{
+    public boolean isOfTypeApplicationUser() throws IdentityOAuth2Exception {
         return super.isOfTypeApplicationUser();
     }
 
     @Override
-    public boolean validateScope(OAuthTokenReqMessageContext tokReqMsgCtx){
-        ScopesIssuer scopesIssuer = new ScopesIssuer();
-        return scopesIssuer.setScopes(tokReqMsgCtx);
+    public boolean validateScope(OAuthTokenReqMessageContext tokReqMsgCtx) {
+        return ScopesIssuer.getInstance().setScopes(tokReqMsgCtx);
     }
 }

@@ -305,9 +305,9 @@
             </dependency>
 
             <dependency>
-                <groupId>org.wso2.carbon</groupId>
+                <groupId>org.wso2.carbon.apimgt</groupId>
                 <artifactId>org.wso2.carbon.apimgt.handlers.security.stub</artifactId>
-                <version>${wso2carbon.version}</version>
+                <version>4.2.1-SNAPSHOT</version>
             </dependency>
 
             <dependency>
