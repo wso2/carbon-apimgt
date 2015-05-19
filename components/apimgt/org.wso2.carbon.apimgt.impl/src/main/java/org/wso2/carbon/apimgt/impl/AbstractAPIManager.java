@@ -1151,7 +1151,7 @@ public abstract class AbstractAPIManager implements APIManager {
         apiObj.put("serverURL", envDetails.toString());
         apiObj.put("status", APIUtil.checkValue(api.getStatus().toString()));
         if (api.getThumbnailUrl() == null) {
-            apiObj.put("thumbnailUrl", "images/api-default.png");
+
         } else {
             apiObj.put("thumbnailUrl", APIUtil.prependWebContextRoot(api.getThumbnailUrl()));
         }

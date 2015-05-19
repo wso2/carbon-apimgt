@@ -245,9 +245,11 @@ asset.renderer = function(ctx) {
                 if (page.assets && page.assets.id) {
                     var httpEndpoint = page.api.serverURL.split(",")[1];
                     var httpsEndpoint = page.api.serverURL.split(",")[2];
+                    var isDefaultVersion=page.api.isDefaultVersion;
 
                     page.assets.httpEndpoint = httpEndpoint;
                     page.assets.httpsEndpoint = httpsEndpoint;
+                    page.assets.isDefaultVersion = isDefaultVersion;
 
                     //var prodEps = parse(page.assets.attributes.overview_endpointConfig).production_endpoints;
                     //var sandBoxEps = parse(page.assets.attributes.overview_endpointConfig).sandbox_endpoints;

@@ -45,6 +45,7 @@ $(function () {
     var EV_GENERATE_SAND_TOKEN = 'eventGenerateSandboxToken';
     var EV_RGEN_PROD_TOKEN = 'eventRegenerateProductionToken';
     var EV_RGEN_SAND_TOKEN = 'eventRegenerateSandboxToken';
+    var EV_SUB_DELETE = 'eventSubscriptionDelete';
 
     var APP_STORE = {};
 
@@ -155,24 +156,14 @@ $(function () {
     var deleteSubscriptionMetadata = function (appName, apiName, apiProvider, apiVersion, action) {
         var subscriptionDetails = findSubscriptionDetails(appName);
         if (action == 'deleteSubscription') {
-            return getUpdatedSubscriptionIndex(appName, apiName, apiProvider, apiVersion);
-        }
-    };
-
-    /*
-     The function update metadata.appsWithSubs.subscriptions
-     */
-    var getUpdatedSubscriptionIndex = function (appName, apiName, apiProvider, apiVersion) {
-        var subscriptions = findSubscriptionDetails(appName);
-        var sub;
-        for (var subIndex in subscriptions) {
-            sub = subscriptions[subIndex];
-            if (sub.name == apiName && sub.provider == apiProvider && sub.version == apiVersion) {
-                subscriptions.splice(subIndex, 1);
-                return subIndex;
+            var sub;
+            for (var subIndex in subscriptionDetails) {
+                sub = subscriptionDetails[subIndex];
+                if (sub.name == apiName && sub.provider == apiProvider && sub.version == apiVersion) {
+                    subscriptionDetails.splice(subIndex, 1);
+                }
             }
         }
-        return [];
     };
 
     /*
@@ -291,7 +282,6 @@ $(function () {
 
         $('#input-checkbox-showkeys').change(function () {
             var isChecked = $('#input-checkbox-showkeys').prop('checked');
-            console.info('Show Keys: ' + isChecked);
             APP_STORE['showKeys'] = isChecked;
             if (isChecked) {
                 events.publish(EV_SHOW_KEYS);
@@ -379,8 +369,8 @@ $(function () {
             url: getSubscriptionAPI(appName, 'deleteSubscription'),
             data: deleteAPISubscriptionData,
             success: function () {
-                var index = deleteSubscriptionMetadata(appName, apiName, apiProvider, apiVersion, 'deleteSubscription')
-                events.publish(EV_APP_SELECT, metadata.appsWithSubs[index].subscriptions);
+                deleteSubscriptionMetadata(appName, apiName, apiProvider, apiVersion, 'deleteSubscription')
+                events.publish(EV_SUB_DELETE, {appName: appName});
             }
         });
     };
@@ -394,6 +384,7 @@ $(function () {
     events.register(EV_HIDE_KEYS);
     events.register(EV_RGEN_PROD_TOKEN);
     events.register(EV_RGEN_SAND_TOKEN);
+    events.register(EV_SUB_DELETE);
 
     /*
      Keys View
@@ -512,7 +503,6 @@ $(function () {
         subscriptions: [EV_APP_SELECT, EV_SHOW_KEYS, EV_HIDE_KEYS, EV_GENERATE_SAND_TOKEN],
         partial: 'sub-keys-hidden-prod',
         resolveRender: function (data) {
-            console.info(APP_STORE.sandboxKeys);
             //Determine if the keys need to be visible
             if (APP_STORE.showKeys) {
                 return false;
@@ -542,10 +532,11 @@ $(function () {
         container: PROD_DOMAIN_CONTAINER,
         partial: 'sub-domain-token-prod',
         beforeRender: function (data) {
-            data.environment = Views.translate('Production');
-            data.allowedDomains = Views.translate('ALL');
-            data.validityTime = Views.translate('3600');
-            if ($('#subscription_selection').val() == null) {
+            if (data.appName != null) {
+                data.environment = Views.translate('Production');
+                data.allowedDomains = Views.translate('ALL');
+                data.validityTime = Views.translate('3600');
+            } else if (typeof(data.appName) != "undefined" || typeof(data.appName) == "null") {
                 data.isAppNameAvailable = Views.translate('false');
             }
         },
@@ -557,7 +548,14 @@ $(function () {
     Views.extend('defaultProductionDomainView', {
         id: 'updateProductionDomainView',
         partial: 'sub-domain-update-prod',
-        subscriptions: [EV_GENERATE_PROD_TOKEN],
+        resolveRender: function (data) {
+            if (!APP_STORE.productionKeys) {
+                return false;
+            } else {
+                return true;
+            }
+        },
+        subscriptions: [EV_APP_SELECT, EV_GENERATE_PROD_TOKEN],
         afterRender: attachUpdateProductionDomains
     });
 
@@ -566,10 +564,11 @@ $(function () {
         id: 'defaultSandboxDomainView',
         container: SAND_DOMAIN_CONTAINER,
         beforeRender: function (data) {
-            data.environment = Views.translate('Sandbox');
-            data.allowedDomains = Views.translate('ALL');
-            data.validityTime = Views.translate('3600');
-            if ($('#subscription_selection').val() == null) {
+            if (data.appName != null) {
+                data.environment = Views.translate('Sandbox');
+                data.allowedDomains = Views.translate('ALL');
+                data.validityTime = Views.translate('3600');
+            } else if (typeof(data.appName) != "undefined" || typeof(data.appName) == "null") {
                 data.isAppNameAvailable = Views.translate('false');
             }
         },
@@ -580,8 +579,15 @@ $(function () {
     Views.extend('defaultSandboxDomainView', {
         id: 'updateSandboxDomainVIew',
         partial: 'sub-domain-update-prod',
-        afterRender: attachUpdateSandboxDomains,
-        subscriptions: [EV_GENERATE_SAND_TOKEN]
+        resolveRender: function (data) {
+            if (!APP_STORE.sandboxKeys) {
+                return false;
+            } else {
+                return true;
+            }
+        },
+        subscriptions: [EV_APP_SELECT, EV_GENERATE_SAND_TOKEN],
+        afterRender: attachUpdateSandboxDomains
     });
 
     /*
@@ -593,9 +599,13 @@ $(function () {
         partial: 'sub-listing',
         beforeRender: function (data) {
             var appName = data.appName;
-            data.subscriptions = findSubscriptionDetails(appName);
+            if (appName != null) {
+                data.subscriptions = findSubscriptionDetails(appName);
+            } else {
+                data.isAppNameAvailable = Views.translate('false');
+            }
         },
-        subscriptions: [EV_APP_SELECT],
+        subscriptions: [EV_APP_SELECT, EV_SUB_DELETE],
         afterRender: function () {
         }
     });
@@ -658,7 +668,7 @@ $(function () {
         APP_STORE.appDetails = details;
         APP_STORE.productionKeys = findProdKeys(details);
         APP_STORE.sandboxKeys = findSandKeys(details);
-        //APP_STORE.showKeys = false;
+        APP_STORE.showKeys = true;
     };
 
     var defaultAppName = $('#subscription_selection').val();
