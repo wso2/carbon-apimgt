@@ -769,12 +769,18 @@ public class WSO2APIPublisher implements APIPublisher {
         }
         String hostName = CarbonUtils.getServerConfiguration().getFirstProperty("HostName");
         String backendHttpPort = getBackendPort("http");
+        String transport = "http://";
+
+        if ("-1".equals(backendHttpPort)) {
+            backendHttpPort = getBackendPort("https");
+            transport = "https://";
+        }
 
         if (hostName == null) {
             hostName = System.getProperty("carbon.local.ip");
         }
-        return "http://" + hostName + ":" + backendHttpPort+postfixUrl;
 
+        return transport + hostName + ":" + backendHttpPort + postfixUrl;
     }
 
     /**
