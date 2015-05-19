@@ -363,15 +363,10 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
         OAuth2TokenValidationResponseDTO responseDTO = clientApplicationDTO.getAccessTokenValidationResponse();
 
         if (!responseDTO.isValid()) {
-            // Convert the IS returned error code in to standard error code
-            if (responseDTO.getErrorMsg().equals("Invalid input. Access token validation failed")) {
-                tokenInfo.setTokenValid(responseDTO.isValid());
-                tokenInfo.addParameter("errorMsg", 900901);
-                return tokenInfo;
-            } else {
-                log.error("Invalid OAuth Token : " + responseDTO.getErrorMsg());
-                throw new APIManagementException("Invalid OAuth Token : " + responseDTO.getErrorMsg());
-            }
+            tokenInfo.setTokenValid(responseDTO.isValid());
+            log.error("Invalid OAuth Token : " + responseDTO.getErrorMsg());
+            tokenInfo.setErrorcode(APIConstants.KeyValidationStatus.API_AUTH_INVALID_CREDENTIALS);
+            return tokenInfo;
         }
 
         tokenInfo.setTokenValid(responseDTO.isValid());
