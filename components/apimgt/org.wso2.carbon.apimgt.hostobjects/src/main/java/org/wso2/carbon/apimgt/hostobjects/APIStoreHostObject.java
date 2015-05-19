@@ -4663,6 +4663,11 @@ public class APIStoreHostObject extends ScriptableObject {
 
     }
 
+    /**
+     * This method create the json object of the environments in the API
+     * @param api API object of selected api .
+     * @return json object of environments
+     */
     private static JSONObject getEnvironmentsOfAPI(API api) {
         APIManagerConfiguration config = HostObjectComponent.getAPIManagerConfiguration();
         Map<String, Environment> environments = config.getApiGatewayEnvironments();
@@ -4696,6 +4701,16 @@ public class APIStoreHostObject extends ScriptableObject {
         return environmentObject;
     }
 
+    /**
+     * this method used to iterate environments according to type
+     *
+     * @param environments json
+     * @param api API object of selected api .
+     * @param version version of API
+     * @param myn
+     * @param envCount count parameter
+     * @param type type of environment
+     */
     private static void createAPIEndpointsPerType(JSONObject environments, API api, String version, NativeArray myn,
                                                  int envCount, String type) {
         for (Object prodKeys : environments.keySet()) {
