@@ -75,39 +75,13 @@ public class ScopesIssuer {
 
         String consumerKey = tokReqMsgCtx.getOauth2AccessTokenReqDTO().getClientId();
         String username = tokReqMsgCtx.getAuthorizedUser();
-
-        String cacheKey = getAppUserScopeCacheKey(consumerKey, username, requestedScopes);
-        Cache cache = Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER).
-                getCache(APIConstants.APP_USER_SCOPE_CACHE);
-
         List<String> reqScopeList = Arrays.asList(requestedScopes);
 
         try {
             Map<String, String> appScopes = null;
-            Cache appCache = Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER).
-                    getCache(APIConstants.APP_SCOPE_CACHE);
-
-            //Cache hit
-            if(appCache.containsKey(consumerKey)){
-                appScopes = (Map<String, String>)appCache.get(consumerKey);
-
-                // checking the user cache only if app cache is available (since we only update app cache)
-                if(cache.containsKey(cacheKey)){
-                    tokReqMsgCtx.setScope((String [])cache.get(cacheKey));
-                    return true;
-                }
-            }
-            //Cache miss
-            else{
-                ApiMgtDAO apiMgtDAO = new ApiMgtDAO();
-                //Get all the scopes and roles against the scopes defined for the APIs subscribed to the application.
-                appScopes = apiMgtDAO.getScopeRolesOfApplication(consumerKey);
-                //If scopes is null, set empty hashmap to scopes so that we avoid adding a null entry to the cache.
-                if(appScopes == null){
-                    appScopes = new HashMap<String, String>();
-                }
-                appCache.put(consumerKey, appScopes);
-            }
+            ApiMgtDAO apiMgtDAO = new ApiMgtDAO();
+            //Get all the scopes and roles against the scopes defined for the APIs subscribed to the application.
+            appScopes = apiMgtDAO.getScopeRolesOfApplication(consumerKey);
 
             //If no scopes can be found in the context of the application
             if(appScopes.isEmpty()){
@@ -118,7 +92,6 @@ public class ScopesIssuer {
 
                 String[] allowedScopes = getAllowedScopes(reqScopeList);
                 tokReqMsgCtx.setScope(allowedScopes);
-                cache.put(cacheKey, allowedScopes);
                 return true;
             }
 
@@ -146,7 +119,6 @@ public class ScopesIssuer {
                     log.debug("Could not find roles of the user.");
                 }
                 tokReqMsgCtx.setScope(defaultScope);
-                cache.put(cacheKey, defaultScope);
                 return true;
             }
 
@@ -175,11 +147,9 @@ public class ScopesIssuer {
             }
             if(!authorizedScopes.isEmpty()){
                 String[] authScopesArr = authorizedScopes.toArray(new String[authorizedScopes.size()]);
-                cache.put(cacheKey, authScopesArr);
                 tokReqMsgCtx.setScope(authScopesArr);
             }
             else{
-                cache.put(cacheKey, defaultScope);
                 tokReqMsgCtx.setScope(defaultScope);
             }
         } catch (APIManagementException e) {
@@ -201,24 +171,6 @@ public class ScopesIssuer {
           }
         }
         return false;
-    }
-
-    private String getAppUserScopeCacheKey(String consumerKey, String username, String[] requestedScopes){
-        StringBuilder reqScopesBuilder = new StringBuilder("");
-        for(int i=0; i<requestedScopes.length; i++){
-            reqScopesBuilder.append(requestedScopes[i]);
-        }
-
-        int reqScopesHash = reqScopesBuilder.toString().hashCode();
-
-        StringBuilder cacheKey = new StringBuilder("");
-        cacheKey.append(consumerKey);
-        cacheKey.append(":");
-        cacheKey.append(username);
-        cacheKey.append(":");
-        cacheKey.append(reqScopesHash);
-
-        return cacheKey.toString();
     }
 
     /**
