@@ -41,13 +41,13 @@ $(function() {
 
         $('input:radio').change(
             function(){
-                /*if($('input:radio:checked').val() == 'inline') {
+                if($('input:radio:checked').val() == 'inline') {
                     $('.implementation_method_endpoint').css({'display':'none'});
-                    $('.api-implement-resources').css({'display':'block'});
-                } else {*/
+                    $('.api_designer').css({'display':'block'});
+                } else {
                     $('.implementation_method_endpoint').css({'display':'block'});
-                    $('.api-implement-resources').css({'display':'none'}); 
-                //}
+                    $('.api_designer').css({'display':'none'}); 
+                }
             }
         );  
 
@@ -178,8 +178,11 @@ $(function() {
                                                      dataType: "json",
                                                      onkeyup: false,
                                                      submitHandler: function(form) {
+                                                         var designer = APIMangerAPI.APIDesigner();
+                                                         $('#swagger').val(JSON.stringify(designer.api_doc));
                                                          $('#saveMessage').show();
                                                          $('#saveButtons').hide();
+
                                                          $(form).ajaxSubmit({
                                                                                 success:function(responseText, statusText, xhr, $form){
                                                                                     $('#saveMessage').hide();
