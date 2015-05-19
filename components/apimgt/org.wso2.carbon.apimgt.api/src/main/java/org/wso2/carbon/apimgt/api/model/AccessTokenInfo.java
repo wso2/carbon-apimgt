@@ -44,10 +44,21 @@ public class AccessTokenInfo {
     private long issuedTime;
 
     private long validityPeriod;
+
+    private int errorcode;
+
     private String endUserName;
 
     public String[] getScopes() {
         return scope;
+    }
+
+    public int getErrorcode() {
+        return errorcode;
+    }
+
+    public void setErrorcode(int errorcode) {
+        this.errorcode = errorcode;
     }
 
     public void setScope(String[] scope) {

@@ -245,7 +245,7 @@ public class Utils {
             //check the validity of cached OAuth2AccessToken Response
             if ((currentTime) > (issuedTime + validityPeriod)) {
                 accessTokenDO.setValidationStatus(
-                        APIConstants.KeyValidationStatus.API_AUTH_ACCESS_TOKEN_EXPIRED);
+                        APIConstants.KeyValidationStatus.API_AUTH_INVALID_CREDENTIALS);
                 if (accessTokenDO.getEndUserToken() != null) {
                     log.info("Token " + accessTokenDO.getEndUserToken() + " expired.");
                 }
