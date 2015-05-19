@@ -16,15 +16,10 @@
 
 package org.wso2.carbon.apimgt.impl;
 
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.FaultGatewaysException;
 import org.wso2.carbon.apimgt.api.model.*;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
-
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 /**
  * User aware APIProvider implementation which ensures that the invoking user has the
@@ -46,56 +41,66 @@ public class UserAwareAPIProvider extends APIProviderImpl {
     }
 
     @Override
-    public String addAPI(API api) throws APIManagementException {
+    public void addAPI(API api) throws APIManagementException {
         checkCreatePermission();
-        return super.addAPI(api);
+        super.addAPI(api);
     }
 
     @Override
-    public boolean createNewAPIVersion(JSONObject api, String newVersion) throws DuplicateAPIException,
+    public void createNewAPIVersion(API api, String newVersion) throws DuplicateAPIException,
             APIManagementException {
         checkCreatePermission();
         super.createNewAPIVersion(api, newVersion);
-        return true;
     }
 
     @Override
-    public Map<String, List<String>> updateAPI(API api) throws APIManagementException {
+    public void updateAPI(API api) throws APIManagementException, FaultGatewaysException {
         checkCreatePermission();
-        return super.updateAPI(api);
+        super.updateAPI(api);
     }
 
     @Override
-    public boolean deleteAPI(JSONObject identifier) throws APIManagementException {
+    public void manageAPI(API api) throws APIManagementException,FaultGatewaysException {
+        boolean permitted = APIUtil.checkPermissionQuietly(username, APIConstants.Permissions.API_CREATE) ||
+                APIUtil.checkPermissionQuietly(username, APIConstants.Permissions.API_PUBLISH);
+        if(!permitted){
+            String permission = APIConstants.Permissions.API_CREATE + " or " + APIConstants.Permissions.API_PUBLISH;
+            throw new APIManagementException("User '" + username + "' does not have the " +
+                    "required permission: " + permission);
+        }
+        super.updateAPI(api);
+    }
+
+    @Override
+    public void deleteAPI(APIIdentifier identifier) throws APIManagementException {
         checkCreatePermission();
-        return super.deleteAPI(identifier);
+        super.deleteAPI(identifier);
     }
 
     @Override
-    public Map<String, List<String>> changeAPIStatus(API api, APIStatus status, String userId,
-                                                     boolean updateGatewayConfig) throws APIManagementException {
+    public void changeAPIStatus(API api, APIStatus status, String userId,
+                                boolean updateGatewayConfig) throws APIManagementException, FaultGatewaysException {
         checkPublishPermission();
-        return super.changeAPIStatus(api, status, userId, updateGatewayConfig);
+        super.changeAPIStatus(api, status, userId, updateGatewayConfig);
     }
 
     @Override
-    public void addDocumentation(JSONObject api,
-                                 JSONObject documentation) throws APIManagementException {
+    public void addDocumentation(APIIdentifier apiId,
+                                 Documentation documentation) throws APIManagementException {
         checkCreatePermission();
-        super.addDocumentation(api, documentation);
+        super.addDocumentation(apiId, documentation);
     }
 
     @Override
-    public boolean removeDocumentation(JSONObject apiId, String docName,
+    public void removeDocumentation(APIIdentifier apiId, String docName,
                                     String docType) throws APIManagementException {
         checkCreatePermission();
         super.removeDocumentation(apiId, docName, docType);
-        return true;
     }
 
     @Override
-    public boolean checkIfAPIExists(String providerName,String apiName,String version) throws APIManagementException {
-        return super.checkIfAPIExists(providerName,apiName,version);
+    public boolean checkIfAPIExists(APIIdentifier apiId) throws APIManagementException {
+        return super.checkIfAPIExists(apiId);
     }
 
     @Override
@@ -106,28 +111,10 @@ public class UserAwareAPIProvider extends APIProviderImpl {
     }
    
     @Override
-    public void addDocumentationContent(JSONObject api, String documentationName,
+    public void addDocumentationContent(API api, String documentationName,
                                         String text) throws APIManagementException {
         checkCreatePermission();
         super.addDocumentationContent(api, documentationName, text);
-    }
-
-    @Override
-    public String manageAPI(JSONObject api) throws APIManagementException {
-        checkCreatePermission();
-	    return  super.manageAPI(api);
-    }
-
-	@Override
-	public String designAPI(JSONObject api) throws APIManagementException {
-		checkCreatePermission();
-		return  super.designAPI(api);
-	}
-
-    @Override
-    public String updateDesignAPI(JSONObject api) throws APIManagementException {
-        checkCreatePermission();
-        return  super.updateDesignAPI(api);
     }
 
     @Override
@@ -136,41 +123,7 @@ public class UserAwareAPIProvider extends APIProviderImpl {
         super.copyAllDocumentation(apiId, toVersion);
     }
 
-	public boolean isAPIAvailable(APIIdentifier api) throws APIManagementException {
-		checkCreatePermission();
-		return super.isAPIAvailable(api);
-	}
-
-	public boolean isApiNameExist(String apiName) throws APIManagementException {
-		checkCreatePermission();
-		return super.isApiNameExist(apiName);
-	}
-
-	public boolean isContextExist(String context) throws APIManagementException {
-		checkCreatePermission();
-		return super.isContextExist(context);
-	}
-
-	public Set<Tier> getTiers() throws APIManagementException {
-		checkCreatePermission();
-		return super.getTiers();
-	}
-
-	public String updateAPIStatus(JSONObject apiData) throws APIManagementException {
-		checkCreatePermission();
-		return super.updateAPIStatus(apiData);
-	}
-
-	public boolean hasPublishPermission() throws APIManagementException {
-		try {
-			checkPublishPermission();
-			return true;
-		} catch (APIManagementException e) {
-			return false;
-		}
-	}
-
-	public void checkCreatePermission() throws APIManagementException {
+    public void checkCreatePermission() throws APIManagementException {
         APIUtil.checkPermission(username, APIConstants.Permissions.API_CREATE);
     }
     

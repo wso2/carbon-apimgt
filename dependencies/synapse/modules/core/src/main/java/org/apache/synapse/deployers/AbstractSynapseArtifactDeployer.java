@@ -514,8 +514,8 @@ public abstract class AbstractSynapseArtifactDeployer extends AbstractDeployer {
                 try {
                     FileUtils.moveFile(file, new File(backupFilePath));
                 } catch (IOException e) {
-                    handleSynapseArtifactDeploymentError("Error while backing up the artifact: " +
-                            file.getName(), e);
+                	 log.warn("Error while backing up the artifact: ", e);
+                     return "ERROR_WHILE_BACKING_UP_ARTIFACT";
                 }
             }
         }

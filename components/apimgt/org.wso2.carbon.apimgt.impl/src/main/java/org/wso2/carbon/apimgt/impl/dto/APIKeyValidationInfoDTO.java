@@ -198,5 +198,50 @@ public class APIKeyValidationInfoDTO implements Serializable {
     public void setScopes(Set<String> scopes) {
         this.scopes = scopes;
     }
+
+    public String toString() {
+
+        StringBuilder builder = new StringBuilder(20);
+        builder.append("APIKeyValidationInfoDTO = { authorized:").append(authorized).
+                append(" , subscriber:").append(subscriber).
+                append(" , tier:").append(tier).
+                append(" , type:").append(type).
+                append(" , userType:").append(userType).
+                append(" , endUserToken:").append(endUserToken).
+                append(" , endUserName:").append(endUserName).
+                append(" , applicationId:").append(applicationId).
+                append(" , applicationName:").append(applicationName).
+                append(" , applicationTier:").append(applicationTier).
+                append(" , validationStatus:").append(validationStatus).
+                append(" , validityPeriod:").append(validityPeriod).
+                append(" , issuedTime:").append(issuedTime).
+                append(" , apiName:").append(apiName).
+                append(" , consumerKey:").append(consumerKey).
+                append(" , apiPublisher:").append(apiPublisher);
+
+        if (authorizedDomains != null && !authorizedDomains.isEmpty()) {
+            builder.append(" , authorizedDomains:[");
+            for (String domain : authorizedDomains) {
+                builder.append(domain + ",");
+            }
+            builder.replace(builder.length() - 1, builder.length() - 1, "]");
+
+        } else {
+            builder.append("]");
+        }
+
+        if (scopes != null && !scopes.isEmpty()) {
+            builder.append(" , scopes:[");
+            for (String scope : scopes) {
+                builder.append(scope + ",");
+            }
+            builder.replace(builder.length() - 1, builder.length() - 1, "]");
+
+        } else {
+            builder.append("]");
+        }
+
+        return builder.toString();
+    }
 }
 

@@ -18,10 +18,8 @@
 
 package org.wso2.carbon.apimgt.impl.workflow;
 
-import org.apache.axis2.util.JavaUtils;
 import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.impl.APIConstants;
-import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
+import org.wso2.carbon.apimgt.impl.APIManagerAnalyticsConfiguration;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dto.WorkflowDTO;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
@@ -124,11 +122,10 @@ public abstract class WorkflowExecutor implements Serializable {
     * @param workflowDTO workflow DTO
     */
     public void publishEvents(WorkflowDTO workflowDTO) {
-        APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
+        APIManagerAnalyticsConfiguration analyticsConfiguration = ServiceReferenceHolder.getInstance().
                 getAPIManagerConfigurationService().
-                getAPIManagerConfiguration();
-        String enabledStr = config.getFirstProperty(APIConstants.API_USAGE_ENABLED);
-        boolean enabled = enabledStr != null && JavaUtils.isTrueExplicitly(enabledStr);
+                getAPIAnalyticsConfiguration();
+        boolean enabled = analyticsConfiguration.isAnalyticsEnabled();
         if (enabled) {
             APIMgtWorkflowDataPublisher publisher = new APIMgtWorkflowDataPublisher();
             publisher.publishEvent(workflowDTO);

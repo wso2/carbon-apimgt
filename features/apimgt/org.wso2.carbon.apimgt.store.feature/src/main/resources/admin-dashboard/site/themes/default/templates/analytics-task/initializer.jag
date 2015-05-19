@@ -1,0 +1,13 @@
+<%
+jagg.initializer("analytics-task", {
+
+    preInitialize:function () {
+        jagg.addHeaderJS("custom-validate", "jagg", "templates/utils/custom-validation/custom-validation.js");
+        jagg.addFooterJS("handlebars", "jagg", "templates/analytics-task/js/handlebars-v1.3.0.js");
+        jagg.addFooterJS("design-api", "jagg", "templates/analytics-task/js/analytics.js");
+
+
+    }
+});
+%>
+

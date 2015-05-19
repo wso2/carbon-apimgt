@@ -62,13 +62,34 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
 
     private volatile Authenticator authenticator;
 
+    private SynapseEnvironment synapseEnvironment;
+
     public void init(SynapseEnvironment synapseEnvironment) {
+        this.synapseEnvironment = synapseEnvironment;
 		if (log.isDebugEnabled()) {
 			log.debug("Initializing API authentication handler instance");
 		}
+        if (ServiceReferenceHolder.getInstance().getApiManagerConfigurationService() != null){
+            initializeAuthenticator();
+        }
+    }
+
+    public void destroy() {        
+        if(authenticator != null) {
+        	authenticator.destroy();
+        } else {
+        	log.warn("Unable to destroy uninitialized authentication handler instance");
+        }        
+    }
+
+    private void initializeAuthenticator() {
         String authenticatorType = ServiceReferenceHolder.getInstance().getAPIManagerConfiguration().
                 getFirstProperty(APISecurityConstants.API_SECURITY_AUTHENTICATOR);
         if (authenticatorType == null) {
+            /*
+            if the APIManagerConfigurationService is not set at the time the APIAuthenticationHandler intializes
+            the authenticator is null. Then we need to initialize the authenticator in the first request
+             */
             authenticatorType = OAuthAuthenticator.class.getName();
         }
         try {
@@ -81,19 +102,14 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
         authenticator.init(synapseEnvironment);
     }
 
-    public void destroy() {        
-        if(authenticator != null) {
-        	authenticator.destroy();
-        } else {
-        	log.warn("Unable to destroy uninitialized authentication handler instance");
-        }        
-    }
-
     public boolean handleRequest(MessageContext messageContext) {
         try {
             if (Utils.isStatsEnabled()) {
                 long currentTime = System.currentTimeMillis();
                 messageContext.setProperty("api.ut.requestTime", Long.toString(currentTime));
+            }
+            if (authenticator == null) {
+                initializeAuthenticator();
             }
             if (authenticator.authenticate(messageContext)) {
                 return true;
@@ -119,18 +135,6 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
             long currentTime = System.currentTimeMillis();
             messageContext.setProperty("api.ut.backendRequestEndTime", Long.toString(currentTime));
         }
-    	if (Utils.isCORSEnabled()) {
-	    	/* For CORS support adding required headers to the response */
-	    	org.apache.axis2.context.MessageContext axis2MC = ((Axis2MessageContext) messageContext).
-	                getAxis2MessageContext();
-	    	Map<String, String> headers = (Map) axis2MC.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
-	    		    	    	
-	    	headers.put(APIConstants.CORSHeaders.ACCESS_CONTROL_ALLOW_ORIGIN, Utils.getAllowedOrigin(authenticator.getRequestOrigin()));
-	        headers.put(APIConstants.CORSHeaders.ACCESS_CONTROL_ALLOW_METHODS, Utils.getAllowedMethods());
-	        headers.put(APIConstants.CORSHeaders.ACCESS_CONTROL_ALLOW_HEADERS, Utils.getAllowedHeaders());
-	        axis2MC.setProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS, headers);
-    	}
- 
         return true;
     }
 
@@ -169,7 +173,8 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
             status = HttpStatus.SC_FORBIDDEN;
         } else {
             status = HttpStatus.SC_UNAUTHORIZED;
-            Map<String, String> headers = new HashMap<String, String>();
+            Map<String, String> headers =
+                    (Map) axis2MC.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
             headers.put(HttpHeaders.WWW_AUTHENTICATE, authenticator.getChallengeString());
             axis2MC.setProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS, headers);
         }
@@ -179,15 +184,6 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
         } else {
             Utils.setSOAPFault(messageContext, "Client", "Authentication Failure", e.getMessage());
         }
-        if (Utils.isCORSEnabled()) {
-        	/* For CORS support adding required headers to the fault response */
-        	Map<String, String> headers = (Map) axis2MC.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
-            headers.put(APIConstants.CORSHeaders.ACCESS_CONTROL_ALLOW_ORIGIN, Utils.getAllowedOrigin(authenticator.getRequestOrigin()));
-            headers.put(APIConstants.CORSHeaders.ACCESS_CONTROL_ALLOW_METHODS, Utils.getAllowedMethods());
-            headers.put(APIConstants.CORSHeaders.ACCESS_CONTROL_ALLOW_HEADERS, Utils.getAllowedHeaders());
-            axis2MC.setProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS, headers);
-        }
-        
         Utils.sendFault(messageContext, status);
     }
 

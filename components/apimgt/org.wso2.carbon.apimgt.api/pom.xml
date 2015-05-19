@@ -27,6 +27,10 @@
             <groupId>com.googlecode.json-simple.wso2</groupId>
             <artifactId>json-simple</artifactId>            
         </dependency>
+        <dependency>
+            <groupId>org.wso2.carbon</groupId>
+            <artifactId>org.wso2.carbon.registry.api</artifactId>
+        </dependency>
     </dependencies>
     <build>
         <plugins>

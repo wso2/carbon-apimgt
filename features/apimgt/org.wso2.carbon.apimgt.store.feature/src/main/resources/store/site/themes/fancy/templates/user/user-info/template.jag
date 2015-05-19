@@ -1,0 +1,80 @@
+<% jagg.template("user/user-info", function(inputs, outputs, jagg) { %>
+<%
+	var fields = outputs.fields, length = fields.length;
+        var user = session.get("logged.user");
+        var mod = jagg.module("manager");
+        var httpsUrl= mod.getHTTPsURL();
+        if(!user){ %>
+        <script>
+            location.href = "<%= jagg.getSiteContext()%>";
+        </script>
+        <% } else { var username = user.username; }%>
+        <script>
+            var context= "<%=jagg.getSiteContext()%>";
+        </script>
+<div class="title-section"><h2><%=i18n.localize("privacy")%></h2></div>
+<div class="content-section shadow-up">
+<div class="content-data">
+<h1><%=i18n.localize("changePassword")%></h1>
+<form class="form-horizontal">
+	<fieldset>
+		<div class="control-group">
+			<label class="control-label" for="currentPassword"><%=i18n.localize("currentPassword")%>:<span class="requiredAstrix">*</span></label>
+			<div class="controls"><input type="password" class="password" id="currentPassword" /></div>		            
+		</div>
+    </fieldset>
+</form>
+<form class="form-horizontal" id="change-password" autocomplete="off">
+<fieldset>
+
+    <input id="hiddenUsername" type="hidden" value="<%=username%>">
+    <input id="hiddenTenantDomain" type="hidden" value="<%=request_tenant%>">
+    <div class="control-group">
+        <label class="control-label" for="newPassword"><%=i18n.localize("newPassword")%>:<span class="requiredAstrix">*</span></label>
+        <div class="controls">
+            <div class="row-fluid">
+                    <div class="span6">
+                        <input type="password" class="input-large password validPassword" id="newPassword" name="newPassword" />
+
+                        <div class="help-block" id="password-help" style="display:none">
+                          <%=i18n.localize("pwHelpMsgLine1")%>
+                            <ul>
+                                <li><%=i18n.localize("pwHelpMsgLine2")%></li>
+                                <li><%=i18n.localize("pwHelpMsgLine3")%></li>
+                                <li><%=i18n.localize("pwHelpMsgLine4")%></li>
+                                <li><%=i18n.localize("pwHelpMsgLine5")%></li>
+                            </ul>
+
+                        </div>
+                    </div>
+                    <div class="span6">
+                        <div class="password-meter" style="display:none;">
+                            <div class="password-meter-message"></div>
+                            <div class="password-meter-bg">
+                                <div class="password-meter-bar"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+    </div>
+
+    <div class="control-group">
+            <label class="control-label" for="newPasswordConfirm"><%=i18n.localize("retypePassword")%>:<span class="requiredAstrix">*</span></label>
+            <div class="controls"><input type="password" class="matchPasswords input-large" id="newPasswordConfirm" /></div>
+    </div>
+	<input type="hidden" id="fieldCount" name="fieldCount" value="<%=length%>"/> 
+    <div class="form-actions">
+        <input class="submit btn btn-primary" type="submit" value="<%=i18n.localize("submit")%>"/>
+
+    </div> 
+</fieldset>
+      </form>
+</div>
+</div>
+
+<form id="signUpRedirectForm" method="post" action="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("templates/user/user-info/redirector.jag"))%>">
+        <input type="hidden" name="redirectToHome" id="redirectToHome" value="<%= jagg.getSiteContext() %>" />
+</form> 
+
+<% }); %>

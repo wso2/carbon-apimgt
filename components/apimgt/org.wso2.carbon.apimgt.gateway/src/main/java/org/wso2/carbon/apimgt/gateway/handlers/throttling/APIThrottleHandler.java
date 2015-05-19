@@ -47,6 +47,8 @@ import org.wso2.carbon.throttle.core.*;
 import org.wso2.carbon.throttle.core.factory.ThrottleContextFactory;
 
 import java.util.Date;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -211,18 +213,7 @@ public class APIThrottleHandler extends AbstractHandler {
             Utils.setSOAPFault(messageContext, "Server", "Message Throttled Out",
                                "You have exceeded your quota");
         }
-        org.apache.axis2.context.MessageContext axis2MC = ((Axis2MessageContext) messageContext).
-                getAxis2MessageContext();
-
-        if (Utils.isCORSEnabled()) {
-            /* For CORS support adding required headers to the fault response */
-            Map<String, String> headers = (Map) axis2MC.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
-            headers.put(APIConstants.CORSHeaders.ACCESS_CONTROL_ALLOW_ORIGIN, Utils.getAllowedOrigin((String) headers.get("Origin")));
-            headers.put(APIConstants.CORSHeaders.ACCESS_CONTROL_ALLOW_METHODS, Utils.getAllowedMethods());
-            headers.put(APIConstants.CORSHeaders.ACCESS_CONTROL_ALLOW_HEADERS, Utils.getAllowedHeaders());
-            axis2MC.setProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS, headers);
-        }
-        Utils.sendFault(messageContext, HttpStatus.SC_SERVICE_UNAVAILABLE);
+           Utils.sendFault(messageContext, HttpStatus.SC_SERVICE_UNAVAILABLE);
     }
 
     private OMElement getFaultPayload() {
@@ -430,6 +421,8 @@ public class APIThrottleHandler extends AbstractHandler {
             // gets the remote caller role name
             AuthenticationContext authContext = APISecurityUtils.getAuthenticationContext(synCtx);
             String accessToken;
+            String consumerKey;
+            String authorizedUser;
             String roleID;
             String applicationId;
             String applicationTier;
@@ -437,6 +430,8 @@ public class APIThrottleHandler extends AbstractHandler {
             if (authContext != null) {
                 //Although the method says getApiKey, what is actually returned is the Bearer header (accessToken)
                 accessToken = authContext.getApiKey();
+                consumerKey = authContext.getConsumerKey();
+                authorizedUser = authContext.getUsername();
                 roleID = authContext.getTier();
                 applicationTier = authContext.getApplicationTier();
                 applicationId = authContext.getApplicationId();
@@ -528,16 +523,10 @@ public class APIThrottleHandler extends AbstractHandler {
                 //get throttling information for given request with resource path and http verb
                 APIKeyValidator validator = new APIKeyValidator(ServiceReferenceHolder.getInstance().getConfigurationContextService().getServerConfigContext().getAxisConfiguration());
                 VerbInfoDTO verbInfoDTO = null;
-                try {
+
                     //verbInfoDTO = validator.getVerbInfoDTOFromAPIData(apiContext, apiVersion, requestPath, httpMethod);
-                    verbInfoDTO = validator.findMatchingVerb(synCtx);
-                } catch (APISecurityException e) {
-                    log.error("API Security Exception " + e.getMessage());
-                    e.printStackTrace();
-                } catch (ResourceNotFoundException e) {
-                    log.error("Could not find matching resource " + e.getMessage());
-                    e.printStackTrace();
-                }
+                verbInfoDTO = (VerbInfoDTO) synCtx.getProperty(APIConstants.VERB_INFO_DTO);
+
                 String resourceLevelRoleId = null;
                 //no data related to verb information data
                 if (verbInfoDTO == null) {
@@ -553,7 +542,10 @@ public class APIThrottleHandler extends AbstractHandler {
                     } else {
                         resourceLevelRoleId = resourceAndHTTPVerbThrottlingTier;
                     }
-                    String resourceAndHTTPVerbKey = verbInfoDTO.getRequestKey() + "-" + accessToken;
+                    //adding consumerKey and authz_user combination instead of access token to resourceAndHTTPVerbKey
+                    //This avoids sending more than the permitted number of requests in a unit time by
+                    // regenerating the access token
+                    String resourceAndHTTPVerbKey = verbInfoDTO.getRequestKey() + "-" + consumerKey + ":" + authorizedUser;
                     //resourceLevelTier should get from auth context or request synapse context
                     // getResourceAuthenticationScheme(apiContext, apiVersion, requestPath, httpMethod);
                     //api + resource+http verb combination as verb_resource_api_combined_key
@@ -641,7 +633,10 @@ public class APIThrottleHandler extends AbstractHandler {
 
                         apiContext = apiContext != null ? apiContext : "";
                         apiVersion = apiVersion != null ? apiVersion : "";
-                        String apiKey = apiContext + ":" + apiVersion + ":" + accessToken;
+                        //adding consumerKey and authz_user combination instead of access token to apiKey
+                        //This avoids sending more than the permitted number of requests in a unit time by
+                        // regenerating the access token
+                        String apiKey = apiContext + ":" + apiVersion + ":" + consumerKey + ":" + authorizedUser;
                         //If the application has not been subscribed to the Unlimited Tier and
                         //if application level throttling has passed
                         if (!APIConstants.UNLIMITED_TIER.equals(roleID) &&

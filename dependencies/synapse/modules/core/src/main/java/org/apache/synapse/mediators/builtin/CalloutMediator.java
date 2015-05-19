@@ -155,6 +155,7 @@ public class CalloutMediator extends AbstractMediator implements ManagedLifecycl
 
             if (action != null) {
                 synapseOutMsgCtx.setWSAAction(action);
+                synapseOutMsgCtx.setSoapAction(action);
             }
 
             if (synLog.isTraceOrDebugEnabled()) {

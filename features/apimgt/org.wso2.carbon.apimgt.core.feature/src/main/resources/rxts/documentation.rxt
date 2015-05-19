@@ -42,6 +42,14 @@
 		    <value>File</value>	
                 </values>
             </field>
+             <field type="options">
+                  <name label="Visibility">Visibility</name>
+                  <values>
+                       <value>API_Level</value>
+                       <value>Private</value>
+            	       <value>Shared</value>
+                  </values>
+             </field>
             <field type="text" required="true" readonly="true">
                 <name>Source URL</name>
             </field>

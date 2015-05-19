@@ -23,4 +23,6 @@ public interface APIManagerConfigurationService {
 
     public APIManagerConfiguration getAPIManagerConfiguration();
 
+    public APIManagerAnalyticsConfiguration getAPIAnalyticsConfiguration();
+
 }

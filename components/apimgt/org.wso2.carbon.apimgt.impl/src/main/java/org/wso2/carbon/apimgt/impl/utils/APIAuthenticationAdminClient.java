@@ -22,6 +22,8 @@ import org.apache.axis2.client.ServiceClient;
 import org.apache.axis2.client.Stub;
 import org.apache.axis2.context.ServiceContext;
 import org.apache.axis2.transport.http.HTTPConstants;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.handlers.security.stub.APIAuthenticationServiceStub;
 import org.wso2.carbon.apimgt.handlers.security.stub.types.APIKeyMapping;
 import org.wso2.carbon.apimgt.impl.APIConstants;
@@ -35,6 +37,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.rmi.RemoteException;
 import java.util.List;
+import java.util.Set;
 
 /**
  * A service client implementation for the APIAuthenticationService (an admin service offered
@@ -42,6 +45,8 @@ import java.util.List;
  */
 //TODO need to refactor code after design review
 public class APIAuthenticationAdminClient { // extends AbstractAPIGatewayAdminClient {
+
+    private static final Log log = LogFactory.getLog(APIAuthenticationAdminClient.class);
 
     private APIAuthenticationServiceStub stub;
 
@@ -75,13 +80,29 @@ public class APIAuthenticationAdminClient { // extends AbstractAPIGatewayAdminCl
     }
 
     /**
+     * Removes the active tokens that are cached on the API Gateway
+     * @param activeTokens - The active access tokens to be removed from the gateway cache.
+     * @throws AxisFault - If a communication error occurs.
+     */
+    public void invalidateCachedTokens(Set<String> activeTokens) throws AxisFault {
+        try {
+            stub.invalidateCachedTokens(activeTokens.toArray(new String[activeTokens.size()]));
+        } catch (RemoteException e) {
+            log.error("RemoteException occurred when calling service method 'invalidateCachedTokens' of " +
+                    "APIAuthenticationService", e);
+            throw new AxisFault("RemoteException occurred when calling service method 'invalidateCachedTokens' of " +
+                    " APIAuthenticationService" , e);
+        }
+    }
+
+    /**
      * Log into the API gateway or keyMgt as an admin, and initialize the specified client stub using
      * the established authentication session. This method will also set some timeout
      * values and enable session management on the stub so that it can be successfully used
      * for any subsequent admin service invocations.
      *
      * @param stub A client stub to be setup
-     * @throws org.apache.axis2.AxisFault if an error occurs when logging into the API gateway
+     * @throws AxisFault if an error occurs when logging into the API gateway
      */
     protected void setup(Stub stub, Environment environment) throws AxisFault {
         APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
@@ -91,7 +112,7 @@ public class APIAuthenticationAdminClient { // extends AbstractAPIGatewayAdminCl
         boolean loggedIn = false;
 
         String keyMgtKeyCacheEnabledString =
-                config.getFirstProperty(APIConstants.API_KEY_MANAGER_ENABLE_VALIDATION_INFO_CACHE);
+                config.getFirstProperty(APIConstants.API_KEY_VALIDATOR_ENABLE_VALIDATION_INFO_CACHE);
 
         //If keyMgt server key cache enabled we login to KM
         if (keyMgtKeyCacheEnabledString != null) {
@@ -129,7 +150,7 @@ public class APIAuthenticationAdminClient { // extends AbstractAPIGatewayAdminCl
      * Login to the API gateway as an admin
      *
      * @return A session cookie string
-     * @throws org.apache.axis2.AxisFault if an error occurs while logging in
+     * @throws AxisFault if an error occurs while logging in
      */
     private String loginGateway(Environment environment) throws AxisFault {
         APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
@@ -170,14 +191,14 @@ public class APIAuthenticationAdminClient { // extends AbstractAPIGatewayAdminCl
      * Login to the API keyMgt as an admin
      *
      * @return A session cookie string
-     * @throws org.apache.axis2.AxisFault if an error occurs while logging in
+     * @throws AxisFault if an error occurs while logging in
      */
     private String loginKeyMgt() throws AxisFault {
         APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
                 getAPIManagerConfigurationService().getAPIManagerConfiguration();
-        String user = config.getFirstProperty(APIConstants.API_KEY_MANAGER_USERNAME);
-        String password = config.getFirstProperty(APIConstants.API_KEY_MANAGER_PASSWORD);
-        String url = config.getFirstProperty(APIConstants.API_KEY_MANAGER_URL);
+        String user = config.getFirstProperty(APIConstants.API_KEY_VALIDATOR_USERNAME);
+        String password = config.getFirstProperty(APIConstants.API_KEY_VALIDATOR_PASSWORD);
+        String url = config.getFirstProperty(APIConstants.API_KEY_VALIDATOR_URL);
 
         if (url == null || user == null || password == null) {
             throw new AxisFault("Required API keyMgt admin configuration unspecified");
@@ -225,17 +246,17 @@ public class APIAuthenticationAdminClient { // extends AbstractAPIGatewayAdminCl
                 return environment.getServerURL() + serviceName;
             }
         }
-        String keyMgtKeyCacheEnabledString = config.getFirstProperty(APIConstants.API_KEY_MANAGER_ENABLE_VALIDATION_INFO_CACHE);
+        String keyMgtKeyCacheEnabledString = config.getFirstProperty(APIConstants.API_KEY_VALIDATOR_ENABLE_VALIDATION_INFO_CACHE);
         //If keyMgt server key cache enabled we return gateway URL
         if (keyMgtKeyCacheEnabledString != null) {
             Boolean keyMgtKeyCacheEnabled = Boolean.parseBoolean(keyMgtKeyCacheEnabledString);
             if (keyMgtKeyCacheEnabled) {
-                String url = config.getFirstProperty(APIConstants.API_KEY_MANAGER_URL);
+                String url = config.getFirstProperty(APIConstants.API_KEY_VALIDATOR_URL);
                 return url + serviceName;
             }
         }
         //By default return url of Gateway
-        //String url = config.getFirstProperty(APIConstants.API_KEY_MANAGER_URL);
+        //String url = config.getFirstProperty(APIConstants.API_KEY_VALIDATOR_URL);
         String url = environment.getServerURL();
         return url + serviceName;
     }

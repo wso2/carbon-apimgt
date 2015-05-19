@@ -19,7 +19,6 @@
 package org.wso2.carbon.apimgt.impl.internal;
 
 import org.apache.axis2.engine.ListenerManager;
-import org.apache.axis2.util.JavaUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -28,19 +27,18 @@ import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.component.ComponentContext;
 import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.impl.APIConstants;
-import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
-import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
-import org.wso2.carbon.apimgt.impl.APIManagerConfigurationServiceImpl;
-import org.wso2.carbon.apimgt.impl.APIManagerFactory;
+import org.wso2.carbon.apimgt.impl.*;
+import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.listners.UserAddListener;
 import org.wso2.carbon.apimgt.impl.observers.APIStatusObserverList;
+import org.wso2.carbon.apimgt.impl.observers.CommonConfigDeployer;
 import org.wso2.carbon.apimgt.impl.observers.SignupObserver;
 import org.wso2.carbon.apimgt.impl.observers.TenantServiceCreator;
 import org.wso2.carbon.apimgt.impl.utils.APIMgtDBUtil;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.utils.RemoteAuthorizationManager;
+import org.wso2.carbon.bam.service.data.publisher.services.ServiceDataPublisherAdmin;
 import org.wso2.carbon.base.MultitenantConstants;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.governance.api.util.GovernanceConstants;
@@ -76,7 +74,6 @@ import java.io.InputStream;
 import java.util.List;
 
 
-
 /**
  * @scr.component name="org.wso2.apimgt.impl.services" immediate="true"
  * @scr.reference name="registry.service"
@@ -100,7 +97,9 @@ import java.util.List;
  * @scr.reference name="tenant.indexloader"
  * interface="org.wso2.carbon.registry.indexing.service.TenantIndexingLoader" cardinality="1..1" policy="dynamic"
  * bind="setIndexLoader" unbind="unsetIndexLoader"
-
+ * @scr.reference name="bam.service.data.publisher"
+ * interface="org.wso2.carbon.bam.service.data.publisher.services.ServiceDataPublisherAdmin" cardinality="0..1"
+ * policy="dynamic" bind="setDataPublisherService" unbind="unsetDataPublisherService"
  */
 public class APIManagerComponent {
     //TODO refactor caching implementation
@@ -109,7 +108,10 @@ public class APIManagerComponent {
 
     private ServiceRegistration registration;
 
+    private static ServiceDataPublisherAdmin dataPublisherAdminService;
+
     private static TenantRegistryLoader tenantRegistryLoader;
+    private APIManagerConfiguration configuration = new APIManagerConfiguration();
 
 
     protected void activate(ComponentContext componentContext) throws Exception {
@@ -131,7 +133,6 @@ public class APIManagerComponent {
             APIUtil.loadTenantSelfSignUpConfigurations(tenantId);
             
             
-            APIManagerConfiguration configuration = new APIManagerConfiguration();
             String filePath = CarbonUtils.getCarbonHome() + File.separator + "repository" +
                     File.separator + "conf" + File.separator + "api-manager.xml";
             configuration.load(filePath);
@@ -146,6 +147,9 @@ public class APIManagerComponent {
                         Axis2ConfigurationContextObserver.class.getName(), listener, null);
             }
 
+            CommonConfigDeployer configDeployer = new CommonConfigDeployer();
+            bundleContext.registerService(Axis2ConfigurationContextObserver.class.getName(), configDeployer, null);
+
             SignupObserver signupObserver = new SignupObserver();
             bundleContext.registerService(Axis2ConfigurationContextObserver.class.getName(), signupObserver,null);
             
@@ -156,6 +160,9 @@ public class APIManagerComponent {
                     APIManagerConfigurationService.class.getName(),
                     configurationService, null);
             APIStatusObserverList.getInstance().init(configuration);
+
+            APIManagerAnalyticsConfiguration analyticsConfiguration = APIManagerAnalyticsConfiguration.getInstance();
+            analyticsConfiguration.setAPIManagerConfiguration(configuration);
 
             AuthorizationUtils.addAuthorizeRoleListener(APIConstants.AM_CREATOR_APIMGT_EXECUTION_ID,
                                                         RegistryUtils.getAbsolutePath(RegistryContext.getBaseInstance(),
@@ -203,19 +210,9 @@ public class APIManagerComponent {
                 }
             }
             APIUtil.createSelfSignUpRoles(MultitenantConstants.SUPER_TENANT_ID);
-            
-            /* Add Bam Server Profile for collecting southbound statistics*/
-            String enabledStr = configuration.getFirstProperty(APIConstants.API_USAGE_ENABLED);
-            boolean enabled = enabledStr != null && JavaUtils.isTrueExplicitly(enabledStr);
-            if (enabled) {
-            	String bamServerURL = configuration.getFirstProperty(APIConstants.API_USAGE_BAM_SERVER_URL);
-                String bamServerUser = configuration.getFirstProperty(APIConstants.API_USAGE_BAM_SERVER_USER);
-                String bamServerPassword = configuration.getFirstProperty(APIConstants.API_USAGE_BAM_SERVER_PASSWORD);
-                String bamServerThriftPort = configuration.getFirstProperty(APIConstants.API_USAGE_THRIFT_PORT);
-            	APIUtil.addBamServerProfile(bamServerURL, bamServerUser, bamServerPassword, 
-            			bamServerThriftPort, MultitenantConstants.SUPER_TENANT_ID);
-            }
-            
+
+            // Initialise KeyManager.
+            KeyManagerHolder.initializeKeyManager(filePath);
         } catch (APIManagementException e) {
             log.error("Error while initializing the API manager component", e);
         }
@@ -240,6 +237,21 @@ public class APIManagerComponent {
 
     protected void unsetRegistryService(RegistryService registryService) {
         ServiceReferenceHolder.getInstance().setRegistryService(null);
+    }
+
+    protected void setDataPublisherService(ServiceDataPublisherAdmin service) {
+        log.debug("Event Data Publisher service bound to the API usage handler");
+        dataPublisherAdminService = service;
+        APIManagerAnalyticsConfiguration.createNewInstance().setAPIManagerConfiguration(configuration);
+    }
+
+    protected void unsetDataPublisherService(ServiceDataPublisherAdmin service) {
+        log.debug("Event Data Publisher service unbound from the API usage handler");
+        dataPublisherAdminService = null;
+    }
+
+    public static ServiceDataPublisherAdmin getDataPublisherAdminService() {
+        return dataPublisherAdminService;
     }
 
     protected void setIndexLoader(TenantIndexingLoader indexLoader) {
@@ -470,7 +482,7 @@ public class APIManagerComponent {
     
     /**
      * Add the External API Stores Configuration to registry
-     * @throws org.wso2.carbon.apimgt.api.APIManagementException
+     * @throws APIManagementException
      */
     private void addExternalStoresConfigs() throws APIManagementException {
         RegistryService registryService = ServiceReferenceHolder.getInstance().getRegistryService();
@@ -515,5 +527,6 @@ public class APIManagerComponent {
     public static TenantRegistryLoader getTenantRegistryLoader(){
         return tenantRegistryLoader;
     }
+
 
 }
