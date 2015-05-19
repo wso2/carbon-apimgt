@@ -27,10 +27,6 @@
 	var inSequencesLoaded = false;
 	var outSequencesLoaded = false;
 	var faultSequencesLoaded = false;
-
-
-
-
 </script>
 <div class="col-sm-12 text-center">
     <ul class="new-sub-menu-wizard" style="margin:0 auto">
@@ -90,13 +86,7 @@
 											<a class="icon-question-sign help_popup" help_data="default_api_help"></a>
 
 											<p id="default_api_help" class="hide">
-												{{t "Marks one API version in a group as the default, \so that it can be invoked
-										without specifying the version number in the URL. For example, i
-										f you mark http://host:port/youtube/2.0 as the default API,
-										requests made to http://host:port/youtube/ are automatically
-										routed to version 2.0. If you mark an unpublished API as the default,
-										the previous default, published API will still be used as the default until
-										the new default API is published"}}</p>
+												{{t locale.defaultAPIHelpMsg}}</p>
 											{{#unless api.isDefaultVersion}}
 												{{#if api.hasDefaultVersion}}
 													<p class="help-block">Currently set to version
@@ -196,27 +186,23 @@
 								{{/if}}
 								<!--Response Caching -->
             <div class="form-group">
-                <label class="custom-form-label col-lg-2 col-md-2 col-sm-12 col-xs-12" for="responseCache">{{t "Response Caching"}}:</label>
+                <label class="custom-form-label col-lg-2 col-md-2 col-sm-12 col-xs-12" for="responseCache">{{t locale.responseCache}}:</label>
                 <div class="custom-form-right col-lg-5 col-md-8 col-sm-8 col-xs-12">
 										<select class="select required" id="responseCache" name="responseCache">
 											<option value="disabled {{#if api.responseCache.enabled}}checked{{/if}}">{{t
-											"Disabled"}}</option>
+											locale.enabled}}</option>
 											<option value="enabled" {{#if api.responseCache.distabled}}checked{{/if}}>{{t
-											"Enabled"}}</option>
+											locale.disabled}}</option>
 										</select>
 										<a class="icon-question-sign help_popup" help_data="cache_help"></a>
 
-										<p id="cache_help" class="hide">{{t "This option determines whether to cache the response
-										messages of the API. Caching improves performance,
-									 because the backend server does not have to process the
-									 same data for a request multiple times.
-									 To offset the risk of stale data in the cache,
-									 set an appropriate timeout period when prompted."}}</p>
+										<p id="cache_help" class="hide">{{t locale.cacheHelpMsg}}</p>
 									</div>
 								</div>
 								<div class="form-group" id="cacheTimeout" {{#unless api.responseCache
 								.enabled}}style="display:none;"{{/unless}}>
-									<label class="custom-form-label col-lg-2 col-md-2 col-sm-12 col-xs-12" for="cacheTimeout">{{t "Cache Timeout"}}:<span
+									<label class="custom-form-label col-lg-2 col-md-2 col-sm-12 col-xs-12"
+										   for="cacheTimeout">{{t locale.cacheTimeout}}:<span
 											class="requiredAstrix">*</span></label>
 
 									<div class="custom-form-right col-lg-5 col-md-8 col-sm-8 col-xs-12">
@@ -237,30 +223,26 @@
 													<select class="select required" id="subscriptions" name="subscriptions">
 														<option value="current_tenant"
 															{{#if api.subscriptionAvailabilityCurrentTenant}}
-															    selected="selected" {{/if}}>{{t "Available to current tenant only"}}</option>
+															    selected="selected" {{/if}}>{{t locale.availableToCurrentTenant}}</option>
 														<option value="all_tenants"
 															{{#if api.subscriptionAvailabilityAllTenants}}
 															    selected="selected" {{/if}}
-																>{{t "Available to all the tenants"}}</option>
+																>{{t locale.availableToAllTenants}}</option>
 														{{#unless apiConfig.enableSelectedTenantSubscription}}
 															<option value="specific_tennats" {{#if api
-															.subscriptionAvailabilitySpecificTenants}}selected="selected"{{/if}} >{{t "Available to specific tenants"}}</option>
+															.subscriptionAvailabilitySpecificTenants}}selected="selected
+															"{{/if}} >{{t locale.availableToSpecificTenants}}</option>
 														{{/unless}}
 													</select>
 												{{else}}
 													<select class="select required" id="subscriptions" name="subscriptions">
-														<option value="current_tenant" selected="selected">{{t "Available to current tenant only"}}</option>
+														<option value="current_tenant" selected="selected">{{t
+														locale.availableToCurrentTenant}}</option>
 													</select>
 												{{/if}}
 												<a class="icon-question-sign help_popup" help_data="subscriptions_help"></a>
 
-												<div id="subscriptions_help" class="hide">{{t "This option specifies the tenants who
-									can subscribe to an API in a multi-tenanted setup. <strong> Available to
-									current Tenant Only:</strong> only users in the current organization/tenant
-									domain can subscribe to the API <strong>Available to All the Tenants:</strong>
-									users of all organizations/tenant domains can subscribe to the API <strong> Available
-									to Specific Tenants:</strong> users of the organizations/tenant domains you specify as
-									well as the current tenant domain can subscribe to the API"}}</div>
+												<div id="subscriptions_help" class="hide">{{t locale.subscriptionHelpMsg}}</div>
 											</div>
 										{{/if}}
 									{{/if}}
@@ -276,7 +258,7 @@
 										       id="tenants" name="tenants" value="{{api.subscriptionTenants}}"/>
 
 										<p class="help-block"
-										   id="tennatsHelp">{{t "Comma separated list (e.g.,: tenant1,tenant2,tenant3)"}}</p>
+										   id="tennatsHelp">{{t locale.rolesHelpMsg}}</p>
 									</div>
 								</div>
 					</div>
@@ -393,10 +375,11 @@
 					</div>
 					<div class="form-actions" id="saveButtons">
 						<button class="btn btn-info" id="save_api" data-loading-text="<i class='fa fa-spinner fa-pulse'
-					id='loader'></i>Loading">{{t "Save"}}</button>
+					id='loader'></i>Loading">{{t locale.save}}</button>
 						{{#if api.isPermitted}} <button class="btn btn-primary" id="publish_api" data-loading-text="<i
 					class='fa fa-spinner fa-pulse' id='loader'></i>Loading">Save & Publish</button> {{/if}}
-						<input type="reset" class="btn btn-default" value="{{t "Cancel"}}" onclick="javascript:window.location.href='./'" />
+						<input type="reset" class="btn btn-default" value="{{t locale.cancel}}"
+							onclick="javascript:window.location.href='./'" />
 					</div>
 					</form>
 				</div>

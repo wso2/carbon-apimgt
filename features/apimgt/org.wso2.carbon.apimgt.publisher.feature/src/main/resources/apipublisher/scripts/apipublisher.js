@@ -42,6 +42,7 @@ var apipublisher = {};
     APIProviderProxy.prototype.getAllProviders = function () {
         return this.impl.getAllProviders();
     };
+
     APIProviderProxy.prototype.designAPI = function (api) {
         var apiObj = new Packages.org.json.simple.JSONObject();
         apiObj.put("provider", api.provider);
@@ -50,6 +51,7 @@ var apipublisher = {};
         apiObj.put("version", api.version);
         return this.impl.designAPI(apiObj);
     };
+
     APIProviderProxy.prototype.implementAPI = function (api) {
         var apiObj = new Packages.org.json.simple.JSONObject();
         apiObj.put("provider", api.provider);
@@ -67,9 +69,11 @@ var apipublisher = {};
         apiObj.put("wadl", api.wadl);
         return this.impl.implementAPI(apiObj);
     };
+
     APIProviderProxy.prototype.manageAPI = function (api) {
         return this.impl.manageAPI(api);
     };
+
     APIProviderProxy.prototype.updateDesignAPI = function (api) {
         var apiObj = new Packages.org.json.simple.JSONObject();
         apiObj.put("provider", api.provider);
@@ -81,36 +85,42 @@ var apipublisher = {};
         apiObj.put("visibility", api.visibility);
         apiObj.put("visibleRoles", api.visibility);
         apiObj.put("swagger", api.swagger);
-        apiObj.put("techOwner", api.techOwner);
-        apiObj.put("techOwnerEmail", api.techOwnerEmail);
-        apiObj.put("bizOwner", api.bizOwner);
-        apiObj.put("bizOwnerEmail", api.bizOwnerEmail);
+        apiObj.put("thumbnailUrl", api.thumbnailUrl);
         return this.impl.updateDesignAPI(apiObj);
     };
+
     APIProviderProxy.prototype.addDocumentation = function (api, document) {
         return this.impl.addDocumentation(api);
     };
+
     APIProviderProxy.prototype.addInlineContent = function (api, docName, content) {
         return this.impl.addInlineContent(api, docName, content);
     };
+
     APIProviderProxy.prototype.createNewAPIVersion = function (api, newVersion) {
         return this.impl.createNewAPIVersion(api, newVersion);
     };
+
     APIProviderProxy.prototype.getAllAPIUsageByProvider = function (providerName) {
         return this.impl.getAllAPIUsageByProvider(providerName);
     };
+
     APIProviderProxy.prototype.getSubscribersOfAPI = function (apiId) {
         return this.impl.getSubscribersOfAPI(apiId);
     };
+
     APIProviderProxy.prototype.getAPIsByProvider = function (providerName) {
         return this.impl.getAPIsByProvider(providerName);
     };
+
     APIProviderProxy.prototype.getSubscribersOfAPI = function (apiId) {
         return this.impl.getSubscribersOfAPI(apiId);
     };
+
     APIProviderProxy.prototype.getDefaultVersion = function (apiId) {
         return this.impl.getDefaultVersion(apiId);
     };
+
     APIProviderProxy.prototype.getCustomFaultSequences = function () {
         var sequences;
         try {
@@ -131,6 +141,7 @@ var apipublisher = {};
             };
         }
     };
+
     APIProviderProxy.prototype.getCustomInSequences = function () {
         var sequences;
         try {
@@ -151,6 +162,7 @@ var apipublisher = {};
             };
         }
     };
+
     APIProviderProxy.prototype.getCustomOutSequences = function () {
         var sequences;
         try {
@@ -171,6 +183,7 @@ var apipublisher = {};
             };
         }
     };
+
     APIProviderProxy.prototype.getEnvironments = function () {
         var environments;
         try {
@@ -191,9 +204,11 @@ var apipublisher = {};
             };
         }
     };
+
     APIProviderProxy.prototype.updateSubscription = function (apiId, status, appId) {
         return this.impl.updateSubscription(apiId, status, appId);
     };
+
     APIProviderProxy.prototype.removeDocumentation = function (apiId, docName, docType) {
         return this.impl.removeDocumentation(apiId, docName, docType);
     };
@@ -212,6 +227,7 @@ var apipublisher = {};
         identifier.put(API_VERSION, apiVersion);
         return this.impl.deleteAPI(identifier);
     };
+
     APIProviderProxy.prototype.getAPI = function (apiProvider, apiName, apiVersion) {
         var identifier = new Packages.org.json.simple.JSONObject();
         identifier.put(API_PROVIDER, apiProvider);
@@ -287,22 +303,28 @@ var apipublisher = {};
             };
         }
     };
+
     APIProviderProxy.prototype.getAllDocumentation = function (apiId) {
         return this.impl.getAllDocumentation(apiId);
     };
+
     APIProviderProxy.prototype.getAllDocumentation = function (apiId) {
         return this.impl.getAllDocumentation(apiId);
     };
+
     APIProviderProxy.prototype.getInlineContent = function (apiId, docName) {
         return this.impl.getDocumentationContent(apiId, docName);
     };
+
     APIProviderProxy.prototype.getTiers = function (tenantDomain) {
         var availableTiers = this.impl.getTiers(tenantDomain);
         return JSON.parse(availableTiers);
     };
+
     APIProviderProxy.prototype.getSubscriberAPIs = function (subscriberName) {
         return this.impl.getSubscriberAPIs(subscriberName);
     };
+
     APIProviderProxy.prototype.checkIfAPIExists = function (apiProvider, apiName, apiVersion) {
         return this.impl.checkIfAPIExists(apiProvider, apiName, apiVersion);
     };
@@ -523,6 +545,32 @@ var apipublisher = {};
                 error:true,
                 message:e.message.split(":")[1]
 
+            };
+        }
+    };
+
+    APIProviderProxy.prototype.hasPublishPermission = function () {
+        var success, log = new Log();
+        try {
+            success = this.impl.hasPublishPermission();
+            if (log.isDebugEnabled()) {
+                log.debug("hasPublishPermission method " );
+            }
+            if(success){
+                return {
+                    error:false,
+                    permitted:success
+                };
+            }else{
+                return {
+                    error:true,
+                    permitted:success
+                }; }
+        } catch (e) {
+            log.error(e.message);
+            return {
+                error:true,
+                permitted:false
             };
         }
     };

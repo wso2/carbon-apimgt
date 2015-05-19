@@ -1869,18 +1869,27 @@ Set<API> apiSet) throws APIManagementException {
 		
 	}
 
-	public void removeSubscription(APIIdentifier identifier, String userId, int applicationId)
+    /**
+     * This method will remove the subscription according to the provided parameters.
+     *
+     * @param identifier API identifier of removed API
+     * @param userId, applicationId
+     * @throws APIManagementException
+     */
+    public void removeSubscription(APIIdentifier identifier, String userId, int applicationId)
             throws APIManagementException {
         apiMgtDAO.removeSubscription(identifier, applicationId);
         if (APIUtil.isAPIGatewayKeyCacheEnabled()) {
             invalidateCachedKeys(applicationId, identifier);
         }
-        if(log.isDebugEnabled()){
+        if (log.isDebugEnabled()) {
             String appName = apiMgtDAO.getApplicationNameFromId(applicationId);
-            String logMessage = "API Name: " + identifier.getApiName() + ", API Version "+identifier.getVersion()+" subscription removed by " + userId +" from app "+ appName;
+            String logMessage = "API Name: " + identifier.getApiName() + ", API Version " + identifier.getVersion()
+                    + " subscription removed by " + userId + " from app " + appName;
             log.debug(logMessage);
         }
     }
+
     /**
      *
      * @param applicationId Application ID related cache keys to be cleared

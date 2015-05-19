@@ -126,8 +126,12 @@ public final class APIConstants {
     public static final String GA_CONFIGURATION_LOCATION = APIMGT_REGISTRY_LOCATION + "/statistics/ga-config.xml";
 
     public static final String WORKFLOW_EXECUTOR_LOCATION = API_APPLICATION_DATA_LOCATION + "/workflow-extensions.xml";
-
+    
     public static final String WORKFLOW_MEDIA_TYPE = "workflow-config";
+    
+    public static final String API_LIFE_CYCLE_LOCATION = GOVERNANCE_COMPONENT_REGISTRY_LOCATION + "/lifecycles/APILifeCycle";
+    
+    public static final String XML_MEDIA_TYPE = "application/xml";
     
     //registry resource containing the self signup user config
     public static final String SELF_SIGN_UP_CONFIG_LOCATION = API_APPLICATION_DATA_LOCATION + "/sign-up-config.xml";

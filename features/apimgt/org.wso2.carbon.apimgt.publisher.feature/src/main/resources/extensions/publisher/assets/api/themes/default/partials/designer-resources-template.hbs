@@ -31,7 +31,7 @@
                 <input type="text" id="inputResource" placeholder="Resource" class="form-control">
             </div>
             <div class="custom-form-right col-lg-1 col-md-4 col-sm-3 col-xs-2">
-            <button class="btn" type="button" id="add_resource" style="margin:0 0 10px 10px;"><i class="icon-plus-sign"></i>&nbsp;{{t "addNewResource"}}</button>
+            <button class="btn" type="button" id="add_resource" style="margin:0 0 10px 10px;"><i class="icon-plus-sign"></i>&nbsp;{{t "Add New Resource"}}</button>
             </div>
         </div>
 
@@ -51,7 +51,7 @@
             </td>
             <td class="resource_expand"><a class="resource-path">{{ ../path }}</a></td>    
             <td  width="99%"><span class="operation-summary change_summary" data-path="$.apis[{{ ../../index}}].file.apis[{{ ../index }}].operations[{{ @index }}]" data-attr="summary" >{{ summary }}</span></td>
-            <td class="delete_resource_td "><a class='operation-summary delete_resource' data-path-name="{{ ../path }}" data-path="$.apis[{{ ../../index}}].file.apis[{{ ../index }}].operations" data-index="{{ @index }}"><i class='icon-trash'></i></a></td>
+            <td class="delete_resource_td "><a class='operation-summary delete_resource' data-path-name="{{ ../path }}" data-path="$.apis[{{ ../../index}}].file.apis[{{ ../index }}].operations" data-index="{{ @index }}"><i class='fa fa-trash'></i></a></td>
         </tr>
         <tr><td colspan="4" class="resource_body" data-path="$.apis[{{ ../../index}}].file.apis[{{ ../index }}].operations[{{ @index }}]"></td></tr>
         {{/each}}
