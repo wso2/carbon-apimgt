@@ -181,7 +181,7 @@ asset.manager = function(ctx) {
                 api.endpoint_config= options.attributes.endpoint_config;
                 api.destinationStats= options.attributes.destinationStats;
                 api.advertiseOnly= options.attributes.overview_advertiseOnly;
-                //api.swagger = generate_swagger_object(options.attributes.swagger);
+                api.swagger = generate_swagger_object(options.attributes.swagger);
 
                 var apiProxy = apiPublisher.instance(ctx.username);
                 result = apiProxy.implementAPI(api);
