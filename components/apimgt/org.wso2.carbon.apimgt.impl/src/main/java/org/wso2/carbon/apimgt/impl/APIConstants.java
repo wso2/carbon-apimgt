@@ -331,7 +331,11 @@ public final class APIConstants {
     public static final String TOKEN_URL = "TokenURL";
     public static final String REVOKE_URL = "RevokeURL";
 
+
+    public static final String DEVICE_SCOPE_PATTERN = "^device_.*";
+    public static final String OPEN_ID_SCOPE_NAME = "openid";
     public static final String API_KEY_MANGER_VALIDATIONHANDLER_CLASS_NAME = API_KEY_VALIDATOR + "KeyValidationHandlerClassName";
+    public static final String API_KEY_MANGER_SCOPE_WHITELIST = API_KEY_VALIDATOR + "ScopeWhitelist.Scope";
 
     public static final String API_KEY_MANAGER_THRIFT_SERVER_HOST = API_KEY_VALIDATOR + "ThriftServerHost";
     public static final String API_KEY_VALIDATOR_CLIENT_TYPE = API_KEY_VALIDATOR + "KeyValidatorClientType";
