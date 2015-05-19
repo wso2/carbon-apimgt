@@ -45,7 +45,6 @@ var version = outputs.api.version;
 var swaggerAPI = jagg.url("/api-docs"+"/"+providerValUe+"/"+apiName+"/"+version);
 
 var api = outputs.api;%>
-<input type="hidden" id="environments_values" value='<%=JSON.parse(api.serverURL)%>'/>
   <script type="text/javascript">
     $(function () {
       window.swaggerUi = new SwaggerUi({
@@ -87,25 +86,23 @@ $(document).ready(function(){
 var show_environments = function(){
     var type = $("#key_type").val();
     $("#environment_name").children('option').hide();
-    $("#environment_name").children("option[class=" + type + "]").show();
-    var options = $("#environment_name").children("option[class=" + type + "]");
-    if(options.length != 0){
+    $("#environment_name").children("option[class='" + type + "']").show();
+    var options = $("#environment_name").children("option[class='"+ type + "']");
+    if(options.length > 0){
     options[0].selected=true;
+    if (options.length == 1) {
+      $("#environment_name").hide();
+    }
     }else{
     $("#environment_name").children("option[class='hybrid']")[0].selected = true;
+    $("#environment_name").hide();
     }
     select_environment();
           };
 var select_environment = function(){
     var selectedEnvironment = $("#environment_name");
-    var type = $("option:selected",selectedEnvironment).attr("class");
     var name =selectedEnvironment.val();
-    var environment_urls =$("#environments_values").val();
-    var protocol = location.protocol;
-    var environmentUrl= JSON.parse(environment_urls)[type][name][protocol.substring(0,protocol.length-1)];
-    swaggerUi.api.host = "localhost:8280";
-    swaggerUi.render();
-
+    window.swaggerUi.updateSwaggerUi({ "url" : swaggerUi.api.url + "?envName="+name});   
           };
   $("#access_token").change(function(){
     var key = $(this).val();

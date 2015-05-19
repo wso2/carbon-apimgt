@@ -46,7 +46,7 @@ var log = new Log();
         var host = getLocation(url).host;
         var port = getLocation(url).port;
         var accessProtocol = getLocation(url).protocol;
-
+        var envName = request.getParameter("envName");
         var tenantDomain = "";
         var tenantID = -1234;
 	    var isTenantFlowStarted = false;
@@ -106,9 +106,18 @@ var log = new Log();
         for(var type in splitVal){
             var environmentsToType = splitVal[type];
             for(var name in environmentsToType ){
-            var environmentURL = environmentsToType[name];
-                urlArr[count] = environmentURL["https"];
+                var environmentURL;
+                if(envName == name){
+                    environmentURL = environmentsToType[name];
+                    urlArr[count] = environmentURL[accessProtocol.replace(":","")];
+                    count++;
+                    break;
+                }else{
+                var environmentURL = environmentsToType[name];
+                urlArr[count] = environmentURL[accessProtocol.replace(":","")];
                 count++;
+                }
+           
             }
         }
         if(urlArr.length===1){
@@ -127,25 +136,10 @@ var log = new Log();
         jsonObj.basePath = api.context;
 
 	//assign default value to host with first environment address
-	if (urlArr.length > 0 && urlArr[0].indexOf("https") == 0) {
-	        jsonObj.host = urlArr[0].trim().replace("https://","");
-	} else {
-		jsonObj.host = urlArr[0].trim().replace("http://","");
+	if (urlArr.length > 0 ) {
+	        jsonObj.host = urlArr[0].trim().replace(accessProtocol+"//","");
 	}
 
-	if (accessProtocol.indexOf("https:") == 0) {
-		for (var i =0; i < urlArr.length; i++) {
-			if (urlArr[i].indexOf("https") != -1) {
-				jsonObj.host = urlArr[i].trim().replace("https://","");
-			}
-		}
-	} else {
-		for (var i =0; i < urlArr.length; i++) {
-			if (urlArr[i].indexOf("https") == -1) {
-				jsonObj.host = urlArr[i].trim().replace("http://","");
-			}
-		}
-	}
 
         var paths = {}; //fix for /*
         for (var property in jsonObj.paths) {
