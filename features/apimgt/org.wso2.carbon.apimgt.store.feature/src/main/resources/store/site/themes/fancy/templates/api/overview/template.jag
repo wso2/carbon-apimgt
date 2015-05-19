@@ -25,35 +25,39 @@
             }
         }
         else{
-    	    var environments = api.serverURL.split("|");
-    	    for (j=0; j<environments.length; j++){
-    	        var environment = environments[j];
-    	        var epParams =  environment.split(",");
-    	        %>
-    	            <h5><%=epParams[0]%> <%=i18n.localize("urls")%>:</h5>
+    	    var environments = JSON.parse(api.serverURL);
+            var log = new Log();
+    	    for(var environmentType in environments){
+    	        var environmentsPerType = environments[environmentType];
+                if(environmentType == "production"){
+                    %>
+                    <h4>PRODUCTION Endpoints</h4>
+                    <%} else if(environmentType == "sandbox"){
+                        %>
+                    <h4>SANDBOX Endpoints</h4>
+                <%}
+                    for( var environmentName in environmentsPerType){
+                        var environmenturls = environmentsPerType[environmentName];
+                %>
+    	            <h5><%=environmentName%> <%=i18n.localize("urls")%>:</h5>
 
     	        <%
                 // since we are using context versioning, we remove the api.version from the URL.
                 // The reason is that the context will have the version now
-    	        for (i = 1; i < epParams.length; i++) {
-    	            %>
-    	            <div  class="well well-small api_urls"><%=epParams[i]%><%=api.context%>
+    	        for (var urltype in environmenturls ) {
+                    %>
+    	            <div  class="well well-small api_urls"><%=environmenturls[urltype]%><%=api.context%>
                         <%if (api.isDefaultVersion){
                             var apiContext = api.context;
                             apiContext = apiContext.replace(api.version + "/", "");
                             apiContext = apiContext.replace(api.version, "");%>
-                            <br><%=epParams[i]%><%=apiContext%>
+                            <br><%=d[x]%><%=apiContext%>
                         <%}%>
                     </div>
-
-    	            <%
-    	        }
-    	        %>
-
-    	        <%
-    	    }
-        }
-	    %>
+    	            <%}
+                    }
+                    }
+                    }%>
     <%}%>
     <% if(api.wsdl && api.wsdl != ""){ %>        
     <p>

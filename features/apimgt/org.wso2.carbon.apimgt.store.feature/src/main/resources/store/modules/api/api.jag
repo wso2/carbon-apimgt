@@ -8,7 +8,7 @@ var getAPIDescription = function (api, username) {
 		var encode = require('encode');
     		encode = new encode.Encode();
         	var api2 = store.getAPI(api.provider, api.name, api.version, username);
-		        
+
         if (log.isDebugEnabled()) {
             log.debug("getAPI : " + stringify(api));
         }

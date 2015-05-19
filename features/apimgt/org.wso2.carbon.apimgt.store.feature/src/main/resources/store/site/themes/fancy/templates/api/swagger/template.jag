@@ -52,7 +52,7 @@ var api = outputs.api;%>
       dom_id: "swagger-ui-container",
       supportedSubmitMethods: ['get', 'post', 'put', 'delete'],
       onComplete: function(swaggerApi, swaggerUi){
-        console.log("Loaded SwaggerUI");        
+        console.log("Loaded SwaggerUI");
       },
       onFailure: function(data) {
         console.log("Unable to Load SwaggerUI");
@@ -83,22 +83,45 @@ $(document).ready(function(){
     }     
     $("#access_token").trigger("change");
   };
-
+var show_environments = function(){
+    var type = $("#key_type").val();
+    $("#environment_name").children('option').hide();
+    $("#environment_name").children("option[class='" + type + "']").show();
+    var options = $("#environment_name").children("option[class='"+ type + "']");
+    if(options.length > 0){
+    options[0].selected=true;
+    if (options.length == 1) {
+      $("#environment_name").hide();
+    }
+    }else{
+    $("#environment_name").children("option[class='hybrid']")[0].selected = true;
+    $("#environment_name").hide();
+    }
+    select_environment();
+          };
+var select_environment = function(){
+    var selectedEnvironment = $("#environment_name");
+    var name =selectedEnvironment.val();
+    window.swaggerUi.updateSwaggerUi({ "url" : swaggerUi.api.url + "?envName="+name});   
+          };
   $("#access_token").change(function(){
     var key = $(this).val();
     if(key && key.trim() != "") {
       swaggerUi.api.clientAuthorizations.add("key", new SwaggerClient.ApiKeyAuthorization("Authorization", "Bearer "+ key, "header"));
-    }        
+    }
   });
 
   $("#sub_app_list").change(change_token);
   $("#key_type").change(change_token);
+  $("#key_type").change(show_environments);
+  $("#environment_name").change(select_environment);
+  show_environments();
   change_token();
-});  
+});
 </script>
 <div id="authorizations" class="">
     <form class="form-horizontal">
-<% if(subscriptions != null && subscriptions.length > 0) { %>    
+<% if(subscriptions != null && subscriptions.length > 0) { %>
       <div class="control-group"  style="margin-bottom:10px;">
         <label class="control-label" for="inputEmail">Try</label>
         <div class="controls form-inline">
@@ -110,15 +133,27 @@ $(document).ready(function(){
           <label> On </label>
           <select id="key_type">
             <option value="production">Production</option>
-            <option value="sandbox">Sandbox</option>        
-          </select> 
-          <label> Environment. </label>
+            <option value="sandbox">Sandbox</option>
+          </select>
+          <select id="environment_name">
+          <%
+          var envir = JSON.parse(api.serverURL);
+          for(var types in envir){
+            var endpointType=envir[types];
+            for(var endpoint in endpointType){
+            %>
+               <option value="<%=endpoint%>" class="<%=types%>"><%=endpoint%></option>
+         <%   }
+          }
+          %>
+            </select>
+          <!--label> Environment. </label-->
         </div>
       </div>
 <% }else if(jagg.getUser() != null){ %>
     <div class="alert alert-info" style="margin-bottom:10px">
-    <i class="fa fa-info"></i> &nbsp;&nbsp; Please subscribe to the API to generate an access token. If you already have an access token please provide it bellow. 
-    </div>  
+    <i class="fa fa-info"></i> &nbsp;&nbsp; Please subscribe to the API to generate an access token. If you already have an access token please provide it bellow.
+    </div>
 <% }else{ %>
     <div class="alert alert-info" style="margin-bottom:10px">
     <i class="fa fa-info"></i> &nbsp;&nbsp;You require an access token to try the API. Please login and subscribe to API to generate an access token. If you already have an access token please provide it bellow.
