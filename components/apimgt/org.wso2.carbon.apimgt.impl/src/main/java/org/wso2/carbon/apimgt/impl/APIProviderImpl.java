@@ -1074,6 +1074,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 throw new DuplicateAPIException("API version already exist with version :"
                                                 + newVersion);
             }
+            registry.beginTransaction();
             Resource apiSourceArtifact = registry.get(apiSourcePath);
             GenericArtifactManager artifactManager = APIUtil.getArtifactManager(registry,
                                                                                 APIConstants.API_KEY);
@@ -1152,7 +1153,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     registry.applyTag(targetPath, tag.getTagName());
                 }
             }
-
+            
+            
             // Retain the docs
             List<Documentation> docs = getAllDocumentation(api.getId());
             APIIdentifier newId = new APIIdentifier(api.getId().getProviderName(),
@@ -1234,14 +1236,20 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             }
 
             apiMgtDAO.addAPI(newAPI,tenantId);
+            registry.commitTransaction();
 
-        } catch (RegistryException e) {
-            String msg = "Failed to create new version : " + newVersion + " of : "
-                         + api.getId().getApiName();
-            handleException(msg, e);
         } catch (ParseException e) {
-            String msg = "Couldn't Create json Object from Swagger object for version" + newVersion + " of : "
-                         + api.getId().getApiName();
+            String msg =
+                         "Couldn't Create json Object from Swagger object for version" + newVersion + " of : " +
+                                 api.getId().getApiName();
+            handleException(msg, e);
+        } catch (Exception e) {
+            try {
+                registry.rollbackTransaction();
+            } catch (RegistryException re) {
+                handleException("Error while rolling back the transaction for API: " + api.getId(), re);
+            }
+            String msg = "Failed to create new version : " + newVersion + " of : " + api.getId().getApiName();
             handleException(msg, e);
         }
     }
