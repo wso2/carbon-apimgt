@@ -2759,6 +2759,7 @@ public class APIStoreHostObject extends ScriptableObject {
                 if(scopeName != null && !scopeName.isEmpty()) {
                     scopeBuilder.append(scopeName);
                     scopeBuilder.append(", ");
+                    scopeName = "";
                 }
 			}
 		}
