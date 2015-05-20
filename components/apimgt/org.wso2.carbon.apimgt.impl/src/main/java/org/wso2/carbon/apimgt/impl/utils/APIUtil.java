@@ -257,6 +257,8 @@ public final class APIUtil {
             }
             api.addAvailableTiers(availableTier);
             api.setContext(artifact.getAttribute(APIConstants.API_OVERVIEW_CONTEXT));
+            // We set the context template here
+            api.setContextTemplate(artifact.getAttribute(APIConstants.API_OVERVIEW_CONTEXT_TEMPLATE));
             api.setLatest(Boolean.valueOf(artifact.getAttribute(APIConstants.API_OVERVIEW_IS_LATEST)));
 
 
@@ -2025,7 +2027,7 @@ public final class APIUtil {
 
             if ((currentTime - timestampSkew) > (issuedTime + validityPeriod)) {
                 accessTokenDO.setValidationStatus(
-                        APIConstants.KeyValidationStatus.API_AUTH_ACCESS_TOKEN_EXPIRED);
+                        APIConstants.KeyValidationStatus.API_AUTH_INVALID_CREDENTIALS);
                 if (accessTokenDO.getEndUserToken() != null) {
                     log.info("Token " + accessTokenDO.getEndUserToken() + " expired.");
                 }
@@ -3750,11 +3752,12 @@ public final class APIUtil {
             clientDomain = clientDomain.trim();
         }
         List<String> authorizedDomains = apiKeyValidationInfoDTO.getAuthorizedDomains();
-        if (!(authorizedDomains.contains("ALL") || authorizedDomains.contains(clientDomain))) {
+        if (authorizedDomains != null && !(authorizedDomains.contains("ALL") || authorizedDomains.contains(clientDomain)
+        )) {
             log.error("Unauthorized client domain :" + clientDomain +
-                    ". Only \"" + authorizedDomains + "\" domains are authorized to access the API.");
+                      ". Only \"" + authorizedDomains + "\" domains are authorized to access the API.");
             throw new APIManagementException("Unauthorized client domain :" + clientDomain +
-                    ". Only \"" + authorizedDomains + "\" domains are authorized to access the API.");
+                                             ". Only \"" + authorizedDomains + "\" domains are authorized to access the API.");
         }
 
     }

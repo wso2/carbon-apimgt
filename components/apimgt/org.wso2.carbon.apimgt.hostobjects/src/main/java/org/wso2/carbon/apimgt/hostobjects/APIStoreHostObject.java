@@ -1959,33 +1959,19 @@ public class APIStoreHostObject extends ScriptableObject {
                     index++;
                 }
             } else {
-                APIManagerConfiguration config = HostObjectComponent.getAPIManagerConfiguration();
-                Map<String, Environment> environments = config.getApiGatewayEnvironments();
-                Set<String> environmentsPublishedByAPI = new HashSet<String>(api.getEnvironments());
-                environmentsPublishedByAPI.remove("none");
+                JSONObject environmentsObject = getEnvironmentsOfAPI(api);
+                JSONObject productionEnvironmentObjects = (JSONObject) environmentsObject.get("production");
+                JSONObject sandboxEnvironmentObjects = (JSONObject) environmentsObject.get("sandbox");
+                JSONObject hybridEnvironmentObjects = (JSONObject) environmentsObject.get("hybrid");
                 int envCount = 0;
-                for (String environmentName : environmentsPublishedByAPI) {
-                    NativeObject appObj = new NativeObject();
-                    appObj.put("environmentName", appObj, environmentName);
-                    Environment environment = environments.get(environmentName);
-                    String envURLString = filterUrls(environment.getApiGatewayEndpoint(), api.getTransports());
-                    String[] envURLs = envURLString.split(",");
-
-                    NativeArray envs = new NativeArray(0);
-                    int index = 0;
-
-                    for (String envURL : envURLs) {
-                        envs.put(index, envs, envURL + api.getContext());
-                        if (api.isDefaultVersion()) {
-                            String apiContext = api.getContext();
-                            apiContext = apiContext.replace(version + "/", "");
-                            envs.put(++index, envs, envURL + apiContext);
-                        }
-                        index++;
-                    }
-                    appObj.put("environmentURLs", appObj, envs);
-                    myn.put(envCount, myn, appObj);
-                    envCount++;
+                if (!productionEnvironmentObjects.isEmpty()) {
+                    createAPIEndpointsPerType(productionEnvironmentObjects, api, version, myn, envCount, "production");
+                }
+                if (!sandboxEnvironmentObjects.isEmpty()) {
+                    createAPIEndpointsPerType(sandboxEnvironmentObjects, api, version, myn, envCount, "sandbox");
+                }
+                if (!hybridEnvironmentObjects.isEmpty()) {
+                    createAPIEndpointsPerType(hybridEnvironmentObjects, api, version, myn, envCount, "hybrid");
                 }
             }
 
@@ -2051,25 +2037,7 @@ public class APIStoreHostObject extends ScriptableObject {
                         int userRate = apiConsumer.getUserRating(apiIdentifier, user);
                         row.put("userRate", row, userRate);
                     }
-                    APIManagerConfiguration config = HostObjectComponent.getAPIManagerConfiguration();
-                    Map<String, Environment> environments = config.getApiGatewayEnvironments();
-                    StringBuilder envDetails = new StringBuilder();
-                    Set<String> environmentsPublishedByAPI =
-                            new HashSet<String>(api.getEnvironments());
-                    environmentsPublishedByAPI.remove("none");
-                    for (String environmentName : environmentsPublishedByAPI) {
-                        Environment environment = environments.get(environmentName);
-                        envDetails.append(environment.getName() + ",");
-                        envDetails.append(filterUrls(environment.getApiGatewayEndpoint(),
-                                                     api.getTransports()) + "|");
-                    }
-                    if (!envDetails.toString().isEmpty()) {
-                        //removig last seperator mark
-                        envDetails = envDetails.deleteCharAt(envDetails.length() - 1);
-
-                    }
-                    //row.put("serverURL", row, config.getFirstProperty(APIConstants.API_GATEWAY_API_ENDPOINT));
-                    row.put("serverURL", row, envDetails.toString());
+                    row.put("serverURL", row, getEnvironmentsOfAPI(api).toJSONString());
                     NativeArray tierArr = new NativeArray(0);
                     Set<Tier> tierSet = api.getAvailableTiers();
                     if (tierSet != null) {
@@ -2209,32 +2177,17 @@ public class APIStoreHostObject extends ScriptableObject {
         return myn;
     }
 
-    private static String filterUrls(String apiData, String transports) {
-        if (apiData != null && transports != null) {
-            List<String> urls = new ArrayList<String>();
-            List<String> transportList = new ArrayList<String>();
-            urls.addAll(Arrays.asList(apiData.split(",")));
-            transportList.addAll(Arrays.asList(transports.split(",")));
-            urls = filterUrlsByTransport(urls, transportList, "https");
-            urls = filterUrlsByTransport(urls, transportList, "http");
-            String urlString = urls.toString();
-            return urlString.substring(1, urlString.length() - 1);
-        }
-        return apiData;
-    }
-
-    private static List<String> filterUrlsByTransport(List<String> urlsList, List<String> transportList, String transportName) {
-        if (!transportList.contains(transportName)) {
-            ListIterator<String> it = urlsList.listIterator();
-            while (it.hasNext()) {
-                String url = it.next();
-                if (url.startsWith(transportName + ":")) {
-                    it.remove();
+    private static String filterUrlsByTransport(List<String> urlsList, List<String> transportList,
+                                                String transportName) {
+        String endpointUrl = "";
+        if (transportList.contains(transportName)) {
+       for (String env : urlsList){
+                if (env.startsWith(transportName + ":")) {
+                    endpointUrl = env;
                 }
             }
-            return urlsList;
         }
-        return urlsList;
+        return endpointUrl;
     }
 
     public static boolean jsFunction_isSubscribed(Context cx, Scriptable thisObj,
@@ -4713,4 +4666,75 @@ public class APIStoreHostObject extends ScriptableObject {
 
     }
 
+    /**
+     * This method create the json object of the environments in the API
+     * @param api API object of selected api .
+     * @return json object of environments
+     */
+    private static JSONObject getEnvironmentsOfAPI(API api) {
+        APIManagerConfiguration config = HostObjectComponent.getAPIManagerConfiguration();
+        Map<String, Environment> environments = config.getApiGatewayEnvironments();
+        JSONObject environmentObject = new JSONObject();
+        JSONObject productionEnvironmentObject = new JSONObject();
+        JSONObject sandboxEnvironmentObject = new JSONObject();
+        JSONObject hybridEnvironmentObject = new JSONObject();
+        Set<String> environmentsPublishedByAPI =
+                new HashSet<String>(api.getEnvironments());
+        environmentsPublishedByAPI.remove("none");
+        for (String environmentName : environmentsPublishedByAPI) {
+            Environment environment = environments.get(environmentName);
+            JSONObject jsonObject = new JSONObject();
+            List<String> environmenturls = new ArrayList<String>();
+            environmenturls.addAll(Arrays.asList((environment.getApiGatewayEndpoint().split(","))));
+            List<String> transports = new ArrayList<String>();
+            transports.addAll(Arrays.asList((api.getTransports().split(","))));
+            jsonObject.put("http", filterUrlsByTransport(environmenturls, transports, "http"));
+            jsonObject.put("https", filterUrlsByTransport(environmenturls, transports, "https"));
+            if (APIConstants.GATEWAY_ENV_TYPE_PRODUCTION.equals(environment.getType())) {
+                productionEnvironmentObject.put(environment.getName(), jsonObject);
+            } else if (APIConstants.GATEWAY_ENV_TYPE_SANDBOX.equals(environment.getType())) {
+                sandboxEnvironmentObject.put(environment.getName(), jsonObject);
+            } else {
+                hybridEnvironmentObject.put(environment.getName(), jsonObject);
+            }
+        }
+        environmentObject.put(APIConstants.GATEWAY_ENV_TYPE_PRODUCTION, productionEnvironmentObject);
+        environmentObject.put(APIConstants.GATEWAY_ENV_TYPE_SANDBOX, sandboxEnvironmentObject);
+        environmentObject.put(APIConstants.GATEWAY_ENV_TYPE_HYBRID, hybridEnvironmentObject);
+        return environmentObject;
+    }
+
+    /**
+     * this method used to iterate environments according to type
+     *
+     * @param environments json
+     * @param api API object of selected api .
+     * @param version version of API
+     * @param myn
+     * @param envCount count parameter
+     * @param type type of environment
+     */
+    private static void createAPIEndpointsPerType(JSONObject environments, API api, String version, NativeArray myn,
+                                                 int envCount, String type) {
+        for (Object prodKeys : environments.keySet()) {
+            JSONObject environmentObject = (JSONObject) environments.get(prodKeys);
+            NativeObject appObj = new NativeObject();
+            appObj.put("environmentName", appObj, prodKeys);
+            appObj.put("environmentType", appObj, type);
+            NativeArray envs = new NativeArray(0);
+            int index = 0;
+            for (Object envURL : environmentObject.entrySet()) {
+                envs.put(index, envs, envURL + api.getContext());
+                if (api.isDefaultVersion()) {
+                    String apiContext = api.getContext();
+                    apiContext = apiContext.replace(version + "/", "");
+                    envs.put(++index, envs, envURL + apiContext);
+                }
+                index++;
+                appObj.put("environmentURLs", appObj, envs);
+                myn.put(envCount, myn, appObj);
+                envCount++;
+            }
+        }
+    }
 }
