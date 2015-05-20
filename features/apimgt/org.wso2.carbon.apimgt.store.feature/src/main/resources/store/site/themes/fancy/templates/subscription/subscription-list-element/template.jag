@@ -15,6 +15,13 @@
 	   if (length % itemsPerPage != 0) {
 	   		numberOfPages++;
 	   }
+	   var prodKeyScopeArray, sandKeyScopeArray;
+	   if(app.prodKeyScopeValue != null){
+	   		var prodKeyScopeArray = app.prodKeyScopeValue.split(" ");
+	   }
+	   if(app.sandKeyScopeValue != null){
+	   		var sandKeyScopeArray = app.sandKeyScopeValue.split(" ");
+	   }
 %>
 
         <input type="hidden"  class="prodAccessTokenHidden" id="prodAccessTokenHiddenID" value="<%=app.prodKey%>" >
@@ -380,7 +387,7 @@
 											<div class="span10">
 												<div class="form-inline proRegenerateForm">
 												    <% if(lenS > 0){ %>
-													    <a href="#scopePopup" role="button" class="btn" data-toggle="modal" ><%=i18n.localize("selectScopes")%></a>
+													    <a href="#scopePopupSand" role="button" class="btn" data-toggle="modal" ><%=i18n.localize("selectScopes")%></a>
 													<% } %>
 													Validity: <input type="text" class="input-mini token-validity-input" id="refreshSandValidityTime" value="<%=sandValidityTime%>" maxlength="70"  autofocus="autofocus" /> Seconds
 		                            				<span class="label label-warning" id = "timeWarn" style="display:none;"><%=i18n.localize("timeWarn")%></span>
@@ -412,7 +419,7 @@
                        <%=i18n.localize("sandboxKeyMsg")%>
                        <% if(lenS > 0){ %>
                            <br><br>
-                           <a href="#scopePopup" role="button" class="btn" data-toggle="modal" ><%=i18n.localize("selectScopes")%></a>
+                           <a href="#scopePopupSand" role="button" class="btn" data-toggle="modal" ><%=i18n.localize("selectScopes")%></a>
                        <% } %>
                        <div class="gen-btn-wrapper" <% if(app.sandboxKey!=null){%>style="display:none"<% } %> >
                        		<div class="cDivParentOfManualAuthAppCreateSandBox">
@@ -659,7 +666,17 @@
 
                                 <% for (var i = 0; i < lenS; i++) {
 
-                                         %><li><input type="checkbox" name="<%=scopes[i].scopeName%>" value="<%=scopes[i].scopeKey%>" id="<%= scopes[i].scopeKey%>" class="Checkbox"> <%= scopes[i].scopeName%> : <%= scopes[i].scopeKey %></li><%
+                                         %><li><input type="checkbox" name="<%=scopes[i].scopeName%>" value="<%=scopes[i].scopeKey%>" id="<%= scopes[i].scopeKey%>" class="CheckboxProd" <%
+                                         	if(app.prodKeyScopeValue != null){
+                                         		for(var j = 0; j < prodKeyScopeArray.length; j++){
+	                                         		if(prodKeyScopeArray.indexOf(scopes[i].scopeKey)>-1){
+	                                         			%>checked<%
+	                                         			break;
+	                                         		}
+                                         		}
+                                         	}
+                                         	
+                                         %>> <%= scopes[i].scopeName%> : <%= scopes[i].scopeKey %></li><%
                                         }
                                         %></ul><%
                                  %>
@@ -667,6 +684,37 @@
 
                     <div class="modal-footer">
                     <input class="btn btn-primary" data-dismiss="modal" type="button" id="scopeSelectButtonPop" value="Select">
+                    <button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
+                    </div>
+            </div>
+            
+            <div id="scopePopupSand" class="modal hide fade" tabindex="-1" role="dialog" aria-hidden="true">
+                    <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                    <h3><%=i18n.localize("selectScopes")%></h3>
+                    </div>
+                    <div class="modal-body">
+                        <ul>
+
+                                <% for (var i = 0; i < lenS; i++) {
+                                         %><li><input type="checkbox" name="<%=scopes[i].scopeName%>" value="<%=scopes[i].scopeKey%>" id="<%= scopes[i].scopeKey%>" class="CheckboxSand" <%
+                                         if(app.sandKeyScopeValue != null){
+                                         	for(var j = 0; j < sandKeyScopeArray.length; j++){
+                                         		if(sandKeyScopeArray.indexOf(scopes[i].scopeKey)>-1){
+                                         			%>checked<%
+                                         			break;
+                                         		}
+                                         	}
+                                         }
+                                         	
+                                         %>> <%= scopes[i].scopeName%> : <%= scopes[i].scopeKey %></li><%
+                                        }
+                                        %></ul><%
+                                 %>
+                    </div>
+
+                    <div class="modal-footer">
+                    <input class="btn btn-primary" data-dismiss="modal" type="button" id="scopeSelectButtonPopSand" value="Select">
                     <button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
                     </div>
             </div>

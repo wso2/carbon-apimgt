@@ -15,19 +15,18 @@ function showHideKeys(){
 $(document).ready(function () {
     
     $('#scopeSelectButtonPop').click(function() {
-    	var selected = ($('.Checkbox:checked').map(function() {
+    	var selected = ($('.CheckboxProd:checked').map(function() {
     	    return this.value;
     	}).get().join(' '));
     	$('#prodScopeInput').attr('value', selected);
-    	$('#sandScopeInput').attr('value', selected);
     	});
     
-    /*$("select[name='scope']").change(function() {
-        var multipleValues = $(this).val() || [];
-        var spaced_string = multipleValues.join(" ");
-        $('#scopeInput').attr('value', spaced_string);
-
-    });*/
+    $('#scopeSelectButtonPopSand').click(function() {
+    	var selected = ($('.CheckboxSand:checked').map(function() {
+    	    return this.value;
+    	}).get().join(' '));
+    	$('#sandScopeInput').attr('value', selected);
+    	});
 
     $.ajaxSetup({
         contentType: "application/x-www-form-urlencoded; charset=utf-8"
