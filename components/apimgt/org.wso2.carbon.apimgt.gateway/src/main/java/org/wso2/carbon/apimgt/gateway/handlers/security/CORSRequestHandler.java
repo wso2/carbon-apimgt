@@ -123,7 +123,7 @@ public class CORSRequestHandler extends AbstractHandler implements ManagedLifecy
 		messageContext.setProperty(APIConstants.API_RESOURCE_CACHE_KEY, resourceCacheKey);
 		setCORSHeaders(messageContext, selectedResourceWithVerb);
 		if (selectedResource != null && selectedResourceWithVerb != null) {
-				if ("inline".equals(inline)) {
+				if ("inline".equalsIgnoreCase(inline)) {
 					messageContext.getSequence("_cors_request_handler").mediate(messageContext);
 				}
 				status =  true;
