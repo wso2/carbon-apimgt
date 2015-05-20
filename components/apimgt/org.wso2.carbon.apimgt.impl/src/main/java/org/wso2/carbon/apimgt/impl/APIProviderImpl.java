@@ -1674,8 +1674,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         apiMgtDAO.updateSubscription(apiId,subStatus,appId);
     }
 
-    public void deleteAPI(APIIdentifier identifier) throws APIManagementException {
-        String path = APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR +
+    public boolean deleteAPI(APIIdentifier identifier) throws APIManagementException {
+	    String path = APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR +
                       identifier.getProviderName() + RegistryConstants.PATH_SEPARATOR +
                       identifier.getApiName()+RegistryConstants.PATH_SEPARATOR+identifier.getVersion();
         

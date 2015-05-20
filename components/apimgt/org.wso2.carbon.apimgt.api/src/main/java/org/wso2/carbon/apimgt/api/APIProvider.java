@@ -272,7 +272,7 @@ public interface APIProvider extends APIManager {
      * @param identifier APIIdentifier
      * @throws APIManagementException if failed to remove the API
      */
-    public void deleteAPI(APIIdentifier identifier) throws APIManagementException;
+    public boolean deleteAPI(APIIdentifier identifier) throws APIManagementException;
 
     /**
      * Search API

@@ -4129,18 +4129,6 @@ public final class APIUtil {
     /**
      * Get the authenticator server URL
      *
-     * @return url
-     */
-    public static boolean isDataPublishingEnabled() {
-        APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
-                getAPIManagerConfigurationService().getAPIManagerConfiguration();
-        String enabledStr = config.getFirstProperty(APIConstants.API_USAGE_ENABLED);
-        return enabledStr != null && Boolean.parseBoolean(enabledStr);
-    }
-
-    /**
-     * Get the authenticator server URL
-     *
      * @return url String
      * @throws APIManagementException If API key manager URL unspecified
      */
@@ -4548,31 +4536,6 @@ public final class APIUtil {
 			}
 		}
 		return transport;
-	}
-
-	/**
-	 * Used to get instance of ProviderKeyMgtClient
-	 * @return ProviderKeyMgtClient
-	 * @throws APIManagementException
-	 */
-	public static ProviderKeyMgtClient getProviderClient(APIManagerConfiguration config) throws APIManagementException {
-		String url = config.getFirstProperty(APIConstants.API_KEY_MANAGER_URL);
-		if (url == null) {
-			handleException("API key manager URL unspecified");
-		}
-
-		String username = config.getFirstProperty(APIConstants.API_KEY_MANAGER_USERNAME);
-		String password = config.getFirstProperty(APIConstants.API_KEY_MANAGER_PASSWORD);
-		if (username == null || password == null) {
-			handleException("Authentication credentials for API Provider manager unspecified");
-		}
-
-		try {
-			return new ProviderKeyMgtClient(url, username, password);
-		} catch (APIManagementException e) {
-			handleException("Error while initializing the provider  management client", e);
-			return null;
-		}
 	}
 	
 	public static UserRegistry getRootRegistry() throws RegistryException{

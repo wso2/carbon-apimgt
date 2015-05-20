@@ -39,6 +39,7 @@ import org.wso2.carbon.apimgt.api.APIManager;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIKey;
+import org.wso2.carbon.apimgt.api.model.APIStore;
 import org.wso2.carbon.apimgt.api.model.Documentation;
 import org.wso2.carbon.apimgt.api.model.DocumentationType;
 import org.wso2.carbon.apimgt.api.model.Icon;
@@ -48,6 +49,7 @@ import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APINameComparator;
+import org.wso2.carbon.apimgt.impl.utils.APIStoreNameComparator;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.utils.TierNameComparator;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
@@ -782,4 +784,27 @@ public abstract class AbstractAPIManager implements APIManager {
 
         return domains;
     }
+
+	/**
+	 * When enabled publishing to external APIStores support,get all the external apistore details which are
+	 * published and stored in db and which are not unpublished
+	 *
+	 * @param apiId The API Identifier which need to update in db
+	 * @throws org.wso2.carbon.apimgt.api.APIManagementException
+	 *          If failed to update subscription status
+	 */
+	@Override
+	public Set<APIStore> getExternalAPIStores(APIIdentifier apiId)
+			throws APIManagementException {
+		//adding tenantDomain check to provide access to the API details page to the anonymous user
+		if (tenantDomain != null && APIUtil.isAPIsPublishToExternalAPIStores(tenantId)) {
+			SortedSet<APIStore> sortedApiStores = new TreeSet<APIStore>(new APIStoreNameComparator());
+			Set<APIStore> publishedStores = apiMgtDAO.getExternalAPIStoresDetails(apiId);
+			sortedApiStores.addAll(publishedStores);
+			return APIUtil.getExternalAPIStores(sortedApiStores, tenantId);
+		} else {
+			return null;
+		}
+	}
+
 }
