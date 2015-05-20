@@ -70,8 +70,6 @@ import org.wso2.carbon.user.core.UserStoreException;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
-import java.util.*;
-
 /**
  * The basic abstract implementation of the core APIManager interface. This implementation uses
  * the governance system registry for storing APIs and related metadata.

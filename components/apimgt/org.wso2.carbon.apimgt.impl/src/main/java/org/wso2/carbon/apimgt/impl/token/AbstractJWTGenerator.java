@@ -280,10 +280,6 @@ public abstract class AbstractJWTGenerator implements TokenGenerator {
             String error = "Error in signature";
             //do not log
             throw new APIManagementException(error);
-        }catch (org.wso2.carbon.registry.core.exceptions.RegistryException e) {
-            String error = "Error in load tenant from registry";
-            //do not log
-            throw new APIManagementException(error);
         }
     }
 

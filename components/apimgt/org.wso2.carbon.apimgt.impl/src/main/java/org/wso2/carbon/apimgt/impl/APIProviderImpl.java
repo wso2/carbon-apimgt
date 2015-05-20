@@ -30,11 +30,13 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
+import org.wso2.carbon.apimgt.api.APIDefinition;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.FaultGatewaysException;
 import org.wso2.carbon.apimgt.api.dto.UserApplicationAPIUsage;
 import org.wso2.carbon.apimgt.api.model.*;
+import org.wso2.carbon.apimgt.impl.definitions.APIDefinitionFromSwagger20;
 import org.wso2.carbon.apimgt.impl.dto.Environment;
 import org.wso2.carbon.apimgt.impl.dto.TierPermissionDTO;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
@@ -1701,6 +1703,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             GenericArtifact apiArtifact = artifactManager.getGenericArtifact(apiArtifactResourceId);
             String inSequence = apiArtifact.getAttribute(APIConstants.API_OVERVIEW_INSEQUENCE);
             String outSequence = apiArtifact.getAttribute(APIConstants.API_OVERVIEW_OUTSEQUENCE);
+            String environments = apiArtifact.getAttribute(APIConstants.API_OVERVIEW_ENVIRONMENTS);
             
             //Delete the dependencies associated  with the api artifact
 			GovernanceArtifact[] dependenciesArray = apiArtifact.getDependencies();
@@ -1737,14 +1740,15 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             // gatewayType check is required when API Management is deployed on
             // other servers to avoid synapse
             if (gatewayExists && gatewayType.equals("Synapse")) {
-                //if (isAPIPublished(api)) {
-            		api.setInSequence(inSequence); //need to remove the custom sequences
-            		api.setOutSequence(outSequence);
-                    removeFromGateway(api);
-                    if(api.isDefaultVersion()){
-                        removeDefaultAPIFromGateway(api);
-                    }
-                //}
+                // if (isAPIPublished(api)) {
+                api.setInSequence(inSequence); // need to remove the custom sequences
+                api.setOutSequence(outSequence);
+                api.setEnvironments(APIUtil.extractEnvironmentsForAPI(environments));
+                removeFromGateway(api);
+                if (api.isDefaultVersion()) {
+                    removeDefaultAPIFromGateway(api);
+                }
+                // }
             } else {
                 log.debug("Gateway is not existed for the current API Provider");
             }

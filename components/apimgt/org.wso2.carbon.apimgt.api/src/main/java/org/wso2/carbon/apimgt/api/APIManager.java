@@ -18,8 +18,6 @@
 
 package org.wso2.carbon.apimgt.api;
 
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
 import org.wso2.carbon.apimgt.api.model.*;
 
 import java.util.List;
@@ -60,7 +58,7 @@ public interface APIManager {
      * @return An API object related to the given identifier or null
      * @throws APIManagementException if failed get API from APIIdentifier
      */
-    public JSONObject getAPI(JSONObject identifier) throws APIManagementException;
+    public API getAPI(APIIdentifier identifier) throws APIManagementException;
 
     /**
      * Checks the Availability of given APIIdentifier
@@ -107,7 +105,7 @@ public interface APIManager {
      * @return List<Documentation>
      * @throws APIManagementException if failed to get Documentations
      */
-    public JSONArray getAllDocumentation(JSONObject apiId)
+    public List<Documentation> getAllDocumentation(APIIdentifier apiId)
             throws APIManagementException;
 
     /**
@@ -141,7 +139,7 @@ public interface APIManager {
      * @return if failed to get doc content
      * @throws APIManagementException if the asking documentation content is unavailable
      */
-    public JSONObject getDocumentationContent(JSONObject identifier, String documentationName)
+    public String getDocumentationContent(APIIdentifier identifier, String documentationName)
             throws APIManagementException;
 
     /**
@@ -186,7 +184,7 @@ public interface APIManager {
      * @return Set<API>
      * @throws APIManagementException if failed to get API for subscriber
      */
-    public Set<API> getSubscriberAPIs(String subscriber) throws APIManagementException;
+    public Set<API> getSubscriberAPIs(Subscriber subscriber) throws APIManagementException;
 
     /**
      * Associates the given icon image with the specified path.
@@ -273,13 +271,15 @@ public interface APIManager {
     */
     public Set<Tier> getTiers() throws APIManagementException;
 
+
+
     /**
      * Returns a list of pre-defined # {@link org.wso2.carbon.apimgt.api.model.Tier} in the system.
      *
      * @return Set<Tier>
      * @throws APIManagementException if failed to get the predefined tiers
      */
-    public JSONArray getTiers(String tenantDomain) throws APIManagementException;
+    public Set<Tier> getTiers(String tenantDomain) throws APIManagementException;
 
     /**
      * Returns a list of domain name mappings.
@@ -296,16 +296,6 @@ public interface APIManager {
      * @throws APIManagementException
      *          If failed to update subscription status
      */
-
     public Set<APIStore> getExternalAPIStores(APIIdentifier apiId) throws APIManagementException;
-    /**
-     * Returns full list of Subscribers of an API
-     *
-     * @param identifier APIIdentifier
-     * @return Set<Subscriber>
-     * @throws org.wso2.carbon.apimgt.api.APIManagementException if failed to get Subscribers
-     */
-    public JSONArray getSubscribersOfAPI(JSONObject identifier)
-            throws APIManagementException;
-
+    
 }

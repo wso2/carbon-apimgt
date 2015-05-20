@@ -231,7 +231,7 @@ public interface APIProvider extends APIManager {
      * @param api,        API
      * @param documentationName, name of the inline documentation
      * @param text,              content of the inline documentation
-     * @throws org.wso2.carbon.apimgt.api.APIManagementException if failed to add the document as a resource to registry
+     * @throws APIManagementException if failed to add the document as a resource to registry
      */
     public void addDocumentationContent(API api, String documentationName, String text)
             throws APIManagementException;

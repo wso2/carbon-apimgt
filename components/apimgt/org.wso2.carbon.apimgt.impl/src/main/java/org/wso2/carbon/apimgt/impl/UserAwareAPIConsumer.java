@@ -16,8 +16,6 @@
 
 package org.wso2.carbon.apimgt.impl;
 
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.Application;
@@ -47,9 +45,10 @@ public class UserAwareAPIConsumer extends APIConsumerImpl {
     }
 
     @Override
-    public String addSubscription(APIIdentifier id, int applicationId, String userId) throws APIManagementException {
+    public String addSubscription(APIIdentifier identifier,
+                                String userId, int applicationId) throws APIManagementException {
         checkSubscribePermission();
-        return super.addSubscription(id, applicationId, userId);
+        return super.addSubscription(identifier, userId, applicationId);
     }
 
     @Override
@@ -60,9 +59,9 @@ public class UserAwareAPIConsumer extends APIConsumerImpl {
     }
 
     @Override
-    public String addApplication(String appName, String userName, String tier, String callbackUrl, String description) throws APIManagementException {
+    public String addApplication(Application application, String userId) throws APIManagementException {
         checkSubscribePermission();
-        return super.addApplication(appName, userName, tier, callbackUrl, description);
+        return super.addApplication(application, userId);
     }
 
     @Override
@@ -78,23 +77,9 @@ public class UserAwareAPIConsumer extends APIConsumerImpl {
     }
 
     @Override
-    public JSONObject getApplicationKey(String username, String applicationName, String tokenType,
-                                  String scopes, String validityPeriod, String callbackUrl,
-                                  JSONArray accessAllowDomainsArr) throws APIManagementException {
-        checkSubscribePermission();
-        return super.getApplicationKey(username,applicationName,tokenType,scopes,validityPeriod,callbackUrl,accessAllowDomainsArr);
-    }
-
-    @Override
     public void addComment(APIIdentifier identifier, String s, String user) throws APIManagementException {
         checkSubscribePermission();
         super.addComment(identifier, s, user);
-    }
-
-    @Override
-    public JSONObject getAllSubscriptions(String userName, String appName, int startSubIndex, int endSubIndex) throws APIManagementException {
-        checkSubscribePermission();
-        return super.getAllSubscriptions(userName,appName,startSubIndex,endSubIndex);
     }
 
     public void checkSubscribePermission() throws APIManagementException {

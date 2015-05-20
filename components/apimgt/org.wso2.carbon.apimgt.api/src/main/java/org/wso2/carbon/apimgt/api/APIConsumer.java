@@ -541,4 +541,6 @@ public interface APIConsumer extends APIManager {
 	public Set<Scope> getScopesByScopeKeys(String scopeKeys, int tenantId)
 			throws APIManagementException;
 
+    public String getGroupIds(String response) throws APIManagementException;
+
 }

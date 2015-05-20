@@ -676,6 +676,12 @@
                 <artifactId>Saxon-HE</artifactId>
                 <version>${Saxon-HE.version}</version>
             </dependency>
+
+            <dependency>
+                <groupId>org.wso2.carbon.deployment</groupId>
+                <artifactId>org.wso2.carbon.bam.service.data.publisher</artifactId>
+                <version>4.2.2-SNAPSHOT</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
