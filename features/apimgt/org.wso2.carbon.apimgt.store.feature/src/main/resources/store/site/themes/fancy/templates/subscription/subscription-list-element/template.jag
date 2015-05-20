@@ -17,10 +17,10 @@
 	   }
 	   var prodKeyScopeArray, sandKeyScopeArray;
 	   if(app.prodKeyScopeValue != null){
-	   		var prodKeyScopeArray = app.prodKeyScopeValue.split(" ");
+	   		prodKeyScopeArray = app.prodKeyScopeValue.split(" ");
 	   }
 	   if(app.sandKeyScopeValue != null){
-	   		var sandKeyScopeArray = app.sandKeyScopeValue.split(" ");
+	   		sandKeyScopeArray = app.sandKeyScopeValue.split(" ");
 	   }
 %>
 
