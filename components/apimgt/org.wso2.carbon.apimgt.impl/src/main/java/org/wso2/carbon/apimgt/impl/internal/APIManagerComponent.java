@@ -115,7 +115,7 @@ public class APIManagerComponent {
         if (log.isDebugEnabled()) {
             log.debug("API manager component activated");
         }
-        
+
         try {
             BundleContext bundleContext = componentContext.getBundleContext();
             addRxtConfigs();
@@ -127,10 +127,10 @@ public class APIManagerComponent {
             APIUtil.loadTenantWorkFlowExtensions(tenantId);
             //load self sigup configuration to the registry
             APIUtil.loadTenantSelfSignUpConfigurations(tenantId);
-            
-            
+
+
             String filePath = CarbonUtils.getCarbonHome() + File.separator + "repository" +
-                    File.separator + "conf" + File.separator + "api-manager.xml";
+                              File.separator + "conf" + File.separator + "api-manager.xml";
             configuration.load(filePath);
 
             //WorkflowExecutorFactory.getInstance().load(filePath);
@@ -147,8 +147,8 @@ public class APIManagerComponent {
             bundleContext.registerService(Axis2ConfigurationContextObserver.class.getName(), configDeployer, null);
 
             SignupObserver signupObserver = new SignupObserver();
-            bundleContext.registerService(Axis2ConfigurationContextObserver.class.getName(), signupObserver,null);
-            
+            bundleContext.registerService(Axis2ConfigurationContextObserver.class.getName(), signupObserver, null);
+
             APIManagerConfigurationServiceImpl configurationService =
                     new APIManagerConfigurationServiceImpl(configuration);
             ServiceReferenceHolder.getInstance().setAPIManagerConfigurationService(configurationService);
@@ -181,7 +181,7 @@ public class APIManagerComponent {
                                                                                       APIConstants.API_APPLICATION_DATA_LOCATION),
                                                         APIConstants.Permissions.API_PUBLISH,
                                                         UserMgtConstants.EXECUTE_ACTION, null);
-            
+
             setupImagePermissions();
             RemoteAuthorizationManager authorizationManager = RemoteAuthorizationManager.getInstance();
             authorizationManager.init();
@@ -191,7 +191,7 @@ public class APIManagerComponent {
             if (selfSignInProcessEnabled) {
                 if (bundleContext != null) {
                     bundleContext.registerService(UserStoreManagerListener.class.getName(),
-                            new UserAddListener(), null);
+                                                  new UserAddListener(), null);
                 }
             }
             //Load initially available api contexts at the server startup. This Cache is only use by the products other than the api-manager
@@ -208,7 +208,7 @@ public class APIManagerComponent {
             APIUtil.createSelfSignUpRoles(MultitenantConstants.SUPER_TENANT_ID);
 
             // Initialise KeyManager.
-            KeyManagerHolder.initializeKeyManager(filePath);
+            KeyManagerHolder.initializeKeyManager(configuration);
         } catch (APIManagementException e) {
             log.error("Error while initializing the API manager component", e);
         }
