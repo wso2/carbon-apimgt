@@ -21,7 +21,8 @@ i18n.init(request,localeResourcesBasePath);
         
         if (jagg.getUser() != null) {
         	isSuperTenant = jagg.getUser().isSuperTenant;
-			tenantDomain = jagg.getUser().username.split('@')[1];
+		var MultitenantUtils = Packages.org.wso2.carbon.utils.multitenancy.MultitenantUtils;
+    		tenantDomain = MultitenantUtils.getTenantDomain(jagg.getUser().username);
         }
         
 
@@ -79,7 +80,7 @@ i18n.init(request,localeResourcesBasePath);
                    <%=i18n.localize("logged")%> <h4><%=user.username%></h4>
                </li>
                <% if(isSelfSignupEnabled) { %>
-               <li><a href="<%= jagg.getHttpsUrl('/')%>site/pages/user-info.jag"><%=i18n.localize("privacy")%></a></li> <% } %>
+               <li><a href="<%= jagg.getHttpsUrl('/')%>site/pages/user-info.jag?tenant=<%=tenantDomain%>"><%=i18n.localize("privacy")%></a></li> <% } %>
                <li class="logout-link-special"><button id="logout-link" class="btn btn-danger"><%=i18n.localize("logout")%></button></li>
              </ul>
            </li>

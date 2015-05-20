@@ -18,7 +18,9 @@ package org.wso2.carbon.apimgt.keymgt.handlers;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.tools.ant.util.regexp.RegexpUtil;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.identity.base.IdentityException;
@@ -29,26 +31,37 @@ import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.user.api.UserStoreManager;
 import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
+import sun.misc.Regexp;
 
 import javax.cache.Cache;
 import javax.cache.Caching;
 import java.util.*;
+import java.util.regex.Pattern;
 
 public class ScopesIssuer {
 
     private static Log log = LogFactory.getLog(ScopesIssuer.class);
 
-    private static final String DEVICE_SCOPE_PREFIX = "device_";
-
     private static final String DEFAULT_SCOPE_NAME = "default";
-    
-    private static final String OPEN_ID_SCOPE_NAME = "openid";
 
     private List<String> scopeSkipList = new ArrayList<String>();
 
-    public ScopesIssuer(){
-        scopeSkipList.add("am_application_scope");
+    /** Singleton of ScopeIssuer.**/
+    private static ScopesIssuer scopesIssuer;
+
+    public static void loadInstance(List<String> whitelist){
+        scopesIssuer = new ScopesIssuer();
+        if(whitelist != null && !whitelist.isEmpty()){
+            scopesIssuer.scopeSkipList.addAll(whitelist);
+        }
     }
+
+    private ScopesIssuer(){}
+
+    public static ScopesIssuer getInstance(){
+        return scopesIssuer;
+    }
+
 
     public boolean setScopes(OAuthTokenReqMessageContext tokReqMsgCtx){
         String[] requestedScopes = tokReqMsgCtx.getScope();
@@ -62,39 +75,13 @@ public class ScopesIssuer {
 
         String consumerKey = tokReqMsgCtx.getOauth2AccessTokenReqDTO().getClientId();
         String username = tokReqMsgCtx.getAuthorizedUser();
-
-        String cacheKey = getAppUserScopeCacheKey(consumerKey, username, requestedScopes);
-        Cache cache = Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER).
-                getCache(APIConstants.APP_USER_SCOPE_CACHE);
-
         List<String> reqScopeList = Arrays.asList(requestedScopes);
 
         try {
             Map<String, String> appScopes = null;
-            Cache appCache = Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER).
-                    getCache(APIConstants.APP_SCOPE_CACHE);
-
-            //Cache hit
-            if(appCache.containsKey(consumerKey)){
-                appScopes = (Map<String, String>)appCache.get(consumerKey);
-
-                // checking the user cache only if app cache is available (since we only update app cache)
-                if(cache.containsKey(cacheKey)){
-                    tokReqMsgCtx.setScope((String [])cache.get(cacheKey));
-                    return true;
-                }
-            }
-            //Cache miss
-            else{
-                ApiMgtDAO apiMgtDAO = new ApiMgtDAO();
-                //Get all the scopes and roles against the scopes defined for the APIs subscribed to the application.
-                appScopes = apiMgtDAO.getScopeRolesOfApplication(consumerKey);
-                //If scopes is null, set empty hashmap to scopes so that we avoid adding a null entry to the cache.
-                if(appScopes == null){
-                    appScopes = new HashMap<String, String>();
-                }
-                appCache.put(consumerKey, appScopes);
-            }
+            ApiMgtDAO apiMgtDAO = new ApiMgtDAO();
+            //Get all the scopes and roles against the scopes defined for the APIs subscribed to the application.
+            appScopes = apiMgtDAO.getScopeRolesOfApplication(consumerKey);
 
             //If no scopes can be found in the context of the application
             if(appScopes.isEmpty()){
@@ -105,7 +92,6 @@ public class ScopesIssuer {
 
                 String[] allowedScopes = getAllowedScopes(reqScopeList);
                 tokReqMsgCtx.setScope(allowedScopes);
-                cache.put(cacheKey, allowedScopes);
                 return true;
             }
 
@@ -133,7 +119,6 @@ public class ScopesIssuer {
                     log.debug("Could not find roles of the user.");
                 }
                 tokReqMsgCtx.setScope(defaultScope);
-                cache.put(cacheKey, defaultScope);
                 return true;
             }
 
@@ -156,20 +141,15 @@ public class ScopesIssuer {
                 //The requested scope is defined for the context of the App but no roles have been associated with the scope
                 //OR
                 //The scope string starts with 'device_'.
-                else if (appScopes.containsKey(scope) || scope.startsWith(DEVICE_SCOPE_PREFIX) ||
-                         scopeSkipList.contains(scope)) {
-                    authorizedScopes.add(scope);
-                } else if (appScopes.containsKey(scope) || scope.equalsIgnoreCase(OPEN_ID_SCOPE_NAME)) {
+                else if (appScopes.containsKey(scope) || isWhiteListedScope(scope)) {
                     authorizedScopes.add(scope);
                 }
             }
             if(!authorizedScopes.isEmpty()){
                 String[] authScopesArr = authorizedScopes.toArray(new String[authorizedScopes.size()]);
-                cache.put(cacheKey, authScopesArr);
                 tokReqMsgCtx.setScope(authScopesArr);
             }
             else{
-                cache.put(cacheKey, defaultScope);
                 tokReqMsgCtx.setScope(defaultScope);
             }
         } catch (APIManagementException e) {
@@ -179,27 +159,24 @@ public class ScopesIssuer {
         return true;
     }
 
-    private String getAppUserScopeCacheKey(String consumerKey, String username, String[] requestedScopes){
-        StringBuilder reqScopesBuilder = new StringBuilder("");
-        for(int i=0; i<requestedScopes.length; i++){
-            reqScopesBuilder.append(requestedScopes[i]);
+    /**
+     * Determines if the scope is specified in the whitelist.
+     * @param scope
+     * @return
+     */
+    private boolean isWhiteListedScope(String scope){
+        for(String scopeTobeSkipped : scopeSkipList){
+          if(scope.matches(scopeTobeSkipped)){
+              return true;
+          }
         }
-
-        int reqScopesHash = reqScopesBuilder.toString().hashCode();
-
-        StringBuilder cacheKey = new StringBuilder("");
-        cacheKey.append(consumerKey);
-        cacheKey.append(":");
-        cacheKey.append(username);
-        cacheKey.append(":");
-        cacheKey.append(reqScopesHash);
-
-        return cacheKey.toString();
+        return false;
     }
 
     /**
-     * Get the set of default scopes. This will return a String array which has the scopes that are prefixed with
-     * "device_" from the set of requested scopes. If no such scopes exists, it will only return the 'default' scope.
+     * Get the set of default scopes. If a requested scope is matches with the patterns specified in the whitelist,
+     * then such scopes will be issued without further validation. If the scope list is empty,
+     * token will be issued for default scope.
      * @param requestedScopes - The set of requested scopes
      * @return
      */
@@ -208,20 +185,13 @@ public class ScopesIssuer {
 
         //Iterate the requested scopes list.
         for (String scope : requestedScopes) {
-            if (scope.startsWith(DEVICE_SCOPE_PREFIX)) {
-                authorizedScopes.add(scope);
-            } else if (scope.equalsIgnoreCase(OPEN_ID_SCOPE_NAME)) {
+            if(isWhiteListedScope(scope)){
                 authorizedScopes.add(scope);
             }
         }
 
         if(authorizedScopes.isEmpty()){
             authorizedScopes.add(DEFAULT_SCOPE_NAME);
-        }
-
-        scopeSkipList.retainAll(requestedScopes);
-        if(!scopeSkipList.isEmpty()){
-            authorizedScopes.addAll(scopeSkipList);
         }
 
         return authorizedScopes.toArray(new String[authorizedScopes.size()]);

@@ -226,15 +226,15 @@ APIDesigner.prototype.add_default_resource = function(){
     $("#add_resource").trigger('click');
 }
 
-APIDesigner.prototype.get_scopes = function(){
+APIDesigner.prototype.get_scopes = function() {
+    var options = [{ "value": "" , "text": "" }];
     if(typeof(this.api_doc.securityDefinitions)!='undefined'){
-	var scopes = this.api_doc.securityDefinitions.apim['x-wso2-scopes'];
-	var options = [{ "value": "" , "text": "" }]
+	var scopes = this.api_doc.securityDefinitions.apim['x-wso2-scopes'];	
 	for(var i =0; i < scopes.length ; i++ ){
 	    options.push({ "value": scopes[i].key , "text": scopes[i].name });
-	}
-	return options;
+	}	
     }
+    return options;
 }
 
 APIDesigner.prototype.has_resources = function(){

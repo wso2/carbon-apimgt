@@ -27,14 +27,7 @@
                   </a>
               </li>
               <% } %>
-              <li class="dropdown tryit-menu-item">
-                  <a class="dropdown-toggle" data-toggle="dropdown" href="#">
-                      Tools <b class="caret"></b></a>
-                  <ul class="dropdown-menu">
-                      <li>
-                          <a href="<%=jagg.getAbsoluteUrl("/site/pages/rest-client.jag")%>?<%=urlPrefix%>">RESTClient</a></li>
-                  </ul>
-              </li>
+
 
                 <% jagg.includeBlock("user/login", null); %>
 

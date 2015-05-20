@@ -991,15 +991,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         APITemplateBuilderImpl vtb = new APITemplateBuilderImpl(api);
 
         if(!api.getStatus().equals(APIStatus.PROTOTYPED)) {
-            Map<String, String> corsProperties = new HashMap<String, String>();
-            corsProperties.put("inline", api.getImplementation());
-            if (api.getAllowedHeaders() != null && api.getAllowedHeaders() != "") {
-                corsProperties.put("allowHeaders", api.getAllowedHeaders());
-            }
-            if (api.getAllowedOrigins() != null && api.getAllowedOrigins() != "") {
-                corsProperties.put("allowedOrigins", api.getAllowedOrigins());
-            }
-            vtb.addHandler("org.wso2.carbon.apimgt.gateway.handlers.security.CORSRequestHandler", corsProperties);
+
             vtb.addHandler("org.wso2.carbon.apimgt.gateway.handlers.security.APIAuthenticationHandler", Collections.EMPTY_MAP);
 
             Map<String, String> properties = new HashMap<String, String>();
@@ -1022,6 +1014,15 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 vtb.addHandler("org.wso2.carbon.apimgt.gateway.handlers.ext.APIManagerExtensionHandler", Collections.EMPTY_MAP);
             }
         }
+        Map<String, String> corsProperties = new HashMap<String, String>();
+        corsProperties.put("inline", api.getImplementation());
+        if (api.getAllowedHeaders() != null && api.getAllowedHeaders() != "") {
+            corsProperties.put("allowHeaders", api.getAllowedHeaders());
+        }
+        if (api.getAllowedOrigins() != null && api.getAllowedOrigins() != "") {
+            corsProperties.put("allowedOrigins", api.getAllowedOrigins());
+        }
+        vtb.addHandler("org.wso2.carbon.apimgt.gateway.handlers.security.CORSRequestHandler", corsProperties);
         return vtb;
     }
 
@@ -1074,6 +1075,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 throw new DuplicateAPIException("API version already exist with version :"
                                                 + newVersion);
             }
+            registry.beginTransaction();
             Resource apiSourceArtifact = registry.get(apiSourcePath);
             GenericArtifactManager artifactManager = APIUtil.getArtifactManager(registry,
                                                                                 APIConstants.API_KEY);
@@ -1152,7 +1154,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     registry.applyTag(targetPath, tag.getTagName());
                 }
             }
-
+            
+            
             // Retain the docs
             List<Documentation> docs = getAllDocumentation(api.getId());
             APIIdentifier newId = new APIIdentifier(api.getId().getProviderName(),
@@ -1234,14 +1237,20 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             }
 
             apiMgtDAO.addAPI(newAPI,tenantId);
+            registry.commitTransaction();
 
-        } catch (RegistryException e) {
-            String msg = "Failed to create new version : " + newVersion + " of : "
-                         + api.getId().getApiName();
-            handleException(msg, e);
         } catch (ParseException e) {
-            String msg = "Couldn't Create json Object from Swagger object for version" + newVersion + " of : "
-                         + api.getId().getApiName();
+            String msg =
+                         "Couldn't Create json Object from Swagger object for version" + newVersion + " of : " +
+                                 api.getId().getApiName();
+            handleException(msg, e);
+        } catch (Exception e) {
+            try {
+                registry.rollbackTransaction();
+            } catch (RegistryException re) {
+                handleException("Error while rolling back the transaction for API: " + api.getId(), re);
+            }
+            String msg = "Failed to create new version : " + newVersion + " of : " + api.getId().getApiName();
             handleException(msg, e);
         }
     }

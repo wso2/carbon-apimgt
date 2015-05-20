@@ -31,6 +31,7 @@ public class DefaultKeyValidationHandler extends AbstractKeyValidationHandler {
 
     @Override
     public boolean validateToken(TokenValidationContext validationContext) throws APIKeyMgtException {
+        // If validationInfoDTO is taken from cache, validity of the cached infoDTO is checked with each request.
         if (validationContext.isCacheHit()) {
             APIKeyValidationInfoDTO infoDTO = validationContext.getValidationInfoDTO();
 
@@ -39,7 +40,7 @@ public class DefaultKeyValidationHandler extends AbstractKeyValidationHandler {
             boolean tokenExpired = APIUtil.isAccessTokenExpired(infoDTO);
             if (tokenExpired) {
                 infoDTO.setAuthorized(false);
-                infoDTO.setValidationStatus(APIConstants.KeyValidationStatus.API_AUTH_ACCESS_TOKEN_EXPIRED);
+                infoDTO.setValidationStatus(APIConstants.KeyValidationStatus.API_AUTH_INVALID_CREDENTIALS);
                 log.debug("Token " + validationContext.getAccessToken() + " expired.");
                 return false;
             } else {
@@ -50,12 +51,15 @@ public class DefaultKeyValidationHandler extends AbstractKeyValidationHandler {
         AccessTokenInfo tokenInfo = null;
 
         try {
+
+            // Obtaining details about the token.
             tokenInfo = KeyManagerHolder.getKeyManagerInstance().getTokenMetaData(validationContext.getAccessToken());
 
             if (tokenInfo == null) {
                 return false;
             }
 
+            // Setting TokenInfo in validationContext. Methods down in the chain can use TokenInfo.
             validationContext.setTokenInfo(tokenInfo);
             //TODO: Eliminate use of APIKeyValidationInfoDTO if possible
 
@@ -64,12 +68,17 @@ public class DefaultKeyValidationHandler extends AbstractKeyValidationHandler {
 
             if (!tokenInfo.isTokenValid()) {
                 apiKeyValidationInfoDTO.setAuthorized(false);
-                if (tokenInfo.getParameter("errorMsg") != null) {
-                    apiKeyValidationInfoDTO.setValidationStatus((Integer)tokenInfo.getParameter("errorMsg"));
+                if (tokenInfo.getErrorcode() > 0) {
+                    apiKeyValidationInfoDTO.setValidationStatus(tokenInfo.getErrorcode());
+                }else {
+                    apiKeyValidationInfoDTO.setValidationStatus(APIConstants
+                                                                        .KeyValidationStatus.API_AUTH_GENERAL_ERROR);
                 }
                 return false;
             }
 
+            // This block checks if a Token of Application Type is trying to access a resource protected with
+            // Application Token
             if (!hasTokenRequiredAuthLevel(validationContext.getRequiredAuthenticationLevel(), tokenInfo)) {
                 apiKeyValidationInfoDTO.setAuthorized(false);
                 apiKeyValidationInfoDTO.setValidationStatus(APIConstants.KeyValidationStatus.API_AUTH_INCORRECT_ACCESS_TOKEN_TYPE);
