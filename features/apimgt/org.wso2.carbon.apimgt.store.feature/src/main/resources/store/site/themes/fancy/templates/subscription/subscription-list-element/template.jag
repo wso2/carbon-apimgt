@@ -671,7 +671,7 @@
                     </div>
             </div>
         <% } %>
-		
+		<script src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("js/lib/ZeroClipboard.min.js"))%>"></script>
 		<script>
 
 			var client = new ZeroClipboard($('.curl-copybtn'));

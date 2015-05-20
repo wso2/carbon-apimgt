@@ -964,7 +964,7 @@ public class ApiMgtDAO {
                     }
                     if (validityPeriod!=Long.MAX_VALUE && (currentTime - timestampSkew) > (issuedTime + validityPeriod)) {
                         keyValidationInfoDTO.setValidationStatus(
-                                APIConstants.KeyValidationStatus.API_AUTH_ACCESS_TOKEN_EXPIRED);
+                                APIConstants.KeyValidationStatus.API_AUTH_INVALID_CREDENTIALS);
                         if (log.isDebugEnabled()) {
                             log.debug("Access token: " + accessToken + " has expired. " +
                                       "Reason ((currentTime - timestampSkew) > (issuedTime + validityPeriod)) : " +
@@ -1006,7 +1006,7 @@ public class ApiMgtDAO {
                         }
                     }
 				} else {
-					keyValidationInfoDTO.setValidationStatus(APIConstants.KeyValidationStatus.API_AUTH_ACCESS_TOKEN_INACTIVE);
+					keyValidationInfoDTO.setValidationStatus(APIConstants.KeyValidationStatus.API_AUTH_INVALID_CREDENTIALS);
 					if (log.isDebugEnabled()) {
 						log.debug("Access token: " + accessToken + " is inactive");
 					}
