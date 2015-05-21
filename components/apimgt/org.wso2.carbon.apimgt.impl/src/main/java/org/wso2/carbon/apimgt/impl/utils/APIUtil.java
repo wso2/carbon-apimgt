@@ -1169,7 +1169,7 @@ public final class APIUtil {
 
                 registry.put(wsdlResourcePath, wsdlResource);
                 //set the anonymous role for wsld resource to avoid basicauth security.
-                setResourcePermissions(api.getId().getProviderName(), null, null, wsdlResourcePath);
+                setResourcePermissions(api.getId().getProviderName(), api.getVisibility(), null, wsdlResourcePath);
             }
 
 			//set the wsdl resource permlink as the wsdlURL.
