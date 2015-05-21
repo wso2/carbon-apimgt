@@ -150,15 +150,15 @@
             <label class="custom-form-label col-lg-2 col-md-2 col-sm-12 col-xs-12" for="imageUrl">{{t "Thumbnail"}}</label>
             <div class="custom-form-right col-lg-5 col-md-8 col-sm-9 col-xs-10">
                     {{#unless thumb}}
-                        <div class="col-lg-2 col-md-4 col-sm-6 col-xs-6">
+                        <div class="col-lg-4 col-md-4 col-sm-6 col-xs-6">
                             <img id="apiEditThumb" alt="" src="{{url "/themes/default/img/icons/ico-sort.png"}}"/>
                         </div>
                     {{else}}
-                        <div class="col-lg-2 col-md-4 col-sm-6 col-xs-6">
+                        <div class="col-lg-4 col-md-4 col-sm-6 col-xs-6">
                             <img id="apiEditThumb" alt="" src="<%=jagg.getRegistryPath(api.thumb)%>"/>
                         </div>
                     {{/unless}}
-                <div class="col-lg-10 col-md-8 col-sm-6 col-xs-6">
+                <div class="col-lg-8 col-md-8 col-sm-6 col-xs-6">
                     <a onclick="javascript:$('#imageUrl').toggle('slow')" class="btn btn-primary">
                         <i class="icon-picture"></i> {{t "Change Icon"}}
                     </a>
