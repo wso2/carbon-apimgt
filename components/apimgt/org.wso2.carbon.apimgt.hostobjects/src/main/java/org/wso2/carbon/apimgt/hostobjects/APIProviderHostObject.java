@@ -443,6 +443,24 @@ public class APIProviderHostObject extends ScriptableObject {
             //scopes
             Set<Scope> scopes = definitionFromSwagger20.getScopes(String.valueOf(apiData.get("swagger", apiData)));
             api.setScopes(scopes);
+            
+            try {
+                int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager().
+                                                                                            getTenantId(tenantDomain);
+                APIManagerConfiguration config = HostObjectComponent.getAPIManagerConfiguration();
+                List<String> whitelist = config.getProperty(APIConstants.API_KEY_MANGER_SCOPE_WHITELIST);
+                for (URITemplate uriTemplate : uriTemplates) {
+                    Scope scope = uriTemplate.getScope();
+                    if (scope != null && !(whitelist != null && whitelist.contains(scope))) {
+                        if (apiProvider.isScopeKeyAssigned(apiId, scope.getKey(), tenantId)) {
+                            handleException("Scope " + scope.getKey() + " is already assigned by another API");
+                        }
+                    }                    
+                }
+            } catch (UserStoreException e) {
+                handleException("Error while reading tenant information ", e);
+            }
+            
 
             //Save swagger in the registry
             apiProvider.saveSwagger20Definition(api.getId(),(String) apiData.get("swagger", apiData));
@@ -4756,6 +4774,37 @@ public class APIProviderHostObject extends ScriptableObject {
             }
         }
         return myn;
+    }
+    
+    public static String jsFunction_isScopeExist(Context cx, Scriptable thisObj,
+                                                   Object[] args, Function funObj)
+            throws APIManagementException {
+        Boolean scopeExist = false;
+        if (args != null && isStringValues(args)) {
+            String scopeKey = (String) args[0];
+            String username = (String) args[1];
+            
+            String tenantDomain = MultitenantUtils.getTenantDomain(username);
+            //update permission cache before validate user
+            int tenantId = -1234;
+            try {
+                tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
+                        .getTenantId(tenantDomain);
+            } catch (UserStoreException e) {
+                handleException("Error while reading tenant information ", e);
+            }
+
+            APIProvider apiProvider = getAPIProvider(thisObj);
+            
+            try {
+                scopeExist = apiProvider.isScopeKeyExist(scopeKey, tenantId);
+            } catch (APIManagementException e) {
+                handleException("Error from registry while checking the input context is already exist", e);
+            }
+        } else {
+            handleException("Input context value is null");
+        }
+        return scopeExist.toString();
     }
 
     /**

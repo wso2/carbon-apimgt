@@ -422,36 +422,13 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
     }
 
     @Override
-    public void loadConfiguration(String configuration) throws APIManagementException {
-        if (configuration != null && !configuration.isEmpty()) {
-            StAXOMBuilder builder = null;
-            try {
-                builder = new StAXOMBuilder(new ByteArrayInputStream(configuration.getBytes()));
-                OMElement document = builder.getDocumentElement();
-                if (this.configuration == null) {
-                    synchronized (this) {
-                        this.configuration = new KeyManagerConfiguration();
-                        this.configuration.setManualModeSupported(true);
-                        this.configuration.setResourceRegistrationEnabled(true);
-                        this.configuration.setTokenValidityConfigurable(true);
-                        Iterator<OMElement> elementIterator = document.getChildElements();
-                        while (elementIterator.hasNext()) {
-                            OMElement element = elementIterator.next();
-                            this.configuration.addParameter(element.getLocalName(),
-                                                            APIManagerConfiguration.replaceSystemProperty(element
-                                                                                                                  .getText()));
-                        }
-                    }
-                }
-
-            } catch (XMLStreamException e) {
-                e.printStackTrace();
-            }
-
+    public void loadConfiguration(KeyManagerConfiguration configuration) throws APIManagementException {
+        if (configuration != null) {
+            this.configuration = configuration;
         } else {
 
-            // If Configuration block is not found, read the Server-URL and other properties from APIKeyValidator
-            // section.
+            // If the provided configuration is null, read the Server-URL and other properties from
+            // APIKeyValidator section.
             APIManagerConfiguration config = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
                     .getAPIManagerConfiguration();
             if (this.configuration == null) {

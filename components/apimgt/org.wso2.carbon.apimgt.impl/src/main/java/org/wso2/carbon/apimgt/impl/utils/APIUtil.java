@@ -2505,63 +2505,65 @@ public final class APIUtil {
         return propertyMap;
     }
 
+	public static void addDefinedAllSequencesToRegistry(UserRegistry registry,
+	                                                    String customSequenceType)
+			throws APIManagementException {
+
+		try {
+			File inSequenceDir = new File(
+					APIConstants.API_CUSTOM_SEQUENCES_FOLDER_LOCATION + File.separator +
+					customSequenceType);
+			File[] sequences = inSequenceDir.listFiles();
+
+			for (File sequenceFile : sequences) {
+				String sequenceFileName = sequenceFile.getName();
+				String regResourcePath =
+						APIConstants.API_CUSTOM_SEQUENCE_LOCATION + File.separator +
+						customSequenceType + File.separator + sequenceFileName;
+				if (registry.resourceExists(regResourcePath)) {
+					if (log.isDebugEnabled()) {
+						log.debug("Defined sequences have already been added to the registry");
+					}
+				} else {
+					if (log.isDebugEnabled()) {
+						log.debug("Adding defined sequences to the registry.");
+					}
+
+					InputStream inSeqStream =
+							new FileInputStream(sequenceFile);
+					byte[] inSeqData = IOUtils.toByteArray(inSeqStream);
+					Resource inSeqResource = registry.newResource();
+					inSeqResource.setContent(inSeqData);
+
+					registry.put(regResourcePath, inSeqResource);
+				}
+			}
+
+		} catch (RegistryException e) {
+			throw new APIManagementException(
+					"Error while saving defined sequences to the registry ", e);
+		} catch (IOException e) {
+			throw new APIManagementException("Error while reading defined sequence ", e);
+		}
+
+	}
+
+
     public static void writeDefinedSequencesToTenantRegistry(int tenantID)
             throws APIManagementException {
         try {
+
             RegistryService registryService =
                     ServiceReferenceHolder.getInstance()
                             .getRegistryService();
             UserRegistry govRegistry = registryService.getGovernanceSystemRegistry(tenantID);
 
-            if (govRegistry.resourceExists(APIConstants.API_CUSTOM_INSEQUENCE_LOCATION)) {
-                if(log.isDebugEnabled()){
-                    log.debug("Defined sequences have already been added to the tenant's registry");
-                }
-                //No need to add to add in sequences or out sequences. Do not return yet until we check for fault
-                // sequences as well. (Designed to support migrations).
-                //return;
-            }
-            else{
-                if(log.isDebugEnabled()){
-                    log.debug("Adding defined sequences to the tenant's registry.");
-                }
-
-                InputStream inSeqStream =
-                        APIManagerComponent.class.getResourceAsStream("/definedsequences/in/log_in_message.xml");
-                byte[] inSeqData = IOUtils.toByteArray(inSeqStream);
-                Resource inSeqResource = govRegistry.newResource();
-                inSeqResource.setContent(inSeqData);
-
-                govRegistry.put(APIConstants.API_CUSTOM_INSEQUENCE_LOCATION + "log_in_message.xml", inSeqResource);
-
-                InputStream outSeqStream =
-                        APIManagerComponent.class.getResourceAsStream("/definedsequences/out/log_out_message.xml");
-                byte[] outSeqData = IOUtils.toByteArray(outSeqStream);
-                Resource outSeqResource = govRegistry.newResource();
-                outSeqResource.setContent(outSeqData);
-
-                govRegistry.put(APIConstants.API_CUSTOM_OUTSEQUENCE_LOCATION + "log_out_message.xml", outSeqResource);
-            }
-            if (govRegistry.resourceExists(APIConstants.API_CUSTOM_FAULTSEQUENCE_LOCATION)) {
-                if(log.isDebugEnabled()){
-                    log.debug("Defined fault sequences have already been added to the tenant's registry");
-                }
-                //Fault sequences have already been added. Nothing to do beyond this. Return.
-                return;
-            }
-
-            InputStream faultSeqStream =
-                    APIManagerComponent.class.getResourceAsStream("/definedsequences/fault/json_fault.xml");
-            byte[] faultSeqData = IOUtils.toByteArray(faultSeqStream);
-            Resource faultSeqResource = govRegistry.newResource();
-            faultSeqResource.setContent(faultSeqData);
-
-            govRegistry.put(APIConstants.API_CUSTOM_FAULTSEQUENCE_LOCATION + "json_fault.xml", faultSeqResource);
+            APIUtil.addDefinedAllSequencesToRegistry(govRegistry, APIConstants.API_CUSTOM_SEQUENCE_TYPE_IN);
+            APIUtil.addDefinedAllSequencesToRegistry(govRegistry, APIConstants.API_CUSTOM_SEQUENCE_TYPE_OUT);
+            APIUtil.addDefinedAllSequencesToRegistry(govRegistry, APIConstants.API_CUSTOM_SEQUENCE_TYPE_FAULT);
 
         } catch (RegistryException e) {
             throw new APIManagementException("Error while saving defined sequences to the tenant's registry ", e);
-        } catch (IOException e) {
-            throw new APIManagementException("Error while reading defined sequence ", e);
         }
 	}
 

@@ -365,24 +365,45 @@ APIDesigner.prototype.init_controllers = function(){
 			roles : $("#scopeRoles").val()
 		};
 
-        API_DESIGNER.api_doc.securityDefinitions = $.extend({}, securityDefinitions, API_DESIGNER.api_doc.securityDefinitions);
+		jagg.post("/site/blocks/item-design/ajax/add.jag", { action:"validateScope", scope:$("#scopeKey").val()},
+			function (result) {
+			    if (!result.error) {
 
-		for (var i = 0; i < API_DESIGNER.api_doc.securityDefinitions.apim['x-wso2-scopes'].length; i++) {
-			if (API_DESIGNER.api_doc.securityDefinitions.apim['x-wso2-scopes'][i].key === $(
-					"#scopeKey").val() || API_DESIGNER.api_doc.securityDefinitions.apim['x-wso2-scopes'][i].key === $(
-					"#scopeName").val()) {
+				API_DESIGNER.api_doc.securityDefinitions = $.extend({}, securityDefinitions, API_DESIGNER.api_doc.securityDefinitions);
+
+				for (var i = 0; i < API_DESIGNER.api_doc.securityDefinitions.apim['x-wso2-scopes'].length; i++) {
+					if (API_DESIGNER.api_doc.securityDefinitions.apim['x-wso2-scopes'][i].key === $(
+							"#scopeKey").val() || API_DESIGNER.api_doc.securityDefinitions.apim['x-wso2-scopes'][i].key === $(
+							"#scopeName").val()) {
+						jagg.message({
+							content : "Scope " + $("#scopeKey").val() + " already exists",
+							type : "error"
+						});
+						return;
+					}
+				}
+		      		if (result.isScopeExist == "true") {
+					jagg.message({
+						content : "Scope " + $("#scopeKey").val() + " already assigned by an API.",
+						type : "error"
+					});
+					return;
+				} 
+			
+				API_DESIGNER.api_doc.securityDefinitions.apim['x-wso2-scopes'].push(scope);
+				$("#define_scope_modal").modal('hide');
+				API_DESIGNER.render_scopes();
+				API_DESIGNER.render_resources();
+			
+			    } else {
 				jagg.message({
-					content : "You should not define same scope.",
+					content : result.message,
 					type : "error"
 				});
-				return;
-			}
-		}
-		
-        API_DESIGNER.api_doc.securityDefinitions.apim['x-wso2-scopes'].push(scope);
-		$("#define_scope_modal").modal('hide');
-		API_DESIGNER.render_scopes();
-		API_DESIGNER.render_resources();
+					return;
+				}       
+
+		}, "json"); 
 	}); 
 
     $("#swaggerEditor").click(API_DESIGNER.edit_swagger);
