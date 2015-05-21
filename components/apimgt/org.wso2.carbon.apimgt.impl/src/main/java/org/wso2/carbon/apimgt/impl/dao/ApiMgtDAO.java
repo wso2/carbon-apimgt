@@ -6707,7 +6707,13 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
             if(api.isApiHeaderChanged()){
                 prepStmt = connection.prepareStatement(query);
                 prepStmt.setString(1, api.getContext());
-                prepStmt.setString(2, api.getContextTemplate());
+                String contextTemplate = api.getContextTemplate();
+                //If the context template ends with {version} this means that the version will be at the end of the context.
+                if(contextTemplate.endsWith("/" + APIConstants.VERSION_PLACEHOLDER)){
+                    //Remove the {version} part from the context template.
+                    contextTemplate = contextTemplate.split(Pattern.quote("/" + APIConstants.VERSION_PLACEHOLDER))[0];
+                }
+                prepStmt.setString(2, contextTemplate);
                 prepStmt.setString(3, APIUtil.replaceEmailDomainBack(api.getId().getProviderName()));
                 prepStmt.setString(4, api.getId().getApiName());
                 prepStmt.setString(5, api.getId().getVersion());
