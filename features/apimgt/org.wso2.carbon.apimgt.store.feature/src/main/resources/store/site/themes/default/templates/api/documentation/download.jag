@@ -1,0 +1,20 @@
+<%
+include("/jagg/jagg.jag");
+var store = jagg.module("manager").getAPIStoreObj();
+var domain=request.getParameter("tenant");
+var resourceUrl = request.getParameter("resourceUrl");
+
+    if(store.getDocument instanceof Function){
+        var object = store.getDocument(domain,resourceUrl);
+            if(object == null){
+                response.status = 500;
+               }else{
+                response.contentType = "application/force-download";
+                response.addHeader("Content-Disposition","attachment; filename = "+object.name);
+                print(object.Data);
+               }
+    }else{
+     response.status = 200;
+     response.sendRedirect(resourceUrl);
+    }
+%>
