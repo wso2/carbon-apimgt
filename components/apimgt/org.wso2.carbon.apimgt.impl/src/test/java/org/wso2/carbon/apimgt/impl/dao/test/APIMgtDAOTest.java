@@ -312,6 +312,7 @@ public class APIMgtDAOTest extends TestCase {
 		APIIdentifier apiId = new APIIdentifier("hiranya", "WSO2Earth", "1.0.0");
 		API api = new API(apiId);
 		api.setContext("/wso2earth");
+        api.setContextTemplate("/wso2earth/{version}");
 
 		apiMgtDAO.addAPI(api,-1234);
 
@@ -399,6 +400,7 @@ public class APIMgtDAOTest extends TestCase {
 
 		API api = new API(new APIIdentifier("SUMEDHA", "API1", "V2.0.0"));
 		api.setContext("/context1");
+        api.setContextTemplate("/context1/{version}");
 
 		apiMgtDAO.addAPI(api,-1234);
 		apiMgtDAO.makeKeysForwardCompatible("SUMEDHA", "API1", "V1.0.0", "V2.0.0", "/context1");
