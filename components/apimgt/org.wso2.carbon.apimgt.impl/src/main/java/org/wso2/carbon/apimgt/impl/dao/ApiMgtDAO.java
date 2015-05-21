@@ -6080,8 +6080,8 @@ public class ApiMgtDAO {
         PreparedStatement prepStmt = null;
         ResultSet rs = null;
 
-        String query = "INSERT INTO AM_API (API_PROVIDER, API_NAME, API_VERSION, CONTEXT) " +
-                       "VALUES (?,?,?,?)";
+        String query = "INSERT INTO AM_API (API_PROVIDER, API_NAME, API_VERSION, CONTEXT, CONTEXT_TEMPLATE) " +
+                       "VALUES (?,?,?,?,?)";
 
         try {
             connection = APIMgtDBUtil.getConnection();
@@ -6092,8 +6092,14 @@ public class ApiMgtDAO {
             prepStmt.setString(2, api.getId().getApiName());
             prepStmt.setString(3, api.getId().getVersion());
             prepStmt.setString(4, api.getContext());
+            String contextTemplate = api.getContextTemplate();
+            //If the context template ends with {version} this means that the version will be at the end of the context.
+            if(contextTemplate.endsWith("/" + APIConstants.VERSION_PLACEHOLDER)){
+                //Remove the {version} part from the context template.
+                contextTemplate = contextTemplate.split(Pattern.quote("/" + APIConstants.VERSION_PLACEHOLDER))[0];
+            }
+            prepStmt.setString(5, contextTemplate);
             prepStmt.execute();
-
 
             rs = prepStmt.getGeneratedKeys();
             int applicationId = -1;
@@ -6692,8 +6698,8 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
 
         String previousDefaultVersion = getDefaultVersion(api.getId());
 
-        String query = "UPDATE AM_API SET CONTEXT = ? WHERE API_PROVIDER = ? AND API_NAME = ? AND" +
-                       " API_VERSION = ? ";
+        String query = "UPDATE AM_API SET CONTEXT = ?, CONTEXT_TEMPLATE = ? WHERE API_PROVIDER = ? AND API_NAME = ? AND"
+                        + " API_VERSION = ? ";
         try {
             connection = APIMgtDBUtil.getConnection();
             connection.setAutoCommit(false);
@@ -6701,9 +6707,10 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
             if(api.isApiHeaderChanged()){
                 prepStmt = connection.prepareStatement(query);
                 prepStmt.setString(1, api.getContext());
-                prepStmt.setString(2, APIUtil.replaceEmailDomainBack(api.getId().getProviderName()));
-                prepStmt.setString(3, api.getId().getApiName());
-                prepStmt.setString(4, api.getId().getVersion());
+                prepStmt.setString(2, api.getContextTemplate());
+                prepStmt.setString(3, APIUtil.replaceEmailDomainBack(api.getId().getProviderName()));
+                prepStmt.setString(4, api.getId().getApiName());
+                prepStmt.setString(5, api.getId().getVersion());
                 prepStmt.execute();
             }
 
@@ -8856,6 +8863,29 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
             handleException("Failed to check Scope Key availability : " + scopeKey, e);
         } finally {
             APIMgtDBUtil.closeAllConnections(prepStmt, connection, resultSet);
+        }
+        return false;
+    }
+
+    public boolean isDuplicateContextTemplate(String contextTemplate) throws APIManagementException {
+        Connection conn = null;
+        ResultSet resultSet = null;
+        PreparedStatement ps = null;
+        try {
+            conn = APIMgtDBUtil.getConnection();
+
+            String sqlQuery = "SELECT COUNT(CONTEXT_TEMPLATE) AS CTX_COUNT FROM AM_API WHERE CONTEXT_TEMPLATE = ?";
+
+            ps = conn.prepareStatement(sqlQuery);
+            ps.setString(1, contextTemplate);
+            resultSet = ps.executeQuery();
+            resultSet.next();
+            int count = resultSet.getInt("CTX_COUNT");
+            return count > 0;
+        } catch (SQLException e) {
+            handleException("Failed to count contexts which match " + contextTemplate, e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(ps, conn, resultSet);
         }
         return false;
     }

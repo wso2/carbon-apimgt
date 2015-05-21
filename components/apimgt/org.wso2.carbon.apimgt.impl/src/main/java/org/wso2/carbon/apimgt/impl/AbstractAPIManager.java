@@ -793,4 +793,16 @@ public abstract class AbstractAPIManager implements APIManager {
 
         return domains;
     }
+
+
+    public boolean isDuplicateContextTemplate(String contextTemplate) throws APIManagementException{
+
+        if (contextTemplate != null && contextTemplate.startsWith("/t/"))
+            contextTemplate =
+                    contextTemplate.replace("/t/" + MultitenantUtils.getTenantDomainFromUrl(contextTemplate), "");
+        if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
+            contextTemplate = "/t/" + tenantDomain + contextTemplate;
+        }
+        return apiMgtDAO.isDuplicateContextTemplate(contextTemplate);
+    }
 }
