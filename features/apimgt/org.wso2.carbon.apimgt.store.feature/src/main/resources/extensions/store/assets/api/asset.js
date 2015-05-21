@@ -176,7 +176,7 @@ asset.renderer = function(ctx) {
     var apidata=JSON.parse(resultapi);    
     if(apidata!=null){
     tiers=apidata.tiers;     
-    if(status=="PUBLISHED"){
+    if(status=="PUBLISHED" && user){
     showSubscribe=true;
     }   
     }    
