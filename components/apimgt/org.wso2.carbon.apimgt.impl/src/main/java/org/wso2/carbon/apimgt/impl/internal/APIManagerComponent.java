@@ -388,6 +388,7 @@ public class APIManagerComponent {
 					ServiceReferenceHolder.getInstance().getRegistryService();
 			UserRegistry registry = registryService.getGovernanceSystemRegistry();
 
+			//Add all custom in,out and fault sequences to registry
 			APIUtil.addDefinedAllSequencesToRegistry(registry,
 			                                         APIConstants.API_CUSTOM_SEQUENCE_TYPE_IN);
 			APIUtil.addDefinedAllSequencesToRegistry(registry,

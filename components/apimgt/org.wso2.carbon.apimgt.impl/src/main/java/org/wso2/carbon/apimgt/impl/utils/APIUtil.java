@@ -2510,33 +2510,42 @@ public final class APIUtil {
 			throws APIManagementException {
 
 		try {
-			File inSequenceDir = new File(
+			String seqFolderLocation =
 					APIConstants.API_CUSTOM_SEQUENCES_FOLDER_LOCATION + File.separator +
-					customSequenceType);
-			File[] sequences = inSequenceDir.listFiles();
+					customSequenceType;
+			File inSequenceDir = new File(seqFolderLocation);
+			File[] sequences;
+			sequences = inSequenceDir.listFiles();
 
-			for (File sequenceFile : sequences) {
-				String sequenceFileName = sequenceFile.getName();
-				String regResourcePath =
-						APIConstants.API_CUSTOM_SEQUENCE_LOCATION + File.separator +
-						customSequenceType + File.separator + sequenceFileName;
-				if (registry.resourceExists(regResourcePath)) {
-					if (log.isDebugEnabled()) {
-						log.debug("Defined sequences have already been added to the registry");
+			if (sequences != null) {
+				for (File sequenceFile : sequences) {
+					String sequenceFileName = sequenceFile.getName();
+					String regResourcePath =
+							APIConstants.API_CUSTOM_SEQUENCE_LOCATION + File.separator +
+							customSequenceType + File.separator + sequenceFileName;
+					if (registry.resourceExists(regResourcePath)) {
+						if (log.isDebugEnabled()) {
+							log.debug("Defined sequences have already been added to the registry");
+						}
+					} else {
+						if (log.isDebugEnabled()) {
+							log.debug("Adding defined sequences to the registry.");
+						}
+
+						InputStream inSeqStream =
+								new FileInputStream(sequenceFile);
+						byte[] inSeqData = IOUtils.toByteArray(inSeqStream);
+						Resource inSeqResource = registry.newResource();
+						inSeqResource.setContent(inSeqData);
+
+						registry.put(regResourcePath, inSeqResource);
 					}
-				} else {
-					if (log.isDebugEnabled()) {
-						log.debug("Adding defined sequences to the registry.");
-					}
-
-					InputStream inSeqStream =
-							new FileInputStream(sequenceFile);
-					byte[] inSeqData = IOUtils.toByteArray(inSeqStream);
-					Resource inSeqResource = registry.newResource();
-					inSeqResource.setContent(inSeqData);
-
-					registry.put(regResourcePath, inSeqResource);
 				}
+			} else {
+				log.error(
+						"Custom sequence template location unavailable for custom sequence type " +
+						customSequenceType + " : " + seqFolderLocation
+				);
 			}
 
 		} catch (RegistryException e) {
@@ -2548,23 +2557,27 @@ public final class APIUtil {
 
 	}
 
+	public static void writeDefinedSequencesToTenantRegistry(int tenantID)
+			throws APIManagementException {
+		try {
 
-    public static void writeDefinedSequencesToTenantRegistry(int tenantID)
-            throws APIManagementException {
-        try {
+			RegistryService registryService =
+					ServiceReferenceHolder.getInstance()
+					                      .getRegistryService();
+			UserRegistry govRegistry = registryService.getGovernanceSystemRegistry(tenantID);
 
-            RegistryService registryService =
-                    ServiceReferenceHolder.getInstance()
-                            .getRegistryService();
-            UserRegistry govRegistry = registryService.getGovernanceSystemRegistry(tenantID);
+			//Add all custom in,out and fault sequences to tenant registry
+			APIUtil.addDefinedAllSequencesToRegistry(govRegistry,
+			                                         APIConstants.API_CUSTOM_SEQUENCE_TYPE_IN);
+			APIUtil.addDefinedAllSequencesToRegistry(govRegistry,
+			                                         APIConstants.API_CUSTOM_SEQUENCE_TYPE_OUT);
+			APIUtil.addDefinedAllSequencesToRegistry(govRegistry,
+			                                         APIConstants.API_CUSTOM_SEQUENCE_TYPE_FAULT);
 
-            APIUtil.addDefinedAllSequencesToRegistry(govRegistry, APIConstants.API_CUSTOM_SEQUENCE_TYPE_IN);
-            APIUtil.addDefinedAllSequencesToRegistry(govRegistry, APIConstants.API_CUSTOM_SEQUENCE_TYPE_OUT);
-            APIUtil.addDefinedAllSequencesToRegistry(govRegistry, APIConstants.API_CUSTOM_SEQUENCE_TYPE_FAULT);
-
-        } catch (RegistryException e) {
-            throw new APIManagementException("Error while saving defined sequences to the tenant's registry ", e);
-        }
+		} catch (RegistryException e) {
+			throw new APIManagementException(
+					"Error while saving defined sequences to the tenant's registry ", e);
+		}
 	}
 
 	/**
