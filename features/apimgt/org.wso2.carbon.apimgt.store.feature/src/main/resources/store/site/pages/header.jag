@@ -61,8 +61,7 @@ var isTenantAllowed=function(){
     var illegalChars = /([~!@#;%^*+={}\|\\<>\"\',])/;
     var illegalCharsInput = /(\<[a-zA-Z0-9\s\/]*>)/;
     if (illegalChars.test(request_tenant) || illegalCharsInput.test(request_tenant)) {
-        // redirect to 404
-        exit();
+          response.sendRedirect(jagg.url("/site/pages/error-pages/404.html"));              
     }
 
 %>

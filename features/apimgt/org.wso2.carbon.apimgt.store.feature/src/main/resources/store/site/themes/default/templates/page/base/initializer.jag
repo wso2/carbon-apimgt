@@ -1,0 +1,43 @@
+<%
+jagg.initializer("page/base", {
+
+    preInitialize:function (data) {
+        var jaggi = {
+            context: jagg.url(''),
+            registry: jagg.getRegistryPath(''),
+        };      
+
+        if(jagg.getTenantDomain()){
+            jaggi.tenant = jagg.getTenantDomain();
+        }
+
+        jagg.addHeaderCSS("page/base", "bootstrap3", "lib/bootstrap/css/bootstrap.min.css");
+        jagg.addHeaderCSS("page/base", "font-awesome", "lib/font-awesome/css/font-awesome.min.css");
+        jagg.addHeaderCSS("page/base", "bootstrap-select-css", "lib/bootstrap-select/css/bootstrap-select.min.css");
+        jagg.addHeaderCSS("page/base", "localstyles", "css/localstyles.css");
+        jagg.addHeaderCSS("page/base", "bootstrap-rating.css", "lib/bootstrap-rating/bootstrap-rating.css");
+
+        //include jquery at the top
+        jagg.addHeaderJS("page/base", "jquery1.9.0", "lib/jquery.min.js");        
+        jagg.addHeaderJS("page/base", "i18n", "js/lib/i18n/i18next-1.5.9.js");
+        jagg.addHeaderJS("page/base", "csrf", "js/lib/jquery-csrf.js");
+        jagg.addHeaderJS("page/base", "handlebars", "lib/handlebars.min.js");
+        jagg.addHeaderJS("page/base", "bootstrap-rating.js", "lib/bootstrap-rating/bootstrap-rating.js");
+       
+
+
+        jagg.addHeaderJS("page/base", "jagg", "templates/page/base/js/jagg.js");
+        jagg.addHeaderJS("page/base", "base", "templates/page/base/js/base.js");
+        jagg.addHeaderJSCode("page/base", "jagg.site", 'jagg.site = ' + stringify(jaggi) + ';');
+        jagg.addHeaderJSCode("page/base", "jagg.loggedIn", 'jagg.loggedIn = ' + Boolean(jagg.getUser()) + ';');
+
+        jagg.addFooterJS("page/base", "handlebars", "lib/main.js");
+        jagg.addFooterJS("page/base", "bootstrap3js", "lib/bootstrap/js/bootstrap.min.js");
+        jagg.addFooterJS("page/base", "bootstrap-selectjs", "lib/bootstrap-select/js/bootstrap-select.min.js");
+        jagg.addFooterJS("page/base", "jquery.validator", "js/lib/jquery.validate.min.js");
+        jagg.addFooterJS("page/base", "jquery.validate.password", "js/lib/jquery.validate.password.js");
+        jagg.addFooterJS("page/base", "jquery.cookie", "js/lib/jquery.cookie.js");
+    }
+});
+%>
+
