@@ -1739,7 +1739,8 @@ public class APIProviderHostObject extends ScriptableObject {
                 String currentUser = ((APIProviderHostObject) thisObj).getUsername();
                 apiProvider.changeAPIStatus(api, newStatus, currentUser, publishToGateway);
 
-                if (oldStatus.equals(APIStatus.CREATED) && newStatus.equals(APIStatus.PUBLISHED)) {
+                if ((oldStatus.equals(APIStatus.CREATED) || oldStatus.equals(APIStatus.PROTOTYPED))  
+                        && newStatus.equals(APIStatus.PUBLISHED)) {
                     if (makeKeysForwardCompatible) {
                         apiProvider.makeAPIKeysForwardCompatible(api);
                     }
