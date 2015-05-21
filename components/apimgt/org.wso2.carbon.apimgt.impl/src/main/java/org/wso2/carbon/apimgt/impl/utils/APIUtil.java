@@ -1852,6 +1852,7 @@ public final class APIUtil {
                }
                api.addAvailableTiers(availableTier);
                api.setContext(artifact.getAttribute(APIConstants.API_OVERVIEW_CONTEXT));
+               api.setContextTemplate(artifact.getAttribute(APIConstants.API_OVERVIEW_CONTEXT_TEMPLATE));
                api.setLatest(Boolean.valueOf(artifact.getAttribute(APIConstants.API_OVERVIEW_IS_LATEST)));
                ArrayList<URITemplate> urlPatternsList;
 
