@@ -288,4 +288,25 @@ public interface APIManager {
      * @throws org.wso2.carbon.apimgt.api.APIManagementException if failed to get the predefined tiers
      */
     public Map<String,String> getTenantDomainMappings(String tenantDomain) throws APIManagementException;
+    
+    /**
+     * Check whether the given scope key is already available under given tenant
+     *
+     * @param scopeKey candidate scope key
+     * @param tenantId tenant id
+     * @return true if the scope key is already available
+     * @throws APIManagementException if failed to check the context availability
+     */
+    public boolean isScopeKeyExist(String scopeKey, int tenantid) throws APIManagementException;
+    
+    /**
+     * Check whether the given scope key is already assigned to an API under given tenant
+     *
+     * @param identifier API Identifier 
+     * @param scopeKey candidate scope key
+     * @param tenantId tenant id
+     * @return true if the scope key is already available
+     * @throws APIManagementException if failed to check the context availability
+     */
+    public boolean isScopeKeyAssigned(APIIdentifier identifier, String scopeKey, int tenantid) throws APIManagementException;
 }

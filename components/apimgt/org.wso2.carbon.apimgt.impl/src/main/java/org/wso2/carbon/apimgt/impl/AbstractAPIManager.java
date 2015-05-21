@@ -584,6 +584,17 @@ public abstract class AbstractAPIManager implements APIManager {
         }
         return apiMgtDAO.isContextExist(context);
     }
+    
+    public boolean isScopeKeyExist(String scopeKey, int tenantid) throws APIManagementException {
+
+        return apiMgtDAO.isScopeKeyExist(scopeKey, tenantid);
+    }
+
+    public boolean isScopeKeyAssigned(APIIdentifier identifier, String scopeKey, int tenantid) 
+                                                                                    throws APIManagementException {
+
+        return apiMgtDAO.isScopeKeyAssigned(identifier, scopeKey, tenantid);
+    }      
 
 
     public boolean isApiNameExist(String apiName) throws APIManagementException {
