@@ -55,6 +55,7 @@ import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.impl.UserAwareAPIProvider;
 import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
+import org.wso2.carbon.apimgt.impl.handlers.ScopesIssuer;
 import org.wso2.carbon.apimgt.impl.definitions.APIDefinitionFromSwagger20;
 import org.wso2.carbon.apimgt.impl.dto.Environment;
 import org.wso2.carbon.apimgt.impl.dto.TierPermissionDTO;
@@ -446,12 +447,10 @@ public class APIProviderHostObject extends ScriptableObject {
             
             try {
                 int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager().
-                                                                                            getTenantId(tenantDomain);
-                APIManagerConfiguration config = HostObjectComponent.getAPIManagerConfiguration();
-                List<String> whitelist = config.getProperty(APIConstants.API_KEY_MANGER_SCOPE_WHITELIST);
+                                                                                            getTenantId(tenantDomain);                
                 for (URITemplate uriTemplate : uriTemplates) {
                     Scope scope = uriTemplate.getScope();
-                    if (scope != null && !(whitelist != null && whitelist.contains(scope))) {
+                    if (scope != null && !(ScopesIssuer.getInstance().isWhiteListedScope(scope.getKey()))) {
                         if (apiProvider.isScopeKeyAssigned(apiId, scope.getKey(), tenantId)) {
                             handleException("Scope " + scope.getKey() + " is already assigned by another API");
                         }
@@ -4784,22 +4783,24 @@ public class APIProviderHostObject extends ScriptableObject {
             String scopeKey = (String) args[0];
             String username = (String) args[1];
             
-            String tenantDomain = MultitenantUtils.getTenantDomain(username);
-            //update permission cache before validate user
-            int tenantId = -1234;
-            try {
-                tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
-                        .getTenantId(tenantDomain);
-            } catch (UserStoreException e) {
-                handleException("Error while reading tenant information ", e);
-            }
-
-            APIProvider apiProvider = getAPIProvider(thisObj);
-            
-            try {
-                scopeExist = apiProvider.isScopeKeyExist(scopeKey, tenantId);
-            } catch (APIManagementException e) {
-                handleException("Error from registry while checking the input context is already exist", e);
+            if (!ScopesIssuer.getInstance().isWhiteListedScope(scopeKey)) {
+                String tenantDomain = MultitenantUtils.getTenantDomain(username);
+                //update permission cache before validate user
+                int tenantId = -1234;
+                try {
+                    tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
+                            .getTenantId(tenantDomain);
+                } catch (UserStoreException e) {
+                    handleException("Error while reading tenant information ", e);
+                }
+    
+                APIProvider apiProvider = getAPIProvider(thisObj);
+                
+                try {
+                    scopeExist = apiProvider.isScopeKeyExist(scopeKey, tenantId);
+                } catch (APIManagementException e) {
+                    handleException("Error from registry while checking the input context is already exist", e);
+                }
             }
         } else {
             handleException("Input context value is null");
