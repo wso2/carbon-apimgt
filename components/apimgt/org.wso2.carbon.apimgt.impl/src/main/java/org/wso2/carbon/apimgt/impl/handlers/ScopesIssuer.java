@@ -14,7 +14,7 @@
  *  limitations under the License.
  */
 
-package org.wso2.carbon.apimgt.keymgt.handlers;
+package org.wso2.carbon.apimgt.impl.handlers;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -164,7 +164,7 @@ public class ScopesIssuer {
      * @param scope
      * @return
      */
-    private boolean isWhiteListedScope(String scope){
+    public boolean isWhiteListedScope(String scope){
         for(String scopeTobeSkipped : scopeSkipList){
           if(scope.matches(scopeTobeSkipped)){
               return true;
