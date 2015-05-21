@@ -1497,3 +1497,10 @@ ol.linenums li {
     }
 }
 */
+
+.simple-space-maker-inline{
+    display:inline;
+}
+.simple-space-maker-inline .btn{
+    margin-top:-10px;
+}
