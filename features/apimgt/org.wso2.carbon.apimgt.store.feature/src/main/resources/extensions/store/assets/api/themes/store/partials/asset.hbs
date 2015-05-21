@@ -45,10 +45,10 @@
 				</table>
 			</div>
 			{{#if showSubscribe}} 
-			<div class='span9' appStyleFix>
-				<div class='well'>
-
-				<select id='application-list'>	
+			<div class='span9 well' appStyleFix>
+            <div class="span5">
+                <label><strong>Applications</strong></label>
+				<select id='application-list' class="span12">
          {{#unless subscribedToDefault}} 
          <option value="-">{{t "Select Application..."}}</option>		             
          {{/unless}}        
@@ -59,24 +59,28 @@
 				    {{/each}}
 		 </optgroup>			   
 				</select>
-
-				<select id="tiers-list" name="tiers-list">
+            </div>
+                    <div class="span4">
+                        <label><strong>Tiers</strong></label>
+				<select id="tiers-list" name="tiers-list" class="span12">
                    {{#if tiers}}		                   
 				   {{#each tiers}}
 					<option value="{{this}}">{{this}}</option>
 				    {{/each}}{{/if}}
 		                    
 		                </select>
-				<div class="simple-space-maker simple-space-maker-inline">
-		                    <button onclick="triggerSubscribe()" id="subscribe-button" class="btn btn-primary " {{#unless tiersAvailable}} disabled="disabled" {{/unless}}>{{t "Subscribe"}}					
+                        </div>
+                    <div class="span3">
+                        <label>&nbsp;</label>
+				<div class="simple-space-maker">
+		                    <button onclick="triggerSubscribe()" id="subscribe-button" class="btn btn-primary span12" {{#unless tiersAvailable}} disabled="disabled" {{/unless}}>{{t "Subscribe"}}
 		                    </button>
 		                     {{#unless tiersAvailable}}
                                 <span id="subsBtnDesc" class="help-block">{{t "You may not be entitled to any of the available tiers"}}</span>
                             {{/unless}}
 
 		                </div>
-
-				</div>
+                        </div>
 			</div>
 			{{/if}}
 			<input type="hidden" id="apiname" value="{{api.name}}">
