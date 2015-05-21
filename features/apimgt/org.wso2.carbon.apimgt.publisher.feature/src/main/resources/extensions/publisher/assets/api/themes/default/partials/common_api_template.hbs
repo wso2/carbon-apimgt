@@ -137,15 +137,15 @@
         <div class="form-group">
             <label class="custom-form-label col-lg-2 col-md-2 col-sm-12 col-xs-12" for="imageUrl">{{t "Thumbnail"}}</label>
             <div class="custom-form-right col-lg-5 col-md-8 col-sm-9 col-xs-10">
-                    {{#unless thumb}}
-                        <div class="col-lg-4 col-md-4 col-sm-6 col-xs-6">
-                            <img id="apiEditThumb" alt="" src="{{url "/themes/default/img/icons/ico-sort.png"}}"/>
-                        </div>
+                     {{#if api.thumb}}
+	                    <div class="col-lg-4 col-md-4 col-sm-6 col-xs-6">
+		                    <img src='{{url ""}}/storage/{{assets.type}}/{{id}}/{{api.thumb}}' alt="" id="apiEditThumb"/>
+	              </div>
                     {{else}}
                         <div class="col-lg-4 col-md-4 col-sm-6 col-xs-6">
-                            <img id="apiEditThumb" alt="" src="<%=jagg.getRegistryPath(api.thumb)%>"/>
-                        </div>
-                    {{/unless}}
+-		                    <img id="apiEditThumb" alt="" src="{{url "/extensions/assets/api/themes/default/imgs/api-default.png"}}"/>
+-	                    </div>
+-                    {{/if}}
                 <div class="col-lg-8 col-md-8 col-sm-6 col-xs-6">
                     <a onclick="javascript:$('#imageUrl').toggle('slow')" class="btn btn-primary">
                         <i class="icon-picture"></i> {{t "Change Icon"}}
