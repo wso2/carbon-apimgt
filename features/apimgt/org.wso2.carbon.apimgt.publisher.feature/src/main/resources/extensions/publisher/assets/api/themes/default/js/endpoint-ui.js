@@ -12,20 +12,20 @@ $(document).ready(function () {
         schema: {
             format: {
                 type: 'string',
-                title: 'endpointUi.Format',
+                title: 'Format',
                 'enum': ['soap11', 'soap12', 'POX', 'REST', 'GET', 'leave-as-is'],
                 description:'Message format for the endpoint.',
                 'default': 'leave-as-is'
             },
             optimize: {
                 type: 'string',
-                title: 'endpointUi.Optimize',
+                title: 'Optimize',
                 'enum': ['SWA', 'MTOM', 'leave-as-is'],
                 description:'Method to optimize the attachments.',
                 'default': 'leave-as-is'
             },
             suspendErrorCode: {
-                title: 'endpointUi.Error_Codes',
+                title: 'Error_Codes',
                 type: 'array',
                 description: 'A list of error codes.If these error codes are received from the endpoint, the endpoint will be suspended.',
                 items:{
@@ -35,22 +35,22 @@ $(document).ready(function () {
 
             },
             suspendDuration: {
-                title: 'endpointUi.Intial Duration (Millis)',
+                title: 'Intial Duration (Millis)',
                 description:'The duration that the endpoint is suspended for the first time after the receiving the suspend error codes.',
                 type: 'number'
             },
             suspendMaxDuration: {
-                title: 'endpointUi.Max Duration (Millis)',
+                title: 'Max Duration (Millis)',
                 description:'The maximum duration that the endpoint is suspended after the receiving the suspend error codes.',
                 type: 'number'
             },
             factor: {
-                title: 'endpointUi.Factor',
+                title: 'Factor',
                 description:'The duration to suspend can vary from the first time suspension to the subsequent time. The factor value decides the suspense duration variance between subsequent suspensions.',
                 type: 'number'
             },
             retryErroCode: {
-                title: 'endpointUi.Error Codes',
+                title: 'Error Codes',
                 type: 'array',
                 description:'A list of error codes. If these error codes are received from the endpoint, the request will be subjected to a timeout.',
                 items:{
@@ -59,23 +59,23 @@ $(document).ready(function () {
                 }
             },
             retryTimeOut: {
-                title: 'endpointUi.Retries Before Suspension',
+                title: 'Retries Before Suspension',
                 description:'The number of re-tries in case of a timeout, caused by the above listed error codes.',
                 type: 'number'
             },
             retryDelay: {
-                title: 'endpointUi.Retry Delay(Millis)',
+                title: 'Retry Delay(Millis)',
                 description:'The delay between retries, in milliseconds.',
                 type: 'number'
             },
             actionSelect: {
-                title: 'endpointUi.Action',
+                title: 'Action',
                 type: 'string',
                 description:'The action to be done at a timeout situation. You can select from: 1) Never Timeout 2) Discard Message 3) Execute Fault Sequence',
                 'enum': [ "neverTimeout", "discard", "fault" ]
             },
             actionDuration: {
-                title: 'endpointUi.Duration (Millis)',
+                title: 'Duration (Millis)',
                 description:'The duration in milliseconds before considering a request as timeout.',
                 type: 'number'
             }
@@ -83,45 +83,45 @@ $(document).ready(function () {
         form: [{
             "type": "fieldset",
             "htmlClass": "ae_message_content",
-            "title": 'endpointUi.Message Content',
+            "title": 'eMessage Content',
             "items": [{
                 key: 'format',
                 'titleMap': {
                     'soap11': "SOAP 1.1",
                     'soap12': "SOAP 1.2",
-                    'POX': 'endpointUi.pox',
-                    'REST': 'endpointUi.rest',
+                    'POX': 'pox',
+                    'REST': 'rest',
                     'GET': "GET",
-                    'leave-as-is': 'endpointUi.Leave As-Is'
+                    'leave-as-is': 'Leave As-Is'
                 }
             }, {
                 key: 'optimize',
                 'titleMap': {
                     'soap11': "SwA",
                     'soap12': "MTOM",
-                    'leave-as-is': "endpointUi.Leave As-Is"
+                    'leave-as-is': "Leave As-Is"
                 }
             }]
         }, {
             "type": "fieldset",
-            "title": "endpointUi.Endpoint Suspend State",
+            "title": "Endpoint Suspend State",
             "items": [ {
                 key:'suspendErrorCode',
                 type:'multiselect',
                 fieldHtmlClass:'error_codes_selection',
                 'titleMap':{
-                    "101507": 	"endpointUi.101507",
-                    "101508": 	"endpointUi.101508",
-                    "101505": 	"endpointUi.101505",
-                    "101506": 	"endpointUi.101506",
-                    "101509": 	"endpointUi.101509",
-                    "101500": 	"endpointUi.101500" ,
-                    "101510": 	"endpointUi.101510",
-                    "101001": 	"endpointUi.101001",
-                    "101000": 	"endpointUi.101000",
-                    "101503": 	"endpointUi.101503",
-                    "101504": 	"endpointUi.101504",
-                    "101501": 	"endpointUi.101501"
+                   "101507":"101507 : Connect cancel",
+                   "101508":"101508 : Connect timeout",
+                   "101505":"101505 : Connection closed",
+                   "101506":"101506 : HTTP protocol violation",
+                   "101509":"101509 : Send abort",
+                   "101500":"101500 : Sender IO error sending",
+                   "101510":"101510 : Response processing failure",
+                   "101001":"101001 : Receiver IO error receiving",
+                   "101000":"101000 : Receiver IO error sending",
+                   "101503":"101503 : Connection failed",
+                   "101504":"101504 : Connection timed out",
+                   "101501":"101501 : Sender IO error receiving",
                 }
             },
                 { key:'suspendDuration'},
@@ -130,37 +130,37 @@ $(document).ready(function () {
 
         }, {
             "type": "fieldset",
-            "title": "endpointUi.Endpoint Timeout State",
+            "title": "Endpoint Timeout State",
             "items": [ {
                 key:'retryErroCode',
                 type:'multiselect',
                 fieldHtmlClass:'error_codes_selection',
                 'titleMap':{
-                    "101507": 	"endpointUi.101507",
-                    "101508": 	"endpointUi.101508",
-                    "101505": 	"endpointUi.101505",
-                    "101506": 	"endpointUi.101506",
-                    "101509": 	"endpointUi.101509",
-                    "101500": 	"endpointUi.101500" ,
-                    "101510": 	"endpointUi.101510",
-                    "101001": 	"endpointUi.101001",
-                    "101000": 	"endpointUi.101000",
-                    "101503": 	"endpointUi.101503",
-                    "101504": 	"endpointUi.101504",
-                    "101501": 	"endpointUi.101501"
+                    "101507":"101507 : Connect cancel",
+                    "101508":"101508 : Connect timeout",
+                    "101505":"101505 : Connection closed",
+                    "101506":"101506 : HTTP protocol violation",
+                    "101509":"101509 : Send abort",
+                    "101500":"101500 : Sender IO error sending",
+                    "101510":"101510 : Response processing failure",
+                    "101001":"101001 : Receiver IO error receiving",
+                    "101000":"101000 : Receiver IO error sending",
+                    "101503":"101503 : Connection failed",
+                    "101504":"101504 : Connection timed out",
+                    "101501":"101501 : Sender IO error receiving",
                 }
             },
                 'retryTimeOut', 'retryDelay']
         }, {
             "type": "fieldset",
-            "title": "endpointUi.Connection Timeout",
+            "title": "Connection Timeout",
             "items": [
                 {
                     key: 'actionSelect',
                     'titleMap': {
-                        "neverTimeout": "endpointUi.Never timeout",
-                        "discard": "endpointUi.Discard message",
-                        "fault": "endpointUi.Execute fault sequence"
+                        "neverTimeout": "Never timeout",
+                        "discard": "Discard message",
+                        "fault": "Execute fault sequence"
                     },
                     value:'fault'
                 },{
@@ -176,12 +176,12 @@ $(document).ready(function () {
         "schema": {
 
             "production_endpoints": {
-                "title": "endpointUi.Production Endpoint",
+                "title": "Production Endpoint",
                 "type": "endpoint",
                 "fieldHtmlClass": "input-xlarge validateEndpoints"
             },
             sandbox_endpoints: {
-                title: "endpointUi.Sandbox Endpoint",
+                title: "Sandbox Endpoint",
                 type: 'endpoint',
                 "fieldHtmlClass": "input-xlarge validateEndpoints"
             }
@@ -195,11 +195,11 @@ $(document).ready(function () {
         "schema": {
 
             "production_endpoints": {
-                "title": "endpointUi.Production Endpoint",
+                "title": "Production Endpoint",
                 "type": "endpoint"
             },
             sandbox_endpoints: {
-                title: "endpointUi.Sandbox Endpoint",
+                title: "Sandbox Endpoint",
                 type: 'endpoint'
 
             }
@@ -217,31 +217,31 @@ $(document).ready(function () {
         "schema": {
 
             "production_endpoints": {
-                "title": "endpointUi.Production WSDL",
+                "title": "Production WSDL",
                 "type": "endpoint",
                 "urlType":"wsdl",
                 "fieldHtmlClass": "input-xlarge validateEndpoints"
             },
             'wsdlendpointService': {
-                title: "endpointUi.Service",
+                title: "Service",
                 type: 'text'
             },
             'wsdlendpointPort': {
-                title: "endpointUi.Port",
+                title: "Port",
                 type: 'text'
             },
             "sandbox_endpoints": {
-                title: "endpointUi.Sandbox WSDL",
+                title: "Sandbox WSDL",
                 type: 'endpoint',
                 "urlType":"wsdl",
                 "fieldHtmlClass": "input-xlarge validateEndpoints"
             },
             'wsdlendpointServiceSandbox': {
-                title: "endpointUi.Service",
+                title: "Service",
                 type: 'text'
             },
             'wsdlendpointPortSandbox': {
-                title: "endpointUi.Port",
+                title: "Port",
                 type: 'text'
             }
         },
@@ -268,28 +268,28 @@ $(document).ready(function () {
     APP.form.failover_endpoint = {
         "schema": {
             "production_endpoints": {
-                "title": "endpointUi.Production Endpoint",
+                "title": "Production Endpoint",
                 "type": "endpoint",
                 "fieldHtmlClass": "input-xlarge"
             },
             "production_failovers": {
-                "title": "endpointUi.Production Fail-over Endpoints",
+                "title": "Production Fail-over Endpoints",
                 "type": "array",
                 "items": {
                     "type": "endpoint",
-                    "title": "endpointUi.Endpoint"+" {{idx}} )"
+                    "title": "Endpoint"+" {{idx}} )"
                 }
             },
             sandbox_endpoints: {
-                title: "endpointUi.Sandbox Endpoint",
+                title: "Sandbox Endpoint",
                 type: 'endpoint'
             },
             "sandbox_failovers": {
-                "title": "endpointUi.Sandbox Fail-over Endpoints",
+                "title": "Sandbox Fail-over Endpoints",
                 "type": "array",
                 "items": {
                     "type": "endpoint",
-                    "title": "endpointUi.Endpoint"+" {{idx}} )"
+                    "title": "Endpoint"+" {{idx}} )"
                 }
             }
         },
@@ -302,21 +302,21 @@ $(document).ready(function () {
         "schema": {
             algoCombo: {
                 type: 'string',
-                title: "endpointUi.Algorithm",
+                title: "Algorithm",
                 'enum': ['org.apache.synapse.endpoints.algorithms.RoundRobin', 'other'],
                 'default': 'org.apache.synapse.endpoints.algorithms.RoundRobin'
             },
             algoClassName: {
                 type: 'string',
-                title: "endpointUi.AlgorithmOther"
+                title: "Algorithm Other"
             },
             sessionManagement: {
                 type: 'string',
-                title: "endpointUi.Session Management",
+                title: "Session Management",
                 'enum': [ 'http', 'soap', 'simpleClientSession','none']
             },
             sessionTimeOut: {
-                title: "endpointUi.Session Timeout (Mills) ",
+                title: "Session Timeout (Mills) ",
                 type: 'number'
             },
             failOver: {
@@ -324,19 +324,19 @@ $(document).ready(function () {
                 'enum': [ 'True', 'False']
             },
             "production_endpoints": {
-                "title": "endpointUi.Production Endpoints",
+                "title": "Production Endpoints",
                 "type": "array",
                 "items": {
                     "type": "endpoint",
-                    "title": "endpointUi.Endpoint"+" {{idx}} )"
+                    "title": "Endpoint"+" {{idx}} )"
                 }
             },
             "sandbox_endpoints": {
-                "title": "endpointUi.Sandbox Endpoints",
+                "title": "Sandbox Endpoints",
                 "type": "array",
                 "items": {
                     "type": "endpoint",
-                    "title": "endpointUi.Endpoint"+" {{idx}} )"
+                    "title": "Endpoint"+" {{idx}} )"
                 }
             }
         },
@@ -345,7 +345,7 @@ $(document).ready(function () {
             {
                 key:'algoCombo',
                 titleMap:{
-                    'org.apache.synapse.endpoints.algorithms.RoundRobin' : "endpointUi.Round-robin",
+                    'org.apache.synapse.endpoints.algorithms.RoundRobin' : "Round-robin",
                     "other":"Other"
                 },
                 "onChange": function (evt) {
@@ -372,10 +372,10 @@ $(document).ready(function () {
             {
                 key:'sessionManagement',
                 titleMap:{
-                    'http':"endpointUi.Transport",
-                    'soap':"endpointUi.SOAP",
-                    'simpleClientSession':"endpointUi.Client ID",
-		    		'none':"endpointUi.none",
+                    'http':"Transport",
+                    'soap':"SOAP",
+                    'simpleClientSession':"Client ID",
+		    		'none':"none",
                 },
                 value:'none'
             },

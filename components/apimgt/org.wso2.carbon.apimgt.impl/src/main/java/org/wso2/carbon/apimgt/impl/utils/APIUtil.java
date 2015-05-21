@@ -133,6 +133,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.commons.lang.StringUtils;
+import org.wso2.carbon.governance.lcm.util.CommonUtil;
 
 /**
  * This class contains the utility methods used by the implementations of APIManager, APIProvider
@@ -2298,6 +2299,36 @@ public final class APIUtil {
             throw new APIManagementException("Error while reading External Stores configuration file content", e);
         }
     }
+    
+    public static void loadTenantAPILifecycle(int tenantID)throws APIManagementException {
+        try {
+            UserRegistry govRegistry = getSystemConfigRegistry(tenantID);
+
+            if (govRegistry.resourceExists(APIConstants.API_LIFE_CYCLE_LOCATION)) {
+                log.debug("External Stores configuration already uploaded to the registry");
+                return;
+            }
+            if (log.isDebugEnabled()) {
+                log.debug("Adding External Stores configuration to the tenant's registry");
+            }
+            String relativePath = "/lifecycle/APILifeCycle.xml";
+            Resource resource = govRegistry.newResource();
+            byte[] data = getResourceData(relativePath);
+            resource.setContent(data);
+            resource.setMediaType(APIConstants.XML_MEDIA_TYPE);
+            String content = new String(data);
+            UserRegistry rootRegistry = getRootRegistry();
+            CommonUtil.addLifecycle(content, govRegistry, rootRegistry);
+        } catch (RegistryException e) {
+            throw new APIManagementException("Error while saving External Stores configuration information to the registry", e);
+        } catch (IOException e) {
+            throw new APIManagementException("Error while reading External Stores configuration file content", e);
+        } catch (XMLStreamException e) {
+        	throw new APIManagementException("Error while generate  External Stores configuration file content", e);
+		}
+    }
+    
+    
 
     /**
      *
@@ -4554,5 +4585,24 @@ public final class APIUtil {
 			return null;
 		}
 	}
+	
+	public static UserRegistry getRootRegistry() throws RegistryException{
+	   	 RegistryService registryService = ServiceReferenceHolder.getInstance().getRegistryService();	   	
+	     UserRegistry govRegistry = registryService.getRegistry(CarbonConstants.REGISTRY_SYSTEM_USERNAME);
+	     return govRegistry;
+	}
+	   
+	
+	public static UserRegistry getSystemConfigRegistry(int tenantID) throws RegistryException{
+   	 RegistryService registryService = ServiceReferenceHolder.getInstance().getRegistryService();
+        UserRegistry govRegistry = registryService.getConfigSystemRegistry(tenantID);
+        return govRegistry;
+   }
+   
+   private static byte[] getResourceData(final String relativePath) throws IOException{
+   	InputStream inputStream = APIManagerComponent.class.getResourceAsStream(relativePath);
+       byte[] data = IOUtils.toByteArray(inputStream);
+       return data;
+   }
 
 }

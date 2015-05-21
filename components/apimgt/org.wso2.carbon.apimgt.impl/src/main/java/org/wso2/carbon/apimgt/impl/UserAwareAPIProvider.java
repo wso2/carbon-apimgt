@@ -161,6 +161,15 @@ public class UserAwareAPIProvider extends APIProviderImpl {
 		return super.updateAPIStatus(apiData);
 	}
 
+	public boolean hasPublishPermission() throws APIManagementException {
+		try {
+			checkPublishPermission();
+			return true;
+		} catch (APIManagementException e) {
+			return false;
+		}
+	}
+
 	public void checkCreatePermission() throws APIManagementException {
         APIUtil.checkPermission(username, APIConstants.Permissions.API_CREATE);
     }

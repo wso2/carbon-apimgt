@@ -7,7 +7,7 @@ $(document).ready(function(){
             var designer =new  APIMangerAPI.APIDesigner();
             designer.load_api_document(data.data);
             designer.set_default_management_values();
-            designer.render_resources_template();
+            designer.render_resources();
             $("#swaggerUpload").modal('hide');
      });
      }else{
@@ -51,7 +51,7 @@ $(document).ready(function(){
                                                           if(result) {
                                                           var designer = new APIMangerAPI.APIDesigner();
                                                           designer.add_default_resource();
-                                                          $("#design_form").submit();
+                                                          $("#form-asset-create").submit();
                                                           }
                                                           });
                                                          return false;
@@ -92,7 +92,7 @@ $(document).ready(function(){
                                                                             BootstrapDialog.show({
                                                                             type: BootstrapDialog.TYPE_DANGER,
                                                                             title: 'Error',
-                                                                            message: 'Error while changing the life cycle state.',
+                                                                            message: 'Error while creating the API.',
                                                                             buttons: [{
                                                                             label: 'OK',
                                                                             action: function(dialogRef){

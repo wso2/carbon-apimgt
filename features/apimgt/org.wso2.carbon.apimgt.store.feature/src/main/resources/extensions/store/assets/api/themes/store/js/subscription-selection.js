@@ -17,6 +17,8 @@
  *
  */
 
+var removeAPISubscription;
+
 /*
  This js function will populate the UI after metadata generation in pages/my_subscription.jag
  */
@@ -43,6 +45,7 @@ $(function () {
     var EV_GENERATE_SAND_TOKEN = 'eventGenerateSandboxToken';
     var EV_RGEN_PROD_TOKEN = 'eventRegenerateProductionToken';
     var EV_RGEN_SAND_TOKEN = 'eventRegenerateSandboxToken';
+    var EV_SUB_DELETE = 'eventSubscriptionDelete';
 
     var APP_STORE = {};
 
@@ -148,6 +151,22 @@ $(function () {
     };
 
     /*
+     The function delete subscription metadata
+     */
+    var deleteSubscriptionMetadata = function (appName, apiName, apiProvider, apiVersion, action) {
+        var subscriptionDetails = findSubscriptionDetails(appName);
+        if (action == 'deleteSubscription') {
+            var sub;
+            for (var subIndex in subscriptionDetails) {
+                sub = subscriptionDetails[subIndex];
+                if (sub.name == apiName && sub.provider == apiProvider && sub.version == apiVersion) {
+                    subscriptionDetails.splice(subIndex, 1);
+                }
+            }
+        }
+    };
+
+    /*
      The function invokes when generating fresh production tokens
      */
     var attachGenerateProdToken = function () {
@@ -211,7 +230,7 @@ $(function () {
      */
     var attachUpdateProductionDomains = function () {
 
-        $('#btn-production-updateDomains').on('click', function () {
+        $('#btn-Production-updateDomains').on('click', function () {
             var allowedDomains = $('#input-Production-allowedDomains').val();
             console.info(JSON.stringify(APP_STORE.productionKeys));
             var domainUpdateData = {};
@@ -234,7 +253,7 @@ $(function () {
 
     var attachUpdateSandboxDomains = function () {
 
-        $('#btn-sandbox-updateDomains').on('click', function () {
+        $('#btn-Sandbox-updateDomains').on('click', function () {
             var allowedDomains = $('#input-Sandbox-allowedDomains').val();
             console.info(JSON.stringify(APP_STORE.productionKeys));
             var domainUpdateData = {};
@@ -263,7 +282,6 @@ $(function () {
 
         $('#input-checkbox-showkeys').change(function () {
             var isChecked = $('#input-checkbox-showkeys').prop('checked');
-            console.info('Show Keys: ' + isChecked);
             APP_STORE['showKeys'] = isChecked;
             if (isChecked) {
                 events.publish(EV_SHOW_KEYS);
@@ -336,6 +354,32 @@ $(function () {
         });
     };
 
+    removeAPISubscription = function (apiName, apiVersion, apiProvider) {
+        //(apiname, version, provider, user, tier, appId) 
+        var appName = $('#subscription_selection').val();
+        var appDetails = findAppDetails(appName);
+        var deleteAPISubscriptionData = {};
+        deleteAPISubscriptionData.apiName = apiName;
+        deleteAPISubscriptionData.apiVersion = apiVersion;
+        deleteAPISubscriptionData.apiProvider = apiProvider;
+        deleteAPISubscriptionData.appId = appDetails.id;
+        deleteAPISubscriptionData.appTier = appDetails.tier;
+        $.ajax({
+            type: 'POST',
+            url: getSubscriptionAPI(appName, 'deleteSubscription'),
+            data: deleteAPISubscriptionData,
+            success: function () {
+                deleteSubscriptionMetadata(appName, apiName, apiProvider, apiVersion, 'deleteSubscription');
+                var subs = findSubscriptionDetails(appName);
+                if (subs.length != 0) {
+                    events.publish(EV_SUB_DELETE, {appName: appName});
+                } else {
+                    location.reload();
+                }
+
+            }
+        });
+    };
 
     events.register(EV_APP_SELECT);
     events.register(EV_SHOW_KEYS);
@@ -346,6 +390,7 @@ $(function () {
     events.register(EV_HIDE_KEYS);
     events.register(EV_RGEN_PROD_TOKEN);
     events.register(EV_RGEN_SAND_TOKEN);
+    events.register(EV_SUB_DELETE);
 
     /*
      Keys View
@@ -464,7 +509,6 @@ $(function () {
         subscriptions: [EV_APP_SELECT, EV_SHOW_KEYS, EV_HIDE_KEYS, EV_GENERATE_SAND_TOKEN],
         partial: 'sub-keys-hidden-prod',
         resolveRender: function (data) {
-            console.info(APP_STORE.sandboxKeys);
             //Determine if the keys need to be visible
             if (APP_STORE.showKeys) {
                 return false;
@@ -494,10 +538,11 @@ $(function () {
         container: PROD_DOMAIN_CONTAINER,
         partial: 'sub-domain-token-prod',
         beforeRender: function (data) {
-            data.environment = Views.translate('Production');
-            data.allowedDomains = Views.translate('ALL');
-            data.validityTime = Views.translate('3600');
-            if ($('#subscription_selection').val() == null) {
+            if (data.appName != null) {
+                data.environment = Views.translate('Production');
+                data.allowedDomains = Views.translate('ALL');
+                data.validityTime = Views.translate('3600');
+            } else if (typeof(data.appName) != "undefined" || typeof(data.appName) == "null") {
                 data.isAppNameAvailable = Views.translate('false');
             }
         },
@@ -509,7 +554,14 @@ $(function () {
     Views.extend('defaultProductionDomainView', {
         id: 'updateProductionDomainView',
         partial: 'sub-domain-update-prod',
-        subscriptions: [EV_GENERATE_PROD_TOKEN],
+        resolveRender: function (data) {
+            if (!APP_STORE.productionKeys) {
+                return false;
+            } else {
+                return true;
+            }
+        },
+        subscriptions: [EV_APP_SELECT, EV_GENERATE_PROD_TOKEN],
         afterRender: attachUpdateProductionDomains
     });
 
@@ -518,10 +570,11 @@ $(function () {
         id: 'defaultSandboxDomainView',
         container: SAND_DOMAIN_CONTAINER,
         beforeRender: function (data) {
-            data.environment = Views.translate('Sandbox');
-            data.allowedDomains = Views.translate('ALL');
-            data.validityTime = Views.translate('3600');
-            if ($('#subscription_selection').val() == null) {
+            if (data.appName != null) {
+                data.environment = Views.translate('Sandbox');
+                data.allowedDomains = Views.translate('ALL');
+                data.validityTime = Views.translate('3600');
+            } else if (typeof(data.appName) != "undefined" || typeof(data.appName) == "null") {
                 data.isAppNameAvailable = Views.translate('false');
             }
         },
@@ -532,8 +585,15 @@ $(function () {
     Views.extend('defaultSandboxDomainView', {
         id: 'updateSandboxDomainVIew',
         partial: 'sub-domain-update-prod',
-        afterRender: attachUpdateSandboxDomains,
-        subscriptions: [EV_GENERATE_SAND_TOKEN]
+        resolveRender: function (data) {
+            if (!APP_STORE.sandboxKeys) {
+                return false;
+            } else {
+                return true;
+            }
+        },
+        subscriptions: [EV_APP_SELECT, EV_GENERATE_SAND_TOKEN],
+        afterRender: attachUpdateSandboxDomains
     });
 
     /*
@@ -545,9 +605,13 @@ $(function () {
         partial: 'sub-listing',
         beforeRender: function (data) {
             var appName = data.appName;
-            data.subscriptions = findSubscriptionDetails(appName);
+            if (appName != null) {
+                data.subscriptions = findSubscriptionDetails(appName);
+            } else {
+                data.isAppNameAvailable = Views.translate('false');
+            }
         },
-        subscriptions: [EV_APP_SELECT],
+        subscriptions: [EV_APP_SELECT, EV_SUB_DELETE],
         afterRender: function () {
         }
     });
@@ -610,7 +674,7 @@ $(function () {
         APP_STORE.appDetails = details;
         APP_STORE.productionKeys = findProdKeys(details);
         APP_STORE.sandboxKeys = findSandKeys(details);
-        //APP_STORE.showKeys = false;
+        APP_STORE.showKeys = true;
     };
 
     var defaultAppName = $('#subscription_selection').val();

@@ -68,6 +68,10 @@ require('/modules/store.js').exec(function (ctx) {
                 if (keys.accessToken != null) {
                     print(keys);
                 }
+            } else if (uriOptions.action == 'deleteSubscription') {
+                // (apiname, version, provider, user, tier, appId)
+                apistore.removeSubscription(options.apiName, options.apiVersion, options.apiProvider,
+                        user.username, options.appTier, options.appId);
             }
             break;
 

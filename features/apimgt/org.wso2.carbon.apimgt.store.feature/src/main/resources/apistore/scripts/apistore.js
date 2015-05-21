@@ -104,6 +104,7 @@ var apistore = {};
     StoreAPIProxy.prototype.getSubscriber = function (userName) {
         return this.impl.getSubscriber(userName);
     };
+
     StoreAPIProxy.prototype.addSubscriber = function (userName, tenantId) {
         var subscriber = new APISubscriber(userName);
         subscriber.setSubscribedDate(new Date());
@@ -111,9 +112,11 @@ var apistore = {};
         subscriber.setTenantId(tenantId);
         return this.impl.addSubscriber(subscriber);
     };
+
     StoreAPIProxy.prototype.getAPISubscriptions = function (provider, apiname, version, username) {
         return this.impl.getSubscriptions(provider, apiname, version, username);
     };
+
     StoreAPIProxy.prototype.getAPI = function (provider, name, version) {
         var identifier = new Packages.org.json.simple.JSONObject();
         identifier.put("provider", provider);
@@ -121,6 +124,7 @@ var apistore = {};
         identifier.put("version", version);
         return this.impl.getAPI(identifier);
     };
+
     StoreAPIProxy.prototype.addSubscription = function (apiname, version, provider, user, tier, appId) {
         provider = APIUtil.replaceEmailDomain(provider);
         var apiIdentifier = new APIIdentifier(provider, apiname, version);
@@ -138,6 +142,14 @@ var apistore = {};
         }
         return this.impl.getRefreshToken(userId, applicationName, requestedScopes, oldAccessToken,
             arr, consumerKey, consumerSecret, validityTime);
+    };
+
+    //removeSubscription(APIIdentifier identifier, String userId, int applicationId)
+    StoreAPIProxy.prototype.removeSubscription = function (apiname, version, provider, user, tier, appId) {
+        provider = APIUtil.replaceEmailDomain(provider);
+        var apiIdentifier = new APIIdentifier(provider, apiname, version);
+        apiIdentifier.setTier(tier);
+        return this.impl.removeSubscription(apiIdentifier, user, appId);
     };
 
 })(apistore);

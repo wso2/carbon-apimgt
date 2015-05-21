@@ -37,7 +37,7 @@
         <label class="custom-form-label col-lg-2 col-md-2 col-sm-12 col-xs-12" for="context">Implementation Method</label>
                 <label class="checkbox-inline">
                             <input class="implementation_methods" type="radio" value="endpoint"
-                                   name="implementation_methods" selected="selected"> Backend Endpoint
+                                   name="implementation_methods" checked="checked"> Backend Endpoint
                         </label>
                 <label class="checkbox-inline">
                             <input class="implementation_methods" type="radio" value="inline"
@@ -92,11 +92,14 @@
 
                 <div class="form-group">
                     <label class="custom-form-label col-lg-2 col-md-2 col-sm-12 col-xs-12" for=""></label>
-                    <div class="custom-form-right col-lg-5 col-md-8 col-sm-9 col-xs-10">
+                    <div class="custom-form-right col-lg-5 col-md-8 col-sm-9 col-xs-10 show-more" style="display:block">
                         <a href="#" class="more-options btn btn-default" ref="more-options-endpoints">Show More</a>
                     </div>
+                    <div class="custom-form-right col-lg-5 col-md-8 col-sm-9 col-xs-10 show-less" style="display:none">
+                        <a href="#" class="less-options btn btn-default" ref="less-options-endpoints">Show Less</a>
+                    </div>
                 </div>
-                <div id="more-options-endpoints" style="display:block">
+                <div id="more-options-endpoints" style="display:none">
 
                     <div class="form-group">
                         <label class="custom-form-label col-lg-2 col-md-2 col-sm-12 col-xs-12" for="endpointType">{{t "Endpoint Security Scheme"}}:<span
