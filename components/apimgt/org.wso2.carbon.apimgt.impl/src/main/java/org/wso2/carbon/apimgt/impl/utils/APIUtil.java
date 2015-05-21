@@ -2509,10 +2509,12 @@ public final class APIUtil {
 	                                                    String customSequenceType)
 			throws APIManagementException {
 
+		InputStream inSeqStream = null;
+		String seqFolderLocation =
+				APIConstants.API_CUSTOM_SEQUENCES_FOLDER_LOCATION + File.separator +
+				customSequenceType;
+
 		try {
-			String seqFolderLocation =
-					APIConstants.API_CUSTOM_SEQUENCES_FOLDER_LOCATION + File.separator +
-					customSequenceType;
 			File inSequenceDir = new File(seqFolderLocation);
 			File[] sequences;
 			sequences = inSequenceDir.listFiles();
@@ -2532,7 +2534,7 @@ public final class APIUtil {
 							log.debug("Adding defined sequences to the registry.");
 						}
 
-						InputStream inSeqStream =
+						inSeqStream =
 								new FileInputStream(sequenceFile);
 						byte[] inSeqData = IOUtils.toByteArray(inSeqStream);
 						Resource inSeqResource = registry.newResource();
@@ -2553,6 +2555,16 @@ public final class APIUtil {
 					"Error while saving defined sequences to the registry ", e);
 		} catch (IOException e) {
 			throw new APIManagementException("Error while reading defined sequence ", e);
+		} finally {
+			if (inSeqStream != null) {
+				try {
+					inSeqStream.close();
+				} catch (IOException e) {
+					log.error(
+							"Error while closing input stream in path " + seqFolderLocation + " " +
+							e);
+				}
+			}
 		}
 
 	}
