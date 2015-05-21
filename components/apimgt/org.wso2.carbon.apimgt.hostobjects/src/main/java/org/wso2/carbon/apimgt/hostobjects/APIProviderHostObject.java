@@ -449,8 +449,8 @@ public class APIProviderHostObject extends ScriptableObject {
         }
 
         // removing scopes from cache
-        ProviderKeyMgtClient providerClient = HostObjectUtils.getProviderClient();
         try {
+            ProviderKeyMgtClient providerClient = HostObjectUtils.getProviderClient();
             String[] consumerKeys = apiProvider.getConsumerKeys(new APIIdentifier(provider, name, version));
             if (consumerKeys != null && consumerKeys.length != 0) {
                 providerClient.removeScopeCache(consumerKeys);
