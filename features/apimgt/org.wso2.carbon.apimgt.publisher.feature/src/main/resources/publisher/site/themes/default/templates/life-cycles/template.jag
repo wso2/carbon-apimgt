@@ -19,7 +19,7 @@ function getSelectedValue(oldStatus) {
     var selObj = document.getElementById('editStatus');
     var selIndex = selObj.selectedIndex;
     var newStatus = selObj.options[selIndex].value;
-    if (oldStatus == "CREATED" && newStatus == "PUBLISHED" && <%=oldExist%>) {
+    if ((oldStatus == "CREATED" || oldStatus == "PROTOTYPED") && newStatus == "PUBLISHED" && <%=oldExist%>) {
         $('#deprecateOldVersionsDiv').show();
         $('#requireResubscriptionDiv').show();
     } else {
