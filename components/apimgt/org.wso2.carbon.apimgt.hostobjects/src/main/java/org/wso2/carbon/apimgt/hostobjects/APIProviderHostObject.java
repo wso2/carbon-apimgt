@@ -1005,8 +1005,9 @@ public class APIProviderHostObject extends ScriptableObject {
         String contextVal = (String) apiData.get("context", apiData);
         APIProvider apiProvider = getAPIProvider(thisObj);
         //check for context exists
-        if (apiProvider.isContextExist(contextVal)) {
-            handleException("Error occurred while adding the API. A duplicate API context already exists for " + contextVal);
+        if (apiProvider.isDuplicateContextTemplate(contextVal)) {
+            handleException("Error occurred while adding the API. A duplicate API context already exists for "
+                    + contextVal);
         }
         String context = contextVal.startsWith("/") ? contextVal : ("/" + contextVal);
         String providerDomain=MultitenantUtils.getTenantDomain(String.valueOf(apiData.get("provider", apiData)));
@@ -2986,9 +2987,9 @@ public class APIProviderHostObject extends ScriptableObject {
             }
             APIProvider apiProvider = getAPIProvider(thisObj);
             try {
-                contextExist = apiProvider.isContextExist(context);
+                contextExist = apiProvider.isDuplicateContextTemplate(context);
             } catch (APIManagementException e) {
-                handleException("Error from registry while checking the input context is already exist", e);
+                handleException("Error while checking whether context exists", e);
             }
         } else {
             handleException("Input context value is null");
