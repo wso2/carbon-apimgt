@@ -8833,9 +8833,9 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
         PreparedStatement prepStmt = null;
         PreparedStatement prepStmt2 = null;
         ResultSet resultSet = null;
-        String apiScopeQuery = "SELECT API.API_ID from AM_API API, IDN_OAUTH2_SCOPE IDN, AM_API_SCOPES ASC "
-                                       + "WHERE IDN.SCOPE_ID=ASC.SCOPE_ID AND " 
-                                       + "ASC.API_ID=API.API_ID AND "
+        String apiScopeQuery = "SELECT API.API_ID from AM_API API, IDN_OAUTH2_SCOPE IDN, AM_API_SCOPES AMS "
+                                       + "WHERE IDN.SCOPE_ID=AMS.SCOPE_ID AND " 
+                                       + "AMS.API_ID=API.API_ID AND "
                                        + "IDN.SCOPE_KEY = ? AND " 
                                        + "IDN.tenant_id = ?";
         String getApiQuery =
