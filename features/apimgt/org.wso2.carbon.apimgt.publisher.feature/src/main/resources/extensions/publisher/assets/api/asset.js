@@ -332,7 +332,6 @@ asset.configure = function (ctx) {
                 }
             }
         },
-
         meta: {
             lifecycle: {
                 name: 'APILifeCycle',
@@ -386,11 +385,11 @@ asset.renderer = function (ctx) {
 
     var buildListLeftNav = function (page, util) {
         var navList = util.navList();
-        navList.push('ADD ' + type.toUpperCase(), 'fa-plus', util.buildUrl('create'));
-        navList.push('All Statistics', 'fa-area-chart', '/asts/' + type + '/statistics');
-        navList.push('Subscriptions', 'fa fa-bookmark', '/asts/' + type + '/statistics');
-        navList.push('Statistics', 'fa-area-chart', '/asts/' + type + '/statistics');
-        navList.push('Tier Permissions', 'fa fa-cog', '/asts/' + type + '/statistics');
+        navList.push('ADD ' + type.toUpperCase(), 'btn-add-new', util.buildUrl('create'));
+        navList.push('All Statistics', 'btn-stats', '/asts/' + type + '/statistics');
+        navList.push('Subscriptions', 'btn-subscribe', '/asts/' + type + '/statistics');
+        navList.push('Statistics', 'btn-stats', '/asts/' + type + '/statistics');
+        navList.push('Tier Permissions', 'btn-cog', '/asts/' + type + '/statistics');
         //navList.push('Configuration', 'icon-dashboard', util.buildUrl('configuration'));
         return navList.list();
     };
@@ -398,12 +397,12 @@ asset.renderer = function (ctx) {
     var buildDefaultLeftNav = function (page, util) {
         var id = page.assets.id;
         var navList = util.navList();
-        navList.push('Edit', 'fa-pencil', util.buildUrl('design') + '/' + id);
-        navList.push('Overview', 'fa-list-alt', util.buildUrl('details') + '/' + id);
-        navList.push('Life Cycle', 'fa-recycle', util.buildUrl('lifecycle') + '/' + id);
-        navList.push('Versions', 'fa-recycle', util.buildUrl('versions') + '/' + id);
-        navList.push('Docs', 'fa-recycle', util.buildUrl('docs') + '/' + id);
-        navList.push('Users', 'fa-recycle', util.buildUrl('users') + '/' + id);
+        navList.push('Edit', 'btn-edit', util.buildUrl('design') + '/' + id);
+        navList.push('Overview', 'btn-overview', util.buildUrl('details') + '/' + id);
+        navList.push('Life Cycle', 'btn-lifecycle', util.buildUrl('lifecycle') + '/' + id);
+        navList.push('Versions', 'btn-versions', util.buildUrl('versions') + '/' + id);
+        navList.push('Docs', 'btn-docs', util.buildUrl('docs') + '/' + id);
+        navList.push('Users', 'btn-users', util.buildUrl('users') + '/' + id);
         return navList.list();
     };
 
