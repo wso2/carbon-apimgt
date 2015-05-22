@@ -109,15 +109,14 @@ var select_environment = function(){
     var key = $(this).val();
     if(key && key.trim() != "") {
       swaggerUi.api.clientAuthorizations.add("key", new SwaggerClient.ApiKeyAuthorization("Authorization", "Bearer "+ key, "header"));
+      change_token();
     }
   });
 
   $("#sub_app_list").change(change_token);
-  $("#key_type").change(change_token);
   $("#key_type").change(show_environments);
   $("#environment_name").change(select_environment);
   show_environments();
-  change_token();
 });
 </script>
 <div id="authorizations" class="col-sm-12">
