@@ -22,6 +22,13 @@ import com.google.gson.Gson;
 
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.http.HttpHeaders;
+import org.apache.http.HttpHost;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpHead;
+import org.apache.http.conn.params.ConnRoutePNames;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.jaggeryjs.scriptengine.exceptions.ScriptException;
 import org.json.simple.JSONObject;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.impl.builder.StAXOMBuilder;
@@ -42,15 +49,19 @@ import org.apache.woden.WSDLFactory;
 import org.apache.woden.WSDLReader;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
+import org.mozilla.javascript.NativeObject;
+import org.mozilla.javascript.Scriptable;
 import org.w3c.dom.Document;
 import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.doc.model.APIDefinition;
 import org.wso2.carbon.apimgt.api.doc.model.APIResource;
 import org.wso2.carbon.apimgt.api.doc.model.Operation;
 import org.wso2.carbon.apimgt.api.doc.model.Parameter;
 import org.wso2.carbon.apimgt.api.model.*;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.APIManagerAnalyticsConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.clients.ApplicationManagementServiceClient;
 import org.wso2.carbon.apimgt.impl.clients.OAuthAdminClient;
@@ -84,6 +95,7 @@ import org.wso2.carbon.governance.api.generic.dataobjects.GenericArtifact;
 import org.wso2.carbon.governance.api.util.GovernanceConstants;
 import org.wso2.carbon.governance.api.util.GovernanceUtils;
 import org.wso2.carbon.identity.oauth.config.OAuthServerConfiguration;
+import org.wso2.carbon.ndatasource.common.DataSourceException;
 import org.wso2.carbon.registry.core.*;
 import org.wso2.carbon.registry.core.Tag;
 import org.wso2.carbon.registry.core.config.Mount;
@@ -112,6 +124,8 @@ import javax.cache.Cache;
 import javax.cache.CacheConfiguration;
 import javax.cache.CacheManager;
 import javax.cache.Caching;
+import javax.net.ssl.HostnameVerifier;
+import javax.net.ssl.SSLSession;
 import javax.xml.namespace.QName;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -150,7 +164,9 @@ public final class APIUtil {
 
     private static ConfigurationContextService configContextService = null;
 
-    public static void setConfigContextService(ConfigurationContextService configContext) {
+	private static String VERSION_PARAM="{version}";
+
+	public static void setConfigContextService(ConfigurationContextService configContext) {
         APIUtil.configContextService = configContext;
     }
 
@@ -1128,6 +1144,33 @@ public final class APIUtil {
             return null;
         }
     }
+
+	/**
+	 * Used to get instance of ProviderKeyMgtClient
+	 * @return ProviderKeyMgtClient
+	 * @throws APIManagementException
+	 */
+	public static ProviderKeyMgtClient getProviderClient() throws APIManagementException {
+		APIManagerConfiguration config = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
+																.getAPIManagerConfiguration();
+		String url = config.getFirstProperty(APIConstants.API_KEY_VALIDATOR_URL);
+		if (url == null) {
+			handleException("API key manager URL unspecified");
+		}
+
+		String username = config.getFirstProperty(APIConstants.API_KEY_VALIDATOR_USERNAME);
+		String password = config.getFirstProperty(APIConstants.API_KEY_VALIDATOR_PASSWORD);
+		if (username == null || password == null) {
+			handleException("Authentication credentials for API Provider manager unspecified");
+		}
+
+		try {
+			return new ProviderKeyMgtClient(url, username, password);
+		} catch (APIManagementException e) {
+			handleException("Error while initializing the provider  management client", e);
+			return null;
+		}
+	}
 
     public static OAuthAdminClient getOauthAdminClient() throws APIManagementException {
 
@@ -4192,36 +4235,36 @@ public final class APIUtil {
      * @throws APIManagementException If the endpointConfig is invalid or URI is invalid
      */
     public static boolean validateEndpointURI(String endpointConfig) throws APIManagementException {
-        if (endpointConfig != null) {
-            try {
-                JSONParser parser = new JSONParser();
-                JSONObject jsonObject = (JSONObject) parser.parse(endpointConfig);
-                Object epType = jsonObject.get("endpoint_type");
-                if (epType instanceof String && APIConstants.PROTOCOL_HTTP.equals(epType)) {
-                    // extract production uri from config
-                    Object prodEPs = (JSONObject) jsonObject.get("production_endpoints");
-                    if (prodEPs instanceof JSONObject) {
-                        Object url = ((JSONObject) prodEPs).get("url");
-                        if (url instanceof String && !isValidURI(url.toString())) {
-                            handleException("Invalid Production Endpoint URI. Please refer HTTP Endpoint "
-                                    + "documentation of the WSO2 ESB for details.");
-                        }
-                    }
-                    // extract sandbox uri from config
-                    Object sandEPs = (JSONObject) jsonObject.get("sandbox_endpoints");
-                    if (sandEPs instanceof JSONObject) {
-                        Object url = ((JSONObject) sandEPs).get("url");
-                        if (url instanceof String && !isValidURI(url.toString())) {
-                            handleException("Invalid Sandbox Endpoint URI. Please refer HTTP Endpoint "
-                                    + "documentation of the WSO2 ESB for details.");
-                        }
-                    }
-                }
-            } catch (ParseException e) {
-                handleException("Invalid Endpoint config", e);
-            }
-        }
-        return true;
+	    if (endpointConfig != null) {
+		    try {
+			    JSONParser parser = new JSONParser();
+			    JSONObject jsonObject = (JSONObject) parser.parse(endpointConfig);
+			    Object epType = jsonObject.get("endpoint_type");
+			    if (epType instanceof String && "http".equals(epType)) {
+				    // extract production uri from config
+				    Object prodEPs = (JSONObject) jsonObject.get("production_endpoints");
+				    if (prodEPs instanceof JSONObject) {
+					    Object url = ((JSONObject) prodEPs).get("url");
+					    if (url instanceof String && !isValidURI(url.toString())) {
+						    handleException("Invalid Production Endpoint URI. Please refer HTTP Endpoint " +
+						                    "documentation of the WSO2 ESB for details.");
+					    }
+				    }
+				    // extract sandbox uri from config
+				    Object sandEPs = (JSONObject) jsonObject.get("sandbox_endpoints");
+				    if (sandEPs instanceof JSONObject) {
+					    Object url = ((JSONObject) sandEPs).get("url");
+					    if (url instanceof String && !isValidURI(url.toString())) {
+						    handleException("Invalid Sandbox Endpoint URI. Please refer HTTP Endpoint " +
+						                    "documentation of the WSO2 ESB for details.");
+					    }
+				    }
+			    }
+		    } catch (ParseException e) {
+			    handleException("Invalid Endpoint config", e);
+		    }
+	    }
+	    return true;
     }
 
     /**
@@ -4231,40 +4274,40 @@ public final class APIUtil {
      * @return true if URI doesn't contain params or contains valid params
      */
     private static boolean isValidURI(String url) {
-        boolean isInvalid = false;
-        // validate only if uri contains { or }
-        if (url != null && (url.contains("{") || url.contains("}"))) {
-            // check { and } are matched or not. otherwise invalid
-            int startCount = 0, endCount = 0;
-            for (char c : url.toCharArray()) {
-                if (c == '{') {
-                    startCount++;
-                } else if (c == '}') {
-                    endCount++;
-                }
-                // this check guarantee the order of '{' and '}'. Ex: {uri.var.name} not }uri.var.name{
-                if (endCount > startCount) {
-                    isInvalid = true;
-                    break;
-                }
-            }
-            // continue only if the matching no of brackets are found. otherwise invalid
-            if (startCount == endCount) {
-                // extract content including { } brackets
-                Matcher pathParamMatcher = pathParamExtractorPattern.matcher(url);
-                while (pathParamMatcher.find()) {
-                    // validate the format of { } content
-                    Matcher formatMatcher = pathParamValidatorPattern.matcher(pathParamMatcher.group());
-                    if (!formatMatcher.matches()) {
-                        isInvalid = true;
-                        break;
-                    }
-                }
-            } else {
-                isInvalid = true;
-            }
-        }
-        return !isInvalid;
+	    boolean isInvalid = false;
+	    // validate only if uri contains { or }
+	    if (url != null && (url.contains("{") || url.contains("}"))) {
+		    // check { and } are matched or not. otherwise invalid
+		    int startCount = 0, endCount = 0;
+		    for (char c : url.toCharArray()) {
+			    if (c == '{') {
+				    startCount++;
+			    } else if (c == '}') {
+				    endCount++;
+			    }
+			    // this check guarantee the order of '{' and '}'. Ex: {uri.var.name} not }uri.var.name{
+			    if (endCount > startCount) {
+				    isInvalid = true;
+				    break;
+			    }
+		    }
+		    // continue only if the matching no of brackets are found. otherwise invalid
+		    if (startCount == endCount) {
+			    // extract content including { } brackets
+			    Matcher pathParamMatcher = pathParamExtractorPattern.matcher(url);
+			    while (pathParamMatcher.find()) {
+				    // validate the format of { } content
+				    Matcher formatMatcher = pathParamValidatorPattern.matcher(pathParamMatcher.group());
+				    if (!formatMatcher.matches()) {
+					    isInvalid = true;
+					    break;
+				    }
+			    }
+		    } else {
+			    isInvalid = true;
+		    }
+	    }
+	    return !isInvalid;
     }
 
     // End of APIProvider related methods.
@@ -4557,5 +4600,270 @@ public final class APIUtil {
        return data;
    }
 
+	/**
+	 *This methos is to check whether stat publishing is enabled
+	 * @return boolean
+	 */
+	public static boolean checkDataPublishingEnabled() {
+		APIManagerAnalyticsConfiguration analyticsConfiguration =
+				ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIAnalyticsConfiguration();
+		return analyticsConfiguration.isAnalyticsEnabled();
+	}
 
+	/**
+	 * This method will clear recently added API cache.
+	 * @param username
+	 */
+	public static void invalidateRecentlyAddedAPICache(String username){
+		try{
+			PrivilegedCarbonContext.startTenantFlow();
+			APIManagerConfiguration config = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().
+																	getAPIManagerConfiguration();
+			boolean isRecentlyAddedAPICacheEnabled =
+					Boolean.parseBoolean(config.getFirstProperty(APIConstants.API_STORE_RECENTLY_ADDED_API_CACHE_ENABLE));
+
+			if (username != null && isRecentlyAddedAPICacheEnabled) {
+				String tenantDomainFromUserName = MultitenantUtils.getTenantDomain(username);
+				if (tenantDomainFromUserName != null &&
+				    !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomainFromUserName)) {
+					PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomainFromUserName,
+							true);
+				} else {
+					PrivilegedCarbonContext.getThreadLocalCarbonContext()
+							.setTenantDomain(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME, true);
+				}
+				Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER).getCache("RECENTLY_ADDED_API")
+						.remove(username + ":" + tenantDomainFromUserName);
+			}
+		} finally {
+			PrivilegedCarbonContext.endTenantFlow();
+		}
+	}
+
+	public static boolean isUsageDataSourceSpecified() {
+		try {
+			return (null != ServiceReferenceHolder.getInstance().getDataSourceService().
+					getDataSource(APIConstants.API_USAGE_DATA_SOURCE_NAME));
+		} catch (DataSourceException e) {
+			return false;
+		}
+	}
+
+	public static boolean isStatPublishingEnabled() {
+		return ServiceReferenceHolder.getInstance().
+				getAPIManagerConfigurationService().getAPIAnalyticsConfiguration().isAnalyticsEnabled();
+	}
+
+	/**
+	 * Validate the backend by sending HTTP HEAD
+	 *
+	 * @param urlVal - backend URL
+	 * @return - status of HTTP HEAD Request to backend
+	 */
+	public static String sendHttpHEADRequest(String urlVal) {
+
+		String response = "error while connecting";
+
+		HttpClient client = new DefaultHttpClient();
+		HttpHead head = new HttpHead(urlVal);
+		client.getParams().setParameter("http.socket.timeout", 4000);
+		client.getParams().setParameter("http.connection.timeout", 4000);
+
+
+		if (System.getProperty(APIConstants.HTTP_PROXY_HOST) != null &&
+		    System.getProperty(APIConstants.HTTP_PROXY_PORT) != null) {
+			if (log.isDebugEnabled()) {
+				log.debug("Proxy configured, hence routing through configured proxy");
+			}
+			String proxyHost = System.getProperty(APIConstants.HTTP_PROXY_HOST);
+			String proxyPort = System.getProperty(APIConstants.HTTP_PROXY_PORT);
+			client.getParams().setParameter(ConnRoutePNames.DEFAULT_PROXY,
+					new HttpHost(proxyHost, new Integer(proxyPort)));
+		}
+
+		try {
+			HttpResponse httpResponse = client.execute(head);
+			int statusCode = httpResponse.getStatusLine().getStatusCode();
+
+			//If the endpoint doesn't support HTTP HEAD or if status code is < 400
+			if (statusCode == 405 || statusCode / 100 < 4) {
+				if (log.isDebugEnabled() && statusCode == 405) {
+					log.debug("Endpoint doesn't support HTTP HEAD");
+				}
+				response = "success";
+			}
+		} catch (IOException e) {
+			// sending a default error message.
+			log.error("Error occurred while connecting backend : " + urlVal + ", reason : " + e.getMessage());
+		} finally {
+			client.getConnectionManager().shutdown();
+		}
+		return response;
+	}
+
+	public static void validateWsdl(String url) throws Exception {
+
+		URL wsdl = new URL(url);
+		BufferedReader in = new BufferedReader(new InputStreamReader(wsdl.openStream()));
+		String inputLine;
+		boolean isWsdl2 = false;
+		boolean isWsdl10 = false;
+		StringBuilder urlContent = new StringBuilder();
+		while ((inputLine = in.readLine()) != null) {
+			String wsdl2NameSpace = "http://www.w3.org/ns/wsdl";
+			String wsdl10NameSpace = "http://schemas.xmlsoap.org/wsdl/";
+			urlContent.append(inputLine);
+			isWsdl2 = urlContent.indexOf(wsdl2NameSpace) > 0;
+			isWsdl10 = urlContent.indexOf(wsdl10NameSpace) > 0;
+		}
+		in.close();
+		if (isWsdl10) {
+			javax.wsdl.xml.WSDLReader wsdlReader11 = javax.wsdl.factory.WSDLFactory.newInstance().newWSDLReader();
+			wsdlReader11.readWSDL(url);
+		} else if (isWsdl2) {
+			WSDLReader wsdlReader20 = WSDLFactory.newInstance().newWSDLReader();
+			wsdlReader20.readWSDL(url);
+		} else {
+			handleException("URL is not in format of wsdl1/wsdl2");
+		}
+
+	}
+
+	public boolean resourceMethodMatches(String[] resourceMethod1,
+	                                      String[] resourceMethod2) {
+		for (String m1 : resourceMethod1) {
+			for (String m2 : resourceMethod2) {
+				if (m1.equals(m2)) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * @param failedGateways map of failed environments
+	 * @return json string of input map
+	 */
+	public static String createFailedGatewaysAsJsonString(Map<String, List<String>> failedGateways) {
+		String failedJson = "{\"PUBLISHED\" : \"\" ,\"UNPUBLISHED\":\"\"}";
+		if (failedGateways != null) {
+			if (!failedGateways.isEmpty()) {
+				StringBuilder failedToPublish = new StringBuilder();
+				StringBuilder failedToUnPublish = new StringBuilder();
+				for (String environmentName : failedGateways.get("PUBLISHED")) {
+					failedToPublish.append(environmentName + ",");
+				}
+				for (String environmentName : failedGateways.get("UNPUBLISHED")) {
+					failedToUnPublish.append(environmentName + ",");
+				}
+				if (!"".equals(failedToPublish.toString())) {
+					failedToPublish.deleteCharAt(failedToPublish.length() - 1);
+				}
+				if (!"".equals(failedToUnPublish.toString())) {
+					failedToUnPublish.deleteCharAt(failedToUnPublish.length() - 1);
+				}
+				failedJson = "{\"PUBLISHED\" : \"" + failedToPublish.toString() + "\" ,\"UNPUBLISHED\":\"" +
+				             failedToUnPublish.toString() + "\"}";
+			}
+		}
+		return failedJson;
+	}
+
+	public static String userAgentParser(String userAgent){
+		String userBrowser;
+		if(userAgent.contains("Chrome")){
+			userBrowser = "Chrome";
+		}
+		else if(userAgent.contains("Firefox")){
+			userBrowser = "Firefox";
+		}
+		else if(userAgent.contains("Opera")){
+			userBrowser = "Opera";
+		}
+		else if(userAgent.contains("MSIE")){
+			userBrowser = "Internet Explorer";
+		}
+		else{
+			userBrowser = "Other";
+		}
+		return userBrowser;
+	}
+
+	public static boolean isStringValues(Object[] args) {
+		int i = 0;
+		for (Object arg : args) {
+
+			if (!(arg instanceof String)) {
+				return false;
+
+			}
+			i++;
+		}
+		return true;
+	}
+
+	public static int getSubscriberCount(Set<Subscriber> subs)
+			throws APIManagementException {
+		Set<String> subscriberNames = new HashSet<String>();
+		if (subs != null) {
+			for (Subscriber sub : subs) {
+				subscriberNames.add(sub.getName());
+			}
+			return subscriberNames.size();
+		} else {
+			return 0;
+		}
+	}
+
+	public static String getTransports(String transportStr) {
+		String transport  = transportStr;
+		if (transportStr != null) {
+			if ((transportStr.indexOf(",") == 0) || (transportStr.indexOf(",") == (transportStr.length()-1))) {
+				transport =transportStr.replace(",","");
+			}
+		}
+		return transport;
+	}
+
+	private static String checkAndSetVersionParam(String context) {
+		// This is to support the new Pluggable version strategy
+		// if the context does not contain any {version} segment, we use the default version strategy.
+		if(!context.contains(VERSION_PARAM)){
+			if(!context.endsWith("/")){
+				context = context + "/";
+			}
+			context = context + VERSION_PARAM;
+		}
+		return context;
+	}
+
+	private static void checkFileSize(File file)
+			throws ScriptException, APIManagementException {
+		if (file != null) {
+			long length = file.length();
+			if (length / 1024.0 > 1024) {
+				handleException("Image file exceeds the maximum limit of 1MB");
+			}
+		}
+	}
+
+	private static String updateContextWithVersion(String version, String contextVal, String context) {
+		// This condition should not be true for any occasion but we keep it so that there are no loopholes in
+		// the flow.
+		if (version == null) {
+			// context template patterns - /{version}/foo or /foo/{version}
+			// if the version is null, then we remove the /{version} part from the context
+			context = contextVal.replace("/" + VERSION_PARAM, "");
+		}else{
+			context = context.replace(VERSION_PARAM, version);
+		}
+		return context;
+	}
+
+	private static HostnameVerifier DO_NOT_VERIFY = new HostnameVerifier() {
+		public boolean verify(String hostname, SSLSession session) {
+			return true;
+		}
+	};
 }
