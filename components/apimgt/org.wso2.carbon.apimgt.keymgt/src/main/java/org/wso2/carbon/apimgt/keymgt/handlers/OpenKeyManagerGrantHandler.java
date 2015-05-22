@@ -43,9 +43,6 @@ public class OpenKeyManagerGrantHandler extends ClientCredentialsGrantHandler {
         if(validityPeriod != 0) {
             //set validity time
             tokReqMsgCtx.setValidityPeriod(validityPeriod);
-        }else{
-            //set default validity time
-            tokReqMsgCtx.setValidityPeriod(DEFAULT_VALIDITY_PERIOD);
         }
 
         return true;
