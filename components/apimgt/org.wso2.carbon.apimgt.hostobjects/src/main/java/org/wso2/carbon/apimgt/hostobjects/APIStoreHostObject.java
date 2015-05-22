@@ -2708,13 +2708,21 @@ public class APIStoreHostObject extends ScriptableObject {
 
 	private static List<Scope> getAllowedScopesForUserApplication(String username,
 	                                                              Set<Scope> reqScopeSet) {
-		String[] userRoles = null;
-		List<Scope> authorizedScopes = new ArrayList<Scope>();
-		try {
-			userRoles = APIUtil.getListOfRoles(username);
-		} catch (APIManagementException e) {
-			log.error("Error while getting  the roles for user", e);
-		}
+        String[] userRoles = null;
+        org.wso2.carbon.user.api.UserStoreManager userStoreManager = null;
+
+        List<Scope> authorizedScopes = new ArrayList<Scope>();
+        try {
+            RealmService realmService = ServiceReferenceHolder.getInstance().getRealmService();
+            int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
+                                                 .getTenantId(MultitenantUtils.getTenantDomain(username));
+            userStoreManager = realmService.getTenantUserRealm(tenantId).getUserStoreManager();
+            userRoles = userStoreManager.getRoleListOfUser(MultitenantUtils.getTenantAwareUsername(username));
+        } catch (org.wso2.carbon.user.api.UserStoreException e) {
+            // Log and return since we do not want to stop issuing the token in
+            // case of scope validation failures.
+            log.error("Error when getting the tenant's UserStoreManager or when getting roles of user ", e);
+        }
 
 		List<String> userRoleList = new ArrayList<String>(Arrays.asList(userRoles));
 
