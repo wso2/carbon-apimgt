@@ -34,14 +34,6 @@
                          lenS = scopes.length;
 
 
-                         <!-- If token is not set to never expire, then take the expiration in seconds -->
-                         if (prodVadidataionTime > 0) {
-                            prodVadidataionTime = prodVadidataionTime / 1000;
-                         }
-                         if (sandVadidataionTime > 0) {
-                            sandVadidataionTime = sandVadidataionTime / 1000;
-                         }
-
                          <!-- This is required to remove the decimal points getting added by jaggery to validation time-->
                          if (prodVadidataionTime != null) {
                             var prod_tmp = String(Math.ceil(prodVadidataionTime)).split(".");
