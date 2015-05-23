@@ -374,15 +374,17 @@
         <th>Description</th>
         <th width="100px">Parameter Type</th>
         <th width="100px">Data Type</th>
-        <th width="100px">Required</th>            
+        <th width="100px">Required</th>
+        <th width="100px">Delete</th>
         </tr>    
     {{#each parameters}}
-        <tr>
+        <tr id="{{name}}">
         <td>{{ name }}</td>
         <td><a class="param_desc" data-path="{{ ../resource_path}}.parameters[{{@index}}]" data-attr="description">{{ description }}</a></td>
         <td><a class="param_paramType" data-type="select" data-path="{{ ../resource_path}}.parameters[{{@index}}]" data-attr="in">{{ in }}</a></td>
         <td><a class="param_type" data-path="{{../resource_path}}.parameters[{{@index}}]" data-attr="type">{{ type }}</a></td>
         <td><a class="param_required" data-type="select" data-path="{{../resource_path}}.parameters[{{@index}}]" data-attr="required" data-value="{{toString required }}"></a></td>
+        <td align="center"><a data-path-name="{{path}}" data-path="{{../resource_path}}.parameters[{{@index}}]" data-index="{{@index}}" style="margin-left: 40px" class="delete_parameter icon-trash"></a></td>
         </tr> 
     {{/each}}
     {{/if}}
