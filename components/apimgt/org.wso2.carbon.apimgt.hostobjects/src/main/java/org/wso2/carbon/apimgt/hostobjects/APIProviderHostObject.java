@@ -2301,14 +2301,16 @@ public class APIProviderHostObject extends ScriptableObject {
         APIProvider apiProvider = getAPIProvider(thisObj);
         try {
             Set<Tier> tiers = apiProvider.getTiers();
+            List<Tier> tierList = APIUtil.sortTiers(tiers);
             int i = 0;
             if (tiers != null) {
-                for (Tier tier : tiers) {
+                for (Tier tier : tierList) {
                     NativeObject row = new NativeObject();
                     row.put("tierName", row, tier.getName());
                     row.put("tierDisplayName", row, tier.getDisplayName());
                     row.put("tierDescription", row,
                             tier.getDescription() != null ? tier.getDescription() : "");
+                    row.put("defaultTier", row, i == 0);
                     myn.put(i, myn, row);
                     i++;
                 }
