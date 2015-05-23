@@ -57,7 +57,8 @@ var api = outputs.api;%>
       onFailure: function(data) {
         console.log("Unable to Load SwaggerUI");
       },
-      docExpansion: "list"
+      docExpansion: "list",
+      validatorUrl: null
     });
 
     window.swaggerUi.load();
