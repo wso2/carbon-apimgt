@@ -379,7 +379,8 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
         tokenInfo.setTokenValid(responseDTO.isValid());
         tokenInfo.setEndUserName(responseDTO.getAuthorizedUser());
         tokenInfo.setConsumerKey(clientApplicationDTO.getConsumerKey());
-        tokenInfo.setValidityPeriod(responseDTO.getExpiryTime());
+        // Convert Expiry Time to milliseconds.
+        tokenInfo.setValidityPeriod(responseDTO.getExpiryTime() * 1000);
         tokenInfo.setIssuedTime(System.currentTimeMillis());
         tokenInfo.setScope(responseDTO.getScope());
 
