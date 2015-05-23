@@ -2000,8 +2000,6 @@ public final class APIUtil {
 
             if ((currentTime - timestampSkew) > (issuedTime + validityPeriod)) {
                 accessTokenDO.setValidationStatus(APIConstants.KeyValidationStatus.API_AUTH_INVALID_CREDENTIALS);
-                log.info("Token " + accessTokenDO.toString() + " expired.");
-
                 return true;
             }
         }
