@@ -11,6 +11,12 @@
     var mod = jagg.module("api");
     var tiers = mod.getTiers().tiers;
     var default_tier = tiers[tiers.length -1].tierName;
+    for (var i = 0; i < tiers.length; i++){
+        if(tiers[i].defaultTier){
+            default_tier = tiers[i].tierName;
+            break;
+        }
+    }
     var enableSelectedTenantSubscription = site.enableSelectedTenantSubscription;
     var storeUrl = jagg.module("manager").getAPIStoreURL().url;
 
@@ -31,7 +37,7 @@
         <% } %>
     ];
 
-    var DEFAULT_TIER = "<%= tiers[tiers.length -1].tierName%>";
+    var DEFAULT_TIER = "<%=default_tier%>";
     var DEFAULT_AUTH = "Application & Application User";
     var OPTION_DEFAULT_AUTH = "None";
 
