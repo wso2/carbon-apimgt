@@ -337,6 +337,28 @@ APIDesigner.prototype.init_controllers = function(){
         API_DESIGNER.render_resource(resource_body);
     });
 
+    this.container.delegate(".delete_parameter", "click", function (event) {
+        console.log("deleting parameter");
+        //var elementToDelete =  $(this).parent().parent();
+        var deleteData = $(this).attr("data-path");
+        var i = $(this).attr("data-index");
+
+        var deleteDataArray = deleteData.split(".");
+        var operations = deleteDataArray[2];
+        var operation = deleteDataArray[3];
+        var paramName = API_DESIGNER.api_doc.paths[operations][operation]['parameters'][i]['name'];
+
+        jagg.message({content: 'Do you want to delete the parameter <strong>' + paramName + '</strong> ?',
+            type: 'confirm', title: "Delete Parameter",
+            okCallback: function () {
+                API_DESIGNER = APIDesigner();
+                console.log(API_DESIGNER.api_doc.paths[operations]);
+                API_DESIGNER.api_doc.paths[operations][operation]['parameters'].splice(i,1);
+                console.log(API_DESIGNER.api_doc.paths[operations]);
+                API_DESIGNER.render_resources();
+            }});
+    });
+
     this.container.delegate(".delete_scope","click", function(){
         var i = $(this).attr("data-index");
         API_DESIGNER.api_doc.securityDefinitions.apim['x-wso2-scopes'].splice(i, 1);
