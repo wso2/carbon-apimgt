@@ -359,6 +359,21 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         return result;
     }
 
+    public String getUUIDByApi(String provider, String name, String version) throws APIManagementException {
+        String path = APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR + provider +
+                RegistryConstants.PATH_SEPARATOR + name + RegistryConstants.PATH_SEPARATOR + version +
+                RegistryConstants.PATH_SEPARATOR + APIConstants.API_KEY;
+        String artifactId = null;
+        try {
+            GovernanceUtils.loadGovernanceArtifacts((UserRegistry) registry);
+            Resource apiResource = registry.get(path);
+            artifactId = apiResource.getUUID();
+        } catch (RegistryException e) {
+            handleException("Error while loading registry/governance artifacts", e);
+        }
+        return artifactId;
+    }
+
     /**
      * Shows how a given consumer uses the given API.
      *
