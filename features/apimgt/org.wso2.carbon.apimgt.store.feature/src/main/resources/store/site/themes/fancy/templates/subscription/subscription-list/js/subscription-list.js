@@ -33,9 +33,11 @@ $(document).ready(function () {
     });
 
     $("#refreshProdValidityTime").keyup(function() {
-        var prodvalidityTime = $(this).val();
-        if (isNaN(prodvalidityTime)|| prodvalidityTime>9223372036854775807) {
-            $(this).next().show();
+        var prodvalidityTime = $(this).val().trim();
+        if (isNaN(prodvalidityTime)|| prodvalidityTime>9223372036854775807 || prodvalidityTime.length == 0) {
+            if (prodvalidityTime.length != 0) {
+                $(this).next().show();
+            }
             $('.show-hide-key',$(this).parent()).attr('disabled','disabled');
             $('.app-key-generate-button',$(this).parent().parent().parent()).attr('disabled','disabled');
         } else {
@@ -46,10 +48,11 @@ $(document).ready(function () {
     });
 
     $("#refreshSandValidityTime").keyup(function() {
-        var sandvalidityTime = $(this).val();
-        $(this).next().show();
-        if (isNaN(sandvalidityTime)|| sandvalidityTime>9223372036854775807) {
-            $(this).next().show();
+        var sandvalidityTime = $(this).val().trim();
+        if (isNaN(sandvalidityTime)|| sandvalidityTime>9223372036854775807 || sandvalidityTime.length == 0) {
+            if (sandvalidityTime.length != 0) {
+                $(this).next().show();
+            }
             $('.show-hide-key',$(this).parent()).attr('disabled','disabled');
             $('.app-key-generate-button',$(this).parent().parent().parent()).attr('disabled','disabled');
         } else {
@@ -85,7 +88,6 @@ $(document).ready(function () {
     });
 
     $('.app-key-generate-button').click(function () {
-
         var elem = $(this);
         var i = elem.attr("iteration");
         var keyType = elem.attr("data-keytype");
@@ -250,7 +252,6 @@ $(document).ready(function () {
 var mapExistingOauthClient=function(oBtnElement){
 
     ////////////////////////////////////////////////////////////////////////////////////////////
-
     var elem = oBtnElement;
     var i = elem.attr("iteration");
     var keyType = elem.attr("data-keytype");
@@ -326,13 +327,13 @@ var regenerate=function(appName,keyType,i,btn,div,clientId,clientSecret) {
         oldAccessToken = $('.prodAccessTokenHidden').val();
         authorizedDomainsTemp = $('#allowedDomainsPro').val();
         if(authorizedDomainsTemp == ''){$('#allowedDomainsPro').val('ALL')}
-        validityTime=$('#refreshProdValidityTime').val();
+        validityTime=$('#refreshProdValidityTime').val().trim();
         tokenScope=$('#prodScopeInput').val();
     } else {
         oldAccessToken = $('.sandAccessTokenHidden').val();
         authorizedDomainsTemp = $('#allowedDomainsSand').val();
         if(authorizedDomainsTemp == ''){$('#allowedDomainsSand').val('ALL')}
-        validityTime=$('#refreshSandValidityTime').val();
+        validityTime=$('#refreshSandValidityTime').val().trim();
         tokenScope=$('#sandScopeInput').val();
     }
 
