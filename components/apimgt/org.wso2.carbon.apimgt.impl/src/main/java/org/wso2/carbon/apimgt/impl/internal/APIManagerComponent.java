@@ -29,6 +29,7 @@ import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.impl.*;
 import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
+import org.wso2.carbon.apimgt.impl.handlers.ScopesIssuer;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.listners.UserAddListener;
 import org.wso2.carbon.apimgt.impl.observers.APIStatusObserverList;
@@ -67,7 +68,9 @@ import org.wso2.carbon.utils.ConfigurationContextService;
 import org.wso2.carbon.utils.FileUtil;
 
 import javax.cache.Cache;
+
 import java.io.*;
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -209,6 +212,31 @@ public class APIManagerComponent {
 
             // Initialise KeyManager.
             KeyManagerHolder.initializeKeyManager(configuration);
+            
+            // loading white listed scopes
+            List<String> whitelist = null;
+
+            // Read scope whitelist from Configuration.
+            if (configuration != null) {
+                whitelist = configuration.getProperty(APIConstants.API_KEY_MANGER_SCOPE_WHITELIST);
+            }
+
+            // If whitelist is null, default scopes will be put.
+            if (whitelist == null) {
+                String applicationTokenScope = null;
+
+                whitelist = new ArrayList<String>();
+                whitelist.add(APIConstants.OPEN_ID_SCOPE_NAME);
+                whitelist.add(APIConstants.DEVICE_SCOPE_PATTERN);
+                applicationTokenScope =
+                                        configuration.getFirstProperty(APIConstants.API_KEY_VALIDATOR_APPLICATION_TOKEN_SCOPE);
+
+                if (applicationTokenScope != null) {
+                    whitelist.add(applicationTokenScope);
+                }
+            }
+
+            ScopesIssuer.loadInstance(whitelist);
         } catch (APIManagementException e) {
             log.error("Error while initializing the API manager component", e);
         }
@@ -388,6 +416,7 @@ public class APIManagerComponent {
 					ServiceReferenceHolder.getInstance().getRegistryService();
 			UserRegistry registry = registryService.getGovernanceSystemRegistry();
 
+			//Add all custom in,out and fault sequences to registry
 			APIUtil.addDefinedAllSequencesToRegistry(registry,
 			                                         APIConstants.API_CUSTOM_SEQUENCE_TYPE_IN);
 			APIUtil.addDefinedAllSequencesToRegistry(registry,

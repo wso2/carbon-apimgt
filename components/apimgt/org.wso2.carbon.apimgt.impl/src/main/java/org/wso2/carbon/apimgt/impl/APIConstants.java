@@ -684,6 +684,7 @@ public final class APIConstants {
     public static final String API_CUSTOM_SEQUENCE_TYPE_OUT = "out";
     public static final String API_CUSTOM_SEQUENCE_TYPE_FAULT = "fault";
 
+    public static final String VERSION_PLACEHOLDER = "{version}";
 
     public static enum SupportedHTTPVerbs {
         GET,

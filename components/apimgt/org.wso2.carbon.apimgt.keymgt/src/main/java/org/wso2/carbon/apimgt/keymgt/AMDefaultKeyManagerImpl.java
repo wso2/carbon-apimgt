@@ -52,6 +52,7 @@ import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.keymgt.client.SubscriberKeyMgtClient;
 import org.wso2.carbon.apimgt.keymgt.util.APIKeyMgtDataHolder;
 import org.wso2.carbon.apimgt.keymgt.util.APIKeyMgtUtil;
+import org.wso2.carbon.identity.oauth.common.OAuthConstants;
 import org.wso2.carbon.identity.oauth2.OAuth2TokenValidationService;
 import org.wso2.carbon.identity.oauth2.dto.OAuth2ClientApplicationDTO;
 import org.wso2.carbon.identity.oauth2.dto.OAuth2TokenValidationRequestDTO;
@@ -283,6 +284,12 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
             //get default application access token name from config.
 
             String applicationScope = APIKeyMgtDataHolder.getApplicationTokenScope();
+
+            // When validity time set to a negative value, a token is considered never to expire.
+            if(tokenRequest.getValidityPeriod() == OAuthConstants.UNASSIGNED_VALIDITY_PERIOD){
+                // Setting a different -ve value if the set value is -1 (-1 will be ignored by TokenValidator)
+                tokenRequest.setValidityPeriod(-2);
+            }
 
             //Generate New Access Token
             HttpClient tokenEPClient = APIKeyMgtUtil.getHttpClient(keyMgtPort, keyMgtProtocol);

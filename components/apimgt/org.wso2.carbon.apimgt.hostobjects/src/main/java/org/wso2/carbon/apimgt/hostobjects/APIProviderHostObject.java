@@ -55,6 +55,7 @@ import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.impl.UserAwareAPIProvider;
 import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
+import org.wso2.carbon.apimgt.impl.handlers.ScopesIssuer;
 import org.wso2.carbon.apimgt.impl.definitions.APIDefinitionFromSwagger20;
 import org.wso2.carbon.apimgt.impl.dto.Environment;
 import org.wso2.carbon.apimgt.impl.dto.TierPermissionDTO;
@@ -443,6 +444,22 @@ public class APIProviderHostObject extends ScriptableObject {
             //scopes
             Set<Scope> scopes = definitionFromSwagger20.getScopes(String.valueOf(apiData.get("swagger", apiData)));
             api.setScopes(scopes);
+            
+            try {
+                int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager().
+                                                                                            getTenantId(tenantDomain);                
+                for (URITemplate uriTemplate : uriTemplates) {
+                    Scope scope = uriTemplate.getScope();
+                    if (scope != null && !(ScopesIssuer.getInstance().isWhiteListedScope(scope.getKey()))) {
+                        if (apiProvider.isScopeKeyAssigned(apiId, scope.getKey(), tenantId)) {
+                            handleException("Scope " + scope.getKey() + " is already assigned by another API");
+                        }
+                    }                    
+                }
+            } catch (UserStoreException e) {
+                handleException("Error while reading tenant information ", e);
+            }
+            
 
             //Save swagger in the registry
             apiProvider.saveSwagger20Definition(api.getId(),(String) apiData.get("swagger", apiData));
@@ -987,8 +1004,9 @@ public class APIProviderHostObject extends ScriptableObject {
         String contextVal = (String) apiData.get("context", apiData);
         APIProvider apiProvider = getAPIProvider(thisObj);
         //check for context exists
-        if (apiProvider.isContextExist(contextVal)) {
-            handleException("Error occurred while adding the API. A duplicate API context already exists for " + contextVal);
+        if (apiProvider.isDuplicateContextTemplate(contextVal)) {
+            handleException("Error occurred while adding the API. A duplicate API context already exists for "
+                    + contextVal);
         }
         String context = contextVal.startsWith("/") ? contextVal : ("/" + contextVal);
         String providerDomain=MultitenantUtils.getTenantDomain(String.valueOf(apiData.get("provider", apiData)));
@@ -1721,7 +1739,8 @@ public class APIProviderHostObject extends ScriptableObject {
                 String currentUser = ((APIProviderHostObject) thisObj).getUsername();
                 apiProvider.changeAPIStatus(api, newStatus, currentUser, publishToGateway);
 
-                if (oldStatus.equals(APIStatus.CREATED) && newStatus.equals(APIStatus.PUBLISHED)) {
+                if ((oldStatus.equals(APIStatus.CREATED) || oldStatus.equals(APIStatus.PROTOTYPED))  
+                        && newStatus.equals(APIStatus.PUBLISHED)) {
                     if (makeKeysForwardCompatible) {
                         apiProvider.makeAPIKeysForwardCompatible(api);
                     }
@@ -2968,9 +2987,9 @@ public class APIProviderHostObject extends ScriptableObject {
             }
             APIProvider apiProvider = getAPIProvider(thisObj);
             try {
-                contextExist = apiProvider.isContextExist(context);
+                contextExist = apiProvider.isDuplicateContextTemplate(context);
             } catch (APIManagementException e) {
-                handleException("Error from registry while checking the input context is already exist", e);
+                handleException("Error while checking whether context exists", e);
             }
         } else {
             handleException("Input context value is null");
@@ -4756,6 +4775,39 @@ public class APIProviderHostObject extends ScriptableObject {
             }
         }
         return myn;
+    }
+    
+    public static String jsFunction_isScopeExist(Context cx, Scriptable thisObj,
+                                                   Object[] args, Function funObj)
+            throws APIManagementException {
+        Boolean scopeExist = false;
+        if (args != null && isStringValues(args)) {
+            String scopeKey = (String) args[0];
+            String username = (String) args[1];
+            
+            if (!ScopesIssuer.getInstance().isWhiteListedScope(scopeKey)) {
+                String tenantDomain = MultitenantUtils.getTenantDomain(username);
+                //update permission cache before validate user
+                int tenantId = -1234;
+                try {
+                    tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
+                            .getTenantId(tenantDomain);
+                } catch (UserStoreException e) {
+                    handleException("Error while reading tenant information ", e);
+                }
+    
+                APIProvider apiProvider = getAPIProvider(thisObj);
+                
+                try {
+                    scopeExist = apiProvider.isScopeKeyExist(scopeKey, tenantId);
+                } catch (APIManagementException e) {
+                    handleException("Error from registry while checking the input context is already exist", e);
+                }
+            }
+        } else {
+            handleException("Input context value is null");
+        }
+        return scopeExist.toString();
     }
 
     /**

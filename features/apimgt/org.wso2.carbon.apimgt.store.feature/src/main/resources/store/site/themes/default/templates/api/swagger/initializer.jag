@@ -1,0 +1,25 @@
+<%
+jagg.initializer("api/swagger", {
+
+    preInitialize:function () {
+        //jagg.addFooterJS("api/api-info", "api-info", "templates/api/api-info/js/api-info.js");
+
+		jagg.addHeaderJS("api/api-info", "api-info1", "templates/api/swagger/swagger/lib/jquery.slideto.min.js");
+		jagg.addHeaderJS("api/api-info", "api-info2", "templates/api/swagger/swagger/lib/jquery.wiggle.min.js");
+		jagg.addHeaderJS("api/api-info", "api-info3", "templates/api/swagger/swagger/lib/jquery.ba-bbq.min.js");
+		jagg.addHeaderJS("api/api-info", "api-info4", "templates/api/swagger/swagger/lib/handlebars-2.0.0.js");
+		jagg.addHeaderJS("api/api-info", "api-info6", "templates/api/swagger/swagger/lib/underscore-min.js");
+		jagg.addHeaderJS("api/api-info", "api-info7", "templates/api/swagger/swagger/lib/backbone-min.js");
+		jagg.addHeaderJS("api/api-info", "api-info8", "templates/api/swagger/swagger/swagger-ui.js");
+		jagg.addHeaderJS("api/api-info", "api-info9", "templates/api/swagger/swagger/lib/highlight.7.3.pack.js");
+		jagg.addHeaderJS("api/api-info", "api-info10", "templates/api/swagger/swagger/lib/marked.js");
+
+		jagg.addHeaderCSS("api/api-info", "api-info13", "templates/api/swagger/swagger/css/screen.css");
+    },
+
+    postInitialize:function(inputs, outputs) {
+        jagg.addFooterJSCode("api/api-info", "api", "jagg.api = " + stringify(inputs.api) + ";");
+    }
+});
+
+%>
