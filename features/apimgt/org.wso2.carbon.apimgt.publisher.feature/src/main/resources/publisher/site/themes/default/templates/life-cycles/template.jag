@@ -226,6 +226,11 @@ var checkExternalStores=function(status){
 	}else{
 		$('#removeFromExternalStoresMsg').hide();
 	}
+    if (status !== 'PUBLISHED') {
+        $('#externalAPIStores').hide();
+    }else{
+        $('#externalAPIStores').show();
+    }
 }
 
  </script>

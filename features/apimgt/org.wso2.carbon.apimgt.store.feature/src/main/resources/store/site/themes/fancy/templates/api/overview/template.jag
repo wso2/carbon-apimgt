@@ -29,10 +29,10 @@
             var log = new Log();
     	    for(var environmentType in environments){
     	        var environmentsPerType = environments[environmentType];
-                if(environmentType == "production"){
+                if(environmentType == "production" && environmentsPerType.length>0){
                     %>
                     <h4>PRODUCTION Endpoints</h4>
-                    <%} else if(environmentType == "sandbox"){
+                    <%} else if(environmentType == "sandbox" && environmentsPerType.length>0){
                         %>
                     <h4>SANDBOX Endpoints</h4>
                 <%}
