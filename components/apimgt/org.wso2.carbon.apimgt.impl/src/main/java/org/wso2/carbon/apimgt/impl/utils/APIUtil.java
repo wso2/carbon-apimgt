@@ -1999,11 +1999,9 @@ public final class APIUtil {
             //check the validity of cached OAuth2AccessToken Response
 
             if ((currentTime - timestampSkew) > (issuedTime + validityPeriod)) {
-                accessTokenDO.setValidationStatus(
-                        APIConstants.KeyValidationStatus.API_AUTH_INVALID_CREDENTIALS);
-                if (accessTokenDO.getEndUserToken() != null) {
-                    log.info("Token " + accessTokenDO.getEndUserToken() + " expired.");
-                }
+                accessTokenDO.setValidationStatus(APIConstants.KeyValidationStatus.API_AUTH_INVALID_CREDENTIALS);
+                log.info("Token " + accessTokenDO.toString() + " expired.");
+
                 return true;
             }
         }
