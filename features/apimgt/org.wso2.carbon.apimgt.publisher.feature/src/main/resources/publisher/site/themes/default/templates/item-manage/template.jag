@@ -597,6 +597,8 @@
             });
         };
 
+        $("#scope_form").validate();
+
         var v = $("#manage_form").validate({
             submitHandler: function(form) {
             if(!validate_tiers()){
@@ -696,21 +698,21 @@
     <div class="modal-body">
     <form id="scope_form" class="form-horizontal">
         <div class="control-group">
-            <label class="control-label" for="scopeKey">Scope Key</label>
+            <label class="control-label" for="scopeKey">Scope Key<span class="requiredAstrix">*</span></label>
             <div class="controls">
-            <input type="text" id="scopeKey" placeholder="Eg: api_name_read">
+            <input type="text" id="scopeKey" name="scopeKey" class="required" placeholder="Eg: api_name_read">
             </div>
         </div>
         <div class="control-group">
-            <label class="control-label" for="scopeName">Scope Name</label>
+            <label class="control-label" for="scopeName">Scope Name<span class="requiredAstrix">*</span></label>
             <div class="controls">
-            <input type="text" id="scopeName" placeholder="Eg: Read My Data">
+            <input type="text" id="scopeName" name="scopeName"  class="required" placeholder="Eg: Read My Data">
             </div>
         </div>
         <div class="control-group">
             <label class="control-label" for="scopeRoles">Roles</label>
             <div class="controls">
-            <input type="text" id="scopeRoles" placeholder="Eg: role1,role2,role3">
+            <input type="text" id="scopeRoles" class="validateRoles" placeholder="Eg: role1,role2,role3" data-role="tagsinput" />
             </div>
         </div>
         <div class="control-group">

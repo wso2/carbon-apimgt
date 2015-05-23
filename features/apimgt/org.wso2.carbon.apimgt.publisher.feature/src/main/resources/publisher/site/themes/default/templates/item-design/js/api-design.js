@@ -374,6 +374,9 @@ APIDesigner.prototype.init_controllers = function(){
     });
 
     $("#scope_submit").click(function(){
+        if(!$("#scope_form").valid()){
+            return;
+        }     
         var securityDefinitions = {
             "apim":{
                 "x-wso2-scopes":[]
