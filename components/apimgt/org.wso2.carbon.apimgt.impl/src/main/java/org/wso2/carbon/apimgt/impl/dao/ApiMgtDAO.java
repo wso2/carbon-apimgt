@@ -2861,7 +2861,7 @@ public class ApiMgtDAO {
                 authorizedDomains = getAuthorizedDomains(accessToken);
                 apiKey.setType(resultSet.getString("TOKEN_TYPE"));
                 apiKey.setAuthorizedDomains(authorizedDomains);
-                apiKey.setValidityPeriod(resultSet.getLong("VALIDITY_PERIOD"));
+                apiKey.setValidityPeriod(resultSet.getLong("VALIDITY_PERIOD") / 1000);
                 apiKey.setState(resultSet.getString("STATE"));
                 return apiKey;
             }
@@ -2971,7 +2971,7 @@ public class ApiMgtDAO {
                 authorizedDomains = getAuthorizedDomains(accessToken);
                 apiKey.setType(resultSet.getString("TOKEN_TYPE"));
                 apiKey.setAuthorizedDomains(authorizedDomains);
-                apiKey.setValidityPeriod(resultSet.getLong("VALIDITY_PERIOD"));
+                apiKey.setValidityPeriod(resultSet.getLong("VALIDITY_PERIOD") / 1000);
                 return apiKey;
             }
             return null;
