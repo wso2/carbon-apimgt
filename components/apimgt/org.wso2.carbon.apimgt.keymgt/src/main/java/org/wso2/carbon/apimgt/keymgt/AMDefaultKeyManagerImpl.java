@@ -63,6 +63,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -379,9 +380,20 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
         tokenInfo.setTokenValid(responseDTO.isValid());
         tokenInfo.setEndUserName(responseDTO.getAuthorizedUser());
         tokenInfo.setConsumerKey(clientApplicationDTO.getConsumerKey());
-        tokenInfo.setValidityPeriod(responseDTO.getExpiryTime());
+        // Convert Expiry Time to milliseconds.
+        tokenInfo.setValidityPeriod(responseDTO.getExpiryTime() * 1000);
         tokenInfo.setIssuedTime(System.currentTimeMillis());
         tokenInfo.setScope(responseDTO.getScope());
+
+        // If token has am_application_scope, consider the token as an Application token.
+        String[] scopes = responseDTO.getScope();
+        String applicationTokenScope = APIKeyMgtDataHolder.getApplicationTokenScope();
+
+        if (scopes != null && applicationTokenScope != null && !applicationTokenScope.isEmpty()) {
+            if (Arrays.asList(scopes).contains(applicationTokenScope)) {
+                tokenInfo.setApplicationToken(true);
+            }
+        }
 
         if (APIUtil.checkAccessTokenPartitioningEnabled() &&
             APIUtil.checkUserNameAssertionEnabled()) {

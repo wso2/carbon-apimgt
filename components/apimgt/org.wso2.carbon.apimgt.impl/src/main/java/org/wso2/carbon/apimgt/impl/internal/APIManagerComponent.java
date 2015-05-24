@@ -223,17 +223,9 @@ public class APIManagerComponent {
 
             // If whitelist is null, default scopes will be put.
             if (whitelist == null) {
-                String applicationTokenScope = null;
-
                 whitelist = new ArrayList<String>();
                 whitelist.add(APIConstants.OPEN_ID_SCOPE_NAME);
                 whitelist.add(APIConstants.DEVICE_SCOPE_PATTERN);
-                applicationTokenScope =
-                                        configuration.getFirstProperty(APIConstants.API_KEY_VALIDATOR_APPLICATION_TOKEN_SCOPE);
-
-                if (applicationTokenScope != null) {
-                    whitelist.add(applicationTokenScope);
-                }
             }
 
             ScopesIssuer.loadInstance(whitelist);

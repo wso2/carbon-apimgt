@@ -4373,16 +4373,20 @@ public class APIStoreHostObject extends ScriptableObject {
             } else {
                 tiers = apiConsumer.getTiers();
             }
+
+            List<Tier> tierList = APIUtil.sortTiers(tiers);
             int i = 0;
-            for (Tier tier : tiers) {
+            for (Tier tier : tierList) {
                 NativeObject row = new NativeObject();
                 row.put("tierName", row, tier.getName());
                 row.put("tierDisplayName", row, tier.getDisplayName());
                 row.put("tierDescription", row,
                         tier.getDescription() != null ? tier.getDescription() : "");
+                row.put("defaultTier", row, i == 0);
                 myn.put(i, myn, row);
                 i++;
             }
+
         } catch (Exception e) {
             log.error("Error while getting available tiers", e);
         }
