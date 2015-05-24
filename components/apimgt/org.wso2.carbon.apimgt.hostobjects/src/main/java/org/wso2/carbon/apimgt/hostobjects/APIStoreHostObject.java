@@ -3238,8 +3238,6 @@ public class APIStoreHostObject extends ScriptableObject {
     public static NativeObject jsFunction_getApplicationByName(Context cx,
                                                                Scriptable thisObj, Object[] args, Function funObj)
             throws ScriptException, APIManagementException {
-
-        NativeObject row = new NativeObject();
         if (args != null) {
             String userId = (String) args[0];
             String applicationName = (String) args[1];
@@ -3247,6 +3245,7 @@ public class APIStoreHostObject extends ScriptableObject {
             APIConsumer apiConsumer = getAPIConsumer(thisObj);
             Application application = apiConsumer.getApplicationsByName(userId, applicationName,groupId);
             if (application != null) {
+                NativeObject row = new NativeObject();
 
                 row.put("name", row, application.getName());
                 row.put("tier", row, application.getTier());
@@ -3254,9 +3253,11 @@ public class APIStoreHostObject extends ScriptableObject {
                 row.put("callbackUrl", row, application.getCallbackUrl());
                 row.put("status", row, application.getStatus());
                 row.put("description", row, application.getDescription());
+
+                return row;
             }
         }
-        return row;
+        return null;
     }
 
     public static String jsFunction_addApplication(Context cx,
