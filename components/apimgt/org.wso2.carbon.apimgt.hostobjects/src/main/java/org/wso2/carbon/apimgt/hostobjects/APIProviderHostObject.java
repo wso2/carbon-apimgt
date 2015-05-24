@@ -589,6 +589,10 @@ public class APIProviderHostObject extends ScriptableObject {
         	api.setEndpointSecured(true);
         	api.setEndpointUTUsername(endpointUTUsername);
         	api.setEndpointUTPassword(endpointUTPassword);
+        } else {
+            api.setEndpointSecured(false);
+            api.setEndpointUTUsername(null);
+            api.setEndpointUTPassword(null);
         }
         	        
         
