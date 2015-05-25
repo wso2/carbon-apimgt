@@ -406,7 +406,7 @@ public class DefaultKeyManagerImpl extends AbstractKeyManager {
      * @throws APIManagementException
      */
     @Override
-    public OAuthApplicationInfo createSemiManualAuthApplication(OAuthAppRequest appInfoRequest)
+    public OAuthApplicationInfo mapOAuthApplication(OAuthAppRequest appInfoRequest)
             throws APIManagementException {
 
         //initiate OAuthApplicationInfo
