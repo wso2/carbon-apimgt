@@ -26,7 +26,10 @@ $( document ).ready(function() {
     });
 
     $("#startFromExistingSOAPEndpoint").click(function(){
-        $('#startFromExistingSOAPEndpoint-form').ajaxSubmit({
+        
+        var wsdl = $("#wsdl-url").val();
+        window.location.href = 'create?wsdl=' + wsdl;
+        /*$('#startFromExistingSOAPEndpoint-form').ajaxSubmit({
             success:function(responseText, statusText, xhr, $form){
                 if (!responseText.error) {
                     window.location = jagg.site.context + "/design"
@@ -47,7 +50,7 @@ $( document ).ready(function() {
                     }
                 }                
             }, dataType: 'json'
-        });
+        });*/
     });
     
 
