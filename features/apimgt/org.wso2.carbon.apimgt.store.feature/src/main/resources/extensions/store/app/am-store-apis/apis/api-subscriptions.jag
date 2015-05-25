@@ -18,7 +18,7 @@
  *
  */
 require('/modules/store.js').exec(function (ctx) {
-    var log = new Log();
+    var log = new Log('api_subsciptions_endpoint');
     // log.info("inside api");
     var server = require('store').server;
     var responseProcessor = require('utils').response;

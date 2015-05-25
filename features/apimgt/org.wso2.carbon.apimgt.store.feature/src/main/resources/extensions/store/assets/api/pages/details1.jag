@@ -16,7 +16,7 @@
  */
 var caramel;
 require('/modules/store.js').exec(function(ctx) {
-	var log = new Log();
+	var log = new Log('details1_page');
 
     caramel = require('caramel');
     var rxt = require('rxt');
