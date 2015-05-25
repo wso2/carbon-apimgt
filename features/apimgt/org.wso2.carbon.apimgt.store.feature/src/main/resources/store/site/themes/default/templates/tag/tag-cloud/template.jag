@@ -8,7 +8,12 @@
 
 <script type="text/javascript">
     $(function(){
-        jagg.post( "/site/blocks/tag/tag-cloud/ajax/list.jag", { action:"getAllTags", tenant: jagg.site.tenant }, function (result) {
+        jagg.post( "/site/blocks/tag/tag-cloud/ajax/list.jag", { 
+          <% if(jagg.getTenantDomain()){ %>
+            tenant: "<%= jagg.getTenantDomain()%>",
+          <% } %> 
+          action:"getAllTags"          
+        }, function (result) {
            if (result.error == false) {
               var path = "<%=jagg.urlTenanted("/site/pages/list-apis.jag",{ "page" : 1 })%>";
               var words = [];
