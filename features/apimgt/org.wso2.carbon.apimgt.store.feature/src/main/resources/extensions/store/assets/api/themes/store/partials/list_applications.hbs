@@ -12,15 +12,17 @@
         </thead>
         <tbody>
         {{#each applications}}
-            <tr>
+            <tr id='tr-application-{{id}}-data'>
                 <td>{{name}}</td>
                 <td>{{tier}}</td>
                 <td>{{status}}</td>
                 <td>{{callbackUrl}}</td>
                 <td>{{description}}</td>
                 <td>
-                    <a><i class='icon-edit'></i> {{t "Edit"}}</a>
-                    <a><i class='icon-trash'></i> {{t "Delete"}}</a>
+                    <a href="javascript:changeAppRowtoEditView('{{name}}','{{../cuser.username}}','{{id}}','{{tier}}','{{status}}','{{callbackUrl}}','{{description}}');"><i
+                            class='icon-edit'></i> {{t "Edit"}}</a>
+                    <a href="javascript:removeApplication('{{name}}','{{../cuser.username}}','{{id}}');"><i
+                            class='icon-trash'></i> {{t "Delete"}}</a>
                 </td>
             </tr>
         {{/each}}

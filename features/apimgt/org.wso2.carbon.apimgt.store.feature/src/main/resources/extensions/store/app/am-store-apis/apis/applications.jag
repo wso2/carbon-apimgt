@@ -19,43 +19,19 @@
  */
 require('/modules/store.js').exec(function (ctx) {
     var log = new Log();
+    var req = ctx.request;
     var server = require('store').server;
     var user = server.current(ctx.session);
     var apistore = require('apistore').apistore.instance(user.username);
     var options = request.getAllParameters('UTF-8');
     var httpMethod = request.getMethod();
-    // var APPLICATIONS_INFO_PATTERN ='/{context}/apis/applications/{appName}';
-    // var uriMatcher = new URIMatcher(request.getRequestURI());
-    // var options;
+
+    var API_APPLICATIONS_URL = '/{context}/apis/applications/{action}';
+
+    var uriMatcher = new URIMatcher(req.getRequestURI());
+    var uriOptions;
     switch (httpMethod) {
         case 'GET':
-            // log.info('GET :: ' + httpMethod);
-            // options = uriMatcher.match(APPLICATIONS_INFO_PATTERN);
-            // if(options.appName){
-            //     var subscribedAPIsResult = apistore.getAllSubscriptions(user.username,options.appName,0,100);
-            //     var subscribedAPIs = [];
-            //      subscribedAPIs = JSON.parse(subscribedAPIsResult);
-            //      var app;
-            //      var apps = subscribedAPIs.applications ||[];
-            //      var found;
-            //      var details;
-            //      log.info('Starting to search');
-            //      log.info(subscribedAPIs.applications);
-            //     //log.info('Application.jag -- JSON.parse(subscribedAPIsResult) :: ' + subscribedAPIsResult);
-            //         //print(subscribedAPIs.applications[0]);
-            //         for (var i = 0; ((i < apps.length) && (!found)); i++) {
-            //             app = apps[i];
-            //             log.info('checking '+app.name);
-            //             if(app.name === options.appName){
-            //                 found =true;
-            //                 details = app;
-            //             }
-            //         };
-            //     print(details);
-            // } else {
-            // log.error('Name of application has not been provided');
-            // response.sendError(404,'Please provide the name of the application to retrieve details');
-            // }
             var appDataResult = apistore.getApplications(user.username);
             var appData = [];
             appData = JSON.parse(appDataResult);
@@ -66,8 +42,18 @@ require('/modules/store.js').exec(function (ctx) {
 
         case 'POST':
             //log.info('POST :: ' + httpMethod);
-            apistore.addApplication(options.overview_name, user.username, options.overview_tier,
-                    options.overview_callbackurl, options.overview_description);
+            uriOptions = uriMatcher.match(API_APPLICATIONS_URL);
+
+            if (uriOptions.action == "newapp") {
+                apistore.addApplication(options.overview_name, user.username, options.overview_tier,
+                        options.overview_callbackurl, options.overview_description);
+            } else if (uriOptions.action == "editapp") {
+                apistore.updateApplication(options.appName, options.userName, options.appId, options.tier,
+                        options.callbackUrl, options.description);
+            } else if (uriOptions.action == "delapp") {
+                apistore.removeApplication(options.appName, options.userName, options.appId);
+            }
+
             break;
 
         default:

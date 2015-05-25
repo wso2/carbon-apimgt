@@ -25,7 +25,8 @@ var apistore = {};
     var APIManagerFactory = Packages.org.wso2.carbon.apimgt.impl.APIManagerFactory;
     var APISubscriber = Packages.org.wso2.carbon.apimgt.api.model.Subscriber;
     var APIIdentifier = Packages.org.wso2.carbon.apimgt.api.model.APIIdentifier;
-    var APIUtil = org.wso2.carbon.apimgt.impl.utils.APIUtil;
+    var APIUtil = Packages.org.wso2.carbon.apimgt.impl.utils.APIUtil;
+    var Application = Packages.org.wso2.carbon.apimgt.api.model.Application;
     var Date = Packages.java.util.Date;
     var log = new Log("jaggery-modules.api-manager.store");
 
@@ -84,6 +85,29 @@ var apistore = {};
 
     StoreAPIProxy.prototype.addApplication = function (appName, userName, tier, callbackUrl, description) {
         return this.impl.addApplication(appName, userName, tier, callbackUrl, description);
+    };
+
+    /*
+    * This function update the application according to the given arguments.
+    */
+    StoreAPIProxy.prototype.updateApplication = function (appName, userName, appId, tier, callbackUrl, description) {
+        var subscriber = new APISubscriber(userName);
+        var application = new Application(appName, subscriber);
+        application.setId(appId);
+        application.setTier(tier);
+        application.setCallbackUrl(callbackUrl);
+        application.setDescription(description);
+        return this.impl.updateApplication(application);
+    };
+
+    /*
+     * This function delete the application according to the arguments.
+     */
+    StoreAPIProxy.prototype.removeApplication = function (appName, userName, appId) {
+        var subscriber = new APISubscriber(userName);
+        var application = new Application(appName, subscriber);
+        application.setId(appId);
+        return this.impl.removeApplication(application);
     };
 
     StoreAPIProxy.prototype.getAllPaginatedAPIsByStatus = function (tenantDomain, start, end, apiStatus) {
