@@ -373,6 +373,7 @@ public class CacheMediator extends AbstractMediator implements ManagedLifecycle,
                                 responseEnvelop, msgCtx.isSOAP11());
                     }
                     if (omSOAPEnv != null) {
+                        omSOAPEnv.buildWithAttachments();
                         synCtx.setEnvelope(omSOAPEnv);
                     }
                 } catch (AxisFault axisFault) {
