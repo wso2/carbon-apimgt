@@ -175,11 +175,29 @@ function APIDesigner(){
  
 }
 
-APIDesigner.prototype.check_if_resource_exist = function(path, method){    
-    if(this.api_doc.paths[path] == undefined || this.api_doc.paths[path][method] == undefined){
-        return false;
+APIDesigner.prototype.check_if_resource_exist = function(path, method){
+
+    for (var key in this.api_doc.paths) {
+
+	//remove tailing slash
+	if (path.lastIndexOf('/') == path.length -1) {
+		path = path.substring(0, path.length -1);
+	}
+
+	var keyWithoutTailingSlash = key;
+	if (key.lastIndexOf('/') == key.length -1) {
+		keyWithoutTailingSlash = key.substring(0, key.length -1);
+	}
+
+        if(keyWithoutTailingSlash.toLowerCase() == path.toLowerCase()){
+
+            if (this.api_doc.paths[key].hasOwnProperty(method)) {
+
+                return true;
+            }
+        }
     }
-    return true;
+    return false;
 }
 
 
@@ -208,15 +226,15 @@ APIDesigner.prototype.add_default_resource = function(){
     $("#add_resource").trigger('click');
 }
 
-APIDesigner.prototype.get_scopes = function(){
+APIDesigner.prototype.get_scopes = function() {
+    var options = [{ "value": "" , "text": "" }];
     if(typeof(this.api_doc.securityDefinitions)!='undefined'){
-	var scopes = this.api_doc.securityDefinitions.apim['x-wso2-scopes'];
-	var options = [{ "value": "" , "text": "" }]
+	var scopes = this.api_doc.securityDefinitions.apim['x-wso2-scopes'];	
 	for(var i =0; i < scopes.length ; i++ ){
 	    options.push({ "value": scopes[i].key , "text": scopes[i].name });
-	}
-	return options;
+	}	
     }
+    return options;
 }
 
 APIDesigner.prototype.has_resources = function(){
@@ -319,6 +337,28 @@ APIDesigner.prototype.init_controllers = function(){
         API_DESIGNER.render_resource(resource_body);
     });
 
+    this.container.delegate(".delete_parameter", "click", function (event) {
+        console.log("deleting parameter");
+        //var elementToDelete =  $(this).parent().parent();
+        var deleteData = $(this).attr("data-path");
+        var i = $(this).attr("data-index");
+
+        var deleteDataArray = deleteData.split(".");
+        var operations = deleteDataArray[2];
+        var operation = deleteDataArray[3];
+        var paramName = API_DESIGNER.api_doc.paths[operations][operation]['parameters'][i]['name'];
+
+        jagg.message({content: 'Do you want to delete the parameter <strong>' + paramName + '</strong> ?',
+            type: 'confirm', title: "Delete Parameter",
+            okCallback: function () {
+                API_DESIGNER = APIDesigner();
+                console.log(API_DESIGNER.api_doc.paths[operations]);
+                API_DESIGNER.api_doc.paths[operations][operation]['parameters'].splice(i,1);
+                console.log(API_DESIGNER.api_doc.paths[operations]);
+                API_DESIGNER.render_resources();
+            }});
+    });
+
     this.container.delegate(".delete_scope","click", function(){
         var i = $(this).attr("data-index");
         API_DESIGNER.api_doc.securityDefinitions.apim['x-wso2-scopes'].splice(i, 1);
@@ -334,6 +374,9 @@ APIDesigner.prototype.init_controllers = function(){
     });
 
     $("#scope_submit").click(function(){
+        if(!$("#scope_form").valid()){
+            return;
+        }     
         var securityDefinitions = {
             "apim":{
                 "x-wso2-scopes":[]
@@ -347,33 +390,56 @@ APIDesigner.prototype.init_controllers = function(){
 			roles : $("#scopeRoles").val()
 		};
 
-        API_DESIGNER.api_doc.securityDefinitions = $.extend({}, securityDefinitions, API_DESIGNER.api_doc.securityDefinitions);
+		jagg.post("/site/blocks/item-design/ajax/add.jag", { action:"validateScope", scope:$("#scopeKey").val()},
+			function (result) {
+			    if (!result.error) {
 
-		for (var i = 0; i < API_DESIGNER.api_doc.securityDefinitions.apim['x-wso2-scopes'].length; i++) {
-			if (API_DESIGNER.api_doc.securityDefinitions.apim['x-wso2-scopes'][i].key === $(
-					"#scopeKey").val() || API_DESIGNER.api_doc.securityDefinitions.apim['x-wso2-scopes'][i].key === $(
-					"#scopeName").val()) {
+				API_DESIGNER.api_doc.securityDefinitions = $.extend({}, securityDefinitions, API_DESIGNER.api_doc.securityDefinitions);
+
+				for (var i = 0; i < API_DESIGNER.api_doc.securityDefinitions.apim['x-wso2-scopes'].length; i++) {
+					if (API_DESIGNER.api_doc.securityDefinitions.apim['x-wso2-scopes'][i].key === $(
+							"#scopeKey").val() || API_DESIGNER.api_doc.securityDefinitions.apim['x-wso2-scopes'][i].key === $(
+							"#scopeName").val()) {
+						jagg.message({
+							content : "Scope " + $("#scopeKey").val() + " already exists",
+							type : "error"
+						});
+						return;
+					}
+				}
+		      		if (result.isScopeExist == "true") {
+					jagg.message({
+						content : "Scope " + $("#scopeKey").val() + " already assigned by an API.",
+						type : "error"
+					});
+					return;
+				} 
+			
+				API_DESIGNER.api_doc.securityDefinitions.apim['x-wso2-scopes'].push(scope);
+				$("#define_scope_modal").modal('hide');
+				API_DESIGNER.render_scopes();
+				API_DESIGNER.render_resources();
+			
+			    } else {
 				jagg.message({
-					content : "You should not define same scope.",
+					content : result.message,
 					type : "error"
 				});
-				return;
-			}
-		}
-		
-        API_DESIGNER.api_doc.securityDefinitions.apim['x-wso2-scopes'].push(scope);
-		$("#define_scope_modal").modal('hide');
-		API_DESIGNER.render_scopes();
-		API_DESIGNER.render_resources();
+					return;
+				}       
+
+		}, "json"); 
 	}); 
 
     $("#swaggerEditor").click(API_DESIGNER.edit_swagger);
 
     $("#update_swagger").click(API_DESIGNER.update_swagger);
+
+    $("#close_swagger_editor").click(API_DESIGNER.close_swagger_editor);
 }
  
 APIDesigner.prototype.load_api_document = function(api_document){
-    this.api_doc = api_document
+    this.api_doc = api_document;
     this.render_resources();
     this.render_scopes();
     $("#version").val(api_document.info.version);
@@ -506,7 +572,7 @@ APIDesigner.prototype.query = function(path){
 }
 
 APIDesigner.prototype.add_resource = function(resource, path){    
-    var path = path.toLowerCase();
+    
     if(path.charAt(0) != "/")
         path = "/" + path;
     if(this.api_doc.paths[path] == undefined){
@@ -519,21 +585,25 @@ APIDesigner.prototype.add_resource = function(resource, path){
 };
 
 APIDesigner.prototype.edit_swagger = function(){
-    var designer =  APIDesigner();
-    designer.swagger_editor = ace.edit("swagger_editor");
-    //var textarea = $('textarea[name="description"]').hide();    
-    designer.swagger_editor.setFontSize(16);
-    designer.swagger_editor.setTheme("ace/theme/textmate");
-    designer.swagger_editor.getSession().setMode("ace/mode/yaml");
-    designer.swagger_editor.getSession().setValue(jsyaml.safeDump(designer.api_doc));
-    
+    $("body").addClass("modal-open");
+    $("#swaggerEditer").append('<iframe id="se-iframe"  style="border:0px;" width="100%" height="100%"></iframe>');    
+    document.getElementById('se-iframe').src = $("#swaggerEditer").attr("editor-url");
+    $("#swaggerEditer").fadeIn("fast");
+};
+
+APIDesigner.prototype.close_swagger_editor = function(){
+    $("body").removeClass("modal-open");
+    $("#se-iframe").remove();
+    $("#swaggerEditer").fadeOut("fast");
 };
 
 APIDesigner.prototype.update_swagger = function(){
+    $("body").removeClass("modal-open");
+    $("#se-iframe").remove();
+    $("#swaggerEditer").fadeOut("fast");    
     var designer =  APIDesigner();
-    var json = jsyaml.safeLoad(designer.swagger_editor.getSession().getValue());
-    designer.load_api_document(json);
-    $('#swaggerEditer').modal('toggle');    
+    var json = jsyaml.safeLoad(designer.yaml);
+    designer.load_api_document(json);          
 };
 
 
@@ -567,28 +637,46 @@ $(document).ready(function(){
         $(this).prop('checked', true);
     });
 
-    $('#import_swagger').click(function(){
+    $('#swagger_import_file').change(function (event) {
+        var file = event.target.files[0];
+        var fileReader = new FileReader();
+        fileReader.addEventListener("load", function (event) {
+            jsonFile = event.target;
+        });
+        //Read the text file
+        fileReader.readAsText(file);
+    });
 
-        if($('#swagger_import_url').val().length == 0){
-        }else{
-        $('#import_swagger').buttonLoader('start');
-        $('#swagger_help').hide();
-        var data = {
-            "swagger_url" : $("#swagger_import_url").val() // "http://petstore.swagger.wordnik.com/api/api-docs"
-        }
-        $.get( jagg.site.context + "/site/blocks/item-design/ajax/import.jag", data , function( data ) {
+    $('#import_swagger').click(function () {
+        if ($('#swagger_import_url').val().length == 0) {
+
+            $('#import_swagger').buttonLoader('start');
+            $('#swagger_help').hide();
+            var data = JSON.parse(jsonFile.result); //swagger file content
+
             var designer = APIDesigner();
             designer.load_api_document(data);
-            $('#swagger_help').hide();
             $('#import_swagger').buttonLoader('stop');
             $("#swaggerUpload").modal('hide');
-        }).fail(function(data){
-            $('#swagger_help').show();
-            $('#import_swagger').buttonLoader('stop');
-            $('#errorMsgClose').on('click', function(e) {
+        } else {
+            $('#import_swagger').buttonLoader('start');
+            $('#swagger_help').hide();
+            var data = {
+                "swagger_url": $("#swagger_import_url").val() // "http://petstore.swagger.wordnik.com/api/api-docs"
+            }
+            $.get(jagg.site.context + "/site/blocks/item-design/ajax/import.jag", data, function (data) {
+                var designer = APIDesigner();
+                designer.load_api_document(data);
                 $('#swagger_help').hide();
+                $('#import_swagger').buttonLoader('stop');
+                $("#swaggerUpload").modal('hide');
+            }).fail(function (data) {
+                $('#swagger_help').show();
+                $('#import_swagger').buttonLoader('stop');
+                $('#errorMsgClose').on('click', function (e) {
+                    $('#swagger_help').hide();
+                });
             });
-        });
         }
     });
 

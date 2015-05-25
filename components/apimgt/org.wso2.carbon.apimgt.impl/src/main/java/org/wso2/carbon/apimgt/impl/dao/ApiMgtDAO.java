@@ -86,7 +86,6 @@ import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.impl.dto.*;
-
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.token.JWTGenerator;
 import org.wso2.carbon.apimgt.impl.token.TokenGenerator;
@@ -94,7 +93,6 @@ import org.wso2.carbon.apimgt.impl.utils.APIMgtDBUtil;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.utils.APIVersionComparator;
 import org.wso2.carbon.apimgt.impl.utils.RemoteUserManagerClient;
-
 import org.wso2.carbon.apimgt.impl.utils.ApplicationUtils;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowConstants;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowExecutorFactory;
@@ -964,7 +962,7 @@ public class ApiMgtDAO {
                     }
                     if (validityPeriod!=Long.MAX_VALUE && (currentTime - timestampSkew) > (issuedTime + validityPeriod)) {
                         keyValidationInfoDTO.setValidationStatus(
-                                APIConstants.KeyValidationStatus.API_AUTH_ACCESS_TOKEN_EXPIRED);
+                                APIConstants.KeyValidationStatus.API_AUTH_INVALID_CREDENTIALS);
                         if (log.isDebugEnabled()) {
                             log.debug("Access token: " + accessToken + " has expired. " +
                                       "Reason ((currentTime - timestampSkew) > (issuedTime + validityPeriod)) : " +
@@ -1006,7 +1004,7 @@ public class ApiMgtDAO {
                         }
                     }
 				} else {
-					keyValidationInfoDTO.setValidationStatus(APIConstants.KeyValidationStatus.API_AUTH_ACCESS_TOKEN_INACTIVE);
+					keyValidationInfoDTO.setValidationStatus(APIConstants.KeyValidationStatus.API_AUTH_INVALID_CREDENTIALS);
 					if (log.isDebugEnabled()) {
 						log.debug("Access token: " + accessToken + " is inactive");
 					}
@@ -2863,7 +2861,7 @@ public class ApiMgtDAO {
                 authorizedDomains = getAuthorizedDomains(accessToken);
                 apiKey.setType(resultSet.getString("TOKEN_TYPE"));
                 apiKey.setAuthorizedDomains(authorizedDomains);
-                apiKey.setValidityPeriod(resultSet.getLong("VALIDITY_PERIOD"));
+                apiKey.setValidityPeriod(resultSet.getLong("VALIDITY_PERIOD") / 1000);
                 apiKey.setState(resultSet.getString("STATE"));
                 return apiKey;
             }
@@ -2973,7 +2971,7 @@ public class ApiMgtDAO {
                 authorizedDomains = getAuthorizedDomains(accessToken);
                 apiKey.setType(resultSet.getString("TOKEN_TYPE"));
                 apiKey.setAuthorizedDomains(authorizedDomains);
-                apiKey.setValidityPeriod(resultSet.getLong("VALIDITY_PERIOD"));
+                apiKey.setValidityPeriod(resultSet.getLong("VALIDITY_PERIOD") / 1000);
                 return apiKey;
             }
             return null;
@@ -4243,6 +4241,7 @@ public class ApiMgtDAO {
                               "   AND API.API_PROVIDER = ? " +
                               "   AND API.API_ID = SUBS.API_ID " +
                               "   AND SUBS.SUBS_CREATE_STATE = '" + APIConstants.SubscriptionCreatedStatus.SUBSCRIBE + "'" +
+                              "   AND SUBS.SUB_STATUS != '" + APIConstants.SubscriptionStatus.REJECTED + "'" +
                               "ORDER BY " +
                               "   APP.NAME";
 
@@ -6081,8 +6080,8 @@ public class ApiMgtDAO {
         PreparedStatement prepStmt = null;
         ResultSet rs = null;
 
-        String query = "INSERT INTO AM_API (API_PROVIDER, API_NAME, API_VERSION, CONTEXT) " +
-                       "VALUES (?,?,?,?)";
+        String query = "INSERT INTO AM_API (API_PROVIDER, API_NAME, API_VERSION, CONTEXT, CONTEXT_TEMPLATE) " +
+                       "VALUES (?,?,?,?,?)";
 
         try {
             connection = APIMgtDBUtil.getConnection();
@@ -6093,8 +6092,14 @@ public class ApiMgtDAO {
             prepStmt.setString(2, api.getId().getApiName());
             prepStmt.setString(3, api.getId().getVersion());
             prepStmt.setString(4, api.getContext());
+            String contextTemplate = api.getContextTemplate();
+            //If the context template ends with {version} this means that the version will be at the end of the context.
+            if(contextTemplate.endsWith("/" + APIConstants.VERSION_PLACEHOLDER)){
+                //Remove the {version} part from the context template.
+                contextTemplate = contextTemplate.split(Pattern.quote("/" + APIConstants.VERSION_PLACEHOLDER))[0];
+            }
+            prepStmt.setString(5, contextTemplate);
             prepStmt.execute();
-
 
             rs = prepStmt.getGeneratedKeys();
             int applicationId = -1;
@@ -6693,8 +6698,8 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
 
         String previousDefaultVersion = getDefaultVersion(api.getId());
 
-        String query = "UPDATE AM_API SET CONTEXT = ? WHERE API_PROVIDER = ? AND API_NAME = ? AND" +
-                       " API_VERSION = ? ";
+        String query = "UPDATE AM_API SET CONTEXT = ?, CONTEXT_TEMPLATE = ? WHERE API_PROVIDER = ? AND API_NAME = ? AND"
+                        + " API_VERSION = ? ";
         try {
             connection = APIMgtDBUtil.getConnection();
             connection.setAutoCommit(false);
@@ -6702,9 +6707,16 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
             if(api.isApiHeaderChanged()){
                 prepStmt = connection.prepareStatement(query);
                 prepStmt.setString(1, api.getContext());
-                prepStmt.setString(2, APIUtil.replaceEmailDomainBack(api.getId().getProviderName()));
-                prepStmt.setString(3, api.getId().getApiName());
-                prepStmt.setString(4, api.getId().getVersion());
+                String contextTemplate = api.getContextTemplate();
+                //If the context template ends with {version} this means that the version will be at the end of the context.
+                if(contextTemplate.endsWith("/" + APIConstants.VERSION_PLACEHOLDER)){
+                    //Remove the {version} part from the context template.
+                    contextTemplate = contextTemplate.split(Pattern.quote("/" + APIConstants.VERSION_PLACEHOLDER))[0];
+                }
+                prepStmt.setString(2, contextTemplate);
+                prepStmt.setString(3, APIUtil.replaceEmailDomainBack(api.getId().getProviderName()));
+                prepStmt.setString(4, api.getId().getApiName());
+                prepStmt.setString(5, api.getId().getVersion());
                 prepStmt.execute();
             }
 
@@ -7594,7 +7606,7 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
 //        try {
 //            conn = APIMgtDBUtil.getConnection();
 //            ps = conn.prepareStatement(registrationEntry);
-//            ps.setInt(1, application.getApplicationId());
+//            ps.setInt(1, application.getId());
 //            rs = ps.executeQuery();
 //
 //            while (rs.next()) {
@@ -8270,7 +8282,7 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
                     }
                     ps.close();
                     ps2.setInt(1,api_id);
-                    ps2.setInt(2,scope.getApplicationId());
+                    ps2.setInt(2,scope.getId());
                     ps2.execute();
                     ps2.close();
 
@@ -8730,6 +8742,156 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
             handleException("Failed to check api Name availability : " + apiName, e);
         } finally {
             APIMgtDBUtil.closeAllConnections(prepStmt, connection, resultSet);
+        }
+        return false;
+    }
+
+    public Set<String> getActiveTokensOfApplication(int applicationId) throws APIManagementException {
+        Connection conn = null;
+        ResultSet resultSet = null;
+        PreparedStatement ps = null;
+        try {
+            conn = APIMgtDBUtil.getConnection();
+
+            String sqlQuery = "SELECT TKN.ACCESS_TOKEN" +
+                    " FROM IDN_OAUTH2_ACCESS_TOKEN TKN," +
+                    "      AM_APPLICATION_KEY_MAPPING AKM" +
+                    " WHERE AKM.APPLICATION_ID = ?" +
+                    " AND AKM.CONSUMER_KEY = TKN.CONSUMER_KEY" +
+                    " AND TKN.TOKEN_STATE = 'ACTIVE'";
+
+            ps = conn.prepareStatement(sqlQuery);
+            ps.setInt(1, applicationId);
+            resultSet = ps.executeQuery();
+            Set<String> tokens = new HashSet<String>();
+            while (resultSet.next()) {
+                tokens.add(APIUtil.decryptToken(resultSet.getString("ACCESS_TOKEN")));
+            }
+            return tokens;
+        } catch (SQLException e) {
+            handleException("Failed to get active access tokens of application " + applicationId, e);
+        } catch (CryptoException e) {
+            handleException("Token decryption failed of an active access token of application " + applicationId, e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(ps, conn, resultSet);
+        }
+        return null;
+    }
+    
+    /**
+     * Check the given scope key is already available under given tenant
+     *
+     * @param scopeKey candidate scope key
+     * @param tenantId tenant id
+     * @return true if the scope key is already available
+     * @throws APIManagementException
+     */
+    public boolean isScopeKeyExist(String scopeKey, int tenantId) throws APIManagementException {
+        Connection connection = null;
+        PreparedStatement prepStmt = null;
+        ResultSet resultSet = null;
+
+        String query = "SELECT COUNT(SCOPE_ID) AS SCOPE_COUNT FROM IDN_OAUTH2_SCOPE WHERE SCOPE_KEY = ? AND TENANT_ID = ?";
+        
+        try {
+            connection = APIMgtDBUtil.getConnection();
+
+            prepStmt = connection.prepareStatement(query);
+            prepStmt.setString(1, scopeKey);
+            prepStmt.setInt(2, tenantId);
+            resultSet = prepStmt.executeQuery();
+
+            int scopeCount = 0;
+            if (resultSet != null) {
+                while (resultSet.next()) {
+                    scopeCount = resultSet.getInt("SCOPE_COUNT");
+                }
+            }
+            if (scopeCount > 0) {
+                return true;
+            }
+        } catch (SQLException e) {
+            handleException("Failed to check Scope Key availability : " + scopeKey, e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(prepStmt, connection, resultSet);
+        }
+        return false;
+    }
+    
+    /**
+     * Check whether the given scope key is already assigned to another API than given under given tenant
+     *
+     * @param identifier API Identifier 
+     * @param scopeKey candidate scope key
+     * @param tenantId tenant id
+     * @return true if the scope key is already available
+     * @throws APIManagementException if failed to check the context availability
+     */
+    public boolean isScopeKeyAssigned(APIIdentifier identifier, String scopeKey, int tenantId)
+                                                                                              throws APIManagementException {
+        Connection connection = null;
+        PreparedStatement prepStmt = null;
+        PreparedStatement prepStmt2 = null;
+        ResultSet resultSet = null;
+        String apiScopeQuery = "SELECT API.API_ID from AM_API API, IDN_OAUTH2_SCOPE IDN, AM_API_SCOPES AMS "
+                                       + "WHERE IDN.SCOPE_ID=AMS.SCOPE_ID AND " 
+                                       + "AMS.API_ID=API.API_ID AND "
+                                       + "IDN.SCOPE_KEY = ? AND " 
+                                       + "IDN.tenant_id = ?";
+        String getApiQuery =
+                             "SELECT API_ID FROM AM_API API WHERE API_PROVIDER = ? AND "
+                                     + "API_NAME = ? AND API_VERSION = ?";
+
+        try {
+            connection = APIMgtDBUtil.getConnection();
+
+            prepStmt = connection.prepareStatement(apiScopeQuery);
+            prepStmt.setString(1, scopeKey);
+            prepStmt.setInt(2, tenantId);
+            resultSet = prepStmt.executeQuery();
+
+            if (resultSet != null && resultSet.next()) {
+                int apiID = resultSet.getInt("API_ID");
+
+                prepStmt2 = connection.prepareStatement(getApiQuery);
+                prepStmt2.setString(1, APIUtil.replaceEmailDomainBack(identifier.getProviderName()));
+                prepStmt2.setString(2, identifier.getApiName());
+                prepStmt2.setString(3, identifier.getVersion());
+                resultSet = prepStmt2.executeQuery();
+
+                if (resultSet != null && resultSet.next()) {
+                    return (apiID != resultSet.getInt("API_ID"));
+                }
+
+            }
+
+        } catch (SQLException e) {
+            handleException("Failed to check Scope Key availability : " + scopeKey, e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(prepStmt, connection, resultSet);
+        }
+        return false;
+    }
+
+    public boolean isDuplicateContextTemplate(String contextTemplate) throws APIManagementException {
+        Connection conn = null;
+        ResultSet resultSet = null;
+        PreparedStatement ps = null;
+        try {
+            conn = APIMgtDBUtil.getConnection();
+
+            String sqlQuery = "SELECT COUNT(CONTEXT_TEMPLATE) AS CTX_COUNT FROM AM_API WHERE CONTEXT_TEMPLATE = ?";
+
+            ps = conn.prepareStatement(sqlQuery);
+            ps.setString(1, contextTemplate);
+            resultSet = ps.executeQuery();
+            resultSet.next();
+            int count = resultSet.getInt("CTX_COUNT");
+            return count > 0;
+        } catch (SQLException e) {
+            handleException("Failed to count contexts which match " + contextTemplate, e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(ps, conn, resultSet);
         }
         return false;
     }

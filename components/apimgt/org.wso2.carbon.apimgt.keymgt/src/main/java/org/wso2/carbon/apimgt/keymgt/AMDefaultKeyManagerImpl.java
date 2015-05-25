@@ -52,6 +52,7 @@ import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.keymgt.client.SubscriberKeyMgtClient;
 import org.wso2.carbon.apimgt.keymgt.util.APIKeyMgtDataHolder;
 import org.wso2.carbon.apimgt.keymgt.util.APIKeyMgtUtil;
+import org.wso2.carbon.identity.oauth.common.OAuthConstants;
 import org.wso2.carbon.identity.oauth2.OAuth2TokenValidationService;
 import org.wso2.carbon.identity.oauth2.dto.OAuth2ClientApplicationDTO;
 import org.wso2.carbon.identity.oauth2.dto.OAuth2TokenValidationRequestDTO;
@@ -62,6 +63,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -74,7 +76,7 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
 
     private static final String OAUTH_RESPONSE_ACCESSTOKEN = "access_token";
     private static final String OAUTH_RESPONSE_EXPIRY_TIME = "expires_in";
-    private static final String GRANT_TYPE_VALUE = "open_keymanager";
+    private static final String GRANT_TYPE_VALUE = "application_token";
     private static final String GRANT_TYPE_PARAM_VALIDITY = "validity_period";
 
     private KeyManagerConfiguration configuration;
@@ -284,6 +286,12 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
 
             String applicationScope = APIKeyMgtDataHolder.getApplicationTokenScope();
 
+            // When validity time set to a negative value, a token is considered never to expire.
+            if(tokenRequest.getValidityPeriod() == OAuthConstants.UNASSIGNED_VALIDITY_PERIOD){
+                // Setting a different -ve value if the set value is -1 (-1 will be ignored by TokenValidator)
+                tokenRequest.setValidityPeriod(-2);
+            }
+
             //Generate New Access Token
             HttpClient tokenEPClient = APIKeyMgtUtil.getHttpClient(keyMgtPort, keyMgtProtocol);
             HttpPost httpTokpost = new HttpPost(tokenEndpoint);
@@ -363,23 +371,29 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
         OAuth2TokenValidationResponseDTO responseDTO = clientApplicationDTO.getAccessTokenValidationResponse();
 
         if (!responseDTO.isValid()) {
-            // Convert the IS returned error code in to standard error code
-            if (responseDTO.getErrorMsg().equals("Invalid input. Access token validation failed")) {
-                tokenInfo.setTokenValid(responseDTO.isValid());
-                tokenInfo.addParameter("errorMsg", 900901);
-                return tokenInfo;
-            } else {
-                log.error("Invalid OAuth Token : " + responseDTO.getErrorMsg());
-                throw new APIManagementException("Invalid OAuth Token : " + responseDTO.getErrorMsg());
-            }
+            tokenInfo.setTokenValid(responseDTO.isValid());
+            log.error("Invalid OAuth Token : " + responseDTO.getErrorMsg());
+            tokenInfo.setErrorcode(APIConstants.KeyValidationStatus.API_AUTH_INVALID_CREDENTIALS);
+            return tokenInfo;
         }
 
         tokenInfo.setTokenValid(responseDTO.isValid());
         tokenInfo.setEndUserName(responseDTO.getAuthorizedUser());
         tokenInfo.setConsumerKey(clientApplicationDTO.getConsumerKey());
-        tokenInfo.setValidityPeriod(responseDTO.getExpiryTime());
+        // Convert Expiry Time to milliseconds.
+        tokenInfo.setValidityPeriod(responseDTO.getExpiryTime() * 1000);
         tokenInfo.setIssuedTime(System.currentTimeMillis());
         tokenInfo.setScope(responseDTO.getScope());
+
+        // If token has am_application_scope, consider the token as an Application token.
+        String[] scopes = responseDTO.getScope();
+        String applicationTokenScope = APIKeyMgtDataHolder.getApplicationTokenScope();
+
+        if (scopes != null && applicationTokenScope != null && !applicationTokenScope.isEmpty()) {
+            if (Arrays.asList(scopes).contains(applicationTokenScope)) {
+                tokenInfo.setApplicationToken(true);
+            }
+        }
 
         if (APIUtil.checkAccessTokenPartitioningEnabled() &&
             APIUtil.checkUserNameAssertionEnabled()) {
@@ -427,36 +441,13 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
     }
 
     @Override
-    public void loadConfiguration(String configuration) throws APIManagementException {
-        if (configuration != null && !configuration.isEmpty()) {
-            StAXOMBuilder builder = null;
-            try {
-                builder = new StAXOMBuilder(new ByteArrayInputStream(configuration.getBytes()));
-                OMElement document = builder.getDocumentElement();
-                if (this.configuration == null) {
-                    synchronized (this) {
-                        this.configuration = new KeyManagerConfiguration();
-                        this.configuration.setManualModeSupported(true);
-                        this.configuration.setResourceRegistrationEnabled(true);
-                        this.configuration.setTokenValidityConfigurable(true);
-                        Iterator<OMElement> elementIterator = document.getChildElements();
-                        while (elementIterator.hasNext()) {
-                            OMElement element = elementIterator.next();
-                            this.configuration.addParameter(element.getLocalName(),
-                                                            APIManagerConfiguration.replaceSystemProperty(element
-                                                                                                                  .getText()));
-                        }
-                    }
-                }
-
-            } catch (XMLStreamException e) {
-                e.printStackTrace();
-            }
-
+    public void loadConfiguration(KeyManagerConfiguration configuration) throws APIManagementException {
+        if (configuration != null) {
+            this.configuration = configuration;
         } else {
 
-            // If Configuration block is not found, read the Server-URL and other properties from APIKeyValidator
-            // section.
+            // If the provided configuration is null, read the Server-URL and other properties from
+            // APIKeyValidator section.
             APIManagerConfiguration config = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
                     .getAPIManagerConfiguration();
             if (this.configuration == null) {

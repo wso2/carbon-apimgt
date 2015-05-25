@@ -459,6 +459,35 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
 
     /**
+     * This method is used to save the wsdl file in the registry
+     * This is used when user starts api creation with a soap endpoint
+     *
+     * @param api api object
+     * @throws APIManagementException
+     * @throws RegistryException
+     */
+    private void updateWsdl(API api) throws APIManagementException, RegistryException {
+
+        registry.beginTransaction();
+        String apiArtifactId = registry.get(APIUtil.getAPIPath(api.getId())).getUUID();
+        GenericArtifactManager artifactManager = APIUtil.getArtifactManager(registry,
+                APIConstants.API_KEY);
+        GenericArtifact artifact = artifactManager.getGenericArtifact(apiArtifactId);
+        GenericArtifact apiArtifact = APIUtil.createAPIArtifactContent(artifact, api);
+        String artifactPath = GovernanceUtils.getArtifactPath(registry, apiArtifact.getId());
+        if (APIUtil.isValidWSDLURL(api.getWsdlUrl(), false)) {
+            String path = APIUtil.createWSDL(registry, api);
+            if (path != null) {
+                registry.addAssociation(artifactPath, path, CommonConstants.ASSOCIATION_TYPE01);
+                apiArtifact.setAttribute(APIConstants.API_OVERVIEW_WSDL, api.getWsdlUrl()); //reset the wsdl path
+                artifactManager.updateGenericArtifact(apiArtifact); //update the  artifact
+            }
+        }
+        registry.commitTransaction();
+    }
+
+
+    /**
      * Updates an existing API
      *
      * @param api API
@@ -492,6 +521,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                         }
                     }
                 }
+
+                //Update WSDL in the registry
+                updateWsdl(api);
 
                 boolean updatePermissions = false;
                 if(!oldApi.getVisibility().equals(api.getVisibility()) || (oldApi.getVisibility().equals(APIConstants.API_RESTRICTED_VISIBILITY) && !api.getVisibleRoles().equals(oldApi.getVisibleRoles()))){
@@ -613,8 +645,10 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 }
 
             } catch (APIManagementException e) {
-            	handleException("Error while updating the API :" +api.getId().getApiName() + ". " + e.getMessage(), e);
-            } 
+                handleException("Error while updating the API :" + api.getId().getApiName() + ". " + e.getMessage(), e);
+            } catch (RegistryException e) {
+                handleException("Error while saving wsdl in the registry for the API :" + api.getId().getApiName() + ". " + e.getMessage(), e);
+            }
         } else {
             // We don't allow API status updates via this method.
             // Use changeAPIStatus for that kind of updates.
@@ -680,18 +714,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                             // reset the wsdl path to permlink
                             updateApiArtifact.setAttribute(APIConstants.API_OVERVIEW_WSDL, api.getWsdlUrl());
                         }
-                    }
-                } else if (registry != null && wsdlURL != null && !wsdlURL.isEmpty()) {
-                    String[] wsdlUrlRelativePath =
-                            wsdlURL.split(RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH);
-                    String wsdlRegistryPath = null;
-                    if (wsdlUrlRelativePath.length == 2) {
-                        wsdlRegistryPath = wsdlUrlRelativePath[1];
-                    }
-                    if (wsdlRegistryPath != null) {
-                        registry.delete(wsdlRegistryPath);
-                        registry.removeAssociation(artifactPath, wsdlURL, CommonConstants.ASSOCIATION_TYPE01);
-                        updateApiArtifact.setAttribute(APIConstants.API_OVERVIEW_WSDL, "");
                     }
                 }
                 if (api.getUrl() != null && !"".equals(api.getUrl())){
@@ -989,17 +1011,17 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
     private APITemplateBuilder getAPITemplateBuilder(API api){
         APITemplateBuilderImpl vtb = new APITemplateBuilderImpl(api);
-
+        Map<String, String> corsProperties = new HashMap<String, String>();
+        corsProperties.put("inline", api.getImplementation());
+        if (api.getAllowedHeaders() != null && api.getAllowedHeaders() != "") {
+            corsProperties.put("allowHeaders", api.getAllowedHeaders());
+        }
+        if (api.getAllowedOrigins() != null && api.getAllowedOrigins() != "") {
+            corsProperties.put("allowedOrigins", api.getAllowedOrigins());
+        }
+        vtb.addHandler("org.wso2.carbon.apimgt.gateway.handlers.security.CORSRequestHandler", corsProperties);
         if(!api.getStatus().equals(APIStatus.PROTOTYPED)) {
-            Map<String, String> corsProperties = new HashMap<String, String>();
-            corsProperties.put("inline", api.getImplementation());
-            if (api.getAllowedHeaders() != null && api.getAllowedHeaders() != "") {
-                corsProperties.put("allowHeaders", api.getAllowedHeaders());
-            }
-            if (api.getAllowedOrigins() != null && api.getAllowedOrigins() != "") {
-                corsProperties.put("allowedOrigins", api.getAllowedOrigins());
-            }
-            vtb.addHandler("org.wso2.carbon.apimgt.gateway.handlers.security.CORSRequestHandler", corsProperties);
+
             vtb.addHandler("org.wso2.carbon.apimgt.gateway.handlers.security.APIAuthenticationHandler", Collections.EMPTY_MAP);
 
             Map<String, String> properties = new HashMap<String, String>();
@@ -1022,6 +1044,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 vtb.addHandler("org.wso2.carbon.apimgt.gateway.handlers.ext.APIManagerExtensionHandler", Collections.EMPTY_MAP);
             }
         }
+
         return vtb;
     }
 
@@ -1074,6 +1097,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 throw new DuplicateAPIException("API version already exist with version :"
                                                 + newVersion);
             }
+            registry.beginTransaction();
             Resource apiSourceArtifact = registry.get(apiSourcePath);
             GenericArtifactManager artifactManager = APIUtil.getArtifactManager(registry,
                                                                                 APIConstants.API_KEY);
@@ -1152,7 +1176,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     registry.applyTag(targetPath, tag.getTagName());
                 }
             }
-
+            
+            
             // Retain the docs
             List<Documentation> docs = getAllDocumentation(api.getId());
             APIIdentifier newId = new APIIdentifier(api.getId().getProviderName(),
@@ -1210,8 +1235,12 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                                                                          api.getId().getVersion(),
                                                                          api.getId().getProviderName());
             if (registry.resourceExists(resourcePath + APIConstants.API_DOC_2_0_RESOURCE_NAME)) {
-                definitionFromSwagger20.saveAPIDefinition(newAPI, 
-                                          definitionFromSwagger20.getAPIDefinition(api.getId(), registry), registry);
+                JSONObject swaggerObject = (JSONObject) new JSONParser()
+                        .parse(definitionFromSwagger20.getAPIDefinition(api.getId(), registry));
+                JSONObject infoObject = (JSONObject) swaggerObject.get("info");
+                infoObject.remove("version");
+                infoObject.put("version", newAPI.getId().getVersion());
+                definitionFromSwagger20.saveAPIDefinition(newAPI, swaggerObject.toJSONString(), registry);
             }
             
             // Make sure to unset the isLatest flag on the old version
@@ -1230,10 +1259,20 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             }
 
             apiMgtDAO.addAPI(newAPI,tenantId);
+            registry.commitTransaction();
 
-        } catch (RegistryException e) {
-            String msg = "Failed to create new version : " + newVersion + " of : "
-                         + api.getId().getApiName();
+        } catch (ParseException e) {
+            String msg =
+                         "Couldn't Create json Object from Swagger object for version" + newVersion + " of : " +
+                                 api.getId().getApiName();
+            handleException(msg, e);
+        } catch (Exception e) {
+            try {
+                registry.rollbackTransaction();
+            } catch (RegistryException re) {
+                handleException("Error while rolling back the transaction for API: " + api.getId(), re);
+            }
+            String msg = "Failed to create new version : " + newVersion + " of : " + api.getId().getApiName();
             handleException(msg, e);
         }
     }
@@ -2302,10 +2341,14 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     @Override
     public void saveSwagger20Definition(APIIdentifier apiId, String jsonText) throws APIManagementException {
         try {
+            PrivilegedCarbonContext.startTenantFlow();
+            PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
             definitionFromSwagger20.saveAPIDefinition(getAPI(apiId), jsonText, registry);
 
         } catch (APIManagementException e) {
             handleException("Error while adding Swagger v2.0 Definition for " + apiId.getApiName() + "-" + apiId.getVersion(), e);
+        } finally {
+            PrivilegedCarbonContext.endTenantFlow();
         }
     }
 

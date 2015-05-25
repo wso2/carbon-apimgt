@@ -16,31 +16,58 @@
 
 package org.wso2.carbon.apimgt.keymgt.handlers;
 
+import org.wso2.carbon.apimgt.impl.handlers.ScopesIssuer;
+import org.wso2.carbon.apimgt.keymgt.util.APIKeyMgtDataHolder;
 import org.wso2.carbon.identity.oauth2.IdentityOAuth2Exception;
 import org.wso2.carbon.identity.oauth2.token.OAuthTokenReqMessageContext;
 import org.wso2.carbon.identity.oauth2.token.handlers.grant.ClientCredentialsGrantHandler;
 
-public class ExtendedClientCredentialsGrantHandler  extends ClientCredentialsGrantHandler{
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
+public class ExtendedClientCredentialsGrantHandler extends ClientCredentialsGrantHandler {
 
     @Override
     public boolean validateGrant(OAuthTokenReqMessageContext tokReqMsgCtx)
-            throws IdentityOAuth2Exception{
+            throws IdentityOAuth2Exception {
         return super.validateGrant(tokReqMsgCtx);
     }
 
     @Override
-    public boolean issueRefreshToken() throws IdentityOAuth2Exception{
+    public boolean issueRefreshToken() throws IdentityOAuth2Exception {
         return super.issueRefreshToken();
     }
 
     @Override
-    public boolean isOfTypeApplicationUser() throws IdentityOAuth2Exception{
+    public boolean isOfTypeApplicationUser() throws IdentityOAuth2Exception {
         return super.isOfTypeApplicationUser();
     }
 
     @Override
-    public boolean validateScope(OAuthTokenReqMessageContext tokReqMsgCtx){
-        ScopesIssuer scopesIssuer = new ScopesIssuer();
-        return scopesIssuer.setScopes(tokReqMsgCtx);
+    public boolean validateScope(OAuthTokenReqMessageContext tokReqMsgCtx) {
+        boolean state = ScopesIssuer.getInstance().setScopes(tokReqMsgCtx);
+
+        // If ScopeIssuer returns true, then see if application scope is set.
+        if (state) {
+            String[] scopes = tokReqMsgCtx.getScope();
+
+            String applicationScope = APIKeyMgtDataHolder.getApplicationTokenScope();
+            if (scopes != null) {
+
+                // Arrays.asList won't work here, because list.add cannot be called on the returned list.
+                ArrayList<String> scopeList = new ArrayList<String>(scopes.length);
+                for (String scope : scopes) {
+                    scopeList.add(scope);
+                }
+                // Forcefully add application scope if it's not included in the list.
+                if (!scopeList.contains(applicationScope)) {
+                    scopeList.add(applicationScope);
+                    tokReqMsgCtx.setScope(scopeList.toArray(new String[scopeList.size()]));
+                }
+            }
+        }
+
+        return state;
     }
 }

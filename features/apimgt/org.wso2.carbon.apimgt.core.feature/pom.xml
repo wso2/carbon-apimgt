@@ -278,7 +278,7 @@
                                 <importBundleDef>org.wso2.carbon:org.wso2.carbon.identity.authentication:${carbon.platform.version}</importBundleDef>
                                 <importBundleDef>org.wso2.carbon:org.wso2.carbon.identity.thrift.authentication:4.2.1</importBundleDef>
                                 <importBundleDef>libthrift.wso2:libthrift:0.8.0.wso2v1</importBundleDef>
-                                <importBundleDef>com.github.dblock.waffle.wso2:waffle-jna:1.6.wso2v1</importBundleDef>
+                                <importBundleDef>com.github.dblock.waffle.wso2:waffle-jna:1.6.wso2v2</importBundleDef>
                                 <importBundleDef>org.wso2.carbon:org.wso2.carbon.ganalytics.publisher:4.2.1</importBundleDef>
                                 <importBundleDef>org.wso2.carbon:org.wso2.carbon.bam.service.data.publisher:4.2.1</importBundleDef>
                             </importBundles>

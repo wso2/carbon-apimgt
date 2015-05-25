@@ -35,11 +35,22 @@ public abstract class AbstractKeyValidationHandler implements KeyValidationHandl
 
         APIKeyValidationInfoDTO dto = validationContext.getValidationInfoDTO();
 
+
         if (validationContext.getTokenInfo() != null) {
             if (validationContext.getTokenInfo().isApplicationToken()) {
                 dto.setUserType(APIConstants.ACCESS_TOKEN_USER_TYPE_APPLICATION);
             } else {
                 dto.setUserType("APPLICATION_USER");
+            }
+
+            AccessTokenInfo tokenInfo = validationContext.getTokenInfo();
+
+            // This block checks if a Token of Application Type is trying to access a resource protected with
+            // Application Token
+            if (!hasTokenRequiredAuthLevel(validationContext.getRequiredAuthenticationLevel(), tokenInfo)) {
+                dto.setAuthorized(false);
+                dto.setValidationStatus(APIConstants.KeyValidationStatus.API_AUTH_INCORRECT_ACCESS_TOKEN_TYPE);
+                return false;
             }
         }
 
@@ -75,46 +86,41 @@ public abstract class AbstractKeyValidationHandler implements KeyValidationHandl
         return state;
     }
 
-    protected void checkClientDomainAuthorized (APIKeyValidationInfoDTO apiKeyValidationInfoDTO, String clientDomain)
+    protected void checkClientDomainAuthorized(APIKeyValidationInfoDTO apiKeyValidationInfoDTO, String clientDomain)
             throws APIKeyMgtException {
         try {
-            APIUtil.checkClientDomainAuthorized(apiKeyValidationInfoDTO,clientDomain);
+            APIUtil.checkClientDomainAuthorized(apiKeyValidationInfoDTO, clientDomain);
         } catch (APIManagementException e) {
-            log.error("Error while validating client domain",e);
+            log.error("Error while validating client domain", e);
         }
 
     }
 
     /**
      * Determines whether the provided token is an ApplicationToken.
+     *
      * @param tokenInfo
      */
     protected void setTokenType(AccessTokenInfo tokenInfo) {
-        String[] scopes = tokenInfo.getScopes();
-        String applicationTokenScope = APIKeyMgtDataHolder.getApplicationTokenScope();
 
-        if (scopes != null && applicationTokenScope != null && !applicationTokenScope.isEmpty()) {
-            if (Arrays.asList(scopes).contains(applicationTokenScope)) {
-                tokenInfo.setApplicationToken(true);
-            }
-        }
 
     }
 
     /**
      * Resources protected with Application token type can only be accessed using Application Access Tokens. This method
      * verifies if a particular resource can be accessed using the obtained token.
+     *
      * @param authScheme Type of token required by the resource (Application | User Token)
-     * @param tokenInfo Details about the Token
+     * @param tokenInfo  Details about the Token
      * @return {@code true} if token is of the type required, {@code false} otherwise.
      */
     protected boolean hasTokenRequiredAuthLevel(String authScheme,
-                                                        AccessTokenInfo tokenInfo) {
+                                                AccessTokenInfo tokenInfo) {
 
         if (authScheme == null || authScheme.isEmpty() || tokenInfo == null) {
             return false;
         }
-        setTokenType(tokenInfo);
+        // setTokenType(tokenInfo);
 
         if (APIConstants.AUTH_APPLICATION_LEVEL_TOKEN.equals(authScheme)) {
             return tokenInfo.isApplicationToken();

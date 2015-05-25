@@ -122,6 +122,21 @@ public interface ForumManager {
      */
     public ForumSearchDTO<ForumTopicDTO> searchTopicsBySubject(int start, int count, String searchString, String user,
                                                      String tenantDomain) throws ForumException;
+    
+    /**
+     * search the topics by search text for a given resourceid
+     * @param start
+     * @param count
+     * @param searchString
+     * @param resourceIdentifier
+     * @param user
+     * @param tenantDomain
+     * @return
+     * @throws ForumException
+     */
+    public ForumSearchDTO<ForumTopicDTO> searchTopicsBySubjectForResourceId(int start, int count, String searchString, 
+                                                                          final String resourceIdentifier, String user, 
+                                                                          String tenantDomain) throws ForumException;
 
     /**
      *

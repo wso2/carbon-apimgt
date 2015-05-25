@@ -487,11 +487,13 @@ public interface APIConsumer extends APIManager {
      * @param tenantDomain tenant domain
      * @param start starting number
      * @param end ending number
+     * @param returnAPITags If true, tags of each API is returned
      * @return set of API
      * @throws APIManagementException if failed to API set
      */
 
-    public Map<String,Object> getAllPaginatedAPIsByStatus(String tenantDomain,int start,int end, String Status) throws APIManagementException;
+    public Map<String,Object> getAllPaginatedAPIsByStatus(String tenantDomain,int start,int end, String Status, 
+                                                          boolean returnAPITags) throws APIManagementException;
 
     /**
      * Revokes the oldAccessToken generating a new one.

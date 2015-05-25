@@ -27,7 +27,7 @@ import java.io.Serializable;
  * This class represents this unique identifier.
  */
 @SuppressWarnings("unused")
-public class APIIdentifier implements Serializable, Comparable {
+public class APIIdentifier implements Serializable{
 
     private final String providerName;
     private final String apiName;
@@ -83,17 +83,13 @@ public class APIIdentifier implements Serializable, Comparable {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
 
         APIIdentifier that = (APIIdentifier) o;
 
         return apiName.equals(that.apiName) && providerName.equals(that.providerName) &&
-               version.equals(that.version);
+                version.equals(that.version);
     }
 
     @Override
@@ -103,17 +99,9 @@ public class APIIdentifier implements Serializable, Comparable {
         result = 31 * result + version.hashCode();
         return result;
     }
-
+    
     @Override
     public String toString() {
-        return this.getProviderName() + "-" + this.getApiName() + "-" + this.getVersion();
-    }
-
-    @Override
-    public int compareTo(Object o) {
-        if (o != null && o instanceof APIIdentifier) {
-            return o.toString().compareTo(this.toString());
-        }
-        return 0;
+    	return this.getProviderName() + "-" + this.getApiName() + "-" + this.getVersion();
     }
 }

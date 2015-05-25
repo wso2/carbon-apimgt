@@ -446,14 +446,33 @@ var jagg = jagg || (function () {
     }    
 
     var url = function(path,parameters){
-        var params = ""
+        var tail = "";
         if(parameters){
-            params = "?";
-            for (var key in parameters) {
-                params = key+"="+parameters[key];
+            var params = [];
+            for (var key in parameters) {                
+                params.push(key+"="+parameters[key]) ;
             }
+            if(/\?/.test(path)){
+                tail = "&";
+            }
+            else{
+                tail = "?";
+            }
+            tail = tail + params.join("&");
         }
-        return getSiteContext()+ path + params;
+        return getSiteContext()+ path + tail;
+    };
+
+    // following function will generate a url with the currently activated tenant
+    var urlTenanted = function(path, parameters){
+        //if tenented add tenant url
+        if(getTenantDomain() != null && !(/(\?tenant\=|\&tenant\=)/i.test(path))){
+            if(!parameters){
+                parameters = {};
+            }
+            parameters.tenant = getTenantDomain();
+        }
+        return url(path,parameters)
     };
 
     var getCarbonProxyContextPath = function(){
@@ -835,6 +854,7 @@ var jagg = jagg || (function () {
         addFooterCode:addFooterCode,
         includeJag:includeJag,
         url:url,
+        urlTenanted:urlTenanted,
         getRegistryPath:getRegistryPath,
         getSiteContext:getSiteContext,
         getHttpsUrl:getHttpsUrl,

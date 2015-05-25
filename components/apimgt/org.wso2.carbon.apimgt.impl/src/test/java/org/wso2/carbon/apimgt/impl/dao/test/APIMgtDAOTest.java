@@ -224,7 +224,7 @@ public class APIMgtDAOTest extends TestCase {
 		assertNotNull(applications);
 		assertTrue(applications.length > 0);
 		for (int a = 0; a < applications.length; a++) {
-			assertTrue(applications[a].getApplicationId() > 0);
+			assertTrue(applications[a].getId() > 0);
 			assertNotNull(applications[a].getName());
 		}
 	}
@@ -312,6 +312,7 @@ public class APIMgtDAOTest extends TestCase {
 		APIIdentifier apiId = new APIIdentifier("hiranya", "WSO2Earth", "1.0.0");
 		API api = new API(apiId);
 		api.setContext("/wso2earth");
+        api.setContextTemplate("/wso2earth/{version}");
 
 		apiMgtDAO.addAPI(api,-1234);
 
@@ -399,6 +400,7 @@ public class APIMgtDAOTest extends TestCase {
 
 		API api = new API(new APIIdentifier("SUMEDHA", "API1", "V2.0.0"));
 		api.setContext("/context1");
+        api.setContextTemplate("/context1/{version}");
 
 		apiMgtDAO.addAPI(api,-1234);
 		apiMgtDAO.makeKeysForwardCompatible("SUMEDHA", "API1", "V1.0.0", "V2.0.0", "/context1");
@@ -435,7 +437,7 @@ public class APIMgtDAOTest extends TestCase {
 		Set<SubscribedAPI> subscriptions = apiMgtDAO.getSubscribedAPIs(subscriber);
 		assertEquals(1, subscriptions.size());
 		SubscribedAPI sub = subscriptions.toArray(new SubscribedAPI[subscriptions.size()])[0];
-		apiMgtDAO.removeSubscription(sub.getApiId(), sub.getApplication().getApplicationId());
+		apiMgtDAO.removeSubscription(sub.getApiId(), sub.getApplication().getId());
 
 		subscriptions = apiMgtDAO.getSubscribedAPIs(subscriber);
 		assertTrue(subscriptions.isEmpty());

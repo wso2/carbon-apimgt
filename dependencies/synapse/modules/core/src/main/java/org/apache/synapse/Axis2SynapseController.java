@@ -424,21 +424,25 @@ public class Axis2SynapseController implements SynapseController {
 		if (configurationContext == null || synapseConfiguration == null) {
 			return;
 		}
-		DeploymentEngine deploymentEngine = (DeploymentEngine) configurationContext
-				.getAxisConfiguration().getConfigurator();
-		String carbonRepoPath = configurationContext.getAxisConfiguration().getRepository()
-				.getPath();
-		SynapseArtifactDeploymentStore deploymentStore = synapseConfiguration
-				.getArtifactDeploymentStore();
 
-		String synapseImportDir = synapseConfiguration.getPathToConfigFile() + File.separator
-				+ MultiXMLConfigurationBuilder.SYNAPSE_IMPORTS_DIR;
+		AxisConfiguration axisConfig = configurationContext.getAxisConfiguration();
 
-        /*Registering Import Deployer is not required here.*/
-		//deploymentEngine.addDeployer(new ImportDeployer(), synapseImportDir, "xml");
+		synchronized (axisConfig) {
+		    DeploymentEngine deploymentEngine = (DeploymentEngine) axisConfig.getConfigurator();
+		    String carbonRepoPath = axisConfig.getRepository()
+			    .getPath();
+		    SynapseArtifactDeploymentStore deploymentStore = synapseConfiguration
+			    .getArtifactDeploymentStore();
 
-		String libsPath = carbonRepoPath + File.separator + "synapse-libs";
-		deploymentEngine.addDeployer(new LibraryArtifactDeployer(), libsPath, "zip");
+		    String synapseImportDir = synapseConfiguration.getPathToConfigFile() + File.separator
+			    + MultiXMLConfigurationBuilder.SYNAPSE_IMPORTS_DIR;
+
+		/*Registering Import Deployer is not required here.*/
+		    //deploymentEngine.addDeployer(new ImportDeployer(), synapseImportDir, "xml");
+
+		    String libsPath = carbonRepoPath + File.separator + "synapse-libs";
+		    deploymentEngine.addDeployer(new LibraryArtifactDeployer(), libsPath, "zip");
+		}
 	}
 
 

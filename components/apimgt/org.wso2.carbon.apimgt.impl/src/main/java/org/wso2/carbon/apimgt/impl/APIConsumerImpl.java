@@ -70,6 +70,7 @@ import org.wso2.carbon.governance.api.common.dataobjects.GovernanceArtifact;
 import org.wso2.carbon.governance.api.exception.GovernanceException;
 import org.wso2.carbon.governance.api.generic.GenericArtifactManager;
 import org.wso2.carbon.governance.api.generic.dataobjects.GenericArtifact;
+import org.wso2.carbon.governance.api.util.GovernanceUtils;
 import org.wso2.carbon.registry.core.ActionConstants;
 import org.wso2.carbon.registry.core.Association;
 import org.wso2.carbon.registry.core.Collection;
@@ -466,7 +467,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
      */
     @Override
 	public Map<String, Object> getAllPaginatedAPIsByStatus(String tenantDomain,
-			int start, int end, final String apiStatus) throws APIManagementException {
+			int start, int end, final String apiStatus, boolean returnAPItags) throws APIManagementException {
     	Boolean displayAPIsWithMultipleStatus = APIUtil.isAllowDisplayAPIsWithMultipleStatus();
     	Map<String, List<String>> listMap = new HashMap<String, List<String>>();
         //Check the api-manager.xml config file entry <DisplayAllAPIs> value is false
@@ -528,7 +529,17 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                     String status = artifact.getAttribute(APIConstants.API_OVERVIEW_STATUS);
 
                     API api  = APIUtil.getAPI(artifact);
-
+                    
+                    if (returnAPItags) {
+                        String artifactPath = GovernanceUtils.getArtifactPath(registry, artifact.getId());
+                        Set<String> tags = new HashSet<String>();
+                        org.wso2.carbon.registry.core.Tag[] tag = registry.getTags(artifactPath);
+                        for (org.wso2.carbon.registry.core.Tag tag1 : tag) {
+                            tags.add(tag1.getTagName());
+                        }
+                        api.addTags(tags);
+                    }
+                    
                     if (api != null) {
                         String key;
                         //Check the configuration to allow showing multiple versions of an API true/false
@@ -1690,7 +1701,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             }
 
             if (APIUtil.isAPIGatewayKeyCacheEnabled()) {
-                invalidateCachedKeys(applicationId, identifier);
+                invalidateCachedKeys(applicationId);
             }
             if (log.isDebugEnabled()) {
                 String logMessage = "API Name: " + identifier.getApiName() + ", API Version "+identifier.getVersion()+" subscribe by " + userId + " for app "+ apiMgtDAO.getApplicationNameFromId(applicationId);
@@ -1708,7 +1719,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             throws APIManagementException {
         apiMgtDAO.removeSubscription(identifier, applicationId);
         if (APIUtil.isAPIGatewayKeyCacheEnabled()) {
-            invalidateCachedKeys(applicationId, identifier);
+            invalidateCachedKeys(applicationId);
         }
         if(log.isDebugEnabled()){
             String appName = apiMgtDAO.getApplicationNameFromId(applicationId);
@@ -1719,13 +1730,30 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     /**
      *
      * @param applicationId Application ID related cache keys to be cleared
-     * @param identifier API identifier of changed/unsubscribed API
      * @throws APIManagementException
      */
-    private void invalidateCachedKeys(int applicationId, APIIdentifier identifier) throws APIManagementException {
-        identifier.setApplicationId(Integer.toString(applicationId));
-        CacheInvalidationHolder.getInstance().addApiKeyMapping(identifier);
-        log.debug("Added API Identifier " + identifier.toString() + " Subscribed under Application ID : " + applicationId);
+    private void invalidateCachedKeys(int applicationId) throws APIManagementException {
+        APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
+                getAPIManagerConfigurationService().getAPIManagerConfiguration();
+        if (config.getApiGatewayEnvironments().size() <= 0) {
+            return;
+        }
+
+        Set<String> activeTokens = apiMgtDAO.getActiveTokensOfApplication(applicationId);
+        if(activeTokens == null || activeTokens.isEmpty()){
+            return;
+        }
+
+        Map<String, Environment> gatewayEnvs = config.getApiGatewayEnvironments();
+        try {
+            for (Environment environment : gatewayEnvs.values()) {
+                APIAuthenticationAdminClient client = new APIAuthenticationAdminClient(environment);
+                client.invalidateCachedTokens(activeTokens);
+            }
+        } catch (AxisFault axisFault) {
+            //log and ignore since we do not have to halt the user operation due to cache invalidation failures.
+            log.error("Error occurred while invalidating the Gateway Token Cache ", axisFault);
+        }
     }
 
     public void removeSubscriber(APIIdentifier identifier, String userId)
@@ -1817,36 +1845,19 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     }
 
 
+    /**
+     * Function to remove an Application from the API Store
+     * @param application - The Application Object that represents the Application
+     * @throws APIManagementException
+     */
     public void removeApplication(Application application) throws APIManagementException {
         APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
                 getAPIManagerConfigurationService().getAPIManagerConfiguration();
-        boolean gatewayExists = config.getApiGatewayEnvironments().size() > 0;
-        Set<SubscribedAPI> apiSet = null;
 
-        if (gatewayExists) {
-            apiSet = getSubscribedAPIs(application.getSubscriber());
-        }
+        //Remove from cache first since we won't be able to find active access tokens once the application is removed.
+        invalidateCachedKeys(application.getId());
+
         apiMgtDAO.deleteApplication(application);
-
-        if (gatewayExists && apiSet != null) {
-            Set<SubscribedAPI> removables = new HashSet<SubscribedAPI>();
-            for (SubscribedAPI api : apiSet) {
-                if (!api.getApplication().getName().equals(application.getName())) {
-                    removables.add(api);
-                }
-            }
-
-            for (SubscribedAPI api : removables) {
-                apiSet.remove(api);
-            }
-            for (SubscribedAPI api : apiSet) {
-                APIIdentifier apiId = api.getApiId();
-                apiId.setApplicationId(Integer.toString(application.getId()));
-                // Clear API Identifiers from Cache.
-                CacheInvalidationHolder.getInstance().addApiKeyMapping(apiId);
-            }
-
-        }
     }
 
     /**

@@ -1,0 +1,8 @@
+<%
+jagg.initializer("subscription/subscription-authapp/subscription-authapp-main", {
+
+    preInitialize:function () {
+
+    }
+});
+%>

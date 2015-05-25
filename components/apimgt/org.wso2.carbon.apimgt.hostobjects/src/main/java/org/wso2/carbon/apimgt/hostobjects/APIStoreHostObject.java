@@ -71,6 +71,7 @@ import org.wso2.carbon.user.mgt.stub.UserAdminStub;
 import org.wso2.carbon.user.mgt.stub.UserAdminUserAdminException;
 import org.wso2.carbon.user.mgt.stub.types.carbon.FlaggedName;
 import org.wso2.carbon.utils.CarbonUtils;
+import org.wso2.carbon.identity.user.registration.stub.UserRegistrationAdminServiceException;
 import org.wso2.carbon.identity.user.registration.stub.UserRegistrationAdminServiceStub;
 import org.wso2.carbon.identity.user.registration.stub.dto.UserDTO;
 import org.wso2.carbon.identity.user.registration.stub.dto.UserFieldDTO;
@@ -91,7 +92,6 @@ public class APIStoreHostObject extends ScriptableObject {
     private static final String httpPort = "mgt.transport.http.port";
     private static final String httpsPort = "mgt.transport.https.port";
     private static final String hostName = "carbon.local.ip";
-    private APIStoreCacheInvalidator cacheInvalidator;
 
     private APIConsumer apiConsumer;
 
@@ -99,12 +99,7 @@ public class APIStoreHostObject extends ScriptableObject {
 
     // The zero-argument constructor used for create instances for runtime
     public APIStoreHostObject() throws APIManagementException {
-
-//        APIManagerConfiguration config = org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder.getInstance().
-//                getAPIManagerConfigurationService().getAPIManagerConfiguration();
-//        if (config.getApiGatewayEnvironments().size() > 0) {
-            cacheInvalidator = new APIStoreCacheInvalidator();
-//        }
+        //apiConsumer = APIManagerFactory.getInstance().getAPIConsumer();
     }
 
     public APIStoreHostObject(String loggedUser) throws APIManagementException {
@@ -1769,6 +1764,7 @@ public class APIStoreHostObject extends ScriptableObject {
             										throws ScriptException, APIManagementException {
     	APIConsumer apiConsumer = getAPIConsumer(thisObj);
     	String tenantDomain;
+    	boolean retuenAPItags = false;
         if (args[0] != null) {
         	tenantDomain = (String) args[0];
         } else {
@@ -1777,8 +1773,12 @@ public class APIStoreHostObject extends ScriptableObject {
             
         int start = Integer.parseInt((String) args[1]);
         int end = Integer.parseInt((String) args[2]);
+        
+        if (args.length > 3 && args[3] != null) {
+            retuenAPItags = Boolean.parseBoolean((String) args[3]);
+        }
             
-        return getPaginatedAPIsByStatus(apiConsumer, tenantDomain, start, end, APIConstants.PROTOTYPED);
+        return getPaginatedAPIsByStatus(apiConsumer, tenantDomain, start, end, APIConstants.PROTOTYPED, retuenAPItags);
     	
     }
 
@@ -1788,22 +1788,27 @@ public class APIStoreHostObject extends ScriptableObject {
     	
     	APIConsumer apiConsumer = getAPIConsumer(thisObj);
     	String tenantDomain;
+    	boolean returnAPItags = false;
         if (args[0] != null) {
         	tenantDomain = (String) args[0];
         } else {
         	tenantDomain = MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
         }
-            
+
         int start = Integer.parseInt((String) args[1]);
         int end = Integer.parseInt((String) args[2]);
+        
+        if (args.length > 3 && args[3] != null) {
+            returnAPItags = Boolean.parseBoolean((String) args[3]);
+        }
             
-        return getPaginatedAPIsByStatus(apiConsumer, tenantDomain, start, end, APIConstants.PUBLISHED);
+        return getPaginatedAPIsByStatus(apiConsumer, tenantDomain, start, end, APIConstants.PUBLISHED, returnAPItags);
             
             
     }
     
     private static NativeObject getPaginatedAPIsByStatus(APIConsumer apiConsumer, String tenantDomain, int start, 
-    		int end, String status) {
+    		int end, String status, boolean returnAPItags) {
     	
     	Set<API> apiSet;
         Map<String, Object> resultMap;
@@ -1819,7 +1824,7 @@ public class APIStoreHostObject extends ScriptableObject {
                 PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME, true);
 
             }
-            resultMap = apiConsumer.getAllPaginatedAPIsByStatus(tenantDomain, start, end, status);
+            resultMap = apiConsumer.getAllPaginatedAPIsByStatus(tenantDomain, start, end, status, returnAPItags);
 
         } catch (APIManagementException e) {
             log.error("Error from Registry API while getting API Information", e);
@@ -1861,6 +1866,31 @@ public class APIStoreHostObject extends ScriptableObject {
                     }
                     row.put("apiOwner", row, apiOwner);
                     row.put("isAdvertiseOnly", row, api.isAdvertiseOnly());
+                    
+                    NativeArray tierArr = new NativeArray(0);
+                    Set<Tier> tierSet = api.getAvailableTiers();
+                    if (tierSet != null) {
+                        Iterator tierIt = tierSet.iterator();
+                        int j = 0;
+                        while (tierIt.hasNext()) {
+                            Object tierObject = tierIt.next();
+                            Tier tier = (Tier) tierObject;
+                            tierArr.put(j, tierArr, tier.getName());
+                            j++;
+                        }
+                    }
+                    row.put("tiers", row, tierArr);
+                    
+                    if (returnAPItags) {                    
+                        StringBuilder tagsSet = new StringBuilder("");
+                        for (int k = 0; k < api.getTags().toArray().length; k++) {
+                            tagsSet.append(api.getTags().toArray()[k].toString());
+                            if (k != api.getTags().toArray().length - 1) {
+                                tagsSet.append(",");
+                            }
+                        }
+                        row.put("tags", row, tagsSet.toString());
+                    }
                     myn.put(i, myn, row);
                     i++;
                 }
@@ -1926,33 +1956,19 @@ public class APIStoreHostObject extends ScriptableObject {
                     index++;
                 }
             } else {
-                APIManagerConfiguration config = HostObjectComponent.getAPIManagerConfiguration();
-                Map<String, Environment> environments = config.getApiGatewayEnvironments();
-                Set<String> environmentsPublishedByAPI = new HashSet<String>(api.getEnvironments());
-                environmentsPublishedByAPI.remove("none");
+                JSONObject environmentsObject = getEnvironmentsOfAPI(api);
+                JSONObject productionEnvironmentObjects = (JSONObject) environmentsObject.get("production");
+                JSONObject sandboxEnvironmentObjects = (JSONObject) environmentsObject.get("sandbox");
+                JSONObject hybridEnvironmentObjects = (JSONObject) environmentsObject.get("hybrid");
                 int envCount = 0;
-                for (String environmentName : environmentsPublishedByAPI) {
-                    NativeObject appObj = new NativeObject();
-                    appObj.put("environmentName", appObj, environmentName);
-                    Environment environment = environments.get(environmentName);
-                    String envURLString = filterUrls(environment.getApiGatewayEndpoint(), api.getTransports());
-                    String[] envURLs = envURLString.split(",");
-
-                    NativeArray envs = new NativeArray(0);
-                    int index = 0;
-
-                    for (String envURL : envURLs) {
-                        envs.put(index, envs, envURL + api.getContext());
-                        if (api.isDefaultVersion()) {
-                            String apiContext = api.getContext();
-                            apiContext = apiContext.replace(version + "/", "");
-                            envs.put(++index, envs, envURL + apiContext);
-                        }
-                        index++;
-                    }
-                    appObj.put("environmentURLs", appObj, envs);
-                    myn.put(envCount, myn, appObj);
-                    envCount++;
+                if (!productionEnvironmentObjects.isEmpty()) {
+                    createAPIEndpointsPerType(productionEnvironmentObjects, api, version, myn, envCount, "production");
+                }
+                if (!sandboxEnvironmentObjects.isEmpty()) {
+                    createAPIEndpointsPerType(sandboxEnvironmentObjects, api, version, myn, envCount, "sandbox");
+                }
+                if (!hybridEnvironmentObjects.isEmpty()) {
+                    createAPIEndpointsPerType(hybridEnvironmentObjects, api, version, myn, envCount, "hybrid");
                 }
             }
 
@@ -2018,25 +2034,7 @@ public class APIStoreHostObject extends ScriptableObject {
                         int userRate = apiConsumer.getUserRating(apiIdentifier, user);
                         row.put("userRate", row, userRate);
                     }
-                    APIManagerConfiguration config = HostObjectComponent.getAPIManagerConfiguration();
-                    Map<String, Environment> environments = config.getApiGatewayEnvironments();
-                    StringBuilder envDetails = new StringBuilder();
-                    Set<String> environmentsPublishedByAPI =
-                            new HashSet<String>(api.getEnvironments());
-                    environmentsPublishedByAPI.remove("none");
-                    for (String environmentName : environmentsPublishedByAPI) {
-                        Environment environment = environments.get(environmentName);
-                        envDetails.append(environment.getName() + ",");
-                        envDetails.append(filterUrls(environment.getApiGatewayEndpoint(),
-                                                     api.getTransports()) + "|");
-                    }
-                    if (!envDetails.toString().isEmpty()) {
-                        //removig last seperator mark
-                        envDetails = envDetails.deleteCharAt(envDetails.length() - 1);
-
-                    }
-                    //row.put("serverURL", row, config.getFirstProperty(APIConstants.API_GATEWAY_API_ENDPOINT));
-                    row.put("serverURL", row, envDetails.toString());
+                    row.put("serverURL", row, getEnvironmentsOfAPI(api).toJSONString());
                     NativeArray tierArr = new NativeArray(0);
                     Set<Tier> tierSet = api.getAvailableTiers();
                     if (tierSet != null) {
@@ -2118,6 +2116,8 @@ public class APIStoreHostObject extends ScriptableObject {
                     row.put("subscriptionAvailability", row, api.getSubscriptionAvailability());
                     row.put("subscriptionAvailableTenants", row, api.getSubscriptionAvailableTenants());
                     row.put("isDefaultVersion",row,api.isDefaultVersion());
+                    row.put("transports",row,api.getTransports());
+
                     myn.put(0, myn, row);
                 }
 
@@ -2174,32 +2174,17 @@ public class APIStoreHostObject extends ScriptableObject {
         return myn;
     }
 
-    private static String filterUrls(String apiData, String transports) {
-        if (apiData != null && transports != null) {
-            List<String> urls = new ArrayList<String>();
-            List<String> transportList = new ArrayList<String>();
-            urls.addAll(Arrays.asList(apiData.split(",")));
-            transportList.addAll(Arrays.asList(transports.split(",")));
-            urls = filterUrlsByTransport(urls, transportList, "https");
-            urls = filterUrlsByTransport(urls, transportList, "http");
-            String urlString = urls.toString();
-            return urlString.substring(1, urlString.length() - 1);
-        }
-        return apiData;
-    }
-
-    private static List<String> filterUrlsByTransport(List<String> urlsList, List<String> transportList, String transportName) {
-        if (!transportList.contains(transportName)) {
-            ListIterator<String> it = urlsList.listIterator();
-            while (it.hasNext()) {
-                String url = it.next();
-                if (url.startsWith(transportName + ":")) {
-                    it.remove();
+    private static String filterUrlsByTransport(List<String> urlsList, List<String> transportList,
+                                                String transportName) {
+        String endpointUrl = "";
+        if (transportList.contains(transportName)) {
+       for (String env : urlsList){
+                if (env.startsWith(transportName + ":")) {
+                    endpointUrl = env;
                 }
             }
-            return urlsList;
         }
-        return urlsList;
+        return endpointUrl;
     }
 
     public static boolean jsFunction_isSubscribed(Context cx, Scriptable thisObj,
@@ -2226,59 +2211,67 @@ public class APIStoreHostObject extends ScriptableObject {
     public static NativeArray jsFunction_getAllDocumentation(Context cx,
                                                              Scriptable thisObj, Object[] args, Function funObj)
             throws ScriptException, APIManagementException {
-        List<Documentation> doclist = null;
-        String providerName = "";
-        String apiName = "";
-        String version = "";
-        String username = "";
-        if (args != null && args.length != 0) {
-            providerName = APIUtil.replaceEmailDomain((String) args[0]);
-            apiName = (String) args[1];
-            version = (String) args[2];
-            username = (String) args[3];
+        if (args == null || args.length == 0) {
+            handleException("Invalid number of parameters.");
         }
-        APIIdentifier apiIdentifier = new APIIdentifier(providerName, apiName, version);
-        NativeArray myn = new NativeArray(0);
+        boolean isTenantFlowStarted = false;
+        List<Documentation> doclist = null;
+        String providerName = APIUtil.replaceEmailDomain((String) args[0]);
+        String apiName = (String) args[1];
+        String version = (String) args[2];
+        String username = (String) args[3];
         APIConsumer apiConsumer = getAPIConsumer(thisObj);
+        NativeArray myn = new NativeArray(0);
         try {
+            String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(providerName));
+            if (tenantDomain != null && !org.wso2.carbon.utils.multitenancy.MultitenantConstants
+                    .SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
+                isTenantFlowStarted = true;
+                PrivilegedCarbonContext.startTenantFlow();
+                PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
+            }
+            APIIdentifier apiIdentifier = new APIIdentifier(providerName, apiName, version);
             doclist = apiConsumer.getAllDocumentation(apiIdentifier, username);
+            if (doclist != null) {
+                Iterator it = doclist.iterator();
+                int i = 0;
+                while (it.hasNext()) {
+                    NativeObject row = new NativeObject();
+                    Object docObject = it.next();
+                    Documentation documentation = (Documentation) docObject;
+                    Object objectSourceType = documentation.getSourceType();
+                    String strSourceType = objectSourceType.toString();
+                    row.put("name", row, documentation.getName());
+                    row.put("sourceType", row, strSourceType);
+                    row.put("summary", row, documentation.getSummary());
+                    String content;
+                    if (strSourceType.equals("INLINE")) {
+                        content = apiConsumer.getDocumentationContent(apiIdentifier, documentation.getName());
+                        row.put("content", row, content);
+                    }
+                    row.put("sourceUrl", row, documentation.getSourceUrl());
+                    row.put("filePath", row, documentation.getFilePath());
+                    DocumentationType documentationType = documentation.getType();
+                    row.put("type", row, documentationType.getType());
+
+                    if (documentationType == DocumentationType.OTHER) {
+                        row.put("otherTypeName", row, documentation.getOtherTypeName());
+                    }
+
+                    myn.put(i, myn, row);
+                    i++;
+                }
+            }
         } catch (APIManagementException e) {
             handleException("Error from Registry API while getting All Documentation on " + apiName, e);
         } catch (Exception e) {
             handleException("Error while getting All Documentation " + apiName, e);
-        }
-        if (doclist != null) {
-            Iterator it = doclist.iterator();
-            int i = 0;
-            while (it.hasNext()) {
-                NativeObject row = new NativeObject();
-                Object docObject = it.next();
-                Documentation documentation = (Documentation) docObject;
-                Object objectSourceType = documentation.getSourceType();
-                String strSourceType = objectSourceType.toString();
-                row.put("name", row, documentation.getName());
-                row.put("sourceType", row, strSourceType);
-                row.put("summary", row, documentation.getSummary());
-                String content;
-                if (strSourceType.equals("INLINE")) {
-                    content = apiConsumer.getDocumentationContent(apiIdentifier, documentation.getName());
-                    row.put("content", row, content);
-                }
-                row.put("sourceUrl", row, documentation.getSourceUrl());
-                row.put("filePath", row, documentation.getFilePath());
-                DocumentationType documentationType = documentation.getType();
-                row.put("type", row, documentationType.getType());
-
-                if (documentationType == DocumentationType.OTHER) {
-                    row.put("otherTypeName", row, documentation.getOtherTypeName());
-                }
-
-                myn.put(i, myn, row);
-                i++;
+        } finally {
+            if (isTenantFlowStarted) {
+                PrivilegedCarbonContext.endTenantFlow();
             }
         }
         return myn;
-
     }
 
     public static NativeArray jsFunction_getComments(Context cx,
@@ -2432,7 +2425,7 @@ public class APIStoreHostObject extends ScriptableObject {
             String subsStatus = apiConsumer.addSubscription(apiIdentifier, userId, applicationId);
             return subsStatus;
         } catch (APIManagementException e) {
-            handleException("Error while adding subscription for user: " + userId + " Reason: " + e.getMessage(), e);
+            handleException("Error while adding subscription for user: " + userId + ". Reason: " + e.getMessage(), e);
             return null;
         } finally {
             if (isTenantFlowStarted) {
@@ -2715,13 +2708,21 @@ public class APIStoreHostObject extends ScriptableObject {
 
 	private static List<Scope> getAllowedScopesForUserApplication(String username,
 	                                                              Set<Scope> reqScopeSet) {
-		String[] userRoles = null;
-		List<Scope> authorizedScopes = new ArrayList<Scope>();
-		try {
-			userRoles = APIUtil.getListOfRoles(username);
-		} catch (APIManagementException e) {
-			log.error("Error while getting  the roles for user", e);
-		}
+        String[] userRoles = null;
+        org.wso2.carbon.user.api.UserStoreManager userStoreManager = null;
+
+        List<Scope> authorizedScopes = new ArrayList<Scope>();
+        try {
+            RealmService realmService = ServiceReferenceHolder.getInstance().getRealmService();
+            int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
+                                                 .getTenantId(MultitenantUtils.getTenantDomain(username));
+            userStoreManager = realmService.getTenantUserRealm(tenantId).getUserStoreManager();
+            userRoles = userStoreManager.getRoleListOfUser(MultitenantUtils.getTenantAwareUsername(username));
+        } catch (org.wso2.carbon.user.api.UserStoreException e) {
+            // Log and return since we do not want to stop issuing the token in
+            // case of scope validation failures.
+            log.error("Error when getting the tenant's UserStoreManager or when getting roles of user ", e);
+        }
 
 		List<String> userRoleList = new ArrayList<String>(Arrays.asList(userRoles));
 
@@ -2766,6 +2767,7 @@ public class APIStoreHostObject extends ScriptableObject {
                 if(scopeName != null && !scopeName.isEmpty()) {
                     scopeBuilder.append(scopeName);
                     scopeBuilder.append(", ");
+                    scopeName = "";
                 }
 			}
 		}
@@ -2883,6 +2885,7 @@ public class APIStoreHostObject extends ScriptableObject {
 
                         boolean prodEnableRegenarateOption = true;
 
+                        // When the Production Access Token is successfully created.
                         if (prodKey != null && prodKey.getAccessToken() != null && prodApp != null) {
                             String jsonString = prodApp.getJsonString();
 
@@ -2896,19 +2899,18 @@ public class APIStoreHostObject extends ScriptableObject {
                             appObj.put("prodConsumerSecret", appObj, prodConsumerSecret);
                             appObj.put("prodJsonString", appObj, jsonString);
 
-                            if (prodKey.getValidityPeriod() == Long.MAX_VALUE) {
-                                prodEnableRegenarateOption = false;
-                            }
-                            appObj.put("prodRegenerateOption", appObj, prodEnableRegenarateOption);
 
                             appObj.put("prodAuthorizedDomains", appObj, prodKey.getAuthorizedDomains());
 
                             if (isApplicationAccessTokenNeverExpire(prodKey.getValidityPeriod())) {
                                 appObj.put("prodValidityTime", appObj, -1);
+                                prodEnableRegenarateOption = false;
                             } else {
                                 appObj.put("prodValidityTime", appObj, prodKey.getValidityPeriod());
                             }
-                        } else if (prodKey != null && prodApp != null) {
+                            appObj.put("prodRegenerateOption", appObj, prodEnableRegenarateOption);
+                        } // Prod Token is not generated, but consumer key & secret is available
+                        else if (prodKey != null && prodApp != null) {
                             String jsonString = prodApp.getJsonString();
                             String prodConsumerKey = prodApp.getClientId();
                             String prodConsumerSecret = prodApp.getClientSecret();
@@ -2926,7 +2928,7 @@ public class APIStoreHostObject extends ScriptableObject {
                                 appObj.put("prodValidityTime", appObj, -1);
                             } else {
                                 appObj.put("prodValidityTime", appObj,
-                                           getApplicationAccessTokenValidityPeriodInSeconds() * 1000);
+                                           getApplicationAccessTokenValidityPeriodInSeconds());
                             }
                             appObj.put("prodKeyState", appObj, prodKey.getState());
                         } else {
@@ -2942,7 +2944,7 @@ public class APIStoreHostObject extends ScriptableObject {
                                 appObj.put("prodValidityTime", appObj, -1);
                             } else {
                                 appObj.put("prodValidityTime", appObj,
-                                           getApplicationAccessTokenValidityPeriodInSeconds() * 1000);
+                                           getApplicationAccessTokenValidityPeriodInSeconds());
                             }
                             appObj.put("prodJsonString", appObj, null);
 
@@ -2974,24 +2976,15 @@ public class APIStoreHostObject extends ScriptableObject {
                             appObj.put("sandboxConsumerSecret", appObj, sandboxConsumerSecret);
                             appObj.put("sandboxKeyState", appObj, sandboxKey.getState());
                             appObj.put("sandboxJsonString", appObj, jsonString);
-                            if (sandboxKey.getValidityPeriod() == Long.MAX_VALUE) {
-                                sandEnableRegenarateOption = false;
-                            }
-                            appObj.put("sandRegenarateOption", appObj, sandEnableRegenarateOption);
 
                             appObj.put("sandboxAuthorizedDomains", appObj, sandboxKey.getAuthorizedDomains());
                             if (isApplicationAccessTokenNeverExpire(sandboxKey.getValidityPeriod())) {
-                                if (tenantDomain != null &&
-                                    !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
-                                    isTenantFlowStarted = true;
-                                    PrivilegedCarbonContext.startTenantFlow();
-                                    PrivilegedCarbonContext.getThreadLocalCarbonContext()
-                                            .setTenantDomain(tenantDomain, true);
-                                }
                                 appObj.put("sandValidityTime", appObj, -1);
+                                sandEnableRegenarateOption = false;
                             } else {
                                 appObj.put("sandValidityTime", appObj, sandboxKey.getValidityPeriod());
                             }
+                            appObj.put("sandRegenarateOption", appObj, sandEnableRegenarateOption);
                         } else if (sandboxKey != null && sandApp != null) {
                             String jsonString = sandApp.getJsonString();
                             String sandboxConsumerKey = sandApp.getClientId();
@@ -3010,7 +3003,7 @@ public class APIStoreHostObject extends ScriptableObject {
                                 appObj.put("sandValidityTime", appObj, -1);
                             } else {
                                 appObj.put("sandValidityTime", appObj,
-                                           getApplicationAccessTokenValidityPeriodInSeconds() * 1000);
+                                           getApplicationAccessTokenValidityPeriodInSeconds());
                             }
                         } else {
                             appObj.put("sandboxKey", appObj, null);
@@ -3026,7 +3019,7 @@ public class APIStoreHostObject extends ScriptableObject {
                                 appObj.put("sandValidityTime", appObj, -1);
                             } else {
                                 appObj.put("sandValidityTime", appObj,
-                                           getApplicationAccessTokenValidityPeriodInSeconds() * 1000);
+                                           getApplicationAccessTokenValidityPeriodInSeconds());
                             }
                         }
 
@@ -3245,8 +3238,6 @@ public class APIStoreHostObject extends ScriptableObject {
     public static NativeObject jsFunction_getApplicationByName(Context cx,
                                                                Scriptable thisObj, Object[] args, Function funObj)
             throws ScriptException, APIManagementException {
-
-        NativeObject row = new NativeObject();
         if (args != null) {
             String userId = (String) args[0];
             String applicationName = (String) args[1];
@@ -3254,6 +3245,7 @@ public class APIStoreHostObject extends ScriptableObject {
             APIConsumer apiConsumer = getAPIConsumer(thisObj);
             Application application = apiConsumer.getApplicationsByName(userId, applicationName,groupId);
             if (application != null) {
+                NativeObject row = new NativeObject();
 
                 row.put("name", row, application.getName());
                 row.put("tier", row, application.getTier());
@@ -3261,9 +3253,11 @@ public class APIStoreHostObject extends ScriptableObject {
                 row.put("callbackUrl", row, application.getCallbackUrl());
                 row.put("status", row, application.getStatus());
                 row.put("description", row, application.getDescription());
+
+                return row;
             }
         }
-        return row;
+        return null;
     }
 
     public static String jsFunction_addApplication(Context cx,
@@ -3410,13 +3404,14 @@ public class APIStoreHostObject extends ScriptableObject {
             for (Application app : apps) {
                 appsMap.put(app.getName(), app);
             }
+            
+            // check whether there is an app with same name
+            if (!name.equals(oldName) && appsMap.containsKey(name)) {
+                return false;
+            }
 
             for (Application app : apps) {
-                if(appsMap.containsKey(app.getName())){
-                    //check whether there is an app with same name
-                    if(!name.equals(oldName) && appsMap.containsKey(name)){
-                        return false;
-                    }
+                if (app.getName().equals(oldName)) {
                     Application application = new Application(name, subscriber);
                     application.setId(app.getId());
                     application.setTier(tier);
@@ -3607,10 +3602,9 @@ public class APIStoreHostObject extends ScriptableObject {
         return false;
     }
 
-    public static void jsFunction_addUser(Context cx, Scriptable thisObj,
-                                          Object[] args,
-                                          Function funObj) throws APIManagementException {
-    	String customErrorMsg = null;
+    public static void jsFunction_addUser(Context cx, Scriptable thisObj, Object[] args, Function funObj)
+                                                                                    throws APIManagementException {
+        String customErrorMsg = null;
 
         if (args != null && isStringArray(args)) {
             String username = args[0].toString();
@@ -3619,14 +3613,17 @@ public class APIStoreHostObject extends ScriptableObject {
 
             APIManagerConfiguration config = HostObjectComponent.getAPIManagerConfiguration();
             /*
-            boolean workFlowEnabled = Boolean.parseBoolean(config.getFirstProperty(APIConstants.SELF_SIGN_UP_ENABLED));
-            if (!workFlowEnabled) {
-                handleException("Self sign up has been disabled on this server");
-            } */
+             * boolean workFlowEnabled =
+             * Boolean.parseBoolean(config.getFirstProperty
+             * (APIConstants.SELF_SIGN_UP_ENABLED));
+             * if (!workFlowEnabled) {
+             * handleException("Self sign up has been disabled on this server");
+             * }
+             */
             String serverURL = config.getFirstProperty(APIConstants.AUTH_MANAGER_URL);
             String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(username));
 
-        /* fieldValues will contain values up to last field user entered*/
+            /* fieldValues will contain values up to last field user entered */
             String fieldValues[] = fields.split("\\|");
             UserFieldDTO[] userFields = getOrderedUserFieldDTO();
             for (int i = 0; i < fieldValues.length; i++) {
@@ -3634,127 +3631,114 @@ public class APIStoreHostObject extends ScriptableObject {
                     userFields[i].setFieldValue(fieldValues[i]);
                 }
             }
-        /* assign empty string for rest of the user fields */
+            /* assign empty string for rest of the user fields */
             for (int i = fieldValues.length; i < userFields.length; i++) {
                 userFields[i].setFieldValue("");
-            }  
-         
+            }
+
             boolean isTenantFlowStarted = false;
-            
+
             try {
 
-				if (tenantDomain != null &&
-						!MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
-					isTenantFlowStarted = true;
-					PrivilegedCarbonContext.startTenantFlow();
-					PrivilegedCarbonContext.getThreadLocalCarbonContext()
-					.setTenantDomain(tenantDomain, true);
-				}
-				// get the signup configuration
-				UserRegistrationConfigDTO signupConfig =
-						SelfSignUpUtil.getSignupConfiguration(tenantDomain);
-				// set tenant specific sign up user storage
-				if (signupConfig != null && signupConfig.getSignUpDomain() != "") {
-					if (!signupConfig.isSignUpEnabled()) {
-						handleException("Self sign up has been disabled for this tenant domain");
-					}
-					int index = username.indexOf(UserCoreConstants.DOMAIN_SEPARATOR);
-					/*
-					 * if there is a different domain provided by the user other than one 
-					 * given in the configuration, add the correct signup domain. Here signup
-					 * domain refers to the user storage
-					 */
-				
-					if (index > 0) {
-						username =
-								signupConfig.getSignUpDomain().toUpperCase() +
-								UserCoreConstants.DOMAIN_SEPARATOR +
-								username.substring(index + 1);
-					} else {
-						username =
-								signupConfig.getSignUpDomain().toUpperCase() +
-								UserCoreConstants.DOMAIN_SEPARATOR + username;
-					}
-				}
-				
-				//check whether admin credentials are correct. 
-				boolean validCredentials = checkCredentialsForAuthServer(signupConfig.getAdminUserName(), 
-						signupConfig.getAdminPassword(), serverURL);
-				
-				if(validCredentials) {
-					UserDTO userDTO = new UserDTO();
-					userDTO.setUserFields(userFields);
-					userDTO.setUserName(username);
-					userDTO.setPassword(password);
-					
-					
+                if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
+                    isTenantFlowStarted = true;
+                    PrivilegedCarbonContext.startTenantFlow();
+                    PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
+                }
+                // get the signup configuration
+                UserRegistrationConfigDTO signupConfig = SelfSignUpUtil.getSignupConfiguration(tenantDomain);
+                // set tenant specific sign up user storage
+                if (signupConfig != null && signupConfig.getSignUpDomain() != "") {
+                    if (!signupConfig.isSignUpEnabled()) {
+                        handleException("Self sign up has been disabled for this tenant domain");
+                    }
+                    int index = username.indexOf(UserCoreConstants.DOMAIN_SEPARATOR);
+                    /*
+                     * if there is a different domain provided by the user other than one given in the configuration, 
+                     * add the correct signup domain. Here signup domain refers to the user storage
+                     */
 
-					UserRegistrationAdminServiceStub stub =
-							new UserRegistrationAdminServiceStub(
-							                                     null,
-							                                     serverURL +
-							                                     "UserRegistrationAdminService");
-					ServiceClient client = stub._getServiceClient();
-					Options option = client.getOptions();
-					option.setManageSession(true);
+                    if (index > 0) {
+                        username =
+                                   signupConfig.getSignUpDomain().toUpperCase() + UserCoreConstants.DOMAIN_SEPARATOR +
+                                           username.substring(index + 1);
+                    } else {
+                        username =
+                                   signupConfig.getSignUpDomain().toUpperCase() + UserCoreConstants.DOMAIN_SEPARATOR +
+                                           username;
+                    }
+                }
 
-					stub.addUser(userDTO);
+                // check whether admin credentials are correct.
+                boolean validCredentials =
+                                           checkCredentialsForAuthServer(signupConfig.getAdminUserName(),
+                                                                         signupConfig.getAdminPassword(), serverURL);
 
-					WorkflowExecutor userSignUpWFExecutor =
-							WorkflowExecutorFactory.getInstance()
-							.getWorkflowExecutor(WorkflowConstants.WF_TYPE_AM_USER_SIGNUP);
+                if (validCredentials) {
+                    UserDTO userDTO = new UserDTO();
+                    userDTO.setUserFields(userFields);
+                    userDTO.setUserName(username);
+                    userDTO.setPassword(password);
 
-					WorkflowDTO signUpWFDto = new WorkflowDTO();
-					signUpWFDto.setWorkflowReference(username);
-					signUpWFDto.setStatus(WorkflowStatus.CREATED);
-					signUpWFDto.setCreatedTime(System.currentTimeMillis());
-					signUpWFDto.setTenantDomain(tenantDomain);
+                    UserRegistrationAdminServiceStub stub = new UserRegistrationAdminServiceStub(null, serverURL +
+                                                                                       "UserRegistrationAdminService");
+                    ServiceClient client = stub._getServiceClient();
+                    Options option = client.getOptions();
+                    option.setManageSession(true);
 
-					try {
-						int tenantId =
-								ServiceReferenceHolder.getInstance().getRealmService()
-								.getTenantManager()
-								.getTenantId(tenantDomain);
-						signUpWFDto.setTenantId(tenantId);
-					} catch (org.wso2.carbon.user.api.UserStoreException e) {
-						log.error("Error while loading Tenant ID for given tenant domain :" +
-								tenantDomain);
-					}
+                    stub.addUser(userDTO);
 
-					signUpWFDto.setExternalWorkflowReference(userSignUpWFExecutor.generateUUID());
-					signUpWFDto.setWorkflowType(WorkflowConstants.WF_TYPE_AM_USER_SIGNUP);
-					signUpWFDto.setCallbackUrl(userSignUpWFExecutor.getCallbackURL());
+                    WorkflowExecutor userSignUpWFExecutor = WorkflowExecutorFactory.getInstance()
+                                                        .getWorkflowExecutor(WorkflowConstants.WF_TYPE_AM_USER_SIGNUP);
 
-					try {
-						userSignUpWFExecutor.execute(signUpWFDto);
-					} catch (WorkflowException e) {
-						log.error("Unable to execute User SignUp Workflow", e);
-						// removeUser(username, config, serverURL);
-						removeTenantUser(username, signupConfig, serverURL);
-						
-						handleException("Unable to execute User SignUp Workflow", e);
-					}
-				} else {
-					customErrorMsg = "Unable to add a user. Please check credentials in "
-							+ "the signup-config.xml in the registry";
-					handleException(customErrorMsg);
-				}
-				
+                    WorkflowDTO signUpWFDto = new WorkflowDTO();
+                    signUpWFDto.setWorkflowReference(username);
+                    signUpWFDto.setStatus(WorkflowStatus.CREATED);
+                    signUpWFDto.setCreatedTime(System.currentTimeMillis());
+                    signUpWFDto.setTenantDomain(tenantDomain);
 
-			} catch (RemoteException e) {
-				handleException(e.getMessage(), e);
-			} catch (Exception e) {
-				if(customErrorMsg != null) {
-					handleException(customErrorMsg);
-				} else {
-					handleException("Error while adding the user: " + username, e);
-				}
-				
-			} finally {
-				if (isTenantFlowStarted) {
-					PrivilegedCarbonContext.endTenantFlow();
-				}
-			}
+                    try {
+                        int tenantId =
+                                       ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
+                                                             .getTenantId(tenantDomain);
+                        signUpWFDto.setTenantId(tenantId);
+                    } catch (org.wso2.carbon.user.api.UserStoreException e) {
+                        log.error("Error while loading Tenant ID for given tenant domain :" + tenantDomain);
+                    }
+
+                    signUpWFDto.setExternalWorkflowReference(userSignUpWFExecutor.generateUUID());
+                    signUpWFDto.setWorkflowType(WorkflowConstants.WF_TYPE_AM_USER_SIGNUP);
+                    signUpWFDto.setCallbackUrl(userSignUpWFExecutor.getCallbackURL());
+
+                    try {
+                        userSignUpWFExecutor.execute(signUpWFDto);
+                    } catch (WorkflowException e) {
+                        log.error("Unable to execute User SignUp Workflow", e);
+                        // removeUser(username, config, serverURL);
+                        removeTenantUser(username, signupConfig, serverURL);
+
+                        handleException("Unable to execute User SignUp Workflow", e);
+                    }
+                } else {
+                    customErrorMsg =
+                                     "Unable to add a user. Please check credentials in "
+                                             + "the signup-config.xml in the registry";
+                    handleException(customErrorMsg);
+                }
+
+            } catch (RemoteException e) {
+                handleException(e.getMessage(), e);
+            } catch (UserRegistrationAdminServiceException e) {
+                handleException("Error while adding the user: " + username + ". " + e.getMessage(), e);
+            } catch (WorkflowException e) {
+                handleException("Error while adding the user: " + username + ". " + e.getMessage(), e);
+            } catch (UserAdminUserAdminException e) {
+                handleException("Error while adding the user: " + username + ". " + e.getMessage(), e);
+            } finally {
+                if (isTenantFlowStarted) {
+                    PrivilegedCarbonContext.endTenantFlow();
+                }
+            }
         } else {
             handleException("Invalid input parameters.");
         }
@@ -4144,13 +4128,19 @@ public class APIStoreHostObject extends ScriptableObject {
             row.put("accessToken", row, response.getAccessToken());
             row.put("consumerKey", row, response.getConsumerKey());
             row.put("consumerSecret", row, response.getConsumerKey());
-            row.put("validityTime", row, response.getValidityPeriod());
+
             row.put("responseParams", row, response.getJSONString());
             row.put("tokenScope", row, response.getScopes());
 
             boolean isRegenarateOptionEnabled = true;
             if (getApplicationAccessTokenValidityPeriodInSeconds() < 0) {
                 isRegenarateOptionEnabled = false;
+            }
+
+            if (isApplicationAccessTokenNeverExpire(response.getValidityPeriod())) {
+                row.put("validityTime", row, -1);
+            } else {
+                row.put("validityTime", row, response.getValidityPeriod());
             }
             row.put("enableRegenarate", row, isRegenarateOptionEnabled);
             return row;
@@ -4383,16 +4373,20 @@ public class APIStoreHostObject extends ScriptableObject {
             } else {
                 tiers = apiConsumer.getTiers();
             }
+
+            List<Tier> tierList = APIUtil.sortTiers(tiers);
             int i = 0;
-            for (Tier tier : tiers) {
+            for (Tier tier : tierList) {
                 NativeObject row = new NativeObject();
                 row.put("tierName", row, tier.getName());
                 row.put("tierDisplayName", row, tier.getDisplayName());
                 row.put("tierDescription", row,
                         tier.getDescription() != null ? tier.getDescription() : "");
+                row.put("defaultTier", row, i == 0);
                 myn.put(i, myn, row);
                 i++;
             }
+
         } catch (Exception e) {
             log.error("Error while getting available tiers", e);
         }
@@ -4523,7 +4517,7 @@ public class APIStoreHostObject extends ScriptableObject {
     }
 
     private static boolean isApplicationAccessTokenNeverExpire(long validityPeriod) {
-        return validityPeriod == Long.MAX_VALUE;
+        return validityPeriod < 0 || validityPeriod == Long.MAX_VALUE;
     }
 
     public static boolean jsFunction_isEnableEmailUsername(Context cx,
@@ -4680,4 +4674,75 @@ public class APIStoreHostObject extends ScriptableObject {
 
     }
 
+    /**
+     * This method create the json object of the environments in the API
+     * @param api API object of selected api .
+     * @return json object of environments
+     */
+    private static JSONObject getEnvironmentsOfAPI(API api) {
+        APIManagerConfiguration config = HostObjectComponent.getAPIManagerConfiguration();
+        Map<String, Environment> environments = config.getApiGatewayEnvironments();
+        JSONObject environmentObject = new JSONObject();
+        JSONObject productionEnvironmentObject = new JSONObject();
+        JSONObject sandboxEnvironmentObject = new JSONObject();
+        JSONObject hybridEnvironmentObject = new JSONObject();
+        Set<String> environmentsPublishedByAPI =
+                new HashSet<String>(api.getEnvironments());
+        environmentsPublishedByAPI.remove("none");
+        for (String environmentName : environmentsPublishedByAPI) {
+            Environment environment = environments.get(environmentName);
+            JSONObject jsonObject = new JSONObject();
+            List<String> environmenturls = new ArrayList<String>();
+            environmenturls.addAll(Arrays.asList((environment.getApiGatewayEndpoint().split(","))));
+            List<String> transports = new ArrayList<String>();
+            transports.addAll(Arrays.asList((api.getTransports().split(","))));
+            jsonObject.put("http", filterUrlsByTransport(environmenturls, transports, "http"));
+            jsonObject.put("https", filterUrlsByTransport(environmenturls, transports, "https"));
+            if (APIConstants.GATEWAY_ENV_TYPE_PRODUCTION.equals(environment.getType())) {
+                productionEnvironmentObject.put(environment.getName(), jsonObject);
+            } else if (APIConstants.GATEWAY_ENV_TYPE_SANDBOX.equals(environment.getType())) {
+                sandboxEnvironmentObject.put(environment.getName(), jsonObject);
+            } else {
+                hybridEnvironmentObject.put(environment.getName(), jsonObject);
+            }
+        }
+        environmentObject.put(APIConstants.GATEWAY_ENV_TYPE_PRODUCTION, productionEnvironmentObject);
+        environmentObject.put(APIConstants.GATEWAY_ENV_TYPE_SANDBOX, sandboxEnvironmentObject);
+        environmentObject.put(APIConstants.GATEWAY_ENV_TYPE_HYBRID, hybridEnvironmentObject);
+        return environmentObject;
+    }
+
+    /**
+     * this method used to iterate environments according to type
+     *
+     * @param environments json
+     * @param api API object of selected api .
+     * @param version version of API
+     * @param myn
+     * @param envCount count parameter
+     * @param type type of environment
+     */
+    private static void createAPIEndpointsPerType(JSONObject environments, API api, String version, NativeArray myn,
+                                                 int envCount, String type) {
+        for (Object prodKeys : environments.keySet()) {
+            JSONObject environmentObject = (JSONObject) environments.get(prodKeys);
+            NativeObject appObj = new NativeObject();
+            appObj.put("environmentName", appObj, prodKeys);
+            appObj.put("environmentType", appObj, type);
+            NativeArray envs = new NativeArray(0);
+            int index = 0;
+            for (Object envURL : environmentObject.entrySet()) {
+                envs.put(index, envs, envURL + api.getContext());
+                if (api.isDefaultVersion()) {
+                    String apiContext = api.getContext();
+                    apiContext = apiContext.replace(version + "/", "");
+                    envs.put(++index, envs, envURL + apiContext);
+                }
+                index++;
+                appObj.put("environmentURLs", appObj, envs);
+                myn.put(envCount, myn, appObj);
+                envCount++;
+            }
+        }
+    }
 }

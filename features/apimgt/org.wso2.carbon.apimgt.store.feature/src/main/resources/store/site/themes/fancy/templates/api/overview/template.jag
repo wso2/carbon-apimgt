@@ -1,10 +1,11 @@
 <% jagg.template("api/overview", function(inputs, outputs, jagg) { %>
 <% var api = outputs.api, user = outputs.user, log = new Log(); %>
 <% var domains = jagg.module("domains").getDomainMappings(jagg.getTenantDomain()).domains;%>
+<% var transports = api.transports.split(","); %>
 <div id="overview">
 	<%if (!api.isAdvertiseOnly) {%>
 
-	    <%
+	    <% 
         if(domains != null){
             for (var key in domains) {
                 var re = /\/$/g
@@ -12,45 +13,51 @@
                 var contextWithoutTenant = api.context.replace("/t/"+ jagg.getTenantDomain() , "");
                 // since we are using context versioning, we remove the api.version from the URL.
                 // The reason is that the context will have the version now
+                for(var t=0;t < transports.length;t++){
                 %>
-                <div  class="well well-small api_urls"><%=domainValue%><%= contextWithoutTenant %>
+                <div  class="well well-small api_urls"><%= transports[t] %>://<%=domainValue%><%= contextWithoutTenant %>
                     <%if (api.isDefaultVersion){%>
-                        <br><%=%><%= contextWithoutTenant %>
+                        <br><%= transports[t] %><%= contextWithoutTenant %>
                     <%}%>
                 </div>
                 <%
+                }
             }
         }
         else{
-    	    var environments = api.serverURL.split("|");
-    	    for (j=0; j<environments.length; j++){
-    	        var environment = environments[j];
-    	        var epParams =  environment.split(",");
-    	        %>
-    	            <h5><%=epParams[0]%> <%=i18n.localize("urls")%>:</h5>
+    	    var environments = JSON.parse(api.serverURL);
+            var log = new Log();
+    	    for(var environmentType in environments){
+    	        var environmentsPerType = environments[environmentType];
+                if(environmentType == "production" && environmentsPerType.length>0){
+                    %>
+                    <h4>PRODUCTION Endpoints</h4>
+                    <%} else if(environmentType == "sandbox" && environmentsPerType.length>0){
+                        %>
+                    <h4>SANDBOX Endpoints</h4>
+                <%}
+                    for( var environmentName in environmentsPerType){
+                        var environmenturls = environmentsPerType[environmentName];
+                %>
+    	            <h5><%=environmentName%> <%=i18n.localize("urls")%>:</h5>
 
     	        <%
                 // since we are using context versioning, we remove the api.version from the URL.
                 // The reason is that the context will have the version now
-    	        for (i = 1; i < epParams.length; i++) {
-    	            %>
-    	            <div  class="well well-small api_urls"><%=epParams[i]%><%=api.context%>
+    	        for (var urltype in environmenturls ) {
+                    %>
+    	            <div  class="well well-small api_urls"><%=environmenturls[urltype]%><%=api.context%>
                         <%if (api.isDefaultVersion){
                             var apiContext = api.context;
                             apiContext = apiContext.replace(api.version + "/", "");
                             apiContext = apiContext.replace(api.version, "");%>
-                            <br><%=epParams[i]%><%=apiContext%>
+                            <br><%=d[x]%><%=apiContext%>
                         <%}%>
                     </div>
-
-    	            <%
-    	        }
-    	        %>
-
-    	        <%
-    	    }
-        }
-	    %>
+    	            <%}
+                    }
+                    }
+                    }%>
     <%}%>
     <% if(api.wsdl && api.wsdl != ""){ %>        
     <p>

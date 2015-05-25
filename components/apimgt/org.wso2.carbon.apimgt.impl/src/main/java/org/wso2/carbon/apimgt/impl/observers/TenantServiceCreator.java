@@ -141,58 +141,7 @@ public class TenantServiceCreator extends AbstractAxis2ConfigurationContextObser
                 createTenantSynapseConfigHierarchy(synapseConfigDir, tenantDomain);
             }
         } catch (Exception e) {
-             log.error("Failed to create Tenant's synapse sequences.");
-        }
-
-        try{
-            APIUtil.loadTenantAPIPolicy(tenantDomain, tenantId);
-        }catch (Exception e){
-            log.error("Failed to load tiers.xml to tenant's registry");
-        }
-
-        try{
-            APIUtil.writeDefinedSequencesToTenantRegistry(tenantId);
-        }catch(Exception e){
-            log.error("Failed to write defined sequences to tenant " + tenantDomain + "'s registry");
-        }
-        
-        try {
-            APIUtil.loadTenantExternalStoreConfig(tenantId);
-        } catch(Exception e) {
-            log.error("Failed to load external-stores.xml to tenant " + tenantDomain + "'s registry");
-        }
-        
-        try {
-            APIUtil.loadTenantGAConfig(tenantId);
-        } catch(Exception e) {
-            log.error("Failed to load ga-config.xml to tenant " + tenantDomain + "'s registry");
-        }
-        
-        try {
-        	 //load workflow-extension configuration to the registry
-        	APIUtil.loadTenantWorkFlowExtensions(tenantId);
-        } catch(Exception e) {
-            log.error("Failed to load workflow-extension.xml to tenant " + tenantDomain + "'s registry");
-        }
-        
-        try {
-        	 //load self signup configurations to the registry            
-            APIUtil.loadTenantSelfSignUpConfigurations(tenantId);
-        } catch(Exception e) {
-           log.error("Failed to load sign-up-config.xml to tenant " + tenantDomain + "'s registry");
-        }
-        try {
-            APIManagerAnalyticsConfiguration configuration = ServiceReferenceHolder.getInstance().
-                    getAPIManagerConfigurationService().getAPIAnalyticsConfiguration();
-            boolean enabled = configuration.isAnalyticsEnabled();
-            if (enabled) {
-                String bamServerURL = configuration.getBamServerUrlGroups();
-                String bamServerUser = configuration.getBamServerUser();
-                String bamServerPassword = configuration.getBamServerPassword();
-                APIUtil.addBamServerProfile(bamServerURL, bamServerUser, bamServerPassword, tenantId);
-            }
-        } catch (APIManagementException e) {
-            log.error("Failed to load bam profile configuration to tenant " + tenantDomain + "'s registry");
+            log.error("Failed to create Tenant's synapse sequences.");
         }
     }
 

@@ -584,6 +584,17 @@ public abstract class AbstractAPIManager implements APIManager {
         }
         return apiMgtDAO.isContextExist(context);
     }
+    
+    public boolean isScopeKeyExist(String scopeKey, int tenantid) throws APIManagementException {
+
+        return apiMgtDAO.isScopeKeyExist(scopeKey, tenantid);
+    }
+
+    public boolean isScopeKeyAssigned(APIIdentifier identifier, String scopeKey, int tenantid) 
+                                                                                    throws APIManagementException {
+
+        return apiMgtDAO.isScopeKeyAssigned(identifier, scopeKey, tenantid);
+    }      
 
 
     public boolean isApiNameExist(String apiName) throws APIManagementException {
@@ -777,21 +788,21 @@ public abstract class AbstractAPIManager implements APIManager {
     public Map<String,String> getTenantDomainMappings(String tenantDomain) throws APIManagementException {
         boolean isTenantFlowStarted = false;
         Map<String,String> domains;
-        try {
-            if(tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)){
-                isTenantFlowStarted = true;
-                PrivilegedCarbonContext.startTenantFlow();
-                PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
-            }
 
-            int requestedTenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
-            domains = APIUtil.getDomainMappings(requestedTenantId);
+        domains = APIUtil.getDomainMappings(tenantDomain);
 
-        } finally {
-            if (isTenantFlowStarted) {
-                PrivilegedCarbonContext.endTenantFlow();
-            }
-        }
         return domains;
+    }
+
+
+    public boolean isDuplicateContextTemplate(String contextTemplate) throws APIManagementException{
+
+        if (contextTemplate != null && contextTemplate.startsWith("/t/"))
+            contextTemplate =
+                    contextTemplate.replace("/t/" + MultitenantUtils.getTenantDomainFromUrl(contextTemplate), "");
+        if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
+            contextTemplate = "/t/" + tenantDomain + contextTemplate;
+        }
+        return apiMgtDAO.isDuplicateContextTemplate(contextTemplate);
     }
 }

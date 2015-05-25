@@ -4,7 +4,7 @@ include("/jagg/jagg.jag");
     var site = require("/site/conf/site.json");
     var ssoEnabled = site.ssoConfiguration.enabled;
     response.contentType = "application/json; charset=UTF-8";
-    var mod, obj, name, version, provider, tier,  application, context, result, username,
+    var mod, obj, apiName, version, provider, tier,  applicationId, context, result, username,
             user = jagg.getUser(),
             msg = require("/site/conf/ui-messages.jag"),
             action = request.getParameter("action");
@@ -41,8 +41,42 @@ include("/jagg/jagg.jag");
         apiName = request.getParameter("name");
         version = request.getParameter("version");
         provider = request.getParameter("provider");
-        applicationId = parseInt(request.getParameter("applicationId"), 10);
+
         username = user.username;
+
+        var applicationName = request.getParameter("applicationName");
+
+        if (null != applicationName) {
+            var groupId = session.get("groupId");
+
+            mod = jagg.module("application");
+            result = mod.getApplicationByName(username,applicationName,groupId);
+
+            if (result.error) {
+                print({
+                    error:result.error,
+                    message:msg.error.authError(action, username)
+                });
+
+                return;
+            }
+
+            if (result.application) {
+                applicationId = result.application.id;
+            } else {
+                print({
+                    error:true,
+                    message:msg.error.appNameError(applicationName)
+                });
+
+                return;
+            }
+        }
+        else {
+            applicationId = parseInt(request.getParameter("applicationId"), 10);
+        }
+
+
 
         mod = jagg.module("subscription");
         result = mod.removeAPISubscription(username,applicationId,{

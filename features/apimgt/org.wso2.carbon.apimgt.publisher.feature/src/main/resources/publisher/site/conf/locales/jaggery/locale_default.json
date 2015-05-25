@@ -208,7 +208,7 @@
     "clear": "Clear",
 
     "nameHelpMsg" : "Display name to be shown in the API Store." ,
-    "contextHelpMsg" : "URI context path of the API." ,
+    "contextHelpMsg" : "URI context path of the API.<br/> Supported formats are.. <br/> 1. /foo <br/> 2. /foo/bar <br/> 3. /foo/{version}/bar (case sensitive) - Allows the version to be within the context" ,
     "tierHelpMsg" : "Tiers limit the number of requests a subscriber can make to an API. An API can be exposed over one or more tiers. The Gold, Silver and Bronze tiers allow 20, 5 and 1 request/s respectively per minute." ,
     "roleHelpMsg" : "<strong>Public :</strong> The API is accessible to everyone and can be advertised in multiple stores - a central store and/or non-WSO2 stores.<br/><strong> Visible to my domain :</strong>  The API is visible to all users who are registered in the API's tenant domain.<br/><strong>Restricted by roles :</strong> The API is visible only to specific user roles in the tenant store that you specify." ,
     "docRoleHelpMsg" : "<strong>Same as API visibility: </strong> Visible to the same user roles who can see the API.<br/><strong> Visible to my domain :</strong>  Visible to all registered users in the API's tenant domain.<br/><strong>Private:</strong> Visible only to the API creator's role." ,
@@ -231,7 +231,7 @@
     "lifecycleSuccessMsg":"Successfully updated the API status.",
     "searchMsg":"No matching APIs found.",
     "noAPIsMsg":"No APIs created yet.",
-    "noAPIsMsg1":"No APIs created yet. Click the button below to get started.",
+    "noAPIsMsg1":"No APIs created yet. Click one of below buttons to get started.",
     "versionHelpMsg": "E.g.,:v1.0.1",
     "noApisByProviderMsg": "No APIs provided by the user",
     "revokeHelpMsg": "Search Options - 1) By Access Token [Default]  2) By Authorized User ->user:xxxx  3) By Created Date -> after:yyyy-mm-dd  or before:yyyy-mm-dd",
