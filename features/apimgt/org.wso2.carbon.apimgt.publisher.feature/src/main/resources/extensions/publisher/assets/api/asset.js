@@ -295,6 +295,10 @@ asset.server = function (ctx) {
                         title: 'Manage',
                         url: 'manage',
                         path: 'manage.jag'
+                    }, {
+                        title: 'Start Creating an API',
+                        url: 'start',
+                        path: 'start.jag'
                     }],
             apis: [{
                        url: 'endpoints',
@@ -468,6 +472,9 @@ asset.renderer = function (ctx) {
                         page.leftNav = buildListLeftNav(page, this);
                         break;
                     case 'statistics':
+                        page.leftNav = buildListLeftNav(page, this);
+                        break;
+                    case 'start':
                         page.leftNav = buildListLeftNav(page, this);
                         break;
                     default:
