@@ -1,6 +1,5 @@
 <%
 
-//response.contentType = 'text/rjavascript';
 response.addHeader('Cache-Control','no-cache, no-store, must-revalidate'); // HTTP 1.1.
 response.addHeader('Pragma','no-cache'); // HTTP 1.0.
 response.addHeader('Expires','0');
@@ -8,6 +7,8 @@ response.contentType = "application/json; charset=UTF-8";
 
 include("/jagg/jagg.jag");
 var site = require("/site/conf/site.json");
+var msg = require("/site/conf/ui-messages.jag");
+
 
 var verb = request.getMethod();
 
@@ -58,10 +59,8 @@ try{
 if( ( request.getMethod() == 'POST' || 
       request.getMethod() == 'DELETE' || 
       request.getMethod() == 'PUT' ) && !jagg.isCSRFTokenValid()){
-    print({
-        error:true,
-        message: msg.error.csrfError
-    });
+    message.error = true;
+    message.message = msg.error.csrfError;
 }else if (verb == "DELETE" && replyId != null) {
 
     forum.removeReply(replyId, user.username, tenantDomain);

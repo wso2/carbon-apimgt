@@ -29,8 +29,6 @@
             var minLength = 6;
             var passwordStrength   = 0;
 
-			if ((password.length >0) && (password.length <=5)) passwordStrength=1;
-
 			if (password.length >= minLength) passwordStrength++;
 
 			if ((password.match(/[a-z]/)) && (password.match(/[A-Z]/)) ) passwordStrength++;
@@ -40,6 +38,8 @@
 			if (password.match(/.[!,@,#,$,%,^,&,*,?,_,~,-,(,)]/))	passwordStrength++;
 
 			if (password.length > 12) passwordStrength++;
+
+			if ((password.length >0) && (password.length <=5)) passwordStrength=0;
 
             if (username && password.toLowerCase()== username.toLowerCase()){
 			    passwordStrength = 0;

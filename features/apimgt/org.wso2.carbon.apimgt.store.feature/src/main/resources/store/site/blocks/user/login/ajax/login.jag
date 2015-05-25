@@ -17,6 +17,8 @@ include("/jagg/jagg.jag");
 
     var validation = {
         "action": { type: "safetext"},
+        "tenant": { type: "tenant"},
+        "username": { type: "loginname"}
     };
 
     var validation_errors = jagg.validateInputs(validation);
