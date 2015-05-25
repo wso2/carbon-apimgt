@@ -79,7 +79,6 @@ $( document ).ready(function() {
     });
 
     $('.toggleRadios input[type=radio]').click(function(){
-        console.log("Toggle radio selected!");
         $('.toggleContainers .controls').hide();
         $('.toggleRadios input[type=radio]').prop('checked', false);
         $('#' + $(this).val()).closest('div').fadeIn();
