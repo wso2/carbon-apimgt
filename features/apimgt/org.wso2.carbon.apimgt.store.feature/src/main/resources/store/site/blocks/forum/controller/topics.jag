@@ -1,6 +1,5 @@
 <%
 
-//response.contentType = 'text/rjavascript';
 response.addHeader('Cache-Control','no-cache, no-store, must-revalidate'); // HTTP 1.1.
 response.addHeader('Pragma','no-cache'); // HTTP 1.0.
 response.addHeader('Expires','0');
@@ -59,13 +58,20 @@ var message = { error : false };
 //Handle exceptions related to user checks
 try{
 
-if( ( request.getMethod() == 'POST' || 
+var validation = {
+    "page": { type: "number"}
+};
+
+var validation_errors = jagg.validateInputs(validation);
+
+if(validation_errors != true){
+    message.error = true;
+    message.message = msg.error.invalidInputs(validation_errors);
+}else if( ( request.getMethod() == 'POST' || 
       request.getMethod() == 'DELETE' || 
       request.getMethod() == 'PUT' ) && !jagg.isCSRFTokenValid()){
-    print({
-        error:true,
-        message: msg.error.csrfError
-    });
+    message.error = true;
+    message.message = msg.error.csrfError;
 }else if (verb == "DELETE" && topicId != null) {
 
     var user = getUser();
