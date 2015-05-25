@@ -47,6 +47,9 @@ import javax.cache.Cache;
 import javax.cache.Caching;
 import java.util.*;
 import org.wso2.carbon.apimgt.gateway.handlers.Utils;
+import org.wso2.carbon.context.CarbonContext;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
+import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
 /**
  * This class is used to validate a given API key against a given API context and a version.
@@ -91,12 +94,15 @@ public class APIKeyValidator {
     protected Cache getGatewayKeyCache() {
         return Caching.getCacheManager(
                 APIConstants.API_MANAGER_CACHE_MANAGER).getCache(APIConstants.GATEWAY_KEY_CACHE_NAME);
-        //return PrivilegedCarbonContext.getCurrentContext(axisConfig).getCache("keyCache");
+    }
+
+    protected Cache getGatewayTokenCache() {
+        return Caching.getCacheManager(
+                APIConstants.API_MANAGER_CACHE_MANAGER).getCache(APIConstants.GATEWAY_TOKEN_CACHE_NAME);
     }
 
     protected Cache getResourceCache() {
         return Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER).getCache(APIConstants.RESOURCE_CACHE_NAME);
-        //return PrivilegedCarbonContext.getCurrentContext(axisConfig).getCache("resourceCache");
     }
 
     /**
@@ -122,16 +128,27 @@ public class APIKeyValidator {
 
         String cacheKey = APIUtil.getAccessTokenCacheKey(apiKey, context, prefixedVersion, matchingResource,
                                                          httpVerb, authenticationScheme);
+        //If Gateway key caching is enabled.
         if (gatewayKeyCacheEnabled) {
-            APIKeyValidationInfoDTO info = (APIKeyValidationInfoDTO) getGatewayKeyCache().get(cacheKey);
+            //Get the access token from the first level cache.
+            String cachedToken = (String) getGatewayTokenCache().get(apiKey);
 
-            if (info != null) {
-                if (APIUtil.isAccessTokenExpired(info)) {
-                    info.setAuthorized(false);
-                 // in cache, if token is expired  remove cache entry.
-                    getGatewayKeyCache().remove(cacheKey);
+            //If the access token exists in the first level cache.
+            if (cachedToken != null) {
+                APIKeyValidationInfoDTO info = (APIKeyValidationInfoDTO) getGatewayKeyCache().get(cacheKey);
+
+                if (info != null) {
+                    if (APIUtil.isAccessTokenExpired(info)) {
+                        log.info("Token " + apiKey + " expired.");
+                        info.setAuthorized(false);
+                        // in cache, if token is expired  remove cache entry.
+                        getGatewayKeyCache().remove(cacheKey);
+
+                        //Remove from the first level token cache as well.
+                        getGatewayTokenCache().remove(apiKey);
+                    }
+                    return info;
                 }
-                return info;
             }
         }
 
@@ -147,9 +164,33 @@ public class APIKeyValidator {
         APIKeyValidationInfoDTO info = doGetKeyValidationInfo(context, prefixedVersion, apiKey, authenticationScheme, clientDomain,
                                                               matchingResource, httpVerb);
         if (info != null) {
-            if (gatewayKeyCacheEnabled && clientDomain == null) { //save into cache only if, validation is correct and api is allowed for all domains
+            //save into cache only if, validation is correct and api is allowed for all domains
+            if (gatewayKeyCacheEnabled && clientDomain == null) {
+
+                //Get the tenant domain of the API that is being invoked.
+                String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
+
+                //Add to first level Token Cache.
+                getGatewayTokenCache().put(apiKey, tenantDomain);
+                //Add to Key Cache.
                 getGatewayKeyCache().put(cacheKey, info);
+
+                //If this is NOT a super-tenant API that is being invoked
+                if (!MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
+                    //Add the tenant domain as a reference to the super tenant cache so we know from which tenant cache
+                    //to remove the entry when the need occurs to clear this particular cache entry.
+                    try {
+                        PrivilegedCarbonContext.startTenantFlow();
+                        PrivilegedCarbonContext.getThreadLocalCarbonContext().
+                                setTenantDomain(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME, true);
+
+                        getGatewayTokenCache().put(apiKey, tenantDomain);
+                    } finally {
+                        PrivilegedCarbonContext.endTenantFlow();
+                    }
+                }
             }
+
             return info;
         } else {
         	String warnMsg = "API key validation service returns null object";
@@ -157,7 +198,8 @@ public class APIKeyValidator {
             throw new APISecurityException(APISecurityConstants.API_AUTH_GENERAL_ERROR,
                     warnMsg);
         }
-        //}
+
+
     }
 
     protected APIKeyValidationInfoDTO doGetKeyValidationInfo(String context, String apiVersion, String apiKey,
@@ -199,6 +241,9 @@ public class APIKeyValidator {
         VerbInfoDTO verb = null;
         try {
             verb = findMatchingVerb(synCtx);
+            if(verb != null){
+                synCtx.setProperty(APIConstants.VERB_INFO_DTO, verb);
+            }
         } catch (ResourceNotFoundException e) {
             log.error("Could not find matching resource for request");
             return APIConstants.NO_MATCHING_AUTH_SCHEME;

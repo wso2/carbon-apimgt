@@ -77,7 +77,7 @@ var addAnalyticsConfig = function (configData) {
         eventingConfigData.setUrl(configData.eventReceiverURL);
         eventingConfigData.setUserName(configData.eventReceiverUsername);
         eventingConfigData.setPassword(configData.eventReceiverPassword);
-
+        eventingConfigData.setServiceStatsEnable(true);
         var analyzingConfigData = stub.getAnalyzingConfigData();
         analyzingConfigData.setUrl(configData.eventAnalyserURL);
         analyzingConfigData.setUserName(configData.eventAnalyserUsername);

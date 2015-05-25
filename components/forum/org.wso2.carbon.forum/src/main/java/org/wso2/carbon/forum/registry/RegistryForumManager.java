@@ -636,6 +636,70 @@ public class RegistryForumManager implements ForumManager {
             PaginationContext.destroy();
         }
     }
+    
+    @Override
+    public ForumSearchDTO<ForumTopicDTO> searchTopicsBySubjectForResourceId(int start, int count, String searchString,
+                                                                            final String resourceIdentifier,
+                                                                            String user, String tenantDomain)
+                                                                                                throws ForumException {
+
+        final String regex = "*" + searchString.trim() + "*";
+
+        Map<String, List<String>> listMap = new HashMap<String, List<String>>();
+        listMap.put(ForumConstants.OVERVIEW_SUBJECT, new ArrayList<String>() {
+            {
+                add(regex);
+            }
+        });
+        listMap.put(ForumConstants.OVERVIEW_RESOURCE_IDENTIFIER, new ArrayList<String>() {
+            {
+                add(resourceIdentifier.replace("@", "-AT-"));
+            }
+        });
+
+        Registry registry = getRegistry(user, tenantDomain);
+
+        PaginationContext.init(start, count, "DESC", ForumConstants.OVERVIEW_TOPIC_TIMESTAMP, Integer.MAX_VALUE);
+
+        GenericArtifactManager artifactManager = getArtifactManager(registry, TOPIC_RXT_KEY);
+
+        if (artifactManager == null) {
+            if (log.isDebugEnabled()) {
+                log.debug("Could not get artifact manager for topic.rxt, probably no topics found");
+            }
+            return null;
+        }
+
+        try {
+            
+            GenericArtifact[] genericArtifacts = artifactManager.findGenericArtifacts(listMap);
+            if (genericArtifacts == null || genericArtifacts.length == 0) {
+                if (log.isDebugEnabled()) {
+                    log.debug("No Forum Topics Found");
+                }
+                return null;
+            }
+
+            List<ForumTopicDTO> topics = new ArrayList<ForumTopicDTO>();
+            ForumTopicDTO forumTopicDTO = null;
+            for (GenericArtifact artifact : genericArtifacts) {
+                forumTopicDTO = createForumTopicDTOFromArtifact(artifact, registry);
+                topics.add(forumTopicDTO);
+            }
+
+            ForumSearchDTO<ForumTopicDTO> forumSearchDTO = new ForumSearchDTO<ForumTopicDTO>();
+            forumSearchDTO.setPaginatedResults(topics);
+            forumSearchDTO.setTotalResultCount(PaginationContext.getInstance().getLength());
+
+            return forumSearchDTO;
+        } catch (GovernanceException e) {
+            log.error("Error finding forum topics " + e.getMessage());
+            throw new ForumException("Error finding forum topics", e);
+        } finally {
+            PaginationContext.destroy();
+        }
+    }
+
 
     public ForumSearchDTO<ForumTopicDTO> getTopicsByResourceId(int start, int count, final String resourceIdentifier,
                                                                String user, String tenantDomain) throws ForumException{

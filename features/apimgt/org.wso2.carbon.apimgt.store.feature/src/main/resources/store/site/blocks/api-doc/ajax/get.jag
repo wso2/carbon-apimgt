@@ -46,7 +46,7 @@ var log = new Log();
         var host = getLocation(url).host;
         var port = getLocation(url).port;
         var accessProtocol = getLocation(url).protocol;
-
+        var envName = request.getParameter("envName");
         var tenantDomain = "";
         var tenantID = -1234;
 	    var isTenantFlowStarted = false;
@@ -100,15 +100,26 @@ var log = new Log();
             var api = result.api;
         var serverURL = api.serverURL;
         var context = api.context;
-        var splitVal = serverURL.split(",");
+        var splitVal = JSON.parse(serverURL);
         var urlArr = new Array();
         var count = 0;
-        for(var i=0; i < splitVal.length ; i++){
-            if(splitVal[i].trim().indexOf("http") > -1){
-                urlArr[count] = splitVal[i];
+        for(var type in splitVal){
+            var environmentsToType = splitVal[type];
+            for(var name in environmentsToType ){
+                var environmentURL;
+                if(envName == name){
+                    environmentURL = environmentsToType[name];
+                    urlArr[count] = environmentURL[accessProtocol.replace(":","")];
+                    count++;
+                    break;
+                }else{
+                var environmentURL = environmentsToType[name];
+                urlArr[count] = environmentURL[accessProtocol.replace(":","")];
                 count++;
-            };
-        };
+                }
+           
+            }
+        }
         if(urlArr.length===1){
             // We do not need to append the version since with the context versioning, the version is embedded in the context.
             jsonObj.basePath=urlArr[0]+context;
@@ -123,27 +134,12 @@ var log = new Log();
         }
 
         jsonObj.basePath = api.context;
-        
+
 	//assign default value to host with first environment address
-	if (urlArr.length > 0 && urlArr[0].indexOf("https") == 0) {
-	        jsonObj.host = urlArr[0].trim().replace("https://","");
-	} else {
-		jsonObj.host = urlArr[0].trim().replace("http://","");
+	if (urlArr.length > 0 ) {
+	        jsonObj.host = urlArr[0].trim().replace(accessProtocol+"//","");
 	}
-	
-	if (accessProtocol.indexOf("https:") == 0) {
-		for (var i =0; i < urlArr.length; i++) {
-			if (urlArr[i].indexOf("https") != -1) {
-				jsonObj.host = urlArr[i].trim().replace("https://","");
-			}
-		}
-	} else {
-		for (var i =0; i < urlArr.length; i++) {
-			if (urlArr[i].indexOf("https") == -1) {
-				jsonObj.host = urlArr[i].trim().replace("http://","");
-			}
-		}
-	}
+
 
         var paths = {}; //fix for /*
         for (var property in jsonObj.paths) {

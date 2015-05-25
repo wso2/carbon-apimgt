@@ -41,6 +41,7 @@ import java.io.InputStream;
 import java.io.StringWriter;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * This is a factory class.you have to use this when you need to initiate classes by reading config file.
@@ -54,84 +55,50 @@ public class KeyManagerHolder {
 
 
     /**
-     * Initialises KeyManager by reading key-manager.xml.
+     * Read values from APIManagerConfiguration.
      *
-     * @param configPath Path to key-manager.xml
+     * @param apiManagerConfiguration API Manager Configuration
      * @throws APIManagementException
      */
-    public static void initializeKeyManager(String configPath) throws APIManagementException {
+    public static void initializeKeyManager(APIManagerConfiguration apiManagerConfiguration)
+            throws APIManagementException {
+        if (apiManagerConfiguration != null) {
+            try {
+                // If APIKeyManager section is disabled, we are reading values defined in APIKeyValidator section.
+                if (apiManagerConfiguration.getFirstProperty(APIConstants.KEY_MANAGER_CLIENT) == null) {
+                    keyManager = (KeyManager) Class.forName("org.wso2.carbon.apimgt.keymgt.AMDefaultKeyManagerImpl").newInstance();
+                    keyManager.loadConfiguration(null);
+                } else {
+                    // If APIKeyManager section is enabled, class name is picked from there.
+                    String clazz = apiManagerConfiguration.getFirstProperty(APIConstants.KEY_MANAGER_CLIENT);
+                    keyManager = (KeyManager) Class.forName(clazz).newInstance();
+                    Set<String> configKeySet = apiManagerConfiguration.getConfigKeySet();
 
-        InputStream in = null;
-        try {
-            in = FileUtils.openInputStream(new File(configPath));
-            StAXOMBuilder builder = new StAXOMBuilder(in);
-            OMElement document = builder.getDocumentElement();
-            if (document == null) {
-                throw new APIManagementException("api-manager.xml not found.");
-            }
+                    KeyManagerConfiguration keyManagerConfiguration = new KeyManagerConfiguration();
 
-            log.debug("Reading api-manager.xml");
-            OMElement keyManagerElement = document.getFirstChildWithName(new QName("APIKeyManager"));
-            // Run this if APIKeyManager section is not specified.
-            if (keyManagerElement == null) {
-                keyManager = (KeyManager) Class.forName("org.wso2.carbon.apimgt.keymgt.AMDefaultKeyManagerImpl").newInstance();
-                keyManager.loadConfiguration(null);
-            } else {
-                // Instantiating the class implementing KeyManager interface.
-                log.debug("Initialised KeyManager implementation");
-                APIManagerConfiguration configuration = ServiceReferenceHolder.getInstance()
-                        .getAPIManagerConfigurationService().getAPIManagerConfiguration();
+                    // Iterating through the Configuration and seeing which elements are starting with APIKeyManager
+                    // .Configuration. Values of those keys will be set in KeyManagerConfiguration object.
+                    String startKey = APIConstants.API_KEY_MANAGER + "Configuration.";
+                    for (String configKey : configKeySet) {
+                        if (configKey.startsWith(startKey)) {
+                            keyManagerConfiguration.addParameter(configKey.replace(startKey, ""),
+                                                                 apiManagerConfiguration.getFirstProperty(configKey));
+                        }
+                    }
 
-                String keyManagerClass = configuration.getFirstProperty(APIConstants.KEY_MANAGER_CLIENT);
-                keyManager = (KeyManager) Class.forName(keyManagerClass).newInstance();
-                OMElement configElement = keyManagerElement.getFirstChildWithName(new QName("Configuration"));
-
-                if (configElement == null) {
-                    throw new APIManagementException("Configuration section not found. api-manager.xml may be " +
-                                                     "corrupted.");
+                    // Set the created configuration in the KeyManager instance.
+                    keyManager.loadConfiguration(keyManagerConfiguration);
                 }
-
-                log.debug("Loading KeyManager configuration,");
-
-                // Reading contents inside <Configuration> block and pass it to specific KeyManager implementation.
-                // Implementers can provide specific parameters needed for their implementation withing the Configuration
-                // block.
-                XMLOutputFactory xof = XMLOutputFactory.newInstance();
-                XMLStreamWriter streamWriter;
-                StringWriter stringStream = new StringWriter();
-                streamWriter = xof.createXMLStreamWriter(stringStream);
-                configElement.serialize(streamWriter);
-                streamWriter.close();
-                keyManager.loadConfiguration(stringStream.toString());
-
-                log.debug("Successfully loaded KeyManager configuration.");
+            } catch (ClassNotFoundException e) {
+                log.error("Error occurred while instantiating KeyManager implementation");
+                throw new APIManagementException("Error occurred while instantiating KeyManager implementation", e);
+            } catch (InstantiationException e) {
+                log.error("Error occurred while instantiating KeyManager implementation");
+                throw new APIManagementException("Error occurred while instantiating KeyManager implementation", e);
+            } catch (IllegalAccessException e) {
+                log.error("Error occurred while instantiating KeyManager implementation");
+                throw new APIManagementException("Error occurred while instantiating KeyManager implementation", e);
             }
-
-        } catch (IOException e) {
-            log.error(e);
-            throw new APIManagementException("I/O error while reading the API manager " +
-                                             "configuration: " + configPath, e);
-        } catch (XMLStreamException e) {
-            log.error(e);
-            throw new APIManagementException("Error while parsing the API manager " +
-                                             "configuration: " + configPath, e);
-        } catch (OMException e) {
-            log.error(e);
-            throw new APIManagementException("Error while parsing API Manager configuration: " + configPath, e);
-        } catch (ClassNotFoundException e) {
-            log.error(e);
-            throw new APIManagementException("Error occurred while instantiating KeyManager implementation", e);
-        } catch (InstantiationException e) {
-            log.error(e);
-            throw new APIManagementException("Error occurred while instantiating KeyManager implementation", e);
-        } catch (IllegalAccessException e) {
-            log.error(e);
-            throw new APIManagementException("Error occurred while instantiating KeyManager implementation", e);
-        } catch (APIManagementException e) {
-            log.error(e);
-            throw new APIManagementException("Error occurred while instantiating KeyManager implementation", e);
-        } finally {
-            IOUtils.closeQuietly(in);
         }
     }
 
