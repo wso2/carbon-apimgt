@@ -729,9 +729,9 @@ $(document).ready(function(){
                         if (ssoEnabled) {
                              var currentLoc = window.location.pathname;
                              if (currentLoc.indexOf(".jag") >= 0) {
-                                 location.href = "index.jag";
+                                 location.href = "login.jag?requestedPage="+currentLoc;
                              } else {
-                                 location.href = 'site/pages/index.jag';
+                                 location.href = 'site/pages/login.jag?requestedPage='+currentLoc;
                              }
                         } else {
                              jagg.showLogin();
