@@ -1,6 +1,7 @@
 <% jagg.template("api/provider-apis", function(inputs, outputs, jagg) {%>
 <% var stars = require(jagg.getThemeFile("utils/ratings/star-generator.js")); %>
-    <%if(outputs.apiOwner!=null){%> <h4><%=i18n.localize("moreAPI")%>  '<%=outputs.apiOwner%>'</h4><%}%>
+    <%if(outputs.apiBizOwner != null){%> <h4><%=i18n.localize("moreAPI")%>  '<%=outputs.apiBizOwner%>'</h4><%}
+    else if(outputs.apiOwner != null){%> <h4><%=i18n.localize("moreAPI")%>  '<%=outputs.apiOwner%>'</h4><%}%>
     <%
     var urlPrefix;
     var tenant=request_tenant;

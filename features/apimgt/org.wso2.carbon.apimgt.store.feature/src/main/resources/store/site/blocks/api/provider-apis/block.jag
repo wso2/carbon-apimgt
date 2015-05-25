@@ -12,20 +12,24 @@ jagg.block("api/provider-apis", {
         var apiOwner = inputs.apiOwner;
         var currentApi = inputs.currentApi;
         var currentApiVersion = inputs.currentApiVersion;
+        var apiBizOwner = inputs.apiBizOwner;
         if(providerId != 'Provider'){
             var mod = jagg.module("api");
-            var result = mod.getPublishedAPIsByProvider(providerId,username,currentApi,currentApiVersion,inputs.count,apiOwner);
+            var result = mod.getPublishedAPIsByProvider(providerId,username,currentApi,currentApiVersion,inputs.count,
+                                                        apiOwner, apiBizOwner);
             var apis=result.apis;
             return {
                 "apis":apis,
                 "providerId":providerId,
-                "apiOwner":apiOwner
+                "apiOwner":apiOwner,
+                "apiBizOwner":apiBizOwner
             };
         }else{
             return {
                 "apis":null,
                 "providerId":null,
-                "apiOwner":null
+                "apiOwner":null,
+                "apiBizOwner":null
             };
         }
     },

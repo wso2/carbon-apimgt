@@ -29,12 +29,17 @@ i18n.init(request,localeResourcesBasePath);
     var apiVersion=null;
     var apiProvider="Provider";
     var apiOwner="";
+    var apiBizOwner="";
 
     if(!error){
     apiName=api.name;
     apiVersion=api.version;
     apiProvider=api.provider;
     apiOwner=api.apiOwner;
+    apiBizOwner=api.bizOwner;
+
+    var log = new Log();
+    log.info("Biz Owner = " + api.bizOwner);
     }
     title = "API Store - " + apiName;
 
@@ -57,6 +62,7 @@ i18n.init(request,localeResourcesBasePath);
                             "inputs":{
                                      "providerId":apiProvider,
                                      "apiOwner":apiOwner,
+                                     "apiBizOwner":apiBizOwner,
                                      "currentApi":apiName,
                                      "currentApiVersion":apiVersion,
                                      "uriTemplates":uriTemplates,
