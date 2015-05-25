@@ -4,9 +4,8 @@ var site = require("/site/conf/site.json");
 
 var subtheme = request.getParameter("subthemeToApply");
 session.put("theme", {
-	"base" : 'fancy',
+	"base" : 'default',
     "subtheme" : (subtheme && subtheme != "") ? subtheme : null
 });
-//response.sendRedirect(openRedirectValidation(request.getParameter("pathToSend")));
 response.sendRedirect(jagg.urlTenanted("/"));
 %>
