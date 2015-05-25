@@ -101,6 +101,8 @@ var log = new Log();
             if(headerKey == "Accept-Language"){result.req_al = headerValue;}
             if(headerKey == "Accept-Charset"){result.req_acc = headerValue;}
         }
+        //always return text/plain to prevent XSS attacks.
+        response.contentType = "text/plain; charset=UTF-8"; 
         print(stringify(result)+"**#*#**#*#"+xhr.responseText);
     } else {
         response.contentType = "application/json; charset=UTF-8";

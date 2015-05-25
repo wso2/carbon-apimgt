@@ -7,7 +7,7 @@ var log = new Log();
 
 var validation = {
     "action": { type: "safetext"},
-    "username": { type: "names"},
+    "username": { type: "name"},
     "password": { type: "password"},
 };
 
