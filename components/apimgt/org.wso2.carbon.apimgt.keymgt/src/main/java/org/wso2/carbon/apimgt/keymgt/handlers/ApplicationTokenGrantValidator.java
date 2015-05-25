@@ -21,8 +21,8 @@ import org.apache.amber.oauth2.common.validators.AbstractValidator;
 
 import javax.servlet.http.HttpServletRequest;
 
-public class OpenKeyManagerGrantValidator extends AbstractValidator<HttpServletRequest> {
-    public OpenKeyManagerGrantValidator() {
+public class ApplicationTokenGrantValidator extends AbstractValidator<HttpServletRequest> {
+    public ApplicationTokenGrantValidator() {
 
         // validity period must be in the request parameter
         requiredParams.add("validity_period");

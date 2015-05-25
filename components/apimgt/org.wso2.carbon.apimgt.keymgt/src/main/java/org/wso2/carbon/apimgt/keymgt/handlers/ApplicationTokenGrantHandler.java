@@ -3,27 +3,21 @@ package org.wso2.carbon.apimgt.keymgt.handlers;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.impl.handlers.ScopesIssuer;
-import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.keymgt.util.APIKeyMgtDataHolder;
 import org.wso2.carbon.identity.oauth2.IdentityOAuth2Exception;
 import org.wso2.carbon.identity.oauth2.model.*;
 import org.wso2.carbon.identity.oauth2.token.OAuthTokenReqMessageContext;
 import org.wso2.carbon.identity.oauth2.token.handlers.grant.ClientCredentialsGrantHandler;
-import org.wso2.carbon.apimgt.impl.APIConstants;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
 
 /**
  * This grant handler will accept validity period as a parameter.
  */
-public class OpenKeyManagerGrantHandler extends ClientCredentialsGrantHandler {
+public class ApplicationTokenGrantHandler extends ClientCredentialsGrantHandler {
 
-    private static Log log = LogFactory.getLog(OpenKeyManagerGrantHandler.class);
+    private static Log log = LogFactory.getLog(ApplicationTokenGrantHandler.class);
     private static final String OPENKM_GRANT_PARAM = "validity_period";
     private static final int DEFAULT_VALIDITY_PERIOD = 3600000;
 
