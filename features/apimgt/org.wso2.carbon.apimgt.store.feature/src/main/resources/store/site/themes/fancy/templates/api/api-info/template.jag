@@ -95,7 +95,11 @@ if(tenant!=null) {
     <div class="content-data">
         <%if(api.isAdvertiseOnly && api.apiOwner != null) {%>
         	<h6><i class="icon-user"></i> <%=api.apiOwner%></h6>
-        <%}else {%>
+        <%}
+        else if(api.bizOwner != null){%>
+            <h6><i class="icon-user"></i> <%=api.bizOwner%></h6>
+        <%}
+        else {%>
         	<h6><i class="icon-user"></i> <%=api.provider%></h6>
         <%}%>
         <div class="api-info">

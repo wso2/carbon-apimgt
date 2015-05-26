@@ -65,6 +65,7 @@ import org.wso2.carbon.apimgt.keymgt.stub.types.carbon.ApplicationKeysDTO;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.governance.api.common.dataobjects.GovernanceArtifact;
 import org.wso2.carbon.governance.api.exception.GovernanceException;
+import org.wso2.carbon.governance.api.generic.GenericArtifactFilter;
 import org.wso2.carbon.governance.api.generic.GenericArtifactManager;
 import org.wso2.carbon.governance.api.generic.dataobjects.GenericArtifact;
 import org.wso2.carbon.governance.api.util.GovernanceUtils;
@@ -79,6 +80,7 @@ import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.core.pagination.PaginationContext;
 import org.wso2.carbon.registry.core.session.UserRegistry;
 import org.wso2.carbon.registry.core.utils.RegistryUtils;
+import org.wso2.carbon.user.api.AuthorizationManager;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
@@ -1210,149 +1212,88 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             handleException("Failed to get Published APIs for provider : " + providerId, e);
             return null;
         }
-
-
     }
 
-    public Set<API> getPublishedAPIsByProvider(String providerId, String loggedUsername, int limit, String apiOwner)
-            throws APIManagementException {
-        SortedSet<API> apiSortedSet = new TreeSet<API>(new APINameComparator());
-        SortedSet<API> apiVersionsSortedSet = new TreeSet<API>(new APIVersionComparator());
+    public Set<API> getPublishedAPIsByProvider(String providerId, String loggedUsername, int limit, String apiOwner,
+                                               String apiBizOwner) throws APIManagementException {
+
         try {
-            Map<String, API> latestPublishedAPIs = new HashMap<String, API>();
-            List<API> multiVersionedAPIs = new ArrayList<API>();
-            Comparator<API> versionComparator = new APIVersionComparator();
             Boolean allowMultipleVersions = APIUtil.isAllowDisplayMultipleVersions();
             Boolean showAllAPIs = APIUtil.isAllowDisplayAPIsWithMultipleStatus();
 
             String providerDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(providerId));
-            int id = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager().getTenantId(providerDomain);
+            int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager().getTenantId(providerDomain);
             Registry registry = ServiceReferenceHolder.getInstance().
-                    getRegistryService().getGovernanceSystemRegistry(id);
+                    getRegistryService().getGovernanceSystemRegistry(tenantId);
 
-            org.wso2.carbon.user.api.AuthorizationManager manager = ServiceReferenceHolder.getInstance().
-                    getRealmService().getTenantUserRealm(id).
-                    getAuthorizationManager();
-
-            String providerPath = APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR +
-                                  providerId;
             GenericArtifactManager artifactManager = APIUtil.getArtifactManager(registry,
-                                                                                APIConstants.API_KEY);
-            Association[] associations = registry.getAssociations(providerPath,
-                                                                  APIConstants.PROVIDER_ASSOCIATION);
+                    APIConstants.API_KEY);
+
             int publishedAPICount = 0;
 
-            for (Association association1 : associations) {
+            Map<String, API> apiCollection = new HashMap<String, API>();
 
-                if (publishedAPICount >= limit) {
-                    break;
-                }
+            if(apiBizOwner != null && !apiBizOwner.isEmpty()){
 
-                Association association = association1;
-                String apiPath = association.getDestinationPath();
+                try {
 
-                Resource resource;
-                String path = RegistryUtils.getAbsolutePath(RegistryContext.getBaseInstance(),
-                                                            APIUtil.getMountedPath(RegistryContext.getBaseInstance(),
-                                                                                   RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH) +
-                                                            apiPath);
-                boolean checkAuthorized = false;
-                String userNameWithoutDomain = loggedUsername;
+                    //PaginationContext.init(0, limit, "DESC", "timestamp", limit);
 
-                String loggedDomainName = "";
-                if (!"".equals(loggedUsername) &&
-                    !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(super.tenantDomain)) {
-                    String[] nameParts = loggedUsername.split("@");
-                    loggedDomainName = nameParts[1];
-                    userNameWithoutDomain = nameParts[0];
-                }
+                    final String bizOwner = apiBizOwner;
 
-                if (loggedUsername.equals("")) {
-                    // Anonymous user is viewing.
-                    checkAuthorized = manager.isRoleAuthorized(APIConstants.ANONYMOUS_ROLE, path, ActionConstants.GET);
-                } else {
-                    // Some user is logged in.
-                    checkAuthorized = manager.isUserAuthorized(userNameWithoutDomain, path, ActionConstants.GET);
-                }
-
-                String apiArtifactId = null;
-                if (checkAuthorized) {
-                    resource = registry.get(apiPath);
-                    apiArtifactId = resource.getUUID();
-                }
-
-                if (apiArtifactId != null) {
-                    GenericArtifact artifact = artifactManager.getGenericArtifact(apiArtifactId);
-
-                    // check the API status
-                    String status = artifact.getAttribute(APIConstants.API_OVERVIEW_STATUS);
-
-                    API api = null;
-                    //Check the api-manager.xml config file entry <DisplayAllAPIs> value is false
-                    if (!showAllAPIs) {
-                        // then we are only interested in published APIs here...
-                        if (status.equals(APIConstants.PUBLISHED)) {
-                            api = APIUtil.getAPI(artifact);
-                            publishedAPICount++;
+                    GenericArtifact[] genericArtifacts = artifactManager.findGenericArtifacts(new GenericArtifactFilter() {
+                        public boolean matches(GenericArtifact artifact) throws GovernanceException {
+                            if (artifact.getAttribute(APIConstants.API_OVERVIEW_BUSS_OWNER) != null) {
+                                return bizOwner.matches(artifact.getAttribute(APIConstants.API_OVERVIEW_BUSS_OWNER));
+                            }
+                            return false;
                         }
-                    } else {   // else we are interested in both deprecated/published APIs here...
-                        if (status.equals(APIConstants.PUBLISHED) || status.equals(APIConstants.DEPRECATED)) {
-                            api = APIUtil.getAPI(artifact);
-                            publishedAPICount++;
+                    });
 
+                    if(genericArtifacts != null && genericArtifacts.length > 0){
+
+                        for(GenericArtifact artifact : genericArtifacts){
+                            if (publishedAPICount >= limit) {
+                                break;
+                            }
+
+                            if(isCandidateAPI(artifact.getPath(), loggedUsername, artifactManager, tenantId, showAllAPIs,
+                                              allowMultipleVersions, apiOwner, providerId, registry, apiCollection)){
+                                publishedAPICount += 1;
+                            }
                         }
-
                     }
-                    if (api != null) {
-                        // apiOwner is the value coming from front end and compared against the API instance
-                        if (apiOwner != null && !apiOwner.isEmpty()) {
-                            if (APIUtil.replaceEmailDomainBack(providerId)
-                                        .equals(APIUtil.replaceEmailDomainBack(apiOwner)) &&
-                                api.getApiOwner() != null && !api.getApiOwner().isEmpty() &&
-                                !APIUtil.replaceEmailDomainBack(apiOwner)
-                                        .equals(APIUtil.replaceEmailDomainBack(api.getApiOwner()))) {
-                                continue; // reject remote APIs when local admin user's API selected
-                            } else if (!APIUtil.replaceEmailDomainBack(providerId).equals(
-                                    APIUtil.replaceEmailDomainBack(apiOwner)) &&
-                                       !APIUtil.replaceEmailDomainBack(apiOwner)
-                                               .equals(APIUtil.replaceEmailDomainBack(api.getApiOwner()))) {
-                                continue; // reject local admin's APIs when remote API selected
-                            }
-                        }
-                        String key;
-                        //Check the configuration to allow showing multiple versions of an API true/false
-                        if (!allowMultipleVersions) { //If allow only showing the latest version of an API
-                            key = api.getId().getProviderName() + ":" + api.getId().getApiName();
-                            API existingAPI = latestPublishedAPIs.get(key);
-                            if (existingAPI != null) {
-                                // If we have already seen an API with the same name, make sure
-                                // this one has a higher version number
-                                if (versionComparator.compare(api, existingAPI) > 0) {
-                                    latestPublishedAPIs.put(key, api);
-                                }
-                            } else {
-                                // We haven't seen this API before
-                                latestPublishedAPIs.put(key, api);
-                            }
-                        } else { //If allow showing multiple versions of an API
-                            key = api.getId().getProviderName() + ":" + api.getId().getApiName() + ":" + api.getId()
-                                    .getVersion();
-                            multiVersionedAPIs.add(api);
-                        }
+                } catch (GovernanceException e) {
+                    log.error("Error while finding APIs by business owner " + apiBizOwner, e);
+                    return null;
+                } finally {
+                    //PaginationContext.destroy();
+                }
+            }
+            else{
+                String providerPath = APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR +
+                        providerId;
+
+                Association[] associations = registry.getAssociations(providerPath,
+                        APIConstants.PROVIDER_ASSOCIATION);
+
+                for (Association association1 : associations) {
+                    if (publishedAPICount >= limit) {
+                        break;
+                    }
+
+                    Association association = association1;
+                    String apiPath = association.getDestinationPath();
+
+                    if(isCandidateAPI(apiPath, loggedUsername, artifactManager, tenantId, showAllAPIs,
+                            allowMultipleVersions, apiOwner, providerId, registry, apiCollection)){
+
+                        publishedAPICount += 1;
                     }
                 }
             }
-            if (!allowMultipleVersions) {
-                for (API api : latestPublishedAPIs.values()) {
-                    apiSortedSet.add(api);
-                }
-                return apiSortedSet;
-            } else {
-                for (API api : multiVersionedAPIs) {
-                    apiVersionsSortedSet.add(api);
-                }
-                return apiVersionsSortedSet;
-            }
+
+            return new HashSet<API>(apiCollection.values());
 
         } catch (RegistryException e) {
             handleException("Failed to get Published APIs for provider : " + providerId, e);
@@ -1364,10 +1305,137 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             handleException("Failed to get Published APIs for provider : " + providerId, e);
             return null;
         }
-
     }
 
+    private boolean isCandidateAPI(String apiPath, String loggedUsername, GenericArtifactManager artifactManager,
+                                   int tenantId, boolean showAllAPIs, boolean allowMultipleVersions,
+                                   String apiOwner, String providerId, Registry registry, Map<String, API> apiCollection)
+            throws UserStoreException, RegistryException, APIManagementException {
 
+        AuthorizationManager manager = ServiceReferenceHolder.getInstance().getRealmService().
+                                                getTenantUserRealm(tenantId).getAuthorizationManager();
+        Comparator<API> versionComparator = new APIVersionComparator();
+
+        Resource resource;
+        String path = RegistryUtils.getAbsolutePath(RegistryContext.getBaseInstance(),
+                APIUtil.getMountedPath(RegistryContext.getBaseInstance(),
+                        RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH) +
+                        apiPath);
+        boolean checkAuthorized = false;
+        String userNameWithoutDomain = loggedUsername;
+
+        String loggedDomainName = "";
+        if (!"".equals(loggedUsername) &&
+                !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(super.tenantDomain)) {
+            String[] nameParts = loggedUsername.split("@");
+            loggedDomainName = nameParts[1];
+            userNameWithoutDomain = nameParts[0];
+        }
+
+        if (loggedUsername.equals("")) {
+            // Anonymous user is viewing.
+            checkAuthorized = manager.isRoleAuthorized(APIConstants.ANONYMOUS_ROLE, path, ActionConstants.GET);
+        } else {
+            // Some user is logged in.
+            checkAuthorized = manager.isUserAuthorized(userNameWithoutDomain, path, ActionConstants.GET);
+        }
+
+        String apiArtifactId = null;
+        if (checkAuthorized) {
+            resource = registry.get(apiPath);
+            apiArtifactId = resource.getUUID();
+        }
+
+        if (apiArtifactId != null) {
+            GenericArtifact artifact = artifactManager.getGenericArtifact(apiArtifactId);
+
+            // check the API status
+            String status = artifact.getAttribute(APIConstants.API_OVERVIEW_STATUS);
+
+            API api = null;
+            //Check the api-manager.xml config file entry <DisplayAllAPIs> value is false
+            if (!showAllAPIs) {
+                // then we are only interested in published APIs here...
+                if (status.equals(APIConstants.PUBLISHED)) {
+                    api = APIUtil.getAPI(artifact);
+                }
+            } else {   // else we are interested in both deprecated/published APIs here...
+                if (status.equals(APIConstants.PUBLISHED) || status.equals(APIConstants.DEPRECATED)) {
+                    api = APIUtil.getAPI(artifact);
+                }
+
+            }
+            if (api != null) {
+                // apiOwner is the value coming from front end and compared against the API instance
+                if (apiOwner != null && !apiOwner.isEmpty()) {
+                    if (APIUtil.replaceEmailDomainBack(providerId)
+                            .equals(APIUtil.replaceEmailDomainBack(apiOwner)) &&
+                            api.getApiOwner() != null && !api.getApiOwner().isEmpty() &&
+                            !APIUtil.replaceEmailDomainBack(apiOwner)
+                                    .equals(APIUtil.replaceEmailDomainBack(api.getApiOwner()))) {
+                        return false; // reject remote APIs when local admin user's API selected
+                    } else if (!APIUtil.replaceEmailDomainBack(providerId).equals(
+                            APIUtil.replaceEmailDomainBack(apiOwner)) &&
+                            !APIUtil.replaceEmailDomainBack(apiOwner)
+                                    .equals(APIUtil.replaceEmailDomainBack(api.getApiOwner()))) {
+                        return false; // reject local admin's APIs when remote API selected
+                    }
+                }
+                String key;
+                //Check the configuration to allow showing multiple versions of an API true/false
+                if (!allowMultipleVersions) { //If allow only showing the latest version of an API
+                    key = api.getId().getProviderName() + ":" + api.getId().getApiName();
+                    API existingAPI = apiCollection.get(key);
+                    if (existingAPI != null) {
+                        // If we have already seen an API with the same name, make sure
+                        // this one has a higher version number
+                        if (versionComparator.compare(api, existingAPI) > 0) {
+                            apiCollection.put(key, api);
+                            return true;
+                        }
+                    } else {
+                        // We haven't seen this API before
+                        apiCollection.put(key, api);
+                        return true;
+                    }
+                } else { //If allow showing multiple versions of an API
+                    key = api.getId().getProviderName() + ":" + api.getId().getApiName() + ":" + api.getId()
+                            .getVersion();
+                    //we're not really interested in the key, so generate one for the sake of adding this element to
+                    //the map.
+                    key = key + "_" + apiCollection.size();
+                    apiCollection.put(key, api);
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    private void getAPIsByBusinessOwner(Registry registry, final String businessOwner){
+
+        Map<String, List<String>> listMap = new HashMap<String, List<String>>();
+        listMap.put(APIConstants.API_OVERVIEW_BUSS_OWNER, new ArrayList<String>() {{
+            add(businessOwner);
+        }});
+
+        try {
+            GenericArtifactManager artifactManager = APIUtil.getArtifactManager(registry, APIConstants.API_KEY);
+            GenericArtifact[] genericArtifacts = artifactManager.findGenericArtifacts(listMap);
+
+            if(genericArtifacts != null && genericArtifacts.length > 0){
+                //Set<API>
+                for(GenericArtifact artifact : genericArtifacts){
+                    artifact.getPath();
+                }
+            }
+
+        } catch (APIManagementException e) {
+            e.printStackTrace();
+        } catch (GovernanceException e) {
+            e.printStackTrace();
+        }
+    }
 
     public Map<String,Object> searchPaginatedAPIs(String searchTerm, String searchType, String requestedTenantDomain,int start,int end)
             throws APIManagementException {
