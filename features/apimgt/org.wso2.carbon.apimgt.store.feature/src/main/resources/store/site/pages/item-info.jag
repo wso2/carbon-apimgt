@@ -38,8 +38,6 @@ i18n.init(request,localeResourcesBasePath);
     apiOwner=api.apiOwner;
     apiBizOwner=api.bizOwner;
 
-    var log = new Log();
-    log.info("Biz Owner = " + api.bizOwner);
     }
     title = "API Store - " + apiName;
 

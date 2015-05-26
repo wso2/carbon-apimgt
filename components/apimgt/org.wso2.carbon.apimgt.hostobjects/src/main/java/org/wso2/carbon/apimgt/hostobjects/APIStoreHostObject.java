@@ -4020,13 +4020,14 @@ public class APIStoreHostObject extends ScriptableObject {
                                                                     Function funObj)
             throws APIManagementException {
         NativeArray apiArray = new NativeArray(0);
-        if (args != null && isStringArray(args)) {
+        if (args != null) {
             String providerName = APIUtil.replaceEmailDomain(args[0].toString());
             String username = args[1].toString();
             String limitArg = args[2].toString();
             int limit = Integer.parseInt(limitArg);
             String apiOwner = args[3].toString();
             String apiBizOwner = null;
+            //If api biz-owner is not null
             if(args[4] != null){
                 apiBizOwner = args[4].toString();
             }
@@ -4035,7 +4036,7 @@ public class APIStoreHostObject extends ScriptableObject {
             APIConsumer apiConsumer = getAPIConsumer(thisObj);
             boolean isTenantFlowStarted = false;
             try {
-                String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(username));
+                String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(providerName));
                 if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
                     isTenantFlowStarted = true;
                     PrivilegedCarbonContext.startTenantFlow();

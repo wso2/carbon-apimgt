@@ -65,6 +65,7 @@ import org.wso2.carbon.apimgt.keymgt.stub.types.carbon.ApplicationKeysDTO;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.governance.api.common.dataobjects.GovernanceArtifact;
 import org.wso2.carbon.governance.api.exception.GovernanceException;
+import org.wso2.carbon.governance.api.generic.GenericArtifactFilter;
 import org.wso2.carbon.governance.api.generic.GenericArtifactManager;
 import org.wso2.carbon.governance.api.generic.dataobjects.GenericArtifact;
 import org.wso2.carbon.governance.api.util.GovernanceUtils;
@@ -1215,53 +1216,39 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 
     public Set<API> getPublishedAPIsByProvider(String providerId, String loggedUsername, int limit, String apiOwner,
                                                String apiBizOwner) throws APIManagementException {
-        SortedSet<API> apiSortedSet = new TreeSet<API>(new APINameComparator());
-        SortedSet<API> apiVersionsSortedSet = new TreeSet<API>(new APIVersionComparator());
 
         try {
-            Map<String, API> latestPublishedAPIs = new HashMap<String, API>();
-            List<API> multiVersionedAPIs = new ArrayList<API>();
-            Comparator<API> versionComparator = new APIVersionComparator();
             Boolean allowMultipleVersions = APIUtil.isAllowDisplayMultipleVersions();
             Boolean showAllAPIs = APIUtil.isAllowDisplayAPIsWithMultipleStatus();
 
             String providerDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(providerId));
-            int id = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager().getTenantId(providerDomain);
+            int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager().getTenantId(providerDomain);
             Registry registry = ServiceReferenceHolder.getInstance().
-                    getRegistryService().getGovernanceSystemRegistry(id);
+                    getRegistryService().getGovernanceSystemRegistry(tenantId);
 
-            org.wso2.carbon.user.api.AuthorizationManager manager = ServiceReferenceHolder.getInstance().
-                    getRealmService().getTenantUserRealm(id).
-                    getAuthorizationManager();
-
-            String providerPath = APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR +
-                                  providerId;
             GenericArtifactManager artifactManager = APIUtil.getArtifactManager(registry,
-                                                                                APIConstants.API_KEY);
-            Association[] associations = registry.getAssociations(providerPath,
-                                                                  APIConstants.PROVIDER_ASSOCIATION);
+                    APIConstants.API_KEY);
+
             int publishedAPICount = 0;
 
             Map<String, API> apiCollection = new HashMap<String, API>();
 
             if(apiBizOwner != null && !apiBizOwner.isEmpty()){
 
-                final String businessOwner = apiBizOwner;
-
-                Map<String, List<String>> listMap = new HashMap<String, List<String>>();
-                listMap.put(APIConstants.API_OVERVIEW_BUSS_OWNER, new ArrayList<String>() {{
-                    add(businessOwner);
-                }});
-
-                boolean tenantFlowStarted = false;
                 try {
-                    if(!MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(providerDomain)){
-                        PrivilegedCarbonContext.startTenantFlow();
-                        PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(providerDomain, true);
-                        tenantFlowStarted = true;
-                    }
 
-                    GenericArtifact[] genericArtifacts = artifactManager.findGenericArtifacts(listMap);
+                    //PaginationContext.init(0, limit, "DESC", "timestamp", limit);
+
+                    final String bizOwner = apiBizOwner;
+
+                    GenericArtifact[] genericArtifacts = artifactManager.findGenericArtifacts(new GenericArtifactFilter() {
+                        public boolean matches(GenericArtifact artifact) throws GovernanceException {
+                            if (artifact.getAttribute(APIConstants.API_OVERVIEW_BUSS_OWNER) != null) {
+                                return bizOwner.matches(artifact.getAttribute(APIConstants.API_OVERVIEW_BUSS_OWNER));
+                            }
+                            return false;
+                        }
+                    });
 
                     if(genericArtifacts != null && genericArtifacts.length > 0){
 
@@ -1270,8 +1257,8 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                                 break;
                             }
 
-                            if(isCandidateAPI(artifact.getPath(), loggedUsername, artifactManager, id, showAllAPIs,
-                                              allowMultipleVersions, apiOwner, providerId, apiCollection)){
+                            if(isCandidateAPI(artifact.getPath(), loggedUsername, artifactManager, tenantId, showAllAPIs,
+                                              allowMultipleVersions, apiOwner, providerId, registry, apiCollection)){
                                 publishedAPICount += 1;
                             }
                         }
@@ -1280,12 +1267,16 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                     log.error("Error while finding APIs by business owner " + apiBizOwner, e);
                     return null;
                 } finally {
-                    if(tenantFlowStarted){
-                        PrivilegedCarbonContext.endTenantFlow();
-                    }
+                    //PaginationContext.destroy();
                 }
             }
             else{
+                String providerPath = APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR +
+                        providerId;
+
+                Association[] associations = registry.getAssociations(providerPath,
+                        APIConstants.PROVIDER_ASSOCIATION);
+
                 for (Association association1 : associations) {
                     if (publishedAPICount >= limit) {
                         break;
@@ -1294,16 +1285,15 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                     Association association = association1;
                     String apiPath = association.getDestinationPath();
 
-                    if(isCandidateAPI(apiPath, loggedUsername, artifactManager, id, showAllAPIs,
-                            allowMultipleVersions, apiOwner, providerId, apiCollection)){
+                    if(isCandidateAPI(apiPath, loggedUsername, artifactManager, tenantId, showAllAPIs,
+                            allowMultipleVersions, apiOwner, providerId, registry, apiCollection)){
 
                         publishedAPICount += 1;
                     }
                 }
             }
 
-            Set<API> apis = new HashSet<API>(apiCollection.values());
-            return apis;
+            return new HashSet<API>(apiCollection.values());
 
         } catch (RegistryException e) {
             handleException("Failed to get Published APIs for provider : " + providerId, e);
@@ -1319,7 +1309,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 
     private boolean isCandidateAPI(String apiPath, String loggedUsername, GenericArtifactManager artifactManager,
                                    int tenantId, boolean showAllAPIs, boolean allowMultipleVersions,
-                                   String apiOwner, String providerId, Map<String, API> apiCollection)
+                                   String apiOwner, String providerId, Registry registry, Map<String, API> apiCollection)
             throws UserStoreException, RegistryException, APIManagementException {
 
         AuthorizationManager manager = ServiceReferenceHolder.getInstance().getRealmService().
