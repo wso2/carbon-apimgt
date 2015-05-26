@@ -51,7 +51,7 @@
                             var apiContext = api.context;
                             apiContext = apiContext.replace(api.version + "/", "");
                             apiContext = apiContext.replace(api.version, "");%>
-                            <br><%=d[x]%><%=apiContext%>
+                            <br><%=environmenturls[urltype]%><%=apiContext%>
                         <%}%>
                     </div>
     	            <%}
