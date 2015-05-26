@@ -20,7 +20,6 @@ package org.wso2.carbon.apimgt.impl;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -57,8 +56,6 @@ import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
 import org.wso2.carbon.apimgt.api.model.Subscriber;
 import org.wso2.carbon.apimgt.api.model.Tag;
 import org.wso2.carbon.apimgt.api.model.Tier;
-import org.wso2.carbon.apimgt.api.model.URITemplate;
-import org.wso2.carbon.apimgt.handlers.security.stub.types.APIKeyMapping;
 import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.impl.dto.*;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
@@ -1540,7 +1537,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 
         KeyManager keyManager = KeyManagerHolder.getKeyManagerInstance();
         //createApplication on oAuthorization server.
-        OAuthApplicationInfo oAuthApplication = keyManager.createSemiManualAuthApplication(oauthAppRequest);
+        OAuthApplicationInfo oAuthApplication = keyManager.mapOAuthApplication(oauthAppRequest);
 
         AccessTokenRequest tokenRequest = ApplicationUtils.createAccessTokenRequest(oAuthApplication,null);
         AccessTokenInfo tokenInfo = keyManager.getNewApplicationAccessToken(tokenRequest);

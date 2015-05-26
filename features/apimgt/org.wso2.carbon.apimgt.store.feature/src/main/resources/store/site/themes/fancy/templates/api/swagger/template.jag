@@ -57,7 +57,8 @@ var api = outputs.api;%>
       onFailure: function(data) {
         console.log("Unable to Load SwaggerUI");
       },
-      docExpansion: "list"
+      docExpansion: "list",
+      validatorUrl: null
     });
 
     window.swaggerUi.load();
@@ -102,7 +103,8 @@ var show_environments = function(){
 var select_environment = function(){
     var selectedEnvironment = $("#environment_name");
     var name =selectedEnvironment.val();
-    window.swaggerUi.updateSwaggerUi({ "url" : swaggerUi.api.url + "?envName="+name});   
+    window.swaggerUi.updateSwaggerUi({ "url" : swaggerUi.api.url + "?envName="+name});
+    change_token();
           };
   $("#access_token").change(function(){
     var key = $(this).val();
@@ -112,11 +114,9 @@ var select_environment = function(){
   });
 
   $("#sub_app_list").change(change_token);
-  $("#key_type").change(change_token);
   $("#key_type").change(show_environments);
   $("#environment_name").change(select_environment);
   show_environments();
-  change_token();
 });
 </script>
 <div id="authorizations" class="">

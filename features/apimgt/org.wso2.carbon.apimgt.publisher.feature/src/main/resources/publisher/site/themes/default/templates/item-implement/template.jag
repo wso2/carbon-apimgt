@@ -181,7 +181,7 @@
                 </div>
                 <div class="span11">
                     <h4 >Prototype</h4>
-                    <p>Use the inbuilt javascript engine to prototype the API or provide an endpoint to a prototype API. Inbuilt javascript engine do not have support to prototype SOAP APIs</p>
+                    <p>Use the inbuilt JavaScript engine to prototype the API or provide an endpoint to a prototype API. Inbuilt JavaScript engine does not have support to prototype SOAP APIs</p>
                 </div>
             </div>
 

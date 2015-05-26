@@ -138,6 +138,8 @@ public final class APIUtil {
 
     private static boolean isContextCacheInitialized = false;
 
+    private static final String DESCRIPTION = "Allows [1] request(s) per minute.";
+
     private static Set<Integer> registryInitializedTenants = new HashSet<Integer>();
     private static GenericArtifactManager genericArtifactManager;
 
@@ -1169,7 +1171,7 @@ public final class APIUtil {
 
                 registry.put(wsdlResourcePath, wsdlResource);
                 //set the anonymous role for wsld resource to avoid basicauth security.
-                setResourcePermissions(api.getId().getProviderName(), null, null, wsdlResourcePath);
+                setResourcePermissions(api.getId().getProviderName(), api.getVisibility(), null, wsdlResourcePath);
             }
 
 			//set the wsdl resource permlink as the wsdlURL.
@@ -1359,9 +1361,17 @@ public final class APIUtil {
                     tier.setPolicyContent(policy.toString().getBytes());
                     tier.setDisplayName(displayName);
                     // String desc = resource.getProperty(APIConstants.TIER_DESCRIPTION_PREFIX + id.getText());
+
                     String desc;
                     try {
-                        desc = APIDescriptionGenUtil.generateDescriptionFromPolicy(policy);
+                        long requestPerMin = APIDescriptionGenUtil.getAllowedCountPerMinute(policy);
+                        tier.setRequestsPerMin(requestPerMin);
+                        if(requestPerMin >= 1){
+                            desc = DESCRIPTION.replaceAll("\\[1\\]", Long.toString(requestPerMin));
+                        }
+                        else{
+                            desc = DESCRIPTION;
+                        }
                     } catch (APIManagementException ex) {
                         desc = APIConstants.TIER_DESC_NOT_AVAILABLE;
                     }
@@ -1382,6 +1392,7 @@ public final class APIUtil {
                 Tier tier = new Tier(APIConstants.UNLIMITED_TIER);
                 tier.setDescription(APIConstants.UNLIMITED_TIER_DESC);
                 tier.setDisplayName(APIConstants.UNLIMITED_TIER);
+                tier.setRequestsPerMin(Long.MAX_VALUE);
                 tiers.put(tier.getName(), tier);
             }
         } catch (RegistryException e) {
@@ -1394,6 +1405,18 @@ public final class APIUtil {
             throw new APIManagementException(msg, e);
         }
         return tiers;
+    }
+
+    /**
+     * Sorts the list of tiers according to the number of requests allowed per minute in each tier in descending order.
+     * @param tiers - The list of tiers to be sorted
+     * @return - The sorted list.
+     */
+    public static List<Tier> sortTiers(Set<Tier> tiers){
+        List<Tier> tierList = new ArrayList<Tier>();
+        tierList.addAll(tiers);
+        Collections.sort(tierList);
+        return tierList;
     }
 
     /**
@@ -1540,7 +1563,15 @@ public final class APIUtil {
                     // String desc = resource.getProperty(APIConstants.TIER_DESCRIPTION_PREFIX + id.getText());
                     String desc;
                     try {
-                        desc = APIDescriptionGenUtil.generateDescriptionFromPolicy(policy);
+                        long requestPerMin = APIDescriptionGenUtil.getAllowedCountPerMinute(policy);
+                        tier.setRequestsPerMin(requestPerMin);
+
+                        if(requestPerMin >= 1){
+                            desc = DESCRIPTION.replaceAll("\\[1\\]", Long.toString(requestPerMin));
+                        }
+                        else{
+                            desc = DESCRIPTION;
+                        }
                     } catch (APIManagementException ex) {
                         desc = APIConstants.TIER_DESC_NOT_AVAILABLE;
                     }
@@ -1561,6 +1592,7 @@ public final class APIUtil {
                 Tier tier = new Tier(APIConstants.UNLIMITED_TIER);
                 tier.setDescription(APIConstants.UNLIMITED_TIER_DESC);
                 tier.setDisplayName(APIConstants.UNLIMITED_TIER);
+                tier.setRequestsPerMin(Long.MAX_VALUE);
                 tiers.put(tier.getName(), tier);
             }
         } catch (RegistryException e) {
@@ -1852,6 +1884,7 @@ public final class APIUtil {
                }
                api.addAvailableTiers(availableTier);
                api.setContext(artifact.getAttribute(APIConstants.API_OVERVIEW_CONTEXT));
+               api.setContextTemplate(artifact.getAttribute(APIConstants.API_OVERVIEW_CONTEXT_TEMPLATE));
                api.setLatest(Boolean.valueOf(artifact.getAttribute(APIConstants.API_OVERVIEW_IS_LATEST)));
                ArrayList<URITemplate> urlPatternsList;
 
@@ -1998,11 +2031,7 @@ public final class APIUtil {
             //check the validity of cached OAuth2AccessToken Response
 
             if ((currentTime - timestampSkew) > (issuedTime + validityPeriod)) {
-                accessTokenDO.setValidationStatus(
-                        APIConstants.KeyValidationStatus.API_AUTH_INVALID_CREDENTIALS);
-                if (accessTokenDO.getEndUserToken() != null) {
-                    log.info("Token " + accessTokenDO.getEndUserToken() + " expired.");
-                }
+                accessTokenDO.setValidationStatus(APIConstants.KeyValidationStatus.API_AUTH_INVALID_CREDENTIALS);
                 return true;
             }
         }
@@ -2509,34 +2538,45 @@ public final class APIUtil {
 	                                                    String customSequenceType)
 			throws APIManagementException {
 
+		InputStream inSeqStream = null;
+		String seqFolderLocation =
+				APIConstants.API_CUSTOM_SEQUENCES_FOLDER_LOCATION + File.separator +
+				customSequenceType;
+
 		try {
-			File inSequenceDir = new File(
-					APIConstants.API_CUSTOM_SEQUENCES_FOLDER_LOCATION + File.separator +
-					customSequenceType);
-			File[] sequences = inSequenceDir.listFiles();
+			File inSequenceDir = new File(seqFolderLocation);
+			File[] sequences;
+			sequences = inSequenceDir.listFiles();
 
-			for (File sequenceFile : sequences) {
-				String sequenceFileName = sequenceFile.getName();
-				String regResourcePath =
-						APIConstants.API_CUSTOM_SEQUENCE_LOCATION + File.separator +
-						customSequenceType + File.separator + sequenceFileName;
-				if (registry.resourceExists(regResourcePath)) {
-					if (log.isDebugEnabled()) {
-						log.debug("Defined sequences have already been added to the registry");
+			if (sequences != null) {
+				for (File sequenceFile : sequences) {
+					String sequenceFileName = sequenceFile.getName();
+					String regResourcePath =
+							APIConstants.API_CUSTOM_SEQUENCE_LOCATION + File.separator +
+							customSequenceType + File.separator + sequenceFileName;
+					if (registry.resourceExists(regResourcePath)) {
+						if (log.isDebugEnabled()) {
+							log.debug("Defined sequences have already been added to the registry");
+						}
+					} else {
+						if (log.isDebugEnabled()) {
+							log.debug("Adding defined sequences to the registry.");
+						}
+
+						inSeqStream =
+								new FileInputStream(sequenceFile);
+						byte[] inSeqData = IOUtils.toByteArray(inSeqStream);
+						Resource inSeqResource = registry.newResource();
+						inSeqResource.setContent(inSeqData);
+
+						registry.put(regResourcePath, inSeqResource);
 					}
-				} else {
-					if (log.isDebugEnabled()) {
-						log.debug("Adding defined sequences to the registry.");
-					}
-
-					InputStream inSeqStream =
-							new FileInputStream(sequenceFile);
-					byte[] inSeqData = IOUtils.toByteArray(inSeqStream);
-					Resource inSeqResource = registry.newResource();
-					inSeqResource.setContent(inSeqData);
-
-					registry.put(regResourcePath, inSeqResource);
 				}
+			} else {
+				log.error(
+						"Custom sequence template location unavailable for custom sequence type " +
+						customSequenceType + " : " + seqFolderLocation
+				);
 			}
 
 		} catch (RegistryException e) {
@@ -2544,27 +2584,41 @@ public final class APIUtil {
 					"Error while saving defined sequences to the registry ", e);
 		} catch (IOException e) {
 			throw new APIManagementException("Error while reading defined sequence ", e);
+		} finally {
+			if (inSeqStream != null) {
+				try {
+					inSeqStream.close();
+				} catch (IOException e) {
+					log.error(
+							"Error while closing input stream in path " + seqFolderLocation + " " +
+							e);
+				}
+			}
 		}
 
 	}
 
+	public static void writeDefinedSequencesToTenantRegistry(int tenantID)
+			throws APIManagementException {
+		try {
 
-    public static void writeDefinedSequencesToTenantRegistry(int tenantID)
-            throws APIManagementException {
-        try {
+			RegistryService registryService =
+					ServiceReferenceHolder.getInstance()
+					                      .getRegistryService();
+			UserRegistry govRegistry = registryService.getGovernanceSystemRegistry(tenantID);
 
-            RegistryService registryService =
-                    ServiceReferenceHolder.getInstance()
-                            .getRegistryService();
-            UserRegistry govRegistry = registryService.getGovernanceSystemRegistry(tenantID);
+			//Add all custom in,out and fault sequences to tenant registry
+			APIUtil.addDefinedAllSequencesToRegistry(govRegistry,
+			                                         APIConstants.API_CUSTOM_SEQUENCE_TYPE_IN);
+			APIUtil.addDefinedAllSequencesToRegistry(govRegistry,
+			                                         APIConstants.API_CUSTOM_SEQUENCE_TYPE_OUT);
+			APIUtil.addDefinedAllSequencesToRegistry(govRegistry,
+			                                         APIConstants.API_CUSTOM_SEQUENCE_TYPE_FAULT);
 
-            APIUtil.addDefinedAllSequencesToRegistry(govRegistry, APIConstants.API_CUSTOM_SEQUENCE_TYPE_IN);
-            APIUtil.addDefinedAllSequencesToRegistry(govRegistry, APIConstants.API_CUSTOM_SEQUENCE_TYPE_OUT);
-            APIUtil.addDefinedAllSequencesToRegistry(govRegistry, APIConstants.API_CUSTOM_SEQUENCE_TYPE_FAULT);
-
-        } catch (RegistryException e) {
-            throw new APIManagementException("Error while saving defined sequences to the tenant's registry ", e);
-        }
+		} catch (RegistryException e) {
+			throw new APIManagementException(
+					"Error while saving defined sequences to the tenant's registry ", e);
+		}
 	}
 
 	/**

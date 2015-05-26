@@ -63,6 +63,9 @@ var error = {
         return "Invalid inputs "+params;
 
     },
+    appNameError:function(applicationName) {
+        return "Invalid application name '" + applicationName + "' specified";
+    },
 
 };
 %>

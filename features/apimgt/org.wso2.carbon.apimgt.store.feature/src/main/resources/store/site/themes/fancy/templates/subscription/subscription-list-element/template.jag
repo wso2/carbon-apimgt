@@ -15,6 +15,13 @@
 	   if (length % itemsPerPage != 0) {
 	   		numberOfPages++;
 	   }
+	   var prodKeyScopeArray, sandKeyScopeArray;
+	   if(app.prodKeyScopeValue != null){
+	   		prodKeyScopeArray = app.prodKeyScopeValue.split(" ");
+	   }
+	   if(app.sandKeyScopeValue != null){
+	   		sandKeyScopeArray = app.sandKeyScopeValue.split(" ");
+	   }
 %>
 
         <input type="hidden"  class="prodAccessTokenHidden" id="prodAccessTokenHiddenID" value="<%=app.prodKey%>" >
@@ -33,14 +40,6 @@
                          var scopes = app.scopes;
                          lenS = scopes.length;
 
-
-                         <!-- If token is not set to never expire, then take the expiration in seconds -->
-                         if (prodVadidataionTime > 0) {
-                            prodVadidataionTime = prodVadidataionTime / 1000;
-                         }
-                         if (sandVadidataionTime > 0) {
-                            sandVadidataionTime = sandVadidataionTime / 1000;
-                         }
 
                          <!-- This is required to remove the decimal points getting added by jaggery to validation time-->
                          if (prodVadidataionTime != null) {
@@ -159,7 +158,7 @@
 													Validity Time: <input type="text" class="input-mini token-validity-input" id="refreshProdValidityTime" value='<%=prodValidityTime %>' maxlength="70"  autofocus="autofocus" /> Seconds
 
 													<span class="label label-warning" id = "timeWarn" style="display:none;"><%=i18n.localize("timeWarn")%></span>
-													<button class="show-hide-key btn btn-primary" onclick="regenerate('<%=app.name%>','PRODUCTION',200,this,'pull-right','<%=app.prodConsumerKey%>','<%=app.prodConsumerSecret%>')" ><i class="fa fa-repeat"></i> <%=i18n.localize("regenerate")%></button>
+													<button class="show-hide-key btn btn-primary" onclick="regenerate('<%=encode.forJavaScript(app.name)%>','PRODUCTION',200,this,'pull-right','<%=app.prodConsumerKey%>','<%=app.prodConsumerSecret%>')" ><i class="fa fa-repeat"></i> <%=i18n.localize("regenerate")%></button>
 												</div>
 											</div>
 										</div>
@@ -251,7 +250,7 @@
                                <div>The domains from which requests are allowed to the APIs. Leave empty or enter "ALL" to allow all domains.</div>
                                <% if(app.prodKey != null ) { %>
                                <button class="btn"
-                                       onclick="updateAccessAllowDomains('<%=app.name%>','PRODUCTION',200,this)" style="font-size:11px;">Update Domains</button>
+                                       onclick="updateAccessAllowDomains('<%=encode.forJavaScript(app.name)%>','PRODUCTION',200,this)" style="font-size:11px;">Update Domains</button>
                                <div style="display:none" class="success-update-msg">Successfully updated.</div>
                                <% } else { %>
                                     Token Validity: <input type="text" class="input-mini token-validity-input" id="refreshProdValidityTime" value="<%=prodValidityTime%>" maxlength="70"  autofocus="autofocus" style="margin-top:5px;"  />  Seconds
@@ -380,11 +379,11 @@
 											<div class="span10">
 												<div class="form-inline proRegenerateForm">
 												    <% if(lenS > 0){ %>
-													    <a href="#scopePopup" role="button" class="btn" data-toggle="modal" ><%=i18n.localize("selectScopes")%></a>
+													    <a href="#scopePopupSand" role="button" class="btn" data-toggle="modal" ><%=i18n.localize("selectScopes")%></a>
 													<% } %>
 													Validity: <input type="text" class="input-mini token-validity-input" id="refreshSandValidityTime" value="<%=sandValidityTime%>" maxlength="70"  autofocus="autofocus" /> Seconds
 		                            				<span class="label label-warning" id = "timeWarn" style="display:none;"><%=i18n.localize("timeWarn")%></span>
-		                            				<button class="show-hide-key btn btn-primary" onclick="regenerate('<%=app.name%>','SANDBOX',200,this,'pull-right','<%=app.sandboxConsumerKey%>','<%=app.sandboxConsumerSecret%>')" ><i class="fa fa-repeat"></i> <%=i18n.localize("regenerate")%></button>
+		                            				<button class="show-hide-key btn btn-primary" onclick="regenerate('<%=encode.forJavaScript(app.name)%>','SANDBOX',200,this,'pull-right','<%=app.sandboxConsumerKey%>','<%=app.sandboxConsumerSecret%>')" ><i class="fa fa-repeat"></i> <%=i18n.localize("regenerate")%></button>
 												</div>
 											</div>
 										</div>
@@ -412,7 +411,7 @@
                        <%=i18n.localize("sandboxKeyMsg")%>
                        <% if(lenS > 0){ %>
                            <br><br>
-                           <a href="#scopePopup" role="button" class="btn" data-toggle="modal" ><%=i18n.localize("selectScopes")%></a>
+                           <a href="#scopePopupSand" role="button" class="btn" data-toggle="modal" ><%=i18n.localize("selectScopes")%></a>
                        <% } %>
                        <div class="gen-btn-wrapper" <% if(app.sandboxKey!=null){%>style="display:none"<% } %> >
                        		<div class="cDivParentOfManualAuthAppCreateSandBox">
@@ -476,7 +475,7 @@
                                	<div>The domains from which requests are allowed to the APIs. Leave empty or enter "ALL" to allow all domains.</div>
 		                        <% if(app.sandboxKey!=null){ %>
 		                        <button  class="btn"
-		                              onclick="updateAccessAllowDomains('<%=app.name%>','SANDBOX',200,this,'allowDomainsSandRegenBtn')" style="font-size:11px;">Update Domains</button>
+		                              onclick="updateAccessAllowDomains('<%=encode.forJavaScript(app.name)%>','SANDBOX',200,this,'allowDomainsSandRegenBtn')" style="font-size:11px;">Update Domains</button>
 		                        <div style="display:none" class="success-update-msg">Successfully updated.</div>
 		                        <% } else { %>
 		                        Token Validity: <input type="text" class="input-mini token-validity-input" id="refreshSandValidityTime" value="<%=sandValidityTime%>" maxlength="70"  autofocus="autofocus" style="margin-top:5px;"  />  Seconds
@@ -659,7 +658,17 @@
 
                                 <% for (var i = 0; i < lenS; i++) {
 
-                                         %><li><input type="checkbox" name="<%=scopes[i].scopeName%>" value="<%=scopes[i].scopeKey%>" id="<%= scopes[i].scopeKey%>" class="Checkbox"> <%= scopes[i].scopeName%> : <%= scopes[i].scopeKey %></li><%
+                                         %><li><input type="checkbox" name="<%=scopes[i].scopeName%>" value="<%=scopes[i].scopeKey%>" id="<%= scopes[i].scopeKey%>" class="CheckboxProd" <%
+                                         	if(app.prodKeyScopeValue != null){
+                                         		for(var j = 0; j < prodKeyScopeArray.length; j++){
+	                                         		if(prodKeyScopeArray.indexOf(scopes[i].scopeKey)>-1){
+	                                         			%>checked<%
+	                                         			break;
+	                                         		}
+                                         		}
+                                         	}
+                                         	
+                                         %>> <%= scopes[i].scopeName%> : <%= scopes[i].scopeKey %></li><%
                                         }
                                         %></ul><%
                                  %>
@@ -667,6 +676,37 @@
 
                     <div class="modal-footer">
                     <input class="btn btn-primary" data-dismiss="modal" type="button" id="scopeSelectButtonPop" value="Select">
+                    <button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
+                    </div>
+            </div>
+            
+            <div id="scopePopupSand" class="modal hide fade" tabindex="-1" role="dialog" aria-hidden="true">
+                    <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                    <h3><%=i18n.localize("selectScopes")%></h3>
+                    </div>
+                    <div class="modal-body">
+                        <ul>
+
+                                <% for (var i = 0; i < lenS; i++) {
+                                         %><li><input type="checkbox" name="<%=scopes[i].scopeName%>" value="<%=scopes[i].scopeKey%>" id="<%= scopes[i].scopeKey%>" class="CheckboxSand" <%
+                                         if(app.sandKeyScopeValue != null){
+                                         	for(var j = 0; j < sandKeyScopeArray.length; j++){
+                                         		if(sandKeyScopeArray.indexOf(scopes[i].scopeKey)>-1){
+                                         			%>checked<%
+                                         			break;
+                                         		}
+                                         	}
+                                         }
+                                         	
+                                         %>> <%= scopes[i].scopeName%> : <%= scopes[i].scopeKey %></li><%
+                                        }
+                                        %></ul><%
+                                 %>
+                    </div>
+
+                    <div class="modal-footer">
+                    <input class="btn btn-primary" data-dismiss="modal" type="button" id="scopeSelectButtonPopSand" value="Select">
                     <button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
                     </div>
             </div>

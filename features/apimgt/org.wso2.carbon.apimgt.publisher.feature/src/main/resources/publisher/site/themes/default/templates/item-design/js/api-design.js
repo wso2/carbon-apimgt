@@ -337,6 +337,28 @@ APIDesigner.prototype.init_controllers = function(){
         API_DESIGNER.render_resource(resource_body);
     });
 
+    this.container.delegate(".delete_parameter", "click", function (event) {
+        console.log("deleting parameter");
+        //var elementToDelete =  $(this).parent().parent();
+        var deleteData = $(this).attr("data-path");
+        var i = $(this).attr("data-index");
+
+        var deleteDataArray = deleteData.split(".");
+        var operations = deleteDataArray[2];
+        var operation = deleteDataArray[3];
+        var paramName = API_DESIGNER.api_doc.paths[operations][operation]['parameters'][i]['name'];
+
+        jagg.message({content: 'Do you want to delete the parameter <strong>' + paramName + '</strong> ?',
+            type: 'confirm', title: "Delete Parameter",
+            okCallback: function () {
+                API_DESIGNER = APIDesigner();
+                console.log(API_DESIGNER.api_doc.paths[operations]);
+                API_DESIGNER.api_doc.paths[operations][operation]['parameters'].splice(i,1);
+                console.log(API_DESIGNER.api_doc.paths[operations]);
+                API_DESIGNER.render_resources();
+            }});
+    });
+
     this.container.delegate(".delete_scope","click", function(){
         var i = $(this).attr("data-index");
         API_DESIGNER.api_doc.securityDefinitions.apim['x-wso2-scopes'].splice(i, 1);
@@ -352,6 +374,9 @@ APIDesigner.prototype.init_controllers = function(){
     });
 
     $("#scope_submit").click(function(){
+        if(!$("#scope_form").valid()){
+            return;
+        }     
         var securityDefinitions = {
             "apim":{
                 "x-wso2-scopes":[]
@@ -365,24 +390,45 @@ APIDesigner.prototype.init_controllers = function(){
 			roles : $("#scopeRoles").val()
 		};
 
-        API_DESIGNER.api_doc.securityDefinitions = $.extend({}, securityDefinitions, API_DESIGNER.api_doc.securityDefinitions);
+		jagg.post("/site/blocks/item-design/ajax/add.jag", { action:"validateScope", scope:$("#scopeKey").val()},
+			function (result) {
+			    if (!result.error) {
 
-		for (var i = 0; i < API_DESIGNER.api_doc.securityDefinitions.apim['x-wso2-scopes'].length; i++) {
-			if (API_DESIGNER.api_doc.securityDefinitions.apim['x-wso2-scopes'][i].key === $(
-					"#scopeKey").val() || API_DESIGNER.api_doc.securityDefinitions.apim['x-wso2-scopes'][i].key === $(
-					"#scopeName").val()) {
+				API_DESIGNER.api_doc.securityDefinitions = $.extend({}, securityDefinitions, API_DESIGNER.api_doc.securityDefinitions);
+
+				for (var i = 0; i < API_DESIGNER.api_doc.securityDefinitions.apim['x-wso2-scopes'].length; i++) {
+					if (API_DESIGNER.api_doc.securityDefinitions.apim['x-wso2-scopes'][i].key === $(
+							"#scopeKey").val() || API_DESIGNER.api_doc.securityDefinitions.apim['x-wso2-scopes'][i].key === $(
+							"#scopeName").val()) {
+						jagg.message({
+							content : "Scope " + $("#scopeKey").val() + " already exists",
+							type : "error"
+						});
+						return;
+					}
+				}
+		      		if (result.isScopeExist == "true") {
+					jagg.message({
+						content : "Scope " + $("#scopeKey").val() + " already assigned by an API.",
+						type : "error"
+					});
+					return;
+				} 
+			
+				API_DESIGNER.api_doc.securityDefinitions.apim['x-wso2-scopes'].push(scope);
+				$("#define_scope_modal").modal('hide');
+				API_DESIGNER.render_scopes();
+				API_DESIGNER.render_resources();
+			
+			    } else {
 				jagg.message({
-					content : "You should not define same scope.",
+					content : result.message,
 					type : "error"
 				});
-				return;
-			}
-		}
-		
-        API_DESIGNER.api_doc.securityDefinitions.apim['x-wso2-scopes'].push(scope);
-		$("#define_scope_modal").modal('hide');
-		API_DESIGNER.render_scopes();
-		API_DESIGNER.render_resources();
+					return;
+				}       
+
+		}, "json"); 
 	}); 
 
     $("#swaggerEditor").click(API_DESIGNER.edit_swagger);
@@ -682,10 +728,11 @@ $(document).ready(function(){
                     if (responseText.message == "timeout") {
                         if (ssoEnabled) {
                              var currentLoc = window.location.pathname;
+                             var queryString=encodeURIComponent(window.location.search);
                              if (currentLoc.indexOf(".jag") >= 0) {
-                                 location.href = "index.jag";
+                                 location.href = "login.jag?requestedPage=" + currentLoc + queryString;
                              } else {
-                                 location.href = 'site/pages/index.jag';
+                                 location.href = 'site/pages/login.jag?requestedPage=' + currentLoc + queryString;
                              }
                         } else {
                              jagg.showLogin();

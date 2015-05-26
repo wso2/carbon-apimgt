@@ -459,6 +459,35 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
 
     /**
+     * This method is used to save the wsdl file in the registry
+     * This is used when user starts api creation with a soap endpoint
+     *
+     * @param api api object
+     * @throws APIManagementException
+     * @throws RegistryException
+     */
+    private void updateWsdl(API api) throws APIManagementException, RegistryException {
+
+        registry.beginTransaction();
+        String apiArtifactId = registry.get(APIUtil.getAPIPath(api.getId())).getUUID();
+        GenericArtifactManager artifactManager = APIUtil.getArtifactManager(registry,
+                APIConstants.API_KEY);
+        GenericArtifact artifact = artifactManager.getGenericArtifact(apiArtifactId);
+        GenericArtifact apiArtifact = APIUtil.createAPIArtifactContent(artifact, api);
+        String artifactPath = GovernanceUtils.getArtifactPath(registry, apiArtifact.getId());
+        if (APIUtil.isValidWSDLURL(api.getWsdlUrl(), false)) {
+            String path = APIUtil.createWSDL(registry, api);
+            if (path != null) {
+                registry.addAssociation(artifactPath, path, CommonConstants.ASSOCIATION_TYPE01);
+                apiArtifact.setAttribute(APIConstants.API_OVERVIEW_WSDL, api.getWsdlUrl()); //reset the wsdl path
+                artifactManager.updateGenericArtifact(apiArtifact); //update the  artifact
+            }
+        }
+        registry.commitTransaction();
+    }
+
+
+    /**
      * Updates an existing API
      *
      * @param api API
@@ -492,6 +521,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                         }
                     }
                 }
+
+                //Update WSDL in the registry
+                updateWsdl(api);
 
                 boolean updatePermissions = false;
                 if(!oldApi.getVisibility().equals(api.getVisibility()) || (oldApi.getVisibility().equals(APIConstants.API_RESTRICTED_VISIBILITY) && !api.getVisibleRoles().equals(oldApi.getVisibleRoles()))){
@@ -613,8 +645,10 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 }
 
             } catch (APIManagementException e) {
-            	handleException("Error while updating the API :" +api.getId().getApiName() + ". " + e.getMessage(), e);
-            } 
+                handleException("Error while updating the API :" + api.getId().getApiName() + ". " + e.getMessage(), e);
+            } catch (RegistryException e) {
+                handleException("Error while saving wsdl in the registry for the API :" + api.getId().getApiName() + ". " + e.getMessage(), e);
+            }
         } else {
             // We don't allow API status updates via this method.
             // Use changeAPIStatus for that kind of updates.
@@ -680,18 +714,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                             // reset the wsdl path to permlink
                             updateApiArtifact.setAttribute(APIConstants.API_OVERVIEW_WSDL, api.getWsdlUrl());
                         }
-                    }
-                } else if (registry != null && wsdlURL != null && !wsdlURL.isEmpty()) {
-                    String[] wsdlUrlRelativePath =
-                            wsdlURL.split(RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH);
-                    String wsdlRegistryPath = null;
-                    if (wsdlUrlRelativePath.length == 2) {
-                        wsdlRegistryPath = wsdlUrlRelativePath[1];
-                    }
-                    if (wsdlRegistryPath != null) {
-                        registry.delete(wsdlRegistryPath);
-                        registry.removeAssociation(artifactPath, wsdlURL, CommonConstants.ASSOCIATION_TYPE01);
-                        updateApiArtifact.setAttribute(APIConstants.API_OVERVIEW_WSDL, "");
                     }
                 }
                 if (api.getUrl() != null && !"".equals(api.getUrl())){
@@ -989,7 +1011,15 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
     private APITemplateBuilder getAPITemplateBuilder(API api){
         APITemplateBuilderImpl vtb = new APITemplateBuilderImpl(api);
-
+        Map<String, String> corsProperties = new HashMap<String, String>();
+        corsProperties.put("inline", api.getImplementation());
+        if (api.getAllowedHeaders() != null && api.getAllowedHeaders() != "") {
+            corsProperties.put("allowHeaders", api.getAllowedHeaders());
+        }
+        if (api.getAllowedOrigins() != null && api.getAllowedOrigins() != "") {
+            corsProperties.put("allowedOrigins", api.getAllowedOrigins());
+        }
+        vtb.addHandler("org.wso2.carbon.apimgt.gateway.handlers.security.CORSRequestHandler", corsProperties);
         if(!api.getStatus().equals(APIStatus.PROTOTYPED)) {
 
             vtb.addHandler("org.wso2.carbon.apimgt.gateway.handlers.security.APIAuthenticationHandler", Collections.EMPTY_MAP);
@@ -1014,15 +1044,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 vtb.addHandler("org.wso2.carbon.apimgt.gateway.handlers.ext.APIManagerExtensionHandler", Collections.EMPTY_MAP);
             }
         }
-        Map<String, String> corsProperties = new HashMap<String, String>();
-        corsProperties.put("inline", api.getImplementation());
-        if (api.getAllowedHeaders() != null && api.getAllowedHeaders() != "") {
-            corsProperties.put("allowHeaders", api.getAllowedHeaders());
-        }
-        if (api.getAllowedOrigins() != null && api.getAllowedOrigins() != "") {
-            corsProperties.put("allowedOrigins", api.getAllowedOrigins());
-        }
-        vtb.addHandler("org.wso2.carbon.apimgt.gateway.handlers.security.CORSRequestHandler", corsProperties);
+
         return vtb;
     }
 
