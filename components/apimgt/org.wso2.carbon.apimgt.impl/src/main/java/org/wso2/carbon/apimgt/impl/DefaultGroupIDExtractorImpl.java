@@ -42,9 +42,10 @@ public class DefaultGroupIDExtractorImpl implements LoginPostExecutor {
                  UserRealm realm = (UserRealm) realmService.getTenantUserRealm(tenantId);
                  UserStoreManager manager = realm.getUserStoreManager();
             organization =
-                    manager.getUserClaimValue(MultitenantUtils.getTenantAwareUsername(username), claim, null).trim();
-                       
-
+                    manager.getUserClaimValue(MultitenantUtils.getTenantAwareUsername(username), claim, null);
+            if (organization != null) {
+                organization = organization.trim();
+            }
         } catch (JSONException e) {
             log.error("Exception occured while trying to get group Identifier from login response");
         } catch (org.wso2.carbon.user.api.UserStoreException e) {
