@@ -2442,7 +2442,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 			}
 		}
 
-		String visibility = api.getVisibility());
+		String visibility = api.getVisibility();
 		String visibleRoles = "";
 
 

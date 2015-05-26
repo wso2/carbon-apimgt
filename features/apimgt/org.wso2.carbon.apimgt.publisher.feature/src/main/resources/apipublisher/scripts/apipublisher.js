@@ -49,9 +49,8 @@ var apipublisher = {};
     };
 
     APIProviderProxy.prototype.implementAPI = function (api) {
-        var apiObj = new Packages.org.json.simple.JSONObject();
         var identifier = new Packages.org.wso2.carbon.apimgt.api.model.APIIdentifier(api.provider, api.apiName, api.version);
-        var api = new Packages.org.wso2.carbon.apimgt.api.model.API(identifier);
+        var apiOb = new Packages.org.wso2.carbon.apimgt.api.model.API(identifier);
 
         apiObj.put("implementation_type", api.implementation_type);
         apiObj.put("wsdl", api.wsdl);

@@ -129,7 +129,7 @@ public class DefaultKeyValidationHandler extends AbstractKeyValidationHandler {
 
         AccessTokenDO accessTokenDO = new AccessTokenDO(apiKeyValidationInfoDTO.getConsumerKey(),
                 apiKeyValidationInfoDTO.getEndUserName(), scopes,
-                null, apiKeyValidationInfoDTO.getValidityPeriod(),
+                null, null, apiKeyValidationInfoDTO.getValidityPeriod(), apiKeyValidationInfoDTO.getRefreshTokenValidityPeriod(),
                 apiKeyValidationInfoDTO.getType());
 
         accessTokenDO.setAccessToken(validationContext.getAccessToken());
