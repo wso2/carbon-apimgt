@@ -1531,7 +1531,7 @@ table.dataTable tbody td.no-padding {
 
 #designNewAPI {
     margin-top: -50px;
-    margin-right: 20px;
+    margin-right: 25px;
 }
 
 .slideContainer > .well{
@@ -1580,4 +1580,14 @@ table.dataTable tbody td.no-padding {
 
 .publish-label{
     font-size:14px;
+}
+
+#startFromExistingAPI {
+    margin-top: -4px !important;
+    margin-right: 4px;
+}
+
+#startFromExistingSOAPEndpoint{
+    margin-top: -52px;
+    margin-right: 4px;
 }

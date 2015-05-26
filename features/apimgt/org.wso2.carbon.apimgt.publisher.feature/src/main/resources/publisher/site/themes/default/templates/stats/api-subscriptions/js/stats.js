@@ -147,7 +147,7 @@ require(["dojo/dom", "dojo/domReady!"], function (dom) {
                         var div = d3.select("body").append("div").attr("class", "toolTip");
 
                         var w = 250;
-                        var h = 250;
+                        var h = 270;
                         var r = 60;
                         var ir = 35;
                         var textOffset = 24;
@@ -182,7 +182,7 @@ require(["dojo/dom", "dojo/domReady!"], function (dom) {
 
                         var vis = d3.select("#pie-chart").append("svg:svg")
                             .attr("width", w)
-                            .attr("height", h-40);
+                            .attr("height", h-10);
 
                         vis.append("text").attr("class", "title_text")
                                .attr("x", 125)

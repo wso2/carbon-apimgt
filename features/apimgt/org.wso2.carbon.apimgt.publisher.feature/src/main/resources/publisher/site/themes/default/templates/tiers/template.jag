@@ -40,6 +40,7 @@
         				var roleInputName = "roles" + i;
         				var tierInputName = "tier" + i;
         				var statusUpdateMsgName = "statusUpdateMsg" +i;
+                        var tierPermissionBtn = "tierPermission" + i;
         			%>
                          <tr>
 	        					<td><%=tierPermissions[i].tierDisplayName%></td>
@@ -82,7 +83,7 @@
 		            			
 		            			
 		            			<div class="form-actions" id="saveButtons">
-                    				<input type="submit" id="addNewAPIButton" name="addNewAPIButton" class="btn btn-primary" value="<%=i18n.localize("updatePermissions")%>" onclick="updatePermissions('<%=tiers[i].tierName%>', <%=i%>)"/>
+                    				<button type="submit" id="addNewAPIButton" name="addNewAPIButton" onclick="updatePermissions('<%=tiers[i].tierName%>', <%=i%>, '<%=tierPermissionBtn%>' )" class="btn btn-primary has-spinner <%=tierPermissionBtn%>"><%=i18n.localize("updatePermissions")%></button>
                 				</div>
                 				
                 				<div class="alert alert-success" id="<%=statusUpdateMsgName%>" style="display:none;">
