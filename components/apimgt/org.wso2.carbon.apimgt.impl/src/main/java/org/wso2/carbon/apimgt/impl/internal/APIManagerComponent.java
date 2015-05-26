@@ -29,6 +29,7 @@ import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.impl.*;
 import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
+import org.wso2.carbon.apimgt.impl.handlers.ScopesIssuer;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.listners.UserAddListener;
 import org.wso2.carbon.apimgt.impl.observers.APIStatusObserverList;
@@ -67,10 +68,9 @@ import org.wso2.carbon.utils.ConfigurationContextService;
 import org.wso2.carbon.utils.FileUtil;
 
 import javax.cache.Cache;
-import java.io.File;
-import java.io.FilenameFilter;
-import java.io.IOException;
-import java.io.InputStream;
+
+import java.io.*;
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -118,7 +118,7 @@ public class APIManagerComponent {
         if (log.isDebugEnabled()) {
             log.debug("API manager component activated");
         }
-        
+
         try {
             BundleContext bundleContext = componentContext.getBundleContext();
             addRxtConfigs();
@@ -131,10 +131,10 @@ public class APIManagerComponent {
             APIUtil.loadTenantAPILifecycle(tenantId);
             //load self sigup configuration to the registry
             APIUtil.loadTenantSelfSignUpConfigurations(tenantId);
-            
-            
+
+
             String filePath = CarbonUtils.getCarbonHome() + File.separator + "repository" +
-                    File.separator + "conf" + File.separator + "api-manager.xml";
+                              File.separator + "conf" + File.separator + "api-manager.xml";
             configuration.load(filePath);
 
             //WorkflowExecutorFactory.getInstance().load(filePath);
@@ -151,8 +151,8 @@ public class APIManagerComponent {
             bundleContext.registerService(Axis2ConfigurationContextObserver.class.getName(), configDeployer, null);
 
             SignupObserver signupObserver = new SignupObserver();
-            bundleContext.registerService(Axis2ConfigurationContextObserver.class.getName(), signupObserver,null);
-            
+            bundleContext.registerService(Axis2ConfigurationContextObserver.class.getName(), signupObserver, null);
+
             APIManagerConfigurationServiceImpl configurationService =
                     new APIManagerConfigurationServiceImpl(configuration);
             ServiceReferenceHolder.getInstance().setAPIManagerConfigurationService(configurationService);
@@ -185,7 +185,7 @@ public class APIManagerComponent {
                                                                                       APIConstants.API_APPLICATION_DATA_LOCATION),
                                                         APIConstants.Permissions.API_PUBLISH,
                                                         UserMgtConstants.EXECUTE_ACTION, null);
-            
+
             setupImagePermissions();
             RemoteAuthorizationManager authorizationManager = RemoteAuthorizationManager.getInstance();
             authorizationManager.init();
@@ -195,7 +195,7 @@ public class APIManagerComponent {
             if (selfSignInProcessEnabled) {
                 if (bundleContext != null) {
                     bundleContext.registerService(UserStoreManagerListener.class.getName(),
-                            new UserAddListener(), null);
+                                                  new UserAddListener(), null);
                 }
             }
             //Load initially available api contexts at the server startup. This Cache is only use by the products other than the api-manager
@@ -212,7 +212,24 @@ public class APIManagerComponent {
             APIUtil.createSelfSignUpRoles(MultitenantConstants.SUPER_TENANT_ID);
 
             // Initialise KeyManager.
-            KeyManagerHolder.initializeKeyManager(filePath);
+            KeyManagerHolder.initializeKeyManager(configuration);
+            
+            // loading white listed scopes
+            List<String> whitelist = null;
+
+            // Read scope whitelist from Configuration.
+            if (configuration != null) {
+                whitelist = configuration.getProperty(APIConstants.API_KEY_MANGER_SCOPE_WHITELIST);
+            }
+
+            // If whitelist is null, default scopes will be put.
+            if (whitelist == null) {
+                whitelist = new ArrayList<String>();
+                whitelist.add(APIConstants.OPEN_ID_SCOPE_NAME);
+                whitelist.add(APIConstants.DEVICE_SCOPE_PATTERN);
+            }
+
+            ScopesIssuer.loadInstance(whitelist);
         } catch (APIManagementException e) {
             log.error("Error while initializing the API manager component", e);
         }
@@ -386,62 +403,25 @@ public class APIManagerComponent {
         }
     }
 
-    private void addDefinedSequencesToRegistry() throws APIManagementException {
-        RegistryService registryService = ServiceReferenceHolder.getInstance().getRegistryService();
-        try {
-            UserRegistry registry = registryService.getGovernanceSystemRegistry();
-            if (registry.resourceExists(APIConstants.API_CUSTOM_INSEQUENCE_LOCATION)) {
-                if(log.isDebugEnabled()){
-                    log.debug("Defined sequences have already been added to the registry");
-                }
-                //No need to add to add in sequences or out sequences. Do not return yet until we check for fault
-                // sequences as well. (Designed to support migrations).
-                //return;
-            }
-            else{
-                if(log.isDebugEnabled()){
-                    log.debug("Adding defined sequences to the registry.");
-                }
+	private void addDefinedSequencesToRegistry() throws APIManagementException {
+		try {
+			RegistryService registryService =
+					ServiceReferenceHolder.getInstance().getRegistryService();
+			UserRegistry registry = registryService.getGovernanceSystemRegistry();
 
-                InputStream inSeqStream =
-                        APIManagerComponent.class.getResourceAsStream("/definedsequences/in/log_in_message.xml");
-                byte[] inSeqData = IOUtils.toByteArray(inSeqStream);
-                Resource inSeqResource = registry.newResource();
-                inSeqResource.setContent(inSeqData);
+			//Add all custom in,out and fault sequences to registry
+			APIUtil.addDefinedAllSequencesToRegistry(registry,
+			                                         APIConstants.API_CUSTOM_SEQUENCE_TYPE_IN);
+			APIUtil.addDefinedAllSequencesToRegistry(registry,
+			                                         APIConstants.API_CUSTOM_SEQUENCE_TYPE_OUT);
+			APIUtil.addDefinedAllSequencesToRegistry(registry,
+			                                         APIConstants.API_CUSTOM_SEQUENCE_TYPE_FAULT);
 
-                registry.put(APIConstants.API_CUSTOM_INSEQUENCE_LOCATION + "log_in_message.xml", inSeqResource);
-
-                InputStream outSeqStream =
-                        APIManagerComponent.class.getResourceAsStream("/definedsequences/out/log_out_message.xml");
-                byte[] outSeqData = IOUtils.toByteArray(outSeqStream);
-                Resource outSeqResource = registry.newResource();
-                outSeqResource.setContent(outSeqData);
-
-                registry.put(APIConstants.API_CUSTOM_OUTSEQUENCE_LOCATION + "log_out_message.xml", outSeqResource);
-            }
-
-            if (registry.resourceExists(APIConstants.API_CUSTOM_FAULTSEQUENCE_LOCATION)) {
-                if(log.isDebugEnabled()){
-                    log.debug("Defined fault sequences have already been added to the tenant's registry");
-                }
-                //Fault sequences have already been added. Nothing to do beyond this. Return.
-                return;
-            }
-
-            InputStream faultSeqStream =
-                    APIManagerComponent.class.getResourceAsStream("/definedsequences/fault/json_fault.xml");
-            byte[] faultSeqData = IOUtils.toByteArray(faultSeqStream);
-            Resource faultSeqResource = registry.newResource();
-            faultSeqResource.setContent(faultSeqData);
-
-            registry.put(APIConstants.API_CUSTOM_FAULTSEQUENCE_LOCATION + "json_fault.xml", faultSeqResource);
-
-        } catch (RegistryException e) {
-            throw new APIManagementException("Error while saving defined sequences to the registry ", e);
-        } catch (IOException e) {
-            throw new APIManagementException("Error while reading defined sequence ", e);
-        }
-    }
+		} catch (RegistryException e) {
+			throw new APIManagementException(
+					"Error while saving defined sequences to the registry ", e);
+		}
+	}
 
     private void setupSelfRegistration(APIManagerConfiguration config) throws APIManagementException {
         boolean enabled = Boolean.parseBoolean(config.getFirstProperty(APIConstants.SELF_SIGN_UP_ENABLED));

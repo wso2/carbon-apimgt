@@ -114,6 +114,13 @@ public class APIManagerConfiguration {
         }
     }
 
+    public Set<String> getConfigKeySet() {
+        if (configuration != null) {
+            return configuration.keySet();
+        }
+        return null;
+    }
+
     public String getFirstProperty(String key) {
         List<String> value = configuration.get(key);
         if (value == null) {

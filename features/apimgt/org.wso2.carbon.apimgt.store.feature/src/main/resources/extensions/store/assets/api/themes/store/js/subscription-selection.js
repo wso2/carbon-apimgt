@@ -230,7 +230,7 @@ $(function () {
      */
     var attachUpdateProductionDomains = function () {
 
-        $('#btn-production-updateDomains').on('click', function () {
+        $('#btn-Production-updateDomains').on('click', function () {
             var allowedDomains = $('#input-Production-allowedDomains').val();
             console.info(JSON.stringify(APP_STORE.productionKeys));
             var domainUpdateData = {};
@@ -253,7 +253,7 @@ $(function () {
 
     var attachUpdateSandboxDomains = function () {
 
-        $('#btn-sandbox-updateDomains').on('click', function () {
+        $('#btn-Sandbox-updateDomains').on('click', function () {
             var allowedDomains = $('#input-Sandbox-allowedDomains').val();
             console.info(JSON.stringify(APP_STORE.productionKeys));
             var domainUpdateData = {};
@@ -369,8 +369,14 @@ $(function () {
             url: getSubscriptionAPI(appName, 'deleteSubscription'),
             data: deleteAPISubscriptionData,
             success: function () {
-                deleteSubscriptionMetadata(appName, apiName, apiProvider, apiVersion, 'deleteSubscription')
-                events.publish(EV_SUB_DELETE, {appName: appName});
+                deleteSubscriptionMetadata(appName, apiName, apiProvider, apiVersion, 'deleteSubscription');
+                var subs = findSubscriptionDetails(appName);
+                if (subs.length != 0) {
+                    events.publish(EV_SUB_DELETE, {appName: appName});
+                } else {
+                    location.reload();
+                }
+
             }
         });
     };

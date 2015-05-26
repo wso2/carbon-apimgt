@@ -30,7 +30,6 @@ import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationServiceImpl;
 import org.wso2.carbon.apimgt.impl.generated.thrift.APIKeyMgtException;
-import org.wso2.carbon.apimgt.keymgt.handlers.ScopesIssuer;
 import org.wso2.carbon.apimgt.keymgt.service.thrift.APIKeyValidationServiceImpl;
 import org.wso2.carbon.apimgt.keymgt.util.APIKeyMgtDataHolder;
 import org.wso2.carbon.base.ServerConfiguration;
@@ -45,8 +44,6 @@ import org.wso2.carbon.apimgt.impl.generated.thrift.APIKeyValidationService;
 import java.io.File;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -84,25 +81,7 @@ public class APIKeyMgtServiceComponent {
                     new APIManagerConfigurationServiceImpl(configuration);
             ServiceReferenceHolder.getInstance().setAPIManagerConfigurationService(configurationService);
 
-            APIKeyMgtDataHolder.initData();
-            List<String> whitelist = null;
-
-            // Read scope whitelist from Configuration.
-            if (configuration != null) {
-                whitelist = configuration.getProperty(APIConstants.API_KEY_MANGER_SCOPE_WHITELIST);
-            }
-
-            // If whitelist is null, default scopes will be put.
-            if (whitelist == null) {
-                whitelist = new ArrayList<String>();
-                whitelist.add(APIConstants.OPEN_ID_SCOPE_NAME);
-                whitelist.add(APIConstants.DEVICE_SCOPE_PATTERN);
-                if (APIKeyMgtDataHolder.getApplicationTokenScope() != null) {
-                    whitelist.add(APIKeyMgtDataHolder.getApplicationTokenScope());
-                }
-            }
-
-            ScopesIssuer.loadInstance(whitelist);
+            APIKeyMgtDataHolder.initData();                       
 
             //Based on configuration we have to decide thrift server run or not
             if (APIKeyMgtDataHolder.getThriftServerEnabled()) {

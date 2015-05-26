@@ -406,7 +406,7 @@ public class DefaultKeyManagerImpl extends AbstractKeyManager {
      * @throws APIManagementException
      */
     @Override
-    public OAuthApplicationInfo createSemiManualAuthApplication(OAuthAppRequest appInfoRequest)
+    public OAuthApplicationInfo mapOAuthApplication(OAuthAppRequest appInfoRequest)
             throws APIManagementException {
 
         //initiate OAuthApplicationInfo
@@ -419,31 +419,8 @@ public class DefaultKeyManagerImpl extends AbstractKeyManager {
     }
 
     @Override
-    public void loadConfiguration(String configuration) throws APIManagementException{
-        if(configuration != null && !configuration.isEmpty()){
-            StAXOMBuilder builder = null;
-            try {
-                builder = new StAXOMBuilder(new ByteArrayInputStream(configuration.getBytes()));
-                OMElement document = builder.getDocumentElement();
-                if(this.configuration == null) {
-                    synchronized (this) {
-                        this.configuration = new KeyManagerConfiguration();
-                        this.configuration.setManualModeSupported(true);
-                        this.configuration.setResourceRegistrationEnabled(true);
-                        this.configuration.setTokenValidityConfigurable(true);
-                        Iterator<OMElement> elementIterator = document.getChildElements();
-                        while (elementIterator.hasNext()){
-                            OMElement element = elementIterator.next();
-                            this.configuration.addParameter(element.getLocalName(),element.getText());
-                        }
-                    }
-                }
-
-            } catch (XMLStreamException e) {
-                e.printStackTrace();
-            }
-
-        }
+    public void loadConfiguration(KeyManagerConfiguration configuration) throws APIManagementException{
+        return;
     }
 
     @Override

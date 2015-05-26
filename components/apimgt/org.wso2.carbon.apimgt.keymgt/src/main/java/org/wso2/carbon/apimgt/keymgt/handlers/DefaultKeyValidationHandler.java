@@ -77,14 +77,6 @@ public class DefaultKeyValidationHandler extends AbstractKeyValidationHandler {
                 return false;
             }
 
-            // This block checks if a Token of Application Type is trying to access a resource protected with
-            // Application Token
-            if (!hasTokenRequiredAuthLevel(validationContext.getRequiredAuthenticationLevel(), tokenInfo)) {
-                apiKeyValidationInfoDTO.setAuthorized(false);
-                apiKeyValidationInfoDTO.setValidationStatus(APIConstants.KeyValidationStatus.API_AUTH_INCORRECT_ACCESS_TOKEN_TYPE);
-                return false;
-            }
-
             apiKeyValidationInfoDTO.setAuthorized(tokenInfo.isTokenValid());
             apiKeyValidationInfoDTO.setEndUserName(tokenInfo.getEndUserName());
             apiKeyValidationInfoDTO.setConsumerKey(tokenInfo.getConsumerKey());

@@ -125,7 +125,7 @@ public interface KeyManager {
      * @return OAuthApplicationInfo with oAuth application properties.
      * @throws APIManagementException
      */
-    OAuthApplicationInfo createSemiManualAuthApplication(OAuthAppRequest appInfoRequest) throws APIManagementException;
+    OAuthApplicationInfo mapOAuthApplication(OAuthAppRequest appInfoRequest) throws APIManagementException;
 
     /**
      * This method will create an AccessTokenRequest using OAuthApplicationInfo object. If tokenRequest is null,
@@ -137,7 +137,7 @@ public interface KeyManager {
     AccessTokenRequest buildAccessTokenRequestFromOAuthApp(OAuthApplicationInfo oAuthApplication,
                                                            AccessTokenRequest tokenRequest) throws APIManagementException;
 
-    void loadConfiguration(String configuration) throws APIManagementException;
+    void loadConfiguration(KeyManagerConfiguration configuration) throws APIManagementException;
 
     /**
      * This Method will talk to APIResource registration end point  of  authorization server and creates a new resource

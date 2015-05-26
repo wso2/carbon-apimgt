@@ -426,4 +426,23 @@ public interface APIProvider extends APIManager {
      * @throws APIManagementException
      */
     public void saveSwagger20Definition(APIIdentifier apiId, String jsonText) throws APIManagementException;
+
+	/**
+	 * Create a API for given api identifier and context
+	 *
+	 * @param apiIdentifier the API identifier
+	 * @param context context of the API
+	 * @return uuid of the generic API artifact that has created
+	 */
+	public String createAPI(APIIdentifier apiIdentifier, String context) throws APIManagementException;
+
+	/**
+	 * Update the API with the values coming in the design phase
+	 * @param api Object which contains the values to be updated
+	 * @param tags list of tags
+	 * @param swagger swagger from the API Doc
+	 * @return return success of fail
+	 * @throws APIManagementException
+	 */
+	public boolean updateAPIDesign(API api, String tags, String swagger) throws APIManagementException;
 }

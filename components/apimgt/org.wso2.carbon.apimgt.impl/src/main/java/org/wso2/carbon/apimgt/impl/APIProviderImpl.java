@@ -24,12 +24,14 @@ import org.apache.axiom.om.OMFactory;
 import org.apache.axiom.om.util.AXIOMUtil;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.Constants;
+import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
+import org.mozilla.javascript.NativeObject;
 import org.wso2.carbon.apimgt.api.APIDefinition;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
@@ -459,6 +461,35 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
 
     /**
+     * This method is used to save the wsdl file in the registry
+     * This is used when user starts api creation with a soap endpoint
+     *
+     * @param api api object
+     * @throws APIManagementException
+     * @throws RegistryException
+     */
+    private void updateWsdl(API api) throws APIManagementException, RegistryException {
+
+        registry.beginTransaction();
+        String apiArtifactId = registry.get(APIUtil.getAPIPath(api.getId())).getUUID();
+        GenericArtifactManager artifactManager = APIUtil.getArtifactManager(registry,
+                APIConstants.API_KEY);
+        GenericArtifact artifact = artifactManager.getGenericArtifact(apiArtifactId);
+        GenericArtifact apiArtifact = APIUtil.createAPIArtifactContent(artifact, api);
+        String artifactPath = GovernanceUtils.getArtifactPath(registry, apiArtifact.getId());
+        if (APIUtil.isValidWSDLURL(api.getWsdlUrl(), false)) {
+            String path = APIUtil.createWSDL(registry, api);
+            if (path != null) {
+                registry.addAssociation(artifactPath, path, CommonConstants.ASSOCIATION_TYPE01);
+                apiArtifact.setAttribute(APIConstants.API_OVERVIEW_WSDL, api.getWsdlUrl()); //reset the wsdl path
+                artifactManager.updateGenericArtifact(apiArtifact); //update the  artifact
+            }
+        }
+        registry.commitTransaction();
+    }
+
+
+    /**
      * Updates an existing API
      *
      * @param api API
@@ -492,6 +523,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                         }
                     }
                 }
+
+                //Update WSDL in the registry
+                updateWsdl(api);
 
                 boolean updatePermissions = false;
                 if(!oldApi.getVisibility().equals(api.getVisibility()) || (oldApi.getVisibility().equals(APIConstants.API_RESTRICTED_VISIBILITY) && !api.getVisibleRoles().equals(oldApi.getVisibleRoles()))){
@@ -613,8 +647,10 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 }
 
             } catch (APIManagementException e) {
-            	handleException("Error while updating the API :" +api.getId().getApiName() + ". " + e.getMessage(), e);
-            } 
+                handleException("Error while updating the API :" + api.getId().getApiName() + ". " + e.getMessage(), e);
+            } catch (RegistryException e) {
+                handleException("Error while saving wsdl in the registry for the API :" + api.getId().getApiName() + ". " + e.getMessage(), e);
+            }
         } else {
             // We don't allow API status updates via this method.
             // Use changeAPIStatus for that kind of updates.
@@ -680,18 +716,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                             // reset the wsdl path to permlink
                             updateApiArtifact.setAttribute(APIConstants.API_OVERVIEW_WSDL, api.getWsdlUrl());
                         }
-                    }
-                } else if (registry != null && wsdlURL != null && !wsdlURL.isEmpty()) {
-                    String[] wsdlUrlRelativePath =
-                            wsdlURL.split(RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH);
-                    String wsdlRegistryPath = null;
-                    if (wsdlUrlRelativePath.length == 2) {
-                        wsdlRegistryPath = wsdlUrlRelativePath[1];
-                    }
-                    if (wsdlRegistryPath != null) {
-                        registry.delete(wsdlRegistryPath);
-                        registry.removeAssociation(artifactPath, wsdlURL, CommonConstants.ASSOCIATION_TYPE01);
-                        updateApiArtifact.setAttribute(APIConstants.API_OVERVIEW_WSDL, "");
                     }
                 }
                 if (api.getUrl() != null && !"".equals(api.getUrl())){
@@ -989,17 +1013,17 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
     private APITemplateBuilder getAPITemplateBuilder(API api){
         APITemplateBuilderImpl vtb = new APITemplateBuilderImpl(api);
-
+        Map<String, String> corsProperties = new HashMap<String, String>();
+        corsProperties.put("inline", api.getImplementation());
+        if (api.getAllowedHeaders() != null && api.getAllowedHeaders() != "") {
+            corsProperties.put("allowHeaders", api.getAllowedHeaders());
+        }
+        if (api.getAllowedOrigins() != null && api.getAllowedOrigins() != "") {
+            corsProperties.put("allowedOrigins", api.getAllowedOrigins());
+        }
+        vtb.addHandler("org.wso2.carbon.apimgt.gateway.handlers.security.CORSRequestHandler", corsProperties);
         if(!api.getStatus().equals(APIStatus.PROTOTYPED)) {
-            Map<String, String> corsProperties = new HashMap<String, String>();
-            corsProperties.put("inline", api.getImplementation());
-            if (api.getAllowedHeaders() != null && api.getAllowedHeaders() != "") {
-                corsProperties.put("allowHeaders", api.getAllowedHeaders());
-            }
-            if (api.getAllowedOrigins() != null && api.getAllowedOrigins() != "") {
-                corsProperties.put("allowedOrigins", api.getAllowedOrigins());
-            }
-            vtb.addHandler("org.wso2.carbon.apimgt.gateway.handlers.security.CORSRequestHandler", corsProperties);
+
             vtb.addHandler("org.wso2.carbon.apimgt.gateway.handlers.security.APIAuthenticationHandler", Collections.EMPTY_MAP);
 
             Map<String, String> properties = new HashMap<String, String>();
@@ -1022,6 +1046,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 vtb.addHandler("org.wso2.carbon.apimgt.gateway.handlers.ext.APIManagerExtensionHandler", Collections.EMPTY_MAP);
             }
         }
+
         return vtb;
     }
 
@@ -2325,13 +2350,222 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     @Override
     public void saveSwagger20Definition(APIIdentifier apiId, String jsonText) throws APIManagementException {
         try {
+            PrivilegedCarbonContext.startTenantFlow();
+            PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
             definitionFromSwagger20.saveAPIDefinition(getAPI(apiId), jsonText, registry);
 
         } catch (APIManagementException e) {
             handleException("Error while adding Swagger v2.0 Definition for " + apiId.getApiName() + "-" + apiId.getVersion(), e);
+        } finally {
+            PrivilegedCarbonContext.endTenantFlow();
         }
     }
 
+	public String createAPI(APIIdentifier apiIdentifier, String apiContext) throws APIManagementException {
+
+		String provider = apiIdentifier.getProviderName();
+		String name = apiIdentifier.getApiName();
+		String version = apiIdentifier.getVersion();
+		String contextVal = apiContext;
+
+		String providerDomain = MultitenantUtils.getTenantDomain(provider);
+
+		String context = contextVal.startsWith("/") ? contextVal : ("/" + contextVal);
+		if(!MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equalsIgnoreCase(providerDomain)) {
+			//Create tenant aware context for API
+			context= "/t/" + providerDomain + context;
+		}
+
+		if (provider != null) {
+			provider = APIUtil.replaceEmailDomain(provider);
+		}
+		provider = (provider != null ? provider.trim() : null);
+		name = (name != null ? name.trim() : null);
+		version = (version != null ? version.trim() : null);
+
+		APIIdentifier apiId = new APIIdentifier(provider, name, version);
+
+		if (isAPIAvailable(apiId)) {
+			handleException("Error occurred while adding the API. A duplicate API already exists for " +
+			                name + "-" + version);
+		}
+
+		API api = new API(apiId);
+		api.setStatus(APIStatus.CREATED);
+
+		// This is to support the new Pluggable version strategy
+		// if the context does not contain any {version} segment, we use the default version strategy.
+		context = APIUtil.checkAndSetVersionParam(context);
+		api.setContextTemplate(context);
+
+		context = APIUtil.updateContextWithVersion(version, contextVal, context);
+
+		api.setContext(context);
+		api.setVisibility(APIConstants.API_GLOBAL_VISIBILITY);
+		api.setLastUpdated(new Date());
+
+		saveAPI(api, true);
+
+		return getUuuidOfAPI(apiIdentifier);
+	}
+
+	public boolean updateAPIDesign(API api, String tags, String swagger) throws APIManagementException {
+
+		String provider = api.getId().getProviderName();
+		String name = api.getId().getApiName();
+		String version = api.getId().getVersion();
+		String contextVal = api.getContext();
+		String description = api.getDescription();
+
+        /* Business Information*/
+		String techOwner = api.getTechnicalOwner();
+		String techOwnerEmail = api.getTechnicalOwnerEmail();
+		String bizOwner = api.getBusinessOwner();
+		String bizOwnerEmail = api.getBusinessOwnerEmail();
+
+		String context = contextVal.startsWith("/") ? contextVal : ("/" + contextVal);
+		String providerDomain = MultitenantUtils.getTenantDomain(provider);
+		if(!MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equalsIgnoreCase(providerDomain))
+		{
+			//Create tenant aware context for API
+			context= "/t/"+ providerDomain+context;
+		}
+
+		Set<String> tag = new HashSet<String>();
+
+		if (tags != null) {
+			if (tags.indexOf(",") >= 0) {
+				String[] userTag = tags.split(",");
+				tag.addAll(Arrays.asList(userTag).subList(0, tags.split(",").length));
+			} else {
+				tag.add(tags);
+			}
+		}
+
+		String visibility = api.getVisibility());
+		String visibleRoles = "";
+
+
+		if (visibility != null && visibility.equals(APIConstants.API_RESTRICTED_VISIBILITY)) {
+			visibleRoles = api.getVisibleRoles();
+		}
+
+		if (provider != null) {
+			provider = APIUtil.replaceEmailDomain(provider);
+		}
+		provider = (provider != null ? provider.trim() : null);
+		name = (name != null ? name.trim() : null);
+		version = (version != null ? version.trim() : null);
+		APIIdentifier apiId = new APIIdentifier(provider, name, version);
+		API savedAPI = null;
+		boolean isTenantFlowStarted = false;
+		String tenantDomain;
+		try {
+			tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(provider));
+			if(tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
+				isTenantFlowStarted = true;
+				PrivilegedCarbonContext.startTenantFlow();
+				PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
+			}
+			savedAPI = getAPI(apiId);
+		} finally {
+			if (isTenantFlowStarted) {
+				PrivilegedCarbonContext.endTenantFlow();
+			}
+		}
+
+		if (api.getWadlUrl() != null) {
+			String wsdl = api.getWsdlUrl();
+			if(wsdl != null && !wsdl.isEmpty()) {
+				savedAPI.setWsdlUrl(wsdl);
+			}
+		}
+
+		if (swagger != null) {
+			// Read URI Templates from swagger resource and set it to api object
+			Set<URITemplate> uriTemplates = definitionFromSwagger20.getURITemplates(savedAPI,swagger);
+			savedAPI.setUriTemplates(uriTemplates);
+
+			// Save the swagger definition in the registry
+			saveSwagger20Definition(savedAPI.getId(), swagger);
+		}
+
+		savedAPI.setDescription(StringEscapeUtils.escapeHtml(description));
+		HashSet<String> deletedTags = new HashSet<String>(savedAPI.getTags());
+		deletedTags.removeAll(tag);
+		savedAPI.removeTags(deletedTags);
+		savedAPI.addTags(tag);
+		savedAPI.setBusinessOwner(bizOwner);
+		savedAPI.setBusinessOwnerEmail(bizOwnerEmail);
+		savedAPI.setTechnicalOwner(techOwner);
+		savedAPI.setTechnicalOwnerEmail(techOwnerEmail);
+		savedAPI.setVisibility(visibility);
+		savedAPI.setVisibleRoles(visibleRoles != null ? visibleRoles.trim() : null);
+		savedAPI.setLastUpdated(new Date());
+
+		return saveAPI(savedAPI, false);
+	}
+
+	/**
+	 * This method save or update the API object
+	 * @param api
+	 * @param create
+	 * @return true if the API was added successfully
+	 * @throws APIManagementException
+	 */
+	private boolean saveAPI(API api, boolean create) throws APIManagementException {
+		boolean success = false;
+		boolean isTenantFlowStarted = false;
+		try {
+			String tenantDomain =
+					MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(api.getId().getProviderName()));
+			if(tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
+				isTenantFlowStarted = true;
+				PrivilegedCarbonContext.startTenantFlow();
+				PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
+			}
+
+			//Image uploading will be handle by the ES.
+			/*if (fileHostObject != null && fileHostObject.getJavaScriptFile().getLength() != 0) {
+				Icon icon = new Icon(fileHostObject.getInputStream(),
+						fileHostObject.getJavaScriptFile().getContentType());
+				String thumbPath = APIUtil.getIconPath(api.getId());
+
+				String thumbnailUrl = addIcon(thumbPath, icon);
+				api.setThumbnailUrl(APIUtil.prependTenantPrefix(thumbnailUrl, api.getId().getProviderName()));
+
+                *//*Set permissions to anonymous role for thumbPath*//*
+				APIUtil.setResourcePermissions(api.getId().getProviderName(), null, null, thumbPath);
+			}*/
+
+			if (create) {
+				addAPI(api);
+			} else {
+				manageAPI(api);
+			}
+			success = true;
+		} catch (FaultGatewaysException e) {
+			handleException("Gateway exception occurrred while saving the API", e);
+			return false;
+		} finally {
+			if (isTenantFlowStarted) {
+				PrivilegedCarbonContext.endTenantFlow();
+			}
+		}
+
+		return success;
+	}
+
+	public String getUuuidOfAPI(APIIdentifier identifier) throws APIManagementException {
+		String apiPath = APIUtil.getAPIPath(identifier);
+		Resource apiResource = null;
+		try {
+			apiResource = registry.get(apiPath);
+		} catch (RegistryException e) {
+			handleException("Error while accessing the registry resource", e);
+		}
+		return apiResource.getUUID();
+	}
 }
 
 

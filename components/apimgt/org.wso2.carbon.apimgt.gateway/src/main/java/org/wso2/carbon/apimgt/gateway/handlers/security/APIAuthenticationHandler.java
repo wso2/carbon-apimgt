@@ -74,12 +74,12 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
         }
     }
 
-    public void destroy() {        
+    public void destroy() {
         if(authenticator != null) {
         	authenticator.destroy();
         } else {
         	log.warn("Unable to destroy uninitialized authentication handler instance");
-        }        
+        }
     }
 
     private void initializeAuthenticator() {
@@ -103,6 +103,13 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
     }
 
     public boolean handleRequest(MessageContext messageContext) {
+        long startTime = System.nanoTime();
+        long endTime;
+        long difference;
+
+        endTime = System.nanoTime();
+        difference = (endTime - startTime) / 1000000;
+        String messageDetails = logMessageDetails(messageContext, difference);
         try {
             if (Utils.isStatsEnabled()) {
                 long currentTime = System.currentTimeMillis();
@@ -112,12 +119,16 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
                 initializeAuthenticator();
             }
             if (authenticator.authenticate(messageContext)) {
+                if (log.isDebugEnabled()) {
+                   log.debug("Authenticated API, authentication response relieved: " + messageDetails +
+                            ", elapsedTimeInMilliseconds=" + difference / 1000000);
+                }
                 return true;
             }
         } catch (APISecurityException e) {
 
             if (log.isDebugEnabled()) {
-                logMessageDetails(messageContext);
+              log.debug("Call to API gateway : " + messageDetails);
             }
             // We do not need to log authentication failures as errors since these are not product errors.
             log.warn("API authentication failure due to " +
@@ -206,7 +217,7 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
         return payload;
     }
 
-    private void logMessageDetails(MessageContext messageContext) {
+    private String logMessageDetails(MessageContext messageContext, long elapsedTime) {
         //TODO: Hardcoded const should be moved to a common place which is visible to org.wso2.carbon.apimgt.gateway.handlers
         String applicationName = (String) messageContext.getProperty("APPLICATION_NAME");
         String endUserName = (String) messageContext.getProperty("END_USER_NAME");
@@ -227,6 +238,10 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
         if (userAgent != null) {
             logMessage = logMessage + " with userAgent=" + userAgent;
         }
+        String accessToken = (String) ((TreeMap) axisMC.getProperty("TRANSPORT_HEADERS")).get("Authorization");
+        if (accessToken != null) {
+            logMessage = logMessage + " with accessToken=" + accessToken;
+        }
         String requestURI = (String) messageContext.getProperty(RESTConstants.REST_FULL_REQUEST_PATH);
         if (requestURI != null) {
             logMessage = logMessage + " for requestURI=" + requestURI;
@@ -241,7 +256,10 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
         if (remoteIP != null) {
             logMessage = logMessage + " from clientIP=" + remoteIP;
         }
-        log.debug("Call to API Gateway " + logMessage);
+        if(elapsedTime > 0){
+            logMessage = logMessage + " elapsedTimeInMilliseconds=" + elapsedTime;
+        }
+        return logMessage;
     }
-        
+
 }
