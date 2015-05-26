@@ -5321,6 +5321,8 @@ public class ApiMgtDAO {
                 application.setCallbackUrl(rs.getString("CALLBACK_URL"));
                 application.setDescription(rs.getString("DESCRIPTION"));
                 application.setStatus(rs.getString("APPLICATION_STATUS"));
+                int subsCount=getSubscriptionCount(subscriber,application.getName(),groupingId);
+                application.setSubsCount(subsCount);
                
                 Set<APIKey> keys = getApplicationKeys(subscriber.getName() , application.getId());
                 Map<String,OAuthApplicationInfo> keyMap = getOAuthApplications(application.getId());
