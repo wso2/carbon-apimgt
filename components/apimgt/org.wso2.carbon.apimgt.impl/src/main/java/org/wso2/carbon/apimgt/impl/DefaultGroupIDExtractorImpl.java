@@ -44,7 +44,7 @@ public class DefaultGroupIDExtractorImpl implements LoginPostExecutor {
             organization =
                     manager.getUserClaimValue(MultitenantUtils.getTenantAwareUsername(username), claim, null);
             if (organization != null) {
-                organization = organization.trim();
+                organization = tenantDomain + "/" + organization.trim();
             }
         } catch (JSONException e) {
             log.error("Exception occured while trying to get group Identifier from login response");
