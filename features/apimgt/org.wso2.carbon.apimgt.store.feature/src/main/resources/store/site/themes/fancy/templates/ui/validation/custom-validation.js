@@ -19,5 +19,9 @@ $(document).ready(function() {
         return !illegalChars.test(value);
     }, 'Input contains one or more illegal characters  (& &lt; &gt; \'  " ');
 
-
+    $("#newUsername").charCount({
+        allowed: 30,
+        warning: 20,
+        counterText: 'Characters left: '
+    });
 });
