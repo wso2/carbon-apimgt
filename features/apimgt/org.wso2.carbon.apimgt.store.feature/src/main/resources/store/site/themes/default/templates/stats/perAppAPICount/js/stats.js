@@ -1,66 +1,73 @@
-var t_on = {
-    'apiChart':1,
-    'subsChart':1,
-    'userChart':1,
-    'serviceTimeChart':1,
-    'tempLoadingSpace':1,
-    'subsChart':1
-};
 var currentLocation;
 
-
-var chartColorScheme1 = ["#3da0ea","#bacf0b","#e7912a","#4ec9ce","#f377ab","#ec7337","#bacf0b","#f377ab","#3da0ea","#e7912a","#bacf0b"];
-//fault colors || shades of red
-var chartColorScheme2 = ["#ED2939","#E0115F","#E62020","#F2003C","#ED1C24","#CE2029","#B31B1B","#990000","#800000","#B22222","#DA2C43"];
-//fault colors || shades of blue
-var chartColorScheme3 = ["#0099CC","#436EEE","#82CFFD","#33A1C9","#8DB6CD","#60AFFE","#7AA9DD","#104E8B","#7EB6FF","#4981CE","#2E37FE"];
 currentLocation=window.location.pathname;
 var statsEnabled = isDataPublishingEnabled();
 
-
-require(["dojo/dom", "dojo/domReady!"], function(dom){
     currentLocation=window.location.pathname;
-    //Initiating the fake progress bar
-    jagg.fillProgress('apiChart');jagg.fillProgress('userChart');jagg.fillProgress('subsChart');jagg.fillProgress('serviceTimeChart');jagg.fillProgress('tempLoadingSpace');
-
     jagg.post("/site/blocks/stats/perAppAPICount/ajax/stats.jag", { action:"getFirstAccessTime",currentLocation:currentLocation  },
         function (json) {            
 
             if (!json.error) {
 
                 if( json.usage && json.usage.length > 0){
-                    
                     var d = new Date();
                     var firstAccessDay = new Date(json.usage[0].year, json.usage[0].month-1, json.usage[0].day);
-                    var currentDay = new Date(d.getFullYear(), d.getMonth(), d.getDate());
-                    if(firstAccessDay.valueOf() == currentDay.valueOf()){
-                        currentDay = new Date(d.getFullYear(), d.getMonth(), d.getDate()+1);
-                    }
-                    var rangeSlider =  $("#rangeSlider");
-                    //console.info(currentDay);
-                    rangeSlider.dateRangeSlider({
-                        "bounds":{
-                            min: firstAccessDay,
-                            max: currentDay
-                        },
-                        "defaultValues":{
-                            min: firstAccessDay,
-                            max: currentDay
-                        }
+                    var currentDay = new Date(d.getFullYear(), d.getMonth(), d.getDate(),d.getHours(),d.getMinutes());
+
+                    //day picker
+                    $('#today-btn').on('click',function(){
+                        getDateTime(currentDay,currentDay-86400000);
                     });
-                    rangeSlider.bind("valuesChanged", function(e, data){
-                        var from = convertTimeString(data.values.min);
-                        var to = convertTimeStringPlusDay(data.values.max);
 
-             
-                        drawGraphAPIUsage(from,to);
+                    //hour picker
+                    $('#hour-btn').on('click',function(){
+                        getDateTime(currentDay,currentDay-3600000);
+                    })
 
+                    //week picker
+                    $('#week-btn').on('click',function(){
+                        getDateTime(currentDay,currentDay-604800000);
+                    })
 
-                        console.info("drawGraphAPIUsage");
-
-                        
+                    //month picker
+                    $('#month-btn').on('click',function(){
+                        getDateTime(currentDay,currentDay-(604800000*4));
                     });
-                    
+
+                    $('#date-range').click(function(){
+                         $(this).removeClass('active');
+                    });
+
+                    //date picker
+                    $('#date-range').daterangepicker({
+                          timePicker: true,
+                          timePickerIncrement: 30,
+                          format: 'YYYY-MM-DD h:mm',
+                          opens: 'left',
+                    });
+
+                    $('#date-range').on('apply.daterangepicker', function(ev, picker) {
+                       btnActiveToggle(this);
+                       //$('#date-range').toggleClass('active');
+                       var from = convertTimeString(picker.startDate);
+                       var to = convertTimeString(picker.endDate);
+                       var fromStr = from.split(" ");
+                       var toStr = to.split(" ");
+                       var dateStr = fromStr[0] + " <i>" + fromStr[1] + "</i> <b>to</b> " + toStr[0] + " <i>" + toStr[1] + "</i>";
+                       $("#date-range span").html(dateStr);
+                       drawGraphAPIUsage(from,to);
+                    });
+
+                    //setting default date
+                    var to = new Date();
+                    var from = new Date(to.getTime() - 1000 * 60 * 60 * 24 * 30);
+
+                    getDateTime(to,from);
+
+                    $('body').on('click', '.btn-group button', function (e) {
+                        $(this).addClass('active');
+                        $(this).siblings().removeClass('active');
+                    });
 
                 }
 
@@ -73,11 +80,7 @@ require(["dojo/dom", "dojo/domReady!"], function(dom){
                     $('#content').html("");
                     $('#content').append($('<div class="errorWrapper"><span class="label top-level-warning"><i class="icon-warning-sign icon-white"></i>'
                         +i18n.t('errorMsgs.checkBAMConnectivity')+'</span><br/><img src="../themes/fancy/templates/stats/perAppAPICount/images/statsThumb.png" alt="Smiley face"></div>'));
-
-
                 }
-
-
             }
             else {
                 if (json.message == "AuthenticateError") {
@@ -86,138 +89,95 @@ require(["dojo/dom", "dojo/domReady!"], function(dom){
                     jagg.message({content:json.message,type:"error"});
                 }
             }
-            t_on['apiChart'] = 0;
-            t_on['userChart'] = 1;
         }, "json");
 
-});
 
 $(document).ready(function(){
     $(document).scroll(function(){
         var top=$(document).scrollTop();
-       // console.info(top);
         var width = $("#rangeSliderWrapper").width();
         if(top > 180){
-            $("#rangeSliderWrapper").css("position","fixed").css("top","30px").width(width);
-        
+            $("#rangeSliderWrapper").css("position","fixed").css("top","50px").width(width);
         }else{
-          
-           $("#rangeSliderWrapper").css({ "position": "relative", "top": "0px" }); 
+           $("#rangeSliderWrapper").css({ "position": "relative", "top": "0px" });
         }
-
     })
 })
 
-
-
 var drawGraphAPIUsage = function(from,to){
-
-
     var fromDate = from;
     var toDate = to;
     jagg.post("/site/blocks/stats/perAppAPICount/ajax/stats.jag", { action:"getProviderAPIUsage",currentLocation:currentLocation,fromDate:fromDate,toDate:toDate  },
         function (json) {
             if (!json.error) {
-                var lentth1 = json.usage.length;
+                var dataLength = json.usage.length;
+                if(dataLength>0){
                 $('#apiUsage').empty();
-                for(var k=0 ; k<lentth1 ;k++){
+                    for(var k=0 ; k<dataLength ;k++){
+                    $('#apiUsage').append($('<h3>Application Name:  '+json.usage[k].appName+'</h3><div class="col-md-12"><div class="col-md-6"><div id="apiChart'+(k+1)+'" class="chart"><svg style="height:400px;"></svg></div></div> <div class="col-md-6"> <table class="table table-striped table-bordered" id="apiTable'+(k+1)+'" class="display" cellspacing="0" width="100%"><thead><tr> <th>'+ i18n.t("apiName")+'</th><th>'+ i18n.t("noOfAPICalls")+'</th></tr></thead> </table> </div></div>'));
+                    }
 
-                     $('#apiUsage').append($('<div class="well"><div class="row-fluid"> <h3>Application Name:  '+json.usage[k].appName+'</h3><div class="span6" style="height:350px; width :350px"><div id="apiChart'+(k+1)+'" style="height:350px;"><div class="progress progress-striped active"><div class="bar" style="width: 10%;"></div></div></div> </div> <div class="span6"> <table class="table graphTable" id="apiTable'+(k+1)+'" style="display:none;"><tr> <th>'+ i18n.t("apiName")+'</th><th>'+ i18n.t("noOfAPICalls")+'</th></tr> </table> </div></div></div>'));
-             } for(var k=0 ; k<lentth1 ;k++){
-                var length = json.usage[k].apiCountArray.length,data = [];
+                     for(var k=0 ; k<dataLength ;k++){
 
-                $('#apiTable'+(k+1)).find("tr:gt(0)").remove();
-                $('#apiChart'+(k+1)).empty();
-                for (var i = 0; i < length; i++) {
-                    data[i] = [ json.usage[k].apiCountArray[i].apiName, parseInt( json.usage[k].apiCountArray[i].count )];
-                    $('#apiTable'+(k+1)).append($('<tr><td>' +  json.usage[k].apiCountArray[i].apiName + '</td><td class="tdNumberCell">' +json.usage[k].apiCountArray[i].count + '</td></tr>'));
+                        var length = json.usage[k].apiCountArray.length,data = [];
+                        var chartData=[];
+                        for (var i = 0; i < length; i++) {
 
-                }
-
-                if (length > 0) {
-                    $('#apiTable'+(k+1)).show();
-                    require([
-                        // Require the basic chart class
-                        "dojox/charting/Chart",
-
-                        // Require the theme of our choosing
-                        "dojox/charting/themes/Claro",
-
-                        // Charting plugins:
-
-                        //  We want to plot a Pie chart
-                        "dojox/charting/plot2d/Pie",
-
-                        // Retrieve the Legend, Tooltip, and MoveSlice classes
-                        "dojox/charting/action2d/Tooltip",
-                        "dojox/charting/action2d/MoveSlice",
-
-                        //  We want to use Markers
-                        "dojox/charting/plot2d/Markers",
-
-                        //  We'll use default x/y axes
-                        "dojox/charting/axis2d/Default"
-                    ], function(Chart, theme, Pie, Tooltip, MoveSlice) {
-
-                        // Create the chart within it's "holding" node
-                        var apiUsageChart = new Chart("apiChart"+(k+1));
-
-                        // Set the theme
-                        apiUsageChart.setTheme(theme);
-
-                        // Add the only/default plot
-                        apiUsageChart.addPlot("default", {
-                            type: Pie,
-                            markers: true,
-                            radius:130
-                        });
-
-                        // Add axes
-                        apiUsageChart.addAxis("x");
-                        apiUsageChart.addAxis("y", { min: 5000, max: 30000, vertical: true, fixLower: "major", fixUpper: "major" });
-
-                        // Define the data
-                        var chartData; var color = -1;
-                        require(["dojo/_base/array"], function(array){
-                            chartData= array.map(data, function(d){
-                                color++;
-                                return {y: d[1], tooltip: "<b>"+d[0]+"</b><br /><i>"+d[1]+" call(s)</i>",fill:chartColorScheme1[color]};
-
+                            data[i] = [ json.usage[k].apiCountArray[i].apiName, parseInt( json.usage[k].apiCountArray[i].count )];
+                            $('#apiTable'+(k+1)).append($('<tr><td>' +  json.usage[k].apiCountArray[i].apiName + '</td><td class="tdNumberCell">' +json.usage[k].apiCountArray[i].count + '</td></tr>'));
+                            chartData.push({"apiName":json.usage[k].apiCountArray[i].apiName,
+                                            "count":parseInt( json.usage[k].apiCountArray[i].count )
                             });
-                        });
 
-                        apiUsageChart.addSeries("API Usage",chartData);
-
-
-
-                        // Create the tooltip
-                        var tip = new Tooltip(apiUsageChart,"default");
-
-                        // Create the slice mover
-                        var mag = new MoveSlice(apiUsageChart,"default");
-
-                        // Render the chart!
-                        apiUsageChart.render();
-
-
-
-                    });
-
+                        }
+                        drawChart('#apiChart'+(k+1),k,chartData);
+                        if (length > 0) {
+                            $('#apiTable'+(k+1)).dataTable();
+                            $('#apiTable'+(k+1)).show();
+                        }
+                     }
+                    }else{
+                        $('#apiUsage').html($('<h3 class="no-data-heading center-wrapper">No Data Available</h3>'));
+                    }
                 } else {
-
+                    if (json.message == "AuthenticateError") {
+                        jagg.showLogin();
+                    } else {
+                        jagg.message({content:json.message,type:"error"});
+                    }
                 }
+            }, "json");
+}
+function drawChart(div,i,data) {
+    var h = 600;
+    var r = h/2;
+    var arc = d3.svg.arc().outerRadius(r);
 
+    nv.addGraph(function() {
+    var chart = nv.models.pieChart()
+      .x(function(d) { return d.apiName })
+      .y(function(d) { return d.count })
+      .showLabels(true)
+      .labelType("percent")
+      .showLegend(false)
+      .color(d3.scale.category20().range());
+    var chartID = "#apiChart"+(i+1) +" svg";
+    d3.select(chartID)
+        .datum(data)
+        .transition().duration(350)
+        .call(chart);
+    d3.selectAll(".nv-label text")
+      .attr("transform", function(d){
+          d.innerRadius = -450;
+          d.outerRadius = r;
+          return "translate(" + arc.centroid(d) + ")";}
+      )
+      .attr("text-anchor", "middle")
+      .style({"font-size": "1em"});
 
-            }
-            } else {
-                if (json.message == "AuthenticateError") {
-                    jagg.showLogin();
-                } else {
-                    jagg.message({content:json.message,type:"error"});
-                }
-            }
-            t_on['apiChart'] = 0;
-        }, "json");
+    nv.utils.windowResize(chart.update);
+    return chart;
+    });
 }
 
 function isDataPublishingEnabled(){
@@ -239,11 +199,9 @@ function isDataPublishingEnabled(){
 
 var convertTimeString = function(date){
     var d = new Date(date);
-    var formattedDate = d.getFullYear() + "-" + formatTimeChunk((d.getMonth()+1)) + "-" + formatTimeChunk(d.getDate());
+    var formattedDate = d.getFullYear() + "-" + formatTimeChunk((d.getMonth()+1)) + "-" + formatTimeChunk(d.getDate())+" "+formatTimeChunk(d.getHours())+":"+formatTimeChunk(d.getMinutes());
     return formattedDate;
 };
-
-
 
 var convertTimeStringPlusDay = function(date){
     var d = new Date(date);
@@ -257,3 +215,20 @@ var formatTimeChunk = function (t){
     }
     return t;
 };
+
+function btnActiveToggle(button){
+    $(button).siblings().removeClass('active');
+    $(button).addClass('active');
+}
+
+function getDateTime(currentDay,fromDay){
+    var to = convertTimeString(currentDay);
+    var from = convertTimeString(fromDay);
+    var toDate = to.split(" ");
+    var fromDate = from.split(" ");
+    var dateStr= fromDate[0]+" <i>"+fromDate[1]+"</i> <b>to</b> "+toDate[0]+" <i>"+toDate[1]+"</i>";
+    $("#date-range span").html(dateStr);
+    $('#date-range').data('daterangepicker').setStartDate(from);
+    $('#date-range').data('daterangepicker').setEndDate(to);
+    drawGraphAPIUsage(from,to);
+}
