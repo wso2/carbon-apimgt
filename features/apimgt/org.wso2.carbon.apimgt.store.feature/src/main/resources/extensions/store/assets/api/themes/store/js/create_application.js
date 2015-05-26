@@ -125,6 +125,12 @@ $(function () {
             success: function (data) {
                 document.getElementById("tr-application-" + metadata.editRowData.appId + "-data").innerHTML =
                     getNewTrUpdated();
+                var message = {};
+                message.text = '<div><i class="icon-briefcase"></i> Application: ' +
+                metadata.editRowData.appName + ' has been updated.</div>';
+                message.type = 'success';
+                message.layout = 'topRight';
+                noty(message);
             }
         });
     };
@@ -143,17 +149,38 @@ $(function () {
      */
     removeApplication = function (appName, userName, appId) {
         setMetadataForDelRow(appName, appId);
-        var removeApplicationData = {};
-        removeApplicationData.appName = appName;
-        removeApplicationData.userName = userName;
-        removeApplicationData.appId = appId;
-        $.ajax({
-            type: 'POST',
-            url: getApplicationsAPI('delapp'),
-            data: removeApplicationData,
-            success: function (data) {
-                $("#tr-application-" + metadata.delRowData.appId + "-data").remove();
-            }
+        noty({
+            text: "Are you sure you want to remove the application '" + appName + "'? This will cancel all the existing subscriptions and keys associated with the application.",
+            layout: 'topRight',
+            type: 'confirm',
+            closeWith: ['click'],
+            buttons: [
+                {
+                    addClass: 'btn btn-primary', text: 'Yes', onClick: function ($noty) {
+                    $noty.close();
+
+                    var removeApplicationData = {};
+                    removeApplicationData.appName = appName;
+                    removeApplicationData.userName = userName;
+                    removeApplicationData.appId = appId;
+
+                    $.ajax({
+                        type: 'POST',
+                        url: getApplicationsAPI('delapp'),
+                        data: removeApplicationData,
+                        success: function (data) {
+                            $("#tr-application-" + metadata.delRowData.appId + "-data").remove();
+                        }
+                    });
+
+                }
+                },
+                {
+                    addClass: 'btn btn-other', text: 'No', onClick: function ($noty) {
+                    $noty.close();
+                }
+                }
+            ]
         });
     };
 
