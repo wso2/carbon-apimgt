@@ -4826,7 +4826,7 @@ public final class APIUtil {
 		return transport;
 	}
 
-	private static String checkAndSetVersionParam(String context) {
+	public static String checkAndSetVersionParam(String context) {
 		// This is to support the new Pluggable version strategy
 		// if the context does not contain any {version} segment, we use the default version strategy.
 		if(!context.contains(VERSION_PARAM)){
@@ -4848,7 +4848,7 @@ public final class APIUtil {
 		}
 	}
 
-	private static String updateContextWithVersion(String version, String contextVal, String context) {
+	public static String updateContextWithVersion(String version, String contextVal, String context) {
 		// This condition should not be true for any occasion but we keep it so that there are no loopholes in
 		// the flow.
 		if (version == null) {
@@ -4861,7 +4861,7 @@ public final class APIUtil {
 		return context;
 	}
 
-	private static HostnameVerifier DO_NOT_VERIFY = new HostnameVerifier() {
+	public static HostnameVerifier DO_NOT_VERIFY = new HostnameVerifier() {
 		public boolean verify(String hostname, SSLSession session) {
 			return true;
 		}
