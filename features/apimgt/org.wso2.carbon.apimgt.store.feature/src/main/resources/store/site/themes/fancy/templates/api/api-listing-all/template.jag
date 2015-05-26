@@ -165,12 +165,13 @@ var reqUrl = request.getRequestURI();
 
                             <div class="version-provider-wrapper">
                                 <%=api.version%>
-
-
-
                             <%if(api.isAdvertiseOnly) {%>
                                 <a href="<%=path%>" class="link-to-provider link-h2"><%=api.apiOwner%></a>
-                            <%}else {%>
+                            <%}
+                            else if(api.apiBusinessOwner != null){%>
+                                <a href="<%=path%>" class="link-to-provider link-h2"><%=api.apiBusinessOwner%></a>
+                            <%}
+                            else {%>
                                 <a href="<%=path%>" class="link-to-provider link-h2"><%=api.provider%></a>
                             <%}%>
                            </div>

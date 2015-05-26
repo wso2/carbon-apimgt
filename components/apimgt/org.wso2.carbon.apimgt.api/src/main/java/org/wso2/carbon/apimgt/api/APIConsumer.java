@@ -398,8 +398,8 @@ public interface APIConsumer extends APIManager {
      * @return set of API
      * @throws APIManagementException if failed to get set of API
      */
-    public Set<API> getPublishedAPIsByProvider(String providerId, String loggedUser, int limit, String apiOwner)
-            throws APIManagementException;
+    public Set<API> getPublishedAPIsByProvider(String providerId, String loggedUser, int limit, String apiOwner,
+                                               String apiBizOwner) throws APIManagementException;
 
      /** Get a list of published APIs by the given provider.
      *
@@ -460,7 +460,7 @@ public interface APIConsumer extends APIManager {
      * @param applicationName Name of the Application
      * @param tokenType Type of the Token (PRODUCTION | SANDBOX)
      * @param tokenScope scope of the token
-     * @param the groupingId the application belongs to.
+     * @param groupingId the application belongs to.
      * @return a Map containing the details of the OAuth application.
      * @throws APIManagementException if failed to get the tiers
      */

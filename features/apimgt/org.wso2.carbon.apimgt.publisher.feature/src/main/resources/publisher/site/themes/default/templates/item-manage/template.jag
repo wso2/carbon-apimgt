@@ -261,7 +261,7 @@
                             <%=i18n.localize("tenants")%>:<span class="requiredAstrix">*</span>
                         </label>
                         <div class="controls">
-                            <input type="text" class="input required"
+                            <input type="text" class="input"
                             id="tenants" name="tenants" value="<%=api.subscriptionTenants%>"/>
                             <p class="help-block" id="tenantsHelp"><%=i18n.localize("tenantsHelpMsg")%></p>
                         </div>
@@ -611,7 +611,9 @@
 
         var v = $("#manage_form").validate({
             submitHandler: function(form) {
-            if(!validate_tiers()){
+            var tiersValidated = validate_tiers();
+            var subscriptionValidated = validate_subscription();
+            if(!tiersValidated || !subscriptionValidated){
                 return false;
             }
             if(!validate_Transports()){

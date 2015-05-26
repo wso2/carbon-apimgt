@@ -13,6 +13,22 @@ function validate_tiers(){
     return false;
 }
 
+function validate_subscription(){
+    var subscriptionType = $('#subscriptions').val();
+    if(subscriptionType == 'specific_tenants'){
+        var tenants = $('#tenants').val().trim();
+        $("#subscriptions_error").remove();
+        if(tenants.length > 0){
+            return true;
+        }
+        //set error
+        $("#tenants").after('<label id="subscriptions_error" class="error" for="tenants" generated="true" style="display: block;">This field is required.</label>').focus();
+        return false;
+    } else {
+        return true;
+    }
+}
+
 $(document).ready(function(){
 
     $('.multiselect').multiselect();
