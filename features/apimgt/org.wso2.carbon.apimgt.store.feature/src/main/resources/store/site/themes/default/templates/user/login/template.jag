@@ -2,6 +2,13 @@
 var i18n = require("i18n");var publisherUrl;
 var localeResourcesBasePath="/site/conf/locales/jaggery/";
 i18n.init(request,localeResourcesBasePath);
+
+var themes = [
+  { base : "default" , subtheme:"default" },
+  { base : "default" , subtheme:"united" },
+  { base : "default" , subtheme:"paper" },  
+]
+
 %>
 <% var user = outputs.user; %>
 <%
@@ -46,16 +53,22 @@ i18n.init(request,localeResourcesBasePath);
   <li class="dropdown">
     <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false"><%=i18n.localize("selectTheme")%> <span class="caret"></span></a>
     <ul class="dropdown-menu" role="menu">
-      <li><a href="<%=jagg.urlTenanted(jagg.getThemeFile("templates/user/theme/template.jag?subthemeToApply=default"))%>">Default</a></li>    
-      <li><a href="<%=jagg.urlTenanted(jagg.getThemeFile("templates/user/theme/template.jag?subthemeToApply=united"))%>">United</a></li>
-      <li><a href="<%=jagg.urlTenanted(jagg.getThemeFile("templates/user/theme/template.jag?subthemeToApply=paper"))%>">Paper</a></li>
+      <% for(var i=0;i < themes.length;i++) {
+        if(themes[i].subtheme == jagg.getUserTheme().subtheme ){
+      %>
+      <li><a class="active"><%=themes[i].subtheme%></a></li>
+      <%} else { %>              
+      <li><a href="<%=jagg.urlTenanted(jagg.getThemeFile("templates/user/theme/template.jag?themeToApply="+themes[i].base+"&subthemeToApply="+themes[i].subtheme))%>"><%=themes[i].subtheme%></a></li>
+      <% }
+      } %>
     </ul>
   </li>
   <li class="dropdown">
     <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false"><%=user.username%> <span class="caret"></span></a>
     <ul class="dropdown-menu" role="menu">
-      <li><a><%=i18n.localize("logged")%></a></li>
-      <li><a><h4><%=user.username%></h4></a></li>
+      <li role="presentation" class="dropdown-header"><%=i18n.localize("logged")%></li>
+      <li role="presentation" class="disabled"><a role="menuitem" tabindex="-1" href="#"><strong><%=user.username%></strong></a></li>
+      <li role="presentation" class="divider"></li>
       <% if(isSelfSignupEnabled) { %>
                <li><a href="<%= jagg.urlTenanted('/site/pages/user-info.jag')%>"><%=i18n.localize("privacy")%></a></li> <% } %>
       <li class="divider"></li>

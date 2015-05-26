@@ -421,7 +421,7 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
      * @throws org.wso2.carbon.apimgt.api.APIManagementException
      */
     @Override
-    public OAuthApplicationInfo createSemiManualAuthApplication(OAuthAppRequest appInfoRequest)
+    public OAuthApplicationInfo mapOAuthApplication(OAuthAppRequest appInfoRequest)
             throws APIManagementException {
 
         //initiate OAuthApplicationInfo

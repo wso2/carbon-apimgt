@@ -19,6 +19,9 @@ jagg.block("subscription/subscription-list", {
         var applications, result, response, selectedApp, totalLength,  user = inputs.user, page;
         if(request.getParameter('selectedApp')!=null){
             selectedApp = request.getParameter('selectedApp');
+            if(selectedApp instanceof Array){
+                selectedApp = String(selectedApp[0]);
+            }
         }else if(session.get('selectedApp') != null){
             selectedApp = session.get('selectedApp');
         }else{

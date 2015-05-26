@@ -96,6 +96,24 @@
     </div>
   <%  }%>
 
+<script>
+    $(document).ready(function(){
+        <% if(api != null && api.subs == 0){ %>
+            $('#visibility').change(function(){
+                var visibility = $('#visibility').find(":selected").val();
+                if (visibility != "public"){
+                    jagg.message({content:"You have changed visibility of API, so based on visibility subscription availability may change",type:"warn"});
+                }
+                if (visibility == "public" || visibility == "private" || visibility == "controlled"){
+                    $('#rolesDiv').hide(); 
+                }
+                else { 
+                    $('#rolesDiv').show(); 
+                }
+            });
+        <% } %>
+    });
+</script>
 
     <div class="row-fluid">
         <div class="span12">

@@ -1,5 +1,5 @@
-var updatePermissions = function (tierName, n) {
-
+var updatePermissions = function (tierName, n, btn) {
+    $('.' + btn).buttonLoader('start');
     var permissiontype, roles;
     permissiontype = getRadioValue($('input[name=permissionType'+n+']:radio:checked'));
     roles = document.getElementById('roles'+n).value;
@@ -11,6 +11,7 @@ var updatePermissions = function (tierName, n) {
         roles:roles,
     }, function (result) {
         if (!result.error) {
+            $('.tierPermission'+n).buttonLoader('stop');
             $('#statusUpdateMsg' + n).show();
             var t = setTimeout("hideMsg("+ n +")", 1000);
         } else {

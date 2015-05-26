@@ -138,7 +138,8 @@
                 							</div>
 										</div>
 
-										<div class="regenerate-wrapper">
+										<div class="regenerate-wrapper row">
+											<div class="col-sm-2">
 												<div class="dropdown pull-left">
 													<button class="btn btn-default dropdown-toggle curlurl-genbtn" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-expanded="true"
 													    title="View cURL command to generate a token as an end user">
@@ -149,6 +150,8 @@
 														<li role="gencurl"><a role="menuitem" tabindex="-1" href="javascript:generateCurl('<%=app.prodConsumerKey%>:<%=app.prodConsumerSecret%>', '<%=gatewayurlendpoint%>', 'client_credentials', 'prodCurl');">GrantType: Client Credentials</a></li>
 													</ul>
 												</div>
+											</div>
+											<div class="col-sm-10">
 												<div class="form-inline proRegenerateForm pull-right">
 
 													<% if(lenS > 0){ %>
@@ -159,6 +162,7 @@
 													<span class="label label-warning" id = "timeWarn" style="display:none;"><%=i18n.localize("timeWarn")%></span>
 													<button class="show-hide-key btn btn-primary" onclick="regenerate('<%=app.name%>','PRODUCTION',200,this,'pull-right','<%=app.prodConsumerKey%>','<%=app.prodConsumerSecret%>')" ><i class="fa fa-repeat"></i> <%=i18n.localize("regenerate")%></button>
 												</div>
+											</div>
 										</div>
 									</div>
 								</div>
@@ -367,7 +371,8 @@
                 							</div>
 										</div>
 
-										<div class="regenerate-wrapper">
+										<div class="regenerate-wrapper row">
+											<div class="col-sm-2">
 												<div class="dropdown pull-left">
 													<button class="btn btn-default dropdown-toggle curlurl-genbtn" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-expanded="true"
 													    title="View cURL command to generate a token as an end user">
@@ -378,6 +383,8 @@
 														<li role="gencurl"><a role="menuitem" tabindex="-1" href="javascript:generateCurl('<%=app.sandboxConsumerKey%>:<%=app.sandboxConsumerSecret%>', '<%=gatewayurlendpoint%>', 'client_credentials', 'sandboxCurl');">GrantType: Client Credentials</a></li>
 													</ul>
 												</div>
+											</div>
+											<div class="col-sm-10">
 												<div class="form-inline proRegenerateForm pull-right">
 												    <% if(lenS > 0){ %>
 													    <a href="#scopePopup" role="button" class="btn" data-toggle="modal" ><%=i18n.localize("selectScopes")%></a>
@@ -386,6 +393,7 @@
 		                            				<span class="label label-warning" id = "timeWarn" style="display:none;"><%=i18n.localize("timeWarn")%></span>
 		                            				<button class="show-hide-key btn btn-primary" onclick="regenerate('<%=app.name%>','SANDBOX',200,this,'pull-right','<%=app.sandboxConsumerKey%>','<%=app.sandboxConsumerSecret%>')" ><i class="fa fa-repeat"></i> <%=i18n.localize("regenerate")%></button>
 												</div>
+											</div>
 										</div>
 									</div>
 								</div>

@@ -30,7 +30,7 @@ function triggerSubscribe() {
         if (result.error == false) {
             if(result.status == 'REJECTED')    {
                 $('#messageModal').html($('#confirmation-data').html());
-                $('#messageModal h3.modal-title').html(i18n.t('info.subscriptionRejectTitle'));
+                $('#messageModal h4.modal-title').html(i18n.t('info.subscriptionRejectTitle'));
                 $('#messageModal div.modal-body').html('\n\n' + i18n.t('info.subscriptionRejected'));
                 $('#messageModal a.btn-primary').html(i18n.t('info.OK'));
                 $('#messageModal a.btn-primary').click(function() {
@@ -38,7 +38,7 @@ function triggerSubscribe() {
                 });
             } else  {
                 $('#messageModal').html($('#confirmation-data').html());
-                $('#messageModal h3.modal-title').html(i18n.t('info.subscription'));
+                $('#messageModal h4.modal-title').html(i18n.t('info.subscription'));
                 if(result.status == 'ON_HOLD'){
                     $('#messageModal div.modal-body').html('\n\n' + i18n.t('info.subscriptionPending'));
                 }else{
