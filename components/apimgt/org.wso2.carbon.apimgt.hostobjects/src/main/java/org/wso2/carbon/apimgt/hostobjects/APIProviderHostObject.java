@@ -1128,6 +1128,9 @@ public class APIProviderHostObject extends ScriptableObject {
                     if (authType.equals("Application User")) {
                         authType = "Application_User";
                     }
+                    if (authType.equals("Application")) {
+                        authType = APIConstants.AUTH_APPLICATION_LEVEL_TOKEN;
+                    }
                     template.setThrottlingTier((String) mapEntryValue.get("throttling_tier"));
                     template.setAuthType(authType);
                     template.setResourceURI(endpoint);
@@ -1171,6 +1174,10 @@ public class APIProviderHostObject extends ScriptableObject {
                                     if (authType.equals("Application User")) {
                                         authType = "Application_User";
                                     }
+                                    if (authType.equals("Application")) {
+                                        authType = APIConstants.AUTH_APPLICATION_LEVEL_TOKEN;
+                                    }
+
                                     template.setThrottlingTier(throttlingTier);
                                     template.setAuthType(authType);
                                     template.setResourceURI(endpoint);
@@ -1519,6 +1526,9 @@ public class APIProviderHostObject extends ScriptableObject {
                     if (authType.equals("Application User")) {
                         authType = "Application_User";
                     }
+                    if (authType.equals("Application")) {
+                        authType = APIConstants.AUTH_APPLICATION_LEVEL_TOKEN;
+                    }
                     template.setThrottlingTier((String) mapEntryValue.get("throttling_tier"));
                     template.setAuthType(authType);
                     template.setResourceURI(endpoint);
@@ -1562,6 +1572,9 @@ public class APIProviderHostObject extends ScriptableObject {
                                     }
                                     if (authType.equals("Application User")) {
                                         authType = "Application_User";
+                                    }
+                                    if (authType.equals("Application")) {
+                                        authType = APIConstants.AUTH_APPLICATION_LEVEL_TOKEN;
                                     }
                                     template.setThrottlingTier(throttlingTier);
                                     template.setAuthType(authType);

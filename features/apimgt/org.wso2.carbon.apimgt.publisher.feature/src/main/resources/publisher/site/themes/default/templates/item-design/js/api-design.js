@@ -728,10 +728,11 @@ $(document).ready(function(){
                     if (responseText.message == "timeout") {
                         if (ssoEnabled) {
                              var currentLoc = window.location.pathname;
+                             var queryString=encodeURIComponent(window.location.search);
                              if (currentLoc.indexOf(".jag") >= 0) {
-                                 location.href = "index.jag";
+                                 location.href = "login.jag?requestedPage=" + currentLoc + queryString;
                              } else {
-                                 location.href = 'site/pages/index.jag';
+                                 location.href = 'site/pages/login.jag?requestedPage=' + currentLoc + queryString;
                              }
                         } else {
                              jagg.showLogin();
