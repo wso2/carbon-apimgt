@@ -11,7 +11,8 @@ $(document).ready(function () {
                 message.text = '<div><i class="icon-briefcase"></i> Select an application.</div>';
                 message.type = 'error';
                 message.layout = 'topRight';
-                noty(message);       
+                noty(message); 
+                return;      
     }
      var tier = $("#tiers-list").val();
     $.ajax({
@@ -29,11 +30,25 @@ $(document).ready(function () {
         $("#subscribe-button").html('Subscribe');
         $("#subscribe-button").removeAttr('disabled');
         if (result.data.error == false) {
-                var message ={};
-                message.text = '<div><i class="icon-briefcase"></i> Successfully API subscribed.</div>';
-                message.type = 'success';
-                message.layout = 'topRight';
-                noty(message);                
+                noty({
+	        text: "Congratulations! You have successfully subscribed to the API. Please go to 'My Subscriptions' page to review your subscription and generate keys.", 
+                layout: 'topRight',
+                type: 'confirm',          
+                closeWith: ['click', 'hover'],         
+	        buttons: [
+		{addClass: 'btn btn-primary', text: 'Go to My Subscriptions', onClick: function($noty) {
+				$noty.close();
+                                window.location.href =caramel.context+ '/asts/api/my_subscriptions';
+				
+			}
+		},
+		{addClass: 'btn btn-other', text: 'Stay on this page', onClick: function($noty) {
+				$noty.close();
+                                window.location.href = window.location.href;				
+			}
+		}
+	]
+});             
               
         } else {
            var message ={};
