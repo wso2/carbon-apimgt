@@ -1,3 +1,4 @@
+
 {{#with assets}}
 	<div class="well asset-well">
 		<div class="container-fluid">
@@ -22,9 +23,16 @@
 		</div>
 
 	</div>
-	{{#each tables}}
-		{{renderTablePreview .}}
-	{{/each}}
+	{{> api_details .}}
+
+	<div class="row-fluid">
+		<div class="simple-space-maker">
+			<button  id="copy-api-button" class="btn btn-primary ">{{t "Create New Version"}}</button>
+			                                       
+		</div>
+	</div>
+
+	{{> copy_api .}}
 
 	{{#if tags}}
 		<a data-toggle="collapse" href="#collapseTags" class="collapsing-h2"><h2>Tags</h2></a>
