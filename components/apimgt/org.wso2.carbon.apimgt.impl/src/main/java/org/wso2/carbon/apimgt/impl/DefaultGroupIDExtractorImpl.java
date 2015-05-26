@@ -41,7 +41,7 @@ public class DefaultGroupIDExtractorImpl implements LoginPostExecutor {
               
                  UserRealm realm = (UserRealm) realmService.getTenantUserRealm(tenantId);
                  UserStoreManager manager = realm.getUserStoreManager();
-                 organization = manager.getUserClaimValue(username, claim, null);
+                 organization = manager.getUserClaimValue(username, claim, null).trim();
                        
 
         } catch (JSONException e) {
