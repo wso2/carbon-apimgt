@@ -370,3 +370,40 @@ a.remove_rating:hover{ color: #C00}
 
 /* Utility Components Styles */
 .help-popup { position: absolute; right: 0; margin-top: -25px; cursor: pointer;}
+
+/* Stat pages Styles */
+#date-range{
+    padding-right:30px;
+    width:300px;
+    height:100%;
+    display:inline-block;
+}
+
+#today-btn,#hour-btn,#week-btn, #month-btn{
+    width:60px;
+}
+
+.center-wrapper{
+    margin:0 auto;
+	margin-left:auto;
+	margin-right:auto;
+	align:center;
+	text-align:center;
+    padding-top: 100px;
+    padding-bottom: 100px;
+}
+
+#rangeSliderWrapper{
+    z-index: 3;
+}
+
+.no-data-heading{
+    color : #7e7e7e;
+}
+
+#subsChart>svg{
+    width:300px !important;
+    height:240px !important;
+    display:inline-block;
+}
+
