@@ -15,12 +15,22 @@
             <tr id='tr-application-{{id}}-data'>
                 <td>{{name}}</td>
                 <td>{{tier}}</td>
-                <td>{{status}}</td>
+                {{#each status}}
+                    {{#if isActive}}
+                        <td>ACTIVE</td>
+                    {{else}}
+                        <td>INACTIVE</td>
+                    {{/if}}
+                {{/each}}
                 <td>{{callbackUrl}}</td>
                 <td>{{description}}</td>
                 <td>
-                    <a href="javascript:changeAppRowtoEditView('{{name}}','{{../cuser.username}}','{{id}}','{{tier}}','{{status}}','{{callbackUrl}}','{{description}}');"><i
-                            class='icon-edit'></i> {{t "Edit"}}</a>
+                    {{#each status}}
+                        {{#if isActive}}
+                            <a href="javascript:changeAppRowtoEditView('{{../../name}}','{{../../../cuser.username}}','{{../../id}}','{{../../tier}}','{{isActive}}','{{../../callbackUrl}}','{{../../description}}');"><i
+                                    class='icon-edit'></i> {{t "Edit"}}</a>
+                        {{/if}}
+                    {{/each}}
                     <a href="javascript:removeApplication('{{name}}','{{../cuser.username}}','{{id}}');"><i
                             class='icon-trash'></i> {{t "Delete"}}</a>
                 </td>

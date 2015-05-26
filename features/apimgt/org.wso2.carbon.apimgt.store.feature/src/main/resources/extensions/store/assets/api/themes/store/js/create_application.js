@@ -94,7 +94,7 @@ $(function () {
      */
     var getNewTrUpdated = function () {
         return "<td>" + metadata.editRowData.appName + "</td> <td>" + metadata.editRowData.tier + "</td> <td>" +
-            metadata.editRowData.status + "</td> <td>" + metadata.editRowData.callbackUrl + "</td> <td>" +
+            getState(metadata.editRowData.status) + "</td> <td>" + metadata.editRowData.callbackUrl + "</td> <td>" +
             metadata.editRowData.description + "</td> <td> <a href=\"javascript:changeAppRowtoEditView('" +
             metadata.editRowData.appName + "','" + metadata.editRowData.userName + "','" +
             metadata.editRowData.appId + "','" + metadata.editRowData.tier + "','" + metadata.editRowData.status +
@@ -185,6 +185,17 @@ $(function () {
     };
 
     /*
+     * This function returns the corresponding value of the application status for the given boolean
+     */
+    var getState = function (isActive) {
+        if (isActive) {
+            return "ACTIVE";
+        } else {
+            return "INACTIVE";
+        }
+    };
+
+    /*
      * This function change the application html view row to edit view
      */
     changeAppRowtoEditView = function (appName, userName, appId, tier, status, callbackUrl, description) {
@@ -193,7 +204,7 @@ $(function () {
             "'/></td> <td><select id='new_overview_tier_" + appId +
             "' name='new_overview_tier_" + appId + "' value='" + tier +
             "'> <option>Unlimited</option> <option>Bronze</option> <option>Silver</option> <option>Gold</option> </select></td> <td>" +
-            status + "</td> <td><input id='new_overview_callbackurl_" + appId +
+            getState(status) + "</td> <td><input id='new_overview_callbackurl_" + appId +
             "' type='text' name='new_overview_callbackurl_" + appId + "' class='input-medium' value='" +
             callbackUrl + "'/></td> <td><textarea id='new_overview_description_" + appId +
             "' type='text' name='new_overview_description_" + appId + "' rows='1' cols='10'>" + description +
