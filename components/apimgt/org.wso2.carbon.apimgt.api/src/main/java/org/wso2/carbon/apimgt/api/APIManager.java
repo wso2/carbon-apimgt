@@ -155,7 +155,7 @@ public interface APIManager {
      * Creates a new subscriber. The newly created subscriber id will be set in the given object.
      *
      * @param subscriber The subscriber to be added
-     * @param the groupId to which the subscriber belongs to
+     * @param groupingId - the groupId to which the subscriber belongs to
      * @throws org.wso2.carbon.apimgt.api.APIManagementException if failed add subscriber
      */
     public void addSubscriber(Subscriber subscriber, String groupingId) throws APIManagementException;
@@ -288,6 +288,38 @@ public interface APIManager {
      * @throws org.wso2.carbon.apimgt.api.APIManagementException if failed to get the predefined tiers
      */
     public Map<String,String> getTenantDomainMappings(String tenantDomain) throws APIManagementException;
+
+    /**
+     * Check whether the given scope key is already available under given tenant
+     *
+     * @param scopeKey candidate scope key
+     * @param tenantid tenant id
+     * @return true if the scope key is already available
+     * @throws APIManagementException if failed to check the context availability
+     */
+    public boolean isScopeKeyExist(String scopeKey, int tenantid) throws APIManagementException;
+    
+    /**
+     * Check whether the given scope key is already assigned to an API under given tenant
+     *
+     * @param identifier API Identifier 
+     * @param scopeKey candidate scope key
+     * @param tenantid tenant id
+     * @return true if the scope key is already available
+     * @throws APIManagementException if failed to check the context availability
+     */
+    public boolean isScopeKeyAssigned(APIIdentifier identifier, String scopeKey, int tenantid) throws APIManagementException;
+
+    /**
+     * Check if a given context template already exists
+     * @param contextTemplate - The contextTemplate to be checked for
+        *                        <p>
+        *                        Ex: /foo/{version}/bar
+        *                        </p>
+     * @return boolean - true if the template exists, false otherwise.
+     * @throws APIManagementException - If an error occurs while checking the value in the APIM DB.
+     */
+    public boolean isDuplicateContextTemplate(String contextTemplate) throws APIManagementException;
 
     /**
      * When enabled publishing to external APIStores support,get all the external apistore details which are
