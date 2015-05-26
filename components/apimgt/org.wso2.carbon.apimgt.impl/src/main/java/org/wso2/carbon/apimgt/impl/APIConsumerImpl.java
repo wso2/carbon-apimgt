@@ -1906,7 +1906,15 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         if(app != null && APIConstants.ApplicationStatus.APPLICATION_CREATED.equals(app.getStatus())){
             throw new APIManagementException("Cannot update the application while it is INACTIVE");
         }
+
         apiMgtDAO.updateApplication(application);
+
+        try{
+            invalidateCachedKeys(application.getId());
+        }catch(APIManagementException ignore){
+            //Log and ignore since we do not want to throw exceptions to the front end due to cache invalidation failure.
+            log.warn("Failed to invalidate Gateway Cache " + ignore.getMessage());
+        }
     }
 
 
@@ -1919,8 +1927,13 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
                 getAPIManagerConfigurationService().getAPIManagerConfiguration();
 
-        //Remove from cache first since we won't be able to find active access tokens once the application is removed.
-        invalidateCachedKeys(application.getId());
+        try {
+            //Remove from cache first since we won't be able to find active access tokens once the application is removed.
+            invalidateCachedKeys(application.getId());
+        }catch(APIManagementException ignore){
+            //Log and proceed since we do not want to halt the application delete due to cache invalidation failures.
+            log.warn("Failed to invalidate Gateway Cache " + ignore.getMessage());
+        }
 
         apiMgtDAO.deleteApplication(application);
     }
