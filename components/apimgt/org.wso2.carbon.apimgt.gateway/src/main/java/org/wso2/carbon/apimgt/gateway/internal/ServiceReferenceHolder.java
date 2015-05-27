@@ -52,6 +52,10 @@ public class ServiceReferenceHolder {
         return amConfigService.getAPIManagerConfiguration();
     }
 
+    public APIManagerConfigurationService getApiManagerConfigurationService() {
+        return amConfigService;
+    }
+
     public void setAPIManagerConfigurationService(APIManagerConfigurationService amConfigService) {
         this.amConfigService = amConfigService;
     }

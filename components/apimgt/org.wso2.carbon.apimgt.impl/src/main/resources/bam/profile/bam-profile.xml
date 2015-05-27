@@ -1,8 +1,8 @@
 <serverProfile xmlns="http://ws.apache.org/ns/synapse">
-	<connection loadbalancer="false" secure="false" urlSet=""
-		ip="[1]" authPort="[2]" receiverPort="[3]"></connection>
-	<credential userName="[4]"
-		password="[5]"></credential>
+	<connection loadbalancer="true" secure="false" urlSet="[1]"
+		ip="" authPort="" receiverPort=""></connection>
+	<credential userName="[2]"
+		password="[3]"></credential>
 	<streams>
 		<stream name="org_wso2_apimgt_statistics_destination" version="1.0.0"
 			nickName="destination_statistics" description="Stream for API Manager destination based statistics">
@@ -16,7 +16,7 @@
 				</property>
 				<property name="request" value="1" type="INTEGER"
 					isExpression="false"></property>
-				<property name="apiPublisher" value="get-property('API_PUBLISHER')"
+				<property name="apiPublisher" value="get-property('api.ut.apiPublisher')"
 					type="STRING" isExpression="true">
 				</property>
 				<property name="context" value="get-property('REST_API_CONTEXT')"

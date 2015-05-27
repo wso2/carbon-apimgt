@@ -1141,3 +1141,41 @@ ol.progtrckr li.progtrckr-todo:before {
 #design_form div.control-group, #implement_form div.control-group, #manage_form div.control-group{
     margin-bottom: 8px;
 }
+
+.ui_message {
+    margin: 0 0 0 10px;
+    padding: 5px;
+    width: 90%;
+    background-color: #E6E6E6 !important;
+}
+
+.analytics_table tr td{
+    vertical-align: top;
+}
+
+.receiver_url_table{
+    width: 100%;
+}
+
+.table_header{
+    background-color: #E6E6E6;
+}
+
+.analytics-form-actions{
+    background: transparent;
+}
+
+.wr-guide-text {
+    border-bottom:1px solid #e4e4e4;
+    padding:0px 0px 10px 0px;
+    margin-bottom:0px;
+}
+
+.wr-enable-chk {
+    background:#f0f0f0;
+    padding:15px 0px 15px 15px;
+}
+
+#more-options-datasource select{
+    width: 284px !important;
+}

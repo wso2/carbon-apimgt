@@ -19,10 +19,12 @@ package org.wso2.carbon.apimgt.usage.client.internal;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.service.component.ComponentContext;
+import org.wso2.carbon.apimgt.impl.APIManagerAnalyticsConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
 import org.wso2.carbon.apimgt.usage.client.APIUsageStatisticsClient;
 import org.wso2.carbon.apimgt.usage.client.exception.APIMgtUsageQueryServiceClientException;
+import org.wso2.carbon.bam.service.data.publisher.services.ServiceDataPublisherAdmin;
 
 /**
  * @scr.component name="org.wso2.apimgt.usage.client" immediate="true"
@@ -36,12 +38,16 @@ public class APIUsageClientServiceComponent {
 
     private static APIManagerConfiguration configuration = null;
 
+    private static APIManagerAnalyticsConfiguration analyticsConfiguration = null;
+
     protected void activate(ComponentContext componentContext)
             throws APIMgtUsageQueryServiceClientException {
         if (log.isDebugEnabled()) {
             log.debug("API usage client component activated");
         }
-        APIUsageStatisticsClient.initializeDataSource();
+        if (analyticsConfiguration.isAnalyticsEnabled()){
+            APIUsageStatisticsClient.initializeDataSource();
+        }
     }
 
     protected void deactivate(ComponentContext componentContext) {
@@ -51,14 +57,18 @@ public class APIUsageClientServiceComponent {
     protected void setAPIManagerConfigurationService(APIManagerConfigurationService amcService) {
         log.debug("API manager configuration service bound to the API usage client component");
         configuration = amcService.getAPIManagerConfiguration();
+        analyticsConfiguration = amcService.getAPIAnalyticsConfiguration();
     }
 
     protected void unsetAPIManagerConfigurationService(APIManagerConfigurationService amcService) {
         log.debug("API manager configuration service unbound from the API usage client component");
-        configuration = null;
     }
 
     public static APIManagerConfiguration getAPIManagerConfiguration() {
         return configuration;
+    }
+
+    public static APIManagerAnalyticsConfiguration getAnalyticsConfiguration() {
+        return analyticsConfiguration;
     }
 }

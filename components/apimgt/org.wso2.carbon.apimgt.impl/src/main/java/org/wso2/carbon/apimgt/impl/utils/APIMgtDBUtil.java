@@ -57,7 +57,7 @@ public final class APIMgtDBUtil {
     /**
      * Initializes the data source
      *
-     * @throws org.wso2.carbon.apimgt.api.APIManagementException if an error occurs while loading DB configuration
+     * @throws APIManagementException if an error occurs while loading DB configuration
      */
     public static void initialize() throws Exception {
         if (dataSource != null) {

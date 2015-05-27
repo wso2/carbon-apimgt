@@ -40,7 +40,7 @@ public interface ClaimsRetriever {
   /**
      * Initialization method that runs only once.
      *
-     * @throws org.wso2.carbon.apimgt.api.APIManagementException
+     * @throws APIManagementException
      */
     void init() throws APIManagementException;
 
@@ -50,14 +50,14 @@ public interface ClaimsRetriever {
      * @return a sorted map
      *                  keys - claimURIs
      *                  values - claim values.
-     * @throws org.wso2.carbon.apimgt.api.APIManagementException
+     * @throws APIManagementException
      */
     SortedMap<String,String> getClaims(String endUserName) throws APIManagementException;
 
   /**
      * Must return the dialect URI of the user ClaimURIs.
      *
-     * @throws org.wso2.carbon.apimgt.api.APIManagementException
+     * @throws APIManagementException
      */
     String getDialectURI(String endUserName);
 

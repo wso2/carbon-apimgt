@@ -50,53 +50,70 @@ public class APIManagerCacheExtensionHandler extends AbstractHandler {
     private void clearCacheForAccessToken(MessageContext messageContext) {
 
         org.apache.axis2.context.MessageContext axisMC = ((Axis2MessageContext) messageContext).getAxis2MessageContext();
-        try {
-            String revokedToken = (String) ((TreeMap) axisMC.getProperty("TRANSPORT_HEADERS")).get("RevokedAccessToken");
-            String renewedToken = (String) ((TreeMap) axisMC.getProperty("TRANSPORT_HEADERS")).get("DeactivatedAccessToken");
-            String authorizedUser = (String) ((TreeMap) axisMC.getProperty("TRANSPORT_HEADERS")).get("AuthorizedUser");
-            PrivilegedCarbonContext.startTenantFlow();
-           // if (authorizedUser != null) {
-           //     String tenantDomain = MultitenantUtils.getTenantDomain(authorizedUser);
-           //     PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
-           // } else {
-            //This if condition commented out as a temp fix for APIMANAGER-1830.Reason is when we set gateway cache,we always set cache
-            //values for tenant/super tenants in super tenant space only.In gateway oauth handler code,to get tenant domain there's no direct
-            //method,rather processing incoming request attributes,which will add additional cost for each API request.
-            PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME, true);
-            // }
-            Iterator iterator = Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER).
-                                                                   getCache(APIConstants.GATEWAY_KEY_CACHE_NAME).keys();
-            if (revokedToken != null) {
-                while (iterator.hasNext()) {
-                    String cacheKey = iterator.next().toString();
-                    if (cacheKey.contains(revokedToken)) {
-                        Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER).
-                                                         getCache(APIConstants.GATEWAY_KEY_CACHE_NAME).remove(cacheKey);
-                        if (log.isDebugEnabled()) {
-                            log.debug("clearing cache entries associated with token " + revokedToken);
-                        }
-                        break;
-                    }
-                }
-            }
+        String revokedToken = (String) ((TreeMap) axisMC.getProperty("TRANSPORT_HEADERS")).get("RevokedAccessToken");
+        String renewedToken = (String) ((TreeMap) axisMC.getProperty("TRANSPORT_HEADERS")).get("DeactivatedAccessToken");
+        String authorizedUser = (String) ((TreeMap) axisMC.getProperty("TRANSPORT_HEADERS")).get("AuthorizedUser");
 
-            if (renewedToken != null) {
-                while (iterator.hasNext()) {
-                    String cacheKey = iterator.next().toString();
-                    if (cacheKey.contains(renewedToken)) {
-                        Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER).
-                                                         getCache(APIConstants.GATEWAY_KEY_CACHE_NAME).remove(cacheKey);
-                        if (log.isDebugEnabled()) {
-                            log.debug("clearing cache entries associated with token " + renewedToken);
-                        }
-                        break;
-                    }
-                }
+        if (revokedToken != null) {
+
+            //Find the actual tenant domain on which the access token was cached. It is stored as a reference in
+            //the super tenant cache.
+            String cachedTenantDomain = (String) Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER).
+                    getCache(APIConstants.GATEWAY_TOKEN_CACHE_NAME).get(revokedToken);
+
+            //Remove the super tenant cache entry.
+            Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER).
+                    getCache(APIConstants.GATEWAY_TOKEN_CACHE_NAME).remove(revokedToken);
+
+            //Remove token from tenant cache.
+            removeTokenFromTenantTokenCache(revokedToken, cachedTenantDomain);
+
+        }
+
+        if (renewedToken != null) {
+
+            //Find the actual tenant domain on which the access token was cached. It is stored as a reference in
+            //the super tenant cache.
+            String cachedTenantDomain = (String) Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER).
+                    getCache(APIConstants.GATEWAY_TOKEN_CACHE_NAME).get(renewedToken);
+
+            //Remove the super tenant cache entry.
+            Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER).
+                    getCache(APIConstants.GATEWAY_TOKEN_CACHE_NAME).remove(renewedToken);
+
+            //Remove token from tenant cache.
+            removeTokenFromTenantTokenCache(renewedToken, cachedTenantDomain);
+
+        }
+    }
+
+    /**
+     * Removes the access token that was cached in the tenant's cache space.
+     * @param accessToken - Token to be removed from the cache.
+     * @param cachedTenantDomain - Tenant domain from which the token should be removed.
+     */
+    private void removeTokenFromTenantTokenCache(String accessToken, String cachedTenantDomain){
+        //If the token was cached in the tenant cache
+        if(cachedTenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(cachedTenantDomain)){
+
+            if(log.isDebugEnabled()){
+                log.debug("Going to remove cache entry " + accessToken + " from " + cachedTenantDomain + " domain");
             }
-        } catch (Exception e) {
-            log.error("Error while clearing cache");
-        } finally {
-            PrivilegedCarbonContext.endTenantFlow();
+            try{
+                PrivilegedCarbonContext.startTenantFlow();
+                PrivilegedCarbonContext.getThreadLocalCarbonContext().
+                        setTenantDomain(cachedTenantDomain, true);
+
+                //Remove the tenant cache entry.
+                Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER).
+                        getCache(APIConstants.GATEWAY_TOKEN_CACHE_NAME).remove(accessToken);
+
+                if(log.isDebugEnabled()){
+                    log.debug("Removed cache entry " + accessToken + " from " + cachedTenantDomain + " domain");
+                }
+            }finally{
+                PrivilegedCarbonContext.endTenantFlow();
+            }
         }
     }
 

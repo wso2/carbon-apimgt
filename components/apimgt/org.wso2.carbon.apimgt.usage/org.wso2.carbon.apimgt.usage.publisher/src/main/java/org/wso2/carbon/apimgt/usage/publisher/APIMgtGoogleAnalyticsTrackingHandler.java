@@ -5,6 +5,7 @@ import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Map;
+import java.util.UUID;
 
 import javax.xml.namespace.QName;
 
@@ -101,47 +102,52 @@ public class APIMgtGoogleAnalyticsTrackingHandler extends AbstractHandler {
 	 * 
 	 * @throws Exception
 	 */
-	private void trackPageView(MessageContext msgCtx) throws Exception {
-		@SuppressWarnings("rawtypes")
-		Map headers = (Map) ((Axis2MessageContext) msgCtx).getAxis2MessageContext().
-			getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
+    private void trackPageView(MessageContext msgCtx) throws Exception {
+        @SuppressWarnings("rawtypes")
+        Map headers = (Map) ((Axis2MessageContext) msgCtx).getAxis2MessageContext()
+                                               .getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
 
-		String host = (String) headers.get(HttpHeaders.HOST);
-		String domainName = host;
-		if (host != null && host.indexOf(":") != -1){
-			domainName = host.substring(0, host.indexOf(":"));
-		}
-		if (isEmpty(domainName)) {
-			domainName = "";
-		}
+        String host = (String) headers.get(HttpHeaders.HOST);
+        String domainName = host;
+        if (host != null && host.indexOf(":") != -1) {
+            domainName = host.substring(0, host.indexOf(":"));
+        }
+        if (isEmpty(domainName)) {
+            domainName = "";
+        }
 
-		String path = (String) msgCtx
-				.getProperty(RESTConstants.REST_FULL_REQUEST_PATH);
-		String documentPath = path;
-		if (isEmpty(documentPath)) {
-			documentPath = "";
-		} 
+        // Get client IP
+        String userIP = (String) ((Axis2MessageContext) msgCtx).getAxis2MessageContext().getProperty("REMOTE_ADDR");
+        String path = (String) msgCtx.getProperty(RESTConstants.REST_FULL_REQUEST_PATH);
+        String documentPath = path;
+        if (isEmpty(documentPath)) {
+            documentPath = "";
+        }
 
-		String account = config.googleAnalyticsTrackingID;
+        String account = config.googleAnalyticsTrackingID;
 
-		String userAgent = (String) headers.get(HttpHeaders.USER_AGENT);
-		if (isEmpty(userAgent)) {
-			userAgent = "";
-		}
+        String userAgent = (String) headers.get(HttpHeaders.USER_AGENT);
+        if (isEmpty(userAgent)) {
+            userAgent = "";
+        }
 
-		String visitorId = getVisitorId(account, userAgent, msgCtx);
+        String visitorId = getVisitorId(account, userAgent, msgCtx);
 
-		/* Set the visitorId in MessageContext */
-		msgCtx.setProperty(COOKIE_NAME, visitorId);
+        /* Set the visitorId in MessageContext */
+        msgCtx.setProperty(COOKIE_NAME, visitorId);
 
-		String httpMethod = (String)((Axis2MessageContext) msgCtx).getAxis2MessageContext().
-                getProperty(Constants.Configuration.HTTP_METHOD);
+        String httpMethod =
+                            (String) ((Axis2MessageContext) msgCtx).getAxis2MessageContext()
+                                                                   .getProperty(Constants.Configuration.HTTP_METHOD);
 		
 		GoogleAnalyticsData data = new GoogleAnalyticsData
                 .DataBuilder(account, GOOGLE_ANALYTICS_TRACKER_VERSION , visitorId , GoogleAnalyticsConstants.HIT_TYPE_PAGEVIEW)
                 .setDocumentPath(documentPath)
                 .setDocumentHostName(domainName)
                 .setDocumentTitle(httpMethod)
+                .setSessionControl("end")
+                .setCacheBuster(getCacheBusterId())
+                .setIPOverride(userIP)
                 .build();
 
         String payload = GoogleAnalyticsDataPublisher.buildPayloadString(data);
@@ -220,5 +226,33 @@ public class APIMgtGoogleAnalyticsTrackingHandler extends AbstractHandler {
 	public void setConfigKey(String configKey) {
 		this.configKey = configKey;
 	}
+	
+    /**
+     * Generates a 32 character length random number for cacheBusterId
+     * @return cacheBusterId
+     * @throws NoSuchAlgorithmException
+     * @throws UnsupportedEncodingException
+     */
+    private static String getCacheBusterId() throws NoSuchAlgorithmException, UnsupportedEncodingException {
+        String message = getRandomNumber() + UUID.randomUUID().toString();
+        MessageDigest m = MessageDigest.getInstance("MD5");
+        m.update(message.getBytes("UTF-8"), 0, message.length());
+        byte[] sum = m.digest();
+        BigInteger messageAsNumber = new BigInteger(1, sum);
+        String md5String = messageAsNumber.toString(16);
+        /* Pad to make sure id is 32 characters long. */
+        while (md5String.length() < 32) {
+            md5String = "0" + md5String;
+        }
+        return "0x" + md5String.substring(0, 16);
+    }
+
+    /**
+     * Generate a random number
+     * @return random number
+     */
+    private static String getRandomNumber() {
+        return Integer.toString((int) (Math.random() * 0x7fffffff));
+    }
 
 }
