@@ -17,7 +17,7 @@
  *
  */
 var render = function(theme, data, meta, require) {
-    var log = new Log();
+    var log = new Log('my_applications_renderers_page');
     var navigation = 'navigation';
     var navigationContext = data;
     switch (data.assetTypeCount) {
