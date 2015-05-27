@@ -45,9 +45,9 @@ var apistore = {};
     var DateFormat=Packages.java.text.DateFormat;
     var SimpleDateFormat=Packages.java.text.SimpleDateFormat;
 
-    var TierSet=new Set<Tier>();
-    var uriTemplates=new Set<URITemplate>();
-    var attributes=new HashMap<String,Object>();
+    var TierSet=new Set();
+    var uriTemplates=new Set();
+    var attributes=new HashMap();
     var log = new Log("jaggery-modules.api-manager.store");
 
     function StoreAPIProxy(username) {
@@ -83,7 +83,7 @@ var apistore = {};
         return resultArray;
     };
     StoreAPIProxy.prototype.getDeniedTiers = function () {
-        var tiers=new Set<String>();
+        var tiers=new Set();
         tiers= this.impl.getDeniedTiers();
         var deniedTiers = new Packages.org.json.simple.JSONArray();
         for (var i=0;i<tiers.size();i++) {
@@ -163,7 +163,7 @@ var apistore = {};
                 while (it.hasNext()) {
                     var tierObj = new Packages.org.json.simple.JSONObject();
                     tierObject = it.next();
-                    var tier = (Tier) tierObject;
+                    var tier = tierObject;
                     tierObj.put("tierName", tier.getName());
                     tierObj.put("tierDisplayName", tier.getDisplayName());
                     tierObj.put("tierDescription", tier.getDescription() != null ? tier.getDescription() : "");
@@ -191,14 +191,14 @@ var apistore = {};
             row.put("visibleRoles", API.getVisibleRoles());
 
             uriTemplates = API.getUriTemplates();
-            var uriTemplatesArr = new ArrayList<JSONArray>();
+            var uriTemplatesArr = new ArrayList();
             if (uriTemplates.size() != 0) {
                 var uriTempArr = new Packages.org.json.simple.JSONArray(uriTemplates.size());
                 var i = uriTemplates.iterator();
 
                 while (i.hasNext()) {
-                    var utArr = new ArrayList<String>();
-                    var ut = (URITemplate)i.next();
+                    var utArr = new ArrayList();
+                    var ut = i.next();
                     utArr.add(ut.getUriTemplate());
                     utArr.add(ut.getMethodsAsString().replaceAll("\\s", ","));
                     utArr.add(ut.getAuthTypeAsString().replaceAll("\\s", ","));
