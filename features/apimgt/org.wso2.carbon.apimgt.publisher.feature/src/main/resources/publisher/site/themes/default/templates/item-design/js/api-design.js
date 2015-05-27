@@ -535,7 +535,7 @@ APIDesigner.prototype.render_resource = function(container){
         emptytext: '+ Add Implementation Notes',
         success : this.update_elements
     });
-    container.find('.content_type').editable({
+    container.find('.produces').editable({
         value : "application/json",
         source: content_types,
         success : this.update_elements
