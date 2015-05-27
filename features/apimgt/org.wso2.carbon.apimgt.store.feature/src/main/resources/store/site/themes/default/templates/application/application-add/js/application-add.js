@@ -72,13 +72,6 @@ $(document).ready(function () {
             }
         });*/
    
-    $('.help_popup').click(function()
-	    {
-	        $('#callback_help').toggle('fast', function()
-	        {
-	            $('#callback_help').html(i18n.t('info.callBackHelpMsg'));
-	        });
-	        return false;
-	    });
+
 });
 
