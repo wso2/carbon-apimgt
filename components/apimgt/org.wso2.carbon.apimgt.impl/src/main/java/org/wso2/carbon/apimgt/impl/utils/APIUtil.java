@@ -95,7 +95,6 @@ import org.wso2.carbon.governance.api.generic.dataobjects.GenericArtifact;
 import org.wso2.carbon.governance.api.util.GovernanceConstants;
 import org.wso2.carbon.governance.api.util.GovernanceUtils;
 import org.wso2.carbon.identity.oauth.config.OAuthServerConfiguration;
-import org.wso2.carbon.ndatasource.common.DataSourceException;
 import org.wso2.carbon.registry.core.*;
 import org.wso2.carbon.registry.core.Tag;
 import org.wso2.carbon.registry.core.config.Mount;
@@ -4696,7 +4695,7 @@ public final class APIUtil {
 		}
 	}
 
-	public static boolean isUsageDataSourceSpecified() {
+	/*public static boolean isUsageDataSourceSpecified() {
 		try {
 			return (null != ServiceReferenceHolder.getInstance().getDataSourceService().
 					getDataSource(APIConstants.API_USAGE_DATA_SOURCE_NAME));
