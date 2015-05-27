@@ -31,6 +31,7 @@ i18n.init(request,localeResourcesBasePath);
         var oidcEnabled = '<%=site.oidcConfiguration.enabled%>';
         var tenant = '<%=tenant%>';
         var urlPrefix = '<%=urlPrefix%>';
+        var siteContext = '<%=jagg.getSiteContext()%>';
     </script>
 
     <title><%=outputs.title%></title>
