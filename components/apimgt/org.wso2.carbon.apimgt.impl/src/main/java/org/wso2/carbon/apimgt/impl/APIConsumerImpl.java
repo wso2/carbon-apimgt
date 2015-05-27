@@ -18,30 +18,18 @@
 
 package org.wso2.carbon.apimgt.impl;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.SortedSet;
-import java.util.TreeSet;
-
-import javax.cache.Caching;
-
 import org.apache.axis2.AxisFault;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
 import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.api.model.OAuthAppRequest;
 import org.wso2.carbon.apimgt.api.LoginPostExecutor;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
+import org.wso2.carbon.apimgt.api.model.APIKey;
 import org.wso2.carbon.apimgt.api.model.APIRating;
 import org.wso2.carbon.apimgt.api.model.APIStatus;
 import org.wso2.carbon.apimgt.api.model.AccessTokenInfo;
@@ -50,17 +38,33 @@ import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.api.model.ApplicationConstants;
 import org.wso2.carbon.apimgt.api.model.Documentation;
 import org.wso2.carbon.apimgt.api.model.KeyManager;
+import org.wso2.carbon.apimgt.api.model.OAuthAppRequest;
 import org.wso2.carbon.apimgt.api.model.OAuthApplicationInfo;
 import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
 import org.wso2.carbon.apimgt.api.model.Subscriber;
 import org.wso2.carbon.apimgt.api.model.Tag;
 import org.wso2.carbon.apimgt.api.model.Tier;
+import org.wso2.carbon.apimgt.impl.dto.ApplicationRegistrationWorkflowDTO;
+import org.wso2.carbon.apimgt.impl.dto.ApplicationWorkflowDTO;
+import org.wso2.carbon.apimgt.impl.dto.Environment;
+import org.wso2.carbon.apimgt.impl.dto.SubscriptionWorkflowDTO;
+import org.wso2.carbon.apimgt.impl.dto.TierPermissionDTO;
+import org.wso2.carbon.apimgt.impl.dto.WorkflowDTO;
 import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
-import org.wso2.carbon.apimgt.impl.dto.*;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
-import org.wso2.carbon.apimgt.impl.utils.*;
-import org.wso2.carbon.apimgt.impl.workflow.*;
+import org.wso2.carbon.apimgt.impl.utils.APIAuthenticationAdminClient;
+import org.wso2.carbon.apimgt.impl.utils.APINameComparator;
+import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.apimgt.impl.utils.APIVersionComparator;
+import org.wso2.carbon.apimgt.impl.utils.ApplicationUtils;
+import org.wso2.carbon.apimgt.impl.utils.LRUCache;
+import org.wso2.carbon.apimgt.impl.workflow.AbstractApplicationRegistrationWorkflowExecutor;
+import org.wso2.carbon.apimgt.impl.workflow.WorkflowConstants;
+import org.wso2.carbon.apimgt.impl.workflow.WorkflowException;
+import org.wso2.carbon.apimgt.impl.workflow.WorkflowExecutor;
+import org.wso2.carbon.apimgt.impl.workflow.WorkflowExecutorFactory;
+import org.wso2.carbon.apimgt.impl.workflow.WorkflowStatus;
 import org.wso2.carbon.apimgt.keymgt.stub.types.carbon.ApplicationKeysDTO;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.governance.api.common.dataobjects.GovernanceArtifact;
@@ -82,6 +86,20 @@ import org.wso2.carbon.registry.core.utils.RegistryUtils;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
+
+import javax.cache.Caching;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
 /**
  * This class provides the core API store functionality. It is implemented in a very
@@ -613,7 +631,11 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         tokenRequest.setValidityPeriod(Long.parseLong(validityTime));
         tokenRequest.setTokenToRevoke(oldAccessToken);
         tokenRequest.setScope(requestedScopes);
-
+        boolean isRegenarateOptionEnabled = true;
+        if (APIUtil.getApplicationAccessTokenValidityPeriodInSeconds() < 0) {
+            isRegenarateOptionEnabled = false;
+        }
+        tokenRequest.setRegenerateOptionEnabled(isRegenarateOptionEnabled);
         try {
             // Populating additional parameters.
             tokenRequest = ApplicationUtils.populateTokenRequest(jsonInput, tokenRequest);
@@ -1650,12 +1672,13 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         return isSubscribed;
     }
 
-    public String addSubscription(APIIdentifier identifier, String userId, int applicationId)
+    public String addSubscription(APIIdentifier apiId, String userId, int applicationId)
             throws APIManagementException {
+        APIIdentifier identifier = getAPIIdentifier(apiId, userId);
         API api = getAPI(identifier);
         if (api.getStatus().equals(APIStatus.PUBLISHED)) {
             int subscriptionId = apiMgtDAO.addSubscription(identifier, api.getContext(), applicationId,
-                    APIConstants.SubscriptionStatus.ON_HOLD);
+                                                           APIConstants.SubscriptionStatus.ON_HOLD);
 
             boolean isTenantFlowStarted = false;
             if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
@@ -1701,27 +1724,118 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 invalidateCachedKeys(applicationId);
             }
             if (log.isDebugEnabled()) {
-                String logMessage = "API Name: " + identifier.getApiName() + ", API Version "+identifier.getVersion()+" subscribe by " + userId + " for app "+ apiMgtDAO.getApplicationNameFromId(applicationId);
+                String logMessage = "API Name: " + identifier.getApiName() + ", API Version " + identifier.getVersion() + " subscribe by " + userId + " for app " + apiMgtDAO.getApplicationNameFromId(applicationId);
                 log.debug(logMessage);
             }
 
             return apiMgtDAO.getSubscriptionStatusById(subscriptionId);
         } else {
             throw new APIManagementException("Subscriptions not allowed on APIs in the state: " +
-                    api.getStatus().getStatus());
+                                             api.getStatus().getStatus());
         }
     }
 
-    public void removeSubscription(APIIdentifier identifier, String userId, int applicationId)
+    private APIIdentifier getAPIIdentifier(APIIdentifier apiIdentifier, String userId)
             throws APIManagementException {
-        apiMgtDAO.removeSubscription(identifier, applicationId);
-        if (APIUtil.isAPIGatewayKeyCacheEnabled()) {
-            invalidateCachedKeys(applicationId);
+        boolean isTenantFlowStarted = false;
+        try {
+            String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(apiIdentifier.getProviderName()));
+            if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
+                isTenantFlowStarted = true;
+                PrivilegedCarbonContext.startTenantFlow();
+                PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
+            }
+
+            // Validation for allowed throttling tiers
+            API api = getAPI(apiIdentifier);
+            Set<Tier> tiers = api.getAvailableTiers();
+            String tier = apiIdentifier.getTier();
+            Iterator<Tier> iterator = tiers.iterator();
+            boolean isTierAllowed = false;
+            List<String> allowedTierList = new ArrayList<String>();
+            while (iterator.hasNext()) {
+                Tier t = iterator.next();
+                if (t.getName() != null && (t.getName()).equals(tier)) {
+                    isTierAllowed = true;
+                }
+                allowedTierList.add(t.getName());
+            }
+            if (!isTierAllowed) {
+                throw new APIManagementException("Tier " + tier + " is not allowed for API " + apiIdentifier.getApiName() + "-" + apiIdentifier.getVersion() + ". Only "
+                                                 + Arrays.toString(allowedTierList.toArray()) + " Tiers are alllowed.");
+            }
+            if (isTierDeneid(tier)) {
+                throw new APIManagementException("Tier " + tier + " is not allowed for user " + userId);
+            }
+            // Tenant based validation for subscription
+            String userDomain = MultitenantUtils.getTenantDomain(userId);
+            boolean subscriptionAllowed = false;
+            if (!userDomain.equals(tenantDomain)) {
+                String subscriptionAvailability = api.getSubscriptionAvailability();
+                if (APIConstants.SUBSCRIPTION_TO_ALL_TENANTS.equals(subscriptionAvailability)) {
+                    subscriptionAllowed = true;
+                } else if (APIConstants.SUBSCRIPTION_TO_SPECIFIC_TENANTS.equals(subscriptionAvailability)) {
+                    String subscriptionAllowedTenants = api.getSubscriptionAvailableTenants();
+                    String allowedTenants[] = null;
+                    if (subscriptionAllowedTenants != null) {
+                        allowedTenants = subscriptionAllowedTenants.split(",");
+                        if (allowedTenants != null) {
+                            for (String tenant : allowedTenants) {
+                                if (tenant != null && userDomain.equals(tenant.trim())) {
+                                    subscriptionAllowed = true;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                }
+            } else {
+                subscriptionAllowed = true;
+            }
+            if (!subscriptionAllowed) {
+                throw new APIManagementException("Subscription is not allowed for " + userDomain);
+            }
+            apiIdentifier.setTier(tier);
+
+            return apiIdentifier;
+        } catch (APIManagementException e) {
+            handleException("Error while adding subscription for user: " + userId + " Reason: " + e.getMessage(), e);
+            return null;
+        } finally {
+            if (isTenantFlowStarted) {
+                PrivilegedCarbonContext.endTenantFlow();
+            }
         }
-        if(log.isDebugEnabled()){
-            String appName = apiMgtDAO.getApplicationNameFromId(applicationId);
-            String logMessage = "API Name: " + identifier.getApiName() + ", API Version "+identifier.getVersion()+" subscription removed by " + userId +" from app "+ appName;
-            log.debug(logMessage);
+
+    }
+
+    public boolean removeSubscription(APIIdentifier identifier, String userId, int applicationId)
+            throws APIManagementException {
+        boolean isTenantFlowStarted = false;
+        try {
+            String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(userId));
+            if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
+                isTenantFlowStarted = true;
+                PrivilegedCarbonContext.startTenantFlow();
+                PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
+            }
+            apiMgtDAO.removeSubscription(identifier, applicationId);
+            if (APIUtil.isAPIGatewayKeyCacheEnabled()) {
+                invalidateCachedKeys(applicationId);
+            }
+            if (log.isDebugEnabled()) {
+                String appName = apiMgtDAO.getApplicationNameFromId(applicationId);
+                String logMessage = "API Name: " + identifier.getApiName() + ", API Version " + identifier.getVersion() + " subscription removed by " + userId + " from app " + appName;
+                log.debug(logMessage);
+            }
+            return true;
+        } catch (APIManagementException e) {
+            handleException("Error while removing the subscription of" + identifier.getApiName() + "-" + identifier.getVersion(), e);
+            return false;
+        } finally {
+            if (isTenantFlowStarted) {
+                PrivilegedCarbonContext.endTenantFlow();
+            }
         }
     }
 
@@ -2448,4 +2562,130 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         }
     }
 
+   /*
+   *  Generate a key for a subscribed Application - args[] list String subscriberID, String
+   * application name, String keyType
+   */
+    public JSONObject generateApplicationKey(String username, String applicationName, String tokenType,
+                                        String scopes, String validityPeriod, String callbackUrl,
+                                        JSONArray accessAllowDomainsArr, String jsonParams,
+                                        String groupingId)
+            throws APIManagementException {
+
+        String[] accessAllowDomainsArray = new String[accessAllowDomainsArr.size()];
+        for (int i = 0; i < accessAllowDomainsArr.size(); i++) {
+            accessAllowDomainsArray[i] = (String) accessAllowDomainsArr.get(i);
+        }
+
+        try {
+            String tenantDomain = MultitenantUtils.getTenantDomain(username);
+            int tenantId =
+                    ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
+                            .getTenantId(tenantDomain);
+
+            if (null == validityPeriod || validityPeriod.isEmpty()) { // In case a validity period is unspecified
+                long defaultValidityPeriod = APIUtil.getApplicationAccessTokenValidityPeriodInSeconds();
+
+                if (defaultValidityPeriod < 0) {
+                    validityPeriod = String.valueOf(Long.MAX_VALUE);
+                } else {
+                    validityPeriod = String.valueOf(defaultValidityPeriod);
+                }
+            }
+            //checking for authorized scopes
+            Set<Scope> scopeSet = new LinkedHashSet<Scope>();
+            List<Scope> authorizedScopes = new ArrayList<Scope>();
+            String authScopeString;
+            if (scopes != null && scopes.length() != 0 &&
+                !scopes.equals(APIConstants.OAUTH2_DEFAULT_SCOPE)) {
+                scopeSet.addAll(getScopesByScopeKeys(scopes, tenantId));
+                authorizedScopes = APIUtil.getAllowedScopesForUserApplication(username, scopeSet);
+            }
+
+            if (!authorizedScopes.isEmpty()) {
+                StringBuilder scopeBuilder = new StringBuilder();
+                for (Scope scope : authorizedScopes) {
+                    scopeBuilder.append(scope.getKey()).append(" ");
+                }
+                authScopeString = scopeBuilder.toString();
+            } else {
+                authScopeString = APIConstants.OAUTH2_DEFAULT_SCOPE;
+            }
+
+            Map<String, Object> keyDetails = requestApprovalForApplicationRegistration(
+                    username, applicationName, tokenType, callbackUrl,
+                    accessAllowDomainsArray, validityPeriod, authScopeString,
+                    groupingId, jsonParams);
+
+            JSONObject row = new JSONObject();
+            String authorizedDomains = "";
+            boolean first = true;
+            for (String anAccessAllowDomainsArray : accessAllowDomainsArray) {
+                if (first) {
+                    authorizedDomains = anAccessAllowDomainsArray;
+                    first = false;
+                } else {
+                    authorizedDomains = authorizedDomains + ", " + anAccessAllowDomainsArray;
+                }
+            }
+
+            Set<Map.Entry<String, Object>> entries = keyDetails.entrySet();
+
+            for (Map.Entry<String, Object> entry : entries) {
+                row.put(entry.getKey(), entry.getValue());
+            }
+            boolean isRegenarateOptionEnabled = true;
+            if (APIUtil.getApplicationAccessTokenValidityPeriodInSeconds() < 0) {
+                isRegenarateOptionEnabled = false;
+            }
+            row.put("enableRegenarate", isRegenarateOptionEnabled);
+            row.put("accessallowdomains", authorizedDomains);
+            return row;
+        } catch (Exception e) {
+            String msg = "Error while obtaining the application access token for the application:" + applicationName;
+            log.error(msg, e);
+            throw new APIManagementException(msg, e);
+        }
+    }
+
+    @Override
+    public JSONArray getAPISubscriptions(String providerName, String apiName, String version, String user,String groupId) throws APIManagementException{
+
+        APIIdentifier apiIdentifier = new APIIdentifier(APIUtil.replaceEmailDomain(providerName), apiName, version);
+        Subscriber subscriber = new Subscriber(user);
+        JSONArray subscriptions = new JSONArray();
+        Set<SubscribedAPI> apis = getSubscribedIdentifiers(subscriber, apiIdentifier,groupId);
+
+        int i = 0;
+        if (apis != null) {
+            for (SubscribedAPI api : apis) {
+                JSONObject row = new JSONObject();
+                row.put("application", api.getApplication().getName());
+                row.put("applicationId", api.getApplication().getId());
+                row.put("prodKey", getKey(api, APIConstants.API_KEY_TYPE_PRODUCTION));
+                row.put("sandboxKey", getKey(api, APIConstants.API_KEY_TYPE_SANDBOX));
+                ArrayList<APIKey> keys = (ArrayList<APIKey>) api.getApplication().getKeys();
+                for(APIKey key : keys){
+                    row.put(key.getType()+"_KEY", key.getAccessToken());
+                }
+                subscriptions.add(i++, row);
+            }
+        }
+        return subscriptions;
+
+    }
+
+    private static APIKey getKey(SubscribedAPI api, String keyType) {
+        List<APIKey> apiKeys = api.getKeys();
+        return getKeyOfType(apiKeys, keyType);
+    }
+
+    private static APIKey getKeyOfType(List<APIKey> apiKeys, String keyType) {
+        for (APIKey key : apiKeys) {
+            if (keyType.equals(key.getType())) {
+                return key;
+            }
+        }
+        return null;
+    }
 }

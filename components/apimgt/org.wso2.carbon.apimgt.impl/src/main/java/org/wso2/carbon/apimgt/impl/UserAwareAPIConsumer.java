@@ -52,10 +52,10 @@ public class UserAwareAPIConsumer extends APIConsumerImpl {
     }
 
     @Override
-    public void removeSubscription(APIIdentifier identifier, String userId,
+    public boolean removeSubscription(APIIdentifier identifier, String userId,
                                    int applicationId) throws APIManagementException {
         checkSubscribePermission();
-        super.removeSubscription(identifier, userId, applicationId);
+        return super.removeSubscription(identifier, userId, applicationId);
     }
 
     @Override

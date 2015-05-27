@@ -17,9 +17,12 @@
 */
 package org.wso2.carbon.apimgt.api.model;
 
-import org.wso2.carbon.apimgt.api.APIManagementException;
-
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * This class represent the Application in api model
@@ -37,6 +40,7 @@ public class Application {
     private String description;
     private String status;
     private String groupId;
+    private int subsCount;
 
     /**Holds workflow status**/
     private String applicationWorkFlowStatus; 
@@ -65,6 +69,14 @@ public class Application {
 
     public void setStatus(String status) {
         this.status = status;
+    }
+
+    public int getSubsCount() {
+        return subsCount;
+    }
+
+    public void setSubsCount(int count) {
+        this.subsCount = subsCount;
     }
 
     public String getName() {

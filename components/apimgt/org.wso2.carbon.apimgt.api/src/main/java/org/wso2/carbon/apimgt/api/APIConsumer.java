@@ -18,7 +18,19 @@
 
 package org.wso2.carbon.apimgt.api;
 
-import org.wso2.carbon.apimgt.api.model.*;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import org.wso2.carbon.apimgt.api.model.API;
+import org.wso2.carbon.apimgt.api.model.APIIdentifier;
+import org.wso2.carbon.apimgt.api.model.APIRating;
+import org.wso2.carbon.apimgt.api.model.AccessTokenInfo;
+import org.wso2.carbon.apimgt.api.model.Application;
+import org.wso2.carbon.apimgt.api.model.Comment;
+import org.wso2.carbon.apimgt.api.model.OAuthApplicationInfo;
+import org.wso2.carbon.apimgt.api.model.Scope;
+import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
+import org.wso2.carbon.apimgt.api.model.Subscriber;
+import org.wso2.carbon.apimgt.api.model.Tag;
 
 import java.util.List;
 import java.util.Map;
@@ -233,7 +245,7 @@ public interface APIConsumer extends APIManager {
      * @param applicationId Application Id
      * @throws APIManagementException if failed to add subscription details to database
      */
-    public void removeSubscription(APIIdentifier identifier, String userId, int applicationId)
+    public boolean removeSubscription(APIIdentifier identifier, String userId, int applicationId)
             throws APIManagementException;
 
     /**
@@ -542,5 +554,28 @@ public interface APIConsumer extends APIManager {
 			throws APIManagementException;
 
     public String getGroupIds(String response) throws APIManagementException;
+
+    /*
+    *  Generate a key for a subscribed Application - args[] list String subscriberID, String
+    * application name, String keyType
+    */
+
+    public JSONObject generateApplicationKey(String username, String applicationName,
+                                             String tokenType,
+                                             String scopes, String validityPeriod,
+                                             String callbackUrl,
+                                             JSONArray accessAllowDomainsArr, String jsonParams,
+                                             String groupingId)
+            throws APIManagementException;
+    /*
+    * Return API subscription information
+    * @param providerName api provider
+    * @param apiName api name
+    * @param version api version
+    * @param user subscriber
+    *
+    */
+    public JSONArray getAPISubscriptions(String providerName, String apiName, String version,
+                                         String user,String groupId) throws APIManagementException;
 
 }
