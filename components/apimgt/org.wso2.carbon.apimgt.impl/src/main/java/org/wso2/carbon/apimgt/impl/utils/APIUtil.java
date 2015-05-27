@@ -2552,8 +2552,8 @@ public final class APIUtil {
 				for (File sequenceFile : sequences) {
 					String sequenceFileName = sequenceFile.getName();
 					String regResourcePath =
-							APIConstants.API_CUSTOM_SEQUENCE_LOCATION + File.separator +
-							customSequenceType + File.separator + sequenceFileName;
+							APIConstants.API_CUSTOM_SEQUENCE_LOCATION + "/" +
+							customSequenceType + "/" + sequenceFileName;
 					if (registry.resourceExists(regResourcePath)) {
 						if (log.isDebugEnabled()) {
 							log.debug("Defined sequences have already been added to the registry");
