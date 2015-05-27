@@ -79,6 +79,12 @@ var getThemeFile = function (path) {
 }
 return getThemePath() + path;
 };
+ var getWorkflowCookie = function () {
+        return session.get("workflowCookie");
+            };
+    var setWorkflowCookie = function (workflowCookie) {
+        return session.put("workflowCookie",workflowCookie);
+    };
 
     var getThemesPath = function () {
         return "/site/themes/";
@@ -333,6 +339,17 @@ return getThemePath() + path;
         return url ? url : path;
     };
 
+    var url = function(path,parameters){
+        var params = ""
+        if(parameters){
+            params = "?";
+            for (var key in parameters) {
+                params = key+"="+parameters[key];
+            }
+        }
+        return  "/admin-dashboard" + path;
+    };
+
     var getMappedUrl = function (path) {
         return getAbsoluteUrl(getUrlMapping(path));
     };
@@ -541,8 +558,12 @@ return getThemePath() + path;
         getCreatePermitted:getCreatePermitted,
         setPublishPermitted:setPublishPermitted,
         getPublishPermitted:getPublishPermitted,
-	setManageTierPermitted:setManageTierPermitted,
-	getManageTierPermitted:getManageTierPermitted,
+	    setManageTierPermitted:setManageTierPermitted,
+	    getManageTierPermitted:getManageTierPermitted,
+	    setManageTierPermitted:setManageTierPermitted,
+	    getManageTierPermitted:getManageTierPermitted,
+        setWorkflowCookie:setWorkflowCookie,
+        getWorkflowCookie:getWorkflowCookie,
         block:block,
         module:module,
         initializer:initializer,
@@ -567,6 +588,7 @@ return getThemePath() + path;
         addFooterJSCode:addFooterJSCode,
         addFooterCode:addFooterCode,
         includeJag:includeJag,
+        url:url,
         getUserTheme:getUserTheme,
         getThemeFile:getThemeFile
     };

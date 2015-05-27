@@ -18,7 +18,7 @@
  */
 	
 var resources = function(page, meta) {
-    var log = new Log();
+    var log = new Log('add_applications_helper');
     // log.info('Add application loaded');
     return {};
 };

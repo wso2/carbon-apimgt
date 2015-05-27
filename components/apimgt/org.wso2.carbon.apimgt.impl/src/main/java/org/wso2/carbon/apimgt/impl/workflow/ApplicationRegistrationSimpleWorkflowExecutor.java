@@ -79,6 +79,10 @@ public class ApplicationRegistrationSimpleWorkflowExecutor extends AbstractAppli
 		try {
             dao.createApplicationRegistrationEntry((ApplicationRegistrationWorkflowDTO)workFlowDTO,false);
             generateKeysForApplication(regWFDTO);
+			if(regWFDTO.getApplicationInfo() != null && regWFDTO.getApplicationInfo().getClientId() != null ){
+				dao.addAccessAllowDomains(regWFDTO.getApplicationInfo().getClientId(), regWFDTO.getAllowedDomains());
+			}
+
 		} catch (APIManagementException e) {
 			String msg = "Error occured when updating the status of the Application creation process";
 			log.error(msg, e);

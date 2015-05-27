@@ -17,7 +17,7 @@
  *
  */
 var resources = function(page,meta){
-	var log = new Log();
+	var log = new Log('my_applications_helper');
 	// log.info('My Applications loaded');
 	return{
 		js:['libs/jquery.form.min.js','create_application.js']

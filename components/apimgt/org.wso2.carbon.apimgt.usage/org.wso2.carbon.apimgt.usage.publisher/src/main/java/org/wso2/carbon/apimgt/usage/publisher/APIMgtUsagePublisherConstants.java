@@ -47,22 +47,4 @@ public final class APIMgtUsagePublisherConstants {
 
     public static final String API_GOOGLE_ANALYTICS_TRACKING_ENABLED = "Enabled";
     public static final String API_GOOGLE_ANALYTICS_TRACKING_ID = "TrackingID";
-
-
-	public static final String API_USAGE_PUBLISHING = "APIUsageTracking.";
-	public static final String API_USAGE_STREAMS = API_USAGE_PUBLISHING + "Streams.";
-	public static final String API_USAGE_REQUEST_STREAM = API_USAGE_STREAMS + "Request.";
-	public static final String API_USAGE_RESPONSE_STREAM = API_USAGE_STREAMS + "Response.";
-	public static final String API_USAGE_FAULT_STREAM = API_USAGE_STREAMS + "Fault.";
-    public static final String API_USAGE_THROTTLE_STREAM = API_USAGE_STREAMS + "Throttle.";
-	public static final String API_REQUEST_STREAM_NAME = API_USAGE_REQUEST_STREAM + "Name";
-	public static final String API_REQUEST_STREAM_VERSION = API_USAGE_REQUEST_STREAM + "Version";
-	public static final String API_RESPONSE_STREAM_NAME = API_USAGE_RESPONSE_STREAM + "Name";
-	public static final String API_RESPONSE_STREAM_VERSION = API_USAGE_RESPONSE_STREAM + "Version";
-	public static final String API_FAULT_STREAM_NAME = API_USAGE_FAULT_STREAM + "Name";
-	public static final String API_FAULT_STREAM_VERSION = API_USAGE_FAULT_STREAM + "Version";
-    public static final String API_THROTTLE_STREAM_NAME = API_USAGE_THROTTLE_STREAM + "Name";
-	public static final String API_THRORRLE_STREAM_VERSION = API_USAGE_THROTTLE_STREAM + "Version";
-
-
 }

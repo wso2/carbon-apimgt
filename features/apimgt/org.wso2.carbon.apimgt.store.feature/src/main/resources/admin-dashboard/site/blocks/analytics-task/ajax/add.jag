@@ -1,0 +1,100 @@
+<%
+include("/jagg/jagg.jag");
+var log = new Log();
+
+
+(function () {
+    response.contentType = "text/plain; charset=UTF-8";
+    var mod, obj, result, username,
+        		action = request.getParameter("action"),
+                site = require("/site/conf/site.json"),
+                msg = require("/site/conf/ui-messages.jag");
+    if(jagg.getUser() == null){
+        print({
+            error:true,
+            message:'timeout'
+        });
+    } else if (request.getMethod() == 'POST') {
+        mod = jagg.module("analytics");
+        var configData = {};
+
+        configData.eventReceiverURL = request.getParameter('event_receivers');
+        configData.eventReceiverUsername = request.getParameter('eventReceiverUsername');
+        configData.eventReceiverPassword = request.getParameter('eventReceiverPassword');
+
+        configData.eventAnalyserURL = request.getParameter('eventAnalyserURL');
+        configData.eventAnalyserUsername = request.getParameter('eventAnalyserUsername');
+        configData.eventAnalyserPassword = request.getParameter('eventAnalyserPassword');
+
+        configData.statDsURL = request.getParameter('statDsURL');
+        configData.statDsDriver = request.getParameter('statDsDriver');
+        configData.statDsUsername = request.getParameter('statDsUsername');
+        configData.statDsPassword = request.getParameter('statDsPassword');
+
+        // setting JDBC pool properties
+        configData.statDsDefAutoCommit = request.getParameter('statDsDefAutoCommit');
+        configData.statDsDefReadOnly = request.getParameter('statDsDefReadOnly');
+        configData.statDsDefTrans = request.getParameter('statDsDefTrans');
+        configData.statDsDefCatalog = request.getParameter('statDsDefCatalog');
+        configData.statDsMaxActive = request.getParameter('statDsMaxActive');
+        configData.statDsMaxIdle = request.getParameter('statDsMaxIdle');
+        configData.statDsMinIdle = request.getParameter('statDsMinIdle');
+        configData.statDsInitialSize = request.getParameter('statDsInitialSize');
+        configData.statDsMaxWait = request.getParameter('statDsMaxWait');
+        configData.statDsTestOnBorrow = request.getParameter('statDsTestOnBorrow');
+        configData.statDsTestOnReturn = request.getParameter('statDsTestOnReturn');
+        configData.statDsTestWhileIdle = request.getParameter('statDsTestWhileIdle');
+        configData.statDsValidationQuery = request.getParameter('statDsValidationQuery');
+        configData.statDsValidationClass = request.getParameter('statDsValidationClass');
+        configData.statDsTimeEviction = request.getParameter('statDsTimeEviction');
+        configData.statDsNoOfTestsEviction = request.getParameter('statDsNoOfTestsEviction');
+        configData.statDsMinEvictableIdleTime = request.getParameter('statDsMinEvictableIdleTime');
+        configData.statDsAccessToConnAllowed = request.getParameter('statDsAccessToConnAllowed');
+        configData.statDsRemoveAbandoned = request.getParameter('statDsRemoveAbandoned');
+        configData.statDsRemoveAbandonedTimeout = request.getParameter('statDsRemoveAbandonedTimeout');
+        configData.statDsLogAbandoned = request.getParameter('statDsLogAbandoned');
+        configData.statDsConnProperties = request.getParameter('statDsConnProperties');
+        configData.statDsInitSql = request.getParameter('statDsInitSql');
+        configData.statDsJDBCInterceptors = request.getParameter('statDsJDBCInterceptors');
+        configData.statDsValidationInterval = request.getParameter('statDsValidationInterval');
+        configData.statDsFairQueue = request.getParameter('statDsFairQueue');
+        configData.statDsJMXEnabled = request.getParameter('statDsJMXEnabled');
+        configData.statDsAbandonWhenPrecFull = request.getParameter('statDsAbandonWhenPrecFull');
+        configData.statDsMaxAge = request.getParameter('statDsMaxAge');
+        configData.statDsUseEquals = request.getParameter('statDsUseEquals');
+        configData.statDsSuspectTimeout = request.getParameter('statDsSuspectTimeout');
+        configData.statDsAlternateUsernameAllowed = request.getParameter('statDsAlternateUsernameAllowed');
+        configData.statDsValidationQueryTimeout = request.getParameter('statDsValidationQueryTimeout');
+
+
+        result = mod.addAnalyticsConfig(configData);
+        if (result.error) {
+            print(result);
+            return false;
+        }
+
+        result = mod.addToolbox(configData);
+        if (result.error) {
+            print(result);
+            return false;
+        }
+
+        result = mod.addDatasourceConfig(configData);
+        if (result.error) {
+            print(result);
+            return false;
+        }
+
+        result = mod.addBamServerProfile(configData);
+        if (result.error) {
+            print(result);
+            return false;
+        }
+
+        obj = {
+            error:false
+        }
+        print(obj);
+    }
+}());
+%>

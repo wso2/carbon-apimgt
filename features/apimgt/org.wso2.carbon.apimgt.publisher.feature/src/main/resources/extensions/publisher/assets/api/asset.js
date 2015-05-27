@@ -324,7 +324,11 @@ asset.server = function (ctx) {
                    }, {
                        url: 'api-subscriptions',
                        path: 'api-subscriptions.jag'
-            }]
+                   }, {
+                       url: 'copyAPI',
+                       path: 'copy_api.jag'
+                   }]
+
         }
     }
 };
@@ -482,6 +486,38 @@ asset.renderer = function (ctx) {
                         break;
                 }
                 return page;
+            },
+
+              populateTest:function(page){
+                if(page.meta.pageName !=='details'){
+                    return;
+                }
+                var assets = page.assets;
+               var tables = page.assets.tables;
+               if(tables.length > 1){
+                    tables.splice(1,1);
+               }
+               var firstOne = tables[0];
+               assets.context = firstOne.fields.context.value;
+               assets.wsdl = firstOne.fields.wsdl.value;
+               assets.wadl = firstOne.fields.wadl.value;
+               assets.tier = firstOne.fields.tier.value;
+
+               var endpointJSON = firstOne.fields.endpointConfig.value;
+               var endpoints = JSON.parse(endpointJSON);
+               var prodEndpoint = endpoints.production_endpoints;
+               var sandboxEndpoint = endpoints.sandbox_endpoints;
+               var endpontType = endpoints.endpoint_type;
+
+               assets.prodEndpoint = prodEndpoint;
+               assets.sandboxEndpoint = sandboxEndpoint;
+               assets.endpontType = endpontType;
+               assets.lastUpdatedDate = page.lastUpdatedDate;
+               assets.createdDate = page.createdDate;
+
+
+
+
             }
         }
     };

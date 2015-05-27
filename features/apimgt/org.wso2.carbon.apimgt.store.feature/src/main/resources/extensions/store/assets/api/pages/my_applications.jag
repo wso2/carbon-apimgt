@@ -20,7 +20,7 @@
 var caramel;
 require('/modules/store.js').exec(function(ctx) {
     caramel = require('caramel');
-    var log = new Log();
+    var log = new Log('my_applications_page');
     var ui = require('rxt').ui;
     var asset = require('rxt').asset;
     var uriMatcher = new URIMatcher(ctx.request.getRequestURI());

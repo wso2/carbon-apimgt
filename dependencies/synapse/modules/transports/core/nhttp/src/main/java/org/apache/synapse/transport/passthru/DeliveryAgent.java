@@ -180,6 +180,11 @@ public class DeliveryAgent {
                         "Error connecting to the back end",
                         null,
                         ProtocolState.REQUEST_READY);
+                synchronized (msgCtx) {
+                    msgCtx.setProperty(PassThroughConstants.WAIT_BUILDER_IN_STREAM_COMPLETE,
+                            Boolean.TRUE);
+                    msgCtx.notifyAll();
+                }
             }
         } else {
             throw new IllegalStateException("Queue cannot be null for: " + route);

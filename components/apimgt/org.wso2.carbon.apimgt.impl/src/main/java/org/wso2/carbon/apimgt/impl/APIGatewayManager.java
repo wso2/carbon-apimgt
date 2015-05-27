@@ -16,6 +16,12 @@
 
 package org.wso2.carbon.apimgt.impl;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
+import javax.xml.namespace.QName;
+
 import org.apache.axiom.om.OMElement;
 import org.apache.axis2.AxisFault;
 import org.apache.commons.logging.Log;
@@ -31,11 +37,6 @@ import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.utils.RESTAPIAdminClient;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
-
-import javax.xml.namespace.QName;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
 
 public class APIGatewayManager {
 
@@ -71,7 +72,8 @@ public class APIGatewayManager {
 	 * @param tenantDomain
 	 *            - Tenant Domain of the publisher
 	 */
-    public List<String> publishToGateway(API api, APITemplateBuilder builder, String tenantDomain) {
+    public List<String> publishToGateway(API api, APITemplateBuilder builder, String tenantDomain) 
+                                                                                       throws APIManagementException {
         List<String> failedEnvironmentsList = new ArrayList<String>(0);
         if (api.getEnvironments() == null) {
             return failedEnvironmentsList;
@@ -116,7 +118,7 @@ public class APIGatewayManager {
                     deployAPIFaultSequence(api, tenantDomain, environment);
 
                     operation ="update";
-                    api.setImplementation("ENDPOINT");
+
                     //Update the API
                     if(api.getImplementation().equalsIgnoreCase(APIConstants.IMPLEMENTATION_TYPE_INLINE)){
                         client.updateApiForInlineScript(builder, tenantDomain);
@@ -159,7 +161,7 @@ public class APIGatewayManager {
                     deployAPIFaultSequence(api, tenantDomain, environment);
 
                     operation ="add";
-                    api.setImplementation("ENDPOINT");
+
                     //Add the API
                     if(api.getImplementation().equalsIgnoreCase(APIConstants.IMPLEMENTATION_TYPE_INLINE)){
                         client.addPrototypeApiScriptImpl(builder, tenantDomain);
@@ -181,8 +183,9 @@ public class APIGatewayManager {
 				}
 			}
             } catch (AxisFault axisFault) {
-                log.error("Error occurred when publish to gateway " + environmentName, axisFault);
                 failedEnvironmentsList.add(environmentName);
+                log.error("Error occurred when publish to gateway " + environmentName, axisFault);
+                throw new APIManagementException(axisFault.getMessage(), axisFault);
             } catch (APIManagementException ex) {
                 log.error("Error occurred deploying sequences on " + environmentName, ex);
             }
@@ -293,8 +296,8 @@ public class APIGatewayManager {
 	 *            -API object
 	 * @param tenantDomain
 	 * @param environment
-	 * @throws org.wso2.carbon.apimgt.api.APIManagementException
-	 * @throws org.apache.axis2.AxisFault
+	 * @throws APIManagementException
+	 * @throws AxisFault
 	 */
     private void deployCustomSequences(API api, String tenantDomain, Environment environment)
             throws APIManagementException,
@@ -368,7 +371,7 @@ public class APIGatewayManager {
 	 * @param api
 	 * @param tenantDomain
 	 * @param environment
-	 * @throws org.wso2.carbon.apimgt.api.APIManagementException
+	 * @throws APIManagementException
 	 */
     private void undeployCustomSequences(API api, String tenantDomain, Environment environment) {
 
@@ -406,7 +409,7 @@ public class APIGatewayManager {
 	 * @param api
 	 * @param tenantDomain
 	 * @param environment
-	 * @throws org.wso2.carbon.apimgt.api.APIManagementException
+	 * @throws APIManagementException
 	 */
 	private void updateCustomSequences(API api, String tenantDomain, Environment environment)
 	                                                                                         throws APIManagementException {
@@ -527,7 +530,7 @@ public class APIGatewayManager {
      * @param tenantDomain
      * @param environment
      * @param operation -add,delete,update operations for an API
-     * @throws org.wso2.carbon.apimgt.api.APIManagementException
+     * @throws APIManagementException
      */
 	private void setSecurevaultProperty(API api, String tenantDomain, Environment environment,String operation)
 	                                                                                          throws APIManagementException {
