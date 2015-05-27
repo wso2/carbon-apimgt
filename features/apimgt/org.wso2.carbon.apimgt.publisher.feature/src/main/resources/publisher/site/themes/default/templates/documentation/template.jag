@@ -17,7 +17,6 @@
         var urlPostfix;
         if(tenant!='null') {urlPrefix="?tenant="+tenant;}else{urlPrefix='';}
         if(tenant!='null') {urlPostfix="&tenant="+tenant;}else{urlPostfix='';}
-	var tenantUtil = Packages.org.wso2.carbon.utils.multitenancy.MultitenantUtils;
      %>
     <div class="span12">
         <div class="row-fluid">
@@ -203,7 +202,7 @@
                         <% }else if (doc.sourceType == "URL"){%>
                          	<a href="<%= encode.forHtmlAttribute(encode.forUri(doc.sourceUrl))%><%=urlPrefix%>" target="_blank" ><i class="icon-check"></i> <%=i18n.localize("view")%></a>
                         <%}else if (doc.sourceType == "FILE"){ %>
-			 <a href="/publisher/site/themes/default/templates/documentation/download.jag?tenant=<%=tenantUtil.getTenantDomain(provider)%>&resourceUrl=<%=doc.filePath%>" target="_blank" download><i class="icon-check"></i>
+			 <a href="/publisher/site/themes/default/templates/documentation/download.jag?resourceUrl=<%=doc.filePath%>" target="_blank" download><i class="icon-check"></i>
 			  <%=i18n.localize("open")%>
 			  </a>
 			<%}%>

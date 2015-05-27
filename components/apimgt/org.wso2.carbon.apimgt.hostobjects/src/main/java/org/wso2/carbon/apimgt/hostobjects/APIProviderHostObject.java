@@ -4751,8 +4751,7 @@ public class APIProviderHostObject extends ScriptableObject {
             username = APIConstants.END_USER_ANONYMOUS;
         }
         String resource = (String) args[1];
-        String tenantDomain = (String) args[0];
-        Map<String, Object> docResourceMap = APIUtil.getDocument(username, resource, tenantDomain);
+        Map<String, Object> docResourceMap = APIUtil.getDocument(username, resource);
         if (!docResourceMap.isEmpty()) {
             data.put("Data", data,
                      cx.newObject(thisObj, "Stream", new Object[] { docResourceMap.get("Data") }));

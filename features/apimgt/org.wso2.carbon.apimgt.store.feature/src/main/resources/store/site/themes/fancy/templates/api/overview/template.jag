@@ -61,7 +61,7 @@
     <%}%>
     <% if(api.wsdl && api.wsdl != ""){ %>        
     <p>
-        <a href="<%=api.wsdl%>" target="_blank"><h6><%=i18n.localize("wsdl")%></h6></a>
+        <a href="/store/site/themes/fancy/templates/api/documentation/download.jag?resourceUrl=<%=api.wsdl%>" target="_blank"><h6><%=i18n.localize("wsdl")%></h6></a>
     </p>
     <% } %>
     <% if(api.wadl && api.wadl != ""){ %>
