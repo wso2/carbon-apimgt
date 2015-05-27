@@ -106,7 +106,7 @@ var publishedInExternalStores=<%=publishedInExternalStores%>;
 
       </div>
        <div class="form-actions">
-                <input type="submit" id="updateStateButton" disabled="disabled" class="btn btn-primary" value="<%=i18n.localize("update")%>"/>
+                <input type="submit" id="updateStateButton" disabled="disabled" class="btn btn-primary has-spinner" value="<%=i18n.localize("update")%>"/>
                 <input type="button" id="resetState" disabled="disabled" class="btn" value="<%=i18n.localize("reset")%>" />
        </div>
        <div class="alert alert-success" id="statusUpdateMsg" style="display:none;">
@@ -157,6 +157,7 @@ $('#editStatus option').each(  //when refreshed page the default is not selected
         );
  var v = $("#editStatusForm").validate({
         submitHandler: function(form) {
+            $('#updateStateButton').buttonLoader('start');
             $(form).ajaxSubmit({
                 success:function(responseText, statusText, xhr, $form)  {
                   if(!responseText.error){
@@ -172,6 +173,7 @@ $('#editStatus option').each(  //when refreshed page the default is not selected
                         $('#status').html(lastLcChange.newStatus);
                         $('.storeCheck').attr("disabled",false);
                         $('#inUpdated').html(jagg.getDate(lastLcChange.date));
+                        $('#updateStateButton').buttonLoader('stop');
                         toggleUpdateBtn();
                         var t = setTimeout("hideMsg()", 3000);
 
@@ -180,6 +182,7 @@ $('#editStatus option').each(  //when refreshed page the default is not selected
                         checkExternalStores(lastLcChange.newStatus);
 
                   }else{
+                        $('#updateStateButton').buttonLoader('stop');
                         if(responseText.message == "AuthenticateError"){
                          jagg.showLogin();
                         }else{
