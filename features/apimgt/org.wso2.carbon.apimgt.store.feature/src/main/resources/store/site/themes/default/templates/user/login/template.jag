@@ -37,9 +37,9 @@ var themes = [
 <ul class="nav navbar-nav navbar-right">
 <%if ((jagg.getTenantDomain() != null)&& site.showPublicStoreURL){%>
 <li class="dropdown">
-  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">Go to <span class="caret"></span></a>
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false"><i class="fa fa-external-link"></i> Go to <span class="caret"></span></a>
   <ul class="dropdown-menu" role="menu">
-    <li><a href="<%=jagg.getAbsoluteUrl("/")%>">Go to <%=i18n.localize("publicAPIStore")%></a></li>
+    <li><a href="<%=jagg.getAbsoluteUrl("/")%>"><i class="fa fa-globe"></i> <%=i18n.localize("publicAPIStore")%></a></li>
   </ul>
 </li>      
 <%}%>
@@ -51,7 +51,7 @@ var themes = [
 <%}%>
 
   <li class="dropdown">
-    <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false"><%=i18n.localize("selectTheme")%> <span class="caret"></span></a>
+    <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false"><i class="fa fa-paint-brush"></i> <%=i18n.localize("selectTheme")%> <span class="caret"></span></a>
     <ul class="dropdown-menu" role="menu">
       <% for(var i=0;i < themes.length;i++) {
         if(themes[i].subtheme == jagg.getUserTheme().subtheme ){
@@ -64,7 +64,7 @@ var themes = [
     </ul>
   </li>
   <li class="dropdown">
-    <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false"><%=user.username%> <span class="caret"></span></a>
+    <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false"><i class="fa fa-user"></i> <%=user.username%> <span class="caret"></span></a>
     <ul class="dropdown-menu" role="menu">
       <li role="presentation" class="dropdown-header"><%=i18n.localize("logged")%></li>
       <li role="presentation" class="disabled"><a role="menuitem" tabindex="-1" href="#"><strong><%=user.username%></strong></a></li>
@@ -116,7 +116,7 @@ var themes = [
 </ul -->
 <% } else { %>
   <%if(isSelfSignupEnabled){%>
-  <li><a id="register-link" href="<%= jagg.urlTenanted('/site/pages/sign-up.jag')%>"><%=i18n.localize("signup")%></a></li>
+  <li><a id="register-link" href="<%= jagg.urlTenanted('/site/pages/sign-up.jag')%>"><i class="fa fa-pencil-square-o"></i> <%=i18n.localize("signup")%></a></li>
   <%}%>
   <li><a id="login-link"><i class="fa fa-sign-in"></i> <%=i18n.localize("login")%></a></li>
   <li>&nbsp;&nbsp;&nbsp;</li>
