@@ -89,6 +89,12 @@ var apipublisher = {};
     };
 
     APIProviderProxy.prototype.createNewAPIVersion = function (api, newVersion) {
+    	 var apiObj = new Packages.org.json.simple.JSONObject();
+         apiObj.put("provider", api.provider);
+         apiObj.put("version", api.version);
+         apiObj.put("name", api.name);
+         apiObj.put("defaultVersion", api.defaultVersion);
+
         return this.impl.createNewAPIVersion(api, newVersion);
     };
 
