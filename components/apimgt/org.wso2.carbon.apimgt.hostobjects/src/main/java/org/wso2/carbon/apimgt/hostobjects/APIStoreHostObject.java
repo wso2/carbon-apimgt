@@ -4634,8 +4634,8 @@ public class APIStoreHostObject extends ScriptableObject {
                                                       Object[] args, Function funObj)
             throws ScriptException,
                    APIManagementException {
-        if (args == null || args.length != 2 || !isStringArray(args)) {
-            handleException("Invalid input parameters expected resource Url and tenantDomain");
+        if (args == null || args.length != 1 || !isStringArray(args)) {
+            handleException("Invalid input parameters expected resource Url");
         }
         NativeObject data = new NativeObject();
 
@@ -4644,7 +4644,7 @@ public class APIStoreHostObject extends ScriptableObject {
         if (username == null) {
             username = APIConstants.END_USER_ANONYMOUS;
         }
-        String resource = (String) args[1];
+        String resource = (String) args[0];
         //String tenantDomain = (String) args[0];
         Map<String, Object> docResourceMap = APIUtil.getDocument(username, resource);
         if (!docResourceMap.isEmpty()) {
