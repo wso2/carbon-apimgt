@@ -232,20 +232,20 @@ $(function () {
 
         $('#btn-Production-updateDomains').on('click', function () {
             var allowedDomains = $('#input-Production-allowedDomains').val();
-            console.info(JSON.stringify(APP_STORE.productionKeys));
+            var appName = $('#subscription_selection').val();
             var domainUpdateData = {};
             domainUpdateData['accessToken'] = APP_STORE.productionKeys.accessToken;
             domainUpdateData['accessAllowedDomains'] = allowedDomains;
-
-            console.info('***Domain Update Data****');
-            console.info(JSON.stringify(domainUpdateData));
             $.ajax({
-                type: 'PUT',
-                url: API_DOMAIN_URL,
-                contentType: 'application/json',
-                data: JSON.stringify(domainUpdateData),
+                type: 'POST',
+                url: getSubscriptionAPI(appName, 'updateDomain'),
+                data: domainUpdateData,
                 success: function (data) {
-                    console.info('Domain updated successfully');
+                    var message = {};
+                    message.text = '<div><i class="icon-briefcase"></i> Production domain updated successfully.</div>';
+                    message.type = 'success';
+                    message.layout = 'topRight';
+                    noty(message);
                 }
             });
         });
@@ -255,20 +255,20 @@ $(function () {
 
         $('#btn-Sandbox-updateDomains').on('click', function () {
             var allowedDomains = $('#input-Sandbox-allowedDomains').val();
-            console.info(JSON.stringify(APP_STORE.productionKeys));
+            var appName = $('#subscription_selection').val();
             var domainUpdateData = {};
             domainUpdateData['accessToken'] = APP_STORE.sandboxKeys.accessToken;
             domainUpdateData['accessAllowedDomains'] = allowedDomains;
-
-            console.info('***Sanbox Domain Update Data***');
-            console.info(JSON.stringify(domainUpdateData));
             $.ajax({
-                type: 'PUT',
-                url: API_DOMAIN_URL,
-                contentType: 'application/json',
-                data: JSON.stringify(domainUpdateData),
+                type: 'POST',
+                url: getSubscriptionAPI(appName, 'updateDomain'),
+                data: domainUpdateData,
                 success: function (data) {
-                    console.info('Domain updated successfully');
+                    var message = {};
+                    message.text = '<div><i class="icon-briefcase"></i> Sandbox domain updated successfully.</div>';
+                    message.type = 'success';
+                    message.layout = 'topRight';
+                    noty(message);
                 }
             });
         });
@@ -405,7 +405,7 @@ $(function () {
         beforeRender: function (data) {
             data.environment = Views.translate('Production');
             if (data.appName == null) {
-                data.isAppNameAvailable = Views.translate('false');
+                data.isDataNotAvailable = true;
             }
         },
         resolveRender: function () {
@@ -423,7 +423,6 @@ $(function () {
         partial: 'sub-keys-visible-prod',
         subscriptions: [EV_APP_SELECT, EV_SHOW_KEYS, EV_GENERATE_PROD_TOKEN],
         resolveRender: function (data) {
-            //alert('Resolve rendering!');
             if (!APP_STORE.showKeys) {
                 return false;
             }
@@ -470,7 +469,9 @@ $(function () {
         beforeRender: function (data) {
             data.environment = Views.translate('Sandbox');
             if (data.appName == null) {
-                data.isAppNameAvailable = Views.translate('false');
+                data.isDataNotAvailable = true;
+            } else {
+                data.isDataNotAvailable = false;
             }
         },
         resolveRender: function () {
@@ -538,12 +539,13 @@ $(function () {
         container: PROD_DOMAIN_CONTAINER,
         partial: 'sub-domain-token-prod',
         beforeRender: function (data) {
-            if (data.appName != null) {
+            if (data.appName != null && !APP_STORE.productionKeys) {
+                data.isDataNotAvailable = false;
                 data.environment = Views.translate('Production');
                 data.allowedDomains = Views.translate('ALL');
                 data.validityTime = Views.translate('3600');
-            } else if (typeof(data.appName) != "undefined" || typeof(data.appName) == "null") {
-                data.isAppNameAvailable = Views.translate('false');
+            } else if (typeof(data.appName) == "undefined" || typeof(data.appName) == "null") {
+                data.isDataNotAvailable = true;
             }
         },
         subscriptions: [EV_APP_SELECT],
@@ -556,8 +558,12 @@ $(function () {
         partial: 'sub-domain-update-prod',
         resolveRender: function (data) {
             if (!APP_STORE.productionKeys) {
+                data.isDataNotAvailable = true;
                 return false;
             } else {
+                data.environment = Views.translate('Production');
+                data.allowedDomains = APP_STORE.productionKeys.allowedDomains;
+                data.isDataNotAvailable = false;
                 return true;
             }
         },
@@ -570,14 +576,16 @@ $(function () {
         id: 'defaultSandboxDomainView',
         container: SAND_DOMAIN_CONTAINER,
         beforeRender: function (data) {
-            if (data.appName != null) {
+            if (data.appName != null && !APP_STORE.sandboxKeys) {
+                data.isDataNotAvailable = false;
                 data.environment = Views.translate('Sandbox');
                 data.allowedDomains = Views.translate('ALL');
                 data.validityTime = Views.translate('3600');
-            } else if (typeof(data.appName) != "undefined" || typeof(data.appName) == "null") {
-                data.isAppNameAvailable = Views.translate('false');
+            } else if (typeof(data.appName) == "undefined" || typeof(data.appName) == "null") {
+                data.isDataNotAvailable = true;
             }
         },
+        subscriptions: [EV_APP_SELECT],
         afterRender: function () {
         }
     });
@@ -587,8 +595,12 @@ $(function () {
         partial: 'sub-domain-update-prod',
         resolveRender: function (data) {
             if (!APP_STORE.sandboxKeys) {
+                data.isDataNotAvailable = false;
                 return false;
             } else {
+                data.environment = Views.translate('Sandbox');
+                data.allowedDomains = APP_STORE.sandboxKeys.allowedDomains;
+                data.isDataNotAvailable = true;
                 return true;
             }
         },
@@ -606,9 +618,10 @@ $(function () {
         beforeRender: function (data) {
             var appName = data.appName;
             if (appName != null) {
+                data.isDataNotAvailable = false;
                 data.subscriptions = findSubscriptionDetails(appName);
             } else {
-                data.isAppNameAvailable = Views.translate('false');
+                data.isDataNotAvailable = true;
             }
         },
         subscriptions: [EV_APP_SELECT, EV_SUB_DELETE],
@@ -643,6 +656,7 @@ $(function () {
         keys.validityTime = details.prodValidityTime;
         keys.consumerKey = details.prodConsumerKey;
         keys.consumerSecret = details.prodConsumerSecret;
+        keys.allowedDomains = details.prodAuthorizedDomains;
 
         return keys;
     };
@@ -660,6 +674,7 @@ $(function () {
         keys.validityTime = details.sandValidityTime;
         keys.consumerKey = details.sandboxConsumerKey;
         keys.consumerSecret = details.sandboxConsumerSecret;
+        keys.allowedDomains = details.sandboxAuthorizedDomains;
 
         return keys;
     };
