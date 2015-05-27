@@ -11,7 +11,7 @@ APISamples.prototype.deploySample1 = function(){
 	formData.append("version", "1.0.0");
 	formData.append("description", "The WeatherAPI gives the weather details according to the city name");
 	formData.append("tags", "weather");
-	formData.append("visibility", "Public");
+	formData.append("visibility", "public");
 	formData.append("context", "weatherapi");
 	formData.append("swagger", this.sample1_swagger);
 	formData.append("apiThumb","/site/themes/default/images/weatherAPI.png");

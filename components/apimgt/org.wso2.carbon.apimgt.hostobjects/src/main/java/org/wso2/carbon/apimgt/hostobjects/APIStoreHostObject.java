@@ -1866,6 +1866,7 @@ public class APIStoreHostObject extends ScriptableObject {
                     }
                     row.put("apiOwner", row, apiOwner);
                     row.put("isAdvertiseOnly", row, api.isAdvertiseOnly());
+                    row.put("apiBusinessOwner", row, api.getBusinessOwner());
                     
                     NativeArray tierArr = new NativeArray(0);
                     Set<Tier> tierSet = api.getAvailableTiers();
@@ -4014,28 +4015,34 @@ public class APIStoreHostObject extends ScriptableObject {
         }
     }
 
-    public static NativeArray jsFunction_getPublishedAPIsByProvider(Context cx, Scriptable thisObj,
+    public static NativeArray  jsFunction_getPublishedAPIsByProvider(Context cx, Scriptable thisObj,
                                                                     Object[] args,
                                                                     Function funObj)
             throws APIManagementException {
         NativeArray apiArray = new NativeArray(0);
-        if (args != null && isStringArray(args)) {
+        if (args != null) {
             String providerName = APIUtil.replaceEmailDomain(args[0].toString());
             String username = args[1].toString();
             String limitArg = args[2].toString();
             int limit = Integer.parseInt(limitArg);
             String apiOwner = args[3].toString();
+            String apiBizOwner = null;
+            //If api biz-owner is not null
+            if(args[4] != null){
+                apiBizOwner = args[4].toString();
+            }
+
             Set<API> apiSet;
             APIConsumer apiConsumer = getAPIConsumer(thisObj);
             boolean isTenantFlowStarted = false;
             try {
-                String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(username));
+                String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(providerName));
                 if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
                     isTenantFlowStarted = true;
                     PrivilegedCarbonContext.startTenantFlow();
                     PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
                 }
-                apiSet = apiConsumer.getPublishedAPIsByProvider(providerName, username, limit, apiOwner);
+                apiSet = apiConsumer.getPublishedAPIsByProvider(providerName, username, limit, apiOwner, apiBizOwner);
             } catch (APIManagementException e) {
                 handleException("Error while getting published APIs information of the provider - " +
                         providerName, e);
