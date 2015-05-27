@@ -88,8 +88,8 @@ var apistore = {};
     };
 
     /*
-    * This function update the application according to the given arguments.
-    */
+     * This function update the application according to the given arguments.
+     */
     StoreAPIProxy.prototype.updateApplication = function (appName, userName, appId, tier, callbackUrl, description) {
         var subscriber = new APISubscriber(userName);
         var application = new Application(appName, subscriber);
@@ -114,6 +114,9 @@ var apistore = {};
         return this.impl.getAllPaginatedAPIsByStatus(tenantDomain, start, end, apiStatus);
     };
 
+    /*
+     * This function returns fresh(new) tokens to my subscriptions page.
+     */
     StoreAPIProxy.prototype.getApplicationKey = function (userId, applicationName, tokenType, tokenScopes,
                                                           validityPeriod, callbackUrl, accessAllowDomains) {
         var arr = new Packages.org.json.simple.JSONArray();
@@ -156,6 +159,9 @@ var apistore = {};
         return this.impl.addSubscription(apiIdentifier, appId, user);
     };
 
+    /*
+     * This function returns the refresh tokens to my subscriptions page.
+     */
     StoreAPIProxy.prototype.getRefreshToken = function (userId, applicationName, requestedScopes,
                                                         oldAccessToken, accessAllowDomainsArr,
                                                         consumerKey, consumerSecret, validityTime) {
@@ -168,12 +174,22 @@ var apistore = {};
             arr, consumerKey, consumerSecret, validityTime);
     };
 
-    //removeSubscription(APIIdentifier identifier, String userId, int applicationId)
+    /*
+     * This function remove the subscription for the application.
+     */
     StoreAPIProxy.prototype.removeSubscription = function (apiname, version, provider, user, tier, appId) {
         provider = APIUtil.replaceEmailDomain(provider);
         var apiIdentifier = new APIIdentifier(provider, apiname, version);
         apiIdentifier.setTier(tier);
         return this.impl.removeSubscription(apiIdentifier, user, appId);
+    };
+
+    /*
+     * This function update the allowed domains by splitting the accessAllowDomains by ','.
+     */
+    StoreAPIProxy.prototype.updateAccessAllowDomains = function (accessToken, accessAllowDomains) {
+        var domains = accessAllowDomains.split(",");
+        return this.impl.updateAccessAllowDomains(accessToken, domains);
     };
 
 })(apistore);
