@@ -18,7 +18,7 @@
  *
  */
 require('/modules/store.js').exec(function (ctx) {
-    var log = new Log();
+    var log = new Log('application_endpoint');
     var res = ctx.response;
     var req = ctx.request;
     var session = ctx.session;
@@ -72,6 +72,8 @@ require('/modules/store.js').exec(function (ctx) {
                 // (apiname, version, provider, user, tier, appId)
                 apistore.removeSubscription(options.apiName, options.apiVersion, options.apiProvider,
                         user.username, options.appTier, options.appId);
+            } else if (uriOptions.action == 'updateDomain') {
+                apistore.updateAccessAllowDomains(options.accessToken, options.accessAllowedDomains);
             }
             break;
 
