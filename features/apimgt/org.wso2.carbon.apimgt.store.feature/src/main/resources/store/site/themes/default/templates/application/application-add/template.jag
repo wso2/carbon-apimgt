@@ -81,9 +81,9 @@ An application is a logical collection of APIs. Applications allow you to use a 
     <label class="col-lg-2 col-md-3 control-label" for="callback-url"><%=i18n.localize("callbackUrl")%></label>    
     <div class="col-lg-4 col-md-6">
         <input type="text" class="validInput form-control" name="callback-url"  id="callback-url"/>
-        <i class="fa fa-question-circle help-popup" data-target="#callback_help" ></i>        
-        <div id="callback_help"></div>    
     </div>
+    <a href="#" title="Callback URL Help" id="callback-help" class="help-text" data-placement="bottom" rel="popover" data-popover-content="#callBackHelpMsg"><i class="fa fa-question-circle"></i></a>
+    <div style="display:none"><div id="callBackHelpMsg"><%= i18n.localize("callBackHelpMsg") %></div></div>
   </div>
   <div class="form-group">
     <label for="description" class="col-lg-2 col-md-3 control-label">Description</label>    
