@@ -71,19 +71,34 @@ $(function(){
 				                message.text = '<div><i class="icon-briefcase"></i> Successfully New API Version Created.</div>';
 				                message.type = 'success';
 				                message.layout = 'topRight';
+				                //noty(message);   
 				                window.location.href = caramel.context+'/asts/api/list'; 
-				                //noty(message);                
+				                           
 				              
 				        } else {
 				           var message ={};
 				                message.text = '<div><i class="icon-briefcase"></i> New API Version creation process failed.</div>';
 				                message.type = 'error';
 				                message.layout = 'topRight';
-				                window.location.href = caramel.context+'/asts/api/list'; 
+				                window.location.href = caramel.context+'/asts/api/list';
 				                //noty(message);
+				                BootstrapDialog.show({
+					                type: BootstrapDialog.TYPE_DANGER,
+					                title: 'Error',
+					                message: 'Error Occured while Create New Version',
+					                buttons: [{
+					                
+						                label: 'Close',
+						                action: function(dialogItself){
+						                    dialogItself.close();
+						                }
+						            
+					            	}]
+
+					            });
 				        }
 				          
-				        },
+				    },
 				    dataType: "json"
 				}); 
 

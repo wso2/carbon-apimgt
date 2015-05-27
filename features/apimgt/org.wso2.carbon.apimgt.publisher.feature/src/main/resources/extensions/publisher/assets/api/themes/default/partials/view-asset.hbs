@@ -13,10 +13,12 @@
 				<div class="col-lg-10">
 					<h1>{{name}}</h1>
 					<i class="fa fa-circle"></i> {{lifecycleState}}
-					<div class="well-description">{{tables.0.fields.createdtime.value}}</div>
-					<div class="well-description">{{tables.0.fields.description.value}}</div>
+					<div class="well-description">{{createdDate}}</div>
+					{{#if tables.0.fields.description.value}} 
+						<div class="well-description">{{tables.0.fields.description.value}}</div>
+					{{/if}}					
 					<div>
-						{{> asset-version-info .}}
+						{{tables.0.fields.version.value}}
 					</div>
 				</div>
 			</div>

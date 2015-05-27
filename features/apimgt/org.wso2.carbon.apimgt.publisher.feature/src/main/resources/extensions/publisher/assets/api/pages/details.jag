@@ -48,11 +48,13 @@ require('/modules/publisher.js').exec(function(ctx) {
             var governanceUtils = Packages.org.wso2.carbon.governance.api.util.GovernanceUtils;           
             var resource = registry.get(assets.path);
             var timeInNumber = resource.updated.time;
-            var lastUpdatedDate = new Date(timeInNumber);
-            
-           // print(timeInNumber);
-            //print(lastUpdatedDate.toString());
+            var createdTimeInNumber = resource.created.time;
+
+            var lastUpdatedDate = new Date(timeInNumber);            
             page.lastUpdatedDate = lastUpdatedDate.toString();
+
+            var createdDate = new Date(createdTimeInNumber); 
+            page.createdDate = createdDate.toString();
 
             
 

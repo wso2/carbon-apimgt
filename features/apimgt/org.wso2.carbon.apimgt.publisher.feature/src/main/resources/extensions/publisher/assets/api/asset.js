@@ -503,6 +503,7 @@ asset.renderer = function (ctx) {
                assets.sandboxEndpoint = sandboxEndpoint;
                assets.endpontType = endpontType;
                assets.lastUpdatedDate = page.lastUpdatedDate;
+               assets.createdDate = page.createdDate;
 
 
 
