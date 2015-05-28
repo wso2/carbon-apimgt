@@ -2596,6 +2596,20 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 		}
 		return apiResource.getUUID();
 	}
+
+	public int getSubscriberCount(APIIdentifier apiId)
+			throws APIManagementException {
+		Set<Subscriber> subs = getSubscribersOfAPI(apiId);
+		Set<String> subscriberNames = new HashSet<String>();
+		if (subs != null) {
+			for (Subscriber sub : subs) {
+				subscriberNames.add(sub.getName());
+			}
+			return subscriberNames.size();
+		} else {
+			return 0;
+		}
+	}
 }
 
 
