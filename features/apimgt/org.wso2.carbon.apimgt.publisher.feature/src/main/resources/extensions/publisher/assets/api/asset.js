@@ -296,6 +296,10 @@ asset.server = function (ctx) {
                         url: 'manage',
                         path: 'manage.jag'
                     }, {
+                        title: 'Subscriptions',
+                        url: 'api-subscriptions',
+                        path: 'api-subscriptions.jag'
+                    }, {
                         title: 'Start Creating an API',
                         url: 'start',
                         path: 'start.jag'
@@ -321,7 +325,9 @@ asset.server = function (ctx) {
                    },{
                        url: 'tiers',
                        path: 'tiers.jag'
-
+                   }, {
+                       url: 'api-subscriptions',
+                       path: 'api-subscriptions.jag'
                    }, {
                        url: 'copyAPI',
                        path: 'copy_api.jag'
@@ -329,6 +335,7 @@ asset.server = function (ctx) {
                        url: 'validation',
                        path: 'validation.jag'
                    }]
+
         }
     }
 };
@@ -398,7 +405,7 @@ asset.renderer = function (ctx) {
         var navList = util.navList();
         navList.push('ADD ' + type.toUpperCase(), 'btn-add-new', util.buildUrl('create'));
         navList.push('All Statistics', 'btn-stats', '/asts/' + type + '/statistics');
-        navList.push('Subscriptions', 'btn-subscribe', '/asts/' + type + '/statistics');
+        navList.push('Subscriptions', 'btn-subscribe', '/asts/' + type + '/api-subscriptions');
         navList.push('Statistics', 'btn-stats', '/asts/' + type + '/statistics');
         navList.push('Tier Permissions', 'btn-cog', '/asts/' + type + '/statistics');
         //navList.push('Configuration', 'icon-dashboard', util.buildUrl('configuration'));
@@ -476,6 +483,9 @@ asset.renderer = function (ctx) {
                         page.leftNav = buildListLeftNav(page, this);
                         break;
                     case 'statistics':
+                        page.leftNav = buildListLeftNav(page, this);
+                        break;
+                    case 'api-subscriptions':
                         page.leftNav = buildListLeftNav(page, this);
                         break;
                     case 'start':
