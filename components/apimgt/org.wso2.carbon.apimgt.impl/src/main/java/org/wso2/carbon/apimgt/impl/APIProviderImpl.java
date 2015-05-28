@@ -3381,8 +3381,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         String swaggerContent = (String) apiObj.get("swagger");
 
         if (swaggerContent != null) {
-             Set<URITemplate> uriTemplates = parseResourceConfig(apiId, (String) swaggerContent, api);
-             api.setUriTemplates(uriTemplates);
+             //Set<URITemplate> uriTemplates = parseResourceConfig(apiId, (String) swaggerContent, api);
+             //api.setUriTemplates(uriTemplates);
         }
         Map<String,String> results= new HashMap<String, String>();
         results=saveAPI(api, false);
