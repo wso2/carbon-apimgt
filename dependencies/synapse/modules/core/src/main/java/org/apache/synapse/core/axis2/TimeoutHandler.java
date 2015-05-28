@@ -86,8 +86,12 @@ public class TimeoutHandler extends TimerTask {
             alreadyExecuting = true;
             try {
                 processCallbacks();
-            } catch (Exception ignore) {}
-            alreadyExecuting = false;
+            } catch (Exception ex) {
+            	log.warn("Exception occurred while processing callbacks", ex);
+            }
+            finally {
+                alreadyExecuting = false;
+            }
         }
     }
 
@@ -169,15 +173,24 @@ public class TimeoutHandler extends TimerTask {
                                     msgContext.setEnvelope(soapEnvelope);
                                 } catch (Exception ex) {
                                     log.error("Error resetting SOAP Envelope",ex);
+                                    continue;
                                 }
  
-                                Stack<FaultHandler> faultStack = msgContext.getFaultStack();
-                                FaultHandler f = faultStack.pop();
-                                if(f != null){
-                                	f.handleFault(msgContext);
-                                }
-
-                            }
+								Stack<FaultHandler> faultStack = msgContext.getFaultStack();
+								if (!faultStack.isEmpty()) {
+									FaultHandler faultHandler = faultStack.pop();
+									if (faultHandler != null) {
+										try {
+											faultHandler.handleFault(msgContext);
+										} catch (Exception ex) {
+											log.warn("Exception occurred while executing the fault handler",
+											         ex);
+											continue;
+										}
+									}
+								}
+							}
+                            
                         }
 
                     } else if (currentTime > globalTimeout + callback.getTimeOutOn()) {
@@ -186,7 +199,14 @@ public class TimeoutHandler extends TimerTask {
                 }
 
                 for(Object key : toRemove) {
-                    if (!"true".equals(((AsyncCallback) callbackStore.get(key)).getSynapseOutMsgCtx().getProperty(SynapseConstants.OUT_ONLY))) {
+
+                    AsyncCallback callback = (AsyncCallback) callbackStore.get(key);
+                    if (callback == null) {
+                        // we will get here if we get a response from the Backend while clearing callbacks
+                        continue;
+                    }
+
+                    if (!"true".equals(callback.getSynapseOutMsgCtx().getProperty(SynapseConstants.OUT_ONLY))) {
                         log.warn("Expiring message ID : " + key + "; dropping message after " +
                                 "global timeout of : " + (globalTimeout / 1000) + " seconds");
                     }

@@ -1,0 +1,8 @@
+<%
+jagg.block("oidc/filter", {
+    initialize:function (data) {
+
+    }
+
+});
+%>

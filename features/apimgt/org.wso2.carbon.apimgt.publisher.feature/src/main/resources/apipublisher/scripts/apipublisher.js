@@ -44,19 +44,14 @@ var apipublisher = {};
     };
 
     APIProviderProxy.prototype.designAPI = function (api) {
-        var apiObj = new Packages.org.json.simple.JSONObject();
-        apiObj.put("provider", api.provider);
-        apiObj.put("context", api.context);
-        apiObj.put("name", api.name);
-        apiObj.put("version", api.version);
-        return this.impl.designAPI(apiObj);
+        var identifier = new Packages.org.wso2.carbon.apimgt.api.model.APIIdentifier(api.provider, api.name, api.version);
+        return this.impl.createAPI(identifier, api.context);
     };
 
     APIProviderProxy.prototype.implementAPI = function (api) {
-        var apiObj = new Packages.org.json.simple.JSONObject();
-        apiObj.put("provider", api.provider);
-        apiObj.put("name", api.apiName);
-        apiObj.put("version", api.version);
+        var identifier = new Packages.org.wso2.carbon.apimgt.api.model.APIIdentifier(api.provider, api.apiName, api.version);
+        var apiOb = new Packages.org.wso2.carbon.apimgt.api.model.API(identifier);
+
         apiObj.put("implementation_type", api.implementation_type);
         apiObj.put("wsdl", api.wsdl);
         apiObj.put("wadl", api.wadl);
@@ -75,18 +70,14 @@ var apipublisher = {};
     };
 
     APIProviderProxy.prototype.updateDesignAPI = function (api) {
-        var apiObj = new Packages.org.json.simple.JSONObject();
-        apiObj.put("provider", api.provider);
-        apiObj.put("context", api.context);
-        apiObj.put("name", api.name);
-        apiObj.put("version", api.version);
-        apiObj.put("description", api.description);
-        apiObj.put("tags", api.tags);
-        apiObj.put("visibility", api.visibility);
-        apiObj.put("visibleRoles", api.visibility);
-        apiObj.put("swagger", api.swagger);
-        apiObj.put("thumbnailUrl", api.thumbnailUrl);
-        return this.impl.updateDesignAPI(apiObj);
+        var identifier = new Packages.org.wso2.carbon.apimgt.api.model.APIIdentifier(api.provider, api.name, api.version);
+        var apiOb = new Packages.org.wso2.carbon.apimgt.api.model.API(identifier);
+        apiOb.setContext(api.context);
+        apiOb.setDescription(api.description);
+        apiOb.setVisibility(api.visibility);
+        apiOb.setVisibleRoles(api.visibleRoles);
+        apiOb.setThumbnailUrl(api.thumbnailUrl);
+        return this.impl.updateAPIDesign(apiObj,  api.tags, api.swagger);
     };
 
     APIProviderProxy.prototype.addDocumentation = function (api, document) {
@@ -98,6 +89,12 @@ var apipublisher = {};
     };
 
     APIProviderProxy.prototype.createNewAPIVersion = function (api, newVersion) {
+    	 var apiObj = new Packages.org.json.simple.JSONObject();
+         apiObj.put("provider", api.provider);
+         apiObj.put("version", api.version);
+         apiObj.put("name", api.name);
+         apiObj.put("defaultVersion", api.defaultVersion);
+
         return this.impl.createNewAPIVersion(api, newVersion);
     };
 

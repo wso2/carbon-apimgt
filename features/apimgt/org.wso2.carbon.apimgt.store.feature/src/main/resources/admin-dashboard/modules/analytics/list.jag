@@ -1,0 +1,149 @@
+<%
+
+var log = new Log();
+
+var getAnalyticsConfig = function (analyticsData) {
+
+    try {
+        var carbon = require('carbon');
+        var process = require('process');
+        var realmConfiguration = new org.wso2.carbon.user.core.config.RealmConfigXMLProcessor().
+                buildRealmConfigurationFromFile();
+        var username = realmConfiguration.getAdminUserName();
+        var password = realmConfiguration.getAdminPassword();
+        var service_url = 'https://' + process.getProperty('carbon.local.ip') + ':' +
+                process.getProperty('mgt.transport.https.port');
+        var stub = new org.wso2.carbon.bam.service.data.publisher.stub.
+                ServiceDataPublisherAdminStub(service_url + '/services/ServiceDataPublisherAdmin');
+        var client = stub._getServiceClient();
+        var client_options = client.getOptions();
+        var authenticator = new org.apache.axis2.transport.http.HttpTransportProperties.Authenticator();
+        authenticator.setUsername(username);
+        authenticator.setPassword(password);
+        authenticator.setPreemptiveAuthentication(true);
+        client_options.setProperty(org.apache.axis2.transport.http.HTTPConstants.AUTHENTICATE, authenticator);
+        client.setOptions(client_options);
+
+        var eventingConfig = stub.getEventingConfigData();
+        var analyzingConfigData = stub.getAnalyzingConfigData();
+        var conf = null;
+        if (eventingConfig.getUrl() == '') {
+            conf = {
+                enableAnalytics: eventingConfig.getServiceStatsEnable(),
+                eventReceiverURL: '',
+                eventReceiverUsername: username,
+                eventReceiverPassword: password,
+                eventAnalyserURL: '',
+                eventAnalyserUsername: username,
+                eventAnalyserPassword: password
+            };
+        } else if (eventingConfig.getServiceStatsEnable()) {
+            conf = {
+                enableAnalytics: eventingConfig.getServiceStatsEnable(),
+                eventReceiverURL: eventingConfig.getUrl(),
+                eventReceiverUsername: eventingConfig.getUserName(),
+                eventReceiverPassword: eventingConfig.getPassword(),
+                eventAnalyserURL: analyzingConfigData.getUrl(),
+                eventAnalyserUsername: analyzingConfigData.getUserName(),
+                eventAnalyserPassword: analyzingConfigData.getPassword()
+            };
+        }else{
+	         conf = {
+              	enableAnalytics:eventingConfig.getServiceStatsEnable(),
+            };
+	}
+        return {
+            error: false,
+            analytics: conf
+        };
+    } catch (ex) {
+        var message = "Error occurred while retrieving Analytics configurations (Cause:" + ex.message + ")";
+        log.error(message);
+        return {
+            error: true,
+            message: message
+        };
+    }
+};
+
+var getDatasourceConfig = function () {
+
+    try {
+        var carbon = require('carbon');
+        var process = require('process');
+        var realmConfiguration = new org.wso2.carbon.user.core.config.RealmConfigXMLProcessor().buildRealmConfigurationFromFile();
+        var username = realmConfiguration.getAdminUserName();
+        var password = realmConfiguration.getAdminPassword();
+        var url = 'https://' + process.getProperty('carbon.local.ip') + ':' + process.getProperty('mgt.transport.https.port');
+        var stub = new org.wso2.carbon.ndatasource.ui.stub.NDataSourceAdminStub(url + '/services/NDataSourceAdmin');
+        var client = stub._getServiceClient();
+        var options = client.getOptions();
+        var authenticator = new org.apache.axis2.transport.http.HttpTransportProperties.Authenticator();
+        authenticator.setUsername(username);
+        authenticator.setPassword(password);
+        authenticator.setPreemptiveAuthentication(true);
+        options.setProperty(org.apache.axis2.transport.http.HTTPConstants.AUTHENTICATE, authenticator);
+        client.setOptions(options);
+
+        var dsName = "WSO2AM_STATS_DB";
+        var dataSource = stub.getDataSource(dsName);
+        var ds = null;
+        if (dataSource == null) {
+            log.warn("Datasource '" + dsName + "' not available.");
+        } else {
+            var dataSourceConfig = dataSource.getDsMetaInfo().getDefinition().getDsXMLConfiguration();
+            var dataSourceXml = new XML(new String(dataSourceConfig));
+            ds = {
+                statDsURL: dataSourceXml.url.text(),
+                statDsUsername: dataSourceXml.username.text(),
+                statDsPassword: dataSourceXml.password.text(),
+                statDsDriver: dataSourceXml.driverClassName.text(),
+                statDsDefaultAutoCommit: dataSourceXml.defaultAutoCommit.text(),
+                statDsDefaultReadOnly: dataSourceXml.defaultReadOnly.text(),
+                statDsDefaultTransactionIsolation: dataSourceXml.defaultTransactionIsolation.text(),
+                statDsDefaultCatalog: dataSourceXml.defaultCatalog.text(),
+                statDsMaxActive: dataSourceXml.maxActive.text(),
+                statDsMaxIdle: dataSourceXml.maxIdle.text(),
+                statDsMinIdle: dataSourceXml.minIdle.text(),
+                statDsInitialSize: dataSourceXml.initialSize.text(),
+                statDsMaxWait: dataSourceXml.maxWait.text(),
+                statDsTestOnBorrow: dataSourceXml.testOnBorrow.text(),
+                statDsTestOnReturn: dataSourceXml.testOnReturn.text(),
+                statDsTestWhileIdle: dataSourceXml.testWhileIdle.text(),
+                statDsValidationQuery: dataSourceXml.validationQuery.text(),
+                statDsValidationClass: dataSourceXml.validatorClassName.text(),
+                statDsTimeBetweenEvictionRunsMillis: dataSourceXml.timeBetweenEvictionRunsMillis.text(),
+                statDsNumTestsPerEvictionRun: dataSourceXml.numTestsPerEvictionRun.text(),
+                statDsMinEvictableIdleTimeMillis: dataSourceXml.minEvictableIdleTimeMillis.text(),
+                statDsAccessToUnderlyingConnectionAllowed: dataSourceXml.accessToUnderlyingConnectionAllowed.text(),
+                statDsRemoveAbandoned: dataSourceXml.removeAbandoned.text(),
+                statDsRemoveAbandonedTimeout: dataSourceXml.removeAbandonedTimeout.text(),
+                statDsLogAbandoned: dataSourceXml.logAbandoned.text(),
+                statDsConnectionProperties: dataSourceXml.connectionProperties.text(),
+                statDsInitSQL: dataSourceXml.initSQL.text(),
+                statDsJdbcInterceptors: dataSourceXml.jdbcInterceptors.text(),
+                statDsValidationInterval: dataSourceXml.validationInterval.text(),
+                statDsFairQueue: dataSourceXml.fairQueue.text(),
+                statDsJMXEnabled: dataSourceXml.jmxEnabled.text(),
+                statDsAbandonWhenPercentageFull: dataSourceXml.abandonWhenPercentageFull.text(),
+                statDsMaxAge: dataSourceXml.maxAge.text(),
+                statDsUseEquals: dataSourceXml.useEquals.text(),
+                statDsSuspectTimeout: dataSourceXml.suspectTimeout.text(),
+                statDsAlternateUsernameAllowed: dataSourceXml.alternateUsernameAllowed.text(),
+                statDsValidationQueryTimeout: dataSourceXml.validationQueryTimeout.text()
+            };
+        }
+        return {
+            error: false,
+            dataSource: ds
+        };
+    } catch (ex) {
+        var message = "Error occurred while retrieving Datasource configurations (Cause:" + ex.message + ")";
+        log.error(message);
+        return {
+            error: true,
+            message: message
+        };
+    }
+};
+%>

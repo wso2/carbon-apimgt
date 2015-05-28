@@ -1,0 +1,32 @@
+<%
+jagg.module("analytics", {
+
+    getAnalyticsConfig:function () {
+        return jagg.require(jagg.getModulesDir() + "analytics/list.jag").getAnalyticsConfig.apply(this, arguments);
+    },
+
+    getDatasourceConfig:function () {
+        return jagg.require(jagg.getModulesDir() + "analytics/list.jag").getDatasourceConfig.apply(this, arguments);
+    },
+
+    enableAnalytics:function () {
+        return jagg.require(jagg.getModulesDir() + "analytics/add.jag").enableAnalytics.apply(this, arguments);
+    },
+
+    addAnalyticsConfig:function () {
+        return jagg.require(jagg.getModulesDir() + "analytics/add.jag").addAnalyticsConfig.apply(this, arguments);
+    },
+
+    addDatasourceConfig:function () {
+        return jagg.require(jagg.getModulesDir() + "analytics/add.jag").addDatasourceConfig.apply(this, arguments);
+    },
+
+    addToolbox:function () {
+        return jagg.require(jagg.getModulesDir() + "analytics/add.jag").addToolbox.apply(this, arguments);
+    },
+
+    addBamServerProfile:function () {
+        return jagg.require(jagg.getModulesDir() + "analytics/add.jag").addBamServerProfile.apply(this, arguments);
+    }
+});
+%>

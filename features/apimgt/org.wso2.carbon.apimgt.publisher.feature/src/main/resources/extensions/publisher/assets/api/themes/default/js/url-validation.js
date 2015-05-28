@@ -1,8 +1,14 @@
 $(document).ready(function(){
     $( "body" ).delegate( "button.check_url_valid", "click", function() {
         var btn = this;
-        var url = $(this).parent().prev().find('input:first').val();
-        var type = $.parseJSON($("#endpoint_config").val())['endpoint_type']
+        var url = $(this).parent().find('input:first').val();
+        var type = '';
+        var attr = $(this).attr('url-type');
+        if (typeof attr !== typeof undefined && attr !== false) {
+            type = $(btn).attr('url-type');
+        } else {
+            type = $.parseJSON($("#endpoint_config").val())['endpoint_type']
+        }
         $(btn).parent().parent().find('.url_validate_label').remove();
         $(btn).addClass("loadingButton-small");
         $(btn).val("Validating..");

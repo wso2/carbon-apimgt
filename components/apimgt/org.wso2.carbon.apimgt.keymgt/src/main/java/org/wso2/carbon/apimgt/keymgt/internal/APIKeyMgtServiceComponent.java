@@ -81,7 +81,8 @@ public class APIKeyMgtServiceComponent {
                     new APIManagerConfigurationServiceImpl(configuration);
             ServiceReferenceHolder.getInstance().setAPIManagerConfigurationService(configurationService);
 
-            APIKeyMgtDataHolder.initData();
+            APIKeyMgtDataHolder.initData();                       
+
             //Based on configuration we have to decide thrift server run or not
             if (APIKeyMgtDataHolder.getThriftServerEnabled()) {
                 APIKeyValidationServiceImpl.init(thriftAuthenticationService);
@@ -179,7 +180,7 @@ public class APIKeyMgtServiceComponent {
 
             String thriftPortString =
                     APIKeyMgtDataHolder.getAmConfigService().getAPIManagerConfiguration().getFirstProperty(
-                            APIConstants.API_KEY_MANGER_THRIFT_SERVER_PORT);
+                            APIConstants.API_KEY_VALIDATOR_THRIFT_SERVER_PORT);
 
             if (thriftPortString == null) {
                 thriftPortString = "10398";
@@ -188,7 +189,7 @@ public class APIKeyMgtServiceComponent {
 
             String thriftHostString =
                     APIKeyMgtDataHolder.getAmConfigService().getAPIManagerConfiguration().getFirstProperty(
-                    APIConstants.API_KEY_MANGER_THRIFT_SERVER_HOST);
+                    APIConstants.API_KEY_VALIDATOR_THRIFT_SERVER_HOST);
 
             if(thriftHostString == null){
                 thriftHostString = NetworkUtils.getLocalHostname();
@@ -197,7 +198,7 @@ public class APIKeyMgtServiceComponent {
 
             String thriftClientTimeOut =
                     APIKeyMgtDataHolder.getAmConfigService().getAPIManagerConfiguration().getFirstProperty(
-                    APIConstants.API_KEY_MANGER_CONNECTION_TIMEOUT);
+                    APIConstants.API_KEY_VALIDATOR_CONNECTION_TIMEOUT);
             if (thriftPortString == null || thriftClientTimeOut == null) {
                 throw new APIKeyMgtException("Port and Connection timeout not provided to start thrift key mgt service.");
             }

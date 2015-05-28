@@ -58,6 +58,7 @@ var apistore = {};
 
     apistore.instance = function (username) {
         return new StoreAPIProxy(username);
+   
     };
 
     StoreAPIProxy.prototype.getAllSubscriptions = function (userName, appName, startSubIndex, endSubIndex) {
@@ -83,6 +84,7 @@ var apistore = {};
         }
         return resultArray;
     };
+
     StoreAPIProxy.prototype.getDeniedTiers = function () {
         var tiers=new Set();
         tiers= this.impl.getDeniedTiers();
@@ -94,6 +96,8 @@ var apistore = {};
         }
         return deniedTiers;
     };
+
+
     StoreAPIProxy.prototype.addApplication = function (appName, userName, tier, callbackUrl, description) {
         var subscriber = new APISubscriber(username);
         var application = new Application(name, subscriber);
@@ -105,6 +109,7 @@ var apistore = {};
         }
         return this.impl.addApplication(application,userName);
     };
+
     StoreAPIProxy.prototype.getApplicationKey = function (userId, applicationName, tokenType, tokenScopes,
                                                           validityPeriod, callbackUrl, accessAllowDomains) {
         var arr = new Packages.org.json.simple.JSONArray();

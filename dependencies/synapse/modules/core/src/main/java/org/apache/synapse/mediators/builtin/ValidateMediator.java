@@ -103,6 +103,11 @@ public class ValidateMediator extends AbstractListMediator implements FlowContin
     private final SchemaFactory factory = SchemaFactory.newInstance(
             XMLConstants.W3C_XML_SCHEMA_NS_URI);
 
+    /**
+     * This is the cached schema key.
+     */
+    private String cachedPropKey;
+    
     @SuppressWarnings({"ThrowableResultOfMethodCallIgnored"})
     public boolean mediate(MessageContext synCtx) {
 
@@ -122,6 +127,9 @@ public class ValidateMediator extends AbstractListMediator implements FlowContin
         for (Value schemaKey : schemaKeys) {
             // Derive actual key from message context
             String propKey = schemaKey.evaluateValue(synCtx);
+            if (!propKey.equals(cachedPropKey)) {
+                reCreate = true;       // request re-initialization of Validator
+            }
             Entry dp = synCtx.getConfiguration().getEntryDefinition(propKey);
             if (dp != null && dp.isDynamic()) {
                 if (!dp.isCached() || dp.isExpired()) {
@@ -144,6 +152,7 @@ public class ValidateMediator extends AbstractListMediator implements FlowContin
                     // Derive actual key from message context
                     String propName = schemaKey.evaluateValue(synCtx);
                     sources[i++] = SynapseConfigUtils.getStreamSource(synCtx.getEntry(propName));
+                    cachedPropKey = propName;
                 }
                 // load the UserDefined SchemaURIResolver implementations
                 try {
@@ -168,6 +177,7 @@ public class ValidateMediator extends AbstractListMediator implements FlowContin
                     //reset the errorhandler state
                     errorHandler.setValidationError(false);
                     cachedSchema = null;
+                    cachedPropKey = null;
                     handleException("Error creating a new schema objects for schemas : "
                             + schemaKeys.toString(), errorHandler.getSaxParseException(), synCtx);
                 }
@@ -201,7 +211,7 @@ public class ValidateMediator extends AbstractListMediator implements FlowContin
 
                 // set error message and detail (stack trace) into the message context
                 synCtx.setProperty(SynapseConstants.ERROR_MESSAGE,
-                    errorHandler.getSaxParseException().getMessage());
+                    errorHandler.getAllExceptions());
                 synCtx.setProperty(SynapseConstants.ERROR_EXCEPTION,
                     errorHandler.getSaxParseException());
                 synCtx.setProperty(SynapseConstants.ERROR_DETAIL,
@@ -313,15 +323,18 @@ public class ValidateMediator extends AbstractListMediator implements FlowContin
 
         private boolean validationError = false;
         private SAXParseException saxParseException = null;
-
+        private List<SAXParseException> saxParseExceptionList = new ArrayList<SAXParseException>();
+        
         public void error(SAXParseException exception) throws SAXException {
             validationError = true;
             saxParseException = exception;
+            saxParseExceptionList.add(exception);
         }
 
         public void fatalError(SAXParseException exception) throws SAXException {
             validationError = true;
             saxParseException = exception;
+            saxParseExceptionList.add(exception);
         }
 
         public void warning(SAXParseException exception) throws SAXException {
@@ -334,6 +347,21 @@ public class ValidateMediator extends AbstractListMediator implements FlowContin
         public SAXParseException getSaxParseException() {
             return saxParseException;
         }
+        
+        public List<SAXParseException> getSaxParseExceptionList() {
+            return saxParseExceptionList;
+        }
+
+        public String getAllExceptions() {
+            StringBuilder errors = new StringBuilder();
+            for(SAXParseException e: saxParseExceptionList) {
+                errors.append(e.getMessage());
+                errors.append("\n");
+            }
+
+            return errors.toString();
+        }
+
 
         /**
          * To set explicitly validation error condition

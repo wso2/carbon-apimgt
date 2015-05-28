@@ -27,6 +27,7 @@ import org.apache.synapse.rest.AbstractHandler;
 import org.apache.synapse.rest.RESTConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityUtils;
 import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationContext;
+import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.usage.publisher.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.usage.publisher.dto.RequestPublisherDTO;
 import org.wso2.carbon.apimgt.usage.publisher.internal.UsageComponent;
@@ -45,20 +46,24 @@ public class APIMgtUsageHandler extends AbstractHandler {
 
     private volatile APIMgtUsageDataPublisher publisher;
 
-    private boolean enabled = UsageComponent.getApiMgtConfigReaderService().isEnabled();
-
-    private String publisherClass = UsageComponent.getApiMgtConfigReaderService().getPublisherClass();
-
     public boolean handleRequest(MessageContext mc) {
 
+        boolean enabled = DataPublisherUtil.getApiManagerAnalyticsConfiguration().isAnalyticsEnabled();
+
+        boolean skipEventReceiverConnection = DataPublisherUtil.getApiManagerAnalyticsConfiguration().
+                isSkipEventReceiverConnection();
+
+        String publisherClass = UsageComponent.getAmConfigService().
+                getAPIAnalyticsConfiguration().getPublisherClass();
         try {
             long currentTime = System.currentTimeMillis();
 
-            if (!enabled) {
+            if (!enabled || skipEventReceiverConnection) {
                 return true;
             }
 
             if (publisher == null) {
+                // The publisher initializes in the first request only
                 synchronized (this) {
                     if (publisher == null) {
                         try {
@@ -98,13 +103,23 @@ public class APIMgtUsageHandler extends AbstractHandler {
             String api_version = (String) mc.getProperty(RESTConstants.SYNAPSE_REST_API);
             String fullRequestPath = (String) mc.getProperty(RESTConstants.REST_FULL_REQUEST_PATH);
             int tenantDomainIndex = fullRequestPath.indexOf("/t/");
-            String apiPublisher = MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
+            String apiPublisher = (String) mc.getProperty(APIMgtUsagePublisherConstants.API_PUBLISHER);
+            String tenantDomain = MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
             if (tenantDomainIndex != -1) {
                 String temp = fullRequestPath.substring(tenantDomainIndex + 3, fullRequestPath.length());
-                apiPublisher = temp.substring(0, temp.indexOf("/"));
+                tenantDomain = temp.substring(0, temp.indexOf("/"));
             }
-
+            
+            if (apiPublisher == null) {
+                apiPublisher = getAPIProviderFromRESTAPI(api_version);
+            }
+            
+            if (apiPublisher != null && !apiPublisher.endsWith(tenantDomain)) {
+                apiPublisher = apiPublisher + "@" + tenantDomain;
+            } 
+            
             int index = api_version.indexOf("--");
+            
             if (index != -1) {
                 api_version = api_version.substring(index + 2);
             }
@@ -118,9 +133,9 @@ public class APIMgtUsageHandler extends AbstractHandler {
             String resource = extractResource(mc);
             String method = (String) (axis2MsgContext.getProperty(
                     Constants.Configuration.HTTP_METHOD));
-            String tenantDomain = MultitenantUtils.getTenantDomain(username);
+            String userTenantDomain = MultitenantUtils.getTenantDomain(username);
             int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager().
-                    getTenantId(tenantDomain);
+                    getTenantId(userTenantDomain);
 
             RequestPublisherDTO requestPublisherDTO = new RequestPublisherDTO();
             requestPublisherDTO.setConsumerKey(consumerKey);
@@ -132,7 +147,7 @@ public class APIMgtUsageHandler extends AbstractHandler {
             requestPublisherDTO.setMethod(method);
             requestPublisherDTO.setRequestTime(currentTime);
             requestPublisherDTO.setUsername(username);
-            requestPublisherDTO.setTenantDomain(tenantDomain);
+            requestPublisherDTO.setTenantDomain(userTenantDomain);
             requestPublisherDTO.setHostName(hostName);
             requestPublisherDTO.setApiPublisher(apiPublisher);
             requestPublisherDTO.setApplicationName(applicationName);
@@ -175,6 +190,19 @@ public class APIMgtUsageHandler extends AbstractHandler {
             log.error("Cannot publish event. " + e.getMessage(), e);
         }
         return true;
+    }
+
+    private String getAPIProviderFromRESTAPI(String api_version) {
+        int index = api_version.indexOf("--");
+        if (index != -1) {
+            String apiProvider = api_version.substring(0, index);
+            if (apiProvider.contains(APIConstants.EMAIL_DOMAIN_SEPARATOR_REPLACEMENT)) {
+                apiProvider = apiProvider.replace(APIConstants.EMAIL_DOMAIN_SEPARATOR_REPLACEMENT,
+                                      APIConstants.EMAIL_DOMAIN_SEPARATOR);
+            }
+            return apiProvider;
+        }
+        return null;
     }
 
     public boolean handleResponse(MessageContext mc) {
