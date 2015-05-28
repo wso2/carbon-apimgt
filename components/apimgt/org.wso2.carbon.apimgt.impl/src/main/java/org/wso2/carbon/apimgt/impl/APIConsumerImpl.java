@@ -1083,16 +1083,19 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 		                                        "/%s/description.txt";
 		String thumbnailPathPattern = APIConstants.TAGS_INFO_ROOT_LOCATION + "/%s/thumbnail.png";
 
+		//if the tenantDomain is not specified super tenant domain is used
 		if(tenantDomain == null || tenantDomain.trim() == "" ){
 			try {
 				tenantDomain = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager().getSuperTenantDomain();
 			} catch (org.wso2.carbon.user.core.UserStoreException e) {
-				log.warn("Cannot get super tenant domain name",e);
+				handleException("Cannot get super tenant domain name",e);
 			}
 		}
 
+		//get the registry instance related to the tenant domain
 		UserRegistry govRegistry = null;
 		try {
+			ServiceReferenceHolder.getInstance().getRealmService().getTenantManager().getTenantId(tenantDomain);
 			int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
 			                                     .getTenantId(tenantDomain);
 			RegistryService registryService =
@@ -1101,43 +1104,51 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 			govRegistry = registryService.getGovernanceSystemRegistry(tenantId);
 
 		} catch (UserStoreException e) {
-			log.warn("Cannot get registry for tenant domain name:"+tenantDomain,e);
+			handleException("Cannot get tenant id for tenant domain name:"+tenantDomain,e);
 		} catch (RegistryException e) {
-			log.warn("Cannot get registry for tenant domain name:"+tenantDomain,e);
+			handleException("Cannot get registry for tenant domain name:"+tenantDomain,e);
 		}
 
 		if (govRegistry != null) {
-			for (Tag tag : tags) {
-				// Get the description.
-				Resource descriptionResource = null;
-				String descriptionPath = String.format(descriptionPathPattern, tag.getName());
+		for (Tag tag : tags) {
+			// Get the description.
+			Resource descriptionResource = null;
+			String descriptionPath = String.format(descriptionPathPattern, tag.getName());
+			try {
+				descriptionResource = govRegistry.get(descriptionPath);
+			} catch (RegistryException e) {
+				//warn and proceed to the next tag
+				log.warn(String.format("Cannot get the description for the tag '%s'",
+				                       tag.getName()));
+			}
+			// The resource is assumed to be a byte array since its the content
+			// of a text file.
+			if (descriptionResource != null) {
 				try {
-					descriptionResource = govRegistry.get(descriptionPath);
-				} catch (RegistryException e) {
-					log.warn(String.format("Cannot get the description for the tag '%s'",
-					                       tag.getName()));
-				}
-				// The resource is assumed to be a byte array since its the content
-				// of a text file.
-				if (descriptionResource != null) {
-					try {
-						String description = new String((byte[]) descriptionResource.getContent());
-						tag.setDescription(description);
-					} catch (Exception e) {
-						handleException(String.format("Cannot read content of %s", descriptionPath),
-						                e);
-					}
-				}
-				// Checks whether the thumbnail exists.
-				String thumbnailPath = String.format(thumbnailPathPattern, tag.getName());
-				try {
-					tag.setThumbnailExists(govRegistry.resourceExists(thumbnailPath));
-				} catch (RegistryException e) {
-					log.warn(String.format("Error while querying the existence of %s",
-					                       thumbnailPath),
-					         e);
+					String description = new String((byte[])descriptionResource.getContent());
+					tag.setDescription(description);
+
+				} catch (ClassCastException e) {
+					//added warnings as it can then proceed to load rest of resources/tags
+					log.warn(String.format("Cannot cast content of %s to byte[]", descriptionPath),
+					                e);
+				}catch (RegistryException e) {
+					//added warnings as it can then proceed to load rest of resources/tags
+					log.warn(String.format("Cannot read content of %s", descriptionPath),
+					                e);
 				}
 			}
+			// Checks whether the thumbnail exists.
+			String thumbnailPath = String.format(thumbnailPathPattern, tag.getName());
+			try {
+				tag.setThumbnailExists(govRegistry.resourceExists(thumbnailPath));
+			} catch (RegistryException e) {
+				//warn and then proceed to load rest of tags
+				log.warn(String.format("Error while querying the existence of %s",
+				                       thumbnailPath),
+				         e);
+			}
+		}
 		}
 		return tags;
 	}
