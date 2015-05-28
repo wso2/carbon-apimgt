@@ -74,19 +74,17 @@ $(function () {
     };
 
     /*
-     The function returns the details of the given application
+     The function returns details of scopes for the given application
      */
     var findAppDetails = function (appName) {
         var apps = metadata.appsWithSubs;
         var app;
         for (var appIndex in apps) {
             app = apps[appIndex];
-
             if (app.name == appName) {
                 return app;
             }
         }
-
         return null;
     };
 
@@ -404,8 +402,21 @@ $(function () {
         partial: 'sub-keys-generate-prod',
         beforeRender: function (data) {
             data.environment = Views.translate('Production');
+            // retrieving scopes if available.
+            data.scopes = findAppDetails($('#subscription_selection').val()).scopes;
+
+            // Checking whether scopes are available.
+            if (data.scopes.length > 0) {
+                data.isScopeAvailable = true;
+            } else {
+                data.isScopeAvailable = false;
+            }
+
+            // Checking whether application name is selected.
             if (data.appName == null) {
                 data.isDataNotAvailable = true;
+            } else {
+                data.isDataNotAvailable = false;
             }
         },
         resolveRender: function () {
@@ -468,6 +479,17 @@ $(function () {
         partial: 'sub-keys-generate-prod',
         beforeRender: function (data) {
             data.environment = Views.translate('Sandbox');
+            // retrieving scopes if available.
+            data.scopes = findAppDetails($('#subscription_selection').val()).scopes;
+
+            // Checking whether scopes are available.
+            if (data.scopes.length > 0) {
+                data.isScopeAvailable = true;
+            } else {
+                data.isScopeAvailable = false;
+            }
+
+            // Checking whether application name is selected.
             if (data.appName == null) {
                 data.isDataNotAvailable = true;
             } else {
@@ -595,12 +617,12 @@ $(function () {
         partial: 'sub-domain-update-prod',
         resolveRender: function (data) {
             if (!APP_STORE.sandboxKeys) {
-                data.isDataNotAvailable = false;
+                data.isDataNotAvailable = true;
                 return false;
             } else {
                 data.environment = Views.translate('Sandbox');
                 data.allowedDomains = APP_STORE.sandboxKeys.allowedDomains;
-                data.isDataNotAvailable = true;
+                data.isDataNotAvailable = false;
                 return true;
             }
         },

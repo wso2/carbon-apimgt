@@ -25,9 +25,9 @@ var apistore = {};
     var APIManagerFactory = Packages.org.wso2.carbon.apimgt.impl.APIManagerFactory;
     var APISubscriber = Packages.org.wso2.carbon.apimgt.api.model.Subscriber;
     var APIIdentifier = Packages.org.wso2.carbon.apimgt.api.model.APIIdentifier;
-    var API= Packages.org.wso2.carbon.apimgt.api.model.API;
-    var Application=Packages.org.wso2.carbon.apimgt.api.model.Application;
     var APIUtil = Packages.org.wso2.carbon.apimgt.impl.utils.APIUtil;
+    var Application = Packages.org.wso2.carbon.apimgt.api.model.Application;
+    var API= Packages.org.wso2.carbon.apimgt.api.model.API;    
     var Date = Packages.java.util.Date;
     var Tier= Packages.org.wso2.carbon.apimgt.api.model.Tier;
     var URITemplate= Packages.org.wso2.carbon.apimgt.api.model.URITemplate;
@@ -58,7 +58,7 @@ var apistore = {};
 
     apistore.instance = function (username) {
         return new StoreAPIProxy(username);
-
+   
     };
 
     StoreAPIProxy.prototype.getAllSubscriptions = function (userName, appName, startSubIndex, endSubIndex) {
@@ -113,6 +113,32 @@ var apistore = {};
         return this.impl.addApplication(application,userName);
     };
 
+     /*
+     * This function update the application according to the given arguments.
+     */
+    StoreAPIProxy.prototype.updateApplication = function (appName, userName, appId, tier, callbackUrl, description) {
+        var subscriber = new APISubscriber(userName);
+        var application = new Application(appName, subscriber);
+        application.setId(appId);
+        application.setTier(tier);
+        application.setCallbackUrl(callbackUrl);
+        application.setDescription(description);
+        return this.impl.updateApplication(application);
+    };
+
+     /*
+     * This function delete the application according to the arguments.
+     */
+    StoreAPIProxy.prototype.removeApplication = function (appName, userName, appId) {
+        var subscriber = new APISubscriber(userName);
+        var application = new Application(appName, subscriber);
+        application.setId(appId);
+        return this.impl.removeApplication(application);
+    };
+
+    /*
+     * This function returns fresh(new) tokens to my subscriptions page.
+     */
     StoreAPIProxy.prototype.getApplicationKey = function (userId, applicationName, tokenType, tokenScopes,
                                                           validityPeriod, callbackUrl, accessAllowDomains) {
         var arr = new Packages.org.json.simple.JSONArray();
@@ -252,6 +278,9 @@ var apistore = {};
         return this.impl.addSubscription(apiIdentifier, appId, user);
     };
 
+    /*
+     * This function returns the refresh tokens to my subscriptions page.
+     */
     StoreAPIProxy.prototype.getRefreshToken = function (userId, applicationName, requestedScopes,
                                                         oldAccessToken, accessAllowDomainsArr,
                                                         consumerKey, consumerSecret, validityTime) {
@@ -281,7 +310,9 @@ var apistore = {};
 
     };
 
-    //removeSubscription(APIIdentifier identifier, String userId, int applicationId)
+    /*
+     * This function remove the subscription for the application.
+     */
     StoreAPIProxy.prototype.removeSubscription = function (apiname, version, provider, user, tier, appId) {
         provider = APIUtil.replaceEmailDomain(provider);
         var apiIdentifier = new APIIdentifier(provider, apiname, version);
@@ -289,4 +320,13 @@ var apistore = {};
         return this.impl.removeSubscription(apiIdentifier, user, appId);
     };
 
+    /*
+     * This function update the allowed domains by splitting the accessAllowDomains by ','.
+     */
+    StoreAPIProxy.prototype.updateAccessAllowDomains = function (accessToken, accessAllowDomains) {
+        var domains = accessAllowDomains.split(",");
+        return this.impl.updateAccessAllowDomains(accessToken, domains);
+    };
+
 })(apistore);
+
