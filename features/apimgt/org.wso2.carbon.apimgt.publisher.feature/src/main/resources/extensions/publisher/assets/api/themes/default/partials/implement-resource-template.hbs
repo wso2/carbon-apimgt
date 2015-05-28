@@ -1,0 +1,28 @@
+<legend>Resources</legend>
+<table style="width:100%">                       
+{{#each api_doc.apis}}
+{{ setIndex @index}}
+    <tr>
+	<td colspan="3">{{t "InlineHelp"}}</td>
+    </tr>
+    <tr>
+    <td colspan="3"><h4 class="resource_group_title">{{ path }}</h4></td>
+    </tr>
+    {{# each file.apis}}
+        {{ setIndex @index}}
+        {{# each operations}}
+        <tr class="resource_container" data-path="$.apis[{{ ../../index}}].file.apis[{{ ../index }}].operations[{{ @index }}]">
+            <td class="resource-method-td resource_expand" data-path="$.apis[{{ ../../index}}].file.apis[{{ ../index }}].operations[{{ @index }}]">
+                <span class=" resource-method resource-method-{{ method }}">{{ method }}</span>
+            </td>
+            <td class="resource_expand"><a class="resource-path">{{ ../path }}</a></td>    
+            <td  width="99%"><span class="operation-summary change_summary" data-path="$.apis[{{ ../../index}}].file.apis[{{ ../index }}].operations[{{ @index }}]" data-attr="summary" >{{ summary }}</span></td>
+        </tr>
+        <tr><td colspan="3" class="resource_body" data-path="$.apis[{{ ../../index}}].file.apis[{{ ../index }}].operations[{{ @index }}]"></td></tr>
+        {{/each}}
+    {{/each}}
+
+{{/each}}
+</table>   
+                        
+

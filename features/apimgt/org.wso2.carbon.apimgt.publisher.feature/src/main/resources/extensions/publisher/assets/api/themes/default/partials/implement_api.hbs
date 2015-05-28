@@ -1,3 +1,23 @@
+<script language="javascript">
+    //TODO move to code segment
+    var VERBS = ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'];
+    var AUTH_TYPES = [
+        {"value": "None", "text": "{{t "None"}}"},
+        {"value": "Application", "text": "{{t "Application"}}"},
+        {"value": "Application User", "text": "{{t "Application User"}}"},
+        {"value": "Application & Application User", "text": "{{t "Application & Application User"}}"}
+    ];
+    
+    var DEFAULT_AUTH = "Application & Application User";
+    var OPTION_DEFAULT_AUTH = "None";
+    var insequence = "{{api.inSequence}}";
+    var outsequence = "{{api.outSequence}}";
+    var faultsequence = "{{api.faultSequence}}";
+    var inSequencesLoaded = false;
+    var outSequencesLoaded = false;
+    var faultSequencesLoaded = false;
+</script>
+
     <div class="col-sm-12 text-center">
             <ul class="new-sub-menu-wizard" style="margin:0 auto">
                 <li>
@@ -178,8 +198,7 @@
             </fieldset>
 
                 
-                <div id="api_designer">
-                    <div id ="apidoc_details"></div>
+                <div id="api_designer" class="api_designer" style="display:none">
                     <div id ="resource_details"></div>
                 </div>            
                 <input type="hidden" name="name" value="{{api.name}}" />
