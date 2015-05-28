@@ -1,6 +1,6 @@
 <%
 /*
- *  Copyright (c) 2005-2014, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *  Copyright (c) 2005-2015, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  *  WSO2 Inc. licenses this file to you under the Apache License,
  *  Version 2.0 (the "License"); you may not use this file except
@@ -23,33 +23,11 @@ require('/modules/publisher.js').exec(function(ctx) {
     var ui = require('rxt').ui;
     var asset = require('rxt').asset;
     var uriMatcher = new URIMatcher(ctx.request.getRequestURI());
-    var options = uriMatcher.match('/{context}/asts/{type}/{pageName}/{+id}');
+    var options = uriMatcher.match('/{context}/asts/{type}/{pageName}');
     var type = options.type;
     var am = asset.createUserAssetManager(ctx.session, type);
     var page = ui.buildPage(ctx.session, ctx.request);
-    var output;
-
-    if (!options.id) {
-        ctx.response.sendError(400, 'Cannot render the implementation details without an asset id');
-        return;
-    }
-    am = asset.createUserAssetManager(ctx.session, options.type);
-    try {
-        asset = am.get(options.id);
-    }
-    catch(e){
-        log.error(e);
-        ctx.response.sendError(404,'Asset was not found');
-        return;
-    }
-    var apiPublisher =  require('apipublisher').apipublisher;
-    var apiProxy = apiPublisher.instance(ctx.username);
-    var api = apiProxy.getAPI(asset.attributes.overview_provider, asset.attributes.overview_name, asset.attributes.overview_version).api;
-
-    var output = am.render(asset, page)._custom();
-    api.id = options.id;
-    output.api = api;
-    output.id = api.id;
+    var output = am.render(page)._custom();
     caramel.render(output);
-}, request, response, session);
+}, request, response, session);	
 %>
