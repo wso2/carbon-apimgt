@@ -725,8 +725,7 @@ public class APIProviderHostObject extends ScriptableObject {
         api.setVisibility(visibility);
         api.setVisibleRoles(visibleRoles != null ? visibleRoles.trim() : null);
         api.setLastUpdated(new Date());
-        
-        checkFileSize(fileHostObject);
+
         
         return saveAPI(apiProvider, api, fileHostObject, false);
     }
