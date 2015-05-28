@@ -1,8 +1,13 @@
 <% jagg.template("api/provider-apis", function(inputs, outputs, jagg) {%>
+<%  
+    var owner="";
+    if(outputs.apiBizOwner != null){ owner = outputs.apiBizOwner }
+    else if(outputs.apiOwner != null){ owner =outputs.apiOwner }
 
+%>
 <%if(outputs.apiOwner!=null){%>
 <div id="recently-added" class="panel panel-default">
-  <div class="panel-heading"><%=i18n.localize("moreAPI")%>  '<%=outputs.apiOwner%>'</div>
+  <div class="panel-heading"><%=i18n.localize("moreAPI")%>  '<%= owner %>'</div>
   <div class="panel-body">
     <%
     var urlPrefix;
