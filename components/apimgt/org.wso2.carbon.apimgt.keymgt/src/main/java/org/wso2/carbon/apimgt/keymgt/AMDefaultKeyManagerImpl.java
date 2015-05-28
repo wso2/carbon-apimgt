@@ -495,6 +495,11 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
 
     }
 
+    @Override
+    public void deleteMappedApplication(String consumerKey) throws APIManagementException {
+
+    }
+
     /**
      * common method to throw exceptions.
      *
