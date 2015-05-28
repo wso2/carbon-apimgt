@@ -26,7 +26,7 @@ var apistore = {};
     var APISubscriber = Packages.org.wso2.carbon.apimgt.api.model.Subscriber;
     var APIIdentifier = Packages.org.wso2.carbon.apimgt.api.model.APIIdentifier;
     var API= Packages.org.wso2.carbon.apimgt.api.model.API;
-    var Application=Packages.org.wso2.carbon.apimgt.api.model.Applications;
+    var Application=Packages.org.wso2.carbon.apimgt.api.model.Application;
     var APIUtil = Packages.org.wso2.carbon.apimgt.impl.utils.APIUtil;
     var Date = Packages.java.util.Date;
     var Tier= Packages.org.wso2.carbon.apimgt.api.model.Tier;
@@ -58,7 +58,7 @@ var apistore = {};
 
     apistore.instance = function (username) {
         return new StoreAPIProxy(username);
-   
+
     };
 
     StoreAPIProxy.prototype.getAllSubscriptions = function (userName, appName, startSubIndex, endSubIndex) {
@@ -67,10 +67,12 @@ var apistore = {};
 
     StoreAPIProxy.prototype.getApplications = function (userName) {
         var resultArray = new Packages.org.json.simple.JSONArray();
-        var applications=new Application[100];
-        applications=this.impl.getApplications(userName);
+        //var applications=new Application[];
+        var subscriber = new APISubscriber(userName);
+        var applications=this.impl.getApplications(subscriber,null);
         if (applications) {
             for (var i=0;i<applications.length;i++) {
+                var subsCount=this.impl.getSubscriptionCount(subscriber,applications[i].getName(),null);
                 var row = new Packages.org.json.simple.JSONObject();
                 row.put("name", applications[i].getName());
                 row.put("tier", applications[i].getTier());
@@ -78,7 +80,7 @@ var apistore = {};
                 row.put("callbackUrl", applications[i].getCallbackUrl());
                 row.put("status", applications[i].getStatus());
                 row.put("description", applications[i].getDescription());
-                row.put("apiCount", row, applications[i].getSubscriptionCount());
+                row.put("apiCount", subsCount);
                 resultArray.add(row);
             }
         }
@@ -100,10 +102,11 @@ var apistore = {};
 
     StoreAPIProxy.prototype.addApplication = function (appName, userName, tier, callbackUrl, description) {
         var subscriber = new APISubscriber(username);
-        var application = new Application(name, subscriber);
+        var application = new Application(appName, subscriber);
         application.setTier(tier);
         application.setCallbackUrl(callbackUrl);
         application.setDescription(description);
+        var groupId="";
         if (groupId != null) {
             application.setGroupId(groupId);
         }
@@ -287,4 +290,3 @@ var apistore = {};
     };
 
 })(apistore);
-
