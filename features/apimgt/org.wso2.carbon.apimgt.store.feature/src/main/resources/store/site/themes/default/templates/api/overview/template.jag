@@ -29,10 +29,10 @@
             var log = new Log();
     	    for(var environmentType in environments){
     	        var environmentsPerType = environments[environmentType];
-                if(environmentType == "production" && environmentsPerType.length>0){
+                if(environmentType == "production" && stringify(environmentsPerType).length>0){
                     %>
                     <h4>PRODUCTION Endpoints</h4>
-                    <%} else if(environmentType == "sandbox" && environmentsPerType.length>0){
+                    <%} else if(environmentType == "sandbox" && stringify(environmentsPerType).length>0){
                         %>
                     <h4>SANDBOX Endpoints</h4>
                 <%}
@@ -67,7 +67,7 @@
     <% if(api.wadl && api.wadl != ""){ %>
         <h4><%=i18n.localize("wadl")%>:</h4>
     <p>
-        <a href="<%=api.wadl%>" target="_blank"><%=api.wadl%></a>
+        <a href="/store/site/themes/default/templates/api/documentation/download.jag?resourceUrl=<%=api.wadl%>" target="_blank"><%=api.wadl%></a>
     </p>
         <% } %>
     <% if(api.description && api.description != ""){ %>
