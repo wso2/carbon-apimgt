@@ -9,7 +9,7 @@ function triggerSubscribe() {
     var applicationId = $("#application-list").val();
     var applicationName = $("#application-list option:selected").text();
     if (applicationId == "-" || applicationId == "createNewApp") {
-        jagg.message({content:i18n.t('info.appSelect'),type:"info"});
+        window.location.href = '../site/pages/applications.jag?goBack=yes&'+urlPrefix;        
         return;
     }
     var api = jagg.api;
@@ -113,14 +113,6 @@ $(document).ready(function () {
 
     });
 
-    $('#application-list').change(
-            function(){
-                if($(this).val() == "createNewApp"){
-                    //$.cookie('apiPath','foo');
-                    window.location.href = '../site/pages/applications.jag?goBack=yes&'+urlPrefix;
-                }
-            }
-            );
     jagg.initStars($(".api-info"), function (rating, api) {
         jagg.post("/site/blocks/api/api-info/ajax/api-info.jag", {
             action:"addRating",
