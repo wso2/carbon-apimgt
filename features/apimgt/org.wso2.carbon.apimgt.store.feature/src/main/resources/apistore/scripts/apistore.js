@@ -33,6 +33,7 @@ var apistore = {};
     var URITemplate= Packages.org.wso2.carbon.apimgt.api.model.URITemplate;
 
     var Set=Packages.java.util.Set;
+    var HashSet=Packages.java.util.HashSet;
     var List=Packages.java.util.List;
     var ArrayList=Packages.java.util.ArrayList;
     var Iterator=Packages.java.util.Iterator;
@@ -45,8 +46,8 @@ var apistore = {};
     var DateFormat=Packages.java.text.DateFormat;
     var SimpleDateFormat=Packages.java.text.SimpleDateFormat;
 
-    var TierSet=new Set();
-    var uriTemplates=new Set();
+    var TierSet=new HashSet();
+    var uriTemplates=new HashSet();
     var attributes=new HashMap();
     var log = new Log("jaggery-modules.api-manager.store");
 
@@ -57,6 +58,7 @@ var apistore = {};
 
     apistore.instance = function (username) {
         return new StoreAPIProxy(username);
+   
     };
 
     StoreAPIProxy.prototype.getAllSubscriptions = function (userName, appName, startSubIndex, endSubIndex) {
@@ -82,6 +84,7 @@ var apistore = {};
         }
         return resultArray;
     };
+
     StoreAPIProxy.prototype.getDeniedTiers = function () {
         var tiers=new Set();
         tiers= this.impl.getDeniedTiers();
@@ -93,6 +96,8 @@ var apistore = {};
         }
         return deniedTiers;
     };
+
+
     StoreAPIProxy.prototype.addApplication = function (appName, userName, tier, callbackUrl, description) {
         var subscriber = new APISubscriber(username);
         var application = new Application(name, subscriber);
@@ -104,6 +109,7 @@ var apistore = {};
         }
         return this.impl.addApplication(application,userName);
     };
+
     StoreAPIProxy.prototype.getApplicationKey = function (userId, applicationName, tokenType, tokenScopes,
                                                           validityPeriod, callbackUrl, accessAllowDomains) {
         var arr = new Packages.org.json.simple.JSONArray();
@@ -112,7 +118,7 @@ var apistore = {};
             arr.add(domains[index]);
         }
         return this.impl.getApplicationKey(userId, applicationName, tokenType,
-            tokenScopes, validityPeriod, callbackUrl, arr);
+                                           tokenScopes, validityPeriod, callbackUrl, arr);
     };
 
     StoreAPIProxy.prototype.getSubscriber = function (userName) {
@@ -124,7 +130,8 @@ var apistore = {};
         subscriber.setSubscribedDate(new Date());
         subscriber.setEmail("");
         subscriber.setTenantId(tenantId);
-        return this.impl.addSubscriber(subscriber);
+        //TO-DO- The second parameter [group id] need to be added later
+        return this.impl.addSubscriber(subscriber,null);
     };
 
     StoreAPIProxy.prototype.getAPISubscriptions = function (provider, apiname, version, username) {
@@ -132,10 +139,7 @@ var apistore = {};
     };
 
     StoreAPIProxy.prototype.getAPI = function (provider, name, version) {
-        var identifier = new Packages.org.json.simple.JSONObject();
-        identifier.put("provider", provider);
-        identifier.put("name", name);
-        identifier.put("version", version);
+        var identifier = new Packages.org.wso2.carbon.apimgt.api.model.APIIdentifier(provider,name,version);
         API=this.impl.getAPI(identifier);
         var myn= new Packages.org.json.simple.JSONArray();
         //JSONfy the result
@@ -162,7 +166,8 @@ var apistore = {};
                 Iterator =TierSet.iterator();
                 while (it.hasNext()) {
                     var tierObj = new Packages.org.json.simple.JSONObject();
-                    tierObject = it.next();
+                    var tierObject = Packages.org.wso2.carbon.apimgt.api.model.Tier;
+                    tierObject=it.next();
                     var tier = tierObject;
                     tierObj.put("tierName", tier.getName());
                     tierObj.put("tierDisplayName", tier.getDisplayName());
@@ -198,7 +203,8 @@ var apistore = {};
 
                 while (i.hasNext()) {
                     var utArr = new ArrayList();
-                    var ut = i.next();
+                    var ut = Packages.org.wso2.carbon.apimgt.api.model.URITemplate;
+                    ut=i.next();
                     utArr.add(ut.getUriTemplate());
                     utArr.add(ut.getMethodsAsString().replaceAll("\\s", ","));
                     utArr.add(ut.getAuthTypeAsString().replaceAll("\\s", ","));

@@ -181,7 +181,7 @@ asset.manager = function(ctx) {
                 api.endpoint_config= options.attributes.endpoint_config;
                 api.destinationStats= options.attributes.destinationStats;
                 api.advertiseOnly= options.attributes.overview_advertiseOnly;
-                //api.swagger = generate_swagger_object(options.attributes.swagger);
+                api.swagger = generate_swagger_object(options.attributes.swagger);
 
                 var apiProxy = apiPublisher.instance(ctx.username);
                 result = apiProxy.implementAPI(api);
@@ -299,7 +299,11 @@ asset.server = function (ctx) {
                         title: 'Subscriptions',
                         url: 'api-subscriptions',
                         path: 'api-subscriptions.jag'
-            }],
+                    }, {
+                        title: 'Start Creating an API',
+                        url: 'start',
+                        path: 'start.jag'
+                    }],
             apis: [{
                        url: 'endpoints',
                        path: 'endpoints.jag'
@@ -318,7 +322,7 @@ asset.server = function (ctx) {
                    },{
                        url: 'sequences',
                        path: 'sequences.jag'
-                   }, {
+                   },{
                        url: 'tiers',
                        path: 'tiers.jag'
                    }, {
@@ -327,6 +331,9 @@ asset.server = function (ctx) {
                    }, {
                        url: 'copyAPI',
                        path: 'copy_api.jag'
+                   },{
+                       url: 'validation',
+                       path: 'validation.jag'
                    }]
 
         }
@@ -479,6 +486,9 @@ asset.renderer = function (ctx) {
                         page.leftNav = buildListLeftNav(page, this);
                         break;
                     case 'api-subscriptions':
+                        page.leftNav = buildListLeftNav(page, this);
+                        break;
+                    case 'start':
                         page.leftNav = buildListLeftNav(page, this);
                         break;
                     default:

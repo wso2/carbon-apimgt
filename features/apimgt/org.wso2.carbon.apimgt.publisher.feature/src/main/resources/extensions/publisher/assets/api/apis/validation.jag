@@ -17,7 +17,6 @@
 
 require('/modules/publisher.js').exec(function (ctx) {
 	var log = new Log('asset_api_endpoints');
-	// log.info("Calling validation API");
 	var ref = require('utils').request;
 	var responseProcessor = require('utils').response;
 	var req = ctx.request;
@@ -35,7 +34,6 @@ require('/modules/publisher.js').exec(function (ctx) {
 			var apiPublisher = require('apipublisher').apipublisher;
 			var apiProxy = apiPublisher.instance(username);
 			var action = request.getParameter("action");
-			// log.info(action);
 			if (uriMatcher.match(GET_VALIDATION_URL)) {//return assets by type
 				if (action === "isAPINameExist") {
 					var apiName = request.getParameter("apiName");
@@ -99,11 +97,13 @@ require('/modules/publisher.js').exec(function (ctx) {
 					if (result.error) {
 						obj = {
 							error: true,
+							status: 'error',
 							message: "Backend error occurred"
 						};
 					} else {
 						obj = {
 							error: false,
+							status: 'success',
 							response: result.response
 						}
 					}

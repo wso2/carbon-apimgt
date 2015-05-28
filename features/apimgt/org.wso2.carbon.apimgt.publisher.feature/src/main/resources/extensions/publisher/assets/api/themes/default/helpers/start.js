@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2005-2014, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *  Copyright (c) 2005-2015, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  *  WSO2 Inc. licenses this file to you under the Apache License,
  *  Version 2.0 (the "License"); you may not use this file except
@@ -16,16 +16,8 @@
  *  under the License.
  *
  */
-
 var resources = function(page,meta){
 	return {
-		js:['jquery-validate.min.js', 
-		'implement_api.js', 'underscore.js', 'jsonform.js','api-design.js', 'custom-validation.js',
-		'url-validation.js','bootstrap-multiselect.js', 'bootstrap-editable.js', 'jsonpath-0.8.0.js',
-		'endpoint-ui.js', 'handlebars.js', 'implement_api_design.js', 'implement_api_inline.js',
-		'jquery-ace.min.js', 'src-noconflict/ace.js', 'src-noconflict/mode-javascript.js',
-		'bootstrap-typeahead.js', 'typeaheadjs.js'],
-		css:['bootstrap-multiselect.css','api_designer.css'],
-        code:['manage_api_meta.hbs']
-    };
+		js:['start.js']
+	};
 };
