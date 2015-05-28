@@ -288,6 +288,29 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     /**
+     * This method returns the artifactID or the UUID of the api resource.
+     *
+     * @param provider creator of the api
+     * @param name name of the api
+     * @param version version of the api
+     * @return artifactId UUID of the resource
+     * @throws APIManagementException
+     */
+    public String getUUIDByApi(String provider, String name, String version) throws APIManagementException {
+        APIIdentifier identifier = new APIIdentifier(provider, name, version);
+        String path = APIUtil.getAPIPath(identifier);
+        String artifactId = null;
+        try {
+            GovernanceUtils.loadGovernanceArtifacts((UserRegistry) registry);
+            Resource apiResource = registry.get(path);
+            artifactId = apiResource.getUUID();
+        } catch (RegistryException e) {
+            handleException("Error while loading registry/governance artifacts", e);
+        }
+        return artifactId;
+    }
+
+    /**
      * Shows how a given consumer uses the given API.
      *
      * @param apiIdentifier APIIdentifier

@@ -110,8 +110,22 @@ var apipublisher = {};
         return this.impl.getAPIsByProvider(providerName);
     };
 
-    APIProviderProxy.prototype.getSubscribersOfAPI = function (apiId) {
-        return this.impl.getSubscribersOfAPI(apiId);
+    /*
+     * This method returns the subscription details needed for api-subscriptions page.
+     */
+    APIProviderProxy.prototype.getSubscribersOfAPI = function (provider, name, version) {
+        var apiObj = new Packages.org.json.simple.JSONObject();
+        apiObj.put("provider", provider);
+        apiObj.put("name", name);
+        apiObj.put("version", version);
+        return this.impl.getSubscribersOfAPI(apiObj);
+    };
+
+    /*
+    * This method returns the UUID of an artifact
+    */
+    APIProviderProxy.prototype.getUUIDByApi = function (provider, name, version) {
+        return this.impl.getUUIDByApi(provider, name, version);
     };
 
     APIProviderProxy.prototype.getDefaultVersion = function (apiId) {
@@ -202,8 +216,15 @@ var apipublisher = {};
         }
     };
 
-    APIProviderProxy.prototype.updateSubscription = function (apiId, status, appId) {
-        return this.impl.updateSubscription(apiId, status, appId);
+    /*
+    * This method is used to update the application wise and user wise subscription status
+    */
+    APIProviderProxy.prototype.updateSubscription = function (apiProvider, apiName, apiVersion, appId, status) {
+        var identifier = new Packages.org.json.simple.JSONObject();
+        identifier.put(API_PROVIDER, apiProvider);
+        identifier.put(API_NAME, apiName);
+        identifier.put(API_VERSION, apiVersion);
+        return this.impl.updateSubscription(identifier, status, appId);
     };
 
     APIProviderProxy.prototype.removeDocumentation = function (apiId, docName, docType) {
