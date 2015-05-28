@@ -34,19 +34,26 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.keymgt.APIKeyMgtException;
+import org.wso2.carbon.apimgt.keymgt.service.TokenValidationContext;
 import org.wso2.carbon.governance.api.generic.GenericArtifactManager;
 import org.wso2.carbon.governance.api.generic.dataobjects.GenericArtifact;
 import org.wso2.carbon.identity.base.IdentityException;
 import org.wso2.carbon.identity.core.util.IdentityDatabaseUtil;
+import org.wso2.carbon.identity.oauth2.dto.OAuth2TokenValidationRequestDTO;
 import org.wso2.carbon.registry.core.Registry;
 import org.wso2.carbon.registry.core.Resource;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.user.api.TenantManager;
 import org.wso2.carbon.user.api.UserStoreException;
 
+import javax.cache.Cache;
+import javax.cache.Caching;
 import java.sql.Connection;
+import java.util.HashMap;
+import java.util.Map;
 
 public class APIKeyMgtUtil {
 
@@ -63,10 +70,21 @@ public class APIKeyMgtUtil {
         }
     }
 
+    public static Map<String,String> constructParameterMap(OAuth2TokenValidationRequestDTO.TokenValidationContextParam[] params){
+        Map<String,String> paramMap = null;
+        if(params != null){
+            paramMap = new HashMap<String, String>();
+            for(OAuth2TokenValidationRequestDTO.TokenValidationContextParam param : params){
+                paramMap.put(param.getKey(),param.getValue());
+            }
+        }
+
+        return paramMap;
+    }
     /**
      * Get a database connection instance from the Identity Persistence Manager
      * @return Database Connection
-     * @throws org.wso2.carbon.apimgt.keymgt.APIKeyMgtException Error when getting an instance of the identity Persistence Manager
+     * @throws APIKeyMgtException Error when getting an instance of the identity Persistence Manager
      */
     public static Connection getDBConnection() throws APIKeyMgtException {
         try {
@@ -75,6 +93,79 @@ public class APIKeyMgtUtil {
             String errMsg = "Error when getting a database connection from the Identity Persistence Manager";
             log.error(errMsg, e);
             throw new APIKeyMgtException(errMsg, e);
+        }
+    }
+
+    /**
+     * Get the KeyValidationInfo object from cache, for a given cache-Key
+     *
+     * @param cacheKey Key for the Cache Entry
+     * @return APIKeyValidationInfoDTO
+     * @throws APIKeyMgtException
+     */
+    public static APIKeyValidationInfoDTO getFromKeyManagerCache(String cacheKey) {
+
+        APIKeyValidationInfoDTO info = null;
+
+        boolean cacheEnabledKeyMgt = APIKeyMgtDataHolder.getKeyCacheEnabledKeyMgt();
+
+        Cache cache = Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER).getCache(APIConstants.KEY_CACHE_NAME);
+
+        //We only fetch from cache if KeyMgtValidationInfoCache is enabled.
+        if (cacheEnabledKeyMgt) {
+            info = (APIKeyValidationInfoDTO) cache.get(cacheKey);
+            //If key validation information is not null then only we proceed with cached object
+            if (info != null) {
+                if (log.isDebugEnabled()) {
+                    log.debug("Found cached access token for : " + cacheKey + ".");
+                }
+            }
+        }
+
+        return info;
+    }
+
+
+    /**
+     * Store KeyValidationInfoDTO in Key Manager Cache
+     *
+     * @param cacheKey          Key for the Cache Entry to be stored
+     * @param validationInfoDTO KeyValidationInfoDTO object
+     */
+    public static void writeToKeyManagerCache(String cacheKey, APIKeyValidationInfoDTO validationInfoDTO) {
+
+        boolean cacheEnabledKeyMgt = APIKeyMgtDataHolder.getKeyCacheEnabledKeyMgt();
+
+        if (cacheKey != null) {
+            if (log.isDebugEnabled()) {
+                log.debug("Storing KeyValidationDTO for key: " + cacheKey + ".");
+            }
+        }
+
+        if (validationInfoDTO != null) {
+            if (cacheEnabledKeyMgt) {
+                Cache cache = Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER).
+                        getCache(APIConstants.KEY_CACHE_NAME);
+                cache.put(cacheKey, validationInfoDTO);
+            }
+        }
+    }
+
+    /**
+     * Remove APIKeyValidationInfoDTO from Key Manager Cache
+     *
+     * @param cacheKey Key for the Cache Entry to be removed
+     */
+    public static void removeFromKeyManagerCache(String cacheKey) {
+
+        boolean cacheEnabledKeyMgt = APIKeyMgtDataHolder.getKeyCacheEnabledKeyMgt();
+
+        if (cacheKey != null && cacheEnabledKeyMgt) {
+
+            Cache cache = Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER).
+                    getCache(APIConstants.KEY_CACHE_NAME);
+            cache.remove(cacheKey);
+            log.debug("KeyValidationInfoDTO removed for key : " + cacheKey);
         }
     }
 

@@ -211,23 +211,9 @@ public class Axis2FlexibleMEPClient {
                 Object o = axisOutMsgCtx.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
     			Map _headers = (Map) o;
     			if (_headers != null) {
-                    _headers.remove(HTTP.CONTENT_TYPE);
-                    
-                if ( axisOutMsgCtx.getSoapAction() != null){
-                         String actionHeaderPrefix = ";action=\""; 
-                         String contentTypeWithAction = 
-                                            new StringBuilder(org.apache.axis2.transport.http.HTTPConstants.MEDIA_TYPE_APPLICATION_SOAP_XML.length() 
-                                            + axisOutMsgCtx.getSoapAction().length() + actionHeaderPrefix.length() + 1)
-                                              .append(org.apache.axis2.transport.http.HTTPConstants.MEDIA_TYPE_APPLICATION_SOAP_XML)
-                                              .append(actionHeaderPrefix)
-                                              .append(axisOutMsgCtx.getSoapAction())
-                                              .append('\"')
-                                              .toString();
-                         _headers.put(HTTP.CONTENT_TYPE, contentTypeWithAction);
-                     }else{
-                         _headers.put(HTTP.CONTENT_TYPE, org.apache.axis2.transport.http.HTTPConstants.MEDIA_TYPE_APPLICATION_SOAP_XML);
-                     }
-               }
+    				_headers.remove(HTTP.CONTENT_TYPE);
+    				_headers.put(HTTP.CONTENT_TYPE, org.apache.axis2.transport.http.HTTPConstants.MEDIA_TYPE_APPLICATION_SOAP_XML);
+    			}
 
             } else if (SynapseConstants.FORMAT_REST.equals(endpoint.getFormat())) {
                 /*format=rest is kept only backword compatibility. We no longer needed that.*/

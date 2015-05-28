@@ -434,6 +434,10 @@ public class TargetRequest {
 	public HttpRequest getRequest() {
 		return request;
 	}
+	
+	public HttpRoute getRoute() {
+	    return route;
+	}
     
     
 }

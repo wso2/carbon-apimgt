@@ -112,7 +112,11 @@ public class TargetRequestFactory {
 
             // port
             int port = url.getPort();
-            request.setPort(port != -1 ? port : 80);
+            if(port == -1 ) {
+                request.setPort(request.getRoute().getTargetHost().getPort());
+            } else {
+                request.setPort(port);
+            }
 
             // chunk
             String disableChunking = (String) msgContext.getProperty(

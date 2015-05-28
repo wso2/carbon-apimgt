@@ -19,7 +19,9 @@
 
 package org.apache.synapse.mediators.builtin;
 
+import org.apache.axiom.om.OMAbstractFactory;
 import org.apache.axiom.om.OMElement;
+import org.apache.axiom.soap.SOAPEnvelope;
 import org.apache.axiom.soap.SOAPHeader;
 import org.apache.axiom.soap.SOAPHeaderBlock;
 import org.apache.synapse.MessageContext;
@@ -180,8 +182,23 @@ public class LogMediator extends AbstractMediator {
     private String getFullLogMessage(MessageContext synCtx) {
         StringBuffer sb = new StringBuffer();
         sb.append(getSimpleLogMessage(synCtx));
-        if (synCtx.getEnvelope() != null)
-            sb.append(separator).append("Envelope: ").append(synCtx.getEnvelope());
+		try {
+			if (synCtx.getEnvelope() != null)
+				sb.append(separator).append("Envelope: ").append(synCtx.getEnvelope());
+		} catch (Exception e) {
+			SOAPEnvelope envelope = synCtx.isSOAP11() ? OMAbstractFactory.getSOAP11Factory()
+			                                                             .getDefaultEnvelope()
+			                                         : OMAbstractFactory.getSOAP12Factory()
+			                                                            .getDefaultEnvelope();
+			try {
+				synCtx.setEnvelope(envelope);
+			} catch (Exception e1) {
+				log.error("Could not replace faulty SOAP Envelop. Error: " +
+				          e1.getLocalizedMessage());
+				return sb.toString();
+			}
+			handleException("Could not build full log message: " + e.getLocalizedMessage(), synCtx);
+		}
         return trimLeadingSeparator(sb);
     }
 

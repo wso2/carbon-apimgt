@@ -89,7 +89,7 @@ public class ApiPublisherExecutor implements Execution {
             GenericArtifact apiArtifact = artifactManager.getGenericArtifact(artifactId);
             API api = APIUtil.getAPI(apiArtifact);
             APIProvider apiProvider = APIManagerFactory.getInstance().getAPIProvider(user);
-            failedGateways = apiProvider.updateAPIStatus(api.getId(), targetState, true, false, true);
+            //failedGateways = apiProvider.updateAPIStatus(api.getId(), targetState, true, false, true);
             //Setting resource again to the context as it's updated within updateAPIStatus method
             String apiPath = APIUtil.getAPIPath(api.getId());
             apiResource = registry.get(apiPath);

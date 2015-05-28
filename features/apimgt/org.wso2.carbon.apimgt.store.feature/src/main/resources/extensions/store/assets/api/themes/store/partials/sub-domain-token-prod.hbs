@@ -1,25 +1,21 @@
 <!-- Domain token view
 The view is used to display the domain details
 -->
-{{#if isAppNameAvailable}}
+{{#if isDataNotAvailable}}
     <fieldset>
         <span class='help-block'>Please subscribe to APIs to view domain information</span>
     </fieldset>
 {{else}}
-    <form>
-        <fieldset>
-            <h5>Allowed Domains</h5>
-            <textarea class='input-xlarge' id='input-{{ environment }}-allowedDomains'>{{allowedDomains}}</textarea>
-            <span class='help-block'>Leaving empty or filling with ALL will allow all domains</span>
-        </fieldset>
-    </form>
+    <fieldset>
+        <h5>Allowed Domains</h5>
+        <textarea class='input-xlarge' id='input-{{ environment }}-allowedDomains'>{{allowedDomains}}</textarea>
+        <span class='help-block'>Leaving empty or filling with ALL will allow all domains</span>
+    </fieldset>
 
     <!--View # 1: Token data-->
     <h5>Token Validity</h5>
-    <form class='form form-inline'>
-        <fieldset>
-            <input type='text' class='input-small' id='input-{{ environment }}-validityTime' value='{{validityTime}}'/>
-            <label>seconds</label>
-        </fieldset>
-    </form>
+    <fieldset>
+        <input type='text' class='input-small' id='input-{{ environment }}-validityTime' value='{{validityTime}}'/>
+        <label>seconds</label>
+    </fieldset>
 {{/if}}

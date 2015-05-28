@@ -18,8 +18,7 @@
 
 package org.wso2.carbon.apimgt.impl;
 
-import org.apache.synapse.rest.RESTConstants;
-
+import javax.ws.rs.POST;
 import javax.xml.namespace.QName;
 
 /**
@@ -67,7 +66,8 @@ public final class APIConstants {
     
     public static final String API_TIER_LOCATION = API_APPLICATION_DATA_LOCATION + "/tiers.xml";
 
-    public static final String API_DOMAIN_MAPPINGS = API_APPLICATION_DATA_LOCATION + "/domain-mappings.json";
+    //location for custom url domain mapings. "<tenant-id>" will be replaced by actual tenant name.
+    public static final String API_DOMAIN_MAPPINGS = "/customurl/api-cloud/<tenant-id>/urlMapping/<tenant-id>";
 
 
     public static final String API_IMAGE_LOCATION = API_APPLICATION_DATA_LOCATION + "/icons";
@@ -102,8 +102,7 @@ public final class APIConstants {
     public static final String API_DOC_RESOURCE_NAME = "api-doc.json";
     
     public static final String API_DOC_1_2_RESOURCE_NAME = "/api-doc";
-    
-    public static final String API_DEFINITION_DOC_NAME = "Swagger API Definition";
+    public static final String API_DOC_2_0_RESOURCE_NAME = "swagger.json";
 
     public static final String API_ICON_IMAGE = "icon";
     
@@ -120,6 +119,8 @@ public final class APIConstants {
     public static final String DOC_SHARED_VISIBILITY = "PRIVATE";
 
     public static final String ACCESS_TOKEN_STORE_TABLE = "IDN_OAUTH2_ACCESS_TOKEN";
+
+    public static final String CONSUMER_KEY_ACCESS_TOKEN_MAPPING_TABLE = "CONSUMER_KEY_ACCESS_TOKEN_MAPPING";
     
     public static final String EXTERNAL_API_STORES_LOCATION = APIMGT_REGISTRY_LOCATION + "/externalstores/external-api-stores.xml";
     
@@ -267,6 +268,7 @@ public final class APIConstants {
     public static final String CREATED = "CREATED";
     public static final String DEPRECATED = "DEPRECATED";
     public static final String PROTOTYPED = "PROTOTYPED";
+    public static final String VERB_INFO_DTO = "VERB_INFO";
 
 
     public static class TokenStatus {
@@ -309,32 +311,51 @@ public final class APIConstants {
     public static final String API_GATEWAY_CLIENT_DOMAIN_HEADER = API_GATEWAY + "ClientDomainHeader";
     public static final String API_GATEWAY_TYPE = "GatewayType";
     public static final String API_GATEWAY_TYPE_SYNAPSE = "Synapse";
-    
+
+    public static final String API_KEY_VALIDATOR = "APIKeyValidator.";
+    public static final String API_KEY_VALIDATOR_URL = API_KEY_VALIDATOR + "ServerURL";
+    public static final String API_KEY_VALIDATOR_REVOKE_API_URL = API_KEY_VALIDATOR + "RevokeAPIURL";
+    public static final String API_KEY_VALIDATOR_TOKEN_ENDPOINT_NAME = API_KEY_VALIDATOR + "TokenEndPointName";
+    public static final String API_KEY_VALIDATOR_USERNAME = API_KEY_VALIDATOR + "Username";
+    public static final String API_KEY_VALIDATOR_PASSWORD = API_KEY_VALIDATOR + "Password";
+    public static final String API_KEY_VALIDATOR_APPLICATION_ACCESS_TOKEN_VALIDATION_PERIOD = API_KEY_VALIDATOR + "ApplicationTokenDefaultValidityPeriod";
+    public static final String API_KEY_VALIDATOR_THRIFT_CLIENT_PORT = API_KEY_VALIDATOR + "ThriftClientPort";
+    public static final String API_KEY_VALIDATOR_THRIFT_SERVER_PORT = API_KEY_VALIDATOR + "ThriftServerPort";
+    public static final String API_KEY_VALIDATOR_THRIFT_SERVER_HOST = API_KEY_VALIDATOR + "ThriftServerHost";
+    public static final String API_KEY_VALIDATOR_CONNECTION_TIMEOUT = API_KEY_VALIDATOR + "ThriftClientConnectionTimeOut";
+
+    // Constants needed for KeyManager section
     public static final String API_KEY_MANAGER = "APIKeyManager.";
-    public static final String API_KEY_MANAGER_URL = API_KEY_MANAGER + "ServerURL";
-    public static final String API_KEY_MANAGER_REVOKE_API_URL = API_KEY_MANAGER + "RevokeAPIURL";
-    public static final String API_KEY_MANAGER_TOKEN_ENDPOINT_NAME = API_KEY_MANAGER + "TokenEndPointName";
-    public static final String API_KEY_MANAGER_USERNAME = API_KEY_MANAGER + "Username";
-    public static final String API_KEY_MANAGER_PASSWORD = API_KEY_MANAGER + "Password";
-    public static final String API_KEY_MANAGER_APPLICATION_ACCESS_TOKEN_VALIDATION_PERIOD = API_KEY_MANAGER + "ApplicationTokenDefaultValidityPeriod";
-    public static final String API_KEY_MANGER_THRIFT_CLIENT_PORT = API_KEY_MANAGER + "ThriftClientPort";
-    public static final String API_KEY_MANGER_THRIFT_SERVER_PORT = API_KEY_MANAGER + "ThriftServerPort";
-    public static final String API_KEY_MANGER_THRIFT_SERVER_HOST = API_KEY_MANAGER + "ThriftServerHost";
-    public static final String API_KEY_MANGER_CONNECTION_TIMEOUT = API_KEY_MANAGER + "ThriftClientConnectionTimeOut";
-    public static final String API_KEY_MANAGER_THRIFT_SERVER_HOST = API_KEY_MANAGER + "ThriftServerHost";
-    public static final String API_KEY_VALIDATOR_CLIENT_TYPE = API_KEY_MANAGER + "KeyValidatorClientType";
+    public static final String KEY_MANAGER_CLIENT = API_KEY_MANAGER+"KeyManagerClientImpl";
+    public static final String KEY_MANAGER = "KeyManager";
+    public static final String KEY_MANAGER_USERNAME = "Username";
+    public static final String KEY_MANAGER_PASSWORD = "Password";
+    public static final String AUTHSERVER_URL = "ServerURL";
+
+    public static final String TOKEN_URL = "TokenURL";
+    public static final String REVOKE_URL = "RevokeURL";
+
+
+    public static final String DEVICE_SCOPE_PATTERN = "^device_.*";
+    public static final String OPEN_ID_SCOPE_NAME = "openid";
+    public static final String API_KEY_MANGER_VALIDATIONHANDLER_CLASS_NAME = API_KEY_VALIDATOR + "KeyValidationHandlerClassName";
+    public static final String API_KEY_MANGER_SCOPE_WHITELIST = API_KEY_VALIDATOR + "ScopeWhitelist.Scope";
+
+    public static final String API_KEY_MANAGER_THRIFT_SERVER_HOST = API_KEY_VALIDATOR + "ThriftServerHost";
+    public static final String API_KEY_VALIDATOR_CLIENT_TYPE = API_KEY_VALIDATOR + "KeyValidatorClientType";
     public static final String API_KEY_VALIDATOR_WS_CLIENT = "WSClient";
-    public static final String API_KEY_MANAGER_ENABLE_THRIFT_SERVER = API_KEY_MANAGER + "EnableThriftServer";
+    public static final String API_KEY_VALIDATOR_ENABLE_THRIFT_SERVER = API_KEY_VALIDATOR + "EnableThriftServer";
     public static final String API_KEY_VALIDATOR_THRIFT_CLIENT = "ThriftClient";
-    public static final String API_KEY_SECURITY_CONTEXT_TTL = API_KEY_MANAGER + "SecurityContextTTL";
-    public static final String API_KEY_MANAGER_ENABLE_JWT_CACHE = API_KEY_MANAGER + "EnableJWTCache";
-    public static final String API_KEY_MANAGER_ENABLE_VALIDATION_INFO_CACHE = API_KEY_MANAGER + "EnableKeyMgtValidationInfoCache";
-    public static final String API_KEY_MANAGER_REMOVE_USERNAME_TO_JWT_FOR_APP_TOKEN = API_KEY_MANAGER + "RemoveUserNameFromJWTForApplicationToken";
-    public static final String API_KEY_MANAGER_ENABLE_ASSERTIONS = API_KEY_MANAGER + "EnableAssertions.";
-    public static final String API_KEY_MANAGER_ENABLE_ASSERTIONS_USERNAME = API_KEY_MANAGER_ENABLE_ASSERTIONS + "UserName";
-    public static final String API_KEY_MANAGER_ENABLE_ACCESS_TOKEN_PARTITIONING = API_KEY_MANAGER + "AccessTokenPartitioning." + "EnableAccessTokenPartitioning";
-    public static final String API_KEY_MANAGER_ACCESS_TOKEN_PARTITIONING_DOMAINS = API_KEY_MANAGER + "AccessTokenPartitioning." + "AccessTokenPartitioningDomains";
-    public static final String API_KEY_MANAGER_ENCRYPT_TOKENS = API_KEY_MANAGER + "EncryptPersistedTokens";
+    public static final String API_KEY_SECURITY_CONTEXT_TTL = API_KEY_VALIDATOR + "SecurityContextTTL";
+    public static final String API_KEY_VALIDATOR_ENABLE_JWT_CACHE = API_KEY_VALIDATOR + "EnableJWTCache";
+    public static final String API_KEY_VALIDATOR_ENABLE_VALIDATION_INFO_CACHE = API_KEY_VALIDATOR + "EnableKeyMgtValidationInfoCache";
+    public static final String API_KEY_VALIDATOR_REMOVE_USERNAME_TO_JWT_FOR_APP_TOKEN = API_KEY_VALIDATOR + "RemoveUserNameFromJWTForApplicationToken";
+    public static final String API_KEY_VALIDATOR_ENABLE_ASSERTIONS = API_KEY_VALIDATOR + "EnableAssertions.";
+    public static final String API_KEY_MANAGER_ENABLE_ASSERTIONS_USERNAME = API_KEY_VALIDATOR_ENABLE_ASSERTIONS + "UserName";
+    public static final String API_KEY_MANAGER_ENABLE_ACCESS_TOKEN_PARTITIONING = API_KEY_VALIDATOR + "AccessTokenPartitioning." + "EnableAccessTokenPartitioning";
+    public static final String API_KEY_MANAGER_ACCESS_TOKEN_PARTITIONING_DOMAINS = API_KEY_VALIDATOR + "AccessTokenPartitioning." + "AccessTokenPartitioningDomains";
+    public static final String API_KEY_VALIDATOR_ENCRYPT_TOKENS = API_KEY_VALIDATOR + "EncryptPersistedTokens";
+    public static final String API_KEY_VALIDATOR_APPLICATION_TOKEN_SCOPE = API_KEY_VALIDATOR +"ApplicationTokenScope";
 
     public static final String API_STORE = "APIStore.";
     public static final String SHOW_API_STORE_URL_FROM_PUBLISHER = "APIStore."+"DisplayURL";
@@ -346,6 +367,7 @@ public final class APIConstants {
     public static final String API_STORE_FORCE_CI_COMPARISIONS = API_STORE + "CompareCaseInsensitively";
     public static final String API_STORE_TAG_CACHE_DURATION = API_STORE + "TagCacheDuration";
     public static final String API_STORE_REUSE_APP_NAME = API_STORE + "ReuseAppName";
+    public static final String API_STORE_DISABLE_PERMISSION_CHECK = API_STORE + "DisablePermissionCheck";
 
     public static final String API_PUBLISHER = "APIPublisher.";
     public static final String SHOW_API_PUBLISHER_URL_FROM_STORE = "APIPublisher."+"DisplayURL";
@@ -421,15 +443,26 @@ public final class APIConstants {
     
 
     public static final String API_USAGE_TRACKING = "APIUsageTracking.";
-    public static final String API_USAGE_ENABLED = API_USAGE_TRACKING + "Enabled";
+    public static final String API_USAGE_BAM_SERVER_URL_GROUPS = API_USAGE_TRACKING + "BAMServerURL";
     public static final String API_USAGE_BUILD_MSG = API_USAGE_TRACKING + "PublishResponseMessageSize";
-    public static final String API_USAGE_THRIFT_PORT = API_USAGE_TRACKING + "ThriftPort";
-    public static final String API_USAGE_BAM_SERVER_URL = API_USAGE_TRACKING + "BAMServerURL";
     public static final String API_USAGE_BAM_SERVER_USER = API_USAGE_TRACKING + "BAMUsername";
     public static final String API_USAGE_BAM_SERVER_PASSWORD = API_USAGE_TRACKING + "BAMPassword";
+    public static final String API_USAGE_SKIP_EVENT_RECEIVER_CONN = API_USAGE_TRACKING + "SkipEventReceiverConnection";
     public static final String API_USAGE_PUBLISHER_CLASS = API_USAGE_TRACKING + "PublisherClass";
-    public static final String API_USAGE_DATA_SOURCE_NAME = API_USAGE_TRACKING + "DataSourceName";
+    public static final String API_USAGE_DATA_SOURCE_NAME = "WSO2AM_STATS_DB";
     public static final String API_USAGE_STREAMS = API_USAGE_TRACKING + "Streams.";
+    public static final String API_USAGE_REQUEST_STREAM = API_USAGE_STREAMS + "Request.";
+    public static final String API_USAGE_RESPONSE_STREAM = API_USAGE_STREAMS + "Response.";
+    public static final String API_USAGE_FAULT_STREAM = API_USAGE_STREAMS + "Fault.";
+    public static final String API_USAGE_THROTTLE_STREAM = API_USAGE_STREAMS + "Throttle.";
+    public static final String API_REQUEST_STREAM_NAME = API_USAGE_REQUEST_STREAM + "Name";
+    public static final String API_REQUEST_STREAM_VERSION = API_USAGE_REQUEST_STREAM + "Version";
+    public static final String API_RESPONSE_STREAM_NAME = API_USAGE_RESPONSE_STREAM + "Name";
+    public static final String API_RESPONSE_STREAM_VERSION = API_USAGE_RESPONSE_STREAM + "Version";
+    public static final String API_FAULT_STREAM_NAME = API_USAGE_FAULT_STREAM + "Name";
+    public static final String API_FAULT_STREAM_VERSION = API_USAGE_FAULT_STREAM + "Version";
+    public static final String API_THROTTLE_STREAM_NAME = API_USAGE_THROTTLE_STREAM + "Name";
+    public static final String API_THRORRLE_STREAM_VERSION = API_USAGE_THROTTLE_STREAM + "Version";
     public static final String API_USAGE_WF_STREAM = API_USAGE_STREAMS + "Workflow.";
     public static final String API_WF_STREAM_NAME = API_USAGE_WF_STREAM + "Name";
     public static final String API_WF_STREAM_VERSION = API_USAGE_WF_STREAM + "Version";
@@ -465,7 +498,7 @@ public final class APIConstants {
     
     public static final String SUBSCRIPTION_TO_CURRENT_TENANT = "current_tenant";
     public static final String SUBSCRIPTION_TO_ALL_TENANTS = "all_tenants";
-    public static final String SUBSCRIPTION_TO_SPECIFIC_TENANTS = "specific_tennats";
+    public static final String SUBSCRIPTION_TO_SPECIFIC_TENANTS = "specific_tenants";
     public static final String NO_PERMISSION_ERROR="noPermissions";
     public static final String JSON_PARSE_ERROR="parseErrors";
 
@@ -492,6 +525,7 @@ public final class APIConstants {
     public static final String API_CONTEXT_CACHE_MANAGER = "API_CONTEXT_CACHE_MANAGER";
     public static final String RESOURCE_CACHE_NAME = "resourceCache";
     public static final String GATEWAY_KEY_CACHE_NAME = "gatewayKeyCache";
+    public static final String GATEWAY_TOKEN_CACHE_NAME = "GATEWAY_TOKEN_CACHE";
     public static final String KEY_CACHE_NAME = "keyCache";
     public static final String JWT_CACHE_NAME = "jwtCache";
     public static final String API_CONTEXT_CACHE = "apiContextCache";
@@ -505,6 +539,7 @@ public final class APIConstants {
     public static final String AUTH_NO_AUTHENTICATION = "None";
     public static final String AUTH_APPLICATION_LEVEL_TOKEN = "Application";
     public static final String AUTH_APPLICATION_USER_LEVEL_TOKEN = "Application_User";
+    public static final String AUTH_APP_AND_USER ="Application_User";
     public static final String AUTH_APPLICATION_OR_USER_LEVEL_TOKEN = "Any";
     public static final String NO_MATCHING_AUTH_SCHEME = "noMatchedAuthScheme";
 
@@ -584,6 +619,27 @@ public final class APIConstants {
         public static final String REGISTRATION_COMPLETED = "COMPLETED";
 
     }
+
+    public interface KeyValidationRequestConstants {
+        String RESOURCE_CONTEXT = "context";
+        String RESOURCE_VERSION = "apiVersion";
+        String RESOURCE_AUTH_LEVEL = "authLevel";
+        String RESOURCE_PATH = "resource";
+        String RESOURCE_VERB = "httpVerb";
+        String KEY_DOMAIN = "clientDomain";
+        String CACHE_KEY = "cacheKey";
+
+        String RESOURCE_PARAMS = "keymgt_resource_params";
+        String VALIDATED_DTO = "validatedDTO";
+        String KM_CACHE_HIT = "km_cacheHit";
+    }
+
+    public static class FrontEndParameterNames {
+        public static final String CONSUMER_KEY = "consumerKey";
+        public static final String CONSUMER_SECRET = "consumerSecret";
+        public static final String CLIENT_DETAILS = "appDetails";
+        public static final String CALLBACK_URL = "callbackUrl";
+    }
     
     //key  of the endpoint securevault
     public static final String API_SECUREVAULT_ENABLE = "EnableSecureVault";
@@ -609,6 +665,9 @@ public final class APIConstants {
     public static final String CLAIM_URI = "ClaimUri";
 
     public static final String DEFAULT_VERSION_PREFIX = "_default_";
+    public static final String OAUTH_HEADER_SPLITTER = ",";
+    public static final String CONSUMER_KEY_SEGMENT = "Bearer";
+    public static final String CONSUMER_KEY_SEGMENT_DELIMITER = " ";
 
     public static final String HTTP_PROXY_HOST = "http.proxyHost";
     public static final String HTTP_PROXY_PORT = "http.proxyPort";
@@ -616,14 +675,28 @@ public final class APIConstants {
 
     public static final String KEYMANAGER_HOSTNAME = "keyManagerHostname";
     public static final String KEYMANAGER_PORT = "keyManagerPort";
-    public static final String KEYMANAGER_SERVERURL = "APIKeyManager.ServerURL";
+    public static final String KEYMANAGER_SERVERURL = API_KEY_VALIDATOR+"ServerURL";
     public static final String CARBON_LOCALIP = "carbon.local.ip";
 
     public static final String APIPROVIDER_HOSTCACHE = "apiProvideHostObjectCache";
     public static final String TENANTCOUNT_CACHEKEY = "apiProviderCacheKey";
+    
+    public static final String API_STORE_GROUP_EXTRACTOR_IMPLEMENTATION = API_STORE + "GroupingExtractor";
 
-    public static final String SYNAPSE_REST_CONTEXT_VERSION_VARIABLE = RESTConstants
-            .SYNAPSE_REST_CONTEXT_VERSION_VARIABLE;
+    public static final String API_CUSTOM_SEQUENCES_FOLDER_LOCATION = "repository/resources/customsequences";
+    public static final String API_CUSTOM_SEQUENCE_TYPE_IN = "in";
+    public static final String API_CUSTOM_SEQUENCE_TYPE_OUT = "out";
+    public static final String API_CUSTOM_SEQUENCE_TYPE_FAULT = "fault";
+
+    public static final String VERSION_PLACEHOLDER = "{version}";
+
+    public static enum SupportedHTTPVerbs {
+        GET,
+        POST,
+        PUT,
+        DELETE,
+        OPTIONS
+    }
 
     public static final String PROPERTY_HOSTNAME = "HostName";
     public static final String PROTOCOL_HTTP = "http";

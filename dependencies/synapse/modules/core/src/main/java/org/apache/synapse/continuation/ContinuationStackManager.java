@@ -84,8 +84,13 @@ public class ContinuationStackManager {
      */
     public static void updateSeqContinuationState(MessageContext synCtx, int position) {
         if (synCtx.isContinuationEnabled()) {
-            ContinuationState seqContState = synCtx.getContinuationStateStack().peek();
-            seqContState.getLeafChild().setPosition(position);
+            if (!synCtx.getContinuationStateStack().isEmpty()) {
+                ContinuationState seqContState = synCtx.getContinuationStateStack().peek();
+                seqContState.getLeafChild().setPosition(position);
+            } else {
+                //Ideally we should not get here.
+                log.warn("Continuation Stack is empty. Probably due to a configuration issue");
+            }
         }
     }
 
@@ -100,9 +105,14 @@ public class ContinuationStackManager {
     public static void addReliantContinuationState(MessageContext synCtx, int subBranch,
                                                    int position) {
         if (synCtx.isContinuationEnabled()) {
-            ContinuationState seqContState = synCtx.getContinuationStateStack().peek();
-            seqContState.getLeafChild().setPosition(position);
-            seqContState.addLeafChild(new ReliantContinuationState(subBranch));
+        	   if (!synCtx.getContinuationStateStack().isEmpty()) {
+                   ContinuationState seqContState = synCtx.getContinuationStateStack().peek();
+                   seqContState.getLeafChild().setPosition(position);
+                   seqContState.addLeafChild(new ReliantContinuationState(subBranch));
+               } else {
+                   //Ideally we should not get here.
+                   log.warn("Continuation Stack is empty. Probably due to a configuration issue");
+               }
         }
     }
 
@@ -114,8 +124,13 @@ public class ContinuationStackManager {
      */
     public static void removeReliantContinuationState(MessageContext synCtx) {
         if (synCtx.isContinuationEnabled()) {
-            ContinuationState seqContState = synCtx.getContinuationStateStack().peek();
-            seqContState.removeLeafChild();
+        	if (!synCtx.getContinuationStateStack().isEmpty()) {
+                ContinuationState seqContState = synCtx.getContinuationStateStack().peek();
+                seqContState.removeLeafChild();
+            } else {
+                //Ideally we should not get here.
+                log.warn("Continuation Stack is empty. Probably due to a configuration issue");
+            }
         }
     }
 
