@@ -741,7 +741,12 @@ $(document).ready(function(){
                         jagg.message({content:responseText.message,type:"error"});
                     }
                 }
-            }, dataType: 'json'
+            },
+            error: function() {
+                $('#'+thisID).buttonLoader('stop');
+                jagg.message({content:"Error occurred while updating API",type:"error"});
+            },
+            dataType: 'json'
         });
         }
     });
