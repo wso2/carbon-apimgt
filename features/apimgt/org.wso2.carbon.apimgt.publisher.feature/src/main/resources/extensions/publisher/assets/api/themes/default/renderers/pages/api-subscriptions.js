@@ -16,11 +16,24 @@
  *  under the License.
  *
  */
-var resources = function (page, meta) {
-    var log = new Log();
-    // log.info('My Applications loaded');
-    return {
-        js: ['libs/jquery.form.min.js', 'create_application.js'],
-        code: ['my_applications/my-applications-metadata.hbs']
-    };
+var render = function (theme, data, meta, require) {
+    theme('single-col-fluid', {
+        title: 'Subscriptions',
+        header: [{
+            partial: 'header',
+            context: data
+        }],
+        ribbon: [{
+            partial: 'ribbon',
+            context: data
+        }],
+        leftnav: [{
+            partial: 'left-nav',
+            context: data
+        }],
+        listassets: [{
+            partial: 'api-subscriptions',
+            context: data
+        }]
+    });
 };

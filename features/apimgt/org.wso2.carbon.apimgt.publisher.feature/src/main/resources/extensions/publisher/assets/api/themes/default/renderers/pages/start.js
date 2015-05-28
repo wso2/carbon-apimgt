@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2015, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *  Copyright (c) 2005-2015, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  *  WSO2 Inc. licenses this file to you under the Apache License,
  *  Version 2.0 (the "License"); you may not use this file except
@@ -16,11 +16,24 @@
  *  under the License.
  *
  */
-var resources = function (page, meta) {
-    var log = new Log();
-    // log.info('My Applications loaded');
-    return {
-        js: ['libs/jquery.form.min.js', 'create_application.js'],
-        code: ['my_applications/my-applications-metadata.hbs']
-    };
+var render = function(theme, data, meta, require) {
+    theme('single-col-fluid', {
+        title: 'Start Creating an API',
+        header: [{
+            partial: 'header',
+            context: data
+        }],
+        ribbon: [{
+            partial: 'ribbon',
+            context: data
+        }],
+        leftnav: [{
+            partial:'left-nav',
+            context:data
+        }],
+        listassets: [{
+            partial: 'start',
+            context: data
+        }]
+    });
 };

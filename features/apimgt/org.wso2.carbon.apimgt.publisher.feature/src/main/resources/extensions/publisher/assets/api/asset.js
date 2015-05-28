@@ -181,7 +181,7 @@ asset.manager = function(ctx) {
                 api.endpoint_config= options.attributes.endpoint_config;
                 api.destinationStats= options.attributes.destinationStats;
                 api.advertiseOnly= options.attributes.overview_advertiseOnly;
-                //api.swagger = generate_swagger_object(options.attributes.swagger);
+                api.swagger = generate_swagger_object(options.attributes.swagger);
 
                 var apiProxy = apiPublisher.instance(ctx.username);
                 result = apiProxy.implementAPI(api);
@@ -295,6 +295,14 @@ asset.server = function (ctx) {
                         title: 'Manage',
                         url: 'manage',
                         path: 'manage.jag'
+                    }, {
+                        title: 'Subscriptions',
+                        url: 'api-subscriptions',
+                        path: 'api-subscriptions.jag'
+                    }, {
+                        title: 'Start Creating an API',
+                        url: 'start',
+                        path: 'start.jag'
                     }],
             apis: [{
                        url: 'endpoints',
@@ -314,14 +322,20 @@ asset.server = function (ctx) {
                    },{
                        url: 'sequences',
                        path: 'sequences.jag'
-                   }, {
+                   },{
                        url: 'tiers',
                        path: 'tiers.jag'
-
+                   }, {
+                       url: 'api-subscriptions',
+                       path: 'api-subscriptions.jag'
                    }, {
                        url: 'copyAPI',
                        path: 'copy_api.jag'
+                   },{
+                       url: 'validation',
+                       path: 'validation.jag'
                    }]
+
         }
     }
 };
@@ -391,7 +405,7 @@ asset.renderer = function (ctx) {
         var navList = util.navList();
         navList.push('ADD ' + type.toUpperCase(), 'btn-add-new', util.buildUrl('create'));
         navList.push('All Statistics', 'btn-stats', '/asts/' + type + '/statistics');
-        navList.push('Subscriptions', 'btn-subscribe', '/asts/' + type + '/statistics');
+        navList.push('Subscriptions', 'btn-subscribe', '/asts/' + type + '/api-subscriptions');
         navList.push('Statistics', 'btn-stats', '/asts/' + type + '/statistics');
         navList.push('Tier Permissions', 'btn-cog', '/asts/' + type + '/statistics');
         //navList.push('Configuration', 'icon-dashboard', util.buildUrl('configuration'));
@@ -469,6 +483,12 @@ asset.renderer = function (ctx) {
                         page.leftNav = buildListLeftNav(page, this);
                         break;
                     case 'statistics':
+                        page.leftNav = buildListLeftNav(page, this);
+                        break;
+                    case 'api-subscriptions':
+                        page.leftNav = buildListLeftNav(page, this);
+                        break;
+                    case 'start':
                         page.leftNav = buildListLeftNav(page, this);
                         break;
                     default:

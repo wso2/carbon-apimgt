@@ -19,6 +19,7 @@ package org.wso2.carbon.apimgt.impl;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.Application;
+import org.wso2.carbon.apimgt.api.model.Subscriber;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 
 /**
@@ -80,6 +81,12 @@ public class UserAwareAPIConsumer extends APIConsumerImpl {
     public void addComment(APIIdentifier identifier, String s, String user) throws APIManagementException {
         checkSubscribePermission();
         super.addComment(identifier, s, user);
+    }
+
+    @Override
+    public Application[] getApplications(Subscriber subscriber, String groupingId)  throws APIManagementException {
+        checkSubscribePermission();
+        return super.getApplications(subscriber,groupingId);
     }
 
     public void checkSubscribePermission() throws APIManagementException {

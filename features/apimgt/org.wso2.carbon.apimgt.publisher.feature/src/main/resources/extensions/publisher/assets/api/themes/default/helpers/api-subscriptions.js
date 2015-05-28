@@ -17,10 +17,8 @@
  *
  */
 var resources = function (page, meta) {
-    var log = new Log();
-    // log.info('My Applications loaded');
     return {
-        js: ['libs/jquery.form.min.js', 'create_application.js'],
-        code: ['my_applications/my-applications-metadata.hbs']
+        js: ['api_subscriptions.js'],
+        code: ['api_subscriptions/api-subscriptions-metadata.hbs']
     };
 };
