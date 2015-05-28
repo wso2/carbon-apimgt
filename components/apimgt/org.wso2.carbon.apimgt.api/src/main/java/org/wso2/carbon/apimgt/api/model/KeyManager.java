@@ -176,4 +176,12 @@ public interface KeyManager {
      * @throws APIManagementException
      */
     void deleteRegisteredResourceByAPIId(String apiID) throws APIManagementException;
+
+    /**
+     * This method will be used to delete mapping records of oAuth applications.
+     * @param consumerKey
+     * @throws APIManagementException
+     */
+    void deleteMappedApplication(String consumerKey) throws APIManagementException;
+
 }
