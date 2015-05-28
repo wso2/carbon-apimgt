@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2005-2014, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *  Copyright (c) 2015, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  *  WSO2 Inc. licenses this file to you under the Apache License,
  *  Version 2.0 (the "License"); you may not use this file except
@@ -16,10 +16,11 @@
  *  under the License.
  *
  */
-var resources = function(page,meta){
-	var log = new Log('my_applications_helper');
-	// log.info('My Applications loaded');
-	return{
-		js:['libs/jquery.form.min.js','create_application.js']
-	};
+var resources = function (page, meta) {
+    var log = new Log();
+    // log.info('My Applications loaded');
+    return {
+        js: ['libs/jquery.form.min.js', 'create_application.js'],
+        code: ['my_applications/my-applications-metadata.hbs']
+    };
 };
