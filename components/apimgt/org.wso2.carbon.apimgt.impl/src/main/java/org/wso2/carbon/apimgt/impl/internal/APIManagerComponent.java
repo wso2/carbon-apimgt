@@ -493,7 +493,10 @@ public class APIManagerComponent {
         }
     }
 
-    private void addApplicationsPermissionsToRegistry() {
+    /**
+     * This method will create new permission name  "applications" in registry permission.
+     */
+    private void addApplicationsPermissionsToRegistry() throws APIManagementException {
         Registry tenantGovReg = CarbonContext.getThreadLocalCarbonContext().getRegistry(
                 RegistryType.USER_GOVERNANCE);
 
@@ -522,9 +525,9 @@ public class APIManagerComponent {
                 }
             }
         } catch (org.wso2.carbon.user.core.UserStoreException e) {
-            e.printStackTrace();
+            throw new APIManagementException("Error while reading user store information.", e);
         } catch (org.wso2.carbon.registry.api.RegistryException e) {
-            e.printStackTrace();
+            throw new APIManagementException("Error while creating new permission in registry", e);
         }
 
     }
