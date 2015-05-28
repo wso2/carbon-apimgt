@@ -27,9 +27,10 @@ $( document ).ready(function() {
 
     $("#startFromExistingSOAPEndpoint").click(function(){
         
-        var wsdl = $("#wsdl-url").val();
-        window.location.href = 'create?wsdl=' + wsdl;
-        /*$('#startFromExistingSOAPEndpoint-form').ajaxSubmit({
+        $( "#startFromExistingSOAPEndpoint-form" ).submit();
+        /*var wsdl = $("#wsdl-url").val();
+        window.location.href = 'design?wsdl=' + wsdl;
+        $('#startFromExistingSOAPEndpoint-form').ajaxSubmit({
             success:function(responseText, statusText, xhr, $form){
                 if (!responseText.error) {
                     window.location = jagg.site.context + "/design"
