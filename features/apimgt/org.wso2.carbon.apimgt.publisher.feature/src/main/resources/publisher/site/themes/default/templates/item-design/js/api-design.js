@@ -624,7 +624,7 @@ $(document).ready(function(){
     });
 
     $("#clearThumb").on("click", function () {
-        $('#apiThumb-container').html('<input type="file" class="input-xlarge validateImageFile" name="apiThumb" />');
+        $('#apiThumb-container').html('<input type="file" id="apiThumb" class="input-xlarge validateImageFile" name="apiThumb" />');
     });
 
     $('#import_swagger').attr('disabled','disabled');
@@ -778,6 +778,14 @@ $(document).ready(function(){
         }
         else if($(this).val().length == 0){
             $('.add-tags-error').html('');
+        }
+    });
+
+    $('#apiThumb').live('change', function() {
+        var imageFileSize = this.files[0].size/1024/1024;
+        if (imageFileSize > 1){
+          $('#error-invalidImageFileSize').modal('show');
+          $('#apiThumb-container').html('<input type="file" id="apiThumb" class="input-xlarge validateImageFile" name="apiThumb" />');
         }
     });
 });
