@@ -9,8 +9,11 @@
     <form>
         <fieldset>
             <span class='help-block'>{{ environment }} keys are not yet generated for this app </span>
+            {{#if isScopeAvailable}}
+                <input type='button' class='btn btn-primary btn-small' value='Select Scopes '
+                       id='btn-select-{{ ../environment }}-scopes-view'/>
+            {{/if}}
             <input type='button' class='btn btn-primary' value='Generate ' id='btn-generate-{{ environment }}-token'/>
         </fieldset>
     </form>
 {{/if}}
-
