@@ -19,7 +19,7 @@
     <div class="form-group">
         <label class="control-label col-sm-2" for="newUsername"><%=i18n.localize("username")%>:<span class="requiredAstrix">*</span></label>
         <div class="col-sm-4">
-            <input id="newUsername" name="newUsername" minlength="5" maxlength="30" type="text" class="required validName input-medium noSpace form-control" />
+            <input id="newUsername" name="newUsername" maxlength="30" minlength="5" type="text" class="required validName input-medium noSpace form-control" />
             <%              
                 if(request_tenant != null) { %>
                      <label class="lblTenantDomainName" class="control-label col-sm-2" for="newUsername"> @<%=request_tenant%></label>
