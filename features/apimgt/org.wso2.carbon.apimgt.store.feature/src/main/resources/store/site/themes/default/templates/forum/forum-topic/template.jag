@@ -23,9 +23,9 @@
     <small><i class="fa fa-pencil-square-o " id="forum_edit_topic_icon" data-id="{{ topicId }}"></i></small>
   <%}%>
   </h2>
-
+  <br>
   <div>
-    <input id="forum_topic_subject_edit_input" type="text" class="form-control" style="display: none" value="{{ replies.topic.0.subject}}">
+    <input id="forum_topic_subject_edit_input" type="text" class="form-control input-lg" style="display: none" value="{{ replies.topic.0.subject}}">
     </input>
   </div>
 
@@ -33,7 +33,7 @@
 
 
 <script id="forum_topic_details_template" type="text/x-handlebars-template">
-        
+
   <div id="forum_topic_view_block">
     <div id="forum_topic_description" class="forum-description">
       {{# html_sanitize replies.topic.0.description }}{{/html_sanitize}}
@@ -56,21 +56,20 @@
 
   </div>
 
-  <hr />
-  <div id="forum_topic_rating_block">
-      <div class="col-sm-1">
-        <div class="average-rating">
+  <div class="col-sm-12"><hr /></div>
+  <div id="forum_topic_rating_block" class="col-sm-12">
+        <div class="average-rating col-sm-1">
           <%=inputs.averageRating%>
         </div>
-      </div>
-      <div class="user_rating col-sm-11">
+        <div class="user_rating col-sm-11">
           Your Rating : <span class="your_rating"><% if(inputs.userRating){%><%= inputs.userRating %>/5<% }else{ %>N/A<% } %></span><br />
-          <input type="hidden" class="rating-tooltip-manual rate_save" value="<%= inputs.userRating %>"/> 
-          <a class="remove_rating"><i class="fa fa-times-circle"></i></a>                                   
-      </div>      
-  </div>  
-  <hr />
-  <br />
+            <input type="hidden" class="rating-tooltip-manual rate_save" value="<%= inputs.userRating %>"/>
+          <a class="remove_rating"><i class="fa fa-times-circle"></i></a>
+        </div
+  </div>
+  </div>
+  <div class="col-sm-12"><hr /></div>
+
   <div id="forum_replies_block" class="clearfix col-sm-12">
   </div>
 
@@ -100,8 +99,8 @@
             <br/>
 
             <%if(jagg.getUser()){%>
-              <i class="icon-trash forum_delete_reply_icon" data-id="{{ replyId }}" />
-              <i class="icon-edit forum_edit_reply_icon" data-id="{{ replyId }}" />
+              <span class="glyphicon glyphicon-trash forum_delete_reply_icon" data-id="{{ replyId }}" ></span>
+              <span class="glyphicon glyphicon-edit forum_edit_reply_icon" data-id="{{ replyId }}" ></span>
             <%}%>
           </td>
           <td id="forum_reply_content_cell_{{ replyId }}" data-id="{{ replyId }}">
