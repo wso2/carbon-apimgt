@@ -8,7 +8,7 @@
 			nickName="destination_statistics" description="Stream for API Manager destination based statistics">
 			<payload></payload>
 			<properties>
-				<property name="api" value="get-property('API_NAME')" type="STRING"
+				<property name="api" value="get-property('api.ut.api')" type="STRING"
 					isExpression="true">
 				</property>
 				<property name="version" value="get-property('SYNAPSE_REST_API_VERSION')"

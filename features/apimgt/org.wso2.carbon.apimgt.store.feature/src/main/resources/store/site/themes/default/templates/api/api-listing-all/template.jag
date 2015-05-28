@@ -261,10 +261,7 @@ var reqUrl = request.getRequestURI();
                         <div class="caption">
                             <a href="<%=path%>" class="api-name fade-out" title="<%=api.name%>"><%=api.name%></a>
                             <div class="version-provider-wrapper fade-out">
-                                <%=api.version%>
-                                <% var log = new Log();
-                                   log.info("API Owner for " + api.name + " is " + api.apiOwner);
-                                %>
+                                <%=api.version%>                                
                                 <%if(api.isAdvertiseOnly) {%>
                                     <a href="<%=path%>" class="link-to-provider link-h2"><%=api.apiOwner%></a>
                                 <%}
