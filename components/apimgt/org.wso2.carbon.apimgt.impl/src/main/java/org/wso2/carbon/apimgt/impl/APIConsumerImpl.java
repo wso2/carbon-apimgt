@@ -1118,14 +1118,13 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 				descriptionResource = govRegistry.get(descriptionPath);
 			} catch (RegistryException e) {
 				//warn and proceed to the next tag
-				log.warn(String.format("Cannot get the description for the tag '%s'",
-				                       tag.getName()));
+				log.warn(String.format("Cannot get the description for the tag '%s'", tag.getName()));
 			}
 			// The resource is assumed to be a byte array since its the content
 			// of a text file.
 			if (descriptionResource != null) {
 				try {
-					String description = new String((byte[])descriptionResource.getContent());
+					String description = new String((byte[]) descriptionResource.getContent());
 					tag.setDescription(description);
 
 				} catch (ClassCastException e) {
@@ -1144,8 +1143,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 				tag.setThumbnailExists(govRegistry.resourceExists(thumbnailPath));
 			} catch (RegistryException e) {
 				//warn and then proceed to load rest of tags
-				log.warn(String.format("Error while querying the existence of %s",
-				                       thumbnailPath),
+				log.warn(String.format("Error while querying the existence of %s", thumbnailPath),
 				         e);
 			}
 		}
