@@ -78,6 +78,7 @@ import org.wso2.carbon.registry.core.Resource;
 import org.wso2.carbon.registry.core.config.RegistryContext;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.core.pagination.PaginationContext;
+import org.wso2.carbon.registry.core.service.RegistryService;
 import org.wso2.carbon.registry.core.session.UserRegistry;
 import org.wso2.carbon.registry.core.utils.RegistryUtils;
 import org.wso2.carbon.user.api.AuthorizationManager;
@@ -1081,32 +1082,61 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 		                                APIConstants.TAGS_INFO_ROOT_LOCATION +
 		                                        "/%s/description.txt";
 		String thumbnailPathPattern = APIConstants.TAGS_INFO_ROOT_LOCATION + "/%s/thumbnail.png";
-		for (Tag tag : tags) {
-			// Get the description.
-			Resource descriptionResource = null;
-			String descriptionPath = String.format(descriptionPathPattern, tag.getName());
+
+		if(tenantDomain == null || tenantDomain.trim() == "" ){
 			try {
-				descriptionResource = registry.get(descriptionPath);
-			} catch (RegistryException e) {
-				log.warn(String.format("Cannot get the description for the tag '%s'", tag.getName()));
+				tenantDomain = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager().getSuperTenantDomain();
+			} catch (org.wso2.carbon.user.core.UserStoreException e) {
+				log.warn("Cannot get super tenant domain name",e);
 			}
-			// The resource is assumed to be a byte array since its the content
-			// of a text file.
-			if (descriptionResource != null) {
+		}
+
+		UserRegistry govRegistry = null;
+		try {
+			int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
+			                                     .getTenantId(tenantDomain);
+			RegistryService registryService =
+					ServiceReferenceHolder.getInstance()
+					                      .getRegistryService();
+			govRegistry = registryService.getGovernanceSystemRegistry(tenantId);
+
+		} catch (UserStoreException e) {
+			log.warn("Cannot get registry for tenant domain name:"+tenantDomain,e);
+		} catch (RegistryException e) {
+			log.warn("Cannot get registry for tenant domain name:"+tenantDomain,e);
+		}
+
+		if (govRegistry != null) {
+			for (Tag tag : tags) {
+				// Get the description.
+				Resource descriptionResource = null;
+				String descriptionPath = String.format(descriptionPathPattern, tag.getName());
 				try {
-					String description = new String((byte[]) descriptionResource.getContent());
-					tag.setDescription(description);
-				} catch (Exception e) {
-					handleException(String.format("Cannot read content of %s", descriptionPath), e);
+					descriptionResource = govRegistry.get(descriptionPath);
+				} catch (RegistryException e) {
+					log.warn(String.format("Cannot get the description for the tag '%s'",
+					                       tag.getName()));
 				}
-			}
-			// Checks whether the thumbnail exists.
-			String thumbnailPath = String.format(thumbnailPathPattern, tag.getName());
-			try {
-				tag.setThumbnailExists(registry.resourceExists(thumbnailPath));
-			} catch (RegistryException e) {
-				log.warn(String.format("Error while querying the existence of %s", thumbnailPath),
-				         e);
+				// The resource is assumed to be a byte array since its the content
+				// of a text file.
+				if (descriptionResource != null) {
+					try {
+						String description = new String((byte[]) descriptionResource.getContent());
+						tag.setDescription(description);
+					} catch (Exception e) {
+						handleException(String.format("Cannot read content of %s", descriptionPath),
+						                e);
+					}
+				}
+				// Checks whether the thumbnail exists.
+				String thumbnailPath = String.format(thumbnailPathPattern, tag.getName());
+				try {
+					tag.setThumbnailExists(govRegistry.resourceExists(thumbnailPath));
+				} catch (RegistryException e) {
+					log.warn(String.format("Error while querying the existence of %s",
+					                       thumbnailPath),
+					         e);
+				}
 			}
 		}
 		return tags;
