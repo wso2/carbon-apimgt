@@ -4713,9 +4713,15 @@ public class APIStoreHostObject extends ScriptableObject {
                 hybridEnvironmentObject.put(environment.getName(), jsonObject);
             }
         }
-        environmentObject.put(APIConstants.GATEWAY_ENV_TYPE_PRODUCTION, productionEnvironmentObject);
-        environmentObject.put(APIConstants.GATEWAY_ENV_TYPE_SANDBOX, sandboxEnvironmentObject);
-        environmentObject.put(APIConstants.GATEWAY_ENV_TYPE_HYBRID, hybridEnvironmentObject);
+        if (!productionEnvironmentObject.isEmpty()){
+            environmentObject.put(APIConstants.GATEWAY_ENV_TYPE_PRODUCTION, productionEnvironmentObject);
+        }
+        if (!sandboxEnvironmentObject.isEmpty()){
+            environmentObject.put(APIConstants.GATEWAY_ENV_TYPE_SANDBOX, sandboxEnvironmentObject);
+        }
+        if (!hybridEnvironmentObject.isEmpty()){
+            environmentObject.put(APIConstants.GATEWAY_ENV_TYPE_HYBRID, hybridEnvironmentObject);
+        }
         return environmentObject;
     }
 
