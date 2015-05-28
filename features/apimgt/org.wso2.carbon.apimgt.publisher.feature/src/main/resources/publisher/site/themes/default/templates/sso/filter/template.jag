@@ -7,16 +7,9 @@
 	var sessionId = session.getId();
 	var isAuthenticated = ssoRelyingParty.isSessionAuthenticated(sessionId);
 
-	var requestURI;
-	var requestedPage = request.getParameter("requestedPage");
-	if(requestedPage!=null){
-	requestURI = requestedPage;
-	}else{
-	  requestURI = request.getRequestURI();
-	  if(request.getQueryString()!=null){
-	    requestURI =requestURI+'?'+request.getQueryString();
-	  }
-	}
+	//Since we always redirect to root in Publisher
+	var requestURI = jagg.getAbsoluteUrl("/");
+	
 	var checkSSO = true;
 
 	if(requestURI.indexOf("register.jag") != -1) {

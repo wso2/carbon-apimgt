@@ -382,7 +382,7 @@
     <a class="notes" data-path="{{resource_path}}" data-attr="description">{{ description }}</a>
     <br />
     <br />        
-    <h5>Response Content Type : <a href="#" data-path="{{resource_path}}" data-attr="content_type" class="content_type" data-type="typeahead" data-pk="1" data-title="Responce Content Type">{{ content_type }}</a></h5>
+    <h5>Response Content Type : <a href="#" data-path="{{resource_path}}" data-attr="produces" class="content_type produces" data-type="typeahead" data-pk="1" data-title="Response Content Type">{{ produces }}</a></h5>
     <br />
     <h5>Parameters :</h5>
     {{#if parameters}}
