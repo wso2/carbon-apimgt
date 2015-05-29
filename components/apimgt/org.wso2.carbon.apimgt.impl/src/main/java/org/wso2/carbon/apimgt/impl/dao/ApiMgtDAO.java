@@ -3571,6 +3571,35 @@ public class ApiMgtDAO {
 
     }
 
+    /**
+     * This method will delete allow domains record by given consumer key
+     * @param consumerKey
+     */
+    public static void deleteAccessAllowDomains(String consumerKey) throws APIManagementException {
+
+        String sqlDeleteAccessAllowDomains = "DELETE " +
+                " FROM AM_APP_KEY_DOMAIN_MAPPING " +
+                " WHERE CONSUMER_KEY=?";
+
+        Connection connection = null;
+        PreparedStatement prepStmt = null;
+        try {
+            connection = APIMgtDBUtil.getConnection();
+            prepStmt = connection.prepareStatement(sqlDeleteAccessAllowDomains);
+            prepStmt.setString(1, consumerKey);
+            prepStmt.execute();
+            prepStmt.close();
+
+            connection.commit();
+
+        } catch (SQLException e) {
+            handleException("Error while deleting allowed domains for application identified " +
+                    "by consumer key :" + consumerKey, e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(prepStmt, connection, null);
+        }
+    }
+
     public static void addAccessAllowDomains(String oAuthConsumerKey, String[] accessAllowDomains) throws
             APIManagementException {
 
@@ -5478,6 +5507,7 @@ public class ApiMgtDAO {
                     prepStmt.execute();
                     prepStmt.close();
 
+                    KeyManagerHolder.getKeyManagerInstance().deleteMappedApplication(consumerKey);
                     // OAuth app is deleted if only it has been created from API Store. For mapped clients we don't
                     // call delete.
                     if(!"MAPPED".equals(mode)) {
