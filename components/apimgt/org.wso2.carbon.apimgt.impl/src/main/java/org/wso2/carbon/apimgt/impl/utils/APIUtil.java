@@ -2505,7 +2505,7 @@ public final class APIUtil {
                         
             String bamProfileConfig = bamProfile.replaceAll("\\[1\\]", bamServerURL).
             		replaceAll("\\[2\\]", bamServerUser).
-            		replaceAll("\\[3\\]", bamServerPassword);
+            		replaceAll("\\[3\\]", encryptPassword(bamServerPassword));
 
             Resource resource = registry.newResource();
             resource.setContent(bamProfileConfig);
