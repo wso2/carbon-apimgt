@@ -1,41 +1,43 @@
 <div class='well'>
-<form class='form-horizontal' method='post' id='form-application-create' action='{{url ""}}/apis/applications'>
-	<div class='control-group'>
-			<label class='control-label'>Name</label>
-			<div class='controls'>
-				<input type='text' id='overview_name' name='overview_name' />				
-			</div>
-	</div>
-	<div class='control-group'>
-			<label class='control-label'>Throttling Tier</label>
-			<div class='controls'>
-                <select id='overview_tier' name='overview_tier'>
-                    <option>Unlimited</option>
-                    <option>Bronze</option>
-                    <option>Silver</option>
-					<option>Gold</option>
-				</select>
-			</div>	
-			<div class='controls'>
-				<small>
-				{{t "Applications are required to make API subscriptions and consume them.You will be able to subscribe these applications to APIs from the API details page.Requests made from the application will be throttled by the Application level throttling tier and the subscription level throttling tier"}}
-				</small>
-			</div>
-	</div>
-	<div class='control-group'>
-			<label class='control-label' for='overview_callbackurl'>Callback URL</label>
-			<div class='controls'>
-				<input id='overview_callbackurl' class='input-xxlarge' type='text' name='overview_callbackurl'/>
-			</div>
-	</div>
-	<div class='control-group'>
-			<label class='control-label' for='overview_description'>Description</label>
-			<div class='controls'>
-				<textarea id='overview_description' type='text' name='overview_description'></textarea>
-			</div>
-	</div>
-	<div class='form-actions'>
-		<input type='submit' class='btn btn-primary' value='{{t "Add"}}' />
-	</div>
-</form>
+    <div class='control-group'>
+        <label class='control-label'>Name</label>
+
+        <div class='controls'>
+            <input type='text' id='overview_name' name='overview_name'/>
+        </div>
+    </div>
+    <div class='control-group'>
+        <label class='control-label'>Throttling Tier</label>
+
+        <div class='controls'>
+            <select id='overview_tier' name='overview_tier'>
+                <option>Unlimited</option>
+                <option>Bronze</option>
+                <option>Silver</option>
+                <option>Gold</option>
+            </select>
+        </div>
+        <div class='controls'>
+            <small>
+                {{t "Applications are required to make API subscriptions and consume them.You will be able to subscribe these applications to APIs from the API details page.Requests made from the application will be throttled by the Application level throttling tier and the subscription level throttling tier"}}
+            </small>
+        </div>
+    </div>
+    <div class='control-group'>
+        <label class='control-label' for='overview_callbackurl'>Callback URL</label>
+
+        <div class='controls'>
+            <input id='overview_callbackurl' class='input-xxlarge' type='text' name='overview_callbackurl'/>
+        </div>
+    </div>
+    <div class='control-group'>
+        <label class='control-label' for='overview_description'>Description</label>
+
+        <div class='controls'>
+            <textarea id='overview_description' type='text' name='overview_description'></textarea>
+        </div>
+    </div>
+    <div class='form-actions'>
+        <button class='btn btn-primary' onclick='javascript:addApplication();'>{{t "Add"}}</button>
+    </div>
 </div>

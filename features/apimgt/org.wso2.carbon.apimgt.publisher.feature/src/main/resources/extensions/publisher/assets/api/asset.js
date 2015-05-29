@@ -85,61 +85,60 @@ asset.manager = function(ctx) {
             var rxtModule = require('rxt');
             var assetMod = rxtModule.asset;
             if(options.attributes.action=="design"){
-            api.apiName = options.attributes.overview_name;
-            api.name = options.attributes.overview_name;
-            api.version = options.attributes.overview_version;
-            if (options.attributes.provider == null) {
-                api.provider = ctx.username;
-            } else {
-                api.provider = options.attributes.overview_provider;
-            }
-            api.context = options.attributes.overview_context;
+                api.apiName = options.attributes.overview_name;
+                api.name = options.attributes.overview_name;
+                api.version = options.attributes.overview_version;
+                if (options.attributes.provider == null) {
+                    api.provider = ctx.username;
+                } else {
+                    api.provider = options.attributes.overview_provider;
+                }
+                api.context = options.attributes.overview_context;
 
-            //TODO now we no need to save Icon through API manager as asset API does it for us
-            //Need to properly cope with that changed
-            api.thumbnailContent = request.getFile("overview_thumbnail");
-            api.thumbnailUrl = null;
+                //TODO now we no need to save Icon through API manager as asset API does it for us
+                //Need to properly cope with that changed
+                api.thumbnailContent = request.getFile("overview_thumbnail");
+                api.thumbnailUrl = null;
 
-            //validate uploaded image and set API has a image if content is valid
-            if(api.thumbnailContent != null && isValiedImage(api.thumbnailContent)){
-               api.thumbnailUrl = 'overview_thumbnail';
-            } else if(api.thumbnailContent != null && !isValiedImage(api.thumbnailContent)){
-                obj = {
-                    error:true,
-                    message:"Please upload a valid image file for the API icon."
-                };
-                print(obj);
-                return;
-            }
+                //validate uploaded image and set API has a image if content is valid
+                if(api.thumbnailContent != null && isValiedImage(api.thumbnailContent)){
+                    api.thumbnailUrl = 'overview_thumbnail';
+                } else if(api.thumbnailContent != null && !isValiedImage(api.thumbnailContent)){
+                    obj = {
+                        error:true,
+                        message:"Please upload a valid image file for the API icon."
+                    };
+                    print(obj);
+                    return;
+                }
 
-            //If API not exist create
-            var apiProxy = apiPublisher.instance(ctx.username);
-            result=apiProxy.checkIfAPIExists(api.provider,api.name,api.version);
+                //If API not exist create
+                var apiProxy = apiPublisher.instance(ctx.username);
+                result = apiProxy.checkIfAPIExists(api.provider, api.name, api.version);
 
-            if(!result){
-                result = apiProxy.designAPI(api);
+                if(!result.error && !result.exist){
+                    result = apiProxy.createAPI(api);
+                    if (result!=null && result.error) {
+                        throw "Error while creating the API." + result.error;
+                    } else{
+                        options.id=result.uuid;
+                        options.name=api.name;
+                        options.attributes.overview_provider=api.provider;
+                        options.attributes.overview_status='CREATED';
+                    }
+                } else {
+                    throw "Error while creating the API." + result.error;
+                }
+                api.description = options.attributes.overview_description;
+                api.tags = options.attributes.overview_tags;
+                api.visibility = options.attributes.visibility;
+                api.visibleRoles = options.attributes.roles;
+                api.swagger = generate_swagger_object(options.attributes.swagger);
+                result = apiProxy.updateDesignAPI(api);
                 if (result!=null && result.error) {
-                    throw "Error while creating the API.";
-                }
-                else{
-                options.id=result;
-                options.name=api.name;
-                options.attributes.overview_provider=api.provider;
-                options.attributes.overview_status='CREATED';
+                    throw "Error while updating the API.";
                 }
             }
-            api.description = options.attributes.overview_description;
-            api.tags = options.attributes.overview_tags;
-            api.visibility = options.attributes.visibility;
-            api.visibleRoles = options.attributes.roles;
-            api.swagger = generate_swagger_object(options.attributes.swagger);
-            result = apiProxy.updateDesignAPI(api);
-            if (result!=null && result.error) {
-            throw "Error while updating the API.";
-            }
-            }
-
-
         },
         remove : function(id) {
             var asset = this.get.call(this, id);
@@ -296,6 +295,10 @@ asset.server = function (ctx) {
                         url: 'manage',
                         path: 'manage.jag'
                     }, {
+                        title: 'Subscriptions',
+                        url: 'api-subscriptions',
+                        path: 'api-subscriptions.jag'
+                    }, {
                         title: 'Start Creating an API',
                         url: 'start',
                         path: 'start.jag'
@@ -321,7 +324,9 @@ asset.server = function (ctx) {
                    },{
                        url: 'tiers',
                        path: 'tiers.jag'
-
+                   }, {
+                       url: 'api-subscriptions',
+                       path: 'api-subscriptions.jag'
                    }, {
                        url: 'copyAPI',
                        path: 'copy_api.jag'
@@ -329,6 +334,7 @@ asset.server = function (ctx) {
                        url: 'validation',
                        path: 'validation.jag'
                    }]
+
         }
     }
 };
@@ -398,7 +404,7 @@ asset.renderer = function (ctx) {
         var navList = util.navList();
         navList.push('ADD ' + type.toUpperCase(), 'btn-add-new', util.buildUrl('create'));
         navList.push('All Statistics', 'btn-stats', '/asts/' + type + '/statistics');
-        navList.push('Subscriptions', 'btn-subscribe', '/asts/' + type + '/statistics');
+        navList.push('Subscriptions', 'btn-subscribe', '/asts/' + type + '/api-subscriptions');
         navList.push('Statistics', 'btn-stats', '/asts/' + type + '/statistics');
         navList.push('Tier Permissions', 'btn-cog', '/asts/' + type + '/statistics');
         //navList.push('Configuration', 'icon-dashboard', util.buildUrl('configuration'));
@@ -476,6 +482,9 @@ asset.renderer = function (ctx) {
                         page.leftNav = buildListLeftNav(page, this);
                         break;
                     case 'statistics':
+                        page.leftNav = buildListLeftNav(page, this);
+                        break;
+                    case 'api-subscriptions':
                         page.leftNav = buildListLeftNav(page, this);
                         break;
                     case 'start':

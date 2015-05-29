@@ -445,4 +445,12 @@ public interface APIProvider extends APIManager {
 	 * @throws APIManagementException
 	 */
 	public boolean updateAPIDesign(API api, String tags, String swagger) throws APIManagementException;
+
+	/**
+	 * Get subscriber count of API
+	 * @param apiId api identifier
+	 * @return number of subscribers of API
+	 * @throws APIManagementException
+	 */
+	public int getSubscriberCount(APIIdentifier apiId) throws APIManagementException;
 }

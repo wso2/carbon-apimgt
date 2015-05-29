@@ -74,19 +74,17 @@ $(function () {
     };
 
     /*
-     The function returns the details of the given application
+     The function returns details of scopes for the given application
      */
     var findAppDetails = function (appName) {
         var apps = metadata.appsWithSubs;
         var app;
         for (var appIndex in apps) {
             app = apps[appIndex];
-
             if (app.name == appName) {
                 return app;
             }
         }
-
         return null;
     };
 
@@ -404,8 +402,21 @@ $(function () {
         partial: 'sub-keys-generate-prod',
         beforeRender: function (data) {
             data.environment = Views.translate('Production');
+
+            // Checking whether application name is selected.
             if (data.appName == null) {
                 data.isDataNotAvailable = true;
+            } else {
+                data.isDataNotAvailable = false;
+                // retrieving scopes if available.
+                data.scopes = findAppDetails($('#subscription_selection').val()).scopes;
+
+                // Checking whether scopes are available.
+                if (data.scopes.length > 0) {
+                    data.isScopeAvailable = true;
+                } else {
+                    data.isScopeAvailable = false;
+                }
             }
         },
         resolveRender: function () {
@@ -468,10 +479,21 @@ $(function () {
         partial: 'sub-keys-generate-prod',
         beforeRender: function (data) {
             data.environment = Views.translate('Sandbox');
+
+            // Checking whether application name is selected.
             if (data.appName == null) {
                 data.isDataNotAvailable = true;
             } else {
                 data.isDataNotAvailable = false;
+                // retrieving scopes if available.
+                data.scopes = findAppDetails($('#subscription_selection').val()).scopes;
+
+                // Checking whether scopes are available.
+                if (data.scopes.length > 0) {
+                    data.isScopeAvailable = true;
+                } else {
+                    data.isScopeAvailable = false;
+                }
             }
         },
         resolveRender: function () {
@@ -544,7 +566,7 @@ $(function () {
                 data.environment = Views.translate('Production');
                 data.allowedDomains = Views.translate('ALL');
                 data.validityTime = Views.translate('3600');
-            } else if (typeof(data.appName) == "undefined" || typeof(data.appName) == "null") {
+            } else if (typeof(data.appName) == "undefined" || typeof(data.appName) == "null" || data.appName == null) {
                 data.isDataNotAvailable = true;
             }
         },
@@ -581,7 +603,7 @@ $(function () {
                 data.environment = Views.translate('Sandbox');
                 data.allowedDomains = Views.translate('ALL');
                 data.validityTime = Views.translate('3600');
-            } else if (typeof(data.appName) == "undefined" || typeof(data.appName) == "null") {
+            } else if (typeof(data.appName) == "undefined" || typeof(data.appName) == "null" || data.appName == null) {
                 data.isDataNotAvailable = true;
             }
         },
@@ -595,18 +617,21 @@ $(function () {
         partial: 'sub-domain-update-prod',
         resolveRender: function (data) {
             if (!APP_STORE.sandboxKeys) {
-                data.isDataNotAvailable = false;
+                data.isDataNotAvailable = true;
                 return false;
             } else {
                 data.environment = Views.translate('Sandbox');
                 data.allowedDomains = APP_STORE.sandboxKeys.allowedDomains;
-                data.isDataNotAvailable = true;
+                data.isDataNotAvailable = false;
                 return true;
             }
         },
         subscriptions: [EV_APP_SELECT, EV_GENERATE_SAND_TOKEN],
         afterRender: attachUpdateSandboxDomains
     });
+    /*
+     End of Domain View
+     */
 
     /*
      API Subscription listing view

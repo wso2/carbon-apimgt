@@ -1,0 +1,76 @@
+<div id='subscriptions-table-data'>
+    <table class='table table-bordered'>
+        <thead>
+        <tr>
+            <th>{{t "User"}}</th>
+            <th>{{t "Application"}}</th>
+            <th>{{t "Subscribed APIs & Actions"}}</th>
+        </tr>
+        </thead>
+        <tbody>
+        {{#each apiSubscriptions}}
+            <tr>
+                <td>{{userName}}</td>
+                <td>{{application}}</td>
+                <td>
+                    {{#each apis}}
+                        <a href="javascript:getAPIUrl('{{../../cuser.username}}','{{apiName}}','{{apiVersion}}');">
+                            &#169; {{apiName}} - {{apiVersion}}
+                        </a>
+                        <!-- Make sure to update the js/api_subscriptions.js file if you change below views(form and div) -->
+                        <div id="td-{{../userName}}-{{../application}}-{{apiName}}-{{apiVersion}}">
+                            {{#if isNotHold}}
+
+                                {{#if ../isBlocked}}
+
+                                    <input type="radio"
+                                           name="{{../../../../cuser.username}}-{{../apiName}}-{{../apiVersion}}-{{../../../appId}}-{{../../../userName}}-{{../../../application}}"
+                                           onclick="javascript:updateSubscription('{{../../../../cuser.username}}','{{../apiName}}','{{../apiVersion}}','{{../../../appId}}','PROD_ONLY_BLOCKED','{{../../../userName}}','{{../../../application}}');"
+                                           disabled>
+                                    Production Only
+                                    <input type="radio"
+                                           name="{{../../../../cuser.username}}-{{../apiName}}-{{../apiVersion}}-{{../../../appId}}-{{../../../userName}}-{{../../../application}}"
+                                           onclick="javascript:updateSubscription('{{../../../../cuser.username}}','{{../apiName}}','{{../apiVersion}}','{{../../../appId}}','UNBLOCKED','{{../../../userName}}','{{../../../application}}');"
+                                           disabled> Production & Sandbox
+
+                                    <a href="javascript:updateSubscription('{{../../../../cuser.username}}','{{../apiName}}','{{../apiVersion}}','{{../../../appId}}','UNBLOCKED','{{../../../userName}}','{{../../../application}}');">
+                                        Unblock
+                                    </a>
+                                {{else}}
+
+                                    {{#if ../../isProdOnly}}
+                                        <input type="radio"
+                                               name="{{../../../../../cuser.username}}-{{../../apiName}}-{{../../apiVersion}}-{{../../../../appId}}-{{../../../../userName}}-{{../../../../application}}"
+                                               onclick="javascript:updateSubscription('{{../../../../../cuser.username}}','{{../../apiName}}','{{../../apiVersion}}','{{../../../../appId}}','PROD_ONLY_BLOCKED','{{../../../../userName}}','{{../../../../application}}');"
+                                               checked> Production Only
+                                        <input type="radio"
+                                               name="{{../../../../../cuser.username}}-{{../../apiName}}-{{../../apiVersion}}-{{../../../../appId}}-{{../../../../userName}}-{{../../../../application}}"
+                                               onclick="javascript:updateSubscription('{{../../../../../cuser.username}}','{{../../apiName}}','{{../../apiVersion}}','{{../../../../appId}}','UNBLOCKED','{{../../../../userName}}','{{../../../../application}}');">
+                                        Production & Sandbox
+                                    {{else}}
+                                        <input type="radio"
+                                               name="{{../../../../../cuser.username}}-{{../../apiName}}-{{../../apiVersion}}-{{../../../../appId}}-{{../../../../userName}}-{{../../../../application}}"
+                                               onclick="javascript:updateSubscription('{{../../../../../cuser.username}}','{{../../apiName}}','{{../../apiVersion}}','{{../../../../appId}}','PROD_ONLY_BLOCKED','{{../../../../userName}}','{{../../../../application}}');">
+                                        Production Only
+                                        <input type="radio"
+                                               name="{{../../../../../cuser.username}}-{{../../apiName}}-{{../../apiVersion}}-{{../../../../appId}}-{{../../../../userName}}-{{../../../../application}}"
+                                               onclick="javascript:updateSubscription('{{../../../../../cuser.username}}','{{../../apiName}}','{{../../apiVersion}}','{{../../../../appId}}','UNBLOCKED','{{../../../../userName}}','{{../../../../application}}');"
+                                               checked> Production & Sandbox
+                                    {{/if}}
+
+                                    <a href="javascript:updateSubscription('{{../../../../cuser.username}}','{{../apiName}}','{{../apiVersion}}','{{../../../appId}}','BLOCKED','{{../../../userName}}','{{../../../application}}');">
+                                        Block
+                                    </a>
+                                {{/if}}
+
+                            {{else}}
+                                Subscriptions pending approval!
+                            {{/if}}
+                        </div>
+                    {{/each}}
+                </td>
+            </tr>
+        {{/each}}
+        </tbody>
+    </table>
+</div>
