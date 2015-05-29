@@ -175,8 +175,8 @@ public interface APIConsumer extends APIManager {
      * @return
      * @throws APIManagementException
      */
-    public Map<String,Object> saveSemiManualClient(String jsonString, String userName, String clientId,
-                                                   String  applicationName) throws APIManagementException;
+    public Map<String,Object> mapExistingOAuthClient(String jsonString, String userName, String clientId,
+                                                     String applicationName) throws APIManagementException;
 
 
     /**

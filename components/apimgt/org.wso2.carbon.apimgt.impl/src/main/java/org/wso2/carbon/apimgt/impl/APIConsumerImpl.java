@@ -1636,12 +1636,12 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
      * @return
      * @throws APIManagementException
      */
-    public Map<String, Object> saveSemiManualClient(String jsonString, String userName, String clientId,
-                                                    String applicationName) throws APIManagementException {
+    public Map<String, Object> mapExistingOAuthClient(String jsonString, String userName, String clientId,
+                                                      String applicationName) throws APIManagementException {
 
         String callBackURL = null;
 
-        OAuthAppRequest oauthAppRequest = ApplicationUtils.createOauthAppRequest(applicationName, callBackURL,"default",
+        OAuthAppRequest oauthAppRequest = ApplicationUtils.createOauthAppRequest(clientId, callBackURL,"default",
                                                                                   jsonString);
 
         KeyManager keyManager = KeyManagerHolder.getKeyManagerInstance();
