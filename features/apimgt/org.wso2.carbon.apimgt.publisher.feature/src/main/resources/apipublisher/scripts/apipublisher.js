@@ -71,7 +71,7 @@ var apipublisher = {};
         return this.impl.getAllProviders();
     };
 
-    APIProviderProxy.prototype.designAPI = function (api) {
+    APIProviderProxy.prototype.createAPI = function (api) {
         var identifier = new Packages.org.wso2.carbon.apimgt.api.model.APIIdentifier(api.provider, api.name, api.version);
         return this.impl.createAPI(identifier, api.context);
     };
@@ -298,6 +298,8 @@ var apipublisher = {};
             var tierSet = '';
             var tiersDisplayNamesSet = '';
             var tiersDescSet = '';
+
+            //Creating tier representtation
             for(var i = 0; i < tiers.length  ; i++) {
                 tierSet += tiers[0].getName();
                 tiersDisplayNamesSet += tiers[0].getDisplayName();
