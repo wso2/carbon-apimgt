@@ -1115,10 +1115,12 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 			Resource descriptionResource = null;
 			String descriptionPath = String.format(descriptionPathPattern, tag.getName());
 			try {
-				descriptionResource = govRegistry.get(descriptionPath);
+				if (govRegistry.resourceExists(descriptionPath)) {
+					descriptionResource = govRegistry.get(descriptionPath);
+				}
 			} catch (RegistryException e) {
 				//warn and proceed to the next tag
-				log.warn(String.format("Cannot get the description for the tag '%s'", tag.getName()));
+				log.warn(String.format("Error while querying the existence of the description for the tag '%s'", tag.getName()));
 			}
 			// The resource is assumed to be a byte array since its the content
 			// of a text file.
