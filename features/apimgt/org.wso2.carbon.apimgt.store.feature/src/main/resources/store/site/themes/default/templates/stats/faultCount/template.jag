@@ -21,7 +21,7 @@
     </div>
     </div>
   
-    <h2><%=i18n.localize("faultyInvocationTitle")%></h2>
+    <h3><%=i18n.localize("faultyInvocationTitle")%></h3>
 
         <div class="col-md-12" id="tableContainer hide">
              <table class="table table-striped table-bordered hide" id="PerAppAPIFaultCountTable" class="display" cellspacing="0" width="100%">

@@ -3,13 +3,10 @@ jagg.initializer("stats/faultCount", {
 
     preInitialize:function () {
         jagg.addHeaderCSS("stats", " dataTable","lib/dataTables/css/dataTables.bootstrap.css");
-        jagg.addHeaderCSS("stats", "claro","lib/dojo-release-1.8.3/dijit/themes/claro/claro.css");
-        jagg.addHeaderCSS("stats", "easy-pie-css","lib/easy-pie-chart/jquery.easy-pie-chart.css");
         jagg.addHeaderCSS("stats", "datepicker","lib/datepicker/css/daterangepicker-bs3.css");
 
         jagg.addHeaderJS("stats", "jquery-dataTable","lib/dataTables/js/jquery.dataTables.min.js");
         jagg.addHeaderJS("stats", "dataTable","lib/dataTables/js/dataTables.bootstrap.js");
-        jagg.addHeaderJS("stats", "easy-pie-chart","lib/easy-pie-chart/jquery.easy-pie-chart.js");
         jagg.addHeaderJS("stats", "moment", "lib/datepicker/js/moment.js");
         jagg.addHeaderJS("stats", "datepicker", "lib/datepicker/js/daterangepicker.js");
         jagg.addHeaderJS("stats", "jplot", "templates/stats/faultCount/js/stats.js");
