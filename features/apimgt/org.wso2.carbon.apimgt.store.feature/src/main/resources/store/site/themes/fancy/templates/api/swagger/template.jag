@@ -90,13 +90,13 @@ var show_environments = function(){
     $("#environment_name").children("option[class='" + type + "']").show();
     var options = $("#environment_name").children("option[class='"+ type + "']");
     if(options.length > 0){
-    options[0].selected=true;
-    if (options.length == 1) {
-      $("#environment_name").hide();
-    }
-    }else{
-    $("#environment_name").children("option[class='hybrid']")[0].selected = true;
-    $("#environment_name").hide();
+    	options[0].selected=true;
+	    if (options.length == 1) {
+	      $("#environment_name").hide();
+	    }
+    } else if ($("#environment_name").children("option[class='hybrid']").length > 0) {
+	    $("#environment_name").children("option[class='hybrid']")[0].selected = true;
+	    $("#environment_name").hide();
     }
     select_environment();
           };
