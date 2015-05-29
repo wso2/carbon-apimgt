@@ -298,7 +298,7 @@ public abstract class AbstractAPIManager implements APIManager {
     public API getAPI(APIIdentifier apiId) throws APIManagementException {
         Registry registry;
         String provider = APIUtil.replaceEmailDomain(apiId.getProviderName());
-        APIIdentifier identifier=new APIIdentifier(provider,apiId.getApiName(),apiId.getVersion());
+        APIIdentifier identifier=new APIIdentifier(provider, apiId.getApiName(), apiId.getVersion());
         String apiPath = APIUtil.getAPIPath(identifier);
         boolean isTenantFlowStarted = false;
         try {
