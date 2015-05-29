@@ -1641,8 +1641,9 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 
         String callBackURL = null;
 
-        OAuthAppRequest oauthAppRequest = ApplicationUtils.createOauthAppRequest(clientId, callBackURL,"default",
+        OAuthAppRequest oauthAppRequest = ApplicationUtils.createOauthAppRequest(applicationName, callBackURL,"default",
                                                                                   jsonString);
+
 
         KeyManager keyManager = KeyManagerHolder.getKeyManagerInstance();
         //createApplication on oAuthorization server.
