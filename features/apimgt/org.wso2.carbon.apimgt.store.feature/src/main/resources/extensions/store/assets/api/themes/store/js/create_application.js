@@ -20,13 +20,11 @@
 var updateApplication;
 var removeApplication;
 var changeAppRowtoEditView;
+var addApplication;
 /*
  This js function will populate the UI after metadata generation in pages/my_applications.jag
  */
 $(function () {
-    var obtainFormMeta = function (formId) {
-        return $(formId).data();
-    };
 
     /*
      * This function refresh the by adding the new entries applications table
@@ -125,12 +123,19 @@ $(function () {
             success: function (data) {
                 document.getElementById("tr-application-" + metadata.editRowData.appId + "-data").innerHTML =
                     getNewTrUpdated();
-                var message = {};
-                message.text = '<div><i class="icon-briefcase"></i> Application: ' +
-                metadata.editRowData.appName + ' has been updated.</div>';
-                message.type = 'success';
-                message.layout = 'topRight';
-                noty(message);
+                BootstrapDialog.show({
+                    type: BootstrapDialog.TYPE_SUCCESS,
+                    title: 'success',
+                    message: '<div><i class="icon-briefcase"></i> Application: ' +
+                    metadata.editRowData.appName + ' has been updated.</div>',
+                    buttons: [{
+                        label: 'Close',
+                        action: function (dialogItself) {
+                            dialogItself.close();
+                        }
+                    }]
+
+                });
             }
         });
     };
@@ -149,16 +154,13 @@ $(function () {
      */
     removeApplication = function (appName, userName, appId) {
         setMetadataForDelRow(appName, appId);
-        noty({
-            text: "Are you sure you want to remove the application '" + appName + "'? This will cancel all the existing subscriptions and keys associated with the application.",
-            layout: 'topRight',
-            type: 'confirm',
-            closeWith: ['click'],
-            buttons: [
-                {
-                    addClass: 'btn btn-primary', text: 'Yes', onClick: function ($noty) {
-                    $noty.close();
-
+        BootstrapDialog.show({
+            type: BootstrapDialog.TYPE_SUCCESS,
+            title: 'success',
+            message: 'Are you sure you want to remove the application ' + appName + '? This will cancel all the existing subscriptions and keys associated with the application.',
+            buttons: [{
+                label: 'Yes',
+                action: function (dialogItself) {
                     var removeApplicationData = {};
                     removeApplicationData.appName = appName;
                     removeApplicationData.userName = userName;
@@ -172,15 +174,15 @@ $(function () {
                             $("#tr-application-" + metadata.delRowData.appId + "-data").remove();
                         }
                     });
+                    dialogItself.close();
+                }
+            }, {
+                label: 'No',
+                action: function (dialogItself) {
+                    dialogItself.close();
+                }
+            }]
 
-                }
-                },
-                {
-                    addClass: 'btn btn-other', text: 'No', onClick: function ($noty) {
-                    $noty.close();
-                }
-                }
-            ]
         });
     };
 
@@ -196,7 +198,7 @@ $(function () {
     };
 
     /*
-     * This function change the application html view row to edit view
+     * This function change the application html table row to edit view
      */
     changeAppRowtoEditView = function (appName, userName, appId, tier, status, callbackUrl, description) {
         var rowContent = "<td><input type='text' id='new_overview_name_" + appId +
@@ -215,28 +217,71 @@ $(function () {
         document.getElementById("tr-application-" + appId + "-data").innerHTML = rowContent;
     };
 
-    $(document).ready(function () {
+    /*
+     * This function triggers the api function for add new application.
+     */
+    addApplication = function () {
         var appName = $('#overview_name').val();
-        $('#form-application-create').ajaxForm({
-            success: function () {
-                var options = obtainFormMeta('#form-application-create');
-                var message = {};
-                message.text = '<div><i class="icon-briefcase"></i> Application: ' +
-                appName + ' has been created.</div>';
-                message.type = 'success';
-                message.layout = 'topRight';
-                noty(message);
-                refreshApplicationList();
-            },
-            error: function () {
-                var message = {};
-                message.text = '<div><i class="icon-briefcase"></i> Application: ' +
-                appName + ' has not been created.</div>';
-                message.type = 'error';
-                message.layout = 'topRight';
-                noty(message);
-            }
-        });
-    });
+        if (appName != '') {
+            var addNewApplicationData = {};
+            addNewApplicationData.appName = $('#overview_name').val();
+            addNewApplicationData.tier = $('#overview_tier').val();
+            addNewApplicationData.callbackUrl = $('#overview_callbackurl').val();
+            addNewApplicationData.description = $('#overview_description').val();
+            $.ajax({
+                type: 'POST',
+                url: getApplicationsAPI('newapp'),
+                data: addNewApplicationData,
+                success: function (data) {
+                    refreshApplicationList();
+                    BootstrapDialog.show({
+                        type: BootstrapDialog.TYPE_SUCCESS,
+                        title: 'success',
+                        message: '<div><i class="icon-briefcase"></i> Application: ' +
+                        appName + ' has been created.</div>',
+                        buttons: [{
+                            label: 'Close',
+                            action: function (dialogItself) {
+                                dialogItself.close();
+                            }
+                        }]
+
+                    });
+                },
+                error: function (result) {
+
+                    BootstrapDialog.show({
+                        type: BootstrapDialog.TYPE_DANGER,
+                        title: 'Error',
+                        message: '<div><i class="icon-briefcase"></i> Application: ' +
+                        appName + ' has not been created.</div>',
+                        buttons: [{
+                            label: 'Close',
+                            action: function (dialogItself) {
+                                dialogItself.close();
+                            }
+
+                        }]
+
+                    });
+                }
+            });
+        } else {
+            BootstrapDialog.show({
+                type: BootstrapDialog.TYPE_DANGER,
+                title: 'Error',
+                message: "Can't leave application name empty!",
+                buttons: [{
+                    label: 'Close',
+                    action: function (dialogItself) {
+                        dialogItself.close();
+                    }
+
+                }]
+
+            });
+        }
+    };
+
 
 });

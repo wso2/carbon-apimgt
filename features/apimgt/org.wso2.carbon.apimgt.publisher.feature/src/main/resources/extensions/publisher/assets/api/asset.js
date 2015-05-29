@@ -120,8 +120,7 @@ asset.manager = function(ctx) {
                     result = apiProxy.createAPI(api);
                     if (result!=null && result.error) {
                         throw "Error while creating the API." + result.error;
-                    }
-                    else{
+                    } else{
                         options.id=result.uuid;
                         options.name=api.name;
                         options.attributes.overview_provider=api.provider;
