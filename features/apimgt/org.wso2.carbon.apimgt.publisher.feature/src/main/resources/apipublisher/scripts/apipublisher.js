@@ -46,9 +46,6 @@ var apipublisher = {};
     var DateFormat=Packages.java.text.DateFormat;
     var SimpleDateFormat=Packages.java.text.SimpleDateFormat;
 
-    var TierSet=new Set();
-    var uriTemplates=new Set();
-    var attributes=new HashMap();
     var log = new Log("jaggery-modules.api-manager.publisher");
     //Defining constant fields
     var API_PROVIDER = "provider";
@@ -73,7 +70,22 @@ var apipublisher = {};
 
     APIProviderProxy.prototype.createAPI = function (api) {
         var identifier = new Packages.org.wso2.carbon.apimgt.api.model.APIIdentifier(api.provider, api.name, api.version);
-        return this.impl.createAPI(identifier, api.context);
+        var uuid;
+        try {
+            uuid = this.impl.createAPI(identifier, api.context);
+            if (log.isDebugEnabled()) {
+                log.debug("Error while creating API" );
+            }
+            return {
+                error:false,
+                uuid:uuid
+            };
+        } catch (e) {
+            log.error(e.message);
+            return {
+                error:e
+            };
+        }
     };
 
     APIProviderProxy.prototype.implementAPI = function (api) {
@@ -105,7 +117,7 @@ var apipublisher = {};
         apiOb.setVisibility(api.visibility);
         apiOb.setVisibleRoles(api.visibleRoles);
         apiOb.setThumbnailUrl(api.thumbnailUrl);
-        return this.impl.updateAPIDesign(apiObj,  api.tags, api.swagger);
+        return this.impl.updateAPIDesign(apiOb,  api.tags, api.swagger);
     };
 
     APIProviderProxy.prototype.addDocumentation = function (api, document) {
@@ -150,8 +162,8 @@ var apipublisher = {};
     };
 
     /*
-    * This method returns the UUID of an artifact
-    */
+     * This method returns the UUID of an artifact
+     */
     APIProviderProxy.prototype.getUUIDByApi = function (provider, name, version) {
         return this.impl.getUUIDByApi(provider, name, version);
     };
@@ -245,8 +257,8 @@ var apipublisher = {};
     };
 
     /*
-    * This method is used to update the application wise and user wise subscription status
-    */
+     * This method is used to update the application wise and user wise subscription status
+     */
     APIProviderProxy.prototype.updateSubscription = function (apiProvider, apiName, apiVersion, appId, status) {
         var identifier = new Packages.org.json.simple.JSONObject();
         identifier.put(API_PROVIDER, apiProvider);
@@ -298,8 +310,6 @@ var apipublisher = {};
             var tierSet = '';
             var tiersDisplayNamesSet = '';
             var tiersDescSet = '';
-
-            //Creating tier representtation
             for(var i = 0; i < tiers.length  ; i++) {
                 tierSet += tiers[0].getName();
                 tiersDisplayNamesSet += tiers[0].getDisplayName();
@@ -318,14 +328,12 @@ var apipublisher = {};
                 wsdl: api.getWsdlUrl(),
                 version: api.getId().getVersion(),
                 tags: api.getTagSetAsString(),
-                endpoint: result.get('name'),
                 availableTiers: tierSet,
                 status: api.getStatus().toString(),
                 thumb: APIUtil.getWebContextRoot(api.getThumbnailUrl()),
                 context: api.getContext(),
                 lastUpdated: Long.valueOf(api.getLastUpdated().getTime()).toString(),
                 subs: subscriberCount,
-                templates: result.get('name'),
                 sandbox: api.getSandboxUrl(),
                 tierDescs:tiersDescSet,
                 bizOwner: api.getBusinessOwner(),
@@ -342,7 +350,6 @@ var apipublisher = {};
                 provider: APIUtil.replaceEmailDomainBack(api.getId().getProviderName()),
                 transport_http: APIUtil.checkTransport("http", api.getTransports()),
                 transport_https: APIUtil.checkTransport("https", api.getTransports()),
-                apiStores: result.get('externalAPIStores'),
                 inSequence: api.getInSequence(),
                 outSequence: api.getOutSequence(),
                 subscriptionAvailability: api.getSubscriptionAvailability(),
@@ -353,11 +360,8 @@ var apipublisher = {};
                 availableTiersDisplayNames: tiersDisplayNamesSet,
                 faultSequence: api.getFaultSequence(),
                 destinationStats: api.getDestinationStatsEnabled(),
-                resources: result.get('apiResources'),
-                scopes: result.get('scopes'),
                 isDefaultVersion: api.isDefaultVersion(),
                 implementation: api.getImplementation(),
-                environments: result.get('publishedEnvironments'),
                 hasDefaultVersion: hasDefaultVersion,
                 currentDefaultVersion: defaultVersion
             };
@@ -397,7 +401,24 @@ var apipublisher = {};
     };
 
     APIProviderProxy.prototype.checkIfAPIExists = function (apiProvider, apiName, apiVersion) {
-        return this.impl.checkIfAPIExists(apiProvider, apiName, apiVersion);
+
+        var exists;
+        var identifier = new Packages.org.wso2.carbon.apimgt.api.model.APIIdentifier(apiProvider, apiName, apiVersion);
+        try {
+            exists = this.impl.checkIfAPIExists(identifier);
+            if (log.isDebugEnabled()) {
+                log.debug("Error while checking api exist for : " + apiName + " : " + exists);
+            }
+            return {
+                error:false,
+                exist:exists
+            };
+        } catch (e) {
+            log.error(e.message);
+            return {
+                error:e
+            };
+        }
     };
 
     APIProviderProxy.prototype.isSynapseGateway = function () {
@@ -419,9 +440,24 @@ var apipublisher = {};
         }
     };
 
-    APIProviderProxy.prototype.getSwagger12Resource = function (apiProvider, apiName, apiVersion) {
+    APIProviderProxy.prototype.getSwagger20Definition = function (apiProvider, apiName, apiVersion) {
         var identifier = new Packages.org.wso2.carbon.apimgt.api.model.APIIdentifier(apiProvider, apiName, apiVersion);
-        return JSON.parse(this.impl.getSwagger12Definition(identifier));
+        var data;
+        try {
+            data = JSON.parse(this.impl.getSwagger20Definition(identifier));
+            if (log.isDebugEnabled()) {
+                log.debug("Error while getting swagger20 resource" );
+            }
+            return {
+                error:false,
+                data:data
+            };
+        } catch (e) {
+            log.error(e.message);
+            return {
+                error:e
+            };
+        }
     };
 
     APIProviderProxy.prototype.isMultipleTenantsAvailable = function(){
