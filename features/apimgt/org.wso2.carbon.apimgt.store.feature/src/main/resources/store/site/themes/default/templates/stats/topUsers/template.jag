@@ -21,13 +21,13 @@
     </div>
     </div>
 
-   <h2 style="margin-bottom:30px;"><%=i18n.localize("registeredUseres")%></h2>
+   <h3 style="margin-bottom:30px;"><%=i18n.localize("registeredUseres")%></h3>
         <div class="col-md-12"
             <div id="subsChart">
             </div>
         </div>
 
-   <h2 style="margin-top:30px;"><%=i18n.localize("topUsersTitle")%></h2>
+   <h3 style="margin-top:30px;"><%=i18n.localize("topUsersTitle")%></h3>
         <div class="col-md-12">
             <div id="topUsersView"></div>
         </div>

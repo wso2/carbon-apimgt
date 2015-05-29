@@ -71,14 +71,14 @@ var statsEnabled = isDataPublishingEnabled();
                 }
 
                 else if (json.usage && json.usage.length == 0 && statsEnabled) {
-                    $('#content').html("");
-                    $('#content').append($('<div class="errorWrapper"><img src="../themes/fancy/templates/stats/images/statsEnabledThumb.png" alt="Stats Enabled"></div>'));
+                    $('.stat-page').html("");
+                    $('.stat-page').append($('<br><div class="errorWrapper"><img src="../themes/default/templates/stats/images/statsEnabledThumb.png" alt="Stats Enabled"></div>'));
                 }
 
                 else{
-                    $('#content').html("");
-                    $('#content').append($('<div class="errorWrapper"><span class="label top-level-warning"><i class="icon-warning-sign icon-white"></i>'
-                        +i18n.t('errorMsgs.checkBAMConnectivity')+'</span><br/><img src="../themes/fancy/templates/stats/faultCount/images/statsThumb.png" alt="Smiley face"></div>'));
+                    $('.stat-page').html("");
+                    $('.stat-page').append($('<br><div class="errorWrapper"><span class="top-level-warning"><span class="glyphicon glyphicon-warning-sign blue"></span>'
+                        +i18n.t('errorMsgs.checkBAMConnectivity')+'</span><br/><img src="../themes/default/templates/stats/apiCallType/images/statsThumb.png" alt="Smiley face"></div>'));
                 }
             }
             else {
@@ -124,7 +124,7 @@ var drawAPIResponseFaultCountTable = function(from,to){
                         $('#PerAppAPIFaultCountTable').append($('<tr><td>' + json.usage[i].appName + '</td><td>' +json.usage[i].apiCountArray[0].apiName + '</td><td class="tdNumberCell">' + json.usage[i].apiCountArray[0].count + '</td></tr>'));
                          if(json.usage[i].apiCountArray.length > 1){
                              for (var j =1 ; j < json.usage[i].apiCountArray.length; j++) {
-                                 $('#PerAppAPIFaultCountTable').append($('<tr><td>' + "" + '</td><td>' + json.usage[i].apiCountArray[j].apiName + '</td><td class="tdNumberCell">' + json.usage[i].apiCountArray[j].count + '</td></tr>'));
+                                 $('#PerAppAPIFaultCountTable').append($('<tr><td>' + json.usage[i].appName + '</td><td>' + json.usage[i].apiCountArray[j].apiName + '</td><td class="tdNumberCell">' + json.usage[i].apiCountArray[j].count + '</td></tr>'));
                              }
                          }
                     }
