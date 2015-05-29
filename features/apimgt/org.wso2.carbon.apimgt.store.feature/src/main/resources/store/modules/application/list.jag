@@ -37,9 +37,7 @@ var getApplicationByName = function (username, applicationName, groupId) {
             store = jagg.module("manager").getAPIStoreObj();
 
     try {
-        var log = new Log();
-        log.info("user name " + username);
-        log.info("applicationName" + applicationName);
+
         application = store.getApplicationByName(username , applicationName, groupId);
         if (log.isDebugEnabled()) {
             log.debug("getApplicationsByName : " + stringify(application));
