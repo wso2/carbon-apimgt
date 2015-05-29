@@ -1,0 +1,42 @@
+{
+  "codegen": {
+    "servers": "http://generator.swagger.io/api/gen/servers",
+    "clients": "http://generator.swagger.io/api/gen/clients",
+    "server": "http://generator.swagger.io/api/gen/servers/{language}",
+    "client": "http://generator.swagger.io/api/gen/clients/{language}"
+  },
+  "analytics": {
+    "google": {
+      "id": ""
+    }
+  },
+  "disableCodeGen": false,
+  "disableExamples":true,
+  "disableImport":true,
+  "examplesFolder": "/spec-files/",
+  "editorOptions": {
+  
+  },
+  "exampleFiles": [
+    "default.yaml",
+    "heroku-pets.yaml",
+    "minimal.yaml",
+    "echo.yaml",
+    "petstore_simple.yaml",
+    "petstore_full.yaml",
+    "basic-auth.yaml",
+    "security.yaml"
+  ],
+  "autocompleteExtension": {},
+  "useBackendForStorage": false,
+  "backendThrottle": 200,
+  "backendEndpoint": "/editor/spec",
+  "backendHealthCheckTimeout": 5000,
+  "useYamlBackend": false,
+  "disableFileMenu": false,
+  "headerBranding": false,
+  "enableTryIt": false,
+  "brandingCssClass": "",
+  "schemaUrl": "/schema/swagger.json",
+  "importProxyUrl": ""
+}

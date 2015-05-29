@@ -64,7 +64,7 @@ $(document).ready(function () {
 		targetLocation = window.location.href;		
 		//targetLocation = currentLocation;
 		}
-		var redirectURL = '/store/site/pages/sso-filter.jag?requestedPage='+encodeURIComponent(targetLocation);
+		var redirectURL = siteContext + '/site/pages/sso-filter.jag?requestedPage='+encodeURIComponent(targetLocation);
 		window.location.href = redirectURL;	
 	return false;
 	}

@@ -60,7 +60,7 @@
           if(request.getQueryString()){
           listAPIsURL+= "?" + request.getQueryString();
           } %>
-            <div class="alert alert-info">
+            <div class="alert alert-info margin-top">
              No subscriptions are created yet. To add a new subscription , select an API and subscribe to it from  <a href="<%=jagg.getAbsoluteUrl(listAPIsURL)%>" >API listing page</a>.
             </div>
     <%}%>
