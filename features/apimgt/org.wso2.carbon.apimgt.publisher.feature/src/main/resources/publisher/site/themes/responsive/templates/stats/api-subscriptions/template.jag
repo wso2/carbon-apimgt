@@ -1,0 +1,51 @@
+<% jagg.template("stats/api-subscriptions", function(inputs, outputs, jagg) { %>
+<link type="text/css" rel="stylesheet" href="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("templates/utils/dojo-release-1.8.3/dijit/themes/claro/claro.css"))%>"  media="screen"/>
+
+<!-- donut chart plugin-->
+<script type="text/javascript" src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("templates/utils/donut-chart/d3.v3.min.js"))%>"></script>
+<script type="text/javascript" src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("templates/utils/donut-chart/jquery-ui.js"))%>"></script>
+<link type="text/css" rel="stylesheet" href="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("templates/utils/donut-chart/jquery-ui.css"))%>"/>
+<link type="text/css" rel="stylesheet" href="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("templates/utils/donut-chart/donut-chart.css"))%>"/>
+
+<!--pagination-->
+<script type="text/javascript" src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("templates/utils/pagination/jquery.simplePagination.js"))%>"></script>
+<!--<link type="text/css" rel="stylesheet" href="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("templates/utils/pagination/pagination.css"))%>"/>-->
+<!--<link type="text/css" rel="stylesheet" href="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("lib/bootstrap/css/bootstrap.min.css"))%>"/>-->
+
+<!--datepicker-->
+<script type="text/javascript" src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("templates/utils/datepicker/js/moment.js"))%>"></script>
+<script type="text/javascript" src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("templates/utils/datepicker/js/jquery.daterangepicker.js"))%>"></script>
+<link type="text/css" rel="stylesheet" href="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("templates/utils/datepicker/css/daterangepicker.css"))%>"/>
+
+
+  <!--[if lt IE 9]><script language="javascript" type="text/javascript" src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("templates/utils/jqplot/excanvas.min.js"))%>" ></script><![endif]-->
+
+
+
+<div class="title-section"> <h2><%=i18n.localize("overallAPISubscriptionsTitle")%></h2> </div>
+
+<div class="content-section shadow-up">
+<div class="content-data">
+    <div class="well">
+        <div class="row-fluid">
+        <div class="span12">
+            <div id="slidercontainer" style="width:100%; height:100%">
+                <div id="pie-chart" >
+					<div class="progress progress-striped active">
+                		<div class="bar" style="width: 10%;"></div>
+            		</div>
+				</div>
+            </div>
+        </div>
+        </div>
+    </div>
+
+<div id="pagination" class="pagination pagination-sm"></div>
+
+</div>
+</div>
+
+
+<% }); %>
+
+
