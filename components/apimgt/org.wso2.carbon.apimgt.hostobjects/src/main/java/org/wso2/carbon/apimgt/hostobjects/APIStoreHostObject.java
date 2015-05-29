@@ -1962,14 +1962,14 @@ public class APIStoreHostObject extends ScriptableObject {
                 JSONObject sandboxEnvironmentObjects = (JSONObject) environmentsObject.get("sandbox");
                 JSONObject hybridEnvironmentObjects = (JSONObject) environmentsObject.get("hybrid");
                 int envCount = 0;
-                if (!productionEnvironmentObjects.isEmpty()) {
-                    createAPIEndpointsPerType(productionEnvironmentObjects, api, version, myn, envCount, "production");
+                if (productionEnvironmentObjects != null && !productionEnvironmentObjects.isEmpty()) {
+                 envCount = createAPIEndpointsPerType(productionEnvironmentObjects, api, version, myn, envCount, "production");
                 }
-                if (!sandboxEnvironmentObjects.isEmpty()) {
-                    createAPIEndpointsPerType(sandboxEnvironmentObjects, api, version, myn, envCount, "sandbox");
+                if (sandboxEnvironmentObjects != null && !sandboxEnvironmentObjects.isEmpty()) {
+                    envCount = createAPIEndpointsPerType(sandboxEnvironmentObjects, api, version, myn, envCount, "sandbox");
                 }
-                if (!hybridEnvironmentObjects.isEmpty()) {
-                    createAPIEndpointsPerType(hybridEnvironmentObjects, api, version, myn, envCount, "hybrid");
+                if (hybridEnvironmentObjects != null && !hybridEnvironmentObjects.isEmpty()) {
+                    envCount = createAPIEndpointsPerType(hybridEnvironmentObjects, api, version, myn, envCount, "hybrid");
                 }
             }
 
@@ -4713,13 +4713,13 @@ public class APIStoreHostObject extends ScriptableObject {
                 hybridEnvironmentObject.put(environment.getName(), jsonObject);
             }
         }
-        if (!productionEnvironmentObject.isEmpty()){
+        if (productionEnvironmentObject != null && !productionEnvironmentObject.isEmpty()){
             environmentObject.put(APIConstants.GATEWAY_ENV_TYPE_PRODUCTION, productionEnvironmentObject);
         }
-        if (!sandboxEnvironmentObject.isEmpty()){
+        if (sandboxEnvironmentObject != null && !sandboxEnvironmentObject.isEmpty()){
             environmentObject.put(APIConstants.GATEWAY_ENV_TYPE_SANDBOX, sandboxEnvironmentObject);
         }
-        if (!hybridEnvironmentObject.isEmpty()){
+        if (hybridEnvironmentObject != null && !hybridEnvironmentObject.isEmpty()){
             environmentObject.put(APIConstants.GATEWAY_ENV_TYPE_HYBRID, hybridEnvironmentObject);
         }
         return environmentObject;
@@ -4727,15 +4727,14 @@ public class APIStoreHostObject extends ScriptableObject {
 
     /**
      * this method used to iterate environments according to type
-     *
-     * @param environments json
+     *  @param environments json
      * @param api API object of selected api .
      * @param version version of API
      * @param myn
      * @param envCount count parameter
      * @param type type of environment
      */
-    private static void createAPIEndpointsPerType(JSONObject environments, API api, String version, NativeArray myn,
+    private static int createAPIEndpointsPerType(JSONObject environments, API api, String version, NativeArray myn,
                                                  int envCount, String type) {
         for (Object prodKeys : environments.keySet()) {
             JSONObject environmentObject = (JSONObject) environments.get(prodKeys);
@@ -4754,8 +4753,9 @@ public class APIStoreHostObject extends ScriptableObject {
                 index++;
                 appObj.put("environmentURLs", appObj, envs);
                 myn.put(envCount, myn, appObj);
-                envCount++;
             }
         }
+        envCount++;
+        return envCount;
     }
 }
