@@ -1,0 +1,81 @@
+<% jagg.template("page/base", function(inputs, outputs, jagg) { %>
+
+<%
+var i18n = require("i18n");
+var localeResourcesBasePath="/site/conf/locales/jaggery/";
+var tenantDomain=request.getParameter("tenant");
+var urlPrefix;
+var urlPostfix;
+if(tenantDomain!='null'){
+   urlPrefix="?tenant="+ encode.forUriComponent(tenantDomain);
+   urlPostfix="&tenant="+ encode.forUriComponent(tenantDomain);
+}else{
+   urlPrefix='';
+   urlPostfix='';
+}
+i18n.init(request,localeResourcesBasePath);
+%>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <script>
+        var requestURL = '<%= jagg.getAbsoluteUrl("") %>';
+        var ssoEnabled = '<%=site.ssoConfiguration.enabled%>';
+        var tenantDomain = '<%= encode.forJavaScript(tenantDomain) %>';
+    </script>
+    <title><%=outputs.title%></title>
+    <meta charset="UTF-8">
+    <meta name="description" content=""/>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+
+
+    <!-- Le fav and touch icons -->
+    <link rel="shortcut icon" href="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("images/favicon.png"))%>">
+
+<%
+    var data = jagg.data();
+    if(data.header) {
+        jagg.printData(data.header.js);
+        jagg.printData(data.header.css);
+        jagg.printData(data.header.code);
+    }
+    %>
+</head>
+<%var reqUrl = request.getRequestURI();
+var provider = request.getParameter("provider");
+var name = request.getParameter("apiName");
+var version = request.getParameter("version")
+var docName = request.getParameter("docName");
+var inlineUrl="inline";
+var jsonUrl="json";
+var addUrl="add";
+var editUrl="info";
+%>
+<body>
+
+    <% jagg.includeBlocks(outputs.header); %>
+    <% jagg.includeBlocks(outputs.body); %>
+    <% jagg.includeBlocks(outputs.footer); %>
+    <% jagg.includeBlock("dialogs", null); %>
+    <%
+    if(data.footer) {
+        jagg.printData(data.footer.js);
+        jagg.printData(data.footer.css);
+        jagg.printData(data.footer.code);
+    }
+    %>
+    <script>
+        var siteRoot = '<%=jagg.getAbsoluteUrl("/site/themes/"+jagg.getUserTheme().base)%>';
+    </script>
+
+
+    <script type="text/javascript" src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("lib/jquery.cookie.js"))%>"></script>
+    <script type="text/javascript" src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("lib/jquery.form.js"))%>"></script>
+
+
+    <script type="text/javascript" src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("templates/utils/button-loader/jquery.buttonLoader.js"))%>"></script>
+
+
+</body>
+</html>
+<% }); %>
