@@ -96,21 +96,25 @@
     </div>
   <%  }%>
 
+
 <script>
     $(document).ready(function(){
         <% if(api != null && api.subs == 0){ %>
-            $('#visibility').change(function(){
-                var visibility = $('#visibility').find(":selected").val();
-                if (visibility != "public"){
-                    jagg.message({content:"You have changed visibility of API, so based on visibility subscription availability may change",type:"warn"});
-                }
-                if (visibility == "public" || visibility == "private" || visibility == "controlled"){
-                    $('#rolesDiv').hide(); 
-                }
-                else { 
-                    $('#rolesDiv').show(); 
-                }
-            });
+            var visibility = $('#visibility').find(":selected").val();
+            if (visibility == "public"){
+                $('#visibility').change(function(){
+                    visibility = $('#visibility').find(":selected").val();
+                    if (visibility != "public"){
+                        jagg.message({content:"You have changed visibility of API, so based on visibility subscription availability may change",type:"warning"});
+                    }
+                    if (visibility == "public" || visibility == "private" || visibility == "controlled"){
+                        $('#rolesDiv').hide();
+                    }
+                    else {
+                        $('#rolesDiv').show();
+                    }
+                });
+            }
         <% } %>
     });
 </script>
@@ -253,6 +257,27 @@
 	    </div>
 	 <%}%>
 
+	 <div id="error-invalidImageFileSize" class="modal hide fade" tabindex="-1" role="dialog" aria-hidden="true">
+         <div class="modal-header">
+         <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+         <h3>API Publisher - Error</h3>
+         </div>
+         <div class="modal-body">
+         <table>
+             <tbody>
+                 <tr>
+                     <td><img src="/publisher/site/themes/default/images/error.png" align="center" hspace="10"></td>
+                     <td><span class="messageText">Image file exceeds the maximum limit of 1MB.</span></td>
+             </tbody>
+         </table>
+         </div>
+         <div class="modal-footer successMsgFooter">
+             <div class="pull-right">
+             <button class="btn btn-primary" data-dismiss="modal" aria-hidden="true">OK</button>
+             </div>
+         </div>
+     </div>
+
 <% if(api){ %>
             <div class="control-group">
                 <label class="control-label" for="imageUrl"><%=i18n.localize("thumbnail")%></label>
@@ -265,7 +290,7 @@
                         </a>
                     </div>
                     <div class="pull-left" id="imageUrl" style="display:none;">
-                        <div id="apiThumb-container" class="pull-left"> <input type="file" class="input-xlarge validateImageFile" name="apiThumb" /></div>
+                        <div id="apiThumb-container" class="pull-left"> <input id ="apiThumb" type="file" class="input-xlarge validateImageFile" name="apiThumb" /></div>
                         <input class="pull-left btn" type="button" id="clearThumb" value="<%=i18n.localize("clear")%>"/>
                         <div class="help-block pull-left inline-help">
                             <ul>

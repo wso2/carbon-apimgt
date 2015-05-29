@@ -38,7 +38,7 @@ i18n.init(request,localeResourcesBasePath);
                 <i class="fa fa-tachometer"></i>
                                 <br>
               <a href="#" class="dropdown-toggle" data-toggle="dropdown">Themes <b class="caret"></b></a>
-              <ul class="dropdown-menu theme-container">
+              <ul class="dropdown-menu theme-container" style="height:400px">
                 <li  class="themeSelection"><h3><%=i18n.localize("selectTheme")%></h3>
                     <form id="themeSelectForm" action="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("templates/user/theme/template.jag?theme=modern"))%>">
                         <input type="hidden" id="themeToApply" name="themeToApply" />
@@ -62,8 +62,17 @@ i18n.init(request,localeResourcesBasePath);
                                             <br /><div class="themeName"><%=i18n.localize("dark")%></div>
                                         </a>
                                     </div>
-
                                 </td>
+                              </tr>
+                              <tr>
+                                <td>
+                                    <div class="thumbnail">
+                                        <a data-theme="default" data-subtheme="default" class="badge themeLabel" onclick="applyTheme(this)">
+                                            <img src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("images/thumb-responsive.png"))%>" />
+                                            <br /><div class="themeName">Responsive</div>
+                                        </a>
+                                    </div>
+                                </td>                                
                             </tr>
                         </table>
                     </form>

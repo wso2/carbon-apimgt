@@ -284,7 +284,7 @@
                             </importBundles>
                             <importFeatures>
                                 <importFeatureDef>org.wso2.carbon.core.server:${carbon.platform.version}</importFeatureDef>
-                                <importFeatureDef>org.wso2.carbon.identity.oauth.server:4.2.5-SNAPSHOT</importFeatureDef>
+                                <importFeatureDef>org.wso2.carbon.identity.oauth.server:4.2.5</importFeatureDef>
                                 <importFeatureDef>org.wso2.carbon.um.ws.service.server:${carbon.platform.version}</importFeatureDef>
                             </importFeatures>
                         </configuration>

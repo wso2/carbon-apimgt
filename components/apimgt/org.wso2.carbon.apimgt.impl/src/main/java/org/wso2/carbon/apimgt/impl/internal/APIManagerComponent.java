@@ -41,8 +41,13 @@ import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.utils.RemoteAuthorizationManager;
 import org.wso2.carbon.bam.service.data.publisher.services.ServiceDataPublisherAdmin;
 import org.wso2.carbon.base.MultitenantConstants;
+import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
+import org.wso2.carbon.context.RegistryType;
 import org.wso2.carbon.governance.api.util.GovernanceConstants;
+import org.wso2.carbon.identity.application.common.IdentityApplicationManagementException;
+import org.wso2.carbon.registry.api.Collection;
+import org.wso2.carbon.registry.api.Registry;
 import org.wso2.carbon.registry.core.ActionConstants;
 import org.wso2.carbon.registry.core.RegistryConstants;
 import org.wso2.carbon.registry.core.Resource;
@@ -112,6 +117,7 @@ public class APIManagerComponent {
 
     private static TenantRegistryLoader tenantRegistryLoader;
     private APIManagerConfiguration configuration = new APIManagerConfiguration();
+    public static final String APPLICATION_ROOT_PERMISSION =  "applications";
 
 
     protected void activate(ComponentContext componentContext) throws Exception {
@@ -124,6 +130,7 @@ public class APIManagerComponent {
             addRxtConfigs();
             addTierPolicies();
             addDefinedSequencesToRegistry();
+            addApplicationsPermissionsToRegistry();
             APIUtil.loadTenantExternalStoreConfig(MultitenantConstants.SUPER_TENANT_ID);
             APIUtil.loadTenantGAConfig(MultitenantConstants.SUPER_TENANT_ID);
             int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
@@ -484,6 +491,45 @@ public class APIManagerComponent {
         } catch (IOException e) {
             throw new APIManagementException("Error while reading External Stores configuration file content", e);
         }
+    }
+
+    /**
+     * This method will create new permission name  "applications" in registry permission.
+     */
+    private void addApplicationsPermissionsToRegistry() throws APIManagementException {
+        Registry tenantGovReg = CarbonContext.getThreadLocalCarbonContext().getRegistry(
+                RegistryType.USER_GOVERNANCE);
+
+        String permissionResourcePath = CarbonConstants.UI_PERMISSION_NAME + RegistryConstants.PATH_SEPARATOR +
+                APPLICATION_ROOT_PERMISSION;
+        try {
+
+            if (!tenantGovReg.resourceExists(permissionResourcePath)) {
+                String loggedInUser = CarbonContext.getThreadLocalCarbonContext().getUsername();
+                boolean loggedInUserChanged;
+                UserRealm realm =
+                        (UserRealm) CarbonContext.getThreadLocalCarbonContext().getUserRealm();
+
+                //Logged in user is not authorized to create the permission.
+                // Temporarily change the user to the admin for creating the permission
+                PrivilegedCarbonContext.getThreadLocalCarbonContext().setUsername(
+                        realm.getRealmConfiguration().getAdminUserName());
+                tenantGovReg = CarbonContext.getThreadLocalCarbonContext()
+                        .getRegistry(RegistryType.USER_GOVERNANCE);
+                loggedInUserChanged = true;
+                Collection appRootNode = tenantGovReg.newCollection();
+                appRootNode.setProperty("name", "Applications");
+                tenantGovReg.put(permissionResourcePath, appRootNode);
+                if (loggedInUserChanged) {
+                    PrivilegedCarbonContext.getThreadLocalCarbonContext().setUsername(loggedInUser);
+                }
+            }
+        } catch (org.wso2.carbon.user.core.UserStoreException e) {
+            throw new APIManagementException("Error while reading user store information.", e);
+        } catch (org.wso2.carbon.registry.api.RegistryException e) {
+            throw new APIManagementException("Error while creating new permission in registry", e);
+        }
+
     }
     
    protected void setConfigurationContextService(ConfigurationContextService contextService) {

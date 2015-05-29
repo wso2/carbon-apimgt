@@ -310,12 +310,19 @@ a.remove_rating:hover{ color: #C00}
 .requiredAstrix{ color: red; }
 
 /* forum styles */
-#forum_add_reply_button, #topic-add-actions{
+#forum_add_reply_button, #topic-add-actions, .edit-topic-form-actions, .forum-reply-actions{
     margin-top : 10px;
 }
-#subject{
+
+/* bold Forum Subject */
+#subject, #forum_topic_subject_edit_input{
     font-weight:bold;
     margin-bottom:10px;
+}
+
+/*pointer for forum paginator*/
+#forum_topics_list_paginator{
+    cursor:pointer;
 }
 
 /* word wrap */
@@ -324,14 +331,10 @@ a.remove_rating:hover{ color: #C00}
     word-break:break-all;
 }
 
-/* bold Forum Subject */
-
-
 /* pointer to show more Details in sign-up */
 .moreDetails{
     cursor:pointer
 }
-
 
 /* API List styling */
 .thumbnail .caption .api-name{ font-weight: bold; display: block; width: 100%; font-size: 1.2em;}

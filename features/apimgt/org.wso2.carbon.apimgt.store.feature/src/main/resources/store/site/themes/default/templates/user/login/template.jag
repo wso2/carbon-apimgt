@@ -51,16 +51,19 @@ var themes = [
 <%}%>
 
   <li class="dropdown">
-    <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false"><i class="fa fa-paint-brush"></i> <%=i18n.localize("selectTheme")%> <span class="caret"></span></a>
+    <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false"><i class="fa fa-paint-brush"></i> Themes<span class="caret"></span></a>
     <ul class="dropdown-menu" role="menu">
+      <li role="presentation" class="dropdown-header"><%=i18n.localize("selectTheme")%></li>
       <% for(var i=0;i < themes.length;i++) {
         if(themes[i].subtheme == jagg.getUserTheme().subtheme ){
       %>
-      <li><a class="active"><%=themes[i].subtheme%></a></li>
+      <li role="presentation" class="disabled"><a><i class="fa fa-check pull-right"></i><%=themes[i].subtheme%></a></li>
       <%} else { %>              
       <li><a href="<%=jagg.urlTenanted(jagg.getThemeFile("templates/user/theme/template.jag?themeToApply="+themes[i].base+"&subthemeToApply="+themes[i].subtheme))%>"><%=themes[i].subtheme%></a></li>
       <% }
       } %>
+      <li role="presentation" class="divider"></li>
+      <li><a href="<%=jagg.urlTenanted(jagg.getThemeFile("templates/user/theme/template.jag?themeToApply=fancy&subthemeToApply=null"))%>"> Fancy</a></li>
     </ul>
   </li>
   <li class="dropdown">

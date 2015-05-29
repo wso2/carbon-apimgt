@@ -1652,6 +1652,10 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         //Do application mapping with consumerKey.
         apiMgtDAO.createApplicationKeyTypeMappingForManualClients(oauthAppRequest, applicationName, userName, clientId);
 
+        //in semi manual mode we are allowing ALL domains.
+        String[] domainArray = {"ALL"};
+        apiMgtDAO.addAccessAllowDomains(clientId, domainArray);
+
         //#TODO get actuall values from response and pass.
         Map<String, Object> keyDetails = new HashMap<String, Object>();
 
@@ -2563,6 +2567,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             if (applicationId != null && tokenType != null) {
                 apiMgtDAO.deleteApplicationKeyMappingByConsumerKey(consumerKey);
                 apiMgtDAO.deleteApplicationRegistration(applicationId, tokenType);
+                apiMgtDAO.deleteAccessAllowDomains(consumerKey);
             }
         }
     }

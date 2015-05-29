@@ -1,19 +1,18 @@
 <%
 include("/jagg/jagg.jag");
 var publisher = jagg.module("manager").getAPIProviderObj();
-var domain = request.getParameter("tenant");
 var resourceUrl = request.getParameter("resourceUrl");
 
     if(publisher.getDocument instanceof Function){
-var object = publisher.getDocument(domain,resourceUrl);
-if(object == null){
-    response.status=500;
-   }else{
-    response.contentType = "application/force-download";
-    response.addHeader("Content-Disposition","attachment; filename="+object.name);
+        var object = publisher.getDocument(resourceUrl);
+        if(object == null){
+            response.status=500;
+           }else{
+            response.contentType = "application/force-download";
+            response.addHeader("Content-Disposition","attachment; filename="+object.name);
 
-    print(object.Data);
-}
+            print(object.Data);
+        }
     }else{
     response.status = 200;
     response.sendRedirect(resourceUrl);

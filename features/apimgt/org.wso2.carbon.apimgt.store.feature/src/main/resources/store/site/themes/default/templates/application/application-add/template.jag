@@ -64,7 +64,7 @@ An application is a logical collection of APIs. Applications allow you to use a 
                 unlimitedTierDesc = tiers[i].tierDescription;
             }
           %>
-          <option value="<%=tiers[i].tierName%>" <%if(tiers[i].tierName == "Unlimited"){print("selected=\"selected\"")}%>>
+          <option value="<%=tiers[i].tierName%>" <%if(tiers[i].defaultTier){print("selected=\"selected\"")}%>>          
             <%=tiers[i].tierDisplayName%>
           </option>
           <%}%>

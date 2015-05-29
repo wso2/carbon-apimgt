@@ -104,7 +104,7 @@
 	            var newStatus;
 	            var className;
                 var subscriberName=subscriber.username;
-                if(apiList.indexOf(",")>=0){
+                if(apiList != null){
                     var apis=apiList.split(",");
                 %>
                                 <td rowspan=<%=apis.length%>><i class="icon-user"></i><%=subscriber.username%></td>
