@@ -72,14 +72,14 @@ var statsEnabled = isDataPublishingEnabled();
                 }
 
                 else if (json.usage && json.usage.length == 0 && statsEnabled) {
-                    $('#content').html("");
-                    $('#content').append($('<div class="errorWrapper"><img src="../themes/fancy/templates/stats/images/statsEnabledThumb.png" alt="Stats Enabled"></div>'));
+                    $('.stat-page').html("");
+                    $('.stat-page').append($('<br><div class="errorWrapper"><img src="../themes/default/templates/stats/images/statsEnabledThumb.png" alt="Stats Enabled"></div>'));
                 }
 
                 else{
-                    $('#content').html("");
-                    $('#content').append($('<div class="errorWrapper"><span class="label top-level-warning"><i class="icon-warning-sign icon-white"></i>'
-                        +i18n.t('errorMsgs.checkBAMConnectivity')+'</span><br/><img src="../themes/fancy/templates/stats/perAppAPICount/images/statsThumb.png" alt="Smiley face"></div>'));
+                    $('.stat-page').html("");
+                    $('.stat-page').append($('<br><div class="errorWrapper"><span class="top-level-warning"><span class="glyphicon glyphicon-warning-sign blue"></span>'
+                        +i18n.t('errorMsgs.checkBAMConnectivity')+'</span><br/><img src="../themes/default/templates/stats/apiCallType/images/statsThumb.png" alt="Smiley face"></div>'));
                 }
             }
             else {
@@ -114,7 +114,7 @@ var drawGraphAPIUsage = function(from,to){
                 if(dataLength>0){
                 $('#apiUsage').empty();
                     for(var k=0 ; k<dataLength ;k++){
-                    $('#apiUsage').append($('<h3>Application Name:  '+json.usage[k].appName+'</h3><div class="col-md-12"><div class="col-md-6"><div id="apiChart'+(k+1)+'" class="chart"><svg style="height:400px;"></svg></div></div> <div class="col-md-6"> <table class="table table-striped table-bordered" id="apiTable'+(k+1)+'" class="display" cellspacing="0" width="100%"><thead><tr> <th>'+ i18n.t("apiName")+'</th><th>'+ i18n.t("noOfAPICalls")+'</th></tr></thead> </table> </div></div>'));
+                    $('#apiUsage').append($('<h4>Application Name:  '+json.usage[k].appName+'</h4><div class="col-md-12"><div class="col-md-6"><div id="apiChart'+(k+1)+'" class="chart"><svg style="height:400px;"></svg></div></div> <div class="col-md-6"> <table class="table table-striped table-bordered" id="apiTable'+(k+1)+'" class="display" cellspacing="0" width="100%"><thead><tr> <th>'+ i18n.t("apiName")+'</th><th>'+ i18n.t("noOfAPICalls")+'</th></tr></thead> </table> </div></div>'));
                     }
 
                      for(var k=0 ; k<dataLength ;k++){
@@ -132,7 +132,14 @@ var drawGraphAPIUsage = function(from,to){
                         }
                         drawChart('#apiChart'+(k+1),k,chartData);
                         if (length > 0) {
-                            $('#apiTable'+(k+1)).dataTable();
+                            $('#apiTable'+(k+1)).dataTable({
+                            "fnDrawCallback": function(){
+                                if(this.fnSettings().fnRecordsDisplay()<=$('#apiTable'+(k+1)+'_length option:selected' ).val()
+                              || $('#apiTable'+(k+1)+'_length option:selected' ).val()==-1)
+                                $('#apiTable'+(k+1)+'_paginate').hide();
+                                else $('#apiTable'+(k+1)+'_paginate').show();
+                              }
+                            });
                             $('#apiTable'+(k+1)).show();
                         }
                      }
