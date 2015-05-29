@@ -22,6 +22,34 @@ var apipublisher = {};
 
 (function (apipublisher) {
 
+    var APIManagerFactory = Packages.org.wso2.carbon.apimgt.impl.APIManagerFactory;
+    var APISubscriber = Packages.org.wso2.carbon.apimgt.api.model.Subscriber;
+    var APIIdentifier = Packages.org.wso2.carbon.apimgt.api.model.APIIdentifier;
+    var API= Packages.org.wso2.carbon.apimgt.api.model.API;
+    var Application=Packages.org.wso2.carbon.apimgt.api.model.Applications;
+    var APIUtil = Packages.org.wso2.carbon.apimgt.impl.utils.APIUtil;
+    var Date = Packages.java.util.Date;
+    var Tier= Packages.org.wso2.carbon.apimgt.api.model.Tier;
+    var URITemplate= Packages.org.wso2.carbon.apimgt.api.model.URITemplate;
+
+    var Set=Packages.java.util.Set;
+    var List=Packages.java.util.List;
+    var ArrayList=Packages.java.util.ArrayList;
+    var Iterator=Packages.java.util.Iterator;
+    var String=Packages.java.lang.String;
+    var Object=Packages.java.lang.Object;
+    var Map=Packages.java.util.Map;
+    var Long=Packages.java.lang.Long;
+    var HashMap=Packages.java.util.HashMap;
+    var JSONArray=Packages.org.json.simple.JSONArray;
+
+    var DateFormat=Packages.java.text.DateFormat;
+    var SimpleDateFormat=Packages.java.text.SimpleDateFormat;
+
+    var TierSet=new Set();
+    var uriTemplates=new Set();
+    var attributes=new HashMap();
+    var log = new Log("jaggery-modules.api-manager.publisher");
     //Defining constant fields
     var API_PROVIDER = "provider";
     var API_NAME = "name";
@@ -43,7 +71,7 @@ var apipublisher = {};
         return this.impl.getAllProviders();
     };
 
-    APIProviderProxy.prototype.designAPI = function (api) {
+    APIProviderProxy.prototype.createAPI = function (api) {
         var identifier = new Packages.org.wso2.carbon.apimgt.api.model.APIIdentifier(api.provider, api.name, api.version);
         return this.impl.createAPI(identifier, api.context);
     };
@@ -89,11 +117,11 @@ var apipublisher = {};
     };
 
     APIProviderProxy.prototype.createNewAPIVersion = function (api, newVersion) {
-    	 var apiObj = new Packages.org.json.simple.JSONObject();
-         apiObj.put("provider", api.provider);
-         apiObj.put("version", api.version);
-         apiObj.put("name", api.name);
-         apiObj.put("defaultVersion", api.defaultVersion);
+        var apiObj = new Packages.org.json.simple.JSONObject();
+        apiObj.put("provider", api.provider);
+        apiObj.put("version", api.version);
+        apiObj.put("name", api.name);
+        apiObj.put("defaultVersion", api.defaultVersion);
 
         return this.impl.createNewAPIVersion(api, newVersion);
     };
@@ -110,8 +138,22 @@ var apipublisher = {};
         return this.impl.getAPIsByProvider(providerName);
     };
 
-    APIProviderProxy.prototype.getSubscribersOfAPI = function (apiId) {
-        return this.impl.getSubscribersOfAPI(apiId);
+    /*
+     * This method returns the subscription details needed for api-subscriptions page.
+     */
+    APIProviderProxy.prototype.getSubscribersOfAPI = function (provider, name, version) {
+        var apiObj = new Packages.org.json.simple.JSONObject();
+        apiObj.put("provider", provider);
+        apiObj.put("name", name);
+        apiObj.put("version", version);
+        return this.impl.getSubscribersOfAPI(apiObj);
+    };
+
+    /*
+    * This method returns the UUID of an artifact
+    */
+    APIProviderProxy.prototype.getUUIDByApi = function (provider, name, version) {
+        return this.impl.getUUIDByApi(provider, name, version);
     };
 
     APIProviderProxy.prototype.getDefaultVersion = function (apiId) {
@@ -202,8 +244,15 @@ var apipublisher = {};
         }
     };
 
-    APIProviderProxy.prototype.updateSubscription = function (apiId, status, appId) {
-        return this.impl.updateSubscription(apiId, status, appId);
+    /*
+    * This method is used to update the application wise and user wise subscription status
+    */
+    APIProviderProxy.prototype.updateSubscription = function (apiProvider, apiName, apiVersion, appId, status) {
+        var identifier = new Packages.org.json.simple.JSONObject();
+        identifier.put(API_PROVIDER, apiProvider);
+        identifier.put(API_NAME, apiName);
+        identifier.put(API_VERSION, apiVersion);
+        return this.impl.updateSubscription(identifier, status, appId);
     };
 
     APIProviderProxy.prototype.removeDocumentation = function (apiId, docName, docType) {
@@ -218,78 +267,103 @@ var apipublisher = {};
      * @returns {boolean} whether successfully removed or not
      */
     APIProviderProxy.prototype.deleteAPI = function (apiProvider, apiName, apiVersion) {
-        var identifier = new Packages.org.json.simple.JSONObject();
-        identifier.put(API_PROVIDER, apiProvider);
-        identifier.put(API_NAME, apiName);
-        identifier.put(API_VERSION, apiVersion);
-        return this.impl.deleteAPI(identifier);
+        var identifier = new Packages.org.wso2.carbon.apimgt.api.model.APIIdentifier(apiProvider, apiName, apiVersion);
+        var success, log = new Log();
+        try {
+            success = result = this.impl.deleteAPI(identifier);
+            if (log.isDebugEnabled()) {
+                log.debug("Error while deleting the API : " + apiName + " : " + exists);
+            }
+            return {
+                error:false,
+                success:success
+            };
+        } catch (e) {
+            log.error(e.message);
+            return {
+                error:e
+            };
+        }
     };
 
     APIProviderProxy.prototype.getAPI = function (apiProvider, apiName, apiVersion) {
-        var identifier = new Packages.org.json.simple.JSONObject();
-        identifier.put(API_PROVIDER, apiProvider);
-        identifier.put(API_NAME, apiName);
-        identifier.put(API_VERSION, apiVersion);
+        var identifier = new Packages.org.wso2.carbon.apimgt.api.model.APIIdentifier(apiProvider, apiName, apiVersion);
         var defaultVersion = this.getDefaultVersion(identifier);
         var hasDefaultVersion = (defaultVersion != null);
-        var api;
+        var apiOb;
         try {
-            result = this.impl.getAPI(identifier);
-            if (log.isDebugEnabled()) {
-                log.debug("getAPI : " + stringify(result));
+            api = this.impl.getAPI(identifier);
+            var subscriberCount = this.impl.getSubscriberCount(identifier);
+            var tiers = api.getTierSetAsArray();
+            var tierSet = '';
+            var tiersDisplayNamesSet = '';
+            var tiersDescSet = '';
+
+            //Creating tier representtation
+            for(var i = 0; i < tiers.length  ; i++) {
+                tierSet += tiers[0].getName();
+                tiersDisplayNamesSet += tiers[0].getDisplayName();
+                tiersDescSet += tiers[0].getDescription();
+                if (i != tierSet.length - 1) {
+                    tierSet += ',';
+                    tiersDisplayNamesSet += ',';
+                    tiersDescSet += ',';
+                }
             }
-            api = {
-                name: result.get('name'),
-                version: result.get('version'),
-                description: result.get('description'),
+
+            apiOb = {
+                name: api.getId().getApiName(),
+                description: api.getDescription(),
+                url: api.getUrl(),
+                wsdl: api.getWsdlUrl(),
+                version: api.getId().getVersion(),
+                tags: api.getTagSetAsString(),
                 endpoint: result.get('name'),
-                wsdl: result.get('wsdlUrl'),
-                tags: result.get('tags'),
-                availableTiers: result.get('tiers'),
-                status: result.get('status'),
-                thumb: result.get('thumbnailUrl'),
-                context: result.get('context'),
-                lastUpdated: result.get('lastUpdatedTime'),
-                subs: result.get('subscribersCount'),
+                availableTiers: tierSet,
+                status: api.getStatus().toString(),
+                thumb: APIUtil.getWebContextRoot(api.getThumbnailUrl()),
+                context: api.getContext(),
+                lastUpdated: Long.valueOf(api.getLastUpdated().getTime()).toString(),
+                subs: subscriberCount,
                 templates: result.get('name'),
-                sandbox: result.get('sandboxUrl'),
-                tierDescs: result.get('tierDescriptions'),
-                bizOwner: result.get('businessOwner'),
-                bizOwnerMail: result.get('businessOwnerMail'),
-                techOwner: result.get('techOwner'),
-                techOwnerMail: result.get('techOwnerMail'),
-                wadl: result.get('wadlUrl'),
-                visibility: result.get('visibility'),
-                roles: result.get('visibleRoles'),
-                tenants: result.get('visibleTenants'),
-                epUsername: result.get('UTUsername'),
-                epPassword: result.get('UTPassword'),
-                endpointTypeSecured: result.get('isEndpointSecured'),
-                provider: result.get('provider'),
-                transport_http: result.get('httpTransport'),
-                transport_https: result.get('httpsTransport'),
+                sandbox: api.getSandboxUrl(),
+                tierDescs:tiersDescSet,
+                bizOwner: api.getBusinessOwner(),
+                bizOwnerMail: api.getBusinessOwnerEmail(),
+                techOwner: api.getTechnicalOwner(),
+                techOwnerMail: api.getTechnicalOwnerEmail(),
+                wadl: api.getWadlUrl(),
+                visibility: api.getVisibility(),
+                roles: api.getVisibleRoles(),
+                tenants: api.getVisibleTenants(),
+                epUsername: api.getEndpointUTUsername(),
+                epPassword: api.getEndpointUTPassword(),
+                endpointTypeSecured: api.isEndpointSecured(),
+                provider: APIUtil.replaceEmailDomainBack(api.getId().getProviderName()),
+                transport_http: APIUtil.checkTransport("http", api.getTransports()),
+                transport_https: APIUtil.checkTransport("https", api.getTransports()),
                 apiStores: result.get('externalAPIStores'),
-                inSequence: result.get('insequence'),
-                outSequence: result.get('outsequence'),
-                subscriptionAvailability: result.get('subscriptionAvailability'),
-                subscriptionTenants: result.get('subscriptionAvailableTenants'),
-                endpointConfig: result.get('endpointConfig'),
-                responseCache: result.get('responseCache'),
-                cacheTimeout: result.get('cacheTimeout'),
-                availableTiersDisplayNames: result.get('tierDislayNames'),
-                faultSequence: result.get('faultsequence'),
-                destinationStats: result.get('destinationStatsEnabled'),
+                inSequence: api.getInSequence(),
+                outSequence: api.getOutSequence(),
+                subscriptionAvailability: api.getSubscriptionAvailability(),
+                subscriptionTenants: api.getSubscriptionAvailableTenants(),
+                endpointConfig: api.getEndpointConfig(),
+                responseCache: api.getResponseCache(),
+                cacheTimeout: api.getCacheTimeout(),
+                availableTiersDisplayNames: tiersDisplayNamesSet,
+                faultSequence: api.getFaultSequence(),
+                destinationStats: api.getDestinationStatsEnabled(),
                 resources: result.get('apiResources'),
                 scopes: result.get('scopes'),
-                isDefaultVersion: result.get('defaultVersion'),
-                implementation: result.get('implementation'),
+                isDefaultVersion: api.isDefaultVersion(),
+                implementation: api.getImplementation(),
                 environments: result.get('publishedEnvironments'),
                 hasDefaultVersion: hasDefaultVersion,
                 currentDefaultVersion: defaultVersion
             };
             return {
                 error:false,
-                api:api
+                api:apiOb
             };
         } catch (e) {
             log.error(e.message);
