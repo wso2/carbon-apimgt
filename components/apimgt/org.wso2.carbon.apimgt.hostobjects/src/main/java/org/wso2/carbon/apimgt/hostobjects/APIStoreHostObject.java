@@ -44,7 +44,6 @@ import org.wso2.carbon.apimgt.impl.dto.UserRegistrationConfigDTO;
 import org.wso2.carbon.apimgt.impl.dto.WorkflowDTO;
 import org.wso2.carbon.apimgt.impl.dto.xsd.APIInfoDTO;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowStatus;
-import org.wso2.carbon.apimgt.hostobjects.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.utils.SelfSignUpUtil;
 import org.wso2.carbon.apimgt.impl.workflow.*;
@@ -61,7 +60,6 @@ import org.wso2.carbon.core.util.PermissionUpdateUtil;
 import org.wso2.carbon.identity.oauth.config.OAuthServerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIConstants.ApplicationStatus;
 import org.wso2.carbon.identity.oauth.internal.OAuthComponentServiceHolder;
-import org.wso2.carbon.registry.core.RegistryConstants;
 import org.wso2.carbon.user.core.UserCoreConstants;
 import org.wso2.carbon.user.core.UserRealm;
 import org.wso2.carbon.user.core.UserStoreException;
@@ -952,7 +950,7 @@ public class APIStoreHostObject extends ScriptableObject {
                 String applicationName = (String) apiData.get("applicationName", apiData);
                 //this map will hold response that we are getting from Application registration process.
                 Map<String, Object> keyDetails;
-                getAPIConsumer(thisObj).saveSemiManualClient(jsonString, userName, clientId, applicationName);
+                getAPIConsumer(thisObj).mapExistingOAuthClient(jsonString, userName, clientId, applicationName);
 
             } catch (Exception e) {
                 handleException("Error while obtaining the application access token for the application" + e
