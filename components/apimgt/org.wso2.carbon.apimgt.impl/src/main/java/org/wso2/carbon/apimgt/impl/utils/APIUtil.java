@@ -163,6 +163,7 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.URLConnection;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -4958,4 +4959,43 @@ public final class APIUtil {
 			return true;
 		}
 	};
+
+	public String isURLValid(String type, String urlVal) throws APIManagementException {
+
+		String response = "";
+
+		if (urlVal != null && !urlVal.isEmpty()) {
+			URLConnection conn = null;
+			try {
+				URL url = new URL(urlVal);
+				if (type != null && type.equals("wsdl")) {
+					validateWsdl(urlVal);
+					response = "success";
+				}
+				// checking http,https endpoints up to resource level by doing
+				// http HEAD. And other end point
+				// validation do through basic url connect
+				else if (url.getProtocol().matches("https")) {
+					ServerConfiguration serverConfig = CarbonUtils.getServerConfiguration();
+					String trustStorePath = serverConfig.getFirstProperty("Security.TrustStore.Location");
+					String trustStorePassword = serverConfig.getFirstProperty("Security.TrustStore.Password");
+					System.setProperty("javax.net.ssl.trustStore", trustStorePath);
+					System.setProperty("javax.net.ssl.trustStorePassword", trustStorePassword);
+
+					return sendHttpHEADRequest(urlVal);
+				} else if (url.getProtocol().matches("http")) {
+					return sendHttpHEADRequest(urlVal);
+				} else {
+					return "error while connecting";
+				}
+			} catch (Exception e) {
+				response = e.getMessage();
+			} finally {
+				if (conn != null) {
+					conn = null;
+				}
+			}
+		}
+		return response;
+	}
 }

@@ -554,10 +554,17 @@ var apipublisher = {};
         }
     };
 
-    APIProviderProxy.prototype.isContextExist = function (context,oldContext) {
+    APIProviderProxy.prototype.isContextExist = function (context, oldContext) {
         var exists, log = new Log();
+        if(context == oldContext) {
+            return {
+                error:false,
+                exist:true
+            };
+        }
+
         try {
-            exists = this.impl.isContextExist(context);
+            exists = this.impl.isDuplicateContextTemplate(context);
             if (log.isDebugEnabled()) {
                 log.debug("isContext exist for : " + context + " : " + exists);
             }
@@ -574,15 +581,19 @@ var apipublisher = {};
     };
 
     APIProviderProxy.prototype.isURLValid = function (type,url) {
-        var result, log = new Log();
+        var result, valid = false, log = new Log();
         try {
-            result = this.impl.isURLValid(type,url);
+            result = APIUtil.isURLValid(type,url);
+            if(result == 'success') {
+                valid = true;
+            }
             if (log.isDebugEnabled()) {
                 log.debug("Invoke isURLValid" );
             }
             return {
                 error:false,
-                response:result
+                response:result,
+                valid : valid
             };
         } catch (e) {
             log.error(e.message);
@@ -592,10 +603,22 @@ var apipublisher = {};
         }
     };
 
-    APIProviderProxy.prototype.validateRoles = function(roles,username) {
+    APIProviderProxy.prototype.validateRoles = function(roles) {
+
         var validRole, log = new Log();
+        var roleList ;
+        if(roles != null && !roles == '') {
+            roleList = roles.split(',');
+        } else {
+            return {
+                error:true,
+                valid: false,
+                errorMsg : 'Please provide non empty roles set to valid'
+            };
+        }
+
         try {
-            validRole = this.impl.validateRoles(roles,username);
+            validRole = this.impl.validateRoles(roleList);
             if (log.isDebugEnabled()) {
                 log.debug("Invoke validateRoles function.");
             }
@@ -661,7 +684,7 @@ var apipublisher = {};
         try {
             success = this.impl.hasPublishPermission();
             if (log.isDebugEnabled()) {
-                log.debug("hasPublishPermission method " );
+                log.debug("check whether user has publisher permission" );
             }
             if(success){
                 return {
@@ -678,6 +701,25 @@ var apipublisher = {};
             return {
                 error:true,
                 permitted:false
+            };
+        }
+    };
+
+    APIProviderProxy.prototype.isScopeExist = function (scope, tenantId) {
+        var result, log = new Log();
+        try {
+            result = this.impl.isScopeExist(scope, tenantId);
+            if (log.isDebugEnabled()) {
+                log.debug("Invoke isScopeExist()" );
+            }
+            return {
+                error:false,
+                isScopeExist:result
+            };
+        } catch (e) {
+            log.error(e.message);
+            return {
+                error:e
             };
         }
     };
