@@ -2527,7 +2527,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 			}
 		}
 
-		if (api.getWadlUrl() != null) {
+		if (api.getWsdlUrl() != null) {
 			String wsdl = api.getWsdlUrl();
 			if(wsdl != null && !wsdl.isEmpty()) {
 				savedAPI.setWsdlUrl(wsdl);
