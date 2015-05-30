@@ -948,9 +948,13 @@ public class APIStoreHostObject extends ScriptableObject {
                 String clientId = (String) apiData.get("client_id", apiData);
                 //APIM application name.
                 String applicationName = (String) apiData.get("applicationName", apiData);
+
+                String keyType = (String) apiData.get("keytype", apiData);
+                String authorizedDomains = (String) apiData.get("authorizedDomains", apiData);
                 //this map will hold response that we are getting from Application registration process.
                 Map<String, Object> keyDetails;
-                getAPIConsumer(thisObj).mapExistingOAuthClient(jsonString, userName, clientId, applicationName);
+                getAPIConsumer(thisObj).mapExistingOAuthClient(jsonString, userName, clientId, applicationName,
+                                                               keyType, new String[]{"ALL"});
 
             } catch (Exception e) {
                 handleException("Error while obtaining the application access token for the application" + e

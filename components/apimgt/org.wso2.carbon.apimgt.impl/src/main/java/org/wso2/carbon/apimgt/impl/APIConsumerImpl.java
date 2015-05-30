@@ -1633,15 +1633,18 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
      * @param userName user name of logged in user.
      * @param clientId this is the consumer key of oAuthApplication
      * @param applicationName this is the APIM appication name.
-     * @return
+     * @param keyType
+     *@param allowedDomainArray @return
      * @throws APIManagementException
      */
     public Map<String, Object> mapExistingOAuthClient(String jsonString, String userName, String clientId,
-                                                      String applicationName) throws APIManagementException {
+                                                      String applicationName, String keyType,
+                                                      String[] allowedDomainArray) throws APIManagementException {
 
         String callBackURL = null;
 
-        OAuthAppRequest oauthAppRequest = ApplicationUtils.createOauthAppRequest(applicationName, callBackURL,"default",
+        OAuthAppRequest oauthAppRequest = ApplicationUtils.createOauthAppRequest(applicationName, clientId, callBackURL,
+                                                                                 "default",
                                                                                   jsonString);
 
 
@@ -1653,11 +1656,9 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         AccessTokenInfo tokenInfo = keyManager.getNewApplicationAccessToken(tokenRequest);
 
         //Do application mapping with consumerKey.
-        apiMgtDAO.createApplicationKeyTypeMappingForManualClients(oauthAppRequest, applicationName, userName, clientId);
+        apiMgtDAO.createApplicationKeyTypeMappingForManualClients(keyType, applicationName, userName, clientId);
 
-        //in semi manual mode we are allowing ALL domains.
-        String[] domainArray = {"ALL"};
-        apiMgtDAO.addAccessAllowDomains(clientId, domainArray);
+        apiMgtDAO.addAccessAllowDomains(clientId, allowedDomainArray);
 
         //#TODO get actuall values from response and pass.
         Map<String, Object> keyDetails = new HashMap<String, Object>();
@@ -2051,7 +2052,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             // Build key manager instance and create oAuthAppRequest by
             // jsonString.
             OAuthAppRequest request =
-                    ApplicationUtils.createOauthAppRequest(applicationNameAfterAppend.toString(),
+                    ApplicationUtils.createOauthAppRequest(applicationNameAfterAppend.toString(), null,
                                                            callbackUrl, tokenScope, jsonString);
             request.getOAuthApplicationInfo().addParameter(ApplicationConstants.VALIDITY_PERIOD, validityTime);
 
@@ -2533,8 +2534,8 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
         }
         //Create OauthAppRequest object by passing json String.
-        OAuthAppRequest oauthAppRequest = ApplicationUtils.createOauthAppRequest(applicationName, callbackUrl, tokenScope,
-                                                                                 jsonString);
+        OAuthAppRequest oauthAppRequest = ApplicationUtils.createOauthAppRequest(applicationName, null, callbackUrl,
+                                                                                 tokenScope, jsonString);
 
         String consumerKey = apiMgtDAO.getConsumerKeyForApplicationKeyType(applicationName, userId, tokenType,
                                                                            groupingId);
