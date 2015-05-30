@@ -3,7 +3,8 @@
 	<a class="notes" data-path="{{resource_path}}" data-attr="description">{{ description }}</a>
 	<br />
 	<br />
-	<h5>Response Content Type : <a href="#" data-path="{{resource_path}}" data-attr="produces" class="content_type produces" data-type="typeahead" data-pk="1" data-title="Response Content Type">{{ produces }}</a></h5>
+	<h5>Response Content Type : <a href="#" data-path="{{resource_path}}" data-attr="produces" class="content_type
+	produces" data-type="typeaheadjs" data-pk="1" data-title="Response Content Type">{{ produces }}</a></h5>
 	<br />
 	<h5>Parameters :</h5>
 	{{#if parameters}}
@@ -23,7 +24,7 @@
 				<td><a class="param_paramType" data-type="select" data-path="{{ ../resource_path}}.parameters[{{@index}}]" data-attr="in">{{ in }}</a></td>
 				<td><a class="param_type" data-path="{{../resource_path}}.parameters[{{@index}}]" data-attr="type">{{ type }}</a></td>
 				<td><a class="param_required" data-type="select" data-path="{{../resource_path}}.parameters[{{@index}}]" data-attr="required" data-value="{{toString required }}"></a></td>
-				<td align="center"><a data-path-name="{{path}}" data-path="{{../resource_path}}.parameters[{{@index}}]" data-index="{{@index}}" style="margin-left: 40px" class="delete_parameter icon-trash"></a></td>
+				<td align="center"><a data-path-name="{{path}}" data-path="{{../resource_path}}.parameters[{{@index}}]" data-index="{{@index}}" style="margin-left: 40px" class="delete_parameter fa fa-trash"></a></td>
 			</tr>
 		{{/each}}
 	{{/if}}

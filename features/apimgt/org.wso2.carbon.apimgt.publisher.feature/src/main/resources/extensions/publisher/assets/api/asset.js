@@ -56,18 +56,6 @@ asset.manager = function(ctx) {
         return true;
     };
 
-    var generate_swagger_object=function(swagger){
-    swaggerObj = {
-        api_doc : parse(swagger),
-        resources : []
-     };
-
-    for(i = 0 ; i < swaggerObj.api_doc.apis.length ; i++ ){
-        swaggerObj.resources.push(swaggerObj.api_doc.apis[i].file);
-        delete swaggerObj.api_doc.apis[i].file
-    }
-    return stringify(swaggerObj);
-    }
     return {
         importAssetFromHttpRequest: function(options) {
             var asset = {};
@@ -126,15 +114,14 @@ asset.manager = function(ctx) {
                         options.attributes.overview_provider=api.provider;
                         options.attributes.overview_status='CREATED';
                     }
-                } else {
-                    throw "Error while creating the API." + result.error;
                 }
                 api.description = options.attributes.overview_description;
                 api.tags = options.attributes.overview_tags;
                 api.visibility = options.attributes.visibility;
                 api.visibleRoles = options.attributes.roles;
+                api.swagger = options.attributes.swagger;
                 api.wsdl = options.attributes.wsdl;
-                api.swagger = generate_swagger_object(options.attributes.swagger);
+                api.swagger = options.attributes.swagger;
                 result = apiProxy.updateDesignAPI(api);
                 if (result!=null && result.error) {
                     throw "Error while updating the API.";
@@ -181,7 +168,7 @@ asset.manager = function(ctx) {
                 api.endpoint_config= options.attributes.endpoint_config;
                 api.destinationStats= options.attributes.destinationStats;
                 api.advertiseOnly= options.attributes.overview_advertiseOnly;
-                api.swagger = generate_swagger_object(options.attributes.swagger);
+                api.swagger = options.attributes.swagger;
 
                 var apiProxy = apiPublisher.instance(ctx.username);
                 result = apiProxy.implementAPI(api);
@@ -217,7 +204,7 @@ asset.manager = function(ctx) {
 
                 apiData.context = options.attributes.overview_context;
                 apiData.defaultVersion = options.attributes.default_version_checked;
-                apiData.swagger = generate_swagger_object(options.attributes.swagger);
+                apiData.swagger = options.attributes.swagger;
                 apiData.tier = options.attributes.tiersCollection;
                 if(options.attributes.transport_http == null && options.attributes.transport_https == null){
                     apiData.transports = null;

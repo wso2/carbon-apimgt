@@ -833,7 +833,7 @@ $(function () {
             }
         });
 
-        $("#resource_url_pattern").live('change',function(){
+        $("#resource_url_pattern").on('change',function(){
             var re = new RegExp("^/?([a-zA-Z0-9]|-|_)+");
             var arr = re.exec($(this).val());
             if(arr && arr.length)
@@ -934,7 +934,7 @@ $(function () {
             }
         });
 
-        $('#apiThumb').live('change', function() {
+        $('#apiThumb').on('change', function() {
             var imageFileSize = this.files[0].size/1024/1024;
             if (imageFileSize > 1){
                 $('#error-invalidImageFileSize').modal('show');
@@ -1034,15 +1034,15 @@ $(function () {
     function renderResourceCallback(that) {
         $('#resource_details').find('.scope_select').editable({
                                                                   emptytext: '+ Scope',
-                                                                  source: this.get_scopes(),
-                                                                  success : this.update_elements
+                                                                  source: that.get_scopes(),
+                                                                  success : that.update_elements
                                                               });
 
         if(typeof(TIERS) !== 'undefined'){
             $('#resource_details').find('.throttling_select').editable({
                                                                            emptytext: '+ Throttling',
                                                                            source: TIERS,
-                                                                           success : this.update_elements
+                                                                           success : that.update_elements
                                                                        });
         }
 
@@ -1051,14 +1051,14 @@ $(function () {
                                                                           emptytext: '+ Auth Type',
                                                                           source: AUTH_TYPES,
                                                                           autotext: "always",
-                                                                          display: this.display_element,
-                                                                          success : this.update_elements
+                                                                          display: that.display_element,
+                                                                          success : that.update_elements
                                                                       });
         }
 
         $('#resource_details').find('.change_summary').editable({
                                                                     emptytext: '+ Summary',
-                                                                    success : this.update_elements,
+                                                                    success : that.update_elements,
                                                                     inputclass : 'resource_summary'
                                                                 });
     }
@@ -1078,25 +1078,25 @@ $(function () {
         container.find('.notes').editable({
                                               type: 'textarea',
                                               emptytext: '+ Add Implementation Notes',
-                                              success : this.update_elements
+                                              success : that.update_elements
                                           });
         container.find('.produces').editable({
                                                  value : "application/json",
                                                  source: content_types,
-                                                 success : this.update_elements
+                                                 success : that.update_elements
                                              });
         container.find('.param_desc').editable({
                                                    emptytext: '+ Empty',
-                                                   success : this.update_elements
+                                                   success : that.update_elements
                                                });
         container.find('.param_paramType').editable({
                                                         emptytext: '+ Set Param Type',
                                                         source: [ { value:"query", text:"query" },{ value:"body", text:"body"}, { value:"header", text:"header" }, { value:"form", value:"form"} ],
-                                                        success : this.update_elements
+                                                        success : that.update_elements
                                                     });
         container.find('.param_type').editable({
                                                    emptytext: '+ Empty',
-                                                   success : this.update_elements
+                                                   success : that.update_elements
                                                });
         container.find('.param_required').editable({
                                                        emptytext: '+ Empty',
@@ -1108,7 +1108,7 @@ $(function () {
                                                                $(this).text("False");
                                                        },
                                                        source: [ { value:true, text:"True" },{ value:false, text:"False"} ],
-                                                       success : this.update_elements_boolean
+                                                       success : that.update_elements_boolean
                                                    });
     }
 
@@ -1116,5 +1116,8 @@ $(function () {
         return '/extensions/assets/api/themes/' + caramel.themer + '/partials/' + name + '.hbs';
     };
 
+    var id = function (name) {
+        return '#' + name;
+    };
     APIMangerAPI.APIDesigner = APIDesigner;
 });
