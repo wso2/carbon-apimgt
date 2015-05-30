@@ -74,11 +74,12 @@ public class ApplicationUtils {
      * @param callbackURL This is the call back URL of the application
      * @param tokenScope
      * @param clientDetails
+     * @param clientId
      * @return appRequest object of OauthAppRequest.
      * @throws APIManagementException
      */
-    public static OAuthAppRequest createOauthAppRequest(String clientName, String callbackURL,String tokenScope, String
-                                                        clientDetails)
+    public static OAuthAppRequest createOauthAppRequest(String clientName, String clientId, String callbackURL, String tokenScope, String
+            clientDetails)
             throws
             APIManagementException {
 
@@ -88,6 +89,7 @@ public class ApplicationUtils {
         authApplicationInfo.setClientName(clientName);
         authApplicationInfo.setCallBackURL(callbackURL);
         authApplicationInfo.addParameter("tokenScope",tokenScope);
+        authApplicationInfo.setClientId(clientId);
 
         if (clientDetails != null) {
             //parse json string and set applicationInfo parameters.

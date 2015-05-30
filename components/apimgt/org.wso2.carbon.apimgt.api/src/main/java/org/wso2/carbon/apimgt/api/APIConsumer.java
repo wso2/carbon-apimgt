@@ -172,11 +172,13 @@ public interface APIConsumer extends APIManager {
      * @param userName user name of logged in user.
      * @param clientId this is the consumer key of oAuthApplication
      * @param applicationName this is the APIM appication name.
-     * @return
+     * @param keyType
+     *@param allowedDomainArray @return
      * @throws APIManagementException
      */
     public Map<String,Object> mapExistingOAuthClient(String jsonString, String userName, String clientId,
-                                                     String applicationName) throws APIManagementException;
+                                                     String applicationName, String keyType,
+                                                     String[] allowedDomainArray) throws APIManagementException;
 
 
     /**
