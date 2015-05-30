@@ -453,4 +453,11 @@ public interface APIProvider extends APIManager {
 	 * @throws APIManagementException
 	 */
 	public int getSubscriberCount(APIIdentifier apiId) throws APIManagementException;
+
+	/**
+	 * Check whether user has publish permission
+	 *
+	 * @return true if user has publish permission else false
+	 */
+	public boolean hasPublishPermission() throws APIManagementException;
 }

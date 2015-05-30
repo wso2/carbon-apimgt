@@ -1,61 +1,62 @@
-<legend>Resources</legend>
-    <div class="resource_create">
-        <div class="form-group">
-            <label class="custom-form-label col-lg-2 col-md-2 col-sm-12 col-xs-12" for="inputPassword">
-                URL Pattern<br/>
-                {{#if api}}
-                    <span class="add-on" id="resource_url_pattern_refix">{{api.context}}</span>
-                {{else}}
-                    <span class="add-on" id="resource_url_pattern_refix">/{context}/{version}/</span>
-                {{/if}}
-            </label>
-            <div class="custom-form-right col-lg-5 col-md-8 col-sm-8 col-xs-12">
-                <div class="input-prepend">
-                    <input id="resource_url_pattern" type="text" placeholder="Url Pattern Ex: path/to/resource" class="resource_url_pattern form-control"/>
-                </div>
-            </div>
-        </div>
-        <div class="form-group">
-            <label class="custom-form-label col-lg-2 col-md-2 col-sm-12 col-xs-12" for=""></label>
-            <div class="custom-form-right col-lg-5 col-md-8 col-sm-8 col-xs-12">
-            {{#each verbs}}
-                    <label class="checkbox-inline">
-                    <input type="checkbox" value="{{ . }}" class="http_verb_select" >  {{ . }}
-                    </label>
-                {{/each}}
-                </div>
-        </div>
-        <div class="form-group">
-            <label class="custom-form-label col-lg-2 col-md-2 col-sm-12 col-xs-12" for="inputResource">Resource Name</label>
-            <div class="custom-form-right col-lg-5 col-md-8 col-sm-9 col-xs-10">
-                <input type="text" id="inputResource" placeholder="Resource" class="form-control">
-            </div>
-            <div class="custom-form-right col-lg-1 col-md-4 col-sm-3 col-xs-2">
-            <button class="btn" type="button" id="add_resource" style="margin:0 0 10px 10px;"><i class="icon-plus-sign"></i>&nbsp;{{t "Add New Resource"}}</button>
-            </div>
-        </div>
-
-    </div>
-<table style="width:100%">                       
-{{#each api_doc.apis}}
-{{ setIndex @index}}
-    <tr>
-    <td colspan="4"><h4 class="resource_group_title">{{ path }}</h4></td>
-    </tr>
-    {{# each file.apis}}
-        {{ setIndex @index}}
-        {{# each operations}}
-        <tr class="resource_container" data-path="$.apis[{{ ../../index}}].file.apis[{{ ../index }}].operations[{{ @index }}]">
-            <td class="resource-method-td resource_expand" data-path="$.apis[{{ ../../index}}].file.apis[{{ ../index }}].operations[{{ @index }}]">
-                <span class=" resource-method resource-method-{{ method }}">{{ method }}</span>
-            </td>
-            <td class="resource_expand"><a class="resource-path">{{ ../path }}</a></td>    
-            <td  width="99%"><span class="operation-summary change_summary" data-path="$.apis[{{ ../../index}}].file.apis[{{ ../index }}].operations[{{ @index }}]" data-attr="summary" >{{ summary }}</span></td>
-            <td class="delete_resource_td "><a class='operation-summary delete_resource' data-path-name="{{ ../path }}" data-path="$.apis[{{ ../../index}}].file.apis[{{ ../index }}].operations" data-index="{{ @index }}"><i class='fa fa-trash'></i></a></td>
-        </tr>
-        <tr><td colspan="4" class="resource_body" data-path="$.apis[{{ ../../index}}].file.apis[{{ ../index }}].operations[{{ @index }}]"></td></tr>
-        {{/each}}
-    {{/each}}
-
-{{/each}}
+<legend>API Definition</legend>
+<div class="resource_create">
+	<div class="control-group">
+		<label class="control-label" for="inputPassword">URL Pattern</label>
+		<div class="controls">
+			<div class="input-prepend">
+				{{#if api}}
+					<span class="add-on" id="resource_url_pattern_refix">{{api.context}}</span>
+				{{else}}
+					<span class="add-on" id="resource_url_pattern_refix">/{context}/{version}/</span>
+				{{/if}}
+				<input style="width:500px" id="resource_url_pattern" type="text" placeholder="Url Pattern Ex: path/to/resource" class="resource_url_pattern"/>
+			</div>
+		</div>
+	</div>
+	<div class="control-group">
+		<label class="control-label" for=""></label>
+		<div class="controls">
+			{{#each verbs}}
+				<label class="checkbox inline" style="text-transform:uppercase;">
+					<input type="checkbox" value="{{ . }}" class="http_verb_select" >  {{ . }}
+				</label>
+			{{/each}}
+			<div class "checkbox inline" id="options" style="display: none;" >
+			<label class="checkbox inline">
+				<input type="checkbox" value="options" class="http_verb_select"> OPTIONS
+			</label>
+			<a class="icon-question-sign help_popup" help_data="options_help" data-trigger="hover"></a>
+			<p id="options_help" class="hide"><%=i18n.localize("optionsHelpMsg")%></p>
+			<label id="less" style="display:inline;">less</label>
+		</div>
+		<label id="more" style="display:inline;">more</label>
+	</div>
+</div>
+<!-- div class="control-group">
+	<label class="control-label" for="inputResourceTags">Tags</label>
+	<div class="controls">
+		<input type="text" id="inputResourceTags" placeholder="tags">
+	</div>
+</div -->
+<div class="control-group">
+	<label class="control-label"></label>
+	<div class="controls">
+		<button class="btn" type="button" id="add_resource" style="margin:10px 0 0px 0px;"><i class="icon-plus-sign"></i>&nbsp;Add</button>
+	</div>
+</div>
+</div>
+<table style="width:100%">
+	{{#each doc.paths}}
+		{{# each this}}
+			<tr class="resource_container" data-path="$.paths.{{ path }}.{{@key}}">
+				<td class="resource-method-td resource_expand" data-path="$.paths.{{ path}}.{{ @key }}">
+					<span class=" resource-method resource-method-{{ @key }}">{{ @key }}</span>
+				</td>
+				<td class="resource_expand"><a class="resource-path">{{ path }}</a></td>
+				<td  width="99%"><span class="operation-summary change_summary" data-path="$.paths.{{ path }}.{{@key}}" data-attr="summary" >{{ summary }}</span></td>
+				<td class="delete_resource_td "><a class='operation-summary delete_resource' data-operation="{{ @key }}" data-path-name="{{ path }}" data-path="$.paths.{{ path }}.{{@key}}" data-index="{{ @index }}"><i class='icon-trash'></i></a></td>
+			</tr>
+			<tr><td colspan="4" class="resource_body hide" data-path="$.paths.{{ path }}.{{@key}}"></td></tr>
+		{{/each}}
+	{{/each}}
 </table>

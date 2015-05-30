@@ -23,6 +23,8 @@ require('/modules/publisher.js').exec(function (ctx) {
 	var server = require('store').server;
 	var user = server.current(ctx.session);
 	var username = user.username;
+	var usr = carbon.server.tenantUser(user.username);
+	var tenantId = usr.tenantId;
 	var uriMatcher = new URIMatcher(req.getRequestURI());
 	var GET_VALIDATION_URL = '/{context}/asts/api/apis/validation';
 	var method = req.getMethod();
@@ -49,9 +51,7 @@ require('/modules/publisher.js').exec(function (ctx) {
 							exist: result.exist
 						}
 					}
-
-					print(obj);
-
+					response = responseProcessor.buildSuccessResponse(response, constants.STATUS_CODES.OK, obj);
 				} else if (action === "isContextExist") {
 					var context = request.getParameter("context");
 					var oldContext = request.getParameter("oldContext");
@@ -67,9 +67,7 @@ require('/modules/publisher.js').exec(function (ctx) {
 							exist: result.exist
 						}
 					}
-
-					print(obj);
-
+					response = responseProcessor.buildSuccessResponse(response, constants.STATUS_CODES.OK, obj);
 				} else if (action === "validateRoles") {
 					var user = jagg.getUser().username;
 					var roles = request.getParameter("roles");
@@ -85,9 +83,7 @@ require('/modules/publisher.js').exec(function (ctx) {
 							response: result.valid
 						}
 					}
-
-					print(obj);
-
+					response = responseProcessor.buildSuccessResponse(response, constants.STATUS_CODES.OK, obj);
 				}
 
 				else if (action === "isURLValid") {
@@ -121,7 +117,11 @@ require('/modules/publisher.js').exec(function (ctx) {
 							tiers: result.tiers
 						}
 					}
-					print(obj);
+					response = responseProcessor.buildSuccessResponse(response, constants.STATUS_CODES.OK, obj);
+				} else if (action === "validateScope") {
+					var scope = request.getParameter("scope");
+					var data = apiProxy.isScopeExist(scope, tenantId);
+					print(data);
 				} else {
 					response = responseProcessor.buildErrorResponse(response,
 																	constants.STATUS_CODES.NOT_IMPLEMENTED,
