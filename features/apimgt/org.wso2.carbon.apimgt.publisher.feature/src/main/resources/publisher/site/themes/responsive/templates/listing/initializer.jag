@@ -1,0 +1,11 @@
+<%
+jagg.initializer("listing", {
+
+    preInitialize:function () {
+    	jagg.addHeaderJS("listing", "listing", "templates/listing/js/listing.js");
+    	jagg.addHeaderJS("listing", "sample", "templates/listing/js/samples.js");
+    }
+
+});
+%>
+

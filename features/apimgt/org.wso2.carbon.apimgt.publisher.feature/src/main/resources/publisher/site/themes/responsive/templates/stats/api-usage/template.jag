@@ -1,0 +1,76 @@
+<% jagg.template("stats/api-usage", function(inputs, outputs, jagg) { %>
+<link type="text/css" rel="stylesheet" href="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("templates/utils/dojo-release-1.8.3/dijit/themes/claro/claro.css"))%>"  media="screen"/>
+
+<!-- easy-pie-chart plugin -->
+<script type="text/javascript" src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("templates/utils/easy-pie-chart/jquery.easy-pie-chart.js"))%>"></script>
+<link type="text/css" rel="stylesheet" href="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("templates/utils/easy-pie-chart/jquery.easy-pie-chart.css"))%>"/>
+
+<!--datepicker-->
+<script type="text/javascript" src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("templates/utils/datepicker/js/moment.js"))%>"></script>
+<script type="text/javascript" src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("templates/utils/datepicker/js/jquery.daterangepicker.js"))%>"></script>
+<link type="text/css" rel="stylesheet" href="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("templates/utils/datepicker/css/daterangepicker.css"))%>"/>
+
+<!--Pie chart-->
+<script type="text/javascript" src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("templates/utils/nvd3/js/d3.v3.js"))%>"></script>
+<script type="text/javascript" src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("templates/utils/nvd3/js/nv.d3.js"))%>"></script>
+<link type="text/css" rel="stylesheet" href="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("templates/utils/nvd3/css/nv.d3.css"))%>"/>
+<link type="text/css" rel="stylesheet" href="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("templates/utils/donut-chart/donut-chart.css"))%>"/>
+
+
+  <!--[if lt IE 9]><script language="javascript" type="text/javascript" src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("templates/utils/jqplot/excanvas.min.js"))%>" ></script><![endif]-->
+
+
+<div class="title-section"> <h2><%=i18n.localize("apiUsageComparisonTitle")%></h2> </div>
+
+<div class="content-section shadow-up">
+<div class="content-data">
+
+
+<div class="row-fluid api-stats">
+
+<!--First Section-->
+<div class="well">
+    <div class="row-fluid">
+    <div id="rangeSliderWrapper" class="pull-right">
+            <div class="row-fluid">
+            <div class="span12">
+                <div id="dateRangePickerContainer">
+                    <div class="btn-group" role="group">
+                        <button id="hour-btn" type="button" class="btn btn-default date-range">Hour</button>
+                        <button id="today-btn" type="button" class="btn btn-default date-range">Day
+                        </button>
+                        <button id="week-btn" type="button" class="btn btn-default date-range">Week</button>
+                        <button id="month-btn" type="button" class="btn btn-default date-range active">
+                            Month
+                        </button>
+                        <button id="date-range" type="button" class="btn btn-default date-range last-child"
+                                data-toggle="popup" title="Click to set custom date range">.
+
+                        </button>
+                    </div>
+                    <span class="add-on-cal"><i class="icon-calendar"></i></span>
+                </div>
+            </div>
+            </div>
+        </div>
+     <div class="span11">
+            <div id="apiChart" style="margin-top:15px">
+                <div class="progress progress-striped active">
+                    <div class="bar" style="width: 10%;"></div>
+                </div>
+            </div>
+     </div>
+      <div class="span11">
+              <div id="tableContainer" style="margin-top:20px"></div>
+      </div>
+
+    </div>
+</div>
+
+</div>
+</div>
+</div>
+
+<% }); %>
+
+
