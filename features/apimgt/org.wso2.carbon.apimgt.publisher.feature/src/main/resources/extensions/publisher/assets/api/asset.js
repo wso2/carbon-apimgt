@@ -133,6 +133,7 @@ asset.manager = function(ctx) {
                 api.tags = options.attributes.overview_tags;
                 api.visibility = options.attributes.visibility;
                 api.visibleRoles = options.attributes.roles;
+                api.wsdl = options.attributes.wsdl;
                 api.swagger = generate_swagger_object(options.attributes.swagger);
                 result = apiProxy.updateDesignAPI(api);
                 if (result!=null && result.error) {

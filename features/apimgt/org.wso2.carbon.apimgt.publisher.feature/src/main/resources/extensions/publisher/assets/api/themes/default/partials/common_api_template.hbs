@@ -138,14 +138,14 @@
             <label class="custom-form-label col-lg-2 col-md-2 col-sm-12 col-xs-12" for="imageUrl">{{t "Thumbnail"}}</label>
             <div class="custom-form-right col-lg-5 col-md-8 col-sm-9 col-xs-10">
                      {{#if api.thumb}}
-	                    <div class="col-lg-4 col-md-4 col-sm-6 col-xs-6">
-		                    <img src='{{url ""}}/storage/{{assets.type}}/{{id}}/{{api.thumb}}' alt="" id="apiEditThumb"/>
-	              </div>
+                        <div class="col-lg-4 col-md-4 col-sm-6 col-xs-6">
+                            <img src='{{url ""}}/storage/{{assets.type}}/{{id}}/{{api.thumb}}' alt="" id="apiEditThumb"/>
+                  </div>
                     {{else}}
                         <div class="col-lg-4 col-md-4 col-sm-6 col-xs-6">
--		                    <img id="apiEditThumb" alt="" src="{{url "/extensions/assets/api/themes/default/imgs/api-default.png"}}"/>
--	                    </div>
--                    {{/if}}
+                           <img id="apiEditThumb" alt="" src="{{url "/extensions/assets/api/themes/default/imgs/api-default.png"}}"/>
+                       </div>
+                    {{/if}}
                 <div class="col-lg-8 col-md-8 col-sm-6 col-xs-6">
                     <a onclick="javascript:$('#imageUrl').toggle('slow')" class="btn btn-primary">
                         <i class="icon-picture"></i> {{t "Change Icon"}}
@@ -207,7 +207,24 @@
         </div>
     </div>
     <br/><br/>
-    <div id="api_designer">
+    {{#if wsdl}}
+        <div id="api_designer">
+            <a  href="#wsdlUpload" role="button" class="btn pull-right" data-toggle="modal" ><i class="icon-download-alt" ></i> {{t "Import"}} </a>
+            <legend>{{t "API Definition"}}</legend>                   
+            <div class="control-group api_wsdl">
+                <label class="control-label" for="wsdl">{{t "WSDL"}}:</label>
+                <div class="controls">
+                <div class="input-append">
+                <input type="text" class="input-xlarge validInput" id="wsdl" name="wsdl"  value="{{wsdl}}" />
+                <button class="btn check_url_valid" url-type="wsdl" type="button" >{{t "Test URI"}}</button>
+                <a class="icon-question-sign help_popup" help_data="wsdldesc_help"></a>
+                <p id="wsdldesc_help" class="hide">{{t "wsdlDescHelpMsg"}}</p>
+            </div>
+            <p class="help-block">{{t "wsdlDescHelpMsg"}}</p>                
+        </div> 
+    
+    {{else}}
+        <div id="api_designer">
         <div id="resource_details">
             <legend>Resources</legend>
             <div class="resource_create">
@@ -251,6 +268,7 @@
             </div>
         </div>
     </div>
+    {{/if}}
     <input type="hidden" name="action" value="design"/>
     <input type="hidden" id="swagger" name="swagger"/>
 
