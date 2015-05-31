@@ -6,7 +6,6 @@ $(document).ready(function(){
      $.get(swaggerUrl , function( data ) {
             var designer =new  APIMangerAPI.APIDesigner();
             designer.load_api_document(data.data);
-            designer.set_default_management_values();
             designer.render_resources();
             $("#swaggerUpload").modal('hide');
      });

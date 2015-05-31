@@ -225,47 +225,25 @@
     
     {{else}}
         <div id="api_designer">
+		<div id = "resource_overview">
+			<legend>API Definition</legend>
+			<div class="resource_create">
+				<div class="control-group">
+					<label class="control-label" for="inputPassword">URL Pattern</label>
+					<div class="controls">
+						<div class="input-prepend">
+							{{#if api}}
+								<span class="add-on" id="resource_url_pattern_refix">{{api.context}}</span>
+							{{else}}
+								<span class="add-on" id="resource_url_pattern_refix">/{context}/{version}/</span>
+							{{/if}}
+							<input style="width:500px" id="resource_url_pattern" type="text" placeholder="Url Pattern Ex: path/to/resource" class="resource_url_pattern"/>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
         <div id="resource_details">
-            <legend>Resources</legend>
-            <div class="resource_create">
-                <div class="form-group">
-                    <label class="custom-form-label col-lg-2 col-md-2 col-sm-12 col-xs-12" for="inputPassword">URL Pattern</label>
-                    <div class="custom-form-right col-lg-5 col-md-8 col-sm-9 col-xs-10">
-                        <div class="input-prepend">
-                            <span class="add-on">/{context}/{version}/</span>
-                            <input id="resource_url_pattern" type="text" placeholder="Url Pattern Ex: path/to/resource" class="resource_url_pattern form-control"/>
-                        </div>
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label class="custom-form-label col-lg-2 col-md-2 col-sm-12 col-xs-12" for=""></label>
-                    <div class="custom-form-right col-lg-5 col-md-8 col-sm-9 col-xs-10">
-                        <label class="checkbox-inline">
-                            <input type="checkbox" value="GET" class="http_verb_select"> GET
-                        </label>
-                        <label class="checkbox-inline">
-                        <input type="checkbox" value="POST" class="http_verb_select"> POST
-                        </label>
-                            <label class="checkbox-inline">
-                        <input type="checkbox" value="PUT" class="http_verb_select"> PUT
-                            </label>
-                                <label class="checkbox-inline">
-                        <input type="checkbox" value="DELETE" class="http_verb_select"> DELETE
-                                </label>
-                                    <label class="checkbox-inline">
-                        <input type="checkbox" value="OPTIONS" class="http_verb_select"> OPTIONS
-                                        </label>
-                    </div>
-                </div>
-                <div class="control-group">
-                    <label class="control-label" for="inputResource">Resource Name</label>
-
-                    <div class="controls">
-                        <input type="text" id="inputResource" placeholder="Resource">
-                    </div>
-                </div>
-                <button class="btn" type="button" id="add_resource" style="margin:0 0 10px 10px;"><i class="icon-plus-sign"></i>&nbsp;{{t "Add New Resource"}}</button>
-            </div>
         </div>
     </div>
     {{/if}}

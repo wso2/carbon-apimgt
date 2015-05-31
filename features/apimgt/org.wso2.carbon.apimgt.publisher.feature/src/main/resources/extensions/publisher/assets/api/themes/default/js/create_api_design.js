@@ -667,7 +667,7 @@ $(function () {
         var operation = this.query(container.attr('data-path'));
         var context = jQuery.extend(true, {}, operation[0]);
         context.resource_path = container.attr('data-path');
-        var partial = 'designer-resources-template_manage_body_padding';
+        var partial = 'designer-resource-template';
         var that = this;
         renderPartialWithContainer(partial, container,context, that, renderResourcePaddingCallback);
         //var output = Handlebars.partials['designer-resource-template'](context);
