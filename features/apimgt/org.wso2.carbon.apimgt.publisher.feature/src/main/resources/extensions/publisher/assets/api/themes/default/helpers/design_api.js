@@ -21,7 +21,7 @@ var resources = function(page,meta){
         js:['create_api_design.js','jquery-ace.min.js','typeahead.bundle.js', 'bootstrap.js',
             'jquery.form.js','jquery.cookie.js','bootstrap-tagsinput.min.js','jquery.validate.min.js','js-yaml.min.js','bootstrap-dialog.min.js',
             'create_asset.js','bootstrap-editable.js' ,'bootstrap-multiselect.js', 'custom-validation.js',
-            'jsonpath-0.8.0.js','handlebars.js','jquery.noty.packaged.min.js' ,'typeaheadjs.js', 'bootstrap3-typeahead.min.js'],
+            'jsonpath-0.8.0.js','handlebars.js','jquery.noty.packaged.min.js' ,'typeaheadjs.js'],
         code:['manage_api_meta.hbs'],
         css:['bootstrap/bootstrap-editable.css',
              'bootstrap/bootstrap-tagsinput.css','api_designer.css','bootstrap-dialog.min.css', 'bootstrap-multiselect.css']

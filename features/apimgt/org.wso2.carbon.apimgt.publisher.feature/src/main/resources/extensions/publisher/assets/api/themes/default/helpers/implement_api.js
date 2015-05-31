@@ -23,8 +23,7 @@ var resources = function(page,meta){
 		'implement_api.js', 'underscore.js', 'jsonform.js', 'custom-validation.js',
 		'url-validation.js','bootstrap-multiselect.js', 'bootstrap-editable.js', 'jsonpath-0.8.0.js',
 		'endpoint-ui.js', 'handlebars.js', 'implement_api_design.js', 'implement_api_inline.js',
-		'jquery-ace.min.js', 'src-noconflict/ace.js', 'src-noconflict/mode-javascript.js',
-		'bootstrap-typeahead.js', 'typeaheadjs.js'],
+		'jquery-ace.min.js', 'src-noconflict/ace.js', 'src-noconflict/mode-javascript.js', 'typeaheadjs.js'],
 		css:['bootstrap-multiselect.css','api_designer.css'],
         code:['manage_api_meta.hbs']
     };
