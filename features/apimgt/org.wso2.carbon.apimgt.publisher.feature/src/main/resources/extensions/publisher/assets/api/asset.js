@@ -159,7 +159,8 @@ asset.manager = function(ctx) {
                 };
                 api.context = options.attributes.overview_context;
 
-              //api.implementation_type = options.attributes.implementation_methods;
+                //TODO Hard coded
+                api.implementation_type = 'endpoint';
                 api.wsdl = options.attributes.wsdl;
                 api.wadl = options.attributes.wadl;
                 api.endpointSecured = options.attributes.endpointType;
