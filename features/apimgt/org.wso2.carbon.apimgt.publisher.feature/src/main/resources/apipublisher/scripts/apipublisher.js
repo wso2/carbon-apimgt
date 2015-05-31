@@ -41,6 +41,7 @@ var apipublisher = {};
     var Map=Packages.java.util.Map;
     var Long=Packages.java.lang.Long;
     var HashMap=Packages.java.util.HashMap;
+    var HashSet=Packages.java.util.HashSet;
     var JSONArray=Packages.org.json.simple.JSONArray;
     var JSONValue=Packages.org.json.simple.JSONValue;
 
@@ -106,10 +107,6 @@ var apipublisher = {};
         apiOb.setDestinationStatsEnabled(api.destinationStats);
         apiOb.setSwagger(api.swagger);
         return this.impl.updateAPIImplementation(apiOb);
-    };
-
-    APIProviderProxy.prototype.manageAPI = function (api) {
-        return this.impl.manageAPI(api);
     };
 
     APIProviderProxy.prototype.updateDesignAPI = function (api) {
@@ -615,46 +612,49 @@ var apipublisher = {};
     APIProviderProxy.prototype.manageAPI = function (api) {
         var success;
         var log = new Log();
+        log.info(api);
         try {
-            var apiJson = new Packages.org.json.simple.JSONObject();
-            apiJson.put("name", api.apiName);
-            apiJson.put("provider", api.provider);
-            apiJson.put("version", api.version);
-            apiJson.put("context", api.context);
-            apiJson.put("defaultVersion", api.defaultVersion);
-            apiJson.put("swagger", api.swagger);
-            apiJson.put("tier", api.tier);
-            apiJson.put("inSequence", api.inSequence);
-            apiJson.put("outSequence", api.outSequence);
-            apiJson.put("responseCache", api.responseCache);
-            apiJson.put("subscriptionAvailability", api.subscriptionAvailability);
-            apiJson.put("subscriptionTenants", api.subscriptionTenants);
-            apiJson.put("bizOwner", api.bizOwner);
-            apiJson.put("bizOwnerMail", api.bizOwnerMail);
-            apiJson.put("techOwner", api.techOwner);
-            apiJson.put("techOwnerMail", api.techOwnerMail);
-            apiJson.put("faultSequence", api.faultSequence);
-            apiJson.put("cacheTimeout", api.cacheTimeout);
-            apiJson.put("destinationStats", api.destinationStats);
-            apiJson.put("environments", api.environments);
-            success = this.impl.manageAPI(apiJson);
+            var identifier = new Packages.org.wso2.carbon.apimgt.api.model.APIIdentifier(api.provider, api.apiName, api.version);
+            var apiOb = new Packages.org.wso2.carbon.apimgt.api.model.API(identifier);
+
+            var tierSet = new HashSet();
+            var tierArray = api.tier.split(',');
+            var tier;
+            for (var tierName in tierArray) {
+                tier = new Tier(tierName);
+                tierSet.add(tier);
+            }
+            var environments = APIUtil.extractEnvironmentsForAPI(api.environments);
+
+            apiOb.addAvailableTiers(tierSet);
+            apiOb.setSubscriptionAvailability(api.subscriptionAvailability);
+            apiOb.setSubscriptionAvailableTenants(api.subscriptionTenants);
+            if('default_version' == api.defaultVersion) {
+                apiOb.setAsDefaultVersion(true);
+            } else {
+                apiOb.setAsDefaultVersion(false);
+            }
+            apiOb.setTransports(api.transports);
+            apiOb.setInSequence(api.inSequence);
+            apiOb.setOutSequence(api.outSequence);
+            apiOb.setFaultSequence(api.faultSequence);
+            apiOb.setBusinessOwner(api.bizOwner);
+            apiOb.setBusinessOwnerEmail(api.bizOwnerMail);
+            apiOb.setTechnicalOwner(api.techOwner);
+            apiOb.setTechnicalOwnerEmail(api.techOwnerMail);
+            apiOb.setEnvironments(environments);
+            apiOb.setResponseCache(api.responseCache);
+            apiOb.setCacheTimeout(api.cacheTimeout);
+            apiOb.setSwagger(api.swagger);
+            success = this.impl.updateAPIManagePhase(apiOb);
             // log.info("=============================================");
             if (log.isDebugEnabled()) {
                 log.debug("manageAPI : " + api.name + "-" + api.version);
             }
             if(success){
-                var failedToPublishEnvironments = JSON.parse(success).PUBLISHED;
-                var failedToUnPublishEnvironments = JSON.parse(success).UNPUBLISHED;
-                if(failedToPublishEnvironments == "" && failedToUnPublishEnvironments == ""){
-                    return {
-                        error:false
-                    };
-                }else{
-                    return {
-                        error:true,
-                        message:success + '||warning'
-                    };
-                }
+                return {
+                    error:false
+                };
             }else{
                 return {
                     error:true
@@ -663,7 +663,7 @@ var apipublisher = {};
             log.error(e);
             return {
                 error:true,
-                message:e.message.split(":")[1]
+                message:e.message.replace(e.message.split(":")[0] + ":", "")
             };
         }
     };

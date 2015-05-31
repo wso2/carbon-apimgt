@@ -487,4 +487,29 @@ public interface APIProvider extends APIManager {
 	 * @return true if role set is valid, else false
 	 */
 	public boolean validateRoles(String[] inputRoles);
+
+	/**
+	 * Retrieves active tenant domains and return true or false to display private
+	 * visibility
+	 *
+	 * @return boolean true If display private visibility
+	 */
+	public boolean isMultipleTenantsAvailable();
+
+	/**
+	 * This method is to functionality of managing an API in API-Provider     *
+	 *
+	 * @param updatedAPI updated api contents
+	 * @return true if the API was added successfully
+	 * @throws APIManagementException Wrapped exception by org.wso2.carbon.apimgt.api.APIManagementException
+	 */
+	public boolean updateAPIManagePhase(API updatedAPI) throws APIManagementException, FaultGatewaysException;
+
+	/**
+	 *
+	 * @return true if the API was added successfully
+	 * @throws APIManagementException
+	 */
+	public  boolean updateAPIStatus(APIIdentifier identifier, String status, boolean publishToGateway, boolean deprecateOldVersions
+			,boolean makeKeysForwardCompatible) throws APIManagementException, FaultGatewaysException;
 }

@@ -22,6 +22,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
+import org.wso2.carbon.apimgt.api.FaultGatewaysException;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIStatus;
 import org.wso2.carbon.apimgt.impl.APIConstants;
@@ -75,7 +76,6 @@ public class ApiPublisherExecutor implements Execution {
     public boolean execute(RequestContext context, String currentState, String targetState) {
         boolean executed = false;
         String user = CarbonContext.getThreadLocalCarbonContext().getUsername();
-        String failedGateways = null;
         try {
             GenericArtifactManager artifactManager = APIUtil
                     .getArtifactManager(context.getSystemRegistry(), APIConstants.API_KEY);
@@ -89,22 +89,24 @@ public class ApiPublisherExecutor implements Execution {
             GenericArtifact apiArtifact = artifactManager.getGenericArtifact(artifactId);
             API api = APIUtil.getAPI(apiArtifact);
             APIProvider apiProvider = APIManagerFactory.getInstance().getAPIProvider(user);
-            //failedGateways = apiProvider.updateAPIStatus(api.getId(), targetState, true, false, true);
+	        executed = apiProvider.updateAPIStatus(api.getId(), targetState, true, false, true);
             //Setting resource again to the context as it's updated within updateAPIStatus method
             String apiPath = APIUtil.getAPIPath(api.getId());
             apiResource = registry.get(apiPath);
             context.setResource(apiResource);
-            if (failedGateways != null) {
+            /*if (failedGateways != null) {
                 executed = true;
             } else {
                 // TODO Failed gateways returns json string which need to be format and correct this place.
-            }
+            }*/
         } catch (RegistryException e) {
             log.error("Failed to get the generic artifact, While executing ApiPublisherExecutor. ", e);
         } catch (APIManagementException e) {
             log.error("Failed to publish service to API store, While executing ApiPublisherExecutor. ", e);
+        } catch (FaultGatewaysException e) {
+	        log.error("Failed to publish service gateway, While executing ApiPublisherExecutor. ", e);
         }
-        return executed;
+	    return executed;
     }
 
     private static APIStatus getApiStatus(String status) {
