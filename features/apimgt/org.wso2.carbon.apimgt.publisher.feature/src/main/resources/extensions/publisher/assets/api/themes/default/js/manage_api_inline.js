@@ -202,7 +202,7 @@ $(function () {
                                                                   BootstrapDialog.show({
                                                                   type: BootstrapDialog.TYPE_DANGER,
                                                                   title: 'Error',
-                                                                  message: 'Error while changing the life cycle state.',
+                                                                  message: 'Error while savng API.',
                                                                   buttons: [{
                                                                   label: 'OK',
                                                                   action: function(dialogRef){

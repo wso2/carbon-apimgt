@@ -41,7 +41,9 @@ var apipublisher = {};
     var Map=Packages.java.util.Map;
     var Long=Packages.java.lang.Long;
     var HashMap=Packages.java.util.HashMap;
+    var HashSet=Packages.java.util.HashSet;
     var JSONArray=Packages.org.json.simple.JSONArray;
+    var JSONValue=Packages.org.json.simple.JSONValue;
 
     var DateFormat=Packages.java.text.DateFormat;
     var SimpleDateFormat=Packages.java.text.SimpleDateFormat;
@@ -91,22 +93,20 @@ var apipublisher = {};
     APIProviderProxy.prototype.implementAPI = function (api) {
         var identifier = new Packages.org.wso2.carbon.apimgt.api.model.APIIdentifier(api.provider, api.apiName, api.version);
         var apiOb = new Packages.org.wso2.carbon.apimgt.api.model.API(identifier);
-
-        apiObj.put("implementation_type", api.implementation_type);
-        apiObj.put("wsdl", api.wsdl);
-        apiObj.put("wadl", api.wadl);
-        apiObj.put("endpointSecured", api.endpointSecured);
-        apiObj.put("endpointUTUsername", api.endpointUTUsername);
-        apiObj.put("endpointUTPassword", api.endpointUTPassword);
-        apiObj.put("endpoint_config", api.endpoint_config);
-        apiObj.put("destinationStats", api.destinationStats);
-        apiObj.put("swagger", api.swagger);
-        apiObj.put("wadl", api.wadl);
-        return this.impl.implementAPI(apiObj);
-    };
-
-    APIProviderProxy.prototype.manageAPI = function (api) {
-        return this.impl.manageAPI(api);
+        apiOb.setImplementation(api.implementation_type);
+        apiOb.setWsdlUrl(api.wsdl);
+        apiOb.setWadlUrl(api.wadl);
+        if('secured' == api.endpointSecured) {
+            apiOb.setEndpointSecured(true);
+        } else {
+            apiOb.setEndpointSecured(false);
+        }
+        apiOb.setEndpointUTUsername(api.endpointUTUsername);
+        apiOb.setEndpointUTPassword(api.endpointUTPassword);
+        apiOb.setEndpointConfig(api.endpoint_config);
+        apiOb.setDestinationStatsEnabled(api.destinationStats);
+        apiOb.setSwagger(api.swagger);
+        return this.impl.updateAPIImplementation(apiOb);
     };
 
     APIProviderProxy.prototype.updateDesignAPI = function (api) {
@@ -173,11 +173,15 @@ var apipublisher = {};
     };
 
     APIProviderProxy.prototype.getCustomFaultSequences = function () {
-        var sequences;
+        var sequences = [];
         try {
-            sequences = JSON.parse(this.impl.getCustomFaultSequences());
+            sequencesList = this.impl.getCustomFaultSequences();
+            for (var i = 0 ; i < sequencesList.size(); i++) {
+                sequences.push(sequencesList.get(i));
+            }
+            log.info(sequences);
             if (log.isDebugEnabled()) {
-                log.debug("getCustomInSequences " +  " : " + sequences);
+                log.debug("getCustomOutSequences " +  " : " + sequences);
             }
 
             return {
@@ -194,11 +198,15 @@ var apipublisher = {};
     };
 
     APIProviderProxy.prototype.getCustomInSequences = function () {
-        var sequences;
+        var sequences = [];
         try {
-            sequences = JSON.parse(this.impl.getCustomInSequences());
+            sequencesList = this.impl.getCustomInSequences();
+            for (var i = 0 ; i < sequencesList.size(); i++) {
+                sequences.push(sequencesList.get(i));
+            }
+            log.info(sequences);
             if (log.isDebugEnabled()) {
-                log.debug("getCustomInSequences " +  " : " + sequences);
+                log.debug("getCustomOutSequences " +  " : " + sequences);
             }
 
             return {
@@ -215,9 +223,13 @@ var apipublisher = {};
     };
 
     APIProviderProxy.prototype.getCustomOutSequences = function () {
-        var sequences;
+        var sequences = [];
         try {
-            sequences = JSON.parse(this.impl.getCustomOutSequences());
+            sequencesList = this.impl.getCustomOutSequences();
+            for (var i = 0 ; i < sequencesList.size(); i++) {
+                sequences.push(sequencesList.get(i));
+            }
+            log.info(sequences);
             if (log.isDebugEnabled()) {
                 log.debug("getCustomOutSequences " +  " : " + sequences);
             }
@@ -235,17 +247,33 @@ var apipublisher = {};
         }
     };
 
+
     APIProviderProxy.prototype.getEnvironments = function () {
         var environments;
+        var environmentList = [];
+        log.info('=================================');
         try {
-            environments = JSON.parse(this.impl.getEnvironments());
+            environments = APIUtil.getEnvironments();
+            var environment;
+            var iterator = environments.values().iterator();
+            while(iterator.hasNext()) {
+                log.info('+++++++++++++++++++++++++++++==');
+                environment = iterator.next();
+                environmentList.push({
+                                         "name" : environment.getName(),
+                                         "description"  : environment.getDescription(),
+                                         "type"       : environment.getType()
+                                     });
+            }
+            log.info(environmentList);
+            log.info('=================================');
             if (log.isDebugEnabled()) {
                 log.debug("getCustomOutSequences " +  " : " + sequences);
             }
 
             return {
                 error:false,
-                environments:environments
+                environments:environmentList
             };
         } catch (e) {
             log.error(e.message);
@@ -321,6 +349,76 @@ var apipublisher = {};
                 }
             }
 
+            var uriTemplates = api.getUriTemplates();
+            if (uriTemplates.size() != 0) {
+                var uriTempArr = new Array();
+                var iterator = uriTemplates.iterator();
+                var uriTemplatesArr = new Array();
+                while (iterator.hasNext()) {
+                    var utArr = new Array();
+                    var ut = iterator.next();
+                    utArr.push(ut.getUriTemplate());
+                    utArr.push(ut.getMethodsAsString().replaceAll("\\s", ","));
+                    utArr.push(ut.getAuthTypeAsString().replaceAll("\\s", ","));
+                    utArr.push(ut.getThrottlingTiersAsString().replaceAll("\\s", ","));
+                    var utNArr = new Array();
+                    for (var p = 0; p < utArr.length; p++) {
+                        utNArr.push(utArr[p]);
+                    }
+                    uriTemplatesArr.push(utNArr);
+                }
+
+                for (var c = 0; c < uriTemplatesArr.length; c++) {
+                    uriTempArr.push(uriTemplatesArr[c]);
+                }
+            }
+
+            var externalStoresSet = this.impl.getExternalAPIStores(identifier);
+            var store;
+            var storeList = [];
+            if(externalStoresSet != null && externalStoresSet.size() != 0) {
+                var iterator = externalStoresSet.iterator();
+                while (iterator.hasNext()) {
+                    store = iterator.next();
+                    storeList.push({
+                                       "name": store.getName(),
+                                       "displayName": store.getDisplayName(),
+                                       "published": store.isPublished()
+                                   });
+                }
+            }
+
+            var resourceArray = new Array();
+            if (uriTemplates.size() != 0) {
+                var iterator = uriTemplates.iterator();
+                while (iterator.hasNext()) {
+                    var resourceObj =[];
+                    var ut = iterator.next();
+                    resourceObj.push({
+                                         "resourceObj" : ut.getUriTemplate(),
+                                         "http_verbs"  : JSONValue.parse(ut.getResourceMap())
+                                     });
+                    resourceArray.push(resourceObj);
+                }
+            }
+
+            var scopes = api.getScopes();
+            var scopesNative = new Array();
+            var iterator = scopes.iterator();
+            if(scopes != null) {
+                while (iterator.hasNext()) {
+                    var scopeNative = [];
+                    scopeNative.push({
+                                         "id": scope.getId(),
+                                         "key": scope.getKey(),
+                                         "name": scope.getName(),
+                                         "roles": scope.getRoles(),
+                                         "description": scope.getDescription()
+                                     });
+                    scopesNative.push(scopeNative);
+                }
+            }
+
             apiOb = {
                 name: api.getId().getApiName(),
                 description: api.getDescription(),
@@ -334,6 +432,7 @@ var apipublisher = {};
                 context: api.getContext(),
                 lastUpdated: Long.valueOf(api.getLastUpdated().getTime()).toString(),
                 subs: subscriberCount,
+                templates: uriTempArr,
                 sandbox: api.getSandboxUrl(),
                 tierDescs:tiersDescSet,
                 bizOwner: api.getBusinessOwner(),
@@ -350,6 +449,7 @@ var apipublisher = {};
                 provider: APIUtil.replaceEmailDomainBack(api.getId().getProviderName()),
                 transport_http: APIUtil.checkTransport("http", api.getTransports()),
                 transport_https: APIUtil.checkTransport("https", api.getTransports()),
+                apiStores: storeList,
                 inSequence: api.getInSequence(),
                 outSequence: api.getOutSequence(),
                 subscriptionAvailability: api.getSubscriptionAvailability(),
@@ -360,9 +460,12 @@ var apipublisher = {};
                 availableTiersDisplayNames: tiersDisplayNamesSet,
                 faultSequence: api.getFaultSequence(),
                 destinationStats: api.getDestinationStatsEnabled(),
+                resources: JSONValue.toJSONString(resourceArray),
+                scopes: scopesNative,
                 isDefaultVersion: api.isDefaultVersion(),
                 implementation: api.getImplementation(),
                 hasDefaultVersion: hasDefaultVersion,
+                environments: APIUtil.writeEnvironmentsToArtifact(api),
                 currentDefaultVersion: defaultVersion
             };
             return {
@@ -392,8 +495,35 @@ var apipublisher = {};
     };
 
     APIProviderProxy.prototype.getTiers = function (tenantDomain) {
-        var availableTiers = this.impl.getTiers(tenantDomain);
-        return JSON.parse(availableTiers);
+
+        var tierList = new Array();
+        try {
+            var availableTiers = this.impl.getTiers(tenantDomain);
+            var tierList = [];
+            var tier;
+            var sortedTierList = APIUtil.sortTiers(availableTiers);
+            for (var i = 0 ; i < sortedTierList.size() ; i ++) {
+                tier = sortedTierList.get(i);
+                tierList.push({
+                                  "tierName": tier.getName(),
+                                  "tierDisplayName": tier.getDisplayName(),
+                                  "tierDescription": tier.getDescription(),
+                                  "defaultTier": 0
+                              });
+            }
+            if (log.isDebugEnabled()) {
+                log.debug("Invoke getTiers()" );
+            }
+            return {
+                error:false,
+                tiers:tierList
+            };
+        } catch (e) {
+            log.error(e.message);
+            return {
+                error:e
+            };
+        }
     };
 
     APIProviderProxy.prototype.getSubscriberAPIs = function (subscriberName) {
@@ -482,46 +612,49 @@ var apipublisher = {};
     APIProviderProxy.prototype.manageAPI = function (api) {
         var success;
         var log = new Log();
+        log.info(api);
         try {
-            var apiJson = new Packages.org.json.simple.JSONObject();
-            apiJson.put("name", api.apiName);
-            apiJson.put("provider", api.provider);
-            apiJson.put("version", api.version);
-            apiJson.put("context", api.context);
-            apiJson.put("defaultVersion", api.defaultVersion);
-            apiJson.put("swagger", api.swagger);
-            apiJson.put("tier", api.tier);
-            apiJson.put("inSequence", api.inSequence);
-            apiJson.put("outSequence", api.outSequence);
-            apiJson.put("responseCache", api.responseCache);
-            apiJson.put("subscriptionAvailability", api.subscriptionAvailability);
-            apiJson.put("subscriptionTenants", api.subscriptionTenants);
-            apiJson.put("bizOwner", api.bizOwner);
-            apiJson.put("bizOwnerMail", api.bizOwnerMail);
-            apiJson.put("techOwner", api.techOwner);
-            apiJson.put("techOwnerMail", api.techOwnerMail);
-            apiJson.put("faultSequence", api.faultSequence);
-            apiJson.put("cacheTimeout", api.cacheTimeout);
-            apiJson.put("destinationStats", api.destinationStats);
-            apiJson.put("environments", api.environments);
-            success = this.impl.manageAPI(apiJson);
+            var identifier = new Packages.org.wso2.carbon.apimgt.api.model.APIIdentifier(api.provider, api.apiName, api.version);
+            var apiOb = new Packages.org.wso2.carbon.apimgt.api.model.API(identifier);
+
+            var tierSet = new HashSet();
+            var tierArray = api.tier.split(',');
+            var tier;
+            for (var tierName in tierArray) {
+                tier = new Tier(tierName);
+                tierSet.add(tier);
+            }
+            var environments = APIUtil.extractEnvironmentsForAPI(api.environments);
+
+            apiOb.addAvailableTiers(tierSet);
+            apiOb.setSubscriptionAvailability(api.subscriptionAvailability);
+            apiOb.setSubscriptionAvailableTenants(api.subscriptionTenants);
+            if('default_version' == api.defaultVersion) {
+                apiOb.setAsDefaultVersion(true);
+            } else {
+                apiOb.setAsDefaultVersion(false);
+            }
+            apiOb.setTransports(api.transports);
+            apiOb.setInSequence(api.inSequence);
+            apiOb.setOutSequence(api.outSequence);
+            apiOb.setFaultSequence(api.faultSequence);
+            apiOb.setBusinessOwner(api.bizOwner);
+            apiOb.setBusinessOwnerEmail(api.bizOwnerMail);
+            apiOb.setTechnicalOwner(api.techOwner);
+            apiOb.setTechnicalOwnerEmail(api.techOwnerMail);
+            apiOb.setEnvironments(environments);
+            apiOb.setResponseCache(api.responseCache);
+            apiOb.setCacheTimeout(api.cacheTimeout);
+            apiOb.setSwagger(api.swagger);
+            success = this.impl.updateAPIManagePhase(apiOb);
             // log.info("=============================================");
             if (log.isDebugEnabled()) {
                 log.debug("manageAPI : " + api.name + "-" + api.version);
             }
             if(success){
-                var failedToPublishEnvironments = JSON.parse(success).PUBLISHED;
-                var failedToUnPublishEnvironments = JSON.parse(success).UNPUBLISHED;
-                if(failedToPublishEnvironments == "" && failedToUnPublishEnvironments == ""){
-                    return {
-                        error:false
-                    };
-                }else{
-                    return {
-                        error:true,
-                        message:success + '||warning'
-                    };
-                }
+                return {
+                    error:false
+                };
             }else{
                 return {
                     error:true
@@ -530,7 +663,7 @@ var apipublisher = {};
             log.error(e);
             return {
                 error:true,
-                message:e.message.split(":")[1]
+                message:e.message.replace(e.message.split(":")[0] + ":", "")
             };
         }
     };
@@ -554,10 +687,17 @@ var apipublisher = {};
         }
     };
 
-    APIProviderProxy.prototype.isContextExist = function (context,oldContext) {
+    APIProviderProxy.prototype.isContextExist = function (context, oldContext) {
         var exists, log = new Log();
+        if(context == oldContext) {
+            return {
+                error:false,
+                exist:true
+            };
+        }
+
         try {
-            exists = this.impl.isContextExist(context);
+            exists = this.impl.isDuplicateContextTemplate(context);
             if (log.isDebugEnabled()) {
                 log.debug("isContext exist for : " + context + " : " + exists);
             }
@@ -574,15 +714,19 @@ var apipublisher = {};
     };
 
     APIProviderProxy.prototype.isURLValid = function (type,url) {
-        var result, log = new Log();
+        var result, valid = false, log = new Log();
         try {
-            result = this.impl.isURLValid(type,url);
+            result = APIUtil.isURLValid(type,url);
+            if(result == 'success') {
+                valid = true;
+            }
             if (log.isDebugEnabled()) {
                 log.debug("Invoke isURLValid" );
             }
             return {
                 error:false,
-                response:result
+                response:result,
+                valid : valid
             };
         } catch (e) {
             log.error(e.message);
@@ -592,10 +736,22 @@ var apipublisher = {};
         }
     };
 
-    APIProviderProxy.prototype.validateRoles = function(roles,username) {
+    APIProviderProxy.prototype.validateRoles = function(roles) {
+
         var validRole, log = new Log();
+        var roleList ;
+        if(roles != null && !roles == '') {
+            roleList = roles.split(',');
+        } else {
+            return {
+                error:true,
+                valid: false,
+                errorMsg : 'Please provide non empty roles set to valid'
+            };
+        }
+
         try {
-            validRole = this.impl.validateRoles(roles,username);
+            validRole = this.impl.validateRoles(roleList);
             if (log.isDebugEnabled()) {
                 log.debug("Invoke validateRoles function.");
             }
@@ -661,7 +817,7 @@ var apipublisher = {};
         try {
             success = this.impl.hasPublishPermission();
             if (log.isDebugEnabled()) {
-                log.debug("hasPublishPermission method " );
+                log.debug("check whether user has publisher permission" );
             }
             if(success){
                 return {
@@ -678,6 +834,55 @@ var apipublisher = {};
             return {
                 error:true,
                 permitted:false
+            };
+        }
+    };
+
+    APIProviderProxy.prototype.isScopeExist = function (scope, tenantId) {
+        var result, log = new Log();
+        try {
+            result = this.impl.isScopeKeyExist(scope, tenantId);
+            if (log.isDebugEnabled()) {
+                log.debug("Invoke isScopeExist()" );
+            }
+            return {
+                error:false,
+                isScopeExist:result
+            };
+        } catch (e) {
+            log.error(e.message);
+            return {
+                error:e
+            };
+        }
+    };
+
+    APIProviderProxy.prototype.isAPIOlderVersionExist = function (apiProvider, apiName, apiVersion) {
+        var identifier = new Packages.org.wso2.carbon.apimgt.api.model.APIIdentifier(apiProvider, apiName, apiVersion);
+        try {
+            var exist = this.impl.isAPIOlderVersionExist(identifier);
+            if (log.isDebugEnabled()) {
+                log.debug("isAPIOlderVersionExist : " + api.name + "-" + api.version);
+            }
+            if (!exist) {
+                return {
+                    error:true,
+                    exist:false
+                };
+            } else {
+                return {
+                    error:false,
+                    exist:true
+                };
+            }
+
+        } catch (e) {
+            log.error(e.message);
+            return {
+                error:e,
+                exist:false,
+                message:e.message.split(":")[1]
+
             };
         }
     };

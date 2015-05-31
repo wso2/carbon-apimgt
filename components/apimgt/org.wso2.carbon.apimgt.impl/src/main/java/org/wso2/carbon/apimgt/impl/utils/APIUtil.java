@@ -65,6 +65,7 @@ import org.wso2.carbon.apimgt.api.model.APIStore;
 import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.api.model.Documentation;
 import org.wso2.carbon.apimgt.api.model.DocumentationType;
+import org.wso2.carbon.apimgt.api.model.KeyManager;
 import org.wso2.carbon.apimgt.api.model.KeyManagerConfiguration;
 import org.wso2.carbon.apimgt.api.model.Provider;
 import org.wso2.carbon.apimgt.api.model.Scope;
@@ -163,6 +164,7 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.URLConnection;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -4958,4 +4960,63 @@ public final class APIUtil {
 			return true;
 		}
 	};
+
+	public String isURLValid(String type, String urlVal) throws APIManagementException {
+
+		String response = "";
+
+		if (urlVal != null && !urlVal.isEmpty()) {
+			URLConnection conn = null;
+			try {
+				URL url = new URL(urlVal);
+				if (type != null && type.equals("wsdl")) {
+					validateWsdl(urlVal);
+					response = "success";
+				}
+				// checking http,https endpoints up to resource level by doing
+				// http HEAD. And other end point
+				// validation do through basic url connect
+				else if (url.getProtocol().matches("https")) {
+					ServerConfiguration serverConfig = CarbonUtils.getServerConfiguration();
+					String trustStorePath = serverConfig.getFirstProperty("Security.TrustStore.Location");
+					String trustStorePassword = serverConfig.getFirstProperty("Security.TrustStore.Password");
+					System.setProperty("javax.net.ssl.trustStore", trustStorePath);
+					System.setProperty("javax.net.ssl.trustStorePassword", trustStorePassword);
+
+					return sendHttpHEADRequest(urlVal);
+				} else if (url.getProtocol().matches("http")) {
+					return sendHttpHEADRequest(urlVal);
+				} else {
+					return "error while connecting";
+				}
+			} catch (Exception e) {
+				response = e.getMessage();
+			} finally {
+				if (conn != null) {
+					conn = null;
+				}
+			}
+		}
+		return response;
+	}
+
+	/**
+	 * This method is to functionality of get list of environments that list in api-manager.xml
+	 *
+	 * @return list of environments with details of environments
+	 */
+	public static Map<String, Environment> getEnvironments() {
+		APIManagerConfiguration config =
+				ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
+						.getAPIManagerConfiguration();
+		Map<String, Environment> environments = config.getApiGatewayEnvironments();
+		return environments;
+	}
+
+	public static Map getRegisteredResourceByAPIIdentifier(APIIdentifier identifier) throws APIManagementException {
+		//get new key manager
+		KeyManager keyManager = KeyManagerHolder.getKeyManagerInstance();
+		Map registeredResource = keyManager.getResourceByApiId(identifier.toString());
+		return registeredResource;
+	}
 }
