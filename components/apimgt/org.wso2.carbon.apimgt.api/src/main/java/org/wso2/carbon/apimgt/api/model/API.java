@@ -80,6 +80,7 @@ public class API implements Serializable{
     private String subscriptionAvailableTenants;
     private String allowedHeaders;
     private String allowedOrigins;
+    private String swagger;
 
     private String endpointConfig;
     
@@ -624,5 +625,13 @@ public class API implements Serializable{
 			return tierSet.toArray(new Tier[tierSet.size()]);
 		}
 		return new Tier[0];
+	}
+
+	public String getSwagger() {
+		return swagger;
+	}
+
+	public void setSwagger(String swagger) {
+		this.swagger = swagger;
 	}
 }

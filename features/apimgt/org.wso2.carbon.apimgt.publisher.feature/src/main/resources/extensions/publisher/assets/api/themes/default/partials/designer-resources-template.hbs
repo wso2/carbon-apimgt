@@ -1,19 +1,4 @@
-<legend>API Definition</legend>
-<div class="resource_create">
-	<div class="control-group">
-		<label class="control-label" for="inputPassword">URL Pattern</label>
-		<div class="controls">
-			<div class="input-prepend">
-				{{#if api}}
-					<span class="add-on" id="resource_url_pattern_refix">{{api.context}}</span>
-				{{else}}
-					<span class="add-on" id="resource_url_pattern_refix">/{context}/{version}/</span>
-				{{/if}}
-				<input style="width:500px" id="resource_url_pattern" type="text" placeholder="Url Pattern Ex: path/to/resource" class="resource_url_pattern"/>
-			</div>
-		</div>
-	</div>
-	<div class="control-group">
+<div class="control-group">
 		<label class="control-label" for=""></label>
 		<div class="controls">
 			{{#each verbs}}
@@ -26,7 +11,8 @@
 				<input type="checkbox" value="options" class="http_verb_select"> OPTIONS
 			</label>
 			<a class="icon-question-sign help_popup" help_data="options_help" data-trigger="hover"></a>
-			<p id="options_help" class="hide"><%=i18n.localize("optionsHelpMsg")%></p>
+			<p id="options_help" class="hide">{{t "Select Options method to send OPTIONS calls to backed. If not selected
+			API gateway will return OPTIONS call with the allowed methods in gateway."}}</p>
 			<label id="less" style="display:inline;">less</label>
 		</div>
 		<label id="more" style="display:inline;">more</label>
@@ -54,7 +40,9 @@
 				</td>
 				<td class="resource_expand"><a class="resource-path">{{ path }}</a></td>
 				<td  width="99%"><span class="operation-summary change_summary" data-path="$.paths.{{ path }}.{{@key}}" data-attr="summary" >{{ summary }}</span></td>
-				<td class="delete_resource_td "><a class='operation-summary delete_resource' data-operation="{{ @key }}" data-path-name="{{ path }}" data-path="$.paths.{{ path }}.{{@key}}" data-index="{{ @index }}"><i class='icon-trash'></i></a></td>
+				<td class="delete_resource_td "><a class='operation-summary delete_resource' data-operation="{{ @key }}"
+												   data-path-name="{{ path }}" data-path="$.paths.{{ path }}.{{@key}}"
+												   data-index="{{ @index }}"><i class='fa fa-trash'></i></a></td>
 			</tr>
 			<tr><td colspan="4" class="resource_body hide" data-path="$.paths.{{ path }}.{{@key}}"></td></tr>
 		{{/each}}

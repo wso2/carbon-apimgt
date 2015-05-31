@@ -460,4 +460,31 @@ public interface APIProvider extends APIManager {
 	 * @return true if user has publish permission else false
 	 */
 	public boolean hasPublishPermission() throws APIManagementException;
+
+	/**
+	 * This method is to functionality of update implementation of an API in API-Provider
+	 *
+	 * @param  updatedAPI the updated api contents
+	 * @return true if the API was added successfully
+	 * @throws APIManagementException Wrapped exception by org.wso2.carbon.apimgt.api.APIManagementException
+	 */
+	public boolean updateAPIImplementation(API updatedAPI) throws APIManagementException;
+
+	/**
+	 * Check whehter older versions exist for given api
+	 *
+	 * @param identifier the api identifier
+	 *
+	 * @return true if older version exist else false
+	 * @throws APIManagementException
+	 */
+	public boolean isAPIOlderVersionExist(APIIdentifier identifier) throws APIManagementException;
+
+	/**
+	 * Validate given set of roles
+	 *
+	 * @param inputRoles input role set
+	 * @return true if role set is valid, else false
+	 */
+	public boolean validateRoles(String[] inputRoles);
 }

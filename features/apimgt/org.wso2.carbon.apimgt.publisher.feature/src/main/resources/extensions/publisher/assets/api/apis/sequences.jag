@@ -56,7 +56,7 @@ require('/modules/publisher.js').exec(function (ctx) {
 					if (result.error) {
 						obj = {
 							error: true,
-							message: msg.error.backendError(action)
+							message: result.error.backendError(action)
 						};
 					} else {
 						obj = {
@@ -71,7 +71,7 @@ require('/modules/publisher.js').exec(function (ctx) {
 					if (result.error) {
 						obj = {
 							error: true,
-							message: msg.error.backendError(action)
+							message: result.error.backendError(action)
 						};
 					} else {
 						obj = {
@@ -86,7 +86,7 @@ require('/modules/publisher.js').exec(function (ctx) {
 					if (result.error) {
 						obj = {
 							error: true,
-							message: msg.error.backendError(action)
+							message: result.error.backendError(action)
 						};
 					} else {
 						obj = {
@@ -98,7 +98,7 @@ require('/modules/publisher.js').exec(function (ctx) {
 				} else {
 					print({
 							  error: true,
-							  message: msg.error.invalidAction(action)
+							  message: result.error.invalidAction(action)
 						  });
 				}
 			} else {

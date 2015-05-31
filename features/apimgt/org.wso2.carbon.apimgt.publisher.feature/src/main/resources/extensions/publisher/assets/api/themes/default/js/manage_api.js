@@ -61,19 +61,17 @@ $(function () {
 
         });
 
-
-
-
         loadInSequences();
         loadOutSequences();
         loadFaultSequences();
 
-        if ( $("#toggleSequence").attr('checked') ) {
-            $('#toggleSequence').parent().next().show();
+    $('#toggleSequence').click(function() {
+        if ($(this).is(':checked')) {
+            $('#seqTable').show();
+        } else {
+            $('#seqTable').hide();
         }
-        else {
-            $('#toggleSequence').parent().next().hide();
-        }
+    });
 
     $('.js_hidden_section_title').click(function(){
         var $next = $(this).next();

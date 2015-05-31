@@ -65,6 +65,7 @@ import org.wso2.carbon.apimgt.api.model.APIStore;
 import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.api.model.Documentation;
 import org.wso2.carbon.apimgt.api.model.DocumentationType;
+import org.wso2.carbon.apimgt.api.model.KeyManager;
 import org.wso2.carbon.apimgt.api.model.KeyManagerConfiguration;
 import org.wso2.carbon.apimgt.api.model.Provider;
 import org.wso2.carbon.apimgt.api.model.Scope;
@@ -4997,5 +4998,25 @@ public final class APIUtil {
 			}
 		}
 		return response;
+	}
+
+	/**
+	 * This method is to functionality of get list of environments that list in api-manager.xml
+	 *
+	 * @return list of environments with details of environments
+	 */
+	public static Map<String, Environment> getEnvironments() {
+		APIManagerConfiguration config =
+				ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
+						.getAPIManagerConfiguration();
+		Map<String, Environment> environments = config.getApiGatewayEnvironments();
+		return environments;
+	}
+
+	public static Map getRegisteredResourceByAPIIdentifier(APIIdentifier identifier) throws APIManagementException {
+		//get new key manager
+		KeyManager keyManager = KeyManagerHolder.getKeyManagerInstance();
+		Map registeredResource = keyManager.getResourceByApiId(identifier.toString());
+		return registeredResource;
 	}
 }
