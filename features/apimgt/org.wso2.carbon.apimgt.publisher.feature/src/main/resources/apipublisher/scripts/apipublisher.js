@@ -449,10 +449,10 @@ var apipublisher = {};
             var tierSet = '';
             var tiersDisplayNamesSet = '';
             var tiersDescSet = '';
-            for(var i = 0; i < tiers.length  ; i++) {
-                tierSet += tiers[0].getName();
-                tiersDisplayNamesSet += tiers[0].getDisplayName();
-                tiersDescSet += tiers[0].getDescription();
+            for(var i = 0; i < tiers.length; i++) {
+                tierSet += tiers[i].getName();
+                tiersDisplayNamesSet += tiers[i].getDisplayName();
+                tiersDescSet += tiers[i].getDescription();
                 if (i != tierSet.length - 1) {
                     tierSet += ',';
                     tiersDisplayNamesSet += ',';
@@ -731,10 +731,11 @@ var apipublisher = {};
             var tierSet = new HashSet();
             var tierArray = api.tier.split(',');
             var tier;
-            for (var tierName in tierArray) {
-                tier = new Tier(tierName);
+            for (var i = 0 ; tierArray.length; i++) {
+                tier = new Tier(tierArray[i]);
                 tierSet.add(tier);
             }
+
             var environments = APIUtil.extractEnvironmentsForAPI(api.environments);
 
             apiOb.addAvailableTiers(tierSet);
