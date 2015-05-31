@@ -2040,8 +2040,7 @@ public class APIProviderHostObject extends ScriptableObject {
      * @throws APIManagementException Wrapped exception by org.wso2.carbon.apimgt.api.APIManagementException
      */
 
-    public static NativeArray
-    jsFunction_getAPI(Context cx, Scriptable thisObj,
+    public static NativeArray jsFunction_getAPI(Context cx, Scriptable thisObj,
                                                 Object[] args,
                                                 Function funObj) throws APIManagementException {
         NativeArray myn = new NativeArray(0);
@@ -2071,9 +2070,159 @@ public class APIProviderHostObject extends ScriptableObject {
             }
             API api = apiProvider.getAPI(apiId);
             if (api != null) {
+                Set<URITemplate> uriTemplates = api.getUriTemplates();
+
+                myn.put(0, myn, checkValue(api.getId().getApiName()));
+                myn.put(1, myn, checkValue(api.getDescription()));
+                myn.put(2, myn, checkValue(api.getUrl()));
+                myn.put(3, myn, checkValue(api.getWsdlUrl()));
+                myn.put(4, myn, checkValue(api.getId().getVersion()));
+                StringBuilder tagsSet = new StringBuilder("");
+                for (int k = 0; k < api.getTags().toArray().length; k++) {
+                    tagsSet.append(api.getTags().toArray()[k].toString());
+                    if (k != api.getTags().toArray().length - 1) {
+                        tagsSet.append(",");
+                    }
+                }
+                myn.put(5, myn, checkValue(tagsSet.toString()));
+                StringBuilder tiersSet = new StringBuilder("");
+                StringBuilder tiersDisplayNamesSet = new StringBuilder("");
+                StringBuilder tiersDescSet = new StringBuilder("");
+                Set<Tier> tierSet = api.getAvailableTiers();
+                Iterator it = tierSet.iterator();
+                int j = 0;
+                while (it.hasNext()) {
+                    Object tierObject = it.next();
+                    Tier tier = (Tier) tierObject;
+                    tiersSet.append(tier.getName());
+                    tiersDisplayNamesSet.append(tier.getDisplayName());
+                    tiersDescSet.append(tier.getDescription());
+                    if (j != tierSet.size() - 1) {
+                        tiersSet.append(",");
+                        tiersDisplayNamesSet.append(",");
+                        tiersDescSet.append(",");
+                    }
+                    j++;
+                }
+
+                myn.put(6, myn, checkValue(tiersSet.toString()));
+                myn.put(7, myn, checkValue(api.getStatus().toString()));
+                myn.put(8, myn, getWebContextRoot(api.getThumbnailUrl()));
+                myn.put(9, myn, api.getContext());
+                myn.put(10, myn, checkValue(Long.valueOf(api.getLastUpdated().getTime()).toString()));
+                myn.put(11, myn, getSubscriberCount(apiId, thisObj));
+
+                if (uriTemplates.size() != 0) {
+                    NativeArray uriTempArr = new NativeArray(uriTemplates.size());
+                    Iterator i = uriTemplates.iterator();
+                    List<NativeArray> uriTemplatesArr = new ArrayList<NativeArray>();
+                    while (i.hasNext()) {
+                        List<String> utArr = new ArrayList<String>();
+                        URITemplate ut = (URITemplate) i.next();
+                        utArr.add(ut.getUriTemplate());
+                        utArr.add(ut.getMethodsAsString().replaceAll("\\s", ","));
+                        utArr.add(ut.getAuthTypeAsString().replaceAll("\\s", ","));
+                        utArr.add(ut.getThrottlingTiersAsString().replaceAll("\\s", ","));
+                        NativeArray utNArr = new NativeArray(utArr.size());
+                        for (int p = 0; p < utArr.size(); p++) {
+                            utNArr.put(p, utNArr, utArr.get(p));
+                        }
+                        uriTemplatesArr.add(utNArr);
+                    }
+
+                    for (int c = 0; c < uriTemplatesArr.size(); c++) {
+                        uriTempArr.put(c, uriTempArr, uriTemplatesArr.get(c));
+                    }
+
+                    myn.put(12, myn, uriTempArr);
+                }
+
+                myn.put(13, myn, checkValue(api.getSandboxUrl()));
+                myn.put(14, myn, checkValue(tiersDescSet.toString()));
+                myn.put(15, myn, checkValue(api.getBusinessOwner()));
+                myn.put(16, myn, checkValue(api.getBusinessOwnerEmail()));
+                myn.put(17, myn, checkValue(api.getTechnicalOwner()));
+                myn.put(18, myn, checkValue(api.getTechnicalOwnerEmail()));
+                myn.put(19, myn, checkValue(api.getWadlUrl()));
+                myn.put(20, myn, checkValue(api.getVisibility()));
+                myn.put(21, myn, checkValue(api.getVisibleRoles()));
+                myn.put(22, myn, checkValue(api.getVisibleTenants()));
+                myn.put(23, myn, checkValue(api.getEndpointUTUsername()));
+                myn.put(24, myn, checkValue(api.getEndpointUTPassword()));
+                myn.put(25, myn, checkValue(Boolean.toString(api.isEndpointSecured())));
+                myn.put(26, myn, APIUtil.replaceEmailDomainBack(checkValue(api.getId().getProviderName())));
+                myn.put(27, myn, checkTransport("http",api.getTransports()));
+                myn.put(28, myn, checkTransport("https",api.getTransports()));
+                Set<APIStore> storesSet=apiProvider.getExternalAPIStores(api.getId());
+                if(storesSet!=null && storesSet.size()!=0){
+                    NativeArray apiStoresArray=new NativeArray(0);
+                    int i=0;
+                    for(APIStore store:storesSet){
+                        NativeObject storeObject=new NativeObject();
+                        storeObject.put("name",storeObject,store.getName());
+                        storeObject.put("displayName",storeObject,store.getDisplayName());
+                        storeObject.put("published",storeObject,store.isPublished());
+                        apiStoresArray.put(i,apiStoresArray,storeObject);
+                        i++;
+                    }
+                    myn.put(29, myn, apiStoresArray);
+                }
+                myn.put(30, myn, checkValue(api.getInSequence()));
+                myn.put(31, myn, checkValue(api.getOutSequence()));
+
+                myn.put(32, myn, checkValue(api.getSubscriptionAvailability()));
+                myn.put(33, myn, checkValue(api.getSubscriptionAvailableTenants()));
+
+                //@todo need to handle backword compatibility
+                myn.put(34, myn, checkValue(api.getEndpointConfig()));
+
+                myn.put(35, myn, checkValue(api.getResponseCache()));
+                myn.put(36, myn, checkValue(Integer.toString(api.getCacheTimeout())));
+                myn.put(37, myn, checkValue(tiersDisplayNamesSet.toString()));
+
+                myn.put(38, myn, checkValue(api.getFaultSequence()));
+                myn.put(39, myn, checkValue(api.getDestinationStatsEnabled()));
+
+
+                myn.put(39, myn, checkValue(api.getDestinationStatsEnabled()));
+                myn.put(39, myn, checkValue(api.getDestinationStatsEnabled()));
+
 
                 //todo implement resource load
 
+                if (uriTemplates.size() != 0) {
+                    JSONArray resourceArray = new JSONArray();
+                    Iterator i = uriTemplates.iterator();
+                    List<NativeArray> uriTemplatesArr = new ArrayList<NativeArray>();
+                    while (i.hasNext()) {
+                        JSONObject resourceObj = new JSONObject();
+                        URITemplate ut = (URITemplate) i.next();
+
+                        resourceObj.put("url_pattern",ut.getUriTemplate());
+                        resourceObj.put("http_verbs",JSONValue.parse(ut.getResourceMap()));
+
+                        resourceArray.add(resourceObj);
+                    }
+
+                    myn.put(40, myn, JSONValue.toJSONString(resourceArray));
+                }
+
+
+                Set<Scope> scopes = api.getScopes();
+                JSONArray scopesNative = new JSONArray();
+                for(Scope scope:scopes){
+                    JSONObject scopeNative = new JSONObject();
+                    scopeNative.put("id",scope.getId());
+                    scopeNative.put("key", scope.getKey());
+                    scopeNative.put("name",scope.getName());
+                    scopeNative.put("roles", scope.getRoles());
+                    scopeNative.put("description", scope.getDescription());
+                    scopesNative.add(scopeNative);
+                }
+                myn.put(41, myn, scopesNative.toJSONString());
+                myn.put(42, myn, checkValue(Boolean.toString(api.isDefaultVersion())));
+                myn.put(43, myn, api.getImplementation());
+                myn.put(44, myn, APIUtil.writeEnvironmentsToArtifact(api));
                 //get new key manager
                 KeyManager keyManager = KeyManagerHolder.getKeyManagerInstance();
                 Map registeredResource = keyManager.getResourceByApiId(api.getId().toString());
