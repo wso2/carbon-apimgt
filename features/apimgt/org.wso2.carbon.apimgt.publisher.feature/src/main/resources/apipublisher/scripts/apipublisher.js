@@ -176,51 +176,13 @@ var apipublisher = {};
     };
 
     APIProviderProxy.prototype.getCustomFaultSequences = function () {
-        var sequences;
+        var sequences = [];
         try {
-            sequences = JSON.parse(this.impl.getCustomFaultSequences());
-            if (log.isDebugEnabled()) {
-                log.debug("getCustomInSequences " +  " : " + sequences);
+            sequencesList = this.impl.getCustomFaultSequences();
+            for (var i = 0 ; i < sequencesList.size(); i++) {
+                sequences.push(sequencesList.get(i));
             }
-
-            return {
-                error:false,
-                sequences:sequences
-            };
-        } catch (e) {
-            log.error(e.message);
-            return {
-                error:e,
-                sequences:null
-            };
-        }
-    };
-
-    APIProviderProxy.prototype.getCustomInSequences = function () {
-        var sequences;
-        try {
-            sequences = JSON.parse(this.impl.getCustomInSequences());
-            if (log.isDebugEnabled()) {
-                log.debug("getCustomInSequences " +  " : " + sequences);
-            }
-
-            return {
-                error:false,
-                sequences:sequences
-            };
-        } catch (e) {
-            log.error(e.message);
-            return {
-                error:e,
-                sequences:null
-            };
-        }
-    };
-
-    APIProviderProxy.prototype.getCustomOutSequences = function () {
-        var sequences;
-        try {
-            sequences = JSON.parse(this.impl.getCustomOutSequences());
+            log.info(sequences);
             if (log.isDebugEnabled()) {
                 log.debug("getCustomOutSequences " +  " : " + sequences);
             }
@@ -237,6 +199,57 @@ var apipublisher = {};
             };
         }
     };
+
+    APIProviderProxy.prototype.getCustomInSequences = function () {
+        var sequences = [];
+        try {
+            sequencesList = this.impl.getCustomInSequences();
+            for (var i = 0 ; i < sequencesList.size(); i++) {
+                sequences.push(sequencesList.get(i));
+            }
+            log.info(sequences);
+            if (log.isDebugEnabled()) {
+                log.debug("getCustomOutSequences " +  " : " + sequences);
+            }
+
+            return {
+                error:false,
+                sequences:sequences
+            };
+        } catch (e) {
+            log.error(e.message);
+            return {
+                error:e,
+                sequences:null
+            };
+        }
+    };
+
+    APIProviderProxy.prototype.getCustomOutSequences = function () {
+        var sequences = [];
+        try {
+            sequencesList = this.impl.getCustomOutSequences();
+            for (var i = 0 ; i < sequencesList.size(); i++) {
+                sequences.push(sequencesList.get(i));
+            }
+            log.info(sequences);
+            if (log.isDebugEnabled()) {
+                log.debug("getCustomOutSequences " +  " : " + sequences);
+            }
+
+            return {
+                error:false,
+                sequences:sequences
+            };
+        } catch (e) {
+            log.error(e.message);
+            return {
+                error:e,
+                sequences:null
+            };
+        }
+    };
+
 
     APIProviderProxy.prototype.getEnvironments = function () {
         var environments;
@@ -828,7 +841,7 @@ var apipublisher = {};
     APIProviderProxy.prototype.isScopeExist = function (scope, tenantId) {
         var result, log = new Log();
         try {
-            result = this.impl.isScopeExist(scope, tenantId);
+            result = this.impl.isScopeKeyExist(scope, tenantId);
             if (log.isDebugEnabled()) {
                 log.debug("Invoke isScopeExist()" );
             }

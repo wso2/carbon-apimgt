@@ -594,7 +594,6 @@ $(function () {
 
 
     APIDesigner.prototype.render_scopes = function(){
-        if($('#scopes-template').length){
             context = {
                 "api_doc" : this.api_doc
             }
@@ -603,7 +602,6 @@ $(function () {
             var partial = 'scope_template';
             var container = 'scopes_view';
             renderPartialWithContainerName(partial, container, context);
-        }
     };
 
     APIDesigner.prototype.transform = function(api_doc){
@@ -657,7 +655,7 @@ $(function () {
          success : this.update_elements,
          inputclass : 'resource_summary'
          });*/
-        var partial = 'designer-resources-template_manage.hbs';
+        var partial = 'designer-resources-template_manage';
         var container = 'resource_details';
         var that = this;
         renderPartialWithContainerName(partial, container, context, that, renderResourceCallback);

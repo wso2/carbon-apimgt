@@ -313,8 +313,8 @@ $(function () {
         $("#version").change(function(e){
             APIDesigner().api_doc.info.version = $(this).val();
             // We do not need the version anymore. With the new plugable version strategy the context will have the version
-            APIDesigner().baseURLValue = "http://localhost:8280/"+$("#context").val().replace("/","")});
-        $("#context").change(function(e){ APIDesigner().baseURLValue = "http://localhost:8280/"+$(this).val().replace("/","")});
+            APIDesigner().baseURLValue = "http://localhost:8280/"+$("#overview_context").val().replace("/","")});
+        $("#overview_context").change(function(e){ APIDesigner().baseURLValue = "http://localhost:8280/"+$(this).val().replace("/","")});
         $("#name").change(function(e){ APIDesigner().api_doc.info.title = $(this).val() });
         $("#description").change(function(e){ APIDesigner().api_doc.info.description = $(this).val() });
 
@@ -450,8 +450,8 @@ $(function () {
                 roles : $("#scopeRoles").val()
             };
 
-            var validationUrl =  caramel.context + "/asts/api/apis/validation";
-            var data = { action:"validateScope" , scope:$("#scopeKey").val()};
+            var validationUrl =  caramel.context + "/asts/api/apis/validation?action=validateScope";
+            var data = { scope:$("#scopeKey").val()};
             $.ajax({
                        url: validationUrl,
                        type: 'POST',
@@ -953,8 +953,8 @@ $(function () {
     });
 
     function getContextValue() {
-        var context = $('#context').val();
-        var version = $('#apiVersion').val();
+        var context = $('#overview_context').val();
+        var version = $('#overview_version').val();
 
         if (context == "" && version != "") {
             $('#contextForUrl').html("/{context}/" + version);
@@ -977,8 +977,8 @@ $(function () {
     }
 
     function updateContextPattern(){
-        var context = $('#context').val();
-        var version = $('#version').val();
+        var context = $('#overview_context').val();
+        var version = $('#overview_version').val();
 
         if(context != ""){
             if(context.indexOf("{version}") < 0){

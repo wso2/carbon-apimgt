@@ -119,9 +119,21 @@ require('/modules/publisher.js').exec(function (ctx) {
 					}
 					response = responseProcessor.buildSuccessResponse(response, constants.STATUS_CODES.OK, obj);
 				} else if (action === "validateScope") {
-					var scope = request.getParameter("scope");
-					var data = apiProxy.isScopeExist(scope, tenantId);
-					print(data);
+					data = obtainData(request);
+					var scope = data.scope;
+					var result = apiProxy.isScopeExist(scope, tenantId);
+					if (result.error) {
+						obj = {
+							error: true,
+							message: "Backend error occurred"
+						};
+					} else {
+						obj = {
+							error: false,
+							isScopeExist: result.isScopeExist
+						}
+					}
+					response = responseProcessor.buildSuccessResponse(response, constants.STATUS_CODES.OK, data);
 				} else {
 					response = responseProcessor.buildErrorResponse(response,
 																	constants.STATUS_CODES.NOT_IMPLEMENTED,

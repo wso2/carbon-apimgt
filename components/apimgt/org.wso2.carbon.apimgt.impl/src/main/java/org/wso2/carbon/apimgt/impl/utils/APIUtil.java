@@ -5010,7 +5010,6 @@ public final class APIUtil {
 				ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
 						.getAPIManagerConfiguration();
 		Map<String, Environment> environments = config.getApiGatewayEnvironments();
-		environments.values().iterator().hasNext()
 		return environments;
 	}
 
