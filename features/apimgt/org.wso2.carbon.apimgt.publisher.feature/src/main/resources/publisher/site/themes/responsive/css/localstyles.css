@@ -423,3 +423,108 @@ a.remove_rating:hover{ color: #C00}
     display:inline-block;
 }
 
+.blue{
+    color:#337ab7;
+}
+
+/* donut chart Styles */
+#pie-chart .total{
+  font-size: 10px;
+  font-weight: bold;
+}
+#pie-chart .units{
+  width:10px;
+  word-wrap: break-word;
+  fill: gray;
+  font-size: 10px;
+}
+#pie-chart .label{
+  fill: #CCC;
+  font-size: 18px;
+  font-weight: bold;
+}
+
+#pie-chart .value{
+  font-size: 10px;
+  font-weight: bold;
+}
+
+.toolTip {
+    position: absolute;
+    display: none;
+    width: auto;
+    height: auto;
+    background: none repeat scroll 0 0 white;
+    border: 0 none;
+    border-radius: 4px 4px 4px 4px;
+    box-shadow: -3px 3px 15px #888888;
+    color: black;
+    font: 12px sans-serif;
+    padding: 5px;
+    text-align: left;
+}
+
+
+/* Scatter chart Styles */
+#tooltipTable{
+    padding: 0;
+    margin-top:10px;
+    border-left: 1px solid #dbdbdb;
+    border-top: 1px solid #dbdbdb;
+}
+
+#tooltipTable th {
+       font: 11px "Trebuchet MS", Verdana, Arial, Helvetica, sans-serif;
+       color: #666;
+       border-right: 1px solid #dbdbdb;
+       border-bottom: 1px solid #dbdbdb;
+       border-top: 1px solid #dbdbdb;
+       letter-spacing: 2px;
+       text-align: left;
+       padding: 2px 2px 2px 4px;
+       background: #eee;
+}
+
+#tooltipTable td {
+       border-right: 1px solid #dbdbdb;
+       border-bottom: 1px solid #dbdbdb;
+       background: #fff;
+       padding: 2px 2px 2px 4px;
+       color: #4f6b72;
+       text-align: left;
+}
+
+.dimple-bubble{
+    cursor:pointer;
+}
+
+#apiUsage_note{
+    margin-right:20px;
+    color:#7d7d7d;
+}
+
+
+/* API Usage table Styles */
+td.details-control> div.showDetail:before {
+    font-family: FontAwesome;
+    content: "\f13a";
+    display: inline;
+    padding-left: 10px !important;
+    vertical-align: middle;
+    cursor:pointer;
+}
+td.details-control{
+    cursor:pointer;
+}
+
+div.slider{
+    display:none;
+}
+tr.shown td.details-control> div.showDetail:before {
+    font-family: FontAwesome;
+    content:  "\f139";
+    display: inline;
+    padding-left: 10px !important;
+    vertical-align: middle;
+    cursor:pointer;
+}

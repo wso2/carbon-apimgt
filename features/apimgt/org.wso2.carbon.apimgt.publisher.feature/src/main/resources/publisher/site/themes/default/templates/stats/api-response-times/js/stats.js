@@ -210,7 +210,7 @@ var drawProviderAPIServiceTime = function (from, to) {
 
                             d3.selectAll(".nv-bar")
                                 .append("text")
-                                .attr("y", chart.xAxis.rangeBand() /2)
+                                .attr("y", $('rect').attr('height')/2)
                                 .attr("x", function(d) {
                                   return d3.select(this.previousSibling).attr('width')+5 ;
                                 })
@@ -310,7 +310,7 @@ var drawProviderAPIServiceTime = function (from, to) {
 
                                 d3.selectAll(".nv-bar")
                                     .append("text")
-                                    .attr("y", chart.xAxis.rangeBand() /2)
+                                    .attr("y", $('rect').attr('height') /2)
                                     .attr("x", function(d) {
                                       return d3.select(this.previousSibling).attr('width');
                                     })
