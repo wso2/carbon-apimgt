@@ -396,7 +396,7 @@ asset.renderer = function (ctx) {
 
     var buildListLeftNav = function (page, util) {
         var navList = util.navList();
-        navList.push('ADD ' + type.toUpperCase(), 'btn-add-new', util.buildUrl('create'));
+        navList.push('ADD ' + type.toUpperCase(), 'btn-add-new', util.buildUrl('start'));
         navList.push('All Statistics', 'btn-stats', '/asts/' + type + '/statistics');
         navList.push('Subscriptions', 'btn-subscribe', '/asts/' + type + '/api-subscriptions');
         navList.push('Statistics', 'btn-stats', '/asts/' + type + '/statistics');
