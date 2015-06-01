@@ -32,6 +32,7 @@ import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIKey;
 import org.wso2.carbon.apimgt.api.model.APIRating;
 import org.wso2.carbon.apimgt.api.model.APIStatus;
+import org.wso2.carbon.apimgt.api.model.APISubscription;
 import org.wso2.carbon.apimgt.api.model.AccessTokenInfo;
 import org.wso2.carbon.apimgt.api.model.AccessTokenRequest;
 import org.wso2.carbon.apimgt.api.model.Application;
@@ -2649,30 +2650,248 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     }
 
     @Override
-    public JSONArray getAPISubscriptions(String providerName, String apiName, String version, String user,String groupId) throws APIManagementException{
+    public Map<String, Object> getAllSubscriptions(String userName, String appName,
+                                                   int startSubIndex, int endSubIndex,
+                                                   String groupId) throws APIManagementException {
+        boolean isTenantFlowStarted = false;
+        APISubscription subscription = new APISubscription();
+        Integer subscriptionCount = 0;
+        Map<String, Object> result = new HashMap<String, Object>();
+        List<APISubscription> subs = new ArrayList<APISubscription>();
+        Map<String, Object> apis = new HashMap<String, Object>();
+        Set<Map<String, Object>> apiSet = new HashSet<Map<String, Object>>();
+        String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(username));
+        try {
+            if (tenantDomain != null &&
+                !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
+                isTenantFlowStarted = true;
+                PrivilegedCarbonContext.startTenantFlow();
+                PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
+            }
 
-        APIIdentifier apiIdentifier = new APIIdentifier(APIUtil.replaceEmailDomain(providerName), apiName, version);
-        Subscriber subscriber = new Subscriber(user);
-        JSONArray subscriptions = new JSONArray();
-        Set<SubscribedAPI> apis = getSubscribedIdentifiers(subscriber, apiIdentifier,groupId);
+            Subscriber subscriber = new Subscriber(username);
+            Application[] applications;
+            applications = getApplications(new Subscriber(username), groupId);
+            if (applications != null) {
+                int i = 0;
+                for (Application application : applications) {
 
-        int i = 0;
-        if (apis != null) {
-            for (SubscribedAPI api : apis) {
-                JSONObject row = new JSONObject();
-                row.put("application", api.getApplication().getName());
-                row.put("applicationId", api.getApplication().getId());
-                row.put("prodKey", getKey(api, APIConstants.API_KEY_TYPE_PRODUCTION));
-                row.put("sandboxKey", getKey(api, APIConstants.API_KEY_TYPE_SANDBOX));
-                ArrayList<APIKey> keys = (ArrayList<APIKey>) api.getApplication().getKeys();
-                for(APIKey key : keys){
-                    row.put(key.getType()+"_KEY", key.getAccessToken());
+                    long startLoop = 0;
+                    if (log.isDebugEnabled()) {
+                        startLoop = System.currentTimeMillis();
+                    }
+
+                    Set<Scope> scopeSet = new LinkedHashSet<Scope>();
+
+                    if (((appName == null || appName.isEmpty()) && i == 0) ||
+                        appName.equals(application.getName())) {
+
+                        //get Number of subscriptions for the given application by the subscriber.
+                        subscriptionCount = getSubscriptionCount(subscriber, application.getName(), groupId);
+                        //get subscribed APIs set as per the starting and ending indexes for application.
+                        Set<SubscribedAPI> subscribedAPIs;
+                        subscribedAPIs = getPaginatedSubscribedAPIs(subscriber, application.getName(), startSubIndex, endSubIndex, groupId);
+
+                        List<APIIdentifier> identifiers = new ArrayList<APIIdentifier>();
+                        for (SubscribedAPI subscribedAPI : subscribedAPIs) {
+                            apiSet.add(addAPIObj(subscribedAPI, application));
+                            identifiers.add(subscribedAPI.getApiId());
+
+                        }
+                        if (!identifiers.isEmpty()) {
+                            //get scopes for subscribed apis
+                            scopeSet = getScopesBySubscribedAPIs(identifiers);
+                        }
+                    }
+
+                    if (log.isDebugEnabled()) {
+                        log.debug("getSubscribedAPIs loop took : " +
+                                  (System.currentTimeMillis() - startLoop) + "ms");
+                    }
+
+
+                    if (APIConstants.ApplicationStatus.APPLICATION_APPROVED.equals(application.getStatus())) {
+                        subscription.setAppId(application.getId());
+                        subscription.setAppName(application.getName());
+                        subscription.setCallbackUrl(application.getCallbackUrl());
+                        APIKey prodKey = getAppKey(application, APIConstants.API_KEY_TYPE_PRODUCTION);
+
+                        OAuthApplicationInfo prodApp = application.getOAuthApp("PRODUCTION");
+
+                        String prodKeyScope = "";
+                        if (prodKey != null && prodKey.getTokenScope() != null) {
+                            //convert scope keys to names
+                            prodKeyScope = APIUtil.getScopeNamesByKey(prodKey.getTokenScope(), scopeSet);
+                        }
+
+                        boolean prodEnableRegenarateOption = true;
+
+                        // When the Production Access Token is successfully created.
+                        if (prodKey != null && prodKey.getAccessToken() != null && prodApp != null) {
+                            String jsonString = prodApp.getJsonString();
+
+                            String prodConsumerKey = prodApp.getClientId();
+                            String prodConsumerSecret = prodApp.getClientSecret();
+                            subscription.setProdKey(prodKey.getAccessToken());
+                            subscription.setProdKeyScope(prodKeyScope);
+                            subscription.setProdKeyScopeValue(prodKey.getTokenScope());
+                            subscription.setProdConsumerKey(prodConsumerKey);
+                            subscription.setProdConsumerSecret(prodConsumerSecret);
+                            subscription.setProdJsonString(jsonString);
+
+                            subscription.setProdAuthorizedDomains(prodKey.getAuthorizedDomains());
+                            if (APIUtil.isApplicationAccessTokenNeverExpire(prodKey.getValidityPeriod())) {
+                                subscription.setProdValidityTime(-1);
+                                prodEnableRegenarateOption = false;
+                            } else {
+                                subscription.setProdValidityTime(prodKey.getValidityPeriod());
+                            }
+                            subscription.setProdRegenerateOption(prodEnableRegenarateOption);
+                        } // Prod Token is not generated, but consumer key & secret is available
+                        else if (prodKey != null && prodApp != null) {
+                            String jsonString = prodApp.getJsonString();
+                            String prodConsumerKey = prodApp.getClientId();
+                            String prodConsumerSecret = prodApp.getClientSecret();
+                            subscription.setProdKey(null);
+                            subscription.setProdKeyScope(null);
+                            subscription.setProdKeyScopeValue(null);
+                            subscription.setProdConsumerKey(prodConsumerKey);
+                            subscription.setProdConsumerSecret(prodConsumerSecret);
+                            subscription.setProdRegenerateOption(prodEnableRegenarateOption);
+                            subscription.setProdAuthorizedDomains(null);
+                            subscription.setProdJsonString(jsonString);
+
+                            if (APIUtil.isApplicationAccessTokenNeverExpire(
+                                    APIUtil.getApplicationAccessTokenValidityPeriodInSeconds())) {
+                                subscription.setProdValidityTime(-1);
+                            } else {
+                                subscription.setProdValidityTime(APIUtil.getApplicationAccessTokenValidityPeriodInSeconds());
+                            }
+                            subscription.setProdKeyState(prodKey.getState());
+                        } else {
+                            subscription.setProdKey(null);
+                            subscription.setProdKeyScope(null);
+                            subscription.setProdKeyScopeValue(null);
+                            subscription.setProdConsumerKey(null);
+                            subscription.setProdConsumerSecret(null);
+                            subscription.setProdRegenerateOption(prodEnableRegenarateOption);
+                            subscription.setProdAuthorizedDomains(null);
+                            if (APIUtil.isApplicationAccessTokenNeverExpire(
+                                    APIUtil.getApplicationAccessTokenValidityPeriodInSeconds())) {
+                                subscription.setProdValidityTime(-1);
+                            } else {
+                                subscription.setProdValidityTime(APIUtil.getApplicationAccessTokenValidityPeriodInSeconds());
+                            }
+                            subscription.setProdJsonString(null);
+
+                        }
+
+                        APIKey sandboxKey = getAppKey(application, APIConstants.API_KEY_TYPE_SANDBOX);
+
+                        OAuthApplicationInfo sandApp = application.getOAuthApp("SANDBOX");
+                        boolean sandEnableRegenarateOption = true;
+
+
+                        String sandKeyScope = "";
+                        if (sandboxKey != null && sandboxKey.getTokenScope() != null) {
+                            //convert scope keys to names
+                            sandKeyScope = APIUtil.getScopeNamesByKey(sandboxKey.getTokenScope(), scopeSet);
+                        }
+
+
+                        if (sandboxKey != null && sandboxKey.getConsumerKey() != null && sandApp != null) {
+                            String jsonString = sandApp.getJsonString();
+
+                            String sandboxConsumerKey = sandApp.getClientId();
+                            String sandboxConsumerSecret = sandApp.getClientSecret();
+                            subscription.setSandKey(sandboxKey.getAccessToken());
+                            subscription.setSandKeyScope(sandKeyScope);
+                            subscription.setSandKeyScopeValue(sandboxKey.getTokenScope());
+                            subscription.setSandConsumerKey(sandboxConsumerKey);
+                            subscription.setSandConsumerSecret(sandboxConsumerSecret);
+                            subscription.setSandKeyState(sandboxKey.getState());
+                            subscription.setSandJsonString(jsonString);
+                            subscription.setSandAuthorizedDomains(sandboxKey.getAuthorizedDomains());
+                            if (APIUtil.isApplicationAccessTokenNeverExpire(sandboxKey.getValidityPeriod())) {
+                                subscription.setSandValidityTime(-1);
+                                sandEnableRegenarateOption = false;
+                            } else {
+                                subscription.setSandValidityTime(sandboxKey.getValidityPeriod());
+                            }
+                            subscription.setSandRegenerateOption(sandEnableRegenarateOption);
+                        } else if (sandboxKey != null && sandApp != null) {
+                            String jsonString = sandApp.getJsonString();
+                            String sandboxConsumerKey = sandApp.getClientId();
+                            String sandboxConsumerSecret = sandApp.getClientSecret();
+                            subscription.setSandKey(null);
+                            subscription.setSandKeyScope(null);
+                            subscription.setSandKeyScopeValue(null);
+                            subscription.setSandConsumerKey(sandboxConsumerKey);
+                            subscription.setSandConsumerSecret(sandboxConsumerSecret);
+                            subscription.setSandRegenerateOption(sandEnableRegenarateOption);
+                            subscription.setSandAuthorizedDomains(null);
+                            subscription.setSandKeyState(sandboxKey.getState());
+                            subscription.setSandJsonString(jsonString);
+                            if (APIUtil.isApplicationAccessTokenNeverExpire(
+                                    APIUtil.getApplicationAccessTokenValidityPeriodInSeconds())) {
+                                subscription.setSandValidityTime(-1);
+                            } else {
+                                subscription.setSandValidityTime(APIUtil.getApplicationAccessTokenValidityPeriodInSeconds());
+                            }
+                        } else {
+                            subscription.setSandKey(null);
+                            subscription.setSandKeyScope(null);
+                            subscription.setSandKeyScopeValue(null);
+                            subscription.setSandConsumerKey(null);
+                            subscription.setSandConsumerSecret(null);
+                            subscription.setSandRegenerateOption(sandEnableRegenarateOption);
+                            subscription.setSandAuthorizedDomains(null);
+                            subscription.setSandJsonString(null);
+                            if (APIUtil.isApplicationAccessTokenNeverExpire(
+                                    APIUtil.getApplicationAccessTokenValidityPeriodInSeconds())) {
+                                subscription.setSandValidityTime(-1);
+                            } else {
+                                subscription.setSandValidityTime(APIUtil.getApplicationAccessTokenValidityPeriodInSeconds());
+                            }
+                        }
+
+
+                        if (appName == null || appName.isEmpty() || appName.equals(application.getName())) {
+
+                            startLoop = 0;
+                            if (log.isDebugEnabled()) {
+                                startLoop = System.currentTimeMillis();
+                            }
+
+                            if (log.isDebugEnabled()) {
+                                log.debug("getSubscribedAPIs loop took : " +
+                                          (System.currentTimeMillis() - startLoop) + "ms");
+                            }
+                        }
+                        subscription.setSubscriptions(apiSet);
+                        subscription.setScopes(scopeSet);
+                        subs.add(subscription);
+                        result.put("applications", subs);
+                        result.put("totalLength", subscriptionCount);
+                    }
+
+
                 }
-                subscriptions.add(i++, row);
+            }
+
+
+        } catch (APIManagementException e)
+
+        {
+            handleException("Error while obtaining subscriptions data", e);
+        } finally
+
+        {
+            if (isTenantFlowStarted) {
+                PrivilegedCarbonContext.endTenantFlow();
             }
         }
-        return subscriptions;
-
+        return result;
     }
 
     private static APIKey getKey(SubscribedAPI api, String keyType) {
@@ -2688,4 +2907,82 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         }
         return null;
     }
+
+    private Map<String,Object> addAPIObj(SubscribedAPI subscribedAPI, Application appObject) throws APIManagementException {
+
+        Map<String,Object> apiMap=new HashMap<String, Object>();
+        try {
+            API api = getAPIInfo(subscribedAPI.getApiId());
+            apiMap.put("name",subscribedAPI.getApiId().getApiName());
+            apiMap.put("provider",APIUtil.replaceEmailDomainBack(subscribedAPI.getApiId().getProviderName()));
+            apiMap.put("version",subscribedAPI.getApiId().getVersion());
+            apiMap.put("status",api.getStatus().toString());
+            apiMap.put("tier",subscribedAPI.getTier().getDisplayName());
+            apiMap.put("subStatus",subscribedAPI.getSubStatus());
+            apiMap.put("thumburl",APIUtil.prependWebContextRoot(api.getThumbnailUrl()));
+            apiMap.put("context",api.getContext());
+            //Read key from the appObject
+            APIKey prodKey = getAppKey(appObject, APIConstants.API_KEY_TYPE_PRODUCTION);
+            if (prodKey != null) {
+                apiMap.put("prodKey", prodKey.getAccessToken());
+                apiMap.put("prodConsumerKey", prodKey.getConsumerKey());
+                apiMap.put("prodConsumerSecret", prodKey.getConsumerSecret());
+                apiMap.put("prodAuthorizedDomains", prodKey.getAuthorizedDomains());
+                if (APIUtil.isApplicationAccessTokenNeverExpire(prodKey.getValidityPeriod())) {
+                    apiMap.put("prodValidityTime", -1);
+                } else {
+                    apiMap.put("prodValidityTime", prodKey.getValidityPeriod());
+                }
+                //apiObj.put("prodValidityRemainingTime", apiObj, apiMgtDAO.getApplicationAccessTokenRemainingValidityPeriod(prodKey.getAccessToken()));
+            } else {
+                apiMap.put("prodKey", null);
+                apiMap.put("prodConsumerKey", null);
+                apiMap.put("prodConsumerSecret", null);
+                apiMap.put("prodAuthorizedDomains", null);
+                if (APIUtil.isApplicationAccessTokenNeverExpire(APIUtil.getApplicationAccessTokenValidityPeriodInSeconds())) {
+                    apiMap.put("prodValidityTime", -1);
+                } else {
+                    apiMap.put("prodValidityTime", APIUtil.getApplicationAccessTokenValidityPeriodInSeconds() * 1000);
+                }
+                // apiObj.put("prodValidityRemainingTime", apiObj, getApplicationAccessTokenValidityPeriodInSeconds() * 1000);
+            }
+
+            APIKey sandboxKey = getAppKey(appObject, APIConstants.API_KEY_TYPE_SANDBOX);
+            if (sandboxKey != null) {
+                apiMap.put("sandboxKey", sandboxKey.getAccessToken());
+                apiMap.put("sandboxConsumerKey", sandboxKey.getConsumerKey());
+                apiMap.put("sandboxConsumerSecret", sandboxKey.getConsumerSecret());
+                apiMap.put("sandAuthorizedDomains", sandboxKey.getAuthorizedDomains());
+                if (APIUtil.isApplicationAccessTokenNeverExpire(sandboxKey.getValidityPeriod())) {
+                    apiMap.put("sandValidityTime", -1);
+                } else {
+                    apiMap.put("sandValidityTime",sandboxKey.getValidityPeriod());
+                }
+                //apiObj.put("sandValidityRemainingTime", apiObj, apiMgtDAO.getApplicationAccessTokenRemainingValidityPeriod(sandboxKey.getAccessToken()));
+            } else {
+                apiMap.put("sandboxKey",null);
+                apiMap.put("sandboxConsumerKey",  null);
+                apiMap.put("sandboxConsumerSecret", null);
+                apiMap.put("sandAuthorizedDomains", null);
+                if (APIUtil.getApplicationAccessTokenValidityPeriodInSeconds() < 0) {
+                    apiMap.put("sandValidityTime", -1);
+                } else {
+                    apiMap.put("sandValidityTime", APIUtil.getApplicationAccessTokenValidityPeriodInSeconds() * 1000);
+                }
+                // apiObj.put("sandValidityRemainingTime", apiObj, getApplicationAccessTokenValidityPeriodInSeconds() * 1000);
+            }
+            apiMap.put("hasMultipleEndpoints", String.valueOf(api.getSandboxUrl() != null));
+
+        } catch (APIManagementException e) {
+            log.error("Error while obtaining application metadata", e);
+        }
+        return apiMap;
+    }
+
+    private APIKey getAppKey(Application app, String keyType) {
+        List<APIKey> apiKeys = app.getKeys();
+        return getKeyOfType(apiKeys, keyType);
+    }
+
+
 }

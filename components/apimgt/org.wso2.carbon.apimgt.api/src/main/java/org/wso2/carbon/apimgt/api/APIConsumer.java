@@ -568,14 +568,13 @@ public interface APIConsumer extends APIManager {
                                              String groupingId)
             throws APIManagementException;
     /*
-    * Return API subscription information
+    * Return API subscriptions information
     * @param providerName api provider
     * @param apiName api name
     * @param version api version
     * @param user subscriber
     *
     */
-    public JSONArray getAPISubscriptions(String providerName, String apiName, String version,
-                                         String user,String groupId) throws APIManagementException;
+    public Map<String,Object> getAllSubscriptions(String userName, String appName, int startSubIndex, int endSubIndex,String groupId) throws APIManagementException;
 
 }

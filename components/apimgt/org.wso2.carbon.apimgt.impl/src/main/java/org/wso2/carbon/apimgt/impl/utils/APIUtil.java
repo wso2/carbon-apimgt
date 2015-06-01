@@ -46,6 +46,7 @@ import org.apache.woden.WSDLException;
 import org.apache.woden.WSDLFactory;
 import org.apache.woden.WSDLReader;
 import org.jaggeryjs.scriptengine.exceptions.ScriptException;
+import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
@@ -62,6 +63,7 @@ import org.wso2.carbon.apimgt.api.model.APIKey;
 import org.wso2.carbon.apimgt.api.model.APIPublisher;
 import org.wso2.carbon.apimgt.api.model.APIStatus;
 import org.wso2.carbon.apimgt.api.model.APIStore;
+import org.wso2.carbon.apimgt.api.model.APISubscription;
 import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.api.model.Documentation;
 import org.wso2.carbon.apimgt.api.model.DocumentationType;
@@ -4958,4 +4960,80 @@ public final class APIUtil {
 			return true;
 		}
 	};
+
+    public JSONObject stringifyAPISubscriptions(Map<String, Object> subscriptions) {
+        List<APISubscription> subs = (List<APISubscription>) subscriptions.get("applications");
+        int subscriptionCount = (Integer) subscriptions.get("totalLength");
+        JSONArray applicationList = new JSONArray();
+        JSONObject result = new JSONObject();
+        if (subs != null) {
+            for (APISubscription sub : subs) {
+                JSONObject appObj = new JSONObject();
+                appObj.put("id", sub.getAppId());
+                appObj.put("name", sub.getAppName());
+                appObj.put("callbackUrl", sub.getCallbackUrl());
+                appObj.put("prodKey", sub.getProdKey());
+                appObj.put("prodKeyScope", sub.getProdKeyScope());
+                appObj.put("prodKeyScopeValue", sub.getProdKeyScopeValue());
+                appObj.put("prodConsumerKey", sub.getProdConsumerKey());
+                appObj.put("prodConsumerSecret", sub.getProdConsumerSecret());
+                appObj.put("prodJsonString", sub.getProdJsonString());
+                appObj.put("prodAuthorizedDomains", sub.getProdAuthorizedDomains());
+                appObj.put("prodValidityTime", sub.getProdValidityTime());
+                appObj.put("prodRegenerateOption", sub.isProdRegenerateOption());
+                appObj.put("prodKeyState", sub.getProdKeyState());
+                appObj.put("sandboxKey", sub.getSandKey());
+                appObj.put("sandKeyScope", sub.getSandKeyScope());
+                appObj.put("sandKeyScopeValue", sub.getSandKeyScopeValue());
+                appObj.put("sandboxConsumerKey", sub.getSandConsumerKey());
+                appObj.put("sandboxConsumerSecret", sub.getSandConsumerSecret());
+                appObj.put("sandboxKeyState", sub.getSandKeyState());
+                appObj.put("sandboxJsonString", sub.getSandJsonString());
+                appObj.put("sandboxAuthorizedDomains", sub.getSandAuthorizedDomains());
+                appObj.put("sandValidityTime", sub.getSandValidityTime());
+                appObj.put("sandRegenarateOption", sub.isSandRegenerateOption());
+                Set<Scope> scopeSet=sub.getScopes();
+                Set<Map<String,Object>> apisubs=sub.getSubscriptions();
+                JSONArray scopesArray=new JSONArray();
+                for (Scope scope : scopeSet) {
+                    JSONObject scopeObj = new JSONObject();
+                    scopeObj.put("scopeKey", scope.getKey());
+                    scopeObj.put("scopeName", scope.getName());
+                    scopesArray.add(scopeObj);
+                }
+                JSONArray apisArray=new JSONArray();
+                for(Map<String,Object> api:apisubs){
+                    JSONObject apiObj = new JSONObject();
+                    apiObj.put("name", api.get("name"));
+                    apiObj.put("provider", api.get("provider"));
+                    apiObj.put("version", api.get("version"));
+                    apiObj.put("status", api.get("status"));
+                    apiObj.put("tier", api.get("tier"));
+                    apiObj.put("subStatus", api.get("subStatus"));
+                    apiObj.put("thumburl", api.get("thumburl"));
+                    apiObj.put("context", api.get("context"));
+                    apiObj.put("prodKey", api.get("prodKey"));
+                    apiObj.put("prodConsumerKey", api.get("prodConsumerKey"));
+                    apiObj.put("prodConsumerSecret", api.get("prodConsumerSecret"));
+                    apiObj.put("prodAuthorizedDomains", api.get("prodAuthorizedDomains"));
+                    apiObj.put("prodValidityTime", api.get("prodValidityTime"));
+                    apiObj.put("sandboxKey", api.get("sandboxKey"));
+                    apiObj.put("sandboxConsumerKey", api.get("sandboxConsumerKey"));
+                    apiObj.put("sandboxConsumerSecret", api.get("sandboxConsumerSecret"));
+                    apiObj.put("sandAuthorizedDomains", api.get("sandAuthorizedDomains"));
+                    apiObj.put("sandValidityTime", api.get("sandValidityTime"));
+                    apiObj.put("hasMultipleEndpoints", api.get("hasMultipleEndpoints"));
+                    apisArray.add(apiObj);
+                }
+                appObj.put("subscriptions",apisArray);
+                appObj.put("scopes",scopesArray);
+                applicationList.add(appObj);
+                result.put("applications", applicationList);
+                result.put("totalLength", subscriptionCount);
+
+            }
+        }
+        return result;
+
+    }
 }
