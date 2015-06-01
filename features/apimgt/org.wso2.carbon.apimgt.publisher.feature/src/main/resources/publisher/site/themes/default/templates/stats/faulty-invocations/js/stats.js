@@ -232,11 +232,15 @@ var drawAPIResponseFaultCountChart = function(from,to){
 
                             if (dataStructure[0].values.length > 4) chart.margin({bottom: 160});
 
+                            var labels = [];
+                            for(var i = 0; i <dataStructure[0].values.length ; i++){
+                                labels.push(dataStructure[0].values[i].label)
+                            }
+
                             chart.xAxis
                                 .axisLabel('APIs')
-                                .tickFormat(function (d) {
-                                var label = dataStructure[0].values[d].label;
-                                return label;
+                                .tickFormat(function (d,i) {
+                                return labels[i];;
                             });
                             chart.xAxis.tickValues(dataStructure[0].values.map( function(d){return d.x;}));
                             if (dataStructure[0].values.length > 4) chart.xAxis.rotateLabels(-45);
