@@ -162,10 +162,16 @@ var apipublisher = {};
     };
 
     APIProviderProxy.prototype.getAllAPIUsageByProvider = function (providerName) {
-    	var apis = [];
+    	var apisJSON;
     	try{
     		apisArray = this.impl.getAllAPIUsageByProvider(providerName);
-    		for (var i = 0 ; i < apisArray.size(); i++) {
+    		var json = APIUtil.convertToString(apisArray);
+    		if(json != null){
+    			apisJSON = JSON.parse(json);
+    			log.error(json);
+    		}
+    		
+    		/*for (var i = 0 ; i < apisArray.size(); i++) {
     			var usage = pisArray.get(i);
     			var apiSubscriptionsArray = usage.getApiSubscriptions();
     			var apiSubscriptions = [];
@@ -186,17 +192,17 @@ var apipublisher = {};
                     
                     
     			});
-            }
+            }*/
     		
     		return {
                 error:false,
-                apis:apis
+                apis:apisJSON
             };
     	}catch(e){
     		log.error(e.message);
             return {
                 error:e,
-                apis:apis
+                apis:null
             };
     	}
         
@@ -232,7 +238,9 @@ var apipublisher = {};
     };
 
     APIProviderProxy.prototype.getAPIsByProvider = function (providerName) {
-        return this.impl.getAPIsByProvider(providerName);
+    	apis = this.impl.getAPIsByProvider(providerName);
+    	var apisJSON = JSON.parse(APIUtil.convertToString(apis));
+        return apisJSON;
     };
 
     /*
@@ -449,10 +457,10 @@ var apipublisher = {};
             var tierSet = '';
             var tiersDisplayNamesSet = '';
             var tiersDescSet = '';
-            for(var i = 0; i < tiers.length  ; i++) {
-                tierSet += tiers[0].getName();
-                tiersDisplayNamesSet += tiers[0].getDisplayName();
-                tiersDescSet += tiers[0].getDescription();
+            for(var i = 0; i < tiers.length; i++) {
+                tierSet += tiers[i].getName();
+                tiersDisplayNamesSet += tiers[i].getDisplayName();
+                tiersDescSet += tiers[i].getDescription();
                 if (i != tierSet.length - 1) {
                     tierSet += ',';
                     tiersDisplayNamesSet += ',';
@@ -731,10 +739,11 @@ var apipublisher = {};
             var tierSet = new HashSet();
             var tierArray = api.tier.split(',');
             var tier;
-            for (var tierName in tierArray) {
-                tier = new Tier(tierName);
+            for (var i = 0 ; tierArray.length; i++) {
+                tier = new Tier(tierArray[i]);
                 tierSet.add(tier);
             }
+
             var environments = APIUtil.extractEnvironmentsForAPI(api.environments);
 
             apiOb.addAvailableTiers(tierSet);
