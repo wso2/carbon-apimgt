@@ -164,84 +164,89 @@ asset.renderer = function(ctx) {
             }
             var lenI=0,lenJ=0,i,j,result,apidata,deniedTiers,tiers,appsList=[],subscribedToDefault=false,showSubscribe=false,status,selectedDefault=false;
             var apistore = require('apistore').apistore.instance(userName);
+
+            var asset = page.assets;
+            if (asset != null) {
+                status = asset.lifecycleState;
+                if (status != null) {
+                    status = status.toUpperCase()
+                }
+            }
+            var resultapi = apistore.getAPI(asset.attributes.overview_provider,
+                asset.name, asset.attributes.overview_version);
+            var apidata=resultapi.api;
+            if (apidata != null) {
+                tiers = apidata.tiers;
+                if (status == "PUBLISHED" && user) {
+                    showSubscribe = true;
+                }
+            }
+
             if (userName != '__wso2.am.anon__') {
                 var applications = JSON.parse(apistore.getApplications(userName));
-            }
-            var asset = page.assets;
-            if(asset!=null){
-                status=asset.lifecycleState;
-                if(status!=null){
-                    status=status.toUpperCase()
+
+                var subscriptions = JSON.parse(apistore.getAPISubscriptions(asset.attributes.overview_provider,
+                    asset.name, asset.attributes.overview_version, userName));
+                if (applications) {
+                    lenI = applications.length;
                 }
-            }
-            var resultapi=apistore.getAPI(asset.attributes.overview_provider,asset.name,asset.attributes.overview_version);
-            var apidata=resultapi.api;
-            if(apidata!=null){
-                tiers=apidata.tiers;
-                if(status=="PUBLISHED" && user){
-                    showSubscribe=true;
+                if (subscriptions) {
+                    lenJ = subscriptions.length;
                 }
-            }
-            var subscriptions=JSON.parse(apistore.getAPISubscriptions(asset.attributes.overview_provider,asset.name,asset.attributes.overview_version,userName));
-            if(applications){
-                lenI = applications.length;
-            }if(subscriptions){
-                lenJ = subscriptions.length;
-            }
-            Label1:
+                Label1:
                     for (i = 0; i < lenI; i++) {
                         var application = applications[i];
                         for (j = 0; j < lenJ; j++) {
                             var subscription = subscriptions[j];
                             if (subscription.applicationId == application.id) {
-                                if(application.name=="DefaultApplication"){
-                                    selectedDefault=true;
+                                if (application.name == "DefaultApplication") {
+                                    selectedDefault = true;
                                 }
                                 continue Label1;
-                            }else{
-                                if(application.name=="DefaultApplication"){
-                                    subscribedToDefault=true;
+                            } else {
+                                if (application.name == "DefaultApplication") {
+                                    subscribedToDefault = true;
                                 }
                             }
                         }
 
-                        if(application.status=="APPROVED"){
-                            application.selectedDefault=selectedDefault;
+                        if (application.status == "APPROVED") {
+                            application.selectedDefault = selectedDefault;
                             appsList.push(application);
                         }
                     }
 
-            result = apistore.getDeniedTiers();
-            deniedTiers = result.tiers;
-            var k,m,allowedTiers=[],denied = false, tiersAvailable = false;
-            if(tiers){
-                var tiersVal=tiers.split(",");
-                for(var m=0;m<tiersVal.length;m++){
-                    if(deniedTiers){
-                        var deniedTiersVal=deniedTiers.split(",");
-                        for (var k=0;k<deniedTiersVal.length;k++) {
-                            if (tiersVal[m].tierName == deniedTiersVal[k].tierName) {
-                                denied = true;
+                result = apistore.getDeniedTiers();
+                deniedTiers = result.tiers;
+                var k, m, allowedTiers = [], denied = false, tiersAvailable = false;
+                if (tiers) {
+                    var tiersVal = tiers.split(",");
+                    for (var m = 0; m < tiersVal.length; m++) {
+                        if (deniedTiers) {
+                            var deniedTiersVal = deniedTiers.split(",");
+                            for (var k = 0; k < deniedTiersVal.length; k++) {
+                                if (tiersVal[m].tierName == deniedTiersVal[k].tierName) {
+                                    denied = true;
+                                }
                             }
                         }
+                        if (!denied) {
+                            allowedTiers.push(tiersVal[m]);
+                            tiersAvailable = true;
+                        }
+                        denied = false;
                     }
-                    if (!denied) {
-                        allowedTiers.push(tiersVal[m]);
-                        tiersAvailable = true;
-                    }
-                    denied = false;
                 }
+
+                page.applications = appsList;
+                page.tiersAvailable = tiersAvailable;
+                page.tiers = allowedTiers;
+                page.subscribedToDefault = subscribedToDefault;
             }
-            
-            if (userName != '__wso2.am.anon__') {
-                page.applications= appsList;
-            }
-            page.tiersAvailable=tiersAvailable;
-            page.tiers=allowedTiers;
-            page.subscribedToDefault=subscribedToDefault;
-            page.showSubscribe=showSubscribe;
-            page.api=apidata;
-            page.status=status;
+
+            page.showSubscribe = showSubscribe;
+            page.api = apidata;
+            page.status = status;
 
             //=================== Getting subscription details ========================
         },
