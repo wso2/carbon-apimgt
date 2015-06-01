@@ -67,7 +67,30 @@ var apipublisher = {};
     };
 
     APIProviderProxy.prototype.getAllProviders = function () {
-        return this.impl.getAllProviders();
+    	var providers = [];
+    	
+    	try{
+    		providerSet = this.impl.getAllProviders();
+    		for (var i = 0 ; i < providerSet.size(); i++) {
+    			var provider = providerSet.get(i);
+        		providers.push({
+        			"name":provider.getName(),
+        			"email":provider.getEmail(),
+        			"description":provider.getDescription()
+        		});
+            }
+    		return {
+                error:false,
+                providers:providers
+            };
+    	}catch(e){
+    		log.error(e.message);
+            return {
+                error:e,
+                providers:null
+            };
+    	}
+    	
     };
 
     APIProviderProxy.prototype.createAPI = function (api) {
@@ -139,11 +162,73 @@ var apipublisher = {};
     };
 
     APIProviderProxy.prototype.getAllAPIUsageByProvider = function (providerName) {
-        return this.impl.getAllAPIUsageByProvider(providerName);
+    	var apis = [];
+    	try{
+    		apisArray = this.impl.getAllAPIUsageByProvider(providerName);
+    		for (var i = 0 ; i < apisArray.size(); i++) {
+    			var usage = pisArray.get(i);
+    			var apiSubscriptionsArray = usage.getApiSubscriptions();
+    			var apiSubscriptions = [];
+    			for(var y = 0 ; y < apiSubscriptionsArray.size(); y++){
+    				var apiSubscription = apiSubscriptions.get(y);
+    				apiSubscriptions.push({
+    					"status": apiSubscription.getSubStatus()
+        				
+    				});
+    			}
+    			apis.push({
+    				"userId": usage.getUserId(),
+    				"applicationName":subscriber.getName(),
+                    "subStatus": subscriber.getDescription(),
+                    "accessToken": new Date(subscriber.getSubscribedDate().getTime()),
+                    "accessTokenStatus": subscriber.getId(),
+                    "apiSubscriptions": apiSubscriptions
+                    
+                    
+    			});
+            }
+    		
+    		return {
+                error:false,
+                apis:apis
+            };
+    	}catch(e){
+    		log.error(e.message);
+            return {
+                error:e,
+                apis:apis
+            };
+    	}
+        
     };
 
     APIProviderProxy.prototype.getSubscribersOfAPI = function (apiId) {
-        return this.impl.getSubscribersOfAPI(apiId);
+    	var subscribers = [];
+    	try{
+    		subscriberSet = this.impl.getSubscribersOfAPI(apiId);
+    		for (var i = 0 ; i < subscriberSet.size(); i++) {
+    			var subscriber = subscriberSet.get(i);
+    			subscribers.push({
+    				"name":subscriber.getName(),
+                    "description": subscriber.getDescription(),
+                    "subscribedDate": new Date(subscriber.getSubscribedDate().getTime()),
+                    "id": subscriber.getId(),
+                    "tenantId": subscriber.getTenantId(),
+                    "email": subscriber.getEmail()
+                });
+            }
+    		return {
+                error:false,
+                subscribers:subscribers
+            };
+    	}catch(e){
+    		log.error(e.message);
+            return {
+                error:e,
+                subscribers:subscribers
+            };
+    	}
+        
     };
 
     APIProviderProxy.prototype.getAPIsByProvider = function (providerName) {
@@ -158,7 +243,33 @@ var apipublisher = {};
         apiObj.put("provider", provider);
         apiObj.put("name", name);
         apiObj.put("version", version);
-        return this.impl.getSubscribersOfAPI(apiObj);
+        var subscribers = [];
+    	try{
+    		subscriberSet = this.impl.getSubscribersOfAPI(apiObj);
+    		for (var i = 0 ; i < subscriberSet.size(); i++) {
+    			var subscriber = subscriberSet.get(i);
+    			subscribers.push({
+    				"name":subscriber.getName(),
+                    "description": subscriber.getDescription(),
+                    "subscribedDate": new Date(subscriber.getSubscribedDate().getTime()),
+                    "id": subscriber.getId(),
+                    "tenantId": subscriber.getTenantId(),
+                    "email": subscriber.getEmail()
+                });
+            }
+    		return {
+                error:false,
+                subscribers:subscribers
+            };
+    	}catch(e){
+    		log.error(e.message);
+            return {
+                error:e,
+                subscribers:subscribers
+            };
+    	}
+        
+ 
     };
 
     /*
