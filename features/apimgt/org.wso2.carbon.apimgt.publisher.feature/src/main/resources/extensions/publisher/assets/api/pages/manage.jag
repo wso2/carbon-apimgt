@@ -118,7 +118,7 @@ require('/modules/publisher.js').exec(function(ctx) {
 	output.api = api;
 	output.api.isSynapseGateway = apiProxy.isSynapseGateway().isSynapseGateway;
 	//Set available tiers and last tiers
-	var configuredTiers = apiProxy.getTiers(tenantDomain);
+	var configuredTiers = apiProxy.getTiers(tenantDomain).tiers;
 	for (var i = 0; i < configuredTiers.length; i++) {
 		if (i < (configuredTiers.length - 1)) {
 			configuredTiers[i].last = false;

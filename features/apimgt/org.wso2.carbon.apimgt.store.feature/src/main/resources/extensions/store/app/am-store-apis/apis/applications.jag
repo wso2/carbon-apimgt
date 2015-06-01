@@ -63,8 +63,8 @@ require('/modules/store.js').exec(function (ctx) {
             uriOptions = uriMatcher.match(API_APPLICATIONS_URL);
 
             if (uriOptions.action == "newapp") {
-                apistore.addApplication(options.overview_name, user.username, options.overview_tier,
-                        options.overview_callbackurl, options.overview_description);
+                apistore.addApplication(options.appName, user.username, options.tier,
+                        options.callbackUrl, options.description);
             } else if (uriOptions.action == "editapp") {
                 apistore.updateApplication(options.appName, options.userName, options.appId, options.tier,
                         options.callbackUrl, options.description);

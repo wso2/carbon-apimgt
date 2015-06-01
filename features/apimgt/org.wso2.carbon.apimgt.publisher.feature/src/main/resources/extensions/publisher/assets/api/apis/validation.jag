@@ -23,11 +23,14 @@ require('/modules/publisher.js').exec(function (ctx) {
 	var server = require('store').server;
 	var user = server.current(ctx.session);
 	var username = user.username;
+	var usr = carbon.server.tenantUser(user.username);
+	var tenantId = usr.tenantId;
 	var uriMatcher = new URIMatcher(req.getRequestURI());
 	var GET_VALIDATION_URL = '/{context}/asts/api/apis/validation';
 	var method = req.getMethod();
 	var response = ctx.response;
 	response.contentType = 'application/json';
+	var CONTENT_TYPE_JSON = 'application/json';
 	var constants = require("rxt").constants;
 	switch (method) {
 		case 'POST':// GET endpoints
@@ -49,9 +52,7 @@ require('/modules/publisher.js').exec(function (ctx) {
 							exist: result.exist
 						}
 					}
-
-					print(obj);
-
+					response = responseProcessor.buildSuccessResponse(response, constants.STATUS_CODES.OK, obj);
 				} else if (action === "isContextExist") {
 					var context = request.getParameter("context");
 					var oldContext = request.getParameter("oldContext");
@@ -67,9 +68,7 @@ require('/modules/publisher.js').exec(function (ctx) {
 							exist: result.exist
 						}
 					}
-
-					print(obj);
-
+					response = responseProcessor.buildSuccessResponse(response, constants.STATUS_CODES.OK, obj);
 				} else if (action === "validateRoles") {
 					var user = jagg.getUser().username;
 					var roles = request.getParameter("roles");
@@ -85,9 +84,7 @@ require('/modules/publisher.js').exec(function (ctx) {
 							response: result.valid
 						}
 					}
-
-					print(obj);
-
+					response = responseProcessor.buildSuccessResponse(response, constants.STATUS_CODES.OK, obj);
 				}
 
 				else if (action === "isURLValid") {
@@ -121,7 +118,23 @@ require('/modules/publisher.js').exec(function (ctx) {
 							tiers: result.tiers
 						}
 					}
-					print(obj);
+					response = responseProcessor.buildSuccessResponse(response, constants.STATUS_CODES.OK, obj);
+				} else if (action === "validateScope") {
+					data = obtainData(request);
+					var scope = data.scope;
+					var result = apiProxy.isScopeExist(scope, tenantId);
+					if (result.error) {
+						obj = {
+							error: true,
+							message: "Backend error occurred"
+						};
+					} else {
+						obj = {
+							error: false,
+							isScopeExist: result.isScopeExist
+						}
+					}
+					response = responseProcessor.buildSuccessResponse(response, constants.STATUS_CODES.OK, data);
 				} else {
 					response = responseProcessor.buildErrorResponse(response,
 																	constants.STATUS_CODES.NOT_IMPLEMENTED,
@@ -137,6 +150,35 @@ require('/modules/publisher.js').exec(function (ctx) {
 															' method.Try making the request with the appropriate verb' +
 															'(hint: create/update operations use POST).');
 	}
+
+	/**
+	 * Allows request data to be sent in either the request body or
+	 * as url encoded query parameters
+	 * @param  {Object} req  Request object
+	 * @return {Object}      An object which contains data from request body and url encoded parameters
+	 */
+	function obtainData(req) {
+		var data = {};
+		var contentType = parseContentType(req.getContentType());
+		if (contentType === CONTENT_TYPE_JSON) {
+			try {
+				data = req.getContent();
+			} catch (e) {
+				log.error('Unable to obtain content from request', e);
+			}
+		}
+		var params = req.getAllParameters('UTF-8');
+		//Mix the content with request parameters
+		for (var key in params) {
+			data[key] = params[key];
+		}
+		return data;
+	};
+
+	function parseContentType(contentTypString) {
+		var comps = contentTypString.split(';');
+		return comps[0];
+	};
 }, request, response, session); %>
 
 

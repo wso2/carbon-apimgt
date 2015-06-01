@@ -42,8 +42,10 @@ import org.wso2.carbon.apimgt.api.model.APIStore;
 import org.wso2.carbon.apimgt.api.model.Documentation;
 import org.wso2.carbon.apimgt.api.model.DuplicateAPIException;
 import org.wso2.carbon.apimgt.api.model.Icon;
+import org.wso2.carbon.apimgt.api.model.KeyManager;
 import org.wso2.carbon.apimgt.api.model.LifeCycleEvent;
 import org.wso2.carbon.apimgt.api.model.Provider;
+import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.api.model.Subscriber;
 import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
@@ -51,6 +53,8 @@ import org.wso2.carbon.apimgt.api.model.Usage;
 import org.wso2.carbon.apimgt.impl.definitions.APIDefinitionFromSwagger20;
 import org.wso2.carbon.apimgt.impl.dto.Environment;
 import org.wso2.carbon.apimgt.impl.dto.TierPermissionDTO;
+import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
+import org.wso2.carbon.apimgt.impl.handlers.ScopesIssuer;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.observers.APIStatusObserverList;
 import org.wso2.carbon.apimgt.impl.publishers.WSO2APIPublisher;
@@ -61,6 +65,8 @@ import org.wso2.carbon.apimgt.impl.utils.APINameComparator;
 import org.wso2.carbon.apimgt.impl.utils.APIStoreNameComparator;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.utils.APIVersionComparator;
+import org.wso2.carbon.apimgt.impl.utils.APIVersionStringComparator;
+import org.wso2.carbon.apimgt.keymgt.client.ProviderKeyMgtClient;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.governance.api.common.dataobjects.GovernanceArtifact;
 import org.wso2.carbon.governance.api.exception.GovernanceException;
@@ -2527,7 +2533,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 			}
 		}
 
-		if (api.getWadlUrl() != null) {
+		if (api.getWsdlUrl() != null) {
 			String wsdl = api.getWsdlUrl();
 			if(wsdl != null && !wsdl.isEmpty()) {
 				savedAPI.setWsdlUrl(wsdl);
@@ -2559,6 +2565,95 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 		return saveAPI(savedAPI, false);
 	}
 
+	public boolean updateAPIImplementation(API updatedAPI)
+			throws APIManagementException {
+
+		String provider = updatedAPI.getId().getProviderName();
+		String name = updatedAPI.getId().getApiName();
+		String version = updatedAPI.getId().getVersion();
+		String implementationType = updatedAPI.getImplementation();
+
+		if (provider != null) {
+			provider = APIUtil.replaceEmailDomain(provider);
+		}
+		provider = (provider != null ? provider.trim() : null);
+		name = (name != null ? name.trim() : null);
+		version = (version != null ? version.trim() : null);
+
+		APIIdentifier apiId = new APIIdentifier(provider, name, version);
+		API api = null;
+		boolean isTenantFlowStarted = false;
+		String tenantDomain;
+		try {
+			tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(provider));
+			if(tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
+				isTenantFlowStarted = true;
+				PrivilegedCarbonContext.startTenantFlow();
+				PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
+			}
+			api = getAPI(apiId);
+		} finally {
+			if (isTenantFlowStarted) {
+				PrivilegedCarbonContext.endTenantFlow();
+			}
+		}
+
+		api.setLastUpdated(new Date());
+
+		String wsdl = updatedAPI.getWsdlUrl();
+		String wadl = updatedAPI.getWadlUrl();
+		boolean endpointSecured = updatedAPI.isEndpointSecured();
+		String endpointUTUsername = updatedAPI.getEndpointUTUsername();
+		String endpointUTPassword = updatedAPI.getEndpointUTPassword();
+
+		api.setWadlUrl(wadl);
+		if(wsdl != null && !wsdl.isEmpty()){
+			api.setWsdlUrl(wsdl);
+		}
+		api.setEndpointConfig(updatedAPI.getEndpointConfig());
+
+		if(implementationType.equalsIgnoreCase(APIConstants.IMPLEMENTATION_TYPE_INLINE)){
+			api.setImplementation(APIConstants.IMPLEMENTATION_TYPE_INLINE);
+		}
+		else if(implementationType.equalsIgnoreCase(APIConstants.IMPLEMENTATION_TYPE_ENDPOINT)){
+			api.setImplementation(APIConstants.IMPLEMENTATION_TYPE_ENDPOINT);
+			// Validate endpoint URI format
+			APIUtil.validateEndpointURI(api.getEndpointConfig());
+		}else{
+			throw new APIManagementException("Invalid Implementation Type.");
+		}
+
+
+		String destinationStats = updatedAPI.getDestinationStatsEnabled();
+		if (APIConstants.ENABLED.equalsIgnoreCase(destinationStats)) {
+			destinationStats = APIConstants.ENABLED;
+		} else {
+			destinationStats = APIConstants.DISABLED;
+		}
+		api.setDestinationStatsEnabled(destinationStats);
+
+		//set secured endpoint parameters
+		if (endpointSecured) {
+			api.setEndpointSecured(true);
+			api.setEndpointUTUsername(endpointUTUsername);
+			api.setEndpointUTPassword(endpointUTPassword);
+		} else {
+			api.setEndpointSecured(false);
+			api.setEndpointUTUsername(null);
+			api.setEndpointUTPassword(null);
+		}
+
+
+		if (updatedAPI.getSwagger() != null) {
+			//Read swagger from the registry todo: check why was this done
+			//String swaggerFromRegistry = apiProvider.getSwagger20Definition(api.getId());
+			//Read URI Templates from swagger resource and set to api object
+			Set<URITemplate> uriTemplates = definitionFromSwagger20.getURITemplates(api, updatedAPI.getSwagger());
+			api.setUriTemplates(uriTemplates);
+			saveSwagger20Definition(api.getId(), updatedAPI.getSwagger());
+		}
+		return saveAPI(api, false);
+	}
 	/**
 	 * This method save or update the API object
 	 * @param api
@@ -2618,6 +2713,368 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 			handleException("Error while accessing the registry resource", e);
 		}
 		return apiResource.getUUID();
+	}
+
+	public int getSubscriberCount(APIIdentifier apiId)
+			throws APIManagementException {
+		Set<Subscriber> subs = getSubscribersOfAPI(apiId);
+		Set<String> subscriberNames = new HashSet<String>();
+		if (subs != null) {
+			for (Subscriber sub : subs) {
+				subscriberNames.add(sub.getName());
+			}
+			return subscriberNames.size();
+		} else {
+			return 0;
+		}
+	}
+
+	public boolean hasPublishPermission() throws APIManagementException {
+		try {
+			APIUtil.checkPermission(this.username, APIConstants.Permissions.API_PUBLISH);
+		} catch (APIManagementException e) {
+			//Returning false here by catching the exception which indicates the failure
+			//that user doesn't has the permission
+			return false;
+		}
+		return true;
+	}
+
+	public boolean validateRoles(String[] inputRoles) {
+		boolean valid=false;
+		try {
+			String[] roles=APIUtil.getRoleNames(this.username);
+			if (roles != null && inputRoles != null) {
+				for (String inputRole : inputRoles) {
+					for (String role : roles) {
+						valid= (inputRole.equals(role));
+						if(valid){ //If we found a match for the input role,then no need to process the for loop further
+							break;
+						}
+					}
+					//If the input role doesn't match with any of the role existing in the system
+					if(!valid){
+						return valid;
+					}
+
+				}
+				return valid;
+			}
+		}catch (Exception e) {
+			log.error("Error while validating the input roles.",e);
+		}
+		return valid;
+	}
+
+	public boolean isAPIOlderVersionExist(APIIdentifier identifier)
+			throws APIManagementException {
+		boolean apiOlderVersionExist = false;
+		String provider = identifier.getProviderName();
+		provider = APIUtil.replaceEmailDomain(provider);
+		String name = identifier.getApiName();
+		String currentVersion = identifier.getVersion();
+		boolean isTenantFlowStarted = false;
+		try {
+			String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(provider));
+			if(tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
+				isTenantFlowStarted = true;
+				PrivilegedCarbonContext.startTenantFlow();
+				PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
+			}
+
+			Set<String> versions = getAPIVersions(provider, name);
+			APIVersionStringComparator comparator = new APIVersionStringComparator();
+			for (String version : versions) {
+				if (comparator.compare(version, currentVersion) < 0) {
+					apiOlderVersionExist = true;
+					break;
+				}
+			}
+		} finally {
+			if (isTenantFlowStarted) {
+				PrivilegedCarbonContext.endTenantFlow();
+			}
+		}
+		return apiOlderVersionExist;
+	}
+
+	public boolean isMultipleTenantsAvailable() {
+		int tenantsDomainSize;
+		Object cacheObj = Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER).
+				getCache(APIConstants.APIPROVIDER_HOSTCACHE).get(APIConstants.TENANTCOUNT_CACHEKEY);
+		//if tenantDomainSize is not in the cache, Then the cache object is null
+		if (cacheObj == null) {
+			tenantsDomainSize = 0;
+		} else {
+			tenantsDomainSize = Integer.parseInt(cacheObj.toString());
+		}
+		//if there only super tenant in the system, tenantDomainSize is 1
+		if (tenantsDomainSize < 2) {
+			try {
+				Set<String> tenantDomains = APIUtil.getActiveTenantDomains();
+				//if there is more than than one tenant
+				if (tenantDomains.size() > 1) {
+					Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER).
+							getCache(APIConstants.APIPROVIDER_HOSTCACHE).
+							put(APIConstants.TENANTCOUNT_CACHEKEY, String.valueOf(tenantDomains.size()));
+					return true;
+				} else {
+					return false;
+				}
+			} catch (UserStoreException e) {
+                /*If there are errors in getting active tenant domains from user store,
+                 Minimum privileges are allocated to the user
+                */
+				log.error("Errors in getting active tenants form UserStore " + e.getMessage(), e);
+				return false;
+			}
+		} else {
+			return true;
+		}
+	}
+
+	/**
+	 * This method is to functionality of managing an API in API-Provider     *
+	 *
+	 * @param updatedAPI updated api contents
+	 * @return true if the API was added successfully
+	 * @throws APIManagementException Wrapped exception by org.wso2.carbon.apimgt.api.APIManagementException
+	 */
+	public boolean updateAPIManagePhase(API updatedAPI) throws APIManagementException, FaultGatewaysException {
+		boolean success = false;
+
+		String provider = updatedAPI.getId().getProviderName();
+		String name = updatedAPI.getId().getApiName();
+		String version = updatedAPI.getId().getVersion();
+
+		String subscriptionAvailability = updatedAPI.getSubscriptionAvailability();
+		String subscriptionAvailableTenants = "";
+		if (subscriptionAvailability != null && subscriptionAvailability.equals(APIConstants.SUBSCRIPTION_TO_SPECIFIC_TENANTS)) {
+			subscriptionAvailableTenants = updatedAPI.getSubscriptionAvailableTenants();
+		}
+
+		boolean defaultVersion = updatedAPI.isDefaultVersion();
+
+		String transport = updatedAPI.getTransports();
+
+		Set<Tier> updatedTiers = updatedAPI.getAvailableTiers();
+
+		String inSequence =  updatedAPI.getInSequence();
+		String outSequence = updatedAPI.getOutSequence();
+		String faultSequence = updatedAPI.getFaultSequence();
+		String businessOwner = updatedAPI.getBusinessOwner();
+		String businessOwnerEmail = updatedAPI.getBusinessOwnerEmail();
+		String technicalOwner = updatedAPI.getTechnicalOwner();
+		String technicalOwnerEmail = updatedAPI.getTechnicalOwnerEmail();
+		Set<String> environments = updatedAPI.getEnvironments();
+		String responseCache = updatedAPI.getResponseCache();
+		int cacheTimeOut = APIConstants.API_RESPONSE_CACHE_TIMEOUT;
+		if (APIConstants.ENABLED.equalsIgnoreCase(responseCache)) {
+			responseCache = APIConstants.ENABLED;
+			try {
+				cacheTimeOut = updatedAPI.getCacheTimeout();
+			} catch (NumberFormatException e) {
+				//ignore
+			}
+		} else {
+			responseCache = APIConstants.DISABLED;
+		}
+
+
+		if (provider != null) {
+			provider = APIUtil.replaceEmailDomain(provider);
+		}
+		provider = (provider != null ? provider.trim() : null);
+		name = (name != null ? name.trim() : null);
+		version = (version != null ? version.trim() : null);
+
+		APIIdentifier apiId = new APIIdentifier(provider, name, version);
+		API api = null;
+		boolean isTenantFlowStarted = false;
+		String tenantDomain = null;
+		try {
+			tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(provider));
+			if(tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
+				isTenantFlowStarted = true;
+				PrivilegedCarbonContext.startTenantFlow();
+				PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
+			}
+			api = getAPI(apiId);
+		} finally {
+			if (isTenantFlowStarted) {
+				PrivilegedCarbonContext.endTenantFlow();
+			}
+		}
+
+		api.setTransports(transport);
+		api.setSubscriptionAvailability(subscriptionAvailability);
+		api.setSubscriptionAvailableTenants(subscriptionAvailableTenants);
+		api.setResponseCache(responseCache);
+		api.setCacheTimeout(cacheTimeOut);
+		api.setAsDefaultVersion(defaultVersion);
+
+		api.removeCustomSequences();
+		if (inSequence != null) {
+			api.setInSequence(inSequence);
+		}
+		if (outSequence != null) {
+			api.setOutSequence(outSequence);
+		}
+
+		List<String> sequenceList = getCustomFaultSequences();
+		if (faultSequence != null && sequenceList.contains(faultSequence)) {
+			api.setFaultSequence(faultSequence);
+		}
+
+		if(businessOwner != null){
+			api.setBusinessOwner(businessOwner);
+		}
+		if(businessOwnerEmail != null){
+			api.setBusinessOwnerEmail(businessOwnerEmail);
+		}
+		if(technicalOwner != null){
+			api.setTechnicalOwner(technicalOwner);
+		}
+		if(technicalOwnerEmail != null){
+			api.setTechnicalOwnerEmail(technicalOwnerEmail);
+		}
+
+		api.setEnvironments(environments);
+
+		if (updatedTiers != null) {
+			api.removeAllTiers();
+			api.addAvailableTiers(updatedTiers);
+		}
+
+		api.setLastUpdated(new Date());
+
+		if (updatedAPI.getSwagger() != null) {
+
+			//Read URI Templates from swagger resource and set to api object
+			Set<URITemplate> uriTemplates = definitionFromSwagger20.getURITemplates(api, updatedAPI.getSwagger());
+			api.setUriTemplates(uriTemplates);
+
+			//scopes
+			Set<Scope> scopes = definitionFromSwagger20.getScopes(updatedAPI.getSwagger());
+			api.setScopes(scopes);
+
+			try {
+				int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager().
+						getTenantId(tenantDomain);
+				for (URITemplate uriTemplate : uriTemplates) {
+					Scope scope = uriTemplate.getScope();
+					if (scope != null && !(ScopesIssuer.getInstance().isWhiteListedScope(scope.getKey()))) {
+						if (isScopeKeyAssigned(apiId, scope.getKey(), tenantId)) {
+							handleException("Scope " + scope.getKey() + " is already assigned by another API");
+						}
+					}
+				}
+			} catch (UserStoreException e) {
+				handleException("Error while reading tenant information ", e);
+			}
+
+
+			//Save swagger in the registry
+			saveSwagger20Definition(api.getId(), updatedAPI.getSwagger());
+		}
+
+		// removing scopes from cache
+		ProviderKeyMgtClient providerClient = APIUtil.getProviderClient();
+		try {
+			String[] consumerKeys = getConsumerKeys(new APIIdentifier(provider, name, version));
+			if (consumerKeys != null && consumerKeys.length != 0) {
+				providerClient.removeScopeCache(consumerKeys);
+			}
+
+		} catch (APIManagementException e) {
+			//swallowing the excepion since the api update should happen even if cache update fails
+			log.error("Error while removing the scope cache", e);
+		}
+		//get new key manager instance for  resource registration.
+		KeyManager keyManager = KeyManagerHolder.getKeyManagerInstance();
+
+		Map registeredResource = keyManager.getResourceByApiId(api.getId().toString());
+
+		if (registeredResource == null) {
+			boolean isNewResourceRegistered = keyManager.registerNewResource(api , null);
+			if (!isNewResourceRegistered) {
+				handleException("APIResource registration is failed while adding the API- " + api.getId().getApiName
+						() + "-" + api
+						                .getId().getVersion());
+			}
+		} else {
+			//update APIResource.
+			String resourceId = (String) registeredResource.get("resourceId");
+			if (resourceId == null) {
+				handleException("APIResource update is failed because of empty resourceID.");
+			}
+			keyManager.updateRegisteredResource(api , registeredResource);
+		}
+		return saveAPI(api, false);
+	}
+
+	/**
+	 *
+	 * @return true if the API was added successfully
+	 * @throws APIManagementException
+	 */
+	public  boolean updateAPIStatus(APIIdentifier identifier, String status, boolean publishToGateway, boolean deprecateOldVersions
+									,boolean makeKeysForwardCompatible)
+			throws APIManagementException, FaultGatewaysException {
+		boolean success = false;
+		String provider = identifier.getProviderName();
+		String providerTenantMode = identifier.getProviderName();
+		provider = APIUtil.replaceEmailDomain(provider);
+		String name = identifier.getApiName();
+		String version = identifier.getVersion();
+		boolean isTenantFlowStarted = false;
+		try {
+			String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(providerTenantMode));
+			if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
+				isTenantFlowStarted = true;
+				PrivilegedCarbonContext.startTenantFlow();
+				PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
+			}
+			APIIdentifier apiId = new APIIdentifier(provider, name, version);
+			API api = getAPI(apiId);
+			if (api != null) {
+				APIStatus oldStatus = api.getStatus();
+				APIStatus newStatus = APIUtil.getApiStatus(status);
+				String currentUser = this.username;
+				changeAPIStatus(api, newStatus, currentUser, publishToGateway);
+
+				if ((oldStatus.equals(APIStatus.CREATED) || oldStatus.equals(APIStatus.PROTOTYPED))
+				    && newStatus.equals(APIStatus.PUBLISHED)) {
+					if (makeKeysForwardCompatible) {
+						makeAPIKeysForwardCompatible(api);
+					}
+
+					if (deprecateOldVersions) {
+						List<API> apiList = getAPIsByProvider(provider);
+						APIVersionComparator versionComparator = new APIVersionComparator();
+						for (API oldAPI : apiList) {
+							if (oldAPI.getId().getApiName().equals(name) &&
+							    versionComparator.compare(oldAPI, api) < 0 &&
+							    (oldAPI.getStatus().equals(APIStatus.PUBLISHED))) {
+								changeAPIStatus(oldAPI, APIStatus.DEPRECATED,
+										currentUser, publishToGateway);
+							}
+						}
+					}
+				}
+				success = true;
+			} else {
+				handleException("Couldn't find an API with the name-" + name + "version-" + version);
+			}
+		} catch (FaultGatewaysException e) {
+			handleException("Error while pubslishing to API gateway");
+			return false;
+		} finally {
+			if (isTenantFlowStarted) {
+				PrivilegedCarbonContext.endTenantFlow();
+			}
+		}
+		return success;
 	}
 }
 

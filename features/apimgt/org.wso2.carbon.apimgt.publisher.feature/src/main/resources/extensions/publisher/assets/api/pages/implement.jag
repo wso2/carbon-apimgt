@@ -50,6 +50,21 @@ require('/modules/publisher.js').exec(function(ctx) {
     api.id = options.id;
     output.api = api;
     output.id = api.id;
+	output.api.isPermitted = apiProxy.hasPublishPermission().permitted;
+
+	//TODO hard coded values replace
+	output.api.isCreatePermitted = true;
+	output.api.isDataPublishingEnabled = false;
+	output.api.storeUrl = 'test';
+	//TODO correctly fix this
+	output.api.inline_impl = "'";
+	output.api.hide_endpoint="hide";
+	output.api.endpoint_impl = "checked='checked'";
+	output.api.hide_impl = "hide";
+
+	//Set language specific helper messages and names
+	var locale = require('/extensions/assets/api/locale/locale_en.json');
+	output.locale = locale;
     caramel.render(output);
 }, request, response, session);
 %>

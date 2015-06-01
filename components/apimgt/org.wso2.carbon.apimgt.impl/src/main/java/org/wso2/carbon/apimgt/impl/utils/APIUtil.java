@@ -46,8 +46,8 @@ import org.apache.woden.WSDLException;
 import org.apache.woden.WSDLFactory;
 import org.apache.woden.WSDLReader;
 import org.jaggeryjs.scriptengine.exceptions.ScriptException;
-import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
+import org.json.simple.JSONArray;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.w3c.dom.Document;
@@ -67,6 +67,7 @@ import org.wso2.carbon.apimgt.api.model.APISubscription;
 import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.api.model.Documentation;
 import org.wso2.carbon.apimgt.api.model.DocumentationType;
+import org.wso2.carbon.apimgt.api.model.KeyManager;
 import org.wso2.carbon.apimgt.api.model.KeyManagerConfiguration;
 import org.wso2.carbon.apimgt.api.model.Provider;
 import org.wso2.carbon.apimgt.api.model.Scope;
@@ -165,6 +166,7 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.URLConnection;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -1281,7 +1283,11 @@ public final class APIUtil {
 
                 registry.put(wsdlResourcePath, wsdlResource);
                 //set the anonymous role for wsld resource to avoid basicauth security.
-                setResourcePermissions(api.getId().getProviderName(), api.getVisibility(), null, wsdlResourcePath);
+                String visibleRoles[] = null;
+                if (api.getVisibleRoles() != null) {
+                    visibleRoles = api.getVisibleRoles().split(",");
+                }
+                setResourcePermissions(api.getId().getProviderName(), api.getVisibility(), visibleRoles, wsdlResourcePath);
             }
 
 			//set the wsdl resource permlink as the wsdlURL.
@@ -2693,8 +2699,8 @@ public final class APIUtil {
 				for (File sequenceFile : sequences) {
 					String sequenceFileName = sequenceFile.getName();
 					String regResourcePath =
-							APIConstants.API_CUSTOM_SEQUENCE_LOCATION + File.separator +
-							customSequenceType + File.separator + sequenceFileName;
+							APIConstants.API_CUSTOM_SEQUENCE_LOCATION + "/" +
+							customSequenceType + "/" + sequenceFileName;
 					if (registry.resourceExists(regResourcePath)) {
 						if (log.isDebugEnabled()) {
 							log.debug("Defined sequences have already been added to the registry");
@@ -4032,8 +4038,7 @@ public final class APIUtil {
      * @throws APIManagementException
      */
 
-    public static Map<String, Object> getDocument(String userName, String resourceUrl,
-                                                  String tenantDomain)
+    public static Map<String, Object> getDocument(String userName, String resourceUrl)
             throws APIManagementException {
         Map<String, Object> documentMap = new HashMap<String, Object>();
 
@@ -4046,17 +4051,15 @@ public final class APIUtil {
             handleException("Invalid resource Path " + resourceUrl);
         }
         Resource apiDocResource;
-        Registry registryType = null;
-        int tenantId = MultitenantConstants.SUPER_TENANT_ID;
+        Registry registryType;
+        int tenantId;
+        String tenantDomain = MultitenantUtils.getTenantDomain(userName);
         try {
-            if (tenantDomain != null && !"null".equals(tenantDomain)) {
+           
                 tenantId = ServiceReferenceHolder
                         .getInstance().getRealmService().getTenantManager()
                         .getTenantId(tenantDomain);
-            }
-            if (tenantId != MultitenantConstants.SUPER_TENANT_ID) {
-                userName = userName.split("@" + tenantDomain)[0];
-            }
+                userName = MultitenantUtils.getTenantAwareUsername(userName);
             registryType = ServiceReferenceHolder
                     .getInstance().
                             getRegistryService().getGovernanceUserRegistry(userName, tenantId);
@@ -5036,4 +5039,62 @@ public final class APIUtil {
         return result;
 
     }
+	public String isURLValid(String type, String urlVal) throws APIManagementException {
+
+		String response = "";
+
+		if (urlVal != null && !urlVal.isEmpty()) {
+			URLConnection conn = null;
+			try {
+				URL url = new URL(urlVal);
+				if (type != null && type.equals("wsdl")) {
+					validateWsdl(urlVal);
+					response = "success";
+				}
+				// checking http,https endpoints up to resource level by doing
+				// http HEAD. And other end point
+				// validation do through basic url connect
+				else if (url.getProtocol().matches("https")) {
+					ServerConfiguration serverConfig = CarbonUtils.getServerConfiguration();
+					String trustStorePath = serverConfig.getFirstProperty("Security.TrustStore.Location");
+					String trustStorePassword = serverConfig.getFirstProperty("Security.TrustStore.Password");
+					System.setProperty("javax.net.ssl.trustStore", trustStorePath);
+					System.setProperty("javax.net.ssl.trustStorePassword", trustStorePassword);
+
+					return sendHttpHEADRequest(urlVal);
+				} else if (url.getProtocol().matches("http")) {
+					return sendHttpHEADRequest(urlVal);
+				} else {
+					return "error while connecting";
+				}
+			} catch (Exception e) {
+				response = e.getMessage();
+			} finally {
+				if (conn != null) {
+					conn = null;
+				}
+			}
+		}
+		return response;
+	}
+
+	/**
+	 * This method is to functionality of get list of environments that list in api-manager.xml
+	 *
+	 * @return list of environments with details of environments
+	 */
+	public static Map<String, Environment> getEnvironments() {
+		APIManagerConfiguration config =
+				ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
+						.getAPIManagerConfiguration();
+		Map<String, Environment> environments = config.getApiGatewayEnvironments();
+		return environments;
+	}
+
+	public static Map getRegisteredResourceByAPIIdentifier(APIIdentifier identifier) throws APIManagementException {
+		//get new key manager
+		KeyManager keyManager = KeyManagerHolder.getKeyManagerInstance();
+		Map registeredResource = keyManager.getResourceByApiId(identifier.toString());
+		return registeredResource;
+	}
 }

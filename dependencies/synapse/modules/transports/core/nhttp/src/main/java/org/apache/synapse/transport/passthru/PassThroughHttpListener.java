@@ -17,7 +17,9 @@
 package org.apache.synapse.transport.passthru;
 
 import java.io.IOException;
+import java.net.InetAddress;
 import java.net.InetSocketAddress;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -271,6 +273,21 @@ public class PassThroughHttpListener implements TransportListener {
 
         if(PassThroughConfiguration.getInstance().getMaxActiveConnections() != -1) {
             addMaxActiveConnectionCountController(PassThroughConfiguration.getInstance().getMaxActiveConnections());
+        }
+
+        InetAddress bindAddress;
+        Parameter bindParam = pttInDescription.getParameter("bind-address");
+        if (bindParam != null) {
+            try {
+                bindAddress = InetAddress.getByName((String) bindParam.getValue());
+            } catch (UnknownHostException e) {
+                throw AxisFault.makeFault(e);
+            }
+            if (bindAddress != null) {
+                Parameter portParam = pttInDescription.getParameter("port");
+                int port = Integer.parseInt(portParam.getValue().toString());
+                addressSet.add(new InetSocketAddress(bindAddress, port));
+            }
         }
 
         if (addressSet.isEmpty()) {

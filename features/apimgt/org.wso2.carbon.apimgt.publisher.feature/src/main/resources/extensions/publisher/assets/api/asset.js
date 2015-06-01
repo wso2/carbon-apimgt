@@ -56,18 +56,6 @@ asset.manager = function(ctx) {
         return true;
     };
 
-    var generate_swagger_object=function(swagger){
-    swaggerObj = {
-        api_doc : parse(swagger),
-        resources : []
-     };
-
-    for(i = 0 ; i < swaggerObj.api_doc.apis.length ; i++ ){
-        swaggerObj.resources.push(swaggerObj.api_doc.apis[i].file);
-        delete swaggerObj.api_doc.apis[i].file
-    }
-    return stringify(swaggerObj);
-    }
     return {
         importAssetFromHttpRequest: function(options) {
             var asset = {};
@@ -85,61 +73,60 @@ asset.manager = function(ctx) {
             var rxtModule = require('rxt');
             var assetMod = rxtModule.asset;
             if(options.attributes.action=="design"){
-            api.apiName = options.attributes.overview_name;
-            api.name = options.attributes.overview_name;
-            api.version = options.attributes.overview_version;
-            if (options.attributes.provider == null) {
-                api.provider = ctx.username;
-            } else {
-                api.provider = options.attributes.overview_provider;
-            }
-            api.context = options.attributes.overview_context;
+                api.apiName = options.attributes.overview_name;
+                api.name = options.attributes.overview_name;
+                api.version = options.attributes.overview_version;
+                if (options.attributes.provider == null) {
+                    api.provider = ctx.username;
+                } else {
+                    api.provider = options.attributes.overview_provider;
+                }
+                api.context = options.attributes.overview_context;
 
-            //TODO now we no need to save Icon through API manager as asset API does it for us
-            //Need to properly cope with that changed
-            api.thumbnailContent = request.getFile("overview_thumbnail");
-            api.thumbnailUrl = null;
+                //TODO now we no need to save Icon through API manager as asset API does it for us
+                //Need to properly cope with that changed
+                api.thumbnailContent = request.getFile("overview_thumbnail");
+                api.thumbnailUrl = null;
 
-            //validate uploaded image and set API has a image if content is valid
-            if(api.thumbnailContent != null && isValiedImage(api.thumbnailContent)){
-               api.thumbnailUrl = 'overview_thumbnail';
-            } else if(api.thumbnailContent != null && !isValiedImage(api.thumbnailContent)){
-                obj = {
-                    error:true,
-                    message:"Please upload a valid image file for the API icon."
-                };
-                print(obj);
-                return;
-            }
+                //validate uploaded image and set API has a image if content is valid
+                if(api.thumbnailContent != null && isValiedImage(api.thumbnailContent)){
+                    api.thumbnailUrl = 'overview_thumbnail';
+                } else if(api.thumbnailContent != null && !isValiedImage(api.thumbnailContent)){
+                    obj = {
+                        error:true,
+                        message:"Please upload a valid image file for the API icon."
+                    };
+                    print(obj);
+                    return;
+                }
 
-            //If API not exist create
-            var apiProxy = apiPublisher.instance(ctx.username);
-            result=apiProxy.checkIfAPIExists(api.provider,api.name,api.version);
+                //If API not exist create
+                var apiProxy = apiPublisher.instance(ctx.username);
+                result = apiProxy.checkIfAPIExists(api.provider, api.name, api.version);
 
-            if(!result){
-                result = apiProxy.designAPI(api);
+                if(!result.error && !result.exist){
+                    result = apiProxy.createAPI(api);
+                    if (result!=null && result.error) {
+                        throw "Error while creating the API." + result.error;
+                    } else{
+                        options.id=result.uuid;
+                        options.name=api.name;
+                        options.attributes.overview_provider=api.provider;
+                        options.attributes.overview_status='CREATED';
+                    }
+                }
+                api.description = options.attributes.overview_description;
+                api.tags = options.attributes.overview_tags;
+                api.visibility = options.attributes.visibility;
+                api.visibleRoles = options.attributes.roles;
+                api.swagger = options.attributes.swagger;
+                api.wsdl = options.attributes.wsdl;
+                api.swagger = options.attributes.swagger;
+                result = apiProxy.updateDesignAPI(api);
                 if (result!=null && result.error) {
-                    throw "Error while creating the API.";
-                }
-                else{
-                options.id=result;
-                options.name=api.name;
-                options.attributes.overview_provider=api.provider;
-                options.attributes.overview_status='CREATED';
+                    throw "Error while updating the API.";
                 }
             }
-            api.description = options.attributes.overview_description;
-            api.tags = options.attributes.overview_tags;
-            api.visibility = options.attributes.visibility;
-            api.visibleRoles = options.attributes.roles;
-            api.swagger = generate_swagger_object(options.attributes.swagger);
-            result = apiProxy.updateDesignAPI(api);
-            if (result!=null && result.error) {
-            throw "Error while updating the API.";
-            }
-            }
-
-
         },
         remove : function(id) {
             var asset = this.get.call(this, id);
@@ -172,7 +159,8 @@ asset.manager = function(ctx) {
                 };
                 api.context = options.attributes.overview_context;
 
-              //api.implementation_type = options.attributes.implementation_methods;
+                //TODO Hard coded
+                api.implementation_type = 'endpoint';
                 api.wsdl = options.attributes.wsdl;
                 api.wadl = options.attributes.wadl;
                 api.endpointSecured = options.attributes.endpointType;
@@ -181,7 +169,7 @@ asset.manager = function(ctx) {
                 api.endpoint_config= options.attributes.endpoint_config;
                 api.destinationStats= options.attributes.destinationStats;
                 api.advertiseOnly= options.attributes.overview_advertiseOnly;
-                api.swagger = generate_swagger_object(options.attributes.swagger);
+                api.swagger = options.attributes.swagger;
 
                 var apiProxy = apiPublisher.instance(ctx.username);
                 result = apiProxy.implementAPI(api);
@@ -217,7 +205,7 @@ asset.manager = function(ctx) {
 
                 apiData.context = options.attributes.overview_context;
                 apiData.defaultVersion = options.attributes.default_version_checked;
-                apiData.swagger = generate_swagger_object(options.attributes.swagger);
+                apiData.swagger = options.attributes.swagger;
                 apiData.tier = options.attributes.tiersCollection;
                 if(options.attributes.transport_http == null && options.attributes.transport_https == null){
                     apiData.transports = null;
@@ -274,15 +262,18 @@ asset.server = function (ctx) {
             pages: [{
                         title: 'Design an API',
                         url: 'design',
-                        path: 'design.jag'
+                        path: 'design.jag',
+                        permission:'ASSET_CREATE'
                     }, {
                         title: 'Implement an API',
                         url: 'implement',
-                        path: 'implement.jag'
+                        path: 'implement.jag',
+                        permission:'ASSET_CREATE'
                     }, {
                         title: 'Manage an API',
                         url: 'manage',
-                        path: 'manage.jag'
+                        path: 'manage.jag',
+                        permission:'ASSET_CREATE'
                     }, {
                         title: 'Documents',
                         url: 'documents',
@@ -294,7 +285,8 @@ asset.server = function (ctx) {
                     }, {
                         title: 'Manage',
                         url: 'manage',
-                        path: 'manage.jag'
+                        path: 'manage.jag',
+                        permission:'ASSET_CREATE'
                     }, {
                         title: 'Subscriptions',
                         url: 'api-subscriptions',
@@ -302,7 +294,8 @@ asset.server = function (ctx) {
                     }, {
                         title: 'Start Creating an API',
                         url: 'start',
-                        path: 'start.jag'
+                        path: 'start.jag',
+                        permission:'ASSET_CREATE'
                     }],
             apis: [{
                        url: 'endpoints',
@@ -403,7 +396,7 @@ asset.renderer = function (ctx) {
 
     var buildListLeftNav = function (page, util) {
         var navList = util.navList();
-        navList.push('ADD ' + type.toUpperCase(), 'btn-add-new', util.buildUrl('create'));
+        navList.push('ADD ' + type.toUpperCase(), 'btn-add-new', util.buildUrl('start'));
         navList.push('All Statistics', 'btn-stats', '/asts/' + type + '/statistics');
         navList.push('Subscriptions', 'btn-subscribe', '/asts/' + type + '/api-subscriptions');
         navList.push('Statistics', 'btn-stats', '/asts/' + type + '/statistics');

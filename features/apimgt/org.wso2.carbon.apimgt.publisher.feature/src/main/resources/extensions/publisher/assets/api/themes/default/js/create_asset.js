@@ -6,7 +6,6 @@ $(document).ready(function(){
      $.get(swaggerUrl , function( data ) {
             var designer =new  APIMangerAPI.APIDesigner();
             designer.load_api_document(data.data);
-            designer.set_default_management_values();
             designer.render_resources();
             $("#swaggerUpload").modal('hide');
      });
@@ -35,7 +34,7 @@ $(document).ready(function(){
                                                  dataType: "json",
                                                  onkeyup: false,
                                                  submitHandler: function(form) {
-                                                     if(designer.has_resources() == false){
+                                                     if(designer.has_resources() == false && !$('#wsdl').val()){
                                                          /* jagg.message({
                                                           content:"At least one resource should be specified. Do you want to add a wildcard resource (/*)." ,
                                                           type:"confirm",

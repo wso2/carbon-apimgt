@@ -1866,6 +1866,7 @@ public class APIStoreHostObject extends ScriptableObject {
                     }
                     row.put("apiOwner", row, apiOwner);
                     row.put("isAdvertiseOnly", row, api.isAdvertiseOnly());
+                    row.put("apiBusinessOwner", row, api.getBusinessOwner());
                     
                     NativeArray tierArr = new NativeArray(0);
                     Set<Tier> tierSet = api.getAvailableTiers();
@@ -1961,14 +1962,14 @@ public class APIStoreHostObject extends ScriptableObject {
                 JSONObject sandboxEnvironmentObjects = (JSONObject) environmentsObject.get("sandbox");
                 JSONObject hybridEnvironmentObjects = (JSONObject) environmentsObject.get("hybrid");
                 int envCount = 0;
-                if (!productionEnvironmentObjects.isEmpty()) {
-                    createAPIEndpointsPerType(productionEnvironmentObjects, api, version, myn, envCount, "production");
+                if (productionEnvironmentObjects != null && !productionEnvironmentObjects.isEmpty()) {
+                 envCount = createAPIEndpointsPerType(productionEnvironmentObjects, api, version, myn, envCount, "production");
                 }
-                if (!sandboxEnvironmentObjects.isEmpty()) {
-                    createAPIEndpointsPerType(sandboxEnvironmentObjects, api, version, myn, envCount, "sandbox");
+                if (sandboxEnvironmentObjects != null && !sandboxEnvironmentObjects.isEmpty()) {
+                    envCount = createAPIEndpointsPerType(sandboxEnvironmentObjects, api, version, myn, envCount, "sandbox");
                 }
-                if (!hybridEnvironmentObjects.isEmpty()) {
-                    createAPIEndpointsPerType(hybridEnvironmentObjects, api, version, myn, envCount, "hybrid");
+                if (hybridEnvironmentObjects != null && !hybridEnvironmentObjects.isEmpty()) {
+                    envCount = createAPIEndpointsPerType(hybridEnvironmentObjects, api, version, myn, envCount, "hybrid");
                 }
             }
 
@@ -4014,28 +4015,34 @@ public class APIStoreHostObject extends ScriptableObject {
         }
     }
 
-    public static NativeArray jsFunction_getPublishedAPIsByProvider(Context cx, Scriptable thisObj,
+    public static NativeArray  jsFunction_getPublishedAPIsByProvider(Context cx, Scriptable thisObj,
                                                                     Object[] args,
                                                                     Function funObj)
             throws APIManagementException {
         NativeArray apiArray = new NativeArray(0);
-        if (args != null && isStringArray(args)) {
+        if (args != null) {
             String providerName = APIUtil.replaceEmailDomain(args[0].toString());
             String username = args[1].toString();
             String limitArg = args[2].toString();
             int limit = Integer.parseInt(limitArg);
             String apiOwner = args[3].toString();
+            String apiBizOwner = null;
+            //If api biz-owner is not null
+            if(args[4] != null){
+                apiBizOwner = args[4].toString();
+            }
+
             Set<API> apiSet;
             APIConsumer apiConsumer = getAPIConsumer(thisObj);
             boolean isTenantFlowStarted = false;
             try {
-                String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(username));
+                String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(providerName));
                 if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
                     isTenantFlowStarted = true;
                     PrivilegedCarbonContext.startTenantFlow();
                     PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
                 }
-                apiSet = apiConsumer.getPublishedAPIsByProvider(providerName, username, limit, apiOwner);
+                apiSet = apiConsumer.getPublishedAPIsByProvider(providerName, username, limit, apiOwner, apiBizOwner);
             } catch (APIManagementException e) {
                 handleException("Error while getting published APIs information of the provider - " +
                         providerName, e);
@@ -4627,8 +4634,8 @@ public class APIStoreHostObject extends ScriptableObject {
                                                       Object[] args, Function funObj)
             throws ScriptException,
                    APIManagementException {
-        if (args == null || args.length != 2 || !isStringArray(args)) {
-            handleException("Invalid input parameters expected resource Url and tenantDomain");
+        if (args == null || args.length != 1 || !isStringArray(args)) {
+            handleException("Invalid input parameters expected resource Url");
         }
         NativeObject data = new NativeObject();
 
@@ -4637,9 +4644,9 @@ public class APIStoreHostObject extends ScriptableObject {
         if (username == null) {
             username = APIConstants.END_USER_ANONYMOUS;
         }
-        String resource = (String) args[1];
-        String tenantDomain = (String) args[0];
-        Map<String, Object> docResourceMap = APIUtil.getDocument(username, resource, tenantDomain);
+        String resource = (String) args[0];
+        //String tenantDomain = (String) args[0];
+        Map<String, Object> docResourceMap = APIUtil.getDocument(username, resource);
         if (!docResourceMap.isEmpty()) {
             data.put("Data", data,
                      cx.newObject(thisObj, "Stream", new Object[] { docResourceMap.get("Data") }));
@@ -4706,23 +4713,28 @@ public class APIStoreHostObject extends ScriptableObject {
                 hybridEnvironmentObject.put(environment.getName(), jsonObject);
             }
         }
-        environmentObject.put(APIConstants.GATEWAY_ENV_TYPE_PRODUCTION, productionEnvironmentObject);
-        environmentObject.put(APIConstants.GATEWAY_ENV_TYPE_SANDBOX, sandboxEnvironmentObject);
-        environmentObject.put(APIConstants.GATEWAY_ENV_TYPE_HYBRID, hybridEnvironmentObject);
+        if (productionEnvironmentObject != null && !productionEnvironmentObject.isEmpty()){
+            environmentObject.put(APIConstants.GATEWAY_ENV_TYPE_PRODUCTION, productionEnvironmentObject);
+        }
+        if (sandboxEnvironmentObject != null && !sandboxEnvironmentObject.isEmpty()){
+            environmentObject.put(APIConstants.GATEWAY_ENV_TYPE_SANDBOX, sandboxEnvironmentObject);
+        }
+        if (hybridEnvironmentObject != null && !hybridEnvironmentObject.isEmpty()){
+            environmentObject.put(APIConstants.GATEWAY_ENV_TYPE_HYBRID, hybridEnvironmentObject);
+        }
         return environmentObject;
     }
 
     /**
      * this method used to iterate environments according to type
-     *
-     * @param environments json
+     *  @param environments json
      * @param api API object of selected api .
      * @param version version of API
      * @param myn
      * @param envCount count parameter
      * @param type type of environment
      */
-    private static void createAPIEndpointsPerType(JSONObject environments, API api, String version, NativeArray myn,
+    private static int createAPIEndpointsPerType(JSONObject environments, API api, String version, NativeArray myn,
                                                  int envCount, String type) {
         for (Object prodKeys : environments.keySet()) {
             JSONObject environmentObject = (JSONObject) environments.get(prodKeys);
@@ -4741,8 +4753,9 @@ public class APIStoreHostObject extends ScriptableObject {
                 index++;
                 appObj.put("environmentURLs", appObj, envs);
                 myn.put(envCount, myn, appObj);
-                envCount++;
             }
         }
+        envCount++;
+        return envCount;
     }
 }
