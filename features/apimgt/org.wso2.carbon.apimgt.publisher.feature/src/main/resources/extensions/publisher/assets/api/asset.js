@@ -262,15 +262,18 @@ asset.server = function (ctx) {
             pages: [{
                         title: 'Design an API',
                         url: 'design',
-                        path: 'design.jag'
+                        path: 'design.jag',
+                        permission:'ASSET_CREATE'
                     }, {
                         title: 'Implement an API',
                         url: 'implement',
-                        path: 'implement.jag'
+                        path: 'implement.jag',
+                        permission:'ASSET_CREATE'
                     }, {
                         title: 'Manage an API',
                         url: 'manage',
-                        path: 'manage.jag'
+                        path: 'manage.jag',
+                        permission:'ASSET_CREATE'
                     }, {
                         title: 'Documents',
                         url: 'documents',
@@ -282,7 +285,8 @@ asset.server = function (ctx) {
                     }, {
                         title: 'Manage',
                         url: 'manage',
-                        path: 'manage.jag'
+                        path: 'manage.jag',
+                        permission:'ASSET_CREATE'
                     }, {
                         title: 'Subscriptions',
                         url: 'api-subscriptions',
@@ -290,7 +294,8 @@ asset.server = function (ctx) {
                     }, {
                         title: 'Start Creating an API',
                         url: 'start',
-                        path: 'start.jag'
+                        path: 'start.jag',
+                        permission:'ASSET_CREATE'
                     }],
             apis: [{
                        url: 'endpoints',
