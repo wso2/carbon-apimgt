@@ -101,13 +101,9 @@ public class ScopesIssuer {
             String[] userRoles = null;
 
             try {
-                tenantId = IdentityUtil.getTenantIdOFUser(username);
+                tenantId = tokReqMsgCtx.getTenantID();
                 userStoreManager = realmService.getTenantUserRealm(tenantId).getUserStoreManager();
                 userRoles = userStoreManager.getRoleListOfUser(MultitenantUtils.getTenantAwareUsername(username));
-            } catch (IdentityException e) {
-                //Log and return since we do not want to stop issuing the token in case of scope validation failures.
-                log.error("Error when obtaining tenant Id of user " + username, e);
-                return false;
             } catch (UserStoreException e) {
                 //Log and return since we do not want to stop issuing the token in case of scope validation failures.
                 log.error("Error when getting the tenant's UserStoreManager or when getting roles of user ", e);
