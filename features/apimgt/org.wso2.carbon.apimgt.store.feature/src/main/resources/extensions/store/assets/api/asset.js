@@ -175,7 +175,7 @@ asset.renderer = function(ctx) {
                 }
             }
             var resultapi=apistore.getAPI(asset.attributes.overview_provider,asset.name,asset.attributes.overview_version);
-            var apidata=resultapi;
+            var apidata=resultapi.api;
             if(apidata!=null){
                 tiers=apidata.tiers;
                 if(status=="PUBLISHED" && user){
