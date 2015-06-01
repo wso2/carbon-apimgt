@@ -27,11 +27,12 @@ var apistore = {};
     var APIIdentifier = Packages.org.wso2.carbon.apimgt.api.model.APIIdentifier;
     var APIUtil = Packages.org.wso2.carbon.apimgt.impl.utils.APIUtil;
     var Application = Packages.org.wso2.carbon.apimgt.api.model.Application;
-    var API= Packages.org.wso2.carbon.apimgt.api.model.API;    
+    var API= Packages.org.wso2.carbon.apimgt.api.model.API;
     var Date = Packages.java.util.Date;
     var Tier= Packages.org.wso2.carbon.apimgt.api.model.Tier;
     var URITemplate= Packages.org.wso2.carbon.apimgt.api.model.URITemplate;
 
+    var JSONValue=Packages.org.json.simple.JSONValue;
     var Set=Packages.java.util.Set;
     var HashSet=Packages.java.util.HashSet;
     var List=Packages.java.util.List;
@@ -58,7 +59,7 @@ var apistore = {};
 
     apistore.instance = function (username) {
         return new StoreAPIProxy(username);
-   
+
     };
 
     StoreAPIProxy.prototype.getAllSubscriptions = function (userName, appName, startSubIndex, endSubIndex) {
@@ -114,7 +115,7 @@ var apistore = {};
         return this.impl.addApplication(application,userName);
     };
 
-     /*
+    /*
      * This function update the application according to the given arguments.
      */
     StoreAPIProxy.prototype.updateApplication = function (appName, userName, appId, tier, callbackUrl, description) {
@@ -127,7 +128,7 @@ var apistore = {};
         return this.impl.updateApplication(application);
     };
 
-     /*
+    /*
      * This function delete the application according to the arguments.
      */
     StoreAPIProxy.prototype.removeApplication = function (appName, userName, appId) {
@@ -169,106 +170,97 @@ var apistore = {};
     };
 
     StoreAPIProxy.prototype.getAPI = function (provider, name, version) {
-        var identifier = new Packages.org.wso2.carbon.apimgt.api.model.APIIdentifier(provider,name,version);
-        API=this.impl.getAPI(identifier);
-        var myn= new Packages.org.json.simple.JSONArray();
-        //JSONfy the result
-        if (API) {
-            var row = new Packages.org.json.simple.JSONObject();
-            APIIdentifier = API.getId();
-            row.put("name", APIIdentifier.getApiName());
-            row.put("provider", APIUtil.replaceEmailDomainBack(APIIdentifier.getProviderName()));
-            row.put("version", APIIdentifier.getVersion());
-            row.put("description", API.getDescription());
-            row.put("rates", API.getRating());
-            row.put("endpoint", API.getUrl());
-            row.put("wsdl", API.getWsdlUrl());
-            row.put("wadl", API.getWadlUrl());
-            var dateFormat = new SimpleDateFormat("dd/MMM/yyyy HH:mm:ss a z");
-            var dateFormatted = dateFormat.format(API.getLastUpdated());
-            row.put("updatedDate", dateFormatted);
-            row.put("context", API.getContext());
-            row.put("status", API.getStatus().getStatus());
-            row.put("serverURL", getEnvironmentsOfAPI(api).toJSONString());
-            var tierArr = new Packages.org.json.simple.JSONArray();
-            TierSet = API.getAvailableTiers();
-            if (TierSet) {
-                Iterator =TierSet.iterator();
-                while (it.hasNext()) {
-                    var tierObj = new Packages.org.json.simple.JSONObject();
-                    var tierObject = Packages.org.wso2.carbon.apimgt.api.model.Tier;
-                    tierObject=it.next();
-                    var tier = tierObject;
-                    tierObj.put("tierName", tier.getName());
-                    tierObj.put("tierDisplayName", tier.getDisplayName());
-                    tierObj.put("tierDescription", tier.getDescription() != null ? tier.getDescription() : "");
-                    if (tier.getTierAttributes()) {
-                        attributes = tier.getTierAttributes();
-                        var attributesList = "";
-                        for (var j=0;j<attributes.entrySet().size();j++) {
-                            attributesList += attribute.getKey() + "::" + attribute.getValue() + ",";
+        var identifier = new Packages.org.wso2.carbon.apimgt.api.model.APIIdentifier(provider, name, version);
 
-                        }
-                        tierObj.put("tierAttributes", tierObj, attributesList);
-                    }
-                    tierArr.add(tierObj);
-
-
+        var apiOb;
+        try {
+            api = this.impl.getAPI(identifier);
+            var tiers = api.getTierSetAsArray();
+            var tierSet = '';
+            var tiersDisplayNamesSet = '';
+            var tiersDescSet = '';
+            for(var i = 0; i < tiers.length  ; i++) {
+                tierSet += tiers[0].getName();
+                tiersDisplayNamesSet += tiers[0].getDisplayName();
+                tiersDescSet += tiers[0].getDescription();
+                if (i != tierSet.length - 1) {
+                    tierSet += ',';
+                    tiersDisplayNamesSet += ',';
+                    tiersDescSet += ',';
                 }
             }
-            row.put("tiers", tierArr);
-            row.put("subscribed", isSubscribed);
-            row.put("bizOwner", API.getBusinessOwner());
-            row.put("bizOwnerMail", API.getBusinessOwnerEmail());
-            row.put("techOwner", API.getTechnicalOwner());
-            row.put("techOwnerMail", API.getTechnicalOwnerEmail());
-            row.put("visibility", API.getVisibility());
-            row.put("visibleRoles", API.getVisibleRoles());
 
-            uriTemplates = API.getUriTemplates();
-            var uriTemplatesArr = new ArrayList();
+            var uriTemplates = api.getUriTemplates();
             if (uriTemplates.size() != 0) {
-                var uriTempArr = new Packages.org.json.simple.JSONArray(uriTemplates.size());
-                var i = uriTemplates.iterator();
-
-                while (i.hasNext()) {
-                    var utArr = new ArrayList();
-                    var ut = Packages.org.wso2.carbon.apimgt.api.model.URITemplate;
-                    ut=i.next();
-                    utArr.add(ut.getUriTemplate());
-                    utArr.add(ut.getMethodsAsString().replaceAll("\\s", ","));
-                    utArr.add(ut.getAuthTypeAsString().replaceAll("\\s", ","));
-                    utArr.add(ut.getThrottlingTiersAsString().replaceAll("\\s", ","));
-                    var  utNArr = new Packages.org.json.simple.JSONArray(utArr.size());
-                    for (var p = 0; p < utArr.size(); p++) {
-                        utNArr.put(p, utNArr, utArr.get(p));
+                var uriTempArr = new Array();
+                var iterator = uriTemplates.iterator();
+                var uriTemplatesArr = new Array();
+                while (iterator.hasNext()) {
+                    var utArr = new Array();
+                    var ut = iterator.next();
+                    utArr.push(ut.getUriTemplate());
+                    utArr.push(ut.getMethodsAsString().replaceAll("\\s", ","));
+                    utArr.push(ut.getAuthTypeAsString().replaceAll("\\s", ","));
+                    utArr.push(ut.getThrottlingTiersAsString().replaceAll("\\s", ","));
+                    var utNArr = new Array();
+                    for (var p = 0; p < utArr.length; p++) {
+                        utNArr.push(utArr[p]);
                     }
-                    uriTemplatesArr.add(utNArr);
+                    uriTemplatesArr.push(utNArr);
                 }
 
-                for (var c = 0; c < uriTemplatesArr.size(); c++) {
-                    uriTempArr.add(uriTemplatesArr.get(c));
+                for (var c = 0; c < uriTemplatesArr.length; c++) {
+                    uriTempArr.push(uriTemplatesArr[c]);
                 }
-
-                myn.add(1, uriTempArr);
             }
-            row.put("uriTemplates", uriTemplatesArr.toString());
-            var apiOwner = API.getApiOwner();
-            if (!apiOwner) {
-                apiOwner = APIUtil.replaceEmailDomainBack(APIIdentifier.getProviderName());
-            }
-            row.put("apiOwner", apiOwner);
-            row.put("isAdvertiseOnly", API.isAdvertiseOnly());
-            row.put("redirectURL", API.getRedirectURL());
 
-            row.put("subscriptionAvailability", API.getSubscriptionAvailability());
-            row.put("subscriptionAvailableTenants", API.getSubscriptionAvailableTenants());
-            row.put("isDefaultVersion",API.isDefaultVersion());
-            row.put("transports",API.getTransports());
 
-            myn.add(0, row);
+            var dateFormat = new SimpleDateFormat("dd/MMM/yyyy HH:mm:ss a z");
+            var dateFormatted = dateFormat.format(api.getLastUpdated());
+
+            apiOb = {
+                name: api.getId().getApiName(),
+                description: api.getDescription(),
+                endpoint: api.getUrl(),
+                wsdl: api.getWsdlUrl(),
+                version: api.getId().getVersion(),
+                tags: api.getTagSetAsString(),
+                tiers: tierSet,
+                status: api.getStatus().toString(),
+                thumb: APIUtil.getWebContextRoot(api.getThumbnailUrl()),
+                context: api.getContext(),
+                updatedDate: dateFormatted,
+                tierDescs:tiersDescSet,
+                bizOwner: api.getBusinessOwner(),
+                bizOwnerMail: api.getBusinessOwnerEmail(),
+                techOwner: api.getTechnicalOwner(),
+                techOwnerMail: api.getTechnicalOwnerEmail(),
+                wadl: api.getWadlUrl(),
+                visibility: api.getVisibility(),
+                roles: api.getVisibleRoles(),
+                tenants: api.getVisibleTenants(),
+                provider: APIUtil.replaceEmailDomainBack(api.getId().getProviderName()),
+                transport_http: APIUtil.checkTransport("http", api.getTransports()),
+                transport_https: APIUtil.checkTransport("https", api.getTransports()),
+                responseCache: api.getResponseCache(),
+                cacheTimeout: api.getCacheTimeout(),
+                availableTiersDisplayNames: tiersDisplayNamesSet,
+                isDefaultVersion: api.isDefaultVersion(),
+                serverURL:APIUtil.writeEnvironmentsToArtifact(api)
+
+            };
+            return {
+                error:false,
+                api:apiOb
+            };
+        } catch (e) {
+            log.error(e.message);
+            return {
+                error:e,
+                api:null,
+                message:e.message.split(":")[1]
+            };
         }
-        return myn;
 
     };
 
@@ -330,4 +322,3 @@ var apistore = {};
     };
 
 })(apistore);
-
