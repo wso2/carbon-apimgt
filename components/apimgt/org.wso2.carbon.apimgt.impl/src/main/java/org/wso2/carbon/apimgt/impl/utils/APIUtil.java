@@ -4043,4 +4043,18 @@ public final class APIUtil {
         PermissionUpdateUtil.updatePermissionTree(tenantId);
     }
 
+    /**
+     * Check whether given application name is available under current subscriber or group
+     *
+     * @param subscriber      subscriber name
+     * @param applicationName application name
+     * @param groupId         group of the subscriber
+     * @return true if application is available for the subscriber
+     * @throws APIManagementException if failed to get applications for given subscriber
+     */
+    public static boolean isApplicationExist(String subscriber, String applicationName, String groupId)
+            throws APIManagementException {
+        return ApiMgtDAO.isApplicationExist(applicationName, subscriber, groupId);
+    }
+
 }
