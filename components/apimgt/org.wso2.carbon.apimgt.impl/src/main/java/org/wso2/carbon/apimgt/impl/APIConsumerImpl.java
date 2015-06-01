@@ -2781,12 +2781,11 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                                                    int startSubIndex, int endSubIndex,
                                                    String groupId) throws APIManagementException {
         boolean isTenantFlowStarted = false;
-        APISubscription subscription = new APISubscription();
+
         Integer subscriptionCount = 0;
         Map<String, Object> result = new HashMap<String, Object>();
         List<APISubscription> subs = new ArrayList<APISubscription>();
-        Map<String, Object> apis = new HashMap<String, Object>();
-        Set<Map<String, Object>> apiSet = new HashSet<Map<String, Object>>();
+
         String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(username));
         try {
             if (tenantDomain != null &&
@@ -2802,7 +2801,8 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             if (applications != null) {
                 int i = 0;
                 for (Application application : applications) {
-
+                    APISubscription subscription = new APISubscription();
+                    Set<Map<String, Object>> apiSet = new HashSet<Map<String, Object>>();
                     long startLoop = 0;
                     if (log.isDebugEnabled()) {
                         startLoop = System.currentTimeMillis();
@@ -2810,7 +2810,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 
                     Set<Scope> scopeSet = new LinkedHashSet<Scope>();
 
-                    if (((appName == null || appName.isEmpty()) && i == 0) ||
+                    if (((appName == null || appName.isEmpty())) ||
                         appName.equals(application.getName())) {
 
                         //get Number of subscriptions for the given application by the subscriber.
