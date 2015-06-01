@@ -3345,6 +3345,7 @@ public class APIStoreHostObject extends ScriptableObject {
         if (args != null && isStringArray(args)) {
             String applicationName = (String) args[0];
             String username = (String) args[1];
+            String groupingId = (String) args[2];
             boolean isTenantFlowStarted = false;
             try {
                 String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(username));
@@ -3353,6 +3354,13 @@ public class APIStoreHostObject extends ScriptableObject {
                     PrivilegedCarbonContext.startTenantFlow();
                     PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
                 }
+
+                //check whether application exist prior to get subscription
+                if (!APIUtil.isApplicationExist(username, applicationName, groupingId)) {
+                    handleException("Application " + applicationName + " does not exist for user " +
+                            "" + username);
+                }
+
                 Subscriber subscriber = new Subscriber(username);
                 APIConsumer apiConsumer = getAPIConsumer(thisObj);
                 Set<SubscribedAPI> subscribedAPIs = apiConsumer.getSubscribedAPIs(subscriber, applicationName, null);
