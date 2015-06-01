@@ -657,7 +657,7 @@ $(function () {
          success : this.update_elements,
          inputclass : 'resource_summary'
          });*/
-        var partial = 'implement-resource-template.hbs';
+        var partial = 'implement-resource-template';
         var container = 'resource_details';
         var that = this;
         renderPartialWithContainerName(partial, container, context, that, renderResourceCallback);
@@ -667,7 +667,7 @@ $(function () {
         var operation = this.query(container.attr('data-path'));
         var context = jQuery.extend(true, {}, operation[0]);
         context.resource_path = container.attr('data-path');
-        var partial = 'implement-resource-template-body.hbs';
+        var partial = 'implement-resource-template-body';
         var that = this;
         renderPartialWithContainer(partial, container,context, that, renderResourcePaddingCallback);
         //var output = Handlebars.partials['designer-resource-template'](context);
