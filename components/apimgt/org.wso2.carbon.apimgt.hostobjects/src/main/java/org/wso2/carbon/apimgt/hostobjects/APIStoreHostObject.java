@@ -2951,8 +2951,10 @@ public class APIStoreHostObject extends ScriptableObject {
                                            getApplicationAccessTokenValidityPeriodInSeconds());
                             }
                             appObj.put("prodJsonString", appObj, null);
-                            if (prodKey != null) {
-                                appObj.put("prodKeyState", appObj, prodKey.getState());
+			    if(prodKey != null) {
+                                if (prodKey.getState() != null) {
+                                    appObj.put("prodKeyState", appObj, prodKey.getState());
+                                }
                             }
                         }
 
@@ -3027,8 +3029,10 @@ public class APIStoreHostObject extends ScriptableObject {
                                 appObj.put("sandValidityTime", appObj,
                                            getApplicationAccessTokenValidityPeriodInSeconds());
                             }
-                            if (sandboxKey != null) {
-                                appObj.put("sandboxKeyState", appObj, sandboxKey.getState());
+			  if(sandboxKey != null) {
+                                if (sandboxKey.getState() != null) {
+                                    appObj.put("sandboxKeyState", appObj, sandboxKey.getState());
+                                }
                             }
                         }
 
