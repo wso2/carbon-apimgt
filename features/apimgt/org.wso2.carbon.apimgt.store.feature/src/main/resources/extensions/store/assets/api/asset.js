@@ -164,7 +164,9 @@ asset.renderer = function(ctx) {
             }
             var lenI=0,lenJ=0,i,j,result,apidata,deniedTiers,tiers,appsList=[],subscribedToDefault=false,showSubscribe=false,status,selectedDefault=false;
             var apistore = require('apistore').apistore.instance(userName);
-            var applications = JSON.parse(apistore.getApplications(userName));
+            if (userName != '__wso2.am.anon__') {
+                var applications = JSON.parse(apistore.getApplications(userName));
+            }
             var asset = page.assets;
             if(asset!=null){
                 status=asset.lifecycleState;
@@ -230,8 +232,10 @@ asset.renderer = function(ctx) {
                     denied = false;
                 }
             }
-
-            page.applications= appsList;
+            
+            if (userName != '__wso2.am.anon__') {
+                page.applications= appsList;
+            }
             page.tiersAvailable=tiersAvailable;
             page.tiers=allowedTiers;
             page.subscribedToDefault=subscribedToDefault;
