@@ -268,7 +268,7 @@ var apistore = {};
         provider = APIUtil.replaceEmailDomain(provider);
         var apiIdentifier = new APIIdentifier(provider, apiname, version);
         apiIdentifier.setTier(tier);
-        return this.impl.addSubscription(apiIdentifier, appId, user);
+        return this.impl.addSubscription(apiIdentifier, user, appId);
     };
 
     /*
