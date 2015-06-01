@@ -450,8 +450,8 @@ $(function () {
                 roles : $("#scopeRoles").val()
             };
 
-            var validationUrl =  caramel.context + "/asts/api/apis/validation";
-            var data = { action:"validateScope" , scope:$("#scopeKey").val()};
+            var validationUrl =  caramel.context + "/asts/api/apis/validation?action=validateScope";
+            var data = {scope:$("#scopeKey").val()};
             $.ajax({
                        url: validationUrl,
                        type: 'POST',

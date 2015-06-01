@@ -62,9 +62,9 @@
 <br/><br/>
 
 {{#if api}}
-	<form id="form-asset-create" class='form-horizontal' method='post' action='{{url ""}}/apis/assets?type={{rxt.shortName}}' enctype="multipart/form-data">
-{{else}}
 	<form id="form-asset-create" class='form-horizontal' method='post' action='{{url ""}}/apis/assets/{{api.id}}?type={{rxt.shortName}}' enctype="multipart/form-data">
+{{else}}
+	<form id="form-asset-create" class='form-horizontal' method='post' action='{{url ""}}/apis/assets?type={{rxt.shortName}}' enctype="multipart/form-data">
 {{/if}}
 	<legend>General Details</legend>
     {{#unless api}}
