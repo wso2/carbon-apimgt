@@ -119,9 +119,10 @@ require('/modules/publisher.js').exec(function (ctx) {
 
     var apiSubDataResult = apiProxy.getAllAPIUsageByProvider(user.username);
     if (apiSubDataResult != null) {
-        var apiSubData = JSON.parse(apiSubDataResult);
+        var apiSubData = apiSubDataResult.apis;
         for (var a in apiSubData) {
-            var apisJson = createApisJson(apiSubData[a].apis);
+           // var apisJson = createApisJson(apiSubData[a].apis);
+           	var apisJson = apiSubData[a].apis;
             apiSubData[a].apis = apisJson;
         }
         output.apiSubscriptions = apiSubData;
