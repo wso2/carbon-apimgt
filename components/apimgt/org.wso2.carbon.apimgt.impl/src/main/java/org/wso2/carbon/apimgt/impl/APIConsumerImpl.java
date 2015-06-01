@@ -3111,5 +3111,31 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         return getKeyOfType(apiKeys, keyType);
     }
 
+    @Override
+    public JSONArray getSubscriptions(String providerName, String apiName, String version, String user,String groupId) throws APIManagementException{
+        APIIdentifier apiIdentifier = new APIIdentifier(APIUtil.replaceEmailDomain(providerName), apiName, version);
+        Subscriber subscriber = new Subscriber(user);
+        JSONArray subscriptions = new JSONArray();
+        Set<SubscribedAPI> apis = getSubscribedIdentifiers(subscriber, apiIdentifier,groupId);
+
+        int i = 0;
+        if (apis != null) {
+            for (SubscribedAPI api : apis) {
+                JSONObject row = new JSONObject();
+                row.put("application", api.getApplication().getName());
+                row.put("applicationId", api.getApplication().getId());
+                row.put("prodKey", getKey(api, APIConstants.API_KEY_TYPE_PRODUCTION));
+                row.put("sandboxKey", getKey(api, APIConstants.API_KEY_TYPE_SANDBOX));
+                ArrayList<APIKey> keys = (ArrayList<APIKey>) api.getApplication().getKeys();
+                for(APIKey key : keys){
+                    row.put(key.getType()+"_KEY", key.getAccessToken());
+                }
+                subscriptions.add(i++, row);
+            }
+        }
+        return subscriptions;
+
+    }
+
 
 }

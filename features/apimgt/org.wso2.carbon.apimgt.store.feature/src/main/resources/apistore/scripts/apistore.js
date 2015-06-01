@@ -90,7 +90,7 @@ var apistore = {};
     };
 
     StoreAPIProxy.prototype.getDeniedTiers = function () {
-        var tiers=new Set();
+        var tiers=new HashSet();
         tiers= this.impl.getDeniedTiers();
         var deniedTiers = new Packages.org.json.simple.JSONArray();
         for (var i=0;i<tiers.size();i++) {
@@ -166,7 +166,7 @@ var apistore = {};
     };
 
     StoreAPIProxy.prototype.getAPISubscriptions = function (provider, apiname, version, username) {
-        return this.impl.getSubscriptions(provider, apiname, version, username);
+        return this.impl.getSubscriptions(provider, apiname, version, username,null);
     };
 
     StoreAPIProxy.prototype.getAPI = function (provider, name, version) {

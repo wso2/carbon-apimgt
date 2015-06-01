@@ -577,4 +577,7 @@ public interface APIConsumer extends APIManager {
     */
     public Map<String,Object> getAllSubscriptions(String userName, String appName, int startSubIndex, int endSubIndex,String groupId) throws APIManagementException;
 
+    public JSONArray getSubscriptions(String providerName, String apiName, String version, String user,String groupId) throws APIManagementException;
+
+
 }
