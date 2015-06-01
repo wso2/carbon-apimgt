@@ -16,6 +16,7 @@
 
 package org.wso2.carbon.apimgt.impl;
 
+import org.json.simple.JSONArray;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.Application;
@@ -91,5 +92,10 @@ public class UserAwareAPIConsumer extends APIConsumerImpl {
 
     public void checkSubscribePermission() throws APIManagementException {
         APIUtil.checkPermission(username, APIConstants.Permissions.API_SUBSCRIBE);
+    }
+
+    public JSONArray getSubscriptions(String providerName, String apiName, String version, String user,String groupId) throws APIManagementException{
+        checkSubscribePermission();
+        return super.getSubscriptions(providerName,apiName,version,user,groupId);
     }
 }

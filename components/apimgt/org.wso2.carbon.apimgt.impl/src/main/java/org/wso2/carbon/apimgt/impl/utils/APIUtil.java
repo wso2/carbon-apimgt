@@ -18,7 +18,52 @@
 
 package org.wso2.carbon.apimgt.impl.utils;
 
-import com.google.gson.Gson;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FilenameFilter;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLConnection;
+import java.rmi.RemoteException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.ListIterator;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeMap;
+import java.util.TreeSet;
+import java.util.concurrent.TimeUnit;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import javax.cache.Cache;
+import javax.cache.CacheConfiguration;
+import javax.cache.CacheManager;
+import javax.cache.Caching;
+import javax.net.ssl.HostnameVerifier;
+import javax.net.ssl.SSLSession;
+import javax.xml.namespace.QName;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.stream.XMLInputFactory;
+import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamReader;
+
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.impl.builder.StAXOMBuilder;
 import org.apache.axiom.om.util.AXIOMUtil;
@@ -47,6 +92,7 @@ import org.apache.woden.WSDLFactory;
 import org.apache.woden.WSDLReader;
 import org.jaggeryjs.scriptengine.exceptions.ScriptException;
 import org.json.simple.JSONObject;
+import org.json.simple.JSONArray;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.w3c.dom.Document;
@@ -62,6 +108,7 @@ import org.wso2.carbon.apimgt.api.model.APIKey;
 import org.wso2.carbon.apimgt.api.model.APIPublisher;
 import org.wso2.carbon.apimgt.api.model.APIStatus;
 import org.wso2.carbon.apimgt.api.model.APIStore;
+import org.wso2.carbon.apimgt.api.model.APISubscription;
 import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.api.model.Documentation;
 import org.wso2.carbon.apimgt.api.model.DocumentationType;
@@ -140,53 +187,7 @@ import org.wso2.carbon.utils.FileUtil;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 import org.xml.sax.SAXException;
 
-import javax.cache.Cache;
-import javax.cache.CacheConfiguration;
-import javax.cache.CacheManager;
-import javax.cache.Caching;
-import javax.net.ssl.HostnameVerifier;
-import javax.net.ssl.SSLSession;
-import javax.xml.namespace.QName;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.stream.XMLInputFactory;
-import javax.xml.stream.XMLStreamException;
-import javax.xml.stream.XMLStreamReader;
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FilenameFilter;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.math.BigDecimal;
-import java.math.RoundingMode;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.URLConnection;
-import java.rmi.RemoteException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.ListIterator;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-import java.util.SortedSet;
-import java.util.TreeMap;
-import java.util.TreeSet;
-import java.util.concurrent.TimeUnit;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
-import org.apache.commons.lang.StringUtils;
-import org.wso2.carbon.governance.lcm.util.CommonUtil;
+import com.google.gson.Gson;
 
 /**
  * This class contains the utility methods used by the implementations of APIManager, APIProvider
@@ -645,7 +646,6 @@ public final class APIUtil {
             api.setDestinationStatsEnabled(artifact.getAttribute(APIConstants.API_OVERVIEW_DESTINATION_BASED_STATS_ENABLED));
             api.setAsDefaultVersion(Boolean.valueOf(artifact.getAttribute(APIConstants.API_OVERVIEW_IS_DEFAULT_VERSION)));
             api.setImplementation(artifact.getAttribute(APIConstants.PROTOTYPE_OVERVIEW_IMPLEMENTATION));
-            api.setBusinessOwner(artifact.getAttribute(APIConstants.API_OVERVIEW_BUSS_OWNER));
             ArrayList<URITemplate> urlPatternsList;
             urlPatternsList = ApiMgtDAO.getAllURITemplates(api.getContext(), api.getId().getVersion());
             Set<URITemplate> uriTemplates = new HashSet<URITemplate>(urlPatternsList);
@@ -2646,7 +2646,7 @@ public final class APIUtil {
                         
             String bamProfileConfig = bamProfile.replaceAll("\\[1\\]", bamServerURL).
             		replaceAll("\\[2\\]", bamServerUser).
-            		replaceAll("\\[3\\]", encryptPassword(bamServerPassword));
+            		replaceAll("\\[3\\]", bamServerPassword);
 
             Resource resource = registry.newResource();
             resource.setContent(bamProfileConfig);
@@ -4032,6 +4032,7 @@ public final class APIUtil {
      *
      * @param userName     logged in username
      * @param resourceUrl  resource want to download
+     * @param tenantDomain loggedUserTenantDomain
      * @return map that contains Data of the resource
      * @throws APIManagementException
      */
@@ -4053,6 +4054,7 @@ public final class APIUtil {
         int tenantId;
         String tenantDomain = MultitenantUtils.getTenantDomain(userName);
         try {
+           
                 tenantId = ServiceReferenceHolder
                         .getInstance().getRealmService().getTenantManager()
                         .getTenantId(tenantDomain);
@@ -4961,6 +4963,81 @@ public final class APIUtil {
 		}
 	};
 
+    public JSONObject stringifyAPISubscriptions(Map<String, Object> subscriptions) {
+        List<APISubscription> subs = (List<APISubscription>) subscriptions.get("applications");
+        int subscriptionCount = (Integer) subscriptions.get("totalLength");
+        JSONArray applicationList = new JSONArray();
+        JSONObject result = new JSONObject();
+        if (subs != null) {
+            for (APISubscription sub : subs) {
+                JSONObject appObj = new JSONObject();
+                appObj.put("id", sub.getAppId());
+                appObj.put("name", sub.getAppName());
+                appObj.put("callbackUrl", sub.getCallbackUrl());
+                appObj.put("prodKey", sub.getProdKey());
+                appObj.put("prodKeyScope", sub.getProdKeyScope());
+                appObj.put("prodKeyScopeValue", sub.getProdKeyScopeValue());
+                appObj.put("prodConsumerKey", sub.getProdConsumerKey());
+                appObj.put("prodConsumerSecret", sub.getProdConsumerSecret());
+                appObj.put("prodJsonString", sub.getProdJsonString());
+                appObj.put("prodAuthorizedDomains", sub.getProdAuthorizedDomains());
+                appObj.put("prodValidityTime", sub.getProdValidityTime());
+                appObj.put("prodRegenerateOption", sub.isProdRegenerateOption());
+                appObj.put("prodKeyState", sub.getProdKeyState());
+                appObj.put("sandboxKey", sub.getSandKey());
+                appObj.put("sandKeyScope", sub.getSandKeyScope());
+                appObj.put("sandKeyScopeValue", sub.getSandKeyScopeValue());
+                appObj.put("sandboxConsumerKey", sub.getSandConsumerKey());
+                appObj.put("sandboxConsumerSecret", sub.getSandConsumerSecret());
+                appObj.put("sandboxKeyState", sub.getSandKeyState());
+                appObj.put("sandboxJsonString", sub.getSandJsonString());
+                appObj.put("sandboxAuthorizedDomains", sub.getSandAuthorizedDomains());
+                appObj.put("sandValidityTime", sub.getSandValidityTime());
+                appObj.put("sandRegenarateOption", sub.isSandRegenerateOption());
+                Set<Scope> scopeSet=sub.getScopes();
+                Set<Map<String,Object>> apisubs=sub.getSubscriptions();
+                JSONArray scopesArray=new JSONArray();
+                for (Scope scope : scopeSet) {
+                    JSONObject scopeObj = new JSONObject();
+                    scopeObj.put("scopeKey", scope.getKey());
+                    scopeObj.put("scopeName", scope.getName());
+                    scopesArray.add(scopeObj);
+                }
+                JSONArray apisArray=new JSONArray();
+                for(Map<String,Object> api:apisubs){
+                    JSONObject apiObj = new JSONObject();
+                    apiObj.put("name", api.get("name"));
+                    apiObj.put("provider", api.get("provider"));
+                    apiObj.put("version", api.get("version"));
+                    apiObj.put("status", api.get("status"));
+                    apiObj.put("tier", api.get("tier"));
+                    apiObj.put("subStatus", api.get("subStatus"));
+                    apiObj.put("thumburl", api.get("thumburl"));
+                    apiObj.put("context", api.get("context"));
+                    apiObj.put("prodKey", api.get("prodKey"));
+                    apiObj.put("prodConsumerKey", api.get("prodConsumerKey"));
+                    apiObj.put("prodConsumerSecret", api.get("prodConsumerSecret"));
+                    apiObj.put("prodAuthorizedDomains", api.get("prodAuthorizedDomains"));
+                    apiObj.put("prodValidityTime", api.get("prodValidityTime"));
+                    apiObj.put("sandboxKey", api.get("sandboxKey"));
+                    apiObj.put("sandboxConsumerKey", api.get("sandboxConsumerKey"));
+                    apiObj.put("sandboxConsumerSecret", api.get("sandboxConsumerSecret"));
+                    apiObj.put("sandAuthorizedDomains", api.get("sandAuthorizedDomains"));
+                    apiObj.put("sandValidityTime", api.get("sandValidityTime"));
+                    apiObj.put("hasMultipleEndpoints", api.get("hasMultipleEndpoints"));
+                    apisArray.add(apiObj);
+                }
+                appObj.put("subscriptions",apisArray);
+                appObj.put("scopes",scopesArray);
+                applicationList.add(appObj);
+                result.put("applications", applicationList);
+                result.put("totalLength", subscriptionCount);
+
+            }
+        }
+        return result;
+
+    }
 	public String isURLValid(String type, String urlVal) throws APIManagementException {
 
 		String response = "";
@@ -5018,5 +5095,13 @@ public final class APIUtil {
 		KeyManager keyManager = KeyManagerHolder.getKeyManagerInstance();
 		Map registeredResource = keyManager.getResourceByApiId(identifier.toString());
 		return registeredResource;
+	}
+	
+	public static String convertToString(Object obj){
+		
+		Gson gson = new Gson();
+		String json = gson.toJson(obj);
+         
+        return json;
 	}
 }

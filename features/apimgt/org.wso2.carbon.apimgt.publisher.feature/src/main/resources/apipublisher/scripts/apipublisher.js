@@ -67,7 +67,30 @@ var apipublisher = {};
     };
 
     APIProviderProxy.prototype.getAllProviders = function () {
-        return this.impl.getAllProviders();
+    	var providers = [];
+    	
+    	try{
+    		providerSet = this.impl.getAllProviders();
+    		for (var i = 0 ; i < providerSet.size(); i++) {
+    			var provider = providerSet.get(i);
+        		providers.push({
+        			"name":provider.getName(),
+        			"email":provider.getEmail(),
+        			"description":provider.getDescription()
+        		});
+            }
+    		return {
+                error:false,
+                providers:providers
+            };
+    	}catch(e){
+    		log.error(e.message);
+            return {
+                error:e,
+                providers:null
+            };
+    	}
+    	
     };
 
     APIProviderProxy.prototype.createAPI = function (api) {
@@ -139,15 +162,85 @@ var apipublisher = {};
     };
 
     APIProviderProxy.prototype.getAllAPIUsageByProvider = function (providerName) {
-        return this.impl.getAllAPIUsageByProvider(providerName);
+    	var apisJSON;
+    	try{
+    		apisArray = this.impl.getAllAPIUsageByProvider(providerName);
+    		var json = APIUtil.convertToString(apisArray);
+    		if(json != null){
+    			apisJSON = JSON.parse(json);
+    			log.error(json);
+    		}
+    		
+    		/*for (var i = 0 ; i < apisArray.size(); i++) {
+    			var usage = pisArray.get(i);
+    			var apiSubscriptionsArray = usage.getApiSubscriptions();
+    			var apiSubscriptions = [];
+    			for(var y = 0 ; y < apiSubscriptionsArray.size(); y++){
+    				var apiSubscription = apiSubscriptions.get(y);
+    				apiSubscriptions.push({
+    					"status": apiSubscription.getSubStatus()
+        				
+    				});
+    			}
+    			apis.push({
+    				"userId": usage.getUserId(),
+    				"applicationName":subscriber.getName(),
+                    "subStatus": subscriber.getDescription(),
+                    "accessToken": new Date(subscriber.getSubscribedDate().getTime()),
+                    "accessTokenStatus": subscriber.getId(),
+                    "apiSubscriptions": apiSubscriptions
+                    
+                    
+    			});
+            }*/
+    		
+    		return {
+                error:false,
+                apis:apisJSON
+            };
+    	}catch(e){
+    		log.error(e.message);
+            return {
+                error:e,
+                apis:null
+            };
+    	}
+        
     };
 
     APIProviderProxy.prototype.getSubscribersOfAPI = function (apiId) {
-        return this.impl.getSubscribersOfAPI(apiId);
+    	var subscribers = [];
+    	try{
+    		subscriberSet = this.impl.getSubscribersOfAPI(apiId);
+    		for (var i = 0 ; i < subscriberSet.size(); i++) {
+    			var subscriber = subscriberSet.get(i);
+    			subscribers.push({
+    				"name":subscriber.getName(),
+                    "description": subscriber.getDescription(),
+                    "subscribedDate": new Date(subscriber.getSubscribedDate().getTime()),
+                    "id": subscriber.getId(),
+                    "tenantId": subscriber.getTenantId(),
+                    "email": subscriber.getEmail()
+                });
+            }
+    		return {
+                error:false,
+                subscribers:subscribers
+            };
+    	}catch(e){
+    		log.error(e.message);
+            return {
+                error:e,
+                subscribers:subscribers
+            };
+    	}
+        
     };
 
     APIProviderProxy.prototype.getAPIsByProvider = function (providerName) {
-        return this.impl.getAPIsByProvider(providerName);
+    	apis = this.impl.getAPIsByProvider(providerName);
+    	var apisJSON = JSON.parse(APIUtil.convertToString(apis));
+        return apisJSON;
     };
 
     /*
@@ -158,7 +251,33 @@ var apipublisher = {};
         apiObj.put("provider", provider);
         apiObj.put("name", name);
         apiObj.put("version", version);
-        return this.impl.getSubscribersOfAPI(apiObj);
+        var subscribers = [];
+    	try{
+    		subscriberSet = this.impl.getSubscribersOfAPI(apiObj);
+    		for (var i = 0 ; i < subscriberSet.size(); i++) {
+    			var subscriber = subscriberSet.get(i);
+    			subscribers.push({
+    				"name":subscriber.getName(),
+                    "description": subscriber.getDescription(),
+                    "subscribedDate": new Date(subscriber.getSubscribedDate().getTime()),
+                    "id": subscriber.getId(),
+                    "tenantId": subscriber.getTenantId(),
+                    "email": subscriber.getEmail()
+                });
+            }
+    		return {
+                error:false,
+                subscribers:subscribers
+            };
+    	}catch(e){
+    		log.error(e.message);
+            return {
+                error:e,
+                subscribers:subscribers
+            };
+    	}
+        
+ 
     };
 
     /*
@@ -338,10 +457,10 @@ var apipublisher = {};
             var tierSet = '';
             var tiersDisplayNamesSet = '';
             var tiersDescSet = '';
-            for(var i = 0; i < tiers.length  ; i++) {
-                tierSet += tiers[0].getName();
-                tiersDisplayNamesSet += tiers[0].getDisplayName();
-                tiersDescSet += tiers[0].getDescription();
+            for(var i = 0; i < tiers.length; i++) {
+                tierSet += tiers[i].getName();
+                tiersDisplayNamesSet += tiers[i].getDisplayName();
+                tiersDescSet += tiers[i].getDescription();
                 if (i != tierSet.length - 1) {
                     tierSet += ',';
                     tiersDisplayNamesSet += ',';
@@ -620,10 +739,11 @@ var apipublisher = {};
             var tierSet = new HashSet();
             var tierArray = api.tier.split(',');
             var tier;
-            for (var tierName in tierArray) {
-                tier = new Tier(tierName);
+            for (var i = 0 ; tierArray.length; i++) {
+                tier = new Tier(tierArray[i]);
                 tierSet.add(tier);
             }
+
             var environments = APIUtil.extractEnvironmentsForAPI(api.environments);
 
             apiOb.addAvailableTiers(tierSet);
