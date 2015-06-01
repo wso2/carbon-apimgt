@@ -793,7 +793,7 @@
         <jaggery.version>0.10.1</jaggery.version>
 
 	<!-- carbon mediation -->
-	<carbon.mediation.version>4.4.1</carbon.mediation.version>
+	<carbon.mediation.version>4.4.2</carbon.mediation.version>
 
         <!-- Misc Versions -->
         <orbit.version.h2.engine>1.2.140.wso2v3</orbit.version.h2.engine>
