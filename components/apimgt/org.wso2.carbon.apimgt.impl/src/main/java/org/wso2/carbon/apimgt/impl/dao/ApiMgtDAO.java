@@ -120,7 +120,7 @@ public class ApiMgtDAO {
 
 
     private static final String ENABLE_JWT_CACHE = "APIKeyManager.EnableJWTCache";
-    private boolean forceCaseInsensitiveComparisons = false;
+    private static boolean forceCaseInsensitiveComparisons = false;
 
 
     public ApiMgtDAO() {
@@ -1618,7 +1618,7 @@ public class ApiMgtDAO {
      * @return Subscriber
      * @throws APIManagementException if failed to get Subscriber from subscriber id
      */
-    public Subscriber getSubscriber(String subscriberName) throws APIManagementException {
+    public static Subscriber getSubscriber(String subscriberName) throws APIManagementException {
 
         Connection conn = null;
         Subscriber subscriber = null;
@@ -5136,6 +5136,89 @@ public class ApiMgtDAO {
     }
 
     /**
+     * Check whether given application name is available under current subscriber or group
+     *
+     * @param appName  application name
+     * @param username subscriber
+     * @param groupId  group of the subscriber
+     * @return true if application is available for the subscriber
+     * @throws APIManagementException if failed to get applications for given subscriber
+     */
+    public static boolean isApplicationExist(String appName, String username, String groupId)
+            throws APIManagementException {
+        if (username == null) {
+            return false;
+        }
+        Subscriber subscriber = getSubscriber(username);
+
+        Connection connection = null;
+        PreparedStatement preparedStatement = null;
+        ResultSet resultSet = null;
+        int appId = 0;
+
+        String sqlQuery = "SELECT " +
+                "   APP.APPLICATION_ID " +
+                "FROM " +
+                "   AM_APPLICATION APP," +
+                "   AM_SUBSCRIBER SUB " +
+                "WHERE " +
+                "   APP.NAME= ?" +
+                "   AND APP.SUBSCRIBER_ID = SUB.SUBSCRIBER_ID";
+
+        String whereClauseWithGroupId = " AND (APP.GROUP_ID = ? OR (APP.GROUP_ID = '' AND SUB.USER_ID = ?))";
+        String whereClauseWithGroupIdCaseInsensitive =
+                " AND (APP.GROUP_ID = ? OR (APP.GROUP_ID = '' " + "AND LOWER(SUB.USER_ID) = " +
+                        "LOWER(?)))";
+        String whereClause = " AND SUB.USER_ID = ? ";
+        String whereClauseCaseInsensitive = " AND LOWER(SUB.USER_ID) = LOWER(?) ";
+
+        try {
+            connection = APIMgtDBUtil.getConnection();
+
+            if (groupId != null && !groupId.equals("null") && !groupId.isEmpty()) {
+                if (forceCaseInsensitiveComparisons) {
+                    sqlQuery += whereClauseWithGroupIdCaseInsensitive;
+                } else {
+                    sqlQuery += whereClauseWithGroupId;
+                }
+            } else {
+                if (forceCaseInsensitiveComparisons) {
+                    sqlQuery += whereClauseCaseInsensitive;
+                } else {
+                    sqlQuery += whereClause;
+                }
+            }
+
+            preparedStatement = connection.prepareStatement(sqlQuery);
+            preparedStatement.setString(1, appName);
+
+            if (groupId != null && !groupId.equals("null") && !groupId.equals("")) {
+                preparedStatement.setString(2, groupId);
+                preparedStatement.setString(3, subscriber.getName());
+            } else {
+                preparedStatement.setString(2, subscriber.getName());
+            }
+
+            resultSet = preparedStatement.executeQuery();
+
+            while (resultSet.next()) {
+                appId = resultSet.getInt("APPLICATION_ID");
+            }
+
+            if (appId > 0) {
+                return true;
+            }
+
+        } catch (SQLException e) {
+            handleException("Error when getting the application id from" + " the persistence store.", e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(preparedStatement, connection, resultSet);
+        }
+        return false;
+    }
+
+
+	/**
      * @param username Subscriber
      * @return ApplicationId for given appname.
      * @throws APIManagementException if failed to get Applications for given subscriber.

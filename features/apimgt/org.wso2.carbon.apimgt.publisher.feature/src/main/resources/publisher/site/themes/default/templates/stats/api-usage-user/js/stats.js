@@ -135,6 +135,7 @@ var drawAPIUsage = function (from,to) {
                         var newLength=0;
                         subscriberDetails=[];
                         var inputData=[];
+                        groupData = [];
 
                         if (length > 0) {
                             $('#pie-chart').empty();

@@ -1,17 +1,4 @@
-var t_on = {
-    'apiChart': 1,
-    'subsChart': 1,
-    'serviceTimeChart': 1,
-    'tempLoadingSpace': 1
-};
 var currentLocation;
-
-var chartColorScheme1 = ["#3da0ea", "#bacf0b", "#e7912a", "#4ec9ce", "#f377ab", "#ec7337", "#bacf0b", "#f377ab", "#3da0ea", "#e7912a", "#bacf0b"];
-//fault colors || shades of red
-var chartColorScheme2 = ["#ED2939", "#E0115F", "#E62020", "#F2003C", "#ED1C24", "#CE2029", "#B31B1B", "#990000", "#800000", "#B22222", "#DA2C43"];
-//fault colors || shades of blue
-var chartColorScheme3 = ["#0099CC", "#436EEE", "#82CFFD", "#33A1C9", "#8DB6CD", "#60AFFE", "#7AA9DD", "#104E8B", "#7EB6FF", "#4981CE", "#2E37FE"];
-currentLocation = window.location.pathname;
 var statsEnabled = isDataPublishingEnabled();
 
 var isToday=false;
@@ -20,13 +7,7 @@ var isHour=false;
 var isDefault=false;
 var isWeek=false;
 
-require(["dojo/dom", "dojo/domReady!"], function (dom) {
     currentLocation = window.location.pathname;
-    //Initiating the fake progress bar
-    jagg.fillProgress('apiChart');
-    jagg.fillProgress('subsChart');
-    jagg.fillProgress('serviceTimeChart');
-    jagg.fillProgress('tempLoadingSpace');
 
     jagg.post("/site/blocks/stats/api-usage-resource-path/ajax/stats.jag", { action: "getFirstAccessTime", currentLocation: currentLocation  },
         function (json) {
@@ -68,35 +49,33 @@ require(["dojo/dom", "dojo/domReady!"], function (dom) {
                         isWeek,isToday,isDefault,isHour=false;
                     });
 
-                    //date picker
-                    $('#date-range').dateRangePicker(
-                        {
-                            startOfWeek: 'monday',
-                            separator : ' to ',
-                            format: 'YYYY-MM-DD HH:mm',
-                            autoClose: false,
-                            time: {
-                                enabled: true
-                            },
-                            shortcuts:'hide',
-                            endDate:currentDay
-                        })
-                        .bind('datepicker-apply',function(event,obj)
-                        {
-                             btnActiveToggle(this);
-                             var from = convertDate(obj.date1);
-                             var to = convertDate(obj.date2);
-                             var fromStr = from.split(" ");
-                             var toStr = to.split(" ");
-                             var dateStr = fromStr[0] + " <i>" + fromStr[1] + "</i> <b>to</b> " + toStr[0] + " <i>" + toStr[1] + "</i>";
-                             $("#date-range").html(dateStr);
-                             drawAPIUsageByResourcePath(from,to);
+                    $('#date-range').click(function(){
+                         $(this).removeClass('active');
+                    });
 
-                             $('.apply-btn').on('click',function(){
-                                 isDefault=true;
-                                 isWeek,isMonth,isToday,isHour=false;
-                             });
+                    //date picker
+                    $('#date-range').daterangepicker({
+                          timePicker: true,
+                          timePickerIncrement: 30,
+                          format: 'YYYY-MM-DD h:mm',
+                          opens: 'left',
+                    });
+
+                    $('#date-range').on('apply.daterangepicker', function(ev, picker) {
+                       btnActiveToggle(this);
+                       var from = convertTimeString(picker.startDate);
+                       var to = convertTimeString(picker.endDate);
+                       var fromStr = from.split(" ");
+                       var toStr = to.split(" ");
+                       var dateStr = fromStr[0] + " <i>" + fromStr[1] + "</i> <b>to</b> " + toStr[0] + " <i>" + toStr[1] + "</i>";
+                       $("#date-range span").html(dateStr);
+                       drawAPIUsageByResourcePath(from,to);
+                        $('.apply-btn').on('click',function(){
+                            isDefault=true;
+                            isWeek,isMonth,isToday,isHour=false;
                         });
+                    });
+
 
                     //setting default date
                     var to = new Date();
@@ -116,22 +95,16 @@ require(["dojo/dom", "dojo/domReady!"], function (dom) {
                         $(this).addClass('active');
                     });
 
-
-                    var width = $("#rangeSliderWrapper").width();
-                    //$("#rangeSliderWrapper").affix();
-                    $("#rangeSliderWrapper").width(width);
-
                 }
-
                 else if (json.usage && json.usage.length == 0 && statsEnabled) {
-                    $('#middle').html("");
-                    $('#middle').append($('<div class="errorWrapper"><img src="../themes/default/templates/stats/images/statsEnabledThumb.png" alt="Stats Enabled"></div>'));
+                    $('.stat-page').html("");
+                    $('.stat-page').append($('<br><div class="errorWrapper"><img src="../themes/responsive/templates/stats/images/statsEnabledThumb.png" alt="Stats Enabled"></div>'));
                 }
 
-                else {
-                    $('#middle').html("");
-                    $('#middle').append($('<div class="errorWrapper"><span class="label top-level-warning"><i class="icon-warning-sign icon-white"></i>'
-                        + i18n.t('errorMsgs.checkBAMConnectivity') + '</span><br/><img src="../themes/default/templates/stats/api-usage-resource-path/images/statsThumb.png" alt="Smiley face"></div>'));
+                else{
+                    $('.stat-page').html("");
+                    $('.stat-page').append($('<br><div class="errorWrapper"><span class="top-level-warning"><span class="glyphicon glyphicon-warning-sign blue"></span>'
+                        +i18n.t('errorMsgs.checkBAMConnectivity')+'</span><br/><img src="../themes/responsive/templates/stats/images/statsThumb.png" alt="Smiley face"></div>'));
                 }
 
             }
@@ -142,9 +115,8 @@ require(["dojo/dom", "dojo/domReady!"], function (dom) {
                     jagg.message({content: json.message, type: "error"});
                 }
             }
-            t_on['apiChart'] = 0;
+
         }, "json");
-});
 
 
 var drawAPIUsageByResourcePath = function (from, to) {
@@ -152,16 +124,24 @@ var drawAPIUsageByResourcePath = function (from, to) {
     var toDate = to;
     jagg.post("/site/blocks/stats/api-usage-resource-path/ajax/stats.jag", { action: "getAPIUsageByResourcePath", currentLocation: currentLocation, fromDate: fromDate, toDate: toDate},
         function (json) {
+            $('#spinner').hide();
             if (!json.error) {
                 $('#resourcePathUsageTable').find("tr:gt(0)").remove();
                 var length = json.usage.length;
 
-                $('#tempLoadingSpaceResourcePath').empty();
+                if (length == 0) {
+                    $('#resourcePathUsageTable').hide();
+                    $('#noData').html('');
+                    $('#noData').append($('<h3 class="no-data-heading center-wrapper">No Data Available</h3>'));
+
+                } else {
+
+                $('#noData').empty();
                 $('#chartContainer').empty();
 
                 $('div#resourcePathUsageTable_wrapper.dataTables_wrapper.no-footer').remove();
                 var chart;
-                var $dataTable =$('<table class="display defaultTable" width="100%" cellspacing="0" id="resourcePathUsageTable"></table>');
+                var $dataTable =$('<table class="display table table-striped table-bordered" width="100%" cellspacing="0" id="resourcePathUsageTable"></table>');
 
                 $dataTable.append($('<thead class="tableHead"><tr>'+
                                         '<th id="api">api</th>'+
@@ -285,7 +265,7 @@ var drawAPIUsageByResourcePath = function (from, to) {
                                    time = parsedResponse[i][1][j][1][k][1][m][1][l][1];
                                }
                                rowId++;
-                               $dataTable.append($('<tr id='+rowId+'><td>' + appName + '</td><td>' + version + '</td><td>' +'<a id="'+rowId+'" class="link" href="#" >'+contextName+'</a>'+ '</td><td>' + method + '</td><td class="tdNumberCell">' + hitCount+ '</td></tr>'));
+                               $dataTable.append($('<tr id='+rowId+'><td>' + appName + '</td><td>' + version + '</td><td>' +'<a id="'+rowId+'" class="link" href="#" >'+contextName+'</a>'+ '</td><td>' + method + '</td><td class="tdNumberCell" style="text-align:right">' + hitCount+ '</td></tr>'));
                                hitCount =0;
                             }
                         }
@@ -297,14 +277,6 @@ var drawAPIUsageByResourcePath = function (from, to) {
                     //on context click to show the graph
                     $dataTable.on("click", '.link',function(){
 
-                        //disable scrolling
-                        $('body').css('overflow','hidden');
-                        window.onmousewheel = document.onmousewheel = function(e) {
-                            e = e || window.event;
-                            if (e.preventDefault)
-                                e.preventDefault();
-                            e.returnValue = false;
-                        };
 
                         var row= $(this).closest('tr').attr('id');
                         var context=$(this).text();
@@ -352,8 +324,8 @@ var drawAPIUsageByResourcePath = function (from, to) {
                                                 dataStructure.sort(function(obj1, obj2) {
                                                     return obj1.x - obj2.x;
                                                 });
-
-
+                                                $("#chartModal").modal();
+                                                $('#chartModal').on('shown.bs.modal', function (e) {
                                                 nv.addGraph(function () {
                                                     chart = nv.models.lineWithFocusChart().margin({right: 120,top: 100,left: 120});
                                                     var fitScreen = false;
@@ -431,6 +403,7 @@ var drawAPIUsageByResourcePath = function (from, to) {
 
                                                 return chart;
                                                 });
+                                                });
 
                                                 data_lineWithFocusChart = [{
                                                     'values': dataStructure,
@@ -444,26 +417,9 @@ var drawAPIUsageByResourcePath = function (from, to) {
                             }
                         }
                     }
-                    $('#light').css('display','block');
-                    $('#fade').css('display','block');
+
+
                 });
-
-                $('#fade').on("click",function(){
-                    $('#light').css('display','none');$('#fade').css('display','none'); $('body').css('overflow','auto');
-                    window.onmousewheel = document.onmousewheel = function(e) {
-                        e = e || window.event;
-                        if (e.preventDefault)
-                            e.preventDefault();
-                        e.returnValue = true;
-                    };
-                });
-
-                if (length == 0) {
-                    $('#resourcePathUsageTable').hide();
-                    $('#tempLoadingSpaceResourcePath').html('');
-                    $('#tempLoadingSpaceResourcePath').append($('<h3 class="no-data-heading center-wrapper">No Data Available</h3>'));
-
-                } else {
                     $('#tableContainer').append($dataTable);
                     $('#chartContainer').append($('<div id="lineWithFocusChart"><svg style="height:450px;"></svg></div>'));
                     $('#tableContainer').show();
@@ -476,7 +432,7 @@ var drawAPIUsageByResourcePath = function (from, to) {
                                 $('#resourcePathUsageTable_paginate').show();
                         },
                     });
-                    $('select').css('width','60px');
+                    $('select').css('width','80px');
                 }
 
             } else {
@@ -486,7 +442,6 @@ var drawAPIUsageByResourcePath = function (from, to) {
                     jagg.message({content: json.message, type: "error"});
                 }
             }
-            t_on['tempLoadingSpaceResourcePath'] = 0;
         }, "json");
 
 }
@@ -526,15 +481,6 @@ var formatTimeChunk = function (t) {
     return t;
 };
 
-function convertDate(date) {
-    var month = date.getMonth() + 1;
-    var day = date.getDate();
-    var hour=date.getHours();
-    var minute=date.getMinutes();
-    return date.getFullYear() + '-' + (('' + month).length < 2 ? '0' : '')
-        + month + '-' + (('' + day).length < 2 ? '0' : '') + day +" "+ (('' + hour).length < 2 ? '0' : '')
-        + hour +":"+(('' + minute).length < 2 ? '0' : '')+ minute;
-}
 
 function getCell(column, row) {
     var column = $('#' + column).index();
@@ -551,17 +497,7 @@ function btnActiveToggle(button){
     $(button).addClass('active');
 }
 
-function onClose(){
-    $('#light').css('display','none');
-    $('#fade').css('display','none');
-    $('body').css('overflow','auto');
-    window.onmousewheel = document.onmousewheel = function(e) {
-        e = e || window.event;
-        if (e.preventDefault)
-            e.preventDefault();
-        e.returnValue = true;
-    };
-}
+
 
 function getDateTime(currentDay,fromDay){
     var to = convertTimeString(currentDay);
@@ -569,7 +505,8 @@ function getDateTime(currentDay,fromDay){
     var toDate = to.split(" ");
     var fromDate = from.split(" ");
     var dateStr= fromDate[0]+" <i>"+fromDate[1]+"</i> <b>to</b> "+toDate[0]+" <i>"+toDate[1]+"</i>";
-    $("#date-range").html(dateStr);
-    $('#date-range').data('dateRangePicker').setDateRange(from,to);
+    $("#date-range span").html(dateStr);
+    $('#date-range').data('daterangepicker').setStartDate(from);
+    $('#date-range').data('daterangepicker').setEndDate(to);
     drawAPIUsageByResourcePath(from,to);
 }

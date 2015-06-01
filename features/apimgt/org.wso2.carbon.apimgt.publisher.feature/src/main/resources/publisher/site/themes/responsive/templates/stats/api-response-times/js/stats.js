@@ -1,26 +1,7 @@
-var t_on = {
-    'apiChart': 1,
-    'subsChart': 1,
-    'serviceTimeChart': 1,
-    'tempLoadingSpace': 1
-};
 var currentLocation;
-
-var chartColorScheme1 = ["#3da0ea", "#bacf0b", "#e7912a", "#4ec9ce", "#f377ab", "#ec7337", "#bacf0b", "#f377ab", "#3da0ea", "#e7912a", "#bacf0b"];
-//fault colors || shades of red
-var chartColorScheme2 = ["#ED2939", "#E0115F", "#E62020", "#F2003C", "#ED1C24", "#CE2029", "#B31B1B", "#990000", "#800000", "#B22222", "#DA2C43"];
-//fault colors || shades of blue
-var chartColorScheme3 = ["#0099CC", "#436EEE", "#82CFFD", "#33A1C9", "#8DB6CD", "#60AFFE", "#7AA9DD", "#104E8B", "#7EB6FF", "#4981CE", "#2E37FE"];
-currentLocation = window.location.pathname;
 var statsEnabled = isDataPublishingEnabled();
 
-require(["dojo/dom", "dojo/domReady!"], function (dom) {
     currentLocation = window.location.pathname;
-    //Initiating the fake progress bar
-    jagg.fillProgress('apiChart');
-    jagg.fillProgress('subsChart');
-    jagg.fillProgress('serviceTimeChart');
-    jagg.fillProgress('tempLoadingSpace');
 
     jagg.post("/site/blocks/stats/api-response-times/ajax/stats.jag", { action: "getFirstAccessTime", currentLocation: currentLocation  },
         function (json) {
@@ -52,30 +33,28 @@ require(["dojo/dom", "dojo/domReady!"], function (dom) {
                         getDateTime(currentDay,currentDay-(604800000*4));
                     });
 
+                    $('#date-range').click(function(){
+                         $(this).removeClass('active');
+                    });
+
                     //date picker
-                    $('#date-range').dateRangePicker(
-                        {
-                            startOfWeek: 'monday',
-                            separator : ' <b>to</b> ',
-                            format: 'YYYY-MM-DD HH:mm',
-                            autoClose: false,
-                            time: {
-                                enabled: true
-                            },
-                            shortcuts:'hide',
-                            endDate:currentDay
-                        })
-                        .bind('datepicker-apply',function(event,obj)
-                        {
-                             btnActiveToggle(this);
-                             var from = convertDate(obj.date1);
-                             var to = convertDate(obj.date2);
-                             var fromStr = from.split(" ");
-                             var toStr = to.split(" ");
-                             var dateStr = fromStr[0] + " <i>" + fromStr[1] + "</i> <b>to</b> " + toStr[0] + " <i>" + toStr[1] + "</i>";
-                             $("#date-range").html(dateStr);
-                             drawProviderAPIServiceTime(from,to);
-                        });
+                    $('#date-range').daterangepicker({
+                          timePicker: true,
+                          timePickerIncrement: 30,
+                          format: 'YYYY-MM-DD h:mm',
+                          opens: 'left',
+                    });
+
+                    $('#date-range').on('apply.daterangepicker', function(ev, picker) {
+                       btnActiveToggle(this);
+                       var from = convertTimeString(picker.startDate);
+                       var to = convertTimeString(picker.endDate);
+                       var fromStr = from.split(" ");
+                       var toStr = to.split(" ");
+                       var dateStr = fromStr[0] + " <i>" + fromStr[1] + "</i> <b>to</b> " + toStr[0] + " <i>" + toStr[1] + "</i>";
+                       $("#date-range span").html(dateStr);
+                       drawProviderAPIServiceTime(from,to);
+                    });
 
                     //setting default date
                     var to = new Date();
@@ -92,21 +71,17 @@ require(["dojo/dom", "dojo/domReady!"], function (dom) {
                         $(this).siblings().removeClass('active');
                     });
 
-                    var width = $("#rangeSliderWrapper").width();
-                    //$("#rangeSliderWrapper").affix();
-                    $("#rangeSliderWrapper").width(width);
-
                 }
 
                 else if (json.usage && json.usage.length == 0 && statsEnabled) {
-                    $('#middle').html("");
-                    $('#middle').append($('<div class="errorWrapper"><img src="../themes/default/templates/stats/images/statsEnabledThumb.png" alt="Stats Enabled"></div>'));
+                    $('.stat-page').html("");
+                    $('.stat-page').append($('<br><div class="errorWrapper"><img src="../themes/responsive/templates/stats/images/statsEnabledThumb.png" alt="Stats Enabled"></div>'));
                 }
 
-                else {
-                    $('#middle').html("");
-                    $('#middle').append($('<div class="errorWrapper"><span class="label top-level-warning"><i class="icon-warning-sign icon-white"></i>'
-                        + i18n.t('errorMsgs.checkBAMConnectivity') + '</span><br/><img src="../themes/default/templates/stats/api-response-times/images/statsThumb.png" alt="Smiley face"></div>'));
+                else{
+                    $('.stat-page').html("");
+                    $('.stat-page').append($('<br><div class="errorWrapper"><span class="top-level-warning"><span class="glyphicon glyphicon-warning-sign blue"></span>'
+                        +i18n.t('errorMsgs.checkBAMConnectivity')+'</span><br/><img src="../themes/responsive/templates/stats/images/statsThumb.png" alt="Smiley face"></div>'));
                 }
 
 
@@ -118,28 +93,27 @@ require(["dojo/dom", "dojo/domReady!"], function (dom) {
                     jagg.message({content: json.message, type: "error"});
                 }
             }
-            t_on['apiChart'] = 0;
         }, "json");
 
-});
 
 var drawProviderAPIServiceTime = function (from, to) {
     var fromDate = from;
     var toDate = to;
     jagg.post("/site/blocks/stats/api-response-times/ajax/stats.jag", { action: "getProviderAPIServiceTime", currentLocation: currentLocation, fromDate: fromDate, toDate: toDate },
         function (json) {
+            $('#spinner').hide();
             if (!json.error) {
 
                     var length = json.usage.length, s1 = [];
                     var data = [];
 
                     if (length > 0) {
-                    $('#tempLoadingSpace').empty();
+                    $('#noData').empty();
                     $('#tableContainer').empty();
                     $('#chartContainer').empty();
 
 
-                    var $dataTable = $('<table class="display defaultTable" width="100%" cellspacing="0" id="apiSelectTable"></table>');
+                    var $dataTable = $('<table class="display table table-striped table-bordered" width="100%" cellspacing="0" id="apiSelectTable"></table>');
                         $dataTable.append($('<thead class="tableHead"><tr>' +
                             '<th width="10%"></th>' +
                             '<th>API</th>' +
@@ -193,7 +167,7 @@ var drawProviderAPIServiceTime = function (from, to) {
                             chart = nv.models.multiBarHorizontalChart()
                                 .x(function(d) { return d.label })
                                 .y(function(d) { return d.value })
-                                .margin({top: 0, right: 25, left: 25,bottom:50})
+                                .margin({top: 0, right: 5, left: 5,bottom:50})
                                 .barColor(d3.scale.category20().range())
                                 .tooltips(false)
                                 .showControls(true);
@@ -208,9 +182,10 @@ var drawProviderAPIServiceTime = function (from, to) {
                                 .datum(data_chart)
                                 .call(chart);
 
+                            $('.nv-legend').hide();
                             d3.selectAll(".nv-bar")
                                 .append("text")
-                                .attr("y", chart.xAxis.rangeBand() /2)
+                                .attr("y", $('rect').attr('height')/2)
                                 .attr("x", function(d) {
                                   return d3.select(this.previousSibling).attr('width')+5 ;
                                 })
@@ -248,7 +223,7 @@ var drawProviderAPIServiceTime = function (from, to) {
                                  null
                              ],
                          });
-                         $('select').css('width','60px');
+                         $('select').css('width','80px');
 
                         var count=15;
                         //on checkbox check and uncheck event
@@ -295,7 +270,7 @@ var drawProviderAPIServiceTime = function (from, to) {
                                     chart = nv.models.multiBarHorizontalChart()
                                         .x(function(d) { return d.label })
                                         .y(function(d) { return d.value })
-                                        .margin({top: 0, right: 25, left: 25,bottom:50})
+                                        .margin({top: 0, right: 5, left: 5,bottom:50})
                                         .barColor(d3.scale.category20().range())
                                         .tooltips(false)
                                         .showControls(false);
@@ -308,9 +283,11 @@ var drawProviderAPIServiceTime = function (from, to) {
                                     .datum(data_chart)
                                     .call(chart);
 
+                                $('.nv-legend').hide();
+
                                 d3.selectAll(".nv-bar")
                                     .append("text")
-                                    .attr("y", chart.xAxis.rangeBand() /2)
+                                    .attr("y", $('rect').attr('height')/2)
                                     .attr("x", function(d) {
                                       return d3.select(this.previousSibling).attr('width');
                                     })
@@ -326,13 +303,14 @@ var drawProviderAPIServiceTime = function (from, to) {
                             }else{
                                 $('#chartContainer').append($('<div id="serviceTimeChart" class="with-3d-shadow with-transitions"><svg style="height:500px;"></svg></div>'));
                             }
+
                             $('#serviceTimeChart svg').show();
                         });
                     }else if(length == 0) {
                         $('#chartContainer').hide();
                         $('#tableContainer').hide();
-                        $('#tempLoadingSpace').html('');
-                        $('#tempLoadingSpace').append($('<h3 class="no-data-heading center-wrapper">No Data Available</h3>'));
+                        $('#noData').html('');
+                        $('#noData').append($('<h3 class="no-data-heading center-wrapper">No Data Available</h3>'));
                     }
             } else {
                 if (json.message == "AuthenticateError") {
@@ -341,7 +319,6 @@ var drawProviderAPIServiceTime = function (from, to) {
                     jagg.message({content: json.message, type: "error"});
                 }
             }
-            t_on['serviceTimeChart'] = 0;
         }, "json");
 }
 
@@ -401,8 +378,9 @@ function getDateTime(currentDay,fromDay){
     var toDate = to.split(" ");
     var fromDate = from.split(" ");
     var dateStr= fromDate[0]+" <i>"+fromDate[1]+"</i> <b>to</b> "+toDate[0]+" <i>"+toDate[1]+"</i>";
-    $("#date-range").html(dateStr);
-    $('#date-range').data('dateRangePicker').setDateRange(from,to);
+    $("#date-range span").html(dateStr);
+    $('#date-range').data('daterangepicker').setStartDate(from);
+    $('#date-range').data('daterangepicker').setEndDate(to);
     drawProviderAPIServiceTime(from,to);
 }
 
