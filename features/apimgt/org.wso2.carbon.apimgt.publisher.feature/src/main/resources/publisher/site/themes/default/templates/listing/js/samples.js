@@ -40,11 +40,11 @@ APISamples.prototype.deploySample1 = function(){
 		{
 			var urlDesign = '/site/blocks/item-design/ajax/add.jag';
 			var dataJSON = '{action:"implement",name:"WeatherAPI",provider:username,version:"1.0.0",provider:"'+username+'",implementation_methods:"endpoint",endpoint_type:"http",endpoint_config:\'{"production_endpoints":{"url":"http://api.openweathermap.org/data/2.5/weather","config":null},"endpoint_type":"http"}\',production_endpoints:"http://api.openweathermap.org/data/2.5/weather",sandbox_endpoints:" ",endpointType:"nonsecured",swagger:this.sample1_swagger}';
-			var resultImplement = jagg.post(urlDesign,{action:"implement",name:"WeatherAPI",version:"1.0.0",provider:username,implementation_methods:"endpoint",endpoint_type:"http",endpoint_config:'{"production_endpoints":{"url":"http://api.openweathermap.org/data/2.5/weather","config":null},"endpoint_type":"http"}',production_endpoints:"http://api.openweathermap.org/data/2.5/weather",sandbox_endpoints:" ",endpointType:"nonsecured",swagger:this.sample1_swagger},
+			var resultImplement = jagg.post(urlDesign,{action:"implement",name:"WeatherAPI",version:"1.0.0",provider:username,implementation_methods:"endpoint",endpoint_type:"http",endpoint_config:'{"production_endpoints":{"url":"http://api.openweathermap.org/data/2.5/weather","config":null}, "sandbox_endpoints":{"url":"http://api.openweathermap.org/data/2.5/weather","config":null}, "endpoint_type":"http"}',production_endpoints:"http://api.openweathermap.org/data/2.5/weather",sandbox_endpoints:" ",endpointType:"nonsecured",swagger:this.sample1_swagger},
 		
 			function(result){
 			
-			var resultManage = jagg.post(urlDesign,{action:"manage",name:"WeatherAPI",provider:username,version:"1.0.0",default_version_checked:" ",tier:"Unlimited",tiersCollection:"Unlimited",transport_http:"http",transport_https:"https",subscriptions:"all_tenants",swagger:this.sample1_swagger},
+			var resultManage = jagg.post(urlDesign,{action:"manage",name:"WeatherAPI",provider:username,version:"1.0.0",default_version_checked:" ",tier:"Unlimited",tiersCollection:"Unlimited",transport_http:"http",transport_https:"https",swagger:this.sample1_swagger},
 			
 			function(result){
 				if (isPublishPermitted) {
