@@ -739,7 +739,7 @@ var apipublisher = {};
             var tierSet = new HashSet();
             var tierArray = api.tier.split(',');
             var tier;
-            for (var i = 0 ; tierArray.length; i++) {
+            for (var i = 0 ; i < tierArray.length; i++) {
                 tier = new Tier(tierArray[i]);
                 tierSet.add(tier);
             }
