@@ -213,7 +213,7 @@ $(document).ready(function () {
         }]
     };
 
-    APP.form.wsdl_endpoint = {
+    /*APP.form.wsdl_endpoint = {
         "schema": {
 
             "production_endpoints": {
@@ -263,7 +263,7 @@ $(document).ready(function () {
                 "fieldHtmlClass":"validateSandboxWSDLPort"
             }
         ]
-    };
+    };*/
 
     APP.form.failover_endpoint = {
         "schema": {
