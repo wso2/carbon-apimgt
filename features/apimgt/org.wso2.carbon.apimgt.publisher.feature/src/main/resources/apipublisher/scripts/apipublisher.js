@@ -882,44 +882,26 @@ var apipublisher = {};
     APIProviderProxy.prototype.updateAPIStatus = function (api) {
         var log = new Log();
         try {
-            var apiData = new Packages.org.json.simple.JSONObject();
-            apiData.put("provider", api.provider);
-            apiData.put("apiName", api.apiName);
-            apiData.put("version", api.version);
-            apiData.put("status", api.status);
-            apiData.put("publishToGateway", api.publishToGateway);
-            apiData.put("deprecateOldVersions", api.deprecateOldVersions);
-            apiData.put("makeKeysForwardCompatible", api.makeKeysForwardCompatible);
-            var success = this.impl.updateAPIStatus(apiData);
+            var identifier = new Packages.org.wso2.carbon.apimgt.api.model.APIIdentifier(api.provider, api.apiName, api.version);
+            var success = this.impl.updateAPIStatus(identifier, api.status, api.deprecateOldVersions, api.makeKeysForwardCompatible);
             if (log.isDebugEnabled()) {
                 log.debug("updateAPIStatus : " + api.name + "-" + api.version);
             }
-
             if (!success) {
                 return {
                     error:true
                 };
             } else {
-                var failedToPublishEnvironments = JSON.parse(success).PUBLISHED;
-                var failedToUnPublishEnvironments = JSON.parse(success).UNPUBLISHED;
-                if(failedToPublishEnvironments == "" && failedToUnPublishEnvironments == ""){
-                    return {
-                        error:false
-                    };
-                }else{
-                    return {
-                        error:true,
-                        message:success + '||warning'
-                    };
-                }
+                return {
+                   error:true,
+                   message:success + '||warning'
+                };
             }
-
         } catch (e) {
             log.error(e.message);
             return {
                 error:true,
                 message:e.message.split(":")[1]
-
             };
         }
     };
