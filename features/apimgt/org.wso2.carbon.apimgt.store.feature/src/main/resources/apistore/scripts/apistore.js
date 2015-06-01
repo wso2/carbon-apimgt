@@ -62,7 +62,8 @@ var apistore = {};
     };
 
     StoreAPIProxy.prototype.getAllSubscriptions = function (userName, appName, startSubIndex, endSubIndex) {
-        return APIUtil.stringifyAPISubscriptions(this.impl.getAllSubscriptions(userName, appName, startSubIndex, endSubIndex));
+        var result=this.impl.getAllSubscriptions(userName, appName, startSubIndex, endSubIndex,null);
+        return new APIUtil().stringifyAPISubscriptions(result);
     };
 
     StoreAPIProxy.prototype.getApplications = function (userName) {
