@@ -4044,13 +4044,14 @@ public class ApiMgtDAO {
     /**
      * This method will create a new client at key-manager side.further it will add new record to
      * the AM_APPLICATION_KEY_MAPPING table
-     * @param oauthAppRequest details of oAuthApplication.
+     *
+     * @param keyType
      * @param applicationName apim application name.
      * @param userName apim user name
      * @param clientId this is the consumner key.
      * @throws APIManagementException
      */
-    public void createApplicationKeyTypeMappingForManualClients(OAuthAppRequest oauthAppRequest, String applicationName,
+    public void createApplicationKeyTypeMappingForManualClients(String keyType, String applicationName,
                                                                 String userName, String clientId) throws APIManagementException {
 
         String consumerKey = null;
@@ -4061,9 +4062,7 @@ public class ApiMgtDAO {
         PreparedStatement ps = null;
         //initiate key manager.
         KeyManager keyManager = KeyManagerHolder.getKeyManagerInstance();
-        //get oAuthApplicationInfo object.
-        OAuthApplicationInfo oAuthApplicationInfo = oauthAppRequest.getOAuthApplicationInfo();
-        oAuthApplicationInfo.setClientId(clientId);
+
         //APIM application id.
         int applicationId = getApplicationId(applicationName, userName);
 
@@ -4077,7 +4076,7 @@ public class ApiMgtDAO {
                 ps = connection.prepareStatement(addApplicationKeyMapping);
                 ps.setInt(1, applicationId);
                 ps.setString(2, APIUtil.encryptToken(consumerKey));
-                ps.setString(3, (String) oAuthApplicationInfo.getParameter(ApplicationConstants.APP_KEY_TYPE));
+                ps.setString(3, keyType);
                 ps.setString(4, APIConstants.AppRegistrationStatus.REGISTRATION_COMPLETED);
                 // If the CK/CS pair is pasted on the screen set this to MAPPED
                 ps.setString(5,"MAPPED");
@@ -7548,8 +7547,8 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
                 workflowDTO.setUserName(subscriber.getName());
                 workflowDTO.setDomainList(rs.getString("ALLOWED_DOMAINS"));
                 workflowDTO.setValidityTime(rs.getLong("VALIDITY_PERIOD"));
-                OAuthAppRequest request = ApplicationUtils.createOauthAppRequest(application.getName(),
-                        application.getCallbackUrl(), rs.getString("TOKEN_SCOPE"),rs.getString("INPUTS"));
+                OAuthAppRequest request = ApplicationUtils.createOauthAppRequest(application.getName(), null,
+                                                                                 application.getCallbackUrl(), rs.getString("TOKEN_SCOPE"), rs.getString("INPUTS"));
                 workflowDTO.setAppInfoDTO(request);
 
             }

@@ -279,7 +279,8 @@ var mapExistingOauthClient=function(oBtnElement){
         "username" : userName,
         "key_type" : keyType,
         "client_secret":clientSecret,
-        "applicationName" : "erere"
+        "validityPeriod" : validityTime,
+        "client_id" : clientId
     };
     console.log(oJsonParams);
 

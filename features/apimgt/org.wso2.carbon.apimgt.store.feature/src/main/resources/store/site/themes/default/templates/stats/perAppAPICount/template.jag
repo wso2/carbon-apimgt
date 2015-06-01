@@ -22,8 +22,8 @@
     </div>
     </div>
 
-    <h2><%=i18n.localize("apiUsage")%></h2>
-
+    <h3><%=i18n.localize("apiUsage")%></h3>
+    <br>
     <div class="class="col-md-12">
         <div id="apiUsage"></div>
     </div>

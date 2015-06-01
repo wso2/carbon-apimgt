@@ -67,14 +67,14 @@ var statsEnabled = isDataPublishingEnabled();
                 }
 
                 else if (json.usage && json.usage.length == 0 && statsEnabled) {
-                    $('#content').html("");
-                    $('#content').append($('<div class="errorWrapper"><img src="../themes/fancy/templates/stats/images/statsEnabledThumb.png" alt="Stats Enabled"></div>'));
+                    $('.stat-page').html("");
+                    $('.stat-page').append($('<br><div class="errorWrapper"><img src="../themes/default/templates/stats/images/statsEnabledThumb.png" alt="Stats Enabled"></div>'));
                 }
 
                 else{
-                    $('#content').html("");
-                    $('#content').append($('<div class="errorWrapper"><span class="label top-level-warning"><i class="icon-warning-sign icon-white"></i>'
-                        +i18n.t('errorMsgs.checkBAMConnectivity')+'</span><br/><img src="../themes/fancy/templates/stats/topUsers/images/statsThumb.png" alt="Smiley face"></div>'));
+                    $('.stat-page').html("");
+                    $('.stat-page').append($('<br><div class="errorWrapper"><span class="top-level-warning"><span class="glyphicon glyphicon-warning-sign blue"></span>'
+                        +i18n.t('errorMsgs.checkBAMConnectivity')+'</span><br/><img src="../themes/default/templates/stats/apiCallType/images/statsThumb.png" alt="Smiley face"></div>'));
                 }
             }
             else {
@@ -109,7 +109,7 @@ var drawTopUsersGraph = function(from,to){
                 $('#topUsersView').empty();
                 if (length > 0) {
                 for(var k=0 ; k<length ;k++){
-                     $('#topUsersView').append($(' <h3>Application Name:  '+json.usage[k].appName+'</h3><div class="col-md-12" ><div class="col-md-6" ><div id="userChart'+(k+1)+'" ><svg style="height:400px;"></svg></div> </div> <div class="col-md-6"> <table class="table table-striped table-bordered" id="userTable'+(k+1)+'" class="userTable display" cellspacing="0" width="100%"><thead><tr> <th>User</th><th>Number of API Calls</th></tr></thead> </table> </div> </div>'));
+                     $('#topUsersView').append($(' <h4>Application Name:  '+json.usage[k].appName+'</h4><div class="col-md-12" ><div class="col-md-6" ><div id="userChart'+(k+1)+'" ><svg style="height:400px;"></svg></div> </div> <div class="col-md-6"> <table class="table table-striped table-bordered" id="userTable'+(k+1)+'" class="userTable display" cellspacing="0" width="100%"><thead><tr> <th>User</th><th>Number of API Calls</th></tr></thead> </table> </div> </div>'));
                 }
 
                 for(var k=0 ; k<length ;k++){
@@ -125,7 +125,14 @@ var drawTopUsersGraph = function(from,to){
                         });
                     }
                     drawChart('#userChart'+(k+1),k,chartData);
-                    $('#userTable'+(k+1)).dataTable();
+                    $('#userTable'+(k+1)).dataTable({
+                        "fnDrawCallback": function(){
+                            if(this.fnSettings().fnRecordsDisplay()<=$('#userTable'+(k+1)+'_length option:selected' ).val()
+                          || $('#userTable'+(k+1)+'_length option:selected' ).val()==-1)
+                            $('#userTable'+(k+1)+'_paginate').hide();
+                            else $('#userTable'+(k+1)+'_paginate').show();
+                          }
+                        });
                     $('#userTable'+(k+1)).show();
                 }
             }else{

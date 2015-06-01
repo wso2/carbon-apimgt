@@ -78,6 +78,7 @@ import org.wso2.carbon.registry.core.Resource;
 import org.wso2.carbon.registry.core.config.RegistryContext;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.core.pagination.PaginationContext;
+import org.wso2.carbon.registry.core.service.RegistryService;
 import org.wso2.carbon.registry.core.session.UserRegistry;
 import org.wso2.carbon.registry.core.utils.RegistryUtils;
 import org.wso2.carbon.user.api.AuthorizationManager;
@@ -1081,14 +1082,45 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 		                                APIConstants.TAGS_INFO_ROOT_LOCATION +
 		                                        "/%s/description.txt";
 		String thumbnailPathPattern = APIConstants.TAGS_INFO_ROOT_LOCATION + "/%s/thumbnail.png";
+
+		//if the tenantDomain is not specified super tenant domain is used
+		if(tenantDomain == null || tenantDomain.trim() == "" ){
+			try {
+				tenantDomain = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager().getSuperTenantDomain();
+			} catch (org.wso2.carbon.user.core.UserStoreException e) {
+				handleException("Cannot get super tenant domain name",e);
+			}
+		}
+
+		//get the registry instance related to the tenant domain
+		UserRegistry govRegistry = null;
+		try {
+			ServiceReferenceHolder.getInstance().getRealmService().getTenantManager().getTenantId(tenantDomain);
+			int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
+			                                     .getTenantId(tenantDomain);
+			RegistryService registryService =
+					ServiceReferenceHolder.getInstance()
+					                      .getRegistryService();
+			govRegistry = registryService.getGovernanceSystemRegistry(tenantId);
+
+		} catch (UserStoreException e) {
+			handleException("Cannot get tenant id for tenant domain name:"+tenantDomain,e);
+		} catch (RegistryException e) {
+			handleException("Cannot get registry for tenant domain name:"+tenantDomain,e);
+		}
+
+		if (govRegistry != null) {
 		for (Tag tag : tags) {
 			// Get the description.
 			Resource descriptionResource = null;
 			String descriptionPath = String.format(descriptionPathPattern, tag.getName());
 			try {
-				descriptionResource = registry.get(descriptionPath);
+				if (govRegistry.resourceExists(descriptionPath)) {
+					descriptionResource = govRegistry.get(descriptionPath);
+				}
 			} catch (RegistryException e) {
-				log.warn(String.format("Cannot get the description for the tag '%s'", tag.getName()));
+				//warn and proceed to the next tag
+				log.warn(String.format("Error while querying the existence of the description for the tag '%s'", tag.getName()));
 			}
 			// The resource is assumed to be a byte array since its the content
 			// of a text file.
@@ -1096,18 +1128,27 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 				try {
 					String description = new String((byte[]) descriptionResource.getContent());
 					tag.setDescription(description);
-				} catch (Exception e) {
-					handleException(String.format("Cannot read content of %s", descriptionPath), e);
+
+				} catch (ClassCastException e) {
+					//added warnings as it can then proceed to load rest of resources/tags
+					log.warn(String.format("Cannot cast content of %s to byte[]", descriptionPath),
+					                e);
+				}catch (RegistryException e) {
+					//added warnings as it can then proceed to load rest of resources/tags
+					log.warn(String.format("Cannot read content of %s", descriptionPath),
+					                e);
 				}
 			}
 			// Checks whether the thumbnail exists.
 			String thumbnailPath = String.format(thumbnailPathPattern, tag.getName());
 			try {
-				tag.setThumbnailExists(registry.resourceExists(thumbnailPath));
+				tag.setThumbnailExists(govRegistry.resourceExists(thumbnailPath));
 			} catch (RegistryException e) {
+				//warn and then proceed to load rest of tags
 				log.warn(String.format("Error while querying the existence of %s", thumbnailPath),
 				         e);
 			}
+		}
 		}
 		return tags;
 	}
@@ -1592,16 +1633,20 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
      * @param userName user name of logged in user.
      * @param clientId this is the consumer key of oAuthApplication
      * @param applicationName this is the APIM appication name.
-     * @return
+     * @param keyType
+     *@param allowedDomainArray @return
      * @throws APIManagementException
      */
-    public Map<String, Object> saveSemiManualClient(String jsonString, String userName, String clientId,
-                                                    String applicationName) throws APIManagementException {
+    public Map<String, Object> mapExistingOAuthClient(String jsonString, String userName, String clientId,
+                                                      String applicationName, String keyType,
+                                                      String[] allowedDomainArray) throws APIManagementException {
 
         String callBackURL = null;
 
-        OAuthAppRequest oauthAppRequest = ApplicationUtils.createOauthAppRequest(applicationName, callBackURL,"default",
+        OAuthAppRequest oauthAppRequest = ApplicationUtils.createOauthAppRequest(applicationName, clientId, callBackURL,
+                                                                                 "default",
                                                                                   jsonString);
+
 
         KeyManager keyManager = KeyManagerHolder.getKeyManagerInstance();
         //createApplication on oAuthorization server.
@@ -1611,11 +1656,9 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         AccessTokenInfo tokenInfo = keyManager.getNewApplicationAccessToken(tokenRequest);
 
         //Do application mapping with consumerKey.
-        apiMgtDAO.createApplicationKeyTypeMappingForManualClients(oauthAppRequest, applicationName, userName, clientId);
+        apiMgtDAO.createApplicationKeyTypeMappingForManualClients(keyType, applicationName, userName, clientId);
 
-        //in semi manual mode we are allowing ALL domains.
-        String[] domainArray = {"ALL"};
-        apiMgtDAO.addAccessAllowDomains(clientId, domainArray);
+        apiMgtDAO.addAccessAllowDomains(clientId, allowedDomainArray);
 
         //#TODO get actuall values from response and pass.
         Map<String, Object> keyDetails = new HashMap<String, Object>();
@@ -2009,7 +2052,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             // Build key manager instance and create oAuthAppRequest by
             // jsonString.
             OAuthAppRequest request =
-                    ApplicationUtils.createOauthAppRequest(applicationNameAfterAppend.toString(),
+                    ApplicationUtils.createOauthAppRequest(applicationNameAfterAppend.toString(), null,
                                                            callbackUrl, tokenScope, jsonString);
             request.getOAuthApplicationInfo().addParameter(ApplicationConstants.VALIDITY_PERIOD, validityTime);
 
@@ -2491,8 +2534,8 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
         }
         //Create OauthAppRequest object by passing json String.
-        OAuthAppRequest oauthAppRequest = ApplicationUtils.createOauthAppRequest(applicationName, callbackUrl, tokenScope,
-                                                                                 jsonString);
+        OAuthAppRequest oauthAppRequest = ApplicationUtils.createOauthAppRequest(applicationName, null, callbackUrl,
+                                                                                 tokenScope, jsonString);
 
         String consumerKey = apiMgtDAO.getConsumerKeyForApplicationKeyType(applicationName, userId, tokenType,
                                                                            groupingId);

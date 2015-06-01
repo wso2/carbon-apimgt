@@ -395,6 +395,14 @@ include("/jagg/jagg.jag");
         saveAuthAppParams.username = user.username;
         saveAuthAppParams.jsonParams = request.getParameter("jsonParams");
         saveAuthAppParams.client_id = request.getParameter("client_id");
+        saveAuthAppParams.validityTime = request.getParameter("validityTime");
+        saveAuthAppParams.keytype = request.getParameter("keytype");
+        saveAuthAppParams.authorizedDomains = request.getParameter("authorizedDomains");
+
+        if(saveAuthAppParams.authorizedDomains == null){
+            saveAuthAppParams.authorizedDomains = "ALL";
+        }
+        
         saveAuthAppParams.applicationName = request.getParameter("applicationName");
 
 

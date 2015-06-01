@@ -8,8 +8,15 @@
 
         function getThumbnailUrl(tag){
             
+            var urlPrefix = "";
+            var tenantDomain = jagg.getTenantDomain();
+            if (tenantDomain == "carbon.super"){
+                tenantDomain = "";
+            } else {
+                urlPrefix = "/t/";
+            }
 			if(tag.isThumbnailExists){
-                return "/registry/resource/_system/governance/apimgt/applicationdata/tags/" + 
+                return urlPrefix+tenantDomain+"/registry/resource/_system/governance/apimgt/applicationdata/tags/" + 
                             tag.name + "/thumbnail.png";
             }else{
                 return jagg.getAbsoluteUrl(jagg.getThemeFile("images/api-group-default.png"));

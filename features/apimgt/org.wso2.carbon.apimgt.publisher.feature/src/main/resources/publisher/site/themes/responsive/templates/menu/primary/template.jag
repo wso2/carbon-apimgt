@@ -1,0 +1,52 @@
+<% jagg.template("menu/primary", function(inputs, outputs, jagg) { %>
+<%var reqUrl = request.getRequestURI();var storeUrl;
+ var inlineUrl=jagg.getAbsoluteUrl("/site/pages/inline-editor.jag");
+
+ var urlPrefix;
+ var urlPostfix;
+ var tenant= encode.forUriComponent(request.getParameter("tenant"));
+ if(tenant!='null') {urlPrefix="?tenant="+tenant;}else{urlPrefix='';}
+ if(tenant!='null') {urlPostfix="&tenant="+tenant;}else{urlPostfix='';}
+
+%>
+<%var statUrl = request.getParameter("stat");
+
+<%if(jagg.getShowStoreURL()){%>
+<%storeUrl = jagg.module("manager").getAPIStoreURL().url;
+var MultitenantUtils = Packages.org.wso2.carbon.utils.multitenancy.MultitenantUtils;
+var tenantDomain =MultitenantUtils.getTenantDomain(outputs.user.username);
+
+                if(tenantDomain==undefined){tenantDomain='carbon.super';}
+                storeUrl = storeUrl+"?tenant="+tenantDomain;%>
+<%}%>
+
+<!-- Fixed navbar -->
+<nav class="navbar navbar-default navbar-fixed-top navbar-inverse">
+  <div class="navbar-header">
+    <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+      <span class="sr-only">Toggle navigation</span>
+      <span class="icon-bar"></span>
+      <span class="icon-bar"></span>
+      <span class="icon-bar"></span>
+    </button>
+    <a class="navbar-brand" onclick="jagg.sessionAwareJS({redirect:'<%=jagg.getMappedUrl("/site/pages/index.jag")%><%=urlPrefix%>',e:event})" href="<%=jagg.getMappedUrl("/site/pages/index.jag")%><%=urlPrefix%>">API Publisher</a>
+  </div>
+  <div id="navbar" class="collapse navbar-collapse">
+      <ul class="nav navbar-nav navbar-right">
+        <%if(jagg.getShowStoreURL()){%>
+        <li><a href="<%=storeUrl%>" target="_blank">Go to <%=i18n.localize("apistore")%></a></li>
+        <%}%>        
+        <li class="dropdown">
+          <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false"><%if(outputs.user!=null){%><%=outputs.user.username%><%}%> <span class="caret"></span></a>
+          <ul class="dropdown-menu" role="menu">
+            <li role="presentation" class="dropdown-header"><%=i18n.localize("logged")%></li>
+            <li role="presentation" class="disabled"><a role="menuitem" tabindex="-1" href="#"><strong><%=outputs.user.username%></strong></a></li>
+            <li role="presentation" class="divider"></li>
+            <li><a href="<%=jagg.getAbsoluteUrl("/site/pages/logout.jag")%><%=urlPrefix%>" id="logout-link"><i class="fa fa-sign-out"></i> <%=i18n.localize("logout")%></a></li>
+          </ul>
+        </li>
+        <li>&nbsp;&nbsp;&nbsp;</li>
+      </ul>        
+  </div><!--/.nav-collapse -->
+</nav>
+<%});%>

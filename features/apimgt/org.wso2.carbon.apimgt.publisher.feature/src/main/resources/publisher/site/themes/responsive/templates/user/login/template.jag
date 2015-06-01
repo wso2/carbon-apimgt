@@ -1,0 +1,53 @@
+<% jagg.template("user/login", function(inputs, outputs, jagg) { %>
+
+<%      if(request.isSecure()){
+
+            if(jagg.getUser() != null){
+                response.sendRedirect('index.jag');
+            }
+%>
+<style>
+  #wrapper { padding-left: 0 !important }
+</style>
+<div class="container-fluid login-container">
+    <div class="row">
+      <div class="col-md-4 col-md-offset-4">
+        <center><h1 id="login_page_logo">API Publisher</h1></center>
+      </div>      
+    </div>            
+    <div class="row">      
+      <div class="col-md-4 col-md-offset-4">
+      <div class="panel panel-default ">
+        <div class="panel-heading">
+          <h2 class="panel-title">Login</h2>
+        </div>
+        <div class="panel-body">
+          <div class="alert alert-danger" id="loginError" style="display:none">
+            <span id="loginErrorSpan"></span>
+          </div>
+         <form class="" action="index.jag" id="loginForm" autocomplete="off">
+            <div class="form-group">
+              <label for="username"><%=i18n.localize("username")%>:<span class="requiredAstrix">*</span></label>
+              <input type="text"  class="form-control" id="username" autofocus="autofocus" validation="required"  />
+            </div>
+            <div class="form-group">
+              <label for="pass"><%=i18n.localize("password")%>:<span class="requiredAstrix">*</span></label>
+              <input type="password" class="form-control"  id="pass" />
+            </div>
+            <input type="hidden"  id="tenant" value="<%= encode.forHtml(request.getParameter("tenant"))%>"/>
+            <input type="button" class="btn btn-primary" onclick="login()"  value="<%=i18n.localize("login")%>" id="loginButton" />
+            <input type="reset" class="btn btn-default" value="<%=i18n.localize("reset")%>" />
+         </form>          
+        </div>
+      </div>
+      </div>      
+    </div>
+</div>
+<% } else {
+        var mod,httpsUrl;
+        mod = jagg.module("manager");
+        httpsUrl= mod.getHTTPsURL();
+
+        response.sendRedirect(jagg.getHttpsUrl("/"));
+} %>
+<%});%>
