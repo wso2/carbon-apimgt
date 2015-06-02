@@ -168,7 +168,7 @@ var apipublisher = {};
     		var json = APIUtil.convertToString(apisArray);
     		if(json != null){
     			apisJSON = JSON.parse(json);
-    			log.error(json);
+    			log.info(json);
     		}
     		
     		/*for (var i = 0 ; i < apisArray.size(); i++) {

@@ -38,94 +38,39 @@ require('/modules/publisher.js').exec(function (ctx) {
     var apiProxy = apiPublisher.instance(user.username);
 
 
-    var createApisJson = function (apiList) {
-        var apiDataArr = [];
-        var isNotHold = false;
-        var isBlocked = false;
-        var isProdOnly = false;
-
-        if (apiList.indexOf(",") >= 0) {
-            var apis = apiList.split(",");
-            for (var n = 0; n < apis.length; n++) {
-                api = apis[n].split("::");
-                apiStatus = api[0];
-                apiName = api[1];
-                apiVersion = api[2];
-                //log.info(apiStatus + ' ' + apiName + ' ' + apiVersion);
-
-                if (apiStatus != "ON_HOLD") {
-                    if (apiStatus == "UNBLOCKED" || apiStatus == "PROD_ONLY_BLOCKED" || apiStatus == "UNBLOCK") {
-                        isNotHold = true;
-                        isBlocked = false;
-                        if (apiStatus == "PROD_ONLY_BLOCKED") {
-                            isProdOnly = true;
-                        } else {
-                            isProdOnly = false;
-                        }
-                    } else {
-                        isNotHold = true;
-                        isBlocked = true;
-                        isProdOnly = false;
-                    }
-                } else {
-                    isNotHold = false;
-                }
-
-                apiDataArr.push({
-                    "apiStatus": apiStatus,
-                    "isBlocked": isBlocked,
-                    "isProdOnly": isProdOnly,
-                    "isNotHold": isNotHold,
-                    "apiName": apiName,
-                    "apiVersion": apiVersion
-                });
-            }
-        } else {
-            api = apiList.split("::");
-            apiStatus = api[0];
-            apiName = api[1];
-            apiVersion = api[2];
-            //log.info(apiStatus+ ' '+apiName + ' '+ apiVersion);
-
-            if (apiStatus != "ON_HOLD") {
-                if (apiStatus == "UNBLOCKED" || apiStatus == "PROD_ONLY_BLOCKED" || apiStatus == "UNBLOCK") {
-                    isNotHold = true;
-                    isBlocked = false;
-                    if (apiStatus == "PROD_ONLY_BLOCKED") {
-                        isProdOnly = true;
-                    } else {
-                        isProdOnly = false;
-                    }
-                } else {
-                    isNotHold = true;
-                    isBlocked = true;
-                    isProdOnly = false;
-                }
-            } else {
-                isNotHold = false;
-            }
-
-            apiDataArr.push({
-                "apiStatus": apiStatus,
-                "isBlocked": isBlocked,
-                "isProdOnly": isProdOnly,
-                "isNotHold": isNotHold,
-                "apiName": apiName,
-                "apiVersion": apiVersion
-            });
-        }
-        return apiDataArr;
-    };
-
     var apiSubDataResult = apiProxy.getAllAPIUsageByProvider(user.username);
-    if (apiSubDataResult != null) {
-        var apiSubData = apiSubDataResult.apis;
-        for (var a in apiSubData) {
-           // var apisJson = createApisJson(apiSubData[a].apis);
-           	var apisJson = apiSubData[a].apis;
-            apiSubData[a].apis = apisJson;
-        }
-        output.apiSubscriptions = apiSubData;
+    
+    if (apiSubDataResult != null && apiSubDataResult.apis != null) {
+    	var apis = apiSubDataResult.apis;
+    	var apisArray = [];
+    	
+    	for(var b in apis){
+    		var apiSubData = apis[b];
+    		var userId = apiSubData.userId;
+    		var appName = apiSubData.applicationName;
+	        
+	        var apiDataArr = [];
+	        var subscriptions = apiSubData.apiSubscriptions;
+	        for (var a in subscriptions) {
+	           // var apisJson = createApisJson(apiSubData[a].apis);
+	           	var apisJson = subscriptions[a];
+	           	apiDataArr.push({
+	                "apiStatus": apisJson.subStatus,
+	                "isBlocked": apisJson.isBlocked,
+	                "isProdOnly": apisJson.subStatus == "PROD_ONLY_BLOCKED"? true:false,
+	                "isNotHold": apisJson.subStatus != "ON_HOLD"? true:false,
+	                "apiName": apisJson.apiId.apiName,
+	                "apiVersion": apisJson.apiId.version
+	            });
+	        }
+	        apisArray.push({
+	        	"userName":userId,
+	        	"application":appName,
+	        	"apiSubscriptions":apiDataArr
+	        });
+    	}
+      
+        output.apis = apisArray;
     }
 
     caramel.render(output);
