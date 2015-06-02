@@ -255,8 +255,8 @@ asset.renderer = function(ctx) {
                 if (page.assets && page.assets.id) {
                     var httpEndpoint,httpsEndpoint;
                     if(page.api.serverURL){
-                        httpEndpoint = page.api.serverURL.split(",")[1];
-                        httpsEndpoint = page.api.serverURL.split(",")[2];
+                        httpEndpoint = page.api.serverURL.split(",")[0];
+                        httpsEndpoint = page.api.serverURL.split(",")[1];
                     }
                     var isDefaultVersion=page.api.isDefaultVersion;
 

@@ -4285,6 +4285,38 @@ public final class APIUtil {
     }
 
     /**
+     * This method will return gateway endpoints in a comma separated string.
+     *
+     * @param api API will used to get published environments
+     * @return endpoints comma separated string
+     * @throws APIManagementException If API key manager URL unspecified
+     */
+    public static String getGatewayEndpoints(API api) throws APIManagementException {
+        String endpoints = "none";
+        APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
+                getAPIManagerConfigurationService().getAPIManagerConfiguration();
+        String publishedEnvironments = writeEnvironmentsToArtifact(api);
+        String[] publishedEnvironmentSet = publishedEnvironments.split(",");
+        for (int i = 0; i < config.getApiGatewayEnvironments().keySet().toArray().length; i++) {
+            for (int j = 0; j < publishedEnvironmentSet.length; j++) {
+                if (config.getApiGatewayEnvironments().keySet().toArray()[i].toString()
+                        .equals(publishedEnvironmentSet[j])) {
+                    Environment environment = (Environment) config.getApiGatewayEnvironments().values().toArray()[i];
+                    endpoints = environment.getApiGatewayEndpoint();
+                    break;
+                }
+            }
+        }
+        if (StringUtils.isBlank(publishedEnvironments)) {
+            handleException("Published environments unspecified");
+        }
+        if (StringUtils.isBlank(endpoints) || endpoints == "none") {
+            handleException("Endpoints are unspecified or No matching environments found!");
+        }
+        return endpoints;
+    }
+
+    /**
      * Get the running transport port
      *
      * @param transport [http/https]
