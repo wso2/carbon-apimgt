@@ -148,8 +148,9 @@ var apistore = {};
         for (var index = 0; index < domains.length; index++) {
             arr.add(domains[index]);
         }
-        return this.impl.getApplicationKey(userId, applicationName, tokenType,
-                                           tokenScopes, validityPeriod, callbackUrl, arr);
+        var jsonParams={"username":userId};
+        return this.impl.generateApplicationKey(userId, applicationName, tokenType,
+                                                tokenScopes, validityPeriod, callbackUrl, arr,stringify(jsonParams),null);
     };
 
     StoreAPIProxy.prototype.getSubscriber = function (userName) {
@@ -180,9 +181,9 @@ var apistore = {};
             var tiersDisplayNamesSet = '';
             var tiersDescSet = '';
             for(var i = 0; i < tiers.length  ; i++) {
-                tierSet += tiers[0].getName();
-                tiersDisplayNamesSet += tiers[0].getDisplayName();
-                tiersDescSet += tiers[0].getDescription();
+                tierSet += tiers[i].getName();
+                tiersDisplayNamesSet += tiers[i].getDisplayName();
+                tiersDescSet += tiers[i].getDescription();
                 if (i != tierSet.length - 1) {
                     tierSet += ',';
                     tiersDisplayNamesSet += ',';
@@ -268,7 +269,7 @@ var apistore = {};
         provider = APIUtil.replaceEmailDomain(provider);
         var apiIdentifier = new APIIdentifier(provider, apiname, version);
         apiIdentifier.setTier(tier);
-        return this.impl.addSubscription(apiIdentifier, appId, user);
+        return this.impl.addSubscription(apiIdentifier, user, appId);
     };
 
     /*

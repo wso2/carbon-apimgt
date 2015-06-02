@@ -5097,11 +5097,9 @@ public final class APIUtil {
 		return registeredResource;
 	}
 	
-	public static String convertToString(Object obj){
-		
+	public static String convertToString(Object obj) {
 		Gson gson = new Gson();
 		String json = gson.toJson(obj);
-         
-        return json;
+		return json;
 	}
 }

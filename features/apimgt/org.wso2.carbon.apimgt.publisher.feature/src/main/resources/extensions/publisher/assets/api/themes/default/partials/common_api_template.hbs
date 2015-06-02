@@ -1,6 +1,6 @@
 <script language="javascript">
     //TODO move to code segment
-    var VERBS = ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'];
+    var VERBS = ['GET', 'POST', 'PUT', 'DELETE'];
     var AUTH_TYPES = [
         {"value": "None", "text": "{{t "None"}}"},
         {"value": "Application", "text": "{{t "Application"}}"},
@@ -61,8 +61,12 @@
 <a href='' class='btn btn-success'><i class='fa-download-alt'></i>Import Swagger Definition</a>
 <br/><br/>
 
-<form id="form-asset-create" class='form-horizontal' method='post' action='{{url ""}}/apis/assets?type={{rxt.shortName}}' enctype="multipart/form-data">
-    <legend>General Details</legend>
+{{#if api}}
+	<form id="form-asset-create" class='form-horizontal' method='post' action='{{url ""}}/apis/assets/{{api.id}}?type={{rxt.shortName}}' enctype="multipart/form-data">
+{{else}}
+	<form id="form-asset-create" class='form-horizontal' method='post' action='{{url ""}}/apis/assets?type={{rxt.shortName}}' enctype="multipart/form-data">
+{{/if}}
+	<legend>General Details</legend>
     {{#unless api}}
     <div class='form-group'>
         <label class='custom-form-label col-lg-2 col-md-2 col-sm-12 col-xs-12' for='overview_name'>Name:<span class="requiredAstrix">*</span></label>

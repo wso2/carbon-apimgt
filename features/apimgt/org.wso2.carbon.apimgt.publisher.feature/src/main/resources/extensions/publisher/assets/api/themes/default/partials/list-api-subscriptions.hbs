@@ -8,12 +8,12 @@
         </tr>
         </thead>
         <tbody>
-        {{#each apiSubscriptions}}
+        {{#each apis}}
             <tr>
                 <td>{{userName}}</td>
                 <td>{{application}}</td>
                 <td>
-                    {{#each apis}}
+                    {{#each apiSubscriptions}}
                         <a href="javascript:getAPIUrl('{{../../cuser.username}}','{{apiName}}','{{apiVersion}}');">
                             &#169; {{apiName}} - {{apiVersion}}
                         </a>
