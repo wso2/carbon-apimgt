@@ -68,7 +68,7 @@ var apipublisher = {};
 
     APIProviderProxy.prototype.getAllProviders = function () {
     	var providers = [];
-    	
+
     	try{
     		providerSet = this.impl.getAllProviders();
     		for (var i = 0 ; i < providerSet.size(); i++) {
@@ -90,7 +90,7 @@ var apipublisher = {};
                 providers:null
             };
     	}
-    	
+
     };
 
     APIProviderProxy.prototype.createAPI = function (api) {
@@ -170,7 +170,7 @@ var apipublisher = {};
     			apisJSON = JSON.parse(json);
     			//log.info(json);
     		}
-    		
+
     		/*for (var i = 0 ; i < apisArray.size(); i++) {
     			var usage = pisArray.get(i);
     			var apiSubscriptionsArray = usage.getApiSubscriptions();
@@ -179,7 +179,7 @@ var apipublisher = {};
     				var apiSubscription = apiSubscriptions.get(y);
     				apiSubscriptions.push({
     					"status": apiSubscription.getSubStatus()
-        				
+
     				});
     			}
     			apis.push({
@@ -189,11 +189,11 @@ var apipublisher = {};
                     "accessToken": new Date(subscriber.getSubscribedDate().getTime()),
                     "accessTokenStatus": subscriber.getId(),
                     "apiSubscriptions": apiSubscriptions
-                    
-                    
+
+
     			});
             }*/
-    		
+
     		return {
                 error:false,
                 apis:apisJSON
@@ -205,7 +205,7 @@ var apipublisher = {};
                 apis:null
             };
     	}
-        
+
     };
 
     APIProviderProxy.prototype.getSubscribersOfAPI = function (apiId) {
@@ -234,7 +234,7 @@ var apipublisher = {};
                 subscribers:subscribers
             };
     	}
-        
+
     };
 
     APIProviderProxy.prototype.getAPIsByProvider = function (providerName) {
@@ -276,8 +276,8 @@ var apipublisher = {};
                 subscribers:subscribers
             };
     	}
-        
- 
+
+
     };
 
     /*
@@ -407,11 +407,8 @@ var apipublisher = {};
      * This method is used to update the application wise and user wise subscription status
      */
     APIProviderProxy.prototype.updateSubscription = function (apiProvider, apiName, apiVersion, appId, status) {
-        var identifier = new Packages.org.json.simple.JSONObject();
-        identifier.put(API_PROVIDER, apiProvider);
-        identifier.put(API_NAME, apiName);
-        identifier.put(API_VERSION, apiVersion);
-        return this.impl.updateSubscription(identifier, status, appId);
+        var identifier = new Packages.org.wso2.carbon.apimgt.api.model.APIIdentifier(apiProvider, apiName, apiVersion);
+        return this.impl.updateSubscription(identifier, status, parseInt(appId));
     };
 
     APIProviderProxy.prototype.removeDocumentation = function (apiId, docName, docType) {
