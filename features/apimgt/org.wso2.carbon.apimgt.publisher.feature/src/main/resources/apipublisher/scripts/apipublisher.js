@@ -168,7 +168,7 @@ var apipublisher = {};
     		var json = APIUtil.convertToString(apisArray);
     		if(json != null){
     			apisJSON = JSON.parse(json);
-    			log.info(json);
+    			//log.info(json);
     		}
     		
     		/*for (var i = 0 ; i < apisArray.size(); i++) {
@@ -298,7 +298,7 @@ var apipublisher = {};
             for (var i = 0 ; i < sequencesList.size(); i++) {
                 sequences.push(sequencesList.get(i));
             }
-            log.info(sequences);
+            //log.info(sequences);
             if (log.isDebugEnabled()) {
                 log.debug("getCustomOutSequences " +  " : " + sequences);
             }
@@ -323,7 +323,7 @@ var apipublisher = {};
             for (var i = 0 ; i < sequencesList.size(); i++) {
                 sequences.push(sequencesList.get(i));
             }
-            log.info(sequences);
+            //log.info(sequences);
             if (log.isDebugEnabled()) {
                 log.debug("getCustomOutSequences " +  " : " + sequences);
             }
@@ -348,7 +348,7 @@ var apipublisher = {};
             for (var i = 0 ; i < sequencesList.size(); i++) {
                 sequences.push(sequencesList.get(i));
             }
-            log.info(sequences);
+            //log.info(sequences);
             if (log.isDebugEnabled()) {
                 log.debug("getCustomOutSequences " +  " : " + sequences);
             }
@@ -370,13 +370,13 @@ var apipublisher = {};
     APIProviderProxy.prototype.getEnvironments = function () {
         var environments;
         var environmentList = [];
-        log.info('=================================');
+        //log.info('=================================');
         try {
             environments = APIUtil.getEnvironments();
             var environment;
             var iterator = environments.values().iterator();
             while(iterator.hasNext()) {
-                log.info('+++++++++++++++++++++++++++++==');
+                //log.info('+++++++++++++++++++++++++++++==');
                 environment = iterator.next();
                 environmentList.push({
                                          "name" : environment.getName(),
@@ -384,8 +384,8 @@ var apipublisher = {};
                                          "type"       : environment.getType()
                                      });
             }
-            log.info(environmentList);
-            log.info('=================================');
+            //log.info(environmentList);
+            //log.info('=================================');
             if (log.isDebugEnabled()) {
                 log.debug("getCustomOutSequences " +  " : " + sequences);
             }
@@ -731,7 +731,7 @@ var apipublisher = {};
     APIProviderProxy.prototype.manageAPI = function (api) {
         var success;
         var log = new Log();
-        log.info(api);
+        //log.info(api);
         try {
             var identifier = new Packages.org.wso2.carbon.apimgt.api.model.APIIdentifier(api.provider, api.apiName, api.version);
             var apiOb = new Packages.org.wso2.carbon.apimgt.api.model.API(identifier);
