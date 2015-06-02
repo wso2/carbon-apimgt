@@ -2760,7 +2760,10 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             Set<Map.Entry<String, Object>> entries = keyDetails.entrySet();
 
             for (Map.Entry<String, Object> entry : entries) {
+                //TODO remove below check and set values properly
+                if(!entry.getKey().equals("tokenDetails")&& !entry.getKey().equals("appDetails")&&!entry.getKey().equals("tokenScope")){
                 row.put(entry.getKey(), entry.getValue());
+                }
             }
             boolean isRegenarateOptionEnabled = true;
             if (APIUtil.getApplicationAccessTokenValidityPeriodInSeconds() < 0) {
