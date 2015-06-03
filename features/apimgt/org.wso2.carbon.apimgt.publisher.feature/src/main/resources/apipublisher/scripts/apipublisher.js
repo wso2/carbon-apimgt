@@ -154,7 +154,11 @@ var apipublisher = {};
     APIProviderProxy.prototype.createNewAPIVersion = function (api, newVersion) {
         var identifier = new Packages.org.wso2.carbon.apimgt.api.model.APIIdentifier(api.provider, api.name, api.version);
         var apiOb = new Packages.org.wso2.carbon.apimgt.api.model.API(identifier);
-        apiObj.put("defaultVersion", api.defaultVersion);
+        if('default_version' == api.defaultVersion) {
+            apiOb.setAsDefaultVersion(true);
+        } else {
+            apiOb.setAsDefaultVersion(false);
+        }
         return this.impl.createNewAPIVersion(apiOb, newVersion);
     };
 
