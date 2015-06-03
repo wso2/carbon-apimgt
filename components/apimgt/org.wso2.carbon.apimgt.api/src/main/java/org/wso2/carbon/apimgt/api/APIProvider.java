@@ -193,7 +193,7 @@ public interface APIProvider extends APIManager {
      * @throws APIManagementException If an error occurs while trying to create
      *                                the new version of the API
      */
-    public void createNewAPIVersion(API api, String newVersion) throws DuplicateAPIException,
+    public boolean createNewAPIVersion(API api, String newVersion) throws DuplicateAPIException,
             APIManagementException;
 
     /**
