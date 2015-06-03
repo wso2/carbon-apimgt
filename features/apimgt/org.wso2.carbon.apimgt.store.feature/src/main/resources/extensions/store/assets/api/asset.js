@@ -254,9 +254,9 @@ asset.renderer = function(ctx) {
             populateEndPoints : function(page){
                 if (page.assets && page.assets.id) {
                     var httpEndpoint,httpsEndpoint;
-                    if(page.api.serverURL){
-                        httpEndpoint = page.api.serverURL.split(",")[0];
-                        httpsEndpoint = page.api.serverURL.split(",")[1];
+                    if (page.api.serverURL.split(",")[0] == 'Production and Sandbox') {
+                        httpEndpoint = page.api.serverURL.split(",")[1];
+                        httpsEndpoint = page.api.serverURL.split(",")[2];
                     }
                     var isDefaultVersion=page.api.isDefaultVersion;
 
