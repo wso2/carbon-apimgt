@@ -152,13 +152,10 @@ var apipublisher = {};
     };
 
     APIProviderProxy.prototype.createNewAPIVersion = function (api, newVersion) {
-        var apiObj = new Packages.org.json.simple.JSONObject();
-        apiObj.put("provider", api.provider);
-        apiObj.put("version", api.version);
-        apiObj.put("name", api.name);
+        var identifier = new Packages.org.wso2.carbon.apimgt.api.model.APIIdentifier(api.provider, api.name, api.version);
+        var apiOb = new Packages.org.wso2.carbon.apimgt.api.model.API(identifier);
         apiObj.put("defaultVersion", api.defaultVersion);
-
-        return this.impl.createNewAPIVersion(api, newVersion);
+        return this.impl.createNewAPIVersion(apiOb, newVersion);
     };
 
     APIProviderProxy.prototype.getAllAPIUsageByProvider = function (providerName) {
