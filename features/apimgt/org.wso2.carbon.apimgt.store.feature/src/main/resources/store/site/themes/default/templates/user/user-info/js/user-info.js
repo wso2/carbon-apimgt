@@ -39,6 +39,16 @@ $(document).ready(function() {
      }
     });
     
-
+    $("#newPassword").keyup(function() {
+        $(this).valid();
+    });
+    $('#newPassword').focus(function(){
+        $('#password-help').show();
+        $('.password-meter').show();
+    });
+    $('#newPassword').blur(function(){
+        $('#password-help').hide();
+        $('.password-meter').hide();
+    });
     
 });

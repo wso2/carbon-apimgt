@@ -29,7 +29,7 @@ if(api != null) {
                 <li><a href="#users" data-toggle="tab" id="usersLink"><i class="icon-user"></i><%=i18n.localize("users")%> </a></li>
                 <% if (api.status != "PROTOTYPED") {%>
                 <%if(api.apiStores!=null){%>
-                <li id="externalAPIStores"><a href="#external" data-toggle="tab" id="usersLink"><i class="icon-share-alt"></i><%=i18n.localize("externalAPIStores")%> </a></li>                
+                <li id="externalAPIStoresTab"><a href="#external" data-toggle="tab" id="usersLink"><i class="icon-share-alt"></i><%=i18n.localize("externalAPIStores")%> </a></li>                
                 <%}%>
                 <%}%>
             </ul>
