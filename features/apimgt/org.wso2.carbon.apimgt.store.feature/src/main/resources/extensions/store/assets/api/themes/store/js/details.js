@@ -25,12 +25,20 @@ $(document).ready(function () {
     var version=$("#version").val();
     var provider=$("#provider").val();
     if (applicationId == "-" || applicationId == "createNewApp") {
-        var message ={};
-                message.text = '<div><i class="icon-briefcase"></i> Select an application.</div>';
-                message.type = 'error';
-                message.layout = 'topRight';
-                noty(message); 
-                return;      
+        BootstrapDialog.show({
+                                 type: BootstrapDialog.TYPE_DANGER,
+                                 title: 'Error',
+                                 message: 'Select an application.',
+                                 buttons: [{
+                                               label: 'OK',
+                                               action: function(dialogRef){
+                                                   dialogRef.close();
+                                               }
+                                           }
+
+                                 ]
+                             });
+        return;
     }
      var tier = $("#tiers-list").val();
     $.ajax({
@@ -49,32 +57,40 @@ $(document).ready(function () {
         $("#subscribe-button").html('Subscribe');
         $("#subscribe-button").removeAttr('disabled');
         if (result.data.error == false) {
-                noty({
-	        text: "Congratulations! You have successfully subscribed to the API. Please go to 'My Subscriptions' page to review your subscription and generate keys.", 
-                layout: 'topRight',
-                type: 'confirm',          
-                closeWith: ['click', 'hover'],         
-	        buttons: [
-		{addClass: 'btn btn-primary', text: 'Go to My Subscriptions', onClick: function($noty) {
-				$noty.close();
-                                window.location.href =caramel.context+ '/asts/api/my_subscriptions';
-				
-			}
-		},
-		{addClass: 'btn btn-other', text: 'Stay on this page', onClick: function($noty) {
-				$noty.close();
-                                window.location.href = window.location.href;				
-			}
-		}
-	]
-});             
+
+            BootstrapDialog.show({
+                                     type: BootstrapDialog.TYPE_SUCCESS,
+                                     title: 'Success',
+                                     message: 'Congratulations! You have successfully subscribed to the API. Please go to "My Subscriptions" page to review your subscription and generate keys.',
+                                     buttons: [{
+                                                   label: 'Go to My Subscriptions',
+                                                   action: function(dialogRef){
+                                                       window.location.href =caramel.context+ '/asts/api/my_subscriptions';
+                                                   }
+                                               },{
+                                         label: 'Stay on this page',
+                                         action: function(dialogRef){
+                                             window.location.reload();
+                                         }
+                                     }
+
+                                     ]
+                                 });
               
         } else {
-           var message ={};
-                message.text = '<div><i class="icon-briefcase"></i> API subscribe process failed.</div>';
-                message.type = 'error';
-                message.layout = 'topRight';
-                noty(message);
+            BootstrapDialog.show({
+                                     type: BootstrapDialog.TYPE_DANGER,
+                                     title: 'Error',
+                                     message: 'API subscribe process failed.',
+                                     buttons: [{
+                                                   label: 'OK',
+                                                   action: function(dialogRef){
+                                                       dialogRef.close();
+                                                   }
+                                               }
+
+                                     ]
+                                 });
         }
           
         },

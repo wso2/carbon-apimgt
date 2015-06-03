@@ -52,7 +52,7 @@ require('/modules/publisher.js').exec(function(ctx) {
 	var apiProxy = apiPublisher.instance(ctx.username);
 	var api = apiProxy.getAPI(asset.attributes.overview_provider, asset.attributes.overview_name, asset.attributes.overview_version).api;
 
-	log.info(api);
+	//log.info(api);
 
 	page = rxtModule.ui.buildPage(ctx.session, ctx.request);
 	output = am.render(asset,page)._custom();

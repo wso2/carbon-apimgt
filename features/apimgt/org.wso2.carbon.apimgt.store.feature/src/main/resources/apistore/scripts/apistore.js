@@ -247,7 +247,7 @@ var apistore = {};
                 cacheTimeout: api.getCacheTimeout(),
                 availableTiersDisplayNames: tiersDisplayNamesSet,
                 isDefaultVersion: api.isDefaultVersion(),
-                serverURL:APIUtil.writeEnvironmentsToArtifact(api)
+                serverURL:APIUtil.getGatewayEndpoints(api)
 
             };
             return {

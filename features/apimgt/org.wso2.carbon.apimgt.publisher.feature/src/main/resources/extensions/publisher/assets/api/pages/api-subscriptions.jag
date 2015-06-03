@@ -39,37 +39,37 @@ require('/modules/publisher.js').exec(function (ctx) {
 
 
     var apiSubDataResult = apiProxy.getAllAPIUsageByProvider(user.username);
-    
+
     if (apiSubDataResult != null && apiSubDataResult.apis != null) {
-    	var apis = apiSubDataResult.apis;
-    	var apisArray = [];
-    	
-    	for(var b in apis){
-    		var apiSubData = apis[b];
-    		var userId = apiSubData.userId;
-    		var appName = apiSubData.applicationName;
-	        
-	        var apiDataArr = [];
-	        var subscriptions = apiSubData.apiSubscriptions;
-	        for (var a in subscriptions) {
-	           // var apisJson = createApisJson(apiSubData[a].apis);
-	           	var apisJson = subscriptions[a];
-	           	apiDataArr.push({
-	                "apiStatus": apisJson.subStatus,
-	                "isBlocked": apisJson.isBlocked,
-	                "isProdOnly": apisJson.subStatus == "PROD_ONLY_BLOCKED"? true:false,
-	                "isNotHold": apisJson.subStatus != "ON_HOLD"? true:false,
-	                "apiName": apisJson.apiId.apiName,
-	                "apiVersion": apisJson.apiId.version
-	            });
-	        }
-	        apisArray.push({
-	        	"userName":userId,
-	        	"application":appName,
-	        	"apiSubscriptions":apiDataArr
-	        });
-    	}
-      
+        var apis = apiSubDataResult.apis;
+        var apisArray = [];
+        for (var b in apis) {
+            var apiSubData = apis[b];
+            var userId = apiSubData.userId;
+            var appId = apiSubData.appId;
+            var appName = apiSubData.applicationName;
+
+            var apiDataArr = [];
+            var subscriptions = apiSubData.apiSubscriptions;
+            for (var a in subscriptions) {
+                var apisJson = subscriptions[a];
+                apiDataArr.push({
+                    "apiStatus": apisJson.subStatus,
+                    "isBlocked": apisJson.subStatus == "BLOCKED" ? true : false,
+                    "isProdOnly": apisJson.subStatus == "PROD_ONLY_BLOCKED" ? true : false,
+                    "isNotHold": apisJson.subStatus != "ON_HOLD" ? true : false,
+                    "apiName": apisJson.apiId.apiName,
+                    "apiVersion": apisJson.apiId.version
+                });
+            }
+            apisArray.push({
+                "userName": userId,
+                "appId": appId,
+                "application": appName,
+                "apiSubscriptions": apiDataArr
+            });
+        }
+
         output.apis = apisArray;
     }
 

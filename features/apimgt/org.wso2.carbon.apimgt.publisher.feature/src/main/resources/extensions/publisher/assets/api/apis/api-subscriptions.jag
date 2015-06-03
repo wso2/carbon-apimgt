@@ -51,10 +51,8 @@ require('/modules/publisher.js').exec(function (ctx) {
             } else if (uriOptions.action == 'updateSubscription') {
                 var apiSubResult = apiProxy.updateSubscription(params.apiProvider,
                         params.apiName, params.apiVersion, params.appId, params.status);
-                if (apiSubResult != null) {
-                    response = responseProcessor.buildSuccessResponse(response,
-                            constants.STATUS_CODES.OK, apiSubResult);
-                }
+                response = responseProcessor.buildSuccessResponse(response,
+                        constants.STATUS_CODES.OK, apiSubResult || "success");
             }
             break;
 
