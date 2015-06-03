@@ -219,6 +219,7 @@
                                     <directory>resources</directory>
                                     <includes>
                                         <include>conf/api-manager.xml</include>
+                                        <include>conf/identity.xml</include>
                                         <include>conf/master-datasources.xml</include>
                                         <include>conf/WSO2AM_DB.h2.db</include>
                                         <include>**/*.sql</include>
