@@ -352,5 +352,6 @@ asset.renderer = function(ctx) {
                 action.name ='Statistics';
                 page.actionBar.actions.push(action);
         }
-    };
+        }
+    }
 }
