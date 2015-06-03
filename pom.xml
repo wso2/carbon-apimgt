@@ -695,6 +695,12 @@
                 <artifactId>org.wso2.carbon.bam.service.data.publisher</artifactId>
                 <version>${carbon.deployment.version}</version>
             </dependency>
+
+	    <dependency>
+		<groupId>org.wso2.orbit.com.nimbusds</groupId>
+		<artifactId>nimbus-jose-jwt</artifactId>
+		<version>${nimbusds.version}</version>
+	    </dependency>
         </dependencies>
     </dependencyManagement>
 
@@ -731,7 +737,7 @@
         <apimgt.store.feature.version>1.2.5-SNAPSHOT</apimgt.store.feature.version>
         <apimgt.synapse.feature.version>1.2.5-SNAPSHOT</apimgt.synapse.feature.version>
 
-
+	<nimbusds.version>2.26.1.wso2v3</nimbusds.version>
 
         <!-- Carbon kernel version -->
         <wso2carbon.version>4.4.0</wso2carbon.version>
