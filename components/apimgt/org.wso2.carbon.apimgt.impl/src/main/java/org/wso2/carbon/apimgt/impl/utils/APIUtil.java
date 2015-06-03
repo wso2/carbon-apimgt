@@ -4343,7 +4343,7 @@ public final class APIUtil {
             backendPort = Integer.toString(port);
             return backendPort;
         } catch (APIManagementException e) {
-            log.error(e.getMessage());
+            log.error("Error occurred while getting config context.", e);
             return null;
 
         }
