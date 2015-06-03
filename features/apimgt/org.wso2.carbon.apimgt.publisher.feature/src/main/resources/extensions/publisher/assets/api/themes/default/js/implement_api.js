@@ -44,11 +44,11 @@ $(function() {
                 if($('input:radio:checked').val() == 'inline') {
                     $('.implementation_method_endpoint').css({'display':'none'});
                     $('.api_designer').css({'display':'block'});
-                    $('.manageSaveButton').removeClass('hide');
+                    $('#prototyped_api').removeClass('hide');
                 } else {
                     $('.implementation_method_endpoint').css({'display':'block'});
                     $('.api_designer').css({'display':'none'});
-                    $('.manageSaveButton').addClass('hide'); 
+                    $('#prototyped_api').addClass('hide'); 
                 }
             }
         );  
