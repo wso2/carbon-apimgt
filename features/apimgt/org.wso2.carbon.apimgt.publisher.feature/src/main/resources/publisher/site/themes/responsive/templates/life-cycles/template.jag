@@ -230,9 +230,9 @@ var checkExternalStores=function(status){
 		$('#removeFromExternalStoresMsg').hide();
 	}
     if (status !== 'PUBLISHED') {
-        $('#externalAPIStores').hide();
+        $('#externalAPIStoresTab').hide();
     }else{
-        $('#externalAPIStores').show();
+        $('#externalAPIStoresTab').show();
     }
 }
 
