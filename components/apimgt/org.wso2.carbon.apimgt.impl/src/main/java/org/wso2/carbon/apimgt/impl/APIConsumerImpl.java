@@ -1898,16 +1898,11 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 
     public String addApplication(Application application, String userId)
             throws APIManagementException {
-
-        List<Application> applications = apiMgtDAO.getBasicApplicationDetails(userId, null);
-
-        if (applications != null && !applications.isEmpty()) {
-            if (APIUtil.doesApplicationExist(applications.toArray(new Application[applications.size()]),
-                                             application.getName())) {
-                handleException("A duplicate application already exists by the name - " + application.getName());
-            }
+        
+        if (APIUtil.isApplicationExist(userId, application.getName(), application.getGroupId())) {
+            handleException("A duplicate application already exists by the name - " + application.getName());
         }
-
+        
         int applicationId = apiMgtDAO.addApplication(application, userId);
 
         boolean isTenantFlowStarted = false;
