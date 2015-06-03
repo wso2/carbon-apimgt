@@ -208,10 +208,21 @@ public final class APIUtil {
 
 	private static String VERSION_PARAM="{version}";
 
+    /**
+     * This method is used to set config context service
+     *
+     * @param configContext
+     */
 	public static void setConfigContextService(ConfigurationContextService configContext) {
         APIUtil.configContextService = configContext;
     }
 
+    /**
+     * This method is used to get config context
+     *
+     * @return configContextService.getServerConfigContext()
+     * @throws APIManagementException
+     */
     public static ConfigurationContext getConfigContext() throws APIManagementException {
         if (configContextService == null) {
             handleException("ConfigurationContextService is null");
