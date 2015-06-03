@@ -61,6 +61,7 @@ import org.wso2.carbon.identity.oauth.OAuthAdminService;
 import org.wso2.carbon.identity.oauth.cache.CacheKey;
 import org.wso2.carbon.identity.oauth.cache.OAuthCache;
 import org.wso2.carbon.identity.oauth.cache.OAuthCacheKey;
+import org.wso2.carbon.identity.oauth.common.OAuthConstants;
 import org.wso2.carbon.identity.oauth.config.OAuthServerConfiguration;
 import org.wso2.carbon.identity.oauth.dto.OAuthConsumerAppDTO;
 import org.wso2.carbon.utils.CarbonUtils;
@@ -167,6 +168,7 @@ public class APIKeyMgtSubscriberService extends AbstractAdmin {
 
             oAuthConsumerAppDTO.setApplicationName(applicationName);
             oAuthConsumerAppDTO.setCallbackUrl(callbackUrl);
+            oAuthConsumerAppDTO.setOAuthVersion(OAuthConstants.OAuthVersions.VERSION_2);
             log.debug("Creating OAuth App " + applicationName);
             oAuthAdminService.registerOAuthApplicationData(oAuthConsumerAppDTO);
             log.debug("Created OAuth App " + applicationName);
