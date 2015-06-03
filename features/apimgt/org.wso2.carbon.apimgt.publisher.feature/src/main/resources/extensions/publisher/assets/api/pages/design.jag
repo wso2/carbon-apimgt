@@ -20,7 +20,6 @@
 var caramel;
 require('/modules/publisher.js').exec(function(ctx) {
 	var log = new Log();
-	// log.info("DESIGN CALLED");
 	var rxtModule = require('rxt');
 	var ui = require('rxt').ui;
 	var carbon = require('carbon');
@@ -53,7 +52,7 @@ require('/modules/publisher.js').exec(function(ctx) {
 	var apiProxy = apiPublisher.instance(ctx.username);
 	var api = apiProxy.getAPI(asset.attributes.overview_provider, asset.attributes.overview_name, asset.attributes.overview_version).api;
 
-	log.info(api);
+	//log.info(api);
 
 	page = rxtModule.ui.buildPage(ctx.session, ctx.request);
 	output = am.render(asset,page)._custom();
@@ -71,7 +70,7 @@ require('/modules/publisher.js').exec(function(ctx) {
 	output.id=api.id;
 	output.public_visibility = public_visibility;
 	output.private_visibility = private_visibility;	
-	// log.info(output);
+	//log.info(output);
 	} else {
 	var type = options.type;
     var page = ui.buildPage(ctx.session, ctx.request);
@@ -81,6 +80,11 @@ require('/modules/publisher.js').exec(function(ctx) {
     		output.wsdl = wsdl;
     	}
 	}
+
+	//Check configurations specific properties
+	var config = require('/extensions/assets/api/config/config.json');
+	output.config = config;
+
 	caramel.render(output);
 }, request, response, session);
 %>

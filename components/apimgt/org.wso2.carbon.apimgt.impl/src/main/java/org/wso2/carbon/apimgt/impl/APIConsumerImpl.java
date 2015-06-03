@@ -619,16 +619,19 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
      * @param clientId                Consumer Key for the Application
      * @param clientSecret            Consumer Secret for the Application
      * @param validityTime            Desired Validity time for the token
-     * @param accessAllowDomainsArray List of domains that this access token should be allowed to.
+     * @param accessAllowDomains List of domains that this access token should be allowed to.
      * @param jsonInput               Additional parameters if Authorization server needs any.
      * @return Renewed Access Token.
      * @throws APIManagementException
      */
     @Override
     public AccessTokenInfo renewAccessToken(String oldAccessToken, String clientId, String clientSecret,
-                                            String validityTime, String[] accessAllowDomainsArray,String
-            requestedScopes[], String jsonInput) throws APIManagementException {
+                                            String validityTime, String accessAllowDomains,String
+            requestedScopesString, String jsonInput) throws APIManagementException {
+
         // Create Token Request with parameters provided from UI.
+        String[] requestedScopes=requestedScopesString.split(",");
+        String[] accessAllowDomainsArray = accessAllowDomains.split(",");
         AccessTokenRequest tokenRequest = new AccessTokenRequest();
         tokenRequest.setClientId(clientId);
         tokenRequest.setClientSecret(clientSecret);
@@ -2760,7 +2763,10 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             Set<Map.Entry<String, Object>> entries = keyDetails.entrySet();
 
             for (Map.Entry<String, Object> entry : entries) {
+                //TODO remove below check and set values properly
+                if(!entry.getKey().equals("tokenDetails")&& !entry.getKey().equals("appDetails")&&!entry.getKey().equals("tokenScope")){
                 row.put(entry.getKey(), entry.getValue());
+                }
             }
             boolean isRegenarateOptionEnabled = true;
             if (APIUtil.getApplicationAccessTokenValidityPeriodInSeconds() < 0) {
@@ -2781,12 +2787,11 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                                                    int startSubIndex, int endSubIndex,
                                                    String groupId) throws APIManagementException {
         boolean isTenantFlowStarted = false;
-        APISubscription subscription = new APISubscription();
+
         Integer subscriptionCount = 0;
         Map<String, Object> result = new HashMap<String, Object>();
         List<APISubscription> subs = new ArrayList<APISubscription>();
-        Map<String, Object> apis = new HashMap<String, Object>();
-        Set<Map<String, Object>> apiSet = new HashSet<Map<String, Object>>();
+
         String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(username));
         try {
             if (tenantDomain != null &&
@@ -2802,7 +2807,8 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             if (applications != null) {
                 int i = 0;
                 for (Application application : applications) {
-
+                    APISubscription subscription = new APISubscription();
+                    Set<Map<String, Object>> apiSet = new HashSet<Map<String, Object>>();
                     long startLoop = 0;
                     if (log.isDebugEnabled()) {
                         startLoop = System.currentTimeMillis();
@@ -2810,7 +2816,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 
                     Set<Scope> scopeSet = new LinkedHashSet<Scope>();
 
-                    if (((appName == null || appName.isEmpty()) && i == 0) ||
+                    if (((appName == null || appName.isEmpty())) ||
                         appName.equals(application.getName())) {
 
                         //get Number of subscriptions for the given application by the subscriber.

@@ -146,7 +146,47 @@ asset.manager = function(ctx) {
             return this._super.list.call(this, paging);
         },
         update: function(options){
-            if(options.attributes.action == "implement"){
+            if(options.attributes.action == "design"){
+                var api = {};
+                api.apiName = options.attributes.overview_name;
+                api.name = options.attributes.overview_name;
+                api.version = options.attributes.overview_version;
+                if (options.attributes.provider == null) {
+                    api.provider = ctx.username;
+                } else {
+                    api.provider = options.attributes.overview_provider;
+                }
+                api.context = options.attributes.overview_context;
+
+                //TODO now we no need to save Icon through API manager as asset API does it for us
+                //Need to properly cope with that changed
+                api.thumbnailContent = request.getFile("overview_thumbnail");
+                api.thumbnailUrl = null;
+
+                //validate uploaded image and set API has a image if content is valid
+                if(api.thumbnailContent != null && isValiedImage(api.thumbnailContent)){
+                    api.thumbnailUrl = 'overview_thumbnail';
+                } else if(api.thumbnailContent != null && !isValiedImage(api.thumbnailContent)){
+                    obj = {
+                        error:true,
+                        message:"Please upload a valid image file for the API icon."
+                    };
+                    print(obj);
+                    return;
+                }
+                var apiProxy = apiPublisher.instance(ctx.username);
+                api.description = options.attributes.overview_description;
+                api.tags = options.attributes.overview_tags;
+                api.visibility = options.attributes.visibility;
+                api.visibleRoles = options.attributes.roles;
+                api.swagger = options.attributes.swagger;
+                api.wsdl = options.attributes.wsdl;
+                api.swagger = options.attributes.swagger;
+                result = apiProxy.updateDesignAPI(api);
+                if (result!=null && result.error) {
+                    throw "Error while updating the API.";
+                }
+            } else if(options.attributes.action == "implement"){
                 var result, obj;
                 var api = {};
                 api.apiName = options.attributes.overview_name;

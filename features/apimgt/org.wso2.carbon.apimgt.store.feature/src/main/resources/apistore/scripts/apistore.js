@@ -148,8 +148,9 @@ var apistore = {};
         for (var index = 0; index < domains.length; index++) {
             arr.add(domains[index]);
         }
-        return this.impl.getApplicationKey(userId, applicationName, tokenType,
-                                           tokenScopes, validityPeriod, callbackUrl, arr);
+        var jsonParams={"username":userId};
+        return this.impl.generateApplicationKey(userId, applicationName, tokenType,
+                                                tokenScopes, validityPeriod, callbackUrl, arr,stringify(jsonParams),null);
     };
 
     StoreAPIProxy.prototype.getSubscriber = function (userName) {
@@ -246,7 +247,7 @@ var apistore = {};
                 cacheTimeout: api.getCacheTimeout(),
                 availableTiersDisplayNames: tiersDisplayNamesSet,
                 isDefaultVersion: api.isDefaultVersion(),
-                serverURL:APIUtil.writeEnvironmentsToArtifact(api)
+                serverURL:APIUtil.getGatewayEndpoints(api)
 
             };
             return {

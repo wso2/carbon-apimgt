@@ -68,7 +68,7 @@ var apipublisher = {};
 
     APIProviderProxy.prototype.getAllProviders = function () {
     	var providers = [];
-    	
+
     	try{
     		providerSet = this.impl.getAllProviders();
     		for (var i = 0 ; i < providerSet.size(); i++) {
@@ -90,7 +90,7 @@ var apipublisher = {};
                 providers:null
             };
     	}
-    	
+
     };
 
     APIProviderProxy.prototype.createAPI = function (api) {
@@ -168,9 +168,9 @@ var apipublisher = {};
     		var json = APIUtil.convertToString(apisArray);
     		if(json != null){
     			apisJSON = JSON.parse(json);
-    			log.error(json);
+    			//log.info(json);
     		}
-    		
+
     		/*for (var i = 0 ; i < apisArray.size(); i++) {
     			var usage = pisArray.get(i);
     			var apiSubscriptionsArray = usage.getApiSubscriptions();
@@ -179,7 +179,7 @@ var apipublisher = {};
     				var apiSubscription = apiSubscriptions.get(y);
     				apiSubscriptions.push({
     					"status": apiSubscription.getSubStatus()
-        				
+
     				});
     			}
     			apis.push({
@@ -189,11 +189,11 @@ var apipublisher = {};
                     "accessToken": new Date(subscriber.getSubscribedDate().getTime()),
                     "accessTokenStatus": subscriber.getId(),
                     "apiSubscriptions": apiSubscriptions
-                    
-                    
+
+
     			});
             }*/
-    		
+
     		return {
                 error:false,
                 apis:apisJSON
@@ -205,7 +205,7 @@ var apipublisher = {};
                 apis:null
             };
     	}
-        
+
     };
 
     APIProviderProxy.prototype.getSubscribersOfAPI = function (apiId) {
@@ -234,7 +234,7 @@ var apipublisher = {};
                 subscribers:subscribers
             };
     	}
-        
+
     };
 
     APIProviderProxy.prototype.getAPIsByProvider = function (providerName) {
@@ -276,8 +276,8 @@ var apipublisher = {};
                 subscribers:subscribers
             };
     	}
-        
- 
+
+
     };
 
     /*
@@ -298,7 +298,7 @@ var apipublisher = {};
             for (var i = 0 ; i < sequencesList.size(); i++) {
                 sequences.push(sequencesList.get(i));
             }
-            log.info(sequences);
+            //log.info(sequences);
             if (log.isDebugEnabled()) {
                 log.debug("getCustomOutSequences " +  " : " + sequences);
             }
@@ -323,7 +323,7 @@ var apipublisher = {};
             for (var i = 0 ; i < sequencesList.size(); i++) {
                 sequences.push(sequencesList.get(i));
             }
-            log.info(sequences);
+            //log.info(sequences);
             if (log.isDebugEnabled()) {
                 log.debug("getCustomOutSequences " +  " : " + sequences);
             }
@@ -348,7 +348,7 @@ var apipublisher = {};
             for (var i = 0 ; i < sequencesList.size(); i++) {
                 sequences.push(sequencesList.get(i));
             }
-            log.info(sequences);
+            //log.info(sequences);
             if (log.isDebugEnabled()) {
                 log.debug("getCustomOutSequences " +  " : " + sequences);
             }
@@ -370,13 +370,13 @@ var apipublisher = {};
     APIProviderProxy.prototype.getEnvironments = function () {
         var environments;
         var environmentList = [];
-        log.info('=================================');
+        //log.info('=================================');
         try {
             environments = APIUtil.getEnvironments();
             var environment;
             var iterator = environments.values().iterator();
             while(iterator.hasNext()) {
-                log.info('+++++++++++++++++++++++++++++==');
+                //log.info('+++++++++++++++++++++++++++++==');
                 environment = iterator.next();
                 environmentList.push({
                                          "name" : environment.getName(),
@@ -384,8 +384,8 @@ var apipublisher = {};
                                          "type"       : environment.getType()
                                      });
             }
-            log.info(environmentList);
-            log.info('=================================');
+            //log.info(environmentList);
+            //log.info('=================================');
             if (log.isDebugEnabled()) {
                 log.debug("getCustomOutSequences " +  " : " + sequences);
             }
@@ -407,11 +407,8 @@ var apipublisher = {};
      * This method is used to update the application wise and user wise subscription status
      */
     APIProviderProxy.prototype.updateSubscription = function (apiProvider, apiName, apiVersion, appId, status) {
-        var identifier = new Packages.org.json.simple.JSONObject();
-        identifier.put(API_PROVIDER, apiProvider);
-        identifier.put(API_NAME, apiName);
-        identifier.put(API_VERSION, apiVersion);
-        return this.impl.updateSubscription(identifier, status, appId);
+        var identifier = new Packages.org.wso2.carbon.apimgt.api.model.APIIdentifier(apiProvider, apiName, apiVersion);
+        return this.impl.updateSubscription(identifier, status, parseInt(appId));
     };
 
     APIProviderProxy.prototype.removeDocumentation = function (apiId, docName, docType) {
@@ -731,7 +728,7 @@ var apipublisher = {};
     APIProviderProxy.prototype.manageAPI = function (api) {
         var success;
         var log = new Log();
-        log.info(api);
+        //log.info(api);
         try {
             var identifier = new Packages.org.wso2.carbon.apimgt.api.model.APIIdentifier(api.provider, api.apiName, api.version);
             var apiOb = new Packages.org.wso2.carbon.apimgt.api.model.API(identifier);
@@ -890,44 +887,26 @@ var apipublisher = {};
     APIProviderProxy.prototype.updateAPIStatus = function (api) {
         var log = new Log();
         try {
-            var apiData = new Packages.org.json.simple.JSONObject();
-            apiData.put("provider", api.provider);
-            apiData.put("apiName", api.apiName);
-            apiData.put("version", api.version);
-            apiData.put("status", api.status);
-            apiData.put("publishToGateway", api.publishToGateway);
-            apiData.put("deprecateOldVersions", api.deprecateOldVersions);
-            apiData.put("makeKeysForwardCompatible", api.makeKeysForwardCompatible);
-            var success = this.impl.updateAPIStatus(apiData);
+            var identifier = new Packages.org.wso2.carbon.apimgt.api.model.APIIdentifier(api.provider, api.apiName, api.version);
+            var success = this.impl.updateAPIStatus(identifier, api.status, api.deprecateOldVersions, api.makeKeysForwardCompatible);
             if (log.isDebugEnabled()) {
                 log.debug("updateAPIStatus : " + api.name + "-" + api.version);
             }
-
             if (!success) {
                 return {
                     error:true
                 };
             } else {
-                var failedToPublishEnvironments = JSON.parse(success).PUBLISHED;
-                var failedToUnPublishEnvironments = JSON.parse(success).UNPUBLISHED;
-                if(failedToPublishEnvironments == "" && failedToUnPublishEnvironments == ""){
-                    return {
-                        error:false
-                    };
-                }else{
-                    return {
-                        error:true,
-                        message:success + '||warning'
-                    };
-                }
+                return {
+                   error:true,
+                   message:success + '||warning'
+                };
             }
-
         } catch (e) {
             log.error(e.message);
             return {
                 error:true,
                 message:e.message.split(":")[1]
-
             };
         }
     };

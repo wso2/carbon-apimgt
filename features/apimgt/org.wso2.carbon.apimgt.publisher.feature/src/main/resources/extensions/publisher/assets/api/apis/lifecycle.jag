@@ -41,7 +41,7 @@ require('/modules/publisher.js').exec(function (ctx) {
 	var CONTENT_TYPE_JSON = 'application/json';
 	response.contentType = CONTENT_TYPE_JSON;
 	var constants = require("rxt").constants;
-	log.info("Calling Life Cycle API");
+	//log.info("Calling Life Cycle API");
 	data = obtainData(request);
 	switch (method) {
 		case 'POST':
@@ -54,7 +54,7 @@ require('/modules/publisher.js').exec(function (ctx) {
 				apiData.apiName = data.name;
 				apiData.version = data.version;
 				apiData.status = data.status;
-				log.info(data.deprecateOldVersions);
+				//log.info(data.deprecateOldVersions);
 				if (data.publishToGateway != null) {
 					apiData.publishToGateway = data.publishToGateway;
 				} else {
