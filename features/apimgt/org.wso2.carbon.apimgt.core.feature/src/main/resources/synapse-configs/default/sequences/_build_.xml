@@ -16,10 +16,11 @@
   ~  specific language governing permissions and limitations
   ~  under the License.
   -->
-
-<!-- Registry declaration of the WSO2 ESB -->
-<registry xmlns="http://ws.apache.org/ns/synapse" provider="org.wso2.carbon.mediation.registry.WSO2Registry">
-    <!--all resources loaded from the URL registry would be
-    cached for this number of milliseconds -->
-    <parameter name="cachableDuration">15000</parameter>
-</registry>
+<sequence xmlns="http://ws.apache.org/ns/synapse" name="_build_">
+    <builder>
+        <messageBuilder contentType="application/json" class="org.apache.axis2.json.JSONBuilder"
+                        formatterClass="org.apache.axis2.json.JSONMessageFormatter"/>
+        <messageBuilder contentType="application/xml" class="org.apache.axis2.builder.ApplicationXMLBuilder"
+                        formatterClass="org.apache.axis2.transport.http.ApplicationXMLFormatter"/>
+    </builder>
+</sequence>
