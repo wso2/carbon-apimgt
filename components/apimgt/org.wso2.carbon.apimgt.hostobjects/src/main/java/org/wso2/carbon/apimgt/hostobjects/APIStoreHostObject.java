@@ -2443,7 +2443,7 @@ public class APIStoreHostObject extends ScriptableObject {
             throw new APIManagementException("Invalid input parameters for AddAPISubscription method");
         }
 
-        String providerName = args[0].toString();
+        String providerName = APIUtil.replaceEmailDomain(args[0].toString());
         String apiName = args[1].toString();
         String version = args[2].toString();
         String tier = args[3].toString();
