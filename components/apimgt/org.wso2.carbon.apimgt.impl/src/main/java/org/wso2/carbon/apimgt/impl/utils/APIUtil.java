@@ -4307,9 +4307,6 @@ public final class APIUtil {
                 }
             }
         }
-        if (StringUtils.isBlank(publishedEnvironments)) {
-            handleException("Published environments unspecified");
-        }
         if (endpoints.toString().isEmpty()) {
             handleException("Endpoints are unspecified or No matching environments found!");
         } else {
