@@ -2033,7 +2033,6 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 appRegWFDto =
                         (ApplicationRegistrationWorkflowDTO) WorkflowExecutorFactory.getInstance()
                                 .createWorkflowDTO(WorkflowConstants.WF_TYPE_AM_APPLICATION_REGISTRATION_PRODUCTION);
-                applicationNameAfterAppend.append("_PRODUCTION");
 
             }// if it is a sandBox application.
             else if (APIConstants.API_KEY_TYPE_SANDBOX.equals(tokenType)) { // if
@@ -2047,7 +2046,6 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 appRegWFDto =
                         (ApplicationRegistrationWorkflowDTO) WorkflowExecutorFactory.getInstance()
                                 .createWorkflowDTO(WorkflowConstants.WF_TYPE_AM_APPLICATION_REGISTRATION_SANDBOX);
-                applicationNameAfterAppend.append("_SANDBOX");
             }
             // Build key manager instance and create oAuthAppRequest by
             // jsonString.
