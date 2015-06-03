@@ -1,104 +1,135 @@
 <script>
     var isSocial = ('{{features.social.enabled}}' == 'true');
 
+
 </script>
-<h1>{{assets.name}}</h1>	
-<div class='container-fluid'>
-		<div class='row-fluid'>
-			<div class='span3'>
-				<div class ='row'>
-					<a><i class='icon-user'></i> {{api.provider}}</a>
-					{{#if api.thumbnailurl}}
-					<img src='{{api.thumbnailurl}}' class='img-polaroid'></img>
-					{{else}}
-					<img src='{{url ""}}/extensions/assets/api/themes/store/imgs/api-default.png' class='img-polaroid'></img>
-					{{/if}}
-				</div>	
-			</div>
-			<div class='span9'>
-				<table class='table'>
-					<thead>
-					</thead>
-					<tbody>
-						<tr>
-							<td><b>{{t "Rating"}}</b></td>
-							<td>
-								{{t "Your rating:"}}
-								<span class="asset-rating">
+<div class="asset-description padding-bottom-double ">
+    <div class="asset-description-header">
+        <div class="col-lg-12 white-bg left ">
+            <h3>{{assets.name}}</h3>
+
+            <div class="clear"></div>
+            <hr>
+        </div>
+    </div>
+    <div class="asset-details-header ">
+        <!-- aset details -->
+        <div class="col-xs-12 col-sm-12 col-md-5 col-lg-5 white-bg">
+            <div class=" details-image white-bg">
+                <a><i class='icon-user'></i> {{api.provider}}</a>
+                {{#if api.thumbnailurl}}
+                    <img src='{{api.thumbnailurl}}' class="img-responsive"/>
+                {{else}}
+                    <img src='{{url ""}}/extensions/assets/api/themes/store/imgs/api-default.png'
+                         class="img-responsive"/>
+                {{/if}}
+            </div>
+            <div class="details-container">
+                <div class="col-lg-9">
+                    <h4 class="margin-none">asdad</h4>
+
+                    <p class="grey padding-none margin-none">{{t "Version"}}</p>
+
+                    <p class="light-blue padding-none margin-none">{{t "by"}}</p>
+                </div>
+                <div class="col-lg-5 padding-top right asset-rating margin-left-double">
+                </div>
+            </div>
+        </div>
+        <!-- end of asset details-->
+    </div>
+    <div class="white-bg asset-details-wrapper ">
+        <div class="white-bg padding-right-double padding-left-double">
+            <table class='table'>
+                <thead>
+                </thead>
+                <tbody>
+                <tr>
+                    <td><b>{{t "Rating"}}</b></td>
+                    <td>
+                        {{t "Your rating:"}}
+                        <span class="asset-rating">
                             		<div style="width:{{ratingPx}}px"></div>
                     			</span>
-							</td>
-						</tr>
-						<tr>
-							<td><b>{{t "Version"}}</b></td>
-							<td>{{api.version}}</td>
-						</tr>
-						<tr>
-							<td><b>{{t "Status"}}</b></td>
-							<td>{{status}}</td>
-						</tr>
-						<tr>
-							<td><b>{{t "Updated"}}</b></td>
-							<td>{{api.updatedDate}}</td>
-						</tr>
-					</tbody>
-				</table>
-			</div>
-			{{#if showSubscribe}} 
-			<div class='span9 well' appStyleFix>
-            <div class="span5">
+                    </td>
+                </tr>
+                <tr>
+                    <td><b>{{t "Version"}}</b></td>
+                    <td>{{api.version}}</td>
+                </tr>
+                <tr>
+                    <td><b>{{t "Status"}}</b></td>
+                    <td>{{status}}</td>
+                </tr>
+                <tr>
+                    <td><b>{{t "Updated"}}</b></td>
+                    <td>{{api.updatedDate}}</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {{#if showSubscribe}}
+        <div class='col-lg-12 well appStyleFix'>
+            <div class="col-lg-5">
                 <label><strong>Applications</strong></label>
-				<select id='application-list' class="span12">
-         {{#unless subscribedToDefault}} 
-         <option value="-">{{t "Select Application..."}}</option>		             
-         {{/unless}}        
-         <option value="createNewApp">{{t "New Application..."}}</option>	
-         <optgroup label="My Applications">		    
-				    {{#each applications}}
-					<option value="{{id}}" {{#if selectedDefault}} selected {{/if}}>{{name}}</option>
-				    {{/each}}
-		 </optgroup>			   
-				</select>
+                <select id='application-list' class="span12">
+                    {{#unless subscribedToDefault}}
+                        <option value="-">{{t "Select Application..."}}</option>
+                    {{/unless}}
+                    <option value="createNewApp">{{t "New Application..."}}</option>
+                    <optgroup label="My Applications">
+                        {{#each applications}}
+                            <option value="{{id}}" {{#if selectedDefault}} selected {{/if}}>{{name}}</option>
+                        {{/each}}
+                    </optgroup>
+                </select>
             </div>
-                    <div class="span4">
-                        <label><strong>Tiers</strong></label>
-				<select id="tiers-list" name="tiers-list" class="span12">
-                   {{#if tiers}}		                   
-				   {{#each tiers}}
-					<option value="{{this}}">{{this}}</option>
-				    {{/each}}{{/if}}
+            <div class="col-lg-4">
+                <label><strong>Tiers</strong></label>
+                <select id="tiers-list" name="tiers-list" class="span12">
+                    {{#if tiers}}
+                        {{#each tiers}}
+                            <option value="{{this}}">{{this}}</option>
+                        {{/each}}{{/if}}
 		                    
-		                </select>
-                        </div>
-                    <div class="span3">
-                        <label>&nbsp;</label>
-				<div class="simple-space-maker">
-		                    <button onclick="triggerSubscribe()" id="subscribe-button" class="btn btn-primary span12" {{#unless tiersAvailable}} disabled="disabled" {{/unless}}>{{t "Subscribe"}}
-		                    </button>
-		                     {{#unless tiersAvailable}}
-                                <span id="subsBtnDesc" class="help-block">{{t "You may not be entitled to any of the available tiers"}}</span>
-                            {{/unless}}
+                </select>
+            </div>
+            <div class="col-lg-3">
+                <label>&nbsp;</label>
 
-		                </div>
-                        </div>
-			</div>
-			{{/if}}
-			<input type="hidden" id="apiname" value="{{api.name}}">
-			<input type="hidden" id="version" value="{{api.version}}">
-			<input type="hidden" id="provider" value="{{api.provider}}">
-		</div>	
-</div>
-<ul class='nav nav-tabs'>
-	<li><a href='#api-overview'>{{t "Overview"}}</a></li>
-	<li><a href='#api-docs'>{{t "Documentation"}}</a></li>
-	<li><a href='#'>{{t "API Console"}}</a></li>
-	<li><a href='#'>{{t "Throttling Info"}}</a></li>
-	<li><a href='#'>{{t "Forum"}}</a></li>
-</ul>
+                <div class="simple-space-maker">
+                    <button onclick="triggerSubscribe()" id="subscribe-button"
+                            class="btn btn-primary span12" {{#unless tiersAvailable}}
+                            disabled="disabled" {{/unless}}>{{t "Subscribe"}}
+                    </button>
+                    {{#unless tiersAvailable}}
+                        <span id="subsBtnDesc"
+                              class="help-block">{{t "You may not be entitled to any of the available tiers"}}</span>
+                    {{/unless}}
 
-<div class='tab-content'>
-	<div class='tab-pane active' id='api-overview'>
-		{{> api_overview .}}
-	</div>
-	<div class='tab-pane' id='api-docs'>{{t "Docs"}}</div>
+                </div>
+            </div>
+        </div>
+    {{/if}}
+    <input type="hidden" id="apiname" value="{{api.name}}">
+    <input type="hidden" id="version" value="{{api.version}}">
+    <input type="hidden" id="provider" value="{{api.provider}}">
+
+    <div class="assetp-properties margin-top-double">
+        <ul class='nav nav-tabs'>
+            <li><a href='#api-overview'>{{t "Overview"}}</a></li>
+            <li><a href='#api-docs'>{{t "Documentation"}}</a></li>
+            <li><a href='#'>{{t "API Console"}}</a></li>
+            <li><a href='#'>{{t "Throttling Info"}}</a></li>
+            <li><a href='#'>{{t "Forum"}}</a></li>
+        </ul>
+
+        <div class='tab-content'>
+            <div class='tab-pane active' id='api-overview'>
+                {{> api_overview .}}
+            </div>
+            <div class='tab-pane' id='api-docs'>{{t "Docs"}}</div>
+        </div>
+    </div>
 </div>
