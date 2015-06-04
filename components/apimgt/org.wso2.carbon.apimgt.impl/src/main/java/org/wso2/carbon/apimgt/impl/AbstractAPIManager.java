@@ -42,7 +42,6 @@ import org.wso2.carbon.apimgt.impl.utils.TierNameComparator;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.governance.api.generic.GenericArtifactManager;
 import org.wso2.carbon.governance.api.generic.dataobjects.GenericArtifact;
-import org.wso2.carbon.governance.api.util.GovernanceUtils;
 import org.wso2.carbon.registry.core.ActionConstants;
 import org.wso2.carbon.registry.core.Association;
 import org.wso2.carbon.registry.core.Collection;
@@ -856,7 +855,6 @@ public abstract class AbstractAPIManager implements APIManager {
         String path = APIUtil.getAPIPath(identifier);
         String artifactId = null;
         try {
-            GovernanceUtils.loadGovernanceArtifacts((UserRegistry) registry);
             Resource apiResource = registry.get(path);
             artifactId = apiResource.getUUID();
         } catch (RegistryException e) {
