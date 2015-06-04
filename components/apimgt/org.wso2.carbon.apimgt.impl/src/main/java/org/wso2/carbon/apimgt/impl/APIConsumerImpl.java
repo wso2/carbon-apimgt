@@ -1629,6 +1629,21 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     }
 
     /**
+     *This method will delete application key mapping table and application registration table.
+     *@param applicationId application id
+     *@param tokenType Token Type.
+     *@return
+     *@throws APIManagementException
+     */
+    public void deleteFromApplicationRegistration(String applicationId ,String tokenType) throws
+            APIManagementException{
+
+        apiMgtDAO.deleteApplicationRegistration(applicationId , tokenType);
+        apiMgtDAO.deleteApplicationKeyMappingByApplicationIdAndType(applicationId , tokenType);
+
+    }
+
+    /**
      *
      * @param jsonString this string will contain oAuth app details
      * @param userName user name of logged in user.
