@@ -125,8 +125,8 @@ $(function () {
                     getNewTrUpdated();
                 BootstrapDialog.show({
                     type: BootstrapDialog.TYPE_SUCCESS,
-                    title: 'success',
-                    message: '<div><i class="icon-briefcase"></i> Application: ' +
+                    title: 'Application Updated!',
+                    message: '<div><i class="fw fw-check"></i> Application: ' +
                     metadata.editRowData.appName + ' has been updated.</div>',
                     buttons: [{
                         label: 'Close',
@@ -155,9 +155,10 @@ $(function () {
     removeApplication = function (appName, userName, appId) {
         setMetadataForDelRow(appName, appId);
         BootstrapDialog.show({
-            type: BootstrapDialog.TYPE_SUCCESS,
-            title: 'success',
-            message: 'Are you sure you want to remove the application ' + appName + '? This will cancel all the existing subscriptions and keys associated with the application.',
+            type: BootstrapDialog.TYPE_WARNING,
+            title: 'Warning',
+            message: '<div><i class="fw fw-warning"></i>Are you sure you want to remove the application ' + appName +
+            '? This will cancel all the existing subscriptions and keys associated with the application.</div>',
             buttons: [{
                 label: 'Yes',
                 action: function (dialogItself) {
@@ -236,8 +237,8 @@ $(function () {
                     refreshApplicationList();
                     BootstrapDialog.show({
                         type: BootstrapDialog.TYPE_SUCCESS,
-                        title: 'success',
-                        message: '<div><i class="icon-briefcase"></i> Application: ' +
+                        title: 'Application Created!',
+                        message: '<div><i class="fw fw-check"></i> Application: ' +
                         appName + ' has been created.</div>',
                         buttons: [{
                             label: 'Close',
@@ -252,8 +253,8 @@ $(function () {
 
                     BootstrapDialog.show({
                         type: BootstrapDialog.TYPE_DANGER,
-                        title: 'Error',
-                        message: '<div><i class="icon-briefcase"></i> Application: ' +
+                        title: 'Application not Created!',
+                        message: '<div><i class="fw fw-warning"></i> Application: ' +
                         appName + ' has not been created.</div>',
                         buttons: [{
                             label: 'Close',
@@ -270,7 +271,7 @@ $(function () {
             BootstrapDialog.show({
                 type: BootstrapDialog.TYPE_DANGER,
                 title: 'Error',
-                message: "Can't leave application name empty!",
+                message: '<div><i class="fw fw-warning"></i>Can\'t leave application name empty!</div>',
                 buttons: [{
                     label: 'Close',
                     action: function (dialogItself) {
