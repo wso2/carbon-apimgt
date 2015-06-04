@@ -42,10 +42,12 @@
        });
 
    </script>
+
        <div class="alert alert-info" id="apiInfo" style="display:none;">
            <div style="padding-bottom:10px"><b><%=i18n.localize("aboutAPIs")%></b></div>
        </div>
-
+    <div class="col-md-12">
+    <div class="row">
     <ul class="thumbnails">
         <span class="loading"></span>
         <%
@@ -141,14 +143,18 @@
                 </div>
                 <%} else {%>
         <li>
-            <div class="thumbnail">
+            <%if(outputs.isCreatePermitted){%>
+                <button id="alertClose" title="Delete API" type="button" class="close  btn-api-del" onClick="removeAPI('<%=api.name%>','<%=api.version%>','<%=api.provider%>',this);return false;"><%=i18n.localize("times")%></button>
+            <%}%>
+            <div class="thumbnail" >
                     <a href="<%=path%>">
                         <% if(api.thumb == null) { %>
-                        <img class="thumb responsive" src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("images/api-default.png"))%>" alt=""/>
+                        <img width="150" height="150" style="min-width:150px;min-height:150px" class="thumb responsive" src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("images/api-default.png"))%>" alt=""/>
                         <% } else{ %>
-                        <img class="thumb responsive" src="<%=jagg.getRegistryPath(api.thumb)%>" alt=""/>
+                        <img width="150" height="150" style="min-width:150px;min-height:150px" class="thumb responsive" src="<%=jagg.getRegistryPath(api.thumb)%>" alt=""/>
                         <% } %>
                     </a>
+
                     <div class="caption">
                         <a href="<%=path%>" onclick="jagg.sessionAwareJS({redirect:'<%=path%>'})" class="link-h1" title="<%=api.name%>">
                             <%=api.name%>
@@ -163,15 +169,14 @@
                             </a>
                         </div>
                         <p><%=api.status%></p>
-                        <%if(outputs.isCreatePermitted){%>
-                            <button title="Delete API" type="button" class="close btn-api-del" onClick="removeAPI('<%=api.name%>','<%=api.version%>','<%=api.provider%>',this);return false;"><%=i18n.localize("times")%></button>
-                        <%}%>
+
                     </div>
                 </div>
         </li>
         <% }} }%>
     </ul>
-
+    </div>
+    </div>
 
    <!--START Pagination links-->
    <% jagg.includeBlock("paginator", {currentPage:currentPage,numberOfPages:numberOfPages}); %>

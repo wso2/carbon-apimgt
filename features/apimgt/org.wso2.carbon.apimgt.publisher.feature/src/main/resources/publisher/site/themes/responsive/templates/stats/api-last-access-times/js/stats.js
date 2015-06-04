@@ -159,7 +159,7 @@ var drawProviderAPIVersionUserLastAccess = function(from,to){
                             else $('#lastAccessTable_paginate').show();
                           }
                     });
-                    $('select').css('width','60px');
+                    $('select').css('width','80px');
                 }
 
             } else {

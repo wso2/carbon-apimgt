@@ -14,8 +14,8 @@
 %>
  <!--START Pagination links-->
     <% if(numberOfPages > 1) { %>
-                    <div class="pagination">
-                        <ul>
+                    <div>
+                        <ul class="pagination">
                           <li <% if(currentPage == 1) { %> class="disabled" <% } %>><a <% if(currentPage != 1) { %>
                           href="?page=<%=String((currentPage-1))%><%if(query!=null){%>&query=<%=query%><%}%><%if(uname!=null){%>&uname=<%=uname%><%}%><%if(uname!=null){%>&uname=<%=uname%><%}%><%if(name!=null){%>&name=<%=name%><%}%><%if(version!=null){%>&version=<%=version%><%}%><%if(provider!=null){%>&provider=<%=provider%><%}%>"<% } %> >&lt;&lt;</a></li>
 

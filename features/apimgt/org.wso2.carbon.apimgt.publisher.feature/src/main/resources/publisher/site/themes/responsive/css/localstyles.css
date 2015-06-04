@@ -504,7 +504,7 @@ a.remove_rating:hover{ color: #C00}
 }
 
 
-/* API Usage table Styles */
+/* Statistics API Usage table Styles */
 td.details-control> div.showDetail:before {
     font-family: FontAwesome;
     content: "\f13a";
@@ -527,4 +527,49 @@ tr.shown td.details-control> div.showDetail:before {
     padding-left: 10px !important;
     vertical-align: middle;
     cursor:pointer;
+}
+
+/* error message style*/
+.errorMsg{
+    color:#d10000;
+    font-size:12px;
+    font-weight: 100;
+}
+
+/* delete api button */
+.btn-api-del{
+    margin-left: 181px;
+    margin-top: 2px;
+    position: absolute;
+    color:black;
+}
+
+/* api listing api name */
+.link-h1{
+    font-weight: bold;
+    display: block;
+    width: 100%;
+    font-size: 1.2em;
+}
+
+/* lifecycle icon image */
+.icon-lifecycle{
+    background:transparent url(../images/lifecycle.png) no-repeat 0 0;
+    width:14px;
+    height:14px;
+}
+
+/* api Thumbnail image */
+#apiThumb{
+    width:150px;
+    height:150px;
+    min-width:150px;
+    min-height:150px;
+}
+
+/* help block */
+.help-block{
+    color: #747474;
+    font-size: 11px;
+    margin-top: 5px;
 }
