@@ -141,10 +141,10 @@ var log = new Log();
 	}
 
 
-        var paths = {}; //fix for /*
+        var paths = {}; //fix for /*, {url-template}*
         for (var property in jsonObj.paths) {
             if (jsonObj.paths.hasOwnProperty(property)) {
-                paths[property.replace("/*","/")] = jsonObj.paths[property];
+                paths[property.replace("*","")] = jsonObj.paths[property];
             }
         }
         jsonObj.paths = paths;
