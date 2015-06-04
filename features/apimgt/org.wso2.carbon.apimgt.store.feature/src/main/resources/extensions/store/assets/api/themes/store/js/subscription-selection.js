@@ -18,7 +18,7 @@
  */
 
 var removeAPISubscription;
-
+var getAPIUrl;
 /*
  This js function will populate the UI after metadata generation in pages/my_subscription.jag
  */
@@ -162,6 +162,43 @@ $(function () {
                 }
             }
         }
+    };
+
+    /*
+     *This function bind the data and get the UUID needed to return API URL.
+     */
+    getAPIUrl = function (apiProvider, apiName, apiVersion) {
+        var apiData = {};
+        var appName = $('#subscription_selection').val();
+        apiData.apiName = apiName;
+        apiData.apiVersion = apiVersion;
+        apiData.apiProvider = apiProvider;
+        apiData.appName = appName;
+        $.ajax({
+            type: 'POST',
+            url: getSubscriptionAPI(appName, 'getUUID'),
+            data: apiData,
+            success: function (data) {
+                if (!data.error) {
+                    var uuid = data.response;
+                    window.location = 'details/' + uuid;
+                } else {
+                    BootstrapDialog.show({
+                        type: BootstrapDialog.TYPE_DANGER,
+                        title: 'Error',
+                        message: '<div><i class="icon-briefcase"></i> Unable to locate the artifact</div>',
+                        buttons: [{
+                            label: 'Close',
+                            action: function (dialogItself) {
+                                dialogItself.close();
+                            }
+
+                        }]
+
+                    });
+                }
+            }
+        });
     };
 
     /*
@@ -353,29 +390,60 @@ $(function () {
     };
 
     removeAPISubscription = function (apiName, apiVersion, apiProvider) {
-        //(apiname, version, provider, user, tier, appId) 
-        var appName = $('#subscription_selection').val();
-        var appDetails = findAppDetails(appName);
-        var deleteAPISubscriptionData = {};
-        deleteAPISubscriptionData.apiName = apiName;
-        deleteAPISubscriptionData.apiVersion = apiVersion;
-        deleteAPISubscriptionData.apiProvider = apiProvider;
-        deleteAPISubscriptionData.appId = appDetails.id;
-        deleteAPISubscriptionData.appTier = appDetails.tier;
-        $.ajax({
-            type: 'POST',
-            url: getSubscriptionAPI(appName, 'deleteSubscription'),
-            data: deleteAPISubscriptionData,
-            success: function () {
-                deleteSubscriptionMetadata(appName, apiName, apiProvider, apiVersion, 'deleteSubscription');
-                var subs = findSubscriptionDetails(appName);
-                if (subs.length != 0) {
-                    events.publish(EV_SUB_DELETE, {appName: appName});
-                } else {
-                    location.reload();
+        BootstrapDialog.show({
+            type: BootstrapDialog.TYPE_WARNING,
+            title: 'Warning',
+            message: '<div><i class="fw fw-warning"></i>Are you sure you want to remove the subscription for ' +
+            apiName + '? </div>',
+            buttons: [{
+                label: 'Yes',
+                action: function (dialogItself) {
+                    var appName = $('#subscription_selection').val();
+                    var appDetails = findAppDetails(appName);
+                    var deleteAPISubscriptionData = {};
+                    deleteAPISubscriptionData.apiName = apiName;
+                    deleteAPISubscriptionData.apiVersion = apiVersion;
+                    deleteAPISubscriptionData.apiProvider = apiProvider;
+                    deleteAPISubscriptionData.appId = appDetails.id;
+                    deleteAPISubscriptionData.appTier = appDetails.tier;
+                    $.ajax({
+                        type: 'POST',
+                        url: getSubscriptionAPI(appName, 'deleteSubscription'),
+                        data: deleteAPISubscriptionData,
+                        success: function (data) {
+                            if (data.success) {
+                                deleteSubscriptionMetadata(appName, apiName, apiProvider,
+                                    apiVersion, 'deleteSubscription');
+                                var subs = findSubscriptionDetails(appName);
+                                if (subs.length != 0) {
+                                    events.publish(EV_SUB_DELETE, {appName: appName});
+                                } else {
+                                    location.reload();
+                                }
+                            } else {
+                                BootstrapDialog.show({
+                                    type: BootstrapDialog.TYPE_DANGER,
+                                    title: 'Fail to Delete Subscription!',
+                                    message: '<div><i class="fw fw-warning"></i> API : ' +
+                                    appName + ' subscription could not be deleted.</div>',
+                                    buttons: [{
+                                        label: 'Close',
+                                        action: function (dialogItself) {
+                                            dialogItself.close();
+                                        }
+                                    }]
+                                });
+                            }
+                        }
+                    });
+                    dialogItself.close();
                 }
-
-            }
+            }, {
+                label: 'No',
+                action: function (dialogItself) {
+                    dialogItself.close();
+                }
+            }]
         });
     };
 
