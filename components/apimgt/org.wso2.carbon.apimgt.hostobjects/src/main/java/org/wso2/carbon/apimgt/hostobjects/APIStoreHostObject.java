@@ -3068,7 +3068,7 @@ public class APIStoreHostObject extends ScriptableObject {
                                 appObj.put("sandValidityTime", appObj,
                                            getApplicationAccessTokenValidityPeriodInSeconds());
                             }
-			  if(sandboxKey != null) {
+                            if (sandboxKey != null) {
                                 if (sandboxKey.getState() != null) {
                                     appObj.put("sandboxKeyState", appObj, sandboxKey.getState());
                                 }
