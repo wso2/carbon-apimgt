@@ -16,10 +16,9 @@
   ~  specific language governing permissions and limitations
   ~  under the License.
   -->
-
-<!-- Registry declaration of the WSO2 ESB -->
-<registry xmlns="http://ws.apache.org/ns/synapse" provider="org.wso2.carbon.mediation.registry.WSO2Registry">
-    <!--all resources loaded from the URL registry would be
-    cached for this number of milliseconds -->
-    <parameter name="cachableDuration">15000</parameter>
-</registry>
+<sequence xmlns="http://ws.apache.org/ns/synapse" name="_resource_mismatch_handler_">
+    <property name="ERROR_CODE" value="403"/>
+    <property name="ERROR_MESSAGE" value="No matching resource found in the API for the given request"/>
+    <property name="CUSTOM_HTTP_SC" value="403"/>
+    <sequence key="fault"/>
+</sequence>
