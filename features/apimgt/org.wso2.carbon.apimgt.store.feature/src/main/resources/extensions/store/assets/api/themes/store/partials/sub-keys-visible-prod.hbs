@@ -1,36 +1,48 @@
 <!--Visible keys
     The view displays all the keys
 -->
-
-<form>
-    <fieldset>
-        <h5>Access Token</h5>
+<div class='form-group'>
+    <label class='custom-form-label col-lg-2 col-md-2 col-sm-12 col-xs-12'>Access Token</label>
+    <div class='custom-form-right col-lg-5 col-md-8 col-sm-8 col-xs-12'>
         <span class='badge badge-success input-xlarge'>{{accessToken}}</span>
-    </fieldset>
-</form>
-
-<form class='form form-inline'>
-    <button type='button' class='btn btn-primary btn-small' value='Regenerate Key'
-            id='btn-refresh-{{ environment }}-token'>
-        <i class='icon-refresh'> Regenerate Key</i>
-    </button>
-    {{#if isScopeAvailable}}
-        <input type='button' class='btn btn-primary btn-small' value='Select Scopes '
-               id='btn-select-{{ ../environment }}-scopes-view'/>
-    {{/if}}
-    <label>Token Validity</label>
-    <input type='text' class='input input-small' id='input-{{ environment }}-validityTime' value='{{validityTime}}'/>
-    <label> seconds </label>
-</form>
-<form>
-    <fieldset>
-        <h5>Consumer Key</h5>
+    </div>
+</div>
+<div class='form-group'>
+    <label class='custom-form-label col-lg-2 col-md-2 col-sm-12 col-xs-12'>&nbsp;</label>
+    <div class='custom-form-right col-lg-5 col-md-8 col-sm-8 col-xs-12'>
+        <button type='button' class='btn btn-primary btn-small' value='Regenerate Key'
+                id='btn-refresh-{{ environment }}-token'>
+            <i class='fa fa-refresh'> Re-generate Key</i>
+        </button>
+    </div>
+</div>
+<div class='form-group'>
+    <label class='custom-form-label col-lg-2 col-md-2 col-sm-12 col-xs-12'>&nbsp;</label>
+    <div class='custom-form-right col-lg-5 col-md-8 col-sm-8 col-xs-12'>
+        {{#if isScopeAvailable}}
+            <input type='button' class='btn btn-primary btn-small' value='Select Scopes '
+                   id='btn-select-{{ ../environment }}-scopes-view'/>
+        {{/if}}
+    </div>
+</div>
+<div class='form-group'>
+    <label class='custom-form-label col-lg-2 col-md-2 col-sm-12 col-xs-12'>Token Validity</label>
+    <div class='custom-form-right col-lg-5 col-md-8 col-sm-8 col-xs-12'>
+        <input type='text' class='form-control' id='input-{{ environment }}-validityTime' value='{{validityTime}}'/> Seconds
+    </div>
+</div>
+<div class='form-group'>
+    <label class='custom-form-label col-lg-2 col-md-2 col-sm-12 col-xs-12'>Consumer Key</label>
+    <div class='custom-form-right col-lg-5 col-md-8 col-sm-8 col-xs-12'>
         <span class='badge badge-success input-xlarge'>{{consumerKey}}</span>
-
-        <h5>Consumer Secret</h5>
+    </div>
+</div>
+<div class='form-group'>
+    <label class='custom-form-label col-lg-2 col-md-2 col-sm-12 col-xs-12'>Consumer Secret</label>
+    <div class='custom-form-right col-lg-5 col-md-8 col-sm-8 col-xs-12'>
         <span class='badge badge-success input-xlarge'>{{consumerSecret}}</span>
-    </fieldset>
-</form>
+    </div>
+</div>
 
 
 

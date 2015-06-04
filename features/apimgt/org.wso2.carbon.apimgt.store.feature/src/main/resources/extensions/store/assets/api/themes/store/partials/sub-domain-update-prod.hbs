@@ -1,18 +1,25 @@
 <!-- Domain update view
+
 -->
 {{#if isDataNotAvailable}}
-    <fieldset>
-        <span class='help-block'>Please subscribe to APIs to view domain information</span>
-    </fieldset>
+    <div class='form-group'>
+        <label class='custom-form-label col-lg-2 col-md-2 col-sm-12 col-xs-12'>&nbsp;</label>
+        <div class='custom-form-right col-lg-5 col-md-8 col-sm-8 col-xs-12'>
+            <span class='help-block'>Please subscribe to APIs to view domain information</span>
+        </div>
+    </div>
 {{else}}
-    <fieldset>
-        <h5>Allowed Domains</h5>
-        <textarea class='input-xlarge' id='input-{{ environment }}-allowedDomains'>{{allowedDomains}}</textarea>
-        <span class='help-block'>Leaving empty or filling with ALL will allow all domains</span>
-    </fieldset>
-
-    <fieldset>
-        <input type='button' class='btn btn-primary btn-block' value='Update Domains'
-               id='btn-{{ environment }}-updateDomains'>
-    </fieldset>
+    <div class='form-group'>
+        <label class='custom-form-label col-lg-2 col-md-2 col-sm-12 col-xs-12'>Allowed Domains</label>
+        <div class='custom-form-right col-lg-5 col-md-8 col-sm-8 col-xs-12'>
+            <textarea class='form-control' id='input-{{ environment }}-allowedDomains'>{{allowedDomains}}</textarea>
+            <span class='help-block'>Leaving empty or filling with ALL will allow all domains</span>
+        </div>
+    </div>
+    <div class='form-group'>
+        <label class='custom-form-label col-lg-2 col-md-2 col-sm-12 col-xs-12'>&nbsp;</label>
+        <div class='custom-form-right col-lg-5 col-md-8 col-sm-8 col-xs-12'>
+            <input type='button' class='btn btn-primary' value='Update Domains' id='btn-{{ environment }}-updateDomains'>
+        </div>
+    </div>
 {{/if}}
