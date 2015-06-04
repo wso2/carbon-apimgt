@@ -2758,6 +2758,40 @@ public class ApiMgtDAO {
         return key;
     }
 
+    /**
+     * Gets ConsumerKeys when given the Application ID.
+     * @param applicationId
+     * @return {@link java.util.Set} containing ConsumerKeys
+     * @throws APIManagementException
+     */
+    public Set<String> getConsumerKeysOfApplication(int applicationId) throws APIManagementException {
+        Connection connection = null;
+        PreparedStatement preparedStatement = null;
+        ResultSet resultSet = null;
+        Set<String> consumerKeys = new HashSet<String>();
+
+        String sqlQuery = "SELECT CONSUMER_KEY FROM AM_APPLICATION_KEY_MAPPING WHERE APPLICATION_ID = ?";
+
+        try {
+            connection = APIMgtDBUtil.getConnection();
+            preparedStatement = connection.prepareStatement(sqlQuery);
+            preparedStatement.setInt(1, applicationId);
+            resultSet = preparedStatement.executeQuery();
+            while (resultSet.next()) {
+                String consumerKey = resultSet.getString("CONSUMER_KEY");
+                if (consumerKey != null) {
+                    consumerKeys.add(consumerKey);
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Error occurred while getting the State of Access Token", e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(preparedStatement, connection, resultSet);
+        }
+
+        return consumerKeys;
+    }
+
     private APIKey getProductionKeyOfApplication(int applicationId, String accessTokenStoreTable)
                                                 throws SQLException, CryptoException, APIManagementException {
 
@@ -8897,22 +8931,21 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
         return false;
     }
 
-    public Set<String> getActiveTokensOfApplication(int applicationId) throws APIManagementException {
+    public Set<String> getActiveTokensOfConsumerKey(String consumerKey) throws APIManagementException {
         Connection conn = null;
         ResultSet resultSet = null;
         PreparedStatement ps = null;
         try {
             conn = APIMgtDBUtil.getConnection();
 
-            String sqlQuery = "SELECT TKN.ACCESS_TOKEN" +
-                    " FROM IDN_OAUTH2_ACCESS_TOKEN TKN," +
-                    "      AM_APPLICATION_KEY_MAPPING AKM" +
-                    " WHERE AKM.APPLICATION_ID = ?" +
-                    " AND AKM.CONSUMER_KEY = TKN.CONSUMER_KEY" +
-                    " AND TKN.TOKEN_STATE = 'ACTIVE'";
+            String sqlQuery = "SELECT ACCESS_TOKEN" +
+                              " FROM IDN_OAUTH2_ACCESS_TOKEN" +
+                              " WHERE " +
+                              " CONSUMER_KEY = ?" +
+                              " AND TOKEN_STATE = 'ACTIVE'";
 
             ps = conn.prepareStatement(sqlQuery);
-            ps.setInt(1, applicationId);
+            ps.setString(1, consumerKey);
             resultSet = ps.executeQuery();
             Set<String> tokens = new HashSet<String>();
             while (resultSet.next()) {
@@ -8920,15 +8953,15 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
             }
             return tokens;
         } catch (SQLException e) {
-            handleException("Failed to get active access tokens of application " + applicationId, e);
+            handleException("Failed to get active access tokens for consumerKey " + consumerKey, e);
         } catch (CryptoException e) {
-            handleException("Token decryption failed of an active access token of application " + applicationId, e);
+            handleException("Token decryption failed of an active access token of consumerKey " + consumerKey, e);
         } finally {
             APIMgtDBUtil.closeAllConnections(ps, conn, resultSet);
         }
         return null;
     }
-    
+
     /**
      * Check the given scope key is already available under given tenant
      *

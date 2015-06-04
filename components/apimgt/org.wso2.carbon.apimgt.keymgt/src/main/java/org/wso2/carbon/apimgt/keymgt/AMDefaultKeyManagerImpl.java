@@ -67,6 +67,7 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * This class holds the key manager implementation considering WSO2 as the identity provider
@@ -125,10 +126,6 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
 
         try {
             JSONObject jsonObject = new JSONObject(info.getJsonString());
-//            if (jsonObject.has(ApplicationConstants.OAUTH_CLIENT_SECRET)) {
-//                oAuthApplicationInfo.addParameter(ApplicationConstants.
-//                                                          OAUTH_CLIENT_SECRET, jsonObject.get(ApplicationConstants.OAUTH_CLIENT_SECRET));
-//            }
 
             if (jsonObject.has(ApplicationConstants.
                                        OAUTH_REDIRECT_URIS)) {
@@ -198,10 +195,6 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
             oAuthApplicationInfo.setClientSecret(info.getClientSecret());
 
             JSONObject jsonObject = new JSONObject(info.getJsonString());
-//            if (jsonObject.has(ApplicationConstants.OAUTH_CLIENT_SECRET)) {
-//                oAuthApplicationInfo.addParameter(ApplicationConstants.
-//                                                          OAUTH_CLIENT_SECRET, jsonObject.get(ApplicationConstants.OAUTH_CLIENT_SECRET));
-//            }
 
             if (jsonObject.has(ApplicationConstants.
                                        OAUTH_REDIRECT_URIS)) {
@@ -498,6 +491,13 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
     @Override
     public void deleteMappedApplication(String consumerKey) throws APIManagementException {
 
+    }
+
+    @Override
+    public Set<String> getActiveTokensByConsumerKey(String consumerKey) throws APIManagementException {
+        ApiMgtDAO apiMgtDAO = new ApiMgtDAO();
+        Set<String> activeTokens = apiMgtDAO.getActiveTokensOfConsumerKey(consumerKey);
+        return activeTokens;
     }
 
     /**
