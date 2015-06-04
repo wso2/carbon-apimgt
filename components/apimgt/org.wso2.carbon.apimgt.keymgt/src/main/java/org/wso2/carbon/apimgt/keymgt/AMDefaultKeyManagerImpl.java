@@ -99,13 +99,7 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
             log.debug("Trying to create OAuth application :" + applicationName);
         }
 
-        String callBackURL = "";
-        if (oAuthApplicationInfo.getParameter("callback_url") != null) {
-            JSONArray jsonArray = (JSONArray) oAuthApplicationInfo.getParameter("callback_url");
-            for (Object callbackUrlObject : jsonArray) {
-                callBackURL = (String) callbackUrlObject;
-            }
-        }
+        String callBackURL = oAuthApplicationInfo.getCallBackURL();
 
         String tokenScope = (String) oAuthApplicationInfo.getParameter("tokenScope");
         String tokenScopes[] = new String[1];
