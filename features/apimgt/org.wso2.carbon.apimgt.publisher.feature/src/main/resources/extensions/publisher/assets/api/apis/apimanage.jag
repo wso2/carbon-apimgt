@@ -40,7 +40,6 @@ require('/modules/publisher.js').exec(function (ctx) {
 	var method = request.getMethod();
 	var options = ref.getQueryOptions(request.getQueryString());
 	var response = ctx.response;
-	// log.info("Calling Manage API" + username);
 	var constants = require("rxt").constants;
 	switch (method) {
 		case 'POST':// GET endpoints
@@ -93,10 +92,7 @@ require('/modules/publisher.js').exec(function (ctx) {
 					apiData.cacheTimeout= request.getParameter("cacheTimeout","UTF-8");
 					apiData.destinationStats= request.getParameter("destinationStats","UTF-8");
 					apiData.environments = request.getParameter("environments");
-					// log.info("+++++++++++++++++++++++++++++++++++++++++++++++");
 					apiProxy.manageAPI(apiData);
-					// log.info("=============================================");
-					// log.info(apiData);
 					response = responseProcessor.buildSuccessResponse(response,
 																	  constants.STATUS_CODES.OK, "Asset Updated " +
 																								 "Successfully");
