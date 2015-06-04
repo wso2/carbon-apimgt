@@ -966,6 +966,45 @@ public class APIStoreHostObject extends ScriptableObject {
 
     }
 
+
+    /**
+     * This method is responsible delete records from application registration table and key mapping table
+     * If user had wrong inputs and he is unable to continue using create key method he has to delete it and re-create.
+     *
+     * @param cx      will be used to store information about the executing of the script.
+     *                This is a object of org.mozilla.javascript.Context package.
+     * @param thisObj Object of Scriptable interface provides for the management of
+     *                properties and for performing conversions.
+     * @param args    this will contain parameter list from jag files.
+     * @param funObj  this object  provides for calling functions and constructors.
+     * @throws ScriptException
+     * @throws APIManagementException
+     * @throws ParseException
+     */
+    public static void jsFunction_deleteFromApplicationRegistration(Context cx, Scriptable thisObj,
+                                                         Object[] args, Function funObj)
+            throws ScriptException, APIManagementException, ParseException {
+        if (args != null && args.length != 0) {
+
+            try {
+
+                String applicationId = (String) args[0];
+                String keyType = (String) args[1];
+
+                //this map will hold response that we are getting from Application registration process.
+                Map<String, Object> keyDetails;
+                getAPIConsumer(thisObj).deleteFromApplicationRegistration(applicationId, keyType);
+
+            } catch (Exception e) {
+                handleException("Error while obtaining the application access token for the application" + e
+                        .getMessage(), e);
+            }
+        } else {
+            handleException("Invalid input parameters.");
+        }
+
+    }
+
     public static NativeObject jsFunction_login(Context cx, Scriptable thisObj,
                                                 Object[] args, Function funObj) throws ScriptException,
             APIManagementException {
@@ -2950,10 +2989,12 @@ public class APIStoreHostObject extends ScriptableObject {
                                 appObj.put("prodValidityTime", appObj,
                                            getApplicationAccessTokenValidityPeriodInSeconds());
                             }
-                            appObj.put("prodJsonString", appObj, null);
-                            if (prodKey != null) {
-                                appObj.put("prodKeyState", appObj, prodKey.getState());
+                            if(prodKey != null) {
+                                if (prodKey.getState() != null) {
+                                    appObj.put("prodKeyState", appObj, prodKey.getState());
+                                }
                             }
+                            appObj.put("prodJsonString", appObj, null);
                         }
 
                         APIKey sandboxKey = getAppKey(application, APIConstants.API_KEY_TYPE_SANDBOX);
@@ -3028,7 +3069,9 @@ public class APIStoreHostObject extends ScriptableObject {
                                            getApplicationAccessTokenValidityPeriodInSeconds());
                             }
                             if (sandboxKey != null) {
-                                appObj.put("sandboxKeyState", appObj, sandboxKey.getState());
+                                if (sandboxKey.getState() != null) {
+                                    appObj.put("sandboxKeyState", appObj, sandboxKey.getState());
+                                }
                             }
                         }
 

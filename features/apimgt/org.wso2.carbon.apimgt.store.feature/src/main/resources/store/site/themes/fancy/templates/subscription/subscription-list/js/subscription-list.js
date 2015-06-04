@@ -61,7 +61,25 @@ $(document).ready(function () {
             $('.app-key-generate-button',$(this).parent().parent().parent()).removeAttr('disabled');
         }
     });
+    $('.generateAgainBtn').click(function () {
 
+        var elem = $(this);
+        var keyType = elem.attr("data-keyType");
+        var applicationId = elem.attr("data-applicationId");
+
+        jagg.post("/site/blocks/subscription/subscription-add/ajax/subscription-add.jag", {
+            action:"deleteFromApplicationRegistration",
+            applicationId:applicationId,
+            keyType:keyType
+        }, function (result) {
+            if (!result.error) {
+                location.reload();
+            } else {
+                jagg.message({content:result.message,type:"error"});
+            }
+        }, "json");
+
+    });
 
     $('.js_toggle').click(function(){
         var $i = $('i',this);

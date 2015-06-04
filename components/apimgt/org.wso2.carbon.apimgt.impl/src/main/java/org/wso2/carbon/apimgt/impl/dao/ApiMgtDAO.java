@@ -5764,6 +5764,43 @@ public class ApiMgtDAO {
             APIMgtDBUtil.closeAllConnections(ps,connection,null);
         }
     }
+
+    /**
+     * This method will delete a record from AM_APPLICATION_REGISTRATION
+     * @param applicationId
+     * @param tokenType
+     */
+    public void deleteApplicationKeyMappingByApplicationIdAndType(String applicationId, String tokenType)
+            throws APIManagementException {
+
+        Connection connection = null;
+        PreparedStatement ps = null;
+        try {
+            connection = APIMgtDBUtil.getConnection();
+            String deleteRegistrationEntry = "DELETE " +
+                    "FROM" +
+                    "   AM_APPLICATION_KEY_MAPPING  " +
+                    "WHERE" +
+                    "   APPLICATION_ID = ?" +
+                    "AND" +
+                    "   KEY_TYPE = ?";
+
+            if (log.isDebugEnabled()) {
+                log.debug("trying to delete a record from AM_APPLICATION_KEY_MAPPING table by application ID " +
+                        applicationId + " and Token type" + tokenType);
+            }
+            ps = connection.prepareStatement(deleteRegistrationEntry);
+            ps.setString(1, applicationId);
+            ps.setString(2, tokenType);
+            ps.executeUpdate();
+            connection.commit();
+        } catch (SQLException e) {
+            handleException("Error while removing AM_APPLICATION_KEY_MAPPING table", e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(ps,connection,null);
+        }
+
+    }
     /**
      * Delete a record from AM_APPLICATION_REGISTRATION table by application ID and token type.
      * @param applicationId APIM application ID.
