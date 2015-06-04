@@ -139,6 +139,32 @@ var mapExistingOauthClient = function (authAppParams) {
     }
 };
 
+var deleteFromApplicationRegistration = function (applicationId , keyType) {
+
+    var key,
+            log = new Log(),
+            store = jagg.module("manager").getAPIStoreObj();
+    try {
+
+        key = store.deleteFromApplicationRegistration(applicationId, keyType);
+
+        if (log.isDebugEnabled()) {
+            log.debug("Deleting from application registration.");
+        }
+        return {
+            error:false,
+            key:key
+        };
+    } catch (e) {
+        log.error(e.message);
+        return {
+            error:true,
+            key:null
+        };
+    }
+};
+
+
 
 var refreshToken = function (username,application, keyType ,oldAccessToken, accessAllowDomains ,
 		clientId, clientSecret, validityTime,tokenScope) {
