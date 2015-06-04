@@ -169,20 +169,19 @@ public class APIKeyMgtSubscriberService extends AbstractAdmin {
             oAuthConsumerAppDTO.setCallbackUrl(callbackUrl);
 
             String[] allowedGrantTypes = oAuthAdminService.getAllowedGrantTypes();
-            List<String> grantTypeList = Arrays.asList(allowedGrantTypes);
-
             // CallbackURL is needed for authorization_code and implicit grant types. If CallbackURL is empty,
             // simply remove those grant types from the list
-            if (callbackUrl == null || callbackUrl.isEmpty()) {
-                grantTypeList.remove("authorization_code");
-                grantTypeList.remove("implicit");
-            }
-
             StringBuilder grantTypeString = new StringBuilder();
 
-            for (String grantType : grantTypeList) {
+            for (String grantType : allowedGrantTypes) {
+                if (callbackUrl == null || callbackUrl.isEmpty()) {
+                    if ("authorization_code".equals(grantType) || "implicit".equals(grantType)) {
+                        continue;
+                    }
+                }
                 grantTypeString.append(grantType).append(" ");
             }
+
             if (grantTypeString.length() > 0) {
                 oAuthConsumerAppDTO.setGrantTypes(grantTypeString.toString().trim());
                 log.debug("Setting Grant Type String : " + grantTypeString);
