@@ -390,29 +390,60 @@ $(function () {
     };
 
     removeAPISubscription = function (apiName, apiVersion, apiProvider) {
-        //(apiname, version, provider, user, tier, appId) 
-        var appName = $('#subscription_selection').val();
-        var appDetails = findAppDetails(appName);
-        var deleteAPISubscriptionData = {};
-        deleteAPISubscriptionData.apiName = apiName;
-        deleteAPISubscriptionData.apiVersion = apiVersion;
-        deleteAPISubscriptionData.apiProvider = apiProvider;
-        deleteAPISubscriptionData.appId = appDetails.id;
-        deleteAPISubscriptionData.appTier = appDetails.tier;
-        $.ajax({
-            type: 'POST',
-            url: getSubscriptionAPI(appName, 'deleteSubscription'),
-            data: deleteAPISubscriptionData,
-            success: function () {
-                deleteSubscriptionMetadata(appName, apiName, apiProvider, apiVersion, 'deleteSubscription');
-                var subs = findSubscriptionDetails(appName);
-                if (subs.length != 0) {
-                    events.publish(EV_SUB_DELETE, {appName: appName});
-                } else {
-                    location.reload();
+        BootstrapDialog.show({
+            type: BootstrapDialog.TYPE_WARNING,
+            title: 'Warning',
+            message: '<div><i class="fw fw-warning"></i>Are you sure you want to remove the subscription for ' +
+            apiName + '? </div>',
+            buttons: [{
+                label: 'Yes',
+                action: function (dialogItself) {
+                    var appName = $('#subscription_selection').val();
+                    var appDetails = findAppDetails(appName);
+                    var deleteAPISubscriptionData = {};
+                    deleteAPISubscriptionData.apiName = apiName;
+                    deleteAPISubscriptionData.apiVersion = apiVersion;
+                    deleteAPISubscriptionData.apiProvider = apiProvider;
+                    deleteAPISubscriptionData.appId = appDetails.id;
+                    deleteAPISubscriptionData.appTier = appDetails.tier;
+                    $.ajax({
+                        type: 'POST',
+                        url: getSubscriptionAPI(appName, 'deleteSubscription'),
+                        data: deleteAPISubscriptionData,
+                        success: function (data) {
+                            if (data.success) {
+                                deleteSubscriptionMetadata(appName, apiName, apiProvider,
+                                    apiVersion, 'deleteSubscription');
+                                var subs = findSubscriptionDetails(appName);
+                                if (subs.length != 0) {
+                                    events.publish(EV_SUB_DELETE, {appName: appName});
+                                } else {
+                                    location.reload();
+                                }
+                            } else {
+                                BootstrapDialog.show({
+                                    type: BootstrapDialog.TYPE_DANGER,
+                                    title: 'Fail to Delete Subscription!',
+                                    message: '<div><i class="fw fw-warning"></i> API : ' +
+                                    appName + ' subscription could not be deleated.</div>',
+                                    buttons: [{
+                                        label: 'Close',
+                                        action: function (dialogItself) {
+                                            dialogItself.close();
+                                        }
+                                    }]
+                                });
+                            }
+                        }
+                    });
+                    dialogItself.close();
                 }
-
-            }
+            }, {
+                label: 'No',
+                action: function (dialogItself) {
+                    dialogItself.close();
+                }
+            }]
         });
     };
 

@@ -70,25 +70,36 @@ require('/modules/store.js').exec(function (ctx) {
                 }
             } else if (uriOptions.action == 'deleteSubscription') {
                 // (apiname, version, provider, user, tier, appId)
-                apistore.removeSubscription(options.apiName, options.apiVersion, options.apiProvider,
+                var isSubRemovedResult = apistore.removeSubscription(options.apiName, options.apiVersion, options.apiProvider,
                         user.username, options.appTier, options.appId);
+                var isSubscriptionRemoved;
+                if (isSubRemovedResult) {
+                    isSubscriptionRemoved = {
+                        success: isSubRemovedResult
+                    };
+                } else {
+                    isSubscriptionRemoved = {
+                        success: isSubRemovedResult
+                    };
+                }
+                print(isSubscriptionRemoved);
             } else if (uriOptions.action == 'updateDomain') {
                 apistore.updateAccessAllowDomains(options.accessToken, options.accessAllowedDomains);
             } else if (uriOptions.action == 'getUUID') {
                 var uuidResult = apistore.getUUIDByApi(options.apiProvider, options.apiName, options.apiVersion);
+                var uuid;
                 if (uuidResult != null) {
-                    var uuid = {
+                    uuid = {
                         error: false,
                         response: uuidResult
                     };
-                    print(uuid);
                 } else {
-                    var uuid = {
+                    uuid = {
                         error: true,
                         response: 'No artifact found'
                     };
-                    print(uuid);
                 }
+                print(uuid);
             }
             break;
 
