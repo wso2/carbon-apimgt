@@ -18,7 +18,7 @@
  *
  */
 require('/modules/store.js').exec(function (ctx) {
-    var log = new Log('application_endpoint');
+    var log = new Log('application_api');
     var res = ctx.response;
     var req = ctx.request;
     var session = ctx.session;

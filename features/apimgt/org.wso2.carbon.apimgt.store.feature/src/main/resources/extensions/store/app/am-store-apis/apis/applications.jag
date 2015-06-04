@@ -18,7 +18,7 @@
  *
  */
 require('/modules/store.js').exec(function (ctx) {
-    var log = new Log('applications_endpoint');
+    var log = new Log('applications_api');
     var req = ctx.request;
     var server = require('store').server;
     var user = server.current(ctx.session);
