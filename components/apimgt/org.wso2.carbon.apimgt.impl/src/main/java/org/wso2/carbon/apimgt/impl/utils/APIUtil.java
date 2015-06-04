@@ -5134,28 +5134,4 @@ public final class APIUtil {
 		return json;
 	}
 
-    /**
-     * This method returns the artifactID or the UUID of the api resource.
-     *
-     * @param provider creator of the api
-     * @param name name of the api
-     * @param version version of the api
-     * @param registry
-     * @return artifactId UUID of the resource
-     * @throws APIManagementException
-     */
-    public static String getUUIDByApi(String provider, String name, String version, Registry registry)
-            throws APIManagementException {
-        APIIdentifier identifier = new APIIdentifier(provider, name, version);
-        String path = APIUtil.getAPIPath(identifier);
-        String artifactId = null;
-        try {
-            GovernanceUtils.loadGovernanceArtifacts((UserRegistry) registry);
-            Resource apiResource = registry.get(path);
-            artifactId = apiResource.getUUID();
-        } catch (RegistryException e) {
-            handleException("Error while loading registry/governance artifacts", e);
-        }
-        return artifactId;
-    }
 }

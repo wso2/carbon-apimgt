@@ -42,6 +42,7 @@ import org.wso2.carbon.apimgt.impl.utils.TierNameComparator;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.governance.api.generic.GenericArtifactManager;
 import org.wso2.carbon.governance.api.generic.dataobjects.GenericArtifact;
+import org.wso2.carbon.governance.api.util.GovernanceUtils;
 import org.wso2.carbon.registry.core.ActionConstants;
 import org.wso2.carbon.registry.core.Association;
 import org.wso2.carbon.registry.core.Collection;
@@ -839,5 +840,29 @@ public abstract class AbstractAPIManager implements APIManager {
 			return null;
 		}
 	}
+
+    /**
+     * This method returns the artifactID or the UUID of the api resource.
+     *
+     * @param provider creator of the api
+     * @param name name of the api
+     * @param version version of the api
+     * @return artifactId UUID of the resource
+     * @throws APIManagementException
+     */
+    public String getUUIDByApi(String provider, String name, String version)
+            throws APIManagementException {
+        APIIdentifier identifier = new APIIdentifier(provider, name, version);
+        String path = APIUtil.getAPIPath(identifier);
+        String artifactId = null;
+        try {
+            GovernanceUtils.loadGovernanceArtifacts((UserRegistry) registry);
+            Resource apiResource = registry.get(path);
+            artifactId = apiResource.getUUID();
+        } catch (RegistryException e) {
+            handleException("Error while loading registry/governance artifacts", e);
+        }
+        return artifactId;
+    }
 
 }
