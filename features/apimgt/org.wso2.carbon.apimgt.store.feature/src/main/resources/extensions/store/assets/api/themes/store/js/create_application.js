@@ -93,13 +93,13 @@ $(function () {
     var getNewTrUpdated = function () {
         return "<td>" + metadata.editRowData.appName + "</td> <td>" + metadata.editRowData.tier + "</td> <td>" +
             getState(metadata.editRowData.status) + "</td> <td>" + metadata.editRowData.callbackUrl + "</td> <td>" +
-            metadata.editRowData.description + "</td> <td> <a href=\"javascript:changeAppRowtoEditView('" +
+            metadata.editRowData.description + "</td> <td class='text-center'> <a href=\"javascript:changeAppRowtoEditView('" +
             metadata.editRowData.appName + "','" + metadata.editRowData.userName + "','" +
             metadata.editRowData.appId + "','" + metadata.editRowData.tier + "','" + metadata.editRowData.status +
             "','" + metadata.editRowData.callbackUrl + "','" + metadata.editRowData.description +
-            "');\"><i class='icon-edit'></i> Edit</a> <a href=\"javascript:removeApplication('" +
+            "');\"><i class='fa fa-edit'></i> Edit</a>&nbsp;&nbsp;&nbsp;&nbsp;<a href=\"javascript:removeApplication('" +
             metadata.editRowData.appName + "','" + metadata.editRowData.userName + "','" +
-            metadata.editRowData.appId + "');\"><i class='icon-trash'></i> Delete</a> </td>";
+            metadata.editRowData.appId + "');\"><i class='fa fa-trash'></i> Delete</a> </td>";
     };
 
     /*
@@ -125,8 +125,8 @@ $(function () {
                     getNewTrUpdated();
                 BootstrapDialog.show({
                     type: BootstrapDialog.TYPE_SUCCESS,
-                    title: 'success',
-                    message: '<div><i class="icon-briefcase"></i> Application: ' +
+                    title: 'Application Updated!',
+                    message: '<div><i class="fw fw-check"></i> Application: ' +
                     metadata.editRowData.appName + ' has been updated.</div>',
                     buttons: [{
                         label: 'Close',
@@ -155,9 +155,10 @@ $(function () {
     removeApplication = function (appName, userName, appId) {
         setMetadataForDelRow(appName, appId);
         BootstrapDialog.show({
-            type: BootstrapDialog.TYPE_SUCCESS,
-            title: 'success',
-            message: 'Are you sure you want to remove the application ' + appName + '? This will cancel all the existing subscriptions and keys associated with the application.',
+            type: BootstrapDialog.TYPE_WARNING,
+            title: 'Warning!',
+            message: '<div><i class="fw fw-warning"></i>Are you sure you want to remove the application ' + appName +
+            '? This will cancel all the existing subscriptions and keys associated with the application.</div>',
             buttons: [{
                 label: 'Yes',
                 action: function (dialogItself) {
@@ -202,17 +203,17 @@ $(function () {
      */
     changeAppRowtoEditView = function (appName, userName, appId, tier, status, callbackUrl, description) {
         var rowContent = "<td><input type='text' id='new_overview_name_" + appId +
-            "' name='new_overview_name_" + appId + "' class='input-medium' value='" + appName +
+            "' name='new_overview_name_" + appId + "' class='form-control' value='" + appName +
             "'/></td> <td><select id='new_overview_tier_" + appId +
-            "' name='new_overview_tier_" + appId + "' value='" + tier +
+            "' name='new_overview_tier_" + appId + "' class='form-control' value='" + tier +
             "'> <option>Unlimited</option> <option>Bronze</option> <option>Silver</option> <option>Gold</option> </select></td> <td>" +
             getState(status) + "</td> <td><input id='new_overview_callbackurl_" + appId +
-            "' type='text' name='new_overview_callbackurl_" + appId + "' class='input-medium' value='" +
+            "' type='text' name='new_overview_callbackurl_" + appId + "' class='form-control' value='" +
             callbackUrl + "'/></td> <td><textarea id='new_overview_description_" + appId +
-            "' type='text' name='new_overview_description_" + appId + "' rows='1' cols='10'>" + description +
-            "</textarea></td> <td> <a href=\"javascript:updateApplication('" + userName + "','" +
-            appId + "','" + status + "');\"><i class='icon-save'></i> Save</a> <a href=\"javascript:removeApplication('" +
-            appName + "','" + userName + "','" + appId + "');\"><i class='icon-trash'></i> Delete</a> </td>";
+            "' type='text' name='new_overview_description_" + appId + "' rows='1' cols='10' class='form-control'>" + description +
+            "</textarea></td> <td class='text-center'> <a href=\"javascript:updateApplication('" + userName + "','" +
+            appId + "','" + status + "');\"><i class='fa fa-edit'></i> Save</a>&nbsp;&nbsp;<a href=\"javascript:removeApplication('" +
+            appName + "','" + userName + "','" + appId + "');\"><i class='fa fa-trash'></i> Delete</a> </td>";
 
         document.getElementById("tr-application-" + appId + "-data").innerHTML = rowContent;
     };
@@ -236,8 +237,8 @@ $(function () {
                     refreshApplicationList();
                     BootstrapDialog.show({
                         type: BootstrapDialog.TYPE_SUCCESS,
-                        title: 'success',
-                        message: '<div><i class="icon-briefcase"></i> Application: ' +
+                        title: 'Application Created!',
+                        message: '<div><i class="fw fw-check"></i> Application: ' +
                         appName + ' has been created.</div>',
                         buttons: [{
                             label: 'Close',
@@ -252,8 +253,8 @@ $(function () {
 
                     BootstrapDialog.show({
                         type: BootstrapDialog.TYPE_DANGER,
-                        title: 'Error',
-                        message: '<div><i class="icon-briefcase"></i> Application: ' +
+                        title: 'Application not Created!',
+                        message: '<div><i class="fw fw-warning"></i> Application: ' +
                         appName + ' has not been created.</div>',
                         buttons: [{
                             label: 'Close',
@@ -270,7 +271,7 @@ $(function () {
             BootstrapDialog.show({
                 type: BootstrapDialog.TYPE_DANGER,
                 title: 'Error',
-                message: "Can't leave application name empty!",
+                message: '<div><i class="fw fw-warning"></i>Can\'t leave application name empty!</div>',
                 buttons: [{
                     label: 'Close',
                     action: function (dialogItself) {

@@ -16,9 +16,12 @@
  *  under the License.
  *
  */
-var resources=function(page,meta){
-  return{
-      js:['handlebars-v1.3.0.js','events.js','views.js','console.js','subscription-selection.js'] ,
-      code:['subscriptions/subscriptions-metadata.hbs']
-  };
+var resources = function (page, meta) {
+    return {
+        js: ['handlebars-v1.3.0.js', 'events.js', 'views.js', 'console.js', 'subscription-selection.js',
+            'bootstrap-dialog.min.js', 'bootstrap-editable.js', 'bootstrap-multiselect.js'],
+        css: ['bootstrap/bootstrap-editable.css', 'bootstrap-dialog.min.css',
+            'bootstrap/bootstrap-tagsinput.css', 'bootstrap-multiselect.css','apim_store_custom.css'],
+        code: ['subscriptions/subscriptions-metadata.hbs']
+    };
 };

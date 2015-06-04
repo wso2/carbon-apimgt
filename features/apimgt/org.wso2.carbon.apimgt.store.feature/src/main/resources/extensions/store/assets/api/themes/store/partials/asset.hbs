@@ -16,7 +16,7 @@
         <!-- aset details -->
         <div class="col-xs-12 col-sm-12 col-md-5 col-lg-5 white-bg">
             <div class=" details-image white-bg">
-                <a><i class='icon-user'></i> {{api.provider}}</a>
+
                 {{#if api.thumbnailurl}}
                     <img src='{{api.thumbnailurl}}' class="img-responsive"/>
                 {{else}}
@@ -26,49 +26,49 @@
             </div>
             <div class="details-container">
                 <div class="col-lg-9">
-                    <h4 class="margin-none">asdad</h4>
+                    <h4 class="margin-none">{{t "Your rating:"}}
+                        <span class="asset-rating">
+                            		<div style="width:{{ratingPx}}px"></div>
+                    			</span></h4>
 
-                    <p class="grey padding-none margin-none">{{t "Version"}}</p>
+                    <p class="grey padding-none margin-none">{{t "Version"}} {{api.version}}</p>
+                    <p class="grey padding-none margin-none">{{t "Status"}} {{status}}</p>
+                    <p class="grey padding-none margin-none">{{t "Updated"}} {{api.updatedDate}}</p>
+                    <p class="light-blue padding-none margin-none">{{t "by"}} <a><i class='icon-user'></i> {{api.provider}}</a></p>
+                </div>
 
-                    <p class="light-blue padding-none margin-none">{{t "by"}}</p>
-                </div>
-                <div class="col-lg-5 padding-top right asset-rating margin-left-double">
-                </div>
             </div>
         </div>
         <!-- end of asset details-->
     </div>
-    <div class="white-bg asset-details-wrapper ">
-        <div class="white-bg padding-right-double padding-left-double">
-            <table class='table'>
-                <thead>
-                </thead>
-                <tbody>
-                <tr>
-                    <td><b>{{t "Rating"}}</b></td>
-                    <td>
-                        {{t "Your rating:"}}
-                        <span class="asset-rating">
-                            		<div style="width:{{ratingPx}}px"></div>
-                    			</span>
-                    </td>
-                </tr>
-                <tr>
-                    <td><b>{{t "Version"}}</b></td>
-                    <td>{{api.version}}</td>
-                </tr>
-                <tr>
-                    <td><b>{{t "Status"}}</b></td>
-                    <td>{{status}}</td>
-                </tr>
-                <tr>
-                    <td><b>{{t "Updated"}}</b></td>
-                    <td>{{api.updatedDate}}</td>
-                </tr>
-                </tbody>
-            </table>
-        </div>
-    </div>
+    <!--<div class="white-bg asset-details-wrapper ">-->
+        <!--<div class="white-bg padding-right-double padding-left-double">-->
+            <!--<table class='table'>-->
+                <!--<thead>-->
+                <!--</thead>-->
+                <!--<tbody>-->
+                <!--<tr>-->
+                    <!--<td><b>{{t "Rating"}}</b></td>-->
+                    <!--<td>-->
+
+                    <!--</td>-->
+                <!--</tr>-->
+                <!--<tr>-->
+                    <!--<td><b>{{t "Version"}}</b></td>-->
+                    <!--<td></td>-->
+                <!--</tr>-->
+                <!--<tr>-->
+                    <!--<td><b>{{t "Status"}}</b></td>-->
+                    <!--<td>{{status}}</td>-->
+                <!--</tr>-->
+                <!--<tr>-->
+                    <!--<td><b>{{t "Updated"}}</b></td>-->
+                    <!--<td>{{api.updatedDate}}</td>-->
+                <!--</tr>-->
+                <!--</tbody>-->
+            <!--</table>-->
+        <!--</div>-->
+    <!--</div>-->
     {{#if showSubscribe}}
         <div class='col-lg-12 well appStyleFix'>
             <div class="col-lg-5">
