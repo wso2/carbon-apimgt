@@ -2912,6 +2912,7 @@ public class APIStoreHostObject extends ScriptableObject {
                                 appObj.put("prodValidityTime", appObj, prodKey.getValidityPeriod());
                             }
                             appObj.put("prodRegenerateOption", appObj, prodEnableRegenarateOption);
+                            appObj.put("prodKeyState", appObj, prodKey.getState());
                         } // Prod Token is not generated, but consumer key & secret is available
                         else if (prodKey != null && prodApp != null) {
                             String jsonString = prodApp.getJsonString();
@@ -2950,7 +2951,9 @@ public class APIStoreHostObject extends ScriptableObject {
                                            getApplicationAccessTokenValidityPeriodInSeconds());
                             }
                             appObj.put("prodJsonString", appObj, null);
-
+                            if (prodKey != null) {
+                                appObj.put("prodKeyState", appObj, prodKey.getState());
+                            }
                         }
 
                         APIKey sandboxKey = getAppKey(application, APIConstants.API_KEY_TYPE_SANDBOX);
@@ -3023,6 +3026,9 @@ public class APIStoreHostObject extends ScriptableObject {
                             } else {
                                 appObj.put("sandValidityTime", appObj,
                                            getApplicationAccessTokenValidityPeriodInSeconds());
+                            }
+                            if (sandboxKey != null) {
+                                appObj.put("sandboxKeyState", appObj, sandboxKey.getState());
                             }
                         }
 
