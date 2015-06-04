@@ -660,19 +660,34 @@
                     </div>
                     <div class="modal-body">
                         <ul>
-
-                                <% for (var i = 0; i < lenS; i++) {
+                                <%  var mod = jagg.module("user");
+                                    var userRolesResult = mod.getRolesOfUser(userName);
+                                    for (var i = 0; i < lenS; i++) {
 
                                          %><li><input type="checkbox" name="<%=scopes[i].scopeName%>" value="<%=scopes[i].scopeKey%>" id="<%= scopes[i].scopeKey%>" class="CheckboxProd" <%
-                                         	if(app.prodKeyScopeValue != null){
-                                         		for(var j = 0; j < prodKeyScopeArray.length; j++){
-	                                         		if(prodKeyScopeArray.indexOf(scopes[i].scopeKey)>-1){
-	                                         			%>checked<%
-	                                         			break;
-	                                         		}
-                                         		}
-                                         	}
-                                         	
+                                               if(app.prodKeyScopeValue != null){
+                                                       for(var j = 0; j < prodKeyScopeArray.length; j++){
+                                                               if(prodKeyScopeArray.indexOf(scopes[i].scopeKey)>-1){
+                                                                       %>checked<%
+                                                                       break;
+                                                               }
+                                                        }
+                                                }
+
+                                                if(!userRolesResult.error){
+                                                    var userRoles = userRolesResult.roles;
+                                                    var scopeRoles = scopes[i].scopeRoles.split(",");
+                                                    var disabled = true;
+                                                    for (var j = 0; j < userRoles.length; j++) {
+                                                        if (scopeRoles.indexOf(userRoles[j])>-1){
+                                                            disabled = false;
+                                                            break;
+                                                        }
+                                                    }
+                                                    if (disabled) {
+                                                        %> disabled<%
+                                                    }
+                                                }
                                          %>> <%= scopes[i].scopeName%> : <%= scopes[i].scopeKey %></li><%
                                         }
                                         %></ul><%

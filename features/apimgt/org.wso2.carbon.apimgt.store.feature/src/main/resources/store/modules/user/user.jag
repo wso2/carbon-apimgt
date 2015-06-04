@@ -51,5 +51,22 @@ var checkIfUserExsits = function (username) {
             return true;
         }
 
+};
+
+var getRolesOfUser = function (username){
+    store = jagg.module("manager").getAPIStoreObj();
+
+    try {
+        if (log.isDebugEnabled()) {
+            log.debug("Retrieving roles of user");
+        }
+        return store.getRolesOfUser(username);
+    } catch (e) {
+        log.error(e.message);
+        return {
+            error:true,
+            message:e.message.split("Exception:")[1]
+        };
+    }
 }
 %>
