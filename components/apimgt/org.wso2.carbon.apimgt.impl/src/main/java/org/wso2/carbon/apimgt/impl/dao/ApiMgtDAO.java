@@ -2634,7 +2634,7 @@ public class ApiMgtDAO {
         return querySqlArr;
     }
 
-    private Set<APIKey> getApplicationKeys(String username, int applicationId)
+    public Set<APIKey> getApplicationKeys(String username, int applicationId)
             throws APIManagementException {
 
         String accessTokenStoreTable = APIConstants.ACCESS_TOKEN_STORE_TABLE;
@@ -8897,22 +8897,21 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
         return false;
     }
 
-    public Set<String> getActiveTokensOfApplication(int applicationId) throws APIManagementException {
+    public Set<String> getActiveTokensOfConsumerKey(String consumerKey) throws APIManagementException {
         Connection conn = null;
         ResultSet resultSet = null;
         PreparedStatement ps = null;
         try {
             conn = APIMgtDBUtil.getConnection();
 
-            String sqlQuery = "SELECT TKN.ACCESS_TOKEN" +
-                    " FROM IDN_OAUTH2_ACCESS_TOKEN TKN," +
-                    "      AM_APPLICATION_KEY_MAPPING AKM" +
-                    " WHERE AKM.APPLICATION_ID = ?" +
-                    " AND AKM.CONSUMER_KEY = TKN.CONSUMER_KEY" +
-                    " AND TKN.TOKEN_STATE = 'ACTIVE'";
+            String sqlQuery = "SELECT ACCESS_TOKEN" +
+                              " FROM IDN_OAUTH2_ACCESS_TOKEN" +
+                              " WHERE " +
+                              " CONSUMER_KEY = ?" +
+                              " AND TOKEN_STATE = 'ACTIVE'";
 
             ps = conn.prepareStatement(sqlQuery);
-            ps.setInt(1, applicationId);
+            ps.setString(1, consumerKey);
             resultSet = ps.executeQuery();
             Set<String> tokens = new HashSet<String>();
             while (resultSet.next()) {
@@ -8920,15 +8919,15 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
             }
             return tokens;
         } catch (SQLException e) {
-            handleException("Failed to get active access tokens of application " + applicationId, e);
+            handleException("Failed to get active access tokens for consumerKey " + consumerKey, e);
         } catch (CryptoException e) {
-            handleException("Token decryption failed of an active access token of application " + applicationId, e);
+            handleException("Token decryption failed of an active access token of consumerKey " + consumerKey, e);
         } finally {
             APIMgtDBUtil.closeAllConnections(ps, conn, resultSet);
         }
         return null;
     }
-    
+
     /**
      * Check the given scope key is already available under given tenant
      *

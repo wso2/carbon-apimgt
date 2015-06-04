@@ -38,6 +38,7 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.model.APIKey;
 import org.wso2.carbon.apimgt.api.model.OAuthAppRequest;
 import org.wso2.carbon.apimgt.api.LoginPostExecutor;
 import org.wso2.carbon.apimgt.api.model.API;
@@ -1085,13 +1086,13 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 		String thumbnailPathPattern = APIConstants.TAGS_INFO_ROOT_LOCATION + "/%s/thumbnail.png";
 
 		//if the tenantDomain is not specified super tenant domain is used
-		if(tenantDomain == null || tenantDomain.trim() == "" ){
-			try {
-				tenantDomain = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager().getSuperTenantDomain();
-			} catch (org.wso2.carbon.user.core.UserStoreException e) {
-				handleException("Cannot get super tenant domain name",e);
-			}
-		}
+        if (tenantDomain == null || "".equals(tenantDomain.trim())) {
+            try {
+                tenantDomain = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager().getSuperTenantDomain();
+            } catch (org.wso2.carbon.user.core.UserStoreException e) {
+                handleException("Cannot get super tenant domain name", e);
+            }
+        }
 
 		//get the registry instance related to the tenant domain
 		UserRegistry govRegistry = null;
@@ -1867,8 +1868,19 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             return;
         }
 
-        Set<String> activeTokens = apiMgtDAO.getActiveTokensOfApplication(applicationId);
-        if(activeTokens == null || activeTokens.isEmpty()){
+        Set<APIKey> consumerApps = apiMgtDAO.getApplicationKeys(this.username, applicationId);
+
+        Set<String> activeTokens = new HashSet<String>();
+        for (APIKey apiKey : consumerApps) {
+            if (apiKey.getConsumerKey() != null) {
+                Set<String> tempTokens = KeyManagerHolder.getKeyManagerInstance().
+                        getActiveTokensByConsumerKey(apiKey.getConsumerKey());
+                if (tempTokens != null) {
+                    activeTokens.addAll(tempTokens);
+                }
+            }
+        }
+        if (activeTokens == null || activeTokens.isEmpty()) {
             return;
         }
 
