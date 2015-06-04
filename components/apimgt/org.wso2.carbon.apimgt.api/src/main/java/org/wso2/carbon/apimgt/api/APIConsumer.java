@@ -180,6 +180,16 @@ public interface APIConsumer extends APIManager {
                                                      String applicationName, String keyType,
                                                      String[] allowedDomainArray) throws APIManagementException;
 
+    /**
+     *This method will delete from application key mapping table and application registration table.
+     *@param applicationId application id
+     *@param tokenType Token Type.
+     *@return
+     *@throws APIManagementException
+     */
+    public void deleteFromApplicationRegistration(String applicationId ,String tokenType) throws
+            APIManagementException;
+
 
     /**
      * Returns a set of SubscribedAPIs filtered by the given application name and in between starting and ending indexes.

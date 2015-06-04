@@ -54,8 +54,7 @@
                          }
 
                         %>
-
-                        <% if(app.prodKey != null ) { %>
+                        <% if(app.prodKey != null || app.prodKeyState == "COMPLETED" ) { %>
                         <!-- START Show key info -->
 
                         <div class="row-fluid keys">
@@ -183,7 +182,13 @@
                                    		data-callbackUrl="<%=encode.forHtmlAttribute(app.callbackUrl)%>"
                                    		data-keytype="PRODUCTION"
                                    		iteration="200"><%=i18n.localize("generateKey")%></button>
+                                   		<button  class="btn btn-primary btn-providekeys generateAgainBtn"
+											data-keyType="PRODUCTION"
+										    data-applicationId="<%=app.id%>">
+											Generate again
+										</button>
                         		</div>
+
 							<%}%>
                         <% } else{ %>
                         <%=i18n.localize("prodKeyMsg")%>
@@ -289,7 +294,9 @@
 	   			<div class="span6">
 
                         <!-- START Show key info -->
-                    	<% if(app.sandboxKey!=null){%>
+
+                    	<% if(app.sandboxKey!=null || app.sandboxKeyState == "COMPLETED"){%>
+
 
                         <div class="row-fluid keys">
 							<div class="span3">
@@ -410,6 +417,11 @@
                                    		data-callbackUrl="<%=encode.forHtmlAttribute(app.callbackUrl)%>"
                                    		data-keytype="SANDBOX"
                                    		iteration="200"><%=i18n.localize("generateKey")%></button>
+                                   		<button  class="btn btn-primary btn-providekeys generateAgainBtn"
+											data-keyType="SANDBOX"
+										    data-applicationId="<%=app.id%>">
+											Generate again
+										</button>
                         		</div>
 					   		<%}%>
                        <% } else {%>

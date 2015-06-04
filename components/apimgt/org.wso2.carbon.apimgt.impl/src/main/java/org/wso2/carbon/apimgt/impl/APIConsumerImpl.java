@@ -1629,6 +1629,21 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     }
 
     /**
+     *This method will delete application key mapping table and application registration table.
+     *@param applicationId application id
+     *@param tokenType Token Type.
+     *@return
+     *@throws APIManagementException
+     */
+    public void deleteFromApplicationRegistration(String applicationId ,String tokenType) throws
+            APIManagementException{
+
+        apiMgtDAO.deleteApplicationRegistration(applicationId , tokenType);
+        apiMgtDAO.deleteApplicationKeyMappingByApplicationIdAndType(applicationId , tokenType);
+
+    }
+
+    /**
      *
      * @param jsonString this string will contain oAuth app details
      * @param userName user name of logged in user.
@@ -2030,7 +2045,6 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 appRegWFDto =
                         (ApplicationRegistrationWorkflowDTO) WorkflowExecutorFactory.getInstance()
                                 .createWorkflowDTO(WorkflowConstants.WF_TYPE_AM_APPLICATION_REGISTRATION_PRODUCTION);
-                applicationNameAfterAppend.append("_PRODUCTION");
 
             }// if it is a sandBox application.
             else if (APIConstants.API_KEY_TYPE_SANDBOX.equals(tokenType)) { // if
@@ -2044,7 +2058,6 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 appRegWFDto =
                         (ApplicationRegistrationWorkflowDTO) WorkflowExecutorFactory.getInstance()
                                 .createWorkflowDTO(WorkflowConstants.WF_TYPE_AM_APPLICATION_REGISTRATION_SANDBOX);
-                applicationNameAfterAppend.append("_SANDBOX");
             }
             // Build key manager instance and create oAuthAppRequest by
             // jsonString.

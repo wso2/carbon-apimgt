@@ -427,6 +427,37 @@ include("/jagg/jagg.jag");
             }
         }
         print(obj);
+     }else if (action == "deleteFromApplicationRegistration" && request.getMethod() == 'POST') {
+
+        if (!user) {
+            print({
+                error:true,
+                message:msg.error.loginRequired(action)
+            });
+            return;
+        }
+
+        var applicationId = request.getParameter("applicationId");
+        var keyType = request.getParameter("keyType");
+
+        mod = jagg.module("subscription");
+
+        result = mod.deleteFromApplicationRegistration(applicationId , keyType);
+
+        if (result.error) {
+            obj = {
+                error:result.error,
+                message:msg.error.authError(action, username)
+            };
+        } else {
+            obj = {
+                error:false,
+                data:{
+                    key:result.key
+                }
+            }
+        }
+        print(obj);
      }
      else {
         print({

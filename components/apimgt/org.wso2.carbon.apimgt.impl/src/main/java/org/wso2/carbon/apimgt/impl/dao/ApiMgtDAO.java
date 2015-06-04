@@ -5764,6 +5764,43 @@ public class ApiMgtDAO {
             APIMgtDBUtil.closeAllConnections(ps,connection,null);
         }
     }
+
+    /**
+     * This method will delete a record from AM_APPLICATION_REGISTRATION
+     * @param applicationId
+     * @param tokenType
+     */
+    public void deleteApplicationKeyMappingByApplicationIdAndType(String applicationId, String tokenType)
+            throws APIManagementException {
+
+        Connection connection = null;
+        PreparedStatement ps = null;
+        try {
+            connection = APIMgtDBUtil.getConnection();
+            String deleteRegistrationEntry = "DELETE " +
+                    "FROM" +
+                    "   AM_APPLICATION_KEY_MAPPING  " +
+                    "WHERE" +
+                    "   APPLICATION_ID = ?" +
+                    "AND" +
+                    "   KEY_TYPE = ?";
+
+            if (log.isDebugEnabled()) {
+                log.debug("trying to delete a record from AM_APPLICATION_KEY_MAPPING table by application ID " +
+                        applicationId + " and Token type" + tokenType);
+            }
+            ps = connection.prepareStatement(deleteRegistrationEntry);
+            ps.setString(1, applicationId);
+            ps.setString(2, tokenType);
+            ps.executeUpdate();
+            connection.commit();
+        } catch (SQLException e) {
+            handleException("Error while removing AM_APPLICATION_KEY_MAPPING table", e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(ps,connection,null);
+        }
+
+    }
     /**
      * Delete a record from AM_APPLICATION_REGISTRATION table by application ID and token type.
      * @param applicationId APIM application ID.
@@ -6608,7 +6645,8 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
 
         	String whereClause = "  WHERE SUB.USER_ID =? AND APP.NAME=? AND SUB.SUBSCRIBER_ID=APP.SUBSCRIBER_ID";
         	String whereClauseCaseInSensitive = "  WHERE LOWER(SUB.USER_ID) =LOWER(?) AND APP.NAME=? AND SUB.SUBSCRIBER_ID=APP.SUBSCRIBER_ID";
-        	String whereClausewithGroupId = "  WHERE  APP.GROUP_ID= ? AND APP.NAME=? AND SUB.SUBSCRIBER_ID=APP.SUBSCRIBER_ID";
+        	String whereClausewithGroupId = "  WHERE  (APP.GROUP_ID = ? OR (APP.GROUP_ID = '' AND SUB.USER_ID = ?)) AND " +
+        	        "APP.NAME = ? AND SUB.SUBSCRIBER_ID = APP.SUBSCRIBER_ID";
         	
 
             if(groupId != null && !groupId.equals("null") && !groupId.isEmpty()){
@@ -6625,7 +6663,8 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
                    
             if(groupId != null && !groupId.equals("null") && !groupId.isEmpty()){
                 prepStmt.setString(1, groupId);
-                prepStmt.setString(2, applicationName);
+                prepStmt.setString(2, userId);
+                prepStmt.setString(3, applicationName);
             }else{
                 prepStmt.setString(1, userId);
                 prepStmt.setString(2, applicationName);
