@@ -156,7 +156,7 @@ $(function () {
         setMetadataForDelRow(appName, appId);
         BootstrapDialog.show({
             type: BootstrapDialog.TYPE_WARNING,
-            title: 'Warning',
+            title: 'Warning!',
             message: '<div><i class="fw fw-warning"></i>Are you sure you want to remove the application ' + appName +
             '? This will cancel all the existing subscriptions and keys associated with the application.</div>',
             buttons: [{
