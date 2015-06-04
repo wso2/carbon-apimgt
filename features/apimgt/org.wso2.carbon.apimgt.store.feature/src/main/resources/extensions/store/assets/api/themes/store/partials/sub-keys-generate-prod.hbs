@@ -2,18 +2,21 @@
     This view is shown when a key has not been generated
  -->
 {{#if isDataNotAvailable}}
-    <fieldset>
-        <span class='help-block'>Please subscribe to APIs to view tokens</span>
-    </fieldset>
+    <div class='form-group'>
+        <label class='custom-form-label col-lg-2 col-md-2 col-sm-12 col-xs-12'>&nbsp;</label>
+        <div class='custom-form-right col-lg-5 col-md-8 col-sm-8 col-xs-12'>
+            <span class='help-block'>Please subscribe to APIs to view tokens</span>
+        </div>
+    </div>
 {{else}}
-    <form>
-        <fieldset>
+    <div class='form-group'>
+        <label class='custom-form-label col-lg-2 col-md-2 col-sm-12 col-xs-12'>&nbsp;</label>
+        <div class='custom-form-right col-lg-5 col-md-8 col-sm-8 col-xs-12'>
             <span class='help-block'>{{ environment }} keys are not yet generated for this app </span>
             {{#if isScopeAvailable}}
-                <input type='button' class='btn btn-primary btn-small' value='Select Scopes '
-                       id='btn-select-{{ ../environment }}-scopes-view'/>
+                <input type='button' class='btn btn-primary' value='Select Scopes' id='btn-select-{{ ../environment }}-scopes-view'/>
             {{/if}}
-            <input type='button' class='btn btn-primary' value='Generate ' id='btn-generate-{{ environment }}-token'/>
-        </fieldset>
-    </form>
+            <input type='button' class='btn btn-primary' value='Generate' id='btn-generate-{{ environment }}-token'/>
+        </div>
+    </div>
 {{/if}}
