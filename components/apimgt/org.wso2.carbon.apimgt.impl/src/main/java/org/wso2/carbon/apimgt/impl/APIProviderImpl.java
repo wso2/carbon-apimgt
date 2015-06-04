@@ -1144,8 +1144,18 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      *          If an error occurs while trying to create
      *          the new version of the API
      */
-    public void createNewAPIVersion(API api, String newVersion) throws DuplicateAPIException,
-                                                                       APIManagementException {
+    public boolean createNewAPIVersion(API api, String newVersion) throws DuplicateAPIException ,APIManagementException {
+	    boolean success = false;
+	    boolean isTenantFlowStarted = false;
+	    String providerName = api.getId().getProviderName();
+	    try {
+		    String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(providerName));
+		    if(tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
+			    isTenantFlowStarted = true;
+			    PrivilegedCarbonContext.startTenantFlow();
+			    PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
+		    }
+
         String apiSourcePath = APIUtil.getAPIPath(api.getId());
 
         String targetPath = APIConstants.API_LOCATION + RegistryConstants.PATH_SEPARATOR +
@@ -1153,7 +1163,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                             RegistryConstants.PATH_SEPARATOR + api.getId().getApiName() +
                             RegistryConstants.PATH_SEPARATOR + newVersion +
                             APIConstants.API_RESOURCE_NAME;
-        try {
+
             if (registry.resourceExists(targetPath)) {
                 throw new DuplicateAPIException("API version already exist with version :"
                                                 + newVersion);
@@ -1311,7 +1321,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             artifactManager.updateGenericArtifact(oldArtifact);
 
             int tenantId = -1234;
-            String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(api.getId().getProviderName()));
             try {
                 tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager().getTenantId(tenantDomain);
             } catch (UserStoreException e) {
@@ -1321,7 +1330,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
             apiMgtDAO.addAPI(newAPI,tenantId);
             registry.commitTransaction();
-
+		    success = true;
         } catch (ParseException e) {
             String msg =
                          "Couldn't Create json Object from Swagger object for version" + newVersion + " of : " +
@@ -1335,7 +1344,12 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             }
             String msg = "Failed to create new version : " + newVersion + " of : " + api.getId().getApiName();
             handleException(msg, e);
-        }
+	    } finally {
+		    if (isTenantFlowStarted) {
+			    PrivilegedCarbonContext.endTenantFlow();
+		    }
+	    }
+	    return success;
     }
 
     /**

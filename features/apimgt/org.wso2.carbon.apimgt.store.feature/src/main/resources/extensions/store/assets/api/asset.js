@@ -254,9 +254,9 @@ asset.renderer = function(ctx) {
             populateEndPoints : function(page){
                 if (page.assets && page.assets.id) {
                     var httpEndpoint,httpsEndpoint;
-                    if(page.api.serverURL){
-                        httpEndpoint = page.api.serverURL.split(",")[0];
-                        httpsEndpoint = page.api.serverURL.split(",")[1];
+                    if (page.api.serverURL.split(",")[0] == 'Production and Sandbox') {
+                        httpEndpoint = page.api.serverURL.split(",")[1];
+                        httpsEndpoint = page.api.serverURL.split(",")[2];
                     }
                     var isDefaultVersion=page.api.isDefaultVersion;
 
@@ -320,7 +320,38 @@ asset.renderer = function(ctx) {
                     var assetUrl = widgetLink+'?name=' + asset.name + '&version=' + attributes.overview_version + '&provider=' + attributes.overview_provider;
                     page.api_embed_links = '<iframe width="450" height="120" src="' + assetUrl + '" frameborder="0" allowfullscreen></iframe>';
                 }
-            }
+            },  populateApiActionBar: function(page,meta){
+                var action = {};
+                action.url = '/asts/api/list';
+                action.iconClass ='ast-create';
+                action.name ='APIs';
+                page.actionBar.actions.push(action);
+                action = {};
+                action.url = '/asts/api/prototyped_apis';
+                action.iconClass ='ast-create';
+                action.name ='Prototyped APIs';
+                page.actionBar.actions.push(action);
+                action = {};
+                action.url = '/asts/api/my_applications';
+                action.iconClass ='ast-create';
+                action.name ='My Applications';
+                page.actionBar.actions.push(action);
+                action = {};
+                action.url = '/asts/api/my_subscriptions';
+                action.iconClass ='ast-create';
+                action.name ='My Subscriptions';
+                page.actionBar.actions.push(action);
+                action = {};
+                action.url = '/asts/api/forum';
+                action.iconClass ='ast-create';
+                action.name ='Forum';
+                page.actionBar.actions.push(action);
+                action = {};
+                action.url = '/asts/api/statistics';
+                action.iconClass ='ast-create';
+                action.name ='Statistics';
+                page.actionBar.actions.push(action);
         }
-    };
+        }
+    }
 }

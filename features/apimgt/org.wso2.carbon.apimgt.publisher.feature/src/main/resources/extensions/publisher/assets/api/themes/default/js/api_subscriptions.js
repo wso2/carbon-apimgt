@@ -85,56 +85,52 @@ $(function () {
     var getNewDivContent = function () {
         var contentData = "Unknown state selected!";
         if (metadata.newRowData.status == "UNBLOCKED") {
-            contentData = "<form><input type=\"radio\" name=\"" + metadata.newRowData.apiProvider + "-" + metadata.newRowData.apiName + "-" +
+            contentData = "<form><input type=\"radio\" name=\"" +
+            metadata.newRowData.apiProvider + "-" + metadata.newRowData.apiName + "-" +
             metadata.newRowData.apiVersion + "-" + metadata.newRowData.appId + "-" +
-            metadata.newRowData.apiUsername + "-" + metadata.newRowData.application + "\" onclick=\"javascript:updateSubscription('" +
-            metadata.newRowData.apiProvider + "','" + metadata.newRowData.apiName + "','" +
-            metadata.newRowData.apiVersion + "','" + metadata.newRowData.appId + "','PROD_ONLY_BLOCKED','" +
-            metadata.newRowData.apiUsername + "','" + metadata.newRowData.application +
-            "');\"> Production Only <input type=\"radio\" name=\"" + metadata.newRowData.apiProvider + "-" + metadata.newRowData.apiName + "-" +
+            metadata.newRowData.apiUsername + "-" + metadata.newRowData.application +
+            "\" id=\"r1-" + metadata.newRowData.apiProvider + "-" + metadata.newRowData.apiName + "-" +
             metadata.newRowData.apiVersion + "-" + metadata.newRowData.appId + "-" +
-            metadata.newRowData.apiUsername + "-" + metadata.newRowData.application + "\" onclick=\"javascript:updateSubscription('" +
+            metadata.newRowData.apiUsername + "-" + metadata.newRowData.application +
+            "\" value=\"PROD_ONLY_BLOCKED\"> Production Only <input type=\"radio\" name=\"" +
+            metadata.newRowData.apiProvider + "-" + metadata.newRowData.apiName + "-" +
+            metadata.newRowData.apiVersion + "-" + metadata.newRowData.appId + "-" +
+            metadata.newRowData.apiUsername + "-" + metadata.newRowData.application +
+            "\" id=\"r2-" + metadata.newRowData.apiProvider + "-" + metadata.newRowData.apiName + "-" +
+            metadata.newRowData.apiVersion + "-" + metadata.newRowData.appId + "-" +
+            metadata.newRowData.apiUsername + "-" + metadata.newRowData.application +
+            "\" value=\"BLOCKED\" checked> Production & Sandbox <a href=\"javascript:updateSubscription('" +
             metadata.newRowData.apiProvider + "','" + metadata.newRowData.apiName + "','" +
-            metadata.newRowData.apiVersion + "','" + metadata.newRowData.appId + "','UNBLOCKED','" +
-            metadata.newRowData.apiUsername + "','" + metadata.newRowData.application +
-            "');\" checked> Production & Sandbox <a href=\"javascript:updateSubscription('" +
-            metadata.newRowData.apiProvider + "','" + metadata.newRowData.apiName + "','" +
-            metadata.newRowData.apiVersion + "','" + metadata.newRowData.appId + "','BLOCKED','" +
+            metadata.newRowData.apiVersion + "','" + metadata.newRowData.appId + "','GET_SELECTED','" +
             metadata.newRowData.apiUsername + "','" + metadata.newRowData.application + "');\"> Block </a> </form>";
         } else if (metadata.newRowData.status == "BLOCKED") {
-            contentData = "<form><input type=\"radio\" name=\"" + metadata.newRowData.apiProvider + "-" + metadata.newRowData.apiName + "-" +
+            contentData = "<form><input type=\"radio\" name=\"" + metadata.newRowData.apiProvider +
+            "-" + metadata.newRowData.apiName + "-" +
             metadata.newRowData.apiVersion + "-" + metadata.newRowData.appId + "-" +
-            metadata.newRowData.apiUsername + "-" + metadata.newRowData.application + "\" onclick=\"javascript:updateSubscription('" +
-            metadata.newRowData.apiProvider + "','" + metadata.newRowData.apiName + "','" +
-            metadata.newRowData.apiVersion + "','" + metadata.newRowData.appId + "','PROD_ONLY_BLOCKED','" +
-            metadata.newRowData.apiUsername + "','" + metadata.newRowData.application +
-            "');\" disabled> Production Only <input type=\"radio\" name=\"" + metadata.newRowData.apiProvider + "-" + metadata.newRowData.apiName + "-" +
+            metadata.newRowData.apiUsername + "-" + metadata.newRowData.application +
+            "\" disabled> Production Only <input type=\"radio\" name=\"" +
+            metadata.newRowData.apiProvider + "-" + metadata.newRowData.apiName + "-" +
             metadata.newRowData.apiVersion + "-" + metadata.newRowData.appId + "-" +
-            metadata.newRowData.apiUsername + "-" + metadata.newRowData.application + "\" onclick=\"javascript:updateSubscription('" +
-            metadata.newRowData.apiProvider + "','" + metadata.newRowData.apiName + "','" +
-            metadata.newRowData.apiVersion + "','" + metadata.newRowData.appId + "','UNBLOCKED','" +
-            metadata.newRowData.apiUsername + "','" + metadata.newRowData.application +
-            "');\" disabled> Production & Sandbox <a href=\"javascript:updateSubscription('" + metadata.newRowData.apiProvider +
+            metadata.newRowData.apiUsername + "-" + metadata.newRowData.application +
+            "\" checked disabled> Production & Sandbox <a href=\"javascript:updateSubscription('" +
+            metadata.newRowData.apiProvider +
             "','" + metadata.newRowData.apiName + "','" + metadata.newRowData.apiVersion + "','" +
             metadata.newRowData.appId + "','UNBLOCKED','" + metadata.newRowData.apiUsername + "','" +
             metadata.newRowData.application + "');\"> Unblock </a> </form>";
         } else if (metadata.newRowData.status == "PROD_ONLY_BLOCKED") {
-            contentData = "<form><input type=\"radio\" name=\"" + metadata.newRowData.apiProvider + "-" + metadata.newRowData.apiName + "-" +
+            contentData = "<form><input type=\"radio\" name=\"" + metadata.newRowData.apiProvider +
+            "-" + metadata.newRowData.apiName + "-" +
             metadata.newRowData.apiVersion + "-" + metadata.newRowData.appId + "-" +
-            metadata.newRowData.apiUsername + "-" + metadata.newRowData.application + "\" onclick=\"javascript:updateSubscription('" +
-            metadata.newRowData.apiProvider + "','" + metadata.newRowData.apiName + "','" +
-            metadata.newRowData.apiVersion + "','" + metadata.newRowData.appId + "','PROD_ONLY_BLOCKED','" +
-            metadata.newRowData.apiUsername + "','" + metadata.newRowData.application +
-            "');\" checked> Production Only <input type=\"radio\" name=\"" + metadata.newRowData.apiProvider + "-" + metadata.newRowData.apiName + "-" +
+            metadata.newRowData.apiUsername + "-" + metadata.newRowData.application +
+            "\" checked disabled> Production Only <input type=\"radio\" name=\"" +
+            metadata.newRowData.apiProvider + "-" + metadata.newRowData.apiName + "-" +
             metadata.newRowData.apiVersion + "-" + metadata.newRowData.appId + "-" +
-            metadata.newRowData.apiUsername + "-" + metadata.newRowData.application + "\" onclick=\"javascript:updateSubscription('" +
-            metadata.newRowData.apiProvider + "','" + metadata.newRowData.apiName + "','" +
-            metadata.newRowData.apiVersion + "','" + metadata.newRowData.appId + "','UNBLOCKED','" +
-            metadata.newRowData.apiUsername + "','" + metadata.newRowData.application +
-            "');\"> Production & Sandbox <a href=\"javascript:updateSubscription('" + metadata.newRowData.apiProvider +
+            metadata.newRowData.apiUsername + "-" + metadata.newRowData.application +
+            "\" disabled> Production & Sandbox <a href=\"javascript:updateSubscription('" +
+            metadata.newRowData.apiProvider +
             "','" + metadata.newRowData.apiName + "','" + metadata.newRowData.apiVersion + "','" +
-            metadata.newRowData.appId + "','BLOCKED','" + metadata.newRowData.apiUsername + "','" +
-            metadata.newRowData.application + "');\"> Block </a> </form>";
+            metadata.newRowData.appId + "','UNBLOCKED','" + metadata.newRowData.apiUsername + "','" +
+            metadata.newRowData.application + "');\"> Unblock </a> </form>";
         }
         return contentData;
     };
@@ -145,12 +141,24 @@ $(function () {
      */
     updateSubscription = function (apiProvider, apiName, apiVersion, appId, status, apiUsername, application) {
         var apiData = {};
-        setMetadata(apiProvider, apiName, apiVersion, appId, status, apiUsername, application);
+        var newStatus = status;
+        if (status == 'GET_SELECTED') {
+            if (document.getElementById('r1-' + apiProvider + '-' + apiName + '-' + apiVersion + '-' +
+                appId + '-' + apiUsername + '-' + application).checked) {
+                newStatus = document.getElementById('r1-' + apiProvider + '-' + apiName + '-' +
+                apiVersion + '-' + appId + '-' + apiUsername + '-' + application).value;
+            } else if (document.getElementById('r2-' + apiProvider + '-' + apiName + '-' +
+                apiVersion + '-' + appId + '-' + apiUsername + '-' + application).checked) {
+                newStatus = document.getElementById('r2-' + apiProvider + '-' + apiName + '-' +
+                apiVersion + '-' + appId + '-' + apiUsername + '-' + application).value;
+            }
+        }
+        setMetadata(apiProvider, apiName, apiVersion, appId, newStatus, apiUsername, application);
         apiData.apiName = apiName;
         apiData.apiVersion = apiVersion;
         apiData.apiProvider = apiProvider;
         apiData.appId = appId;
-        apiData.status = status;
+        apiData.status = newStatus;
         $.ajax({
             type: 'POST',
             url: getSubscriptionAPI('updateSubscription'),

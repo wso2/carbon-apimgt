@@ -4292,7 +4292,7 @@ public final class APIUtil {
      * @throws APIManagementException If API key manager URL unspecified
      */
     public static String getGatewayEndpoints(API api) throws APIManagementException {
-        String endpoints = "none";
+        StringBuilder endpoints = new StringBuilder();
         APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
                 getAPIManagerConfigurationService().getAPIManagerConfiguration();
         String publishedEnvironments = writeEnvironmentsToArtifact(api);
@@ -4302,18 +4302,17 @@ public final class APIUtil {
                 if (config.getApiGatewayEnvironments().keySet().toArray()[i].toString()
                         .equals(publishedEnvironmentSet[j])) {
                     Environment environment = (Environment) config.getApiGatewayEnvironments().values().toArray()[i];
-                    endpoints = environment.getApiGatewayEndpoint();
+                    endpoints.append(publishedEnvironmentSet[j] + ","+ environment.getApiGatewayEndpoint()+ ",");
                     break;
                 }
             }
         }
-        if (StringUtils.isBlank(publishedEnvironments)) {
-            handleException("Published environments unspecified");
-        }
-        if (StringUtils.isBlank(endpoints) || endpoints == "none") {
+        if (endpoints.toString().isEmpty()) {
             handleException("Endpoints are unspecified or No matching environments found!");
+        } else {
+            endpoints.deleteCharAt(endpoints.length() - 1);
         }
-        return endpoints;
+        return endpoints.toString();
     }
 
     /**
