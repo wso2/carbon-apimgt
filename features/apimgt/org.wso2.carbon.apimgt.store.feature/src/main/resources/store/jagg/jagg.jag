@@ -772,7 +772,7 @@ var jagg = jagg || (function () {
         var errors = [];
         //set most used parapeters
         config.name = { type:"name"};
-        config.provider = { type:"name"};
+        config.provider = { type:"provider"};
         config.version = { type:"name"};        
 
         for(var key in config){
@@ -812,6 +812,10 @@ var jagg = jagg || (function () {
               case "email":
                 var regex = /^([A-Za-z0-9_\-\.])+\@([A-Za-z0-9_\-\.])+\.([A-Za-z]{2,4})$/;
                 if(!regex.test(value)) errors.push(key);              
+                break;
+               case "provider":
+                var regex = /([~!#$;%^*+={}\|\\<>\"\'\,])/;  
+                if(regex.test(value)) errors.push(key);
                 break;
               default:
             }            
