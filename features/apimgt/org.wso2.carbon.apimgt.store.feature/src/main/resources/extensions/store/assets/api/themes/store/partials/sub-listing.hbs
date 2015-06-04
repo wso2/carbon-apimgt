@@ -4,53 +4,46 @@ Subscription listing page
 
 <br/><br/>
 <legend>{{t "Subscribed APIs "}}</legend>
-
 <div id="assets-container" data-pages="{{pages}}">
-    <div class="row-fluid">
-        {{#if isDataNotAvailable}}
-            <fieldset>
-                <span class='help-block'>Please subscribe to APIs to view subscribed APIs</span>
-            </fieldset>
-        {{else}}
+    {{#if isDataNotAvailable}}
+        <fieldset>
+            <span class='help-block'>Please subscribe to APIs to view subscribed APIs</span>
+        </fieldset>
+    {{else}}
+        <section>
             {{#each subscriptions}}
-                <div class="span3 asset" data-id="{{name}}-{{version}}-{{provider}}"
-                     data-type="{{type}}">
+                <div class="ctrl-wr-asset">
                     <button title="Delete Subscription" type="button" class="close btn-del-sub"
                             onclick="removeAPISubscription('{{name}}','{{version}}','{{provider}}');
-                                    return false;"><i class="fw fw-delete">X</i></button>
-                    {{#if thumburl}}
-                        <img src='{{thumburl}}'>
-                    {{else}}
-                        <img src='{{url ""}}/extensions/assets/api/themes/store/imgs/api-default.png'>
-                    {{/if}}
-                    <a href="javascript:getAPIUrl('{{provider}}','{{name}}','{{version}}');" >
-                        <div class="asset-details">
-                            <div class="asset-name">
-                                <ul>
-                                    <li>
-                                        <h4>{{t "name"}}</h4>
-                                        <a class="asset-name" href="#">{{name}}</a>
-                                    </li>
-                                    <li>
-                                        <h4>{{t "version"}}</h4>
-                                        <a class="asset-version" href="#">{{version}}</a>
+                                    return false;"><i class="fa fa-trash"></i> </button>
+                    <div class="itm-ast">
+                        <a class="ast-img " href="javascript:getAPIUrl('{{provider}}','{{name}}','{{version}}');" >
+                            {{#if thumburl}}
+                                <img src='{{thumburl}}'>
+                            {{else}}
+                                <img src='{{url ""}}/extensions/assets/api/themes/store/imgs/api-default.png'>
+                            {{/if}}
+                        </a>
+                        <div class="ast-content">
+                            <div class="ast-title padding">
+                                <a class="ast-name truncate" href="javascript:getAPIUrl('{{provider}}','{{name}}','{{version}}');">{{name}}</a>
+                                <span class="ast-auth">{{provider}}</span>
+                            </div>
+                            <div class="pull-left asset-rating-container">
+                        <span class="asset-rating">
 
-                                    </li>
-
-                                    <li>
-                                        <h4>{{t "author"}}</h4>
-                                        <a class="asset-author" href="#">{{provider}}</a>
-
-                                    </li>
-
-                                </ul>
+                        </span>
+                            </div>
+                            <div class="pull-right">
 
                             </div>
                         </div>
-                    </a>
+                    </div>
                 </div>
             {{/each}}
-        {{/if}}
-    </div>
+        </section>
+    {{/if}}
 </div>
-<div class="loading-inf-scroll"></div>
+<div class="loading-inf-scroll">
+
+</div><div class="loading-inf-scroll"></div>
