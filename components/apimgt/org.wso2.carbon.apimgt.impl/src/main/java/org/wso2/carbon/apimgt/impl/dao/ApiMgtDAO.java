@@ -6608,7 +6608,8 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
 
         	String whereClause = "  WHERE SUB.USER_ID =? AND APP.NAME=? AND SUB.SUBSCRIBER_ID=APP.SUBSCRIBER_ID";
         	String whereClauseCaseInSensitive = "  WHERE LOWER(SUB.USER_ID) =LOWER(?) AND APP.NAME=? AND SUB.SUBSCRIBER_ID=APP.SUBSCRIBER_ID";
-        	String whereClausewithGroupId = "  WHERE  APP.GROUP_ID= ? AND APP.NAME=? AND SUB.SUBSCRIBER_ID=APP.SUBSCRIBER_ID";
+        	String whereClausewithGroupId = "  WHERE  (APP.GROUP_ID = ? OR (APP.GROUP_ID = '' AND SUB.USER_ID = ?)) AND " +
+        	        "APP.NAME = ? AND SUB.SUBSCRIBER_ID = APP.SUBSCRIBER_ID";
         	
 
             if(groupId != null && !groupId.equals("null") && !groupId.isEmpty()){
@@ -6625,7 +6626,8 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
                    
             if(groupId != null && !groupId.equals("null") && !groupId.isEmpty()){
                 prepStmt.setString(1, groupId);
-                prepStmt.setString(2, applicationName);
+                prepStmt.setString(2, userId);
+                prepStmt.setString(3, applicationName);
             }else{
                 prepStmt.setString(1, userId);
                 prepStmt.setString(2, applicationName);
