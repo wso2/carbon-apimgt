@@ -68,6 +68,7 @@ import org.wso2.carbon.utils.CarbonUtils;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -163,14 +164,35 @@ public class APIKeyMgtSubscriberService extends AbstractAdmin {
 
             // Then Create OAuthApp
             OAuthAdminService oAuthAdminService = new OAuthAdminService();
-
             OAuthConsumerAppDTO oAuthConsumerAppDTO = new OAuthConsumerAppDTO();
-
             oAuthConsumerAppDTO.setApplicationName(applicationName);
             oAuthConsumerAppDTO.setCallbackUrl(callbackUrl);
+
+            String[] allowedGrantTypes = oAuthAdminService.getAllowedGrantTypes();
+            List<String> grantTypeList = Arrays.asList(allowedGrantTypes);
+
+            // CallbackURL is needed for authorization_code and implicit grant types. If CallbackURL is empty,
+            // simply remove those grant types from the list
+            if (callbackUrl == null || callbackUrl.isEmpty()) {
+                grantTypeList.remove("authorization_code");
+                grantTypeList.remove("implicit");
+            }
+
+            StringBuilder grantTypeString = new StringBuilder();
+
+            for (String grantType : grantTypeList) {
+                grantTypeString.append(grantType).append(" ");
+            }
+            if (grantTypeString.length() > 0) {
+                oAuthConsumerAppDTO.setGrantTypes(grantTypeString.toString().trim());
+                log.debug("Setting Grant Type String : " + grantTypeString);
+            }
+
             oAuthConsumerAppDTO.setOAuthVersion(OAuthConstants.OAuthVersions.VERSION_2);
             log.debug("Creating OAuth App " + applicationName);
             oAuthAdminService.registerOAuthApplicationData(oAuthConsumerAppDTO);
+            // === Finished Creating OAuth App ===
+
             log.debug("Created OAuth App " + applicationName);
             OAuthConsumerAppDTO createdApp = oAuthAdminService.getOAuthApplicationDataByAppName(oAuthConsumerAppDTO
                                                                                                         .getApplicationName());
