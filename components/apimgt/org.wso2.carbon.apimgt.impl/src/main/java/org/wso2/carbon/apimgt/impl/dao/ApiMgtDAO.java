@@ -2634,7 +2634,7 @@ public class ApiMgtDAO {
         return querySqlArr;
     }
 
-    public Set<APIKey> getApplicationKeys(String username, int applicationId)
+    private Set<APIKey> getApplicationKeys(String username, int applicationId)
             throws APIManagementException {
 
         String accessTokenStoreTable = APIConstants.ACCESS_TOKEN_STORE_TABLE;
@@ -2756,6 +2756,40 @@ public class ApiMgtDAO {
         }
 
         return key;
+    }
+
+    /**
+     * Gets ConsumerKeys when given the Application ID.
+     * @param applicationId
+     * @return {@link java.util.Set} containing ConsumerKeys
+     * @throws APIManagementException
+     */
+    public Set<String> getConsumerKeysOfApplication(int applicationId) throws APIManagementException {
+        Connection connection = null;
+        PreparedStatement preparedStatement = null;
+        ResultSet resultSet = null;
+        Set<String> consumerKeys = new HashSet<String>();
+
+        String sqlQuery = "SELECT CONSUMER_KEY FROM AM_APPLICATION_KEY_MAPPING WHERE APPLICATION_ID = ?";
+
+        try {
+            connection = APIMgtDBUtil.getConnection();
+            preparedStatement = connection.prepareStatement(sqlQuery);
+            preparedStatement.setInt(1, applicationId);
+            resultSet = preparedStatement.executeQuery();
+            while (resultSet.next()) {
+                String consumerKey = resultSet.getString("CONSUMER_KEY");
+                if (consumerKey != null) {
+                    consumerKeys.add(consumerKey);
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Error occurred while getting the State of Access Token", e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(preparedStatement, connection, resultSet);
+        }
+
+        return consumerKeys;
     }
 
     private APIKey getProductionKeyOfApplication(int applicationId, String accessTokenStoreTable)

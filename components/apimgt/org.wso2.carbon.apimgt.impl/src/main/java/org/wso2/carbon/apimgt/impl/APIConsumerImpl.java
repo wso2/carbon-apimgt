@@ -1868,18 +1868,17 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             return;
         }
 
-        Set<APIKey> consumerApps = apiMgtDAO.getApplicationKeys(this.username, applicationId);
+        Set<String> consumerKeys = apiMgtDAO.getConsumerKeysOfApplication(applicationId);
 
         Set<String> activeTokens = new HashSet<String>();
-        for (APIKey apiKey : consumerApps) {
-            if (apiKey.getConsumerKey() != null) {
+        for (String consumerKey : consumerKeys) {
                 Set<String> tempTokens = KeyManagerHolder.getKeyManagerInstance().
-                        getActiveTokensByConsumerKey(apiKey.getConsumerKey());
+                        getActiveTokensByConsumerKey(consumerKey);
                 if (tempTokens != null) {
                     activeTokens.addAll(tempTokens);
                 }
-            }
         }
+
         if (activeTokens == null || activeTokens.isEmpty()) {
             return;
         }
