@@ -425,7 +425,7 @@ $(function () {
                                     type: BootstrapDialog.TYPE_DANGER,
                                     title: 'Fail to Delete Subscription!',
                                     message: '<div><i class="fw fw-warning"></i> API : ' +
-                                    appName + ' subscription could not be deleated.</div>',
+                                    appName + ' subscription could not be deleted.</div>',
                                     buttons: [{
                                         label: 'Close',
                                         action: function (dialogItself) {
