@@ -18,7 +18,7 @@
  */
 
 var removeAPISubscription;
-
+var getAPIUrl;
 /*
  This js function will populate the UI after metadata generation in pages/my_subscription.jag
  */
@@ -162,6 +162,43 @@ $(function () {
                 }
             }
         }
+    };
+
+    /*
+     *This function bind the data and get the UUID needed to return API URL.
+     */
+    getAPIUrl = function (apiProvider, apiName, apiVersion) {
+        var apiData = {};
+        var appName = $('#subscription_selection').val();
+        apiData.apiName = apiName;
+        apiData.apiVersion = apiVersion;
+        apiData.apiProvider = apiProvider;
+        apiData.appName = appName;
+        $.ajax({
+            type: 'POST',
+            url: getSubscriptionAPI(appName, 'getUUID'),
+            data: apiData,
+            success: function (data) {
+                if (!data.error) {
+                    var uuid = data.response;
+                    window.location = 'details/' + uuid;
+                } else {
+                    BootstrapDialog.show({
+                        type: BootstrapDialog.TYPE_DANGER,
+                        title: 'Error',
+                        message: '<div><i class="icon-briefcase"></i> Unable to locate the artifact</div>',
+                        buttons: [{
+                            label: 'Close',
+                            action: function (dialogItself) {
+                                dialogItself.close();
+                            }
+
+                        }]
+
+                    });
+                }
+            }
+        });
     };
 
     /*

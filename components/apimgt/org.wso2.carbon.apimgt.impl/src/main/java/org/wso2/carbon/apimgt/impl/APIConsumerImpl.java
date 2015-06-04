@@ -3143,5 +3143,17 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 
     }
 
+    /**
+     * This method returns the artifactID or the UUID of the api resource.
+     *
+     * @param provider creator of the api
+     * @param name name of the api
+     * @param version version of the api
+     * @return artifactId UUID of the resource
+     * @throws APIManagementException
+     */
+    public String getUUIDByApi(String provider, String name, String version) throws APIManagementException {
+        return APIUtil.getUUIDByApi(provider, name, version, registry);
+    }
 
 }

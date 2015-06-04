@@ -321,4 +321,11 @@ var apistore = {};
         return this.impl.updateAccessAllowDomains(accessToken, domains);
     };
 
+    /*
+     * This method returns the UUID of an artifact
+     */
+    StoreAPIProxy.prototype.getUUIDByApi = function (provider, name, version) {
+        return this.impl.getUUIDByApi(provider, name, version);
+    };
+
 })(apistore);

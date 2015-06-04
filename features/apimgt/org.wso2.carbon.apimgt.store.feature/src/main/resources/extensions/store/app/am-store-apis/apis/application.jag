@@ -74,6 +74,21 @@ require('/modules/store.js').exec(function (ctx) {
                         user.username, options.appTier, options.appId);
             } else if (uriOptions.action == 'updateDomain') {
                 apistore.updateAccessAllowDomains(options.accessToken, options.accessAllowedDomains);
+            } else if (uriOptions.action == 'getUUID') {
+                var uuidResult = apistore.getUUIDByApi(options.apiProvider, options.apiName, options.apiVersion);
+                if (uuidResult != null) {
+                    var uuid = {
+                        error: false,
+                        response: uuidResult
+                    };
+                    print(uuid);
+                } else {
+                    var uuid = {
+                        error: true,
+                        response: 'No artifact found'
+                    };
+                    print(uuid);
+                }
             }
             break;
 
