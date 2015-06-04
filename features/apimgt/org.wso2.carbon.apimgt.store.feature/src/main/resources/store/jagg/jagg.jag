@@ -815,9 +815,7 @@ var jagg = jagg || (function () {
                 break;
                case "provider":
                 var regex = /([~!#$;%^*+={}\|\\<>\"\'\,])/;  
-                log.info("within provider css");
-                log.info(regex.test(value)+"value"+value);
-                if(regex.test(value)) errors.push(key);                
+                if(regex.test(value)) errors.push(key);
                 break;
               default:
             }            
