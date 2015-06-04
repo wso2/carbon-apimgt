@@ -2858,6 +2858,7 @@ public class APIStoreHostObject extends ScriptableObject {
                                 NativeObject scopeObj = new NativeObject();
                                 scopeObj.put("scopeKey", scopeObj, scope.getKey());
                                 scopeObj.put("scopeName", scopeObj, scope.getName());
+                                scopeObj.put("scopeRoles",scopeObj, scope.getRoles());
                                 scopesArray.put(scopesArray.getIds().length, scopesArray, scopeObj);
                             }
                         }
@@ -4202,6 +4203,68 @@ public class APIStoreHostObject extends ScriptableObject {
             apiConsumer.updateAccessAllowDomains(accessToken, accessAllowDomainsArray);
         } catch (Exception e) {
             handleException(e.getMessage(), e);
+        }
+    }
+
+    /**
+     * Given a name of a user the function returns the roles of the user
+     *
+     * @param cx
+     * @param thisObj
+     * @param args
+     * @param funObj
+     * @return
+     * @throws APIManagementException
+     * @throws AxisFault
+     */
+    public static NativeObject jsFunction_getRolesOfUser(Context cx, Scriptable thisObj,
+                                                         Object[] args,
+                                                         Function funObj) throws APIManagementException, AxisFault {
+        String userName = (String) args[0];
+
+        NativeObject result = new NativeObject();
+        NativeArray roles = new NativeArray(0);
+
+        if (userName != null) {
+
+            APIManagerConfiguration config = HostObjectComponent.getAPIManagerConfiguration();
+            String serverURL = config.getFirstProperty(APIConstants.AUTH_MANAGER_URL);
+
+            UserAdminStub userAdminStub = new UserAdminStub(null, serverURL + "UserAdmin");
+            String adminUsername = config.getFirstProperty(APIConstants.AUTH_MANAGER_USERNAME);
+            String adminPassword = config.getFirstProperty(APIConstants.AUTH_MANAGER_PASSWORD);
+
+            CarbonUtils.setBasicAccessSecurityHeaders(adminUsername, adminPassword,
+                                                      true, userAdminStub._getServiceClient());
+            FlaggedName[] flaggedNames;
+            try {
+                flaggedNames = userAdminStub.getRolesOfUser(userName, "*", -1);
+                if (flaggedNames != null) {
+                    for (int i = 0; i < flaggedNames.length; i++) {
+                        if (flaggedNames[i].getSelected()) {
+                            roles.put(roles.getIds().length, roles, flaggedNames[i].getItemName());
+                        }
+                    }
+                }
+                result.put("error", result, false);
+                result.put("roles", result, roles);
+                return result;
+            } catch (RemoteException e) {
+                handleException("Error getting roles of user:" + userName, e);
+                result.put("error", result, true);
+                result.put("message", result, "Error getting roles of user:" + userName);
+                return result;
+            } catch (UserAdminUserAdminException e) {
+                handleException("Error getting roles of user:" + userName, e);
+                result.put("error", result, true);
+                result.put("message", result, "Error getting roles of user:" + userName);
+                return result;
+            }
+
+        } else {
+            result.put("error", result, true);
+            result.put("message", result, "Please provide a valid username");
+            return result;
         }
     }
 
