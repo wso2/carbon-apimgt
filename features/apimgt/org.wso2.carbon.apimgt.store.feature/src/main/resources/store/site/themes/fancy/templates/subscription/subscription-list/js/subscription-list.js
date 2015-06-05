@@ -93,6 +93,7 @@ $(document).ready(function () {
         var keyType = elem.attr("data-keytype");
         var authoDomains;
         var domainsDiv;
+        var applicationName = elem.attr("data-application");
         var regen;
         var link;
         var userName = elem.attr("data-username");
@@ -127,6 +128,17 @@ $(document).ready(function () {
         }, function (result) {
             if (!result.error) {
                 location.reload();
+                var accToken = result.data.key.accessToken;
+
+                if(keyType== 'PRODUCTION'){
+                    //Storing production access token in local storage
+                    localStorage.setItem('production-key'+applicationName, accToken);
+                }
+                else{
+                    //Storing sandbox access token in local storage
+                    localStorage.setItem('sandbox-key'+applicationName,accToken);
+                }
+
             } else {
                 jagg.message({content: result.message, type: "error"});
             }
@@ -251,7 +263,6 @@ $(document).ready(function () {
 
 var mapExistingOauthClient=function(oBtnElement){
 
-    ////////////////////////////////////////////////////////////////////////////////////////////
     var elem = oBtnElement;
     var i = elem.attr("iteration");
     var keyType = elem.attr("data-keytype");
@@ -378,12 +389,16 @@ var regenerate=function(appName,keyType,i,btn,div,clientId,clientSecret) {
                 if(!regenerateOption){ $('.proRegenerateForm').hide(); }
                 $('.accessTokenDisplayPro').html(result.data.key.accessToken).attr('data-value',result.data.key.accessToken);
                 $('.accessTokenScopeDisplayPro').html(generatedScopesNames).attr('data-value',generatedScopesNames);
+                //Storing production access token in local storage
+                localStorage.setItem('production-key'+appName, result.data.key.accessToken);
                 showHideKeys();
             } else{
                 $('.sandAccessTokenHidden').val(result.data.key.accessToken);
                 if(!regenerateOption){ $('.sandRegenerateForm').hide(); }
                 $('.accessTokenDisplaySand').html(result.data.key.accessToken).attr('data-value',result.data.key.accessToken);
                 $('.sandScopeDisplayPro').html(generatedScopesNames).attr('data-value',generatedScopesNames);
+                //Storing sandbox access token in local Storage
+                localStorage.setItem('sandbox-key'+appName, result.data.key.accessToken);
                 //change sandScopeDisplayPro name
                 showHideKeys();
             }
