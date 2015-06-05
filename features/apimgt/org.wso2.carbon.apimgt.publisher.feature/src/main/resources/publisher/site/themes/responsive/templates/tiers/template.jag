@@ -7,8 +7,7 @@
 		<div class="title-section">
                 <h2><%=i18n.localize("tierPermissions")%></h2>
         </div>
-        <div class="content-section shadow-up">
-        	<div class="content-data">
+        <div class = "col-sm-12">
         		<table class="table table-bordered">
         			<thead>
         				<tr>
@@ -48,22 +47,22 @@
 	        					<div>
 		        					<div id="radiodev" class="form-inline">
 		        					<% if (denied) {%>
-		        						<label class="checkbox-inline radio">
+		        						<label class="radio-inline">
 			        						<input type="radio"  name="<%=radioInputName%>" value="allow" id="y"/>
 			       							<%=i18n.localize("allow")%>
 			       						</label>
-			       						<label class="checkbox-inline radio">
+			       						<label class="radio-inline">
 			       							<input type="radio" name="<%=radioInputName%>" value="deny" id="z" checked/>
 			        						<%=i18n.localize("deny")%>
 			        					</label>
 		        					 <%} else {
 		        					 	
 		        					 %>
-		        					 	<label class="checkbox-inline radio">
+		        					 	<label class="radio-inline">
 		        					 		<input type="radio"  name="<%=radioInputName%>" value="allow" id="y" checked/>
 			       							<%=i18n.localize("allow")%>
 			       						</label>
-			       						<label class="checkbox-inline radio">
+			       						<label class="radio-inline">
 			       							<input type="radio" name="<%=radioInputName%>" value="deny" id="z"/>
 			        						<%=i18n.localize("deny")%>
 			        					</label>
@@ -71,19 +70,21 @@
 		        					 </div>
 		        					 <div class="form-inline">
 		        					 	<label class="control-label" for="roles" id="rolesLabel" name="rolesLabel">roles</label>
-		        					 	<input type="text" class="input rolesInput"  id="<%=roleInputName%>" name="<%=roleInputName%>" value="<%=roleList%>"/>
-		        					 	<label class="errorTier" id="errorTier<%=String(i)%>"style="display:none;">This field is required.</label>
-                                        <label class="errorTier" id="errorTierRoles<%=String(i)%>"style="display:none;">Invalid role name[s]</label>
-		        					 	<label class="help-block" id="rolesHelp"><%=i18n.localize("rolesHelpMsg")%></label>
+		        					 	<input type="text" class="input rolesInput form-control"  id="<%=roleInputName%>" name="<%=roleInputName%>" value="<%=roleList%>"/>
+		        					 	<label class="errorTier errorMsg" id="errorTier<%=String(i)%>"style="display:none;">This field is required.</label>
+                                        <label class="errorTier errorMsg" id="errorTierRoles<%=String(i)%>"style="display:none;">Invalid role name[s]</label>
+		        					 	<p class="help-block" id="rolesHelp"><%=i18n.localize("rolesHelpMsg")%></p>
 		        					 </div>
-	        					</div> 
+	        					</div>
 		                	
 		                		
 	                        	
 		            			
 		            			
 		            			<div class="form-actions" id="saveButtons">
-                    				<button type="submit" id="addNewAPIButton" name="addNewAPIButton" onclick="updatePermissions('<%=tiers[i].tierName%>', <%=i%>, '<%=tierPermissionBtn%>' )" class="btn btn-primary has-spinner <%=tierPermissionBtn%>"><%=i18n.localize("updatePermissions")%></button>
+                    				<div class="form-group">
+                                        <button type="submit" id="addNewAPIButton" name="addNewAPIButton" onclick="updatePermissions('<%=tiers[i].tierName%>', <%=i%>, '<%=tierPermissionBtn%>' )" class="btn btn-primary has-spinner <%=tierPermissionBtn%>"><%=i18n.localize("updatePermissions")%></button>
+                                    </div>
                 				</div>
                 				
                 				<div class="alert alert-success" id="<%=statusUpdateMsgName%>" style="display:none;">
@@ -95,6 +96,6 @@
         			%>
         			</tbody>
         		</table>
-        	</div>
+        </div>
 	</div>
 <%});%>
