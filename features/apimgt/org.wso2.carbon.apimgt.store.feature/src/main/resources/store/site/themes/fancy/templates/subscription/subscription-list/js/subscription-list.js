@@ -258,11 +258,25 @@ $(document).ready(function () {
     });
 
     $("#btnProvideKeyProductionSave").click(function () {
-        mapExistingOauthClient($(this));
+
+        if($("#inputConsumerKeyProduction").val().trim() == "" || $("#inputConsumerSecretProduction").val().trim() == "") {
+            jagg.message({content: "Consumer key and Consumer secret can not be empty.", type: "error"});
+        }
+        else{
+            mapExistingOauthClient($(this));
+        }
+
     });
 
     $("#btnProvideKeySandBoxSave").click(function () {
-        mapExistingOauthClient($(this));
+
+        if($("#inputConsumerKeySandBox").val().trim() == "" || $("#inputConsumerSecretSandBox").val().trim() == "") {
+            jagg.message({content: "Consumer key and Consumer secret can not be empty.", type: "error"});
+        }
+        else{
+            mapExistingOauthClient($(this));
+        }
+
     });
 
 });
