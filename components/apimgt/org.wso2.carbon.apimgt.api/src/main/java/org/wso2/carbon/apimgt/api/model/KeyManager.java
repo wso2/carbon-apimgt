@@ -21,6 +21,7 @@ package org.wso2.carbon.apimgt.api.model;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 
 import java.util.Map;
+import java.util.Set;
 
 /**
  * This Interface is  providing functionality to  key manager specific core operations.
@@ -125,7 +126,7 @@ public interface KeyManager {
      * @return OAuthApplicationInfo with oAuth application properties.
      * @throws APIManagementException
      */
-    OAuthApplicationInfo createSemiManualAuthApplication(OAuthAppRequest appInfoRequest) throws APIManagementException;
+    OAuthApplicationInfo mapOAuthApplication(OAuthAppRequest appInfoRequest) throws APIManagementException;
 
     /**
      * This method will create an AccessTokenRequest using OAuthApplicationInfo object. If tokenRequest is null,
@@ -176,4 +177,20 @@ public interface KeyManager {
      * @throws APIManagementException
      */
     void deleteRegisteredResourceByAPIId(String apiID) throws APIManagementException;
+
+    /**
+     * This method will be used to delete mapping records of oAuth applications.
+     * @param consumerKey
+     * @throws APIManagementException
+     */
+    void deleteMappedApplication(String consumerKey) throws APIManagementException;
+
+    /**
+     * When provided the ConsumerKey, this method will provide all the Active tokens issued against that Key.
+     * @param consumerKey ConsumerKey of the OAuthClient
+     * @return {@link java.util.Set} having active access tokens.
+     * @throws APIManagementException
+     */
+    Set<String> getActiveTokensByConsumerKey(String consumerKey) throws APIManagementException;
+
 }

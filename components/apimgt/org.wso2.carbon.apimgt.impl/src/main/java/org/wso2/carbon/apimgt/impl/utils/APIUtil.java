@@ -564,6 +564,7 @@ public final class APIUtil {
             api.setDestinationStatsEnabled(artifact.getAttribute(APIConstants.API_OVERVIEW_DESTINATION_BASED_STATS_ENABLED));
             api.setAsDefaultVersion(Boolean.valueOf(artifact.getAttribute(APIConstants.API_OVERVIEW_IS_DEFAULT_VERSION)));
             api.setImplementation(artifact.getAttribute(APIConstants.PROTOTYPE_OVERVIEW_IMPLEMENTATION));
+            api.setBusinessOwner(artifact.getAttribute(APIConstants.API_OVERVIEW_BUSS_OWNER));
             ArrayList<URITemplate> urlPatternsList;
             urlPatternsList = ApiMgtDAO.getAllURITemplates(api.getContext(), api.getId().getVersion());
             Set<URITemplate> uriTemplates = new HashSet<URITemplate>(urlPatternsList);
@@ -1171,7 +1172,11 @@ public final class APIUtil {
 
                 registry.put(wsdlResourcePath, wsdlResource);
                 //set the anonymous role for wsld resource to avoid basicauth security.
-                setResourcePermissions(api.getId().getProviderName(), api.getVisibility(), null, wsdlResourcePath);
+                String visibleRoles[] = null;
+                if (api.getVisibleRoles() != null) {
+                    visibleRoles = api.getVisibleRoles().split(",");
+                }
+                setResourcePermissions(api.getId().getProviderName(), api.getVisibility(), visibleRoles, wsdlResourcePath);
             }
 
 			//set the wsdl resource permlink as the wsdlURL.
@@ -2500,7 +2505,7 @@ public final class APIUtil {
                         
             String bamProfileConfig = bamProfile.replaceAll("\\[1\\]", bamServerURL).
             		replaceAll("\\[2\\]", bamServerUser).
-            		replaceAll("\\[3\\]", bamServerPassword);
+            		replaceAll("\\[3\\]", encryptPassword(bamServerPassword));
 
             Resource resource = registry.newResource();
             resource.setContent(bamProfileConfig);
@@ -2552,8 +2557,8 @@ public final class APIUtil {
 				for (File sequenceFile : sequences) {
 					String sequenceFileName = sequenceFile.getName();
 					String regResourcePath =
-							APIConstants.API_CUSTOM_SEQUENCE_LOCATION + File.separator +
-							customSequenceType + File.separator + sequenceFileName;
+							APIConstants.API_CUSTOM_SEQUENCE_LOCATION + "/" +
+							customSequenceType + "/" + sequenceFileName;
 					if (registry.resourceExists(regResourcePath)) {
 						if (log.isDebugEnabled()) {
 							log.debug("Defined sequences have already been added to the registry");
@@ -3886,13 +3891,11 @@ public final class APIUtil {
      *
      * @param userName     logged in username
      * @param resourceUrl  resource want to download
-     * @param tenantDomain loggedUserTenantDomain
      * @return map that contains Data of the resource
      * @throws APIManagementException
      */
 
-    public static Map<String, Object> getDocument(String userName, String resourceUrl,
-                                                  String tenantDomain)
+    public static Map<String, Object> getDocument(String userName, String resourceUrl)
             throws APIManagementException {
         Map<String, Object> documentMap = new HashMap<String, Object>();
 
@@ -3905,17 +3908,14 @@ public final class APIUtil {
             handleException("Invalid resource Path " + resourceUrl);
         }
         Resource apiDocResource;
-        Registry registryType = null;
-        int tenantId = MultitenantConstants.SUPER_TENANT_ID;
+        Registry registryType;
+        int tenantId;
+        String tenantDomain = MultitenantUtils.getTenantDomain(userName);
         try {
-            if (tenantDomain != null && !"null".equals(tenantDomain)) {
                 tenantId = ServiceReferenceHolder
                         .getInstance().getRealmService().getTenantManager()
                         .getTenantId(tenantDomain);
-            }
-            if (tenantId != MultitenantConstants.SUPER_TENANT_ID) {
-                userName = userName.split("@" + tenantDomain)[0];
-            }
+                userName = MultitenantUtils.getTenantAwareUsername(userName);
             registryType = ServiceReferenceHolder
                     .getInstance().
                             getRegistryService().getGovernanceUserRegistry(userName, tenantId);
@@ -4041,6 +4041,20 @@ public final class APIUtil {
         String tenantDomain = MultitenantUtils.getTenantDomain(username);
         int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager().getTenantId(tenantDomain);
         PermissionUpdateUtil.updatePermissionTree(tenantId);
+    }
+
+    /**
+     * Check whether given application name is available under current subscriber or group
+     *
+     * @param subscriber      subscriber name
+     * @param applicationName application name
+     * @param groupId         group of the subscriber
+     * @return true if application is available for the subscriber
+     * @throws APIManagementException if failed to get applications for given subscriber
+     */
+    public static boolean isApplicationExist(String subscriber, String applicationName, String groupId)
+            throws APIManagementException {
+        return ApiMgtDAO.isApplicationExist(applicationName, subscriber, groupId);
     }
 
 }

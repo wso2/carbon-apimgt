@@ -40,7 +40,7 @@ include("/jagg/jagg.jag");
 	    return;
         }
 
-        application = request.getParameter("application");
+        application = request.getParameter("application", "UTF-8");
         username = user.username;
         tier = request.getParameter("tier");
         callbackUrl = request.getParameter("callbackUrl");

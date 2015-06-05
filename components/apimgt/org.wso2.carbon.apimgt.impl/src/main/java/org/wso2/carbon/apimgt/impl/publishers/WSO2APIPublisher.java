@@ -32,17 +32,14 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.protocol.ClientContext;
 import org.apache.http.entity.mime.HttpMultipartMode;
 import org.apache.http.entity.mime.MultipartEntity;
-
 import org.apache.http.entity.mime.content.FileBody;
 import org.apache.http.entity.mime.content.StringBody;
 import org.apache.http.impl.client.BasicCookieStore;
-
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.protocol.BasicHttpContext;
 import org.apache.http.protocol.HttpContext;
 import org.apache.http.util.EntityUtils;
-
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.*;
 import org.wso2.carbon.apimgt.impl.APIConstants;
@@ -51,7 +48,6 @@ import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.registry.core.Resource;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.core.session.UserRegistry;
-
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.utils.CarbonUtils;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
@@ -63,6 +59,7 @@ import java.net.*;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.regex.Pattern;
 
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
@@ -540,7 +537,15 @@ public class WSO2APIPublisher implements APIPublisher {
             k++;
         }
         params.add(new BasicNameValuePair("tiersCollection", checkValue(tiersSet.toString())));
-        params.add(new BasicNameValuePair("context", api.getContext()));
+        String contextTemplate = api.getContextTemplate();
+        //If the context template ends with {version} this means that the version will be at the end of the context.
+        if(contextTemplate != null && contextTemplate.endsWith("/" + APIConstants.VERSION_PLACEHOLDER)){
+            //Remove the {version} part from the context template.
+            contextTemplate = contextTemplate.split(Pattern.quote("/" + APIConstants.VERSION_PLACEHOLDER))[0];
+        } else {
+            contextTemplate = api.getContext();
+        }
+        params.add(new BasicNameValuePair("context", contextTemplate));
         params.add(new BasicNameValuePair("bizOwner", api.getBusinessOwner()));
         params.add(new BasicNameValuePair("bizOwnerMail", api.getBusinessOwnerEmail()));
         params.add(new BasicNameValuePair("techOwner", api.getTechnicalOwner()));

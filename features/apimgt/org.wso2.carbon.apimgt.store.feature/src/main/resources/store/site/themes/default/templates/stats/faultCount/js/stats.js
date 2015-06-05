@@ -1,25 +1,8 @@
-var t_on = {
-    'apiChart':1,
-    'subsChart':1,
-    'userChart':1,
-    'serviceTimeChart':1,
-    'tempLoadingSpace':1,
-    'subsChart':1
-};
 var currentLocation;
-
-var chartColorScheme1 = ["#3da0ea","#bacf0b","#e7912a","#4ec9ce","#f377ab","#ec7337","#bacf0b","#f377ab","#3da0ea","#e7912a","#bacf0b"];
-//fault colors || shades of red
-var chartColorScheme2 = ["#ED2939","#E0115F","#E62020","#F2003C","#ED1C24","#CE2029","#B31B1B","#990000","#800000","#B22222","#DA2C43"];
-//fault colors || shades of blue
-var chartColorScheme3 = ["#0099CC","#436EEE","#82CFFD","#33A1C9","#8DB6CD","#60AFFE","#7AA9DD","#104E8B","#7EB6FF","#4981CE","#2E37FE"];
 currentLocation=window.location.pathname;
 var statsEnabled = isDataPublishingEnabled();
 
-require(["dojo/dom", "dojo/domReady!"], function(dom){
     currentLocation=window.location.pathname;
-    //Initiating the fake progress bar
-    jagg.fillProgress('apiChart');jagg.fillProgress('userChart');jagg.fillProgress('subsChart');jagg.fillProgress('serviceTimeChart');jagg.fillProgress('tempLoadingSpace');
 
     jagg.post("/site/blocks/stats/faultCount/ajax/stats.jag", { action:"getFirstAccessTime",currentLocation:currentLocation  },
         function (json) {            
@@ -30,42 +13,73 @@ require(["dojo/dom", "dojo/domReady!"], function(dom){
                     
                     var d = new Date();
                     var firstAccessDay = new Date(json.usage[0].year, json.usage[0].month-1, json.usage[0].day);
-                    var currentDay = new Date(d.getFullYear(), d.getMonth(), d.getDate());
-                    if(firstAccessDay.valueOf() == currentDay.valueOf()){
-                        currentDay = new Date(d.getFullYear(), d.getMonth(), d.getDate()+1);
-                    }
-                    var rangeSlider =  $("#rangeSlider");
-                    //console.info(currentDay);
-                    rangeSlider.dateRangeSlider({
-                        "bounds":{
-                            min: firstAccessDay,
-                            max: currentDay
-                        },
-                        "defaultValues":{
-                            min: firstAccessDay,
-                            max: currentDay
-                        }
+                    var currentDay = new Date(d.getFullYear(), d.getMonth(), d.getDate(),d.getHours(),d.getMinutes());
+
+                    //day picker
+                    $('#today-btn').on('click',function(){
+                        getDateTime(currentDay,currentDay-86400000);
                     });
-                    rangeSlider.bind("valuesChanged", function(e, data){
-                        var from = convertTimeString(data.values.min);
-                        var to = convertTimeStringPlusDay(data.values.max);                        
-                        drawAPIResponseFaultCountTable(from,to);
+
+                    //hour picker
+                    $('#hour-btn').on('click',function(){
+                        getDateTime(currentDay,currentDay-3600000);
+                    })
+
+                    //week picker
+                    $('#week-btn').on('click',function(){
+                        getDateTime(currentDay,currentDay-604800000);
+                    })
+
+                    //month picker
+                    $('#month-btn').on('click',function(){
+                        getDateTime(currentDay,currentDay-(604800000*4));
+                    });
+
+                    $('#date-range').click(function(){
+                         $(this).removeClass('active');
+                    });
+
+                    //date picker
+                    $('#date-range').daterangepicker({
+                          timePicker: true,
+                          timePickerIncrement: 30,
+                          format: 'YYYY-MM-DD h:mm',
+                          opens: 'left',
+                    });
+
+                    $('#date-range').on('apply.daterangepicker', function(ev, picker) {
+                       btnActiveToggle(this);
+                       var from = convertTimeString(picker.startDate);
+                       var to = convertTimeString(picker.endDate);
+                       var fromStr = from.split(" ");
+                       var toStr = to.split(" ");
+                       var dateStr = fromStr[0] + " <i>" + fromStr[1] + "</i> <b>to</b> " + toStr[0] + " <i>" + toStr[1] + "</i>";
+                       $("#date-range span").html(dateStr);
+                       drawAPIResponseFaultCountTable(from,to);
+                    });
+
+                    //setting default date
+                    var to = new Date();
+                    var from = new Date(to.getTime() - 1000 * 60 * 60 * 24 * 30);
+
+                    getDateTime(to,from);
+
+                    $('body').on('click', '.btn-group button', function (e) {
+                        $(this).addClass('active');
+                        $(this).siblings().removeClass('active');
                     });
                 }
 
                 else if (json.usage && json.usage.length == 0 && statsEnabled) {
-                    $('#content').html("");
-                    $('#content').append($('<div class="errorWrapper"><img src="../themes/fancy/templates/stats/images/statsEnabledThumb.png" alt="Stats Enabled"></div>'));
+                    $('.stat-page').html("");
+                    $('.stat-page').append($('<br><div class="errorWrapper"><img src="../themes/default/templates/stats/images/statsEnabledThumb.png" alt="Stats Enabled"></div>'));
                 }
 
                 else{
-                    $('#content').html("");
-                    $('#content').append($('<div class="errorWrapper"><span class="label top-level-warning"><i class="icon-warning-sign icon-white"></i>'
-                        +i18n.t('errorMsgs.checkBAMConnectivity')+'</span><br/><img src="../themes/fancy/templates/stats/faultCount/images/statsThumb.png" alt="Smiley face"></div>'));
-
+                    $('.stat-page').html("");
+                    $('.stat-page').append($('<br><div class="errorWrapper"><span class="top-level-warning"><span class="glyphicon glyphicon-warning-sign blue"></span>'
+                        +i18n.t('errorMsgs.checkBAMConnectivity')+'</span><br/><img src="../themes/default/templates/stats/apiCallType/images/statsThumb.png" alt="Smiley face"></div>'));
                 }
-
-
             }
             else {
                 if (json.message == "AuthenticateError") {
@@ -74,32 +88,19 @@ require(["dojo/dom", "dojo/domReady!"], function(dom){
                     jagg.message({content:json.message,type:"error"});
                 }
             }
-            t_on['apiChart'] = 0;
-            t_on['userChart'] = 1;
         }, "json");
-
-});
-
 
 $(document).ready(function(){
     $(document).scroll(function(){
         var top=$(document).scrollTop();
-        console.info(top);
         var width = $("#rangeSliderWrapper").width();
         if(top > 180){
-            $("#rangeSliderWrapper").css("position","fixed").css("top","30px").width(width);
-        
+            $("#rangeSliderWrapper").css("position","fixed").css("top","50px").width(width);
         }else{
-          
            $("#rangeSliderWrapper").css({ "position": "relative", "top": "0px" }); 
         }
-
     })
 })
-
-
-
-
 
 var drawAPIResponseFaultCountTable = function(from,to){
 
@@ -107,25 +108,33 @@ var drawAPIResponseFaultCountTable = function(from,to){
     var toDate = to;
     jagg.post("/site/blocks/stats/faultCount/ajax/stats.jag", { action:"getPerAppAPIFaultCount",currentLocation:currentLocation,fromDate:fromDate,toDate:toDate  },
         function (json) {
+            $('#spinner').hide();
             if (!json.error) {
+
                 $('#PerAppAPIFaultCountTable').find("tr:gt(0)").remove();
                 var length = json.usage.length;
-                $('#PerAppAPIFaultCountTable').show();
-                for (var i = 0; i < json.usage.length; i++) {
-                    var k = json.usage[i].apiCountArray[0].apiName; 
-                    $('#PerAppAPIFaultCountTable').append($('<tr><td>' + json.usage[i].appName + '</td><td>' +json.usage[i].apiCountArray[0].apiName + '</td><td class="tdNumberCell">' + json.usage[i].apiCountArray[0].count + '</td></tr>'));
-                     if(json.usage[i].apiCountArray.length > 1){
-                     for (var j =1 ; j < json.usage[i].apiCountArray.length; j++) {
-                         $('#PerAppAPIFaultCountTable').append($('<tr><td>' + "" + '</td><td>' + json.usage[i].apiCountArray[j].apiName + '</td><td class="tdNumberCell">' + json.usage[i].apiCountArray[j].count + '</td></tr>'));
-                } }
-                }
-                if (length == 0) {
-                    $('#PerAppAPIFaultCountTable').hide();
-                    $('#tempLoadingSpace').html('');
-                    $('#tempLoadingSpace').append($('<span class="label label-info">'+i18n.t('errorMsgs.noData')+'</span>'));
+                if( length > 0){
 
-                }else{
-                    $('#tempLoadingSpace').hide();
+                    $('#noData').addClass('hide');
+                    $('#tableContainer').removeClass('hide');
+                    $('#PerAppAPIFaultCountTable').removeClass('hide');
+                    $('#PerAppAPIFaultCountTable_wrapper').removeClass('hide');
+
+                    for (var i = 0; i < json.usage.length; i++) {
+                        var k = json.usage[i].apiCountArray[0].apiName;
+                        $('#PerAppAPIFaultCountTable').append($('<tr><td>' + json.usage[i].appName + '</td><td>' +json.usage[i].apiCountArray[0].apiName + '</td><td class="tdNumberCell">' + json.usage[i].apiCountArray[0].count + '</td></tr>'));
+                         if(json.usage[i].apiCountArray.length > 1){
+                             for (var j =1 ; j < json.usage[i].apiCountArray.length; j++) {
+                                 $('#PerAppAPIFaultCountTable').append($('<tr><td>' + json.usage[i].appName + '</td><td>' + json.usage[i].apiCountArray[j].apiName + '</td><td class="tdNumberCell">' + json.usage[i].apiCountArray[j].count + '</td></tr>'));
+                             }
+                         }
+                    }
+                    $('#PerAppAPIFaultCountTable').dataTable();
+                }
+                else if(length == 0) {
+                    $('#noData').removeClass('hide');
+                    $('#PerAppAPIFaultCountTable').addClass('hide');
+                    $('#PerAppAPIFaultCountTable_wrapper').addClass('hide');
                 }
 
             } else {
@@ -135,7 +144,6 @@ var drawAPIResponseFaultCountTable = function(from,to){
                     jagg.message({content:json.message,type:"error"});
                 }
             }
-            t_on['tempLoadingSpace'] = 0;
         }, "json");
 }
 
@@ -157,11 +165,9 @@ function isDataPublishingEnabled(){
 
 var convertTimeString = function(date){
     var d = new Date(date);
-    var formattedDate = d.getFullYear() + "-" + formatTimeChunk((d.getMonth()+1)) + "-" + formatTimeChunk(d.getDate());
+    var formattedDate = d.getFullYear() + "-" + formatTimeChunk((d.getMonth()+1)) + "-" + formatTimeChunk(d.getDate())+" "+formatTimeChunk(d.getHours())+":"+formatTimeChunk(d.getMinutes());
     return formattedDate;
 };
-
-
 
 var convertTimeStringPlusDay = function(date){
     var d = new Date(date);
@@ -175,3 +181,20 @@ var formatTimeChunk = function (t){
     }
     return t;
 };
+
+function getDateTime(currentDay,fromDay){
+    var to = convertTimeString(currentDay);
+    var from = convertTimeString(fromDay);
+    var toDate = to.split(" ");
+    var fromDate = from.split(" ");
+    var dateStr= fromDate[0]+" <i>"+fromDate[1]+"</i> <b>to</b> "+toDate[0]+" <i>"+toDate[1]+"</i>";
+    $("#date-range span").html(dateStr);
+    $('#date-range').data('daterangepicker').setStartDate(from);
+    $('#date-range').data('daterangepicker').setEndDate(to);
+    drawAPIResponseFaultCountTable(from,to);
+}
+
+function btnActiveToggle(button){
+    $(button).siblings().removeClass('active');
+    $(button).addClass('active');
+}

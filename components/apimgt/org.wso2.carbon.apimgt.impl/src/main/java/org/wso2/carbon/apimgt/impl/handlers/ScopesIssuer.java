@@ -46,29 +46,32 @@ public class ScopesIssuer {
 
     private List<String> scopeSkipList = new ArrayList<String>();
 
-    /** Singleton of ScopeIssuer.**/
+    /**
+     * Singleton of ScopeIssuer.*
+     */
     private static ScopesIssuer scopesIssuer;
 
-    public static void loadInstance(List<String> whitelist){
+    public static void loadInstance(List<String> whitelist) {
         scopesIssuer = new ScopesIssuer();
-        if(whitelist != null && !whitelist.isEmpty()){
+        if (whitelist != null && !whitelist.isEmpty()) {
             scopesIssuer.scopeSkipList.addAll(whitelist);
         }
     }
 
-    private ScopesIssuer(){}
+    private ScopesIssuer() {
+    }
 
-    public static ScopesIssuer getInstance(){
+    public static ScopesIssuer getInstance() {
         return scopesIssuer;
     }
 
 
-    public boolean setScopes(OAuthTokenReqMessageContext tokReqMsgCtx){
+    public boolean setScopes(OAuthTokenReqMessageContext tokReqMsgCtx) {
         String[] requestedScopes = tokReqMsgCtx.getScope();
         String[] defaultScope = new String[]{DEFAULT_SCOPE_NAME};
 
         //If no scopes were requested.
-        if(requestedScopes == null || requestedScopes.length == 0){
+        if (requestedScopes == null || requestedScopes.length == 0) {
             tokReqMsgCtx.setScope(defaultScope);
             return true;
         }
@@ -84,10 +87,10 @@ public class ScopesIssuer {
             appScopes = apiMgtDAO.getScopeRolesOfApplication(consumerKey);
 
             //If no scopes can be found in the context of the application
-            if(appScopes.isEmpty()){
-                if(log.isDebugEnabled()){
+            if (appScopes.isEmpty()) {
+                if (log.isDebugEnabled()) {
                     log.debug("No scopes defined for the Application " +
-                            tokReqMsgCtx.getOauth2AccessTokenReqDTO().getClientId());
+                              tokReqMsgCtx.getOauth2AccessTokenReqDTO().getClientId());
                 }
 
                 String[] allowedScopes = getAllowedScopes(reqScopeList);
@@ -101,21 +104,22 @@ public class ScopesIssuer {
             String[] userRoles = null;
 
             try {
-                tenantId = IdentityUtil.getTenantIdOFUser(username);
+                tenantId = tokReqMsgCtx.getTenantID();
+
+                // If tenant Id is not set in the tokenReqContext, deriving it from username.
+                if (tenantId == 0 || tenantId == -1) {
+                    tenantId = IdentityUtil.getTenantIdOFUser(username);
+                }
                 userStoreManager = realmService.getTenantUserRealm(tenantId).getUserStoreManager();
                 userRoles = userStoreManager.getRoleListOfUser(MultitenantUtils.getTenantAwareUsername(username));
-            } catch (IdentityException e) {
-                //Log and return since we do not want to stop issuing the token in case of scope validation failures.
-                log.error("Error when obtaining tenant Id of user " + username, e);
-                return false;
             } catch (UserStoreException e) {
                 //Log and return since we do not want to stop issuing the token in case of scope validation failures.
                 log.error("Error when getting the tenant's UserStoreManager or when getting roles of user ", e);
                 return false;
             }
 
-            if(userRoles == null || userRoles.length == 0){
-                if(log.isDebugEnabled()){
+            if (userRoles == null || userRoles.length == 0) {
+                if (log.isDebugEnabled()) {
                     log.debug("Could not find roles of the user.");
                 }
                 tokReqMsgCtx.setScope(defaultScope);
@@ -134,7 +138,7 @@ public class ScopesIssuer {
                     List<String> roleList = new ArrayList<String>(Arrays.asList(roles.replaceAll(" ", "").split(",")));
                     //Check if user has at least one of the roles associated with the scope
                     roleList.retainAll(userRoleList);
-                    if(!roleList.isEmpty()){
+                    if (!roleList.isEmpty()) {
                         authorizedScopes.add(scope);
                     }
                 }
@@ -145,15 +149,18 @@ public class ScopesIssuer {
                     authorizedScopes.add(scope);
                 }
             }
-            if(!authorizedScopes.isEmpty()){
+            if (!authorizedScopes.isEmpty()) {
                 String[] authScopesArr = authorizedScopes.toArray(new String[authorizedScopes.size()]);
                 tokReqMsgCtx.setScope(authScopesArr);
-            }
-            else{
+            } else {
                 tokReqMsgCtx.setScope(defaultScope);
             }
         } catch (APIManagementException e) {
             log.error("Error while getting scopes of application " + e.getMessage());
+            return false;
+        } catch (IdentityException e) {
+            //Log and return since we do not want to stop issuing the token in case of scope validation failures.
+            log.error("Error when obtaining tenant Id of user " + username, e);
             return false;
         }
         return true;
@@ -161,14 +168,15 @@ public class ScopesIssuer {
 
     /**
      * Determines if the scope is specified in the whitelist.
+     *
      * @param scope
      * @return
      */
-    public boolean isWhiteListedScope(String scope){
-        for(String scopeTobeSkipped : scopeSkipList){
-          if(scope.matches(scopeTobeSkipped)){
-              return true;
-          }
+    public boolean isWhiteListedScope(String scope) {
+        for (String scopeTobeSkipped : scopeSkipList) {
+            if (scope.matches(scopeTobeSkipped)) {
+                return true;
+            }
         }
         return false;
     }
@@ -177,20 +185,21 @@ public class ScopesIssuer {
      * Get the set of default scopes. If a requested scope is matches with the patterns specified in the whitelist,
      * then such scopes will be issued without further validation. If the scope list is empty,
      * token will be issued for default scope.
+     *
      * @param requestedScopes - The set of requested scopes
      * @return
      */
-    private String[] getAllowedScopes(List<String> requestedScopes){
+    private String[] getAllowedScopes(List<String> requestedScopes) {
         List<String> authorizedScopes = new ArrayList<String>();
 
         //Iterate the requested scopes list.
         for (String scope : requestedScopes) {
-            if(isWhiteListedScope(scope)){
+            if (isWhiteListedScope(scope)) {
                 authorizedScopes.add(scope);
             }
         }
 
-        if(authorizedScopes.isEmpty()){
+        if (authorizedScopes.isEmpty()) {
             authorizedScopes.add(DEFAULT_SCOPE_NAME);
         }
 

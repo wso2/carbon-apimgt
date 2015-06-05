@@ -8,7 +8,7 @@
 			nickName="destination_statistics" description="Stream for API Manager destination based statistics">
 			<payload></payload>
 			<properties>
-				<property name="api" value="get-property('API_NAME')" type="STRING"
+				<property name="api" value="get-property('api.ut.api')" type="STRING"
 					isExpression="true">
 				</property>
 				<property name="version" value="get-property('SYNAPSE_REST_API_VERSION')"
@@ -24,7 +24,7 @@
 				<property name="destination" value="get-property('ENDPOINT_ADDRESS')"
 					type="STRING" isExpression="true"></property>
 				<property name="requestTime" value="get-property('SYSTEM_TIME')"
-					type="STRING" isExpression="true"></property>
+					type="LONG" isExpression="true"></property>
 				<property name="hostName" value="get-property('SERVER_IP')"
 					type="STRING" isExpression="true"></property>
 			</properties>

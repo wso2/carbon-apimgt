@@ -26,18 +26,17 @@
                            </div>
                         </div>
                         <div class="control-group toggleContainers">
-                           <div class="controls hide">
+                           <div class="controls hide pull-left">
                                <input name="swagger-url" id="swagger-url" class="input-xxlarge" type="text"/>
-                               <br/>
-                               <span class="label label-info">Ex: http://petstore.swagger.io/v2/swagger.json</span>
+                               <p class="help-block" style="margin-top:-3px;">Ex: http://petstore.swagger.io/v2/swagger.json</p>
                            </div>
-                           <div class="controls hide">
+                           <div class="controls hide pull-left">
                               <input name="swagger-file" id="swagger-file" type="file" class="upload" />
                            </div>
                         </div>
                         <input name="action" value="start" type="hidden"/>
                         <input name="type" value="rest" type="hidden"/>
-                        <button id="startFromExistingAPI" class="btn btn-primary pull-right" type="button">Start Creating</button>
+                        <button id="startFromExistingAPI" class="btn btn-primary pull-right has-spinner" type="button">Start Creating</button>
                </fieldset>
                </form>
             </div>
@@ -70,7 +69,7 @@
                         </div>
                         <input name="action" value="start" type="hidden"/>
                         <input name="type" value="soap" type="hidden"/>                        
-                        <button id="startFromExistingSOAPEndpoint" class="btn btn-primary pull-right" type="button">Start Creating</button>
+                        <button id="startFromExistingSOAPEndpoint" class="btn btn-primary pull-right has-spinner" type="button">Start Creating</button>
                      </div>
                   </fieldset>
                </form>

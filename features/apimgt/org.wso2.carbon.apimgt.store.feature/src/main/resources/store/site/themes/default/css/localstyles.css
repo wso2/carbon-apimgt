@@ -249,6 +249,15 @@ code {
 .tab-content { border-width: 0px 1px 1px 1px; border-style: solid; border-color:#ddd; padding: 20px; 
   min-height: 300px }
 
+
+/* Nav Bar */
+.long-navbar { display: none;}
+@media(min-width:1200px){
+  .short-navbar { display: none;}
+  .long-navbar { display: block;}
+}
+
+
 /* API Overview Tab */
 .share-select { margin: 0;}
 .share-select li.active a{ background: #f5f5f5; border-color: #ddd; color: #777}
@@ -281,7 +290,10 @@ input#access_token {margin-right: 20px}
 .panel-title .glyphicon-chevron-down { display: none;}
 .panel-title .collapsed .glyphicon-chevron-down { display: inline-block;}
 .subscribed-api-name { font-size: 1.1em; font-weight: bold;}
-
+.sub-title .collapsed .glyphicon-chevron-up { display: none;}
+.sub-title .glyphicon-chevron-down { display: none;}
+.sub-title .collapsed .glyphicon-chevron-down { display: inline-block;}
+#subscription-list dl{ margin: 10px;}
 
 /* Brand */
 .navbar-brand { background: url('../images/wso2.svg'); background-size: 75px ; background-repeat: no-repeat; 
@@ -298,12 +310,19 @@ a.remove_rating:hover{ color: #C00}
 .requiredAstrix{ color: red; }
 
 /* forum styles */
-#forum_add_reply_button, #topic-add-actions{
+#forum_add_reply_button, #topic-add-actions, .edit-topic-form-actions, .forum-reply-actions{
     margin-top : 10px;
 }
-#subject{
+
+/* bold Forum Subject */
+#subject, #forum_topic_subject_edit_input{
     font-weight:bold;
     margin-bottom:10px;
+}
+
+/*pointer for forum paginator*/
+#forum_topics_list_paginator{
+    cursor:pointer;
 }
 
 /* word wrap */
@@ -312,14 +331,10 @@ a.remove_rating:hover{ color: #C00}
     word-break:break-all;
 }
 
-/* bold Forum Subject */
-
-
 /* pointer to show more Details in sign-up */
 .moreDetails{
     cursor:pointer
 }
-
 
 /* API List styling */
 .thumbnail .caption .api-name{ font-weight: bold; display: block; width: 100%; font-size: 1.2em;}
@@ -369,4 +384,45 @@ a.remove_rating:hover{ color: #C00}
 
 
 /* Utility Components Styles */
-.help-popup { position: absolute; right: 0; margin-top: -25px; cursor: pointer;}
+
+.help-popup { cursor: pointer; margin-top: 10px;}
+.margin-top { margin-top: 10px;}
+/* Stat pages Styles */
+#date-range{
+    padding-right:30px;
+    width:300px;
+    height:100%;
+    display:inline-block;
+}
+
+#today-btn,#hour-btn,#week-btn, #month-btn{
+    width:60px;
+}
+
+.center-wrapper{
+    margin:0 auto;
+	margin-left:auto;
+	margin-right:auto;
+	align:center;
+	text-align:center;
+    padding-top: 100px;
+    padding-bottom: 100px;
+}
+
+#rangeSliderWrapper{
+    z-index: 3;
+}
+
+.no-data-heading{
+    color : #7e7e7e;
+}
+
+#subsChart>svg{
+    width:300px !important;
+    height:240px !important;
+    display:inline-block;
+}
+
+.blue{
+    color:#337ab7;
+}

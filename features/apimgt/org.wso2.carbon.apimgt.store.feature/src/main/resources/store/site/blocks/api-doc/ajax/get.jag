@@ -52,7 +52,8 @@ var log = new Log();
 	    var isTenantFlowStarted = false;
 
         if(providerVal.indexOf("@") > -1){
-            tenantDomain = providerVal.split("@")[1];
+            var MultitenantUtils = Packages.org.wso2.carbon.utils.multitenancy.MultitenantUtils;
+	    tenantDomain = MultitenantUtils.getTenantDomain(providerVal);
             providerVal = providerVal.replace("@","-AT-");
             if(tenantDomain){
                 tenantID = carbon.server.osgiService('org.wso2.carbon.user.core.service.RealmService').getTenantManager().getTenantId(tenantDomain);
@@ -141,10 +142,10 @@ var log = new Log();
 	}
 
 
-        var paths = {}; //fix for /*
+        var paths = {}; //fix for /*, {url-template}*
         for (var property in jsonObj.paths) {
             if (jsonObj.paths.hasOwnProperty(property)) {
-                paths[property.replace("/*","/")] = jsonObj.paths[property];
+                paths[property.replace("*","")] = jsonObj.paths[property];
             }
         }
         jsonObj.paths = paths;

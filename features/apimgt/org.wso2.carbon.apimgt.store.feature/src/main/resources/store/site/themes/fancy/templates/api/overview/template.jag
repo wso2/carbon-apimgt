@@ -29,10 +29,10 @@
             var log = new Log();
     	    for(var environmentType in environments){
     	        var environmentsPerType = environments[environmentType];
-                if(environmentType == "production" && environmentsPerType.length>0){
+                if(environmentType == "production"){
                     %>
                     <h4>PRODUCTION Endpoints</h4>
-                    <%} else if(environmentType == "sandbox" && environmentsPerType.length>0){
+                    <%} else if(environmentType == "sandbox"){
                         %>
                     <h4>SANDBOX Endpoints</h4>
                 <%}
@@ -51,7 +51,7 @@
                             var apiContext = api.context;
                             apiContext = apiContext.replace(api.version + "/", "");
                             apiContext = apiContext.replace(api.version, "");%>
-                            <br><%=d[x]%><%=apiContext%>
+                            <br><%=environmenturls[urltype]%><%=apiContext%>
                         <%}%>
                     </div>
     	            <%}
@@ -61,13 +61,13 @@
     <%}%>
     <% if(api.wsdl && api.wsdl != ""){ %>        
     <p>
-        <a href="<%=api.wsdl%>" target="_blank"><h6><%=i18n.localize("wsdl")%></h6></a>
+        <a href="/store/site/themes/fancy/templates/api/documentation/download.jag?resourceUrl=<%=api.wsdl%>" target="_blank"><h6><%=i18n.localize("wsdl")%></h6></a>
     </p>
     <% } %>
     <% if(api.wadl && api.wadl != ""){ %>
         <h6><%=i18n.localize("wadl")%>:</h6>
     <p>
-        <a href="<%=api.wadl%>" target="_blank"><%=api.wadl%></a>
+        <a href="/store/site/themes/fancy/templates/api/documentation/download.jag?resourceUrl=<%=api.wadl%>" target="_blank"><%=api.wadl%></a>
     </p>
         <% } %>
     <% if(api.description && api.description != ""){ %>

@@ -124,12 +124,12 @@ public class CORSRequestHandler extends AbstractHandler implements ManagedLifecy
 		setCORSHeaders(messageContext, selectedResourceWithVerb);
 		if (selectedResource != null && selectedResourceWithVerb != null) {
 				if ("inline".equalsIgnoreCase(inline)) {
-					messageContext.getSequence("_cors_request_handler").mediate(messageContext);
+					messageContext.getSequence("_cors_request_handler_").mediate(messageContext);
 				}
 				status =  true;
 			}else if (selectedResource != null && selectedResourceWithVerb == null ){
 			if ("OPTIONS".equalsIgnoreCase(httpMethod)) {
-				messageContext.getSequence("_cors_request_handler").mediate(messageContext);
+				messageContext.getSequence("_cors_request_handler_").mediate(messageContext);
 				Utils.send(messageContext, HttpStatus.SC_OK);
 				status = false;
 			} else {
@@ -142,7 +142,7 @@ public class CORSRequestHandler extends AbstractHandler implements ManagedLifecy
 	}
 
 	public boolean handleResponse(MessageContext messageContext) {
-		messageContext.getSequence("_cors_request_handler").mediate(messageContext);
+		messageContext.getSequence("_cors_request_handler_").mediate(messageContext);
 		return true;
 	}
 
@@ -168,6 +168,10 @@ public class CORSRequestHandler extends AbstractHandler implements ManagedLifecy
 			}
 		} else {
 			allowedMethods = Utils.getAllowedMethods();
+		}
+		if ("*".equals(allowHeaders)) {
+			allowedMethods = headers.get("Access-Control-Request-Headers");
+
 		}
 		messageContext.setProperty(APIConstants.CORS_CONFIGURATION_ENABLED, Utils.isCORSEnabled());
 		messageContext.setProperty(APIConstants.CORSHeaders.ACCESS_CONTROL_ALLOW_METHODS, allowedMethods);

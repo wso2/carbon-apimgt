@@ -160,7 +160,9 @@
 													Validity Time: <input type="text" class="form-control input-sm token-validity-input" id="refreshProdValidityTime" value='<%=prodValidityTime %>' maxlength="70"  autofocus="autofocus" /> Seconds
 
 													<span class="label label-warning" id = "timeWarn" style="display:none;"><%=i18n.localize("timeWarn")%></span>
+													<a class="icon-question-sign help_popup_prod"></a>
 													<button class="show-hide-key btn btn-primary" onclick="regenerate('<%=app.name%>','PRODUCTION',200,this,'pull-right','<%=app.prodConsumerKey%>','<%=app.prodConsumerSecret%>')" ><i class="fa fa-repeat"></i> <%=i18n.localize("regenerate")%></button>
+													<div id="prodtoken_help"></div>
 												</div>
 											</div>
 										</div>
@@ -192,37 +194,39 @@
                             <a href="#scopePopup" role="button" class="btn" data-toggle="modal" ><%=i18n.localize("selectScopes")%></a>
                         <% } %>
                         <div class="gen-btn-wrapper">
-                        	<div class="cDivParentOfManualAuthAppCreateProduction">
-                        		<div class="cDivRowOfElements">
-                        			<div class="cDivTextMappingExternalAuthApp">
+                        	<div class="cDivParentOfManualAuthAppCreateProduction form-horizontal margin-top">
+                        		<div class="cDivRowOfElements form-group">
+                        			<label class="cDivTextMappingExternalAuthApp col-sm-4 control-label" >
                         			Consumer key :
-                        			</div>
-									<div class="cDivInputMappingExternalAuthApp">
-										<input type="text" class="input-xlarge token-validity-input"
+                        			</label>
+									<div class="cDivInputMappingExternalAuthApp col-sm-8">
+										<input type="text" class="form-control token-validity-input"
 										id="inputConsumerKeyProduction" value=""  maxlength="200"
 										autofocus="autofocus"
-										style="margin-top:5px;"  />
+										 />
 									</div>
                         		</div>
-                        		<div class="cDivRowOfElements">
-                        			<div class="cDivTextMappingExternalAuthApp">
+                        		<div class="cDivRowOfElements form-group">
+                        			<label class="cDivTextMappingExternalAuthApp  col-sm-4 control-label">
 									Consumer secret :
-									</div>
-									<div class="cDivInputMappingExternalAuthApp">
-										<input type="text" class="input-xlarge token-validity-input"
+									</label>
+									<div class="cDivInputMappingExternalAuthApp col-sm-8">
+										<input type="text" class="form-control token-validity-input"
 										id="inputConsumerSecretProduction" value="" maxlength="200"
 										autofocus="autofocus"
-										style="margin-top:5px;"  />
+										/>
 									</div>
                         		</div>
+                        	    <div class="pull-right">                        		
                         		<button  class="btn btn-primary "
                         		id="btnProvideKeyProductionSave" data-application="<%= encode.forHtmlAttribute(app.name)%>"
 									   data-callbackUrl="<%=encode.forHtmlAttribute(app.callbackUrl)%>"
 									   data-keytype="PRODUCTION"
 									   data-username="<%= userName %>"
 									   iteration="200">Save</button>
-									<button  class="btn btn-primary "
+									<button  class="btn btn-default "
 									id="btnProvideKeyProductionCancle">Cancel</button>
+								</div>									
                         	</div>
                         	<div class="cDivDefaultBtnSet">
 								<button  class="app-key-generate-button btn btn-primary btn-generatekeys" onclick="jagg
@@ -235,7 +239,7 @@
 									   <% if(site.mapExistingAuthApps != false){ %>
 								<button  class="btn btn-primary btn-providekeys"
 								id="btnProvideKeyProduction">Provide
-								keys</button>
+								keys</button>																
 								<% } %>
                             </div>
 
@@ -257,9 +261,9 @@
                                <% } else { %>
                                     Token Validity: <input type="text" class="input-mini token-validity-input" id="refreshProdValidityTime" value="<%=prodValidityTime%>" maxlength="70"  autofocus="autofocus" style="margin-top:5px;"  />  Seconds
                                     <span class="label label-warning" id = "timeWarn" style="display:none;"><%=i18n.localize("timeWarn")%></span>
-                               <% } %>
-                               <a class="icon-question-sign help_popup_prod"></a>
-                               <div id="prodtoken_help"></div>
+				    <a class="icon-question-sign help_popup_prod"></a>
+                                    <div id="prodtoken_help"></div>
+                               <% } %>                               
                             </div>
                         	<!-- END config section -->
                         </div>
@@ -391,7 +395,9 @@
 													<% } %>
 													Validity Time: <input type="text" class="form-control input-sm token-validity-input" id="refreshSandValidityTime" value="<%=sandValidityTime%>" maxlength="70"  autofocus="autofocus" /> Seconds
 		                            				<span class="label label-warning" id = "timeWarn" style="display:none;"><%=i18n.localize("timeWarn")%></span>
+									<a class="icon-question-sign help_popup_sand"></a>		                            
 		                            				<button class="show-hide-key btn btn-primary" onclick="regenerate('<%=app.name%>','SANDBOX',200,this,'pull-right','<%=app.sandboxConsumerKey%>','<%=app.sandboxConsumerSecret%>')" ><i class="fa fa-repeat"></i> <%=i18n.localize("regenerate")%></button>
+									<div id="sandtoken_help"></div>
 												</div>
 											</div>
 										</div>
@@ -422,37 +428,39 @@
                            <a href="#scopePopup" role="button" class="btn" data-toggle="modal" ><%=i18n.localize("selectScopes")%></a>
                        <% } %>
                        <div class="gen-btn-wrapper" <% if(app.sandboxKey!=null){%>style="display:none"<% } %> >
-                       		<div class="cDivParentOfManualAuthAppCreateSandBox">
-                        		<div class="cDivRowOfElements">
-                        			<div class="cDivTextMappingExternalAuthApp">
+                       		<div class="cDivParentOfManualAuthAppCreateSandBox form-horizontal margin-top">
+                        		<div class="cDivRowOfElements form-group">
+                        			<label class="cDivTextMappingExternalAuthApp col-sm-4  control-label">
                         			Consumer key :
-                        			</div>
-									<div class="cDivInputMappingExternalAuthApp">
-										<input type="text" class="input-xlarge token-validity-input"
+                        			</label>
+									<div class="cDivInputMappingExternalAuthApp col-sm-8">
+										<input type="text" class="form-control token-validity-input"
 										id="inputConsumerKeySandBox" value=""  maxlength="200"
 										autofocus="autofocus"
-										style="margin-top:5px;"  />
+										/>
 									</div>
                         		</div>
-                        		<div class="cDivRowOfElements">
-                        			<div class="cDivTextMappingExternalAuthApp">
+                        		<div class="cDivRowOfElements form-group">
+                        			<label class="cDivTextMappingExternalAuthApp col-sm-4  control-label">
 									Consumer secreat :
-									</div>
-									<div class="cDivInputMappingExternalAuthApp">
-										<input type="text" class="input-xlarge token-validity-input"
+									</label>
+									<div class="cDivInputMappingExternalAuthApp col-sm-8">
+										<input type="text" class="form-control token-validity-input"
 										id="inputConsumerSecretSandBox" value="" maxlength="200"
 										autofocus="autofocus"
-										style="margin-top:5px;"  />
+										/>
 									</div>
                         		</div>
+                        		<div class="pull-right">
                         		<button  class="btn btn-primary "
                         		id="btnProvideKeySandBoxSave" data-application="<%=encode.forHtmlAttribute(app.name)%>"
 									   data-callbackUrl="<%=encode.forHtmlAttribute(app.callbackUrl)%>"
 									   data-keytype="SANDBOX"
 									   data-username="<%= userName %>"
 									   iteration="200">Save</button>
-                            	<button  class="btn btn-primary "
+                            	<button  class="btn btn-default "
                             	id="btnProvideKeySandBoxCancel">Cancel</button>
+                            	</div>
                         	</div>
                         	<div class="defaultBtnSetForSandBox">
 							   <button  class="app-key-generate-button btn btn-primary btn-generatekeys" onclick="jagg
@@ -487,9 +495,9 @@
 		                        <% } else { %>
 		                        Token Validity: <input type="text" class="input-mini token-validity-input" id="refreshSandValidityTime" value="<%=sandValidityTime%>" maxlength="70"  autofocus="autofocus" style="margin-top:5px;"  />  Seconds
 		                            <span class="label label-warning" id = "timeWarn" style="display:none;"><%=i18n.localize("timeWarn")%></span>
-		                        <% } %>
-		                        <a class="icon-question-sign help_popup_sand"></a>
-		                        <div id="sandtoken_help"></div>
+					    <a class="icon-question-sign help_popup_sand"></a>
+		                            <div id="sandtoken_help"></div>
+		                        <% } %>		                        
                             </div>
                         	<!-- END config section -->
                         </div>
@@ -513,8 +521,9 @@
   </div>
 </div>          
 
-        <h3 data-section="api-listing" class="js_toggle">Subscribed APIs <i class="icon-chevron-down icon-keys"></i></h3>
-        <div class="container-fluid subsApiListing api-section">
+        <h3 class="sub-title"><span data-toggle="collapse" data-target="#subscription-list" aria-expanded="true" aria-controls="subscription-list">Subscribed APIs <small><i class="glyphicon glyphicon-chevron-down "></i><i class="glyphicon glyphicon-chevron-up "></i></small></span></h3>
+
+        <div class="container-fluid subsApiListing api-section" id="subscription-list">
             <div class="row">
             	<table class="table table-bordered">
             		<thead>
@@ -552,14 +561,19 @@
 
             			<tr>
 						 <td>
-						 	<a href="<%=path%>" class="thumbnailInsideLink"><img width="50" alt="" src="<%=thumbURL%>"  <%if(api.subStatus != "UNBLOCKED") {%>class="desaturate"  title="Subscription not active."<%}%>/></a>
-						 	<a href="<%=path%>" class="service-name" title="<%=api.name%>-<%=api.version%>"><%=apiName%> - <%=api.version%></a>
-						 	<br /> <span>API Status :</span>
+						 	<a href="<%=path%>" class="thumbnailInsideLink pull-left"><img width="50" alt="" src="<%=thumbURL%>"  <%if(api.subStatus != "UNBLOCKED") {%>class="desaturate"  title="Subscription not active."<%}%>/></a>
+						 	<dl>
+							  <dt>&nbsp; <a href="<%=path%>" class="service-name" title="<%=api.name%>-<%=api.version%>"><%=apiName%> - <%=api.version%></a></dt>
+							  <dd>&nbsp; API Status : 
+						 	
 						 	<% if(api.status == "DEPRECATED") { %>
                             <span class="label label-warning"><%=i18n.localize("deprecated")%></span>
                             <% } else if(api.status == "RETIRED") { %>
                             <span class="label label-danger"><%=i18n.localize("retired")%></span>
-                            <% } %>
+                            <% } else if(api.status == "PUBLISHED"){%>
+                            <span class="label label-primary"><%=api.status%></span>
+                            <%} %></dd>
+							</dl>
 						 </td>
 				         <td><%=api.provider%></td>
 				         <td>							

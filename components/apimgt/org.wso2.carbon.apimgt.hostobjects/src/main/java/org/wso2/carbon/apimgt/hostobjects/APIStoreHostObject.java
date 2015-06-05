@@ -44,7 +44,6 @@ import org.wso2.carbon.apimgt.impl.dto.UserRegistrationConfigDTO;
 import org.wso2.carbon.apimgt.impl.dto.WorkflowDTO;
 import org.wso2.carbon.apimgt.impl.dto.xsd.APIInfoDTO;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowStatus;
-import org.wso2.carbon.apimgt.hostobjects.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.utils.SelfSignUpUtil;
 import org.wso2.carbon.apimgt.impl.workflow.*;
@@ -61,7 +60,6 @@ import org.wso2.carbon.core.util.PermissionUpdateUtil;
 import org.wso2.carbon.identity.oauth.config.OAuthServerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIConstants.ApplicationStatus;
 import org.wso2.carbon.identity.oauth.internal.OAuthComponentServiceHolder;
-import org.wso2.carbon.registry.core.RegistryConstants;
 import org.wso2.carbon.user.core.UserCoreConstants;
 import org.wso2.carbon.user.core.UserRealm;
 import org.wso2.carbon.user.core.UserStoreException;
@@ -950,9 +948,52 @@ public class APIStoreHostObject extends ScriptableObject {
                 String clientId = (String) apiData.get("client_id", apiData);
                 //APIM application name.
                 String applicationName = (String) apiData.get("applicationName", apiData);
+
+                String keyType = (String) apiData.get("keytype", apiData);
+                String authorizedDomains = (String) apiData.get("authorizedDomains", apiData);
                 //this map will hold response that we are getting from Application registration process.
                 Map<String, Object> keyDetails;
-                getAPIConsumer(thisObj).saveSemiManualClient(jsonString, userName, clientId, applicationName);
+                getAPIConsumer(thisObj).mapExistingOAuthClient(jsonString, userName, clientId, applicationName,
+                                                               keyType, new String[]{"ALL"});
+
+            } catch (Exception e) {
+                handleException("Error while obtaining the application access token for the application" + e
+                        .getMessage(), e);
+            }
+        } else {
+            handleException("Invalid input parameters.");
+        }
+
+    }
+
+
+    /**
+     * This method is responsible delete records from application registration table and key mapping table
+     * If user had wrong inputs and he is unable to continue using create key method he has to delete it and re-create.
+     *
+     * @param cx      will be used to store information about the executing of the script.
+     *                This is a object of org.mozilla.javascript.Context package.
+     * @param thisObj Object of Scriptable interface provides for the management of
+     *                properties and for performing conversions.
+     * @param args    this will contain parameter list from jag files.
+     * @param funObj  this object  provides for calling functions and constructors.
+     * @throws ScriptException
+     * @throws APIManagementException
+     * @throws ParseException
+     */
+    public static void jsFunction_deleteFromApplicationRegistration(Context cx, Scriptable thisObj,
+                                                         Object[] args, Function funObj)
+            throws ScriptException, APIManagementException, ParseException {
+        if (args != null && args.length != 0) {
+
+            try {
+
+                String applicationId = (String) args[0];
+                String keyType = (String) args[1];
+
+                //this map will hold response that we are getting from Application registration process.
+                Map<String, Object> keyDetails;
+                getAPIConsumer(thisObj).deleteFromApplicationRegistration(applicationId, keyType);
 
             } catch (Exception e) {
                 handleException("Error while obtaining the application access token for the application" + e
@@ -1866,6 +1907,7 @@ public class APIStoreHostObject extends ScriptableObject {
                     }
                     row.put("apiOwner", row, apiOwner);
                     row.put("isAdvertiseOnly", row, api.isAdvertiseOnly());
+                    row.put("apiBusinessOwner", row, api.getBusinessOwner());
                     
                     NativeArray tierArr = new NativeArray(0);
                     Set<Tier> tierSet = api.getAvailableTiers();
@@ -1961,14 +2003,14 @@ public class APIStoreHostObject extends ScriptableObject {
                 JSONObject sandboxEnvironmentObjects = (JSONObject) environmentsObject.get("sandbox");
                 JSONObject hybridEnvironmentObjects = (JSONObject) environmentsObject.get("hybrid");
                 int envCount = 0;
-                if (!productionEnvironmentObjects.isEmpty()) {
-                    createAPIEndpointsPerType(productionEnvironmentObjects, api, version, myn, envCount, "production");
+                if (productionEnvironmentObjects != null && !productionEnvironmentObjects.isEmpty()) {
+                 envCount = createAPIEndpointsPerType(productionEnvironmentObjects, api, version, myn, envCount, "production");
                 }
-                if (!sandboxEnvironmentObjects.isEmpty()) {
-                    createAPIEndpointsPerType(sandboxEnvironmentObjects, api, version, myn, envCount, "sandbox");
+                if (sandboxEnvironmentObjects != null && !sandboxEnvironmentObjects.isEmpty()) {
+                    envCount = createAPIEndpointsPerType(sandboxEnvironmentObjects, api, version, myn, envCount, "sandbox");
                 }
-                if (!hybridEnvironmentObjects.isEmpty()) {
-                    createAPIEndpointsPerType(hybridEnvironmentObjects, api, version, myn, envCount, "hybrid");
+                if (hybridEnvironmentObjects != null && !hybridEnvironmentObjects.isEmpty()) {
+                    envCount = createAPIEndpointsPerType(hybridEnvironmentObjects, api, version, myn, envCount, "hybrid");
                 }
             }
 
@@ -2440,7 +2482,7 @@ public class APIStoreHostObject extends ScriptableObject {
             throw new APIManagementException("Invalid input parameters for AddAPISubscription method");
         }
 
-        String providerName = args[0].toString();
+        String providerName = APIUtil.replaceEmailDomain(args[0].toString());
         String apiName = args[1].toString();
         String version = args[2].toString();
         String tier = args[3].toString();
@@ -2909,6 +2951,7 @@ public class APIStoreHostObject extends ScriptableObject {
                                 appObj.put("prodValidityTime", appObj, prodKey.getValidityPeriod());
                             }
                             appObj.put("prodRegenerateOption", appObj, prodEnableRegenarateOption);
+                            appObj.put("prodKeyState", appObj, prodKey.getState());
                         } // Prod Token is not generated, but consumer key & secret is available
                         else if (prodKey != null && prodApp != null) {
                             String jsonString = prodApp.getJsonString();
@@ -2946,8 +2989,12 @@ public class APIStoreHostObject extends ScriptableObject {
                                 appObj.put("prodValidityTime", appObj,
                                            getApplicationAccessTokenValidityPeriodInSeconds());
                             }
+                            if(prodKey != null) {
+                                if (prodKey.getState() != null) {
+                                    appObj.put("prodKeyState", appObj, prodKey.getState());
+                                }
+                            }
                             appObj.put("prodJsonString", appObj, null);
-
                         }
 
                         APIKey sandboxKey = getAppKey(application, APIConstants.API_KEY_TYPE_SANDBOX);
@@ -3020,6 +3067,11 @@ public class APIStoreHostObject extends ScriptableObject {
                             } else {
                                 appObj.put("sandValidityTime", appObj,
                                            getApplicationAccessTokenValidityPeriodInSeconds());
+                            }
+                            if (sandboxKey != null) {
+                                if (sandboxKey.getState() != null) {
+                                    appObj.put("sandboxKeyState", appObj, sandboxKey.getState());
+                                }
                             }
                         }
 
@@ -3342,6 +3394,7 @@ public class APIStoreHostObject extends ScriptableObject {
         if (args != null && isStringArray(args)) {
             String applicationName = (String) args[0];
             String username = (String) args[1];
+            String groupingId = (String) args[2];
             boolean isTenantFlowStarted = false;
             try {
                 String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(username));
@@ -3350,6 +3403,13 @@ public class APIStoreHostObject extends ScriptableObject {
                     PrivilegedCarbonContext.startTenantFlow();
                     PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
                 }
+
+                //check whether application exist prior to get subscription
+                if (!APIUtil.isApplicationExist(username, applicationName, groupingId)) {
+                    handleException("Application " + applicationName + " does not exist for user " +
+                            "" + username);
+                }
+
                 Subscriber subscriber = new Subscriber(username);
                 APIConsumer apiConsumer = getAPIConsumer(thisObj);
                 Set<SubscribedAPI> subscribedAPIs = apiConsumer.getSubscribedAPIs(subscriber, applicationName, null);
@@ -4014,28 +4074,34 @@ public class APIStoreHostObject extends ScriptableObject {
         }
     }
 
-    public static NativeArray jsFunction_getPublishedAPIsByProvider(Context cx, Scriptable thisObj,
+    public static NativeArray  jsFunction_getPublishedAPIsByProvider(Context cx, Scriptable thisObj,
                                                                     Object[] args,
                                                                     Function funObj)
             throws APIManagementException {
         NativeArray apiArray = new NativeArray(0);
-        if (args != null && isStringArray(args)) {
+        if (args != null) {
             String providerName = APIUtil.replaceEmailDomain(args[0].toString());
             String username = args[1].toString();
             String limitArg = args[2].toString();
             int limit = Integer.parseInt(limitArg);
             String apiOwner = args[3].toString();
+            String apiBizOwner = null;
+            //If api biz-owner is not null
+            if(args[4] != null){
+                apiBizOwner = args[4].toString();
+            }
+
             Set<API> apiSet;
             APIConsumer apiConsumer = getAPIConsumer(thisObj);
             boolean isTenantFlowStarted = false;
             try {
-                String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(username));
+                String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(providerName));
                 if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
                     isTenantFlowStarted = true;
                     PrivilegedCarbonContext.startTenantFlow();
                     PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
                 }
-                apiSet = apiConsumer.getPublishedAPIsByProvider(providerName, username, limit, apiOwner);
+                apiSet = apiConsumer.getPublishedAPIsByProvider(providerName, username, limit, apiOwner, apiBizOwner);
             } catch (APIManagementException e) {
                 handleException("Error while getting published APIs information of the provider - " +
                         providerName, e);
@@ -4627,8 +4693,8 @@ public class APIStoreHostObject extends ScriptableObject {
                                                       Object[] args, Function funObj)
             throws ScriptException,
                    APIManagementException {
-        if (args == null || args.length != 2 || !isStringArray(args)) {
-            handleException("Invalid input parameters expected resource Url and tenantDomain");
+        if (args == null || args.length != 1 || !isStringArray(args)) {
+            handleException("Invalid input parameters expected resource Url");
         }
         NativeObject data = new NativeObject();
 
@@ -4637,9 +4703,9 @@ public class APIStoreHostObject extends ScriptableObject {
         if (username == null) {
             username = APIConstants.END_USER_ANONYMOUS;
         }
-        String resource = (String) args[1];
-        String tenantDomain = (String) args[0];
-        Map<String, Object> docResourceMap = APIUtil.getDocument(username, resource, tenantDomain);
+        String resource = (String) args[0];
+        //String tenantDomain = (String) args[0];
+        Map<String, Object> docResourceMap = APIUtil.getDocument(username, resource);
         if (!docResourceMap.isEmpty()) {
             data.put("Data", data,
                      cx.newObject(thisObj, "Stream", new Object[] { docResourceMap.get("Data") }));
@@ -4706,23 +4772,28 @@ public class APIStoreHostObject extends ScriptableObject {
                 hybridEnvironmentObject.put(environment.getName(), jsonObject);
             }
         }
-        environmentObject.put(APIConstants.GATEWAY_ENV_TYPE_PRODUCTION, productionEnvironmentObject);
-        environmentObject.put(APIConstants.GATEWAY_ENV_TYPE_SANDBOX, sandboxEnvironmentObject);
-        environmentObject.put(APIConstants.GATEWAY_ENV_TYPE_HYBRID, hybridEnvironmentObject);
+        if (productionEnvironmentObject != null && !productionEnvironmentObject.isEmpty()){
+            environmentObject.put(APIConstants.GATEWAY_ENV_TYPE_PRODUCTION, productionEnvironmentObject);
+        }
+        if (sandboxEnvironmentObject != null && !sandboxEnvironmentObject.isEmpty()){
+            environmentObject.put(APIConstants.GATEWAY_ENV_TYPE_SANDBOX, sandboxEnvironmentObject);
+        }
+        if (hybridEnvironmentObject != null && !hybridEnvironmentObject.isEmpty()){
+            environmentObject.put(APIConstants.GATEWAY_ENV_TYPE_HYBRID, hybridEnvironmentObject);
+        }
         return environmentObject;
     }
 
     /**
      * this method used to iterate environments according to type
-     *
-     * @param environments json
+     *  @param environments json
      * @param api API object of selected api .
      * @param version version of API
      * @param myn
      * @param envCount count parameter
      * @param type type of environment
      */
-    private static void createAPIEndpointsPerType(JSONObject environments, API api, String version, NativeArray myn,
+    private static int createAPIEndpointsPerType(JSONObject environments, API api, String version, NativeArray myn,
                                                  int envCount, String type) {
         for (Object prodKeys : environments.keySet()) {
             JSONObject environmentObject = (JSONObject) environments.get(prodKeys);
@@ -4741,8 +4812,9 @@ public class APIStoreHostObject extends ScriptableObject {
                 index++;
                 appObj.put("environmentURLs", appObj, envs);
                 myn.put(envCount, myn, appObj);
-                envCount++;
             }
         }
+        envCount++;
+        return envCount;
     }
 }
