@@ -1096,7 +1096,6 @@ public class ApiMgtDAO {
     }
 
 
-
     public boolean validateSubscriptionDetails(String context, String version, String consumerKey,
                                                APIKeyValidationInfoDTO infoDTO) throws APIManagementException {
 
@@ -1104,13 +1103,13 @@ public class ApiMgtDAO {
         boolean defaultVersionInvoked = false;
 
         //Check if the api version has been prefixed with _default_
-        if(version != null && version.startsWith(APIConstants.DEFAULT_VERSION_PREFIX)){
+        if (version != null && version.startsWith(APIConstants.DEFAULT_VERSION_PREFIX)) {
             defaultVersionInvoked = true;
             //Remove the prefix from the version.
             version = version.split(APIConstants.DEFAULT_VERSION_PREFIX)[1];
         }
 
-        String sql = "SELECT "+
+        String sql = "SELECT " +
                      "   SUB.TIER_ID," +
                      "   SUBS.USER_ID," +
                      "   SUB.SUB_STATUS," +
@@ -1133,22 +1132,22 @@ public class ApiMgtDAO {
                      "   AND SUB.APPLICATION_ID = APP.APPLICATION_ID" +
                      "   AND APP.SUBSCRIBER_ID = SUBS.SUBSCRIBER_ID" +
                      "   AND API.API_ID = SUB.API_ID" +
-                     "   AND AKM.APPLICATION_ID=APP.APPLICATION_ID"+
+                     "   AND AKM.APPLICATION_ID=APP.APPLICATION_ID" +
                      "   AND AKM.APPLICATION_ID=APP.APPLICATION_ID";
         Connection conn = null;
         PreparedStatement ps = null;
         ResultSet rs = null;
-        Map<String,Object> results = null;
+        Map<String, Object> results = null;
         try {
             conn = APIMgtDBUtil.getConnection();
             ps = conn.prepareStatement(sql);
             ps.setString(1, context);
-            ps.setString(2,consumerKey);
-            if(!defaultVersionInvoked){
+            ps.setString(2, consumerKey);
+            if (!defaultVersionInvoked) {
                 ps.setString(3, version);
             }
             rs = ps.executeQuery();
-            if(rs.next()){
+            if (rs.next()) {
                 String subscriptionStatus = rs.getString("SUB_STATUS");
                 String type = rs.getString("KEY_TYPE");
                 if (subscriptionStatus.equals(APIConstants.SubscriptionStatus.BLOCKED)) {
@@ -1156,14 +1155,13 @@ public class ApiMgtDAO {
                             APIConstants.KeyValidationStatus.API_BLOCKED);
                     infoDTO.setAuthorized(false);
                     return false;
-                } else if(APIConstants.SubscriptionStatus.ON_HOLD.equals(subscriptionStatus) ||
-                          APIConstants.SubscriptionStatus.REJECTED.equals(subscriptionStatus)){
+                } else if (APIConstants.SubscriptionStatus.ON_HOLD.equals(subscriptionStatus) ||
+                           APIConstants.SubscriptionStatus.REJECTED.equals(subscriptionStatus)) {
                     infoDTO.setValidationStatus(APIConstants.KeyValidationStatus.SUBSCRIPTION_INACTIVE);
                     infoDTO.setAuthorized(false);
                     return false;
-                }
-                else if (subscriptionStatus.equals(APIConstants.SubscriptionStatus.PROD_ONLY_BLOCKED) &&
-                         !APIConstants.API_KEY_TYPE_SANDBOX.equals(type)) {
+                } else if (subscriptionStatus.equals(APIConstants.SubscriptionStatus.PROD_ONLY_BLOCKED) &&
+                           !APIConstants.API_KEY_TYPE_SANDBOX.equals(type)) {
                     infoDTO.setValidationStatus(
                             APIConstants.KeyValidationStatus.API_BLOCKED);
                     infoDTO.setType(type);
@@ -1182,11 +1180,12 @@ public class ApiMgtDAO {
                 return true;
             }
             infoDTO.setAuthorized(false);
+            infoDTO.setValidationStatus(APIConstants.KeyValidationStatus.API_AUTH_RESOURCE_FORBIDDEN);
 
         } catch (SQLException e) {
-            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+            handleException("Exception occurred while validating Subscription.", e);
         } finally {
-            APIMgtDBUtil.closeAllConnections(ps,conn,rs);
+            APIMgtDBUtil.closeAllConnections(ps, conn, rs);
         }
         return false;
     }
