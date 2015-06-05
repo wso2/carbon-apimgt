@@ -438,7 +438,7 @@ var regenerate=function(appName,keyType,i,btn,div,clientId,clientSecret) {
         } else {
             jagg.message({content:result.message,type:"error"});
         }
-        $('#' + div).hide();
+
         if (regenerateOption) {
             $(btn).show();
             $('#' + div).show();
