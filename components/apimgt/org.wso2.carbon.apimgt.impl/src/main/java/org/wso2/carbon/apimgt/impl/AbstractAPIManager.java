@@ -272,24 +272,26 @@ public abstract class AbstractAPIManager implements APIManager {
         List<API> apiSortedList = new ArrayList<API>();
         boolean isTenantFlowStarted = false;
         try {
-        	if(tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain))	{
-        		isTenantFlowStarted = true;
+            if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
+                isTenantFlowStarted = true;
                 PrivilegedCarbonContext.startTenantFlow();
                 PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
-        	}
+            }
             GenericArtifactManager artifactManager = APIUtil.getArtifactManager(registry,
                                                                                 APIConstants.API_KEY);
             GenericArtifact[] artifacts = artifactManager.getAllGenericArtifacts();
             for (GenericArtifact artifact : artifacts) {
-                apiSortedList.add(APIUtil.getAPI(artifact));
+                API api = APIUtil.getAPI(artifact);
+                if (api != null) {
+                    apiSortedList.add(api);
+                }
             }
-
         } catch (RegistryException e) {
             handleException("Failed to get APIs from the registry", e);
         } finally {
-        	if (isTenantFlowStarted) {
-        		PrivilegedCarbonContext.endTenantFlow();
-        	}
+            if (isTenantFlowStarted) {
+                PrivilegedCarbonContext.endTenantFlow();
+            }
         }
 
         Collections.sort(apiSortedList, new APINameComparator());
