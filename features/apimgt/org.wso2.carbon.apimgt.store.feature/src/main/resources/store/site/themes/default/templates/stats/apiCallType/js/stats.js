@@ -105,6 +105,7 @@ var drawAppAPICallType = function(from,to){
     var toDate = to;
     jagg.post("/site/blocks/stats/apiCallType/ajax/stats.jag", { action:"getAppApiCallType",currentLocation:currentLocation,fromDate:fromDate,toDate:toDate  },
         function (json) {
+            $('#spinner').hide();
             if (!json.error) {
                 $('#AppApiCallTypeTable').find("tr:gt(0)").remove();
                 var length = json.usage.length;

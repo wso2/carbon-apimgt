@@ -104,6 +104,7 @@ var drawTopUsersGraph = function(from,to){
     var toDate = to;
     jagg.post("/site/blocks/stats/topUsers/ajax/stats.jag", { action:"getTopAppUsers",currentLocation:currentLocation,fromDate:fromDate,toDate:toDate  },
         function (json) {
+            $('#topUsersSpinner').hide();
             if (!json.error) {
                 var length = json.usage.length;
                 $('#topUsersView').empty();
@@ -160,7 +161,10 @@ function drawChart(div,i,data) {
           .showLabels(true)
           .labelType("percent")
           .showLegend(false)
-          .color(d3.scale.category20().range());
+          .color(d3.scale.category20().range())
+          .tooltipContent( function(key, x, y){
+             return  '<b>'+key + '</b> - ' + Math.round(x) + " <i>call(s)</i>"
+           } );
       var chartID = "#userChart"+(i+1) +" svg";
         d3.select(chartID)
             .datum(data)
@@ -174,7 +178,7 @@ function drawChart(div,i,data) {
               return "translate(" + arc.centroid(d) + ")";}
           )
           .attr("text-anchor", "middle")
-          .style({"font-size": "1em"});
+          .style({"font-size": "0.7em"});
 
       nv.utils.windowResize(chart.update);
       return chart;
@@ -188,7 +192,6 @@ var drawTopAppUsers = function(from,to){
     jagg.post("/site/blocks/stats/topUsers/ajax/stats.jag", { action:"getTopAppUsers",currentLocation:currentLocation,fromDate:fromDate,toDate:toDate  },
         function (json) {
             if (!json.error) {
-
                 $('#topAppUsersTable').find("tr:gt(0)").remove();
                 var length = json.usage.length;
                 $('#topAppUsersTable').show();
@@ -222,6 +225,7 @@ var drawRegisteredUserCountByApplications = function(from,to){
     var toDate = to;
     jagg.post("/site/blocks/stats/topUsers/ajax/stats.jag", { action:"getPerAppSubscribers",currentLocation:currentLocation,fromDate:fromDate,toDate:toDate  },
         function (json) {
+            $('#registeredUseresSpinner').hide();
             if (!json.error) {
                 var length = json.usage.length,data = [];
                 var appData=[];

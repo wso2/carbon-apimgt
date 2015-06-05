@@ -109,12 +109,13 @@ var drawGraphAPIUsage = function(from,to){
     var toDate = to;
     jagg.post("/site/blocks/stats/perAppAPICount/ajax/stats.jag", { action:"getProviderAPIUsage",currentLocation:currentLocation,fromDate:fromDate,toDate:toDate  },
         function (json) {
+            $('#spinner').hide();
             if (!json.error) {
                 var dataLength = json.usage.length;
                 if(dataLength>0){
                 $('#apiUsage').empty();
                     for(var k=0 ; k<dataLength ;k++){
-                    $('#apiUsage').append($('<h4>Application Name:  '+json.usage[k].appName+'</h4><div class="col-md-12"><div class="col-md-6"><div id="apiChart'+(k+1)+'" class="chart"><svg style="height:400px;"></svg></div></div> <div class="col-md-6"> <table class="table table-striped table-bordered" id="apiTable'+(k+1)+'" class="display" cellspacing="0" width="100%"><thead><tr> <th>'+ i18n.t("apiName")+'</th><th>'+ i18n.t("noOfAPICalls")+'</th></tr></thead> </table> </div></div>'));
+                    $('#apiUsage').append($('<h4>Application Name:  '+json.usage[k].appName+'</h4><div class="col-md-12"><div class="col-md-6"><div id="apiChart'+(k+1)+'" class="chart"><svg style="height:400px;"></svg></div></div> <div class="col-md-6"> <table class="table table-striped table-bordered" id="apiTable'+(k+1)+'" class="display" cellspacing="0" width="100%"><thead><tr> <th>API Name</th><th>Number of API Calls</th></tr></thead> </table> </div></div>'));
                     }
 
                      for(var k=0 ; k<dataLength ;k++){
@@ -167,7 +168,10 @@ function drawChart(div,i,data) {
       .showLabels(true)
       .labelType("percent")
       .showLegend(false)
-      .color(d3.scale.category20().range());
+      .color(d3.scale.category20().range())
+      .tooltipContent( function(key, x, y){
+         return  '<b>'+key + '</b> - ' + Math.round(x) + " <i>call(s)</i>"
+       } );;
     var chartID = "#apiChart"+(i+1) +" svg";
     d3.select(chartID)
         .datum(data)
@@ -180,7 +184,7 @@ function drawChart(div,i,data) {
           return "translate(" + arc.centroid(d) + ")";}
       )
       .attr("text-anchor", "middle")
-      .style({"font-size": "1em"});
+      .style({"font-size": "0.7em"});
 
     nv.utils.windowResize(chart.update);
     return chart;
