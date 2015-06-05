@@ -1,5 +1,5 @@
 <div id='application-table-data'>
-    <table class='table table-bordered'>
+    <table class='table table-bordered table-condensed '>
         <thead>
         <tr>
             <th>{{t "Name"}}</th>
@@ -24,15 +24,13 @@
                 {{/each}}
                 <td>{{callbackUrl}}</td>
                 <td>{{description}}</td>
-                <td>
+                <td class="text-center">
                     {{#each status}}
                         {{#if isActive}}
-                            <a href="javascript:changeAppRowtoEditView('{{../../name}}','{{../../../cuser.username}}','{{../../id}}','{{../../tier}}','{{isActive}}','{{../../callbackUrl}}','{{../../description}}');"><i
-                                    class='icon-edit'></i> {{t "Edit"}}</a>
+                            <a href="javascript:changeAppRowtoEditView('{{../../name}}','{{../../../cuser.username}}','{{../../id}}','{{../../tier}}','{{isActive}}','{{../../callbackUrl}}','{{../../description}}');"><i class='fa fa-edit'></i> {{t "Edit"}}</a>
                         {{/if}}
-                    {{/each}}
-                    <a href="javascript:removeApplication('{{name}}','{{../cuser.username}}','{{id}}');"><i
-                            class='icon-trash'></i> {{t "Delete"}}</a>
+                    {{/each}}&nbsp;&nbsp;
+                    <a href="javascript:removeApplication('{{name}}','{{../cuser.username}}','{{id}}');"><i class='fa fa-trash'></i> {{t "Delete"}}</a>
                 </td>
             </tr>
         {{/each}}

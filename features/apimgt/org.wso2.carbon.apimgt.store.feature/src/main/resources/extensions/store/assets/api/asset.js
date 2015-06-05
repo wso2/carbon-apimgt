@@ -322,32 +322,32 @@ asset.renderer = function(ctx) {
                 }
             },  populateApiActionBar: function(page,meta){
                 var action = {};
-                action.url = '/list';
+                action.url = '/asts/api/list';
                 action.iconClass ='ast-create';
                 action.name ='APIs';
                 page.actionBar.actions.push(action);
                 action = {};
-                action.url = '/prototyped_apis';
+                action.url = '/asts/api/prototyped_apis';
                 action.iconClass ='ast-create';
                 action.name ='Prototyped APIs';
                 page.actionBar.actions.push(action);
                 action = {};
-                action.url = '/my_applications';
+                action.url = '/asts/api/my_applications';
                 action.iconClass ='ast-create';
                 action.name ='My Applications';
                 page.actionBar.actions.push(action);
                 action = {};
-                action.url = '/my_subscriptions';
+                action.url = '/asts/api/my_subscriptions';
                 action.iconClass ='ast-create';
                 action.name ='My Subscriptions';
                 page.actionBar.actions.push(action);
                 action = {};
-                action.url = '/forum';
+                action.url = '/asts/api/forum';
                 action.iconClass ='ast-create';
                 action.name ='Forum';
                 page.actionBar.actions.push(action);
                 action = {};
-                action.url = '/statistics';
+                action.url = '/asts/api/statistics';
                 action.iconClass ='ast-create';
                 action.name ='Statistics';
                 page.actionBar.actions.push(action);

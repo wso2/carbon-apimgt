@@ -1,4 +1,5 @@
 <div id='subscriptions-table-data'>
+    {{#if apis}}
     <table class='table table-bordered'>
         <thead>
         <tr>
@@ -15,7 +16,7 @@
                 <td>
                     {{#each apiSubscriptions}}
                         <a href="javascript:getAPIUrl('{{../../cuser.username}}','{{apiName}}','{{apiVersion}}');">
-                            &#169; {{apiName}} - {{apiVersion}}
+                            <i class="fw fw-api"></i> {{apiName}} - {{apiVersion}}
                         </a>
                         <!-- Make sure to update the js/api_subscriptions.js file if you change below views(form and div) -->
                         <div id="td-{{../userName}}-{{../application}}-{{apiName}}-{{apiVersion}}">
@@ -74,4 +75,7 @@
         {{/each}}
         </tbody>
     </table>
+    {{else}}
+        No subscribed API's found!
+    {{/if}}
 </div>

@@ -134,7 +134,7 @@ public class CommonUtil {
             }
         } catch (IOException e) {
             // sending a default error message.
-            log.error("Error occurred while connecting backend : " + urlVal + ", reason : " + e.getMessage());
+            log.error("Error occurred while connecting backend : " + urlVal + ", reason : " + e.getMessage(), e);
         } finally {
             client.getConnectionManager().shutdown();
         }

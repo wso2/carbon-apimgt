@@ -765,7 +765,6 @@ var apipublisher = {};
             apiOb.setCacheTimeout(api.cacheTimeout);
             apiOb.setSwagger(api.swagger);
             success = this.impl.updateAPIManagePhase(apiOb);
-            // log.info("=============================================");
             if (log.isDebugEnabled()) {
                 log.debug("manageAPI : " + api.name + "-" + api.version);
             }

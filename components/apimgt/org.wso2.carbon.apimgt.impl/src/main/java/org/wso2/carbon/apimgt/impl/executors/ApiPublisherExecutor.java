@@ -108,15 +108,4 @@ public class ApiPublisherExecutor implements Execution {
         }
 	    return executed;
     }
-
-    private static APIStatus getApiStatus(String status) {
-        APIStatus apiStatus = null;
-        for (APIStatus aStatus : APIStatus.values()) {
-            if (aStatus.getStatus().equalsIgnoreCase(status)) {
-                apiStatus = aStatus;
-                break;
-            }
-        }
-        return apiStatus;
-    }
 }

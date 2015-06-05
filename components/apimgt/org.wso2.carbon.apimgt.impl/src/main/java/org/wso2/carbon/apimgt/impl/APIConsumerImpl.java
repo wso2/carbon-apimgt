@@ -21,6 +21,7 @@ package org.wso2.carbon.apimgt.impl;
 import org.apache.axis2.AxisFault;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.codehaus.plexus.util.StringUtils;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.wso2.carbon.CarbonConstants;
@@ -2816,8 +2817,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 
                     Set<Scope> scopeSet = new LinkedHashSet<Scope>();
 
-                    if (((appName == null || appName.isEmpty())) ||
-                        appName.equals(application.getName())) {
+                    if (StringUtils.isBlank(appName) || appName.equals(application.getName())) {
 
                         //get Number of subscriptions for the given application by the subscriber.
                         subscriptionCount = getSubscriptionCount(subscriber, application.getName(), groupId);
