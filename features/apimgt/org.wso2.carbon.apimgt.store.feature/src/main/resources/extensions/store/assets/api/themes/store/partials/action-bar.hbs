@@ -1,0 +1,16 @@
+{{#if actionBar}}
+<div class="wr-action-btn-bar">
+	<ul class="nav navbar-nav">
+		{{#each actionBar.actions}}
+		<li>
+	     <a href='{{url ""}}{{this.url}}' id="{{this.id}}">
+			<li class="action-wrapper">
+				<div class="action-img-icon">{{this.iconClass}}</div>
+				<label class="action-title">{{this.name}}<label>
+			</li>
+		</a>
+		</li>
+		{{/each}}
+	</ul>
+</div>
+{{/if}}
