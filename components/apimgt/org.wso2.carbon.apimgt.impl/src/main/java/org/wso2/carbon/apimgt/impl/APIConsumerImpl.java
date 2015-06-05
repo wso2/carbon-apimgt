@@ -232,7 +232,10 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 GenericArtifact genericArtifact = artifactManager.getGenericArtifact(uuid);
                 if (genericArtifact != null &&
                     genericArtifact.getAttribute(APIConstants.API_OVERVIEW_STATUS).equals(APIConstants.PUBLISHED)) {
-                    apiSet.add(APIUtil.getAPI(genericArtifact));
+                    API api = APIUtil.getAPI(genericArtifact);
+                    if (api != null) {
+                        apiSet.add(api);
+                    }
                 }
             }
 
@@ -532,17 +535,18 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 
                     API api  = APIUtil.getAPI(artifact);
                     
-                    if (returnAPItags) {
-                        String artifactPath = GovernanceUtils.getArtifactPath(registry, artifact.getId());
-                        Set<String> tags = new HashSet<String>();
-                        org.wso2.carbon.registry.core.Tag[] tag = registry.getTags(artifactPath);
-                        for (org.wso2.carbon.registry.core.Tag tag1 : tag) {
-                            tags.add(tag1.getTagName());
-                        }
-                        api.addTags(tags);
-                    }
-                    
                     if (api != null) {
+
+                        if (returnAPItags) {
+                            String artifactPath = GovernanceUtils.getArtifactPath(registry, artifact.getId());
+                            Set<String> tags = new HashSet<String>();
+                            org.wso2.carbon.registry.core.Tag[] tag = registry.getTags(artifactPath);
+                            for (org.wso2.carbon.registry.core.Tag tag1 : tag) {
+                                tags.add(tag1.getTagName());
+                            }
+                            api.addTags(tags);
+                        }
+
                         String key;
                         //Check the configuration to allow showing multiple versions of an API true/false
                         if (!displayMultipleVersions) { //If allow only showing the latest version of an API
@@ -919,9 +923,11 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         		GenericArtifact[] genericArtifacts = artifactManager.findGenericArtifacts(listMap);
         		SortedSet<API> allAPIs = new TreeSet<API>(new APINameComparator());
         		for (GenericArtifact artifact : genericArtifacts) {
-        			API api = APIUtil.getAPI(artifact);
-        			allAPIs.add(api);
-        		}
+                    API api = APIUtil.getAPI(artifact);
+                    if (api != null) {
+                        allAPIs.add(api);
+                    }
+                }
 
 				if (!APIUtil.isAllowDisplayMultipleVersions()) {
 					Map<String, API> latestPublishedAPIs = new HashMap<String, API>();

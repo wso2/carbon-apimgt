@@ -4074,7 +4074,7 @@ public class APIStoreHostObject extends ScriptableObject {
         }
     }
 
-    public static NativeArray  jsFunction_getPublishedAPIsByProvider(Context cx, Scriptable thisObj,
+    public static NativeArray jsFunction_getPublishedAPIsByProvider(Context cx, Scriptable thisObj,
                                                                     Object[] args,
                                                                     Function funObj)
             throws APIManagementException {
@@ -4087,7 +4087,7 @@ public class APIStoreHostObject extends ScriptableObject {
             String apiOwner = args[3].toString();
             String apiBizOwner = null;
             //If api biz-owner is not null
-            if(args[4] != null){
+            if (args[4] != null) {
                 apiBizOwner = args[4].toString();
             }
 
@@ -4104,7 +4104,7 @@ public class APIStoreHostObject extends ScriptableObject {
                 apiSet = apiConsumer.getPublishedAPIsByProvider(providerName, username, limit, apiOwner, apiBizOwner);
             } catch (APIManagementException e) {
                 handleException("Error while getting published APIs information of the provider - " +
-                        providerName, e);
+                                providerName, e);
                 return null;
             } catch (Exception e) {
                 handleException("Error while getting published APIs information of the provider", e);
@@ -4122,14 +4122,20 @@ public class APIStoreHostObject extends ScriptableObject {
                     Object apiObject = it.next();
                     API api = (API) apiObject;
                     APIIdentifier apiIdentifier = api.getId();
+                    int apiId = ApiMgtDAO.getAPIID(apiIdentifier, null);
+
+                    // API is partially created/deleted. We shouldn't be showing this API.
+                    if (apiId == -1) {
+                        continue;
+                    }
                     currentApi.put("name", currentApi, apiIdentifier.getApiName());
                     currentApi.put("provider", currentApi,
-                            APIUtil.replaceEmailDomainBack(apiIdentifier.getProviderName()));
+                                   APIUtil.replaceEmailDomainBack(apiIdentifier.getProviderName()));
                     currentApi.put("version", currentApi,
-                            apiIdentifier.getVersion());
+                                   apiIdentifier.getVersion());
                     currentApi.put("description", currentApi, api.getDescription());
                     //Rating should retrieve from db
-                    currentApi.put("rates", currentApi, ApiMgtDAO.getAverageRating(api.getId()));
+                    currentApi.put("rates", currentApi, ApiMgtDAO.getAverageRating(apiId));
                     if (api.getThumbnailUrl() == null) {
                         currentApi.put("thumbnailurl", currentApi, "images/api-default.png");
                     } else {

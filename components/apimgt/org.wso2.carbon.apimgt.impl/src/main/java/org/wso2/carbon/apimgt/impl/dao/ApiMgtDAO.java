@@ -4902,7 +4902,53 @@ public class ApiMgtDAO {
             
             avrRating = getAverageRating(apiId, conn);
                         
-            conn.commit();
+
+        } catch (SQLException e) {
+            if (conn != null) {
+                try {
+                    conn.rollback();
+                } catch (SQLException e1) {
+                    log.error("Failed to rollback getting user ratings ", e);
+                }
+            }
+            handleException("Failed to get user ratings", e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(null, conn, null);
+        }
+        return avrRating;
+    }
+
+
+    public static float getAverageRating(int apiId)
+            throws APIManagementException {
+        Connection conn = null;
+        float avrRating = 0;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+        try {
+            conn = APIMgtDBUtil.getConnection();
+            conn.setAutoCommit(false);
+
+            if (apiId == -1) {
+                String msg = "Invalid APIId : " + apiId;
+                log.error(msg);
+                return Float.NEGATIVE_INFINITY;
+            }
+            //This query to update the AM_API_RATINGS table
+            String sqlQuery = "SELECT CAST( SUM(RATING) AS DECIMAL)/COUNT(RATING) AS RATING " +
+                              " FROM AM_API_RATINGS" +
+                              " WHERE API_ID =? GROUP BY API_ID ";
+
+            ps = conn.prepareStatement(sqlQuery);
+            ps.setInt(1, apiId);
+            rs = ps.executeQuery();
+
+            while (rs.next()) {
+                avrRating = rs.getFloat("RATING");
+            }
+            ps.close();
+
+
         } catch (SQLException e) {
             if (conn != null) {
                 try {
@@ -4934,7 +4980,7 @@ public class ApiMgtDAO {
             if (apiId == -1) {
                 String msg = "Could not load API record for: " + apiIdentifier.getApiName();
                 log.error(msg);
-                throw new APIManagementException(msg);
+                return Float.NEGATIVE_INFINITY;
             }
             //This query to update the AM_API_RATINGS table
             String sqlQuery = "SELECT CAST( SUM(RATING) AS DECIMAL)/COUNT(RATING) AS RATING " +
@@ -6925,8 +6971,10 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
     }
 
     public static int getAPIID(APIIdentifier apiId, Connection connection) throws APIManagementException {
+        boolean created = false;
         PreparedStatement prepStmt = null;
         ResultSet rs = null;
+
         int id = -1;
         String getAPIQuery = "SELECT " +
                              "API.API_ID FROM AM_API API" +
@@ -6936,6 +6984,13 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
                              " AND API.API_VERSION = ?";
 
         try {
+            if (connection == null) {
+
+                // If connection is not provided a new one will be created.
+                connection = APIMgtDBUtil.getConnection();
+                created = true;
+            }
+
             prepStmt = connection.prepareStatement(getAPIQuery);
             prepStmt.setString(1, APIUtil.replaceEmailDomainBack(apiId.getProviderName()));
             prepStmt.setString(2, apiId.getApiName());
@@ -6947,12 +7002,15 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
             if (id == -1) {
                 String msg = "Unable to find the API: " + apiId + " in the database";
                 log.error(msg);
-                throw new APIManagementException(msg);
             }
         } catch (SQLException e) {
             handleException("Error while locating API: " + apiId + " from the database", e);
         } finally {
-            APIMgtDBUtil.closeAllConnections(prepStmt, null, rs);
+            if (created) {
+                APIMgtDBUtil.closeAllConnections(prepStmt, connection, rs);
+            } else {
+                APIMgtDBUtil.closeAllConnections(prepStmt, null, rs);
+            }
         }
         return id;
     }
