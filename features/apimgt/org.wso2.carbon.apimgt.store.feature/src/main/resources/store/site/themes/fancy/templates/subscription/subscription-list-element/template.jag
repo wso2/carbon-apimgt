@@ -136,19 +136,23 @@
 										</div>
 
 										<div class="regenerate-wrapper">
-											<div class="span2">
+											<div class="span12">
 												<div class="dropdown">
 													<button class="btn btn-default dropdown-toggle curlurl-genbtn" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-expanded="true"
 													    title="View cURL command to generate a token as an end user">
 														cURL <span class="caret"></span>
 													</button>
+
+													<a class="icon-question-sign curlHelp_popup_prod"></a>
+                                                    <div id="curlProdtoken_help"></div>
+
 													<ul class="dropdown-menu" role="menu" aria-labelledby="gencurl-menu">
 														<li role="gencurl"><a role="menuitem" tabindex="-1" href="javascript:generateCurl('<%=app.prodConsumerKey%>:<%=app.prodConsumerSecret%>', '<%=gatewayurlendpoint%>', 'password', 'prodCurl');">GrantType: Password</a></li>
 														<li role="gencurl"><a role="menuitem" tabindex="-1" href="javascript:generateCurl('<%=app.prodConsumerKey%>:<%=app.prodConsumerSecret%>', '<%=gatewayurlendpoint%>', 'client_credentials', 'prodCurl');">GrantType: Client Credentials</a></li>
 													</ul>
 												</div>
 											</div>
-											<div class="span10">
+											<div class="span12">
 												<div class="form-inline proRegenerateForm">
 
 													<% if(lenS > 0){ %>
@@ -156,10 +160,10 @@
                                             						            <% } %>		
 													Validity Time: <input type="text" class="input-mini token-validity-input" id="refreshProdValidityTime" value='<%=prodValidityTime %>' maxlength="70"  autofocus="autofocus" /> Seconds
 
-													<span class="label label-warning" id = "timeWarn" style="display:none;"><%=i18n.localize("timeWarn")%></span>											
+													<span class="label label-warning" id = "timeWarn" style="display:none;"><%=i18n.localize("timeWarn")%></span>
 													<a class="icon-question-sign help_popup_prod"></a>
 													<button class="show-hide-key btn btn-primary" onclick="regenerate('<%=encode.forJavaScript(app.name)%>','PRODUCTION',200,this,'pull-right','<%=app.prodConsumerKey%>','<%=app.prodConsumerSecret%>')" ><i class="fa fa-repeat"></i> <%=i18n.localize("regenerate")%></button>
-												<div id="prodtoken_help"></div>
+													<div id="prodtoken_help"></div>
 												</div>
 											</div>
 										</div>
@@ -262,10 +266,9 @@
                                <% } else { %>
                                     Token Validity: <input type="text" class="input-mini token-validity-input" id="refreshProdValidityTime" value="<%=prodValidityTime%>" maxlength="70"  autofocus="autofocus" style="margin-top:5px;"  />  Seconds
                                     <span class="label label-warning" id = "timeWarn" style="display:none;"><%=i18n.localize("timeWarn")%></span>
-				    <a class="icon-question-sign help_popup_prod"></a>
-                               	    <div id="prodtoken_help"></div>
                                <% } %>
-                               
+                               <a class="icon-question-sign help_popup_prod"></a>
+                               <div id="prodtoken_help"></div>
                             </div>
                         	<!-- END config section -->
                         </div>
@@ -374,28 +377,30 @@
 										</div>
 
 										<div class="regenerate-wrapper">
-											<div class="span2">
+											<div class="span12">
 												<div class="dropdown">
 													<button class="btn btn-default dropdown-toggle curlurl-genbtn" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-expanded="true"
 													    title="View cURL command to generate a token as an end user">
 															cURL <span class="caret"></span>
 			   										</button>
+			   										<a class="icon-question-sign curlHelp_popup_sand"></a>
+                                                    <div id="curlSandtoken_help"></div>
 													<ul class="dropdown-menu" role="menu" aria-labelledby="gencurl-menu">
 														<li role="gencurl"><a role="menuitem" tabindex="-1" href="javascript:generateCurl('<%=app.sandboxConsumerKey%>:<%=app.sandboxConsumerSecret%>', '<%=gatewayurlendpoint%>', 'password', 'sandboxCurl');">GrantType: Password</a></li>
 														<li role="gencurl"><a role="menuitem" tabindex="-1" href="javascript:generateCurl('<%=app.sandboxConsumerKey%>:<%=app.sandboxConsumerSecret%>', '<%=gatewayurlendpoint%>', 'client_credentials', 'sandboxCurl');">GrantType: Client Credentials</a></li>
 													</ul>
 												</div>
 											</div>
-											<div class="span10">
+											<div class="span12">
 												<div class="form-inline proRegenerateForm">
 												    <% if(lenS > 0){ %>
 													    <a href="#scopePopupSand" role="button" class="btn" data-toggle="modal" ><%=i18n.localize("selectScopes")%></a>
 													<% } %>
 													Validity: <input type="text" class="input-mini token-validity-input" id="refreshSandValidityTime" value="<%=sandValidityTime%>" maxlength="70"  autofocus="autofocus" /> Seconds
 		                            				<span class="label label-warning" id = "timeWarn" style="display:none;"><%=i18n.localize("timeWarn")%></span>
-									<a class="icon-question-sign help_popup_sand"></a>		                        
+		                            				<a class="icon-question-sign help_popup_sand"></a>
 		                            				<button class="show-hide-key btn btn-primary" onclick="regenerate('<%=encode.forJavaScript(app.name)%>','SANDBOX',200,this,'pull-right','<%=app.sandboxConsumerKey%>','<%=app.sandboxConsumerSecret%>')" ><i class="fa fa-repeat"></i> <%=i18n.localize("regenerate")%></button>
-									<div id="sandtoken_help"></div>
+		                            				<div id="sandtoken_help"></div>
 												</div>
 											</div>
 										</div>
@@ -497,9 +502,9 @@
 		                        <% } else { %>
 		                        Token Validity: <input type="text" class="input-mini token-validity-input" id="refreshSandValidityTime" value="<%=sandValidityTime%>" maxlength="70"  autofocus="autofocus" style="margin-top:5px;"  />  Seconds
 		                            <span class="label label-warning" id = "timeWarn" style="display:none;"><%=i18n.localize("timeWarn")%></span>
-					    <a class="icon-question-sign help_popup_sand"></a>
-		                            <div id="sandtoken_help"></div>
-		                        <% } %>		                        
+		                        <% } %>
+		                        <a class="icon-question-sign help_popup_sand"></a>
+		                        <div id="sandtoken_help"></div>
                             </div>
                         	<!-- END config section -->
                         </div>

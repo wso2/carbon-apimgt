@@ -236,6 +236,21 @@ $(document).ready(function () {
 	    return false;
 	 });
 
+    $('.curlHelp_popup_prod').click(function(){
+        $('#curlProdtoken_help').toggle('fast', function()
+        {
+            $('#curlProdtoken_help').html(i18n.t('info.curlHelpMsg'));
+        });
+        return false;
+    });
+
+    $('.curlHelp_popup_sand').click(function(){
+        $('#curlSandtoken_help').toggle('fast', function(){
+            $('#curlSandtoken_help').html(i18n.t('info.curlHelpMsg'));
+        });
+        return false;
+    });
+
    $('#btnProvideKeyProduction').click(function () {
        $('.cDivParentOfManualAuthAppCreateProduction').show();
        $('.cDivDefaultBtnSet').hide();
@@ -437,8 +452,7 @@ var regenerate=function(appName,keyType,i,btn,div,clientId,clientSecret) {
         } else {
             jagg.message({content:result.message,type:"error"});
         }
-        $(btn).prev().hide();
-        $('#' + div).hide();
+
         if (regenerateOption) {
             $(btn).show();
             $('#' + div).show();
