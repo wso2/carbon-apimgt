@@ -21,15 +21,11 @@ var store = jagg.module("manager").getAPIStoreObj();
            	}
 
 		filePath = request.getParameter("filePath");
-	   	username = user.username;
-
-		var MultitenantUtils = Packages.org.wso2.carbon.utils.multitenancy.MultitenantUtils;
-		var domain= MultitenantUtils.getTenantDomain(username);
 
 		var encode = require('encode');
     		encode = new encode.Encode();
 		try {
-			var object = store.getDocument(String(domain), filePath);
+			var object = store.getDocument(filePath);
 		    	if (!object.Data) {
 				response.status = 500;
 				print({
