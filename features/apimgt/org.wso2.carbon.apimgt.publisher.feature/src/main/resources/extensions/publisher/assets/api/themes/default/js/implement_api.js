@@ -44,11 +44,11 @@ $(function() {
                 if($('input:radio:checked').val() == 'inline') {
                     $('.implementation_method_endpoint').css({'display':'none'});
                     $('.api_designer').css({'display':'block'});
-                    $('#prototyped_api').removeClass('hide');
+                    //$('#prototyped_api').removeClass('hide');
                 } else {
                     $('.implementation_method_endpoint').css({'display':'block'});
-                    $('.api_designer').css({'display':'none'});
-                    $('#prototyped_api').addClass('hide'); 
+                    $('.api_designer').css({'display':'none'}); 
+                    //$('#prototyped_api').addClass('hide');
                 }
             }
         );  
@@ -71,6 +71,21 @@ $(function() {
           }else{
             $('#api-implement-more-credentials').css({'display':'none'});
           }
+        });
+
+        var previousClicked = "";
+        $('.api-implement-type').click(function(){
+            $($(this).attr('value')).slideToggle();
+            $($(this).attr('value')).removeClass('hide');
+            if(previousClicked !="" && previousClicked != $(this).attr('value')){
+                $(previousClicked).slideUp();
+            }
+            previousClicked=$(this).attr('value');
+        });
+
+        $(".implementation_methods").change(function(event){
+            //$(".implementation_method").hide();
+            $(".implementation_method_"+$(this).val()).show();
         });
 
         $( "#api-implement-endpoint-type" ).change(function() {
@@ -174,6 +189,134 @@ $(function() {
             $("#implement_form").submit();
         });
         //LB EP related- END
+        var v = $("#prototype_form").validate({
+        submitHandler: function(form) {        
+        var designer = APIMangerAPI.APIDesigner();
+        var endpoint_config = {"production_endpoints":{"url": $("#prototype_endpoint").val(),"config":null},"endpoint_type":"http"}
+        $('.swagger').val(JSON.stringify(designer.api_doc));
+        $('.prototype_config').val(JSON.stringify(endpoint_config));        
+
+        //$('#'+thisID).buttonLoader('start');
+
+        $(form).ajaxSubmit({
+            success:function(responseText, statusText, xhr, $form) {
+             if (!responseText.error) {
+                var designer = APIMangerAPI.APIDesigner();
+                designer.saved_api = {};
+                designer.saved_api.name = responseText.data.apiName;
+                designer.saved_api.version = responseText.data.version;
+                designer.saved_api.provider = responseText.data.provider;
+               // $('#'+thisID).buttonLoader('stop');
+                $( "body" ).trigger( "prototype_saved" );                             
+             } else {
+                 if (responseText.message == "timeout") {
+                     if (ssoEnabled) {
+                         var currentLoc = window.location.pathname;
+                         if (currentLoc.indexOf(".jag") >= 0) {
+                             location.href = "index.jag";
+                         } else {
+                             location.href = 'site/pages/index.jag';
+                         }
+                     } else {
+                         jagg.showLogin();
+                     }
+                 } else {
+                     jagg.message({content:responseText.message,type:"error"});
+                 }
+                 $('#'+thisID).buttonLoader('stop');
+             }
+            }, dataType: 'json'
+        });
+        }
+    });
+    
+    $("#prototyped_api").click(function(e){
+      
+        $("body").on("prototype_saved", function(e){
+            $("body").unbind("prototype_saved");
+                var designer = APIMangerAPI.APIDesigner();
+                console.log("prototyped_api pressed body on!!");
+
+                data = {
+                    action: "updateStatus",
+                    name: designer.saved_api.name,
+                    version: designer.saved_api.version,
+                    provider: designer.saved_api.provider,
+                    status: "PROTOTYPED",
+                    publishToGateway: true,
+                    requireResubscription: true
+                };
+                $.ajax({
+                           url: caramel.context + '/asts/api/apis/lifecycle?type=api',
+                           type: 'POST',
+                           data: JSON.stringify(data),
+                           contentType: 'application/json',
+                           success: function (data) {
+                               //BootstrapDialog.alert('Successfully Changed the life cycle state');
+                                BootstrapDialog.show({
+                                type: BootstrapDialog.TYPE_INFO,
+                                title: 'Success',
+                                message: 'Successfully deployed as a prototype.',
+                                buttons: [{
+                                            label: 'OK',
+                                            action: function(dialogRef){
+                                            dialogRef.close();
+                                          }
+                                          }]             
+                                });  
+                           },
+                           error: function (data) {
+                               //BootstrapDialog.alert('Error while changing the life cycle state');
+                            BootstrapDialog.show({
+                                                  type: BootstrapDialog.TYPE_DANGER,
+                                                  title: 'Error',
+                                                  message: 'Error while deploying as a prototype.',
+                                                  buttons: [{
+                                                             label: 'OK',
+                                                             action: function(dialogRef){
+                                                             dialogRef.close();
+                                                            }
+                                                            }]             
+                                                  });   
+                           }
+                       });
+                /*$.ajax({
+                    type: "POST",
+                    url: jagg.site.context + "/site/blocks/life-cycles/ajax/life-cycles.jag",
+                    data: {
+                        action :"updateStatus",
+                        name:designer.saved_api.name,
+                        version:designer.saved_api.version,
+                        provider: designer.saved_api.provider,
+                        status: "PROTOTYPED",
+                        publishToGateway:true,
+                        requireResubscription:true
+                    },
+                    success: function(responseText){
+                        if (!responseText.error) {
+                             $("#prototype-success").modal('show');
+                        }else{
+                             if (responseText.message == "timeout") {
+                                 if (ssoEnabled) {
+                                     var currentLoc = window.location.pathname;
+                                     if (currentLoc.indexOf(".jag") >= 0) {
+                                         location.href = "index.jag";
+                                     } else {
+                                       location.href = 'site/pages/index.jag';
+                                     }
+                                 } else {
+                                     jagg.showLogin();
+                                 }
+                             } else {
+                                 jagg.message({content:responseText.message,type:"error"});
+                             }
+                        }
+                    },
+                    dataType: "json"
+                });             */  
+            });
+       // $("#prototype_form").submit();                        
+    });
 
         var v = $("#implement_form").validate({
                                                      contentType : "application/x-www-form-urlencoded;charset=utf-8",
@@ -211,5 +354,28 @@ $(function() {
                                                                             });
                                                      }
                                                  });
+
+
+
+
+
     });
 });
+
+var thisID='';
+$('#saveBtn').click(function(e){
+    thisID = $(this).attr('id');
+});
+
+$('#savePrototypeBtn').click(function(e){
+    thisID = $(this).attr('id');
+});
+
+/*$('#prototyped_api').click(function(e){
+    thisID = $(this).attr('id');
+});*/
+
+$('#go_to_manage').click(function(e){
+    thisID = $(this).attr('id');
+});
+

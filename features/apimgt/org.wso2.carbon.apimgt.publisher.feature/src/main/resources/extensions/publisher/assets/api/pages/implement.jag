@@ -65,6 +65,13 @@ require('/modules/publisher.js').exec(function(ctx) {
 	//Set language specific helper messages and names
 	var locale = require('/extensions/assets/api/locale/locale_en.json');
 	output.locale = locale;
+    //TODO 
+    /*
+    following is to avoid The choice of Java method java.lang.String.replace matching JavaScript
+    argument types (function,function) is ambiguous
+    Error while loading implement API page after initial page save.
+    */
+    output.api.endpointConfig = new String(api.endpointConfig);
     caramel.render(output);
 }, request, response, session);
 %>
