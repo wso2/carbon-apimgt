@@ -19,6 +19,6 @@
 
 var resources = function(){
     return {
-        css:['common.css']
+        css:['apim_common.css']
     }
 };

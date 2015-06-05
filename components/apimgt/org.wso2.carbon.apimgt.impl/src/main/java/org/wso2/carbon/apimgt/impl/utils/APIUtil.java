@@ -208,10 +208,21 @@ public final class APIUtil {
 
 	private static String VERSION_PARAM="{version}";
 
+    /**
+     * This method is used to set config context service
+     *
+     * @param configContext
+     */
 	public static void setConfigContextService(ConfigurationContextService configContext) {
         APIUtil.configContextService = configContext;
     }
 
+    /**
+     * This method is used to get config context
+     *
+     * @return configContextService.getServerConfigContext()
+     * @throws APIManagementException
+     */
     public static ConfigurationContext getConfigContext() throws APIManagementException {
         if (configContextService == null) {
             handleException("ConfigurationContextService is null");
@@ -4332,7 +4343,7 @@ public final class APIUtil {
             backendPort = Integer.toString(port);
             return backendPort;
         } catch (APIManagementException e) {
-            log.error(e.getMessage());
+            log.error("Error occurred while getting config context.", e);
             return null;
 
         }
@@ -5133,4 +5144,5 @@ public final class APIUtil {
 		String json = gson.toJson(obj);
 		return json;
 	}
+
 }
