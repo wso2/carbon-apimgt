@@ -17,8 +17,31 @@
  *
  */
 
-var resources = function(){
-    return {
-        css:['apim_common.css']
+/*
+ * Changed the logic of this js after ES properly given the option to inherit css
+ */
+var name;
+var parentHelper = new File('/extensions/app/greg-publisher-defaults/themes/default/helpers/header.js');
+
+if(parentHelper.isExists()){
+    var hps = require('/extensions/app/greg-publisher-defaults/themes/default/helpers/header.js');
+    var that = this;
+    /*
+     In order to inherit all variables in the default helper
+     */
+    for (name in hps) {
+        if (hps.hasOwnProperty(name)) {
+            that[name] = hps[name];
+        }
     }
+    var fn = that.resources;
+}
+
+var resources = function(page, meta) {
+    var o = fn ? fn(page, meta) : {};
+    if (!o.css) {
+        o.css = [];
+    }
+    o.css.push('apim_common.css');
+    return o;
 };
