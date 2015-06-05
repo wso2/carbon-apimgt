@@ -242,3 +242,21 @@ margin: 20px 0px 10px 10px;
 .requiredAstrix{
     color:red;
 }
+
+.get-started label,.get-started label s{
+    font-size: 18px;
+    font-weight:normal;
+}
+.get-started label p, .get-started label s.paragraph{
+    font-size: 14px;
+    font-weight:normal;
+    color:#999;
+    margin-top:4px;
+    margin-bottom:30px;
+}
+.get-started label s, .get-started label s.paragraph{
+    color:#ccc;
+}
+.marg-top-6{
+    margin-top:6px;
+}

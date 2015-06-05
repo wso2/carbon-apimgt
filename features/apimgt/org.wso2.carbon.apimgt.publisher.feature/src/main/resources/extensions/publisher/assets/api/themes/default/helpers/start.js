@@ -18,6 +18,7 @@
  */
 var resources = function(page,meta){
 	return {
-		js:['start.js']
+		js:['start.js'],
+		css:['api_designer.css']
 	};
 };

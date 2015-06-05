@@ -61,11 +61,11 @@ $( document ).ready(function() {
         });
 
         $(this).closest('.create-options').addClass('selected');
-        $('#designNewAPI').hide();
+        $('.designNewAPIContainer').slideUp();
     });
 
     $('#create-new-api').click(function(){
-        $('#designNewAPI').show();
+        $('.designNewAPIContainer').slideDown();
     });
 
 
