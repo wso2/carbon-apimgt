@@ -1,5 +1,13 @@
 <% jagg.template("documentation/inline-editor", function(inputs, outputs, jagg) {
 var mode = request.getParameter("mode");
+var infoMappedUrl=jagg.getMappedUrl("/site/pages/item-info.jag");
+var tenantDomain= encode.forUriComponent(request.getParameter("tenant"));
+var urlPostfix;
+if(tenantDomain!='null'){
+    urlPostfix="&tenant="+tenantDomain;
+}else{
+    urlPostfix='';
+}
 %>
 <script type="text/javascript">
 var apiName = "<%= encode.forJavaScript(request.getParameter("apiName"))%>";
@@ -14,7 +22,28 @@ var docName = "<%= encode.forJavaScript(request.getParameter("docName"))%>";
 
         <div id="layout-base" class="container-fluid content-section" style="padding:20px">
             <div class="row-fluid">
-                <div class="span12"></div>
+                <div class="span12">
+                    <ul class="breadcrumb">
+                        <li>
+                            <%
+                                var apiUrl = infoMappedUrl + "?name=" + encode.forUriComponent(request.getParameter("apiName")) + "&version=" + encode.forUriComponent(request.getParameter("version"))+ "&provider=" + encode.forUriComponent(request.getParameter("provider"))+urlPostfix;
+                            %>
+                            <a href="<%=apiUrl%>" onclick="navigateBack('overview')"><%= encode.forHtml(request.getParameter("apiName"))%>-<%= encode.forHtml(request.getParameter("version"))%></a>
+                        </li>
+                        <li>
+                            <span class="divider">/</span>
+                        </li>
+                        <li>
+                            <a href="<%=apiUrl%>" onclick="navigateBack('docs')">Docs</a>
+                        </li>
+                        <li>
+                            <span class="divider">/</span>
+                        </li>
+                        <li>
+                            <%= encode.forHtml(request.getParameter("docName"))%>
+                        </li>
+                    </ul>
+                </div>
                 <div class="span12">
                     <div id="apiDeatils">
                         <h2><%= encode.forHtml(request.getParameter("docName"))%></h2>
