@@ -118,6 +118,12 @@ var select_environment = function(){
   $("#environment_name").change(select_environment);
   show_environments();
 });
+
+function checkOnKeyPress(e) {
+    if (e.which == 13 ||e.keyCode == 13) {
+        return false;
+    }
+}
 </script>
 <div id="authorizations" class="">
     <form class="form-horizontal">
@@ -169,7 +175,7 @@ var select_environment = function(){
         <div class="controls form-inline">
           <div class="input-prepend">
           <span class="add-on">Authorization : Bearer </span>
-          <input type="text" id="access_token" name="access_token" placeholder="Access Token" class="input-xxlarge" onkeydown="return false;">
+          <input type="text" id="access_token" name="access_token" placeholder="Access Token" class="input-xxlarge" onkeypress="return checkOnKeyPress(event)">
           </div>        
         </div>
       </div>
