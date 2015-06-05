@@ -24,6 +24,9 @@
 
     <h3><%=i18n.localize("apiUsage")%></h3>
     <br>
+    <div id="spinner" class="center-wrapper">
+        <i id="icon-spinner" class="fa fa-spinner fa-pulse fa-4x"></i>
+    </div>
     <div class="class="col-md-12">
         <div id="apiUsage"></div>
     </div>
