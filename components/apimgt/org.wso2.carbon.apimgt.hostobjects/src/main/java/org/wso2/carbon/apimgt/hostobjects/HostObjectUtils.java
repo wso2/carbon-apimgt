@@ -121,12 +121,8 @@ public class HostObjectUtils {
             handleException("Authentication credentials for API Provider manager unspecified");
         }
 
-        try {
-            return new ProviderKeyMgtClient(url, username, password);
-        } catch (APIManagementException e) {
-            handleException("Error while initializing the provider  management client", e);
-            return null;
-        }
+        return new ProviderKeyMgtClient(url, username, password);
+
     }
 
     private static void handleException(String msg) throws APIManagementException {
