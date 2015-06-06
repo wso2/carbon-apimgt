@@ -142,7 +142,9 @@ public class CORSRequestHandler extends AbstractHandler implements ManagedLifecy
 	}
 
 	public boolean handleResponse(MessageContext messageContext) {
-		messageContext.getSequence("_cors_request_handler_").mediate(messageContext);
+		if(Utils.isCORSEnabled() && messageContext.getSequence("_cors_request_handler") != null) {
+			messageContext.getSequence("_cors_request_handler_").mediate(messageContext);
+		}
 		return true;
 	}
 

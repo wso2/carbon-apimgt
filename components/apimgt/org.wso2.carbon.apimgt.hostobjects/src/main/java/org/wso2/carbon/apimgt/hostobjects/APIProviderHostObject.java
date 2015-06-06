@@ -3462,8 +3462,7 @@ public class APIProviderHostObject extends ScriptableObject {
                 row.put("api_name", row, usage.getApiName());
                 row.put("api_version", row, usage.getApiVersion());
                 row.put("user", row, usage.getUser());
-                Date date = new Date(String.valueOf(usage.getLastAccessTime()));
-                row.put("lastAccess", row, Long.valueOf(date.getTime()).toString());
+                row.put("lastAccess", row, usage.getLastAccessTime());
                 myn.put(i, myn, row);
                 i++;
             }
