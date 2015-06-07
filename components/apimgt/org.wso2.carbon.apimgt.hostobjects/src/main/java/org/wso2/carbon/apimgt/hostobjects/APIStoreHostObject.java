@@ -3467,7 +3467,7 @@ public class APIStoreHostObject extends ScriptableObject {
             
             // check whether there is an app with same name
             if (!name.equals(oldName) && appsMap.containsKey(name)) {
-                return false;
+                handleException("An application already exist by the name " + name);
             }
 
             for (Application app : apps) {
