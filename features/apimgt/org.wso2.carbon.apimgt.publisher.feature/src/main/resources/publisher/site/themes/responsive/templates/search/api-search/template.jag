@@ -14,7 +14,7 @@ var query=request.getParameter("query");
                 <button class="btn btn-primary"><%=i18n.localize("search")%></button>
             </div>
         </div>
-    <div id="searchAPIHelp" class="help-block" style="display:none;">
+    <div id="searchAPIHelp" class="hide help-popover-content">
     <div><%=i18n.localize("searchAPIHelpMsg1")%></div>
     <ol>
         <li><%=i18n.localize("searchAPIHelpMsg2")%></li>

@@ -21,8 +21,8 @@ var docName = "<%= encode.forJavaScript(request.getParameter("docName"))%>";
 
 
         <div id="layout-base" class="container-fluid content-section" style="padding:20px">
-            <div class="row-fluid">
-                <div class="span12">
+            <div class="row">
+                <div class="col-md-12">
                     <ul class="breadcrumb">
                         <li>
                             <%
@@ -44,7 +44,7 @@ var docName = "<%= encode.forJavaScript(request.getParameter("docName"))%>";
                         </li>
                     </ul>
                 </div>
-                <div class="span12">
+                <div class="col-md-12">
                     <div id="apiDeatils">
                         <h2><%= encode.forHtml(request.getParameter("docName"))%></h2>
                     </div>
@@ -54,10 +54,10 @@ var docName = "<%= encode.forJavaScript(request.getParameter("docName"))%>";
                 </div>
                 </div>
 
-                <div class="span8">
+                <div class="col-md-8">
                     <textarea id="inlineEditor" style="width:100%;height:500px;"></textarea>
                 </div>
-                <div class="span3">
+                <div class="col-md-3">
                     <table class="table table-bordered table-striped">
                         <thead>
                         <tr>
@@ -75,11 +75,11 @@ var docName = "<%= encode.forJavaScript(request.getParameter("docName"))%>";
                     </table>
                 </div>
                 <% if(mode=="edit"){%>
-                <div class="span12">
+                <div class="col-md-12">
                     <div style="padding:10px 0;">
                         <button type="button" title="Save the changes to the document and stay in this tab" class="btn btn-primary" id="inline-apply-button" onclick="saveContent(provider,apiName,apiVersion,docName,'apply')">Save</button>
                         <button type="button" title="Save the document and close this tab" class="btn btn-primary" id="inline-save-button" onclick="saveContent(provider,apiName,apiVersion,docName,'save')">Save and Close</button>
-                        <button type="button" title="Cancel all the unsaved changes and close this tab"  class="btn" id="inline-cancel-button" onclick="window.close()">Cancel</button>
+                        <button type="button" title="Cancel all the unsaved changes and close this tab"  class="btn btn-default" id="inline-cancel-button" onclick="window.close()">Cancel</button>
 
                     </div>
                 </div>
