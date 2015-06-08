@@ -3645,6 +3645,7 @@ public class ApiMgtDAO {
 
         try {
             connection = APIMgtDBUtil.getConnection();
+            connection.setAutoCommit(false);
 
             if (accessAllowDomains != null && !accessAllowDomains[0].trim().equals("")) {
                 for (int i = 0; i < accessAllowDomains.length; i++) {
