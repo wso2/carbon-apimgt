@@ -28,7 +28,26 @@ $( document ).ready(function() {
         });
     });
 
+    $('#wsdl-url').change(function(){
+        $('.wsdlError').hide();
+        $('#wsdl-url').removeClass('error');
+    });
+
+    $('#wsdl-url').keyup(function(){
+        $('.wsdlError').hide();
+        $('#wsdl-url').removeClass('error');
+    });
+
     $("#startFromExistingSOAPEndpoint").click(function(){
+        var wsdlURL = $('#wsdl-url').val();
+        if (wsdlURL.toLowerCase().indexOf("?wsdl") < 0) {
+            $('#wsdl-url').addClass('error');
+            $('.wsdlError').show();
+            console.log("Wrong endpoint.");
+           return;
+        }
+        $('.wsdlError').hide();
+
         var btn = $(this);
         $(btn).buttonLoader('start');
         $('#startFromExistingSOAPEndpoint-form').ajaxSubmit({
@@ -64,6 +83,7 @@ $( document ).ready(function() {
 
         $(this).closest('.create-options').addClass('selected');
         $('#designNewAPI').hide();
+        $('.wsdlError').hide();
     });
 
     $('#create-new-api').click(function(){
