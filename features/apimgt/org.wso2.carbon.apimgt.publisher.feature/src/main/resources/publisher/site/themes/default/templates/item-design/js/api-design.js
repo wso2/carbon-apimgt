@@ -32,6 +32,17 @@ var content_types = [
        { value : "text/html", text :  "text/html"}
 ];
 
+//function to check if an attribute exists in a nested series of objects
+function checkNested(obj) {
+  for (var i = 1; i < arguments.length; i++) {
+    if (!obj.hasOwnProperty(arguments[i])) {
+      return false;
+    }
+    obj = obj[arguments[i]];
+  }
+  return true;
+}
+
 //Create a designer class
 function APIDesigner(){
     //implement singleton pattern
@@ -203,7 +214,6 @@ APIDesigner.prototype.check_if_resource_exist = function(path, method){
 
 APIDesigner.prototype.set_default_management_values = function(){
     var operations = this.query("$.paths.*.*");
-    console.log(operations);
     for(var i=0;i < operations.length;i++){
         if(!operations[i]["x-auth-type"]){
             if(operations[i].method == "OPTIONS"){
@@ -228,11 +238,11 @@ APIDesigner.prototype.add_default_resource = function(){
 
 APIDesigner.prototype.get_scopes = function() {
     var options = [{ "value": "" , "text": "" }];
-    if(typeof(this.api_doc.securityDefinitions)!='undefined'){
-	var scopes = this.api_doc.securityDefinitions.apim['x-wso2-scopes'];	
-	for(var i =0; i < scopes.length ; i++ ){
-	    options.push({ "value": scopes[i].key , "text": scopes[i].name });
-	}	
+    if(checkNested(this.api_doc, 'securityDefinitions','apim','x-wso2-scopes')){
+    	var scopes = this.api_doc.securityDefinitions.apim['x-wso2-scopes'];	
+    	for(var i =0; i < scopes.length ; i++ ){
+    	    options.push({ "value": scopes[i].key , "text": scopes[i].name });
+    	}	
     }
     return options;
 }
@@ -292,7 +302,6 @@ APIDesigner.prototype.init_controllers = function(){
         jagg.message({content:'Do you want to remove "'+op+' : '+pn+'" resource from list.',type:'confirm',title:"Remove Resource",
         okCallback:function(){
             API_DESIGNER = APIDesigner();
-            //console.log(i, pn, op, operations);
             delete API_DESIGNER.api_doc.paths[pn][op];
             API_DESIGNER.render_resources(); 
         }});
@@ -338,7 +347,6 @@ APIDesigner.prototype.init_controllers = function(){
     });
 
     this.container.delegate(".delete_parameter", "click", function (event) {
-        console.log("deleting parameter");
         //var elementToDelete =  $(this).parent().parent();
         var deleteData = $(this).attr("data-path");
         var i = $(this).attr("data-index");
@@ -352,9 +360,7 @@ APIDesigner.prototype.init_controllers = function(){
             type: 'confirm', title: "Delete Parameter",
             okCallback: function () {
                 API_DESIGNER = APIDesigner();
-                console.log(API_DESIGNER.api_doc.paths[operations]);
                 API_DESIGNER.api_doc.paths[operations][operation]['parameters'].splice(i,1);
-                console.log(API_DESIGNER.api_doc.paths[operations]);
                 API_DESIGNER.render_resources();
             }});
     });
