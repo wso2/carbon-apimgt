@@ -80,12 +80,23 @@ include("/jagg/jagg.jag");
 
         result = mod.getAllSubscriptions(username,selectedApp,startIndex,endIndex);
 
-
         if (result.error) {
-            obj = {
-                error:result.error,
-                message:msg.error.authError(action, username)
-            };
+            if (result.error.javaException instanceof org.wso2.carbon.apimgt.api.ApplicationNotFoundException) {
+                obj = {
+                    "subscriptionCallbackResponse" : {
+                        "error":"true",
+                        "message":result.message
+                    }
+                };
+                response.status = 404;
+                response.contentType = "application/json";
+            }
+            else{
+                obj = {
+                    error:result.error,
+                    message:msg.error.authError(action, username)
+                };
+            }
         } else {
             obj = {
                 error:false,
@@ -110,10 +121,22 @@ include("/jagg/jagg.jag");
         result = mod.getAPISubscriptionsForApplication(username,appname);
 
         if (result.error) {
-            obj = {
-                error:result.error,
-                message:result.message
-            };
+            if (result.error.javaException instanceof org.wso2.carbon.apimgt.api.ApplicationNotFoundException) {
+                obj = {
+                    "subscriptionCallbackResponse" : {
+                        "error":"true",
+                        "message":result.message
+                    }
+                };
+                response.status = 404;
+                response.contentType = "application/json";
+            }
+            else{
+                obj = {
+                    error:result.error,
+                    message:result.message
+                };
+            }
         } else {
             obj = {
                 error:false,
