@@ -261,8 +261,9 @@
                 </table>
                 </div>
                 <div class="modal-footer">
-                <button class="btn btn-primary" data-dismiss="modal" aria-hidden="true">OK</button>
+                <a href='<%= jagg.url("/info?"+ apiUrlId ) %>' class="btn btn-primary">Go to Overview</a>
                 <a href='<%=storeUrl%>/apis/info?name=<%=api.name%>&version=<%=api.version%>&provider=<%=api.provider%>' class="btn has-spinner">Go to API Store</a>
+                <button class="btn" data-dismiss="modal" aria-hidden="true">OK</button>
                 </div>
             </div>
             </div>
