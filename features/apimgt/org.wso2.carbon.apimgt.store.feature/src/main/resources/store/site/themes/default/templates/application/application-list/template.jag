@@ -104,7 +104,10 @@
                 if(status=='APPROVED'){
                     statusVal='ACTIVE';
                     disableUpdate = false;
-                }else{
+                } else if(status=='REJECTED') {
+                    statusVal='REJECTED';
+                    disableUpdate = true;
+                } else{
                     statusVal='INACTIVE';
                     disableUpdate = true;
                 }
