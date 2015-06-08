@@ -139,14 +139,14 @@ var mapExistingOauthClient = function (authAppParams) {
     }
 };
 
-var deleteFromApplicationRegistration = function (applicationId , keyType) {
+var cleanUpApplicationRegistration = function (applicationId , keyType) {
 
     var key,
             log = new Log(),
             store = jagg.module("manager").getAPIStoreObj();
     try {
 
-        key = store.deleteFromApplicationRegistration(applicationId, keyType);
+        key = store.cleanUpApplicationRegistration(applicationId, keyType);
 
         if (log.isDebugEnabled()) {
             log.debug("Deleting from application registration.");

@@ -1642,11 +1642,15 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
      *@return
      *@throws APIManagementException
      */
-    public void deleteFromApplicationRegistration(String applicationId ,String tokenType) throws
+    public void cleanUpApplicationRegistration(String applicationId ,String tokenType) throws
             APIManagementException{
 
         apiMgtDAO.deleteApplicationRegistration(applicationId , tokenType);
         apiMgtDAO.deleteApplicationKeyMappingByApplicationIdAndType(applicationId , tokenType);
+        String consumerKey = apiMgtDAO.getConsumerkeyByApplicationIdAndKeyType(applicationId,tokenType);
+        if(consumerKey != null){
+            apiMgtDAO.deleteAccessAllowDomains(consumerKey);
+        }
 
     }
 

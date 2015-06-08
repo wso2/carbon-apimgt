@@ -78,6 +78,7 @@
     "showKeysMsg" : "Keys available. Click 'Show Keys' to view.",
     "prodKeyMsg" : "Production keys are not yet generated for this application.",
     "prodKeyCreatedMsg" : "Request to register this application has been sent.",
+    "cleanUpSubscriptions" : "Error! You have partially created keys. Please click on clean up button and try again.",
     "prodKeyRejectedMsg" : "This application has been rejected of creating Production keys.",
     "prodKeyApprovedMsg" : "This Application is approved to create Production Keys. Please click the Create Keys button to obtain an Access Token",
     "sandboxKeyMsg" : "Sandbox keys are not yet generated for this application.",

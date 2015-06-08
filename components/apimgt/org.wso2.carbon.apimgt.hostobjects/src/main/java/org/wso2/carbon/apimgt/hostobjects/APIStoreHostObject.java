@@ -981,7 +981,7 @@ public class APIStoreHostObject extends ScriptableObject {
      * @throws APIManagementException
      * @throws ParseException
      */
-    public static void jsFunction_deleteFromApplicationRegistration(Context cx, Scriptable thisObj,
+    public static void jsFunction_cleanUpApplicationRegistration(Context cx, Scriptable thisObj,
                                                          Object[] args, Function funObj)
             throws ScriptException, APIManagementException, ParseException {
         if (args != null && args.length != 0) {
@@ -993,7 +993,7 @@ public class APIStoreHostObject extends ScriptableObject {
 
                 //this map will hold response that we are getting from Application registration process.
                 Map<String, Object> keyDetails;
-                getAPIConsumer(thisObj).deleteFromApplicationRegistration(applicationId, keyType);
+                getAPIConsumer(thisObj).cleanUpApplicationRegistration(applicationId, keyType);
 
             } catch (Exception e) {
                 handleException("Error while obtaining the application access token for the application" + e

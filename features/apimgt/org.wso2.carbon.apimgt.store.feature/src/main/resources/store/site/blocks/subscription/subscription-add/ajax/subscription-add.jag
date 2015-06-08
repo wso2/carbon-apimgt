@@ -427,7 +427,7 @@ include("/jagg/jagg.jag");
             }
         }
         print(obj);
-     }else if (action == "deleteFromApplicationRegistration" && request.getMethod() == 'POST') {
+     }else if (action == "cleanUpApplicationRegistration" && request.getMethod() == 'POST') {
 
         if (!user) {
             print({
@@ -442,7 +442,7 @@ include("/jagg/jagg.jag");
 
         mod = jagg.module("subscription");
 
-        result = mod.deleteFromApplicationRegistration(applicationId , keyType);
+        result = mod.cleanUpApplicationRegistration(applicationId , keyType);
 
         if (result.error) {
             obj = {
