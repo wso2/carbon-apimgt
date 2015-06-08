@@ -14,11 +14,7 @@
 		{{/each}}
 	];
 
-		{{#each api.configuredTiers}}
-			{{#if this.last}}
-			var DEFAULT_TIER = "{{this.tierName}}";
-			{{/if}}
-		{{/each}}
+	var DEFAULT_TIER = "Unlimited";
 	var DEFAULT_AUTH = "Application & Application User";
 	var OPTION_DEFAULT_AUTH = "None";
 	var insequence = "{{api.inSequence}}";
