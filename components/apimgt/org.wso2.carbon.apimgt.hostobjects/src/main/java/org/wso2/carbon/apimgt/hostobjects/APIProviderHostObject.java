@@ -3984,26 +3984,26 @@ public class APIProviderHostObject extends ScriptableObject {
         return apiOlderVersionExist;
     }
 
-	public static String jsFunction_isURLValid(Context cx, Scriptable thisObj, Object[] args,
-	                                           Function funObj) throws APIManagementException {
-		String response = "";
-		if (args == null || !isStringValues(args)) {
-			handleException("Invalid input parameters.");
-		}
-		String urlVal = (String) args[1];
-		String type = (String) args[0];
-		if (urlVal != null && !urlVal.isEmpty()) {
+    public static String jsFunction_isURLValid(Context cx, Scriptable thisObj, Object[] args, Function funObj)
+                                                                                       throws APIManagementException {
+        String response = "";
+        if (args == null || !isStringValues(args)) {
+            handleException("Invalid input parameters.");
+        }
+        String urlVal = (String) args[1];
+        String type = (String) args[0];
+        if (urlVal != null && !urlVal.isEmpty()) {
             urlVal = urlVal.trim();
-			URLConnection conn = null;
-			try {
-				URL url = new URL(urlVal);
-				if (type != null && type.equals("wsdl")) {
-					validateWsdl(urlVal);
-					response = "success";
-				}
-				// checking http,https endpoints up to resource level by doing
-				// http HEAD. And other end point
-				// validation do through basic url connect
+            URLConnection conn = null;
+            try {
+                URL url = new URL(urlVal);
+                if (type != null && type.equals("wsdl")) {
+                    validateWsdl(urlVal);
+                    response = "success";
+                }
+                // checking http,https endpoints up to resource level by doing
+                // http HEAD. And other end point
+                // validation do through basic url connect
                 else if (url.getProtocol().matches("https")) {
                     ServerConfiguration serverConfig = CarbonUtils.getServerConfiguration();
                     String trustStorePath = serverConfig.getFirstProperty("Security.TrustStore.Location");
@@ -4018,16 +4018,16 @@ public class APIProviderHostObject extends ScriptableObject {
                     return "error while connecting";
                 }
             } catch (Exception e) {
-				response = e.getMessage();
-			} finally {
-				if (conn != null) {
-					conn = null;
-				}
-			}
-		}
-		return response;
+                response = e.getMessage();
+            } finally {
+                if (conn != null) {
+                    conn = null;
+                }
+            }
+        }
+        return response;
 
-	} 
+    }
 
 	private static HostnameVerifier DO_NOT_VERIFY = new HostnameVerifier() {
 		public boolean verify(String hostname, SSLSession session) {
