@@ -578,13 +578,13 @@ $(document).ready(function () {
                 var value_index = name.replace(/([a-zA-Z0-9_]*)/, '').replace('[','').replace(']','');
                 if(value_index == ''){
                     if(ec[field] != undefined && ec[field] !="")
-                        ec[field] = { url: ec[field] , config: ep_config };
+                        ec[field] = { url: ec[field].trim() , config: ep_config };
                     else
                         ec[field] = undefined;
                 }
                 else{
                     if(ec[field][value_index] != undefined && ec[field][value_index] !="")
-                        ec[field][value_index] = { url: ec[field][value_index] , config: ep_config };
+                        ec[field][value_index] = { url: ec[field][value_index].trim() , config: ep_config };
                     else{
                         ec[field].splice(value_index,1);
                     }
@@ -620,13 +620,13 @@ $(document).ready(function () {
             var value_index = name.replace(/([a-zA-Z0-9_]*)/, '').replace('[','').replace(']','');
             if(value_index == ''){
                 if(ec[field] != undefined && ec[field] !="")
-                    ec[field] = { url: ec[field] , config: ep_config };
+                    ec[field] = { url: ec[field].trim() , config: ep_config };
                 else
                     ec[field] = undefined;
             }
             else{
                 if(ec[field][value_index] != undefined && ec[field][value_index] !="")
-                    ec[field][value_index] = { url: ec[field][value_index] , config: ep_config };
+                    ec[field][value_index] = { url: ec[field][value_index].trim() , config: ep_config };
                 else{
                     ec[field].splice(value_index,1);
                 }
