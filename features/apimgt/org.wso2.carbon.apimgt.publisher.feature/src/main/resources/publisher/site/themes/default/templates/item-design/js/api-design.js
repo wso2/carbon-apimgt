@@ -332,7 +332,7 @@ APIDesigner.prototype.init_controllers = function(){
         if(resource.parameters ==undefined){
             resource.parameters = [];
         }
-        resource.parameters.push({ name : parameter , paramType : "query", required : false , type: "string"});
+        resource.parameters.push({ name : parameter , in : "query", required : false , type: "string"});
         //@todo need to checge parent.parent to stop code brak when template change.
         API_DESIGNER.render_resource(resource_body);
     });
@@ -546,7 +546,7 @@ APIDesigner.prototype.render_resource = function(container){
     });
     container.find('.param_paramType').editable({
         emptytext: '+ Set Param Type',
-        source: [ { value:"query", text:"query" },{ value:"body", text:"body"}, { value:"header", text:"header" }, { value:"form", value:"form"} ],
+        source: [ { value:"query", text:"query" },{ value:"header", text:"header" }, { value:"formData", value:"formData"} ],
         success : this.update_elements
     });
     container.find('.param_type').editable({
