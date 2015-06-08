@@ -67,7 +67,6 @@ p{
 }
 a{
     cursor:pointer;
-    color:#444;
 }
 a.link-to-api, a.title{
     font-weight: bold;
