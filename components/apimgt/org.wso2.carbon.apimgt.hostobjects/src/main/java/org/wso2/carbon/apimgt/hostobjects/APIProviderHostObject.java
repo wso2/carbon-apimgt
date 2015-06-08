@@ -3993,6 +3993,7 @@ public class APIProviderHostObject extends ScriptableObject {
 		String urlVal = (String) args[1];
 		String type = (String) args[0];
 		if (urlVal != null && !urlVal.isEmpty()) {
+            urlVal = urlVal.trim();
 			URLConnection conn = null;
 			try {
 				URL url = new URL(urlVal);
