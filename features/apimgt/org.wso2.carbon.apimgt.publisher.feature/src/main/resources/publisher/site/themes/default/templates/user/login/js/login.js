@@ -23,7 +23,7 @@ var login = function () {
 
                   } else {
                       $('#loginError').show('fast');
-                      $('#loginErrorSpan').html('<strong>'+i18n.t("errorMsgs.login")+'</strong><br />' + result.message);
+                      $('#loginErrorSpan').text(result.message).prepend('<strong>'+i18n.t("errorMsgs.login")+'</strong><br />');
                   }
               }, "json");
 
