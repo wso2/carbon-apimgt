@@ -1065,7 +1065,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         		// give a warn.
 				if (!userRegistry.resourceExists(tagsQueryPath)) {
 					log.warn("Failed to retrieve tags query resource at " + tagsQueryPath);
-					return tagSet;
+					return new TreeSet<Tag>();
 				}
 			} catch (RegistryException e1) {
 				//ignore
