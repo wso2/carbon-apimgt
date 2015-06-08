@@ -2143,7 +2143,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                                                                String tokenScope, String groupingId)
                                                                                                     throws APIManagementException {
 
-    	Application application = apiMgtDAO.getApplicationByName(applicationName, null, groupingId);
+        Application application = apiMgtDAO.getApplicationByName(applicationName, userId, groupingId);
         String status = apiMgtDAO.getRegistrationApprovalState(application.getId(), tokenType);
         Map<String, String> keyDetails = null;
         if(!application.getSubscriber().getName().equals(userId)){
