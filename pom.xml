@@ -26,7 +26,7 @@
     <modules>
         <module>dependencies/synapse</module>
         <module>service-stubs/apimgt</module>
-	<module>service-stubs/oidc-authenticator</module>
+	    <module>service-stubs/oidc-authenticator</module>
         <module>components/apimgt</module>
         <module>components/forum</module>
         <module>components/oidc-authenticator</module>
@@ -284,6 +284,12 @@
                 <groupId>org.jaggeryjs</groupId>
                 <artifactId>org.jaggeryjs.hostobjects.web</artifactId>
                 <version>${jaggery.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.wso2.carbon.hostobjects</groupId>
+                <artifactId>org.wso2.carbon.hostobjects.sso</artifactId>
+                <version>${hostobject.version}</version>
             </dependency>
 
             <dependency>
@@ -695,6 +701,7 @@
         <carbon.forum.version>1.2.0-SNAPSHOT</carbon.forum.version>
         <carbon.forum.feature.version>1.2.0-SNAPSHOT</carbon.forum.feature.version>
         <carbon.forum.server.feature.version>1.2.0-SNAPSHOT</carbon.forum.server.feature.version>
+        <hostobject.version>4.2.3-SNAPSHOT</hostobject.version>
 
         <apimgt.core.feature.version>1.2.4-SNAPSHOT</apimgt.core.feature.version>
         <apimgt.feature.version>1.2.4-SNAPSHOT</apimgt.feature.version>
