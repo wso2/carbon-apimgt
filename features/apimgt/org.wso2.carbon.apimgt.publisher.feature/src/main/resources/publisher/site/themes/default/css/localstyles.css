@@ -1526,12 +1526,6 @@ table.dataTable tbody td.no-padding {
 
 .select-label>p{
     font-weight:normal;
-    font-size:12px;
-}
-
-#designNewAPI {
-    margin-top: -50px;
-    margin-right: 25px;
 }
 
 .slideContainer > .well{
@@ -1582,12 +1576,17 @@ table.dataTable tbody td.no-padding {
     font-size:14px;
 }
 
-#startFromExistingAPI {
-    margin-top: -4px !important;
-    margin-right: 4px;
+/* api design more options */
+#more, #less , .optionsHelp{
+    vertical-align: top;
+    margin-top:2px;
 }
 
-#startFromExistingSOAPEndpoint{
-    margin-top: -52px;
-    margin-right: 4px;
+/* api manage sequence table select */
+#seqTable select{
+    width:70%;
+}
+
+#resource_details, #gatewayEnvironments{
+    padding-left:10px;
 }

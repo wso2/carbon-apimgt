@@ -107,7 +107,6 @@ $( document ).ready(function() {
     $('.toggleRadios input[type=radio]').prop('checked', false);
     $('.toggleRadios input[type=radio]').click(function(){
         $('.toggleContainers .controls').hide();
-        $('#startFromExistingAPI').css('margin-top','-67px');
         $('.toggleRadios input[type=radio]').prop('checked', false);
         $('#' + $(this).val()).closest('div').fadeIn();
         $(this).prop('checked', true);
