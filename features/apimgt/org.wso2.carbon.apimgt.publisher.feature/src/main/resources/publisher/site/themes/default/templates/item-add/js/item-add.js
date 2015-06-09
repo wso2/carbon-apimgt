@@ -5,8 +5,8 @@ $( document ).ready(function() {
         $(btn).buttonLoader('start');
         $('#startFromExistingAPI-form').ajaxSubmit({
             success:function(responseText, statusText, xhr, $form){
+                $(btn).buttonLoader('stop');
                 if (!responseText.error) {
-                    $(btn).buttonLoader('stop');
                     window.location = jagg.site.context + "/design"
                 }else {
                     if (responseText.message == "timeout") {
@@ -52,8 +52,8 @@ $( document ).ready(function() {
         $(btn).buttonLoader('start');
         $('#startFromExistingSOAPEndpoint-form').ajaxSubmit({
             success:function(responseText, statusText, xhr, $form){
-                if (!responseText.error) {
-                    $(btn).buttonLoader('stop');
+                $(btn).buttonLoader('stop');
+                if (!responseText.error) {                    
                     window.location = jagg.site.context + "/design"
                 }else {
                     if (responseText.message == "timeout") {
