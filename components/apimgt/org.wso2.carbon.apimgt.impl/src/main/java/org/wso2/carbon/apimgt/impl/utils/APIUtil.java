@@ -3687,14 +3687,18 @@ public final class APIUtil {
             if (isAllowDisplayAPIsWithMultipleStatus()) {
                 if (status.equals(APIConstants.PUBLISHED) || status.equals(APIConstants.DEPRECATED)) {
                     API api=APIUtil.getAPI(artifact, registry);
-                    apiList.add(api);
-                    apiNames.append(api.getId().getApiName());
+                    if (api != null) {
+                        apiList.add(api);
+                        apiNames.append(api.getId().getApiName());
+                    }
                 }
             } else {
                 if (status.equals(APIConstants.PUBLISHED)) {
                     API api=APIUtil.getAPI(artifact, registry);
-                    apiList.add(api);
-                    apiNames.append(api.getId().getApiName());
+                    if (api != null) {
+                        apiList.add(api);
+                        apiNames.append(api.getId().getApiName());
+                    }
                 }
             }
             }

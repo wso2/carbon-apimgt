@@ -834,7 +834,10 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                     float rating = registry.getAverageRating(artifactPath);
                     if (rating > APIConstants.TOP_TATE_MARGIN && (returnLimit < limit)) {
                         returnLimit++;
-                        apiSortedSet.add(APIUtil.getAPI(genericArtifact, registry));
+                        API api = APIUtil.getAPI(genericArtifact, registry);
+                        if (api != null) {
+                            apiSortedSet.add(api);
+                        }
                     }
                 }
             }
@@ -1600,11 +1603,17 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 
                     if (APIUtil.isAllowDisplayAPIsWithMultipleStatus()) {
                         if (status.equals(APIConstants.PUBLISHED) || status.equals(APIConstants.DEPRECATED)) {
-                            apiList.add(APIUtil.getAPI(artifact, registry));
+                            API resultAPI = APIUtil.getAPI(artifact, registry);
+                            if (resultAPI != null) {
+                                apiList.add(resultAPI);
+                            }
                         }
                     } else {
                         if (status.equals(APIConstants.PUBLISHED)) {
-                            apiList.add(APIUtil.getAPI(artifact, registry));
+                            API resultAPI = APIUtil.getAPI(artifact, registry);
+                            if (resultAPI != null) {
+                                apiList.add(resultAPI);
+                            }
                         }
                     }
                     totalLength=apiList.size();
