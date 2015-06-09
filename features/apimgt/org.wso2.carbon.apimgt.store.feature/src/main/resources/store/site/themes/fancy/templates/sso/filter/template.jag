@@ -35,7 +35,7 @@
 		checkSSO = false;
 	}else if (passiveAuthRequired != null && 'false' == passiveAuthRequired) {
         isPassiveAuthRequired = false;
-    } else if (requestURI == '/store/' || requestURI.indexOf("list-apis.jag") != -1 || requestURI.indexOf("apis/info") != -1) {
+    } else if ((requestURI == site.context+'/') || requestURI.indexOf(site.context+'/?tenant=') != -1 || requestURI.indexOf("list-apis.jag") != -1 || requestURI.indexOf("apis/info") != -1) {
         isPassiveAuthRequired = true;
     }
 
