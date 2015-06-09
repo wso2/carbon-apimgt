@@ -18,9 +18,11 @@ package org.wso2.carbon.apimgt.keymgt.handlers;
 
 import org.wso2.carbon.apimgt.impl.handlers.ScopesIssuer;
 import org.wso2.carbon.apimgt.keymgt.util.APIKeyMgtDataHolder;
+import org.wso2.carbon.base.MultitenantConstants;
 import org.wso2.carbon.identity.oauth2.IdentityOAuth2Exception;
 import org.wso2.carbon.identity.oauth2.token.OAuthTokenReqMessageContext;
 import org.wso2.carbon.identity.oauth2.token.handlers.grant.ClientCredentialsGrantHandler;
+import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -31,7 +33,16 @@ public class ExtendedClientCredentialsGrantHandler extends ClientCredentialsGran
     @Override
     public boolean validateGrant(OAuthTokenReqMessageContext tokReqMsgCtx)
             throws IdentityOAuth2Exception {
-        return super.validateGrant(tokReqMsgCtx);
+
+        boolean validateResult =  super.validateGrant(tokReqMsgCtx);
+        String tenantDomain = tokReqMsgCtx.getOauth2AccessTokenReqDTO().getTenantDomain();
+        String username = tokReqMsgCtx.getAuthorizedUser();
+        String retrievedDomain =  MultitenantUtils.getTenantDomain(username);
+        if(!MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)){
+            username = username+"@"+tenantDomain;
+            tokReqMsgCtx.setAuthorizedUser(username);
+        }
+        return validateResult;
     }
 
     @Override
