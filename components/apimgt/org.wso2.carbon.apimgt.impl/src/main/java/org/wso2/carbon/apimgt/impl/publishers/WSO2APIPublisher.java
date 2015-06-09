@@ -65,7 +65,7 @@ import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
 
 public class WSO2APIPublisher implements APIPublisher {
-    private Log log = LogFactory.getLog(getClass());
+    private static Log log = LogFactory.getLog(WSO2APIPublisher.class);
 
     /**
      * The method to publish API to external WSO2 Store
@@ -768,10 +768,18 @@ public class WSO2APIPublisher implements APIPublisher {
     }
 
     private static String getFullRegistryIconUrl(String postfixUrl) {
-        String webContext = CarbonUtils.getServerConfiguration().getFirstProperty("WebContextRoot");
-        if (postfixUrl != null && webContext != null && !webContext.equals("/")) {
-            postfixUrl = webContext + postfixUrl;
+        String proxyContext = CarbonUtils.getServerConfiguration().getFirstProperty("ProxyContextPath");
+        String tmpPostfixUrl = "";
+        if (proxyContext != null && !proxyContext.equals("/")) {
+            tmpPostfixUrl = proxyContext;
         }
+
+        String webContext = CarbonUtils.getServerConfiguration().getFirstProperty("WebContextRoot");
+        if (webContext != null && !webContext.equals("/")) {
+            tmpPostfixUrl = tmpPostfixUrl + webContext;
+        }
+
+        postfixUrl = tmpPostfixUrl + postfixUrl;
         String hostName = CarbonUtils.getServerConfiguration().getFirstProperty("HostName");
         String backendHttpPort = getBackendPort("http");
         String transport = "http://";
@@ -784,7 +792,9 @@ public class WSO2APIPublisher implements APIPublisher {
         if (hostName == null) {
             hostName = System.getProperty("carbon.local.ip");
         }
-
+        if (log.isDebugEnabled()) {
+            log.debug("Publisher Registry icon URL :- " + transport + hostName + ":" + backendHttpPort + postfixUrl);
+        }
         return transport + hostName + ":" + backendHttpPort + postfixUrl;
     }
 
