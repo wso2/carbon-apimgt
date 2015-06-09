@@ -16,12 +16,16 @@
 
 package org.wso2.carbon.apimgt.keymgt.handlers;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.impl.handlers.ScopesIssuer;
+import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.keymgt.util.APIKeyMgtDataHolder;
 import org.wso2.carbon.base.MultitenantConstants;
 import org.wso2.carbon.identity.oauth2.IdentityOAuth2Exception;
 import org.wso2.carbon.identity.oauth2.token.OAuthTokenReqMessageContext;
 import org.wso2.carbon.identity.oauth2.token.handlers.grant.ClientCredentialsGrantHandler;
+import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.util.ArrayList;
@@ -29,19 +33,28 @@ import java.util.Arrays;
 import java.util.List;
 
 public class ExtendedClientCredentialsGrantHandler extends ClientCredentialsGrantHandler {
+    private static final Log log = LogFactory.getLog(ExtendedClientCredentialsGrantHandler.class);
 
     @Override
     public boolean validateGrant(OAuthTokenReqMessageContext tokReqMsgCtx)
             throws IdentityOAuth2Exception {
 
-        boolean validateResult =  super.validateGrant(tokReqMsgCtx);
-        /*String tenantDomain = tokReqMsgCtx.getOauth2AccessTokenReqDTO().getTenantDomain();
+        boolean validateResult = super.validateGrant(tokReqMsgCtx);
+        int tenantId = tokReqMsgCtx.getTenantID();
+        String tenantDomain = MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
+        if (tenantId != MultitenantConstants.SUPER_TENANT_ID) {
+            try {
+                tenantDomain = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager().getDomain
+                        (tenantId);
+            } catch (UserStoreException e) {
+                log.error("Error occurred while obtaining Tenant Domain from Tenant ID", e);
+                throw new IdentityOAuth2Exception(e.getMessage());
+            }
+        }
         String username = tokReqMsgCtx.getAuthorizedUser();
-        String retrievedDomain =  MultitenantUtils.getTenantDomain(username);
-        if(!MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)){
-            username = username+"@"+tenantDomain;
-            tokReqMsgCtx.setAuthorizedUser(username);
-        }*/
+        username = username + "@" + tenantDomain;
+        tokReqMsgCtx.setAuthorizedUser(username);
+
         return validateResult;
     }
 
@@ -57,6 +70,7 @@ public class ExtendedClientCredentialsGrantHandler extends ClientCredentialsGran
 
     @Override
     public boolean validateScope(OAuthTokenReqMessageContext tokReqMsgCtx) {
+        // Execute ScopeIssuer
         boolean state = ScopesIssuer.getInstance().setScopes(tokReqMsgCtx);
 
         // If ScopeIssuer returns true, then see if application scope is set.
