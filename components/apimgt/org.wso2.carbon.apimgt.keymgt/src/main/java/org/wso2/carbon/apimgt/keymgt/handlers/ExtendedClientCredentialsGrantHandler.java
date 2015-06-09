@@ -35,13 +35,13 @@ public class ExtendedClientCredentialsGrantHandler extends ClientCredentialsGran
             throws IdentityOAuth2Exception {
 
         boolean validateResult =  super.validateGrant(tokReqMsgCtx);
-        String tenantDomain = tokReqMsgCtx.getOauth2AccessTokenReqDTO().getTenantDomain();
+        /*String tenantDomain = tokReqMsgCtx.getOauth2AccessTokenReqDTO().getTenantDomain();
         String username = tokReqMsgCtx.getAuthorizedUser();
         String retrievedDomain =  MultitenantUtils.getTenantDomain(username);
         if(!MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)){
             username = username+"@"+tenantDomain;
             tokReqMsgCtx.setAuthorizedUser(username);
-        }
+        }*/
         return validateResult;
     }
 
