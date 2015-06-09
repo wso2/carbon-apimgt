@@ -1082,7 +1082,7 @@ public final class APIUtil {
                     log.debug("Couldn't find GovernanceArtifactConfiguration of RXT: " + key +
                               ". Tenant id set in registry : " + ((UserRegistry) registry).getTenantId() +
                               ", Tenant domain set in PrivilegedCarbonContext: " +
-                              PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain());
+                              PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId());
                 }
             }
         } catch (RegistryException e) {
