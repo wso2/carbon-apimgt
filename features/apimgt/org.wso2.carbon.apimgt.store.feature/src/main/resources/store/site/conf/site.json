@@ -13,7 +13,9 @@
         "keyStorePassword" : "",
         "identityAlias" : "",
         "responseSigningEnabled":"true",
-        "keyStoreName" :""
+        "keyStoreName" :"",
+        "passive" : "false",
+        "acsURL" : ""
     },
     "oidcConfiguration" : {
       "enabled" : "false",

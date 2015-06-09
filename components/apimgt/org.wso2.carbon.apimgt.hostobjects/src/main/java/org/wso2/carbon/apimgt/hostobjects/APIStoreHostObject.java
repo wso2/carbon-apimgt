@@ -147,10 +147,10 @@ public class APIStoreHostObject extends ScriptableObject {
 		String tenantDomain = args[0].toString();
 		if (tenantDomain != null &&
 		    !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
-			APIUtil.loadTenantConfig(tenantDomain);
-		}
+            APIUtil.loadTenantConfig(tenantDomain);
+        }
 
-	}
+    }
         			    
     
 
