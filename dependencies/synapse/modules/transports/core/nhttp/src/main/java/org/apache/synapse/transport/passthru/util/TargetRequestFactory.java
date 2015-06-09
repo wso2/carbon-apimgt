@@ -69,7 +69,7 @@ public class TargetRequestFactory {
                     noEntityBody == null || !noEntityBody);
 
             // headers
-            PassThroughTransportUtils.removeUnwantedHeaders(msgContext,
+            PassThroughTransportUtils.removeUnwantedFieldsFromTransportAndExcessHeaders(msgContext,
                     configuration.isPreserveServerHeader(),
                     configuration.isPreserveUserAgentHeader());
 
