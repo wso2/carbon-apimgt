@@ -32,13 +32,9 @@ if(secure){
 var apiName = outputs.api.name;
 var providerValUe = outputs.api.provider;
 var version = outputs.api.version;
+var APIUtil = Packages.org.wso2.carbon.apimgt.impl.utils.APIUtil;
+providerValUe = APIUtil.replaceEmailDomain(providerValUe);
 
-    if(providerValUe.indexOf("@") > -1){
-        providerValUe = providerValUe.replace("@","%40");
-    }
-	  if(providerValUe.indexOf("/") > -1){
-        providerValUe = providerValUe.replace("/","-DOM-");
-    }
 
 //Calling the jaggery API
 
