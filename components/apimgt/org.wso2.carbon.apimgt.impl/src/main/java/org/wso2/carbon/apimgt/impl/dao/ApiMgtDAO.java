@@ -2817,7 +2817,6 @@ public class ApiMgtDAO {
                         " ICA.CONSUMER_KEY = AKM.CONSUMER_KEY AND" +
                         " IAT.CONSUMER_KEY = ICA.CONSUMER_KEY AND" +
                         " AKM.KEY_TYPE = 'PRODUCTION' AND" +
-                        " ICA.USERNAME = IAT.AUTHZ_USER AND" +
                         " (IAT.TOKEN_STATE = 'ACTIVE' OR" +
                         " IAT.TOKEN_STATE = 'EXPIRED' OR" +
                         " IAT.TOKEN_STATE = 'REVOKED')" +
@@ -2843,7 +2842,6 @@ public class ApiMgtDAO {
                         " ICA.CONSUMER_KEY = AKM.CONSUMER_KEY AND" +
                         " IAT.CONSUMER_KEY = ICA.CONSUMER_KEY AND" +
                         " AKM.KEY_TYPE = 'PRODUCTION' AND" +
-                        " ICA.USERNAME = IAT.AUTHZ_USER AND" +
                         " (IAT.TOKEN_STATE = 'ACTIVE' OR" +
                         " IAT.TOKEN_STATE = 'EXPIRED' OR" +
                         " IAT.TOKEN_STATE = 'REVOKED')" +
@@ -2929,7 +2927,6 @@ public class ApiMgtDAO {
                         " ICA.CONSUMER_KEY = AKM.CONSUMER_KEY AND" +
                         " IAT.CONSUMER_KEY = ICA.CONSUMER_KEY AND" +
                         " AKM.KEY_TYPE = 'SANDBOX' AND" +
-                        " ICA.USERNAME = IAT.AUTHZ_USER AND" +
                         " (IAT.TOKEN_STATE = 'ACTIVE' OR" +
                         " IAT.TOKEN_STATE = 'EXPIRED' OR" +
                         " IAT.TOKEN_STATE = 'REVOKED')" +
@@ -2954,7 +2951,6 @@ public class ApiMgtDAO {
                         " ICA.CONSUMER_KEY = AKM.CONSUMER_KEY AND" +
                         " IAT.CONSUMER_KEY = ICA.CONSUMER_KEY AND" +
                         " AKM.KEY_TYPE = 'SANDBOX' AND" +
-                        " ICA.USERNAME = IAT.AUTHZ_USER AND" +
                         " (IAT.TOKEN_STATE = 'ACTIVE' OR" +
                         " IAT.TOKEN_STATE = 'EXPIRED' OR" +
                         " IAT.TOKEN_STATE = 'REVOKED')" +
