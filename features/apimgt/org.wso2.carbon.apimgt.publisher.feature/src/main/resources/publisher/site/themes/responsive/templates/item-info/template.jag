@@ -29,7 +29,7 @@ if(api != null) {
                 <li><a href="#lifecycles" data-toggle="tab" id="lifecyclesLink"  <%if(!permitted){%> style="display:none;"<%}%>><img class="icon-lifecycle"> <%=i18n.localize("lifeCycle")%></a></li>
                 <li><a href="#versions" data-toggle="tab" id="versionsLink"><i class="glyphicon glyphicon-th-list"></i> <%=i18n.localize("versions")%></a></li>
                 <li><a href="#docs" data-toggle="tab" id="docsLink"><i class="glyphicon glyphicon-file"></i> <%=i18n.localize("docs")%></a></li>
-                <li><a href="#users" data-toggle="tab" id="usersLink"><i class="glyphicon glyphicon-user"></i><%=i18n.localize("users")%> </a></li>
+                <li><a href="#users" data-toggle="tab" id="usersLink"><i class="glyphicon glyphicon-user"></i> <%=i18n.localize("users")%> </a></li>
                 <% if (api.status != "PROTOTYPED") {%>
                 <%if(api.apiStores!=null){%>
                 <li id="externalAPIStoresTab"><a href="#external" data-toggle="tab" id="usersLink"><i class="icon-share-alt"></i><%=i18n.localize("externalAPIStores")%> </a></li>                
