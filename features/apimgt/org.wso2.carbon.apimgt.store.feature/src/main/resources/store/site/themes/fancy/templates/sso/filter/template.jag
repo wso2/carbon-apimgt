@@ -8,10 +8,20 @@
 	var isAuthenticated = ssoRelyingParty.isSessionAuthenticated(sessionId);
 
 	var requestURI;
+
+    var isPassiveAuthRequired = false;
+    var acsUrl = "";
+    var samlAuthRequest;
+
+    if(site.ssoConfiguration.acsURL != null)    {
+       acsUrl = site.ssoConfiguration.acsURL;
+    }
+
 	var requestedPage = request.getParameter("requestedPage");
-	if(requestedPage!=null){
-	requestURI = requestedPage;
-	}else{
+    var passiveAuthRequired = request.getParameter("passiveAuthRequired");
+    if(requestedPage!=null) {
+        requestURI = requestedPage;
+    } else {
 	  requestURI = request.getRequestURI();
 	  if(request.getQueryString()!=null){
 	    requestURI =requestURI+'?'+request.getQueryString();
@@ -23,7 +33,12 @@
 		checkSSO = false;
 	}else if(requestURI.indexOf("confirmemail.jag") != -1) {
 		checkSSO = false;
-	}
+	}else if (passiveAuthRequired != null && 'false' == passiveAuthRequired) {
+        isPassiveAuthRequired = false;
+    } else if ((requestURI == site.context+'/') || requestURI.indexOf(site.context+'/?tenant=') != -1 || requestURI.indexOf("list-apis.jag") != -1 || requestURI.indexOf("apis/info") != -1) {
+        isPassiveAuthRequired = true;
+    }
+
 	if (checkSSO && !Boolean(isAuthenticated)) {
 
 	    var keyStorePassword = site.ssoConfiguration.keyStorePassword;
@@ -44,7 +59,12 @@
             ssoRelyingParty.setProperty("identityAlias", String(site.ssoConfiguration.identityAlias));
             ssoRelyingParty.setProperty("keyStoreName", String(site.ssoConfiguration.keyStoreName));
 
-	    var samlAuthRequest = ssoRelyingParty.getSAMLAuthRequest();
+        if(site.ssoConfiguration.passive == "true")    {
+           samlAuthRequest = ssoRelyingParty.getSAMLPassiveAuthRequest(isPassiveAuthRequired, acsUrl);
+        } else  {
+           samlAuthRequest = ssoRelyingParty.getSAMLAuthRequest();
+        }
+
 	    var encodedRequest = ssoRelyingParty.encode(samlAuthRequest);
 	    var relayState = ssoRelyingParty.getUUID();
 	    ssoRelyingParty.setRelayStateProperty(relayState, requestURI);

@@ -143,6 +143,20 @@ public final class APIUtil {
     private static Set<Integer> registryInitializedTenants = new HashSet<Integer>();
     private static GenericArtifactManager genericArtifactManager;
 
+
+    private static final int DEFAULT_TENANT_IDLE_MINS = 30;
+    private static long tenantIdleTimeMillis;
+    private static Set<String> currentLoadingTenants = new HashSet<String>();
+
+    //Need tenantIdleTime to check whether the tenant is in idle state in loadTenantConfig method
+    static {
+        tenantIdleTimeMillis =
+                Long.parseLong(System.getProperty(
+                        org.wso2.carbon.utils.multitenancy.MultitenantConstants.TENANT_IDLE_TIME,
+                        String.valueOf(DEFAULT_TENANT_IDLE_MINS)))
+                * 60 * 1000;
+    }
+
     /**
      * This method used to get API from governance artifact
      *
@@ -3766,18 +3780,52 @@ public final class APIUtil {
 
     /**
      * load tenant axis configurations.
+     *
      * @param tenantDomain
      */
-	public static void loadTenantConfig(String tenantDomain) {
+    public static void loadTenantConfig(String tenantDomain) {
+        final String finalTenantDomain = tenantDomain;
+        ConfigurationContext ctx =
+                ServiceReferenceHolder.getContextService().getServerConfigContext();
 
-		try {
-			ConfigurationContext ctx = ServiceReferenceHolder.getContextService().getServerConfigContext();
-			TenantAxisUtils.getTenantAxisConfiguration(tenantDomain, ctx);
-		} catch (Exception e) {
-			log.error("Error while creating axis configuration for tenant " + tenantDomain, e);
-		}
+        //Cannot use the tenantDomain directly because it's getting locked in createTenantConfigurationContext()
+        // method in TenantAxisUtils
+        String accessFlag = tenantDomain + "@WSO2";
 
-	}
+        long lastAccessed = TenantAxisUtils.getLastAccessed(tenantDomain, ctx);
+        //Only if the tenant is in unloaded state, we do the loading
+        if (System.currentTimeMillis() - lastAccessed >= tenantIdleTimeMillis) {
+            synchronized (accessFlag.intern()) {
+                // Currently loading tenants are added to a set.
+                // If a tenant domain is in the set it implies that particular tenant is being loaded.
+                // Therefore if and only if the set does not contain the tenant.
+                if (!currentLoadingTenants.contains(tenantDomain)) {
+                    //Only one concurrent request is allowed to add to the currentLoadingTenants
+                    currentLoadingTenants.add(tenantDomain);
+                    ctx.getThreadPool().execute(new Runnable() {
+                        public void run() {
+                            Thread.currentThread()
+                                  .setName("APIMHostObjectUtils-loadTenantConfig-thread");
+                            try {
+                                PrivilegedCarbonContext.startTenantFlow();
+                                ConfigurationContext ctx =
+                                        ServiceReferenceHolder.getContextService()
+                                                              .getServerConfigContext();
+                                TenantAxisUtils.getTenantAxisConfiguration(finalTenantDomain, ctx);
+                            } catch (Exception e) {
+                                log.error("Error while creating axis configuration for tenant " +
+                                          finalTenantDomain, e);
+                            } finally {
+                                //only after the tenant is loaded completely, the tenant domain is removed from the set
+                                currentLoadingTenants.remove(finalTenantDomain);
+                                PrivilegedCarbonContext.endTenantFlow();
+                            }
+                        }
+                    });
+                }
+            }
+        }
+    }
 
     public static void checkClientDomainAuthorized(APIKeyValidationInfoDTO apiKeyValidationInfoDTO, String clientDomain)
             throws APIManagementException {
