@@ -5474,6 +5474,7 @@ public class ApiMgtDAO {
                 + "   ,DESCRIPTION  "
                 + "   ,APPLICATION_STATUS  "
                 + "   ,USER_ID  "
+                + "   ,GROUP_ID  "
                 + "FROM "
                 + "   AM_APPLICATION APP, "
                 + "   AM_SUBSCRIBER SUB  "
@@ -5530,7 +5531,8 @@ public class ApiMgtDAO {
                 application.setCallbackUrl(rs.getString("CALLBACK_URL"));
                 application.setDescription(rs.getString("DESCRIPTION"));
                 application.setStatus(rs.getString("APPLICATION_STATUS"));
-               
+                application.setGroupId(rs.getString("GROUP_ID"));
+
                 Set<APIKey> keys = getApplicationKeys(subscriber.getName() , application.getId());
                 Map<String,OAuthApplicationInfo> keyMap = getOAuthApplications(application.getId());
                     for (String keyType : keyMap.keySet()){
