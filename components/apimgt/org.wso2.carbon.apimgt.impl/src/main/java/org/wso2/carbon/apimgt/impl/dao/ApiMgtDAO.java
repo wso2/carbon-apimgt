@@ -5603,14 +5603,8 @@ public class ApiMgtDAO {
         } finally {
             APIMgtDBUtil.closeAllConnections(prepStmt, connection, rs);
         }
-
-        String[] consumerKeyArray;
-        if (consumerKeys.size() == 0) {
-            consumerKeyArray = null;
-        } else {
-            consumerKeyArray = consumerKeys.toArray(new String[consumerKeys.size()]);
-        }
-        return consumerKeyArray;
+        
+        return consumerKeys.toArray(new String[consumerKeys.size()]);
     }
 
     public void deleteApplication(Application application) throws APIManagementException {
