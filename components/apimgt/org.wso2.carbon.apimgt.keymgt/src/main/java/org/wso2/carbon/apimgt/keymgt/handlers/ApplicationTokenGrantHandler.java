@@ -5,10 +5,13 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.impl.handlers.ScopesIssuer;
 import org.wso2.carbon.apimgt.keymgt.util.APIKeyMgtDataHolder;
+import org.wso2.carbon.base.MultitenantConstants;
+import org.wso2.carbon.identity.core.util.IdentityUtil;
 import org.wso2.carbon.identity.oauth2.IdentityOAuth2Exception;
 import org.wso2.carbon.identity.oauth2.model.*;
 import org.wso2.carbon.identity.oauth2.token.OAuthTokenReqMessageContext;
 import org.wso2.carbon.identity.oauth2.token.handlers.grant.ClientCredentialsGrantHandler;
+import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.util.ArrayList;
 
@@ -54,7 +57,17 @@ public class ApplicationTokenGrantHandler extends ClientCredentialsGrantHandler 
     public boolean validateGrant(OAuthTokenReqMessageContext tokReqMsgCtx)
             throws IdentityOAuth2Exception {
 
-        return super.validateGrant(tokReqMsgCtx);
+        boolean validateResult =  super.validateGrant(tokReqMsgCtx);
+        /*String tenantDomain = tokReqMsgCtx.getOauth2AccessTokenReqDTO().getTenantDomain();
+        String username = tokReqMsgCtx.getAuthorizedUser();
+
+        String retrievedDomain =  MultitenantUtils.getTenantDomain(username);
+        if(!MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(retrievedDomain)){
+            username = username+"@"+tenantDomain;
+            tokReqMsgCtx.setAuthorizedUser(username);
+        }*/
+        return validateResult;
+
 
     }
 
