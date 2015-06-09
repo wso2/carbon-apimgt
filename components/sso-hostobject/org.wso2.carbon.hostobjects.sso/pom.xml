@@ -18,11 +18,11 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
-	<parent>
+    <parent>
         <groupId>org.wso2.carbon.hostobjects</groupId>
         <artifactId>sso-hostobject</artifactId>
         <version>4.2.3-SNAPSHOT</version>
-	    <relativePath>../pom.xml</relativePath>
+        <relativePath>../pom.xml</relativePath>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
@@ -42,26 +42,26 @@
             <artifactId>commons-logging</artifactId>
             <version>1.1.1</version>
         </dependency>
-      <dependency>
-        <groupId>opensaml.wso2</groupId>
-        <artifactId>opensaml2</artifactId>
-        <version>2.4.1.wso2v1</version>
-      </dependency>
-    <dependency>
-      <groupId>commons-codec.wso2</groupId>
-      <artifactId>commons-codec</artifactId>
-      <version>1.4.0.wso2v1</version>
-    </dependency>
+        <dependency>
+            <groupId>opensaml.wso2</groupId>
+            <artifactId>opensaml2</artifactId>
+            <version>2.4.1.wso2v1</version>
+        </dependency>
+        <dependency>
+            <groupId>commons-codec.wso2</groupId>
+            <artifactId>commons-codec</artifactId>
+            <version>1.4.0.wso2v1</version>
+        </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.core</artifactId>
             <version>4.2.0</version>
         </dependency>
         <dependency>
-          <groupId>org.jaggeryjs</groupId>
-          <artifactId>org.jaggeryjs.hostobjects.web</artifactId>
-          <version>0.9.0.ALPHA4.wso2v1</version>
-    </dependency>
+            <groupId>org.jaggeryjs</groupId>
+            <artifactId>org.jaggeryjs.hostobjects.web</artifactId>
+            <version>0.9.0.ALPHA4.wso2v1</version>
+        </dependency>
         <dependency>
             <groupId>commons-lang.wso2</groupId>
             <artifactId>commons-lang</artifactId>
@@ -76,12 +76,12 @@
                 <artifactId>maven-scr-plugin</artifactId>
                 <version>1.7.2</version>
                 <executions>
-                  <execution>
-                    <id>generate-scr-scrdescriptor</id>
-                    <goals>
-                      <goal>scr</goal>
-                    </goals>
-                  </execution>
+                    <execution>
+                        <id>generate-scr-scrdescriptor</id>
+                        <goals>
+                            <goal>scr</goal>
+                        </goals>
+                    </execution>
                 </executions>
             </plugin>
             <plugin>
@@ -102,8 +102,8 @@
             </plugin>
         </plugins>
     </build>
-	<properties>
-		<commons-codec.version>1.4.0.wso2v1</commons-codec.version>
-		<opensaml2.version>2.4.1.wso2v1</opensaml2.version>
-	</properties>
+    <properties>
+        <commons-codec.version>1.4.0.wso2v1</commons-codec.version>
+        <opensaml2.version>2.4.1.wso2v1</opensaml2.version>
+    </properties>
 </project>
