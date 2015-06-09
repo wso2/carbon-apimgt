@@ -40,22 +40,15 @@ var isAPIOlderVersionExist = function (api) {
         if (log.isDebugEnabled()) {
             log.debug("isAPIOlderVersionExist : " + api.name + "-" + api.version);
         }
-        if (!exist) {
-            return {
-                error:true,
-                exist:false
-            };
-        } else {
-            return {
+        return {
                 error:false,
-                exist:true
+                exist:exist
             };
-        }
-
+        
     } catch (e) {
         log.error(e.message);
         return {
-            error:e,
+            error:true,
             exist:false,
             message:e.message.split(":")[1]
 

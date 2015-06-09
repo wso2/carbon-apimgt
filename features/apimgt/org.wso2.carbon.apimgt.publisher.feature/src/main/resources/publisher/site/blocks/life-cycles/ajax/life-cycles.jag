@@ -53,9 +53,7 @@ include("/jagg/jagg.jag");
                 message:result.message
             };
         } else {
-            obj = {
-                error:false
-            }
+            obj = result;
         }
         print(obj);
 

@@ -187,7 +187,7 @@ public interface APIConsumer extends APIManager {
      *@return
      *@throws APIManagementException
      */
-    public void deleteFromApplicationRegistration(String applicationId ,String tokenType) throws
+    public void cleanUpApplicationRegistration(String applicationId ,String tokenType) throws
             APIManagementException;
 
 

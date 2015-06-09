@@ -68,7 +68,7 @@ $(document).ready(function () {
         var applicationId = elem.attr("data-applicationId");
 
         jagg.post("/site/blocks/subscription/subscription-add/ajax/subscription-add.jag", {
-            action:"deleteFromApplicationRegistration",
+            action:"cleanUpApplicationRegistration",
             applicationId:applicationId,
             keyType:keyType
         }, function (result) {

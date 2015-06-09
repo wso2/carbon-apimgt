@@ -34,6 +34,7 @@ import org.json.simple.parser.ParseException;
 import org.mozilla.javascript.*;
 import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.ApplicationNotFoundException;
 import org.wso2.carbon.apimgt.api.model.*;
 import org.wso2.carbon.apimgt.hostobjects.internal.HostObjectComponent;
 import org.wso2.carbon.apimgt.hostobjects.internal.ServiceReferenceHolder;
@@ -981,7 +982,7 @@ public class APIStoreHostObject extends ScriptableObject {
      * @throws APIManagementException
      * @throws ParseException
      */
-    public static void jsFunction_deleteFromApplicationRegistration(Context cx, Scriptable thisObj,
+    public static void jsFunction_cleanUpApplicationRegistration(Context cx, Scriptable thisObj,
                                                          Object[] args, Function funObj)
             throws ScriptException, APIManagementException, ParseException {
         if (args != null && args.length != 0) {
@@ -993,7 +994,7 @@ public class APIStoreHostObject extends ScriptableObject {
 
                 //this map will hold response that we are getting from Application registration process.
                 Map<String, Object> keyDetails;
-                getAPIConsumer(thisObj).deleteFromApplicationRegistration(applicationId, keyType);
+                getAPIConsumer(thisObj).cleanUpApplicationRegistration(applicationId, keyType);
 
             } catch (Exception e) {
                 handleException("Error while obtaining the application access token for the application" + e
@@ -2822,7 +2823,7 @@ public class APIStoreHostObject extends ScriptableObject {
 
     public static NativeObject jsFunction_getAllSubscriptions(Context cx,
                                                               Scriptable thisObj, Object[] args, Function funObj)
-            throws ScriptException, APIManagementException {
+            throws ScriptException, APIManagementException, ApplicationNotFoundException {
 
         if (args == null || args.length == 0 || !isStringArray(args)) {
             return null;
@@ -2854,6 +2855,14 @@ public class APIStoreHostObject extends ScriptableObject {
                 isTenantFlowStarted = true;
                 PrivilegedCarbonContext.startTenantFlow();
                 PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
+            }
+
+            //check whether application exist prior to get subscriptions
+            if (!APIUtil.isApplicationExist(username, appName, groupingId)) {
+                String message = "Application " + appName + " does not exist for user " +
+                        "" + username;
+                log.error(message);
+                throw new ApplicationNotFoundException(message);
             }
 
             Subscriber subscriber = new Subscriber(username);
@@ -3388,7 +3397,7 @@ public class APIStoreHostObject extends ScriptableObject {
 
     public static NativeArray jsFunction_getSubscriptionsByApplication(Context cx,
                                                                        Scriptable thisObj, Object[] args, Function funObj)
-            throws ScriptException, APIManagementException {
+            throws ScriptException, APIManagementException, ApplicationNotFoundException {
 
         NativeArray myn = new NativeArray(0);
         if (args != null && isStringArray(args)) {
@@ -3406,8 +3415,10 @@ public class APIStoreHostObject extends ScriptableObject {
 
                 //check whether application exist prior to get subscription
                 if (!APIUtil.isApplicationExist(username, applicationName, groupingId)) {
-                    handleException("Application " + applicationName + " does not exist for user " +
-                            "" + username);
+                    String message = "Application " + applicationName + " does not exist for user " +
+                            "" + username;
+                    log.error(message);
+                    throw new ApplicationNotFoundException(message);
                 }
 
                 Subscriber subscriber = new Subscriber(username);

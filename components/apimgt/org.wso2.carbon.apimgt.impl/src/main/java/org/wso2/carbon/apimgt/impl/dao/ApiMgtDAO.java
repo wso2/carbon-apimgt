@@ -9138,4 +9138,40 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
         return false;
     }
 
+    /**
+     * @param applicationId
+     * @param keyType
+     * @return
+     */
+    public static String getConsumerkeyByApplicationIdAndKeyType(String applicationId, String keyType)
+            throws APIManagementException {
+        Connection conn = null;
+        ResultSet resultSet = null;
+        PreparedStatement ps = null;
+        String consumerKey = null;
+        try {
+            conn = APIMgtDBUtil.getConnection();
+
+            String sqlQuery = "SELECT CONSUMER_KEY " +
+                    " FROM AM_APPLICATION_KEY_MAPPING " +
+                    " WHERE APPLICATION_ID   = ? AND KEY_TYPE = ? ";
+
+            ps = conn.prepareStatement(sqlQuery);
+            ps.setString(1, applicationId);
+            ps.setString(2, keyType);
+            resultSet = ps.executeQuery();
+
+            while (resultSet.next()) {
+                consumerKey = resultSet.getString("CONSUMER_KEY");
+            }
+
+        } catch (SQLException e) {
+            handleException("Failed to get consumer key by applicationId " + applicationId + "and keyType " + keyType
+                    , e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(ps, conn, resultSet);
+        }
+        return consumerKey;
+    }
+
 }
