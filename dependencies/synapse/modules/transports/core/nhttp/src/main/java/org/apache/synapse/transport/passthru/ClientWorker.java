@@ -87,7 +87,9 @@ public class ClientWorker implements Runnable {
             headers.remove(PassThroughConstants.LOCATION);
             String prefix = (String) outMsgCtx.getProperty(PassThroughConstants.SERVICE_PREFIX);
             if (prefix != null) {
-                headers.put(PassThroughConstants.LOCATION, prefix + urlContext);
+                headers.put(PassThroughConstants.LOCATION, prfix
+                                                           + (urlContext.startsWith("/") ? urlContext.substring(1)
+                                                                                            : urlContext));
             }
 
         }
