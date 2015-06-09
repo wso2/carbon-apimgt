@@ -45,10 +45,6 @@
             <artifactId>org.wso2.carbon.governance.api</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.wso2.carbon.hostobjects</groupId>
-            <artifactId>org.wso2.carbon.hostobjects.sso</artifactId>
-        </dependency>
-        <dependency>
             <groupId>org.wso2.carbon.apimgt</groupId>
             <artifactId>org.wso2.carbon.apimgt.api</artifactId>
         </dependency>
@@ -96,7 +92,7 @@
                                 <importFeatureDef>org.wso2.carbon.registry.core:${carbon.platform.version}</importFeatureDef>
                             </importFeatures>
                             <importBundles>
-                                <importBundleDef>org.wso2.carbon.hostobjects:org.wso2.carbon.hostobjects.sso</importBundleDef>
+                                <importBundleDef>org.wso2.carbon:org.wso2.carbon.hostobjects.sso:4.2.2</importBundleDef>
 
                             </importBundles>
                         </configuration>
