@@ -435,17 +435,19 @@ public class APIUsageStatisticsClient {
     private List<String> getAppsbySubscriber(String subscriberName) throws APIMgtUsageQueryServiceClientException {
 
         Connection connection = null;
-        Statement statement = null;
+        PreparedStatement statement = null;
         ResultSet rs = null;
         try {
             connection = APIMgtDBUtil.getConnection();
-            statement = connection.createStatement();
-            String query;
 
-            query = "SELECT CONSUMER_KEY, NAME FROM AM_APPLICATION_KEY_MAPPING INNER JOIN AM_APPLICATION ON " +
-                    "AM_APPLICATION_KEY_MAPPING.APPLICATION_ID=AM_APPLICATION.APPLICATION_ID INNER JOIN AM_SUBSCRIBER" +
-                    " ON AM_APPLICATION.SUBSCRIBER_ID = AM_SUBSCRIBER.SUBSCRIBER_ID WHERE AM_SUBSCRIBER.USER_ID = '"
-                    + subscriberName + "' ";
+            String query = "SELECT CONSUMER_KEY, NAME FROM AM_APPLICATION_KEY_MAPPING INNER JOIN AM_APPLICATION ON " +
+                           "AM_APPLICATION_KEY_MAPPING.APPLICATION_ID=AM_APPLICATION.APPLICATION_ID INNER JOIN " +
+                           "AM_SUBSCRIBER" +
+                           " ON AM_APPLICATION.SUBSCRIBER_ID = AM_SUBSCRIBER.SUBSCRIBER_ID WHERE AM_SUBSCRIBER" +
+                           ".USER_ID = ? ";
+
+            statement = connection.prepareStatement(query);
+            statement.setString(1, subscriberName);
 
             rs = statement.executeQuery(query);
 
