@@ -107,7 +107,7 @@
 		                    </label>
 		                    </div>
 									<div id="otherTypeDiv" class="controls" style="display:none;">
-				                 <span class="requiredAstrix">*</span> <input type="text" class="required" id="specifyBox" style="width:98%;"/>
+				                 <span class="requiredAstrix">*</span> <input type="text" class="required form-control" id="specifyBox" style="width:98%;"/>
 				                </div>
 
 		            </div>
@@ -132,7 +132,7 @@
 		                      </label></div>
 		                    
 		                    <div id="sourceUrlDoc" class="controls" style="display:none;">
-		                     <span class="requiredAstrix">*</span> <input type="text" class="required" style="width:98%" id="docUrl">
+		                     <span class="requiredAstrix">*</span> <input type="text" class="form-control required" style="width:98%" id="docUrl">
 		                    </div>
 
                             <div class="radio"><label class="radio">
