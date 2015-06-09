@@ -1076,13 +1076,20 @@ public final class APIUtil {
         try {
             GovernanceUtils.loadGovernanceArtifacts((UserRegistry) registry);
             if(GovernanceUtils.findGovernanceArtifactConfiguration(key, registry)!=null){
-            artifactManager = new GenericArtifactManager(registry, key);
+                artifactManager = new GenericArtifactManager(registry, key);
+            } else {
+                if (log.isDebugEnabled()) {
+                    log.debug("Couldn't find GovernanceArtifactConfiguration of RXT: " + key +
+                              ". Tenant id set in registry : " + ((UserRegistry) registry).getTenantId() +
+                              ", Tenant domain set in PrivilegedCarbonContext: " +
+                              PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain());
+                }
             }
         } catch (RegistryException e) {
             String msg = "Failed to initialize GenericArtifactManager";
             log.error(msg, e);
             throw new APIManagementException(msg, e);
-        }
+        } 
         return artifactManager;
     }
 
