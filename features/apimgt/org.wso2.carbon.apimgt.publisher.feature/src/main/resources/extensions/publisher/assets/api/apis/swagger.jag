@@ -46,7 +46,8 @@ require('/modules/publisher.js').exec(function (ctx) {
 	switch (method) {
 		case 'GET':// GET endpoints
 			options.type = req.getParameter('type');
-			if (uriMatcher.match(GET_SWAGGER_DOC_URL)) {//return assets by type
+			var action = req.getParameter('action');
+			if (action = 'swaggerDoc') {//return assets by type
 				var apiPublisher =  require('apipublisher').apipublisher;
 				var apiProxy = apiPublisher.instance(username);
 				var apiData = {};
@@ -65,12 +66,27 @@ require('/modules/publisher.js').exec(function (ctx) {
 																	constants.STATUS_CODES.INTERNAL_SERVER_ERROR,
 																	'Error while getting swagger resource');
 				}
-			}  else {
+			} else if (action = 'sessionSwaggerDoc') {
+				var swagger = session.get("swagger");
+				session.put("swagger", null);
+				//@todo Error reporting
+				response = responseProcessor.buildSuccessResponse(response, constants.STATUS_CODES.OK, swagger);
+
+			} else if (action = 'swaggerDocFromFile') {
+				var url = req.getParameter("swagger_url");
+				url = url.trim();
+				//@todo need to validate returned swagger v2
+				var data = {};
+				var content = get(url, data, "json");
+				var swaggerJson = content.data;
+				//@todo Error reporting
+				response = responseProcessor.buildSuccessResponse(response, constants.STATUS_CODES.OK, swaggerJson);
+
+			} else {
 				response = responseProcessor.buildErrorResponse(response,
 																constants.STATUS_CODES.NOT_IMPLEMENTED, 'Unable to locate this GET endpoint');
 			}
 			break;
-
 		default://other un-implemented endpoints
 			response = responseProcessor.buildErrorResponse(response, constants.STATUS_CODES.NOT_IMPLEMENTED,
 															'The endpoint that you have requested is not implemented for the ' + method +

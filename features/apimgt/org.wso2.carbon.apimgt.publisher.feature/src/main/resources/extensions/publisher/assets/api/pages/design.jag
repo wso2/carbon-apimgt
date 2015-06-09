@@ -20,71 +20,102 @@
 var caramel;
 require('/modules/publisher.js').exec(function(ctx) {
 	var log = new Log();
-	var rxtModule = require('rxt');
 	var ui = require('rxt').ui;
 	var carbon = require('carbon');
 	var server = require('store').server;
 	var user = server.current(ctx.session);
-	var usr = carbon.server.tenantUser(user.username);
-	var tenantDomain =  carbon.server.tenantDomain({tenantId: usr.tenantId});
+	var request = ctx.request;
 	caramel = require('caramel');
 	var am;
 	var uriMatcher = new URIMatcher(ctx.request.getRequestURI());
 	var options = uriMatcher.match('/{context}/asts/{type}/{pageName}/{+id}') || uriMatcher.match('/{context}/asts/{type}/{pageName}');
 	var page;
 	var output;
+
 	am = asset.createUserAssetManager(ctx.session, options.type);
-	if(options.id){
-	/*if (!options.id) {
-		ctx.response.sendError(400, 'Cannot render the implementation details without an asset id');
-		return;
-	}*/
-	
-	try {
-		asset = am.get(options.id);
-	}
-	catch(e){
-		log.error(e);
-		ctx.response.sendError(404,'Asset was not found');
-		return;
-	}
-	var apiPublisher =  require('apipublisher').apipublisher;
-	var apiProxy = apiPublisher.instance(ctx.username);
-	var api = apiProxy.getAPI(asset.attributes.overview_provider, asset.attributes.overview_name, asset.attributes.overview_version).api;
-
-	//log.info(api);
-
-	page = rxtModule.ui.buildPage(ctx.session, ctx.request);
+	//Render page
+	page = ui.buildPage(ctx.session, ctx.request);
 	output = am.render(asset,page)._custom();
-	output.api=api;
-	output.wsdl = api.wsdl;
-	api.id = options.id;
-	var public_visibility,private_visibility;
-	//formatting visibility	
-	if(api.visibility == 'public') {	    
-		public_visibility = true;
-	}
-	if(api.visibility == 'private') {	    
-		private_visibility = true;
-	}
-	output.id=api.id;
-	output.public_visibility = public_visibility;
-	output.private_visibility = private_visibility;	
-	//log.info(output);
+
+	var apiMetaData = {};
+	output.apiMetaData = apiMetaData;
+	var action = request.getParameter("action");
+	if(options.id){
+		try {
+			asset = am.get(options.id);
+		}
+		catch(e){
+			log.error(e);
+			ctx.response.sendError(404,'Asset was not found');
+			return;
+		}
+
+		var apiPublisher =  require('apipublisher').apipublisher;
+		var apiProxy = apiPublisher.instance(user.username);
+		var api = apiProxy.getAPI(asset.attributes.overview_provider, asset.attributes.overview_name, asset.attributes.overview_version).api;
+		output.api = api;
+		output.wsdl = api.wsdl;
+		api.id = options.id;
+		var public_visibility,private_visibility;
+		//formatting visibility
+		if(api.visibility == 'public') {
+			public_visibility = true;
+		}
+		if(api.visibility == 'private') {
+			private_visibility = true;
+		}
+		output.id=api.id;
+		output.public_visibility = public_visibility;
+		output.private_visibility = private_visibility;
+
 	} else {
-	var type = options.type;
-    var page = ui.buildPage(ctx.session, ctx.request);
-    var output = am.render(page)._custom();
-    var wsdl = ctx.request.getParameter('wsdl-url');
-    	if(wsdl){
-    		output.wsdl = wsdl;
-    	}
+		if (request.getMethod() == 'POST' && (action === "start")) {
+			var type = request.getParameter("type");
+			var swagger = null;
+			var wsdl = null;
+			if(type == "rest"){
+				var url = request.getParameter("swagger-url");
+				var file = request.getFile("swagger-file");
+				var import_type = request.getParameter("import-definition");
+				if(import_type == "swagger-url" && url){
+					url = url.trim();
+					var data = { };
+					var content = get(url, data ,"json");
+					swagger = content.data;
+				} else if(import_type == "swagger-file" && file){
+					file.open("r");
+					swagger = file.readAll();
+					file.close();
+				} else{
+					var obj = require("/extensions/assets/api/config/default_swagger.json");
+					swagger = stringify(obj);
+				}
+			} else if(type == "soap"){
+				var url = request.getParameter("wsdl-url");
+				var file = request.getFile("wsdl-file");
+				var import_type = request.getParameter("import-definition");
+				wsdl = "soap";
+				if(url){
+					wsdl = url.trim();
+				}
+			}
+
+			if(swagger){
+				session.put("swagger", swagger);
+				output.apiMetaData.swaggerAvailable = true;
+			} else {
+				output.apiMetaData.swaggerAvailable = false;
+			}
+
+			if (wsdl) {
+				output.apiMetaData.wsdl = wsdl;
+			}
+		}
 	}
 
 	//Check configurations specific properties
 	var config = require('/extensions/assets/api/config/config.json');
 	output.config = config;
-
 	caramel.render(output);
 }, request, response, session);
 %>

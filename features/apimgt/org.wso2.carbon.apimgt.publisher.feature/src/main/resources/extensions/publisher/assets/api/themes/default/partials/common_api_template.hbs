@@ -225,31 +225,72 @@
                 <p id="wsdldesc_help" class="hide">{{t "wsdlDescHelpMsg"}}</p>
             </div>
             <p class="help-block">{{t "wsdlDescHelpMsg"}}</p>                
-        </div> 
-    
+        </div>
     {{else}}
-        <div id="api_designer">
-		<div id = "resource_overview">
-			<legend>API Definition</legend>
-			<div class="resource_create">
-				<div class="control-group">
-					<label class="control-label" for="inputPassword">URL Pattern</label>
-					<div class="controls">
-						<div class="input-prepend">
-							{{#if api}}
-								<span class="add-on" id="resource_url_pattern_refix">{{api.context}}</span>
-							{{else}}
-								<span class="add-on" id="resource_url_pattern_refix">/{context}/{version}/</span>
-							{{/if}}
-							<input style="width:500px" id="resource_url_pattern" type="text" placeholder="Url Pattern Ex: path/to/resource" class="resource_url_pattern"/>
+		{{#if api}}
+		{{#if api.wsdl}}
+			<div id="api_designer">
+				<a  href="#wsdlUpload" role="button" class="btn pull-right" data-toggle="modal" ><i class="icon-download-alt" ></i> {{t "Import"}} </a>
+				<legend>{{t "API Definition"}}</legend>
+			<div class="control-group api_wsdl">
+				<label class="control-label" for="wsdl">{{t "WSDL"}}:</label>
+				<div class="controls">
+					<div class="input-append">
+						<input type="text" class="input-xlarge validInput" id="wsdl" name="wsdl"  value="{{wsdl}}" />
+						<button class="btn check_url_valid" url-type="wsdl" type="button" >{{t "Test URI"}}</button>
+						<a class="icon-question-sign help_popup" help_data="wsdldesc_help"></a>
+						<p id="wsdldesc_help" class="hide">{{t "wsdlDescHelpMsg"}}</p>
+					</div>
+					<p class="help-block">{{t "wsdlDescHelpMsg"}}</p>
+				</div>
+		{{else}}
+				<div id="api_designer">
+					<div id = "resource_overview">
+						<legend>API Definition</legend>
+						<div class="resource_create">
+							<div class="control-group">
+								<label class="control-label" for="inputPassword">URL Pattern</label>
+								<div class="controls">
+									<div class="input-prepend">
+										{{#if api}}
+											<span class="add-on" id="resource_url_pattern_refix">{{api.context}}</span>
+										{{else}}
+											<span class="add-on" id="resource_url_pattern_refix">/{context}/{version}/</span>
+										{{/if}}
+										<input style="width:500px" id="resource_url_pattern" type="text" placeholder="Url Pattern Ex: path/to/resource" class="resource_url_pattern"/>
+									</div>
+								</div>
+							</div>
 						</div>
 					</div>
+					<div id="resource_details">
+					</div>
 				</div>
-			</div>
-		</div>
-        <div id="resource_details">
-        </div>
-    </div>
+		{{/if}}
+		{{else}}
+				<div id="api_designer">
+					<div id = "resource_overview">
+						<legend>API Definition</legend>
+						<div class="resource_create">
+							<div class="control-group">
+								<label class="control-label" for="inputPassword">URL Pattern</label>
+								<div class="controls">
+									<div class="input-prepend">
+										{{#if api}}
+											<span class="add-on" id="resource_url_pattern_refix">{{api.context}}</span>
+										{{else}}
+											<span class="add-on" id="resource_url_pattern_refix">/{context}/{version}/</span>
+										{{/if}}
+										<input style="width:500px" id="resource_url_pattern" type="text" placeholder="Url Pattern Ex: path/to/resource" class="resource_url_pattern"/>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+					<div id="resource_details">
+					</div>
+				</div>
+		{{/if}}
     {{/if}}
     <input type="hidden" name="action" value="design"/>
     <input type="hidden" id="swagger" name="swagger"/>

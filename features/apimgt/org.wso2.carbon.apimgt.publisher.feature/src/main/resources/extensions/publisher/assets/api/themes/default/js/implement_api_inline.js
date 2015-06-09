@@ -1,6 +1,6 @@
 $(function () {
 
-    var swaggerUrl = caramel.context + "/asts/api/apis/swagger?provider=" + store.publisher.api.provider + "&name=" + store.publisher.api.name + "&version=" + store.publisher.api.version;
+    var swaggerUrl = caramel.context + "/asts/api/apis/swagger?action=swaggerDoc&provider=" + store.publisher.api.provider + "&name=" + store.publisher.api.name + "&version=" + store.publisher.api.version;
     $(document).ready(function () {
         $.ajaxSetup({
                         contentType: "application/x-www-form-urlencoded; charset=utf-8"

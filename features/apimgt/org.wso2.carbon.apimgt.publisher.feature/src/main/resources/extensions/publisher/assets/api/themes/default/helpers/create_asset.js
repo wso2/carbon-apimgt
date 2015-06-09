@@ -22,7 +22,7 @@ var resources = function(page,meta){
             'jquery.form.js','jquery.cookie.js','bootstrap-tagsinput.min.js','jquery.validate.min.js','js-yaml.min.js','bootstrap-dialog.min.js','bootstrap-dialog.min.js',
             'create_asset.js','bootstrap-editable.js' ,'bootstrap-multiselect.js', 'custom-validation.js',
             'jsonpath-0.8.0.js','handlebars.js','jquery.noty.packaged.min.js' ,'typeaheadjs.js'],
-        code:['manage_api_meta.hbs'],
+        code:['api_meta.hbs'],
         css:['bootstrap/bootstrap-editable.css','bootstrap/bootstrap-tagsinput.css','api_designer.css', 'bootstrap-dialog.min.css','bootstrap-multiselect.css','bootstrap-dialog.min.css']
     }
 };
