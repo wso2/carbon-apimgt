@@ -1,4 +1,5 @@
 var removeAPI = function(name, version, provider, buttonElement) {
+    $(".modal-footer").html("");
     var apiThumbnail = $(buttonElement).closest(".thumbnail");
     jagg.message({
         content:"Are you sure you want to delete the API - " + name + " - " + version ,
@@ -13,7 +14,6 @@ var removeAPI = function(name, version, provider, buttonElement) {
             $(".modal-body").addClass("loadingButton");
             $(".modal-body").css({"margin-left":25});
             $(".modal-body").html("Deleting API : "+ name + " - " + version );
-            $(".modal").css({width:350});
 
             buttonElement.hidden = true;
             apiThumbnail.hide();
@@ -24,7 +24,6 @@ var removeAPI = function(name, version, provider, buttonElement) {
                           $(".modal-header .close").show();
                           $(".modal-body").css({"margin-left":0});
                           $(".modal-body").html("");
-                          $(".modal").css({width:560});
                           $(".modal-body").removeClass("loadingButton");
                           $("#messageModal").hide();
 

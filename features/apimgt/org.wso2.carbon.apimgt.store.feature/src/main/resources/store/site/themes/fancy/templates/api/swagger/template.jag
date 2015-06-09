@@ -64,22 +64,6 @@ var api = outputs.api;%>
     window.swaggerUi.load();
   });
 
-    function changeFunc() {
-            var selectBox = document.getElementById("key_type");
-            var appName = document.getElementById("sub_app_list");
-            var selectedKeyValue = selectBox.options[selectBox.selectedIndex].value;
-            var selectedAppName = appName.options[appName.selectedIndex].value;
-
-            if(selectedKeyValue == "production"){
-    	        var prodKey1 = localStorage.getItem('production-key'+selectedAppName)
-    	        document.getElementById("access_token").value = prodKey1;
-
-    	    }
-            if(selectedKeyValue == "sandbox"){
-    	        var sandKey1 = localStorage.getItem('sandbox-key'+selectedAppName);
-    	        document.getElementById("access_token").value = sandKey1;
-    	    }
-        }
   </script>
 
 <% if(api.status != "PROTOTYPED"){ %>
@@ -87,6 +71,19 @@ var api = outputs.api;%>
 <script language="javascript">
 $(document).ready(function(){
 
+  var change_token = function(){
+    $(".notoken").hide();
+    var option = $("#sub_app_list option:selected");
+    var type = $("#key_type").val();
+    var key = option.attr("data-"+type);
+    if(key == "null"){
+      $(".notoken").show("slow");
+      $("#access_token").val("");
+    }else{
+      $("#access_token").val(key);
+    }     
+    $("#access_token").trigger("change");
+  };
 var show_environments = function(){
     var type = $("#key_type").val();
     $("#environment_name").children('option').hide();
@@ -107,6 +104,7 @@ var select_environment = function(){
     var selectedEnvironment = $("#environment_name");
     var name =selectedEnvironment.val();
     window.swaggerUi.updateSwaggerUi({ "url" : swaggerUi.api.url + "?envName="+name});
+    change_token();
           };
   $("#access_token").change(function(){
     var key = $(this).val();
@@ -115,6 +113,7 @@ var select_environment = function(){
     }
   });
 
+  $("#sub_app_list").change(change_token);
   $("#key_type").change(show_environments);
   $("#environment_name").change(select_environment);
   show_environments();
@@ -134,13 +133,13 @@ function checkOnKeyPress(e) {
         <div class="controls form-inline">
           <select id="sub_app_list" class="inline">
           <% for(var i = 0 ;subscriptions.length > i;i++){ %>
-            <option value="<%= encode.forHtml(subscriptions[i].application)%>" data-sandbox="<%= subscriptions[i].SANDBOX_KEY %>"
-                   data-production="<%= subscriptions[i].PRODUCTION_KEY %>"><%= encode.forHtml(subscriptions[i].application)%>
+            <option value="" data-sandbox="<%= subscriptions[i].SANDBOX_KEY %>" data-production="<%= subscriptions[i].PRODUCTION_KEY %>">
+                <%= encode.forHtml(subscriptions[i].application)%>
             </option>
           <% } %>
           </select>
           <label> On </label>
-          <select id="key_type" onclick="changeFunc()">
+          <select id="key_type">
             <option value="production">Production</option>
             <option value="sandbox">Sandbox</option>
           </select>
