@@ -210,7 +210,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     /**
      * Returns the set of APIs with the given tag, retrieved from registry
      * 
-     * @param requestedTenant - tenant domain of the accessed store
+     * @param requestedTenant - Tenant domain of the accessed store
      * @param registry - Current registry; tenant/SuperTenant
      * @param tag
      * @return
