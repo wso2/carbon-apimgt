@@ -1,6 +1,10 @@
 var APIMangerAPI = {};
 $(function () {
 //This is the default place holder
+    var designer_resource_template_name;
+    var designer_resource_template_body_name;
+    var scope_template_name;
+
     var api_doc =
     {
         "swagger": "2.0",
@@ -313,8 +317,8 @@ $(function () {
         $("#version").change(function(e){
             APIDesigner().api_doc.info.version = $(this).val();
             // We do not need the version anymore. With the new plugable version strategy the context will have the version
-            APIDesigner().baseURLValue = "http://localhost:8280/"+$("#context").val().replace("/","")});
-        $("#context").change(function(e){ APIDesigner().baseURLValue = "http://localhost:8280/"+$(this).val().replace("/","")});
+            APIDesigner().baseURLValue = "http://localhost:8280/"+$("#overview_context").val().replace("/","")});
+        $("#overview_context").change(function(e){ APIDesigner().baseURLValue = "http://localhost:8280/"+$(this).val().replace("/","")});
         $("#name").change(function(e){ APIDesigner().api_doc.info.title = $(this).val() });
         $("#description").change(function(e){ APIDesigner().api_doc.info.description = $(this).val() });
 
@@ -450,8 +454,8 @@ $(function () {
                 roles : $("#scopeRoles").val()
             };
 
-            var validationUrl =  caramel.context + "/asts/api/apis/validation";
-            var data = { action:"validateScope" , scope:$("#scopeKey").val()};
+            var validationUrl =  caramel.context + "/asts/api/apis/validation?action=validateScope";
+            var data = {scope:$("#scopeKey").val()};
             $.ajax({
                        url: validationUrl,
                        type: 'POST',
@@ -592,18 +596,36 @@ $(function () {
         }
     };
 
+    APIDesigner.prototype.set_partials = function (phase) {
+        if (phase == 'design') {
+            designer_resource_template_name = 'designer-resource-template-design';
+            designer_resource_template_body_name = 'designer-resource-template-design-body';
+            scope_template_name = 'scope_template';
+        } else if (phase == 'implement') {
+            designer_resource_template_name = 'designer-resource-template-implement';
+            designer_resource_template_body_name = 'designer-resource-template-implement-body';
+            scope_template_name = 'scope_template';
+        } else if (phase == 'manage') {
+            designer_resource_template_name = 'designer-resource-manage-design';
+            designer_resource_template_body_name = 'designer-resource-manage-design-body';
+            scope_template_name = 'scope_template';
+        } else {
+            //Default
+            designer_resource_template_name = 'designer-resource-template-design';
+            designer_resource_template_body_name = 'designer-resource-template-design-body';
+            scope_template_name = 'scope_template';
+        }
+    };
 
     APIDesigner.prototype.render_scopes = function(){
-        if($('#scopes-template').length){
             context = {
                 "api_doc" : this.api_doc
             }
             //var output = Handlebars.partials['scopes-template'](context);
             //$('#scopes_view').html(output);
-            var partial = 'scope_template';
+            var partial = scope_template_name;
             var container = 'scopes_view';
             renderPartialWithContainerName(partial, container, context);
-        }
     };
 
     APIDesigner.prototype.transform = function(api_doc){
@@ -657,7 +679,7 @@ $(function () {
          success : this.update_elements,
          inputclass : 'resource_summary'
          });*/
-        var partial = 'implement-resource-template';
+        var partial = designer_resource_template_name;
         var container = 'resource_details';
         var that = this;
         renderPartialWithContainerName(partial, container, context, that, renderResourceCallback);
@@ -667,7 +689,7 @@ $(function () {
         var operation = this.query(container.attr('data-path'));
         var context = jQuery.extend(true, {}, operation[0]);
         context.resource_path = container.attr('data-path');
-        var partial = 'implement-resource-template-body';
+        var partial = designer_resource_template_body_name;
         var that = this;
         renderPartialWithContainer(partial, container,context, that, renderResourcePaddingCallback);
         //var output = Handlebars.partials['designer-resource-template'](context);
@@ -953,8 +975,8 @@ $(function () {
     });
 
     function getContextValue() {
-        var context = $('#context').val();
-        var version = $('#apiVersion').val();
+        var context = $('#overview_context').val();
+        var version = $('#overview_version').val();
 
         if (context == "" && version != "") {
             $('#contextForUrl').html("/{context}/" + version);
@@ -977,8 +999,8 @@ $(function () {
     }
 
     function updateContextPattern(){
-        var context = $('#context').val();
-        var version = $('#version').val();
+        var context = $('#overview_context').val();
+        var version = $('#overview_version').val();
 
         if(context != ""){
             if(context.indexOf("{version}") < 0){

@@ -1,10 +1,12 @@
 $(document).ready(function(){
     var designer = new APIMangerAPI.APIDesigner();
+    designer.set_partials('design');
     var swaggerUrl = caramel.context + "/asts/api/apis/swagger?action=swaggerDoc&provider="+store.publisher.api.provider+"&name="+store.publisher.api.name+ "&version="+store.publisher.api.version;
     // $.fn.editable.defaults.mode = 'inline';
     if(store.publisher.api.name != ""){
      $.get(swaggerUrl , function( data ) {
             var designer = new  APIMangerAPI.APIDesigner();
+            designer.set_partials('design');
             designer.load_api_document(data.data);
             designer.render_resources();
             $("#swaggerUpload").modal('hide');

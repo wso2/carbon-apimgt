@@ -9,6 +9,7 @@ $(function () {
 
         $.get(swaggerUrl, function (data) {
             var designer = new APIMangerAPI.APIDesigner();
+            designer.set_partials('manage');
             designer.load_api_document(data.data);
             designer.set_default_management_values();
             designer.render_resources();
