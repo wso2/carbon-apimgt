@@ -199,7 +199,9 @@
 .resource-method-get{
     background-color: #0F6AB4;
 }
-
+.resource-method-head{
+    background-color: #ffd20f;
+}
 .resource-method-post{
     background-color: #10A54A;
 }
