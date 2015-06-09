@@ -5473,13 +5473,32 @@ public class ApiMgtDAO {
                 + "   AM_APPLICATION APP, "
                 + "   AM_SUBSCRIBER SUB  "
                 + "WHERE "
-                + "   SUB.SUBSCRIBER_ID = APP.SUBSCRIBER_ID "; 
-        String whereClauseWithGroupId= "   AND "
-                +"     (GROUP_ID= ? "
-                + "      OR "
-                + "     (GROUP_ID='' AND SUB.USER_ID=?))";
-        String whereClause =  "   AND "
-                + " SUB.USER_ID=?";
+                + "   SUB.SUBSCRIBER_ID = APP.SUBSCRIBER_ID ";
+
+        String whereClauseWithGroupId;
+
+        if(forceCaseInsensitiveComparisons){
+           whereClauseWithGroupId = "   AND "
+                    +"     (GROUP_ID= ? "
+                    + "      OR "
+                    + "     (GROUP_ID='' AND LOWER(SUB.USER_ID) = LOWER(?)))";
+        }
+        else{
+            whereClauseWithGroupId = "   AND "
+                    +"     (GROUP_ID= ? "
+                    + "      OR "
+                    + "     (GROUP_ID='' AND SUB.USER_ID=?))";
+        }
+
+        String whereClause;
+        if(forceCaseInsensitiveComparisons){
+            whereClause = "   AND "
+                    + " LOWER(SUB.USER_ID) = LOWER(?)";
+        }
+        else{
+            whereClause=  "   AND "
+                    + " SUB.USER_ID = ?";
+        }
 
        if(groupingId != null && !groupingId.equals("null") && !groupingId.isEmpty()){
            sqlQuery += whereClauseWithGroupId;
