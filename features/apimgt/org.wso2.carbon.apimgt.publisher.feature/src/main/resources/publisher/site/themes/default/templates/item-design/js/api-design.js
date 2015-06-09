@@ -70,13 +70,12 @@ function APIDesigner(){
     this.init_controllers();
 
     $( "#api_designer" ).delegate( "#more", "click", this, function( event ) {
-        $("#options").css("display", "inline");
-        $("#more").hide();
+                        $("#options").css("display", "inline-block");
+                        $("#more").hide();
     });
-    
-    $( "#api_designer" ).delegate( "#less", "click", this, function( event ) {
-        $("#options").hide();
-        $("#more").css("display", "inline");
+  $( "#api_designer" ).delegate( "#less", "click", this, function( event ) {
+                         $("#options").hide();
+                         $("#more").css("display", "inline-block");
     });
 
     $( "#api_designer" ).delegate( "a.help_popup", "mouseover", this, function( event ) {
@@ -674,11 +673,11 @@ $(document).ready(function(){
                 "swagger_url": $("#swagger_import_url").val() // "http://petstore.swagger.wordnik.com/api/api-docs"
             }
             $.get(jagg.site.context + "/site/blocks/item-design/ajax/import.jag", data, function (data) {
+                $('#import_swagger').buttonLoader('stop');
+                $('#swagger_help').hide();
+                $("#swaggerUpload").modal('hide');
                 var designer = APIDesigner();
                 designer.load_api_document(data);
-                $('#swagger_help').hide();
-                $('#import_swagger').buttonLoader('stop');
-                $("#swaggerUpload").modal('hide');
             }).fail(function (data) {
                 $('#swagger_help').show();
                 $('#import_swagger').buttonLoader('stop');
@@ -838,9 +837,7 @@ function updateContextPattern(){
 
     if(context != ""){
         if(context.indexOf("{version}") < 0){
-            if(context.lastIndexOf('/') < 0){
-                context = context + '/';
-            }
+            context = context + '/';
             context = context + "{version}";
         }
         $('#resource_url_pattern_refix').text(context);
