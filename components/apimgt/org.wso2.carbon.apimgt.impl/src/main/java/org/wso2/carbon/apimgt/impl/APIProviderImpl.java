@@ -1982,7 +1982,10 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 						if (value != null) {
 							matcher = pattern.matcher(value);
 							if (matcher != null && matcher.find()) {
-								apiList.add(APIUtil.getAPI(artifact, registry));
+                                API resultAPI = APIUtil.getAPI(artifact, registry);
+                                if (resultAPI != null) {
+                                    apiList.add(resultAPI);
+                                }
 							}
 						}				
 				    }	

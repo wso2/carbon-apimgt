@@ -659,7 +659,9 @@ public abstract class AbstractAPIManager implements APIManager {
 	                GenericArtifact artifact = artifactManager.getGenericArtifact(
 	                        resource.getUUID());
 	                API api = APIUtil.getAPI(artifact, registry);
-	                apiSortedSet.add(api);
+	                if (api != null) {
+	                    apiSortedSet.add(api);
+	                }
 	            } catch (RegistryException e) {
 	                handleException("Failed to get APIs for subscriber: " + subscriber.getName(), e);
 	            }
