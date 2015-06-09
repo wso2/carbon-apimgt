@@ -251,8 +251,13 @@ public final class APIUtil {
             String providerName = artifact.getAttribute(APIConstants.API_OVERVIEW_PROVIDER);
             String apiName = artifact.getAttribute(APIConstants.API_OVERVIEW_NAME);
             String apiVersion = artifact.getAttribute(APIConstants.API_OVERVIEW_VERSION);
-            APIIdentifier apiId = new APIIdentifier(providerName, apiName, apiVersion);
-            api = new API(apiId);
+            APIIdentifier apiIdentifier = new APIIdentifier(providerName, apiName, apiVersion);
+            int apiId = ApiMgtDAO.getAPIID(apiIdentifier, null);
+
+            if(apiId == -1){
+                return null;
+            }
+            api = new API(apiIdentifier);
             // set rating
             String artifactPath = GovernanceUtils.getArtifactPath(registry, artifact.getId());
             // BigDecimal bigDecimal = new BigDecimal(getAverageRating(apiId));
@@ -425,8 +430,14 @@ public final class APIUtil {
             String providerName = artifact.getAttribute(APIConstants.API_OVERVIEW_PROVIDER);
             String apiName = artifact.getAttribute(APIConstants.API_OVERVIEW_NAME);
             String apiVersion = artifact.getAttribute(APIConstants.API_OVERVIEW_VERSION);
-            APIIdentifier apiId = new APIIdentifier(providerName, apiName, apiVersion);
-            api = new API(apiId);
+            APIIdentifier apiIdentifier = new APIIdentifier(providerName, apiName, apiVersion);
+            int apiId = ApiMgtDAO.getAPIID(apiIdentifier, null);
+
+            if (apiId == -1) {
+                return null;
+            }
+
+            api = new API(apiIdentifier);
             // set rating
             String artifactPath = GovernanceUtils.getArtifactPath(registry, artifact.getId());
             // BigDecimal bigDecimal = new BigDecimal(getAverageRating(apiId));
@@ -468,7 +479,7 @@ public final class APIUtil {
                 }
             } catch (NumberFormatException e) {
                 if (log.isWarnEnabled()) {
-                    log.warn("Error while retrieving cache timeout from the registry for " + apiId);
+                    log.warn("Error while retrieving cache timeout from the registry for " + apiIdentifier);
                 }
                 // ignore the exception and use default cache timeout value
             }
@@ -608,8 +619,13 @@ public final class APIUtil {
             String providerName = artifact.getAttribute(APIConstants.API_OVERVIEW_PROVIDER);
             String apiName = artifact.getAttribute(APIConstants.API_OVERVIEW_NAME);
             String apiVersion = artifact.getAttribute(APIConstants.API_OVERVIEW_VERSION);
-            api = new API(new APIIdentifier(providerName, apiName, apiVersion));
-            api.setRating(getAverageRating(api.getId()));
+            APIIdentifier apiIdentifier = new APIIdentifier(providerName, apiName, apiVersion);
+            api = new API(apiIdentifier);
+            int apiId = ApiMgtDAO.getAPIID(apiIdentifier, null);
+            if (apiId == -1) {
+                return null;
+            }
+            api.setRating(getAverageRating(apiId));
             api.setThumbnailUrl(artifact.getAttribute(APIConstants.API_OVERVIEW_THUMBNAIL_URL));
             api.setStatus(getApiStatus(artifact.getAttribute(APIConstants.API_OVERVIEW_STATUS)));
             api.setContext(artifact.getAttribute(APIConstants.API_OVERVIEW_CONTEXT));
@@ -2968,6 +2984,10 @@ public final class APIUtil {
         return ApiMgtDAO.getAverageRating(apiId);
     }
 
+    public static float getAverageRating(int apiId) throws APIManagementException {
+        return ApiMgtDAO.getAverageRating(apiId);
+    }
+
     public static List<Tenant> getAllTenantsWithSuperTenant() throws UserStoreException {
         Tenant[] tenants = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager().getAllTenants();
         ArrayList<Tenant> tenantArrayList=new ArrayList<Tenant>();
@@ -4195,6 +4215,20 @@ public final class APIUtil {
         String tenantDomain = MultitenantUtils.getTenantDomain(username);
         int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager().getTenantId(tenantDomain);
         PermissionUpdateUtil.updatePermissionTree(tenantId);
+    }
+
+	/**
+     * Check whether given application name is available under current subscriber or group
+     *
+     * @param subscriber      subscriber name
+     * @param applicationName application name
+     * @param groupId         group of the subscriber
+     * @return true if application is available for the subscriber
+     * @throws APIManagementException if failed to get applications for given subscriber
+     */
+    public static boolean isApplicationExist(String subscriber, String applicationName, String groupId)
+            throws APIManagementException {
+        return ApiMgtDAO.isApplicationExist(applicationName, subscriber, groupId);
     }
 
     // Start of APIProvider related methods.

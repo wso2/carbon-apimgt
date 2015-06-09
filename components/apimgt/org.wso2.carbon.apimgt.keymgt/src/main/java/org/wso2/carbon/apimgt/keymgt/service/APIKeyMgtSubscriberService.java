@@ -61,12 +61,14 @@ import org.wso2.carbon.identity.oauth.OAuthAdminService;
 import org.wso2.carbon.identity.oauth.cache.CacheKey;
 import org.wso2.carbon.identity.oauth.cache.OAuthCache;
 import org.wso2.carbon.identity.oauth.cache.OAuthCacheKey;
+import org.wso2.carbon.identity.oauth.common.OAuthConstants;
 import org.wso2.carbon.identity.oauth.config.OAuthServerConfiguration;
 import org.wso2.carbon.identity.oauth.dto.OAuthConsumerAppDTO;
 import org.wso2.carbon.utils.CarbonUtils;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -167,8 +169,31 @@ public class APIKeyMgtSubscriberService extends AbstractAdmin {
 
             oAuthConsumerAppDTO.setApplicationName(applicationName);
             oAuthConsumerAppDTO.setCallbackUrl(callbackUrl);
+
+            String[] allowedGrantTypes = oAuthAdminService.getAllowedGrantTypes();
+            // CallbackURL is needed for authorization_code and implicit grant types. If CallbackURL is empty,
+            // simply remove those grant types from the list
+            StringBuilder grantTypeString = new StringBuilder();
+
+            for (String grantType : allowedGrantTypes) {
+                if (callbackUrl == null || callbackUrl.isEmpty()) {
+                    if ("authorization_code".equals(grantType) || "implicit".equals(grantType)) {
+                        continue;
+                    }
+                }
+                grantTypeString.append(grantType).append(" ");
+            }
+
+            if (grantTypeString.length() > 0) {
+                oAuthConsumerAppDTO.setGrantTypes(grantTypeString.toString().trim());
+                log.debug("Setting Grant Type String : " + grantTypeString);
+            }
+
+            oAuthConsumerAppDTO.setOAuthVersion(OAuthConstants.OAuthVersions.VERSION_2);
             log.debug("Creating OAuth App " + applicationName);
             oAuthAdminService.registerOAuthApplicationData(oAuthConsumerAppDTO);
+            // === Finished Creating OAuth App ===
+
             log.debug("Created OAuth App " + applicationName);
             OAuthConsumerAppDTO createdApp = oAuthAdminService.getOAuthApplicationDataByAppName(oAuthConsumerAppDTO
                                                                                                         .getApplicationName());

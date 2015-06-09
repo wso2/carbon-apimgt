@@ -73,8 +73,8 @@
                         <Bundle-Name>${project.artifactId}</Bundle-Name>
                         <Private-Package>
                             org.wso2.carbon.apimgt.interceptor.valve.internal
-                            org.wso2.carbon.apimgt.impl.dao.*;version="${carbon.apimgt.version}",
-                            org.wso2.carbon.apimgt.impl.utils.*;version="${carbon.apimgt.version}",
+                            <!--org.wso2.carbon.apimgt.impl.dao.*;version="${carbon.apimgt.version}",-->
+                            <!--org.wso2.carbon.apimgt.impl.utils.*;version="${carbon.apimgt.version}",-->
                         </Private-Package>
                         <Export-Package>
                             !org.wso2.carbon.apimgt.interceptor.valve.internal,

@@ -280,7 +280,10 @@ public abstract class AbstractAPIManager implements APIManager {
                                                                                 APIConstants.API_KEY);
             GenericArtifact[] artifacts = artifactManager.getAllGenericArtifacts();
             for (GenericArtifact artifact : artifacts) {
-                apiSortedList.add(APIUtil.getAPI(artifact));
+                API api = APIUtil.getAPI(artifact);
+                if (api != null) {
+                    apiSortedList.add(api);
+                }
             }
 
         } catch (RegistryException e) {
