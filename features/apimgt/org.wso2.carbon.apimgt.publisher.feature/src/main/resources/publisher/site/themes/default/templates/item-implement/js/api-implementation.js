@@ -77,7 +77,14 @@ $(document).ready(function(){
              }
             }, dataType: 'json'
         });
-        }
+        },
+        errorPlacement: function (error, element) {
+             if (element.parent().hasClass("input-append")){
+                error.insertAfter(element.parent());
+             }else{
+                error.insertAfter(element);
+             }
+        },
     });
 
     var v = $("#prototype_form").validate({

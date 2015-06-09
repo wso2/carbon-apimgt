@@ -464,13 +464,15 @@
                 {{/each}}
                 <div class "checkbox inline" id="options" style="display: none;" >
                     <label class="checkbox inline">
-                    <input type="checkbox" value="options" class="http_verb_select"> OPTIONS
+                        <input type="checkbox" value="options" class="http_verb_select"> OPTIONS
                     </label>
+                    <div style="display:inline-block;" class="optionsHelp">
                     <a class="icon-question-sign help_popup" help_data="options_help" data-trigger="hover"></a>
                     <p id="options_help" class="hide"><%=i18n.localize("optionsHelpMsg")%></p>
-                    <label id="less" style="display:inline;">less</label>
+                    <label id="less" style="display:inline-block;">less</label>
                     </div>
-                     <label id="more" style="display:inline;">more</label>
+                </div>
+                    <label id="more" style="display:inline-block;">more</label>
             </div>
         </div>
         <!-- div class="control-group">
