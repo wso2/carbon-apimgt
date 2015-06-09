@@ -178,6 +178,31 @@ public interface APIConsumer extends APIManager {
     public Set<SubscribedAPI> getSubscribedAPIs(Subscriber subscriber, String applicationName, String groupingId)
             throws APIManagementException;
 
+	 /**
+     *
+     * @param jsonString this string will contain oAuth app details
+     * @param userName user name of logged in user.
+     * @param clientId this is the consumer key of oAuthApplication
+     * @param applicationName this is the APIM appication name.
+     * @param keyType
+     *@param allowedDomainArray @return
+     * @throws APIManagementException
+     */
+    public Map<String,Object> mapExistingOAuthClient(String jsonString, String userName, String clientId,
+                                                     String applicationName, String keyType,
+                                                     String[] allowedDomainArray) throws APIManagementException;
+
+    /**
+     *This method will delete from application key mapping table and application registration table.
+     *@param applicationId application id
+     *@param tokenType Token Type.
+     *@return
+     *@throws APIManagementException
+     */
+    public void deleteFromApplicationRegistration(String applicationId ,String tokenType) throws
+            APIManagementException;
+	
+
     /**
      *
      * @param jsonString this string will contain oAuth app details
@@ -187,8 +212,8 @@ public interface APIConsumer extends APIManager {
      * @return
      * @throws APIManagementException
      */
-    public Map<String,Object> saveSemiManualClient(String jsonString, String userName, String clientId,
-                                                   String  applicationName) throws APIManagementException;
+    /*public Map<String,Object> saveSemiManualClient(String jsonString, String userName, String clientId,
+                                                   String  applicationName) throws APIManagementException;*/
 
 
     /**
@@ -520,7 +545,7 @@ public interface APIConsumer extends APIManager {
      * @throws APIManagementException
      */
     AccessTokenInfo renewAccessToken(String oldAccessToken, String clientId, String clientSecret, String validityTime,
-                                     String accessAllowDomainsArray,String requestedScopes, String jsonInput) throws
+                                     String[] accessAllowDomainsArray,String[] requestedScopes, String jsonInput) throws
             APIManagementException;
 
 	/**

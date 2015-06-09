@@ -950,9 +950,52 @@ public class APIStoreHostObject extends ScriptableObject {
                 String clientId = (String) apiData.get("client_id", apiData);
                 //APIM application name.
                 String applicationName = (String) apiData.get("applicationName", apiData);
+
+                String keyType = (String) apiData.get("keytype", apiData);
+                String authorizedDomains = (String) apiData.get("authorizedDomains", apiData);
                 //this map will hold response that we are getting from Application registration process.
                 Map<String, Object> keyDetails;
-                getAPIConsumer(thisObj).saveSemiManualClient(jsonString, userName, clientId, applicationName);
+                getAPIConsumer(thisObj).mapExistingOAuthClient(jsonString, userName, clientId, applicationName,
+                                                               keyType, new String[]{"ALL"});
+
+            } catch (Exception e) {
+                handleException("Error while obtaining the application access token for the application" + e
+                        .getMessage(), e);
+            }
+        } else {
+            handleException("Invalid input parameters.");
+        }
+
+    }
+
+
+    /**
+     * This method is responsible delete records from application registration table and key mapping table
+     * If user had wrong inputs and he is unable to continue using create key method he has to delete it and re-create.
+     *
+     * @param cx      will be used to store information about the executing of the script.
+     *                This is a object of org.mozilla.javascript.Context package.
+     * @param thisObj Object of Scriptable interface provides for the management of
+     *                properties and for performing conversions.
+     * @param args    this will contain parameter list from jag files.
+     * @param funObj  this object  provides for calling functions and constructors.
+     * @throws ScriptException
+     * @throws APIManagementException
+     * @throws ParseException
+     */
+    public static void jsFunction_deleteFromApplicationRegistration(Context cx, Scriptable thisObj,
+                                                         Object[] args, Function funObj)
+            throws ScriptException, APIManagementException, ParseException {
+        if (args != null && args.length != 0) {
+
+            try {
+
+                String applicationId = (String) args[0];
+                String keyType = (String) args[1];
+
+                //this map will hold response that we are getting from Application registration process.
+                Map<String, Object> keyDetails;
+                getAPIConsumer(thisObj).deleteFromApplicationRegistration(applicationId, keyType);
 
             } catch (Exception e) {
                 handleException("Error while obtaining the application access token for the application" + e
@@ -2441,7 +2484,7 @@ public class APIStoreHostObject extends ScriptableObject {
             throw new APIManagementException("Invalid input parameters for AddAPISubscription method");
         }
 
-        String providerName = args[0].toString();
+        String providerName = APIUtil.replaceEmailDomain(args[0].toString());
         String apiName = args[1].toString();
         String version = args[2].toString();
         String tier = args[3].toString();
@@ -2910,6 +2953,7 @@ public class APIStoreHostObject extends ScriptableObject {
                                 appObj.put("prodValidityTime", appObj, prodKey.getValidityPeriod());
                             }
                             appObj.put("prodRegenerateOption", appObj, prodEnableRegenarateOption);
+                            appObj.put("prodKeyState", appObj, prodKey.getState());
                         } // Prod Token is not generated, but consumer key & secret is available
                         else if (prodKey != null && prodApp != null) {
                             String jsonString = prodApp.getJsonString();
@@ -2946,6 +2990,11 @@ public class APIStoreHostObject extends ScriptableObject {
                             } else {
                                 appObj.put("prodValidityTime", appObj,
                                            getApplicationAccessTokenValidityPeriodInSeconds());
+                            }
+                            if(prodKey != null) {
+                                if (prodKey.getState() != null) {
+                                    appObj.put("prodKeyState", appObj, prodKey.getState());
+                                }
                             }
                             appObj.put("prodJsonString", appObj, null);
 
@@ -3021,6 +3070,11 @@ public class APIStoreHostObject extends ScriptableObject {
                             } else {
                                 appObj.put("sandValidityTime", appObj,
                                            getApplicationAccessTokenValidityPeriodInSeconds());
+                            }
+                            if (sandboxKey != null) {
+                                if (sandboxKey.getState() != null) {
+                                    appObj.put("sandboxKeyState", appObj, sandboxKey.getState());
+                                }
                             }
                         }
 
@@ -3343,6 +3397,7 @@ public class APIStoreHostObject extends ScriptableObject {
         if (args != null && isStringArray(args)) {
             String applicationName = (String) args[0];
             String username = (String) args[1];
+            String groupingId = (String) args[2];
             boolean isTenantFlowStarted = false;
             try {
                 String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(username));
@@ -3351,6 +3406,13 @@ public class APIStoreHostObject extends ScriptableObject {
                     PrivilegedCarbonContext.startTenantFlow();
                     PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
                 }
+
+                //check whether application exist prior to get subscription
+                if (!APIUtil.isApplicationExist(username, applicationName, groupingId)) {
+                    handleException("Application " + applicationName + " does not exist for user " +
+                            "" + username);
+                }
+
                 Subscriber subscriber = new Subscriber(username);
                 APIConsumer apiConsumer = getAPIConsumer(thisObj);
                 Set<SubscribedAPI> subscribedAPIs = apiConsumer.getSubscribedAPIs(subscriber, applicationName, null);
@@ -4063,6 +4125,12 @@ public class APIStoreHostObject extends ScriptableObject {
                     Object apiObject = it.next();
                     API api = (API) apiObject;
                     APIIdentifier apiIdentifier = api.getId();
+                    int apiId = ApiMgtDAO.getAPIID(apiIdentifier, null);
+
+                    // API is partially created/deleted. We shouldn't be showing this API.
+                    if (apiId == -1) {
+                        continue;
+                    }
                     currentApi.put("name", currentApi, apiIdentifier.getApiName());
                     currentApi.put("provider", currentApi,
                             APIUtil.replaceEmailDomainBack(apiIdentifier.getProviderName()));
@@ -4070,7 +4138,7 @@ public class APIStoreHostObject extends ScriptableObject {
                             apiIdentifier.getVersion());
                     currentApi.put("description", currentApi, api.getDescription());
                     //Rating should retrieve from db
-                    currentApi.put("rates", currentApi, ApiMgtDAO.getAverageRating(api.getId()));
+                    currentApi.put("rates", currentApi, ApiMgtDAO.getAverageRating(apiId));
                     if (api.getThumbnailUrl() == null) {
                         currentApi.put("thumbnailurl", currentApi, "images/api-default.png");
                     } else {

@@ -114,8 +114,7 @@ public abstract class AbstractApplicationRegistrationWorkflowExecutor extends Wo
         ApiMgtDAO dao = new ApiMgtDAO();
         if(WorkflowStatus.APPROVED.equals(workflowDTO.getStatus())) {
             dogenerateKeysForApplication(workflowDTO);
-            dao.updateApplicationRegistration(APIConstants.AppRegistrationStatus.REGISTRATION_COMPLETED,
-                                              workflowDTO.getKeyType(),workflowDTO.getApplication().getId());
+
         }
     }
 
@@ -124,15 +123,20 @@ public abstract class AbstractApplicationRegistrationWorkflowExecutor extends Wo
         log.debug("Registering Application and creating an Access Token... ");
         Application application = workflowDTO.getApplication();
         Subscriber subscriber = application.getSubscriber();
-
+        ApiMgtDAO dao = new ApiMgtDAO();
         if (application == null || subscriber == null || workflowDTO.getAllowedDomains() == null) {
-            ApiMgtDAO dao = new ApiMgtDAO();
             dao.populateAppRegistrationWorkflowDTO(workflowDTO);
         }
 
         try {
             //get new key manager
             KeyManager keyManager = KeyManagerHolder.getKeyManagerInstance();
+
+            StringBuilder applicationNameAfterAppend = new StringBuilder(application.getName());
+            String keyType = workflowDTO.getKeyType();
+            applicationNameAfterAppend.append("_").append(keyType);
+            workflowDTO.getAppInfoDTO().getOAuthApplicationInfo()
+                       .setClientName(applicationNameAfterAppend.toString());
             //createApplication on oAuthorization server.
             OAuthApplicationInfo oAuthApplication = keyManager.createApplication(workflowDTO.getAppInfoDTO());
             //Do application mapping with consumerKey.
@@ -141,6 +145,10 @@ public abstract class AbstractApplicationRegistrationWorkflowExecutor extends Wo
             //update associateApplication
             //application.updateAssociateOAuthApp(workflowDTO.getKeyType(), oAuthApplication);
             ApplicationUtils.updateOAuthAppAssociation(application,workflowDTO.getKeyType(),oAuthApplication);
+
+            //change create application status in to completed.
+            dao.updateApplicationRegistration(APIConstants.AppRegistrationStatus.REGISTRATION_COMPLETED,
+                    workflowDTO.getKeyType(),workflowDTO.getApplication().getId());
 
             workflowDTO.setApplicationInfo(oAuthApplication);
 

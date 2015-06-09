@@ -101,7 +101,12 @@ public class ScopesIssuer {
             String[] userRoles = null;
 
             try {
-                tenantId = IdentityUtil.getTenantIdOFUser(username);
+                tenantId = tokReqMsgCtx.getTenantID();
+
+                // If tenant Id is not set in the tokenReqContext, deriving it from username.
+                if (tenantId == 0 || tenantId == -1) {
+                    tenantId = IdentityUtil.getTenantIdOFUser(username);
+                }
                 userStoreManager = realmService.getTenantUserRealm(tenantId).getUserStoreManager();
                 userRoles = userStoreManager.getRoleListOfUser(MultitenantUtils.getTenantAwareUsername(username));
             } catch (IdentityException e) {

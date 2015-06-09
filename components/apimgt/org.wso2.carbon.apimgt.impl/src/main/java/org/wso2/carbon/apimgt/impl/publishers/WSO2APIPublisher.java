@@ -63,6 +63,7 @@ import java.net.*;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.regex.Pattern;
 
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
@@ -540,7 +541,15 @@ public class WSO2APIPublisher implements APIPublisher {
             k++;
         }
         params.add(new BasicNameValuePair("tiersCollection", checkValue(tiersSet.toString())));
-        params.add(new BasicNameValuePair("context", api.getContext()));
+        String contextTemplate = api.getContextTemplate();
+        //If the context template ends with {version} this means that the version will be at the end of the context.
+        if(contextTemplate != null && contextTemplate.endsWith("/" + APIConstants.VERSION_PLACEHOLDER)){
+            //Remove the {version} part from the context template.
+            contextTemplate = contextTemplate.split(Pattern.quote("/" + APIConstants.VERSION_PLACEHOLDER))[0];
+        } else {
+            contextTemplate = api.getContext();
+        }
+        params.add(new BasicNameValuePair("context", contextTemplate));
         params.add(new BasicNameValuePair("bizOwner", api.getBusinessOwner()));
         params.add(new BasicNameValuePair("bizOwnerMail", api.getBusinessOwnerEmail()));
         params.add(new BasicNameValuePair("techOwner", api.getTechnicalOwner()));
