@@ -1139,10 +1139,12 @@ public class ApiMgtDAO {
         ResultSet rs = null;
         Map<String, Object> results = null;
         try {
+            //encrypt consumer key before passing it to query.
+            String encryptedConsumerKey = APIUtil.encryptToken(consumerKey);
             conn = APIMgtDBUtil.getConnection();
             ps = conn.prepareStatement(sql);
             ps.setString(1, context);
-            ps.setString(2, consumerKey);
+            ps.setString(2, encryptedConsumerKey);
             if (!defaultVersionInvoked) {
                 ps.setString(3, version);
             }
@@ -1184,7 +1186,10 @@ public class ApiMgtDAO {
 
         } catch (SQLException e) {
             handleException("Exception occurred while validating Subscription.", e);
-        } finally {
+        } catch (CryptoException e) {
+            handleException("Error while encrypting consumer key", e);
+        }
+        finally {
             APIMgtDBUtil.closeAllConnections(ps, conn, rs);
         }
         return false;
@@ -7483,9 +7488,11 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
         PreparedStatement prepStmt = null;
         ResultSet rs = null;
         try {
+            //encrypt consumer key before passing it to query.
+            String encryptedConsumerKey = APIUtil.encryptToken(consumerKey);
             connection = APIMgtDBUtil.getConnection();
             prepStmt = connection.prepareStatement(accessAllowDomainsSql);
-            prepStmt.setString(1, consumerKey);
+            prepStmt.setString(1, encryptedConsumerKey);
             rs = prepStmt.executeQuery();
             boolean first = true;
             while (rs.next()) {
@@ -7501,6 +7508,8 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
         } catch (SQLException e) {
             throw new APIManagementException
                     ("Error in retrieving access allowing domain list from table.", e);
+        } catch (CryptoException e) {
+            handleException("Error while encrypting consumer key", e);
         } finally {
             APIMgtDBUtil.closeAllConnections(prepStmt, connection, rs);
         }
