@@ -1,57 +1,49 @@
-$( document ).ready(function() {
-
+$(function() {
     $("#startFromExistingAPI").click(function(){
         $('#startFromExistingAPI-form').ajaxSubmit({
             success:function(responseText, statusText, xhr, $form){
-                if (!responseText.error) {
-                    window.location = jagg.site.context + "/design"
+                if (!responseText.success) {
+                    window.location = caramel.context + "/asts/api/design";
                 }else {
-                    if (responseText.message == "timeout") {
-                        if (ssoEnabled) {
-                             var currentLoc = window.location.pathname;
-                             if (currentLoc.indexOf(".jag") >= 0) {
-                                 location.href = "index.jag";
-                             } else {
-                                 location.href = 'site/pages/index.jag';
-                             }
-                        } else {
-                             jagg.showLogin();
-                        }
-                    } else {
-                        jagg.message({content:responseText.message,type:"error"});
-                    }
+                    BootstrapDialog.show({
+                                             type: BootstrapDialog.TYPE_DANGER,
+                                             title: 'Error',
+                                             message: responseText.message,
+                                             buttons: [{
+                                                           label: 'Ok',
+                                                           action: function(dialogItself){
+                                                               dialogItself.close();
+                                                           }
+                                                       }]
+                                         });
                 }                
             }, dataType: 'json'
         });
     });
 
     $("#startFromExistingSOAPEndpoint").click(function(){
-        
         $( "#startFromExistingSOAPEndpoint-form" ).submit();
-        /*var wsdl = $("#wsdl-url").val();
+        var wsdl = $("#wsdl-url").val();
         window.location.href = 'design?wsdl=' + wsdl;
         $('#startFromExistingSOAPEndpoint-form').ajaxSubmit({
             success:function(responseText, statusText, xhr, $form){
-                if (!responseText.error) {
-                    window.location = jagg.site.context + "/design"
+                if (!responseText.success) {
+                    window.location = caramel.context + "/asts/api/design";
                 }else {
-                    if (responseText.message == "timeout") {
-                        if (ssoEnabled) {
-                             var currentLoc = window.location.pathname;
-                             if (currentLoc.indexOf(".jag") >= 0) {
-                                 location.href = "index.jag";
-                             } else {
-                                 location.href = 'site/pages/index.jag';
-                             }
-                        } else {
-                             jagg.showLogin();
-                        }
-                    } else {
-                        jagg.message({content:responseText.message,type:"error"});
-                    }
+                    BootstrapDialog.show({
+                                             type: BootstrapDialog.TYPE_DANGER,
+                                             title: 'Error',
+                                             message: responseText.message,
+                                             buttons: [{
+                                                           label: 'Ok',
+                                                           action: function(dialogItself){
+                                                               dialogItself.close();
+                                                           }
+                                                       }]
+                                         });
                 }                
             }, dataType: 'json'
-        });*/
+        });
     });
     
 

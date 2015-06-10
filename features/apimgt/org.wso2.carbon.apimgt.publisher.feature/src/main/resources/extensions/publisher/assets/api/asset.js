@@ -338,27 +338,18 @@ asset.server = function (ctx) {
                         permission:'ASSET_CREATE'
                     }],
             apis: [{
-                       url: 'endpoints',
-                       path: 'endpoints.jag'
-                   }, {
-                       url: 'prototype',
-                       path: 'prototype.jag'
-                   }, {
                        url: 'swagger',
                        path: 'swagger.jag'
                    }, {
                        url: 'lifecycle',
                        path: 'lifecycle.jag'
-                   },{
-                       url: 'apimanage',
-                       path: 'apimanage.jag'
+                   }, {
+                       url: 'start',
+                       path: 'start.jag'
                    },{
                        url: 'sequences',
                        path: 'sequences.jag'
                    },{
-                       url: 'tiers',
-                       path: 'tiers.jag'
-                   }, {
                        url: 'api-subscriptions',
                        path: 'api-subscriptions.jag'
                    }, {
@@ -368,7 +359,6 @@ asset.server = function (ctx) {
                        url: 'validation',
                        path: 'validation.jag'
                    }]
-
         }
     }
 };

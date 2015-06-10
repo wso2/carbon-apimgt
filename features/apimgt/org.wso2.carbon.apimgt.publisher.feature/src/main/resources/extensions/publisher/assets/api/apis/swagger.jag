@@ -47,7 +47,7 @@ require('/modules/publisher.js').exec(function (ctx) {
 		case 'GET':// GET endpoints
 			options.type = req.getParameter('type');
 			var action = req.getParameter('action');
-			if (action = 'swaggerDoc') {//return assets by type
+			if (action == 'swaggerDoc') {//return assets by type
 				var apiPublisher =  require('apipublisher').apipublisher;
 				var apiProxy = apiPublisher.instance(username);
 				var apiData = {};
@@ -66,13 +66,13 @@ require('/modules/publisher.js').exec(function (ctx) {
 																	constants.STATUS_CODES.INTERNAL_SERVER_ERROR,
 																	'Error while getting swagger resource');
 				}
-			} else if (action = 'sessionSwaggerDoc') {
+			} else if (action == 'sessionSwaggerDoc') {
 				var swagger = session.get("swagger");
 				session.put("swagger", null);
 				//@todo Error reporting
 				response = responseProcessor.buildSuccessResponse(response, constants.STATUS_CODES.OK, swagger);
 
-			} else if (action = 'swaggerDocFromFile') {
+			} else if (action == 'swaggerDocFromFile') {
 				var url = req.getParameter("swagger_url");
 				url = url.trim();
 				//@todo need to validate returned swagger v2

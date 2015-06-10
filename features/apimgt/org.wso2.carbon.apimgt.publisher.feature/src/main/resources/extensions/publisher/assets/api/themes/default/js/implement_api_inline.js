@@ -11,7 +11,6 @@ $(function () {
                         contentType: "application/x-www-form-urlencoded; charset=utf-8"
                     });
 
-
         $.get(swaggerUrl, function (data) {
             designer.load_api_document(data.data);
             designer.set_default_management_values();

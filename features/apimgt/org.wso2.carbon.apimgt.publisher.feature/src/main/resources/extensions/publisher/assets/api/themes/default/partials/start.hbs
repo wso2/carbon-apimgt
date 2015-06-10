@@ -13,7 +13,7 @@
 
 		<div id="existingAPI" class="slideContainer col-lg-12 col-md-12" style="display:none">
 			<div class="well">
-				<form role="form" id="startFromExistingAPI-form" enctype="multipart/form-data" action="#">
+				<form role="form" id="startFromExistingAPI-form" enctype="multipart/form-data" action="{{url ""}}/asts/api/apis/start" method="post">
 					<fieldset>
 						<div class="form-inline">
 							<div class="control-group toggleRadios">
@@ -52,7 +52,7 @@
 		</label>
 
 		<div id="soapEndpoint" class="slideContainer col-lg-12 col-md-12 well" style="display:none">
-			<form role="form" id="startFromExistingSOAPEndpoint-form" action="design" method="post">
+			<form role="form" id="startFromExistingSOAPEndpoint-form" action="{{url ""}}/asts/api/apis/start" method="post">
 				<fieldset>
 					<div class="form-group">
 						<label class="custom-form-label marg-top-6 col-lg-2 col-md-2 col-sm-12 col-xs-12">{{t "Provide WSDL URL"}}</label>

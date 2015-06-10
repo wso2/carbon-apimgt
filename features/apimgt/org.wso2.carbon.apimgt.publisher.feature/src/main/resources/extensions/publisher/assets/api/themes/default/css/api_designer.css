@@ -144,7 +144,7 @@
 
 .scope_container {
     margin: 5px 0 0 10px;
-    padding: 10px;    
+    padding: 10px;
     background-color: #F5F5BB !important;
 }
 
@@ -157,8 +157,8 @@
 }
 
 .resource_container{
-      background-color:#F5F5F5;
-  /*    line-height: 12px;*/
+    background-color:#F5F5F5;
+    /*    line-height: 12px;*/
 }
 
 .resource_container td{
@@ -166,7 +166,7 @@
     vertical-align: top;
 }
 
-.resource_expand { cursor: pointer; }
+.resource_expand { cursor: pointer; word-wrap:none;}
 
 .resource_container .editable{ padding-top: 0px !important;}
 
@@ -189,33 +189,34 @@
     color:white;
     font-weight: bolder;
     margin-top: -5px;
+    text-transform: uppercase;
 }
 
 .resource_container td{
     border-top: 2px #FFF solid;
 }
 
-.resource-method-GET{
+.resource-method-get{
     background-color: #0F6AB4;
 }
 
-.resource-method-POST{
+.resource-method-post{
     background-color: #10A54A;
 }
 
-.resource-method-PUT{
+.resource-method-put{
     background-color: #C5862B;
 }
 
-.resource-method-PATCH{
+.resource-method-patch{
     background-color: #D38042;
 }
 
-.resource-method-DELETE{
+.resource-method-delete{
     background-color: #A41E22;
 }
 
-.resource-method-OPTIONS{
+.resource-method-options{
     background-color: #777;
 }
 
@@ -233,30 +234,26 @@
 }
 
 .resource_group_title{
-margin: 20px 0px 10px 10px;
+    margin: 20px 0px 10px 10px;
 }
 
 .resource_summary{
     width: 400px;
 }
-.requiredAstrix{
-    color:red;
+
+#apiEditThumb{
+    width: 100px;
+    height:100px;
 }
 
-.get-started label,.get-started label s{
-    font-size: 18px;
-    font-weight:normal;
+#swaggerEditer{
 }
-.get-started label p, .get-started label s.paragraph{
-    font-size: 14px;
-    font-weight:normal;
-    color:#999;
-    margin-top:4px;
-    margin-bottom:30px;
+
+.swagger_editer_header{
+    padding: 10px;
+    background: #4a4a4a;
 }
-.get-started label s, .get-started label s.paragraph{
-    color:#ccc;
-}
-.marg-top-6{
-    margin-top:6px;
+
+body.modal-open {
+    overflow: hidden;
 }

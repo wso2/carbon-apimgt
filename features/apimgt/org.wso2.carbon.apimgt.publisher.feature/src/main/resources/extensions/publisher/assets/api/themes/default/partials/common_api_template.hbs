@@ -1,6 +1,6 @@
 <script language="javascript">
     //TODO move to code segment
-    var VERBS = ['GET', 'POST', 'PUT', 'HEAD', 'DELETE'];
+    var VERBS = ['get', 'post', 'put', 'head', 'delete'];
     var AUTH_TYPES = [
         {"value": "None", "text": "{{t "None"}}"},
         {"value": "Application", "text": "{{t "Application"}}"},
@@ -211,7 +211,7 @@
         </div>
     </div>
     <br/><br/>
-    {{#if wsdl}}
+    {{#if apiMetaData.wsdl}}
         <div id="api_designer">
             <a  href="#wsdlUpload" role="button" class="btn pull-right" data-toggle="modal" ><i class="icon-download-alt" ></i> {{t "Import"}} </a>
             <legend>{{t "API Definition"}}</legend>                   
@@ -219,7 +219,7 @@
                 <label class="control-label" for="wsdl">{{t "WSDL"}}:</label>
                 <div class="controls">
                 <div class="input-append">
-                <input type="text" class="input-xlarge validInput" id="wsdl" name="wsdl"  value="{{wsdl}}" />
+                <input type="text" class="input-xlarge validInput" id="wsdl" name="wsdl"  value="{{apiMetaData.wsdl}}" />
                 <button class="btn check_url_valid" url-type="wsdl" type="button" >{{t "Test URI"}}</button>
                 <a class="icon-question-sign help_popup" help_data="wsdldesc_help"></a>
                 <p id="wsdldesc_help" class="hide">{{t "wsdlDescHelpMsg"}}</p>
@@ -245,6 +245,8 @@
 				</div>
 		{{else}}
 				<div id="api_designer">
+					<a  href="#swaggerUpload" role="button" class="btn pull-right" data-toggle="modal" ><i class="icon-download-alt" ></i> Import </a>
+					<a  href="#" id="swaggerEditor" class="btn pull-right" style="margin:0 10px" ><i class="icon-edit" ></i> Edit Source</a>
 					<div id = "resource_overview">
 						<legend>API Definition</legend>
 						<div class="resource_create">
@@ -269,6 +271,8 @@
 		{{/if}}
 		{{else}}
 				<div id="api_designer">
+					<a  href="#swaggerUpload" role="button" class="btn pull-right" data-toggle="modal" ><i class="icon-download-alt" ></i> Import </a>
+					<a  href="#" id="swaggerEditor" class="btn pull-right" style="margin:0 10px" ><i class="icon-edit" ></i> Edit Source</a>
 					<div id = "resource_overview">
 						<legend>API Definition</legend>
 						<div class="resource_create">

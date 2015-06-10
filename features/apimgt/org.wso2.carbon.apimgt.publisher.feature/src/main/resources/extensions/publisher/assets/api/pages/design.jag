@@ -36,10 +36,9 @@ require('/modules/publisher.js').exec(function(ctx) {
 	//Render page
 	page = ui.buildPage(ctx.session, ctx.request);
 	output = am.render(asset,page)._custom();
-
 	var apiMetaData = {};
 	output.apiMetaData = apiMetaData;
-	var action = request.getParameter("action");
+
 	if(options.id){
 		try {
 			asset = am.get(options.id);
@@ -69,47 +68,14 @@ require('/modules/publisher.js').exec(function(ctx) {
 		output.private_visibility = private_visibility;
 
 	} else {
-		if (request.getMethod() == 'POST' && (action === "start")) {
-			var type = request.getParameter("type");
-			var swagger = null;
-			var wsdl = null;
-			if(type == "rest"){
-				var url = request.getParameter("swagger-url");
-				var file = request.getFile("swagger-file");
-				var import_type = request.getParameter("import-definition");
-				if(import_type == "swagger-url" && url){
-					url = url.trim();
-					var data = { };
-					var content = get(url, data ,"json");
-					swagger = content.data;
-				} else if(import_type == "swagger-file" && file){
-					file.open("r");
-					swagger = file.readAll();
-					file.close();
-				} else{
-					var obj = require("/extensions/assets/api/config/default_swagger.json");
-					swagger = stringify(obj);
-				}
-			} else if(type == "soap"){
-				var url = request.getParameter("wsdl-url");
-				var file = request.getFile("wsdl-file");
-				var import_type = request.getParameter("import-definition");
-				wsdl = "soap";
-				if(url){
-					wsdl = url.trim();
-				}
-			}
-
-			if(swagger){
-				session.put("swagger", swagger);
-				output.apiMetaData.swaggerAvailable = true;
-			} else {
-				output.apiMetaData.swaggerAvailable = false;
-			}
-
-			if (wsdl) {
-				output.apiMetaData.wsdl = wsdl;
-			}
+		//Set api meta data related when loading the design page with available session data
+		if(session.get("wsdl")) {
+			output.apiMetaData.wsdl = session.get("wsdl");
+			session.put("wsdl", null);
+		} else if (session.get("swagger")) {
+			output.apiMetaData.swaggerAvailable = true;
+		} else {
+			output.apiMetaData.swaggerAvailable = false;
 		}
 	}
 
