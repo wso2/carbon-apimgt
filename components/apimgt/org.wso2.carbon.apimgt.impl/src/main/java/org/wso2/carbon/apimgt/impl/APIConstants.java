@@ -20,6 +20,9 @@ package org.wso2.carbon.apimgt.impl;
 
 import javax.ws.rs.POST;
 import javax.xml.namespace.QName;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * This class represents the constants that are used for APIManager implementation
@@ -533,6 +536,7 @@ public final class APIConstants {
     public static final int API_CONTEXT_CACHE_EXPIRY_TIME_IN_DAYS = 3650 ;
 
     //URI Authentication Schemes
+    public static final Set<String> SUPPORTED_METHODS = new HashSet<String>((Arrays.asList(new String[] {"get","put","post","delete","head","options"})));
     public static final String AUTH_NO_AUTHENTICATION = "None";
     public static final String AUTH_APPLICATION_LEVEL_TOKEN = "Application";
     public static final String AUTH_APPLICATION_USER_LEVEL_TOKEN = "Application_User";

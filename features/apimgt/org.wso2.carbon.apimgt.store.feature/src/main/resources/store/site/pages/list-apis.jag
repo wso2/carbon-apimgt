@@ -9,6 +9,13 @@ var tenantDomain = jagg.getTenantDomain();
 
 (function () {
     isTenantAllowed();
+    user = jagg.getUser();
+
+    if ((!session.get("hasTriedSSO") || Boolean(user)) && site.ssoConfiguration.enabled == "true" && site.ssoConfiguration.passive == "true") {
+        jagg.includeBlock("sso/filter", {});
+    }
+
+    session.put("hasTriedSSO", false);
 
 var mod = jagg.module("manager");
 
