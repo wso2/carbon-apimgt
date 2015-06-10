@@ -402,14 +402,28 @@ public class SAMLSSORelyingPartyObject extends ScriptableObject {
      * @return
      * @throws Exception
      */
-    public static String jsFunction_getSAMLAuthRequest(Context cx, Scriptable thisObj,
-                                                       Object[] args,
-                                                       Function funObj)
+    public static String jsFunction_getSAMLAuthRequest(Context cx, Scriptable thisObj, Object[] args, Function funObj)
             throws Exception {
         SAMLSSORelyingPartyObject relyingPartyObject = (SAMLSSORelyingPartyObject) thisObj;
-        return Util.marshall(new AuthReqBuilder().
-                buildAuthenticationRequest(relyingPartyObject.getSSOProperty(SSOConstants.ISSUER_ID)));
-
+        //ADDED
+        if (!Boolean.valueOf(relyingPartyObject.getSSOProperty(SSOConstants.SIGN_REQUESTS))) {
+            return Util.marshall(new AuthReqBuilder().buildAuthenticationRequest(
+                    relyingPartyObject.getSSOProperty(SSOConstants.ISSUER_ID)));
+        } else {
+            int argLength = args.length;
+            if (argLength == 0) {
+                return Util.marshall(new AuthReqBuilder().buildSignedAuthRequest(
+                        relyingPartyObject.getSSOProperty(SSOConstants.ISSUER_ID), MultitenantConstants.SUPER_TENANT_ID,
+                        MultitenantConstants.SUPER_TENANT_DOMAIN_NAME));
+            } else {
+                String consumerUrl = (String) args[0];
+                return Util.marshall(new AuthReqBuilder().buildSignedAuthRequestWithConsumerUrl(
+                        relyingPartyObject.getSSOProperty(SSOConstants.ISSUER_ID),
+                        relyingPartyObject.getSSOProperty(SSOConstants.IDP_URL), consumerUrl,
+                        MultitenantConstants.SUPER_TENANT_ID, MultitenantConstants.SUPER_TENANT_DOMAIN_NAME));
+            }
+        }
+        //END
     }
 
     /**
