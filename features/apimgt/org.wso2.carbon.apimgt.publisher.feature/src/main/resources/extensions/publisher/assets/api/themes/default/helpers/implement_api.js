@@ -18,13 +18,12 @@
  */
 
 var resources = function(page,meta){
-	return {
-		js:['jquery-validate.min.js', 
-		'implement_api.js', 'underscore.js', 'jsonform.js', 'custom-validation.js',
-		'url-validation.js','bootstrap-multiselect.js', 'bootstrap-editable.js', 'jsonpath-0.8.0.js',
-		'endpoint-ui.js', 'handlebars.js', 'api_designer.js', 'implement_api_inline.js',
-		'jquery-ace.min.js', 'src-noconflict/ace.js', 'src-noconflict/mode-javascript.js', 'typeaheadjs.js', 'bootstrap-dialog.min.js'],
-		css:['bootstrap-multiselect.css','api_designer.css', 'bootstrap/bootstrap-editable.css', 'bootstrap-dialog.min.css'],
+    return {
+        js:['jquery-validate.min.js', 'underscore.js', 'jsonform.js', 'custom-validation.js',
+            'url-validation.js','bootstrap-multiselect.js', 'bootstrap-editable.js', 'jsonpath-0.8.0.js',
+            'endpoint-ui.js', 'handlebars.js','jquery-ace.min.js', 'src-noconflict/ace.js', 'src-noconflict/mode-javascript.js', 'typeaheadjs.js',
+            'bootstrap-dialog.min.js','api_designer.js','implement_api_inline.js','implement_api.js'],
+        css:['bootstrap-multiselect.css','api_designer.css', 'bootstrap/bootstrap-editable.css', 'bootstrap-dialog.min.css'],
         code:['api_meta.hbs']
     };
 };

@@ -598,21 +598,21 @@ $(function () {
 
     APIDesigner.prototype.set_partials = function (phase) {
         if (phase == 'design') {
-            designer_resource_template_name = 'designer-resource-template-design';
-            designer_resource_template_body_name = 'designer-resource-template-design-body';
+            designer_resource_template_name = 'designer-resources-template-design';
+            designer_resource_template_body_name = 'designer-resources-template-design-body';
             scope_template_name = 'scope_template';
         } else if (phase == 'implement') {
-            designer_resource_template_name = 'designer-resource-template-implement';
-            designer_resource_template_body_name = 'designer-resource-template-implement-body';
+            designer_resource_template_name = 'designer-resources-template-implement';
+            designer_resource_template_body_name = 'designer-resources-template-implement-body';
             scope_template_name = 'scope_template';
         } else if (phase == 'manage') {
-            designer_resource_template_name = 'designer-resource-manage-design';
-            designer_resource_template_body_name = 'designer-resource-manage-design-body';
+            designer_resource_template_name = 'designer-resources-template-manage';
+            designer_resource_template_body_name = 'designer-resources-template-manage-body';
             scope_template_name = 'scope_template';
         } else {
             //Default
-            designer_resource_template_name = 'designer-resource-template-design';
-            designer_resource_template_body_name = 'designer-resource-template-design-body';
+            designer_resource_template_name = 'designer-resources-template-design';
+            designer_resource_template_body_name = 'designer-resources-template-design-body';
             scope_template_name = 'scope_template';
         }
     };
@@ -1024,7 +1024,7 @@ $(function () {
         fn = fn || function () {
         };
         if (!partialName) {
-            throw 'A template name has not been specified for template key ' + partialKey;
+            throw 'A template name has not been specified for template key ' + partialName;
         }
         var obj = {};
         obj[partialName] = partial(partialName);
@@ -1039,10 +1039,10 @@ $(function () {
         fn = fn || function () {
         };
         if (!partialName) {
-            throw 'A template name has not been specified for template key ' + partialKey;
+            throw 'A template name has not been specified for template key ' + partialName;
         }
         if (!containerName) {
-            throw 'A container name has not been specified for container key ' + containerKey;
+            throw 'A container name has not been specified for container key ' + partialName;
         }
         var obj = {};
         obj[partialName] = partial(partialName);

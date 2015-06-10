@@ -1,4 +1,7 @@
 $(function () {
+    //Initializing the designer
+    var designer = new APIMangerAPI.APIDesigner();
+    designer.set_partials('manage');
 
     var swaggerUrl = caramel.context + "/asts/api/apis/swagger?action=swaggerDoc&provider=" + store.publisher.api.provider + "&name=" + store.publisher.api.name + "&version=" + store.publisher.api.version;
     $(document).ready(function () {
@@ -8,8 +11,6 @@ $(function () {
 
 
         $.get(swaggerUrl, function (data) {
-            var designer = new APIMangerAPI.APIDesigner();
-            designer.set_partials('manage');
             designer.load_api_document(data.data);
             designer.set_default_management_values();
             designer.render_resources();
