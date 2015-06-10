@@ -1939,7 +1939,7 @@ public class APIStoreHostObject extends ScriptableObject {
                 }
                 result.put("apis", result, myn);
                 result.put("totalLength", result, resultMap.get("totalLength"));
-
+                result.put("isMore", result, resultMap.get("isMore"));
             }
         }
         return result;

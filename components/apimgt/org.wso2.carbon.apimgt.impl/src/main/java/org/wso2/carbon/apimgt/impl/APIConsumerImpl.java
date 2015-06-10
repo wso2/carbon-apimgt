@@ -496,6 +496,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         SortedSet<API> apiSortedSet = new TreeSet<API>(new APINameComparator());
         SortedSet<API> apiVersionsSortedSet = new TreeSet<API>(new APIVersionComparator());
         int totalLength=0;
+        boolean isMore = false;
         try {
             Registry userRegistry;
             boolean isTenantMode=(tenantDomain != null);
@@ -516,8 +517,27 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             List<API> multiVersionedAPIs = new ArrayList<API>();
             Comparator<API> versionComparator = new APIVersionComparator();
             Boolean displayMultipleVersions = APIUtil.isAllowDisplayMultipleVersions();
+            String paginationLimit = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
+                                                           .getAPIManagerConfiguration()
+                                                           .getFirstProperty(APIConstants.API_STORE_APIS_PER_PAGE);
 
-            PaginationContext.init(start, end, "ASC", APIConstants.API_OVERVIEW_NAME, Integer.MAX_VALUE);
+            // If the Config exists read the value and substitute for the hard coded '30' below
+            int maxPaginationLimit;
+            if (paginationLimit != null) {
+                // The additional 1 added to the maxPaginationLimit is to help us determine if more
+                // APIs may exist so that we know that we are unable to determine the actual total
+                // API count. We will subtract this 1 later on so that it does not interfere with
+                // the logic of the rest of the application
+                int pagination = Integer.parseInt(paginationLimit);
+                maxPaginationLimit = start + pagination + 1;
+
+                PaginationContext.init(start, end, "ASC", APIConstants.API_OVERVIEW_NAME, maxPaginationLimit);
+            }
+            // Else if the config is not specifed we go with default functionality and load all
+            else {
+                maxPaginationLimit = Integer.MAX_VALUE;
+                PaginationContext.init(start, end, "ASC", APIConstants.API_OVERVIEW_NAME, Integer.MAX_VALUE);
+            }
 
             GenericArtifactManager artifactManager = APIUtil.getArtifactManager(userRegistry, APIConstants.API_KEY);
             if (artifactManager != null) {
@@ -526,7 +546,16 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 if (genericArtifacts == null || genericArtifacts.length == 0) {
                     result.put("apis",apiSortedSet);
                     result.put("totalLength",totalLength);
+                    result.put("isMore", isMore);
                     return result;
+                }
+
+                // Check to see if we can speculate that there are more APIs to be loaded
+                if (maxPaginationLimit == totalLength) {
+                    isMore =
+                            true;  // More APIs exist so we cannot determine the total API count without incurring a
+                            // performance hit
+                    --totalLength; // Remove the additional 1 we added earlier when setting max pagination limit
                 }
 
                 for (GenericArtifact artifact : genericArtifacts) {
@@ -575,6 +604,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                     }
                     result.put("apis",apiSortedSet);
                     result.put("totalLength",totalLength);
+                    result.put("isMore", isMore);
                     return result;
 
                 } else {
@@ -583,6 +613,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                     }
                     result.put("apis",apiVersionsSortedSet);
                     result.put("totalLength",totalLength);
+                    result.put("isMore", isMore);
                     return result;
 
                 }
@@ -597,6 +628,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         }
         result.put("apis",apiSortedSet);
         result.put("totalLength",totalLength);
+        result.put("isMore", isMore);
         return result;
 	}
 
