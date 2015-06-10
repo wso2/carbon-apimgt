@@ -416,6 +416,14 @@ public abstract class AbstractAPIManager implements APIManager {
         return null;
     }
 
+    /**
+     * Checks whether the given document already exists for the given api
+     *
+     * @param identifier API Identifier
+     * @param docName Name of the document
+     * @return true if document already exists for the given api
+     * @throws APIManagementException if failed to check existence of the documentation
+     */
     public boolean isDocumentationExist(APIIdentifier identifier, String docName)
             throws APIManagementException {
         String docPath = APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR +
