@@ -49,6 +49,7 @@ p{
 }
 a{
     cursor:pointer;
+    color:#444;
 }
 .noborder-table tr td{
     border-top:none;
@@ -71,6 +72,9 @@ a{
     height:26px;
     display:block;
     margin-top:11px;
+}
+.doc-content{
+    color:#0088cc;
 }
 .row-fluid div.special-link-box1{
     background: #f0f0f0;
