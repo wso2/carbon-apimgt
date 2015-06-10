@@ -860,6 +860,11 @@ function updateContextPattern(){
     var version = $('#version').val();
 
     if(context != ""){
+        if(context.search("{") != -1 || context.search("}") != -1){
+            context = context.replace("{","");
+            context = context.replace("}","");
+            $('#error-invalidContextValue').modal('show');
+        }
         if(context.indexOf("{version}") < 0){
             context = context + '/';
             context = context + "{version}";
@@ -874,3 +879,4 @@ function updateContextPattern(){
         $('#resource_url_pattern_refix').text(context);
     }
 }
+
