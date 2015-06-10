@@ -165,6 +165,8 @@ public class APIManagerConfiguration {
                     Environment environment = new Environment();
                     OMElement environmentElem = (OMElement) environmentIterator.next();
                     environment.setType(environmentElem.getAttributeValue(new QName("type")));
+                    environment.setShowInConsole(
+                            Boolean.parseBoolean(environmentElem.getAttributeValue(new QName("api-console"))));
                     environment.setName(replaceSystemProperty(
                             environmentElem.getFirstChildWithName(new QName("Name")).getText()));
                     environment.setServerURL(replaceSystemProperty(
