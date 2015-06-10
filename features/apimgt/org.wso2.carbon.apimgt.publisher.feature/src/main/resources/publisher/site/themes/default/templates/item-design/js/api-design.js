@@ -305,7 +305,10 @@ APIDesigner.prototype.init_controllers = function(){
         okCallback:function(){
             API_DESIGNER = APIDesigner();
             delete API_DESIGNER.api_doc.paths[pn][op];
-            API_DESIGNER.render_resources(); 
+            API_DESIGNER.render_resources();
+            if(Object.keys(API_DESIGNER.api_doc.paths[pn]).length == 0) {
+                delete API_DESIGNER.api_doc.paths[pn];
+            }
         }});
         //delete resource if no operations       
     });
