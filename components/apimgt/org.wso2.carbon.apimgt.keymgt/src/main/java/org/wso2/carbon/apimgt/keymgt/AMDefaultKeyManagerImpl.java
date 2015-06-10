@@ -419,16 +419,37 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
 
         //initiate OAuthApplicationInfo
         OAuthApplicationInfo oAuthApplicationInfo = appInfoRequest.getOAuthApplicationInfo();
+
+        String consumerKey = oAuthApplicationInfo.getClientId();
         String tokenScope = (String) oAuthApplicationInfo.getParameter("tokenScope");
         String tokenScopes[] = new String[1];
         tokenScopes[0] = tokenScope;
         String clientSecret = (String) oAuthApplicationInfo.getParameter("client_secret");
         oAuthApplicationInfo.setClientSecret(clientSecret);
 
+
+        //check whether given consumer key and secret match or not. If it does not match throw an exception.
+        SubscriberKeyMgtClient keyMgtClient = APIUtil.getKeyManagementClient();
+        org.wso2.carbon.apimgt.api.model.xsd.OAuthApplicationInfo info = null;
+        try {
+            info = keyMgtClient.getOAuthApplication(oAuthApplicationInfo.getClientId());
+            if(!clientSecret.equals(info.getClientSecret())){
+                throw new APIManagementException("The secret key is wrong for the given consumer key " + consumerKey );
+            }
+
+        } catch (Exception e) {
+            handleException("Some thing went wrong while getting OAuth application for given consumer key " +
+                    oAuthApplicationInfo.getClientId(), e);
+        }
+        if (info == null || info.getClientId() == null) {
+            return null;
+        }
+
         oAuthApplicationInfo.addParameter("tokenScope", tokenScopes);
         if (log.isDebugEnabled()) {
             log.debug("Creating semi-manual application for consumer id  :  " + oAuthApplicationInfo.getClientId());
         }
+
 
         return oAuthApplicationInfo;
     }
