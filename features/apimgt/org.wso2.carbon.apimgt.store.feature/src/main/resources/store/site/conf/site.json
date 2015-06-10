@@ -7,13 +7,13 @@
     "tagWiseMode" :"false",
     "tagGroupKey" :"-group",
     "ssoConfiguration" : {
-        "enabled" : "false",
+        "enabled" : "true",
         "issuer" : "API_STORE",
         "identityProviderURL" : "https://localhost:9443/samlsso",
-        "keyStorePassword" : "",
-        "identityAlias" : "",
+        "keyStorePassword" : "wso2carbon",
+        "identityAlias" : "wso2carbon",
         "responseSigningEnabled":"true",
-        "keyStoreName" :"",
+        "keyStoreName" :"repository/resources/security/wso2carbon.jks",
         "passive" : "true",
         "acsURL" : "https://localhost:{carbon.https.port}/store/jagg/jaggery_acs.jag"
     },
