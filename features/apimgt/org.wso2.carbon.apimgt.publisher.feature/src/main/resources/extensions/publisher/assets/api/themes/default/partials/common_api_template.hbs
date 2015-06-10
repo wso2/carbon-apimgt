@@ -58,8 +58,51 @@
     <br/>
 </div>
 <h1>Design API</h1>
-<a href='' class='btn btn-success'><i class='fa-download-alt'></i>Import Swagger Definition</a>
-<br/><br/>
+<div id = "swaggerContent">
+	<div id="swaggerUpload" class="modal hide fade" tabindex="-1" role="dialog" aria-hidden="true">
+	<div class="modal-header">
+		<button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+		<h3 id="swaggerUploadLabel">Import Swagger 2 Definition</h3>
+	</div>
+	<div class="modal-body">
+		<div id="swagger_help" class="alert alert-danger hide" role="alert">
+			Enter a valid url
+			<button type="button" class="close" id="errorMsgClose"><span aria-hidden="true">&times;</span></button>
+		</div>
+		<div class="form-inline">
+			<div class="control-group toggleRadios">
+				<div class="controls">
+					<label class="control-label sub-select-label">Upload swagger definition as</label>
+					<label class="radio sub-labels"><input type="radio" class="select-file" name="import-definition" id="" value="swagger_import_file"/>Swagger File</label>
+					<label class="radio sub-labels urlSelect-label"><input type="radio" class="select-url" name="import-definition" value="swagger_import_url"/>Swagger Url</label>
+				</div>
+
+			</div>
+		</div>
+		<div class="control-group toggleContainers">
+			<div class="controls hide">
+				<input type="file" id="swagger_import_file" name="swagger_import_file" size="chars">
+			</div>
+			<div class="controls hide">
+				<label>Definition URL:</label>
+				<input type="text" placeholder="" class="span12" id="swagger_import_url" name="swagger_import_url">
+				<span class="help-block">Example : http://petstore.swagger.io/v2/swagger.json </span>
+			</div>
+		</div>
+	</div>
+	<div class="modal-footer">
+		<button class="btn btn-primary has-spinner" id="import_swagger">Import</button>
+		<button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
+	</div>
+</div>
+<div id="swaggerEditer" editor-url="{{url ""}}/extensions/assets/api/themes/default/lib/swagger-editor/#/"
+	 style="position:absolute;z-index:9000; top:0; left:0; height:100%; width:100%">
+<div class="swagger_editer_header">
+	<button class="btn btn-primary" id="update_swagger">Save</button>
+	<button class="btn" data-dismiss="modal" aria-hidden="true" id="close_swagger_editor">Close</button>
+</div>
+</div>
+</div>
 
 {{#if api}}
 	<form id="form-asset-create" class='form-horizontal' method='post' action='{{url ""}}/apis/assets/{{api.id}}?type={{rxt.shortName}}' enctype="multipart/form-data">
@@ -236,7 +279,7 @@
 				<label class="control-label" for="wsdl">{{t "WSDL"}}:</label>
 				<div class="controls">
 					<div class="input-append">
-						<input type="text" class="input-xlarge validInput" id="wsdl" name="wsdl"  value="{{wsdl}}" />
+						<input type="text" class="input-xlarge validInput" id="wsdl" name="wsdl"  value="{{api.wsdl}}" />
 						<button class="btn check_url_valid" url-type="wsdl" type="button" >{{t "Test URI"}}</button>
 						<a class="icon-question-sign help_popup" help_data="wsdldesc_help"></a>
 						<p id="wsdldesc_help" class="hide">{{t "wsdlDescHelpMsg"}}</p>
