@@ -2906,6 +2906,7 @@ public class APIStoreHostObject extends ScriptableObject {
                                 NativeObject scopeObj = new NativeObject();
                                 scopeObj.put("scopeKey", scopeObj, scope.getKey());
                                 scopeObj.put("scopeName", scopeObj, scope.getName());
+                                scopeObj.put("scopeRoles",scopeObj, scope.getRoles());
                                 scopesArray.put(scopesArray.getIds().length, scopesArray, scopeObj);
                             }
                         }
@@ -4269,6 +4270,69 @@ public class APIStoreHostObject extends ScriptableObject {
             apiConsumer.updateAccessAllowDomains(accessToken, accessAllowDomainsArray);
         } catch (Exception e) {
             handleException(e.getMessage(), e);
+        }
+    }
+
+    /**
+     * Given a name of a user the function returns the roles of the user
+     *
+     * @param cx
+     * @param thisObj
+     * @param args
+     * @param funObj
+     * @return
+     * @throws APIManagementException
+     * @throws AxisFault
+     */
+    public static NativeObject jsFunction_getRolesOfUser(Context cx, Scriptable thisObj, Object[] args, Function funObj)
+            throws APIManagementException, AxisFault {
+        String userName = (String) args[0];
+        NativeObject result = new NativeObject();
+        NativeArray roles = new NativeArray(0);
+        boolean isTenantFlowStarted = false;
+        if (userName != null) {
+            String tenantDomain = MultitenantUtils.getTenantDomain(userName);
+            try {
+                if (tenantDomain != null &&
+                        !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
+                    // To resolve the caching issue. Otherwise, if the roles of the user were updated, they will not be available here.
+                    isTenantFlowStarted = true;
+                    PrivilegedCarbonContext.startTenantFlow();
+                    PrivilegedCarbonContext.getThreadLocalCarbonContext()
+                            .setTenantDomain(tenantDomain, true);
+                }
+                int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager().getTenantId(
+                        tenantDomain);
+                org.wso2.carbon.user.api.UserStoreManager manager =
+                        ServiceReferenceHolder.getInstance().getRealmService().getTenantUserRealm(tenantId)
+                                .getUserStoreManager();
+
+                String userNameWithoutTenant = MultitenantUtils.getTenantAwareUsername(userName);
+                String[] roleList = manager.getRoleListOfUser(userNameWithoutTenant);
+
+                for (int i = 0; i < roleList.length; i++) {
+                    roles.put(roles.getIds().length, roles, roleList[i]);
+                }
+
+                result.put("error", result, false);
+                result.put("roles", result, roles);
+                return result;
+
+            } catch (org.wso2.carbon.user.api.UserStoreException e) {
+                handleException("Error getting roles of user:" + userName, e);
+                result.put("error", result, true);
+                result.put("message", result, "Error getting roles of user:" + userName);
+                return result;
+            } finally {
+                if (isTenantFlowStarted) {
+                    PrivilegedCarbonContext.endTenantFlow();
+                }
+            }
+
+        } else {
+            result.put("error", result, true);
+            result.put("message", result, "Please provide a valid username");
+            return result;
         }
     }
 

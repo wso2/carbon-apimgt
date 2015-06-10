@@ -708,11 +708,34 @@
                     <div class="modal-body">
                         <ul>
 
-                                <% for (var i = 0; i < lenS; i++) {
+                                <%  var mod = jagg.module("user");
+                                    var userRolesResult = mod.getRolesOfUser(userName);
+                                    var hasDisabledScopes = false;
+                                    for (var i = 0; i < lenS; i++) {
 
-                                         %><li><input type="checkbox" name="<%=scopes[i].scopeName%>" value="<%=scopes[i].scopeKey%>" id="<%= scopes[i].scopeKey%>" class="Checkbox"> <%= scopes[i].scopeName%> : <%= scopes[i].scopeKey %></li><%
+                                         %><li><input type="checkbox" name="<%=scopes[i].scopeName%>" value="<%=scopes[i].scopeKey%>" id="<%= scopes[i].scopeKey%>" class="Checkbox" <%
+
+                                                if(!userRolesResult.error){
+                                                    var userRoles = userRolesResult.roles;
+                                                    var scopeRoles = scopes[i].scopeRoles.split(",");
+                                                    var disabled = true;
+                                                    for (var j = 0; j < userRoles.length; j++) {
+                                                        if (scopeRoles.indexOf(userRoles[j])>-1){
+                                                            disabled = false;
+                                                            break;
+                                                        }
+                                                    }
+                                                    if (disabled) {
+                                                        hasDisabledScopes = true;
+                                                        %> disabled<%
+                                                    }
+                                                }
+
+                                         %>> <%= scopes[i].scopeName%> : <%= scopes[i].scopeKey %></li><%
                                         }
-                                        %></ul><%
+                                        %></ul><% if (hasDisabledScopes) { %>
+                                            <div class="help-block">You should have required roles to get access to disabled scopes</div>
+                                        <%}%>
                                  %>
                     </div>
 
