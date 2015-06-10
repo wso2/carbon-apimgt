@@ -73,19 +73,23 @@ public class ClientWorker implements Runnable {
                 (response.getStatus() != HttpStatus.SC_SEE_OTHER) &&
                 (response.getStatus() != HttpStatus.SC_TEMPORARY_REDIRECT) )) {
             URL url;
+            String urlContext = null;
             try {
                 url = new URL(oriURL);
+                urlContext = url.getFile();
             } catch (MalformedURLException e) {
-                log.error("Invalid URL received", e);
-                return;
+                if (log.isDebugEnabled()) {
+                    log.debug("Relative URL received for Location : " + oriURL, e);
+                }
+                urlContext = oriURL;
             }
 
             headers.remove(PassThroughConstants.LOCATION);
-            String prfix = (String) outMsgCtx.getProperty(PassThroughConstants.SERVICE_PREFIX);
-            if (prfix != null) {
-                headers.put(PassThroughConstants.LOCATION, prfix
-                                                           + (url.getFile().startsWith("/") ? url.getFile().substring(1)
-                                                                                            : url.getFile()));
+            String prefix = (String) outMsgCtx.getProperty(PassThroughConstants.SERVICE_PREFIX);
+            if (prefix != null) {
+                headers.put(PassThroughConstants.LOCATION, prefix
+                                                           + (urlContext.startsWith("/") ? urlContext.substring(1)
+                                                                                            : urlContext));
             }
 
         }

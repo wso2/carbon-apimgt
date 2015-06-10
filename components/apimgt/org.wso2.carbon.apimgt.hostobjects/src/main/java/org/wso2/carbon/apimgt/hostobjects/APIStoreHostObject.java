@@ -147,10 +147,10 @@ public class APIStoreHostObject extends ScriptableObject {
 		String tenantDomain = args[0].toString();
 		if (tenantDomain != null &&
 		    !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
-			APIUtil.loadTenantConfig(tenantDomain);
-		}
+            APIUtil.loadTenantConfig(tenantDomain);
+        }
 
-	}
+    }
         			    
     
 
@@ -3276,6 +3276,7 @@ public class APIStoreHostObject extends ScriptableObject {
                     row.put("status", row, application.getStatus());
                     row.put("description", row, application.getDescription());
                     row.put("apiCount", row, subscriptionCount);
+                    row.put("groupId", row, application.getGroupId());
                     myn.put(i++, myn, row);
                 }
             }
