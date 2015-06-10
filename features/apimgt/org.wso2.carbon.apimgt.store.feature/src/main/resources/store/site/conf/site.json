@@ -15,7 +15,7 @@
         "responseSigningEnabled":"true",
         "keyStoreName" :"",
         "passive" : "true",
-        "acsURL" : "https://localhost:9443/store/jagg/jaggery_acs.jag"
+        "acsURL" : "https://localhost:{carbon.https.port}/store/jagg/jaggery_acs.jag"
     },
     "oidcConfiguration" : {
       "enabled" : "false",
