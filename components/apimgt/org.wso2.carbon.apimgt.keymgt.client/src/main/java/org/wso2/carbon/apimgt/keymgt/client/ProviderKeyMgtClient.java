@@ -55,7 +55,7 @@ public class ProviderKeyMgtClient {
             String authenticatedCookie = (String) serviceContext.getProperty(HTTPConstants.COOKIE_STRING);
 
             if (log.isDebugEnabled()) {
-                log.debug("Authentication Successful with AuthenticationAdmin. " + "Authenticated Cookie ID : " +
+                log.debug("Authentication Successful with AuthenticationAdmin. Authenticated Cookie ID : " +
                           authenticatedCookie);
             }
 
