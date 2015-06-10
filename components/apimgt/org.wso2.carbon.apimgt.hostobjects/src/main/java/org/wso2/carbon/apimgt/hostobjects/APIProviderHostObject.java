@@ -3812,8 +3812,8 @@ public class APIProviderHostObject extends ScriptableObject {
 		String tenantDomain = args[0].toString();
 		if (tenantDomain != null &&
 		    !org.wso2.carbon.base.MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
-			APIUtil.loadTenantConfig(tenantDomain);
-		}
+            APIUtil.loadTenantConfig(tenantDomain);
+        }
 	}
 
     public static NativeArray jsFunction_getLifeCycleEvents(Context cx, Scriptable thisObj,

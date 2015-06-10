@@ -2,10 +2,17 @@
 var i18n = require("i18n");
 var localeResourcesBasePath="/site/conf/locales/jaggery/";
 var tenantDomain = jagg.getTenantDomain();
+var site = require("/site/conf/site.json");
 i18n.init(request,localeResourcesBasePath);
 jagg.block("api/api-info", {
     initialize:function (data) {
+        user = jagg.getUser();
 
+        if ((!session.get("hasTriedSSO") || Boolean(user)) && site.ssoConfiguration.enabled == "true" && site.ssoConfiguration.passive == "true") {
+            jagg.includeBlock("sso/filter", {});
+        }
+
+        session.put("hasTriedSSO", false);
     },
 
     getInputs:function () {

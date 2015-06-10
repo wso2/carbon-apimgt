@@ -70,10 +70,10 @@ public class APIDefinitionFromSwagger20 extends APIDefinition {
                     JSONObject path = (JSONObject) paths.get(uriTempVal);
                     for (Iterator pathIterator = path.keySet().iterator(); pathIterator.hasNext(); ) {
                         String httpVerb = (String) pathIterator.next();
-                        JSONObject operation = (JSONObject) path.get(httpVerb);
 
-                        //PATCH is not supported. Need to remove this check when PATCH is supported
-                        if (!"PATCH".equals(httpVerb)) {
+                        //Only continue for supported operations
+                        if (APIConstants.SUPPORTED_METHODS.contains(httpVerb.toLowerCase())) {
+                            JSONObject operation = (JSONObject) path.get(httpVerb);
                             URITemplate template = new URITemplate();
                             Scope scope= APIUtil.findScopeByKey(scopes,(String) operation.get("x-scope"));
                             String authType = (String) operation.get("x-auth-type");

@@ -36,8 +36,7 @@
                 if(fullUserName != null){
                     var domainName = MultitenantUtils.getTenantDomain(fullUserName);
                     if (MultitenantConstants.SUPER_TENANT_DOMAIN_NAME !== domainName) {
-                        jagg.module("manager").loadTenantRegistry(domainName);
-                        jagg.module("manager").loadTenantAxisConfiguration(domainName);
+                        jagg.module("manager").loadTenantRegistry(String(domainName));
                     }
                 }
                 var isSignatureValid = ssoRelyingParty.validateSignature(samlResponse);
@@ -77,6 +76,9 @@
             showURL=showStoreURL.permitted;
             }
             jagg.setShowStoreURL(showURL);
+            if (MultitenantConstants.SUPER_TENANT_DOMAIN_NAME !== domainName) {
+                jagg.module("manager").getAPIProviderObj().loadAxisConfigOfTenant(String(domainName));
+            }
             response.sendRedirect(requestedURI);
             return;
         } else {

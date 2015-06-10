@@ -29,6 +29,16 @@
                             return;
                         }
 
+                        if(site.ssoConfiguration.passive == "true") {
+                            var isPassiveAuthRes = ssoRelyingParty.isPassiveAuthResponse(samlResponse);
+                            if(Boolean(isPassiveAuthRes))  {
+                                session.put("hasTriedSSO", true);
+                                response.sendRedirect(requestedURI);
+                                return;
+                            }
+                        }
+
+
                         // validating the signature
                         if(site.ssoConfiguration.responseSigningEnabled === 'true'){
                             var fullUserName = ssoRelyingParty.getSAMLResponseNameId(samlResponse);
@@ -37,8 +47,7 @@
                             if(fullUserName != null){
                                 var domainName = MultitenantUtils.getTenantDomain(fullUserName);
                                 if (MultitenantConstants.SUPER_TENANT_DOMAIN_NAME !== domainName) {
-                                    jagg.module("manager").loadTenantRegistry(domainName);
-                                    jagg.module("manager").loadTenantAxisConfiguration(domainName);
+                                    jagg.module("manager").loadTenantRegistry(String(domainName));
                                 }
                             }
 
@@ -89,6 +98,9 @@
     			        }
                         session.put("LOGGED_IN_USER",ssoRelyingParty.getLoggedInUser(sessionId));
 						session.put("hasPublisherAccess",showURL);
+                        if (MultitenantConstants.SUPER_TENANT_DOMAIN_NAME !== domainName) {
+                            jagg.module("manager").loadTenantAxisConfiguration(String(domainName));
+                        }
                         response.sendRedirect(requestedURI);
                         return;
                    } }else{

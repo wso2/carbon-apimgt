@@ -209,16 +209,24 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 
     /**
      * Returns the set of APIs with the given tag, retrieved from registry
-     *
+     * 
+     * @param requestedTenant - Tenant domain of the accessed store
      * @param registry - Current registry; tenant/SuperTenant
      * @param tag
      * @return
      * @throws APIManagementException
      */
-    private Set<API> getAPIsWithTag(Registry registry, String tag)
+    private Set<API> getAPIsWithTag(String requestedTenant, Registry registry, String tag)
             throws APIManagementException {
         Set<API> apiSet = new TreeSet<API>(new APINameComparator());
+        boolean isTenantFlowStarted = false;
         try {
+            if (requestedTenant != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(requestedTenant)) {
+                PrivilegedCarbonContext.startTenantFlow();
+                PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(requestedTenant, true);
+                isTenantFlowStarted = true;                
+            }
+            
             String resourceByTagQueryPath = RegistryConstants.QUERIES_COLLECTION_PATH + "/resource-by-tag";
             Map<String, String> params = new HashMap<String, String>();
             params.put("1", tag);
@@ -241,6 +249,10 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 
         } catch (RegistryException e) {
             handleException("Failed to get API for tag " + tag, e);
+        } finally {
+            if (isTenantFlowStarted) {
+                PrivilegedCarbonContext.endTenantFlow();
+            }
         }
         return apiSet;
     }
@@ -1024,27 +1036,37 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             } else {
                 userRegistry = registry;
             }
-            if (requestedTenant != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(requestedTenant)) {
-                isTenantFlowStarted = true;
-                PrivilegedCarbonContext.startTenantFlow();
-                PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(requestedTenant, true);
+            Collection collection = null;
+            try {
+                if (requestedTenant != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(requestedTenant)) {
+                    isTenantFlowStarted = true;
+                    PrivilegedCarbonContext.startTenantFlow();
+                    PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(requestedTenant, true);
+                }
+                collection = userRegistry.executeQuery(tagsQueryPath, params);
+            } finally {
+                if (isTenantFlowStarted) {
+                    PrivilegedCarbonContext.endTenantFlow();
+                }
             }
-            Collection collection = userRegistry.executeQuery(tagsQueryPath, params);
-            for (String fullTag : collection.getChildren()) {
-                //remove hardcoded path value
-                String tagName = fullTag.substring(fullTag.indexOf(";") + 1, fullTag.indexOf(":"));
-
-                Set<API> apisWithTag = getAPIsWithTag(userRegistry, tagName);
-                    /* Add the APIs against the tag name */
-                    if (apisWithTag.size() != 0) {
-                        if (tempTaggedAPIs.containsKey(tagName)) {
-                            for (API api : apisWithTag) {
-                                tempTaggedAPIs.get(tagName).add(api);
+            
+            if (collection != null) {
+                for (String fullTag : collection.getChildren()) {
+                    //remove hardcoded path value
+                    String tagName = fullTag.substring(fullTag.indexOf(";") + 1, fullTag.indexOf(":"));
+    
+                    Set<API> apisWithTag = getAPIsWithTag(requestedTenant, userRegistry, tagName);
+                        /* Add the APIs against the tag name */
+                        if (apisWithTag.size() != 0) {
+                            if (tempTaggedAPIs.containsKey(tagName)) {
+                                for (API api : apisWithTag) {
+                                    tempTaggedAPIs.get(tagName).add(api);
+                                }
+                            } else {
+                                tempTaggedAPIs.put(tagName, apisWithTag);
                             }
-                        } else {
-                            tempTaggedAPIs.put(tagName, apisWithTag);
                         }
-                    }
+                }
             }
 
             if(tempTaggedAPIs != null){
@@ -1076,11 +1098,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             handleException("Failed to get all the tags", e);
         } catch (UserStoreException e) {
             handleException("Failed to get all the tags", e);
-        } finally {
-            if (isTenantFlowStarted) {
-                PrivilegedCarbonContext.endTenantFlow();
-            }
-        }
+        } 
         return tagSet;
     }
 

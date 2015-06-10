@@ -13,7 +13,9 @@
         "keyStorePassword" : "",
         "identityAlias" : "",
         "responseSigningEnabled":"true",
-        "keyStoreName" :""
+        "keyStoreName" :"",
+        "passive" : "true",
+        "acsURL" : "https://localhost:9443/store/jagg/jaggery_acs.jag"
     },
     "oidcConfiguration" : {
       "enabled" : "false",
