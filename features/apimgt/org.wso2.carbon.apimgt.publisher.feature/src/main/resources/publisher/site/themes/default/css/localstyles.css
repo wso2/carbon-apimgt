@@ -1499,7 +1499,7 @@ table.dataTable tbody td.no-padding {
 }
 
 .create-options>p{
-    margin-left:32px;
+    padding-left:34px;
 }
 
 .api-implement-type{
@@ -1570,6 +1570,7 @@ table.dataTable tbody td.no-padding {
     font-size: 0.7em;
     margin-left: 10px;
     text-align:right;
+    white-space: nowrap;
 }
 
 .publish-label{
