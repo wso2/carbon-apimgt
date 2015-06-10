@@ -2858,7 +2858,8 @@ public class APIStoreHostObject extends ScriptableObject {
             }
 
             //check whether application exist prior to get subscriptions
-            if (!(appName == null || appName.isEmpty()) && !APIUtil.isApplicationExist(username, appName, groupingId)) {
+            if (!(appName == null || appName.isEmpty()) &&
+                    !APIUtil.isApplicationExist(username, appName, groupingId)) {
                 String message = "Application " + appName + " does not exist for user " +
                         "" + username;
                 log.error(message);
