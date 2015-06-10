@@ -569,7 +569,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                             // performance hit
                     --totalLength; // Remove the additional 1 we added earlier when setting max pagination limit
                 }
-
+                int tempLength=0;
                 for (GenericArtifact artifact : genericArtifacts) {
                     // adding the API provider can mark the latest API .
                     String status = artifact.getAttribute(APIConstants.API_OVERVIEW_STATUS);
@@ -608,6 +608,10 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                                     .getVersion();
                             multiVersionedAPIs.add(api);
                         }
+                    }
+                    tempLength++;
+                    if (tempLength >= totalLength){
+                        break;
                     }
                 }
                 if (!displayMultipleVersions) {

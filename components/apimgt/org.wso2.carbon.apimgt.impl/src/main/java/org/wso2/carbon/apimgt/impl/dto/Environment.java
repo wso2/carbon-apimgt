@@ -36,6 +36,16 @@ public class Environment implements Serializable {
 
     private String description;
 
+    public boolean isShowInConsole() {
+        return showInConsole;
+    }
+
+    public void setShowInConsole(boolean showInConsole) {
+        this.showInConsole = showInConsole;
+    }
+
+    private boolean showInConsole;
+
     public String getDescription() {
         return description;
     }

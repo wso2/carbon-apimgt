@@ -85,14 +85,18 @@ var show_environments = function(){
     $("#environment_name").children('option').hide();
     $("#environment_name").children("option[class='" + type + "']").show();
     var options = $("#environment_name").children("option[class='"+ type + "']");
+      if (options.length <= 1) {
+        $("#environment_name").hide();
+      }
     if(options.length > 0){
+     $("#OnEnvironment").show(); 
+     $("#environment_name").show();
     	options[0].selected=true;
-	    if (options.length == 1) {
-	      $("#environment_name").hide();
-	    }
     } else if ($("#environment_name").children("option[class='hybrid']").length > 0) {
-	    $("#environment_name").children("option[class='hybrid']")[0].selected = true;
-	    $("#environment_name").hide();
+	    $("#environment_name").children("option[class='hybrid']")[0].selected = true; 
+    }else{
+      $("#environment_name").hide();
+      $("#OnEnvironment").hide();
     }
     select_environment();
           };
@@ -134,20 +138,25 @@ function checkOnKeyPress(e) {
             </option>
           <% } %>
           </select>
-          <label> On </label>
+          <label> Using </label>
           <select id="key_type">
             <option value="production">Production</option>
             <option value="sandbox">Sandbox</option>
           </select>
+          <label> Key </label>
+          <label id="OnEnvironment"> On Environment</label>
+
           <select id="environment_name">
           <%
           var envir = JSON.parse(api.serverURL);
           for(var types in envir){
             var endpointType=envir[types];
             for(var endpoint in endpointType){
-            %>
-               <option value="<%=endpoint%>" class="<%=types%>"><%=endpoint%></option>
-         <%   }
+                if(endpointType[endpoint]["showInConsole"]){
+                %>
+                   <option value="<%=endpoint%>" class="<%=types%>"><%=endpoint%></option>
+                <% }
+            }
           }
           %>
             </select>
