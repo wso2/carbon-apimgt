@@ -95,6 +95,10 @@ public class APIManagerConfiguration {
             readChildElements(builder.getDocumentElement(), new Stack<String>());
             initialized = true;
             addKeyManagerConfigsAsSystemProperties();
+            String url = getFirstProperty(APIConstants.API_KEY_VALIDATOR_URL);
+            if (url == null) {
+                log.error("API_KEY_VALIDATOR_URL is null");
+            }
         } catch (IOException e) {
             log.error(e.getMessage());
             throw new APIManagementException("I/O error while reading the API manager " +
