@@ -827,7 +827,7 @@ public class APIUsageStatisticsClient {
     public List<PerUserAPIUsageDTO> getUsageBySubscribers(String providerName, String apiName, int limit)
             throws APIMgtUsageQueryServiceClientException {
 
-        OMElement omElement = this.queryDatabase(
+        OMElement omElement = this.buildOMElementFromDatabaseTable(
                 APIUsageStatisticsClientConstants.KEY_USAGE_SUMMARY);
         Collection<APIUsageByUser> usageData = getUsageBySubscriber(omElement);
         Map<String, PerUserAPIUsageDTO> usageByUsername = new TreeMap<String, PerUserAPIUsageDTO>();
@@ -855,7 +855,7 @@ public class APIUsageStatisticsClient {
 
     public List<APIRequestsByUserAgentsDTO> getUserAgentSummaryForALLAPIs() throws APIMgtUsageQueryServiceClientException{
 
-        OMElement omElement = this.queryDatabase("API_USERAGENT_SUMMARY");
+        OMElement omElement = this.buildOMElementFromDatabaseTable("API_USERAGENT_SUMMARY");
         Collection<APIUserAgent> userAgentData = getUserAgent(omElement);
         Map<String, APIRequestsByUserAgentsDTO> apiRequestByUserAgents = new TreeMap<String, APIRequestsByUserAgentsDTO>();
         APIRequestsByUserAgentsDTO userAgentsDTO = null;
@@ -949,7 +949,7 @@ public class APIUsageStatisticsClient {
     public List<APIResponseFaultCountDTO> getAPIFaultyAnalyzeByTime(String providerName)
             throws APIMgtUsageQueryServiceClientException {
 
-        OMElement omElement = this.queryDatabase(
+        OMElement omElement = this.buildOMElementFromDatabaseTable(
                 APIUsageStatisticsClientConstants.API_REQUEST_TIME_FAULT_SUMMARY);
         Collection<APIResponseFaultCount> faultyData = getAPIResponseFaultCount(omElement);
         List<API> providerAPIs = getAPIsByProvider(providerName);
@@ -976,7 +976,7 @@ public class APIUsageStatisticsClient {
     public List<PerUserAPIUsageDTO> getUsageBySubscribers(String providerName, String apiName,
                                                           String apiVersion, int limit) throws APIMgtUsageQueryServiceClientException {
 
-        OMElement omElement = this.queryDatabase(
+        OMElement omElement = this.buildOMElementFromDatabaseTable(
                 APIUsageStatisticsClientConstants.KEY_USAGE_SUMMARY);
 
         Collection<APIUsageByUser> usageData = getUsageBySubscriber(omElement);
@@ -1015,7 +1015,7 @@ public class APIUsageStatisticsClient {
         int month = cal.get(Calendar.MONTH) + 1;
 
         if (!period.equals("" + year + "-" + month)) {
-            omElement = this.queryDatabase(APIUsageStatisticsClientConstants.KEY_USAGE_MONTH_SUMMARY);
+            omElement = this.buildOMElementFromDatabaseTable(APIUsageStatisticsClientConstants.KEY_USAGE_MONTH_SUMMARY);
             Collection<APIVersionUsageByUserMonth> usageData = getUsageAPIBySubscriberMonthly(omElement);
             for (APIVersionUsageByUserMonth usageEntry : usageData) {
 
@@ -1038,7 +1038,7 @@ public class APIUsageStatisticsClient {
             }
 
         } else {
-            omElement = this.queryDatabase(APIUsageStatisticsClientConstants.KEY_USAGE_MONTH_SUMMARY);
+            omElement = this.buildOMElementFromDatabaseTable(APIUsageStatisticsClientConstants.KEY_USAGE_MONTH_SUMMARY);
             Collection<APIVersionUsageByUser> usageData = getUsageAPIBySubscriber(omElement);
             for (APIVersionUsageByUser usageEntry : usageData) {
 
@@ -1160,7 +1160,14 @@ public class APIUsageStatisticsClient {
         return new String(bytes);
     }
 
-    private OMElement queryDatabase(String columnFamily) throws APIMgtUsageQueryServiceClientException {
+    /**
+     *
+     * @param tableName - database table
+     * @return OMElement
+     * @throws APIMgtUsageQueryServiceClientException
+     * Fetches the data from the passed table and builds a OEMElemnet
+     */
+    private OMElement buildOMElementFromDatabaseTable(String tableName) throws APIMgtUsageQueryServiceClientException {
 
         if (dataSource == null) {
             throw new APIMgtUsageQueryServiceClientException("BAM data source hasn't been initialized. Ensure " +
@@ -1176,9 +1183,9 @@ public class APIUsageStatisticsClient {
             String query;
             StringBuilder returnStringBuilder = new StringBuilder("<omElement><rows>");
             //check whether table exist first
-            if (isTableExist(columnFamily, connection)) {//Table Exist
+            if (isTableExist(tableName, connection)) {//Table Exist
 
-                query = "SELECT * FROM  " + columnFamily;
+                query = "SELECT * FROM  " + tableName;
 
                 rs = statement.executeQuery(query);
                 int columnCount = rs.getMetaData().getColumnCount();
