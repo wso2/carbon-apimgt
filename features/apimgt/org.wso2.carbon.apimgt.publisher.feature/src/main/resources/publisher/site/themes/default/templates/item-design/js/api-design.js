@@ -849,3 +849,4 @@ function updateContextPattern(){
         $('#resource_url_pattern_refix').text(context);
     }
 }
+
