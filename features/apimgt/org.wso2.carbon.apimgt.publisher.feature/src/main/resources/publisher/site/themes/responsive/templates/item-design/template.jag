@@ -288,7 +288,7 @@
               <tbody>
                   <tr>
                      <td><img src="/publisher/site/themes/default/images/error.png" align="center" hspace="10"></td>
-                     <td><span class="messageText">"{" or "}" is Not allowed in context field. Please remove it.</span></td>
+                     <td><span class="messageText">"{" or "}" is not allowed in context field.</span></td>
               </tbody>
           </table>
           </div>
@@ -298,7 +298,7 @@
                </div>
           </div>
      </div>
-     
+
 <% if(api){ %>
             <div class="form-group">
                 <label class="col-sm-2 control-label" for="imageUrl"><%=i18n.localize("thumbnail")%></label>
