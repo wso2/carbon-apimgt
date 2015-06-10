@@ -26,15 +26,14 @@
         }
         else{
     	    var environments = JSON.parse(api.serverURL);
-            var log = new Log();
     	    for(var environmentType in environments){
     	        var environmentsPerType = environments[environmentType];
                 if(environmentType == "production"){
                     %>
-                    <h4>PRODUCTION Endpoints</h4>
+                    <h4>Production Endpoints</h4>
                     <%} else if(environmentType == "sandbox"){
                         %>
-                    <h4>SANDBOX Endpoints</h4>
+                    <h4>Sandbox Endpoints</h4>
                 <%}
                     for( var environmentName in environmentsPerType){
                         var environmenturls = environmentsPerType[environmentName];
@@ -45,6 +44,7 @@
                 // since we are using context versioning, we remove the api.version from the URL.
                 // The reason is that the context will have the version now
     	        for (var urltype in environmenturls ) {
+                    if(urltype != "showInConsole"){
                     %>
     	            <div  class="well well-small api_urls"><%=environmenturls[urltype]%><%=api.context%>
                         <%if (api.isDefaultVersion){
@@ -55,6 +55,7 @@
                         <%}%>
                     </div>
     	            <%}
+                    }
                     }
                     }
                     }%>

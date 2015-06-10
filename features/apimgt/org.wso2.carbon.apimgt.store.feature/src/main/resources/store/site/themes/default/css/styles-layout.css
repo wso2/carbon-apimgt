@@ -73,6 +73,9 @@ a{
     display:block;
     margin-top:11px;
 }
+.doc-content{
+    color:#0088cc;
+}
 .row-fluid div.special-link-box1{
     background: #f0f0f0;
     padding:10px 20px;

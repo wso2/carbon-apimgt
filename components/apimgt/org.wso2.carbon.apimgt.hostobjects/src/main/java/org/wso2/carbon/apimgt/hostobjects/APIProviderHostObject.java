@@ -2864,6 +2864,14 @@ public class APIProviderHostObject extends ScriptableObject {
 
         APIIdentifier apiId = new APIIdentifier(APIUtil.replaceEmailDomain(providerName), apiName, version);
         Documentation doc = new Documentation(getDocType(docType), docName);
+        APIProvider apiProvider = getAPIProvider(thisObj);
+
+        //add documentation is allowed only if document name does not already exist for this api
+        if (apiProvider.isDocumentationExist(apiId, docName)) {
+            handleException("Error occurred while adding the document. " + docName +
+                    " already exists for API " + apiName + "-" + version);
+        }
+
         if (doc.getType() == DocumentationType.OTHER) {
             doc.setOtherTypeName(args[9].toString());
         }
@@ -2888,7 +2896,6 @@ public class APIProviderHostObject extends ScriptableObject {
         } else {
             doc.setVisibility(Documentation.DocumentVisibility.OWNER_ONLY);
         }
-        APIProvider apiProvider = getAPIProvider(thisObj);
         try {
 
             if (fileHostObject != null && fileHostObject.getJavaScriptFile().getLength() != 0) {
@@ -3915,6 +3922,13 @@ public class APIProviderHostObject extends ScriptableObject {
 
         APIIdentifier apiId = new APIIdentifier(providerName, apiName, version);
         Documentation doc = new Documentation(getDocType(docType), docName);
+        APIProvider apiProvider = getAPIProvider(thisObj);
+
+        //update documentation is allowed only if documentation name already exists for this api
+        if (!apiProvider.isDocumentationExist(apiId, docName)) {
+            handleException("Error occurred while updating the document. " + docName +
+                    " does not exist for API " + apiName + "-" + version);
+        }
 
         if (doc.getType() == DocumentationType.OTHER) {
             doc.setOtherTypeName(args[9].toString());
@@ -3939,8 +3953,7 @@ public class APIProviderHostObject extends ScriptableObject {
         } else {
             doc.setVisibility(Documentation.DocumentVisibility.OWNER_ONLY);
         }
-        APIProvider apiProvider = getAPIProvider(thisObj);
-        
+
         Documentation oldDoc = apiProvider.getDocumentation(apiId, doc.getType(), doc.getName());
 
         try {
