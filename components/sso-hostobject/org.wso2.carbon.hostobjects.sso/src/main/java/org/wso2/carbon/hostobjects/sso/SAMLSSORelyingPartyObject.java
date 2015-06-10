@@ -135,20 +135,20 @@ public class SAMLSSORelyingPartyObject extends ScriptableObject {
             Response samlResponse = (Response) samlObject;
             SAMLSSORelyingPartyObject relyingPartyObject = (SAMLSSORelyingPartyObject) thisObj;
 
+            //Try and validate the signature using the super tenant key store.
             boolean sigValid = Util.validateSignature(samlResponse,
                     relyingPartyObject.getSSOProperty(SSOConstants.KEY_STORE_NAME),
                     relyingPartyObject.getSSOProperty(SSOConstants.KEY_STORE_PASSWORD),
                     relyingPartyObject.getSSOProperty(SSOConstants.IDP_ALIAS),
-                    tenantId, tenantDomain);
+                    MultitenantConstants.SUPER_TENANT_ID, MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
 
-            //If signature validation was done using a tenant key store and signature validation failed.
+            //If not success, try and validate the signature using tenant key store.
             if(!sigValid && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)){
-                //Try and validate the signature using the super tenant key store.
                 sigValid = Util.validateSignature(samlResponse,
                         relyingPartyObject.getSSOProperty(SSOConstants.KEY_STORE_NAME),
                         relyingPartyObject.getSSOProperty(SSOConstants.KEY_STORE_PASSWORD),
                         relyingPartyObject.getSSOProperty(SSOConstants.IDP_ALIAS),
-                        MultitenantConstants.SUPER_TENANT_ID, MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
+                        tenantId, tenantDomain);
             }
             return sigValid;
         }
@@ -402,14 +402,28 @@ public class SAMLSSORelyingPartyObject extends ScriptableObject {
      * @return
      * @throws Exception
      */
-    public static String jsFunction_getSAMLAuthRequest(Context cx, Scriptable thisObj,
-                                                       Object[] args,
-                                                       Function funObj)
+    public static String jsFunction_getSAMLAuthRequest(Context cx, Scriptable thisObj, Object[] args, Function funObj)
             throws Exception {
         SAMLSSORelyingPartyObject relyingPartyObject = (SAMLSSORelyingPartyObject) thisObj;
-        return Util.marshall(new AuthReqBuilder().
-                buildAuthenticationRequest(relyingPartyObject.getSSOProperty(SSOConstants.ISSUER_ID)));
-
+        //ADDED
+        if (!Boolean.valueOf(relyingPartyObject.getSSOProperty(SSOConstants.SIGN_REQUESTS))) {
+            return Util.marshall(new AuthReqBuilder().buildAuthenticationRequest(
+                    relyingPartyObject.getSSOProperty(SSOConstants.ISSUER_ID)));
+        } else {
+            int argLength = args.length;
+            if (argLength == 0) {
+                return Util.marshall(new AuthReqBuilder().buildSignedAuthRequest(
+                        relyingPartyObject.getSSOProperty(SSOConstants.ISSUER_ID), MultitenantConstants.SUPER_TENANT_ID,
+                        MultitenantConstants.SUPER_TENANT_DOMAIN_NAME));
+            } else {
+                String consumerUrl = (String) args[0];
+                return Util.marshall(new AuthReqBuilder().buildSignedAuthRequestWithConsumerUrl(
+                        relyingPartyObject.getSSOProperty(SSOConstants.ISSUER_ID),
+                        relyingPartyObject.getSSOProperty(SSOConstants.IDP_URL), consumerUrl,
+                        MultitenantConstants.SUPER_TENANT_ID, MultitenantConstants.SUPER_TENANT_DOMAIN_NAME));
+            }
+        }
+        //END
     }
 
     /**
