@@ -61,13 +61,13 @@ public class AuthReqBuilder {
     public AuthnRequest buildPassiveAuthenticationRequest(String issuerId, String acsUrl) throws Exception  {
         Util.doBootstrap();
         //matches shortest segments that are between '{' and '}'
-        Pattern pattern = Pattern.compile("\\{(.*?)\\}");
+        Pattern pattern = Pattern.compile("\\$\\{(.*?)\\}");
         Matcher matcher = pattern.matcher(acsUrl);
         while (matcher.find()) {
             String match = matcher.group(1);
             String property = System.getProperty(match);
             if (property != null) {
-                acsUrl = acsUrl.replace("{" + match + "}", property);
+                acsUrl = acsUrl.replace("${" + match + "}", property);
             } else {
                 log.warn("System Property " + match + " is not set");
             }
