@@ -24,6 +24,7 @@ require('/modules/publisher.js').exec(function(ctx) {
 	var carbon = require('carbon');
 	var server = require('store').server;
 	var user = server.current(ctx.session);
+	var asset = require('rxt').asset;
 	var request = ctx.request;
 	caramel = require('caramel');
 	var am;
@@ -31,17 +32,14 @@ require('/modules/publisher.js').exec(function(ctx) {
 	var options = uriMatcher.match('/{context}/asts/{type}/{pageName}/{+id}') || uriMatcher.match('/{context}/asts/{type}/{pageName}');
 	var page;
 	var output;
-
 	am = asset.createUserAssetManager(ctx.session, options.type);
 	//Render page
 	page = ui.buildPage(ctx.session, ctx.request);
-	output = am.render(asset,page)._custom();
-	var apiMetaData = {};
-	output.apiMetaData = apiMetaData;
-
 	if(options.id){
+		var assets;
+		//Set assets id
 		try {
-			asset = am.get(options.id);
+			assets = am.get(options.id);
 		}
 		catch(e){
 			log.error(e);
@@ -49,9 +47,10 @@ require('/modules/publisher.js').exec(function(ctx) {
 			return;
 		}
 
+		output = am.render(assets, page)._custom();
 		var apiPublisher =  require('apipublisher').apipublisher;
 		var apiProxy = apiPublisher.instance(user.username);
-		var api = apiProxy.getAPI(asset.attributes.overview_provider, asset.attributes.overview_name, asset.attributes.overview_version).api;
+		var api = apiProxy.getAPI(assets.attributes.overview_provider, assets.attributes.overview_name, assets.attributes.overview_version).api;
 		output.api = api;
 		output.wsdl = api.wsdl;
 		api.id = options.id;
@@ -68,6 +67,10 @@ require('/modules/publisher.js').exec(function(ctx) {
 		output.private_visibility = private_visibility;
 
 	} else {
+		var assets = {};
+		output = am.render(assets, page)._custom();
+		var apiMetaData = {};
+		output.apiMetaData = apiMetaData;
 		//Set api meta data related when loading the design page with available session data
 		if(session.get("wsdl")) {
 			output.apiMetaData.wsdl = session.get("wsdl");
