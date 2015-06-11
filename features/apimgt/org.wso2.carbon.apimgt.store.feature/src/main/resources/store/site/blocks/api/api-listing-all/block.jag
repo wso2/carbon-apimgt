@@ -66,6 +66,7 @@ jagg.block("api/api-listing-all", {
         return {
             "apis":apis,
             "totalLength":response.result.totalLength,
+            "isMore":response.result.isMore,
             "error":error,
             "message":message
         };

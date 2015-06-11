@@ -80,7 +80,7 @@ public class AuthReqBuilder {
             String match = matcher.group(1);
             String property = System.getProperty(match);
             if (property != null) {
-                acsUrl = acsUrl.replace("{" + match + "}", property);
+                acsUrl = acsUrl.replace("${" + match + "}", property);
             } else {
                 log.warn("System Property " + match + " is not set");
             }

@@ -67,13 +67,24 @@ public class APIDefinitionFromSwagger20 extends APIDefinition {
                 JSONObject paths = (JSONObject) swagger.get("paths");
                 for (Iterator pathsIterator = paths.keySet().iterator(); pathsIterator.hasNext(); ) {
                     String uriTempVal = (String) pathsIterator.next();
+                    //if url template is a custom attribute "^x-" ignore.
+                    if(uriTempVal.startsWith("x-") || uriTempVal.startsWith("X-")){
+                        continue;
+                    }
                     JSONObject path = (JSONObject) paths.get(uriTempVal);
+                    // Following code check is done to handle $ref objects supported by swagger spec
+                    // See field types supported by "Path Item Object" in swagger spec.
+                    if(path.containsKey("$ref")){
+                        log.info("Reference "+uriTempVal+" path object was ignored when generating URL template for api \""
+                                 + api.getId().getApiName() +"\"");
+                        continue;
+                    }
                     for (Iterator pathIterator = path.keySet().iterator(); pathIterator.hasNext(); ) {
                         String httpVerb = (String) pathIterator.next();
-                        JSONObject operation = (JSONObject) path.get(httpVerb);
 
-                        //PATCH is not supported. Need to remove this check when PATCH is supported
-                        if (!"PATCH".equals(httpVerb)) {
+                        //Only continue for supported operations
+                        if (APIConstants.SUPPORTED_METHODS.contains(httpVerb.toLowerCase())) {
+                            JSONObject operation = (JSONObject) path.get(httpVerb);
                             URITemplate template = new URITemplate();
                             Scope scope= APIUtil.findScopeByKey(scopes,(String) operation.get("x-scope"));
                             String authType = (String) operation.get("x-auth-type");
@@ -364,5 +375,4 @@ public class APIDefinitionFromSwagger20 extends APIDefinition {
 
         return swaggerObject.toJSONString();
     }
-
 }

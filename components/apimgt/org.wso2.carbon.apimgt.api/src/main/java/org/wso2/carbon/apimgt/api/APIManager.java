@@ -99,6 +99,17 @@ public interface APIManager {
             throws APIManagementException;
 
     /**
+     * Checks whether the given document already exists for the given api
+     *
+     * @param identifier API Identifier
+     * @param docName Name of the document
+     * @return true if document already exists for the given api
+     * @throws APIManagementException if failed to check existence of the documentation
+     */
+    public boolean isDocumentationExist(APIIdentifier identifier, String docName)
+            throws APIManagementException;
+
+    /**
      * Returns a list of documentation attached to a particular API
      *
      * @param apiId APIIdentifier

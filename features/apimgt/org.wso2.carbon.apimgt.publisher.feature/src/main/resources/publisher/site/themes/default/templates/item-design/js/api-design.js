@@ -25,6 +25,18 @@ Handlebars.registerHelper( 'toString', function returnToString( x ){
     return ( x === void 0 ) ? 'undefined' : x.toString();
 } );
 
+Handlebars.registerHelper('ref', function(items, options) {
+  if(items["$ref"] != undefined){
+    var api = APIDesigner();
+    var result = api.query(items["$ref"].replace("#","$").replace(/\//g,"."));
+    if(result.length > 0){
+        items = result[0];
+    }
+  }
+  out = options.fn(items);
+  return out;
+});
+
 var content_types = [
        { value : "application/json", text :  "application/json"},
        { value : "application/xml", text :  "application/xml"},
@@ -265,9 +277,14 @@ APIDesigner.prototype.display_elements = function(value,source){
 };
 
 APIDesigner.prototype.update_elements = function(resource, newValue){
+    debugger;
     var API_DESIGNER = APIDesigner();
     var obj = API_DESIGNER.query($(this).attr('data-path'));
     var obj = obj[0]
+    if(obj["$ref"]!=undefined){
+        var obj = API_DESIGNER.query(obj["$ref"].replace("#","$").replace(/\//g,"."));  
+        var obj = obj[0];      
+    }
     var i = $(this).attr('data-attr');
     obj[i] = newValue;
 };
@@ -279,7 +296,11 @@ APIDesigner.prototype.update_elements_boolean = function(resource, newValue){
         newValue = false;
     var API_DESIGNER = APIDesigner();
     var obj = API_DESIGNER.query($(this).attr('data-path'));
-    var obj = obj[0]
+    var obj = obj[0];
+    if(obj["$ref"]!=undefined ){
+        var obj = API_DESIGNER.query(obj["$ref"].replace("#","$").replace(/\//g,"."));  
+        var obj = obj[0];      
+    }    
     var i = $(this).attr('data-attr');
     obj[i] = newValue;
 };
@@ -305,7 +326,10 @@ APIDesigner.prototype.init_controllers = function(){
         okCallback:function(){
             API_DESIGNER = APIDesigner();
             delete API_DESIGNER.api_doc.paths[pn][op];
-            API_DESIGNER.render_resources(); 
+            API_DESIGNER.render_resources();
+            if(Object.keys(API_DESIGNER.api_doc.paths[pn]).length == 0) {
+                delete API_DESIGNER.api_doc.paths[pn];
+            }
         }});
         //delete resource if no operations       
     });
@@ -594,7 +618,7 @@ APIDesigner.prototype.add_resource = function(resource, path){
 
 APIDesigner.prototype.edit_swagger = function(){
     $("body").addClass("modal-open");
-    $("#swaggerEditer").append('<iframe id="se-iframe"  style="border:0px;" width="100%" height="100%"></iframe>');    
+    $("#swaggerEditer").append('<iframe id="se-iframe"  style="border:0px;"background: #4a4a4a; width="100%" height="100%"></iframe>');    
     document.getElementById('se-iframe').src = $("#swaggerEditer").attr("editor-url");
     $("#swaggerEditer").fadeIn("fast");
 };
@@ -836,6 +860,11 @@ function updateContextPattern(){
     var version = $('#version').val();
 
     if(context != ""){
+        if(context.search("{") != -1 || context.search("}") != -1){
+            context = context.replace("{","");
+            context = context.replace("}","");
+            $('#error-invalidContextValue').modal('show');
+        }
         if(context.indexOf("{version}") < 0){
             context = context + '/';
             context = context + "{version}";
@@ -850,3 +879,4 @@ function updateContextPattern(){
         $('#resource_url_pattern_refix').text(context);
     }
 }
+

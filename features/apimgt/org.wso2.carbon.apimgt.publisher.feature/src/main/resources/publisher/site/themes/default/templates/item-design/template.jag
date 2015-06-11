@@ -278,6 +278,27 @@
          </div>
      </div>
 
+     <div id="error-invalidContextValue" class="modal hide fade" tabindex="-1" role="dialog" aria-hidden="true">
+          <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+          <h3>API Publisher - Error</h3>
+          </div>
+          <div class="modal-body">
+          <table>
+              <tbody>
+                  <tr>
+                     <td><img src="/publisher/site/themes/default/images/error.png" align="center" hspace="10"></td>
+                     <td><span class="messageText">"{" and "}" are not allowed in context field.</span></td>
+              </tbody>
+          </table>
+          </div>
+             <div class="modal-footer successMsgFooter">
+               <div class="pull-right">
+               <button class="btn btn-primary" data-dismiss="modal" aria-hidden="true">OK</button>
+               </div>
+          </div>
+     </div>
+
 <% if(api){ %>
             <div class="control-group">
                 <label class="control-label" for="imageUrl"><%=i18n.localize("thumbnail")%></label>
@@ -421,14 +442,16 @@
         <th width="100px">Delete</th>
         </tr>    
     {{#each parameters}}
+        {{#ref this}}
         <tr id="{{name}}">
         <td>{{ name }}</td>
-        <td><a class="param_desc" data-path="{{ ../resource_path}}.parameters[{{@index}}]" data-attr="description">{{ description }}</a></td>
-        <td><a class="param_paramType" data-type="select" data-path="{{ ../resource_path}}.parameters[{{@index}}]" data-attr="in">{{ in }}</a></td>
-        <td><a class="param_type" data-path="{{../resource_path}}.parameters[{{@index}}]" data-attr="type">{{ type }}</a></td>
-        <td><a class="param_required" data-type="select" data-path="{{../resource_path}}.parameters[{{@index}}]" data-attr="required" data-value="{{toString required }}"></a></td>
-        <td align="center"><a data-path-name="{{path}}" data-path="{{../resource_path}}.parameters[{{@index}}]" data-index="{{@index}}" style="margin-left: 40px" class="delete_parameter icon-trash"></a></td>
-        </tr> 
+        <td><a class="param_desc" data-path="{{ ../../resource_path}}.parameters[{{@index}}]" data-attr="description">{{ description }}</a></td>
+        <td><a class="param_paramType" data-type="select" data-path="{{ ../../resource_path}}.parameters[{{@index}}]" data-attr="in">{{ in }}</a></td>
+        <td><a class="param_type" data-path="{{../../resource_path}}.parameters[{{@index}}]" data-attr="type">{{ type }}</a></td>
+        <td><a class="param_required" data-type="select" data-path="{{../../resource_path}}.parameters[{{@index}}]" data-attr="required" data-value="{{toString required }}"></a></td>
+        <td align="center"><a data-path-name="{{path}}" data-path="{{../../resource_path}}.parameters[{{@index}}]" data-index="{{@index}}" style="margin-left: 40px" class="delete_parameter icon-trash"></a></td>
+        </tr>
+        {{/ref}} 
     {{/each}}
     {{/if}}
     </table>

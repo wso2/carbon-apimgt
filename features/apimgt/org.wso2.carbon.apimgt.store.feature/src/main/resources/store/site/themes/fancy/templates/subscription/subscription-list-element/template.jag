@@ -191,7 +191,7 @@
                                    		iteration="200"><%=i18n.localize("generateKey")%></button>
                                    		<button title="<%=i18n.localize("cleanUpWarning")%>"  class="btn btn-primary btn-providekeys generateAgainBtn"
 											data-keyType="PRODUCTION"
-										    data-applicationId="<%=app.id%>">
+										    data-applicationName="<%=app.name%>">
 											Clean up
 										</button>
                         		</div>
@@ -204,7 +204,7 @@
 			   					</div>
 								<button title="<%=i18n.localize("cleanUpSubscriptions")%>"  class="btn btn-primary btn-providekeys generateAgainBtn"
 											data-keyType="PRODUCTION"
-										    data-applicationId="<%=app.id%>">
+										    data-applicationName="<%=app.name%>">
 											Clean up
 		   						</button>
 							<% } %>
@@ -438,7 +438,7 @@
                                    		iteration="200"><%=i18n.localize("generateKey")%></button>
                                    		<button title="<%=i18n.localize("cleanUpWarning")%>"  class="btn btn-primary btn-providekeys generateAgainBtn"
 											data-keyType="SANDBOX"
-										    data-applicationId="<%=app.id%>">
+										    data-applicationName="<%=app.name%>">
 											Clean up
 										</button>
                         		</div>
@@ -449,7 +449,7 @@
 			   					</div>
 								<button title="<%=i18n.localize("cleanUpSubscriptions")%>" class="btn btn-primary btn-providekeys generateAgainBtn"
 											data-keyType="SANDBOX"
-										    data-applicationId="<%=app.id%>">
+										    data-applicationName="<%=app.name%>">
 											Clean up
 		   						</button>
 							<% } %>

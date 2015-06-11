@@ -989,12 +989,14 @@ public class APIStoreHostObject extends ScriptableObject {
 
             try {
 
-                String applicationId = (String) args[0];
+                String applicationName = (String) args[0];
                 String keyType = (String) args[1];
+                String groupingId = (String) args[2];
+                String username = (String) args[3];
 
                 //this map will hold response that we are getting from Application registration process.
                 Map<String, Object> keyDetails;
-                getAPIConsumer(thisObj).cleanUpApplicationRegistration(applicationId, keyType);
+                getAPIConsumer(thisObj).cleanUpApplicationRegistration(applicationName, keyType, groupingId, username);
 
             } catch (Exception e) {
                 handleException("Error while obtaining the application access token for the application" + e
@@ -1939,7 +1941,7 @@ public class APIStoreHostObject extends ScriptableObject {
                 }
                 result.put("apis", result, myn);
                 result.put("totalLength", result, resultMap.get("totalLength"));
-
+                result.put("isMore", result, resultMap.get("isMore"));
             }
         }
         return result;
@@ -2858,7 +2860,8 @@ public class APIStoreHostObject extends ScriptableObject {
             }
 
             //check whether application exist prior to get subscriptions
-            if (!(appName == null || appName.isEmpty()) && !APIUtil.isApplicationExist(username, appName, groupingId)) {
+            if (!(appName == null || appName.isEmpty()) &&
+                    !APIUtil.isApplicationExist(username, appName, groupingId)) {
                 String message = "Application " + appName + " does not exist for user " +
                         "" + username;
                 log.error(message);
@@ -4782,6 +4785,7 @@ public class APIStoreHostObject extends ScriptableObject {
             transports.addAll(Arrays.asList((api.getTransports().split(","))));
             jsonObject.put("http", filterUrlsByTransport(environmenturls, transports, "http"));
             jsonObject.put("https", filterUrlsByTransport(environmenturls, transports, "https"));
+            jsonObject.put("showInConsole", environment.isShowInConsole());
             if (APIConstants.GATEWAY_ENV_TYPE_PRODUCTION.equals(environment.getType())) {
                 productionEnvironmentObject.put(environment.getName(), jsonObject);
             } else if (APIConstants.GATEWAY_ENV_TYPE_SANDBOX.equals(environment.getType())) {
