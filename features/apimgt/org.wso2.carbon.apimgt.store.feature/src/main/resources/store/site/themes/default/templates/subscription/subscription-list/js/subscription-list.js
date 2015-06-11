@@ -231,6 +231,22 @@ $(document).ready(function () {
 	    return false;
 	 });
 
+    $('.update_domain_popup_prod').click(function(){
+        $('#update_help_prod').toggle('fast', function()
+        {
+            $('#update_help_prod').html(i18n.t('info.domainUpdateHelp'));
+        });
+        return false;
+    });
+
+    $('.update_domain_popup_sand').click(function(){
+        $('#update_help_sand').toggle('fast', function()
+        {
+            $('#update_help_sand').html(i18n.t('info.domainUpdateHelp'));
+        });
+        return false;
+    });
+
    $('#btnProvideKeyProduction').click(function () {
        $('.cDivParentOfManualAuthAppCreateProduction').show();
        $('.cDivDefaultBtnSet').hide();
