@@ -19,16 +19,14 @@
 package org.wso2.carbon.apimgt.impl;
 
 import org.apache.axis2.AxisFault;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.codehaus.plexus.util.StringUtils;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.api.model.APIKey;
-import org.wso2.carbon.apimgt.api.model.OAuthAppRequest;
 import org.wso2.carbon.apimgt.api.LoginPostExecutor;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
@@ -50,11 +48,26 @@ import org.wso2.carbon.apimgt.api.model.Subscriber;
 import org.wso2.carbon.apimgt.api.model.Tag;
 import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
+import org.wso2.carbon.apimgt.impl.dto.ApplicationRegistrationWorkflowDTO;
+import org.wso2.carbon.apimgt.impl.dto.ApplicationWorkflowDTO;
+import org.wso2.carbon.apimgt.impl.dto.Environment;
+import org.wso2.carbon.apimgt.impl.dto.SubscriptionWorkflowDTO;
+import org.wso2.carbon.apimgt.impl.dto.TierPermissionDTO;
+import org.wso2.carbon.apimgt.impl.dto.WorkflowDTO;
 import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
-import org.wso2.carbon.apimgt.impl.dto.*;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
-import org.wso2.carbon.apimgt.impl.utils.*;
-import org.wso2.carbon.apimgt.impl.workflow.*;
+import org.wso2.carbon.apimgt.impl.utils.APIAuthenticationAdminClient;
+import org.wso2.carbon.apimgt.impl.utils.APINameComparator;
+import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.apimgt.impl.utils.APIVersionComparator;
+import org.wso2.carbon.apimgt.impl.utils.ApplicationUtils;
+import org.wso2.carbon.apimgt.impl.utils.LRUCache;
+import org.wso2.carbon.apimgt.impl.workflow.AbstractApplicationRegistrationWorkflowExecutor;
+import org.wso2.carbon.apimgt.impl.workflow.WorkflowConstants;
+import org.wso2.carbon.apimgt.impl.workflow.WorkflowException;
+import org.wso2.carbon.apimgt.impl.workflow.WorkflowExecutor;
+import org.wso2.carbon.apimgt.impl.workflow.WorkflowExecutorFactory;
+import org.wso2.carbon.apimgt.impl.workflow.WorkflowStatus;
 import org.wso2.carbon.apimgt.keymgt.stub.types.carbon.ApplicationKeysDTO;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.governance.api.common.dataobjects.GovernanceArtifact;
@@ -2263,7 +2276,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             if (applicationInfo != null) {
                 keyDetails.put("consumerKey", applicationInfo.getClientId());
                 keyDetails.put("consumerSecret", applicationInfo.getClientSecret());
-                keyDetails.put("appDetails", applicationInfo.getJsonString());
+                keyDetails.put("appDetails", APIUtil.convertToString(applicationInfo));
             }
 
             // There can be instances where generating the Application Token is
@@ -2273,8 +2286,8 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             if (tokenInfo != null) {
                 keyDetails.put("accessToken", tokenInfo.getAccessToken());
                 keyDetails.put("validityTime", tokenInfo.getValidityPeriod());
-                keyDetails.put("tokenDetails", tokenInfo.getJSONString());
-                keyDetails.put("tokenScope", tokenInfo.getScopes());
+                keyDetails.put("tokenDetails", APIUtil.convertToString(tokenInfo));
+                keyDetails.put("tokenScope", StringUtils.join(tokenInfo.getScopes(),","));
             }
             return keyDetails;
         } catch (WorkflowException e) {
@@ -2822,10 +2835,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             Set<Map.Entry<String, Object>> entries = keyDetails.entrySet();
 
             for (Map.Entry<String, Object> entry : entries) {
-                //TODO remove below check and set values properly
-                if(!entry.getKey().equals("tokenDetails")&& !entry.getKey().equals("appDetails")&&!entry.getKey().equals("tokenScope")){
                 row.put(entry.getKey(), entry.getValue());
-                }
             }
             boolean isRegenarateOptionEnabled = true;
             if (APIUtil.getApplicationAccessTokenValidityPeriodInSeconds() < 0) {

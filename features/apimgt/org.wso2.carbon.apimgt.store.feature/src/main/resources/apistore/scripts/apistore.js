@@ -298,6 +298,7 @@ var apistore = {};
         resultJson.put("consumerSecret", response.getConsumerKey());
         resultJson.put("validityTime", response.getValidityPeriod());
         resultJson.put("responseParams", response.getJSONString());
+        resultJson.put("tokenScope", response.getScopes());
         resultJson.put("enableRegenarate", response.isRegenarateOptionEnabled);
         return resultJson;
 
