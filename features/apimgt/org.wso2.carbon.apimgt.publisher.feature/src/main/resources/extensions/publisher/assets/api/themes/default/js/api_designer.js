@@ -268,9 +268,11 @@ $(function () {
     APIDesigner.prototype.get_scopes = function() {
         var options = [{ "value": "" , "text": "" }];
         if(typeof(this.api_doc.securityDefinitions)!='undefined'){
+            if(typeof(this.api_doc.securityDefinitions.apim)!='undefined') {
             var scopes = this.api_doc.securityDefinitions.apim['x-wso2-scopes'];
             for(var i =0; i < scopes.length ; i++ ){
                 options.push({ "value": scopes[i].key , "text": scopes[i].name });
+                }
             }
         }
         return options;
@@ -842,9 +844,10 @@ $(function () {
                 var data = {
                     "swagger_url": $("#swagger_import_url").val() // "http://petstore.swagger.wordnik.com/api/api-docs"
                 }
-                $.get(jagg.site.context + "/site/blocks/item-design/ajax/import.jag", data, function (data) {
+                var swaggerUrl = caramel.context + "/asts/api/apis/swagger?action=swaggerFromUrl";
+                $.post(swaggerUrl, data, function (result) {
                     var designer = APIDesigner();
-                    designer.load_api_document(data);
+                    designer.load_api_document(result.data);
                     $('#swagger_help').hide();
                     $('#import_swagger').buttonLoader('stop');
                     $("#swaggerUpload").modal('hide');

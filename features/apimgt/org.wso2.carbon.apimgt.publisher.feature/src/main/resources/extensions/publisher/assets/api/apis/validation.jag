@@ -70,7 +70,7 @@ require('/modules/publisher.js').exec(function (ctx) {
 					}
 					response = responseProcessor.buildSuccessResponse(response, constants.STATUS_CODES.OK, obj);
 				} else if (action === "validateRoles") {
-					var user = jagg.getUser().username;
+					var user = username;
 					var roles = request.getParameter("roles");
 					result = apiProxy.validateRoles(roles, user);
 					if (result.error) {
@@ -104,7 +104,7 @@ require('/modules/publisher.js').exec(function (ctx) {
 							response: result.response
 						}
 					}
-					print(obj);
+					response = responseProcessor.buildSuccessResponse(response, constants.STATUS_CODES.OK, obj);
 				} else if (action === "getTiers") {
 					result = apiProxy.getTiers();
 					if (result.error) {
@@ -151,6 +151,7 @@ require('/modules/publisher.js').exec(function (ctx) {
 															'(hint: create/update operations use POST).');
 	}
 
+	//TODO Move to common place
 	/**
 	 * Allows request data to be sent in either the request body or
 	 * as url encoded query parameters

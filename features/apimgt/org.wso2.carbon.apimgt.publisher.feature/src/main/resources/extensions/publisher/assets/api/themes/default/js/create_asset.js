@@ -22,21 +22,6 @@ $(document).ready(function(){
             });  
      }
 
-    $("#clearThumb").on("click", function () {
-        $('#apiThumb-container').html('<input type="file" class="input-xlarge" name="apiThumb" />');
-    });
-
-    $('#import_swagger').click(function(){
-        var data = {
-            "swagger_url" : $("#swagger_import_url").val() // "http://petstore.swagger.wordnik.com/api/api-docs"
-        }
-        $.get( jagg.site.context + "/site/blocks/item-design/ajax/import.jag", data , function( data ) {
-            var designer = APIDesigner();
-            designer.load_api_document(data);
-            $("#swaggerUpload").modal('hide');
-        });
-    });
-
     var v = $("#form-asset-create").validate({
                                                  contentType : "application/x-www-form-urlencoded;charset=utf-8",
                                                  dataType: "json",

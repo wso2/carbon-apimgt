@@ -40,13 +40,15 @@ require('/modules/publisher.js').exec(function (ctx) {
 	var method = req.getMethod();
 	var options = ref.getQueryOptions(req.getQueryString());
 	var response = ctx.response;
-	response.contentType = 'application/json';
+	var CONTENT_TYPE_JSON = 'application/json';
+	var action;
+	response.contentType = CONTENT_TYPE_JSON;
 	var constants = require("rxt").constants;
 	// log.info("Calling Swagger API");
 	switch (method) {
 		case 'GET':// GET endpoints
 			options.type = req.getParameter('type');
-			var action = req.getParameter('action');
+			action = req.getParameter('action');
 			if (action == 'swaggerDoc') {//return assets by type
 				var apiPublisher =  require('apipublisher').apipublisher;
 				var apiProxy = apiPublisher.instance(username);
@@ -73,7 +75,23 @@ require('/modules/publisher.js').exec(function (ctx) {
 				response = responseProcessor.buildSuccessResponse(response, constants.STATUS_CODES.OK, swagger);
 
 			} else if (action == 'swaggerDocFromFile') {
-				var url = req.getParameter("swagger_url");
+				var file = request.getFile("swagger-file");
+				file.open("r");
+				var swaggerContent = file.readAll();
+				var swagger = JSON.parse(swaggerContent);
+				file.close();
+				//@todo Error reporting
+				response = responseProcessor.buildSuccessResponse(response, constants.STATUS_CODES.OK, swagger);
+			} else {
+				response = responseProcessor.buildErrorResponse(response,
+																constants.STATUS_CODES.NOT_IMPLEMENTED, 'Unable to locate this GET endpoint');
+			}
+			break;
+		case 'POST':// GET endpoints
+			action = req.getParameter('action');
+			if (action == 'swaggerFromUrl') {
+				var data = obtainData(request);
+				var url = data.swagger_url;
 				url = url.trim();
 				//@todo need to validate returned swagger v2
 				var data = {};
@@ -81,16 +99,46 @@ require('/modules/publisher.js').exec(function (ctx) {
 				var swaggerJson = content.data;
 				//@todo Error reporting
 				response = responseProcessor.buildSuccessResponse(response, constants.STATUS_CODES.OK, swaggerJson);
-
 			} else {
 				response = responseProcessor.buildErrorResponse(response,
-																constants.STATUS_CODES.NOT_IMPLEMENTED, 'Unable to locate this GET endpoint');
+																constants.STATUS_CODES.NOT_IMPLEMENTED, 'Unable to locate this POST endpoint');
 			}
 			break;
+
 		default://other un-implemented endpoints
 			response = responseProcessor.buildErrorResponse(response, constants.STATUS_CODES.NOT_IMPLEMENTED,
 															'The endpoint that you have requested is not implemented for the ' + method +
 															' method.Try making the request with the appropriate verb' +
 															'(hint: create/update operations use POST).');
 	}
+
+	//TODO Move to common place
+	/**
+	 * Allows request data to be sent in either the request body or
+	 * as url encoded query parameters
+	 * @param  {Object} req  Request object
+	 * @return {Object}      An object which contains data from request body and url encoded parameters
+	 */
+	function obtainData(req) {
+		var data = {};
+		var contentType = parseContentType(req.getContentType());
+		if (contentType === CONTENT_TYPE_JSON) {
+			try {
+				data = req.getContent();
+			} catch (e) {
+				log.error('Unable to obtain content from request', e);
+			}
+		}
+		var params = req.getAllParameters('UTF-8');
+		//Mix the content with request parameters
+		for (var key in params) {
+			data[key] = params[key];
+		}
+		return data;
+	};
+
+	function parseContentType(contentTypString) {
+		var comps = contentTypString.split(';');
+		return comps[0];
+	};
 }, request, response, session); %>
