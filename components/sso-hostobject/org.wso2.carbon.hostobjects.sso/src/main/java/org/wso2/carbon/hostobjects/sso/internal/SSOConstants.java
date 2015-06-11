@@ -26,6 +26,7 @@ public class SSOConstants {
     public static final String KEY_STORE_PASSWORD = "keyStorePassword";
     public static final String IDP_ALIAS = "identityAlias";
     public static final String ISSUER_ID = "issuerId";
+    public static final String SIGN_REQUESTS = "signRequests";
 
     public static final String SAML_ENCODED = "isEncoded";
     public static final String SAML_DEFLATE = "deflate";
