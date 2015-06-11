@@ -65,11 +65,11 @@ $(document).ready(function () {
 
         var elem = $(this);
         var keyType = elem.attr("data-keyType");
-        var applicationId = elem.attr("data-applicationId");
+        var applicationName = elem.attr("data-applicationName");
 
         jagg.post("/site/blocks/subscription/subscription-add/ajax/subscription-add.jag", {
             action:"cleanUpApplicationRegistration",
-            applicationId:applicationId,
+            applicationName:applicationName,
             keyType:keyType
         }, function (result) {
             if (!result.error) {
