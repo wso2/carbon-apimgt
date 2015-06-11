@@ -763,18 +763,21 @@ $(function () {
         $("body").addClass("modal-open");
         $("#swaggerEditer").append('<iframe id="se-iframe"  style="border:0px;" width="100%" height="100%"></iframe>');
         document.getElementById('se-iframe').src = $("#swaggerEditer").attr("editor-url");
+        $("#swaggerEditer").addClass('in').removeClass('hide');
         $("#swaggerEditer").fadeIn("fast");
     };
 
     APIDesigner.prototype.close_swagger_editor = function(){
         $("body").removeClass("modal-open");
         $("#se-iframe").remove();
+        $("#swaggerEditer").addClass('hide').removeClass('in');
         $("#swaggerEditer").fadeOut("fast");
     };
 
     APIDesigner.prototype.update_swagger = function(){
         $("body").removeClass("modal-open");
         $("#se-iframe").remove();
+        $("#swaggerEditer").addClass('hide').removeClass('in');
         $("#swaggerEditer").fadeOut("fast");
         var designer =  APIDesigner();
         var json = jsyaml.safeLoad(designer.yaml);
