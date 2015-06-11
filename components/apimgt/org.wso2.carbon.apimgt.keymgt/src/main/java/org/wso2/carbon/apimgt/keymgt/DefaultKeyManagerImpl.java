@@ -54,11 +54,13 @@ import org.wso2.carbon.identity.oauth2.dto.OAuth2TokenValidationRequestDTO;
 import org.wso2.carbon.identity.oauth2.dto.OAuth2TokenValidationResponseDTO;
 
 import javax.xml.stream.XMLStreamException;
+
 import java.io.ByteArrayInputStream;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * This class holds the key manager implementation considering WSO2 as the identity provider
@@ -509,6 +511,13 @@ public class DefaultKeyManagerImpl extends AbstractKeyManager {
         oAuthConsumerAppDTO.setGrantTypes((String) oAuthApplicationInfo.getParameter(ApplicationConstants.OAUTH_CLIENT_GRANT));
 
         return oAuthConsumerAppDTO;
+    }
+
+    @Override
+    public Set<String> getActiveTokensByConsumerKey(String consumerKey) throws APIManagementException {
+        ApiMgtDAO apiMgtDAO = new ApiMgtDAO();
+        Set<String> activeTokens = apiMgtDAO.getActiveTokensOfConsumerKey(consumerKey);
+        return activeTokens;
     }
 
 

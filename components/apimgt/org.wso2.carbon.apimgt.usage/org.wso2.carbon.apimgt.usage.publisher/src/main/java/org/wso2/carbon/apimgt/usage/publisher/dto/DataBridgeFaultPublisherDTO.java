@@ -64,7 +64,7 @@ public class DataBridgeFaultPublisherDTO extends FaultPublisherDTO{
                 "          {'name':'version','type':'STRING'}," +
                 "          {'name':'errorCode','type':'STRING'}," +
                 "          {'name':'errorMessage','type':'STRING'}," +
-                "          {'name':'requestTime','type':'STRING'}," +
+                "          {'name':'requestTime','type':'LONG'}," +
                 "          {'name':'userId','type':'STRING'}," +
                 "          {'name':'tenantDomain','type':'STRING'}," +
                 "          {'name':'hostName','type':'STRING'}," +
@@ -80,7 +80,7 @@ public class DataBridgeFaultPublisherDTO extends FaultPublisherDTO{
 
     public Object createPayload(){
         return new Object[]{getConsumerKey(),getContext(),getApi_version(),getApi(), getResourcePath(),getMethod(),
-                getVersion(),getErrorCode(),getErrorMessage(), String.valueOf(getRequestTime()),getUsername(),
+                getVersion(),getErrorCode(),getErrorMessage(), getRequestTime(),getUsername(),
                 getTenantDomain(),getHostName(),getApiPublisher(), getApplicationName(), getApplicationId(),getProtocol()};
     }
 }

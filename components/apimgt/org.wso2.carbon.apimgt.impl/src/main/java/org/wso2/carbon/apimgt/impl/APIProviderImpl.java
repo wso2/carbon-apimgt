@@ -1133,8 +1133,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 			    PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
 		    }
 
-        String apiSourcePath = APIUtil.getAPIPath(api.getId());
-
         String targetPath = APIConstants.API_LOCATION + RegistryConstants.PATH_SEPARATOR +
                             api.getId().getProviderName() +
                             RegistryConstants.PATH_SEPARATOR + api.getId().getApiName() +
@@ -1145,174 +1143,11 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 throw new DuplicateAPIException("API version already exist with version :"
                                                 + newVersion);
             }
-            registry.beginTransaction();
-            Resource apiSourceArtifact = registry.get(apiSourcePath);
-            GenericArtifactManager artifactManager = APIUtil.getArtifactManager(registry,
-                                                                                APIConstants.API_KEY);
-            GenericArtifact artifact = artifactManager.getGenericArtifact(
-                    apiSourceArtifact.getUUID());
-
-            //Create new API version
-            artifact.setId(UUID.randomUUID().toString());
-            artifact.setAttribute(APIConstants.API_OVERVIEW_VERSION, newVersion);
-
-            //Check the status of the existing api,if its not in 'CREATED' status set
-            //the new api status as "CREATED"
-            String status = artifact.getAttribute(APIConstants.API_OVERVIEW_STATUS);
-            if (!status.equals(APIConstants.CREATED)) {
-                artifact.setAttribute(APIConstants.API_OVERVIEW_STATUS, APIConstants.CREATED);
+            boolean added=copyAPI(api,newVersion,targetPath);
+            if(added){
+            associateLifeCycle(targetPath,registry);
             }
-
-            if(api.isDefaultVersion()){
-                artifact.setAttribute(APIConstants.API_OVERVIEW_IS_DEFAULT_VERSION, "true");
-                //Check whether an existing API is set as default version.
-                String defaultVersion = getDefaultVersion(api.getId());
-
-                //if so, change its DefaultAPIVersion attribute to false
-
-                if(defaultVersion!=null){
-                    APIIdentifier defaultAPIId=new APIIdentifier(api.getId().getProviderName(),api.getId().getApiName(),defaultVersion);
-                    updateDefaultAPIInRegistry(defaultAPIId,false);
-                }
-            }else{
-                artifact.setAttribute(APIConstants.API_OVERVIEW_IS_DEFAULT_VERSION, "false");
-            }
-            //Check whether the existing api has its own thumbnail resource and if yes,add that image
-            //thumb to new API                                       thumbnail path as well.
-            String thumbUrl = APIConstants.API_IMAGE_LOCATION + RegistryConstants.PATH_SEPARATOR +
-                              api.getId().getProviderName() + RegistryConstants.PATH_SEPARATOR +
-                              api.getId().getApiName() + RegistryConstants.PATH_SEPARATOR +
-                              api.getId().getVersion() + RegistryConstants.PATH_SEPARATOR + APIConstants.API_ICON_IMAGE;
-            if (registry.resourceExists(thumbUrl)) {
-                Resource oldImage = registry.get(thumbUrl);
-                apiSourceArtifact.getContentStream();
-                APIIdentifier newApiId = new APIIdentifier(api.getId().getProviderName(),
-                                                           api.getId().getApiName(), newVersion);
-                Icon icon = new Icon(oldImage.getContentStream(), oldImage.getMediaType());
-                artifact.setAttribute(APIConstants.API_OVERVIEW_THUMBNAIL_URL,
-                                      addIcon(APIUtil.getIconPath(newApiId), icon));
-            }
-            // Here we keep the old context
-            String oldContext =  artifact.getAttribute(APIConstants.API_OVERVIEW_CONTEXT);
-
-            // We need to change the context by setting the new version
-            // This is a change that is coming with the context version strategy
-            String contextTemplate = artifact.getAttribute(APIConstants.API_OVERVIEW_CONTEXT_TEMPLATE);
-            artifact.setAttribute(APIConstants.API_OVERVIEW_CONTEXT, contextTemplate.replace("{version}", newVersion));
-
-            artifactManager.addGenericArtifact(artifact);
-            String artifactPath = GovernanceUtils.getArtifactPath(registry, artifact.getId());
-            registry.addAssociation(APIUtil.getAPIProviderPath(api.getId()), targetPath,
-                                    APIConstants.PROVIDER_ASSOCIATION);
-            String roles=artifact.getAttribute(APIConstants.API_OVERVIEW_VISIBLE_ROLES);
-            String[] rolesSet = new String[0];
-            if (roles != null) {
-                rolesSet = roles.split(",");
-            }
-            APIUtil.setResourcePermissions(api.getId().getProviderName(), 
-            		artifact.getAttribute(APIConstants.API_OVERVIEW_VISIBILITY), rolesSet, artifactPath);
-            //Here we have to set permission specifically to image icon we added
-            String iconPath = artifact.getAttribute(APIConstants.API_OVERVIEW_THUMBNAIL_URL);
-            if (iconPath != null) {
-            	iconPath=iconPath.substring(iconPath.lastIndexOf("/apimgt"));
-                APIUtil.copyResourcePermissions(api.getId().getProviderName(),thumbUrl,iconPath);
-            }
-            // Retain the tags
-            org.wso2.carbon.registry.core.Tag[] tags = registry.getTags(apiSourcePath);
-            if (tags != null) {
-                for (org.wso2.carbon.registry.core.Tag tag : tags) {
-                    registry.applyTag(targetPath, tag.getTagName());
-                }
-            }
-            
-            
-            // Retain the docs
-            List<Documentation> docs = getAllDocumentation(api.getId());
-            APIIdentifier newId = new APIIdentifier(api.getId().getProviderName(),
-                                                    api.getId().getApiName(), newVersion);
-            API newAPI = getAPI(newId,api.getId(), oldContext);
-
-            if(api.isDefaultVersion()){
-                newAPI.setAsDefaultVersion(true);
-            }else{
-                newAPI.setAsDefaultVersion(false);
-            }
-
-            for (Documentation doc : docs) {
-                /* copying the file in registry for new api */
-                Documentation.DocumentSourceType sourceType = doc.getSourceType();
-                if (sourceType == Documentation.DocumentSourceType.FILE) {
-                    String absoluteSourceFilePath = doc.getFilePath();
-                    // extract the prepend
-                    // ->/registry/resource/_system/governance/ and for
-                    // tenant
-                    // /t/my.com/registry/resource/_system/governance/
-                    int prependIndex = absoluteSourceFilePath.indexOf(APIConstants.API_LOCATION);
-                    String prependPath = absoluteSourceFilePath.substring(0, prependIndex);
-                    // get the file name from absolute file path
-                    int fileNameIndex = absoluteSourceFilePath.lastIndexOf(RegistryConstants.PATH_SEPARATOR);
-                    String fileName = absoluteSourceFilePath.substring(fileNameIndex + 1);
-                    // create relative file path of old location
-                    String sourceFilePath = absoluteSourceFilePath.substring(prependIndex);
-                    // create the relative file path where file should be
-                    // copied
-                    String targetFilePath =
-                                            APIConstants.API_LOCATION + RegistryConstants.PATH_SEPARATOR +
-                                                    newId.getProviderName() + RegistryConstants.PATH_SEPARATOR +
-                                                    newId.getApiName() + RegistryConstants.PATH_SEPARATOR +
-                                                    newId.getVersion() + RegistryConstants.PATH_SEPARATOR +
-                                                    APIConstants.DOC_DIR + RegistryConstants.PATH_SEPARATOR +
-                                                    APIConstants.DOCUMENT_FILE_DIR + RegistryConstants.PATH_SEPARATOR +
-                                                    fileName;
-                    // copy the file from old location to new location(for
-                    // new api)
-                    registry.copy(sourceFilePath, targetFilePath);
-                    // update the filepath attribute in doc artifact to
-                    // create new doc artifact for new version of api
-                    doc.setFilePath(prependPath + targetFilePath);
-                }
-                createDocumentation(newAPI, doc);
-                String content = getDocumentationContent(api.getId(), doc.getName());
-                if (content != null) {
-                    addDocumentationContent(newAPI, doc.getName(), content);
-                }
-            }
-
-            //Copy Swagger 2.0 resources for New version. 
-            String resourcePath = APIUtil.getSwagger20DefinitionFilePath(api.getId().getApiName(), 
-                                                                         api.getId().getVersion(),
-                                                                         api.getId().getProviderName());
-            if (registry.resourceExists(resourcePath + APIConstants.API_DOC_2_0_RESOURCE_NAME)) {
-                JSONObject swaggerObject = (JSONObject) new JSONParser()
-                        .parse(definitionFromSwagger20.getAPIDefinition(api.getId(), registry));
-                JSONObject infoObject = (JSONObject) swaggerObject.get("info");
-                infoObject.remove("version");
-                infoObject.put("version", newAPI.getId().getVersion());
-                definitionFromSwagger20.saveAPIDefinition(newAPI, swaggerObject.toJSONString(), registry);
-            }
-            
-            // Make sure to unset the isLatest flag on the old version
-            GenericArtifact oldArtifact = artifactManager.getGenericArtifact(
-                    apiSourceArtifact.getUUID());
-            oldArtifact.setAttribute(APIConstants.API_OVERVIEW_IS_LATEST, "false");
-            artifactManager.updateGenericArtifact(oldArtifact);
-
-            int tenantId = -1234;
-            try {
-                tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager().getTenantId(tenantDomain);
-            } catch (UserStoreException e) {
-                throw new APIManagementException("Error in retrieving Tenant Information while adding api :"
-                        +api.getId().getApiName(),e);
-            }
-
-            apiMgtDAO.addAPI(newAPI,tenantId);
-            registry.commitTransaction();
-		    success = true;
-        } catch (ParseException e) {
-            String msg =
-                         "Couldn't Create json Object from Swagger object for version" + newVersion + " of : " +
-                                 api.getId().getApiName();
-            handleException(msg, e);
+            success = true;
         } catch (Exception e) {
             try {
                 registry.rollbackTransaction();
@@ -1327,6 +1162,197 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 		    }
 	    }
 	    return success;
+    }
+
+    private boolean copyAPI(API api,String newVersion,String targetPath) throws APIManagementException {
+        boolean success=false;
+        String apiSourcePath = APIUtil.getAPIPath(api.getId());
+        try{
+        registry.beginTransaction();
+        Resource apiSourceArtifact = registry.get(apiSourcePath);
+        GenericArtifactManager artifactManager = APIUtil.getArtifactManager(registry,
+                                                                            APIConstants.API_KEY);
+        GenericArtifact artifact = artifactManager.getGenericArtifact(
+                apiSourceArtifact.getUUID());
+
+        //Create new API version
+        artifact.setId(UUID.randomUUID().toString());
+        artifact.setAttribute(APIConstants.API_OVERVIEW_VERSION, newVersion);
+
+        //Check the status of the existing api,if its not in 'CREATED' status set
+        //the new api status as "CREATED"
+        String status = artifact.getAttribute(APIConstants.API_OVERVIEW_STATUS);
+        if (!status.equals(APIConstants.CREATED)) {
+            artifact.setAttribute(APIConstants.API_OVERVIEW_STATUS, APIConstants.CREATED);
+        }
+
+        if(api.isDefaultVersion()){
+            artifact.setAttribute(APIConstants.API_OVERVIEW_IS_DEFAULT_VERSION, "true");
+            //Check whether an existing API is set as default version.
+            String defaultVersion = getDefaultVersion(api.getId());
+
+            //if so, change its DefaultAPIVersion attribute to false
+
+            if(defaultVersion!=null){
+                APIIdentifier defaultAPIId=new APIIdentifier(api.getId().getProviderName(),api.getId().getApiName(),defaultVersion);
+                updateDefaultAPIInRegistry(defaultAPIId,false);
+            }
+        }else{
+            artifact.setAttribute(APIConstants.API_OVERVIEW_IS_DEFAULT_VERSION, "false");
+        }
+        //Check whether the existing api has its own thumbnail resource and if yes,add that image
+        //thumb to new API                                       thumbnail path as well.
+        String thumbUrl = APIConstants.API_IMAGE_LOCATION + RegistryConstants.PATH_SEPARATOR +
+                          api.getId().getProviderName() + RegistryConstants.PATH_SEPARATOR +
+                          api.getId().getApiName() + RegistryConstants.PATH_SEPARATOR +
+                          api.getId().getVersion() + RegistryConstants.PATH_SEPARATOR + APIConstants.API_ICON_IMAGE;
+        if (registry.resourceExists(thumbUrl)) {
+            Resource oldImage = registry.get(thumbUrl);
+            apiSourceArtifact.getContentStream();
+            APIIdentifier newApiId = new APIIdentifier(api.getId().getProviderName(),
+                                                       api.getId().getApiName(), newVersion);
+            Icon icon = new Icon(oldImage.getContentStream(), oldImage.getMediaType());
+            artifact.setAttribute(APIConstants.API_OVERVIEW_THUMBNAIL_URL,
+                                  addIcon(APIUtil.getIconPath(newApiId), icon));
+        }
+        // Here we keep the old context
+        String oldContext =  artifact.getAttribute(APIConstants.API_OVERVIEW_CONTEXT);
+
+        // We need to change the context by setting the new version
+        // This is a change that is coming with the context version strategy
+        String contextTemplate = artifact.getAttribute(APIConstants.API_OVERVIEW_CONTEXT_TEMPLATE);
+        artifact.setAttribute(APIConstants.API_OVERVIEW_CONTEXT, contextTemplate.replace("{version}", newVersion));
+
+        artifactManager.addGenericArtifact(artifact);
+        String artifactPath = GovernanceUtils.getArtifactPath(registry, artifact.getId());
+        registry.addAssociation(APIUtil.getAPIProviderPath(api.getId()), targetPath,
+                                APIConstants.PROVIDER_ASSOCIATION);
+        String roles=artifact.getAttribute(APIConstants.API_OVERVIEW_VISIBLE_ROLES);
+        String[] rolesSet = new String[0];
+        if (roles != null) {
+            rolesSet = roles.split(",");
+        }
+        APIUtil.setResourcePermissions(api.getId().getProviderName(),
+                                       artifact.getAttribute(APIConstants.API_OVERVIEW_VISIBILITY), rolesSet, artifactPath);
+        //Here we have to set permission specifically to image icon we added
+        String iconPath = artifact.getAttribute(APIConstants.API_OVERVIEW_THUMBNAIL_URL);
+        if (iconPath != null) {
+            iconPath=iconPath.substring(iconPath.lastIndexOf("/apimgt"));
+            APIUtil.copyResourcePermissions(api.getId().getProviderName(),thumbUrl,iconPath);
+        }
+        // Retain the tags
+        org.wso2.carbon.registry.core.Tag[] tags = registry.getTags(apiSourcePath);
+        if (tags != null) {
+            for (org.wso2.carbon.registry.core.Tag tag : tags) {
+                registry.applyTag(targetPath, tag.getTagName());
+            }
+        }
+
+
+        // Retain the docs
+        List<Documentation> docs = getAllDocumentation(api.getId());
+        APIIdentifier newId = new APIIdentifier(api.getId().getProviderName(),
+                                                api.getId().getApiName(), newVersion);
+        API newAPI = getAPI(newId,api.getId(), oldContext);
+
+        if(api.isDefaultVersion()){
+            newAPI.setAsDefaultVersion(true);
+        }else{
+            newAPI.setAsDefaultVersion(false);
+        }
+
+        for (Documentation doc : docs) {
+                /* copying the file in registry for new api */
+            Documentation.DocumentSourceType sourceType = doc.getSourceType();
+            if (sourceType == Documentation.DocumentSourceType.FILE) {
+                String absoluteSourceFilePath = doc.getFilePath();
+                // extract the prepend
+                // ->/registry/resource/_system/governance/ and for
+                // tenant
+                // /t/my.com/registry/resource/_system/governance/
+                int prependIndex = absoluteSourceFilePath.indexOf(APIConstants.API_LOCATION);
+                String prependPath = absoluteSourceFilePath.substring(0, prependIndex);
+                // get the file name from absolute file path
+                int fileNameIndex = absoluteSourceFilePath.lastIndexOf(RegistryConstants.PATH_SEPARATOR);
+                String fileName = absoluteSourceFilePath.substring(fileNameIndex + 1);
+                // create relative file path of old location
+                String sourceFilePath = absoluteSourceFilePath.substring(prependIndex);
+                // create the relative file path where file should be
+                // copied
+                String targetFilePath =
+                        APIConstants.API_LOCATION + RegistryConstants.PATH_SEPARATOR +
+                        newId.getProviderName() + RegistryConstants.PATH_SEPARATOR +
+                        newId.getApiName() + RegistryConstants.PATH_SEPARATOR +
+                        newId.getVersion() + RegistryConstants.PATH_SEPARATOR +
+                        APIConstants.DOC_DIR + RegistryConstants.PATH_SEPARATOR +
+                        APIConstants.DOCUMENT_FILE_DIR + RegistryConstants.PATH_SEPARATOR +
+                        fileName;
+                // copy the file from old location to new location(for
+                // new api)
+                registry.copy(sourceFilePath, targetFilePath);
+                // update the filepath attribute in doc artifact to
+                // create new doc artifact for new version of api
+                doc.setFilePath(prependPath + targetFilePath);
+            }
+            createDocumentation(newAPI, doc);
+            String content = getDocumentationContent(api.getId(), doc.getName());
+            if (content != null) {
+                addDocumentationContent(newAPI, doc.getName(), content);
+            }
+        }
+
+        //Copy Swagger 2.0 resources for New version.
+        String resourcePath = APIUtil.getSwagger20DefinitionFilePath(api.getId().getApiName(),
+                                                                     api.getId().getVersion(),
+                                                                     api.getId().getProviderName());
+        if (registry.resourceExists(resourcePath + APIConstants.API_DOC_2_0_RESOURCE_NAME)) {
+            JSONObject swaggerObject = (JSONObject) new JSONParser()
+                    .parse(definitionFromSwagger20.getAPIDefinition(api.getId(), registry));
+            JSONObject infoObject = (JSONObject) swaggerObject.get("info");
+            infoObject.remove("version");
+            infoObject.put("version", newAPI.getId().getVersion());
+            definitionFromSwagger20.saveAPIDefinition(newAPI, swaggerObject.toJSONString(), registry);
+        }
+
+        // Make sure to unset the isLatest flag on the old version
+        GenericArtifact oldArtifact = artifactManager.getGenericArtifact(
+                apiSourceArtifact.getUUID());
+        oldArtifact.setAttribute(APIConstants.API_OVERVIEW_IS_LATEST, "false");
+        artifactManager.updateGenericArtifact(oldArtifact);
+        int tenantId = -1234;
+        try {
+            tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager().getTenantId(tenantDomain);
+        } catch (UserStoreException e) {
+            throw new APIManagementException("Error in retrieving Tenant Information while adding api :"
+                                             +api.getId().getApiName(),e);
+        }
+
+        apiMgtDAO.addAPI(newAPI,tenantId);
+        registry.commitTransaction();
+        success=true;
+        } catch (ParseException e) {
+            String msg =
+                    "Couldn't Create json Object from Swagger object for version" + newVersion + " of : " +
+                    api.getId().getApiName();
+            handleException(msg, e);
+        } catch (Exception e) {
+            try {
+                registry.rollbackTransaction();
+            } catch (RegistryException re) {
+                handleException("Error while rolling back the transaction for API: " + api.getId(), re);
+            }
+            String msg = "Failed to create new version : " + newVersion + " of : " + api.getId().getApiName();
+            handleException(msg, e);
+        }
+        return success;
+    }
+
+    /*
+    Attach the lifecycle to a registry resource
+     */
+    private void associateLifeCycle(String resourcePath, Registry registry) throws RegistryException {
+
+        GovernanceUtils.associateAspect(resourcePath, APIConstants.API_LIFE_CYCLE, registry);
     }
 
     /**

@@ -67,6 +67,7 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * This class holds the key manager implementation considering WSO2 as the identity provider
@@ -99,13 +100,7 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
             log.debug("Trying to create OAuth application :" + applicationName);
         }
 
-        String callBackURL = "";
-        if (oAuthApplicationInfo.getParameter("callback_url") != null) {
-            JSONArray jsonArray = (JSONArray) oAuthApplicationInfo.getParameter("callback_url");
-            for (Object callbackUrlObject : jsonArray) {
-                callBackURL = (String) callbackUrlObject;
-            }
-        }
+        String callBackURL = oAuthApplicationInfo.getCallBackURL();
 
         String tokenScope = (String) oAuthApplicationInfo.getParameter("tokenScope");
         String tokenScopes[] = new String[1];
@@ -380,8 +375,14 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
         tokenInfo.setTokenValid(responseDTO.isValid());
         tokenInfo.setEndUserName(responseDTO.getAuthorizedUser());
         tokenInfo.setConsumerKey(clientApplicationDTO.getConsumerKey());
+
         // Convert Expiry Time to milliseconds.
-        tokenInfo.setValidityPeriod(responseDTO.getExpiryTime() * 1000);
+        if(responseDTO.getExpiryTime() == Long.MAX_VALUE){
+            tokenInfo.setValidityPeriod(Long.MAX_VALUE);
+        } else {
+            tokenInfo.setValidityPeriod(responseDTO.getExpiryTime() * 1000);
+        }
+
         tokenInfo.setIssuedTime(System.currentTimeMillis());
         tokenInfo.setScope(responseDTO.getScope());
 
@@ -498,6 +499,13 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
     @Override
     public void deleteMappedApplication(String consumerKey) throws APIManagementException {
 
+    }
+
+    @Override
+    public Set<String> getActiveTokensByConsumerKey(String consumerKey) throws APIManagementException {
+        ApiMgtDAO apiMgtDAO = new ApiMgtDAO();
+        Set<String> activeTokens = apiMgtDAO.getActiveTokensOfConsumerKey(consumerKey);
+        return activeTokens;
     }
 
     /**

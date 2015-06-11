@@ -18,25 +18,21 @@ package org.wso2.carbon.apimgt.impl.handlers;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.tools.ant.util.regexp.RegexpUtil;
 import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.api.model.Scope;
-import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
+import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.identity.base.IdentityException;
 import org.wso2.carbon.identity.core.util.IdentityUtil;
-import org.wso2.carbon.identity.oauth.internal.OAuthComponentServiceHolder;
 import org.wso2.carbon.identity.oauth2.token.OAuthTokenReqMessageContext;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.user.api.UserStoreManager;
 import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
-import sun.misc.Regexp;
 
-import javax.cache.Cache;
-import javax.cache.Caching;
-import java.util.*;
-import java.util.regex.Pattern;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 
 public class ScopesIssuer {
 
@@ -96,12 +92,17 @@ public class ScopesIssuer {
             }
 
             int tenantId;
-            RealmService realmService = OAuthComponentServiceHolder.getRealmService();
+            RealmService realmService = ServiceReferenceHolder.getInstance().getRealmService();
             UserStoreManager userStoreManager = null;
             String[] userRoles = null;
 
             try {
-                tenantId = IdentityUtil.getTenantIdOFUser(username);
+                tenantId = tokReqMsgCtx.getTenantID();
+
+                // If tenant Id is not set in the tokenReqContext, deriving it from username.
+                if (tenantId == 0 || tenantId == -1) {
+                    tenantId = IdentityUtil.getTenantIdOFUser(username);
+                }
                 userStoreManager = realmService.getTenantUserRealm(tenantId).getUserStoreManager();
                 userRoles = userStoreManager.getRoleListOfUser(MultitenantUtils.getTenantAwareUsername(username));
             } catch (IdentityException e) {

@@ -27,6 +27,8 @@ import org.json.simple.JSONObject;
 import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.model.APIKey;
+import org.wso2.carbon.apimgt.api.model.OAuthAppRequest;
 import org.wso2.carbon.apimgt.api.LoginPostExecutor;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
@@ -47,26 +49,12 @@ import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
 import org.wso2.carbon.apimgt.api.model.Subscriber;
 import org.wso2.carbon.apimgt.api.model.Tag;
 import org.wso2.carbon.apimgt.api.model.Tier;
-import org.wso2.carbon.apimgt.impl.dto.ApplicationRegistrationWorkflowDTO;
-import org.wso2.carbon.apimgt.impl.dto.ApplicationWorkflowDTO;
-import org.wso2.carbon.apimgt.impl.dto.Environment;
-import org.wso2.carbon.apimgt.impl.dto.SubscriptionWorkflowDTO;
-import org.wso2.carbon.apimgt.impl.dto.TierPermissionDTO;
-import org.wso2.carbon.apimgt.impl.dto.WorkflowDTO;
+import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
+import org.wso2.carbon.apimgt.impl.dto.*;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
-import org.wso2.carbon.apimgt.impl.utils.APIAuthenticationAdminClient;
-import org.wso2.carbon.apimgt.impl.utils.APINameComparator;
-import org.wso2.carbon.apimgt.impl.utils.APIUtil;
-import org.wso2.carbon.apimgt.impl.utils.APIVersionComparator;
-import org.wso2.carbon.apimgt.impl.utils.ApplicationUtils;
-import org.wso2.carbon.apimgt.impl.utils.LRUCache;
-import org.wso2.carbon.apimgt.impl.workflow.AbstractApplicationRegistrationWorkflowExecutor;
-import org.wso2.carbon.apimgt.impl.workflow.WorkflowConstants;
-import org.wso2.carbon.apimgt.impl.workflow.WorkflowException;
-import org.wso2.carbon.apimgt.impl.workflow.WorkflowExecutor;
-import org.wso2.carbon.apimgt.impl.workflow.WorkflowExecutorFactory;
-import org.wso2.carbon.apimgt.impl.workflow.WorkflowStatus;
+import org.wso2.carbon.apimgt.impl.utils.*;
+import org.wso2.carbon.apimgt.impl.workflow.*;
 import org.wso2.carbon.apimgt.keymgt.stub.types.carbon.ApplicationKeysDTO;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.governance.api.common.dataobjects.GovernanceArtifact;
@@ -159,7 +147,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     public Subscriber getSubscriber(String subscriberId) throws APIManagementException {
         Subscriber subscriber = null;
         try {
-            subscriber = apiMgtDAO.getSubscriber(subscriberId);
+            subscriber = ApiMgtDAO.getSubscriber(subscriberId);
         } catch (APIManagementException e) {
             handleException("Failed to get Subscriber", e);
         }
@@ -250,7 +238,10 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 GenericArtifact genericArtifact = artifactManager.getGenericArtifact(uuid);
                 if (genericArtifact != null &&
                     genericArtifact.getAttribute(APIConstants.API_OVERVIEW_STATUS).equals(APIConstants.PUBLISHED)) {
-                    apiSet.add(APIUtil.getAPI(genericArtifact));
+                    API api = APIUtil.getAPI(genericArtifact);
+                    if (api != null) {
+                        apiSet.add(api);
+                    }
                 }
             }
 
@@ -550,17 +541,18 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 
                     API api  = APIUtil.getAPI(artifact);
                     
-                    if (returnAPItags) {
-                        String artifactPath = GovernanceUtils.getArtifactPath(registry, artifact.getId());
-                        Set<String> tags = new HashSet<String>();
-                        org.wso2.carbon.registry.core.Tag[] tag = registry.getTags(artifactPath);
-                        for (org.wso2.carbon.registry.core.Tag tag1 : tag) {
-                            tags.add(tag1.getTagName());
-                        }
-                        api.addTags(tags);
-                    }
-                    
                     if (api != null) {
+
+                        if (returnAPItags) {
+                            String artifactPath = GovernanceUtils.getArtifactPath(registry, artifact.getId());
+                            Set<String> tags = new HashSet<String>();
+                            org.wso2.carbon.registry.core.Tag[] tag = registry.getTags(artifactPath);
+                            for (org.wso2.carbon.registry.core.Tag tag1 : tag) {
+                                tags.add(tag1.getTagName());
+                            }
+                            api.addTags(tags);
+                        }
+
                         String key;
                         //Check the configuration to allow showing multiple versions of an API true/false
                         if (!displayMultipleVersions) { //If allow only showing the latest version of an API
@@ -620,19 +612,18 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
      * @param clientId                Consumer Key for the Application
      * @param clientSecret            Consumer Secret for the Application
      * @param validityTime            Desired Validity time for the token
-     * @param accessAllowDomains List of domains that this access token should be allowed to.
+     * @param accessAllowDomainsArray List of domains that this access token should be allowed to.
      * @param jsonInput               Additional parameters if Authorization server needs any.
      * @return Renewed Access Token.
      * @throws APIManagementException
      */
     @Override
     public AccessTokenInfo renewAccessToken(String oldAccessToken, String clientId, String clientSecret,
-                                            String validityTime, String accessAllowDomains,String
-            requestedScopesString, String jsonInput) throws APIManagementException {
-
+                                            String validityTime, String[] accessAllowDomainsArray,String
+            requestedScopes[], String jsonInput) throws APIManagementException {
         // Create Token Request with parameters provided from UI.
-        String[] requestedScopes=requestedScopesString.split(",");
-        String[] accessAllowDomainsArray = accessAllowDomains.split(",");
+       // String[] requestedScopes=requestedScopesString.split(",");
+        //String[] accessAllowDomainsArray = accessAllowDomains.split(",");
         AccessTokenRequest tokenRequest = new AccessTokenRequest();
         tokenRequest.setClientId(clientId);
         tokenRequest.setClientSecret(clientSecret);
@@ -944,9 +935,11 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         		GenericArtifact[] genericArtifacts = artifactManager.findGenericArtifacts(listMap);
         		SortedSet<API> allAPIs = new TreeSet<API>(new APINameComparator());
         		for (GenericArtifact artifact : genericArtifacts) {
-        			API api = APIUtil.getAPI(artifact);
-        			allAPIs.add(api);
-        		}
+                    API api = APIUtil.getAPI(artifact);
+                    if (api != null) {
+                        allAPIs.add(api);
+                    }
+                }
 
 				if (!APIUtil.isAllowDisplayMultipleVersions()) {
 					Map<String, API> latestPublishedAPIs = new HashMap<String, API>();
@@ -1111,13 +1104,13 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 		String thumbnailPathPattern = APIConstants.TAGS_INFO_ROOT_LOCATION + "/%s/thumbnail.png";
 
 		//if the tenantDomain is not specified super tenant domain is used
-		if(tenantDomain == null || tenantDomain.trim() == "" ){
-			try {
-				tenantDomain = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager().getSuperTenantDomain();
-			} catch (org.wso2.carbon.user.core.UserStoreException e) {
-				handleException("Cannot get super tenant domain name",e);
-			}
-		}
+        if (tenantDomain == null || "".equals(tenantDomain.trim())) {
+            try {
+                tenantDomain = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager().getSuperTenantDomain();
+            } catch (org.wso2.carbon.user.core.UserStoreException e) {
+                handleException("Cannot get super tenant domain name", e);
+            }
+        }
 
 		//get the registry instance related to the tenant domain
 		UserRegistry govRegistry = null;
@@ -1655,20 +1648,38 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     }
 
     /**
+     *This method will delete application key mapping table and application registration table.
+     *@param applicationId application id
+     *@param tokenType Token Type.
+     *@return
+     *@throws APIManagementException
+     */
+    public void deleteFromApplicationRegistration(String applicationId ,String tokenType) throws
+            APIManagementException{
+
+        apiMgtDAO.deleteApplicationRegistration(applicationId , tokenType);
+        apiMgtDAO.deleteApplicationKeyMappingByApplicationIdAndType(applicationId , tokenType);
+
+    }
+
+    /**
      *
      * @param jsonString this string will contain oAuth app details
      * @param userName user name of logged in user.
      * @param clientId this is the consumer key of oAuthApplication
      * @param applicationName this is the APIM appication name.
-     * @return
+     * @param keyType
+     *@param allowedDomainArray @return
      * @throws APIManagementException
      */
-    public Map<String, Object> saveSemiManualClient(String jsonString, String userName, String clientId,
-                                                    String applicationName) throws APIManagementException {
+    public Map<String, Object> mapExistingOAuthClient(String jsonString, String userName, String clientId,
+                                                      String applicationName, String keyType,
+                                                      String[] allowedDomainArray) throws APIManagementException {
 
         String callBackURL = null;
 
-        OAuthAppRequest oauthAppRequest = ApplicationUtils.createOauthAppRequest(applicationName, callBackURL,"default",
+        OAuthAppRequest oauthAppRequest = ApplicationUtils.createOauthAppRequest(applicationName, clientId, callBackURL,
+                                                                                 "default",
                                                                                   jsonString);
 
         KeyManager keyManager = KeyManagerHolder.getKeyManagerInstance();
@@ -1679,11 +1690,9 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         AccessTokenInfo tokenInfo = keyManager.getNewApplicationAccessToken(tokenRequest);
 
         //Do application mapping with consumerKey.
-        apiMgtDAO.createApplicationKeyTypeMappingForManualClients(oauthAppRequest, applicationName, userName, clientId);
+        apiMgtDAO.createApplicationKeyTypeMappingForManualClients(keyType, applicationName, userName, clientId);
 
-        //in semi manual mode we are allowing ALL domains.
-        String[] domainArray = {"ALL"};
-        apiMgtDAO.addAccessAllowDomains(clientId, domainArray);
+        apiMgtDAO.addAccessAllowDomains(clientId, allowedDomainArray);
 
         //#TODO get actuall values from response and pass.
         Map<String, Object> keyDetails = new HashMap<String, Object>();
@@ -1702,7 +1711,56 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         return keyDetails;
 
     }
+    
+    /**
+    *
+    * @param jsonString this string will contain oAuth app details
+    * @param userName user name of logged in user.
+    * @param clientId this is the consumer key of oAuthApplication
+    * @param applicationName this is the APIM appication name.
+    * @return
+    * @throws APIManagementException
+    */
+   /*public Map<String, Object> saveSemiManualClient(String jsonString, String userName, String clientId,
+                                                   String applicationName) throws APIManagementException {
 
+       String callBackURL = null;
+
+       OAuthAppRequest oauthAppRequest = ApplicationUtils.createOauthAppRequest(applicationName, callBackURL,"default",
+                                                                                 jsonString);
+
+       KeyManager keyManager = KeyManagerHolder.getKeyManagerInstance();
+       //createApplication on oAuthorization server.
+       OAuthApplicationInfo oAuthApplication = keyManager.mapOAuthApplication(oauthAppRequest);
+
+       AccessTokenRequest tokenRequest = ApplicationUtils.createAccessTokenRequest(oAuthApplication,null);
+       AccessTokenInfo tokenInfo = keyManager.getNewApplicationAccessToken(tokenRequest);
+
+       //Do application mapping with consumerKey.
+       apiMgtDAO.createApplicationKeyTypeMappingForManualClients(oauthAppRequest, applicationName, userName, clientId);
+
+       //in semi manual mode we are allowing ALL domains.
+       String[] domainArray = {"ALL"};
+       apiMgtDAO.addAccessAllowDomains(clientId, domainArray);
+
+       //#TODO get actuall values from response and pass.
+       Map<String, Object> keyDetails = new HashMap<String, Object>();
+
+       if(tokenInfo != null){
+           keyDetails.put("validityTime", Long.toString(tokenInfo.getValidityPeriod()));
+           keyDetails.put("accessToken", tokenInfo.getAccessToken());
+       }
+
+       if(oAuthApplication != null){
+           keyDetails.put("consumerKey", oAuthApplication.getClientId());
+           keyDetails.put("consumerSecret", oAuthApplication.getParameter("client_secret"));
+           keyDetails.put("appDetails",oAuthApplication.getJsonString());
+       }
+
+       return keyDetails;
+
+   }
+*/
     public Set<SubscribedAPI> getSubscribedAPIs(Subscriber subscriber) throws APIManagementException {
         Set<SubscribedAPI> subscribedAPIs = getSubscribedAPIs(subscriber, null);
         return subscribedAPIs;
@@ -1853,6 +1911,30 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         }
     }
 
+    public boolean removeSubscription(APIIdentifier identifier, String userId, int applicationId)
+	    throws APIManagementException {
+	try {
+	    apiMgtDAO.removeSubscription(identifier, applicationId);
+	    if (APIUtil.isAPIGatewayKeyCacheEnabled()) {
+		invalidateCachedKeys(applicationId);
+	    }
+	    
+	    if (log.isDebugEnabled()) {
+		String appName = apiMgtDAO.getApplicationNameFromId(applicationId);
+		String logMessage = "API Name: " + identifier.getApiName() + ", API Version " + identifier.getVersion()
+			+ " subscription removed by " + userId + " from app " + appName;
+		log.debug(logMessage);
+	    }
+	    return true;
+	} catch (APIManagementException e) {
+	    handleException(
+		    "Error while removing the subscription of" + identifier.getApiName() + "-"
+			    + identifier.getVersion(), e);
+	    return false;
+	}
+
+    }
+
     private APIIdentifier getAPIIdentifier(APIIdentifier apiIdentifier, String userId)
             throws APIManagementException {
         boolean isTenantFlowStarted = false;
@@ -1927,36 +2009,6 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 
     }
 
-    public boolean removeSubscription(APIIdentifier identifier, String userId, int applicationId)
-            throws APIManagementException {
-        boolean isTenantFlowStarted = false;
-        try {
-            String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(userId));
-            if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
-                isTenantFlowStarted = true;
-                PrivilegedCarbonContext.startTenantFlow();
-                PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
-            }
-            apiMgtDAO.removeSubscription(identifier, applicationId);
-            if (APIUtil.isAPIGatewayKeyCacheEnabled()) {
-                invalidateCachedKeys(applicationId);
-            }
-            if (log.isDebugEnabled()) {
-                String appName = apiMgtDAO.getApplicationNameFromId(applicationId);
-                String logMessage = "API Name: " + identifier.getApiName() + ", API Version " + identifier.getVersion() + " subscription removed by " + userId + " from app " + appName;
-                log.debug(logMessage);
-            }
-            return true;
-        } catch (APIManagementException e) {
-            handleException("Error while removing the subscription of" + identifier.getApiName() + "-" + identifier.getVersion(), e);
-            return false;
-        } finally {
-            if (isTenantFlowStarted) {
-                PrivilegedCarbonContext.endTenantFlow();
-            }
-        }
-    }
-
     /**
      *
      * @param applicationId Application ID related cache keys to be cleared
@@ -1969,8 +2021,18 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             return;
         }
 
-        Set<String> activeTokens = apiMgtDAO.getActiveTokensOfApplication(applicationId);
-        if(activeTokens == null || activeTokens.isEmpty()){
+        Set<String> consumerKeys = apiMgtDAO.getConsumerKeysOfApplication(applicationId);
+
+        Set<String> activeTokens = new HashSet<String>();
+        for (String consumerKey : consumerKeys) {
+                Set<String> tempTokens = KeyManagerHolder.getKeyManagerInstance().
+                        getActiveTokensByConsumerKey(consumerKey);
+                if (tempTokens != null) {
+                    activeTokens.addAll(tempTokens);
+                }
+        }
+
+        if (activeTokens == null || activeTokens.isEmpty()) {
             return;
         }
 
@@ -2015,15 +2077,11 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 
     public String addApplication(Application application, String userId)
             throws APIManagementException {
-
-        List<Application> applications = apiMgtDAO.getBasicApplicationDetails(userId, null);
-
-        if (applications != null && !applications.isEmpty()) {
-            if (APIUtil.doesApplicationExist(applications.toArray(new Application[applications.size()]), userId)) {
-                handleException("A duplicate application already exists by the name - " + application.getName());
-            }
+        
+        if (APIUtil.isApplicationExist(userId, application.getName(), application.getGroupId())) {
+            handleException("A duplicate application already exists by the name - " + application.getName());
         }
-
+        
         int applicationId = apiMgtDAO.addApplication(application, userId);
 
         boolean isTenantFlowStarted = false;
@@ -2170,7 +2228,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             // Build key manager instance and create oAuthAppRequest by
             // jsonString.
             OAuthAppRequest request =
-                    ApplicationUtils.createOauthAppRequest(applicationNameAfterAppend.toString(),
+                    ApplicationUtils.createOauthAppRequest(applicationNameAfterAppend.toString(), null,
                                                            callbackUrl, tokenScope, jsonString);
             request.getOAuthApplicationInfo().addParameter(ApplicationConstants.VALIDITY_PERIOD, validityTime);
 
@@ -2652,8 +2710,8 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
         }
         //Create OauthAppRequest object by passing json String.
-        OAuthAppRequest oauthAppRequest = ApplicationUtils.createOauthAppRequest(applicationName, callbackUrl, tokenScope,
-                                                                                 jsonString);
+        OAuthAppRequest oauthAppRequest = ApplicationUtils.createOauthAppRequest(applicationName, null, callbackUrl,
+                                                                                 tokenScope, jsonString);
 
         String consumerKey = apiMgtDAO.getConsumerKeyForApplicationKeyType(applicationName, userId, tokenType,
                                                                            groupingId);

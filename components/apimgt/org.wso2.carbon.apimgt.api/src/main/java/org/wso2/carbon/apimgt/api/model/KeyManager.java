@@ -21,6 +21,7 @@ package org.wso2.carbon.apimgt.api.model;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 
 import java.util.Map;
+import java.util.Set;
 
 /**
  * This Interface is  providing functionality to  key manager specific core operations.
@@ -183,5 +184,13 @@ public interface KeyManager {
      * @throws APIManagementException
      */
     void deleteMappedApplication(String consumerKey) throws APIManagementException;
+
+    /**
+     * When provided the ConsumerKey, this method will provide all the Active tokens issued against that Key.
+     * @param consumerKey ConsumerKey of the OAuthClient
+     * @return {@link java.util.Set} having active access tokens.
+     * @throws APIManagementException
+     */
+    Set<String> getActiveTokensByConsumerKey(String consumerKey) throws APIManagementException;
 
 }

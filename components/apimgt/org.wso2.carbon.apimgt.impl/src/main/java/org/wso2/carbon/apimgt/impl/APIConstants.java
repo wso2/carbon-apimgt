@@ -18,7 +18,6 @@
 
 package org.wso2.carbon.apimgt.impl;
 
-import javax.ws.rs.POST;
 import javax.xml.namespace.QName;
 
 /**
@@ -270,6 +269,7 @@ public final class APIConstants {
     public static final String PROTOTYPED = "PROTOTYPED";
     public static final String VERB_INFO_DTO = "VERB_INFO";
 
+    public static final String API_LIFE_CYCLE="APILifeCycle";
 
     public static class TokenStatus {
         public static final String ACTIVE = "ACTIVE";
@@ -512,6 +512,7 @@ public final class APIConstants {
         public static final int API_AUTH_INCORRECT_ACCESS_TOKEN_TYPE = 900905;
         public static final int API_AUTH_INCORRECT_API_RESOURCE = 900906;
         public static final int API_BLOCKED = 900907;
+        public static final int API_AUTH_RESOURCE_FORBIDDEN = 900908;
         public static final int SUBSCRIPTION_INACTIVE = 900909;
         public static final int INVALID_SCOPE = 900910;
     }
