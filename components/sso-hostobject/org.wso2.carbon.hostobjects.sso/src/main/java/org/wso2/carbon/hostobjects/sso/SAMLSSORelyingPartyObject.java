@@ -425,6 +425,7 @@ public class SAMLSSORelyingPartyObject extends ScriptableObject {
                                     relyingPartyObject.getSSOProperty(SSOConstants.ISSUER_ID),
                                     MultitenantConstants.SUPER_TENANT_ID,
                                     MultitenantConstants.SUPER_TENANT_DOMAIN_NAME,
+                                    relyingPartyObject.getSSOProperty(SSOConstants.IDP_URL),
                                     acsUrl));
                 }
             } else {

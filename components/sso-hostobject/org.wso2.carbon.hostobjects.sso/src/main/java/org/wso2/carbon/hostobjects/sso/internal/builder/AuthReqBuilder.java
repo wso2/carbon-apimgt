@@ -94,7 +94,7 @@ public class AuthReqBuilder {
      * @throws Exception
      */
     public AuthnRequest buildPassiveSignedAuthenticationRequest(String issuerId, int tenantId,
-            String tenantDomain, String acsUrl) throws Exception {
+            String tenantDomain, String destination, String acsUrl) throws Exception {
         Util.doBootstrap();
         acsUrl = processAcsUrl(acsUrl);
         AuthnRequest authnRequest = (AuthnRequest) Util.buildXMLObject(AuthnRequest.DEFAULT_ELEMENT_NAME);
@@ -105,6 +105,7 @@ public class AuthReqBuilder {
         authnRequest.setNameIDPolicy(buildNameIDPolicy());
         authnRequest.setIsPassive(true);
         authnRequest.setAssertionConsumerServiceURL(acsUrl);
+        authnRequest.setDestination(destination);
         SSOAgentCarbonX509Credential ssoAgentCarbonX509Credential =
                 new SSOAgentCarbonX509Credential(tenantId, tenantDomain);
         setSignature(authnRequest, SignatureConstants.ALGO_ID_SIGNATURE_RSA,
