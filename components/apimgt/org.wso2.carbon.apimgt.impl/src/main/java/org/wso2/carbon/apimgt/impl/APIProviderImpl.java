@@ -18,6 +18,31 @@
 
 package org.wso2.carbon.apimgt.impl;
 
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.SortedSet;
+import java.util.StringTokenizer;
+import java.util.TreeSet;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import javax.cache.Cache;
+import javax.cache.Caching;
+import javax.xml.namespace.QName;
+import javax.xml.stream.XMLStreamException;
+
 import org.apache.axiom.om.OMAbstractFactory;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMFactory;
@@ -40,7 +65,9 @@ import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIStatus;
 import org.wso2.carbon.apimgt.api.model.APIStore;
 import org.wso2.carbon.apimgt.api.model.Documentation;
+import org.wso2.carbon.apimgt.api.model.Documentation.DocumentSourceType;
 import org.wso2.carbon.apimgt.api.model.DuplicateAPIException;
+import org.wso2.carbon.apimgt.api.model.FileData;
 import org.wso2.carbon.apimgt.api.model.Icon;
 import org.wso2.carbon.apimgt.api.model.KeyManager;
 import org.wso2.carbon.apimgt.api.model.LifeCycleEvent;
@@ -89,29 +116,6 @@ import org.wso2.carbon.user.api.AuthorizationManager;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
-
-import javax.cache.Cache;
-import javax.cache.Caching;
-import javax.xml.namespace.QName;
-import javax.xml.stream.XMLStreamException;
-import java.io.File;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.SortedSet;
-import java.util.StringTokenizer;
-import java.util.TreeSet;
-import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * This class provides the core API provider functionality. It is implemented in a very
@@ -1407,6 +1411,40 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     public void addDocumentation(APIIdentifier apiId, Documentation documentation)
     		throws APIManagementException {
     	API api = getAPI(apiId);
+    	FileData file = null;
+    	String docName = documentation.getName();
+    	String version = apiId.getVersion();
+    	DocumentSourceType  sourceType = documentation.getSourceType();
+    	
+    	if (sourceType.equals(Documentation.DocumentSourceType.FILE)) {
+    	    file = documentation.getFile(); 
+        }
+
+	try {
+	    if (file != null && file.getContent().length != 0) {
+		String contentType = file.getContentType();
+
+		Icon icon = new Icon(new ByteArrayInputStream(file.getContent()), contentType);
+		String fileName = file.getFileName();
+		String filePath = APIUtil.getDocumentationFilePath(apiId, fileName);
+		String visibleRolesList = api.getVisibleRoles();
+		String[] visibleRoles = new String[0];
+		if (visibleRolesList != null) {
+		    visibleRoles = visibleRolesList.split(",");
+		}
+		APIUtil.setResourcePermissions(api.getId().getProviderName(), api.getVisibility(), visibleRoles,
+			filePath);
+		documentation.setFilePath(addIcon(filePath, icon));
+	    } else if (sourceType.equals(Documentation.DocumentSourceType.FILE)) {
+		throw new APIManagementException("Empty File Attachment.");
+	    }
+
+	} catch (Exception e) {
+	    handleException(
+		    "Error while creating an attachment for Document- " + docName + "-" + version + ". "
+			    + e.getMessage(), e);
+	}
+    	
     	createDocumentation(api, documentation);
     }
 

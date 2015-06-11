@@ -35,6 +35,8 @@ public class Documentation implements Serializable{
     private DocumentVisibility visibility;
     private Date lastUpdated;
     private String filePath;
+    private FileData file;
+    private String otherTypeName;
 
     public String getOtherTypeName() {
         return otherTypeName;
@@ -44,8 +46,7 @@ public class Documentation implements Serializable{
         this.otherTypeName = otherTypeName;
     }
 
-    private String otherTypeName;
-
+    
     public String getFilePath() {
         return filePath;
     }
@@ -65,6 +66,24 @@ public class Documentation implements Serializable{
     public Documentation(DocumentationType type, String name) {
         this.type = type;
         this.name = name;
+    }
+    
+    
+
+    public Documentation(DocumentationType type, String name, String summary, DocumentSourceType sourceType,
+	    String sourceUrl, DocumentVisibility visibility, Date lastUpdated, String filePath, FileData file,
+	    String otherTypeName) {
+	super();
+	this.type = type;
+	this.name = name;
+	this.summary = summary;
+	this.sourceType = sourceType;
+	this.sourceUrl = sourceUrl;
+	this.visibility = visibility;
+	this.lastUpdated = lastUpdated;
+	this.filePath = filePath;
+	this.file = file;
+	this.otherTypeName = otherTypeName;
     }
 
     @Override
@@ -145,4 +164,13 @@ public class Documentation implements Serializable{
             this.visibility = visibility;
         }
     }
+    public FileData getFile() {
+        return file;
+    }
+
+    public void setFile(FileData file) {
+        this.file = file;
+    }
+    
+    
 }
