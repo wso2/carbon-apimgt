@@ -67,7 +67,18 @@ public class APIDefinitionFromSwagger20 extends APIDefinition {
                 JSONObject paths = (JSONObject) swagger.get("paths");
                 for (Iterator pathsIterator = paths.keySet().iterator(); pathsIterator.hasNext(); ) {
                     String uriTempVal = (String) pathsIterator.next();
+                    //if url template is a custom attribute "^x-" ignore.
+                    if(uriTempVal.startsWith("x-") || uriTempVal.startsWith("X-")){
+                        continue;
+                    }
                     JSONObject path = (JSONObject) paths.get(uriTempVal);
+                    // Following code check is done to handle $ref objects supported by swagger spec
+                    // See field types supported by "Path Item Object" in swagger spec.
+                    if(path.containsKey("$ref")){
+                        log.info("Reference "+uriTempVal+" path object was ignored when generating URL template for api \""
+                                 + api.getId().getApiName() +"\"");
+                        continue;
+                    }
                     for (Iterator pathIterator = path.keySet().iterator(); pathIterator.hasNext(); ) {
                         String httpVerb = (String) pathIterator.next();
 
@@ -364,5 +375,4 @@ public class APIDefinitionFromSwagger20 extends APIDefinition {
 
         return swaggerObject.toJSONString();
     }
-
 }

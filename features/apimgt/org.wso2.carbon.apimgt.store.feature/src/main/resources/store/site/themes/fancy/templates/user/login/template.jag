@@ -9,6 +9,7 @@ i18n.init(request,localeResourcesBasePath);
         var mod = jagg.module("manager");
         var httpsUrl= mod.getHTTPsURL();
 		var isSelfSignupEnabled = mod.isSelfSignupEnabledForTenantUser(request_tenant);
+		var tenantDomains = mod.getActiveTenantDomains().tenantDomains;
     var log = new Log();
 
         var currentURL = request.getRequestURI();
@@ -129,7 +130,7 @@ if(isSelfSignupEnabled){%>
 				Go to <a href="<%=jagg.getAbsoluteUrl("/")%><%="?tenant=" + tenantDomain%>"><%=tenantDomain%><%=i18n.localize("apistoreDesc")%></a>
 
 
-		<%} else if ((tenant != null)&& site.showPublicStoreURL){%>
+		<%} else if ((tenant != null) && site.showPublicStoreURL && tenantDomains != null){%>
 
 			Go to <a href="<%=jagg.getAbsoluteUrl("/")%>"><%=i18n.localize("publicAPIStore")%></a>
 

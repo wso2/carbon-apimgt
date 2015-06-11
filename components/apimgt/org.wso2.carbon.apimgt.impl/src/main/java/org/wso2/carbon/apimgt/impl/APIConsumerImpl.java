@@ -1737,13 +1737,13 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                                                                                  "default",
                                                                                   jsonString);
 
+        KeyManager keyManager = KeyManagerHolder.getKeyManagerInstance();
+        //createApplication on oAuthorization server.
+        OAuthApplicationInfo oAuthApplication = keyManager.mapOAuthApplication(oauthAppRequest);
 
         //Do application mapping with consumerKey.
         apiMgtDAO.createApplicationKeyTypeMappingForManualClients(keyType, applicationName, userName, clientId);
         apiMgtDAO.addAccessAllowDomains(clientId, allowedDomainArray);
-        KeyManager keyManager = KeyManagerHolder.getKeyManagerInstance();
-        //createApplication on oAuthorization server.
-        OAuthApplicationInfo oAuthApplication = keyManager.mapOAuthApplication(oauthAppRequest);
 
         AccessTokenRequest tokenRequest = ApplicationUtils.createAccessTokenRequest(oAuthApplication,null);
         AccessTokenInfo tokenInfo = keyManager.getNewApplicationAccessToken(tokenRequest);

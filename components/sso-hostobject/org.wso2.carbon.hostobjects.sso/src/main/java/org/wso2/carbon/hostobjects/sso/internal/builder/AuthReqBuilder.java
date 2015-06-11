@@ -18,6 +18,8 @@
 
 package org.wso2.carbon.hostobjects.sso.internal.builder;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.joda.time.DateTime;
 import org.opensaml.common.SAMLVersion;
 import org.opensaml.saml2.core.AuthnRequest;
@@ -27,8 +29,12 @@ import org.opensaml.saml2.core.impl.IssuerBuilder;
 import org.opensaml.saml2.core.impl.NameIDPolicyBuilder;
 import org.wso2.carbon.hostobjects.sso.internal.SSOConstants;
 import org.wso2.carbon.hostobjects.sso.internal.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class AuthReqBuilder {
+
+    private static Log log = LogFactory.getLog(AuthReqBuilder.class);
         /**
      * Generate an authentication request.
      *
@@ -54,6 +60,18 @@ public class AuthReqBuilder {
      */
     public AuthnRequest buildPassiveAuthenticationRequest(String issuerId, String acsUrl) throws Exception  {
         Util.doBootstrap();
+        //matches shortest segments that are between '{' and '}'
+        Pattern pattern = Pattern.compile("\\$\\{(.*?)\\}");
+        Matcher matcher = pattern.matcher(acsUrl);
+        while (matcher.find()) {
+            String match = matcher.group(1);
+            String property = System.getProperty(match);
+            if (property != null) {
+                acsUrl = acsUrl.replace("${" + match + "}", property);
+            } else {
+                log.warn("System Property " + match + " is not set");
+            }
+        }
         AuthnRequest authnRequest = (AuthnRequest) Util.buildXMLObject(AuthnRequest.DEFAULT_ELEMENT_NAME);
         authnRequest.setID(Util.createID());
         authnRequest.setVersion(SAMLVersion.VERSION_20);

@@ -107,7 +107,7 @@ var datasourceData = outputs.datasourceData;
                 <td>
                     <div class="control-group">
                         <div class="controls">
-                            <input type="text" class="input-xlarge validInput noSpace notEmpty" id="eventAnalyserURL" name="eventAnalyserURL" autofocus="autofocus" value=""/>
+                            <input type="text" class="input-xlarge validInput" id="eventAnalyserURL" name="eventAnalyserURL" autofocus="autofocus" value=""/>
                             <a class="icon-question-sign help_popup" help_data="eventAnalyserURLHelp"></a>
                             <p id="eventAnalyserURLHelp" class="hide">Event Analyser URL. Please make sure the Analyzer node is running on the given URL</p>
                         </div>
@@ -116,7 +116,7 @@ var datasourceData = outputs.datasourceData;
                 <td>
                     <div class="control-group">
                         <div class="controls">
-                            <input type="text" class="input-xlarge validInput noSpace notEmpty" id="eventAnalyserUsername" name="eventAnalyserUsername" autofocus="autofocus" value=""/>
+                            <input type="text" class="input-xlarge validInput" id="eventAnalyserUsername" name="eventAnalyserUsername" autofocus="autofocus" value=""/>
                             <a class="icon-question-sign help_popup" help_data="eventAnalyserUsernameHelp"></a>
                             <p id="eventAnalyserUsernameHelp" class="hide">Event Analyser Username</p>
                         </div>
@@ -125,7 +125,7 @@ var datasourceData = outputs.datasourceData;
                 <td>
                     <div class="control-group">
                         <div class="controls">
-                            <input type="password" class="input-xlarge validInput noSpace notEmpty" id="eventAnalyserPassword" name="eventAnalyserPassword" autofocus="autofocus" value=""/>
+                            <input type="password" class="input-xlarge validInput noSpace" id="eventAnalyserPassword" name="eventAnalyserPassword" autofocus="autofocus" value=""/>
                             <a class="icon-question-sign help_popup" help_data="eventAnalyserPasswordHelp"></a>
                             <p id="eventAnalyserPasswordHelp" class="hide">Event Analyser Password</p>
                         </div>
