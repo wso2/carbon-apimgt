@@ -20,8 +20,6 @@ package org.wso2.carbon.hostobjects.sso.internal.builder;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.xml.security.c14n.Canonicalizer;
-import org.apache.xml.security.signature.XMLSignature;
 import org.joda.time.DateTime;
 import org.opensaml.common.SAMLVersion;
 import org.opensaml.saml2.core.AuthnRequest;
@@ -35,21 +33,12 @@ import org.opensaml.xml.XMLObjectBuilder;
 import org.opensaml.xml.io.Marshaller;
 import org.opensaml.xml.io.MarshallerFactory;
 import org.opensaml.xml.security.x509.X509Credential;
-import org.opensaml.xml.signature.KeyInfo;
-import org.opensaml.xml.signature.Signature;
-import org.opensaml.xml.signature.Signer;
-import org.opensaml.xml.signature.X509Data;
-import org.wso2.carbon.base.MultitenantConstants;
-import org.wso2.carbon.core.util.KeyStoreManager;
+import org.opensaml.xml.signature.*;
+import org.opensaml.xml.util.Base64;
 import org.wso2.carbon.hostobjects.sso.internal.SSOConstants;
 import org.wso2.carbon.hostobjects.sso.internal.util.*;
 import javax.xml.namespace.QName;
-import java.security.KeyStore;
-import java.security.KeyStoreException;
-import java.security.PrivateKey;
-import java.security.PublicKey;
 import java.security.cert.CertificateEncodingException;
-import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -85,7 +74,7 @@ public class AuthReqBuilder {
     public AuthnRequest buildPassiveAuthenticationRequest(String issuerId, String acsUrl) throws Exception  {
         Util.doBootstrap();
         //matches shortest segments that are between '{' and '}'
-        Pattern pattern = Pattern.compile("\\{(.*?)\\}");
+        Pattern pattern = Pattern.compile("\\$\\{(.*?)\\}");
         Matcher matcher = pattern.matcher(acsUrl);
         while (matcher.find()) {
             String match = matcher.group(1);
@@ -107,8 +96,6 @@ public class AuthReqBuilder {
         return authnRequest;
     }
 
-    // >>> ADDED START***********************************
-    
     /**
      * Generate an signed authentication request.
      *
@@ -126,17 +113,19 @@ public class AuthReqBuilder {
         authnRequest.setNameIDPolicy(buildNameIDPolicy());
         SSOAgentCarbonX509Credential ssoAgentCarbonX509Credential =
                 new SSOAgentCarbonX509Credential(tenantId, tenantDomain);
-        setSignature(authnRequest, XMLSignature.ALGO_ID_SIGNATURE_RSA,
+        setSignature(authnRequest, SignatureConstants.ALGO_ID_SIGNATURE_RSA,
                 new X509CredentialImpl(ssoAgentCarbonX509Credential));
         return authnRequest;
     }
-
+    
+    
     /**
      * Generate an Signed authentication request with a custom consumer url.
      *
      * @return AuthnRequest Object
      * @throws Exception error when bootstrapping
      */
+
     public AuthnRequest buildSignedAuthRequestWithConsumerUrl(String issuerId, String destination, String consumerUrl,
             int tenantId,
             String tenantDomain) throws Exception {
@@ -151,12 +140,10 @@ public class AuthReqBuilder {
         authnRequest.setDestination(destination);
         SSOAgentCarbonX509Credential ssoAgentCarbonX509Credential =
                 new SSOAgentCarbonX509Credential(tenantId, tenantDomain);
-        setSignature(authnRequest, XMLSignature.ALGO_ID_SIGNATURE_RSA,
+        setSignature(authnRequest, SignatureConstants.ALGO_ID_SIGNATURE_RSA,
                 new X509CredentialImpl(ssoAgentCarbonX509Credential));
         return authnRequest;
     }
-
-    // <<< ADDED END***********************************
 
     /**
      * Build the issuer object
@@ -182,8 +169,6 @@ public class AuthReqBuilder {
         return nameIDPolicy;
     }
 
-    // >>> ADDED START***********************************
-
     /**
      * Sign the SAML AuthnRequest message
      *
@@ -198,16 +183,14 @@ public class AuthReqBuilder {
             Signature signature = (Signature) buildXMLObject(Signature.DEFAULT_ELEMENT_NAME);
             signature.setSigningCredential(cred);
             signature.setSignatureAlgorithm(signatureAlgorithm);
-            signature.setCanonicalizationAlgorithm(Canonicalizer.ALGO_ID_C14N_EXCL_OMIT_COMMENTS);
-
+            signature.setCanonicalizationAlgorithm(SignatureConstants.ALGO_ID_C14N_EXCL_OMIT_COMMENTS);
             try {
                 KeyInfo keyInfo = (KeyInfo) buildXMLObject(KeyInfo.DEFAULT_ELEMENT_NAME);
                 X509Data data = (X509Data) buildXMLObject(X509Data.DEFAULT_ELEMENT_NAME);
                 org.opensaml.xml.signature.X509Certificate cert =
                         (org.opensaml.xml.signature.X509Certificate) buildXMLObject(
                                 org.opensaml.xml.signature.X509Certificate.DEFAULT_ELEMENT_NAME);
-                String value =
-                        org.apache.xml.security.utils.Base64.encode(cred.getEntityCertificate().getEncoded());
+                String value = Base64.encodeBytes(cred.getEntityCertificate().getEncoded());
                 cert.setValue(value);
                 data.getX509Certificates().add(cert);
                 keyInfo.getX509Datas().add(data);
@@ -227,8 +210,7 @@ public class AuthReqBuilder {
             Marshaller marshaller = marshallerFactory.getMarshaller(authnRequest);
 
             marshaller.marshall(authnRequest);
-
-            org.apache.xml.security.Init.init();
+            
             Signer.signObjects(signatureList);
             return authnRequest;
 
@@ -236,6 +218,7 @@ public class AuthReqBuilder {
             throw new Exception("Error while signing the SAML Request message", e);
         }
     }
+    
 
     /**
      * Sign the SAML AuthnRequest message
@@ -245,13 +228,15 @@ public class AuthReqBuilder {
      * @param cred
      * @return
      */
+    
+    
     public static LogoutRequest setSignature(LogoutRequest logoutRequest, String signatureAlgorithm,
             X509Credential cred) throws Exception {
         try {
             Signature signature = (Signature) buildXMLObject(Signature.DEFAULT_ELEMENT_NAME);
             signature.setSigningCredential(cred);
             signature.setSignatureAlgorithm(signatureAlgorithm);
-            signature.setCanonicalizationAlgorithm(Canonicalizer.ALGO_ID_C14N_EXCL_OMIT_COMMENTS);
+            signature.setCanonicalizationAlgorithm(SignatureConstants.ALGO_ID_C14N_EXCL_OMIT_COMMENTS);
 
             try {
                 KeyInfo keyInfo = (KeyInfo) buildXMLObject(KeyInfo.DEFAULT_ELEMENT_NAME);
@@ -259,8 +244,7 @@ public class AuthReqBuilder {
                 org.opensaml.xml.signature.X509Certificate cert =
                         (org.opensaml.xml.signature.X509Certificate) buildXMLObject(
                                 org.opensaml.xml.signature.X509Certificate.DEFAULT_ELEMENT_NAME);
-                String value =
-                        org.apache.xml.security.utils.Base64.encode(cred.getEntityCertificate().getEncoded());
+                String value = Base64.encodeBytes(cred.getEntityCertificate().getEncoded());
                 cert.setValue(value);
                 data.getX509Certificates().add(cert);
                 keyInfo.getX509Datas().add(data);
@@ -281,7 +265,6 @@ public class AuthReqBuilder {
 
             marshaller.marshall(logoutRequest);
 
-            org.apache.xml.security.Init.init();
             Signer.signObjects(signatureList);
             return logoutRequest;
 
@@ -289,6 +272,7 @@ public class AuthReqBuilder {
             throw new Exception("Error while signing the Logout Request message", e);
         }
     }
+    
 
     /**
      * Builds SAML Elements
@@ -308,6 +292,5 @@ public class AuthReqBuilder {
                 objectQName.getPrefix());
     }
 
-    // <<< ADDED END***********************************
     
 }

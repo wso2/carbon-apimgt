@@ -47,13 +47,6 @@ public class X509CredentialImpl implements X509Credential {
     private X509Certificate entityCertificate = null;
     private PrivateKey privateKey = null;
 
-    /*ADDED
-    public X509CredentialImpl(SSOAgentX509Credential credential) throws Exception {
-        publicKey = credential.getPublicKey();
-        this.entityCertificate = credential.getEntityCertificate();
-        this.privateKey = credential.getPrivateKey();
-    }//END*/
-
     /**
      * The key is constructed form modulus and exponent.
      *
@@ -74,6 +67,12 @@ public class X509CredentialImpl implements X509Credential {
         signingCert = cert;
     }
 
+    public X509CredentialImpl(SSOAgentX509Credential credential) throws Exception {
+        publicKey = credential.getPublicKey();
+        this.entityCertificate = credential.getEntityCertificate();
+        this.privateKey = credential.getPrivateKey();
+    }
+
     /**
      * Retrieves the publicKey
      */
@@ -86,7 +85,7 @@ public class X509CredentialImpl implements X509Credential {
     }
 
     public X509Certificate getEntityCertificate() {
-        return entityCertificate; //ADDED
+        return entityCertificate;
     }
 
     public Collection<X509CRL> getCRLs() {
@@ -120,7 +119,7 @@ public class X509CredentialImpl implements X509Credential {
     }
 
     public PrivateKey getPrivateKey() {
-        return privateKey; //ADDED
+        return privateKey;
     }
 
     public SecretKey getSecretKey() {

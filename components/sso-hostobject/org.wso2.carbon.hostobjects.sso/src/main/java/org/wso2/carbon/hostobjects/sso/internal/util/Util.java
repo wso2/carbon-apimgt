@@ -41,16 +41,17 @@ import org.w3c.dom.ls.LSOutput;
 import org.w3c.dom.ls.LSSerializer;
 import org.wso2.carbon.base.MultitenantConstants;
 import org.wso2.carbon.core.util.KeyStoreManager;
-import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import javax.xml.namespace.QName;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
-import java.io.*;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
 import java.security.KeyStore;
-import java.security.KeyStoreException;
 import java.util.Random;
 import java.util.zip.Deflater;
 import java.util.zip.DeflaterOutputStream;
@@ -218,34 +219,6 @@ public class Util {
         return new String(Base64.decode(encodedStr));
     }
 
-    
-    
-    public static X509Certificate getCertificateForTenant(String tenantDomain,String keyStoreName, String keyStorePassword, String alias){
-        KeyStore keyStore = null;
-        java.security.cert.X509Certificate cert = null;
-        try {
-            int tenantId = Util.getRealmService().getTenantManager().getTenantId(tenantDomain);
-
-            if (tenantId != MultitenantConstants.SUPER_TENANT_ID) {
-                // get an instance of the corresponding Key Store Manager instance
-                KeyStoreManager keyStoreManager = KeyStoreManager.getInstance(tenantId);
-                keyStore = keyStoreManager.getKeyStore(generateKSNameFromDomainName(tenantDomain));
-                cert = (java.security.cert.X509Certificate) keyStore.getCertificate(tenantDomain);
-            } else {
-                keyStore = KeyStore.getInstance("JKS");
-                keyStore.load(new FileInputStream(new File(keyStoreName)), keyStorePassword.toCharArray());
-                cert = (java.security.cert.X509Certificate) keyStore.getCertificate(alias);
-            }
-        } catch (UserStoreException e) {
-            log.error("Error while getting tenant id for tenant domain:" + tenantDomain, e);
-        } catch (FileNotFoundException e){
-            log.error("Error while getting certificate file " + keyStoreName, e);
-        } catch (Exception e){
-            log.error("Error while getting certificate for " + tenantDomain, e);
-        }
-        return cert;
-    }
-    
     /**
      * This method validates the signature of the SAML Response.
      *
@@ -257,7 +230,18 @@ public class Util {
                                             String tenantDomain) {
         boolean isSigValid = false;
         try {
-            
+            KeyStore keyStore = null;
+            java.security.cert.X509Certificate cert = null;
+            if (tenantId != MultitenantConstants.SUPER_TENANT_ID) {
+                // get an instance of the corresponding Key Store Manager instance
+                KeyStoreManager keyStoreManager = KeyStoreManager.getInstance(tenantId);
+                keyStore = keyStoreManager.getKeyStore(generateKSNameFromDomainName(tenantDomain));
+                cert = (java.security.cert.X509Certificate) keyStore.getCertificate(tenantDomain);
+            } else {
+                keyStore = KeyStore.getInstance("JKS");
+                keyStore.load(new FileInputStream(new File(keyStoreName)), keyStorePassword.toCharArray());
+                cert = (java.security.cert.X509Certificate) keyStore.getCertificate(alias);
+            }
             if (log.isDebugEnabled()) {
                 log.debug("Validating against " + cert.getSubjectDN().getName());
             }

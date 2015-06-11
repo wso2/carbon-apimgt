@@ -189,9 +189,10 @@ public class SAMLSSORelyingPartyObject extends ScriptableObject {
         String logoutRequest = StringEscapeUtils.unescapeXml((String) args[0]);
         String decodedString = isEncoded ? Util.decode(logoutRequest) : logoutRequest;
         XMLObject samlObject = Util.unmarshall(decodedString);
-		if (log.isDebugEnabled() && samlObject instanceof LogoutRequest) {
-			log.debug("Request is a logout request and request is " + args[0]);
-		}
+        if (log.isDebugEnabled() && samlObject instanceof LogoutRequest) {
+            log.debug("Request is a logout request and request is " + args[0]);
+        }
+
         return samlObject instanceof LogoutRequest;
 
     }
@@ -226,9 +227,9 @@ public class SAMLSSORelyingPartyObject extends ScriptableObject {
 
         String decodedString = isEncoded ? Util.decode((String) args[0]) : (String) args[0];
         XMLObject samlObject = Util.unmarshall(decodedString);
-		if (log.isDebugEnabled() && samlObject instanceof LogoutResponse) {
-			log.debug("Response is a logout response and response is " + args[0]);
-		}
+        if (log.isDebugEnabled() && samlObject instanceof LogoutResponse) {
+            log.debug("Response is a logout response and response is " + args[0]);
+        }
         return samlObject instanceof LogoutResponse;
 
     }
@@ -405,25 +406,28 @@ public class SAMLSSORelyingPartyObject extends ScriptableObject {
     public static String jsFunction_getSAMLAuthRequest(Context cx, Scriptable thisObj, Object[] args, Function funObj)
             throws Exception {
         SAMLSSORelyingPartyObject relyingPartyObject = (SAMLSSORelyingPartyObject) thisObj;
-        //ADDED
         if (!Boolean.valueOf(relyingPartyObject.getSSOProperty(SSOConstants.SIGN_REQUESTS))) {
-            return Util.marshall(new AuthReqBuilder().buildAuthenticationRequest(
-                    relyingPartyObject.getSSOProperty(SSOConstants.ISSUER_ID)));
+            return Util.marshall(new AuthReqBuilder().
+                    buildAuthenticationRequest(
+                            relyingPartyObject.getSSOProperty(SSOConstants.ISSUER_ID)));
         } else {
             int argLength = args.length;
             if (argLength == 0) {
-                return Util.marshall(new AuthReqBuilder().buildSignedAuthRequest(
-                        relyingPartyObject.getSSOProperty(SSOConstants.ISSUER_ID), MultitenantConstants.SUPER_TENANT_ID,
-                        MultitenantConstants.SUPER_TENANT_DOMAIN_NAME));
+                return Util.marshall(new AuthReqBuilder().
+                        buildSignedAuthRequest(
+                                relyingPartyObject.getSSOProperty(SSOConstants.ISSUER_ID),
+                                MultitenantConstants.SUPER_TENANT_ID,
+                                MultitenantConstants.SUPER_TENANT_DOMAIN_NAME));
             } else {
                 String consumerUrl = (String) args[0];
-                return Util.marshall(new AuthReqBuilder().buildSignedAuthRequestWithConsumerUrl(
-                        relyingPartyObject.getSSOProperty(SSOConstants.ISSUER_ID),
-                        relyingPartyObject.getSSOProperty(SSOConstants.IDP_URL), consumerUrl,
-                        MultitenantConstants.SUPER_TENANT_ID, MultitenantConstants.SUPER_TENANT_DOMAIN_NAME));
+                return Util.marshall(new AuthReqBuilder().
+                        buildSignedAuthRequestWithConsumerUrl(
+                                relyingPartyObject.getSSOProperty(SSOConstants.ISSUER_ID),
+                                relyingPartyObject.getSSOProperty(SSOConstants.IDP_URL),
+                                consumerUrl, MultitenantConstants.SUPER_TENANT_ID,
+                                MultitenantConstants.SUPER_TENANT_DOMAIN_NAME));
             }
         }
-        //END
     }
 
     /**
