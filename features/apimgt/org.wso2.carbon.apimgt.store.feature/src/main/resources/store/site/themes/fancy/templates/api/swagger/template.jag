@@ -38,7 +38,12 @@ providerValUe = APIUtil.replaceEmailDomain(providerValUe);
 
 //Calling the jaggery API
 
-var swaggerAPI = jagg.url("/api-docs"+"/"+providerValUe+"/"+apiName+"/"+version);
+var swaggerAPI ;
+if(providerValUe.contains("/")){
+swaggerAPI = jagg.url("/api-docs"+"?provider="+encodeURIComponent(providerValUe)+"&name="+encodeURIComponent(apiName)+"&version="+encodeURIComponent(version));
+  }else{
+swaggerAPI = jagg.url("/api-docs"+"/"+providerValUe+"/"+apiName+"/"+version);
+  }
 
 var api = outputs.api;%>
   <script type="text/javascript">
@@ -103,7 +108,11 @@ var show_environments = function(){
 var select_environment = function(){
     var selectedEnvironment = $("#environment_name");
     var name =selectedEnvironment.val();
-    window.swaggerUi.updateSwaggerUi({ "url" : swaggerUi.api.url + "?envName="+name});
+    if (swaggerUi.api.url.contains("?")) {
+    window.swaggerUi.updateSwaggerUi({ "url" : swaggerUi.api.url + "&envName="+name});    
+    }else{
+    window.swaggerUi.updateSwaggerUi({ "url" : swaggerUi.api.url + "? envName="+name});
+    }
     change_token();
           };
   $("#access_token").change(function(){

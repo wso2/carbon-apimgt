@@ -35,13 +35,16 @@ var log = new Log();
             providerVal = uriMatcher.elements().providerVal;
             apiNameVal = uriMatcher.elements().apiNameVal;
             apiVersionVal = uriMatcher.elements().apiVersionVal;
-        }else {
+        }else if(request.getParameter("provider") != null) {
+            providerVal =request.getParameter("provider");
+            apiNameVal = request.getParameter("name");
+            apiVersionVal = request.getParameter("version");
+            }else{
             print({
                 error:true,
                 message:msg.error.invalidAction(action)
             });
         }
-
         var url = request.getRequestURL();
         var host = getLocation(url).host;
         var port = getLocation(url).port;
