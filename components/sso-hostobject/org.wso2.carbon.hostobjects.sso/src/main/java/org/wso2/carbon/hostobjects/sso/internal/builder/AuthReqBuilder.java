@@ -73,26 +73,42 @@ public class AuthReqBuilder {
      */
     public AuthnRequest buildPassiveAuthenticationRequest(String issuerId, String acsUrl) throws Exception  {
         Util.doBootstrap();
-        //matches shortest segments that are between '{' and '}'
-        Pattern pattern = Pattern.compile("\\$\\{(.*?)\\}");
-        Matcher matcher = pattern.matcher(acsUrl);
-        while (matcher.find()) {
-            String match = matcher.group(1);
-            String property = System.getProperty(match);
-            if (property != null) {
-                acsUrl = acsUrl.replace("${" + match + "}", property);
-            } else {
-                log.warn("System Property " + match + " is not set");
-            }
-        }
+        acsUrl = processAcsUrl(acsUrl);
         AuthnRequest authnRequest = (AuthnRequest) Util.buildXMLObject(AuthnRequest.DEFAULT_ELEMENT_NAME);
         authnRequest.setID(Util.createID());
         authnRequest.setVersion(SAMLVersion.VERSION_20);
         authnRequest.setIssueInstant(new DateTime());
-        authnRequest.setIssuer(buildIssuer( issuerId));
+        authnRequest.setIssuer(buildIssuer(issuerId));
         authnRequest.setNameIDPolicy(buildNameIDPolicy());
         authnRequest.setIsPassive(true);
         authnRequest.setAssertionConsumerServiceURL(acsUrl);
+        return authnRequest;
+    }
+
+    /**
+     * Generate a signed Authentication request with passiveAuth
+     *
+     * @param issuerId
+     * @param acsUrl
+     * @return
+     * @throws Exception
+     */
+    public AuthnRequest buildPassiveSignedAuthenticationRequest(String issuerId, int tenantId,
+            String tenantDomain, String acsUrl) throws Exception {
+        Util.doBootstrap();
+        acsUrl = processAcsUrl(acsUrl);
+        AuthnRequest authnRequest = (AuthnRequest) Util.buildXMLObject(AuthnRequest.DEFAULT_ELEMENT_NAME);
+        authnRequest.setID(Util.createID());
+        authnRequest.setVersion(SAMLVersion.VERSION_20);
+        authnRequest.setIssueInstant(new DateTime());
+        authnRequest.setIssuer(buildIssuer(issuerId));
+        authnRequest.setNameIDPolicy(buildNameIDPolicy());
+        authnRequest.setIsPassive(true);
+        authnRequest.setAssertionConsumerServiceURL(acsUrl);
+        SSOAgentCarbonX509Credential ssoAgentCarbonX509Credential =
+                new SSOAgentCarbonX509Credential(tenantId, tenantDomain);
+        setSignature(authnRequest, SignatureConstants.ALGO_ID_SIGNATURE_RSA,
+                new X509CredentialImpl(ssoAgentCarbonX509Credential));
         return authnRequest;
     }
 
@@ -292,5 +308,26 @@ public class AuthReqBuilder {
                 objectQName.getPrefix());
     }
 
+    /**
+     * Replaces the ${} in url with system properties and returns
+     *
+     * @param acsUrl
+     * @return
+     */
+    private String processAcsUrl(String acsUrl){
+        //matches shortest segments that are between '{' and '}'
+        Pattern pattern = Pattern.compile("\\$\\{(.*?)\\}");
+        Matcher matcher = pattern.matcher(acsUrl);
+        while (matcher.find()) {
+            String match = matcher.group(1);
+            String property = System.getProperty(match);
+            if (property != null) {
+                acsUrl = acsUrl.replace("${" + match + "}", property);
+            } else {
+                log.warn("System Property " + match + " is not set");
+            }
+        }
+        return acsUrl;
+    }
     
 }
