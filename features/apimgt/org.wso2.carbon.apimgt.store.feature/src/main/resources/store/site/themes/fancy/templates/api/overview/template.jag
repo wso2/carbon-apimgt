@@ -45,6 +45,7 @@
                 // since we are using context versioning, we remove the api.version from the URL.
                 // The reason is that the context will have the version now
     	        for (var urltype in environmenturls ) {
+    	        if(environmenturls[urltype] != ""){
                     %>
     	            <div  class="well well-small api_urls"><%=environmenturls[urltype]%><%=api.context%>
                         <%if (api.isDefaultVersion){
@@ -55,6 +56,7 @@
                         <%}%>
                     </div>
     	            <%}
+                    }
                     }
                     }
                     }%>
