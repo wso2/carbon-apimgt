@@ -255,15 +255,16 @@
                                <textarea id="allowedDomainsPro" class="form-control"><% if(app.prodKey != null ) { %><%=app.prodAuthorizedDomains%><% } else { %>ALL<% } %></textarea>
                                <div>The domains from which requests are allowed to the APIs. Leave empty or enter "ALL" to allow all domains.</div>
                                <% if(app.prodKey != null ) { %>
-                               <button class="btn btn-default"
-                                       onclick="updateAccessAllowDomains('<%=app.name%>','PRODUCTION',200,this)" >Update Domains</button>
+                               <button class="btn btn-default" onclick="updateAccessAllowDomains('<%=app.name%>','PRODUCTION',200,this)" >Update Domains</button>
                                <div style="display:none" class="success-update-msg">Successfully updated.</div>
+                               <a class="icon-question-sign update_domain_popup_prod"></a>
+                               <div id="update_help_prod"></div>
                                <% } else { %>
                                     Token Validity: <input type="text" class="input-mini token-validity-input" id="refreshProdValidityTime" value="<%=prodValidityTime%>" maxlength="70"  autofocus="autofocus" style="margin-top:5px;"  />  Seconds
                                     <span class="label label-warning" id = "timeWarn" style="display:none;"><%=i18n.localize("timeWarn")%></span>
-				    <a class="icon-question-sign help_popup_prod"></a>
+                                    <a class="icon-question-sign help_popup_prod"></a>
                                     <div id="prodtoken_help"></div>
-                               <% } %>                               
+                               <% } %>
                             </div>
                         	<!-- END config section -->
                         </div>
@@ -488,15 +489,17 @@
                             <div>
                                	<textarea id="allowedDomainsSand" class="form-control"><% if(app.sandboxKey!=null){ %><%=app.sandboxAuthorizedDomains%><% }else{ %>ALL<% } %></textarea>
                                	<div>The domains from which requests are allowed to the APIs. Leave empty or enter "ALL" to allow all domains.</div>
-		                        <% if(app.sandboxKey!=null){ %>
+ 		                        <% if(app.sandboxKey!=null){ %>
 		                        <button  class="btn btn-default"
 		                              onclick="updateAccessAllowDomains('<%=app.name%>','SANDBOX',200,this,'allowDomainsSandRegenBtn')">Update Domains</button>
 		                        <div style="display:none" class="success-update-msg">Successfully updated.</div>
+                               <a class="icon-question-sign update_domain_popup_sand"></a>
+                               <div id="update_help_sand"></div>
 		                        <% } else { %>
 		                        Token Validity: <input type="text" class="input-mini token-validity-input" id="refreshSandValidityTime" value="<%=sandValidityTime%>" maxlength="70"  autofocus="autofocus" style="margin-top:5px;"  />  Seconds
 		                            <span class="label label-warning" id = "timeWarn" style="display:none;"><%=i18n.localize("timeWarn")%></span>
-					    <a class="icon-question-sign help_popup_sand"></a>
-		                            <div id="sandtoken_help"></div>
+                                    <a class="icon-question-sign help_popup_sand"></a>
+                                    <div id="sandtoken_help"></div>
 		                        <% } %>		                        
                             </div>
                         	<!-- END config section -->
