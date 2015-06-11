@@ -989,12 +989,14 @@ public class APIStoreHostObject extends ScriptableObject {
 
             try {
 
-                String applicationId = (String) args[0];
+                String applicationName = (String) args[0];
                 String keyType = (String) args[1];
+                String groupingId = (String) args[2];
+                String username = (String) args[3];
 
                 //this map will hold response that we are getting from Application registration process.
                 Map<String, Object> keyDetails;
-                getAPIConsumer(thisObj).cleanUpApplicationRegistration(applicationId, keyType);
+                getAPIConsumer(thisObj).cleanUpApplicationRegistration(applicationName, keyType, groupingId, username);
 
             } catch (Exception e) {
                 handleException("Error while obtaining the application access token for the application" + e
