@@ -438,7 +438,10 @@ asset.renderer = function (ctx) {
     var buildDefaultLeftNav = function (page, util) {
         var id = page.assets.id;
         var navList = util.navList();
-        navList.push('Edit', 'btn-edit', util.buildUrl('design') + '/' + id);
+        //Edit option will only be available if asset has created
+        if(id) {
+            navList.push('Edit', 'btn-edit', util.buildUrl('design') + '/' + id);
+        }
         navList.push('Overview', 'btn-overview', util.buildUrl('details') + '/' + id);
         navList.push('Life Cycle', 'btn-lifecycle', util.buildUrl('lifecycle') + '/' + id);
         navList.push('Versions', 'btn-versions', util.buildUrl('versions') + '/' + id);
