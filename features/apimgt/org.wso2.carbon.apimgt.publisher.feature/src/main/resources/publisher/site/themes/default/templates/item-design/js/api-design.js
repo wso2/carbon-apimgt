@@ -618,7 +618,7 @@ APIDesigner.prototype.add_resource = function(resource, path){
 
 APIDesigner.prototype.edit_swagger = function(){
     $("body").addClass("modal-open");
-    $("#swaggerEditer").append('<iframe id="se-iframe"  style="border:0px;" width="100%" height="100%"></iframe>');    
+    $("#swaggerEditer").append('<iframe id="se-iframe"  style="border:0px;"background: #4a4a4a; width="100%" height="100%"></iframe>');    
     document.getElementById('se-iframe').src = $("#swaggerEditer").attr("editor-url");
     $("#swaggerEditer").fadeIn("fast");
 };
@@ -860,6 +860,11 @@ function updateContextPattern(){
     var version = $('#version').val();
 
     if(context != ""){
+        if(context.search("{") != -1 || context.search("}") != -1){
+            context = context.replace("{","");
+            context = context.replace("}","");
+            $('#error-invalidContextValue').modal('show');
+        }
         if(context.indexOf("{version}") < 0){
             context = context + '/';
             context = context + "{version}";
@@ -874,3 +879,4 @@ function updateContextPattern(){
         $('#resource_url_pattern_refix').text(context);
     }
 }
+

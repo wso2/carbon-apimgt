@@ -5603,14 +5603,8 @@ public class ApiMgtDAO {
         } finally {
             APIMgtDBUtil.closeAllConnections(prepStmt, connection, rs);
         }
-
-        String[] consumerKeyArray;
-        if (consumerKeys.size() == 0) {
-            consumerKeyArray = null;
-        } else {
-            consumerKeyArray = consumerKeys.toArray(new String[consumerKeys.size()]);
-        }
-        return consumerKeyArray;
+        
+        return consumerKeys.toArray(new String[consumerKeys.size()]);
     }
 
     public void deleteApplication(Application application) throws APIManagementException {
@@ -5884,7 +5878,7 @@ public class ApiMgtDAO {
                     "   AM_APPLICATION_KEY_MAPPING  " +
                     "WHERE" +
                     "   APPLICATION_ID = ?" +
-                    "AND" +
+                    " AND" +
                     "   KEY_TYPE = ?";
 
             if (log.isDebugEnabled()) {
@@ -5892,7 +5886,7 @@ public class ApiMgtDAO {
                         applicationId + " and Token type" + tokenType);
             }
             ps = connection.prepareStatement(deleteRegistrationEntry);
-            ps.setString(1, applicationId);
+            ps.setInt(1, Integer.parseInt(applicationId));
             ps.setString(2, tokenType);
             ps.executeUpdate();
             connection.commit();
@@ -5920,7 +5914,7 @@ public class ApiMgtDAO {
                     "   AM_APPLICATION_REGISTRATION " +
                     "WHERE" +
                     "   APP_ID = ?" +
-                    "AND" +
+                    " AND" +
                     "   TOKEN_TYPE = ?";
 
             if (log.isDebugEnabled()) {
@@ -5928,7 +5922,7 @@ public class ApiMgtDAO {
                         applicationId + " and Token type" + tokenType);
             }
             ps = connection.prepareStatement(deleteRegistrationEntry);
-            ps.setString(1, applicationId);
+            ps.setInt(1, Integer.parseInt(applicationId));
             ps.setString(2, tokenType);
             ps.executeUpdate();
             connection.commit();

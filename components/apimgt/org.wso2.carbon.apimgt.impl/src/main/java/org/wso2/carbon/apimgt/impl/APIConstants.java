@@ -367,6 +367,8 @@ public final class APIConstants {
     public static final String API_STORE_TAG_CACHE_DURATION = API_STORE + "TagCacheDuration";
     public static final String API_STORE_REUSE_APP_NAME = API_STORE + "ReuseAppName";
     public static final String API_STORE_DISABLE_PERMISSION_CHECK = API_STORE + "DisablePermissionCheck";
+    public static final String API_STORE_APIS_PER_PAGE = API_STORE + "APIsPerPage";
+
 
     public static final String API_PUBLISHER = "APIPublisher.";
     public static final String SHOW_API_PUBLISHER_URL_FROM_STORE = "APIPublisher."+"DisplayURL";

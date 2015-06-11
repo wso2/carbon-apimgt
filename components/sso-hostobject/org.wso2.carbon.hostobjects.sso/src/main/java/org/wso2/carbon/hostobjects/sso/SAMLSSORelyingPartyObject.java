@@ -135,20 +135,20 @@ public class SAMLSSORelyingPartyObject extends ScriptableObject {
             Response samlResponse = (Response) samlObject;
             SAMLSSORelyingPartyObject relyingPartyObject = (SAMLSSORelyingPartyObject) thisObj;
 
+            //Try and validate the signature using the super tenant key store.
             boolean sigValid = Util.validateSignature(samlResponse,
                     relyingPartyObject.getSSOProperty(SSOConstants.KEY_STORE_NAME),
                     relyingPartyObject.getSSOProperty(SSOConstants.KEY_STORE_PASSWORD),
                     relyingPartyObject.getSSOProperty(SSOConstants.IDP_ALIAS),
-                    tenantId, tenantDomain);
+                    MultitenantConstants.SUPER_TENANT_ID, MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
 
-            //If signature validation was done using a tenant key store and signature validation failed.
+            //If not success, try and validate the signature using tenant key store.
             if(!sigValid && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)){
-                //Try and validate the signature using the super tenant key store.
                 sigValid = Util.validateSignature(samlResponse,
                         relyingPartyObject.getSSOProperty(SSOConstants.KEY_STORE_NAME),
                         relyingPartyObject.getSSOProperty(SSOConstants.KEY_STORE_PASSWORD),
                         relyingPartyObject.getSSOProperty(SSOConstants.IDP_ALIAS),
-                        MultitenantConstants.SUPER_TENANT_ID, MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
+                        tenantId, tenantDomain);
             }
             return sigValid;
         }
