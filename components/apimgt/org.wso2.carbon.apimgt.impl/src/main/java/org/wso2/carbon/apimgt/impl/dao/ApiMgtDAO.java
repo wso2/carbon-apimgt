@@ -1255,8 +1255,9 @@ public class ApiMgtDAO {
             conn.setAutoCommit(false);
             
             String query = "INSERT" +
-                           " INTO AM_SUBSCRIBER (USER_ID, TENANT_ID, EMAIL_ADDRESS, DATE_SUBSCRIBED)" +
-                           " VALUES (?,?,?,?)";
+                           " INTO AM_SUBSCRIBER (USER_ID, TENANT_ID, EMAIL_ADDRESS, DATE_SUBSCRIBED, " +
+                           "CREATED_BY, CREATED_TIME)" +
+                           " VALUES (?,?,?,?,?,?)";
 
             ps = conn.prepareStatement(query, new String[]{"subscriber_id"});
 
@@ -1265,6 +1266,8 @@ public class ApiMgtDAO {
             ps.setInt(2, subscriber.getTenantId());
             ps.setString(3, subscriber.getEmail());
             ps.setTimestamp(4, new Timestamp(subscriber.getSubscribedDate().getTime()));
+            ps.setString(5, subscriber.getName());
+            ps.setTimestamp(6, new Timestamp(subscriber.getSubscribedDate().getTime()));
             ps.executeUpdate();
                        
 
@@ -1322,14 +1325,16 @@ public class ApiMgtDAO {
             conn.setAutoCommit(false);
             
             String query = "UPDATE" +
-                           " AM_SUBSCRIBER SET USER_ID=?, TENANT_ID=?, EMAIL_ADDRESS=?, DATE_SUBSCRIBED=?" +
-                           " WHERE SUBSCRIBER_ID=?";
+                           " AM_SUBSCRIBER SET USER_ID=?, TENANT_ID=?, EMAIL_ADDRESS=?, DATE_SUBSCRIBED=?, " +
+                           "UPDATED_BY=?, UPDATED_TIME=? WHERE SUBSCRIBER_ID=?";
             ps = conn.prepareStatement(query);
             ps.setString(1, subscriber.getName());
             ps.setInt(2, subscriber.getTenantId());
             ps.setString(3, subscriber.getEmail());
             ps.setTimestamp(4, new Timestamp(subscriber.getSubscribedDate().getTime()));
-            ps.setInt(5, subscriber.getId());
+            ps.setString(5, subscriber.getName());
+            ps.setTimestamp(6, new Timestamp(System.currentTimeMillis()));
+            ps.setInt(7, subscriber.getId());
             ps.executeUpdate();
                         
             conn.commit();
@@ -1439,8 +1444,8 @@ public class ApiMgtDAO {
 
             //This query to update the AM_SUBSCRIPTION table
             String sqlQuery = "INSERT " +
-                              "INTO AM_SUBSCRIPTION (TIER_ID,API_ID,APPLICATION_ID,SUB_STATUS, SUBS_CREATE_STATE)" +
-                              " VALUES (?,?,?,?,?)";
+                              "INTO AM_SUBSCRIPTION (TIER_ID,API_ID,APPLICATION_ID,SUB_STATUS, SUBS_CREATE_STATE, " +
+                              "CREATED_BY, CREATED_TIME) VALUES (?,?,?,?,?,?,?)";
 
             //Adding data to the AM_SUBSCRIPTION table
             //ps = conn.prepareStatement(sqlQuery, Statement.RETURN_GENERATED_KEYS);
@@ -1454,6 +1459,9 @@ public class ApiMgtDAO {
             preparedStforInsert.setInt(3, applicationId);
             preparedStforInsert.setString(4, status != null ? status : APIConstants.SubscriptionStatus.UNBLOCKED);
             preparedStforInsert.setString(5, APIConstants.SubscriptionCreatedStatus.SUBSCRIBE);
+            //TODO Need to find logged in user who perform this subscription
+            preparedStforInsert.setString(6, null);
+            preparedStforInsert.setTimestamp(7, new Timestamp(System.currentTimeMillis()));
 
             preparedStforInsert.executeUpdate();
             rs = preparedStforInsert.getGeneratedKeys();
@@ -3476,13 +3484,17 @@ public class ApiMgtDAO {
             }
 
             //This query to update the AM_SUBSCRIPTION table
-            String sqlQuery ="UPDATE AM_SUBSCRIPTION SET SUB_STATUS = ? WHERE API_ID = ? AND APPLICATION_ID = ?";
+            String sqlQuery ="UPDATE AM_SUBSCRIPTION SET SUB_STATUS = ?, UPDATED_BY = ?, UPDATED_TIME = ? " +
+                             "WHERE API_ID = ? AND APPLICATION_ID = ?";
 
             //Updating data to the AM_SUBSCRIPTION table
             ps = conn.prepareStatement(sqlQuery);
             ps.setString(1, subStatus);
-            ps.setInt(2, apiId);
-            ps.setInt(3, applicationId);
+            //TODO Need to find logged in user who does this update.
+            ps.setString(2, null);
+            ps.setTimestamp(3, new Timestamp(System.currentTimeMillis()));
+            ps.setInt(4, apiId);
+            ps.setInt(5, applicationId);
             ps.execute();
             
             // finally commit transaction
@@ -5038,8 +5050,9 @@ public class ApiMgtDAO {
             }
             //This query to update the AM_APPLICATION table
             String sqlQuery = "INSERT " +
-                              "INTO AM_APPLICATION (NAME, SUBSCRIBER_ID, APPLICATION_TIER, CALLBACK_URL, DESCRIPTION, APPLICATION_STATUS, GROUP_ID)" +
-                              " VALUES (?,?,?,?,?,?,?)";
+                              "INTO AM_APPLICATION (NAME, SUBSCRIBER_ID, APPLICATION_TIER, CALLBACK_URL, DESCRIPTION, "
+                              + "APPLICATION_STATUS, GROUP_ID, CREATED_BY, CREATED_TIME)" +
+                              " VALUES (?,?,?,?,?,?,?,?,?)";
             // Adding data to the AM_APPLICATION  table
             //ps = conn.prepareStatement(sqlQuery);
             ps = conn.prepareStatement(sqlQuery, new String[]{"APPLICATION_ID"});
@@ -5059,6 +5072,8 @@ public class ApiMgtDAO {
                 ps.setString(6, APIConstants.ApplicationStatus.APPLICATION_CREATED);
             }
             ps.setString(7, application.getGroupId());
+            ps.setString(8, subscriber.getName());
+            ps.setTimestamp(9, new Timestamp(System.currentTimeMillis()));
             ps.executeUpdate();
                         
             ResultSet rs = ps.getGeneratedKeys();
@@ -5094,6 +5109,8 @@ public class ApiMgtDAO {
                               ", APPLICATION_TIER = ? " +
                               ", CALLBACK_URL = ? " +
                               ", DESCRIPTION = ? " +
+                              ", UPDATED_BY = ? " +
+                              ", UPDATED_TIME = ? " +
                               "WHERE" +
                               " APPLICATION_ID = ?";
             // Adding data to the AM_APPLICATION  table
@@ -5102,7 +5119,10 @@ public class ApiMgtDAO {
             ps.setString(2, application.getTier());
             ps.setString(3, application.getCallbackUrl());
             ps.setString(4, application.getDescription());
-            ps.setInt(5, application.getId());
+            //TODO need to find the proper user who updates this application.
+            ps.setString(5, null);
+            ps.setTimestamp(6, new Timestamp(System.currentTimeMillis()));
+            ps.setInt(7, application.getId());
 
             ps.executeUpdate();
             ps.close();
@@ -6325,8 +6345,8 @@ public class ApiMgtDAO {
         PreparedStatement prepStmt = null;
         ResultSet rs = null;
 
-        String query = "INSERT INTO AM_API (API_PROVIDER, API_NAME, API_VERSION, CONTEXT, CONTEXT_TEMPLATE) " +
-                       "VALUES (?,?,?,?,?)";
+        String query = "INSERT INTO AM_API (API_PROVIDER, API_NAME, API_VERSION, CONTEXT, CONTEXT_TEMPLATE, " +
+                       "CREATED_BY, CREATED_TIME) VALUES (?,?,?,?,?,?,?)";
 
         try {
             connection = APIMgtDBUtil.getConnection();
@@ -6344,6 +6364,8 @@ public class ApiMgtDAO {
                 contextTemplate = contextTemplate.split(Pattern.quote("/" + APIConstants.VERSION_PLACEHOLDER))[0];
             }
             prepStmt.setString(5, contextTemplate);
+            prepStmt.setString(6, APIUtil.replaceEmailDomainBack(api.getId().getProviderName()));
+            prepStmt.setTimestamp(7, new Timestamp(System.currentTimeMillis()));
             prepStmt.execute();
 
             rs = prepStmt.getGeneratedKeys();
@@ -6945,7 +6967,7 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
 
         String previousDefaultVersion = getDefaultVersion(api.getId());
 
-        String query = "UPDATE AM_API SET CONTEXT = ?, CONTEXT_TEMPLATE = ? WHERE API_PROVIDER = ? AND API_NAME = ? AND"
+        String query = "UPDATE AM_API SET CONTEXT = ?, CONTEXT_TEMPLATE = ?, UPDATED_BY = ?, UPDATED_TIME = ? WHERE API_PROVIDER = ? AND API_NAME = ? AND"
                         + " API_VERSION = ? ";
         try {
             connection = APIMgtDBUtil.getConnection();
@@ -6961,9 +6983,12 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
                     contextTemplate = contextTemplate.split(Pattern.quote("/" + APIConstants.VERSION_PLACEHOLDER))[0];
                 }
                 prepStmt.setString(2, contextTemplate);
-                prepStmt.setString(3, APIUtil.replaceEmailDomainBack(api.getId().getProviderName()));
-                prepStmt.setString(4, api.getId().getApiName());
-                prepStmt.setString(5, api.getId().getVersion());
+                //TODO Need to find who exactly does this update.
+                prepStmt.setString(3, null);
+                prepStmt.setTimestamp(4, new Timestamp(System.currentTimeMillis()));
+                prepStmt.setString(5, APIUtil.replaceEmailDomainBack(api.getId().getProviderName()));
+                prepStmt.setString(6, api.getId().getApiName());
+                prepStmt.setString(7, api.getId().getVersion());
                 prepStmt.execute();
             }
 
