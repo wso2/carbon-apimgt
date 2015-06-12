@@ -56,7 +56,7 @@ var datasourceData = outputs.datasourceData;
                 <td>
                     <div class="control-group">
                         <div class="controls">
-                            <input type="text" class="input-xlarge validInput" id="eventReceiverUsername" name="eventReceiverUsername" autofocus="autofocus"/>
+                            <input type="text" class="validInput" id="eventReceiverUsername" name="eventReceiverUsername" autofocus="autofocus"/>
                             <a class="icon-question-sign help_popup" help_data="eventReceiverUsernameHelp"></a>
                             <p id="eventReceiverUsernameHelp" class="hide">Event Receiver Username</p>
                         </div>
@@ -65,7 +65,7 @@ var datasourceData = outputs.datasourceData;
                 <td>
                     <div class="control-group">
                         <div class="controls">
-                            <input type="password" class="input-xlarge validInput" id="eventReceiverPassword" name="eventReceiverPassword" autofocus="autofocus" value=""/>
+                            <input type="password" class="validInput" id="eventReceiverPassword" name="eventReceiverPassword" autofocus="autofocus" value=""/>
                             <a class="icon-question-sign help_popup" help_data="eventReceiverPasswordHelp"></a>
                             <p id="eventReceiverPasswordHelp" class="hide">Event Receiver Password</p>
                         </div>
@@ -81,8 +81,8 @@ var datasourceData = outputs.datasourceData;
             </tr>
             <tr>
                 <td colspan="4">
-                    <div id="event_receiver_urls_space">
-                        <div id ="event_receiver_url"></div>
+                    <div id="event_receiver_urls_space" class="span11">
+                        <div id ="event_receiver_url" ></div>
                     </div>
                 </td>
             </tr>
@@ -116,7 +116,7 @@ var datasourceData = outputs.datasourceData;
                 <td>
                     <div class="control-group">
                         <div class="controls">
-                            <input type="text" class="input-xlarge validInput" id="eventAnalyserUsername" name="eventAnalyserUsername" autofocus="autofocus" value=""/>
+                            <input type="text" class="validInput" id="eventAnalyserUsername" name="eventAnalyserUsername" autofocus="autofocus" value=""/>
                             <a class="icon-question-sign help_popup" help_data="eventAnalyserUsernameHelp"></a>
                             <p id="eventAnalyserUsernameHelp" class="hide">Event Analyser Username</p>
                         </div>
@@ -125,7 +125,7 @@ var datasourceData = outputs.datasourceData;
                 <td>
                     <div class="control-group">
                         <div class="controls">
-                            <input type="password" class="input-xlarge validInput noSpace" id="eventAnalyserPassword" name="eventAnalyserPassword" autofocus="autofocus" value=""/>
+                            <input type="password" class="validInput noSpace" id="eventAnalyserPassword" name="eventAnalyserPassword" autofocus="autofocus" value=""/>
                             <a class="icon-question-sign help_popup" help_data="eventAnalyserPasswordHelp"></a>
                             <p id="eventAnalyserPasswordHelp" class="hide">Event Analyser Password</p>
                         </div>
@@ -153,7 +153,7 @@ var datasourceData = outputs.datasourceData;
                     <div class="control-group">
                         <label class="control-label" for="statDsDriver">JDBC Driver Class:<span class="requiredAstrix">*</span></label>
                         <div class="controls">
-                            <input type="text" class="input-xlarge validInput noSpace notEmpty" id="statDsDriver" name="statDsDriver" autofocus="autofocus" value=""/>
+                            <input type="text" class="validInput noSpace notEmpty" id="statDsDriver" name="statDsDriver" autofocus="autofocus" value=""/>
                              <a class="icon-question-sign help_popup" help_data="dsDriverHelp"></a>
                              <p id="dsDriverHelp" class="hide">Statistics Datasource Driver Class Name</p>
                         </div>
@@ -163,7 +163,7 @@ var datasourceData = outputs.datasourceData;
                     <div class="control-group">
                         <label class="control-label" for="statDsUsername">Username:<span class="requiredAstrix">*</span></label>
                         <div class="controls">
-                            <input type="text" class="input-xlarge validInput noSpace notEmpty" id="statDsUsername" name="statDsUsername" autofocus="autofocus" value=""/>
+                            <input type="text" class="validInput noSpace notEmpty" id="statDsUsername" name="statDsUsername" autofocus="autofocus" value=""/>
                             <a class="icon-question-sign help_popup" help_data="dsUsernameHelp"></a>
                             <p id="dsUsernameHelp" class="hide">Statistics Datasource Username</p>
                         </div>
@@ -173,7 +173,7 @@ var datasourceData = outputs.datasourceData;
                     <div class="control-group">
                         <label class="control-label" for="statDsPassword">Password:<span class="requiredAstrix">*</span></label>
                         <div class="controls">
-                            <input type="password" class="input-xlarge validInput noSpace notEmpty" id="statDsPassword" name="statDsPassword" autofocus="autofocus" value=""/>
+                            <input type="password" class="validInput noSpace notEmpty" id="statDsPassword" name="statDsPassword" autofocus="autofocus" value=""/>
                             <a class="icon-question-sign help_popup" help_data="dsPasswordHelp"></a>
                             <p id="dsPasswordHelp" class="hide">Statistics Datasource Password</p>
                         </div>
