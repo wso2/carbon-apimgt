@@ -54,7 +54,9 @@
                          }
 
                         %>
-                        <% if(app.prodKey != null || app.prodKeyState == "COMPLETED" ) { %>
+
+                        <% if((app.prodKey != null || app.prodKeyState == "COMPLETED") && app.prodConsumerKey != null )
+	   { %>
                         <!-- START Show key info -->
 
                         <div class="row-fluid keys">
@@ -181,19 +183,31 @@
 							<%} if(app.prodKeyState == "APPROVED") { %>
                         		<%=i18n.localize("prodKeyApprovedMsg")%>
                         		<div class="gen-btn-wrapper">
+
                                    <button  class="app-create-key-button btn btn-primary"
                                    		data-application="<%=encode.forHtmlAttribute(app.name)%>"
                                    		data-callbackUrl="<%=encode.forHtmlAttribute(app.callbackUrl)%>"
                                    		data-keytype="PRODUCTION"
                                    		iteration="200"><%=i18n.localize("generateKey")%></button>
-                                   		<button  class="btn btn-primary btn-providekeys generateAgainBtn"
+                                   		<button title="<%=i18n.localize("cleanUpWarning")%>"  class="btn btn-primary btn-providekeys generateAgainBtn"
 											data-keyType="PRODUCTION"
-										    data-applicationId="<%=app.id%>">
-											Generate again
+										    data-applicationName="<%=app.name%>">
+											Clean up
 										</button>
                         		</div>
 
 							<%}%>
+
+							<% if(app.prodKeyState == "COMPLETED" && app.prodKey == null){ %>
+								<div class="errorMessage">
+							    	<%=i18n.localize("cleanUpSubscriptions")%>
+			   					</div>
+								<button title="<%=i18n.localize("cleanUpSubscriptions")%>"  class="btn btn-primary btn-providekeys generateAgainBtn"
+											data-keyType="PRODUCTION"
+										    data-applicationName="<%=app.name%>">
+											Clean up
+		   						</button>
+							<% } %>
                         <% } else{ %>
                         <%=i18n.localize("prodKeyMsg")%>
                         <% if(lenS > 0){ %>
@@ -300,7 +314,7 @@
 
                         <!-- START Show key info -->
 
-                    	<% if(app.sandboxKey!=null || app.sandboxKeyState == "COMPLETED"){%>
+                    	<% if((app.sandboxKey!=null || app.sandboxKeyState == "COMPLETED")  && app.sandboxConsumerKey != null){%>
 
 
                         <div class="row-fluid keys">
@@ -424,13 +438,23 @@
                                    		data-callbackUrl="<%=encode.forHtmlAttribute(app.callbackUrl)%>"
                                    		data-keytype="SANDBOX"
                                    		iteration="200"><%=i18n.localize("generateKey")%></button>
-                                   		<button  class="btn btn-primary btn-providekeys generateAgainBtn"
+                                   		<button title="<%=i18n.localize("cleanUpWarning")%>"  class="btn btn-primary btn-providekeys generateAgainBtn"
 											data-keyType="SANDBOX"
-										    data-applicationId="<%=app.id%>">
-											Generate again
+										    data-applicationName="<%=app.name%>">
+											Clean up
 										</button>
                         		</div>
 					   		<%}%>
+					   		<% if(app.sandboxKeyState == "COMPLETED" && app.sandboxKey == null){ %>
+								<div class="errorMessage">
+							    	<%=i18n.localize("cleanUpSubscriptions")%>
+			   					</div>
+								<button title="<%=i18n.localize("cleanUpSubscriptions")%>" class="btn btn-primary btn-providekeys generateAgainBtn"
+											data-keyType="SANDBOX"
+										    data-applicationName="<%=app.name%>">
+											Clean up
+		   						</button>
+							<% } %>
                        <% } else {%>
                        <%=i18n.localize("sandboxKeyMsg")%>
                        <% if(lenS > 0){ %>
@@ -508,7 +532,7 @@
 		                            <span class="label label-warning" id = "timeWarn" style="display:none;"><%=i18n.localize("timeWarn")%></span>
                                     <a class="icon-question-sign help_popup_sand"></a>
                                     <div id="sandtoken_help"></div>
-		                        <% } %>    
+		                        <% } %>
                             </div>
                         	<!-- END config section -->
                         </div>
