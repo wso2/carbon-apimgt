@@ -277,7 +277,7 @@
     "useCase1":"WSO2 Use Case: API Facade Pattern",
     "more":"More >>",
     "throttlingTier":"Throttling Tier",
-	"sequence":"Sequences",
+	"sequence":"Message Mediation Policies",
     "inFlow":"In Flow",
     "outFlow":"Out Flow",
     "faultFlow":"Fault Flow",

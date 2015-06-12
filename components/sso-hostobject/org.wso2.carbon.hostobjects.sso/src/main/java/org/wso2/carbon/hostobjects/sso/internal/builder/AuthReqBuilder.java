@@ -119,7 +119,7 @@ public class AuthReqBuilder {
      * @return Signed AuthnRequest Object
      * @throws Exception error when bootstrapping
      */
-    public AuthnRequest buildSignedAuthRequest(String issuerId, int tenantId,
+    public AuthnRequest buildSignedAuthRequest(String issuerId, String destination, int tenantId,
             String tenantDomain) throws Exception {
         Util.doBootstrap();
         AuthnRequest authnRequest = (AuthnRequest) Util.buildXMLObject(AuthnRequest.DEFAULT_ELEMENT_NAME);
@@ -128,6 +128,7 @@ public class AuthReqBuilder {
         authnRequest.setIssueInstant(new DateTime());
         authnRequest.setIssuer(buildIssuer(issuerId));
         authnRequest.setNameIDPolicy(buildNameIDPolicy());
+        authnRequest.setDestination(destination);
         SSOAgentCarbonX509Credential ssoAgentCarbonX509Credential =
                 new SSOAgentCarbonX509Credential(tenantId, tenantDomain);
         setSignature(authnRequest, SignatureConstants.ALGO_ID_SIGNATURE_RSA,
@@ -235,61 +236,6 @@ public class AuthReqBuilder {
             throw new Exception("Error while signing the SAML Request message", e);
         }
     }
-    
-
-    /**
-     * Sign the SAML AuthnRequest message
-     *
-     * @param logoutRequest
-     * @param signatureAlgorithm
-     * @param cred
-     * @return
-     */
-    
-    
-    public static LogoutRequest setSignature(LogoutRequest logoutRequest, String signatureAlgorithm,
-            X509Credential cred) throws Exception {
-        try {
-            Signature signature = (Signature) buildXMLObject(Signature.DEFAULT_ELEMENT_NAME);
-            signature.setSigningCredential(cred);
-            signature.setSignatureAlgorithm(signatureAlgorithm);
-            signature.setCanonicalizationAlgorithm(SignatureConstants.ALGO_ID_C14N_EXCL_OMIT_COMMENTS);
-
-            try {
-                KeyInfo keyInfo = (KeyInfo) buildXMLObject(KeyInfo.DEFAULT_ELEMENT_NAME);
-                X509Data data = (X509Data) buildXMLObject(X509Data.DEFAULT_ELEMENT_NAME);
-                org.opensaml.xml.signature.X509Certificate cert =
-                        (org.opensaml.xml.signature.X509Certificate) buildXMLObject(
-                                org.opensaml.xml.signature.X509Certificate.DEFAULT_ELEMENT_NAME);
-                String value = Base64.encodeBytes(cred.getEntityCertificate().getEncoded());
-                cert.setValue(value);
-                data.getX509Certificates().add(cert);
-                keyInfo.getX509Datas().add(data);
-                signature.setKeyInfo(keyInfo);
-            } catch (CertificateEncodingException e) {
-                throw new SecurityException("Error getting certificate", e);
-            }
-
-            logoutRequest.setSignature(signature);
-
-            List<Signature> signatureList = new ArrayList<Signature>();
-            signatureList.add(signature);
-
-            // Marshall and Sign
-            MarshallerFactory marshallerFactory =
-                    org.opensaml.xml.Configuration.getMarshallerFactory();
-            Marshaller marshaller = marshallerFactory.getMarshaller(logoutRequest);
-
-            marshaller.marshall(logoutRequest);
-
-            Signer.signObjects(signatureList);
-            return logoutRequest;
-
-        } catch (Exception e) {
-            throw new Exception("Error while signing the Logout Request message", e);
-        }
-    }
-    
 
     /**
      * Builds SAML Elements

@@ -10,12 +10,7 @@
 	var requestURI;
 
     var isPassiveAuthRequired = false;
-    var acsUrl = "";
     var samlAuthRequest;
-
-    if(site.ssoConfiguration.acsURL != null)    {
-       acsUrl = site.ssoConfiguration.acsURL;
-    }
 
 	var requestedPage = request.getParameter("requestedPage");
     var passiveAuthRequired = request.getParameter("passiveAuthRequired");
@@ -66,7 +61,7 @@
 
         var consumerUrl = jagg.getHttpsUrl("/jagg/jaggery_acs.jag");
         if(site.ssoConfiguration.passive == "true")    {
-            samlAuthRequest = ssoRelyingParty.getSAMLAuthRequest(isPassiveAuthRequired, acsUrl);
+            samlAuthRequest = ssoRelyingParty.getSAMLAuthRequest(isPassiveAuthRequired, consumerUrl);
         } else {
             if(site.ssoConfiguration.signRequests && (site.reverseProxy.enabled == "auto")){
                 samlAuthRequest = ssoRelyingParty.getSAMLAuthRequest(consumerUrl);
