@@ -313,7 +313,7 @@ asset.server = function (ctx) {
                         permission:'ASSET_CREATE'
                     }, {
                         title: 'Documents',
-                        url: 'documents',
+                        url: 'docs',
                         path: 'documents.jag'
                     }, {
                         title: 'Tier Permissions',
@@ -355,6 +355,9 @@ asset.server = function (ctx) {
                    },{
                        url: 'validation',
                        path: 'validation.jag'
+                   },{
+                       url: 'addDoc',
+                       path: 'document_add.jag'
                    }]
         }
     }
@@ -521,7 +524,7 @@ asset.renderer = function (ctx) {
                 return page;
             },
 
-              populateTest:function(page){
+              populateDetails:function(page){
                 if(page.meta.pageName !=='details'){
                     return;
                 }
@@ -532,6 +535,7 @@ asset.renderer = function (ctx) {
                }
                var firstOne = tables[0];
                assets.context = firstOne.fields.context.value;
+               assets.provider = firstOne.fields.provider.value;
                assets.wsdl = firstOne.fields.wsdl.value;
                assets.wadl = firstOne.fields.wadl.value;
                assets.tier = firstOne.fields.tier.value;
@@ -548,10 +552,22 @@ asset.renderer = function (ctx) {
                assets.lastUpdatedDate = page.lastUpdatedDate;
                assets.createdDate = page.createdDate;
 
+            },
 
-
-
+            populateDetails:function(page){
+                if(page.meta.pageName !=='docs'){
+                    return;
+                }
+                var assets = page.assets;
+               var tables = page.assets.tables;
+               if(tables.length > 1){
+                    tables.splice(1,1);
+               }
+               var firstOne = tables[0];
+               assets.provider = firstOne.fields.provider.value;
             }
+
+
         }
     };
 };
