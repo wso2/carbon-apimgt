@@ -2044,9 +2044,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     if (published) { // If published,then save to database.
                         publishedStores.add(store);
                     }
-                } catch (APIManagementException e) {
-                    log.error("Publishing to external API Store " + store.getDisplayName() + " Failed. " +
-                              e.getMessage());
+                } catch (Exception e) { // Catch any exception, log it and proceed
+                    log.error("Publishing to external API Store " + store.getDisplayName() + " Failed. " + e);
                 }
             }
             if (publishedStores.size() != 0) {
@@ -2078,9 +2077,15 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             boolean publishedToStore=false;
             for (APIStore store : publishedStores) {  //If selected external store in edit page is already saved in db
             	if (store.equals(apiStore)) { //Check if there's a modification happened in config file external store definition
-                    if (!isAPIAvailableInExternalAPIStore(api, apiStore)) {
-                    // API is not available
-            	    continue;
+                    try {
+                        if (!isAPIAvailableInExternalAPIStore(api, apiStore)) {
+                            // API is not available
+                            continue;
+                        }
+                    } catch (Exception e) { // Catch any exception, log it and proceed
+                        log.error("Error while checking API : " + api.getId() + " in external API Store " +
+                                  store.getDisplayName() + ". " + e);
+                        continue;
                     }
                     if (!store.getEndpoint().equals(apiStore.getEndpoint()) || !store.getType().equals((apiStore.getType()))||!store.getDisplayName().equals(apiStore.getDisplayName())) {
                         //Include the store definition to update the db stored APIStore set
@@ -2125,10 +2130,18 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
                 org.wso2.carbon.apimgt.api.model.APIPublisher publisher =
                         APIUtil.getExternalAPIStore(store.getName(), tenantId).getPublisher();
-                boolean deleted=publisher.deleteFromStore(api.getId(), APIUtil.getExternalAPIStore(store.getName(), tenantId));
-                if (deleted) {
-                    //If the attempt is successful, database will be changed deleting the External store mappings.
-                    removalCompletedStores.add(store);
+                try {
+                    boolean deleted =
+                                      publisher.deleteFromStore(api.getId(),
+                                                                APIUtil.getExternalAPIStore(store.getName(), tenantId));
+                    if (deleted) {
+                        // If the attempt is successful, database will be
+                        // changed deleting the External store mappings.
+                        removalCompletedStores.add(store);
+                    }
+                } catch (Exception e) { // Catch any exception, log it and proceed
+                    log.error("Error while deleting API : " + api.getId() + " in external API Store " +
+                              store.getDisplayName() + ". " + e);
                 }
 
             }
@@ -2217,8 +2230,14 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     @Override
     public Set<APIStore> getPublishedExternalAPIStores(APIIdentifier apiId)
             throws APIManagementException {
+        Set<APIStore> storesSet = new HashSet<APIStore>();
+        SortedSet<APIStore> configuredAPIStores = new TreeSet<APIStore>(new APIStoreNameComparator());
+        configuredAPIStores.addAll(APIUtil.getExternalStores(tenantId));        
         if (APIUtil.isAPIsPublishToExternalAPIStores(tenantId)) {
-            return apiMgtDAO.getExternalAPIStoresDetails(apiId);
+            storesSet =  apiMgtDAO.getExternalAPIStoresDetails(apiId);
+            //Retains only the stores that contained in configuration
+            storesSet.retainAll(configuredAPIStores);
+            return storesSet;
 
         } else {
             return null;
