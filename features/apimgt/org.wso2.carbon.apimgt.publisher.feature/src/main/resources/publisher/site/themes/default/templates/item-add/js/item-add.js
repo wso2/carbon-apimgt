@@ -40,13 +40,14 @@ $( document ).ready(function() {
 
     $("#startFromExistingSOAPEndpoint").click(function(){
         var wsdlURL = $('#wsdl-url').val();
-        if (wsdlURL.toLowerCase().indexOf("?wsdl") < 0) {
-            $('#wsdl-url').addClass('error');
-            $('.wsdlError').show();
-            console.log("Wrong endpoint.");
-           return;
+        if(wsdlURL!=""){
+            if (wsdlURL.toLowerCase().indexOf("wsdl") < 0) {
+                $('#wsdl-url').addClass('error');
+                $('.wsdlError').show();
+                console.log("Wrong endpoint.");
+                return;
+            }
         }
-        $('.wsdlError').hide();
 
         var btn = $(this);
         $(btn).buttonLoader('start');

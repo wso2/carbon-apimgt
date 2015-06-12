@@ -28,7 +28,7 @@
                         <div class="control-group toggleContainers">
                            <div class="controls hide">
                                <input name="swagger-url" id="swagger-url" class="input-xxlarge" type="text"/>
-                               <p class="help-block" style="margin-top:-3px;">Ex: http://petstore.swagger.io/v2/swagger.json</p>
+                               <p class="help-block" style="margin-top:-3px;">Eg: http://petstore.swagger.io/v2/swagger.json</p>
                            </div>
                            <div class="controls hide">
                               <input name="swagger-file" id="swagger-file" type="file" class="upload" />
@@ -61,9 +61,9 @@
                      <div class="control-group">
                         <div class="control-group">
                            <div class="controls">
-                               <input id="wsdl-url" name="wsdl-url" class="input-xxlarge" type="text"/>
+                               <input id="wsdl-url" name="wsdl-url" class="input-xxlarge is_url_valid" type="text"/>
                                <label for="wsdl-url" class="error wsdlError">Please use a valid wsdl endpoint</label>
-                               <p class="help-block">E.g.,:http://appserver/services/echo?wsdl</p>
+                               <p class="help-block">Eg : http://appserver/services/echo?wsdl</p>
                            </div>
                            <div class="controls hide">
                               <input name="wsdl-file" type="file" />
