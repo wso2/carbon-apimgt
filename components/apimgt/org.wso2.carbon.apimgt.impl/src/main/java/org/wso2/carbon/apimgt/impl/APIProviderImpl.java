@@ -2039,10 +2039,17 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         if (apiStoreSet.size() > 0) {
             for (APIStore store : apiStoreSet) {
                 org.wso2.carbon.apimgt.api.model.APIPublisher publisher = store.getPublisher();
-                boolean published=publisher.publishToStore(api, store);//First trying to publish the API to external APIStore
+                
+                try {
+                    // First trying to publish the API to external APIStore
+                    boolean published = publisher.publishToStore(api, store);
 
-                if (published) { //If published,then save to database.
-                    publishedStores.add(store);
+                    if (published) { // If published,then save to database.
+                        publishedStores.add(store);
+                    }
+                } catch (APIManagementException e) {
+                    log.error("Publishing to external API Store " + store.getDisplayName() + " Failed. " +
+                              e.getMessage());
                 }
             }
             if (publishedStores.size() != 0) {
