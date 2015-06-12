@@ -131,6 +131,10 @@
                          Enter a valid url
                          <button type="button" class="close" id="errorMsgClose"><span aria-hidden="true">&times;</span></button>
                     </div>
+                    <div id="swagger_file_help" class="alert alert-danger hide" role="alert">
+                         Enter a valid Swagger file
+                         <button type="button" class="close" id="fileErrorMsgClose"><span aria-hidden="true">&times;</span></button>
+                    </div>
                     <div class="form-inline">
                        <div class="control-group toggleRadios">
                           <div class="controls">
