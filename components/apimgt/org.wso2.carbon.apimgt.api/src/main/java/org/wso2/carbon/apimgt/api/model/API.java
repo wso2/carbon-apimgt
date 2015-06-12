@@ -98,6 +98,9 @@ public class API implements Serializable{
 
     private Set<String> environments;
 
+	//Storing image properties
+	private FileData image;
+
     public Set<String> getEnvironments() {
         return environments;
     }
@@ -633,5 +636,13 @@ public class API implements Serializable{
 
 	public void setSwagger(String swagger) {
 		this.swagger = swagger;
+	}
+
+	public FileData getImage() {
+		return image;
+	}
+
+	public void setImage(FileData image) {
+		this.image = image;
 	}
 }

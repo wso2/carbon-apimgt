@@ -18,6 +18,7 @@
 
 package org.wso2.carbon.apimgt.api.model;
 
+import java.io.InputStream;
 import java.io.Serializable;
 
 @SuppressWarnings("unused")
@@ -25,20 +26,29 @@ public final class FileData implements Serializable{
 
     private static final long serialVersionUID = 8159854241542883627L;
     
-    private final byte[] content;
+    private InputStream content;
     private final String fileName;
-    private final String contentType;
-    private final String filePath;
-    
-    public FileData(byte[] content, String fileName, String contentType, String filePath) {
+    private String contentType;
+    private String filePath;
+	private String extension;
+
+    public FileData(InputStream content, String fileName, String contentType, String filePath) {
 	super();
 	this.content = content;
 	this.fileName = fileName;
-	this.contentType = contentType;
-	this.filePath = filePath;
+	this.setContentType(contentType);
+	this.setFilePath(filePath);
     }
 
-    public byte[] getContent() {
+	public FileData(InputStream content, String fileName) {
+		super();
+		this.content = content;
+		this.fileName = fileName;
+		this.setContentType(contentType);
+		this.setFilePath(filePath);
+	}
+
+    public InputStream getContent() {
         return content;
     }
 
@@ -53,7 +63,21 @@ public final class FileData implements Serializable{
     public String getFilePath() {
         return filePath;
     }
-    
-    
+
+	public void setContentType(String contentType) {
+		this.contentType = contentType;
+	}
+
+	public void setFilePath(String filePath) {
+		this.filePath = filePath;
+	}
+
+	public String getExtension() {
+		return extension;
+	}
+
+	public void setExtension(String extension) {
+		this.extension = extension;
+	}
 
 }

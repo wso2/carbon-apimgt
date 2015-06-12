@@ -31,6 +31,7 @@ var apipublisher = {};
     var Date = Packages.java.util.Date;
     var Tier= Packages.org.wso2.carbon.apimgt.api.model.Tier;
     var URITemplate= Packages.org.wso2.carbon.apimgt.api.model.URITemplate;
+    var FileData= Packages.org.wso2.carbon.apimgt.api.model.FileData;
 
     var Set=Packages.java.util.Set;
     var List=Packages.java.util.List;
@@ -56,6 +57,8 @@ var apipublisher = {};
 
     var APIManagerFactory = Packages.org.wso2.carbon.apimgt.impl.APIManagerFactory;
     var log = new Log("jaggery-modules.api-manager.publisher");
+    var utils = require("utils");
+    var ref = utils.file;
 
     function APIProviderProxy(username) {
         this.username = username;
@@ -140,6 +143,14 @@ var apipublisher = {};
         apiOb.setVisibility(api.visibility);
         apiOb.setVisibleRoles(api.visibleRoles);
         apiOb.setThumbnailUrl(api.thumbnailUrl);
+        if(apiOb.thumbnail != null) {
+            var fileOb = apiOb.thumbnail;
+            var image = new FileData(fileOb.file.getStream(), fileOb.file.getName());
+            var extension = ref.getExtension(fileOb.file);
+            var mediaType = ref.getMimeType(extension);
+            image.setExtension(extension);
+            image.getContentType(mediaType);
+        }
         return this.impl.updateAPIDesign(apiOb,  api.tags, api.swagger);
     };
 
