@@ -610,8 +610,9 @@ $(document).ready(function () {
         }
     );
 
-    APP.update_ep_config = function() {
+    APP.update_ep_config = function(status) {
         var ec = APP.ep_form.getValues();
+        ec.implementation_status = status;
         ec.endpoint_type = $('#endpoint_type').val();
         $('.advance_endpoint_config').each(function(index, el){
             var ep_config = jQuery.parseJSON($(el).attr('ep-config-data'));
