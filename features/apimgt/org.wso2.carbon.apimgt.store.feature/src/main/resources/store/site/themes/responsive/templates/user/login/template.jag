@@ -4,9 +4,9 @@ var localeResourcesBasePath="/site/conf/locales/jaggery/";
 i18n.init(request,localeResourcesBasePath);
 
 var themes = [
-  { base : "default" , subtheme:"default" },
-  { base : "default" , subtheme:"united" },
-  { base : "default" , subtheme:"paper" },  
+  { base : "responsive" , subtheme:"default" },
+  { base : "responsive" , subtheme:"united" },
+  { base : "responsive" , subtheme:"paper" },  
 ]
 
 %>
