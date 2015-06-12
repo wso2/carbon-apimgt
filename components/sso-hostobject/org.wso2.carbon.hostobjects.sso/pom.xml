@@ -67,6 +67,11 @@
             <artifactId>commons-lang</artifactId>
             <version>2.6.0.wso2v1</version>
         </dependency>
+        <dependency>
+            <groupId>org.opensaml</groupId>
+            <artifactId>opensaml</artifactId>
+            <version>2.2.3</version>
+         </dependency>
     </dependencies>
 
     <build>
