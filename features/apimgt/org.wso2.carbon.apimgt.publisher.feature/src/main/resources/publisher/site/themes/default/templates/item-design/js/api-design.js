@@ -269,8 +269,8 @@ APIDesigner.prototype.update_elements = function(resource, newValue){
     var API_DESIGNER = APIDesigner();
     var obj = API_DESIGNER.query($(this).attr('data-path'));
     var obj = obj[0]
-    if(obj["$ref"]!=undefined){
-        var obj = API_DESIGNER.query(obj["$ref"].replace("#","$").replace(/\//g,"."));
+    if (obj["$ref"] != undefined) {
+        var obj = API_DESIGNER.query(obj["$ref"].replace("#", "$").replace(/\//g, "."));
         var obj = obj[0];
     }
     var i = $(this).attr('data-attr');
@@ -285,8 +285,8 @@ APIDesigner.prototype.update_elements_boolean = function(resource, newValue){
     var API_DESIGNER = APIDesigner();
     var obj = API_DESIGNER.query($(this).attr('data-path'));
     var obj = obj[0];
-    if(obj["$ref"]!=undefined ){
-        var obj = API_DESIGNER.query(obj["$ref"].replace("#","$").replace(/\//g,"."));
+    if (obj["$ref"] != undefined) {
+        var obj = API_DESIGNER.query(obj["$ref"].replace("#", "$").replace(/\//g, "."));
         var obj = obj[0];
     }
     var i = $(this).attr('data-attr');
@@ -315,7 +315,7 @@ APIDesigner.prototype.init_controllers = function(){
             API_DESIGNER = APIDesigner();
             delete API_DESIGNER.api_doc.paths[pn][op];
             API_DESIGNER.render_resources();
-            if(Object.keys(API_DESIGNER.api_doc.paths[pn]).length == 0) {
+            if (Object.keys(API_DESIGNER.api_doc.paths[pn]).length == 0) {
                 delete API_DESIGNER.api_doc.paths[pn];
             }
         }});
