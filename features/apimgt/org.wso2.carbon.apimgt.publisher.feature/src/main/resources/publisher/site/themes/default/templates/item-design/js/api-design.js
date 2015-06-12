@@ -476,6 +476,9 @@ APIDesigner.prototype.load_api_document = function(api_document){
     this.render_scopes();
     $("#version").val(api_document.info.version);
     $("#name").val(api_document.info.title);
+    if(api_document.info.title && api_document.info.title != ""){
+        $("#name").valid();
+    }    
     if(api_document.info.description){
     	$("#description").val(api_document.info.description);
     }
