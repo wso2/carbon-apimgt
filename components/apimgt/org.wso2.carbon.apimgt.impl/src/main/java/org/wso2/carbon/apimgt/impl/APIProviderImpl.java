@@ -1421,10 +1421,10 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
 
 	try {
-	    if (file != null && file.getContent().length != 0) {
+	    if (file != null) {
 		String contentType = file.getContentType();
 
-		Icon icon = new Icon(new ByteArrayInputStream(file.getContent()), contentType);
+		Icon icon = new Icon(file.getContent(), contentType);
 		String fileName = file.getFileName();
 		String filePath = APIUtil.getDocumentationFilePath(apiId, fileName);
 		String visibleRolesList = api.getVisibleRoles();
