@@ -26,15 +26,15 @@ Handlebars.registerHelper( 'toString', function returnToString( x ){
 } );
 
 Handlebars.registerHelper('ref', function(items, options) {
-  if(items["$ref"] != undefined){
-    var api = APIDesigner();
-    var result = api.query(items["$ref"].replace("#","$").replace(/\//g,"."));
-    if(result.length > 0){
-        items = result[0];
+    if(items["$ref"] != undefined){
+        var api = APIDesigner();
+        var result = api.query(items["$ref"].replace("#","$").replace(/\//g,"."));
+        if(result.length > 0){
+            items = result[0];
+        }
     }
-  }
-  out = options.fn(items);
-  return out;
+    out = options.fn(items);
+    return out;
 });
 
 var content_types = [
@@ -281,9 +281,9 @@ APIDesigner.prototype.update_elements = function(resource, newValue){
     var API_DESIGNER = APIDesigner();
     var obj = API_DESIGNER.query($(this).attr('data-path'));
     var obj = obj[0]
-    if(obj["$ref"]!=undefined){
-        var obj = API_DESIGNER.query(obj["$ref"].replace("#","$").replace(/\//g,"."));  
-        var obj = obj[0];      
+    if (obj["$ref"] != undefined) {
+        var obj = API_DESIGNER.query(obj["$ref"].replace("#", "$").replace(/\//g, "."));
+        var obj = obj[0];
     }
     var i = $(this).attr('data-attr');
     obj[i] = newValue;
@@ -297,10 +297,10 @@ APIDesigner.prototype.update_elements_boolean = function(resource, newValue){
     var API_DESIGNER = APIDesigner();
     var obj = API_DESIGNER.query($(this).attr('data-path'));
     var obj = obj[0];
-    if(obj["$ref"]!=undefined ){
-        var obj = API_DESIGNER.query(obj["$ref"].replace("#","$").replace(/\//g,"."));  
-        var obj = obj[0];      
-    }    
+    if (obj["$ref"] != undefined) {
+        var obj = API_DESIGNER.query(obj["$ref"].replace("#", "$").replace(/\//g, "."));
+        var obj = obj[0];
+    }
     var i = $(this).attr('data-attr');
     obj[i] = newValue;
 };
@@ -327,7 +327,7 @@ APIDesigner.prototype.init_controllers = function(){
             API_DESIGNER = APIDesigner();
             delete API_DESIGNER.api_doc.paths[pn][op];
             API_DESIGNER.render_resources();
-            if(Object.keys(API_DESIGNER.api_doc.paths[pn]).length == 0) {
+            if (Object.keys(API_DESIGNER.api_doc.paths[pn]).length == 0) {
                 delete API_DESIGNER.api_doc.paths[pn];
             }
         }});

@@ -523,7 +523,10 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 }
 
                 //Update WSDL in the registry
-                updateWsdl(api);
+                if (api.getWsdlUrl() != null) {
+                    updateWsdl(api);
+                }
+
 
                 boolean updatePermissions = false;
                 if(!oldApi.getVisibility().equals(api.getVisibility()) || (oldApi.getVisibility().equals(APIConstants.API_RESTRICTED_VISIBILITY) && !api.getVisibleRoles().equals(oldApi.getVisibleRoles()))){
