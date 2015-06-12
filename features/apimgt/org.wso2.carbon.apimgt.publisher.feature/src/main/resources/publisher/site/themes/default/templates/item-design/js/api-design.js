@@ -664,8 +664,16 @@ $(document).ready(function(){
 
     $('#import_swagger').attr('disabled','disabled');
     $('.toggleRadios input[type=radio]').click(function(){
-        $('#import_swagger').removeAttr("disabled");
+        if (($(this).val() == 'swagger_import_file' &&
+            typeof jsonFile != 'undefined') ||
+            ($(this).val() == 'swagger_import_url' &&
+            $('#swagger_import_url').val().length != 0)) {
+            $('#import_swagger').removeAttr("disabled");
+        } else {
+            $('#import_swagger').attr('disabled','disabled');
+        }
         $('#swagger_help').hide();
+        $('#swagger_file_help').hide();
         $('.toggleContainers .controls').hide();
         $('.toggleRadios input[type=radio]').prop('checked', false);
         $('#' + $(this).val()).closest('div').fadeIn();
@@ -680,22 +688,40 @@ $(document).ready(function(){
         });
         //Read the text file
         fileReader.readAsText(file);
+        $('#import_swagger').removeAttr("disabled");
+    });
+
+    $('#swagger_import_url').keyup(function(){
+        if($('#swagger_import_url').val().length != 0) {
+            $('#import_swagger').removeAttr("disabled");
+        } else {
+            $('#import_swagger').attr('disabled','disabled');
+        }
     });
 
     $('#import_swagger').click(function () {
-        if ($('#swagger_import_url').val().length == 0) {
+        if ($('.toggleRadios input[type=radio]:checked').val() == 'swagger_import_file') {
 
             $('#import_swagger').buttonLoader('start');
             $('#swagger_help').hide();
-            var data = JSON.parse(jsonFile.result); //swagger file content
-
-            var designer = APIDesigner();
-            designer.load_api_document(data);
-            $('#import_swagger').buttonLoader('stop');
-            $("#swaggerUpload").modal('hide');
+            $('#swagger_file_help').hide();
+            try{
+                var data = JSON.parse(jsonFile.result); //swagger file content
+                var designer = APIDesigner();
+                designer.load_api_document(data);
+                $('#import_swagger').buttonLoader('stop');
+                $("#swaggerUpload").modal('hide');
+            } catch (err){
+                $('#swagger_file_help').show();
+                $('#import_swagger').buttonLoader('stop');
+                $('#fileErrorMsgClose').on('click', function (e) {
+                    $('#swagger_file_help').hide();
+                });
+            }
         } else {
             $('#import_swagger').buttonLoader('start');
             $('#swagger_help').hide();
+            $('#swagger_file_help').hide();
             var data = {
                 "swagger_url": $("#swagger_import_url").val() // "http://petstore.swagger.wordnik.com/api/api-docs"
             }
