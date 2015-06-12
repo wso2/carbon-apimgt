@@ -1591,3 +1591,10 @@ table.dataTable tbody td.no-padding {
 #resource_details, #gatewayEnvironments{
     padding-left:10px;
 }
+
+.goTo_api_overview {
+    font-weight: normal;
+    font-size: 0.7em;
+    margin-left: 10px;
+    white-space: nowrap;
+}
