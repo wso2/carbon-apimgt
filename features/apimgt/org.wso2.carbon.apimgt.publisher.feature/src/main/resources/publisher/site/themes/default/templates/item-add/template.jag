@@ -48,32 +48,38 @@
          <div id="soapEndpoint" class="slideContainer hide">
             <div class="well">
                <form role="form" id="startFromExistingSOAPEndpoint-form" action="<%= jagg.url("/site/blocks/item-design/ajax/add.jag") %>">
-                  <fieldset>
-                     <div class="form-inline">
-                        <div class="control-group">
-                           <div class="controls toggleRadios">
-                              <label class="control-label sub-select-label">Provide WSDL URL</label>
-                               <!-- label class="radio sub-labels"><input type="radio" name="import-wsdl" id="import-wsdl-file" value="WSDL-file"/>File</label>
-                               <label class="radio sub-labels " ><input type="radio" name="import-wsdl" id="import-wsdl-url" value="WSDL-url"/>URL</label -->
-                           </div>
+                <fieldset>
+                    <div class="form-inline">
+                        <div class="control-group toggleRadios">
+                            <div class="controls">
+                                <label class="control-label sub-select-label">Import wsdl definition as</label>
+                                <!--<label class="radio sub-labels"><input type="radio" name="import-wsdl" class="select-file"
+                                                                       id="import-wsdl-file" value="wsdl-file"/>WSDL
+                                    File</label>-->
+                                <label class="radio sub-labels"><input type="radio" name="import-wsdl" class="select-url"
+                                                                       id="import-wsdl-url" value="wsdl-url"/>WSDL
+                                    URL</label>
+                            </div>
                         </div>
-                     </div>
-                     <div class="control-group">
-                        <div class="control-group">
-                           <div class="controls">
-                               <input id="wsdl-url" name="wsdl-url" class="input-xxlarge" type="text"/>
-                               <label for="wsdl-url" class="error wsdlError">Please use a valid wsdl endpoint</label>
-                               <p class="help-block">E.g.,:http://appserver/services/echo?wsdl</p>
-                           </div>
-                           <div class="controls hide">
-                              <input name="wsdl-file" type="file" />
-                           </div>
+                    </div>
+                    <div class="control-group toggleContainers">
+                        <div class="controls hide">
+                            <input id="wsdl-url" name="wsdl-url" class="input-xxlarge is_url_valid" url-type="wsdl" type="text"/>
+                            <a class="icon-question-sign help_popup" help_data="wsdldesc_help"></a>
+                            <p id="wsdldesc_help" class="hide"><%=i18n.localize("wsdlDescHelpMsg")%></p>
+                            <label for="wsdl-url" class="error wsdlError">Please use a valid wsdl endpoint</label>
+                            <p class="help-block">E.g.,:http://appserver/services/echo?wsdl</p>
                         </div>
-                        <input name="action" value="start" type="hidden"/>
-                        <input name="type" value="soap" type="hidden"/>
-                        <button id="startFromExistingSOAPEndpoint" class="btn btn-primary has-spinner" type="button">Start Creating</button>
-                     </div>
-                  </fieldset>
+                        <!--<div class="controls hide">
+                            <input name="wsdl-file" id="wsdl-file" type="file" class="upload"/>
+                        </div>-->
+                    </div>
+                    <input name="action" value="start" type="hidden"/>
+                    <input name="type" value="soap" type="hidden"/>
+                    <button id="startFromExistingSOAPEndpoint" class="btn btn-primary has-spinner" type="button">Start
+                        Creating
+                    </button>
+                </fieldset>
                </form>
             </div>
          </div>
