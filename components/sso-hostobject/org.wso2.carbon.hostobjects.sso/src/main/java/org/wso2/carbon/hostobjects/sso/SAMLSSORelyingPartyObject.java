@@ -411,8 +411,8 @@ public class SAMLSSORelyingPartyObject extends ScriptableObject {
         int argLength = args.length;
         if (argLength == 2) {
             isPassiveRequired = (Boolean) args[0];
+            acsUrl = (String) args[1];
             if (isPassiveRequired) {
-                acsUrl = (String) args[1];
                 if (!Boolean.valueOf(relyingPartyObject.getSSOProperty(SSOConstants.SIGN_REQUESTS))) {
                     //builds an unsigned passive authentication request
                     return Util.marshall(new AuthReqBuilder().
@@ -435,11 +435,12 @@ public class SAMLSSORelyingPartyObject extends ScriptableObject {
                             buildAuthenticationRequest(
                                     relyingPartyObject.getSSOProperty(SSOConstants.ISSUER_ID)));
                 } else {
-                    //builds a signed non-passive authentication request
+                    //builds a signed non-passive authentication request with consumer url
                     return Util.marshall(new AuthReqBuilder().
-                            buildSignedAuthRequest(
+                            buildSignedAuthRequestWithConsumerUrl(
                                     relyingPartyObject.getSSOProperty(SSOConstants.ISSUER_ID),
-                                    MultitenantConstants.SUPER_TENANT_ID,
+                                    relyingPartyObject.getSSOProperty(SSOConstants.IDP_URL),
+                                    acsUrl, MultitenantConstants.SUPER_TENANT_ID,
                                     MultitenantConstants.SUPER_TENANT_DOMAIN_NAME));
                 }
             }
@@ -456,6 +457,7 @@ public class SAMLSSORelyingPartyObject extends ScriptableObject {
                     return Util.marshall(new AuthReqBuilder().
                             buildSignedAuthRequest(
                                     relyingPartyObject.getSSOProperty(SSOConstants.ISSUER_ID),
+                                    relyingPartyObject.getSSOProperty(SSOConstants.IDP_URL),
                                     MultitenantConstants.SUPER_TENANT_ID,
                                     MultitenantConstants.SUPER_TENANT_DOMAIN_NAME));
                 } else {
@@ -524,15 +526,33 @@ public class SAMLSSORelyingPartyObject extends ScriptableObject {
         if (relyingPartyObject.getSessionInfo((String) args[1]) != null) {
             String sessionIndexId = relyingPartyObject.getSessionInfo((String) args[1]).getSessionIndex();
             if (sessionIndexId != null && sessionIndexId.length() > 0) {
-
-                return Util.marshall(new LogoutRequestBuilder().
-                        buildLogoutRequest((String) args[0], sessionIndexId,
-                                           SSOConstants.LOGOUT_USER,
-                                           relyingPartyObject.getSSOProperty(SSOConstants.ISSUER_ID)));
+                if (!Boolean.valueOf(relyingPartyObject.getSSOProperty(SSOConstants.SIGN_REQUESTS))) {
+                    return Util.marshall(new LogoutRequestBuilder().
+                            buildLogoutRequest((String) args[0], sessionIndexId,
+                                    SSOConstants.LOGOUT_USER,
+                                    relyingPartyObject.getSSOProperty(SSOConstants.ISSUER_ID)));
+                } else {
+                    return Util.marshall(new LogoutRequestBuilder().
+                            buildSignedLogoutRequest((String) args[0], sessionIndexId,
+                                    SSOConstants.LOGOUT_USER,
+                                    relyingPartyObject.getSSOProperty(SSOConstants.ISSUER_ID),
+                                    MultitenantConstants.SUPER_TENANT_ID,
+                                    MultitenantConstants.SUPER_TENANT_DOMAIN_NAME,
+                                    relyingPartyObject.getSSOProperty(SSOConstants.IDP_URL)));
+                }
             } else {
-                return Util.marshall(new LogoutRequestBuilder().
-                        buildLogoutRequest((String) args[0], SSOConstants.LOGOUT_USER,
-                                           relyingPartyObject.getSSOProperty(SSOConstants.ISSUER_ID)));
+                if (!Boolean.valueOf(relyingPartyObject.getSSOProperty(SSOConstants.SIGN_REQUESTS))) {
+                    return Util.marshall(new LogoutRequestBuilder().
+                            buildLogoutRequest((String) args[0], SSOConstants.LOGOUT_USER,
+                                    relyingPartyObject.getSSOProperty(SSOConstants.ISSUER_ID)));
+                } else {
+                    return Util.marshall(new LogoutRequestBuilder().
+                            buildSignedLogoutRequest((String) args[0], SSOConstants.LOGOUT_USER,
+                                    relyingPartyObject.getSSOProperty(SSOConstants.ISSUER_ID),
+                                    MultitenantConstants.SUPER_TENANT_ID,
+                                    MultitenantConstants.SUPER_TENANT_DOMAIN_NAME,
+                                    relyingPartyObject.getSSOProperty(SSOConstants.IDP_URL)));
+                }
             }
         }
         log.debug("Session Information not found");
