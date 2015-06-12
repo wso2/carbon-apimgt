@@ -493,13 +493,13 @@
             <dependency>
                 <groupId>org.wso2.carbon</groupId>
                 <artifactId>org.wso2.carbon.identity.core</artifactId>
-                <version>4.2.6-SNAPSHOT</version>
+                <version>4.2.6</version>
             </dependency>
 
             <dependency>
                 <groupId>org.wso2.carbon</groupId>
                 <artifactId>org.wso2.carbon.identity.oauth</artifactId>
-                <version>4.2.6-SNAPSHOT</version>
+                <version>4.2.6</version>
             </dependency>
 
             <dependency>
