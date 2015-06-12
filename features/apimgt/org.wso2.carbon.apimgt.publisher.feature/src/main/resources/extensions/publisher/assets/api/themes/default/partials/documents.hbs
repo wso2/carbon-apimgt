@@ -1,2 +1,20 @@
-{{> add_document .}}
-{{> list_documents .}}
+
+<div id="document-container">
+	
+	<div class="container-fluid" style="padding-left: 0px;">
+		<div id="addDoc" class="simple-space-maker">
+			<a href="#" onclick="" id="addDocHref">
+
+			    <i class=" icon-plus-sign"></i>
+	             {{t " Add New Document"}}
+
+			</a>
+			                                       
+		</div>
+
+		
+	</div>
+	{{> add_document .}}
+	{{> list_documents .}}
+
+</div>
