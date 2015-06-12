@@ -2530,6 +2530,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 		String version = api.getId().getVersion();
 		String contextVal = api.getContext();
 		String description = api.getDescription();
+		String thumbnailUrl = api.getThumbnailUrl();
 
         /* Business Information*/
 		String techOwner = api.getTechnicalOwner();
@@ -2616,6 +2617,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 		savedAPI.setVisibility(visibility);
 		savedAPI.setVisibleRoles(visibleRoles != null ? visibleRoles.trim() : null);
 		savedAPI.setLastUpdated(new Date());
+		savedAPI.setThumbnailUrl(thumbnailUrl);
 
 		return saveAPI(savedAPI, false);
 	}
@@ -2709,6 +2711,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 		}
 		return saveAPI(api, false);
 	}
+
 	/**
 	 * This method save or update the API object
 	 * @param api
@@ -2728,18 +2731,18 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 				PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
 			}
 
-			//Image uploading will be handle by the ES.
-			/*if (fileHostObject != null && fileHostObject.getJavaScriptFile().getLength() != 0) {
-				Icon icon = new Icon(fileHostObject.getInputStream(),
-						fileHostObject.getJavaScriptFile().getContentType());
+			//Image uploading
+			if (api.getImage() != null) {
+				Icon icon = new Icon(api.getImage().getContent(),
+						api.getImage().getContentType());
 				String thumbPath = APIUtil.getIconPath(api.getId());
 
 				String thumbnailUrl = addIcon(thumbPath, icon);
 				api.setThumbnailUrl(APIUtil.prependTenantPrefix(thumbnailUrl, api.getId().getProviderName()));
 
-                *//*Set permissions to anonymous role for thumbPath*//*
+                /*Set permissions to anonymous role for thumbPath*/
 				APIUtil.setResourcePermissions(api.getId().getProviderName(), null, null, thumbPath);
-			}*/
+			}
 
 			if (create) {
 				addAPI(api);
@@ -3130,6 +3133,11 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 			}
 		}
 		return success;
+	}
+
+	public boolean changeLifeCycleStatus(APIIdentifier apiIdentifier, String targetStatus) {
+
+		return true;
 	}
 }
 

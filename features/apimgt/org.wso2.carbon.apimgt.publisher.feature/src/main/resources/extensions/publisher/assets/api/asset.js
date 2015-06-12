@@ -72,7 +72,7 @@ asset.manager = function(ctx) {
             var api = {};
             var rxtModule = require('rxt');
             var assetMod = rxtModule.asset;
-            if(options.attributes.action=="design"){
+            if(options.attributes.action=="design") {
                 api.apiName = options.attributes.overview_name;
                 api.name = options.attributes.overview_name;
                 api.version = options.attributes.overview_version;
@@ -85,34 +85,31 @@ asset.manager = function(ctx) {
 
                 //TODO now we no need to save Icon through API manager as asset API does it for us
                 //Need to properly cope with that changed
-                api.thumbnailContent = request.getFile("overview_thumbnail");
-                api.thumbnailUrl = null;
-
-                //validate uploaded image and set API has a image if content is valid
-                if(api.thumbnailContent != null && isValiedImage(api.thumbnailContent)){
-                    api.thumbnailUrl = 'overview_thumbnail';
-                } else if(api.thumbnailContent != null && !isValiedImage(api.thumbnailContent)){
-                    obj = {
-                        error:true,
-                        message:"Please upload a valid image file for the API icon."
-                    };
-                    print(obj);
-                    return;
-                }
-
+                api.thumbnailUrl = options.attributes.overview_thumbnail;
+                //Skipping handling the image upload here
+                /*//validate uploaded image and set API has a image if content is valid
+                 if(api.thumbnail != null && api.thumbnail != "" && isValiedImage(api.thumbnail)){
+                 api.thumbnailUrl = 'overview_thumbnail';
+                 } else if(api.thumbnail != null && api.thumbnail != "" && !isValiedImage(api.thumbnail)){
+                 obj = {
+                 error:true,
+                 message:"Please upload a valid image file for the API icon."
+                 };
+                 throw 'Error while creating the API' + obj;
+                 }*/
                 //If API not exist create
                 var apiProxy = apiPublisher.instance(ctx.username);
                 result = apiProxy.checkIfAPIExists(api.provider, api.name, api.version);
 
-                if(!result.error && !result.exist){
+                if (!result.error && !result.exist) {
                     result = apiProxy.createAPI(api);
-                    if (result!=null && result.error) {
+                    if (result != null && result.error) {
                         throw "Error while creating the API." + result.error;
-                    } else{
-                        options.id=result.uuid;
-                        options.name=api.name;
-                        options.attributes.overview_provider=api.provider;
-                        options.attributes.overview_status='CREATED';
+                    } else {
+                        options.id = result.uuid;
+                        options.name = api.name;
+                        options.attributes.overview_provider = api.provider;
+                        options.attributes.overview_status = 'CREATED';
                     }
                 }
                 api.description = options.attributes.overview_description;
@@ -123,8 +120,8 @@ asset.manager = function(ctx) {
                 api.wsdl = options.attributes.wsdl;
                 api.swagger = options.attributes.swagger;
                 result = apiProxy.updateDesignAPI(api);
-                if (result!=null && result.error) {
-                    throw "Error while updating the API.";
+                if (result != null && result.error) {
+                    throw "Error while updating the API." + result.error;
                 }
             }
         },
@@ -160,20 +157,20 @@ asset.manager = function(ctx) {
 
                 //TODO now we no need to save Icon through API manager as asset API does it for us
                 //Need to properly cope with that changed
-                api.thumbnailContent = request.getFile("overview_thumbnail");
-                api.thumbnailUrl = null;
-
-                //validate uploaded image and set API has a image if content is valid
-                if(api.thumbnailContent != null && isValiedImage(api.thumbnailContent)){
-                    api.thumbnailUrl = 'overview_thumbnail';
-                } else if(api.thumbnailContent != null && !isValiedImage(api.thumbnailContent)){
-                    obj = {
-                        error:true,
-                        message:"Please upload a valid image file for the API icon."
-                    };
-                    print(obj);
-                    return;
-                }
+                api.thumbnailUrl = options.attributes.overview_thumbnail;
+                //Skip for now as ES side handle the image uploading functionality
+                /*api.thumbnailUrl = null;
+                 //validate uploaded image and set API has a image if content is valid
+                 if(api.thumbnail != null && api.thumbnail != "" && isValiedImage(api.thumbnail)){
+                 api.thumbnailUrl = 'overview_thumbnail';
+                 } else if(api.thumbnail != null && api.thumbnail != "" && !isValiedImage(api.thumbnail)){
+                 obj = {
+                 error:true,
+                 message:"Please upload a valid image file for the API icon."
+                 };
+                 print(obj);
+                 return;
+                 }*/
                 var apiProxy = apiPublisher.instance(ctx.username);
                 api.description = options.attributes.overview_description;
                 api.tags = options.attributes.overview_tags;
