@@ -1282,25 +1282,11 @@ public class ApiMgtDAO {
             
             conn.commit();
             
-            // Check for duplicate default applications if group id is available.
-
-                Application[] apps = getApplications(subscriber, groupingId);
-                
-               if(groupingId != null && !groupingId.equals("null") && !groupingId.isEmpty()){
-                if(!APIUtil.doesApplicationExist(apps, APIConstants.DEFAULT_APPLICATION_NAME)){
-                    // Add default application
-                    Application defaultApp = new Application(APIConstants.DEFAULT_APPLICATION_NAME, subscriber);
-                    defaultApp.setTier(APIConstants.UNLIMITED_TIER);
-                    defaultApp.setGroupId(groupingId);
-                    addApplication(defaultApp, subscriber.getName(), conn);
-                }
-               }else{
-                    // Add default application
-                    Application defaultApp = new Application(APIConstants.DEFAULT_APPLICATION_NAME, subscriber);
-                    defaultApp.setTier(APIConstants.UNLIMITED_TIER);
-                    defaultApp.setGroupId(groupingId);
-                    addApplication(defaultApp, subscriber.getName(), conn);
-                }
+            //Add default application.
+            //It will not be shared within in the group 
+            Application defaultApp = new Application(APIConstants.DEFAULT_APPLICATION_NAME, subscriber);
+            defaultApp.setTier(APIConstants.UNLIMITED_TIER);
+            addApplication(defaultApp, subscriber.getName(), conn);
                                                                
         } catch (SQLException e) {
             if (conn != null) {
