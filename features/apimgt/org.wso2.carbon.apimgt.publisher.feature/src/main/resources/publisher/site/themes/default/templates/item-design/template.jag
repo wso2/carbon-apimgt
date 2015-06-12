@@ -370,7 +370,7 @@
                     session.put( "wsdl", null );
                 %>
                 <div id="api_designer">
-                    <a  href="#wsdlUpload" role="button" class="btn pull-right" data-toggle="modal" ><i class="icon-download-alt" ></i> Import </a>
+                    <!--<a  href="#wsdlUpload" role="button" class="btn pull-right" data-toggle="modal" ><i class="icon-download-alt" ></i> Import </a>-->
                     <legend>API Definition</legend>
                     <div class="control-group api_wsdl">
                         <label class="control-label" for="wsdl"><%=i18n.localize("wsdl")%>:</label>
