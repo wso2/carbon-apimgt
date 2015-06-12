@@ -4,6 +4,9 @@
 var site = require("/site/conf/site.json");
 var ssoEnabled = site.ssoConfiguration.enabled;
 var oidcEnabled = site.oidcConfiguration.enabled;
+var reverseProxyEnable = site.reverseProxy.enabled;
+var siteContext = site.context;
+
 if (ssoEnabled === 'true') {
     jagg.includeBlock("sso/filter", {});
 } else if(oidcEnabled === 'true') {
@@ -11,7 +14,14 @@ if (ssoEnabled === 'true') {
 }
 
 var getRedirectPathForNonAuthenticatedUser = function () {
-    var requestedPage = request.getRequestURI();
+
+    // if reverse proxy enabled from site json, below code block will remove URI context from the absolute
+    if(reverseProxyEnable){
+        var requestedPageAbsoluteUrl = jagg.getAbsoluteUrl(request.getRequestURI());
+        var requestedPage = requestedPageAbsoluteUrl.replace(siteContext,'');
+    }else {
+        var requestedPage = request.getRequestURI();
+    }
     if (request.getQueryString() != null) {
         requestedPage = requestedPage + '?' + encodeURIComponent(request.getQueryString());
     }

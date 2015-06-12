@@ -52,9 +52,12 @@
         </a>
     </li>
 </ul>
-</center> 
+</center>
     <div class="title-section">
-        <h2><%= encode.forHtml(api.name) %>(<%= encode.forHtml(api.version) %>) : <%= encode.forHtml(api.context) %></h2>
+        <h2><%= encode.forHtml(api.name) %>(<%= encode.forHtml(api.version) %>) : <%= encode.forHtml(api.context) %>
+        <% if(api){ %>
+            &nbsp;<a class = "goTo_api_overview" href="<%= jagg.url("/info?"+ apiUrlId ) %>" ><i class=" icon-list-alt"></i> Go to Overview</a>
+        <% } %></h2>
     </div>
     <div class="content-section shadow-up">
     <div class="content-data">   
@@ -170,7 +173,7 @@
                     <input type="hidden" value="endpoint" name="implementation_methods" >
                     <div class="form-actions" id="saveButtons">
                         <button type="submit" class="btn btn-default manageSaveButton has-spinner" id="saveBtn" >Save</button>
-                        <button id="go_to_manage" class="btn btn-primary manageSaveButton pull-right has-spinner">Next : Manage &gt;</button>
+                        <button id="go_to_manage" class="btn btn-primary manageSaveButton has-spinner">Next : Manage &gt;</button>
                     </div>
                     </form>
                 </div>
@@ -241,7 +244,7 @@
                     <input type="hidden" name="action" value="implement" />
                     <input type="hidden" id="swagger" name="swagger" class="swagger" value="" />
                     <button type="submit" class="btn btn-default manageSaveButton has-spinner" id="savePrototypeBtn" >Save</button>
-                    <button class="btn btn-warning manageSaveButton pull-right has-spinner" id="prototyped_api" >Deploy as a Prototype</button>
+                    <button class="btn btn-warning manageSaveButton has-spinner" id="prototyped_api" >Deploy as a Prototype</button>
 
                 </div>
             </form>
