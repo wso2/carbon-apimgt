@@ -152,7 +152,6 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
 
     @Override
     public OAuthApplicationInfo updateApplication(OAuthAppRequest appInfoDTO) throws APIManagementException {
-        // TO DO
         return null;
 
     }
