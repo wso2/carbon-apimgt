@@ -288,7 +288,7 @@
               <tbody>
                   <tr>
                      <td><img src="/publisher/site/themes/default/images/error.png" align="center" hspace="10"></td>
-                     <td><span class="messageText">"{" and "}" are not allowed in context field.</span></td>
+                     <td><span class="messageText">Empty curly brackets "{}" are not allowed in context field.</span></td>
               </tbody>
           </table>
           </div>

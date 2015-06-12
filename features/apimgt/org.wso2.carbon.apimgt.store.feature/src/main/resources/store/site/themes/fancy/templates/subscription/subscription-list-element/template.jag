@@ -277,12 +277,14 @@
                                <button class="btn"
                                        onclick="updateAccessAllowDomains('<%=encode.forJavaScript(app.name)%>','PRODUCTION',200,this)" style="font-size:11px;">Update Domains</button>
                                <div style="display:none" class="success-update-msg">Successfully updated.</div>
+                               <a class="icon-question-sign update_domain_popup_prod"></a>
+                               <div id="update_help_prod"></div>
                                <% } else { %>
                                     Token Validity: <input type="text" class="input-mini token-validity-input" id="refreshProdValidityTime" value="<%=prodValidityTime%>" maxlength="70"  autofocus="autofocus" style="margin-top:5px;"  />  Seconds
                                     <span class="label label-warning" id = "timeWarn" style="display:none;"><%=i18n.localize("timeWarn")%></span>
+                                    <a class="icon-question-sign help_popup_prod"></a>
+                                    <div id="prodtoken_help"></div>
                                <% } %>
-                               <a class="icon-question-sign help_popup_prod"></a>
-                               <div id="prodtoken_help"></div>
                             </div>
                         	<!-- END config section -->
                         </div>
@@ -523,12 +525,14 @@
 		                        <button  class="btn"
 		                              onclick="updateAccessAllowDomains('<%=encode.forJavaScript(app.name)%>','SANDBOX',200,this,'allowDomainsSandRegenBtn')" style="font-size:11px;">Update Domains</button>
 		                        <div style="display:none" class="success-update-msg">Successfully updated.</div>
+                               <a class="icon-question-sign update_domain_popup_sand"></a>
+                               <div id="update_help_sand"></div>
 		                        <% } else { %>
 		                        Token Validity: <input type="text" class="input-mini token-validity-input" id="refreshSandValidityTime" value="<%=sandValidityTime%>" maxlength="70"  autofocus="autofocus" style="margin-top:5px;"  />  Seconds
 		                            <span class="label label-warning" id = "timeWarn" style="display:none;"><%=i18n.localize("timeWarn")%></span>
+                                    <a class="icon-question-sign help_popup_sand"></a>
+                                    <div id="sandtoken_help"></div>
 		                        <% } %>
-		                        <a class="icon-question-sign help_popup_sand"></a>
-		                        <div id="sandtoken_help"></div>
                             </div>
                         	<!-- END config section -->
                         </div>
