@@ -25,6 +25,18 @@ Handlebars.registerHelper( 'toString', function returnToString( x ){
     return ( x === void 0 ) ? 'undefined' : x.toString();
 } );
 
+Handlebars.registerHelper('ref', function(items, options) {
+    if(items["$ref"] != undefined){
+        var api = APIDesigner();
+        var result = api.query(items["$ref"].replace("#","$").replace(/\//g,"."));
+        if(result.length > 0){
+            items = result[0];
+        }
+    }
+    out = options.fn(items);
+    return out;
+});
+
 var content_types = [
        { value : "application/json", text :  "application/json"},
        { value : "application/xml", text :  "application/xml"},
