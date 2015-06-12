@@ -92,6 +92,7 @@ var show_environments = function(){
     var options = $("#environment_name").children("option[class='"+ type + "']");
       if (options.length <= 1) {
         $("#environment_name").hide();
+         $("#OnEnvironment").hide();
       }
     if(options.length > 0){
      $("#OnEnvironment").show(); 
