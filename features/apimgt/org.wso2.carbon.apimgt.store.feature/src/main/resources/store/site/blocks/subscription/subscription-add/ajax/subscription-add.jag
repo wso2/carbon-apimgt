@@ -204,6 +204,10 @@ include("/jagg/jagg.jag");
         var callbackUrl = request.getParameter("callbackUrl");
         var username = user.username;
         var accessAllowDomains = request.getParameter("authorizedDomains");
+
+        if (accessAllowDomains == null) {
+            accessAllowDomains = "ALL";
+        }
 	    var tokenScope = request.getParameter("tokenScope");
         //var tokenScope = "default";
 
