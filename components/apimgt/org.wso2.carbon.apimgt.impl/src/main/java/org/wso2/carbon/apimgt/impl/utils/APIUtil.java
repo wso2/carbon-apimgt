@@ -5216,7 +5216,7 @@ public final class APIUtil {
     }
 	
     public static FileData populateFileData(byte[] content, String fileName, String contentType, String filePath) {
-	FileData file = new FileData(content, fileName, contentType, filePath);
+	FileData file = new FileData(new ByteArrayInputStream(content), fileName, contentType, filePath);
 	return file;
     }
 
