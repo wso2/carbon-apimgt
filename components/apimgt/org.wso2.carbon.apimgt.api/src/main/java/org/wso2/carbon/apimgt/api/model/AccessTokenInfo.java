@@ -22,6 +22,7 @@ package org.wso2.carbon.apimgt.api.model;
 
 import org.json.simple.JSONObject;
 
+import java.util.Arrays;
 import java.util.HashMap;
 
 /**
@@ -138,8 +139,8 @@ public class AccessTokenInfo {
     public String getJSONString(){
 
         // TODO:Need to add other parameters into the param Map.
-        if(!parameters.containsKey("scopes")){
-            parameters.put("scopes",scope);
+        if(!parameters.containsKey("scopes") && scope != null){
+            parameters.put("scopes", Arrays.toString(scope));
         }
 
         if(!parameters.containsKey("tokenState")){
