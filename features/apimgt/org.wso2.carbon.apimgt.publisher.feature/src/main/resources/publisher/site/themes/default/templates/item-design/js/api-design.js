@@ -233,7 +233,7 @@ APIDesigner.prototype.set_default_management_values = function(){
 
 APIDesigner.prototype.add_default_resource = function(){
     $("#resource_url_pattern").val("*");
-    $(".http_verb_select:lt(4)").attr("checked","checked");
+    $(".http_verb_select:lt(5)").attr("checked","checked");
     $("#inputResource").val("Default");
     $("#add_resource").trigger('click');
 }
@@ -265,9 +265,14 @@ APIDesigner.prototype.display_elements = function(value,source){
 };
 
 APIDesigner.prototype.update_elements = function(resource, newValue){
+    debugger;
     var API_DESIGNER = APIDesigner();
     var obj = API_DESIGNER.query($(this).attr('data-path'));
     var obj = obj[0]
+    if(obj["$ref"]!=undefined){
+        var obj = API_DESIGNER.query(obj["$ref"].replace("#","$").replace(/\//g,"."));
+        var obj = obj[0];
+    }
     var i = $(this).attr('data-attr');
     obj[i] = newValue;
 };
@@ -279,7 +284,11 @@ APIDesigner.prototype.update_elements_boolean = function(resource, newValue){
         newValue = false;
     var API_DESIGNER = APIDesigner();
     var obj = API_DESIGNER.query($(this).attr('data-path'));
-    var obj = obj[0]
+    var obj = obj[0];
+    if(obj["$ref"]!=undefined ){
+        var obj = API_DESIGNER.query(obj["$ref"].replace("#","$").replace(/\//g,"."));
+        var obj = obj[0];
+    }
     var i = $(this).attr('data-attr');
     obj[i] = newValue;
 };
@@ -690,55 +699,6 @@ $(document).ready(function(){
             });
         }
     });
-
-    $('#wsdl_import_file').change(function (event) {
-        var file = event.target.files[0];
-        var fileReader = new FileReader();
-        fileReader.addEventListener("load", function (event) {
-            wsdlFile = event.target;
-        });
-        //Read the text file
-        fileReader.readAsText(file);
-    });
-
-    $('#import_wsdl').click(function () {
-
-        var wsdlUrl = $('#wsdl_import_url').val();
-        if (wsdlUrl.length == 0) {
-            $('#import_swagger').buttonLoader('start');
-            $('#swagger_help').hide();
-            var data = wsdlFile.result;
-            /*var data = {
-                "wsdl": wsdlFile.result
-            }*/
-            $.post(jagg.site.context + "/site/blocks/item-design/ajax/save.jag", data, function (data) {
-                $('#import_swagger').buttonLoader('stop');
-                $('#swagger_help').hide();
-                $("#swaggerUpload").modal('hide');
-                $("#wsdl").val("apimgt/applicationdata/wsdls/temp.wsdl");
-            }).fail(function (data) {
-                $('#swagger_help').show();
-                $('#import_swagger').buttonLoader('stop');
-                $('#errorMsgClose').on('click', function (e) {
-                    $('#swagger_help').hide();
-                });
-            });
-            /*var dataBlob = new Blob([data], { type: 'application/xml' });
-            var tempUrl = URL.createObjectURL(dataBlob);
-            $("#wsdl").val(tempUrl);
-            $("#wsdl").prop('disabled', true);
-            $(".check_url_valid").prop('disabled', true);*/
-            $('#import_wsdl').buttonLoader('stop');
-            $("#wsdlUpload").modal('hide');
-        } else {
-            $('#import_wsdl').buttonLoader('start');
-            $('#wsdl_help').hide();
-            $("#wsdl").val(wsdlUrl);
-            $('#import_wsdl').buttonLoader('stop');
-            $("#wsdlUpload").modal('hide');
-        }
-    });
-
 
     $("#resource_url_pattern").live('change',function(){
         var re = new RegExp("^/?([a-zA-Z0-9]|-|_)+");
