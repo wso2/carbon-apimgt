@@ -166,6 +166,38 @@ var addDatasourceConfig = function (configData) {
 
 
 var addToolbox = function (configData) {
+    if(configData.eventAnalyserURL.trim() == ""){
+        var message = "Data Analyzer URL is empty. Toolbox will not be deployed.";
+        log.warn(message);
+        return {
+            error: false,
+            message: message
+        };
+    }
+    if(configData.eventAnalyserUsername.trim() == ""){
+        var message = "Event Analyzer Username is empty.";
+        log.error(message);
+        return {
+            error: true,
+            message: message
+        };
+    }
+    if(configData.eventAnalyserUsername.trim().indexOf(" ") > -1){
+        var message = "Event Analyzer Username cannot contain space character.";
+        log.error(message);
+        return {
+            error: true,
+            message: message
+        };
+    }
+    if(configData.eventAnalyserPassword.trim() == ""){
+        var message = "Data Analyzer Password is empty.";
+        log.error(message);
+        return {
+            error: true,
+            message: message
+        };
+    }
     try {
         var process = require('process');
         var toolBoxPath = process.getProperty('carbon.home') + '/statistics';

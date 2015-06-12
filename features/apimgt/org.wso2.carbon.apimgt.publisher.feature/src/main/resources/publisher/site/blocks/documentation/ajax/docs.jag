@@ -112,7 +112,7 @@ include("/jagg/jagg.jag");
             result = mod.removeDocumentation(apiInfo, docInfo);
             if (result.error) {
                 obj = {
-                    error:result.error,
+                    error:true,
                     message:result.message
                 };
             } else {

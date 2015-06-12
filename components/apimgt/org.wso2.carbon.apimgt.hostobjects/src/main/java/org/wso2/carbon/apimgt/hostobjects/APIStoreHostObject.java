@@ -34,6 +34,7 @@ import org.json.simple.parser.ParseException;
 import org.mozilla.javascript.*;
 import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.ApplicationNotFoundException;
 import org.wso2.carbon.apimgt.api.model.*;
 import org.wso2.carbon.apimgt.hostobjects.internal.HostObjectComponent;
 import org.wso2.carbon.apimgt.hostobjects.internal.ServiceReferenceHolder;
@@ -146,10 +147,10 @@ public class APIStoreHostObject extends ScriptableObject {
 		String tenantDomain = args[0].toString();
 		if (tenantDomain != null &&
 		    !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
-			APIUtil.loadTenantConfig(tenantDomain);
-		}
+            APIUtil.loadTenantConfig(tenantDomain);
+        }
 
-	}
+    }
         			    
     
 
@@ -981,19 +982,21 @@ public class APIStoreHostObject extends ScriptableObject {
      * @throws APIManagementException
      * @throws ParseException
      */
-    public static void jsFunction_deleteFromApplicationRegistration(Context cx, Scriptable thisObj,
+    public static void jsFunction_cleanUpApplicationRegistration(Context cx, Scriptable thisObj,
                                                          Object[] args, Function funObj)
             throws ScriptException, APIManagementException, ParseException {
         if (args != null && args.length != 0) {
 
             try {
 
-                String applicationId = (String) args[0];
+                String applicationName = (String) args[0];
                 String keyType = (String) args[1];
+                String groupingId = (String) args[2];
+                String username = (String) args[3];
 
                 //this map will hold response that we are getting from Application registration process.
                 Map<String, Object> keyDetails;
-                getAPIConsumer(thisObj).deleteFromApplicationRegistration(applicationId, keyType);
+                getAPIConsumer(thisObj).cleanUpApplicationRegistration(applicationName, keyType, groupingId, username);
 
             } catch (Exception e) {
                 handleException("Error while obtaining the application access token for the application" + e
@@ -1938,7 +1941,7 @@ public class APIStoreHostObject extends ScriptableObject {
                 }
                 result.put("apis", result, myn);
                 result.put("totalLength", result, resultMap.get("totalLength"));
-
+                result.put("isMore", result, resultMap.get("isMore"));
             }
         }
         return result;
@@ -2482,6 +2485,7 @@ public class APIStoreHostObject extends ScriptableObject {
             throw new APIManagementException("Invalid input parameters for AddAPISubscription method");
         }
 
+        APIConsumer apiConsumer = getAPIConsumer(thisObj);
         String providerName = APIUtil.replaceEmailDomain(args[0].toString());
         String apiName = args[1].toString();
         String version = args[2].toString();
@@ -2489,16 +2493,22 @@ public class APIStoreHostObject extends ScriptableObject {
         String applicationName = ((String) args[4]);
         String userId = args[5].toString();
         APIIdentifier apiIdentifier = new APIIdentifier(providerName, apiName, version);
-        apiIdentifier.setTier(tier);
 
-        APIConsumer apiConsumer = getAPIConsumer(thisObj);
-        try {
-            int applicationId = APIUtil.getApplicationId(applicationName, userId);
-            apiConsumer.addSubscription(apiIdentifier, userId, applicationId);
-        } catch (APIManagementException e) {
-            handleException("Error while adding the subscription for user: " + userId, e);
+        //Check whether tier is denied or not before adding
+        Set<String> tiers = apiConsumer.getDeniedTiers();
+        if (!tiers.contains(tier)) {
+            apiIdentifier.setTier(tier);
+            try {
+                int applicationId = APIUtil.getApplicationId(applicationName, userId);
+                apiConsumer.addSubscription(apiIdentifier, userId, applicationId);
+            } catch (APIManagementException e) {
+                handleException("Error while adding the subscription for user: " + userId, e);
+            }
+            return true;
+        } else {
+            handleException("Cannot add subscription to with the denied tier");
+            return false;
         }
-        return true;
     }
 
     public static boolean jsFunction_removeSubscriber(Context cx,
@@ -2822,7 +2832,7 @@ public class APIStoreHostObject extends ScriptableObject {
 
     public static NativeObject jsFunction_getAllSubscriptions(Context cx,
                                                               Scriptable thisObj, Object[] args, Function funObj)
-            throws ScriptException, APIManagementException {
+            throws ScriptException, APIManagementException, ApplicationNotFoundException {
 
         if (args == null || args.length == 0 || !isStringArray(args)) {
             return null;
@@ -2854,6 +2864,15 @@ public class APIStoreHostObject extends ScriptableObject {
                 isTenantFlowStarted = true;
                 PrivilegedCarbonContext.startTenantFlow();
                 PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
+            }
+
+            //check whether application exist prior to get subscriptions
+            if (!(appName == null || appName.isEmpty()) &&
+                    !APIUtil.isApplicationExist(username, appName, groupingId)) {
+                String message = "Application " + appName + " does not exist for user " +
+                        "" + username;
+                log.error(message);
+                throw new ApplicationNotFoundException(message);
             }
 
             Subscriber subscriber = new Subscriber(username);
@@ -3267,6 +3286,7 @@ public class APIStoreHostObject extends ScriptableObject {
                     row.put("status", row, application.getStatus());
                     row.put("description", row, application.getDescription());
                     row.put("apiCount", row, subscriptionCount);
+                    row.put("groupId", row, application.getGroupId());
                     myn.put(i++, myn, row);
                 }
             }
@@ -3388,7 +3408,7 @@ public class APIStoreHostObject extends ScriptableObject {
 
     public static NativeArray jsFunction_getSubscriptionsByApplication(Context cx,
                                                                        Scriptable thisObj, Object[] args, Function funObj)
-            throws ScriptException, APIManagementException {
+            throws ScriptException, APIManagementException, ApplicationNotFoundException {
 
         NativeArray myn = new NativeArray(0);
         if (args != null && isStringArray(args)) {
@@ -3406,8 +3426,10 @@ public class APIStoreHostObject extends ScriptableObject {
 
                 //check whether application exist prior to get subscription
                 if (!APIUtil.isApplicationExist(username, applicationName, groupingId)) {
-                    handleException("Application " + applicationName + " does not exist for user " +
-                            "" + username);
+                    String message = "Application " + applicationName + " does not exist for user " +
+                            "" + username;
+                    log.error(message);
+                    throw new ApplicationNotFoundException(message);
                 }
 
                 Subscriber subscriber = new Subscriber(username);
@@ -3467,7 +3489,7 @@ public class APIStoreHostObject extends ScriptableObject {
             
             // check whether there is an app with same name
             if (!name.equals(oldName) && appsMap.containsKey(name)) {
-                return false;
+                handleException("An application already exist by the name " + name);
             }
 
             for (Application app : apps) {
@@ -4074,7 +4096,7 @@ public class APIStoreHostObject extends ScriptableObject {
         }
     }
 
-    public static NativeArray  jsFunction_getPublishedAPIsByProvider(Context cx, Scriptable thisObj,
+    public static NativeArray jsFunction_getPublishedAPIsByProvider(Context cx, Scriptable thisObj,
                                                                     Object[] args,
                                                                     Function funObj)
             throws APIManagementException {
@@ -4087,7 +4109,7 @@ public class APIStoreHostObject extends ScriptableObject {
             String apiOwner = args[3].toString();
             String apiBizOwner = null;
             //If api biz-owner is not null
-            if(args[4] != null){
+            if (args[4] != null) {
                 apiBizOwner = args[4].toString();
             }
 
@@ -4104,7 +4126,7 @@ public class APIStoreHostObject extends ScriptableObject {
                 apiSet = apiConsumer.getPublishedAPIsByProvider(providerName, username, limit, apiOwner, apiBizOwner);
             } catch (APIManagementException e) {
                 handleException("Error while getting published APIs information of the provider - " +
-                        providerName, e);
+                                providerName, e);
                 return null;
             } catch (Exception e) {
                 handleException("Error while getting published APIs information of the provider", e);
@@ -4122,14 +4144,20 @@ public class APIStoreHostObject extends ScriptableObject {
                     Object apiObject = it.next();
                     API api = (API) apiObject;
                     APIIdentifier apiIdentifier = api.getId();
+                    int apiId = ApiMgtDAO.getAPIID(apiIdentifier, null);
+
+                    // API is partially created/deleted. We shouldn't be showing this API.
+                    if (apiId == -1) {
+                        continue;
+                    }
                     currentApi.put("name", currentApi, apiIdentifier.getApiName());
                     currentApi.put("provider", currentApi,
-                            APIUtil.replaceEmailDomainBack(apiIdentifier.getProviderName()));
+                                   APIUtil.replaceEmailDomainBack(apiIdentifier.getProviderName()));
                     currentApi.put("version", currentApi,
-                            apiIdentifier.getVersion());
+                                   apiIdentifier.getVersion());
                     currentApi.put("description", currentApi, api.getDescription());
                     //Rating should retrieve from db
-                    currentApi.put("rates", currentApi, ApiMgtDAO.getAverageRating(api.getId()));
+                    currentApi.put("rates", currentApi, ApiMgtDAO.getAverageRating(apiId));
                     if (api.getThumbnailUrl() == null) {
                         currentApi.put("thumbnailurl", currentApi, "images/api-default.png");
                     } else {
@@ -4764,6 +4792,7 @@ public class APIStoreHostObject extends ScriptableObject {
             transports.addAll(Arrays.asList((api.getTransports().split(","))));
             jsonObject.put("http", filterUrlsByTransport(environmenturls, transports, "http"));
             jsonObject.put("https", filterUrlsByTransport(environmenturls, transports, "https"));
+            jsonObject.put("showInConsole", environment.isShowInConsole());
             if (APIConstants.GATEWAY_ENV_TYPE_PRODUCTION.equals(environment.getType())) {
                 productionEnvironmentObject.put(environment.getName(), jsonObject);
             } else if (APIConstants.GATEWAY_ENV_TYPE_SANDBOX.equals(environment.getType())) {

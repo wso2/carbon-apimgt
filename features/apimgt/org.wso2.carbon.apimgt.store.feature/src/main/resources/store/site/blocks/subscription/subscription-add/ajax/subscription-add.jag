@@ -427,7 +427,7 @@ include("/jagg/jagg.jag");
             }
         }
         print(obj);
-     }else if (action == "deleteFromApplicationRegistration" && request.getMethod() == 'POST') {
+     }else if (action == "cleanUpApplicationRegistration" && request.getMethod() == 'POST') {
 
         if (!user) {
             print({
@@ -437,12 +437,15 @@ include("/jagg/jagg.jag");
             return;
         }
 
-        var applicationId = request.getParameter("applicationId");
+        var applicationName = request.getParameter("applicationName");
         var keyType = request.getParameter("keyType");
+        var groupingId=session.get("groupId");
+        var username = user.username;
+
 
         mod = jagg.module("subscription");
 
-        result = mod.deleteFromApplicationRegistration(applicationId , keyType);
+        result = mod.cleanUpApplicationRegistration(applicationName , keyType, groupingId , username);
 
         if (result.error) {
             obj = {

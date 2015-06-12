@@ -143,6 +143,20 @@ public final class APIUtil {
     private static Set<Integer> registryInitializedTenants = new HashSet<Integer>();
     private static GenericArtifactManager genericArtifactManager;
 
+
+    private static final int DEFAULT_TENANT_IDLE_MINS = 30;
+    private static long tenantIdleTimeMillis;
+    private static Set<String> currentLoadingTenants = new HashSet<String>();
+
+    //Need tenantIdleTime to check whether the tenant is in idle state in loadTenantConfig method
+    static {
+        tenantIdleTimeMillis =
+                Long.parseLong(System.getProperty(
+                        org.wso2.carbon.utils.multitenancy.MultitenantConstants.TENANT_IDLE_TIME,
+                        String.valueOf(DEFAULT_TENANT_IDLE_MINS)))
+                * 60 * 1000;
+    }
+
     /**
      * This method used to get API from governance artifact
      *
@@ -159,8 +173,13 @@ public final class APIUtil {
             String providerName = artifact.getAttribute(APIConstants.API_OVERVIEW_PROVIDER);
             String apiName = artifact.getAttribute(APIConstants.API_OVERVIEW_NAME);
             String apiVersion = artifact.getAttribute(APIConstants.API_OVERVIEW_VERSION);
-            APIIdentifier apiId = new APIIdentifier(providerName, apiName, apiVersion);
-            api = new API(apiId);
+            APIIdentifier apiIdentifier = new APIIdentifier(providerName, apiName, apiVersion);
+            int apiId = ApiMgtDAO.getAPIID(apiIdentifier, null);
+
+            if(apiId == -1){
+                return null;
+            }
+            api = new API(apiIdentifier);
             // set rating
             String artifactPath = GovernanceUtils.getArtifactPath(registry, artifact.getId());
             // BigDecimal bigDecimal = new BigDecimal(getAverageRating(apiId));
@@ -333,8 +352,14 @@ public final class APIUtil {
             String providerName = artifact.getAttribute(APIConstants.API_OVERVIEW_PROVIDER);
             String apiName = artifact.getAttribute(APIConstants.API_OVERVIEW_NAME);
             String apiVersion = artifact.getAttribute(APIConstants.API_OVERVIEW_VERSION);
-            APIIdentifier apiId = new APIIdentifier(providerName, apiName, apiVersion);
-            api = new API(apiId);
+            APIIdentifier apiIdentifier = new APIIdentifier(providerName, apiName, apiVersion);
+            int apiId = ApiMgtDAO.getAPIID(apiIdentifier, null);
+
+            if (apiId == -1) {
+                return null;
+            }
+
+            api = new API(apiIdentifier);
             // set rating
             String artifactPath = GovernanceUtils.getArtifactPath(registry, artifact.getId());
             // BigDecimal bigDecimal = new BigDecimal(getAverageRating(apiId));
@@ -376,7 +401,7 @@ public final class APIUtil {
                 }
             } catch (NumberFormatException e) {
                 if (log.isWarnEnabled()) {
-                    log.warn("Error while retrieving cache timeout from the registry for " + apiId);
+                    log.warn("Error while retrieving cache timeout from the registry for " + apiIdentifier);
                 }
                 // ignore the exception and use default cache timeout value
             }
@@ -507,7 +532,6 @@ public final class APIUtil {
     }
 
 
-
     public static API getAPI(GovernanceArtifact artifact)
             throws APIManagementException {
 
@@ -516,8 +540,13 @@ public final class APIUtil {
             String providerName = artifact.getAttribute(APIConstants.API_OVERVIEW_PROVIDER);
             String apiName = artifact.getAttribute(APIConstants.API_OVERVIEW_NAME);
             String apiVersion = artifact.getAttribute(APIConstants.API_OVERVIEW_VERSION);
-            api = new API(new APIIdentifier(providerName, apiName, apiVersion));
-            api.setRating(getAverageRating(api.getId()));
+            APIIdentifier apiIdentifier = new APIIdentifier(providerName, apiName, apiVersion);
+            api = new API(apiIdentifier);
+            int apiId = ApiMgtDAO.getAPIID(apiIdentifier, null);
+            if (apiId == -1) {
+                return null;
+            }
+            api.setRating(getAverageRating(apiId));
             api.setThumbnailUrl(artifact.getAttribute(APIConstants.API_OVERVIEW_THUMBNAIL_URL));
             api.setStatus(getApiStatus(artifact.getAttribute(APIConstants.API_OVERVIEW_STATUS)));
             api.setContext(artifact.getAttribute(APIConstants.API_OVERVIEW_CONTEXT));
@@ -533,9 +562,9 @@ public final class APIUtil {
 
             int cacheTimeout = APIConstants.API_RESPONSE_CACHE_TIMEOUT;
             try {
-            	cacheTimeout = Integer.parseInt(artifact.getAttribute(APIConstants.API_OVERVIEW_CACHE_TIMEOUT));
-            } catch(NumberFormatException e) {
-            	//ignore
+                cacheTimeout = Integer.parseInt(artifact.getAttribute(APIConstants.API_OVERVIEW_CACHE_TIMEOUT));
+            } catch (NumberFormatException e) {
+                //ignore
             }
             api.setCacheTimeout(cacheTimeout);
 
@@ -1061,13 +1090,20 @@ public final class APIUtil {
         try {
             GovernanceUtils.loadGovernanceArtifacts((UserRegistry) registry);
             if(GovernanceUtils.findGovernanceArtifactConfiguration(key, registry)!=null){
-            artifactManager = new GenericArtifactManager(registry, key);
+                artifactManager = new GenericArtifactManager(registry, key);
+            } else {
+                if (log.isDebugEnabled()) {
+                    log.debug("Couldn't find GovernanceArtifactConfiguration of RXT: " + key +
+                              ". Tenant id set in registry : " + ((UserRegistry) registry).getTenantId() +
+                              ", Tenant domain set in PrivilegedCarbonContext: " +
+                              PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId());
+                }
             }
         } catch (RegistryException e) {
             String msg = "Failed to initialize GenericArtifactManager";
             log.error(msg, e);
             throw new APIManagementException(msg, e);
-        }
+        } 
         return artifactManager;
     }
 
@@ -2816,6 +2852,10 @@ public final class APIUtil {
         return ApiMgtDAO.getAverageRating(apiId);
     }
 
+    public static float getAverageRating(int apiId) throws APIManagementException {
+        return ApiMgtDAO.getAverageRating(apiId);
+    }
+
     public static List<Tenant> getAllTenantsWithSuperTenant() throws UserStoreException {
         Tenant[] tenants = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager().getAllTenants();
         ArrayList<Tenant> tenantArrayList=new ArrayList<Tenant>();
@@ -3668,14 +3708,18 @@ public final class APIUtil {
             if (isAllowDisplayAPIsWithMultipleStatus()) {
                 if (status.equals(APIConstants.PUBLISHED) || status.equals(APIConstants.DEPRECATED)) {
                     API api=APIUtil.getAPI(artifact, registry);
-                    apiList.add(api);
-                    apiNames.append(api.getId().getApiName());
+                    if (api != null) {
+                        apiList.add(api);
+                        apiNames.append(api.getId().getApiName());
+                    }
                 }
             } else {
                 if (status.equals(APIConstants.PUBLISHED)) {
                     API api=APIUtil.getAPI(artifact, registry);
-                    apiList.add(api);
-                    apiNames.append(api.getId().getApiName());
+                    if (api != null) {
+                        apiList.add(api);
+                        apiNames.append(api.getId().getApiName());
+                    }
                 }
             }
             }
@@ -3736,18 +3780,52 @@ public final class APIUtil {
 
     /**
      * load tenant axis configurations.
+     *
      * @param tenantDomain
      */
-	public static void loadTenantConfig(String tenantDomain) {
+    public static void loadTenantConfig(String tenantDomain) {
+        final String finalTenantDomain = tenantDomain;
+        ConfigurationContext ctx =
+                ServiceReferenceHolder.getContextService().getServerConfigContext();
 
-		try {
-			ConfigurationContext ctx = ServiceReferenceHolder.getContextService().getServerConfigContext();
-			TenantAxisUtils.getTenantAxisConfiguration(tenantDomain, ctx);
-		} catch (Exception e) {
-			log.error("Error while creating axis configuration for tenant " + tenantDomain, e);
-		}
+        //Cannot use the tenantDomain directly because it's getting locked in createTenantConfigurationContext()
+        // method in TenantAxisUtils
+        String accessFlag = tenantDomain + "@WSO2";
 
-	}
+        long lastAccessed = TenantAxisUtils.getLastAccessed(tenantDomain, ctx);
+        //Only if the tenant is in unloaded state, we do the loading
+        if (System.currentTimeMillis() - lastAccessed >= tenantIdleTimeMillis) {
+            synchronized (accessFlag.intern()) {
+                // Currently loading tenants are added to a set.
+                // If a tenant domain is in the set it implies that particular tenant is being loaded.
+                // Therefore if and only if the set does not contain the tenant.
+                if (!currentLoadingTenants.contains(tenantDomain)) {
+                    //Only one concurrent request is allowed to add to the currentLoadingTenants
+                    currentLoadingTenants.add(tenantDomain);
+                    ctx.getThreadPool().execute(new Runnable() {
+                        public void run() {
+                            Thread.currentThread()
+                                  .setName("APIMHostObjectUtils-loadTenantConfig-thread");
+                            try {
+                                PrivilegedCarbonContext.startTenantFlow();
+                                ConfigurationContext ctx =
+                                        ServiceReferenceHolder.getContextService()
+                                                              .getServerConfigContext();
+                                TenantAxisUtils.getTenantAxisConfiguration(finalTenantDomain, ctx);
+                            } catch (Exception e) {
+                                log.error("Error while creating axis configuration for tenant " +
+                                          finalTenantDomain, e);
+                            } finally {
+                                //only after the tenant is loaded completely, the tenant domain is removed from the set
+                                currentLoadingTenants.remove(finalTenantDomain);
+                                PrivilegedCarbonContext.endTenantFlow();
+                            }
+                        }
+                    });
+                }
+            }
+        }
+    }
 
     public static void checkClientDomainAuthorized(APIKeyValidationInfoDTO apiKeyValidationInfoDTO, String clientDomain)
             throws APIManagementException {

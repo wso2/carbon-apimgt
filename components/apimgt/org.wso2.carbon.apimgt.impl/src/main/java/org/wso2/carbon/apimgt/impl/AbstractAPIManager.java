@@ -272,24 +272,26 @@ public abstract class AbstractAPIManager implements APIManager {
         List<API> apiSortedList = new ArrayList<API>();
         boolean isTenantFlowStarted = false;
         try {
-        	if(tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain))	{
-        		isTenantFlowStarted = true;
+            if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
+                isTenantFlowStarted = true;
                 PrivilegedCarbonContext.startTenantFlow();
                 PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
-        	}
+            }
             GenericArtifactManager artifactManager = APIUtil.getArtifactManager(registry,
                                                                                 APIConstants.API_KEY);
             GenericArtifact[] artifacts = artifactManager.getAllGenericArtifacts();
             for (GenericArtifact artifact : artifacts) {
-                apiSortedList.add(APIUtil.getAPI(artifact));
+                API api = APIUtil.getAPI(artifact);
+                if (api != null) {
+                    apiSortedList.add(api);
+                }
             }
-
         } catch (RegistryException e) {
             handleException("Failed to get APIs from the registry", e);
         } finally {
-        	if (isTenantFlowStarted) {
-        		PrivilegedCarbonContext.endTenantFlow();
-        	}
+            if (isTenantFlowStarted) {
+                PrivilegedCarbonContext.endTenantFlow();
+            }
         }
 
         Collections.sort(apiSortedList, new APINameComparator());
@@ -412,6 +414,29 @@ public abstract class AbstractAPIManager implements APIManager {
             handleException("Error while adding the icon image to the registry", e);
         }
         return null;
+    }
+
+    /**
+     * Checks whether the given document already exists for the given api
+     *
+     * @param identifier API Identifier
+     * @param docName Name of the document
+     * @return true if document already exists for the given api
+     * @throws APIManagementException if failed to check existence of the documentation
+     */
+    public boolean isDocumentationExist(APIIdentifier identifier, String docName)
+            throws APIManagementException {
+        String docPath = APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR +
+                identifier.getProviderName() + RegistryConstants.PATH_SEPARATOR +
+                identifier.getApiName() + RegistryConstants.PATH_SEPARATOR +
+                identifier.getVersion() + RegistryConstants.PATH_SEPARATOR +
+                APIConstants.DOC_DIR + RegistryConstants.PATH_SEPARATOR + docName;
+        try {
+            return registry.resourceExists(docPath);
+        } catch (RegistryException e) {
+            handleException("Failed to check existence of the document :" + docPath, e);
+            return false;
+        }
     }
 
     public List<Documentation> getAllDocumentation(APIIdentifier apiId) throws APIManagementException {
@@ -657,7 +682,9 @@ public abstract class AbstractAPIManager implements APIManager {
 	                GenericArtifact artifact = artifactManager.getGenericArtifact(
 	                        resource.getUUID());
 	                API api = APIUtil.getAPI(artifact, registry);
-	                apiSortedSet.add(api);
+	                if (api != null) {
+	                    apiSortedSet.add(api);
+	                }
 	            } catch (RegistryException e) {
 	                handleException("Failed to get APIs for subscriber: " + subscriber.getName(), e);
 	            }

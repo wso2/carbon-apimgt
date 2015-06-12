@@ -105,27 +105,43 @@ public class PassThroughTransportUtils {
      * Remove unwanted headers from the http response of outgoing request. These are headers which
      * should be dictated by the transport and not the user. We remove these as these may get
      * copied from the request messages
-     * 
-     * @param msgContext the Axis2 Message context from which these headers should be removed
-     * @param preserveServerHeader if true preserve the original server header
+     *
+     * @param msgContext              the Axis2 Message context from which these headers should be removed
+     * @param preserveServerHeader    if true preserve the original server header
      * @param preserveUserAgentHeader if true preserve the original user-agent header
      */
-    public static void removeUnwantedHeaders(MessageContext msgContext,
-                                             boolean preserveServerHeader,
-                                             boolean preserveUserAgentHeader) {
-        Map headers = (Map) msgContext.getProperty(MessageContext.TRANSPORT_HEADERS);
-   	
-        if (headers == null || headers.isEmpty()) {
-            return;
+    public static void removeUnwantedFieldsFromTransportAndExcessHeaders(MessageContext msgContext,
+                                                                         boolean preserveServerHeader,
+                                                                         boolean preserveUserAgentHeader) {
+        Map transportHeaders = (Map) msgContext.getProperty(MessageContext.TRANSPORT_HEADERS);
+        Map excessHeaders = (Map) msgContext.getProperty(NhttpConstants.EXCESS_TRANSPORT_HEADERS);
+
+        if (transportHeaders != null && !transportHeaders.isEmpty()) {
+            //a hack which takes the original content header
+            if (transportHeaders.get(HTTP.CONTENT_LEN) != null) {
+                msgContext.setProperty(PassThroughConstants.ORGINAL_CONTEN_LENGTH, transportHeaders.get(HTTP.CONTENT_LEN));
+            }
+
+            removeUnwantedHeaders(transportHeaders, msgContext, preserveServerHeader, preserveUserAgentHeader);
         }
-        
 
-        
-        //a hack which takes the original content header
-     	if(headers.get(HTTP.CONTENT_LEN) != null){
-           msgContext.setProperty(PassThroughConstants.ORGINAL_CONTEN_LENGTH,headers.get(HTTP.CONTENT_LEN));
-         }
+        if (excessHeaders != null && !excessHeaders.isEmpty()) {
+            removeUnwantedHeaders(excessHeaders, msgContext, preserveServerHeader, preserveUserAgentHeader);
+        }
 
+    }
+
+
+    /**
+     * Remove unwanted headers from the given header.
+     *
+     * @param msgContext              the Axis2 Message context from which these headers should be removed
+     * @param preserveServerHeader    if true preserve the original server header
+     * @param preserveUserAgentHeader if true preserve the original user-agent header
+     */
+    private static void removeUnwantedHeaders(Map headers, MessageContext msgContext,
+                                              boolean preserveServerHeader,
+                                              boolean preserveUserAgentHeader) {
         Iterator iter = headers.keySet().iterator();
         while (iter.hasNext()) {
             String headerName = (String) iter.next();

@@ -35,13 +35,16 @@ var log = new Log();
             providerVal = uriMatcher.elements().providerVal;
             apiNameVal = uriMatcher.elements().apiNameVal;
             apiVersionVal = uriMatcher.elements().apiVersionVal;
-        }else {
+        }else if(request.getParameter("provider") != null) {
+            providerVal =request.getParameter("provider");
+            apiNameVal = request.getParameter("name");
+            apiVersionVal = request.getParameter("version");
+            }else{
             print({
                 error:true,
                 message:msg.error.invalidAction(action)
             });
         }
-
         var url = request.getRequestURL();
         var host = getLocation(url).host;
         var port = getLocation(url).port;
@@ -50,15 +53,16 @@ var log = new Log();
         var tenantDomain = "";
         var tenantID = -1234;
 	    var isTenantFlowStarted = false;
-
+        var MultitenantUtils = Packages.org.wso2.carbon.utils.multitenancy.MultitenantUtils;
+        var APIUtil = Packages.org.wso2.carbon.apimgt.impl.utils.APIUtil;
         if(providerVal.indexOf("@") > -1){
-            var MultitenantUtils = Packages.org.wso2.carbon.utils.multitenancy.MultitenantUtils;
-	    tenantDomain = MultitenantUtils.getTenantDomain(providerVal);
-            providerVal = providerVal.replace("@","-AT-");
+            providerVal = APIUtil.replaceEmailDomain(providerVal);
+        }
+           tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(providerVal));
             if(tenantDomain){
                 tenantID = carbon.server.osgiService('org.wso2.carbon.user.core.service.RealmService').getTenantManager().getTenantId(tenantDomain);
             }
-        }
+
 	
         if(providerVal.indexOf("-DOM-") > -1){
              providerVal = providerVal.replace("-DOM-","/");

@@ -1,5 +1,5 @@
 function APISamples () {
-    this.sample1_swagger = "{\"paths\":{ \"/*\":{\"get\":{\"parameters\":[{\"description\":\"Name of the City\",\"name\":\"q\",\"type\":\"string\",\"required\":false,\"in\":\"query\"}],\"responses\":{\"200\":{ } },\"x-auth-type\":\"Application & Application User\", \"x-throttling-tier\":\"Unlimited\" },\"options\":{\"responses\":{\"200\":{ }},\"x-auth-type\":\"None\",\"x-throttling-tier\":\"Unlimited\"}}},\"swagger\":\"2.0\",\"info\":{ \"title\":\"WeatherAPI\",\"version\":\"1.0.0\"}}";
+    this.sample1_swagger = "{\"paths\":{ \"/*\":{\"get\":{\"parameters\":[{\"description\":\"Name of the City\",\"name\":\"q\",\"type\":\"string\",\"required\":false,\"in\":\"query\"}],\"responses\":{\"200\":{ } },\"x-auth-type\":\"Application & Application User\", \"x-throttling-tier\":\"Unlimited\" }}},\"swagger\":\"2.0\",\"info\":{ \"title\":\"WeatherAPI\",\"version\":\"1.0.0\"}}";
 }
 
 

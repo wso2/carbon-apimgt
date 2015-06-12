@@ -13,7 +13,10 @@
         "keyStorePassword" : "",
         "identityAlias" : "",
         "responseSigningEnabled":"true",
-        "keyStoreName" :""
+        "keyStoreName" :"",
+        "passive" : "true",
+        "acsURL" : "https://localhost:${carbon.https.port}/store/jagg/jaggery_acs.jag",
+        "signRequests" : "false"
     },
     "oidcConfiguration" : {
       "enabled" : "false",

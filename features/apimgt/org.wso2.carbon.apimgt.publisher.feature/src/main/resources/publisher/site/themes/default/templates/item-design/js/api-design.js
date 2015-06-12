@@ -25,12 +25,35 @@ Handlebars.registerHelper( 'toString', function returnToString( x ){
     return ( x === void 0 ) ? 'undefined' : x.toString();
 } );
 
+Handlebars.registerHelper('ref', function(items, options) {
+  if(items["$ref"] != undefined){
+    var api = APIDesigner();
+    var result = api.query(items["$ref"].replace("#","$").replace(/\//g,"."));
+    if(result.length > 0){
+        items = result[0];
+    }
+  }
+  out = options.fn(items);
+  return out;
+});
+
 var content_types = [
        { value : "application/json", text :  "application/json"},
        { value : "application/xml", text :  "application/xml"},
        { value : "text/plain", text :  "text/plain"},
        { value : "text/html", text :  "text/html"}
 ];
+
+//function to check if an attribute exists in a nested series of objects
+function checkNested(obj) {
+  for (var i = 1; i < arguments.length; i++) {
+    if (!obj.hasOwnProperty(arguments[i])) {
+      return false;
+    }
+    obj = obj[arguments[i]];
+  }
+  return true;
+}
 
 //Create a designer class
 function APIDesigner(){
@@ -59,21 +82,23 @@ function APIDesigner(){
     this.init_controllers();
 
     $( "#api_designer" ).delegate( "#more", "click", this, function( event ) {
-                        $("#options").css("display", "inline");
+                        $("#options").css("display", "inline-block");
                         $("#more").hide();
     });
   $( "#api_designer" ).delegate( "#less", "click", this, function( event ) {
                          $("#options").hide();
-                         $("#more").css("display", "inline");
+                         $("#more").css("display", "inline-block");
     });
-         $( "#api_designer" ).delegate( "a.help_popup", "mouseover", this, function( event ) {
-    $('a.help_popup').popover({
-        html : true,
-        content: function() {
-            return $('#'+$(this).attr('help_data')).html();
-        }
+
+    $( "#api_designer" ).delegate( "a.help_popup", "mouseover", this, function( event ) {
+        $('a.help_popup').popover({
+            html : true,
+            content: function() {
+                return $('#'+$(this).attr('help_data')).html();
+            }
+        });
     });
-            });
+
     $( "#api_designer" ).delegate( ".resource_expand", "click", this, function( event ) {
         if(this.resource_created == undefined){
             event.data.render_resource($(this).parent().next().find('.resource_body'));
@@ -203,7 +228,6 @@ APIDesigner.prototype.check_if_resource_exist = function(path, method){
 
 APIDesigner.prototype.set_default_management_values = function(){
     var operations = this.query("$.paths.*.*");
-    console.log(operations);
     for(var i=0;i < operations.length;i++){
         if(!operations[i]["x-auth-type"]){
             if(operations[i].method == "OPTIONS"){
@@ -221,18 +245,18 @@ APIDesigner.prototype.set_default_management_values = function(){
 
 APIDesigner.prototype.add_default_resource = function(){
     $("#resource_url_pattern").val("*");
-    $(".http_verb_select:lt(4)").attr("checked","checked");
+    $(".http_verb_select:lt(5)").attr("checked","checked");
     $("#inputResource").val("Default");
     $("#add_resource").trigger('click');
 }
 
 APIDesigner.prototype.get_scopes = function() {
     var options = [{ "value": "" , "text": "" }];
-    if(typeof(this.api_doc.securityDefinitions)!='undefined'){
-	var scopes = this.api_doc.securityDefinitions.apim['x-wso2-scopes'];	
-	for(var i =0; i < scopes.length ; i++ ){
-	    options.push({ "value": scopes[i].key , "text": scopes[i].name });
-	}	
+    if(checkNested(this.api_doc, 'securityDefinitions','apim','x-wso2-scopes')){
+    	var scopes = this.api_doc.securityDefinitions.apim['x-wso2-scopes'];	
+    	for(var i =0; i < scopes.length ; i++ ){
+    	    options.push({ "value": scopes[i].key , "text": scopes[i].name });
+    	}	
     }
     return options;
 }
@@ -253,9 +277,14 @@ APIDesigner.prototype.display_elements = function(value,source){
 };
 
 APIDesigner.prototype.update_elements = function(resource, newValue){
+    debugger;
     var API_DESIGNER = APIDesigner();
     var obj = API_DESIGNER.query($(this).attr('data-path'));
     var obj = obj[0]
+    if(obj["$ref"]!=undefined){
+        var obj = API_DESIGNER.query(obj["$ref"].replace("#","$").replace(/\//g,"."));  
+        var obj = obj[0];      
+    }
     var i = $(this).attr('data-attr');
     obj[i] = newValue;
 };
@@ -267,7 +296,11 @@ APIDesigner.prototype.update_elements_boolean = function(resource, newValue){
         newValue = false;
     var API_DESIGNER = APIDesigner();
     var obj = API_DESIGNER.query($(this).attr('data-path'));
-    var obj = obj[0]
+    var obj = obj[0];
+    if(obj["$ref"]!=undefined ){
+        var obj = API_DESIGNER.query(obj["$ref"].replace("#","$").replace(/\//g,"."));  
+        var obj = obj[0];      
+    }    
     var i = $(this).attr('data-attr');
     obj[i] = newValue;
 };
@@ -292,9 +325,11 @@ APIDesigner.prototype.init_controllers = function(){
         jagg.message({content:'Do you want to remove "'+op+' : '+pn+'" resource from list.',type:'confirm',title:"Remove Resource",
         okCallback:function(){
             API_DESIGNER = APIDesigner();
-            //console.log(i, pn, op, operations);
             delete API_DESIGNER.api_doc.paths[pn][op];
-            API_DESIGNER.render_resources(); 
+            API_DESIGNER.render_resources();
+            if(Object.keys(API_DESIGNER.api_doc.paths[pn]).length == 0) {
+                delete API_DESIGNER.api_doc.paths[pn];
+            }
         }});
         //delete resource if no operations       
     });
@@ -332,13 +367,12 @@ APIDesigner.prototype.init_controllers = function(){
         if(resource.parameters ==undefined){
             resource.parameters = [];
         }
-        resource.parameters.push({ name : parameter , paramType : "query", required : false , type: "string"});
+        resource.parameters.push({ name : parameter , in : "query", required : false , type: "string"});
         //@todo need to checge parent.parent to stop code brak when template change.
         API_DESIGNER.render_resource(resource_body);
     });
 
     this.container.delegate(".delete_parameter", "click", function (event) {
-        console.log("deleting parameter");
         //var elementToDelete =  $(this).parent().parent();
         var deleteData = $(this).attr("data-path");
         var i = $(this).attr("data-index");
@@ -352,9 +386,7 @@ APIDesigner.prototype.init_controllers = function(){
             type: 'confirm', title: "Delete Parameter",
             okCallback: function () {
                 API_DESIGNER = APIDesigner();
-                console.log(API_DESIGNER.api_doc.paths[operations]);
                 API_DESIGNER.api_doc.paths[operations][operation]['parameters'].splice(i,1);
-                console.log(API_DESIGNER.api_doc.paths[operations]);
                 API_DESIGNER.render_resources();
             }});
     });
@@ -546,7 +578,7 @@ APIDesigner.prototype.render_resource = function(container){
     });
     container.find('.param_paramType').editable({
         emptytext: '+ Set Param Type',
-        source: [ { value:"query", text:"query" },{ value:"body", text:"body"}, { value:"header", text:"header" }, { value:"form", value:"form"} ],
+        source: [ { value:"query", text:"query" },{ value:"header", text:"header" }, { value:"formData", value:"formData"} ],
         success : this.update_elements
     });
     container.find('.param_type').editable({
@@ -586,7 +618,7 @@ APIDesigner.prototype.add_resource = function(resource, path){
 
 APIDesigner.prototype.edit_swagger = function(){
     $("body").addClass("modal-open");
-    $("#swaggerEditer").append('<iframe id="se-iframe"  style="border:0px;" width="100%" height="100%"></iframe>');    
+    $("#swaggerEditer").append('<iframe id="se-iframe"  style="border:0px;"background: #4a4a4a; width="100%" height="100%"></iframe>');    
     document.getElementById('se-iframe').src = $("#swaggerEditer").attr("editor-url");
     $("#swaggerEditer").fadeIn("fast");
 };
@@ -665,11 +697,11 @@ $(document).ready(function(){
                 "swagger_url": $("#swagger_import_url").val() // "http://petstore.swagger.wordnik.com/api/api-docs"
             }
             $.get(jagg.site.context + "/site/blocks/item-design/ajax/import.jag", data, function (data) {
+                $('#import_swagger').buttonLoader('stop');
+                $('#swagger_help').hide();
+                $("#swaggerUpload").modal('hide');
                 var designer = APIDesigner();
                 designer.load_api_document(data);
-                $('#swagger_help').hide();
-                $('#import_swagger').buttonLoader('stop');
-                $("#swaggerUpload").modal('hide');
             }).fail(function (data) {
                 $('#swagger_help').show();
                 $('#import_swagger').buttonLoader('stop');
@@ -834,9 +866,7 @@ function updateContextPattern(){
             $('#error-invalidContextValue').modal('show');
         }
         if(context.indexOf("{version}") < 0){
-            if(context.lastIndexOf('/') < 0){
-                context = context + '/';
-            }
+            context = context + '/';
             context = context + "{version}";
         }
         $('#resource_url_pattern_refix').text(context);

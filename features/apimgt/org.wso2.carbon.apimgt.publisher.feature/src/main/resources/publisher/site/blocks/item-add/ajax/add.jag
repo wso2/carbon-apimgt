@@ -64,6 +64,8 @@ include("/jagg/jagg.jag");
             apiData.environments=request.getParameter("environments","UTF-8");
             var externalAPIStoresArray = new Array();
             var externalAPIStores = request.getParameter("externalAPIStores");
+            var provider = request.getParameter("provider","UTF-8");
+
             if(externalAPIStores!=null){
             var externalAPIStoresVals=externalAPIStores.split("::");
              for(var k=0;k<externalAPIStoresVals.length;k++){
@@ -113,12 +115,16 @@ include("/jagg/jagg.jag");
             apiData.uriAuthMethodArr = uriAuthMethodArr;
             apiData.throttlingTierArr = throttlingTierArr;
 
-            if(action === "addAPI"){
-            apiData.provider = jagg.getUser().username;
-            result = mod.addAPI(apiData);
-            }else{
-            apiData.provider = jagg.getUser().username;
-            result = mod.updateAPI(apiData);
+            if (provider == null) {
+                apiData.provider = jagg.getUser().username;
+            } else {
+                apiData.provider = provider;
+            }
+
+            if(action === "addAPI"){            
+            	result = mod.addAPI(apiData);
+            }else{            
+            	result = mod.updateAPI(apiData);
             }
             if (result.error == true) {
                 obj = {

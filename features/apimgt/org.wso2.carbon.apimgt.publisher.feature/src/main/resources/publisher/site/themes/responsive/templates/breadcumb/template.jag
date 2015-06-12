@@ -69,9 +69,6 @@
                     <%=i18n.localize("apis")%>
                 </li>
                 <li>
-                    <span class="divider"></span>
-                </li>
-                <li>
                     <a href="<%=allStatsMappedUrl%>" onclick="jagg.sessionAwareJS({redirect:'<%=allStatsMappedUrl%>',e:event})"><%=i18n.localize("allStats")%></a>
                 </li>
                 <% } %>

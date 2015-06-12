@@ -466,8 +466,8 @@ public class APIProviderHostObject extends ScriptableObject {
         }
 
         // removing scopes from cache
-        ProviderKeyMgtClient providerClient = HostObjectUtils.getProviderClient();
         try {
+            ProviderKeyMgtClient providerClient = HostObjectUtils.getProviderClient();
             String[] consumerKeys = apiProvider.getConsumerKeys(new APIIdentifier(provider, name, version));
             if (consumerKeys != null && consumerKeys.length != 0) {
                 providerClient.removeScopeCache(consumerKeys);
@@ -1366,7 +1366,7 @@ public class APIProviderHostObject extends ScriptableObject {
 
     public static boolean jsFunction_updateAPI(Context cx, Scriptable thisObj,
                                                Object[] args,
-                                               Function funObj) throws APIManagementException {
+                                               Function funObj) throws APIManagementException, FaultGatewaysException {
 
         if (args==null || args.length == 0) {
             handleException("Invalid number of input parameters.");
@@ -1505,123 +1505,126 @@ public class APIProviderHostObject extends ScriptableObject {
         APIIdentifier apiId = new APIIdentifier(provider, name, version);
         API api = new API(apiId);
 
-        //to keep the backword compatibility if resource_config not set process the old way.
-        if(apiData.get("resource_config", apiData) != null){
-            Set<URITemplate> uriTemplates = new LinkedHashSet<URITemplate>();
-            JSONParser parser = new JSONParser();
-            JSONObject resourceConfig =null;
-            try{
-                resourceConfig = (JSONObject) parser.parse((String) apiData.get("resource_config", apiData));
-            }catch(ParseException e){
-                handleException("Invalid resource config", e);
-            }catch(ClassCastException e){
-                handleException("Unable to create JSON object from resource config", e);
-            }
-
-            //process scopes
-            JSONArray scopes = (JSONArray) resourceConfig.get("scopes");
-            Set<Scope> scopeList = new LinkedHashSet<Scope>();
-            for (int i=0; i < scopes.size(); i++)
-            {
-                Map scope = (Map) scopes.get(i); //access with get() method
-                Scope scopeObj = new Scope();
-                scopeObj.setKey((String) scope.get("key"));
-                scopeObj.setName((String) scope.get("name"));
-                scopeObj.setRoles((String) scope.get("roles"));
-                scopeObj.setDescription((String) scope.get("description"));
-                scopeList.add(scopeObj);
-            }
-            api.setScopes(scopeList);
-
-
-            JSONArray resources = (JSONArray) resourceConfig.get("resources");
-            for (int k = 0; k < resources.size(); k++) {
-                JSONObject resource = (JSONObject) resources.get(k);
-
-
-                Map http_verbs = (Map) resource.get("http_verbs");
-                Iterator iterator = http_verbs.entrySet().iterator();
-
-                while (iterator.hasNext()) {
-                    Map.Entry mapEntry = (Map.Entry) iterator.next();
-                    Map mapEntryValue = (Map) mapEntry.getValue();
-
-                    URITemplate template = new URITemplate();
-                    String uriTempVal = (String) resource.get("url_pattern");
-                    uriTempVal = uriTempVal.startsWith("/") ? uriTempVal : ("/" + uriTempVal);
-                    template.setUriTemplate(uriTempVal);
-                    template.setHTTPVerb((String)mapEntry.getKey());
-                    String authType = (String) mapEntryValue.get("auth_type");
-                    if (authType.equals("Application & Application User")) {
-                        authType = APIConstants.AUTH_APPLICATION_OR_USER_LEVEL_TOKEN;
-                    }
-                    if (authType.equals("Application User")) {
-                        authType = "Application_User";
-                    }
-                    if (authType.equals("Application")) {
-                        authType = APIConstants.AUTH_APPLICATION_LEVEL_TOKEN;
-                    }
-                    template.setThrottlingTier((String) mapEntryValue.get("throttling_tier"));
-                    template.setAuthType(authType);
-                    template.setResourceURI(endpoint);
-                    template.setResourceSandboxURI(sandboxUrl);
-                    Scope scope= APIUtil.findScopeByKey(scopeList,(String) mapEntryValue.get("scope"));
-                    template.setScope(scope);
-                    uriTemplates.add(template);
+        // to keep the backword compatibility if swagger not set process from
+        // resource_config or old way.
+        if (apiData.get("swagger", apiData) == null) {
+            if(apiData.get("resource_config", apiData) != null){
+                Set<URITemplate> uriTemplates = new LinkedHashSet<URITemplate>();
+                JSONParser parser = new JSONParser();
+                JSONObject resourceConfig =null;
+                try{
+                    resourceConfig = (JSONObject) parser.parse((String) apiData.get("resource_config", apiData));
+                }catch(ParseException e){
+                    handleException("Invalid resource config", e);
+                }catch(ClassCastException e){
+                    handleException("Unable to create JSON object from resource config", e);
                 }
-            }
-            //todo handle casting exceptions
-            api.setUriTemplates(uriTemplates);
-            //todo clean out the code.
-        }else{
-            //following is the old fashioned way of processing resources
-            NativeArray uriMethodArr = (NativeArray) apiData.get("uriMethodArr", apiData);
-            NativeArray authTypeArr = (NativeArray) apiData.get("uriAuthMethodArr", apiData);
-            NativeArray throttlingTierArr = (NativeArray) apiData.get("throttlingTierArr", apiData);
-            NativeArray uriTemplateArr = (NativeArray) apiData.get("uriTemplateArr", apiData);
-            if (uriTemplateArr != null && uriMethodArr != null && authTypeArr != null) {
-                if (uriTemplateArr.getLength() == uriMethodArr.getLength()) {
-                    Set<URITemplate> uriTemplates = new LinkedHashSet<URITemplate>();
-                    for (int i = 0; i < uriTemplateArr.getLength(); i++) {
-                        String uriMethods = (String) uriMethodArr.get(i, uriMethodArr);
-                        String uriMethodsAuthTypes = (String) authTypeArr.get(i, authTypeArr);
-                        String[] uriMethodArray = uriMethods.split(",");
-                        String[] authTypeArray = uriMethodsAuthTypes.split(",");
-                        String uriMethodsThrottlingTiers = (String) throttlingTierArr.get(i, throttlingTierArr);
-                        String[] throttlingTierArray = uriMethodsThrottlingTiers.split(",");
-                        for (int k = 0; k < uriMethodArray.length; k++) {
-                            for (int j = 0; j < authTypeArray.length; j++) {
-                                if (j == k) {
-                                    URITemplate template = new URITemplate();
-                                    String uriTemp = (String) uriTemplateArr.get(i, uriTemplateArr);
-                                    String uriTempVal = uriTemp.startsWith("/") ? uriTemp : ("/" + uriTemp);
-                                    template.setUriTemplate(uriTempVal);
-                                    String throttlingTier = throttlingTierArray[j];
-                                    template.setHTTPVerb(uriMethodArray[k]);
-                                    String authType = authTypeArray[j];
-                                    if (authType.equals("Application & Application User")) {
-                                        authType = APIConstants.AUTH_APPLICATION_OR_USER_LEVEL_TOKEN;
-                                    }
-                                    if (authType.equals("Application User")) {
-                                        authType = "Application_User";
-                                    }
-                                    if (authType.equals("Application")) {
-                                        authType = APIConstants.AUTH_APPLICATION_LEVEL_TOKEN;
-                                    }
-                                    template.setThrottlingTier(throttlingTier);
-                                    template.setAuthType(authType);
-                                    template.setResourceURI(endpoint);
-                                    template.setResourceSandboxURI(sandboxUrl);
-
-                                    uriTemplates.add(template);
-                                    break;
-                                }
-
-                            }
+    
+                //process scopes
+                JSONArray scopes = (JSONArray) resourceConfig.get("scopes");
+                Set<Scope> scopeList = new LinkedHashSet<Scope>();
+                for (int i=0; i < scopes.size(); i++)
+                {
+                    Map scope = (Map) scopes.get(i); //access with get() method
+                    Scope scopeObj = new Scope();
+                    scopeObj.setKey((String) scope.get("key"));
+                    scopeObj.setName((String) scope.get("name"));
+                    scopeObj.setRoles((String) scope.get("roles"));
+                    scopeObj.setDescription((String) scope.get("description"));
+                    scopeList.add(scopeObj);
+                }
+                api.setScopes(scopeList);
+    
+    
+                JSONArray resources = (JSONArray) resourceConfig.get("resources");
+                for (int k = 0; k < resources.size(); k++) {
+                    JSONObject resource = (JSONObject) resources.get(k);
+    
+    
+                    Map http_verbs = (Map) resource.get("http_verbs");
+                    Iterator iterator = http_verbs.entrySet().iterator();
+    
+                    while (iterator.hasNext()) {
+                        Map.Entry mapEntry = (Map.Entry) iterator.next();
+                        Map mapEntryValue = (Map) mapEntry.getValue();
+    
+                        URITemplate template = new URITemplate();
+                        String uriTempVal = (String) resource.get("url_pattern");
+                        uriTempVal = uriTempVal.startsWith("/") ? uriTempVal : ("/" + uriTempVal);
+                        template.setUriTemplate(uriTempVal);
+                        template.setHTTPVerb((String)mapEntry.getKey());
+                        String authType = (String) mapEntryValue.get("auth_type");
+                        if (authType.equals("Application & Application User")) {
+                            authType = APIConstants.AUTH_APPLICATION_OR_USER_LEVEL_TOKEN;
                         }
-
+                        if (authType.equals("Application User")) {
+                            authType = "Application_User";
+                        }
+                        if (authType.equals("Application")) {
+                            authType = APIConstants.AUTH_APPLICATION_LEVEL_TOKEN;
+                        }
+                        template.setThrottlingTier((String) mapEntryValue.get("throttling_tier"));
+                        template.setAuthType(authType);
+                        template.setResourceURI(endpoint);
+                        template.setResourceSandboxURI(sandboxUrl);
+                        Scope scope= APIUtil.findScopeByKey(scopeList,(String) mapEntryValue.get("scope"));
+                        template.setScope(scope);
+                        uriTemplates.add(template);
                     }
-                    api.setUriTemplates(uriTemplates);
+                }
+                //todo handle casting exceptions
+                api.setUriTemplates(uriTemplates);
+                //todo clean out the code.
+            }else{
+                //following is the old fashioned way of processing resources
+                NativeArray uriMethodArr = (NativeArray) apiData.get("uriMethodArr", apiData);
+                NativeArray authTypeArr = (NativeArray) apiData.get("uriAuthMethodArr", apiData);
+                NativeArray throttlingTierArr = (NativeArray) apiData.get("throttlingTierArr", apiData);
+                NativeArray uriTemplateArr = (NativeArray) apiData.get("uriTemplateArr", apiData);
+                if (uriTemplateArr != null && uriMethodArr != null && authTypeArr != null) {
+                    if (uriTemplateArr.getLength() == uriMethodArr.getLength()) {
+                        Set<URITemplate> uriTemplates = new LinkedHashSet<URITemplate>();
+                        for (int i = 0; i < uriTemplateArr.getLength(); i++) {
+                            String uriMethods = (String) uriMethodArr.get(i, uriMethodArr);
+                            String uriMethodsAuthTypes = (String) authTypeArr.get(i, authTypeArr);
+                            String[] uriMethodArray = uriMethods.split(",");
+                            String[] authTypeArray = uriMethodsAuthTypes.split(",");
+                            String uriMethodsThrottlingTiers = (String) throttlingTierArr.get(i, throttlingTierArr);
+                            String[] throttlingTierArray = uriMethodsThrottlingTiers.split(",");
+                            for (int k = 0; k < uriMethodArray.length; k++) {
+                                for (int j = 0; j < authTypeArray.length; j++) {
+                                    if (j == k) {
+                                        URITemplate template = new URITemplate();
+                                        String uriTemp = (String) uriTemplateArr.get(i, uriTemplateArr);
+                                        String uriTempVal = uriTemp.startsWith("/") ? uriTemp : ("/" + uriTemp);
+                                        template.setUriTemplate(uriTempVal);
+                                        String throttlingTier = throttlingTierArray[j];
+                                        template.setHTTPVerb(uriMethodArray[k]);
+                                        String authType = authTypeArray[j];
+                                        if (authType.equals("Application & Application User")) {
+                                            authType = APIConstants.AUTH_APPLICATION_OR_USER_LEVEL_TOKEN;
+                                        }
+                                        if (authType.equals("Application User")) {
+                                            authType = "Application_User";
+                                        }
+                                        if (authType.equals("Application")) {
+                                            authType = APIConstants.AUTH_APPLICATION_LEVEL_TOKEN;
+                                        }
+                                        template.setThrottlingTier(throttlingTier);
+                                        template.setAuthType(authType);
+                                        template.setResourceURI(endpoint);
+                                        template.setResourceSandboxURI(sandboxUrl);
+    
+                                        uriTemplates.add(template);
+                                        break;
+                                    }
+    
+                                }
+                            }
+    
+                        }
+                        api.setUriTemplates(uriTemplates);
+                    }
                 }
             }
         }
@@ -1724,8 +1727,39 @@ public class APIProviderHostObject extends ScriptableObject {
         		PrivilegedCarbonContext.endTenantFlow();
         	}
         }
-        String apiDefinitionJSON = definitionFromSwagger20.generateAPIDefinition(api);
-        apiProvider.saveSwagger20Definition(api.getId(), apiDefinitionJSON);
+        
+        if (apiData.get("swagger", apiData) != null) {
+            // Read URI Templates from swagger resource and set to api object
+            Set<URITemplate> uriTemplates = definitionFromSwagger20.getURITemplates(api,
+                                                                     String.valueOf(apiData.get("swagger", apiData)));
+            api.setUriTemplates(uriTemplates);
+
+            // scopes
+            Set<Scope> scopes = definitionFromSwagger20.getScopes(String.valueOf(apiData.get("swagger", apiData)));
+            api.setScopes(scopes);
+            
+            try {
+                int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
+                                                     .getTenantId(tenantDomain);
+                for (URITemplate uriTemplate : uriTemplates) {
+                    Scope scope = uriTemplate.getScope();
+                    if (scope != null && !(ScopesIssuer.getInstance().isWhiteListedScope(scope.getKey()))) {
+                        if (apiProvider.isScopeKeyAssigned(apiId, scope.getKey(), tenantId)) {
+                            handleException("Scope " + scope.getKey() + " is already assigned by another API");
+                        }
+                    }
+                }
+            } catch (UserStoreException e) {
+                handleException("Error while reading tenant information ", e);
+            }
+
+            // Save swagger in the registry
+            apiProvider.saveSwagger20Definition(api.getId(), (String) apiData.get("swagger", apiData));
+            saveAPI(apiProvider, api, null, false);
+        } else {
+            String apiDefinitionJSON = definitionFromSwagger20.generateAPIDefinition(api);
+            apiProvider.saveSwagger20Definition(api.getId(), apiDefinitionJSON);            
+        }
         return success;
     }
 
@@ -2830,6 +2864,14 @@ public class APIProviderHostObject extends ScriptableObject {
 
         APIIdentifier apiId = new APIIdentifier(APIUtil.replaceEmailDomain(providerName), apiName, version);
         Documentation doc = new Documentation(getDocType(docType), docName);
+        APIProvider apiProvider = getAPIProvider(thisObj);
+
+        //add documentation is allowed only if document name does not already exist for this api
+        if (apiProvider.isDocumentationExist(apiId, docName)) {
+            handleException("Error occurred while adding the document. " + docName +
+                    " already exists for API " + apiName + "-" + version);
+        }
+
         if (doc.getType() == DocumentationType.OTHER) {
             doc.setOtherTypeName(args[9].toString());
         }
@@ -2854,7 +2896,6 @@ public class APIProviderHostObject extends ScriptableObject {
         } else {
             doc.setVisibility(Documentation.DocumentVisibility.OWNER_ONLY);
         }
-        APIProvider apiProvider = getAPIProvider(thisObj);
         try {
 
             if (fileHostObject != null && fileHostObject.getJavaScriptFile().getLength() != 0) {
@@ -3778,8 +3819,8 @@ public class APIProviderHostObject extends ScriptableObject {
 		String tenantDomain = args[0].toString();
 		if (tenantDomain != null &&
 		    !org.wso2.carbon.base.MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
-			APIUtil.loadTenantConfig(tenantDomain);
-		}
+            APIUtil.loadTenantConfig(tenantDomain);
+        }
 	}
 
     public static NativeArray jsFunction_getLifeCycleEvents(Context cx, Scriptable thisObj,
@@ -3881,6 +3922,13 @@ public class APIProviderHostObject extends ScriptableObject {
 
         APIIdentifier apiId = new APIIdentifier(providerName, apiName, version);
         Documentation doc = new Documentation(getDocType(docType), docName);
+        APIProvider apiProvider = getAPIProvider(thisObj);
+
+        //update documentation is allowed only if documentation name already exists for this api
+        if (!apiProvider.isDocumentationExist(apiId, docName)) {
+            handleException("Error occurred while updating the document. " + docName +
+                    " does not exist for API " + apiName + "-" + version);
+        }
 
         if (doc.getType() == DocumentationType.OTHER) {
             doc.setOtherTypeName(args[9].toString());
@@ -3905,8 +3953,7 @@ public class APIProviderHostObject extends ScriptableObject {
         } else {
             doc.setVisibility(Documentation.DocumentVisibility.OWNER_ONLY);
         }
-        APIProvider apiProvider = getAPIProvider(thisObj);
-        
+
         Documentation oldDoc = apiProvider.getDocumentation(apiId, doc.getType(), doc.getName());
 
         try {
@@ -3984,25 +4031,26 @@ public class APIProviderHostObject extends ScriptableObject {
         return apiOlderVersionExist;
     }
 
-	public static String jsFunction_isURLValid(Context cx, Scriptable thisObj, Object[] args,
-	                                           Function funObj) throws APIManagementException {
-		String response = "";
-		if (args == null || !isStringValues(args)) {
-			handleException("Invalid input parameters.");
-		}
-		String urlVal = (String) args[1];
-		String type = (String) args[0];
-		if (urlVal != null && !urlVal.isEmpty()) {
-			URLConnection conn = null;
-			try {
-				URL url = new URL(urlVal);
-				if (type != null && type.equals("wsdl")) {
-					validateWsdl(urlVal);
-					response = "success";
-				}
-				// checking http,https endpoints up to resource level by doing
-				// http HEAD. And other end point
-				// validation do through basic url connect
+    public static String jsFunction_isURLValid(Context cx, Scriptable thisObj, Object[] args, Function funObj)
+                                                                                       throws APIManagementException {
+        String response = "";
+        if (args == null || !isStringValues(args)) {
+            handleException("Invalid input parameters.");
+        }
+        String urlVal = (String) args[1];
+        String type = (String) args[0];
+        if (urlVal != null && !urlVal.isEmpty()) {
+            urlVal = urlVal.trim();
+            URLConnection conn = null;
+            try {
+                URL url = new URL(urlVal);
+                if (type != null && type.equals("wsdl")) {
+                    validateWsdl(urlVal);
+                    response = "success";
+                }
+                // checking http,https endpoints up to resource level by doing
+                // http HEAD. And other end point
+                // validation do through basic url connect
                 else if (url.getProtocol().matches("https")) {
                     ServerConfiguration serverConfig = CarbonUtils.getServerConfiguration();
                     String trustStorePath = serverConfig.getFirstProperty("Security.TrustStore.Location");
@@ -4017,16 +4065,16 @@ public class APIProviderHostObject extends ScriptableObject {
                     return "error while connecting";
                 }
             } catch (Exception e) {
-				response = e.getMessage();
-			} finally {
-				if (conn != null) {
-					conn = null;
-				}
-			}
-		}
-		return response;
+                response = e.getMessage();
+            } finally {
+                if (conn != null) {
+                    conn = null;
+                }
+            }
+        }
+        return response;
 
-	} 
+    }
 
 	private static HostnameVerifier DO_NOT_VERIFY = new HostnameVerifier() {
 		public boolean verify(String hostname, SSLSession session) {

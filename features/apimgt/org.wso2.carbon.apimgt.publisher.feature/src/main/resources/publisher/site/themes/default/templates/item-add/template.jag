@@ -26,17 +26,17 @@
                            </div>
                         </div>
                         <div class="control-group toggleContainers">
-                           <div class="controls hide pull-left">
+                           <div class="controls hide">
                                <input name="swagger-url" id="swagger-url" class="input-xxlarge" type="text"/>
                                <p class="help-block" style="margin-top:-3px;">Ex: http://petstore.swagger.io/v2/swagger.json</p>
                            </div>
-                           <div class="controls hide pull-left">
+                           <div class="controls hide">
                               <input name="swagger-file" id="swagger-file" type="file" class="upload" />
                            </div>
                         </div>
                         <input name="action" value="start" type="hidden"/>
                         <input name="type" value="rest" type="hidden"/>
-                        <button id="startFromExistingAPI" class="btn btn-primary pull-right has-spinner" type="button">Start Creating</button>
+                        <button id="startFromExistingAPI" class="btn btn-primary has-spinner" type="button">Start Creating</button>
                </fieldset>
                </form>
             </div>
@@ -61,25 +61,31 @@
                      <div class="control-group">
                         <div class="control-group">
                            <div class="controls">
-                               <input name="wsdl-url" class="input-xxlarge" type="text"/>
+                               <input id="wsdl-url" name="wsdl-url" class="input-xxlarge" type="text"/>
+                               <label for="wsdl-url" class="error wsdlError">Please use a valid wsdl endpoint</label>
+                               <p class="help-block">E.g.,:http://appserver/services/echo?wsdl</p>
                            </div>
                            <div class="controls hide">
                               <input name="wsdl-file" type="file" />
                            </div>
                         </div>
                         <input name="action" value="start" type="hidden"/>
-                        <input name="type" value="soap" type="hidden"/>                        
-                        <button id="startFromExistingSOAPEndpoint" class="btn btn-primary pull-right has-spinner" type="button">Start Creating</button>
+                        <input name="type" value="soap" type="hidden"/>
+                        <button id="startFromExistingSOAPEndpoint" class="btn btn-primary has-spinner" type="button">Start Creating</button>
                      </div>
                   </fieldset>
                </form>
             </div>
          </div>
 
-            <label class="radio  select-label create-options"><input class="create-api" id="create-new-api" type="radio" name="create-api"/>Design new API
+            <label class="radio  select-label create-options"><input class="create-api" id="create-new-api" type="radio" name="create-api" data-target="#newAPI" />Design new API
             <p><%=i18n.localize("designNewAPI")%></p></label>
 
-            <a href="<%= jagg.url("/design")%>" id="designNewAPI" class="btn btn-primary pull-right hide" type="button">Start Creating</a>
+            <div id="newAPI" class="slideContainer hide">
+               <div class="well">
+                    <button onclick="window.location='<%= jagg.url("/design")%>'" id="designNewAPI" class="btn btn-primary hide" type="button">Start Creating</button>
+               </div>
+            </div.
          </div>
       </div>
    </div>

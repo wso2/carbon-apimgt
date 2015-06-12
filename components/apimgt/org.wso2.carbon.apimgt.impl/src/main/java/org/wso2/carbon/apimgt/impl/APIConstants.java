@@ -20,6 +20,9 @@ package org.wso2.carbon.apimgt.impl;
 
 import javax.ws.rs.POST;
 import javax.xml.namespace.QName;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * This class represents the constants that are used for APIManager implementation
@@ -364,6 +367,8 @@ public final class APIConstants {
     public static final String API_STORE_TAG_CACHE_DURATION = API_STORE + "TagCacheDuration";
     public static final String API_STORE_REUSE_APP_NAME = API_STORE + "ReuseAppName";
     public static final String API_STORE_DISABLE_PERMISSION_CHECK = API_STORE + "DisablePermissionCheck";
+    public static final String API_STORE_APIS_PER_PAGE = API_STORE + "APIsPerPage";
+
 
     public static final String API_PUBLISHER = "APIPublisher.";
     public static final String SHOW_API_PUBLISHER_URL_FROM_STORE = "APIPublisher."+"DisplayURL";
@@ -508,6 +513,7 @@ public final class APIConstants {
         public static final int API_AUTH_INCORRECT_ACCESS_TOKEN_TYPE = 900905;
         public static final int API_AUTH_INCORRECT_API_RESOURCE = 900906;
         public static final int API_BLOCKED = 900907;
+        public static final int API_AUTH_RESOURCE_FORBIDDEN = 900908;
         public static final int SUBSCRIPTION_INACTIVE = 900909;
         public static final int INVALID_SCOPE = 900910;
     }
@@ -532,6 +538,7 @@ public final class APIConstants {
     public static final int API_CONTEXT_CACHE_EXPIRY_TIME_IN_DAYS = 3650 ;
 
     //URI Authentication Schemes
+    public static final Set<String> SUPPORTED_METHODS = new HashSet<String>((Arrays.asList(new String[] {"get","put","post","delete","head","options"})));
     public static final String AUTH_NO_AUTHENTICATION = "None";
     public static final String AUTH_APPLICATION_LEVEL_TOKEN = "Application";
     public static final String AUTH_APPLICATION_USER_LEVEL_TOKEN = "Application_User";

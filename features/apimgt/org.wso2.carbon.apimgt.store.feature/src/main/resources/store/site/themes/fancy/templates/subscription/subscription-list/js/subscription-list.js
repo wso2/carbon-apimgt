@@ -13,14 +13,14 @@ function showHideKeys(){
     }
 
 $(document).ready(function () {
-    
+
     $('#scopeSelectButtonPop').click(function() {
     	var selected = ($('.CheckboxProd:checked').map(function() {
     	    return this.value;
     	}).get().join(' '));
     	$('#prodScopeInput').attr('value', selected);
     	});
-    
+
     $('#scopeSelectButtonPopSand').click(function() {
     	var selected = ($('.CheckboxSand:checked').map(function() {
     	    return this.value;
@@ -65,11 +65,11 @@ $(document).ready(function () {
 
         var elem = $(this);
         var keyType = elem.attr("data-keyType");
-        var applicationId = elem.attr("data-applicationId");
+        var applicationName = elem.attr("data-applicationName");
 
         jagg.post("/site/blocks/subscription/subscription-add/ajax/subscription-add.jag", {
-            action:"deleteFromApplicationRegistration",
-            applicationId:applicationId,
+            action:"cleanUpApplicationRegistration",
+            applicationName:applicationName,
             keyType:keyType
         }, function (result) {
             if (!result.error) {
@@ -111,7 +111,6 @@ $(document).ready(function () {
         var keyType = elem.attr("data-keytype");
         var authoDomains;
         var domainsDiv;
-        var applicationName = elem.attr("data-application");
         var regen;
         var link;
         var userName = elem.attr("data-username");
@@ -146,17 +145,6 @@ $(document).ready(function () {
         }, function (result) {
             if (!result.error) {
                 location.reload();
-                var accToken = result.data.key.accessToken;
-
-                if(keyType== 'PRODUCTION'){
-                    //Storing production access token in local storage
-                    localStorage.setItem('production-key'+applicationName, accToken);
-                }
-                else{
-                    //Storing sandbox access token in local storage
-                    localStorage.setItem('sandbox-key'+applicationName,accToken);
-                }
-
             } else {
                 jagg.message({content: result.message, type: "error"});
             }
@@ -230,8 +218,8 @@ $(document).ready(function () {
         showHideKeys();
     });
     showHideKeys();
-    
-    
+
+
     $('.help_popup_prod').click(function(){
 	        $('#prodtoken_help').toggle('fast', function()
 	        {
@@ -239,7 +227,7 @@ $(document).ready(function () {
 	        });
 	        return false;
 	    })
-	    
+
    $('.help_popup_sand').click(function(){
 	 $('#sandtoken_help').toggle('fast', function()
 	 {
@@ -452,16 +440,12 @@ var regenerate=function(appName,keyType,i,btn,div,clientId,clientSecret) {
                 if(!regenerateOption){ $('.proRegenerateForm').hide(); }
                 $('.accessTokenDisplayPro').html(result.data.key.accessToken).attr('data-value',result.data.key.accessToken);
                 $('.accessTokenScopeDisplayPro').html(generatedScopesNames).attr('data-value',generatedScopesNames);
-                //Storing production access token in local storage
-                localStorage.setItem('production-key'+appName, result.data.key.accessToken);
                 showHideKeys();
             } else{
                 $('.sandAccessTokenHidden').val(result.data.key.accessToken);
                 if(!regenerateOption){ $('.sandRegenerateForm').hide(); }
                 $('.accessTokenDisplaySand').html(result.data.key.accessToken).attr('data-value',result.data.key.accessToken);
                 $('.sandScopeDisplayPro').html(generatedScopesNames).attr('data-value',generatedScopesNames);
-                //Storing sandbox access token in local Storage
-                localStorage.setItem('sandbox-key'+appName, result.data.key.accessToken);
                 //change sandScopeDisplayPro name
                 showHideKeys();
             }

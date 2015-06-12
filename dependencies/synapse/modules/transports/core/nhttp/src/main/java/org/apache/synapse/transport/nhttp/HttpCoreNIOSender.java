@@ -240,7 +240,7 @@ public class HttpCoreNIOSender extends AbstractHandler implements TransportSende
     public InvocationResponse invoke(MessageContext msgContext) throws AxisFault {
 
         // remove unwanted HTTP headers (if any from the current message)
-        removeUnwantedHeaders(msgContext);
+        removeUnwantedFieldsFromTransportAndExcessHeaders(msgContext);
 
         if (AddressingHelper.isReplyRedirected(msgContext)
                 && !msgContext.getReplyTo().hasNoneAddress()) {
@@ -280,14 +280,35 @@ public class HttpCoreNIOSender extends AbstractHandler implements TransportSende
      * Remove unwanted headers from the http response of outgoing request. These are headers which
      * should be dictated by the transport and not the user. We remove these as these may get
      * copied from the request messages
+     *
      * @param msgContext the Axis2 Message context from which these headers should be removed
      */
-    private void removeUnwantedHeaders(MessageContext msgContext) {
-        Map headers = (Map) msgContext.getProperty(MessageContext.TRANSPORT_HEADERS);
+    private void removeUnwantedFieldsFromTransportAndExcessHeaders(MessageContext msgContext) {
+        Map transportHeaders = (Map) msgContext.getProperty(MessageContext.TRANSPORT_HEADERS);
+        Map excessHeaders = (Map) msgContext.getProperty(NhttpConstants.EXCESS_TRANSPORT_HEADERS);
 
-        if (headers == null || headers.isEmpty()) {
-            return;
+        if (transportHeaders != null && !transportHeaders.isEmpty()) {
+            removeUnwantedHeaders(transportHeaders, msgContext, preserveServerHeader, preserveUserAgentHeader);
         }
+
+        if (excessHeaders != null && !excessHeaders.isEmpty()) {
+            removeUnwantedHeaders(excessHeaders, msgContext, preserveServerHeader, preserveUserAgentHeader);
+        }
+
+    }
+
+    /**
+     * Remove unwanted headers from the given header.
+     * should be dictated by the transport and not the user. We remove these as these may get
+     * copied from the request messages
+     *
+     * @param msgContext              the Axis2 Message context from which these headers should be removed
+     * @param preserveServerHeader    if true preserve the original server header
+     * @param preserveUserAgentHeader if true preserve the original user-agent header
+     */
+    private static void removeUnwantedHeaders(Map headers, MessageContext msgContext,
+                                              boolean preserveServerHeader,
+                                              boolean preserveUserAgentHeader) {
 
         Iterator iter = headers.keySet().iterator();
         while (iter.hasNext()) {
@@ -308,6 +329,7 @@ public class HttpCoreNIOSender extends AbstractHandler implements TransportSende
                 iter.remove();
             }
         }
+
     }
 
     /**
@@ -406,7 +428,7 @@ public class HttpCoreNIOSender extends AbstractHandler implements TransportSende
         int contentLength = extractContentLength(msgContext);
 
         // remove unwanted HTTP headers (if any from the current message)
-        removeUnwantedHeaders(msgContext);
+        removeUnwantedFieldsFromTransportAndExcessHeaders(msgContext);
 
         ServerWorker worker = (ServerWorker) msgContext.getProperty(Constants.OUT_TRANSPORT_INFO);
         HttpResponse response = worker.getResponse();

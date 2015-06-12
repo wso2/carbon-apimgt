@@ -1982,7 +1982,10 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 						if (value != null) {
 							matcher = pattern.matcher(value);
 							if (matcher != null && matcher.find()) {
-								apiList.add(APIUtil.getAPI(artifact, registry));
+                                API resultAPI = APIUtil.getAPI(artifact, registry);
+                                if (resultAPI != null) {
+                                    apiList.add(resultAPI);
+                                }
 							}
 						}				
 				    }	
@@ -2096,7 +2099,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         try {
             publishToExternalAPIStores(api, notPublishedAPIStores);
         } catch (APIManagementException e) {
-            e.printStackTrace();
+            handleException("Failed to publish API to external Store", e);
         }
         //Update the APIs which are already exist in the external APIStore
         updateAPIInExternalAPIStores(api,updateApiStores);
@@ -2113,7 +2116,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         if (removedApiStores.size() > 0) {
             for (APIStore store : removedApiStores) {
 
-                org.wso2.carbon.apimgt.api.model.APIPublisher publisher = store.getPublisher();
+                org.wso2.carbon.apimgt.api.model.APIPublisher publisher =
+                        APIUtil.getExternalAPIStore(store.getName(), tenantId).getPublisher();
                 boolean deleted=publisher.deleteFromStore(api.getId(), APIUtil.getExternalAPIStore(store.getName(), tenantId));
                 if (deleted) {
                     //If the attempt is successful, database will be changed deleting the External store mappings.
