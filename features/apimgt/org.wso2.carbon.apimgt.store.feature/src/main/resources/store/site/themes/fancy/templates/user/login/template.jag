@@ -68,7 +68,7 @@ i18n.init(request,localeResourcesBasePath);
                               <tr>
                                 <td>
                                     <div class="thumbnail">
-                                        <a data-theme="default" data-subtheme="default" class="badge themeLabel" onclick="applyTheme(this)">
+                                        <a data-theme="responsive" data-subtheme="default" class="badge themeLabel" onclick="applyTheme(this)">
                                             <img src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("images/thumb-responsive.png"))%>" />
                                             <br /><div class="themeName">Responsive</div>
                                         </a>
