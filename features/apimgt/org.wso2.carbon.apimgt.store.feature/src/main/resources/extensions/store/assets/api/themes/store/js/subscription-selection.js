@@ -477,7 +477,15 @@ $(function () {
             } else {
                 data.isDataNotAvailable = false;
                 // retrieving scopes if available.
-                data.scopes = findAppDetails($('#subscription_selection').val()).scopes;
+                var appD=findAppDetails($('#subscription_selection').val());
+                var prodScope=hideDefaultAppScopes(appD.prodKeyScopeValue);
+                if(prodScope){
+                    data.keyScopeExist=true;
+                    data.keyScopeValue=prodScope ;
+                }else{
+                    data.keyScopeExist=false;
+                }
+                data.scopes = appD.scopes;
 
                 // Checking whether scopes are available.
                 if (data.scopes.length > 0) {
@@ -554,7 +562,15 @@ $(function () {
             } else {
                 data.isDataNotAvailable = false;
                 // retrieving scopes if available.
-                data.scopes = findAppDetails($('#subscription_selection').val()).scopes;
+                var appD=findAppDetails($('#subscription_selection').val());
+                var sandScope=hideDefaultAppScopes(appD.sandKeyScopeValue);
+                if(sandScope){
+                data.keyScopeExist=true;
+                data.keyScopeValue= sandScope;
+                }else{
+                data.keyScopeExist=false;
+                }
+                data.scopes = appD.scopes;
 
                 // Checking whether scopes are available.
                 if (data.scopes.length > 0) {
@@ -573,6 +589,20 @@ $(function () {
         afterRender: attachGenerateSandToken,
         subscriptions: [EV_APP_SELECT]
     });
+
+    var hideDefaultAppScopes=function(scopes){
+        var scopesList='';
+        if(scopes!=null){
+        var scopesArr=scopes.split(" ");
+        for(var i=0;i<scopesArr.length;i++){
+          if(scopesArr[i]!="am_application_scope" && scopesArr[i]!="default"){
+              scopesList+=scopesArr[i]+" ";
+          }
+        }
+        }
+        return scopesList;
+
+    };
 
     Views.extend('defaultSandboxKeyView', {
         id: 'visibleSandboxKeyView',
