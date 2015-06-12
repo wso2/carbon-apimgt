@@ -2943,6 +2943,8 @@ public final class APIUtil {
             throws APIManagementException {
         SortedSet<APIStore> apiStores = new TreeSet<APIStore>(new APIStoreNameComparator());
         apiStores.addAll(getExternalStores(tenantId));
+        //Retains only the stores that contained in configuration
+        inputStores.retainAll(apiStores);
         boolean exists = false;
         if (apiStores.size() != 0) {
             for (APIStore store : apiStores) {
