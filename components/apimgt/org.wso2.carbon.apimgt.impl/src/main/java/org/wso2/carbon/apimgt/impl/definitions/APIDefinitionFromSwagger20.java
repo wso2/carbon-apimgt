@@ -250,43 +250,6 @@ public class APIDefinitionFromSwagger20 extends APIDefinition {
     @Override
     @SuppressWarnings("unchecked")
     public String generateAPIDefinition(API api) throws APIManagementException {
-        /*JSONParser parser = new JSONParser();
-        String contactObjectTemplate = "{\"name\":\"\", \"url\":\"\", \"email\":\"\"}";
-        String licenceObjectTemplate = "{\"name\":\"\", \"url\":\"\"}";
-        String infoObjectTemplate = "{\"title\":\"\",\"description\":\"\",\"termsOfService\":\"\",\"contact\":[]," +
-                "\"licence\":[],\"version\":\"\"}";
-
-        String pathsObjectTemplate = "{}";
-
-        String pathItemObjectTemplate = "{\"$ref\":\"\",\"get\":\"\",\"put\":\"\",\"post\":\"\",\"delete\":\"\"," +
-                "\"options\":\"\",\"head\":\"\",\"patch\":\"\",\"parameters\":\"\"}";
-        String externalDocObjectTemplate = "{\"description\":\"\",\"url\":\"\"}";
-        String parameterObjectTemplate = "{\"name\":\"\", \"in\":\"\", \"description\":\"\", \"required\":\"\"}";
-        String schemaObjectTemplate = "{\"discriminator\":\"\", \"readOnly\":\"\", \"xml\":[], \"externalDocs\":[], \"example\":\"\"}";
-        String xmlObjectTemplate = "{\"name\":\"\",\"namespace\":\"\",\"prefix\":\"\",\"attribute\":\"\",\"wrapped\":\"\"}";
-        String responsesObjectTemplate = "{\"default\":\"\"}";
-        String responseObjectTemplate = "{\"description\":\"\",\"schema\":[],\"headers\":[],\"example\":[]}";
-
-        String headersObject = "{}";
-        String exampleObject = "{}";
-        String definitionObject = "{}";
-        String parameterDefinitionObject = "{}";
-        String responsesDefinitionObject = "{}";
-        String securityDefinitionObject = "{}";
-
-        String securitySchemeObjectTemplate = "{\"type\":\"\",\"description\":\"\",\"name\":\"\",\"in\":\"\"," +
-                "\"flow\":\"\",\"authorizationUrl\":\"\",\"tokenUrl\":\"\",\"scopes\":[]}";
-
-        String scopesObject = "{}";
-        String securityRequirementObject = "{}";
-
-        String tagObjectTemplate = "{\"name\":\"\", \"description\":\"\",\"externalDocs\":[]}";
-
-
-        String swaggerObjectTemplate = "{\"swagger\":\"2.0\",\"info\":[],\"host\":\"\",\"basePath\":\"\",\"schemes\":[]," +
-                "\"consumes\":[],\"produces\":[],\"paths\":[],\"definitions\":[],\"parameters\":[],\"responses\":[]," +
-                "\"securityDefinitions\":[],\"security\":[],\"tags\":[],\"externalDocs\":[]}";*/
-
         APIIdentifier identifier = api.getId();
         APIManagerConfiguration config = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration();
 
@@ -305,19 +268,27 @@ public class APIDefinitionFromSwagger20 extends APIDefinition {
         //Create info object
         JSONObject infoObject = new JSONObject();
         infoObject.put("title", api.getId().getApiName());
-        infoObject.put("description", api.getDescription());
+        if(api.getDescription() != null){
+            infoObject.put("description", api.getDescription());
+        }
 
         //Create contact object and map business owner info
         JSONObject contactObject = new JSONObject();
-        contactObject.put("name", api.getBusinessOwner());
-        contactObject.put("email", api.getBusinessOwnerEmail());
-        //put contact object to info object
-        infoObject.put("contact", contactObject);
+        if(api.getBusinessOwner() != null ){
+            contactObject.put("name", api.getBusinessOwner());
+        }
+        if(api.getBusinessOwnerEmail() != null ){
+            contactObject.put("email", api.getBusinessOwnerEmail());
+        }
+        if(api.getBusinessOwner() != null || api.getBusinessOwnerEmail() != null) {
+            //put contact object to info object
+            infoObject.put("contact", contactObject);
+        }
 
-        //Create licence object
-        JSONObject licenceObject = new JSONObject();
+        //Create licence object # no need for this since this is not mandatory
+        //JSONObject licenceObject = new JSONObject();
 
-        infoObject.put("licence", licenceObject);
+        //infoObject.put("license", licenceObject);
         infoObject.put("version", api.getId().getVersion());
 
         //add info object to swaggerObject
