@@ -173,12 +173,14 @@ $(document).ready(function(){
 
     // last saved implementation state
     var endpoint_config = jQuery.parseJSON($('#endpoint_config').val());
-    if(endpoint_config.implementation_status == "managed"){
-        $('#prototype').hide();
-        $('#managed-api').slideDown();
-    }else if(endpoint_config.implementation_status == "prototyped"){
-        $('#managed-api').hide();
-        $('#prototype').slideDown();
+    if ($('#endpoint_config').val()){
+        if(endpoint_config.implementation_status == "managed"){
+            $('#prototype').hide();
+            $('#managed-api').slideDown();
+        }else if(endpoint_config.implementation_status == "prototyped"){
+            $('#managed-api').hide();
+            $('#prototype').slideDown();
+        }
     }
 
 });
