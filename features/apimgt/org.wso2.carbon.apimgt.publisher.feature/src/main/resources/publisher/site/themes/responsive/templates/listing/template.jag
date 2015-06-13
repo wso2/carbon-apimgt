@@ -25,6 +25,7 @@
    	var user = <%=jagg.getUser()%>;
 	var isPublishPermitted = <%=outputs.isPublishPermitted%>;
 	var username = user.username ; 
+	var siteContext = "<%=jagg.getSiteContext()%>";
 
    function hideMsg() {
        $('#apiInfo').hide("fast");

@@ -733,7 +733,8 @@ return getThemePath() + path;
         isValiedImage:isValiedImage,
         url:url,
         getRegistryPath:getRegistryPath,
-        getHttpsUrl:getHttpsUrl
+        getHttpsUrl:getHttpsUrl,
+	getSiteContext:getSiteContext
     };
 
 }());
