@@ -3998,9 +3998,7 @@ public final class APIUtil {
                         .getInstance().getRealmService().getTenantManager()
                         .getTenantId(tenantDomain);
             }
-            if (tenantId != MultitenantConstants.SUPER_TENANT_ID) {
-                userName = userName.split("@" + tenantDomain)[0];
-            }
+            userName = MultitenantUtils.getTenantAwareUsername(userName);
             registryType = ServiceReferenceHolder
                     .getInstance().
                             getRegistryService().getGovernanceUserRegistry(userName, tenantId);
