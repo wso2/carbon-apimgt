@@ -299,7 +299,9 @@ public class APIDefinitionFromSwagger20 extends APIDefinition {
         JSONObject operationObject;
         JSONObject responseObject = new JSONObject();
         //add default response
-        responseObject.put("200","{}");
+        JSONObject status200 = new JSONObject();
+        status200.put("description", "OK");
+        responseObject.put("200",status200);
 
         for (URITemplate uriTemplate : uriTemplates) {
             String pathName = uriTemplate.getUriTemplate();
