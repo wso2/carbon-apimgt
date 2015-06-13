@@ -4820,8 +4820,8 @@ public class APIProviderHostObject extends ScriptableObject {
                                                       Object[] args, Function funObj)
             throws ScriptException,
                    APIManagementException {
-        if (args == null || args.length != 1 || !isStringArray(args)) {
-            handleException("Invalid input parameters expected resource Url");
+        if (args == null || args.length != 2 || !isStringArray(args)) {
+            handleException("Invalid input parameters expected resource Url and tenantDomain");
         }
         NativeObject data = new NativeObject();
 
@@ -4830,8 +4830,9 @@ public class APIProviderHostObject extends ScriptableObject {
         if (username == null) {
             username = APIConstants.END_USER_ANONYMOUS;
         }
-        String resource = (String) args[0];
-        Map<String, Object> docResourceMap = APIUtil.getDocument(username, resource);
+        String resource = (String) args[1];
+        String tenantDomain = (String) args[0];
+        Map<String, Object> docResourceMap = APIUtil.getDocument(username, resource, tenantDomain);
         if (!docResourceMap.isEmpty()) {
             data.put("Data", data,
                      cx.newObject(thisObj, "Stream", new Object[] { docResourceMap.get("Data") }));

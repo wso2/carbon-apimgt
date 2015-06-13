@@ -3971,11 +3971,13 @@ public final class APIUtil {
      *
      * @param userName     logged in username
      * @param resourceUrl  resource want to download
+     * @param tenantDomain loggedUserTenantDomain
      * @return map that contains Data of the resource
      * @throws APIManagementException
      */
 
-    public static Map<String, Object> getDocument(String userName, String resourceUrl)
+    public static Map<String, Object> getDocument(String userName, String resourceUrl,
+                                                  String tenantDomain)
             throws APIManagementException {
         Map<String, Object> documentMap = new HashMap<String, Object>();
 
@@ -3988,14 +3990,17 @@ public final class APIUtil {
             handleException("Invalid resource Path " + resourceUrl);
         }
         Resource apiDocResource;
-        Registry registryType;
-        int tenantId;
-        String tenantDomain = MultitenantUtils.getTenantDomain(userName);
+        Registry registryType = null;
+        int tenantId = MultitenantConstants.SUPER_TENANT_ID;
         try {
+            if (tenantDomain != null && !"null".equals(tenantDomain)) {
                 tenantId = ServiceReferenceHolder
                         .getInstance().getRealmService().getTenantManager()
                         .getTenantId(tenantDomain);
-                userName = MultitenantUtils.getTenantAwareUsername(userName);
+            }
+            if (tenantId != MultitenantConstants.SUPER_TENANT_ID) {
+                userName = userName.split("@" + tenantDomain)[0];
+            }
             registryType = ServiceReferenceHolder
                     .getInstance().
                             getRegistryService().getGovernanceUserRegistry(userName, tenantId);
