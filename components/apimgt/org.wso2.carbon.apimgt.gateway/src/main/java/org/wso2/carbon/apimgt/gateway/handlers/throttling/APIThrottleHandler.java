@@ -144,27 +144,27 @@ public class APIThrottleHandler extends AbstractHandler {
             }
         }
 
-        synchronized (this) {
-            if ((throttle == null && !isResponse) || (isResponse && concurrentAccessController == null)) {
-                ClusteringAgent clusteringAgent = cc.getAxisConfiguration().getClusteringAgent();
-                if (clusteringAgent != null) {
-                    isClusteringEnable = true;
-                }
-            }
 
-            if (!isResponse) {
-                //check the availability of the ConcurrentAccessController
-                //if this is a clustered environment
-                if (isClusteringEnable) {
-                    concurrentAccessController = (ConcurrentAccessController) cc.getProperty(key);
-                }
-                initThrottle(messageContext, cc);
-            } else {
-                // if the message flow path is OUT , then must lookup from ConfigurationContext -
-                // never create ,just get the existing one
-                concurrentAccessController = (ConcurrentAccessController) cc.getProperty(key);
+        if ((throttle == null && !isResponse) || (isResponse && concurrentAccessController == null)) {
+            ClusteringAgent clusteringAgent = cc.getAxisConfiguration().getClusteringAgent();
+            if (clusteringAgent != null) {
+                isClusteringEnable = true;
             }
         }
+
+        if (!isResponse) {
+            //check the availability of the ConcurrentAccessController
+            //if this is a clustered environment
+            if (isClusteringEnable) {
+                concurrentAccessController = (ConcurrentAccessController) cc.getProperty(key);
+            }
+            initThrottle(messageContext, cc);
+        } else {
+            // if the message flow path is OUT , then must lookup from ConfigurationContext -
+            // never create ,just get the existing one
+            concurrentAccessController = (ConcurrentAccessController) cc.getProperty(key);
+        }
+
 
         // perform concurrency throttling
         boolean canAccess = doThrottleByConcurrency(isResponse);
@@ -722,19 +722,22 @@ public class APIThrottleHandler extends AbstractHandler {
 
             try {
                 // Creates the throttle from the policy
-                throttle = ThrottleFactory.createMediatorThrottle(
-                        PolicyEngine.getPolicy((OMElement) entryValue));
+                synchronized (this) {
+                    if (throttle == null || reCreate) {
+                        throttle = ThrottleFactory.createMediatorThrottle(
+                                PolicyEngine.getPolicy((OMElement) entryValue));
 
-                ThrottleContext throttleContext = throttle.getThrottleContext(
-                        ThrottleConstants.ROLE_BASED_THROTTLE_KEY);
+                        ThrottleContext throttleContext = throttle.getThrottleContext(
+                                ThrottleConstants.ROLE_BASED_THROTTLE_KEY);
 
-                if (throttleContext != null) {
-                    ThrottleConfiguration throttleConfiguration = throttleContext.getThrottleConfiguration();
-                    ThrottleContext resourceContext =
-                            ThrottleContextFactory.createThrottleContext(ThrottleConstants.ROLE_BASE, throttleConfiguration);
-                    throttle.addThrottleContext(RESOURCE_THROTTLE_KEY, resourceContext);
+                        if (throttleContext != null) {
+                            ThrottleConfiguration throttleConfiguration = throttleContext.getThrottleConfiguration();
+                            ThrottleContext resourceContext =
+                                    ThrottleContextFactory.createThrottleContext(ThrottleConstants.ROLE_BASE, throttleConfiguration);
+                            throttle.addThrottleContext(RESOURCE_THROTTLE_KEY, resourceContext);
+                        }
+                    }
                 }
-
                 //For non-clustered  environment , must re-initiates
                 //For  clustered  environment,
                 //concurrent access controller is null ,
@@ -747,6 +750,7 @@ public class APIThrottleHandler extends AbstractHandler {
                         cc.removeProperty(key);
                     }
                 }
+
             } catch (ThrottleException e) {
                 handleException("Error processing the throttling policy", e);
             }
