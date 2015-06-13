@@ -1,10 +1,11 @@
 <%
 include("/jagg/jagg.jag");
 var store = jagg.module("manager").getAPIStoreObj();
+var tenantDomain=request.getParameter("tenant");
 var resourceUrl = request.getParameter("resourceUrl");
 
     if(store.getDocument instanceof Function){
-        var object = store.getDocument(resourceUrl);
+        var object = store.getDocument(tenantDomain,resourceUrl);
             if(object == null){
                 response.status = 500;
                }else{

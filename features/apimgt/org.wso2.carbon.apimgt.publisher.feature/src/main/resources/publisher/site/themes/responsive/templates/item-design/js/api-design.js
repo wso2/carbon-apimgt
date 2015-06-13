@@ -221,7 +221,7 @@ APIDesigner.prototype.set_default_management_values = function(){
 
 APIDesigner.prototype.add_default_resource = function(){
     $("#resource_url_pattern").val("*");
-    $(".http_verb_select:lt(4)").attr("checked","checked");
+    $(".http_verb_select:lt(5)").attr("checked","checked");
     $("#inputResource").val("Default");
     $("#add_resource").trigger('click');
 }

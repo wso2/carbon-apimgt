@@ -32,6 +32,8 @@ if(secure){
 var apiName = outputs.api.name;
 var providerValUe = outputs.api.provider;
 var version = outputs.api.version;
+var APIUtil = Packages.org.wso2.carbon.apimgt.impl.utils.APIUtil;
+providerValUe = APIUtil.replaceEmailDomain(providerValUe);
 
     if(providerValUe.indexOf("@") > -1){
         providerValUe = providerValUe.replace("@","%40");
@@ -42,7 +44,12 @@ var version = outputs.api.version;
 
 //Calling the jaggery API
 
-var swaggerAPI = jagg.url("/api-docs"+"/"+providerValUe+"/"+apiName+"/"+version);
+var swaggerAPI ;
+if(providerValUe.contains("/")){
+swaggerAPI = jagg.url("/api-docs"+"?provider="+encodeURIComponent(providerValUe)+"&name="+encodeURIComponent(apiName)+"&version="+encodeURIComponent(version));
+  }else{
+swaggerAPI = jagg.url("/api-docs"+"/"+providerValUe+"/"+apiName+"/"+version);
+  }
 
 var api = outputs.api;%>
   <script type="text/javascript">
@@ -50,7 +57,7 @@ var api = outputs.api;%>
       window.swaggerUi = new SwaggerUi({
       url:  "<%=swaggerAPI%>",
       dom_id: "swagger-ui-container",
-      supportedSubmitMethods: ['get', 'post', 'put', 'delete' ],
+      supportedSubmitMethods: ['get', 'post', 'put', 'delete','head'],
       onComplete: function(swaggerApi, swaggerUi){
         console.log("Loaded SwaggerUI");
       },
@@ -76,7 +83,7 @@ $(document).ready(function(){
     var option = $("#sub_app_list option:selected");
     var type = $("#key_type").val();
     var key = option.attr("data-"+type);
-      if(key == "null"){
+    if(key == "null"){
       $(".notoken").show("slow");
       $("#access_token").val("");
     }else{
@@ -89,27 +96,36 @@ var show_environments = function(){
     $("#environment_name").children('option').hide();
     $("#environment_name").children("option[class='" + type + "']").show();
     var options = $("#environment_name").children("option[class='"+ type + "']");
+      if (options.length <= 1) {
+        $("#environment_name").hide();
+         $("#OnEnvironment").hide();
+      }
     if(options.length > 0){
+     $("#OnEnvironment").show(); 
+     $("#environment_name").show();
     	options[0].selected=true;
-	    if (options.length == 1) {
-	      $("#environment_name").hide();
-	    }
-    }else if ($("#environment_name").children("option[class='hybrid']").length > 0) {
-	    $("#environment_name").children("option[class='hybrid']")[0].selected = true;
-	    $("#environment_name").hide();
+    } else if ($("#environment_name").children("option[class='hybrid']").length > 0) {
+	    $("#environment_name").children("option[class='hybrid']")[0].selected = true; 
+    }else{
+      $("#environment_name").hide();
+      $("#OnEnvironment").hide();
     }
     select_environment();
           };
 var select_environment = function(){
     var selectedEnvironment = $("#environment_name");
     var name =selectedEnvironment.val();
-    window.swaggerUi.updateSwaggerUi({ "url" : swaggerUi.api.url + "?envName="+name});   
+    if (window.swaggerUi.api.url.indexOf("?")!=-1) {
+    window.swaggerUi.updateSwaggerUi({ "url" : swaggerUi.api.url + "&envName="+name});    
+    }else{
+    window.swaggerUi.updateSwaggerUi({ "url" : swaggerUi.api.url + "? envName="+name});
+    }
+    change_token();
           };
   $("#access_token").change(function(){
     var key = $(this).val();
     if(key && key.trim() != "") {
       swaggerUi.api.clientAuthorizations.add("key", new SwaggerClient.ApiKeyAuthorization("Authorization", "Bearer "+ key, "header"));
-      change_token();
     }
   });
 
@@ -138,20 +154,25 @@ function checkOnKeyPress(e) {
             </option>
           <% } %>
           </select>
-          <label> On </label>
+          <label> Using </label>
           <select id="key_type">
             <option value="production">Production</option>
             <option value="sandbox">Sandbox</option>
           </select>
+          <label> Key </label>
+          <label id="OnEnvironment"> On Environment</label>
+
           <select id="environment_name">
           <%
           var envir = JSON.parse(api.serverURL);
           for(var types in envir){
             var endpointType=envir[types];
             for(var endpoint in endpointType){
-            %>
-               <option value="<%=endpoint%>" class="<%=types%>"><%=endpoint%></option>
-         <%   }
+                if(endpointType[endpoint]["showInConsole"]){
+                %>
+                   <option value="<%=endpoint%>" class="<%=types%>"><%=endpoint%></option>
+                <% }
+            }
           }
           %>
             </select>

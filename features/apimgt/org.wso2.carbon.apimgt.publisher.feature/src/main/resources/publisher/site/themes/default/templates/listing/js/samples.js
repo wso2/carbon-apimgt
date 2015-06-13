@@ -17,7 +17,7 @@ APISamples.prototype.deploySample1 = function(){
 	formData.append("apiThumb","/site/themes/default/images/weatherAPI.png");
 	
 	var request = new XMLHttpRequest();
-	request.open("POST", "/publisher/site/blocks/item-design/ajax/add.jag");
+	request.open("POST", siteContext + "/site/blocks/item-design/ajax/add.jag");
 	request.send(formData);
          
 		jagg.message({
@@ -53,7 +53,7 @@ APISamples.prototype.deploySample1 = function(){
 					var result2 = jagg.post(urlPublished,{action:"updateStatus",name:"WeatherAPI",version:"1.0.0",provider:username,status:"PUBLISHED",publishToGateway:true,requireResubscription:true},
 					function(result){
 						if(!result.error){
-							window.location.assign("/publisher/site/pages/index.jag");
+							window.location.assign(siteContext + "/site/pages/index.jag");
 							$(".modal-body").removeClass("loadingButton");
 							jagg.message({
  								content:"Sample WeatherAPI is Deployed Successfully" ,
@@ -64,7 +64,7 @@ APISamples.prototype.deploySample1 = function(){
 				
 					},'json');
 				} else {
-					window.location.assign("/publisher/site/pages/index.jag");
+					window.location.assign(siteContext + "/site/pages/index.jag");
 					$(".modal-body").removeClass("loadingButton");
 					jagg.message({
  						content:"Sample WeatherAPI is Deployed Successfully" ,

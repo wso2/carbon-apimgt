@@ -15,7 +15,7 @@
     }
 %> 
 <script language="javascript">
-    var VERBS = [ 'get' , 'post' , 'put' , 'delete'];
+    var VERBS = [ 'get' , 'post' , 'put' , 'delete','head'];
     var AUTH_TYPES = [
       { "value": "<%=i18n.localize("none")%>", "text":"<%=i18n.localize("none")%>"} ,
       { "value": "<%=i18n.localize("application")%>", "text":"<%=i18n.localize("application")%>"},
@@ -266,7 +266,7 @@
          <table>
              <tbody>
                  <tr>
-                     <td><img src="/publisher/site/themes/default/images/error.png" align="center" hspace="10"></td>
+                     <td><img src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("images/error.png"))%>" align="center" hspace="10"></td>
                      <td><span class="messageText">Image file exceeds the maximum limit of 1MB.</span></td>
              </tbody>
          </table>
