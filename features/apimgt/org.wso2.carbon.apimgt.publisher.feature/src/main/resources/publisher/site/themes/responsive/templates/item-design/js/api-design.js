@@ -828,10 +828,6 @@ function updateContextPattern(){
     var version = $('#version').val();
 
     if(context != ""){
-        if(context.search("{}") != -1 ){
-            context = context.replace("{}","");
-            $('#error-invalidContextValue').modal('show');
-        }
         if(context.indexOf("{version}") < 0){
             if(context.lastIndexOf('/') < 0){
                 context = context + '/';
