@@ -1,7 +1,8 @@
 <% jagg.template("api/overview", function(inputs, outputs, jagg) { %>
 <% var api = outputs.api, user = outputs.user, log = new Log(); %>
 <% var domains = jagg.module("domains").getDomainMappings(jagg.getTenantDomain()).domains;%>
-<% var transports = api.transports.split(","); %>
+<% var transports = api.transports.split(",");
+ var tenantDomain=request_tenant;%>
 <div id="overview">
 	<%if (!api.isAdvertiseOnly) {%>
 
@@ -64,13 +65,13 @@
     <%}%>
     <% if(api.wsdl && api.wsdl != ""){ %>        
     <p>
-        <a href="/store/site/themes/fancy/templates/api/documentation/download.jag?resourceUrl=<%=api.wsdl%>" target="_blank"><h6><%=i18n.localize("wsdl")%></h6></a>
+        <a href="/store/site/themes/fancy/templates/api/documentation/download.jag?tenant=<%=tenantDomain%>&resourceUrl=<%=api.wsdl%>" target="_blank"><h6><%=i18n.localize("wsdl")%></h6></a>
     </p>
     <% } %>
     <% if(api.wadl && api.wadl != ""){ %>
         <h6><%=i18n.localize("wadl")%>:</h6>
     <p>
-        <a href="/store/site/themes/fancy/templates/api/documentation/download.jag?resourceUrl=<%=api.wadl%>" target="_blank"><%=api.wadl%></a>
+        <a href="/store/site/themes/fancy/templates/api/documentation/download.jag?tenant=<%=tenantDomain%>&resourceUrl=<%=api.wadl%>" target="_blank"><%=api.wadl%></a>
     </p>
         <% } %>
     <% if(api.description && api.description != ""){ %>
