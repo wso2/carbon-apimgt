@@ -76,7 +76,7 @@
 </center> 
     <div class="title-section">
         <% if(api){ %> 
-            <h2><%= encode.forHtml(api.name) %>(<%= encode.forHtml(api.version) %>) : <%= encode.forHtml(api.context) %></h2>
+            <h2><%= encode.forHtml(api.name) %>(<%= encode.forHtml(api.version) %>) : <%= encode.forHtml(api.context) %>&nbsp;<a class = "goTo_api_overview" href="<%= jagg.url("/info?"+ apiUrlId ) %>" ><i class=" icon-list-alt"></i> Go to Overview</a></h2>
         <% }else{ %>
             <h2>Design API</h2>
         <% } %>

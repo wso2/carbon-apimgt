@@ -65,7 +65,9 @@
                      <div class="control-group">
                         <div class="control-group">
                            <div class="controls">
-                               <input name="wsdl-url" class="input-xxlarge" type="text"/>
+                               <input id="wsdl-url" name="wsdl-url" class="input-xxlarge is_url_valid" type="text"/>
+                               <label for="wsdl-url" class="error wsdlError">Please use a valid wsdl endpoint</label>
+                               <p class="help-block">Eg : http://appserver/services/echo?wsdl</p>
                            </div>
                            <div class="controls hide">
                               <input name="wsdl-file" type="file" />

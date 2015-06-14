@@ -1,6 +1,7 @@
 <% jagg.template("overview", function(inputs, outputs, jagg) { %>
 <% var api=outputs.api; var createPermitted=outputs.isCreatePermitted;%>
-<%  if(api.endpointConfig){ 
+<%var tenant= encode.forUriComponent(request.getParameter("tenant"));%>
+<%  if(api.endpointConfig){
     var endpoint_config = parse(api.endpointConfig); 
   } %>
 <div class="row">
