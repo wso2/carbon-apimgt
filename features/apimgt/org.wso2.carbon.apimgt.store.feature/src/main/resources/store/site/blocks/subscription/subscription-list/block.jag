@@ -43,7 +43,8 @@ jagg.block("subscription/subscription-list", {
 		return {
 			"applications":applications,
 			"totalLength":totalLength,
-			"page":page
+			"page":page,
+			"itemsPerPage":itemsPerPage
 		};
      },
 
