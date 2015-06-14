@@ -155,7 +155,27 @@ var apipublisher = {};
     };
 
     APIProviderProxy.prototype.addDocumentation = function (api, document) {
-        return this.impl.addDocumentation(api);
+        var identifier = new Packages.org.wso2.carbon.apimgt.api.model.APIIdentifier(api.provider, api.name, api.version);
+        var docType = document.docType;
+        var sourceType = document.sourceType;
+        var sourceURL = document.sourceURL;
+        var summary = document.summary;
+        var docName = document.docName;
+        var otherTypeName = document.otherTypeName;
+        var visibility = document.visibility;
+
+        var doc = APIUtil.populateDocument(docType,sourceType,sourceURL,summary,docName,otherTypeName,visibility); 
+
+        if(sourceType == 'File'){
+            var content = document.content;
+            var fileName = document.fileName;
+            var contentType = document.contentType;
+            var filePath = document.filePath;
+            var file = APIUtil.populateFileData(content,fileName,contentType,filePath);
+            doc.setFile(file);
+        }
+        
+        return this.impl.addDocumentation(identifier,doc);
     };
 
     APIProviderProxy.prototype.addInlineContent = function (api, docName, content) {
