@@ -551,11 +551,12 @@ var apipublisher = {};
             }
 
             var scopes = api.getScopes();
-            var scopesNative = new Array();
+            var scopesArray = new Array();
             var iterator = scopes.iterator();
             if(scopes != null) {
                 while (iterator.hasNext()) {
                     var scopeNative = [];
+                    var scope = iterator.next();
                     scopeNative.push({
                                          "id": scope.getId(),
                                          "key": scope.getKey(),
@@ -563,7 +564,7 @@ var apipublisher = {};
                                          "roles": scope.getRoles(),
                                          "description": scope.getDescription()
                                      });
-                    scopesNative.push(scopeNative);
+                    scopesArray.push(scopeNative);
                 }
             }
 
@@ -609,7 +610,7 @@ var apipublisher = {};
                 faultSequence: api.getFaultSequence(),
                 destinationStats: api.getDestinationStatsEnabled(),
                 resources: JSONValue.toJSONString(resourceArray),
-                scopes: scopesNative,
+                scopes: scopesArray,
                 isDefaultVersion: api.isDefaultVersion(),
                 implementation: api.getImplementation(),
                 hasDefaultVersion: hasDefaultVersion,
@@ -765,17 +766,18 @@ var apipublisher = {};
             var identifier = new Packages.org.wso2.carbon.apimgt.api.model.APIIdentifier(api.provider, api.apiName, api.version);
             var apiOb = new Packages.org.wso2.carbon.apimgt.api.model.API(identifier);
 
-            var tierSet = new HashSet();
-            var tierArray = api.tier.split(',');
-            var tier;
-            for (var i = 0 ; i < tierArray.length; i++) {
-                tier = new Tier(tierArray[i]);
-                tierSet.add(tier);
+            if(api.tier != null && api.tier != "") {
+                var tierSet = new HashSet();
+                var tierArray = api.tier.split(',');
+                var tier;
+                for (var i = 0; i < tierArray.length; i++) {
+                    tier = new Tier(tierArray[i]);
+                    tierSet.add(tier);
+                }
+                apiOb.addAvailableTiers(tierSet);
             }
 
             var environments = APIUtil.extractEnvironmentsForAPI(api.environments);
-
-            apiOb.addAvailableTiers(tierSet);
             apiOb.setSubscriptionAvailability(api.subscriptionAvailability);
             apiOb.setSubscriptionAvailableTenants(api.subscriptionTenants);
             if('default_version' == api.defaultVersion) {
@@ -919,18 +921,18 @@ var apipublisher = {};
         var log = new Log();
         try {
             var identifier = new Packages.org.wso2.carbon.apimgt.api.model.APIIdentifier(api.provider, api.apiName, api.version);
-            var success = this.impl.updateAPIStatus(identifier, api.status, api.deprecateOldVersions, api.makeKeysForwardCompatible);
+            var success = this.impl.changeLifeCycleStatus(identifier, api.status, true, api.deprecateOldVersions, api.makeKeysForwardCompatible);
             if (log.isDebugEnabled()) {
                 log.debug("updateAPIStatus : " + api.name + "-" + api.version);
             }
             if (!success) {
                 return {
-                    error:true
+                    error:false
                 };
             } else {
                 return {
                    error:true,
-                   message:success + '||warning'
+                   message: "Error while changing life cycle status"
                 };
             }
         } catch (e) {

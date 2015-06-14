@@ -5220,4 +5220,8 @@ public final class APIUtil {
 	return file;
     }
 
+	public static String getLifeCycleTransitionAction(String currentStatus, String nextStatu) {
+		//TODO Implement
+		return "Publish";
+	}
 }

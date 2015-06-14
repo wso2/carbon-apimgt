@@ -50,12 +50,7 @@ require('/modules/publisher.js').exec(function(ctx) {
 	var apiPublisher =  require('apipublisher').apipublisher;
 	var apiProxy = apiPublisher.instance(user.username);
 	var api = apiProxy.getAPI(asset.attributes.overview_provider, asset.attributes.overview_name, asset.version).api;
-	//Formatting string types
-	if(api.isDefaultVersion == "true") {
-		api.isDefaultVersion = true;
-	} else if (api.isDefaultVersion == "false") {
-		api.isDefaultVersion = false;
-	}
+
 	page = rxtModule.ui.buildPage(ctx.session, ctx.request);
 	output = am.render(asset,page)._custom();
 
