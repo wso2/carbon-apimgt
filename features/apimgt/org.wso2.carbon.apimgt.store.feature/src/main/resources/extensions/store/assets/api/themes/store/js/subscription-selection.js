@@ -175,30 +175,30 @@ $(function () {
         apiData.apiProvider = apiProvider;
         apiData.appName = appName;
         $.ajax({
-            type: 'POST',
-            url: getSubscriptionAPI(appName, 'getUUID'),
-            data: apiData,
-            success: function (data) {
-                if (!data.error) {
-                    var uuid = data.response;
-                    window.location = 'details/' + uuid;
-                } else {
-                    BootstrapDialog.show({
-                        type: BootstrapDialog.TYPE_DANGER,
-                        title: 'Error',
-                        message: '<div><i class="icon-briefcase"></i> Unable to locate the artifact</div>',
-                        buttons: [{
-                            label: 'Close',
-                            action: function (dialogItself) {
-                                dialogItself.close();
-                            }
+                   type: 'POST',
+                   url: getSubscriptionAPI(appName, 'getUUID'),
+                   data: apiData,
+                   success: function (data) {
+                       if (!data.error) {
+                           var uuid = data.response;
+                           window.location = 'details/' + uuid;
+                       } else {
+                           BootstrapDialog.show({
+                                                    type: BootstrapDialog.TYPE_DANGER,
+                                                    title: 'Error',
+                                                    message: '<div><i class="icon-briefcase"></i> Unable to locate the artifact</div>',
+                                                    buttons: [{
+                                                                  label: 'Close',
+                                                                  action: function (dialogItself) {
+                                                                      dialogItself.close();
+                                                                  }
 
-                        }]
+                                                              }]
 
-                    });
-                }
-            }
-        });
+                                                });
+                       }
+                   }
+               });
     };
 
     /*
@@ -210,23 +210,28 @@ $(function () {
         $('#btn-generate-Production-token').on('click', function () {
             var appName = $('#subscription_selection').val();
             var appDetails = findAppDetails(appName);
+            var selectedScopes='';
+            $("input[name='chk_group_Production']:checked").each(function() {
+                selectedScopes+=$(this).val()+" ";
+            });
             var tokenRequestData = {};
             tokenRequestData['appName'] = appName;
             tokenRequestData['keyType'] = 'Production';
             tokenRequestData['accessAllowDomains'] = $('#input-Production-allowedDomains').val() || 'ALL';
             tokenRequestData['callbackUrl'] = appDetails.callbackUrl || '';
             tokenRequestData['validityTime'] = $('#input-Production-validityTime').val();
+            tokenRequestData['tokenScope'] = selectedScopes;
             $.ajax({
-                type: 'POST',
-                url: getSubscriptionAPI(appName, 'new'),
-                data: tokenRequestData,
-                success: function (data) {
-                    var jsonData = data;
-                    APP_STORE.productionKeys = jsonData;
-                    updateMetadata(appName, jsonData, 'Production', 'new');
-                    events.publish(EV_GENERATE_PROD_TOKEN, jsonData);
-                }
-            });
+                       type: 'POST',
+                       url: getSubscriptionAPI(appName, 'new'),
+                       data: tokenRequestData,
+                       success: function (data) {
+                           var jsonData = data;
+                           APP_STORE.productionKeys = jsonData;
+                           updateMetadata(appName, jsonData, 'Production', 'new');
+                           events.publish(EV_GENERATE_PROD_TOKEN, jsonData);
+                       }
+                   });
         });
     };
 
@@ -238,23 +243,28 @@ $(function () {
         $('#btn-generate-Sandbox-token').on('click', function () {
             var appName = $('#subscription_selection').val();
             var appDetails = findAppDetails(appName);
+            var selectedScopes='';
+            $("input[name='chk_group_Sandbox']:checked").each(function() {
+                selectedScopes+=$(this).val()+" ";
+            });
             var tokenRequestData = {};
             tokenRequestData['appName'] = appName;
             tokenRequestData['keyType'] = 'Sandbox';
             tokenRequestData['accessAllowDomains'] = $('#input-Sandbox-allowedDomains').val() || 'ALL';
             tokenRequestData['callbackUrl'] = appDetails.callbackUrl || '';
             tokenRequestData['validityTime'] = $('#input-Sandbox-validityTime').val();
+            tokenRequestData['tokenScope'] = selectedScopes;
             $.ajax({
-                type: 'POST',
-                url: getSubscriptionAPI(appName, 'new'),
-                data: tokenRequestData,
-                success: function (data) {
-                    var jsonData = data;
-                    APP_STORE.sandboxKeys = jsonData;
-                    updateMetadata(appName, jsonData, 'Sandbox', 'new');
-                    events.publish(EV_GENERATE_SAND_TOKEN, jsonData);
-                }
-            });
+                       type: 'POST',
+                       url: getSubscriptionAPI(appName, 'new'),
+                       data: tokenRequestData,
+                       success: function (data) {
+                           var jsonData = data;
+                           APP_STORE.sandboxKeys = jsonData;
+                           updateMetadata(appName, jsonData, 'Sandbox', 'new');
+                           events.publish(EV_GENERATE_SAND_TOKEN, jsonData);
+                       }
+                   });
 
         });
     };
@@ -272,17 +282,17 @@ $(function () {
             domainUpdateData['accessToken'] = APP_STORE.productionKeys.accessToken;
             domainUpdateData['accessAllowedDomains'] = allowedDomains;
             $.ajax({
-                type: 'POST',
-                url: getSubscriptionAPI(appName, 'updateDomain'),
-                data: domainUpdateData,
-                success: function (data) {
-                    var message = {};
-                    message.text = '<div><i class="icon-briefcase"></i> Production domain updated successfully.</div>';
-                    message.type = 'success';
-                    message.layout = 'topRight';
-                    noty(message);
-                }
-            });
+                       type: 'POST',
+                       url: getSubscriptionAPI(appName, 'updateDomain'),
+                       data: domainUpdateData,
+                       success: function (data) {
+                           var message = {};
+                           message.text = '<div><i class="icon-briefcase"></i> Production domain updated successfully.</div>';
+                           message.type = 'success';
+                           message.layout = 'topRight';
+                           noty(message);
+                       }
+                   });
         });
     };
 
@@ -295,17 +305,17 @@ $(function () {
             domainUpdateData['accessToken'] = APP_STORE.sandboxKeys.accessToken;
             domainUpdateData['accessAllowedDomains'] = allowedDomains;
             $.ajax({
-                type: 'POST',
-                url: getSubscriptionAPI(appName, 'updateDomain'),
-                data: domainUpdateData,
-                success: function (data) {
-                    var message = {};
-                    message.text = '<div><i class="icon-briefcase"></i> Sandbox domain updated successfully.</div>';
-                    message.type = 'success';
-                    message.layout = 'topRight';
-                    noty(message);
-                }
-            });
+                       type: 'POST',
+                       url: getSubscriptionAPI(appName, 'updateDomain'),
+                       data: domainUpdateData,
+                       success: function (data) {
+                           var message = {};
+                           message.text = '<div><i class="icon-briefcase"></i> Sandbox domain updated successfully.</div>';
+                           message.type = 'success';
+                           message.layout = 'topRight';
+                           noty(message);
+                       }
+                   });
         });
     };
 
@@ -334,6 +344,10 @@ $(function () {
         $('#btn-refresh-Production-token').on('click', function () {
             var appName = $('#subscription_selection').val();
             var appDetails = findAppDetails(appName);
+            var selectedScopes='';
+            $("input[name='chk_group_Production']:checked").each(function() {
+                selectedScopes+=$(this).val()+" ";
+            });
             var tokenRequestData = {};
             tokenRequestData.appName = appName;
             tokenRequestData.keyType = 'Production';
@@ -342,19 +356,20 @@ $(function () {
             tokenRequestData.accessToken = appDetails.prodKey;
             tokenRequestData.consumerKey = appDetails.prodConsumerKey;
             tokenRequestData.consumerSecret = appDetails.prodConsumerSecret;
+            tokenRequestData.tokenScope = selectedScopes;
             $.ajax({
-                type: 'POST',
-                url: getSubscriptionAPI(appName, 'refresh'),
-                data: tokenRequestData,
-                success: function (data) {
-                    data.consumerKey = APP_STORE.productionKeys.consumerKey;
-                    data.consumerSecret = APP_STORE.productionKeys.consumerSecret;
-                    var jsonData = data;
-                    APP_STORE.productionKeys = jsonData;
-                    updateMetadata(appName, jsonData, 'Production', 'refresh');
-                    events.publish(EV_GENERATE_PROD_TOKEN, jsonData);
-                }
-            });
+                       type: 'POST',
+                       url: getSubscriptionAPI(appName, 'refresh'),
+                       data: tokenRequestData,
+                       success: function (data) {
+                           data.consumerKey = APP_STORE.productionKeys.consumerKey;
+                           data.consumerSecret = APP_STORE.productionKeys.consumerSecret;
+                           var jsonData = data;
+                           APP_STORE.productionKeys = jsonData;
+                           updateMetadata(appName, jsonData, 'Production', 'refresh');
+                           events.publish(EV_GENERATE_PROD_TOKEN, jsonData);
+                       }
+                   });
         });
     };
 
@@ -365,6 +380,10 @@ $(function () {
         $('#btn-refresh-Sandbox-token').on('click', function () {
             var appName = $('#subscription_selection').val();
             var appDetails = findAppDetails(appName);
+            var selectedScopes='';
+            $("input[name='chk_group_Sandbox']:checked").each(function() {
+                selectedScopes+=$(this).val()+" ";
+            });
             var tokenRequestData = {};
             tokenRequestData.appName = appName;
             tokenRequestData.keyType = 'Sandbox';
@@ -373,78 +392,79 @@ $(function () {
             tokenRequestData.accessToken = appDetails.sandboxKey;
             tokenRequestData.consumerKey = appDetails.sandboxConsumerKey;
             tokenRequestData.consumerSecret = appDetails.sandboxConsumerSecret;
+            tokenRequestData.tokenScope = selectedScopes;
             $.ajax({
-                type: 'POST',
-                url: getSubscriptionAPI(appName, 'refresh'),
-                data: tokenRequestData,
-                success: function (data) {
-                    data.consumerKey = APP_STORE.sandboxKeys.consumerKey;
-                    data.consumerSecret = APP_STORE.sandboxKeys.consumerSecret;
-                    var jsonData = data;
-                    APP_STORE.sandboxKeys = jsonData;
-                    updateMetadata(appName, jsonData, 'Sandbox', 'refresh');
-                    events.publish(EV_GENERATE_SAND_TOKEN, jsonData);
-                }
-            });
+                       type: 'POST',
+                       url: getSubscriptionAPI(appName, 'refresh'),
+                       data: tokenRequestData,
+                       success: function (data) {
+                           data.consumerKey = APP_STORE.sandboxKeys.consumerKey;
+                           data.consumerSecret = APP_STORE.sandboxKeys.consumerSecret;
+                           var jsonData = data;
+                           APP_STORE.sandboxKeys = jsonData;
+                           updateMetadata(appName, jsonData, 'Sandbox', 'refresh');
+                           events.publish(EV_GENERATE_SAND_TOKEN, jsonData);
+                       }
+                   });
         });
     };
 
     removeAPISubscription = function (apiName, apiVersion, apiProvider) {
         BootstrapDialog.show({
-            type: BootstrapDialog.TYPE_WARNING,
-            title: 'Warning',
-            message: '<div><i class="fw fw-warning"></i>Are you sure you want to remove the subscription for ' +
-            apiName + '? </div>',
-            buttons: [{
-                label: 'Yes',
-                action: function (dialogItself) {
-                    var appName = $('#subscription_selection').val();
-                    var appDetails = findAppDetails(appName);
-                    var deleteAPISubscriptionData = {};
-                    deleteAPISubscriptionData.apiName = apiName;
-                    deleteAPISubscriptionData.apiVersion = apiVersion;
-                    deleteAPISubscriptionData.apiProvider = apiProvider;
-                    deleteAPISubscriptionData.appId = appDetails.id;
-                    deleteAPISubscriptionData.appTier = appDetails.tier;
-                    $.ajax({
-                        type: 'POST',
-                        url: getSubscriptionAPI(appName, 'deleteSubscription'),
-                        data: deleteAPISubscriptionData,
-                        success: function (data) {
-                            if (data.success) {
-                                deleteSubscriptionMetadata(appName, apiName, apiProvider,
-                                    apiVersion, 'deleteSubscription');
-                                var subs = findSubscriptionDetails(appName);
-                                if (subs.length != 0) {
-                                    events.publish(EV_SUB_DELETE, {appName: appName});
-                                } else {
-                                    location.reload();
-                                }
-                            } else {
-                                BootstrapDialog.show({
-                                    type: BootstrapDialog.TYPE_DANGER,
-                                    title: 'Fail to Delete Subscription!',
-                                    message: '<div><i class="fw fw-warning"></i> API : ' +
-                                    appName + ' subscription could not be deleted.</div>',
-                                    buttons: [{
-                                        label: 'Close',
-                                        action: function (dialogItself) {
-                                            dialogItself.close();
-                                        }
-                                    }]
-                                });
-                            }
-                        }
-                    });
-                    dialogItself.close();
-                }
-            }, {
-                label: 'No',
-                action: function (dialogItself) {
-                    dialogItself.close();
-                }
-            }]
-        });
+                                 type: BootstrapDialog.TYPE_WARNING,
+                                 title: 'Warning',
+                                 message: '<div><i class="fw fw-warning"></i>Are you sure you want to remove the subscription for ' +
+                                          apiName + '? </div>',
+                                 buttons: [{
+                                               label: 'Yes',
+                                               action: function (dialogItself) {
+                                                   var appName = $('#subscription_selection').val();
+                                                   var appDetails = findAppDetails(appName);
+                                                   var deleteAPISubscriptionData = {};
+                                                   deleteAPISubscriptionData.apiName = apiName;
+                                                   deleteAPISubscriptionData.apiVersion = apiVersion;
+                                                   deleteAPISubscriptionData.apiProvider = apiProvider;
+                                                   deleteAPISubscriptionData.appId = appDetails.id;
+                                                   deleteAPISubscriptionData.appTier = appDetails.tier;
+                                                   $.ajax({
+                                                              type: 'POST',
+                                                              url: getSubscriptionAPI(appName, 'deleteSubscription'),
+                                                              data: deleteAPISubscriptionData,
+                                                              success: function (data) {
+                                                                  if (data.success) {
+                                                                      deleteSubscriptionMetadata(appName, apiName, apiProvider,
+                                                                                                 apiVersion, 'deleteSubscription');
+                                                                      var subs = findSubscriptionDetails(appName);
+                                                                      if (subs.length != 0) {
+                                                                          events.publish(EV_SUB_DELETE, {appName: appName});
+                                                                      } else {
+                                                                          location.reload();
+                                                                      }
+                                                                  } else {
+                                                                      BootstrapDialog.show({
+                                                                                               type: BootstrapDialog.TYPE_DANGER,
+                                                                                               title: 'Fail to Delete Subscription!',
+                                                                                               message: '<div><i class="fw fw-warning"></i> API : ' +
+                                                                                                        appName + ' subscription could not be deleted.</div>',
+                                                                                               buttons: [{
+                                                                                                             label: 'Close',
+                                                                                                             action: function (dialogItself) {
+                                                                                                                 dialogItself.close();
+                                                                                                             }
+                                                                                                         }]
+                                                                                           });
+                                                                  }
+                                                              }
+                                                          });
+                                                   dialogItself.close();
+                                               }
+                                           }, {
+                                               label: 'No',
+                                               action: function (dialogItself) {
+                                                   dialogItself.close();
+                                               }
+                                           }]
+                             });
     };
 
     events.register(EV_APP_SELECT);
@@ -486,10 +506,19 @@ $(function () {
                     data.keyScopeExist=false;
                 }
                 data.scopes = appD.scopes;
-
+                data.scopes=appD.scopes;
                 // Checking whether scopes are available.
-                if (data.scopes.length > 0) {
+                if (data.scopes && data.scopes.length > 0) {
                     data.isScopeAvailable = true;
+                    var scopesArr=prodScope.split(" ");
+                    for(var j=0;j<data.scopes.length;j++){
+                        for(var i=0;i<scopesArr.length;i++){
+                            if(scopesArr[i]==data.scopes[j].scopeName){
+                                data.scopes[j].checked=true}
+                        }
+                    }
+                    // Checking whether scopes are available.
+
                 } else {
                     data.isScopeAvailable = false;
                 }
@@ -565,16 +594,22 @@ $(function () {
                 var appD=findAppDetails($('#subscription_selection').val());
                 var sandScope=hideDefaultAppScopes(appD.sandKeyScopeValue);
                 if(sandScope){
-                data.keyScopeExist=true;
-                data.keyScopeValue= sandScope;
+                    data.keyScopeExist=true;
+                    data.keyScopeValue= sandScope;
                 }else{
-                data.keyScopeExist=false;
+                    data.keyScopeExist=false;
                 }
-                data.scopes = appD.scopes;
-
+                data.scopes=appD.scopes;
                 // Checking whether scopes are available.
-                if (data.scopes.length > 0) {
+                if (data.scopes && data.scopes.length > 0) {
                     data.isScopeAvailable = true;
+                    var scopesArr=sandScope.split(" ");
+                    for(var j=0;j<data.scopes.length;j++){
+                        for(var i=0;i<scopesArr.length;i++){
+                            if(scopesArr[i]==data.scopes[j].scopeName){
+                                data.scopes[j].checked=true;                        }
+                        }
+                    }
                 } else {
                     data.isScopeAvailable = false;
                 }
@@ -593,12 +628,12 @@ $(function () {
     var hideDefaultAppScopes=function(scopes){
         var scopesList='';
         if(scopes!=null){
-        var scopesArr=scopes.split(" ");
-        for(var i=0;i<scopesArr.length;i++){
-          if(scopesArr[i]!="am_application_scope" && scopesArr[i]!="default"){
-              scopesList+=scopesArr[i]+" ";
-          }
-        }
+            var scopesArr=scopes.split(" ");
+            for(var i=0;i<scopesArr.length;i++){
+                if(scopesArr[i]!="am_application_scope" && scopesArr[i]!="default"){
+                    scopesList+=scopesArr[i]+" ";
+                }
+            }
         }
         return scopesList;
 

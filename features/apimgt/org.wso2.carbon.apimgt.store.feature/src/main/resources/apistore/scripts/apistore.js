@@ -280,25 +280,18 @@ var apistore = {};
                                                         consumerKey, consumerSecret, validityTime) {
 
         var response = Packages.org.wso2.carbon.apimgt.api.model.AccessTokenRequest;
-        var arr = new Packages.org.json.simple.JSONArray();
-        var domains = accessAllowDomainsArr.split(",");
-        for (var index = 0; index < domains.length; index++) {
-            arr.add(domains[index]);
+        response= this.impl.renewAccessToken(oldAccessToken,consumerKey,consumerSecret,validityTime,accessAllowDomainsArr,requestedScopes,null);
+        var scopes="";
+        for(var i=0;i<response.getScopes().length;i++){
+            scopes+=response.getScopes()[i]+" ";
         }
-
-        var scopesArr = new Packages.org.json.simple.JSONArray();
-        var scopes = requestedScopes.split(",");
-        for (var index = 0; index < scopes.length; index++) {
-            scopesArr.add(scopes[index]);
-        }
-        response= this.impl.renewAccessToken(oldAccessToken,consumerKey,consumerSecret,validityTime,arr,scopesArr,null);
         var resultJson = new Packages.org.json.simple.JSONObject();
         resultJson.put("accessToken", response.getAccessToken());
         resultJson.put("consumerKey", response.getConsumerKey());
         resultJson.put("consumerSecret", response.getConsumerKey());
         resultJson.put("validityTime", response.getValidityPeriod());
         resultJson.put("responseParams", response.getJSONString());
-        resultJson.put("tokenScope", response.getScopes());
+        resultJson.put("tokenScope", scopes);
         resultJson.put("enableRegenarate", response.isRegenarateOptionEnabled);
         return resultJson;
 

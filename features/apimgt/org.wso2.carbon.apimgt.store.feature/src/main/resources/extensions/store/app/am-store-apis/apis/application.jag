@@ -51,7 +51,7 @@ require('/modules/store.js').exec(function (ctx) {
             if (uriOptions.action == 'new') {
                 // (userId, applicationName, tokenType, tokenScopes,validityPeriod,callbackUrl,accessAllowDomainsArr)
                 var keyResult = apistore.getApplicationKey(user.username, options.appName,
-                        options.keyType.toUpperCase(), 'default', options.validityTime,
+                        options.keyType.toUpperCase(), options.tokenScope, options.validityTime,
                         options.callbackUrl, options.accessAllowDomains);
                 var keys = [];
                 keys = JSON.parse(keyResult);
@@ -61,7 +61,7 @@ require('/modules/store.js').exec(function (ctx) {
             } else if (uriOptions.action == 'refresh') {
                 // (userId, applicationName, requestedScopes, oldAccessToken, accessAllowDomainsArr, 
                 //consumerKey, consumerSecret, validityTime)
-                var keyResult = apistore.getRefreshToken(user.username, options.appName, 'default,am_application_scope', options.accessToken,
+                var keyResult = apistore.getRefreshToken(user.username, options.appName, options.tokenScope, options.accessToken,
                         options.accessAllowDomains, options.consumerKey, options.consumerSecret, options.validityTime);
                 var keys = [];
                 keys = JSON.parse(keyResult);

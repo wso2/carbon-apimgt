@@ -545,7 +545,7 @@ public interface APIConsumer extends APIManager {
      * @throws APIManagementException
      */
     AccessTokenInfo renewAccessToken(String oldAccessToken, String clientId, String clientSecret, String validityTime,
-                                     String[] accessAllowDomainsArray,String[] requestedScopes, String jsonInput) throws
+                                     String accessAllowDomainsArray,String requestedScopes, String jsonInput) throws
             APIManagementException;
 
 	/**
