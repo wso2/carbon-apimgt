@@ -515,6 +515,8 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             if ((isTenantMode && this.tenantDomain==null) || (isTenantMode && isTenantDomainNotMatching(tenantDomain))) {//Tenant store anonymous mode
                 int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
                         .getTenantId(tenantDomain);
+                // explicitly load the tenant's registry
+                APIUtil.loadTenantRegistry(tenantId);
                 userRegistry = ServiceReferenceHolder.getInstance().
                         getRegistryService().getGovernanceUserRegistry(CarbonConstants.REGISTRY_ANONNYMOUS_USERNAME, tenantId);
                 PrivilegedCarbonContext.getThreadLocalCarbonContext().setUsername(CarbonConstants.REGISTRY_ANONNYMOUS_USERNAME);
