@@ -339,7 +339,7 @@ a.remove_rating:hover{ color: #C00}
 /* API List styling */
 .thumbnail .caption .api-name{ font-weight: bold; display: block; width: 100%; font-size: 1.2em;}
 .thumbnail .caption .api-version{ font-weight: bold; display: block; width: 100%;}
-.api-count-display{ color:#747474; font-size:15px; padding:10px 20px 5px; display: inline-block; float: left; margin: 15px 0px; }
+.api-count-display{ color:#747474; font-size:15px;padding:10px 0px 10px }
 .api-count-display span{ font-size:16px; font-weight:bold; }
 
 #tenant_container {
@@ -425,4 +425,9 @@ a.remove_rating:hover{ color: #C00}
 
 .blue{
     color:#337ab7;
+}
+
+/* aligning api listing page pagination */
+#apiListingPagination{
+    margin-left:-15px;
 }
