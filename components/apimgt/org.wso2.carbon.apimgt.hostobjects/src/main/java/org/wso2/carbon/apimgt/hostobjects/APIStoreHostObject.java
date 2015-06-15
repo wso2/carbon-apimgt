@@ -1313,6 +1313,7 @@ public class APIStoreHostObject extends ScriptableObject {
                 if(api.isAdvertiseOnly()){
                     currentApi.put("owner",currentApi,APIUtil.replaceEmailDomainBack(api.getApiOwner()));
                 }
+                currentApi.put("businessOwner", currentApi, APIUtil.replaceEmailDomainBack(api.getBusinessOwner()));
                 currentApi.put("visibility", currentApi, api.getVisibility());
                 currentApi.put("visibleRoles", currentApi, api.getVisibleRoles());
                 apiArray.put(i, apiArray, currentApi);
@@ -3146,6 +3147,7 @@ public class APIStoreHostObject extends ScriptableObject {
             apiObj.put("subStatus", apiObj, subscribedAPI.getSubStatus());
             apiObj.put("thumburl", apiObj, APIUtil.prependWebContextRoot(api.getThumbnailUrl()));
             apiObj.put("context", apiObj, api.getContext());
+            apiObj.put("businessOwner", apiObj, APIUtil.replaceEmailDomainBack(api.getBusinessOwner()));
             //Read key from the appObject
             APIKey prodKey = getAppKey(appObject, APIConstants.API_KEY_TYPE_PRODUCTION);
             if (prodKey != null) {
