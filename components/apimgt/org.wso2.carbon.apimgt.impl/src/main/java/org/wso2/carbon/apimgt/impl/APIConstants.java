@@ -564,6 +564,7 @@ public final class APIConstants {
     public static final String API_UPDATE_ACTION="updateAPI";
     public static final String API_CHANGE_STATUS_ACTION="updateStatus";
     public static final String API_REMOVE_ACTION="removeAPI";
+    public static final String API_COPY_ACTION="createNewAPI";
     public static final String API_LOGIN_ACTION="login";
     public static final String API_LOGOUT_ACTION="logout";
     public static final String APISTORE_LOGIN_USERNAME="username";
@@ -573,6 +574,7 @@ public final class APIConstants {
     public static final String APISTORE_ADD_URL="/site/blocks/item-add/ajax/add.jag";
     public static final String APISTORE_DELETE_URL="/site/blocks/item-add/ajax/remove.jag";
     public static final String APISTORE_LIST_URL="/site/blocks/listing/ajax/item-list.jag";
+    public static final String APISTORE_COPY_URL="/site/blocks/overview/ajax/overview.jag";
 
     public static final String SWAGGER_VERSION = "1.1";
     

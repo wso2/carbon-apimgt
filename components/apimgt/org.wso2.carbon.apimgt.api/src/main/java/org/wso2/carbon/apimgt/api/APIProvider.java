@@ -349,16 +349,19 @@ public interface APIProvider extends APIManager {
      * @throws APIManagementException
      *          If failed to update subscription status
      */
-    public void publishToExternalAPIStores(API api, Set<APIStore> apiStoreSet) throws APIManagementException;
+    public void publishToExternalAPIStores(API api, Set<APIStore> apiStoreSet, boolean apiOlderVersionExist)
+            throws APIManagementException;
 
     /**
      * Update the API to external APIStores and database
      * @param api The API which need to published
      * @param apiStoreSet The APIStores set to which need to publish API
+     * @param apiOlderVersionExist The api contained older versions
      * @throws APIManagementException
      *          If failed to update subscription status
      */
-    public boolean updateAPIsInExternalAPIStores(API api, Set<APIStore> apiStoreSet) throws APIManagementException;
+    public boolean updateAPIsInExternalAPIStores(API api, Set<APIStore> apiStoreSet, boolean apiOlderVersionExist)
+            throws APIManagementException;
 
 
     /**

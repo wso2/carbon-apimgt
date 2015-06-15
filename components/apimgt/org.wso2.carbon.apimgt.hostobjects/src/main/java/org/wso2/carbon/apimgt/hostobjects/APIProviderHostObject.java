@@ -1294,7 +1294,7 @@ public class APIProviderHostObject extends ScriptableObject {
                     String apiStoreName = externalAPIStores.get(k, externalAPIStores).toString();
                     apiStores.add(APIUtil.getExternalAPIStore(apiStoreName, tenantId));
                 }
-            apiProvider.publishToExternalAPIStores(api, apiStores);
+            apiProvider.publishToExternalAPIStores(api, apiStores,false);
             }
             success = true;
 
@@ -4634,7 +4634,16 @@ public class APIProviderHostObject extends ScriptableObject {
 		                for (Object store : externalAPIStores) {
 		                	inputStores.add(APIUtil.getExternalAPIStore((String) store, tenantId));
 		                }
-                        updated = apiProvider.updateAPIsInExternalAPIStores(api,inputStores);
+                        Set<String> versions = apiProvider.getAPIVersions(provider, name);
+                        APIVersionStringComparator comparator = new APIVersionStringComparator();
+                        boolean apiOlderVersionExist = false;
+                        for (String tempVersion : versions) {
+                            if (comparator.compare(tempVersion, version) < 0) {
+                                apiOlderVersionExist = true;
+                                break;
+                            }
+                        }
+                        updated = apiProvider.updateAPIsInExternalAPIStores(api, inputStores, apiOlderVersionExist);
 
                     }
 	                return updated;
