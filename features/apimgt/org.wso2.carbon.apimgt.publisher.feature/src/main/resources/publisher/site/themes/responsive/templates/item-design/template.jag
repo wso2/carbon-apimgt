@@ -76,7 +76,7 @@
 </center> 
     <div class="title-section">
         <% if(api){ %> 
-            <h2><%= encode.forHtml(api.name) %>(<%= encode.forHtml(api.version) %>) : <%= encode.forHtml(api.context) %>&nbsp;<a class = "btn btn-default pull-right" href="<%= jagg.url("/info?"+ apiUrlId ) %>" ><i class=" icon-list-alt"></i> Go to Overview</a></h2>
+            <h2><%= encode.forHtml(api.name) %>(<%= encode.forHtml(api.version) %>) : <%= encode.forHtml(api.context) %>&nbsp;<a class = "btn btn-default pull-right" href="<%= jagg.url("/info?"+ apiUrlId ) %>" ><i class="fa fa-list-alt"></i> Go to Overview</a></h2>
         <% }else{ %>
             <h2>Design API</h2>
         <% } %>
@@ -124,7 +124,7 @@
             <div id="swaggerUpload" class="modal hide fade" tabindex="-1" role="dialog" aria-hidden="true">
                 <div class="modal-header">
                 <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-                <h3 id="swaggerUploadLabel">Import Swagger 2 Definition</h3>                    
+                <h3 id="swaggerUploadLabel">Import API Definition</h3>                    
                 </div>
                 <div class="modal-body">
                     <div id="swagger_help" class="alert alert-danger hide" role="alert">
@@ -134,7 +134,7 @@
                     <div class="form-inline">
                        <div class="form-group toggleRadios">
                           <div class="col-sm-10">
-                              <label class="col-sm-2 control-label sub-select-label">Upload swagger definition as</label>
+                              <label class="col-sm-2 control-label sub-select-label">Upload API definition as</label>
                               <label class="radio sub-labels"><input type="radio" class="select-file" name="import-definition" id="" value="swagger_import_file"/>Swagger File</label>
                               <label class="radio sub-labels urlSelect-label"><input type="radio" class="select-url" name="import-definition" value="swagger_import_url"/>Swagger Url</label>
                           </div>
@@ -329,7 +329,7 @@
                     session.put( "wsdl", null );
                 %>
                 <div id="api_designer">
-                    <a  href="#wsdlUpload" role="button" class="btn pull-right" data-toggle="modal" ><i class="icon-download-alt" ></i> Import </a>
+                    <a  href="#wsdlUpload" role="button" class="btn pull-right" data-toggle="modal" ><i class="fa fa-download" ></i> Import </a>
                     <legend>API Definition</legend>
                     <div class="form-group api_wsdl">
                         <label class="col-sm-2 control-label" for="wsdl"><%=i18n.localize("wsdl")%>:</label>
@@ -344,8 +344,8 @@
                 </div>
                 <% }else{ %>
                 <div id="api_designer">
-                    <a  href="#swaggerUpload" role="button" class="btn pull-right" data-toggle="modal" ><i class="icon-download-alt" ></i> Import </a>
-                    <a  href="#" id="swaggerEditor" class="btn pull-right" style="margin:0 10px" ><i class="icon-edit" ></i> Edit Source</a>                
+                    <a  href="#swaggerUpload" role="button" class="btn btn-default pull-right" data-toggle="modal" ><i class="fa fa-download" ></i> Import </a>
+                    <a  href="#" id="swaggerEditor" class="btn btn-default pull-right" style="margin:0 10px" ><i class="fa fa-edit" ></i> Edit Source</a>                
                     <div id ="resource_details">
                     </div>
                 </div>      
@@ -358,9 +358,7 @@
         			<%}%>
                 <input type="hidden" name="action" value="design" />
                 <input type="hidden" id="swagger" name="swagger" value="" />
-                <div class="form-actions" style="display:none" id="saveMessage">
-                    <div class="btn loadingButton">Saving API. Please wait..</div>
-                </div>
+
                 <div class="form-actions" id="saveButtons">
 
                     <button type="submit" class="btn btn-default has-spinner" id="saveBtn">Save</button>
@@ -384,11 +382,8 @@
 <script id="designer-resource-template" type="text/x-handlebars-template">
 <div class="resource_body_padding">
     <h5>Description :</h5>
-    <a class="notes" data-path="{{resource_path}}" data-attr="description">{{ description }}</a>
-    <br />
-    <br />        
+        <a class="notes" data-path="{{resource_path}}" data-attr="description">{{ description }}</a>     
     <h5>Response Content Type : <a href="#" data-path="{{resource_path}}" data-attr="produces" class="content_type produces" data-type="typeahead" data-pk="1" data-title="Response Content Type">{{ produces }}</a></h5>
-    <br />
     <h5>Parameters :</h5>
     {{#if parameters}}
     <table class="table table-condensed table-hover table-bordered">
@@ -412,8 +407,8 @@
     {{/each}}
     {{/if}}
     </table>
-    <input type="text" class="parameter_name" name="parameter_name" placeholder="Parameter Name" style="padding:2px 4px"/>
-    <a class="btn btn-small add_parameter" type="button" ><i class="icon-plus-sign"></i>&nbsp;Add Parameter</a>
+    <input type="text" style="width:200px;margin-right:5px;" class="parameter_name form-control input-sm pull-left" name="parameter_name" placeholder="Parameter Name"/>
+    <a class="btn btn-small btn-default add_parameter btn-sm" type="button" ><i class="fa fa-plus"></i>&nbsp;Add Parameter</a>
 </div>  
 </script>
 
@@ -423,34 +418,34 @@
     <div class="resource_create">
         <div class="form-group">
             <label class="col-sm-2 control-label" for="inputPassword">URL Pattern</label>
-            <div class="col-sm-10">
-                <div class="input-prepend">
+            <div class="col-sm-6">
+                <div class="input-group">
                     <% if(api){ %>
-                        <span class="add-on" id="resource_url_pattern_refix"><%= encode.forHtml(api.context)%></span>
+                        <span class="input-group-addon" id="resource_url_pattern_refix"><%= encode.forHtml(api.context)%></span>
                     <% }else{ %>
-                        <span class="add-on" id="resource_url_pattern_refix">/{context}/{version}/</span>
+                        <span class="input-group-addon" id="resource_url_pattern_refix">/{context}/{version}/</span>
                     <% } %>
-                    <input style="width:500px" id="resource_url_pattern" type="text" placeholder="Url Pattern Ex: path/to/resource" class="resource_url_pattern"/>
+                    <input id="resource_url_pattern" type="text" placeholder="Url Pattern Ex: path/to/resource" class="resource_url_pattern form-control"/>
                 </div>
             </div>
         </div>
         <div class="form-group">
             <label class="col-sm-2 control-label" for=""></label>
             <div class="col-sm-10">
-                {{#each verbs}}
-                    <label class="checkbox inline" style="text-transform:uppercase;">
+                {{#each verbs}}             
+                    <label class="checkbox checkbox-inline" style="text-transform:uppercase;">
                     <input type="checkbox" value="{{ . }}" class="http_verb_select" >  {{ . }}
                     </label>
                 {{/each}}
-                <div class "checkbox inline" id="options" style="display: none;" >
-                    <label class="checkbox inline">
-                    <input type="checkbox" value="options" class="http_verb_select"> OPTIONS
-                    </label>
-                    <a class="icon-question-sign help_popup" help_data="options_help" data-trigger="hover"></a>
-                    <p id="options_help" class="hide"><%=i18n.localize("optionsHelpMsg")%></p>
-                    <label id="less" style="display:inline;">less</label>
+                    <div class "checkbox inline" id="options" style="display: none;" >
+                        <label class="checkbox checkbox-inline">
+                        &nbsp;<input type="checkbox" value="options" class="http_verb_select"> OPTIONS
+                        </label>
+                        <a class="icon-question-sign help_popup" help_data="options_help" data-trigger="hover"></a>
+                        <p id="options_help" class="hide"><%=i18n.localize("optionsHelpMsg")%></p>
+                        <label id="less" class="checkbox-inline">less</label>
                     </div>
-                     <label id="more" style="display:inline;">more</label>
+                    <label id="more" class="checkbox-inline">more</label>
             </div>
         </div>
         <!-- div class="form-group">
@@ -462,7 +457,7 @@
         <div class="form-group">
             <label class="col-sm-2 control-label"></label>
             <div class="col-sm-10">
-                <button class="btn" type="button" id="add_resource" style="margin:10px 0 0px 0px;"><i class="icon-plus-sign"></i>&nbsp;Add</button>
+                <button class="btn btn-default" type="button" id="add_resource" style="margin:10px 0 0px 0px;"><i class="fa fa-plus"></i>&nbsp;Add</button>
             </div>
         </div>        
     </div>
@@ -475,9 +470,9 @@
             </td>
             <td class="resource_expand"><a class="resource-path">{{ path }}</a></td>    
             <td  width="99%"><span class="operation-summary change_summary" data-path="$.paths.{{ path }}.{{@key}}" data-attr="summary" >{{ summary }}</span></td>
-            <td class="delete_resource_td "><a class='operation-summary delete_resource' data-operation="{{ @key }}" data-path-name="{{ path }}" data-path="$.paths.{{ path }}.{{@key}}" data-index="{{ @index }}"><i class='icon-trash'></i></a></td>
+            <td class="delete_resource_td "><a class='operation-summary delete_resource' data-operation="{{ @key }}" data-path-name="{{ path }}" data-path="$.paths.{{ path }}.{{@key}}" data-index="{{ @index }}"><i class='fa fa-trash'></i></a></td>
         </tr>
-        <tr><td colspan="4" class="resource_body hide" data-path="$.paths.{{ path }}.{{@key}}"></td></tr>
+        <tr><td colspan="4" class="resource_body" style="display:none" data-path="$.paths.{{ path }}.{{@key}}"></td></tr>
     {{/each}}
 {{/each}}
 </table>                                         

@@ -261,3 +261,7 @@ margin: 20px 0px 10px 10px;
 body.modal-open {
     overflow: hidden;
 }
+
+.form-actions{
+    margin-top: 20px;
+}
