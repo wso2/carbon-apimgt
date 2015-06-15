@@ -1,94 +1,133 @@
-
-
 <div class="row-fluid>
-
     <div class="span10">
-    {{#if fields.description.value}}
-        <div class="well" id="apiView">{{fields.description.value}}
-        </div>
-    {{/if}}
-        <table class="table table-bordered">
-            <tbody>
-            <tr>
-                <td class="span3">{{t "context"}}</td>
-                <td id="inUrl">{{context}}</td>
-            </tr>
-           {{#if prodEndpoint.url}} 
-	            <tr>
-	                <td class="span3">{{t "Production URL"}}</td>
-	                <td id="inUrl">{{prodEndpoint.url}}</td>
-	            </tr>
-            {{/if}}
-            {{#if fields.productionFailoverEp.value}}           
-            <tr>
-                <td>{{t "productionFailoverEp"}}</td>
-                <td id="inUrl">{{fields.productionFailoverEp.value}}</td>
-            </tr>
-            {{/if}}
-           {{#if sandboxEndpoint.url}}
-            <tr>
-                <td>{{t "sandbox Endpoint"}}</td>
-                <td id="sandbox">{{sandboxEndpoint.url}}</td>
-            </tr>
-            {{/if}}
-            
+<table class="table table-bordered">
+	<tbody>
+	<tr>
+		<td class="span3">{{t "Visibilitty"}}</td>
+		<td id="inUrl">
+			{{#if api.visibilityLevel.restricted}}
+				"{{t "Restricted by roles, only visible to"}} {{api.roles}}"
+			{{else}}
+				{{api.visibility}}
+			{{/if}}
+		</td>
+	</tr>
+	<tr>
+		<td class="span3">{{t "Context"}}</td>
+		<td id="inUrl">{{api.context}}</td>
+	</tr>
 
-            {{#if wsdl}}
-            <tr>
-                <td>{{t "WSDL"}}</td>
-                <td id="wsdl">{{wsdl}}</td>
-            </tr>
-            {{/if}}
-            {{#if wadl}}
-            <tr>
-                <td>{{t "WADL"}}</td>
-                <td id="wsdl">{{wadl}}</td>
-            </tr>
-            {{/if}}
-            <tr>
-                <td>{{t "Lastupdated"}}</td>
-                <td id="inUpdated" class="dateFull">{{lastUpdatedDate}}</td>
-            </tr>
-            <tr>
-                <td>{{t "Tier Availability"}}</td>
-                <td id="tierAvb">{{tier}}</td>
-            </tr>
-            <tr>
-                <td>{{t "Default API Version"}}</td>
-                <td id="defaultAPIVersion">
-                    {{#if isDefault}}
-                        {{version}}
-                    {{else}}
-                        {{t "None"}}
-                    {{/if}}
-                </td>
-            </tr>
-            {{#if fields.tags.value}}
-            <tr>
-                <td>{{t "Tags"}}</td>
-                <td id="tags"> {{fields.tags.value}}</td>
-            </tr>
-             {{/if}}
-            {{#if fields.bizOwner.value}}
-             <tr>
-                <td>{{t "Business Ownser"}}</td>
-                <td id="bizOwnerData">{{fields.bizOwner.value}} {{#if api.bizOwnerMail.value}}
-                [<a href="mailto:{{api.bizOwnerMail.value}}">{{api.bizOwnerMail.value}}</a>]
-                {{/if}}
-                </td>
-            </tr>
-             {{/if}}
-            {{#if fields.techOwner.value}}
-             <tr>
-                <td>{{t "Technical Owner"}}</td>
-                <td id="techOwnerData">{{fields.techOwner.value}}{{#if fields.techOwnerMail.value}}
-                [<a href="mailto:{{fields.techOwnerMail.value}}">{{fields.techOwnerMail.value}}</a>]
-                {{/if}}
-                </td>
-            </tr>
-            {{/if}}
-            </tbody>
-        </table>
-    </div>
+	{{#if api.simplifiedConfig.production_endpoints}}
+		<tr>
+			<td class="span3">{{t "Production Endpoints"}}</td>
+			<td id="inUrl">
+				<ul class="endpoint_list">
+					{{#each api.simplifiedConfig.production_endpoints}}
+						{{this.url}}
+					{{/each}}
+				</ul>
+			</td>
+		</tr>
+	{{/if}}
+	{{#if api.simplifiedConfig.production_failovers}}
+		<tr>
+			<td class="span3">{{t "Production Failover Endpoints"}}</td>
+			<td id="inUrl">
+				<ul class="endpoint_list">
+					{{#each api.simplifiedConfig.production_failovers}}
+						{{this.url}}
+					{{/each}}
+				</ul>
+			</td>
+		</tr>
+	{{/if}}
+
+	{{#if api.simplifiedConfig.sandbox_endpoints}}
+		<tr>
+			<td class="span3">{{t "Sandbox Endpoints"}}</td>
+			<td id="inUrl">
+				<ul class="endpoint_list">
+					{{#each api.simplifiedConfig.sandbox_endpoints}}
+						{{this.url}}
+					{{/each}}
+				</ul>
+			</td>
+		</tr>
+	{{/if}}
+	{{#if api.simplifiedConfig.sandbox_failovers}}
+		<tr>
+			<td class="span3">{{t "Sandbox Failover Endpoints"}}</td>
+			<td id="inUrl">
+				<ul class="endpoint_list">
+					{{#each api.simplifiedConfig.sandbox_failovers}}
+						{{this.url}}
+					{{/each}}
+				</ul>
+			</td>
+		</tr>
+	{{/if}}
+
+	{{#if api.wsdl}}
+		<tr>
+			<td>{{t "WSDL"}}</td>
+			<td id="wsdl">{{api.wsdl}}</td>
+		</tr>
+	{{/if}}
+	{{#if api.wadl}}
+		<tr>
+			<td>{{t "WADL"}}</td>
+			<td id="wsdl">{{api.wadl}}</td>
+		</tr>
+	{{/if}}
+	<tr>
+		<td>{{t "Lastupdated"}}</td>
+		<td id="inUpdated" class="dateFull">{{api.lastUpdated}}</td>
+	</tr>
+	<tr>
+		<td>{{t "Tier Availability"}}</td>
+		<td id="tierAvb">{{api.availableTiersDisplayNames}}</td>
+	</tr>
+	<tr>
+		<td>{{t "Default API Version"}}</td>
+		<td id="defaultAPIVersion">
+			{{#if api.hasDefaultVersion}}
+				{{api.currentDefaultVersion}}
+			{{else}}
+				{{t "None"}}
+			{{/if}}
+		</td>
+	</tr>
+	{{#if api.tags}}
+		<tr>
+			<td>{{t "Tags"}}</td>
+			<td id="tags"> {{api.tags}}</td>
+		</tr>
+	{{/if}}
+	{{#if api.bizOwner}}
+		<tr>
+			<td>{{t "Business Ownser"}}</td>
+			<td id="bizOwnerData">{{api.bizOwner}}
+				[<a href="mailto:{{api.bizOwnerMail}}">{{api.bizOwnerMail}}</a>]
+			</td>
+		</tr>
+	{{/if}}
+	{{#if api.techOwner}}
+		<tr>
+			<td>{{t "Technical Owner"}}</td>
+			<td id="techOwnerData">{{api.techOwner}}
+				[<a href="mailto:{{api.techOwnerMail}}">{{api.techOwnerMail}}</a>]
+			</td>
+		</tr>
+	{{/if}}
+	<tr>
+		<td>Published Environments</td>
+		<td>
+			{{#each api.publishedEnvionments}}
+				{{this}}
+			{{/each}}
+		</td>
+	</tbody>
+</table>
+</div>
 </div>
 

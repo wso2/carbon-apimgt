@@ -1,36 +1,36 @@
 
 <div  id='copy-api-container' class="row-fluid" style='display:none;' >
-	
-	<form novalidate="novalidate" id="copyApiForm">   
-	    <div style="display: block;" class="well" id="copy-api">
-	        <input id="overviewAPIVersion" value={{version}} type="hidden">
-	        <input id="overviewAPIName" value={{name}} type="hidden">
-	        <input id="copyAPINewVersion" value="" type="hidden">
-	        <input id="copyAPIProvider" value={{#tables}}{{fields.provider.value}}{{/tables}} type="hidden">
-	        <label>{{t "To Version"}}</label>
-	        <input id="copyAPIEmptyVersion" value='{{t "New API Version is Empty"}}' type="hidden">
-	        <input class="span3 required" id="copy-api-new-version-txt" type="text"><span class="help-inline">{{t " Ex:v1.0.1"}}</span>
-	        
-	        <div class="default-version">
-	            <label class="control-label">{{t "Default Version"}}</label>
-	            <div class="controls">
-	                <input id="copyAPIDefaultVersion"  value="" type="checkbox">
-	                <input id="copyAPIDefaultVersionValue"  value="" type="hidden">
-	                 
-	                    <p class="help-block">{{t "Currently set to version :"}} {{version}}</p>
-	                 
-	            </div>
-	        </div>
-	       
-	        
-	        <div class="copy-buttons">
-	            <button type="button" id="copy-api-done-button" class="btn btn-primary copy-button">{{t "Done"}}</button>
-	            <button type="button" id="copy-api-cancel-button" class="btn cancel-button" >{{t "Cancel"}}</button>
-	        </div>
+
+	<form novalidate="novalidate" id="copyApiForm">
+		<div style="display: block;" class="well" id="copy-api">
+			<input id="overviewAPIVersion" value="{{api.version}}" type="hidden"/>
+			<input id="overviewAPIName" value="{{api.name}}" type="hidden"/>
+			<input id="copyAPINewVersion" value="" type="hidden"/>
+			<input id="copyAPIProvider" value="{{api.provider}}" type="hidden">
+			<label>{{t "To Version"}}</label>
+			<input id="copyAPIEmptyVersion" value='{{t "New API Version is Empty"}}' type="hidden">
+			<input class="span3 required" id="copy-api-new-version-txt" type="text"><span class="help-inline">{{t " Ex:v1.0.1"}}</span>
+
+			<div class="default-version">
+				<label class="control-label">{{t "Default Version"}}</label>
+				<div class="controls">
+					<input id="copyAPIDefaultVersion"  value="" type="checkbox">
+					<input id="copyAPIDefaultVersionValue"  value="" type="hidden">
+
+					<p class="help-block">{{t "Currently set to version :"}} {{api.version}}</p>
+
+				</div>
+			</div>
 
 
-	    </div>
-	    
-    </form>
+			<div class="copy-buttons">
+				<button type="button" id="copy-api-done-button" class="btn btn-primary copy-button">{{t "Done"}}</button>
+				<button type="button" id="copy-api-cancel-button" class="btn cancel-button" >{{t "Cancel"}}</button>
+			</div>
+
+
+		</div>
+
+	</form>
 
 </div>
