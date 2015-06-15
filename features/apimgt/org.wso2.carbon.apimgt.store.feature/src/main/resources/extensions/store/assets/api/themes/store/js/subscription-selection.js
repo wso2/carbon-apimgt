@@ -96,13 +96,35 @@ $(function () {
         if (action == 'new') {
             if (environment == 'Production') {
 
-                appData.prodKeyScope = newDetails.tokenScope;
                 appData.prodValidityTime = newDetails.validityTime;
                 appData.prodAuthorizedDomains = newDetails.accessallowdomains;
                 appData.prodKey = newDetails.accessToken;
                 appData.prodConsumerKey = newDetails.consumerKey;
                 appData.prodRegenarateOption = newDetails.enableRegenarate;
                 appData.prodConsumerSecret = newDetails.consumerSecret;
+                var prodScope=hideDefaultAppScopeVals(newDetails.tokenScope);
+                if(prodScope){
+                    appData.keyScopeExist=true;
+                    appData.keyScopeValue=prodScope ;
+                }else{
+                    appData.keyScopeExist=false;
+                }
+                appData.scopes = findAppDetails(appName).scopes;
+                // Checking whether scopes are available.
+                if (appData.scopes && appData.scopes.length > 0) {
+                    appData.isScopeAvailable = true;
+                    var scopesArr=prodScope.split(" ");
+                    for(var j=0;j<appData.scopes.length;j++){
+                        for(var i=0;i<scopesArr.length;i++){
+                            if(scopesArr[i]==appData.scopes[j].scopeName){
+                                appData.scopes[j].checked=true}
+                        }
+                    }
+                    // Checking whether scopes are available.
+
+                } else {
+                    appData.isScopeAvailable = false;
+                }
             } else if (environment == 'Sandbox') {
 
                 appData.sandKeyScope = newDetails.tokenScope;
@@ -112,6 +134,29 @@ $(function () {
                 appData.sandboxConsumerKey = newDetails.consumerKey;
                 appData.sandRegenarateOption = newDetails.enableRegenarate;
                 appData.sandboxConsumerSecret = newDetails.consumerSecret;
+                var sandScope1=hideDefaultAppScopeVals(newDetails.tokenScope);
+                if(sandScope1){
+                    appData.keyScopeExist=true;
+                    appData.keyScopeValue=sandScope1 ;
+                }else{
+                    appData.keyScopeExist=false;
+                }
+                appData.scopes = findAppDetails(appName).scopes;
+                // Checking whether scopes are available.
+                if (appData.scopes && appData.scopes.length > 0) {
+                    appData.isScopeAvailable = true;
+                    var scopesArr4=sandScope1.split(" ");
+                    for(var t=0;t<appData.scopes.length;t++){
+                        for(var s=0;s<scopesArr4.length;s++){
+                            if(scopesArr4[s]==appData.scopes[t].scopeName){
+                                appData.scopes[t].checked=true}
+                        }
+                    }
+                    // Checking whether scopes are available.
+
+                } else {
+                    appData.isScopeAvailable = false;
+                }
             }
         } else if (action == 'refresh') {
             if (environment == 'Production') {
@@ -121,6 +166,29 @@ $(function () {
                 appData.prodAuthorizedDomains = newDetails.accessallowdomains;
                 appData.prodKey = newDetails.accessToken;
                 appData.prodRegenarateOption = newDetails.enableRegenarate;
+                var prodScope1=hideDefaultAppScopes(newDetails.tokenScope);
+                if(prodScope1){
+                    appData.keyScopeExist=true;
+                    appData.keyScopeValue=prodScope1 ;
+                }else{
+                    appData.keyScopeExist=false;
+                }
+                appData.scopes = findAppDetails(appName).scopes;
+                // Checking whether scopes are available.
+                if (appData.scopes && appData.scopes.length > 0) {
+                    appData.isScopeAvailable = true;
+                    var scopesArr1=prodScope1.split(" ");
+                    for(var m=0;m<appData.scopes.length;m++){
+                        for(var n=0;n<scopesArr1.length;n++){
+                            if(scopesArr1[n]==appData.scopes[m].scopeName){
+                                appData.scopes[m].checked=true}
+                        }
+                    }
+                    // Checking whether scopes are available.
+
+                } else {
+                    appData.isScopeAvailable = false;
+                }
             } else if (environment == 'Sandbox') {
 
                 appData.sandKeyScope = newDetails.tokenScope;
@@ -128,6 +196,29 @@ $(function () {
                 appData.sandboxAuthorizedDomains = newDetails.accessallowdomains;
                 appData.sandboxKey = newDetails.accessToken;
                 appData.sandRegenarateOption = newDetails.enableRegenarate;
+                var sandScope=hideDefaultAppScopes(newDetails.tokenScope);
+                if(sandScope){
+                    appData.keyScopeExist=true;
+                    appData.keyScopeValue=sandScope ;
+                }else{
+                    appData.keyScopeExist=false;
+                }
+                appData.scopes = findAppDetails(appName).scopes;
+                // Checking whether scopes are available.
+                if (appData.scopes && appData.scopes.length > 0) {
+                    appData.isScopeAvailable = true;
+                    var scopesArr3=sandScope.split(" ");
+                    for(var p=0;p<appData.scopes.length;p++){
+                        for(var q=0;q<scopesArr3.length;q++){
+                            if(scopesArr3[q]==appData.scopes[p].scopeName){
+                                appData.scopes[p].checked=true}
+                        }
+                    }
+                    // Checking whether scopes are available.
+
+                } else {
+                    appData.isScopeAvailable = false;
+                }
             }
         }
         updateAppDetails(appName, appData);
@@ -229,7 +320,7 @@ $(function () {
                            var jsonData = data;
                            APP_STORE.productionKeys = jsonData;
                            updateMetadata(appName, jsonData, 'Production', 'new');
-                           events.publish(EV_GENERATE_PROD_TOKEN, jsonData);
+                           events.publish(EV_GENERATE_PROD_TOKEN, findAppDetails(appName));
                        }
                    });
         });
@@ -262,7 +353,7 @@ $(function () {
                            var jsonData = data;
                            APP_STORE.sandboxKeys = jsonData;
                            updateMetadata(appName, jsonData, 'Sandbox', 'new');
-                           events.publish(EV_GENERATE_SAND_TOKEN, jsonData);
+                           events.publish(EV_GENERATE_SAND_TOKEN, findAppDetails(appName));
                        }
                    });
 
@@ -367,7 +458,7 @@ $(function () {
                            var jsonData = data;
                            APP_STORE.productionKeys = jsonData;
                            updateMetadata(appName, jsonData, 'Production', 'refresh');
-                           events.publish(EV_GENERATE_PROD_TOKEN, jsonData);
+                           events.publish(EV_GENERATE_PROD_TOKEN, findAppDetails(appName));
                        }
                    });
         });
@@ -403,7 +494,7 @@ $(function () {
                            var jsonData = data;
                            APP_STORE.sandboxKeys = jsonData;
                            updateMetadata(appName, jsonData, 'Sandbox', 'refresh');
-                           events.publish(EV_GENERATE_SAND_TOKEN, jsonData);
+                           events.publish(EV_GENERATE_SAND_TOKEN, findAppDetails(appName));
                        }
                    });
         });
@@ -629,6 +720,20 @@ $(function () {
         var scopesList='';
         if(scopes!=null){
             var scopesArr=scopes.split(" ");
+            for(var i=0;i<scopesArr.length;i++){
+                if(scopesArr[i]!="am_application_scope" && scopesArr[i]!="default"){
+                    scopesList+=scopesArr[i]+" ";
+                }
+            }
+        }
+        return scopesList;
+
+    };
+
+    var hideDefaultAppScopeVals=function(scopes){
+        var scopesList='';
+        if(scopes!=null){
+            var scopesArr=scopes.split(",");
             for(var i=0;i<scopesArr.length;i++){
                 if(scopesArr[i]!="am_application_scope" && scopesArr[i]!="default"){
                     scopesList+=scopesArr[i]+" ";
