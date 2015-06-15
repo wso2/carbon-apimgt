@@ -20,12 +20,13 @@
     </div>
 {{/if}}
 </forum>
+<div class=" padding-top-double">
 <legend>{{t "Share"}}:</legend>
 <div class='tabbable'>
     <ul class='nav nav-tabs btn-group'>
-        <li class='btn'><a href='#api-social-buttons' data-toggle='tab'>{{t "Social Sites"}}</a></li>
-        <li class='btn'><a href='#api-embed' data-toggle='tab'>{{t "Embed"}}</a></li>
-        <li class='btn'><a href='mailto:?Subject={{assets.name}}'><i class='icon-envelope'></i> {{t "Email"}}</a></li>
+        <li class='btn-tab'><a href='#api-social-buttons' data-toggle='tab'>{{t "Social Sites"}}</a></li>
+        <li class='btn-tab'><a href='#api-embed' data-toggle='tab'>{{t "Embed"}}</a></li>
+        <li class='btn-tab'><a href='mailto:?Subject={{assets.name}}'><i class='icon-envelope'></i> {{t "Email"}}</a></li>
     </ul>
     <!--div class='btn-group nav nav-tabs'>
         <button class='btn'>Social sites</button>
@@ -42,8 +43,8 @@
         </div>
     </div>
 </div>
-
-
+</div>
+<div class=" padding-top-double">
 <legend>Comments</legend>
 <div>
     {{#if features.social.enabled}}
@@ -59,3 +60,4 @@
         <div id="comment-content" class="content user-review"></div>
     {{/if}}
 </div>
+    </div>
