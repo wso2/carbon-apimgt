@@ -490,7 +490,7 @@ var apipublisher = {};
                 tierSet += tiers[i].getName();
                 tiersDisplayNamesSet += tiers[i].getDisplayName();
                 tiersDescSet += tiers[i].getDescription();
-                if (i != tierSet.length - 1) {
+                if (i != tiers.length - 1) {
                     tierSet += ',';
                     tiersDisplayNamesSet += ',';
                     tiersDescSet += ',';
@@ -579,7 +579,7 @@ var apipublisher = {};
                 status: api.getStatus().toString(),
                 thumb: APIUtil.getWebContextRoot(api.getThumbnailUrl()),
                 context: api.getContext(),
-                lastUpdated: Long.valueOf(api.getLastUpdated().getTime()).toString(),
+                lastUpdated: api.getLastUpdated().toString(),
                 subs: subscriberCount,
                 templates: uriTempArr,
                 sandbox: api.getSandboxUrl(),
