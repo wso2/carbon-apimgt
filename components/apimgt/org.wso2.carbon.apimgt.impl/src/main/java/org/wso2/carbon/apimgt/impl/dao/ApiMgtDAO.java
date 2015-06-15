@@ -89,11 +89,7 @@ import org.wso2.carbon.apimgt.impl.dto.*;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.token.JWTGenerator;
 import org.wso2.carbon.apimgt.impl.token.TokenGenerator;
-import org.wso2.carbon.apimgt.impl.utils.APIMgtDBUtil;
-import org.wso2.carbon.apimgt.impl.utils.APIUtil;
-import org.wso2.carbon.apimgt.impl.utils.APIVersionComparator;
-import org.wso2.carbon.apimgt.impl.utils.RemoteUserManagerClient;
-import org.wso2.carbon.apimgt.impl.utils.ApplicationUtils;
+import org.wso2.carbon.apimgt.impl.utils.*;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowConstants;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowExecutorFactory;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowStatus;
@@ -9204,5 +9200,41 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
         }
         return consumerKey;
     }
+
+    /**
+     * Get external APIStores details which are stored in database
+     *
+     * @param apiIdentifier API Identifier
+     * @throws APIManagementException if failed to get external APIStores
+     */
+    public static String getLastPublishedAPIVersionFromAPIStore(APIIdentifier apiIdentifier,String storeName)
+            throws APIManagementException {
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+        Connection conn = null;
+        String version = null;
+        try {
+            conn = APIMgtDBUtil.getConnection();
+            String sqlQuery =
+                    "SELECT API.API_VERSION FROM AM_API API , AM_EXTERNAL_STORES  ES WHERE ES.API_ID = " +
+                    "API.API_ID and API.API_PROVIDER = ? and API.API_NAME=? and ES.STORE_ID =? ORDER By API.CREATED_TIME ASC";
+            ps = conn.prepareStatement(sqlQuery);
+            ps.setString(1, apiIdentifier.getProviderName());
+            ps.setString(2,apiIdentifier.getApiName());
+            ps.setString(3,storeName);
+            rs = ps.executeQuery();
+            while (rs.next()) {
+                version = rs.getString("API_VERSION");
+            }
+        } catch (SQLException e) {
+            handleException("Error while getting External APIStore details from the database for  the API : " +
+                            apiIdentifier.getApiName() + "-" + apiIdentifier.getVersion(), e);
+
+        } finally {
+            APIMgtDBUtil.closeAllConnections(ps, conn, rs);
+        }
+        return version;
+    }
+
 
 }

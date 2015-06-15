@@ -26,7 +26,6 @@ import org.apache.axis2.AxisFault;
 import org.apache.axis2.Constants;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
@@ -2031,7 +2030,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      *          If failed to update subscription status
      */
     @Override
-    public void publishToExternalAPIStores(API api, Set<APIStore> apiStoreSet)
+    public void publishToExternalAPIStores(API api, Set<APIStore> apiStoreSet, boolean apiOlderVersionExist)
             throws APIManagementException {
 
         Set<APIStore> publishedStores = new HashSet<APIStore>();
@@ -2041,7 +2040,13 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 
                 try {
                     // First trying to publish the API to external APIStore
-                    boolean published = publisher.publishToStore(api, store);
+                    boolean published;
+                    if (apiOlderVersionExist) {
+                        published = publisher.CreateVersionedAPIToStore(api, store);
+                        publisher.updateToStore(api, store);
+                    } else {
+                        published = publisher.publishToStore(api, store);
+                    }
 
                     if (published) { // If published,then save to database.
                         publishedStores.add(store);
@@ -2064,7 +2069,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      *          If failed to update subscription status
      */
     @Override
-    public boolean updateAPIsInExternalAPIStores(API api, Set<APIStore> apiStoreSet) throws APIManagementException {
+    public boolean updateAPIsInExternalAPIStores(API api, Set<APIStore> apiStoreSet, boolean apiOlderVersionExist)
+            throws APIManagementException {
         boolean updated=false;
         Set<APIStore> publishedStores=getPublishedExternalAPIStores(api.getId());
         Set<APIStore> notPublishedAPIStores = new HashSet<APIStore>();
@@ -2111,7 +2117,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
         //Publish API to external APIStore which are not yet published
         try {
-            publishToExternalAPIStores(api, notPublishedAPIStores);
+            publishToExternalAPIStores(api, notPublishedAPIStores,apiOlderVersionExist);
         } catch (APIManagementException e) {
             handleException("Failed to publish API to external Store", e);
         }
