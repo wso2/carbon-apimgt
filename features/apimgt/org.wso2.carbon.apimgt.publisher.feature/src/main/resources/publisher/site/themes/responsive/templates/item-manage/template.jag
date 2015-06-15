@@ -83,7 +83,7 @@
 
         <h2>Manage API: <%= encode.forHtml(api.name) %> : <%= encode.forHtml(api.context) %>&nbsp;
         <% if(api){ %>
-               <a class = "goTo_api_overview" href="<%= jagg.url("/info?"+ apiUrlId ) %>" ><i class=" icon-list-alt"></i> Go to Overview</a>
+               <button type="button" class="btn btn-default pull-right" onclick="window.location='<%= jagg.url("/info?"+ apiUrlId ) %>'"><i class=" glyphicon glyphicon-list-alt"></i> Go to Overview</button>
         <% } %>
         </h2>
 
@@ -95,7 +95,7 @@
     </div>
 <%
     if(api != null && api.subs > 0){%>
-    <div class="alert alert-block" id="editAPIWarn" style="display:block">
+    <div class="alert alert-block alert-warning" id="editAPIWarn" style="display:block">
         <span id="editWarnSpan"><b>Warning!</b><br/>
         You are editing an API with active subscribers. Tier Availability changes will not be reflected on
         active subscriptions.
@@ -103,38 +103,41 @@
     </div>
   <%  }%>
 
-    <div class="row-fluid">
-        <div class="span12">                           
+    <div class="row">
+        <div class="col-sm-12">
             <form class="form-horizontal" method="POST"
               id="manage_form"
               enctype="multipart/form-data" action="<%= jagg.url("/site/blocks/item-design/ajax/add.jag?" + apiUrlId ) %>&action=manage">
     <fieldset>
     <legend>Configurations</legend>
 
-            <div class="control-group">
-                    <label  class="control-label" >Make this default version</label>
-                     <div class="controls">
-                        <input type="checkbox" class="default_version_check" id="default_version" name="default_version" value="default_version" <%if(api.isDefaultVersion=="true"){%>checked<%}%>/>
+            <div class="form-group form-inline">
+                        <label class = "col-sm-3 control-label" >Make this default version</label>
+                     <div class="col-sm-8">
+                         <div class = "checkbox">
+                             <label>
+                                 <input type="checkbox" class="default_version_check" id="default_version" name="default_version" value="default_version" <%if(api.isDefaultVersion=="true"){%>checked<%}%>/>
+                             </label>
+                         </div>
+                         <a  class="glyphicon glyphicon-question-sign help_popup" help_data="default_api_help"></a>
 
-                        <a class="icon-question-sign help_popup" help_data="default_api_help"></a>
-            
-                        <p id="default_api_help" class="hide"><%=i18n.localize("defaultAPIHelpMsg")%></p>
+                         <p id="default_api_help" class="hide"><%=i18n.localize("defaultAPIHelpMsg")%></p>
 
-                        <%if(api.isDefaultVersion=="false"){if(api.hasDefaultVersion){%>
-                            <p class="help-block">Currently set to version : <%=api.currentDefaultVersion%></p>
-                        <%}else{%>
-                            <p class="help-block">No default version defined for the current API</p>
-                        <%}}%>
+                         <%if(api.isDefaultVersion=="false"){if(api.hasDefaultVersion){%>
+                             <p class="help-block">Currently set to version : <%=api.currentDefaultVersion%></p>
+                         <%}else{%>
+                             <p class="help-block">No default version defined for the current API</p>
+                         <%}}%>
 
-                        <input type="hidden" id="default_version_checked" name="default_version_checked" value=<%if(api.isDefaultVersion=="true"){%>"default_version"<%}else{%>""<%}%>/>
-                    </div>
-                    
+                     </div>
+                     <input type="hidden" id="default_version_checked" name="default_version_checked" value=<%if(api.isDefaultVersion=="true"){%>"default_version"<%}else{%>""<%}%>/>
             </div>
 
-                <div class="control-group">
-                    <label class="control-label" for="tier"><%=i18n.localize("tier")%>:<span class="requiredAstrix">*</span></label>
-                    <div class="controls">                   
-                        <select id="tier" name="tier"  class="multiselect selected hide required" multiple="multiple">
+                <div class="form-group">
+                        <label class="control-label col-sm-3" for="tier"><%=i18n.localize("tier")%>:<span class="requiredAstrix">*</span></label>
+
+                    <div class="controls col-sm-8 tierSelect">
+                        <select id="tier" name="tier"  class="form-control multiselect selected required" multiple="multiple">
                         <%
                         for (var i = 0; i < tiers.length; i++) {
                             var isSelected = api.availableTiers.indexOf(tiers[i].tierName) > -1;
@@ -144,45 +147,50 @@
                         </select>
                         <script type="text/javascript">
 
-                        </script> 
-                        <a class="icon-question-sign help_popup" help_data="tier_help"></a>
+                        </script>
+                        <a class=" help_popup" help_data="tier_help"></a>
                         <p id="tier_help" class="hide"><%=i18n.localize("tierHelpMsg")%></p>
                     </div>
                 </div>
 
-                <div class="control-group transport-styles">
-                <label class="control-label" for="transports"><%=i18n.localize("transports")%>:<span class="requiredAstrix">*</span></label>
-                <div class="controls">
+                <div class="form-group form-inline transport-styles">
+                <label class="control-label col-sm-3" for="transports"><%=i18n.localize("transports")%>:<span class="requiredAstrix">*</span></label>
+                <div class="controls col-sm-8">
                     <div class="checkbox">
-                        <label  class="checkbox inline" >
+                        <label >
                             <input type="checkbox" id="transport_https" name="transport_https"  value="https" <%if(api.transport_https=="checked"){%>checked<%}%>/>
 
                             <%=i18n.localize("httpsTransport")%>
                         </label>
-                        <label  class="checkbox inline " >
+                    </div>
+                    <div class="checkbox">
+                        <label   >
                             <input type="checkbox"  id="transport_http" name="transport_http"  value="http" <%if(api.transport_http=="checked"){%>checked<%}%>/>
-                         
+
                             <%=i18n.localize("httpTransport")%>
                         </label>
-                        <a class="icon-question-sign help_popup" help_data="http_help"></a>
-                        <p id="http_help" class="hide"><%=i18n.localize("httpHelpMsg")%></p>
+                        
                     </div>
+                <a class="glyphicon glyphicon-question-sign help_popup" help_data="http_help"></a>
+                <p id="http_help" class="hide"><%=i18n.localize("httpHelpMsg")%></p>
                 </div>
-             </div> 
+             </div>
 
             <% if (isSynapseGateway) { %>
-            <div class="control-group">
-                <label class="control-label" for="sequence"><%=i18n.localize("sequence")%>:</label>
+            <div class="form-group">
+                <label class="control-label col-sm-3" for="sequence"><%=i18n.localize("sequence")%>:</label>
 
 
-                <div class="controls">
-                <label class="checkbox">
+                <div class="controls col-sm-8">
+                <div class="checkbox">
+                <label>
                     <input type="checkbox" id="toggleSequence" name="sequence_check" id="sequence_check"
                 <%
                 if((api.inSequence && (!"none".equals(api.inSequence)))|| (api.outSequence && (!"none".equals(api.outSequence)))
                 	|| ( api.faultSequence && (!"none".equals(api.faultSequence)))){ %>
                 checked="checked"<%}%>><%=i18n.localize("sequenceMsg")%>
                 </label>
+                </div>
                 <table class="table table-bordered table-striped" id="seqTable"
                 <% if(!api.inSequence && !api.outSequence && !api.faultSequence){ %>style="display:none"<%}%>>
                     <thead>
@@ -194,17 +202,17 @@
                     </thead>
                         <tr>
                             <td>
-                                <select id="inSequence"  name="inSequence" >
+                                <select id="inSequence"  class="form-control" name="inSequence" >
                                     <option value="none" selected="selected"><%=i18n.localize("none")%></option>
                                 </select>
                             </td>
                             <td>
-                                <select id="outSequence"  name="outSequence">
+                                <select id="outSequence"  class="form-control" name="outSequence">
                                     <option value="none" selected="selected"><%=i18n.localize("none")%></option>
                                 </select>
                             </td>
                             <td>
-                                <select id="faultSequence"  name="faultSequence">
+                                <select id="faultSequence" class="form-control" name="faultSequence">
                                     <option value="none" selected="selected"><%=i18n.localize("none")%></option>
                                 </select>
                             </td>
@@ -216,36 +224,36 @@
 
 
             <!--Response Caching -->
-                <div class="control-group">
-                    <label class="control-label" for="responseCache"><%=i18n.localize("responseCache")%>:</label>
-                      <div class="controls"> 
+                <div class="form-group">
+                    <label class="control-label col-sm-3" for="responseCache"><%=i18n.localize("responseCache")%>:</label>
+                      <div class="controls col-sm-8">
                        <select class="select required" id="responseCache" name="responseCache">
                             <option value="disabled" <%if(api.responseCache != "Enabled"){%> selected="selected" <%}%>><%=i18n.localize("disabled")%></option>
                             <option value="enabled" <%if(api.responseCache=="Enabled"){%> selected="selected" <%}%>><%=i18n.localize("enabled")%></option>
-                        </select>                                
-                        <a class="icon-question-sign help_popup" help_data="cache_help"></a>
-                        <p id="cache_help" class="hide"><%=i18n.localize("cacheHelpMsg")%></p>           
+                        </select>
+                        <a class="glyphicon glyphicon-question-sign help_popup" help_data="cache_help"></a>
+                        <p id="cache_help" class="hide"><%=i18n.localize("cacheHelpMsg")%></p>
                      </div>
                 </div>
-                <div class="control-group" id="cacheTimeout"  <%if(api.responseCache != "Enabled"){%> style="display:none;" <%}%>>
-                    <label class="control-label" for="cacheTimeout"><%=i18n.localize("cacheTimeout")%>:<span class="requiredAstrix">*</span></label>
-                    <div class="controls">
-                        <input type="text" style="text-align:right;" class="input-small required validInput number" id="cacheTimeout" name="cacheTimeout" value=<%=api.cacheTimeout%>>
+                <div class="form-group" id="cacheTimeout"  <%if(api.responseCache != "Enabled"){%> style="display:none;" <%}%>>
+                    <label class="control-label col-sm-3" for="cacheTimeout"><%=i18n.localize("cacheTimeout")%>:<span class="requiredAstrix">*</span></label>
+                    <div class="controls col-sm-8">
+                        <input type="text" style="text-align:right;" class="form-control input-small required validInput number" id="cacheTimeout" name="cacheTimeout" value=<%=api.cacheTimeout%>>
                     </div>
                 </div>
             <!--Response Caching End -->
 
-                <div class="control-group">
+                <div class="form-group">
 		        <% mod = jagg.module("api");
 		 	result = mod.isMultipleTenantsAvailable();
 	         	var isMultipleTenantsAvailable = result.status;
 			if(api.visibility == "public" && isMultipleTenantsAvailable == true){%>
-                        <label class="control-label" for="subscriptions"><%=i18n.localize("subscriptionsTitle")%>:</label>
-                        <div class="controls">
+                        <label class="control-label col-sm-3" for="subscriptions"><%=i18n.localize("subscriptionsTitle")%>:</label>
+                        <div class="controls col-sm-8">
                         	<% if(api.visibility!="public") {%>
                            	<select class="select required" id="subscriptions" name="subscriptions" >
                                	<option value="current_tenant"  selected="selected"><%=i18n.localize("availableToCurrentTenant")%></option>
-                           	</select> 
+                           	</select>
                         	<%} else {%>
                             	<select class="select required" id="subscriptions" name="subscriptions" >
                                	<option value="current_tenant" <%if(api.subscriptionAvailability=="current_tenant"){%> selected="selected" <%}%> ><%=i18n.localize("availableToCurrentTenant")%></option>
@@ -253,14 +261,14 @@
                                 	<% if(!(enableSelectedTenantSubscription == 'false')) {%>
                                 	<option value="specific_tenants" <%if(api.subscriptionAvailability=="specific_tenants"){%> selected="selected" <%}%> ><%=i18n.localize("availableToSpecificTenants")%></option>
                                 	<% } %>
-                            	</select> 
-                        	<%}%>     
-                            	<a class="icon-question-sign help_popup" help_data="subscriptions_help"></a>
+                            	</select>
+                        	<%}%>
+                            	<a class="glyphicon glyphicon-question-sign help_popup" help_data="subscriptions_help"></a>
                            	<div id="subscriptions_help" class="hide"><%=i18n.localize("subscriptionHelpMsg")%></div>
                        </div>
                        <% } %>            
                 <br/>
-                    <div class="control-group" id="tenantsDiv" <%if(api.subscriptionAvailability!="specific_tenants"){%>style="display: none;"<%}%>>
+                    <div class="form-group" id="tenantsDiv" <%if(api.subscriptionAvailability!="specific_tenants"){%>style="display: none;"<%}%>>
                         <label class="control-label" for="tenants" id="tenantLabel" name="tenantLabel">
                             <%=i18n.localize("tenants")%>:<span class="requiredAstrix">*</span>
                         </label>
@@ -275,9 +283,10 @@
     </fieldset>
 
        <fieldset>
-    	<legend class="legend-with-hidden-info js_hidden_section_title">Gateway Environments<i class="icon-chevron-right icon-keys"></i></legend>
+    	<legend class="legend-with-hidden-info js_hidden_section_title">Gateway Environments<i class="glyphicon glyphicon-chevron-right icon-keys"></i></legend>
     	 <div id="gatewayEnvironments" style="display: none;">
     	<!--legend>Environments</legend-->
+
 
         <table class="table table-bordered table-striped">
         	 <thead>
@@ -336,32 +345,32 @@
                     </script>
                 </fieldset>
     <fieldset>
-	<legend class="legend-with-hidden-info js_hidden_section_title"><%=i18n.localize("businessInformationTitle")%> <i class="icon-chevron-right icon-keys"></i></legend>
+	<legend class="legend-with-hidden-info js_hidden_section_title"><%=i18n.localize("businessInformationTitle")%> <i class="glyphicon glyphicon-chevron-right icon-keys"></i></legend>
 	 <div style="display: none">
 	<!--legend>Business Information</legend-->
                                
-                    <div class="control-group">
-                        <label class="control-label" for="bizOwner"><%=i18n.localize("busiOwner")%>:</label>
-                        <div class="controls">
-                             <input type="text" class="input-xlarge validInput" id="bizOwner" name="bizOwner" value="<%=api.bizOwner%>"/>
+                    <div class="form-group">
+                        <label class="control-label col-sm-3" for="bizOwner"><%=i18n.localize("busiOwner")%>:</label>
+                        <div class="controls col-sm-8">
+                             <input type="text" class=" validInput form-control businessInfo" id="bizOwner" name="bizOwner" value="<%=api.bizOwner%>"/>
                         </div>
                     </div>
-                     <div class="control-group">
-                        <label class="control-label" for="bizOwnerMail"><%=i18n.localize("busiOwnerMail")%>:</label>
-                        <div class="controls">
-                             <input type="text" class="input-xlarge email" id="bizOwnerMail" name="bizOwnerMail" value="<%=api.bizOwnerMail%>"/>
+                     <div class="form-group">
+                        <label class="control-label col-sm-3" for="bizOwnerMail"><%=i18n.localize("busiOwnerMail")%>:</label>
+                        <div class="controls col-sm-8">
+                             <input type="text" class=" email form-control businessInfo" id="bizOwnerMail" name="bizOwnerMail" value="<%=api.bizOwnerMail%>"/>
                         </div>
                     </div>
-                     <div class="control-group">
-                        <label class="control-label" for="techOwner"><%=i18n.localize("techOwner")%>:</label>
-                        <div class="controls">
-                             <input type="text" class="input-xlarge validInput" id="techOwner" name="techOwner" value="<%=api.techOwner%>"/>
+                     <div class="form-group">
+                        <label class="control-label col-sm-3" for="techOwner"><%=i18n.localize("techOwner")%>:</label>
+                        <div class="controls col-sm-8">
+                             <input type="text" class=" validInput form-control businessInfo" id="techOwner" name="techOwner" value="<%=api.techOwner%>"/>
                         </div>
                     </div>
-                     <div class="control-group">
-                        <label class="control-label" for="techOwnerMail"><%=i18n.localize("techOwnerMail")%>:</label>
-                        <div class="controls">
-                             <input type="text" class="input-xlarge email" id="techOwnerMail" name="techOwnerMail" value="<%=api.techOwnerMail%>"/>
+                     <div class="form-group">
+                        <label class="control-label col-sm-3" for="techOwnerMail"><%=i18n.localize("techOwnerMail")%>:</label>
+                        <div class="controls col-sm-8">
+                             <input type="text" class=" email form-control businessInfo" id="techOwnerMail" name="techOwnerMail" value="<%=api.techOwnerMail%>"/>
                         </div>
                     </div>
                  </div>
@@ -382,35 +391,43 @@
                 <div class="form-actions" style="display:none" id="saveMessage">
                     <div class="btn loadingButton">Saving API. Please wait..</div>
                 </div>
+                <br/>
+                <br/>
                 <div class="form-actions" id="saveButtons"> 
 
                     <button class="btn btn-default has-spinner" id="save_api"><%=i18n.localize("save")%></button>
                     <%if(outputs.isPermitted){%> <a class="btn btn-primary has-spinner" id="publish_api">Save & Publish</a>  <%}%>
 
-                    <input type="reset" class="btn" value="<%=i18n.localize("cancel")%>" onclick="javascript:window.location.href='./'" />                                         
+                    <input type="reset" class="btn btn-default" value="<%=i18n.localize("cancel")%>" onclick="javascript:window.location.href='./'" />
                 </div>
             </form>
 
         </div>
 
-        <div id="publish-success" class="modal hide fade" tabindex="-1" role="dialog" aria-hidden="true">
-            <div class="modal-header">
-            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-            <h3>Congratulations</h3>
-            </div>
-            <div class="modal-body">
+        <div id="publish-success" class="modal fade">
+          <div class="modal-dialog">
+            <div class="modal-content">
+              <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h3>Congratulations</h3>
+              </div>
+              <div class="modal-body">
                 <label class="publish-label">You have successfully published your API : <%=api.name%>-<%=api.version%></label>
                 </br>
                 <label class="publish-label">What's Next</label>
-            </div>
-            <div class="modal-footer successMsgFooter">
+              </div>
+              <div class="modal-footer successMsgFooter">
                 <div class="pull-right">
-                <a href="<%= jagg.url("/info?"+ apiUrlId ) %>" class="btn btn-primary">Go to Overview</a>
-                <a href='javascript:void(0)' id="goToStore-btn" class="btn btn-default">Go to API Store</a>
                 <button id="editAPI-btn" class="btn btn-default" data-dismiss="modal" aria-hidden="true">Keep Editing API</button>
+                <a href='javascript:void(0)' id="goToStore-btn" class="btn btn-default">Go to API Store</a>
+                <a href="<%= jagg.url("/info?"+ apiUrlId ) %>" class="btn btn-primary">Go to Overview</a>
                 </div>
-            </div>
-        </div>
+              </div>
+            </div><!-- /.modal-content -->
+          </div><!-- /.modal-dialog -->
+        </div><!-- /.modal -->
+
+
     </div>
     </div>
     </div>
@@ -462,11 +479,11 @@
                 <span class=" resource-method resource-method-{{ @key }}">{{ @key }}</span>
             </td>
             <td class="resource_expand"><a class="resource-path">{{ path }}</a></td>    
-            <td  width="99%"><span class="operation-summary change_summary" data-path="$.paths.{{ path }}.{{@key}}" data-attr="summary" >{{ summary }}</span></td>
+            <td><span class="operation-summary change_summary" data-path="$.paths.{{ path }}.{{@key}}" data-attr="summary" >{{ summary }}</span></td>
             <td><a class="operation-summary auth_type_select"  data-type="select" data-path="$.paths.{{ path }}.{{@key}}" data-attr="x-auth-type" data-value="{{ x-auth-type }}"></a></td>        
             <td><a class='operation-summary throttling_select'  data-type="select" data-path="$.paths.{{ path }}.{{@key}}" data-attr="x-throttling-tier">{{ x-throttling-tier }}</a></td>
             <td><a class="operation-summary scope_select"  data-type="select" data-path="$.paths.{{ path }}.{{@key}}" data-attr="x-scope">{{ x-scope }}</a></td>        </tr>
-        <tr><td colspan="6" class="resource_body hide" data-path="$.paths.{{ path }}.{{@key}}"></td></tr>
+        <tr><td colspan="6" class="resource_body " data-path="$.paths.{{ path }}.{{@key}}"></td></tr>
     {{/each}}
 {{/each}}
 </table>                           
@@ -486,7 +503,7 @@
             {{/each}}
         </ul>
     {{/if}}
-        <a id="define_scopes" class="pointer btn"><i class="icon-plus-sign"></i>&nbsp;Add Scopes</a>
+        <a id="define_scopes" class="pointer btn"><i class="glyphicon glyphicon-plus-sign"></i>&nbsp;Add Scopes</a>
     </div>
 </script>
 
@@ -683,7 +700,10 @@
     });
 </script>
 
-<div  id="define_scope_modal" class="modal hide fade">
+
+<div  id="define_scope_modal" class="modal fade">
+    <div class="modal-dialog">
+    <div class="modal-content">
     <div class="modal-header">
     <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
     <h3>Define Scope</h3>
@@ -693,25 +713,25 @@
         <div class="control-group">
             <label class="control-label" for="scopeKey">Scope Key<span class="requiredAstrix">*</span></label>
             <div class="controls">
-            <input type="text" id="scopeKey" name="scopeKey" class="required" placeholder="Eg: api_name_read">
+            <input type="text" id="scopeKey" name="scopeKey" class="form-control required" placeholder="Eg: api_name_read">
             </div>
         </div>
         <div class="control-group">
             <label class="control-label" for="scopeName">Scope Name<span class="requiredAstrix">*</span></label>
             <div class="controls">
-            <input type="text" id="scopeName" name="scopeName"  class="required" placeholder="Eg: Read My Data">
+            <input type="text" id="scopeName" name="scopeName"  class="form-control required" placeholder="Eg: Read My Data">
             </div>
         </div>
         <div class="control-group">
             <label class="control-label" for="scopeRoles">Roles</label>
             <div class="controls">
-            <input type="text" id="scopeRoles" class="" placeholder="Eg: role1,role2,role3" data-role="tagsinput" />
+            <input type="text" id="scopeRoles" class="form-control" placeholder="Eg: role1,role2,role3" data-role="tagsinput" />
             </div>
         </div>
         <div class="control-group">
             <label class="control-label" for="inputEmail">Description</label>
             <div class="controls">
-            <textarea id="scopeDescription" placeholder="Eg: This scope will group all the administration APIs"></textarea>
+            <textarea id="scopeDescription" class="form-control" placeholder="Eg: This scope will group all the administration APIs"></textarea>
             </div>
         </div>        
     </form>
@@ -720,6 +740,8 @@
     <div id="res" class="hide" style="color:red;float:left"></div>
     <a class="btn" data-dismiss="modal">Close</a>
     <a class="btn btn-primary" id="scope_submit">Add Scope</a>
+    </div>
+    </div>
     </div>
 </div>
 
