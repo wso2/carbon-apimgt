@@ -1,17 +1,10 @@
-
-
-<div class="row-fluid>
-
+<div class="row-fluid">
     <div class="span10">
-    {{#if fields.description.value}}
-        <div class="well" id="apiView">{{fields.description.value}}
-        </div>
-    {{/if}}
         <table class="table table-bordered">
             <tbody>
             <tr>
-                <td class="span3">{{t "context"}}</td>
-                <td id="inUrl">{{context}}</td>
+                <td class="span3">{{t "Context"}}</td>
+                <td id="inUrl">{{api.context}}</td>
             </tr>
            {{#if prodEndpoint.url}} 
 	            <tr>
@@ -33,31 +26,31 @@
             {{/if}}
             
 
-            {{#if wsdl}}
+            {{#if api.wsdl}}
             <tr>
                 <td>{{t "WSDL"}}</td>
-                <td id="wsdl">{{wsdl}}</td>
+                <td id="wsdl">{{api.wsdl}}</td>
             </tr>
             {{/if}}
-            {{#if wadl}}
+            {{#if api.wadl}}
             <tr>
                 <td>{{t "WADL"}}</td>
-                <td id="wsdl">{{wadl}}</td>
+                <td id="wsdl">{{api.wadl}}</td>
             </tr>
             {{/if}}
             <tr>
-                <td>{{t "Lastupdated"}}</td>
-                <td id="inUpdated" class="dateFull">{{lastUpdatedDate}}</td>
+                <td>{{t "Last Updated"}}</td>
+                <td id="inUpdated" class="dateFull">{{api.lastUpdated}}</td>
             </tr>
             <tr>
                 <td>{{t "Tier Availability"}}</td>
-                <td id="tierAvb">{{tier}}</td>
+                <td id="tierAvb">{{api.availableTiers}}</td>
             </tr>
             <tr>
                 <td>{{t "Default API Version"}}</td>
                 <td id="defaultAPIVersion">
-                    {{#if isDefault}}
-                        {{version}}
+                    {{#if api.hasDefaultVersion}}
+                        {{api.currentDefaultVersion}}
                     {{else}}
                         {{t "None"}}
                     {{/if}}
