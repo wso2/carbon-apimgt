@@ -1504,3 +1504,5 @@ ol.linenums li {
 .simple-space-maker-inline .btn{
     margin-top:-10px;
 }
+.white-bg {background-color: #fff;}
+.asset-properties{width: 100%; background-color:#002a80;  }
