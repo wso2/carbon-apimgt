@@ -124,7 +124,7 @@
             <div id="swaggerUpload" class="modal hide fade" tabindex="-1" role="dialog" aria-hidden="true">
                 <div class="modal-header">
                 <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-                <h3 id="swaggerUploadLabel">Import Swagger 2 Definition</h3>                    
+                <h3 id="swaggerUploadLabel">Import API Definition</h3>                    
                 </div>
                 <div class="modal-body">
                     <div id="swagger_help" class="alert alert-danger hide" role="alert">
@@ -138,7 +138,7 @@
                     <div class="form-inline">
                        <div class="control-group toggleRadios">
                           <div class="controls">
-                              <label class="control-label sub-select-label">Upload swagger definition as</label>
+                              <label class="control-label sub-select-label">Upload API definition as</label>
                               <label class="radio sub-labels"><input type="radio" class="select-file" name="import-definition" id="" value="swagger_import_file"/>Swagger File</label>
                               <label class="radio sub-labels urlSelect-label"><input type="radio" class="select-url" name="import-definition" value="swagger_import_url"/>Swagger Url</label>
                           </div>
