@@ -16,3 +16,32 @@
 .multiselect-container>li>a> .checkbox{
     padding-top:5px;
 }
+
+/* hacks */
+.cu-option {
+    padding-right:15px;
+    padding-left: 15px;
+}
+
+.api-implement-type {
+    cursor:pointer;
+}
+
+table.opt-selectable {
+    width:100%;
+}
+
+table.opt-selectable td {
+    border-bottom: 1px solid #e4e4e4;
+    padding-bottom:10px;
+}
+.collapse-icon-wrp{cursor:pointer; color: #fff; background-color: #333; padding:5px 10px; height: 50px; width: 50px; margin-right: 15px;}
+.collapse-icon-wrp:hover{color: #fff; background-color: #237BD5;}
+
+.icon-wrp{padding:5px 20px; height: 50px; width: 50px; margin-right: 15px;}
+#jsonform-1-elt-production_endpoints, #jsonform-1-elt-sandbox_endpoints,.jsonform-9-elt-production_endpoints
+{width: 100%;
+    background-color: #fff;
+    border: 1px solid #E0E0E0;
+    padding: 6px 0; margin-top: -10px;}
+

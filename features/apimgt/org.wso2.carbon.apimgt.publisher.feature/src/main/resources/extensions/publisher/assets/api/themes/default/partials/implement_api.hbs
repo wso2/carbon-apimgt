@@ -52,12 +52,17 @@
 	        <span id="addErrorSpan"></span>
 	    </div>
 	            <div class="api-implement-type" value="#managed-api">
-	                <div class="span1">
-	                    <i class="fa fa-cogs fa-3x"></i>
-	                </div>
 	                <div class="span11">
-	                    <h4>Managed API</h4>
-	                    <p>Provide endpoints of the production API and sandbox API to be managed.</p>
+						<table class="opt-selectable">
+							<tr>
+								<td class="collapse-icon-wrp"><i class="fa fa-plus-circle fa-2x"></i></td>
+								<td class="icon-wrp"><i class="fa fa-cogs fa-3x"></i></td>
+								<td>
+                                    <h4>Managed API</h4>
+                                    <p>Provide endpoints of the production API and sandbox API to be managed.</p>
+								</td>
+							</tr>
+						</table>
 	                </div>
 	            </div>
 
@@ -68,8 +73,8 @@
 
 	                <fieldset class="implementation_method_endpoint_manage implementation_method">
 	                <div class="form-group">
-	                    <label class="custom-form-label col-lg-2 col-md-2 col-sm-12 col-xs-12" for="endpoint_type">Endpoint Type:<span class="requiredAstrix">*</span></label>
-	                    <div class="custom-form-right col-lg-5 col-md-8 col-sm-9 col-xs-10">
+	                    <label class="custom-form-label col-lg-2  " for="endpoint_type">Endpoint Type:<span class="requiredAstrix">*</span></label>
+	                    <div class="custom-form-right col-lg-5  ">
 	                            <select class="select required" id="endpoint_type" name="endpoint_type">
 	                                <option value="http"  selected="selected">HTTP Endpoint</option>
 	                                <option value="address">Address Endpoint</option>
@@ -83,24 +88,24 @@
 	                <input id="endpoint_config" type="hidden" value="" name="endpoint_config">
 	                <div id="endpoint_help" class="hide">
 	                    <div class="form-group">
-	                        <label class="custom-form-label col-lg-2 col-md-2 col-sm-12 col-xs-12" for="">HTTP Endpoint</label>
-	                        <div class="custom-form-right col-lg-5 col-md-8 col-sm-9 col-xs-10">A REST service endpoint based on a URI template</div>
+	                        <label class="custom-form-label col-lg-2  " for="">HTTP Endpoint</label>
+	                        <div class="custom-form-right col-lg-5  ">A REST service endpoint based on a URI template</div>
 	                    </div>
 	                    <div class="form-group">
-	                        <label class="custom-form-label col-lg-2 col-md-2 col-sm-12 col-xs-12" for="">Address Endpoint</label>
-	                        <div class="custom-form-right col-lg-5 col-md-8 col-sm-9 col-xs-10">The direct URL of the service</div>
+	                        <label class="custom-form-label col-lg-2  " for="">Address Endpoint</label>
+	                        <div class="custom-form-right col-lg-5  ">The direct URL of the service</div>
 	                    </div>
 	                    <div class="form-group">
-	                        <label class="custom-form-label col-lg-2 col-md-2 col-sm-12 col-xs-12" for="">WSDL Endpoint</label>
-	                        <div class="custom-form-right col-lg-5 col-md-8 col-sm-9 col-xs-10">The WSDL, service and port</div>
+	                        <label class="custom-form-label col-lg-2  " for="">WSDL Endpoint</label>
+	                        <div class="custom-form-right col-lg-5  ">The WSDL, service and port</div>
 	                    </div>
 	                    <div class="form-group">
-	                        <label class="custom-form-label col-lg-2 col-md-2 col-sm-12 col-xs-12" for="">Failover Group</label>
-	                        <div class="custom-form-right col-lg-5 col-md-8 col-sm-9 col-xs-10">The endpoints that the service tries to connect to in case of a failure. This happens in a round robin manner</div>
+	                        <label class="custom-form-label col-lg-2  " for="">Failover Group</label>
+	                        <div class="custom-form-right col-lg-5  ">The endpoints that the service tries to connect to in case of a failure. This happens in a round robin manner</div>
 	                    </div>
 	                    <div class="form-group">
-	                        <label class="custom-form-label col-lg-2 col-md-2 col-sm-12 col-xs-12" for="">Load Balance</label>
-	                        <div class="custom-form-right col-lg-5 col-md-8 col-sm-9 col-xs-10">The endpoints where the incoming requests are directed to in a round robin manner. They automatically handle fail-over as well</div>
+	                        <label class="custom-form-label col-lg-2  " for="">Load Balance</label>
+	                        <div class="custom-form-right col-lg-5  ">The endpoints where the incoming requests are directed to in a round robin manner. They automatically handle fail-over as well</div>
 	                    </div>
 	                </div>
 
@@ -108,21 +113,21 @@
 	                </div>
 
 	                <div class="form-group">
-	                    <label class="custom-form-label col-lg-2 col-md-2 col-sm-12 col-xs-12" for=""></label>
-	                    <div class="custom-form-right col-lg-5 col-md-8 col-sm-9 col-xs-10 show-more" style="display:block">
+	                    <label class="custom-form-label col-lg-2  " for=""></label>
+	                    <div class="custom-form-right col-lg-5   show-more" style="display:block">
 	                        <a href="#" class="more-options btn btn-default" ref="more-options-endpoints">Show More</a>
 	                    </div>
-	                    <div class="custom-form-right col-lg-5 col-md-8 col-sm-9 col-xs-10 show-less" style="display:none">
+	                    <div class="custom-form-right col-lg-5   show-less" style="display:none">
 	                        <a href="#" class="less-options btn btn-default" ref="less-options-endpoints">Show Less</a>
 	                    </div>
 	                </div>
 	                <div id="more-options-endpoints" style="display:none">
 
 	                    <div class="form-group">
-	                        <label class="custom-form-label col-lg-2 col-md-2 col-sm-12 col-xs-12" for="endpointType">{{t "Endpoint Security Scheme"}}:<span
+	                        <label class="custom-form-label col-lg-2  " for="endpointType">{{t "Endpoint Security Scheme"}}:<span
 	                                class="requiredAstrix">*</span></label>
 
-	                        <div class="custom-form-right col-lg-5 col-md-8 col-sm-9 col-xs-10">
+	                        <div class="custom-form-right col-lg-5  ">
 	                    <select class="select required" id="api-implement-more-security" name="endpointType" >
 	                                <option value="nonsecured" selected="selected">Non Secured</option>
 	                        <option value="secured">Secured</option>
@@ -134,23 +139,23 @@
 	                </div>
 
 	                <div class="form-group" id="api-implement-more-credentials" style="display:none">
-	                    <label class="custom-form-label col-lg-2 col-md-2 col-sm-12 col-xs-12" for="credentials">{{t "Credentials"}}:<span class="requiredAstrix">*</span></label>
-	                        <div class="custom-form-label col-lg-5 col-md-12 col-sm-12 col-xs-12">
+	                    <label class="custom-form-label col-lg-2  " for="credentials">{{t "Credentials"}}:<span class="requiredAstrix">*</span></label>
+	                        <div class="custom-form-label col-lg-5  ">
 	                            <input type="text" class="form-control required validInput" id="epUsername"
 	                                   name="epUsername" value="">
 	                            </div>
 	                        <div class="clearfix"></div><br/>
-	                        <label class="custom-form-label col-lg-2 col-md-2 col-sm-12 col-xs-12" for=""></label>
-	                        <div class="custom-form-label col-lg-5 col-md-12 col-sm-12 col-xs-12">
+	                        <label class="custom-form-label col-lg-2  " for=""></label>
+	                        <div class="custom-form-label col-lg-5  ">
 	                            <input type="password" class="form-control required" id="epPassword"
 	                                   name="epPassword" value="">
 	                        </div>
 	                    </div>
 
 	                 <div class="form-group api_wsdl">
-	                 <label class="custom-form-label col-lg-2 col-md-2 col-sm-12 col-xs-12" for="wsdl">{{t "WSDL"}}:</label>
+	                 <label class="custom-form-label col-lg-2  " for="wsdl">{{t "WSDL"}}:</label>
 
-	                 <div class="custom-form-label col-lg-5 col-md-12 col-sm-12 col-xs-12">
+	                 <div class="custom-form-label col-lg-5  ">
 	                 <div class="input-append">
 	                 <input type="text" class="form-control validInput" id="wsdl" name="wsdl"  value="" />
 
@@ -161,28 +166,28 @@
 	                            <p class="help-block"></p>
 
 	                        </div>
-	                        <div class="custom-form-right col-lg-1 col-md-4 col-sm-3 col-xs-2">
+	                        <div class="custom-form-right col-lg-1  ">
 	                            <button class="btn btn-default check_url_valid" url-type="wsdl" type="button">{{t "Test URI"}}</button>
 	                        </div>
 	                    </div>
 	                    <div class="form-group">
-	                        <label class="custom-form-label col-lg-2 col-md-2 col-sm-12 col-xs-12" for="wadl">{{t "WADL"}}:</label>
+	                        <label class="custom-form-label col-lg-2  " for="wadl">{{t "WADL"}}:</label>
 
-	                        <div class="custom-form-label col-lg-5 col-md-8 col-sm-9 col-xs-10">
+	                        <div class="custom-form-label col-lg-5  ">
 	                 <div class="input-append">
 	                 <input type="text" class="form-control validInput" id="wadl" name="wadl" value="" />
 	                 </div>
 	                 <p class="help-block"></p>
 	                 </div>
-	                        <div class="custom-form-right col-lg-1 col-md-4 col-sm-3 col-xs-2">
+	                        <div class="custom-form-right col-lg-1  ">
 	                            <button class="btn btn-default check_url_valid" type="button">{{t "Test URI"}}</button>
 	                 </div>
 	                </div><!-- more option endpoint -->
 	                    <!--Southboud statistics -->
 	                    <div class="form-group">
-	                        <label class="custom-form-label col-lg-2 col-md-2 col-sm-12 col-xs-12" for="destinationStats">{{t "Destination Stats"}}:</label>
+	                        <label class="custom-form-label col-lg-2  " for="destinationStats">{{t "Destination Stats"}}:</label>
 
-	                        <div class="custom-form-label col-lg-5 col-md-12 col-sm-12 col-xs-12">
+	                        <div class="custom-form-label col-lg-5  ">
 	                            <select class="select required form-control" id="destinationStats" name="destinationStats">
 	                                <option value="disabled"> </option>
 	                                <option value="enabled"> </option>
@@ -213,15 +218,20 @@
 	    </div>
 	  
 
-	                <div class="api-implement-type" value="#prototype">
-	                <div class="span1">
-	                    <i class="fa fa-cog fa-3x" ></i>
-	                </div>
-	                <div class="span11">
-	                    <h4 >Prototype</h4>
-	                    <p>Use the inbuilt javascript engine to prototype the API or provide an endpoint to a prototype API. Inbuilt javascript engine do not have support to prototype SOAP APIs</p>
-	                </div>
-	            </div>
+                        <div class="api-implement-type" value="#prototype">
+                            <div class="span11">
+                                <table class="opt-selectable">
+                                    <tr>
+                                        <td class="collapse-icon-wrp"><i class="fa fa-plus-circle fa-2x"></i></td>
+                                        <td class="icon-wrp"><i class="fa fa-cog fa-3x"></i></td>
+                                        <td>
+                                            <h4>Prototype</h4>
+                                            <p>Use the inbuilt javascript engine to prototype the API or provide an endpoint to a prototype API. Inbuilt javascript engine do not have support to prototype SOAP APIs.</p>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
 
 	            <div class="slideContainer hide" id="prototype">
 	            <div class="well">
@@ -230,7 +240,7 @@
 	                <fieldset>
 	        <legend>Implementation Method</legend>
 	            <div class="form-group">
-	        <label class="custom-form-label col-lg-2 col-md-2 col-sm-12 col-xs-12" for="context">Implementation Method</label>
+	        <label class="custom-form-label col-lg-2  " for="context">Implementation Method</label>
 	                <label class="checkbox-inline">
 	                            <input class="implementation_methods" type="radio" value="inline"
 	                                   name="implementation_methods"> {{t "Inline"}}

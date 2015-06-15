@@ -73,9 +73,9 @@
 						      enctype="multipart/form-data" action="{{url ""}}/apis/assets/{{api.id}}?type=api">
             <legend>Configurations</legend>
             <div class="form-group">
-                <label class="custom-form-label col-lg-2 col-md-2 col-sm-12 col-xs-12">Make this default version</label>
+                <label class="custom-form-label col-lg-2  ">Make this default version</label>
 
-                <div class="custom-form-right col-lg-5 col-md-8 col-sm-8 col-xs-12">
+                <div class="custom-form-right col-lg-5 ">
 											<input type="checkbox" class="default_version_check" id="default_version"
 											       name="default_version" value="default_version"
 												   {{#if api.isDefaultVersion}}checked{{/if}}/>
@@ -96,9 +96,9 @@
 										</div>
 									</div>
 								<div class="form-group">
-										<label class="custom-form-label col-lg-2 col-md-2 col-sm-12 col-xs-12" for="tier">{{t "Tier Availability"}}:<span
+										<label class="custom-form-label col-lg-2  " for="tier">{{t "Tier Availability"}}:<span
 												class="requiredAstrix">*</span></label>
-									<div class="custom-form-right col-lg-5 col-md-8 col-sm-8 col-xs-12">
+									<div class="custom-form-right col-lg-5 ">
 										<select id="tier" name="tier" class="multiselect selected hide required"
 										        multiple="multiple">
 											{{#each api.filteredTiers}}
@@ -111,8 +111,8 @@
 									</div>
 								</div>
             <div class="form-group transport-styles">
-                <label class="custom-form-label col-lg-2 col-md-2 col-sm-12 col-xs-12" for="transports">{{t "Transports"}}:<span class="requiredAstrix">*</span></label>
-                <div class="custom-form-right col-lg-5 col-md-8 col-sm-8 col-xs-12">
+                <label class="custom-form-label col-lg-2  " for="transports">{{t "Transports"}}:<span class="requiredAstrix">*</span></label>
+                <div class="custom-form-right col-lg-5 ">
                     <div class="checkbox">
                         <label class="checkbox inline">
                             <input type="checkbox" id="transport_http" name="transport_http"
@@ -131,8 +131,8 @@
             </div>
             {{#if api.isSynapseGateway}}
                 <div class="form-group">
-                    <label class="custom-form-label col-lg-2 col-md-2 col-sm-12 col-xs-12" for="sequence">{{t "Sequences"}}:</label>
-                    <div class="custom-form-right col-lg-5 col-md-8 col-sm-8 col-xs-12">
+                    <label class="custom-form-label col-lg-2  " for="sequence">{{t "Sequences"}}:</label>
+                    <div class="custom-form-right col-lg-5 ">
 												<input type="checkbox" id="toggleSequence" name="sequence_check"
 												       id="sequence_check"
 													{{#if api.inSequence}}
@@ -182,8 +182,8 @@
 								{{/if}}
 								<!--Response Caching -->
             <div class="form-group">
-                <label class="custom-form-label col-lg-2 col-md-2 col-sm-12 col-xs-12" for="responseCache">{{t locale.responseCache}}:</label>
-                <div class="custom-form-right col-lg-5 col-md-8 col-sm-8 col-xs-12">
+                <label class="custom-form-label col-lg-2  " for="responseCache">{{t locale.responseCache}}:</label>
+                <div class="custom-form-right col-lg-5 ">
 										<select class="select required" id="responseCache" name="responseCache">
 											<option value="disabled" {{#if api.responseCache.disabled}}checked{{/if}}>{{t
 											locale.disabled}}</option>
@@ -197,11 +197,11 @@
 								</div>
 								<div class="form-group" id="cacheTimeout" {{#unless api.responseCache
 								.enabled}}style="display:none;"{{/unless}}>
-									<label class="custom-form-label col-lg-2 col-md-2 col-sm-12 col-xs-12"
+									<label class="custom-form-label col-lg-2  "
 										   for="cacheTimeout">{{t locale.cacheTimeout}}:<span
 											class="requiredAstrix">*</span></label>
 
-									<div class="custom-form-right col-lg-5 col-md-8 col-sm-8 col-xs-12">
+									<div class="custom-form-right col-lg-5 ">
 										<input type="text" style="text-align:right;"
 										       class="form-control required validInput number" id="cacheTimeout"
 										       name="cacheTimeout" value={{api.cacheTimeout}}>
@@ -212,9 +212,9 @@
 								<div class="form-group">
 									{{#if api.publicVisibility}}
 										{{#if api.isMultipleTenantsAvailable}}
-											<label class="custom-form-label col-lg-2 col-md-2 col-sm-12 col-xs-12" for="subscriptions">{{t "Subscriptions"}}:</label>
+											<label class="custom-form-label col-lg-2  " for="subscriptions">{{t "Subscriptions"}}:</label>
 
-											<div class="custom-form-right col-lg-5 col-md-8 col-sm-8 col-xs-12">
+											<div class="custom-form-right col-lg-5 ">
 												{{#if api.publicVisibility}}
 													<select class="select required" id="subscriptions" name="subscriptions">
 														<option value="current_tenant"
@@ -245,11 +245,11 @@
 									<br/>
 										<div class="form-group" id="tenantsDiv" {{#unless api
 								.subscriptionAvailabilitySpecificTenants}}style="display: none;"{{/unless}}>
-									<label class="custom-form-label col-lg-2 col-md-2 col-sm-12 col-xs-12" for="tenants" id="tennatLabel" name="tennatLabel">
+									<label class="custom-form-label col-lg-2  " for="tenants" id="tennatLabel" name="tennatLabel">
 										{{t "Tenants"}}:<span class="requiredAstrix">*</span>
 									</label>
 
-									<div class="custom-form-right col-lg-5 col-md-8 col-sm-8 col-xs-12">
+									<div class="custom-form-right col-lg-5 ">
 										<input type="text" class="input required"
 										       id="tenants" name="tenants" value="{{api.subscriptionTenants}}"/>
 
@@ -324,29 +324,29 @@
 							<!--legend>Business Information</legend-->
 
 							<div class="form-group">
-								<label class="custom-form-label col-lg-2 col-md-2 col-sm-12 col-xs-12" for="bizOwner">{{t "Business Owner"}}:</label>
-								<div class="custom-form-right col-lg-5 col-md-8 col-sm-8 col-xs-12">
+								<label class="custom-form-label col-lg-2  " for="bizOwner">{{t "Business Owner"}}:</label>
+								<div class="custom-form-right col-lg-5 ">
 									<input type="text" class="form-control validInput" id="bizOwner" name="bizOwner"
 									       value="{{api.bizOwner}}"/>
 								</div>
 							</div>
 							<div class="form-group">
-								<label class="custom-form-label col-lg-2 col-md-2 col-sm-12 col-xs-12" for="bizOwnerMail">{{t "Business Owner Email"}} :</label>
-								<div class="custom-form-right col-lg-5 col-md-8 col-sm-8 col-xs-12">
+								<label class="custom-form-label col-lg-2  " for="bizOwnerMail">{{t "Business Owner Email"}} :</label>
+								<div class="custom-form-right col-lg-5 ">
 									<input type="text" class="form-control email" id="bizOwnerMail" name="bizOwnerMail"
 									       value="{{api.bizOwnerMail}}"/>
 								</div>
 							</div>
 							<div class="form-group">
-								<label class="custom-form-label col-lg-2 col-md-2 col-sm-12 col-xs-12" for="techOwner">{{t "Technical  Owner"}} :</label>
-								<div class="custom-form-right col-lg-5 col-md-8 col-sm-8 col-xs-12">
+								<label class="custom-form-label col-lg-2  " for="techOwner">{{t "Technical  Owner"}} :</label>
+								<div class="custom-form-right col-lg-5 ">
 									<input type="text" class="form-control validInput" id="techOwner" name="techOwner"
 									       value="{{api.techOwner}}"/>
 								</div>
 							</div>
 							<div class="form-group">
-								<label class="custom-form-label col-lg-2 col-md-2 col-sm-12 col-xs-12" for="techOwnerMail">{{t "Technical Owner Email"}} :</label>
-								<div class="custom-form-right col-lg-5 col-md-8 col-sm-8 col-xs-12">
+								<label class="custom-form-label col-lg-2  " for="techOwnerMail">{{t "Technical Owner Email"}} :</label>
+								<div class="custom-form-right col-lg-5 ">
 									<input type="text" class="form-control email" id="techOwnerMail" name="techOwnerMail"
 									       value="{{api.techOwnerMail}}"/>
 								</div>

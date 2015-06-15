@@ -196,7 +196,7 @@ jsonform.fieldTemplate = function(inner) {
     '<%= (node.disabled ? " jsonform-disabled" : "") %>' +
     '">' +
     '<% if (node.title && !elt.notitle) { %>' +
-      '<label class="custom-form-label col-lg-2 col-md-2 col-sm-12 col-xs-12" for="<%= node.id %>"><%= node.title %></label>' +
+      '<label class="custom-form-label col-lg-2 " for="<%= node.id %>"><%= node.title %></label>' +
     '<% } %>' +
     '<div>' +
       '<% if (node.prepend || node.append) { %>' +
@@ -335,7 +335,7 @@ jsonform.elementTypes = {
   },
   'endpoint':{
     'template':
-      '<div class="custom-form-label col-lg-5 col-md-12 col-sm-12 col-xs-12">'+
+      '<div class="custom-form-label col-lg-5">'+
       '<input type="text" ' +
       '<%= (fieldHtmlClass ? "class=\'" + fieldHtmlClass + "\' " : "") %>' +
       ' class="form-control validateEndpoints" '+
@@ -348,7 +348,7 @@ jsonform.elementTypes = {
       ' />'+
       '<p class="help-block">E.g.,: http://appserver/resource</p>'+
       '</div>'+
-      '<div class="custom-form-right col-lg-2 col-md-4 col-sm-3 col-xs-2">'+
+      '<div class="custom-form-right col-lg-2">'+
       '<button class="btn btn-success advance_endpoint_config" ep-config-data="{}" type="button" field-name="<%= node.name %>">Advanced Options</button>'+
       '<button class="btn btn-default check_url_valid" type="button" >Test</button>'+
       '</div>',
