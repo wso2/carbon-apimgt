@@ -618,14 +618,18 @@ APIDesigner.prototype.add_resource = function(resource, path){
 };
 
 APIDesigner.prototype.edit_swagger = function(){
-    $("body").addClass("modal-open");
+    //$("body").addClass("modal-open");
+    //var editor = $("#swaggerEditer").remove();
+    //$('body').append(editor);
+    $(".content-data.row").hide();
     $("#swaggerEditer").append('<iframe id="se-iframe"  style="border:0px;"background: #4a4a4a; width="100%" height="100%"></iframe>');    
     document.getElementById('se-iframe').src = $("#swaggerEditer").attr("editor-url");
     $("#swaggerEditer").fadeIn("fast");
 };
 
 APIDesigner.prototype.close_swagger_editor = function(){
-    $("body").removeClass("modal-open");
+    //$("body").removeClass("modal-open");
+    $(".content-data.row").show();
     $("#se-iframe").remove();
     $("#swaggerEditer").fadeOut("fast");
 };
