@@ -14,8 +14,8 @@
     </div>
     <div class="asset-details-header ">
         <!-- aset details -->
-        <div class="col-xs-12 col-sm-12 col-md-5 col-lg-5 white-bg">
-            <div class=" details-image white-bg">
+        <div class="col-xs-12 col-sm-12 col-md-5 col-lg-12 white-bg">
+            <div class=" col-xs-12 col-sm-12 col-md-5 col-lg-2 white-bg">
 
                 {{#if api.thumbnailurl}}
                     <img src='{{api.thumbnailurl}}' class="img-responsive"/>
@@ -24,7 +24,7 @@
                          class="img-responsive"/>
                 {{/if}}
             </div>
-            <div class="details-container">
+            <div class="col-xs-12 col-sm-12 col-md-5 col-lg-8 ">
                 <div class="col-lg-9">
                     <h4 class="margin-none">{{t "Your rating:"}}
                         <span class="asset-rating">
@@ -40,7 +40,7 @@
             </div>
         </div>
         <!-- end of asset details-->
-    </div>
+
     <!--<div class="white-bg asset-details-wrapper ">-->
         <!--<div class="white-bg padding-right-double padding-left-double">-->
             <!--<table class='table'>-->
@@ -70,8 +70,9 @@
         <!--</div>-->
     <!--</div>-->
     {{#if showSubscribe}}
-        <div class='col-lg-12 well appStyleFix'>
-            <div class="col-lg-5">
+
+        <div class='col-lg-12 border-top panel appStyleFix'>
+            <div class="col-lg-2">
                 <label><strong>Applications</strong></label>
                 <select id='application-list' class="span12">
                     {{#unless subscribedToDefault}}
@@ -85,19 +86,16 @@
                     </optgroup>
                 </select>
             </div>
-            <div class="col-lg-4">
+            <div class="col-lg-2">
                 <label><strong>Tiers</strong></label>
                 <select id="tiers-list" name="tiers-list" class="span12">
                     {{#if tiers}}
                         {{#each tiers}}
                             <option value="{{this}}">{{this}}</option>
                         {{/each}}{{/if}}
-		                    
                 </select>
             </div>
-            <div class="col-lg-3">
-                <label>&nbsp;</label>
-
+            <div class="col-lg-1">
                 <div class="simple-space-maker">
                     <button onclick="triggerSubscribe()" id="subscribe-button"
                             class="btn btn-primary span12" {{#unless tiersAvailable}}
@@ -111,12 +109,13 @@
                 </div>
             </div>
         </div>
+    </div>
     {{/if}}
     <input type="hidden" id="apiname" value="{{api.name}}">
     <input type="hidden" id="version" value="{{api.version}}">
     <input type="hidden" id="provider" value="{{api.provider}}">
 
-    <div class="assetp-properties margin-top-double">
+    <div class="asset-properties margin-top-double float-left">
         <ul class='nav nav-tabs'>
             <li><a href='#api-overview'>{{t "Overview"}}</a></li>
             <li><a href='#api-docs'>{{t "Documentation"}}</a></li>

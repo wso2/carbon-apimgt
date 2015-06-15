@@ -47,3 +47,97 @@ a:hover, a:focus{
   -o-transition: border-color ease-in-out .15s, box-shadow ease-in-out .15s;
   transition: border-color ease-in-out .15s, box-shadow ease-in-out .15s;
   }
+.white-bg {background-color: #fff;}
+.asset-properties{ background-color: #fff; padding: 0 20px;}
+.asset-details-header { background-color: blue;}
+textarea{width :600px;}
+.panel {
+    margin-bottom: 189px;
+    background-color: #fff;
+    border: 0px solid transparent;
+    border-radius: 0px;
+    -webkit-box-shadow: 0 1px 1px rgba(0, 0, 0, .05);
+    box-shadow:none;}
+
+button, input, select, textarea {
+    border: 1px solid #E0E0E0;
+    margin-top: 10px;
+    padding: 5px;
+}
+
+.btn.active, .btn:active {
+    background-image: none;
+    outline: 0;
+    -webkit-box-shadow: none;
+    box-shadow: none;
+}
+.btn.hover, .btn:hover {
+    color: #fff;
+}
+.nav-tabs > li > a:hover {
+    color: #fff;
+}
+.nav-tabs > li > a:active {
+    color: #fff;
+}
+p {
+    margin: 0 0 3px;
+}
+.tab-pane {
+    display: none;
+    margin-top: 25px;
+}
+.btn-tab{
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 1.42857143;
+    text-align: center;
+    white-space: nowrap;
+    -ms-touch-action: manipulation;
+    /* touch-action: manipulation; */
+    cursor: pointer;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+.input-xxlarge{width: 300px; background-color: #FCFCFC;}
+.border-top{border-top:0px solid #E0E0E0;  margin: 15px 15px 30px 15px; width: 98%;  }
+legend {
+    padding-top: 10px;
+    text-transform: uppercase;
+}
+.action-title {
+    padding: 8px 2px 2px 5px ;
+    color: #fff ;
+}
+.action-title a{
+    padding: 8px 2px 2px 5px ;
+    color: #fff ;
+}
+
+.action-wrapper {
+    padding: 8px 2px 2px 5px !important;
+    color: #fff !important;
+}
+.action-wrapper a{
+    padding: 8px 2px 2px 5px !important;
+    color: #fff !important;
+}
+.action-wrapper a{color: #C7C7C7 !important;}
+.action-wrapper {color: #C7C7C7 !important;}
+.action-wrapper > li > a{color: #C7C7C7 !important;}
+.nav {margin-top: -10px; width: 100%;}
+.navbar-nav>li {
+        float: left;
+        margin-top: 5px;
+    }
+.asset-description-header{margin-top: 10px;}
+.wr-action-btn-bar{height: 50px;}
+.form-horizontal{margin-bottom: 30px;  }
+.padding-top-double{padding-top: 20px;  }
+.nav-tabs > li {
+    display: block;
+    padding-top: 24px;
+    position: relative;
+}
