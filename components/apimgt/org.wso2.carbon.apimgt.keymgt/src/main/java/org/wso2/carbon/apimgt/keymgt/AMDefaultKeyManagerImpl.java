@@ -520,6 +520,11 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
         return activeTokens;
     }
 
+    @Override
+    public AccessTokenInfo getAccessTokenByConsumerKey(String consumerKey) throws APIManagementException {
+        return null;
+    }
+
     /**
      * common method to throw exceptions.
      *
