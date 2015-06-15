@@ -1,7 +1,7 @@
 {
   "name": "bootstrap-rating",
   "main": "bootstrap-rating.js",
-  "version": "1.2.0",
+  "version": "1.3.0",
   "homepage": "https://github.com/dreyescat/bootstrap-rating",
   "author": {
     "name": "dreyescat",
@@ -32,11 +32,11 @@
     "bootstrap": "~3.2.0",
     "fontawesome": "~4.2.0"
   },
-  "_release": "1.2.0",
+  "_release": "1.3.0",
   "_resolution": {
     "type": "version",
-    "tag": "v1.2.0",
-    "commit": "990256458dcb91539e01d4c5f4f8b3e0dd460b40"
+    "tag": "v1.3.0",
+    "commit": "cc81ac14e183193d4608eab986d86135bd4ee30d"
   },
   "_source": "git://github.com/dreyescat/bootstrap-rating.git",
   "_target": "*",

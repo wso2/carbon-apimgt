@@ -1,6 +1,7 @@
 <% jagg.template("overview", function(inputs, outputs, jagg) { %>
 <% var api=outputs.api; var createPermitted=outputs.isCreatePermitted;%>
-<%  if(api.endpointConfig){ 
+<%var tenant= encode.forUriComponent(request.getParameter("tenant"));%>
+<%  if(api.endpointConfig){
     var endpoint_config = parse(api.endpointConfig); 
   } %>
 <div class="row">
@@ -211,10 +212,6 @@
         </div>
 
 
-    </div>
-    <hr />
-    <div id="show-copy-api" class="form-actions">
-        <button type="button" class="btn btn-default" onclick="javascript:$('#copy-api').toggle('slow');$('#show-copy-api').toggle()"><%=i18n.localize("CreateNewVersion")%></button>
     </div>
     </form>
 </div>

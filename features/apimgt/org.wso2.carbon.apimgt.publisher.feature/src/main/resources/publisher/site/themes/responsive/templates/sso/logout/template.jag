@@ -24,7 +24,6 @@
                         if (log.isDebugEnabled()) {
                             log.debug("User information not avaialble, so invalidating session");
                         }
-                        session.invalidate();
                         response.sendRedirect(jagg.getHttpsUrl("/"));
                         return;
                 }
