@@ -512,4 +512,21 @@ public interface APIProvider extends APIManager {
 	 */
 	public  boolean updateAPIStatus(APIIdentifier identifier, String status, boolean publishToGateway, boolean deprecateOldVersions
 			,boolean makeKeysForwardCompatible) throws APIManagementException, FaultGatewaysException;
+
+	/**
+	 * Change the API Status. This method is responsible invoke the governance api to change the life cycle status.
+	 * If API is already published, then this method will execute only updateAPIStatus method as there is no life cycle
+	 * transition. So the API publisher executor not executed when current status and target status not changed
+	 *
+	 * @param apiIdentifier api identifier
+	 * @param targetStatus next state
+	 * @param publishToGateway  boolean value to indicate publish to the gateway or not
+	 * @param deprecateOldVersions boolean value to indicate deprecate old versions or not
+	 * @param makeKeysForwardCompatible boolean value to indicate makes key forward compatible or not
+	 * @return true if api status change successful
+	 * @throws APIManagementException
+	 */
+	public boolean changeLifeCycleStatus(APIIdentifier apiIdentifier, String targetStatus, boolean publishToGateway,
+	                                     boolean deprecateOldVersions ,boolean makeKeysForwardCompatible)
+			throws	APIManagementException;
 }

@@ -221,8 +221,7 @@ $(function () {
         var publishAPI = function () {
             var data = {};
             $("body").off('api_saved');
-            if (store.publisher.api.lifeState.toUpperCase() == 'PUBLISHED') {
-                data = {
+            data = {
                     action: "updateStatus",
                     name: store.publisher.api.name,
                     version: store.publisher.api.version,
@@ -230,60 +229,57 @@ $(function () {
                     status: "PUBLISHED",
                     publishToGateway: true,
                     requireResubscription: true
-                };
-                $.ajax({
-                           url: caramel.context + '/asts/api/apis/lifecycle?type=api',
-                           type: 'POST',
-                           data: JSON.stringify(data),
-                           contentType: 'application/json',
-                           success: function (data) {
-                               //BootstrapDialog.alert('Successfully Changed the life cycle state');
-                                BootstrapDialog.show({
-                                type: BootstrapDialog.TYPE_INFO,
-                                title: 'Success',
-                                message: 'Successfully Changed the life cycle state.',
-                                buttons: [{
-                                            label: 'OK',
-                                            action: function(dialogRef){
-                                            dialogRef.close();
-                                          }
-                                          }]             
-                                });  
+            };
+            $.ajax({
+                       url: caramel.context + '/asts/api/apis/lifecycle?type=api',
+                       type: 'POST',
+                       data: JSON.stringify(data),
+                       contentType: 'application/json',
+                       success: function (data) {
+                           //BootstrapDialog.alert('Successfully Changed the life cycle state');
+                           if(!data.error) {
+                               BootstrapDialog.show({
+                                                        type: BootstrapDialog.TYPE_INFO,
+                                                        title: 'Success',
+                                                        message: 'Successfully Changed the life cycle state.',
+                                                        buttons: [{
+                                                                      label: 'OK',
+                                                                      action: function (dialogRef) {
+                                                                          dialogRef.close();
+                                                                      }
+                                                                  }]
+                                                    });
+                           } else {
+                               BootstrapDialog.show({
+                                                        type: BootstrapDialog.TYPE_DANGER,
+                                                        title: 'Error',
+                                                        message: 'Error while changing the life cycle state.' + data.message,
+                                                        buttons: [{
+                                                                      label: 'OK',
+                                                                      action: function (dialogRef) {
+                                                                          dialogRef.close();
+                                                                      }
+                                                                  }]
+                                                    });
+                                }
                            },
-                           error: function (data) {
-                               //BootstrapDialog.alert('Error while changing the life cycle state');
-                            BootstrapDialog.show({
-                                                  type: BootstrapDialog.TYPE_DANGER,
-                                                  title: 'Error',
-                                                  message: 'Error while changing the life cycle state.',
-                                                  buttons: [{
-                                                             label: 'OK',
-                                                             action: function(dialogRef){
-                                                             dialogRef.close();
-                                                            }
-                                                            }]             
-                                                            });   
-                           }
-                       });
-            } else {
-                data.action = 'publish';
-                data.nextState = 'published';
-                data.comment = "Changed API Status";
-                $.ajax({
-                           url: caramel.context + '/apis/asset/' + store.publisher.api.id + '/change-state?type=api&lifecycle=' + store.publisher.api.lifeCycle,
-                           type: 'POST',
-                           data: JSON.stringify(data),
-                           contentType: 'application/json',
-                           success: function (data) {
-                               store.publisher.api.lifeState = 'PUBLISHED';
-                               BootstrapDialog.alert('Successfully Changed the life cycle state');
-                           },
-                           error: function (data) {
-                               BootstrapDialog.alert('Error while changing the life cycle state');
-                           }
-                       });
-            }
-        };
+                       error: function (data) {
+                           //TODO Handle failed gateways
+                           //BootstrapDialog.alert('Error while changing the life cycle state');
+                           BootstrapDialog.show({
+                                                    type: BootstrapDialog.TYPE_DANGER,
+                                                    title: 'Error',
+                                                    message: 'Error while changing the life cycle state.',
+                                                    buttons: [{
+                                                                  label: 'OK',
+                                                                  action: function (dialogRef) {
+                                                                      dialogRef.close();
+                                                                  }
+                                                              }]
+                                                });
+                       }
+                   });
+            };
 
         //hack to validate tiers
         function validate_tiers() {

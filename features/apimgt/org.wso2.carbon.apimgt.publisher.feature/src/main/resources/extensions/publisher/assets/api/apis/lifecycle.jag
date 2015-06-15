@@ -75,7 +75,7 @@ require('/modules/publisher.js').exec(function (ctx) {
 				}
 
 				result = apiProxy.updateAPIStatus(apiData);
-				if (result.error == true) {
+				if (result.error) {
 					obj = {
 						error: true,
 						message: result.message

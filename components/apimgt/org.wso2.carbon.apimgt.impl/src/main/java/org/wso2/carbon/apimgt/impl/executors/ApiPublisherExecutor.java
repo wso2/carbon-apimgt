@@ -94,11 +94,6 @@ public class ApiPublisherExecutor implements Execution {
             String apiPath = APIUtil.getAPIPath(api.getId());
             apiResource = registry.get(apiPath);
             context.setResource(apiResource);
-            /*if (failedGateways != null) {
-                executed = true;
-            } else {
-                // TODO Failed gateways returns json string which need to be format and correct this place.
-            }*/
         } catch (RegistryException e) {
             log.error("Failed to get the generic artifact, While executing ApiPublisherExecutor. ", e);
         } catch (APIManagementException e) {

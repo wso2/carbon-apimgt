@@ -329,5 +329,5 @@ public interface APIManager {
      *          If failed to update subscription status
      */
     public Set<APIStore> getExternalAPIStores(APIIdentifier apiId) throws APIManagementException;
-    
+
 }

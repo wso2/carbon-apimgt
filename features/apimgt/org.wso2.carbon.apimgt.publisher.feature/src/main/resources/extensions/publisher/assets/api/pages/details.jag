@@ -43,21 +43,15 @@ require('/modules/publisher.js').exec(function(ctx) {
              var currentSession = ctx.session; 
             var server = store.server;
             var user = store.user;
-
             var registry = user.userRegistry(currentSession);
             var governanceUtils = Packages.org.wso2.carbon.governance.api.util.GovernanceUtils;           
             var resource = registry.get(assets.path);
             var timeInNumber = resource.updated.time;
             var createdTimeInNumber = resource.created.time;
-
             var lastUpdatedDate = new Date(timeInNumber);            
             page.lastUpdatedDate = lastUpdatedDate.toString();
-
             var createdDate = new Date(createdTimeInNumber); 
             page.createdDate = createdDate.toString();
-
-            
-
             var output = am.render(assets, page).details();
             caramel.render(output);
         }
