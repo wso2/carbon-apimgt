@@ -82,10 +82,10 @@ var reqUrl = request.getRequestURI();
         if(query == 'null')query = null;
         if(numberOfPages > 1) {
             if (outputs.isMore) {%>
-                <div class="api-count-display"><span><%=String(from).split('.')[0]%> - <%=String(to).split('.')[0]%></span> of More <%=i18n.localize("apis")%></div>
+                <div class="col-sm-12 api-count-display"><span><%=String(from).split('.')[0]%> - <%=String(to).split('.')[0]%></span> of More <%=i18n.localize("apis")%></div>
             <%}
             else {%>
-                <div class="api-count-display"><span><%=String(from).split('.')[0]%> - <%=String(to).split('.')[0]%></span> of <span><%=String(outputs.totalLength).split('.')[0]%></span> <%=i18n.localize("apis")%></div>
+                <div class="col-sm-12 api-count-display"><span><%=String(from).split('.')[0]%> - <%=String(to).split('.')[0]%></span> of <span><%=String(outputs.totalLength).split('.')[0]%></span> <%=i18n.localize("apis")%></div>
             <% }
         }%>
         <div class="thumbnail-custom">
@@ -192,8 +192,8 @@ var reqUrl = request.getRequestURI();
             </ul>
             <%
                      if(numberOfPages > 1) { %>
-            <div class="pagination">
-                <ul>
+                <div class="col-sm-12">
+                <ul class="pagination " id="apiListingPagination">
                     <li <% if(page == 1) { %> class="disabled" <% } %>>
                         <a
                                 <% if(page != 1) { %>
@@ -289,10 +289,8 @@ var reqUrl = request.getRequestURI();
                     <li <% if(page == numberOfPages) { %> class="disabled" <% } %>><a <% if(page != numberOfPages) {
                              %>href="?<%=tagPrefix%>page=<%=String((page+1))%><%=urlPrefix%><% if(query!=null){ %>&query=<%=query%><%}%>"<% } %>>&gt;&gt;</a></li>
 
-
-
                 </ul>
-            </div>
+                </div>
             <% } %>
 
 
@@ -316,18 +314,6 @@ var reqUrl = request.getRequestURI();
         </div>
     </div>
 </div>
-<style>
-    .api-count-display{
-        color:#747474;
-        font-size:15px;
-        padding:10px 20px 5px;
-    }
-
-    .api-count-display span{
-        font-size:16px;
-        font-weight:bold;
-    }
-</style>
         <%
         }
 
