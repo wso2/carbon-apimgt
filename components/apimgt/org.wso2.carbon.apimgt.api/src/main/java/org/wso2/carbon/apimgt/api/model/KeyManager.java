@@ -193,4 +193,13 @@ public interface KeyManager {
      */
     Set<String> getActiveTokensByConsumerKey(String consumerKey) throws APIManagementException;
 
+
+    /**
+     * Gives details of the Access Token to be displayed on Store.
+     * @param consumerKey
+     * @return {@link org.wso2.carbon.apimgt.api.model.AccessTokenInfo} populating all the details of the Access Token.
+     * @throws APIManagementException
+     */
+    AccessTokenInfo getAccessTokenByConsumerKey(String consumerKey) throws APIManagementException;
+
 }

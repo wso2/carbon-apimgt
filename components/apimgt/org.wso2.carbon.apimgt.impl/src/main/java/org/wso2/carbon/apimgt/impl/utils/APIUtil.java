@@ -3454,6 +3454,7 @@ public final class APIUtil {
         api.setFaultSequence(artifact.getAttribute(APIConstants.API_OVERVIEW_FAULTSEQUENCE));
         api.setDescription(artifact.getAttribute(APIConstants.API_OVERVIEW_DESCRIPTION));
         api.setRedirectURL(artifact.getAttribute(APIConstants.API_OVERVIEW_REDIRECT_URL));
+        api.setBusinessOwner(artifact.getAttribute(APIConstants.API_OVERVIEW_BUSS_OWNER));
         api.setApiOwner(artifact.getAttribute(APIConstants.API_OVERVIEW_OWNER));
         api.setAdvertiseOnly(Boolean.parseBoolean(artifact.getAttribute(APIConstants.API_OVERVIEW_ADVERTISE_ONLY)));
         } catch (GovernanceException e) {

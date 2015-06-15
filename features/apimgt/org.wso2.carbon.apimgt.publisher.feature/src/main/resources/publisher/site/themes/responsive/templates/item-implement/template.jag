@@ -7,6 +7,7 @@
     var isDataPublishingEnabled = mod.isDataPublishingEnabled().isDataPublishingEnabled;
     var apiUrlId = "name="+encode.forHtml(api.name)+"&version="+encode.forHtml(api.version)+"&provider="+encode.forHtml(api.provider);
     var storeUrl = jagg.module("manager").getAPIStoreURL().url;
+    var apiStatus = api.status;
 %>
 <script language="javascript">
     var VERBS = [ 'GET' , 'POST' , 'PUT' , 'DELETE', 'OPTIONS'];
@@ -51,9 +52,12 @@
         </a>
     </li>
 </ul>
-</center> 
+</center>
     <div class="title-section">
-        <h2><%= encode.forHtml(api.name) %>(<%= encode.forHtml(api.version) %>) : <%= encode.forHtml(api.context) %></h2>
+        <h2><%= encode.forHtml(api.name) %>(<%= encode.forHtml(api.version) %>) : <%= encode.forHtml(api.context) %>
+        <% if(api){ %>
+            &nbsp;<a class = "goTo_api_overview" href="<%= jagg.url("/info?"+ apiUrlId ) %>" ><i class=" icon-list-alt"></i> Go to Overview</a>
+        <% } %></h2>
     </div>
     <div class="content-section shadow-up">
     <div class="content-data">   
@@ -136,8 +140,8 @@
                         <div class="control-group" id="credentials" <%if(api.endpointTypeSecured=="false"){%>style="display: none;"<%}%>>
                             <label class="control-label" for="credentials"><%=i18n.localize("credentials")%>:<span class="requiredAstrix">*</span></label>
                             <div class="controls">
-                                <input type="text" class="input-small required validInput" id="epUsername" name="epUsername"  value="<%=api.epUsername%>">
-                                <input type="password" class="input-small required" id="epPassword" name="epPassword" value="<%=api.epPassword%>">
+                                <input type="text" class="input-small required validInput" id="epUsername" name="epUsername" placeholder="Username" value="<%=api.epUsername%>">
+                                <input type="password" class="input-small required" id="epPassword" name="epPassword" placeholder="Password" value="<%=api.epPassword%>">
                             </div>
                         </div>
 
@@ -169,7 +173,7 @@
                     <input type="hidden" value="endpoint" name="implementation_methods" >
                     <div class="form-actions" id="saveButtons">
                         <button type="submit" class="btn btn-default manageSaveButton has-spinner" id="saveBtn" >Save</button>
-                        <button id="go_to_manage" class="btn btn-primary manageSaveButton pull-right has-spinner">Next : Manage &gt;</button>
+                        <button id="go_to_manage" class="btn btn-primary manageSaveButton has-spinner">Next : Manage &gt;</button>
                     </div>
                     </form>
                 </div>
@@ -240,7 +244,7 @@
                     <input type="hidden" name="action" value="implement" />
                     <input type="hidden" id="swagger" name="swagger" class="swagger" value="" />
                     <button type="submit" class="btn btn-default manageSaveButton has-spinner" id="savePrototypeBtn" >Save</button>
-                    <button class="btn btn-warning manageSaveButton pull-right has-spinner" id="prototyped_api" >Deploy as a Prototype</button>
+                    <button class="btn btn-warning manageSaveButton has-spinner" id="prototyped_api" >Deploy as a Prototype</button>
 
                 </div>
             </form>
@@ -261,8 +265,9 @@
                 </table>
                 </div>
                 <div class="modal-footer">
-                <button class="btn btn-primary" data-dismiss="modal" aria-hidden="true">OK</button>
-                <a href='<%=storeUrl%>/apis/info?name=<%=api.name%>&version=<%=api.version%>&provider=<%=api.provider%>' class="btn has-spinner">Go to API Store</a>
+                <a href='<%= jagg.url("/info?"+ apiUrlId ) %>' class="btn btn-primary">Go to Overview</a>
+                <a href='javascript:void(0)' id="goToStore-btn" class="btn btn-default" >Go to API Store</a>
+                <button class="btn btn-default" data-dismiss="modal" aria-hidden="true">Keep Editing API</button>
                 </div>
             </div>
             </div>
@@ -352,7 +357,15 @@ mc.setPayloadJSON('{ "data" : "sample JSON"}');*/
 </script>
 
 <script>
-    $(document).ready(function(){        
+    $(document).ready(function(){
+
+        var status = "<%=apiStatus%>";
+        if(status == "PUBLISHED"){
+            $('#managed-api').slideDown()
+        }else if(status == "PROTOTYPED"){
+            $('#prototype').slideDown();
+        }
+
         $.get( "<%= jagg.url("/site/blocks/item-design/ajax/add.jag") %>?name=<%= encode.forHtml(api.name) %>&version=<%= encode.forHtml(api.version) %>&provider=<%= encode.forHtml(api.provider) %>&action=swagger" , function( data ) {
             var data = jQuery.parseJSON(data);
             var designer = APIDesigner();
@@ -365,7 +378,12 @@ mc.setPayloadJSON('{ "data" : "sample JSON"}');*/
                 location.href = "<%= jagg.url("/manage?"+apiUrlId)%>";
             });
             $("#implement_form").submit();
-        });  
+        });
+
+        $('#goToStore-btn').click(function(){
+            window.open('<%=storeUrl%>/apis/info?name=<%=api.name%>&version=<%=api.version%>&provider=<%=api.provider%>', '_blank');
+            location.href = '<%= jagg.url("/info?"+ apiUrlId ) %>';
+        });
 
         try{
             var endpoint_config = jQuery.parseJSON($(".prototype_config").val());

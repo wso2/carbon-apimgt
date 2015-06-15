@@ -277,7 +277,6 @@ APIDesigner.prototype.display_elements = function(value,source){
 };
 
 APIDesigner.prototype.update_elements = function(resource, newValue){
-    debugger;
     var API_DESIGNER = APIDesigner();
     var obj = API_DESIGNER.query($(this).attr('data-path'));
     var obj = obj[0]
@@ -475,10 +474,7 @@ APIDesigner.prototype.load_api_document = function(api_document){
     this.render_resources();
     this.render_scopes();
     $("#version").val(api_document.info.version);
-    $("#name").val(api_document.info.title);
-    if(api_document.info.title && api_document.info.title != ""){
-        $("#name").valid();
-    }    
+    $("#name").val(api_document.info.title);  
     if(api_document.info.description){
     	$("#description").val(api_document.info.description);
     }

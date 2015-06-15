@@ -533,8 +533,8 @@
             			<tr>
 						 <th>API</th>
 				         <th>Owner</th>
-				         <th>Sunscription Status</th>				         
-				         <th>Sunscription</th>
+				         <th>Subscription Status</th>
+				         <th>Subscription</th>
 				         <th>Actions</th>   			
             			</tr>
             		</thead>
@@ -578,7 +578,14 @@
                             <%} %></dd>
 							</dl>
 						 </td>
-				         <td><%=api.provider%></td>
+				         <td>
+				            <% if(api.businessOwner != null){%>
+				                <a href="<%=path%>" class="link-to-provider link-h2"><%=api.businessOwner%></a>
+				            <%}
+				            <% else {%>
+				                <a href="<%=path%>" class="link-to-provider link-h2"><%=api.provider%></a>
+				            <%}%>
+				         </td>
 				         <td>							
                             <%  if(api.subStatus == "BLOCKED" || api.subStatus == "BLOCKED") { %>
                             <span class="label label-danger"><%=i18n.localize("blocked")%></span>
