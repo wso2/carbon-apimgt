@@ -1306,7 +1306,7 @@ public class APIProviderHostObject extends ScriptableObject {
         		PrivilegedCarbonContext.endTenantFlow();
         	}
         }
-        if(thumbUrl != null){
+        if(thumbUrl != null && !thumbUrl.isEmpty()){
             try {
                 URL url = new URL(thumbUrl);
                 String imageType = url.openConnection().getContentType();
