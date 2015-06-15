@@ -59,5 +59,5 @@ public interface APIPublisher {
      * @param store    Store
      * @return   published/not
      */
-    public boolean CreateVersionedAPIToStore(API api, APIStore store) throws APIManagementException;
+    public boolean CreateVersionedAPIToStore(API api, APIStore store,String version) throws APIManagementException;
 }

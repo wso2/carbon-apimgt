@@ -30,7 +30,6 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.protocol.ClientContext;
-import org.apache.http.entity.mime.FormBodyPart;
 import org.apache.http.entity.mime.HttpMultipartMode;
 import org.apache.http.entity.mime.MultipartEntity;
 import org.apache.http.entity.mime.content.FileBody;
@@ -395,7 +394,7 @@ public class WSO2APIPublisher implements APIPublisher {
     	}
     }
 
-    @Override public boolean CreateVersionedAPIToStore(API api, APIStore store) throws APIManagementException {
+    @Override public boolean CreateVersionedAPIToStore(API api, APIStore store, String version) throws APIManagementException {
         boolean published = false;
 
         if (store.getEndpoint() == null || store.getUsername() == null || store.getPassword() == null) {
@@ -410,7 +409,6 @@ public class WSO2APIPublisher implements APIPublisher {
             httpContext.setAttribute(ClientContext.COOKIE_STORE, cookieStore);
             boolean authenticated = authenticateAPIM(store, httpContext);
             if (authenticated) {  //First try to login to store
-                String version = ApiMgtDAO.getLastPublishedAPIVersionFromAPIStore(api.getId(),store.getName());
                 boolean added = addVersionedAPIToStore(api, store.getEndpoint(),version, httpContext,
                                                        store.getDisplayName(),store.getUsername());
                 if (added) {   //If API creation success,then try publishing the API

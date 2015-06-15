@@ -35,6 +35,7 @@ import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.FaultGatewaysException;
 import org.wso2.carbon.apimgt.api.dto.UserApplicationAPIUsage;
 import org.wso2.carbon.apimgt.api.model.*;
+import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.definitions.APIDefinitionFromSwagger20;
 import org.wso2.carbon.apimgt.impl.dto.Environment;
 import org.wso2.carbon.apimgt.impl.dto.TierPermissionDTO;
@@ -2044,8 +2045,11 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 try {
                     // First trying to publish the API to external APIStore
                     boolean published;
-                    if (apiOlderVersionExist) {
-                        published = publisher.CreateVersionedAPIToStore(api, store);
+                    String version = ApiMgtDAO
+                            .getLastPublishedAPIVersionFromAPIStore(api.getId(), store.getName());
+
+                    if (apiOlderVersionExist && version != null) {
+                        published = publisher.CreateVersionedAPIToStore(api, store,version);
                         publisher.updateToStore(api, store);
                     } else {
                         published = publisher.publishToStore(api, store);
