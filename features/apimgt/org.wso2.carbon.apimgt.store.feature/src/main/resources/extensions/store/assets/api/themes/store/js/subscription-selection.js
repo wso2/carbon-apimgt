@@ -166,7 +166,7 @@ $(function () {
                 appData.prodAuthorizedDomains = newDetails.accessallowdomains;
                 appData.prodKey = newDetails.accessToken;
                 appData.prodRegenarateOption = newDetails.enableRegenarate;
-                var prodScope1=hideDefaultAppScopes(newDetails.tokenScope);
+                var prodScope1=hideDefaultAppScopes(newDetails.tokenScope).trim();
                 if(prodScope1){
                     appData.keyScopeExist=true;
                     appData.keyScopeValue=prodScope1 ;
@@ -196,7 +196,7 @@ $(function () {
                 appData.sandboxAuthorizedDomains = newDetails.accessallowdomains;
                 appData.sandboxKey = newDetails.accessToken;
                 appData.sandRegenarateOption = newDetails.enableRegenarate;
-                var sandScope=hideDefaultAppScopes(newDetails.tokenScope);
+                var sandScope=hideDefaultAppScopes(newDetails.tokenScope).trim();
                 if(sandScope){
                     appData.keyScopeExist=true;
                     appData.keyScopeValue=sandScope ;
@@ -971,3 +971,4 @@ $(function () {
 
 
 });
+
