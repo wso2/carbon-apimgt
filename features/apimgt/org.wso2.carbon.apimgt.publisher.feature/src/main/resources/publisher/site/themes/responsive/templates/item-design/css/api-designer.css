@@ -143,8 +143,7 @@
 */
 
 .scope_container {
-    margin: 5px 0 0 10px;
-    padding: 10px;    
+    padding: 10px;
     background-color: #F5F5BB !important;
 }
 
@@ -260,6 +259,14 @@ margin: 20px 0px 10px 10px;
 
 body.modal-open {
     overflow: hidden;
+}
+
+.tierSelect, input#cacheTimeout{
+    width:30% !important;
+}
+
+.businessInfo{
+    width:40%;
 }
 
 .form-actions{

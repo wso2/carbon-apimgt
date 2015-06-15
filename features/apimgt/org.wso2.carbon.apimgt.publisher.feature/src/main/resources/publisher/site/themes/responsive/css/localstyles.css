@@ -586,3 +586,15 @@ input.error{
     font-size: 11px;
     margin-top: 5px;
 }
+
+.goTo_api_overview {
+    font-weight: normal;
+    font-size: 0.7em;
+    margin-left: 10px;
+    white-space: nowrap;
+}
+
+.help_popup {
+    vertical-align: top;
+    margin-top: 5px;
+}
