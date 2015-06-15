@@ -213,10 +213,6 @@
 
 
     </div>
-    <hr />
-    <div id="show-copy-api" class="form-actions">
-        <button type="button" class="btn btn-default" onclick="javascript:$('#copy-api').toggle('slow');$('#show-copy-api').toggle()"><%=i18n.localize("CreateNewVersion")%></button>
-    </div>
     </form>
 </div>
 <%}%>
