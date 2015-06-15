@@ -54,6 +54,9 @@
             if(result.apis[i].isAdvertiseOnly != null && result.apis[i].isAdvertiseOnly){
               result.apis[i].displayOwner = result.apis[i].owner;
             }
+            else if(result.apis[i].businessOwner != null) {
+              result.apis[i].displayOwner = result.apis[i].businessOwner;
+            }
             else{
               result.apis[i].displayOwner = result.apis[i].provider;
             }

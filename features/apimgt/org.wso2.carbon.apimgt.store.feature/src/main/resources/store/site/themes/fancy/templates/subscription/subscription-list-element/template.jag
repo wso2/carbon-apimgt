@@ -606,7 +606,14 @@
                                     <img src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("images/close.png"))%>" onClick="removeSubscription('<%=api.name%>','<%=api.version%>','<%=api.provider%>','<%=app.id%>',this)" align="right"  class="closeBtn" />
                                     <%}%>
                                     <a href="<%=path%>" class="service-name" title="<%=api.name%>-<%=api.version%>"><%=apiName%> - <%=api.version%></a>
-                                    <div class="provider-info"><%=api.provider%></div>
+                                    <div class="provider-info">
+                                        <% if(api.businessOwner != null){%>
+                                            <a href="<%=path%>" class="link-to-provider link-h2"><%=api.businessOwner%></a>
+                                        <%}
+                                        <% else {%>
+                                            <a href="<%=path%>" class="link-to-provider link-h2"><%=api.provider%></a>
+                                        <%}%>
+                                    </div>
                                     <div class="tier-info"><%=api.tier%> Subscription</div>
                                 </div>
                             </div>
