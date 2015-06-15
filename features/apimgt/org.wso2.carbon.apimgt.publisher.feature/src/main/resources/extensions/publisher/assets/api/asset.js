@@ -255,14 +255,19 @@ asset.manager = function(ctx) {
                 }else{
                     apiData.transports=options.attributes.transport_https;
                 }
+
                 if(options.attributes.inSequence == 'none') {
                     options.attributes.inSequence = null;
                 }
+
                 if(options.attributes.outSequence == 'none') {
                     options.attributes.outSequence = null;
-                }if(options.attributes.faultSequence == 'none') {
+                }
+
+                if(options.attributes.faultSequence == 'none') {
                     options.attributes.faultSequence = null;
                 }
+
                 apiData.inSequence = options.attributes.inSequence;
                 apiData.outSequence= options.attributes.outSequence;
                 apiData.responseCache = options.attributes.responseCache;

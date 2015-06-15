@@ -579,7 +579,7 @@ var apipublisher = {};
                 status: api.getStatus().toString(),
                 thumb: APIUtil.getWebContextRoot(api.getThumbnailUrl()),
                 context: api.getContext(),
-                lastUpdated: Long.valueOf(api.getLastUpdated().getTime()).toString(),
+                lastUpdated: api.getLastUpdated().toString(),
                 subs: subscriberCount,
                 templates: uriTempArr,
                 sandbox: api.getSandboxUrl(),

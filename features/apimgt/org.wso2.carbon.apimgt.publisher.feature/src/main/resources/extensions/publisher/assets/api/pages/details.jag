@@ -42,14 +42,99 @@ require('/modules/publisher.js').exec(function(ctx) {
 			response.sendError(404, 'The asset with id: ' + options.id + ' could not be located.');
 		} else {
 			//Get api resource details
-			log.info(asset);
 			var apiPublisher =  require('apipublisher').apipublisher;
 			var apiProxy = apiPublisher.instance(user.username);
 			var api = apiProxy.getAPI(asset.attributes.overview_provider, asset.attributes.overview_name, asset.version).api;
 			var output = am.render(asset, page).details();
-			log.info(api);
+			api.visibilityLevel = {};
+
+			if(api.visibility == 'restricted') {
+				api.visibilityLevel.restricted = true;
+			} else {
+				api.visibilityLevel.restricted = false;
+			}
+
+			var endpointConfig = api.endpointConfig;
+			var simplifiedConfig = null;
+			if (endpointConfig != null && endpointConfig.trim() != "") {
+				simplifiedConfig = {};
+				endpointConfig = JSON.parse(api.endpointConfig);
+				if (endpointConfig && (endpointConfig.production_endpoints != undefined)) {
+					var production_endpoints = [];
+					if (endpointConfig.production_endpoints instanceof Array) {
+						for (var index = 0; index < endpointConfig.production_endpoints.length; index++) {
+							production_endpoints.push(
+									{"url": endpointConfig.production_endpoints[index].url});
+						}
+						simplifiedConfig.production_endpoints = production_endpoints;
+					}
+					else {
+						production_endpoints.push(
+								{"url": endpointConfig.production_endpoints.url});
+					}
+					simplifiedConfig.production_endpoints = production_endpoints;
+				} else {
+					simplifiedConfig.production_endpoints = null;
+				}
+
+				//Setting production, sanbox urls
+				if (endpointConfig && (endpointConfig.production_failovers != undefined)) {
+					var production_failovers = [];
+					if (endpointConfig.production_failovers instanceof Array) {
+						for (var index = 0; index < endpointConfig.production_failovers.length; index++) {
+							production_failovers.push(
+									{"url": endpointConfig.production_failovers[index].url});
+						}
+						simplifiedConfig.production_failovers = production_failovers;
+					}
+					else {
+						production_endpoints.push(
+								{"url": endpointConfig.production_failovers.url});
+					}
+					simplifiedConfig.production_failovers = production_failovers;
+				} else {
+					simplifiedConfig.production_failovers = null;
+				}
+
+				if (endpointConfig && (endpointConfig.sandbox_endpoints != undefined)) {
+					var sandbox_endpoints = [];
+					if (endpointConfig.sandbox_endpoints instanceof Array) {
+						for (var index = 0; index < endpointConfig.sandbox_endpoints.length; index++) {
+							sandbox_endpoints.push(
+									{"url": endpointConfig.sandbox_endpoints[index].url});
+						}
+						simplifiedConfig.sandbox_endpoints = sandbox_endpoints;
+					}
+					else {
+						sandbox_endpoints.push(
+								{"url": endpointConfig.sandbox_endpoints.url});
+					}
+					simplifiedConfig.sandbox_endpoints = sandbox_endpoints;
+				} else {
+					simplifiedConfig.sandbox_endpoints = null;
+				}
+
+				if (endpointConfig && (endpointConfig.sandbox_failovers != undefined)) {
+					var sandbox_failovers = [];
+					if (endpointConfig.sandbox_failovers instanceof Array) {
+						for (var index = 0; index < endpointConfig.sandbox_failovers.length; index++) {
+							sandbox_failovers.push(
+									{"url": endpointConfig.sandbox_failovers[index].url});
+						}
+						simplifiedConfig.sandbox_failovers = sandbox_failovers;
+					}
+					else {
+						sandbox_failovers.push(
+								{"url": endpointConfig.sandbox_failovers.url});
+					}
+					simplifiedConfig.sandbox_failovers = sandbox_failovers;
+				} else {
+					simplifiedConfig.sandbox_failovers = null;
+				}
+			}
+			api.simplifiedConfig = simplifiedConfig;
+			api.publishedEnvionments = api.environments.split(",");
 			output.api = api;
-			log.info(output);
 			caramel.render(output);
 		}
 	}
