@@ -65,10 +65,9 @@
                                                            thumbURL1 = jagg.site.registry + thumbURL1
                                                        }
                                                        itemProviderDisplayName = api.provider;
-                                                       if(api.isAdvertiseOnly == null || !api.isAdvertiseOnly){
-                                                          if(api.businessOwner != null){
-                                                            itemProviderDisplayName = api.businessOwner;
-                                                          }
+                                                       if((api.isAdvertiseOnly == null || !api.isAdvertiseOnly) &&
+                                                           api.businessOwner != null){
+                                                          itemProviderDisplayName = api.businessOwner;
                                                        }
                                                        starsText = getStaticStars( context, rating ,theme );
                                                        path = '<%=jagg.getMappedUrl("/site/pages/item-info.jag")%>' + "?name=" + api.name + "&version=" + api.version + "&provider=" + api.provider+ "&" + '<%=urlPrefix%>';
