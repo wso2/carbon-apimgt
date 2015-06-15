@@ -394,7 +394,7 @@ public class WSO2APIPublisher implements APIPublisher {
     	}
     }
 
-    @Override public boolean CreateVersionedAPIToStore(API api, APIStore store, String version) throws APIManagementException {
+    @Override public boolean createVersionedAPIToStore(API api, APIStore store, String version) throws APIManagementException {
         boolean published = false;
 
         if (store.getEndpoint() == null || store.getUsername() == null || store.getPassword() == null) {

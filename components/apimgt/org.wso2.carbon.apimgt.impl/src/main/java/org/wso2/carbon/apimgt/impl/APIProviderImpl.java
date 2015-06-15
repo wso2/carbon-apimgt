@@ -2048,7 +2048,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                             .getLastPublishedAPIVersionFromAPIStore(api.getId(), store.getName());
 
                     if (apiOlderVersionExist && version != null) {
-                        published = publisher.CreateVersionedAPIToStore(api, store,version);
+                        published = publisher.createVersionedAPIToStore(api, store, version);
                         publisher.updateToStore(api, store);
                     } else {
                         published = publisher.publishToStore(api, store);
@@ -2131,7 +2131,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
         //Publish API to external APIStore which are not yet published
         try {
-            publishToExternalAPIStores(api, notPublishedAPIStores,apiOlderVersionExist);
+            publishToExternalAPIStores(api, notPublishedAPIStores, apiOlderVersionExist);
         } catch (APIManagementException e) {
             handleException("Failed to publish API to external Store. ", e);
         }
