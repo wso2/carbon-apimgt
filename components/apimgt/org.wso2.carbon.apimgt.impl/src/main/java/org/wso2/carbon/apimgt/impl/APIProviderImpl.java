@@ -2035,9 +2035,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             throws APIManagementException {
 
         Set<APIStore> publishedStores = new HashSet<APIStore>();
-        StringBuilder errorStatus = new StringBuilder();
+        StringBuilder errorStatus = new StringBuilder("Failure to publish to External Stores : ");
         boolean failure = false;
-        int index = 0;
         if (apiStoreSet.size() > 0) {
             for (APIStore store : apiStoreSet) {
                 org.wso2.carbon.apimgt.api.model.APIPublisher publisher = store.getPublisher();
@@ -2061,7 +2060,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 } catch (APIManagementException e) {
                     failure = true;
                     log.error(e);
-                    errorStatus.append(++index + "). " + e.getMessage() + ". ");
+                    errorStatus.append(store.getDisplayName() + ", ");
                 }
             }
             if (publishedStores.size() != 0) {
@@ -2070,7 +2069,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
         
         if (failure) {
-            throw new APIManagementException(errorStatus.toString());
+            throw new APIManagementException(errorStatus.substring(0, errorStatus.length() -2));
         }
 
     }
@@ -2090,9 +2089,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         Set<APIStore> modifiedPublishedApiStores = new HashSet<APIStore>();
         Set<APIStore> updateApiStores = new HashSet<APIStore>();
         Set<APIStore> removedApiStores = new HashSet<APIStore>();
-        StringBuilder errorStatus = new StringBuilder();
+        StringBuilder errorStatus = new StringBuilder("Failed to update External Stores : ");
         boolean failure = false;
-        int index = 0;
         if(publishedStores != null){
             removedApiStores.addAll(publishedStores);
             removedApiStores.removeAll(apiStoreSet);
@@ -2109,7 +2107,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     } catch (APIManagementException e) {
                         failure = true;
                         log.error(e);
-                        errorStatus.append(++index + "). " + e.getMessage() + ". ");
+                        errorStatus.append(store.getDisplayName() + ", ");
                     }
                     if (!store.getEndpoint().equals(apiStore.getEndpoint()) || !store.getType().equals((apiStore.getType()))||!store.getDisplayName().equals(apiStore.getDisplayName())) {
                         //Include the store definition to update the db stored APIStore set
@@ -2135,7 +2133,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         try {
             publishToExternalAPIStores(api, notPublishedAPIStores,apiOlderVersionExist);
         } catch (APIManagementException e) {
-            handleException("Failed to publish API to external Store. " + e.getMessage(), e);
+            handleException("Failed to publish API to external Store. ", e);
         }
         //Update the APIs which are already exist in the external APIStore
         updateAPIInExternalAPIStores(api,updateApiStores);
@@ -2145,7 +2143,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         deleteFromExternalAPIStores(api, removedApiStores);
         
         if (failure) {
-            throw new APIManagementException(errorStatus.toString());
+            throw new APIManagementException(errorStatus.substring(0, errorStatus.length() -2));
         }
         
         updated=true;
@@ -2154,9 +2152,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
     private void deleteFromExternalAPIStores(API api, Set<APIStore> removedApiStores)  throws APIManagementException {
         Set<APIStore> removalCompletedStores = new HashSet<APIStore>();
-        StringBuilder errorStatus = new StringBuilder();
+        StringBuilder errorStatus = new StringBuilder("Failed to delete from External Stores : ");
         boolean failure = false;
-        int index = 0;
         if (removedApiStores.size() > 0) {
             for (APIStore store : removedApiStores) {
 
@@ -2174,7 +2171,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 } catch (APIManagementException e) { 
                     failure = true;
                     log.error(e);
-                    errorStatus.append(++index + "). " + e.getMessage() + ". ");
+                    errorStatus.append(store.getDisplayName() + ", ");
                 }
 
             }
@@ -2183,7 +2180,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             }
             
             if (failure) {
-                throw new APIManagementException(errorStatus.toString());
+                throw new APIManagementException(errorStatus.substring(0, errorStatus.length() -2));
             }
         }
     }
@@ -2211,9 +2208,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     private void updateAPIInExternalAPIStores(API api, Set<APIStore> apiStoreSet)
             throws APIManagementException {
         if (apiStoreSet != null && apiStoreSet.size() > 0) {
-            StringBuilder errorStatus = new StringBuilder();
+            StringBuilder errorStatus = new StringBuilder("Failed to update External Stores : ");
             boolean failure = false;
-            int index = 0; 
             for (APIStore store : apiStoreSet) {
                 try {
                     org.wso2.carbon.apimgt.api.model.APIPublisher publisher = store.getPublisher();
@@ -2221,12 +2217,12 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 } catch (APIManagementException e) {
                     failure = true;
                     log.error(e);
-                    errorStatus.append(++index + "). " + e.getMessage() + ". ");
+                    errorStatus.append(store.getDisplayName() + ", ");
                 }
             }
             
             if (failure) {
-                throw new APIManagementException(errorStatus.toString());
+                throw new APIManagementException(errorStatus.substring(0, errorStatus.length() -2));
             }
         }
 
