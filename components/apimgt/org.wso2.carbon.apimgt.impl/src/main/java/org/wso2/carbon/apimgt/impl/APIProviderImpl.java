@@ -2133,7 +2133,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
         //Publish API to external APIStore which are not yet published
         try {
-            publishToExternalAPIStores(api, notPublishedAPIStores,apiOlderVersionExist);
+            publishToExternalAPIStores(api, notPublishedAPIStores, apiOlderVersionExist);
         } catch (APIManagementException e) {
             handleException("Failed to publish API to external Store. " + e.getMessage(), e);
         }
