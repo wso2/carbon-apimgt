@@ -951,7 +951,7 @@ public class APIProviderHostObject extends ScriptableObject {
         String endpoint = (String) apiData.get("endpoint", apiData);
         String sandboxUrl = (String) apiData.get("sandbox", apiData);
         String visibility = (String) apiData.get("visibility", apiData);
-        String  thumbUrl = (String) apiData.get("thumbUrl", apiData);
+        String thumbUrl = (String) apiData.get("thumbUrl", apiData);
         String visibleRoles = "";
 
 
@@ -1307,32 +1307,32 @@ public class APIProviderHostObject extends ScriptableObject {
         	}
         }
         if(thumbUrl != null){
-               try {
-                   URL url = new URL(thumbUrl);
-                    String imageType = url.openConnection().getContentType();
+            try {
+                URL url = new URL(thumbUrl);
+                String imageType = url.openConnection().getContentType();
 
-                    File fileToUploadFromUrl = new File("tmp/icon");
-                    if (!fileToUploadFromUrl.exists()) {
-                        fileToUploadFromUrl.createNewFile();
-                    }
-                    FileUtils.copyURLToFile(url, fileToUploadFromUrl);
-                    FileBody fileBody = new FileBody(fileToUploadFromUrl, imageType);
+                File fileToUploadFromUrl = new File("tmp/icon");
+                if (!fileToUploadFromUrl.exists()) {
+                    fileToUploadFromUrl.createNewFile();
+                }
+                FileUtils.copyURLToFile(url, fileToUploadFromUrl);
+                FileBody fileBody = new FileBody(fileToUploadFromUrl, imageType);
 
-                    checkImageSize(fileToUploadFromUrl);
+                checkImageSize(fileToUploadFromUrl);
 
-                    Icon thumbIcon = new Icon(fileBody.getInputStream(), url.openConnection().getContentType());
-                    String thumbPath = APIUtil.getIconPath(api.getId());
-                    String thumbnailUrl = apiProvider.addIcon(thumbPath, thumbIcon);
-                    api.setThumbnailUrl(APIUtil.prependTenantPrefix(thumbnailUrl, api.getId().getProviderName()));
+                Icon thumbIcon = new Icon(fileBody.getInputStream(), url.openConnection().getContentType());
+                String thumbPath = APIUtil.getIconPath(api.getId());
+                String thumbnailUrl = apiProvider.addIcon(thumbPath, thumbIcon);
+                api.setThumbnailUrl(APIUtil.prependTenantPrefix(thumbnailUrl, api.getId().getProviderName()));
 
                     /*Set permissions to anonymous role for thumbPath*/
-                    APIUtil.setResourcePermissions(api.getId().getProviderName(), null, null, thumbPath);
+                APIUtil.setResourcePermissions(api.getId().getProviderName(), null, null, thumbPath);
 
-               } catch (IOException e) {
-                   handleException("[Error] Cannot read data from the URL", e);
-                   return false;
-               }
-               apiProvider.updateAPI(api);
+            }catch (IOException e){
+                handleException("[Error] Cannot read data from the URL", e);
+                return false;
+            }
+            apiProvider.updateAPI(api);
 
         }
         if (apiData.get("swagger", apiData) != null) {
@@ -1748,7 +1748,6 @@ public class APIProviderHostObject extends ScriptableObject {
 
             if(thumbUrl != null){
                 try {
-
                     URL url = new URL(thumbUrl);
                     String imageType = url.openConnection().getContentType();
 
