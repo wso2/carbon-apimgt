@@ -36,6 +36,7 @@ include("/jagg/jagg.jag");
             apiData.tags = request.getParameter("tags","UTF-8");
             apiData.tier = request.getParameter("tiersCollection");
             apiData.imageUrl = request.getFile("apiThumb");
+            apiData.thumbUrl = request.getParameter("thumbUrl");
             apiData.context = request.getParameter("context","UTF-8");
             apiData.bizOwner = request.getParameter("bizOwner","UTF-8");
             apiData.bizOwnerEmail = request.getParameter("bizOwnerMail","UTF-8");
