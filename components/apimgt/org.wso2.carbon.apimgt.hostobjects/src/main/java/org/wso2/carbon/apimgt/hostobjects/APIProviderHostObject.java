@@ -23,6 +23,7 @@ import org.apache.axis2.client.Options;
 import org.apache.axis2.client.ServiceClient;
 import org.apache.axis2.context.ServiceContext;
 import org.apache.axis2.transport.http.HTTPConstants;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -31,6 +32,7 @@ import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpHead;
 import org.apache.http.conn.params.ConnRoutePNames;
+import org.apache.http.entity.mime.content.FileBody;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.woden.WSDLFactory;
 import org.apache.woden.WSDLReader;
@@ -86,6 +88,7 @@ import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.SSLSession;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.*;
@@ -726,7 +729,7 @@ public class APIProviderHostObject extends ScriptableObject {
         api.setVisibleRoles(visibleRoles != null ? visibleRoles.trim() : null);
         api.setLastUpdated(new Date());
 
-        
+
         return saveAPI(apiProvider, api, fileHostObject, false);
     }
     
@@ -892,7 +895,7 @@ public class APIProviderHostObject extends ScriptableObject {
 
                 /*Set permissions to anonymous role for thumbPath*/
                 APIUtil.setResourcePermissions(api.getId().getProviderName(), null, null, thumbPath);
-            }  
+            }
             if (create) {
             	apiProvider.addAPI(api);
             } else {
@@ -948,6 +951,7 @@ public class APIProviderHostObject extends ScriptableObject {
         String endpoint = (String) apiData.get("endpoint", apiData);
         String sandboxUrl = (String) apiData.get("sandbox", apiData);
         String visibility = (String) apiData.get("visibility", apiData);
+        String  thumbUrl = (String) apiData.get("thumbUrl", apiData);
         String visibleRoles = "";
 
 
@@ -1302,7 +1306,35 @@ public class APIProviderHostObject extends ScriptableObject {
         		PrivilegedCarbonContext.endTenantFlow();
         	}
         }
-        
+        if(thumbUrl != null){
+               try {
+                   URL url = new URL(thumbUrl);
+                    String imageType = url.openConnection().getContentType();
+
+                    File fileToUploadFromUrl = new File("tmp/icon");
+                    if (!fileToUploadFromUrl.exists()) {
+                        fileToUploadFromUrl.createNewFile();
+                    }
+                    FileUtils.copyURLToFile(url, fileToUploadFromUrl);
+                    FileBody fileBody = new FileBody(fileToUploadFromUrl, imageType);
+
+                    checkImageSize(fileToUploadFromUrl);
+
+                    Icon thumbIcon = new Icon(fileBody.getInputStream(), url.openConnection().getContentType());
+                    String thumbPath = APIUtil.getIconPath(api.getId());
+                    String thumbnailUrl = apiProvider.addIcon(thumbPath, thumbIcon);
+                    api.setThumbnailUrl(APIUtil.prependTenantPrefix(thumbnailUrl, api.getId().getProviderName()));
+
+                    /*Set permissions to anonymous role for thumbPath*/
+                    APIUtil.setResourcePermissions(api.getId().getProviderName(), null, null, thumbPath);
+
+               } catch (IOException e) {
+                   handleException("[Error] Cannot read data from the URL", e);
+                   return false;
+               }
+               apiProvider.updateAPI(api);
+
+        }
         if (apiData.get("swagger", apiData) != null) {
             // Read URI Templates from swagger resource and set to api object
             Set<URITemplate> uriTemplates = definitionFromSwagger20.getURITemplates(api,
@@ -1390,6 +1422,7 @@ public class APIProviderHostObject extends ScriptableObject {
         String bizOwner = (String) apiData.get("bizOwner", apiData);
         String bizOwnerEmail = (String) apiData.get("bizOwnerEmail", apiData);
         String visibility = (String) apiData.get("visibility", apiData);
+        String thumbUrl = (String) apiData.get("thumbUrl",apiData);
         String visibleRoles = "";
         if (visibility != null && visibility.equals(APIConstants.API_RESTRICTED_VISIBILITY)) {
         	visibleRoles = (String) apiData.get("visibleRoles", apiData);
@@ -1712,6 +1745,35 @@ public class APIProviderHostObject extends ScriptableObject {
                 // retain the previously uploaded image
                 api.setThumbnailUrl(oldApi.getThumbnailUrl());
             }
+
+            if(thumbUrl != null){
+                try {
+
+                    URL url = new URL(thumbUrl);
+                    String imageType = url.openConnection().getContentType();
+
+                    File fileToUploadFromUrl = new File("tmp/icon");
+                    if (!fileToUploadFromUrl.exists()) {
+                        fileToUploadFromUrl.createNewFile();
+                    }
+                    FileUtils.copyURLToFile(url, fileToUploadFromUrl);
+                    FileBody fileBody = new FileBody(fileToUploadFromUrl, imageType);
+
+                    checkImageSize(fileToUploadFromUrl);
+
+                    Icon thumbIcon = new Icon(fileBody.getInputStream(), url.openConnection().getContentType());
+                    String thumbPath = APIUtil.getIconPath(api.getId());
+                    String thumbnailUrl = apiProvider.addIcon(thumbPath, thumbIcon);
+                    api.setThumbnailUrl(APIUtil.prependTenantPrefix(thumbnailUrl, api.getId().getProviderName()));
+
+                    /*Set permissions to anonymous role for thumbPath*/
+                    APIUtil.setResourcePermissions(api.getId().getProviderName(), null, null, thumbPath);
+
+                } catch (IOException e) {
+                    handleException("[Error] Cannot read data from the URL", e);
+                    return false;
+                }
+            }
             apiProvider.updateAPI(api);
             boolean hasAPIUpdated=false;
             if(!oldApi.equals(api)){
@@ -1890,6 +1952,17 @@ public class APIProviderHostObject extends ScriptableObject {
         if (fileHostObject != null) {
             long length = fileHostObject.getJavaScriptFile().getLength();
             if (length / 1024.0 > 1024) {
+                handleException("Image file exceeds the maximum limit of 1MB");
+            }
+        }
+    }
+
+    private static void checkImageSize(File file)
+            throws ScriptException, APIManagementException, IOException {
+
+        if(file.exists()){
+            long length = file.length();
+            if(length/ 1024.0 > 1024){
                 handleException("Image file exceeds the maximum limit of 1MB");
             }
         }
