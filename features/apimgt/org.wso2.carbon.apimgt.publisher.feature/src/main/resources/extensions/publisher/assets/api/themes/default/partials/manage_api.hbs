@@ -185,10 +185,10 @@
                 <label class="custom-form-label col-lg-2 col-md-2 col-sm-12 col-xs-12" for="responseCache">{{t locale.responseCache}}:</label>
                 <div class="custom-form-right col-lg-5 col-md-8 col-sm-8 col-xs-12">
 										<select class="select required" id="responseCache" name="responseCache">
-											<option value="enabled" {{#if api.responseCache.enabled}}checked{{/if}}">{{t
-											locale.enabled}}</option>
 											<option value="disabled" {{#if api.responseCache.disabled}}checked{{/if}}>{{t
 											locale.disabled}}</option>
+												<option value="enabled" {{#if api.responseCache.enabled}}checked{{/if}}>{{t
+												locale.enabled}}</option>
 										</select>
 										<a class="icon-question-sign help_popup" help_data="cache_help"></a>
 
