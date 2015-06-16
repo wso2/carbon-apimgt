@@ -1,7 +1,7 @@
 {
     "theme" : {
-        "base" : "responsive",
-        /*"subtheme" : "modern"*/
+        "base" : "default",
+        "subtheme" : "modern"
     },
     "context" : "/publisher",
     "enableRestrictByRoles" : "true",
