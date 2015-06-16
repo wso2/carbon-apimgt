@@ -135,8 +135,8 @@ public class APIDefinitionFromSwagger20 extends APIDefinition {
             swaggerObject = (JSONObject) parser.parse(resourceConfigsJSON);
 
             //Check whether security definitions are defined or not
-            if (swaggerObject.get("securityDefinitions") != null) {
-                JSONObject securityDefinitionsObjects = (JSONObject) swaggerObject.get("securityDefinitions");
+            if (swaggerObject.get("x-wso2-security") != null) {
+                JSONObject securityDefinitionsObjects = (JSONObject) swaggerObject.get("x-wso2-security");
                 Iterator<JSONObject> definitionIterator = securityDefinitionsObjects.values().iterator();
                 while (definitionIterator.hasNext()) {
                     JSONObject securityDefinition = definitionIterator.next();
@@ -344,7 +344,7 @@ public class APIDefinitionFromSwagger20 extends APIDefinition {
         scopesObject.put("x-wso2-scopes", xWso2ScopesArray);
         securityDefinitionObject.put("apim", scopesObject);
 
-        swaggerObject.put("securityDefinitions", securityDefinitionObject);
+        swaggerObject.put("x-wso2-security", securityDefinitionObject);
 
         return swaggerObject.toJSONString();
     }
