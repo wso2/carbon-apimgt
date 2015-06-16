@@ -157,7 +157,7 @@
                     </a>
 
                     <div class="caption">
-                        <a href="<%=path%>" onclick="jagg.sessionAwareJS({redirect:'<%=path%>'})" class="link-h1" title="<%=api.name%>">
+                        <a class ="fade-out" href="<%=path%>" onclick="jagg.sessionAwareJS({redirect:'<%=path%>'})" class="link-h1" title="<%=api.name%>">
                             <%=api.name%>
                         </a>
                         <div class="version-provider-wrapper"><%=api.version%> <a class="link-h2"><%=api.provider%></a></div>
