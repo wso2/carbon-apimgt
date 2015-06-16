@@ -211,6 +211,7 @@ code {
 /** thumbnail list */
 .thumbnails{ display: inline; list-style: none; padding-left: 0px;}
 .thumbnails li{ list-style: none; width:200px; float: left; margin-right: 25px}
+.thumbnails li img { width: 150px; height: 150px;}
 
 .form-search{ margin-bottom: 25px}
 

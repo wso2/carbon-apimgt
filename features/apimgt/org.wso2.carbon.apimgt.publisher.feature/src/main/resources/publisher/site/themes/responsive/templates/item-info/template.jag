@@ -38,7 +38,6 @@ if(api != null) {
             </ul>
             <div id="myTabContent" class="tab-content">
                 <div class="tab-pane fade active in" id="view"><% jagg.includeBlock("overview", {api:api,isCreatePermitted:isCreatePermitted}); %></div>
-                <% //<div class="tab-pane fade" id="edit"><% jagg.includeBlock("item-edit", {api:api}); %></div> %>
                 <div class="tab-pane fade" id="lifecycles"><% jagg.includeBlock("life-cycles", {api:api,isPublishPermitted:permitted}); %></div>
                 <div class="tab-pane fade" id="versions"><%jagg.includeBlock("usage",{api:api}); %></div>
                 <div class="tab-pane fade" id="docs"><%jagg.includeBlock("documentation", {api:api,isCreatePermitted:isCreatePermitted}); %></div>

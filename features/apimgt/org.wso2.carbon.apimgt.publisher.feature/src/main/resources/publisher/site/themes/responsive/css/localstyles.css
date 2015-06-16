@@ -254,6 +254,11 @@ code {
   margin: 20px 20px 10px 10px;
 }
 
+#login_page_logo{
+  background: url('../images/wso2-logo.png'); background-size: 100px ; background-repeat: no-repeat; 
+  width: 330px; padding-left: 100px;
+}
+
 
 #login-link { cursor: pointer;}
 
