@@ -449,7 +449,7 @@ public class APIUsageStatisticsClient {
             statement = connection.prepareStatement(query);
             statement.setString(1, subscriberName);
 
-            rs = statement.executeQuery(query);
+            rs = statement.executeQuery();
 
             List<String> consumerKeys = new ArrayList<String>();
             while (rs.next()) {
