@@ -426,7 +426,7 @@ var jagg = jagg || (function () {
         var match = href.match(/^(https?\:)\/\/(([^:\/?#]*)(?:\:([0-9]+))?)(\/[^?#]*)(\?[^#]*|)(#.*|)$/);
     }
 
-    var getHttpsUrl = function(path){
+    var getHttpsUrl = function(path, parameters){
         var hostname = "";
         var requestSegments = getRequestSegments();     
         mod = jagg.module("manager");
@@ -442,7 +442,7 @@ var jagg = jagg || (function () {
              }
         }        
 
-        return "https://" + hostname + url(path);
+        return "https://" + hostname + url(path, parameters);
     }    
 
     var url = function(path,parameters){
@@ -471,6 +471,9 @@ var jagg = jagg || (function () {
                 parameters = {};
             }
             parameters.tenant = getTenantDomain();
+        }
+        if(isReverseProxyEnabled()){
+            return getHttpsUrl(path, parameters)
         }
         return url(path,parameters)
     };
