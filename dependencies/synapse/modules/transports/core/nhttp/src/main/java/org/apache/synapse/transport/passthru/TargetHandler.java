@@ -376,26 +376,26 @@ public class TargetHandler implements NHttpClientEventHandler {
 			if (response != null) {
 				int responseRead = response.read(conn, decoder);
 
-                if (metrics.getLevel() == MetricsCollector.LEVEL_FULL) {
-                    metrics.incrementBytesReceived(msgCtx, responseRead);
-                } else {
-                    metrics.incrementBytesReceived(responseRead);
-                }
-            }
-            if (decoder.isCompleted()) {
-                if (metrics.getLevel() == MetricsCollector.LEVEL_FULL) {
-                    metrics.incrementMessagesReceived(msgCtx);
-                    metrics.notifyReceivedMessageSize(
-                            msgCtx, conn.getMetrics().getReceivedBytesCount());
-                    metrics.notifySentMessageSize(msgCtx, conn.getMetrics().getSentBytesCount());
-                    metrics.reportResponseCode(msgCtx, conn.getHttpResponse().getStatusLine().getStatusCode());
-                } else {
-                    metrics.incrementMessagesReceived();
-                    metrics.notifyReceivedMessageSize(
-                            conn.getMetrics().getReceivedBytesCount());
-                    metrics.notifySentMessageSize(conn.getMetrics().getSentBytesCount());
-                }
-            }
+				if (metrics.getLevel() == MetricsCollector.LEVEL_FULL) {
+				    metrics.incrementBytesReceived(msgCtx, responseRead);
+				} else {
+				    metrics.incrementBytesReceived(responseRead);
+				}
+			}
+			if (decoder.isCompleted()) {
+				if (metrics.getLevel() == MetricsCollector.LEVEL_FULL) {
+				    metrics.incrementMessagesReceived(msgCtx);
+				    metrics.notifyReceivedMessageSize(
+				            msgCtx, conn.getMetrics().getReceivedBytesCount());
+				    metrics.notifySentMessageSize(msgCtx, conn.getMetrics().getSentBytesCount());
+				    metrics.reportResponseCode(msgCtx, conn.getHttpResponse().getStatusLine().getStatusCode());
+				} else {
+				    metrics.incrementMessagesReceived();
+				    metrics.notifyReceivedMessageSize(
+				            conn.getMetrics().getReceivedBytesCount());
+				    metrics.notifySentMessageSize(conn.getMetrics().getSentBytesCount());
+				}
+			}
 
         } catch (IOException e) {
             logIOException(conn, e);
