@@ -615,7 +615,9 @@ $(document).ready(function () {
         ec.implementation_status = status;
         ec.endpoint_type = $('#endpoint_type').val();
         $('.advance_endpoint_config').each(function(index, el){
-            var ep_config = jQuery.parseJSON($(el).attr('ep-config-data'));
+            if($(el).attr('ep-config-data') && $(el).attr('ep-config-data') != ""){
+                var ep_config = jQuery.parseJSON($(el).attr('ep-config-data'));
+            }
             var name = $(el).attr('field-name');
             var field = name.replace(/\[([0-9]*)\]$/, '');
             var value_index = name.replace(/([a-zA-Z0-9_]*)/, '').replace('[','').replace(']','');
