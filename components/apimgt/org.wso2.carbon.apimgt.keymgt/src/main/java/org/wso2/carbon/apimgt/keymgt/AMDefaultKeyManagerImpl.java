@@ -432,15 +432,15 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
         org.wso2.carbon.apimgt.api.model.xsd.OAuthApplicationInfo info = null;
         try {
             info = keyMgtClient.getOAuthApplication(oAuthApplicationInfo.getClientId());
-            if(!clientSecret.equals(info.getClientSecret())){
-                throw new APIManagementException("The secret key is wrong for the given consumer key " + consumerKey );
+            if (!clientSecret.equals(info.getClientSecret())) {
+                throw new APIManagementException("The secret key is wrong for the given consumer key " + consumerKey);
             }
 
         } catch (Exception e) {
             handleException("Some thing went wrong while getting OAuth application for given consumer key " +
-                    oAuthApplicationInfo.getClientId(), e);
+                            oAuthApplicationInfo.getClientId(), e);
         }
-        if (info == null || info.getClientId() == null) {
+        if (info.getClientId() == null) {
             return null;
         }
 
@@ -464,26 +464,24 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
             APIManagerConfiguration config = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
                     .getAPIManagerConfiguration();
             if (this.configuration == null) {
-                synchronized (this) {
-                    this.configuration = new KeyManagerConfiguration();
-                    this.configuration.setManualModeSupported(true);
-                    this.configuration.setResourceRegistrationEnabled(true);
-                    this.configuration.setTokenValidityConfigurable(true);
-                    this.configuration.addParameter(APIConstants.AUTHSERVER_URL, config.getFirstProperty(APIConstants
-                                                                                                                 .KEYMANAGER_SERVERURL));
-                    this.configuration.addParameter(APIConstants.KEY_MANAGER_USERNAME, config.getFirstProperty(APIConstants.API_KEY_VALIDATOR_USERNAME));
-                    this.configuration.addParameter(APIConstants.KEY_MANAGER_PASSWORD, config.getFirstProperty(APIConstants.API_KEY_VALIDATOR_PASSWORD))
-                    ;
-                    this.configuration.addParameter(APIConstants.REVOKE_URL, config.getFirstProperty(APIConstants
-                                                                                                             .API_KEY_VALIDATOR_REVOKE_API_URL));
-                    String revokeUrl = config.getFirstProperty(APIConstants.API_KEY_VALIDATOR_REVOKE_API_URL);
+                this.configuration = new KeyManagerConfiguration();
+                this.configuration.setManualModeSupported(true);
+                this.configuration.setResourceRegistrationEnabled(true);
+                this.configuration.setTokenValidityConfigurable(true);
+                this.configuration.addParameter(APIConstants.AUTHSERVER_URL, config.getFirstProperty(APIConstants
+                                                                                                             .KEYMANAGER_SERVERURL));
+                this.configuration.addParameter(APIConstants.KEY_MANAGER_USERNAME, config.getFirstProperty(APIConstants.API_KEY_VALIDATOR_USERNAME));
+                this.configuration.addParameter(APIConstants.KEY_MANAGER_PASSWORD, config.getFirstProperty(APIConstants.API_KEY_VALIDATOR_PASSWORD))
+                ;
+                this.configuration.addParameter(APIConstants.REVOKE_URL, config.getFirstProperty(APIConstants
+                                                                                                         .API_KEY_VALIDATOR_REVOKE_API_URL));
+                String revokeUrl = config.getFirstProperty(APIConstants.API_KEY_VALIDATOR_REVOKE_API_URL);
 
-                    // Read the revoke url and replace revoke part to get token url.
-                    String tokenUrl = revokeUrl != null ? revokeUrl.replace("revoke", "token") : null;
-                    this.configuration.addParameter(APIConstants.TOKEN_URL, tokenUrl);
-
-                }
+                // Read the revoke url and replace revoke part to get token url.
+                String tokenUrl = revokeUrl != null ? revokeUrl.replace("revoke", "token") : null;
+                this.configuration.addParameter(APIConstants.TOKEN_URL, tokenUrl);
             }
+
 
         }
     }
