@@ -88,7 +88,7 @@
             <tr class="<%=classes%>" data-value="<%= encode.forHtmlAttribute(app.name)%>" tier-value="<%= encode.forHtml(app.tier)%>" callback-value="<%=  encode.forHtmlAttribute(callbackUrl)%>" description-value="<%=  encode.forHtmlAttribute(description)%>" api-count="<%= encode.forHtml(app.apiCount)%>" >
                 <td class="app_name_cell"><%= encode.forHtml(app.name)%>
                 <%
-                    if(app.groupId !="") {
+                    if(app.groupId !="" && app.groupId !=null) {
                 %>
                         (Shared)
                 <%
