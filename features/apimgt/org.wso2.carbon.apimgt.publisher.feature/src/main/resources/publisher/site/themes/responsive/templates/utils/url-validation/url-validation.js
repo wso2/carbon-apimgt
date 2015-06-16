@@ -14,7 +14,7 @@ $(document).ready(function(){
         $(btn).val(i18n.t('validationMsgs.validating'));
 
         if (url == '') {
-            $(btn).parent().after(' <span class="label label-important url_validate_label"><i class="icon-remove icon-white"></i>'+ i18n.t('validationMsgs.invalid')+'</span>');
+            $(btn).parent().after(' <span class="label label-important url_validate_label"><i class="glyphicon glyphicon-remove icon-white"></i>'+ i18n.t('validationMsgs.invalid')+'</span>');
             var toFade = $(btn).next();
             $(btn).removeClass("loadingButton-small");
             $(btn).val(i18n.t('validationMsgs.testUri'));
@@ -28,10 +28,10 @@ $(document).ready(function(){
                   function (result) {
                       if (!result.error) {
                           if (result.response == "success") {
-                              $(btn).parent().after(' <span class="label label-success url_validate_label"><i class="icon-ok icon-white"></i>'+ i18n.t('validationMsgs.valid')+'</span>');
+                              $(btn).parent().after(' <span class="label label-success url_validate_label"><i class="glyphicon glyphicon-ok icon-white"></i>'+ i18n.t('validationMsgs.valid')+'</span>');
 
                           } else {
-                              $(btn).parent().after(' <span class="label label-important url_validate_label"><i class="icon-remove icon-white"></i>'+ i18n.t('validationMsgs.invalid')+'</span>');
+                              $(btn).parent().after(' <span class="label label-important url_validate_label"><i class="glyphicon glyphicon-remove icon-white"></i>'+ i18n.t('validationMsgs.invalid')+'</span>');
                           }
                           var toFade = $(btn).parent().parent().find('.url_validate_label');
                           var foo = setTimeout(function() {

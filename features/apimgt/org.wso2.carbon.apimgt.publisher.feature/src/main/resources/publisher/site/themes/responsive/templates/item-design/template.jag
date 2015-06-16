@@ -76,7 +76,7 @@
 </center> 
     <div class="title-section">
         <% if(api){ %> 
-            <h2><%= encode.forHtml(api.name) %>(<%= encode.forHtml(api.version) %>) : <%= encode.forHtml(api.context) %>&nbsp;<a class = "btn btn-default pull-right" href="<%= jagg.url("/info?"+ apiUrlId ) %>" ><i class="fa fa-list-alt"></i> Go to Overview</a></h2>
+            <h2><%= encode.forHtml(api.name) %>(<%= encode.forHtml(api.version) %>) : <%= encode.forHtml(api.context) %>&nbsp;<a class = "btn btn-default pull-right" href="<%= jagg.url("/info?"+ apiUrlId ) %>" ><i class="glyphicon glyphicon-list-alt"></i> Go to Overview</a></h2>
         <% }else{ %>
             <h2>Design API</h2>
         <% } %>
@@ -133,7 +133,7 @@
         <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
         <h4 id="swaggerUploadLabel">Import API Definition</h3>
       </div>
-        <div class="modal-body">
+        <div class="modal-body" style="height:140px;">
             <div id="swagger_help" class="alert alert-danger hide" role="alert">
                  Enter a valid url
                  <button type="button" class="close" id="errorMsgClose"><span aria-hidden="true">&times;</span></button>
@@ -142,29 +142,30 @@
                <div class="form-group toggleRadios">
                   <label class="col-sm-5 control-label sub-select-label">Upload API definition as</label>
                   <div class="col-sm-7">
-                      <label class="radio sub-labels"><input type="radio" class="select-file" name="import-definition" id="" value="swagger_import_file"/>Swagger File</label>
-                      <label class="radio sub-labels urlSelect-label"><input type="radio" class="select-url" name="import-definition" value="swagger_import_url"/>Swagger Url</label>
+                      <label class="radio-inline sub-labels"><input type="radio" class="select-file" name="import-definition" id="" value="swagger_import_file"/>Swagger File</label>
+                      <label class="radio-inline sub-labels urlSelect-label"><input type="radio" class="select-url" name="import-definition" value="swagger_import_url"/>Swagger Url</label>
                   </div>
                </div>
             </div>
             <div class="form-group toggleContainers">
-                <div class="col-sm-10" style="display:none">
+                <div class="controls col-sm-12">
                     <input type="file" id="swagger_import_file" name="swagger_import_file" size="chars">
                 </div>
-                <div class="col-sm-10" style="display:none">
+                <div class="controls col-sm-12">
                     <label>Definition URL:</label>
-                    <input type="text" placeholder="" class="col-sm-12" id="swagger_import_url" name="swagger_import_url">
+                    <input type="text" placeholder="" class="form-control" id="swagger_import_url" name="swagger_import_url"/>
                     <span class="help-block">Example : http://petstore.swagger.io/v2/swagger.json </span>
                 </div>
             </div>
-        </div> 
+        </div>
       <div class="modal-footer">
         <button class="btn btn-primary has-spinner" id="import_swagger">Import</button>
         <button class="btn  btn-default" data-dismiss="modal" aria-hidden="true">Close</button>
       </div>
     </div>
   </div>
-</div>  
+</div>
+
 
 
     <div class="row">
