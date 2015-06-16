@@ -80,7 +80,7 @@
                         <a href="<%=path%>">
                             <img src="<%=thumbURL%>" width="100" height="100"/>
                         </a>
-                        <div><a href="<%=path%>" class="link-to-api" title="<%=api.name%>"><%if(api.name.length>12){%><%=api.name.slice(0,10)%>..<%}else{%><%=api.name%><% } %> (<%=api.version%>)</a></div>
+                        <div><a href="<%=path%>" class="link-to-api fade-out" title="<%=api.name%>"> <%=api.name%> (<%=api.version%>)</a></div>
                         <%if(api.isAdvertiseOnly) {%>
                         	<div><a href="<%=path%>" class="link-to-provider"><%=api.apiOwner%></a></div>
                         <%}else {%>

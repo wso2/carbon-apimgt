@@ -165,7 +165,7 @@ var reqUrl = request.getRequestURI();
                             <% } %>
                         </a>
                         <div class="caption">
-                            <a href="<%=path%>" class="link-h1" title="<%=api.name%>"><%=api.name%></a>
+                            <a href="<%=path%>" class="fade-out link-h1" title="<%=api.name%>"><%=api.name%></a>
 
 
                             <div class="version-provider-wrapper">
