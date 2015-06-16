@@ -71,6 +71,9 @@ var publishedInExternalStores=<%=publishedInExternalStores%>;
      <div class="alert alert-warning" id="removeFromExternalStoresMsg" style="display:none;">
      	  <span class="badge badge-warning">!</span> <%=i18n.localize("removeAPIFromExternalStoresWarning")%>
      </div>
+     <div class="alert alert-success" id="statusUpdateMsg" style="display:none;">
+        <%=i18n.localize("lifecycleSuccessMsg")%>
+     </div>     
      <div class="row">
 
             <label class="control-label col-xs-4" for="editStatus" name="state"><%=i18n.localize("state")%>:</label>
@@ -116,9 +119,6 @@ var publishedInExternalStores=<%=publishedInExternalStores%>;
                 <input type="submit" id="updateStateButton" disabled="disabled" class="btn btn-primary has-spinner" value="<%=i18n.localize("update")%>"/>
                 <input type="button" id="resetState" disabled="disabled" class="btn" value="<%=i18n.localize("reset")%>" />
        </div>
-       <div class="alert alert-success" id="statusUpdateMsg" style="display:none;">
-        <%=i18n.localize("lifecycleSuccessMsg")%>
-      </div>
       </div>
       </div>
 </form>

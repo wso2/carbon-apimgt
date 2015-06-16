@@ -252,8 +252,8 @@ APIDesigner.prototype.add_default_resource = function(){
 
 APIDesigner.prototype.get_scopes = function() {
     var options = [{ "value": "" , "text": "" }];
-    if(checkNested(this.api_doc, 'securityDefinitions','apim','x-wso2-scopes')){
-    	var scopes = this.api_doc.securityDefinitions.apim['x-wso2-scopes'];	
+    if(checkNested(this.api_doc, 'x-wso2-security','apim','x-wso2-scopes')){
+    	var scopes = this.api_doc['x-wso2-security'].apim['x-wso2-scopes'];
     	for(var i =0; i < scopes.length ; i++ ){
     	    options.push({ "value": scopes[i].key , "text": scopes[i].name });
     	}	
@@ -392,7 +392,7 @@ APIDesigner.prototype.init_controllers = function(){
 
     this.container.delegate(".delete_scope","click", function(){
         var i = $(this).attr("data-index");
-        API_DESIGNER.api_doc.securityDefinitions.apim['x-wso2-scopes'].splice(i, 1);
+        API_DESIGNER.api_doc['x-wso2-security'].apim['x-wso2-scopes'].splice(i, 1);
         API_DESIGNER.render_scopes();
     });
 
@@ -425,11 +425,11 @@ APIDesigner.prototype.init_controllers = function(){
 			function (result) {
 			    if (!result.error) {
 
-				API_DESIGNER.api_doc.securityDefinitions = $.extend({}, securityDefinitions, API_DESIGNER.api_doc.securityDefinitions);
+				API_DESIGNER.api_doc['x-wso2-security'] = $.extend({}, securityDefinitions, API_DESIGNER.api_doc['x-wso2-security']);
 
-				for (var i = 0; i < API_DESIGNER.api_doc.securityDefinitions.apim['x-wso2-scopes'].length; i++) {
-					if (API_DESIGNER.api_doc.securityDefinitions.apim['x-wso2-scopes'][i].key === $(
-							"#scopeKey").val() || API_DESIGNER.api_doc.securityDefinitions.apim['x-wso2-scopes'][i].key === $(
+				for (var i = 0; i < API_DESIGNER.api_doc['x-wso2-security'].apim['x-wso2-scopes'].length; i++) {
+					if (API_DESIGNER.api_doc['x-wso2-security'].apim['x-wso2-scopes'][i].key === $(
+							"#scopeKey").val() || API_DESIGNER.api_doc['x-wso2-security'].apim['x-wso2-scopes'][i].key === $(
 							"#scopeName").val()) {
 						jagg.message({
 							content : "Scope " + $("#scopeKey").val() + " already exists",
@@ -446,7 +446,7 @@ APIDesigner.prototype.init_controllers = function(){
 					return;
 				} 
 			
-				API_DESIGNER.api_doc.securityDefinitions.apim['x-wso2-scopes'].push(scope);
+				API_DESIGNER.api_doc['x-wso2-security'].apim['x-wso2-scopes'].push(scope);
 				$("#define_scope_modal").modal('hide');
 				API_DESIGNER.render_scopes();
 				API_DESIGNER.render_resources();
