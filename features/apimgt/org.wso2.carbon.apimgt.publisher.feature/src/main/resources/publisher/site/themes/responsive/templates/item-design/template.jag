@@ -118,78 +118,97 @@
         <% } %>
     });
 </script>
+<div id="swaggerEditer" class="modal" editor-url="<%= jagg.getAbsoluteUrl("/site/themes/default/lib/swagger-editor/#/")%>" style="display:none; z-index:9000; top:0; left:0; height:100%; width:100%">
+    <div class="swagger_editer_header">
+    <button class="btn btn-primary" id="update_swagger">Save</button>                    
+    <button class="btn btn-default" data-dismiss="modal" aria-hidden="true" id="close_swagger_editor">Close</button>            
+    </div>              
+</div>   
 
-    <div class="row">
-        <div class="col-sm-12">
-            <div id="swaggerUpload" class="modal hide fade" tabindex="-1" role="dialog" aria-hidden="true">
-                <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-                <h3 id="swaggerUploadLabel">Import API Definition</h3>                    
+<!-- Import Modal -->
+<div class="modal fade" id="swaggerUpload" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 id="swaggerUploadLabel">Import API Definition</h3>
+      </div>
+        <div class="modal-body">
+            <div id="swagger_help" class="alert alert-danger hide" role="alert">
+                 Enter a valid url
+                 <button type="button" class="close" id="errorMsgClose"><span aria-hidden="true">&times;</span></button>
+            </div>
+            <div class="form-inline">
+               <div class="form-group toggleRadios">
+                  <label class="col-sm-5 control-label sub-select-label">Upload API definition as</label>
+                  <div class="col-sm-7">
+                      <label class="radio sub-labels"><input type="radio" class="select-file" name="import-definition" id="" value="swagger_import_file"/>Swagger File</label>
+                      <label class="radio sub-labels urlSelect-label"><input type="radio" class="select-url" name="import-definition" value="swagger_import_url"/>Swagger Url</label>
+                  </div>
+               </div>
+            </div>
+            <div class="form-group toggleContainers">
+                <div class="col-sm-10" style="display:none">
+                    <input type="file" id="swagger_import_file" name="swagger_import_file" size="chars">
                 </div>
-                <div class="modal-body">
-                    <div id="swagger_help" class="alert alert-danger hide" role="alert">
-                         Enter a valid url
-                         <button type="button" class="close" id="errorMsgClose"><span aria-hidden="true">&times;</span></button>
-                    </div>
-                    <div class="form-inline">
-                       <div class="form-group toggleRadios">
-                          <div class="col-sm-10">
-                              <label class="col-sm-2 control-label sub-select-label">Upload API definition as</label>
-                              <label class="radio sub-labels"><input type="radio" class="select-file" name="import-definition" id="" value="swagger_import_file"/>Swagger File</label>
-                              <label class="radio sub-labels urlSelect-label"><input type="radio" class="select-url" name="import-definition" value="swagger_import_url"/>Swagger Url</label>
-                          </div>
-
-                       </div>
-                    </div>
-                    <div class="form-group toggleContainers">
-                        <div class="col-sm-10 hide">
-                            <input type="file" id="swagger_import_file" name="swagger_import_file" size="chars">
-                        </div>
-                        <div class="col-sm-10 hide">
-                            <label>Definition URL:</label>
-                            <input type="text" placeholder="" class="col-sm-12" id="swagger_import_url" name="swagger_import_url">
-                            <span class="help-block">Example : http://petstore.swagger.io/v2/swagger.json </span>
-                        </div>
-                    </div>
-                </div>                    
-                <div class="modal-footer">
-                <button class="btn btn-primary has-spinner" id="import_swagger">Import</button>
-                <button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
+                <div class="col-sm-10" style="display:none">
+                    <label>Definition URL:</label>
+                    <input type="text" placeholder="" class="col-sm-12" id="swagger_import_url" name="swagger_import_url">
+                    <span class="help-block">Example : http://petstore.swagger.io/v2/swagger.json </span>
                 </div>
             </div>
-            <div id="swaggerEditer" editor-url="<%= jagg.getAbsoluteUrl("/site/themes/default/lib/swagger-editor/#/")%>" class="hide" style="position:absolute;z-index:9000; top:0; left:0; height:100%; width:100%">
-                <div class="swagger_editer_header">
-                <button class="btn btn-primary" id="update_swagger">Save</button>                    
-                <button class="btn" data-dismiss="modal" aria-hidden="true" id="close_swagger_editor">Close</button>            
-                </div>              
-            </div>            
+        </div> 
+      <div class="modal-footer">
+        <button class="btn btn-primary has-spinner" id="import_swagger">Import</button>
+        <button class="btn  btn-default" data-dismiss="modal" aria-hidden="true">Close</button>
+      </div>
+    </div>
+  </div>
+</div>  
+
+
+    <div class="row">
+        <div class="col-sm-12">     
             <form class="form-horizontal" method="POST"
               id="design_form"
               enctype="multipart/form-data" action="<%= jagg.url("/site/blocks/item-design/ajax/add.jag?" + apiUrlId ) %>">
-<fieldset>
-    <legend><%=i18n.localize("generalDetailsTitle")%></legend>
-    <% if(!api){ %>    
+
+<div class="panel-group" id="accordion" role="tablist">
+  <div class="panel panel-default">
+    <div class="panel-heading" role="tab" id="headingOne">
+      <h4 class="panel-title">
+        <a data-toggle="collapse" href="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+          <strong><%=i18n.localize("generalDetailsTitle")%></strong>
+        </a>
+      </h4>
+    </div>
+    <div id="collapseOne" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="headingOne">
+      <div class="panel-body">
+
+<div class="row">
+  <div class="col-md-6">
+<% if(!api){ %>    
     <div class="form-group">
-        <label class="col-sm-2 control-label" for="name"><%=i18n.localize("name")%>:<span class="requiredAstrix">*</span></label>
-        <div class="col-sm-2">
-            <input type="text" class="form-control required validRegistryName validateForwardSlashAtEnd validInput apiNameExists noSpace" id="name" name="name" autofocus="autofocus" value=""/>
-            <a class="icon-question-sign help_popup" help_data="name_help"></a>
-            <p id="name_help" class="hide"><%=i18n.localize("nameHelpMsg")%></p>
+        <label class="col-sm-4 control-label" for="name"><%=i18n.localize("name")%>:<span class="requiredAstrix">*</span></label>
+        <div class="col-sm-4">
+            <input type="text" class="form-control required validRegistryName validateForwardSlashAtEnd validInput apiNameExists noSpace" id="name" name="name" autofocus="autofocus" value=""/>            
         </div>
+        <a class="help_popup" help_data="name_help"><i class="fa fa-question-circle"></i></a>
+        <p id="name_help" class="hide"><%=i18n.localize("nameHelpMsg")%></p>        
     </div>
 
     <div class="form-group">
-        <label class="col-sm-2 control-label" for="context"><%=i18n.localize("context")%>:<span class="requiredAstrix">*</span></label>
-        <div class="col-sm-2">
-            <input type="text" class="form-control required validContextTemplate validateForwardSlashAtEnd validInput contextExists noSpace validTemplate" id="context" name="context" onchange="getContextValue()"  onkeyup="updateContextPattern()"  />
-            <a class="icon-question-sign help_popup" help_data="context_help"></a>
-            <p id="context_help" class="hide"><%=i18n.localize("contextHelpMsg")%></p>
+        <label class="col-sm-4 control-label" for="context"><%=i18n.localize("context")%>:<span class="requiredAstrix">*</span></label>
+        <div class="col-sm-4">
+            <input type="text" class="form-control required validContextTemplate validateForwardSlashAtEnd validInput contextExists noSpace validTemplate" id="context" name="context" onchange="getContextValue()"  onkeyup="updateContextPattern()"  />            
         </div>
+        <a class="help_popup" help_data="context_help"><i class="fa fa-question-circle"></i></a>
+        <p id="context_help" class="hide"><%=i18n.localize("contextHelpMsg")%></p>
     </div>
 
     <div class="form-group">
-        <label class="col-sm-2 control-label" for="version"><%=i18n.localize("version")%>:<span class="requiredAstrix">*</span></label>
-        <div class="col-sm-2">
+        <label class="col-sm-4 control-label" for="version"><%=i18n.localize("version")%>:<span class="requiredAstrix">*</span></label>
+        <div class="col-sm-4">
             <input type="text" class="form-control required validInput noSpace" id="version" name="version" onchange="getContextValue()" value="" onkeyup="updateContextPattern()"/>
             <p class="help-block"><%=i18n.localize("versionsHelpMsg")%></p>
         </div>
@@ -202,62 +221,60 @@
     <% } %>
 
     <div class="form-group">
-        <label class="col-sm-2 control-label" for="visibility"><%=i18n.localize("visibility")%>:</label>
-        <div class="col-sm-10">
-            <select class="select required" id="visibility" name="visibility">
-		<% mod = jagg.module("api");
-		 result = mod.isMultipleTenantsAvailable();
-	         var isMultipleTenantsAvailable = result.status;
-		%>
-            	<% if (api) {%>
-                    <option value="public" <%if(api.visibility=="public"){%> selected="selected" <%}%>><%=i18n.localize("public")%></option>
-		    <% if(isMultipleTenantsAvailable == true) {%>
-                    <option value="private" <%if(api.visibility=="private"){%> selected="selected" <%}%>><%=i18n.localize("private")%></option>
-		    <% } %>
-                    <% if(!(enableRestrictByRoles == 'false')) {%>
-                             <option value="restricted" <%if(api.visibility=="restricted"){%> selected="selected" <%}%>><%=i18n.localize("restricted")%></option>
-                    <% } %>
-                    
-                <%} else {%>
-                    <option value="public"><%=i18n.localize("public")%></option>
-		    <% if(isMultipleTenantsAvailable == true) {%>
-                    <option value="private"><%=i18n.localize("private")%></option>
-		    <% } %>
-                    <% if(!(enableRestrictByRoles == 'false')) {%>
-                             <option value="restricted"><%=i18n.localize("restricted")%></option>
-                    <% } %> 
-                <%}%>
-            </select>
-                <a class="icon-question-sign help_popup" help_data="role_help"></a>
-                <p id="role_help" class="hide"><%=i18n.localize("roleHelpMsg")%></p>
-        </div>
+        <label class="col-sm-4  control-label" for="visibility"><%=i18n.localize("visibility")%>:</label>
+        <select class="select required col-sm-6" id="visibility" name="visibility">
+    <% mod = jagg.module("api");
+     result = mod.isMultipleTenantsAvailable();
+         var isMultipleTenantsAvailable = result.status;
+    %>
+            <% if (api) {%>
+                <option value="public" <%if(api.visibility=="public"){%> selected="selected" <%}%>><%=i18n.localize("public")%></option>
+        <% if(isMultipleTenantsAvailable == true) {%>
+                <option value="private" <%if(api.visibility=="private"){%> selected="selected" <%}%>><%=i18n.localize("private")%></option>
+        <% } %>
+                <% if(!(enableRestrictByRoles == 'false')) {%>
+                         <option value="restricted" <%if(api.visibility=="restricted"){%> selected="selected" <%}%>><%=i18n.localize("restricted")%></option>
+                <% } %>
+                
+            <%} else {%>
+                <option value="public"><%=i18n.localize("public")%></option>
+        <% if(isMultipleTenantsAvailable == true) {%>
+                <option value="private"><%=i18n.localize("private")%></option>
+        <% } %>
+                <% if(!(enableRestrictByRoles == 'false')) {%>
+                         <option value="restricted"><%=i18n.localize("restricted")%></option>
+                <% } %> 
+            <%}%>
+        </select>                
+        <a class="help_popup" help_data="role_help"><i class="fa fa-question-circle"></i></a>
+        <p id="role_help" class="hide"><%=i18n.localize("roleHelpMsg")%></p>
     </div>
 
-	<%if(api) { %>
-		<div class="form-group" id="rolesDiv" <%if(api.visibility!="restricted"){%>style="display: none;"<%}%>>
-                <label class="col-sm-2 control-label" for="roles" id="rolesLabel" name="rolesLabel">
+    <%if(api) { %>
+        <div class="form-group" id="rolesDiv" <%if(api.visibility!="restricted"){%>style="display: none;"<%}%>>
+                <label class="col-sm-4 control-label" for="roles" id="rolesLabel" name="rolesLabel">
                     <%=i18n.localize("roles")%>:<span class="requiredAstrix">*</span>
                 </label>
-                <div class="col-sm-4">
+                <div class="col-sm-6">
                     <input type="text" class="form-control required validInput validateRoles"
                     id="roles" name="roles"  value="<%=api.roles%>"/>
                     <p class="help-block" id="rolesHelp"><%=i18n.localize("rolesHelpMsg")%></p>
                 </div>
             </div>
-	<%} else {%>
-	    <div class="form-group" id="rolesDiv" style="display: none;">
-	        <label class="col-sm-2 control-label" for="roles" id="rolesLabel" name="rolesLabel">
-	            <%=i18n.localize("roles")%>:<span class="requiredAstrix">*</span>
-	        </label>
-	        <div class="col-sm-4">
-	            <input type="text" class="form-control required validInput validateRoles"
-	            id="roles" name="roles"/>
-	            <p class="help-block" id="rolesHelp"><%=i18n.localize("rolesHelpMsg")%></p>
-	        </div>
-	    </div>
-	 <%}%>
+    <%} else {%>
+        <div class="form-group" id="rolesDiv" style="display: none;">
+            <label class="col-sm-4 control-label" for="roles" id="rolesLabel" name="rolesLabel">
+                <%=i18n.localize("roles")%>:<span class="requiredAstrix">*</span>
+            </label>
+            <div class="col-sm-6">
+                <input type="text" class="form-control required validInput validateRoles"
+                id="roles" name="roles"/>
+                <p class="help-block" id="rolesHelp"><%=i18n.localize("rolesHelpMsg")%></p>
+            </div>
+        </div>
+     <%}%>
 
-	 <div id="error-invalidImageFileSize" class="modal hide fade" tabindex="-1" role="dialog" aria-hidden="true">
+     <div id="error-invalidImageFileSize" class="modal hide fade" tabindex="-1" role="dialog" aria-hidden="true">
          <div class="modal-header">
          <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
          <h3>API Publisher - Error</h3>
@@ -278,9 +295,33 @@
          </div>
      </div>
 
+
+
+                <div class="form-group">
+                   <label class="col-md-4 control-label" for="description"><%=i18n.localize("description")%>:</label>
+                   <div class="col-md-8">
+                       <textarea class="form-control" id="description" name="description" rows="3"><%= _description %></textarea>
+                   </div>
+               </div>
+
+                <div class="form-group">
+                    <label class="col-md-4 control-label" for="tags"><%=i18n.localize("tags")%>:</label>
+                    <div class="col-md-7 tagContainer">
+                        <input type="text" placeholder="Add tags" class="form-control validInput validRegistryName" id="tags" name="tags" value="<%= _tags %>" data-role="tagsinput"
+                        onkeyup="$(this).validate()"/>
+                        <a class="help_popup" help_data="tag_help" data-trigger="hover"><i class="fa fa-question-circle"></i></a>
+                        <p id="tag_help" class="hide"><%=i18n.localize("tagsHelpMsg")%></p>
+            <p class="help-block"><%=i18n.localize("tagsHelpLabel")%></p>
+                        <label class="tags-error pull-left"></label>
+                        <label class="add-tags-error pull-left"></label>
+                    </div>
+                </div>      
+  </div><!-- left -->
+
+  <div class="col-md-6">
         <div class="form-group">
-            <label class="col-sm-2 control-label" for="imageUrl"><%=i18n.localize("thumbnail")%></label>
-            <div class="col-sm-10">
+            <label class="col-sm-12" for="imageUrl"><%=i18n.localize("thumbnail")%></label>
+            <div class="col-sm-12">
                 <div class="fileinput fileinput-new" data-provides="fileinput">
                   <div class="fileinput-new thumbnail" style="width: 150px; height: 150px;">
                     <% if(api && api.thumb!=null){ %>
@@ -289,7 +330,7 @@
                         <img id="apiEditThumb" alt="" src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("images/api-default.png"))%>" style="width: 150px; height: 150px;"/>
                     <%}%>
                   </div>
-                  <div class="fileinput-preview fileinput-exists thumbnail" style="max-width: 200px; max-height: 150px;"></div>
+                  <div class="fileinput-preview fileinput-exists thumbnail" style="max-width: 150px; max-height: 150px;"></div>
                   <div>
                     <span class="btn btn-default btn-file"><span class="fileinput-new">Select image</span><span class="fileinput-exists">Change</span><input type="file" class="validateImageFile" id="apiThumb"  name="apiThumb"></span>
                     <a href="#" class="btn btn-default fileinput-exists" data-dismiss="fileinput">Remove</a>
@@ -298,28 +339,22 @@
                 <p class="help-block" id="rolesHelp"><%=i18n.localize("imgHelpMsg2")%></p>
             </div>
         </div>
+  </div>  
+</div>      
 
-                <div class="form-group">
-                   <label class="col-sm-2 control-label" for="description"><%=i18n.localize("description")%>:</label>
-                   <div class="col-sm-4">
-                       <textarea class="form-control" id="description" name="description" rows="3"><%= _description %></textarea>
-                   </div>
-               </div>
-
-                <div class="form-group">
-                    <label class="col-sm-2 control-label" for="tags"><%=i18n.localize("tags")%>:</label>
-                    <div class="col-sm-10 tagContainer">
-                        <input type="text" placeholder="Add tags" class="form-control validInput validRegistryName" id="tags" name="tags" value="<%= _tags %>" data-role="tagsinput"
-                        onkeyup="$(this).validate()"/>
-                        <a class="icon-question-sign help_popup" help_data="tag_help" data-trigger="hover"></a>
-                        <p id="tag_help" class="hide"><%=i18n.localize("tagsHelpMsg")%></p>
-			<p class="help-block"><%=i18n.localize("tagsHelpLabel")%></p>
-                        <label class="tags-error pull-left"></label>
-                        <label class="add-tags-error pull-left"></label>
-                    </div>
-                </div>
-    </fieldset>
-
+      </div>
+    </div>
+  </div>
+  <div class="panel panel-default">
+    <div class="panel-heading" role="tab" id="headingTwo">
+      <h4 class="panel-title">
+        <a class="collapsed" data-toggle="collapse"  href="#collapseTwo" aria-expanded="true" aria-controls="collapseTwo">
+          <strong>API Definition</strong>
+        </a>
+      </h4>
+    </div>
+    <div id="collapseTwo" class="panel-collapse" role="tabpanel" aria-labelledby="headingTwo">
+      <div class="panel-body">
                 <% if(session.get("wsdl") || ( api && api.wsdl )) {
                     var wsdl = session.get("wsdl");
                     if(api && api.wsdl){
@@ -328,16 +363,14 @@
 
                     session.put( "wsdl", null );
                 %>
-                <div id="api_designer">
-                    <a  href="#wsdlUpload" role="button" class="btn pull-right" data-toggle="modal" ><i class="fa fa-download" ></i> Import </a>
-                    <legend>API Definition</legend>
+                <div id="api_designer">                    
                     <div class="form-group api_wsdl">
                         <label class="col-sm-2 control-label" for="wsdl"><%=i18n.localize("wsdl")%>:</label>
                         <div class="col-sm-10">
                         <div class="input-append">
                         <input type="text" class="form-control validInput" id="wsdl" name="wsdl"  value="<%= wsdl %>" />
                         <button class="btn check_url_valid" url-type="wsdl" type="button" ><%=i18n.localize("testURI")%></button>
-                        <a class="icon-question-sign help_popup" help_data="wsdldesc_help"></a>
+                        <a class="help_popup" help_data="wsdldesc_help"><i class="fa fa-question-circle"></i></a>
                         <p id="wsdldesc_help" class="hide"><%=i18n.localize("wsdlDescHelpMsg")%></p>
                     </div>
                     <p class="help-block"><%=i18n.localize("wsdlHelpMsg")%></p>                
@@ -350,6 +383,11 @@
                     </div>
                 </div>      
                 <% } %>      
+      </div>
+    </div>
+  </div>  
+</div>
+      
     <%if(api!=null){%>
                 <input type = "hidden" name = "bizOwner" value = "<%=api.bizOwner%>" />
                 <input type = "hidden" name = "bizOwnerMail" value = "<%=api.bizOwnerMail%>" />
@@ -383,7 +421,7 @@
 <div class="resource_body_padding">
     <h5>Description :</h5>
         <a class="notes" data-path="{{resource_path}}" data-attr="description">{{ description }}</a>     
-    <h5>Response Content Type : <a href="#" data-path="{{resource_path}}" data-attr="produces" class="content_type produces" data-type="typeahead" data-pk="1" data-title="Response Content Type">{{ produces }}</a></h5>
+    <h5>Response Content Type : <a href="#" data-path="{{resource_path}}" data-attr="produces" class="content_type produces" data-type="text" data-pk="1" data-title="Response Content Type">{{ produces }}</a></h5>
     <h5>Parameters :</h5>
     {{#if parameters}}
     <table class="table table-condensed table-hover table-bordered">
@@ -402,7 +440,7 @@
         <td><a class="param_paramType" data-type="select" data-path="{{ ../resource_path}}.parameters[{{@index}}]" data-attr="in">{{ in }}</a></td>
         <td><a class="param_type" data-path="{{../resource_path}}.parameters[{{@index}}]" data-attr="type">{{ type }}</a></td>
         <td><a class="param_required" data-type="select" data-path="{{../resource_path}}.parameters[{{@index}}]" data-attr="required" data-value="{{toString required }}"></a></td>
-        <td align="center"><a data-path-name="{{path}}" data-path="{{../resource_path}}.parameters[{{@index}}]" data-index="{{@index}}" style="margin-left: 40px" class="delete_parameter icon-trash"></a></td>
+        <td align="center"><a data-path-name="{{path}}" data-path="{{../resource_path}}.parameters[{{@index}}]" data-index="{{@index}}" style="margin-left: 40px" class="delete_parameter"><i class='fa fa-trash'></i></a></td>
         </tr> 
     {{/each}}
     {{/if}}
@@ -414,7 +452,6 @@
 
 
 <script id="designer-resources-template" type="text/x-handlebars-template">
-<legend>API Definition</legend>
     <div class="resource_create">
         <div class="form-group">
             <label class="col-sm-2 control-label" for="inputPassword">URL Pattern</label>
@@ -441,7 +478,7 @@
                         <label class="checkbox checkbox-inline">
                         &nbsp;<input type="checkbox" value="options" class="http_verb_select"> OPTIONS
                         </label>
-                        <a class="icon-question-sign help_popup" help_data="options_help" data-trigger="hover"></a>
+                        &nbsp;<a class="help_popup" help_data="options_help" data-trigger="hover"><i class="fa fa-question-circle"></i></a>
                         <p id="options_help" class="hide"><%=i18n.localize("optionsHelpMsg")%></p>
                         <label id="less" class="checkbox-inline">less</label>
                     </div>

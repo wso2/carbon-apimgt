@@ -108,8 +108,18 @@
             <form class="form-horizontal" method="POST"
               id="manage_form"
               enctype="multipart/form-data" action="<%= jagg.url("/site/blocks/item-design/ajax/add.jag?" + apiUrlId ) %>&action=manage">
-    <fieldset>
-    <legend>Configurations</legend>
+
+<div class="panel-group" id="accordion" role="tablist" aria-multiselectable="true">
+  <div class="panel panel-default">
+    <div class="panel-heading" role="tab" id="headingOne">
+      <h4 class="panel-title">
+        <a href="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+            <strong>Configurations</strong>
+        </a>
+      </h4>
+    </div>
+    <div id="collapseOne" role="tabpanel" aria-labelledby="headingOne">
+      <div class="panel-body">
 
             <div class="form-group form-inline">
                         <label class = "col-sm-3 control-label" >Make this default version</label>
@@ -187,7 +197,7 @@
                     <input type="checkbox" id="toggleSequence" name="sequence_check" id="sequence_check"
                 <%
                 if((api.inSequence && (!"none".equals(api.inSequence)))|| (api.outSequence && (!"none".equals(api.outSequence)))
-                	|| ( api.faultSequence && (!"none".equals(api.faultSequence)))){ %>
+                    || ( api.faultSequence && (!"none".equals(api.faultSequence)))){ %>
                 checked="checked"<%}%>><%=i18n.localize("sequenceMsg")%>
                 </label>
                 </div>
@@ -244,27 +254,27 @@
             <!--Response Caching End -->
 
                 <div class="form-group">
-		        <% mod = jagg.module("api");
-		 	result = mod.isMultipleTenantsAvailable();
-	         	var isMultipleTenantsAvailable = result.status;
-			if(api.visibility == "public" && isMultipleTenantsAvailable == true){%>
+                <% mod = jagg.module("api");
+            result = mod.isMultipleTenantsAvailable();
+                var isMultipleTenantsAvailable = result.status;
+            if(api.visibility == "public" && isMultipleTenantsAvailable == true){%>
                         <label class="control-label col-sm-3" for="subscriptions"><%=i18n.localize("subscriptionsTitle")%>:</label>
                         <div class="controls col-sm-8">
-                        	<% if(api.visibility!="public") {%>
-                           	<select class="select required" id="subscriptions" name="subscriptions" >
-                               	<option value="current_tenant"  selected="selected"><%=i18n.localize("availableToCurrentTenant")%></option>
-                           	</select>
-                        	<%} else {%>
-                            	<select class="select required" id="subscriptions" name="subscriptions" >
-                               	<option value="current_tenant" <%if(api.subscriptionAvailability=="current_tenant"){%> selected="selected" <%}%> ><%=i18n.localize("availableToCurrentTenant")%></option>
+                            <% if(api.visibility!="public") {%>
+                            <select class="select required" id="subscriptions" name="subscriptions" >
+                                <option value="current_tenant"  selected="selected"><%=i18n.localize("availableToCurrentTenant")%></option>
+                            </select>
+                            <%} else {%>
+                                <select class="select required" id="subscriptions" name="subscriptions" >
+                                <option value="current_tenant" <%if(api.subscriptionAvailability=="current_tenant"){%> selected="selected" <%}%> ><%=i18n.localize("availableToCurrentTenant")%></option>
                                 <option value="all_tenants" <%if(api.subscriptionAvailability=="all_tenants"){%> selected="selected" <%}%> ><%=i18n.localize("availableToAllTenants")%></option>
-                                	<% if(!(enableSelectedTenantSubscription == 'false')) {%>
-                                	<option value="specific_tenants" <%if(api.subscriptionAvailability=="specific_tenants"){%> selected="selected" <%}%> ><%=i18n.localize("availableToSpecificTenants")%></option>
-                                	<% } %>
-                            	</select>
-                        	<%}%>
-                            	<a class="glyphicon glyphicon-question-sign help_popup" help_data="subscriptions_help"></a>
-                           	<div id="subscriptions_help" class="hide"><%=i18n.localize("subscriptionHelpMsg")%></div>
+                                    <% if(!(enableSelectedTenantSubscription == 'false')) {%>
+                                    <option value="specific_tenants" <%if(api.subscriptionAvailability=="specific_tenants"){%> selected="selected" <%}%> ><%=i18n.localize("availableToSpecificTenants")%></option>
+                                    <% } %>
+                                </select>
+                            <%}%>
+                                <a class="glyphicon glyphicon-question-sign help_popup" help_data="subscriptions_help"></a>
+                            <div id="subscriptions_help" class="hide"><%=i18n.localize("subscriptionHelpMsg")%></div>
                        </div>
                        <% } %>            
                 <br/>
@@ -280,17 +290,21 @@
                     
                     </div>
                 </div>
-    </fieldset>
-
-       <fieldset>
-    	<legend class="legend-with-hidden-info js_hidden_section_title">Gateway Environments<i class="glyphicon glyphicon-chevron-right icon-keys"></i></legend>
-    	 <div id="gatewayEnvironments" style="display: none;">
-    	<!--legend>Environments</legend-->
-
-
+      </div>
+    </div>
+  </div><!-- End of configuration panel -->
+  <div class="panel panel-default">
+    <div class="panel-heading" role="tab" id="headingTwo">
+      <h4 class="panel-title">
+        <a class="collapsed" data-toggle="collapse" href="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+          <strong>Gateway Environments</strong>
+        </a>
+      </h4>
+    </div>
+    <div id="collapseTwo" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingTwo">
         <table class="table table-bordered table-striped">
-        	 <thead>
-        	 <tr>
+             <thead>
+             <tr>
                 <th width="5%"><div class="environments_checkbox"></div></th>
                 <th><div class="environments_data">Environment Name</div></th>
                 <th><div class="environments_data">Type</div></th>
@@ -331,7 +345,6 @@
                        <%}}}%>
                        </tbody>
                        </table>
-                     </div>
                     <script>
                     $('input').on('change', function() {
                         var values = $('input:checked.env').map(function() {
@@ -342,13 +355,20 @@
                     }
                         $('#environments').val(values.toString());
                     });
-                    </script>
-                </fieldset>
-    <fieldset>
-	<legend class="legend-with-hidden-info js_hidden_section_title"><%=i18n.localize("businessInformationTitle")%> <i class="glyphicon glyphicon-chevron-right icon-keys"></i></legend>
-	 <div style="display: none">
-	<!--legend>Business Information</legend-->
-                               
+                    </script>                       
+    </div>
+  </div><!-- Gateway environments -->
+
+  <div class="panel panel-default">
+    <div class="panel-heading" role="tab" id="headingThree">
+      <h4 class="panel-title">
+        <a class="collapsed" data-toggle="collapse" href="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
+          <strong><%=i18n.localize("businessInformationTitle")%></strong>
+        </a>
+      </h4>
+    </div>
+    <div id="collapseThree" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingThree">
+      <div class="panel-body">
                     <div class="form-group">
                         <label class="control-label col-sm-3" for="bizOwner"><%=i18n.localize("busiOwner")%>:</label>
                         <div class="controls col-sm-8">
@@ -373,26 +393,42 @@
                              <input type="text" class=" email form-control businessInfo" id="techOwnerMail" name="techOwnerMail" value="<%=api.techOwnerMail%>"/>
                         </div>
                     </div>
-                 </div>
-            </fieldset>
+      </div>
+    </div>
+  </div><!-- Business Information -->
 
+  <div class="panel panel-default">
+    <div class="panel-heading" role="tab" id="headingFour">
+      <h4 class="panel-title">
+        <a class="" data-toggle="collapse" href="#collapseFour" aria-expanded="true" aria-controls="collapseFour">
+                    <strong>Resources</strong>
+        </a>
+      </h4>
+    </div>
+    <div id="collapseThree" class="panel-collapse " role="tabpanel" aria-labelledby="headingFour">
+      <div class="panel-body">
                 <div id="api_designer">
                     <div id ="apidoc_details"></div>
-                    <legend>Resources</legend>
                     <div id="scopes_view"></div>
                     <div id ="resource_details"></div>
-                </div>           
+                </div>      
+      </div>
+    </div>
+  </div><!-- Resources Information -->  
+</div>
+
+
+
+
+
+                          
                 <input type="hidden" id="environments" name="environments" value='<%=environmentsJson%>'/>
                 <input type="hidden" name="name" value="<%= encode.forHtml(api.name) %>" />
                 <input type="hidden" name="version" value="<%= encode.forHtml(api.version) %>" />
                 <input type="hidden" name="provider" value="<%= encode.forHtml(api.provider) %>" />
                 <input type="hidden" name="action" value="manage" />
                 <input type="hidden" id="swagger" name="swagger" value="" />
-                <div class="form-actions" style="display:none" id="saveMessage">
-                    <div class="btn loadingButton">Saving API. Please wait..</div>
-                </div>
-                <br/>
-                <br/>
+
                 <div class="form-actions" id="saveButtons"> 
 
                     <button class="btn btn-default has-spinner" id="save_api"><%=i18n.localize("save")%></button>
@@ -439,11 +475,8 @@
 <script id="designer-resource-template" type="text/x-handlebars-template">
 <div class="resource_body_padding">
     <h5>Description :</h5>
-    <a class="notes" data-path="{{resource_path}}" data-attr="description">{{ description }}</a>
-    <br />
-    <br />        
+    <a class="notes" data-path="{{resource_path}}" data-attr="description">{{ description }}</a><br />       
     <h5>Response Content Type : <a href="#" data-path="{{resource_path}}" data-attr="content_type" class="content_type" data-type="typeahead" data-pk="1" data-title="Responce Content Type">{{ content_type }}</a></h5>
-    <br />
     <h5>Parameters :</h5>
     {{#if parameters}}
     <table class="table table-condensed table-hover table-bordered">
