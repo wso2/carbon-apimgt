@@ -8,6 +8,7 @@ $(document).ready(function(){
     });
 
     $(".implementation_methods").change(function(event){
+        $(".implementation_method_"+$(this).val()).removeClass('hide');
         $(".implementation_method").hide();
         $(".implementation_method_"+$(this).val()).show();
     });
