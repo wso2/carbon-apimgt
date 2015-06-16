@@ -1282,6 +1282,7 @@ public class ApiMgtDAO {
             //It will not be shared within in the group 
             Application defaultApp = new Application(APIConstants.DEFAULT_APPLICATION_NAME, subscriber);
             defaultApp.setTier(APIConstants.UNLIMITED_TIER);
+            defaultApp.setGroupId("");
             addApplication(defaultApp, subscriber.getName(), conn);
                                                                
         } catch (SQLException e) {
