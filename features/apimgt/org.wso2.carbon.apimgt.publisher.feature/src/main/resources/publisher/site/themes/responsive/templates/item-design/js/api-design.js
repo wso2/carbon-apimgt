@@ -659,7 +659,7 @@ $(document).ready(function(){
     $("#clearThumb").on("click", function () {
         $('#apiThumb-container').html('<input type="file" id="apiThumb" class="input-xlarge validateImageFile" name="apiThumb" />');
     });
-
+    $('.toggleContainers .controls').hide();
     $('#import_swagger').attr('disabled','disabled');
     $('.toggleRadios input[type=radio]').click(function(){
         if (($(this).val() == 'swagger_import_file' &&
@@ -674,7 +674,7 @@ $(document).ready(function(){
         $('#swagger_file_help').hide();
         $('.toggleContainers .controls').hide();
         $('.toggleRadios input[type=radio]').prop('checked', false);
-        $('#' + $(this).val()).closest('div').fadeIn();
+        $('#' + $(this).val()).parent().fadeIn();
         $(this).prop('checked', true);
     });
 

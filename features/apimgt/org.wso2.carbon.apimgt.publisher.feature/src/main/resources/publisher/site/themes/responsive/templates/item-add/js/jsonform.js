@@ -306,7 +306,7 @@ jsonform.elementTypes = {
     }
   },
   'color':{
-    'template':'<input type="text" ' +
+    'template':'<input type="text" class="form-control"' +
       '<%= (fieldHtmlClass ? "class=\'" + fieldHtmlClass + "\' " : "") %>' +
       'name="<%= node.name %>" value="<%= escape(value) %>" id="<%= id %>"' +
       '<%= (node.disabled? " disabled" : "")%>' +
@@ -336,7 +336,7 @@ jsonform.elementTypes = {
   'endpoint':{
     'template':
       '<div class="input-append">'+
-      '<input type="text" ' +
+      '<input type="text" class="form-control"' +
       '<%= (fieldHtmlClass ? "class=\'" + fieldHtmlClass + "\' " : "") %>' +
       ' class="validateEndpoints form-control" '+
       'name="<%= node.name %>" value="<%= escape(value) %>" id="<%= id %>"' +
@@ -637,7 +637,7 @@ jsonform.elementTypes = {
     }
   },
   'select':{
-    'template':'<select name="<%= node.name %>" id="<%= id %>"' +
+    'template':'<select class="form-control" name="<%= node.name %>" id="<%= id %>"' +
       '<%= (fieldHtmlClass ? " class=\'" + fieldHtmlClass + "\'" : "") %>' +
       '<%= (node.disabled? " disabled" : "")%>' +
       '<%= (node.schemaElement && node.schemaElement.required ? " required=\'required\'" : "") %>' +

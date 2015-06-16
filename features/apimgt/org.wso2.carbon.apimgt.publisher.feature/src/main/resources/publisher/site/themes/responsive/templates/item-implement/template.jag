@@ -73,13 +73,13 @@
         </span>
     </div>
   <%  }%>
-
+    <br>
     <div class="row">
         <div class="col-sm-12">
 
         <div class="panel panel-default">
-          <div class="panel-heading col-sm-12">
-              <div class="api-implement-type" value="#managed-api">
+          <div class="panel-heading" style="height:100px;">
+              <div class="api-implement-type" data-parent="#accordion" data-toggle="collapse" data-target="#managed-api" value="#managed-api">
                  <div class="col-sm-1">
                      <i class="icon-implement fa fa-cogs fa-3x"></i>
                  </div>
@@ -90,13 +90,11 @@
               </div>
         </div>
 
-          <div class="panel-body">
-            <div class="slideContainer" id="managed-api">
-                <div class="" >
+        <div class="panel-collapse collapse slideContainer" role="tabpanel" id="managed-api">
+            <div class="panel-body">
                     <form class="form-horizontal" method="POST" id="implement_form" enctype="multipart/form-data"
                                     action="<%= jagg.url("/site/blocks/item-design/ajax/add.jag?action=implement&"+apiUrlId ) %>">
-                    <fieldset >
-                        <legend style="margin-left:0px;text-indent:10px"><%=i18n.localize("endpointTitle")%></legend>
+
                         <div class="form-group form-inline">
                             <label class="control-label col-sm-3" for="endpoint_type">Endpoint Type:<span class="requiredAstrix">*</span></label>
                                 <div class="col-sm-4">
@@ -169,7 +167,7 @@
                         <% }%>
 
                         </div><!-- more option endpoint -->
-                    </fieldset>
+
                     <hr />
                     <input type="hidden" name="name" value="<%= encode.forHtml(api.name) %>" />
                     <input type="hidden" name="version" value="<%= encode.forHtml(api.version) %>" />
@@ -186,12 +184,10 @@
                 </div>
             </div>
             </div>
-            </div>
-            <br>
 
             <div class="panel panel-default">
-              <div class="panel-heading col-sm-12">
-                  <div class="api-implement-type" value="#prototype">
+              <div class="panel-heading" style ="height:100px;">
+                  <div class="api-implement-type" data-parent="#accordion" data-toggle="collapse" data-target="#prototype" value="#prototype">
                      <div class="col-sm-1">
                          <i class="icon-implement fa fa-cog fa-3x"></i>
                      </div>
@@ -202,8 +198,9 @@
                   </div>
               </div>
 
+            <div id="prototype" class="panel-collapse collapse slideContainer" role="tabpanel" >
             <div class="panel-body">
-            <div class="slideContainer" id="prototype">
+
             <div class="">
             <form class="form-horizontal" method="POST" id="prototype_form" enctype="multipart/form-data"
                 action="<%= jagg.url("/site/blocks/item-design/ajax/add.jag?action=implement&"+apiUrlId ) %>">
@@ -244,21 +241,22 @@
                     <div class="form-group form-inline">
                         <label class="control-label col-sm-3">Prototype Endpoint:</label>
                         <div class="col-sm-8">
-                            <div class="input-append">
-                            <input type="text" id="prototype_endpoint" value="http://localhost" name="prototype_endpoint" class="required form-control">
-                            <button type="button" class="btn btn-default check_url_valid">Test</button>
-
+                            <div class="input-group">
+                                <input type="text" id="prototype_endpoint" value="http://localhost" name="prototype_endpoint" class="required form-control"/>
+                                <span class="input-group-btn"><button type="button" class="btn btn-default check_url_valid btn-block"><span>Test</span></button></span>
+                            </div>
                             <a style="margin-left:3px" class="glyphicon glyphicon-question-sign help_popup" help_data="endpoint_test_help"></a>
                             <div id="endpoint_test_help" class="hide">
                                 <p>WSO2 API Manager uses HTTP Head to check the validity of the endpoint.</p>
                             </div>
 
-                        </div>
+
                         <p class="help-block">E.g.,: http://appserver/resource</p>
+                        </div>
                         <span style="display:none;" class="help-block jsonform-errortext"></span>
                     </div>
                 </fieldset>
-
+                <hr />
                 <div class="form-actions" id="saveButtons">
 
                     <input type="hidden" name="name" value="<%= encode.forHtml(api.name) %>" />

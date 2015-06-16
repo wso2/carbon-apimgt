@@ -105,11 +105,12 @@ $( document ).ready(function() {
        });
     });
 
+    $('.toggleContainers .controls').hide();
     $('.toggleRadios input[type=radio]').prop('checked', false);
     $('.toggleRadios input[type=radio]').click(function(){
         $('.toggleContainers .controls').hide();
         $('.toggleRadios input[type=radio]').prop('checked', false);
-        $('#' + $(this).val()).closest('div').fadeIn();
+        $('#' + $(this).val()).parent().parent().fadeIn();
         $(this).prop('checked', true);
     });
 
