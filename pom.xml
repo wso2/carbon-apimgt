@@ -68,12 +68,31 @@
                 </plugin>
             </plugins>
         </pluginManagement>
+        <extensions>
+            <extension>
+                <groupId>org.apache.maven.wagon</groupId>
+                <artifactId>wagon-ssh</artifactId>
+                <version>2.1</version>
+            </extension>
+        </extensions>
     </build>
 
     <repositories>
         <repository>
+            <id>wso2-maven2-repository</id>
+            <name>WSO2 Maven2 Repository</name>
+            <url>http://dist.wso2.org/maven2/</url>
+        </repository>
+
+        <repository>
+            <id>wso2-maven2-snapshot-repository</id>
+            <name>WSO2 Maven2 Snapshot Repository</name>
+            <url>http://dist.wso2.org/snapshots/maven2/</url>
+        </repository>
+        <repository>
             <id>wso2-nexus</id>
             <name>WSO2 internal Repository</name>
+
             <url>http://maven.wso2.org/nexus/content/groups/wso2-public/</url>
             <releases>
                 <enabled>true</enabled>
@@ -82,64 +101,23 @@
             </releases>
         </repository>
 
-        <repository>
-            <id>wso2.releases</id>
-            <name>WSO2 internal Repository</name>
-            <url>http://maven.wso2.org/nexus/content/repositories/releases/</url>
-            <releases>
-                <enabled>true</enabled>
-                <updatePolicy>daily</updatePolicy>
-                <checksumPolicy>ignore</checksumPolicy>
-            </releases>
-        </repository>
-
-        <repository>
-            <id>wso2.snapshots</id>
-            <name>Apache Snapshot Repository</name>
-            <url>http://maven.wso2.org/nexus/content/repositories/snapshots/</url>
-            <snapshots>
-                <enabled>true</enabled>
-                <updatePolicy>daily</updatePolicy>
-            </snapshots>
-            <releases>
-                <enabled>false</enabled>
-            </releases>
-        </repository>
     </repositories>
 
     <pluginRepositories>
         <pluginRepository>
-            <id>wso2.releases</id>
-            <name>WSO2 internal Repository</name>
-            <url>http://maven.wso2.org/nexus/content/repositories/releases/</url>
-            <releases>
-                <enabled>true</enabled>
-                <updatePolicy>daily</updatePolicy>
-                <checksumPolicy>ignore</checksumPolicy>
-            </releases>
+            <id>wso2-maven2-repository-1</id>
+            <url>http://dist.wso2.org/maven2</url>
         </pluginRepository>
 
         <pluginRepository>
-            <id>wso2.snapshots</id>
-            <name>WSO2 Snapshot Repository</name>
-            <url>http://maven.wso2.org/nexus/content/repositories/snapshots/</url>
-            <snapshots>
-                <enabled>true</enabled>
-                <updatePolicy>daily</updatePolicy>
-            </snapshots>
-            <releases>
-                <enabled>false</enabled>
-            </releases>
+            <id>wso2-maven2-repository-2</id>
+            <url>http://dist.wso2.org/snapshots/maven2</url>
         </pluginRepository>
         <pluginRepository>
-            <id>wso2-nexus</id>
-            <name>WSO2 internal Repository</name>
-            <url>http://maven.wso2.org/nexus/content/groups/wso2-public/</url>
-            <releases>
-                <enabled>true</enabled>
-                <updatePolicy>daily</updatePolicy>
-                <checksumPolicy>ignore</checksumPolicy>
-            </releases>
+            <id>repository.dev.java.net-maven2</id>
+            <name>Java.net Repository for Maven</name>
+            <url>http://download.java.net/maven/2/</url>
+            <layout>default</layout>
         </pluginRepository>
     </pluginRepositories>
 
@@ -778,6 +756,18 @@
         <javax.xml.soap.imp.pkg.version>[1.0.0, 1.1.0)</javax.xml.soap.imp.pkg.version>
         <javax.xml.stream.imp.pkg.version>[1.0.1, 1.1.0)</javax.xml.stream.imp.pkg.version>
     </properties>
+    <distributionManagement>
+        <repository>
+            <id>wso2-maven2-repository</id>
+            <name>WSO2 Maven2 Repository</name>
+            <url>scp://dist.wso2.org/home/httpd/dist.wso2.org/maven2/</url>
+        </repository>
+        <snapshotRepository>
+            <id>wso2-maven2-snapshot-repository</id>
+            <name>WSO2 Maven2 Snapshot Repository</name>
+            <url>scp://dist.wso2.org/home/httpd/dist.wso2.org/snapshots/maven2/</url>
+        </snapshotRepository>
+    </distributionManagement>
 </project>
 
 
