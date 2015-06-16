@@ -277,7 +277,6 @@ APIDesigner.prototype.display_elements = function(value,source){
 };
 
 APIDesigner.prototype.update_elements = function(resource, newValue){
-    debugger;
     var API_DESIGNER = APIDesigner();
     var obj = API_DESIGNER.query($(this).attr('data-path'));
     var obj = obj[0]
@@ -569,8 +568,7 @@ APIDesigner.prototype.render_resource = function(container){
         success : this.update_elements
     });
     container.find('.produces').editable({
-        value : "application/json",
-        source: content_types,
+        type:"text",
         success : this.update_elements
     });
     container.find('.param_desc').editable({
@@ -618,9 +616,7 @@ APIDesigner.prototype.add_resource = function(resource, path){
 };
 
 APIDesigner.prototype.edit_swagger = function(){
-    //$("body").addClass("modal-open");
-    //var editor = $("#swaggerEditer").remove();
-    //$('body').append(editor);
+    $("body").addClass("modal-open");
     $(".content-data.row").hide();
     $("#swaggerEditer").append('<iframe id="se-iframe"  style="border:0px;"background: #4a4a4a; width="100%" height="100%"></iframe>');    
     document.getElementById('se-iframe').src = $("#swaggerEditer").attr("editor-url");
@@ -628,7 +624,7 @@ APIDesigner.prototype.edit_swagger = function(){
 };
 
 APIDesigner.prototype.close_swagger_editor = function(){
-    //$("body").removeClass("modal-open");
+    $("body").removeClass("modal-open");
     $(".content-data.row").show();
     $("#se-iframe").remove();
     $("#swaggerEditer").fadeOut("fast");

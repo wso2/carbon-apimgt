@@ -117,6 +117,15 @@ code {
     line-height: 15px;
 }
 
+.sidebar-nav li.active {
+    background: #337ab7;
+    color: white !important;
+}
+
+.sidebar-nav li.active a{
+  color: #FFF;
+}
+
 .sidebar-nav .nav-header{
     display: block;
     font-weight: bolder;
@@ -126,13 +135,18 @@ code {
 .sidebar-nav li a {
     display: block;
     text-decoration: none;
-    color: #999999;
+    color: #777;
 }
 
 .sidebar-nav li a:hover {
-    text-decoration: none;
-    color: #fff;
+    text-decoration: underline;
+    color: #000;
     background: rgba(255,255,255,0.2);
+}
+
+.sidebar-nav li.active a:hover {
+    text-decoration: none;
+    color: #FFF;
 }
 
 .sidebar-nav li a:active,
@@ -153,6 +167,15 @@ code {
 .sidebar-nav > .sidebar-brand a:hover {
     color: #fff;
     background: none;
+}
+
+.child-nodesw li{
+  padding-left: 10px;
+}
+
+.sidebar-nav li.statsActive a{
+  color:#337ab7 !important;
+  border-right: 5px solid #337ab7;
 }
 
 @media(min-width:1200px) {
