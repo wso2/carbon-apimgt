@@ -22,13 +22,13 @@
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>oidc-authenticator</artifactId>
-        <version>1.0.0-SNAPSHOT</version>
+        <version>1.0.0</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
     <artifactId>org.wso2.carbon.apimgt.hostobjects.oidc</artifactId>
-    <version>1.0.0-SNAPSHOT</version>
+    <version>1.0.0</version>
     <packaging>bundle</packaging>
     <name>WSO2 Carbon -OIDC HostObject</name>
     <description>Single sign on based on OIDC</description>
@@ -121,6 +121,6 @@
 	<properties>
 		<commons-codec.version>1.4.0.wso2v1</commons-codec.version>
 		<opensaml2.version>2.4.1.wso2v1</opensaml2.version>
-        <mitreid-connect-version>1.1.10-SNAPSHOT</mitreid-connect-version>
+        <mitreid-connect-version>1.1.10</mitreid-connect-version>
 	</properties>
 </project>
