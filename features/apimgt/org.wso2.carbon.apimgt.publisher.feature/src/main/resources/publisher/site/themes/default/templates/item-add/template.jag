@@ -8,7 +8,7 @@
       <div class="row-fluid">
          <div class="span12">
 
-           <label class="radio select-label create-options"><input class="create-api" type="radio" name="create-api" data-target="#existingAPI"/>I have an Existing API
+           <label class="radio select-label create-options"><input autocomplete="off" class="create-api" type="radio" name="create-api" data-target="#existingAPI"/>I have an Existing API
            <p><%=i18n.localize("createFromExistingAPI")%></p>
             </label>
 
@@ -42,7 +42,7 @@
             </div>
          </div>
 
-         <label class="radio select-label create-options"><input class="create-api" type="radio" name="create-api" data-target="#soapEndpoint">I have a SOAP Endpoint
+         <label class="radio select-label create-options"><input autocomplete="off" class="create-api" type="radio" name="create-api" data-target="#soapEndpoint">I have a SOAP Endpoint
          <p><%=i18n.localize("createFromExistingSOAPEndpoint")%></p></label>
 
          <div id="soapEndpoint" class="slideContainer hide">
@@ -78,7 +78,7 @@
             </div>
          </div>
 
-            <label class="radio  select-label create-options"><input class="create-api" id="create-new-api" type="radio" name="create-api" data-target="#newAPI" />Design new API
+            <label class="radio  select-label create-options"><input autocomplete="off" class="create-api" id="create-new-api" type="radio" name="create-api" data-target="#newAPI" />Design new API
             <p><%=i18n.localize("designNewAPI")%></p></label>
 
             <div id="newAPI" class="slideContainer hide">
