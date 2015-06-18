@@ -17,7 +17,7 @@
  *
  */
 asset.manager = function(ctx) {
-    var apiPublisher =  require('apipublisher').apipublisher;
+    var apiPublisher =  require('apipublisher').provider;
     var LOGGED_IN_USER = 'LOGGED_IN_USER';
     var log = new Log('default-asset');
 
@@ -334,6 +334,14 @@ asset.server = function (ctx) {
                         url: 'api-subscriptions',
                         path: 'api-subscriptions.jag'
                     }, {
+                        title: 'API Usage Details By Version',
+                        url: 'versions',
+                        path: 'versions.jag'
+                    }, {
+                        title: 'API Usage Details By Users',
+                        url: 'users',
+                        path: 'users.jag'
+                    }, {
                         title: 'Start Creating an API',
                         url: 'start',
                         path: 'start.jag',
@@ -360,6 +368,9 @@ asset.server = function (ctx) {
                    },{
                        url: 'validation',
                        path: 'validation.jag'
+                   },{
+                       url: 'usage',
+                       path: 'usage.jag'
                    },{
                        url: 'addDoc',
                        path: 'document_add.jag'

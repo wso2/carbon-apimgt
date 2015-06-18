@@ -42,7 +42,7 @@ require('/modules/publisher.js').exec(function(ctx) {
         ctx.response.sendError(404,'Asset was not found');
         return;
     }
-    var apiPublisher =  require('apipublisher').apipublisher;
+    var apiPublisher =  require('apipublisher').provider;
     var apiProxy = apiPublisher.instance(ctx.username);
     var api = apiProxy.getAPI(asset.attributes.overview_provider, asset.attributes.overview_name, asset.attributes.overview_version).api;
 

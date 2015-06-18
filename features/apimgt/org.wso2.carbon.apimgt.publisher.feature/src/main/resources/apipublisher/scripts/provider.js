@@ -18,9 +18,9 @@
  */
 
 //TODO add proper introduction to the module
-var apipublisher = {};
+var provider = {};
 
-(function (apipublisher) {
+(function (provider) {
 
     var APIManagerFactory = Packages.org.wso2.carbon.apimgt.impl.APIManagerFactory;
     var APISubscriber = Packages.org.wso2.carbon.apimgt.api.model.Subscriber;
@@ -65,7 +65,7 @@ var apipublisher = {};
         this.impl = APIManagerFactory.getInstance().getAPIProvider(this.username);
     }
 
-    apipublisher.instance = function(username){
+    provider.instance = function(username){
         return new APIProviderProxy(username);
     };
 
@@ -1018,5 +1018,5 @@ var apipublisher = {};
             };
         }
     };
-})(apipublisher);
+})(provider);
 

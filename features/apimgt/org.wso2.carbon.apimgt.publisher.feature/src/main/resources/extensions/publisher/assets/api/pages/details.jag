@@ -42,7 +42,7 @@ require('/modules/publisher.js').exec(function(ctx) {
 			response.sendError(404, 'The asset with id: ' + options.id + ' could not be located.');
 		} else {
 			//Get api resource details
-			var apiPublisher =  require('apipublisher').apipublisher;
+			var apiPublisher =  require('apipublisher').provider;
 			var apiProxy = apiPublisher.instance(user.username);
 			var api = apiProxy.getAPI(asset.attributes.overview_provider, asset.attributes.overview_name, asset.version).api;
 			var output = am.render(asset, page).details();
