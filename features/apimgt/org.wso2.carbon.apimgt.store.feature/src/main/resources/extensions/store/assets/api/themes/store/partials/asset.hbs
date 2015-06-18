@@ -115,20 +115,25 @@
     <input type="hidden" id="version" value="{{api.version}}">
     <input type="hidden" id="provider" value="{{api.provider}}">
 
-    <div class="asset-properties margin-top-double float-left">
-        <ul class='nav nav-tabs'>
-            <li><a href='#api-overview'>{{t "Overview"}}</a></li>
-            <li><a href='#api-docs'>{{t "Documentation"}}</a></li>
-            <li><a href='#'>{{t "API Console"}}</a></li>
-            <li><a href='#'>{{t "Throttling Info"}}</a></li>
-            <li><a href='#'>{{t "Forum"}}</a></li>
-        </ul>
+  <div class="asset-properties margin-top-double float-left">
+      <ul class="nav nav-tabs">
+          <li class="active"><a data-toggle="tab" href="#api-overview">{{t "Overview"}}</a></li>
+          <li><a data-toggle="tab" href="#api-docs">{{t "Documentation"}}</a></li>
+          <li><a data-toggle="tab" href="#swagger">{{t "API Console"}}</a></li>
+          <li><a data-toggle="tab" href="#">{{t "Throttling Info"}}</a></li>
+          <li><a data-toggle="tab" href="#">{{t "Forum"}}</a></li>
+      </ul>
+      <div class="tab-content">
+          <div id="api-overview" class="tab-pane fade in active">
+          {{> api_overview .}}
+          </div>
+          <div id="api-docs" class="tab-pane fade">{{t "Docs"}}
+          </div>
+          <div id="swagger" class="tab-pane fade">{{> swagger .}}
+          </div>
+      </div>
+  </div>
 
-        <div class='tab-content'>
-            <div class='tab-pane active' id='api-overview'>
-                {{> api_overview .}}
-            </div>
-            <div class='tab-pane' id='api-docs'>{{t "Docs"}}</div>
-        </div>
-    </div>
-</div>
+
+
+  </div>
