@@ -20,6 +20,6 @@ var resources = function(page,meta){
     return {
         js:['graph/nvd3/js/d3.v3.js','graph/nvd3/js/nv.d3.js', 'usage/usage_versions.js', 'bootstrap/bootstrap-dialog.min.js'],
         code : ['api_identifier.hbs'],
-        css:['graph/nvd3/css/nv.d3.css', 'bootstrap-dialog.min.css']
+        css:['graph/nvd3/css/nv.d3.css', 'bootstrap/bootstrap-dialog.min.css']
     }
 };

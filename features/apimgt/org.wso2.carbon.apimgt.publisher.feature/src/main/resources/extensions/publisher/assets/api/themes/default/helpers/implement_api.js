@@ -23,7 +23,7 @@ var resources = function(page,meta){
             'url-validation.js','bootstrap/bootstrap-multiselect.js', 'bootstrap/bootstrap-editable.js', 'jsonpath-0.8.0.js',
             'endpoint-ui.js', 'handlebars.js','jquery/jquery-ace.min.js', 'src-noconflict/ace.js', 'src-noconflict/mode-javascript.js',
             'typeaheadjs.js','bootstrap/bootstrap-dialog.min.js','api_designer.js','implement_api_inline.js','implement_api.js'],
-        css:['bootstrap-multiselect.css','api_designer.css', 'bootstrap/bootstrap-editable.css', 'bootstrap-dialog.min.css'],
+        css:['bootstrap/bootstrap-multiselect.css','api_designer.css', 'bootstrap/bootstrap-editable.css', 'bootstrap/bootstrap-dialog.min.css'],
         code:['api_meta.hbs']
     };
 };

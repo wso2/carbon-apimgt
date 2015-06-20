@@ -25,6 +25,6 @@ var resources = function(page,meta){
             'jquery/jquery.noty.packaged.min.js' ,'typeaheadjs.js'],
         code:['api_meta.hbs', 'design_api_meta.hbs'],
         css:['bootstrap/bootstrap-editable.css','buttonLoader.css',
-             'bootstrap/bootstrap-tagsinput.css','api_designer.css','bootstrap-dialog.min.css', 'bootstrap-multiselect.css']
+             'bootstrap/bootstrap-tagsinput.css','api_designer.css','bootstrap/bootstrap-dialog.min.css', 'bootstrap/bootstrap-multiselect.css']
     }
 };
