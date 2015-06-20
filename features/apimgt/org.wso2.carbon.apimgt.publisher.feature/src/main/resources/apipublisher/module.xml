@@ -18,9 +18,12 @@
 
 <module name="apipublisher" xmlns="http://wso2.org/projects/jaggery/module.xml">
    <script>
-       <name>apipublisher</name>
-       <path>scripts/apipublisher.js</path>
+       <name>provider</name>
+       <path>scripts/provider.js</path>
    </script>
-   
+    <script>
+        <name>statistics</name>
+        <path>scripts/statistics.js</path>
+    </script>
 </module>
 

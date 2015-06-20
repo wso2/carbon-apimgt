@@ -19,11 +19,12 @@
 
 var resources = function(page,meta){
     return {
-        js:['typeahead.bundle.js', 'jquery.form.js','jquery.cookie.js','jquery.validate.min.js','manage_api.js','bootstrap-editable.js' ,
-            'bootstrap-multiselect.js','bootstrap-dialog.min.js','jsonpath-0.8.0.js','handlebars.js','api_designer.js',
-            'manage_api_inline.js', 'typeaheadjs.js'],
+        js:['typeahead.bundle.js', 'jquery/jquery.form.js','jquery/jquery.cookie.js','jquery/jquery.validate.min.js',
+            'manage_api.js','bootstrap/bootstrap-editable.js','bootstrap/bootstrap-multiselect.js',
+            'bootstrap/bootstrap-dialog.min.js','jsonpath-0.8.0.js','handlebars.js','api_designer.js','manage_api_inline.js',
+            'typeaheadjs.js'],
         code:['api_meta.hbs'],
-        css:['bootstrap/bootstrap-editable.css','bootstrap-dialog.min.css',
-             'bootstrap/bootstrap-tagsinput.css','api_designer.css', 'bootstrap-multiselect.css']
+        css:['bootstrap/bootstrap-editable.css','bootstrap/bootstrap-dialog.min.css',
+             'bootstrap/bootstrap-tagsinput.css','api_designer.css', 'bootstrap/bootstrap-multiselect.css']
     }
 };

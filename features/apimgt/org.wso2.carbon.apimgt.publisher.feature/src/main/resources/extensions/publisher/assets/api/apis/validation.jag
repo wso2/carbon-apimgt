@@ -34,7 +34,7 @@ require('/modules/publisher.js').exec(function (ctx) {
 	var constants = require("rxt").constants;
 	switch (method) {
 		case 'POST':// GET endpoints
-			var apiPublisher = require('apipublisher').apipublisher;
+			var apiPublisher = require('apipublisher').provider;
 			var apiProxy = apiPublisher.instance(username);
 			var action = request.getParameter("action");
 			if (uriMatcher.match(GET_VALIDATION_URL)) {//return assets by type
