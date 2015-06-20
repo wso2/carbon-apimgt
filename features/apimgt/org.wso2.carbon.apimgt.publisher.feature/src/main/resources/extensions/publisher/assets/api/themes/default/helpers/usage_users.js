@@ -18,9 +18,9 @@
  */
 var resources = function(page,meta){
     return {
-        js:['graph/nvd3/js/d3.v3.js','graph/nvd3/js/nv.d3.js', 'usage/usage_users.js', 'bootstrap/bootstrap-dialog.min.js',
+        js:['graph/nvd3/js/d3.v3.js','graph/nvd3/js/nv.d3.js', 'jquery/jquery.dataTables.min.js', 'usage/usage_users.js', 'bootstrap/bootstrap-dialog.min.js',
             'bootstrap/dataTables.bootstrap.js'],
         code : ['api_identifier.hbs'],
-        css:['graph/nvd3/css/nv.d3.css', 'bootstrap/bootstrap-dialog.min.css',  'bootstrap/dataTables.bootstrap.css']
+        css:['graph/nvd3/css/nv.d3.css', 'jquery/jquery.dataTables.min.css', 'bootstrap/bootstrap-dialog.min.css',  'bootstrap/dataTables.bootstrap.css']
     }
 };

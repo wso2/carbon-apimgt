@@ -21,12 +21,12 @@
 			{{#unless subscribers}}
 				<tr><td colspan="3">{{t locale.noActiveSubscribersMsg}}</td></tr>
 			{{else}}
-				{{#with subscribers}}
+				{{#each subscribers}}
 					<tr>
-						<td><i class="glyphicon glyphicon-user">&nbsp;</i>{{this.username}}</td>
+						<td><i class="fa fa-user">&nbsp;</i>{{this.name}}</td>
 						<td class="dateFull">{{this.subscribedDate}}</td>
 					</tr>
-				{{/with}}
+				{{/each}}
 			{{/unless}}
 			</tbody>
 		</table>

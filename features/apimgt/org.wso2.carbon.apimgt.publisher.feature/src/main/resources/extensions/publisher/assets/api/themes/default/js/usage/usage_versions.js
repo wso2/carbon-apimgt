@@ -110,46 +110,6 @@ $(function () {
         return size;
     };
 
-    function drawUserChart(chartID, data) {
-        var h = 600;
-        var r = h / 2;
-        var arc = d3.svg.arc().outerRadius(r);
-
-        nv.addGraph(function () {
-            var chart = nv.models.pieChart()
-                    .x(function (d) {
-                           return d.user
-                       })
-                    .y(function (d) {
-                           return d.count
-                       })
-                    .showLabels(true)
-                    .labelType("percent")
-                    .showLegend(false)
-                    .color(d3.scale.category20().range())
-                    .tooltipContent(function (key, x, y) {
-                                        return '<b>' + key + '</b> - ' + Math.round(x) + " <i>call(s)</i>"
-                                    });
-
-            d3.select('#' + chartID + ' svg')
-                    .datum(data)
-                    .transition().duration(350)
-                    .call(chart);
-            d3.selectAll(".nv-label text")
-                    .attr("transform", function (d) {
-                              d.innerRadius = -450;
-                              d.outerRadius = r;
-                              return "translate(" + arc.centroid(d) + ")";
-                          }
-            )
-                    .attr("text-anchor", "middle")
-                    .style({"font-size": "0.7em"});
-
-            nv.utils.windowResize(chart.update);
-            return chart;
-        });
-    };
-
     function drawVersionChart(chartID, data) {
         var h = 600;
         var r = h / 2;
