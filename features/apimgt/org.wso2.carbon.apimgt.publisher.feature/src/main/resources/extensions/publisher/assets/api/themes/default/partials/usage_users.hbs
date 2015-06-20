@@ -1,12 +1,3 @@
-<% var api=outputs.api;
-var subs = jagg.module("subscription");
-var result = subs.getSubscribersOfAPI(api);
-var subscribers = result.subscribers;
-var itemsPerPage = 10; //reduce this number to preview the pagination
-var currentPage = 1;
-var numberOfPages;
-
-%>
 <div class="row-fluid" id="usageSummary" style="display:none;">
 	<div class="span6">
 		<h3>{{t locale.usageSummary}}</h3>
@@ -19,63 +10,26 @@ var numberOfPages;
 <div class="row-fluid">
 	<div class="span12">
 		<h3>{{t locale.activeSubscriptions}}</h3>
-		<table class="table table-bordered">
+		<table id="subscribers" class="table table-striped table-bordered" cellspacing="0" width="100%">
 			<thead>
 			<tr>
 				<th class="span4">{{t locale.name}}</th>
 				<th>{{t locale.dateOfUserRegistration}}</th>
-				<!--<th>Actions</th> -->
 			</tr>
 			</thead>
 			<tbody id="userList">
-			<%
-			var i, subscriber;
-			if(subscribers!=null){
-			var length = subscribers.length;
-			numberOfPages = parseInt(length / itemsPerPage);
-			if (length % itemsPerPage != 0) {
-			numberOfPages++;
-			}
-			if (request.getParameter('page') != null) {
-			currentPage = parseInt(request.getParameter('page'));
-			if((currentPage-1)*itemsPerPage == length){
-			if(String(currentPage)=='1'){%>
-			<script>
-				window.location.href = "<%=jagg.getAbsoluteUrl("/site/pages/item-info.jag")%>";
-			</script>
-			<%}else{
-			currentPage = currentPage - 1;
-			%>
-			<script>
-				window.location.href = "<%=jagg.getAbsoluteUrl("/site/pages/item-info.jag")%>" +"?name="+"<%=api.name%>"+"&version="+"<%=api.version%>"+"&provider="+"<%=api.provider%>"+"&page="+"<%=String(currentPage)%>";
-			</script>
-			<%
-			} }  }
-			var from = (currentPage - 1)*itemsPerPage;
-			var to = currentPage*itemsPerPage;
-			if(currentPage == numberOfPages){
-			to = length%(itemsPerPage*currentPage);
-			if(to == 0){
-			to=itemsPerPage*currentPage;
-			}
-			}
-			{{#if subscribers}}
-			<tr><td colspan="3">{{t locale.noActiveSubscribersMsg}}</td></tr>
+			{{#unless subscribers}}
+				<tr><td colspan="3">{{t locale.noActiveSubscribersMsg}}</td></tr>
 			{{else}}
 				{{#with subscribers}}
 					<tr>
 						<td><i class="glyphicon glyphicon-user">&nbsp;</i>{{this.username}}</td>
 						<td class="dateFull">{{this.subscribedDate}}</td>
-						<!--<td><i class="glyphicon glyphicon-edit"></i> <a href="#">Stats</a>
-						<i class="glyphicon glyphicon-trash"></i> <a href="#">Revoke Access</a>
-						<i class="glyphicon glyphicon-ban-circle"></i> <a href="#">Block</a>-->
-						</td>
 					</tr>
 				{{/with}}
-			{{/if}}
+			{{/unless}}
 			</tbody>
 		</table>
-		<ul id="pagination" class="pagination-sm"></ul>
 	</div>
 </div>
 
@@ -132,11 +86,3 @@ var numberOfPages;
 		</table>
 	</div>
 </div>
-
-
-
-
-
-
-
-<% }); %>

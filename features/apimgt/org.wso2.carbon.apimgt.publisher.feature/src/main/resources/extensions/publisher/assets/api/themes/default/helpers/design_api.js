@@ -20,7 +20,7 @@ var resources = function(page,meta){
     return {
         js:['jquery/jquery-ace.min.js','typeahead.bundle.js','jquery/jquery.buttonLoader.js',
             'jquery/jquery.form.js','jquery/jquery.cookie.js','bootstrap/bootstrap-tagsinput.min.js','jquery/jquery.validate.min.js',
-            'js-yaml.min.js','bootsrap/bootstrap-dialog.min.js','api_designer.js','create_asset.js','bootstrap/bootstrap-editable.js' ,
+            'js-yaml.min.js','bootstrap/bootstrap-dialog.min.js','api_designer.js','create_asset.js','bootstrap/bootstrap-editable.js' ,
             'bootstrap/bootstrap-multiselect.js', 'custom-validation.js','jsonpath-0.8.0.js','handlebars.js',
             'jquery/jquery.noty.packaged.min.js' ,'typeaheadjs.js'],
         code:['api_meta.hbs', 'design_api_meta.hbs'],

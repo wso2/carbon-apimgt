@@ -22,6 +22,10 @@ require('/modules/publisher.js').exec(function(ctx) {
 	caramel = require('caramel');
 	var ui = require('rxt').ui;
 	var asset = require('rxt').asset;
+	var carbon = require('carbon');
+	var server = require('store').server;
+	var user = server.current(ctx.session);
+	var username = user.username;
 	var uriMatcher = new URIMatcher(ctx.request.getRequestURI());
 	var options = uriMatcher.match('/{context}/asts/{type}/{pageName}/{+id}')||uriMatcher.match('/{context}/asts/{type}/{pageName}');
 	var log = new Log('api-usage-by-versiion');
@@ -46,16 +50,13 @@ require('/modules/publisher.js').exec(function(ctx) {
 			apiIdentifier.provider = assets.attributes.overview_provider;
 			var result = apiProxy.getSubscribersOfAPI(apiIdentifier);
 			var subscribers = result.subscribers;
-
 			var output = am.render(assets, page).details();
 			output.apiIdentifier = apiIdentifier;
-
-			var pageProperties = {};
-			var itemsPerPage = 10; //reduce this number to preview the pagination
-			var currentPage = 1;
-			var numberOfPages;
-
-
+			if(subscribers != null && subscribers.length != 0) {
+				output.subscribers = subscribers;
+			} else {
+				output.subscribers = null;
+			}
 			//Set language specific helper messages and names
 			var locale = require('/extensions/assets/api/locale/locale_en.json');
 			output.locale = locale;

@@ -200,32 +200,7 @@ var provider = {};
     		var json = APIUtil.convertToString(apisArray);
     		if(json != null){
     			apisJSON = JSON.parse(json);
-    			//log.info(json);
     		}
-
-    		/*for (var i = 0 ; i < apisArray.size(); i++) {
-    			var usage = pisArray.get(i);
-    			var apiSubscriptionsArray = usage.getApiSubscriptions();
-    			var apiSubscriptions = [];
-    			for(var y = 0 ; y < apiSubscriptionsArray.size(); y++){
-    				var apiSubscription = apiSubscriptions.get(y);
-    				apiSubscriptions.push({
-    					"status": apiSubscription.getSubStatus()
-
-    				});
-    			}
-    			apis.push({
-    				"userId": usage.getUserId(),
-    				"applicationName":subscriber.getName(),
-                    "subStatus": subscriber.getDescription(),
-                    "accessToken": new Date(subscriber.getSubscribedDate().getTime()),
-                    "accessTokenStatus": subscriber.getId(),
-                    "apiSubscriptions": apiSubscriptions
-
-
-    			});
-            }*/
-
     		return {
                 error:false,
                 apis:apisJSON
@@ -245,8 +220,9 @@ var provider = {};
         var identifier = new Packages.org.wso2.carbon.apimgt.api.model.APIIdentifier(apiId.provider, apiId.name, apiId.version);
         try{
     		subscriberSet = this.impl.getSubscribersOfAPI(identifier);
-    		for (var i = 0 ; i < subscriberSet.size(); i++) {
-    			var subscriber = subscriberSet.get(i);
+            var iterator = subscriberSet.iterator();
+    		while(iterator.hasNext()) {
+    			var subscriber = iterator.next();
     			subscribers.push({
     				"name":subscriber.getName(),
                     "description": subscriber.getDescription(),
