@@ -322,8 +322,8 @@ asset.server = function (ctx) {
                         path: 'documents.jag'
                     }, {
                         title: 'Tier Permissions',
-                        url: 'tier_permissions',
-                        path: 'tier_permissions.jag'
+                        url: 'tier-permissions',
+                        path: 'tier-permissions.jag'
                     }, {
                         title: 'Manage',
                         url: 'manage',
@@ -353,9 +353,12 @@ asset.server = function (ctx) {
                    }, {
                        url: 'lifecycle',
                        path: 'lifecycle.jag'
-                   }, {
+                   },{
                        url: 'start',
                        path: 'start.jag'
+                   },{
+                       url: 'tiers',
+                       path: 'tiers.jag'
                    },{
                        url: 'sequences',
                        path: 'sequences.jag'
@@ -446,8 +449,7 @@ asset.renderer = function (ctx) {
         navList.push('All Statistics', 'btn-stats', '/asts/' + type + '/statistics');
         navList.push('Subscriptions', 'btn-subscribe', '/asts/' + type + '/api-subscriptions');
         navList.push('Statistics', 'btn-stats', '/asts/' + type + '/statistics');
-        navList.push('Tier Permissions', 'btn-cog', '/asts/' + type + '/statistics');
-        //navList.push('Configuration', 'icon-dashboard', util.buildUrl('configuration'));
+        navList.push('Tier Permissions', 'btn-cog', '/asts/' + type + '/tier-permissions');
         return navList.list();
     };
 
@@ -531,6 +533,9 @@ asset.renderer = function (ctx) {
                         page.leftNav = buildListLeftNav(page, this);
                         break;
                     case 'start':
+                        page.leftNav = buildListLeftNav(page, this);
+                        break;
+                    case 'tier-permissions':
                         page.leftNav = buildListLeftNav(page, this);
                         break;
                     default:

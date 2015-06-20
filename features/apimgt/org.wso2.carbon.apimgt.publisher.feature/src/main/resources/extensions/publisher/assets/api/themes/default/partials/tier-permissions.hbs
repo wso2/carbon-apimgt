@@ -1,0 +1,67 @@
+<div id="tiers">
+	<div class="title-section">
+		<h2>{{t locale.tierPermissions}}</h2>
+	</div>
+	<div class="content-section shadow-up">
+		<div class="content-data">
+			<table class="table table-bordered">
+				<thead>
+				<tr>
+					<th class="tierSpecialCell">{{t locale.tiers}}</th>
+					<th class="appSpecialCell">{{t locale.permissions}}</th>
+				</tr>
+				</thead>
+				<tbody id="tiers">
+				{{#each tierPermissions}}
+					<tr>
+						<td>{{this.tierDisplayName}}</td>
+						<td>
+							<div>
+								<div id="radiodev" class="form-inline">
+									{{#if this.denied}}
+										<label class="checkbox-inline radio">
+											<input type="radio"  name="permissionType{{this.index}}" value="allow" id="y"/>
+											{{t ../../locale.allow}}
+										</label>
+										<label class="checkbox-inline radio">
+											<input type="radio" name="permissionType{{this.index}}" value="deny" id="z" checked/>
+											{{t ../../locale.deny}}
+										</label>
+									{{else}}
+										<label class="checkbox-inline radio">
+											<input type="radio"  name="permissionType{{this.index}}" value="allow" id="y" checked/>
+											{{t ../../locale.allow}}
+										</label>
+										<label class="checkbox-inline radio">
+											<input type="radio" name="permissionType{{this.index}}" value="deny" id="z"/>
+											{{t ../../locale.deny}}
+										</label>
+									{{/if}}
+								</div>
+								<div class="form-inline">
+									<label class="control-label" for="roles" id="rolesLabel" name="rolesLabel">roles</label>
+									<input type="text" class="input rolesInput"  id="roles{{this.index}}"
+									       name="roles{{this.index}}" value="{{this.roleList}}"/>
+									<label class="errorTier" id="errorTier{{this.index}}"style="display:none;">This field is required.</label>
+									<label class="errorTier" id="errorTierRoles{{this.index}}"style="display:none;">Invalid role name[s]</label>
+									<label class="help-block" id="rolesHelp">{{t ../locale.rolesHelpMsg}}</label>
+								</div>
+							</div>
+
+							<div class="form-actions" id="saveButtons">
+								<button type="submit" id="addNewAPIButton" name="addNewAPIButton"
+								        onclick="updatePermissions('{{this.tierName}}',{{this.index}}, 'tierPermission{{this.index}}')"
+								        class="btn btn-primary has-spinner tierPermission{{this.index}}">{{t ../locale.updatePermissions}}</button>
+							</div>
+
+							<div class="alert alert-success" id="statusUpdateMsg{{this.index}}" style="display:none;">
+								{{t ../locale.tierPermissionSuccessMsg}}
+							</div>
+						</td>
+					</tr>
+				{{/each}}
+				</tbody>
+			</table>
+		</div>
+	</div>
+</div>

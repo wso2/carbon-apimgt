@@ -55,6 +55,7 @@ import org.apache.commons.logging.LogFactory;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
+import org.mozilla.javascript.NativeObject;
 import org.wso2.carbon.apimgt.api.APIDefinition;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
@@ -75,6 +76,7 @@ import org.wso2.carbon.apimgt.api.model.Provider;
 import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.api.model.Subscriber;
 import org.wso2.carbon.apimgt.api.model.Tier;
+import org.wso2.carbon.apimgt.api.model.TierPermission;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.api.model.Usage;
 import org.wso2.carbon.apimgt.impl.definitions.APIDefinitionFromSwagger20;
@@ -2136,8 +2138,43 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
 	@Override
-	public Set<TierPermissionDTO> getTierPermissions() throws APIManagementException {
-		Set<TierPermissionDTO> tierPermissions = apiMgtDAO.getTierPermissions(tenantId);
+	public Set<TierPermission> getTierPermissions() throws APIManagementException {
+		Set<TierPermissionDTO> tierPermissionsFromDb = apiMgtDAO.getTierPermissions(tenantId);
+		Set<TierPermission> tierPermissions = new HashSet<TierPermission>();
+		String everyOneRoleName = ServiceReferenceHolder.getInstance().getRealmService().
+				getBootstrapRealmConfiguration().getEveryOneRoleName();
+		String defaultRoleArray[] = new String[1];
+		defaultRoleArray[0] = everyOneRoleName;
+		TierPermission tierPermission;
+		Set<Tier> tiers = getTiers();
+		if (tiers != null) {
+			for (Tier tier : tiers) {
+				tierPermission = new TierPermission();
+				boolean found = false;
+				for (TierPermissionDTO permission : tierPermissionsFromDb) {
+					if (permission.getTierName().equals(tier.getName())) {
+						tierPermission.setTier(tier);
+						tierPermission.setPermissionType(permission.getPermissionType());
+						String[] roles = permission.getRoles();
+	                        /*If no roles defined return default role list*/
+						if (roles == null || roles.length == 0) {
+							tierPermission.setRoles(defaultRoleArray);
+						} else {
+							tierPermission.setRoles(permission.getRoles());
+						}
+						found = true;
+						break;
+					}
+				}
+            		 /* If no permissions has defined for this tier*/
+				if (!found) {
+					tierPermission.setTier(tier);
+					tierPermission.setPermissionType(APIConstants.TIER_PERMISSION_ALLOW);
+					tierPermission.setRoles(defaultRoleArray);
+				}
+				tierPermissions.add(tierPermission);
+			}
+		}
 		return tierPermissions;
 	}
 
