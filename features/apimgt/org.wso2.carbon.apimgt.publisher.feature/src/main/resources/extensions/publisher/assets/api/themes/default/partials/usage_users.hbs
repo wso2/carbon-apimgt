@@ -1,9 +1,3 @@
-<% jagg.template("users-api", function(inputs, outputs, jagg) { %>
-
-<link type="text/css" rel="stylesheet" href="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("lib/nvd3/css/nv.d3.css"))%>"/>
-<script type="text/javascript" src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("lib/nvd3/js/d3.v3.js"))%>"></script>
-<script type="text/javascript" src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("lib/nvd3/js/nv.d3.js"))%>"></script>
-
 <% var api=outputs.api;
 var subs = jagg.module("subscription");
 var result = subs.getSubscribersOfAPI(api);
@@ -15,7 +9,7 @@ var numberOfPages;
 %>
 <div class="row-fluid" id="usageSummary" style="display:none;">
 	<div class="span6">
-		<h3><%=i18n.localize("usageSummary")%></h3>
+		<h3>{{t locale.usageSummary}}</h3>
 		<table class="table table-bordered">
 			<tbody id="usageTable">
 		</table>
@@ -24,12 +18,12 @@ var numberOfPages;
 
 <div class="row-fluid">
 	<div class="span12">
-		<h3><%=i18n.localize("activeSubscriptions")%></h3>
+		<h3>{{t locale.activeSubscriptions}}</h3>
 		<table class="table table-bordered">
 			<thead>
 			<tr>
-				<th class="span4"><%=i18n.localize("name")%></th>
-				<th><%=i18n.localize("dateOfUserRegistration")%></th>
+				<th class="span4">{{t locale.name}}</th>
+				<th>{{t locale.dateOfUserRegistration}}</th>
 				<!--<th>Actions</th> -->
 			</tr>
 			</thead>
@@ -65,34 +59,29 @@ var numberOfPages;
 			to=itemsPerPage*currentPage;
 			}
 			}
-			if(length==0){
-			to=0;
-			%>
-			<tr><td colspan="3"><%=i18n.localize("noActiveSubscribersMsg")%></td></tr> <%}}%>
-			<%for(i = from; i < to; i++) {
-			subscriber = subscribers[i];
-			%>
-			<tr>
-				<td><i class="glyphicon glyphicon-user">&nbsp;</i><%=subscriber.username%></td>
-				<td class="dateFull"><%=subscriber.subscribedDate%></td>
-				<!--<td><i class="glyphicon glyphicon-edit"></i> <a href="#">Stats</a>
-				<i class="glyphicon glyphicon-trash"></i> <a href="#">Revoke Access</a>
-				<i class="glyphicon glyphicon-ban-circle"></i> <a href="#">Block</a>-->
-				</td>
-			</tr>
-			<%}%>
-
-
+			{{#if subscribers}}
+			<tr><td colspan="3">{{t locale.noActiveSubscribersMsg}}</td></tr>
+			{{else}}
+				{{#with subscribers}}
+					<tr>
+						<td><i class="glyphicon glyphicon-user">&nbsp;</i>{{this.username}}</td>
+						<td class="dateFull">{{this.subscribedDate}}</td>
+						<!--<td><i class="glyphicon glyphicon-edit"></i> <a href="#">Stats</a>
+						<i class="glyphicon glyphicon-trash"></i> <a href="#">Revoke Access</a>
+						<i class="glyphicon glyphicon-ban-circle"></i> <a href="#">Block</a>-->
+						</td>
+					</tr>
+				{{/with}}
+			{{/if}}
 			</tbody>
 		</table>
-
-		<% jagg.includeBlock("paginator", {currentPage:currentPage,numberOfPages:numberOfPages}); %>
+		<ul id="pagination" class="pagination-sm"></ul>
 	</div>
 </div>
 
 <!-- Row -->
 
-<h3><%=i18n.localize("usageByCurrentSubscribers")%> (v-<%= encode.forHtml(request.getParameter("version"))%>)</h3>
+<h3>{{t locale.usageByCurrentSubscribers}} (v-{{apiIdentifier.version}})</h3>
 
 <div id="usageByCurrentSubscribersSpinner" class="center-wrapper">
 	<i id="icon-spinner" class="fa fa-spinner fa-pulse fa-4x"></i>
@@ -109,8 +98,8 @@ var numberOfPages;
 		<table class="display table table-striped table-bordered" cellspacing="0" width="100%" id="userVersionTable" style="display:none">
 			<thead>
 			<tr>
-				<th><%=i18n.localize("subscriber")%></th>
-				<th><%=i18n.localize("noOfAPICalls")%></th>
+				<th>{{t locale.subscriber}}</th>
+				<th>{{t locale.noOfAPICalls}}</th>
 			</tr>
 			</thead>
 		</table>
@@ -119,7 +108,7 @@ var numberOfPages;
 
 
 
-<h3><%=i18n.localize("usageByCurrentSubscribersAcrossAll")%></h3>
+<h3>{{t locale.usageByCurrentSubscribersAcrossAll}}</h3>
 
 <div id="usageByCurrentSubscribersAcrossAllSpinner" class="center-wrapper">
 	<i id="icon-spinner" class="fa fa-spinner fa-pulse fa-4x"></i>
@@ -136,8 +125,8 @@ var numberOfPages;
 		<table class="display table table-striped table-bordered" cellspacing="0" width="100%" id="userTable" style="display:none">
 			<thead>
 			<tr>
-				<th><%=i18n.localize("subscriber")%></th>
-				<th><%=i18n.localize("noOfAPICalls")%></th>
+				<th>{{t locale.subscriber}}</th>
+				<th>{{t locale.noOfAPICalls}}</th>
 			</tr>
 			</thead>
 		</table>

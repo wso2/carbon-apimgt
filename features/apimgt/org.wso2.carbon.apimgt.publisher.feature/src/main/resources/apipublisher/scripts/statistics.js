@@ -66,14 +66,14 @@ var statistics = {};
 
     };
 
-    APIPublisherUsage.prototype.getSubscriberCountByAPIVersions = function (providerName, apiName) {
+    APIPublisherUsage.prototype.getSubscriberCountByAPIVersions = function (apiName, providerName) {
         var usage = [];
         var subscriberCounts;
         try {
-            subscriberCounts = this.impl.getSubscriberCountByAPIVersions(providerName, apiName);
+            subscriberCounts = this.impl.getSubscriberCountByAPIVersions(apiName, providerName);
 
             for (var i = 0 ; i < subscriberCounts.size(); i++) {
-                var subscriberCount = providerVersionUsages.get(i);
+                var subscriberCount = subscriberCounts.get(i);
                 usage.push({
                                "apiVersion":subscriberCount.getApiVersion(),
                                "count": subscriberCount.getCount()

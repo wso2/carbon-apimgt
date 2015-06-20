@@ -55,7 +55,7 @@ require('/modules/publisher.js').exec(function (ctx) {
 			} else if (action == 'getSubscriberCountByAPIVersions') {
 				providerName = req.getParameter('providerName');
 				apiName =  req.getParameter('apiName');
-				data = apiStatsService.getProviderAPIVersionUserLastAccess(providerName, apiName);
+				data = apiStatsService.getSubscriberCountByAPIVersions(apiName, providerName);
 				response = responseProcessor.buildSuccessResponse(response, constants.STATUS_CODES.OK, data);
 			} else if (action == 'getProviderAPIUserUsage') {
 				providerName = req.getParameter('providerName');

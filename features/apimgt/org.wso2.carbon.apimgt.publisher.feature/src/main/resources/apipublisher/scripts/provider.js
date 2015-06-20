@@ -242,8 +242,9 @@ var provider = {};
 
     APIProviderProxy.prototype.getSubscribersOfAPI = function (apiId) {
     	var subscribers = [];
-    	try{
-    		subscriberSet = this.impl.getSubscribersOfAPI(apiId);
+        var identifier = new Packages.org.wso2.carbon.apimgt.api.model.APIIdentifier(apiId.provider, apiId.name, apiId.version);
+        try{
+    		subscriberSet = this.impl.getSubscribersOfAPI(identifier);
     		for (var i = 0 ; i < subscriberSet.size(); i++) {
     			var subscriber = subscriberSet.get(i);
     			subscribers.push({
@@ -273,43 +274,6 @@ var provider = {};
     	apis = this.impl.getAPIsByProvider(providerName);
     	var apisJSON = JSON.parse(APIUtil.convertToString(apis));
         return apisJSON;
-    };
-
-    /*
-     * This method returns the subscription details needed for api-subscriptions page.
-     */
-    APIProviderProxy.prototype.getSubscribersOfAPI = function (provider, name, version) {
-        var apiObj = new Packages.org.json.simple.JSONObject();
-        apiObj.put("provider", provider);
-        apiObj.put("name", name);
-        apiObj.put("version", version);
-        var subscribers = [];
-    	try{
-    		subscriberSet = this.impl.getSubscribersOfAPI(apiObj);
-    		for (var i = 0 ; i < subscriberSet.size(); i++) {
-    			var subscriber = subscriberSet.get(i);
-    			subscribers.push({
-    				"name":subscriber.getName(),
-                    "description": subscriber.getDescription(),
-                    "subscribedDate": new Date(subscriber.getSubscribedDate().getTime()),
-                    "id": subscriber.getId(),
-                    "tenantId": subscriber.getTenantId(),
-                    "email": subscriber.getEmail()
-                });
-            }
-    		return {
-                error:false,
-                subscribers:subscribers
-            };
-    	}catch(e){
-    		log.error(e.message);
-            return {
-                error:e,
-                subscribers:subscribers
-            };
-    	}
-
-
     };
 
     /*

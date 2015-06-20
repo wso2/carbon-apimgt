@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2005-2014, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *  Copyright (c) 2015, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  *  WSO2 Inc. licenses this file to you under the Apache License,
  *  Version 2.0 (the "License"); you may not use this file except
@@ -17,10 +17,9 @@
  *
  */
 var resources = function(page,meta){
-	return {
-		js:['libs/jquery.form.min.js','document.js','bootstrap-dialog.min.js','bootstrap/bootstrap-editable.js',
-            'bootstrap/bootstrap-multiselect.js'],
-		css:['bootstrap/bootstrap-editable.css','bootstrap-dialog.min.css',
-             'bootstrap/bootstrap-tagsinput.css', 'bootstrap-multiselect.css']       
-	};
+    return {
+        js:['graph/nvd3/js/d3.v3.js','graph/nvd3/js/nv.d3.js', 'usage/usage_users.js', 'bootstrap-dialog.min.js'],
+        code : ['api_identifier.hbs'],
+        css:['graph/nvd3/css/nv.d3.css', 'bootstrap-dialog.min.css']
+    }
 };

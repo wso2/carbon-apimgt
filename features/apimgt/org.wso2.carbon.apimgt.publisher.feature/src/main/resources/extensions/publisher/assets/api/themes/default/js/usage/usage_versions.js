@@ -4,100 +4,100 @@ $(function () {
     var provider = store.publisher.apiIdentifier.provider;
     var usageurl = caramel.context + "/asts/api/apis/usage";
     $.post(usageurl, {
-                  action: "getProviderAPIVersionUsage",
-                  provider: provider,
-                  apiName: apiName
-              },
-              function (responseData) {
-                  data = responseData.data;
-                  $('#apiUsageByVersionSpinner').hide();
-                  if (!data.error) {
-                      var length = data.usage.length, data = [];
-                      $('#versionChart').empty();
-                      $('#apiUsageByVersionNoData').empty();
-                      $('#versionTable').find("tr:gt(0)").remove();
-                      var versionChartData = [];
-                      for (var i = 0; i < length; i++) {
-                          data[i] = [data.usage[i].version, parseInt(data.usage[i].count)];
-                          $('#versionTable').append($('<tr><td>' + data.usage[i].version + '</td><td>' + data.usage[i].count + '</td></tr>'));
-                          versionChartData.push({"version": data.usage[i].version, "count": data.usage[i].count});
-                      }
+               action: "getProviderAPIVersionUsage",
+               providerName: provider,
+               apiName: apiName
+           },
+           function (responseData) {
+               content = responseData.data;
+               $('#apiUsageByVersionSpinner').hide();
+               if (!content.error) {
+                   var length = content.usage.length,data = [];
+                   $('#versionChart').empty();
+                   $('#apiUsageByVersionNoData').empty();
+                   $('#versionTable').find("tr:gt(0)").remove();
+                   var versionChartData = [];
+                   for (var i = 0; i < length; i++) {
+                       data[i] = [content.usage[i].content, parseInt(content.usage[i].count)];
+                       $('#versionTable').append($('<tr><td>' + content.usage[i].version + '</td><td>' + content.usage[i].count + '</td></tr>'));
+                       versionChartData.push({"version":content.usage[i].version,"count":content.usage[i].count});
+                   }
 
-                      if (length > 0) {
-                          $('#versionTable').show();
-                          d3.select('#versionChart').append('svg').style('height', '400px');
-                          drawVersionChart('versionChart', versionChartData);
-                          $('#versionChart svg').show();
-                      } else {
-                          $('#versionTable').hide();
-                          $('#versionChart').css("fontSize", 14);
-                          $('#apiUsageByVersionNoData').html('');
-                          $('#apiUsageByVersionNoData').append($('<h3 class="no-data-heading center-wrapper">No Data Available</h3>'));
-                      }
-                  } else {
-                      BootstrapDialog.show({
-                                               type: BootstrapDialog.TYPE_DANGER,
-                                               title: 'Error',
-                                               message:  data.message,
-                                               buttons: [{
-                                                             label: 'Ok',
-                                                             action: function(dialogItself){
-                                                                 dialogItself.close();
-                                                             }
-                                                         }]
-                                           });
-                  }
-              });
+                   if (length > 0) {
+                       $('#versionTable').show();
+                       d3.select('#versionChart').append('svg').style('height','400px');
+                       drawVersionChart('versionChart',versionChartData);
+                       $('#versionChart svg').show();
+                   } else {
+                       $('#versionTable').hide();
+                       $('#versionChart').css("fontSize", 14);
+                       $('#apiUsageByVersionNoData').html('');
+                       $('#apiUsageByVersionNoData').append($('<h3 class="no-data-heading center-wrapper">No Data Available</h3>'));
+                   }
+               } else {
+                   BootstrapDialog.show({
+                                            type: BootstrapDialog.TYPE_DANGER,
+                                            title: 'Error',
+                                            message:  data.message,
+                                            buttons: [{
+                                                          label: 'Ok',
+                                                          action: function(dialogItself){
+                                                              dialogItself.close();
+                                                          }
+                                                      }]
+                                        });
+               }
+           });
 
 
     $.post(usageurl, {
-                  action: "getSubscriberCountByAPIVersions",
-                  provider: provider,
-                  apiName: apiName
-              },
-              function (responseData) {
-                  data = responseData.data;
-                  $('#apiSubscriptionsByVersionSpinner').hide();
-                  if (!data.error) {
-                      var length = data.usage.length, data = [];
-                      $('#versionUserChart').empty();
-                      $('#apiSubscriptionsByVersionsNoData').empty();
-                      $('#versionUserTable').find("tr:gt(0)").remove();
-                      var versionUserChartData = [];
-                      for (var i = 0; i < length; i++) {
-                          data[i] = [data.usage[i].apiVersion, parseInt(data.usage[i].count)];
-                          $('#versionUserTable').append($('<tr><td>' + data.usage[i].apiVersion + '</td><td>' + data.usage[i].count + '</td></tr>'));
-                          versionUserChartData.push({"version": data.usage[i].apiVersion, "count": data.usage[i].count});
-                      }
+               action: "getSubscriberCountByAPIVersions",
+               providerName: provider,
+               apiName: apiName
+           },
+           function (responseData) {
+               content = responseData.data;
+               $('#apiSubscriptionsByVersionSpinner').hide();
+               if (!content.error) {
+                   var length = content.usage.length,data = [];
+                   $('#versionUserChart').empty();
+                   $('#apiSubscriptionsByVersionsNoData').empty();
+                   $('#versionUserTable').find("tr:gt(0)").remove();
+                   var versionUserChartData =[];
+                   for (var i = 0; i < length; i++) {
+                       data[i] = [content.usage[i].apiVersion, parseInt(content.usage[i].count)];
+                       $('#versionUserTable').append($('<tr><td>' + content.usage[i].apiVersion + '</td><td>' + content.usage[i].count + '</td></tr>'));
+                       versionUserChartData.push({"version":content.usage[i].apiVersion,"count":content.usage[i].count});
+                   }
 
-                      if (length > 0) {
-                          $('#versionUserTable').show();
-                          d3.select('#versionUserChart').append('svg').style('height', '400px');
-                          drawVersionChart('versionUserChart', versionUserChartData);
-                          $('#versionUserChart svg').show();
+                   if (length > 0) {
+                       $('#versionUserTable').show();
+                       d3.select('#versionUserChart').append('svg').style('height','400px');
+                       drawVersionChart('versionUserChart',versionUserChartData);
+                       $('#versionUserChart svg').show();
 
-                      } else {
-                          $('#versionUserTable').hide();
-                          $('#versionUserChart').css("fontSize", 14);
-                          $('#apiSubscriptionsByVersionsNoData').html('');
-                          $('#apiSubscriptionsByVersionsNoData').append($('<h3 class="no-data-heading center-wrapper">No Data Available</h3>'));
+                   } else {
+                       $('#versionUserTable').hide();
+                       $('#versionUserChart').css("fontSize", 14);
+                       $('#apiSubscriptionsByVersionsNoData').html('');
+                       $('#apiSubscriptionsByVersionsNoData').append($('<h3 class="no-data-heading center-wrapper">No Data Available</h3>'));
 
-                      }
+                   }
 
-                  } else {
-                      BootstrapDialog.show({
-                                               type: BootstrapDialog.TYPE_DANGER,
-                                               title: 'Error',
-                                               message:  data.message,
-                                               buttons: [{
-                                                             label: 'Ok',
-                                                             action: function(dialogItself){
-                                                                 dialogItself.close();
-                                                             }
-                                                         }]
-                                           });
-                  }
-              });
+               } else {
+                   BootstrapDialog.show({
+                                            type: BootstrapDialog.TYPE_DANGER,
+                                            title: 'Error',
+                                            message:  data.message,
+                                            buttons: [{
+                                                          label: 'Ok',
+                                                          action: function(dialogItself){
+                                                              dialogItself.close();
+                                                          }
+                                                      }]
+                                        });
+               }
+           });
 
 
     Object.size = function (obj) {

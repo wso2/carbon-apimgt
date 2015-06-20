@@ -39,11 +39,14 @@ require('/modules/publisher.js').exec(function(ctx) {
 			response.sendError(404, 'The asset with id: ' + options.id + ' could not be located.');
 		} else {
 			var apiIdentifier = {};
-			apiIdentifier.name = assets.overview_name;
-			apiIdentifier.version = assets.overview_version;
-			apiIdentifier.prrovider = assets.overview_provider;
+			apiIdentifier.name = assets.attributes.overview_name;
+			apiIdentifier.version = assets.attributes.overview_version;
+			apiIdentifier.provider = assets.attributes.overview_provider;
 			var output = am.render(assets, page).details();
 			output.apiIdentifier = apiIdentifier;
+			//Set language specific helper messages and names
+			var locale = require('/extensions/assets/api/locale/locale_en.json');
+			output.locale = locale;
 			caramel.render(output);
 		}
 	}
