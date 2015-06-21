@@ -583,11 +583,10 @@ var provider = {};
         return this.impl.getDocumentationContent(apiId, docName);
     };
 
-    APIProviderProxy.prototype.getTiers = function (tenantDomain) {
+    APIProviderProxy.prototype.getTiers = function () {
 
-        var tierList = new Array();
         try {
-            var availableTiers = this.impl.getTiers(tenantDomain);
+            var availableTiers = this.impl.getTiers();
             var tierList = [];
             var tier;
             var sortedTierList = APIUtil.sortTiers(availableTiers);
@@ -958,5 +957,50 @@ var provider = {};
             };
         }
     };
+
+    APIProviderProxy.prototype.getTierPermissions = function () {
+        var tierPermissionSet;
+        var tierPermissions = [];
+        try {
+            tierPermissionSet = this.impl.getTierPermissions();
+
+            var iterator = tierPermissionSet.iterator();
+            while(iterator.hasNext()) {
+                var tierPermission = iterator.next();
+                tierPermissions.push({
+                                     "tierName":tierPermission.getTier().getName(),
+                                     "tierDisplayName": tierPermission.getTier().getDisplayName(),
+                                     "permissionType": tierPermission.getPermissionType(),
+                                     "roles": tierPermission.getRoles()
+                                 });
+            }
+
+            return {
+                error:false,
+                tierPermissions:tierPermissions
+            };
+        } catch (e) {
+            log.error(e.message);
+            return {
+                error:e,
+                message:e.message.split(":")[1]
+            };
+        }
+    };
+
+    APIProviderProxy.prototype.updateTierPermissions = function (tierName, permissionType, roles) {
+        try{
+           this.impl.updateTierPermissions(tierName, permissionType, roles);
+            return {
+                error:false
+            };
+        }catch(e){
+            log.error(e.message);
+            return {
+                error:e
+            };
+        }
+    };
+
 })(provider);
 

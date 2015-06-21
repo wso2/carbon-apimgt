@@ -1,4 +1,3 @@
-<%
 /*
  *  Copyright (c) 2005-2014, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
@@ -17,17 +16,20 @@
  *  under the License.
  *
  */
-var caramel;
-require('/modules/publisher.js').exec(function(ctx) {
-    caramel = require('caramel');
-    var ui = require('rxt').ui;
-    var asset = require('rxt').asset;
-    var uriMatcher = new URIMatcher(ctx.request.getRequestURI());
-    var options = uriMatcher.match('/{context}/asts/{type}/{pageName}');
-    var type = options.type;
-    var am = asset.createUserAssetManager(ctx.session, type);
-    var page = ui.buildPage(ctx.session, ctx.request);
-    var output = am.render(page)._custom();
-    caramel.render(output);
-}, request, response, session);	
-%>
+var render = function(theme, data, meta, require) {
+    theme('single-col-fluid', {
+        title: 'Asset',
+        header: [{
+            partial: 'header',
+            context: data
+        }],
+        leftnav: [{
+        	partial:'left-nav',
+        	context:data
+        }],
+        listassets: [{
+            partial: 'tier-permissions',
+            context: data
+        }]
+    });
+};

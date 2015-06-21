@@ -17,7 +17,7 @@
  *
  */
 var resources = function(page,meta){
-	return {
-		js:['tier_permissions.js']
-	};
+    return {
+        js:['jquery/jquery.buttonLoader.js', 'tier-permissions.js']
+    };
 };

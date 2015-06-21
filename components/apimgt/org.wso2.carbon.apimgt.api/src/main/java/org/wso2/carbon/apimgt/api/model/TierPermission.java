@@ -1,5 +1,5 @@
 /*
-*  Copyright (c) 2005-2011, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+*  Copyright (c) 2015, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
 *
 *  WSO2 Inc. licenses this file to you under the Apache License,
 *  Version 2.0 (the "License"); you may not use this file except
@@ -15,23 +15,13 @@
 * specific language governing permissions and limitations
 * under the License.
 */
-package org.wso2.carbon.apimgt.impl.dto;
+package org.wso2.carbon.apimgt.api.model;
 
-import java.io.Serializable;
+public class TierPermission {
 
-public class TierPermissionDTO implements Serializable {
-	
-	private String tierName;
+	private Tier tier;
 	private String permissionType;
 	private String[] roles;
-	
-	public String getTierName() {
-		return tierName;
-	}
-
-	public void setTierName(String tierName) {
-		this.tierName = tierName;
-	}
 
 	public String getPermissionType() {
 		return permissionType;
@@ -47,5 +37,13 @@ public class TierPermissionDTO implements Serializable {
 
 	public void setRoles(String[] roles) {
 		this.roles = roles;
+	}
+
+	public Tier getTier() {
+		return tier;
+	}
+
+	public void setTier(Tier tier) {
+		this.tier = tier;
 	}
 }
