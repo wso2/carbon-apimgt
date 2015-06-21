@@ -77,6 +77,9 @@ public abstract class AbstractApplicationRegistrationWorkflowExecutor extends Wo
             Application application = ApplicationUtils.populateApplication(workFlowDTO.getWorkflowReference());
             dao.populateAppRegistrationWorkflowDTO(regWorkFlowDTO);
 
+            dao.updateApplicationRegistration(status,
+                    ((ApplicationRegistrationWorkflowDTO) workFlowDTO).getKeyType(),
+                    ((ApplicationRegistrationWorkflowDTO) workFlowDTO).getApplication().getId());
 //            OauthAppRequest appInfoDTO = ApplicationCreator.createAppInfoDTO(null);
 //            appInfoDTO.setMappingId(regWorkFlowDTO.getWorkflowReference());
 //           // appInfoDTO.retrieveDTO();
@@ -110,10 +113,14 @@ public abstract class AbstractApplicationRegistrationWorkflowExecutor extends Wo
      * @throws APIManagementException
      */
     protected void generateKeysForApplication(ApplicationRegistrationWorkflowDTO workflowDTO) throws
-            APIManagementException {
+                                                                                              APIManagementException {
         ApiMgtDAO dao = new ApiMgtDAO();
-        if(WorkflowStatus.APPROVED.equals(workflowDTO.getStatus())) {
+        if (WorkflowStatus.APPROVED.equals(workflowDTO.getStatus())) {
             dogenerateKeysForApplication(workflowDTO);
+
+            if (workflowDTO.getApplicationInfo() != null && workflowDTO.getApplicationInfo().getClientId() != null) {
+                dao.addAccessAllowDomains(workflowDTO.getApplicationInfo().getClientId(), workflowDTO.getAllowedDomains());
+            }
 
         }
     }

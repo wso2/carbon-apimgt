@@ -67,13 +67,24 @@ public class APIDefinitionFromSwagger20 extends APIDefinition {
                 JSONObject paths = (JSONObject) swagger.get("paths");
                 for (Iterator pathsIterator = paths.keySet().iterator(); pathsIterator.hasNext(); ) {
                     String uriTempVal = (String) pathsIterator.next();
+                    //if url template is a custom attribute "^x-" ignore.
+                    if(uriTempVal.startsWith("x-") || uriTempVal.startsWith("X-")){
+                        continue;
+                    }
                     JSONObject path = (JSONObject) paths.get(uriTempVal);
+                    // Following code check is done to handle $ref objects supported by swagger spec
+                    // See field types supported by "Path Item Object" in swagger spec.
+                    if(path.containsKey("$ref")){
+                        log.info("Reference "+uriTempVal+" path object was ignored when generating URL template for api \""
+                                 + api.getId().getApiName() +"\"");
+                        continue;
+                    }
                     for (Iterator pathIterator = path.keySet().iterator(); pathIterator.hasNext(); ) {
                         String httpVerb = (String) pathIterator.next();
-                        JSONObject operation = (JSONObject) path.get(httpVerb);
 
-                        //PATCH is not supported. Need to remove this check when PATCH is supported
-                        if (!"PATCH".equals(httpVerb)) {
+                        //Only continue for supported operations
+                        if (APIConstants.SUPPORTED_METHODS.contains(httpVerb.toLowerCase())) {
+                            JSONObject operation = (JSONObject) path.get(httpVerb);
                             URITemplate template = new URITemplate();
                             Scope scope= APIUtil.findScopeByKey(scopes,(String) operation.get("x-scope"));
                             String authType = (String) operation.get("x-auth-type");
@@ -124,8 +135,8 @@ public class APIDefinitionFromSwagger20 extends APIDefinition {
             swaggerObject = (JSONObject) parser.parse(resourceConfigsJSON);
 
             //Check whether security definitions are defined or not
-            if (swaggerObject.get("securityDefinitions") != null) {
-                JSONObject securityDefinitionsObjects = (JSONObject) swaggerObject.get("securityDefinitions");
+            if (swaggerObject.get("x-wso2-security") != null) {
+                JSONObject securityDefinitionsObjects = (JSONObject) swaggerObject.get("x-wso2-security");
                 Iterator<JSONObject> definitionIterator = securityDefinitionsObjects.values().iterator();
                 while (definitionIterator.hasNext()) {
                     JSONObject securityDefinition = definitionIterator.next();
@@ -239,43 +250,6 @@ public class APIDefinitionFromSwagger20 extends APIDefinition {
     @Override
     @SuppressWarnings("unchecked")
     public String generateAPIDefinition(API api) throws APIManagementException {
-        /*JSONParser parser = new JSONParser();
-        String contactObjectTemplate = "{\"name\":\"\", \"url\":\"\", \"email\":\"\"}";
-        String licenceObjectTemplate = "{\"name\":\"\", \"url\":\"\"}";
-        String infoObjectTemplate = "{\"title\":\"\",\"description\":\"\",\"termsOfService\":\"\",\"contact\":[]," +
-                "\"licence\":[],\"version\":\"\"}";
-
-        String pathsObjectTemplate = "{}";
-
-        String pathItemObjectTemplate = "{\"$ref\":\"\",\"get\":\"\",\"put\":\"\",\"post\":\"\",\"delete\":\"\"," +
-                "\"options\":\"\",\"head\":\"\",\"patch\":\"\",\"parameters\":\"\"}";
-        String externalDocObjectTemplate = "{\"description\":\"\",\"url\":\"\"}";
-        String parameterObjectTemplate = "{\"name\":\"\", \"in\":\"\", \"description\":\"\", \"required\":\"\"}";
-        String schemaObjectTemplate = "{\"discriminator\":\"\", \"readOnly\":\"\", \"xml\":[], \"externalDocs\":[], \"example\":\"\"}";
-        String xmlObjectTemplate = "{\"name\":\"\",\"namespace\":\"\",\"prefix\":\"\",\"attribute\":\"\",\"wrapped\":\"\"}";
-        String responsesObjectTemplate = "{\"default\":\"\"}";
-        String responseObjectTemplate = "{\"description\":\"\",\"schema\":[],\"headers\":[],\"example\":[]}";
-
-        String headersObject = "{}";
-        String exampleObject = "{}";
-        String definitionObject = "{}";
-        String parameterDefinitionObject = "{}";
-        String responsesDefinitionObject = "{}";
-        String securityDefinitionObject = "{}";
-
-        String securitySchemeObjectTemplate = "{\"type\":\"\",\"description\":\"\",\"name\":\"\",\"in\":\"\"," +
-                "\"flow\":\"\",\"authorizationUrl\":\"\",\"tokenUrl\":\"\",\"scopes\":[]}";
-
-        String scopesObject = "{}";
-        String securityRequirementObject = "{}";
-
-        String tagObjectTemplate = "{\"name\":\"\", \"description\":\"\",\"externalDocs\":[]}";
-
-
-        String swaggerObjectTemplate = "{\"swagger\":\"2.0\",\"info\":[],\"host\":\"\",\"basePath\":\"\",\"schemes\":[]," +
-                "\"consumes\":[],\"produces\":[],\"paths\":[],\"definitions\":[],\"parameters\":[],\"responses\":[]," +
-                "\"securityDefinitions\":[],\"security\":[],\"tags\":[],\"externalDocs\":[]}";*/
-
         APIIdentifier identifier = api.getId();
         APIManagerConfiguration config = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration();
 
@@ -294,19 +268,27 @@ public class APIDefinitionFromSwagger20 extends APIDefinition {
         //Create info object
         JSONObject infoObject = new JSONObject();
         infoObject.put("title", api.getId().getApiName());
-        infoObject.put("description", api.getDescription());
+        if(api.getDescription() != null){
+            infoObject.put("description", api.getDescription());
+        }
 
         //Create contact object and map business owner info
         JSONObject contactObject = new JSONObject();
-        contactObject.put("name", api.getBusinessOwner());
-        contactObject.put("email", api.getBusinessOwnerEmail());
-        //put contact object to info object
-        infoObject.put("contact", contactObject);
+        if(api.getBusinessOwner() != null ){
+            contactObject.put("name", api.getBusinessOwner());
+        }
+        if(api.getBusinessOwnerEmail() != null ){
+            contactObject.put("email", api.getBusinessOwnerEmail());
+        }
+        if(api.getBusinessOwner() != null || api.getBusinessOwnerEmail() != null) {
+            //put contact object to info object
+            infoObject.put("contact", contactObject);
+        }
 
-        //Create licence object
-        JSONObject licenceObject = new JSONObject();
+        //Create licence object # no need for this since this is not mandatory
+        //JSONObject licenceObject = new JSONObject();
 
-        infoObject.put("licence", licenceObject);
+        //infoObject.put("license", licenceObject);
         infoObject.put("version", api.getId().getVersion());
 
         //add info object to swaggerObject
@@ -317,7 +299,9 @@ public class APIDefinitionFromSwagger20 extends APIDefinition {
         JSONObject operationObject;
         JSONObject responseObject = new JSONObject();
         //add default response
-        responseObject.put("200","{}");
+        JSONObject status200 = new JSONObject();
+        status200.put("description", "OK");
+        responseObject.put("200",status200);
 
         for (URITemplate uriTemplate : uriTemplates) {
             String pathName = uriTemplate.getUriTemplate();
@@ -360,7 +344,7 @@ public class APIDefinitionFromSwagger20 extends APIDefinition {
         scopesObject.put("x-wso2-scopes", xWso2ScopesArray);
         securityDefinitionObject.put("apim", scopesObject);
 
-        swaggerObject.put("securityDefinitions", securityDefinitionObject);
+        swaggerObject.put("x-wso2-security", securityDefinitionObject);
 
         return swaggerObject.toJSONString();
     }

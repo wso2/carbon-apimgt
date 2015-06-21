@@ -31,6 +31,7 @@ import org.wso2.carbon.apimgt.api.model.ApplicationConstants;
 import org.wso2.carbon.apimgt.api.model.KeyManager;
 import org.wso2.carbon.apimgt.api.model.OAuthApplicationInfo;
 
+import java.util.Arrays;
 import java.util.Map;
 
 /**
@@ -137,8 +138,11 @@ public abstract class AbstractKeyManager implements KeyManager {
         tokenRequest.setClientId(oAuthApplication.getClientId());
         tokenRequest.setClientSecret(oAuthApplication.getClientSecret());
 
+
         if (oAuthApplication.getParameter("tokenScope") != null) {
-            tokenRequest.setScope((String[]) oAuthApplication.getParameter("tokenScope"));
+            String[] tokenScopes = (String[]) oAuthApplication.getParameter("tokenScope");
+            tokenRequest.setScope(tokenScopes);
+            oAuthApplication.addParameter("tokenScope", Arrays.toString(tokenScopes));
         }
 
         if (oAuthApplication.getParameter(ApplicationConstants.VALIDITY_PERIOD) != null) {

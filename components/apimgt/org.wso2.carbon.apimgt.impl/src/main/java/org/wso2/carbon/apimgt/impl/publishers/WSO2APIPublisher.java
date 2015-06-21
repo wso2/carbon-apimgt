@@ -32,26 +32,23 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.protocol.ClientContext;
 import org.apache.http.entity.mime.HttpMultipartMode;
 import org.apache.http.entity.mime.MultipartEntity;
-
 import org.apache.http.entity.mime.content.FileBody;
 import org.apache.http.entity.mime.content.StringBody;
 import org.apache.http.impl.client.BasicCookieStore;
-
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.protocol.BasicHttpContext;
 import org.apache.http.protocol.HttpContext;
 import org.apache.http.util.EntityUtils;
-
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.*;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.registry.core.Resource;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.core.session.UserRegistry;
-
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.utils.CarbonUtils;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
@@ -69,7 +66,7 @@ import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
 
 public class WSO2APIPublisher implements APIPublisher {
-    private Log log = LogFactory.getLog(getClass());
+    private static Log log = LogFactory.getLog(WSO2APIPublisher.class);
 
     /**
      * The method to publish API to external WSO2 Store
@@ -395,6 +392,34 @@ public class WSO2APIPublisher implements APIPublisher {
     		}
     		return available;
     	}
+    }
+
+    @Override public boolean createVersionedAPIToStore(API api, APIStore store, String version) throws APIManagementException {
+        boolean published = false;
+
+        if (store.getEndpoint() == null || store.getUsername() == null || store.getPassword() == null) {
+            String msg =
+                    "External APIStore endpoint URL or credentials are not defined.Cannot proceed with publishing API" +
+                    " to the APIStore - " +
+                    store.getDisplayName();
+            throw new APIManagementException(msg);
+        } else {
+            CookieStore cookieStore = new BasicCookieStore();
+            HttpContext httpContext = new BasicHttpContext();
+            httpContext.setAttribute(ClientContext.COOKIE_STORE, cookieStore);
+            boolean authenticated = authenticateAPIM(store, httpContext);
+            if (authenticated) {  //First try to login to store
+                boolean added = addVersionedAPIToStore(api, store.getEndpoint(),version, httpContext,
+                                                       store.getDisplayName(),store.getUsername());
+                if (added) {   //If API creation success,then try publishing the API
+                    published = publishAPIToStore(api.getId(), store.getEndpoint(), store.getUsername(), httpContext,
+                                                  store.getDisplayName());
+                }
+                logoutFromExternalStore(store, httpContext);
+            }
+        }
+        return published;
+
     }
 
     private boolean isAPIAvailableInWSO2Store(API api, String externalPublisher, String storeEndpoint,
@@ -772,10 +797,18 @@ public class WSO2APIPublisher implements APIPublisher {
     }
 
     private static String getFullRegistryIconUrl(String postfixUrl) {
-        String webContext = CarbonUtils.getServerConfiguration().getFirstProperty("WebContextRoot");
-        if (postfixUrl != null && webContext != null && !webContext.equals("/")) {
-            postfixUrl = webContext + postfixUrl;
+        String proxyContext = CarbonUtils.getServerConfiguration().getFirstProperty("ProxyContextPath");
+        String tmpPostfixUrl = "";
+        if (proxyContext != null && !proxyContext.equals("/")) {
+            tmpPostfixUrl = proxyContext;
         }
+
+        String webContext = CarbonUtils.getServerConfiguration().getFirstProperty("WebContextRoot");
+        if (webContext != null && !webContext.equals("/")) {
+            tmpPostfixUrl = tmpPostfixUrl + webContext;
+        }
+
+        postfixUrl = tmpPostfixUrl + postfixUrl;
         String hostName = CarbonUtils.getServerConfiguration().getFirstProperty("HostName");
         String backendHttpPort = getBackendPort("http");
         String transport = "http://";
@@ -788,7 +821,9 @@ public class WSO2APIPublisher implements APIPublisher {
         if (hostName == null) {
             hostName = System.getProperty("carbon.local.ip");
         }
-
+        if (log.isDebugEnabled()) {
+            log.debug("Publisher Registry icon URL :- " + transport + hostName + ":" + backendHttpPort + postfixUrl);
+        }
         return transport + hostName + ":" + backendHttpPort + postfixUrl;
     }
 
@@ -821,6 +856,60 @@ public class WSO2APIPublisher implements APIPublisher {
         return storeEndpoint.split("/store")[0] + "/publisher";
     }
 
+    private boolean addVersionedAPIToStore(API api, String storeEndpoint, String version,
+                                           HttpContext httpContext, String displayName, String externalPublisher)
+            throws APIManagementException {
+        boolean added;
+        HttpClient httpclient = new DefaultHttpClient();
+        if (storeEndpoint.contains("/store")) {
+            storeEndpoint = getPublisherURLFromStoreURL(storeEndpoint) + APIConstants.APISTORE_COPY_URL;
+        } else if (!generateEndpoint(storeEndpoint)) {
+            storeEndpoint = storeEndpoint + APIConstants.APISTORE_COPY_URL;
+        }
+        HttpPost httppost = new HttpPost(storeEndpoint);
 
+        try {
+            List<NameValuePair> paramVals = new ArrayList<NameValuePair>();
+            paramVals.add(new BasicNameValuePair("action", APIConstants.API_COPY_ACTION));
+            paramVals.add(new BasicNameValuePair("apiName", api.getId().getApiName()));
+            paramVals.add(new BasicNameValuePair("newVersion",api.getId().getVersion()));
+            paramVals.add(new BasicNameValuePair("version", version));
+            paramVals.add(new BasicNameValuePair("provider",externalPublisher));
+            if (api.isDefaultVersion()){
+                paramVals.add(new BasicNameValuePair("isDefaultVersion","default_version"));
+            }else{
+                paramVals.add(new BasicNameValuePair("isDefaultVersion",""));
+            }
+            httppost.setEntity(new UrlEncodedFormEntity(paramVals, "UTF-8"));
+            HttpResponse response = httpclient.execute(httppost, httpContext);
+            HttpEntity entity = response.getEntity();
+            String responseString = EntityUtils.toString(entity, "UTF-8");
+            boolean isError = Boolean.parseBoolean(responseString.split(",")[0].split(":")[1].split("}")[0].trim());
+            if (!isError) { //If API creation success
+                added = true;
+            } else {
+                String errorMsg = responseString.split(",")[1].split(":")[1].split("}")[0].trim();
+                throw new APIManagementException(
+                        "Error while adding the API-" + api.getId().getApiName() + " to the external WSO2 APIStore-" +
+                        displayName + ".Reason -" + errorMsg);
+            }
+        } catch (UnsupportedEncodingException e) {
+            throw new APIManagementException(
+                    "Error while adding the API-" + api.getId().getApiName() + " to the external WSO2 APIStore-" +
+                    displayName + "--" + e.getMessage(), e);
+
+        } catch (ClientProtocolException e) {
+            throw new APIManagementException(
+                    "Error while adding the API-" + api.getId().getApiName() + " to the external WSO2 APIStore-" +
+                    displayName + "--" + e.getMessage(), e);
+
+        } catch (IOException e) {
+            throw new APIManagementException(
+                    "Error while adding the API:" + api.getId().getApiName() + " to the external WSO2 APIStore:" +
+                    displayName + "--" + e.getMessage(), e);
+
+        }
+        return added;
+    }
 
 }

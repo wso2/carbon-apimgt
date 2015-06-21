@@ -1140,11 +1140,13 @@ public class ApiMgtDAO {
         ResultSet rs = null;
         Map<String,Object> results = null;
         try {
+            //encrypt consumer key before passing it to query.
+            String encryptedConsumerKey = APIUtil.encryptToken(consumerKey);
             conn = APIMgtDBUtil.getConnection();
             ps = conn.prepareStatement(sql);
             ps.setString(1, context);
-            ps.setString(2,consumerKey);
-            if(!defaultVersionInvoked){
+            ps.setString(2, encryptedConsumerKey);
+            if (!defaultVersionInvoked) {
                 ps.setString(3, version);
             }
             rs = ps.executeQuery();
@@ -1186,7 +1188,10 @@ public class ApiMgtDAO {
 
         } catch (SQLException e) {
             handleException("Exception occurred while validating Subscription.", e);
-        } finally {
+        } catch (CryptoException e) {
+            handleException("Error while encrypting consumer key", e);
+        }
+        finally {
             APIMgtDBUtil.closeAllConnections(ps, conn, rs);
         }
         return false;
@@ -1252,8 +1257,9 @@ public class ApiMgtDAO {
             conn.setAutoCommit(false);
             
             String query = "INSERT" +
-                           " INTO AM_SUBSCRIBER (USER_ID, TENANT_ID, EMAIL_ADDRESS, DATE_SUBSCRIBED)" +
-                           " VALUES (?,?,?,?)";
+                           " INTO AM_SUBSCRIBER (USER_ID, TENANT_ID, EMAIL_ADDRESS, DATE_SUBSCRIBED, " +
+                           "CREATED_BY, CREATED_TIME)" +
+                           " VALUES (?,?,?,?,?,?)";
 
             ps = conn.prepareStatement(query, new String[]{"subscriber_id"});
 
@@ -1262,6 +1268,8 @@ public class ApiMgtDAO {
             ps.setInt(2, subscriber.getTenantId());
             ps.setString(3, subscriber.getEmail());
             ps.setTimestamp(4, new Timestamp(subscriber.getSubscribedDate().getTime()));
+            ps.setString(5, subscriber.getName());
+            ps.setTimestamp(6, new Timestamp(subscriber.getSubscribedDate().getTime()));
             ps.executeUpdate();
                        
 
@@ -1276,25 +1284,12 @@ public class ApiMgtDAO {
             
             conn.commit();
             
-            // Check for duplicate default applications if group id is available.
-
-                Application[] apps = getApplications(subscriber, groupingId);
-                
-               if(groupingId != null && !groupingId.equals("null") && !groupingId.isEmpty()){
-                if(!APIUtil.doesApplicationExist(apps, APIConstants.DEFAULT_APPLICATION_NAME)){
-                    // Add default application
-                    Application defaultApp = new Application(APIConstants.DEFAULT_APPLICATION_NAME, subscriber);
-                    defaultApp.setTier(APIConstants.UNLIMITED_TIER);
-                    defaultApp.setGroupId(groupingId);
-                    addApplication(defaultApp, subscriber.getName(), conn);
-                }
-               }else{
-                    // Add default application
-                    Application defaultApp = new Application(APIConstants.DEFAULT_APPLICATION_NAME, subscriber);
-                    defaultApp.setTier(APIConstants.UNLIMITED_TIER);
-                    defaultApp.setGroupId(groupingId);
-                    addApplication(defaultApp, subscriber.getName(), conn);
-                }
+            //Add default application.
+            //It will not be shared within in the group 
+            Application defaultApp = new Application(APIConstants.DEFAULT_APPLICATION_NAME, subscriber);
+            defaultApp.setTier(APIConstants.UNLIMITED_TIER);
+            defaultApp.setGroupId("");
+            addApplication(defaultApp, subscriber.getName(), conn);
                                                                
         } catch (SQLException e) {
             if (conn != null) {
@@ -1319,14 +1314,16 @@ public class ApiMgtDAO {
             conn.setAutoCommit(false);
             
             String query = "UPDATE" +
-                           " AM_SUBSCRIBER SET USER_ID=?, TENANT_ID=?, EMAIL_ADDRESS=?, DATE_SUBSCRIBED=?" +
-                           " WHERE SUBSCRIBER_ID=?";
+                           " AM_SUBSCRIBER SET USER_ID=?, TENANT_ID=?, EMAIL_ADDRESS=?, DATE_SUBSCRIBED=?, " +
+                           "UPDATED_BY=?, UPDATED_TIME=? WHERE SUBSCRIBER_ID=?";
             ps = conn.prepareStatement(query);
             ps.setString(1, subscriber.getName());
             ps.setInt(2, subscriber.getTenantId());
             ps.setString(3, subscriber.getEmail());
             ps.setTimestamp(4, new Timestamp(subscriber.getSubscribedDate().getTime()));
-            ps.setInt(5, subscriber.getId());
+            ps.setString(5, subscriber.getName());
+            ps.setTimestamp(6, new Timestamp(System.currentTimeMillis()));
+            ps.setInt(7, subscriber.getId());
             ps.executeUpdate();
                         
             conn.commit();
@@ -1436,8 +1433,8 @@ public class ApiMgtDAO {
 
             //This query to update the AM_SUBSCRIPTION table
             String sqlQuery = "INSERT " +
-                              "INTO AM_SUBSCRIPTION (TIER_ID,API_ID,APPLICATION_ID,SUB_STATUS, SUBS_CREATE_STATE)" +
-                              " VALUES (?,?,?,?,?)";
+                              "INTO AM_SUBSCRIPTION (TIER_ID,API_ID,APPLICATION_ID,SUB_STATUS, SUBS_CREATE_STATE, " +
+                              "CREATED_BY, CREATED_TIME) VALUES (?,?,?,?,?,?,?)";
 
             //Adding data to the AM_SUBSCRIPTION table
             //ps = conn.prepareStatement(sqlQuery, Statement.RETURN_GENERATED_KEYS);
@@ -1451,6 +1448,9 @@ public class ApiMgtDAO {
             preparedStforInsert.setInt(3, applicationId);
             preparedStforInsert.setString(4, status != null ? status : APIConstants.SubscriptionStatus.UNBLOCKED);
             preparedStforInsert.setString(5, APIConstants.SubscriptionCreatedStatus.SUBSCRIBE);
+            //TODO Need to find logged in user who perform this subscription
+            preparedStforInsert.setString(6, null);
+            preparedStforInsert.setTimestamp(7, new Timestamp(System.currentTimeMillis()));
 
             preparedStforInsert.executeUpdate();
             rs = preparedStforInsert.getGeneratedKeys();
@@ -2819,7 +2819,6 @@ public class ApiMgtDAO {
                         " ICA.CONSUMER_KEY = AKM.CONSUMER_KEY AND" +
                         " IAT.CONSUMER_KEY = ICA.CONSUMER_KEY AND" +
                         " AKM.KEY_TYPE = 'PRODUCTION' AND" +
-                        " ICA.USERNAME = IAT.AUTHZ_USER AND" +
                         " (IAT.TOKEN_STATE = 'ACTIVE' OR" +
                         " IAT.TOKEN_STATE = 'EXPIRED' OR" +
                         " IAT.TOKEN_STATE = 'REVOKED')" +
@@ -2828,29 +2827,60 @@ public class ApiMgtDAO {
         String sql = null, oracleSQL = null, mySQLSQL = null, msSQL = null,postgreSQL = null;
 
         //Construct database specific sql statements.
-        oracleSQL = "SELECT ICA.CONSUMER_KEY AS CONSUMER_KEY," +
-                        " ICA.CONSUMER_SECRET AS CONSUMER_SECRET," +
-                        " IAT.ACCESS_TOKEN AS ACCESS_TOKEN," +
-                        " IAT.VALIDITY_PERIOD AS VALIDITY_PERIOD," +
-                        " IAT.TOKEN_SCOPE AS TOKEN_SCOPE," +
-                        " AKM.KEY_TYPE AS TOKEN_TYPE, " +
-                        " AKM.STATE AS STATE "+
-                        " FROM" +
-                        " AM_APPLICATION_KEY_MAPPING AKM, " +
-                        accessTokenStoreTable + " IAT," +
-                        " IDN_OAUTH_CONSUMER_APPS ICA " +
-                        " WHERE" +
-                        " AKM.APPLICATION_ID = ? AND" +
-                        " IAT.USER_TYPE = ? AND" +
-                        " ICA.CONSUMER_KEY = AKM.CONSUMER_KEY AND" +
-                        " IAT.CONSUMER_KEY = ICA.CONSUMER_KEY AND" +
-                        " AKM.KEY_TYPE = 'PRODUCTION' AND" +
-                        " ICA.USERNAME = IAT.AUTHZ_USER AND" +
-                        " (IAT.TOKEN_STATE = 'ACTIVE' OR" +
-                        " IAT.TOKEN_STATE = 'EXPIRED' OR" +
-                        " IAT.TOKEN_STATE = 'REVOKED')" +
-                        " AND ROWNUM < 2 " +
-                        " ORDER BY IAT.TIME_CREATED DESC";
+//        oracleSQL = "SELECT ICA.CONSUMER_KEY AS CONSUMER_KEY," +
+//                        " ICA.CONSUMER_SECRET AS CONSUMER_SECRET," +
+//                        " IAT.ACCESS_TOKEN AS ACCESS_TOKEN," +
+//                        " IAT.VALIDITY_PERIOD AS VALIDITY_PERIOD," +
+//                        " IAT.TOKEN_SCOPE AS TOKEN_SCOPE," +
+//                        " AKM.KEY_TYPE AS TOKEN_TYPE, " +
+//                        " AKM.STATE AS STATE "+
+//                        " FROM" +
+//                        " AM_APPLICATION_KEY_MAPPING AKM, " +
+//                        accessTokenStoreTable + " IAT," +
+//                        " IDN_OAUTH_CONSUMER_APPS ICA " +
+//                        " WHERE" +
+//                        " AKM.APPLICATION_ID = ? AND" +
+//                        " IAT.USER_TYPE = ? AND" +
+//                        " ICA.CONSUMER_KEY = AKM.CONSUMER_KEY AND" +
+//                        " IAT.CONSUMER_KEY = ICA.CONSUMER_KEY AND" +
+//                        " AKM.KEY_TYPE = 'PRODUCTION' AND" +
+//                        " (IAT.TOKEN_STATE = 'ACTIVE' OR" +
+//                        " IAT.TOKEN_STATE = 'EXPIRED' OR" +
+//                        " IAT.TOKEN_STATE = 'REVOKED')" +
+//                        " AND ROWNUM < 2 " +
+//                        " ORDER BY IAT.TIME_CREATED DESC";
+
+        oracleSQL = "SELECT CONSUMER_KEY, " +
+                "CONSUMER_SECRET, " +
+                "ACCESS_TOKEN, " +
+                "VALIDITY_PERIOD, " +
+                "TOKEN_SCOPE, " +
+                "TOKEN_TYPE, " +
+                "STATE " +
+                "FROM (" +
+                        "SELECT " +
+                        "ICA.CONSUMER_KEY AS CONSUMER_KEY, " +
+                        "ICA.CONSUMER_SECRET AS CONSUMER_SECRET, " +
+                        "IAT.ACCESS_TOKEN AS ACCESS_TOKEN, " +
+                        "IAT.VALIDITY_PERIOD AS VALIDITY_PERIOD, " +
+                        "IAT.TOKEN_SCOPE AS TOKEN_SCOPE, " +
+                        "AKM.KEY_TYPE AS TOKEN_TYPE, " +
+                        "AKM.STATE AS STATE " +
+                        "FROM " +
+                        "AM_APPLICATION_KEY_MAPPING AKM, " +
+                        accessTokenStoreTable + " IAT, " +
+                        "IDN_OAUTH_CONSUMER_APPS ICA " +
+                        "WHERE " +
+                        "AKM.APPLICATION_ID = ? AND " +
+                        "IAT.USER_TYPE = ? AND " +
+                        "ICA.CONSUMER_KEY = AKM.CONSUMER_KEY AND " +
+                        "IAT.CONSUMER_KEY = ICA.CONSUMER_KEY AND " +
+                        "AKM.KEY_TYPE = 'PRODUCTION' AND " +
+                        "(IAT.TOKEN_STATE = 'ACTIVE' OR " +
+                        "IAT.TOKEN_STATE = 'EXPIRED' OR " +
+                        "IAT.TOKEN_STATE = 'REVOKED') " +
+                        "ORDER BY IAT.TIME_CREATED DESC) " +
+                "WHERE ROWNUM < 2";
 
         mySQLSQL = "SELECT" + statement + " LIMIT 1";
 
@@ -2931,7 +2961,6 @@ public class ApiMgtDAO {
                         " ICA.CONSUMER_KEY = AKM.CONSUMER_KEY AND" +
                         " IAT.CONSUMER_KEY = ICA.CONSUMER_KEY AND" +
                         " AKM.KEY_TYPE = 'SANDBOX' AND" +
-                        " ICA.USERNAME = IAT.AUTHZ_USER AND" +
                         " (IAT.TOKEN_STATE = 'ACTIVE' OR" +
                         " IAT.TOKEN_STATE = 'EXPIRED' OR" +
                         " IAT.TOKEN_STATE = 'REVOKED')" +
@@ -2956,7 +2985,6 @@ public class ApiMgtDAO {
                         " ICA.CONSUMER_KEY = AKM.CONSUMER_KEY AND" +
                         " IAT.CONSUMER_KEY = ICA.CONSUMER_KEY AND" +
                         " AKM.KEY_TYPE = 'SANDBOX' AND" +
-                        " ICA.USERNAME = IAT.AUTHZ_USER AND" +
                         " (IAT.TOKEN_STATE = 'ACTIVE' OR" +
                         " IAT.TOKEN_STATE = 'EXPIRED' OR" +
                         " IAT.TOKEN_STATE = 'REVOKED')" +
@@ -3477,13 +3505,17 @@ public class ApiMgtDAO {
             }
 
             //This query to update the AM_SUBSCRIPTION table
-            String sqlQuery ="UPDATE AM_SUBSCRIPTION SET SUB_STATUS = ? WHERE API_ID = ? AND APPLICATION_ID = ?";
+            String sqlQuery ="UPDATE AM_SUBSCRIPTION SET SUB_STATUS = ?, UPDATED_BY = ?, UPDATED_TIME = ? " +
+                             "WHERE API_ID = ? AND APPLICATION_ID = ?";
 
             //Updating data to the AM_SUBSCRIPTION table
             ps = conn.prepareStatement(sqlQuery);
             ps.setString(1, subStatus);
-            ps.setInt(2, apiId);
-            ps.setInt(3, applicationId);
+            //TODO Need to find logged in user who does this update.
+            ps.setString(2, null);
+            ps.setTimestamp(3, new Timestamp(System.currentTimeMillis()));
+            ps.setInt(4, apiId);
+            ps.setInt(5, applicationId);
             ps.execute();
             
             // finally commit transaction
@@ -3647,6 +3679,7 @@ public class ApiMgtDAO {
 
         try {
             connection = APIMgtDBUtil.getConnection();
+            connection.setAutoCommit(false);
 
             if (accessAllowDomains != null && !accessAllowDomains[0].trim().equals("")) {
                 for (int i = 0; i < accessAllowDomains.length; i++) {
@@ -5038,8 +5071,9 @@ public class ApiMgtDAO {
             }
             //This query to update the AM_APPLICATION table
             String sqlQuery = "INSERT " +
-                              "INTO AM_APPLICATION (NAME, SUBSCRIBER_ID, APPLICATION_TIER, CALLBACK_URL, DESCRIPTION, APPLICATION_STATUS, GROUP_ID)" +
-                              " VALUES (?,?,?,?,?,?,?)";
+                              "INTO AM_APPLICATION (NAME, SUBSCRIBER_ID, APPLICATION_TIER, CALLBACK_URL, DESCRIPTION, "
+                              + "APPLICATION_STATUS, GROUP_ID, CREATED_BY, CREATED_TIME)" +
+                              " VALUES (?,?,?,?,?,?,?,?,?)";
             // Adding data to the AM_APPLICATION  table
             //ps = conn.prepareStatement(sqlQuery);
             ps = conn.prepareStatement(sqlQuery, new String[]{"APPLICATION_ID"});
@@ -5059,6 +5093,8 @@ public class ApiMgtDAO {
                 ps.setString(6, APIConstants.ApplicationStatus.APPLICATION_CREATED);
             }
             ps.setString(7, application.getGroupId());
+            ps.setString(8, subscriber.getName());
+            ps.setTimestamp(9, new Timestamp(System.currentTimeMillis()));
             ps.executeUpdate();
                         
             ResultSet rs = ps.getGeneratedKeys();
@@ -5094,6 +5130,8 @@ public class ApiMgtDAO {
                               ", APPLICATION_TIER = ? " +
                               ", CALLBACK_URL = ? " +
                               ", DESCRIPTION = ? " +
+                              ", UPDATED_BY = ? " +
+                              ", UPDATED_TIME = ? " +
                               "WHERE" +
                               " APPLICATION_ID = ?";
             // Adding data to the AM_APPLICATION  table
@@ -5102,7 +5140,10 @@ public class ApiMgtDAO {
             ps.setString(2, application.getTier());
             ps.setString(3, application.getCallbackUrl());
             ps.setString(4, application.getDescription());
-            ps.setInt(5, application.getId());
+            //TODO need to find the proper user who updates this application.
+            ps.setString(5, null);
+            ps.setTimestamp(6, new Timestamp(System.currentTimeMillis()));
+            ps.setInt(7, application.getId());
 
             ps.executeUpdate();
             ps.close();
@@ -5474,17 +5515,37 @@ public class ApiMgtDAO {
                 + "   ,DESCRIPTION  "
                 + "   ,APPLICATION_STATUS  "
                 + "   ,USER_ID  "
+                + "   ,GROUP_ID  "
                 + "FROM "
                 + "   AM_APPLICATION APP, "
                 + "   AM_SUBSCRIBER SUB  "
                 + "WHERE "
-                + "   SUB.SUBSCRIBER_ID = APP.SUBSCRIBER_ID "; 
-        String whereClauseWithGroupId= "   AND "
-                +"     (GROUP_ID= ? "
-                + "      OR "
-                + "     (GROUP_ID='' AND SUB.USER_ID=?))";
-        String whereClause =  "   AND "
-                + " SUB.USER_ID=?";
+                + "   SUB.SUBSCRIBER_ID = APP.SUBSCRIBER_ID ";
+
+        String whereClauseWithGroupId;
+
+        if(forceCaseInsensitiveComparisons){
+           whereClauseWithGroupId = "   AND "
+                    +"     (GROUP_ID= ? "
+                    + "      OR "
+                    + "     (GROUP_ID='' AND LOWER(SUB.USER_ID) = LOWER(?)))";
+        }
+        else{
+            whereClauseWithGroupId = "   AND "
+                    +"     (GROUP_ID= ? "
+                    + "      OR "
+                    + "     (GROUP_ID='' AND SUB.USER_ID=?))";
+        }
+
+        String whereClause;
+        if(forceCaseInsensitiveComparisons){
+            whereClause = "   AND "
+                    + " LOWER(SUB.USER_ID) = LOWER(?)";
+        }
+        else{
+            whereClause=  "   AND "
+                    + " SUB.USER_ID = ?";
+        }
 
        if(groupingId != null && !groupingId.equals("null") && !groupingId.isEmpty()){
            sqlQuery += whereClauseWithGroupId;
@@ -5511,6 +5572,7 @@ public class ApiMgtDAO {
                 application.setCallbackUrl(rs.getString("CALLBACK_URL"));
                 application.setDescription(rs.getString("DESCRIPTION"));
                 application.setStatus(rs.getString("APPLICATION_STATUS"));
+                application.setGroupId(rs.getString("GROUP_ID"));
                 int subsCount=getSubscriptionCount(subscriber,application.getName(),groupingId);
                 application.setSubsCount(subsCount);
                
@@ -5584,14 +5646,8 @@ public class ApiMgtDAO {
         } finally {
             APIMgtDBUtil.closeAllConnections(prepStmt, connection, rs);
         }
-
-        String[] consumerKeyArray;
-        if (consumerKeys.size() == 0) {
-            consumerKeyArray = null;
-        } else {
-            consumerKeyArray = consumerKeys.toArray(new String[consumerKeys.size()]);
-        }
-        return consumerKeyArray;
+        
+        return consumerKeys.toArray(new String[consumerKeys.size()]);
     }
 
     public void deleteApplication(Application application) throws APIManagementException {
@@ -5865,7 +5921,7 @@ public class ApiMgtDAO {
                     "   AM_APPLICATION_KEY_MAPPING  " +
                     "WHERE" +
                     "   APPLICATION_ID = ?" +
-                    "AND" +
+                    " AND" +
                     "   KEY_TYPE = ?";
 
             if (log.isDebugEnabled()) {
@@ -5873,7 +5929,7 @@ public class ApiMgtDAO {
                         applicationId + " and Token type" + tokenType);
             }
             ps = connection.prepareStatement(deleteRegistrationEntry);
-            ps.setString(1, applicationId);
+            ps.setInt(1, Integer.parseInt(applicationId));
             ps.setString(2, tokenType);
             ps.executeUpdate();
             connection.commit();
@@ -5901,7 +5957,7 @@ public class ApiMgtDAO {
                     "   AM_APPLICATION_REGISTRATION " +
                     "WHERE" +
                     "   APP_ID = ?" +
-                    "AND" +
+                    " AND" +
                     "   TOKEN_TYPE = ?";
 
             if (log.isDebugEnabled()) {
@@ -5909,7 +5965,7 @@ public class ApiMgtDAO {
                         applicationId + " and Token type" + tokenType);
             }
             ps = connection.prepareStatement(deleteRegistrationEntry);
-            ps.setString(1, applicationId);
+            ps.setInt(1, Integer.parseInt(applicationId));
             ps.setString(2, tokenType);
             ps.executeUpdate();
             connection.commit();
@@ -6312,8 +6368,8 @@ public class ApiMgtDAO {
         PreparedStatement prepStmt = null;
         ResultSet rs = null;
 
-        String query = "INSERT INTO AM_API (API_PROVIDER, API_NAME, API_VERSION, CONTEXT, CONTEXT_TEMPLATE) " +
-                       "VALUES (?,?,?,?,?)";
+        String query = "INSERT INTO AM_API (API_PROVIDER, API_NAME, API_VERSION, CONTEXT, CONTEXT_TEMPLATE, " +
+                       "CREATED_BY, CREATED_TIME) VALUES (?,?,?,?,?,?,?)";
 
         try {
             connection = APIMgtDBUtil.getConnection();
@@ -6331,6 +6387,8 @@ public class ApiMgtDAO {
                 contextTemplate = contextTemplate.split(Pattern.quote("/" + APIConstants.VERSION_PLACEHOLDER))[0];
             }
             prepStmt.setString(5, contextTemplate);
+            prepStmt.setString(6, APIUtil.replaceEmailDomainBack(api.getId().getProviderName()));
+            prepStmt.setTimestamp(7, new Timestamp(System.currentTimeMillis()));
             prepStmt.execute();
 
             rs = prepStmt.getGeneratedKeys();
@@ -6932,7 +6990,7 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
 
         String previousDefaultVersion = getDefaultVersion(api.getId());
 
-        String query = "UPDATE AM_API SET CONTEXT = ?, CONTEXT_TEMPLATE = ? WHERE API_PROVIDER = ? AND API_NAME = ? AND"
+        String query = "UPDATE AM_API SET CONTEXT = ?, CONTEXT_TEMPLATE = ?, UPDATED_BY = ?, UPDATED_TIME = ? WHERE API_PROVIDER = ? AND API_NAME = ? AND"
                         + " API_VERSION = ? ";
         try {
             connection = APIMgtDBUtil.getConnection();
@@ -6948,9 +7006,12 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
                     contextTemplate = contextTemplate.split(Pattern.quote("/" + APIConstants.VERSION_PLACEHOLDER))[0];
                 }
                 prepStmt.setString(2, contextTemplate);
-                prepStmt.setString(3, APIUtil.replaceEmailDomainBack(api.getId().getProviderName()));
-                prepStmt.setString(4, api.getId().getApiName());
-                prepStmt.setString(5, api.getId().getVersion());
+                //TODO Need to find who exactly does this update.
+                prepStmt.setString(3, null);
+                prepStmt.setTimestamp(4, new Timestamp(System.currentTimeMillis()));
+                prepStmt.setString(5, APIUtil.replaceEmailDomainBack(api.getId().getProviderName()));
+                prepStmt.setString(6, api.getId().getApiName());
+                prepStmt.setString(7, api.getId().getVersion());
                 prepStmt.execute();
             }
 
@@ -7472,9 +7533,11 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
         PreparedStatement prepStmt = null;
         ResultSet rs = null;
         try {
+            //encrypt consumer key before passing it to query.
+            String encryptedConsumerKey = APIUtil.encryptToken(consumerKey);
             connection = APIMgtDBUtil.getConnection();
             prepStmt = connection.prepareStatement(accessAllowDomainsSql);
-            prepStmt.setString(1, consumerKey);
+            prepStmt.setString(1, encryptedConsumerKey);
             rs = prepStmt.executeQuery();
             boolean first = true;
             while (rs.next()) {
@@ -7490,6 +7553,8 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
         } catch (SQLException e) {
             throw new APIManagementException
                     ("Error in retrieving access allowing domain list from table.", e);
+        } catch (CryptoException e) {
+            handleException("Error while encrypting consumer key", e);
         } finally {
             APIMgtDBUtil.closeAllConnections(prepStmt, connection, rs);
         }
@@ -9141,5 +9206,77 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
         }
         return false;
     }
+
+    /**
+     * @param applicationId
+     * @param keyType
+     * @return
+     */
+    public static String getConsumerkeyByApplicationIdAndKeyType(String applicationId, String keyType)
+            throws APIManagementException {
+        Connection conn = null;
+        ResultSet resultSet = null;
+        PreparedStatement ps = null;
+        String consumerKey = null;
+        try {
+            conn = APIMgtDBUtil.getConnection();
+
+            String sqlQuery = "SELECT CONSUMER_KEY " +
+                    " FROM AM_APPLICATION_KEY_MAPPING " +
+                    " WHERE APPLICATION_ID   = ? AND KEY_TYPE = ? ";
+
+            ps = conn.prepareStatement(sqlQuery);
+            ps.setString(1, applicationId);
+            ps.setString(2, keyType);
+            resultSet = ps.executeQuery();
+
+            while (resultSet.next()) {
+                consumerKey = resultSet.getString("CONSUMER_KEY");
+            }
+
+        } catch (SQLException e) {
+            handleException("Failed to get consumer key by applicationId " + applicationId + "and keyType " + keyType
+                    , e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(ps, conn, resultSet);
+        }
+        return consumerKey;
+    }
+
+    /**
+     * Get external APIStores details which are stored in database
+     *
+     * @param apiIdentifier API Identifier
+     * @throws APIManagementException if failed to get external APIStores
+     */
+    public static String getLastPublishedAPIVersionFromAPIStore(APIIdentifier apiIdentifier,String storeName)
+            throws APIManagementException {
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+        Connection conn = null;
+        String version = null;
+        try {
+            conn = APIMgtDBUtil.getConnection();
+            String sqlQuery =
+                    "SELECT API.API_VERSION FROM AM_API API , AM_EXTERNAL_STORES  ES WHERE ES.API_ID = " +
+                    "API.API_ID and API.API_PROVIDER = ? and API.API_NAME=? and ES.STORE_ID =? ORDER By API.CREATED_TIME ASC";
+            ps = conn.prepareStatement(sqlQuery);
+            ps.setString(1, apiIdentifier.getProviderName());
+            ps.setString(2,apiIdentifier.getApiName());
+            ps.setString(3,storeName);
+            rs = ps.executeQuery();
+            while (rs.next()) {
+                version = rs.getString("API_VERSION");
+            }
+        } catch (SQLException e) {
+            handleException("Error while getting External APIStore details from the database for  the API : " +
+                            apiIdentifier.getApiName() + "-" + apiIdentifier.getVersion(), e);
+
+        } finally {
+            APIMgtDBUtil.closeAllConnections(ps, conn, rs);
+        }
+        return version;
+    }
+
 
 }

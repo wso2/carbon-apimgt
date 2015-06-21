@@ -26,7 +26,6 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.APIStore;
 import org.wso2.carbon.apimgt.impl.dto.Environment;
-import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.user.api.RealmConfiguration;
 import org.wso2.carbon.user.api.UserStoreException;
@@ -41,7 +40,14 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.Stack;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -95,6 +101,10 @@ public class APIManagerConfiguration {
             readChildElements(builder.getDocumentElement(), new Stack<String>());
             initialized = true;
             addKeyManagerConfigsAsSystemProperties();
+            String url = getFirstProperty(APIConstants.API_KEY_VALIDATOR_URL);
+            if (url == null) {
+                log.error("API_KEY_VALIDATOR_URL is null");
+            }
         } catch (IOException e) {
             log.error(e.getMessage());
             throw new APIManagementException("I/O error while reading the API manager " +
@@ -165,6 +175,12 @@ public class APIManagerConfiguration {
                     Environment environment = new Environment();
                     OMElement environmentElem = (OMElement) environmentIterator.next();
                     environment.setType(environmentElem.getAttributeValue(new QName("type")));
+                    String showInConsole = environmentElem.getAttributeValue(new QName("api-console"));
+                    if (showInConsole != null) {
+                        environment.setShowInConsole(Boolean.parseBoolean(showInConsole));
+                    } else {
+                        environment.setShowInConsole(true);
+                    }
                     environment.setName(replaceSystemProperty(
                             environmentElem.getFirstChildWithName(new QName("Name")).getText()));
                     environment.setServerURL(replaceSystemProperty(

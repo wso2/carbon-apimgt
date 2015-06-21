@@ -4,18 +4,23 @@ package org.wso2.carbon.apimgt.keymgt.handlers;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.impl.handlers.ScopesIssuer;
+import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.keymgt.util.APIKeyMgtDataHolder;
+import org.wso2.carbon.base.MultitenantConstants;
+import org.wso2.carbon.identity.core.util.IdentityUtil;
 import org.wso2.carbon.identity.oauth2.IdentityOAuth2Exception;
 import org.wso2.carbon.identity.oauth2.model.*;
 import org.wso2.carbon.identity.oauth2.token.OAuthTokenReqMessageContext;
 import org.wso2.carbon.identity.oauth2.token.handlers.grant.ClientCredentialsGrantHandler;
+import org.wso2.carbon.user.api.UserStoreException;
+import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.util.ArrayList;
 
 /**
  * This grant handler will accept validity period as a parameter.
  */
-public class ApplicationTokenGrantHandler extends ClientCredentialsGrantHandler {
+public class ApplicationTokenGrantHandler extends ExtendedClientCredentialsGrantHandler {
 
     private static Log log = LogFactory.getLog(ApplicationTokenGrantHandler.class);
     private static final String OPENKM_GRANT_PARAM = "validity_period";
@@ -70,30 +75,7 @@ public class ApplicationTokenGrantHandler extends ClientCredentialsGrantHandler 
 
     @Override
     public boolean validateScope(OAuthTokenReqMessageContext tokReqMsgCtx) {
-        // Execute ScopeIssuer
-        boolean state = ScopesIssuer.getInstance().setScopes(tokReqMsgCtx);
-
-        // If ScopeIssuer returns true, then see if application scope is set.
-        if (state) {
-            String[] scopes = tokReqMsgCtx.getScope();
-
-            String applicationScope = APIKeyMgtDataHolder.getApplicationTokenScope();
-            if (scopes != null) {
-
-                // Arrays.asList won't work here, because list.add cannot be called on the returned list.
-                ArrayList<String> scopeList = new ArrayList<String>(scopes.length);
-                for (String scope : scopes) {
-                    scopeList.add(scope);
-                }
-                // Forcefully add application scope if it's not included in the list.
-                if (!scopeList.contains(applicationScope)) {
-                    scopeList.add(applicationScope);
-                    tokReqMsgCtx.setScope(scopeList.toArray(new String[scopeList.size()]));
-                }
-            }
-        }
-
-        return state;
+        return super.validateScope(tokReqMsgCtx);
     }
 
 }

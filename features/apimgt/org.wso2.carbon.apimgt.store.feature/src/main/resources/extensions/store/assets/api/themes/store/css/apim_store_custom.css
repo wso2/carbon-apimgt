@@ -141,3 +141,26 @@ legend {
     padding-top: 24px;
     position: relative;
 }
+.editable-div-wrapper-Production {
+
+    position:relative;
+    /*border-radius: 5px;*/
+    background:#292E38;
+    color:#ffffff;
+}
+.editable-div-wrapper-Production i.fa { color:#ffffff;  }
+
+.editable-div-wrapper-Sandbox {
+    margin-top:5px;
+    position:relative;
+    /*border-radius: 5px;*/
+    background:#292E38;
+    color:#ffffff;
+}
+.editable-div-wrapper-Sandbox i.fa { color:#ffffff; padding:8px 0; }
+.curlurl-genbtn { white-space:nowrap; }
+.editable-div {
+    padding:5px 100px 5px 10px;
+    outline: 0;
+}
+.editable-div span { background:#dfebed; color:#292E38; }
