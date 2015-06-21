@@ -195,10 +195,6 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
             oAuthApplicationInfo.setClientSecret(info.getClientSecret());
 
             JSONObject jsonObject = new JSONObject(info.getJsonString());
-//            if (jsonObject.has(ApplicationConstants.OAUTH_CLIENT_SECRET)) {
-//                oAuthApplicationInfo.addParameter(ApplicationConstants.
-//                                                          OAUTH_CLIENT_SECRET, jsonObject.get(ApplicationConstants.OAUTH_CLIENT_SECRET));
-//            }
 
             if (jsonObject.has(ApplicationConstants.
                                        OAUTH_REDIRECT_URIS)) {

@@ -21,6 +21,7 @@
 package org.wso2.carbon.apimgt.api.model;
 
 import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Representation of a Token Generation Request.

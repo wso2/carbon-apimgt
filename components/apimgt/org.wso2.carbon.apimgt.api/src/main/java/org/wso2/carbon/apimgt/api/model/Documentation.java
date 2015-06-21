@@ -46,7 +46,6 @@ public class Documentation implements Serializable{
         this.otherTypeName = otherTypeName;
     }
 
-    
     public String getFilePath() {
         return filePath;
     }

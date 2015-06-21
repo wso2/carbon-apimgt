@@ -17,12 +17,9 @@
 */
 package org.wso2.carbon.apimgt.api.model;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import org.wso2.carbon.apimgt.api.APIManagementException;
+
+import java.util.*;
 
 /**
  * This class represent the Application in api model

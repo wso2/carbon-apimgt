@@ -20,7 +20,7 @@
         <BAMPassword>admin</BAMPassword>
     </APIUsageTracking>
     <APIKeyValidator>
-        <ServerURL>https://localhost:9443/services/</ServerURL>
+        <ServerURL>https://${carbon.local.ip}:${mgt.transport.https.port}${carbon.context}/services/</ServerURL>
         <Username>${admin.username}</Username>
         <Password>${admin.password}</Password>
         <EnableJWTCache>false</EnableJWTCache>
@@ -31,7 +31,7 @@
         <ThriftServerPort>10397</ThriftServerPort>
         <EnableThriftServer>true</EnableThriftServer>
         <TokenEndPointName>/oauth2/token</TokenEndPointName>
-        <RevokeAPIURL>https://localhost:8243/revoke</RevokeAPIURL>
+        <RevokeAPIURL>https://${carbon.local.ip}:${https.nio.port}/revoke</RevokeAPIURL>
         <EncryptPersistedTokens>false</EncryptPersistedTokens>
     </APIKeyValidator>
 </APIManager>
