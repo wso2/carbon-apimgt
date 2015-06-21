@@ -46,7 +46,7 @@ require('/modules/publisher.js').exec(function (ctx) {
 		case 'POST':// POST endpoints
 			options.type = request.getParameter('type');
 			if (uriMatcher.match(POST_NEW_API_URL)) {//return assets by type
-				var apiPublisher =  require('apipublisher').apipublisher;
+				var apiPublisher =  require('apipublisher').provider;
 				var apiProxy = apiPublisher.instance(username);
 				var apiData = {};
 				apiData.name = request.getParameter('name', 'UTF-8');

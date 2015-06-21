@@ -39,7 +39,7 @@ require('/modules/publisher.js').exec(function (ctx) {
     switch (httpMethod) {
         case 'POST':// POST endpoints
             uriOptions = uriMatcher.match(API_SUBSCRIPTIONS_URL);
-            var apiPublisher = require('apipublisher').apipublisher;
+            var apiPublisher = require('apipublisher').provider;
             var apiProxy = apiPublisher.instance(user.username);
 
             if (uriOptions.action == 'getUUID') {

@@ -17,7 +17,7 @@
  *
  */
 asset.manager = function(ctx) {
-    var apiPublisher =  require('apipublisher').apipublisher;
+    var apiPublisher =  require('apipublisher').provider;
     var LOGGED_IN_USER = 'LOGGED_IN_USER';
     var log = new Log('default-asset');
 
@@ -322,8 +322,8 @@ asset.server = function (ctx) {
                         path: 'documents.jag'
                     }, {
                         title: 'Tier Permissions',
-                        url: 'tier_permissions',
-                        path: 'tier_permissions.jag'
+                        url: 'tier-permissions',
+                        path: 'tier-permissions.jag'
                     }, {
                         title: 'Manage',
                         url: 'manage',
@@ -333,6 +333,14 @@ asset.server = function (ctx) {
                         title: 'Subscriptions',
                         url: 'api-subscriptions',
                         path: 'api-subscriptions.jag'
+                    }, {
+                        title: 'API Usage Details By Version',
+                        url: 'versions',
+                        path: 'versions.jag'
+                    }, {
+                        title: 'API Usage Details By Users',
+                        url: 'users',
+                        path: 'users.jag'
                     }, {
                         title: 'Start Creating an API',
                         url: 'start',
@@ -345,9 +353,12 @@ asset.server = function (ctx) {
                    }, {
                        url: 'lifecycle',
                        path: 'lifecycle.jag'
-                   }, {
+                   },{
                        url: 'start',
                        path: 'start.jag'
+                   },{
+                       url: 'tiers',
+                       path: 'tiers.jag'
                    },{
                        url: 'sequences',
                        path: 'sequences.jag'
@@ -360,6 +371,9 @@ asset.server = function (ctx) {
                    },{
                        url: 'validation',
                        path: 'validation.jag'
+                   },{
+                       url: 'usage',
+                       path: 'usage.jag'
                    },{
                        url: 'addDoc',
                        path: 'document_add.jag'
@@ -435,8 +449,7 @@ asset.renderer = function (ctx) {
         navList.push('All Statistics', 'btn-stats', '/asts/' + type + '/statistics');
         navList.push('Subscriptions', 'btn-subscribe', '/asts/' + type + '/api-subscriptions');
         navList.push('Statistics', 'btn-stats', '/asts/' + type + '/statistics');
-        navList.push('Tier Permissions', 'btn-cog', '/asts/' + type + '/statistics');
-        //navList.push('Configuration', 'icon-dashboard', util.buildUrl('configuration'));
+        navList.push('Tier Permissions', 'btn-cog', '/asts/' + type + '/tier-permissions');
         return navList.list();
     };
 
@@ -520,6 +533,9 @@ asset.renderer = function (ctx) {
                         page.leftNav = buildListLeftNav(page, this);
                         break;
                     case 'start':
+                        page.leftNav = buildListLeftNav(page, this);
+                        break;
+                    case 'tier-permissions':
                         page.leftNav = buildListLeftNav(page, this);
                         break;
                     default:

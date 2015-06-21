@@ -35,8 +35,8 @@ var resources = function(page, meta) {
 	}
 	o.css.push('styles.css');
 	o.css.push('assets.css');
-	o.js.push('jquery.event.mousestop.js');
-	o.js.push('jquery.history.js');
+	o.js.push('jquery/jquery.event.mousestop.js');
+	o.js.push('jquery/jquery.history.js');
 	o.js.push('assets.js');
 	o.js.push('asset-helpers.js');
 	return o;

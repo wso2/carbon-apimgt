@@ -4879,7 +4879,7 @@ public final class APIUtil {
 		}
 	}
 
-	protected static  boolean isUsageDataSourceSpecified() {
+	public static  boolean isUsageDataSourceSpecified() {
 		APIManagerConfiguration configuration =
 				ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration();
 

@@ -28,25 +28,24 @@ public class TierPermissionDTO implements Serializable {
 	public String getTierName() {
 		return tierName;
 	}
+
 	public void setTierName(String tierName) {
 		this.tierName = tierName;
 	}
+
 	public String getPermissionType() {
 		return permissionType;
 	}
+
 	public void setPermissionType(String permissionType) {
 		this.permissionType = permissionType;
 	}
+
 	public String[] getRoles() {
 		return roles;
 	}
+
 	public void setRoles(String[] roles) {
 		this.roles = roles;
 	}
-	
-	
-	
-	
-	
-
 }

@@ -34,7 +34,7 @@ require('/modules/publisher.js').exec(function (ctx) {
     var usr = carbon.server.tenantUser(user.username);
     var tenantDomain = carbon.server.tenantDomain({tenantId: usr.tenantId});
 
-    var apiPublisher = require('apipublisher').apipublisher;
+    var apiPublisher = require('apipublisher').provider;
     var apiProxy = apiPublisher.instance(user.username);
 
 

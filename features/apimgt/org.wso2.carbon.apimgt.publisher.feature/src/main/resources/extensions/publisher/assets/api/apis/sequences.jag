@@ -40,7 +40,7 @@ require('/modules/publisher.js').exec(function (ctx) {
 	var method = req.getMethod();
 	var options = ref.getQueryOptions(req.getQueryString());
 	var response = ctx.response;
-	var apiPublisher =  require('apipublisher').apipublisher;
+	var apiPublisher =  require('apipublisher').provider;
 	var apiProxy = apiPublisher.instance(username);
 	response.contentType = 'application/json';
 	var constants = require("rxt").constants;

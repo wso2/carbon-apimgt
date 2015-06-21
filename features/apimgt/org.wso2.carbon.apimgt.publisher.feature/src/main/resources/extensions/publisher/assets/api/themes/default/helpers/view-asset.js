@@ -18,9 +18,8 @@
  */
 var resources = function(page,meta){
     return {
-        js:['copy_api.js','bootstrap-dialog.min.js','bootstrap-editable.js','bootstrap-multiselect.js'] 
-        ,
-		css:['bootstrap/bootstrap-editable.css','bootstrap-dialog.min.css',
-             'bootstrap/bootstrap-tagsinput.css', 'bootstrap-multiselect.css']       
+        js:['copy_api.js','bootstrap/bootstrap-dialog.min.js','bootstrap/bootstrap-editable.js','bootstrap/bootstrap-multiselect.js'],
+		css:['bootstrap/bootstrap-editable.css','bootstrap/bootstrap-dialog.min.css',
+             'bootstrap/bootstrap-tagsinput.css', 'bootstrap/bootstrap-multiselect.css']
     }
 };

@@ -48,7 +48,7 @@ require('/modules/publisher.js').exec(function(ctx) {
 		}
 
 		output = am.render(assets, page)._custom();
-		var apiPublisher =  require('apipublisher').apipublisher;
+		var apiPublisher =  require('apipublisher').provider;
 		var apiProxy = apiPublisher.instance(user.username);
 		var api = apiProxy.getAPI(assets.attributes.overview_provider, assets.attributes.overview_name, assets.attributes.overview_version).api;
 		output.api = api;

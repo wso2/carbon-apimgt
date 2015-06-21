@@ -35,12 +35,12 @@ var resources = function(page, meta) {
     }
     o.css.push('styles.css');
     o.css.push('assets.css');
-    o.css.push('bootstrap-dialog.min.css')
-    o.js.push('jquery.event.mousestop.js');
-    o.js.push('jquery.history.js');
+    o.css.push('bootstrap/bootstrap-dialog.min.css')
+    o.js.push('jquery/jquery.event.mousestop.js');
+    o.js.push('jquery/jquery.history.js');
     o.js.push('assets.js');
     o.js.push('asset-helpers.js');
     o.js.push('remove-asset.js');
-    o.js.push('bootstrap-dialog.min.js');
+    o.js.push('bootstrap/bootstrap-dialog.min.js');
     return o;
 };

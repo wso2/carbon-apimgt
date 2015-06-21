@@ -47,7 +47,7 @@ require('/modules/publisher.js').exec(function (ctx) {
 		case 'POST':
 			options.type = request.getParameter('type');
 			if (uriMatcher.match(UPDATE_LIFECYCLE_URL)) {//return assets by type
-				var apiPublisher = require('apipublisher').apipublisher;
+				var apiPublisher = require('apipublisher').provider;
 				var apiProxy = apiPublisher.instance(username);
 				var apiData = {};
 				apiData.provider = data.provider;
