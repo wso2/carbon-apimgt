@@ -5277,8 +5277,8 @@ public final class APIUtil {
 	return doc;
     }
 	
-    public static FileData populateFileData(byte[] content, String fileName, String contentType, String filePath) {
-	FileData file = new FileData(new ByteArrayInputStream(content), fileName, contentType, filePath);
+    public static FileData populateFileData(InputStream content, String fileName, String contentType, String filePath) {
+	FileData file = new FileData(content, fileName, contentType, filePath);
 	return file;
     }
 
