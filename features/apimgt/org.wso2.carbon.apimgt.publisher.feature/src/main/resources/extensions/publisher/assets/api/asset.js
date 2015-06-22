@@ -573,9 +573,9 @@ asset.renderer = function (ctx) {
                assets.lastUpdatedDate = page.lastUpdatedDate;
                assets.createdDate = page.createdDate;
 
-            },
+            }/*,
 
-            populateDetails:function(page){
+            populateAPIDoc:function(page){
                 if(page.meta.pageName !=='docs'){
                     return;
                 }
@@ -586,7 +586,7 @@ asset.renderer = function (ctx) {
                }
                var firstOne = tables[0];
                assets.provider = firstOne.fields.provider.value;
-            }
+            }*/
 
 
         }

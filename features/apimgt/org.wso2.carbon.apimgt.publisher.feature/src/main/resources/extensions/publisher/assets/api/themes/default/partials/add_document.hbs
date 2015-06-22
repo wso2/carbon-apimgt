@@ -1,102 +1,131 @@
 
 <div id='doc-add-container' class="row-fluid"  style='display:none;'>
-	<form novalidate="novalidate" id='form-document-create' >
+	<form novalidate="novalidate" id='form-document-create' enctype="multipart/form-data" >
+
+		<label id="docTopic" class='control-label' style='display:none;'>{{t "Update Document -"}}</label>
 		<div class="container-fluid" style="padding-left:0">
 			<input id="addDocVersion" value={{assets.version}} type="hidden"/>
 	        <input id="addDocName" value={{assets.name}} type="hidden"/>
 	        <input id="addDocProvider" value={{assets.provider}} type="hidden"/>
 	        <input id="addDocPageId" value={{assets.id}} type="hidden"/>
+	        <input id="errorMsgDocUrl" value={{t "Invalid Document URL"}} type="hidden"/>
+	        <input id="docAction" value="createDocument" type="hidden"/>
+	        {{#if assets.showAPIDocVisibility}}
+	        <input id="showVisibility" value="true" type="hidden"/>
+	        {{else}}
+	        <input id="showVisibility" value="false" type="hidden"/>
+	        {{/if}}
 	        
-	        
-			<div class="span4 name-column">
-				<div class='control-group'>
-						<label class='control-label'>{{t "Name"}}</label>
-						<div class='controls'>
-							<input type='text' id='overview_name' name='overview_name' style="width:25%"/>				
-						</div>
+	        <div class="row-fluid" >
+	        	<div class="span4 name-column">
+	        		<br>
+					<div class='control-group'>
+							<label class='control-label'>{{t "Name"}}</label>
+							<div class='controls'>
+								<input type='text' id='overview_name' name='overview_name' style="width:25%"/>				
+							</div>
+					</div>
+					<div class='control-group'>
+							<label class='control-label'>{{t "Summary"}}</label>
+							<div class='controls'>
+								<textarea name='overview_summary' id='overview_summary' style="width:25%"></textarea>
+							</div>
+					</div>
+					{{#if assets.showAPIDocVisibility}}
+					<div class='control-group' style='display:inline-block;;'>
+							<label class='control-label'>{{t "Visibility"}}</label>
+							<div class='controls'>
+								<select class="select required" id="docVisibility" name="docVisibility" style="width:100%">
+					              <option value="API_LEVEL" selected="true">Same as API visibility</option>
+					              <option value="OWNER_ONLY">Private</option>
+					              <option value="PRIVATE">Visible to my domain</option>
+
+					            </select>			
+							</div>
+					</div>
+					{{/if}}
 				</div>
-				<div class='control-group'>
-						<label class='control-label'>{{t "Summary"}}</label>
+				<div class="span4">
+					<div class='control-group' id="type-control-group">
+						<br>
+						<label class='control-label'>{{t "Type"}}</label>
 						<div class='controls'>
-							<textarea name='overview_summary' id='overview_summary' style="width:25%"></textarea>
-						</div>
-				</div>
-			</div>
-			<div class="span4">
-				<div class='control-group' id="type-control-group">
-					<label class='control-label'>{{t "Type"}}</label>
-					<div class='controls'>
-						{{!-- <select name='overview_type'>
-							<option>How To</option>
-							<option>Samples and SDK</option>
-							<option>Public Forum</option>
-							<option>Support Forum</option>
-							<option>Other (specify)</option>
-						</select> --}}
-						<label class="radio" >
-						<input name="typeOptionRadio" type="radio" value="How To" />
-							{{t "How To"}}
-						</label>
+							
+							<label class="radio" >
+							<input name="typeOptionRadio" id="typeOptionRadio1" type="radio" value="How To" />
+								{{t "How To"}}
+							</label>
+							
+							<label class="radio" >
+							<input name="typeOptionRadio"  id="typeOptionRadio2" type="radio"  value="Samples"/>
+								{{t "Samples and SDK"}}
+							</label>
 
-						<label class="radio" >
-						<input name="typeOptionRadio" type="radio"  value="Samples"/>
-							{{t "Samples and SDK"}}
-						</label>
+							<label class="radio" >
+							<input name="typeOptionRadio"  id="typeOptionRadio3" type="radio"  value="Public Forum"/>
+								{{t "Public Forum"}}
+							</label>
 
-						<label class="radio" >
-						<input name="typeOptionRadio" type="radio"  value="Public Forum"/>
-							{{t "Public Forum"}}
-						</label>
+							<label class="radio" >
+							<input name="typeOptionRadio" id="typeOptionRadio4"  type="radio"  value="Support Forum"/>
+								{{t "Support Forum"}}
+							</label>
 
-						<label class="radio" >
-						<input name="typeOptionRadio" type="radio"  value="Support Forum"/>
-							{{t "Support Forum"}}
-						</label>
+							<label class="radio" >
+							<input name="typeOptionRadio"  id="typeOptionRadio5" type="radio"  value="Other"/>
+								{{t "Other (specify)"}}
+							</label>
+						
+			
+							<div class='controls' id="otherNameControl" style='display:none;'>
+								<span style='color:red;'>*</span>
+								<input type='text' id='overview_other_name' name='overview_other_name' style="width:25%"/>				
+							</div>
+							
 
-						<label class="radio" >
-						<input name="typeOptionRadio" type="radio"  value="Other"/>
-							{{t "Other (specify)"}}
-						</label>
 					
-		
-						<div class='controls' id="otherNameControl" style='display:none;'>
-							<input type='text' id='overview_other_name' name='overview_other_name' style="width:25%"/>				
 						</div>
-				
 					</div>
 				</div>
-			</div>
-			<div class="span4">
-				<div class='control-group' id="source-control-group">
-						<label class='control-label'>{{t "Source"}}</label>
-						<div class='controls'>
-							{{!-- <select name='overview_source'>
-								<option>In-line</option>
-								<option>URL</option>
-								<option>File</option>
-							</select> --}}
+				<div class="span4">
+					<div class='control-group' id="source-control-group">
+							<br>
+							<label class='control-label'>{{t "Source"}}</label>
+							<div class='controls'>
+							
+								<label class="radio" >
+								<input name="sourceOptionRadio" id="sourceOptionRadio1" type="radio" value="In line"/>
+									{{t "In line"}}
+								</label>
 
-						<label class="radio" >
-						<input name="sourceOptionRadio" type="radio" value="In line"/>
-							{{t "In line"}}
-						</label>
+								<label class="radio" >
+								<input name="sourceOptionRadio" id="sourceOptionRadio2"  type="radio" value="URL"/>
+									{{t "URL"}}
+								</label>
 
-						<label class="radio" >
-						<input name="sourceOptionRadio" type="radio" value="URL"/>
-							{{t "URL"}}
-						</label>
+								<div class='controls' id="sourceDocUrl" style='display:none;'>
+									<span style='color:red;'>*</span><input type='text' id='docUrl' name='docUrl' style="width:25%"/>				
+								</div>
 
-						<label class="radio" >
-						<input name="sourceOptionRadio" type="radio" value="File"/>
-							{{t "File"}}
-						</label>
-						</div>
+								<label class="radio" >
+								<input name="sourceOptionRadio"  id="sourceOptionRadio3" type="radio" value="File"/>
+									{{t "File"}}
+								</label>
+								<div class='controls' id="sourceFile" style='display:none;'>
+									<input type='file' id='fileUpload'  name='fileUpload' style="width:100%"/>				
+								</div>
+								<label class='radio' style='display:none;' id='uploadFileName'/>
+							</div>
+
+							
+					</div>
 				</div>
-			</div>
-			<div class='form-actions'>
-				<input id="add-doc-btn" type='button' class='btn btn-primary' value='{{t "Add Document"}}' />
-				<input id="cancel-doc-btn" type='button' class='btn'  value='{{t "Cancel"}}' >
-			</div>
+				<div class='form-actions'>
+					<input id="add-doc-btn" type='button' class='btn btn-primary' value='{{t "Add Document"}}' />
+					<input id="cancel-doc-btn" type='button' class='btn'  value='{{t "Cancel"}}' >
+				</div>
+	        </div>
+			
 		</div>
 	</form>
 

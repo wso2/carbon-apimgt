@@ -2,10 +2,10 @@
 <div id="document-container">
 	
 	<div class="container-fluid" style="padding-left: 0px;">
-		<div id="addDoc" class="simple-space-maker">
+		<div id="addOrUpdateDoc" class="simple-space-maker" style='display:inline;'>
 			<a href="#" onclick="" id="addDocHref">
 
-			    <i class=" icon-plus-sign"></i>
+			    <i class="fa fa-plus"></i>
 	             {{t " Add New Document"}}
 
 			</a>
@@ -14,7 +14,8 @@
 
 		
 	</div>
-	{{> add_document .}}
-	{{> list_documents .}}
+	{{> add_document}}
+	{{> list_documents}}
+
 
 </div>

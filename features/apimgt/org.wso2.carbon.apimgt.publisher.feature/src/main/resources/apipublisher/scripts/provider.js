@@ -167,7 +167,7 @@ var provider = {};
         var doc = APIUtil.populateDocument(docType,sourceType,sourceURL,summary,docName,otherTypeName,visibility); 
 
         if(sourceType == 'File'){
-            var content = document.content;
+            var content = document.content.getStream().getStream();
             var fileName = document.fileName;
             var contentType = document.contentType;
             var filePath = document.filePath;
