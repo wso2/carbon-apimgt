@@ -5,7 +5,7 @@
     <groupId>org.wso2.carbon.apimgt</groupId>
     <artifactId>carbon-apimgt</artifactId>
     <packaging>pom</packaging>
-    <version>1.2.5-SNAPSHOT</version>
+    <version>2.0.0-SNAPSHOT</version>
     <name>WSO2 Carbon - API Management Aggregator Pom</name>
     <url>http://wso2.org</url>
 
@@ -24,10 +24,11 @@
     </scm>
 
     <modules>
-        <!--module>dependencies/synapse</module-->
         <module>service-stubs/apimgt</module>
+        <module>service-stubs//oidc-authenticator</module>
         <module>components/apimgt</module>
         <module>components/forum</module>
+        <module>components/oidc-authenticator</module>
         <module>features/apimgt</module>
         <module>features/forum</module>
         <module>features/synapse</module>
@@ -193,6 +194,24 @@
                 <groupId>org.wso2.carbon.apimgt</groupId>
                 <artifactId>org.wso2.carbon.apimgt.core</artifactId>
                 <version>${apimgt.core.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.wso2.carbon.apimgt</groupId>
+                <artifactId>org.wso2.carbon.apimgt.core</artifactId>
+                <version>${apimgt.core.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.wso2.carbon</groupId>
+                <artifactId>org.wso2.carbon.core.services</artifactId>
+                <version>${carbon.kernel.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>commons-codec.wso2</groupId>
+                <artifactId>commons-codec</artifactId>
+                <version>${commons-codec.version}</version>
             </dependency>
 
             <dependency>
@@ -449,9 +468,13 @@
             <dependency>
                 <groupId>org.wso2.carbon</groupId>
                 <artifactId>org.wso2.carbon.core</artifactId>
-                <version>${wso2carbon.version}</version>
+                <version>${carbon.kernel.version}</version>
             </dependency>
-
+            <dependency>
+                <groupId>org.wso2.carbon</groupId>
+                <artifactId>org.wso2.carbon.core.common</artifactId>
+                <version>${carbon.kernel.version}</version>
+            </dependency>
             <dependency>
                 <groupId>org.wso2.carbon</groupId>
                 <artifactId>org.wso2.carbon.tomcat</artifactId>
@@ -701,6 +724,31 @@
 		<artifactId>nimbus-jose-jwt</artifactId>
 		<version>${nimbusds.version}</version>
 	    </dependency>
+
+            <dependency>
+                <groupId>org.wso2.carbon.apimgt</groupId>
+                <artifactId>org.wso2.carbon.apimgt.authenticator.oidc.stub</artifactId>
+                <version>${carbon.apimgt.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.apache.ws.security.wso2</groupId>
+                <artifactId>wss4j</artifactId>
+                <version>${wss4j.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.wso2.carbon.apimgt</groupId>
+                <artifactId>org.wso2.carbon.apimgt.authenticator.oidc.ui</artifactId>
+                <version>${carbon.apimgt.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>net.minidev</groupId>
+                <artifactId>json-smart</artifactId>
+                <version>${json-smart.version}</version>
+            </dependency>
+
         </dependencies>
     </dependencyManagement>
 
@@ -708,34 +756,34 @@
         <project.scm.id>my-scm-server</project.scm.id>
 
         <!-- APIM Component Version -->
-        <carbon.apimgt.version>1.2.5-SNAPSHOT</carbon.apimgt.version>
-        <carbon.apimgt.imp.pkg.version>[1.2.0, 1.3.0)</carbon.apimgt.imp.pkg.version>
+        <carbon.apimgt.version>2.0.0-SNAPSHOT</carbon.apimgt.version>
+        <carbon.apimgt.imp.pkg.version>[2.0.0, 3.0.0)</carbon.apimgt.imp.pkg.version>
 
-        <apimgt.api.version>1.2.5-SNAPSHOT</apimgt.api.version>
-        <apimgt.impl.version>1.2.5-SNAPSHOT</apimgt.impl.version>
-        <apimgt.core.version>1.2.5-SNAPSHOT</apimgt.core.version>
-        <apimgt.gateway.version>1.2.5-SNAPSHOT</apimgt.gateway.version>
-        <apimgt.hostobjects.version>1.2.5-SNAPSHOT</apimgt.hostobjects.version>
-        <apimgt.interceptor.version>1.2.5-SNAPSHOT</apimgt.interceptor.version>
-        <apimgt.keymgt.version>1.2.5-SNAPSHOT</apimgt.keymgt.version>
-        <apimgt.keymgt.client.version>1.2.5-SNAPSHOT</apimgt.keymgt.client.version>
-        <apimgt.startup.publisher.version>1.2.5-SNAPSHOT</apimgt.startup.publisher.version>
-        <apimgt.usage.client>1.2.5-SNAPSHOT</apimgt.usage.client>
-        <apimgt.usage.publisher>1.2.5-SNAPSHOT</apimgt.usage.publisher>
+        <apimgt.api.version>2.0.0-SNAPSHOT</apimgt.api.version>
+        <apimgt.impl.version>2.0.0-SNAPSHOT</apimgt.impl.version>
+        <apimgt.core.version>2.0.0-SNAPSHOT</apimgt.core.version>
+        <apimgt.gateway.version>2.0.0-SNAPSHOT</apimgt.gateway.version>
+        <apimgt.hostobjects.version>2.0.0-SNAPSHOT</apimgt.hostobjects.version>
+        <apimgt.interceptor.version>2.0.0-SNAPSHOT</apimgt.interceptor.version>
+        <apimgt.keymgt.version>2.0.0-SNAPSHOT</apimgt.keymgt.version>
+        <apimgt.keymgt.client.version>2.0.0-SNAPSHOT</apimgt.keymgt.client.version>
+        <apimgt.startup.publisher.version>2.0.0-SNAPSHOT</apimgt.startup.publisher.version>
+        <apimgt.usage.client>2.0.0-SNAPSHOT</apimgt.usage.client>
+        <apimgt.usage.publisher>2.0.0-SNAPSHOT</apimgt.usage.publisher>
         <apimgt.keymgt.stub.version>4.4.0-SNAPSHOT</apimgt.keymgt.stub.version>
         <apimgt.handlers.security.stub.version>4.4.0</apimgt.handlers.security.stub.version>
-        <carbon.forum.version>1.2.5-SNAPSHOT</carbon.forum.version>
-        <carbon.forum.feature.version>1.2.5-SNAPSHOT</carbon.forum.feature.version>
-        <carbon.forum.server.feature.version>1.2.5-SNAPSHOT</carbon.forum.server.feature.version>
+        <carbon.forum.version>2.0.0-SNAPSHOT</carbon.forum.version>
+        <carbon.forum.feature.version>2.0.0-SNAPSHOT</carbon.forum.feature.version>
+        <carbon.forum.server.feature.version>2.0.0-SNAPSHOT</carbon.forum.server.feature.version>
 
-        <apimgt.core.feature.version>1.2.5-SNAPSHOT</apimgt.core.feature.version>
-        <apimgt.feature.version>1.2.5-SNAPSHOT</apimgt.feature.version>
-        <apimgt.gateway.feature>1.2.5-SNAPSHOT</apimgt.gateway.feature>
-        <apimgt.interceptor.feature>1.2.5-SNAPSHOT</apimgt.interceptor.feature>
-        <apimgt.publisher.feature.version>1.2.5-SNAPSHOT</apimgt.publisher.feature.version>
-        <apimgt.startup.publisher.feature.version>1.2.5-SNAPSHOT</apimgt.startup.publisher.feature.version>
-        <apimgt.store.feature.version>1.2.5-SNAPSHOT</apimgt.store.feature.version>
-        <apimgt.synapse.feature.version>1.2.5-SNAPSHOT</apimgt.synapse.feature.version>
+        <apimgt.core.feature.version>2.0.0-SNAPSHOT</apimgt.core.feature.version>
+        <apimgt.feature.version>2.0.0-SNAPSHOT</apimgt.feature.version>
+        <apimgt.gateway.feature>2.0.0-SNAPSHOT</apimgt.gateway.feature>
+        <apimgt.interceptor.feature>2.0.0-SNAPSHOT</apimgt.interceptor.feature>
+        <apimgt.publisher.feature.version>2.0.0-SNAPSHOT</apimgt.publisher.feature.version>
+        <apimgt.startup.publisher.feature.version>2.0.0-SNAPSHOT</apimgt.startup.publisher.feature.version>
+        <apimgt.store.feature.version>2.0.0-SNAPSHOT</apimgt.store.feature.version>
+        <apimgt.synapse.feature.version>2.0.0-SNAPSHOT</apimgt.synapse.feature.version>
 
 	<nimbusds.version>2.26.1.wso2v3</nimbusds.version>
 
@@ -755,10 +803,10 @@
         <carbon.apimgt.handlers.stub.package.import.version.range>[4.4.0, 4.5.0)</carbon.apimgt.handlers.stub.package.import.version.range>
 
 	<!-- Carbon Governance -->
-        <carbon.governance.version>4.5.1-SNAPSHOT</carbon.governance.version>
+        <carbon.governance.version>4.5.2-SNAPSHOT</carbon.governance.version>
 
         <!-- Carbon Registry -->
-        <carbon.registry.version>4.4.3-SNAPSHOT</carbon.registry.version>
+        <carbon.registry.version>4.4.4-SNAPSHOT</carbon.registry.version>
         <carbon.registry.imp.pkg.version>[1.0.1, 2.0.0)</carbon.registry.imp.pkg.version>
 
 	
@@ -787,7 +835,7 @@
         <axiom.osgi.version.range>[1.2.11.wso2v6, 1.3.0)</axiom.osgi.version.range>
         <version.axiom>1.2.11-wso2v6</version.axiom>
 
-        <apim.version>1.2.5-SNAPSHOT</apim.version>
+        <apim.version>2.0.0-SNAPSHOT</apim.version>
 
         <!-- Servlet API -->
         <exp.pkg.version.javax.servlet>2.6.0</exp.pkg.version.javax.servlet>
@@ -828,7 +876,9 @@
         <commons-logging.version>1.1.1</commons-logging.version>
         <h2-database-engine.version>1.2.140.wso2v3</h2-database-engine.version>
         <Saxon-HE.version>9.4</Saxon-HE.version>
-
+        <wss4j.version>1.5.11.wso2v10</wss4j.version>
+        <commons-codec.version>1.4.0.wso2v1</commons-codec.version>
+        <json-smart.version>1.3</json-smart.version>
         <json-simple.wso2.version>1.1.wso2v1</json-simple.wso2.version>
         <junit.version>4.8.1</junit.version>
         <neethi.wso2.version>2.0.4.wso2v4</neethi.wso2.version>

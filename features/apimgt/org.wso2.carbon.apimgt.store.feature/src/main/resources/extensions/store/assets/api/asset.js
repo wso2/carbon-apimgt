@@ -248,7 +248,69 @@ asset.renderer = function(ctx) {
             page.api = apidata;
             page.status = status;
 
-            //=================== Getting subscription details ========================
+            //Setting throttling infomation
+            var uriTemplates = apidata.templates;
+            log.info(uriTemplates);
+            var tiersList = apistore.getTiers().tiers;
+            var templateRepresentation =  [];
+            if (uriTemplates != null && uriTemplates.length > 0) {
+
+                for (var i = 0; i < uriTemplates.length; i++) {
+                    var methods = uriTemplates[i][1].split(",");
+                    var authTypes = uriTemplates[i][2].split(",");
+                    var throttlingTiers = uriTemplates[i][3].split(",");
+                    var getThrottlingTier, postThrottlingTier, deleteThrottlingTier, optionsThrottlingTier, putThrottlingTier;
+                    var method;
+                    var tierLimitDescriptions = [];
+                    var tierLimitDes;
+
+                    for (var n = 0; n < methods.length; n++) {
+                        method = methods[n];
+                        if (authTypes[n] == 'Application_User') {
+                            authTypes[n] = 'Application User';
+                        } else if (method == "GET") {
+                            getThrottlingTier = throttlingTiers[n];
+                        } else if (method == "POST") {
+                            postThrottlingTier = throttlingTiers[n];
+                        } else if (method == "PUT") {
+                            putThrottlingTier = throttlingTiers[n];
+                        } else if (method == "DELETE") {
+                            deleteThrottlingTier = throttlingTiers[n];
+                        } else if (method == "OPTIONS") {
+                            optionsThrottlingTier = throttlingTiers[n];
+                        }
+
+                        for (var k = 0; k < tiersList.length; k++) {
+                            if (tiersList[k].tierName == getThrottlingTier) {
+                                tierLimitDes = "GET " + tiersList[k].tierDescription;
+                                break;
+                            } else if (tiersList[k].tierName == postThrottlingTier) {
+                                tierLimitDes = "POST " + tiersList[k].tierDescription;
+                                break;
+                            } else if (tiersList[k].tierName == putThrottlingTier) {
+                                tierLimitDes = "PUT " + tiersList[k].tierDescription;
+                                break;
+                            } else if (tiersList[k].tierName == deleteThrottlingTier) {
+                                tierLimitDes = "DELETE " + tiersList[k].tierDescription;
+                                break;
+                            } else if (tiersList[k].tierName == optionsThrottlingTier) {
+                                tierLimitDes = "OPTIONS " + tiersList[k].tierDescription;
+                                break;
+                            }
+                        }
+                        tierLimitDescriptions.push({"description" : tierLimitDes})
+                    }
+
+                    templateRepresentation.push({
+                                                    "templateName": uriTemplates[i][0],
+                                                    "tierLimitDescriptions": tierLimitDescriptions
+                                                });
+                }
+            }
+            page.templateRepresentation = templateRepresentation;
+            //Set language specific helper messages and names
+            var locale = require('/extensions/assets/api/locale/locale_default.json');
+            page.locale = locale;
         },
         pageDecorators: {
             populateEndPoints : function(page){

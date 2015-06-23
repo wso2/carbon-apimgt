@@ -233,6 +233,7 @@ var apistore = {};
                 updatedDate: dateFormatted,
                 tierDescs:tiersDescSet,
                 bizOwner: api.getBusinessOwner(),
+                templates: uriTempArr,
                 bizOwnerMail: api.getBusinessOwnerEmail(),
                 techOwner: api.getTechnicalOwner(),
                 techOwnerMail: api.getTechnicalOwnerEmail(),
@@ -263,6 +264,37 @@ var apistore = {};
             };
         }
 
+    };
+
+    StoreAPIProxy.prototype.getTiers = function () {
+
+        try {
+            var availableTiers = this.impl.getTiers();
+            var tierList = [];
+            var tier;
+            var sortedTierList = APIUtil.sortTiers(availableTiers);
+            for (var i = 0 ; i < sortedTierList.size() ; i ++) {
+                tier = sortedTierList.get(i);
+                tierList.push({
+                                  "tierName": tier.getName(),
+                                  "tierDisplayName": tier.getDisplayName(),
+                                  "tierDescription": tier.getDescription(),
+                                  "defaultTier": 0
+                              });
+            }
+            if (log.isDebugEnabled()) {
+                log.debug("Invoke getTiers()" );
+            }
+            return {
+                error:false,
+                tiers:tierList
+            };
+        } catch (e) {
+            log.error(e.message);
+            return {
+                error:e
+            };
+        }
     };
 
     StoreAPIProxy.prototype.addSubscription = function (apiname, version, provider, user, tier, appId) {

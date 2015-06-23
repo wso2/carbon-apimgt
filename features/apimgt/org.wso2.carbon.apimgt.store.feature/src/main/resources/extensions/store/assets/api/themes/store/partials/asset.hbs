@@ -120,7 +120,7 @@
           <li class="active"><a data-toggle="tab" href="#api-overview">{{t "Overview"}}</a></li>
           <li><a data-toggle="tab" href="#api-docs">{{t "Documentation"}}</a></li>
           <li><a data-toggle="tab" href="#swagger">{{t "API Console"}}</a></li>
-          <li><a data-toggle="tab" href="#">{{t "Throttling Info"}}</a></li>
+          <li><a data-toggle="tab" href="#throttlingInfo">{{t "Throttling Info"}}</a></li>
           <li><a data-toggle="tab" href="#">{{t "Forum"}}</a></li>
       </ul>
       <div class="tab-content">
@@ -131,6 +131,9 @@
           </div>
           <div id="swagger" class="tab-pane fade">{{t "Swagger"}}
           </div>
+	      <div id="throttlingInfo" class="tab-pane fade">
+			  {{> throttling-info .}}
+	      </div>
       </div>
   </div>
 
