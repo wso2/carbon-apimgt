@@ -805,7 +805,7 @@ public class APIUsageStatisticsClient {
             accessTimeDTO.setApiName(entry.getKey());
             APIAccessTime lastAccessTime = entry.getValue();
             accessTimeDTO.setApiVersion(lastAccessTime.apiVersion);
-            accessTimeDTO.setLastAccessTime(dateFormat.format(lastAccessTime.accessTime));
+            accessTimeDTO.setLastAccessTime("" + lastAccessTime.accessTime);
             accessTimeDTO.setUser(lastAccessTime.username);
             accessTimeByAPI.put(entry.getKey(), accessTimeDTO);
         }
@@ -2490,7 +2490,7 @@ public class APIUsageStatisticsClient {
         private String apiName;
         private String apiVersion;
         private String context;
-        private double accessTime;
+        private long accessTime;
         private String username;
 
         public APIAccessTime(OMElement row) {
@@ -2501,7 +2501,7 @@ public class APIUsageStatisticsClient {
             apiVersion = nameVersion.substring(index + 2);
             context = row.getFirstChildWithName(new QName(
                     APIUsageStatisticsClientConstants.CONTEXT)).getText();
-            accessTime = Double.parseDouble(row.getFirstChildWithName(new QName(
+            accessTime = Long.parseLong(row.getFirstChildWithName(new QName(
                     APIUsageStatisticsClientConstants.REQUEST_TIME)).getText());
             username = row.getFirstChildWithName(new QName(
                     APIUsageStatisticsClientConstants.USER_ID)).getText();
