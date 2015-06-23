@@ -48,6 +48,7 @@ require('/modules/publisher.js').exec(function(ctx) {
             var output = am.render(assets, page).details();
             //output.showAPIDocVisibility=canShow;
             output.assets.showAPIDocVisibility = canShow;
+            output.assets.visibility_display = canShow;
             //log.info(output);
             var tables = output.assets.tables;
                if(tables.length > 1){
@@ -76,6 +77,19 @@ require('/modules/publisher.js').exec(function(ctx) {
 
                 if(editContent){
                     attributes.overview_editContent = true;
+                }
+
+                if(canShow){
+                    if(attributes.overview_visibility == 'API_LEVEL'){
+                        attributes.visibility_display = 'Same as API visibility';
+                    }else if(attributes.overview_visibility == 'OWNER_ONLY'){
+                        attributes.visibility_display = 'Private';
+                    }else if(attributes.overview_visibility == 'PRIVATE'){
+                        attributes.visibility_display = 'Visible to my domain';
+                    }
+                }else{
+                    attributes.visibility_display = null;
+                    output.assets.visibility_display = null;
                 }
 
 }

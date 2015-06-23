@@ -97,7 +97,11 @@ $(function(){
 
 
 	$('#add-doc-btn').on('click',function(){
-		saveOrUpdate("createDocument");
+		if($('#docAction').val() == "updateDocument"){
+			saveOrUpdate("updateDocument");
+		}else if($('#docAction').val() == "createDocument"){
+			saveOrUpdate("createDocument");
+		}		
 
 	});
 
@@ -111,11 +115,18 @@ $(function(){
 
 var saveOrUpdate = function(action){
 	var ajaxURL;
+	var successMsg;
+	var errorMsg;
 	if(action == "createDocument"){
-		ajaxURL = caramel.context + '/asts/api/apis/addDoc';
-		$('#doc-add-container').css('display','none');
+		successMsg = 'Successfully Created New Document';
+		errorMsg = 'Error Occured while Create New Document';
+	}else if(action == "updateDocument"){
+		successMsg = 'Successfully Updated Document';
+		errorMsg = 'Error Occured while Update Document';
 	}
-	
+
+	ajaxURL = caramel.context + '/asts/api/apis/addDoc';
+	$('#doc-add-container').css('display','none');
 	
 	var apiName = $('#addDocName').val();
 	var provider = $('#addDocProvider').val();
@@ -131,7 +142,7 @@ var saveOrUpdate = function(action){
 	var sourceURL;
 	var showVisibility = $('#showVisibility').val();
 	if(showVisibility == "true"){
-		visibility = $( "#docVisibility option:selected" ).text();
+		visibility = $("#docVisibility option:selected").text();
 	}
 	
 	var filePath="";
@@ -180,7 +191,7 @@ var saveOrUpdate = function(action){
 	                BootstrapDialog.show({
 		                type: BootstrapDialog.TYPE_SUCCESS,
 		                title: 'success',
-		                message: 'Successfully Created New Document',
+		                message: successMsg,
 		                buttons: [{
 		                
 			                label: 'Close',
@@ -199,7 +210,7 @@ var saveOrUpdate = function(action){
 	                BootstrapDialog.show({
 		                type: BootstrapDialog.TYPE_DANGER,
 		                title: 'Error',
-		                message: 'Error Occured while Create New Document',
+		                message: errorMsg,
 		                buttons: [{
 		                
 			                label: 'Close',
@@ -218,6 +229,75 @@ var saveOrUpdate = function(action){
 	}); 
 
 }
+
+var updateDocumentation = function(docName, docType, summary, sourceType, docUrl, filePath, otherTypeName,visibility,updateTxt){
+	alert(filePath);
+	$('#doc-add-container').css('display','none');
+	$('#addOrUpdateDoc').css('display','none');
+	$('#doc-list-container').css('display','none');
+	
+	var topic = $('#docTopic').text();
+	$('#docTopic').text(topic+' '+docName)
+	$('#add-doc-btn').text(updateTxt);
+	$('#add-doc-btn').val(updateTxt);
+	$('#doc-add-container').show('slow');
+	$('#docTopic').show('slow');
+	$('#docAction').val('updateDocument');
+
+	$('#overview_name').val(docName);
+	$('#overview_summary').val(summary);
+	if($('#showVisibility').val() == "true"){
+		alert(visibility);
+		$("#docVisibility").val(visibility);
+	}
+
+	//populate with previously selected data
+	 if (sourceType == "INLINE") {
+            $('#sourceOptionRadio1').attr('checked', true);
+     } else if(sourceType == "URL"){
+            if (docUrl != "{}") {
+                $('#docUrl').val(docUrl);
+                $('#sourceOptionRadio2').attr('checked', true);
+                $('#sourceDocUrl').show('slow');
+                $('#docUrl').show('slow');
+            }
+     }else {
+            $('#sourceOptionRadio3').attr('checked', true);
+            $('#sourceFile').show('slow');
+            if(filePath){
+            	$("#fileUpload").val(filePath);
+                $('#uploadFileName').text(filePath.split("documentation/files/")[1]);
+                $('#uploadFileName').show('slow');
+            }
+     }
+
+    if(docType == "How To"){
+    	 $('#typeOptionRadio1').attr('checked', true);
+    }else if(docType == "Samples"){
+    	$('#typeOptionRadio2').attr('checked', true);
+    }else if(docType == "Public Forum"){
+    	$('#typeOptionRadio3').attr('checked', true);
+    }else if(docType == "Support Forum"){
+    	$('#typeOptionRadio4').attr('checked', true);
+    }else if(docType == "Other"){
+    	$('#typeOptionRadio5').attr('checked', true);
+    }
+
+
+};
+
+var  editDocumentation = function(url, filePath, editContent){
+	if(url != null){
+		window.open(url);
+	}else if(filePath != null){
+		/*$("docListEdit").on("click", function () {
+    		$(this).attr("href",filePath);
+    	});
+    	$('fileUpload').click();
+		*/
+	}
+
+};
 
 
 var validInputUrl = function(docUrlDiv) {
@@ -305,63 +385,3 @@ var getMimeType = function(extension) {
     return type;
 };
 
-var updateDocumentation = function(docName, docType, summary, sourceType, docUrl, filePath, otherTypeName,visibility,updateTxt){
-	
-	$('#doc-add-container').css('display','none');
-	$('#addOrUpdateDoc').css('display','none');
-	$('#doc-list-container').css('display','none');
-	
-	var topic = $('#docTopic').text();
-	$('#docTopic').text(topic+' '+docName)
-	$('#add-doc-btn').text(updateTxt);
-	$('#add-doc-btn').val(updateTxt);
-	$('#doc-add-container').css('display','inline');
-	$('#docTopic').css('display','inline');
-	$('#docAction').val('updateDocument');
-
-	//populate with previously selected data
-	 if (sourceType == "INLINE") {
-            $('#sourceOptionRadio1').attr('checked', true);
-     } else if(sourceType == "URL"){
-            if (docUrl != "{}") {
-                $('#docUrl').val(docUrl);
-                $('#sourceOptionRadio2').attr('checked', true);
-                $('#sourceDocUrl').show('slow');
-                $('#docUrl').show('slow');
-            }
-     }else {
-            $('#sourceOptionRadio3').attr('checked', true);
-            $('#sourceFile').show('slow');
-            if(filePath){
-                $('#uploadFileName').text(filePath.split("documentation/files/")[1]);
-                $('#uploadFileName').show('slow');
-            }
-     }
-
-    if(docType == "How To"){
-    	 $('#typeOptionRadio1').attr('checked', true);
-    }else if(docType == "Samples"){
-    	$('#typeOptionRadio2').attr('checked', true);
-    }else if(docType == "Public Forum"){
-    	$('#typeOptionRadio3').attr('checked', true);
-    }else if(docType == "Support Forum"){
-    	$('#typeOptionRadio4').attr('checked', true);
-    }else if(docType == "Other"){
-    	$('#typeOptionRadio5').attr('checked', true);
-    }
-
-
-};
-
-var  editDocumentation = function(url, filePath, editContent){
-	if(url != null){
-		window.open(url);
-	}else if(filePath != null){
-		/*$("docListEdit").on("click", function () {
-    		$(this).attr("href",filePath);
-    	});
-    	$('fileUpload').click();
-		*/
-	}
-
-};
