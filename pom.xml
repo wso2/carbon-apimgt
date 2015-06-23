@@ -24,10 +24,11 @@
     </scm>
 
     <modules>
-        <!--module>dependencies/synapse</module-->
         <module>service-stubs/apimgt</module>
+        <module>service-stubs//oidc-authenticator</module>
         <module>components/apimgt</module>
         <module>components/forum</module>
+        <module>components/oidc-authenticator</module>
         <module>features/apimgt</module>
         <module>features/forum</module>
         <module>features/synapse</module>
@@ -193,6 +194,24 @@
                 <groupId>org.wso2.carbon.apimgt</groupId>
                 <artifactId>org.wso2.carbon.apimgt.core</artifactId>
                 <version>${apimgt.core.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.wso2.carbon.apimgt</groupId>
+                <artifactId>org.wso2.carbon.apimgt.core</artifactId>
+                <version>${apimgt.core.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.wso2.carbon</groupId>
+                <artifactId>org.wso2.carbon.core.services</artifactId>
+                <version>${carbon.kernel.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>commons-codec.wso2</groupId>
+                <artifactId>commons-codec</artifactId>
+                <version>${commons-codec.version}</version>
             </dependency>
 
             <dependency>
@@ -449,9 +468,13 @@
             <dependency>
                 <groupId>org.wso2.carbon</groupId>
                 <artifactId>org.wso2.carbon.core</artifactId>
-                <version>${wso2carbon.version}</version>
+                <version>${carbon.kernel.version}</version>
             </dependency>
-
+            <dependency>
+                <groupId>org.wso2.carbon</groupId>
+                <artifactId>org.wso2.carbon.core.common</artifactId>
+                <version>${carbon.kernel.version}</version>
+            </dependency>
             <dependency>
                 <groupId>org.wso2.carbon</groupId>
                 <artifactId>org.wso2.carbon.tomcat</artifactId>
@@ -701,6 +724,31 @@
 		<artifactId>nimbus-jose-jwt</artifactId>
 		<version>${nimbusds.version}</version>
 	    </dependency>
+
+            <dependency>
+                <groupId>org.wso2.carbon.apimgt</groupId>
+                <artifactId>org.wso2.carbon.apimgt.authenticator.oidc.stub</artifactId>
+                <version>${carbon.apimgt.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.apache.ws.security.wso2</groupId>
+                <artifactId>wss4j</artifactId>
+                <version>${wss4j.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.wso2.carbon.apimgt</groupId>
+                <artifactId>org.wso2.carbon.apimgt.authenticator.oidc.ui</artifactId>
+                <version>${carbon.apimgt.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>net.minidev</groupId>
+                <artifactId>json-smart</artifactId>
+                <version>${json-smart.version}</version>
+            </dependency>
+
         </dependencies>
     </dependencyManagement>
 
@@ -828,7 +876,9 @@
         <commons-logging.version>1.1.1</commons-logging.version>
         <h2-database-engine.version>1.2.140.wso2v3</h2-database-engine.version>
         <Saxon-HE.version>9.4</Saxon-HE.version>
-
+        <wss4j.version>1.5.11.wso2v10</wss4j.version>
+        <commons-codec.version>1.4.0.wso2v1</commons-codec.version>
+        <json-smart.version>1.3</json-smart.version>
         <json-simple.wso2.version>1.1.wso2v1</json-simple.wso2.version>
         <junit.version>4.8.1</junit.version>
         <neethi.wso2.version>2.0.4.wso2v4</neethi.wso2.version>
