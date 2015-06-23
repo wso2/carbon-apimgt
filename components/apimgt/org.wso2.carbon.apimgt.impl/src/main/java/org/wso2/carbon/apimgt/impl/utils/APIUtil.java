@@ -4332,7 +4332,7 @@ public final class APIUtil {
      * @return bool
      */
     // TODO: method signature should changed as isAPIDocCanShow()
-    public boolean showAPIDocVisibility() {
+    public static boolean showAPIDocVisibility() {
 
         APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
                 getAPIManagerConfigurationService().getAPIManagerConfiguration();
