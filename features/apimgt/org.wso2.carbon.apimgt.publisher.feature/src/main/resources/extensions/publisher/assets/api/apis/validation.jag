@@ -134,7 +134,7 @@ require('/modules/publisher.js').exec(function (ctx) {
 							isScopeExist: result.isScopeExist
 						}
 					}
-					response = responseProcessor.buildSuccessResponse(response, constants.STATUS_CODES.OK, data);
+					response = responseProcessor.buildSuccessResponse(response, constants.STATUS_CODES.OK, obj);
 				} else {
 					response = responseProcessor.buildErrorResponse(response,
 																	constants.STATUS_CODES.NOT_IMPLEMENTED,
