@@ -354,4 +354,74 @@ var apistore = {};
         return this.impl.getUUIDByApi(provider, name, version);
     };
 
+    /*
+     * This method returns the UUID of an artifact
+     */
+    StoreAPIProxy.prototype.getAllDocumentation = function (provider, name, version, loggedInUser) {
+        try {
+            var documentList = [];
+            var apiIdentifier = new APIIdentifier(provider, name, version);
+            var documents = this.getAllDocumentation(apiIdentifier, loggedInUser);
+            for (var i = 0 ; i < documents.size() ; i ++) {
+                document = documents.get(i);
+                var sourceTypes = [];
+                var content, documentationType, otherTypeName, otherType = false,  = false;
+                var sourceType = document.getSourceType().getType();
+                if ('INLINE' == sourceType) {
+                    sourceTypes.push({
+                                     "inline" :true,
+                                     "url" : false,
+                                      "file" : false
+                                     });
+                    content = this.impl.getDocumentationContent(apiIdentifier, document.getName());
+                } else if ('URL' == sourceType) {
+                    sourceTypes.push({
+                                         "inline" :false,
+                                         "url" : true,
+                                         "file" : false
+                                     });
+                } else {
+                    sourceTypes.push({
+                                         "inline" :false,
+                                         "url" : false,
+                                         "file" : true
+                                     });
+                }
+
+                documentationType = document.getType().getType();
+
+                if (documentationType == 'Other') {
+                    otherType = true;
+                    otherTypeName =  document.getOtherTypeName();
+                }
+
+
+                documentList.push({
+                                  "name": document.getName(),
+                                  "sourceType": sourceType,
+                                  "summary": document.getSummary(),
+                                  "content": content,
+                                  "sourceTypes": sourceTypes,
+                                  "sourceUrl": document.getDescription(),
+                                  "filePath": document.getSourceUrl(),
+                                  "type": documentationType,
+                                  "otherType": otherType,
+                                  "otherTypeName": otherTypeName
+                              });
+            }
+            if (log.isDebugEnabled()) {
+                log.debug("Invoke getAllDocumentation()" );
+            }
+            return {
+                error:false,
+                documents:documentList
+            };
+        } catch (e) {
+            log.error(e.message);
+            return {
+                error:e
+            };
+        }
+    };
+
 })(apistore);

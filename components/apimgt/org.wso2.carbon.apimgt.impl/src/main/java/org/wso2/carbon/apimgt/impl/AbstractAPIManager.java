@@ -488,14 +488,30 @@ public abstract class AbstractAPIManager implements APIManager {
         return documentationList;
     }
 
-    public List<Documentation> getAllDocumentation(APIIdentifier apiId,String loggedUsername) throws APIManagementException {
-        List<Documentation> documentationList = new ArrayList<Documentation>();
-        String apiResourcePath = APIUtil.getAPIPath(apiId);
-        try {
-        	String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(apiId.getProviderName()));
+    public List<Documentation> getAllDocumentation(APIIdentifier apiId, String loggedUsername) throws
+		    APIManagementException {
+	    List<Documentation> documentationList = null;
+	    boolean isTenantFlowStarted = false;
+	    String apiName = apiId.getApiName();
+	    String version = apiId.getVersion();
+	    String username = loggedUsername;
+	    String providerName = APIUtil.replaceEmailDomain(apiId.getProviderName());
+	    try {
+		    String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(providerName));
+		    if (tenantDomain != null && !org.wso2.carbon.utils.multitenancy.MultitenantConstants
+				    .SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
+			    isTenantFlowStarted = true;
+			    PrivilegedCarbonContext.startTenantFlow();
+			    PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
+		    }
+
+			APIIdentifier apiIdentifier = new APIIdentifier(providerName, apiName, version);
+		    String apiResourcePath = APIUtil.getAPIPath(apiIdentifier);
+
             Registry registryType;
+
             /* If the API provider is a tenant, load tenant registry*/
-            boolean isTenantMode=(tenantDomain != null);
+            boolean isTenantMode = (tenantDomain != null);
             if ((isTenantMode && this.tenantDomain==null) || (isTenantMode && isTenantDomainNotMatching(tenantDomain))) {//Tenant store anonymous mode
                 int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
                         .getTenantId(tenantDomain);
@@ -542,7 +558,11 @@ public abstract class AbstractAPIManager implements APIManager {
             handleException("Failed to get documentations for api " + apiId.getApiName(), e);
         } catch (org.wso2.carbon.user.api.UserStoreException e) {
         	handleException("Failed to get documentations for api " + apiId.getApiName(), e);
-		}
+		} finally {
+		    if (isTenantFlowStarted) {
+			    PrivilegedCarbonContext.endTenantFlow();
+		    }
+	    }
         return documentationList;
     }
 
