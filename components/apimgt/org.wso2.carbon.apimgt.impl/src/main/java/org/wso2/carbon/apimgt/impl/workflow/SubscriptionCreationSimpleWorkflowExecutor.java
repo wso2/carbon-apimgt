@@ -18,12 +18,16 @@
 
 package org.wso2.carbon.apimgt.impl.workflow;
 
+import org.apache.axis2.util.JavaUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dto.WorkflowDTO;
+import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
+import org.wso2.carbon.apimgt.impl.workflow.events.APIMgtWorkflowDataPublisher;
 
 import java.util.List;
 
@@ -42,9 +46,10 @@ public class SubscriptionCreationSimpleWorkflowExecutor extends WorkflowExecutor
     }
 
     @Override
-    public void execute(WorkflowDTO workflowDTO) throws WorkflowException{
+    public void execute(WorkflowDTO workflowDTO) throws WorkflowException {
         workflowDTO.setStatus(WorkflowStatus.APPROVED);
         complete(workflowDTO);
+        super.publishEvents(workflowDTO);
     }
 
     @Override

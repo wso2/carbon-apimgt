@@ -24,6 +24,7 @@ public class ServiceReferenceHolder {
     private static final ServiceReferenceHolder instance = new ServiceReferenceHolder();
 
     private APIManagerConfigurationService amConfigurationService;
+    private RealmService realmService;
 
     private ServiceReferenceHolder() {
 
@@ -39,5 +40,13 @@ public class ServiceReferenceHolder {
 
     public void setAPIManagerConfigurationService(APIManagerConfigurationService amConfigurationService) {
         this.amConfigurationService = amConfigurationService;
+    }
+
+    public RealmService getRealmService() {
+        return realmService;
+    }
+
+    public void setRealmService(RealmService realmService) {
+        this.realmService = realmService;
     }
 }

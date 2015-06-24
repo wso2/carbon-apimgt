@@ -1,0 +1,52 @@
+<% jagg.template("api/provider-apis", function(inputs, outputs, jagg) {%>
+<%  
+    var owner="";
+    if(outputs.apiBizOwner != null){ owner = outputs.apiBizOwner }
+    else if(outputs.apiOwner != null){ owner =outputs.apiOwner }
+
+%>
+<%if(outputs.apiOwner!=null){%>
+<div id="recently-added" class="panel panel-default">
+  <div class="panel-heading"><%=i18n.localize("moreAPI")%>  '<%= owner %>'</div>
+  <div class="panel-body">
+    <%
+    var urlPrefix;
+    var tenant=request_tenant;
+    if(tenant!=null) {urlPrefix="&tenant="+tenant;}else{urlPrefix='';}
+
+    var i, api, path,apis = outputs.apis, thumbURL;
+    if(apis!=null && apis.length > 0){
+        length = apis.length;
+        for(i = 0; i < length; i++) {
+            api = apis[i];
+            thumbURL = api.thumbURL;
+            if(thumbURL && thumbURL.indexOf("images/") == 0) {
+                thumbURL = jagg.getAbsoluteUrl(jagg.getThemeFile(thumbURL));
+            } else {
+                thumbURL = jagg.getRegistryPath(thumbURL);
+            }
+            path = jagg.getMappedUrl("/site/pages/item-info.jag") + "?name=" + api.name + "&version=" + api.version +
+                   "&provider=" + api.provider+ urlPrefix;
+    %>
+        <%if(i){ %><hr /><% } %>
+        <div class="row">
+          <div class="col-md-4">
+            <a href="<%=path%>" >
+              <img src="<%=thumbURL%>" width="70px" />
+            </a>
+          </div>
+          <div class="col-md-8">
+            <a href="<%=path%>" >      
+            <strong class="fade-out"><%=api.name%>-<%=api.version%></strong>
+            </a>
+            <input type="hidden" class="rating recent_rating" disabled="disabled" value="<%= api.rating %>" />
+          </div>
+        </div>   
+    <%  }
+    }else{ %>        
+        <div class="text-muted" style="padding:15px">No other APIs from this provider.</div>  
+    <%}%>
+  </div>
+</div>
+<%}%>
+<% }); %>

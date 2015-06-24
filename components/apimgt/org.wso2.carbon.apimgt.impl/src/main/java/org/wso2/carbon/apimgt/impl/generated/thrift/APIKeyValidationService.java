@@ -39,9 +39,13 @@ public class APIKeyValidationService {
 
   public interface AsyncIface {
 
-    public void validateKey(String context, String version, String accessToken, String sessionId, String requiredAuthenticationLevel, String clientDomain, String matchingResource, String httpVerb, org.apache.thrift.async.AsyncMethodCallback<AsyncClient.validateKey_call> resultHandler) throws org.apache.thrift.TException;
+    public void validateKey(String context, String version, String accessToken, String sessionId,
+                            String requiredAuthenticationLevel, String clientDomain, String matchingResource,
+                            String httpVerb,
+                            org.apache.thrift.async.AsyncMethodCallback<AsyncClient.validateKey_call> resultHandler) throws org.apache.thrift.TException;
 
-    public void getAllURITemplates(String context, String apiVersion, String sessionId, org.apache.thrift.async.AsyncMethodCallback<AsyncClient.getAllURITemplates_call> resultHandler) throws org.apache.thrift.TException;
+    public void getAllURITemplates(String context, String apiVersion, String sessionId,
+                                   org.apache.thrift.async.AsyncMethodCallback<AsyncClient.getAllURITemplates_call> resultHandler) throws org.apache.thrift.TException;
 
   }
 
@@ -194,7 +198,7 @@ public class APIKeyValidationService {
       }
 
       public APIKeyValidationInfoDTO getResult() throws APIKeyMgtException, APIManagementException, org.apache.thrift.TException {
-        if (getState() != org.apache.thrift.async.TAsyncMethodCall.State.RESPONSE_READ) {
+        if (getState() != State.RESPONSE_READ) {
           throw new IllegalStateException("Method call not finished!");
         }
         org.apache.thrift.transport.TMemoryInputTransport memoryTransport = new org.apache.thrift.transport.TMemoryInputTransport(getFrameBuffer().array());
@@ -232,7 +236,7 @@ public class APIKeyValidationService {
       }
 
       public List<URITemplate> getResult() throws APIKeyMgtException, APIManagementException, org.apache.thrift.TException {
-        if (getState() != org.apache.thrift.async.TAsyncMethodCall.State.RESPONSE_READ) {
+        if (getState() != State.RESPONSE_READ) {
           throw new IllegalStateException("Method call not finished!");
         }
         org.apache.thrift.transport.TMemoryInputTransport memoryTransport = new org.apache.thrift.transport.TMemoryInputTransport(getFrameBuffer().array());

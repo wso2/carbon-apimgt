@@ -3,8 +3,13 @@ var getAuthServerURL = function() {
     return getAPIStoreObj().getAuthServerURL();
 };
 var getHTTPsURL = function() {
-    return getAPIProviderObj().getHTTPsURL();
+    return getAPIStoreObj().getHTTPsURL(request.getRequestURL());
 };
+
+var getHTTPURL = function() {
+   return getAPIStoreObj().getHTTPURL();
+};
+
 
 var getServer = function() {
     return {
@@ -33,7 +38,7 @@ var getAPIStoreObj = function() {
 var loadTenantRegistry = function (tenantDomain) {
     try {
         if (tenantDomain != null && tenantDomain != "") {
-            getAPIProviderObj().loadRegistryOfTenant(tenantDomain);
+            getAPIStoreObj().loadRegistryOfTenant(tenantDomain);
             return
             {
                 error:false

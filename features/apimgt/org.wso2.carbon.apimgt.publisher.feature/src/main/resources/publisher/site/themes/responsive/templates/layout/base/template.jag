@@ -1,0 +1,33 @@
+<% jagg.template("layout/base", function(inputs, outputs, jagg) { 
+var i18n = require("i18n");var publisherUrl;
+var localeResourcesBasePath="/site/conf/locales/jaggery/";
+i18n.init(request,localeResourcesBasePath); %>
+    <div id="wrapper" >
+        <!-- Sidebar -->
+        <% if(outputs.left) { %>
+        <div id="sidebar-wrapper">
+            <% jagg.includeBlocks(outputs.left); %>
+            <% jagg.includeBlocks(outputs.right); %>
+        </div>
+        <% } %>                 
+
+        <!-- /#sidebar-wrapper -->
+
+        <!-- Page Content -->
+        <div id="page-content-wrapper">
+            <div class="container-fluid">
+                <% jagg.includeBlocks(outputs.top); %>                
+                <% if(outputs.title && outputs.title=="APIs") { %><h2><%=outputs.title%></h2><% } %>            
+                <% jagg.includeBlocks(outputs.middle); %>
+                <% jagg.includeBlocks(outputs.bottom); %>            
+            </div>
+            <% /* following is a hack to get sticky footer working in responsive mode */ %>
+            <footer class="inside-footer text-center">                                   
+              <%=i18n.localize("copyright", "&copy; Copyright 2011 &ndash; 2013 All Rights Reserved.")%>
+              <a class="powered-by-logo pull-right" href="http://wso2.com/products/api-manager" target="_blank"></a>
+            </footer>             
+        </div>
+        <!-- /#page-content-wrapper -->       
+    </div>
+    <!-- /#wrapper -->
+<% }); %>

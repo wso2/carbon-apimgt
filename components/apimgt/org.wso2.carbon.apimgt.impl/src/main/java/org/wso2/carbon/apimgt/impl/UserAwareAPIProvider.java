@@ -17,6 +17,7 @@
 package org.wso2.carbon.apimgt.impl;
 
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.FaultGatewaysException;
 import org.wso2.carbon.apimgt.api.model.*;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 
@@ -46,27 +47,40 @@ public class UserAwareAPIProvider extends APIProviderImpl {
     }
 
     @Override
-    public void createNewAPIVersion(API api, String newVersion) throws DuplicateAPIException,
+    public boolean createNewAPIVersion(API api, String newVersion) throws DuplicateAPIException,
             APIManagementException {
         checkCreatePermission();
-        super.createNewAPIVersion(api, newVersion);
+        return super.createNewAPIVersion(api, newVersion);
     }
 
     @Override
-    public void updateAPI(API api) throws APIManagementException {
+    public void updateAPI(API api) throws APIManagementException, FaultGatewaysException {
         checkCreatePermission();
         super.updateAPI(api);
     }
 
     @Override
-    public void deleteAPI(APIIdentifier identifier) throws APIManagementException {
+    public void manageAPI(API api) throws APIManagementException,FaultGatewaysException {
+        boolean permitted = APIUtil.checkPermissionQuietly(username, APIConstants.Permissions.API_CREATE) ||
+                APIUtil.checkPermissionQuietly(username, APIConstants.Permissions.API_PUBLISH);
+        if(!permitted){
+            String permission = APIConstants.Permissions.API_CREATE + " or " + APIConstants.Permissions.API_PUBLISH;
+            throw new APIManagementException("User '" + username + "' does not have the " +
+                    "required permission: " + permission);
+        }
+        super.updateAPI(api);
+    }
+
+    @Override
+    public boolean deleteAPI(APIIdentifier identifier) throws APIManagementException {
         checkCreatePermission();
         super.deleteAPI(identifier);
+	    return true;
     }
 
     @Override
     public void changeAPIStatus(API api, APIStatus status, String userId,
-                                boolean updateGatewayConfig) throws APIManagementException {
+                                boolean updateGatewayConfig) throws APIManagementException, FaultGatewaysException {
         checkPublishPermission();
         super.changeAPIStatus(api, status, userId, updateGatewayConfig);
     }

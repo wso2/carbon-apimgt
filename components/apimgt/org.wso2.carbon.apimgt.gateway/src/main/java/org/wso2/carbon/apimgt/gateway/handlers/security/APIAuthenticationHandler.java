@@ -62,13 +62,34 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
 
     private volatile Authenticator authenticator;
 
+    private SynapseEnvironment synapseEnvironment;
+
     public void init(SynapseEnvironment synapseEnvironment) {
+        this.synapseEnvironment = synapseEnvironment;
 		if (log.isDebugEnabled()) {
 			log.debug("Initializing API authentication handler instance");
 		}
+        if (ServiceReferenceHolder.getInstance().getApiManagerConfigurationService() != null){
+            initializeAuthenticator();
+        }
+    }
+
+    public void destroy() {
+        if(authenticator != null) {
+        	authenticator.destroy();
+        } else {
+        	log.warn("Unable to destroy uninitialized authentication handler instance");
+        }
+    }
+
+    private void initializeAuthenticator() {
         String authenticatorType = ServiceReferenceHolder.getInstance().getAPIManagerConfiguration().
                 getFirstProperty(APISecurityConstants.API_SECURITY_AUTHENTICATOR);
         if (authenticatorType == null) {
+            /*
+            if the APIManagerConfigurationService is not set at the time the APIAuthenticationHandler intializes
+            the authenticator is null. Then we need to initialize the authenticator in the first request
+             */
             authenticatorType = OAuthAuthenticator.class.getName();
         }
         try {
@@ -81,23 +102,33 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
         authenticator.init(synapseEnvironment);
     }
 
-    public void destroy() {        
-        if(authenticator != null) {
-        	authenticator.destroy();
-        } else {
-        	log.warn("Unable to destroy uninitialized authentication handler instance");
-        }        
-    }
-
     public boolean handleRequest(MessageContext messageContext) {
+        long startTime = System.nanoTime();
+        long endTime;
+        long difference;
+
+        endTime = System.nanoTime();
+        difference = (endTime - startTime) / 1000000;
+        String messageDetails = logMessageDetails(messageContext, difference);
         try {
+            if (Utils.isStatsEnabled()) {
+                long currentTime = System.currentTimeMillis();
+                messageContext.setProperty("api.ut.requestTime", Long.toString(currentTime));
+            }
+            if (authenticator == null) {
+                initializeAuthenticator();
+            }
             if (authenticator.authenticate(messageContext)) {
+                if (log.isDebugEnabled()) {
+                   log.debug("Authenticated API, authentication response relieved: " + messageDetails +
+                            ", elapsedTimeInMilliseconds=" + difference / 1000000);
+                }
                 return true;
             }
         } catch (APISecurityException e) {
 
             if (log.isDebugEnabled()) {
-                logMessageDetails(messageContext);
+              log.debug("Call to API gateway : " + messageDetails);
             }
             // We do not need to log authentication failures as errors since these are not product errors.
             log.warn("API authentication failure due to " +
@@ -111,19 +142,10 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
     }
 
     public boolean handleResponse(MessageContext messageContext) {
-    	
-    	if (Utils.isCORSEnabled()) {
-	    	/* For CORS support adding required headers to the response */
-	    	org.apache.axis2.context.MessageContext axis2MC = ((Axis2MessageContext) messageContext).
-	                getAxis2MessageContext();
-	    	Map<String, String> headers = (Map) axis2MC.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
-	    		    	    	
-	    	headers.put(APIConstants.CORSHeaders.ACCESS_CONTROL_ALLOW_ORIGIN, Utils.getAllowedOrigin(authenticator.getRequestOrigin()));
-	        headers.put(APIConstants.CORSHeaders.ACCESS_CONTROL_ALLOW_METHODS, Utils.getAllowedMethods());
-	        headers.put(APIConstants.CORSHeaders.ACCESS_CONTROL_ALLOW_HEADERS, Utils.getAllowedHeaders());
-	        axis2MC.setProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS, headers);
-    	}
- 
+        if (Utils.isStatsEnabled()) {
+            long currentTime = System.currentTimeMillis();
+            messageContext.setProperty("api.ut.backendRequestEndTime", Long.toString(currentTime));
+        }
         return true;
     }
 
@@ -162,7 +184,8 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
             status = HttpStatus.SC_FORBIDDEN;
         } else {
             status = HttpStatus.SC_UNAUTHORIZED;
-            Map<String, String> headers = new HashMap<String, String>();
+            Map<String, String> headers =
+                    (Map) axis2MC.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
             headers.put(HttpHeaders.WWW_AUTHENTICATE, authenticator.getChallengeString());
             axis2MC.setProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS, headers);
         }
@@ -172,15 +195,6 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
         } else {
             Utils.setSOAPFault(messageContext, "Client", "Authentication Failure", e.getMessage());
         }
-        if (Utils.isCORSEnabled()) {
-        	/* For CORS support adding required headers to the fault response */
-        	Map<String, String> headers = (Map) axis2MC.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
-            headers.put(APIConstants.CORSHeaders.ACCESS_CONTROL_ALLOW_ORIGIN, Utils.getAllowedOrigin(authenticator.getRequestOrigin()));
-            headers.put(APIConstants.CORSHeaders.ACCESS_CONTROL_ALLOW_METHODS, Utils.getAllowedMethods());
-            headers.put(APIConstants.CORSHeaders.ACCESS_CONTROL_ALLOW_HEADERS, Utils.getAllowedHeaders());
-            axis2MC.setProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS, headers);
-        }
-        
         Utils.sendFault(messageContext, status);
     }
 
@@ -203,7 +217,7 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
         return payload;
     }
 
-    private void logMessageDetails(MessageContext messageContext) {
+    private String logMessageDetails(MessageContext messageContext, long elapsedTime) {
         //TODO: Hardcoded const should be moved to a common place which is visible to org.wso2.carbon.apimgt.gateway.handlers
         String applicationName = (String) messageContext.getProperty("APPLICATION_NAME");
         String endUserName = (String) messageContext.getProperty("END_USER_NAME");
@@ -224,6 +238,10 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
         if (userAgent != null) {
             logMessage = logMessage + " with userAgent=" + userAgent;
         }
+        String accessToken = (String) ((TreeMap) axisMC.getProperty("TRANSPORT_HEADERS")).get("Authorization");
+        if (accessToken != null) {
+            logMessage = logMessage + " with accessToken=" + accessToken;
+        }
         String requestURI = (String) messageContext.getProperty(RESTConstants.REST_FULL_REQUEST_PATH);
         if (requestURI != null) {
             logMessage = logMessage + " for requestURI=" + requestURI;
@@ -238,7 +256,10 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
         if (remoteIP != null) {
             logMessage = logMessage + " from clientIP=" + remoteIP;
         }
-        log.debug("Call to API Gateway " + logMessage);
+        if(elapsedTime > 0){
+            logMessage = logMessage + " elapsedTimeInMilliseconds=" + elapsedTime;
+        }
+        return logMessage;
     }
-        
+
 }

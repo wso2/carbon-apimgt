@@ -24,7 +24,8 @@ public class AuthenticatorService {
 
   public interface AsyncIface {
 
-    public void authenticate(String userName, String password, org.apache.thrift.async.AsyncMethodCallback<AsyncClient.authenticate_call> resultHandler) throws org.apache.thrift.TException;
+    public void authenticate(String userName, String password,
+                             org.apache.thrift.async.AsyncMethodCallback<AsyncClient.authenticate_call> resultHandler) throws org.apache.thrift.TException;
 
   }
 

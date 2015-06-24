@@ -1,0 +1,376 @@
+<%
+
+var log = new Log();
+
+var enableAnalytics = function (enable) {
+    try {
+        var carbon = require('carbon');
+        var process = require('process');
+        var realmConfiguration = new org.wso2.carbon.user.core.config.RealmConfigXMLProcessor().
+                buildRealmConfigurationFromFile();
+        var username = realmConfiguration.getAdminUserName();
+        var password = realmConfiguration.getAdminPassword();
+        var url = 'https://' + process.getProperty('carbon.local.ip') + ':' +
+                process.getProperty('mgt.transport.https.port');
+        var stub = new org.wso2.carbon.bam.service.data.publisher.stub.
+                ServiceDataPublisherAdminStub(url + '/services/ServiceDataPublisherAdmin');
+        var client = stub._getServiceClient();
+        var options = client.getOptions();
+        var authenticator = new org.apache.axis2.transport.http.HttpTransportProperties.Authenticator();
+        authenticator.setUsername(username);
+        authenticator.setPassword(password);
+        authenticator.setPreemptiveAuthentication(true);
+        options.setProperty(org.apache.axis2.transport.http.HTTPConstants.AUTHENTICATE, authenticator);
+        client.setOptions(options);
+        var configReaderService = org.wso2.carbon.apimgt.impl.APIManagerAnalyticsConfiguration.getInstance();
+        var eventingConfigData = stub.getEventingConfigData();
+        if(enable === "false"){
+            log.info("Disabling Analytics...");
+            eventingConfigData.setServiceStatsEnable(false);
+            stub.configureEventing(eventingConfigData);
+            configReaderService.setAnalyticsEnabled(false);
+            log.info("Analytics disabled");
+        } else if(enable === "true" && eventingConfigData.getUrl() !== "" && eventingConfigData.getUrl() !== null) {
+            log.info("Enabling Analytics...");
+	        eventingConfigData.setServiceStatsEnable(true);
+            configReaderService.setAnalyticsEnabled(true);
+            stub.configureEventing(eventingConfigData);
+            log.info("Analytics enabled");
+        }
+
+        return {
+            error: false
+        };
+    } catch (ex) {
+        var message = "Error occurred while Enabling/Disabing Analytics (Cause:" + ex.message + ")";
+        log.error(message);
+        return {
+            error: true,
+            message: message
+        };
+    }
+};
+
+var addAnalyticsConfig = function (configData) {
+
+    try {
+        var carbon = require('carbon');
+        var process = require('process');
+        var realmConfiguration = new org.wso2.carbon.user.core.config.RealmConfigXMLProcessor().
+                buildRealmConfigurationFromFile();
+        var username = realmConfiguration.getAdminUserName();
+        var password = realmConfiguration.getAdminPassword();
+        var url = 'https://' + process.getProperty('carbon.local.ip') + ':' +
+                process.getProperty('mgt.transport.https.port');
+        var stub = new org.wso2.carbon.bam.service.data.publisher.stub.
+                ServiceDataPublisherAdminStub(url + '/services/ServiceDataPublisherAdmin');
+        var client = stub._getServiceClient();
+        var options = client.getOptions();
+        var authenticator = new org.apache.axis2.transport.http.HttpTransportProperties.Authenticator();
+        authenticator.setUsername(username);
+        authenticator.setPassword(password);
+        authenticator.setPreemptiveAuthentication(true);
+        options.setProperty(org.apache.axis2.transport.http.HTTPConstants.AUTHENTICATE, authenticator);
+        client.setOptions(options);
+
+        var eventingConfigData = stub.getEventingConfigData();
+        eventingConfigData.setUrl(configData.eventReceiverURL);
+        eventingConfigData.setUserName(configData.eventReceiverUsername);
+        eventingConfigData.setPassword(configData.eventReceiverPassword);
+        eventingConfigData.setServiceStatsEnable(true);
+        var analyzingConfigData = stub.getAnalyzingConfigData();
+        analyzingConfigData.setUrl(configData.eventAnalyserURL);
+        analyzingConfigData.setUserName(configData.eventAnalyserUsername);
+        analyzingConfigData.setPassword(configData.eventAnalyserPassword);
+
+        log.info("Saving Analytics config in registry...");
+        stub.configureEventing(eventingConfigData);
+        stub.configureAnalyzing(analyzingConfigData);
+        var configReaderService = org.wso2.carbon.apimgt.impl.APIManagerAnalyticsConfiguration.getInstance();
+        log.info(configReaderService.getRequestStreamName());
+        log.info(configReaderService.getResponseStreamName());
+        configReaderService.setAnalyticsEnabled(true);
+        configReaderService.setBamServerUrlGroups(configData.eventReceiverURL);
+        configReaderService.setBamServerUser(configData.eventReceiverUsername);
+        configReaderService.setBamServerPassword(configData.eventReceiverPassword);
+        log.info("Analytics config saved in registry.");
+
+        return {
+            error: false
+        };
+    } catch (ex) {
+        var message = "Error occurred while saving Analytics configuration (Cause:" + ex.message + ")";
+        log.error(message);
+        return {
+            error: true,
+            message: message
+        };
+    }
+};
+
+
+var addDatasourceConfig = function (configData) {
+
+    try {
+        var carbon = require('carbon');
+        var process = require('process');
+        var realmConfiguration = new org.wso2.carbon.user.core.config.RealmConfigXMLProcessor()
+                .buildRealmConfigurationFromFile();
+        var username = realmConfiguration.getAdminUserName();
+        var password = realmConfiguration.getAdminPassword();
+        var url = 'https://' + process.getProperty('carbon.local.ip') + ':' +
+                process.getProperty('mgt.transport.https.port');
+        var stub = new org.wso2.carbon.ndatasource.ui.stub.NDataSourceAdminStub(url + '/services/NDataSourceAdmin');
+        var client = stub._getServiceClient();
+        var options = client.getOptions();
+        var authenticator = new org.apache.axis2.transport.http.HttpTransportProperties.Authenticator();
+        authenticator.setUsername(username);
+        authenticator.setPassword(password);
+        authenticator.setPreemptiveAuthentication(true);
+        options.setProperty(org.apache.axis2.transport.http.HTTPConstants.AUTHENTICATE, authenticator);
+        client.setOptions(options);
+
+        var jndiConfig = new org.wso2.carbon.ndatasource.ui.stub.core.xsd.JNDIConfig();
+        var dsName = 'WSO2AM_STATS_DB';
+        var dsJndiName = 'jdbc/WSO2AM_STATS_DB';
+        jndiConfig.setName(dsJndiName);
+
+        var configString = getDataSourceConfigString(configData).result;
+        var dataSourceDefinition = new org.wso2.carbon.ndatasource.ui.stub.core.services.xsd.
+                WSDataSourceMetaInfo_WSDataSourceDefinition();
+        dataSourceDefinition.setType("RDBMS");
+        dataSourceDefinition.setDsXMLConfiguration(configString);
+
+        var dataSourceMetaInfo = new org.wso2.carbon.ndatasource.ui.stub.core.services.xsd.WSDataSourceMetaInfo();
+        dataSourceMetaInfo.setName(dsName);
+        dataSourceMetaInfo.setDescription("The datasource used for getting statistics to API Manager");
+        dataSourceMetaInfo.setJndiConfig(jndiConfig);
+        dataSourceMetaInfo.setDefinition(dataSourceDefinition);
+        log.info("Saving datasource '" + dsName + "'...");
+        stub.addDataSource(dataSourceMetaInfo);
+        log.info("Datasource '" + dsName + "' saved");
+        org.wso2.carbon.apimgt.usage.client.APIUsageStatisticsClient.initializeDataSource();
+        log.info("Initialized datasource '" + dsName);
+        return {
+            error: false
+        };
+    } catch (ex) {
+        var message = "Error occurred while saving datasource (Cause:" + ex.message + ")";
+        log.error(message);
+        return {
+            error: true,
+            message: message
+        };
+    }
+};
+
+
+var addToolbox = function (configData) {
+    if(configData.eventAnalyserURL.trim() == ""){
+        var message = "Data Analyzer URL is empty. Toolbox will not be deployed.";
+        log.warn(message);
+        return {
+            error: false,
+            message: message
+        };
+    }
+    if(configData.eventAnalyserUsername.trim() == ""){
+        var message = "Event Analyzer Username is empty.";
+        log.error(message);
+        return {
+            error: true,
+            message: message
+        };
+    }
+    if(configData.eventAnalyserUsername.trim().indexOf(" ") > -1){
+        var message = "Event Analyzer Username cannot contain space character.";
+        log.error(message);
+        return {
+            error: true,
+            message: message
+        };
+    }
+    if(configData.eventAnalyserPassword.trim() == ""){
+        var message = "Data Analyzer Password is empty.";
+        log.error(message);
+        return {
+            error: true,
+            message: message
+        };
+    }
+    try {
+        var process = require('process');
+        var toolBoxPath = process.getProperty('carbon.home') + '/statistics';
+        var toolBoxName = '';
+
+        if (configData.statDsDriver.toLowerCase().indexOf('oracle') !=-1) {
+            toolBoxName = 'API_Manager_Analytics_Oracle.tbox';
+        } else {
+            toolBoxName = 'API_Manager_Analytics.tbox';
+        }
+        toolBoxPath = toolBoxPath + '/' + toolBoxName;
+        var file = new java.io.File(toolBoxPath);
+
+        var byteArray = org.apache.commons.io.FileUtils.readFileToByteArray(file);
+        var dataHandler = new javax.activation.DataHandler(byteArray, "application/octet-stream");
+
+        var stub = new org.wso2.carbon.bam.toolbox.deployer.stub.BAMToolboxDepolyerServiceStub(configData.
+                eventAnalyserURL + '/services/BAMToolboxDepolyerService');
+        var client = stub._getServiceClient();
+        var options = client.getOptions();
+        var authenticator = new org.apache.axis2.transport.http.HttpTransportProperties.Authenticator();
+        authenticator.setUsername(configData.eventAnalyserUsername);
+        authenticator.setPassword(configData.eventAnalyserPassword);
+        authenticator.setPreemptiveAuthentication(true);
+        options.setProperty(org.apache.axis2.transport.http.HTTPConstants.AUTHENTICATE, authenticator);
+        client.setOptions(options);
+        log.info("Deploying BAM toolbox '" + toolBoxName + "'...");
+        stub.uploadBAMToolBox(dataHandler, toolBoxName);
+        log.info("BAM toolbox '" + toolBoxName + "' deployed");
+        return {
+            error: false
+        };
+    } catch (ex) {
+        var message = "Error occurred while installing BAM Toolbox (Cause:" + ex.message + ")";
+        log.error(message);
+        return {
+            error: true,
+            message: message
+        };
+    }
+};
+
+var addBamServerProfile = function (configData) {
+
+    try {
+        var carbon = require('carbon');
+        org.wso2.carbon.apimgt.impl.utils.APIUtil.addBamServerProfile(configData.eventReceiverURL,
+        configData.eventReceiverUsername, configData.eventReceiverPassword, parseInt(carbon.server.tenantId()));
+        return {
+            error: false
+        };
+    } catch (ex) {
+        var message = "Error occurred while creating BAM Server Profile (Cause:" + ex.message + ")";
+        log.error(message);
+        return {
+            error: true,
+            message: message
+        };
+    }
+};
+
+var getDataSourceConfigString = function (configData) {
+
+    var configString = '<configuration>' +
+            '<url>' + configData.statDsURL + '</url>' +
+            '<username>' + configData.statDsUsername + '</username>' +
+            '<password>' + configData.statDsPassword + '</password>' +
+            '<driverClassName>' + configData.statDsDriver + '</driverClassName>';
+    if (configData.statDsDefAutoCommit != 'select') {
+        configString = configString + '<defaultAutoCommit>' + configData.statDsDefAutoCommit + '</defaultAutoCommit>';
+    }
+    if (configData.statDsDefReadOnly != 'select') {
+        configString = configString + '<defaultReadOnly>' + configData.statDsDefReadOnly + '</defaultReadOnly>';
+    }
+    if (configData.statDsDefTrans != 'select') {
+        configString = configString + '<defaultTransactionIsolation>' + configData.statDsDefTrans + '</defaultTransactionIsolation>';
+    }
+    if (configData.statDsDefCatalog != '') {
+        configString = configString + '<defaultCatalog>' + configData.statDsDefCatalog + '</defaultCatalog>';
+    }
+    if (configData.statDsMaxActive != '') {
+        configString = configString + '<maxActive>' + configData.statDsMaxActive + '</maxActive>';
+    }
+    if (configData.statDsMaxIdle != '') {
+        configString = configString + '<maxIdle>' + configData.statDsMaxIdle + '</maxIdle>';
+    }
+    if (configData.statDsMinIdle != '') {
+        configString = configString + '<minIdle>' + configData.statDsMinIdle + '</minIdle>';
+    }
+    if (configData.statDsInitialSize != '') {
+        configString = configString + '<initialSize>' + configData.statDsInitialSize + '</initialSize>';
+    }
+    if (configData.statDsMaxWait != '') {
+        configString = configString + '<maxWait>' + configData.statDsMaxWait + '</maxWait>';
+    }
+    if (configData.statDsTestOnBorrow != 'select') {
+        configString = configString + '<testOnBorrow>' + configData.statDsTestOnBorrow + '</testOnBorrow>';
+    }
+    if (configData.statDsTestOnReturn != 'select') {
+        configString = configString + '<testOnReturn>' + configData.statDsTestOnReturn + '</testOnReturn>';
+    }
+    if (configData.statDsTestWhileIdle != 'select') {
+        configString = configString + '<testWhileIdle>' + configData.statDsTestWhileIdle + '</testWhileIdle>';
+    }
+    if (configData.statDsValidationQuery != '') {
+        configString = configString + '<validationQuery>' + configData.statDsValidationQuery + '</validationQuery>';
+    }
+    if (configData.statDsValidationClass != '') {
+        configString = configString + '<validatorClassName>' + configData.statDsValidationClass + '</validatorClassName>';
+    }
+    if (configData.statDsTimeEviction != '') {
+        configString = configString + '<timeBetweenEvictionRunsMillis>' + configData.statDsTimeEviction + '</timeBetweenEvictionRunsMillis>';
+    }
+    if (configData.statDsNoOfTestsEviction != '') {
+        configString = configString + '<numTestsPerEvictionRun>' + configData.statDsNoOfTestsEviction + '</numTestsPerEvictionRun>';
+    }
+    if (configData.statDsMinEvictableIdleTime != '') {
+        configString = configString + '<minEvictableIdleTimeMillis>' + configData.statDsMinEvictableIdleTime + '</minEvictableIdleTimeMillis>';
+    }
+    if (configData.statDsAccessToConnAllowed != 'select') {
+        configString = configString + '<accessToUnderlyingConnectionAllowed>' + configData.statDsAccessToConnAllowed + '</accessToUnderlyingConnectionAllowed>';
+    }
+    if (configData.statDsRemoveAbandoned != 'select') {
+        configString = configString + '<removeAbandoned>' + configData.statDsRemoveAbandoned + '</removeAbandoned>';
+    }
+    if (configData.statDsRemoveAbandonedTimeout != '') {
+        configString = configString + '<removeAbandonedTimeout>' + configData.statDsRemoveAbandonedTimeout + '</removeAbandonedTimeout>';
+    }
+    if (configData.statDsLogAbandoned != 'select') {
+        configString = configString + '<logAbandoned>' + configData.statDsLogAbandoned + '</logAbandoned>';
+    }
+    if (configData.statDsConnProperties != '') {
+        configString = configString + '<connectionProperties>' + configData.statDsConnProperties + '</connectionProperties>';
+    }
+    if (configData.statDsInitSql != '') {
+        configString = configString + '<initSQL>' + configData.statDsInitSql + '</initSQL>';
+    }
+    if (configData.statDsJDBCInterceptors != '') {
+        configString = configString + '<jdbcInterceptors>' + configData.statDsJDBCInterceptors + '</jdbcInterceptors>';
+    }
+    if (configData.statDsValidationInterval != '') {
+        configString = configString + '<validationInterval>' + configData.statDsValidationInterval + '</validationInterval>';
+    }
+    if (configData.statDsFairQueue != 'select') {
+        configString = configString + '<fairQueue>' + configData.statDsFairQueue + '</fairQueue>';
+    }
+    if (configData.statDsJMXEnabled != 'select') {
+        configString = configString + '<jmxEnabled>' + configData.statDsJMXEnabled + '</jmxEnabled>';
+    }
+    if (configData.statDsAbandonWhenPrecFull != '') {
+        configString = configString + '<abandonWhenPercentageFull>' + configData.statDsAbandonWhenPrecFull + '</abandonWhenPercentageFull>';
+    }
+    if (configData.statDsMaxAge != '') {
+        configString = configString + '<maxAge>' + configData.statDsMaxAge + '</maxAge>';
+    }
+    if (configData.statDsUseEquals != 'select') {
+        configString = configString + '<useEquals>' + configData.statDsUseEquals + '</useEquals>';
+    }
+    if (configData.statDsSuspectTimeout != '') {
+        configString = configString + '<suspectTimeout>' + configData.statDsSuspectTimeout + '</suspectTimeout>';
+    }
+    if (configData.statDsAlternateUsernameAllowed != 'select') {
+        configString = configString + '<alternateUsernameAllowed>' + configData.statDsAlternateUsernameAllowed + '</alternateUsernameAllowed>';
+    }
+    if (configData.statDsValidationQueryTimeout != '') {
+        configString = configString + '<validationQueryTimeout>' + configData.statDsValidationQueryTimeout + '</validationQueryTimeout>';
+    }
+
+    configString = configString + '</configuration>';
+    return {
+        result:configString
+    };
+};
+
+
+%>

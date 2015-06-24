@@ -1,0 +1,46 @@
+.toolTip {
+    position: absolute;
+    display: none;
+    width: auto;
+    height: auto;
+    background: none repeat scroll 0 0 white;
+    border: 0 none;
+    border-radius: 4px 4px 4px 4px;
+    box-shadow: -3px 3px 15px #888888;
+    color: black;
+    font: 12px sans-serif;
+    padding: 5px;
+    text-align: left;
+}
+
+#tooltipTable{
+    padding: 0;
+    margin-top:10px;
+    border-left: 1px solid #dbdbdb;
+    border-top: 1px solid #dbdbdb;
+}
+
+#tooltipTable th {
+       font: 11px "Trebuchet MS", Verdana, Arial, Helvetica, sans-serif;
+       color: #666;
+       border-right: 1px solid #dbdbdb;
+       border-bottom: 1px solid #dbdbdb;
+       border-top: 1px solid #dbdbdb;
+       letter-spacing: 2px;
+       text-align: left;
+       padding: 2px 2px 2px 4px;
+       background: #eee;
+}
+
+#tooltipTable td {
+       border-right: 1px solid #dbdbdb;
+       border-bottom: 1px solid #dbdbdb;
+       background: #fff;
+       padding: 2px 2px 2px 4px;
+       color: #4f6b72;
+       text-align: left;
+}
+
+.dimple-bubble{
+    cursor:pointer;
+}

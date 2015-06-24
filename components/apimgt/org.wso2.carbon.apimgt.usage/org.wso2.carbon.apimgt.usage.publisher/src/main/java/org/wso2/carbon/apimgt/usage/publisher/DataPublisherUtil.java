@@ -20,6 +20,8 @@ package org.wso2.carbon.apimgt.usage.publisher;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.apimgt.impl.APIManagerAnalyticsConfiguration;
+import org.wso2.carbon.apimgt.usage.publisher.internal.UsageComponent;
 import org.wso2.carbon.base.ServerConfiguration;
 import java.net.Inet4Address;
 import java.net.InetAddress;
@@ -86,5 +88,9 @@ public class DataPublisherUtil {
 
     public static void setEnabledMetering(boolean enabledMetering) {
         isEnabledMetering = enabledMetering;
+    }
+
+    public static APIManagerAnalyticsConfiguration getApiManagerAnalyticsConfiguration() {
+        return UsageComponent.getAmConfigService().getAPIAnalyticsConfiguration();
     }
 }

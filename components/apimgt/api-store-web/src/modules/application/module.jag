@@ -8,6 +8,9 @@ jagg.module("application", {
     getApplications:function () {
         return jagg.require(jagg.getModulesDir() + "application/list.jag").getApplications.apply(this, arguments);
     },
+    getApplicationByName: function () {
+        return jagg.require(jagg.getModulesDir() + "application/list.jag").getApplicationByName.apply(this, arguments);
+    },
 
     updateApplication:function () {
         return jagg.require(jagg.getModulesDir() + "application/update.jag").updateApplication.apply(this, arguments);

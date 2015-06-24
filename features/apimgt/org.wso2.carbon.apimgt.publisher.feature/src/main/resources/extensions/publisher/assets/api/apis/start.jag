@@ -1,0 +1,98 @@
+<%
+/*
+ * Copyright (c) WSO2 Inc. (http://wso2.com) All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/*
+ Description: Invoke routed api endpoints
+ Filename : assets.jag
+ * can be extended by asset type
+
+ ENDPOINTS:
+ POST
+ asts/api/apis/copyAPI
+ */
+
+require('/modules/publisher.js').exec(function (ctx) {
+	var log = new Log('start');
+	var ref = require('utils').request;
+	var responseProcessor = require('utils').response;
+	var request = ctx.request;
+	var server = require('store').server;
+	var uriMatcher = new URIMatcher(request.getRequestURI());
+	var POST_NEW_API_URL = '/{context}/asts/api/apis/start';
+	var method = request.getMethod();
+	var options = ref.getQueryOptions(request.getQueryString());
+	var response = ctx.response;
+	response.contentType = 'application/json';
+	var constants = require("rxt").constants;
+	switch (method) {
+		case 'POST':// POST endpoints
+			var type = request.getParameter("type");
+			var action = request.getParameter("action");
+			if (action === "start") {//return assets by type
+					var swagger = null;
+					var wsdl = null;
+					if(type == "rest"){
+						var url = request.getParameter("swagger-url");
+						var file = request.getFile("swagger-file");
+						var import_type = request.getParameter("import-definition");
+						if(import_type == "swagger-url" && url){
+							url = url.trim();
+							var data = { };
+							var content = get(url, data ,"json");
+							swagger = content.data;
+						} else if(import_type == "swagger-file" && file){
+							file.open("r");
+							var swaggerContent = file.readAll();
+							swagger = JSON.parse(swaggerContent);
+							file.close();
+						} else{
+							var obj = require("/extensions/assets/api/config/default_swagger.json");
+							swagger = stringify(obj);
+						}
+					} else if(type == "soap"){
+						var url = request.getParameter("wsdl-url");
+						var file = request.getFile("wsdl-file");
+						var import_type = request.getParameter("import-definition");
+						wsdl = "soap";
+						if(url){
+							wsdl = url.trim();
+						}
+					}
+
+					if(swagger){
+						session.put("swagger", swagger);
+					}
+
+					if (wsdl) {
+						session.put("wsdl", wsdl);
+					}
+				var data = {};
+				data.success = true;
+				response = responseProcessor.buildSuccessResponse(response, constants.STATUS_CODES.OK, data);
+			}  else {
+				response = responseProcessor.buildErrorResponse(response,
+																constants.STATUS_CODES.NOT_IMPLEMENTED, 'Unable to locate this POST endpoint');
+			}
+			break;
+
+		default://other un-implemented endpoints
+			response = responseProcessor.buildErrorResponse(response, constants.STATUS_CODES.NOT_IMPLEMENTED,
+															'The endpoint that you have requested is not implemented for the ' + method +
+															' method.Try making the request with the appropriate verb' +
+															'(hint: create/update operations use POST).');
+	}
+}, request, response, session); %>

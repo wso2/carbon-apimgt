@@ -20,8 +20,13 @@
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>forum-feature</artifactId>
+<<<<<<< HEAD
         <version>1.3.4-SNAPSHOT</version>
 	    <relativePath>../pom.xml</relativePath>
+=======
+        <version>2.0.0-SNAPSHOT</version>
+	<relativePath>../pom.xml</relativePath>
+>>>>>>> 9b678d884b475ee18ab884349101529c1a909edf
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
@@ -54,12 +59,16 @@
                         </goals>
                         <configuration>
                             <id>org.wso2.carbon.forum</id>
-                            <propertiesFile>../../../etc/feature.properties</propertiesFile>
+                            <propertiesFile>../../etc/feature.properties</propertiesFile>
                             <importFeatures>
-                                <importFeatureDef>org.wso2.carbon.core:${carbon.kernel.version}</importFeatureDef>
+                                <importFeatureDef>org.wso2.carbon.core:${carbon.platform.version}</importFeatureDef>
                             </importFeatures>
                             <includedFeatures>
+<<<<<<< HEAD
                                 <includedFeatureDef>org.wso2.carbon.apimgt:org.wso2.carbon.forum.server.feature:${carbon.apimgt.version}</includedFeatureDef>
+=======
+                                <includedFeatureDef>org.wso2.carbon.apimgt:org.wso2.carbon.forum.server.feature:${carbon.forum.server.feature.version}</includedFeatureDef>
+>>>>>>> 9b678d884b475ee18ab884349101529c1a909edf
                             </includedFeatures>
                         </configuration>
                     </execution>

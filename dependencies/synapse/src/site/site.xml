@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<!--
+  ~  Licensed to the Apache Software Foundation (ASF) under one
+  ~  or more contributor license agreements.  See the NOTICE file
+  ~  distributed with this work for additional information
+  ~  regarding copyright ownership.  The ASF licenses this file
+  ~  to you under the Apache License, Version 2.0 (the
+  ~  "License"); you may not use this file except in compliance
+  ~  with the License.  You may obtain a copy of the License at
+  ~
+  ~   http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~  Unless required by applicable law or agreed to in writing,
+  ~  software distributed under the License is distributed on an
+  ~   * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+  ~  KIND, either express or implied.  See the License for the
+  ~  specific language governing permissions and limitations
+  ~  under the License.
+  -->
+
+<project name="Apache Synapse">
+
+    <bannerLeft>
+        <name></name>
+        <href>http://synapse.apache.org/</href>
+    </bannerLeft>
+
+    <bannerRight>
+        <src>images/apache-synapse-banner.jpg</src>
+        <href>http://www.apache.org</href>
+    </bannerRight>
+
+    <skin>
+        <groupId>org.apache.maven.skins</groupId>
+        <artifactId>maven-default-skin</artifactId>
+        <version>1.0</version>
+    </skin>
+
+    <publishDate format="dd MMM yyyy"/>
+
+    <body>
+        <links>
+            <item name="Apache" href="http://www.apache.org/"/>
+            <item name="WebServices" href="http://ws.apache.org/"/>
+        </links>
+
+        <menu name="Apache Synapse">
+            <item name="About" href="index.html"/>
+            <item name="Downloads" href="download_index.html">
+                <item name="Releases" href="download.html"/>
+                <item name="Source Code" href="source-repository.html"/>
+            </item>
+            <item name="Documentation" href="docs_index.html">
+                <item name="Quick Start Guide" href="Synapse_QuickStart.html"/>
+                <item name="Samples" href="Synapse_Samples.html"/>
+                <item name="Samples Setup" href="Synapse_Samples_Setup.html"/>
+                <item name="Extending Synapse" href="Synapse_Extending.html"/>
+                <item name="Configuration Language" href="Synapse_Configuration_Language.html"/>
+                <item name="Deployment" href="deployment.html"/>
+                <item name="Transports" href="transports.html"/>
+                <item name="Javadocs" href="apidocs/index.html"/>
+                <item name="FAQ" href="faq.html"/>
+            </item>
+            <item name="Previous Versions" href="history.html">
+                <item name="Version 1.1.1" href="1_1_1/content.html"/>
+                <item name="Version 1.1" href="1_1/content.html"/>
+                <item name="Version 1.0" href="1_0/content.html"/>
+            </item>
+            <item name="Project Information" href="project-info.html">
+                <item name="Mailing Lists" href="mail-lists.html"/>
+                <item name="Building" href="building.html"/>
+                <item name="Issue Tracking" href="issue-tracking.html"/>
+                <item name="Dependencies" href="dependencies.html"/>
+                <item name="Dependency Convergence" href="dependency-convergence.html"/>
+                <item name="Project Team" href="team-list.html"/>
+                <item name="Project Summary" href="project-summary.html"/>
+            </item>
+        </menu>
+
+    </body>
+</project>

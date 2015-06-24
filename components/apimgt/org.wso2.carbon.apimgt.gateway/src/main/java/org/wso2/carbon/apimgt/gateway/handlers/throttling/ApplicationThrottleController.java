@@ -41,46 +41,43 @@ public class ApplicationThrottleController {
     private static final Log log = LogFactory.getLog(ApplicationThrottleController.class);
 
     private static final Object lock = new Object();
+    
+    public static ThrottleContext getApplicationThrottleContext(MessageContext synCtx, ThrottleDataHolder dataHolder,
+                                                                String applicationId){
+        synchronized (lock) {
+            Object throttleContext = dataHolder.getThrottleContext(applicationId);
+            if(throttleContext == null){
+                return createThrottleContext(synCtx, dataHolder, applicationId);
+            }
+            return (ThrottleContext)throttleContext;
+        }
+    }
 
-    //TODO: Fix me with the latest throttling changes
-//    public static ThrottleContext getApplicationThrottleContext(MessageContext synCtx, ThrottleDataHolder dataHolder,
-//                                                                String applicationId){
-//        synchronized (lock) {
-//            Object throttleContext = dataHolder.getThrottleContext(applicationId);
-//            if(throttleContext == null){
-//                return createThrottleContext(synCtx, dataHolder, applicationId);
-//            }
-//            return (ThrottleContext)throttleContext;
-//        }
-//    }
+    private static ThrottleContext createThrottleContext(MessageContext synCtx, ThrottleDataHolder dataHolder, String applicationId){
 
+        //Entry entry = synCtx.getConfiguration().getEntryDefinition(APPLICATION_THROTTLE_POLICY_KEY);
+        //if (entry == null) {
+        //    handleException("Cannot find throttling policy using key: " + APPLICATION_THROTTLE_POLICY_KEY);
+        //    return null;
+        //}
 
-    //TODO: Fix me with the latest throttling changes
-//    private static ThrottleContext createThrottleContext(MessageContext synCtx, ThrottleDataHolder dataHolder, String applicationId){
-//
-//        //Entry entry = synCtx.getConfiguration().getEntryDefinition(APPLICATION_THROTTLE_POLICY_KEY);
-//        //if (entry == null) {
-//        //    handleException("Cannot find throttling policy using key: " + APPLICATION_THROTTLE_POLICY_KEY);
-//        //    return null;
-//        //}
-//
-//        //Object entryValue = synCtx.getEntry(APPLICATION_THROTTLE_POLICY_KEY);
-//        Object entryValue = lookup(APPLICATION_THROTTLE_POLICY_KEY);
-//        if (entryValue == null || !(entryValue instanceof OMElement)) {
-//            handleException("Unable to load throttling policy using key: " + APPLICATION_THROTTLE_POLICY_KEY);
-//            return null;
-//        }
-//
-//        try {
-//            Throttle throttle = ThrottleFactory.createMediatorThrottle(PolicyEngine.getPolicy((OMElement) entryValue));
-//            ThrottleContext context = throttle.getThrottleContext(ThrottleConstants.ROLE_BASED_THROTTLE_KEY);
-//            dataHolder.addThrottleContext(applicationId, context);
-//            return context;
-//        } catch (ThrottleException e) {
-//            handleException("Error processing the throttling policy", e);
-//        }
-//        return null;
-//    }
+        //Object entryValue = synCtx.getEntry(APPLICATION_THROTTLE_POLICY_KEY);
+        Object entryValue = lookup(APPLICATION_THROTTLE_POLICY_KEY);
+        if (entryValue == null || !(entryValue instanceof OMElement)) {
+            handleException("Unable to load throttling policy using key: " + APPLICATION_THROTTLE_POLICY_KEY);
+            return null;
+        }
+
+        try {
+            Throttle throttle = ThrottleFactory.createMediatorThrottle(PolicyEngine.getPolicy((OMElement) entryValue));
+            ThrottleContext context = throttle.getThrottleContext(ThrottleConstants.ROLE_BASED_THROTTLE_KEY);
+            dataHolder.addThrottleContext(applicationId, context);
+            return context;
+        } catch (ThrottleException e) {
+            handleException("Error processing the throttling policy", e);
+        }
+        return null;
+    }
 
     private static void handleException(String msg) {
         log.error(msg);

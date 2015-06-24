@@ -1,0 +1,15 @@
+<%
+jagg.initializer("stats/apiCallType", {
+
+    preInitialize:function () {
+        jagg.addHeaderCSS("stats", " dataTable","lib/dataTables/css/dataTables.bootstrap.css");
+        jagg.addHeaderCSS("stats", "datepicker","lib/datepicker/css/daterangepicker-bs3.css");
+
+        jagg.addHeaderJS("stats", "jquery-dataTable","lib/dataTables/js/jquery.dataTables.min.js");
+        jagg.addHeaderJS("stats", "dataTable","lib/dataTables/js/dataTables.bootstrap.js");
+        jagg.addHeaderJS("stats", "moment", "lib/datepicker/js/moment.js");
+        jagg.addHeaderJS("stats", "datepicker", "lib/datepicker/js/daterangepicker.js");
+        jagg.addHeaderJS("stats", "jplot", "templates/stats/apiCallType/js/stats.js");
+    }
+});
+%>

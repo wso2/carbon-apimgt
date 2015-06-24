@@ -1,0 +1,5 @@
+<registry xmlns="http://ws.apache.org/ns/synapse"
+          provider="org.apache.synapse.registry.url.SimpleURLRegistry">
+    <parameter name="root">file:repository/conf/sample/resources/</parameter>
+    <parameter name="cachableDuration">15000</parameter>
+</registry>

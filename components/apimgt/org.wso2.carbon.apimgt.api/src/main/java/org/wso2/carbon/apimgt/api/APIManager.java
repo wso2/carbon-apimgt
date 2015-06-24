@@ -99,6 +99,17 @@ public interface APIManager {
             throws APIManagementException;
 
     /**
+     * Checks whether the given document already exists for the given api
+     *
+     * @param identifier API Identifier
+     * @param docName Name of the document
+     * @return true if document already exists for the given api
+     * @throws APIManagementException if failed to check existence of the documentation
+     */
+    public boolean isDocumentationExist(APIIdentifier identifier, String docName)
+            throws APIManagementException;
+
+    /**
      * Returns a list of documentation attached to a particular API
      *
      * @param apiId APIIdentifier
@@ -155,9 +166,10 @@ public interface APIManager {
      * Creates a new subscriber. The newly created subscriber id will be set in the given object.
      *
      * @param subscriber The subscriber to be added
-     * @throws APIManagementException if failed add subscriber
+     * @param groupingId - the groupId to which the subscriber belongs to
+     * @throws org.wso2.carbon.apimgt.api.APIManagementException if failed add subscriber
      */
-    public void addSubscriber(Subscriber subscriber) throws APIManagementException;
+    public void addSubscriber(Subscriber subscriber, String groupingId) throws APIManagementException;
 
     /**
      * Updates the details of the given subscriber.
@@ -281,10 +293,52 @@ public interface APIManager {
     public Set<Tier> getTiers(String tenantDomain) throws APIManagementException;
 
     /**
-     * Returns the Swagger definition as a string
-     * @param apiId
-     * @return
-     * @throws APIManagementException
+     * Returns a list of domain name mappings.
+     *
+     * @return Set<Tier>
+     * @throws org.wso2.carbon.apimgt.api.APIManagementException if failed to get the predefined tiers
      */
-    public String getSwaggerDefinition(APIIdentifier apiId) throws APIManagementException;
+    public Map<String,String> getTenantDomainMappings(String tenantDomain) throws APIManagementException;
+
+    /**
+     * Check whether the given scope key is already available under given tenant
+     *
+     * @param scopeKey candidate scope key
+     * @param tenantid tenant id
+     * @return true if the scope key is already available
+     * @throws APIManagementException if failed to check the context availability
+     */
+    public boolean isScopeKeyExist(String scopeKey, int tenantid) throws APIManagementException;
+    
+    /**
+     * Check whether the given scope key is already assigned to an API under given tenant
+     *
+     * @param identifier API Identifier 
+     * @param scopeKey candidate scope key
+     * @param tenantid tenant id
+     * @return true if the scope key is already available
+     * @throws APIManagementException if failed to check the context availability
+     */
+    public boolean isScopeKeyAssigned(APIIdentifier identifier, String scopeKey, int tenantid) throws APIManagementException;
+
+    /**
+     * Check if a given context template already exists
+     * @param contextTemplate - The contextTemplate to be checked for
+        *                        <p>
+        *                        Ex: /foo/{version}/bar
+        *                        </p>
+     * @return boolean - true if the template exists, false otherwise.
+     * @throws APIManagementException - If an error occurs while checking the value in the APIM DB.
+     */
+    public boolean isDuplicateContextTemplate(String contextTemplate) throws APIManagementException;
+
+    /**
+     * When enabled publishing to external APIStores support,get all the external apistore details which are
+     * published and stored in db and which are not unpublished
+     * @param apiId The API Identifier which need to update in db
+     * @throws APIManagementException
+     *          If failed to update subscription status
+     */
+    public Set<APIStore> getExternalAPIStores(APIIdentifier apiId) throws APIManagementException;
+
 }

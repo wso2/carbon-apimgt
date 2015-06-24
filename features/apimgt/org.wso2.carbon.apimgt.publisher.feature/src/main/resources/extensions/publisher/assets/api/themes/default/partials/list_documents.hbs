@@ -1,0 +1,50 @@
+
+<div id='doc-list-container' class="row-fluid"  style='display:inline;'>
+	<table class='table table-bordered'>
+		<thead>
+			<tr>
+				<th>{{t "Name"}}</th>
+				<th>{{t "Type"}}</th>
+				{{#if assets.visibility_display}} 
+					<th>{{t "Visibility"}}</th>
+				{{/if}}	
+				
+				<th>{{t "Modified On"}}</th>
+				<th>{{t "Actions"}}</th>
+			</tr>
+		</thead>
+		<tbody>
+			{{#each documents}}
+			<tr>
+				<td>{{name}}</td>
+				<td>{{attributes.overview_type}}</td>				
+				{{#if attributes.visibility_display}} 
+					<td>
+						{{attributes.visibility_display}}
+					</td>
+				{{/if}}				
+				<td></td>
+				<td>
+					<ul class="art-vmenu">
+						{{#if attributes.overview_filePath}} 
+							<a  download="" target="_blank" href="{{attributes.overview_filePath}}"><i name="rowAction1" class='fa fa-pencil-square-o' style="color:black"></i> {{t "Open"}}
+							|</a>
+						{{/if}}
+						{{#if attributes.overview_sourceURL}}
+							<a    href="javascript:editDocumentation('{{attributes.overview_sourceURL}}','{{attributes.overview_filePath}}','{{attributes.overview_editContent}}')"><i name="rowAction2" class='fa fa-pencil-square-o' style="color:black"></i> {{t "View"}}
+							|</a>
+						{{/if}}
+						{{#if attributes.overview_editContent}} 
+							<a    href="javascript:editDocumentation('{{attributes.overview_sourceURL}}','{{attributes.overview_filePath}}','{{attributes.overview_editContent}}')"><i name="rowAction3" class='fa fa-pencil-square-o' style="color:black"></i> {{t "Edit Content"}}
+							|</a>
+						{{/if}}
+						
+						<a href="javascript:updateDocumentation('{{name}}','{{attributes.overview_type}}','{{attributes.overview_summary}}','{{attributes.overview_sourceType}}','{{attributes.overview_sourceURL}}','{{attributes.overview_filePath}}','{{attributes.overview_otherTypeName}}','{{attributes.overview_visibility}}','{{t "Update"}}')"> <i name="rowAction4" class='fa fa-retweet' style="color:black"></i> {{t "Update"}}|</a>
+						<a><i name="rowAction5" class='fa fa-trash' style="color:black"></i> {{t "Delete"}}</a>
+					</ul>
+				</td>
+			</tr>
+			{{/each}}		
+		</tbody>
+	</table>
+</div>

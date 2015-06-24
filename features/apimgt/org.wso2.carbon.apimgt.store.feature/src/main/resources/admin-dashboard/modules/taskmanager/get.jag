@@ -9,6 +9,7 @@ var options = new Array();
 options.useSOAP = 1.2;
 options.action = "http://docs.oasis-open.org/ns/bpel4people/ws-humantask/api/200803/simpleQuery";
 var cookie=session.get("workflowCookie");
+<<<<<<< HEAD
 options["HTTPHeaders"] = [
                               { name : "Cookie", value :cookie },
                         ];
@@ -49,6 +50,52 @@ return parseResponse(result,taskType,endpoint);
 } catch (e) {
 log.error(e.toString());
 session.put("showLogin", "true");
+=======
+if(cookie != null){
+    options["HTTPHeaders"] = [
+                                  { name : "Cookie", value :cookie },
+                            ];
+
+    var searchBy='';
+    if(filterCategory==null||filterCategory=='ALL'){
+    searchBy='ALL_TASKS';
+    } else if(filterCategory=='userOnly'){
+    searchBy='ASSIGNED_TO_ME';
+    }else if(filterCategory=='claimable'){
+    searchBy='CLAIMABLE';
+    }
+
+    var prefixEndpoint;
+    if(taskType=="ApproveSubscription"){
+    prefixEndpoint= site.workflows.subscriptionWorkFlowServerURL;
+    } else if(taskType=="ApproveUser"){
+    prefixEndpoint=site.workflows.signupWorkFlowServerURL;
+    } else if(taskType=="ApproveApplication"){
+    prefixEndpoint=site.workflows.applicationWorkFlowServerURL;
+    } else if(taskType=="ApplicationRegistration"){
+    prefixEndpoint=site.workflows.appRegistrationWorkFlowServerURL;
+    }
+
+    var payload = '<ns:simpleQuery xmlns:ns="http://docs.oasis-open.org/ns/bpel4people/ws-humantask/api/200803" xmlns:ns1="http://docs.oasis-open.org/ns/bpel4people/ws-humantask/types/200803">'+
+    '<ns:simpleQueryInput><ns1:status>RESERVED</ns1:status><ns1:status>IN_PROGRESS</ns1:status><ns1:status>READY</ns1:status><ns1:pageSize>'+50+'</ns1:pageSize><ns1:pageNumber>'+0+'</ns1:pageNumber><ns1:simpleQueryCategory>'+'ALL_TASKS'+'</ns1:simpleQueryCategory></ns:simpleQueryInput></ns:simpleQuery>';
+    var result;
+    var endpoint=prefixEndpoint+"HumanTaskClientAPIAdmin/";
+
+    try {
+
+    version.open(options,endpoint, false);
+    version.send(payload);
+    result = version.responseE4X;
+
+    return parseResponse(result,taskType,endpoint);
+
+    } catch (e) {
+    log.error(e.toString());
+    session.put("showLogin", "true");
+    return null;
+    }
+}else{
+>>>>>>> 9b678d884b475ee18ab884349101529c1a909edf
 return null;
 }
 };

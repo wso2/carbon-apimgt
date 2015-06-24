@@ -1,0 +1,148 @@
+<% jagg.template("user/sign-up", function(inputs, outputs, jagg) { %>
+<%
+	var fields = outputs.fields, length = fields.length;
+        var user = session.get("logged.user");
+        var mod = jagg.module("manager");
+        var httpsUrl= mod.getHTTPsURL();
+        if(user){ %>
+        <script>
+            location.href = "<%= jagg.getSiteContext()%>";
+        </script>
+        <% } %>
+        <script>
+            var context= "<%=jagg.getSiteContext()%>";
+        </script>
+<div class="title-section"><h2><%=i18n.localize("signupTitle")%></h2></div>
+
+<form class="form-horizontal"  id="sign-up" autocomplete="off">
+
+    <div class="form-group">
+        <label class="control-label col-sm-2" for="newUsername"><%=i18n.localize("username")%>:<span class="requiredAstrix">*</span></label>
+        <div class="col-sm-4">
+            <input id="newUsername" name="newUsername" maxlength="30" minlength="5" type="text" class="required validName input-medium noSpace form-control" />
+            <%              
+                if(request_tenant != null) { %>
+                     <label class="lblTenantDomainName" class="control-label col-sm-2" for="newUsername"> @<%=request_tenant%></label>
+            <%    }
+            %>
+           
+            <input id="hiddenTenantDomain" type="hidden" value="<%=request_tenant%>"> 
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label class="control-label col-sm-2" for="newPassword"><%=i18n.localize("password")%>:<span class="requiredAstrix">*</span></label>
+        <div class="col-sm-4">
+            <input type="password" class="input-large password validPassword form-control" id="newPassword" name="newPassword" />
+
+            <div class="help-block" id="password-help" style="display:none">
+              <%=i18n.localize("pwHelpMsgLine1")%>
+                <ul>
+                    <li><%=i18n.localize("pwHelpMsgLine2")%></li>
+                    <li><%=i18n.localize("pwHelpMsgLine3")%></li>
+                    <li><%=i18n.localize("pwHelpMsgLine4")%></li>
+                    <li><%=i18n.localize("pwHelpMsgLine5")%></li>
+                </ul>
+            </div>
+        </div>
+        <div class="col-sm-4">
+            <div class="password-meter" style="display:none;">
+                <div class="password-meter-message"></div>
+                <div class="password-meter-bg">
+                    <div class="password-meter-bar"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="form-group">
+            <label class="control-label col-sm-2" for="newPasswordConfirm"><%=i18n.localize("retypePassword")%>:<span class="requiredAstrix">*</span></label>
+            <div class="col-sm-4"><input type="password" class="matchPasswords input-large form-control" id="newPasswordConfirm" /></div>
+    </div>
+    
+    <%
+        var i, field, inputClass;
+        for(i = 0; i < length; i++) {
+            field = fields[i];
+            var required = field.required;
+            var claimUri = field.claimUri;
+            if (required == true) {
+            	inputClass = "required input-large";
+            } else {
+            	inputClass = "input-xlarge";
+            }
+            if (claimUri.indexOf("name") !== -1) {
+            	inputClass = "required validName input-large noSpace";
+            } else if (claimUri.indexOf("email") !== -1) {
+            	inputClass = "required validEmail input-large noSpace";
+            } 
+    %>
+	<%if (required == true) {%>
+         <div class="form-group">
+            <label class="control-label col-sm-2" for="<%=i%>cliamUri"><%=i18n.localize(field.name, field.name)%>:
+           	 <span class="requiredAstrix">*</span>
+            </label>
+            <div class="col-sm-4"><input type="text" id="<%=i%>cliamUri" name="<%=i%>cliamUri" class="<%=inputClass%> form-control"/></div>
+    	</div>
+	 <%} %>
+    <% } %>
+        <div class="row">
+            <div class= "col-md-2"></div>
+            <div  class= "col-md-4"  style="padding-bottom:10px;" id="moreFieldsLink"><a class="moreDetails" onclick="showMoreFields()"><span class="glyphicon glyphicon-minus-sign" aria-hidden="true"></span> More Details</a></div>
+	    </div>
+	    <div class="row">
+            <div class= "col-md-2"></div>
+	        <div class= "col-md-4" id="hideFieldsLink" style="display:none;padding-bottom:10px;">
+            <a class="moreDetails" onclick="hideMoreFields()">
+            <span class="glyphicon glyphicon-minus-sign" aria-hidden="true"></span> More Details</a>
+	    </div>
+	</div>
+
+        <div id="moreFields" style="display:none">
+		<%		
+		for(i = 0; i < length; i++) {
+            		field = fields[i];
+            		var required = field.required;
+            		var claimUri = field.claimUri;
+			if(field.name == "Home Phone" || field.name == "Telephone") {
+				field.name = "Land Phone";
+			} else if (field.name == "Mobile") {
+				field.name = "Mobile Phone";
+			}
+			if (claimUri.indexOf("address") !== -1) {
+				inputClass = "input-address";
+            		} else if (claimUri.indexOf("country") !== -1) {
+				inputClass = "input-medium";
+	    		} else if (claimUri.indexOf("role") !== -1) {
+				inputClass = "input-small";
+	    		} else {
+				inputClass = "input-large";
+			}
+		%>
+			<%if (required != true) {%>
+                <div class="form-group">
+                        <label class="control-label col-md-2" for="<%=i%>cliamUri"><%=i18n.localize(field.name, field.name)%>:
+                    </label>
+                    <div class= "col-md-4">
+                        <input type="text" id="<%=i%>cliamUri" name="<%=i%>cliamUri" class="<%=inputClass%> form-control"/>
+                    </div>
+                </div>
+	 		<%} %>
+		<% } %>
+	</div>
+	<input type="hidden" id="fieldCount" name="fieldCount" value="<%=length%>"/>
+    <div class="row">
+        <div class= "col-md-2"></div>
+        <div class= "col-md-4">
+            <input class="submit btn btn-primary" type="submit" value="<%=i18n.localize("submit")%>"/>
+        </div>
+    </div>
+</form>
+
+
+<form id="signUpRedirectForm" method="post" action="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("templates/user/sign-up/redirector.jag"))%>">
+        <input type="hidden" name="redirectToHome" id="redirectToHome" value="<%= jagg.getSiteContext() %>" />
+</form>
+
+
+<% }); %>

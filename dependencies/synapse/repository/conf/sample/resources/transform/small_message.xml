@@ -1,0 +1,34 @@
+<ns:getMarketActivityResponse xmlns:ns="http://services.samples/xsd">
+    <ns:quotes type="samples.services.GetQuoteResponse">
+        <ns:change>-2.3331712765191983</ns:change>
+        <ns:earnings>-9.65231195444267</ns:earnings>
+        <ns:high>179.16347749816438</ns:high>
+        <ns:last>172.19045747628292</ns:last>
+        <ns:lastTradeTimestamp>Mon Oct 22 15:11:34 LKT 2007</ns:lastTradeTimestamp>
+        <ns:low>178.7203293609462</ns:low>
+        <ns:marketCap>1.379322935732207E7</ns:marketCap>
+        <ns:name>UXO Company</ns:name>
+        <ns:open>-169.9395638882107</ns:open>
+        <ns:peRatio>-17.09677690440378</ns:peRatio>
+        <ns:percentageChange>1.3736742954737378</ns:percentageChange>
+        <ns:prevClose>-169.84894339269556</ns:prevClose>
+        <ns:symbol>UXO</ns:symbol>
+        <ns:volume>15056</ns:volume>
+    </ns:quotes>
+    <ns:quotes type="samples.services.GetQuoteResponse">
+        <ns:change>3.983139320414658</ns:change>
+        <ns:earnings>-9.04062951777676</ns:earnings>
+        <ns:high>94.57780160008556</ns:high>
+        <ns:last>90.21405473469899</ns:last>
+        <ns:lastTradeTimestamp>Mon Oct 22 15:11:34 LKT 2007</ns:lastTradeTimestamp>
+        <ns:low>93.85204073409948</ns:low>
+        <ns:marketCap>-8372468.946299013</ns:marketCap>
+        <ns:name>OOV Company</ns:name>
+        <ns:open>-88.15089890974984</ns:open>
+        <ns:peRatio>-18.82367884355716</ns:peRatio>
+        <ns:percentageChange>-4.709174373521174</ns:percentageChange>
+        <ns:prevClose>-84.58254047272324</ns:prevClose>
+        <ns:symbol>OOV</ns:symbol>
+        <ns:volume>6922</ns:volume>
+    </ns:quotes>
+</ns:getMarketActivityResponse>

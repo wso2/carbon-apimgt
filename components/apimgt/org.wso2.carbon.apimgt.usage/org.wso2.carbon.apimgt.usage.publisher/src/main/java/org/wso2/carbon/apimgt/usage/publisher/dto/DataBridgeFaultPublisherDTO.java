@@ -18,7 +18,6 @@
 
 package org.wso2.carbon.apimgt.usage.publisher.dto;
 
-import org.wso2.carbon.apimgt.usage.publisher.APIMgtUsagePublisherConstants;
 import org.wso2.carbon.apimgt.usage.publisher.DataPublisherUtil;
 
 public class DataBridgeFaultPublisherDTO extends FaultPublisherDTO{
@@ -40,13 +39,16 @@ public class DataBridgeFaultPublisherDTO extends FaultPublisherDTO{
         setApiPublisher(faultPublisherDTO.getApiPublisher());
         setApplicationName(faultPublisherDTO.getApplicationName());
         setApplicationId(faultPublisherDTO.getApplicationId());
+        setProtocol(faultPublisherDTO.getProtocol());
     }
 
     public static String getStreamDefinition() {
 
-        String streamDefinition =  "{" +
-                "  'name':'" + APIMgtUsagePublisherConstants.API_MANAGER_FAULT_STREAM_NAME + "'," +
-                "  'version':'" + APIMgtUsagePublisherConstants.API_MANAGER_FAULT_STREAM_VERSION + "'," +
+        return  "{" +
+                "  'name':'" +
+                DataPublisherUtil.getApiManagerAnalyticsConfiguration().getFaultStreamName() + "'," +
+                "  'version':'" +
+                DataPublisherUtil.getApiManagerAnalyticsConfiguration().getFaultStreamVersion() + "'," +
                 "  'nickName': 'API Manager Fault Data'," +
                 "  'description': 'Fault Data'," +
                 "  'metaData':[" +
@@ -62,23 +64,23 @@ public class DataBridgeFaultPublisherDTO extends FaultPublisherDTO{
                 "          {'name':'version','type':'STRING'}," +
                 "          {'name':'errorCode','type':'STRING'}," +
                 "          {'name':'errorMessage','type':'STRING'}," +
-                "          {'name':'requestTime','type':'STRING'}," +
+                "          {'name':'requestTime','type':'LONG'}," +
                 "          {'name':'userId','type':'STRING'}," +
                 "          {'name':'tenantDomain','type':'STRING'}," +
                 "          {'name':'hostName','type':'STRING'}," +
                 "          {'name':'apiPublisher','type':'STRING'}," +
                 "          {'name':'applicationName','type':'STRING'}," +
-                "          {'name':'applicationId','type':'STRING'}" +
+                "          {'name':'applicationId','type':'STRING'}," +
+                "          {'name':'protocol','type':'STRING'}" +
                 "  ]" +
 
                 "}";
 
-        return streamDefinition;
     }
 
     public Object createPayload(){
         return new Object[]{getConsumerKey(),getContext(),getApi_version(),getApi(), getResourcePath(),getMethod(),
-                getVersion(),getErrorCode(),getErrorMessage(), String.valueOf(getRequestTime()),getUsername(),
-                getTenantDomain(),getHostName(),getApiPublisher(), getApplicationName(), getApplicationId()};
+                getVersion(),getErrorCode(),getErrorMessage(), getRequestTime(),getUsername(),
+                getTenantDomain(),getHostName(),getApiPublisher(), getApplicationName(), getApplicationId(),getProtocol()};
     }
 }

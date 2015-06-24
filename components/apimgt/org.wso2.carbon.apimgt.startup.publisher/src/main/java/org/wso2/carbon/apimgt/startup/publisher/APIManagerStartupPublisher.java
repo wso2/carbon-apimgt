@@ -36,7 +36,6 @@ import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.startup.publisher.internal.DataHolder;
 import org.wso2.carbon.apimgt.startup.publisher.internal.ServiceReferenceHolder;
-import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.core.ServerStartupHandler;
 import org.wso2.carbon.governance.api.generic.GenericArtifactManager;
 import org.wso2.carbon.governance.api.generic.dataobjects.GenericArtifact;
@@ -45,6 +44,8 @@ import org.wso2.carbon.registry.common.CommonConstants;
 import org.wso2.carbon.registry.core.Registry;
 import org.wso2.carbon.registry.core.Resource;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
+import org.wso2.carbon.user.api.UserStoreException;
+import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import javax.activation.FileTypeMap;
 import javax.cache.Cache;
@@ -55,7 +56,6 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.RandomAccessFile;
-import java.net.MalformedURLException;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
@@ -258,7 +258,16 @@ public class APIManagerStartupPublisher implements ServerStartupHandler {
 			this.registry = DataHolder.getRegistryService()
 					.getGovernanceSystemRegistry();
 			createAPIArtifact(api);
-            final int tenantId = CarbonContext.getThreadLocalCarbonContext().getTenantId();
+
+			int tenantId = -1234;
+			String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(api.getId().getProviderName()));
+			try {
+				tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager().getTenantId(tenantDomain);
+			} catch (UserStoreException e) {
+				throw new APIManagementException("Error in retrieving Tenant Information while adding api :"
+						+api.getId().getApiName(),e);
+			}
+
 			apiMgtDAO.addAPI(api, tenantId);
 			
 			
@@ -341,8 +350,9 @@ public class APIManagerStartupPublisher implements ServerStartupHandler {
 					api.getVisibility(), visibleRoles, artifactPath);
 			registry.commitTransaction();
 
-			// Generate API Definition for Swagger
-			createUpdateAPIDefinition(api);
+			// Generate API Definition for Swagger. 
+			//TO DO: Need to re-write this method to generate swagger 2.0 resource
+			//createUpdateAPIDefinition(api);
 
 		} catch (RegistryException e) {
 			try {
@@ -395,46 +405,6 @@ public class APIManagerStartupPublisher implements ServerStartupHandler {
             handleException("Failed to add documentation", e);
         } 
     }
-
-
-	/**
-	 * Create API Definition in JSON and save in the registry
-	 * 
-	 * @param api
-	 *            API
-	 * @throws org.wso2.carbon.apimgt.api.APIManagementException
-	 *             if failed to generate the content and save
-	 */
-	private void createUpdateAPIDefinition(API api)
-			throws APIManagementException {
-		APIIdentifier identifier = api.getId();
-
-		try {
-			String jsonText = APIUtil.createSwaggerJSONContent(api);
-
-			String resourcePath = APIUtil.getAPIDefinitionFilePath(
-					identifier.getApiName(), identifier.getVersion(), identifier.getProviderName());
-
-			Resource resource = registry.newResource();
-
-			resource.setContent(jsonText);
-			resource.setMediaType("application/json");
-			registry.put(resourcePath, resource);
-
-			/* Set permissions to anonymous role */
-			APIUtil.setResourcePermissions(api.getId().getProviderName(), null,
-					null, resourcePath);
-
-		} catch (RegistryException e) {
-			handleException("Error while adding API Definition for "
-					+ identifier.getApiName() + "-" + identifier.getVersion(),
-					e);
-		} catch (APIManagementException e) {
-			handleException("Error while adding API Definition for "
-					+ identifier.getApiName() + "-" + identifier.getVersion(),
-					e);
-		}
-	}
 
 	/**
 	 * Persist API Status into a property of API Registry resource

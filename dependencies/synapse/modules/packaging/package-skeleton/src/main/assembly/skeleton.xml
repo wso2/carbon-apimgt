@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~  Licensed to the Apache Software Foundation (ASF) under one
+  ~  or more contributor license agreements.  See the NOTICE file
+  ~  distributed with this work for additional information
+  ~  regarding copyright ownership.  The ASF licenses this file
+  ~  to you under the Apache License, Version 2.0 (the
+  ~  "License"); you may not use this file except in compliance
+  ~  with the License.  You may obtain a copy of the License at
+  ~
+  ~   http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~  Unless required by applicable law or agreed to in writing,
+  ~  software distributed under the License is distributed on an
+  ~   * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+  ~  KIND, either express or implied.  See the License for the
+  ~  specific language governing permissions and limitations
+  ~  under the License.
+  -->
+<assembly>
+    <includeBaseDirectory>false</includeBaseDirectory>
+    <formats>
+        <format>zip</format>
+    </formats>
+    <fileSets>
+        <fileSet>
+            <!-- Note that synapse.bat depends on the existence of README.txt! -->
+            <directory>../../distribution/src/main/release</directory>
+            <outputDirectory>/</outputDirectory>
+            <includes>
+                <include>LICENSE</include>
+                <include>NOTICE</include>
+                <include>README.txt</include>
+            </includes>
+        </fileSet>
+        <fileSet>
+            <directory>../../distribution/src/main/bin</directory>
+            <outputDirectory>bin</outputDirectory>
+            <includes>
+                <include>synapse.sh</include>
+                <include>synapse-daemon.sh</include>
+            </includes>
+            <fileMode>755</fileMode>
+        </fileSet>
+        <fileSet>
+            <directory>../../distribution/src/main/bin</directory>
+            <outputDirectory>bin</outputDirectory>
+            <includes>
+                <include>synapse.bat</include>
+                <include>install-synapse-service.bat</include>
+                <include>uninstall-synapse-service.bat</include>
+            </includes>
+        </fileSet>
+        <fileSet>
+            <directory>../../../repository/conf</directory>
+            <outputDirectory>repository/conf</outputDirectory>
+            <includes>
+                <include>wrapper.conf</include>
+            </includes>
+        </fileSet>
+        <fileSet>
+            <directory>../../../modules/core/src/main/resources</directory>
+            <outputDirectory>lib</outputDirectory>
+            <includes>
+                <include>log4j.properties</include>
+            </includes>
+        </fileSet>
+        <fileSet>
+            <directory>../../distribution/src/main/bin</directory>
+            <outputDirectory>lib</outputDirectory>
+            <includes>
+                <include>*.dll</include>
+                <include>*.so</include>
+            </includes>
+        </fileSet>
+        <fileSet>
+            <directory>../../distribution/src/main/bin/native</directory>
+            <outputDirectory>bin/native</outputDirectory>
+            <fileMode>755</fileMode>
+        </fileSet>      
+        <fileSet>
+            <directory>../../../patches</directory>
+            <outputDirectory>lib/patches</outputDirectory>
+            <includes>
+                <include>*.jar</include>
+                <include>patches.txt</include>                
+            </includes>
+        </fileSet>
+    </fileSets>
+    <files>
+        <file>
+            <source>.empty</source>
+            <outputDirectory>work/temp/synapse</outputDirectory>
+        </file>
+    </files>
+</assembly>

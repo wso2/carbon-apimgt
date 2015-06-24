@@ -24,6 +24,7 @@ import org.apache.axis2.context.ServiceContext;
 import org.apache.axis2.transport.http.HTTPConstants;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.apimgt.api.model.xsd.OAuthApplicationInfo;
 import org.wso2.carbon.apimgt.impl.dto.xsd.APIInfoDTO;
 import org.wso2.carbon.apimgt.keymgt.stub.subscriber.APIKeyMgtSubscriberServiceStub;
 import org.wso2.carbon.apimgt.keymgt.stub.types.carbon.ApplicationKeysDTO;
@@ -58,7 +59,7 @@ public class SubscriberKeyMgtClient {
             ServiceClient client = subscriberServiceStub._getServiceClient();
             Options options = client.getOptions();
             options.setManageSession(true);
-            options.setProperty(org.apache.axis2.transport.http.HTTPConstants.COOKIE_STRING,
+            options.setProperty(HTTPConstants.COOKIE_STRING,
                                 authenticatedCookie);
         } catch (Exception e) {
             String errorMsg = "Error when instantiating SubscriberKeyMgtClient.";
@@ -67,14 +68,31 @@ public class SubscriberKeyMgtClient {
         }
     }
 
+
+    public OAuthApplicationInfo createOAuthApplication(String userId, String applicationName, String callbackUrl) throws Exception {
+        OAuthApplicationInfo oAuthApplicationInfo = subscriberServiceStub.createOAuthApplication(userId, applicationName, callbackUrl);
+        return oAuthApplicationInfo;
+    }
+
+
+    public OAuthApplicationInfo getOAuthApplication(String consumerKey) throws Exception {
+        OAuthApplicationInfo oAuthApplicationInfo = subscriberServiceStub.retrieveOAuthApplication(consumerKey);
+        return oAuthApplicationInfo;
+    }
+
+    public void deleteOAuthApplication(String consumerKey) throws Exception {
+        subscriberServiceStub.deleteOAuthApplication(consumerKey);
+    }
+
     public String getAccessKey(String userId, APIInfoDTO apiInfoDTO,
                                String applicationName, String keyType, String callbackUrl) throws Exception {
         return subscriberServiceStub.getAccessToken(userId, apiInfoDTO, applicationName, keyType, callbackUrl);
     }
 
     public ApplicationKeysDTO getApplicationAccessKey(String userId, String applicationName,
-                                                      String keyType, String callbackUrl, String[] allowedDomains,String validityTime) throws Exception {
-        return subscriberServiceStub.getApplicationAccessToken(userId, applicationName, keyType, callbackUrl, allowedDomains, validityTime);
+                                                      String keyType, String callbackUrl, String[] allowedDomains,String validityTime, String tokenScope) throws Exception {
+        ApplicationKeysDTO keys = subscriberServiceStub.getApplicationAccessToken(userId, applicationName, keyType, callbackUrl, allowedDomains, validityTime, tokenScope);
+        return keys;
     }
 
     public String regenerateApplicationAccessKey(String keyType, String oldAccessToken, String[] allowedDomains,

@@ -1,0 +1,43 @@
+Apache Synapse
+Copyright (c) 2005 - 2008 The Apache Software Foundation
+
+   =========================================================================
+   ==  NOTICE file corresponding to the section 4 d of                    ==
+   ==  the Apache License, Version 2.0,                                   ==
+   ==  in this case for the Apache Synapse distribution.                  ==
+   =========================================================================
+
+	This product includes software developed at
+	The Apache Software Foundation (http://www.apache.org/).
+
+The Apache Synapse binary distribution includes software distributed under the
+Apache License (AL) Version 1.1, COMMON DEVELOPMENT AND DISTRIBUTION LICENSE
+(CDDL) Version 1.0, and the Creative Commons Public Domain license. See the
+LICENSE file for details.
+
+COPYRIGHT NOTICES
+
+Copyright (c) 2005-2008 The Apache Software Foundation.  All rights reserved.
+
+* Synapse binary is bundled with:
+ wso2caching-core-3.4.0.jar
+ wso2eventing-api-2.1.jar
+ wso2throttle-core-3.2.jar
+     Copyright (c) 2005-2008, WSO2 Inc. (http://wso2.com). All Rights Reserved.
+ jaxen-1.1.1.jar
+     Copyright 2003-2006 The Werken Company. All Rights Reserved.
+ groovy-all-1.1-rc-1.jar
+	 Copyright 2003 (C) James Strachan and Bob Mcwhirter. All Rights Reserved.
+ jsch-0.1.31.jar
+     Copyright (c) 2002,2003,2004,2005,2006,2007 Atsuhiko Yamanaka, JCraft,Inc. All rights reserved.
+ bcprov-ext-jdk15-1.40.jar
+ bcprov-jdk14-140.jar
+     Copyright (c) 2000 - 2006 The Legion Of The Bouncy Castle (http://www.bouncycastle.org)
+ wrapper-3.2.3.jar
+     Copyright (c) 1999, 2006 Tanuki Software, Inc.
+ quartz-1.6.0.jar
+     Copyright 2004-2005 OpenSymphony
+ JLex-0.0.jar
+     Copyright 1996-2003 by Elliot Joel Berk and C. Scott Ananian
+ java-cup-0.0.jar
+     Copyright 1996-1999 by Scott Hudson, Frank Flannery, C. Scott Ananian

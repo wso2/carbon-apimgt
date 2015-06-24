@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<!--
+  ~  Licensed to the Apache Software Foundation (ASF) under one
+  ~  or more contributor license agreements.  See the NOTICE file
+  ~  distributed with this work for additional information
+  ~  regarding copyright ownership.  The ASF licenses this file
+  ~  to you under the Apache License, Version 2.0 (the
+  ~  "License"); you may not use this file except in compliance
+  ~  with the License.  You may obtain a copy of the License at
+  ~
+  ~   http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~  Unless required by applicable law or agreed to in writing,
+  ~  software distributed under the License is distributed on an
+  ~   * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+  ~  KIND, either express or implied.  See the License for the
+  ~  specific language governing permissions and limitations
+  ~  under the License.
+  -->
+
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified"
+           targetNamespace="http://ws.apache.org/ns/synapse"
+           xmlns="http://ws.apache.org/ns/synapse">
+
+    <xs:include schemaLocation="../../misc/common.xsd"/>
+
+    <xs:element name="log">
+        <xs:annotation>
+            <xs:documentation source="description">
+                Log mediator to log the messages and any properties
+            </xs:documentation>
+        </xs:annotation>
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="property" type="mediatorProperty" minOccurs="0" maxOccurs="unbounded"/>
+            </xs:sequence>
+            <xs:attribute name="level" type="logLevel" use="required" default="simple"/>
+            <xs:attribute name="separator" type="xs:string" use="optional" default=", "/>
+            <xs:attribute name="category" type="logCategory" use="optional" default="INFO"/>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:simpleType name="logLevel">
+        <xs:annotation>
+            <xs:documentation source="description">
+                This simple type represents the possible values for
+                the header mediator action attribute
+            </xs:documentation>
+        </xs:annotation>
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="simple"/>
+            <xs:enumeration value="headers"/>
+            <xs:enumeration value="full"/>
+            <xs:enumeration value="custom"/>
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:simpleType name="logCategory">
+        <xs:annotation>
+            <xs:documentation source="description">
+                This simple type represents the possible values for
+                the header mediator action attribute
+            </xs:documentation>
+        </xs:annotation>
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="FATAL"/>
+            <xs:enumeration value="ERROR"/>
+            <xs:enumeration value="WARN"/>
+            <xs:enumeration value="INFO"/>
+            <xs:enumeration value="DEBUG"/>
+            <xs:enumeration value="TRACE"/>
+        </xs:restriction>
+    </xs:simpleType>
+
+</xs:schema>

@@ -1,0 +1,537 @@
+{Introduction}
+
+  The Synapse project has developed a set of transport implementations that provide protocol
+  support and/or features that go beyond what is provided out of the box by Axis2:
+  
+  * A non blocking HTTP transport that gives better performance in a highly asynchronous
+    environment like Synapse.
+  
+  * A VFS transport that can read messages from files and write outgoing messages to a file system.
+    The file system can be local or remote, and several remote protocols are supported, such as
+    FTP, SSH, WebDAV, etc.
+  
+  * A transport supporting the {{{http://www.fixprotocol.org}Financial Information eXchange}}
+    protocol. FIX is a public-domain messaging standard developed specifically for the real-time electronic
+    exchange of securities transactions. It has a large user base and is developed by the
+    collaborative effort of banks, broker-dealers, exchanges, industry utilities and associations,
+    institutional investors, and IT providers around the world. 
+  
+  []
+  
+  Note that while these transports are developed as part of the Synapse project, they can be used
+  with any Axis2 based application.
+  
+  The Synapse distribution also comes bundled with the following transports from the WS-Commons
+  Transport project:
+  
+  * A JMS transport supporting any JMS 1.0 or 1.1 provider.
+  
+  * A mail transport able to send messages using SMTP and poll messages from a POP3 or IMAP account.
+
+  Apache Synapse is also compatible with the following transport implementations from the Apache
+  Axis2 Transports project:
+
+  * TCP
+
+  * UDP
+
+  These transports are not shipped with Apache Synapse by default and hence they should be
+  downloaded separately from the Axis2 website and installed in the Synapse runtime.
+
+{Contents}
+
+%{toc}
+
+{Non-blocking HTTP transport}
+
+* {Example configurations}
+
++--------------------------------------------------------------------------------------------+
+<transportReceiver name="http" class="org.apache.synapse.transport.nhttp.HttpCoreNIOListener">
+    <parameter name="port">8280</parameter>
+    <parameter name="non-blocking">true</parameter>
+</transportReceiver>
+
+<transportReceiver name="https" class="org.apache.synapse.transport.nhttp.HttpCoreNIOSSLListener">
+    <parameter name="port" locked="false">8243</parameter>
+    <parameter name="non-blocking" locked="false">true</parameter>
+    <parameter name="keystore" locked="false">
+        <KeyStore>
+            <Location>lib/identity.jks</Location>
+            <Type>JKS</Type>
+            <Password>password</Password>
+            <KeyPassword>password</KeyPassword>
+        </KeyStore>
+    </parameter>
+    <parameter name="truststore" locked="false">
+        <TrustStore>
+            <Location>lib/trust.jks</Location>
+            <Type>JKS</Type>
+            <Password>password</Password>
+        </TrustStore>
+    </parameter>
+</transportReceiver>
+
+<transportSender name="http"  class="org.apache.synapse.transport.nhttp.HttpCoreNIOSender">
+    <parameter name="non-blocking" locked="false">true</parameter>
+    <parameter name="warnOnHTTP500" locked="false">*</parameter>
+</transportSender>
+
+<transportSender name="https" class="org.apache.synapse.transport.nhttp.HttpCoreNIOSSLSender">
+    <parameter name="non-blocking" locked="false">true</parameter>
+    <parameter name="warnOnHTTP500" locked="false">*</parameter>
+    <parameter name="keystore" locked="false">
+        <KeyStore>
+            <Location>lib/identity.jks</Location>
+            <Type>JKS</Type>
+            <Password>password</Password>
+            <KeyPassword>password</KeyPassword>
+        </KeyStore>
+    </parameter>
+    <parameter name="truststore" locked="false">
+        <TrustStore>
+            <Location>lib/trust.jks</Location>
+            <Type>JKS</Type>
+            <Password>password</Password>
+        </TrustStore>
+    </parameter>
+</transportSender>
++--------------------------------------------------------------------------------------------+
+
+* {Transport listener parameters}
+
+  The following parameters are supported by both the HTTP and the HTTPS listener:
+
+  [<<<port>>>] The TCP port to bind the listener to.
+  
+  [<<<bind-address>>>] The IP address to bind the listener to.
+  This can be used on hosts that have more than one network interface or IP address
+  to run multiple Synapse instances listening to the same port. If this parameter is not specified,
+  the listener will accept connections on any IP address.
+  
+  [<<<hostname>>>] The host name to use when computing endpoint references in generated WSDL files.
+  The default value is the host name as provided by the operation system or <<<localhost>>> if
+  the host name can't be determined. The value of this parameter is ignored if <<<WSDLEPRPrefix>>>
+  is specified.
+  
+  [<<<WSDLEPRPrefix>>>] The URL prefix to use when computing endpoint references in generated WSDL
+  files. The value must be a valid URL with at least a protocol and host. If this value is
+  unspecified, endpoint references will be computed based on the listener type (HTTP or HTTPS)
+  and <<<hostname>>> and <<<port>>> parameters.
+  
+  This parameter should be used if clients connect to Synapse through a frontend server, e.g. a
+  (load balancing) Apache, and these clients rely on the address information in the WSDL documents
+  exposed through <<<...?wsdl>>> URLs.
+  
+  []
+  
+  The following parameters are specific to the HTTPS listener: 
+  
+  [<<<keystore>>>] The keystore configuration. The value of this parameter must be a
+  <<<\<KeyStore\>>>> element as shown in the example configurations above.
+  
+  [<<<truststore>>>] The truststore configuration. The value of this parameter must be a
+  <<<\<TrustStore\>>>> element as shown in the example configurations above.
+  
+  [<<<SSLVerifyClient>>>] This parameter has the same meaning as the corresponding
+  {{{http://httpd.apache.org/docs/2.2/mod/mod_ssl.html#sslverifyclient}mod_ssl directive}} and
+  sets the desired certificate verification level for client authentication:
+  
+  * <<<none>>> (default): no client certificate is required at all
+  
+  * <<<optional>>>: the client may present a valid certificate, but is not required to do so
+  
+  * <<<require>>>: the client has to present a valid certificate, otherwise the connection
+  request will be terminated during SSL handshake
+
+* {Transport sender parameters}
+
+  The following property can be used to control based on content-types whether the HTTP/HTTPS
+  sender shall output a warning for responses with HTTP status code 500.
+
+  [<<<warnOnHTTP500>>>] A list of content-types for which Synapse shall output a warning when 
+  receiving an HTTP 500 response (each value each seperated by a |).
+  By default Synapse outputs a warning for any HTTP 500 response, irrespective of the content-type.
+  Consequently, also for each SOAP fault a warning will be logged.
+  If only for specific content-types a warning shall be logged, please provide a |-separated 
+  list. To output the warning for messages which do not have a content-type set, please
+  use the value "none"!
+  
+  Example value: x-application/hessian|none
+
+  []
+
+  The following properties can be used to configure the HTTP sender to use a proxy. They can
+  be specified either as transport parameters in declared in <<<\<transportSender\>>>> or as
+  system properties. 
+
+  [<<<http.proxyHost>>>] The host name or address of the proxy server.
+  
+  [<<<http.proxyPort>>>] The TCP port of the proxy server.
+  
+  [<<<http.nonProxyHosts>>>] The hosts to which the HTTP sender should connect directly and
+  not through the proxy server. The value can be a list of hosts, each seperated by a |, and
+  in addition a wildcard character (*) can be used for matching.
+  
+  Example value: <<<*.foo.com|localhost>>>
+  
+  []
+
+  Note that the HTTPS sender has no proxy support yet.
+  
+  The following parameters are specific to the HTTP sender:
+  
+  [<<<keystore>>>] The keystore configuration. The value of this parameter must be a
+  <<<\<KeyStore\>>>> element as shown in the example configurations above.
+  
+  [<<<truststore>>>] The truststore configuration. The value of this parameter must be a
+  <<<\<TrustStore\>>>> element as shown in the example configurations above.
+  
+  [<<<novalidatecert>>>] When set to <<<true>>>, this parameter disables server certificate
+  validation (trust). The default value is <<<false>>>. This parameter will be ignored if
+  <<<truststore>>> is set.
+  
+  Setting his parameter to <<<true>>> is useful in development and test environments, but
+  should not be used in production environments. If validation is disabled, a warning
+  message will be logged at startup.
+  
+  [<<<HostnameVerifier>>>] This optional parameter specifies the policy to apply when
+  checking that the hostname of the server matches the names stored inside the X.509 certificate
+  presented by the server. Possible values are <<<Strict>>>, <<<AllowAll>>> and
+  <<<DefaultAndLocalhost>>>. See the
+  {{{apidocs/org/apache/synapse/transport/nhttp/HostnameVerifier.html}HostnameVerifier Javadoc}}
+  for more details.
+
+{VFS transport}
+
+* {Transport listener}
+
+  The VFS transport listener receives messages dropped in a given local or remote file system
+  location. The location is specified by a URL that either identifies a single file or a directory.
+  The transport listener will periodically poll the specified location and process any file(s)
+  found. After a file has been processed it will be deleted or moved to another location. Note that
+  this is absolutely mandatory to prevent the listener from processing files multiple times.
+  Therefore the VFS transport listener can only be used in situations where it has write access to
+  the file system location and where deleting or moving the dropped files is acceptable.
+
+  The transport is based on {{{http://commons.apache.org/vfs/}Apache Commons VFS}} and supports any
+  protocol for which a VFS provider is available. The transport is preconfigured with providers
+  for local files (<<<file:>>> scheme), HTTP, HTTPS, FTP and SFTP (i.e. file transfer over SSH).
+
+  There is a fundamental difference between the VFS transport and transports such as HTTP and it
+  is important to understand this difference to be able to use the VFS transport correctly.
+  The HTTP transport binds to a single protocol endpoint, i.e. a TCP port on which it accepts
+  incoming HTTP requests. These requests are then dispatched to the right service based on the
+  request URI. On the other hand, the VFS transport only receives the payload of a message, but no
+  additional information that could be used to dispatch the message to a service. This means that
+  file system locations must be explicitly mapped to services. This is done using a set of
+  service parameters.
+
+  For Synapse this means that the VFS transport listener can only be used in conjunction with proxy
+  services. The relevant service parameters are then specified as follows: 
+
++-------------------------------------+  
+<proxy name="MyVFSService" transports="vfs">
+    <parameter name="transport.vfs.FileURI">file:///var/spool/synapse/in</parameter>
+    <parameter name="transport.vfs.ContentType">application/xml</parameter>
+    ...
+    <target>
+        ...
+    </target>
+</proxy>
++-------------------------------------+  
+
+  In this example the file system location <<<file:///var/spool/synapse/in>>> is explicitly bound
+  to <<<MyVFSService>>>, i.e. any message dropped in that location will be predispatched to that
+  service, bypassing any other configured dispatch mechanisms that would apply to messages received
+  through HTTP.
+  
+  The VFS transport recognizes the following service parameters:
+
+  [<<<transport.vfs.FileURI>>> (Required)]
+  The primary File (or Directory) URI in the vfs* transport format,
+  for this service
+  
+  [<<<transport.vfs.ContentType>>> (Required)]
+  The expected content type for files retrieved for this service. The
+  VFS transport uses this information to select the appropriate
+  message builder.
+  
+  Examples:
+  
+  * <<<text/xml>>> for plain XML or SOAP
+  
+  * <<<text/plain; charset=ISO-8859-1>>> for text files
+  
+  * <<<application/octet-stream>>> for binary data
+  
+  []
+  
+  [<<<transport.vfs.FileNamePattern>>> (Optional)]
+  A file name regex pattern to match files against a directory
+  specified by the FileURI
+  
+  [<<<transport.PollInterval>>> (Optional)]
+  The poll interval (in seconds)
+  
+  [<<<transport.vfs.ActionAfterProcess>>> (Optional)]
+  DELETE or MOVE
+  
+  [<<<transport.vfs.MoveAfterProcess>>> (Optional)]
+  The directory to move files after processing (i.e. all files process
+  successfully)
+  
+  [<<<transport.vfs.ActionAfterErrors>>> (Optional)]
+  DELETE or MOVE
+  
+  [<<<transport.vfs.MoveAfterErrors>>> (Optional)]
+  The directory to move files after errors (i.e. some of the files
+  succeed but some fail)
+  
+  [<<<transport.vfs.ActionAfterFailure>>> (Optional)]
+  DELETE or MOVE
+  
+  [<<<transport.vfs.MoveAfterFailure>>> (Optional)]
+  The directory to move after failure (i.e. all files fail)
+
+  [<<<transport.vfs.ReplyFileURI>>> (Optional)]
+  Reply file URI
+  
+  [<<<transport.vfs.ReplyFileName>>> (Optional)]
+  Reply file name (defaults to response.xml)
+  
+  [<<<transport.vfs.MoveTimestampFormat>>> (Optional)]
+  Timestamp prefix format for processed file name. java.text.SimpleDateFormat compatible string. e.g. yyMMddHHmmss'-'
+
+  [<<<transport.vfs.Locking>>> (Optional)]
+  By-default file locking is turned on in the VFS transport, and this parameter lets you configure
+  the locking behaviour on a per service basis. Possible values are <<<enable>>> or <<<disable>>>,
+  and both these values are important because the locking can be disabled at the global level by
+  specifying that at the receiver level and selectively enable locking only for a set of services.
+
+  [<<<transport.vfs.Streaming>>> (Optional)]
+  If this parameter is set to <<<true>>>, the transport will attempt to use a
+  <<<javax.activation.DataSource>>> (instead of a <<<java.io.InputStream>>>) object to pass
+  the content of the file to the message builder. Note that this is only supported by some
+  message builders, e.g. for plain text and binary.
+  
+  This allows processing of the message without storing the entire content in memory.
+  It also has two other side effects:
+  
+  * The incoming file (or connection in case of a remote file) will only
+    be opened on demand.
+    
+  * Since the data is not cached, the file might be read several times.
+  
+  []
+  
+  This option can be used to achieve streaming of large payloads. Note that this feature is
+  still somewhat experimental and might be superseded by a more flexible mechanism in a future
+  release.
+  
+  []
+  
+  Note that since the VFS endpoints are configured at the level of the service, the only parameter
+  that is available at the listener is the file locking configuration parameter whcih is optional 
+  and the transport listener is enabled in <<<axis2.xml>>> simply as
+  follows:
+
++-------------------------------------+  
+<transportReceiver name="vfs" class="org.apache.synapse.transport.vfs.VFSTransportListener">
+    <parameter name="transport.vfs.Locking">enable | disable</parameter> ?
+</transportReceiver>
++-------------------------------------+  
+
+* {Transport sender}
+
+  The VFS transport sender allows to write outgoing messages to local or remote files. As with
+  the listener, the transport sender supports any protocol for which there is a VFS provider.
+
+  The sender is enabled be the following directive in <<<axis2.xml>>> file locking which is
+  by-default enabled can be configured using the <<<transport.vfs.Locking>>> parameter:
+
++-------------------------------------+  
+<transportSender name="vfs" class="org.apache.synapse.transport.vfs.VFSTransportSender">
+    <parameter name="transport.vfs.Locking">enable | disable</parameter> ?
+</transportSender>
++-------------------------------------+  
+
+  To send a message using the VFS transport, the destination URI must start with <<<vfs:>>>
+  followed by a valid VFS URL. For example, in a Synapse mediation, one would use: 
+
++-------------------------------------+  
+<endpoint>
+    <address uri="vfs:file:///var/spool/synapse/out"/>
+</endpoint>
++-------------------------------------+
+
+  Other examples of valid VFS URLs are (see {{http://commons.apache.org/vfs/filesystems.html}} for
+  more samples):
+
+  * <<<file:///directory/filename.ext>>>
+  
+  * <<<file:////somehost/someshare/afile.txt>>>
+  
+  * <<<jar:../lib/classes.jar!/META-INF/manifest.mf>>>
+  
+  * <<<jar:zip:outer.zip!/nested.jar!/somedir>>>
+  
+  * <<<ftp://myusername:mypassword@somehost/pub/downloads/somefile.tgz[?vfs.passive=true]>>>
+
+  []
+  
+  The global configuration of the file locking can be overriden by providing the
+  <<<transport.vfs.Locking>>> as a URL parameter with the appropriate value (<<<enable>>>, or
+  <<<disable>>>) on a given endpoint.
+
+  It should be noted that by its nature, the VFS transport sender doesn't support synchronous
+  responses and should only be invoked using the out-only message exchange pattern.
+  In a Synapse mediation, this can be forced using the following mediator:
+
++-------------------------------------+  
+<property action="set" name="OUT_ONLY" value="true"/>
++-------------------------------------+  
+
+* {Using SFTP}
+
+  To avoid man-in-the-middle attacks, SSH clients will only connect to hosts with a known
+  host key. When connecting for the first time to an SSH server, a typical command line SSH client
+  would request confirmation from the user to add the server and its fingerprint to the list of known
+  hosts.
+  
+  The VFS transports supports SFTP through the {{{http://www.jcraft.com/jsch/}JSch}} library
+  and this library also requires a list of known hosts. Since Synapse is not an interactive
+  process, it can't request confirmation from the user and is therefore unable to automatically add
+  a host to the list. This implies that the list of known hosts must be set up manually before the
+  transport can connect.
+
+  Jsch loads the list of known hosts from a file called <<<known_hosts>>> in the <<<.ssh>>>
+  subdirectory of the user's home directory, i.e. <<<$HOME/.ssh>>> in Unix and
+  <<<%HOMEPATH%\\.ssh>>> in Windows. The location and format of this file are compatible with
+  the {{{http://www.openssh.com/}OpenSSH}} client.
+
+  Since the file not only contains a list of hostnames but also the fingerprints of their host keys,
+  the easiest way to add a new host to that file is to simply use the OpenSSH client to open an SSH
+  session on the target host. The client will then ask to add the credentials to the
+  <<<known_hosts>>> file. Note that if the SSH server is configured to only allow SFTP sessions,
+  but no interactive sessions, the connection will actually fail. Since this doesn't rollback
+  the change to the <<<known_hosts>>> file, this error can be ignored.
+
+* {Known issues}
+
+  The VFS listener will start reading a file as soon as it appears in the configured location.
+  To avoid processing half written files, the creation of these files should be made atomic.
+  On most platforms this can be achieved by writing the data to a temporary file and then
+  moving the file to the target location. Note however that a move operation is only atomic
+  if the source and destination are on the same physical file system. The location for the
+  temporary file should be chosen with that constraint in mind.
+  
+  It should also be noted that the VFS transport sender doesn't create files atomically.
+
+{FIX transport}
+
+  A general overview about the FIX transport can be found in the following articles:
+  
+  * {{{http://wso2.org/library/3449}Apache Synapse FIX'ed}}
+  
+  * {{{http://wso2.org/library/3837}Using the WSO2 ESB and FIX}} (also applies to Synapse)
+
+* {Setting up the FIX Transport}
+
+  To use the FIX transport, you need a local {{{http://www.quickfixj.org}Quickfix/J}} installation.
+  Download Quickfix/J from {{http://www.quickfixj.org/downloads}}.
+  
+  To enable the FIX transport, you need to uncomment the FIX
+  transport sender and FIX transport receiver configurations in the 
+  SYNAPSE_HOME/repository/conf/axis2.xml. Simply locate and uncomment the
+  FIXTransportSender and FIXTransportListener sample configurations. Also
+  add the following jars to the Synapse class path (SYNAPSE_HOME/lib directory).
+  
+  * quickfixj-core.jar
+  
+  * quickfixj-msg-fix40.jar
+  
+  * quickfixj-msg-fix41.jar
+  
+  * quickfixj-msg-fix42.jar
+  
+  * quickfixj-msg-fix43.jar
+  
+  * quickfixj-msg-fix44.jar
+  
+  * mina-core-1.1.0.jar
+  
+  * slf4j-api-1.3.0.jar
+  
+  * slf4j-jdk14-1.3.0.jar
+  
+  []
+  
+  All these jars are shipped with the Quickfix/J binary distribution.
+
+* {FIX Transport Parameters}
+
+  This is the list of all parameters accepted by the FIX transport. Refer
+  the sample 257 and 258 to see how some of them are used in practice.
+
+  [<<<transport.fix.AcceptorConfigURL>>>] If a service needs to listen to incoming
+  FIX messages from a remote initiator then Synapse needs to create an acceptor.
+  This parameter should contain the URL of the file which contains the FIX
+  configuration for the acceptor. (See sample 257)
+
+  [<<<transport.fix.InitiatorConfigURL>>>] If a service needs to send FIX messages
+  to a remote acceptor Synapse should create an initiator. This parameter should
+  contain the URL of the file which contains the FIX configuration for the
+  initiator. (See sample 257)
+
+  [<<<transport.fix.AcceptorMessageStore>>>] The type of message store to be used
+  with the acceptor. Allowed values for this parameter are 'file', 'jdbc', 'memory'
+  and 'sleepycat'. If not specified memory based message store will be used by
+  default. Additional parameters required to configure each of the message stores
+  should be specified in the acceptor configuration file.
+
+  [<<<transport.fix.InitiatorMessageStore>>>] Same as the above but applies only
+  for the initiators. Additional parameters required to configure each of
+  the message stores should be specified in the initiator configuration file.
+
+  [<<<transport.fix.AcceptorLogFactory>>>] Specifies the transport level log factory
+  to be used to log messages going through the acceptor. FIX messages are logged
+  without putting them in SOAP envelopes at this level. Accepted values are
+  'console', 'file' and 'jdbc'. If not specified no logging will be done at the transport
+  level. Additional parameters required to configure each of the lof factories should be
+  specified in the acceptor configuration file.
+
+  [<<<transport.fix.InitiatorLogFactory>>>] Specifies the transport level log factory
+  to be used to log messages going through the initiator. Functionality is similar
+  to the above. Additional parameters required to configure each of the lof factories
+  should be specified in the initiator configuration file.
+
+  [<<<transport.fix.ResponseDeliverToCompID>>>] If a response FIX message sent from
+  Synapse to a remote FIX engine should be forwarded from the remote engine to
+  another party this parameter can be used to set the DeliverToCompID field
+  of the messages at Synapse.
+
+  [<<<transport.fix.ResponseDeliverToSubID>>>] If a response FIX message sent from
+  Synapse to a remote FIX engine should be forwarded from the remote engine to
+  another party this parameter can be used to set the DeliverToSubID field
+  of the messages at Synapse.
+
+  [<<<transport.fix.ResponseDeliverToLocationID>>>] If a response FIX message sent from
+  Synapse to a remote FIX engine should be forwarded from the remote engine to
+  another party this parameter can be used to set the DeliverToLocationID field
+  of the messages at Synapse.
+
+  [<<<transport.fix.ServiceName>>>] Used when messages coming over a different protocol
+  has to be forwarded over FIX. The value must be equal to the name of the service
+  and the scope must be 'axis2-client' (See sample 258)
+
+  [<<<transport.fix.SendAllToInSequence>>>] When there are multiple responses to a FIX
+  request and when we need only one of them to be sent to the original requester
+  this parameter has to be set to 'false'. This mostly comes handy when the original
+  requester is communicating over a different protocol (like HTTP). If this parameter
+  is not set to 'false' at such scenarios messages might get into a loop. (See
+  sample 258)
+
+  [<<<transport.fix.BeginStringValidation>>>] When the FIX messages sent to Synapse should not
+  be forwarded to a FIX session with a different BeginString value this parameter can be
+  set to 'true'. Setting this parameter to 'true' will enforce this restriction.

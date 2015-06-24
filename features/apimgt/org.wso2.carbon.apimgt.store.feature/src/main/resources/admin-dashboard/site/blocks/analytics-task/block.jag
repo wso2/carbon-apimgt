@@ -1,0 +1,25 @@
+<%
+include("/jagg/jagg.jag");
+
+jagg.block("analytics-task", {
+    initializer:function (data) {
+
+    },
+
+    getInputs:function () {
+        return {
+
+        }
+    },
+
+    getOutputs:function (inputs) {
+        mod = jagg.module("analytics");
+        return {
+            "analyticsData" : mod.getAnalyticsConfig(),
+            "datasourceData" : mod.getDatasourceConfig()
+        }
+
+    }
+
+});
+%>

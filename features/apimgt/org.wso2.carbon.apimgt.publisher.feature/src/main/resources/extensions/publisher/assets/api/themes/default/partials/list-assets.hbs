@@ -1,0 +1,74 @@
+<!--
+  ~ Copyright (c) WSO2 Inc. (http://wso2.com) All Rights Reserved.
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~ http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+<div class="row">
+	<div class="col-lg-6 col-md-12 col-sm-9 col-xs-12 wr-filters">
+		{{#if assetCategoryDetails.hasCategories}}
+			<div class="wr-filter-category">
+				<a href="#" class="ico-filter ctrl-filter-category dropdown-toggle" data-toggle="dropdown" aria-expanded="true">Select Category ... <span class="fa fa-angle-down pull-right"></span></a>
+				<ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu1">
+					{{#each assetCategoryDetails.values}}
+						<li><a tabindex="-1" href="#">{{this}}</a></li>
+					{{/each}}
+				</ul>
+			</div>
+		{{/if}}
+
+		<div class="wr-search">
+			<div>
+				<form class="form-group" id="assetSearchForm" action='{{url ""}}{{meta.landingPage}}' style="margin-left:-4px">
+					<input type="text" name="query" class="" placeholder="{{t "Search.."}}" id="inp_searchAsset" value="{{paging.query}}" /><a type="button" href="#" class="btn-search" id="searchButton"><span class="fa fa-search"></span></a>
+					<input type="hidden" name="sortby" value="{{paging.sortBy}}"/>
+					<input type="hidden" name="sort" value="{{paging.sortOrder}}"/>
+				</form>
+			</div>
+		</div>
+	</div>
+	<div class="col-lg-6 col-md-4 col-sm-3 col-xs-12  wr-filters">
+		<div class="wr-filter-sort pull-right">
+			<!--<a href="#" class="ico-filter ctrl-filter-grid"><img src="{{url "/themes/default/img/icons/ico-grid.png"}}" /></a>-->
+			<!--<a href="#" class="ico-filter ctrl-filter-list"><img src="{{url "/themes/default/img/icons/ico-list.png"}}" /></a>-->
+			<a href="#" class="ico-filter ctrl-filter-sort dropdown-toggle" data-toggle="dropdown"><img src="{{url "/themes/default/img/icons/ico-sort.png"}}" /></a>
+			<div class="dropdown-menu">
+				<div class="cu-arrow"></div>
+				<div class="dropdown-menu-content">
+					<a class="filter-item" href="?sortby=overview_name&sort=ASC">Name</a>
+					<a class="filter-item"  href="?sortby=overview_version&sort=ASC">Version</a>
+					<a class="filter-item" href="?sortby=overview_provider&sort=ASC">Status</a>
+					<a class="filter-item" href="?sortby=overview_createdtime&sort=DESC">Date/Time Created</a>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+<div class="row ovrd-wr-asst-listing">
+	<div class="col-md-12">
+		<!-- content -->
+		<div class="ast-container" id="list_assets_table_body">
+			{{#if assets}}
+				{{> list_assets_table_body assets}}
+			{{else}}
+				<div class="emptyAssets-MsgDiv">
+					<i class="icon-frown largeMsgIcon"></i>
+
+					<p class="emptyAssets">Sorry. I couldn't find anything for you</p>
+
+				</div>
+			{{/if}}
+		</div>
+	</div>
+</div>
+
+

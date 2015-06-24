@@ -1,0 +1,52 @@
+<%
+/*
+ * Copyright (c) WSO2 Inc. (http://wso2.com) All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+var caramel;
+require('/modules/store.js').exec(function(ctx) {
+	var log = new Log('details1_page');
+
+    caramel = require('caramel');
+    var rxt = require('rxt');
+    var ratingApi = require('/modules/rating-api.js').api;
+    var tenantApi = require('/modules/tenant-api.js').api;
+    var asset = rxt.asset;
+    var ui = rxt.ui;
+    var core = rxt.core;
+    
+   
+    var constants = rxt.constants;
+    var log = ctx.log;
+    var req = ctx.request;
+    var res = ctx.response;
+    var apiName = req.getParameter("name","UTF-8");
+    var provider = req.getParameter("provider","UTF-8");
+    var version = req.getParameter("provider","UTF-8");
+    
+    var am = asset.createUserAssetManager(ctx.session, "api");
+    var output = am.renderBasic(page)._custom();
+    var server = require('store').server;
+    var user = server.current(ctx.session);
+    var apistore = require('apistore').apistore.instance(user.username);
+    var data = apistore.getApplications(user.username);
+    if(data != null){
+        output.applications = JSON.parse(data);
+    }
+    output.apiName = apiName;
+    output.version = version;
+    output.provider = provider;
+    
+    caramel.render(output);
+}, request, response, session); %>

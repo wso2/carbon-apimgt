@@ -1,0 +1,22 @@
+<script type="text/javascript">
+	if (!store.publisher) {
+		store.publisher = {};
+	}
+
+	if(!store.publisher.api){
+		store.publisher.api ={};
+	}
+
+	store.publisher.api = {
+		name: "{{api.name}}",
+		version: "{{api.version}}",
+		provider: "{{api.provider}}",
+		id: "{{api.id}}",
+		lifeCycle: "{{assets.lifecycle}}",
+		lifeState: "{{assets.lifecycleState}}"
+	};
+
+	if(!store.publisher.urls){
+		store.publisher.urls ={};
+	}
+</script>

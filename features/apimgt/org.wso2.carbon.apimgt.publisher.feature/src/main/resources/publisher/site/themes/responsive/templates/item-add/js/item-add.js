@@ -1,0 +1,96 @@
+$( document ).ready(function() {
+
+    $("#startFromExistingAPI").click(function(){
+        var btn = $(this);
+        $(btn).buttonLoader('start');
+        $('#startFromExistingAPI-form').ajaxSubmit({
+            success:function(responseText, statusText, xhr, $form){
+                if (!responseText.error) {
+                    $(btn).buttonLoader('stop');
+                    window.location = jagg.site.context + "/design"
+                }else {
+                    if (responseText.message == "timeout") {
+                        if (ssoEnabled) {
+                             var currentLoc = window.location.pathname;
+                             if (currentLoc.indexOf(".jag") >= 0) {
+                                 location.href = "index.jag";
+                             } else {
+                                 location.href = 'site/pages/index.jag';
+                             }
+                        } else {
+                             jagg.showLogin();
+                        }
+                    } else {
+                        jagg.message({content:responseText.message,type:"error"});
+                    }
+                }                
+            }, dataType: 'json'
+        });
+    });
+
+    $("#startFromExistingSOAPEndpoint").click(function(){
+        var btn = $(this);
+        $(btn).buttonLoader('start');
+        $('#startFromExistingSOAPEndpoint-form').ajaxSubmit({
+            success:function(responseText, statusText, xhr, $form){
+                if (!responseText.error) {
+                    $(btn).buttonLoader('stop');
+                    window.location = jagg.site.context + "/design"
+                }else {
+                    if (responseText.message == "timeout") {
+                        if (ssoEnabled) {
+                             var currentLoc = window.location.pathname;
+                             if (currentLoc.indexOf(".jag") >= 0) {
+                                 location.href = "index.jag";
+                             } else {
+                                 location.href = 'site/pages/index.jag';
+                             }
+                        } else {
+                             jagg.showLogin();
+                        }
+                    } else {
+                        jagg.message({content:responseText.message,type:"error"});
+                    }
+                }                
+            }, dataType: 'json'
+        });
+    });
+    
+
+    $('.create-api').click(function(){
+        $('.create-options').each(function(){
+            $(this).removeClass('selected');
+        });
+
+        $(this).closest('.create-options').addClass('selected');
+        $('#designNewAPI').hide();
+    });
+
+    $('#create-new-api').click(function(){
+        $('#designNewAPI').show();
+    });
+
+
+    $('.create-options input[type=radio]').click(function(){
+       $(this).prop('checked', true);
+
+       $('.create-options input[type=radio]').each(function(){
+           if(!$(this).is(':checked')){
+              $($(this).attr('data-target')).slideUp();
+           }
+           else {
+               $($(this).attr('data-target')).slideToggle();
+           }
+       });
+    });
+
+    $('.toggleRadios input[type=radio]').prop('checked', false);
+    $('.toggleRadios input[type=radio]').click(function(){
+        $('.toggleContainers .controls').hide();
+        $('#startFromExistingAPI').css('margin-top','-67px');
+        $('.toggleRadios input[type=radio]').prop('checked', false);
+        $('#' + $(this).val()).closest('div').fadeIn();
+        $(this).prop('checked', true);
+    });
+
+});

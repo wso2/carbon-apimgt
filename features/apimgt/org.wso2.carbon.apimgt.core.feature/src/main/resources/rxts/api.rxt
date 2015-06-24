@@ -27,13 +27,29 @@
             <name>Context</name>
         </field>
         <field type="text" required="true">
+            <name>Context Template</name>
+        </field>
+        <field type="text" required="true">
             <name>Version</name>
+        </field>
+		<field type="text" required="true">
+            <name>Version Type</name>
+        </field>
+        <field type="options">
+            <name label="isDefaultVersion">Is Default Version</name>
+            <values>
+                <value>false</value>
+                <value>true</value>
+            </values>
         </field>
         <field type="text">
             <name>Transports</name>
         </field>
         <field type="text">
             <name>Redirect URL</name>
+        </field>
+	<field type="text">
+            <name>Advertise Only</name>
         </field>
         <field type="text">
             <name>API Owner</name>
@@ -51,7 +67,13 @@
         <field type="text" url="true">
             <name>Endpoint URL</name>
         </field>
-		<field type="text" url="true">
+        <field type="text">
+            <name>Implementation</name>
+        </field>
+ 	<field type="text-area">
+            <name>Endpoint Config</name>
+        </field>
+	<field type="text" url="true">
             <name>Endpoint Username</name>
         </field>
 		<field type="text" url="true">
@@ -65,6 +87,9 @@
         </field>
         <field type="text">
             <name>OutSequence</name>
+        </field>
+	<field type="text">
+            <name>FaultSequence</name>
         </field>
         <field type="text">
             <name>WSDL</name>
@@ -104,6 +129,7 @@
             <values>
                 <value>CREATED</value>
                 <value>PUBLISHED</value>
+		<value>PROTOTYPED</value>
                 <value>RETIRED</value>
                 <value>DEPRECATED</value>
                 <value>BLOCKED</value>
@@ -121,12 +147,39 @@
         <field type="text">
             <name>Business Owner Email</name>
         </field>
+	<field type="text">
+            <name>Subscription Availability</name>
+        </field>
+        <field type="text">
+            <name>Tenants</name>
+        </field>
+         <field type="text">
+            <name>Environments</name>
+         </field>
+        <field type="options">
+            <name label="Response Caching">Response Caching</name>
+            <values>
+                <value>Enabled</value>
+                <value>Disabled</value>             
+            </values>
+        </field>
+        <field type="text">
+            <name>Cache Timeout</name>
+        </field>
+        <field type="options">
+            <name label="Destination Statistics">Destination Stats Enabled</name>
+            <values>
+                <value>Enabled</value>
+                <value>Disabled</value>             
+            </values>
+        </field>
     </table>
-    <table name="URITemplate" columns="3">
+    <table name="URITemplate" columns="4">
             <subheading>
                 <heading>URL Pattern</heading>
                 <heading>HTTP Verb</heading>
                 <heading>Auth Type</heading>
+                <heading>Mediation Script</heading>
             </subheading>
             <field type="text">
                 <name>URL Pattern0</name>
@@ -138,6 +191,9 @@
                 <name>Auth Type0</name>
             </field>
             <field type="text">
+                <name>Mediation Script0</name>
+            </field>
+            <field type="text">
                 <name>URL Pattern1</name>
             </field>
             <field type="text">
@@ -145,6 +201,9 @@
             </field>
             <field type="text">
                 <name>Auth Type1</name>
+            </field>
+            <field type="text">
+                <name>Mediation Script1</name>
             </field>
              <field type="text">
                 <name>URL Pattern2</name>
@@ -155,6 +214,9 @@
             <field type="text">
                 <name>Auth Type2</name>
             </field>
+            <field type="text">
+                <name>Mediation Script2</name>
+            </field>
              <field type="text">
                 <name>URL Pattern3</name>
             </field>
@@ -164,6 +226,9 @@
             <field type="text">
                 <name>Auth Type3</name>
             </field>
+            <field type="text">
+                <name>Mediation Script3</name>
+            </field>
              <field type="text">
                 <name>URL Pattern4</name>
             </field>
@@ -172,6 +237,9 @@
             </field>
             <field type="text">
                 <name>Auth Type4</name>
+            </field>
+            <field type="text">
+                <name>Mediation Script4</name>
             </field>
         </table>
 </content>

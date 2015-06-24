@@ -19,7 +19,6 @@
 package org.wso2.carbon.apimgt.impl.internal;
 
 import org.apache.axis2.engine.ListenerManager;
-import org.apache.axis2.util.JavaUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -29,16 +28,29 @@ import org.osgi.service.component.ComponentContext;
 import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.impl.*;
+import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
+import org.wso2.carbon.apimgt.impl.handlers.ScopesIssuer;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.listners.UserAddListener;
 import org.wso2.carbon.apimgt.impl.observers.APIStatusObserverList;
+import org.wso2.carbon.apimgt.impl.observers.CommonConfigDeployer;
 import org.wso2.carbon.apimgt.impl.observers.SignupObserver;
 import org.wso2.carbon.apimgt.impl.observers.TenantServiceCreator;
 import org.wso2.carbon.apimgt.impl.utils.APIMgtDBUtil;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+<<<<<<< HEAD
+=======
+import org.wso2.carbon.apimgt.impl.utils.RemoteAuthorizationManager;
+import org.wso2.carbon.bam.service.data.publisher.services.ServiceDataPublisherAdmin;
+>>>>>>> 9b678d884b475ee18ab884349101529c1a909edf
 import org.wso2.carbon.base.MultitenantConstants;
+import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
+import org.wso2.carbon.context.RegistryType;
 import org.wso2.carbon.governance.api.util.GovernanceConstants;
+import org.wso2.carbon.identity.application.common.IdentityApplicationManagementException;
+import org.wso2.carbon.registry.api.Collection;
+import org.wso2.carbon.registry.api.Registry;
 import org.wso2.carbon.registry.core.ActionConstants;
 import org.wso2.carbon.registry.core.RegistryConstants;
 import org.wso2.carbon.registry.core.Resource;
@@ -64,10 +76,9 @@ import org.wso2.carbon.utils.ConfigurationContextService;
 import org.wso2.carbon.utils.FileUtil;
 
 import javax.cache.Cache;
-import java.io.File;
-import java.io.FilenameFilter;
-import java.io.IOException;
-import java.io.InputStream;
+
+import java.io.*;
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -94,7 +105,9 @@ import java.util.List;
  * @scr.reference name="tenant.indexloader"
  * interface="org.wso2.carbon.registry.indexing.service.TenantIndexingLoader" cardinality="1..1" policy="dynamic"
  * bind="setIndexLoader" unbind="unsetIndexLoader"
-
+ * @scr.reference name="bam.service.data.publisher"
+ * interface="org.wso2.carbon.bam.service.data.publisher.services.ServiceDataPublisherAdmin" cardinality="0..1"
+ * policy="dynamic" bind="setDataPublisherService" unbind="unsetDataPublisherService"
  */
 public class APIManagerComponent {
     //TODO refactor caching implementation
@@ -103,29 +116,35 @@ public class APIManagerComponent {
 
     private ServiceRegistration registration;
 
+    private static ServiceDataPublisherAdmin dataPublisherAdminService;
+
     private static TenantRegistryLoader tenantRegistryLoader;
+    private APIManagerConfiguration configuration = new APIManagerConfiguration();
+    public static final String APPLICATION_ROOT_PERMISSION =  "applications";
+
 
     protected void activate(ComponentContext componentContext) throws Exception {
         if (log.isDebugEnabled()) {
             log.debug("API manager component activated");
         }
-        
+
         try {
             BundleContext bundleContext = componentContext.getBundleContext();
             addRxtConfigs();
             addTierPolicies();
             addDefinedSequencesToRegistry();
+            addApplicationsPermissionsToRegistry();
             APIUtil.loadTenantExternalStoreConfig(MultitenantConstants.SUPER_TENANT_ID);
             APIUtil.loadTenantGAConfig(MultitenantConstants.SUPER_TENANT_ID);
             int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
             APIUtil.loadTenantWorkFlowExtensions(tenantId);
+            APIUtil.loadTenantAPILifecycle(tenantId);
             //load self sigup configuration to the registry
             APIUtil.loadTenantSelfSignUpConfigurations(tenantId);
-            
-            
-            APIManagerConfiguration configuration = new APIManagerConfiguration();
+
+
             String filePath = CarbonUtils.getCarbonHome() + File.separator + "repository" +
-                    File.separator + "conf" + File.separator + "api-manager.xml";
+                              File.separator + "conf" + File.separator + "api-manager.xml";
             configuration.load(filePath);
 
             //WorkflowExecutorFactory.getInstance().load(filePath);
@@ -138,9 +157,12 @@ public class APIManagerComponent {
                         Axis2ConfigurationContextObserver.class.getName(), listener, null);
             }
 
+            CommonConfigDeployer configDeployer = new CommonConfigDeployer();
+            bundleContext.registerService(Axis2ConfigurationContextObserver.class.getName(), configDeployer, null);
+
             SignupObserver signupObserver = new SignupObserver();
-            bundleContext.registerService(Axis2ConfigurationContextObserver.class.getName(), signupObserver,null);
-            
+            bundleContext.registerService(Axis2ConfigurationContextObserver.class.getName(), signupObserver, null);
+
             APIManagerConfigurationServiceImpl configurationService =
                     new APIManagerConfigurationServiceImpl(configuration);
             ServiceReferenceHolder.getInstance().setAPIManagerConfigurationService(configurationService);
@@ -149,39 +171,41 @@ public class APIManagerComponent {
                     configurationService, null);
             APIStatusObserverList.getInstance().init(configuration);
 
+            APIManagerAnalyticsConfiguration analyticsConfiguration = APIManagerAnalyticsConfiguration.getInstance();
+            analyticsConfiguration.setAPIManagerConfiguration(configuration);
+
             AuthorizationUtils.addAuthorizeRoleListener(APIConstants.AM_CREATOR_APIMGT_EXECUTION_ID,
-                    RegistryUtils.getAbsolutePath(RegistryContext.getBaseInstance(),
+                                                        RegistryUtils.getAbsolutePath(RegistryContext.getBaseInstance(),
                                                                                       APIUtil.getMountedPath(RegistryContext.getBaseInstance(),
                                                                                                              RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH) +
-                                                                                              APIConstants.API_APPLICATION_DATA_LOCATION),
-                    APIConstants.Permissions.API_CREATE,
-                    UserMgtConstants.EXECUTE_ACTION, null);
+                                                                                      APIConstants.API_APPLICATION_DATA_LOCATION),
+                                                        APIConstants.Permissions.API_CREATE,
+                                                        UserMgtConstants.EXECUTE_ACTION, null);
             AuthorizationUtils.addAuthorizeRoleListener(APIConstants.AM_CREATOR_GOVERNANCE_EXECUTION_ID,
-                    RegistryUtils.getAbsolutePath(RegistryContext.getBaseInstance(),
+                                                        RegistryUtils.getAbsolutePath(RegistryContext.getBaseInstance(),
                                                                                       APIUtil.getMountedPath(RegistryContext.getBaseInstance(),
                                                                                                              RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH) +
-                                                                                              "/trunk"),
-                    APIConstants.Permissions.API_CREATE,
-                    UserMgtConstants.EXECUTE_ACTION, null);
+                                                                                      "/trunk"),
+                                                        APIConstants.Permissions.API_CREATE,
+                                                        UserMgtConstants.EXECUTE_ACTION, null);
             AuthorizationUtils.addAuthorizeRoleListener(APIConstants.AM_PUBLISHER_APIMGT_EXECUTION_ID,
-                    RegistryUtils.getAbsolutePath(RegistryContext.getBaseInstance(),
+                                                        RegistryUtils.getAbsolutePath(RegistryContext.getBaseInstance(),
                                                                                       APIUtil.getMountedPath(RegistryContext.getBaseInstance(),
                                                                                                              RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH) +
-                                                                                              APIConstants.API_APPLICATION_DATA_LOCATION),
-                    APIConstants.Permissions.API_PUBLISH,
-                    UserMgtConstants.EXECUTE_ACTION, null);
-            
+                                                                                      APIConstants.API_APPLICATION_DATA_LOCATION),
+                                                        APIConstants.Permissions.API_PUBLISH,
+                                                        UserMgtConstants.EXECUTE_ACTION, null);
+
             setupImagePermissions();
 //            RemoteAuthorizationManager authorizationManager = RemoteAuthorizationManager.getInstance();
 //            authorizationManager.init();
             APIMgtDBUtil.initialize();
             //Check User add listener enabled or not
             boolean selfSignInProcessEnabled = Boolean.parseBoolean(configuration.getFirstProperty("WorkFlowExtensions.SelfSignIn.ProcessEnabled"));
-            readRecentlyAddedAPICacheConfigs(configuration);
             if (selfSignInProcessEnabled) {
                 if (bundleContext != null) {
                     bundleContext.registerService(UserStoreManagerListener.class.getName(),
-                            new UserAddListener(), null);
+                                                  new UserAddListener(), null);
                 }
             }
             //Load initially available api contexts at the server startup. This Cache is only use by the products other than the api-manager
@@ -196,19 +220,26 @@ public class APIManagerComponent {
                 }
             }
             APIUtil.createSelfSignUpRoles(MultitenantConstants.SUPER_TENANT_ID);
+
+            // Initialise KeyManager.
+            KeyManagerHolder.initializeKeyManager(configuration);
             
-            /* Add Bam Server Profile for collecting southbound statistics*/
-            String enabledStr = configuration.getFirstProperty(APIConstants.API_USAGE_ENABLED);
-            boolean enabled = enabledStr != null && JavaUtils.isTrueExplicitly(enabledStr);
-            if (enabled) {
-            	String bamServerURL = configuration.getFirstProperty(APIConstants.API_USAGE_BAM_SERVER_URL);
-                String bamServerUser = configuration.getFirstProperty(APIConstants.API_USAGE_BAM_SERVER_USER);
-                String bamServerPassword = configuration.getFirstProperty(APIConstants.API_USAGE_BAM_SERVER_PASSWORD);
-                String bamServerThriftPort = configuration.getFirstProperty(APIConstants.API_USAGE_THRIFT_PORT);
-            	APIUtil.addBamServerProfile(bamServerURL, bamServerUser, bamServerPassword, 
-            			bamServerThriftPort, MultitenantConstants.SUPER_TENANT_ID);
+            // loading white listed scopes
+            List<String> whitelist = null;
+
+            // Read scope whitelist from Configuration.
+            if (configuration != null) {
+                whitelist = configuration.getProperty(APIConstants.API_KEY_MANGER_SCOPE_WHITELIST);
             }
-            
+
+            // If whitelist is null, default scopes will be put.
+            if (whitelist == null) {
+                whitelist = new ArrayList<String>();
+                whitelist.add(APIConstants.OPEN_ID_SCOPE_NAME);
+                whitelist.add(APIConstants.DEVICE_SCOPE_PATTERN);
+            }
+
+            ScopesIssuer.loadInstance(whitelist);
         } catch (APIManagementException e) {
             log.error("Error while initializing the API manager component", e);
         }
@@ -232,6 +263,21 @@ public class APIManagerComponent {
 
     protected void unsetRegistryService(RegistryService registryService) {
         ServiceReferenceHolder.getInstance().setRegistryService(null);
+    }
+
+    protected void setDataPublisherService(ServiceDataPublisherAdmin service) {
+        log.debug("Event Data Publisher service bound to the API usage handler");
+        dataPublisherAdminService = service;
+        APIManagerAnalyticsConfiguration.createNewInstance().setAPIManagerConfiguration(configuration);
+    }
+
+    protected void unsetDataPublisherService(ServiceDataPublisherAdmin service) {
+        log.debug("Event Data Publisher service unbound from the API usage handler");
+        dataPublisherAdminService = null;
+    }
+
+    public static ServiceDataPublisherAdmin getDataPublisherAdminService() {
+        return dataPublisherAdminService;
     }
 
     protected void setIndexLoader(TenantIndexingLoader indexLoader) {
@@ -319,14 +365,14 @@ public class APIManagerComponent {
                     getRealmService().getTenantUserRealm(MultitenantConstants.SUPER_TENANT_ID).
                     getAuthorizationManager();
             String imageLocation =
-                                   APIUtil.getMountedPath(RegistryContext.getBaseInstance(),
-                                                          RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH) +
-                                           APIConstants.API_IMAGE_LOCATION;
+                    APIUtil.getMountedPath(RegistryContext.getBaseInstance(),
+                                           RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH) +
+                    APIConstants.API_IMAGE_LOCATION;
             if (!accessControlAdmin.isRoleAuthorized(CarbonConstants.REGISTRY_ANONNYMOUS_ROLE_NAME,
-                    imageLocation, ActionConstants.GET)) {
+                                                     imageLocation, ActionConstants.GET)) {
                 // Can we get rid of this?
                 accessControlAdmin.authorizeRole(CarbonConstants.REGISTRY_ANONNYMOUS_ROLE_NAME,
-                        imageLocation, ActionConstants.GET);
+                                                 imageLocation, ActionConstants.GET);
             }
         } catch (UserStoreException e) {
             throw new APIManagementException("Error while setting up permissions for image collection", e);
@@ -366,62 +412,25 @@ public class APIManagerComponent {
         }
     }
 
-    private void addDefinedSequencesToRegistry() throws APIManagementException {
-        RegistryService registryService = ServiceReferenceHolder.getInstance().getRegistryService();
-        try {
-            UserRegistry registry = registryService.getGovernanceSystemRegistry();
-            if (registry.resourceExists(APIConstants.API_CUSTOM_INSEQUENCE_LOCATION)) {
-                if(log.isDebugEnabled()){
-                    log.debug("Defined sequences have already been added to the registry");
-                }
-                //No need to add to add in sequences or out sequences. Do not return yet until we check for fault
-                // sequences as well. (Designed to support migrations).
-                //return;
-            }
-            else{
-                if(log.isDebugEnabled()){
-                    log.debug("Adding defined sequences to the registry.");
-                }
+	private void addDefinedSequencesToRegistry() throws APIManagementException {
+		try {
+			RegistryService registryService =
+					ServiceReferenceHolder.getInstance().getRegistryService();
+			UserRegistry registry = registryService.getGovernanceSystemRegistry();
 
-                InputStream inSeqStream =
-                        APIManagerComponent.class.getResourceAsStream("/definedsequences/in/log_in_message.xml");
-                byte[] inSeqData = IOUtils.toByteArray(inSeqStream);
-                Resource inSeqResource = registry.newResource();
-                inSeqResource.setContent(inSeqData);
+			//Add all custom in,out and fault sequences to registry
+			APIUtil.addDefinedAllSequencesToRegistry(registry,
+			                                         APIConstants.API_CUSTOM_SEQUENCE_TYPE_IN);
+			APIUtil.addDefinedAllSequencesToRegistry(registry,
+			                                         APIConstants.API_CUSTOM_SEQUENCE_TYPE_OUT);
+			APIUtil.addDefinedAllSequencesToRegistry(registry,
+			                                         APIConstants.API_CUSTOM_SEQUENCE_TYPE_FAULT);
 
-                registry.put(APIConstants.API_CUSTOM_INSEQUENCE_LOCATION + "log_in_message.xml", inSeqResource);
-
-                InputStream outSeqStream =
-                        APIManagerComponent.class.getResourceAsStream("/definedsequences/out/log_out_message.xml");
-                byte[] outSeqData = IOUtils.toByteArray(outSeqStream);
-                Resource outSeqResource = registry.newResource();
-                outSeqResource.setContent(outSeqData);
-
-                registry.put(APIConstants.API_CUSTOM_OUTSEQUENCE_LOCATION + "log_out_message.xml", outSeqResource);
-            }
-
-            if (registry.resourceExists(APIConstants.API_CUSTOM_FAULTSEQUENCE_LOCATION)) {
-                if(log.isDebugEnabled()){
-                    log.debug("Defined fault sequences have already been added to the tenant's registry");
-                }
-                //Fault sequences have already been added. Nothing to do beyond this. Return.
-                return;
-            }
-
-            InputStream faultSeqStream =
-                    APIManagerComponent.class.getResourceAsStream("/definedsequences/fault/json_fault.xml");
-            byte[] faultSeqData = IOUtils.toByteArray(faultSeqStream);
-            Resource faultSeqResource = registry.newResource();
-            faultSeqResource.setContent(faultSeqData);
-
-            registry.put(APIConstants.API_CUSTOM_FAULTSEQUENCE_LOCATION + "json_fault.xml", faultSeqResource);
-
-        } catch (RegistryException e) {
-            throw new APIManagementException("Error while saving defined sequences to the registry ", e);
-        } catch (IOException e) {
-            throw new APIManagementException("Error while reading defined sequence ", e);
-        }
-    }
+		} catch (RegistryException e) {
+			throw new APIManagementException(
+					"Error while saving defined sequences to the registry ", e);
+		}
+	}
 
     private void setupSelfRegistration(APIManagerConfiguration config) throws APIManagementException {
         boolean enabled = Boolean.parseBoolean(config.getFirstProperty(APIConstants.SELF_SIGN_UP_ENABLED));
@@ -486,6 +495,45 @@ public class APIManagerComponent {
             throw new APIManagementException("Error while reading External Stores configuration file content", e);
         }
     }
+
+    /**
+     * This method will create new permission name  "applications" in registry permission.
+     */
+    private void addApplicationsPermissionsToRegistry() throws APIManagementException {
+        Registry tenantGovReg = CarbonContext.getThreadLocalCarbonContext().getRegistry(
+                RegistryType.USER_GOVERNANCE);
+
+        String permissionResourcePath = CarbonConstants.UI_PERMISSION_NAME + RegistryConstants.PATH_SEPARATOR +
+                APPLICATION_ROOT_PERMISSION;
+        try {
+
+            if (!tenantGovReg.resourceExists(permissionResourcePath)) {
+                String loggedInUser = CarbonContext.getThreadLocalCarbonContext().getUsername();
+                boolean loggedInUserChanged;
+                UserRealm realm =
+                        (UserRealm) CarbonContext.getThreadLocalCarbonContext().getUserRealm();
+
+                //Logged in user is not authorized to create the permission.
+                // Temporarily change the user to the admin for creating the permission
+                PrivilegedCarbonContext.getThreadLocalCarbonContext().setUsername(
+                        realm.getRealmConfiguration().getAdminUserName());
+                tenantGovReg = CarbonContext.getThreadLocalCarbonContext()
+                        .getRegistry(RegistryType.USER_GOVERNANCE);
+                loggedInUserChanged = true;
+                Collection appRootNode = tenantGovReg.newCollection();
+                appRootNode.setProperty("name", "Applications");
+                tenantGovReg.put(permissionResourcePath, appRootNode);
+                if (loggedInUserChanged) {
+                    PrivilegedCarbonContext.getThreadLocalCarbonContext().setUsername(loggedInUser);
+                }
+            }
+        } catch (org.wso2.carbon.user.core.UserStoreException e) {
+            throw new APIManagementException("Error while reading user store information.", e);
+        } catch (org.wso2.carbon.registry.api.RegistryException e) {
+            throw new APIManagementException("Error while creating new permission in registry", e);
+        }
+
+    }
     
    protected void setConfigurationContextService(ConfigurationContextService contextService) {
         ServiceReferenceHolder.setContextService(contextService);
@@ -507,12 +555,6 @@ public class APIManagerComponent {
     public static TenantRegistryLoader getTenantRegistryLoader(){
         return tenantRegistryLoader;
     }
-    private void readRecentlyAddedAPICacheConfigs(APIManagerConfiguration config) {
-        String isRecentlyAddedAPICachedEnabled = config.getFirstProperty(APIConstants.API_STORE_RECENTLY_ADDED_API_CACHE_ENABLE);
-        if (isRecentlyAddedAPICachedEnabled == null) {
-            APIConstants.isRecentlyAddedAPICacheEnabled = false;
-        } else {
-            APIConstants.isRecentlyAddedAPICacheEnabled  =  isRecentlyAddedAPICachedEnabled.equalsIgnoreCase("true") ? true : false;
-        }
-    }
+
+
 }

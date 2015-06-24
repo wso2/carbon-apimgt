@@ -57,7 +57,7 @@ public abstract class AbstractAPIGatewayAdminClient {
         options.setProperty(HTTPConstants.SO_TIMEOUT, 15 * 60 * 1000);
         options.setProperty(HTTPConstants.CONNECTION_TIMEOUT, 15 * 60 * 1000);
         options.setManageSession(true);
-        options.setProperty(org.apache.axis2.transport.http.HTTPConstants.COOKIE_STRING, cookie);
+        options.setProperty(HTTPConstants.COOKIE_STRING, cookie);
     }
 
     /**

@@ -1,0 +1,65 @@
+<%
+/*
+ *  Copyright (c) 2005-2014, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *
+ *  WSO2 Inc. licenses this file to you under the Apache License,
+ *  Version 2.0 (the "License"); you may not use this file except
+ *  in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *  http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing,
+ *  software distributed under the License is distributed on an
+ *  "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ *  KIND, either express or implied.  See the License for the
+ *  specific language governing permissions and limitations
+ *  under the License.
+ *
+ */
+var caramel;
+require('/modules/publisher.js').exec(function(ctx) {
+    caramel = require('caramel');
+    var ui = require('rxt').ui;
+    var asset = require('rxt').asset;
+	var carbon = require('carbon');
+	var server = require('store').server;
+	var user = server.current(ctx.session);
+	var username = user.username;
+
+    var uriMatcher = new URIMatcher(ctx.request.getRequestURI());
+    var options = uriMatcher.match('/{context}/asts/{type}/{pageName}');
+    var type = options.type;
+    var am = asset.createUserAssetManager(ctx.session, type);
+    var page = ui.buildPage(ctx.session, ctx.request);
+    var output = am.render(page)._custom();
+	var apiPublisher =  require('apipublisher').provider;
+	var apiProxy = apiPublisher.instance(username);
+	var tiers = apiProxy.getTiers().tiers;
+	var tierPermissions = apiProxy.getTierPermissions().tierPermissions;
+	output.tiers = tiers;
+	var roleArray, roleList;
+	for(var i = 0 ; i < tierPermissions.length ; i++) {
+		if(tierPermissions[i].permissionType == 'deny') {
+			tierPermissions[i].denied = true;
+		} else {
+			tierPermissions[i].denied = false;
+		}
+		tierPermissions[i].index = i;
+		roleArray = tierPermissions[i].roles;
+
+		if (roleArray.length > 0) {
+			roleList = roleArray[0];
+		}
+		for (var a = 1; a < roleArray.length; a ++) {
+			roleList = roleList + "," + roleArray[a];
+		}
+		tierPermissions[i].roleList = roleList;
+	}
+	output.tierPermissions = tierPermissions;
+	//Set language specific helper messages and names
+	var locale = require('/extensions/assets/api/locale/locale_en.json');
+	output.locale = locale;
+    caramel.render(output);
+}, request, response, session);	
+%>

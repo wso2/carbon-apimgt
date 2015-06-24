@@ -21,6 +21,15 @@ public class APIKeyMapping {
     private String context;
     private String apiVersion;
     private String key;
+    private String cacheKey;
+
+    public String getCacheKey() {
+        return cacheKey;
+    }
+
+    public void setCacheKey(String cacheKey) {
+        this.cacheKey = cacheKey;
+    }
 
     public String getContext() {
         return context;

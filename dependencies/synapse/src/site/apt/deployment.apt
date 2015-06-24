@@ -1,0 +1,226 @@
+{Contents}
+
+%{toc}
+
+{Platform requirements}
+
+  Synapse requires Java 1.5 or higher and has been tested on Java runtime environments from Sun,
+  IBM and Apple. Note that the recommended Java version is 1.5 and that there is at least one
+  known issue on Java 1.6 (see below). Synapse is used on various operation systems, including
+  Linux, Mac OS X, Solaris, Windows and AIX, as well as mainframe environments. The recommended
+  operation system for production use is Linux since it offers a wider range of options to tune
+  the TCP/IP stack. This is important to optimize the performance of the NIO HTTP transport.
+  
+  When selecting the environment for deployment, the following known issues should be taken
+  into account:
+  
+  * There is a known issue related to the script mediator when used with Java 1.6 on Windows.
+    It has been observed that with this combination, random failures can occur during startup of
+    Synapse. It is suspected that this issue is caused by a bug in BSF, but there is no solution
+    or workaround yet.
+  
+  * The <<<synapse.bat>>> and <<<synapse.sh>>> scripts included in the binary distribution use
+    the <<<-server>>> option which is not supported by IBM's JRE. This problem can be easily
+    solved by manually editing these scripts to remove the unsupported <<<-server>>> option.
+    See {{{https://issues.apache.org/jira/browse/SYNAPSE-454}SYNAPSE-454}}.
+    
+  * In the past several issues related to subtle concurrency problems have been reported with
+    the non-blocking HTTP transport (which is the recommended HTTP implementation for Synapse)
+    when used on more "exotic" platforms. While this has been improved it is recommended to
+    thoroughly test the HTTP transport before deploying Synapse in a production environment based
+    on these platforms. Please don't hesitate to report any issues using JIRA or by posting a
+    message on the mailing list.
+
+{Overview of available deployment options}
+
+  Synapse can be deployed in two different ways:
+
+  * Stand-alone, i.e. as an independently managed Java process.
+  
+  * As a J2EE application (WAR) deployed into a simple servlet container (e.g. Tomcat) or a
+    full-featured J2EE application server.
+  
+  []
+  
+  Since Synapse doesn't rely on any container API, the features offered are the same in both
+  deployment scenarios, with very few exceptions:
+  
+  * There is a minor issue that prevents classpath resources from being used in a WAR deployment.
+    See {{{https://issues.apache.org/jira/browse/SYNAPSE-207}SYNAPSE-207}}.
+  
+  * When deployed as a WAR file, Synapse can be configured with the standard Axis2 servlet based
+    HTTP transport: while the recommended HTTP implementation for Synapse is the NIO HTTP
+    transport, there might be situations where it is preferable or mandatory to use the HTTP
+    protocol implementation of the application server.
+
+  []
+  
+  In some scenarios Synapse is used to proxy services that are deployed themselves on an
+  application server. In these cases it would be interesting to deploy Synapse on the same
+  application server and use an in-VM transport instead of HTTP to communicate with these
+  services. Note that for the moment no production-grade implementation of this type of transport
+  exists yet for Axis2, but this might change in the future.
+  
+  Since the features offered are almost the same, the differences between the two deployment
+  options are mainly related to packaging and operational considerations:
+  
+  * Many IT departments prefer deploying J2EE applications than managing stand-alone Java
+    processes, because this allows them to leverage the management and monitoring facilities
+    offered by the application server.
+  
+  * If the use case relies on JNDI resources such as JMS connection factories, JDBC data source
+    and transactions it might be easier to set up and configure these resources when Synapse is
+    deployed directly on the application server that hosts these resources.
+
+{Stand-alone deployment}
+
+* {Using the standard binary distribution}
+
+  The easiest way to get started with a stand-alone deployment is using the standard binary
+  distribution ZIP or tarball (see {{download.html}}). It already contains everything that is
+  needed to run Synapse stand-alone and you only need to customize it according to your requirements:
+  
+  * Place your mediations in <<<repository/conf/synapse.xml>>>.
+  
+  * Place any additional files such as WSDL files, endpoint definitions, etc. referenced by your
+    mediations in the <<<repository>>> directory.
+  
+  * Customize <<<repository/conf/axis2.xml>>> to enable and disable transports according to your needs.
+  
+  * Add any additional libraries required by your mediations to the <<<lib>>> directory. Alternatively
+    modify <<<repository/conf/wrapper.conf>>> to add directories and JAR files to the classpath.
+  
+  * Add any required modules to <<<repository/modules>>>.
+  
+  * If necessary, modify <<<lib/log4j.properties>>> to configure logging.
+
+  []
+  
+  Since the standard binary distribution also contains samples and documentation, you might want
+  to remove the following folders:
+  
+  * <<<docs>>>
+  
+  * <<<repository/conf/sample>>>
+  
+  * <<<samples>>>
+  
+  []
+
+  The <<<bin>>> directory contains Unix and Windows scripts to run Synapse:
+  
+  * <<<synapse.sh>>> and <<<synapse.bat>>> allow to run Synapse in non daemon mode.
+  
+  * <<<synapse-daemon.sh>>> is a Sys V init script that can be used on Unix systems to start and
+    stop Synapse in daemon mode.
+  
+  * <<<install-synapse-service.bat>>> and <<<uninstall-synapse-service.bat>>> can be used on
+    Windows to install Synapse as an NT service.
+
+* {Using Maven to build a custom distribution}
+
+  Building a custom Synapse package based on the standard binary distribution is a manual process
+  and this has some drawbacks:
+  
+  * The JAR files required to run Synapse must be selected manually and it is not easy to identify
+    unused JARs that could be safely removed.
+  
+  * The process is not suitable if there is a requirement for strict configuration management.
+    In particular:
+    
+    * Because of the large number of JAR files, managing the artifacts using a source control
+      repository is not practical.
+    
+    * The process is not repeatable and there is no way to go back to a previous version of
+      the artifacts.
+    
+  * When upgrading to a newer version of Synapse (or when working with snapshot versions), it
+    is necessary either to manually replace the JARs in the current package or to start again
+    from a new version of the standard binary distribution.
+    
+  * If Synapse needs to be deployed with slightly different configurations in multiple
+    environments (e.g. test and production), the corresponding packages need to be prepared
+    manually.
+  
+  []
+  
+  Note that these problems not only arise in the development and maintenance phases of a project,
+  but also when doing proof of concepts that you want to keep in a safe place for later reuse.
+  One approach to overcome these difficulties is to use Maven to assemble a custom package. When
+  used correctly, this approach solves all of the issues identified above. In particular Maven's
+  dependency management together with the excellent
+  {{{http://maven.apache.org/plugins/maven-assembly-plugin/}assembly plugin}} can be used to
+  automatically select the relevant JARs to include and pull them from Maven repositories.
+  The remaining artifacts required to assemble the package can then be easily stored in a source
+  control repository.
+  
+  Synapse provides a Maven archetype that allows to set up this kind of project in only a few
+  simple steps. To begin with, change to the directory where you want to create the project and
+  issue the following command:
+
+-------------------------------------------------------------------
+mvn archetype:generate -DarchetypeCatalog=http://synapse.apache.org
+-------------------------------------------------------------------
+ 
+  In case of problems, you can try to use the latest version of the archetype catalog:
+ 
+-------------------------------------------------------------------
+mvn archetype:generate -DarchetypeCatalog=http://svn.apache.org/repos/asf/synapse/trunk/java/src/site/resources
+-------------------------------------------------------------------
+ 
+  Finally, if you have build Synapse from sources, you don't need to specify a catalog at all:
+  the archetype is added automatically to the local catalog during the build.
+  
+  In any case, when prompted by Maven, select <<<synapse-package-archetype>>> for the Synapse
+  version you want to use. In the next step enter the values for <<<groupId>>>, <<<artifactId>>>
+  and <<<version>>> for your project. You will also be prompted for a package name. Since the
+  archetype doesn't contain any source code, this value is irrelevant and you can continue with the default value.
+  
+  At this stage a Maven project has been created in a subdirectory with the same name as the
+  <<<artifactId>>> specified previously. You should now customize this projects according to your needs:
+  
+  * Add your mediations to <<<repository/conf/synapse.xml>>>.
+
+  * Customize the dependencies in <<<pom.xml>>>. In particular if additional transports such as
+    JMS are needed, add the required dependencies here. Additional Axis2 modules should also be added here.
+  
+  * Enable and configure additional transports in <<<repository/conf/axis2.xml>>>.
+  
+  * Place any other files referenced by <<<synapse.xml>>> into the <<<repository>>> directory.
+
+  []
+  
+  The project is built as usually with the following command:
+ 
+-----------
+mvn package
+-----------
+ 
+  This will create a ZIP file (in the <<<target>>> directory) containing everything that is needed
+  to run your custom Synapse configuration. You only need to uncompress it and use the appropriate
+  script in the <<<bin>>> directory to start Synapse.
+
+{WAR deployment}
+
+  Synapse provides a standard WAR file that can be used to deploy mediations on a servlet container
+  or on a J2EE application server. Note that this WAR file is not part of the downloadable
+  distributions. It can be retrieved from the following location:
+  
+  * {{http://repo1.maven.org/maven2/org/apache/synapse/synapse-war/}} for released versions.
+  
+  * {{http://hudson.zones.apache.org/hudson/job/Synapse%20-%20Trunk/org.apache.synapse$synapse-war/}}
+    for snapshot versions.
+  
+  []
+  
+  Customization of the Web application is similar to the stand-alone option, but the default
+  directory structure is different:
+  
+  * <<<synapse.xml>>> and <<<axis2.xml>>> are placed into the <<<WEB-INF/conf>>> directory. All
+    other files referenced by your mediations should go to the <<<WEB-INF/repository>>> directory.
+  
+  * Additional libraries must be placed into the standard <<<WEB-INF/lib>>> directory.
+
+  * Axis2 modules are located in <<<repository/modules>>>.
+
+  * <<<log4j.properties>>> is located in <<<WEB-INF/classes>>>.

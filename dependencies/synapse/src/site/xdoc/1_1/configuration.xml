@@ -1,0 +1,1511 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<!DOCTYPE html
+   PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd" >
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta content="text/html; charset=iso-8859-1" http-equiv="content-type"/>
+    <title>
+      Synapse Configuration Language
+    </title>
+    <style type="text/css" xml:space="preserve">
+    .command {
+        border: 1px dashed #3c78b5;
+        text-align: left;
+        background-color: #f0f0f0;
+        padding: 3px;
+        font-size: 11px;
+        font-family: Courier;
+        margin: 10px;
+        line-height: 13px;
+    }
+    .consoleOutput {
+        border: 1px dashed #3c78b5;
+        font-size: 11px;
+        font-family: Courier;
+        margin: 10px;
+        line-height: 13px;
+        background-color: #f0f0f0;
+        border-bottom: 1px dashed #3c78b5;
+        padding: 3px;
+        border-style: solid;
+    }
+    .info {
+        border-style: solid;
+        border-width: 1px;
+        border-color: #090;
+        background-color: #dfd;
+        text-align:left;
+        margin-top: 5px;
+        margin-bottom: 5px;
+    }
+    li {
+        font-family: Verdana, arial, sans-serif;
+        font-size: 11px;
+        line-height: 16px;
+        color: #000000;
+        font-weight: normal;
+    }
+    p {
+        font-family: Verdana, arial, sans-serif;
+        font-size: 11px;
+        line-height: 16px;
+        color: #000000;
+        font-weight: normal;
+    }
+    pre {
+        padding: 0px;
+        margin-top: 5px;
+        margin-left: 15px;
+        margin-bottom: 5px;
+        margin-right: 5px;
+        text-align: left;
+        background-color: #f0f0f0;
+        padding: 3px;
+        border: 1px dashed #3c78b5;
+        font-size: 11px;
+        font-family: Courier;
+        margin: 10px;
+        line-height: 13px;
+    }
+    h1 {
+        font-size: 24px;
+        line-height: normal;
+        font-weight: bold;
+        background-color: #f0f0f0;
+        color: #003366;
+        border-bottom: 1px solid #3c78b5;
+        padding: 2px;
+        margin: 36px 0px 4px 0px;
+    }
+    h2 {
+        font-size: 18px;
+        line-height: normal;
+        font-weight: bold;
+        background-color: #f0f0f0;
+        border-bottom: 1px solid #3c78b5;
+        padding: 2px;
+        margin: 27px 0px 4px 0px;
+    }
+    h3 {
+        font-size: 14px;
+        line-height: normal;
+        font-weight: bold;
+        background-color: #f0f0f0;
+        padding: 2px;
+        margin: 21px 0px 4px 0px;
+    }
+    h4 {
+        font-size: 12px;
+        line-height: normal;
+        font-weight: bold;
+        background-color: #f0f0f0;
+        padding: 2px;
+        margin: 18px 0px 4px 0px;
+    }</style>
+  </head>
+  <body>
+    <h1>
+      Synapse Configuration Language
+    </h1>
+    <p>
+      The Synapse configuration language is designed to support a processing
+      model where messages come into Synapse, are processed via some number of
+      mediators and then delivered to an endpoint somewhere. It is currently
+      direction agnostic, but directionality can easily be added as a selection
+      mechanism for mediators (see below for details).
+    </p>
+    <h3>
+      Overall Structure
+    </h3>
+    <p>
+      A Synapse configuration looks like the following at the top level:
+    </p>
+<pre xml:space="preserve"> &lt;definitions&gt;
+   &lt;<a href="#registry">registry</a> provider="string"&gt;...&lt;/registry&gt;?
+   &lt;<a href="#localEntry">localEntry</a> key="string"&gt;...&lt;/localEntry&gt;?
+   &lt;<a href="#sequence">sequence</a> name="string"&gt;...&lt;/sequence&gt;?
+   &lt;<a href="#endpoint">endpoint</a> name="string"&gt;...&lt;/endpoint&gt;?
+   &lt;<a href="#proxy">proxy</a> name="string" ...&gt;...&lt;/proxy&gt;?
+   &lt;<a href="#task">task</a> name="string" ...&gt;...&lt;/task&gt;?
+   <a href="#mediator">mediator</a>*
+ &lt;/definitions&gt;</pre>
+    <p/>
+    <p>
+      The Synapse configuration is held in a single XML file called the
+      'synapse.xml' and this may refer to other configuration fragments and
+      resources - which may be held in an external Registry or Repository. The
+      Synapse release ships with a simple URL based registry implementation that
+      could use a file system, web server etc. as the registry/repository
+      backend. When using the file system, the contents could be held in a
+      version controlled directory so that changes could be controlled and moved
+      from Dev, QA, Staging to Production. The Synapse engine and the simple URL
+      registry implementation support caching and dynamic refreshing of some
+      configuration elements [sequences &amp; endpoints] and resources such as
+      XSLT's, Scripts, XSDs etc. Synapse can be easily integrated with an
+      external registry by implementing the
+      'org.apache.synapse.registry.Registry' interface.
+    </p>
+    <p/>
+    <p>
+      A Synapse configuration refers to resources stored on an external Registry
+      via 'keys'. The 'localEntry' elements in a configuration provides the
+      capability to define a new resource or configuration fragment; or to
+      override any existing resource available under a registry with a local
+      replacement. An example would be to use a localEntry to override the
+      production endpoint definition for development time. Local entries could
+      direct to an external URL for the resource content, or provide the text or
+      XML content inline.
+    </p>
+    <p/>
+    <p>
+      Synapse accepts messages for mediation via the exposed/enabled transports.
+      These are configured via the 'axis2.xml' configuration file. By default
+      the http, https and VFS transports are enabled. Using the JMS and Mail
+      transports requires that these be enabled and configured for your
+      environment via the axis2.xml file. Once a proxy service is defined, it
+      could be configured to listen for messages on one or more of the enabled
+      transports. A proxy service then listens for messages over the selected
+      transports by exposing a virtual service. A proxy service maybe a SOAP or
+      POX service over http/s or SOAP, POX or Plain Text service for other
+      transports such as JMS and VFS - e.g. CSV content being its payload. Thus
+      Synapse is able to switch between these message formats and transports, as
+      well as introduce or terminate QoS aspects such as WS-Security/RM through
+      proxy services.
+    </p>
+    <p/>
+    <p>
+      Sequences define an ordered execution of a set of 'Mediators', where each
+      'Mediator' gets full access to the current message flowing through the
+      system. Synapse ships with a common set of mediators that can handle most
+      of the common tasks such as - logging, content based routing,
+      transformations using XSLT/XQuery, validation, BSF scripting language
+      based or Java class based mediation, database reporting or lookup,
+      caching, throttling, cloning, splitting and aggregation etc. Writing a
+      custom mediator in Java is easy and the supplementary documentation
+      provides more details. The 'Class' and 'POJO' mediators allows one to
+      plugin a Java class easily into the Synapse engine with minimal effort.
+    </p>
+    <p/>
+    <p>
+      Typically proxy services associates mediation sequences for processing
+      incoming and outgoing messages. A Synapse configuration holds two special
+      sequences called the 'main' and 'fault' sequences. The 'main' sequence
+      executes for any message that is not received by any particular proxy
+      service. When using the http/s transports - this refers to the concept of
+      'Message Mediation' where Synapse may be configured as a transparent proxy
+      to its clients. In this scenario, Synapse could receive all messages on
+      the wire and mediate them as necessary and send them to the final
+      destinations. The 'fault' sequence executes whenever Synapse itself
+      encounters an error while processing a message - or when a fault handler
+      has not been defined to handle exceptions. Typically a fault sequence
+      would log the failed message and any other context information.
+    </p>
+    <p/>
+    <p>
+      Endpoints define aspects to be considered when sending a message out from
+      Synapse. Endpoints also allow load balancing, fail-over and timeout
+      scenarios to be handled - or to introduce WS-Security, Addressing or RM
+      for messages sent to an endpoint. An endpoint maybe defined as an Address
+      or using a WSDL definition.
+    </p>
+    <p/>
+    <h2>
+      <a name="registry" id="registry">Registry</a>
+    </h2>
+    <p>
+      The &lt;registry&gt; element is used to define a remote registry which are
+      referenced from within the configuration. The registry provider specifies
+      an implementation class for the registry used, and optionally a number of
+      configuration parameters may be specified to configure the connection to
+      the registry.
+    </p>
+<pre xml:space="preserve"> &lt;registry provider="string"/&gt;
+   &lt;parameter name="string"&gt;text | xml&lt;/parameter&gt;*
+ &lt;/registry&gt;</pre>
+    <p>
+      Registry entries loaded from a remote registry are cached within Synapse
+      as dictated by the registry, and reloaded after the cache periods expires.
+      Hence it is possible to define configuration elements such as (dynamic)
+      sequences and endpoints, as well as resources such as XSLT's or XSDs off
+      the registry, and update the configuration as these change dynamically
+      over time.
+    </p>
+    <p/>
+    <h3>
+      <a name="localEntry" id="localEntry">Local Entry</a>
+    </h3>
+    <p>
+      The &lt;localEntry&gt; element is used to declare registry entries that
+      are local to the Synapse instance, as shown below
+    </p>
+<pre xml:space="preserve">  &lt;localEntry key="string" [src="url"]&gt;text | xml&lt;/localEntry&gt;</pre>
+    <p>
+      These entries are top level entries which are set globally for the entire
+      system. Values of these entries can be retrieved via the extension XPath
+      function "synapse:get-property(prop-name)".
+    </p>
+    <p>
+      An entry can be static text specified as inline text or static XML
+      specified as an inline XML fragment or specified as a URL (using the src
+      attribute). These local entries can override any existing entries with the
+      same keys of the remote registry.
+    </p>
+    <p/>
+    <h2>
+      <a name="sequence" id="sequence">Sequences</a>
+    </h2>
+    <p>
+      A &lt;sequence&gt; element is used to define a sequence of mediators that
+      can be invoked later by name.
+    </p>
+<pre xml:space="preserve"> &lt;sequence name="string" [onError="string"] [key="string"] [trace="enable"]&gt;
+   mediator*
+ &lt;/sequence&gt;</pre>
+    <p>
+      If the configuration defines a sequence named "main" then it is considered
+      as the main mediation sequence of Synapse. If such a sequence is not
+      defined locally, and a registry has been specified, the registry is looked
+      up for a key named "main" to find the main mediation sequence. Synapse
+      also supports the specification of mediators directly within the &lt;definitions&gt;
+      tag, and if any mediators are present, will be considered to constitute
+      the main sequence. In the absence of a main sequence, the Synapse runtime
+      will create a default main sequence that consists of an implicit send
+      mediator.
+    </p>
+    <p>
+      Synapse considers a sequence named "fault", or in its absence a registry
+      entry with a key "fault" as its general fault handler sequence. If Synapse
+      encounters an erroneous situation while processing a message through a
+      sequence, it executes the defined error handling sequence for the current
+      context - which may be specified as the 'onError' sequence for a sequence
+      mediator. If a fault sequence is not specified or cannot be found through
+      the registry, Synapse will create a default fault sequence that will
+      perform a default logging of the message at the log level 'full'.
+    </p>
+    <p>
+      If an optional error handler sequence name is specified on any sequence
+      through the attribute 'onError', an exception on this sequence will invoke
+      the sequence specified by this key.
+    </p>
+    <p>
+      A Dynamic Sequence may be defined by specifying a key reference to a
+      registry entry. As the remote registry entry changes, the sequence will
+      dynamically be updated according to the specified cache duration and
+      expiration. If tracing is enabled on a sequence, all messages being
+      processed through the sequence would write tracing information through
+      each mediation step to the trace.log file configured via the
+      log4j.properties configuration. Setting the trace log level to TRACE would
+      additionally dump the message at each mediation.
+    </p>
+    <p/>
+    <h2>
+      <a name="endpoint" id="endpoint">Endpoints</a>
+    </h2>
+    <p>
+      An &lt;endpoint&gt; element defines a destination for an outgoing message.
+      An endpoint may be specified as an address endpoint, WSDL based endpoint,
+      a load balanced endpoint or a fail-over endpoint as follows:
+    </p>
+<pre xml:space="preserve">&lt;endpoint [name="string"] [key="string"][trace="enable"]&gt;
+  <a href="#address-endpoint">address-endpoint</a> | <a href="#wsdl-endpoint">wsdl-endpoint</a> | <a href="#load-balanced-endpoint">load-balanced-endpoint</a> | <a href="#fail-over-endpoint">fail-over-endpoint</a>
+&lt;/endpoint&gt; </pre>
+    <p>
+      All above endpoint types can have a name attribute. Such named endpoints
+      can be refered by other endpoints, which only contain the key attribute.
+      For example if there is an endpoint named as "foo", following endpoint can
+      be used in any place, where "foo" has to be used. A tracing enabled
+      endpoint would generate trace information into the trace log for each
+      message that passes through.
+    </p>
+<pre xml:space="preserve">&lt;endpoint key="foo"/&gt;</pre>
+    <h4>
+      <a name="address-endpoint" id="address-endpoint">Address Endpoint</a>
+    </h4>
+    <p>
+      Address endpoint is an endpoint defined by specifying the EPR and other
+      attributes of the endpoint directly in the configuration.The 'uri'
+      attribute of the address element contains the EPR of the target endpoint.
+      Message format for the endpoint and the method to optimize attachments can
+      be specified in the format and optimize attributes respectively. Reliable
+      messaging and security policies for the endpoint can be specified in the
+      policy attribute of the enableRM and enableSec elements respectively.
+      WS-Addressing can be engaged for the messaging going to the endpoint by
+      the enableAddressing element. suspendDurationOnFailure attribute specifies
+      the time duration in seconds to suspend this endpoint, if it is detected
+      as failed. If this attribute is not specified, endpoint will never be
+      recovered after a failure.
+    </p>
+    <p/>
+    <p>
+      Address endpoints can timeout the responses if they failed to arrive
+      Synapse in predefined time duration. This is done by the timeout elements.
+      duration element inside the timeout element contains duration for the
+      timeout in seconds. action element specifies the action to be performed
+      once a timeout occurs. Allowed actions are discard and fault. If discard
+      is specified, responses arriving after the timeout will be discarded
+      without further processing. If fault is specified as the action, fault
+      sequence applicable for the endpoint will be activated as soon as the
+      timeout occurs and responses will not be processed after that.
+    </p>
+<pre xml:space="preserve">&lt;address uri="endpoint-address" format="soap11|soap12|pox" [optimize="mtom|swa"]&gt;
+  &lt;enableRM [policy="key"]/&gt;?
+  &lt;enableSec [policy="key"]/&gt;?
+  &lt;enableAddressing/&gt;?
+  &lt;suspendDurationOnFailure&gt;suspend-duration&lt;/suspendDurationOnFailure&gt;?
+  &lt;timeout&gt;
+    &lt;duration&gt;timeout-duration&lt;/duration&gt;
+    &lt;action&gt;discard|fault&lt;/action&gt;
+  &lt;/timeout&gt;?
+&lt;/address&gt;</pre>
+    <h4>
+      <a name="wsdl-endpoint" id="wsdl-endpoint">WSDL Endpoint</a>
+    </h4>
+    <p>
+      WSDL endpoint is an endpoint based on a WSDL document. It can extract the
+      target EPR from a given WSDL. The WSDL document can be specified either as
+      a URI or as an inlined definition within the configuration. The service
+      and port name containing the target EPR has to be specified in service and
+      port attributes respectively. enableRM, enableSec, enableAddressing,
+      suspendDurationOnFailure and timeout elements are same as for the Address
+      endpoint.
+    </p>
+<pre xml:space="preserve">&lt;wsdl [uri="wsdl-uri"] service="qname" port/endpoint="qname"&gt;
+  &lt;wsdl:definition&gt;...&lt;/wsdl:definition&gt;?
+  &lt;wsdl20:description&gt;...&lt;/wsdl20:description&gt;?
+  &lt;enableRM [policy="key"]/&gt;?
+  &lt;enableSec [policy="key"]/&gt;?
+  &lt;enableAddressing/&gt;?
+  &lt;suspendDurationOnFailure&gt;suspend-duration&lt;/suspendDurationOnFailure&gt;?
+  &lt;timeout&gt;
+    &lt;duration&gt;timeout-duration&lt;/duration&gt;
+    &lt;action&gt;discard|fault&lt;/action&gt;
+  &lt;/timeout&gt;?
+&lt;/wsdl&gt;</pre>
+    <h4>
+      <a name="load-balanced-endpoint" id="load-balanced-endpoint">Load
+      balanced Endpoint</a>
+    </h4>
+    <p>
+      A Load balanced endpoint distributes the messages (load) arriving at it
+      among a set of listed endpoints by evaluating the load balancing policy
+      and any other relevant parameters. Policy attribute of the load balance
+      element specifies the load balance policy (algorithm) to be used for
+      selecting the target endpoint. Currently only the roundRobin policy is
+      supported. failover attribute determines if the next endpoint should be
+      selected once the currently selected endpoint has failed. Default is true.
+      The set of endpoints among which the load is distributed can be listed
+      under the loadBalance element. Those endpoints can belong to any endpoint
+      type mentioned in this document. For example, failover endpoints can be
+      listed inside the load balance endpoint to load balance between failover
+      groups.
+    </p>
+    <p/>
+    <p>
+      The optional session element makes the endpoint a session affinity based
+      load balancing endpoint. If it is specified, sessions are bound to
+      endpoints in the first message and all successive messages for those
+      sessions are directed to their associated endpoints. http sessions are
+      supported currently, which identifies sessions based on http cookies.
+      failover attribute mentioned above is not applicable for session affinity
+      based endpoints and it is always set to false. If it is required to have
+      failover behavior in session affinity based load balance endpoints, list
+      failover endpoints as the target endpoints.
+    </p>
+<pre xml:space="preserve">&lt;session type="http"/&gt;?
+&lt;loadBalance [policy="roundRobin"] [failover="true|false"]&gt;
+  &lt;endpoint .../&gt;+
+&lt;/loadBalance&gt;</pre>
+    <h4>
+      <a name="fail-over-endpoint" id="fail-over-endpoint">Failover Endpoint</a>
+    </h4>
+    <p>
+      Failover endpoints send messages to the listed endpoints with the
+      following failover behavior. At the start, first listed endpoint is
+      selected as the primary and all other endpoints are treated as backups.
+      Incoming messages are always sent only to the primary endpoint. If the
+      primary endpoint fails, next active endpoint is selected as the primary
+      and failed endpoint is marked as inactive. Thus it sends messages
+      successfully as long as there is at least one active endpoint among the
+      listed endpoints.
+    </p>
+<pre xml:space="preserve">&lt;failover&gt;
+  &lt;endpoint .../&gt;+
+&lt;/failover&gt;</pre>
+    <h2>
+      <a name="proxy" id="proxy">Proxy service</a>
+    </h2>
+    <p>
+      A &lt;proxy&gt; element is used to define a Synapse Proxy service.
+    </p>
+<pre xml:space="preserve"> &lt;proxy name="string" [transports="(http |https |jms )+|all"]&gt;
+   &lt;description&gt;...&lt;/description&gt;?
+   &lt;target [inSequence="name"] [outSequence="name"] [faultSequence="name"] [endpoint="name"]&gt;
+      &lt;inSequence&gt;...&lt;/inSequence&gt;?
+      &lt;outSequence&gt;...&lt;/outSequence&gt;?
+      &lt;faultSequence&gt;...&lt;/faultSequence&gt;?
+      &lt;endpoint&gt;...&lt;/endpoint&gt;?
+   &lt;/target&gt;?
+   &lt;publishWSDL key="string" uri="string"&gt;
+      &lt;description&gt;...&lt;/description&gt; | &lt;definitions&gt;...&lt;/definitions&gt;
+   &lt;publishWSDL&gt;?
+   &lt;enableSec/&gt;?                            // These two tags will removed after the recognition of the Security and RM can be done by looking at policy
+   &lt;enableRM/&gt;?
+   &lt;policy key="string"&gt;...&lt;/policy&gt;?       // optional service level policies
+                                            // (e.g. WS-Security and/or WS-RM policies)
+   &lt;parameter name="string"&gt;                // optional service parameters
+      string | xml                          // (e.g. transport.jms.ConnectionFactory)
+   &lt;/parameter&gt;
+ &lt;/proxy&gt;</pre>
+    <p>
+      A proxy service is created and exposed on the specified transports through
+      the underlying Axis2 instance, exposing service EPR's as per the standard
+      Axis2 conventions - based on the service name. (Note: that currently Axis2
+      does not allow custom URI's to be set for services on some transports.)
+      The Proxy service could be exposed over all enabled Axis2 transports such
+      as http, https, JMS etc. or on a subset of these. Each service could
+      define the target for received messages as a named sequence or a direct
+      endpoint. Target inSequence or endpoint is required for the proxy
+      configuration, and a target outSequence defines how responses should be
+      handled. Any supplied WS-Policies would apply as service level policies,
+      and any service parameters could be passed into the proxy services'
+      AxisService instance using the parameter elements (e.g. the JMS
+      destination etc). If the proxy service should enable WS-Reliable Messaging
+      or Security, the appropriate modules could be engaged, and specified
+      policies will apply.
+    </p>
+    <p>
+      A Dynamic Proxy may be defined by specifying the properties of the proxy
+      as dynamic entries by refering them with the key. (For example one could
+      specify the inSequence or endpoint with the remote key, without defining
+      it in the local configuration) As the remote registry entry changes, the
+      properties of the proxy will dynamically be updated accordingly. (Note:
+      proxy service definition itself can not be specified to be dynamic; i.e
+      &lt;proxy key="string"/&gt; is wrong)
+    </p>
+    <p/>
+    <p>
+      Transport specific parameters
+    </p>
+    <table border="1" style="width: 100%">
+      <caption/>
+      <tbody>
+        <tr>
+          <td>
+            Transport
+          </td>
+          <td>
+            Require
+          </td>
+          <td>
+            Parameter
+          </td>
+          <td>
+            Description
+          </td>
+        </tr>
+        <tr>
+          <td>
+            JMS
+          </td>
+          <td>
+            Optional
+          </td>
+          <td>
+            transport.jms.ConnectionFactory
+          </td>
+          <td>
+            The JMS connection factory definition (from axis2.xml) to be used to
+            listen for messages for this service
+          </td>
+        </tr>
+        <tr>
+          <td/>
+          <td>
+            Optional
+          </td>
+          <td>
+            transport.jms.Destination
+          </td>
+          <td>
+            The JMS Destination name (Defaults to a Queue with the service name)
+          </td>
+        </tr>
+        <tr>
+          <td/>
+          <td>
+            Optional
+          </td>
+          <td>
+            transport.jms.ReplyDestination
+          </td>
+          <td>
+            The Destination where a reply would be posted
+          </td>
+        </tr>
+        <tr>
+          <td/>
+          <td/>
+          <td/>
+          <td/>
+        </tr>
+        <tr>
+          <td>
+            VFS
+          </td>
+          <td>
+            Required
+          </td>
+          <td>
+            transport.vfs.FileURI
+          </td>
+          <td>
+            The primary File (or Directory) URI in the vfs* transport format,
+            for this service
+          </td>
+        </tr>
+        <tr>
+          <td/>
+          <td>
+            Required
+          </td>
+          <td>
+            transport.vfs.ContentType
+          </td>
+          <td>
+            The content type for messages for this service
+          </td>
+        </tr>
+        <tr>
+          <td/>
+          <td>
+            Optional
+          </td>
+          <td>
+            transport.vfs.FileNamePattern
+          </td>
+          <td>
+            A file name regex pattern to match files against a directory
+            specified by the FileURI
+          </td>
+        </tr>
+        <tr>
+          <td/>
+          <td>
+            Optional
+          </td>
+          <td>
+            transport.PollInterval
+          </td>
+          <td>
+            The poll interval (in seconds)
+          </td>
+        </tr>
+        <tr>
+          <td/>
+          <td>
+            Optional
+          </td>
+          <td>
+            transport.vfs.ActionAfterProcess
+          </td>
+          <td>
+            DELETE or MOVE
+          </td>
+        </tr>
+        <tr>
+          <td/>
+          <td>
+            Optional
+          </td>
+          <td>
+            transport.vfs.MoveAfterProcess
+          </td>
+          <td>
+            The directory to move files after processing (i.e. all files process
+            successfully)
+          </td>
+        </tr>
+        <tr>
+          <td/>
+          <td>
+            Optional
+          </td>
+          <td>
+            transport.vfs.ActionAfterErrors
+          </td>
+          <td>
+            DELETE or MOVE
+          </td>
+        </tr>
+        <tr>
+          <td/>
+          <td>
+            Optional
+          </td>
+          <td>
+            transport.vfs.MoveAfterErrors
+          </td>
+          <td>
+            The directory to move files after errors (i.e. some of the files
+            succeed but some fail)
+          </td>
+        </tr>
+        <tr>
+          <td/>
+          <td>
+            Optional
+          </td>
+          <td>
+            transport.vfs.ActionAfterFailure
+          </td>
+          <td>
+            DELETE or MOVE
+          </td>
+        </tr>
+        <tr>
+          <td/>
+          <td>
+            Optional
+          </td>
+          <td>
+            transport.vfs.MoveAfterFailure
+          </td>
+          <td>
+            The directory to move after failure (i.e. all files fail)
+          </td>
+        </tr>
+        <tr>
+          <td/>
+          <td/>
+          <td/>
+          <td/>
+        </tr>
+        <tr>
+          <td/>
+          <td>
+            Optional
+          </td>
+          <td>
+            transport.vfs.ReplyFileURI
+          </td>
+          <td>
+            Reply file URI
+          </td>
+        </tr>
+        <tr>
+          <td/>
+          <td>
+            Optional
+          </td>
+          <td>
+            transport.vfs.ReplyFileName
+          </td>
+          <td>
+            Reply file name (defaults to response.xml)
+          </td>
+        </tr>
+        <tr>
+          <td/>
+          <td/>
+          <td/>
+          <td/>
+        </tr>
+      </tbody>
+    </table>
+    <p>
+      *VFS Transport URI examples
+    </p>
+    <p>
+      file:///directory/filename.ext
+    </p>
+    <p>
+      file:////somehost/someshare/afile.txt
+    </p>
+    <p>
+      jar:../lib/classes.jar!/META-INF/manifest.mf
+    </p>
+    <p>
+      jar:zip:outer.zip!/nested.jar!/somedir
+    </p>
+    <p>
+      ftp://myusername:mypassword@somehost/pub/downloads/somefile.tgz[?vfs.passive=true]</p>
+    <h2>
+      <a name="task" id="task">Tasks</a>
+    </h2>
+    <p>
+      A &lt;task&gt; element is used to define a Synapse Startup Task.
+    </p>
+<pre xml:space="preserve"> &lt;task class="org.my.synapse.Task" name="string"&gt;
+   &lt;property name="stringProp" value="String"/&gt;
+   &lt;property name="xmlProp"&gt;
+     &lt;somexml&gt;config&lt;/somexml&gt;
+   &lt;/property&gt;
+   &lt;trigger ([[count="10"]? interval="1000"] | [cron="0 * 1 * * ?"] | [once=(true | false)])/&gt;
+ &lt;/task&gt;</pre>
+    <p>
+      A task is created and scheduled to run at the specified time intervals or
+      as specified by the cron expression. The Task class specifies the actual
+      task implementation class (which must implement
+      org.apache.synapse.startup.Task interface) to be executed at the specified
+      interval/s, and name specifies an identifier for the scheduled task.
+      Fields in the task class can be set using properties provided as string
+      literals or as XML fragments. (For example; if the task implementation
+      class has a field named "version" with a corresponding setter method, the
+      configuration value which will be assigned to this field before running
+      the task can be specified using a property with the name version)
+    </p>
+    <p>
+      There are three different trigger mechanisms to schedule tasks. A simple
+      trigger is specified specifying a 'count' and an 'interval', implying that
+      the task will run a 'count' number of times at specified intervals. A
+      trigger may also be specified as a cron trigger using a cron expression. A
+      one-time trigger is specified using the 'once' attribute as true in the
+      definition and could be specified as true in which case this task will be
+      executed only once just after the initialization of Synapse
+    </p>
+    <p/>
+    <h2>
+      <a name="mediator" id="mediator">Mediators</a>
+    </h2>
+    <p>
+      A mediator token refers to any of the following tokens:
+    </p>
+<pre xml:space="preserve"><a href="#send">send</a> | <a href="#drop">drop</a> | <a href="#log">log</a> | <a href="#property">property</a> | <a href="#sequence_ref">sequence</a> | <a href="#validate">validate</a> | <a href="#makefault">makefault</a> | <a href="#xslt">xslt</a> | <a href="#header">header</a> | <a href="#filter">filter</a> | <a href="#switch">switch</a> | <a href="#in">in</a> | <a href="#out">out</a> | <a href="#dblookup">dblookup</a> | <a href="#dbreport">dbreport</a> | <a href="#RMSequence">RMSequence</a> | <a href="#throttle">throttle</a> | <a href="#xquery">xquery</a> | <a href="#cache">cache</a> | <a href="#clone">clone</a> | <a href="#iterate">iterate</a> | <a href="#aggregate">aggregate</a> | <a href="#class">class</a> | <a href="#pojoCommand">pojoCommand</a> | <a href="#script">script</a> | <a href="#spring">spring</a> </pre>
+    <p>
+      In addition to the above, Synapse will be able to load custom mediators
+      via the J2SE Service Provider model. Mediator extensions must implement
+      the MediatorFactory interface.
+    </p>
+    <h3>
+      Core Mediators
+    </h3>
+    <h4>
+      <a name="send" id="send">Send</a>
+    </h4>
+    <p>
+      The send token represents a &lt;send&gt; element. The &lt;send&gt; element
+      is used to send messages out of Synapse to some endpoint, and stop further
+      mediation of the message. The send mediator also copies any message
+      context properties from the current message context to the reply message
+      received on the execution of the send operation. This allows the reply
+      messages to be correlated to the original messages in a flexible manner.
+      Messages may be correlated by WS-A MessageID, or even simple custom text
+      labels. Also see the property mediator.
+    </p>
+    <p>
+      In the simplest case, the place to send the message to is implicit in the
+      message (via a property of the message itself)- that is indicated by the
+      following:
+    </p>
+<pre xml:space="preserve"> &lt;send/&gt;</pre>
+    <p>
+      If the message is to be sent to one or more endpoints, then the following
+      is used:
+    </p>
+<pre xml:space="preserve"> &lt;send&gt;
+   (endpointref | endpoint)+
+ &lt;/send&gt;</pre>
+    <p>
+      where the endpointref token refers to the following:
+    </p>
+<pre xml:space="preserve"> &lt;endpoint key="name"/&gt;</pre>
+    <p>
+      and the endpoint token refers to an anonymous endpoint defined.
+    </p>
+    <p/>
+    <h4>
+      <a name="drop" id="drop">Drop</a>
+    </h4>
+    <p>
+      The drop token refers to a &lt;drop&gt; element which is used to drop a
+      message:
+    </p>
+<pre xml:space="preserve"> &lt;drop/&gt;</pre>
+    <p>
+      Once the &lt;drop&gt; mediator executes, further processing of the current
+      message stops.
+    </p>
+    <p/>
+    <h4>
+      <a name="log" id="log">Log</a>
+    </h4>
+    <p>
+      The log token refers to a &lt;log&gt; element which may be used to log
+      messages being mediated:
+    </p>
+<pre xml:space="preserve"> &lt;log [level="string"] [separator="string"]&gt;
+   &lt;property name="string" (value="literal" | expression="xpath")/&gt;*
+ &lt;/log&gt;</pre>
+    <p>
+      The optional level attribute selects a pre-defined subset of properties to
+      be logged.
+    </p>
+    <p>
+      e.g.
+    </p>
+    <ul>
+      <li>
+        simple = To, From, WSAction, SOAPAction, ReplyTo, MessageID and any
+        properties
+      </li>
+      <li>
+        headers = All SOAP header blocks and any properties
+      </li>
+      <li>
+        full = all attributes included in log level 'simple' and the SOAP
+        envelope and any properties
+      </li>
+      <li>
+        custom = Only properties specified to the Log mediator
+      </li>
+    </ul>
+    <p>
+      A separator if defined will be used to separate the attributes being
+      logged. The default separator is the ',' comma.
+    </p>
+    <p/>
+    <h4>
+      <a name="property" id="property">Property</a>
+    </h4>
+<pre xml:space="preserve"> &lt;property name="string" [action=set|remove] (value="literal" | expression="xpath") [scope=transport|axis2|axis2-client]/&gt;</pre>
+    <p>
+      The property token refers to a &lt;property&gt; element which is a
+      mediator that has no direct impact on the message but rather on the
+      message context flowing through Synapse. The properties which does not
+      specify the action thus set on the message context applies only to the
+      current message and can be later retrieved through the
+      synapse:get-property(prop-name) extension function. If a scope is
+      specified for a property, the property could be set as a transport header
+      property or an (underlying) Axis2 message context property, or as a Axis2
+      client option or as an Axis2 message context property. If a scope is not
+      specified, it will default to the Synapse message context scope. Using the
+      property element with action specified as "remove" you can remove the
+      message context properties if available.
+    </p>
+    <p>
+      There are some well-defined properties that you can get/set:
+    </p>
+    <ul>
+      <li>
+        RESPONSE - 'true' means the message is marked as a response message
+      </li>
+      <li>
+        OUT_ONLY - 'true' means the message is marked as an out-only message
+        that does not expect a response
+      </li>
+      <li>
+        ERROR_CODE - this is set to any error message code encountered
+      </li>
+      <li>
+        ERROR_MESSAGE - this is set to any error message text encountered
+      </li>
+      <li>
+        ERROR_DETAIL - this is set to any error message detail text encountered
+      </li>
+    </ul>
+    <p>
+      There are also some Axis2 and module properties that are useful to set
+      (with scope="axis2"):
+    </p>
+    <ul>
+      <li>
+        Sandesha2RMSpecVersion - can be '1.0' or '1.1'
+      </li>
+      <li>
+        Sandesha2SequenceKey - can be an identifier specifying an Sandesha
+        internal sequence key, and
+      </li>
+      <li>
+        Sandesha2LastMessage - 'true' will make this the last message and
+        terminate the sequence
+      </li>
+    </ul>
+    <p/>
+    <h4>
+      <a name="sequence_ref" id="sequence_ref">Sequence</a>
+    </h4>
+<pre xml:space="preserve"> &lt;sequence key="name"/&gt;</pre>
+    <p>
+      A sequence ref token refers to a &lt;sequence&gt; element which is used to
+      invoke a named sequence of mediators.
+    </p>
+    <p/>
+    <h4>
+      <a name="validate" id="validate">Validate</a>
+    </h4>
+<pre xml:space="preserve"> &lt;validate [source="xpath"]&gt;
+   &lt;property name="validation-feature-id" value="true|false"/&gt;*
+   &lt;schema key="string"/&gt;+
+   &lt;on-fail&gt;
+     mediator+
+   &lt;/on-fail&gt;
+ &lt;/validate&gt;</pre>
+    <p>
+      The &lt;validate&gt; mediator validates the result of the evaluation of
+      the source xpath expression, against the schema specified. If the source
+      attribute is not specified, the validation is performed against the first
+      child of the SOAP body of the current message. If the validation fails,
+      the on-fail sequence of mediators is executed. Properties could be used to
+      turn on/off some of the underlying features of the validator (See
+      http://xerces.apache.org/xerces2-j/features.html)
+    </p>
+    <p/>
+    <h3>
+      Transformation Mediators
+    </h3>
+    <h4>
+      <a name="makefault" id="makefault">Makefault</a>
+    </h4>
+<pre xml:space="preserve"> &lt;makefault [version="soap11|soap12"]&gt;
+   &lt;code (value="literal" | expression="xpath")/&gt;
+   &lt;reason (value="literal" | expression="xpath")&gt;
+   &lt;node&gt;?
+   &lt;role&gt;?
+   &lt;detail&gt;?
+ &lt;/makefault&gt;</pre>
+    <p>
+      The &lt;makefault&gt; mediator transforms the current message into a fault
+      message, but does NOT send it. The &lt;send&gt; mediator needs to be
+      invoked to send a fault message created this way. The fault message "to"
+      header is set to the "faultTo" of the original message if such a header
+      existed on the original message.
+    </p>
+    <p/>
+    <h4>
+      <a name="xslt" id="xslt">XSLT</a>
+    </h4>
+<pre xml:space="preserve"> &lt;xslt key="string" [source="xpath"]&gt;
+   &lt;property name="string" (value="literal" | expression="xpath")/&gt;*
+   &lt;feature name="string" value="true| false" /&gt;
+ &lt;/xslt&gt;</pre>
+    <p>
+      The &lt;xslt&gt; mediator applies the specified XSLT transformation to the
+      given element. If the source element is not specified, it defaults to the
+      first child of the soap body. Optionally parameters (XSLT) could be passed
+      into the transformations through the &lt;property&gt; elements.The &lt;feature&gt;
+      defines a any feature which should be set to the TransformerFactory by
+      explicitly. The feature
+      'http://ws.apache.org/ns/synapse/transform/feature/dom' turns on DOM based
+      transformations instead of serializing elements into Byte streams and/or
+      temporary files. However, this may not prove to be stable for all
+      scenarios - especially for large message transformation.
+    </p>
+    <p/>
+    <h4>
+      <a name="header" id="header">Header</a>
+    </h4>
+<pre xml:space="preserve"> &lt;header name="qname" (value="literal" | expression="xpath") [action="set"]/&gt;
+ &lt;header name="qname" action="remove"/&gt;</pre>
+    <p>
+      The &lt;header&gt; mediator sets or removes a specified header from the
+      current soap message. Currently the set header only supports simple valued
+      headers. In the future we may extend this to have XML structured headers
+      by embedding the XML content within the element itself. The optional
+      action attribute specifies whether the mediator should set or remove the
+      header. If omitted, it defaults to a set-header.
+    </p>
+    <p/>
+    <h3>
+      Selection Mediators
+    </h3>
+    <h4>
+      <a name="filter" id="filter">Filter</a>
+    </h4>
+<pre xml:space="preserve"> &lt;filter (source="xpath" regex="string") | xpath="xpath"&gt;
+   mediator+
+ &lt;/filter&gt;</pre>
+    <p>
+      The &lt;filter&gt; mediator either test the given xpath expression as a
+      boolean expression, or match the evaluation result of a source xpath
+      expression against the given regular expression. If the test succeeds, the
+      filter mediator will execute the enclosed mediators in sequence.
+    </p>
+    <p/>
+    <h4>
+      <a name="switch" id="switch">Switch</a>
+    </h4>
+<pre xml:space="preserve"> &lt;switch source="xpath"&gt;
+   &lt;case regex="string"&gt;
+     mediator+
+   &lt;/case&gt;+
+   &lt;default&gt;
+     mediator+
+   &lt;/default&gt;?
+ &lt;/switch&gt;</pre>
+    <p>
+      The &lt;switch&gt; mediator will evaluate the given source xpath
+      expression into its string value, and match it against the given regular
+      expressions. If the specified cases does not match and a default case
+      exists, it will be executed.
+    </p>
+    <a name="in" id="in"/>
+    <h4>
+      <a name="out" id="out">In / Out</a>
+    </h4>
+<pre xml:space="preserve">&lt;in&gt;<br/>  mediator+
+&lt;/in&gt;<br/></pre>
+<pre xml:space="preserve">&lt;out&gt;
+  mediator+
+&lt;/out&gt;</pre>
+    <p>
+      <br/>
+    </p>
+    <p>
+      The In and Out mediators will execute the child mediators over the current
+      message if the message matches the direction of the mediator. Hence all
+      incoming messages would pass through the "&lt;in&gt;" mediators and vice
+      versa.
+    </p>
+    <p/>
+    <h3>
+      Database Mediators
+    </h3>
+    <h4>
+      <a name="dblookup" id="dblookup">DB-lookup</a>
+    </h4>
+<pre xml:space="preserve">&lt;dblookup&gt;
+   &lt;connection&gt;
+     &lt;pool&gt;
+      (
+       &lt;driver/&gt;
+       &lt;url/&gt;
+       &lt;user/&gt;
+       &lt;password/&gt;
+     |
+       &lt;dsName/&gt;
+       &lt;icClass/&gt;
+       &lt;url/&gt;
+       &lt;user/&gt;
+       &lt;password/&gt;
+     )
+       &lt;property name="name" value="value"/&gt;*
+     &lt;/pool&gt;
+   &lt;/connection&gt;
+   &lt;statement&gt;
+     &lt;sql&gt;select something from table where something_else = ?&lt;/sql&gt;
+     &lt;parameter [value="" | expression=""] type="int|string"/&gt;*
+     &lt;result name="string" column="int|string"/&gt;*
+   &lt;/statement&gt;+
+&lt;/dblookup&gt;</pre>
+    <p/>
+    <p>
+      The dblookup mediator is capable of executing an arbitrary SQL select
+      statement, and then set some resulting values as local message properties
+      on the message context. The DB connection used maybe looked up from an
+      external DataSource or specified in-line, in which case an Apache DBCP
+      connection pool is established and used. Apache DBCP connection pools
+      support the following properties:
+    </p>
+    <ul>
+      <li>
+        autocommit = true | false
+      </li>
+      <li>
+        isolation = Connection.TRANSACTION_NONE |
+        Connection.TRANSACTION_READ_COMMITTED |
+        Connection.TRANSACTION_READ_UNCOMMITTED |
+        Connection.TRANSACTION_REPEATABLE_READ |
+        Connection.TRANSACTION_SERIALIZABLE
+      </li>
+      <li>
+        initialsize = int
+      </li>
+      <li>
+        maxactive = int
+      </li>
+      <li>
+        maxidle = int
+      </li>
+      <li>
+        maxopenstatements = int
+      </li>
+      <li>
+        maxwait = long
+      </li>
+      <li>
+        minidle = int
+      </li>
+      <li>
+        poolstatements = true | false
+      </li>
+      <li>
+        testonborrow = true | false
+      </li>
+      <li>
+        testonreturn = true | false
+      </li>
+      <li>
+        testwhileidle = true | false
+      </li>
+      <li>
+        validationquery = String
+      </li>
+    </ul>
+    <p>
+      More than one statement may be specified, and the SQL statement may
+      specify parameters which could be specified as values or expressions. The
+      types of parameters could be any valid SQL types. Only the first row of a
+      result set will be considered and any others are ignored. The single &lt;result&gt;
+      element contains the 'name' and the column' attributes. The 'name'
+      attribute defines the name under which the result is stored in the Synapse
+      message context, and the column attribute specifies a column number or
+      name .
+    </p>
+    <h4>
+      <a name="dbreport" id="dbreport">DB-report</a>
+    </h4>
+<pre xml:space="preserve">&lt;dbreport&gt;
+   &lt;connection&gt;
+     &lt;pool&gt;
+      (
+       &lt;driver/&gt;
+       &lt;url/&gt;
+       &lt;user/&gt;
+       &lt;password/&gt;
+     |
+       &lt;dsName/&gt;
+       &lt;icClass/&gt;
+       &lt;url/&gt;
+       &lt;user/&gt;
+       &lt;password/&gt;
+     )
+       &lt;property name="name" value="value"/&gt;*
+     &lt;/pool&gt;
+   &lt;/connection&gt;
+   &lt;statement&gt;
+     &lt;sql&gt;insert into something values(?, ?, ?, ?)&lt;/sql&gt;
+     &lt;parameter [value="" | expression=""] type="int|string"/&gt;*
+    &lt;/statement&gt;+
+&lt;/dblreport&gt;</pre>
+    <p/>
+    <p>
+      The dbreport mediator is very similar to the dblookup mediator, but writes
+      information to a Database, using the specified insert SQL statement.
+    </p>
+    <p/>
+    <h3>
+      Advanced Mediators
+    </h3>
+    <h4>
+      <a name="RMSequence" id="RMSequence">RMSequence</a>
+    </h4>
+<pre xml:space="preserve"> &lt;RMSequence (correlation="xpath" [last-message="xpath"]) | single="true" [version="1.0|1.1"]/&gt;</pre>
+    <p>
+      The &lt;RMSequence&gt; mediator can be used to create a sequence of
+      messages to communicate via WS-Reliable Messaging with an WS-RM enabled
+      endpoint (&lt;enableRM&gt;). The simple use case of this mediator is to
+      specify a single="true" property, because this means that only one message
+      is involved in the same sequence. However if multiple messages should be
+      sent in the same sequence, the correlation property should be used with a
+      XPath expression that selects an unique element value from the incoming
+      message. With the result of the XPath expression, Synapse can group
+      messages together that belong to the same sequence. To close the sequence
+      neatly, for the last message of the sequence also an XPath expression
+      should be specified. With the version attribute the WS-RM specification
+      version to be used can be specified, 1.0 or 1.1.
+    </p>
+    <p/>
+    <h4>
+      <a name="throttle" id="throttle">Throttle</a>
+    </h4>
+<pre xml:space="preserve">&lt;throttle [onReject="string"] [onAccept="string"] [id="string"]&gt;
+    &lt;policy key="string"/&gt; | &lt;policy&gt;..&lt;/policy&gt;
+    &lt;onReject&gt;..&lt;/onReject&gt;
+    &lt;onAccept&gt;..&lt;/onAccept&gt;
+&lt;/throttle&gt;</pre>
+    <p/>
+    <p>
+      The Throttle mediator can be used for rate limiting as well as concurrency
+      based limiting. A WS-Policy dictates the throttling configuration and may
+      be specified inline or loaded from the registry. The Throttle mediator
+      could be added in the request path for rate limiting and concurrent access
+      limitation. When using for concurrent access limitation, the same throttle
+      mediator ID must be triggered on the response flow so that completed
+      responses are deducted from the available limit. The acceptance or
+      rejection sequence is executed depending on the evaluation of the
+      throttling policy against the current message.
+    </p>
+    <h4>
+      <a name="xquery" id="xquery">XQuery</a>
+    </h4>
+<pre xml:space="preserve">&lt;xquery [key="string"] [target="xpath"]&gt;
+    &lt;variable name="string" type="string" [key="string"] [expression="xpath"]/&gt;?
+&lt;/xquery&gt; </pre>
+    <p/>
+    <p>
+      The XQuery mediator can be used to perform an XQuery transformation. The
+      'variable' elements define a variable that could be bound to the dynamic
+      context of the XQuery engine in order to access those variables through
+      the XQuery script . The name of the variable corresponds to the name of
+      variable declaration in the XQuery script. The 'type' of the variable must
+      be a valid type defined by the JSR-000225 (XQJ API). The supported types
+      are:
+    </p>
+    <ul>
+      <li>
+        XQItemType.XQBASETYPE_INT -&gt; INT
+      </li>
+      <li>
+        XQItemType.XQBASETYPE_INTEGER -&gt; INTEGER
+      </li>
+      <li>
+        XQItemType.XQBASETYPE_BOOLEAN -&gt; BOOLEAN
+      </li>
+      <li>
+        XQItemType.XQBASETYPE_BYTE - &gt; BYTE
+      </li>
+      <li>
+        XQItemType.XQBASETYPE_DOUBLE -&gt; DOUBLE
+      </li>
+      <li>
+        XQItemType.XQBASETYPE_SHORT -&gt; SHORT
+      </li>
+      <li>
+        XQItemType.XQBASETYPE_LONG -&gt; LONG
+      </li>
+      <li>
+        XQItemType.XQBASETYPE_FLOAT -&gt; FLOAT
+      </li>
+      <li>
+        XQItemType.XQBASETYPE_STRING -&gt; STRING
+      </li>
+      <li>
+        XQItemType.XQITEMKIND_DOCUMENT -&gt; DOCUMENT
+      </li>
+      <li>
+        XQItemType.XQITEMKIND_DOCUMENT_ELEMENT -&gt; DOCUMENT_ELEMENT
+      </li>
+      <li>
+        XQItemType.XQITEMKIND_ELEMENT -&gt; ELEMENT
+      </li>
+    </ul>
+    <p>
+      The expressions will be evaluated against the current SOAP envelope.
+    </p>
+    <h4>
+      <a name="cache" id="cache">Cache</a>
+    </h4>
+<pre xml:space="preserve"> &lt;cache (id="string")? hashGenerator="class" scope="string" timeout="milliseconds"&gt;
+   &lt;onCacheHit (sequence="key")?&gt;
+     (mediator)+
+   &lt;/onCacheHit&gt;
+   &lt;implementation type=(memory | disk) maxSize="int"/&gt;
+ &lt;/cache&gt;</pre>
+    <p>
+      The &lt;cache&gt; mediator will evaluate the hash value of the incoming
+      message as described in the hash generator implementation (which should be
+      a class implementing the org.wso2.caching.digest.DigestGenerator
+      interface) and looks in a cache for a matching response. If the generated
+      hash value has been found in the cache then the cache mediator will
+      execute the onCacheHit sequence which can be specified inline or refered
+      to the registry.
+    </p>
+    <h4>
+      <a name="clone" id="clone">Clone</a>
+    </h4>
+<pre xml:space="preserve"> &lt;clone continueParent=(true | false)&gt;
+   &lt;target to="uri" [soapAction="qname"] sequence="sequence_ref" endpoint="endpoint_ref"&gt;
+     &lt;sequence&gt;
+       (mediator)+
+     &lt;/sequence&gt;
+     &lt;endpoint&gt;
+       endpoint
+     &lt;/endpoint&gt;
+   &lt;/target&gt;
+ &lt;/clone&gt;</pre>
+    <p>
+      The &lt;clone&gt; mediator closely resembles the Message Splitter EIP and
+      will split the message into number of identical messages all of which are
+      identical with the cloning message and processed parallelly using either
+      the specified sequence or endpoint (or both). Cloning message (parent) can
+      be continued or dropped depending on the boolean value of the
+      continueParent attribute which defaults to false and drops the parent when
+      false. This drop is not a general drop, rather stop the message processing
+      but does not closes the transport channel, leaving the ability of one or a
+      set of cloned message responses to be sent back to the caller
+    </p>
+    <h4>
+      <a name="iterate" id="iterate">Iterate</a>
+    </h4>
+<pre xml:space="preserve"> &lt;iterate continueParent=(true | false) preservePayload=(true | false) (attachPath="xpath")? expression="xpath"&gt;
+   &lt;target to="uri" [soapAction="qname"] sequence="sequence_ref" endpoint="endpoint_ref"&gt;
+     &lt;sequence&gt;
+       (mediator)+
+     &lt;/sequence&gt;
+     &lt;endpoint&gt;
+       endpoint
+     &lt;/endpoint&gt;
+   &lt;/target&gt;
+ &lt;/iterate&gt;</pre>
+    <p>
+      The &lt;iterate&gt; mediator implements another EIP and will split the
+      message in to number of different messages derived from the parent message
+      by finding the matching elements of the XPATH expression specified in the
+      configuration. New messages will be created for each and every matching
+      element and processed parallelly using either the specified sequence or
+      endpoint or both. Parent message can be continued or dropped in the same
+      way as in the clone mediator. Iterate parent drop also is a channel
+      blocking drop as per in the clone mediator.
+    </p>
+    <h4>
+      <a name="aggregate" id="aggregate">Aggregate</a>
+    </h4>
+<pre xml:space="preserve"> &lt;aggregate&gt;
+   &lt;corelateOn expression="xpath"/&gt;
+   &lt;completeCondition timeout="time-in-seconds"&gt;
+     &lt;messageCount min="int-min" max="int-max"/&gt;
+   &lt;/completeCondition&gt;
+   &lt;onComplete expression="xpath" sequence="sequence-ref"&gt;
+     (mediator +)?
+   &lt;/onComplete&gt;
+   &lt;invalidate sequence="sequence-ref" timeout="time-in-seconds"&gt;
+     (mediator +)?
+   &lt;/invalidate&gt;
+ &lt;/aggregate&gt;</pre>
+    <p>
+      The &lt;aggregate&gt; mediator implements the Message Aggregator EIP and
+      will aggregate the messages splitted using either the clone or iterate
+      mediators. At the same time it can aggregate messages on the presence of
+      matching elements specified by the corelateOn XPATH expression. Aggregate
+      will collect the messages coming in to that until the messages on the
+      aggregation satisfies the complete condition. On completion of the
+      aggregation it will execute the aggregated message using the onComplete
+      sequence. Aggregated message will be created by combining the messages
+      participating in the aggregation using the onComplete XPATH expression. If
+      a particular aggregation fails to complete in a pre configured time, then
+      that particular aggregation will be invalidated using the invalidate
+      sequence.
+    </p>
+    <h3>
+      Extension mediators
+    </h3>
+    <h4>
+      <a name="class" id="class">Class</a>
+    </h4>
+<pre xml:space="preserve"> &lt;class name="class-name"&gt;
+   &lt;property name="string" value="literal"&gt;
+     (either literal or XML child)
+   &lt;/property&gt;
+ &lt;/class&gt; </pre>
+    <p>
+      The &lt;class&gt; mediator creates an instance of the specified class and
+      sets it as a mediator. The class must implement the
+      org.apache.synapse.api.Mediator interface. If any properties are
+      specified, the corresponding setter methods are invoked on the class,
+      once, during initialization.
+    </p>
+    <p/>
+    <h4>
+      <a name="pojoCommand" id="pojoCommand">POJOCommand</a>
+    </h4>
+<pre xml:space="preserve"> &lt;pojoCommand name="class-name"&gt;
+   &lt;property name="string" value="literal"&gt;
+     (either literal or XML child)
+   &lt;/property&gt;
+   &lt;property name="string" expression="xpath"/&gt;
+ &lt;/pojoCommand&gt; </pre>
+    <p>
+      The &lt;pojoCommand&gt; mediator creates an instance of the specified
+      command class (which may implement the org.apache.synapse.Command
+      interface or should have a public void method named "execute"). If any
+      properties are specified, the corresponding setter methods are invoked on
+      the class and called the execute method of the command executed.
+    </p>
+    <p/>
+    <h3>
+      <a name="script" id="script">Scripting language mediators</a>
+    </h3>
+    <p/>
+    <p>
+      Synapse supports Mediators implemented in a variety of scripting languages
+      such as JavaScript, Python or Ruby. There are two ways of defining script
+      mediators, either with the script program statements stored in a separate
+      file which is referenced via the local or remote registry entry, or with
+      the script program statements embedded in-line within the Synapse
+      configuration. A script mediator using a script off the registry (local or
+      remote) is defined as follows:
+    </p>
+<pre xml:space="preserve"> &lt;script key="string" language="string" [function="script-function-name"]/&gt;</pre>
+    <p>
+      The property key is the registry key to load the script. The language
+      attribute specifies the scripting language of the script code (e.g. "js"
+      for Javascript, "rb" for ruby, "groovy" for Groovy, "py" for Python..).
+      The function is an optional attribute defining the name of the script
+      function to invoke, if not specified it defaults to a function named
+      'mediate'. The function is passed a single parameter - which is the
+      Synapse MessageContext. The function may return a boolean, if it does not,
+      then true is assumed, and the script mediator returns this value. An
+      inline script mediator has the script source embedded in the configuration
+      as follows:
+    </p>
+<pre xml:space="preserve"> &lt;script language="string"&gt;...script source code...&lt;script/&gt;</pre>
+    <p>
+      The execution context environment of the script has access to the Synapse
+      MessageContext predefined in a script variable named 'mc' . An example of
+      an inline mediator using JavaScript/E4X which returns false if the SOAP
+      message body contains an element named 'symbol' which has a value of 'IBM'
+      would be:
+    </p>
+<pre xml:space="preserve"> &lt;script language="js"&gt;mc.getPayloadXML()..symbol != "IBM";&lt;script/&gt;</pre>
+    <p>
+      Synapse uses the Apache <a href="http://jakarta.apache.org/bsf/">Bean
+      Scripting Framework</a> for the scripting language support, any
+      script language supported by BSF may be used to implement a Synapse
+      Mediator.
+    </p>
+    <p>
+      Implementing a Mediator with a script language can have advantages over
+      using the built in Synapse Mediator types or implementing a custom Java
+      class Mediator. Script Mediators have all the flexibility of a class
+      Mediator with access to the Synapse MessageContext and SynapseEnvironment
+      APIs, and the ease of use and dynamic nature of scripting languages allows
+      rapid development and prototyping of custom mediators. An additional
+      benefit of some scripting languages is that they have very simple and
+      elegant XML manipulation capabilities, for example JavaScript E4X or Ruby
+      REXML, so this makes them well suited for use in the Synapse mediation
+      environment. For both types of script mediator definition the
+      MessageContext passed into the script has additional methods over the
+      standard Synapse MessageContext to enable working with the XML in a way
+      natural to the scripting language. For example when using JavaScript
+      getPayloadXML and setPayloadXML, E4X XML objects, and when using Ruby,
+      REXML documents.
+    </p>
+    <h3>
+      Extensibility of Synapse
+    </h3>
+    <p>
+      The Synapse configuration language could be easily extended, with
+      configuration extensions as well as mediation extensions. The Spring
+      mediator is such an example.
+    </p>
+    <h4>
+      Spring Configuration
+    </h4>
+    <p>
+      A Spring configuration could be created as a localEntry or remote registry
+      entry providing a URL or a key reference to a Registry. The configuration
+      is then created on first use or as necessary (as per registry lookup
+      semantics) by the mediators which reference this configuration.
+    </p>
+<pre xml:space="preserve"> &lt;localEntry key="string"/&gt;
+ &lt;localEntry key="string" src="url"/&gt;</pre>
+    <p>
+      The name attribute specifies a unique name for the configuration, and the
+      src, key or inlined XML references to the Spring configuration
+    </p>
+    <p/>
+    <h4>
+      <a name="spring" id="spring">Spring mediator</a>
+    </h4>
+<pre xml:space="preserve"> &lt;spring:spring bean="exampleBean1" key="string"/&gt;</pre>
+    <p>
+      The &lt;spring&gt; element creates an instance of a mediator, which is
+      managed by Spring. This Spring bean must implement the Mediator interface
+      for it to act as a Mediator. The key will reference the Spring
+      ApplicationContext/Configuration used for the bean
+    </p>
+  </body>
+</html>

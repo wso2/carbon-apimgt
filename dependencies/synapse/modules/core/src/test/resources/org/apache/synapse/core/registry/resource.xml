@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<!--Test resource in registry-->
+<table>
+    <entry id="one">
+        <value>ValueOne</value>
+    </entry>
+    <entry id="two">
+        <value>ValueTwo</value>
+    </entry>
+</table>
