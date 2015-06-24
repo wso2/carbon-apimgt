@@ -19,7 +19,7 @@
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>oidc-authenticator</artifactId>
-        <version>1.0.0</version>
+        <version>1.2.5-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -27,7 +27,7 @@
     <artifactId>org.wso2.carbon.apimgt.authenticator.oidc.ui</artifactId>
     <packaging>bundle</packaging>
     <name>OIDC SSO Authenticator - UI bundle</name>
-    <version>1.0.0</version>
+    <version>1.2.5-SNAPSHOT</version>
     <description>OpenID Connect Based SSO Authenticator - UI bundle</description>
     <url>http://wso2.org</url>
 
@@ -35,27 +35,22 @@
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.core</artifactId>
-            <version>${wso2carbon.version}</version>                      
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.core.common</artifactId>
-	    <version>${wso2carbon.version}</version>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.logging</artifactId>
-	    <version>${wso2carbon.version}</version>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.ui</artifactId>
-            <version>${wso2carbon.version}</version>       
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.utils</artifactId>
-            <version>${wso2carbon.version}</version>       
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon.apimgt</groupId>
