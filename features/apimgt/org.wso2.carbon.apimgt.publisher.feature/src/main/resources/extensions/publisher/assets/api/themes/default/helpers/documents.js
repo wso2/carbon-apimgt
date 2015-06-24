@@ -18,9 +18,10 @@
  */
 var resources = function(page,meta){
 	return {
-		js:['libs/jquery.form.min.js','document.js','bootstrap-dialog.min.js','bootstrap-editable.js','bootstrap-multiselect.js','tiny_mce.js','inline.js']
+		js:['libs/jquery.form.min.js','document.js','inline-editor/js/inline.js','bootstrap/bootstrap-dialog.min.js','bootstrap/bootstrap-editable.js','bootstrap/bootstrap-multiselect.js',
+		'inline-editor/tinymce/tiny_mce.js','inline-editor/js/inline.js']
 		,
-		css:['bootstrap/bootstrap-editable.css','bootstrap-dialog.min.css',
-             'bootstrap/bootstrap-tagsinput.css', 'bootstrap-multiselect.css']       
+		css:['styles.css','bootstrap/bootstrap-editable.css','bootstrap/bootstrap-dialog.min.css',
+             'bootstrap/bootstrap-tagsinput.css', 'bootstrap/bootstrap-multiselect.css']       
 	};
 };
