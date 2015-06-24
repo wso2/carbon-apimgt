@@ -207,7 +207,10 @@ var provider = {};
      };
 
     APIProviderProxy.prototype.addInlineContent = function (api, docName, content) {
-        return this.impl.addInlineContent(api, docName, content);
+        var identifier = new Packages.org.wso2.carbon.apimgt.api.model.APIIdentifier(api.provider, api.name, api.version);
+        var apiOb = new Packages.org.wso2.carbon.apimgt.api.model.API(identifier);
+        apiOb.setVisibility(api.visibility);
+        return this.impl.addDocumentationContent(apiOb, docName, content);
     };
 
     APIProviderProxy.prototype.createNewAPIVersion = function (api, newVersion) {

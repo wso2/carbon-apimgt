@@ -7,13 +7,18 @@
 			    <i class="fa fa-plus"></i>
 	             {{t " Add New Document"}}
 			</a>
-			                                       
+			 {{#if assets.showAPIDocVisibility}}
+	        <input id="showVisibility" value="true" type="hidden"/>
+	        {{else}}
+	        <input id="showVisibility" value="false" type="hidden"/>
+	        {{/if}}                                   
 		</div>
 
 		
 	</div>
 	{{> add_document}}
 	{{> list_documents}}
+	{{> inline-editor}}
 
 
 </div>
