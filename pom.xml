@@ -335,7 +335,7 @@
             <dependency>
                 <groupId>org.wso2.carbon.apimgt</groupId>
                 <artifactId>org.wso2.carbon.apimgt.handlers.security.stub</artifactId>
-                <version>${apimgt.handlers.security.stub.version}</version>
+                <version>${carbon.apimgt.version}</version>
             </dependency>
 
             <dependency>
@@ -770,8 +770,8 @@
         <apimgt.startup.publisher.version>2.0.0-SNAPSHOT</apimgt.startup.publisher.version>
         <apimgt.usage.client>2.0.0-SNAPSHOT</apimgt.usage.client>
         <apimgt.usage.publisher>2.0.0-SNAPSHOT</apimgt.usage.publisher>
-        <apimgt.keymgt.stub.version>4.4.0-SNAPSHOT</apimgt.keymgt.stub.version>
-        <apimgt.handlers.security.stub.version>4.4.0</apimgt.handlers.security.stub.version>
+        <apimgt.keymgt.stub.version>2.0.0-SNAPSHOT</apimgt.keymgt.stub.version>
+        <apimgt.handlers.security.stub.version>2.0.0-SNAPSHOT</apimgt.handlers.security.stub.version>
         <carbon.forum.version>2.0.0-SNAPSHOT</carbon.forum.version>
         <carbon.forum.feature.version>2.0.0-SNAPSHOT</carbon.forum.feature.version>
         <carbon.forum.server.feature.version>2.0.0-SNAPSHOT</carbon.forum.server.feature.version>
@@ -800,7 +800,7 @@
         <carbon.platform.version>4.4.0</carbon.platform.version>
         <carbon.platform.package.export.version>4.4.0</carbon.platform.package.export.version>
         <carbon.platform.package.import.version.range>[4.4.0, 4.5.0)</carbon.platform.package.import.version.range>
-        <carbon.apimgt.handlers.stub.package.import.version.range>[4.4.0, 4.5.0)</carbon.apimgt.handlers.stub.package.import.version.range>
+        <carbon.apimgt.handlers.stub.package.import.version.range>[2.0.0, 3.0.0)</carbon.apimgt.handlers.stub.package.import.version.range>
 
 	<!-- Carbon Governance -->
         <carbon.governance.version>4.5.2-SNAPSHOT</carbon.governance.version>
