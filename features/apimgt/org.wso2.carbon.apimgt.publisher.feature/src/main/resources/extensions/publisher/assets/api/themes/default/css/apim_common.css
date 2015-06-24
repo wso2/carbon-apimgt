@@ -39,9 +39,73 @@ table.opt-selectable td {
 .collapse-icon-wrp:hover{color: #fff; background-color: #237BD5;}
 
 .icon-wrp{padding:5px 20px; height: 50px; width: 50px; margin-right: 15px;}
-#jsonform-1-elt-production_endpoints, #jsonform-1-elt-sandbox_endpoints,.jsonform-9-elt-production_endpoints
-{width: 100%;
-    background-color: #fff;
-    border: 1px solid #E0E0E0;
-    padding: 6px 0; margin-top: -10px;}
+#jsonform-1-elt-production_endpoints, #jsonform-1-elt-sandbox_endpoints,#jsonform-9-elt-production_endpoints
+{width: 100%; background-color: #fff; border: 1px solid #E0E0E0; padding: 6px 0; margin-top: -10px;}
+.table-bordered > thead > tr > th, .table-bordered > tbody > tr > th, .table-bordered > tfoot > tr > th,
+.table-bordered > thead > tr > td, .table-bordered > tbody > tr > td, .table-bordered > tfoot > tr > td  {border: 1px solid #ccc;}
+.table > caption + thead > tr:first-child > th, .table > colgroup + thead > tr:first-child > th, .table > thead:first-child > tr:first-child > th, .table > caption + thead > tr:first-child > td, .table > colgroup + thead > tr:first-child > td, .table > thead:first-child > tr:first-child > td {
+    border-top: 1px solid #ccc;}
+.well-description > a{color: #333;}
+.well-description > a> .fa{ padding-right: 10px;}
+.well-description > .fa{ padding-right: 10px;}
+.asset-well [class^="col-lg-"] {
+    padding: 10px;
+}
 
+.version-wp{position: absolute; bottom: 22px; left:150px; width: 70%;}
+.create-vs {
+    float: left;
+    border: 1px solid #ccc;
+    padding: 10px;
+    background-color: #fff;
+    width: 100%;
+    margin-top: 10px;
+}
+label {
+ font-weight: 400;
+}
+.border-right{border-right:1px solid #cccccc; }
+.border-left{border-left:1px solid #cccccc; }
+#copyAPIDefaultVersion{float: left; margin-right: 10px; margin-left: 10px;}
+.controls, .control-label, .help-block{float: left;}
+.help-block {
+    display: block;
+    margin-top: 0px;
+    margin-bottom: 10px;
+    color: #737373;}
+.copy-api-button{float: left; }
+.vs-wp{ float: left; width: 100%;}
+#copy-api-button {
+    float: left;
+    margin-right: 10px;
+}
+.btn-primary {
+    border:0px;
+}
+.simple-space-maker{padding: 10px; color:#fff; background-color: #237bd5; margin-bottom: 20px; float: left; }
+.simple-space-maker:hover{color:#fff; background-color: #1965b2 }
+.simple-space-maker >a {color:#fff; text-decoration: none; }
+
+.bg-red{background-color: red;}
+.bg-blue{background-color: blue;}
+.bg-green{background-color: green;}
+.bg-light-grey{background-color:#f9f9f9; }
+.clear{clear: both;}
+.cnl-label{width:20%; font-weight: 500; text-transform: uppercase;}
+.cnl-group{margin-top: 10px;}
+.cnls{width: 80%;}
+#overview_name, #overview_summary{width:70%; }
+.padding-bottom{padding-bottom: 10px;}
+.margin-bottom{margin-bottom: 10px;}
+.form-actions{text-align: right;}
+.add-wp{padding:15px; margin-bottom: 15px; background-color:#f9f9f9;  border: 1px solid #EAEAEA;}
+.center-wrapper{ background-color: #f3f3f3; border: 1px solid #ececec; padding:10px; margin: 15px;}
+.btn-success {
+    color: #fff;
+    background-color: #237bd5;
+    border:none;
+}
+.btn-success:hover {
+    background-color: #1965b2;
+
+}
