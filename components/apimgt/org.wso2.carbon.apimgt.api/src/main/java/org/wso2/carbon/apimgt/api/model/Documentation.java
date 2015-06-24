@@ -153,6 +153,10 @@ public class Documentation implements Serializable{
         private DocumentSourceType(String type) {
             this.type = type;
         }
+
+	    public String getType() {
+		    return this.type;
+	    }
     }
     public enum DocumentVisibility {
         OWNER_ONLY("owner_only"), PRIVATE("private"),API_LEVEL("api_level");

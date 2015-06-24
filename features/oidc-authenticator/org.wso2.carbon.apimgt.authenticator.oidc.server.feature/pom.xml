@@ -36,7 +36,6 @@
 		<dependency>
 			<groupId>org.wso2.carbon.apimgt</groupId>
 			<artifactId>org.wso2.carbon.apimgt.authenticator.oidc</artifactId>
-			<version>${project.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.wso2.orbit.com.nimbusds</groupId>
