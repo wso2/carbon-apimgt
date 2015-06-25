@@ -423,5 +423,191 @@ var apistore = {};
             };
         }
     };
+ StoreAPIProxy.prototype.getSwaggerContent=function(providerVal,apiNameVal,apiVersionVal,envName){       
+
+        var url = request.getRequestURL();
+        var host = getLocation(url).host;
+        log.info("hostttt"+host);
+        var port = getLocation(url).port;
+        var accessProtocol = getLocation(url).protocol;        
+        var tenantDomain = "";
+        var tenantID = -1234;
+	    var isTenantFlowStarted = false;
+
+        if(providerVal.indexOf("@") > -1){
+            var MultitenantUtils = Packages.org.wso2.carbon.utils.multitenancy.MultitenantUtils;
+	    tenantDomain = MultitenantUtils.getTenantDomain(providerVal);
+            providerVal = providerVal.replace("@","-AT-");
+            if(tenantDomain){
+                tenantID = carbon.server.osgiService('org.wso2.carbon.user.core.service.RealmService').getTenantManager().getTenantId(tenantDomain);
+            }
+        }
+	log.info("providerValll"+providerVal);
+        if(providerVal.indexOf("-DOM-") > -1){
+             providerVal = providerVal.replace("-DOM-","/");
+        }
+
+    	try {
+    		//start tenant flow before fetching swagger resource from the registry
+    		if (tenantDomain != "" && tenantDomain != 'carbon.super') {
+    			var PrivilegedCarbonContext = Packages.org.wso2.carbon.context.PrivilegedCarbonContext;
+    			isTenantFlowStarted = true;
+    			PrivilegedCarbonContext.startTenantFlow();
+    		        PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
+    		}
+
+            var APIUtil = Packages.org.wso2.carbon.apimgt.impl.utils.APIUtil;
+            var apiUtil = new APIUtil();
+            var swaggerPath = apiUtil.getSwagger20DefinitionFilePath(apiNameVal,apiVersionVal, providerVal);
+    		var registry = carbon.server.osgiService('org.wso2.carbon.registry.core.service.RegistryService').getGovernanceUserRegistry("wso2.anonymous.user", tenantID);
+
+    		url = swaggerPath + "swagger.json";
+
+    		var data = registry.get(url);
+                log.info("swagger contentttttt"+data);
+    	}finally {
+    		if (isTenantFlowStarted) {
+                PrivilegedCarbonContext.endTenantFlow();
+            }
+    	}
+        var output = new Packages.java.lang.String(data.content);
+        var jsonObj = JSON.parse(output);
+        log.info("swagger jsonnn contentttttt"+data);
+        var basePathValue = jsonObj.basePath;
+        var username=null;
+        var apistore = new StoreAPIProxy(providerVal);    
+        result =  apistore.getAPI(providerVal,
+                                 apiNameVal,apiVersionVal);
+        log.info("get "+result);
+        var api = result.api;
+        var serverURL = api.serverURL;
+        log.info("api.serverURL "+api.serverURL);
+        var context = api.context;
+        log.info("api.contexttt "+api.context);
+        var splitVal = JSON.parse(serverURL);
+        var urlArr = new Array();
+        var count = 0;
+        for(var type in splitVal){
+            var environmentsToType = splitVal[type];
+            for(var name in environmentsToType ){
+                var environmentURL;
+                if(envName == name){
+                    environmentURL = environmentsToType[name];
+                    urlArr[count] = environmentURL[accessProtocol.replace(":","")];
+                    count++;
+                    break;
+                }else{
+                var environmentURL = environmentsToType[name];
+                urlArr[count] = environmentURL[accessProtocol.replace(":","")];
+                count++;
+                }
+           
+            }
+        }
+        if(urlArr.length===1){
+            // We do not need to append the version since with the context versioning, the version is embedded in the context.
+            jsonObj.basePath=urlArr[0]+context;
+            //jsonObj.basePath=urlArr[0]+context+"/"+apiVersionVal;
+        }else{
+            for(var i=0; i < urlArr.length ; i++){
+                if(urlArr[i].indexOf(accessProtocol) > -1){
+                    jsonObj.basePath=urlArr[i]+context;
+                    // jsonObj.basePath=urlArr[i]+context+"/"+apiVersionVal;
+                }
+            }
+        }
+
+        jsonObj.basePath = api.context;
+
+	//assign default value to host with first environment address
+	if (urlArr.length > 0 ) {
+	        jsonObj.host = urlArr[0].trim().replace(accessProtocol+"//","");
+	}
+
+
+        var paths = {}; //fix for /*, {url-template}*
+        for (var property in jsonObj.paths) {
+            if (jsonObj.paths.hasOwnProperty(property)) {
+                paths[property.replace("*","")] = jsonObj.paths[property];
+            }
+        }
+        jsonObj.paths = paths;
+
+	//assign default value to host with first environment address
+	if (urlArr.length > 0 ) {
+	        jsonObj.host = urlArr[0].trim().replace(accessProtocol+"//","");
+	}
+
+
+        var paths = {}; //fix for /*, {url-template}*
+        for (var property in jsonObj.paths) {
+            if (jsonObj.paths.hasOwnProperty(property)) {
+                paths[property.replace("*","")] = jsonObj.paths[property];
+            }
+        }
+        jsonObj.paths = paths;
+        return jsonObj;
+
+    };
+   function sendReceive (httpMethod,data,url){
+
+    var headers = this.getRequestHeaders(false);
+    var type = "json"; // response format
+    var response;
+    switch (httpMethod){
+        case  "GET":
+            response = get(url,{},headers,type);
+            break;
+        case   "POST":
+            response = post(url,stringify(data),headers,type);
+            break;
+        case    "PUT":
+            response = put(url,stringify(data),headers,type);
+            break;
+        case    "DELETE":
+            response = del(url,stringify(data),headers,type);
+            break;
+        default :
+            log.error("Error in the programme flow.");
+    }
+    log.debug("---------------------:" + stringify(response));
+    if(response.data.Error) {
+        session.put("get-status", response.data.Error.errorMessage);
+    } else {
+        session.put("get-status", "succeeded");
+    }
+    return response;
+};
+
+function getRequestHeaders (ssoEnabled){
+    var requestHeaders;
+    if(ssoEnabled){
+        var accessToken = this.getAccessTokenFromSession();
+        requestHeaders = {
+            "Authorization": "Bearer "+accessToken,
+            "Content-Type": "application/json"
+        };
+    }else{
+        requestHeaders = {
+            "Content-Type": "application/json",
+            "Cookie": "JSESSIONID="+session.get("JSESSIONID")
+        };
+    }
+    return requestHeaders;
+};
+
+function getLocation(href) {
+    var match = href.match(/^(https?\:)\/\/(([^:\/?#]*)(?:\:([0-9]+))?)(\/[^?#]*)(\?[^#]*|)(#.*|)$/);
+    return match && {
+        protocol: match[1],
+        host: match[2],
+        hostname: match[3],
+        port: match[4],
+        pathname: match[5],
+        search: match[6],
+        hash: match[7]
+    }
+}
 
 })(apistore);
+
