@@ -1,8 +1,9 @@
-<div class="control-group">
-		<label class="control-label" for=""></label>
-		<div class="controls">
+<div class="control-group cnl-group">
+    <button class="btn" type="button" id="add_resource" ><i class="icon-plus-sign"></i>&nbsp;Add</button>
+		<label class="control-label cnl-label" for=""></label>
+		<div class="controls cnls margin-left-chk">
 			{{#each verbs}}
-				<label class="checkbox inline" style="text-transform:uppercase;">
+				<label class="checkbox inline  chk-lbe" style="text-transform:uppercase;">
 					<input type="checkbox" value="{{ . }}" class="http_verb_select" >  {{ . }}
 				</label>
 			{{/each}}
@@ -13,9 +14,9 @@
 			<a class="icon-question-sign help_popup" help_data="options_help" data-trigger="hover"></a>
 			<p id="options_help" class="hide">{{t "Select Options method to send OPTIONS calls to backed. If not selected
 			API gateway will return OPTIONS call with the allowed methods in gateway."}}</p>
-			<label id="less" style="display:inline;">less</label>
+			<label id="less" style="display:inline;"><i class="fa fa-minus-circle"></i> less</label>
 		</div>
-		<label id="more" style="display:inline;">more</label>
+		<label id="more" style="display:inline;"> <i class="fa fa-plus-circle"></i> more</label>
 	</div>
 </div>
 <!-- div class="control-group">
@@ -24,12 +25,8 @@
 		<input type="text" id="inputResourceTags" placeholder="tags">
 	</div>
 </div -->
-<div class="control-group">
-	<label class="control-label"></label>
-	<div class="controls">
-		<button class="btn" type="button" id="add_resource" style="margin:10px 0 0px 0px;"><i class="icon-plus-sign"></i>&nbsp;Add</button>
-	</div>
-</div>
+<div class="clear"></div>
+
 </div>
 <table style="width:100%">
 	{{#each doc.paths}}

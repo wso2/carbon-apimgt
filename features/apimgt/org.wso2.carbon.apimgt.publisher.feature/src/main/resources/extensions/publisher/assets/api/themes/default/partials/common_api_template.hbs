@@ -233,14 +233,13 @@
         <div class="form-group">
             <label class="custom-form-label col-lg-2 " for="apiThumb">{{t "Thumbnail"}}:</label>
             <div class="custom-form-right col-lg-5 ">
-                <div id="inpFile">
-                    <div id="apiThumb-container"  style="display: inline;">
-                        <input type="file" class="form-control" id="overview_thumbnail" name="overview_thumbnail"/></div>
+                <div class="fileUpload">
+                    <input id="uploadBtn" type="file" class="upload upload-input" />
+                    <input id="uploadFile" placeholder="Choose File " class="upload-text" disabled="disabled" />
+                    <span class="btn btn-primary upload-btn">Upload</span>
                 </div>
             </div>
-            <div class="custom-form-right col-lg-1 ">
-                <input type="button" class="btn btn-default" id="clearThumb" value="{{t "Clear"}}"/>
-            </div>
+
             <div class="help-block inline-help custom-form-right col-lg-9 col-md-9 col-sm-12 col-xs-12 col-md-offset-3 col-lg-offset-2">
                 <ul>
                     <li>{{t "Size (max): 1MB"}}</li>
@@ -267,7 +266,7 @@
     {{#if apiMetaData.wsdl}}
         <div id="api_designer">
             <a  href="#wsdlUpload" role="button" class="btn pull-right" data-toggle="modal" ><i class="icon-download-alt" ></i> {{t "Import"}} </a>
-            <legend>{{t "API Definition"}}</legend>
+            <legend>{{t "API Definition "}}</legend>
             <div class="control-group api_wsdl">
                 <label class="control-label" for="wsdl">{{t "WSDL"}}:</label>
                 <div class="controls">
@@ -284,7 +283,7 @@
 		{{#if api.wsdl}}
 			<div id="api_designer">
 				<a  href="#wsdlUpload" role="button" class="btn pull-right" data-toggle="modal" ><i class="icon-download-alt" ></i> {{t "Import"}} </a>
-				<legend>{{t "API Definition"}}</legend>
+				<legend>{{t "API Definition "}}</legend>
 			<div class="control-group api_wsdl">
 				<label class="control-label" for="wsdl">{{t "WSDL"}}:</label>
 				<div class="controls">
@@ -365,5 +364,10 @@
 
 </script>
 
+<script>
+   document.getElementById("uploadBtn").onchange = function () {
+        document.getElementById("uploadFile").value = this.value;
+    };
+</script>
 
 <hr/>
