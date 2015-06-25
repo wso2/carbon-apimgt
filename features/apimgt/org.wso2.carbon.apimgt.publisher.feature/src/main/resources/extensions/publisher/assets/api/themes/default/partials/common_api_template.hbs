@@ -233,10 +233,12 @@
         <div class="form-group">
             <label class="custom-form-label col-lg-2 " for="apiThumb">{{t "Thumbnail"}}:</label>
             <div class="custom-form-right col-lg-5 ">
-                <div class="fileUpload">
-                    <input id="uploadBtn" type="file" class="upload upload-input" />
-                    <input id="uploadFile" placeholder="Choose File " class="upload-text" disabled="disabled" />
-                    <span class="btn btn-primary upload-btn">Upload</span>
+                <div class="fileUpload" id="inpFile">
+			
+		            <input id="overview_thumbnail" name="overview_thumbnail" type="file" class="upload upload-input" />
+		            <input id="uploadFile" placeholder="Choose File " class="upload-text" disabled="disabled" />
+		            <span class="btn btn-primary upload-btn">Upload</span>
+			
                 </div>
             </div>
 
@@ -365,7 +367,7 @@
 </script>
 
 <script>
-   document.getElementById("uploadBtn").onchange = function () {
+   document.getElementById("overview_thumbnail").onchange = function () {
         document.getElementById("uploadFile").value = this.value;
     };
 </script>
