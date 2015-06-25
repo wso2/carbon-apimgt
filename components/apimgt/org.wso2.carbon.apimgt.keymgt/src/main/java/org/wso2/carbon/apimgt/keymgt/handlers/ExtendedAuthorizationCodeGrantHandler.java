@@ -16,33 +16,34 @@
 
 package org.wso2.carbon.apimgt.keymgt.handlers;
 
-import org.wso2.carbon.apimgt.impl.handlers.ScopesIssuer;
 import org.wso2.carbon.identity.oauth2.IdentityOAuth2Exception;
+import org.wso2.carbon.identity.oauth2.InvalidRefreshTokenException;
 import org.wso2.carbon.identity.oauth2.dto.OAuth2AccessTokenRespDTO;
 import org.wso2.carbon.identity.oauth2.token.OAuthTokenReqMessageContext;
 import org.wso2.carbon.identity.oauth2.token.handlers.grant.AuthorizationCodeGrantHandler;
 
-public class ExtendedAuthorizationCodeGrantHandler extends AuthorizationCodeGrantHandler {
+public class ExtendedAuthorizationCodeGrantHandler extends AuthorizationCodeGrantHandler{
 
     @Override
-    public boolean validateGrant(OAuthTokenReqMessageContext tokReqMsgCtx) throws IdentityOAuth2Exception {
+    public boolean validateGrant(OAuthTokenReqMessageContext tokReqMsgCtx) throws IdentityOAuth2Exception{
         return super.validateGrant(tokReqMsgCtx);
     }
 
     @Override
     public OAuth2AccessTokenRespDTO issue(OAuthTokenReqMessageContext tokReqMsgCtx)
-            throws IdentityOAuth2Exception {
+            throws IdentityOAuth2Exception, InvalidRefreshTokenException {
         return super.issue(tokReqMsgCtx);
     }
 
     @Override
     public boolean authorizeAccessDelegation(OAuthTokenReqMessageContext tokReqMsgCtx)
-            throws IdentityOAuth2Exception {
+            throws IdentityOAuth2Exception{
         return super.authorizeAccessDelegation(tokReqMsgCtx);
     }
 
     @Override
-    public boolean validateScope(OAuthTokenReqMessageContext tokReqMsgCtx) {
-        return ScopesIssuer.getInstance().setScopes(tokReqMsgCtx);
+    public boolean validateScope(OAuthTokenReqMessageContext tokReqMsgCtx){
+        ScopesIssuer scopesIssuer = new ScopesIssuer();
+        return scopesIssuer.setScopes(tokReqMsgCtx);
     }
 }

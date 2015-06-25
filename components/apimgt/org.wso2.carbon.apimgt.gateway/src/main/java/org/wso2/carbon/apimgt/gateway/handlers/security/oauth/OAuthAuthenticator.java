@@ -25,7 +25,6 @@ import org.apache.synapse.core.SynapseEnvironment;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.rest.RESTConstants;
 import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.gateway.handlers.Utils;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.gateway.handlers.security.*;
 import org.wso2.carbon.apimgt.impl.APIConstants;
@@ -75,8 +74,8 @@ public class OAuthAuthenticator implements Authenticator {
         String apiKey = null;
         if (headers != null) {
             apiKey = extractCustomerKeyFromAuthHeader(headers);
-            if (log.isDebugEnabled()) {
-                log.debug(apiKey != null ? "Received Token ".concat(apiKey) : "No valid Authorization header found");
+            if(log.isDebugEnabled()){
+                log.debug("Received Token ".concat(apiKey));
             }
         }
 
@@ -100,7 +99,7 @@ public class OAuthAuthenticator implements Authenticator {
         String apiVersion = (String) synCtx.getProperty(RESTConstants.SYNAPSE_REST_API_VERSION);
         String fullRequestPath = (String)synCtx.getProperty(RESTConstants.REST_FULL_REQUEST_PATH);
 
-        String requestPath = Utils.getRequestPath(synCtx, fullRequestPath, apiContext, apiVersion);
+        String requestPath = fullRequestPath.substring((apiContext + apiVersion).length() + 1, fullRequestPath.length());
 
         if(log.isDebugEnabled()){
             log.debug("Full Request Path = ".concat(requestPath));
@@ -193,8 +192,8 @@ public class OAuthAuthenticator implements Authenticator {
             APISecurityUtils.setAuthenticationContext(synCtx, authContext, securityContextHeader);
             
             /* Synapse properties required for BAM Mediator*/
-            //String tenantDomain = MultitenantUtils.getTenantDomain(info.getApiPublisher());
-            synCtx.setProperty("api.ut.apiPublisher", info.getApiPublisher());
+            String tenantDomain = MultitenantUtils.getTenantDomain(info.getApiPublisher());
+            synCtx.setProperty("API_PUBLISHER", tenantDomain);
             synCtx.setProperty("API_NAME", info.getApiName());
 
             try {
@@ -330,81 +329,4 @@ public class OAuthAuthenticator implements Authenticator {
 	public String getRequestOrigin() {
 		return requestOrigin;
 	}
-
-    public String getSecurityHeader() {
-        return securityHeader;
-    }
-
-    public void setSecurityHeader(String securityHeader) {
-        this.securityHeader = securityHeader;
-    }
-
-    public String getDefaultAPIHeader() {
-        return defaultAPIHeader;
-    }
-
-    public void setDefaultAPIHeader(String defaultAPIHeader) {
-        this.defaultAPIHeader = defaultAPIHeader;
-    }
-
-    public String getConsumerKeyHeaderSegment() {
-        return consumerKeyHeaderSegment;
-    }
-
-    public void setConsumerKeyHeaderSegment(String consumerKeyHeaderSegment) {
-        this.consumerKeyHeaderSegment = consumerKeyHeaderSegment;
-    }
-
-    public String getOauthHeaderSplitter() {
-        return oauthHeaderSplitter;
-    }
-
-    public void setOauthHeaderSplitter(String oauthHeaderSplitter) {
-        this.oauthHeaderSplitter = oauthHeaderSplitter;
-    }
-
-    public String getConsumerKeySegmentDelimiter() {
-        return consumerKeySegmentDelimiter;
-    }
-
-    public void setConsumerKeySegmentDelimiter(String consumerKeySegmentDelimiter) {
-        this.consumerKeySegmentDelimiter = consumerKeySegmentDelimiter;
-    }
-
-    public String getSecurityContextHeader() {
-        return securityContextHeader;
-    }
-
-    public void setSecurityContextHeader(String securityContextHeader) {
-        this.securityContextHeader = securityContextHeader;
-    }
-
-    public boolean isRemoveOAuthHeadersFromOutMessage() {
-        return removeOAuthHeadersFromOutMessage;
-    }
-
-    public void setRemoveOAuthHeadersFromOutMessage(boolean removeOAuthHeadersFromOutMessage) {
-        this.removeOAuthHeadersFromOutMessage = removeOAuthHeadersFromOutMessage;
-    }
-
-    public String getClientDomainHeader() {
-        return clientDomainHeader;
-    }
-
-    public void setClientDomainHeader(String clientDomainHeader) {
-        this.clientDomainHeader = clientDomainHeader;
-    }
-
-    public boolean isRemoveDefaultAPIHeaderFromOutMessage() {
-        return removeDefaultAPIHeaderFromOutMessage;
-    }
-
-    public void setRemoveDefaultAPIHeaderFromOutMessage(boolean removeDefaultAPIHeaderFromOutMessage) {
-        this.removeDefaultAPIHeaderFromOutMessage = removeDefaultAPIHeaderFromOutMessage;
-    }
-
-    public void setRequestOrigin(String requestOrigin) {
-        this.requestOrigin = requestOrigin;
-    }
-
 }

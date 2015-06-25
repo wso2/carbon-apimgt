@@ -8,10 +8,10 @@
                                        <h5><%=i18n.localize("gettingStarted")%></h5>
 
                                           <ul class="help-links">
-                                          <li><a href="http://dist.wso2.org/products/api-manager/1.7.0/APIManager-GettingStarted-v1.7.0.pdf"><%=i18n.localize("gettingStartedGuide")%></a></li>
-                                          <li><a href="http://docs.wso2.org/wiki/display/AM170/Installing+the+Product" target="_blank"><%=i18n.localize("installationGuide")%></a></li>
-                                          <li><a href="http://docs.wso2.org/display/AM170/Quick+Start" target="_blank"><%=i18n.localize("quickStartGuide")%></a></li>
-                                          <li> <a href="http://docs.wso2.org/display/AM170/Samples" target="_blank"><%=i18n.localize("samplesLink")%></a></li>
+                                          <li><a href="http://dist.wso2.org/products/api-manager/1.5.0/APIManager-GettingStarted-v1.5.0.pdf"><%=i18n.localize("gettingStartedGuide")%></a></li>
+                                          <li><a href="http://docs.wso2.org/wiki/display/AM150/Installing+the+Product" target="_blank"><%=i18n.localize("installationGuide")%></a></li>
+                                          <li><a href="http://docs.wso2.org/display/AM150/Quick+Start" target="_blank"><%=i18n.localize("quickStartGuide")%></a></li>
+                                          <li> <a href="http://docs.wso2.org/display/AM150/Samples" target="_blank"><%=i18n.localize("samplesLink")%></a></li>
                                           </ul>
                                    </div>
                                    <div class="span10 help-and-links">
@@ -29,7 +29,7 @@
                                        <div class="pull-left">
                                            <h5><%=i18n.localize("documentationSupport")%></h5>
                                            <ul class="help-links">
-                                            <li><a target="_blank" href="http://docs.wso2.org/wiki/display/AM170/WSO2+API+Manager+Documentation"><%=i18n.localize("productDocumentation")%></a></li>
+                                            <li><a target="_blank" href="http://docs.wso2.org/wiki/display/AM150/WSO2+API+Manager+Documentation"><%=i18n.localize("productDocumentation")%></a></li>
                                             <li><a target="_blank" href="http://wso2.com/support"><%=i18n.localize("getSupport")%></a></li>
                                             <li><a target="_blank" href="http://wso2.com/products/api-manager/"><%=i18n.localize("productHome")%></a></li>
                                            </ul>

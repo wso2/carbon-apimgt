@@ -34,26 +34,6 @@ public class Environment implements Serializable {
 
     private String apiGatewayEndpoint;
 
-    private String description;
-
-    public boolean isShowInConsole() {
-        return showInConsole;
-    }
-
-    public void setShowInConsole(boolean showInConsole) {
-        this.showInConsole = showInConsole;
-    }
-
-    private boolean showInConsole;
-
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
     public String getType() {
         return type;
     }

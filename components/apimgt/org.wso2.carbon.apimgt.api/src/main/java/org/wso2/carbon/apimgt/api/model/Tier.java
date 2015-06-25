@@ -24,15 +24,13 @@ import java.util.Map;
  * This class represent the Tier
  */
 @SuppressWarnings("unused")
-public class Tier implements Serializable, Comparable<Tier>{
+public class Tier implements Serializable{
 
     private String name;
     private String displayName;
     private String description;
     private byte[] policyContent;
     private Map<String,Object> tierAttributes;
-
-    private long requestsPerMin = 0;
 
     public Tier(String name) {
         this.name = name;
@@ -73,14 +71,6 @@ public class Tier implements Serializable, Comparable<Tier>{
         this.tierAttributes = tierAttributes;
     }
 
-    public long getRequestsPerMin() {
-        return requestsPerMin;
-    }
-
-    public void setRequestsPerMin(long requestsPerMin) {
-        this.requestsPerMin = requestsPerMin;
-    }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -95,16 +85,5 @@ public class Tier implements Serializable, Comparable<Tier>{
     @Override
     public int hashCode() {
         return name != null ? name.hashCode() : 0;
-    }
-
-    @Override
-    public int compareTo(Tier tier) {
-        if(tier.getRequestsPerMin() == Long.MAX_VALUE){
-            return 1;
-        }
-        else if(this.getRequestsPerMin() == Long.MAX_VALUE){
-            return -1;
-        }
-        return new Long(tier.getRequestsPerMin() - this.getRequestsPerMin()).intValue();
     }
 }

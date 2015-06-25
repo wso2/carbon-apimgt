@@ -406,24 +406,24 @@ API Definition for Swagger will not be overriden with the changes you will do to
 	                	<label class="control-label" for="subscriptions"><%=i18n.localize("subscriptionsTitle")%>:</label>
 	                			
 						<div class="controls">
-		                	<select class="select required" id="subscriptions" name="subscriptions" onchange="showHideTenants()">
+		                	<select class="select required" id="subscriptions" name="subscriptions" onchange="showHideTennats()">
 			                	<option value="current_tenant" <%if(api.subscriptionAvailability=="current_tenant"){%> selected="selected" <%}%> ><%=i18n.localize("availableToCurrentTenant")%></option>
 			                	<option value="all_tenants" <%if(api.subscriptionAvailability=="all_tenants"){%> selected="selected" <%}%> ><%=i18n.localize("availableToAllTenants")%></option>
-			                	<option value="specific_tenants" <%if(api.subscriptionAvailability=="specific_tenants"){%> selected="selected" <%}%> ><%=i18n.localize("availableToSpecificTenants")%></option>
+			                	<option value="specific_tennats" <%if(api.subscriptionAvailability=="specific_tennats"){%> selected="selected" <%}%> ><%=i18n.localize("availableToSpecificTenants")%></option>
 		                	</select>
                             <a class="icon-question-sign help_popup" help_data="subscriptions_help"></a>
                             <div id="subscriptions_help" class="hide"><%=i18n.localize("subscriptionHelpMsg")%></div>
 	                	</div>
 					                
                 <br/>
-                	<div class="control-group" id="tenantsDiv" <%if(api.subscriptionAvailability!="specific_tenants"){%>style="display: none;"<%}%>>
-		                <label class="control-label" for="tenants" id="tenantLabel" name="tenantLabel">
+                	<div class="control-group" id="tennatsDiv" <%if(api.subscriptionAvailability!="specific_tennats"){%>style="display: none;"<%}%>>
+		                <label class="control-label" for="tenants" id="tennatLabel" name="tennatLabel">
 		                	<%=i18n.localize("tenants")%>:<span class="requiredAstrix">*</span>
 		                </label>
 		                <div class="controls">
 		                    <input type="text" class="input required"
 		                    id="tenants" name="tenants" value="<%=api.subscriptionTenants%>"/>
-	                        <p class="help-block" id="tenantsHelp"><%=i18n.localize("tenantsHelpMsg")%></p>
+	                        <p class="help-block" id="tennatsHelp"><%=i18n.localize("tenantsHelpMsg")%></p>
 		                </div>
 	                
 	            	</div>

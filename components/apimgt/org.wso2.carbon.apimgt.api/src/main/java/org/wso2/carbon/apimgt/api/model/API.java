@@ -34,7 +34,6 @@ public class API implements Serializable{
     private String wsdlUrl;
     private String wadlUrl;
     private String context;
-    private String contextTemplate;
     private String thumbnailUrl;
     private Set<String> tags = new LinkedHashSet<String>();
     private Set<Documentation> documents = new LinkedHashSet<Documentation>();
@@ -78,9 +77,7 @@ public class API implements Serializable{
     
     private String subscriptionAvailability;
     private String subscriptionAvailableTenants;
-    private String allowedHeaders;
-    private String allowedOrigins;
-    private String swagger;
+ 
 
     private String endpointConfig;
     
@@ -95,19 +92,6 @@ public class API implements Serializable{
 
     private boolean isDefaultVersion = false;
     private boolean isPublishedDefaultVersion=false;
-
-    private Set<String> environments;
-
-	//Storing image properties
-	private FileData image;
-
-    public Set<String> getEnvironments() {
-        return environments;
-    }
-
-    public void setEnvironments(Set<String> environments) {
-        this.environments = environments;
-    }
 
     /**
      * Contains flag indicating whether dummy backend or not
@@ -242,14 +226,6 @@ public class API implements Serializable{
 
     public String getContext() {
         return context;
-    }
-
-    public void setContextTemplate(String contextTemplate) {
-        this.contextTemplate = contextTemplate;
-    }
-
-    public String getContextTemplate() {
-        return contextTemplate;
     }
 
     public void setWsdlUrl(String wsdlUrl) {
@@ -592,57 +568,4 @@ public class API implements Serializable{
     public boolean isPublishedDefaultVersion(){
         return isPublishedDefaultVersion;
     }
-
-    public String getAllowedOrigins() {
-        return allowedOrigins;
-    }
-
-    public void setAllowedOrigins(String allowedOrigins) {
-        this.allowedOrigins = allowedOrigins;
-    }
-
-    public String getAllowedHeaders() {
-        return allowedHeaders;
-    }
-
-    public void setAllowedHeaders(String allowedHeaders) {
-        this.allowedHeaders = allowedHeaders;
-    }
-
-	public String getTagSetAsString() {
-		StringBuilder tagsSet = new StringBuilder("");
-		if(this.getTags() != null) {
-			for (int k = 0; k < this.getTags().toArray().length; k++) {
-				tagsSet.append(this.getTags().toArray()[k].toString());
-				if (k != this.getTags().toArray().length - 1) {
-					tagsSet.append(",");
-				}
-			}
-		}
-		return tagsSet.toString();
-	}
-
-	public Tier[] getTierSetAsArray() {
-		Set<Tier> tierSet = this.getAvailableTiers();
-		if( tierSet != null) {
-			return tierSet.toArray(new Tier[tierSet.size()]);
-		}
-		return new Tier[0];
-	}
-
-	public String getSwagger() {
-		return swagger;
-	}
-
-	public void setSwagger(String swagger) {
-		this.swagger = swagger;
-	}
-
-	public FileData getImage() {
-		return image;
-	}
-
-	public void setImage(FileData image) {
-		this.image = image;
-	}
 }

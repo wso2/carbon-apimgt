@@ -27,29 +27,22 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpHeaders;
 import org.apache.synapse.MessageContext;
-import org.apache.synapse.config.xml.rest.VersionStrategyFactory;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.core.axis2.Axis2Sender;
-import org.apache.synapse.rest.RESTConstants;
 import org.apache.synapse.transport.nhttp.NhttpConstants;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 
 import javax.xml.namespace.QName;
-
-import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
-import java.util.*;
-import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
-// import org.wso2.carbon.identity.oauth2.stub.dto.OAuth2TokenValidationResponseDTO_TokenValidationContextParam;
-
-
-import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
 
 public class Utils {
     
     private static final Log log = LogFactory.getLog(Utils.class);
-    private static APIManagerConfiguration config= ServiceReferenceHolder.getInstance().getAPIManagerConfiguration();
     
     public static void sendFault(MessageContext messageContext, int status) {
         org.apache.axis2.context.MessageContext axis2MC = ((Axis2MessageContext) messageContext).
@@ -181,7 +174,9 @@ public class Utils {
         }
     }
     
-    public static String getAllowedOrigin(String currentRequestOrigin,String allowedOrigins) {
+    public static String getAllowedOrigin(String currentRequestOrigin) {
+    	String allowedOrigins = ServiceReferenceHolder.getInstance().getAPIManagerConfiguration().
+    	        getFirstProperty(APIConstants.CORS_CONFIGURATION_ACCESS_CTL_ALLOW_ORIGIN);
     	if (allowedOrigins != null) {
     		String[] origins = allowedOrigins.split(",");
     		List<String> originsList = new LinkedList<String>();
@@ -199,7 +194,7 @@ public class Utils {
     	
     	return allowedOrigins;
     }
-
+    
     public static String getAllowedHeaders() {
     	return ServiceReferenceHolder.getInstance().getAPIManagerConfiguration().
     	        getFirstProperty(APIConstants.CORS_CONFIGURATION_ACCESS_CTL_ALLOW_HEADERS);
@@ -211,15 +206,10 @@ public class Utils {
     }
     
     public static boolean isCORSEnabled() {
-    	String corsEnabled = config.
+    	String corsEnabled = ServiceReferenceHolder.getInstance().getAPIManagerConfiguration().
     	        getFirstProperty(APIConstants.CORS_CONFIGURATION_ENABLED);
     	    	    	
     	return Boolean.parseBoolean(corsEnabled);
-    }
-
-    public static boolean isStatsEnabled() {
-        return ServiceReferenceHolder.getInstance().getApiManagerConfigurationService().
-                getAPIAnalyticsConfiguration().isAnalyticsEnabled();
     }
 
     /**
@@ -229,6 +219,7 @@ public class Utils {
      * @return
      */
     public static boolean hasAccessTokenExpired(APIKeyValidationInfoDTO accessTokenDO) {
+        long timestampSkew;
         long currentTime;
         long validityPeriod;
         if (accessTokenDO.getValidityPeriod() != Long.MAX_VALUE) {
@@ -245,7 +236,7 @@ public class Utils {
             //check the validity of cached OAuth2AccessToken Response
             if ((currentTime) > (issuedTime + validityPeriod)) {
                 accessTokenDO.setValidationStatus(
-                        APIConstants.KeyValidationStatus.API_AUTH_INVALID_CREDENTIALS);
+                        APIConstants.KeyValidationStatus.API_AUTH_ACCESS_TOKEN_EXPIRED);
                 if (accessTokenDO.getEndUserToken() != null) {
                     log.info("Token " + accessTokenDO.getEndUserToken() + " expired.");
                 }
@@ -257,33 +248,4 @@ public class Utils {
         return false;
     }
 
-    public static String getRequestPath(MessageContext synCtx, String fullRequestPath, String apiContext, String
-            apiVersion) {
-        String requestPath;
-        String versionStrategy = (String) synCtx.getProperty(RESTConstants.SYNAPSE_REST_API_VERSION_STRATEGY);
-
-        if(VersionStrategyFactory.TYPE_URL.equals(versionStrategy)){
-            // most used strategy. server:port/context/version/resource
-            requestPath = fullRequestPath.substring((apiContext + apiVersion).length() + 1, fullRequestPath.length());
-        }else if(VersionStrategyFactory.TYPE_CONTEXT.equals(versionStrategy)){
-            // version in context. server:port/contextWithVersion/resource
-            requestPath = fullRequestPath.substring(apiContext.length(), fullRequestPath.length());
-        }else{
-            // default version. assume there is no version is used
-            requestPath = fullRequestPath.substring(apiContext.length(), fullRequestPath.length());
-        }
-        return requestPath;
-    }
-
-    public static void send(MessageContext messageContext, int status) {
-        org.apache.axis2.context.MessageContext axis2MC =
-                ((Axis2MessageContext) messageContext).getAxis2MessageContext();
-        axis2MC.setProperty(NhttpConstants.HTTP_SC, status);
-        messageContext.setResponse(true);
-        messageContext.setProperty("RESPONSE", "true");
-        messageContext.setTo(null);
-        axis2MC.removeProperty(Constants.Configuration.CONTENT_TYPE);
-        Map headers = (Map) axis2MC.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
-        Axis2Sender.sendBack(messageContext);
-    }
 }

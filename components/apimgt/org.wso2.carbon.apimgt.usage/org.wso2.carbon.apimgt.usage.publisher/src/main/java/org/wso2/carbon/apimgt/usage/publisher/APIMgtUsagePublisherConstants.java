@@ -39,12 +39,18 @@ public final class APIMgtUsagePublisherConstants {
     public static final String API_PUBLISHER = "api.ut.apiPublisher";
     public static final String APPLICATION_NAME = "api.ut.application.name";
     public static final String APPLICATION_ID = "api.ut.application.id";
-    public static final String REQUEST_START_TIME = "api.ut.requestTime";
-    public static final String BACKEND_REQUEST_START_TIME = "api.ut.backendRequestTime";
-    public static final String BACKEND_REQUEST_END_TIME = "api.ut.backendRequestEndTime";
-    public static final String REQUEST_END_TIME = "api.ut.requestEndTime";
 
-
+    public static final String  API_MANAGER_REQUEST_STREAM_NAME = "org.wso2.apimgt.statistics.request";
+    public static final String  API_MANAGER_REQUEST_STREAM_VERSION = "1.0.0";
+    public static final String  API_MANAGER_RESPONSE_STREAM_NAME = "org.wso2.apimgt.statistics.response";
+    public static final String  API_MANAGER_RESPONSE_STREAM_VERSION = "1.0.0";
+    public static final String  API_MANAGER_FAULT_STREAM_NAME = "org.wso2.apimgt.statistics.fault";
+    public static final String  API_MANAGER_FAULT_STREAM_VERSION = "1.0.0";
+    
     public static final String API_GOOGLE_ANALYTICS_TRACKING_ENABLED = "Enabled";
     public static final String API_GOOGLE_ANALYTICS_TRACKING_ID = "TrackingID";
+    
+
+
+        
 }

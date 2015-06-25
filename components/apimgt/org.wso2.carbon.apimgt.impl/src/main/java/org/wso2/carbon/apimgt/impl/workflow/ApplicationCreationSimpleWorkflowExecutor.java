@@ -20,17 +20,13 @@ package org.wso2.carbon.apimgt.impl.workflow;
 
 import java.util.List;
 
-import org.apache.axis2.util.JavaUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.impl.APIConstants;
-import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dto.ApplicationWorkflowDTO;
 import org.wso2.carbon.apimgt.impl.dto.WorkflowDTO;
-import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
-import org.wso2.carbon.apimgt.impl.workflow.events.APIMgtWorkflowDataPublisher;
 
 /**
  * This is a simple work flow extension to have Application creation process
@@ -54,15 +50,14 @@ public class ApplicationCreationSimpleWorkflowExecutor extends WorkflowExecutor 
 	 * @throws WorkflowException
 	 */
 
-    public void execute(WorkflowDTO workFlowDTO) throws WorkflowException {
-        if (log.isDebugEnabled()) {
-            log.info("Executing Application creation Workflow..");
-        }
-        workFlowDTO.setStatus(WorkflowStatus.APPROVED);
-        complete(workFlowDTO);
-        super.publishEvents(workFlowDTO);
+	public void execute(WorkflowDTO workFlowDTO) throws WorkflowException {
+		if (log.isDebugEnabled()) {
+			log.info("Executing Application creation Workflow..");
+		}
+		workFlowDTO.setStatus(WorkflowStatus.APPROVED);
+		complete(workFlowDTO);
 
-    }
+	}
 
 	/**
 	 * Complete the external process status

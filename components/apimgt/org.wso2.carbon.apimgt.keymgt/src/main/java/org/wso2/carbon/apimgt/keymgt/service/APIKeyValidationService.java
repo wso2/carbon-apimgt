@@ -33,12 +33,15 @@ import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.keymgt.APIKeyMgtException;
-import org.wso2.carbon.apimgt.keymgt.handlers.KeyValidationHandler;
-import org.wso2.carbon.apimgt.keymgt.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.keymgt.util.APIKeyMgtDataHolder;
-import org.wso2.carbon.apimgt.keymgt.util.APIKeyMgtUtil;
 import org.wso2.carbon.core.AbstractAdmin;
+import org.wso2.carbon.identity.oauth.config.OAuthServerConfiguration;
+import org.wso2.carbon.identity.oauth2.IdentityOAuth2Exception;
+import org.wso2.carbon.identity.oauth2.model.AccessTokenDO;
+import org.wso2.carbon.identity.oauth2.validators.OAuth2ScopeValidator;
 
+import javax.cache.Cache;
+import javax.cache.Caching;
 import java.util.*;
 
 /**
@@ -46,31 +49,6 @@ import java.util.*;
  */
 public class APIKeyValidationService extends AbstractAdmin {
     private static final Log log = LogFactory.getLog(APIKeyValidationService.class);
-    private static KeyValidationHandler keyValidationHandler;
-
-    public APIKeyValidationService() {
-        try {
-            if (keyValidationHandler == null) {
-
-                KeyValidationHandler validationHandler = (KeyValidationHandler) Class.forName
-                        (ServiceReferenceHolder.getInstance().
-                                getAPIManagerConfigurationService().getAPIManagerConfiguration().
-                                getFirstProperty(APIConstants.API_KEY_MANGER_VALIDATIONHANDLER_CLASS_NAME)).newInstance();
-                log.info("Initialised KeyValidationHandler instance successfully");
-                if (keyValidationHandler == null) {
-                    synchronized (this) {
-                        keyValidationHandler = validationHandler;
-                    }
-                }
-            }
-        } catch (InstantiationException e) {
-            log.error("Error while instantiating class" + e.toString());
-        } catch (IllegalAccessException e) {
-            log.error("Error while accessing class" + e.toString());
-        } catch (ClassNotFoundException e) {
-            log.error("Error while creating keyManager instance" + e.toString());
-        }
-    }
 
     /**
      * Validates the access tokens issued for a particular user to access an API.
@@ -78,7 +56,7 @@ public class APIKeyValidationService extends AbstractAdmin {
      * @param context     Requested context
      * @param accessToken Provided access token
      * @return APIKeyValidationInfoDTO with authorization info and tier info if authorized. If it is not
-     * authorized, tier information will be <pre>null</pre>
+     *         authorized, tier information will be <pre>null</pre>
      * @throws APIKeyMgtException Error occurred when accessing the underlying database or registry.
      */
     public APIKeyValidationInfoDTO validateKey(String context, String version, String accessToken,
@@ -116,73 +94,99 @@ public class APIKeyValidationService extends AbstractAdmin {
             log.debug(logMsg);
         }
 
-        TokenValidationContext validationContext = new TokenValidationContext();
-        validationContext.setAccessToken(accessToken);
-        validationContext.setClientDomain(clientDomain);
-        validationContext.setContext(context);
-        validationContext.setHttpVerb(httpVerb);
-        validationContext.setMatchingResource(matchingResource);
-        validationContext.setRequiredAuthenticationLevel(requiredAuthenticationLevel);
-        validationContext.setValidationInfoDTO(new APIKeyValidationInfoDTO());
-        validationContext.setVersion(version);
+        Cache keyManagerCache =
+                Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER).getCache(APIConstants.KEY_CACHE_NAME);
+        String cacheKey = APIUtil.getAccessTokenCacheKey(accessToken, context, version, matchingResource,
+                                                         httpVerb, requiredAuthenticationLevel);
 
-        String cacheKey = APIUtil.getAccessTokenCacheKey(accessToken,
-                                                         context, version, matchingResource, httpVerb, requiredAuthenticationLevel);
+        APIKeyValidationInfoDTO info;
+        ApiMgtDAO apiMgtDAO = new ApiMgtDAO();
+        Boolean keyCacheEnabledKeyMgt = APIKeyMgtDataHolder.getKeyCacheEnabledKeyMgt();
 
-        validationContext.setCacheKey(cacheKey);
+        //If gateway key cache enabled only we retrieve key validation info or JWT token form cache
+        if (keyCacheEnabledKeyMgt) {
+            info = (APIKeyValidationInfoDTO) keyManagerCache.get(cacheKey);
+            //If key validation information is not null then only we proceed with cached object
+            if (info != null) {
+                if (log.isDebugEnabled()) {
+                    log.debug("Found cached access token for : " + cacheKey + " .Checking for expiration time.");
+                }
+                
+                if (info.isAuthorized()) {
+                    //return if client domain is not-authorized
+                    APIUtil.checkClientDomainAuthorized(info, clientDomain);
+                }
 
-        APIKeyValidationInfoDTO infoDTO = APIKeyMgtUtil.getFromKeyManagerCache(cacheKey);
+                 //check if token has expired
+                boolean tokenExpired = APIUtil.isAccessTokenExpired(info);
+                if (!tokenExpired) {
+                    //If key validation information is authorized then only we have to check for JWT token
+                    //If key validation information is authorized and JWT cache disabled then only we use
+                    //cached api key validation information and generate new JWT token
+                    if (!APIKeyMgtDataHolder.getJWTCacheEnabledKeyMgt() && info.isAuthorized()) {
+                        String JWTString;
 
-        if (infoDTO != null) {
-            validationContext.setCacheHit(true);
-            log.debug("APIKeyValidationInfoDTO fetched from cache. Setting cache hit to true...");
-            validationContext.setValidationInfoDTO(infoDTO);
+                        JWTString = apiMgtDAO.createJWTTokenString(context, version, info);
 
-            // If JWTCache is disabled, we have to re-generate JWT.
-            if (!APIKeyMgtDataHolder.isJWTCacheEnabledKeyMgt()) {
-                infoDTO.setEndUserToken(null);
+                        info.setEndUserToken(JWTString);
+                    }
+                    if (log.isDebugEnabled() && axis2MessageContext != null) {
+                        logMessageDetails(axis2MessageContext, info);
+                    }
+                } else {
+                    log.info("Token " + cacheKey + " expired.");
+                    info.setAuthorized(false);
+                }
+
+                return info;
             }
+        }
 
-            if (infoDTO.getEndUserToken() != null) {
-                log.debug("JWT fetched from cache. Setting JWTCacheHit to true...");
-                validationContext.setJWTCacheHit(true);
+        String resource = context + "/" + version + matchingResource + ":" + httpVerb;
+
+        //If validation info is not cached creates fresh api key validation information object and returns it
+        APIKeyValidationInfoDTO apiKeyValidationInfoDTO = apiMgtDAO.validateKey(context, version, accessToken,requiredAuthenticationLevel);
+
+        OAuth2ScopeValidator scopeValidator = OAuthServerConfiguration.getInstance().getoAuth2ScopeValidator();
+
+        String[] scopes = null;
+        Set<String> scopesSet = apiKeyValidationInfoDTO.getScopes();
+        if(scopesSet != null && !scopesSet.isEmpty()){
+            scopes = scopesSet.toArray(new String[scopesSet.size()]);
+        }
+
+        AccessTokenDO accessTokenDO = new AccessTokenDO(apiKeyValidationInfoDTO.getConsumerKey(),
+                                                        apiKeyValidationInfoDTO.getEndUserName(), scopes,
+                                                        null, apiKeyValidationInfoDTO.getValidityPeriod(),
+                                                        apiKeyValidationInfoDTO.getType());
+        accessTokenDO.setAccessToken(accessToken);
+
+        try {
+            if(scopeValidator != null && !scopeValidator.validateScope(accessTokenDO, resource)){
+                apiKeyValidationInfoDTO.setAuthorized(false);
+                apiKeyValidationInfoDTO.setValidationStatus(APIConstants.KeyValidationStatus.INVALID_SCOPE);
             }
+        } catch (IdentityOAuth2Exception e) {
+            log.error("ERROR while validating token scope " + e.getMessage());
+            apiKeyValidationInfoDTO.setAuthorized(false);
+            apiKeyValidationInfoDTO.setValidationStatus(APIConstants.KeyValidationStatus.INVALID_SCOPE);
         }
 
-        log.debug("Before calling Validate Token method...");
-        boolean state = keyValidationHandler.validateToken(validationContext);
-        log.debug("State after calling validateToken ... " + state);
-
-        if (state) {
-            state = keyValidationHandler.validateSubscription(validationContext);
+        if (apiKeyValidationInfoDTO.isAuthorized()) {
+        	//return if client domain is not-authorized
+            APIUtil.checkClientDomainAuthorized(apiKeyValidationInfoDTO, clientDomain);
         }
-
-        log.debug("State after calling validateSubscription... " + state);
-
-        if (state) {
-            state = keyValidationHandler.validateScopes(validationContext);
-        }
-
-        log.debug("State after calling validateScopes... " + state);
-
-        if (state && APIKeyMgtDataHolder.isJwtGenerationEnabled()) {
-            keyValidationHandler.generateConsumerToken(validationContext);
-        }
-        log.debug("State after calling generateConsumerToken... " + state);
-
-        if (!validationContext.isCacheHit()) {
-            APIKeyMgtUtil.writeToKeyManagerCache(cacheKey, validationContext.getValidationInfoDTO());
+        
+        //If key validation information is not null and key validation enabled at keyMgt we put validation
+        //information into cache
+        if (apiKeyValidationInfoDTO != null) {
+            keyManagerCache.put(cacheKey, apiKeyValidationInfoDTO);
         }
 
         if (log.isDebugEnabled() && axis2MessageContext != null) {
-            logMessageDetails(axis2MessageContext, validationContext.getValidationInfoDTO());
+            logMessageDetails(axis2MessageContext, apiKeyValidationInfoDTO);
         }
-
-        if (log.isDebugEnabled()) {
-            log.debug("APIKeyValidationInfoDTO before returning : " + validationContext.getValidationInfoDTO());
-        }
-
-        return validationContext.getValidationInfoDTO();
+        return apiKeyValidationInfoDTO;
     }
 
     /**
@@ -191,7 +195,7 @@ public class APIKeyValidationService extends AbstractAdmin {
      * @param context Requested context
      * @param version API Version
      * @return APIKeyValidationInfoDTO with authorization info and tier info if authorized. If it is not
-     * authorized, tier information will be <pre>null</pre>
+     *         authorized, tier information will be <pre>null</pre>
      * @throws APIKeyMgtException Error occurred when accessing the underlying database or registry.
      */
     public ArrayList<URITemplate> getAllURITemplates(String context, String version)

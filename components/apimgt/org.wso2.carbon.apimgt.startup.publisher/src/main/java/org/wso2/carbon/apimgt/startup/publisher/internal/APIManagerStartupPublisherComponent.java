@@ -1,3 +1,4 @@
+
 /*
  * Copyright (c) 2005-2012, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
@@ -25,7 +26,6 @@ import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
 import org.wso2.carbon.apimgt.startup.publisher.APIManagerStartupPublisher;
 import org.wso2.carbon.core.ServerStartupHandler;
 import org.wso2.carbon.registry.core.service.RegistryService;
-import org.wso2.carbon.user.core.service.RealmService;
 
 
 /**
@@ -36,9 +36,6 @@ import org.wso2.carbon.user.core.service.RealmService;
  * @scr.reference name="api.manager.config.service"
  * interface="org.wso2.carbon.apimgt.impl.APIManagerConfigurationService" cardinality="1..1"
  * policy="dynamic" bind="setAPIManagerConfigurationService" unbind="unsetAPIManagerConfigurationService"
- * @scr.reference name="user.realm.service"
- * interface="org.wso2.carbon.user.core.service.RealmService"
- * cardinality="1..1" policy="dynamic" bind="setRealmService" unbind="unsetRealmService"
  */
 public class APIManagerStartupPublisherComponent {
 	private static final Log log = LogFactory.getLog(APIManagerStartupPublisherComponent.class);
@@ -79,16 +76,6 @@ public class APIManagerStartupPublisherComponent {
         log.debug("API manager configuration service unbound from the API usage handler");
         ServiceReferenceHolder.getInstance().setAPIManagerConfigurationService(null);
     }
-
-    protected void setRealmService(RealmService realmService) {
-        if (realmService != null && log.isDebugEnabled()) {
-            log.debug("Realm service initialized");
-        }
-        ServiceReferenceHolder.getInstance().setRealmService(realmService);
-    }
-
-    protected void unsetRealmService(RealmService realmService) {
-        ServiceReferenceHolder.getInstance().setRealmService(null);
-    }
+    
 }
 

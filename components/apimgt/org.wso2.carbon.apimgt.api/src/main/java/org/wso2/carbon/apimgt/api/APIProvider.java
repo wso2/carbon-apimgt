@@ -19,6 +19,7 @@ package org.wso2.carbon.apimgt.api;
 
 import org.wso2.carbon.apimgt.api.dto.UserApplicationAPIUsage;
 import org.wso2.carbon.apimgt.api.model.*;
+
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -139,26 +140,14 @@ public interface APIProvider extends APIManager {
     public void addAPI(API api) throws APIManagementException;
 
     /**
-     * Updates design and implementation of an existing API. This method must not be used to change API status. Implementations
+     * Updates an existing API. This method must not be used to change API status. Implementations
      * should throw an exceptions when such attempts are made. All life cycle state changes
      * should be carried out using the changeAPIStatus method of this interface.
      *
      * @param api API
-     * @throws org.wso2.carbon.apimgt.api.APIManagementException if failed to update API
-     * @throws org.wso2.carbon.apimgt.api.FaultGatewaysException on Gateway Failure
+     * @throws APIManagementException if failed to update API
      */
-    public void updateAPI(API api) throws APIManagementException, FaultGatewaysException;
-
-    /**
-     * Updates manage of an existing API. This method must not be used to change API status. Implementations
-     * should throw an exceptions when such attempts are made. All life cycle state changes
-     * should be carried out using the changeAPIStatus method of this interface.
-     *
-     * @param api API
-     * @return failed environments during gateway operation
-     * @throws APIManagementException failed environments during gateway operation
-     */
-    public void manageAPI(API api) throws APIManagementException, FaultGatewaysException;
+    public void updateAPI(API api) throws APIManagementException;
 
     /**
      * Change the lifecycle state of the specified API
@@ -167,12 +156,10 @@ public interface APIProvider extends APIManager {
      * @param status New status of the API
      * @param userId User performing the API state change
      * @param updateGatewayConfig Whether the changes should be pushed to the API gateway or not
-     * @throws org.wso2.carbon.apimgt.api.APIManagementException on error
-     * @throws org.wso2.carbon.apimgt.api.FaultGatewaysException on Gateway Failure
-     * */
+     * @throws APIManagementException on error
+     */
     public void changeAPIStatus(API api, APIStatus status, String userId,
-                                boolean updateGatewayConfig)
-            throws APIManagementException, FaultGatewaysException;
+                                boolean updateGatewayConfig) throws APIManagementException;
 
     /**
      * Locate any API keys issued for the previous versions of the given API, which are
@@ -193,7 +180,7 @@ public interface APIProvider extends APIManager {
      * @throws APIManagementException If an error occurs while trying to create
      *                                the new version of the API
      */
-    public boolean createNewAPIVersion(API api, String newVersion) throws DuplicateAPIException,
+    public void createNewAPIVersion(API api, String newVersion) throws DuplicateAPIException,
             APIManagementException;
 
     /**
@@ -235,7 +222,19 @@ public interface APIProvider extends APIManager {
      */
     public void addDocumentationContent(API api, String documentationName, String text)
             throws APIManagementException;
-   
+    
+    /**
+     * This method used to update the API definition content - Swagger
+     *
+     * @param identifier,        API identifier
+     * @param documentationName, name of the inline documentation
+     * @param text,              content of the inline documentation
+     * @throws org.wso2.carbon.apimgt.api.APIManagementException
+     *          if failed to add the document as a resource to registry
+     */
+    public void addAPIDefinitionContent(APIIdentifier identifier, String documentationName, String text) 
+    					throws APIManagementException;
+
     /**
      * Updates a given documentation
      *
@@ -272,7 +271,7 @@ public interface APIProvider extends APIManager {
      * @param identifier APIIdentifier
      * @throws APIManagementException if failed to remove the API
      */
-    public boolean deleteAPI(APIIdentifier identifier) throws APIManagementException;
+    public void deleteAPI(APIIdentifier identifier) throws APIManagementException;
 
     /**
      * Search API
@@ -290,10 +289,10 @@ public interface APIProvider extends APIManager {
      * @param subStatus Subscription Status
      * @param appId Application Id              *
      * @return int value with subscription id
-     * @throws APIManagementException
+     * @throws org.wso2.carbon.apimgt.api.APIManagementException
      *          If failed to update subscription status
      */
-    public void updateSubscription(APIIdentifier apiId, String subStatus, int appId) throws APIManagementException;
+    public void updateSubscription(APIIdentifier apiId,String subStatus,int appId) throws APIManagementException;
     
     /**
      * Update the Tier Permissions
@@ -301,17 +300,16 @@ public interface APIProvider extends APIManager {
      * @param tierName Tier Name
      * @param permissionType Permission Type
      * @param roles Roles          
-     * @throws APIManagementException
+     * @throws org.wso2.carbon.apimgt.api.APIManagementException
      *          If failed to update subscription status
      */
-    public void updateTierPermissions(String tierName, String permissionType, String roles)
-            throws APIManagementException;
+    public void updateTierPermissions(String tierName, String permissionType, String roles) throws APIManagementException;
     
     /**
      * Get the list of Tier Permissions
      * 
      * @return Tier Permission Set
-     * @throws APIManagementException
+     * @throws org.wso2.carbon.apimgt.api.APIManagementException
      *          If failed to update subscription status
      */
     public Set getTierPermissions() throws APIManagementException;
@@ -346,29 +344,26 @@ public interface APIProvider extends APIManager {
      * When enabled publishing to external APIStores support,publish the API to external APIStores
      * @param api The API which need to published
      * @param apiStoreSet The APIStores set to which need to publish API
-     * @throws APIManagementException
+     * @throws org.wso2.carbon.apimgt.api.APIManagementException
      *          If failed to update subscription status
      */
-    public void publishToExternalAPIStores(API api, Set<APIStore> apiStoreSet, boolean apiOlderVersionExist)
-            throws APIManagementException;
+    public void publishToExternalAPIStores(API api,Set<APIStore> apiStoreSet) throws APIManagementException;
 
     /**
      * Update the API to external APIStores and database
      * @param api The API which need to published
      * @param apiStoreSet The APIStores set to which need to publish API
-     * @param apiOlderVersionExist The api contained older versions
-     * @throws APIManagementException
+     * @throws org.wso2.carbon.apimgt.api.APIManagementException
      *          If failed to update subscription status
      */
-    public boolean updateAPIsInExternalAPIStores(API api, Set<APIStore> apiStoreSet, boolean apiOlderVersionExist)
-            throws APIManagementException;
+    public boolean updateAPIsInExternalAPIStores(API api,Set<APIStore> apiStoreSet) throws APIManagementException;
 
 
     /**
      * When enabled publishing to external APIStores support,get all the external apistore details which are
      * published and stored in db and which are not unpublished
      * @param apiId The API Identifier which need to update in db
-     * @throws APIManagementException
+     * @throws org.wso2.carbon.apimgt.api.APIManagementException
      *          If failed to update subscription status
      */
 
@@ -378,7 +373,7 @@ public interface APIProvider extends APIManager {
      * When enabled publishing to external APIStores support,get only the published external apistore details which are
      * stored in db
      * @param apiId The API Identifier which need to update in db
-     * @throws APIManagementException
+     * @throws org.wso2.carbon.apimgt.api.APIManagementException
      *          If failed to update subscription status
      */
     public Set<APIStore> getPublishedExternalAPIStores(APIIdentifier apiId) throws APIManagementException;
@@ -387,7 +382,7 @@ public interface APIProvider extends APIManager {
      * Checks the Gateway Type
      * 
      * @return True if gateway is Synpase
-     * @throws APIManagementException
+     * @throws org.wso2.carbon.apimgt.api.APIManagementException
      *         
      */
     public boolean isSynapseGateway() throws APIManagementException;
@@ -400,136 +395,23 @@ public interface APIProvider extends APIManager {
      * @return   Set of Documents and APIs
      * @throws APIManagementException
      */
-    public Map<Documentation, API> searchAPIsByDoc(String searchTerm, String searchType) throws APIManagementException;   
-
+    public Map<Documentation, API> searchAPIsByDoc(String searchTerm, String searchType) throws APIManagementException;
+    
     /**
-     * Returns all the Consumer keys of applications which are subscribed to given API
-     *
-     * @param apiIdentifier APIIdentifier
-     * @return a String array of ConsumerKeys
+     * This method updates Swagger 1.2 resources in the registry
+     * @param fileName
+     * @param jsonText
      * @throws APIManagementException
      */
-    public String[] getConsumerKeys(APIIdentifier apiIdentifier) throws APIManagementException;
-
+    public void updateSwagger12Definition(APIIdentifier apiId, String fileName, String jsonText) throws APIManagementException;
+    
+    
     /**
-     * Returns the swagger v2.0 definition as a string
-     *
-     * @param apiId id of the APIIdentifier
-     * @return swagger string
+     * Returns the Swagger12 definition as a string
+     * @param apiId
+     * @return
      * @throws APIManagementException
      */
-    public String getSwagger20Definition(APIIdentifier apiId) throws APIManagementException;
+    public String getSwagger12Definition(APIIdentifier apiId) throws APIManagementException;
 
-
-    /**
-     * This method updates Swagger 2.0 resources in the registry
-     *
-     * @param apiId    id of the APIIdentifier
-     * @param jsonText json text to be saved in the registry
-     * @throws APIManagementException
-     */
-    public void saveSwagger20Definition(APIIdentifier apiId, String jsonText) throws APIManagementException;
-
-	/**
-	 * Create a API for given api identifier and context
-	 *
-	 * @param apiIdentifier the API identifier
-	 * @param context context of the API
-	 * @return uuid of the generic API artifact that has created
-	 */
-	public String createAPI(APIIdentifier apiIdentifier, String context) throws APIManagementException;
-
-	/**
-	 * Update the API with the values coming in the design phase
-	 * @param api Object which contains the values to be updated
-	 * @param tags list of tags
-	 * @param swagger swagger from the API Doc
-	 * @return return success of fail
-	 * @throws APIManagementException
-	 */
-	public boolean updateAPIDesign(API api, String tags, String swagger) throws APIManagementException;
-
-	/**
-	 * Get subscriber count of API
-	 * @param apiId api identifier
-	 * @return number of subscribers of API
-	 * @throws APIManagementException
-	 */
-	public int getSubscriberCount(APIIdentifier apiId) throws APIManagementException;
-
-	/**
-	 * Check whether user has publish permission
-	 *
-	 * @return true if user has publish permission else false
-	 */
-	public boolean hasPublishPermission() throws APIManagementException;
-
-	/**
-	 * This method is to functionality of update implementation of an API in API-Provider
-	 *
-	 * @param  updatedAPI the updated api contents
-	 * @return true if the API was added successfully
-	 * @throws APIManagementException Wrapped exception by org.wso2.carbon.apimgt.api.APIManagementException
-	 */
-	public boolean updateAPIImplementation(API updatedAPI) throws APIManagementException;
-
-	/**
-	 * Check whehter older versions exist for given api
-	 *
-	 * @param identifier the api identifier
-	 *
-	 * @return true if older version exist else false
-	 * @throws APIManagementException
-	 */
-	public boolean isAPIOlderVersionExist(APIIdentifier identifier) throws APIManagementException;
-
-	/**
-	 * Validate given set of roles
-	 *
-	 * @param inputRoles input role set
-	 * @return true if role set is valid, else false
-	 */
-	public boolean validateRoles(String[] inputRoles);
-
-	/**
-	 * Retrieves active tenant domains and return true or false to display private
-	 * visibility
-	 *
-	 * @return boolean true If display private visibility
-	 */
-	public boolean isMultipleTenantsAvailable();
-
-	/**
-	 * This method is to functionality of managing an API in API-Provider     *
-	 *
-	 * @param updatedAPI updated api contents
-	 * @return true if the API was added successfully
-	 * @throws APIManagementException Wrapped exception by org.wso2.carbon.apimgt.api.APIManagementException
-	 */
-	public boolean updateAPIManagePhase(API updatedAPI) throws APIManagementException, FaultGatewaysException;
-
-	/**
-	 *
-	 * @return true if the API was added successfully
-	 * @throws APIManagementException
-	 */
-	public  boolean updateAPIStatus(APIIdentifier identifier, String status, boolean publishToGateway, boolean deprecateOldVersions
-			,boolean makeKeysForwardCompatible) throws APIManagementException, FaultGatewaysException;
-
-	/**
-	 * Change the API Status. This method is responsible invoke the governance api to change the life cycle status.
-	 * If API is already published, then this method will execute only updateAPIStatus method as there is no life cycle
-	 * transition. So the API publisher executor not executed when current status and target status not changed
-	 *
-	 * @param apiIdentifier api identifier
-	 * @param targetStatus next state
-	 * @param publishToGateway  boolean value to indicate publish to the gateway or not
-	 * @param deprecateOldVersions boolean value to indicate deprecate old versions or not
-	 * @param makeKeysForwardCompatible boolean value to indicate makes key forward compatible or not
-	 * @return true if api status change successful
-	 * @throws APIManagementException
-	 */
-	public boolean changeLifeCycleStatus(APIIdentifier apiIdentifier, String targetStatus, boolean publishToGateway,
-	                                     boolean deprecateOldVersions ,boolean makeKeysForwardCompatible)
-			throws	APIManagementException;
 }

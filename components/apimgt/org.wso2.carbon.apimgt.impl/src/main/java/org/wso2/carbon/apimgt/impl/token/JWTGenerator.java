@@ -88,6 +88,11 @@ public class JWTGenerator extends AbstractJWTGenerator {
         ClaimsRetriever claimsRetriever = getClaimsRetriever();
         if (claimsRetriever != null) {
             String tenantAwareUserName = keyValidationInfoDTO.getEndUserName();
+
+            if (MultitenantConstants.SUPER_TENANT_ID == APIUtil.getTenantId(tenantAwareUserName)) {
+                tenantAwareUserName = MultitenantUtils.getTenantAwareUsername(tenantAwareUserName);
+            }
+
             try {
                 return claimsRetriever.getClaims(tenantAwareUserName);
 

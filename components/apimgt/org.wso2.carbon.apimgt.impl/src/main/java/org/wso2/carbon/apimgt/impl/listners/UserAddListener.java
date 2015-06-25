@@ -90,7 +90,7 @@ public class UserAddListener extends AbstractUserStoreManagerListener {
         return PolicyEngine.getPolicy(builder.getDocumentElement());
     }
 
-    private static OMElement getPayload(String userName) throws XMLStreamException, XMLStreamException {
+    private static OMElement getPayload(String userName) throws XMLStreamException, javax.xml.stream.XMLStreamException {
         String payload = "   <p:UserCreationProcessRequest xmlns:p=\"http://wso2.org/bps/sample\">\n" +
                 "      <!--Exactly 1 occurrence-->\n" +
                 "      <p:input>" + userName + "</p:input>\n" +

@@ -1,9 +1,0 @@
-<%
-jagg.initializer("item-add", {
-
-    preInitialize:function () {
-    jagg.addFooterJS("create-options", "jagg", "templates/item-add/js/item-add.js");
-    }
-});
-%>
-

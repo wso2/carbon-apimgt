@@ -28,9 +28,7 @@ import org.apache.synapse.rest.RESTConstants;
 import org.apache.synapse.rest.RESTUtils;
 import org.apache.synapse.rest.Resource;
 import org.apache.synapse.rest.dispatch.RESTDispatcher;
-import org.apache.synapse.rest.dispatch.URITemplateBasedDispatcher;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
-import org.wso2.carbon.apimgt.gateway.handlers.Utils;
 import org.wso2.carbon.apimgt.gateway.handlers.security.keys.APIKeyDataStore;
 import org.wso2.carbon.apimgt.gateway.handlers.security.keys.WSAPIKeyDataStore;
 import org.wso2.carbon.apimgt.gateway.handlers.security.thrift.ThriftAPIDataStore;
@@ -46,10 +44,6 @@ import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import javax.cache.Cache;
 import javax.cache.Caching;
 import java.util.*;
-import org.wso2.carbon.apimgt.gateway.handlers.Utils;
-import org.wso2.carbon.context.CarbonContext;
-import org.wso2.carbon.context.PrivilegedCarbonContext;
-import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
 /**
  * This class is used to validate a given API key against a given API context and a version.
@@ -94,15 +88,12 @@ public class APIKeyValidator {
     protected Cache getGatewayKeyCache() {
         return Caching.getCacheManager(
                 APIConstants.API_MANAGER_CACHE_MANAGER).getCache(APIConstants.GATEWAY_KEY_CACHE_NAME);
-    }
-
-    protected Cache getGatewayTokenCache() {
-        return Caching.getCacheManager(
-                APIConstants.API_MANAGER_CACHE_MANAGER).getCache(APIConstants.GATEWAY_TOKEN_CACHE_NAME);
+        //return PrivilegedCarbonContext.getCurrentContext(axisConfig).getCache("keyCache");
     }
 
     protected Cache getResourceCache() {
         return Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER).getCache(APIConstants.RESOURCE_CACHE_NAME);
+        //return PrivilegedCarbonContext.getCurrentContext(axisConfig).getCache("resourceCache");
     }
 
     /**
@@ -128,27 +119,16 @@ public class APIKeyValidator {
 
         String cacheKey = APIUtil.getAccessTokenCacheKey(apiKey, context, prefixedVersion, matchingResource,
                                                          httpVerb, authenticationScheme);
-        //If Gateway key caching is enabled.
         if (gatewayKeyCacheEnabled) {
-            //Get the access token from the first level cache.
-            String cachedToken = (String) getGatewayTokenCache().get(apiKey);
+            APIKeyValidationInfoDTO info = (APIKeyValidationInfoDTO) getGatewayKeyCache().get(cacheKey);
 
-            //If the access token exists in the first level cache.
-            if (cachedToken != null) {
-                APIKeyValidationInfoDTO info = (APIKeyValidationInfoDTO) getGatewayKeyCache().get(cacheKey);
-
-                if (info != null) {
-                    if (APIUtil.isAccessTokenExpired(info)) {
-                        log.info("Token " + apiKey + " expired.");
-                        info.setAuthorized(false);
-                        // in cache, if token is expired  remove cache entry.
-                        getGatewayKeyCache().remove(cacheKey);
-
-                        //Remove from the first level token cache as well.
-                        getGatewayTokenCache().remove(apiKey);
-                    }
-                    return info;
+            if (info != null) {
+                if (APIUtil.isAccessTokenExpired(info)) {
+                    info.setAuthorized(false);
+                 // in cache, if token is expired  remove cache entry.
+                    getGatewayKeyCache().remove(cacheKey);
                 }
+                return info;
             }
         }
 
@@ -164,33 +144,9 @@ public class APIKeyValidator {
         APIKeyValidationInfoDTO info = doGetKeyValidationInfo(context, prefixedVersion, apiKey, authenticationScheme, clientDomain,
                                                               matchingResource, httpVerb);
         if (info != null) {
-            //save into cache only if, validation is correct and api is allowed for all domains
-            if (gatewayKeyCacheEnabled && clientDomain == null) {
-
-                //Get the tenant domain of the API that is being invoked.
-                String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
-
-                //Add to first level Token Cache.
-                getGatewayTokenCache().put(apiKey, tenantDomain);
-                //Add to Key Cache.
+            if (gatewayKeyCacheEnabled && clientDomain == null) { //save into cache only if, validation is correct and api is allowed for all domains
                 getGatewayKeyCache().put(cacheKey, info);
-
-                //If this is NOT a super-tenant API that is being invoked
-                if (!MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
-                    //Add the tenant domain as a reference to the super tenant cache so we know from which tenant cache
-                    //to remove the entry when the need occurs to clear this particular cache entry.
-                    try {
-                        PrivilegedCarbonContext.startTenantFlow();
-                        PrivilegedCarbonContext.getThreadLocalCarbonContext().
-                                setTenantDomain(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME, true);
-
-                        getGatewayTokenCache().put(apiKey, tenantDomain);
-                    } finally {
-                        PrivilegedCarbonContext.endTenantFlow();
-                    }
-                }
             }
-
             return info;
         } else {
         	String warnMsg = "API key validation service returns null object";
@@ -198,8 +154,7 @@ public class APIKeyValidator {
             throw new APISecurityException(APISecurityConstants.API_AUTH_GENERAL_ERROR,
                     warnMsg);
         }
-
-
+        //}
     }
 
     protected APIKeyValidationInfoDTO doGetKeyValidationInfo(String context, String apiVersion, String apiKey,
@@ -241,9 +196,6 @@ public class APIKeyValidator {
         VerbInfoDTO verb = null;
         try {
             verb = findMatchingVerb(synCtx);
-            if(verb != null){
-                synCtx.setProperty(APIConstants.VERB_INFO_DTO, verb);
-            }
         } catch (ResourceNotFoundException e) {
             log.error("Could not find matching resource for request");
             return APIConstants.NO_MATCHING_AUTH_SCHEME;
@@ -359,12 +311,12 @@ public class APIKeyValidator {
                 log.debug("Resource not found in cache for key: ".concat(resourceCacheKey));
             }
         }
-        String resourceString = (String) synCtx.getProperty(APIConstants.API_ELECTED_RESOURCE);
+
         String apiContext = (String) synCtx.getProperty(RESTConstants.REST_API_CONTEXT);
         String apiVersion = (String) synCtx.getProperty(RESTConstants.SYNAPSE_REST_API_VERSION);
         String fullRequestPath = (String)synCtx.getProperty(RESTConstants.REST_FULL_REQUEST_PATH);
 
-        String requestPath = Utils.getRequestPath(synCtx, fullRequestPath, apiContext, apiVersion);
+        String requestPath = fullRequestPath.substring((apiContext + apiVersion).length() + 1);
         if ("".equals(requestPath)) {
             requestPath = "/";
         }
@@ -376,45 +328,45 @@ public class APIKeyValidator {
 
         String httpMethod = (String)((Axis2MessageContext) synCtx).getAxis2MessageContext().
                 getProperty(Constants.Configuration.HTTP_METHOD);
-        if (resourceString == null) {
-            API selectedApi = null;
-            Resource selectedResource = null;
 
-            for (API api : synCtx.getConfiguration().getAPIs()) {
-                if (apiContext.equals(api.getContext()) && apiVersion.equals(api.getVersion())) {
-                    if (log.isDebugEnabled()) {
-                        log.debug("Selected API: ".concat(apiContext).concat(", Version: ").concat(apiVersion));
-                    }
-                    selectedApi = api;
+        API selectedApi = null;
+        Resource selectedResource = null;
+
+        for(API api : synCtx.getConfiguration().getAPIs()){
+            if(apiContext.equals(api.getContext()) && apiVersion.equals(api.getVersion())){
+                if(log.isDebugEnabled()){
+                    log.debug("Selected API: ".concat(apiContext).concat(", Version: ").concat(apiVersion));
+                }
+                selectedApi = api;
+                break;
+            }
+        }
+
+        if (selectedApi.getResources().length > 0) {
+            for (RESTDispatcher dispatcher : RESTUtils.getDispatchers()) {
+                Resource resource = dispatcher.findResource(synCtx, Arrays.asList(selectedApi.getResources()));
+                if (resource != null) {
+                    selectedResource = resource;
                     break;
                 }
             }
-
-            if (selectedApi.getResources().length > 0) {
-                for (RESTDispatcher dispatcher : RESTUtils.getDispatchers()) {
-                    Resource resource = dispatcher.findResource(synCtx, Arrays.asList(selectedApi.getResources()));
-                    if (resource != null && Arrays.asList(resource.getMethods()).contains(httpMethod)) {
-                        selectedResource = resource;
-                        break;
-                    }
-                }
-            }
-
-            if (selectedResource == null) {
-                //No matching resource found.
-                log.error("Could not find matching resource for " + requestPath);
-                throw new ResourceNotFoundException("Could not find matching resource for " + requestPath);
-            }
-
-            resourceString = selectedResource.getDispatcherHelper().getString();
-            resourceCacheKey = APIUtil.getResourceInfoDTOCacheKey(apiContext, apiVersion, resourceString, httpMethod);
-
-            if (log.isDebugEnabled()) {
-                log.debug("Selected Resource: ".concat(resourceString));
-            }
-            //Set the elected resource
-            synCtx.setProperty(APIConstants.API_ELECTED_RESOURCE, resourceString);
         }
+
+        if(selectedResource == null){
+            //No matching resource found.
+            log.error("Could not find matching resource for " + requestPath);
+            throw new ResourceNotFoundException("Could not find matching resource for " + requestPath);
+        }
+
+        String resourceString = selectedResource.getDispatcherHelper().getString();
+        resourceCacheKey = APIUtil.getResourceInfoDTOCacheKey(apiContext, apiVersion, resourceString, httpMethod);
+
+        if(log.isDebugEnabled()){
+            log.debug("Selected Resource: ".concat(resourceString));
+        }
+        //Set the elected resource
+        synCtx.setProperty(APIConstants.API_ELECTED_RESOURCE, resourceString);
+
         verb = (VerbInfoDTO) getResourceCache().get(resourceCacheKey);
 
         //Cache hit
@@ -477,26 +429,30 @@ public class APIKeyValidator {
 
         ResourceInfoDTO resourceInfoDTO = null;
         VerbInfoDTO verbInfoDTO = null;
-
-        // The following map is used to retrieve already created ResourceInfoDTO rather than iterating -
-        // the resource Set in apiInfoDTO.
-        LinkedHashMap<String,ResourceInfoDTO> resourcesMap = new LinkedHashMap<String, ResourceInfoDTO>();
-        for (URITemplate uriTemplate : uriTemplates) { 
-            resourceInfoDTO = resourcesMap.get(uriTemplate.getUriTemplate());
-            if(null == resourceInfoDTO){ 
-                resourceInfoDTO = new ResourceInfoDTO();
-                resourceInfoDTO.setUrlPattern(uriTemplate.getUriTemplate());
-                resourceInfoDTO.setHttpVerbs(new LinkedHashSet());
-                apiInfoDTO.getResources().add(resourceInfoDTO); 
-                resourcesMap.put(uriTemplate.getUriTemplate(),resourceInfoDTO);
-            } 
-            verbInfoDTO = new VerbInfoDTO();
-            verbInfoDTO.setHttpVerb(uriTemplate.getHTTPVerb());
-            verbInfoDTO.setAuthType(uriTemplate.getAuthType());
-            verbInfoDTO.setThrottling(uriTemplate.getThrottlingTier());
-            resourceInfoDTO.getHttpVerbs().add(verbInfoDTO);
-        }
-
+        int i = 0;
+        for (URITemplate uriTemplate : uriTemplates) {
+        	if (resourceInfoDTO != null && resourceInfoDTO.getUrlPattern().equalsIgnoreCase(uriTemplate.getUriTemplate())) {
+                LinkedHashSet<VerbInfoDTO> verbs = (LinkedHashSet<VerbInfoDTO>) resourceInfoDTO.getHttpVerbs();
+                verbInfoDTO = new VerbInfoDTO();
+                verbInfoDTO.setHttpVerb(uriTemplate.getHTTPVerb());
+                verbInfoDTO.setAuthType(uriTemplate.getAuthType());
+                verbInfoDTO.setThrottling(uriTemplate.getThrottlingTier());
+                verbs.add(verbInfoDTO);
+                resourceInfoDTO.setHttpVerbs(verbs);
+                apiInfoDTO.getResources().add(resourceInfoDTO);
+             } else {
+            	 resourceInfoDTO = new ResourceInfoDTO();
+                 resourceInfoDTO.setUrlPattern(uriTemplate.getUriTemplate());
+                 verbInfoDTO = new VerbInfoDTO();
+                 verbInfoDTO.setHttpVerb(uriTemplate.getHTTPVerb());
+                 verbInfoDTO.setAuthType(uriTemplate.getAuthType());
+                 verbInfoDTO.setThrottling(uriTemplate.getThrottlingTier());
+                 LinkedHashSet<VerbInfoDTO> httpVerbs2 = new LinkedHashSet();
+                 httpVerbs2.add(verbInfoDTO);
+                 resourceInfoDTO.setHttpVerbs(httpVerbs2);
+                 apiInfoDTO.getResources().add(resourceInfoDTO);
+              }
+            }
         return apiInfoDTO;
     }
 

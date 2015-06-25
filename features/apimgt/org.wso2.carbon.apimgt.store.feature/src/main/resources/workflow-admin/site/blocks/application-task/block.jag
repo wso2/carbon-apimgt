@@ -19,6 +19,7 @@ jagg.block("application-task", {
         filterCategory='userOnly';
         }
         taskType = "ApproveApplication";
+
         mod = jagg.module("taskmanager");
 
         result = mod.getTasks(filterCategory,taskType);

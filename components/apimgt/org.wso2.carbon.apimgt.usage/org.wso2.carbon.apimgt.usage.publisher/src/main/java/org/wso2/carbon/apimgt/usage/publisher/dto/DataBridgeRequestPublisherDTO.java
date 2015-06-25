@@ -17,6 +17,7 @@
 */
 package org.wso2.carbon.apimgt.usage.publisher.dto;
 
+import org.wso2.carbon.apimgt.usage.publisher.APIMgtUsagePublisherConstants;
 import org.wso2.carbon.apimgt.usage.publisher.DataPublisherUtil;
 
 public class DataBridgeRequestPublisherDTO extends RequestPublisherDTO {
@@ -36,17 +37,12 @@ public class DataBridgeRequestPublisherDTO extends RequestPublisherDTO {
         setApiPublisher(requestPublisherDTO.getApiPublisher());
         setApplicationName(requestPublisherDTO.getApplicationName());
         setApplicationId(requestPublisherDTO.getApplicationId());
-        setUserAgent(requestPublisherDTO.getUserAgent());
-        setTier(requestPublisherDTO.getTier());
     }
 
     public static String getStreamDefinition() {
-
-        return "{" +
-                "  'name':'" +
-                DataPublisherUtil.getApiManagerAnalyticsConfiguration().getRequestStreamName() + "'," +
-                "  'version':'" +
-                DataPublisherUtil.getApiManagerAnalyticsConfiguration().getRequestStreamVersion() + "'," +
+        String streamDefinition = "{" +
+                "  'name':'" + APIMgtUsagePublisherConstants.API_MANAGER_REQUEST_STREAM_NAME + "'," +
+                "  'version':'" + APIMgtUsagePublisherConstants.API_MANAGER_REQUEST_STREAM_VERSION + "'," +
                 "  'nickName': 'API Manager Request Data'," +
                 "  'description': 'Request Data'," +
                 "  'metaData':[" +
@@ -67,17 +63,17 @@ public class DataBridgeRequestPublisherDTO extends RequestPublisherDTO {
                 "          {'name':'hostName','type':'STRING'}," +
                 "          {'name':'apiPublisher','type':'STRING'}," +
                 "          {'name':'applicationName','type':'STRING'}," +
-                "          {'name':'applicationId','type':'STRING'}," +
-                "          {'name':'userAgent','type':'STRING'}," +
-                "          {'name':'tier','type':'STRING'}" +
+                "          {'name':'applicationId','type':'STRING'}" +
                 "  ]" +
                 "}";
+
+        return streamDefinition;
     }
 
     public Object createPayload(){
         return new Object[]{getConsumerKey(),getContext(),getApi_version(),getApi(), getResourcePath(),getMethod(),
                             getVersion(), getRequestCount(),getRequestTime(),getUsername(),getTenantDomain(),getHostName(),
-                            getApiPublisher(), getApplicationName(), getApplicationId(),getUserAgent(),getTier()};
+                            getApiPublisher(), getApplicationName(), getApplicationId()};
         
     }
 

@@ -20,7 +20,7 @@ package org.wso2.carbon.apimgt.usage.publisher.dto;
 public abstract class PublisherDTO {
 
     private String consumerKey;
-
+    
     private String username;
 
     private String tenantDomain;
@@ -40,14 +40,10 @@ public abstract class PublisherDTO {
     private String hostName;
 
     private String apiPublisher;
-
+    
     private String applicationName;
 
     private String applicationId;
-
-    private String protocol;
-
-
 
     public String getHostName() {
         return hostName;
@@ -137,19 +133,19 @@ public abstract class PublisherDTO {
         return apiPublisher;
     }
 
-    /**
-     * @return the applicationName
-     */
-    public String getApplicationName() {
-        return applicationName;
-    }
+	/**
+	 * @return the applicationName
+	 */
+	public String getApplicationName() {
+		return applicationName;
+	}
 
-    /**
-     * @param applicationName the applicationName to set
-     */
-    public void setApplicationName(String applicationName) {
-        this.applicationName = applicationName;
-    }
+	/**
+	 * @param applicationName the applicationName to set
+	 */
+	public void setApplicationName(String applicationName) {
+		this.applicationName = applicationName;
+	}
 
     public String getApplicationId() {
         return applicationId;
@@ -158,13 +154,4 @@ public abstract class PublisherDTO {
     public void setApplicationId(String applicationId) {
         this.applicationId = applicationId;
     }
-
-    public String getProtocol() {
-        return protocol;
-    }
-
-    public void setProtocol(String protocol) {
-        this.protocol = protocol;
-    }
-
 }

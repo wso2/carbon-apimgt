@@ -53,7 +53,7 @@ public class ThriftUtils {
 
             APIManagerConfiguration config = ServiceReferenceHolder.getInstance().getAPIManagerConfiguration();
 
-            remoteServerURL = config.getFirstProperty(APIConstants.API_KEY_VALIDATOR_URL);
+            remoteServerURL = config.getFirstProperty(APIConstants.API_KEY_MANAGER_URL);
             remoteServerPort = remoteServerURL.split(":")[2].split("/")[0];
             //we expect in the form of : https://ip:port.. as in api-mgt.xml
             thriftServerHost=config.getFirstProperty(APIConstants.API_KEY_MANAGER_THRIFT_SERVER_HOST);
@@ -61,8 +61,8 @@ public class ThriftUtils {
                 thriftServerHost = remoteServerURL.split(":")[1].split("//")[1];
             }
             remoteServerIP = remoteServerURL.split(":")[1].split("//")[1];
-            String thriftPortString = config.getFirstProperty(APIConstants.API_KEY_VALIDATOR_THRIFT_CLIENT_PORT);
-            String clientTimeOutString = config.getFirstProperty(APIConstants.API_KEY_VALIDATOR_CONNECTION_TIMEOUT);
+            String thriftPortString = config.getFirstProperty(APIConstants.API_KEY_MANGER_THRIFT_CLIENT_PORT);
+            String clientTimeOutString = config.getFirstProperty(APIConstants.API_KEY_MANGER_CONNECTION_TIMEOUT);
             if (thriftPortString == null || clientTimeOutString == null) {
                 throw new APISecurityException(APISecurityConstants.API_AUTH_GENERAL_ERROR,
                                                "Thrift client can not be created. Required details are not provided..");
@@ -70,8 +70,8 @@ public class ThriftUtils {
 
             thriftPort = Integer.parseInt(thriftPortString);
             thriftClientConnectionTimeOut = Integer.parseInt(clientTimeOutString);
-            userName = config.getFirstProperty(APIConstants.API_KEY_VALIDATOR_USERNAME);
-            password = config.getFirstProperty(APIConstants.API_KEY_VALIDATOR_PASSWORD);
+            userName = config.getFirstProperty(APIConstants.API_KEY_MANAGER_USERNAME);
+            password = config.getFirstProperty(APIConstants.API_KEY_MANAGER_PASSWORD);
             if (remoteServerIP == null || userName == null || password == null) {
                 throw new APISecurityException(APISecurityConstants.API_AUTH_GENERAL_ERROR,
                                                "Required connection details for the thrift key management server not provided");

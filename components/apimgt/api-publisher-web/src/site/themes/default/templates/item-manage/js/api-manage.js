@@ -24,9 +24,9 @@ $(document).ready(function(){
     $('#subscriptions').change(function(e){
         var subscription = $('#subscriptions').find(":selected").val();
         if (subscription == "current_tenant" || subscription == "all_tenants"){
-            $('#tenantsDiv').hide();
+            $('#tennatsDiv').hide();
         } else {
-            $('#tenantsDiv').show();
+            $('#tennatsDiv').show();
         }
     });
     

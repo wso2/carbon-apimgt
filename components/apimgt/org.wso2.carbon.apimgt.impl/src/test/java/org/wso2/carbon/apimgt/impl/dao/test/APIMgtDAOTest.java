@@ -102,8 +102,6 @@ public class APIMgtDAOTest extends TestCase {
 		assertNotNull(apiKeyValidationInfoDTO);
 		assertFalse(apiKeyValidationInfoDTO.isAuthorized());
 	}
-	
-	
 
 	public void testGetSubscribedUsersForAPI() throws Exception {
 		APIInfoDTO apiInfoDTO = new APIInfoDTO();
@@ -116,7 +114,7 @@ public class APIMgtDAOTest extends TestCase {
 	}
 
 	public void testGetSubscriber() throws Exception {
-		Subscriber subscriber = ApiMgtDAO.getSubscriber("SUMEDHA");
+		Subscriber subscriber = apiMgtDAO.getSubscriber("SUMEDHA");
 		assertNotNull(subscriber);
 		assertNotNull(subscriber.getName());
 		assertNotNull(subscriber.getId());
@@ -251,54 +249,24 @@ public class APIMgtDAOTest extends TestCase {
 		assertEquals(lhs.getSubscribedDate().getTime(), rhs.getSubscribedDate().getTime());
 		assertEquals(lhs.getTenantId(), rhs.getTenantId());
 	}
-	
-	   public void checkApplicationsEqual(Application lhs, Application rhs) throws Exception {
-	        assertEquals(lhs.getId(), rhs.getId());
-	        assertEquals(lhs.getName(), rhs.getName());
-	        assertEquals(lhs.getDescription(), rhs.getDescription());
-            assertEquals(lhs.getCallbackUrl(), rhs.getCallbackUrl());
-	        
-	    }
 
 	public void testAddGetSubscriber() throws Exception {
 		Subscriber subscriber1 = new Subscriber("LA_F");
 		subscriber1.setEmail("laf@wso2.com");
 		subscriber1.setSubscribedDate(new Date());
 		subscriber1.setTenantId(MultitenantConstants.SUPER_TENANT_ID);
-		apiMgtDAO.addSubscriber(subscriber1, "");
+		apiMgtDAO.addSubscriber(subscriber1);
 		assertTrue(subscriber1.getId() > 0);
 		Subscriber subscriber2 = apiMgtDAO.getSubscriber(subscriber1.getId());
 		this.checkSubscribersEqual(subscriber1, subscriber2);
 	}
 
-	public void testAddGetSubscriberWithGroupId() throws Exception {
-		Subscriber subscriber1 = new Subscriber("LA_F_GROUPID");
-		subscriber1.setEmail("laf@wso2.com");
-		subscriber1.setSubscribedDate(new Date());
-		subscriber1.setTenantId(MultitenantConstants.SUPER_TENANT_ID);
-	    apiMgtDAO.addSubscriber(subscriber1, "1");
-		assertTrue(subscriber1.getId() > 0);
-		Subscriber subscriber2 = apiMgtDAO.getSubscriber(subscriber1.getId());
-		this.checkSubscribersEqual(subscriber1, subscriber2);
-	}
-	
-	public void testAddGetSubscriberWithNullGroupId() throws Exception {
-        Subscriber subscriber1 = new Subscriber("LA_F2_GROUPID");
-        subscriber1.setEmail("laf@wso2.com");
-        subscriber1.setSubscribedDate(new Date());
-        subscriber1.setTenantId(MultitenantConstants.SUPER_TENANT_ID);
-        apiMgtDAO.addSubscriber(subscriber1, null);
-        assertTrue(subscriber1.getId() > 0);
-        Subscriber subscriber2 = apiMgtDAO.getSubscriber(subscriber1.getId());
-        this.checkSubscribersEqual(subscriber1, subscriber2);
-    }
-	
 	public void testUpdateGetSubscriber() throws Exception {
 		Subscriber subscriber1 = new Subscriber("LA_F2");
 		subscriber1.setEmail("laf@wso2.com");
 		subscriber1.setSubscribedDate(new Date());
 		subscriber1.setTenantId(MultitenantConstants.SUPER_TENANT_ID);
-	    apiMgtDAO.addSubscriber(subscriber1, "2");
+		apiMgtDAO.addSubscriber(subscriber1);
 		assertTrue(subscriber1.getId() > 0);
 		subscriber1.setEmail("laf2@wso2.com");
 		subscriber1.setSubscribedDate(new Date());
@@ -312,7 +280,6 @@ public class APIMgtDAOTest extends TestCase {
 		APIIdentifier apiId = new APIIdentifier("hiranya", "WSO2Earth", "1.0.0");
 		API api = new API(apiId);
 		api.setContext("/wso2earth");
-        api.setContextTemplate("/wso2earth/{version}");
 
 		apiMgtDAO.addAPI(api,-1234);
 
@@ -329,65 +296,6 @@ public class APIMgtDAOTest extends TestCase {
 		events = apiMgtDAO.getLifeCycleEvents(apiId);
 		assertEquals(3, events.size());
 	}
-	
-	   public void testAddGetApplicationByNameGroupIdNull() throws Exception{
-	        Subscriber subscriber = new Subscriber("LA_F_GROUP_ID_NULL");
-	        subscriber.setEmail("laf@wso2.com");
-	        subscriber.setSubscribedDate(new Date());
-	        subscriber.setTenantId(MultitenantConstants.SUPER_TENANT_ID);
-	        apiMgtDAO.addSubscriber(subscriber, null);
-	        Application application = new Application("testApplication", subscriber);
-	        int applicationId = apiMgtDAO.addApplication(application, subscriber.getName());
-	        application.setId(applicationId);
-	        assertTrue(applicationId > 0);
-	        this.checkApplicationsEqual(application, apiMgtDAO.getApplicationByName("testApplication", subscriber.getName(), null));
-	        
-	    }
-	   
-	   public void testAddGetApplicationByNameWithGroupId() throws Exception{
-           Subscriber subscriber = new Subscriber("LA_F_APP");
-           subscriber.setEmail("laf@wso2.com");
-           subscriber.setSubscribedDate(new Date());
-           subscriber.setTenantId(MultitenantConstants.SUPER_TENANT_ID);
-           apiMgtDAO.addSubscriber(subscriber, "org1");
-           Application application = new Application("testApplication3", subscriber);
-           application.setGroupId("org1");
-           int applicationId = apiMgtDAO.addApplication(application, subscriber.getName());
-           application.setId(applicationId);
-           assertTrue(applicationId > 0);
-           this.checkApplicationsEqual(application, apiMgtDAO.getApplicationByName("testApplication3", subscriber.getName(), "org1"));
-           
-       }
-	   
-       
-       public void testAddGetApplicationByNameWithUserNameNull() throws Exception{
-           Subscriber subscriber = new Subscriber("LA_F_APP2");
-           subscriber.setEmail("laf@wso2.com");
-           subscriber.setSubscribedDate(new Date());
-           subscriber.setTenantId(MultitenantConstants.SUPER_TENANT_ID);
-           apiMgtDAO.addSubscriber(subscriber, "org2");
-           Application application = new Application("testApplication3", subscriber);
-           application.setGroupId("org2");
-           int applicationId = apiMgtDAO.addApplication(application, subscriber.getName());
-           application.setId(applicationId);
-           assertTrue(applicationId > 0);
-           this.checkApplicationsEqual(application, apiMgtDAO.getApplicationByName("testApplication3", null, "org2"));
-           
-       }
-       
-       public void testAddGetApplicationByNameWithUserNameNullGroupIdNull() throws Exception{
-           Subscriber subscriber = new Subscriber("LA_F_APP_UN_GROUP_ID_NULL");
-           subscriber.setEmail("laf@wso2.com");
-           subscriber.setSubscribedDate(new Date());
-           subscriber.setTenantId(MultitenantConstants.SUPER_TENANT_ID);
-           apiMgtDAO.addSubscriber(subscriber, null);
-           Application application = new Application("testApplication2", subscriber);
-           int applicationId = apiMgtDAO.addApplication(application, subscriber.getName());
-           application.setId(applicationId);
-           assertTrue(applicationId  > 0);
-           assertNull(apiMgtDAO.getApplicationByName("testApplication2", null, null));
-           
-       }
 
 	public void testKeyForwardCompatibility() throws Exception {
 		Set<APIIdentifier> apiSet = apiMgtDAO.getAPIByConsumerKey("SSDCHEJJ-AWUIS-232");
@@ -400,7 +308,6 @@ public class APIMgtDAOTest extends TestCase {
 
 		API api = new API(new APIIdentifier("SUMEDHA", "API1", "V2.0.0"));
 		api.setContext("/context1");
-        api.setContextTemplate("/context1/{version}");
 
 		apiMgtDAO.addAPI(api,-1234);
 		apiMgtDAO.makeKeysForwardCompatible("SUMEDHA", "API1", "V1.0.0", "V2.0.0", "/context1");
@@ -428,8 +335,6 @@ public class APIMgtDAOTest extends TestCase {
 			assertEquals("V1.0.0", apiId.getVersion());
 		}
 	}
-	
-
 
 /*
 	public void testUnsubscribe() throws Exception {

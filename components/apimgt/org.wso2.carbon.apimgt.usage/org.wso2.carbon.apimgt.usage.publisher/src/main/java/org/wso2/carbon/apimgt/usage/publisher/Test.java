@@ -22,6 +22,7 @@ import org.wso2.carbon.apimgt.usage.publisher.dto.DataBridgeRequestPublisherDTO;
 import org.wso2.carbon.apimgt.usage.publisher.dto.DataBridgeResponsePublisherDTO;
 import org.wso2.carbon.apimgt.usage.publisher.dto.RequestPublisherDTO;
 import org.wso2.carbon.apimgt.usage.publisher.dto.ResponsePublisherDTO;
+import org.wso2.carbon.apimgt.usage.publisher.service.APIMGTConfigReaderService;
 
 
 public class Test {
@@ -31,6 +32,8 @@ public class Test {
         APIManagerConfiguration config = new APIManagerConfiguration();
 
         //TODO: Populate the config with required BAM parameters - config.load(testFilePath)
+
+        APIMGTConfigReaderService readerService = new APIMGTConfigReaderService(config);
 
         APIMgtUsageDataBridgeDataPublisher testPublisher = new APIMgtUsageDataBridgeDataPublisher();
 

@@ -6,7 +6,6 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
-import org.wso2.carbon.apimgt.impl.handlers.ScopesIssuer;
 import org.wso2.carbon.base.ServerConfigurationException;
 import org.wso2.carbon.identity.base.IdentityException;
 import org.wso2.carbon.identity.core.util.IdentityConfigParser;
@@ -30,7 +29,6 @@ import org.wso2.carbon.user.core.util.UserCoreUtil;
 import javax.cache.Cache;
 import javax.cache.Caching;
 import javax.xml.namespace.QName;
-
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -168,7 +166,8 @@ public class ExtendedPasswordGrantHandler extends PasswordGrantHandler {
 
     @Override
     public boolean validateScope(OAuthTokenReqMessageContext tokReqMsgCtx){
-        return ScopesIssuer.getInstance().setScopes(tokReqMsgCtx);
+        ScopesIssuer scopesIssuer = new ScopesIssuer();
+        return scopesIssuer.setScopes(tokReqMsgCtx);
     }
 
     /**

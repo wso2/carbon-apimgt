@@ -32,8 +32,6 @@ public class APIResponseFaultCountDTO {
 
     private long count;
 
-    private long requestCount;
-
     private String appName;
 
     private String consumerKey;
@@ -93,8 +91,4 @@ public class APIResponseFaultCountDTO {
     public void setFaultPercentage(double faultPercentage) {
         this.faultPercentage = faultPercentage;
     }
-
-    public long getRequestCount() { return requestCount; }
-
-    public void setRequestCount(long requestCount) { this.requestCount = requestCount; }
 }

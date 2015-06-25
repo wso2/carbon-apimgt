@@ -28,13 +28,10 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.hostobjects.internal.HostObjectComponent;
 import org.wso2.carbon.apimgt.hostobjects.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.APIConstants;
-import org.wso2.carbon.apimgt.impl.APIManagerAnalyticsConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.keymgt.client.SubscriberKeyMgtClient;
-import org.wso2.carbon.apimgt.keymgt.client.ProviderKeyMgtClient;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.identity.user.registration.stub.dto.UserFieldDTO;
-import org.wso2.carbon.ndatasource.common.DataSourceException;
 import org.wso2.carbon.utils.CarbonUtils;
 import org.wso2.carbon.utils.ConfigurationContextService;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
@@ -84,13 +81,13 @@ public class HostObjectUtils {
 
     protected static SubscriberKeyMgtClient getKeyManagementClient() throws APIManagementException {
         APIManagerConfiguration config = HostObjectComponent.getAPIManagerConfiguration();
-        String url = config.getFirstProperty(APIConstants.API_KEY_VALIDATOR_URL);
+        String url = config.getFirstProperty(APIConstants.API_KEY_MANAGER_URL);
         if (url == null) {
             handleException("API key manager URL unspecified");
         }
 
-        String username = config.getFirstProperty(APIConstants.API_KEY_VALIDATOR_USERNAME);
-        String password = config.getFirstProperty(APIConstants.API_KEY_VALIDATOR_PASSWORD);
+        String username = config.getFirstProperty(APIConstants.API_KEY_MANAGER_USERNAME);
+        String password = config.getFirstProperty(APIConstants.API_KEY_MANAGER_PASSWORD);
         if (username == null || password == null) {
             handleException("Authentication credentials for API key manager unspecified");
         }
@@ -99,32 +96,6 @@ public class HostObjectUtils {
             return new SubscriberKeyMgtClient(url, username, password);
         } catch (Exception e) {
             handleException("Error while initializing the subscriber key management client", e);
-            return null;
-        }
-    }
-
-    /**
-     * Used to get instance of ProviderKeyMgtClient
-     * @return ProviderKeyMgtClient
-     * @throws APIManagementException
-     */
-    protected static ProviderKeyMgtClient getProviderClient() throws APIManagementException {
-        APIManagerConfiguration config = HostObjectComponent.getAPIManagerConfiguration();
-        String url = config.getFirstProperty(APIConstants.API_KEY_VALIDATOR_URL);
-        if (url == null) {
-            handleException("API key manager URL unspecified");
-        }
-
-        String username = config.getFirstProperty(APIConstants.API_KEY_VALIDATOR_USERNAME);
-        String password = config.getFirstProperty(APIConstants.API_KEY_VALIDATOR_PASSWORD);
-        if (username == null || password == null) {
-            handleException("Authentication credentials for API Provider manager unspecified");
-        }
-
-        try {
-            return new ProviderKeyMgtClient(url, username, password);
-        } catch (APIManagementException e) {
-            handleException("Error while initializing the provider  management client", e);
             return null;
         }
     }
@@ -191,14 +162,11 @@ public class HostObjectUtils {
 
     }
 
-    /**
-    *This methos is to check whether stat publishing is enabled
-    * @return boolean
-     */
     protected static boolean checkDataPublishingEnabled() {
-        APIManagerAnalyticsConfiguration analyticsConfiguration =
-                ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIAnalyticsConfiguration();
-        return analyticsConfiguration.isAnalyticsEnabled();
+        APIManagerConfiguration configuration =
+                ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration();
+        String enabledStr = configuration.getFirstProperty(APIConstants.API_USAGE_ENABLED);
+        return enabledStr != null && Boolean.parseBoolean(enabledStr);
     }
 
     /**
@@ -208,39 +176,25 @@ public class HostObjectUtils {
     public static void invalidateRecentlyAddedAPICache(String username){
         try{
             PrivilegedCarbonContext.startTenantFlow();
-            APIManagerConfiguration config = HostObjectComponent.getAPIManagerConfiguration();
-            boolean isRecentlyAddedAPICacheEnabled =
-                  Boolean.parseBoolean(config.getFirstProperty(APIConstants.API_STORE_RECENTLY_ADDED_API_CACHE_ENABLE));
-            
-            if (username != null && isRecentlyAddedAPICacheEnabled) {
-                String tenantDomainFromUserName = MultitenantUtils.getTenantDomain(username);
-                if (tenantDomainFromUserName != null &&
-                    !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomainFromUserName)) {
-                    PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomainFromUserName,
-                                                                                          true);
-                } else {
-                    PrivilegedCarbonContext.getThreadLocalCarbonContext()
-                                           .setTenantDomain(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME, true);
+            if(username!=null && APIConstants.isRecentlyAddedAPICacheEnabled){
+                String tenantDomainFromUserName =  MultitenantUtils.getTenantDomain(username);
+                if(tenantDomainFromUserName != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomainFromUserName)){
+                    PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomainFromUserName, true);
                 }
-                Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER).getCache("RECENTLY_ADDED_API")
-                       .remove(username + ":" + tenantDomainFromUserName);
+                else {
+                    PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME, true);
+                }
+                Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER).getCache("RECENTLY_ADDED_API").remove(username+":"+tenantDomainFromUserName);
             }
         } finally {
             PrivilegedCarbonContext.endTenantFlow();
         }
     }
 
-    protected static boolean isUsageDataSourceSpecified() {
-        try {
-            return (null != HostObjectComponent.getDataSourceService().
-                    getDataSource(APIConstants.API_USAGE_DATA_SOURCE_NAME));
-        } catch (DataSourceException e) {
-            return false;
-        }
-    }
+    protected static  boolean isUsageDataSourceSpecified() {
+        APIManagerConfiguration configuration =
+                ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration();
 
-    protected static boolean isStatPublishingEnabled() {
-            return ServiceReferenceHolder.getInstance().
-                    getAPIManagerConfigurationService().getAPIAnalyticsConfiguration().isAnalyticsEnabled();
+        return (null != configuration.getFirstProperty(APIConstants.API_USAGE_DATA_SOURCE_NAME));
     }
 }

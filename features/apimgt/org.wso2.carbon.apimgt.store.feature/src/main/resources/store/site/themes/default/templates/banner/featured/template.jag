@@ -1,3 +1,0 @@
-<% jagg.template("banner/featured", function(inputs, outputs, jagg) { %>
-<!-- banner featured -->
-<% }); %>

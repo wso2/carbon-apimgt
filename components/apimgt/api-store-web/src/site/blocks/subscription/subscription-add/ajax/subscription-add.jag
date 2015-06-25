@@ -128,45 +128,6 @@ include("/jagg/jagg.jag");
             }
         }
         print(obj);
-    } else if (action == "deleteAuthApplication" && request.getMethod() == 'POST') {
-
-        if (!user) {
-            print({
-                error:true,
-                message:msg.error.loginRequired(action)
-            });
-            return;
-        }
-        var authAppParams = {};
-        authAppParams.username = user.username;
-        authAppParams.consumerKey = request.getParameter("consumerKey");
-
-        mod = jagg.module("subscription");
-
-        result = mod.deleteAuthApplication(authAppParams);
-
-        if (result.error) {
-            obj = {
-                error:result.error,
-                message:msg.error.authError(action, username)
-            };
-            /*print({
-                error:result.error,
-                message:msg.error.authError(action, username)
-            });
-            response.status = 500;
-            response.contentType = "application/json";
-            return;*/
-        } else {
-            obj = {
-                error:false,
-                data:{
-                    key:result.key
-                }
-            }
-        }
-        print(obj);
-
     } else if (action == "generateApplicationKey" && request.getMethod() == 'POST') {
         if (!user) {
             if(!ssoEnabled){
@@ -177,18 +138,13 @@ include("/jagg/jagg.jag");
 	    }
 	    return;
         }
-        var authAppParams = {};
-        authAppParams.username = user.username;
-        authAppParams.jsonParams = request.getParameter("jsonParams");
-        authAppParams.application = request.getParameter("application");
-        authAppParams.key_type = request.getParameter("key_type");
-	    accessAllowDomains = request.getParameter("authorizedDomains");
-        if(accessAllowDomains != null){
-            var accessAllowDomainsArr = accessAllowDomains.split(",");
-        }
-
-        authAppParams.allow_domains = accessAllowDomainsArr;
-		validityTime = request.getParameter("validityTime");
+        application = request.getParameter("application");
+        keyType = request.getParameter("keytype");
+        callbackUrl = request.getParameter("callbackUrl");
+        username = user.username;
+        accessAllowDomains = request.getParameter("authorizedDomains");       
+        var accessAllowDomainsArr = accessAllowDomains.split(",");
+        validityTime = request.getParameter("validityTime");
 		var retryAfterFailure = request.getParameter("retryAfterFailure");
 	
 		if(retryAfterFailure == null){
@@ -196,88 +152,7 @@ include("/jagg/jagg.jag");
 		}
 
         mod = jagg.module("subscription");
-
-        result = mod.generateApplicationKey(authAppParams);
-
-        if (result.error) {
-            obj = {
-                error:result.error,
-                message:msg.error.authError(action, username)
-            };
-        } else {
-            obj = {
-                error:false,
-                data:{
-                    key:result.key
-                }
-            }
-        }
-        print(obj);
-    }else if (action == "generateApplicationKeyOpenKM" && request.getMethod() == 'POST') {
-
-        if (!user) {
-            if (!ssoEnabled) {
-                print({
-                    error: true,
-                    message: msg.error.loginRequired(action)
-                });
-            }
-            return;
-        }
-        var authAppParams = {};
-        authAppParams.username = user.username;
-        authAppParams.jsonParams = request.getParameter("jsonParams");
-        authAppParams.application = request.getParameter("application");
-        authAppParams.key_type = request.getParameter("key_type");
-        <!--accessAllowDomains = request.getParameter("authorizedDomains");-->
-        <!--if (accessAllowDomains != null) {-->
-        <!--var accessAllowDomainsArr = accessAllowDomains.split(",");-->
-        <!--}-->
-
-        <!--authAppParams.allow_domains = accessAllowDomainsArr;-->
-        <!--validityTime = request.getParameter("validityTime");-->
-        <!--var retryAfterFailure = request.getParameter("retryAfterFailure");-->
-
-        <!--if (retryAfterFailure == null) {-->
-        <!--retryAfterFailure = false;-->
-        <!--}-->
-
-        mod = jagg.module("subscription");
-
-        result = mod.generateApplicationKeyOpenKM(authAppParams);
-
-        if (result.error) {
-            obj = {
-                error: result.error,
-                message: msg.error.authError(action, username)
-            };
-        } else {
-            obj = {
-                error: false,
-                data: {
-                    key: result.key
-                }
-            }
-        }
-        print(obj);
-
-    } else if (action == "updateClientApplication" && request.getMethod() == 'POST') {
-        if (!user) {
-            print({
-                error:true,
-                message:msg.error.loginRequired(action)
-            });
-            return;
-        }
-        var authAppParams = {};
-        authAppParams.username = user.username;
-        authAppParams.jsonParams = request.getParameter("jsonParams");
-
-        /*if(retryAfterFailure == null){
-         retryAfterFailure = false;
-         }*/
-        mod = jagg.module("subscription");
-        result = mod.updateAuthClient(authAppParams);
+        result = mod.generateApplicationKey(application, username, keyType, callbackUrl, accessAllowDomainsArr, validityTime,retryAfterFailure);
 
         if (result.error) {
             obj = {
@@ -358,44 +233,7 @@ include("/jagg/jagg.jag");
             }
         }
         print(obj);
-     }else if (action == "saveAuthapp" && request.getMethod() == 'POST') {
-
-        if (!user) {
-            print({
-                error:true,
-                message:msg.error.loginRequired(action)
-            });
-            return;
-        }
-        var saveAuthAppParams = {};
-        saveAuthAppParams.username = user.username;
-        saveAuthAppParams.jsonParams = request.getParameter("jsonParams");
-        saveAuthAppParams.client_id = request.getParameter("client_id");
-        saveAuthAppParams.applicationName = request.getParameter("applicationName");
-
-
-        //log.info(saveAuthAppParams);
-
-        mod = jagg.module("subscription");
-
-        result = mod.saveAuthapp(saveAuthAppParams);
-
-        if (result.error) {
-            obj = {
-                error:result.error,
-                message:msg.error.authError(action, username)
-            };
-        } else {
-            obj = {
-                error:false,
-                data:{
-                    key:result.key
-                }
-            }
-        }
-        print(obj);
-     }
-     else {
+     }else {
         print({
             error:true,
             message:msg.error.invalidAction(action)

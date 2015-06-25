@@ -19,10 +19,13 @@ package org.wso2.carbon.apimgt.usage.publisher.internal;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
 import org.wso2.carbon.apimgt.usage.publisher.DataPublisherUtil;
+import org.wso2.carbon.apimgt.usage.publisher.service.APIMGTConfigReaderService;
 import org.wso2.carbon.base.ServerConfiguration;
+import org.wso2.carbon.databridge.agent.thrift.DataPublisher;
 import org.wso2.carbon.databridge.agent.thrift.lb.LoadBalancingDataPublisher;
 import org.wso2.carbon.user.core.service.RealmService;
 
@@ -42,14 +45,19 @@ public class UsageComponent {
 
     private static final Log log = LogFactory.getLog(UsageComponent.class);
 
+    private static APIMGTConfigReaderService apimgtConfigReaderService;
     private static APIManagerConfigurationService amConfigService;
 
     private static Map<String, LoadBalancingDataPublisher> dataPublisherMap;
 
     protected void activate(ComponentContext ctx) {
         try {
-            DataPublisherUtil.setEnabledMetering(
-                    Boolean.parseBoolean(ServerConfiguration.getInstance().getFirstProperty("EnableMetering")));
+            apimgtConfigReaderService = new APIMGTConfigReaderService(
+                    amConfigService.getAPIManagerConfiguration());
+            BundleContext bundleContext = ctx.getBundleContext();
+            bundleContext.registerService(APIMGTConfigReaderService.class.getName(),
+                                          apimgtConfigReaderService, null);
+            DataPublisherUtil.setEnabledMetering(Boolean.parseBoolean(ServerConfiguration.getInstance().getFirstProperty("EnableMetering")));
 
             dataPublisherMap = new ConcurrentHashMap<String, LoadBalancingDataPublisher>();
 
@@ -75,10 +83,9 @@ public class UsageComponent {
         ServiceReferenceHolder.getInstance().setAPIManagerConfigurationService(null);
     }
 
-    public static APIManagerConfigurationService getAmConfigService() {
-        return amConfigService;
+    public static APIMGTConfigReaderService getApiMgtConfigReaderService() {
+        return apimgtConfigReaderService;
     }
-
 
     /**
      * Fetch the data publisher which has been registered under the tenant domain.
@@ -96,7 +103,7 @@ public class UsageComponent {
      * Adds a LoadBalancingDataPublisher to the data publisher map.
      * @param tenantDomain - The tenant domain under which the data publisher will be registered.
      * @param dataPublisher - Instance of the LoadBalancingDataPublisher
-     * @throws org.wso2.carbon.apimgt.usage.publisher.internal.DataPublisherAlreadyExistsException - If a data publisher has already been registered under the
+     * @throws DataPublisherAlreadyExistsException - If a data publisher has already been registered under the
      * tenant domain
      */
     public static void addDataPublisher(String tenantDomain, LoadBalancingDataPublisher dataPublisher)

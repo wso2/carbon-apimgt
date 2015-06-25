@@ -23,9 +23,6 @@ public class RequestPublisherDTO extends PublisherDTO {
     private int requestCount = 1;
 
     private long requestTime;
-    private String userAgent;
-
-    private String tier;
 
     public int getRequestCount(){
         return requestCount;
@@ -38,22 +35,5 @@ public class RequestPublisherDTO extends PublisherDTO {
     public long getRequestTime(){
         return requestTime;
     }
-
-    public void setUserAgent(String userAgent) {
-        this.userAgent = userAgent;
-    }
-
-    public String getUserAgent() {
-        return userAgent;
-    }
-
-    public String getTier(){
-        return tier;
-    }
-
-    public void setTier(String tier){
-        this.tier=tier;
-    }
-
 
 }

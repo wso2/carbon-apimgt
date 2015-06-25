@@ -78,15 +78,15 @@ public class TestTenantManager implements TenantManager {
 
     @Override
     public void deleteTenant(int i, boolean b) throws UserStoreException {
-        //To change body of implemented methods use File | Settings | File Templates.
+
     }
 
     public Tenant[] getAllTenantsForTenantDomainStr(String domain) throws UserStoreException {
         return null;
     }
 
-
-	public String[] getAllTenantDomainStrOfUser(String arg0) throws UserStoreException {
+	public String[] getAllTenantDomainStrOfUser(String arg0)
+			throws UserStoreException {
 		return null;
 	}
 }

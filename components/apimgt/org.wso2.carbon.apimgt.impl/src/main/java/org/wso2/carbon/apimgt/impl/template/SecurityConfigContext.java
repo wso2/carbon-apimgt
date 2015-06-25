@@ -20,7 +20,6 @@ import org.apache.velocity.VelocityContext;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
-import org.apache.commons.codec.binary.Base64;
 /**
  * Set the parameters for secured endpoints
  */
@@ -38,16 +37,13 @@ public class SecurityConfigContext extends ConfigContextDecorator {
 
         String alias =  api.getId().getProviderName() + "--" + api.getId().getApiName()
                         + api.getId().getVersion();
-        String unpw = api.getEndpointUTUsername() + ":" + api.getEndpointUTPassword();
 
-        boolean isSecureVaultEnabled = Boolean.parseBoolean(ServiceReferenceHolder.getInstance().
-                                                     getAPIManagerConfigurationService().getAPIManagerConfiguration().
-                                                     getFirstProperty(APIConstants.API_SECUREVAULT_ENABLE));
+        boolean isSecureVaultEnabled = Boolean.parseBoolean(ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration().getFirstProperty(APIConstants.API_SECUREVAULT_ENABLE));
         
         context.put("isEndpointSecured", api.isEndpointSecured());
         context.put("username", api.getEndpointUTUsername());
         context.put("securevault_alias", alias);
-        context.put("base64unpw", new String(Base64.encodeBase64(unpw.getBytes())));
+        context.put("password", api.getEndpointUTPassword());
         context.put("isSecureVaultEnabled", isSecureVaultEnabled);
         
         return context;

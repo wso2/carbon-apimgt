@@ -16,11 +16,9 @@
 
 package org.wso2.carbon.apimgt.impl;
 
-import org.json.simple.JSONArray;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.Application;
-import org.wso2.carbon.apimgt.api.model.Subscriber;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 
 /**
@@ -54,10 +52,10 @@ public class UserAwareAPIConsumer extends APIConsumerImpl {
     }
 
     @Override
-    public boolean removeSubscription(APIIdentifier identifier, String userId,
+    public void removeSubscription(APIIdentifier identifier, String userId,
                                    int applicationId) throws APIManagementException {
         checkSubscribePermission();
-        return super.removeSubscription(identifier, userId, applicationId);
+        super.removeSubscription(identifier, userId, applicationId);
     }
 
     @Override
@@ -84,18 +82,7 @@ public class UserAwareAPIConsumer extends APIConsumerImpl {
         super.addComment(identifier, s, user);
     }
 
-    @Override
-    public Application[] getApplications(Subscriber subscriber, String groupingId)  throws APIManagementException {
-        checkSubscribePermission();
-        return super.getApplications(subscriber,groupingId);
-    }
-
     public void checkSubscribePermission() throws APIManagementException {
         APIUtil.checkPermission(username, APIConstants.Permissions.API_SUBSCRIBE);
-    }
-
-    public JSONArray getSubscriptions(String providerName, String apiName, String version, String user,String groupId) throws APIManagementException{
-        checkSubscribePermission();
-        return super.getSubscriptions(providerName,apiName,version,user,groupId);
     }
 }

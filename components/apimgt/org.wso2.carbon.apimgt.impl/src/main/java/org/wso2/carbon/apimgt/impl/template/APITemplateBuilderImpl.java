@@ -26,7 +26,6 @@ import org.apache.velocity.app.VelocityEngine;
 import org.apache.velocity.runtime.RuntimeConstants;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.impl.APIConstants;
-import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
 import org.wso2.carbon.apimgt.impl.dto.Environment;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
@@ -174,19 +173,9 @@ public class APITemplateBuilderImpl implements APITemplateBuilder {
             VelocityContext context = configcontext.getContext();
             context.put("defaultVersion", defaultVersion);
             String fwdApiContext = this.api.getContext();
-            if (fwdApiContext != null && fwdApiContext.charAt(0) == '/') {
+            if (fwdApiContext != null && fwdApiContext.charAt(0) == '/')
                 fwdApiContext = fwdApiContext.substring(1);
-            }
             context.put("fwdApiContext", fwdApiContext);
-
-            // for default version, we remove the {version} param from the apiContext
-            String apiContext = this.api.getContextTemplate();
-            if(apiContext.contains("{version}")){
-                apiContext = apiContext.replace("/{version}","");
-                apiContext = apiContext.replace("{version}","");
-            }
-
-            context.put("apiContext", apiContext);
 
             Template t = velocityengine.getTemplate(this.getDefaultAPITemplatePath());
 

@@ -1,7 +1,0 @@
-<module name="oidc" namespace="ns" expose="true" xmlns="http://wso2.org/projects/jaggery/module.xml">    
-        <hostObject>
-            <className>org.wso2.carbon.apimgt.hostobjects.oidc.OIDCRelyingPartyObject</className>
-            <name>OIDCRelyingParty</name>
-        </hostObject>
-</module>
-

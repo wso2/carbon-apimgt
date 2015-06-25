@@ -69,16 +69,4 @@ public class APIVersionUserUsageDTO {
         this.context = context;
     }
 
-    @Override
-    public String toString() {
-        final StringBuilder sb = new StringBuilder("APIVersionUserUsageDTO{");
-        sb.append("apiname='").append(apiname).append('\'');
-        sb.append(", context='").append(context).append('\'');
-        sb.append(", version='").append(version).append('\'');
-        sb.append(", count=").append(count);
-        sb.append(", cost='").append(cost).append('\'');
-        sb.append(", costPerAPI='").append(costPerAPI).append('\'');
-        sb.append('}');
-        return sb.toString();
-    }
 }

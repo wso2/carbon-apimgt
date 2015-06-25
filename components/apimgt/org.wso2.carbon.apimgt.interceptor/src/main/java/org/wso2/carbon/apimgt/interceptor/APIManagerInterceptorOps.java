@@ -63,7 +63,7 @@ public class APIManagerInterceptorOps {
 	 * @param clientDomain
 	 * @return
 	 * @throws APIManagementException
-	 * @throws org.wso2.carbon.apimgt.interceptor.valve.APIFaultException
+	 * @throws APIFaultException
 	 */
 	public boolean doAuthenticate(String context, String version, String accessToken,
 	                              String requiredAuthenticationLevel, String clientDomain)
@@ -101,7 +101,7 @@ public class APIManagerInterceptorOps {
 	 * @param request
 	 * @param accessToken
 	 * @return
-	 * @throws org.wso2.carbon.apimgt.interceptor.valve.APIFaultException
+	 * @throws APIFaultException
 	 */
 	public boolean doThrottle(Request request, String accessToken) throws APIFaultException {
 
@@ -133,7 +133,7 @@ public class APIManagerInterceptorOps {
 	 * @param request -Httpservlet request
 	 * @param accessToken
 	 * @return
-	 * @throws org.wso2.carbon.apimgt.interceptor.valve.APIFaultException
+	 * @throws APIFaultException
 	 */
 	public boolean doThrottle(HttpServletRequest request, String accessToken) throws APIFaultException {
 
@@ -168,7 +168,7 @@ public class APIManagerInterceptorOps {
 	 * @param response
 	 *            : boolean
 	 * @return
-	 * @throws org.wso2.carbon.apimgt.interceptor.valve.APIFaultException
+	 * @throws APIFaultException 
 	 * @throws APIManagementException 
 	 */
 	public boolean publishStatistics(HttpServletRequest request, long requestTime, boolean response) throws APIManagementException {	

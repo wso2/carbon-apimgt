@@ -73,7 +73,7 @@ public class APIKeyValidationServiceImpl extends AbstractAdmin
 		} catch (Exception e) {
 			String authErrorMsg = "Error populating current carbon context from thrift auth session: " + e.getMessage();
             log.warn(authErrorMsg);
-            throw new APIKeyMgtException(authErrorMsg);
+            throw new org.wso2.carbon.apimgt.keymgt.APIKeyMgtException(authErrorMsg);
 		}
         
         /*carbonContextHolder.setUsername(storedCarbonCtxHolder.getUsername());
@@ -166,7 +166,7 @@ public class APIKeyValidationServiceImpl extends AbstractAdmin
                 throw new org.wso2.carbon.apimgt.impl.generated.thrift.APIKeyMgtException(initErrorMsg);
             }
 
-        } catch (APIKeyMgtException e) {
+        } catch (org.wso2.carbon.apimgt.keymgt.APIKeyMgtException e) {
             log.error("Error in invoking validate key via thrift..");
             throw new org.wso2.carbon.apimgt.impl.generated.thrift.APIKeyMgtException(e.getMessage());
         } catch (org.wso2.carbon.apimgt.api.APIManagementException e) {
@@ -227,7 +227,7 @@ public class APIKeyValidationServiceImpl extends AbstractAdmin
                 throw new APIKeyMgtException(initErrorMsg);
             }
 
-        } catch (APIKeyMgtException e) {
+        } catch (org.wso2.carbon.apimgt.keymgt.APIKeyMgtException e) {
             log.error("Error in invoking validate key via thrift..");
             throw new org.wso2.carbon.apimgt.impl.generated.thrift.APIKeyMgtException(e.getMessage());
         } catch (org.wso2.carbon.apimgt.api.APIManagementException e) {

@@ -22,7 +22,6 @@ import org.wso2.carbon.apimgt.hostobjects.APIStoreHostObject;
 import org.wso2.carbon.apimgt.hostobjects.HostObjectUtils;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
-import org.wso2.carbon.ndatasource.core.DataSourceService;
 import org.wso2.carbon.registry.core.service.RegistryService;
 import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.utils.ConfigurationContextService;
@@ -44,16 +43,12 @@ import org.wso2.carbon.utils.ConfigurationContextService;
  * @scr.reference name="registry.service"
  * interface="org.wso2.carbon.registry.core.service.RegistryService"
  * cardinality="1..1" policy="dynamic" bind="setRegistryService" unbind="unsetRegistryService"
- * @scr.reference name="datasources.service" interface="org.wso2.carbon.ndatasource.core.DataSourceService"
- * cardinality="1..1" policy="dynamic" bind="setDataSourceService" unbind="unsetDataSourceService"
  */
 public class HostObjectComponent {
 
     private static final Log log = LogFactory.getLog(HostObjectComponent.class);
 
     private static APIManagerConfiguration configuration = null;
-
-    private static DataSourceService dataSourceService;
 
     protected void activate(ComponentContext componentContext) {
        if (log.isDebugEnabled()){
@@ -84,24 +79,6 @@ public class HostObjectComponent {
 
     public static APIManagerConfiguration getAPIManagerConfiguration() {
         return configuration;
-    }
-
-    protected void setDataSourceService(DataSourceService dataSourceService) {
-        if (log.isDebugEnabled()) {
-            log.debug("Setting the Data Sources Service");
-        }
-        HostObjectComponent.dataSourceService = dataSourceService;
-    }
-
-    protected void unsetDataSourceService(DataSourceService dataSourceService) {
-        if (log.isDebugEnabled()) {
-            log.debug("Unsetting the Data Sources Service");
-        }
-        HostObjectComponent.dataSourceService = null;
-    }
-
-    public static DataSourceService getDataSourceService() {
-        return dataSourceService;
     }
 
      protected void setConfigurationContextService(ConfigurationContextService configCtx) {

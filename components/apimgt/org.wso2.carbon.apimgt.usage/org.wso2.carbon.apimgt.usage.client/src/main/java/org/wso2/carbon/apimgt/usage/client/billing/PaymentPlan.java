@@ -136,14 +136,38 @@ public class PaymentPlan extends BillingBase {
      * @return BigDecimal value of cost for used data units
      * @throws Exception at Illegal range of usage value or error in configuration
      */
-    public List<APIUsageRangeCost>  evaluate (String parameterName,int usedAmount) throws Exception {
-        List<APIUsageRangeCost> rangeCosts = new ArrayList<APIUsageRangeCost>();
-        for(DataParameter iterator : elementVector){
+    public Map<String,Object>  evaluate (String parameterName,int usedAmount) throws Exception {
+        BigDecimal total=new BigDecimal(0);
+        Double costPerAPI=new Double(0);
+        Map<String,Object> values=new HashMap<String,Object>();
+        for(DataParameter iterator: elementVector){
             if(iterator.objectName.equals(parameterName)){
-                rangeCosts = iterator.evaluateInvocationCost(usedAmount);
+                total=total.add((BigDecimal) iterator.evaluate(usedAmount).get("total"));
+                costPerAPI= (Double) iterator.evaluate(usedAmount).get("cost");
+
             }
         }
-        return rangeCosts;
+        values.put("total",total);
+        values.put("cost",costPerAPI);
+        return values;
+    }
+
+
+
+    /**
+     * @param billOrder is hash table that contains data parameter name and value pairs
+     * @return BigDecimal value of cost in billing order
+     * @throws Exception @ error in evaluating
+     */
+    public BigDecimal evaluate(Hashtable billOrder) throws Exception{
+        BigDecimal total=new BigDecimal(0);
+        for(DataParameter iterator: elementVector){
+            if(billOrder.containsKey(iterator.objectName)){
+                Integer amount=(Integer)billOrder.get(iterator.objectName);
+                total=total.add((BigDecimal) iterator.evaluate(amount).get("total"));
+            }
+        }
+        return total;
     }
 
 }

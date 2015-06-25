@@ -33,6 +33,7 @@ import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
+import org.wso2.carbon.apimgt.keymgt.stub.validator.APIKeyValidationServiceAPIManagementException;
 import org.wso2.carbon.apimgt.keymgt.stub.validator.APIKeyValidationServiceStub;
 import org.wso2.carbon.utils.CarbonUtils;
 
@@ -45,16 +46,16 @@ public class APIKeyValidatorClient {
 
     private static final int TIMEOUT_IN_MILLIS = 15 * 60 * 1000;
 
-    private APIKeyValidationServiceStub keyValidationServiceStub;
+    private APIKeyValidationServiceStub clientStub;
     private String username;
     private String password;
     private String cookie;
     
     public APIKeyValidatorClient() throws APISecurityException {
         APIManagerConfiguration config = ServiceReferenceHolder.getInstance().getAPIManagerConfiguration();
-        String serviceURL = config.getFirstProperty(APIConstants.API_KEY_VALIDATOR_URL);
-        username = config.getFirstProperty(APIConstants.API_KEY_VALIDATOR_USERNAME);
-        password = config.getFirstProperty(APIConstants.API_KEY_VALIDATOR_PASSWORD);
+        String serviceURL = config.getFirstProperty(APIConstants.API_KEY_MANAGER_URL);
+        username = config.getFirstProperty(APIConstants.API_KEY_MANAGER_USERNAME);
+        password = config.getFirstProperty(APIConstants.API_KEY_MANAGER_PASSWORD);
         if (serviceURL == null || username == null || password == null) {
             throw new APISecurityException(APISecurityConstants.API_AUTH_GENERAL_ERROR,
                     "Required connection details for the key management server not provided");
@@ -62,16 +63,14 @@ public class APIKeyValidatorClient {
 
         try {
             ConfigurationContext ctx = ConfigurationContextFactory.createConfigurationContextFromFileSystem(null, null);
-            keyValidationServiceStub = new APIKeyValidationServiceStub(ctx, serviceURL + "APIKeyValidationService");
-            ServiceClient client = keyValidationServiceStub._getServiceClient();
+            clientStub = new APIKeyValidationServiceStub(ctx, serviceURL + "APIKeyValidationService");
+            ServiceClient client = clientStub._getServiceClient();
             Options options = client.getOptions();
             options.setTimeOutInMilliSeconds(TIMEOUT_IN_MILLIS);
             options.setProperty(HTTPConstants.SO_TIMEOUT, TIMEOUT_IN_MILLIS);
             options.setProperty(HTTPConstants.CONNECTION_TIMEOUT, TIMEOUT_IN_MILLIS);
             options.setCallTransportCleanup(true);
             options.setManageSession(true);
-
-
         } catch (AxisFault axisFault) {
             throw new APISecurityException(APISecurityConstants.API_AUTH_GENERAL_ERROR,
                     "Error while initializing the API key validation stub", axisFault);
@@ -83,30 +82,30 @@ public class APIKeyValidatorClient {
                                                  String matchingResource, String httpVerb) throws APISecurityException {
 
         CarbonUtils.setBasicAccessSecurityHeaders(username, password,
-                true, keyValidationServiceStub._getServiceClient());
+                true, clientStub._getServiceClient());
         if (cookie != null) {
-            keyValidationServiceStub._getServiceClient().getOptions().setProperty(HTTPConstants.COOKIE_STRING, cookie);
+            clientStub._getServiceClient().getOptions().setProperty(HTTPConstants.COOKIE_STRING, cookie);
         }
         try {
-            List headerList = (List)keyValidationServiceStub._getServiceClient().getOptions().getProperty(org.apache.axis2.transport.http.HTTPConstants.HTTP_HEADERS);
+            List headerList = (List)clientStub._getServiceClient().getOptions().getProperty(org.apache.axis2.transport.http.HTTPConstants.HTTP_HEADERS);
             Map headers = (Map) MessageContext.getCurrentMessageContext().getProperty(
                     org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
             if (headers != null) {
                 headerList.add(new Header("activityID", (String)headers.get("activityID")));
             }
-            keyValidationServiceStub._getServiceClient().getOptions().setProperty(org.apache.axis2.transport.http.HTTPConstants.HTTP_HEADERS, headerList);
-            /**/
-
+            clientStub._getServiceClient().getOptions().setProperty(org.apache.axis2.transport.http.HTTPConstants.HTTP_HEADERS, headerList);
             org.wso2.carbon.apimgt.impl.dto.xsd.APIKeyValidationInfoDTO dto =
-                    keyValidationServiceStub.validateKey(context, apiVersion, apiKey,requiredAuthenticationLevel, clientDomain,
+                    clientStub.validateKey(context, apiVersion, apiKey,requiredAuthenticationLevel, clientDomain,
                                            matchingResource, httpVerb);
-
-            ServiceContext serviceContext = keyValidationServiceStub.
+            ServiceContext serviceContext = clientStub.
                     _getServiceClient().getLastOperationContext().getServiceContext();
             cookie = (String) serviceContext.getProperty(HTTPConstants.COOKIE_STRING);
             return toDTO(dto);
         }
-       catch (Exception e) {
+        catch (APIKeyValidationServiceAPIManagementException ex){
+                    throw new APISecurityException(APISecurityConstants.API_AUTH_FORBIDDEN,
+                                    "Resource forbidden", ex);
+        }catch (Exception e) {
             throw new APISecurityException(APISecurityConstants.API_AUTH_GENERAL_ERROR,
                     "Error while accessing backend services for API key validation", e);
         }
@@ -135,19 +134,18 @@ public class APIKeyValidatorClient {
         dto.setScopes(generatedDto.getScopes() == null ? null : new HashSet<String>(Arrays.asList(generatedDto.getScopes())));
         return dto;
     }
-
     public ArrayList<URITemplate> getAllURITemplates(String context, String apiVersion
     ) throws APISecurityException {
 
         CarbonUtils.setBasicAccessSecurityHeaders(username, password,
-                true, keyValidationServiceStub._getServiceClient());
+                                                  true, clientStub._getServiceClient());
         if (cookie != null) {
-            keyValidationServiceStub._getServiceClient().getOptions().setProperty(HTTPConstants.COOKIE_STRING, cookie);
+            clientStub._getServiceClient().getOptions().setProperty(HTTPConstants.COOKIE_STRING, cookie);
         }
         try {
             org.wso2.carbon.apimgt.api.model.xsd.URITemplate[] dto =
-                    keyValidationServiceStub.getAllURITemplates(context, apiVersion);
-            ServiceContext serviceContext = keyValidationServiceStub.
+                    clientStub.getAllURITemplates(context, apiVersion);
+            ServiceContext serviceContext = clientStub.
                     _getServiceClient().getLastOperationContext().getServiceContext();
             cookie = (String) serviceContext.getProperty(HTTPConstants.COOKIE_STRING);
             ArrayList<URITemplate> templates = new ArrayList<URITemplate>();

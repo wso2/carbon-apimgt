@@ -17,7 +17,6 @@ package org.wso2.carbon.apimgt.gateway.handlers.common;
 
 import org.apache.synapse.MessageContext;
 import org.apache.synapse.rest.AbstractHandler;
-import org.wso2.carbon.apimgt.impl.APIConstants;
 
 public class SynapsePropertiesHandler extends AbstractHandler{
 
@@ -26,10 +25,9 @@ public class SynapsePropertiesHandler extends AbstractHandler{
         String httpsport = System.getProperty("https.nio.port");
         messageContext.setProperty("http.nio.port", httpport);
         messageContext.setProperty("https.nio.port", httpsport);
-        String mgtHttpsPort = System.getProperty(APIConstants.KEYMANAGER_PORT);
-        messageContext.setProperty("keyManager.port",mgtHttpsPort);
-        String keyManagerHost = System.getProperty(APIConstants.KEYMANAGER_HOSTNAME);
-        messageContext.setProperty("keyManager.hostname",keyManagerHost);
+        String mgtHttpsPort = System.getProperty("mgt.transport.https.port");
+        messageContext.setProperty("mgtHttpsPort",mgtHttpsPort);
+
         return true;
     }
 

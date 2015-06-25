@@ -18,7 +18,6 @@
 
 package org.wso2.carbon.apimgt.impl.workflow;
 
-import org.apache.axis2.util.JavaUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
@@ -28,7 +27,6 @@ import org.wso2.carbon.apimgt.impl.dto.UserRegistrationConfigDTO;
 import org.wso2.carbon.apimgt.impl.dto.WorkflowDTO;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.SelfSignUpUtil;
-import org.wso2.carbon.apimgt.impl.workflow.events.APIMgtWorkflowDataPublisher;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.util.List;
@@ -37,21 +35,19 @@ public class UserSignUpSimpleWorkflowExecutor extends UserSignUpWorkflowExecutor
 
 	private static final Log log = LogFactory.getLog(UserSignUpSimpleWorkflowExecutor.class);
 
-
 	@Override
 	public String getWorkflowType() {
 		return WorkflowConstants.WF_TYPE_AM_USER_SIGNUP;
 	}
 
 	@Override
-    public void execute(WorkflowDTO workflowDTO) throws WorkflowException {
-        if (log.isDebugEnabled()) {
-            log.debug("Executing User SignUp Workflow for " +
-                      workflowDTO.getWorkflowReference());
-        }
-        complete(workflowDTO);
-        super.publishEvents(workflowDTO);
-    }
+	public void execute(WorkflowDTO workflowDTO) throws WorkflowException {
+		if (log.isDebugEnabled()) {
+			log.debug("Executing User SignUp Workflow for " +
+			          workflowDTO.getWorkflowReference());
+		}
+		complete(workflowDTO);
+	}
 
 	@Override
 	public void complete(WorkflowDTO workflowDTO) throws WorkflowException {
@@ -61,11 +57,12 @@ public class UserSignUpSimpleWorkflowExecutor extends UserSignUpWorkflowExecutor
         			workflowDTO.getExternalWorkflowReference() + "Workflow State : " +
         			workflowDTO.getStatus());
     	}
-        APIManagerConfiguration config = ServiceReferenceHolder.getInstance()
-                .getAPIManagerConfigurationService()
-                .getAPIManagerConfiguration();
-
-        String serverURL = config.getFirstProperty(APIConstants.AUTH_MANAGER_URL);
+		
+		APIManagerConfiguration config =
+				ServiceReferenceHolder.getInstance()
+				.getAPIManagerConfigurationService()
+				.getAPIManagerConfiguration();
+		String serverURL = config.getFirstProperty(APIConstants.AUTH_MANAGER_URL);
 
 		String tenantDomain = workflowDTO.getTenantDomain();
 

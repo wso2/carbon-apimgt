@@ -58,7 +58,7 @@ public class RESTAPIAdminClient extends AbstractAPIGatewayAdminClient {
             	 restApiAdminStub.addApiFromString(apiConfig);
             }
         } catch (Exception e) {
-            throw new AxisFault("Error while publishing API to the Gateway. " + e.getMessage(), e);
+            throw new AxisFault("Error while adding new API", e);
         }
 	}
 
@@ -79,7 +79,7 @@ public class RESTAPIAdminClient extends AbstractAPIGatewayAdminClient {
                 restApiAdminStub.addApiFromString(apiConfig);
             }
         } catch (Exception e) {
-            throw new AxisFault("Error while publishing prototype API to the Gateway. " + e.getMessage(), e);
+            throw new AxisFault("Error while adding new API", e);
         }
     }
 
@@ -94,7 +94,7 @@ public class RESTAPIAdminClient extends AbstractAPIGatewayAdminClient {
                 restApiAdminStub.addApiFromString(apiConfig);
             }
         } catch (Exception e) {
-            throw new AxisFault("Error publishing default API to the Gateway. " + e.getMessage(), e);
+            throw new AxisFault("Error while adding API", e);
         }
     }
 
@@ -115,7 +115,7 @@ public class RESTAPIAdminClient extends AbstractAPIGatewayAdminClient {
              }
             return (APIData) apiData;
         } catch (Exception e) {
-            throw new AxisFault("Error while obtaining API information from gateway. " + e.getMessage(), e);
+            throw new AxisFault("Error while obtaining API information from gateway", e);
         }
     }
 
@@ -130,7 +130,7 @@ public class RESTAPIAdminClient extends AbstractAPIGatewayAdminClient {
             }
             return (APIData) apiData;
         } catch (Exception e) {
-            throw new AxisFault("Error while obtaining default API information from gateway." + e.getMessage(), e);
+            throw new AxisFault("Error while obtaining API information from gateway", e);
         }
     }
     /**
@@ -150,7 +150,7 @@ public class RESTAPIAdminClient extends AbstractAPIGatewayAdminClient {
 				restApiAdminStub.updateApiFromString(qualifiedName, apiConfig);
 			}
 		} catch (Exception e) {
-			throw new AxisFault("Error while updating API in the gateway. " + e.getMessage(), e);
+			throw new AxisFault("Error while updating API", e);
 		}
 	}
 
@@ -171,7 +171,7 @@ public class RESTAPIAdminClient extends AbstractAPIGatewayAdminClient {
                 restApiAdminStub.updateApiFromString(qualifiedName, apiConfig);
             }
         } catch (Exception e) {
-            throw new AxisFault("Error while updating prototype API in the gateway. " + e.getMessage(), e);
+            throw new AxisFault("Error while updating API", e);
         }
     }
 
@@ -186,7 +186,7 @@ public class RESTAPIAdminClient extends AbstractAPIGatewayAdminClient {
                 restApiAdminStub.updateApiFromString(qualifiedDefaultApiName, apiConfig);
             }
         } catch (Exception e) {
-            throw new AxisFault("Error while updating default API in the gateway. " + e.getMessage(), e);
+            throw new AxisFault("Error while updating API", e);
         }
     }
     
@@ -206,7 +206,7 @@ public class RESTAPIAdminClient extends AbstractAPIGatewayAdminClient {
 			}
 			
 		} catch (Exception e) {
-			throw new AxisFault("Error while deleting API from the gateway. " + e.getMessage(), e);
+			throw new AxisFault("Error while deleting API", e);
 		}
 	}
 
@@ -220,7 +220,7 @@ public class RESTAPIAdminClient extends AbstractAPIGatewayAdminClient {
             }
 
         } catch (Exception e) {
-            throw new AxisFault("Error while deleting default API from the gateway. "+ e.getMessage(), e);
+            throw new AxisFault("Error while deleting API", e);
         }
     }
 

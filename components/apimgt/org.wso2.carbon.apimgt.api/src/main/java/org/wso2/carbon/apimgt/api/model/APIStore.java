@@ -26,7 +26,6 @@ public class APIStore {
     private String username;
     private String password;
     private boolean published;
-    private APIPublisher publisher;
 
     public void setType(String type) {
         this.type = type;
@@ -81,14 +80,6 @@ public class APIStore {
 
     public String getPassword() {
         return password;
-    }
-
-    public APIPublisher getPublisher() {
-        return publisher;
-    }
-
-    public void setPublisher(APIPublisher publisher) {
-        this.publisher = publisher;
     }
 
     @Override

@@ -56,7 +56,7 @@ public class APIAuthenticationServiceClient {
             ServiceClient client = stub._getServiceClient();
             Options options = client.getOptions();
             options.setManageSession(true);
-            options.setProperty(HTTPConstants.COOKIE_STRING,
+            options.setProperty(org.apache.axis2.transport.http.HTTPConstants.COOKIE_STRING,
                                 authenticatedCookie);
         } catch (Exception e) {
             String errorMsg = "Error when instantiating APIAuthenticationServiceClient.";

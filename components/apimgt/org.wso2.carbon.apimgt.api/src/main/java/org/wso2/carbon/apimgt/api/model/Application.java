@@ -17,9 +17,10 @@
 */
 package org.wso2.carbon.apimgt.api.model;
 
-import org.wso2.carbon.apimgt.api.APIManagementException;
-
-import java.util.*;
+import java.util.ArrayList;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Set;
 
 /**
  * This class represent the Application in api model
@@ -31,13 +32,10 @@ public class Application {
     private Subscriber subscriber;
     private Set<SubscribedAPI> subscribedAPIs = new LinkedHashSet<SubscribedAPI>();
     private List<APIKey> keys = new ArrayList<APIKey>();
-    private Map<String,OAuthApplicationInfo> oauthApps = new HashMap<String, OAuthApplicationInfo>();
     private String tier;
     private String callbackUrl;
     private String description;
     private String status;
-    private String groupId;
-    private int subsCount;
 
     /**Holds workflow status**/
     private String applicationWorkFlowStatus; 
@@ -45,11 +43,6 @@ public class Application {
     public Application(String name, Subscriber subscriber) {
         this.name = name;
         this.subscriber = subscriber;
-    }
-
-    public Application(int appId) {
-        id = appId;
-        this.subscriber = new Subscriber(null);
     }
 
     public String getDescription() {
@@ -66,14 +59,6 @@ public class Application {
 
     public void setStatus(String status) {
         this.status = status;
-    }
-
-    public int getSubsCount() {
-        return subsCount;
-    }
-
-    public void setSubsCount(int count) {
-        this.subsCount = subsCount;
     }
 
     public String getName() {
@@ -97,18 +82,6 @@ public class Application {
 
     public void removeSubscribedAPIs(Set<SubscribedAPI> subscribedAPIs) {
         this.subscribedAPIs.removeAll(subscribedAPIs);
-    }
-
-    protected Map<String,OAuthApplicationInfo> getOAuthApp(){
-     return oauthApps;
-    }
-
-    public OAuthApplicationInfo getOAuthApp(String keyType){
-       return oauthApps.get(keyType);
-    }
-
-    public void addOAuthApp(String keyType, OAuthApplicationInfo oAuthApplication){
-        oauthApps.put(keyType, oAuthApplication);
     }
 
     public int getId() {
@@ -167,13 +140,5 @@ public class Application {
 
 	public void setApplicationWorkFlowStatus(String applicationWorkFlowStatus) {
 	    this.applicationWorkFlowStatus = applicationWorkFlowStatus;
-    }
-
-    public String getGroupId() {
-        return groupId;
-    }
-
-    public void setGroupId(String groupId) {
-        this.groupId = groupId;
     }
 }

@@ -2,21 +2,7 @@
 <div id="application-list">
     <%
 
-    var i, classes, path, callbackUrl, description, app, apps = outputs.applications;
-
-    var errors = outputs.error;
-    if(errors == true){
-    %>
-        <div id="errorMessage" style="display: none"><%= outputs.message %></div>
-    <%
-    }
-
-    if(apps != null){
-        length = apps.length;
-    }else{
-        length = 0;
-    }
-
+    var i, classes, path, callbackUrl, description, app, apps = outputs.applications, length = apps.length;
     if(length > 0) {
 
     var itemsPerPage = 20; //reduce this number to preview the pagination

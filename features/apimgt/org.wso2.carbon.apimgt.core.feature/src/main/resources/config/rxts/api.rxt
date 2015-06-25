@@ -27,13 +27,7 @@
             <name>Context</name>
         </field>
         <field type="text" required="true">
-            <name>Context Template</name>
-        </field>
-        <field type="text" required="true">
             <name>Version</name>
-        </field>
-		<field type="text" required="true">
-            <name>Version Type</name>
         </field>
         <field type="options">
             <name label="isDefaultVersion">Is Default Version</name>
@@ -61,7 +55,7 @@
             <name label="Endpoint Type">Endpoint Type</name>
             <values>
                 <value>Secured</value>
-                <value>Non Secured</value>
+                <value>Non Secured</value>             
             </values>
         </field>
         <field type="text" url="true">
@@ -153,14 +147,11 @@
         <field type="text">
             <name>Tenants</name>
         </field>
-         <field type="text">
-            <name>Environments</name>
-         </field>
         <field type="options">
             <name label="Response Caching">Response Caching</name>
             <values>
                 <value>Enabled</value>
-                <value>Disabled</value>
+                <value>Disabled</value>             
             </values>
         </field>
         <field type="text">
@@ -170,43 +161,78 @@
             <name label="Destination Statistics">Destination Stats Enabled</name>
             <values>
                 <value>Enabled</value>
-                <value>Disabled</value>
+                <value>Disabled</value>             
             </values>
         </field>
     </table>
-    <table name="URITemplate" columns="4"  maxoccurs="unbounded">
-                    <subheading>
-                        <heading>URL Pattern</heading>
-                        <heading>HTTP Verb</heading>
-                        <heading>Auth Type</heading>
-                        <heading>Mediation Script</heading>
-                    </subheading>
-                    <field type="text">
-                        <name label="URL Pattern">URL Pattern</name>
-                    </field>
-                    <field type="options">
-                        <name label="HTTP Verb">HTTP Verb</name>
-                        <values>
-                            <value>GET</value>
-                            <value>POST</value>
-                            <value>PUT</value>
-                            <value>DELETE</value>
-                            <value>OPTIONS</value>
-                        </values>
-                    </field>
-                    <field type="options">
-                        <name label="Auth Type">Auth Type</name>
-                        <values>
-                            <value>None</value>
-                            <value>Application</value>
-                            <value>Application User</value>
-                            <value>Application And Application User</value>
-                        </values>
-                   </field>
-                   <field type="text">
-                        <name label="Mediation Script">Mediation Script</name>
-                   </field>
-            </table>
+    <table name="URITemplate" columns="4">
+            <subheading>
+                <heading>URL Pattern</heading>
+                <heading>HTTP Verb</heading>
+                <heading>Auth Type</heading>
+                <heading>Mediation Script</heading>
+            </subheading>
+            <field type="text">
+                <name>URL Pattern0</name>
+            </field>
+            <field type="text">
+                <name>HTTP Verb0</name>
+            </field>
+            <field type="text">
+                <name>Auth Type0</name>
+            </field>
+            <field type="text">
+                <name>Mediation Script0</name>
+            </field>
+            <field type="text">
+                <name>URL Pattern1</name>
+            </field>
+            <field type="text">
+                <name>HTTP Verb1</name>
+            </field>
+            <field type="text">
+                <name>Auth Type1</name>
+            </field>
+            <field type="text">
+                <name>Mediation Script1</name>
+            </field>
+             <field type="text">
+                <name>URL Pattern2</name>
+            </field>
+            <field type="text">
+                <name>HTTP Verb2</name>
+            </field>
+            <field type="text">
+                <name>Auth Type2</name>
+            </field>
+            <field type="text">
+                <name>Mediation Script2</name>
+            </field>
+             <field type="text">
+                <name>URL Pattern3</name>
+            </field>
+            <field type="text">
+                <name>HTTP Verb3</name>
+            </field>
+            <field type="text">
+                <name>Auth Type3</name>
+            </field>
+            <field type="text">
+                <name>Mediation Script3</name>
+            </field>
+             <field type="text">
+                <name>URL Pattern4</name>
+            </field>
+            <field type="text">
+                <name>HTTP Verb4</name>
+            </field>
+            <field type="text">
+                <name>Auth Type4</name>
+            </field>
+            <field type="text">
+                <name>Mediation Script4</name>
+            </field>
+        </table>
 </content>
 
 </artifactType>
