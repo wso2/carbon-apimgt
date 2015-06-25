@@ -310,24 +310,6 @@ asset.renderer = function(ctx) {
             //Set language specific helper messages and names
             var locale = require('/extensions/assets/api/locale/locale_default.json');
             page.locale = locale;
-            var documents = apistore.getAllDocumentation().documents;
-            var processedDocuments = [];
-            var type;
-            var docs;
-            for(type in documents) {
-                if(documents.hasOwnProperty(type)) {
-                    docs = documents[type];
-                }
-            for(var i = 0; i <documents.length; i++) {
-                type = documents[i].type;
-                processedDocuments.push({
-                                        "type" : type,
-                                        "empty" : false,
-                                        "docs" : docs
-                                        })
-                }
-            }
-            page.processedDocuments = documents;
         },
         pageDecorators: {
             populateEndPoints : function(page){
