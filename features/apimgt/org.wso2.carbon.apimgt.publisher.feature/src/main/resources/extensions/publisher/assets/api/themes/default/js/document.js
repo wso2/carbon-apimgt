@@ -299,27 +299,6 @@ var  editDocumentation = function(url, filePath, editContent){
 
 };
 
-var editInlineContent	 = function (provider, apiName, version, docName, mode,tenantDomain) {
-	$('#addOrUpdateDoc').hide();
-	$('#doc-add-container').hide();
-	$('#doc-list-container').hide();
-	$('#InlineShowVisibility').val($('#showVisibility').val());
-	$('#InlineDocVisibility').val($('#docVisibility').val());
-	$('#inline-editor-container').show('slow');
-	alert($('#showVisibility').val());
-	$('#inlineDocName').val(docName);
-	$('.inlineDocName').each(function(){            //iterates all elements having stick class
-         $(this).html(docName);       //inside the callback the 'this' is the current html element. etc ...
-     });
-	$('#inlineApiName').val(apiName);
-  	$('#inlineApiProvider').val(provider);
-  	$('#inlineApiVersion').val(version);
-	$('#inlineDocPageId').val($('#addDocPageId').val());
-	$('#inlineButtonGroup').show('fast');
-};
-
-
-
 
 var validInputUrl = function(docUrlDiv) {
     if (docUrlDiv) {
