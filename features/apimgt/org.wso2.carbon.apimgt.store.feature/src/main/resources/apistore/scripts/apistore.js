@@ -365,16 +365,16 @@ var apistore = {};
             for (var i = 0 ; i < documents.size() ; i ++) {
                 document = documents.get(i);
                 var sourceTypes = [];
-                var content, documentationType, otherTypeName, otherType = false,  = false;
+                var content, documentationType, otherTypeName, otherType = false;
                 var sourceType = document.getSourceType().getType();
-                if ('INLINE' == sourceType) {
+                if ('INLINE' == sourceType.toUpperCase()) {
                     sourceTypes.push({
                                      "inline" :true,
                                      "url" : false,
                                       "file" : false
                                      });
                     content = this.impl.getDocumentationContent(apiIdentifier, document.getName());
-                } else if ('URL' == sourceType) {
+                } else if ('URL' == sourceType.toUpperCase()) {
                     sourceTypes.push({
                                          "inline" :false,
                                          "url" : true,
