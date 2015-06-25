@@ -1,0 +1,12 @@
+<h2>{{doc.docName}}</h2>
+<br/>
+<div class="documentation">
+	<div class="span11">
+		{{if doc.content}}
+			No document content have been added yet.
+		{{else}}
+			{{doc.content}}
+		{{/if}}
+	</div>
+</div>
+</div>
