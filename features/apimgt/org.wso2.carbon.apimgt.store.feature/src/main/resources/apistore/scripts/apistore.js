@@ -365,7 +365,7 @@ var apistore = {};
             for (var i = 0 ; i < documents.size() ; i ++) {
                 document = documents.get(i);
                 var sourceTypes = [];
-                var content, documentationType, otherTypeName, otherType = false,  = false;
+                var content, documentationType, otherTypeName, otherType = false;
                 var sourceType = document.getSourceType().getType();
                 if ('INLINE' == sourceType) {
                     sourceTypes.push({
