@@ -1,15 +1,3 @@
-<% jagg.template("api/documentation", function(inputs, outputs, jagg) {
-var provider= encode.forUriComponent(request.getParameter("provider"));
-var name= encode.forUriComponent(request.getParameter("name"));
-var version= encode.forUriComponent(request.getParameter("version"));
-var reqUrl = request.getRequestURI();
-var docUrl=jagg.getAbsoluteUrl("/site/pages/doc-viewer.jag");
-var docMappedUrl=jagg.getMappedUrl("/site/pages/doc-viewer.jag");
-var urlPrefix;
-var tenantDomain=request_tenant;
-if(tenantDomain!=null) {urlPrefix="&tenant="+tenantDomain;}else{urlPrefix='';}
-%>
-
 <div class="api-documentation">
 	{{#each processedDocuments}}
 	<div class="accordion-group">
@@ -18,7 +6,7 @@ if(tenantDomain!=null) {urlPrefix="&tenant="+tenantDomain;}else{urlPrefix='';}
 		</div>
 		<div class="accordion-body">
 			<div class="accordion-inner">
-				{{each this.docs}}
+				{{#each this.docs}}
 				<div class="doc-type-shift">
 					{{#if this.otherType}}
 					<h5>{{this.otherTypeName}}</h5>
@@ -35,35 +23,40 @@ if(tenantDomain!=null) {urlPrefix="&tenant="+tenantDomain;}else{urlPrefix='';}
 					<p><a href="{{this.sourceUrl}}" class="doc-content" target="_blank">
 						{{#if doc.sourceTypes.url}}
 							{{this.sourceUrl}}</a></p>
-					<%}else{%>
-
-					{{t locale.viewDoc}}</a></p>
-					<%}}else if(doc.filePath && doc.filePath!=""){%>
-
-					<p><a href="<%=jagg.url("/site/themes/responsive/templates/api/documentation/download.jag?tenant=" + tenantDomain + "&resourceUrl=" + doc.filePath) %>" class="doc-content" target="_blank" download><%=i18n.localize("download")%></a></p>
-
-					<%}else{
-					%>
+						{{else}}
+							{{t locale.viewDoc}}</a></p>
+						{{/if}}
+					{{else}}
+						{{#if docs.path}}
+							<p><a href="{{caramel.context}}/apis/documentation/download?tenant={{tenantDomain
+							}}&resourceUrl={{doc.filePath}}" class="doc-content" target="_blank"
+								download>{{t locale.download}}</a></p>
+						{{else}}
 					<div>
-						<%if(reqUrl.indexOf(".jag")>=0){%>
-						<a href="doc-viewer.jag?docName=<%= encode.forUriComponent(doc.name)%>&name=<%= encode.forUriComponent(name) %>&version=<%= encode.forUriComponent(version)%>&provider=<%= encode.forUriComponent(provider)%>&<%=urlPrefix%>" class="doc-content"  target="_blank"><%=i18n.localize("viewDoc")%></a>
-						<%}else{%>
-						<a href="../site/pages/doc-viewer.jag?docName=<%= encode.forUriComponent(doc.name) %>&name=<%= encode.forUriComponent(name)%>&version=<%= encode.forUriComponent(version) %>&provider=<%=encode.forUriComponent(provider)%>&<%=urlPrefix%>" class="doc-content"  target="_blank"><%=i18n.localize("viewDoc")%></a>
-						<%}%>
+						{{#if reqUrl.jag}}
+						<a href="doc-viewer.jag?docName={{doc
+					.name}}&name{{name}}&version={{version}}&provider={{provider}}&{{urlPrefix}}" class="doc-content"
+						   target="_blank">{{t locale.viewDoc}}/a>
+						{{else}}
+						<a href="doc-viewer.jag?docName={{doc
+						.name}}&name={{name}}&version={{version}}&provider={{provider}}&{{urlPrefix}}" class="doc-content"
+						   target="_blank">{{t locale.viewDoc}}</a>
+						{{/if}}
 					</div>
-					<%}%>
+					{{/if}}
+					{{/if}}
 				</div>
 				<hr/>
 			</div>
-			<% } %>
+			{{/each}}
 		</div>
 	</div>
 </div>
 {{/each}}
-<% if(empty) { %>
+{{if processedDocuments.empty}}
 <div class="alert alert-info" style="margin-bottom:10px">
 	<i class="fa fa-info"></i> &nbsp;&nbsp; No documents have been associated with this API so far.
 </div>
-<% } %>
+{{/if}}
 </div>
 

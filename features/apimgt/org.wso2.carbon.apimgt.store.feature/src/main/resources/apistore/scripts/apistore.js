@@ -367,14 +367,14 @@ var apistore = {};
                 var sourceTypes = [];
                 var content, documentationType, otherTypeName, otherType = false;
                 var sourceType = document.getSourceType().getType();
-                if ('INLINE' == sourceType) {
+                if ('INLINE' == sourceType.toUpperCase()) {
                     sourceTypes.push({
                                      "inline" :true,
                                      "url" : false,
                                       "file" : false
                                      });
                     content = this.impl.getDocumentationContent(apiIdentifier, document.getName());
-                } else if ('URL' == sourceType) {
+                } else if ('URL' == sourceType.toUpperCase()) {
                     sourceTypes.push({
                                          "inline" :false,
                                          "url" : true,
