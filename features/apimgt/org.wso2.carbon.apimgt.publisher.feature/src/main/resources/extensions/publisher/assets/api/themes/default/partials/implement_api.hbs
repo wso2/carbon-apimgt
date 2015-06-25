@@ -240,15 +240,15 @@
 	                <fieldset>
 	        <legend>Implementation Method</legend>
 	            <div class="form-group">
-	        <label class="custom-form-label col-lg-2  " for="context">Implementation Method</label>
+	        <label class="custom-form-label col-lg-2 uppercase" for="context">Implementation Method :</label>
 	                <label class="checkbox-inline">
 	                            <input class="implementation_methods" type="radio" value="inline"
-	                                   name="implementation_methods"> {{t "Inline"}}
-	                        </label>
+	                            name="implementation_methods"> {{t "Inline"}}
+	                 </label>
 	                <label class="checkbox-inline">
 	                            <input class="implementation_methods" type="radio" value="endpoint"
 	                                   name="implementation_methods" checked="checked"> {{t "Endpoint"}}
-	                        </label>
+	                </label>
 
 	                </div>
 	            <!-- closing the well for endpoints -->
@@ -267,9 +267,9 @@
 
 	                <fieldset class="implementation_method_endpoint implementation_method">
 	                    <input type="hidden" class="prototype_config" name="endpoint_config" value="{{api.endpointConfig}}"/>
-	                    <div class="control-group">
-	                        <label class="control-label">Prototype Endpoint:</label>
-	                        <div class="controls">
+	                    <div class="control-group ">
+	                        <label class="custom-form-label col-lg-2 uppercase">Prototype Endpoint :</label>
+	                        <div class="controls imp-cnls">
 	                            <div class="input-append">
 	                            <input type="text" id="prototype_endpoint" value="http://localhost" name="prototype_endpoint" class="required">
 	                            <button type="button" class="btn check_url_valid">Test</button>
@@ -293,7 +293,7 @@
 	                    <input type="hidden" name="action" value="implement" />
 	                    <input type="hidden" id="swagger" name="swagger" class="swagger" value="" />
 	                    <button type="submit" class="btn btn-primary manageSaveButton has-spinner" id="savePrototypeBtn" >Save</button>
-	                    <button class="btn btn-warning pull-right has-spinner" id="prototyped_api" >Deploy as a Prototype</button>
+	                    <button class="btn btn-primary pull-right has-spinner" id="prototyped_api" >Deploy as a Prototype</button>
 
 	                </div>
 	            </form>
