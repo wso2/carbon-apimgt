@@ -34,19 +34,23 @@ $(function(){
 }*/
 
 function saveContent(provider, apiName, apiVersion, mode) {
-	var contentDoc = tinyMCE.activeEditor.getContent({format:'raw'});//tinyMCE.activeEditor.getBody().textContent;//tinyMCE.get('inlineEditor').getContent();
+	var contentDoc = tinyMCE.get('inlineEditor').getContent();
   var docName = $('#inlineDocName').val();
   var apiName = $('#inlineApiName').val();
   var provider = $('#inlineApiProvider').val();
   var version = $('#inlineApiVersion').val();
+  alert(docName);
 
   var pageId = $('#inlineDocPageId').val();
   var visibility={};
   var showVisibility = $('#InlineShowVisibility').val();
+  alert(showVisibility);
   if(showVisibility == "true"){
     visibility = $('#InlineDocVisibility').val();
   }
+  alert(contentDoc);
   var inlineContent = contentDoc;
+  alert(inlineContent);
   var action = "editInlineContent";
   var successMsg = 'Successfully Edited Inline Content';
   var errorMsg = 'Error Occured while Edit Inline Content';
