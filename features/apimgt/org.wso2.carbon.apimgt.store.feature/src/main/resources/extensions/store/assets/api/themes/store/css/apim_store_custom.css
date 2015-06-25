@@ -134,7 +134,11 @@ legend {
     }
 .asset-description-header{margin-top: 10px;}
 .wr-action-btn-bar{height: 50px;}
-.form-horizontal{margin-bottom: 30px;  }
+.form-horizontal {
+    background-color: #fcfcfc;
+    margin-bottom: 30px;
+    padding: 30px;
+}
 .padding-top-double{padding-top: 20px;  }
 .nav-tabs > li {
     display: block;
@@ -164,3 +168,24 @@ legend {
     outline: 0;
 }
 .editable-div span { background:#dfebed; color:#292E38; }
+.badge {
+    font-size: 14px;
+    font-weight: 400;
+    color: #00344D;
+    background-color: #F9F9F9;
+    border-radius: 0px;
+    width: 50%;
+    height: 35px;
+    border: 1px solid #ccc;
+    padding-top: 10px;
+    text-align: left;
+}
+.custom-form-label{font-weight: 500; text-transform: uppercase;}
+ .regen-btn {margin-top: -2px;
+    height: 35px;}
+.custom-form-right>.form-control {
+    width: 50%; float:left; }
+.flt-spn{float: left; margin-left: 10px; margin-top: 12px;}
+#assets-container{background-color: #fff;}
+.asset-description-header>p{padding-left: 20px;}
+.asset-description-header > .col-lg-12 > h3{padding-top: 20px;}
