@@ -21,21 +21,38 @@ require('/modules/store.js').exec(function (ctx) {
 	var log = new Log();
 	var server = require('store').server;
 	var user = server.current(ctx.session);
-	var apistore = require('apistore').apistore.instance(user.username);
-	var options = request.getAllParameters('UTF-8');
+	var apistore;
+	var username;
+	if(user != null) {
+		username = user.username;
+		apistore = require('apistore').apistore.instance(user.username);
+	} else {
+		username = '__wso2.am.anon__';
+		apistore = require('apistore').apistore.instance(username);
+	}
+
 	var httpMethod = request.getMethod();
 
 	switch (httpMethod) {
 		case 'GET':
-			var tenantDomain=request.getParameter("tenant");
+			var tenantDomain = request.getParameter("tenant");
 			var resourceUrl = request.getParameter("resourceUrl");
-			var object = apistore.getDocument(tenantDomain, resourceUrl);
-			if (object == null) {
+			log.info(tenantDomain);
+			if(tenantDomain == '') {
+				tenantDomain = null;
+			}
+
+			if (username ==  '__wso2.am.anon__') {
+				username = '';
+			}
+
+			var document = apistore.getDocument(username, resourceUrl, tenantDomain).document;
+			if (document == null) {
 				response.status = 500;
 			} else {
 				response.contentType = "application/force-download";
-				response.addHeader("Content-Disposition", "attachment; filename = " + object.name);
-				print(object.Data);
+				response.addHeader("Content-Disposition", "attachment; filename = " + document.name);
+				print(document.data);
 			}
 			break;
 

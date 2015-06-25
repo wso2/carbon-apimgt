@@ -108,17 +108,17 @@ asset.server = function(ctx) {
                         url: 'my_applications',
                         path: 'my_applications.jag',
                         secured: true
-                    },/** {
-            title: 'API Details'
-            url: 'details'
-            path: 'details.jag'
-            },*/
-                    {
+                    },{
                         title: 'My Subscriptions',
                         url: 'my_subscriptions',
                         path: 'my_subscriptions.jag',
                         secured: true
-                    }, {
+                    },{
+                        title: 'View Document',
+                        url: 'document/view',
+                        path: 'view_document.jag',
+                        secured: true
+                    },{
                         title: 'Forum',
                         url: 'forum',
                         path: 'forum.jag'
@@ -152,14 +152,17 @@ asset.renderer = function(ctx) {
             //=================== Getting subscription details ========================
 
             var carbonAPI = require('carbon');
-            var tenantDomain = carbonAPI.server.tenantDomain({
-                                                                 tenantId : ctx.tenantId
-                                                             });
             var server = require('store').server;
             var user = server.current(ctx.session);
+            var tenantId = null, tenantDomain = null;
+
             var userName = '__wso2.am.anon__';
 
             if (user != null) {
+                tenantId = user.tenantId;
+                tenantDomain = carbonAPI.server.tenantDomain({
+                                                                 tenantId : user.tenantId
+                                                             });
                 userName = user.username;
             }
             var lenI=0,lenJ=0,i,j,result,apidata,deniedTiers,tiers,appsList=[],subscribedToDefault=false,showSubscribe=false,status,selectedDefault=false;
@@ -310,6 +313,49 @@ asset.renderer = function(ctx) {
             //Set language specific helper messages and names
             var locale = require('/extensions/assets/api/locale/locale_default.json');
             page.locale = locale;
+            var documents = apistore.getAllDocumentation(asset.attributes.overview_provider,
+                                                         asset.name, asset.attributes.overview_version, userName).documents;
+            var apiIdentifier = {};
+            apiIdentifier.name = asset.attributes.overview_name;
+            apiIdentifier.version = asset.name;
+            apiIdentifier.provider = asset.attributes.overview_provider;
+            page.apiIdentifier = apiIdentifier;
+
+            var processedDocuments = [];
+            var type, index;
+            var docs, empty = true;
+            var processedTypes = [], processed;
+            for(var i = 0; i < documents.length; i++) {
+                empty = false;
+                docs = [], index = 0;
+                processed = false;
+                type = documents[i].type;
+                for(var k = 0 ; k < processedTypes.length; k++) {
+                    if (type == processedTypes[k]) {
+                        processed = true;
+                    }
+                }
+
+                if(processed) {
+                    continue;
+                }
+
+                for(var j = 0; j <documents.length; j++) {
+                    if(type == documents[j].type) {
+                        docs[index] = documents[j];
+                        index++;
+                    }
+                }
+
+                processedDocuments.push({
+                                            "type" : type,
+                                            "docs" : docs
+                                        });
+                processedTypes.push(type);
+            }
+            processedDocuments.empty = empty;
+            page.processedDocuments = processedDocuments;
+            page.tenant = {"tenantId" : tenantId, "tenantDomain" : tenantDomain};
         },
         pageDecorators: {
             populateEndPoints : function(page){

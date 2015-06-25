@@ -1,0 +1,15 @@
+<script type="text/javascript">
+	if (!store.publisher) {
+		store.publisher = {};
+	}
+
+	if(!store.publisher.apiIdentifier){
+		store.publisher.apiIdentifier ={};
+	}
+
+	store.publisher.apiIdentifier = {
+		name: "{{apiIdentifier.name}}",
+		version: "{{apiIdentifier.version}}",
+		provider: "{{apiIdentifier.provider}}"
+	};
+</script>
