@@ -1,4 +1,4 @@
-$(document).ready(function() {
+$(function(){
     tinyMCE.init({
                      mode : "textareas",
                      theme : "advanced",
@@ -14,7 +14,7 @@ $(document).ready(function() {
 });
 
 
-function loadDefaultTinyMCEContent(provider,apiName, version, docName) {
+/*function loadDefaultTinyMCEContent(provider,apiName, version, docName) {
     jagg.post("/site/blocks/documentation/ajax/docs.jag", { action:"getInlineContent", provider:provider,apiName:apiName,version:version,docName:docName },
               function (json) {
                   if (!json.error) {
@@ -31,48 +31,92 @@ function loadDefaultTinyMCEContent(provider,apiName, version, docName) {
 
 
 
-}
+}*/
 
-function saveContent(provider, apiName, apiVersion, docName, mode) {
-	var contentDoc = tinyMCE.get('inlineEditor').getContent();
-	if (docName == "Swagger API Definition") {
-		/* Remove html tags */
-		contentDoc = contentDoc.replace(/(<([^>]+)>)/ig,"");
-		/* Remove &nbsp */
-	  	contentDoc = contentDoc.replace(/&nbsp;/gi,'');
-	}
-    jagg.post("/site/blocks/documentation/ajax/docs.jag", { action:"addInlineContent",provider:provider,apiName:apiName,version:apiVersion,docName:docName,content:contentDoc},
-              function (result) {
-                  if (result.error) {
-                      if (result.message == "AuthenticateError") {
-                          jagg.showLogin();
-                      } else {
-                          jagg.message({content:result.message,type:"error"});
+function saveContent(provider, apiName, apiVersion, mode) {
+	var contentDoc = tinyMCE.activeEditor.getContent({format:'raw'});//tinyMCE.activeEditor.getBody().textContent;//tinyMCE.get('inlineEditor').getContent();
+  var docName = $('#inlineDocName').val();
+  var apiName = $('#inlineApiName').val();
+  var provider = $('#inlineApiProvider').val();
+  var version = $('#inlineApiVersion').val();
+
+  var pageId = $('#inlineDocPageId').val();
+  var visibility={};
+  var showVisibility = $('#InlineShowVisibility').val();
+  if(showVisibility == "true"){
+    visibility = $('#InlineDocVisibility').val();
+  }
+  var inlineContent = contentDoc;
+  var action = "editInlineContent";
+  var successMsg = 'Successfully Edited Inline Content';
+  var errorMsg = 'Error Occured while Edit Inline Content';
+
+  var ajaxURL = caramel.context + '/asts/api/apis/addDoc';
+
+    $('#form-inline-editor').ajaxSubmit({
+          type: "POST",
+          url: ajaxURL,
+          data: {
+              action:action,
+              name:apiName,
+              version:version,
+              provider:provider,
+              docName:docName,
+              visibility:visibility,
+              inlineContent:inlineContent
+
+              
+    
+          },
+          success: function (result) {
+              
+                  BootstrapDialog.show({
+                    type: BootstrapDialog.TYPE_SUCCESS,
+                    title: 'success',
+                    message: successMsg,
+                    buttons: [{
+                    
+                      label: 'Close',
+                      action: function(dialogItself){
+                        dialogItself.close();
+                        if(mode == 'save'){
+                          window.location.href = caramel.context+'/asts/api/docs/'+pageId;
+                        }
+                        
                       }
-                  } else {
-                      if (mode == "save") {
-                         /* $('#messageModal').html($('#confirmation-data').html());
-                          $('#messageModal h3.modal-title').html('Document Content Addition Successful');
-                          $('#messageModal div.modal-body').html('\n\n Successfully saved the documentation content and you will be moved away from this tab.');
-                          $('#messageModal a.btn-primary').html('OK');
-                          $('#messageModal a.btn-other').hide();
-                          $('#messageModal a.btn-primary').click(function() {*/
-                              window.close();
-                          /*});
-                          $('#messageModal').modal();*/
-                      } else {
-                           $('#docAddMessage').show();
-                           setTimeout("hideMsg()", 3000);
+                  
+                  }]
+
+                });
+                 
+              },
+          error : function(result) {                    
+                  
+                  BootstrapDialog.show({
+                    type: BootstrapDialog.TYPE_DANGER,
+                    title: 'Error',
+                    message: errorMsg,
+                    buttons: [{
+                    
+                      label: 'Close',
+                      action: function(dialogItself){
+                        dialogItself.close();
+                        if(mode == 'save'){
+                          window.location.href = caramel.context+'/asts/api/docs/'+pageId;
+                        }
                       }
-                  }
-              }, "json");
+                  
+                  }]
+
+                });
+                },
+                
+         
+          dataType: "json"
+  }); 
 }
 
 var hideMsg=function () {
     $('#docAddMessage').hide("fast");
 }
 
-function navigateBack(tabName){
-  jagg.sessionAwareJS({redirect:'<%= apiUrl%>', e:event})
-  $.cookie("selectedTab", tabName, {path: "/"});
-}

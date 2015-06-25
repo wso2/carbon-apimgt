@@ -69,11 +69,11 @@ var docName = "<%= encode.forJavaScript(request.getParameter("docName"))%>"; --}
             
             
             
-            <div id="inlineButtonGroup" style='display:none;'>
+            <div id="inlineButtonGroup" style='display:none;' >
                 <div style="padding:10px 0;">
                     <button type="button" title="Save the changes to the document and stay in this tab" class="btn btn-primary" id="inline-apply-button" onclick="saveContent('{{assets.provider}}','{{assets.name}}','{{assets.version}}','apply')">{{t "Save"}}</button>
                     <button type="button" title="Save the document and close this tab" class="btn btn-primary" id="inline-save-button" onclick="saveContent('{{assets.provider}}','{{assets.name}}','{{assets.version}}','save')">{{t "Save and Close"}}</button>
-                    <button type="button" title="Cancel all the unsaved changes and close this tab"  class="btn" id="inline-cancel-button" onclick="window.close()">{{t "Cancel"}}</button>
+                    <button type="button" title="Cancel all the unsaved changes and close this tab"  class="btn" id="inline-cancel-button" onclick="saveContent('{{assets.provider}}','{{assets.name}}','{{assets.version}}','cancel')">{{t "Cancel"}}</button>
 
                 </div>
             </div>
