@@ -373,6 +373,46 @@ asset.renderer = function(ctx) {
                     //}
                 }
             },
+             populateSubscriptions : function(page){
+                if (page.assets && page.assets.id) {
+                    var subscriptions = page.subscriptions;
+                    var protocol = "http";
+
+                    function getLocation(href) {
+                        var match = href.match(/^(https?\:)\/\/(([^:\/?#]*)(?:\:([0-9]+))?)(\/[^?#]*)(\?[^#]*|)(#.*|)$/);
+                        return match && {
+                            protocol: match[1],
+                            host: match[2],
+                            hostname: match[3],
+                            port: match[4],
+                            pathname: match[5],
+                            search: match[6],
+                            hash: match[7]
+                        }
+                    }
+                    var url = request.getRequestURL();
+                    var host = getLocation(url).host;
+                    var port = request.getLocalPort();
+                    var secure = request.isSecure();
+                    if(secure){
+                        protocol = "https";
+                    }
+                    var apiName = page.api.name;
+                    var providerValUe = page.api.provider;
+                    var version = page.api.version;
+
+                    if(providerValUe.indexOf("@") > -1){
+                    providerValUe = providerValUe.replace("@","%40");
+                    }
+                    if(providerValUe.indexOf("/") > -1){
+                    providerValUe = providerValUe.replace("/","-DOM-");
+                    } 
+                    var apistore = require('apistore').apistore.instance(providerValUe);                   
+                    page.swaggerAPI=apistore.getSwaggerContent(providerValUe,apiName,version,'Production');
+                    log.info("swagerrrrrrrrr api"+page.swaggerAPI);
+             
+                }
+            },
             socialSitePopulator: function(page, meta) {
                 var utils = require('utils');
                 //If the
