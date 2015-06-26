@@ -477,7 +477,68 @@ function saveContent(provider, apiName, apiVersion, mode) {
          
           dataType: "json"
   }); 
-}
+};
+
+var removeDocumentation = function(provider, apiName, version, docName, docType){
+	var action = 'deleteDocument';
+	var ajaxURL = caramel.context + '/asts/api/apis/addDoc';
+	var errorMsg = 'Error occurred while Deleting Document';
+	var successMsg = 'Successfully Deleted Document';
+	 $.ajax({
+			    type: "POST",
+			    url: ajaxURL,
+			    data: {
+			        action:action,
+			        name:apiName,
+			        version:version,
+			        provider:provider,			      
+			        docName:docName,
+			        docType:docType
+
+			    },
+			    success: function (result) {
+			        BootstrapDialog.show({
+		                type: BootstrapDialog.TYPE_SUCCESS,
+		                title: 'success',
+		                message: successMsg,
+		                buttons: [{
+		                
+			                label: 'Close',
+			                action: function(dialogItself){
+				                dialogItself.close();
+				                window.location.href = caramel.context+'/asts/api/docs/'+pageId;
+			                }
+			            
+		            	}]
+
+		            });
+	               
+			           
+			        },
+			    error : function(result) {		                
+	              BootstrapDialog.show({
+                    type: BootstrapDialog.TYPE_DANGER,
+                    title: 'Error',
+                    message: errorMsg,
+                    buttons: [{
+                    
+                      label: 'Close',
+                      action: function(dialogItself){
+                        dialogItself.close();
+                        window.location.href = caramel.context+'/asts/api/docs/'+pageId;
+                        
+                      }
+                  
+                  }]
+
+                  });
+               	},
+			          
+			   
+			    dataType: "json"
+	
+	}); 
+};
 
 var hideMsg=function () {
     $('#docAddMessage').hide("fast");

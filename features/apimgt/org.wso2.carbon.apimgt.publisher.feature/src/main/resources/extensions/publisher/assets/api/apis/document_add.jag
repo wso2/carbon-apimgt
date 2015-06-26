@@ -109,7 +109,7 @@ require('/modules/publisher.js').exec(function(ctx) {
                 doc.visibility = request.getParameter('visibility', 'UTF-8');
                 apiData.visibility = request.getParameter('visibility', 'UTF-8');
 
-                if (doc.sourceType != null && doc.sourceType == 'File') {
+                if ((action == "createDocument" || action == "updateDocument") && doc.sourceType != null && doc.sourceType == 'File') {
                     doc.content = file;
                     doc.fileName = file.getName();
                     doc.contentType = request.getParameter('contentType', 'UTF-8');
@@ -117,7 +117,10 @@ require('/modules/publisher.js').exec(function(ctx) {
                 }
 
                 
-
+                
+                if(action == "deleteDocument"){
+                    data = apiProxy.removeDocumentation(apiData, doc.docName,doc.docType);
+                }
 
                 if(action == "createDocument"){
                     data = apiProxy.addDocumentation(apiData, doc);
