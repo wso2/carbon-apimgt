@@ -1449,6 +1449,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 	}
     	
     	createDocumentation(api, documentation);
+    	addDocumentationContent(api, docName, "");
     }
 
     /**
