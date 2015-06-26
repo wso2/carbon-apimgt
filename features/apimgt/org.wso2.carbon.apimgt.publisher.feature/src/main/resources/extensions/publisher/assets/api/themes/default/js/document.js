@@ -20,6 +20,19 @@
 
 $(function(){
 
+	 tinyMCE.init({
+                     mode : "textareas",
+                     theme : "advanced",
+                     plugins : "inlinepopups",
+                     theme_advanced_buttons1 : "newdocument,|,bold,italic,underline,link,unlink,|,justifyleft,justifycenter,justifyright,fontselect,fontsizeselect,formatselect",
+                     theme_advanced_buttons2 : "cut,copy,paste,|,bullist,numlist,|,outdent,indent,|,undo,redo,|,forecolor,backcolor",
+                     theme_advanced_buttons3 : "insertdate,inserttime,|,spellchecker,advhr,,removeformat,|,sub,sup,|,charmap,emotions",
+                     theme_advanced_toolbar_location : "top",
+                     theme_advanced_toolbar_align : "left",
+                     theme_advanced_resizing : true
+
+      });
+
 
 
 	$('#addDocHref').on('click',function(){
@@ -235,6 +248,8 @@ var saveOrUpdate = function(action){
 
 }
 
+
+
 var updateDocumentation = function(docName, docType, summary, sourceType, docUrl, filePath, otherTypeName,visibility,updateTxt){
 	$('.mceEditor').css('display','none');
 	$('#doc-add-container').css('display','none');
@@ -306,7 +321,59 @@ var  editDocumentation = function(url, filePath, editContent){
 
 };
 
+var getInlineContent = function(provider, apiName, version,docName, mode,tenantDomain){
+	var content = {};
+	var action = 'getInlineContent';
+	var ajaxURL = caramel.context + '/asts/api/apis/addDoc';
+	var errorMsg = 'Error occurred while retrieve Inline Content';
+	 $.ajax({
+			    type: "GET",
+			    url: ajaxURL,
+			    data: {
+			        action:action,
+			        name:apiName,
+			        version:version,
+			        provider:provider,			      
+			        docName:docName
+
+			    },
+			    success: function (result) {
+			        content = result.data;
+			        tinyMCE.activeEditor.setContent(content, {format : 'raw'});
+			        editInlineContent(provider, apiName, version,docName, mode,tenantDomain);
+	               
+			           
+			        },
+			    error : function(result) {		                
+	              BootstrapDialog.show({
+                    type: BootstrapDialog.TYPE_DANGER,
+                    title: 'Error',
+                    message: errorMsg,
+                    buttons: [{
+                    
+                      label: 'Close',
+                      action: function(dialogItself){
+                        dialogItself.close();
+                        
+                      }
+                  
+                  }]
+
+                  });
+               	},
+			          
+			   
+			    dataType: "json"
+	
+	}); 
+
+	return content;
+
+}
+
 var editInlineContent	 = function (provider, apiName, version, docName, mode,tenantDomain) {
+
+
 	$('#addOrUpdateDoc').hide();
 	$('#doc-add-container').hide();
 	$('#doc-list-container').hide();
@@ -325,6 +392,96 @@ var editInlineContent	 = function (provider, apiName, version, docName, mode,ten
 	$('#inlineButtonGroup').show('fast');
 };
 
+function saveContent(provider, apiName, apiVersion, mode) {
+
+	var contentDoc = tinyMCE.activeEditor.getContent({format:'raw'});//tinyMCE.activeEditor.getBody().textContent;//tinyMCE.get('inlineEditor').getContent();
+  var docName = $('#inlineDocName').val();
+  var apiName = $('#inlineApiName').val();
+  var provider = $('#inlineApiProvider').val();
+  var version = $('#inlineApiVersion').val();
+
+  var pageId = $('#inlineDocPageId').val();
+  if(mode == 'cancel'){
+     window.location.href = caramel.context+'/asts/api/docs/'+pageId;
+  }
+  var visibility={};
+  var showVisibility = $('#InlineShowVisibility').val();
+  if(showVisibility == "true"){
+    visibility = $('#InlineDocVisibility').val();
+  }
+  var inlineContent = contentDoc;
+  var action = "editInlineContent";
+  var successMsg = 'Successfully Edited Inline Content';
+  var errorMsg = 'Error Occured while Edit Inline Content';
+
+  var ajaxURL = caramel.context + '/asts/api/apis/addDoc';
+
+    $('#form-inline-editor').ajaxSubmit({
+          type: "POST",
+          url: ajaxURL,
+          data: {
+              action:action,
+              name:apiName,
+              version:version,
+              provider:provider,
+              docName:docName,
+              visibility:visibility,
+              inlineContent:inlineContent
+
+              
+    
+          },
+          success: function (result) {
+              
+                  BootstrapDialog.show({
+                    type: BootstrapDialog.TYPE_SUCCESS,
+                    title: 'success',
+                    message: successMsg,
+                    buttons: [{
+                    
+                      label: 'Close',
+                      action: function(dialogItself){
+                        dialogItself.close();
+                        if(mode == 'save'){
+                          window.location.href = caramel.context+'/asts/api/docs/'+pageId;
+                        }
+                        
+                      }
+                  
+                  }]
+
+                });
+                 
+              },
+          error : function(result) {                    
+                  
+                  BootstrapDialog.show({
+                    type: BootstrapDialog.TYPE_DANGER,
+                    title: 'Error',
+                    message: errorMsg,
+                    buttons: [{
+                    
+                      label: 'Close',
+                      action: function(dialogItself){
+                        dialogItself.close();
+                        if(mode == 'save'){
+                          window.location.href = caramel.context+'/asts/api/docs/'+pageId;
+                        }
+                      }
+                  
+                  }]
+
+                });
+                },
+                
+         
+          dataType: "json"
+  }); 
+}
+
+var hideMsg=function () {
+    $('#docAddMessage').hide("fast");
+}
 
 
 

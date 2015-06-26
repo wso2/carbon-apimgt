@@ -226,6 +226,11 @@ var provider = {};
         return this.impl.addDocumentationContent(apiOb, docName, content);
     };
 
+    APIProviderProxy.prototype.getInlineContent = function (api, docName) {
+        var apiId = new Packages.org.wso2.carbon.apimgt.api.model.APIIdentifier(api.provider, api.name, api.version);
+        return this.impl.getDocumentationContent(apiId, docName);
+    };
+
     APIProviderProxy.prototype.createNewAPIVersion = function (api, newVersion) {
         var identifier = new Packages.org.wso2.carbon.apimgt.api.model.APIIdentifier(api.provider, api.name, api.version);
         var apiOb = new Packages.org.wso2.carbon.apimgt.api.model.API(identifier);
@@ -616,9 +621,7 @@ var provider = {};
     };
 
 
-    APIProviderProxy.prototype.getInlineContent = function (apiId, docName) {
-        return this.impl.getDocumentationContent(apiId, docName);
-    };
+  
 
     APIProviderProxy.prototype.getTiers = function () {
 

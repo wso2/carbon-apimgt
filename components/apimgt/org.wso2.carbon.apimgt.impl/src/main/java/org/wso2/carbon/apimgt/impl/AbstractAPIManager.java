@@ -457,7 +457,7 @@ public abstract class AbstractAPIManager implements APIManager {
         String apiResourcePath = APIUtil.getAPIPath(apiId);
         try {
         	Association[] docAssociations = registry.getAssociations(apiResourcePath,
-			        APIConstants.DOCUMENTATION_ASSOCIATION);
+                                                                     APIConstants.DOCUMENTATION_ASSOCIATION);
             for (Association association : docAssociations) {
                 String docPath = association.getDestinationPath();
 

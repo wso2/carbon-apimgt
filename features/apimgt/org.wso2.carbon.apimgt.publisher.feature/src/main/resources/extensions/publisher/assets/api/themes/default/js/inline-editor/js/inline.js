@@ -1,6 +1,6 @@
 $(document).ready(function() {
 
-    tinyMCE.init({
+   /* tinyMCE.init({
                      mode : "textareas",
                      theme : "advanced",
                      plugins : "inlinepopups",
@@ -11,7 +11,7 @@ $(document).ready(function() {
                      theme_advanced_toolbar_align : "left",
                      theme_advanced_resizing : true
 
-                 });
+                 });*/
 
 });
 
@@ -35,7 +35,7 @@ $(document).ready(function() {
 
 }*/
 
-function saveContent(provider, apiName, apiVersion, mode) {
+/*function saveContent(provider, apiName, apiVersion, mode) {
 
 	var contentDoc = tinyMCE.activeEditor.getContent({format:'raw'});//tinyMCE.activeEditor.getBody().textContent;//tinyMCE.get('inlineEditor').getContent();
   var docName = $('#inlineDocName').val();
@@ -124,5 +124,5 @@ function saveContent(provider, apiName, apiVersion, mode) {
 
 var hideMsg=function () {
     $('#docAddMessage').hide("fast");
-}
+}*/
 
