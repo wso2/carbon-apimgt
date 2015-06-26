@@ -490,7 +490,7 @@ public abstract class AbstractAPIManager implements APIManager {
 
     public List<Documentation> getAllDocumentation(APIIdentifier apiId, String loggedUsername) throws
 		    APIManagementException {
-	    List<Documentation> documentationList = null;
+	    List<Documentation> documentationList = new ArrayList<Documentation>();
 	    boolean isTenantFlowStarted = false;
 	    String apiName = apiId.getApiName();
 	    String version = apiId.getVersion();

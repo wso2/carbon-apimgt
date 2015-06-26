@@ -18,7 +18,7 @@
  */
 var resources = function(page,meta){
 	return {
-		js:['libs/jquery.form.min.js','document.js','inline-editor/js/inline.js','bootstrap/bootstrap-dialog.min.js','bootstrap/bootstrap-editable.js','bootstrap/bootstrap-multiselect.js',
+		js:['libs/jquery.form.min.js','document.js','bootstrap/bootstrap-dialog.min.js','bootstrap/bootstrap-editable.js','bootstrap/bootstrap-multiselect.js',
 		'inline-editor/tinymce/tiny_mce.js','inline-editor/js/inline.js']
 		,
 		css:['styles.css','bootstrap/bootstrap-editable.css','bootstrap/bootstrap-dialog.min.css',

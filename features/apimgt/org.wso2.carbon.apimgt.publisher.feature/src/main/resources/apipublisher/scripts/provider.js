@@ -206,11 +206,34 @@ var provider = {};
         return APIUtil.showAPIDocVisibility();
      };
 
+     APIProviderProxy.prototype.getAllDocumentation = function (api) {
+        var identifier = new Packages.org.wso2.carbon.apimgt.api.model.APIIdentifier(api.provider, api.name, api.version);
+        var docs = this.impl.getAllDocumentation(identifier);
+        var json = APIUtil.convertToString(docs);
+        log.info(' ####################################################  : '+json);
+        var docsJSON = {};
+        if(json != null){
+            docsJSON = JSON.parse(json);
+        }
+        
+        return docsJSON;
+     };
+
     APIProviderProxy.prototype.addInlineContent = function (api, docName, content) {
         var identifier = new Packages.org.wso2.carbon.apimgt.api.model.APIIdentifier(api.provider, api.name, api.version);
         var apiOb = new Packages.org.wso2.carbon.apimgt.api.model.API(identifier);
         apiOb.setVisibility(api.visibility);
         return this.impl.addDocumentationContent(apiOb, docName, content);
+    };
+
+    APIProviderProxy.prototype.getInlineContent = function (api, docName) {
+        var apiId = new Packages.org.wso2.carbon.apimgt.api.model.APIIdentifier(api.provider, api.name, api.version);
+        return this.impl.getDocumentationContent(apiId, docName);
+    };
+
+    APIProviderProxy.prototype.removeDocumentation = function (api, docName, docType) {
+        var apiId = new Packages.org.wso2.carbon.apimgt.api.model.APIIdentifier(api.provider, api.name, api.version);
+        return this.impl.removeDocumentation(apiId, docName, docType);
     };
 
     APIProviderProxy.prototype.createNewAPIVersion = function (api, newVersion) {
@@ -414,9 +437,7 @@ var provider = {};
         return this.impl.updateSubscription(identifier, status, parseInt(appId));
     };
 
-    APIProviderProxy.prototype.removeDocumentation = function (apiId, docName, docType) {
-        return this.impl.removeDocumentation(apiId, docName, docType);
-    };
+   
 
     /**
      * Delete a API
@@ -602,17 +623,8 @@ var provider = {};
         }
     };
 
-    APIProviderProxy.prototype.getAllDocumentation = function (apiId) {
-        return this.impl.getAllDocumentation(apiId);
-    };
 
-    APIProviderProxy.prototype.getAllDocumentation = function (apiId) {
-        return this.impl.getAllDocumentation(apiId);
-    };
-
-    APIProviderProxy.prototype.getInlineContent = function (apiId, docName) {
-        return this.impl.getDocumentationContent(apiId, docName);
-    };
+  
 
     APIProviderProxy.prototype.getTiers = function () {
 

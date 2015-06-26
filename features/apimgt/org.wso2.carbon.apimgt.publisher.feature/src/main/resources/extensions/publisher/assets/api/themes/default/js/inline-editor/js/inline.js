@@ -1,5 +1,6 @@
-$(function(){
-    tinyMCE.init({
+$(document).ready(function() {
+
+   /* tinyMCE.init({
                      mode : "textareas",
                      theme : "advanced",
                      plugins : "inlinepopups",
@@ -10,7 +11,8 @@ $(function(){
                      theme_advanced_toolbar_align : "left",
                      theme_advanced_resizing : true
 
-                 });
+                 });*/
+
 });
 
 
@@ -33,7 +35,8 @@ $(function(){
 
 }*/
 
-function saveContent(provider, apiName, apiVersion, mode) {
+/*function saveContent(provider, apiName, apiVersion, mode) {
+
 	var contentDoc = tinyMCE.activeEditor.getContent({format:'raw'});//tinyMCE.activeEditor.getBody().textContent;//tinyMCE.get('inlineEditor').getContent();
   var docName = $('#inlineDocName').val();
   var apiName = $('#inlineApiName').val();
@@ -41,6 +44,9 @@ function saveContent(provider, apiName, apiVersion, mode) {
   var version = $('#inlineApiVersion').val();
 
   var pageId = $('#inlineDocPageId').val();
+  if(mode == 'cancel'){
+     window.location.href = caramel.context+'/asts/api/docs/'+pageId;
+  }
   var visibility={};
   var showVisibility = $('#InlineShowVisibility').val();
   if(showVisibility == "true"){
@@ -118,5 +124,5 @@ function saveContent(provider, apiName, apiVersion, mode) {
 
 var hideMsg=function () {
     $('#docAddMessage').hide("fast");
-}
+}*/
 
