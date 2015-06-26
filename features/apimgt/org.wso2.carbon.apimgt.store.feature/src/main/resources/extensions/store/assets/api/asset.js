@@ -108,7 +108,16 @@ asset.server = function(ctx) {
                         url: 'my_applications',
                         path: 'my_applications.jag',
                         secured: true
-                    },{
+                    },/** {
+            title: 'API Details'
+            url: 'details'
+            path: 'details.jag'
+            },*/    {
+                    title: 'Swagger',
+                    url: 'swagger',
+                    path: 'swagger.jag'
+                    },
+                    {
                         title: 'My Subscriptions',
                         url: 'my_subscriptions',
                         path: 'my_subscriptions.jag',
@@ -152,6 +161,7 @@ asset.renderer = function(ctx) {
             //=================== Getting subscription details ========================
 
             var carbonAPI = require('carbon');
+          
             var server = require('store').server;
             var user = server.current(ctx.session);
             var tenantId = null, tenantDomain = null;
@@ -245,10 +255,12 @@ asset.renderer = function(ctx) {
                 page.tiersAvailable = tiersAvailable;
                 page.tiers = allowedTiers;
                 page.subscribedToDefault = subscribedToDefault;
+                page.subscriptions=subscriptions;
+                page.anonymous=false;
             }
 
             page.showSubscribe = showSubscribe;
-            page.api = apidata;
+            page.api = stringify(apidata);
             page.status = status;
 
             //Setting throttling infomation
@@ -360,11 +372,8 @@ asset.renderer = function(ctx) {
         pageDecorators: {
             populateEndPoints : function(page){
                 if (page.assets && page.assets.id) {
-                    var httpEndpoint,httpsEndpoint;
-                    if (page.api.serverURL.split(",")[0] == 'Production and Sandbox') {
-                        httpEndpoint = page.api.serverURL.split(",")[1];
-                        httpsEndpoint = page.api.serverURL.split(",")[2];
-                    }
+                    var httpEndpoint='',httpsEndpoint='';
+
                     var isDefaultVersion=page.api.isDefaultVersion;
 
                     page.assets.httpEndpoint = httpEndpoint;

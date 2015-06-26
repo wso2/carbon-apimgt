@@ -5286,4 +5286,45 @@ public final class APIUtil {
 		//TODO Implement
 		return "Publish";
 	}
+
+    public JSONObject getEnvironmentsOfAPI(API api) {
+        APIManagerConfiguration config = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
+                .getAPIManagerConfiguration();
+        Map<String, Environment> environments = config.getApiGatewayEnvironments();
+        JSONObject environmentObject = new JSONObject();
+        JSONObject productionEnvironmentObject = new JSONObject();
+        JSONObject sandboxEnvironmentObject = new JSONObject();
+        JSONObject hybridEnvironmentObject = new JSONObject();
+        Set<String> environmentsPublishedByAPI =
+                new HashSet<String>(api.getEnvironments());
+        environmentsPublishedByAPI.remove("none");
+        for (String environmentName : environmentsPublishedByAPI) {
+            Environment environment = environments.get(environmentName);
+            JSONObject jsonObject = new JSONObject();
+            List<String> environmenturls = new ArrayList<String>();
+            environmenturls.addAll(Arrays.asList((environment.getApiGatewayEndpoint().split(","))));
+            List<String> transports = new ArrayList<String>();
+            transports.addAll(Arrays.asList((api.getTransports().split(","))));
+            jsonObject.put("http", filterUrlsByTransport(environmenturls, transports, "http"));
+            jsonObject.put("https", filterUrlsByTransport(environmenturls, transports, "https"));
+            jsonObject.put("showInConsole", environment.isShowInConsole());
+            if (APIConstants.GATEWAY_ENV_TYPE_PRODUCTION.equals(environment.getType())) {
+                productionEnvironmentObject.put(environment.getName(), jsonObject);
+            } else if (APIConstants.GATEWAY_ENV_TYPE_SANDBOX.equals(environment.getType())) {
+                sandboxEnvironmentObject.put(environment.getName(), jsonObject);
+            } else {
+                hybridEnvironmentObject.put(environment.getName(), jsonObject);
+            }
+        }
+        if (productionEnvironmentObject != null && !productionEnvironmentObject.isEmpty()) {
+            environmentObject.put(APIConstants.GATEWAY_ENV_TYPE_PRODUCTION, productionEnvironmentObject);
+        }
+        if (sandboxEnvironmentObject != null && !sandboxEnvironmentObject.isEmpty()) {
+            environmentObject.put(APIConstants.GATEWAY_ENV_TYPE_SANDBOX, sandboxEnvironmentObject);
+        }
+        if (hybridEnvironmentObject != null && !hybridEnvironmentObject.isEmpty()) {
+            environmentObject.put(APIConstants.GATEWAY_ENV_TYPE_HYBRID, hybridEnvironmentObject);
+        }
+        return environmentObject;
+    }
 }
