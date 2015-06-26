@@ -3,8 +3,9 @@
     <form class="form-horizontal">
 {{#if subscriptions}}
 <div class="control-group"  style="margin-bottom:10px;">
-        <label class="control-label" for="inputEmail">Try</label>
+
         <div class="controls form-inline">
+	<label class="label-align" for="inputEmail">Try</label>
           <select id="sub_app_list" class="inline">
           {{#each subscriptions}}
             <option value="{{application}}" data-sandbox="{{SANDBOX_KEY}}"
@@ -12,12 +13,12 @@
             </option>
           {{/each}}
           </select>
-          <label> Using </label>
+          <label class="label-align"> Using </label>
           <select id="key_type">
             <option value="production">Production</option>
             <option value="sandbox">Sandbox</option>
           </select>
-          <label> Key </label>
+          <label class="label-align"> Key </label>
           <label id="OnEnvironment"> On Environment</label>
           <select id="environment_name">
           <option value="Production and Sandbox" class="hybrid" >Production and Sandbox</option>
@@ -58,7 +59,6 @@
 
 <div class="swagger-section">
 <div id="message-bar" class="swagger-ui-wrap">&nbsp;</div>
-<div id="Download" style="float:right;font-size:14px"><a href='{{swaggerAPI}}' target="_blank" style="font-size:14px"><i class="icon-share-alt" ></i> Swagger ( /swagger.json )</a></div>
+<div id="Download" style="float:right;font-size:14px"><a href='{{swaggerAPI}}' target="_blank" class="swagger" ><i class="icon-share-alt" ></i> Swagger ( /swagger.json )</a></div>
 <div id="swagger-ui-container" class="swagger-ui-wrap"></div>
 </div>
-

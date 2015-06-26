@@ -260,7 +260,7 @@ asset.renderer = function(ctx) {
             }
 
             page.showSubscribe = showSubscribe;
-            page.api = stringify(apidata);
+            page.api = apidata;
             page.status = status;
 
             //Setting throttling infomation
@@ -329,7 +329,7 @@ asset.renderer = function(ctx) {
                                                          asset.name, asset.attributes.overview_version, userName).documents;
             var apiIdentifier = {};
             apiIdentifier.name = asset.attributes.overview_name;
-            apiIdentifier.version = asset.name;
+            apiIdentifier.version = asset.attributes.overview_version;
             apiIdentifier.provider = asset.attributes.overview_provider;
             page.apiIdentifier = apiIdentifier;
 
