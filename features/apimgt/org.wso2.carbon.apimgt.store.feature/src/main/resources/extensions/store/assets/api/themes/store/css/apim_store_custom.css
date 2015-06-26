@@ -200,3 +200,17 @@ legend {
     height: 54px;
     padding:15px 15px;
 }
+.navbar-right>li{float: right !important;}
+.navbar-nav > li > .dropdown-menu {
+    margin-top: 12px;
+    border-top-left-radius: 0px;
+    border-top-right-radius: 0px;
+}
+div.top-menu-right-custom .navbar-nav > li > a:hover {
+    height: 55px;
+}
+.nav .open > a, .nav .open > a:focus, .nav .open > a:hover {
+    height: 55px !important;}
+.action-wrapper:hover{background-color: #1965b2; opacity: 1;}
+.action-title:hover{background-color: #1965b2; }
+.action-wrapper>a:hover{background-color: #1965b2 !important; }
