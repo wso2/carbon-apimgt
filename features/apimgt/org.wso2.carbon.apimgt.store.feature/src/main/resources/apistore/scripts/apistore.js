@@ -362,7 +362,7 @@ var apistore = {};
         try {
             var documentList = [];
             var apiIdentifier = new APIIdentifier(provider, name, version);
-            var documents = this.getAllDocumentation(apiIdentifier, loggedInUser);
+            var documents = this.impl.getAllDocumentation(apiIdentifier, loggedInUser);
             for (var i = 0 ; i < documents.size() ; i ++) {
                 document = documents.get(i);
                 var sourceTypes = {};
