@@ -32,7 +32,7 @@ $(function () {
                        $('#versionTable').hide();
                        $('#versionChart').css("fontSize", 14);
                        $('#apiUsageByVersionNoData').html('');
-                       $('#apiUsageByVersionNoData').append($('<h3 class="no-data-heading center-wrapper">No Data Available</h3>'));
+                       $('#apiUsageByVersionNoData').append($('<p class="no-data-heading center-wrapper">No Data Available</p>'));
                    }
                } else {
                    BootstrapDialog.show({
@@ -80,7 +80,7 @@ $(function () {
                        $('#versionUserTable').hide();
                        $('#versionUserChart').css("fontSize", 14);
                        $('#apiSubscriptionsByVersionsNoData').html('');
-                       $('#apiSubscriptionsByVersionsNoData').append($('<h3 class="no-data-heading center-wrapper">No Data Available</h3>'));
+                       $('#apiSubscriptionsByVersionsNoData').append($('<p class="no-data-heading center-wrapper">No Data Available</p>'));
 
                    }
 
