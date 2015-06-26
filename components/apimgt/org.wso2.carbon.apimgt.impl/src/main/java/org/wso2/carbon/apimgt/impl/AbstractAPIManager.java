@@ -457,7 +457,7 @@ public abstract class AbstractAPIManager implements APIManager {
         String apiResourcePath = APIUtil.getAPIPath(apiId);
         try {
         	Association[] docAssociations = registry.getAssociations(apiResourcePath,
-                                                                     APIConstants.DOCUMENTATION_ASSOCIATION);
+			        APIConstants.DOCUMENTATION_ASSOCIATION);
             for (Association association : docAssociations) {
                 String docPath = association.getDestinationPath();
 
@@ -490,7 +490,7 @@ public abstract class AbstractAPIManager implements APIManager {
 
     public List<Documentation> getAllDocumentation(APIIdentifier apiId, String loggedUsername) throws
 		    APIManagementException {
-	    List<Documentation> documentationList = null;
+	    List<Documentation> documentationList = new ArrayList<Documentation>();
 	    boolean isTenantFlowStarted = false;
 	    String apiName = apiId.getApiName();
 	    String version = apiId.getVersion();

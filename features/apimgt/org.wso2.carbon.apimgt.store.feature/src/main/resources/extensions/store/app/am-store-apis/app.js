@@ -34,7 +34,7 @@ app.server = function(ctx) {
                 secured:true
             }, {
                 url: 'document/download',
-                path: 'download.jag',
+                path: 'document-download.jag',
                 secured:true
             },{
                 url: 'apisubscriptions',

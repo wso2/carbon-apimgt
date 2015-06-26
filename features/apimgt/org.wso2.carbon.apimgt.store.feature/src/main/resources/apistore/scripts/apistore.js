@@ -26,6 +26,7 @@ var apistore = {};
     var APISubscriber = Packages.org.wso2.carbon.apimgt.api.model.Subscriber;
     var APIIdentifier = Packages.org.wso2.carbon.apimgt.api.model.APIIdentifier;
     var APIUtil = Packages.org.wso2.carbon.apimgt.impl.utils.APIUtil;
+    var APIConstants = Packages.org.wso2.carbon.apimgt.impl.APIConstants;
     var Application = Packages.org.wso2.carbon.apimgt.api.model.Application;
     var API= Packages.org.wso2.carbon.apimgt.api.model.API;
     var Date = Packages.java.util.Date;
@@ -364,28 +365,22 @@ var apistore = {};
             var documents = this.getAllDocumentation(apiIdentifier, loggedInUser);
             for (var i = 0 ; i < documents.size() ; i ++) {
                 document = documents.get(i);
-                var sourceTypes = [];
+                var sourceTypes = {};
                 var content, documentationType, otherTypeName, otherType = false;
                 var sourceType = document.getSourceType().getType();
                 if ('INLINE' == sourceType.toUpperCase()) {
-                    sourceTypes.push({
-                                     "inline" :true,
-                                     "url" : false,
-                                      "file" : false
-                                     });
+                    sourceTypes.inline = true;
+                    sourceTypes.url = false;
+                    sourceTypes.file = false;
                     content = this.impl.getDocumentationContent(apiIdentifier, document.getName());
                 } else if ('URL' == sourceType.toUpperCase()) {
-                    sourceTypes.push({
-                                         "inline" :false,
-                                         "url" : true,
-                                         "file" : false
-                                     });
+                    sourceTypes.inline = false;
+                    sourceTypes.url = true;
+                    sourceTypes.file = false;
                 } else {
-                    sourceTypes.push({
-                                         "inline" :false,
-                                         "url" : false,
-                                         "file" : true
-                                     });
+                    sourceTypes.inline = false;
+                    sourceTypes.url = false;
+                    sourceTypes.file = true;
                 }
 
                 documentationType = document.getType().getType();
@@ -402,8 +397,8 @@ var apistore = {};
                                   "summary": document.getSummary(),
                                   "content": content,
                                   "sourceTypes": sourceTypes,
-                                  "sourceUrl": document.getDescription(),
-                                  "filePath": document.getSourceUrl(),
+                                  "sourceUrl": document.getSourceUrl(),
+                                  "filePath": document.getFilePath(),
                                   "type": documentationType,
                                   "otherType": otherType,
                                   "otherTypeName": otherTypeName
@@ -423,5 +418,35 @@ var apistore = {};
             };
         }
     };
+
+    /*
+     * This method returns the UUID of an artifact
+     */
+    StoreAPIProxy.prototype.getDocument = function (username, resourcepath, tenantDomain) {
+        var document = {};
+        try {
+            if (username == null || username == '') {
+                username = APIConstants.END_USER_ANONYMOUS;
+            }
+
+            var content = APIUtil.getDocument(username, resourcepath, tenantDomain);
+            document.data = content.get("Data");
+            document.contentType = content.get("contentType");
+            document.name = content.get("name");
+            if (log.isDebugEnabled()) {
+                log.debug("Invoke getAllDocumentation()" );
+            }
+            return {
+                error:false,
+                document:document
+            };
+        } catch (e) {
+            log.error(e.message);
+            return {
+                error:e
+            };
+        }
+    };
+
 
 })(apistore);
