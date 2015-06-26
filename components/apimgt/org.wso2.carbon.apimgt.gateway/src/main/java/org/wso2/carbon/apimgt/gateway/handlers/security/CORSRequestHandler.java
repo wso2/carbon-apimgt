@@ -170,7 +170,7 @@ public class CORSRequestHandler extends AbstractHandler implements ManagedLifecy
 			allowedMethods = Utils.getAllowedMethods();
 		}
 		if ("*".equals(allowHeaders)) {
-			allowedMethods = headers.get("Access-Control-Request-Headers");
+			allowHeaders = headers.get("Access-Control-Request-Headers");
 
 		}
 		messageContext.setProperty(APIConstants.CORS_CONFIGURATION_ENABLED, Utils.isCORSEnabled());
