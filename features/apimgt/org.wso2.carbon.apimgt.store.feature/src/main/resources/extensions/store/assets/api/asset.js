@@ -112,7 +112,11 @@ asset.server = function(ctx) {
             title: 'API Details'
             url: 'details'
             path: 'details.jag'
-            },*/
+            },*/    {
+                    title: 'Swagger',
+                    url: 'swagger',
+                    path: 'swagger.jag'
+                    },
                     {
                         title: 'My Subscriptions',
                         url: 'my_subscriptions',
@@ -181,7 +185,6 @@ asset.renderer = function(ctx) {
                     showSubscribe = true;
                 }
             }
-
             if (userName != '__wso2.am.anon__') {
                 var applications = JSON.parse(apistore.getApplications(userName));
 
@@ -242,10 +245,12 @@ asset.renderer = function(ctx) {
                 page.tiersAvailable = tiersAvailable;
                 page.tiers = allowedTiers;
                 page.subscribedToDefault = subscribedToDefault;
+                page.subscriptions=subscriptions;
+                page.anonymous=false;
             }
 
             page.showSubscribe = showSubscribe;
-            page.api = apidata;
+            page.api = stringify(apidata);
             page.status = status;
 
             //Setting throttling infomation
@@ -314,11 +319,8 @@ asset.renderer = function(ctx) {
         pageDecorators: {
             populateEndPoints : function(page){
                 if (page.assets && page.assets.id) {
-                    var httpEndpoint,httpsEndpoint;
-                    if (page.api.serverURL.split(",")[0] == 'Production and Sandbox') {
-                        httpEndpoint = page.api.serverURL.split(",")[1];
-                        httpsEndpoint = page.api.serverURL.split(",")[2];
-                    }
+                    var httpEndpoint='',httpsEndpoint='';
+
                     var isDefaultVersion=page.api.isDefaultVersion;
 
                     page.assets.httpEndpoint = httpEndpoint;
@@ -353,46 +355,6 @@ asset.renderer = function(ctx) {
                     //} else if(parse(page.assets.attributes.overview_endpointConfig).sandbox_endpoints != null && parse(page.assets.attributes.overview_endpointConfig).sandbox_endpoints.url != null) {
                     //    page.assets.sandbox_endpoint = parse(page.assets.attributes.overview_endpointConfig).sandbox_endpoints.url;
                     //}
-                }
-            },
-             populateSubscriptions : function(page){
-                if (page.assets && page.assets.id) {
-                    var subscriptions = page.subscriptions;
-                    var protocol = "http";
-
-                    function getLocation(href) {
-                        var match = href.match(/^(https?\:)\/\/(([^:\/?#]*)(?:\:([0-9]+))?)(\/[^?#]*)(\?[^#]*|)(#.*|)$/);
-                        return match && {
-                            protocol: match[1],
-                            host: match[2],
-                            hostname: match[3],
-                            port: match[4],
-                            pathname: match[5],
-                            search: match[6],
-                            hash: match[7]
-                        }
-                    }
-                    var url = request.getRequestURL();
-                    var host = getLocation(url).host;
-                    var port = request.getLocalPort();
-                    var secure = request.isSecure();
-                    if(secure){
-                        protocol = "https";
-                    }
-                    var apiName = page.api.name;
-                    var providerValUe = page.api.provider;
-                    var version = page.api.version;
-
-                    if(providerValUe.indexOf("@") > -1){
-                    providerValUe = providerValUe.replace("@","%40");
-                    }
-                    if(providerValUe.indexOf("/") > -1){
-                    providerValUe = providerValUe.replace("/","-DOM-");
-                    } 
-                    var apistore = require('apistore').apistore.instance(providerValUe);                   
-                    page.swaggerAPI=apistore.getSwaggerContent(providerValUe,apiName,version,'Production');
-                    log.info("swagerrrrrrrrr api"+page.swaggerAPI);
-             
                 }
             },
             socialSitePopulator: function(page, meta) {

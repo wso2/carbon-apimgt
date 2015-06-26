@@ -115,7 +115,7 @@
     <input type="hidden" id="version" value="{{api.version}}">
     <input type="hidden" id="provider" value="{{api.provider}}">
 
-  <div class="asset-properties margin-top-double float-left">
+<div class="asset-properties margin-top-double float-left">
       <ul class="nav nav-tabs">
           <li class="active"><a data-toggle="tab" href="#api-overview">{{t "Overview"}}</a></li>
           <li><a data-toggle="tab" href="#api-docs">{{t "Documentation"}}</a></li>
@@ -129,13 +129,15 @@
           </div>
           <div id="api-docs" class="tab-pane fade">{{t "Docs"}}
           </div>
-          <div id="swagger" class="tab-pane fade">{{t "Swagger"}}
+          <div id="swagger" class="tab-pane fade">{{> swagger .}}
           </div>
 	      <div id="throttlingInfo" class="tab-pane fade">
 			  {{> throttling-info .}}
 	      </div>
       </div>
   </div>
+
+
 
 
 
