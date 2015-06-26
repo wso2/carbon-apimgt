@@ -38,7 +38,7 @@ $(function () {
                        $('#userChart').hide();
                        $('#userChart').css("fontSize", 14);
                        $('#usageByCurrentSubscribersAcrossAllNoData').html('');
-                       $('#usageByCurrentSubscribersAcrossAllNoData').append($('<h3 class="no-data-heading center-wrapper">No Data Available</h3>'));
+                       $('#usageByCurrentSubscribersAcrossAllNoData').append($('<p class="no-data-heading center-wrapper">No Data Available</p>'));
                    }
 
                } else {
@@ -87,7 +87,7 @@ $(function () {
                        $('#userVersionTable').hide();
                        $('#userVersionChart').css("fontSize", 14);
                        $('#usageByCurrentSubscribersNoData').html('');
-                       $('#usageByCurrentSubscribersNoData').append($('<h3 class="no-data-heading center-wrapper">No Data Available</h3>'));
+                       $('#usageByCurrentSubscribersNoData').append($('<p class="no-data-heading center-wrapper">No Data Available</p>'));
                    }
                } else {
                    BootstrapDialog.show({
