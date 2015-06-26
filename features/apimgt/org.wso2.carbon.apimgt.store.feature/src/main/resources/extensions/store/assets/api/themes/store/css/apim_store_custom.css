@@ -135,7 +135,6 @@ legend {
 .asset-description-header{margin-top: 10px;}
 .wr-action-btn-bar{height: 50px;}
 .form-horizontal {
-    background-color: #fcfcfc;
     margin-bottom: 30px;
     padding: 30px;
 }
@@ -189,3 +188,15 @@ legend {
 #assets-container{background-color: #fff;}
 .asset-description-header>p{padding-left: 20px;}
 .asset-description-header > .col-lg-12 > h3{padding-top: 20px;}
+.grey {color: #6C6767;  }
+.advance-search-btn:hover {
+    color: #FFF;
+    background: #2374c8;
+}
+.advance-search-btn {
+    color: #FFF;
+    background: #1965b2;
+    margin-left: 10px;
+    height: 54px;
+    padding:15px 15px;
+}
