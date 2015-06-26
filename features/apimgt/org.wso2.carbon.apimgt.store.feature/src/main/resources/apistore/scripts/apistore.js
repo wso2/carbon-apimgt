@@ -249,7 +249,7 @@ var apistore = {};
                 cacheTimeout: api.getCacheTimeout(),
                 availableTiersDisplayNames: tiersDisplayNamesSet,
                 isDefaultVersion: api.isDefaultVersion(),
-                serverURL:APIUtil.getGatewayEndpoints(api)
+                serverURL:new APIUtil().getEnvironmentsOfAPI(api)
 
             };
             return {
