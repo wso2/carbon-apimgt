@@ -229,3 +229,8 @@ label {
 }
 .inlineDocName{  
     margin-left: 32px;}
+.has-spinner{margin-left: 10px;}
+.help-block .jsonform-errortext{background-color: red}
+#copy-api-container{background-color: #000088;}
+
+.pagination > .active > a:hover{background-color: #333; margin-left: 1px; border: 1px solid #333;}
