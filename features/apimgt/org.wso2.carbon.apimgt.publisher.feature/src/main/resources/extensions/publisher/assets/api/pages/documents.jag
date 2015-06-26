@@ -36,18 +36,27 @@ require('/modules/publisher.js').exec(function(ctx) {
         var documentAssetManager = asset.createUserAssetManager(session, 'document');
         var page = ui.buildPage(session, request);
         var assets = am.get(options.id);
+        log.info('================================= id : '+ options.id);
         var documents = documentAssetManager.list();
         //show visibility levels
         var apiPublisher =  require('apipublisher').provider;
         var apiProxy = apiPublisher.instance(ctx.username);
         var canShow = apiProxy.isDocVisibilityCanShow();
+
         var user = server.current(ctx.session);
         var usr = carbon.server.tenantUser(user.username);
         var tenantDomain = carbon.server.tenantDomain({tenantId: usr.tenantId});
         if (assets == null) {
             response.sendError(404, 'The asset with id: ' + options.id + ' could not be located.');
         } else {
-            page.documents = documents;
+            var apiId = {};
+            apiId.provider = assets.attributes.overview_provider;
+            apiId.name = assets.attributes.overview_name;
+            apiId.version = assets.version;
+            var allDocs = apiProxy.getAllDocumentation(apiId);
+            log.info('+++++++++++++++++++++++++++++++++++++++ docs : '+ documents);
+            log.info('================================= docs : '+ allDocs);
+            page.documents = allDocs;
             var output = am.render(assets, page).details();
             //output.showAPIDocVisibility=canShow;
             output.cuser.tenantDomain = tenantDomain;
@@ -65,16 +74,16 @@ require('/modules/publisher.js').exec(function(ctx) {
                var docs = output.documents;
                for (i = 0; i < docs.length; i++) { 
                 var doc = docs[i];
-                var attributes = doc.attributes;
+                var attributes = doc;
                 var editContent = true;
-                if(attributes.overview_filePath == null || attributes.overview_filePath == 'null'){
-                    attributes.overview_filePath = null;
+                if(attributes.filePath == null || attributes.filePath == 'null'){
+                    attributes.filePath = null;
                 }else{
                     editContent = false;
                 }
 
-                if(attributes.overview_sourceURL == null || attributes.overview_sourceURL == 'null'){
-                    attributes.overview_sourceURL = null;
+                if(attributes.sourceUrl == null || attributes.sourceUrl == 'null'){
+                    attributes.sourceUrl = null;
                 }else{
                     editContent = false;
                 }
@@ -83,12 +92,40 @@ require('/modules/publisher.js').exec(function(ctx) {
                     attributes.overview_editContent = true;
                 }
 
+                if(doc.type == 'HOWTO'){
+                    doc.type_display = 'How To';
+                }
+
+                if(doc.type == 'SAMPLES'){
+                    doc.type_display = 'Samples';
+                }
+
+                if(doc.type == 'PUBLIC_FORUM'){
+                    doc.type_display = 'Public Forum';
+                }
+
+                if(doc.type == 'SUPPORT_FORUM'){
+                    doc.type_display = 'Support Forum';
+                }
+
+                if(doc.type == 'API_MESSAGE_FORMAT'){
+                    doc.type_display = 'API Message Format';
+                }
+
+                if(doc.type == 'SWAGGER_DOC'){
+                    doc.type_display = 'Swagger API Definition';
+                }
+
+                if(doc.type == 'OTHER'){
+                    doc.type_display = 'Other';
+                }
+
                 if(canShow){
-                    if(attributes.overview_visibility == 'API_LEVEL'){
+                    if(attributes.visibility == 'API_LEVEL'){
                         attributes.visibility_display = 'Same as API visibility';
-                    }else if(attributes.overview_visibility == 'OWNER_ONLY'){
+                    }else if(attributes.visibility == 'OWNER_ONLY'){
                         attributes.visibility_display = 'Private';
-                    }else if(attributes.overview_visibility == 'PRIVATE'){
+                    }else if(attributes.visibility == 'PRIVATE'){
                         attributes.visibility_display = 'Visible to my domain';
                     }
                 }else{
@@ -96,7 +133,7 @@ require('/modules/publisher.js').exec(function(ctx) {
                     output.assets.visibility_display = null;
                 }
 
-}
+            }
             caramel.render(output);
         }
     }

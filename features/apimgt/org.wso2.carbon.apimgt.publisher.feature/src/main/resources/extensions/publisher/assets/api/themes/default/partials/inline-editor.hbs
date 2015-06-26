@@ -38,8 +38,8 @@ var docName = "<%= encode.forJavaScript(request.getParameter("docName"))%>"; --}
 
                 <div class="col-lg-8">
 
-                    <div>
-                        <textarea id="inlineEditor" style="width:100%;height:500px;"></textarea>
+                    <div id='inlineDiv' name='inlineDiv' >
+                        <textarea id="inlineEditor" name="inlineEditor"  style="width:100%;height:500px;"></textarea>
                     </div>
                 </div>
                 <div class="col-lg-4">
@@ -69,8 +69,8 @@ var docName = "<%= encode.forJavaScript(request.getParameter("docName"))%>"; --}
             
             
             
-            <div id="inlineButtonGroup" style='display:none;' >
-                <div style="padding:10px 0;">
+            <div id="inlineButtonGroup" style='float:left;display:none;' >
+                <div style="padding:10px 0;" >
                     <button type="button" title="Save the changes to the document and stay in this tab" class="btn btn-primary" id="inline-apply-button" onclick="saveContent('{{assets.provider}}','{{assets.name}}','{{assets.version}}','apply')">{{t "Save"}}</button>
                     <button type="button" title="Save the document and close this tab" class="btn btn-primary" id="inline-save-button" onclick="saveContent('{{assets.provider}}','{{assets.name}}','{{assets.version}}','save')">{{t "Save and Close"}}</button>
                     <button type="button" title="Cancel all the unsaved changes and close this tab"  class="btn" id="inline-cancel-button" onclick="saveContent('{{assets.provider}}','{{assets.name}}','{{assets.version}}','cancel')">{{t "Cancel"}}</button>

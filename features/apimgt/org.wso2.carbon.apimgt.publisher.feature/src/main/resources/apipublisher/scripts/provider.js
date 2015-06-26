@@ -206,6 +206,19 @@ var provider = {};
         return APIUtil.showAPIDocVisibility();
      };
 
+     APIProviderProxy.prototype.getAllDocumentation = function (api) {
+        var identifier = new Packages.org.wso2.carbon.apimgt.api.model.APIIdentifier(api.provider, api.name, api.version);
+        var docs = this.impl.getAllDocumentation(identifier);
+        var json = APIUtil.convertToString(docs);
+        log.info(' ####################################################  : '+json);
+        var docsJSON = {};
+        if(json != null){
+            docsJSON = JSON.parse(json);
+        }
+        
+        return docsJSON;
+     };
+
     APIProviderProxy.prototype.addInlineContent = function (api, docName, content) {
         var identifier = new Packages.org.wso2.carbon.apimgt.api.model.APIIdentifier(api.provider, api.name, api.version);
         var apiOb = new Packages.org.wso2.carbon.apimgt.api.model.API(identifier);
@@ -602,13 +615,6 @@ var provider = {};
         }
     };
 
-    APIProviderProxy.prototype.getAllDocumentation = function (apiId) {
-        return this.impl.getAllDocumentation(apiId);
-    };
-
-    APIProviderProxy.prototype.getAllDocumentation = function (apiId) {
-        return this.impl.getAllDocumentation(apiId);
-    };
 
     APIProviderProxy.prototype.getInlineContent = function (apiId, docName) {
         return this.impl.getDocumentationContent(apiId, docName);

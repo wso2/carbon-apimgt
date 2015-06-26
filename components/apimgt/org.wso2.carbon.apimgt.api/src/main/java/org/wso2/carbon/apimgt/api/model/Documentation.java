@@ -173,6 +173,7 @@ public class Documentation implements Serializable{
 
     public void setFile(FileData file) {
         this.file = file;
+        this.filePath = file.getFilePath();
     }
     
     

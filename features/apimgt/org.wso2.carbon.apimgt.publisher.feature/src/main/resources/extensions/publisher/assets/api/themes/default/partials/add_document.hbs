@@ -26,14 +26,14 @@
                             </div>
                         </div>
 						<div class="clear"></div>
-                        <div class='control-group cnl-group'>
+                        <div class='control-group cnl-group' >
                             <label class='control-label cnl-label'>{{t "Summary :"}}</label>
-                            <div class='controls cnls'>
-                                <textarea name='overview_summary' id='overview_summary'></textarea>
+                            <div class='controls cnls' id='docSummaryDiv' name='docSummaryDiv' style='width: 80%;'>
+                                <textarea name='doc_summary' id='doc_summary'  style='float: left; width: 100%;'></textarea>
                             </div>
                         </div>
 						{{#if assets.showAPIDocVisibility}}
-                            <div class='control-group cnl-group' style='display:inline-block;;'>
+                            <div class='control-group cnl-group' >
                                 <label class='control-label cnl-label'>{{t "Visibility :"}}</label>
                                 <div class='controls cnls'>
                                     <select class="select required" id="docVisibility" name="docVisibility" style="width:100%">
