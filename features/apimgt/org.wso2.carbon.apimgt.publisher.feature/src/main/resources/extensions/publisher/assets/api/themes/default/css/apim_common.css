@@ -227,3 +227,8 @@ label {
 .txt-filed{width: 90%; margin-top: -12px;}
 .bootstrap-dialog.type-success .modal-header {
     background-color: #237bd5 !important;}
+button.btn-api-del {
+    position: relative !important;
+    top: -140px !important;
+    right: 0px!important;
+}
