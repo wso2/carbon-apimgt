@@ -445,7 +445,7 @@ asset.renderer = function (ctx) {
         navList.push('All Statistics', 'btn-stats', '/assets/' + type + '/statistics');
         navList.push('Subscriptions', 'btn-subscribe', '/assets/' + type + '/api-subscriptions');
         navList.push('Statistics', 'btn-stats', '/assets/' + type + '/statistics');
-        navList.push('Tier Permissions', 'btn-cog', '/assts/' + type + '/tier-permissions');
+        navList.push('Tier Permissions', 'btn-cog', '/assets/' + type + '/tier-permissions');
         return navList.list();
     };
 
