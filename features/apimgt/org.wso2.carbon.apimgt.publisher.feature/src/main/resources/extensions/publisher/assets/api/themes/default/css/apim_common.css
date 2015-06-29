@@ -261,3 +261,23 @@ button.btn-api-del {
 }
 .modal-body {
     float: left;}
+.btn-cog {
+    background:url('../imgs/icons/ico-cog.png') 0.8em 1em no-repeat;
+}
+
+.btn-subscribe {
+    background:url('../imgs/icons/ico-subscribe.png') 0.8em 1em no-repeat;
+}
+
+.btn-versions {
+    background:url('../imgs/icons/ico-versions.png') 0.8em 1em no-repeat;
+}
+
+.btn-docs {
+    background:url('../imgs/icons/ico-docs.png') 0.8em 1em no-repeat;
+}
+
+.btn-users {
+    background:url('../imgs/icons/ico-users.png') 0.8em 1em no-repeat;
+}
+
