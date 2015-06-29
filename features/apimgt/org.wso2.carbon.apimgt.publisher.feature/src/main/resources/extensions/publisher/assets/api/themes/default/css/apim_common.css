@@ -32,7 +32,6 @@
 input, button, select, textarea {
     float: left;
     margin-right: 10px !important;
-    margin-left: 10px !important;
 }
 .multiselect-container>li>a> .checkbox{
     padding-top:5px;
