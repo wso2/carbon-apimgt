@@ -1,5 +1,5 @@
 $(document).ready(function() {
-    var url = caramel.context + "/asts/api/apis/validation";
+    var url = caramel.context + "/assets/api/apis/validation";
 
 
     $.validator.addMethod('contextExists', function(value, element) {

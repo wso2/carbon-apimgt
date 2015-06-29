@@ -24,7 +24,7 @@ require('/modules/store.js').exec(function (ctx) {
     var ui = require('rxt').ui;
     var asset = require('rxt').asset;
     var uriMatcher = new URIMatcher(ctx.request.getRequestURI());
-    var options = uriMatcher.match('/{context}/asts/{type}/{pageName}/{provider}/{apiName}/{apiVersion}');
+    var options = uriMatcher.match('/{context}/assets/{type}/{pageName}/{provider}/{apiName}/{apiVersion}');
     var type = options.type;
     var am;
     var tenantId=-1234;
@@ -46,7 +46,7 @@ require('/modules/store.js').exec(function (ctx) {
     var carbon = require('carbon');
 
     var uri = request.getRequestURI();
-    var callPath = uri.replace("/store/asts/api/swagger", "");
+    var callPath = uri.replace("/store/assets/api/swagger", "");
     var url;
 
     if (uri != null) {

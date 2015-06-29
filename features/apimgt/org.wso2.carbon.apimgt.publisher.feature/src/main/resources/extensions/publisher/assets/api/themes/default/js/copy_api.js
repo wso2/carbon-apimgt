@@ -49,7 +49,7 @@ $(function(){
 		}
 		
 		$('#copyAPINewVersion').val(newVersion);
-		var ajaxURL = caramel.context + '/asts/api/apis/copyAPI';
+		var ajaxURL = caramel.context + '/assets/api/apis/copyAPI';
 		
 
 		 $.ajax({
@@ -75,7 +75,7 @@ $(function(){
 				                label: 'Close',
 				                action: function(dialogItself){
 					                dialogItself.close();
-					                window.location.href = caramel.context+'/asts/api/list';
+					                window.location.href = caramel.context+'/assets/api/list';
 				                }
 				            
 			            	}]
@@ -94,7 +94,7 @@ $(function(){
 				                label: 'Close',
 				                action: function(dialogItself){
 					                dialogItself.close();
-					                window.location.href = caramel.context+'/asts/api/list';
+					                window.location.href = caramel.context+'/assets/api/list';
 				                }
 				            
 			            	}]

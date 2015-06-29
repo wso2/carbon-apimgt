@@ -22,7 +22,7 @@
 
  ENDPOINTS:
  GET
- /apis/asts/swagger
+ /apis/assets/swagger
  */
 
 require('/modules/publisher.js').exec(function (ctx) {

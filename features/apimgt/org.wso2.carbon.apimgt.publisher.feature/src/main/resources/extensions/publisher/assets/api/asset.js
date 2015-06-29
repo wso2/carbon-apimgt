@@ -446,10 +446,10 @@ asset.renderer = function (ctx) {
     var buildListLeftNav = function (page, util) {
         var navList = util.navList();
         navList.push('ADD ' + type.toUpperCase(), 'btn-add-new', util.buildUrl('start'));
-        navList.push('All Statistics', 'btn-stats', '/asts/' + type + '/statistics');
-        navList.push('Subscriptions', 'btn-subscribe', '/asts/' + type + '/api-subscriptions');
-        navList.push('Statistics', 'btn-stats', '/asts/' + type + '/statistics');
-        navList.push('Tier Permissions', 'btn-cog', '/asts/' + type + '/tier-permissions');
+        navList.push('All Statistics', 'btn-stats', '/assets/' + type + '/statistics');
+        navList.push('Subscriptions', 'btn-subscribe', '/assets/' + type + '/api-subscriptions');
+        navList.push('Statistics', 'btn-stats', '/assets/' + type + '/statistics');
+        navList.push('Tier Permissions', 'btn-cog', '/assts/' + type + '/tier-permissions');
         return navList.list();
     };
 

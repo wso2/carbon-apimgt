@@ -1,7 +1,7 @@
 $(document).ready(function(){
     var designer = new APIMangerAPI.APIDesigner();
     designer.set_partials('design');
-    var swaggerUrl = caramel.context + "/asts/api/apis/swagger?action=swaggerDoc&provider="+store.publisher.api.provider+"&name="+store.publisher.api.name+ "&version="+store.publisher.api.version;
+    var swaggerUrl = caramel.context + "/assets/api/apis/swagger?action=swaggerDoc&provider="+store.publisher.api.provider+"&name="+store.publisher.api.name+ "&version="+store.publisher.api.version;
     // $.fn.editable.defaults.mode = 'inline';
     if(store.publisher.api.name != ""){
      $.get(swaggerUrl , function( data ) {
@@ -10,7 +10,7 @@ $(document).ready(function(){
             $("#swaggerUpload").modal('hide');
      });
      } else if(store.publisher.swaggerAvailable) {
-        var sessionSwaggerUrl = caramel.context + "/asts/api/apis/swagger?action=sessionSwaggerDoc";
+        var sessionSwaggerUrl = caramel.context + "/assets/api/apis/swagger?action=sessionSwaggerDoc";
         $.get(sessionSwaggerUrl , function( data ) {
             designer.load_api_document(data.data);
             designer.render_resources();
@@ -21,7 +21,7 @@ $(document).ready(function(){
     //If API is not yet created api save trigger is registered in here
     if(store.publisher.api.name == "") {
         $("body").on("api_saved" , function(e){
-            location.href = caramel.context+"/asts/api/design/"+designer.saved_api.id+"?name="+designer.saved_api.name+"&version="+designer.saved_api.version+"&provider="+designer.saved_api.provider;
+            location.href = caramel.context+"/assets/api/design/"+designer.saved_api.id+"?name="+designer.saved_api.name+"&version="+designer.saved_api.version+"&provider="+designer.saved_api.provider;
         });
     }
 
@@ -108,9 +108,9 @@ $(document).ready(function(){
         $("body").unbind("api_saved");
         $("body").on("api_saved" , function(e){
         if(store.publisher.api.id!=""){
-        location.href = caramel.context + "/asts/api/implement/"+store.publisher.api.id;
+        location.href = caramel.context + "/assets/api/implement/"+store.publisher.api.id;
         }else{
-        location.href = caramel.context + "/asts/api/implement/"+designer.saved_api.id;
+        location.href = caramel.context + "/assets/api/implement/"+designer.saved_api.id;
         }
         });
         $("#form-asset-create").submit();

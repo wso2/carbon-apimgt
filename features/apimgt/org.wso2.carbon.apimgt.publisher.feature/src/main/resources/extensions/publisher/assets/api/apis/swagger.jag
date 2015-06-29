@@ -22,7 +22,7 @@
 
  ENDPOINTS:
  GET
- /apis/asts/swagger
+ /apis/assets/swagger
  */
 
 require('/modules/publisher.js').exec(function (ctx) {
@@ -36,7 +36,7 @@ require('/modules/publisher.js').exec(function (ctx) {
 	var username = user.username;
 	var session = ctx.session;
 	var uriMatcher = new URIMatcher(req.getRequestURI());
-	var GET_SWAGGER_DOC_URL = '/{context}/asts/api/apis/swagger';
+	var GET_SWAGGER_DOC_URL = '/{context}/assets/api/apis/swagger';
 	var method = req.getMethod();
 	var options = ref.getQueryOptions(req.getQueryString());
 	var response = ctx.response;

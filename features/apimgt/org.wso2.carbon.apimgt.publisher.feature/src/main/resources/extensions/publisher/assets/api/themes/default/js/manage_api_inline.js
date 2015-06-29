@@ -3,7 +3,7 @@ $(function () {
     var designer = new APIMangerAPI.APIDesigner();
     designer.set_partials('manage');
 
-    var swaggerUrl = caramel.context + "/asts/api/apis/swagger?action=swaggerDoc&provider=" + store.publisher.api.provider + "&name=" + store.publisher.api.name + "&version=" + store.publisher.api.version;
+    var swaggerUrl = caramel.context + "/assets/api/apis/swagger?action=swaggerDoc&provider=" + store.publisher.api.provider + "&name=" + store.publisher.api.name + "&version=" + store.publisher.api.version;
     $(document).ready(function () {
         $.ajaxSetup({
                         contentType: "application/x-www-form-urlencoded; charset=utf-8"
@@ -231,7 +231,7 @@ $(function () {
                     requireResubscription: true
             };
             $.ajax({
-                       url: caramel.context + '/asts/api/apis/lifecycle?type=api',
+                       url: caramel.context + '/assets/api/apis/lifecycle?type=api',
                        type: 'POST',
                        data: JSON.stringify(data),
                        contentType: 'application/json',

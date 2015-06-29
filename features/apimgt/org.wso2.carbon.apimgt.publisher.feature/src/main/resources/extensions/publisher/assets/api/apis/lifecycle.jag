@@ -22,7 +22,7 @@
 
  ENDPOINTS:
  GET
- /apis/asts/swagger
+ /apis/assets/swagger
  */
 
 require('/modules/publisher.js').exec(function (ctx) {
@@ -34,7 +34,7 @@ require('/modules/publisher.js').exec(function (ctx) {
 	var user = server.current(ctx.session);
 	var username = user.username;
 	var uriMatcher = new URIMatcher(request.getRequestURI());
-	var UPDATE_LIFECYCLE_URL = '/{context}/asts/api/apis/lifecycle';
+	var UPDATE_LIFECYCLE_URL = '/{context}/assets/api/apis/lifecycle';
 	var method = request.getMethod();
 	var options = ref.getQueryOptions(request.getQueryString());
 	var response = ctx.response;

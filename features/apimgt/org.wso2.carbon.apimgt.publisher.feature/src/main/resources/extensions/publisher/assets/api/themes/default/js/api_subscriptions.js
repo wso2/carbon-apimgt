@@ -43,7 +43,7 @@ $(function () {
      *This function generate the location of the templates used in the rendering
      */
     var getSubscriptionAPI = function (action) {
-        return caramel.context + '/asts/api/apis/api-subscriptions/' + action;
+        return caramel.context + '/assets/api/apis/api-subscriptions/' + action;
     };
 
     /*

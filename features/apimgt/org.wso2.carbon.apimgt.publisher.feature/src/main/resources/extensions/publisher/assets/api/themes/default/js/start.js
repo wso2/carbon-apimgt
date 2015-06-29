@@ -3,7 +3,7 @@ $(function() {
         $('#startFromExistingAPI-form').ajaxSubmit({
             success:function(responseText, statusText, xhr, $form){
                 if (!responseText.success) {
-                    window.location = caramel.context + "/asts/api/design";
+                    window.location = caramel.context + "/assets/api/design";
                 }else {
                     BootstrapDialog.show({
                                              type: BootstrapDialog.TYPE_DANGER,
@@ -28,7 +28,7 @@ $(function() {
         $('#startFromExistingSOAPEndpoint-form').ajaxSubmit({
             success:function(responseText, statusText, xhr, $form){
                 if (!responseText.success) {
-                    window.location = caramel.context + "/asts/api/design";
+                    window.location = caramel.context + "/assets/api/design";
                 }else {
                     BootstrapDialog.show({
                                              type: BootstrapDialog.TYPE_DANGER,

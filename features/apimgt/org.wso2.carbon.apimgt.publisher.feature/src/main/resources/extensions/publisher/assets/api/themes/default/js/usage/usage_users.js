@@ -7,7 +7,7 @@ $(function () {
     var apiName = store.publisher.apiIdentifier.name;
     var version = store.publisher.apiIdentifier.version;
     var provider = store.publisher.apiIdentifier.provider;
-    var usageurl = caramel.context + "/asts/api/apis/usage";
+    var usageurl = caramel.context + "/assets/api/apis/usage";
     $.post(usageurl, {
                action: "getProviderAPIVersionUsage",
                providerName: provider,

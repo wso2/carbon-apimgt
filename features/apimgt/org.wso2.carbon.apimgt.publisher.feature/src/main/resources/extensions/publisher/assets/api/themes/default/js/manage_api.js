@@ -1,6 +1,6 @@
 $(function () {
     var inSequencesLoaded = false;
-    var url = caramel.context + "/asts/api/apis/sequences";
+    var url = caramel.context + "/assets/api/apis/sequences";
 
 //hack to validate tiers
     function validate_tiers(){

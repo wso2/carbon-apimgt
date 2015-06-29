@@ -32,7 +32,7 @@ require('/modules/publisher.js').exec(function (ctx) {
     var constants = require("rxt").constants;
     var params = req.getAllParameters('UTF-8');
 
-    var API_SUBSCRIPTIONS_URL = '/{context}/asts/{type}/apis/{pageName}/{action}';
+    var API_SUBSCRIPTIONS_URL = '/{context}/assets/{type}/apis/{pageName}/{action}';
     var uriMatcher = new URIMatcher(req.getRequestURI());
     var uriOptions;
 

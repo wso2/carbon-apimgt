@@ -4,7 +4,7 @@ $(function () {
     var designer = new APIMangerAPI.APIDesigner();
     designer.set_partials('implement');
 
-    var swaggerUrl = caramel.context + "/asts/api/apis/swagger?action=swaggerDoc&provider=" + store.publisher.api.provider + "&name=" + store.publisher.api.name + "&version=" + store.publisher.api.version;
+    var swaggerUrl = caramel.context + "/assets/api/apis/swagger?action=swaggerDoc&provider=" + store.publisher.api.provider + "&name=" + store.publisher.api.name + "&version=" + store.publisher.api.version;
 
     $(document).ready(function () {
         $.ajaxSetup({

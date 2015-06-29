@@ -52,7 +52,7 @@ $(function(){
 		$('#overview_name').val("");
 		$('#doc_summary').val('');
 		var pageId = $('#addDocPageId').val();
-		window.location.href = caramel.context+'/asts/api/docs/'+pageId;
+		window.location.href = caramel.context+'/assets/api/docs/'+pageId;
 
 	});
 
@@ -143,7 +143,7 @@ var saveOrUpdate = function(action){
 		errorMsg = 'Error Occured while Update Document';
 	}
 
-	ajaxURL = caramel.context + '/asts/api/apis/addDoc';
+	ajaxURL = caramel.context + '/assets/api/apis/addDoc';
 	$('#doc-add-container').css('display','none');
 	
 	var apiName = $('#addDocName').val();
@@ -215,7 +215,7 @@ var saveOrUpdate = function(action){
 			                label: 'Close',
 			                action: function(dialogItself){
 				                dialogItself.close();
-				                window.location.href = caramel.context+'/asts/api/docs/'+pageId;
+				                window.location.href = caramel.context+'/assets/api/docs/'+pageId;
 			                }
 			            
 		            	}]
@@ -234,7 +234,7 @@ var saveOrUpdate = function(action){
 			                label: 'Close',
 			                action: function(dialogItself){
 				                dialogItself.close();
-				                window.location.href = caramel.context+'/asts/api/docs/'+pageId;
+				                window.location.href = caramel.context+'/assets/api/docs/'+pageId;
 			                }
 			            
 		            	}]
@@ -324,7 +324,7 @@ var  editDocumentation = function(url, filePath, editContent){
 var getInlineContent = function(provider, apiName, version,docName, mode,tenantDomain){
 	var content = {};
 	var action = 'getInlineContent';
-	var ajaxURL = caramel.context + '/asts/api/apis/addDoc';
+	var ajaxURL = caramel.context + '/assets/api/apis/addDoc';
 	var errorMsg = 'Error occurred while retrieve Inline Content';
 	 $.ajax({
 			    type: "GET",
@@ -402,7 +402,7 @@ function saveContent(provider, apiName, apiVersion, mode) {
 
   var pageId = $('#inlineDocPageId').val();
   if(mode == 'cancel'){
-     window.location.href = caramel.context+'/asts/api/docs/'+pageId;
+     window.location.href = caramel.context+'/assets/api/docs/'+pageId;
   }
   var visibility={};
   var showVisibility = $('#InlineShowVisibility').val();
@@ -414,7 +414,7 @@ function saveContent(provider, apiName, apiVersion, mode) {
   var successMsg = 'Successfully Edited Inline Content';
   var errorMsg = 'Error Occured while Edit Inline Content';
 
-  var ajaxURL = caramel.context + '/asts/api/apis/addDoc';
+  var ajaxURL = caramel.context + '/assets/api/apis/addDoc';
 
     $('#form-inline-editor').ajaxSubmit({
           type: "POST",
@@ -443,7 +443,7 @@ function saveContent(provider, apiName, apiVersion, mode) {
                       action: function(dialogItself){
                         dialogItself.close();
                         if(mode == 'save'){
-                          window.location.href = caramel.context+'/asts/api/docs/'+pageId;
+                          window.location.href = caramel.context+'/assets/api/docs/'+pageId;
                         }
                         
                       }
@@ -465,7 +465,7 @@ function saveContent(provider, apiName, apiVersion, mode) {
                       action: function(dialogItself){
                         dialogItself.close();
                         if(mode == 'save'){
-                          window.location.href = caramel.context+'/asts/api/docs/'+pageId;
+                          window.location.href = caramel.context+'/assets/api/docs/'+pageId;
                         }
                       }
                   
@@ -481,7 +481,7 @@ function saveContent(provider, apiName, apiVersion, mode) {
 
 var removeDocumentation = function(provider, apiName, version, docName, docType){
 	var action = 'deleteDocument';
-	var ajaxURL = caramel.context + '/asts/api/apis/addDoc';
+	var ajaxURL = caramel.context + '/assets/api/apis/addDoc';
 	var errorMsg = 'Error occurred while Deleting Document';
 	var successMsg = 'Successfully Deleted Document';
 	 $.ajax({
@@ -506,7 +506,7 @@ var removeDocumentation = function(provider, apiName, version, docName, docType)
 			                label: 'Close',
 			                action: function(dialogItself){
 				                dialogItself.close();
-				                window.location.href = caramel.context+'/asts/api/docs/'+pageId;
+				                window.location.href = caramel.context+'/assets/api/docs/'+pageId;
 			                }
 			            
 		            	}]
@@ -525,7 +525,7 @@ var removeDocumentation = function(provider, apiName, version, docName, docType)
                       label: 'Close',
                       action: function(dialogItself){
                         dialogItself.close();
-                        window.location.href = caramel.context+'/asts/api/docs/'+pageId;
+                        window.location.href = caramel.context+'/assets/api/docs/'+pageId;
                         
                       }
                   

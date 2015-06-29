@@ -1,7 +1,7 @@
 //var subAPI=metadata.swaggerAPI;
 $(function(){
     window.swaggerUi = new SwaggerUi({
-                                         url:'/store/asts/api/swagger/'+store.publisher.apiIdentifier.provider+'/'+store.publisher.apiIdentifier.name+'/'+store.publisher.apiIdentifier.version,
+                                         url:'/store/assets/api/swagger/'+store.publisher.apiIdentifier.provider+'/'+store.publisher.apiIdentifier.name+'/'+store.publisher.apiIdentifier.version,
                                          dom_id: "swagger-ui-container",
                                          supportedSubmitMethods: ['get', 'post', 'put', 'delete','head'],
                                          onComplete: function(swaggerApi, swaggerUi){

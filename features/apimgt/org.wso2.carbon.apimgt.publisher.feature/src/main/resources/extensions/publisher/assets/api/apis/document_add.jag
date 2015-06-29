@@ -30,7 +30,7 @@ require('/modules/publisher.js').exec(function(ctx) {
     var session = ctx.session;
     var uriMatcher = new URIMatcher(request.getRequestURI());
     log.info('=========================================  ' + request.getRequestURI());
-    var POST_NEW_API_URL = '/{context}/asts/api/apis/addDoc';
+    var POST_NEW_API_URL = '/{context}/assets/api/apis/addDoc';
     log.info('=========================================  ' + POST_NEW_API_URL);
 
     var method = request.getMethod();
