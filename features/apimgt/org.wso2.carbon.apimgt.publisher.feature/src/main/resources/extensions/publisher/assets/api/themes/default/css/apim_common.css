@@ -2,8 +2,8 @@
     padding: 40px;
 }
 #resource_url_pattern_refix {
-  font-weight: bold;
-  font-size: 11px;
+    font-weight: bold;
+    font-size: 11px;
 }
 .multiselect-container{
     top:35px;
@@ -11,7 +11,28 @@
 }
 .multiselect-container>li>a{
     padding:4px 30px;
-    border-bottom:1px solid #fff;
+    border-bottom:0px solid #fff;
+}
+
+.multiselect-container > li:hover {
+    color: #000088;
+}
+.multiselect-container.dropdown-menu>.active{background-color: #DDD;}
+.dropdown-menu > .active > a, .dropdown-menu > .active > a:hover, .dropdown-menu > .active > a:focus {
+    color: #FFF;
+    text-decoration: none;
+    background-color: #ddd;
+    outline: 0px none;
+}
+.dropdown-menu > li > a:hover, .dropdown-menu > li > a:focus {
+    color: #262626;
+    background-color: #ddd;
+}
+
+input, button, select, textarea {
+    float: left;
+    margin-right: 10px !important;
+    margin-left: 10px !important;
 }
 .multiselect-container>li>a> .checkbox{
     padding-top:5px;
@@ -62,7 +83,7 @@ table.opt-selectable td {
     margin-top: 10px;
 }
 label {
- font-weight: 400;
+    font-weight: 400;
 }
 .border-right{border-right:1px solid #cccccc; }
 .border-left{border-left:1px solid #cccccc; }
@@ -86,7 +107,7 @@ label {
 .simple-space-maker:hover{color:#fff; background-color: #1965b2 }
 .simple-space-maker >a {color:#fff; text-decoration: none; }
 label {
- font-weight: 400; float: left; }
+    font-weight: 400; float: left; }
 #less, #more{float: left; margin-left: 10px;}
 .border-right{border-right:1px solid #cccccc; }
 .border-left{border-left:1px solid #cccccc; }
@@ -217,7 +238,7 @@ label {
     background-color: #237bd5;
     border:none;}
 .btn-success:hover {background-color: #1965b2;}
-.inlineDocName{  
+.inlineDocName{
     margin-left: 32px;}
 .has-spinner{margin-left: 10px;}
 .help-block .jsonform-errortext{background-color: red}
@@ -232,3 +253,11 @@ button.btn-api-del {
     top: -140px !important;
     right: 0px!important;
 }
+.input-long .textarea-long{width:70%; float: left; border: 1px solid #ccc; height: 30px; border-radius: 0px; margin-left: 10px;}
+.align-group{
+    margin-top: 10px;
+    float: left;
+    width: 100%;
+}
+.modal-body {
+    float: left;}
