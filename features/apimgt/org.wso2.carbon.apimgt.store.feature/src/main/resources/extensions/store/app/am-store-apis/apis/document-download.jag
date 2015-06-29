@@ -37,7 +37,6 @@ require('/modules/store.js').exec(function (ctx) {
 		case 'GET':
 			var tenantDomain = request.getParameter("tenant");
 			var resourceUrl = request.getParameter("resourceUrl");
-			log.info(tenantDomain);
 			if(tenantDomain == '') {
 				tenantDomain = null;
 			}
@@ -57,11 +56,10 @@ require('/modules/store.js').exec(function (ctx) {
 			break;
 
 		case 'POST':
-			// log.info('POST :: ' + httpMethod);
 			break;
 
 		default:
-			// log.info('default :: ' + httpMethod);
+
 			break;
 	}
 

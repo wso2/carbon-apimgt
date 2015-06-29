@@ -139,7 +139,6 @@ asset.manager = function(ctx) {
             }
         },
         list: function(paging) {
-            //log.info(this._super.list.call(this, paging));
             return this._super.list.call(this, paging);
         },
         update: function(options){
@@ -210,7 +209,6 @@ asset.manager = function(ctx) {
 
                 var apiProxy = apiPublisher.instance(ctx.username);
                 result = apiProxy.implementAPI(api);
-                // log.info(result);
                 if (result != null && result.error==true) {
                     obj = {
                         error:true,
@@ -226,7 +224,6 @@ asset.manager = function(ctx) {
                return obj;
             } else if(options.attributes.action == "manage") {
                 var apiData = {};
-                //log.info(options);
                 apiData.apiName = options.name;
                 apiData.version = options.attributes.version;
                 if (request.getParameter("provider") == null) {
@@ -432,7 +429,6 @@ asset.renderer = function (ctx) {
         }
         for (var index in activatedAssets) {
             if (activatedAssets[index] == assetType) {
-                //log.info(activatedAssets[index] + "&" + assetType);
                 return true;
             }
         }
@@ -481,7 +477,6 @@ asset.renderer = function (ctx) {
             }
         },
         details: function (page) {
-            //log.info(page);
             //Doing this because when there are no value specified in column such as thumbnail column it return string "null"
             // value which need be explicitly set to null
             if (page.assets.thumbnail == 'null') {

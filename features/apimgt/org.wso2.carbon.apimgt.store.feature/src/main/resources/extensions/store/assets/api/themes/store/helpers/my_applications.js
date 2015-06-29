@@ -18,7 +18,6 @@
  */
 var resources = function (page, meta) {
     var log = new Log();
-    // log.info('My Applications loaded');
     return {
         js: ['libs/jquery.form.min.js', 'create_application.js', 'bootstrap-dialog.min.js',
             'bootstrap-editable.js', 'bootstrap-multiselect.js'],

@@ -44,7 +44,6 @@ asset.manager = function(ctx){
             return assets;
         },
         get:function(id){
-            // log.info('Calling custom get of asset');
             return this._super.get.call(this,id);
         }
         /*search : function(query, paging) {
@@ -381,7 +380,6 @@ asset.renderer = function(ctx) {
 
                     var environments = JSON.parse(api.serverURL);
                     var filteredEnvironments={};
-                    log.info("originallllll"+stringify(environments));
                     for(var environmentType in environments){
                         var environmentsPerType = environments[environmentType];
                         if(environmentType == "production"){

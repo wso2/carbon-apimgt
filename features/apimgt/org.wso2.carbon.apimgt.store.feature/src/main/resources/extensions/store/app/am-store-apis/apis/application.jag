@@ -36,7 +36,6 @@ require('/modules/store.js').exec(function (ctx) {
     var uriOptions;
     switch (httpMethod) {
         case 'GET':
-            // log.info('GET :: ' + httpMethod);
             // var elements = uriMatcher.elements();
             // options.appName = elements.appName;
             // var subscribedAPIsResult = apistore.getAllSubscriptions(user.username,options.appName,0,100);
@@ -47,7 +46,6 @@ require('/modules/store.js').exec(function (ctx) {
 
         case 'POST':
             uriOptions = uriMatcher.match(API_SUBSCRIPTION_URL);
-            //log.info('POST :: ' + httpMethod + 'action :: ' + uriOptions.action);
             if (uriOptions.action == 'new') {
                 // (userId, applicationName, tokenType, tokenScopes,validityPeriod,callbackUrl,accessAllowDomainsArr)
                 var keyResult = apistore.getApplicationKey(user.username, options.appName,
@@ -104,7 +102,6 @@ require('/modules/store.js').exec(function (ctx) {
             break;
 
         default:
-            // log.info('default :: ' + httpMethod);
             break;
     }
 

@@ -59,7 +59,6 @@ require('/modules/store.js').exec(function (ctx) {
             break;
 
         case 'POST':
-            //log.info('POST :: ' + httpMethod);
             uriOptions = uriMatcher.match(API_APPLICATIONS_URL);
 
             if (uriOptions.action == "newapp") {
@@ -75,7 +74,6 @@ require('/modules/store.js').exec(function (ctx) {
             break;
 
         default:
-            // log.info('default :: ' + httpMethod);
             break;
     }
 

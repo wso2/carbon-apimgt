@@ -29,9 +29,7 @@ require('/modules/publisher.js').exec(function(ctx) {
     var username = user.username;
     var session = ctx.session;
     var uriMatcher = new URIMatcher(request.getRequestURI());
-    log.info('=========================================  ' + request.getRequestURI());
     var POST_NEW_API_URL = '/{context}/assets/api/apis/addDoc';
-    log.info('=========================================  ' + POST_NEW_API_URL);
 
     var method = request.getMethod();
     
@@ -132,7 +130,6 @@ require('/modules/publisher.js').exec(function(ctx) {
 
                 if(action == "editInlineContent"){
                     var inlineContent = request.getParameter('inlineContent', 'UTF-8');
-                    log.info('-----------------------------------------------  ' + inlineContent);
                     data = apiProxy.addInlineContent(apiData, doc.docName, inlineContent);
                 }
                

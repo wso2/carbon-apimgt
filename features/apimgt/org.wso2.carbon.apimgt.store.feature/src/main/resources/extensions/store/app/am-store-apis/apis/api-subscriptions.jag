@@ -19,7 +19,6 @@
  */
 require('/modules/store.js').exec(function (ctx) {
     var log = new Log('api_subsciptions_api');
-    // log.info("inside api");
     var server = require('store').server;
     var responseProcessor = require('utils').response;
     var user = server.current(ctx.session);
@@ -27,8 +26,6 @@ require('/modules/store.js').exec(function (ctx) {
     var response = ctx.response;
     var options = request.getAllParameters('UTF-8');
     var method = request.getMethod();
-    // log.info("methoddd"+method);
-    // log.info(options.applicationId);
 
     var constants = require("rxt").constants;
 
@@ -47,7 +44,6 @@ require('/modules/store.js').exec(function (ctx) {
             break;
 
         default:
-            // log.info('default :: ' + method);
             break;
     }
 

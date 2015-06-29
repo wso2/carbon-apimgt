@@ -60,7 +60,6 @@ $(function () {
      The function returns the curent subscriptions for the given application
      */
     var findSubscriptionDetails = function (appName) {
-        //log.info("appsWithSubs :: " + appsWithSubs);
         var apps = metadata.appsWithSubs;
         var app;
         for (var appIndex in apps) {
