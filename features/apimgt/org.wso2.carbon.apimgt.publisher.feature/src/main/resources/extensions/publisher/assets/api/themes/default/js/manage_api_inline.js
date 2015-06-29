@@ -252,16 +252,16 @@ $(function () {
                                                                    },{
                                                                        label: 'Go to API Store',
                                                                         action: function (dialogRef) {
-                                                                            var storeUrl = store.publisher.urls.storeUrl + '/asts/api/details/' + store.publisher.api.id;
+                                                                            var storeUrl = store.publisher.urls.storeUrl + '/assets/api/details/' + store.publisher.api.id;
                                                                             window.open(storeUrl, '_blank');
-                                                                            var overviewUrl = caramel.context + '/asts/api/details/'+store.publisher.api.id;
+                                                                            var overviewUrl = caramel.context + '/assets/api/details/'+store.publisher.api.id;
                                                                             location.href = overviewUrl;
                                                                       }
                                                                    },{
                                                                       label: 'Go to Overview',
                                                                       cssClass: 'btn-primary',
                                                                       action: function () {
-                                                                          var overviewUrl = caramel.context + '/asts/api/details/'+store.publisher.api.id;
+                                                                          var overviewUrl = caramel.context + '/assets/api/details/'+store.publisher.api.id;
                                                                           location.href = overviewUrl;
                                                                       }
                                                                   }
