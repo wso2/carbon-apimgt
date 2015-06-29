@@ -163,8 +163,10 @@ require('/modules/publisher.js').exec(function(ctx) {
 		filteredTiers.push(tier);
 	}
 
+	var storeUrl = apiProxy.getAPIStoreURL().url;
 	output.api.configuredTiers = configuredTiers;
 	output.api.filteredTiers = filteredTiers;
+	output.api.storeUrl = storeUrl;
 
 	output.api.isPermitted = apiProxy.hasPublishPermission().permitted;
 

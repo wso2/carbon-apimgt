@@ -1045,5 +1045,25 @@ var provider = {};
         }
     };
 
+    APIProviderProxy.prototype.getAPIStoreURL = function (){
+        var result;
+        try {
+            result = APIUtil.getAPIStoreURL();
+            if (log.isDebugEnabled()) {
+                log.debug("getAPIStoreURL : ");
+            }
+            return {
+                error: false,
+                url: result
+            };
+        } catch (e) {
+            return {
+                error: true,
+                message: e.message.split(":")[1]
+            };
+        }
+
+    };
+
 })(provider);
 
