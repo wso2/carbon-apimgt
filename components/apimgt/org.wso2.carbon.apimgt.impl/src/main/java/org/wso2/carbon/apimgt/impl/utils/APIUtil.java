@@ -1543,11 +1543,17 @@ public final class APIUtil {
             log.error(msg, e);
             throw new APIManagementException(msg, e);
         } catch (ClassNotFoundException e) {
-            log.error("Requested APIPublisher Class couldn't found", e);
+            String msg = "Requested APIPublisher Class couldn't found";
+            log.error(msg, e);
+            throw new APIManagementException(msg, e);
         } catch (InstantiationException e) {
-            log.error("Requested APIPublisher Class couldn't load", e);
+            String msg = "Requested APIPublisher Class couldn't load";
+            log.error(msg, e);
+            throw new APIManagementException(msg, e);
         } catch (IllegalAccessException e) {
-            e.printStackTrace();
+            String msg = "Requested APIPublisher Class couldn't access";
+            log.error(msg, e);
+            throw new APIManagementException(msg, e);
         }
         return externalAPIStores;
     }
@@ -3992,13 +3998,9 @@ public final class APIUtil {
         }
         Resource apiDocResource;
         Registry registryType = null;
-        int tenantId = MultitenantConstants.SUPER_TENANT_ID;
+        int tenantId;
         try {
-            if (tenantDomain != null && !"null".equals(tenantDomain)) {
-                tenantId = ServiceReferenceHolder
-                        .getInstance().getRealmService().getTenantManager()
-                        .getTenantId(tenantDomain);
-            }
+           tenantId = APIUtil.getTenantId(userName);
             userName = MultitenantUtils.getTenantAwareUsername(userName);
             registryType = ServiceReferenceHolder
                     .getInstance().
@@ -4011,11 +4013,7 @@ public final class APIUtil {
                 String[] content = apiDocResource.getPath().split("/");
                 documentMap.put("name", content[content.length - 1]);
             }
-        } catch (org.wso2.carbon.user.api.UserStoreException e) {
-            log.error("Couldn't retrieve Tenant Domain for User " + userName, e);
-            handleException("Couldn't retrieve Tenant Domain for User " + userName, e);
-
-        } catch (RegistryException e) {
+        }  catch (RegistryException e) {
             log.error("Couldn't retrieve registry for User " + userName + " Tenant " + tenantDomain,
                       e);
             handleException(

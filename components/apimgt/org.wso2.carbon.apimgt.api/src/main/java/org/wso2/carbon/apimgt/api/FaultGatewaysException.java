@@ -22,26 +22,27 @@ import java.util.Map;
 
 public class FaultGatewaysException extends Exception {
 	private Map<String, List<String>> faultMap;
-
+	public static final String PUBLISHED = "PUBLISHED";
+	public static final String UN_PUBLISHED = "UNPUBLISHED";
 	public String getFaultGateWayString() {
-		String failedJson = "{\"PUBLISHED\" : \"\" ,\"UNPUBLISHED\":\"\"}";
+		String failedJson = "{"+PUBLISHED+" : \"\" ,"+UN_PUBLISHED+":\"\"}";
 		if (faultMap != null) {
 			if (!faultMap.isEmpty()) {
 				StringBuilder failedToPublish = new StringBuilder();
 				StringBuilder failedToUnPublish = new StringBuilder();
-				for (String environmentName : faultMap.get("PUBLISHED")) {
+				for (String environmentName : faultMap.get(PUBLISHED)) {
 					failedToPublish.append(environmentName + ",");
 				}
-				for (String environmentName : faultMap.get("UNPUBLISHED")) {
+				for (String environmentName : faultMap.get(UN_PUBLISHED)) {
 					failedToUnPublish.append(environmentName + ",");
 				}
-				if (!"".equals(failedToPublish.toString())) {
+				if (failedToPublish.length() != 0) {
 					failedToPublish.deleteCharAt(failedToPublish.length() - 1);
 				}
-				if (!"".equals(failedToUnPublish.toString())) {
+				if (failedToUnPublish.length() != 0) {
 					failedToUnPublish.deleteCharAt(failedToUnPublish.length() - 1);
 				}
-				failedJson = "{\"PUBLISHED\" : \"" + failedToPublish.toString() + "\" ,\"UNPUBLISHED\":\"" +
+				failedJson = "{"+PUBLISHED+" : \"" + failedToPublish.toString() + "\" ,"+UN_PUBLISHED+":\"" +
 				             failedToUnPublish.toString() + "\"}";
 			}
 		}

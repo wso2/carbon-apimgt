@@ -24,6 +24,7 @@ import org.apache.axiom.om.OMFactory;
 import org.apache.axiom.om.util.AXIOMUtil;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.Constants;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.simple.JSONObject;
@@ -1015,10 +1016,10 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         APITemplateBuilderImpl vtb = new APITemplateBuilderImpl(api);
         Map<String, String> corsProperties = new HashMap<String, String>();
         corsProperties.put("inline", api.getImplementation());
-        if (api.getAllowedHeaders() != null && api.getAllowedHeaders() != "") {
+        if (!StringUtils.isEmpty(api.getAllowedHeaders())) {
             corsProperties.put("allowHeaders", api.getAllowedHeaders());
         }
-        if (api.getAllowedOrigins() != null && api.getAllowedOrigins() != "") {
+        if (!StringUtils.isEmpty(api.getAllowedOrigins())) {
             corsProperties.put("allowedOrigins", api.getAllowedOrigins());
         }
         vtb.addHandler("org.wso2.carbon.apimgt.gateway.handlers.security.CORSRequestHandler", corsProperties);
