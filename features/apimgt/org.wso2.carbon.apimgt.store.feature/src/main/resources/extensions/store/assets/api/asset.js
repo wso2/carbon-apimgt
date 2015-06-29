@@ -113,9 +113,9 @@ asset.server = function(ctx) {
             url: 'details'
             path: 'details.jag'
             },*/    {
-                    title: 'Swagger',
-                    url: 'swagger',
-                    path: 'swagger.jag'
+                        title: 'Swagger',
+                        url: 'swagger',
+                        path: 'swagger.jag'
                     },
                     {
                         title: 'My Subscriptions',
@@ -161,7 +161,7 @@ asset.renderer = function(ctx) {
             //=================== Getting subscription details ========================
 
             var carbonAPI = require('carbon');
-          
+
             var server = require('store').server;
             var user = server.current(ctx.session);
             var tenantId = null, tenantDomain = null;
@@ -186,7 +186,7 @@ asset.renderer = function(ctx) {
                 }
             }
             var resultapi = apistore.getAPI(asset.attributes.overview_provider,
-                asset.name, asset.attributes.overview_version);
+                                            asset.name, asset.attributes.overview_version);
             var apidata=resultapi.api;
             if (apidata != null) {
                 tiers = apidata.tiers;
@@ -199,7 +199,7 @@ asset.renderer = function(ctx) {
                 var applications = JSON.parse(apistore.getApplications(userName));
 
                 var subscriptions = JSON.parse(apistore.getAPISubscriptions(asset.attributes.overview_provider,
-                    asset.name, asset.attributes.overview_version, userName));
+                                                                            asset.name, asset.attributes.overview_version, userName));
                 if (applications) {
                     lenI = applications.length;
                 }
@@ -207,27 +207,27 @@ asset.renderer = function(ctx) {
                     lenJ = subscriptions.length;
                 }
                 Label1:
-                    for (i = 0; i < lenI; i++) {
-                        var application = applications[i];
-                        for (j = 0; j < lenJ; j++) {
-                            var subscription = subscriptions[j];
-                            if (subscription.applicationId == application.id) {
-                                if (application.name == "DefaultApplication") {
-                                    selectedDefault = true;
-                                }
-                                continue Label1;
-                            } else {
-                                if (application.name == "DefaultApplication") {
-                                    subscribedToDefault = true;
+                        for (i = 0; i < lenI; i++) {
+                            var application = applications[i];
+                            for (j = 0; j < lenJ; j++) {
+                                var subscription = subscriptions[j];
+                                if (subscription.applicationId == application.id) {
+                                    if (application.name == "DefaultApplication") {
+                                        selectedDefault = true;
+                                    }
+                                    continue Label1;
+                                } else {
+                                    if (application.name == "DefaultApplication") {
+                                        subscribedToDefault = true;
+                                    }
                                 }
                             }
-                        }
 
-                        if (application.status == "APPROVED") {
-                            application.selectedDefault = selectedDefault;
-                            appsList.push(application);
+                            if (application.status == "APPROVED") {
+                                application.selectedDefault = selectedDefault;
+                                appsList.push(application);
+                            }
                         }
-                    }
 
                 result = apistore.getDeniedTiers();
                 deniedTiers = result.tiers;
@@ -373,41 +373,47 @@ asset.renderer = function(ctx) {
             populateEndPoints : function(page){
                 if (page.assets && page.assets.id) {
                     var httpEndpoint='',httpsEndpoint='';
+                    var api=page.api;
+                    var isDefaultVersion=api.isDefaultVersion;
 
-                    var isDefaultVersion=page.api.isDefaultVersion;
-
-                    page.assets.httpEndpoint = httpEndpoint;
-                    page.assets.httpsEndpoint = httpsEndpoint;
+                    page.assets.isAdvertiseOnly = api.isAdvertiseOnly;
                     page.assets.isDefaultVersion = isDefaultVersion;
 
-                    //var prodEps = parse(page.assets.attributes.overview_endpointConfig).production_endpoints;
-                    //var sandBoxEps = parse(page.assets.attributes.overview_endpointConfig).sandbox_endpoints;
-                    //
-                    //if(prodEps != null){
-                    //    var prodEpArry = [];
-                    //
-                    //    for(var i = 0; prodEps.length > i; i++){
-                    //        prodEpArry.push(prodEps[i].url);
-                    //    }
-                    //
-                    //    page.assets.production_endpoint = prodEpArry.join(',');
-                    //
-                    //}else {
-                    //    page.assets.production_endpoint = parse(page.assets.attributes.overview_endpointConfig).production_endpoints.url;
-                    //}
-                    //
-                    //if(sandBoxEps != null){
-                    //    var sandBoxEpArry = [];
-                    //
-                    //    for(var i = 0; prodEps.length > i; i++){
-                    //        sandBoxEpArry.push(sandBoxEps[i].url);
-                    //    }
-                    //
-                    //    page.assets.sandbox_endpoint = sandBoxEpArry.join(',');
-                    //
-                    //} else if(parse(page.assets.attributes.overview_endpointConfig).sandbox_endpoints != null && parse(page.assets.attributes.overview_endpointConfig).sandbox_endpoints.url != null) {
-                    //    page.assets.sandbox_endpoint = parse(page.assets.attributes.overview_endpointConfig).sandbox_endpoints.url;
-                    //}
+                    var environments = JSON.parse(api.serverURL);
+                    var filteredEnvironments={};
+                    log.info("originallllll"+stringify(environments));
+                    for(var environmentType in environments){
+                        var environmentsPerType = environments[environmentType];
+                        if(environmentType == "production"){
+                            environmentType.isProd=true;
+                            environmentType.isSand=false;
+                        }else if(environmentType == "sandbox"){
+                            environmentType.isSand=true;
+                            environmentType.isProd=false;
+                        }else{
+                            environmentType.isProd=false;
+                            environmentType.isSand=false;
+                        }
+                        var filEnvironmentsPerType=[];
+                        for( var environmentName in environmentsPerType){
+                            var filteredEnvironmentUrls=[];
+                            var environmenturls = environmentsPerType[environmentName];
+                            for (var urltype in environmenturls ) {
+                                if(urltype != "showInConsole" && urltype == "http"){
+                                    var endpoints=environmenturls[urltype];
+                                    httpEndpoint=endpoints[0];
+                                    httpsEndpoint=endpoints[1];
+                                    filteredEnvironmentUrls.push(environmenturls[urltype]);
+                                }
+                            }
+                            environmentsPerType[environmentName]=filteredEnvironmentUrls;
+
+                        }
+                        environments[environmentType]=environmentsPerType;
+
+                    }
+                    page.assets.httpEndpoint = httpEndpoint;
+                    page.assets.httpsEndpoint = httpsEndpoint;
                 }
             },
             socialSitePopulator: function(page, meta) {
@@ -467,7 +473,7 @@ asset.renderer = function(ctx) {
                 action.iconClass ='fa-line-chart';
                 action.name ='Statistics';
                 page.actionBar.actions.push(action);
-        }
+            }
         }
     }
 }
