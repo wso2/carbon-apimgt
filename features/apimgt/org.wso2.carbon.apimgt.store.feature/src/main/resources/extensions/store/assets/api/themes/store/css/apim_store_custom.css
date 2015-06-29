@@ -141,7 +141,7 @@ legend {
 .asset-description-header{margin-top: 10px;}
 .wr-action-btn-bar{height: 50px;}
 .form-horizontal {
-   
+
     margin-bottom: 30px;
     padding: 30px;
 }
@@ -217,6 +217,11 @@ label {
     top: -92px;
     right: 13px;
     font-size:14px;
+}
+.grey {color: #6C6767;  }
+.advance-search-btn:hover {
+    color: #FFF;
+    background: #2374c8;
 }
 .advance-search-btn {
     color: #FFF;
