@@ -132,7 +132,7 @@
     <div class='form-group'>
         <label class='custom-form-label   col-lg-2'>Context:<span class="requiredAstrix">*</span></label>
         <div class='custom-form-right col-lg-5 '>
-            <input type='text' id='overview_context' name='overview_context' class="form-control required" >
+            <input type='text' id='overview_context' name='overview_context' class="form-control required" onchange="getContextValue()" value="" onkeyup="updateContextPattern()">
             <a class="icon-question-sign help_popup" help_data="context_help"></a>
             <p id="context_help" class="hide">{{t "contextHelpMsg"}}</p>
         </div>
@@ -140,7 +140,7 @@
     <div class='form-group'>
         <label class='custom-form-label col-lg-2 '>Version:<span class="requiredAstrix">*</span></label>
         <div class='custom-form-right col-lg-5 '>
-            <input type='text' id='overview_version' name='overview_version' class="form-control required validInput noSpace" >
+            <input type='text' id='overview_version' name='overview_version' class="form-control required validInput noSpace" onchange="getContextValue()" value="" onkeyup="updateContextPattern()">
             <p class="help-block">{{t "E.g.,: v1.0.0 ,v1.0 , 1.0.0, 1.0"}}</p>
         </div>
     </div>

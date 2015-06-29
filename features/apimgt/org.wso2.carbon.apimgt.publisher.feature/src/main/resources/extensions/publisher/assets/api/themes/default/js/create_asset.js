@@ -116,26 +116,3 @@ $(document).ready(function(){
         $("#form-asset-create").submit();
     });
 });
-
-function getContextValue() {
-    var context = $('#context').val();
-    var version = $('#apiVersion').val();
-
-    if (context == "" && version != "") {
-        $('#contextForUrl').html("/{context}/" + version);
-        $('#contextForUrlDefault').html("/{context}/" + version);
-    }
-    if (context != "" && version == "") {
-        if (context.charAt(0) != "/") {
-            context = "/" + context;
-        }
-        $('#contextForUrl').html(context + "/{version}");
-        $('#contextForUrlDefault').html(context + "/{version}");
-    }
-    if (context != "" && version != "") {
-        if (context.charAt(0) != "/") {
-            context = "/" + context;
-        }
-        $('.contextForUrl').html(context + "/" + version);
-    }
-}
