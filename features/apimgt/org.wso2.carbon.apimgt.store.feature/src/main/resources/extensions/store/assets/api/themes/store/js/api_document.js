@@ -16,27 +16,29 @@
  * under the License.
  *
  */
+var apiName;
+var version;
+var provider;
 $(function () {
-
-    var apiName = store.publisher.apiIdentifier.name;
-    var version = store.publisher.apiIdentifier.version;
-    var provider = store.publisher.apiIdentifier.provider;
-
-    function downloadDocument(filePath, tenantDomain) {
-        var url = caramel.context + '/apis/document/download?tenant='+tenantDomain+'&resourceUrl='+filePath;
-        window.open(url, '_blank');
-    }
-
-    function viewDocument(docName, tenantDomain) {
-        var urlPrefix;
-        if(tenantDomain!=null) {
-            urlPrefix="&tenant="+tenantDomain;
-        } else{
-            urlPrefix='';
-        }
-        var url = caramel.context + '/apis/document/view?docName='+docName+'&name='+apiName+'&version='
-                  +version+'&provider='+provider+urlPrefix;
-        window.open(url, '_blank');
-    }
+    apiName = store.publisher.apiIdentifier.name;
+    version = store.publisher.apiIdentifier.version;
+    provider = store.publisher.apiIdentifier.provider;
 
 });
+
+function downloadDocument(filePath, tenantDomain) {
+    var url = caramel.context + '/apis/document/download?tenant='+tenantDomain+'&resourceUrl='+filePath;
+    window.open(url, '_blank');
+}
+
+function viewDocument(docName, tenantDomain) {
+    var urlPrefix;
+    if(tenantDomain!=null) {
+        urlPrefix="&tenant="+tenantDomain;
+    } else{
+        urlPrefix='';
+    }
+    var url = caramel.context + '/apis/document/view?docName='+docName+'&name='+apiName+'&version='
+              +version+'&provider='+provider+urlPrefix;
+    window.open(url, '_blank');
+}
