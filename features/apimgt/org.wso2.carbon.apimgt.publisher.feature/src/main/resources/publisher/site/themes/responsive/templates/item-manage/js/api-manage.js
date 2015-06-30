@@ -241,9 +241,7 @@ function loadFaultSequences() {
             }, "json");
 }
 
-
-
-$("#toggleSequence").change(function(e){
+$("#toggleSequence").on('click',function(e){
     if($(this).is(":checked")){
         $(this).parent().parent().next().show();
         loadInSequences();
@@ -255,6 +253,7 @@ $("#toggleSequence").change(function(e){
         $('#inSequence').val('') ;
         $('#outSequence').val('');
     }
+    //$('select').selectpicker();
 });
 function validate_Transports(){
     var checkedHttpTransport=$('#transport_http').is(":checked");

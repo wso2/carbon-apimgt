@@ -83,12 +83,12 @@
     </div>     
     <div class="content-section shadow-up">
     <div class="content-data">   
-    <div class="alert alert-error" id="addAPIError" style="display:none">
+    <div class="alert alert-danger" id="addAPIError" style="display:none">
         <span id="addErrorSpan"></span>
     </div>
 <%
     if(api != null && api.subs > 0){%>
-    <div class="alert alert-block" id="editAPIWarn" style="display:block">
+    <div class="alert alert-warning" id="editAPIWarn" style="display:block">
         <span id="editWarnSpan"><b>Warning!</b><br/>
         You are editing an API with active subscribers. Tier Availability changes will not be reflected on
         active subscriptions.<br/>
@@ -191,16 +191,16 @@
 <% if(!api){ %>    
     <div class="form-group">
         <label class="col-sm-4 control-label" for="name"><%=i18n.localize("name")%>:<span class="requiredAstrix">*</span></label>
-        <div class="col-sm-4">
+        <div class="col-sm-6">
             <input type="text" class="form-control required validRegistryName validateForwardSlashAtEnd validInput apiNameExists noSpace" id="name" name="name" autofocus="autofocus" value=""/>            
         </div>
         <a class="help_popup" help_data="name_help"><i class="fa fa-question-circle"></i></a>
-        <p id="name_help" class="hide"><%=i18n.localize("nameHelpMsg")%></p>        
+        <p id="name_help" class="hide"><%=i18n.localize("nameHelpMsg")%></p>
     </div>
 
     <div class="form-group">
         <label class="col-sm-4 control-label" for="context"><%=i18n.localize("context")%>:<span class="requiredAstrix">*</span></label>
-        <div class="col-sm-4">
+        <div class="col-sm-6">
             <input type="text" class="form-control required validContextTemplate validateForwardSlashAtEnd validInput contextExists noSpace validTemplate" id="context" name="context" onchange="getContextValue()"  onkeyup="updateContextPattern()"  />            
         </div>
         <a class="help_popup" help_data="context_help"><i class="fa fa-question-circle"></i></a>
@@ -223,7 +223,8 @@
 
     <div class="form-group">
         <label class="col-sm-4  control-label" for="visibility"><%=i18n.localize("visibility")%>:</label>
-        <select class="select required col-sm-6" id="visibility" name="visibility">
+        <div class="col-sm-6">
+        <select class="select required form-control" id="visibility" name="visibility">
     <% mod = jagg.module("api");
      result = mod.isMultipleTenantsAvailable();
          var isMultipleTenantsAvailable = result.status;
@@ -246,7 +247,8 @@
                          <option value="restricted"><%=i18n.localize("restricted")%></option>
                 <% } %> 
             <%}%>
-        </select>                
+        </select>
+        </div>
         <a class="help_popup" help_data="role_help"><i class="fa fa-question-circle"></i></a>
         <p id="role_help" class="hide"><%=i18n.localize("roleHelpMsg")%></p>
     </div>
@@ -313,8 +315,8 @@
                         <a class="help_popup" help_data="tag_help" data-trigger="hover"><i class="fa fa-question-circle"></i></a>
                         <p id="tag_help" class="hide"><%=i18n.localize("tagsHelpMsg")%></p>
             <p class="help-block"><%=i18n.localize("tagsHelpLabel")%></p>
-                        <label class="tags-error pull-left"></label>
-                        <label class="add-tags-error pull-left"></label>
+                        <label class="tags-error error pull-left"></label>
+                        <label class="add-tags-error error pull-left"></label>
                     </div>
                 </div>      
   </div><!-- left -->

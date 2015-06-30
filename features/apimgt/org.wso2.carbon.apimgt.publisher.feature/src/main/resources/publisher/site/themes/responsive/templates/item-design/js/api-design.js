@@ -99,6 +99,13 @@ function APIDesigner(){
         });
     });
 
+    $('a.help_popup i').popover({
+        html : true,
+        content: function() {
+            return $('#'+$(this).attr('help_data')).html();
+        }
+    });
+
     $( "#api_designer" ).delegate( ".resource_expand", "click", this, function( event ) {
         if(this.resource_created == undefined){
             event.data.render_resource($(this).parent().next().find('.resource_body'));
