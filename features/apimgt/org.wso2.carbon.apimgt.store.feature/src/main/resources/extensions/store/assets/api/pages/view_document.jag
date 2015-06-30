@@ -26,12 +26,29 @@ require('/modules/store.js').exec(function (ctx) {
 	var uriMatcher = new URIMatcher(ctx.request.getRequestURI());
 	var options = uriMatcher.match('/{context}/assets/{type}/{pageName}');
 	var type = options.type;
-	var am = asset.createUserAssetManager(ctx.session, type);
-	var page = ui.buildPage(ctx.session, ctx.request);
-	var output = am.renderBasic(page)._custom();
+	var am;
+	var request = ctx.request;
 	var server = require('store').server;
 	var user = server.current(ctx.session);
-	var apistore = require('apistore').apistore.instance(user.username);
+	var username='_wso2.am.anon_';
+	if (user) {
+		am = asset.createUserAssetManager(ctx.session, type);
+	} else {
+		am = asset.createAnonAssetManager(ctx.session, type, tenantId);
+	}
+	var page = ui.buildPage(ctx.session, ctx.request);
+	var output = am.renderBasic(page)._custom();
+	var apistore = require('apistore').apistore.instance(username);
+
+	var apiName = request.getParameter("name");
+	var version = request.getParameter("version");
+	var provider = request.getParameter("provider");
+	var docName = request.getParameter("docName");
+
+	var result = apistore.getInlineContent(provider, apiName, version, docName);
+	var doc = result.doc;
+	output.doc = doc;
+
 	caramel.render(output);
 }, request, response, session);
 %>

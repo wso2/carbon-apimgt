@@ -633,6 +633,34 @@ function getLocation(href) {
         }
     };
 
+    StoreAPIProxy.prototype.getInlineContent = function (provider, name, version, docName) {
+        var document = {}, result;
+        try {
+            var apiIdentifier = new APIIdentifier(provider, name, version);
+            result = this.impl.getDocumentationContent(apiIdentifier, docName);
+            document.docName = docName;
+            if (result != null && result != '') {
+                document.content = result;
+                document.contentAvailable = true;
+            } else {
+                document.contentAvailable = false;
+            }
+            if (log.isDebugEnabled()) {
+                log.debug("getInlineContent for : " + docName);
+            }
+
+            return {
+                error: false,
+                doc: document
+            };
+        } catch (e) {
+            log.error(e.message);
+            return {
+                error: e,
+                doc: null
+            };
+        }
+    };
 
 })(apistore);
 

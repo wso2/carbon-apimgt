@@ -23,22 +23,21 @@ $(function () {
     apiName = store.publisher.apiIdentifier.name;
     version = store.publisher.apiIdentifier.version;
     provider = store.publisher.apiIdentifier.provider;
-
 });
 
 function downloadDocument(filePath, tenantDomain) {
-    var url = caramel.context + '/apis/document/download?tenant='+tenantDomain+'&resourceUrl='+filePath;
+    var url = caramel.context + '/assets/api/download?tenant=' + tenantDomain + '&resourceUrl=' + filePath;
     window.open(url, '_blank');
 }
 
 function viewDocument(docName, tenantDomain) {
     var urlPrefix;
-    if(tenantDomain!=null) {
-        urlPrefix="&tenant="+tenantDomain;
-    } else{
-        urlPrefix='';
+    if (tenantDomain != null) {
+        urlPrefix = "&tenant=" + tenantDomain;
+    } else {
+        urlPrefix = '';
     }
-    var url = caramel.context + '/apis/document/view?docName='+docName+'&name='+apiName+'&version='
-              +version+'&provider='+provider+urlPrefix;
+    var url = caramel.context + '/assets/api/view_document?docName=' + docName + '&name=' + apiName + '&version='
+              + version + '&provider=' + provider + urlPrefix;
     window.open(url, '_blank');
 }
