@@ -20,7 +20,7 @@ var resources = function (page, meta) {
     var log = new Log();
     return {
         js: ['libs/jquery.form.min.js', 'create_application.js', 'bootstrap-dialog.min.js',
-            'bootstrap-editable.js', 'bootstrap-multiselect.js'],
+            'bootstrap-editable.js', 'bootstrap-multiselect.js','handlebars.js'],
         css: ['bootstrap/bootstrap-editable.css', 'bootstrap-dialog.min.css',
             'bootstrap/bootstrap-tagsinput.css', 'bootstrap-multiselect.css','apim_store_custom.css'],
         code: ['my_applications/my-applications-metadata.hbs']
