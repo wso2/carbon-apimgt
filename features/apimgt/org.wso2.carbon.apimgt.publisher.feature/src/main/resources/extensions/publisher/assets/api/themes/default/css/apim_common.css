@@ -3,7 +3,9 @@
 }
 #resource_url_pattern_refix {
     font-weight: bold;
+    float: left;
     font-size: 11px;
+    margin-left: 12px;
 }
 .multiselect-container{
     top:35px;
@@ -153,7 +155,7 @@ label {
     background-color: #1965b2;
 }
 .chk-lbe{width: 100px; float: left;}
-.margin-left-chk{margin-left: 79px;}
+.margin-left-chk{margin-left: 330px;}
 #add_resource{float: left;  margin-left: 15px;}
 .resource_url_pattern{height: 35px; border: 1px solid #cccccc; }
 
@@ -279,5 +281,13 @@ button.btn-api-del {
 
 .btn-users {
     background:url('../imgs/icons/ico-users.png') 0.8em 1em no-repeat;
+}
+
+.context-area {
+    display: table;
+    width: 100px;
+    height: 35px;
+    background: #b6bcbd;
+    padding-top: 11px;
 }
 
