@@ -2059,7 +2059,8 @@ public class APIStoreHostObject extends ScriptableObject {
                 }
 
                 if (api != null) {
-                    if(api.getStatus() == APIStatus.PUBLISHED || api.getStatus() == APIStatus.PROTOTYPED){
+                    if(api.getStatus() == APIStatus.PUBLISHED || api.getStatus() == APIStatus.PROTOTYPED ||
+                            api.getStatus() == APIStatus.DEPRECATED){
 
                         NativeObject row = new NativeObject();
                         apiIdentifier = api.getId();
