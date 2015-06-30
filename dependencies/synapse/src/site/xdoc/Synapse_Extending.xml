@@ -703,7 +703,7 @@
 
         </pre>
         <p>
-            Shown bellow is the custom xpath function returned by our xpath function extension. Note
+            Shown below is the custom xpath function returned by our xpath function extension. Note
             that this should implement org.jaxen.Function to resolve xpath .
         </p>
         <pre xml:space="preserve">
