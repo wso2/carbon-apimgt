@@ -2059,114 +2059,119 @@ public class APIStoreHostObject extends ScriptableObject {
                 }
 
                 if (api != null) {
-                    NativeObject row = new NativeObject();
-                    apiIdentifier = api.getId();
-                    row.put("name", row, apiIdentifier.getApiName());
-                    row.put("provider", row, APIUtil.replaceEmailDomainBack(apiIdentifier.getProviderName()));
-                    row.put("version", row, apiIdentifier.getVersion());
-                    row.put("description", row, api.getDescription());
-                    row.put("rates", row, api.getRating());
-                    row.put("endpoint", row, api.getUrl());
-                    row.put("wsdl", row, api.getWsdlUrl());
-                    row.put("wadl", row, api.getWadlUrl());
-                    DateFormat dateFormat = new SimpleDateFormat("dd/MMM/yyyy HH:mm:ss a z");
-                    String dateFormatted = dateFormat.format(api.getLastUpdated());
-                    row.put("updatedDate", row, dateFormatted);
-                    row.put("context", row, api.getContext());
-                    row.put("status", row, api.getStatus().getStatus());
+                    if(api.getStatus() == APIStatus.PUBLISHED || api.getStatus() == APIStatus.PROTOTYPED){
 
-                    String user = getUsernameFromObject(thisObj);
-                    if (user != null) {
-                        int userRate = apiConsumer.getUserRating(apiIdentifier, user);
-                        row.put("userRate", row, userRate);
-                    }
-                    row.put("serverURL", row, getEnvironmentsOfAPI(api).toJSONString());
-                    NativeArray tierArr = new NativeArray(0);
-                    Set<Tier> tierSet = api.getAvailableTiers();
-                    if (tierSet != null) {
-                        Iterator it = tierSet.iterator();
-                        int j = 0;
+                        NativeObject row = new NativeObject();
+                        apiIdentifier = api.getId();
+                        row.put("name", row, apiIdentifier.getApiName());
+                        row.put("provider", row, APIUtil.replaceEmailDomainBack(apiIdentifier.getProviderName()));
+                        row.put("version", row, apiIdentifier.getVersion());
+                        row.put("description", row, api.getDescription());
+                        row.put("rates", row, api.getRating());
+                        row.put("endpoint", row, api.getUrl());
+                        row.put("wsdl", row, api.getWsdlUrl());
+                        row.put("wadl", row, api.getWadlUrl());
+                        DateFormat dateFormat = new SimpleDateFormat("dd/MMM/yyyy HH:mm:ss a z");
+                        String dateFormatted = dateFormat.format(api.getLastUpdated());
+                        row.put("updatedDate", row, dateFormatted);
+                        row.put("context", row, api.getContext());
+                        row.put("status", row, api.getStatus().getStatus());
 
-                        while (it.hasNext()) {
-                            NativeObject tierObj = new NativeObject();
-                            Object tierObject = it.next();
-                            Tier tier = (Tier) tierObject;
-                            tierObj.put("tierName", tierObj, tier.getName());
-                            tierObj.put("tierDisplayName", tierObj, tier.getDisplayName());
-                            tierObj.put("tierDescription", tierObj,
-                                    tier.getDescription() != null ? tier.getDescription() : "");
-                            if (tier.getTierAttributes() != null) {
-                                Map<String, Object> attributes;
-                                attributes = tier.getTierAttributes();
-                                String attributesList = "";
-                                for (Map.Entry<String, Object> attribute : attributes.entrySet()) {
-                                    attributesList += attribute.getKey() + "::" + attribute.getValue() + ",";
+                        String user = getUsernameFromObject(thisObj);
+                        if (user != null) {
+                            int userRate = apiConsumer.getUserRating(apiIdentifier, user);
+                            row.put("userRate", row, userRate);
+                        }
+                        row.put("serverURL", row, getEnvironmentsOfAPI(api).toJSONString());
+                        NativeArray tierArr = new NativeArray(0);
+                        Set<Tier> tierSet = api.getAvailableTiers();
+                        if (tierSet != null) {
+                            Iterator it = tierSet.iterator();
+                            int j = 0;
 
+                            while (it.hasNext()) {
+                                NativeObject tierObj = new NativeObject();
+                                Object tierObject = it.next();
+                                Tier tier = (Tier) tierObject;
+                                tierObj.put("tierName", tierObj, tier.getName());
+                                tierObj.put("tierDisplayName", tierObj, tier.getDisplayName());
+                                tierObj.put("tierDescription", tierObj,
+                                        tier.getDescription() != null ? tier.getDescription() : "");
+                                if (tier.getTierAttributes() != null) {
+                                    Map<String, Object> attributes;
+                                    attributes = tier.getTierAttributes();
+                                    String attributesList = "";
+                                    for (Map.Entry<String, Object> attribute : attributes.entrySet()) {
+                                        attributesList += attribute.getKey() + "::" + attribute.getValue() + ",";
+
+                                    }
+                                    tierObj.put("tierAttributes", tierObj, attributesList);
                                 }
-                                tierObj.put("tierAttributes", tierObj, attributesList);
-                            }
-                            tierArr.put(j, tierArr, tierObj);
-                            j++;
+                                tierArr.put(j, tierArr, tierObj);
+                                j++;
 
+                            }
                         }
-                    }
-                    row.put("tiers", row, tierArr);
-                    row.put("subscribed", row, isSubscribed);
-                    if (api.getThumbnailUrl() == null) {
-                        row.put("thumbnailurl", row, "images/api-default.png");
+                        row.put("tiers", row, tierArr);
+                        row.put("subscribed", row, isSubscribed);
+                        if (api.getThumbnailUrl() == null) {
+                            row.put("thumbnailurl", row, "images/api-default.png");
+                        } else {
+                            row.put("thumbnailurl", row, APIUtil.prependWebContextRoot(api.getThumbnailUrl()));
+                        }
+                        row.put("bizOwner", row, api.getBusinessOwner());
+                        row.put("bizOwnerMail", row, api.getBusinessOwnerEmail());
+                        row.put("techOwner", row, api.getTechnicalOwner());
+                        row.put("techOwnerMail", row, api.getTechnicalOwnerEmail());
+                        row.put("visibility", row, api.getVisibility());
+                        row.put("visibleRoles", row, api.getVisibleRoles());
+
+                        Set<URITemplate> uriTemplates = api.getUriTemplates();
+                        List<NativeArray> uriTemplatesArr = new ArrayList<NativeArray>();
+                        if (uriTemplates.size() != 0) {
+                            NativeArray uriTempArr = new NativeArray(uriTemplates.size());
+                            Iterator i = uriTemplates.iterator();
+
+                            while (i.hasNext()) {
+                                List<String> utArr = new ArrayList<String>();
+                                URITemplate ut = (URITemplate) i.next();
+                                utArr.add(ut.getUriTemplate());
+                                utArr.add(ut.getMethodsAsString().replaceAll("\\s", ","));
+                                utArr.add(ut.getAuthTypeAsString().replaceAll("\\s", ","));
+                                utArr.add(ut.getThrottlingTiersAsString().replaceAll("\\s", ","));
+                                NativeArray utNArr = new NativeArray(utArr.size());
+                                for (int p = 0; p < utArr.size(); p++) {
+                                    utNArr.put(p, utNArr, utArr.get(p));
+                                }
+                                uriTemplatesArr.add(utNArr);
+                            }
+
+                            for (int c = 0; c < uriTemplatesArr.size(); c++) {
+                                uriTempArr.put(c, uriTempArr, uriTemplatesArr.get(c));
+                            }
+
+                            myn.put(1, myn, uriTempArr);
+                        }
+                        row.put("uriTemplates", row, uriTemplatesArr.toString());
+                        String apiOwner = api.getApiOwner();
+                        if (apiOwner == null) {
+                            apiOwner = APIUtil.replaceEmailDomainBack(apiIdentifier.getProviderName());
+                        }
+                        row.put("apiOwner", row, apiOwner);
+                        row.put("isAdvertiseOnly", row, api.isAdvertiseOnly());
+                        row.put("redirectURL", row, api.getRedirectURL());
+
+                        row.put("subscriptionAvailability", row, api.getSubscriptionAvailability());
+                        row.put("subscriptionAvailableTenants", row, api.getSubscriptionAvailableTenants());
+                        row.put("isDefaultVersion",row,api.isDefaultVersion());
+                        row.put("transports",row,api.getTransports());
+
+                        myn.put(0, myn, row);
+
                     } else {
-                        row.put("thumbnailurl", row, APIUtil.prependWebContextRoot(api.getThumbnailUrl()));
+                        handleException("No published or prototyped API available with the name"+apiName);
                     }
-                    row.put("bizOwner", row, api.getBusinessOwner());
-                    row.put("bizOwnerMail", row, api.getBusinessOwnerEmail());
-                    row.put("techOwner", row, api.getTechnicalOwner());
-                    row.put("techOwnerMail", row, api.getTechnicalOwnerEmail());
-                    row.put("visibility", row, api.getVisibility());
-                    row.put("visibleRoles", row, api.getVisibleRoles());
-
-                    Set<URITemplate> uriTemplates = api.getUriTemplates();
-                    List<NativeArray> uriTemplatesArr = new ArrayList<NativeArray>();
-                    if (uriTemplates.size() != 0) {
-                        NativeArray uriTempArr = new NativeArray(uriTemplates.size());
-                        Iterator i = uriTemplates.iterator();
-
-                        while (i.hasNext()) {
-                            List<String> utArr = new ArrayList<String>();
-                            URITemplate ut = (URITemplate) i.next();
-                            utArr.add(ut.getUriTemplate());
-                            utArr.add(ut.getMethodsAsString().replaceAll("\\s", ","));
-                            utArr.add(ut.getAuthTypeAsString().replaceAll("\\s", ","));
-                            utArr.add(ut.getThrottlingTiersAsString().replaceAll("\\s", ","));
-                            NativeArray utNArr = new NativeArray(utArr.size());
-                            for (int p = 0; p < utArr.size(); p++) {
-                                utNArr.put(p, utNArr, utArr.get(p));
-                            }
-                            uriTemplatesArr.add(utNArr);
-                        }
-
-                        for (int c = 0; c < uriTemplatesArr.size(); c++) {
-                            uriTempArr.put(c, uriTempArr, uriTemplatesArr.get(c));
-                        }
-
-                        myn.put(1, myn, uriTempArr);
-                    }
-                    row.put("uriTemplates", row, uriTemplatesArr.toString());
-                    String apiOwner = api.getApiOwner();
-                    if (apiOwner == null) {
-                        apiOwner = APIUtil.replaceEmailDomainBack(apiIdentifier.getProviderName());
-                    }
-                    row.put("apiOwner", row, apiOwner);
-                    row.put("isAdvertiseOnly", row, api.isAdvertiseOnly());
-                    row.put("redirectURL", row, api.getRedirectURL());
-
-                    row.put("subscriptionAvailability", row, api.getSubscriptionAvailability());
-                    row.put("subscriptionAvailableTenants", row, api.getSubscriptionAvailableTenants());
-                    row.put("isDefaultVersion",row,api.isDefaultVersion());
-                    row.put("transports",row,api.getTransports());
-
-                    myn.put(0, myn, row);
                 }
-
 
             } catch (APIManagementException e) {
                 handleException("Error from Registry API while getting get API Information on " + apiName, e);
