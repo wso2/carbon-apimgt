@@ -259,8 +259,6 @@ button.btn-api-del {
     float: left;
     width: 100%;
 }
-.modal-body {
-    float: left;}
 .btn-cog {
     background:url('../imgs/icons/ico-cog.png') 0.8em 1em no-repeat;
 }
