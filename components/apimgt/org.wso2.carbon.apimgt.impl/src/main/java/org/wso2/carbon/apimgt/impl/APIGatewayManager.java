@@ -16,9 +16,7 @@
 
 package org.wso2.carbon.apimgt.impl;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import javax.xml.namespace.QName;
 
@@ -72,8 +70,7 @@ public class APIGatewayManager {
 	 * @param tenantDomain
 	 *            - Tenant Domain of the publisher
 	 */
-    public List<String> publishToGateway(API api, APITemplateBuilder builder, String tenantDomain) 
-                                                                                       throws APIManagementException {
+    public List<String> publishToGateway(API api, APITemplateBuilder builder, String tenantDomain) {
         List<String> failedEnvironmentsList = new ArrayList<String>(0);
         if (api.getEnvironments() == null) {
             return failedEnvironmentsList;
@@ -183,11 +180,11 @@ public class APIGatewayManager {
 				}
 			}
             } catch (AxisFault axisFault) {
-                failedEnvironmentsList.add(environmentName);
+                failedEnvironmentsList.add(environmentName + ":" + axisFault.getMessage());
                 log.error("Error occurred when publish to gateway " + environmentName, axisFault);
-                throw new APIManagementException(axisFault.getMessage(), axisFault);
             } catch (APIManagementException ex) {
                 log.error("Error occurred deploying sequences on " + environmentName, ex);
+                failedEnvironmentsList.add(environmentName + ":" + ex.getMessage());
             }
         }
         return failedEnvironmentsList;
@@ -227,9 +224,10 @@ public class APIGatewayManager {
             }
                 } catch (AxisFault axisFault) {
                     log.error("Error occurred when removing from gateway " + environmentName, axisFault);
-                    failedEnvironmentsList.add(environmentName);
+                    failedEnvironmentsList.add(environmentName + ":" + axisFault.getMessage());
                 } catch (APIManagementException ex) {
                     log.error("Error occurred undeploy sequences on " + environmentName, ex);
+                    failedEnvironmentsList.add(environmentName + ":" + ex.getMessage());
                 }
             }
 
@@ -254,7 +252,7 @@ public class APIGatewayManager {
             }
                 } catch (AxisFault axisFault) {
                     log.error("Error occurred when removing default api from gateway " + environmentName, axisFault);
-                    failedEnvironmentsList.add(environmentName);
+                    failedEnvironmentsList.add(environmentName + ":" + axisFault.getMessage());
                 }
             }
         }
@@ -283,7 +281,7 @@ public class APIGatewayManager {
                 }
             } catch (AxisFault axisFault) {
                 log.error("Error occurred when check api is published on gatway" + environment.getName(), axisFault);
-                failedEnvironmentsList.add(environment.getName());
+                failedEnvironmentsList.add(environment.getName() + ":" + axisFault.getMessage());
             }
         }
         return false;
