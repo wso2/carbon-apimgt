@@ -270,7 +270,7 @@
             <a  href="#wsdlUpload" role="button" class="btn pull-right" data-toggle="modal" ><i class="icon-download-alt" ></i> {{t "Import"}} </a>
             <legend>{{t "API Definition "}}</legend>
             <div class="control-group api_wsdl">
-                <label class="control-label" for="wsdl">{{t "WSDL"}}:</label>
+                <label class="control-label custom-form-label col-lg-2" for="wsdl">{{t "WSDL"}}:</label>
                 <div class="controls">
                 <div class="input-append">
                 <input type="text" class="input-xlarge validInput" id="wsdl" name="wsdl"  value="{{apiMetaData.wsdl}}" />
@@ -287,7 +287,7 @@
 				<a  href="#wsdlUpload" role="button" class="btn pull-right" data-toggle="modal" ><i class="icon-download-alt" ></i> {{t "Import"}} </a>
 				<legend>{{t "API Definition "}}</legend>
 			<div class="control-group api_wsdl">
-				<label class="control-label" for="wsdl">{{t "WSDL"}}:</label>
+				<label class="control-label custom-form-label col-lg-2" for="wsdl">{{t "WSDL"}}:</label>
 				<div class="controls">
 					<div class="input-append">
 						<input type="text" class="input-xlarge validInput" id="wsdl" name="wsdl"  value="{{api.wsdl}}" />
@@ -305,13 +305,13 @@
 						<legend>API Definition</legend>
 						<div class="resource_create">
 							<div class="control-group">
-								<label class="control-label" for="inputPassword">URL Pattern</label>
+								<label class="control-label custom-form-label col-lg-2" for="inputPassword">URL Pattern</label>
 								<div class="controls">
 									<div class="input-prepend">
 										{{#if api}}
 											<span class="add-on" id="resource_url_pattern_refix">{{api.context}}</span>
 										{{else}}
-											<span class="add-on" id="resource_url_pattern_refix">/{context}/{version}/</span>
+											<span class="context-area add-on" id="resource_url_pattern_refix">/{context}/{version}/</span>
 										{{/if}}
 										<input style="width:500px" id="resource_url_pattern" type="text" placeholder="Url Pattern Ex: path/to/resource" class="resource_url_pattern"/>
 									</div>
@@ -331,13 +331,13 @@
 						<legend>API Definition</legend>
 						<div class="resource_create">
 							<div class="control-group">
-								<label class="control-label" for="inputPassword">URL Pattern</label>
+								<label class="control-label custom-form-label col-lg-2" for="inputPassword">URL Pattern</label>
 								<div class="controls">
 									<div class="input-prepend">
 										{{#if api}}
 											<span class="add-on" id="resource_url_pattern_refix">{{api.context}}</span>
 										{{else}}
-											<span class="add-on" id="resource_url_pattern_refix">/{context}/{version}/</span>
+											<span class="context-area add-on" id="resource_url_pattern_refix">/{context}/{version}/</span>
 										{{/if}}
 										<input style="width:500px" id="resource_url_pattern" type="text" placeholder="Url Pattern Ex: path/to/resource" class="resource_url_pattern"/>
 									</div>
