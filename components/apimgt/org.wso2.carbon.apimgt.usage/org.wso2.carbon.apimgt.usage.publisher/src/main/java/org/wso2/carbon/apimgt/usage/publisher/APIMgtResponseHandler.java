@@ -27,6 +27,7 @@ import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.mediators.AbstractMediator;
 import org.apache.synapse.rest.RESTConstants;
 import org.apache.synapse.transport.passthru.util.RelayUtils;
+import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.usage.publisher.dto.ResponsePublisherDTO;
 import org.wso2.carbon.apimgt.usage.publisher.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.usage.publisher.internal.UsageComponent;
@@ -110,11 +111,11 @@ public class APIMgtResponseHandler extends AbstractMediator {
             boolean cacheHit = false;
 
             long startTime = Long.parseLong((String) (mc.getProperty(
-                    APIMgtUsagePublisherConstants.REQUEST_START_TIME)));
+                    APIMgtGatewayConstants.REQUEST_START_TIME)));
             long backendStartTime = Long.parseLong((String) (mc.getProperty(
-                    APIMgtUsagePublisherConstants.BACKEND_REQUEST_START_TIME)));
+                    APIMgtGatewayConstants.BACKEND_REQUEST_START_TIME)));
             long backendEndTime = Long.parseLong((String) (mc.getProperty(
-                    APIMgtUsagePublisherConstants.BACKEND_REQUEST_END_TIME)));
+                    APIMgtGatewayConstants.BACKEND_REQUEST_END_TIME)));
             //Check the config property is set to true to build the response message in-order
             //to get the response message size
             boolean isBuildMsg = UsageComponent.getAmConfigService().getAPIAnalyticsConfiguration()
@@ -170,34 +171,34 @@ public class APIMgtResponseHandler extends AbstractMediator {
 
             ResponsePublisherDTO responsePublisherDTO = new ResponsePublisherDTO();
             responsePublisherDTO.setConsumerKey((String) mc.getProperty(
-                    APIMgtUsagePublisherConstants.CONSUMER_KEY));
+                    APIMgtGatewayConstants.CONSUMER_KEY));
             responsePublisherDTO.setUsername((String) mc.getProperty(
-                    APIMgtUsagePublisherConstants.USER_ID));
+                    APIMgtGatewayConstants.USER_ID));
             responsePublisherDTO.setTenantDomain(MultitenantUtils.getTenantDomain(
                     responsePublisherDTO.getUsername()));
             responsePublisherDTO.setContext((String) mc.getProperty(
-                    APIMgtUsagePublisherConstants.CONTEXT));
+                    APIMgtGatewayConstants.CONTEXT));
             responsePublisherDTO.setApi_version((String) mc.getProperty(
-                    APIMgtUsagePublisherConstants.API_VERSION));
+                    APIMgtGatewayConstants.API_VERSION));
             responsePublisherDTO.setApi((String) mc.getProperty(
-                    APIMgtUsagePublisherConstants.API));
+                    APIMgtGatewayConstants.API));
             responsePublisherDTO.setVersion((String) mc.getProperty(
-                    APIMgtUsagePublisherConstants.VERSION));
+                    APIMgtGatewayConstants.VERSION));
             responsePublisherDTO.setResourcePath((String) mc.getProperty(
-                    APIMgtUsagePublisherConstants.RESOURCE));
+                    APIMgtGatewayConstants.RESOURCE));
             responsePublisherDTO.setMethod((String) mc.getProperty(
-                    APIMgtUsagePublisherConstants.HTTP_METHOD));
+                    APIMgtGatewayConstants.HTTP_METHOD));
             responsePublisherDTO.setResponseTime(responseTime);
             responsePublisherDTO.setServiceTime(serviceTime);
             responsePublisherDTO.setBackendTime(backendTime);
             responsePublisherDTO.setHostName((String) mc.getProperty(
-                    APIMgtUsagePublisherConstants.HOST_NAME));
+                    APIMgtGatewayConstants.HOST_NAME));
             responsePublisherDTO.setApiPublisher((String) mc.getProperty(
-                    APIMgtUsagePublisherConstants.API_PUBLISHER));
+                    APIMgtGatewayConstants.API_PUBLISHER));
             responsePublisherDTO.setApplicationName((String) mc.getProperty
-                    (APIMgtUsagePublisherConstants.APPLICATION_NAME));
+                    (APIMgtGatewayConstants.APPLICATION_NAME));
             responsePublisherDTO.setApplicationId((String) mc.getProperty(
-                    APIMgtUsagePublisherConstants.APPLICATION_ID));
+                    APIMgtGatewayConstants.APPLICATION_ID));
             responsePublisherDTO.setCacheHit(cacheHit);
             responsePublisherDTO.setResponseSize(responseSize);
             responsePublisherDTO.setEventTime(endTime);//This is the timestamp response event published

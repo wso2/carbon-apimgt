@@ -693,6 +693,9 @@ public final class APIConstants {
     public static final String API_CUSTOM_SEQUENCE_TYPE_OUT = "out";
     public static final String API_CUSTOM_SEQUENCE_TYPE_FAULT = "fault";
 
+    public static final String API_MANAGER_HOSTNAME = "HostName";
+    public static final String API_MANAGER_HOSTNAME_UNKNOWN = "UNKNOWN_HOST";
+
     public static final String VERSION_PLACEHOLDER = "{version}";
 
     public static enum SupportedHTTPVerbs {

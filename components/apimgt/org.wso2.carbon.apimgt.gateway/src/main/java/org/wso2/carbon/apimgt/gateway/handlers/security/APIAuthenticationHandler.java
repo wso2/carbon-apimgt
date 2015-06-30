@@ -31,17 +31,21 @@ import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.rest.AbstractHandler;
 import org.apache.synapse.rest.RESTConstants;
 import org.apache.synapse.transport.passthru.util.RelayUtils;
+import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.Utils;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.gateway.handlers.security.oauth.OAuthAuthenticator;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
 import javax.xml.stream.XMLStreamException;
 import java.io.IOException;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Authentication handler for REST APIs exposed in the API gateway. This handler will
@@ -123,6 +127,7 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
                    log.debug("Authenticated API, authentication response relieved: " + messageDetails +
                             ", elapsedTimeInMilliseconds=" + difference / 1000000);
                 }
+                setAPIParametersToMessageContext(messageContext);
                 return true;
             }
         } catch (APISecurityException e) {
@@ -262,4 +267,90 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
         return logMessage;
     }
 
+    private void setAPIParametersToMessageContext(MessageContext messageContext) {
+
+        AuthenticationContext authContext = APISecurityUtils.getAuthenticationContext(messageContext);
+        org.apache.axis2.context.MessageContext axis2MsgContext = ((Axis2MessageContext) messageContext).getAxis2MessageContext();
+
+        String consumerKey = "";
+        String username = "";
+        String applicationName = "";
+        String applicationId = "";
+        if (authContext != null) {
+            consumerKey = authContext.getConsumerKey();
+            username = authContext.getUsername();
+            applicationName = authContext.getApplicationName();
+            applicationId = authContext.getApplicationId();
+        }
+
+        String context = (String) messageContext.getProperty(RESTConstants.REST_API_CONTEXT);
+        String api_version = (String) messageContext.getProperty(RESTConstants.SYNAPSE_REST_API);
+
+        int index = api_version.indexOf("--");
+
+        if (index != -1) {
+            api_version = api_version.substring(index + 2);
+        }
+
+        String api = api_version.split(":")[0];
+        String version = (String) messageContext.getProperty(RESTConstants.SYNAPSE_REST_API_VERSION);
+
+        String fullRequestPath = (String) messageContext.getProperty(RESTConstants.REST_FULL_REQUEST_PATH);
+        int tenantDomainIndex = fullRequestPath.indexOf("/t/");
+        String apiPublisher = (String) messageContext.getProperty(APIMgtGatewayConstants.API_PUBLISHER);
+        String tenantDomain = MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
+        if (tenantDomainIndex != -1) {
+            String temp = fullRequestPath.substring(tenantDomainIndex + 3, fullRequestPath.length());
+            tenantDomain = temp.substring(0, temp.indexOf("/"));
+        }
+
+        if (apiPublisher == null) {
+            apiPublisher = getAPIProviderFromRESTAPI(api_version);
+        }
+
+        if (apiPublisher != null && !apiPublisher.endsWith(tenantDomain)) {
+            apiPublisher = apiPublisher + "@" + tenantDomain;
+        }
+
+        String resource = extractResource(messageContext);
+        String method = (String) (axis2MsgContext.getProperty(
+                Constants.Configuration.HTTP_METHOD));
+        String hostName = APIUtil.getHostAddress();
+
+        messageContext.setProperty(APIMgtGatewayConstants.CONSUMER_KEY, consumerKey);
+        messageContext.setProperty(APIMgtGatewayConstants.USER_ID, username);
+        messageContext.setProperty(APIMgtGatewayConstants.CONTEXT, context);
+        messageContext.setProperty(APIMgtGatewayConstants.API_VERSION, api_version);
+        messageContext.setProperty(APIMgtGatewayConstants.API, api);
+        messageContext.setProperty(APIMgtGatewayConstants.VERSION, version);
+        messageContext.setProperty(APIMgtGatewayConstants.RESOURCE, resource);
+        messageContext.setProperty(APIMgtGatewayConstants.HTTP_METHOD, method);
+        messageContext.setProperty(APIMgtGatewayConstants.HOST_NAME, hostName);
+        messageContext.setProperty(APIMgtGatewayConstants.API_PUBLISHER, apiPublisher);
+        messageContext.setProperty(APIMgtGatewayConstants.APPLICATION_NAME, applicationName);
+        messageContext.setProperty(APIMgtGatewayConstants.APPLICATION_ID, applicationId);
+    }
+
+    private String extractResource(MessageContext mc) {
+        String resource = "/";
+        Pattern pattern = Pattern.compile("^/.+?/.+?([/?].+)$");
+        Matcher matcher = pattern.matcher((String) mc.getProperty(RESTConstants.REST_FULL_REQUEST_PATH));
+        if (matcher.find()) {
+            resource = matcher.group(1);
+        }
+        return resource;
+    }
+
+    private String getAPIProviderFromRESTAPI(String api_version) {
+        int index = api_version.indexOf("--");
+        if (index != -1) {
+            String apiProvider = api_version.substring(0, index);
+            if (apiProvider.contains(APIConstants.EMAIL_DOMAIN_SEPARATOR_REPLACEMENT)) {
+                apiProvider = apiProvider.replace(APIConstants.EMAIL_DOMAIN_SEPARATOR_REPLACEMENT,
+                        APIConstants.EMAIL_DOMAIN_SEPARATOR);
+            }
+            return apiProvider;
+        }
+        return null;
+    }
 }
