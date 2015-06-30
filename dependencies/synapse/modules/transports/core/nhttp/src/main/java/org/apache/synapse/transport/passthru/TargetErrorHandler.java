@@ -21,11 +21,14 @@ import org.apache.axis2.AxisFault;
 import org.apache.axis2.context.MessageContext;
 import org.apache.axis2.description.OutOnlyAxisOperation;
 import org.apache.axis2.engine.MessageReceiver;
+import org.apache.axis2.transport.base.MetricsCollector;
 import org.apache.axis2.util.MessageContextBuilder;
 import org.apache.axis2.wsdl.WSDLConstants;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.synapse.transport.nhttp.NhttpConstants;
 import org.apache.synapse.transport.passthru.config.TargetConfiguration;
+import org.apache.synapse.transport.passthru.jmx.PassThroughTransportMetricsCollector;
 
 public class TargetErrorHandler {
     private Log log = LogFactory.getLog(TargetErrorHandler.class);
@@ -63,6 +66,8 @@ public class TargetErrorHandler {
 //        if (mc.getOperationContext().isComplete()) {
 //            return;
 //        } ? why we ignoring this..
+
+        updateFaultInfo(errorCode, mc, targetConfiguration.getMetrics());
 
         targetConfiguration.getWorkerPool().execute(new Runnable() {
             public void run() {
@@ -144,4 +149,25 @@ public class TargetErrorHandler {
         return errorCode + state.ordinal();
     }
 
+    private void updateFaultInfo(int errorCode, MessageContext mc, PassThroughTransportMetricsCollector metrics) {
+        if (mc.getAxisOperation() != null &&
+                mc.getAxisOperation().getMessageReceiver() != null) {
+            if (metrics != null) {
+                if (metrics.getLevel() == MetricsCollector.LEVEL_FULL) {
+                    if (errorCode == NhttpConstants.CONNECTION_TIMEOUT) {
+                        metrics.incrementTimeoutsReceiving(mc);
+                    } else {
+                        metrics.incrementFaultsSending(errorCode, mc);
+                    }
+                } else {
+                    if (errorCode == NhttpConstants.CONNECTION_TIMEOUT) {
+                        metrics.incrementTimeoutsReceiving();
+                    } else {
+                        metrics.incrementFaultsSending();
+                    }
+                }
+            }
+        }
+    }
 }
+
