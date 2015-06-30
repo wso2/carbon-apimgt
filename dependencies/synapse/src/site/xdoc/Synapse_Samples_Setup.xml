@@ -1005,7 +1005,7 @@ SocketConnectPort=9876</pre>
 </div>
 <p>
     Currently, there is only one secret repository and it is  <strong>FileBaseSecretRepository</strong>. It use
-    <strong>cipher-text.properties</strong> to keep secrets. A sample file is shown bellow.
+    <strong>cipher-text.properties</strong> to keep secrets. A sample file is shown below.
 
 </p>
 <div>
@@ -1114,7 +1114,7 @@ synapse.datasources.reportds.maxWait=10000</pre>
 <p>
     This is a simple tool for encrypting and decrypting simple texts such as passwords.
 
-    The arguments that are inputs to this tool with their meanings are shown bellow.
+    The arguments that are inputs to this tool with their meanings are shown below.
     <ul>
         <li><strong>keystore</strong> If keys are in a store , it's location</li>
         <li><strong>storepass</strong> Password for access keyStore</li>

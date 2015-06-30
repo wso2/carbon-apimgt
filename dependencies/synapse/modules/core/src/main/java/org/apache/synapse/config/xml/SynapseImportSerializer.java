@@ -29,7 +29,7 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.synapse.rest.API;
 
 /**
- * This will serialize the SynapseImport to the xml configuration as specified bellow
+ * This will serialize the SynapseImport to the xml configuration as specified below
  * <p/>
  * <pre>
  * &lt;import [xmlns="http://ws.apache.org/ns/synapse"] [name="string"] [package="string"]&gt;

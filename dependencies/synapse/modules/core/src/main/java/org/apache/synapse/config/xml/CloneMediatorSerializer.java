@@ -27,7 +27,7 @@ import org.apache.synapse.mediators.eip.Target;
 import java.util.Iterator;
 
 /**
- * This will serialize the CloneMediator to the xml configuration as specified bellow
+ * This will serialize the CloneMediator to the xml configuration as specified below
  *
  * <pre>
  *  &lt;clone [continueParent=(true | false)]&gt;
