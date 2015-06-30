@@ -47,7 +47,6 @@ $(document).ready(function(){
         $('.swagger').val(JSON.stringify(designer.api_doc));
 
         $('#'+thisID).buttonLoader('start');
-        console.log("hi")
 
         $(form).ajaxSubmit({
             success:function(responseText, statusText, xhr, $form) {
