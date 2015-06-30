@@ -107,11 +107,7 @@ asset.server = function(ctx) {
                         url: 'my_applications',
                         path: 'my_applications.jag',
                         secured: true
-                    },/** {
-            title: 'API Details'
-            url: 'details'
-            path: 'details.jag'
-            },*/    {
+                    }, {
                         title: 'Swagger',
                         url: 'swagger',
                         path: 'swagger.jag'
@@ -123,9 +119,8 @@ asset.server = function(ctx) {
                         secured: true
                     },{
                         title: 'View Document',
-                        url: 'document/view',
-                        path: 'view_document.jag',
-                        secured: true
+                        url: 'view_document',
+                        path: 'view_document.jag'
                     },{
                         title: 'Forum',
                         url: 'forum',
@@ -155,9 +150,6 @@ asset.renderer = function(ctx) {
     };
     return {
         details:function(page){
-            // log.info('Details page rendered!!!');
-
-            //=================== Getting subscription details ========================
 
             var carbonAPI = require('carbon');
 
