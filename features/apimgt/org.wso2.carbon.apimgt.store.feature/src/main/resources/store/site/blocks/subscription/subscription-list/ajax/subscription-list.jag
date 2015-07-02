@@ -104,7 +104,7 @@ include("/jagg/jagg.jag");
             }
         }
         print(obj);
-     }else if (action == "getSubscriptionByApplication") {
+    }else if (action == "getSubscriptionByApplication") {
 	var appname = request.getParameter("app");
         if (!user) {
             if(!ssoEnabled){
@@ -144,7 +144,58 @@ include("/jagg/jagg.jag");
             }
         }
         print(obj);
-     }else {
+    }else if (action == "getSubscriptionByAPI"){
+
+        var appname = request.getParameter("app");
+
+        if (!user) {
+            if(!ssoEnabled){
+        		print({
+        		    error:true,
+        		    message:msg.error.loginRequired(action)
+                    });
+        	}
+        	return;
+        }
+        username = user.username;
+        var log = new Log();
+        log.info(username);
+
+        if((request.getParameter('apiName')!=null) && (request.getParameter('apiVersion')!=null) &&
+                (request.getParameter('provider')!=null) ){
+
+            apiName = request.getParameter('apiName');
+            apiVersion = request.getParameter('apiVersion');
+            provider = request.getParameter('provider');
+
+        	var api = {};
+        	api.name = apiName;
+        	api.version = apiVersion;
+        	api.provider = provider;
+
+            mod = jagg.module("subscription");
+            result = mod.getAPISubscriptions(api, username);
+
+            if (result.error) {
+                obj = {
+                    error:result.error,
+                    message:msg.error.authError(action, username)
+                };
+            } else {
+                obj = {
+                    error:false,
+                    applications:result.subscriptions
+                }
+            }
+        }else{
+            obj = {
+                error:result.error,
+                message:msg.error.invalidInput(action, username)
+            };
+        }
+        print(obj);
+
+    }else {
         print({
             error:true,
             message:msg.error.invalidAction(action)
