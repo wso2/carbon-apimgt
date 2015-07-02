@@ -99,6 +99,7 @@ import org.wso2.carbon.registry.indexing.solr.SolrClient;
 import org.wso2.carbon.user.api.*;
 import org.wso2.carbon.user.core.UserCoreConstants;
 import org.wso2.carbon.user.core.UserRealm;
+import org.wso2.carbon.user.core.config.RealmConfigXMLProcessor;
 import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.user.mgt.UserMgtConstants;
 import org.wso2.carbon.utils.CarbonUtils;
@@ -3540,8 +3541,15 @@ public final class APIUtil {
                                                 String resourceUri, String httpVerb, String authLevel){
         return accessToken + ":" + apiContext + "/" + apiVersion + resourceUri + ":" + httpVerb + ":" + authLevel;
     }
-
-    private static String replaceSystemProperty(String text) {
+    
+    
+    
+    /**
+     * Resolves system properties and replaces in given in text 
+     * @param text
+     * @return System properties resolved text
+     */
+    public static String replaceSystemProperty(String text) {
         int indexOfStartingChars = -1;
         int indexOfClosingBrace;
 
@@ -3556,6 +3564,28 @@ public final class APIUtil {
             String sysProp = text.substring(indexOfStartingChars + 2,
                     indexOfClosingBrace);
             String propValue = System.getProperty(sysProp);
+            
+            if (propValue == null) {
+                if (sysProp.equals("carbon.context")) {
+                    propValue = ServiceReferenceHolder.getContextService().getServerConfigContext().getContextRoot();
+                } else if (sysProp.equals("admin.username") || sysProp.equals("admin.password")) {
+                    try {
+                        RealmConfiguration realmConfig =
+                                                         new RealmConfigXMLProcessor().buildRealmConfigurationFromFile();
+                        if (sysProp.equals("admin.username")) {
+                            propValue = realmConfig.getAdminUserName();
+                        } else {
+                            propValue = realmConfig.getAdminPassword();
+                        }
+                    } catch (UserStoreException e) {
+                        // Can't throw an exception because the server is
+                        // starting and can't be halted.
+                        log.error(e.getMessage());
+                        return null;
+                    }
+                }
+            }
+            //Derive original text value with resolved system property value
             if (propValue != null) {
                 text = text.substring(0, indexOfStartingChars) + propValue
                         + text.substring(indexOfClosingBrace + 1);

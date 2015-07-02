@@ -6,8 +6,8 @@
    <SignUpDomain>PRIMARY</SignUpDomain>   
    
    <!-- Tenant admin information. (for clustered setup credentials for AuthManager) -->
-   <AdminUserName>admin</AdminUserName>
-   <AdminPassword>admin</AdminPassword>
+   <AdminUserName>${admin.username}</AdminUserName>
+   <AdminPassword>${admin.password}</AdminPassword>
    
    <!-- List of roles for the tenant user -->
    <SignUpRoles>
