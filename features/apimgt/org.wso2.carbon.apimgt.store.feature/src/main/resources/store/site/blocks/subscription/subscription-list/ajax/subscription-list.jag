@@ -158,8 +158,6 @@ include("/jagg/jagg.jag");
         	return;
         }
         username = user.username;
-        var log = new Log();
-        log.info(username);
 
         if((request.getParameter('apiName')!=null) && (request.getParameter('apiVersion')!=null) &&
                 (request.getParameter('provider')!=null) ){
