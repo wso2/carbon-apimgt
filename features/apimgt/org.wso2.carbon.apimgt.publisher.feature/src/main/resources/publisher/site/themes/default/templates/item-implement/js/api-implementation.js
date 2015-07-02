@@ -120,8 +120,9 @@ $(document).ready(function(){
                          jagg.showLogin();
                      }
                  } else {
-                     jagg.message({content:responseText.message,type:"error"});
-                 }
+                              var message=responseText.message;
+                              showGatewayFailure(message);
+                         }
                  $('#'+thisID).buttonLoader('stop');
              }
             }, dataType: 'json'
@@ -160,9 +161,10 @@ $(document).ready(function(){
                                  } else {
                                      jagg.showLogin();
                                  }
-                             } else {
-                                 jagg.message({content:responseText.message,type:"error"});
-                             }
+                             }else {
+                              var message=responseText.message;
+                              showGatewayFailure(message);
+                         }
                         }
                     },
                     dataType: "json"
@@ -201,3 +203,39 @@ $('#prototyped_api').click(function(e){
 $('#go_to_manage').click(function(e){
     thisID = $(this).attr('id');
 });
+
+function showGatewayFailure(message) {
+                                   if(message.split("||")[1]=="warning"){
+                                     var environmentsFailed=JSON.parse(message.split("||")[0]);
+                                     var failedToPublishEnvironments=environmentsFailed.PUBLISHED;
+                                     var failedToUnpublishedEnvironments=environmentsFailed.UNPUBLISHED;
+                                     var divPublish="",divUnpublished="";
+                                     for(i= 0; i< failedToPublishEnvironments.split(",").length;i++){
+                                        var splitPublished = (failedToPublishEnvironments.split(",")[i]).split(":");
+                                        divPublish+=splitPublished[0]+"<br>"+splitPublished[1]+"<br>";
+                                         }
+                                     for(i= 0; i< failedToUnpublishedEnvironments.split(",").length;i++){
+                                        var splitUnPublished = (failedToUnpublishedEnvironments.split(",")[i]).split(":");
+
+                                        divUnpublished+=splitUnPublished[0]+"<br>"+splitUnPublished[1]+"<br>";
+                                         }
+                                       $( "#modal-published-content" ).empty();
+                                       $( "#modal-unpublished-content" ).empty();
+                                       $( "#modal-published-content" ).append(divPublish);
+                                       $( "#modal-unpublished-content" ).append(divUnpublished);
+                                       if(failedToPublishEnvironments==""){
+                                       $("#modal-published-header").hide();
+                                       $("#modal-published-content").hide();
+                                        }
+                                       if(failedToUnpublishedEnvironments==""){
+                                            $("#modal-unpublished-header").hide();
+                                            $("#modal-unpublished-content").hide();
+                                          }
+                                         $("#retryType").val("manage");
+                                         $("#environmentsRetry-modal").modal('show');
+                                   }
+                                   else{
+
+                                   jagg.message({content:responseText.message,type:"error"});
+                                       }    
+}

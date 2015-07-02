@@ -218,6 +218,7 @@ var log = new Log();
 
             result = mod.manageAPI(apiData);
             if (result.error==true) {
+
                 obj = {
                     error:true,
                     message:result.message,
