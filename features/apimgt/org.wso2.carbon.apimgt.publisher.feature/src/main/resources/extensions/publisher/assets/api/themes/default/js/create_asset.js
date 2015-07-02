@@ -1,4 +1,12 @@
-$(document).ready(function(){
+$(function(){
+    $("#form-asset-create").submit(function(e) {
+                e.preventDefault();
+     });
+
+    $("#go_to_implement").submit(function(e) {
+        e.preventDefault();
+    });
+
     var designer = new APIMangerAPI.APIDesigner();
     designer.set_partials('design');
     var swaggerUrl = caramel.context + "/assets/api/apis/swagger?action=swaggerDoc&provider="+store.publisher.api.provider+"&name="+store.publisher.api.name+ "&version="+store.publisher.api.version;
@@ -113,6 +121,6 @@ $(document).ready(function(){
         location.href = caramel.context + "/assets/api/implement/"+designer.saved_api.id;
         }
         });
-        $("#form-asset-create").submit();
+        $("#form-asset-create").validate();
     });
 });
