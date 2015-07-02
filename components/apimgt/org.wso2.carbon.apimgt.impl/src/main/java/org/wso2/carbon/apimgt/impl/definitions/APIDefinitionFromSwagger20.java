@@ -314,7 +314,7 @@ public class APIDefinitionFromSwagger20 extends APIDefinition {
             if (pathItemObject != null) {
                 operationObject = new JSONObject();
                 operationObject.put(APIConstants.SWAGGER_X_AUTH_TYPE, uriTemplate.getAuthType());
-                operationObject.put(APIConstants.SWAGGER_X_THROTTLING_TIER , uriTemplate.getThrottlingTier());
+                operationObject.put(APIConstants.SWAGGER_X_THROTTLING_TIER, uriTemplate.getThrottlingTier());
                 operationObject.put(APIConstants.SWAGGER_RESPONSES, responseObject);
                 pathItemObject.put(httpVerb.toLowerCase(), operationObject);
             }

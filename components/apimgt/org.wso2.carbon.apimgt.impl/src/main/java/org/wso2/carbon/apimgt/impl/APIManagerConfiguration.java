@@ -221,11 +221,7 @@ public class APIManagerConfiguration {
                     store.setType(type); //Set Store type [eg:wso2]
                     String name = storeElem.getAttributeValue(new QName(APIConstants.EXTERNAL_API_STORE_ID));
                     if (name == null) {
-                        try {
-                            throw new APIManagementException("The ExternalAPIStore name attribute is not defined in api-manager.xml.");
-                        } catch (APIManagementException e) {
-                            //ignore
-                        }
+                        log.error("The ExternalAPIStore name attribute is not defined in api-manager.xml.");
                     }
                     store.setName(name); //Set store name
                     OMElement configDisplayName = storeElem.getFirstChildWithName(new QName(APIConstants.EXTERNAL_API_STORE_DISPLAY_NAME));
@@ -253,11 +249,7 @@ public class APIManagerConfiguration {
                                     storeElem.getFirstChildWithName(new QName(
                                             APIConstants.EXTERNAL_API_STORE_USERNAME)).getText())); //Set store login username [optional]
                         } else {
-                            try {
-                                throw new APIManagementException("The user-credentials of API Publisher is not defined in the <ExternalAPIStore> config of api-manager.xml.");
-                            } catch (APIManagementException e) {
-                                //ignore
-                            }
+                            log.error("The user-credentials of API Publisher is not defined in the <ExternalAPIStore> config of api-manager.xml.");
                         }
                     }
                     externalAPIStores.add(store);
