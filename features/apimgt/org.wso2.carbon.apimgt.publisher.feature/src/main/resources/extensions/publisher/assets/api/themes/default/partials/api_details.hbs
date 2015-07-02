@@ -21,7 +21,7 @@
 		<tr>
 			<td class="span3">{{t "Production Endpoints"}}</td>
 			<td id="inUrl">
-				<ul class="endpoint_list">
+				<ul class="endpoint_list nav nav-list">
 					{{#each api.simplifiedConfig.production_endpoints}}
 						{{this.url}}
 					{{/each}}
@@ -33,7 +33,7 @@
 		<tr>
 			<td class="span3">{{t "Production Failover Endpoints"}}</td>
 			<td id="inUrl">
-				<ul class="endpoint_list">
+				<ul class="endpoint_list nav nav-list">
 					{{#each api.simplifiedConfig.production_failovers}}
 						{{this.url}}
 					{{/each}}
@@ -46,7 +46,7 @@
 		<tr>
 			<td class="span3">{{t "Sandbox Endpoints"}}</td>
 			<td id="inUrl">
-				<ul class="endpoint_list">
+				<ul class="endpoint_list nav nav-list">
 					{{#each api.simplifiedConfig.sandbox_endpoints}}
 						{{this.url}}
 					{{/each}}
@@ -58,7 +58,7 @@
 		<tr>
 			<td class="span3">{{t "Sandbox Failover Endpoints"}}</td>
 			<td id="inUrl">
-				<ul class="endpoint_list">
+				<ul class="endpoint_list nav nav-list">
 					{{#each api.simplifiedConfig.sandbox_failovers}}
 						{{this.url}}
 					{{/each}}
