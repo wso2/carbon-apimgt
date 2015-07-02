@@ -558,13 +558,15 @@ asset.renderer = function (ctx) {
 
                var endpointJSON = firstOne.fields.endpointConfig.value;
                var endpoints = JSON.parse(endpointJSON);
-               var prodEndpoint = endpoints.production_endpoints;
-               var sandboxEndpoint = endpoints.sandbox_endpoints;
-               var endpontType = endpoints.endpoint_type;
-
+               var prodEndpoint='',sandboxEndpoint='',endpointType='';
+               if(endpoints){
+               prodEndpoint = endpoints.production_endpoints;
+               sandboxEndpoint = endpoints.sandbox_endpoints;
+               endpointType = endpoints.endpoint_type;
+               }
                assets.prodEndpoint = prodEndpoint;
                assets.sandboxEndpoint = sandboxEndpoint;
-               assets.endpontType = endpontType;
+               assets.endpointType = endpointType;
                assets.lastUpdatedDate = page.lastUpdatedDate;
                assets.createdDate = page.createdDate;
 
