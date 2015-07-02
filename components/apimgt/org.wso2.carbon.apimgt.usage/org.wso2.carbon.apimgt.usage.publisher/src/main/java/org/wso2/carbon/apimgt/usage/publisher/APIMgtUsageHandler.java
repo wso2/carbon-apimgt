@@ -25,6 +25,7 @@ import org.apache.synapse.MessageContext;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.rest.AbstractHandler;
 import org.apache.synapse.rest.RESTConstants;
+import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityUtils;
 import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationContext;
 import org.wso2.carbon.apimgt.impl.APIConstants;
@@ -103,7 +104,7 @@ public class APIMgtUsageHandler extends AbstractHandler {
             String api_version = (String) mc.getProperty(RESTConstants.SYNAPSE_REST_API);
             String fullRequestPath = (String) mc.getProperty(RESTConstants.REST_FULL_REQUEST_PATH);
             int tenantDomainIndex = fullRequestPath.indexOf("/t/");
-            String apiPublisher = (String) mc.getProperty(APIMgtUsagePublisherConstants.API_PUBLISHER);
+            String apiPublisher = (String) mc.getProperty(APIMgtGatewayConstants.API_PUBLISHER);
             String tenantDomain = MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
             if (tenantDomainIndex != -1) {
                 String temp = fullRequestPath.substring(tenantDomainIndex + 3, fullRequestPath.length());
@@ -172,19 +173,6 @@ public class APIMgtUsageHandler extends AbstractHandler {
                     log.error("Error occurred while publishing request statistics. Full stacktrace available in debug logs. " + e.getMessage());
                 }
             }
-
-            mc.setProperty(APIMgtUsagePublisherConstants.CONSUMER_KEY, consumerKey);
-            mc.setProperty(APIMgtUsagePublisherConstants.USER_ID, username);
-            mc.setProperty(APIMgtUsagePublisherConstants.CONTEXT, context);
-            mc.setProperty(APIMgtUsagePublisherConstants.API_VERSION, api_version);
-            mc.setProperty(APIMgtUsagePublisherConstants.API, api);
-            mc.setProperty(APIMgtUsagePublisherConstants.VERSION, version);
-            mc.setProperty(APIMgtUsagePublisherConstants.RESOURCE, resource);
-            mc.setProperty(APIMgtUsagePublisherConstants.HTTP_METHOD, method);
-            mc.setProperty(APIMgtUsagePublisherConstants.HOST_NAME, hostName);
-            mc.setProperty(APIMgtUsagePublisherConstants.API_PUBLISHER, apiPublisher);
-            mc.setProperty(APIMgtUsagePublisherConstants.APPLICATION_NAME, applicationName);
-            mc.setProperty(APIMgtUsagePublisherConstants.APPLICATION_ID, applicationId);
 
         } catch (Throwable e) {
             log.error("Cannot publish event. " + e.getMessage(), e);

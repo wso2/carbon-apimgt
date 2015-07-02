@@ -25,26 +25,6 @@ public final class APIMgtUsagePublisherConstants {
     public static final String HEADER_SEGMENT_DELIMITER = " ";
     public static final String  AXIS2_MC_HTTP_METHOD = "HTTP_METHOD";
 
-
-    public static final String CONSUMER_KEY = "api.ut.consumerKey";
-    public static final String USER_ID = "api.ut.userId";
-    public static final String CONTEXT = "api.ut.context";
-    public static final String API_VERSION = "api.ut.api_version";
-    public static final String API = "api.ut.api";
-    public static final String VERSION = "api.ut.version";
-    public static final String REQUEST_TIME = "api.ut.requestTime";
-    public static final String RESOURCE = "api.ut.resource";
-    public static final String HTTP_METHOD = "api.ut.HTTP_METHOD";
-    public static final String HOST_NAME = "api.ut.hostName";
-    public static final String API_PUBLISHER = "api.ut.apiPublisher";
-    public static final String APPLICATION_NAME = "api.ut.application.name";
-    public static final String APPLICATION_ID = "api.ut.application.id";
-    public static final String REQUEST_START_TIME = "api.ut.requestTime";
-    public static final String BACKEND_REQUEST_START_TIME = "api.ut.backendRequestTime";
-    public static final String BACKEND_REQUEST_END_TIME = "api.ut.backendRequestEndTime";
-    public static final String REQUEST_END_TIME = "api.ut.requestEndTime";
-
-
     public static final String API_GOOGLE_ANALYTICS_TRACKING_ENABLED = "Enabled";
     public static final String API_GOOGLE_ANALYTICS_TRACKING_ID = "TrackingID";
 }
