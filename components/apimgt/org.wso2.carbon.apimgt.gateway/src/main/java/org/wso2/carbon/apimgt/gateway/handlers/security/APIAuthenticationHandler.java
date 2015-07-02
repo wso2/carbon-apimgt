@@ -270,7 +270,8 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
     private void setAPIParametersToMessageContext(MessageContext messageContext) {
 
         AuthenticationContext authContext = APISecurityUtils.getAuthenticationContext(messageContext);
-        org.apache.axis2.context.MessageContext axis2MsgContext = ((Axis2MessageContext) messageContext).getAxis2MessageContext();
+        org.apache.axis2.context.MessageContext axis2MsgContext =
+                ((Axis2MessageContext) messageContext).getAxis2MessageContext();
 
         String consumerKey = "";
         String username = "";
