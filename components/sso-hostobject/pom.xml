@@ -150,5 +150,8 @@
         </pluginRepository>
     </pluginRepositories>
 
+   <properties>
+   	<carbon.kernel.version>4.4.0</carbon.kernel.version>
+   </properties>
 
 </project>
