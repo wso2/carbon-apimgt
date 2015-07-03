@@ -50,6 +50,7 @@ import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.keymgt.client.SubscriberKeyMgtClient;
+import org.wso2.carbon.apimgt.keymgt.client.SubscriberKeyMgtClientPool;
 import org.wso2.carbon.apimgt.keymgt.util.APIKeyMgtDataHolder;
 import org.wso2.carbon.apimgt.keymgt.util.APIKeyMgtUtil;
 import org.wso2.carbon.identity.oauth.common.OAuthConstants;
@@ -88,7 +89,6 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
     public OAuthApplicationInfo createApplication(OAuthAppRequest oauthAppRequest) throws APIManagementException {
 
         // OAuthApplications are created by calling to APIKeyMgtSubscriber Service
-        SubscriberKeyMgtClient keyMgtClient = APIUtil.getKeyManagementClient();
         OAuthApplicationInfo oAuthApplicationInfo = oauthAppRequest.getOAuthApplicationInfo();
 
         // Subscriber's name should be passed as a parameter, since it's under the subscriber the OAuth App is created.
@@ -108,10 +108,14 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
 
         oAuthApplicationInfo.addParameter("tokenScope", tokenScopes);
         org.wso2.carbon.apimgt.api.model.xsd.OAuthApplicationInfo info = null;
+        SubscriberKeyMgtClient keyMgtClient = null;
         try {
+            keyMgtClient = SubscriberKeyMgtClientPool.getInstance().get();
             info = keyMgtClient.createOAuthApplication(userId, applicationName, callBackURL);
         } catch (Exception e) {
             handleException("Can not create OAuth application  : " + applicationName, e);
+        } finally {
+            SubscriberKeyMgtClientPool.getInstance().release(keyMgtClient);
         }
 
         if (info == null || info.getJsonString() == null) {
@@ -160,29 +164,35 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
     @Override
     public void deleteApplication(String consumerKey) throws APIManagementException {
 
-        SubscriberKeyMgtClient keyMgtClient = APIUtil.getKeyManagementClient();
-
         if (log.isDebugEnabled()) {
             log.debug("Trying to delete OAuth application for consumer key :" + consumerKey);
         }
 
+        SubscriberKeyMgtClient keyMgtClient = null;
         try {
+            keyMgtClient = SubscriberKeyMgtClientPool.getInstance().get();
             keyMgtClient.deleteOAuthApplication(consumerKey);
         } catch (Exception e) {
             handleException("Can not remove service provider for the given consumer key : " + consumerKey, e);
+        } finally {
+            if (keyMgtClient != null) {
+                SubscriberKeyMgtClientPool.getInstance().release(keyMgtClient);
+            }
         }
     }
 
     @Override
     public OAuthApplicationInfo retrieveApplication(String consumerKey) throws APIManagementException {
-        SubscriberKeyMgtClient keyMgtClient = APIUtil.getKeyManagementClient();
+        //SubscriberKeyMgtClient keyMgtClient = APIUtil.getKeyManagementClient();
 
+        SubscriberKeyMgtClient keyMgtClient = null;
         if (log.isDebugEnabled()) {
             log.debug("Trying to retrieve OAuth application for consumer key :" + consumerKey);
         }
 
         OAuthApplicationInfo oAuthApplicationInfo = new OAuthApplicationInfo();
         try {
+            keyMgtClient = SubscriberKeyMgtClientPool.getInstance().get();
             org.wso2.carbon.apimgt.api.model.xsd.OAuthApplicationInfo info = keyMgtClient.getOAuthApplication(consumerKey);
 
             if (info == null || info.getClientId() == null) {
@@ -213,6 +223,10 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
 
         } catch (Exception e) {
             handleException("Can not retrieve OAuth application for the given consumer key : " + consumerKey, e);
+        } finally {
+            if (keyMgtClient != null) {
+                SubscriberKeyMgtClientPool.getInstance().release(keyMgtClient);
+            }
         }
         return oAuthApplicationInfo;
     }
@@ -273,7 +287,7 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
             String applicationScope = APIKeyMgtDataHolder.getApplicationTokenScope();
 
             // When validity time set to a negative value, a token is considered never to expire.
-            if(tokenRequest.getValidityPeriod() == OAuthConstants.UNASSIGNED_VALIDITY_PERIOD){
+            if (tokenRequest.getValidityPeriod() == OAuthConstants.UNASSIGNED_VALIDITY_PERIOD) {
                 // Setting a different -ve value if the set value is -1 (-1 will be ignored by TokenValidator)
                 tokenRequest.setValidityPeriod(-2);
             }
@@ -368,7 +382,7 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
         tokenInfo.setConsumerKey(clientApplicationDTO.getConsumerKey());
 
         // Convert Expiry Time to milliseconds.
-        if(responseDTO.getExpiryTime() == Long.MAX_VALUE){
+        if (responseDTO.getExpiryTime() == Long.MAX_VALUE) {
             tokenInfo.setValidityPeriod(Long.MAX_VALUE);
         } else {
             tokenInfo.setValidityPeriod(responseDTO.getExpiryTime() * 1000);
@@ -428,9 +442,10 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
 
 
         //check whether given consumer key and secret match or not. If it does not match throw an exception.
-        SubscriberKeyMgtClient keyMgtClient = APIUtil.getKeyManagementClient();
+        SubscriberKeyMgtClient keyMgtClient = null;
         org.wso2.carbon.apimgt.api.model.xsd.OAuthApplicationInfo info = null;
         try {
+            keyMgtClient = SubscriberKeyMgtClientPool.getInstance().get();
             info = keyMgtClient.getOAuthApplication(oAuthApplicationInfo.getClientId());
             if (!clientSecret.equals(info.getClientSecret())) {
                 throw new APIManagementException("The secret key is wrong for the given consumer key " + consumerKey);
@@ -439,6 +454,10 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
         } catch (Exception e) {
             handleException("Some thing went wrong while getting OAuth application for given consumer key " +
                             oAuthApplicationInfo.getClientId(), e);
+        } finally {
+            if (keyMgtClient != null) {
+                SubscriberKeyMgtClientPool.getInstance().release(keyMgtClient);
+            }
         }
         if (info.getClientId() == null) {
             return null;
@@ -481,9 +500,10 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
                 String tokenUrl = revokeUrl != null ? revokeUrl.replace("revoke", "token") : null;
                 this.configuration.addParameter(APIConstants.TOKEN_URL, tokenUrl);
             }
-
-
         }
+
+        SubscriberKeyMgtClientPool.getInstance().setConfiguration(this.configuration);
+
     }
 
     @Override
