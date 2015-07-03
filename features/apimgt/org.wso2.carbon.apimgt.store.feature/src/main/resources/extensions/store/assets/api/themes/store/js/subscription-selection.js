@@ -331,7 +331,7 @@ $(function () {
                        success: function (responseData) {
                            var data = responseData.data;
                            APP_STORE.productionKeys = data;
-                           updateMetadata(appName, jsonData, 'Production', 'new');
+                           updateMetadata(appName, data, 'Production', 'new');
                            events.publish(EV_GENERATE_PROD_TOKEN, findAppDetails(appName));
                        }
                    });
@@ -364,7 +364,7 @@ $(function () {
                        success: function (responseData) {
                            var data = responseData.data;
                            APP_STORE.sandboxKeys = data;
-                           updateMetadata(appName, jsonData, 'Sandbox', 'new');
+                           updateMetadata(appName, data, 'Sandbox', 'new');
                            events.publish(EV_GENERATE_SAND_TOKEN, findAppDetails(appName));
                        }
                    });
