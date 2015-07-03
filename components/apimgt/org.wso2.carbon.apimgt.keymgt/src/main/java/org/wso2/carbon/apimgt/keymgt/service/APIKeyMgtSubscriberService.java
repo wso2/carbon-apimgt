@@ -64,6 +64,8 @@ import org.wso2.carbon.identity.oauth.cache.OAuthCacheKey;
 import org.wso2.carbon.identity.oauth.common.OAuthConstants;
 import org.wso2.carbon.identity.oauth.config.OAuthServerConfiguration;
 import org.wso2.carbon.identity.oauth.dto.OAuthConsumerAppDTO;
+import org.wso2.carbon.user.core.UserCoreConstants;
+import org.wso2.carbon.user.core.util.UserCoreUtil;
 import org.wso2.carbon.utils.CarbonUtils;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
@@ -144,6 +146,12 @@ public class APIKeyMgtSubscriberService extends AbstractAdmin {
         PrivilegedCarbonContext.getThreadLocalCarbonContext().setUsername(userName);
 
         try {
+
+            // Replace domain separator by "_" if user is coming from a secondary userstore.
+            String domain = UserCoreUtil.extractDomainFromName(userName);
+            if (domain != null && !domain.isEmpty() && !UserCoreConstants.PRIMARY_DEFAULT_DOMAIN_NAME.equals(domain)) {
+                userName = userName.replace(UserCoreConstants.DOMAIN_SEPARATOR, "_");
+            }
 
             // Append the username before Application name to make application name unique across two users.
             applicationName = APIUtil.replaceEmailDomain(userName) + "_" + applicationName;
