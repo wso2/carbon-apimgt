@@ -268,7 +268,8 @@ $(function () {
                    type: 'POST',
                    url: getSubscriptionAPI(appName, 'getUUID'),
                    data: apiData,
-                   success: function (data) {
+                   success: function (responseData) {
+                       data = responseData.data;
                        if (!data.error) {
                            var uuid = data.response;
                            window.location = 'details/' + uuid;
@@ -327,9 +328,9 @@ $(function () {
                        type: 'POST',
                        url: getSubscriptionAPI(appName, 'new'),
                        data: tokenRequestData,
-                       success: function (data) {
-                           var jsonData = data;
-                           APP_STORE.productionKeys = jsonData;
+                       success: function (responseData) {
+                           data = responseData.data;
+                           APP_STORE.productionKeys = data;
                            updateMetadata(appName, jsonData, 'Production', 'new');
                            events.publish(EV_GENERATE_PROD_TOKEN, findAppDetails(appName));
                        }
@@ -360,9 +361,9 @@ $(function () {
                        type: 'POST',
                        url: getSubscriptionAPI(appName, 'new'),
                        data: tokenRequestData,
-                       success: function (data) {
-                           var jsonData = data;
-                           APP_STORE.sandboxKeys = jsonData;
+                       success: function (responseData) {
+                           data = responseData.data;
+                           APP_STORE.sandboxKeys = data;
                            updateMetadata(appName, jsonData, 'Sandbox', 'new');
                            events.publish(EV_GENERATE_SAND_TOKEN, findAppDetails(appName));
                        }
@@ -387,7 +388,8 @@ $(function () {
                        type: 'POST',
                        url: getSubscriptionAPI(appName, 'updateDomain'),
                        data: domainUpdateData,
-                       success: function (data) {
+                       success: function (responseData) {
+                               data = responseData.data;
                                BootstrapDialog.show({
                                                         type: BootstrapDialog.TYPE_SUCCESS,
                                                         title: 'Success',
@@ -429,7 +431,8 @@ $(function () {
                        type: 'POST',
                        url: getSubscriptionAPI(appName, 'updateDomain'),
                        data: domainUpdateData,
-                       success: function (data) {
+                       success: function (responseData) {
+                           data = responseData.data;
                            BootstrapDialog.show({
                                                     type: BootstrapDialog.TYPE_SUCCESS,
                                                     title: 'Error',
@@ -501,7 +504,8 @@ $(function () {
                        type: 'POST',
                        url: getSubscriptionAPI(appName, 'refresh'),
                        data: tokenRequestData,
-                       success: function (data) {
+                       success: function (responseData) {
+                           data = responseData.data;
                            data.consumerKey = APP_STORE.productionKeys.consumerKey;
                            data.consumerSecret = APP_STORE.productionKeys.consumerSecret;
                            var jsonData = data;
@@ -550,7 +554,8 @@ $(function () {
                        type: 'POST',
                        url: getSubscriptionAPI(appName, 'refresh'),
                        data: tokenRequestData,
-                       success: function (data) {
+                       success: function (responseData) {
+                           data = responseData.data;
                            data.consumerKey = APP_STORE.sandboxKeys.consumerKey;
                            data.consumerSecret = APP_STORE.sandboxKeys.consumerSecret;
                            var jsonData = data;
@@ -595,7 +600,8 @@ $(function () {
                                                               type: 'POST',
                                                               url: getSubscriptionAPI(appName, 'deleteSubscription'),
                                                               data: deleteAPISubscriptionData,
-                                                              success: function (data) {
+                                                              success: function (responseData) {
+                                                                  data = responseData.data;
                                                                   if (data.success) {
                                                                       deleteSubscriptionMetadata(appName, apiName, apiProvider,
                                                                                                  apiVersion, 'deleteSubscription');

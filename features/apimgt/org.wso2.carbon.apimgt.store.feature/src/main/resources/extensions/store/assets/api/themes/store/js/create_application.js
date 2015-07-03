@@ -35,7 +35,7 @@ $(function () {
                 var partial = 'list_applications';
                 var container = 'list_applications';
                 var data = {};
-                data.applications = JSON.parse(result);
+                data.applications = JSON.parse(result.data);
                 renderPartial(partial, container, data);
             }
         });
@@ -120,9 +120,8 @@ $(function () {
             type: 'POST',
             url: getApplicationsAPI('editapp'),
             data: updateApplicationData,
-            success: function (data) {
-                document.getElementById("tr-application-" + metadata.editRowData.appId + "-data").innerHTML =
-                    getNewTrUpdated();
+            success: function (result) {
+                document.getElementById("tr-application-" + metadata.editRowData.appId + "-data").innerHTML = getNewTrUpdated();
                 BootstrapDialog.show({
                     type: BootstrapDialog.TYPE_SUCCESS,
                     title: 'Application Updated!',
@@ -277,9 +276,7 @@ $(function () {
                     action: function (dialogItself) {
                         dialogItself.close();
                     }
-
                 }]
-
             });
         }
     };

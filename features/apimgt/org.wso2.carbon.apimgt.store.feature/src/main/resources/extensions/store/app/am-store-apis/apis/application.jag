@@ -18,94 +18,87 @@
  *
  */
 require('/modules/store.js').exec(function (ctx) {
-    var log = new Log('application_api');
-    var res = ctx.response;
-    var req = ctx.request;
-    var session = ctx.session;
-
-    var server = require('store').server;
-    var user = server.current(ctx.session);
-    var apistore = require('apistore').apistore.instance(user.username);
-    var options = request.getAllParameters('UTF-8');
-    var httpMethod = request.getMethod();
-    res.contentType = 'application/json';
+	var log = new Log('application_api');
+	var req = ctx.request;
+	var constants = require("rxt").constants;
+	var responseProcessor = require('utils').response;
+	var server = require('store').server;
+	var user = server.current(ctx.session);
+	var apistore = require('apistore').apistore.instance(user.username);
+	var options = request.getAllParameters('UTF-8');
+	var httpMethod = request.getMethod();
 	var response = ctx.response;
+	response.contentType = 'application/json';
 
-    var API_SUBSCRIPTION_URL = '/{context}/apis/application/{appName}/{action}/subscriptions';
+	var API_SUBSCRIPTION_URL = '/{context}/apis/application/{appName}/{action}/subscriptions';
 
-    var uriMatcher = new URIMatcher(req.getRequestURI());
-    var uriOptions;
-    switch (httpMethod) {
-        case 'GET':
-            // var elements = uriMatcher.elements();
-            // options.appName = elements.appName;
-            // var subscribedAPIsResult = apistore.getAllSubscriptions(user.username,options.appName,0,100);
-            // var subscribedAPIs = [];
-            // subscribedAPIs = JSON.parse(subscribedAPIsResult);
-            // print(subscribedAPIs);
-            break;
+	var uriMatcher = new URIMatcher(req.getRequestURI());
+	var uriOptions;
+	switch (httpMethod) {
+		case 'GET':
+			break;
 
-        case 'POST':
-            uriOptions = uriMatcher.match(API_SUBSCRIPTION_URL);
-            if (uriOptions.action == 'new') {
-                // (userId, applicationName, tokenType, tokenScopes,validityPeriod,callbackUrl,accessAllowDomainsArr)
-                var keyResult = apistore.getApplicationKey(user.username, options.appName,
-                        options.keyType.toUpperCase(), options.tokenScope, options.validityTime,
-                        options.callbackUrl, options.accessAllowDomains);
-                var keys = [];
-                keys = JSON.parse(keyResult);
-                if (keys.consumerKey != null) {
-					response = responseProcessor.buildSuccessResponse(response, constants.STATUS_CODES.OK, keys);
-                }
-            } else if (uriOptions.action == 'refresh') {
-                // (userId, applicationName, requestedScopes, oldAccessToken, accessAllowDomainsArr, 
-                //consumerKey, consumerSecret, validityTime)
-                var keyResult = apistore.getRefreshToken(user.username, options.appName, options.tokenScope, options.accessToken,
-                        options.accessAllowDomains, options.consumerKey, options.consumerSecret, options.validityTime);
-                var keys = [];
-                keys = JSON.parse(keyResult);
-                if (keys.accessToken != null) {
+		case 'POST':
+			uriOptions = uriMatcher.match(API_SUBSCRIPTION_URL);
+			if (uriOptions.action == 'new') {
+				// (userId, applicationName, tokenType, tokenScopes,validityPeriod,callbackUrl,accessAllowDomainsArr)
+				var keyResult = apistore.getApplicationKey(user.username, options.appName,
+														   options.keyType.toUpperCase(), options.tokenScope, options.validityTime,
+														   options.callbackUrl, options.accessAllowDomains);
+				var keys = [];
+				keys = JSON.parse(keyResult);
+				if (keys.consumerKey != null) {
 					response = responseProcessor.buildSuccessResponse(response, constants.STATUS_CODES.OK, keys);
 				}
-            } else if (uriOptions.action == 'deleteSubscription') {
-                // (apiname, version, provider, user, tier, appId)
-                var isSubRemovedResult = apistore.removeSubscription(options.apiName, options.apiVersion, options.apiProvider,
-                        user.username, options.appTier, options.appId);
-                var isSubscriptionRemoved;
-                if (isSubRemovedResult) {
-                    isSubscriptionRemoved = {
-                        success: isSubRemovedResult
-                    };
-                } else {
-                    isSubscriptionRemoved = {
-                        success: isSubRemovedResult
-                    };
-                }
+			} else if (uriOptions.action == 'refresh') {
+				// (userId, applicationName, requestedScopes, oldAccessToken, accessAllowDomainsArr,
+				//consumerKey, consumerSecret, validityTime)
+				var keyResult = apistore.getRefreshToken(user.username, options.appName, options.tokenScope, options.accessToken,
+														 options.accessAllowDomains, options.consumerKey, options.consumerSecret, options.validityTime);
+				var keys = [];
+				keys = JSON.parse(keyResult);
+				if (keys.accessToken != null) {
+					response = responseProcessor.buildSuccessResponse(response, constants.STATUS_CODES.OK, keys);
+				}
+			} else if (uriOptions.action == 'deleteSubscription') {
+				// (apiname, version, provider, user, tier, appId)
+				var isSubRemovedResult = apistore.removeSubscription(options.apiName, options.apiVersion, options.apiProvider,
+																	 user.username, options.appTier, options.appId);
+				var isSubscriptionRemoved;
+				if (isSubRemovedResult) {
+					isSubscriptionRemoved = {
+						success: isSubRemovedResult
+					};
+				} else {
+					isSubscriptionRemoved = {
+						success: isSubRemovedResult
+					};
+				}
 				response = responseProcessor.buildSuccessResponse(response, constants.STATUS_CODES.OK, isSubscriptionRemoved);
-            } else if (uriOptions.action == 'updateDomain') {
+			} else if (uriOptions.action == 'updateDomain') {
 				var result = apistore.updateAccessAllowDomains(options.accessToken, options.accessAllowedDomains);
 				response = responseProcessor.buildSuccessResponse(response, constants.STATUS_CODES.OK, result);
-            } else if (uriOptions.action == 'getUUID') {
-                var uuidResult = apistore.getUUIDByApi(options.apiProvider, options.apiName, options.apiVersion);
-                var uuid;
-                if (uuidResult != null) {
-                    uuid = {
-                        error: false,
-                        response: uuidResult
-                    };
-                } else {
-                    uuid = {
-                        error: true,
-                        response: 'No artifact found'
-                    };
-                }
+			} else if (uriOptions.action == 'getUUID') {
+				var uuidResult = apistore.getUUIDByApi(options.apiProvider, options.apiName, options.apiVersion);
+				var uuid;
+				if (uuidResult != null) {
+					uuid = {
+						error: false,
+						response: uuidResult
+					};
+				} else {
+					uuid = {
+						error: true,
+						response: 'No artifact found'
+					};
+				}
 				response = responseProcessor.buildSuccessResponse(response, constants.STATUS_CODES.OK, uuid);
-            }
-            break;
+			}
+			break;
 
-        default:
-            break;
-    }
+		default:
+			break;
+	}
 
 }, request, response, session);
 %>
