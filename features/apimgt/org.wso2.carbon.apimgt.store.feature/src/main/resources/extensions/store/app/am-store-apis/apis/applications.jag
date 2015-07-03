@@ -50,7 +50,6 @@ require('/modules/store.js').exec(function (ctx) {
 	var uriOptions;
 	switch (httpMethod) {
 		case 'GET':
-
 			var applicationDataResult = apistore.getApplications(user.username);
 			if (applicationDataResult != null) {
 				var applicationData = JSON.parse(applicationDataResult);
@@ -66,13 +65,16 @@ require('/modules/store.js').exec(function (ctx) {
 			uriOptions = uriMatcher.match(API_APPLICATIONS_URL);
 
 			if (uriOptions.action == "newapp") {
-				apistore.addApplication(options.appName, user.username, options.tier,
+				var result = apistore.addApplication(options.appName, user.username, options.tier,
 										options.callbackUrl, options.description);
+				response = responseProcessor.buildSuccessResponse(response, constants.STATUS_CODES.OK, result);
 			} else if (uriOptions.action == "editapp") {
-				apistore.updateApplication(options.appName, options.userName, options.appId, options.tier,
+				var result = apistore.updateApplication(options.appName, options.userName, options.appId, options.tier,
 										   options.callbackUrl, options.description);
+				response = responseProcessor.buildSuccessResponse(response, constants.STATUS_CODES.OK, result);
 			} else if (uriOptions.action == "delapp") {
-				apistore.removeApplication(options.appName, options.userName, options.appId);
+				var result = apistore.removeApplication(options.appName, options.userName, options.appId);
+				response = responseProcessor.buildSuccessResponse(response, constants.STATUS_CODES.OK, result);
 			}
 
 			break;

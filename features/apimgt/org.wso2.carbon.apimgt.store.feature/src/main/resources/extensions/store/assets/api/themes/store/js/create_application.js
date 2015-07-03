@@ -35,7 +35,7 @@ $(function () {
                 var partial = 'list_applications';
                 var container = 'list_applications';
                 var data = {};
-                data.applications = JSON.parse(result.data);
+                data.applications = result.data;
                 renderPartial(partial, container, data);
             }
         });
@@ -172,6 +172,19 @@ $(function () {
                         data: removeApplicationData,
                         success: function (data) {
                             $("#tr-application-" + metadata.delRowData.appId + "-data").remove();
+                            BootstrapDialog.show({
+                                                     type: BootstrapDialog.TYPE_SUCCESS,
+                                                     title: 'Success',
+                                                     message: '<div><i class="fw fw-check"></i> Application: ' +
+                                                              appName + ' successfully deleted!</div>',
+                                                     buttons: [{
+                                                                   label: 'Ok',
+                                                                   action: function (dialogItself) {
+                                                                       dialogItself.close();
+                                                                   }
+                                                               }]
+
+                                                 });
                         }
                     });
                     dialogItself.close();
@@ -240,7 +253,7 @@ $(function () {
                         message: '<div><i class="fw fw-check"></i> Application: ' +
                         appName + ' has been created.</div>',
                         buttons: [{
-                            label: 'Close',
+                            label: 'Ok',
                             action: function (dialogItself) {
                                 dialogItself.close();
                             }
@@ -256,7 +269,7 @@ $(function () {
                         message: '<div><i class="fw fw-warning"></i> Application: ' +
                         appName + ' has not been created.</div>',
                         buttons: [{
-                            label: 'Close',
+                            label: 'Ok',
                             action: function (dialogItself) {
                                 dialogItself.close();
                             }
