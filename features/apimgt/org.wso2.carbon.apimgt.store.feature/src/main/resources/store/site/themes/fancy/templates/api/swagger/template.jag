@@ -89,7 +89,8 @@ var show_environments = function(){
     var type = $("#key_type").val();
     $("#environment_name").children('option').hide();
     $("#environment_name").children("option[class='" + type + "']").show();
-    var options = $("#environment_name").children("option[class='"+ type + "']");
+    $("#environment_name").children("option[class='hybrid']").show();
+    var options = $("#environment_name").children("option[style='display: block;']");
       if (options.length <= 1) {
         $("#environment_name").hide();
          $("#OnEnvironment").hide();
@@ -98,8 +99,8 @@ var show_environments = function(){
      $("#OnEnvironment").show(); 
      $("#environment_name").show();
     	options[0].selected=true;
-    } else if ($("#environment_name").children("option[class='hybrid']").length > 0) {
-	    $("#environment_name").children("option[class='hybrid']")[0].selected = true; 
+    } else if ($("#environment_name").children("option[style='display: block;']").length > 0) {
+	    $("#environment_name").children("option[style='display: block;']")[0].selected = true; 
     }else{
       $("#environment_name").hide();
       $("#OnEnvironment").hide();
