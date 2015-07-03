@@ -81,6 +81,7 @@ asset.manager = function(ctx){
 asset.configure = function(ctx) {
     return {
         meta: {
+            thumbnail: 'overview_thumbnail',
             search: {
                 searchableFields: ['overview_provider', 'overview_name']
             }
