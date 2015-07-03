@@ -345,7 +345,23 @@ var apistore = {};
      */
     StoreAPIProxy.prototype.updateAccessAllowDomains = function (accessToken, accessAllowDomains) {
         var domains = accessAllowDomains.split(",");
-        return this.impl.updateAccessAllowDomains(accessToken, domains);
+        try {
+            return this.impl.updateAccessAllowDomains(accessToken, domains);
+
+            if (log.isDebugEnabled()) {
+                log.debug("Invoke updateAccessAllowDomains()" );
+            }
+            return {
+                error:false,
+                success:true
+            };
+        } catch (e) {
+            log.error(e.message);
+            return {
+                error:e,
+                success:false
+            };
+        }
     };
 
     /*

@@ -29,6 +29,7 @@ require('/modules/store.js').exec(function (ctx) {
     var options = request.getAllParameters('UTF-8');
     var httpMethod = request.getMethod();
     res.contentType = 'application/json';
+	var response = ctx.response;
 
     var API_SUBSCRIPTION_URL = '/{context}/apis/application/{appName}/{action}/subscriptions';
 
@@ -54,7 +55,7 @@ require('/modules/store.js').exec(function (ctx) {
                 var keys = [];
                 keys = JSON.parse(keyResult);
                 if (keys.consumerKey != null) {
-                    print(keys);
+					response = responseProcessor.buildSuccessResponse(response, constants.STATUS_CODES.OK, keys);
                 }
             } else if (uriOptions.action == 'refresh') {
                 // (userId, applicationName, requestedScopes, oldAccessToken, accessAllowDomainsArr, 
@@ -64,8 +65,8 @@ require('/modules/store.js').exec(function (ctx) {
                 var keys = [];
                 keys = JSON.parse(keyResult);
                 if (keys.accessToken != null) {
-                    print(keys);
-                }
+					response = responseProcessor.buildSuccessResponse(response, constants.STATUS_CODES.OK, keys);
+				}
             } else if (uriOptions.action == 'deleteSubscription') {
                 // (apiname, version, provider, user, tier, appId)
                 var isSubRemovedResult = apistore.removeSubscription(options.apiName, options.apiVersion, options.apiProvider,
@@ -80,9 +81,10 @@ require('/modules/store.js').exec(function (ctx) {
                         success: isSubRemovedResult
                     };
                 }
-                print(isSubscriptionRemoved);
+				response = responseProcessor.buildSuccessResponse(response, constants.STATUS_CODES.OK, isSubscriptionRemoved);
             } else if (uriOptions.action == 'updateDomain') {
-                apistore.updateAccessAllowDomains(options.accessToken, options.accessAllowedDomains);
+				var result = apistore.updateAccessAllowDomains(options.accessToken, options.accessAllowedDomains);
+				response = responseProcessor.buildSuccessResponse(response, constants.STATUS_CODES.OK, result);
             } else if (uriOptions.action == 'getUUID') {
                 var uuidResult = apistore.getUUIDByApi(options.apiProvider, options.apiName, options.apiVersion);
                 var uuid;
@@ -97,7 +99,7 @@ require('/modules/store.js').exec(function (ctx) {
                         response: 'No artifact found'
                     };
                 }
-                print(uuid);
+				response = responseProcessor.buildSuccessResponse(response, constants.STATUS_CODES.OK, uuid);
             }
             break;
 

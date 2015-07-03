@@ -25,6 +25,7 @@ require('/modules/store.js').exec(function (ctx) {
     var apistore = require('apistore').apistore.instance(user.username);
     var options = request.getAllParameters('UTF-8');
     var httpMethod = request.getMethod();
+	var responseProcessor = require('utils').response;
 
     var createStatusJson = function (appStatus) {
         var appDataArr = [];

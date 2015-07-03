@@ -287,7 +287,19 @@ $(function () {
 
                                                 });
                        }
-                   }
+                   }, error : function(data) {
+                                    BootstrapDialog.show({
+                                         type: BootstrapDialog.TYPE_DANGER,
+                                         title: 'Fail to Delete Subscription!',
+                                         message: '<div><i class="icon-briefcase"></i> Unable to locate the artifact</div>',
+                                         buttons: [{
+                                                       label: 'Ok',
+                                                       action: function(dialogItself){
+                                                           dialogItself.close();
+                                                       }
+                                                   }]
+                                     });
+                }
                });
     };
 
@@ -376,11 +388,30 @@ $(function () {
                        url: getSubscriptionAPI(appName, 'updateDomain'),
                        data: domainUpdateData,
                        success: function (data) {
-                           var message = {};
-                           message.text = '<div><i class="icon-briefcase"></i> Production domain updated successfully.</div>';
-                           message.type = 'success';
-                           message.layout = 'topRight';
-                           noty(message);
+                               BootstrapDialog.show({
+                                                        type: BootstrapDialog.TYPE_SUCCESS,
+                                                        title: 'Success',
+                                                        message: "Production domain updated successfully",
+                                                        buttons: [{
+                                                                      label: 'Ok',
+                                                                      action: function(dialogItself){
+                                                                          dialogItself.close();
+                                                                      }
+                                                                  }]
+                                                    });
+                       },
+                       error : function(data) {
+                                            BootstrapDialog.show({
+                                             type: BootstrapDialog.TYPE_DANGER,
+                                             title: 'Error!',
+                                             message: 'Error while updating production domain',
+                                             buttons: [{
+                                                           label: 'Ok',
+                                                           action: function(dialogItself){
+                                                               dialogItself.close();
+                                                           }
+                                                       }]
+                                         });
                        }
                    });
         });
@@ -399,11 +430,30 @@ $(function () {
                        url: getSubscriptionAPI(appName, 'updateDomain'),
                        data: domainUpdateData,
                        success: function (data) {
-                           var message = {};
-                           message.text = '<div><i class="icon-briefcase"></i> Sandbox domain updated successfully.</div>';
-                           message.type = 'success';
-                           message.layout = 'topRight';
-                           noty(message);
+                           BootstrapDialog.show({
+                                                    type: BootstrapDialog.TYPE_SUCCESS,
+                                                    title: 'Error',
+                                                    message: "Sandbox domain updated successfully.",
+                                                    buttons: [{
+                                                                  label: 'Ok',
+                                                                  action: function(dialogItself){
+                                                                      dialogItself.close();
+                                                                  }
+                                                              }]
+                                                });
+                       },
+                       error : function(data) {
+                           BootstrapDialog.show({
+                                                    type: BootstrapDialog.TYPE_DANGER,
+                                                    title: 'Error!',
+                                                    message: 'Error while updating sandbox domain',
+                                                    buttons: [{
+                                                                  label: 'Ok',
+                                                                  action: function(dialogItself){
+                                                                      dialogItself.close();
+                                                                  }
+                                                              }]
+                                                });
                        }
                    });
         });
@@ -458,6 +508,19 @@ $(function () {
                            APP_STORE.productionKeys = jsonData;
                            updateMetadata(appName, jsonData, 'Production', 'refresh');
                            events.publish(EV_GENERATE_PROD_TOKEN, findAppDetails(appName));
+                       },
+                       error : function(data) {
+                           BootstrapDialog.show({
+                                                    type: BootstrapDialog.TYPE_DANGER,
+                                                    title: 'Error',
+                                                    message: "Error while generating the Production token",
+                                                    buttons: [{
+                                                                  label: 'Ok',
+                                                                  action: function(dialogItself){
+                                                                      dialogItself.close();
+                                                                  }
+                                                              }]
+                                                });
                        }
                    });
         });
@@ -494,6 +557,18 @@ $(function () {
                            APP_STORE.sandboxKeys = jsonData;
                            updateMetadata(appName, jsonData, 'Sandbox', 'refresh');
                            events.publish(EV_GENERATE_SAND_TOKEN, findAppDetails(appName));
+                       }, error : function(data) {
+                           BootstrapDialog.show({
+                                                    type: BootstrapDialog.TYPE_DANGER,
+                                                    title: 'Error',
+                                                    message: "Error while generating the sandbox token",
+                                                    buttons: [{
+                                                                  label: 'Ok',
+                                                                  action: function(dialogItself){
+                                                                      dialogItself.close();
+                                                                  }
+                                                              }]
+                                                });
                        }
                    });
         });
@@ -544,6 +619,19 @@ $(function () {
                                                                                                          }]
                                                                                            });
                                                                   }
+                                                              }, error : function(data) {
+                                                                  BootstrapDialog.show({
+                                                                                           type: BootstrapDialog.TYPE_DANGER,
+                                                                                           title: 'Fail to Delete Subscription!',
+                                                                                           message: '<div><i class="fw fw-warning"></i> API : ' +
+                                                                                                    appName + ' subscription could not be deleted.</div>',
+                                                                                           buttons: [{
+                                                                                                         label: 'Ok',
+                                                                                                         action: function(dialogItself){
+                                                                                                             dialogItself.close();
+                                                                                                         }
+                                                                                                     }]
+                                                                                       });
                                                               }
                                                           });
                                                    dialogItself.close();
