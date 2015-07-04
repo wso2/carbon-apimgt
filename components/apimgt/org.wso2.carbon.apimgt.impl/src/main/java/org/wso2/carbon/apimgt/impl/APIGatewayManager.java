@@ -181,9 +181,19 @@ public class APIGatewayManager {
 				}
 			}
             } catch (AxisFault axisFault) {
+                /*
+                didn't throw this exception to handle multiple gateway publishing
+                if gateway is unreachable we collect that environments into map with issue and show on popup in ui
+                therefore this didn't break the gateway publishing if one gateway unreachable
+                 */
                 failedEnvironmentsList.put(environmentName, axisFault.getMessage());
                 log.error("Error occurred when publish to gateway " + environmentName, axisFault);
             } catch (APIManagementException ex) {
+                /*
+                didn't throw this exception to handle multiple gateway publishing
+                if gateway is unreachable we collect that environments into map with issue and show on popup in ui
+                therefore this didn't break the gateway publishing if one gateway unreachable
+                 */
                 log.error("Error occurred deploying sequences on " + environmentName, ex);
                 failedEnvironmentsList.put(environmentName, ex.getMessage());
             }
@@ -224,9 +234,19 @@ public class APIGatewayManager {
                 }
             }
                 } catch (AxisFault axisFault) {
+                 /*
+                didn't throw this exception to handle multiple gateway publishing
+                if gateway is unreachable we collect that environments into map with issue and show on popup in ui
+                therefore this didn't break the gateway unpublisihing if one gateway unreachable
+                 */
                     log.error("Error occurred when removing from gateway " + environmentName, axisFault);
                     failedEnvironmentsList.put(environmentName, axisFault.getMessage());
                 } catch (APIManagementException ex) {
+                    /*
+                didn't throw this exception to handle multiple gateway publishing
+                if gateway is unreachable we collect that environments into map with issue and show on popup in ui
+                therefore this didn't break the gateway unpublisihing if one gateway unreachable
+                 */
                     log.error("Error occurred undeploy sequences on " + environmentName, ex);
                     failedEnvironmentsList.put(environmentName, ex.getMessage());
                 }
@@ -252,6 +272,11 @@ public class APIGatewayManager {
                 client.deleteDefaultApi(tenantDomain);
             }
                 } catch (AxisFault axisFault) {
+                    /*
+                didn't throw this exception to handle multiple gateway publishing
+                if gateway is unreachable we collect that environments into map with issue and show on popup in ui
+                therefore this didn't break the gateway unpublisihing if one gateway unreachable
+                 */
                     log.error("Error occurred when removing default api from gateway " + environmentName, axisFault);
                     failedEnvironmentsList.put(environmentName, axisFault.getMessage());
                 }
@@ -271,7 +296,6 @@ public class APIGatewayManager {
 	 *         available in none.
 	 */
     public boolean isAPIPublished(API api, String tenantDomain) {
-        List<String> failedEnvironmentsList = new ArrayList<String>(0);
         for (String environmentName : api.getEnvironments()) {
             try {
                 RESTAPIAdminClient client = new RESTAPIAdminClient(api.getId(), environments.get(environmentName));
@@ -281,10 +305,13 @@ public class APIGatewayManager {
                     return true;
                 }
             } catch (AxisFault axisFault) {
+                /*
+                didn't throw this exception to check api available in all the environments
+                therefore we didn't throw exception to avoid if gateway unreachable affect
+                */
                 if (api.getStatus() != APIStatus.CREATED) {
                     log.error("Error occurred when check api is published on gateway" + environmentName, axisFault);
                 }
-                failedEnvironmentsList.add(environmentName);
             }
         }
         return false;

@@ -641,6 +641,11 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                                 }
                             }
                             } catch (AxisFault ex) {
+                                 /*
+                                didn't throw this exception to handle multiple gateway publishing feature therefore
+                                this didn't break invalidating cache from the all the gateways if one gateway is
+                                unreachable
+                                 */
                                 log.error("Error while invalidating from environment " +
                                           environment.getName(), ex);
                             }

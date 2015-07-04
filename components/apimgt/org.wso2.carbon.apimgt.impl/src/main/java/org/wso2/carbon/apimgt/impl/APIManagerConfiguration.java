@@ -207,6 +207,9 @@ public class APIManagerConfiguration {
                     if (!apiGatewayEnvironments.containsKey(environment.getName())) {
                         apiGatewayEnvironments.put(environment.getName(), environment);
                     } else {
+                        /*
+                          This will be happen only on server startup therefore we log and continue the startup
+                         */
                         log.error("Duplicate environment name found in api-manager.xml " +
                                   environment.getName());
                     }

@@ -39,28 +39,36 @@ import java.util.Map;
 public class CORSRequestHandler extends AbstractHandler implements ManagedLifecycle {
 
 	private static final Log log = LogFactory.getLog(CORSRequestHandler.class);
-	private String inline;
+	private String APIImplementationType;
 	private String allowHeaders;
 	private List<String> allowedOrigins;
-	private boolean headerStatus;
+	private boolean InitializeHeaderValues;
 
 	public void init(SynapseEnvironment synapseEnvironment) {
 		if (log.isDebugEnabled()) {
 			log.debug("Initializing CORSRequest Handler instance");
 		}
 		if (ServiceReferenceHolder.getInstance().getApiManagerConfigurationService() != null) {
-			headerStatus = initializeHeaders();
+			InitializeHeaderValues = initializeHeaders();
 		}
 	}
 
-	public boolean initializeHeaders() {
+	/**
+	 * This method used to Initialize  header values
+	 *
+	 * @return true after Initialize the values
+	 */
+	boolean initializeHeaders() {
 		if (allowHeaders == null) {
 			allowHeaders = Utils
 					.getAllowedHeaders();
 		}
 		if (allowedOrigins == null) {
-			allowedOrigins = Arrays.asList(ServiceReferenceHolder.getInstance().getAPIManagerConfiguration().
-					getFirstProperty(APIConstants.CORS_CONFIGURATION_ACCESS_CTL_ALLOW_ORIGIN).split(","));
+			String allowedOriginsList = ServiceReferenceHolder.getInstance().getAPIManagerConfiguration().
+					getFirstProperty(APIConstants.CORS_CONFIGURATION_ACCESS_CTL_ALLOW_ORIGIN);
+			if (!allowedOriginsList.isEmpty()) {
+				allowedOrigins = Arrays.asList(allowedOriginsList.split(","));
+			}
 		}
 		return true;
 	}
@@ -72,8 +80,8 @@ public class CORSRequestHandler extends AbstractHandler implements ManagedLifecy
 	}
 
 	public boolean handleRequest(MessageContext messageContext) {
-		if (!headerStatus) {
-			headerStatus = initializeHeaders();
+		if (!InitializeHeaderValues) {
+			InitializeHeaderValues = initializeHeaders();
 		}
 		String apiContext = (String) messageContext.getProperty(RESTConstants.REST_API_CONTEXT);
 		String apiVersion = (String) messageContext.getProperty(RESTConstants.SYNAPSE_REST_API_VERSION);
@@ -82,7 +90,7 @@ public class CORSRequestHandler extends AbstractHandler implements ManagedLifecy
 		API selectedApi = null;
 		Resource selectedResourceWithVerb = null;
 		Resource selectedResource = null;
-		boolean status = false;
+		boolean status;
 
 		for (API api : messageContext.getConfiguration().getAPIs()) {
 			if (apiContext.equals(api.getContext()) && apiVersion.equals(api.getVersion())) {
@@ -123,7 +131,7 @@ public class CORSRequestHandler extends AbstractHandler implements ManagedLifecy
 		messageContext.setProperty(APIConstants.API_RESOURCE_CACHE_KEY, resourceCacheKey);
 		setCORSHeaders(messageContext, selectedResourceWithVerb);
 		if (selectedResource != null && selectedResourceWithVerb != null) {
-				if ("inline".equalsIgnoreCase(inline)) {
+				if ("inline".equalsIgnoreCase(APIImplementationType)) {
 					messageContext.getSequence(APIConstants.CORS_SEQUENCE_NAME).mediate(messageContext);
 				}
 				status =  true;
@@ -147,6 +155,8 @@ public class CORSRequestHandler extends AbstractHandler implements ManagedLifecy
 	}
 
 	/**
+	 * This method used to set CORS headers into message context
+	 *
 	 * @param messageContext   message context for set cors headers as properties
 	 * @param selectedResource resource according to the request
 	 */
@@ -178,13 +188,6 @@ public class CORSRequestHandler extends AbstractHandler implements ManagedLifecy
 		messageContext.setProperty(APIConstants.CORSHeaders.ACCESS_CONTROL_ALLOW_HEADERS, allowHeaders);
 	}
 
-	public String getInline() {
-		return inline;
-	}
-
-	public void setInline(String inline) {
-		this.inline = inline;
-	}
 
 	public String getAllowHeaders() {
 		return allowHeaders;
@@ -207,4 +210,13 @@ public class CORSRequestHandler extends AbstractHandler implements ManagedLifecy
 	public void setAllowedOrigins(String allowedOrigins) {
 		this.allowedOrigins = Arrays.asList(allowedOrigins.split(","));
 	}
+
+	public String getAPIImplementationType() {
+		return APIImplementationType;
+	}
+
+	public void setAPIImplementationType(String APIImplementationType) {
+		this.APIImplementationType = APIImplementationType;
+	}
+
 }
