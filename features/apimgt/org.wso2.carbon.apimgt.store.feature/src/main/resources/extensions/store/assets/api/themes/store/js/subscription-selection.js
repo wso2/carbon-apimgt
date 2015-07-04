@@ -333,6 +333,19 @@ $(function () {
                            APP_STORE.productionKeys = data;
                            updateMetadata(appName, data, 'Production', 'new');
                            events.publish(EV_GENERATE_PROD_TOKEN, findAppDetails(appName));
+                       },
+                       error: function (data) {
+                           BootstrapDialog.show({
+                                                    type: BootstrapDialog.TYPE_DANGER,
+                                                    title: 'Failure',
+                                                    message: '<div><i class="icon-briefcase"></i>Unable to generate Production key</div>',
+                                                    buttons: [{
+                                                                  label: 'Ok',
+                                                                  action: function (dialogItself) {
+                                                                      dialogItself.close();
+                                                                  }
+                                                              }]
+                                                });
                        }
                    });
         });
@@ -366,6 +379,19 @@ $(function () {
                            APP_STORE.sandboxKeys = data;
                            updateMetadata(appName, data, 'Sandbox', 'new');
                            events.publish(EV_GENERATE_SAND_TOKEN, findAppDetails(appName));
+                       },
+                       error: function (data) {
+                                BootstrapDialog.show({
+                                             type: BootstrapDialog.TYPE_DANGER,
+                                             title: 'Failure',
+                                             message: '<div><i class="icon-briefcase"></i>Unable to generate Sandbox key</div>',
+                                             buttons: [{
+                                                           label: 'Ok',
+                                                           action: function (dialogItself) {
+                                                               dialogItself.close();
+                                                           }
+                                                       }]
+                                         });
                        }
                    });
 
@@ -1003,7 +1029,7 @@ $(function () {
      The function returns the Production Keys of the given application
      */
     var findProdKeys = function (details) {
-        if (!details || !details.prodKey) {
+        if (!details.prodConsumerKey &&  !details.prodConsumerSecret) {
             return null;
         }
         var keys = {};
@@ -1021,7 +1047,7 @@ $(function () {
      The function returns the Sandbox Keys of the given application
      */
     var findSandKeys = function (details) {
-        if (!details || !details.sandboxKey) {
+        if (!details.sandboxConsumerKey &&  !details.sandboxConsumerSecret) {
             return null;
         }
         var keys = {};
