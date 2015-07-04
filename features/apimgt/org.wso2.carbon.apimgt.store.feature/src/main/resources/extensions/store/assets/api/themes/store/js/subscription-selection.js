@@ -268,7 +268,8 @@ $(function () {
                    type: 'POST',
                    url: getSubscriptionAPI(appName, 'getUUID'),
                    data: apiData,
-                   success: function (data) {
+                   success: function (responseData) {
+                       var data = responseData.data;
                        if (!data.error) {
                            var uuid = data.response;
                            window.location = 'details/' + uuid;
@@ -287,7 +288,19 @@ $(function () {
 
                                                 });
                        }
-                   }
+                   }, error : function(data) {
+                                    BootstrapDialog.show({
+                                         type: BootstrapDialog.TYPE_DANGER,
+                                         title: 'Fail to Delete Subscription!',
+                                         message: '<div><i class="icon-briefcase"></i> Unable to locate the artifact</div>',
+                                         buttons: [{
+                                                       label: 'Ok',
+                                                       action: function(dialogItself){
+                                                           dialogItself.close();
+                                                       }
+                                                   }]
+                                     });
+                }
                });
     };
 
@@ -315,11 +328,24 @@ $(function () {
                        type: 'POST',
                        url: getSubscriptionAPI(appName, 'new'),
                        data: tokenRequestData,
-                       success: function (data) {
-                           var jsonData = data;
-                           APP_STORE.productionKeys = jsonData;
-                           updateMetadata(appName, jsonData, 'Production', 'new');
+                       success: function (responseData) {
+                           var data = responseData.data;
+                           APP_STORE.productionKeys = data;
+                           updateMetadata(appName, data, 'Production', 'new');
                            events.publish(EV_GENERATE_PROD_TOKEN, findAppDetails(appName));
+                       },
+                       error: function (data) {
+                           BootstrapDialog.show({
+                                                    type: BootstrapDialog.TYPE_DANGER,
+                                                    title: 'Failure',
+                                                    message: '<div><i class="icon-briefcase"></i>Unable to generate Production key</div>',
+                                                    buttons: [{
+                                                                  label: 'Ok',
+                                                                  action: function (dialogItself) {
+                                                                      dialogItself.close();
+                                                                  }
+                                                              }]
+                                                });
                        }
                    });
         });
@@ -348,11 +374,24 @@ $(function () {
                        type: 'POST',
                        url: getSubscriptionAPI(appName, 'new'),
                        data: tokenRequestData,
-                       success: function (data) {
-                           var jsonData = data;
-                           APP_STORE.sandboxKeys = jsonData;
-                           updateMetadata(appName, jsonData, 'Sandbox', 'new');
+                       success: function (responseData) {
+                           var data = responseData.data;
+                           APP_STORE.sandboxKeys = data;
+                           updateMetadata(appName, data, 'Sandbox', 'new');
                            events.publish(EV_GENERATE_SAND_TOKEN, findAppDetails(appName));
+                       },
+                       error: function (data) {
+                                BootstrapDialog.show({
+                                             type: BootstrapDialog.TYPE_DANGER,
+                                             title: 'Failure',
+                                             message: '<div><i class="icon-briefcase"></i>Unable to generate Sandbox key</div>',
+                                             buttons: [{
+                                                           label: 'Ok',
+                                                           action: function (dialogItself) {
+                                                               dialogItself.close();
+                                                           }
+                                                       }]
+                                         });
                        }
                    });
 
@@ -375,12 +414,32 @@ $(function () {
                        type: 'POST',
                        url: getSubscriptionAPI(appName, 'updateDomain'),
                        data: domainUpdateData,
-                       success: function (data) {
-                           var message = {};
-                           message.text = '<div><i class="icon-briefcase"></i> Production domain updated successfully.</div>';
-                           message.type = 'success';
-                           message.layout = 'topRight';
-                           noty(message);
+                       success: function (responseData) {
+                               var data = responseData.data;
+                               BootstrapDialog.show({
+                                                        type: BootstrapDialog.TYPE_SUCCESS,
+                                                        title: 'Success',
+                                                        message: "Production domain updated successfully",
+                                                        buttons: [{
+                                                                      label: 'Ok',
+                                                                      action: function(dialogItself){
+                                                                          dialogItself.close();
+                                                                      }
+                                                                  }]
+                                                    });
+                       },
+                       error : function(data) {
+                                            BootstrapDialog.show({
+                                             type: BootstrapDialog.TYPE_DANGER,
+                                             title: 'Error!',
+                                             message: 'Error while updating production domain',
+                                             buttons: [{
+                                                           label: 'Ok',
+                                                           action: function(dialogItself){
+                                                               dialogItself.close();
+                                                           }
+                                                       }]
+                                         });
                        }
                    });
         });
@@ -398,12 +457,32 @@ $(function () {
                        type: 'POST',
                        url: getSubscriptionAPI(appName, 'updateDomain'),
                        data: domainUpdateData,
-                       success: function (data) {
-                           var message = {};
-                           message.text = '<div><i class="icon-briefcase"></i> Sandbox domain updated successfully.</div>';
-                           message.type = 'success';
-                           message.layout = 'topRight';
-                           noty(message);
+                       success: function (responseData) {
+                           var data = responseData.data;
+                           BootstrapDialog.show({
+                                                    type: BootstrapDialog.TYPE_SUCCESS,
+                                                    title: 'Error',
+                                                    message: "Sandbox domain updated successfully.",
+                                                    buttons: [{
+                                                                  label: 'Ok',
+                                                                  action: function(dialogItself){
+                                                                      dialogItself.close();
+                                                                  }
+                                                              }]
+                                                });
+                       },
+                       error : function(data) {
+                           BootstrapDialog.show({
+                                                    type: BootstrapDialog.TYPE_DANGER,
+                                                    title: 'Error!',
+                                                    message: 'Error while updating sandbox domain',
+                                                    buttons: [{
+                                                                  label: 'Ok',
+                                                                  action: function(dialogItself){
+                                                                      dialogItself.close();
+                                                                  }
+                                                              }]
+                                                });
                        }
                    });
         });
@@ -451,13 +530,27 @@ $(function () {
                        type: 'POST',
                        url: getSubscriptionAPI(appName, 'refresh'),
                        data: tokenRequestData,
-                       success: function (data) {
+                       success: function (responseData) {
+                           var data = responseData.data;
                            data.consumerKey = APP_STORE.productionKeys.consumerKey;
                            data.consumerSecret = APP_STORE.productionKeys.consumerSecret;
                            var jsonData = data;
                            APP_STORE.productionKeys = jsonData;
                            updateMetadata(appName, jsonData, 'Production', 'refresh');
                            events.publish(EV_GENERATE_PROD_TOKEN, findAppDetails(appName));
+                       },
+                       error : function(data) {
+                           BootstrapDialog.show({
+                                                    type: BootstrapDialog.TYPE_DANGER,
+                                                    title: 'Error',
+                                                    message: "Error while generating the Production token",
+                                                    buttons: [{
+                                                                  label: 'Ok',
+                                                                  action: function(dialogItself){
+                                                                      dialogItself.close();
+                                                                  }
+                                                              }]
+                                                });
                        }
                    });
         });
@@ -487,13 +580,26 @@ $(function () {
                        type: 'POST',
                        url: getSubscriptionAPI(appName, 'refresh'),
                        data: tokenRequestData,
-                       success: function (data) {
+                       success: function (responseData) {
+                           var data = responseData.data;
                            data.consumerKey = APP_STORE.sandboxKeys.consumerKey;
                            data.consumerSecret = APP_STORE.sandboxKeys.consumerSecret;
                            var jsonData = data;
                            APP_STORE.sandboxKeys = jsonData;
                            updateMetadata(appName, jsonData, 'Sandbox', 'refresh');
                            events.publish(EV_GENERATE_SAND_TOKEN, findAppDetails(appName));
+                       }, error : function(data) {
+                           BootstrapDialog.show({
+                                                    type: BootstrapDialog.TYPE_DANGER,
+                                                    title: 'Error',
+                                                    message: "Error while generating the sandbox token",
+                                                    buttons: [{
+                                                                  label: 'Ok',
+                                                                  action: function(dialogItself){
+                                                                      dialogItself.close();
+                                                                  }
+                                                              }]
+                                                });
                        }
                    });
         });
@@ -520,7 +626,8 @@ $(function () {
                                                               type: 'POST',
                                                               url: getSubscriptionAPI(appName, 'deleteSubscription'),
                                                               data: deleteAPISubscriptionData,
-                                                              success: function (data) {
+                                                              success: function (responseData) {
+                                                                  var data = responseData.data;
                                                                   if (data.success) {
                                                                       deleteSubscriptionMetadata(appName, apiName, apiProvider,
                                                                                                  apiVersion, 'deleteSubscription');
@@ -544,6 +651,19 @@ $(function () {
                                                                                                          }]
                                                                                            });
                                                                   }
+                                                              }, error : function(data) {
+                                                                  BootstrapDialog.show({
+                                                                                           type: BootstrapDialog.TYPE_DANGER,
+                                                                                           title: 'Fail to Delete Subscription!',
+                                                                                           message: '<div><i class="fw fw-warning"></i> API : ' +
+                                                                                                    appName + ' subscription could not be deleted.</div>',
+                                                                                           buttons: [{
+                                                                                                         label: 'Ok',
+                                                                                                         action: function(dialogItself){
+                                                                                                             dialogItself.close();
+                                                                                                         }
+                                                                                                     }]
+                                                                                       });
                                                               }
                                                           });
                                                    dialogItself.close();
@@ -909,7 +1029,7 @@ $(function () {
      The function returns the Production Keys of the given application
      */
     var findProdKeys = function (details) {
-        if (!details || !details.prodKey) {
+        if (!details.prodConsumerKey &&  !details.prodConsumerSecret) {
             return null;
         }
         var keys = {};
@@ -927,7 +1047,7 @@ $(function () {
      The function returns the Sandbox Keys of the given application
      */
     var findSandKeys = function (details) {
-        if (!details || !details.sandboxKey) {
+        if (!details.sandboxConsumerKey &&  !details.sandboxConsumerSecret) {
             return null;
         }
         var keys = {};

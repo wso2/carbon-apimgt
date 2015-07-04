@@ -16,15 +16,13 @@
  */
 
 require('/modules/publisher.js').exec(function (ctx) {
-    var log = new Log('api_subscriptions_endpoint: ');
+    var log = new Log('api_subscriptions_endpoint:');
     var ref = require('utils').request;
     var responseProcessor = require('utils').response;
     var req = ctx.request;
 
     var server = require('store').server;
     var user = server.current(ctx.session);
-    var username = user.username;
-    var uriMatcher = new URIMatcher(req.getRequestURI());
     var httpMethod = req.getMethod();
 
     var response = ctx.response;
@@ -57,7 +55,6 @@ require('/modules/publisher.js').exec(function (ctx) {
             break;
 
         default://other un-implemented endpoints
-
             response = responseProcessor.buildErrorResponse(response, constants.STATUS_CODES.NOT_IMPLEMENTED,
                     'The endpoint that you have requested is not implemented for the ' + httpMethod +
                     ' method.Try making the request with the appropriate verb' +

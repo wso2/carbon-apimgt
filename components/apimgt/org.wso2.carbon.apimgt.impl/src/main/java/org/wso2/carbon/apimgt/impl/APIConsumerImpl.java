@@ -685,7 +685,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                                             String validityTime, String accessAllowDomains,String
             requestedScopesString, String jsonInput) throws APIManagementException {
         // Create Token Request with parameters provided from UI.
-        String[] requestedScopes=requestedScopesString.split(" ");
+        String[] requestedScopes = requestedScopesString.split(" ");
         String[] accessAllowDomainsArray = accessAllowDomains.split(",");
         AccessTokenRequest tokenRequest = new AccessTokenRequest();
         tokenRequest.setClientId(clientId);

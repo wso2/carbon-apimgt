@@ -59,20 +59,22 @@ var events;
     EventBus.prototype.publish = function (eventName, data) {
         var cb;
         var dataCopy;
+        var success = true;
         //Check if the event is tracked
         if (this.eventMap.hasOwnProperty(eventName)) {
 
             //Go through each subscriber
             for (var subscriber in this.eventMap[eventName]) {
-
                 //Invoke all subscribers
                 cb = this.eventMap[eventName][subscriber];
 
                 //Perform a shallow copy so that each event handler recieves its own copy of the data
                 //there is no sharing of data between handlers
-                dataCopy=deepCopy(data);
-
-                cb.invoke(dataCopy);
+                dataCopy = deepCopy(data);
+                success = cb.invoke(dataCopy);
+                if(!success) {
+                    break;
+                }
             }
 
         }
