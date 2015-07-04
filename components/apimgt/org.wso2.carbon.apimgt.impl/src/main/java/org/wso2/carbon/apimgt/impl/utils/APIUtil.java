@@ -1543,15 +1543,15 @@ public final class APIUtil {
             log.error(msg, e);
             throw new APIManagementException(msg, e);
         } catch (ClassNotFoundException e) {
-            String msg = "Requested APIPublisher Class couldn't found";
+            String msg = "One or more classes defined in APIConstants.EXTERNAL_API_STORE_CLASS_NAME cannot be found";
             log.error(msg, e);
             throw new APIManagementException(msg, e);
         } catch (InstantiationException e) {
-            String msg = "Requested APIPublisher Class couldn't load";
+            String msg = "One or more classes defined in APIConstants.EXTERNAL_API_STORE_CLASS_NAME cannot be load";
             log.error(msg, e);
             throw new APIManagementException(msg, e);
         } catch (IllegalAccessException e) {
-            String msg = "Requested APIPublisher Class couldn't access";
+            String msg = "One or more classes defined in APIConstants.EXTERNAL_API_STORE_CLASS_NAME cannot be access";
             log.error(msg, e);
             throw new APIManagementException(msg, e);
         }
