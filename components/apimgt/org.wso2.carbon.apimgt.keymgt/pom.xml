@@ -32,13 +32,13 @@
 
 	<dependencies>
 		<dependency>
-			<groupId>org.wso2.carbon</groupId>
+			<groupId>org.wso2.carbon.identity</groupId>
 			<artifactId>org.wso2.carbon.identity.core</artifactId>
 		</dependency>
-        <dependency>
-            <groupId>org.wso2.carbon</groupId>
-            <artifactId>org.wso2.carbon.identity.oauth</artifactId>
-        </dependency>
+        	<dependency>
+            		<groupId>org.wso2.carbon.identity</groupId>
+            		<artifactId>org.wso2.carbon.identity.oauth</artifactId>
+        	</dependency>
 		<dependency>
 			<groupId>org.wso2.carbon</groupId>
 			<artifactId>org.wso2.carbon.registry.core</artifactId>
@@ -52,13 +52,13 @@
 			<artifactId>org.wso2.carbon.utils</artifactId>
 		</dependency>
 		<dependency>
-            <groupId>org.wso2.carbon</groupId>
-            <artifactId>org.wso2.carbon.logging</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.wso2.carbon.apimgt</groupId>
-            <artifactId>org.wso2.carbon.apimgt.impl</artifactId>
-        </dependency>
+            		<groupId>org.wso2.carbon</groupId>
+            		<artifactId>org.wso2.carbon.logging</artifactId>
+        	</dependency>
+        	<dependency>
+            		<groupId>org.wso2.carbon.apimgt</groupId>
+            		<artifactId>org.wso2.carbon.apimgt.impl</artifactId>
+        	</dependency>
 	</dependencies>
 
 	<build>

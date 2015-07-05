@@ -34,7 +34,6 @@ import org.wso2.carbon.apimgt.keymgt.client.SubscriberKeyMgtClient;
 import org.wso2.carbon.apimgt.keymgt.client.ProviderKeyMgtClient;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.identity.user.registration.stub.dto.UserFieldDTO;
-import org.wso2.carbon.ndatasource.common.DataSourceException;
 import org.wso2.carbon.utils.CarbonUtils;
 import org.wso2.carbon.utils.ConfigurationContextService;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
@@ -219,12 +218,10 @@ public class HostObjectUtils {
     }
 
     protected static boolean isUsageDataSourceSpecified() {
-        try {
-            return (null != HostObjectComponent.getDataSourceService().
-                    getDataSource(APIConstants.API_USAGE_DATA_SOURCE_NAME));
-        } catch (DataSourceException e) {
-            return false;
-        }
+        APIManagerConfiguration configuration =
+                ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration();
+
+        return (null != configuration.getFirstProperty(APIConstants.API_USAGE_DATA_SOURCE_NAME));
     }
 
     protected static boolean isStatPublishingEnabled() {
