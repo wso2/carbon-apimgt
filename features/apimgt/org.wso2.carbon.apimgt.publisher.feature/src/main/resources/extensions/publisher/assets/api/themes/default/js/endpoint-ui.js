@@ -83,7 +83,7 @@ $(document).ready(function () {
         form: [{
             "type": "fieldset",
             "htmlClass": "ae_message_content",
-            "title": 'eMessage Content',
+            "title": 'Message Content',
             "items": [{
                 key: 'format',
                 'titleMap': {
@@ -508,12 +508,9 @@ $(document).ready(function () {
     }
     $('#endpoint_type').trigger('change');
 
-    $( "#endpoint_form" ).on( "click", ".advance_endpoint_config", function() {
+    $( "#endpoint_form" ).delegate( ".advance_endpoint_config", "click", function() {
         $('form#advance_form').html('');
-
-        //APP.form.advance_endpoint_config.value = jQuery.parseJSON($(this).attr('ep-config-data'));
-        APP.form.advance_endpoint_config.value = jQuery.parseJSON("{}");
-        //alert(APP.form.advance_endpoint_config);
+        APP.form.advance_endpoint_config.value = jQuery.parseJSON($(this).attr('ep-config-data'));
         $('form#advance_form').jsonForm(APP.form.advance_endpoint_config);
         $('.error_codes_selection').multiselect({
             buttonText: function(options, select) {
@@ -543,9 +540,7 @@ $(document).ready(function () {
         else{
             $(".ae_message_content").hide();
         }
-
         $('#advance_endpoint_config').modal('show');
-
         APP.advance_endpoint_button = $(this);
 
     });
@@ -583,13 +578,13 @@ $(document).ready(function () {
                 var value_index = name.replace(/([a-zA-Z0-9_]*)/, '').replace('[','').replace(']','');
                 if(value_index == ''){
                     if(ec[field] != undefined && ec[field] !="")
-                        ec[field] = { url: ec[field] , config: ep_config };
+                        ec[field] = { url: ec[field].trim() , config: ep_config };
                     else
                         ec[field] = undefined;
                 }
                 else{
                     if(ec[field][value_index] != undefined && ec[field][value_index] !="")
-                        ec[field][value_index] = { url: ec[field][value_index] , config: ep_config };
+                        ec[field][value_index] = { url: ec[field][value_index].trim() , config: ep_config };
                     else{
                         ec[field].splice(value_index,1);
                     }
@@ -615,24 +610,26 @@ $(document).ready(function () {
         }
     );
 
-    APP.update_ep_config = function() {
+    APP.update_ep_config = function(status) {
         var ec = APP.ep_form.getValues();
+        ec.implementation_status = status;
         ec.endpoint_type = $('#endpoint_type').val();
-       $('.advance_endpoint_config').each(function(index, el){
-        console.log($(el).attr('ep-config-data'));
-           var ep_config = jQuery.parseJSON($(el).attr('ep-config-data'));
+        $('.advance_endpoint_config').each(function(index, el){
+            if($(el).attr('ep-config-data') && $(el).attr('ep-config-data') != ""){
+                var ep_config = jQuery.parseJSON($(el).attr('ep-config-data'));
+            }
             var name = $(el).attr('field-name');
             var field = name.replace(/\[([0-9]*)\]$/, '');
             var value_index = name.replace(/([a-zA-Z0-9_]*)/, '').replace('[','').replace(']','');
             if(value_index == ''){
                 if(ec[field] != undefined && ec[field] !="")
-                    ec[field] = { url: ec[field] , config: ep_config };
+                    ec[field] = { url: ec[field].trim() , config: ep_config };
                 else
                     ec[field] = undefined;
             }
             else{
                 if(ec[field][value_index] != undefined && ec[field][value_index] !="")
-                    ec[field][value_index] = { url: ec[field][value_index] , config: ep_config };
+                    ec[field][value_index] = { url: ec[field][value_index].trim() , config: ep_config };
                 else{
                     ec[field].splice(value_index,1);
                 }

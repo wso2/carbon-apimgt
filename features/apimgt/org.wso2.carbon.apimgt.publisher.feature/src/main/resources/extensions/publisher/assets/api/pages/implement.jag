@@ -25,9 +25,7 @@ require('/modules/publisher.js').exec(function(ctx) {
     var uriMatcher = new URIMatcher(ctx.request.getRequestURI());
     var options = uriMatcher.match('/{context}/assets/{type}/{pageName}/{+id}');
     var type = options.type;
-    var am = asset.createUserAssetManager(ctx.session, type);
     var page = ui.buildPage(ctx.session, ctx.request);
-    var output;
 
     if (!options.id) {
         ctx.response.sendError(400, 'Cannot render the implementation details without an asset id');
@@ -55,17 +53,28 @@ require('/modules/publisher.js').exec(function(ctx) {
 	//TODO hard coded values replace
 	output.api.isCreatePermitted = true;
 	output.api.isDataPublishingEnabled = false;
-	output.api.storeUrl = 'test';
-	//TODO correctly fix this
-	output.api.inline_impl = "'";
-	output.api.hide_endpoint="hide";
-	output.api.endpoint_impl = "checked='checked'";
-	output.api.hide_impl = "hide";
+	var storeUrl = apiProxy.getAPIStoreURL().url;
+	output.api.storeUrl = storeUrl;
+
+	//Check configurations specific properties
+	var config = require('/extensions/assets/api/config/config.json');
+	output.config = config;
 
 	//Set language specific helper messages and names
 	var locale = require('/extensions/assets/api/locale/locale_en.json');
 	output.locale = locale;
-    //TODO 
+
+	//Set language specific helper messages and names
+	var locale = require('/extensions/assets/api/locale/locale_en.json');
+	output.locale = locale;
+
+	if(!api.subscribersCount || api.subscribersCount==0){
+		api.subs=false;
+	}else{
+		api.subs=true;
+	}
+
+	//TODO
     /*
     following is to avoid The choice of Java method java.lang.String.replace matching JavaScript
     argument types (function,function) is ambiguous
