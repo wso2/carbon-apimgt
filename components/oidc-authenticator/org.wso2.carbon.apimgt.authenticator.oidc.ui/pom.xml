@@ -57,15 +57,12 @@
 	        <version>1.0.0</version>
         </dependency>
         <dependency>
-            <groupId>org.apache.httpcomponents.wso2</groupId>
+            <groupId>org.wso2.orbit.org.apache.httpcomponents</groupId>
             <artifactId>httpclient</artifactId>
-            <version>4.2.5.wso2v1</version>
         </dependency>
-
 	<dependency>
 	    <groupId>org.apache.ws.security.wso2</groupId>
 	    <artifactId>wss4j</artifactId>
-	    <version>1.5.11.wso2v1</version>
 	</dependency>
     </dependencies>
 

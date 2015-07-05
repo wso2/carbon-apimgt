@@ -21,7 +21,6 @@ package org.wso2.carbon.apimgt.impl.token;
 import org.apache.axiom.util.base64.Base64Utils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.codehaus.jettison.json.JSONException;
 import org.json.simple.JSONObject;
 import org.wso2.carbon.apimgt.api.APIManagementException;
@@ -32,6 +31,7 @@ import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.base.MultitenantConstants;
 import org.wso2.carbon.core.util.KeyStoreManager;
+import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.security.*;
@@ -278,6 +278,10 @@ public abstract class AbstractJWTGenerator implements TokenGenerator {
             throw new APIManagementException(error);
         } catch (SignatureException e) {
             String error = "Error in signature";
+            //do not log
+            throw new APIManagementException(error);
+        } catch (RegistryException e1) {
+            String error = "Error in load tenant from registry";
             //do not log
             throw new APIManagementException(error);
         }

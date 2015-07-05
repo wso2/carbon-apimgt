@@ -127,9 +127,11 @@ public class DefaultKeyValidationHandler extends AbstractKeyValidationHandler {
             }
         }
 
+        //TODO : After carbon 4.4.0 upgrade, AccessTokenDO constructor has new parameter for refresh validity time.
+        //Temporally passed the validity period as the validity period
         AccessTokenDO accessTokenDO = new AccessTokenDO(apiKeyValidationInfoDTO.getConsumerKey(),
                 apiKeyValidationInfoDTO.getEndUserName(), scopes,
-                null, apiKeyValidationInfoDTO.getValidityPeriod(),
+                null, null, apiKeyValidationInfoDTO.getValidityPeriod(), apiKeyValidationInfoDTO.getValidityPeriod(),
                 apiKeyValidationInfoDTO.getType());
 
         accessTokenDO.setAccessToken(validationContext.getAccessToken());

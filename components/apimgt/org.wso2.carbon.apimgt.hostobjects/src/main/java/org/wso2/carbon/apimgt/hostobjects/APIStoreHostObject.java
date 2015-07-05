@@ -61,6 +61,7 @@ import org.wso2.carbon.core.util.PermissionUpdateUtil;
 import org.wso2.carbon.identity.oauth.config.OAuthServerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIConstants.ApplicationStatus;
 import org.wso2.carbon.identity.oauth.internal.OAuthComponentServiceHolder;
+import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.user.core.UserCoreConstants;
 import org.wso2.carbon.user.core.UserRealm;
 import org.wso2.carbon.user.core.UserStoreException;
@@ -125,6 +126,8 @@ public class APIStoreHostObject extends ScriptableObject {
             } catch (org.wso2.carbon.user.api.UserStoreException e) {
                 log.error("Could not load tenant registry. Error while getting tenant id from tenant domain " +
                         tenantDomain);
+            } catch (RegistryException e) {
+                log.error("Could not load tenant registry. Error while loading tenant registry " + tenantDomain);
             }
         }
 

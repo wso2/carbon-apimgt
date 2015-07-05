@@ -36,12 +36,10 @@
         <dependency>
             <groupId>org.wso2.carbon.apimgt</groupId>
             <artifactId>org.wso2.carbon.apimgt.authenticator.oidc.ui</artifactId>
-	    <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon.apimgt</groupId>
             <artifactId>org.wso2.carbon.apimgt.authenticator.oidc.stub</artifactId>
-	    <version>${project.version}</version>
         </dependency>
     </dependencies>
       
@@ -64,7 +62,7 @@
 							<adviceFile>
 								<properties>
 									<propertyDef>org.wso2.carbon.p2.category.type:console</propertyDef>
-                                    <propertyDef>org.eclipse.equinox.p2.type.group:false</propertyDef>                                                                        
+				                                        <propertyDef>org.eclipse.equinox.p2.type.group:false</propertyDef>                                                                   
 								</properties>
 							</adviceFile>
 							<bundles>
