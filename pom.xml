@@ -34,7 +34,7 @@
         <module>features/apimgt</module>
         <module>features/forum</module>
         <module>features/synapse</module>
-	<module>features/oidc-authenticator</module>
+	    <module>features/oidc-authenticator</module>
     </modules>
 
     <build>
