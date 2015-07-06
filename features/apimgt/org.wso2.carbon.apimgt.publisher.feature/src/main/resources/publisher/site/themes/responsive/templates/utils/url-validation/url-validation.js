@@ -1,7 +1,7 @@
 $(document).ready(function(){
     $( "body" ).delegate( "button.check_url_valid", "click", function() {
         var btn = this;
-        var url = $(this).parent().find('input:first').val();
+        var url = $(this).parent().parent().find('input:first').val();
         var type = '';
         var attr = $(this).attr('url-type');
         if (typeof attr !== typeof undefined && attr !== false) {
@@ -14,8 +14,8 @@ $(document).ready(function(){
         $(btn).val(i18n.t('validationMsgs.validating'));
 
         if (url == '') {
-            $(btn).parent().after(' <span class="label label-important url_validate_label"><i class="glyphicon glyphicon-remove icon-white"></i>'+ i18n.t('validationMsgs.invalid')+'</span>');
-            var toFade = $(btn).next();
+            $(btn).parent().parent().after(' <span class="label label-danger url_validate_label"><i class="glyphicon glyphicon-remove icon-white"></i>'+ i18n.t('validationMsgs.invalid')+'</span>');
+            var toFade = $(btn).parent().parent().parent().find('.url_validate_label');
             $(btn).removeClass("loadingButton-small");
             $(btn).val(i18n.t('validationMsgs.testUri'));
             var foo = setTimeout(function(){$(toFade).hide()},3000);
@@ -28,12 +28,12 @@ $(document).ready(function(){
                   function (result) {
                       if (!result.error) {
                           if (result.response == "success") {
-                              $(btn).parent().after(' <span class="label label-success url_validate_label"><i class="glyphicon glyphicon-ok icon-white"></i>'+ i18n.t('validationMsgs.valid')+'</span>');
+                              $(btn).parent().parent().after(' <span class="label label-success url_validate_label"><i class="glyphicon glyphicon-ok icon-white"></i>'+ i18n.t('validationMsgs.valid')+'</span>');
 
                           } else {
-                              $(btn).parent().after(' <span class="label label-important url_validate_label"><i class="glyphicon glyphicon-remove icon-white"></i>'+ i18n.t('validationMsgs.invalid')+'</span>');
+                              $(btn).parent().parent().after(' <span class="label label-danger url_validate_label"><i class="glyphicon glyphicon-remove icon-white"></i>'+ i18n.t('validationMsgs.invalid')+'</span>');
                           }
-                          var toFade = $(btn).parent().parent().find('.url_validate_label');
+                          var toFade = $(btn).parent().parent().parent().find('.url_validate_label');
                           var foo = setTimeout(function() {
                                 $(toFade).hide();
                           }, 3000);

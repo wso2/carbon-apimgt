@@ -90,12 +90,12 @@
     </div>     
     <div class="content-section shadow-up">
     <div class="content-data">   
-    <div class="alert alert-error" id="addAPIError" style="display:none">
+    <div class="alert alert-danger" id="addAPIError" style="display:none">
         <span id="addErrorSpan"></span>
     </div>
 <%
     if(api != null && api.subs > 0){%>
-    <div class="alert alert-block alert-warning" id="editAPIWarn" style="display:block">
+    <div class="alert alert-warning" id="editAPIWarn" style="display:block">
         <span id="editWarnSpan"><b>Warning!</b><br/>
         You are editing an API with active subscribers. Tier Availability changes will not be reflected on
         active subscriptions.
@@ -234,10 +234,10 @@
 
 
             <!--Response Caching -->
-                <div class="form-group">
+                <div class="form-group form-inline">
                     <label class="control-label col-sm-3" for="responseCache"><%=i18n.localize("responseCache")%>:</label>
-                      <div class="controls col-sm-8">
-                       <select class="select required" id="responseCache" name="responseCache">
+                      <div class="controls col-sm-8 responseCacheSelect">
+                       <select class="select required form-control" id="responseCache" name="responseCache">
                             <option value="disabled" <%if(api.responseCache != "Enabled"){%> selected="selected" <%}%>><%=i18n.localize("disabled")%></option>
                             <option value="enabled" <%if(api.responseCache=="Enabled"){%> selected="selected" <%}%>><%=i18n.localize("enabled")%></option>
                         </select>
@@ -253,7 +253,7 @@
                 </div>
             <!--Response Caching End -->
 
-                <div class="form-group">
+                <div class="form-group ">
                 <% mod = jagg.module("api");
             result = mod.isMultipleTenantsAvailable();
                 var isMultipleTenantsAvailable = result.status;
@@ -278,12 +278,13 @@
                        </div>
                        <% } %>            
                 <br/>
+                </div>
                     <div class="form-group" id="tenantsDiv" <%if(api.subscriptionAvailability!="specific_tenants"){%>style="display: none;"<%}%>>
-                        <label class="control-label" for="tenants" id="tenantLabel" name="tenantLabel">
+                        <label class="control-label col-sm-3" for="tenants" id="tenantLabel" name="tenantLabel">
                             <%=i18n.localize("tenants")%>:<span class="requiredAstrix">*</span>
                         </label>
-                        <div class="controls">
-                            <input type="text" class="input"
+                        <div class="col-sm-6">
+                            <input type="text" class="input form-control"
                             id="tenants" name="tenants" value="<%=api.subscriptionTenants%>"/>
                             <p class="help-block" id="tenantsHelp"><%=i18n.localize("tenantsHelpMsg")%></p>
                         </div>
@@ -415,7 +416,7 @@
       </div>
     </div>
   </div><!-- Resources Information -->  
-</div>
+
 
 
 
@@ -429,7 +430,7 @@
                 <input type="hidden" name="action" value="manage" />
                 <input type="hidden" id="swagger" name="swagger" value="" />
 
-                <div class="form-actions" id="saveButtons"> 
+                <div class="form-actions" id="saveButtons">
 
                     <button class="btn btn-default has-spinner" id="save_api"><%=i18n.localize("save")%></button>
                     <%if(outputs.isPermitted){%> <a class="btn btn-primary has-spinner" id="publish_api">Save & Publish</a>  <%}%>

@@ -191,9 +191,6 @@ public abstract class AbstractEndpoint extends FaultHandler implements Endpoint,
                 return;
             }*/
             metricsMBean = new EndpointView(endpointName, this);
-            if(metricsMBean != null) {
-                metricsMBean.destroy();
-            }
 
             MBeanRegistrar.getInstance().registerMBean(metricsMBean, "Endpoint", endpointName);
         }

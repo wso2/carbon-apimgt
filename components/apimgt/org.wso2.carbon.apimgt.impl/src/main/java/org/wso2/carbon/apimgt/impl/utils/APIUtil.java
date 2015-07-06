@@ -99,6 +99,7 @@ import org.wso2.carbon.registry.indexing.solr.SolrClient;
 import org.wso2.carbon.user.api.*;
 import org.wso2.carbon.user.core.UserCoreConstants;
 import org.wso2.carbon.user.core.UserRealm;
+import org.wso2.carbon.user.core.config.RealmConfigXMLProcessor;
 import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.user.mgt.UserMgtConstants;
 import org.wso2.carbon.utils.CarbonUtils;
@@ -122,8 +123,7 @@ import javax.xml.stream.XMLStreamReader;
 import java.io.*;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.net.MalformedURLException;
-import java.net.URL;
+import java.net.*;
 import java.rmi.RemoteException;
 import java.util.*;
 import java.util.Map.Entry;
@@ -156,6 +156,8 @@ public final class APIUtil {
                         String.valueOf(DEFAULT_TENANT_IDLE_MINS)))
                 * 60 * 1000;
     }
+
+    private static String hostAddress = null;
 
     /**
      * This method used to get API from governance artifact
@@ -3539,8 +3541,15 @@ public final class APIUtil {
                                                 String resourceUri, String httpVerb, String authLevel){
         return accessToken + ":" + apiContext + "/" + apiVersion + resourceUri + ":" + httpVerb + ":" + authLevel;
     }
-
-    private static String replaceSystemProperty(String text) {
+    
+    
+    
+    /**
+     * Resolves system properties and replaces in given in text 
+     * @param text
+     * @return System properties resolved text
+     */
+    public static String replaceSystemProperty(String text) {
         int indexOfStartingChars = -1;
         int indexOfClosingBrace;
 
@@ -3555,6 +3564,28 @@ public final class APIUtil {
             String sysProp = text.substring(indexOfStartingChars + 2,
                     indexOfClosingBrace);
             String propValue = System.getProperty(sysProp);
+            
+            if (propValue == null) {
+                if (sysProp.equals("carbon.context")) {
+                    propValue = ServiceReferenceHolder.getContextService().getServerConfigContext().getContextRoot();
+                } else if (sysProp.equals("admin.username") || sysProp.equals("admin.password")) {
+                    try {
+                        RealmConfiguration realmConfig =
+                                                         new RealmConfigXMLProcessor().buildRealmConfigurationFromFile();
+                        if (sysProp.equals("admin.username")) {
+                            propValue = realmConfig.getAdminUserName();
+                        } else {
+                            propValue = realmConfig.getAdminPassword();
+                        }
+                    } catch (UserStoreException e) {
+                        // Can't throw an exception because the server is
+                        // starting and can't be halted.
+                        log.error(e.getMessage());
+                        return null;
+                    }
+                }
+            }
+            //Derive original text value with resolved system property value
             if (propValue != null) {
                 text = text.substring(0, indexOfStartingChars) + propValue
                         + text.substring(indexOfClosingBrace + 1);
@@ -4140,5 +4171,49 @@ public final class APIUtil {
             throws APIManagementException {
         return ApiMgtDAO.isApplicationExist(applicationName, subscriber, groupId);
     }
+
+    public static String getHostAddress() {
+
+        if (hostAddress != null) {
+            return hostAddress;
+        }
+        hostAddress =   ServerConfiguration.getInstance().getFirstProperty(APIConstants.API_MANAGER_HOSTNAME);
+        if(null == hostAddress){
+            if (getLocalAddress() != null) {
+                hostAddress = getLocalAddress().getHostName();
+            }
+            if (hostAddress == null) {
+                hostAddress = APIConstants.API_MANAGER_HOSTNAME_UNKNOWN;
+            }
+            return hostAddress;
+        }else {
+            return hostAddress;
+        }
+    }
+
+    private static InetAddress getLocalAddress(){
+        Enumeration<NetworkInterface> ifaces = null;
+        try {
+            ifaces = NetworkInterface.getNetworkInterfaces();
+        } catch (SocketException e) {
+            log.error("Failed to get host address", e);
+        }
+        if (ifaces != null) {
+            while (ifaces.hasMoreElements()) {
+                NetworkInterface iface = ifaces.nextElement();
+                Enumeration<InetAddress> addresses = iface.getInetAddresses();
+
+                while (addresses.hasMoreElements()) {
+                    InetAddress addr = addresses.nextElement();
+                    if (addr instanceof Inet4Address && !addr.isLoopbackAddress()) {
+                        return addr;
+                    }
+                }
+            }
+        }
+
+        return null;
+    }
+
 
 }

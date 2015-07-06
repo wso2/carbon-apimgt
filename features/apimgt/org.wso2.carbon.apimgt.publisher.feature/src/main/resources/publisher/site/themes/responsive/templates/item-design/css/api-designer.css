@@ -261,7 +261,7 @@ body.modal-open {
     overflow: hidden;
 }
 
-.tierSelect, input#cacheTimeout{
+.tierSelect, input#cacheTimeout, .responseCacheSelect{
     width:30% !important;
 }
 

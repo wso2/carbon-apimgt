@@ -21,6 +21,7 @@ import org.apache.axis2.context.MessageContext;
 import org.apache.axis2.description.WSDL2Constants;
 import org.apache.axis2.engine.MessageReceiver;
 import org.apache.commons.logging.Log;
+import org.apache.axis2.transport.base.MetricsCollector;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.ConnectionClosedException;
 import org.apache.http.HttpException;
@@ -173,6 +174,7 @@ public class TargetHandler implements NHttpClientEventHandler {
 
     public void outputReady(NHttpClientConnection conn, ContentEncoder encoder) {
         ProtocolState connState = null;
+        MessageContext requestMsgCtx = TargetContext.get(conn).getRequestMsgCtx();
         try {
             connState = TargetContext.getState(conn);
             if (connState != ProtocolState.REQUEST_HEAD &&
@@ -184,7 +186,20 @@ public class TargetHandler implements NHttpClientEventHandler {
             TargetRequest request = TargetContext.getRequest(conn);
             if (request.hasEntityBody()) {
                 int bytesWritten = request.write(conn, encoder);
-                metrics.incrementBytesSent(bytesWritten);
+                if (bytesWritten > 0) {
+                    if (metrics.getLevel() == MetricsCollector.LEVEL_FULL) {
+                        metrics.incrementBytesSent(requestMsgCtx, bytesWritten);
+                    } else {
+                        metrics.incrementBytesSent(bytesWritten);
+                    }
+                }
+                if (encoder.isCompleted()) {
+                    if (metrics.getLevel() == MetricsCollector.LEVEL_FULL) {
+                        metrics.incrementMessagesSent(requestMsgCtx);
+                    } else {
+                        metrics.incrementMessagesSent();
+                    }
+                }
             }
         } catch (IOException ex) {
             logIOException(conn, ex);
@@ -193,7 +208,6 @@ public class TargetHandler implements NHttpClientEventHandler {
 
             informWriterError(conn);
 
-            MessageContext requestMsgCtx = TargetContext.get(conn).getRequestMsgCtx();
             if (requestMsgCtx != null) {
                 targetErrorHandler.handleError(requestMsgCtx,
                         ErrorCodes.SND_HTTP_ERROR,
@@ -208,7 +222,6 @@ public class TargetHandler implements NHttpClientEventHandler {
 
             informWriterError(conn);
 
-            MessageContext requestMsgCtx = TargetContext.get(conn).getRequestMsgCtx();
             if (requestMsgCtx != null) {
                 targetErrorHandler.handleError(requestMsgCtx,
                         ErrorCodes.SND_HTTP_ERROR,
@@ -344,6 +357,7 @@ public class TargetHandler implements NHttpClientEventHandler {
 
     public void inputReady(NHttpClientConnection conn, ContentDecoder decoder) {
         ProtocolState connState;
+        MessageContext msgCtx = TargetContext.get(conn).getRequestMsgCtx();
         try {
             connState = TargetContext.getState(conn);
             if (connState.compareTo(ProtocolState.RESPONSE_HEAD) < 0) {
@@ -361,8 +375,28 @@ public class TargetHandler implements NHttpClientEventHandler {
 
 			if (response != null) {
 				int responseRead = response.read(conn, decoder);
-				metrics.incrementBytesReceived(responseRead);
+
+				if (metrics.getLevel() == MetricsCollector.LEVEL_FULL) {
+				    metrics.incrementBytesReceived(msgCtx, responseRead);
+				} else {
+				    metrics.incrementBytesReceived(responseRead);
+				}
 			}
+			if (decoder.isCompleted()) {
+				if (metrics.getLevel() == MetricsCollector.LEVEL_FULL) {
+				    metrics.incrementMessagesReceived(msgCtx);
+				    metrics.notifyReceivedMessageSize(
+				            msgCtx, conn.getMetrics().getReceivedBytesCount());
+				    metrics.notifySentMessageSize(msgCtx, conn.getMetrics().getSentBytesCount());
+				    metrics.reportResponseCode(msgCtx, conn.getHttpResponse().getStatusLine().getStatusCode());
+				} else {
+				    metrics.incrementMessagesReceived();
+				    metrics.notifyReceivedMessageSize(
+				            conn.getMetrics().getReceivedBytesCount());
+				    metrics.notifySentMessageSize(conn.getMetrics().getSentBytesCount());
+				}
+			}
+
         } catch (IOException e) {
             logIOException(conn, e);
             informReaderError(conn);

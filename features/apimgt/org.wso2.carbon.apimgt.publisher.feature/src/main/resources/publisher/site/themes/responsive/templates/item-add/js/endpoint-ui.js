@@ -206,10 +206,10 @@ $(document).ready(function () {
         },
         form: [{
             key: 'production_endpoints',
-            "fieldHtmlClass": "input-xlarge validateEndpoints"
+            "fieldHtmlClass": "input-xlarge form-control validateEndpoints"
         }, {
             key: 'sandbox_endpoints',
-            "fieldHtmlClass": "input-xlarge validateEndpoints"
+            "fieldHtmlClass": "input-xlarge form-control validateEndpoints"
         }]
     };
 
@@ -220,7 +220,7 @@ $(document).ready(function () {
                 "title": i18n.t("endpointUi.Production WSDL"),
                 "type": "endpoint",
                 "urlType":"wsdl",
-                "fieldHtmlClass": "input-xlarge validateEndpoints"
+                "fieldHtmlClass": "input-xlarge form-control validateEndpoints"
             },
             'wsdlendpointService': {
                 title: i18n.t("endpointUi.Service"),
@@ -249,18 +249,18 @@ $(document).ready(function () {
             'production_endpoints',
             {
                 key : 'wsdlendpointService',
-                "fieldHtmlClass":"validateProdWSDLService"
+                "fieldHtmlClass":"validateProdWSDLService form-control"
             },{
                 key:'wsdlendpointPort',
-                "fieldHtmlClass":"validateProdWSDLPort"
+                "fieldHtmlClass":"validateProdWSDLPort form-control"
             }
             , 'sandbox_endpoints',
             {
                 key : 'wsdlendpointServiceSandbox',
-                "fieldHtmlClass":"validateSandboxWSDLService"
+                "fieldHtmlClass":"validateSandboxWSDLService form-control"
             },{
                 key:'wsdlendpointPortSandbox',
-                "fieldHtmlClass":"validateSandboxWSDLPort"
+                "fieldHtmlClass":"validateSandboxWSDLPort form-control"
             }
         ]
     };
