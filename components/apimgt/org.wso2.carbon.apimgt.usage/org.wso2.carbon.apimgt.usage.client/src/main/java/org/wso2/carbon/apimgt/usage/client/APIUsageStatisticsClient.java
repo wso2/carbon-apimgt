@@ -827,9 +827,7 @@ public class APIUsageStatisticsClient {
     public List<PerUserAPIUsageDTO> getUsageBySubscribers(String providerName, String apiName, int limit)
             throws APIMgtUsageQueryServiceClientException {
 
-        OMElement omElement = this.buildOMElementFromDatabaseTable(
-                APIUsageStatisticsClientConstants.KEY_USAGE_SUMMARY);
-        Collection<APIUsageByUser> usageData = getUsageBySubscriber(omElement);
+        Collection<APIUsageByUser> usageData = getUsageOfAPI(apiName, null);
         Map<String, PerUserAPIUsageDTO> usageByUsername = new TreeMap<String, PerUserAPIUsageDTO>();
         List<API> apiList = getAPIsByProvider(providerName);
         for (APIUsageByUser usageEntry : usageData) {
@@ -976,10 +974,7 @@ public class APIUsageStatisticsClient {
     public List<PerUserAPIUsageDTO> getUsageBySubscribers(String providerName, String apiName,
                                                           String apiVersion, int limit) throws APIMgtUsageQueryServiceClientException {
 
-        OMElement omElement = this.buildOMElementFromDatabaseTable(
-                APIUsageStatisticsClientConstants.KEY_USAGE_SUMMARY);
-
-        Collection<APIUsageByUser> usageData = getUsageBySubscriber(omElement);
+        Collection<APIUsageByUser> usageData = getUsageOfAPI(apiName, apiVersion);
         Map<String, PerUserAPIUsageDTO> usageByUsername = new TreeMap<String, PerUserAPIUsageDTO>();
         List<API> apiList = getAPIsByProvider(providerName);
         for (APIUsageByUser usageEntry : usageData) {
@@ -2187,6 +2182,66 @@ public class APIUsageStatisticsClient {
         }
     }
 
+    private Collection<APIUsageByUser> getUsageOfAPI(String apiName, String apiVersion)
+            throws APIMgtUsageQueryServiceClientException {
+        if (dataSource == null) {
+            throw new APIMgtUsageQueryServiceClientException("BAM data source hasn't been initialized. Ensure " +
+                    "that the data source is properly configured in the APIUsageTracker configuration.");
+        }
+
+        Connection connection = null;
+        Statement statement = null;
+        ResultSet rs = null;
+        Collection<APIUsageByUser> usageData = new ArrayList<APIUsageByUser>();
+        try {
+            connection = dataSource.getConnection();
+            statement = connection.createStatement();
+            String query;
+            //check whether table exist first
+            if (isTableExist(APIUsageStatisticsClientConstants.KEY_USAGE_SUMMARY, connection)) {//Table Exist
+                query = "SELECT * FROM " + APIUsageStatisticsClientConstants.KEY_USAGE_SUMMARY + " WHERE api = '" + apiName +"'";
+                if (apiVersion != null ){
+                    query += " AND version = '" + apiVersion + "'";
+                }
+                rs = statement.executeQuery(query);
+                while (rs.next()) {
+                    String context = rs.getString(APIUsageStatisticsClientConstants.CONTEXT);
+                    String username = rs.getString(APIUsageStatisticsClientConstants.USER_ID);
+                    long requestCount = rs.getLong(APIUsageStatisticsClientConstants.REQUEST);
+                    String version = rs.getString(APIUsageStatisticsClientConstants.VERSION);
+                    usageData.add(new APIUsageByUser(context,username,requestCount,version));
+                }
+            }
+            return usageData;
+
+        } catch (SQLException e) {
+            throw new APIMgtUsageQueryServiceClientException("Error occurred while querying from JDBC database", e);
+        } finally {
+            if (rs != null) {
+                try {
+                    rs.close();
+                } catch (SQLException e) {
+
+                }
+            }
+            if (statement != null) {
+                try {
+                    statement.close();
+                } catch (SQLException e) {
+
+                }
+            }
+            if (connection != null) {
+                try {
+                    connection.close();
+                } catch (SQLException e) {
+
+                }
+            }
+        }
+    }
+
+
     private static class AppUsage {
 
 
@@ -2282,6 +2337,13 @@ public class APIUsageStatisticsClient {
                     APIUsageStatisticsClientConstants.REQUEST)).getText());
             apiVersion = row.getFirstChildWithName(new QName(
                     APIUsageStatisticsClientConstants.VERSION)).getText();
+        }
+
+        public APIUsageByUser(String context, String username, long requestCount, String apiVersion) {
+            this.context = context;
+            this.username = username;
+            this.requestCount = requestCount;
+            this.apiVersion = apiVersion;
         }
     }
 
