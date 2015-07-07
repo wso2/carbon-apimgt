@@ -16,13 +16,13 @@
         <!-- aset details -->
         <div class="col-xs-12 col-sm-12 col-md-5 col-lg-12 white-bg">
             <div class=" col-xs-12 col-sm-12 col-md-5 col-lg-2 white-bg">
-
-                {{#if api.thumbnailurl}}
-                    <img src='{{api.thumbnailurl}}' class="img-responsive"/>
-                {{else}}
-                    <img src='{{url ""}}/extensions/assets/api/themes/store/imgs/api-default.png'
-                         class="img-responsive"/>
-                {{/if}}
+            {{#if assets.thumbnail}}
+            <img src='{{url ""}}/storage/{{../rxt.shortName}}/{{assets.id}}/{{assets.thumbnail}}' class="img-responsive"
+            alt="Thumb"/>
+            {{else}}
+            <img src='{{url ""}}/extensions/assets/api/themes/store/imgs/api-default.png'
+            class="img-responsive"/>
+            {{/if}}
             </div>
             <div class="col-xs-12 col-sm-12 col-md-5 col-lg-8 ">
                 <div class="col-lg-9">
