@@ -1129,12 +1129,13 @@ public class APIUsageStatisticsClient {
     }
 
     /**
-     *
+     * @deprecated please do not use this function as this may cause memory overflow. This loads a whole database table into memory as XML object
      * @param tableName - database table
      * @return OMElement
      * @throws APIMgtUsageQueryServiceClientException
      * Fetches the data from the passed table and builds a OEMElemnet
      */
+    @Deprecated
     private OMElement buildOMElementFromDatabaseTable(String tableName) throws APIMgtUsageQueryServiceClientException {
 
         if (dataSource == null) {
