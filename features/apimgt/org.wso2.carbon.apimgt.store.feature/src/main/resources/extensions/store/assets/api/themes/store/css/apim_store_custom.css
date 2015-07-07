@@ -244,3 +244,34 @@ div.top-menu-right-custom .navbar-nav > li > a:hover {
 .action-wrapper:hover{background-color: #1965b2; opacity: 1;}
 .action-title:hover{background-color: #1965b2; }
 .action-wrapper>a:hover{background-color: #1965b2 !important; }
+
+.curlurl-genbtn { white-space:nowrap; }
+.curl-testurlp-wrapper { display:none; }
+.curl-copyinfo {
+    vertical-align:middle;
+    display:none;
+    margin:0;
+    opacity: 0.8;
+    filter: alpha(opacity=80); /* For IE8 and earlier */
+}
+.curl-copybtn, .curl-copybtn:focus, .curl-copybtn:active { outline: 0; background:none; border:none; }
+.curl-copybtn.zeroclipboard-is-hover {}
+.curl-copybtn.zeroclipboard-is-active {}
+
+.editable-div-wrapper {
+    margin-top:5px;
+    position:relative;
+    /*border-radius: 5px;*/
+    background:#292E38;
+    color:#ffffff;
+    width: 70%;
+}
+.editable-div-wrapper i.fa { color:#ffffff; padding:8px 0; }
+
+.copybtn-wrapper { text-align: right; position: absolute; right: 5px; top:0; }
+
+.editable-div {
+    padding:5px 100px 5px 10px;
+    outline: 0;
+}
+.editable-div span { background:#dfebed; color:#292E38; }
