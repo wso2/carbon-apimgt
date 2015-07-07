@@ -346,35 +346,6 @@ function getAPIResponseFaultCount(providerName,from,to) {
      }
  }
 
-function getAPIFaultyAnalyzeByTime(providerName) {
-     var usage = [];
-     var usageout = [];
-     try {
-         usage = apiProvider.getAPIFaultyAnalyzeByTime(providerName);
-         if (log.isDebugEnabled()) {
-             log.debug("getAPIFaultyAnalyzeByTime for : " + providerName);
-         }
-         if (usage == null) {
-             return {
-                 error:true
-             };
-
-         } else {
-             return {
-                 error:false,
-                 usage:usage
-             };
-         }
-     } catch (e) {
-         log.error(e.message);
-         return {
-             error:e,
-             usage:null
-
-         };
-     }
- }
-
 function getFirstAccessTime(providerName, server) {
     var usage = [];
     var usageout = [];

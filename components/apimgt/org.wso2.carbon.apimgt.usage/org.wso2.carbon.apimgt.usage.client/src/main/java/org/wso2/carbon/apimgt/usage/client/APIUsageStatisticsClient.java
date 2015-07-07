@@ -944,33 +944,6 @@ public class APIUsageStatisticsClient {
         return faultyCount;
     }
 
-    public List<APIResponseFaultCountDTO> getAPIFaultyAnalyzeByTime(String providerName)
-            throws APIMgtUsageQueryServiceClientException {
-
-        OMElement omElement = this.buildOMElementFromDatabaseTable(
-                APIUsageStatisticsClientConstants.API_REQUEST_TIME_FAULT_SUMMARY);
-        Collection<APIResponseFaultCount> faultyData = getAPIResponseFaultCount(omElement);
-        List<API> providerAPIs = getAPIsByProvider(providerName);
-        List<APIResponseFaultCountDTO> faultyInvocations = new ArrayList<APIResponseFaultCountDTO>();
-
-        for (APIResponseFaultCount fault : faultyData) {
-            for (API providerAPI : providerAPIs) {
-                if (providerAPI.getId().getApiName().equals(fault.apiName) &&
-                        providerAPI.getId().getVersion().equals(fault.apiVersion) &&
-                        providerAPI.getContext().equals(fault.context)) {
-
-                    APIResponseFaultCountDTO faultyDTO = new APIResponseFaultCountDTO();
-                    faultyDTO.setApiName(fault.apiName + ":" + providerAPI.getId().getProviderName());
-                    faultyDTO.setVersion(fault.apiVersion);
-                    faultyDTO.setContext(fault.context);
-                    faultyDTO.setRequestTime(fault.requestTime);
-                    faultyInvocations.add(faultyDTO);
-                }
-            }
-        }
-        return faultyInvocations;
-    }
-
     public List<PerUserAPIUsageDTO> getUsageBySubscribers(String providerName, String apiName,
                                                           String apiVersion, int limit) throws APIMgtUsageQueryServiceClientException {
 
