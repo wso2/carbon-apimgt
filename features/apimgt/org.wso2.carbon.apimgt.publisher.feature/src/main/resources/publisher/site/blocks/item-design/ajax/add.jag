@@ -2,6 +2,17 @@
 include("/jagg/jagg.jag");
 var log = new Log();
 
+function loadSwaggerObj(path)
+{
+    var obj, file = new File(path);
+    if(file.isExists()){
+        obj = require(path);
+    } else {
+        obj = require("/site/blocks/item-design/ajax/default_swagger.json");
+    }
+    return obj;
+}
+
 (function () {
     response.contentType = "text/plain; charset=UTF-8";
     response.addHeader('Cache-Control','no-cache, no-store, must-revalidate'); // HTTP 1.1.
@@ -50,7 +61,7 @@ var log = new Log();
                 if(url){
                     wsdl = url.trim();    
                 }                
-                var obj = require("/site/blocks/item-design/ajax/default_swagger.json");
+                var obj = loadSwaggerObj("/site/conf/soap_swagger.json");
                 swagger = stringify(obj);            
             }
             if(swagger){
