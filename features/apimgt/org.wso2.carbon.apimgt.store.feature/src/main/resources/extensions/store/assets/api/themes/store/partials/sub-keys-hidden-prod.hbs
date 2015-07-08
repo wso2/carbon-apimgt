@@ -25,15 +25,15 @@
 	<div class="dropdown">
 		<button class="btn btn-default dropdown-toggle curlurl-genbtn" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-expanded="true"
 		    title="View cURL command to generate a token as an end user">
-			cURL <span class="caret"></span>
+			{{t "cURL"}}<span class="caret"></span>
 		</button>
 
 		<a class="icon-question-sign curlHelp_popup_prod"></a>
         <div id="curlProdtoken_help"></div>
 
 		<ul class="dropdown-menu" role="menu" aria-labelledby="gencurl-menu">
-			<li role="gencurl"><a role="menuitem" tabindex="-1" href="javascript:generateCurl( 'ctx1/1.0','password', 'prodCurl');">GrantType: Password</a></li>
-			<li role="gencurl"><a role="menuitem" tabindex="-1" href="javascript:generateCurl('ctx1/1.0','client_credentials', 'prodCurl');">GrantType: Client Credentials</a></li>
+			<li role="gencurl"><a role="menuitem" tabindex="-1" href="javascript:generateCurl( 'password', 'prodCurl');">{{t "GrantType: Password"}}</a></li>
+			<li role="gencurl"><a role="menuitem" tabindex="-1" href="javascript:generateCurl('client_credentials', 'prodCurl');">{{t "GrantType: Client Credentials"}}</a></li>
 		</ul>
 	</div>
 </div>

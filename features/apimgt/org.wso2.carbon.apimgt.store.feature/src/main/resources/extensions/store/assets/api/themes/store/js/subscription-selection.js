@@ -1102,8 +1102,12 @@ $(function () {
 
 });
 
-function generateCurl(gatewayurlendpoint, granttype, id){
+function generateCurl( granttype, id){
     var apps = metadata.appsWithSubs;
+    var gatewayurlendpoint = '';
+    if(metadata.gatewayEndpoint.error == false){
+      gatewayurlendpoint = metadata.gatewayEndpoint.endPoint;
+    }
 
     var appName = $('#subscription_selection').val();
     var consumerKey = {};
@@ -1135,4 +1139,6 @@ function generateCurl(gatewayurlendpoint, granttype, id){
       $('#'+id).closest('.row-fluid').show();
       $('#'+id+ 'Copy').show();
 }
+
+
 

@@ -47,6 +47,9 @@ require('/modules/store.js').exec(function (ctx) {
         }
     }
 
+    var gatewayEP = apistore.getGatewayendpoint('http,https');
+    output.gatewayEndpoint = gatewayEP;
+
     caramel.render(output);
 }, request, response, session);
 %>

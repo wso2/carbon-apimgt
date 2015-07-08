@@ -678,5 +678,20 @@ function getLocation(href) {
         }
     };
 
+    StoreAPIProxy.prototype.getGatewayendpoint = function(transports){
+        try {
+            var endPoint = APIUtil.getGatewayendpoint(transports);
+            return {
+                error: false,
+                endPoint: endPoint
+            };
+        }catch(e){
+            log.error(e.message);
+            return {
+                error:e
+            };
+        }
+    };
+
 })(apistore);
 
