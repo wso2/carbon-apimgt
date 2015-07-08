@@ -41,7 +41,7 @@
                 <plugin>
                     <groupId>org.apache.felix</groupId>
                     <artifactId>maven-scr-plugin</artifactId>
-                    <version>1.7.2</version>
+                    <version>${maven-scr-plugin.version}</version>
                     <executions>
                         <execution>
                             <id>generate-scr-scrdescriptor</id>
@@ -50,6 +50,12 @@
                             </goals>
                         </execution>
                     </executions>
+                </plugin>
+
+                <plugin>
+                    <groupId>org.apache.felix</groupId>
+                    <artifactId>maven-bundle-plugin</artifactId>
+                    <version>${maven-bundle-plugin.version}</version>
                 </plugin>
 
                 <plugin>
@@ -63,6 +69,11 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-deploy-plugin</artifactId>
+                </plugin>
+                <plugin>
+                    <groupId>org.wso2.maven</groupId>
+                    <artifactId>carbon-p2-plugin</artifactId>
+                    <version>${carbon.p2.plugin.version}</version>
                 </plugin>
             </plugins>
         </pluginManagement>
@@ -813,7 +824,7 @@
         <identity.authentication.version>4.2.1</identity.authentication.version>
 
         <!-- Carbon kernel version -->
-        <wso2carbon.version>4.2.0</wso2carbon.version>
+        <wso2carbon.version>4.4.0</wso2carbon.version>
         <carbon.kernel.version>4.4.0</carbon.kernel.version>
 
         <carbon.commons.version>4.4.3</carbon.commons.version>
@@ -835,6 +846,9 @@
 
         <!-- P2 Plugin Version -->
         <carbon.p2.plugin.version>1.5.3</carbon.p2.plugin.version>
+
+        <maven-scr-plugin.version>1.7.2</maven-scr-plugin.version>
+        <maven-bundle-plugin.version>2.5.3</maven-bundle-plugin.version>
 
         <!-- Axis2 Version -->
         <axis2.wso2.version>1.6.1-wso2v11</axis2.wso2.version>

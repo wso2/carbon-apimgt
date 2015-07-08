@@ -33,7 +33,7 @@
 
     <groupId>org.apache.synapse</groupId>
     <artifactId>Apache-Synapse</artifactId>
-    <version>2.1.2-wso2v8-SNAPSHOT</version>
+    <version>2.1.2-wso2v9-SNAPSHOT</version>
 
     <name>Apache Synapse</name>
     <description>Apache Synapse</description>
