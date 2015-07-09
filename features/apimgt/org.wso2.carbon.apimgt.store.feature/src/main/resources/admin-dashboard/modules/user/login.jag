@@ -118,7 +118,7 @@ var logout = function () {
 
 var getWorkflowCookie=function(username,password){
 var log=new Log();
-var isBPSRunning = false;
+var bpsRuning = false;
 try{
 var xhr = new XMLHttpRequest();
 var site = require("/site/conf/site.json");
@@ -127,11 +127,11 @@ try{
 var httpClient = new Packages.org.apache.http.impl.client.DefaultHttpClient();
 var httpPost = new Packages.org.apache.http.client.methods.HttpPost(endpoint);
 httpClient.execute(httpPost);
-isBPSRunning = true;
+bpsRuning = true;
 }catch(e){
 log.warn("Not Retrieving Pending Tasks. Check BPS Connectivity");
 }
-if( isBPSRunning ){
+if( bpsRuning ){
     xhr.open("POST", endpoint);
     var payload = '<soap:Envelope xmlns:soap="http://www.w3.org/2003/05/soap-envelope" xmlns:aut="http://authentication.services.core.carbon.wso2.org"><soap:Header/><soap:Body><aut:login><aut:username>' +  username + '</aut:username><aut:password>' + password + '</aut:password><aut:remoteAddress>localhost</aut:remoteAddress></aut:login></soap:Body></soap:Envelope>';
     xhr.send(payload);
