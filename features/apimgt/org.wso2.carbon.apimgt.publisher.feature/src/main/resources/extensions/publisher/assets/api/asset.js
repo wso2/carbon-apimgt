@@ -117,6 +117,9 @@ asset.manager = function(ctx) {
                 api.visibility = options.attributes.visibility;
                 api.visibleRoles = options.attributes.roles;
                 api.swagger = options.attributes.swagger;
+                if(!options.attributes.wsdl){
+                options.attributes.wsdl=null;
+                }
                 api.wsdl = options.attributes.wsdl;
                 api.swagger = options.attributes.swagger;
                 result = apiProxy.updateDesignAPI(api);
@@ -176,6 +179,9 @@ asset.manager = function(ctx) {
                 api.visibility = options.attributes.visibility;
                 api.visibleRoles = options.attributes.roles;
                 api.swagger = options.attributes.swagger;
+                if(!options.attributes.wsdl){
+                options.attributes.wsdl=null;
+                }
                 api.wsdl = options.attributes.wsdl;
                 api.swagger = options.attributes.swagger;
                 result = apiProxy.updateDesignAPI(api);
@@ -197,7 +203,13 @@ asset.manager = function(ctx) {
 
                 //TODO Hard coded
                 api.implementation_type = 'endpoint';
+                if(!options.attributes.wsdl){
+                    options.attributes.wsdl=null;
+                }
                 api.wsdl = options.attributes.wsdl;
+                if(!options.attributes.wadl){
+                    options.attributes.wadl=null;
+                }
                 api.wadl = options.attributes.wadl;
                 api.endpointSecured = options.attributes.endpointType;
                 api.endpointUTUsername = options.attributes.epUsername;
@@ -213,7 +225,7 @@ asset.manager = function(ctx) {
                     obj = {
                         error:true,
                         message:result.message,
-                        data :apiId,
+                        data :apiId
                     };
                 } else {
                     obj = {
