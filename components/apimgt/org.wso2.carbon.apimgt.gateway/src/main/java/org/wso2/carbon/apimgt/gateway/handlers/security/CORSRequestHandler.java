@@ -39,17 +39,17 @@ import java.util.Map;
 public class CORSRequestHandler extends AbstractHandler implements ManagedLifecycle {
 
 	private static final Log log = LogFactory.getLog(CORSRequestHandler.class);
-	private String APIImplementationType;
+	private String apiImplementationType;
 	private String allowHeaders;
 	private List<String> allowedOrigins;
-	private boolean InitializeHeaderValues;
+	private boolean initializeHeaderValues;
 
 	public void init(SynapseEnvironment synapseEnvironment) {
 		if (log.isDebugEnabled()) {
 			log.debug("Initializing CORSRequest Handler instance");
 		}
 		if (ServiceReferenceHolder.getInstance().getApiManagerConfigurationService() != null) {
-			InitializeHeaderValues = initializeHeaders();
+			 initializeHeaders();
 		}
 	}
 
@@ -58,7 +58,7 @@ public class CORSRequestHandler extends AbstractHandler implements ManagedLifecy
 	 *
 	 * @return true after Initialize the values
 	 */
-	boolean initializeHeaders() {
+	void initializeHeaders() {
 		if (allowHeaders == null) {
 			allowHeaders = Utils
 					.getAllowedHeaders();
@@ -70,7 +70,7 @@ public class CORSRequestHandler extends AbstractHandler implements ManagedLifecy
 				allowedOrigins = Arrays.asList(allowedOriginsList.split(","));
 			}
 		}
-		return true;
+		initializeHeaderValues =  true;
 	}
 
 	public void destroy() {
@@ -80,8 +80,8 @@ public class CORSRequestHandler extends AbstractHandler implements ManagedLifecy
 	}
 
 	public boolean handleRequest(MessageContext messageContext) {
-		if (!InitializeHeaderValues) {
-			InitializeHeaderValues = initializeHeaders();
+		if (!initializeHeaderValues) {
+			initializeHeaders();
 		}
 		String apiContext = (String) messageContext.getProperty(RESTConstants.REST_API_CONTEXT);
 		String apiVersion = (String) messageContext.getProperty(RESTConstants.SYNAPSE_REST_API_VERSION);
@@ -131,7 +131,7 @@ public class CORSRequestHandler extends AbstractHandler implements ManagedLifecy
 		messageContext.setProperty(APIConstants.API_RESOURCE_CACHE_KEY, resourceCacheKey);
 		setCORSHeaders(messageContext, selectedResourceWithVerb);
 		if (selectedResource != null && selectedResourceWithVerb != null) {
-				if ("inline".equalsIgnoreCase(APIImplementationType)) {
+				if ("inline".equalsIgnoreCase(apiImplementationType)) {
 					messageContext.getSequence(APIConstants.CORS_SEQUENCE_NAME).mediate(messageContext);
 				}
 				status =  true;
@@ -211,12 +211,12 @@ public class CORSRequestHandler extends AbstractHandler implements ManagedLifecy
 		this.allowedOrigins = Arrays.asList(allowedOrigins.split(","));
 	}
 
-	public String getAPIImplementationType() {
-		return APIImplementationType;
+	public String getApiImplementationType() {
+		return apiImplementationType;
 	}
 
-	public void setAPIImplementationType(String APIImplementationType) {
-		this.APIImplementationType = APIImplementationType;
+	public void setApiImplementationType(String apiImplementationType) {
+		this.apiImplementationType = apiImplementationType;
 	}
 
 }
