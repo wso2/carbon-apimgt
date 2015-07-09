@@ -978,13 +978,14 @@ public class APIUsageStatisticsClient {
 
         List<APIVersionUserUsageDTO> apiUserUsages = new ArrayList<APIVersionUserUsageDTO>();
 
-        Calendar cal = Calendar.getInstance();
-        int year = cal.get(Calendar.YEAR);
-        int month = cal.get(Calendar.MONTH) + 1;
-
-        if (!period.equals("" + year + "-" + month)) {
             omElement = this.buildOMElementFromDatabaseTable(APIUsageStatisticsClientConstants.KEY_USAGE_MONTH_SUMMARY);
             Collection<APIVersionUsageByUserMonth> usageData = getUsageAPIBySubscriberMonthly(omElement);
+            String periodYear = period.split("-")[0];
+            String periodMonth = period.split("-")[1];
+            if (periodMonth.length() == 1) {
+                periodMonth = "0" + periodMonth;
+            }
+            period = periodYear + "-" + periodMonth;
             for (APIVersionUsageByUserMonth usageEntry : usageData) {
 
                 if (usageEntry.username.equals(subscriberName) && usageEntry.month.equals(period)) {
@@ -1004,30 +1005,6 @@ public class APIUsageStatisticsClient {
                     }
                 }
             }
-
-        } else {
-            omElement = this.buildOMElementFromDatabaseTable(APIUsageStatisticsClientConstants.KEY_USAGE_MONTH_SUMMARY);
-            Collection<APIVersionUsageByUser> usageData = getUsageAPIBySubscriber(omElement);
-            for (APIVersionUsageByUser usageEntry : usageData) {
-
-                if (usageEntry.username.equals(subscriberName)) {
-
-                    List<APIUsageRangeCost> rangeCosts = evaluate(usageEntry.apiName, (int) usageEntry.requestCount);
-
-                    for (APIUsageRangeCost rangeCost : rangeCosts) {
-                        APIVersionUserUsageDTO userUsageDTO = new APIVersionUserUsageDTO();
-                        userUsageDTO.setApiname(usageEntry.apiName);
-                        userUsageDTO.setContext(usageEntry.context);
-                        userUsageDTO.setVersion(usageEntry.apiVersion);
-                        userUsageDTO.setCount(rangeCost.getRangeInvocationCount());
-                        userUsageDTO.setCost(rangeCost.getCost().toString());
-                        userUsageDTO.setCostPerAPI(rangeCost.getCostPerUnit().toString());
-                        apiUserUsages.add(userUsageDTO);
-                    }
-                }
-            }
-        }
-
 
         return apiUserUsages;
     }
@@ -2040,7 +2017,6 @@ public class APIUsageStatisticsClient {
                             APIUsageStatisticsClientConstants.VERSION)).getText())) {
                         usageData.get(i).requestCount = usageData.get(i).requestCount + (long) Double.parseDouble(rowElement.getFirstChildWithName(new QName(
                                 APIUsageStatisticsClientConstants.REQUEST)).getText());
-                        return usageData;
                     }
 
                 }
