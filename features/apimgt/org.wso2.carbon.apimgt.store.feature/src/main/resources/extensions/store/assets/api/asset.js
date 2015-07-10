@@ -150,6 +150,17 @@ asset.renderer = function(ctx) {
         return 'https://digg.com/submit?url=' + assetUrl;
     };
     return {
+        list: function(page) {
+            var assets = page.assets;
+            for (var index in assets) {
+                var asset = assets[index];
+                //Doing this because when there are no value specified in column such as thumbnail column it return string "null"
+                // value which need be explicitly set to null
+                if(asset.thumbnail == 'null') {
+                    asset.thumbnail = null;
+                }
+            }
+        },
         details:function(page){
 
             var carbonAPI = require('carbon');
@@ -170,6 +181,11 @@ asset.renderer = function(ctx) {
             var lenI=0,lenJ=0,i,j,result,apidata,deniedTiers,tiers,appsList=[],subscribedToDefault=false,showSubscribe=false,status,selectedDefault=false;
             var apistore = require('apistore').apistore.instance(userName);
 
+            //Doing this because when there are no value specified in column such as thumbnail column it return string "null"
+            // value which need be explicitly set to null
+            if (page.assets.thumbnail == 'null') {
+                page.assets.thumbnail = null;
+            }
             var asset = page.assets;
             if (asset != null) {
                 status = asset.lifecycleState;
