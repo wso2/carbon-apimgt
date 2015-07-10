@@ -80,6 +80,14 @@ $(function(){
              $('#sourceOptionRadio3').attr('checked', false);
              $('#sourceOptionRadio2').attr('checked', true);
 		}
+
+		if(docType == "Other" || docType == "How To" || docType == "Samples"){
+			 $('#sourceOptionRadio2').attr('checked', false);
+             $('#sourceOptionRadio3').attr('checked', false);
+			 $('#sourceOptionRadio1').prop("checked", true);
+			 $('#sourceDocUrl').hide('slow');
+			 $('#sourceFile').hide('slow');
+		}
 	});
 //source selection
 	$("input[name='sourceOptionRadio']").change(function(){
@@ -92,8 +100,7 @@ $(function(){
 			$('#sourceDocUrl').show('slow');
 			
 
-		}else if(
-			sourceType == "File"){
+		}else if(sourceType == "File"){
 			//$('#sourceDocUrl').fadeIn().css('display','none');
 			$('#sourceDocUrl').hide('slow');
 			$('#sourceFile').show('slow');
@@ -156,7 +163,7 @@ $(function(){
 	$('ul.art-vmenu li').on("click", function(){
  
 
-});
+	});
 
 });
 
