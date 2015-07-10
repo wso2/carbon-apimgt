@@ -22,6 +22,8 @@ import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.impl.builder.StAXOMBuilder;
 import org.apache.axiom.om.util.AXIOMUtil;
 import org.apache.commons.lang.StringEscapeUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
@@ -37,6 +39,7 @@ import org.wso2.carbon.apimgt.usage.client.exception.APIMgtUsageQueryServiceClie
 import org.wso2.carbon.apimgt.usage.client.internal.APIUsageClientServiceComponent;
 import org.wso2.carbon.core.util.CryptoUtil;
 import org.wso2.carbon.utils.CarbonUtils;
+import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import javax.naming.Context;
@@ -67,6 +70,7 @@ public class APIUsageStatisticsClient {
     private static Map<String, String> subscriberAppsMap = new HashMap<String, String>();
     private APIProvider apiProviderImpl;
     private APIConsumer apiConsumerImpl;
+    private static final Log log = LogFactory.getLog(APIUsageStatisticsClient.class);
 
     /* private static String text = "    <PaymentPlan name=\"platinam\">    <parameter name=\"call\">  " +
              "      <range0><start>0</start><end>5</end><value>0.0</value></range0>      " +
@@ -978,14 +982,19 @@ public class APIUsageStatisticsClient {
 
         List<APIVersionUserUsageDTO> apiUserUsages = new ArrayList<APIVersionUserUsageDTO>();
 
-            omElement = this.buildOMElementFromDatabaseTable(APIUsageStatisticsClientConstants.KEY_USAGE_MONTH_SUMMARY);
-            Collection<APIVersionUsageByUserMonth> usageData = getUsageAPIBySubscriberMonthly(omElement);
-            String periodYear = period.split("-")[0];
-            String periodMonth = period.split("-")[1];
-            if (periodMonth.length() == 1) {
-                periodMonth = "0" + periodMonth;
-            }
-            period = periodYear + "-" + periodMonth;
+        String periodYear = period.split("-")[0];
+        String periodMonth = period.split("-")[1];
+        if (periodMonth.length() == 1) {
+            periodMonth = "0" + periodMonth;
+        }
+        period = periodYear + "-" + periodMonth;
+
+        if (subscriberName.equals(MultitenantUtils.getTenantAwareUsername(subscriberName))) {
+            subscriberName = subscriberName + "@" + MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
+        }
+
+        Collection<APIVersionUsageByUserMonth> usageData = getUsageAPIBySubscriberMonthly(subscriberName, period);
+
             for (APIVersionUsageByUserMonth usageEntry : usageData) {
 
                 if (usageEntry.username.equals(subscriberName) && usageEntry.month.equals(period)) {
@@ -2026,6 +2035,82 @@ public class APIUsageStatisticsClient {
         return usageData;
     }
 
+    private Collection<APIVersionUsageByUserMonth> getUsageAPIBySubscriberMonthly(String subscriberName, String period)
+            throws APIMgtUsageQueryServiceClientException {
+
+        if (dataSource == null) {
+            throw new APIMgtUsageQueryServiceClientException("BAM data source hasn't been initialized. Ensure " +
+                    "that the data source is properly configured in the APIUsageTracker configuration.");
+        }
+
+        Connection connection = null;
+        Statement statement = null;
+        ResultSet rs = null;
+        Collection<APIVersionUsageByUserMonth> usageData = new ArrayList<APIVersionUsageByUserMonth>();
+        try {
+            connection = dataSource.getConnection();
+            statement = connection.createStatement();
+            String query;
+            //check whether table exist first
+            if (isTableExist(APIUsageStatisticsClientConstants.KEY_USAGE_MONTH_SUMMARY, connection)) {//Table Exist
+
+                query = "SELECT " + APIUsageStatisticsClientConstants.API + ","
+                        + APIUsageStatisticsClientConstants.VERSION + "," + APIUsageStatisticsClientConstants.CONTEXT
+                        + ",sum(" + APIUsageStatisticsClientConstants.REQUEST + ") as "
+                        + APIUsageStatisticsClientConstants.REQUEST + "," + APIUsageStatisticsClientConstants.MONTH
+                        + "," + APIUsageStatisticsClientConstants.USER_ID + " FROM  "
+                        + APIUsageStatisticsClientConstants.KEY_USAGE_MONTH_SUMMARY + " WHERE "
+                        + APIUsageStatisticsClientConstants.MONTH + " = '" + period + "' AND "
+                        + APIUsageStatisticsClientConstants.USER_ID + " = '" + subscriberName + "' GROUP BY "
+                        + APIUsageStatisticsClientConstants.API_VERSION + ", "
+                        + APIUsageStatisticsClientConstants.USER_ID + ", " + APIUsageStatisticsClientConstants.MONTH;
+
+                rs = statement.executeQuery(query);
+
+                while (rs.next()) {
+                    String apiName = rs.getString(APIUsageStatisticsClientConstants.API);
+                    String apiVersion = rs.getString(APIUsageStatisticsClientConstants.VERSION);
+                    String context = rs.getString(APIUsageStatisticsClientConstants.CONTEXT);
+                    String username = rs.getString(APIUsageStatisticsClientConstants.USER_ID);
+                    long requestCount = rs.getLong(APIUsageStatisticsClientConstants.REQUEST);
+                    String month = rs.getString(APIUsageStatisticsClientConstants.MONTH);
+                    usageData.add(new APIVersionUsageByUserMonth(apiName, apiVersion, context, username, requestCount,
+                            month));
+                }
+            }
+
+            return usageData;
+
+        } catch (SQLException e) {
+            throw new APIMgtUsageQueryServiceClientException("Error occurred while querying from JDBC database", e);
+        } finally {
+            if (rs != null) {
+                try {
+                    rs.close();
+                } catch (SQLException e) {
+                    //this is logged and the process is continued because the query has executed
+                    log.error("Error occurred while closing the result set from JDBC database.", e);
+                }
+            }
+            if (statement != null) {
+                try {
+                    statement.close();
+                } catch (SQLException e) {
+                    //this is logged and the process is continued because the query has executed
+                    log.error("Error occurred while closing the statement from JDBC database.", e);
+                }
+            }
+            if (connection != null) {
+                try {
+                    connection.close();
+                } catch (SQLException e) {
+                    //this is logged and the process is continued because the query has executed
+                    log.error("Error occurred while closing the JDBC database connection.", e);
+                }
+            }
+        }
+    }
+
     public List<APIUsageRangeCost> evaluate(String param, int calls) throws Exception {
         return paymentPlan.evaluate(param, calls);
     }
@@ -2149,9 +2234,10 @@ public class APIUsageStatisticsClient {
             String query;
             //check whether table exist first
             if (isTableExist(APIUsageStatisticsClientConstants.KEY_USAGE_SUMMARY, connection)) {//Table Exist
-                query = "SELECT * FROM " + APIUsageStatisticsClientConstants.KEY_USAGE_SUMMARY + " WHERE api = '" + apiName +"'";
-                if (apiVersion != null ){
-                    query += " AND version = '" + apiVersion + "'";
+                query = "SELECT * FROM " + APIUsageStatisticsClientConstants.KEY_USAGE_SUMMARY
+                        + " WHERE " + APIUsageStatisticsClientConstants.API + " = " + apiName + "'";
+                if (apiVersion != null) {
+                    query += " AND " + APIUsageStatisticsClientConstants.VERSION + " = '" + apiVersion + "'";
                 }
                 rs = statement.executeQuery(query);
                 while (rs.next()) {
@@ -2171,21 +2257,24 @@ public class APIUsageStatisticsClient {
                 try {
                     rs.close();
                 } catch (SQLException e) {
-
+                    //this is logged and the process is continued because the query has executed
+                    log.error("Error occurred while closing the result set from JDBC database.",e);
                 }
             }
             if (statement != null) {
                 try {
                     statement.close();
                 } catch (SQLException e) {
-
+                    //this is logged and the process is continued because the query has executed
+                    log.error("Error occurred while closing the statement from JDBC database.",e);
                 }
             }
             if (connection != null) {
                 try {
                     connection.close();
                 } catch (SQLException e) {
-
+                    //this is logged and the process is continued because the query has executed
+                    log.error("Error occurred while closing the JDBC database connection.",e);
                 }
             }
         }
@@ -2471,6 +2560,16 @@ public class APIUsageStatisticsClient {
                     APIUsageStatisticsClientConstants.VERSION)).getText();
             month = row.getFirstChildWithName(new QName(
                     APIUsageStatisticsClientConstants.MONTH)).getText();
+        }
+
+        public APIVersionUsageByUserMonth(String apiName, String apiVersion, String context, String username,
+                long requestCount, String month) {
+            this.apiName = apiName;
+            this.apiVersion = apiVersion;
+            this.context = context;
+            this.username = username;
+            this.requestCount = requestCount;
+            this.month = month;
         }
     }
 
