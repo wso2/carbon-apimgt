@@ -229,6 +229,7 @@ function loadSwaggerObj(path)
 
             result = mod.manageAPI(apiData);
             if (result.error==true) {
+
                 obj = {
                     error:true,
                     message:result.message,
