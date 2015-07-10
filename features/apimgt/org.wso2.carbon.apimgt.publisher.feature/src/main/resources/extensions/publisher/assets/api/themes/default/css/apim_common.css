@@ -289,3 +289,7 @@ button.btn-api-del {
     padding-top: 11px;
 }
 
+.error{
+    color: #FF0000;
+    background-color: #FFFFFF;
+}
