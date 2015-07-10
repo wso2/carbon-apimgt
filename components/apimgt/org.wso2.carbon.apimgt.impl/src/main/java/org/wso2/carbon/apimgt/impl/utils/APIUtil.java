@@ -1498,39 +1498,34 @@ public final class APIUtil {
                     store.setType(type); //Set Store type [eg:wso2]
                     String name=storeElem.getAttributeValue(new QName(APIConstants.EXTERNAL_API_STORE_ID));
                     if (name == null) {
-                        try {
-                            throw new APIManagementException("The ExternalAPIStore name attribute is not defined in api-manager.xml.");
-                        } catch (APIManagementException e) {
-                            //ignore
-                        }
+                        log.error("The ExternalAPIStore name attribute is not defined in api-manager.xml.");
                     }
                     store.setName(name); //Set store name
-                    OMElement configDisplayName = storeElem.getFirstChildWithName(new QName(APIConstants.EXTERNAL_API_STORE_DISPLAY_NAME));
+                    OMElement configDisplayName = storeElem.getFirstChildWithName
+                            (new QName(APIConstants.EXTERNAL_API_STORE_DISPLAY_NAME));
                     String displayName = (configDisplayName != null) ? replaceSystemProperty(
                             configDisplayName.getText()) : name;
                     store.setDisplayName(displayName);//Set store display name
-                    store.setEndpoint(replaceSystemProperty(
-                            storeElem.getFirstChildWithName(new QName(
-                                    APIConstants.EXTERNAL_API_STORE_ENDPOINT)).getText())); //Set store endpoint,which is used to publish APIs
+                    store.setEndpoint(replaceSystemProperty(storeElem.getFirstChildWithName(
+                            new QName(APIConstants.EXTERNAL_API_STORE_ENDPOINT)).getText()));
+                    //Set store endpoint, which is used to publish APIs
                     store.setPublished(false);
                     if (APIConstants.WSO2_API_STORE_TYPE.equals(type)) {
                         OMElement password = storeElem.getFirstChildWithName(new QName(
                                 APIConstants.EXTERNAL_API_STORE_PASSWORD));
                         if (password != null) {
-                            String key = APIConstants.EXTERNAL_API_STORES + "." + APIConstants.EXTERNAL_API_STORE + "." + APIConstants.EXTERNAL_API_STORE_PASSWORD + '_' + name;//Set store login password [optional]
+                            String key = APIConstants.EXTERNAL_API_STORES + "." + APIConstants.EXTERNAL_API_STORE + "."
+                                    + APIConstants.EXTERNAL_API_STORE_PASSWORD + '_' + name; //Set store login password
                             String value = password.getText();
 
-                    store.setPassword(replaceSystemProperty(value));
-                    store.setUsername(replaceSystemProperty(
-                            storeElem.getFirstChildWithName(new QName(
-                                    APIConstants.EXTERNAL_API_STORE_USERNAME)).getText())); //Set store login username [optional]
-                    }else{
-                        try {
-                            throw new APIManagementException("The user-credentials of API Publisher is not defined in the <ExternalAPIStore> config of api-manager.xml.");
-                        } catch (APIManagementException e) {
-                            //ignore
+                            store.setPassword(replaceSystemProperty(value));
+                            store.setUsername(replaceSystemProperty(storeElem.getFirstChildWithName(
+                                    new QName(APIConstants.EXTERNAL_API_STORE_USERNAME)).getText()));
+                                    //Set store login username
+                        } else {
+                            log.error("The user-credentials of API Publisher is not defined in the <ExternalAPIStore> " +
+                                    "config of api-manager.xml.");
                         }
-                    }
                     }
                     externalAPIStores.add(store);
                 }
