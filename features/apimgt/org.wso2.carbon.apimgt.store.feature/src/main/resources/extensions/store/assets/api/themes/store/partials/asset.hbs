@@ -27,9 +27,11 @@
             <div class="col-xs-12 col-sm-12 col-md-5 col-lg-8 ">
                 <div class="col-lg-9">
                     <h4 class="margin-none">{{t "Your rating:"}}
-                        <span class="asset-rating">
-                            		<div style="width:{{ratingPx}}px"></div>
-                    			</span></h4>
+                        <span class="asset-rating" style="float:left">
+                                <div style="width:{{assets.ratingPx}}px"></div>
+                            </span>
+                        <span class = "rating-count"> ( <i class="fa fa-users"></i> {{assets.count}} )</span>
+                    </h4>
 
                     <p class="grey padding-none margin-none">{{t "Version"}} {{api.version}}</p>
                     <p class="grey padding-none margin-none">{{t "Status"}} {{status}}</p>
@@ -122,6 +124,7 @@
           <li><a data-toggle="tab" href="#swagger">{{t "API Console"}}</a></li>
           <li><a data-toggle="tab" href="#throttlingInfo">{{t "Throttling Info"}}</a></li>
           <li><a data-toggle="tab" href="#">{{t "Forum"}}</a></li>
+          <li><a data-toggle="tab" href="#userReviews">{{t "User Reviews"}}</a></li>
       </ul>
       <div class="tab-content">
           <div id="api-overview" class="tab-pane fade in active">
@@ -134,6 +137,9 @@
 	      <div id="throttlingInfo" class="tab-pane fade">
 			  {{> throttling-info .}}
 	      </div>
+          <div id="userReviews" class="tab-pane fade">
+              {{> user-reviews .}}
+          </div>
       </div>
   </div>
 
