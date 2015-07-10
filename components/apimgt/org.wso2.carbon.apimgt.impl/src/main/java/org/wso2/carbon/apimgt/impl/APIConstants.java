@@ -706,4 +706,5 @@ public final class APIConstants {
         OPTIONS
     }
 
+    public static String CORS_SEQUENCE_NAME = "_cors_request_handler_";
 }

@@ -2889,7 +2889,8 @@ public class ApiMgtDAO {
             connection = APIMgtDBUtil.getConnection();
 
             if (connection.getMetaData().getDriverName().contains("MySQL")
-                    || connection.getMetaData().getDriverName().contains("H2")) {
+                    || connection.getMetaData().getDriverName().contains("H2")
+                    || connection.getMetaData().getDatabaseProductName().contains("DB2")) {
                 sql = mySQLSQL;
             }
             else if(connection.getMetaData().getDriverName().contains("MS SQL")){
@@ -2998,7 +2999,8 @@ public class ApiMgtDAO {
             connection = APIMgtDBUtil.getConnection();
 
             if (connection.getMetaData().getDriverName().contains("MySQL")
-                    || connection.getMetaData().getDriverName().contains("H2")) {
+                    || connection.getMetaData().getDriverName().contains("H2")
+                    || connection.getMetaData().getDatabaseProductName().contains("DB2")) {
                 sql = mySQLSQL;
             }
             else if(connection.getMetaData().getDriverName().contains("MS SQL")){
@@ -6711,7 +6713,8 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
                 }else {
                     is = null;
                 }
-                if (connection.getMetaData().getDriverName().contains("PostgreSQL")) {
+                if (connection.getMetaData().getDriverName().contains("PostgreSQL")
+                        || connection.getMetaData().getDatabaseProductName().contains("DB2")) {
                     if(uriTemplate.getMediationScript() != null) {
                         prepStmt.setBinaryStream(6, is, uriTemplate.getMediationScript().getBytes().length);
                     }else{
